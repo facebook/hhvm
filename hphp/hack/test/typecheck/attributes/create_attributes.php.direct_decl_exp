@@ -9,7 +9,7 @@
         sc_name = ([5:7-8], "\\C"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-        sc_req_implements = [];
+        sc_req_implements = []; sc_req_class = [];
         sc_implements =
         [(Rhint ([5:20-37]),
           (Tapply (([5:20-37], "\\HH\\ClassAttribute"), [])))];
@@ -25,7 +25,7 @@
          sc_name = ([6:7-9], "\\Cc"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([6:21-46]),
            (Tapply (([6:21-46], "\\HH\\ClassConstantAttribute"), [])))];
@@ -41,7 +41,7 @@
          sc_name = ([7:7-8], "\\E"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([7:20-36]),
            (Tapply (([7:20-36], "\\HH\\EnumAttribute"), [])))];
@@ -57,7 +57,7 @@
          sc_name = ([8:7-8], "\\F"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([8:20-40]),
            (Tapply (([8:20-40], "\\HH\\FunctionAttribute"), [])))];
@@ -73,7 +73,7 @@
          sc_name = ([9:7-10], "\\Met"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([9:22-40]),
            (Tapply (([9:22-40], "\\HH\\MethodAttribute"), [])))];
@@ -89,7 +89,7 @@
          sc_name = ([10:7-12], "\\IProp"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([10:24-52]),
            (Tapply (([10:24-52], "\\HH\\InstancePropertyAttribute"), [])))];
@@ -105,7 +105,7 @@
          sc_name = ([11:7-12], "\\SProp"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([11:24-50]),
            (Tapply (([11:24-50], "\\HH\\StaticPropertyAttribute"), [])))];
@@ -121,7 +121,7 @@
          sc_name = ([12:7-8], "\\P"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([12:20-41]),
            (Tapply (([12:20-41], "\\HH\\ParameterAttribute"), [])))];
@@ -137,7 +137,7 @@
          sc_name = ([13:7-8], "\\T"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([13:20-41]),
            (Tapply (([13:20-41], "\\HH\\TypeAliasAttribute"), [])))];
@@ -153,7 +153,7 @@
          sc_name = ([14:7-9], "\\Fi"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([14:21-37]),
            (Tapply (([14:21-37], "\\HH\\FileAttribute"), [])))];
@@ -169,7 +169,7 @@
          sc_name = ([15:7-9], "\\Ec"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([15:21-42]),
            (Tapply (([15:21-42], "\\HH\\EnumClassAttribute"), [])))];
@@ -185,7 +185,7 @@
          sc_name = ([16:7-13], "\\TParam"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([16:25-50]),
            (Tapply (([16:25-50], "\\HH\\TypeParameterAttribute"), [])))];
@@ -201,7 +201,7 @@
          sc_name = ([17:7-9], "\\Tc"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([17:21-45]),
            (Tapply (([17:21-45], "\\HH\\TypeConstantAttribute"), [])))];
@@ -217,7 +217,7 @@
          sc_name = ([18:7-8], "\\L"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([18:20-38]),
            (Tapply (([18:20-38], "\\HH\\LambdaAttribute"), [])))];
@@ -263,7 +263,7 @@
          sc_name = ([27:7-10], "\\CCC"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = []; sc_implements = [];
+         sc_req_implements = []; sc_req_class = []; sc_implements = [];
          sc_support_dynamic_type = false;
          sc_consts =
          [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
@@ -333,7 +333,7 @@
            ];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = []; sc_implements = [];
+         sc_req_implements = []; sc_req_class = []; sc_implements = [];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -350,10 +350,10 @@
               [(Rhint ([43:6-8]), (Tapply (([43:6-8], "\\EE"), [])))])))
            ];
          sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
-         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-         sc_props = []; sc_sprops = []; sc_constructor = None;
-         sc_static_methods = []; sc_methods = [];
+         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+         sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+         sc_typeconsts = []; sc_props = []; sc_sprops = [];
+         sc_constructor = None; sc_static_methods = []; sc_methods = [];
          sc_user_attributes =
          [{ Typing_defs_core.ua_name = ([42:3-4], "\\E");
             ua_classname_params = [] }
@@ -393,10 +393,10 @@
               )))
            ];
          sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
-         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-         sc_props = []; sc_sprops = []; sc_constructor = None;
-         sc_static_methods = []; sc_methods = [];
+         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+         sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+         sc_typeconsts = []; sc_props = []; sc_sprops = [];
+         sc_constructor = None; sc_static_methods = []; sc_methods = [];
          sc_user_attributes =
          [{ Typing_defs_core.ua_name = ([49:12-15], "__EnumClass");
             ua_classname_params = [] };

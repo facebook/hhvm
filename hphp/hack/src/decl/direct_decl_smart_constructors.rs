@@ -3787,6 +3787,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let mut xhp_enum_values = SMap::empty();
         let mut req_extends_len = 0;
         let mut req_implements_len = 0;
+        let mut req_class_len = 0;
         let mut consts_len = 0;
         let mut typeconsts_len = 0;
         let mut props_len = 0;
@@ -3821,6 +3822,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 Node::RequireClause(require) => match require.require_type.token_kind() {
                     Some(TokenKind::Extends) => req_extends_len += 1,
                     Some(TokenKind::Implements) => req_implements_len += 1,
+                    Some(TokenKind::Class) => req_class_len += 1,
                     _ => {}
                 },
                 Node::List(consts @ [Node::Const(..), ..]) => consts_len += consts.len(),
@@ -3851,6 +3853,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let mut xhp_attr_uses = Vec::with_capacity_in(xhp_attr_uses_len, self.arena);
         let mut req_extends = Vec::with_capacity_in(req_extends_len, self.arena);
         let mut req_implements = Vec::with_capacity_in(req_implements_len, self.arena);
+        let mut req_class = Vec::with_capacity_in(req_class_len, self.arena);
         let mut consts = Vec::with_capacity_in(consts_len, self.arena);
         let mut typeconsts = Vec::with_capacity_in(typeconsts_len, self.arena);
         let mut props = Vec::with_capacity_in(props_len, self.arena);
@@ -3898,6 +3901,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     }
                     Some(TokenKind::Implements) => {
                         req_implements.extend(self.node_to_ty(require.name).iter())
+                    }
+                    Some(TokenKind::Class) => {
+                        req_class.extend(self.node_to_ty(require.name).iter())
                     }
                     _ => {}
                 },
@@ -3974,6 +3980,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let xhp_attr_uses = xhp_attr_uses.into_bump_slice();
         let req_extends = req_extends.into_bump_slice();
         let req_implements = req_implements.into_bump_slice();
+        let req_class = req_class.into_bump_slice();
         let consts = consts.into_bump_slice();
         let typeconsts = typeconsts.into_bump_slice();
         let props = props.into_bump_slice();
@@ -4006,6 +4013,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             xhp_enum_values,
             req_extends,
             req_implements,
+            req_class,
             implements,
             support_dynamic_type,
             consts,
@@ -4434,6 +4442,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             xhp_enum_values: SMap::empty(),
             req_extends: &[],
             req_implements: &[],
+            req_class: &[],
             implements: &[],
             support_dynamic_type: parsed_attributes.support_dynamic_type,
             consts,
@@ -4595,6 +4604,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             xhp_enum_values: SMap::empty(),
             req_extends: &[],
             req_implements: &[],
+            req_class: &[],
             implements: &[],
             support_dynamic_type: parsed_attributes.support_dynamic_type,
             consts,

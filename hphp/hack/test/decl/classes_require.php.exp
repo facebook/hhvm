@@ -6,7 +6,7 @@
        sc_name = ([3:16-23], "\\Machine"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-       sc_req_implements = []; sc_implements = [];
+       sc_req_implements = []; sc_req_class = []; sc_implements = [];
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = [];
@@ -54,7 +54,7 @@
         sc_name = ([8:11-17], "\\Fliers"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-        sc_req_implements = []; sc_implements = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];
@@ -89,9 +89,10 @@
         [(Rhint ([13:19-26]), (Tapply (([13:19-26], "\\Machine"), [])))];
         sc_req_implements =
         [(Rhint ([14:22-28]), (Tapply (([14:22-28], "\\Fliers"), [])))];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = [];
+        sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([16:19-26], "takeOff");
            sm_type =
@@ -124,7 +125,7 @@
         sc_uses =
         [(Rhint ([24:7-12]), (Tapply (([24:7-12], "\\Plane"), [])))];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-        sc_req_implements = [];
+        sc_req_implements = []; sc_req_class = [];
         sc_implements =
         [(Rhint ([23:41-47]), (Tapply (([23:41-47], "\\Fliers"), [])))];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];

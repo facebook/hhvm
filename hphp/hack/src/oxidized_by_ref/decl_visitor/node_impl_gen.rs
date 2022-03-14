@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<393d23ec65204c2046531180c7a7f369>>
+// @generated SignedSource<<e392c2a291d88785f5776acb4736fde0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -527,17 +527,18 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 xhp_enum_values: ref __binding_13,
                 req_extends: ref __binding_14,
                 req_implements: ref __binding_15,
-                implements: ref __binding_16,
-                support_dynamic_type: ref __binding_17,
-                consts: ref __binding_18,
-                typeconsts: ref __binding_19,
-                props: ref __binding_20,
-                sprops: ref __binding_21,
-                constructor: ref __binding_22,
-                static_methods: ref __binding_23,
-                methods: ref __binding_24,
-                user_attributes: ref __binding_25,
-                enum_type: ref __binding_26,
+                req_class: ref __binding_16,
+                implements: ref __binding_17,
+                support_dynamic_type: ref __binding_18,
+                consts: ref __binding_19,
+                typeconsts: ref __binding_20,
+                props: ref __binding_21,
+                sprops: ref __binding_22,
+                constructor: ref __binding_23,
+                static_methods: ref __binding_24,
+                methods: ref __binding_25,
+                user_attributes: ref __binding_26,
+                enum_type: ref __binding_27,
             } => {
                 {
                     __binding_0.accept(v)
@@ -617,7 +618,10 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 {
                     __binding_25.accept(v)
                 }
-                { __binding_26.accept(v) }
+                {
+                    __binding_26.accept(v)
+                }
+                { __binding_27.accept(v) }
             }
         }
     }

@@ -883,12 +883,7 @@ and check_tparams_constraints_with_ty_err ~use_pos ~ety_env env tparams =
                         [Log_type ("cstr_ty", cstr_ty); Log_type ("ty", ty)] );
                   ]));
           let (env, e2) =
-            TGenConstraint.check_tparams_constraint_with_ty_err
-              env
-              ~use_pos
-              ck
-              ~cstr_ty
-              ty
+            TGenConstraint.check_tparams_constraint env ~use_pos ck ~cstr_ty ty
           in
           let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
           let ty_errs =
@@ -915,7 +910,7 @@ and check_where_constraints_with_ty_err
         let ((env, e1), ty) = localize_with_ty_err ~ety_env env ty in
         let ((env, e2), cstr_ty) = localize_with_ty_err ~ety_env env cstr_ty in
         let (env, e3) =
-          TGenConstraint.check_where_constraint_with_ty_err
+          TGenConstraint.check_where_constraint
             ~in_class
             env
             ~use_pos

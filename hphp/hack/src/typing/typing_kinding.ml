@@ -210,11 +210,11 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
             fun { tp_name = (_p, x); tp_constraints = cstrl; _ } ty ->
             List.iter cstrl ~f:(fun (ck, cstr_ty) ->
                 let (env, cstr_ty) = TUtils.localize ~ety_env env cstr_ty in
-                let (_ : Typing_env_types.env) =
+                let (_env, ty_err_opt) =
                   TGenConstraint.check_constraint env ck ty ~cstr_ty
                   @@ report_constraint ty cls_name x
                 in
-                ())
+                Option.iter ty_err_opt ~f:Errors.add_typing_error)
           end
           tc_tparams
           tyl

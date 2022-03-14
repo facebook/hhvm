@@ -27,7 +27,7 @@ let subtype_method
     (ft_super : locl_fun_type)
     (on_error : Typing_error.Reasons_callback.t) : env =
   (* This is (1) and (2) below *)
-  let (env, ty_err_opt) =
+  let (env, ty_err1) =
     subtype_funs
       ~on_error:(Some on_error)
       ~check_return
@@ -37,41 +37,79 @@ let subtype_method
       ft_super
       env
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (* This is (3) below *)
   let check_tparams_constraints env tparams =
     let check_tparam_constraints
         env { tp_name = (p, name); tp_constraints = cstrl; _ } =
-      List.fold_left cstrl ~init:env ~f:(fun env (ck, cstr_ty) ->
-          (* TODO(T70068435) Revisit this when implementing bounds on HK generic vars.
-             For now it's safe to produce a Tgeneric with empty args here, because
-             if [name] were higher-kinded, then the constraints must be empty. *)
-          let tgeneric = MakeType.generic (Reason.Rwitness_from_decl p) name in
-          Typing_generic_constraint.check_constraint env ck tgeneric ~cstr_ty
-          @@ Some on_error)
+      let (env, ty_errs) =
+        List.fold_left
+          cstrl
+          ~init:(env, [])
+          ~f:(fun (env, ty_errs) (ck, cstr_ty) ->
+            (* TODO(T70068435) Revisit this when implementing bounds on HK generic vars.
+               For now it's safe to produce a Tgeneric with empty args here, because
+               if [name] were higher-kinded, then the constraints must be empty. *)
+            let tgeneric =
+              MakeType.generic (Reason.Rwitness_from_decl p) name
+            in
+            match
+              Typing_generic_constraint.check_constraint
+                env
+                ck
+                tgeneric
+                ~cstr_ty
+              @@ Some on_error
+            with
+            | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+            | (env, _) -> (env, ty_errs))
+      in
+      (env, Typing_error.multiple_opt ty_errs)
     in
-    List.fold_left tparams ~init:env ~f:check_tparam_constraints
+    let (env, ty_errs) =
+      List.fold_left tparams ~init:(env, []) ~f:(fun (env, ty_errs) tparam ->
+          match check_tparam_constraints env tparam with
+          | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+          | (env, _) -> (env, ty_errs))
+    in
+    (env, Typing_error.multiple_opt ty_errs)
   in
   let check_where_constraints env cstrl =
-    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-        Typing_generic_constraint.check_constraint env ck ty1 ~cstr_ty:ty2
-        @@ Some on_error)
+    let (env, ty_errs) =
+      List.fold_left
+        cstrl
+        ~init:(env, [])
+        ~f:(fun (env, ty_errs) (ty1, ck, ty2) ->
+          match
+            Typing_generic_constraint.check_constraint env ck ty1 ~cstr_ty:ty2
+            @@ Some on_error
+          with
+          | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+          | (env, _) -> (env, ty_errs))
+    in
+    (env, Typing_error.multiple_opt ty_errs)
   in
   (* We only do this if the ft_tparam lengths match. Currently we don't even
    * report this as an error, indeed different names for type parameters.
    * TODO: make it an error to override with wrong number of type parameters
    *)
-  let env =
+  let (env, ty_err2) =
     if
       Int.( <> )
         (List.length ft_sub.ft_tparams)
         (List.length ft_super.ft_tparams)
     then
-      env
+      (env, None)
     else
       check_tparams_constraints env ft_sub.ft_tparams
   in
-  let env = check_where_constraints env ft_sub.ft_where_constraints in
+  let (env, ty_err3) =
+    check_where_constraints env ft_sub.ft_where_constraints
+  in
+  let ty_err_opt =
+    Typing_error.multiple_opt
+    @@ List.filter_map ~f:Fn.id [ty_err1; ty_err2; ty_err3]
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   env
 
 (** Check that the method decl with signature ft_sub can be used to override

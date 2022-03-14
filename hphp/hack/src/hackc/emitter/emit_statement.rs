@@ -96,22 +96,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
             a::Expr_::Binop(bop) => emit_binop(e, env, e_, pos, bop),
             _ => emit_expr::emit_ignored_expr(e, env, pos, e_),
         },
-        a::Stmt_::Return(r_opt) => match r_opt.as_ref() {
-            Some(r) => {
-                let ret = emit_return(e, env)?;
-                let expr_instr = if let Some(e_) = r.2.as_await() {
-                    emit_await(e, env, &r.1, e_)?
-                } else {
-                    emit_expr(e, env, r)?
-                };
-                Ok(InstrSeq::gather(vec![expr_instr, emit_pos(pos), ret]))
-            }
-            None => Ok(InstrSeq::gather(vec![
-                instr::null(),
-                emit_pos(pos),
-                emit_return(e, env)?,
-            ])),
-        },
+        a::Stmt_::Return(r_opt) => emit_return_(e, env, (&**r_opt).as_ref(), pos),
         a::Stmt_::Block(b) => emit_block(env, e, b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
         a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),
@@ -199,6 +184,30 @@ fn emit_binop<'a, 'arena, 'decl>(
         }
     } else {
         emit_expr::emit_ignored_expr(e, env, pos, e_)
+    }
+}
+
+fn emit_return_<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    r_opt: Option<&ast::Expr>,
+    pos: &Pos,
+) -> Result<InstrSeq<'arena>> {
+    match r_opt {
+        Some(r) => {
+            let ret = emit_return(e, env)?;
+            let expr_instr = if let Some(e_) = r.2.as_await() {
+                emit_await(e, env, &r.1, e_)?
+            } else {
+                emit_expr(e, env, r)?
+            };
+            Ok(InstrSeq::gather(vec![expr_instr, emit_pos(pos), ret]))
+        }
+        None => Ok(InstrSeq::gather(vec![
+            instr::null(),
+            emit_pos(pos),
+            emit_return(e, env)?,
+        ])),
     }
 }
 

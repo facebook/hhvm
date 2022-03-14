@@ -1486,36 +1486,7 @@ fn p_expr_impl<'a>(
         IssetExpression(c) => p_special_call(&c.keyword, &c.argument_list, env),
         TupleExpression(c) => p_tuple_expr(c, env),
         FunctionCallExpression(c) => p_function_call_expr(c, env),
-        FunctionPointerExpression(c) => {
-            let targs = match &c.type_args.children {
-                TypeArguments(c) => could_map(&c.types, env, p_targ)?,
-                _ => vec![],
-            };
-
-            let recv = p_expr(&c.receiver, env)?;
-
-            match &recv.2 {
-                Expr_::Id(id) => Ok(Expr_::mk_function_pointer(
-                    aast::FunctionPtrId::FPId(*(id.to_owned())),
-                    targs,
-                )),
-                Expr_::ClassConst(c) => {
-                    if let aast::ClassId_::CIexpr(Expr(_, _, Expr_::Id(_))) = (c.0).2 {
-                        Ok(Expr_::mk_function_pointer(
-                            aast::FunctionPtrId::FPClassConst(c.0.to_owned(), c.1.to_owned()),
-                            targs,
-                        ))
-                    } else {
-                        raise_parsing_error(node, env, &syntax_error::function_pointer_bad_recv);
-                        missing_syntax("function or static method", node, env)
-                    }
-                }
-                _ => {
-                    raise_parsing_error(node, env, &syntax_error::function_pointer_bad_recv);
-                    missing_syntax("function or static method", node, env)
-                }
-            }
-        }
+        FunctionPointerExpression(c) => p_function_pointer_expr(node, c, env),
         QualifiedName(_) => match location {
             ExprLocation::InDoubleQuotedString => {
                 let ast::Id(_, n) = pos_qualified_name(node, env)?;
@@ -2189,6 +2160,40 @@ fn p_function_call_expr<'a>(
             }
 
             Ok(Expr_::mk_call(recv, targs, args, varargs))
+        }
+    }
+}
+fn p_function_pointer_expr<'a>(
+    node: S<'a>,
+    c: &'a FunctionPointerExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    let targs = match &c.type_args.children {
+        TypeArguments(c) => could_map(&c.types, env, p_targ)?,
+        _ => vec![],
+    };
+
+    let recv = p_expr(&c.receiver, env)?;
+
+    match &recv.2 {
+        Expr_::Id(id) => Ok(Expr_::mk_function_pointer(
+            aast::FunctionPtrId::FPId(*(id.to_owned())),
+            targs,
+        )),
+        Expr_::ClassConst(c) => {
+            if let aast::ClassId_::CIexpr(Expr(_, _, Expr_::Id(_))) = (c.0).2 {
+                Ok(Expr_::mk_function_pointer(
+                    aast::FunctionPtrId::FPClassConst(c.0.to_owned(), c.1.to_owned()),
+                    targs,
+                ))
+            } else {
+                raise_parsing_error(node, env, &syntax_error::function_pointer_bad_recv);
+                missing_syntax("function or static method", node, env)
+            }
+        }
+        _ => {
+            raise_parsing_error(node, env, &syntax_error::function_pointer_bad_recv);
+            missing_syntax("function or static method", node, env)
         }
     }
 }

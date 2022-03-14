@@ -31,106 +31,102 @@ FoldedClass {
 }
 
 File root|module_hint.php--there.php
---- ocaml
-+++ rupro
-@@ -1,96 +1,96 @@
- FoldedClass {
-     name: "\\D",
-     pos: Pos(root|module_hint.php--there.php, 5:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
-     is_internal: true,
-     module: (
-         Pos(root|module_hint.php--there.php, 2:54-61),
-         "there",
-     ),
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|module_hint.php--there.php, 5:7-8),
-             ty: HH\classname<this>,
-             origin: "\\D",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\G",
-     pos: Pos(root|module_hint.php--there.php, 8:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
-     is_internal: true,
-     module: (
-         Pos(root|module_hint.php--there.php, 2:54-61),
-         "there",
-     ),
-     tparams: [
-         Tparam {
-             variance: Invariant,
-             name: (
-                 Pos(root|module_hint.php--there.php, 8:9-10),
-                 "T",
-             ),
-             tparams: [],
-             constraints: [],
-             reified: Erased,
-             user_attributes: [],
-         },
-     ],
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|module_hint.php--there.php, 8:7-8),
-             ty: HH\classname<this>,
-             origin: "\\G",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\E",
-     pos: Pos(root|module_hint.php--there.php, 11:6-7),
-     kind: Cenum,
-     is_internal: true,
-     enum_type: EnumType {
-         base: int,
-         constraint: None,
-         includes: [],
-     },
-     module: (
-         Pos(root|module_hint.php--there.php, 2:54-61),
-         "there",
-     ),
-     ancestors: {
-         "\\HH\\BuiltinEnum": HH\BuiltinEnum<E>,
-     },
-     consts: {
-         "A": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|module_hint.php--there.php, 12:3-4),
--            ty: E,
-+            ty: int,
-             origin: "\\E",
-             refs: [],
-         },
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|module_hint.php--there.php, 11:6-7),
-             ty: HH\classname<this>,
-             origin: "\\E",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\HH\\BuiltinEnum",
-     },
- }
+FoldedClass {
+    name: "\\D",
+    pos: Pos(root|module_hint.php--there.php, 5:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    is_internal: true,
+    module: (
+        Pos(root|module_hint.php--there.php, 2:54-61),
+        "there",
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|module_hint.php--there.php, 5:7-8),
+            ty: HH\classname<this>,
+            origin: "\\D",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\G",
+    pos: Pos(root|module_hint.php--there.php, 8:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    is_internal: true,
+    module: (
+        Pos(root|module_hint.php--there.php, 2:54-61),
+        "there",
+    ),
+    tparams: [
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|module_hint.php--there.php, 8:9-10),
+                "T",
+            ),
+            tparams: [],
+            constraints: [],
+            reified: Erased,
+            user_attributes: [],
+        },
+    ],
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|module_hint.php--there.php, 8:7-8),
+            ty: HH\classname<this>,
+            origin: "\\G",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\E",
+    pos: Pos(root|module_hint.php--there.php, 11:6-7),
+    kind: Cenum,
+    is_internal: true,
+    enum_type: EnumType {
+        base: int,
+        constraint: None,
+        includes: [],
+    },
+    module: (
+        Pos(root|module_hint.php--there.php, 2:54-61),
+        "there",
+    ),
+    ancestors: {
+        "\\HH\\BuiltinEnum": HH\BuiltinEnum<E>,
+    },
+    consts: {
+        "A": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|module_hint.php--there.php, 12:3-4),
+            ty: E,
+            origin: "\\E",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|module_hint.php--there.php, 11:6-7),
+            ty: HH\classname<this>,
+            origin: "\\E",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\HH\\BuiltinEnum",
+    },
+}
 
 File root|module_hint.php--everywhere.php
 FoldedClass {
@@ -163,3 +159,5 @@ FoldedClass {
         },
     },
 }
+
+They matched!

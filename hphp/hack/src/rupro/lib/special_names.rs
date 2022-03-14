@@ -7,7 +7,7 @@
 #![allow(non_snake_case)]
 
 use naming_special_names_rust as sn;
-use pos::{Symbol, TypeName};
+use pos::{ClassConstName, Symbol, TypeConstName, TypeName};
 
 #[derive(Debug)]
 pub struct SpecialNames {
@@ -72,40 +72,40 @@ impl SpecialNames {
 
 #[derive(Debug)]
 pub struct Classes {
-    pub cParent: Symbol,
-    pub cStatic: Symbol,
-    pub cSelf: Symbol,
-    pub cUnknown: Symbol,
+    pub cParent: TypeName,
+    pub cStatic: TypeName,
+    pub cSelf: TypeName,
+    pub cUnknown: TypeName,
 
     // Used for dynamic classnames, e.g. new $foo();
-    pub cAwaitable: Symbol,
-    pub cGenerator: Symbol,
-    pub cAsyncGenerator: Symbol,
-    pub cHHFormatString: Symbol,
-    pub cHH_BuiltinEnum: Symbol,
-    pub cHH_BuiltinEnumClass: Symbol,
-    pub cHH_BuiltinAbstractEnumClass: Symbol,
-    pub cThrowable: Symbol,
-    pub cStdClass: Symbol,
-    pub cDateTime: Symbol,
-    pub cDateTimeImmutable: Symbol,
-    pub cAsyncIterator: Symbol,
-    pub cAsyncKeyedIterator: Symbol,
-    pub cStringish: Symbol,
-    pub cStringishObject: Symbol,
-    pub cXHPChild: Symbol,
-    pub cIMemoizeParam: Symbol,
-    pub cUNSAFESingletonMemoizeParam: Symbol,
+    pub cAwaitable: TypeName,
+    pub cGenerator: TypeName,
+    pub cAsyncGenerator: TypeName,
+    pub cHHFormatString: TypeName,
+    pub cHH_BuiltinEnum: TypeName,
+    pub cHH_BuiltinEnumClass: TypeName,
+    pub cHH_BuiltinAbstractEnumClass: TypeName,
+    pub cThrowable: TypeName,
+    pub cStdClass: TypeName,
+    pub cDateTime: TypeName,
+    pub cDateTimeImmutable: TypeName,
+    pub cAsyncIterator: TypeName,
+    pub cAsyncKeyedIterator: TypeName,
+    pub cStringish: TypeName,
+    pub cStringishObject: TypeName,
+    pub cXHPChild: TypeName,
+    pub cIMemoizeParam: TypeName,
+    pub cUNSAFESingletonMemoizeParam: TypeName,
     pub cClassname: TypeName,
-    pub cTypename: Symbol,
-    pub cIDisposable: Symbol,
-    pub cIAsyncDisposable: Symbol,
-    pub cMemberOf: Symbol,
-    pub cEnumClassLabel: Symbol,
+    pub cTypename: TypeName,
+    pub cIDisposable: TypeName,
+    pub cIAsyncDisposable: TypeName,
+    pub cMemberOf: TypeName,
+    pub cEnumClassLabel: TypeName,
 
     /// Classes that can be spliced into ExpressionTrees
-    pub cSpliceable: Symbol,
-    pub cSupportDyn: Symbol,
+    pub cSpliceable: TypeName,
+    pub cSupportDyn: TypeName,
 }
 
 #[derive(Debug)]
@@ -141,7 +141,7 @@ pub struct Collections {
 #[derive(Debug)]
 pub struct Members {
     pub mGetInstanceKey: Symbol,
-    pub mClass: Symbol,
+    pub mClass: ClassConstName,
     pub parentConstruct: Symbol,
     pub __construct: Symbol,
     pub __destruct: Symbol,
@@ -345,11 +345,11 @@ pub struct PseudoConsts {
 
 #[derive(Debug)]
 pub struct Fb {
-    pub cEnum: Symbol,
-    pub tInner: Symbol,
+    pub cEnum: TypeName,
+    pub tInner: TypeConstName,
     pub idx: Symbol,
-    pub cTypeStructure: Symbol,
-    pub cIncorrectType: Symbol,
+    pub cTypeStructure: TypeName,
+    pub cIncorrectType: TypeName,
 }
 
 #[derive(Debug)]
@@ -474,36 +474,40 @@ pub struct ExpressionTrees {
 impl Classes {
     fn new() -> Self {
         Self {
-            cParent: Symbol::new(sn::classes::PARENT),
-            cStatic: Symbol::new(sn::classes::STATIC),
-            cSelf: Symbol::new(sn::classes::SELF),
-            cUnknown: Symbol::new(sn::classes::UNKNOWN),
-            cAwaitable: Symbol::new(sn::classes::AWAITABLE),
-            cGenerator: Symbol::new(sn::classes::GENERATOR),
-            cAsyncGenerator: Symbol::new(sn::classes::ASYNC_GENERATOR),
-            cHHFormatString: Symbol::new(sn::classes::HH_FORMAT_STRING),
-            cHH_BuiltinEnum: Symbol::new(sn::classes::HH_BUILTIN_ENUM),
-            cHH_BuiltinEnumClass: Symbol::new(sn::classes::HH_BUILTIN_ENUM_CLASS),
-            cHH_BuiltinAbstractEnumClass: Symbol::new(sn::classes::HH_BUILTIN_ABSTRACT_ENUM_CLASS),
-            cThrowable: Symbol::new(sn::classes::THROWABLE),
-            cStdClass: Symbol::new(sn::classes::STD_CLASS),
-            cDateTime: Symbol::new(sn::classes::DATE_TIME),
-            cDateTimeImmutable: Symbol::new(sn::classes::DATE_TIME_IMMUTABLE),
-            cAsyncIterator: Symbol::new(sn::classes::ASYNC_ITERATOR),
-            cAsyncKeyedIterator: Symbol::new(sn::classes::ASYNC_KEYED_ITERATOR),
-            cStringish: Symbol::new(sn::classes::STRINGISH),
-            cStringishObject: Symbol::new(sn::classes::STRINGISH_OBJECT),
-            cXHPChild: Symbol::new(sn::classes::XHP_CHILD),
-            cIMemoizeParam: Symbol::new(sn::classes::IMEMOIZE_PARAM),
-            cUNSAFESingletonMemoizeParam: Symbol::new(sn::classes::UNSAFE_SINGLETON_MEMOIZE_PARAM),
-            cClassname: TypeName(Symbol::new(sn::classes::CLASS_NAME)),
-            cTypename: Symbol::new(sn::classes::TYPE_NAME),
-            cIDisposable: Symbol::new(sn::classes::IDISPOSABLE),
-            cIAsyncDisposable: Symbol::new(sn::classes::IASYNC_DISPOSABLE),
-            cMemberOf: Symbol::new(sn::classes::MEMBER_OF),
-            cEnumClassLabel: Symbol::new(sn::classes::ENUM_CLASS_LABEL),
-            cSpliceable: Symbol::new(sn::classes::SPLICEABLE),
-            cSupportDyn: Symbol::new(sn::classes::SUPPORT_DYN),
+            cParent: TypeName::new(sn::classes::PARENT),
+            cStatic: TypeName::new(sn::classes::STATIC),
+            cSelf: TypeName::new(sn::classes::SELF),
+            cUnknown: TypeName::new(sn::classes::UNKNOWN),
+            cAwaitable: TypeName::new(sn::classes::AWAITABLE),
+            cGenerator: TypeName::new(sn::classes::GENERATOR),
+            cAsyncGenerator: TypeName::new(sn::classes::ASYNC_GENERATOR),
+            cHHFormatString: TypeName::new(sn::classes::HH_FORMAT_STRING),
+            cHH_BuiltinEnum: TypeName::new(sn::classes::HH_BUILTIN_ENUM),
+            cHH_BuiltinEnumClass: TypeName::new(sn::classes::HH_BUILTIN_ENUM_CLASS),
+            cHH_BuiltinAbstractEnumClass: TypeName::new(
+                sn::classes::HH_BUILTIN_ABSTRACT_ENUM_CLASS,
+            ),
+            cThrowable: TypeName::new(sn::classes::THROWABLE),
+            cStdClass: TypeName::new(sn::classes::STD_CLASS),
+            cDateTime: TypeName::new(sn::classes::DATE_TIME),
+            cDateTimeImmutable: TypeName::new(sn::classes::DATE_TIME_IMMUTABLE),
+            cAsyncIterator: TypeName::new(sn::classes::ASYNC_ITERATOR),
+            cAsyncKeyedIterator: TypeName::new(sn::classes::ASYNC_KEYED_ITERATOR),
+            cStringish: TypeName::new(sn::classes::STRINGISH),
+            cStringishObject: TypeName::new(sn::classes::STRINGISH_OBJECT),
+            cXHPChild: TypeName::new(sn::classes::XHP_CHILD),
+            cIMemoizeParam: TypeName::new(sn::classes::IMEMOIZE_PARAM),
+            cUNSAFESingletonMemoizeParam: TypeName::new(
+                sn::classes::UNSAFE_SINGLETON_MEMOIZE_PARAM,
+            ),
+            cClassname: TypeName::new(sn::classes::CLASS_NAME),
+            cTypename: TypeName::new(sn::classes::TYPE_NAME),
+            cIDisposable: TypeName::new(sn::classes::IDISPOSABLE),
+            cIAsyncDisposable: TypeName::new(sn::classes::IASYNC_DISPOSABLE),
+            cMemberOf: TypeName::new(sn::classes::MEMBER_OF),
+            cEnumClassLabel: TypeName::new(sn::classes::ENUM_CLASS_LABEL),
+            cSpliceable: TypeName::new(sn::classes::SPLICEABLE),
+            cSupportDyn: TypeName::new(sn::classes::SUPPORT_DYN),
         }
     }
 }
@@ -545,7 +549,7 @@ impl Members {
     fn new() -> Self {
         Self {
             mGetInstanceKey: Symbol::new(sn::members::M_GET_INSTANCE_KEY),
-            mClass: Symbol::new(sn::members::M_CLASS),
+            mClass: ClassConstName::new(sn::members::M_CLASS),
             parentConstruct: Symbol::new("parent::".to_owned() + sn::members::__CONSTRUCT),
             __construct: Symbol::new(sn::members::__CONSTRUCT),
             __destruct: Symbol::new(sn::members::__DESTRUCT),
@@ -788,11 +792,11 @@ impl PseudoConsts {
 impl Fb {
     fn new() -> Self {
         Self {
-            cEnum: Symbol::new(sn::fb::ENUM),
-            tInner: Symbol::new(sn::fb::INNER),
+            cEnum: TypeName::new(sn::fb::ENUM),
+            tInner: TypeConstName::new(sn::fb::INNER),
             idx: Symbol::new(sn::fb::IDX),
-            cTypeStructure: Symbol::new(sn::fb::TYPE_STRUCTURE),
-            cIncorrectType: Symbol::new(sn::fb::INCORRECT_TYPE),
+            cTypeStructure: TypeName::new(sn::fb::TYPE_STRUCTURE),
+            cIncorrectType: TypeName::new(sn::fb::INCORRECT_TYPE),
         }
     }
 }

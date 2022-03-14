@@ -22,6 +22,8 @@ use pos::{
 };
 use std::sync::Arc;
 
+mod decl_enum;
+
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
 
 #[derive(Debug)]
@@ -98,10 +100,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             origin: name,
             refs: Box::default(),
         };
-        consts.insert(
-            ClassConstName(self.special_names.members.mClass),
-            class_const,
-        );
+        consts.insert(self.special_names.members.mClass, class_const);
     }
 
     /// Each concrete type constant `T = τ` implicitly defines a class
@@ -109,7 +108,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     fn type_const_structure(&self, stc: &ShallowTypeconst<R>) -> ClassConst<R> {
         let pos = stc.name.pos();
         let r = R::witness_from_decl(pos.clone());
-        let tsid = Positioned::new(pos.clone(), TypeName(self.special_names.fb.cTypeStructure));
+        let tsid = Positioned::new(pos.clone(), self.special_names.fb.cTypeStructure);
         // The type `this`.
         let tthis = DeclTy::this(r.clone());
         // The type `this::T`.
@@ -693,6 +692,16 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let xhp_attr_deps = self.get_xhp_attr_deps();
 
         let (req_ancestors, req_ancestors_extends) = self.get_class_requirements();
+
+        // TODO(T88552052) can make logic more explicit now, enum members appear to
+        // only need abstract without default and concrete type consts
+        let enum_inner_ty = type_consts
+            .get(&self.special_names.fb.tInner)
+            .and_then(|tc| match &tc.kind {
+                Typeconst::TCConcrete(tc) => Some(&tc.ty),
+                Typeconst::TCAbstract(atc) => atc.default.as_ref(),
+            });
+        self.rewrite_class_consts_for_enum(enum_inner_ty, &ancestors, &mut consts);
 
         let sealed_whitelist = self.get_sealed_whitelist();
 

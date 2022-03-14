@@ -33,45 +33,43 @@ FoldedClass {
 }
 
 File root|module_attr.php--elsewhere.php
---- ocaml
-+++ rupro
-@@ -1,38 +1,38 @@
- FoldedClass {
-     name: "\\E",
-     pos: Pos(root|module_attr.php--elsewhere.php, 5:6-7),
-     kind: Cenum,
-     enum_type: EnumType {
-         base: int,
-         constraint: None,
-         includes: [],
-     },
-     module: (
-         Pos(root|module_attr.php--elsewhere.php, 2:54-65),
-         "elsewhere",
-     ),
-     ancestors: {
-         "\\HH\\BuiltinEnum": HH\BuiltinEnum<E>,
-     },
-     consts: {
-         "A": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|module_attr.php--elsewhere.php, 6:3-4),
--            ty: E,
-+            ty: int,
-             origin: "\\E",
-             refs: [],
-         },
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|module_attr.php--elsewhere.php, 5:6-7),
-             ty: HH\classname<this>,
-             origin: "\\E",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\HH\\BuiltinEnum",
-     },
- }
+FoldedClass {
+    name: "\\E",
+    pos: Pos(root|module_attr.php--elsewhere.php, 5:6-7),
+    kind: Cenum,
+    enum_type: EnumType {
+        base: int,
+        constraint: None,
+        includes: [],
+    },
+    module: (
+        Pos(root|module_attr.php--elsewhere.php, 2:54-65),
+        "elsewhere",
+    ),
+    ancestors: {
+        "\\HH\\BuiltinEnum": HH\BuiltinEnum<E>,
+    },
+    consts: {
+        "A": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|module_attr.php--elsewhere.php, 6:3-4),
+            ty: E,
+            origin: "\\E",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|module_attr.php--elsewhere.php, 5:6-7),
+            ty: HH\classname<this>,
+            origin: "\\E",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\HH\\BuiltinEnum",
+    },
+}
+
+They matched!

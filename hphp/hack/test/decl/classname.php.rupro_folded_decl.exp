@@ -1,62 +1,60 @@
---- ocaml
-+++ rupro
-@@ -1,58 +1,58 @@
- FoldedClass {
-     name: "\\Foo",
-     pos: Pos(root|classname.php, 3:7-10),
-     kind: Cclass(
-         Concrete,
-     ),
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classname.php, 3:7-10),
-             ty: HH\classname<this>,
-             origin: "\\Foo",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\E",
-     pos: Pos(root|classname.php, 6:6-7),
-     kind: Cenum,
-     enum_type: EnumType {
-         base: string,
-         constraint: None,
-         includes: [],
-     },
-     ancestors: {
-         "\\HH\\BuiltinEnum": HH\BuiltinEnum<E>,
-     },
-     consts: {
-         "FOO": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|classname.php, 7:3-6),
--            ty: E,
-+            ty: _,
-             origin: "\\E",
-             refs: [
-                 ClassConstRef(
-                     From(
-                         "\\Foo",
-                     ),
-                     "class",
-                 ),
-             ],
-         },
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classname.php, 6:6-7),
-             ty: HH\classname<this>,
-             origin: "\\E",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\HH\\BuiltinEnum",
-     },
- }
+FoldedClass {
+    name: "\\Foo",
+    pos: Pos(root|classname.php, 3:7-10),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classname.php, 3:7-10),
+            ty: HH\classname<this>,
+            origin: "\\Foo",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\E",
+    pos: Pos(root|classname.php, 6:6-7),
+    kind: Cenum,
+    enum_type: EnumType {
+        base: string,
+        constraint: None,
+        includes: [],
+    },
+    ancestors: {
+        "\\HH\\BuiltinEnum": HH\BuiltinEnum<E>,
+    },
+    consts: {
+        "FOO": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classname.php, 7:3-6),
+            ty: E,
+            origin: "\\E",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\Foo",
+                    ),
+                    "class",
+                ),
+            ],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classname.php, 6:6-7),
+            ty: HH\classname<this>,
+            origin: "\\E",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\HH\\BuiltinEnum",
+    },
+}
+
+They matched!

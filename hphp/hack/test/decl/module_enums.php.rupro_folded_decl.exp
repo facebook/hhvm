@@ -1,68 +1,64 @@
 File root|module_enums.php--X.php
---- ocaml
-+++ rupro
-@@ -1,55 +1,55 @@
- FoldedClass {
-     name: "\\X",
-     pos: Pos(root|module_enums.php--X.php, 5:6-7),
-     kind: Cenum,
-     is_internal: true,
-     enum_type: EnumType {
-         base: int,
-         constraint: None,
-         includes: [],
-     },
-     module: (
-         Pos(root|module_enums.php--X.php, 2:54-57),
-         "X",
-     ),
-     ancestors: {
-         "\\HH\\BuiltinEnum": HH\BuiltinEnum<X>,
-     },
-     consts: {
-         "A": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|module_enums.php--X.php, 6:3-4),
--            ty: X,
-+            ty: int,
-             origin: "\\X",
-             refs: [],
-         },
-         "B": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|module_enums.php--X.php, 7:3-4),
--            ty: X,
-+            ty: int,
-             origin: "\\X",
-             refs: [],
-         },
-         "C": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|module_enums.php--X.php, 8:3-4),
--            ty: X,
-+            ty: int,
-             origin: "\\X",
-             refs: [],
-         },
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|module_enums.php--X.php, 5:6-7),
-             ty: HH\classname<this>,
-             origin: "\\X",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\HH\\BuiltinEnum",
-     },
- }
+FoldedClass {
+    name: "\\X",
+    pos: Pos(root|module_enums.php--X.php, 5:6-7),
+    kind: Cenum,
+    is_internal: true,
+    enum_type: EnumType {
+        base: int,
+        constraint: None,
+        includes: [],
+    },
+    module: (
+        Pos(root|module_enums.php--X.php, 2:54-57),
+        "X",
+    ),
+    ancestors: {
+        "\\HH\\BuiltinEnum": HH\BuiltinEnum<X>,
+    },
+    consts: {
+        "A": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|module_enums.php--X.php, 6:3-4),
+            ty: X,
+            origin: "\\X",
+            refs: [],
+        },
+        "B": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|module_enums.php--X.php, 7:3-4),
+            ty: X,
+            origin: "\\X",
+            refs: [],
+        },
+        "C": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|module_enums.php--X.php, 8:3-4),
+            ty: X,
+            origin: "\\X",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|module_enums.php--X.php, 5:6-7),
+            ty: HH\classname<this>,
+            origin: "\\X",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\HH\\BuiltinEnum",
+    },
+}
 
 File root|module_enums.php--Y.php
 
 
 File root|module_enums.php--no-module.php
 
+
+They matched!

@@ -1460,7 +1460,10 @@ fn p_expr_impl<'a>(
     parent_pos: Option<Pos>,
 ) -> Result<Expr_> {
     env.check_stack_limit();
-    let pos = parent_pos.unwrap_or_else(|| p_pos(node, env));
+    let pos = match parent_pos {
+        Some(pos) => pos,
+        None => p_pos(node, env),
+    };
     match &node.children {
         LambdaExpression(c) => p_lambda_expression(c, env, pos),
         BracedExpression(c) => p_expr_recurse(location, &c.expression, env, None),
@@ -1481,78 +1484,8 @@ fn p_expr_impl<'a>(
         ListExpression(c) => p_list_expr(node, c, env),
         EvalExpression(c) => p_special_call(&c.keyword, &c.argument, env),
         IssetExpression(c) => p_special_call(&c.keyword, &c.argument_list, env),
-        TupleExpression(c) => Ok(Expr_::mk_tuple(could_map(&c.items, env, p_expr)?)),
-        FunctionCallExpression(c) => {
-            let recv = &c.receiver;
-            let args = &c.argument_list;
-            let get_hhas_adata = || {
-                if text_str(recv, env) == "__hhas_adata" {
-                    if let SyntaxList(l) = &args.children {
-                        if let Some(li) = l.first() {
-                            if let ListItem(i) = &li.children {
-                                if let LiteralExpression(le) = &i.item.children {
-                                    let expr = &le.expression;
-                                    if token_kind(expr) == Some(TK::NowdocStringLiteral) {
-                                        return Some(expr);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                None
-            };
-            match get_hhas_adata() {
-                Some(expr) => {
-                    let literal_expression_pos = p_pos(expr, env);
-                    let s = extract_unquoted_string(text_str(expr, env), 0, expr.width())
-                        .map_err(|e| Error::Failwith(e.msg))?;
-                    Ok(Expr_::mk_call(
-                        p_expr(recv, env)?,
-                        vec![],
-                        vec![(
-                            ast::ParamKind::Pnormal,
-                            Expr::new((), literal_expression_pos, Expr_::String(s.into())),
-                        )],
-                        None,
-                    ))
-                }
-                None => {
-                    let targs = match (&recv.children, &c.type_args.children) {
-                        (_, TypeArguments(c)) => could_map(&c.types, env, p_targ)?,
-                        /* TODO might not be needed */
-                        (GenericTypeSpecifier(c), _) => match &c.argument_list.children {
-                            TypeArguments(c) => could_map(&c.types, env, p_targ)?,
-                            _ => vec![],
-                        },
-                        _ => vec![],
-                    };
-
-                    // Mark expression as CallReceiver so that we can correctly set
-                    // PropOrMethod field in ObjGet and ClassGet
-                    let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env, None)?;
-                    let (mut args, varargs) = split_args_vararg(args, env)?;
-
-                    // If the function has an enum class label expression, that's
-                    // the first argument.
-                    if let EnumClassLabelExpression(e) = &c.enum_class_label.children {
-                        assert!(
-                            e.qualifier.is_missing(),
-                            "Parser error: function call with enum class labels"
-                        );
-                        let pos = p_pos(&c.enum_class_label, env);
-                        let enum_class_label = ast::Expr::new(
-                            (),
-                            pos,
-                            Expr_::mk_enum_class_label(None, pos_name(&e.expression, env)?.1),
-                        );
-                        args.insert(0, (ast::ParamKind::Pnormal, enum_class_label));
-                    }
-
-                    Ok(Expr_::mk_call(recv, targs, args, varargs))
-                }
-            }
-        }
+        TupleExpression(c) => p_tuple_expr(c, env),
+        FunctionCallExpression(c) => p_function_call_expr(c, env),
         FunctionPointerExpression(c) => {
             let targs = match &c.type_args.children {
                 TypeArguments(c) => could_map(&c.types, env, p_targ)?,
@@ -2176,6 +2109,88 @@ fn p_list_expr<'a>(
         }
     };
     Ok(Expr_::List(could_map(&c.members, env, p_binder_or_ignore)?))
+}
+
+fn p_tuple_expr<'a>(
+    c: &'a TupleExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    Ok(Expr_::mk_tuple(could_map(&c.items, env, p_expr)?))
+}
+
+fn p_function_call_expr<'a>(
+    c: &'a FunctionCallExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    let recv = &c.receiver;
+    let args = &c.argument_list;
+    let get_hhas_adata = || {
+        if text_str(recv, env) == "__hhas_adata" {
+            if let SyntaxList(l) = &args.children {
+                if let Some(li) = l.first() {
+                    if let ListItem(i) = &li.children {
+                        if let LiteralExpression(le) = &i.item.children {
+                            let expr = &le.expression;
+                            if token_kind(expr) == Some(TK::NowdocStringLiteral) {
+                                return Some(expr);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        None
+    };
+    match get_hhas_adata() {
+        Some(expr) => {
+            let literal_expression_pos = p_pos(expr, env);
+            let s = extract_unquoted_string(text_str(expr, env), 0, expr.width())
+                .map_err(|e| Error::Failwith(e.msg))?;
+            Ok(Expr_::mk_call(
+                p_expr(recv, env)?,
+                vec![],
+                vec![(
+                    ast::ParamKind::Pnormal,
+                    Expr::new((), literal_expression_pos, Expr_::String(s.into())),
+                )],
+                None,
+            ))
+        }
+        None => {
+            let targs = match (&recv.children, &c.type_args.children) {
+                (_, TypeArguments(c)) => could_map(&c.types, env, p_targ)?,
+                /* TODO might not be needed */
+                (GenericTypeSpecifier(c), _) => match &c.argument_list.children {
+                    TypeArguments(c) => could_map(&c.types, env, p_targ)?,
+                    _ => vec![],
+                },
+                _ => vec![],
+            };
+
+            // Mark expression as CallReceiver so that we can correctly set
+            // PropOrMethod field in ObjGet and ClassGet
+            let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env, None)?;
+            let (mut args, varargs) = split_args_vararg(args, env)?;
+
+            // If the function has an enum class label expression, that's
+            // the first argument.
+            if let EnumClassLabelExpression(e) = &c.enum_class_label.children {
+                assert!(
+                    e.qualifier.is_missing(),
+                    "Parser error: function call with enum class labels"
+                );
+                let pos = p_pos(&c.enum_class_label, env);
+                let enum_class_label = ast::Expr::new(
+                    (),
+                    pos,
+                    Expr_::mk_enum_class_label(None, pos_name(&e.expression, env)?.1),
+                );
+                args.insert(0, (ast::ParamKind::Pnormal, enum_class_label));
+            }
+
+            Ok(Expr_::mk_call(recv, targs, args, varargs))
+        }
+    }
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

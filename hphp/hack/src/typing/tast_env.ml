@@ -201,7 +201,11 @@ let is_sub_type_for_union env ty_sub ty_super =
 let referenced_typeconsts env root ids =
   let root = hint_to_ty env root in
   let ety_env = Typing_defs.empty_expand_env in
-  Typing_taccess.referenced_typeconsts env ety_env (root, ids)
+  let (env, ty_err_opt) =
+    Typing_taccess.referenced_typeconsts env ety_env (root, ids)
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  env
 
 let empty ctx = Typing_env_types.empty ctx Relative_path.default ~droot:None
 

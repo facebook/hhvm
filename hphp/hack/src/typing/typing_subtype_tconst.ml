@@ -19,7 +19,7 @@ let make_type_const_equal_with_ty_err
     | LoclType ty ->
       let ety_env = empty_expand_env in
       let ((env, e1), tytconst) =
-        Utils.expand_typeconst_with_ty_err
+        Utils.expand_typeconst
           ety_env
           env
           ~as_tyvar_with_cnstr

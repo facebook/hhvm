@@ -148,28 +148,12 @@ type expand_typeconst =
   pos_id ->
   root_pos:Pos_or_decl.t ->
   allow_abstract_tconst:bool ->
-  env * locl_ty
+  (env * Typing_error.t option) * locl_ty
 
 let (expand_typeconst_ref : expand_typeconst ref) =
   ref (not_implemented "expand_typeconst")
 
 let expand_typeconst x = !expand_typeconst_ref x
-
-type expand_typeconst_with_ty_err =
-  expand_env ->
-  env ->
-  ?ignore_errors:bool ->
-  ?as_tyvar_with_cnstr:Pos.t option ->
-  locl_ty ->
-  pos_id ->
-  root_pos:Pos_or_decl.t ->
-  allow_abstract_tconst:bool ->
-  (env * Typing_error.t option) * locl_ty
-
-let (expand_typeconst_with_ty_err_ref : expand_typeconst_with_ty_err ref) =
-  ref (not_implemented "expand_typeconst_with_ty_err")
-
-let expand_typeconst_with_ty_err x = !expand_typeconst_with_ty_err_ref x
 
 type union =
   env -> ?approx_cancel_neg:bool -> locl_ty -> locl_ty -> env * locl_ty

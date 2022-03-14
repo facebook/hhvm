@@ -257,35 +257,11 @@ type expand_typeconst =
   Typing_defs.pos_id ->
   root_pos:Pos_or_decl.t ->
   allow_abstract_tconst:bool ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 val expand_typeconst_ref : expand_typeconst ref
 
 val expand_typeconst :
-  Typing_defs.expand_env ->
-  Typing_env_types.env ->
-  ?ignore_errors:bool ->
-  ?as_tyvar_with_cnstr:Pos.t option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.pos_id ->
-  root_pos:Pos_or_decl.t ->
-  allow_abstract_tconst:bool ->
-  Typing_env_types.env * Typing_defs.locl_ty
-
-type expand_typeconst_with_ty_err =
-  Typing_defs.expand_env ->
-  Typing_env_types.env ->
-  ?ignore_errors:bool ->
-  ?as_tyvar_with_cnstr:Pos.t option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.pos_id ->
-  root_pos:Pos_or_decl.t ->
-  allow_abstract_tconst:bool ->
-  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
-
-val expand_typeconst_with_ty_err_ref : expand_typeconst_with_ty_err ref
-
-val expand_typeconst_with_ty_err :
   Typing_defs.expand_env ->
   Typing_env_types.env ->
   ?ignore_errors:bool ->

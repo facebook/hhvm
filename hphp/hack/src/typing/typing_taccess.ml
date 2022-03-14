@@ -97,8 +97,8 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
     both a constraint type and assigned type. Which one we choose depends if
     the current root is the base (origin) of the expansion, or if it is an
     upper bound of the base. *)
-let create_root_from_type_constant_with_ty_err
-    ctx env root (_class_pos, class_name) class_ =
+let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
+    =
   let { id = (id_pos, id_name) as id; _ } = ctx in
   match Env.get_typeconst env class_ id_name with
   | None ->
@@ -292,7 +292,7 @@ let rec intersect_results err rl =
     | (Exact ty, Abstract _) ->
       Exact ty)
 
-let rec type_of_result_with_ty_err ~ignore_errors ctx env root res =
+let rec type_of_result ~ignore_errors ctx env root res =
   let type_with_bound env as_tyvar name ~lower_bounds ~upper_bounds =
     match as_tyvar with
     | Some tyvar_pos ->
@@ -328,7 +328,7 @@ let rec type_of_result_with_ty_err ~ignore_errors ctx env root res =
       Abstract { name = name'; names = namel; lower_bounds; upper_bounds }
     in
     let ((env, ty_err_opt), ty) =
-      type_of_result_with_ty_err ~ignore_errors ctx env root res'
+      type_of_result ~ignore_errors ctx env root res'
     in
     let (env, ty) =
       type_with_bound
@@ -367,7 +367,7 @@ let update_class_name env id new_name = function
       id
       { abstr with name = new_name; names = name :: names }
 
-let rec expand_with_ty_err ctx env root =
+let rec expand ctx env root =
   let (env, root) = Env.expand_type env root in
   let err =
     let (pos, tconst) = ctx.id in
@@ -397,7 +397,7 @@ let rec expand_with_ty_err ctx env root =
       let allow_abstract = true in
       { ctx with base; allow_abstract }
     in
-    let ((env, ty_err_opt), res) = expand_with_ty_err ctx env ty in
+    let ((env, ty_err_opt), res) = expand ctx env ty in
     let name = Printf.sprintf "<cls#%s>" name in
     ((env, ty_err_opt), update_class_name env ctx.id name res)
   | Tclass (cls, _, _) ->
@@ -415,7 +415,7 @@ let rec expand_with_ty_err ctx env root =
         in
 
         let ctx = { ctx with allow_abstract } in
-        create_root_from_type_constant_with_ty_err ctx env root cls ci
+        create_root_from_type_constant ctx env root cls ci
     end
   | Tgeneric (s, tyargs) ->
     let ctx =
@@ -436,7 +436,7 @@ let rec expand_with_ty_err ctx env root =
       List.map_env_ty_err_opt
         env
         upper_bounds
-        ~f:(expand_with_ty_err ctx)
+        ~f:(expand ctx)
         ~combine_ty_errs:Typing_error.multiple_opt
     in
     let res = intersect_results err resl in
@@ -448,7 +448,7 @@ let rec expand_with_ty_err ctx env root =
       let abstract_as_tyvar_at_pos = None in
       { ctx with base; allow_abstract; abstract_as_tyvar_at_pos }
     in
-    let ((env, ty_err_opt), res) = expand_with_ty_err ctx env ty in
+    let ((env, ty_err_opt), res) = expand ctx env ty in
     ( (env, ty_err_opt),
       update_class_name env ctx.id (DependentKind.to_string dep_ty) res )
   | Tintersection tyl ->
@@ -466,7 +466,7 @@ let rec expand_with_ty_err ctx env root =
       List.map_env_ty_err_opt
         env
         tyl_nonvars
-        ~f:(expand_with_ty_err ctx)
+        ~f:(expand ctx)
         ~combine_ty_errs:Typing_error.multiple_opt
     in
     let result = intersect_results err resl in
@@ -477,7 +477,7 @@ let rec expand_with_ty_err ctx env root =
         List.map_env_ty_err_opt
           env
           tyl_vars
-          ~f:(expand_with_ty_err ctx)
+          ~f:(expand ctx)
           ~combine_ty_errs:Typing_error.multiple_opt
       in
       (* TODO: should we be taking the intersection of the errors? *)
@@ -491,7 +491,7 @@ let rec expand_with_ty_err ctx env root =
       List.map_env_ty_err_opt
         env
         tyl
-        ~f:(expand_with_ty_err ctx)
+        ~f:(expand ctx)
         ~combine_ty_errs:Typing_error.union_opt
     in
     let result = union_results err resl in
@@ -520,7 +520,7 @@ let rec expand_with_ty_err ctx env root =
     ((env, None), Missing err)
 
 (** Expands a type constant access like A::T to its definition. *)
-let expand_with_env_with_ty_err
+let expand_with_env
     (ety_env : expand_env)
     env
     ?(ignore_errors = false)
@@ -541,10 +541,8 @@ let expand_with_env_with_ty_err
         root_pos;
       }
     in
-    let ((env, e1), res) = expand_with_ty_err ctx env root in
-    let ((env, e2), ty) =
-      type_of_result_with_ty_err ~ignore_errors ctx env root res
-    in
+    let ((env, e1), res) = expand ctx env root in
+    let ((env, e2), ty) = type_of_result ~ignore_errors ctx env root res in
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
     ((env, ty_err_opt), ty)
   in
@@ -554,7 +552,7 @@ let expand_with_env_with_ty_err
 (* This is called with non-nested type accesses e.g. this::T1::T2 is
  * represented by (this, [T1; T2])
  *)
-let referenced_typeconsts_with_ty_err env ety_env (root, ids) =
+let referenced_typeconsts env ety_env (root, ids) =
   let ((env, e1), root) = Phase.localize_with_ty_err ~ety_env env root in
   let (((_env, ty_errs), _ty), res) =
     List.fold
@@ -581,7 +579,7 @@ let referenced_typeconsts_with_ty_err env ety_env (root, ids) =
               | _ -> acc)
         in
         let ((env, ty_err_opt), root) =
-          expand_with_env_with_ty_err
+          expand_with_env
             ety_env
             env
             ~as_tyvar_with_cnstr:None
@@ -600,43 +598,8 @@ let referenced_typeconsts_with_ty_err env ety_env (root, ids) =
   in
   (res, Typing_error.multiple_opt ty_errs)
 
-(* == Side effecting variants =============================================== *)
-
-let referenced_typeconsts env ety_env (root, ids) =
-  let (res, ty_err_opt) =
-    referenced_typeconsts_with_ty_err env ety_env (root, ids)
-  in
-  Option.iter ty_err_opt ~f:Errors.add_typing_error;
-  res
-
-let expand_with_env
-    ety_env
-    env
-    ?ignore_errors
-    ?as_tyvar_with_cnstr
-    root
-    id
-    ~root_pos
-    ~allow_abstract_tconst =
-  let ((env, ty_err_opt), res) =
-    expand_with_env_with_ty_err
-      ety_env
-      env
-      ?ignore_errors
-      ?as_tyvar_with_cnstr
-      root
-      id
-      ~root_pos
-      ~allow_abstract_tconst
-  in
-  Option.iter ty_err_opt ~f:Errors.add_typing_error;
-  (env, res)
-
 (*****************************************************************************)
 (* Exporting *)
 (*****************************************************************************)
 
 let () = Typing_utils.expand_typeconst_ref := expand_with_env
-
-let () =
-  Typing_utils.expand_typeconst_with_ty_err_ref := expand_with_env_with_ty_err

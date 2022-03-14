@@ -1508,53 +1508,12 @@ fn p_expr_impl<'a>(
         CastExpression(c) => p_cast_expr(c, env),
         PrefixedCodeExpression(c) => p_prefixed_code_expr(c, env),
         ConditionalExpression(c) => p_conditional_expr(c, env),
-        SubscriptExpression(c) => Ok(Expr_::mk_array_get(
-            p_expr(&c.receiver, env)?,
-            map_optional(&c.index, env, p_expr)?,
-        )),
-        EmbeddedSubscriptExpression(c) => Ok(Expr_::mk_array_get(
-            p_expr(&c.receiver, env)?,
-            map_optional(&c.index, env, |n, e| p_expr_with_loc(location, n, e, None))?,
-        )),
-        ShapeExpression(c) => Ok(Expr_::Shape(could_map(&c.fields, env, |n, e| {
-            map_shape_expression_field(n, e, p_expr)
-        })?)),
+        SubscriptExpression(c) => p_subscript_expr(c, env),
+        EmbeddedSubscriptExpression(c) => p_embedded_subscript_expr(c, env, location),
+        ShapeExpression(c) => p_shape_expr(c, env),
         ObjectCreationExpression(c) => p_expr_recurse(location, &c.object, env, Some(pos)),
-        ConstructorCall(c) => {
-            let (args, varargs) = split_args_vararg(&c.argument_list, env)?;
-            let (e, hl) = match &c.type_.children {
-                GenericTypeSpecifier(c) => {
-                    let name = pos_name(&c.class_type, env)?;
-                    let hints = match &c.argument_list.children {
-                        TypeArguments(c) => could_map(&c.types, env, p_targ)?,
-                        _ => missing_syntax("generic type arguments", &c.argument_list, env)?,
-                    };
-                    (mk_id_expr(name), hints)
-                }
-                SimpleTypeSpecifier(_) => {
-                    let name = pos_name(&c.type_, env)?;
-                    (mk_id_expr(name), vec![])
-                }
-                _ => (p_expr(&c.type_, env)?, vec![]),
-            };
-            if let Expr_::Id(name) = &e.2 {
-                fail_if_invalid_reified_generic(node, env, &name.1);
-                fail_if_invalid_class_creation(node, env, &name.1);
-            }
-            Ok(Expr_::mk_new(
-                ast::ClassId((), pos, ast::ClassId_::CIexpr(e)),
-                hl,
-                args.into_iter().map(|(_, e)| e).collect(),
-                varargs,
-                (),
-            ))
-        }
-        GenericTypeSpecifier(c) => {
-            if !c.argument_list.is_missing() {
-                raise_parsing_error(&c.argument_list, env, &syntax_error::targs_not_allowed)
-            }
-            Ok(Expr_::mk_id(pos_name(&c.class_type, env)?))
-        }
+        ConstructorCall(c) => p_constructor_call(node, c, env, pos),
+        GenericTypeSpecifier(c) => p_generic_type_specifier(c, env),
         LiteralExpression(c) => p_expr_lit(location, node, &c.expression, env),
         PrefixedStringExpression(c) => {
             /* Temporarily allow only`re`- prefixed strings */
@@ -2267,6 +2226,81 @@ fn p_conditional_expr<'a>(
     let consequence = map_optional(&c.consequence, env, p_expr)?;
     let condition = p_expr(&c.test, env)?;
     Ok(Expr_::mk_eif(condition, consequence, alter))
+}
+
+fn p_subscript_expr<'a>(
+    c: &'a SubscriptExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    Ok(Expr_::mk_array_get(
+        p_expr(&c.receiver, env)?,
+        map_optional(&c.index, env, p_expr)?,
+    ))
+}
+
+fn p_embedded_subscript_expr<'a>(
+    c: &'a EmbeddedSubscriptExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+    location: ExprLocation,
+) -> Result<Expr_> {
+    Ok(Expr_::mk_array_get(
+        p_expr(&c.receiver, env)?,
+        map_optional(&c.index, env, |n, e| p_expr_with_loc(location, n, e, None))?,
+    ))
+}
+
+fn p_constructor_call<'a>(
+    node: S<'a>,
+    c: &'a ConstructorCallChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+    pos: Pos,
+) -> Result<Expr_> {
+    let (args, varargs) = split_args_vararg(&c.argument_list, env)?;
+    let (e, hl) = match &c.type_.children {
+        GenericTypeSpecifier(c) => {
+            let name = pos_name(&c.class_type, env)?;
+            let hints = match &c.argument_list.children {
+                TypeArguments(c) => could_map(&c.types, env, p_targ)?,
+                _ => missing_syntax("generic type arguments", &c.argument_list, env)?,
+            };
+            (mk_id_expr(name), hints)
+        }
+        SimpleTypeSpecifier(_) => {
+            let name = pos_name(&c.type_, env)?;
+            (mk_id_expr(name), vec![])
+        }
+        _ => (p_expr(&c.type_, env)?, vec![]),
+    };
+    if let Expr_::Id(name) = &e.2 {
+        fail_if_invalid_reified_generic(node, env, &name.1);
+        fail_if_invalid_class_creation(node, env, &name.1);
+    }
+    Ok(Expr_::mk_new(
+        ast::ClassId((), pos, ast::ClassId_::CIexpr(e)),
+        hl,
+        args.into_iter().map(|(_, e)| e).collect(),
+        varargs,
+        (),
+    ))
+}
+
+fn p_generic_type_specifier<'a>(
+    c: &'a GenericTypeSpecifierChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    if !c.argument_list.is_missing() {
+        raise_parsing_error(&c.argument_list, env, &syntax_error::targs_not_allowed)
+    }
+    Ok(Expr_::mk_id(pos_name(&c.class_type, env)?))
+}
+
+fn p_shape_expr<'a>(
+    c: &'a ShapeExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    Ok(Expr_::Shape(could_map(&c.fields, env, |n, e| {
+        map_shape_expression_field(n, e, p_expr)
+    })?))
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

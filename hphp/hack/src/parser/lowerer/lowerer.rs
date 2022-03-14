@@ -1501,29 +1501,7 @@ fn p_expr_impl<'a>(
         PrefixUnaryExpression(_) | PostfixUnaryExpression(_) | DecoratedExpression(_) => {
             p_pre_post_unary_decorated_expr(node, env, pos, location)
         }
-        BinaryExpression(c) => {
-            use ExprLocation::*;
-            let rlocation = if token_kind(&c.operator) == Some(TK::Equal) {
-                match location {
-                    AsStatement => RightOfAssignment,
-                    UsingStatement => RightOfAssignmentInUsingStatement,
-                    _ => TopLevel,
-                }
-            } else {
-                TopLevel
-            };
-            let bop_ast_node = p_bop(
-                pos,
-                &c.operator,
-                p_expr_with_loc(ExprLocation::TopLevel, &c.left_operand, env, None)?,
-                p_expr_with_loc(rlocation, &c.right_operand, env, None)?,
-                env,
-            )?;
-            if let Some((ast::Bop::Eq(_), lhs, _)) = bop_ast_node.as_binop() {
-                check_lvalue(lhs, env);
-            }
-            Ok(bop_ast_node)
-        }
+        BinaryExpression(c) => p_binary_expr(c, env, pos, location),
         Token(t) => {
             use ExprLocation::*;
             match (location, t.kind()) {
@@ -2229,6 +2207,27 @@ fn p_pre_post_unary_decorated_expr<'a>(
             _ => missing_syntax("unary operator", node, env),
         }
     }
+}
+
+fn p_binary_expr<'a>(
+    c: &'a BinaryExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+    pos: Pos,
+    location: ExprLocation,
+) -> Result<Expr_> {
+    use ExprLocation::*;
+    let left = p_expr_with_loc(ExprLocation::TopLevel, &c.left_operand, env, None)?;
+    let rlocation = match (token_kind(&c.operator), location) {
+        (Some(TK::Equal), AsStatement) => RightOfAssignment,
+        (Some(TK::Equal), UsingStatement) => RightOfAssignmentInUsingStatement,
+        _ => TopLevel,
+    };
+    let right = p_expr_with_loc(rlocation, &c.right_operand, env, None)?;
+    let bop_ast_node = p_bop(pos, &c.operator, left, right, env)?;
+    if let Some((ast::Bop::Eq(_), lhs, _)) = bop_ast_node.as_binop() {
+        check_lvalue(lhs, env);
+    }
+    Ok(bop_ast_node)
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

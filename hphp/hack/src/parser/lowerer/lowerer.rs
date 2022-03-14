@@ -1487,22 +1487,10 @@ fn p_expr_impl<'a>(
         TupleExpression(c) => p_tuple_expr(c, env),
         FunctionCallExpression(c) => p_function_call_expr(c, env),
         FunctionPointerExpression(c) => p_function_pointer_expr(node, c, env),
-        QualifiedName(_) => match location {
-            ExprLocation::InDoubleQuotedString => {
-                let ast::Id(_, n) = pos_qualified_name(node, env)?;
-                Ok(Expr_::String(n.into()))
-            }
-            _ => Ok(Expr_::mk_id(pos_qualified_name(node, env)?)),
-        },
-        VariableExpression(c) => Ok(Expr_::mk_lvar(lid_from_pos_name(pos, &c.expression, env)?)),
-        PipeVariableExpression(_) => Ok(Expr_::mk_lvar(mk_lid(
-            pos,
-            special_idents::DOLLAR_DOLLAR.into(),
-        ))),
-        InclusionExpression(c) => Ok(Expr_::mk_import(
-            p_import_flavor(&c.require, env)?,
-            p_expr(&c.filename, env)?,
-        )),
+        QualifiedName(_) => p_qualified_name(node, env, location),
+        VariableExpression(c) => p_variable_expr(c, env, pos),
+        PipeVariableExpression(_) => p_pipe_variable_expr(pos),
+        InclusionExpression(c) => p_inclusion_expr(c, env),
         MemberSelectionExpression(c) => p_obj_get(location, &c.object, &c.operator, &c.name, env),
         SafeMemberSelectionExpression(c) => {
             p_obj_get(location, &c.object, &c.operator, &c.name, env)
@@ -2163,6 +2151,7 @@ fn p_function_call_expr<'a>(
         }
     }
 }
+
 fn p_function_pointer_expr<'a>(
     node: S<'a>,
     c: &'a FunctionPointerExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
@@ -2196,6 +2185,41 @@ fn p_function_pointer_expr<'a>(
             missing_syntax("function or static method", node, env)
         }
     }
+}
+
+fn p_qualified_name<'a>(node: S<'a>, env: &mut Env<'a>, location: ExprLocation) -> Result<Expr_> {
+    match location {
+        ExprLocation::InDoubleQuotedString => {
+            let ast::Id(_, n) = pos_qualified_name(node, env)?;
+            Ok(Expr_::String(n.into()))
+        }
+        _ => Ok(Expr_::mk_id(pos_qualified_name(node, env)?)),
+    }
+}
+
+fn p_variable_expr<'a>(
+    c: &'a VariableExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+    pos: Pos,
+) -> Result<Expr_> {
+    Ok(Expr_::mk_lvar(lid_from_pos_name(pos, &c.expression, env)?))
+}
+
+fn p_pipe_variable_expr(pos: Pos) -> Result<Expr_> {
+    Ok(Expr_::mk_lvar(mk_lid(
+        pos,
+        special_idents::DOLLAR_DOLLAR.into(),
+    )))
+}
+
+fn p_inclusion_expr<'a>(
+    c: &'a InclusionExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    Ok(Expr_::mk_import(
+        p_import_flavor(&c.require, env)?,
+        p_expr(&c.filename, env)?,
+    ))
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

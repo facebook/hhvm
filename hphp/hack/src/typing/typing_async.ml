@@ -20,10 +20,10 @@ returns the type of `await e`.
 There is the special case that
   e : ?Awaitable<T> |- await e : ?T
 *)
-let overload_extract_from_awaitable env ~p opt_ty_maybe =
+let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
   let r = Reason.Rwitness p in
   let rec extract_inner env opt_ty_maybe =
-    let (env, e_opt_ty) =
+    let ((env, e1), e_opt_ty) =
       Typing_solver.expand_type_and_solve
         ~description_of_expected:"an Awaitable"
         env
@@ -34,7 +34,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
     | Tunion tyl ->
       let ((env, ty_errs), tyl) =
         List.fold_map
-          ~init:(env, [])
+          ~init:(env, Option.to_list e1)
           ~f:(fun (env, ty_errs) ty ->
             match extract_inner env ty with
             | ((env, Some ty_err), ty) -> ((env, ty_err :: ty_errs), ty)
@@ -46,18 +46,19 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
     | Toption ty ->
       (* We want to try to avoid easy double nullables here, so we handle Toption
        * with some special logic. *)
-      let ((env, ty_err_opt), ty) = extract_inner env ty in
+      let ((env, e2), ty) = extract_inner env ty in
       let (env, ty) = TUtils.union env (MakeType.null r) ty in
-      ((env, ty_err_opt), ty)
+      ((env, Option.merge e1 e2 ~f:Typing_error.both), ty)
     | Tintersection tyl ->
-      let (env, rtyl) =
+      let ((env, e2), rtyl) =
         TUtils.run_on_intersection_with_ty_err env tyl ~f:extract_inner
       in
-      (env, MakeType.intersection r rtyl)
-    | Tprim Aast.Tnull -> ((env, None), e_opt_ty)
+      ( (env, Option.merge e1 e2 ~f:Typing_error.both),
+        MakeType.intersection r rtyl )
+    | Tprim Aast.Tnull -> ((env, e1), e_opt_ty)
     | Tdynamic ->
       (* Awaiting a dynamic results in a new dynamic *)
-      ((env, None), MakeType.dynamic r)
+      ((env, e1), MakeType.dynamic r)
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Terr
@@ -102,7 +103,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
         | Tneg _ ->
           type_var
       in
-      let env =
+      let (env, e2) =
         Type.sub_type
           p
           Reason.URawait
@@ -111,7 +112,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
           expected_type
           Typing_error.Callback.unify_error
       in
-      (env, return_type)
+      ((env, Option.merge e1 e2 ~f:Typing_error.both), return_type)
   in
   let env = Env.open_tyvars env p in
   let ((env, ty_err_opt), ty) = extract_inner env opt_ty_maybe in
@@ -119,23 +120,51 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (env, ty)
 
-let overload_extract_from_awaitable_list env p tyl =
-  List.fold_right
-    ~f:
-      begin
-        fun ty (env, rtyl) ->
-        let (env, rty) = overload_extract_from_awaitable env ~p ty in
-        (env, rty :: rtyl)
-      end
-    tyl
-    ~init:(env, [])
+let overload_extract_from_awaitable env ~p opt_ty_maybe =
+  let ((env, ty_err_opt), res) =
+    overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  (env, res)
 
-let overload_extract_from_awaitable_shape env p fdm =
-  TShapeMap.map_env
-    begin
-      fun env _key (tk, tv) ->
-      let (env, rtv) = overload_extract_from_awaitable env ~p tv in
-      (env, (tk, rtv))
-    end
+let overload_extract_from_awaitable_list_with_ty_err env p tyl =
+  let (env, ty_errs, rtyl) =
+    List.fold_right
+      ~f:(fun ty (env, ty_errs, rtyl) ->
+        let ((env, ty_err_opt), rty) =
+          overload_extract_from_awaitable_with_ty_err env ~p ty
+        in
+        let ty_errs =
+          Option.value_map
+            ~default:ty_errs
+            ~f:(fun e -> e :: ty_errs)
+            ty_err_opt
+        in
+        (env, ty_errs, rty :: rtyl))
+      tyl
+      ~init:(env, [], [])
+  in
+  ((env, Typing_error.multiple_opt ty_errs), rtyl)
+
+let overload_extract_from_awaitable_list env p tyl =
+  let ((env, ty_err_opt), res) =
+    overload_extract_from_awaitable_list_with_ty_err env p tyl
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  (env, res)
+
+let overload_extract_from_awaitable_shape_with_ty_err env p fdm =
+  TShapeMap.map_env_ty_err_opt
+    (fun env _key (tk, tv) ->
+      let (env, rtv) = overload_extract_from_awaitable_with_ty_err env ~p tv in
+      (env, (tk, rtv)))
+    ~combine_ty_errs:Typing_error.multiple_opt
     env
     fdm
+
+let overload_extract_from_awaitable_shape env p fdm =
+  let ((env, ty_err_opt), res) =
+    overload_extract_from_awaitable_shape_with_ty_err env p fdm
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  (env, res)

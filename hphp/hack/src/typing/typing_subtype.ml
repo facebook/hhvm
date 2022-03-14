@@ -2568,7 +2568,7 @@ and simplify_subtype_has_member
             match get_var fresh_tyvar with
             | Some var ->
               (* TODO: can this actually generate an error? *)
-              Typing_solver.solve_to_equal_bound_or_wrt_variance_with_ty_err
+              Typing_solver.solve_to_equal_bound_or_wrt_variance
                 env
                 Reason.Rnone
                 var

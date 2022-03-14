@@ -240,8 +240,9 @@ let fun_def ctx fd :
     | Some _ -> ()
   end;
   let (env, tparams) = List.map_env env f.f_tparams ~f:Typing.type_param in
-  let env = Typing_solver.close_tyvars_and_solve env in
-  let env = Typing_solver.solve_all_unsolved_tyvars env in
+  let (env, e1) = Typing_solver.close_tyvars_and_solve env in
+  let (env, e2) = Typing_solver.solve_all_unsolved_tyvars env in
+
   if
     TypecheckerOptions.enable_sound_dynamic
       (Provider_context.get_tcopt (Env.get_ctx env))
@@ -282,6 +283,8 @@ let fun_def ctx fd :
     }
   in
   let (_env, global_inference_env) = Env.extract_global_inference_env env in
+  let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (fundef, (pos, global_inference_env))
 
 let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
@@ -557,8 +560,8 @@ let method_def ~is_disposable env cls m =
   in
   let m = { m with m_ret = (fst m.m_ret, type_hint') } in
   let (env, tparams) = List.map_env env m.m_tparams ~f:Typing.type_param in
-  let env = Typing_solver.close_tyvars_and_solve env in
-  let env = Typing_solver.solve_all_unsolved_tyvars env in
+  let (env, e1) = Typing_solver.close_tyvars_and_solve env in
+  let (env, e2) = Typing_solver.solve_all_unsolved_tyvars env in
 
   (* if the enclosing class method is annotated with
    * <<__SupportDynamicType>>, check that the method is dynamically callable *)
@@ -604,6 +607,8 @@ let method_def ~is_disposable env cls m =
   in
   let (env, global_inference_env) = Env.extract_global_inference_env env in
   let _env = Env.log_env_change "method_def" initial_env env in
+  let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (method_def, (pos, global_inference_env))
 
 (** Checks that extending this parent is legal - e.g. it is not final and not const. *)
@@ -1944,9 +1949,9 @@ let class_def_ env c tc =
     check_class_members env c tc
   in
   let (env, tparams) = class_type_param env c.c_tparams in
-  let env = Typing_solver.solve_all_unsolved_tyvars env in
+  let (env, e1) = Typing_solver.solve_all_unsolved_tyvars env in
   check_SupportDynamicType env c;
-
+  Option.iter ~f:Errors.add_typing_error e1;
   ( {
       Aast.c_span = c.c_span;
       Aast.c_annotation = Env.save (Env.get_tpenv env) env;

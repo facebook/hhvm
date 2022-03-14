@@ -56,13 +56,14 @@ let make_ts : Typing_env_types.env -> locl_ty -> Typing_env_types.env * locl_ty
     (env, MakeType.dynamic r)
 
 let rec transform_shapemap ?(nullable = false) env pos ty shape =
-  let (env, ty) =
+  let ((env, ty_err_opt), ty) =
     Typing_solver.expand_type_and_solve
       ~description_of_expected:"a shape"
       env
       pos
       ty
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (* If there are Tanys, be conservative and don't try to represent the
    * type more precisely
    *)

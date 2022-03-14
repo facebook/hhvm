@@ -29,16 +29,16 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
       | None ->
         let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
         let sft = { sft_optional = true; sft_ty = element_ty } in
-        ( env,
+        ( (env, None),
           Some
             (mk (r, Tshape (shape_kind, TShapeMap.add field_name sft fields)))
         )
-      | Some _ -> (env, Some ty)
+      | Some _ -> ((env, None), Some ty)
     end
-  | _ -> (env, None)
+  | _ -> ((env, None), None)
 
 let refine_shape field_name pos env shape =
-  let (env, shape) =
+  let ((env, e1), shape) =
     Typing_solver.expand_type_and_narrow
       ~description_of_expected:"a shape"
       env
@@ -57,6 +57,7 @@ let refine_shape field_name pos env shape =
       MakeType.mixed r
   in
   let sft = { sft_optional = false; sft_ty } in
+  Option.iter ~f:Errors.add_typing_error e1;
   Typing_intersection.intersect
     env
     ~r:(Reason.Rwitness pos)
@@ -85,7 +86,7 @@ let rec shrink_shape pos field_name env shape =
    * e.g. turn shape('a' => C) into shape('a' => #1) with a subtype constraint on #1,
    * because we know that the types of the fields don't change
    *)
-  let (env, shape) =
+  let ((env, e1), shape) =
     Typing_solver.expand_type_and_solve
       ~freshen:false
       ~description_of_expected:"a shape"
@@ -109,12 +110,18 @@ let rec shrink_shape pos field_name env shape =
           fields
     in
     let result = mk (Reason.Rwitness pos, Tshape (shape_kind, fields)) in
-    (env, result)
+    ((env, e1), result)
   | Tunion tyl ->
-    let (env, tyl) = List.map_env env tyl ~f:(shrink_shape pos field_name) in
+    let ((env, e2), tyl) =
+      List.map_env_ty_err_opt
+        env
+        tyl
+        ~combine_ty_errs:Typing_error.multiple_opt
+        ~f:(shrink_shape pos field_name)
+    in
     let result = mk (Reason.Rwitness pos, Tunion tyl) in
-    (env, result)
-  | _ -> (env, shape)
+    ((env, Option.merge e1 e2 ~f:Typing_error.both), result)
+  | _ -> ((env, e1), shape)
 
 (* Refine the type of a shape knowing that a call to Shapes::idx is not null.
  * This means that the shape now has the field, and that the type for this
@@ -124,12 +131,12 @@ let rec shrink_shape pos field_name env shape =
  * elsewhere when typechecking the call to Shapes::idx. This allows for more
  * useful typechecking of incomplete code (code in the process of being
  * written). *)
-let shapes_idx_not_null env shape_ty (ty, p, field) =
+let shapes_idx_not_null_with_ty_err env shape_ty (ty, p, field) =
   match TUtils.shape_field_name env (ty, p, field) with
-  | None -> (env, shape_ty)
+  | None -> ((env, None), shape_ty)
   | Some field ->
     let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
-    let (env, shape_ty) =
+    let ((env, e1), shape_ty) =
       Typing_solver.expand_type_and_narrow
         ~description_of_expected:"a shape"
         env
@@ -170,8 +177,18 @@ let shapes_idx_not_null env shape_ty (ty, p, field) =
     (match deref shape_ty with
     | (r, Tunion tyl) ->
       let (env, tyl) = List.map_env env tyl ~f:refine_type in
-      Typing_union.union_list env r tyl
-    | _ -> refine_type env shape_ty)
+      let (env, ty) = Typing_union.union_list env r tyl in
+      ((env, e1), ty)
+    | _ ->
+      let (env, ty) = refine_type env shape_ty in
+      ((env, None), ty))
+
+let shapes_idx_not_null env shape_ty fld =
+  let ((env, ty_err_opt), res) =
+    shapes_idx_not_null_with_ty_err env shape_ty fld
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  (env, res)
 
 let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
   mk
@@ -309,12 +326,17 @@ let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
   in
   make_locl_like_type env res
 
-let remove_key p env shape_ty ((_, field_p, _) as field) =
+let remove_key_with_ty_err p env shape_ty ((_, field_p, _) as field) =
   match TUtils.shape_field_name env field with
-  | None -> (env, TUtils.mk_tany env field_p)
+  | None -> ((env, None), TUtils.mk_tany env field_p)
   | Some field_name ->
     let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
     shrink_shape p field_name env shape_ty
+
+let remove_key p env shape_ty field =
+  let ((env, ty_err_opt), res) = remove_key_with_ty_err p env shape_ty field in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  (env, res)
 
 let to_collection env shape_ty res return_type =
   let mapper =
@@ -385,24 +407,26 @@ let to_collection env shape_ty res return_type =
   mapper#on_type (Type_mapper.fresh_env env) shape_ty
 
 let to_array env pos shape_ty res =
-  let (env, shape_ty) =
+  let ((env, e1), shape_ty) =
     Typing_solver.expand_type_and_solve
       ~description_of_expected:"a shape"
       env
       pos
       shape_ty
   in
+  Option.iter ~f:Errors.add_typing_error e1;
   to_collection env shape_ty res (fun env r key value ->
       make_locl_like_type env (MakeType.darray r key value))
 
 let to_dict env pos shape_ty res =
-  let (env, shape_ty) =
+  let ((env, e1), shape_ty) =
     Typing_solver.expand_type_and_solve
       ~description_of_expected:"a shape"
       env
       pos
       shape_ty
   in
+  Option.iter ~f:Errors.add_typing_error e1;
   to_collection env shape_ty res (fun env r key value ->
       make_locl_like_type env (MakeType.dict r key value))
 
@@ -471,7 +495,7 @@ let check_shape_keys_validity env keys =
   in
   let check_field witness_pos witness_info env key =
     let (env, key_pos, key_info) = get_field_info env key in
-    let prim_errs =
+    let ty_errs =
       let open Typing_error in
       match (witness_info, key_info) with
       | (Some _, None) ->
@@ -503,26 +527,27 @@ let check_shape_keys_validity env keys =
                       }))
             else
               None);
-            (if
-             not
-               (Typing_solver.is_sub_type env ty1 ty2
-               && Typing_solver.is_sub_type env ty2 ty1)
-            then
-              Some
-                (shape
-                   (Primary.Shape.Shape_field_type_mismatch
-                      {
-                        pos = key_pos;
-                        witness_pos;
-                        ty_name = lazy (Typing_print.error env ty2);
-                        witness_ty_name = lazy (Typing_print.error env ty1);
-                      }))
-            else
-              None);
+            (let (ty1_sub_ty2, e1) = Typing_solver.is_sub_type env ty1 ty2
+             and (ty2_sub_ty1, e2) = Typing_solver.is_sub_type env ty2 ty1 in
+             let e3 =
+               if not (ty1_sub_ty2 && ty2_sub_ty1) then
+                 Some
+                   (shape
+                      (Primary.Shape.Shape_field_type_mismatch
+                         {
+                           pos = key_pos;
+                           witness_pos;
+                           ty_name = lazy (Typing_print.error env ty2);
+                           witness_ty_name = lazy (Typing_print.error env ty1);
+                         }))
+               else
+                 None
+             in
+             Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3]);
           ]
     in
-    List.iter prim_errs ~f:Errors.add_typing_error;
-    env
+    let ty_err_opt = Typing_error.multiple_opt ty_errs in
+    (env, ty_err_opt)
   in
   (* Sort the keys by their positions since the error messages will make
    * more sense if we take the one that appears first as canonical and if
@@ -533,4 +558,12 @@ let check_shape_keys_validity env keys =
   | [] -> env
   | witness :: rest_keys ->
     let (env, pos, info) = get_field_info env witness in
-    List.fold_left ~f:(check_field pos info) ~init:env rest_keys
+    let (env, ty_errs) =
+      List.fold_left rest_keys ~init:(env, []) ~f:(fun (env, ty_errs) k ->
+          match check_field pos info env k with
+          | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+          | (env, _) -> (env, ty_errs))
+    in
+    let ty_err_opt = Typing_error.multiple_opt ty_errs in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    env

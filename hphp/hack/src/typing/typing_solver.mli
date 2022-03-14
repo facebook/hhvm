@@ -15,15 +15,12 @@ open Typing_env_types
     result = true implies ty1 <: ty2
     result = false implies NOT ty1 <: ty2 OR we don't know
 *)
-val is_sub_type : env -> locl_ty -> locl_ty -> bool
-
-val is_sub_type_with_ty_err :
-  env -> locl_ty -> locl_ty -> bool * Typing_error.t option
+val is_sub_type : env -> locl_ty -> locl_ty -> bool * Typing_error.t option
 
 val non_null : env -> Pos_or_decl.t -> locl_ty -> env * locl_ty
 
 (* Force solve all remaining unsolved type variables *)
-val solve_all_unsolved_tyvars : env -> env
+val solve_all_unsolved_tyvars : env -> env * Typing_error.t option
 
 val expand_type_and_solve :
   env ->
@@ -31,28 +28,12 @@ val expand_type_and_solve :
   description_of_expected:string ->
   Pos.t ->
   locl_ty ->
-  env * locl_ty
-
-val expand_type_and_solve_with_ty_err :
-  env ->
-  ?freshen:bool ->
-  description_of_expected:string ->
-  Pos.t ->
-  locl_ty ->
   (env * Typing_error.t option) * locl_ty
 
-val expand_type_and_solve_eq : env -> locl_ty -> env * locl_ty
+val expand_type_and_solve_eq :
+  env -> locl_ty -> (env * Typing_error.t option) * locl_ty
 
 val expand_type_and_narrow :
-  env ->
-  ?default:locl_ty ->
-  description_of_expected:string ->
-  (env -> locl_ty -> env * locl_ty option) ->
-  Pos.t ->
-  locl_ty ->
-  env * locl_ty
-
-val expand_type_and_narrow_with_ty_err :
   env ->
   ?default:locl_ty ->
   description_of_expected:string ->
@@ -61,15 +42,13 @@ val expand_type_and_narrow_with_ty_err :
   locl_ty ->
   (env * Typing_error.t option) * locl_ty
 
-val solve_to_equal_bound_or_wrt_variance : env -> Reason.t -> int -> env
-
-val solve_to_equal_bound_or_wrt_variance_with_ty_err :
+val solve_to_equal_bound_or_wrt_variance :
   env -> Reason.t -> int -> env * Typing_error.t option
 
-val close_tyvars_and_solve : env -> env
+val close_tyvars_and_solve : env -> env * Typing_error.t option
 
-val solve_all_unsolved_tyvars_gi : env -> env
+val solve_all_unsolved_tyvars_gi : env -> env * Typing_error.t option
 
-val bind : env -> Ident.t -> locl_ty -> env
+val bind : env -> Ident.t -> locl_ty -> env * Typing_error.t option
 
-val try_bind_to_equal_bound : env -> Ident.t -> env
+val try_bind_to_equal_bound : env -> Ident.t -> env * Typing_error.t option

@@ -1070,13 +1070,13 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
         let (env, ty) = Env.expand_type env receiver_ty in
         ((env, None), ty)
       else
-        Typing_solver.expand_type_and_solve_with_ty_err
+        Typing_solver.expand_type_and_solve
           env
           ~description_of_expected:"an object"
           args.obj_pos
           receiver_ty
     else
-      Typing_solver.expand_type_and_narrow_with_ty_err
+      Typing_solver.expand_type_and_narrow
         env
         ~description_of_expected:"an object"
         (widen_class_for_obj_get
@@ -1115,7 +1115,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
       if args.is_nonnull then
         (true, None)
       else
-        Typing_solver.is_sub_type_with_ty_err
+        Typing_solver.is_sub_type
           env
           receiver_ty
           (Typing_make_type.nonnull Reason.none)
@@ -1316,13 +1316,13 @@ let obj_get_with_mismatches
         let (env, rec_ty) = Env.expand_type env receiver_ty in
         ((env, None), rec_ty)
       else
-        Typing_solver.expand_type_and_solve_with_ty_err
+        Typing_solver.expand_type_and_solve
           env
           ~description_of_expected:"an object"
           obj_pos
           receiver_ty
     else
-      Typing_solver.expand_type_and_narrow_with_ty_err
+      Typing_solver.expand_type_and_narrow
         env
         ~description_of_expected:"an object"
         (widen_class_for_obj_get ~is_method ~nullsafe (snd member_id))

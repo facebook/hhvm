@@ -47,13 +47,14 @@ let xhp_attributes_for_class info : (string * class_elt) list =
  * type that is not XHP.
  *)
 let rec walk_and_gather_xhp_ ~env ~pos cty =
-  let (env, cty) =
+  let ((env, ty_err_opt), cty) =
     Typing_solver.expand_type_and_solve
       ~description_of_expected:"an XHP instance"
       env
       pos
       cty
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   match get_node cty with
   | Tany _
   | Terr
@@ -162,12 +163,16 @@ let is_xhp_child env pos ty =
   let ty_child = MakeType.class_type r SN.Classes.cXHPChild [] in
   (* Any Traversable *)
   let ty_traversable = MakeType.traversable r (MakeType.mixed r) in
-  Typing_solver.is_sub_type
-    env
-    ty
-    (MakeType.nullable_locl
-       r
-       (MakeType.union r [MakeType.dynamic r; ty_child; ty_traversable]))
+  let (res, ty_err_opt) =
+    Typing_solver.is_sub_type
+      env
+      ty
+      (MakeType.nullable_locl
+         r
+         (MakeType.union r [MakeType.dynamic r; ty_child; ty_traversable]))
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  res
 
 let rewrite_xml_into_new pos sid attributes children =
   let cid = CI sid in

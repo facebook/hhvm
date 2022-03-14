@@ -7,6 +7,7 @@
  *
  *)
 
+open Hh_prelude
 open Common
 open Typing_defs
 module Env = Typing_env
@@ -113,9 +114,10 @@ let apply_rules_with_array_index_value_ty_mismatches
      * the intersection of the types and intersection of errors
      *)
     | (r, Tintersection tyl) ->
-      let is_nonnull =
+      let (is_nonnull, ty_err_opt) =
         Typing_solver.is_sub_type env ty (Typing_make_type.nonnull Reason.none)
       in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
       let (env, res) =
         Typing_utils.run_on_intersection env ~f:(iter ~is_nonnull) tyl
       in

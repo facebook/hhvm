@@ -114,7 +114,8 @@ let check_param : env -> Nast.fun_param -> unit =
             env
         in
         let env = Env.set_tyvar_variance env container_type in
-        let env = Typing_solver.close_tyvars_and_solve env in
+        let (env, e1) = Typing_solver.close_tyvars_and_solve env in
+        Option.iter ~f:Errors.add_typing_error e1;
         if is_container then
           check_memoizable env type_param
         else

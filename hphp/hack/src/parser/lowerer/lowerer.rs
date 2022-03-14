@@ -1499,64 +1499,7 @@ fn p_expr_impl<'a>(
             p_obj_get(location, &c.object, &c.operator, &c.name, env)
         }
         PrefixUnaryExpression(_) | PostfixUnaryExpression(_) | DecoratedExpression(_) => {
-            let (operand, op, postfix) = match &node.children {
-                PrefixUnaryExpression(c) => (&c.operand, &c.operator, false),
-                PostfixUnaryExpression(c) => (&c.operand, &c.operator, true),
-                DecoratedExpression(c) => (&c.expression, &c.decorator, false),
-                _ => missing_syntax("unary exppr", node, env)?,
-            };
-
-            /**
-             * FFP does not destinguish between ++$i and $i++ on the level of token
-             * kind annotation. Prevent duplication by switching on `postfix` for
-             * the two operatores for which AST /does/ differentiate between
-             * fixities.
-             */
-            use ast::Uop::*;
-            let mk_unop = |op, e| Ok(Expr_::mk_unop(op, e));
-            let op_kind = token_kind(op);
-            if let Some(TK::At) = op_kind {
-                if env.parser_options.po_disallow_silence {
-                    raise_parsing_error(op, env, &syntax_error::no_silence);
-                }
-                if env.codegen() {
-                    let expr = p_expr(operand, env)?;
-                    mk_unop(Usilence, expr)
-                } else {
-                    let expr = p_expr_with_loc(ExprLocation::TopLevel, operand, env, Some(pos))?;
-                    Ok(expr.2)
-                }
-            } else {
-                let expr = p_expr(operand, env)?;
-                match op_kind {
-                    Some(TK::PlusPlus) if postfix => mk_unop(Upincr, expr),
-                    Some(TK::MinusMinus) if postfix => mk_unop(Updecr, expr),
-                    Some(TK::PlusPlus) => mk_unop(Uincr, expr),
-                    Some(TK::MinusMinus) => mk_unop(Udecr, expr),
-                    Some(TK::Exclamation) => mk_unop(Unot, expr),
-                    Some(TK::Tilde) => mk_unop(Utild, expr),
-                    Some(TK::Plus) => mk_unop(Uplus, expr),
-                    Some(TK::Minus) => mk_unop(Uminus, expr),
-                    Some(TK::Await) => Ok(lift_await(pos, expr, env, location)),
-                    Some(TK::Readonly) => Ok(process_readonly_expr(env, expr)),
-                    Some(TK::Clone) => Ok(Expr_::mk_clone(expr)),
-                    Some(TK::Print) => Ok(Expr_::mk_call(
-                        Expr::new(
-                            (),
-                            pos.clone(),
-                            Expr_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
-                        ),
-                        vec![],
-                        vec![(ast::ParamKind::Pnormal, expr)],
-                        None,
-                    )),
-                    Some(TK::Dollar) => {
-                        raise_parsing_error(op, env, &syntax_error::invalid_variable_name);
-                        Ok(Expr_::Omitted)
-                    }
-                    _ => missing_syntax("unary operator", node, env),
-                }
-            }
+            p_pre_post_unary_decorated_expr(node, env, pos, location)
         }
         BinaryExpression(c) => {
             use ExprLocation::*;
@@ -2220,6 +2163,72 @@ fn p_inclusion_expr<'a>(
         p_import_flavor(&c.require, env)?,
         p_expr(&c.filename, env)?,
     ))
+}
+
+fn p_pre_post_unary_decorated_expr<'a>(
+    node: S<'a>,
+    env: &mut Env<'a>,
+    pos: Pos,
+    location: ExprLocation,
+) -> Result<Expr_> {
+    let (operand, op, postfix) = match &node.children {
+        PrefixUnaryExpression(c) => (&c.operand, &c.operator, false),
+        PostfixUnaryExpression(c) => (&c.operand, &c.operator, true),
+        DecoratedExpression(c) => (&c.expression, &c.decorator, false),
+        _ => missing_syntax("unary exppr", node, env)?,
+    };
+
+    /**
+     * FFP does not destinguish between ++$i and $i++ on the level of token
+     * kind annotation. Prevent duplication by switching on `postfix` for
+     * the two operatores for which AST /does/ differentiate between
+     * fixities.
+     */
+    use ast::Uop::*;
+    let mk_unop = |op, e| Ok(Expr_::mk_unop(op, e));
+    let op_kind = token_kind(op);
+    if let Some(TK::At) = op_kind {
+        if env.parser_options.po_disallow_silence {
+            raise_parsing_error(op, env, &syntax_error::no_silence);
+        }
+        if env.codegen() {
+            let expr = p_expr(operand, env)?;
+            mk_unop(Usilence, expr)
+        } else {
+            let expr = p_expr_with_loc(ExprLocation::TopLevel, operand, env, Some(pos))?;
+            Ok(expr.2)
+        }
+    } else {
+        let expr = p_expr(operand, env)?;
+        match op_kind {
+            Some(TK::PlusPlus) if postfix => mk_unop(Upincr, expr),
+            Some(TK::MinusMinus) if postfix => mk_unop(Updecr, expr),
+            Some(TK::PlusPlus) => mk_unop(Uincr, expr),
+            Some(TK::MinusMinus) => mk_unop(Udecr, expr),
+            Some(TK::Exclamation) => mk_unop(Unot, expr),
+            Some(TK::Tilde) => mk_unop(Utild, expr),
+            Some(TK::Plus) => mk_unop(Uplus, expr),
+            Some(TK::Minus) => mk_unop(Uminus, expr),
+            Some(TK::Await) => Ok(lift_await(pos, expr, env, location)),
+            Some(TK::Readonly) => Ok(process_readonly_expr(env, expr)),
+            Some(TK::Clone) => Ok(Expr_::mk_clone(expr)),
+            Some(TK::Print) => Ok(Expr_::mk_call(
+                Expr::new(
+                    (),
+                    pos.clone(),
+                    Expr_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
+                ),
+                vec![],
+                vec![(ast::ParamKind::Pnormal, expr)],
+                None,
+            )),
+            Some(TK::Dollar) => {
+                raise_parsing_error(op, env, &syntax_error::invalid_variable_name);
+                Ok(Expr_::Omitted)
+            }
+            _ => missing_syntax("unary operator", node, env),
+        }
+    }
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

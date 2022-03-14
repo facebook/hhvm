@@ -682,11 +682,14 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let mut constructor = inh.constructor;
         self.decl_constructor(&mut constructor);
 
+        let direct_ancestors = (self.child.extends.iter())
+            .chain(self.child.implements.iter())
+            .chain(self.child.uses.iter());
+
         let mut ancestors = Default::default();
-        self.child
-            .extends
-            .iter()
-            .for_each(|ty| self.get_implements(ty, &mut ancestors));
+        for ty in direct_ancestors.rev() {
+            self.get_implements(ty, &mut ancestors);
+        }
 
         let mut consts = inh.consts;
         self.child

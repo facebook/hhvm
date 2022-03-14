@@ -126,6 +126,9 @@ FoldedClass {
             from_req_extends: false,
         },
     },
+    ancestors: {
+        "\\T1": T1,
+    },
     consts: {
         "class": ClassConst {
             is_synthesized: true,

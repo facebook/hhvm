@@ -1,77 +1,76 @@
---- ocaml
-+++ rupro
-@@ -1,74 +1,71 @@
- FoldedClass {
-     name: "\\A",
-     pos: Pos(root|type_param_attrs.php, 3:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
--    ancestors: {
--        "\\HH\\TypeParameterAttribute": HH\TypeParameterAttribute,
--    },
-     constructor: (
-         FoldedElement {
-             flags: (empty),
-             origin: "\\A",
-             visibility: Public,
-             deprecated: None,
-         },
-         Inconsistent,
-     ),
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|type_param_attrs.php, 3:7-8),
-             ty: HH\classname<this>,
-             origin: "\\A",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\C",
-     pos: Pos(root|type_param_attrs.php, 7:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
-     tparams: [
-         Tparam {
-             variance: Invariant,
-             name: (
-                 Pos(root|type_param_attrs.php, 7:36-38),
-                 "T1",
-             ),
-             tparams: [],
-             constraints: [],
-             reified: Reified,
-             user_attributes: [
-                 UserAttribute {
-                     name: (
-                         Pos(root|type_param_attrs.php, 7:26-27),
-                         "\\A",
-                     ),
-                     classname_params: [],
-                 },
-                 UserAttribute {
-                     name: (
-                         Pos(root|type_param_attrs.php, 7:11-24),
-                         "__Enforceable",
-                     ),
-                     classname_params: [],
-                 },
-             ],
-         },
-     ],
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|type_param_attrs.php, 7:7-8),
-             ty: HH\classname<this>,
-             origin: "\\C",
-             refs: [],
-         },
-     },
- }
+FoldedClass {
+    name: "\\A",
+    pos: Pos(root|type_param_attrs.php, 3:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    ancestors: {
+        "\\HH\\TypeParameterAttribute": HH\TypeParameterAttribute,
+    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\A",
+            visibility: Public,
+            deprecated: None,
+        },
+        Inconsistent,
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|type_param_attrs.php, 3:7-8),
+            ty: HH\classname<this>,
+            origin: "\\A",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\C",
+    pos: Pos(root|type_param_attrs.php, 7:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    tparams: [
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|type_param_attrs.php, 7:36-38),
+                "T1",
+            ),
+            tparams: [],
+            constraints: [],
+            reified: Reified,
+            user_attributes: [
+                UserAttribute {
+                    name: (
+                        Pos(root|type_param_attrs.php, 7:26-27),
+                        "\\A",
+                    ),
+                    classname_params: [],
+                },
+                UserAttribute {
+                    name: (
+                        Pos(root|type_param_attrs.php, 7:11-24),
+                        "__Enforceable",
+                    ),
+                    classname_params: [],
+                },
+            ],
+        },
+    ],
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|type_param_attrs.php, 7:7-8),
+            ty: HH\classname<this>,
+            origin: "\\C",
+            refs: [],
+        },
+    },
+}
+
+They matched!

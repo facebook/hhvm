@@ -1,6 +1,6 @@
 --- ocaml
 +++ rupro
-@@ -1,210 +1,208 @@
+@@ -1,210 +1,210 @@
  FoldedClass {
      name: "\\Machine",
      pos: Pos(root|classes_require.php, 3:16-23),
@@ -156,9 +156,9 @@
          },
      },
      ancestors: {
--        "\\Fliers": Fliers,
+         "\\Fliers": Fliers,
          "\\Machine": Machine,
--        "\\Plane": Plane,
+         "\\Plane": Plane,
      },
      methods: {
          "closeDoors": FoldedElement {

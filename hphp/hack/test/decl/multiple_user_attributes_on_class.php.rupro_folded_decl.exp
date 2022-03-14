@@ -1,60 +1,59 @@
---- ocaml
-+++ rupro
-@@ -1,57 +1,51 @@
- FoldedClass {
-     name: "\\Foo",
-     pos: Pos(root|multiple_user_attributes_on_class.php, 3:7-10),
-     kind: Cclass(
-         Concrete,
-     ),
--    ancestors: {
--        "\\HH\\ClassAttribute": HH\ClassAttribute,
--    },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|multiple_user_attributes_on_class.php, 3:7-10),
-             ty: HH\classname<this>,
-             origin: "\\Foo",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\Bar",
-     pos: Pos(root|multiple_user_attributes_on_class.php, 4:7-10),
-     kind: Cclass(
-         Concrete,
-     ),
--    ancestors: {
--        "\\HH\\ClassAttribute": HH\ClassAttribute,
--    },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|multiple_user_attributes_on_class.php, 4:7-10),
-             ty: HH\classname<this>,
-             origin: "\\Bar",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\C",
-     pos: Pos(root|multiple_user_attributes_on_class.php, 7:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|multiple_user_attributes_on_class.php, 7:7-8),
-             ty: HH\classname<this>,
-             origin: "\\C",
-             refs: [],
-         },
-     },
- }
+FoldedClass {
+    name: "\\Foo",
+    pos: Pos(root|multiple_user_attributes_on_class.php, 3:7-10),
+    kind: Cclass(
+        Concrete,
+    ),
+    ancestors: {
+        "\\HH\\ClassAttribute": HH\ClassAttribute,
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|multiple_user_attributes_on_class.php, 3:7-10),
+            ty: HH\classname<this>,
+            origin: "\\Foo",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\Bar",
+    pos: Pos(root|multiple_user_attributes_on_class.php, 4:7-10),
+    kind: Cclass(
+        Concrete,
+    ),
+    ancestors: {
+        "\\HH\\ClassAttribute": HH\ClassAttribute,
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|multiple_user_attributes_on_class.php, 4:7-10),
+            ty: HH\classname<this>,
+            origin: "\\Bar",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\C",
+    pos: Pos(root|multiple_user_attributes_on_class.php, 7:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|multiple_user_attributes_on_class.php, 7:7-8),
+            ty: HH\classname<this>,
+            origin: "\\C",
+            refs: [],
+        },
+    },
+}
+
+They matched!

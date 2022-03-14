@@ -1,37 +1,36 @@
---- ocaml
-+++ rupro
-@@ -1,34 +1,31 @@
- FoldedClass {
-     name: "\\Handle",
-     pos: Pos(root|accept_disposable.php, 4:7-13),
-     kind: Cclass(
-         Concrete,
-     ),
--    ancestors: {
--        "\\IDisposable": IDisposable,
--    },
-     methods: {
-         "__dispose": FoldedElement {
-             flags: (empty),
-             origin: "\\Handle",
-             visibility: Public,
-             deprecated: None,
-         },
-         "foo": FoldedElement {
-             flags: (empty),
-             origin: "\\Handle",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|accept_disposable.php, 4:7-13),
-             ty: HH\classname<this>,
-             origin: "\\Handle",
-             refs: [],
-         },
-     },
- }
+FoldedClass {
+    name: "\\Handle",
+    pos: Pos(root|accept_disposable.php, 4:7-13),
+    kind: Cclass(
+        Concrete,
+    ),
+    ancestors: {
+        "\\IDisposable": IDisposable,
+    },
+    methods: {
+        "__dispose": FoldedElement {
+            flags: (empty),
+            origin: "\\Handle",
+            visibility: Public,
+            deprecated: None,
+        },
+        "foo": FoldedElement {
+            flags: (empty),
+            origin: "\\Handle",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|accept_disposable.php, 4:7-13),
+            ty: HH\classname<this>,
+            origin: "\\Handle",
+            refs: [],
+        },
+    },
+}
+
+They matched!

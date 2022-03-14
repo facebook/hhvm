@@ -1,163 +1,162 @@
---- ocaml
-+++ rupro
-@@ -1,160 +1,152 @@
- FoldedClass {
-     name: "\\TMyTrait",
-     pos: Pos(root|traits.php, 3:7-15),
-     kind: Ctrait,
-     methods: {
-         "doNothing": FoldedElement {
-             flags: (empty),
-             origin: "\\TMyTrait",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|traits.php, 3:7-15),
-             ty: HH\classname<this>,
-             origin: "\\TMyTrait",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\TMyTrait2",
-     pos: Pos(root|traits.php, 7:7-16),
-     kind: Ctrait,
-     substs: {
-         "\\TMyTrait": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\TMyTrait2",
-             from_req_extends: false,
-         },
-     },
--    ancestors: {
--        "\\TMyTrait": TMyTrait,
--    },
-     methods: {
-         "doMoreNothing": FoldedElement {
-             flags: (empty),
-             origin: "\\TMyTrait2",
-             visibility: Public,
-             deprecated: None,
-         },
-         "doNothing": FoldedElement {
-             flags: (empty),
-             origin: "\\TMyTrait",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|traits.php, 7:7-16),
-             ty: HH\classname<this>,
-             origin: "\\TMyTrait2",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\TMyTrait",
-     },
- }
- FoldedClass {
-     name: "\\TMyTrait3",
-     pos: Pos(root|traits.php, 13:7-16),
-     kind: Ctrait,
-     methods: {
-         "doYetMoreNothing": FoldedElement {
-             flags: (empty),
-             origin: "\\TMyTrait3",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|traits.php, 13:7-16),
-             ty: HH\classname<this>,
-             origin: "\\TMyTrait3",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\MyTraitUsingClass",
-     pos: Pos(root|traits.php, 17:7-24),
-     kind: Cclass(
-         Concrete,
-     ),
-     substs: {
-         "\\TMyTrait": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\TMyTrait2",
-             from_req_extends: false,
-         },
-         "\\TMyTrait2": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\MyTraitUsingClass",
-             from_req_extends: false,
-         },
-         "\\TMyTrait3": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\MyTraitUsingClass",
-             from_req_extends: false,
-         },
-     },
--    ancestors: {
--        "\\TMyTrait": TMyTrait,
--        "\\TMyTrait2": TMyTrait2,
--        "\\TMyTrait3": TMyTrait3,
--    },
-     methods: {
-         "doMoreNothing": FoldedElement {
-             flags: (empty),
-             origin: "\\TMyTrait2",
-             visibility: Public,
-             deprecated: None,
-         },
-         "doNothing": FoldedElement {
-             flags: (empty),
-             origin: "\\TMyTrait",
-             visibility: Public,
-             deprecated: None,
-         },
-         "doYetMoreNothing": FoldedElement {
-             flags: (empty),
-             origin: "\\TMyTrait3",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|traits.php, 17:7-24),
-             ty: HH\classname<this>,
-             origin: "\\MyTraitUsingClass",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\TMyTrait",
-         "\\TMyTrait2",
-         "\\TMyTrait3",
-     },
- }
+FoldedClass {
+    name: "\\TMyTrait",
+    pos: Pos(root|traits.php, 3:7-15),
+    kind: Ctrait,
+    methods: {
+        "doNothing": FoldedElement {
+            flags: (empty),
+            origin: "\\TMyTrait",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|traits.php, 3:7-15),
+            ty: HH\classname<this>,
+            origin: "\\TMyTrait",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\TMyTrait2",
+    pos: Pos(root|traits.php, 7:7-16),
+    kind: Ctrait,
+    substs: {
+        "\\TMyTrait": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\TMyTrait2",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\TMyTrait": TMyTrait,
+    },
+    methods: {
+        "doMoreNothing": FoldedElement {
+            flags: (empty),
+            origin: "\\TMyTrait2",
+            visibility: Public,
+            deprecated: None,
+        },
+        "doNothing": FoldedElement {
+            flags: (empty),
+            origin: "\\TMyTrait",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|traits.php, 7:7-16),
+            ty: HH\classname<this>,
+            origin: "\\TMyTrait2",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\TMyTrait",
+    },
+}
+FoldedClass {
+    name: "\\TMyTrait3",
+    pos: Pos(root|traits.php, 13:7-16),
+    kind: Ctrait,
+    methods: {
+        "doYetMoreNothing": FoldedElement {
+            flags: (empty),
+            origin: "\\TMyTrait3",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|traits.php, 13:7-16),
+            ty: HH\classname<this>,
+            origin: "\\TMyTrait3",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\MyTraitUsingClass",
+    pos: Pos(root|traits.php, 17:7-24),
+    kind: Cclass(
+        Concrete,
+    ),
+    substs: {
+        "\\TMyTrait": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\TMyTrait2",
+            from_req_extends: false,
+        },
+        "\\TMyTrait2": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\MyTraitUsingClass",
+            from_req_extends: false,
+        },
+        "\\TMyTrait3": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\MyTraitUsingClass",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\TMyTrait": TMyTrait,
+        "\\TMyTrait2": TMyTrait2,
+        "\\TMyTrait3": TMyTrait3,
+    },
+    methods: {
+        "doMoreNothing": FoldedElement {
+            flags: (empty),
+            origin: "\\TMyTrait2",
+            visibility: Public,
+            deprecated: None,
+        },
+        "doNothing": FoldedElement {
+            flags: (empty),
+            origin: "\\TMyTrait",
+            visibility: Public,
+            deprecated: None,
+        },
+        "doYetMoreNothing": FoldedElement {
+            flags: (empty),
+            origin: "\\TMyTrait3",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|traits.php, 17:7-24),
+            ty: HH\classname<this>,
+            origin: "\\MyTraitUsingClass",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\TMyTrait",
+        "\\TMyTrait2",
+        "\\TMyTrait3",
+    },
+}
+
+They matched!

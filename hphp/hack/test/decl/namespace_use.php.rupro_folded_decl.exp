@@ -1,51 +1,50 @@
---- ocaml
-+++ rupro
-@@ -1,48 +1,45 @@
- FoldedClass {
-     name: "\\NS1\\NS2\\MyTrait",
-     pos: Pos(root|namespace_use.php, 6:13-20),
-     kind: Ctrait,
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|namespace_use.php, 6:13-20),
-             ty: HH\classname<this>,
-             origin: "\\NS1\\NS2\\MyTrait",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\C",
-     pos: Pos(root|namespace_use.php, 12:15-16),
-     kind: Cclass(
-         Concrete,
-     ),
-     is_final: true,
-     substs: {
-         "\\NS1\\NS2\\MyTrait": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\C",
-             from_req_extends: false,
-         },
-     },
--    ancestors: {
--        "\\NS1\\NS2\\MyTrait": NS1\NS2\MyTrait,
--    },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|namespace_use.php, 12:15-16),
-             ty: HH\classname<this>,
-             origin: "\\C",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\NS1\\NS2\\MyTrait",
-     },
- }
+FoldedClass {
+    name: "\\NS1\\NS2\\MyTrait",
+    pos: Pos(root|namespace_use.php, 6:13-20),
+    kind: Ctrait,
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|namespace_use.php, 6:13-20),
+            ty: HH\classname<this>,
+            origin: "\\NS1\\NS2\\MyTrait",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\C",
+    pos: Pos(root|namespace_use.php, 12:15-16),
+    kind: Cclass(
+        Concrete,
+    ),
+    is_final: true,
+    substs: {
+        "\\NS1\\NS2\\MyTrait": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\C",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\NS1\\NS2\\MyTrait": NS1\NS2\MyTrait,
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|namespace_use.php, 12:15-16),
+            ty: HH\classname<this>,
+            origin: "\\C",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\NS1\\NS2\\MyTrait",
+    },
+}
+
+They matched!

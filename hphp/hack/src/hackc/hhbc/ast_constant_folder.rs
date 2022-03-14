@@ -318,7 +318,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
     force_class_const: bool,
 ) -> Result<TypedValue<'arena>, Error> {
     // TODO: ML equivalent has this as an implicit parameter that defaults to false.
-    use ast::{Expr_};
+    use ast::Expr_;
     match &expr.2 {
         Expr_::Int(s) => int_expr_to_typed_value(s),
         Expr_::True => Ok(TypedValue::Bool(true)),
@@ -340,46 +340,21 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
         Expr_::Id(_) => Err(Error::UserDefinedConstant),
 
         Expr_::Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, &x.2),
-        Expr_::Collection(x) if x.0.name().eq("keyset") => {
-            let keys = emitter.alloc.alloc_slice_fill_iter(
-                x.2.iter()
-                    .map(|x| keyset_value_afield_to_typed_value(emitter, x))
-                    .collect::<Result<Vec<_>, _>>()?
-                    .into_iter()
-                    .unique()
-                    .collect::<Vec<_>>()
-                    .into_iter(),
-            );
-            Ok(TypedValue::mk_keyset(keys))
-        }
+        Expr_::Collection(x) if x.0.name().eq("keyset") => keyset_expr_to_typed_value(emitter, x),
         Expr_::Collection(x)
             if x.0.name().eq("dict")
                 || allow_maps
                     && (string_utils::cmp(&(x.0).1, "Map", false, true)
                         || string_utils::cmp(&(x.0).1, "ImmMap", false, true)) =>
         {
-            let values = emitter
-                .alloc
-                .alloc_slice_fill_iter(update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|x| afield_to_typed_value_pair(emitter, x))
-                        .collect::<Result<_, _>>()?,
-                ));
-            Ok(TypedValue::mk_dict(values))
+            dict_expr_to_typed_value(emitter, x)
         }
         Expr_::Collection(x)
             if allow_maps
                 && (string_utils::cmp(&(x.0).1, "Set", false, true)
                     || string_utils::cmp(&(x.0).1, "ImmSet", false, true)) =>
         {
-            let values = emitter
-                .alloc
-                .alloc_slice_fill_iter(update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|x| set_afield_to_typed_value_pair(emitter, x))
-                        .collect::<Result<_, _>>()?,
-                ));
-            Ok(TypedValue::mk_dict(values))
+            set_expr_to_typed_value(emitter, x)
         }
         Expr_::Tuple(x) => {
             let v: Vec<_> = x
@@ -483,6 +458,62 @@ fn call_expr_to_typed_value<'arena, 'decl>(
         }
         _ => Err(Error::NotLiteral),
     }
+}
+
+fn set_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(
+        ast::ClassName,
+        Option<ast::CollectionTarg>,
+        Vec<ast::Afield>,
+    ),
+) -> Result<TypedValue<'arena>, Error> {
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|x| set_afield_to_typed_value_pair(emitter, x))
+                .collect::<Result<_, _>>()?,
+        ));
+    Ok(TypedValue::mk_dict(values))
+}
+
+fn dict_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(
+        ast::ClassName,
+        Option<ast::CollectionTarg>,
+        Vec<ast::Afield>,
+    ),
+) -> Result<TypedValue<'arena>, Error> {
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|x| afield_to_typed_value_pair(emitter, x))
+                .collect::<Result<_, _>>()?,
+        ));
+    Ok(TypedValue::mk_dict(values))
+}
+
+fn keyset_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(
+        ast::ClassName,
+        Option<ast::CollectionTarg>,
+        Vec<ast::Afield>,
+    ),
+) -> Result<TypedValue<'arena>, Error> {
+    let keys = emitter.alloc.alloc_slice_fill_iter(
+        x.2.iter()
+            .map(|x| keyset_value_afield_to_typed_value(emitter, x))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .unique()
+            .collect::<Vec<_>>()
+            .into_iter(),
+    );
+    Ok(TypedValue::mk_keyset(keys))
 }
 
 fn float_expr_to_typed_value<'arena, 'decl>(

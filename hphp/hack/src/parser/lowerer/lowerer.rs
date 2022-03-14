@@ -1475,57 +1475,10 @@ fn p_expr_impl<'a>(
         VectorIntrinsicExpression(c) => {
             p_intri_expr(node, &c.keyword, &c.explicit_type, &c.members, env)
         }
-        CollectionLiteralExpression(c) => {
-            let (collection_name, hints) = match &c.name.children {
-                SimpleTypeSpecifier(c) => (pos_name(&c.specifier, env)?, None),
-                GenericTypeSpecifier(c) => {
-                    let hints = expand_type_args(&c.argument_list, env)?;
-                    let hints = check_intrinsic_type_arg_varity(node, env, hints);
-                    (pos_name(&c.class_type, env)?, hints)
-                }
-                _ => (pos_name(&c.name, env)?, None),
-            };
-            Ok(Expr_::mk_collection(
-                collection_name,
-                hints,
-                could_map(&c.initializers, env, p_afield)?,
-            ))
-        }
-        VarrayIntrinsicExpression(c) => {
-            let hints = expand_type_args(&c.explicit_type, env)?;
-            let hints = check_intrinsic_type_arg_varity(node, env, hints);
-            let targ = match hints {
-                Some(ast::CollectionTarg::CollectionTV(ty)) => Some(ty),
-                None => None,
-                _ => missing_syntax("VarrayIntrinsicExpression type args", node, env)?,
-            };
-            Ok(Expr_::mk_varray(targ, could_map(&c.members, env, p_expr)?))
-        }
-        DarrayIntrinsicExpression(c) => {
-            let hints = expand_type_args(&c.explicit_type, env)?;
-            let hints = check_intrinsic_type_arg_varity(node, env, hints);
-            match hints {
-                Some(ast::CollectionTarg::CollectionTKV(tk, tv)) => Ok(Expr_::mk_darray(
-                    Some((tk, tv)),
-                    could_map(&c.members, env, p_member)?,
-                )),
-                None => Ok(Expr_::mk_darray(
-                    None,
-                    could_map(&c.members, env, p_member)?,
-                )),
-                _ => missing_syntax("DarrayIntrinsicExpression type args", node, env),
-            }
-        }
-        ListExpression(c) => {
-            /* TODO: Or tie in with other intrinsics and post-process to List */
-            let p_binder_or_ignore = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr> {
-                match &n.children {
-                    Missing => Ok(Expr::new((), e.mk_none_pos(), Expr_::Omitted)),
-                    _ => p_expr(n, e),
-                }
-            };
-            Ok(Expr_::List(could_map(&c.members, env, p_binder_or_ignore)?))
-        }
+        CollectionLiteralExpression(c) => p_collection_literal_expr(node, c, env),
+        VarrayIntrinsicExpression(c) => p_varray_intrinsic_expr(node, c, env),
+        DarrayIntrinsicExpression(c) => p_darray_intrinsic_expr(node, c, env),
+        ListExpression(c) => p_list_expr(node, c, env),
         EvalExpression(c) => p_special_call(&c.keyword, &c.argument, env),
         IssetExpression(c) => p_special_call(&c.keyword, &c.argument_list, env),
         TupleExpression(c) => Ok(Expr_::mk_tuple(could_map(&c.items, env, p_expr)?)),
@@ -2152,6 +2105,77 @@ fn p_lambda_expression<'a>(
         doc_comment: None,
     };
     Ok(Expr_::mk_lfun(fun, vec![]))
+}
+
+fn p_collection_literal_expr<'a>(
+    node: S<'a>,
+    c: &'a CollectionLiteralExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    let (collection_name, hints) = match &c.name.children {
+        SimpleTypeSpecifier(c) => (pos_name(&c.specifier, env)?, None),
+        GenericTypeSpecifier(c) => {
+            let hints = expand_type_args(&c.argument_list, env)?;
+            let hints = check_intrinsic_type_arg_varity(node, env, hints);
+            (pos_name(&c.class_type, env)?, hints)
+        }
+        _ => (pos_name(&c.name, env)?, None),
+    };
+    Ok(Expr_::mk_collection(
+        collection_name,
+        hints,
+        could_map(&c.initializers, env, p_afield)?,
+    ))
+}
+
+fn p_varray_intrinsic_expr<'a>(
+    node: S<'a>,
+    c: &'a VarrayIntrinsicExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    let hints = expand_type_args(&c.explicit_type, env)?;
+    let hints = check_intrinsic_type_arg_varity(node, env, hints);
+    let targ = match hints {
+        Some(ast::CollectionTarg::CollectionTV(ty)) => Some(ty),
+        None => None,
+        _ => missing_syntax("VarrayIntrinsicExpression type args", node, env)?,
+    };
+    Ok(Expr_::mk_varray(targ, could_map(&c.members, env, p_expr)?))
+}
+
+fn p_darray_intrinsic_expr<'a>(
+    node: S<'a>,
+    c: &'a DarrayIntrinsicExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    let hints = expand_type_args(&c.explicit_type, env)?;
+    let hints = check_intrinsic_type_arg_varity(node, env, hints);
+    match hints {
+        Some(ast::CollectionTarg::CollectionTKV(tk, tv)) => Ok(Expr_::mk_darray(
+            Some((tk, tv)),
+            could_map(&c.members, env, p_member)?,
+        )),
+        None => Ok(Expr_::mk_darray(
+            None,
+            could_map(&c.members, env, p_member)?,
+        )),
+        _ => missing_syntax("DarrayIntrinsicExpression type args", node, env),
+    }
+}
+
+fn p_list_expr<'a>(
+    _node: S<'a>,
+    c: &'a ListExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    /* TODO: Or tie in with other intrinsics and post-process to List */
+    let p_binder_or_ignore = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr> {
+        match &n.children {
+            Missing => Ok(Expr::new((), e.mk_none_pos(), Expr_::Omitted)),
+            _ => p_expr(n, e),
+        }
+    };
+    Ok(Expr_::List(could_map(&c.members, env, p_binder_or_ignore)?))
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

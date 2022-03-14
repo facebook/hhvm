@@ -1,29 +1,27 @@
---- ocaml
-+++ rupro
-@@ -1,25 +1,25 @@
- FoldedClass {
-     name: "\\C",
-     pos: Pos(root|prop_without_visibility_modifier.php, 3:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
-     static_props: {
-         "$b": FoldedElement {
--            flags: FINAL,
-+            flags: FINAL | NEEDS_INIT,
-             origin: "\\C",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|prop_without_visibility_modifier.php, 3:7-8),
-             ty: HH\classname<this>,
-             origin: "\\C",
-             refs: [],
-         },
-     },
- }
+FoldedClass {
+    name: "\\C",
+    pos: Pos(root|prop_without_visibility_modifier.php, 3:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    static_props: {
+        "$b": FoldedElement {
+            flags: FINAL,
+            origin: "\\C",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|prop_without_visibility_modifier.php, 3:7-8),
+            ty: HH\classname<this>,
+            origin: "\\C",
+            refs: [],
+        },
+    },
+}
+
+They matched!

@@ -244,7 +244,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             is_dynamicallycallable: false,
             is_readonly_prop: prop_flags.is_readonly(),
             supports_dynamic_type: false,
-            needs_init: prop_flags.needs_init(),
+            needs_init: false,
         };
         let elt = FoldedElement {
             origin: self.child.name.id(),

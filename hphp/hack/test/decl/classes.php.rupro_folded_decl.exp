@@ -1,201 +1,199 @@
---- ocaml
-+++ rupro
-@@ -1,197 +1,197 @@
- FoldedClass {
-     name: "\\MyClass",
-     pos: Pos(root|classes.php, 3:7-14),
-     kind: Cclass(
-         Concrete,
-     ),
-     props: {
-         "instanceProperty": FoldedElement {
-             flags: FINAL | NEEDS_INIT,
-             origin: "\\MyClass",
-             visibility: Public,
-             deprecated: None,
-         },
-         "p": FoldedElement {
-             flags: FINAL | LATEINIT | NEEDS_INIT,
-             origin: "\\MyClass",
-             visibility: Public,
-             deprecated: None,
-         },
-         "protectedProperty": FoldedElement {
-             flags: FINAL | NEEDS_INIT,
-             origin: "\\MyClass",
-             visibility: Protected(
-                 "\\MyClass",
-             ),
-             deprecated: None,
-         },
-     },
-     static_props: {
-         "$staticProperty": FoldedElement {
--            flags: FINAL,
-+            flags: FINAL | NEEDS_INIT,
-             origin: "\\MyClass",
-             visibility: Private(
-                 "\\MyClass",
-             ),
-             deprecated: None,
-         },
-     },
-     methods: {
-         "async_generator": FoldedElement {
-             flags: (empty),
-             origin: "\\MyClass",
-             visibility: Public,
-             deprecated: None,
-         },
-         "privateMethod": FoldedElement {
-             flags: (empty),
-             origin: "\\MyClass",
-             visibility: Private(
-                 "\\MyClass",
-             ),
-             deprecated: None,
-         },
-         "protectedMethod": FoldedElement {
-             flags: (empty),
-             origin: "\\MyClass",
-             visibility: Protected(
-                 "\\MyClass",
-             ),
-             deprecated: None,
-         },
-         "publicMethod": FoldedElement {
-             flags: (empty),
-             origin: "\\MyClass",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     constructor: (
-         FoldedElement {
-             flags: (empty),
-             origin: "\\MyClass",
-             visibility: Public,
-             deprecated: None,
-         },
-         Inconsistent,
-     ),
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes.php, 3:7-14),
-             ty: HH\classname<this>,
-             origin: "\\MyClass",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\MyAbstractClass",
-     pos: Pos(root|classes.php, 23:16-31),
-     kind: Cclass(
-         Abstract,
-     ),
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes.php, 23:16-31),
-             ty: HH\classname<this>,
-             origin: "\\MyAbstractClass",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\MyFinalClass",
-     pos: Pos(root|classes.php, 24:13-25),
-     kind: Cclass(
-         Concrete,
-     ),
-     is_final: true,
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes.php, 24:13-25),
-             ty: HH\classname<this>,
-             origin: "\\MyFinalClass",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\MyStaticClass",
-     pos: Pos(root|classes.php, 25:22-35),
-     kind: Cclass(
-         Abstract,
-     ),
-     is_final: true,
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes.php, 25:22-35),
-             ty: HH\classname<this>,
-             origin: "\\MyStaticClass",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\MyConstructorPropertiesClass",
-     pos: Pos(root|classes.php, 27:7-35),
-     kind: Cclass(
-         Concrete,
-     ),
-     props: {
-         "hasDefault": FoldedElement {
-             flags: FINAL | NEEDS_INIT,
-             origin: "\\MyConstructorPropertiesClass",
-             visibility: Public,
-             deprecated: None,
-         },
-         "private": FoldedElement {
-             flags: FINAL | NEEDS_INIT,
-             origin: "\\MyConstructorPropertiesClass",
-             visibility: Private(
-                 "\\MyConstructorPropertiesClass",
-             ),
-             deprecated: None,
-         },
-         "protected": FoldedElement {
-             flags: FINAL | NEEDS_INIT,
-             origin: "\\MyConstructorPropertiesClass",
-             visibility: Protected(
-                 "\\MyConstructorPropertiesClass",
-             ),
-             deprecated: None,
-         },
-         "public": FoldedElement {
-             flags: FINAL | NEEDS_INIT,
-             origin: "\\MyConstructorPropertiesClass",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     constructor: (
-         FoldedElement {
-             flags: (empty),
-             origin: "\\MyConstructorPropertiesClass",
-             visibility: Public,
-             deprecated: None,
-         },
-         Inconsistent,
-     ),
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes.php, 27:7-35),
-             ty: HH\classname<this>,
-             origin: "\\MyConstructorPropertiesClass",
-             refs: [],
-         },
-     },
- }
+FoldedClass {
+    name: "\\MyClass",
+    pos: Pos(root|classes.php, 3:7-14),
+    kind: Cclass(
+        Concrete,
+    ),
+    props: {
+        "instanceProperty": FoldedElement {
+            flags: FINAL | NEEDS_INIT,
+            origin: "\\MyClass",
+            visibility: Public,
+            deprecated: None,
+        },
+        "p": FoldedElement {
+            flags: FINAL | LATEINIT | NEEDS_INIT,
+            origin: "\\MyClass",
+            visibility: Public,
+            deprecated: None,
+        },
+        "protectedProperty": FoldedElement {
+            flags: FINAL | NEEDS_INIT,
+            origin: "\\MyClass",
+            visibility: Protected(
+                "\\MyClass",
+            ),
+            deprecated: None,
+        },
+    },
+    static_props: {
+        "$staticProperty": FoldedElement {
+            flags: FINAL,
+            origin: "\\MyClass",
+            visibility: Private(
+                "\\MyClass",
+            ),
+            deprecated: None,
+        },
+    },
+    methods: {
+        "async_generator": FoldedElement {
+            flags: (empty),
+            origin: "\\MyClass",
+            visibility: Public,
+            deprecated: None,
+        },
+        "privateMethod": FoldedElement {
+            flags: (empty),
+            origin: "\\MyClass",
+            visibility: Private(
+                "\\MyClass",
+            ),
+            deprecated: None,
+        },
+        "protectedMethod": FoldedElement {
+            flags: (empty),
+            origin: "\\MyClass",
+            visibility: Protected(
+                "\\MyClass",
+            ),
+            deprecated: None,
+        },
+        "publicMethod": FoldedElement {
+            flags: (empty),
+            origin: "\\MyClass",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\MyClass",
+            visibility: Public,
+            deprecated: None,
+        },
+        Inconsistent,
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes.php, 3:7-14),
+            ty: HH\classname<this>,
+            origin: "\\MyClass",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\MyAbstractClass",
+    pos: Pos(root|classes.php, 23:16-31),
+    kind: Cclass(
+        Abstract,
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes.php, 23:16-31),
+            ty: HH\classname<this>,
+            origin: "\\MyAbstractClass",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\MyFinalClass",
+    pos: Pos(root|classes.php, 24:13-25),
+    kind: Cclass(
+        Concrete,
+    ),
+    is_final: true,
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes.php, 24:13-25),
+            ty: HH\classname<this>,
+            origin: "\\MyFinalClass",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\MyStaticClass",
+    pos: Pos(root|classes.php, 25:22-35),
+    kind: Cclass(
+        Abstract,
+    ),
+    is_final: true,
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes.php, 25:22-35),
+            ty: HH\classname<this>,
+            origin: "\\MyStaticClass",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\MyConstructorPropertiesClass",
+    pos: Pos(root|classes.php, 27:7-35),
+    kind: Cclass(
+        Concrete,
+    ),
+    props: {
+        "hasDefault": FoldedElement {
+            flags: FINAL | NEEDS_INIT,
+            origin: "\\MyConstructorPropertiesClass",
+            visibility: Public,
+            deprecated: None,
+        },
+        "private": FoldedElement {
+            flags: FINAL | NEEDS_INIT,
+            origin: "\\MyConstructorPropertiesClass",
+            visibility: Private(
+                "\\MyConstructorPropertiesClass",
+            ),
+            deprecated: None,
+        },
+        "protected": FoldedElement {
+            flags: FINAL | NEEDS_INIT,
+            origin: "\\MyConstructorPropertiesClass",
+            visibility: Protected(
+                "\\MyConstructorPropertiesClass",
+            ),
+            deprecated: None,
+        },
+        "public": FoldedElement {
+            flags: FINAL | NEEDS_INIT,
+            origin: "\\MyConstructorPropertiesClass",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\MyConstructorPropertiesClass",
+            visibility: Public,
+            deprecated: None,
+        },
+        Inconsistent,
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes.php, 27:7-35),
+            ty: HH\classname<this>,
+            origin: "\\MyConstructorPropertiesClass",
+            refs: [],
+        },
+    },
+}
+
+They matched!

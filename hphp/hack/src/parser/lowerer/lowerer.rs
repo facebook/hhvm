@@ -1505,28 +1505,9 @@ fn p_expr_impl<'a>(
         Token(t) => p_token(node, t, env, location),
         YieldExpression(c) => p_yield_expr(node, c, env, pos, location),
         ScopeResolutionExpression(c) => p_scope_resolution_expr(node, c, env, pos, location),
-        CastExpression(c) => Ok(Expr_::mk_cast(
-            p_hint(&c.type_, env)?,
-            p_expr(&c.operand, env)?,
-        )),
-        PrefixedCodeExpression(c) => {
-            let src_expr = p_expr(&c.expression, env)?;
-
-            let hint = p_hint(&c.prefix, env)?;
-
-            let desugar_result = desugar(&hint, src_expr, env);
-            for (pos, msg) in desugar_result.errors {
-                raise_parsing_error_pos(&pos, env, &msg);
-            }
-
-            Ok(desugar_result.expr.2)
-        }
-        ConditionalExpression(c) => {
-            let alter = p_expr(&c.alternative, env)?;
-            let consequence = map_optional(&c.consequence, env, p_expr)?;
-            let condition = p_expr(&c.test, env)?;
-            Ok(Expr_::mk_eif(condition, consequence, alter))
-        }
+        CastExpression(c) => p_cast_expr(c, env),
+        PrefixedCodeExpression(c) => p_prefixed_code_expr(c, env),
+        ConditionalExpression(c) => p_conditional_expr(c, env),
         SubscriptExpression(c) => Ok(Expr_::mk_array_get(
             p_expr(&c.receiver, env)?,
             map_optional(&c.index, env, p_expr)?,
@@ -2250,6 +2231,42 @@ fn p_scope_resolution_expr<'a>(
             }
         }
     }
+}
+
+fn p_cast_expr<'a>(
+    c: &'a CastExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    Ok(Expr_::mk_cast(
+        p_hint(&c.type_, env)?,
+        p_expr(&c.operand, env)?,
+    ))
+}
+
+fn p_prefixed_code_expr<'a>(
+    c: &'a PrefixedCodeExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    let src_expr = p_expr(&c.expression, env)?;
+
+    let hint = p_hint(&c.prefix, env)?;
+
+    let desugar_result = desugar(&hint, src_expr, env);
+    for (pos, msg) in desugar_result.errors {
+        raise_parsing_error_pos(&pos, env, &msg);
+    }
+
+    Ok(desugar_result.expr.2)
+}
+
+fn p_conditional_expr<'a>(
+    c: &'a ConditionalExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    let alter = p_expr(&c.alternative, env)?;
+    let consequence = map_optional(&c.consequence, env, p_expr)?;
+    let condition = p_expr(&c.test, env)?;
+    Ok(Expr_::mk_eif(condition, consequence, alter))
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

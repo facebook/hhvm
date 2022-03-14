@@ -1521,44 +1521,7 @@ fn p_expr_impl<'a>(
         NullableAsExpression(c) => p_as_expr(&c.left_operand, &c.right_operand, env, true),
         UpcastExpression(c) => p_upcast_expr(&c.left_operand, &c.right_operand, env),
         AnonymousFunction(c) => p_anonymous_function(node, c, env),
-        AwaitableCreationExpression(c) => {
-            let suspension_kind = mk_suspension_kind(&c.async_);
-            let (blk, yld) = map_yielding(&c.compound_statement, env, p_function_body)?;
-            let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
-            let external = c.compound_statement.is_external();
-            let name_pos = p_fun_pos(node, env);
-            let body = ast::Fun_ {
-                span: pos.clone(),
-                annotation: (),
-                readonly_this: None, // set in process_readonly_expr
-                readonly_ret: None,  // TODO: awaitable creation expression
-                ret: ast::TypeHint((), None),
-                name: ast::Id(name_pos, String::from(";anonymous")),
-                tparams: vec![],
-                where_constraints: vec![],
-                body: ast::FuncBody {
-                    fb_ast: if blk.is_empty() {
-                        let pos = p_pos(&c.compound_statement, env);
-                        vec![ast::Stmt::noop(pos)]
-                    } else {
-                        blk
-                    },
-                },
-                fun_kind: mk_fun_kind(suspension_kind, yld),
-                params: vec![],
-                ctxs: None,        // TODO(T70095684)
-                unsafe_ctxs: None, // TODO(T70095684)
-                user_attributes,
-                external,
-                doc_comment: None,
-            };
-            Ok(Expr_::mk_call(
-                Expr::new((), pos, Expr_::mk_lfun(body, vec![])),
-                vec![],
-                vec![],
-                None,
-            ))
-        }
+        AwaitableCreationExpression(c) => p_awaitable_creation_expr(node, c, env, pos),
         XHPExpression(c) if c.open.is_xhp_open() => {
             if let XHPOpen(c1) = &c.open.children {
                 let name = pos_name(&c1.name, env)?;
@@ -2315,6 +2278,50 @@ fn p_anonymous_function<'a>(
     };
     let uses = p_use(&c.use_, env).unwrap_or_else(|_| vec![]);
     Ok(Expr_::mk_efun(fun, uses))
+}
+
+fn p_awaitable_creation_expr<'a>(
+    node: S<'a>,
+    c: &'a AwaitableCreationExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+    pos: Pos,
+) -> Result<Expr_> {
+    let suspension_kind = mk_suspension_kind(&c.async_);
+    let (blk, yld) = map_yielding(&c.compound_statement, env, p_function_body)?;
+    let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
+    let external = c.compound_statement.is_external();
+    let name_pos = p_fun_pos(node, env);
+    let body = ast::Fun_ {
+        span: pos.clone(),
+        annotation: (),
+        readonly_this: None, // set in process_readonly_expr
+        readonly_ret: None,  // TODO: awaitable creation expression
+        ret: ast::TypeHint((), None),
+        name: ast::Id(name_pos, String::from(";anonymous")),
+        tparams: vec![],
+        where_constraints: vec![],
+        body: ast::FuncBody {
+            fb_ast: if blk.is_empty() {
+                let pos = p_pos(&c.compound_statement, env);
+                vec![ast::Stmt::noop(pos)]
+            } else {
+                blk
+            },
+        },
+        fun_kind: mk_fun_kind(suspension_kind, yld),
+        params: vec![],
+        ctxs: None,        // TODO(T70095684)
+        unsafe_ctxs: None, // TODO(T70095684)
+        user_attributes,
+        external,
+        doc_comment: None,
+    };
+    Ok(Expr_::mk_call(
+        Expr::new((), pos, Expr_::mk_lfun(body, vec![])),
+        vec![],
+        vec![],
+        None,
+    ))
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

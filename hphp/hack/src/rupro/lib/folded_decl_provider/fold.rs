@@ -450,11 +450,12 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             if let Some(cls) = self.parents.get(&pos_id.id()) {
                 let subst = Subst::new(&cls.tparams, parent_params);
                 let substitution = Substitution { subst: &subst };
-                // TODO: Do we need to rev? Or was that just a limitation of OCaml's library?
-                cls.req_ancestors.iter().rev().for_each(|req_ancestor| {
-                    let ty = substitution.instantiate(&req_ancestor.ty);
-                    req_ancestors.push(Requirement::new(pos_id.pos().clone(), ty));
-                });
+                req_ancestors.extend(
+                    cls.req_ancestors
+                        .iter()
+                        .map(|req| substitution.instantiate(&req.ty))
+                        .map(|ty| Requirement::new(pos_id.pos().clone(), ty)),
+                );
                 match self.child.kind {
                     ClassishKind::Cclass(_) => {
                         // Not necessary to accumulate req_ancestors_extends for classes --

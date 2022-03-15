@@ -1,215 +1,339 @@
---- ocaml
-+++ rupro
-@@ -1,210 +1,210 @@
- FoldedClass {
-     name: "\\Machine",
-     pos: Pos(root|classes_require.php, 3:16-23),
-     kind: Cclass(
-         Abstract,
-     ),
-     methods: {
-         "closeDoors": FoldedElement {
-             flags: (empty),
-             origin: "\\Machine",
-             visibility: Public,
-             deprecated: None,
-         },
-         "openDoors": FoldedElement {
-             flags: (empty),
-             origin: "\\Machine",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes_require.php, 3:16-23),
-             ty: HH\classname<this>,
-             origin: "\\Machine",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\Fliers",
-     pos: Pos(root|classes_require.php, 8:11-17),
-     kind: Cinterface,
-     methods: {
-         "fly": FoldedElement {
-             flags: ABSTRACT,
-             origin: "\\Fliers",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes_require.php, 8:11-17),
-             ty: HH\classname<this>,
-             origin: "\\Fliers",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\Plane",
-     pos: Pos(root|classes_require.php, 12:7-12),
-     kind: Ctrait,
-     substs: {
-         "\\Fliers": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\Plane",
-             from_req_extends: false,
-         },
-         "\\Machine": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\Plane",
-             from_req_extends: true,
-         },
-     },
-     methods: {
-         "closeDoors": FoldedElement {
-             flags: SYNTHESIZED,
-             origin: "\\Machine",
-             visibility: Public,
-             deprecated: None,
-         },
-         "fly": FoldedElement {
-             flags: ABSTRACT,
-             origin: "\\Fliers",
-             visibility: Public,
-             deprecated: None,
-         },
-         "openDoors": FoldedElement {
-             flags: SYNTHESIZED,
-             origin: "\\Machine",
-             visibility: Public,
-             deprecated: None,
-         },
-         "takeOff": FoldedElement {
-             flags: (empty),
-             origin: "\\Plane",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes_require.php, 12:7-12),
-             ty: HH\classname<this>,
-             origin: "\\Plane",
-             refs: [],
-         },
-     },
-     req_ancestors: [
-         Requirement(
-             Pos(root|classes_require.php, 13:19-26),
-             Machine,
-         ),
-         Requirement(
-             Pos(root|classes_require.php, 14:22-28),
-             Fliers,
-         ),
-     ],
-     req_ancestors_extends: {
-         "\\Fliers",
-         "\\Machine",
-     },
- }
- FoldedClass {
-     name: "\\AirBus",
-     pos: Pos(root|classes_require.php, 23:7-13),
-     kind: Cclass(
-         Concrete,
-     ),
-     substs: {
-         "\\Fliers": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\Plane",
-             from_req_extends: false,
-         },
-         "\\Machine": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\AirBus",
-             from_req_extends: false,
-         },
-         "\\Plane": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\AirBus",
-             from_req_extends: false,
-         },
-     },
-     ancestors: {
-         "\\Fliers": Fliers,
-         "\\Machine": Machine,
-         "\\Plane": Plane,
-     },
-     methods: {
-         "closeDoors": FoldedElement {
-             flags: (empty),
-             origin: "\\Machine",
-             visibility: Public,
-             deprecated: None,
-         },
-         "fly": FoldedElement {
-             flags: (empty),
-             origin: "\\AirBus",
-             visibility: Public,
-             deprecated: None,
-         },
-         "openDoors": FoldedElement {
-             flags: (empty),
-             origin: "\\Machine",
-             visibility: Public,
-             deprecated: None,
-         },
-         "takeOff": FoldedElement {
-             flags: (empty),
-             origin: "\\Plane",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes_require.php, 23:7-13),
-             ty: HH\classname<this>,
-             origin: "\\AirBus",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\Machine",
-         "\\Plane",
-     },
-     req_ancestors: [
-         Requirement(
-             Pos(root|classes_require.php, 24:7-12),
--            Machine,
-+            Fliers,
-         ),
-         Requirement(
-             Pos(root|classes_require.php, 24:7-12),
--            Fliers,
-+            Machine,
-         ),
-     ],
- }
+FoldedClass {
+    name: "\\Machine",
+    pos: Pos(root|classes_require.php, 3:16-23),
+    kind: Cclass(
+        Abstract,
+    ),
+    methods: {
+        "closeDoors": FoldedElement {
+            flags: (empty),
+            origin: "\\Machine",
+            visibility: Public,
+            deprecated: None,
+        },
+        "openDoors": FoldedElement {
+            flags: (empty),
+            origin: "\\Machine",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_require.php, 3:16-23),
+            ty: HH\classname<this>,
+            origin: "\\Machine",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\Fliers",
+    pos: Pos(root|classes_require.php, 8:11-17),
+    kind: Cinterface,
+    methods: {
+        "fly": FoldedElement {
+            flags: ABSTRACT,
+            origin: "\\Fliers",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_require.php, 8:11-17),
+            ty: HH\classname<this>,
+            origin: "\\Fliers",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\Plane",
+    pos: Pos(root|classes_require.php, 12:7-12),
+    kind: Ctrait,
+    substs: {
+        "\\Fliers": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\Plane",
+            from_req_extends: false,
+        },
+        "\\Machine": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\Plane",
+            from_req_extends: true,
+        },
+    },
+    methods: {
+        "closeDoors": FoldedElement {
+            flags: SYNTHESIZED,
+            origin: "\\Machine",
+            visibility: Public,
+            deprecated: None,
+        },
+        "fly": FoldedElement {
+            flags: ABSTRACT,
+            origin: "\\Fliers",
+            visibility: Public,
+            deprecated: None,
+        },
+        "openDoors": FoldedElement {
+            flags: SYNTHESIZED,
+            origin: "\\Machine",
+            visibility: Public,
+            deprecated: None,
+        },
+        "takeOff": FoldedElement {
+            flags: (empty),
+            origin: "\\Plane",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_require.php, 12:7-12),
+            ty: HH\classname<this>,
+            origin: "\\Plane",
+            refs: [],
+        },
+    },
+    req_ancestors: [
+        Requirement(
+            Pos(root|classes_require.php, 13:19-26),
+            Machine,
+        ),
+        Requirement(
+            Pos(root|classes_require.php, 14:22-28),
+            Fliers,
+        ),
+    ],
+    req_ancestors_extends: {
+        "\\Fliers",
+        "\\Machine",
+    },
+}
+FoldedClass {
+    name: "\\HasEngine",
+    pos: Pos(root|classes_require.php, 23:11-20),
+    kind: Cinterface,
+    methods: {
+        "startEngine": FoldedElement {
+            flags: ABSTRACT,
+            origin: "\\HasEngine",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_require.php, 23:11-20),
+            ty: HH\classname<this>,
+            origin: "\\HasEngine",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\Startable",
+    pos: Pos(root|classes_require.php, 27:7-16),
+    kind: Ctrait,
+    substs: {
+        "\\HasEngine": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\Startable",
+            from_req_extends: false,
+        },
+        "\\Machine": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\Startable",
+            from_req_extends: true,
+        },
+    },
+    methods: {
+        "closeDoors": FoldedElement {
+            flags: SYNTHESIZED,
+            origin: "\\Machine",
+            visibility: Public,
+            deprecated: None,
+        },
+        "openDoors": FoldedElement {
+            flags: SYNTHESIZED,
+            origin: "\\Machine",
+            visibility: Public,
+            deprecated: None,
+        },
+        "start": FoldedElement {
+            flags: (empty),
+            origin: "\\Startable",
+            visibility: Public,
+            deprecated: None,
+        },
+        "startEngine": FoldedElement {
+            flags: ABSTRACT,
+            origin: "\\HasEngine",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_require.php, 27:7-16),
+            ty: HH\classname<this>,
+            origin: "\\Startable",
+            refs: [],
+        },
+    },
+    req_ancestors: [
+        Requirement(
+            Pos(root|classes_require.php, 28:19-26),
+            Machine,
+        ),
+        Requirement(
+            Pos(root|classes_require.php, 29:22-31),
+            HasEngine,
+        ),
+    ],
+    req_ancestors_extends: {
+        "\\HasEngine",
+        "\\Machine",
+    },
+}
+FoldedClass {
+    name: "\\AirBus",
+    pos: Pos(root|classes_require.php, 37:7-13),
+    kind: Cclass(
+        Concrete,
+    ),
+    substs: {
+        "\\Fliers": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\Plane",
+            from_req_extends: false,
+        },
+        "\\HasEngine": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\Startable",
+            from_req_extends: false,
+        },
+        "\\Machine": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\AirBus",
+            from_req_extends: false,
+        },
+        "\\Plane": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\AirBus",
+            from_req_extends: false,
+        },
+        "\\Startable": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\AirBus",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\Fliers": Fliers,
+        "\\HasEngine": HasEngine,
+        "\\Machine": Machine,
+        "\\Plane": Plane,
+        "\\Startable": Startable,
+    },
+    methods: {
+        "closeDoors": FoldedElement {
+            flags: (empty),
+            origin: "\\Machine",
+            visibility: Public,
+            deprecated: None,
+        },
+        "fly": FoldedElement {
+            flags: (empty),
+            origin: "\\AirBus",
+            visibility: Public,
+            deprecated: None,
+        },
+        "openDoors": FoldedElement {
+            flags: (empty),
+            origin: "\\Machine",
+            visibility: Public,
+            deprecated: None,
+        },
+        "start": FoldedElement {
+            flags: (empty),
+            origin: "\\Startable",
+            visibility: Public,
+            deprecated: None,
+        },
+        "startEngine": FoldedElement {
+            flags: (empty),
+            origin: "\\AirBus",
+            visibility: Public,
+            deprecated: None,
+        },
+        "takeOff": FoldedElement {
+            flags: (empty),
+            origin: "\\Plane",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_require.php, 37:7-13),
+            ty: HH\classname<this>,
+            origin: "\\AirBus",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\Machine",
+        "\\Plane",
+        "\\Startable",
+    },
+    req_ancestors: [
+        Requirement(
+            Pos(root|classes_require.php, 38:7-12),
+            Fliers,
+        ),
+        Requirement(
+            Pos(root|classes_require.php, 39:7-16),
+            Machine,
+        ),
+        Requirement(
+            Pos(root|classes_require.php, 39:7-16),
+            HasEngine,
+        ),
+    ],
+}
+
+They matched!

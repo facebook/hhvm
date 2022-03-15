@@ -113,35 +113,65 @@
            sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
-  ("\\AirBus",
+  ("\\HasEngine",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-        sc_kind = (Cclass Concrete); sc_module = None;
-        sc_name = ([23:7-13], "\\AirBus"); sc_tparams = [];
-        sc_where_constraints = [];
-        sc_extends =
-        [(Rhint ([23:22-29]), (Tapply (([23:22-29], "\\Machine"), [])))];
-        sc_uses =
-        [(Rhint ([24:7-12]), (Tapply (([24:7-12], "\\Plane"), [])))];
+        sc_kind = Cinterface; sc_module = None;
+        sc_name = ([23:11-20], "\\HasEngine"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = [];
-        sc_implements =
-        [(Rhint ([23:41-47]), (Tapply (([23:41-47], "\\Fliers"), [])))];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];
         sc_methods =
-        [{ Shallow_decl_defs.sm_name = ([26:19-22], "fly");
+        [{ Shallow_decl_defs.sm_name = ([24:19-30], "startEngine");
            sm_type =
-           (Rwitness_from_decl ([26:19-22]),
+           (Rwitness_from_decl ([24:19-30]),
             (Tfun
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability = (CapDefaults [26:19-22]) };
+                 { capability = (CapDefaults [24:19-30]) };
                  ft_ret =
                  { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([26:26-30]), (Tprim Tbool)) };
+                   et_type = (Rhint ([24:34-38]), (Tprim Tvoid)) };
+                 ft_flags =
+                 (make_ft_flags FSync ~return_disposable:false
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false ~is_memoized:false ~variadic:false);
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
+           sm_attributes = [] }
+          ];
+        sc_user_attributes = []; sc_enum_type = None }));
+  ("\\Startable",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = Ctrait; sc_module = None;
+        sc_name = ([27:7-16], "\\Startable"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_req_extends =
+        [(Rhint ([28:19-26]), (Tapply (([28:19-26], "\\Machine"), [])))];
+        sc_req_implements =
+        [(Rhint ([29:22-31]), (Tapply (([29:22-31], "\\HasEngine"), [])))];
+        sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
+        sc_methods =
+        [{ Shallow_decl_defs.sm_name = ([31:19-24], "start");
+           sm_type =
+           (Rwitness_from_decl ([31:19-24]),
+            (Tfun
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [31:19-24]) };
+                 ft_ret =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type = (Rhint ([31:28-32]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
@@ -149,6 +179,63 @@
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
+          ];
+        sc_user_attributes = []; sc_enum_type = None }));
+  ("\\AirBus",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = (Cclass Concrete); sc_module = None;
+        sc_name = ([37:7-13], "\\AirBus"); sc_tparams = [];
+        sc_where_constraints = [];
+        sc_extends =
+        [(Rhint ([37:22-29]), (Tapply (([37:22-29], "\\Machine"), [])))];
+        sc_uses =
+        [(Rhint ([38:7-12]), (Tapply (([38:7-12], "\\Plane"), [])));
+          (Rhint ([39:7-16]), (Tapply (([39:7-16], "\\Startable"), [])))];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = [];
+        sc_implements =
+        [(Rhint ([37:41-47]), (Tapply (([37:41-47], "\\Fliers"), [])));
+          (Rhint ([37:49-58]), (Tapply (([37:49-58], "\\HasEngine"), [])))];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
+        sc_methods =
+        [{ Shallow_decl_defs.sm_name = ([41:19-22], "fly");
+           sm_type =
+           (Rwitness_from_decl ([41:19-22]),
+            (Tfun
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [41:19-22]) };
+                 ft_ret =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type = (Rhint ([41:26-30]), (Tprim Tbool)) };
+                 ft_flags =
+                 (make_ft_flags FSync ~return_disposable:false
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false ~is_memoized:false ~variadic:false);
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] };
+          { Shallow_decl_defs.sm_name = ([45:19-30], "startEngine");
+            sm_type =
+            (Rwitness_from_decl ([45:19-30]),
+             (Tfun
+                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                  ft_implicit_params =
+                  { capability = (CapDefaults [45:19-30]) };
+                  ft_ret =
+                  { et_enforced = Typing_defs_core.Unenforced;
+                    et_type = (Rhint ([45:34-38]), (Tprim Tvoid)) };
+                  ft_flags =
+                  (make_ft_flags FSync ~return_disposable:false
+                    ~returns_readonly:false ~support_dynamic_type:false
+                    ~readonly_this:false ~is_memoized:false ~variadic:false);
+                  ft_ifc_decl = FDPolicied {PUBLIC} }));
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }))
   ]

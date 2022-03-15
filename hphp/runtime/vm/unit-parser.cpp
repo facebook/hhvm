@@ -166,17 +166,11 @@ CompilerResult hackc_compile(
   const RepoOptionsFlags& options,
   CompileAbortMode mode
 ) {
-  std::string aliased_namespaces = options.getAliasedNamespacesConfig();
+  // Create DeclProvider. Returns nullptr if disabled or too early.
+  auto aliased_namespaces = options.getAliasedNamespacesConfig();
+  auto provider = HhvmDeclProvider::create(options);
 
-  std::unique_ptr<HhvmDeclProvider> provider{nullptr};
-  if (RuntimeOption::EvalEnableDecl) {
-    // Decls In Compilation mode is enabled. Create the DeclProvider.
-    // (Semi-)Mock HhvmDeclProvider. TODO: Hook up with bytecode cache logic.
-    int32_t decl_flags = options.getDeclFlags();
-    provider = std::make_unique<HhvmDeclProvider>(decl_flags, aliased_namespaces);
-  }
-
-  std::uint8_t flags = make_env_flags(
+  uint8_t flags = make_env_flags(
     isSystemLib,                    // is_systemlib
     false,                          // is_evaled
     forDebuggerEval,                // for_debugger_eval
@@ -185,8 +179,8 @@ CompilerResult hackc_compile(
   );
 
   NativeEnv const native_env{
-    reinterpret_cast<std::uint64_t>(provider.get()),
-    reinterpret_cast<std::uint64_t>(provider ? &hhvm_decl_provider_get_decl : nullptr),
+    reinterpret_cast<uint64_t>(provider.get()),
+    reinterpret_cast<uint64_t>(provider ? &hhvm_decl_provider_get_decl : nullptr),
     filename,
     aliased_namespaces,
     s_misc_config,
@@ -197,9 +191,11 @@ CompilerResult hackc_compile(
     flags
   };
 
-
-  ::rust::Vec<std::uint8_t> hhas_vec = hackc_compile_from_text_cpp_ffi(native_env, code);
+  // Invoke hackc, producing a rust Vec<u8> containing HHAS.
+  rust::Vec<uint8_t> hhas_vec = hackc_compile_from_text_cpp_ffi(native_env, code);
   auto const hhas = std::string(hhas_vec.begin(), hhas_vec.end());
+
+  // Assemble HHAS into a UnitEmitter, or a std::string if there were errors.
   auto res = assemble_string_handle_errors(code,
                                            hhas,
                                            filename,
@@ -209,9 +205,9 @@ CompilerResult hackc_compile(
                                            mode);
 
   if (RO::EvalTranslateHackC) {
-    ::rust::Box<HackCUnitWrapper> unit_wrapped =
+    rust::Box<HackCUnitWrapper> unit_wrapped =
       hackc_compile_unit_from_text_cpp_ffi(native_env, code);
-    ::rust::Vec<std::uint8_t> hhbc {hackc_unit_to_string_cpp_ffi(native_env, *unit_wrapped)};
+    rust::Vec<uint8_t> hhbc {hackc_unit_to_string_cpp_ffi(native_env, *unit_wrapped)};
     std::string hhasString(hhbc.begin(), hhbc.end());
 
     auto const assemblerOut = [&]() -> std::string {
@@ -301,13 +297,13 @@ ParseFactsResult extract_facts(
   auto const get_facts = [&](const std::string& source_text) -> ParseFactsResult {
     try {
       std::int32_t decl_flags = options.getDeclFlags();
-      ::rust::Box<DeclParserOptions> decl_opts =
+      rust::Box<DeclParserOptions> decl_opts =
         hackc_create_direct_decl_parse_options(
           decl_flags,
           options.getAliasedNamespacesConfig());
       DeclResult decls = hackc_direct_decl_parse(*decl_opts, filename, source_text);
       FactsResult facts = hackc_decls_to_facts_cpp_ffi(decl_flags, decls, source_text);
-      ::rust::String facts_as_json = hackc_facts_to_json_cpp_ffi(facts, source_text);
+      rust::String facts_as_json = hackc_facts_to_json_cpp_ffi(facts, source_text);
       return FactsJSONString { std::string(facts_as_json) };
     } catch (const std::exception& e) {
       return FactsJSONString { "" }; // Swallow errors from HackC

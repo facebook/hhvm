@@ -93,8 +93,10 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
             NameType::Fun => 1,     // HPHP::AutoloadMap::KindOf::Function
             NameType::Const => 2,   // HPHP::AutoloadMap::KindOf::Constant
         };
-        let result =
-            unsafe { (self.provider)(self.data, code, symbol.as_ptr() as _, symbol.len()) };
+        let result = unsafe {
+            // Invoke extern C/C++ provider implementation.
+            (self.provider)(self.data, code, symbol.as_ptr() as _, symbol.len())
+        };
         match result {
             ExternalDeclProviderResult::Missing => Err(Error::NotFound),
             ExternalDeclProviderResult::Decls(p) => {

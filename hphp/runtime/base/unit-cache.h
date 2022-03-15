@@ -117,6 +117,7 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
   R(PHP7_NoHexNumerics)                         \
   R(PHP7_Builtins)                              \
   R(PHP7_Substr)                                \
+  R(EvalEnableDecl)                             \
   /**/
 
 std::string mangleUnitSha1(const std::string& fileSha1,

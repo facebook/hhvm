@@ -1088,7 +1088,13 @@ struct FactsStoreImpl final
 
     folly::fs::path p{folly::fs::path{fileStr->slice()}};
     assertx(p.is_relative());
-    return String{(m_root / p).native()};
+
+    if (tl_heap) {
+      return String{(m_root / p).native()};
+    }
+    // Don't allocate a request-heap string: symbol lookups using
+    // FactsStore need to work on non-request threads.
+    return StrNR(makeStaticString((m_root / p).native()));
   }
 
   /**

@@ -97,6 +97,10 @@ struct AutoloadHandler final : RequestEventHandler {
     return m_map;
   }
 
+  AutoloadMap* getAutoloadMap() {
+    return m_map;
+  }
+
   FactsStore* getFacts() {
     return m_facts;
   }

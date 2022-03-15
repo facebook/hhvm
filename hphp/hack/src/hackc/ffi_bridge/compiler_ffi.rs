@@ -138,11 +138,13 @@ pub mod compile_ffi {
             disable_toplevel_elaboration: bool,
         ) -> u8;
 
+        /// Compile Hack source code to a HackCUnit or an error.
         unsafe fn hackc_compile_unit_from_text_cpp_ffi(
             env: &NativeEnv,
             source_text: &CxxString,
         ) -> Result<Box<HackCUnitWrapper>>;
 
+        /// Compile Hack source code to either HHAS or an error.
         fn hackc_compile_from_text_cpp_ffi(
             env: &NativeEnv,
             source_text: &CxxString,
@@ -153,20 +155,29 @@ pub mod compile_ffi {
             aliased_namespaces: &CxxString,
         ) -> Box<DeclParserOptions>;
 
+        /// Invoke the hackc direct decl parser and return every shallow decl in the file.
         fn hackc_direct_decl_parse(
             options: &DeclParserOptions,
             filename: &CxxString,
             text: &CxxString,
         ) -> DeclResult;
 
+        /// Return true if this symbol is in the given Decls.
         fn hackc_decl_exists(
             decls: &Decls,
             kind: i32, /* HPHP::AutoloadMap::KindOf */
             symbol: &str,
         ) -> bool;
+
+        /// Testing: pretty-print Decls to stdout.
         fn hackc_print_decls(decls: &Decls);
+
+        /// Testing: print the size of this Bytes to stdout.
         fn hackc_print_serialized_size(bytes: &Bytes);
+
+        /// For testing: return true if deserializing these bytes produces the expected Decls.
         unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool;
+
         fn hackc_unit_to_string_cpp_ffi(
             env: &NativeEnv,
             prog: &HackCUnitWrapper,
@@ -430,8 +441,7 @@ pub fn hackc_direct_decl_parse(
 
 unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool {
     let arena = bumpalo::Bump::new();
-
-    let data = std::slice::from_raw_parts(serialized.0.data, serialized.0.len);
+    let data = serialized.0.as_slice();
 
     let op = bincode::config::Options::with_native_endian(bincode::options());
     let mut de = bincode::de::Deserializer::from_slice(data, op);

@@ -98,7 +98,7 @@ std::string
 getCacheBreakerSchemaHash(std::string_view root, const RepoOptions& opts) {
   std::string repoSchemaIdHash = repoSchemaId().toString();
   std::string optsHash = opts.flags().cacheKeySha1().toString();
-  XLOG(INFO) << "Native Facts DB cache breaker."
+  XLOG(INFO) << "Native Facts DB cache breaker:"
              << "\n Repo Schema ID: " << repoSchemaIdHash << "\n Root: " << root
              << "\n RepoOpts hash: " << optsHash;
   std::string rootHash = string_sha1(root);

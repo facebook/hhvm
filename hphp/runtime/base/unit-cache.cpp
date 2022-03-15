@@ -1102,6 +1102,12 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
   auto const& options = RepoOptions::forFile(rpath->data());
   g_context->onLoadWithOptions(requestedPath->data(), options);
 
+  if (RuntimeOption::EvalEnableDecl) {
+    // Initialize AutoloadHandler before we parse the file so HhvmDeclProvider
+    // can respond to queries from HackC.
+    AutoloadHandler::s_instance.getCheck();
+  }
+
   auto [cache, wrapper] = getNonRepoCacheWithWrapper(rpath);
   if (!cache) return CachedUnit{};
   assertx(!wrapper || wrapper->isNormalFileStream());

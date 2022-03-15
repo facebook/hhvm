@@ -2852,25 +2852,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         ForStatement(c) => p_for_stmt(env, pos, c, node),
         ForeachStatement(c) => p_foreach_stmt(env, pos, c, node),
         TryStatement(c) => p_try_stmt(env, pos, c, node),
-        ReturnStatement(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-                let expr = match &c.expression.children {
-                    Missing => None,
-                    _ => Some(p_expr_with_loc(
-                        ExprLocation::RightOfReturn,
-                        &c.expression,
-                        e,
-                        None,
-                    )?),
-                };
-                Ok(ast::Stmt::new(pos, ast::Stmt_::mk_return(expr)))
-            };
-            if is_simple_await_expression(&c.expression) {
-                f(env)
-            } else {
-                lift_awaits_in_statement(node, env, f)
-            }
-        }
+        ReturnStatement(c) => p_return_stmt(env, pos, c, node),
         YieldBreakStatement(_) => Ok(ast::Stmt::new(pos, ast::Stmt_::mk_yield_break())),
         EchoStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -3060,6 +3042,31 @@ fn p_try_stmt<'a>(
             },
         ),
     ))
+}
+
+fn p_return_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a ReturnStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    node: S<'a>,
+) -> Result<ast::Stmt> {
+    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
+        let expr = match &c.expression.children {
+            Missing => None,
+            _ => Some(p_expr_with_loc(
+                ExprLocation::RightOfReturn,
+                &c.expression,
+                e,
+                None,
+            )?),
+        };
+        Ok(ast::Stmt::new(pos, ast::Stmt_::mk_return(expr)))
+    };
+    if is_simple_await_expression(&c.expression) {
+        f(env)
+    } else {
+        lift_awaits_in_statement(node, env, f)
+    }
 }
 
 fn p_foreach_stmt<'a>(

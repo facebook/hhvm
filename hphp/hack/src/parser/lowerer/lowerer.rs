@@ -2845,20 +2845,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         ThrowStatement(c) => p_throw_stmt(env, pos, c, node),
         DoStatement(c) => p_do_stmt(env, pos, c, node),
         WhileStatement(c) => p_while_stmt(env, pos, c, node),
-        UsingStatementBlockScoped(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-                Ok(new(
-                    pos,
-                    S_::mk_using(ast::UsingStmt {
-                        is_block_scoped: true,
-                        has_await: !&c.await_keyword.is_missing(),
-                        exprs: p_exprs_with_loc(&c.expressions, e)?,
-                        block: p_block(false, &c.body, e)?,
-                    }),
-                ))
-            };
-            lift_awaits_in_statement(node, env, f)
-        }
+        UsingStatementBlockScoped(c) => p_using_statement_block_scoped_stmt(env, pos, c, node),
         UsingStatementFunctionScoped(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 Ok(new(
@@ -3101,6 +3088,29 @@ fn p_throw_stmt<'a>(
     })
 }
 
+fn p_using_statement_block_scoped_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a UsingStatementBlockScopedChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+
+    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
+        Ok(new(
+            pos,
+            S_::mk_using(ast::UsingStmt {
+                is_block_scoped: true,
+                has_await: !&c.await_keyword.is_missing(),
+                exprs: p_exprs_with_loc(&c.expressions, e)?,
+                block: p_block(false, &c.body, e)?,
+            }),
+        ))
+    };
+    lift_awaits_in_statement(node, env, f)
+}
+
 fn p_do_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
@@ -3116,7 +3126,8 @@ fn p_do_stmt<'a>(
             p_block(false /* remove noop */, &c.body, env)?,
             p_expr(&c.condition, env)?,
         ),
-    ))}
+    ))
+}
 
 fn p_expression_stmt<'a>(
     env: &mut Env<'a>,

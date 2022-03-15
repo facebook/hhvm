@@ -359,70 +359,17 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
         {
             set_expr_to_typed_value(emitter, x)
         }
-        Expr_::Tuple(x) => {
-            let v: Vec<_> = x
-                .iter()
-                .map(|e| expr_to_typed_value(emitter, e))
-                .collect::<Result<_, _>>()?;
-            Ok(TypedValue::mk_vec(
-                emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
-            ))
-        }
+        Expr_::Tuple(x) => tuple_expr_to_typed_value(emitter, x),
         Expr_::ValCollection(x) if x.0 == ast::VcKind::Vec || x.0 == ast::VcKind::Vector => {
-            let v: Vec<_> =
-                x.2.iter()
-                    .map(|e| expr_to_typed_value(emitter, e))
-                    .collect::<Result<_, _>>()?;
-            Ok(TypedValue::mk_vec(
-                emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
-            ))
+            valcollection_vec_expr_to_typed_value(emitter, x)
         }
         Expr_::ValCollection(x) if x.0 == ast::VcKind::Keyset => {
-            let keys = emitter.alloc.alloc_slice_fill_iter(
-                x.2.iter()
-                    .map(|e| {
-                        expr_to_typed_value(emitter, e).and_then(|tv| match tv {
-                            TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
-                            TypedValue::LazyClass(_)
-                                if emitter
-                                    .options()
-                                    .hhvm
-                                    .flags
-                                    .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS) =>
-                            {
-                                Ok(tv)
-                            }
-                            _ => Err(Error::NotLiteral),
-                        })
-                    })
-                    .collect::<Result<Vec<_>, _>>()?
-                    .into_iter()
-                    .unique()
-                    .collect::<Vec<_>>()
-                    .into_iter(),
-            );
-            Ok(TypedValue::mk_keyset(keys))
+            valcollection_keyset_expr_to_typed_value(emitter, x)
         }
         Expr_::ValCollection(x) if x.0 == ast::VcKind::Set || x.0 == ast::VcKind::ImmSet => {
-            let values = emitter
-                .alloc
-                .alloc_slice_fill_iter(update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|e| set_afield_value_to_typed_value_pair(emitter, e))
-                        .collect::<Result<Vec<_>, _>>()?,
-                ));
-            Ok(TypedValue::mk_dict(values))
+            valcollection_set_expr_to_typed_value(emitter, x)
         }
-        Expr_::KeyValCollection(x) => {
-            let values = emitter
-                .alloc
-                .alloc_slice_fill_iter(update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|e| kv_to_typed_value_pair(emitter, &e.0, &e.1))
-                        .collect::<Result<Vec<_>, _>>()?,
-                ));
-            Ok(TypedValue::mk_dict(values))
-        }
+        Expr_::KeyValCollection(x) => keyvalcollection_expr_to_typed_value(emitter, x),
         Expr_::Shape(fields) => shape_to_typed_value(emitter, fields),
         Expr_::ClassConst(x) => {
             if emitter.options().emit_class_pointers() == 1 && !force_class_const {
@@ -461,6 +408,94 @@ fn call_expr_to_typed_value<'arena, 'decl>(
         }
         _ => Err(Error::NotLiteral),
     }
+}
+
+fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+) -> Result<TypedValue<'arena>, Error> {
+    let keys = emitter.alloc.alloc_slice_fill_iter(
+        x.2.iter()
+            .map(|e| {
+                expr_to_typed_value(emitter, e).and_then(|tv| match tv {
+                    TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
+                    TypedValue::LazyClass(_)
+                        if emitter
+                            .options()
+                            .hhvm
+                            .flags
+                            .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS) =>
+                    {
+                        Ok(tv)
+                    }
+                    _ => Err(Error::NotLiteral),
+                })
+            })
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .unique()
+            .collect::<Vec<_>>()
+            .into_iter(),
+    );
+    Ok(TypedValue::mk_keyset(keys))
+}
+
+fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(
+        ast::KvcKind,
+        Option<(ast::Targ, ast::Targ)>,
+        Vec<ast::Field>,
+    ),
+) -> Result<TypedValue<'arena>, Error> {
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|e| kv_to_typed_value_pair(emitter, &e.0, &e.1))
+                .collect::<Result<Vec<_>, _>>()?,
+        ));
+    Ok(TypedValue::mk_dict(values))
+}
+
+fn valcollection_set_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+) -> Result<TypedValue<'arena>, Error> {
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|e| set_afield_value_to_typed_value_pair(emitter, e))
+                .collect::<Result<Vec<_>, _>>()?,
+        ));
+    Ok(TypedValue::mk_dict(values))
+}
+
+fn valcollection_vec_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+) -> Result<TypedValue<'arena>, Error> {
+    let v: Vec<_> =
+        x.2.iter()
+            .map(|e| expr_to_typed_value(emitter, e))
+            .collect::<Result<_, _>>()?;
+    Ok(TypedValue::mk_vec(
+        emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
+    ))
+}
+
+fn tuple_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &[ast::Expr],
+) -> Result<TypedValue<'arena>, Error> {
+    let v: Vec<_> = x
+        .iter()
+        .map(|e| expr_to_typed_value(emitter, e))
+        .collect::<Result<_, _>>()?;
+    Ok(TypedValue::mk_vec(
+        emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
+    ))
 }
 
 fn set_expr_to_typed_value<'arena, 'decl>(

@@ -2851,24 +2851,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         }
         ForStatement(c) => p_for_stmt(env, pos, c, node),
         ForeachStatement(c) => p_foreach_stmt(env, pos, c, node),
-        TryStatement(c) => Ok(new(
-            pos,
-            S_::mk_try(
-                p_block(false, &c.compound_statement, env)?,
-                could_map(&c.catch_clauses, env, |n, e| match &n.children {
-                    CatchClause(c) => Ok(ast::Catch(
-                        pos_name(&c.type_, e)?,
-                        lid_from_name(&c.variable, e)?,
-                        p_block(true, &c.body, e)?,
-                    )),
-                    _ => missing_syntax("catch clause", n, e),
-                })?,
-                match &c.finally_clause.children {
-                    FinallyClause(c) => p_block(false, &c.body, env)?,
-                    _ => vec![],
-                },
-            ),
-        )),
+        TryStatement(c) => p_try_stmt(env, pos, c, node),
         ReturnStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 let expr = match &c.expression.children {
@@ -3048,6 +3031,35 @@ fn p_throw_stmt<'a>(
     lift_awaits_in_statement(node, env, |e| {
         Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
     })
+}
+
+fn p_try_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a TryStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    _node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+
+    Ok(new(
+        pos,
+        S_::mk_try(
+            p_block(false, &c.compound_statement, env)?,
+            could_map(&c.catch_clauses, env, |n, e| match &n.children {
+                CatchClause(c) => Ok(ast::Catch(
+                    pos_name(&c.type_, e)?,
+                    lid_from_name(&c.variable, e)?,
+                    p_block(true, &c.body, e)?,
+                )),
+                _ => missing_syntax("catch clause", n, e),
+            })?,
+            match &c.finally_clause.children {
+                FinallyClause(c) => p_block(false, &c.body, env)?,
+                _ => vec![],
+            },
+        ),
+    ))
 }
 
 fn p_foreach_stmt<'a>(

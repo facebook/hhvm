@@ -2855,102 +2855,10 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         ReturnStatement(c) => p_return_stmt(env, pos, c, node),
         YieldBreakStatement(_) => Ok(ast::Stmt::new(pos, ast::Stmt_::mk_yield_break())),
         EchoStatement(c) => p_echo_stmt(env, pos, c, node),
-        UnsetStatement(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-                let args = could_map(&c.variables, e, p_expr_for_normal_argument)?;
-                args.iter()
-                    .for_each(|(_, arg)| check_mutate_class_const(arg, node, e));
-                let unset = match &c.keyword.children {
-                    QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
-                        let name = pos_name(&c.keyword, e)?;
-                        ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
-                    }
-                    _ => missing_syntax("id", &c.keyword, e)?,
-                };
-                Ok(new(
-                    pos.clone(),
-                    S_::mk_expr(ast::Expr::new(
-                        (),
-                        pos,
-                        Expr_::mk_call(unset, vec![], args, None),
-                    )),
-                ))
-            };
-            lift_awaits_in_statement(node, env, f)
-        }
+        UnsetStatement(c) => p_unset_stmt(env, pos, c, node),
         BreakStatement(_) => Ok(new(pos, S_::Break)),
         ContinueStatement(_) => Ok(new(pos, S_::Continue)),
-        ConcurrentStatement(c) => {
-            let keyword_pos = p_pos(&c.keyword, env);
-            let (lifted_awaits, Stmt(stmt_pos, stmt)) =
-                with_new_concurrent_scope(env, |e| p_stmt(&c.statement, e))?;
-            let stmt = match stmt {
-                S_::Block(stmts) => {
-                    use ast::Bop::Eq;
-                    /* Reuse tmp vars from lifted_awaits, this is safe because there will
-                     * always be more awaits with tmp vars than statements with assignments */
-                    let mut tmp_vars = lifted_awaits
-                        .iter()
-                        .filter_map(|lifted_await| lifted_await.0.as_ref().map(|x| &x.1));
-                    let mut body_stmts = vec![];
-                    let mut assign_stmts = vec![];
-                    for n in stmts.into_iter() {
-                        if !n.is_assign_expr() {
-                            body_stmts.push(n);
-                            continue;
-                        }
-
-                        if let Some(tv) = tmp_vars.next() {
-                            if let Stmt(p1, S_::Expr(expr)) = n {
-                                if let Expr(_, p2, Expr_::Binop(bop)) = *expr {
-                                    if let (Eq(op), e1, e2) = *bop {
-                                        let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
-                                        if tmp_n.lvar_name() != e2.lvar_name() {
-                                            let new_n = new(
-                                                p1.clone(),
-                                                S_::mk_expr(Expr::new(
-                                                    (),
-                                                    p2.clone(),
-                                                    Expr_::mk_binop(
-                                                        Eq(None),
-                                                        tmp_n.clone(),
-                                                        e2.clone(),
-                                                    ),
-                                                )),
-                                            );
-                                            body_stmts.push(new_n);
-                                        }
-                                        let assign_stmt = new(
-                                            p1,
-                                            S_::mk_expr(Expr::new(
-                                                (),
-                                                p2,
-                                                Expr_::mk_binop(Eq(op), e1, tmp_n),
-                                            )),
-                                        );
-                                        assign_stmts.push(assign_stmt);
-                                        continue;
-                                    }
-                                }
-                            }
-
-                            failwith("Expect assignment stmt")?;
-                        } else {
-                            raise_parsing_error_pos(
-                                &stmt_pos,
-                                env,
-                                &syntax_error::statement_without_await_in_concurrent_block,
-                            );
-                            body_stmts.push(n)
-                        }
-                    }
-                    body_stmts.append(&mut assign_stmts);
-                    new(stmt_pos, S_::mk_block(body_stmts))
-                }
-                _ => failwith("Unexpected concurrent stmt structure")?,
-            };
-            Ok(new(keyword_pos, S_::mk_awaitall(lifted_awaits, vec![stmt])))
-        }
+        ConcurrentStatement(c) => p_concurrent_stmt(env, pos, c, node),
         MarkupSection(_) => p_markup(node, env),
         _ => missing_syntax_(
             Some(new(env.mk_none_pos(), S_::Noop)),
@@ -3022,6 +2930,114 @@ fn p_try_stmt<'a>(
             },
         ),
     ))
+}
+
+fn p_concurrent_stmt<'a>(
+    env: &mut Env<'a>,
+    _pos: Pos,
+    c: &'a ConcurrentStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    _node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+
+    let keyword_pos = p_pos(&c.keyword, env);
+    let (lifted_awaits, Stmt(stmt_pos, stmt)) =
+        with_new_concurrent_scope(env, |e| p_stmt(&c.statement, e))?;
+    let stmt = match stmt {
+        S_::Block(stmts) => {
+            use ast::Bop::Eq;
+            /* Reuse tmp vars from lifted_awaits, this is safe because there will
+             * always be more awaits with tmp vars than statements with assignments */
+            let mut tmp_vars = lifted_awaits
+                .iter()
+                .filter_map(|lifted_await| lifted_await.0.as_ref().map(|x| &x.1));
+            let mut body_stmts = vec![];
+            let mut assign_stmts = vec![];
+            for n in stmts.into_iter() {
+                if !n.is_assign_expr() {
+                    body_stmts.push(n);
+                    continue;
+                }
+
+                if let Some(tv) = tmp_vars.next() {
+                    if let Stmt(p1, S_::Expr(expr)) = n {
+                        if let Expr(_, p2, Expr_::Binop(bop)) = *expr {
+                            if let (Eq(op), e1, e2) = *bop {
+                                let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
+                                if tmp_n.lvar_name() != e2.lvar_name() {
+                                    let new_n = new(
+                                        p1.clone(),
+                                        S_::mk_expr(Expr::new(
+                                            (),
+                                            p2.clone(),
+                                            Expr_::mk_binop(Eq(None), tmp_n.clone(), e2.clone()),
+                                        )),
+                                    );
+                                    body_stmts.push(new_n);
+                                }
+                                let assign_stmt = new(
+                                    p1,
+                                    S_::mk_expr(Expr::new(
+                                        (),
+                                        p2,
+                                        Expr_::mk_binop(Eq(op), e1, tmp_n),
+                                    )),
+                                );
+                                assign_stmts.push(assign_stmt);
+                                continue;
+                            }
+                        }
+                    }
+
+                    failwith("Expect assignment stmt")?;
+                } else {
+                    raise_parsing_error_pos(
+                        &stmt_pos,
+                        env,
+                        &syntax_error::statement_without_await_in_concurrent_block,
+                    );
+                    body_stmts.push(n)
+                }
+            }
+            body_stmts.append(&mut assign_stmts);
+            new(stmt_pos, S_::mk_block(body_stmts))
+        }
+        _ => failwith("Unexpected concurrent stmt structure")?,
+    };
+    Ok(new(keyword_pos, S_::mk_awaitall(lifted_awaits, vec![stmt])))
+}
+
+fn p_unset_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a UnsetStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+
+    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
+        let args = could_map(&c.variables, e, p_expr_for_normal_argument)?;
+        args.iter()
+            .for_each(|(_, arg)| check_mutate_class_const(arg, node, e));
+        let unset = match &c.keyword.children {
+            QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
+                let name = pos_name(&c.keyword, e)?;
+                ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
+            }
+            _ => missing_syntax("id", &c.keyword, e)?,
+        };
+        Ok(new(
+            pos.clone(),
+            S_::mk_expr(ast::Expr::new(
+                (),
+                pos,
+                Expr_::mk_call(unset, vec![], args, None),
+            )),
+        ))
+    };
+    lift_awaits_in_statement(node, env, f)
 }
 
 fn p_echo_stmt<'a>(

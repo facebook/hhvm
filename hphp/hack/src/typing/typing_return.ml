@@ -157,11 +157,13 @@ let make_default_return ~is_method env name =
   else
     mk (r, Typing_utils.tany env)
 
-let implicit_return env pos ~expected ~actual =
+let implicit_return env pos ~expected ~actual ~hint_pos ~is_async=
   let reason = Reason.URreturn in
   (* getting called here *)
+  (* @@ Primary.Wellformedness.Void_usage
+               { pos = p; reason = lazy (Reason.to_string "This is `void`" r) } *)
   let error =
-    Typing_error.Primary.(Wellformedness (Wellformedness.Missing_return pos))
+    Typing_error.Primary.(Wellformedness (Wellformedness.Missing_return {pos; hint_pos; is_async}))
   in
   let open Typing_env_types in
   let (env, ty_err_opt) =
@@ -249,6 +251,8 @@ let fun_implicit_return env pos ret =
     else
       ret
   in
+  let ret_pos = Some(Typing_defs_core.get_pos ret) in
+
   function
   | Ast_defs.FGenerator
   | Ast_defs.FAsyncGenerator ->
@@ -259,14 +263,10 @@ let fun_implicit_return env pos ret =
     let env = check_inout_return Pos.none env in
     let r = Reason.Rno_return pos in
     let rty = MakeType.void r in
-    let ret_pos = Typing_defs_core.get_pos ret in
-    let () = printf "Sync Ret_pos: %s\n" (Pos_or_decl.show ret_pos) in
-    implicit_return env pos ~expected:ret ~actual:rty
+    implicit_return env pos ~expected:ret ~actual:rty ~hint_pos:ret_pos ~is_async:false
   | Ast_defs.FAsync ->
     (* An async function without a terminal block has an implicit return;
      * the Awaitable<void> type *)
     let r = Reason.Rno_return_async pos in
     let rty = MakeType.awaitable r (MakeType.void r) in
-    let ret_pos = Typing_defs_core.get_pos ret in
-    let () = printf "Async Ret_pos: %s\n" (Pos_or_decl.show ret_pos) in
-    implicit_return env pos ~expected:ret ~actual:rty
+    implicit_return env pos ~expected:ret ~actual:rty ~hint_pos:ret_pos ~is_async:true

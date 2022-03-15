@@ -28,6 +28,8 @@ val implicit_return :
   Ast_defs.pos ->
   expected:Typing_defs.locl_ty ->
   actual:Typing_defs.locl_ty ->
+  hint_pos:Pos_or_decl.t option ->
+  is_async:bool ->
   env
 
 val make_return_type :

@@ -304,7 +304,11 @@ module Primary : sig
 
   module Wellformedness : sig
     type t =
-      | Missing_return of Pos.t
+      | Missing_return of {
+          pos: Pos.t;
+          hint_pos: Pos_or_decl.t option;
+          is_async: bool;
+        }
       | Dollardollar_lvalue of Pos.t
       | Void_usage of {
           pos: Pos.t;

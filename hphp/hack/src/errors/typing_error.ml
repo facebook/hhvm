@@ -1272,7 +1272,11 @@ module Primary = struct
 
   module Wellformedness = struct
     type t =
-      | Missing_return of Pos.t
+      | Missing_return of {
+          pos: Pos.t;
+          hint_pos: Pos_or_decl.t option;
+          is_async: bool;
+        }
       | Dollardollar_lvalue of Pos.t
       | Void_usage of {
           pos: Pos.t;
@@ -1295,11 +1299,27 @@ module Primary = struct
         }
       | Tuple_syntax of Pos.t
 
-    let missing_return pos =
-      let claim = lazy (pos, "Invalid return type") in
-      let quickfixes =
-        [Quickfix.make ~title:"Test if quickfix appears" ~new_text:"test" pos]
+    let missing_return pos hint_pos is_async =
+      let return_type =
+        if is_async then
+          "Awaitable<void>"
+        else
+          "void"
       in
+      
+      let quickfixes =
+        match hint_pos with
+        | None -> []
+        | Some hint_pos ->
+          [
+            Quickfix.make
+              ~title:("Change to " ^ Markdown_lite.md_codify return_type)
+              ~new_text:return_type
+              (Pos_or_decl.unsafe_to_raw_pos hint_pos);
+          ]
+      in
+      let claim = lazy (pos, "Invalid return type") in
+      
       (Error_code.MissingReturnInNonVoidFunction, claim, lazy [], quickfixes)
 
     let dollardollar_lvalue pos =
@@ -1382,7 +1402,7 @@ module Primary = struct
         [] )
 
     let to_error : t -> error = function
-      | Missing_return pos -> missing_return pos
+      | Missing_return {pos; hint_pos; is_async} -> missing_return pos hint_pos is_async
       | Dollardollar_lvalue pos -> dollardollar_lvalue pos
       | Void_usage { pos; reason } -> void_usage pos reason
       | Noreturn_usage { pos; reason } -> noreturn_usage pos reason

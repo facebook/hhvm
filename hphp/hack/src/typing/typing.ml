@@ -2298,6 +2298,8 @@ and stmt_ env pos st =
           pos
           ~expected:expected_return.et_type
           ~actual:rty
+          ~hint_pos:None
+          ~is_async:false
     in
     let env = LEnv.move_and_merge_next_in_cont env C.Exit in
     (env, Aast.Return None)

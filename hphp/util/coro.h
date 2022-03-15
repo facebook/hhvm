@@ -250,7 +250,7 @@ struct DummyTask {
     return DummyTask<T>{std::move(val)};
   }
 
-  T&& take() && { return std::move(val); }
+  T take() && { return std::move(val); }
 private:
   T val;
 };

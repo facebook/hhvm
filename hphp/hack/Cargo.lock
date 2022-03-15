@@ -338,6 +338,7 @@ dependencies = [
  "local",
  "ocaml_helper",
  "oxidized",
+ "print_opcode",
  "runtime",
  "thiserror",
  "write_bytes",
@@ -553,6 +554,12 @@ dependencies = [
  "unicode-width",
  "winapi",
 ]
+
+[[package]]
+name = "convert_case"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
 
 [[package]]
 name = "core_utils_rust"
@@ -2925,6 +2932,35 @@ dependencies = [
  "regex",
  "thiserror",
  "write_bytes",
+]
+
+[[package]]
+name = "print_opcode"
+version = "0.0.0"
+dependencies = [
+ "print_opcode_impl",
+ "print_opcode_macro",
+]
+
+[[package]]
+name = "print_opcode_impl"
+version = "0.0.0"
+dependencies = [
+ "convert_case",
+ "hhbc",
+ "macro_test_util",
+ "opcode_test_data",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "print_opcode_macro"
+version = "0.0.0"
+dependencies = [
+ "hhbc",
+ "print_opcode_impl",
 ]
 
 [[package]]

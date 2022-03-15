@@ -42,6 +42,7 @@ label = { path = "../emitter/cargo/label" }
 local = { path = "../emitter/cargo/local" }
 ocaml_helper = { path = "../../utils/ocaml_helper" }
 oxidized = { path = "../../oxidized" }
+print_opcode = { path = "print_opcode/cargo/lib" }
 runtime = { path = "../emitter/cargo/runtime" }
 thiserror = "1.0.29"
 write_bytes = { path = "../../utils/write_bytes/write_bytes" }

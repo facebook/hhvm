@@ -6,6 +6,7 @@
 mod coeffects;
 mod context;
 mod print;
+mod print_opcode;
 mod write;
 
 pub use context::Context;

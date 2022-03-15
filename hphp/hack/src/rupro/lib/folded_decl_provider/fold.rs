@@ -370,12 +370,9 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         &mut self,
         parent_pos: &R::Pos,
         parent_kind: ClassishKind,
-        parent_name: &TypeName,
-        child_pos: &R::Pos,
-        child_kind: ClassishKind,
-        child_name: &TypeName,
+        parent_name: TypeName,
     ) {
-        match (parent_kind, child_kind) {
+        match (parent_kind, self.child.kind) {
             // What is allowed
             (ClassishKind::Cclass(_), ClassishKind::Cclass(_))
             | (ClassishKind::Ctrait, ClassishKind::Ctrait)
@@ -390,10 +387,10 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 .push(TypingError::primary(Primary::WrongExtendKind {
                     parent_pos: parent_pos.clone(),
                     parent_kind,
-                    parent_name: *parent_name,
-                    pos: child_pos.clone(),
-                    kind: child_kind,
-                    name: *child_name,
+                    parent_name,
+                    pos: self.child.name.pos().clone(),
+                    kind: self.child.kind,
+                    name: self.child.name.id(),
                 })),
         }
     }
@@ -408,14 +405,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             extends.insert(pos_id.id());
             if let Some(cls) = self.parents.get(&pos_id.id()) {
                 if pass == Pass::Extends {
-                    self.check_extend_kind(
-                        pos_id.pos(),
-                        cls.kind,
-                        &cls.name,
-                        self.child.name.pos(),
-                        self.child.kind,
-                        &self.child.name.id(),
-                    );
+                    self.check_extend_kind(pos_id.pos(), cls.kind, cls.name);
                 }
 
                 if pass == Pass::Xhp {

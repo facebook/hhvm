@@ -1576,7 +1576,7 @@ and simplify_subtype_i
         | ( _,
             Tprim
               ( Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey | Tvoid
-              | Tnoreturn ) ) ->
+              | Tnoreturn | Tresource ) ) ->
           valid env
         | (_, Tnewtype (name_sub, [_tyarg_sub], _))
           when String.equal name_sub SN.Classes.cSupportDyn ->
@@ -1587,7 +1587,6 @@ and simplify_subtype_i
           | (_, Tnonnull) -> invalid_env env
           | _ -> simplify_subtype ~subtype_env ty ty_super env)
         | (_, (Tdynamic | Tprim Tnull)) -> valid env
-        | (_, Tprim Tresource)
         | (_, Tnonnull)
         | (_, Tshape (Open_shape, _))
         | (_, Tvar _)

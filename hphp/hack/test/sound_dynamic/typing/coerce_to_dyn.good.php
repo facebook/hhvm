@@ -26,13 +26,14 @@ function test_enum_type(E4 $e) : void {
   $e upcast dynamic;
 }
 
-function test_prim(bool $b, int $i, float $f, num $n, string $s, arraykey $ak)
+function test_prim(bool $b, int $i, float $f, num $n, string $s, arraykey $ak, resource $r)
   : void {
   $b upcast dynamic;
   $i upcast dynamic;
   $f upcast dynamic;
   $n upcast dynamic;
   $s upcast dynamic;
+  $r upcast dynamic;
   $c = new C() upcast dynamic;
   $c->m() upcast dynamic;
   null upcast dynamic;

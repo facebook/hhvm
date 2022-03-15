@@ -75,6 +75,21 @@ struct LockFreeLazy {
   template <typename F> const T& get(const F&);
 
   /*
+   * Return a const reference to the contained value. The value is
+   * assumed to be present. Behavior is undefined if not. Only useful
+   * if present() has already returned true and you know there's no
+   * concurrent reset() calls.
+   */
+  const T& rawGet();
+
+  /*
+   * Check (without blocking) whether there's a contained value. This
+   * must be used carefully, as concurrent get() or reset() calls can
+   * change this result at any instant.
+   */
+  bool present() const;
+
+  /*
    * Destroy the contained value (if any). After this calling this,
    * any subsequent calls to get() will re-calculate the value. This
    * call may block if another thread is destroying the
@@ -103,6 +118,10 @@ template<typename T> LockFreeLazy<T>::~LockFreeLazy() {
   assertx(current != State::Updating);
   if (current != State::Present) return;
   std::launder(reinterpret_cast<T*>(&m_storage))->~T();
+}
+
+template<typename T> bool LockFreeLazy<T>::present() const {
+  return m_state.load(std::memory_order_acquire) == State::Present;
 }
 
 template<typename T> template<typename F>
@@ -148,6 +167,11 @@ const T& LockFreeLazy<T>::get(const F& f) {
     // If the compare and swap fails, another thread may be updating
     // it now. Loop back to the top and try again.
   }
+}
+
+template<typename T> const T& LockFreeLazy<T>::rawGet() {
+  assertx(present());
+  return *std::launder(reinterpret_cast<T*>(&m_storage));
 }
 
 template<typename T> void LockFreeLazy<T>::reset() {

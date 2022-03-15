@@ -2849,16 +2849,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         UsingStatementFunctionScoped(c) => {
             p_using_statement_function_scoped_stmt(env, pos, c, node)
         }
-        ForStatement(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-                let ini = could_map(&c.initializer, e, p_expr)?;
-                let ctr = map_optional(&c.control, e, p_expr)?;
-                let eol = could_map(&c.end_of_loop, e, p_expr)?;
-                let blk = p_block(true, &c.body, e)?;
-                Ok(Stmt::new(pos, S_::mk_for(ini, ctr, eol, blk)))
-            };
-            lift_awaits_in_statement(node, env, f)
-        }
+        ForStatement(c) => p_for_stmt(env, pos, c, node),
         ForeachStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 let col = p_expr(&c.collection, e)?;
@@ -3075,6 +3066,24 @@ fn p_throw_stmt<'a>(
     lift_awaits_in_statement(node, env, |e| {
         Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
     })
+}
+
+fn p_for_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a ForStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+
+    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
+        let ini = could_map(&c.initializer, e, p_expr)?;
+        let ctr = map_optional(&c.control, e, p_expr)?;
+        let eol = could_map(&c.end_of_loop, e, p_expr)?;
+        let blk = p_block(true, &c.body, e)?;
+        Ok(Stmt::new(pos, S_::mk_for(ini, ctr, eol, blk)))
+    };
+    lift_awaits_in_statement(node, env, f)
 }
 
 fn p_using_statement_function_scoped_stmt<'a>(

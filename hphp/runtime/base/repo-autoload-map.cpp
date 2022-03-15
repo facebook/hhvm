@@ -29,6 +29,7 @@ namespace HPHP {
 using UnitToPathMap = tbb::concurrent_hash_map<int64_t, const StringData*>;
 
 namespace {
+  // Holds interned absolute paths for symbols we have already looked up.
   UnitToPathMap unitToPathMap;
 }
 
@@ -92,6 +93,15 @@ static Optional<String> getPathFromSymbol(
 }
 
 template <typename Compare>
+static Optional<folly::fs::path> getPathFromSymbol(
+    const RepoAutoloadMap::Map<Compare>& map,
+    std::string_view name) {
+  auto file = getPathFromSymbol(map, StrNR(makeStaticString(name)));
+  if (!file) return {};
+  return file->toCppString();
+}
+
+template <typename Compare>
 Array getSymbolFromPath(
     const RepoAutoloadMap::Map<Compare>& map,
     const String& path) {
@@ -119,23 +129,43 @@ Array getSymbolFromPath(
   return ret;
 }
 
-Optional<String> RepoAutoloadMap::getTypeFile(
-  const String& typeName) {
+Optional<String>
+RepoAutoloadMap::getTypeFile(const String& typeName) {
   return getPathFromSymbol(m_types, typeName);
 }
 
-Optional<String> RepoAutoloadMap::getFunctionFile(
-  const String& funcName) {
+Optional<String>
+RepoAutoloadMap::getFunctionFile(const String& funcName) {
   return getPathFromSymbol(m_functions, funcName);
 }
 
-Optional<String> RepoAutoloadMap::getConstantFile(
-  const String& constName) {
+Optional<String>
+RepoAutoloadMap::getConstantFile(const String& constName) {
   return getPathFromSymbol(m_constants, constName);
 }
 
-Optional<String> RepoAutoloadMap::getTypeAliasFile(
-  const String& typeAliasName) {
+Optional<String>
+RepoAutoloadMap::getTypeAliasFile(const String& typeAliasName) {
+  return getPathFromSymbol(m_typeAliases, typeAliasName);
+}
+
+Optional<folly::fs::path>
+RepoAutoloadMap::getTypeFile(std::string_view typeName) {
+  return getPathFromSymbol(m_types, typeName);
+}
+
+Optional<folly::fs::path>
+RepoAutoloadMap::getFunctionFile(std::string_view funcName) {
+  return getPathFromSymbol(m_functions, funcName);
+}
+
+Optional<folly::fs::path>
+RepoAutoloadMap::getConstantFile(std::string_view constName) {
+  return getPathFromSymbol(m_constants, constName);
+}
+
+Optional<folly::fs::path>
+RepoAutoloadMap::getTypeAliasFile(std::string_view typeAliasName) {
   return getPathFromSymbol(m_typeAliases, typeAliasName);
 }
 

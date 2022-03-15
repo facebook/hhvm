@@ -16,12 +16,14 @@
 
 #include <memory>
 #include <sstream>
+#include <string_view>
 #include <thread>
 
 #include <folly/Likely.h>
 #include <folly/Synchronized.h>
 #include <folly/Unit.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
+#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 #include <folly/futures/FutureSplitter.h>
 #include <folly/logging/xlog.h>
@@ -607,6 +609,33 @@ struct FactsStoreImpl final
         });
   }
 
+  Optional<folly::fs::path> getTypeFile(std::string_view type) override {
+    return getSymbolFile<SymKind::Type>(
+        type,
+        [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
+  }
+
+  Optional<folly::fs::path> getFunctionFile(std::string_view func) override {
+    return getSymbolFile<SymKind::Function>(
+        func, [](SymbolMap& m, Symbol<SymKind::Function> s) {
+          return m.getFunctionFile(s);
+        });
+  }
+
+  Optional<folly::fs::path> getConstantFile(std::string_view name) override {
+    return getSymbolFile<SymKind::Constant>(
+        name, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
+          return m.getConstantFile(s);
+        });
+  }
+
+  Optional<folly::fs::path> getTypeAliasFile(std::string_view name) override {
+    return getSymbolFile<SymKind::Type>(
+        name, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeAliasFile(s);
+        });
+  }
+
   Array getFileTypes(const String& path) override {
     return getFileSymbols<SymKind::Type>(
         path, [](SymbolMap& m, Path s) { return m.getFileTypes(s); });
@@ -1079,22 +1108,24 @@ struct FactsStoreImpl final
     return ret.toArray();
   }
 
-  template <SymKind k, class T>
+  template <SymKind K, class T>
   Optional<String> getSymbolFile(const String& symbol, T lambda) {
-    const StringData* fileStr = lambda(m_map, Symbol<k>{*symbol.get()}).get();
-    if (UNLIKELY(fileStr == nullptr)) {
+    auto path = getSymbolFile<K>(std::string_view{symbol.slice()}, lambda);
+    if (UNLIKELY(!path)) {
       return {};
     }
+    return String{path->native()};
+  }
 
+  template <SymKind K, class T>
+  Optional<folly::fs::path> getSymbolFile(std::string_view symbol, T lambda) {
+    const StringData* fileStr = lambda(m_map, Symbol<K>{symbol}).get();
+    if (UNLIKELY(!fileStr)) {
+      return {};
+    }
     folly::fs::path p{folly::fs::path{fileStr->slice()}};
     assertx(p.is_relative());
-
-    if (tl_heap) {
-      return String{(m_root / p).native()};
-    }
-    // Don't allocate a request-heap string: symbol lookups using
-    // FactsStore need to work on non-request threads.
-    return StrNR(makeStaticString((m_root / p).native()));
+    return m_root / p;
   }
 
   /**

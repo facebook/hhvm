@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <string_view>
 #include <folly/Range.h>
 
 #include "hphp/runtime/base/static-string-table.h"
@@ -29,16 +30,24 @@ namespace HPHP {
 /*
  * Returns true if the class or function name is normalized wrt namespaces.
  */
+inline bool isNSNormalized(std::string_view name) {
+  return name.data()[0] != '\\';
+}
+
 inline bool isNSNormalized(const StringData* name) {
-  return name->data()[0] != '\\';
+  return isNSNormalized(name->slice());
 }
 
 /*
  * Returns true if the class or function name needs to be normalized.
  */
+inline bool needsNSNormalization(std::string_view name) {
+  auto const data = name.data();
+  return name.size() >= 2 && data[0] == '\\' && data[1] != '\\';
+}
+
 inline bool needsNSNormalization(const StringData* name) {
-  auto const data = name->data();
-  return name->size() >= 2 && data[0] == '\\' && data[1] != '\\';
+  return needsNSNormalization(name->slice());
 }
 
 /*
@@ -53,19 +62,26 @@ inline bool notClassMethodPair(const StringData* name) {
  * Leaves the name unchanged if more than one '\' is leading.
  * So '\name' becomes 'name' but '\\name' stays '\\name'.
  */
+
+inline std::string_view normalizeNS(std::string_view name) {
+  if (needsNSNormalization(name)) {
+    return {name.data() + 1, name.size() - 1};
+  }
+  return name;
+}
+
 inline const StringData* normalizeNS(const StringData* name) {
   if (needsNSNormalization(name)) {
-    assertx(name->size() != 0);
-    auto const size  = static_cast<size_t>(name->size() - 1);
-    auto const piece = folly::StringPiece{name->data() + 1, size};
-    return makeStaticString(piece);
+    assertx(!name->empty());
+    return makeStaticString(normalizeNS(name->slice()));
   }
   return name;
 }
 
 inline String normalizeNS(const String& name) {
   if (needsNSNormalization(name.get())) {
-    return String(name.data() + 1, name.size() - 1, CopyString);
+    std::string_view normalized = normalizeNS(std::string_view{name.slice()});
+    return String(normalized);
   }
   return name;
 }

@@ -80,22 +80,18 @@ DeclProviderResult HhvmDeclProvider::getDecl(
   AutoloadMap::KindOf kind,
   std::string_view symbol
 ) {
-  // TODO(T110866581): c_symbol should be normalized before we intern it.
-
-  // Intern symbol now; should be ok since symbols are interned later anyway.
-  // This avoids allocating on the request heap from a hackc thread.
-  StrNR sym(normalizeNS(makeStaticString(symbol.data(), symbol.size())));
-  ITRACE(3, "DP lookup {}\n", sym.c_str());
+  // TODO(T110866581): symbol should be normalized by hackc
+  std::string_view sym(normalizeNS(symbol));
+  ITRACE(3, "DP lookup {}\n", sym);
 
   // Lookup the file where sym is defined in the autoload map.
-  Optional<String> filename_opt = m_map->getFile(kind, sym);
+  auto filename_opt = m_map->getFile(kind, sym);
   if (filename_opt) {
-    String filename_str = filename_opt.value();
-    auto filename = filename_str.toCppString();
+    auto filename = filename_opt->native();
     auto result = m_cache.find(filename);
 
     if (result != m_cache.end()) {
-      ITRACE(3, "DP found cached decls for {} in {}\n", sym.c_str(), filename);
+      ITRACE(3, "DP found cached decls for {} in {}\n", sym, filename);
       return decls(&(*result->second.decls));
     }
 
@@ -106,14 +102,14 @@ DeclProviderResult HhvmDeclProvider::getDecl(
     };
 
     DeclResult decl_result = hackc_direct_decl_parse(*m_opts, filename, text);
-    ITRACE(3, "DP parsed {} in {}\n", sym.c_str(), filename);
+    ITRACE(3, "DP parsed {} in {}\n", sym, filename);
 
     // Insert decl_result into the cache, return DeclResult::decls,
     // a pointer to rust decls in m_cache.
     auto [it, _] = m_cache.insert({filename, std::move(decl_result)});
     return decls(&(*it->second.decls));
   }
-  ITRACE(4, "DP {}: getFile() returned None\n", sym.c_str());
+  ITRACE(4, "DP {}: getFile() returned None\n", sym);
   return missing();
 }
 

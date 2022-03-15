@@ -10,11 +10,12 @@
 
 namespace HH\Lib\File;
 
+use namespace HH\Lib\File;
 use namespace HH\Lib\_Private\_File;
 
-/** Create a new temporary file.
+/** Creates a new temporary file, without automatic cleanup.
  *
- * The file is automatically deleted when the disposable is removed.
+ * `File\temporary_file()` is **strongly** recommended instead.
  *
  * - If the prefix starts with `.`, it is interpreted relative to the current
  *   working directory.
@@ -31,13 +32,12 @@ use namespace HH\Lib\_Private\_File;
  * - will be a new file (i.e. `O_CREAT | O_EXCL`)
  * - be owned by the current user
  * - be created with mode 0600
- * - will be automatically deleted when the object is disposed
+ * - **will not** be automatically deleted
  */
-<<__ReturnDisposable>>
-function temporary_file(
-  string $prefix = 'hack-tmp-',
+function leaky_temporary_file(
+  string $prefix = 'hack-leakytmp-',
   string $suffix = '',
-): TemporaryFile {
+): File\CloseableReadWriteHandle {
   list($fd, $path) = _File\open_temporary_fd($prefix, $suffix);
-  return new TemporaryFile(new _File\CloseableReadWriteHandle($fd, $path));
+  return new _File\CloseableReadWriteHandle($fd, $path);
 }

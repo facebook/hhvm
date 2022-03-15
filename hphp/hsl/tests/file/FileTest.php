@@ -52,7 +52,7 @@ final class FileTest extends HackTest {
         'File should only be readable/writable by current user',
       );
     }
-      expect(file_exists($path))->toBeFalse();
+    expect(file_exists($path))->toBeFalse();
 
     using ($tf = File\temporary_file('foo', '.bar')) {
       $path = $tf->getHandle()->getPath();
@@ -64,11 +64,29 @@ final class FileTest extends HackTest {
     $dir = sys_get_temp_dir().'/hsl-test-'.PseudoRandom\int(0, 99999999);
     mkdir($dir);
     using ($tf = File\temporary_file($dir.'/foo')) {
-      expect(
-        Str\starts_with($tf->getHandle()->getPath(), $dir.'/foo'),
-      )
+      expect(Str\starts_with($tf->getHandle()->getPath(), $dir.'/foo'))
         ->toBeTrue();
     }
+  }
+
+  public async function testLeakyTemporaryFile(): Awaitable<void> {
+    $tf1 = File\leaky_temporary_file();
+    expect($tf1->getPath())->toNotContainSubstring('XXXXXX');
+
+    $tf2 = File\leaky_temporary_file();
+    expect($tf1->getPath())->toNotEqual($tf2->getPath());
+    expect(\file_exists($tf1->getPath()))->toBeTrue();
+    $tf1->close();
+    expect(\file_exists($tf1->getPath()))->toBeTrue();
+    await $tf2->writeAllAsync('hello');
+    $tf2->close();
+
+    // Make sure that the write completed, and no deletions or truncates
+    // happened
+    expect(\file_get_contents($tf2->getPath()))->toEqual('hello');
+
+    \unlink($tf1->getPath());
+    \unlink($tf2->getPath());
   }
 
   public async function testMultipleReads(): Awaitable<void> {

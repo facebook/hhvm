@@ -12,7 +12,7 @@ use std::hash::Hash;
 
 use crate::decl_defs::DeclTy_;
 use crate::typing_defs::{Ty, Ty_};
-use crate::typing_prop::{Constraint, ConstraintF, Prop, PropF};
+use crate::typing_prop::{Prop, PropF};
 use crate::visitor::Walkable;
 
 pub use oxidized::typing_reason::{ArgPosition, BlameSource};
@@ -66,7 +66,6 @@ pub trait Reason:
     fn decl_ty_conser() -> &'static Conser<DeclTy_<Self>>;
     fn ty_conser() -> &'static Conser<Ty_<Self, Ty<Self>>>;
     fn prop_conser() -> &'static Conser<PropF<Self, Prop<Self>>>;
-    fn constraint_conser() -> &'static Conser<ConstraintF<Self, Constraint<Self>>>;
 
     fn from_oxidized(reason: oxidized_by_ref::typing_reason::T_<'_>) -> Self {
         Self::mk(|| {
@@ -383,13 +382,6 @@ impl Reason for BReason {
         static CONSER: Lazy<Conser<PropF<BReason, Prop<BReason>>>> = Lazy::new(Conser::new);
         &CONSER
     }
-
-    #[inline]
-    fn constraint_conser() -> &'static Conser<ConstraintF<BReason, Constraint<BReason>>> {
-        static CONSER: Lazy<Conser<ConstraintF<BReason, Constraint<BReason>>>> =
-            Lazy::new(Conser::new);
-        &CONSER
-    }
 }
 
 impl Walkable<BReason> for BReason {}
@@ -620,13 +612,6 @@ impl Reason for NReason {
     #[inline]
     fn prop_conser() -> &'static Conser<PropF<NReason, Prop<NReason>>> {
         static CONSER: Lazy<Conser<PropF<NReason, Prop<NReason>>>> = Lazy::new(Conser::new);
-        &CONSER
-    }
-
-    #[inline]
-    fn constraint_conser() -> &'static Conser<ConstraintF<NReason, Constraint<NReason>>> {
-        static CONSER: Lazy<Conser<ConstraintF<NReason, Constraint<NReason>>>> =
-            Lazy::new(Conser::new);
         &CONSER
     }
 }

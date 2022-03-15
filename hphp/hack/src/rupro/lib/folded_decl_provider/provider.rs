@@ -6,6 +6,7 @@
 use super::{fold::DeclFolder, DeclName, Error, Result, TypeDecl};
 use crate::cache::Cache;
 use crate::decl_defs::{ConstDecl, DeclTy, DeclTy_, FoldedClass, FunDecl, ShallowClass};
+use crate::dependency_registrar::DependencyRegistrar;
 use crate::reason::Reason;
 use crate::shallow_decl_provider::{self, ShallowDeclProvider};
 use crate::special_names::SpecialNames;
@@ -29,6 +30,8 @@ pub struct LazyFoldedDeclProvider<R: Reason> {
     cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
     special_names: &'static SpecialNames,
     shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
+    #[allow(dead_code)] // TODO: remove on first use
+    dependency_registrar: Arc<dyn DependencyRegistrar>,
 }
 
 impl<R: Reason> LazyFoldedDeclProvider<R> {
@@ -37,12 +40,14 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
         special_names: &'static SpecialNames,
         shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
+        dependency_registrar: Arc<dyn DependencyRegistrar>,
     ) -> Self {
         Self {
             opts,
             cache,
             special_names,
             shallow_decl_provider,
+            dependency_registrar,
         }
     }
 }

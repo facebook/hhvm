@@ -11,6 +11,7 @@ use tempdir::TempDir;
 use fbinit::FacebookInit;
 use hackrs::{
     decl_parser::DeclParser,
+    dependency_registrar::DependencyRegistrar,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
     naming_provider::{NamingProvider, SqliteNamingTable},
     reason::BReason,
@@ -66,12 +67,15 @@ impl TestContext {
                 Arc::clone(&naming_provider),
                 decl_parser.clone(),
             ));
+        let dependency_registrar: Arc<dyn DependencyRegistrar> =
+            Arc::new(hackrs_test_utils::registrar::DependencyMap::new());
         let folded_decl_provider: Arc<dyn FoldedDeclProvider<_>> =
             Arc::new(LazyFoldedDeclProvider::new(
                 Arc::new(oxidized::global_options::GlobalOptions::default()),
                 Arc::new(hackrs_test_utils::cache::NonEvictingCache::new()),
                 SpecialNames::new(),
                 Arc::clone(&shallow_decl_provider),
+                Arc::clone(&dependency_registrar),
             ));
         let typing_decl_provider: Rc<dyn TypingDeclProvider<_>> =
             Rc::new(FoldingTypingDeclProvider::new(

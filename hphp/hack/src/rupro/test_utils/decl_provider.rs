@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::cache::{make_non_eviction_shallow_decl_cache, NonEvictingCache};
+use crate::registrar::DependencyMap;
 use hackrs::{
     decl_parser::DeclParser,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
@@ -51,5 +52,6 @@ pub fn make_folded_decl_provider<R: Reason>(
         Arc::new(NonEvictingCache::new()),
         SpecialNames::new(),
         shallow_decl_provider,
+        Arc::new(DependencyMap::new()),
     ))
 }

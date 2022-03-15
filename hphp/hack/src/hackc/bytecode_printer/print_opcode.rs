@@ -3,26 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    print::{print_fcall_args, print_int, print_label},
-    write::{angle, concat_by, concat_str, concat_str_by, quotes, Error},
-};
-use ffi::{Maybe, Pair, Str};
+use crate::print;
+use ffi::{Maybe, Str};
 use hash::HashSet;
 use hhbc_ast::{
-    AdataId, BareThisOp, ClassId, CollectionType, ConstId, ContCheckOp, FatalOp, FunctionId,
-    IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, MOpMode, MemberKey, MethodId,
-    OODeclExistsOp, ObjMethodOp, Opcode, ParamId, PropId, QueryMOp, ReadonlyOp, SetOpOp,
-    SetRangeOp, SilenceOp, SpecialClsRef, StackIndex, SwitchKind, TypeStructResolveOp,
+    AdataId, BareThisOp, ClassId, ClassNum, CollectionType, ConstId, ContCheckOp, FCallArgs,
+    FatalOp, FunctionId, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs,
+    LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp, ObjMethodOp, Opcode,
+    ParamId, PropId, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef,
+    StackIndex, SwitchKind, TypeStructResolveOp,
 };
 use hhbc_string_utils::float;
 use iterator::IterId;
 use label::Label;
 use local::Local;
 use print_opcode::PrintOpcodeTypes;
-use std::io::{Result, Write};
-use std::write;
-use write_bytes::write_bytes;
+use std::io::{Error, ErrorKind, Result, Write};
 
 pub(crate) struct PrintOpcode<'a, 'b, 'c> {
     pub(crate) opcode: &'b Opcode<'a>,
@@ -42,89 +38,129 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
     fn get_opcode(&self) -> &'b Opcode<'a> {
         self.opcode
     }
+
+    fn print_branch_labels(&self, w: &mut dyn Write, labels: &[Label]) -> Result<()> {
+        w.write_all(b"<")?;
+        for (i, label) in labels.iter().enumerate() {
+            if i != 0 {
+                w.write_all(b" ")?;
+            }
+            self.print_label(w, label)?;
+        }
+        w.write_all(b">")
+    }
+
+    fn print_fcall_args(&self, w: &mut dyn Write, args: &FCallArgs<'_>) -> Result<()> {
+        print::print_fcall_args(w, args, self.dv_labels)
+    }
+
+    fn print_label(&self, w: &mut dyn Write, label: &Label) -> Result<()> {
+        print::print_label(w, label, self.dv_labels)
+    }
+
+    fn print_label2(&self, w: &mut dyn Write, [label1, label2]: &[Label; 2]) -> Result<()> {
+        self.print_label(w, label1)?;
+        w.write_all(b" ")?;
+        self.print_label(w, label2)
+    }
+
+    fn print_s_switch(
+        &self,
+        w: &mut dyn Write,
+        cases: &[Str<'_>],
+        targets: &[Label],
+    ) -> Result<()> {
+        if cases.len() != targets.len() {
+            return Err(Error::new(
+                ErrorKind::Other,
+                "sswitch cases and targets must match length",
+            ));
+        }
+
+        let mut iter = cases.iter().zip(targets).rev();
+        let (_, last_target) = if let Some(last) = iter.next() {
+            last
+        } else {
+            return Err(Error::new(
+                ErrorKind::Other,
+                "sswitch should have at least one case",
+            ));
+        };
+        let iter = iter.rev();
+
+        w.write_all(b"SSwitch <")?;
+        for (case, target) in iter {
+            print_quoted_str(w, case)?;
+            w.write_all(b":")?;
+            self.print_label(w, target)?;
+            w.write_all(b" ")?;
+        }
+
+        w.write_all(b"-:")?;
+        self.print_label(w, last_target)?;
+        w.write_all(b">")
+    }
 }
 
+macro_rules! print_with_display {
+    ($func_name: ident, $ty: ty) => {
+        fn $func_name(w: &mut dyn Write, arg: &$ty) -> Result<()> {
+            write!(w, "{}", arg)
+        }
+    };
+}
+
+print_with_display!(print_class_num, ClassNum);
+print_with_display!(print_num_params, NumParams);
+print_with_display!(print_stack_index, StackIndex);
+
+macro_rules! print_with_debug {
+    ($vis: vis $func_name: ident, $ty: ty) => {
+        $vis fn $func_name(w: &mut dyn Write, arg: &$ty) -> Result<()> {
+            write!(w, "{:?}", arg)
+        }
+    };
+}
+
+print_with_debug!(print_bare_this_op, BareThisOp);
+print_with_debug!(print_collection_type, CollectionType);
+print_with_debug!(print_cont_check_op, ContCheckOp);
+print_with_debug!(print_fatal_op, FatalOp);
+print_with_debug!(print_inc_dec_op, IncDecOp);
+print_with_debug!(print_init_prop_op, InitPropOp);
+print_with_debug!(print_is_log_as_dynamic_call_op, IsLogAsDynamicCallOp);
+print_with_debug!(print_is_type_op, IsTypeOp);
+print_with_debug!(print_m_op_mode, MOpMode);
+print_with_debug!(print_obj_method_op, ObjMethodOp);
+print_with_debug!(print_oo_decl_exists_op, OODeclExistsOp);
+print_with_debug!(print_query_m_op, QueryMOp);
+print_with_debug!(print_readonly_op, ReadonlyOp);
+print_with_debug!(print_set_op_op, SetOpOp);
+print_with_debug!(print_set_range_op, SetRangeOp);
+print_with_debug!(print_silence_op, SilenceOp);
+print_with_debug!(print_special_cls_ref, SpecialClsRef);
+print_with_debug!(print_switch_kind, SwitchKind);
+print_with_debug!(print_type_struct_resolve_op, TypeStructResolveOp);
+
 fn print_adata_id(w: &mut dyn Write, id: &AdataId<'_>) -> Result<()> {
-    write_bytes!(w, "@{}", id)
+    w.write_all(b"@")?;
+    print_str(w, id)
 }
 
 fn print_class_id(w: &mut dyn Write, id: &ClassId<'_>) -> Result<()> {
-    write_bytes!(w, r#""{}""#, escaper::escape_bstr(id.as_bstr()))
+    print_quoted_str(w, &id.as_ffi_str())
 }
 
 fn print_const_id(w: &mut dyn Write, id: &ConstId<'_>) -> Result<()> {
-    write_bytes!(w, r#""{}""#, escaper::escape_bstr(id.as_bstr()))
+    print_quoted_str(w, &id.as_ffi_str())
 }
 
-fn print_collection_type(w: &mut dyn Write, ct: &CollectionType) -> Result<()> {
-    use CollectionType as CT;
-    match *ct {
-        CT::Vector => w.write_all(b"Vector"),
-        CT::Map => w.write_all(b"Map"),
-        CT::Set => w.write_all(b"Set"),
-        CT::Pair => w.write_all(b"Pair"),
-        CT::ImmVector => w.write_all(b"ImmVector"),
-        CT::ImmMap => w.write_all(b"ImmMap"),
-        CT::ImmSet => w.write_all(b"ImmSet"),
-        _ => panic!("Enum value does not match one of listed variants"),
-    }
-}
-
-fn print_eq_op(w: &mut dyn Write, op: &SetOpOp) -> Result<()> {
-    w.write_all(match *op {
-        SetOpOp::PlusEqual => b"PlusEqual",
-        SetOpOp::MinusEqual => b"MinusEqual",
-        SetOpOp::MulEqual => b"MulEqual",
-        SetOpOp::ConcatEqual => b"ConcatEqual",
-        SetOpOp::DivEqual => b"DivEqual",
-        SetOpOp::PowEqual => b"PowEqual",
-        SetOpOp::ModEqual => b"ModEqual",
-        SetOpOp::AndEqual => b"AndEqual",
-        SetOpOp::OrEqual => b"OrEqual",
-        SetOpOp::XorEqual => b"XorEqual",
-        SetOpOp::SlEqual => b"SlEqual",
-        SetOpOp::SrEqual => b"SrEqual",
-        SetOpOp::PlusEqualO => b"PlusEqualO",
-        SetOpOp::MinusEqualO => b"MinusEqualO",
-        SetOpOp::MulEqualO => b"MulEqualO",
-        _ => panic!("Enum value does not match one of listed variants"),
-    })
-}
-
-fn print_fatal_op(w: &mut dyn Write, f: &FatalOp) -> Result<()> {
-    match *f {
-        FatalOp::Parse => w.write_all(b"Fatal Parse"),
-        FatalOp::Runtime => w.write_all(b"Fatal Runtime"),
-        FatalOp::RuntimeOmitFrame => w.write_all(b"Fatal RuntimeOmitFrame"),
-        _ => panic!("Enum value does not match one of listed variants"),
-    }
+fn print_double(w: &mut dyn Write, d: f64) -> Result<()> {
+    write!(w, "{}", float::to_string(d))
 }
 
 fn print_function_id(w: &mut dyn Write, id: &FunctionId<'_>) -> Result<()> {
-    write_bytes!(w, r#""{}""#, escaper::escape_bstr(id.as_bstr()))
-}
-
-fn print_istype_op(w: &mut dyn Write, op: &IsTypeOp) -> Result<()> {
-    use IsTypeOp as Op;
-    match *op {
-        Op::Null => w.write_all(b"Null"),
-        Op::Bool => w.write_all(b"Bool"),
-        Op::Int => w.write_all(b"Int"),
-        Op::Dbl => w.write_all(b"Dbl"),
-        Op::Str => w.write_all(b"Str"),
-        Op::Obj => w.write_all(b"Obj"),
-        Op::Res => w.write_all(b"Res"),
-        Op::Scalar => w.write_all(b"Scalar"),
-        Op::Keyset => w.write_all(b"Keyset"),
-        Op::Dict => w.write_all(b"Dict"),
-        Op::Vec => w.write_all(b"Vec"),
-        Op::ArrLike => w.write_all(b"ArrLike"),
-        Op::LegacyArrLike => w.write_all(b"LegacyArrLike"),
-        Op::ClsMeth => w.write_all(b"ClsMeth"),
-        Op::Func => w.write_all(b"Func"),
-        Op::Class => w.write_all(b"Class"),
-        _ => panic!("Enum value does not match one of listed variants"),
-    }
+    print_quoted_str(w, &id.as_ffi_str())
 }
 
 fn print_iter_args(w: &mut dyn Write, iter_args: &IterArgs<'_>) -> Result<()> {
@@ -146,44 +182,15 @@ fn print_iterator_id(w: &mut dyn Write, i: &IterId) -> Result<()> {
     write!(w, "{}", i)
 }
 
-fn print_incdec_op(w: &mut dyn Write, op: &IncDecOp) -> Result<()> {
-    w.write_all(match *op {
-        IncDecOp::PreInc => b"PreInc",
-        IncDecOp::PostInc => b"PostInc",
-        IncDecOp::PreDec => b"PreDec",
-        IncDecOp::PostDec => b"PostDec",
-        IncDecOp::PreIncO => b"PreIncO",
-        IncDecOp::PostIncO => b"PostIncO",
-        IncDecOp::PreDecO => b"PreDecO",
-        IncDecOp::PostDecO => b"PostDecO",
-        _ => panic!("Enum value does not match one of listed variants"),
-    })
-}
-
 fn print_local(w: &mut dyn Write, local: &Local<'_>) -> Result<()> {
     match local {
-        Local::Unnamed(id) => {
-            w.write_all(b"_")?;
-            print_int(w, id)
-        }
+        Local::Unnamed(id) => write!(w, "_{}", id),
         Local::Named(id) => w.write_all(id),
     }
 }
 
-fn print_member_opmode(w: &mut dyn Write, m: &MOpMode) -> Result<()> {
-    use MOpMode as M;
-    w.write_all(match *m {
-        M::None => b"None",
-        M::Warn => b"Warn",
-        M::Define => b"Define",
-        M::Unset => b"Unset",
-        M::InOut => b"InOut",
-        _ => panic!("Enum value does not match one of listed variants"),
-    })
-}
-
-fn print_method_id(w: &mut dyn Write, id: &MethodId<'_>) -> Result<()> {
-    write_bytes!(w, r#""{}""#, escaper::escape_bstr(id.as_bstr()))
+fn print_local_range(w: &mut dyn Write, locrange: &LocalRange) -> Result<()> {
+    write!(w, "L:{}+{}", locrange.start, locrange.len)
 }
 
 fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>) -> Result<()> {
@@ -203,13 +210,12 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>) -> Result<()> {
         }
         M::ET(s, op) => {
             w.write_all(b"ET:")?;
-            quotes(w, |w| w.write_all(&escaper::escape_bstr(s.as_bstr())))?;
+            print_quoted_str(w, s)?;
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
         M::EI(i, op) => {
-            concat_str(w, ["EI:", i.to_string().as_ref()])?;
-            w.write_all(b" ")?;
+            write!(w, "EI:{} ", i)?;
             print_readonly_op(w, op)
         }
         M::PC(si, op) => {
@@ -240,12 +246,8 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>) -> Result<()> {
     }
 }
 
-fn print_null_flavor(w: &mut dyn Write, f: &ObjMethodOp) -> Result<()> {
-    w.write_all(match *f {
-        ObjMethodOp::NullThrows => b"NullThrows",
-        ObjMethodOp::NullSafe => b"NullSafe",
-        _ => panic!("Enum value does not match one of listed variants"),
-    })
+fn print_method_id(w: &mut dyn Write, id: &MethodId<'_>) -> Result<()> {
+    print_quoted_str(w, &id.as_ffi_str())
 }
 
 fn print_param_id(w: &mut dyn Write, param_id: &ParamId<'_>) -> Result<()> {
@@ -255,100 +257,35 @@ fn print_param_id(w: &mut dyn Write, param_id: &ParamId<'_>) -> Result<()> {
     }
 }
 
-fn print_prop_id(w: &mut dyn Write, id: &PropId<'_>) -> Result<()> {
-    write_bytes!(w, r#""{}""#, escaper::escape_bstr(id.as_bstr()))
+pub(crate) fn print_prop_id(w: &mut dyn Write, id: &PropId<'_>) -> Result<()> {
+    print_quoted_str(w, &id.as_ffi_str())
 }
 
-fn print_query_op(w: &mut dyn Write, q: QueryMOp) -> Result<()> {
-    w.write_all(match q {
-        QueryMOp::CGet => b"CGet",
-        QueryMOp::CGetQuiet => b"CGetQuiet",
-        QueryMOp::Isset => b"Isset",
-        QueryMOp::InOut => b"InOut",
-        _ => panic!("Enum value does not match one of listed variants"),
-    })
+fn print_quoted_str(w: &mut dyn Write, s: &ffi::Str<'_>) -> Result<()> {
+    w.write_all(b"\"")?;
+    w.write_all(&escaper::escape_bstr(s.as_bstr()))?;
+    w.write_all(b"\"")
 }
 
-fn print_readonly_op(w: &mut dyn Write, op: &ReadonlyOp) -> Result<()> {
-    w.write_all(match *op {
-        ReadonlyOp::Readonly => b"Readonly",
-        ReadonlyOp::Mutable => b"Mutable",
-        ReadonlyOp::Any => b"Any",
-        ReadonlyOp::CheckROCOW => b"CheckROCOW",
-        ReadonlyOp::CheckMutROCOW => b"CheckMutROCOW",
-        _ => panic!("Enum value does not match one of listed variants"),
-    })
-}
-
-fn print_special_cls_ref(w: &mut dyn Write, cls_ref: &SpecialClsRef) -> Result<()> {
-    w.write_all(match *cls_ref {
-        SpecialClsRef::LateBoundCls => b"LateBoundCls",
-        SpecialClsRef::SelfCls => b"SelfCls",
-        SpecialClsRef::ParentCls => b"ParentCls",
-        _ => panic!("Enum value does not match one of listed variants"),
-    })
-}
-
-fn print_stack_index(w: &mut dyn Write, si: &StackIndex) -> Result<()> {
-    w.write_all(si.to_string().as_bytes())
-}
-
-fn print_sswitch(
-    w: &mut dyn Write,
-    cases: &[Str<'_>],
-    targets: &[Label],
-    dv_labels: &HashSet<Label>,
-) -> Result<()> {
-    match (cases, targets) {
-        ([], _) | (_, []) => Err(Error::fail("sswitch should have at least one case").into()),
-        ([rest_cases @ .., _last_case], [rest_targets @ .., last_target]) => {
-            w.write_all(b"SSwitch ")?;
-            let rest: Vec<_> = rest_cases
-                .iter()
-                .zip(rest_targets)
-                .map(|(case, target)| Pair(case, target))
-                .collect();
-            angle(w, |w| {
-                concat_by(w, " ", rest, |w, Pair(case, target)| {
-                    write_bytes!(w, r#""{}":"#, escaper::escape_bstr(case.as_bstr()))?;
-                    print_label(w, target, dv_labels)
-                })?;
-                w.write_all(b" -:")?;
-                print_label(w, last_target, dv_labels)
-            })
+fn print_shape_fields(w: &mut dyn Write, keys: &[ffi::Str<'_>]) -> Result<()> {
+    w.write_all(b"<")?;
+    for (i, key) in keys.iter().enumerate() {
+        if i != 0 {
+            w.write_all(b" ")?;
         }
+        print_quoted_str(w, key)?;
     }
+    w.write_all(b">")
 }
 
-fn print_switch(
-    w: &mut dyn Write,
-    kind: &SwitchKind,
-    base: &i64,
-    labels: &[Label],
-    dv_labels: &HashSet<Label>,
-) -> Result<()> {
-    w.write_all(b"Switch ")?;
-    w.write_all(match *kind {
-        SwitchKind::Bounded => b"Bounded ",
-        SwitchKind::Unbounded => b"Unbounded ",
-        _ => panic!("Enum value does not match one of listed variants"),
-    })?;
-    w.write_all(base.to_string().as_bytes())?;
-    w.write_all(b" ")?;
-    angle(w, |w| {
-        concat_by(w, " ", labels, |w, label| print_label(w, label, dv_labels))
-    })
-}
-
-fn print_shape_fields(w: &mut dyn Write, sf: &[&str]) -> Result<()> {
-    concat_by(w, " ", sf, |w, f| {
-        quotes(w, |w| w.write_all(escaper::escape(*f).as_bytes()))
-    })
+fn print_str(w: &mut dyn Write, s: &ffi::Str<'_>) -> Result<()> {
+    use bstr::ByteSlice;
+    w.write_all(s.as_bytes())
 }
 
 impl<'a, 'b, 'c> PrintOpcodeTypes for PrintOpcode<'a, 'b, 'c> {
-    type Write = dyn std::io::Write + 'c;
-    type Error = std::io::Error;
+    type Write = dyn Write + 'c;
+    type Error = Error;
 }
 
 impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
@@ -369,52 +306,47 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
                 w.write_all(b"AssertRATL ")?;
                 print_local(w, local)?;
                 w.write_all(b" ")?;
-                w.write_all(s)
+                print_str(w, s)
             }
             Opcode::AssertRATStk(n, s) => {
-                write_bytes!(w, "AssertRATStk {} {}", n, s,)
+                w.write_all(b"AssertRATStk ")?;
+                print_stack_index(w, n)?;
+                w.write_all(b" ")?;
+                print_str(w, s)
             }
             Opcode::Await => w.write_all(b"Await"),
             Opcode::AwaitAll(range) => {
-                write!(w, "AwaitAll L:{}+{}", range.start, range.len)
+                w.write_all(b"AwaitAll ")?;
+                print_local_range(w, range)
             }
-            Opcode::BareThis(op) => concat_str_by(
-                w,
-                " ",
-                [
-                    "BareThis",
-                    match *op {
-                        BareThisOp::Notice => "Notice",
-                        BareThisOp::NoNotice => "NoNotice",
-                        BareThisOp::NeverNull => "NeverNull",
-                        _ => panic!("Enum value does not match one of listed variants"),
-                    },
-                ],
-            ),
+            Opcode::BareThis(op) => {
+                w.write_all(b"BareThis ")?;
+                print_bare_this_op(w, op)
+            }
             Opcode::BaseC(si, m) => {
                 w.write_all(b"BaseC ")?;
                 print_stack_index(w, si)?;
                 w.write_all(b" ")?;
-                print_member_opmode(w, m)
+                print_m_op_mode(w, m)
             }
             Opcode::BaseGC(si, m) => {
                 w.write_all(b"BaseGC ")?;
                 print_stack_index(w, si)?;
                 w.write_all(b" ")?;
-                print_member_opmode(w, m)
+                print_m_op_mode(w, m)
             }
             Opcode::BaseGL(id, m) => {
                 w.write_all(b"BaseGL ")?;
                 print_local(w, id)?;
                 w.write_all(b" ")?;
-                print_member_opmode(w, m)
+                print_m_op_mode(w, m)
             }
             Opcode::BaseH => w.write_all(b"BaseH"),
             Opcode::BaseL(id, m, op) => {
                 w.write_all(b"BaseL ")?;
                 print_local(w, id)?;
                 w.write_all(b" ")?;
-                print_member_opmode(w, m)?;
+                print_m_op_mode(w, m)?;
                 w.write_all(b" ")?;
                 print_readonly_op(w, op)
             }
@@ -424,7 +356,7 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
                 w.write_all(b" ")?;
                 print_stack_index(w, si2)?;
                 w.write_all(b" ")?;
-                print_member_opmode(w, m)?;
+                print_m_op_mode(w, m)?;
                 w.write_all(b" ")?;
                 print_readonly_op(w, op)
             }
@@ -496,44 +428,49 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
                 w.write_all(b"ColFromArray ")?;
                 print_collection_type(w, ct)
             }
-            Opcode::CombineAndResolveTypeStruct(n) => concat_str_by(
-                w,
-                " ",
-                ["CombineAndResolveTypeStruct", n.to_string().as_str()],
-            ),
-            Opcode::Concat => w.write_all(b"Concat"),
-            Opcode::ConcatN(n) => concat_str_by(w, " ", ["ConcatN", n.to_string().as_str()]),
-            Opcode::ContCheck(ContCheckOp::CheckStarted) => w.write_all(b"ContCheck CheckStarted"),
-            Opcode::ContCheck(ContCheckOp::IgnoreStarted) => {
-                w.write_all(b"ContCheck IgnoreStarted")
+            Opcode::CombineAndResolveTypeStruct(n) => {
+                w.write_all(b"CombineAndResolveTypeStruct ")?;
+                write!(w, "{}", n)
             }
-            Opcode::ContCheck(_) => panic!("invalid ContCheck value"),
+            Opcode::Concat => w.write_all(b"Concat"),
+            Opcode::ConcatN(n) => {
+                w.write_all(b"ConcatN ")?;
+                write!(w, "{}", n)
+            }
+            Opcode::ContCheck(subop1) => {
+                w.write_all(b"ContCheck ")?;
+                print_cont_check_op(w, subop1)
+            }
             Opcode::ContCurrent => w.write_all(b"ContCurrent"),
             Opcode::ContEnter => w.write_all(b"ContEnter"),
             Opcode::ContGetReturn => w.write_all(b"ContGetReturn"),
             Opcode::ContKey => w.write_all(b"ContKey"),
             Opcode::ContRaise => w.write_all(b"ContRaise"),
             Opcode::ContValid => w.write_all(b"ContValid"),
-            Opcode::CreateCl(n, cid) => concat_str_by(
-                w,
-                " ",
-                ["CreateCl", n.to_string().as_str(), cid.to_string().as_str()],
-            ),
+            Opcode::CreateCl(n, cid) => {
+                w.write_all(b"CreateCl ")?;
+                print_num_params(w, n)?;
+                w.write_all(b" ")?;
+                print_class_num(w, cid)
+            }
             Opcode::CreateCont => w.write_all(b"CreateCont"),
-            Opcode::DblAsBits => todo!(),
+            Opcode::DblAsBits => w.write_all(b"DblAsBits"),
             Opcode::Dict(id) => {
                 w.write_all(b"Dict ")?;
                 print_adata_id(w, id)
             }
             Opcode::Dim(m, mk) => {
                 w.write_all(b"Dim ")?;
-                print_member_opmode(w, m)?;
+                print_m_op_mode(w, m)?;
                 w.write_all(b" ")?;
                 print_member_key(w, mk)
             }
             Opcode::Dir => w.write_all(b"Dir"),
             Opcode::Div => w.write_all(b"Div"),
-            Opcode::Double(d) => write!(w, "Double {}", float::to_string(*d)),
+            Opcode::Double(d) => {
+                w.write_all(b"Double ")?;
+                print_double(w, *d)
+            }
             Opcode::Dup => w.write_all(b"Dup"),
             Opcode::EntryNop => w.write_all(b"EntryNop"),
             Opcode::Eq => w.write_all(b"Eq"),
@@ -541,67 +478,79 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
             Opcode::Exit => w.write_all(b"Exit"),
             Opcode::FCallClsMethod(fcall_args, hint, log) => {
                 w.write_all(b"FCallClsMethod ")?;
-                print_fcall_args(w, fcall_args, self.dv_labels)?;
-                write_bytes!(w, r#" "{}" "#, hint)?;
-                w.write_all(match *log {
-                    IsLogAsDynamicCallOp::LogAsDynamicCall => b"LogAsDynamicCall",
-                    IsLogAsDynamicCallOp::DontLogAsDynamicCall => b"DontLogAsDynamicCall",
-                    _ => panic!("Enum value does not match one of listed variants"),
-                })
+                self.print_fcall_args(w, fcall_args)?;
+                w.write_all(b" ")?;
+                print_quoted_str(w, hint)?;
+                w.write_all(b" ")?;
+                print_is_log_as_dynamic_call_op(w, log)
             }
             Opcode::FCallClsMethodD(fcall_args, hint, class, method) => {
                 w.write_all(b"FCallClsMethodD ")?;
-                print_fcall_args(w, fcall_args, self.dv_labels)?;
-                write_bytes!(w, r#" "{}" "#, hint)?;
+                self.print_fcall_args(w, fcall_args)?;
+                w.write_all(b" ")?;
+                print_quoted_str(w, hint)?;
+                w.write_all(b" ")?;
                 print_class_id(w, class)?;
                 w.write_all(b" ")?;
                 print_method_id(w, method)
             }
             Opcode::FCallClsMethodS(fcall_args, hint, clsref) => {
                 w.write_all(b"FCallClsMethodS ")?;
-                print_fcall_args(w, fcall_args, self.dv_labels)?;
-                write_bytes!(w, r#" "{}" "#, hint)?;
+                self.print_fcall_args(w, fcall_args)?;
+                w.write_all(b" ")?;
+                print_quoted_str(w, hint)?;
+                w.write_all(b" ")?;
                 print_special_cls_ref(w, clsref)
             }
             Opcode::FCallClsMethodSD(fcall_args, hint, clsref, method) => {
                 w.write_all(b"FCallClsMethodSD ")?;
-                print_fcall_args(w, fcall_args, self.dv_labels)?;
-                write_bytes!(w, r#" "{}" "#, hint)?;
+                self.print_fcall_args(w, fcall_args)?;
+                w.write_all(b" ")?;
+                print_quoted_str(w, hint)?;
+                w.write_all(b" ")?;
                 print_special_cls_ref(w, clsref)?;
                 w.write_all(b" ")?;
                 print_method_id(w, method)
             }
             Opcode::FCallCtor(fcall_args, hint) => {
                 w.write_all(b"FCallCtor ")?;
-                print_fcall_args(w, fcall_args, self.dv_labels)?;
-                write_bytes!(w, r#" "{}""#, hint)
+                self.print_fcall_args(w, fcall_args)?;
+                w.write_all(b" ")?;
+                print_quoted_str(w, hint)
             }
             Opcode::FCallFunc(fcall_args) => {
                 w.write_all(b"FCallFunc ")?;
-                print_fcall_args(w, fcall_args, self.dv_labels)
+                self.print_fcall_args(w, fcall_args)
             }
             Opcode::FCallFuncD(fcall_args, func) => {
                 w.write_all(b"FCallFuncD ")?;
-                print_fcall_args(w, fcall_args, self.dv_labels)?;
+                self.print_fcall_args(w, fcall_args)?;
                 w.write_all(b" ")?;
                 print_function_id(w, func)
             }
             Opcode::FCallObjMethod(fcall_args, hint, flavor) => {
                 w.write_all(b"FCallObjMethod ")?;
-                print_fcall_args(w, fcall_args, self.dv_labels)?;
-                write_bytes!(w, r#" "{}" "#, hint)?;
-                print_null_flavor(w, flavor)
+                self.print_fcall_args(w, fcall_args)?;
+                w.write_all(b" ")?;
+                print_quoted_str(w, hint)?;
+                w.write_all(b" ")?;
+                print_obj_method_op(w, flavor)
             }
             Opcode::FCallObjMethodD(fcall_args, hint, flavor, method) => {
                 w.write_all(b"FCallObjMethodD ")?;
-                print_fcall_args(w, fcall_args, self.dv_labels)?;
-                write_bytes!(w, r#" "{}" "#, hint)?;
-                print_null_flavor(w, flavor)?;
+                self.print_fcall_args(w, fcall_args)?;
+                w.write_all(b" ")?;
+                print_quoted_str(w, hint)?;
+                w.write_all(b" ")?;
+                print_obj_method_op(w, flavor)?;
                 w.write_all(b" ")?;
                 print_method_id(w, method)
             }
             Opcode::False => w.write_all(b"False"),
-            Opcode::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
+            Opcode::Fatal(fatal_op) => {
+                w.write_all(b"Fatal ")?;
+                print_fatal_op(w, fatal_op)
+            }
             Opcode::File => w.write_all(b"File"),
             Opcode::FuncCred => w.write_all(b"FuncCred"),
             Opcode::GetMemoKeyL(local) => {
@@ -613,25 +562,25 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
             Opcode::Idx => w.write_all(b"Idx"),
             Opcode::IncDecG(op) => {
                 w.write_all(b"IncDecG ")?;
-                print_incdec_op(w, op)
+                print_inc_dec_op(w, op)
             }
             Opcode::IncDecL(id, op) => {
                 w.write_all(b"IncDecL ")?;
                 print_local(w, id)?;
                 w.write_all(b" ")?;
-                print_incdec_op(w, op)
+                print_inc_dec_op(w, op)
             }
             Opcode::IncDecM(i, op, mk) => {
                 w.write_all(b"IncDecM ")?;
-                print_int(w, i)?;
+                print_stack_index(w, i)?;
                 w.write_all(b" ")?;
-                print_incdec_op(w, op)?;
+                print_inc_dec_op(w, op)?;
                 w.write_all(b" ")?;
                 print_member_key(w, mk)
             }
             Opcode::IncDecS(op) => {
                 w.write_all(b"IncDecS ")?;
-                print_incdec_op(w, op)
+                print_inc_dec_op(w, op)
             }
             Opcode::Incl => w.write_all(b"Incl"),
             Opcode::InclOnce => w.write_all(b"InclOnce"),
@@ -639,41 +588,32 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
                 w.write_all(b"InitProp ")?;
                 print_prop_id(w, id)?;
                 w.write_all(b" ")?;
-                match *op {
-                    InitPropOp::Static => w.write_all(b"Static"),
-                    InitPropOp::NonStatic => w.write_all(b"NonStatic"),
-                    _ => panic!("Enum value does not match one of listed variants"),
-                }
+                print_init_prop_op(w, op)
             }
             Opcode::InstanceOf => w.write_all(b"InstanceOf"),
             Opcode::InstanceOfD(id) => {
                 w.write_all(b"InstanceOfD ")?;
                 print_class_id(w, id)
             }
-            Opcode::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
+            Opcode::Int(i) => {
+                w.write_all(b"Int ")?;
+                write!(w, "{}", i)
+            }
             Opcode::IsLateBoundCls => w.write_all(b"IsLateBoundCls"),
             Opcode::IsTypeC(op) => {
                 w.write_all(b"IsTypeC ")?;
-                print_istype_op(w, op)
+                print_is_type_op(w, op)
             }
             Opcode::IsTypeL(local, op) => {
                 w.write_all(b"IsTypeL ")?;
                 print_local(w, local)?;
                 w.write_all(b" ")?;
-                print_istype_op(w, op)
+                print_is_type_op(w, op)
             }
-            Opcode::IsTypeStructC(op) => concat_str_by(
-                w,
-                " ",
-                [
-                    "IsTypeStructC",
-                    match *op {
-                        TypeStructResolveOp::Resolve => "Resolve",
-                        TypeStructResolveOp::DontResolve => "DontResolve",
-                        _ => panic!("Enum value does not match one of listed variants"),
-                    },
-                ],
-            ),
+            Opcode::IsTypeStructC(op) => {
+                w.write_all(b"IsTypeStructC ")?;
+                print_type_struct_resolve_op(w, op)
+            }
             Opcode::IsUnsetL(local) => {
                 w.write_all(b"IsUnsetL ")?;
                 print_local(w, local)
@@ -692,37 +632,56 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
                 w.write_all(b"IterInit ")?;
                 print_iter_args(w, iter_args)?;
                 w.write_all(b" ")?;
-                print_label(w, label, self.dv_labels)
+                self.print_label(w, label)
             }
             Opcode::IterNext(iter_args, label) => {
                 w.write_all(b"IterNext ")?;
                 print_iter_args(w, iter_args)?;
                 w.write_all(b" ")?;
-                print_label(w, label, self.dv_labels)
+                self.print_label(w, label)
             }
             Opcode::Jmp(l) => {
                 w.write_all(b"Jmp ")?;
-                print_label(w, l, self.dv_labels)
+                self.print_label(w, l)
             }
             Opcode::JmpNS(l) => {
                 w.write_all(b"JmpNS ")?;
-                print_label(w, l, self.dv_labels)
+                self.print_label(w, l)
             }
             Opcode::JmpNZ(l) => {
                 w.write_all(b"JmpNZ ")?;
-                print_label(w, l, self.dv_labels)
+                self.print_label(w, l)
             }
             Opcode::JmpZ(l) => {
                 w.write_all(b"JmpZ ")?;
-                print_label(w, l, self.dv_labels)
+                self.print_label(w, l)
             }
             Opcode::Keyset(id) => {
                 w.write_all(b"Keyset ")?;
                 print_adata_id(w, id)
             }
-            Opcode::LIterFree(..) => todo!(),
-            Opcode::LIterInit(..) => todo!(),
-            Opcode::LIterNext(..) => todo!(),
+            Opcode::LIterFree(iter1, loc2) => {
+                w.write_all(b"LIterFree ")?;
+                print_iterator_id(w, iter1)?;
+                w.write_all(b" ")?;
+                print_local(w, loc2)
+            }
+            Opcode::LIterInit(ita, loc2, target3) => {
+                w.write_all(b"LIterInit ")?;
+                print_iter_args(w, ita)?;
+                w.write_all(b" ")?;
+                print_local(w, loc2)?;
+                w.write_all(b" ")?;
+                self.print_label(w, target3)
+            }
+            Opcode::LIterNext(ita, loc2, target3) => {
+                w.write_all(b"LIterNext ")?;
+                print_iter_args(w, ita)?;
+                w.write_all(b" ")?;
+                print_local(w, loc2)?;
+                w.write_all(b" ")?;
+                self.print_label(w, target3)
+            }
             Opcode::LateBoundCls => w.write_all(b"LateBoundCls"),
             Opcode::LazyClass(id) => {
                 w.write_all(b"LazyClass ")?;
@@ -734,21 +693,23 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
             Opcode::Lte => w.write_all(b"Lte"),
             Opcode::MemoGet(label, range) => {
                 w.write_all(b"MemoGet ")?;
-                print_label(w, label, self.dv_labels)?;
-                write!(w, " L:{}+{}", range.start, range.len)
-            }
-            Opcode::MemoGetEager([label1, label2], range) => {
-                w.write_all(b"MemoGetEager ")?;
-                print_label(w, label1, self.dv_labels)?;
+                self.print_label(w, label)?;
                 w.write_all(b" ")?;
-                print_label(w, label2, self.dv_labels)?;
-                write!(w, " L:{}+{}", range.start, range.len)
+                print_local_range(w, range)
+            }
+            Opcode::MemoGetEager(target1, range) => {
+                w.write_all(b"MemoGetEager ")?;
+                self.print_label2(w, target1)?;
+                w.write_all(b" ")?;
+                print_local_range(w, range)
             }
             Opcode::MemoSet(range) => {
-                write!(w, "MemoSet L:{}+{}", range.start, range.len)
+                w.write_all(b"MemoSet ")?;
+                print_local_range(w, range)
             }
             Opcode::MemoSetEager(range) => {
-                write!(w, "MemoSetEager L:{}+{}", range.start, range.len)
+                w.write_all(b"MemoSetEager ")?;
+                print_local_range(w, range)
             }
             Opcode::Method => w.write_all(b"Method"),
             Opcode::Mod => w.write_all(b"Mod"),
@@ -762,10 +723,12 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
                 print_collection_type(w, ct)
             }
             Opcode::NewDictArray(i) => {
-                concat_str_by(w, " ", ["NewDictArray", i.to_string().as_str()])
+                w.write_all(b"NewDictArray ")?;
+                write!(w, "{}", i)
             }
             Opcode::NewKeysetArray(i) => {
-                concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()])
+                w.write_all(b"NewKeysetArray ")?;
+                write!(w, "{}", i)
             }
             Opcode::NewObj => w.write_all(b"NewObj"),
             Opcode::NewObjD(cid) => {
@@ -783,28 +746,21 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
             }
             Opcode::NewPair => w.write_all(b"NewPair"),
             Opcode::NewStructDict(l) => {
-                let ls: Vec<&str> = l.as_ref().iter().map(|s| s.unsafe_as_str()).collect();
                 w.write_all(b"NewStructDict ")?;
-                angle(w, |w| print_shape_fields(w, &ls[0..]))
+                print_shape_fields(w, l)
             }
-            Opcode::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
+            Opcode::NewVec(i) => {
+                w.write_all(b"NewVec ")?;
+                write!(w, "{}", i)
+            }
             Opcode::Nop => w.write_all(b"Nop"),
             Opcode::Not => w.write_all(b"Not"),
             Opcode::Null => w.write_all(b"Null"),
             Opcode::NullUninit => w.write_all(b"NullUninit"),
-            Opcode::OODeclExists(k) => concat_str_by(
-                w,
-                " ",
-                [
-                    "OODeclExists",
-                    match *k {
-                        OODeclExistsOp::Class => "Class",
-                        OODeclExistsOp::Interface => "Interface",
-                        OODeclExistsOp::Trait => "Trait",
-                        _ => panic!("Enum value does not match one of listed variants"),
-                    },
-                ],
-            ),
+            Opcode::OODeclExists(k) => {
+                w.write_all(b"OODeclExists ")?;
+                print_oo_decl_exists_op(w, k)
+            }
             Opcode::ParentCls => w.write_all(b"ParentCls"),
             Opcode::PopC => w.write_all(b"PopC"),
             Opcode::PopL(id) => {
@@ -812,7 +768,7 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
                 print_local(w, id)
             }
             Opcode::PopU => w.write_all(b"PopU"),
-            Opcode::PopU2 => todo!(),
+            Opcode::PopU2 => w.write_all(b"PopU2"),
             Opcode::Pow => w.write_all(b"Pow"),
             Opcode::Print => w.write_all(b"Print"),
             Opcode::PushL(id) => {
@@ -821,9 +777,9 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
             }
             Opcode::QueryM(n, op, mk) => {
                 w.write_all(b"QueryM ")?;
-                print_int(w, n)?;
+                print_stack_index(w, n)?;
                 w.write_all(b" ")?;
-                print_query_op(w, *op)?;
+                print_query_m_op(w, op)?;
                 w.write_all(b" ")?;
                 print_member_key(w, mk)
             }
@@ -884,12 +840,15 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
             }
             Opcode::RetC => w.write_all(b"RetC"),
             Opcode::RetCSuspended => w.write_all(b"RetCSuspended"),
-            Opcode::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
+            Opcode::RetM(p) => {
+                w.write_all(b"RetM ")?;
+                print_stack_index(w, p)
+            }
             Opcode::SSwitch { cases, targets } => {
-                print_sswitch(w, cases.as_ref(), targets.as_ref(), self.dv_labels)
+                self.print_s_switch(w, cases.as_ref(), targets.as_ref())
             }
             Opcode::Same => w.write_all(b"Same"),
-            Opcode::Select => todo!(),
+            Opcode::Select => w.write_all(b"Select"),
             Opcode::SelfCls => w.write_all(b"SelfCls"),
             Opcode::SetG => w.write_all(b"SetG"),
             Opcode::SetImplicitContextByValue => w.write_all(b"SetImplicitContextByValue"),
@@ -899,43 +858,39 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
             }
             Opcode::SetM(i, mk) => {
                 w.write_all(b"SetM ")?;
-                print_int(w, i)?;
+                print_stack_index(w, i)?;
                 w.write_all(b" ")?;
                 print_member_key(w, mk)
             }
             Opcode::SetOpG(op) => {
                 w.write_all(b"SetOpG ")?;
-                print_eq_op(w, op)
+                print_set_op_op(w, op)
             }
             Opcode::SetOpL(id, op) => {
                 w.write_all(b"SetOpL ")?;
                 print_local(w, id)?;
                 w.write_all(b" ")?;
-                print_eq_op(w, op)
+                print_set_op_op(w, op)
             }
             Opcode::SetOpM(i, op, mk) => {
                 w.write_all(b"SetOpM ")?;
-                print_int(w, i)?;
+                print_stack_index(w, i)?;
                 w.write_all(b" ")?;
-                print_eq_op(w, op)?;
+                print_set_op_op(w, op)?;
                 w.write_all(b" ")?;
                 print_member_key(w, mk)
             }
             Opcode::SetOpS(op) => {
                 w.write_all(b"SetOpS ")?;
-                print_eq_op(w, op)
+                print_set_op_op(w, op)
             }
             Opcode::SetRangeM(i, s, op) => {
                 w.write_all(b"SetRangeM ")?;
-                print_int(w, i)?;
+                print_stack_index(w, i)?;
                 w.write_all(b" ")?;
-                print_int(w, &(*s as usize))?;
+                write!(w, "{}", s)?;
                 w.write_all(b" ")?;
-                w.write_all(match *op {
-                    SetRangeOp::Forward => b"Forward",
-                    SetRangeOp::Reverse => b"Reverse",
-                    _ => panic!("Enum value does not match one of listed variants"),
-                })
+                print_set_range_op(w, op)
             }
             Opcode::SetS(op) => {
                 w.write_all(b"SetS ")?;
@@ -947,20 +902,21 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
                 w.write_all(b"Silence ")?;
                 print_local(w, local)?;
                 w.write_all(b" ")?;
-                match *op {
-                    SilenceOp::Start => w.write_all(b"Start"),
-                    SilenceOp::End => w.write_all(b"End"),
-                    _ => panic!("Enum value does not match one of listed variants"),
-                }
+                print_silence_op(w, op)
             }
             Opcode::String(s) => {
                 w.write_all(b"String ")?;
-                quotes(w, |w| w.write_all(&escaper::escape_bstr(s.as_bstr())))
+                print_quoted_str(w, s)
             }
             Opcode::Sub => w.write_all(b"Sub"),
             Opcode::SubO => w.write_all(b"SubO"),
             Opcode::Switch(kind, base, targets) => {
-                print_switch(w, kind, base, targets.as_ref(), self.dv_labels)
+                w.write_all(b"Switch ")?;
+                print_switch_kind(w, kind)?;
+                w.write_all(b" ")?;
+                write!(w, "{}", base)?;
+                w.write_all(b" ")?;
+                self.print_branch_labels(w, targets.as_ref())
             }
             Opcode::This => w.write_all(b"This"),
             Opcode::Throw => w.write_all(b"Throw"),
@@ -975,7 +931,7 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
             }
             Opcode::UnsetM(n, mk) => {
                 w.write_all(b"UnsetM ")?;
-                print_int(w, n)?;
+                print_stack_index(w, n)?;
                 w.write_all(b" ")?;
                 print_member_key(w, mk)
             }
@@ -995,7 +951,7 @@ impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
                 w.write_all(b"VerifyParamTypeTS ")?;
                 print_param_id(w, id)
             }
-            Opcode::VerifyRetNonNullC => todo!(),
+            Opcode::VerifyRetNonNullC => w.write_all(b"VerifyRetNonNullC"),
             Opcode::VerifyRetTypeC => w.write_all(b"VerifyRetTypeC"),
             Opcode::VerifyRetTypeTS => w.write_all(b"VerifyRetTypeTS"),
             Opcode::WHResult => w.write_all(b"WHResult"),

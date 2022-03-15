@@ -2839,24 +2839,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     match &node.children {
         SwitchStatement(c) => p_switch_stmt_(env, pos, c, node),
         IfStatement(c) => p_if_stmt(env, pos, c, node),
-        ExpressionStatement(c) => {
-            let expr = &c.expression;
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-                if expr.is_missing() {
-                    Ok(new(pos, S_::Noop))
-                } else {
-                    Ok(new(
-                        pos,
-                        S_::mk_expr(p_expr_with_loc(ExprLocation::AsStatement, expr, e, None)?),
-                    ))
-                }
-            };
-            if is_simple_assignment_await_expression(expr) || is_simple_await_expression(expr) {
-                f(env)
-            } else {
-                lift_awaits_in_statement(node, env, f)
-            }
-        }
+        ExpressionStatement(c) => p_expression_stmt(env, pos, c, node),
         CompoundStatement(c) => handle_loop_body(pos, &c.statements, env),
         SyntaxList(_) => handle_loop_body(pos, node, env),
         ThrowStatement(c) => lift_awaits_in_statement(node, env, |e| {
@@ -3099,6 +3082,33 @@ fn check_mutate_class_const<'a>(e: &ast::Expr, node: S<'a>, env: &mut Env<'a>) {
         Expr_::ArrayGet(c) if c.1.is_some() => check_mutate_class_const(&c.0, node, env),
         Expr_::ClassConst(_) => raise_parsing_error(node, env, &syntax_error::const_mutation),
         _ => {}
+    }
+}
+
+fn p_expression_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a ExpressionStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+
+    let expr = &c.expression;
+    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
+        if expr.is_missing() {
+            Ok(new(pos, S_::Noop))
+        } else {
+            Ok(new(
+                pos,
+                S_::mk_expr(p_expr_with_loc(ExprLocation::AsStatement, expr, e, None)?),
+            ))
+        }
+    };
+    if is_simple_assignment_await_expression(expr) || is_simple_await_expression(expr) {
+        f(env)
+    } else {
+        lift_awaits_in_statement(node, env, f)
     }
 }
 

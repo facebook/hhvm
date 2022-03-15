@@ -1522,65 +1522,8 @@ fn p_expr_impl<'a>(
         UpcastExpression(c) => p_upcast_expr(&c.left_operand, &c.right_operand, env),
         AnonymousFunction(c) => p_anonymous_function(node, c, env),
         AwaitableCreationExpression(c) => p_awaitable_creation_expr(node, c, env, pos),
-        XHPExpression(c) if c.open.is_xhp_open() => {
-            if let XHPOpen(c1) = &c.open.children {
-                let name = pos_name(&c1.name, env)?;
-                let attrs = could_map(&c1.attributes, env, p_xhp_attr)?;
-                let exprs = aggregate_xhp_tokens(env, &c.body)?
-                    .iter()
-                    .map(|n| p_xhp_embedded(n, env, unesc_xhp))
-                    .collect::<Result<Vec<_>, _>>()?;
-
-                let id = if env.empty_ns_env.disable_xhp_element_mangling {
-                    ast::Id(name.0, name.1)
-                } else {
-                    ast::Id(name.0, String::from(":") + &name.1)
-                };
-
-                Ok(Expr_::mk_xml(
-                    // TODO: update pos_name to support prefix
-                    id, attrs, exprs,
-                ))
-            } else {
-                failwith("expect xhp open")
-            }
-        }
-        EnumClassLabelExpression(c) => {
-            /* Foo#Bar can be the following:
-             * - short version: Foo is None/missing and we only have #Bar
-             * - Foo is a name -> fully qualified Foo#Bar
-             * - Foo is a function call prefix (can happen during auto completion)
-             *   $c->foo#Bar or C::foo#Bar
-             */
-            let ast::Id(label_pos, label_name) = pos_name(&c.expression, env)?;
-            if c.qualifier.is_missing() {
-                Ok(Expr_::mk_enum_class_label(None, label_name))
-            } else if c.qualifier.is_name() {
-                let name = pos_name(&c.qualifier, env)?;
-                Ok(Expr_::mk_enum_class_label(Some(name), label_name))
-            } else if label_name.ends_with("AUTO332") {
-                // This can happen during parsing in auto-complete mode
-                // In such case, the "label_name" must end with AUTO332
-                // We want to treat this as a method call even though we haven't
-                // yet seen the arguments
-                let recv = p_expr_with_loc(ExprLocation::CallReceiver, &c.qualifier, env, None);
-                match recv {
-                    Ok(recv) => {
-                        let enum_class_label = Expr_::mk_enum_class_label(None, label_name);
-                        let enum_class_label = ast::Expr::new((), label_pos, enum_class_label);
-                        Ok(Expr_::mk_call(
-                            recv,
-                            vec![],
-                            vec![(ast::ParamKind::Pnormal, enum_class_label)],
-                            None,
-                        ))
-                    }
-                    Err(err) => Err(err),
-                }
-            } else {
-                missing_syntax_(Some(Expr_::Null), "method call", node, env)
-            }
-        }
+        XHPExpression(c) if c.open.is_xhp_open() => p_xhp_expr(c, env),
+        EnumClassLabelExpression(c) => p_enum_class_label_expr(node, c, env),
         _ => missing_syntax_(Some(Expr_::Null), "expression", node, env),
     }
 }
@@ -2322,6 +2265,74 @@ fn p_awaitable_creation_expr<'a>(
         vec![],
         None,
     ))
+}
+
+fn p_xhp_expr<'a>(
+    c: &'a XHPExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    if let XHPOpen(c1) = &c.open.children {
+        let name = pos_name(&c1.name, env)?;
+        let attrs = could_map(&c1.attributes, env, p_xhp_attr)?;
+        let exprs = aggregate_xhp_tokens(env, &c.body)?
+            .iter()
+            .map(|n| p_xhp_embedded(n, env, unesc_xhp))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let id = if env.empty_ns_env.disable_xhp_element_mangling {
+            ast::Id(name.0, name.1)
+        } else {
+            ast::Id(name.0, String::from(":") + &name.1)
+        };
+
+        Ok(Expr_::mk_xml(
+            // TODO: update pos_name to support prefix
+            id, attrs, exprs,
+        ))
+    } else {
+        failwith("expect xhp open")
+    }
+}
+
+fn p_enum_class_label_expr<'a>(
+    node: S<'a>,
+    c: &'a EnumClassLabelExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    /* Foo#Bar can be the following:
+     * - short version: Foo is None/missing and we only have #Bar
+     * - Foo is a name -> fully qualified Foo#Bar
+     * - Foo is a function call prefix (can happen during auto completion)
+     *   $c->foo#Bar or C::foo#Bar
+     */
+    let ast::Id(label_pos, label_name) = pos_name(&c.expression, env)?;
+    if c.qualifier.is_missing() {
+        Ok(Expr_::mk_enum_class_label(None, label_name))
+    } else if c.qualifier.is_name() {
+        let name = pos_name(&c.qualifier, env)?;
+        Ok(Expr_::mk_enum_class_label(Some(name), label_name))
+    } else if label_name.ends_with("AUTO332") {
+        // This can happen during parsing in auto-complete mode
+        // In such case, the "label_name" must end with AUTO332
+        // We want to treat this as a method call even though we haven't
+        // yet seen the arguments
+        let recv = p_expr_with_loc(ExprLocation::CallReceiver, &c.qualifier, env, None);
+        match recv {
+            Ok(recv) => {
+                let enum_class_label = Expr_::mk_enum_class_label(None, label_name);
+                let enum_class_label = ast::Expr::new((), label_pos, enum_class_label);
+                Ok(Expr_::mk_call(
+                    recv,
+                    vec![],
+                    vec![(ast::ParamKind::Pnormal, enum_class_label)],
+                    None,
+                ))
+            }
+            Err(err) => Err(err),
+        }
+    } else {
+        missing_syntax_(Some(Expr_::Null), "method call", node, env)
+    }
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

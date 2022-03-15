@@ -195,7 +195,7 @@ let eager_full_init genv env _lazy_lev profiling =
 
 let lazy_write_symbol_info_init genv env profiling =
   ( ServerLazyInit.write_symbol_info_init genv env profiling |> post_init genv,
-    Load_state_declined "Write Symobl info state" )
+    Load_state_declined "Write Symbol info state" )
 
 (* entry point *)
 let init

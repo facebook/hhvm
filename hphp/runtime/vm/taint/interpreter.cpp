@@ -1455,6 +1455,10 @@ void iopVerifyParamType(local_var param) {
         value);
     auto path = value->to(state->arena.get(), Hop{callee(), func});
     state->heap_locals.set(param.lval, path);
+  } else {
+    // Explicitly unset parameter here in case a value at this position was
+    // previously tainted
+    state->heap_locals.set(param.lval, nullptr);
   }
 
   // Taint generation.

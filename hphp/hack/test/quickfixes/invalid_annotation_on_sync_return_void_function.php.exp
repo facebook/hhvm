@@ -1,0 +1,5 @@
+Change to `void`
+
+function foo(): void {
+  echo "hello world\n";
+}

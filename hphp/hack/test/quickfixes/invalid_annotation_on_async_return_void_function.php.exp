@@ -1,0 +1,5 @@
+Change to `Awaitable<void>`
+
+async function foo(): Awaitable<void> {
+  echo "hello world\n";
+}

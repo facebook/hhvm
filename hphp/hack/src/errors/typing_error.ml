@@ -1314,7 +1314,7 @@ module Primary = struct
           [
             Quickfix.make
               ~title:("Change to " ^ Markdown_lite.md_codify return_type)
-              ~new_text:return_type
+              ~new_text: "void"
               (Pos_or_decl.unsafe_to_raw_pos hint_pos);
           ]
       in

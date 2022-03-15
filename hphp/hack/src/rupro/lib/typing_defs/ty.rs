@@ -3,13 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+pub use crate::decl_defs::ty::{Exact, Prim};
 use crate::reason::Reason;
 use crate::typing_defs::tyvar::Tyvar;
 use hcons::Hc;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 use pos::{Positioned, Symbol, ToOxidized, TypeName};
-
-pub use crate::decl_defs::ty::{Exact, Prim};
+use std::ops::Deref;
 
 // TODO: Share the representation from decl_defs
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -47,6 +47,12 @@ impl From<&oxidized::ast_defs::ParamKind> for ParamMode {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Ty_<R: Reason, TY> {
+    /// Top
+    Tmixed,
+
+    /// Bottom
+    Tnothing,
+
     /// A primitive type
     Tprim(Prim),
 
@@ -79,6 +85,8 @@ pub enum Ty_<R: Reason, TY> {
 }
 
 walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
+    Ty_::Tmixed => [],
+    Ty_::Tnothing => [],
     Ty_::Tprim(_) => [],
     Ty_::Tfun(fun_type) => [fun_type],
     Ty_::Tany => [],
@@ -106,23 +114,75 @@ impl<R: Reason> Ty<R> {
         Self(reason, Hc::new(ty))
     }
 
+    pub fn mixed(r: R) -> Ty<R> {
+        Self::new(r, Ty_::Tmixed)
+    }
+
+    pub fn nothing(r: R) -> Ty<R> {
+        Self::new(r, Ty_::Tmixed)
+    }
+
     pub fn prim(r: R, prim: Prim) -> Ty<R> {
         Self::new(r, Ty_::Tprim(prim))
     }
 
+    pub fn null(r: R) -> Ty<R> {
+        Self::prim(r, Prim::Tnull)
+    }
     pub fn void(r: R) -> Ty<R> {
         Self::prim(r, Prim::Tvoid)
+    }
+    pub fn int(r: R) -> Ty<R> {
+        Self::prim(r, Prim::Tint)
+    }
+    pub fn float(r: R) -> Ty<R> {
+        Self::prim(r, Prim::Tfloat)
+    }
+    pub fn string(r: R) -> Ty<R> {
+        Self::prim(r, Prim::Tstring)
+    }
+    pub fn num(r: R) -> Ty<R> {
+        Self::prim(r, Prim::Tnum)
+    }
+
+    pub fn arraykey(r: R) -> Ty<R> {
+        Self::prim(r, Prim::Tarraykey)
+    }
+
+    pub fn fun(r: R, ft: FunType<R>) -> Ty<R> {
+        Self::new(r, Ty_::Tfun(ft))
+    }
+
+    pub fn union(r: R, tys: Vec<Ty<R>>) -> Self {
+        let ln = tys.len();
+        if ln == 0 {
+            Self::nothing(r)
+        } else {
+            Self::new(r, Ty_::Tunion(tys))
+        }
+    }
+
+    pub fn var(r: R, tv: Tyvar) -> Self {
+        Self::new(r, Ty_::Tvar(tv))
     }
 
     pub fn any(r: R) -> Ty<R> {
         Self::new(r, Ty_::Tany)
     }
 
+
     pub fn reason(&self) -> &R {
         &self.0
     }
 
     pub fn node(&self) -> &Hc<Ty_<R, Ty<R>>> {
+        &self.1
+    }
+}
+
+impl<R: Reason> Deref for Ty<R> {
+    type Target = Ty_<R, Ty<R>>;
+    fn deref(&self) -> &Self::Target {
         &self.1
     }
 }
@@ -136,6 +196,8 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
         let ty = match &**self.node() {
             Ty_::Tvar(tv) => OTy_::Tvar((*tv).into()),
             Ty_::Tprim(x) => OTy_::Tprim(arena.alloc(*x)),
+            Ty_::Tmixed => OTy_::Tmixed,
+            Ty_::Tnothing => todo!(),
             Ty_::Tunion(_) => todo!(),
             Ty_::Tfun(_) => todo!(),
             Ty_::Tany => todo!(),

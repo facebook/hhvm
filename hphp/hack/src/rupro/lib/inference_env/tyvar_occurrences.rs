@@ -41,6 +41,11 @@ impl TyvarOccurrences {
         fwd
     }
 
+    /// Check if [tv] has any type variables in its binding
+    pub fn contains_any(&self, tv: &Tyvar) -> bool {
+        self.tyvs_in.get(tv).map_or(false, |m| !m.is_empty())
+    }
+
     /// Construct a new occurrences map by adding the occurrence of the
     /// type variable [tv_occ] within [ty_in]
     pub fn add_occurrence(&mut self, tv_occ: Tyvar, tv_in: Tyvar) {
@@ -194,5 +199,23 @@ mod tests {
         assert!(!occs.occurs_in(&tv3, &tv1));
         assert!(!occs.occurs_in(&tv1, &tv4));
         assert!(occs.occurs_in(&tv3, &tv4));
+    }
+
+    #[test]
+    fn test_contains_any() {
+        let mut occs: TyvarOccurrences = Default::default();
+        let gen = IdentGen::new();
+        let tv1: Tyvar = gen.make().into();
+        let tv2: Tyvar = gen.make().into();
+        let tv3: Tyvar = gen.make().into();
+        let tv4: Tyvar = gen.make().into();
+        occs.add_occurrence(tv2, tv1);
+        occs.add_occurrence(tv3, tv1);
+        occs.add_occurrence(tv1, tv4);
+
+        assert!(occs.contains_any(&tv1));
+        assert!(!occs.contains_any(&tv2));
+        assert!(!occs.contains_any(&tv3));
+        assert!(occs.contains_any(&tv4));
     }
 }

@@ -9,11 +9,21 @@ use crate::reason::Reason;
 use crate::typing_defs::{Ty, Variance};
 use im::HashSet;
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TyvarConstraints<R: Reason> {
     variance: Variance,
     lower_bounds: HashSet<Ty<R>>,
     upper_bounds: HashSet<Ty<R>>,
+}
+
+impl<R: Reason> Default for TyvarConstraints<R> {
+    fn default() -> Self {
+        TyvarConstraints {
+            variance: Variance::default(),
+            lower_bounds: HashSet::default(),
+            upper_bounds: HashSet::default(),
+        }
+    }
 }
 
 impl<R: Reason> TyvarConstraints<R> {
@@ -48,9 +58,9 @@ pub enum TyvarState<R: Reason> {
     Constrained(TyvarConstraints<R>),
 }
 
-impl<R: Reason + Default> Default for TyvarState<R> {
+impl<R: Reason> Default for TyvarState<R> {
     fn default() -> TyvarState<R> {
-        TyvarState::Constrained(Default::default())
+        TyvarState::Constrained(TyvarConstraints::default())
     }
 }
 
@@ -87,9 +97,29 @@ impl<R: Reason> TyvarState<R> {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TyvarInfo<R: Reason> {
-    pos: R::Pos,
-    reason: Option<R>,
+    pos: Option<R::Pos>,
     state: TyvarState<R>,
     early_solve_failed: bool,
+}
+impl<R: Reason> Default for TyvarInfo<R> {
+    fn default() -> Self {
+        TyvarInfo {
+            pos: None,
+            state: TyvarState::default(),
+            early_solve_failed: false,
+        }
+    }
+}
+
+impl<R: Reason> TyvarInfo<R> {
+    pub fn is_solved(&self) -> bool {
+        matches!(self.state, TyvarState::Bound(_))
+    }
+
+    pub fn bind(&mut self, pos: Option<R::Pos>, ty: Ty<R>) {
+        self.pos = pos;
+        self.state = TyvarState::Bound(ty);
+    }
 }

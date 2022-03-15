@@ -2850,25 +2850,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
             p_using_statement_function_scoped_stmt(env, pos, c, node)
         }
         ForStatement(c) => p_for_stmt(env, pos, c, node),
-        ForeachStatement(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-                let col = p_expr(&c.collection, e)?;
-                let akw = match token_kind(&c.await_keyword) {
-                    Some(TK::Await) => Some(p_pos(&c.await_keyword, e)),
-                    _ => None,
-                };
-                let value = p_expr(&c.value, e)?;
-                let akv = match (akw, &c.key.children) {
-                    (Some(p), Missing) => ast::AsExpr::AwaitAsV(p, value),
-                    (None, Missing) => ast::AsExpr::AsV(value),
-                    (Some(p), _) => ast::AsExpr::AwaitAsKv(p, p_expr(&c.key, e)?, value),
-                    (None, _) => ast::AsExpr::AsKv(p_expr(&c.key, e)?, value),
-                };
-                let blk = p_block(true, &c.body, e)?;
-                Ok(new(pos, S_::mk_foreach(col, akv, blk)))
-            };
-            lift_awaits_in_statement(node, env, f)
-        }
+        ForeachStatement(c) => p_foreach_stmt(env, pos, c, node),
         TryStatement(c) => Ok(new(
             pos,
             S_::mk_try(
@@ -3066,6 +3048,34 @@ fn p_throw_stmt<'a>(
     lift_awaits_in_statement(node, env, |e| {
         Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
     })
+}
+
+fn p_foreach_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a ForeachStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+
+    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
+        let col = p_expr(&c.collection, e)?;
+        let akw = match token_kind(&c.await_keyword) {
+            Some(TK::Await) => Some(p_pos(&c.await_keyword, e)),
+            _ => None,
+        };
+        let value = p_expr(&c.value, e)?;
+        let akv = match (akw, &c.key.children) {
+            (Some(p), Missing) => ast::AsExpr::AwaitAsV(p, value),
+            (None, Missing) => ast::AsExpr::AsV(value),
+            (Some(p), _) => ast::AsExpr::AwaitAsKv(p, p_expr(&c.key, e)?, value),
+            (None, _) => ast::AsExpr::AsKv(p_expr(&c.key, e)?, value),
+        };
+        let blk = p_block(true, &c.body, e)?;
+        Ok(new(pos, S_::mk_foreach(col, akv, blk)))
+    };
+    lift_awaits_in_statement(node, env, f)
 }
 
 fn p_for_stmt<'a>(

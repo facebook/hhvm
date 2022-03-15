@@ -2854,27 +2854,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         TryStatement(c) => p_try_stmt(env, pos, c, node),
         ReturnStatement(c) => p_return_stmt(env, pos, c, node),
         YieldBreakStatement(_) => Ok(ast::Stmt::new(pos, ast::Stmt_::mk_yield_break())),
-        EchoStatement(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-                let echo = match &c.keyword.children {
-                    QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
-                        let name = pos_name(&c.keyword, e)?;
-                        ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
-                    }
-                    _ => missing_syntax("id", &c.keyword, e)?,
-                };
-                let args = could_map(&c.expressions, e, p_expr_for_normal_argument)?;
-                Ok(new(
-                    pos.clone(),
-                    S_::mk_expr(ast::Expr::new(
-                        (),
-                        pos,
-                        Expr_::mk_call(echo, vec![], args, None),
-                    )),
-                ))
-            };
-            lift_awaits_in_statement(node, env, f)
-        }
+        EchoStatement(c) => p_echo_stmt(env, pos, c, node),
         UnsetStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 let args = could_map(&c.variables, e, p_expr_for_normal_argument)?;
@@ -3042,6 +3022,36 @@ fn p_try_stmt<'a>(
             },
         ),
     ))
+}
+
+fn p_echo_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a EchoStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+
+    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
+        let echo = match &c.keyword.children {
+            QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
+                let name = pos_name(&c.keyword, e)?;
+                ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
+            }
+            _ => missing_syntax("id", &c.keyword, e)?,
+        };
+        let args = could_map(&c.expressions, e, p_expr_for_normal_argument)?;
+        Ok(new(
+            pos.clone(),
+            S_::mk_expr(ast::Expr::new(
+                (),
+                pos,
+                Expr_::mk_call(echo, vec![], args, None),
+            )),
+        ))
+    };
+    lift_awaits_in_statement(node, env, f)
 }
 
 fn p_return_stmt<'a>(

@@ -5,6 +5,7 @@
 
 pub mod cache;
 pub mod decl_provider;
+pub mod registrar;
 pub mod serde_cache;
 
 pub use serde_cache::SerializingCache;

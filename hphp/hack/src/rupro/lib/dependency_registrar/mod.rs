@@ -14,7 +14,7 @@ pub enum Error {}
 // Implementations of `FoldedDeclProvider` need to be able to record
 // dependencies (if needed). We do this by having the functions of this
 // trait take a "who's asking?" symbol of this type.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum DeclName {
     Fun(FunName),
     Const(ConstName),
@@ -40,7 +40,7 @@ impl From<TypeName> for DeclName {
 }
 
 // nb(sf, 2022-03-15): c.f. ` Typing_deps.Dep.variant`
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 /// A node in the dependency graph that, when changed, must recheck all of its
 /// dependents.
 pub enum DependencyName {

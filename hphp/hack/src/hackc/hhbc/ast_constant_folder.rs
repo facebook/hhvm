@@ -371,18 +371,25 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
         }
         Expr_::KeyValCollection(x) => keyvalcollection_expr_to_typed_value(emitter, x),
         Expr_::Shape(fields) => shape_to_typed_value(emitter, fields),
-        Expr_::ClassConst(x) => {
-            if emitter.options().emit_class_pointers() == 1 && !force_class_const {
-                Err(Error::NotLiteral)
-            } else {
-                class_const_to_typed_value(emitter, &x.0, &x.1)
-            }
-        }
+        Expr_::ClassConst(x) => class_const_expr_to_typed_value(emitter, x, force_class_const),
+
         Expr_::ClassGet(_) => Err(Error::UserDefinedConstant),
         ast::Expr_::As(x) if (x.1).1.is_hlike() => {
             expr_to_typed_value_(emitter, &x.0, allow_maps, false)
         }
         _ => Err(Error::NotLiteral),
+    }
+}
+
+fn class_const_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(ast::ClassId, ast::Pstring),
+    force_class_const: bool,
+) -> Result<TypedValue<'arena>, Error> {
+    if emitter.options().emit_class_pointers() == 1 && !force_class_const {
+        Err(Error::NotLiteral)
+    } else {
+        class_const_to_typed_value(emitter, &x.0, &x.1)
     }
 }
 

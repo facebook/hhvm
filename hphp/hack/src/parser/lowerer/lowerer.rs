@@ -1307,18 +1307,6 @@ fn p_expr_with_loc<'a>(
             p_expr_with_loc(location, &c.expression, env, parent_pos)
         }
         ParenthesizedExpression(c) => p_expr_with_loc(location, &c.expression, env, parent_pos),
-        ETSpliceExpression(c) => {
-            let pos = p_pos(node, env);
-
-            let inner_pos = p_pos(&c.expression, env);
-            let inner_expr_ = p_expr_recurse(location, &c.expression, env, parent_pos)?;
-            let inner_expr = ast::Expr::new((), inner_pos, inner_expr_);
-            Ok(ast::Expr::new(
-                (),
-                pos,
-                Expr_::ETSplice(Box::new(inner_expr)),
-            ))
-        }
         _ => {
             let pos = p_pos(node, env);
             let expr_ = p_expr_recurse(location, node, env, parent_pos)?;
@@ -1507,6 +1495,7 @@ fn p_expr_impl<'a>(
         ScopeResolutionExpression(c) => p_scope_resolution_expr(node, c, env, pos, location),
         CastExpression(c) => p_cast_expr(c, env),
         PrefixedCodeExpression(c) => p_prefixed_code_expr(c, env),
+        ETSpliceExpression(c) => p_et_splice_expr(&c.expression, env, location),
         ConditionalExpression(c) => p_conditional_expr(c, env),
         SubscriptExpression(c) => p_subscript_expr(c, env),
         EmbeddedSubscriptExpression(c) => p_embedded_subscript_expr(c, env, location),
@@ -2052,6 +2041,13 @@ fn p_prefixed_code_expr<'a>(
     }
 
     Ok(desugar_result.expr.2)
+}
+
+fn p_et_splice_expr<'a>(expr: S<'a>, env: &mut Env<'a>, location: ExprLocation) -> Result<Expr_> {
+    let inner_pos = p_pos(expr, env);
+    let inner_expr_ = p_expr_recurse(location, expr, env, None)?;
+    let inner_expr = ast::Expr::new((), inner_pos, inner_expr_);
+    Ok(Expr_::ETSplice(Box::new(inner_expr)))
 }
 
 fn p_conditional_expr<'a>(

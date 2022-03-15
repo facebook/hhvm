@@ -897,7 +897,7 @@ wangle::SSLContextConfig ProxygenServer::createContextConfig(
 
   try {
     sslCtxConfig.setCertificate(path.certPath, path.keyPath, "");
-    sslCtxConfig.sslVersion = folly::SSLContext::TLSv1;
+    sslCtxConfig.sslVersion = folly::SSLContext::TLSv1_2;
     sslCtxConfig.isDefault = isDefault;
     sslCtxConfig.setNextProtocols({
       std::begin(RuntimeOption::ServerNextProtocols),

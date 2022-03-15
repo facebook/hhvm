@@ -5,7 +5,8 @@
 
 use super::{Class, Error, Result};
 use crate::decl_defs::{ty::ConsistentKind, DeclTy, FoldedClass};
-use crate::folded_decl_provider::{DeclName, FoldedDeclProvider, Substitution};
+use crate::dependency_registrar::DeclName;
+use crate::folded_decl_provider::{FoldedDeclProvider, Substitution};
 use crate::reason::Reason;
 use crate::typing_defs::ClassElt;
 use once_cell::unsync::OnceCell;

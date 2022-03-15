@@ -4,6 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{ConstDecl, DeclTy, FoldedClass, FunDecl, TypedefDecl};
+use crate::dependency_registrar::DeclName;
+
 use crate::reason::Reason;
 use itertools::Itertools;
 use pos::{ConstName, FunName, MethodName, PropName, TypeName};
@@ -27,6 +29,9 @@ pub enum Error {
     #[error("{0}")]
     Shallow(#[from] crate::shallow_decl_provider::Error),
 
+    #[error("{0}")]
+    Dependency(#[from] crate::dependency_registrar::Error),
+
     #[error(
         "Failed to declare {class} because of error in ancestor {} (via {}): {error}",
         .parents.first().unwrap(),
@@ -44,34 +49,6 @@ pub enum Error {
 pub enum TypeDecl<R: Reason> {
     Class(Arc<FoldedClass<R>>),
     Typedef(Arc<TypedefDecl<R>>),
-}
-
-// Implementations of `FoldedDeclProvider` need to be able to record
-// dependencies (if needed). We do this by having the functions of this
-// trait take a "who's asking?" symbol of this type.
-#[derive(Clone, Copy, Debug)]
-pub enum DeclName {
-    Fun(FunName),
-    Const(ConstName),
-    Type(TypeName),
-}
-
-impl From<FunName> for DeclName {
-    fn from(name: FunName) -> Self {
-        Self::Fun(name)
-    }
-}
-
-impl From<ConstName> for DeclName {
-    fn from(name: ConstName) -> Self {
-        Self::Const(name)
-    }
-}
-
-impl From<TypeName> for DeclName {
-    fn from(name: TypeName) -> Self {
-        Self::Type(name)
-    }
 }
 
 /// A get-or-compute interface for folded declarations. A folded class

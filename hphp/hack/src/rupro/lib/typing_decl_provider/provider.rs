@@ -6,7 +6,8 @@
 use super::{ClassType, Result, TypeDecl, TypingDeclProvider};
 use crate::cache::LocalCache;
 use crate::decl_defs::{ConstDecl, FunDecl};
-use crate::folded_decl_provider::{self, DeclName, FoldedDeclProvider};
+use crate::dependency_registrar::DeclName;
+use crate::folded_decl_provider::{self, FoldedDeclProvider};
 use crate::reason::Reason;
 use pos::{ConstName, FunName, TypeName};
 use std::cell::RefCell;

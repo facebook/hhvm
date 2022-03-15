@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{ty::ConsistentKind, ConstDecl, FunDecl, TypedefDecl};
-use crate::folded_decl_provider::DeclName;
+use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use defs::ClassType;
 use pos::{ConstName, FunName, MethodName, PropName, TypeName};

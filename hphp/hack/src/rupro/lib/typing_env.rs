@@ -7,7 +7,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::folded_decl_provider::DeclName;
+use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use crate::tast::SavedEnv;
 use crate::typing_ctx::TypingCtx;

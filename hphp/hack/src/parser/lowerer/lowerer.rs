@@ -2847,18 +2847,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         WhileStatement(c) => p_while_stmt(env, pos, c, node),
         UsingStatementBlockScoped(c) => p_using_statement_block_scoped_stmt(env, pos, c, node),
         UsingStatementFunctionScoped(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-                Ok(new(
-                    pos,
-                    S_::mk_using(ast::UsingStmt {
-                        is_block_scoped: false,
-                        has_await: !&c.await_keyword.is_missing(),
-                        exprs: p_exprs_with_loc(&c.expression, e)?,
-                        block: vec![mk_noop(e)],
-                    }),
-                ))
-            };
-            lift_awaits_in_statement(node, env, f)
+            p_using_statement_function_scoped_stmt(env, pos, c, node)
         }
         ForStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -3086,6 +3075,29 @@ fn p_throw_stmt<'a>(
     lift_awaits_in_statement(node, env, |e| {
         Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
     })
+}
+
+fn p_using_statement_function_scoped_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a UsingStatementFunctionScopedChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+
+    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
+        Ok(new(
+            pos,
+            S_::mk_using(ast::UsingStmt {
+                is_block_scoped: false,
+                has_await: !&c.await_keyword.is_missing(),
+                exprs: p_exprs_with_loc(&c.expression, e)?,
+                block: vec![mk_noop(e)],
+            }),
+        ))
+    };
+    lift_awaits_in_statement(node, env, f)
 }
 
 fn p_using_statement_block_scoped_stmt<'a>(

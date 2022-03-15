@@ -2838,34 +2838,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     let new = Stmt::new;
     match &node.children {
         SwitchStatement(c) => p_switch_stmt_(env, pos, c, node),
-        IfStatement(c) => {
-            let p_else_if = |n: S<'a>, e: &mut Env<'a>| -> Result<(ast::Expr, ast::Block)> {
-                match &n.children {
-                    ElseifClause(c) => {
-                        Ok((p_expr(&c.condition, e)?, p_block(true, &c.statement, e)?))
-                    }
-                    _ => missing_syntax("elseif clause", n, e),
-                }
-            };
-            let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
-                let condition = p_expr(&c.condition, env)?;
-                let statement = p_block(true /* remove noop */, &c.statement, env)?;
-                let else_ = match &c.else_clause.children {
-                    ElseClause(c) => p_block(true, &c.statement, env)?,
-                    Missing => vec![mk_noop(env)],
-                    _ => missing_syntax("else clause", &c.else_clause, env)?,
-                };
-                let else_ifs = could_map(&c.elseif_clauses, env, p_else_if)?;
-                let else_if = else_ifs
-                    .into_iter()
-                    .rev()
-                    .fold(else_, |child, (cond, stmts)| {
-                        vec![new(pos.clone(), S_::mk_if(cond, stmts, child))]
-                    });
-                Ok(new(pos, S_::mk_if(condition, statement, else_if)))
-            };
-            lift_awaits_in_statement(node, env, f)
-        }
+        IfStatement(c) => p_if_stmt(env, pos, c, node),
         ExpressionStatement(c) => {
             let expr = &c.expression;
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -3127,6 +3100,41 @@ fn check_mutate_class_const<'a>(e: &ast::Expr, node: S<'a>, env: &mut Env<'a>) {
         Expr_::ClassConst(_) => raise_parsing_error(node, env, &syntax_error::const_mutation),
         _ => {}
     }
+}
+
+fn p_if_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a IfStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+
+    let p_else_if = |n: S<'a>, e: &mut Env<'a>| -> Result<(ast::Expr, ast::Block)> {
+        match &n.children {
+            ElseifClause(c) => Ok((p_expr(&c.condition, e)?, p_block(true, &c.statement, e)?)),
+            _ => missing_syntax("elseif clause", n, e),
+        }
+    };
+    let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
+        let condition = p_expr(&c.condition, env)?;
+        let statement = p_block(true /* remove noop */, &c.statement, env)?;
+        let else_ = match &c.else_clause.children {
+            ElseClause(c) => p_block(true, &c.statement, env)?,
+            Missing => vec![mk_noop(env)],
+            _ => missing_syntax("else clause", &c.else_clause, env)?,
+        };
+        let else_ifs = could_map(&c.elseif_clauses, env, p_else_if)?;
+        let else_if = else_ifs
+            .into_iter()
+            .rev()
+            .fold(else_, |child, (cond, stmts)| {
+                vec![new(pos.clone(), S_::mk_if(cond, stmts, child))]
+            });
+        Ok(new(pos, S_::mk_if(condition, statement, else_if)))
+    };
+    lift_awaits_in_statement(node, env, f)
 }
 
 fn p_switch_stmt_<'a>(

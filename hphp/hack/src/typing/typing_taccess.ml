@@ -194,7 +194,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       in
       let to_tys env = function
         | Some ty ->
-          let (env, ty) = Phase.localize_with_ty_err ~ety_env env ty in
+          let (env, ty) = Phase.localize ~ety_env env ty in
           (env, TySet.singleton ty)
         | None -> ((env, None), TySet.empty)
       in
@@ -204,9 +204,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       (match typeconst.ttc_kind with
       (* Concrete type constants *)
       | TCConcrete { tc_type = ty } ->
-        let ((env, ty_err_opt), ty) =
-          Phase.localize_with_ty_err ~ety_env env ty
-        in
+        let ((env, ty_err_opt), ty) = Phase.localize ~ety_env env ty in
         let ty = map_reason ty ~f:(make_reason env id root) in
         ((env, ty_err_opt), Exact ty)
       (* Abstract type constants *)
@@ -553,7 +551,7 @@ let expand_with_env
  * represented by (this, [T1; T2])
  *)
 let referenced_typeconsts env ety_env (root, ids) =
-  let ((env, e1), root) = Phase.localize_with_ty_err ~ety_env env root in
+  let ((env, e1), root) = Phase.localize ~ety_env env root in
   let (((_env, ty_errs), _ty), res) =
     List.fold
       ids

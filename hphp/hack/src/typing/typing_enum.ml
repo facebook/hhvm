@@ -194,18 +194,20 @@ let enum_class_check env tc consts const_types =
           constraint_ = ty_constraint;
           interface = ty_interface;
         } ->
-      let (env, ty_exp) =
+      let ((env, ty_err1), ty_exp) =
         Phase.localize_no_subst env ~ignore_errors:false ty_exp
       in
-      let (env, ty_interface) =
+      Option.iter ~f:Errors.add_typing_error ty_err1;
+      let ((env, ty_err2), ty_interface) =
         match ty_interface with
         | Some dty ->
           let (env, lty) =
             Phase.localize_no_subst env ~ignore_errors:false dty
           in
           (env, Some lty)
-        | None -> (env, None)
+        | None -> ((env, None), None)
       in
+      Option.iter ~f:Errors.add_typing_error ty_err2;
       (* Check that ty_exp <: arraykey *)
       let env =
         enum_check_type
@@ -221,7 +223,10 @@ let enum_class_check env tc consts const_types =
         match ty_constraint with
         | None -> (env, None)
         | Some ty ->
-          let (env, ty) = Phase.localize_no_subst env ~ignore_errors:false ty in
+          let ((env, ty_err1), ty) =
+            Phase.localize_no_subst env ~ignore_errors:false ty
+          in
+          Option.iter ~f:Errors.add_typing_error ty_err1;
           let env =
             enum_check_type
               env

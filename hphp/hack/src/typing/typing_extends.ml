@@ -625,10 +625,10 @@ let check_override
         class_elt.ce_origin
         on_error)
   | _ ->
-    if get_ce_const class_elt then
-      Typing_phase.sub_type_decl env fty_child fty_parent @@ Some on_error
-    else
-      let (env, ty_err_opt) =
+    let (env, ty_err_opt) =
+      if get_ce_const class_elt then
+        Typing_phase.sub_type_decl env fty_child fty_parent @@ Some on_error
+      else
         Typing_ops.unify_decl
           pos
           Typing_reason.URnone
@@ -636,9 +636,9 @@ let check_override
           on_error
           fty_parent
           fty_child
-      in
-      Option.iter ~f:Errors.add_typing_error ty_err_opt;
-      env
+    in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    env
 
 (* Constants and type constants with declared values in declared interfaces can never be
  * overridden by other inherited constants.
@@ -813,7 +813,7 @@ let check_const_override
         parent_class_const.cc_type
     in
 
-    let err_opt =
+    let ty_err_opt1 =
       if const_interface_or_trait_member_not_unique then
         let snd_err =
           Typing_error.Secondary.Interface_or_trait_const_multiple_defs
@@ -853,11 +853,14 @@ let check_const_override
       else
         None
     in
-    Option.iter err_opt ~f:Errors.add_typing_error;
-
-    Phase.sub_type_decl env class_const_type parent_class_const_type
-    @@ Some
-         (Typing_error.Reasons_callback.class_constant_type_mismatch on_error)
+    Option.iter ty_err_opt1 ~f:Errors.add_typing_error;
+    let (env, ty_err_opt2) =
+      Phase.sub_type_decl env class_const_type parent_class_const_type
+      @@ Some
+           (Typing_error.Reasons_callback.class_constant_type_mismatch on_error)
+    in
+    Option.iter ty_err_opt2 ~f:Errors.add_typing_error;
+    env
 
 let check_inherited_member_is_dynamically_callable
     env

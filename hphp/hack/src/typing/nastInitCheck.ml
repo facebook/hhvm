@@ -82,7 +82,10 @@ let type_does_not_require_init env ty_opt =
   match ty_opt with
   | None -> true
   | Some ty ->
-    let (env, ty) = Typing_phase.localize_no_subst env ~ignore_errors:true ty in
+    let ((env, ty_err_opt), ty) =
+      Typing_phase.localize_no_subst env ~ignore_errors:true ty
+    in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     let null = Typing_make_type.null Typing_reason.Rnone in
     Typing_subtype.is_sub_type env null ty
     ||

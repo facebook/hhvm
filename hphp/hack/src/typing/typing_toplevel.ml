@@ -152,13 +152,14 @@ let fun_def ctx fd :
       env
   in
   List.iter ~f:Errors.add_typing_error @@ Typing_type_wellformedness.fun_ env f;
-  let env =
+  let (env, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
       ~ignore_errors:false
       f.f_tparams
       f.f_where_constraints
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   let env = Env.set_fn_kind env f.f_fun_kind in
   let (return_decl_ty, params_decl_ty) =
     merge_decl_header_with_hints ~params:f.f_params ~ret:f.f_ret decl_header env
@@ -169,7 +170,11 @@ let fun_def ctx fd :
       (env, Typing_return.make_default_return ~is_method:false env f.f_name)
     | Some ty ->
       let localize env ty =
-        Phase.localize_no_subst env ~ignore_errors:false ty
+        let ((env, ty_err_opt), lty) =
+          Phase.localize_no_subst env ~ignore_errors:false ty
+        in
+        Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        (env, lty)
       in
       Typing_return.make_return_type localize env ty
   in
@@ -415,7 +420,14 @@ let method_return env m ret_decl_ty =
         empty_expand_env_with_on_error
           (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
       in
-      Typing_return.make_return_type (Phase.localize ~ety_env) env ret
+      Typing_return.make_return_type
+        (fun env dty ->
+          let ((env, ty_err_opt), lty) = Phase.localize ~ety_env env dty in
+
+          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          (env, lty))
+        env
+        ret
   in
   let ret_pos =
     match snd m.m_ret with
@@ -476,13 +488,14 @@ let method_def ~is_disposable env cls m =
   in
   let is_ctor = String.equal (snd m.m_name) SN.Members.__construct in
   let env = Env.set_fun_is_constructor env is_ctor in
-  let env =
+  let (env, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
       ~ignore_errors:false
       m.m_tparams
       m.m_where_constraints
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   let env =
     match Env.get_self_ty env with
     | Some ty when not (Env.is_static env) ->
@@ -1067,45 +1080,55 @@ let typeconst_def
     | TCAbstract
         { c_atc_as_constraint; c_atc_super_constraint; c_atc_default = Some ty }
       ->
-      let (env, ty) =
+      let ((env, ty_err_opt1), ty) =
         Phase.localize_hint_no_subst
           ~ignore_errors:false
           ~report_cycle:(pos, name)
           env
           ty
       in
-      let (env, e1) =
+      Option.iter ~f:Errors.add_typing_error ty_err_opt1;
+      let (env, ty_err_opt2) =
         match c_atc_as_constraint with
         | Some as_ ->
-          let (env, as_) =
+          let ((env, ty_err_opt1), as_) =
             Phase.localize_hint_no_subst ~ignore_errors:false env as_
           in
-          Type.sub_type
-            pos
-            Reason.URtypeconst_cstr
-            env
-            ty
-            as_
-            Typing_error.Callback.unify_error
+          let (env, ty_err_opt2) =
+            Type.sub_type
+              pos
+              Reason.URtypeconst_cstr
+              env
+              ty
+              as_
+              Typing_error.Callback.unify_error
+          in
+          (env, Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
         | None -> (env, None)
       in
-      let (env, e2) =
+      let (env, ty_err_opt3) =
         match c_atc_super_constraint with
         | Some super ->
-          let (env, super) =
+          let ((env, te1), super) =
             Phase.localize_hint_no_subst ~ignore_errors:false env super
           in
-          Type.sub_type
-            pos
-            Reason.URtypeconst_cstr
-            env
-            super
-            ty
-            Typing_error.Callback.unify_error
+          let (env, te2) =
+            Type.sub_type
+              pos
+              Reason.URtypeconst_cstr
+              env
+              super
+              ty
+              Typing_error.Callback.unify_error
+          in
+          (env, Option.merge ~f:Typing_error.both te1 te2)
         | None -> (env, None)
       in
-
-      (env, Option.merge e1 e2 ~f:Typing_error.both)
+      let ty_err_opt =
+        Typing_error.multiple_opt
+        @@ List.filter_map ~f:Fn.id [ty_err_opt1; ty_err_opt2; ty_err_opt3]
+      in
+      (env, ty_err_opt)
     | TCConcrete { c_tc_type = ty } ->
       let (env, _ty) =
         Phase.localize_hint_no_subst
@@ -1114,7 +1137,7 @@ let typeconst_def
           env
           ty
       in
-      (env, None)
+      env
     | _ -> (env, None)
   in
   Option.iter ty_err_opt ~f:Errors.add_typing_error;
@@ -1194,9 +1217,10 @@ let class_const_def ~in_enum_class c env cc =
     | Some h ->
       let ty = Decl_hint.hint env.decl_env h in
       let ty = Typing_enforceability.compute_enforced_ty env ty in
-      let (env, ty) =
+      let ((env, ty_err_opt), ty) =
         Phase.localize_possibly_enforced_no_subst env ~ignore_errors:false ty
       in
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
       (* Removing the HH\MemberOf wrapper in case of enum classes so the
        * following call to expr_* has the right expected type
        *)
@@ -1313,12 +1337,13 @@ let class_var_def ~is_static cls env cv =
     | None -> (env, None)
     | Some decl_cty ->
       let decl_cty = Typing_enforceability.compute_enforced_ty env decl_cty in
-      let (env, cty) =
+      let ((env, ty_err_opt), cty) =
         Phase.localize_possibly_enforced_no_subst
           env
           ~ignore_errors:false
           decl_cty
       in
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
       let expected =
         Some (ExpectedTy.make_and_allow_coercion cv.cv_span Reason.URhint cty)
       in
@@ -1440,9 +1465,10 @@ let class_var_def ~is_static cls env cv =
 (** Check the where constraints of the parents of a class *)
 let check_class_parents_where_constraints env pc impl =
   let check_where_constraints env ((p, _hint), decl_ty) =
-    let (env, locl_ty) =
+    let ((env, ty_err_opt1), locl_ty) =
       Phase.localize_no_subst env ~ignore_errors:false decl_ty
     in
+    Option.iter ty_err_opt1 ~f:Errors.add_typing_error;
     match get_node (TUtils.get_base_type env locl_ty) with
     | Tclass (cls, _, tyl) ->
       (match Env.get_class env (snd cls) with
@@ -1456,13 +1482,17 @@ let check_class_parents_where_constraints env pc impl =
             substs = Subst.make_locl tc_tparams tyl;
           }
         in
-        Phase.check_where_constraints
-          ~in_class:true
-          ~use_pos:pc
-          ~definition_pos:(Pos_or_decl.of_raw_pos p)
-          ~ety_env
-          env
-          (Cls.where_constraints cls)
+        let (env, ty_err_opt2) =
+          Phase.check_where_constraints
+            ~in_class:true
+            ~use_pos:pc
+            ~definition_pos:(Pos_or_decl.of_raw_pos p)
+            ~ety_env
+            env
+            (Cls.where_constraints cls)
+        in
+        Option.iter ty_err_opt2 ~f:Errors.add_typing_error;
+        env
       | _ -> env)
     | _ -> env
   in
@@ -1495,8 +1525,10 @@ let check_generic_class_with_SupportDynamicType env c parents =
     in
     let (env, ty_errs) =
       List.fold parents ~init:(env, []) ~f:(fun (env, ty_errs) (_, ty) ->
-          let (env, lty) = Phase.localize_no_subst env ~ignore_errors:true ty in
-          let (env, ty_err_opt) =
+          let ((env, ty_err_opt1), lty) =
+            Phase.localize_no_subst env ~ignore_errors:true ty
+          in
+          let (env, ty_err_opt2) =
             match get_node lty with
             | Tclass ((_, name), _, _) ->
               begin
@@ -1535,10 +1567,9 @@ let check_generic_class_with_SupportDynamicType env c parents =
             | _ -> (env, None)
           in
           let ty_errs =
-            Option.value_map
-              ~default:ty_errs
-              ~f:(fun e -> e :: ty_errs)
-              ty_err_opt
+            Option.(
+              value_map ~default:ty_errs ~f:(fun e -> e :: ty_errs)
+              @@ merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
           in
           (env, ty_errs))
     in
@@ -1681,14 +1712,15 @@ let check_sealed env c =
 
 let check_class_where_constraints env c tc =
   let (pc, _) = c.c_name in
-  let env =
+  let (env, ty_err_opt1) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
       ~ignore_errors:false
       c.c_tparams
       c.c_where_constraints
   in
-  let env =
+  Option.iter ty_err_opt1 ~f:Errors.add_typing_error;
+  let (env, ty_err_opt2) =
     Phase.check_where_constraints
       ~in_class:true
       ~use_pos:pc
@@ -1699,6 +1731,7 @@ let check_class_where_constraints env c tc =
       env
       (Cls.where_constraints tc)
   in
+  Option.iter ty_err_opt2 ~f:Errors.add_typing_error;
   env
 
 type class_parents = {
@@ -2050,7 +2083,7 @@ let gconst_def ctx cst =
     | Some hint ->
       let ty = Decl_hint.hint env.decl_env hint in
       let ty = Typing_enforceability.compute_enforced_ty env ty in
-      let (env, dty) =
+      let ((env, ty_err_opt1), dty) =
         Phase.localize_possibly_enforced_no_subst env ~ignore_errors:false ty
       in
       let (env, te, value_type) =
@@ -2059,7 +2092,7 @@ let gconst_def ctx cst =
         in
         Typing.expr_with_pure_coeffects env ~expected value
       in
-      let env =
+      let (env, ty_err_opt2) =
         Typing_coercion.coerce_type
           (fst hint)
           Reason.URhint
@@ -2068,7 +2101,10 @@ let gconst_def ctx cst =
           dty
           Typing_error.Callback.unify_error
       in
-      (te, env)
+      let ty_err_opt =
+        Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2
+      in
+      (te, (env, ty_err_opt))
     | None ->
       if (not (is_literal_expr value)) && not (Env.is_hhi env) then
         Errors.add_naming_error

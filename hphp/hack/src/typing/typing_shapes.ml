@@ -364,10 +364,14 @@ let to_collection env shape_ty res return_type =
                       begin
                         match Env.get_const env class_ mid with
                         | Some const ->
-                          Typing_phase.localize_no_subst
-                            env
-                            ~ignore_errors:true
-                            const.cc_type
+                          let ((env, ty_err_opt), lty) =
+                            Typing_phase.localize_no_subst
+                              env
+                              ~ignore_errors:true
+                              const.cc_type
+                          in
+                          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+                          (env, lty)
                         | None -> (env, TUtils.mk_tany_ env p)
                       end
                     | None -> (env, TUtils.mk_tany_ env p)
@@ -470,9 +474,10 @@ let check_shape_keys_validity env keys =
                  Typing_error.Callback.unify_error;
             (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
           | Some { cc_type; _ } ->
-            let (env, ty) =
+            let ((env, ty_err_opt), ty) =
               Typing_phase.localize_no_subst ~ignore_errors:true env cc_type
             in
+            Option.iter ~f:Errors.add_typing_error ty_err_opt;
             let r = Reason.Rwitness key_pos in
             let (env, e2) =
               Type.sub_type key_pos Reason.URnone env ty (MakeType.arraykey r)

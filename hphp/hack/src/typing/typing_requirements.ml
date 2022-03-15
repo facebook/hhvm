@@ -27,13 +27,18 @@ let check_fulfillment env class_pos get_impl (trait_pos, req_ty) =
                 { pos = class_pos; trait_pos; req_pos; req_name }));
       env
     | Some impl_ty ->
-      Typing_phase.sub_type_decl env impl_ty req_ty
-      @@ Some
-           (Typing_error.Reasons_callback.unsatisfied_req_callback
-              ~class_pos
-              ~trait_pos
-              ~req_pos
-              req_name))
+      let (env, ty_err_opt) =
+        Typing_phase.sub_type_decl env impl_ty req_ty
+        @@ Some
+             (Typing_error.Reasons_callback.unsatisfied_req_callback
+                ~class_pos
+                ~trait_pos
+                ~req_pos
+                req_name)
+      in
+
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
+      env)
 
 (** Check whether a class satifies all the requirements of the traits it uses,
     namely [require extends] and [require implements]. *)

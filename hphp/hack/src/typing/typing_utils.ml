@@ -224,14 +224,22 @@ let (simplify_intersections_ref : simplify_intersections ref) =
 
 let simplify_intersections x = !simplify_intersections_ref x
 
-type localize_no_subst = env -> ignore_errors:bool -> decl_ty -> env * locl_ty
+type localize_no_subst =
+  env ->
+  ignore_errors:bool ->
+  decl_ty ->
+  (env * Typing_error.t option) * locl_ty
 
 let (localize_no_subst_ref : localize_no_subst ref) =
   ref (not_implemented "localize_no_subst")
 
 let localize_no_subst x = !localize_no_subst_ref x
 
-type localize = ety_env:expand_env -> env -> decl_ty -> env * locl_ty
+type localize =
+  ety_env:expand_env ->
+  env ->
+  decl_ty ->
+  (env * Typing_error.t option) * locl_ty
 
 let (localize_ref : localize ref) =
   ref (fun ~ety_env:_ -> not_implemented "localize")

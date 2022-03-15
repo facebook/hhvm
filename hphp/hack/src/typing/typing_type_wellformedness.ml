@@ -50,21 +50,26 @@ let check_happly unchecked_tparams env h =
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in
   let ety_env = { empty_expand_env with expand_visible_newtype = false } in
-  let (env, locl_ty) = Phase.localize env ~ety_env decl_ty in
-  match get_node locl_ty with
-  | Tnewtype (type_name, targs, _cstr_ty) ->
-    (match Env.get_typedef env type_name with
-    | None -> env
-    | Some typedef ->
-      check_tparams_constraints env hint_pos typedef.td_tparams targs)
-  | _ ->
-    (match get_node (TUtils.get_base_type env locl_ty) with
-    | Tclass (cls, _, targs) ->
-      (match Env.get_class env (snd cls) with
-      | Some cls ->
-        check_tparams_constraints env hint_pos (Cls.tparams cls) targs
-      | None -> env)
-    | _ -> env)
+  let ((env, ty_err_opt1), locl_ty) = Phase.localize env ~ety_env decl_ty in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt1;
+  let (env, ty_err_opt2) =
+    match get_node locl_ty with
+    | Tnewtype (type_name, targs, _cstr_ty) ->
+      (match Env.get_typedef env type_name with
+      | None -> (env, None)
+      | Some typedef ->
+        check_tparams_constraints env hint_pos typedef.td_tparams targs)
+    | _ ->
+      (match get_node (TUtils.get_base_type env locl_ty) with
+      | Tclass (cls, _, targs) ->
+        (match Env.get_class env (snd cls) with
+        | Some cls ->
+          check_tparams_constraints env hint_pos (Cls.tparams cls) targs
+        | None -> (env, None))
+      | _ -> (env, None))
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt2;
+  env
 
 let rec context_hint ?(in_signature = true) env (p, h) =
   Typing_kinding.Simple.check_well_kinded_context_hint
@@ -189,13 +194,14 @@ let fun_ tenv f =
   let env = { typedef_tparams = []; tenv } in
   (* Add type parameters to typing environment and localize the bounds
      and where constraints *)
-  let tenv =
+  let (tenv, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env.tenv
       ~ignore_errors:true
       f.f_tparams
       f.f_where_constraints
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   let env = { env with tenv } in
   type_hint env f.f_ret
   @ tparams env f.f_tparams
@@ -241,13 +247,14 @@ let class_vars env cvs =
 let method_ env m =
   (* Add method type parameters to environment and localize the bounds
      and where constraints *)
-  let tenv =
+  let (tenv, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env.tenv
       ~ignore_errors:true
       m.m_tparams
       m.m_where_constraints
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   let tenv =
     Env.set_internal
       tenv
@@ -317,13 +324,14 @@ let class_ tenv c =
     c
   in
   (* Add type parameters to typing environment and localize the bounds *)
-  let tenv =
+  let (tenv, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       tenv
       ~ignore_errors:true
       c_tparams
       c_where_constraints
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   let env = { env with tenv } in
   let (c_constructor, c_statics, c_methods) = split_methods c_methods in
   let (c_static_vars, c_vars) = split_vars c_vars in
@@ -372,11 +380,15 @@ let typedef tenv t =
      need to record their kinds in the generic var environment *)
   let where_constraints = [] in
   let tenv_with_typedef_tparams =
-    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      tenv
-      ~ignore_errors:true
-      t_tparams
-      where_constraints
+    let (env, ty_err_opt) =
+      Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+        tenv
+        ~ignore_errors:true
+        t_tparams
+        where_constraints
+    in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    env
   in
   (* For typdefs, we do want to do the simple kind checks on the body
      (e.g., arities match up), but no constraint checks. We need to check the

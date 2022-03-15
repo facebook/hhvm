@@ -48,8 +48,9 @@ let make_ts : Typing_env_types.env -> locl_ty -> Typing_env_types.env * locl_ty
         substs = Subst.make_locl td_tparams [ty];
       }
     in
-    let (env, ty) = Phase.localize ~ety_env env ts in
+    let ((env, ty_err), ty) = Phase.localize ~ety_env env ts in
     let ty = with_reason ty r in
+    Option.iter ~f:Errors.add_typing_error ty_err;
     (env, ty)
   | _ ->
     (* Should not hit this because TypeStructure should always be defined *)

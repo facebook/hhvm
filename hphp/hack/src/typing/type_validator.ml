@@ -56,9 +56,10 @@ class virtual type_validator =
         acc
 
     method! on_taccess acc _r (root, id) =
-      let (env, root) =
+      let ((env, ty_err_opt), root) =
         Typing_phase.localize acc.env ~ety_env:acc.ety_env root
       in
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
       let (env, tyl) =
         Typing_utils.get_concrete_supertypes ~abstract_enum:true env root
       in

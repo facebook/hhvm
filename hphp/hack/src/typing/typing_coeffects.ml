@@ -62,9 +62,10 @@ let rec validate_capability env pos ty =
            { pos; name = Typing_print.full_decl (Env.get_tcopt env) ty })
   | Tgeneric (name, []) when SN.Coeffects.is_generated_generic name -> ()
   | Taccess (root, (_p, c)) ->
-    let (env, root) =
+    let ((env, ty_err_opt), root) =
       Typing_phase.localize_no_subst env ~ignore_errors:false root
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     let (env, candidates) =
       Typing_utils.get_concrete_supertypes ~abstract_enum:false env root
     in
@@ -110,19 +111,21 @@ let type_capability env ctxs unsafe_ctxs default_pos =
 
   let cc = Decl_hint.aast_contexts_to_decl_capability in
   let (decl_pos, cap) = cc env.decl_env ctxs default_pos in
-  let (env, cap_ty) =
+  let ((env, ty_err_opt1), cap_ty) =
     match cap with
     | CapTy ty ->
       if TypecheckerOptions.strict_contexts (Env.get_tcopt env) then
         validate_capability env decl_pos ty;
       Phase.localize_no_subst env ~ignore_errors:false ty
-    | CapDefaults p -> (env, MakeType.default_capability p)
+    | CapDefaults p -> ((env, None), MakeType.default_capability p)
   in
-  let (env, unsafe_cap_ty) =
+  Option.iter ~f:Errors.add_typing_error ty_err_opt1;
+  let ((env, ty_err_opt2), unsafe_cap_ty) =
     match snd @@ cc env.decl_env unsafe_ctxs default_pos with
     | CapTy ty -> Phase.localize_no_subst env ~ignore_errors:false ty
-    | CapDefaults p -> (env, MakeType.default_capability_unsafe p)
+    | CapDefaults p -> ((env, None), MakeType.default_capability_unsafe p)
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt2;
   (env, cap_ty, unsafe_cap_ty)
 
 (* Checking this with List.exists will be a single op in the vast majority of cases (empty) *)

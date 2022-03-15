@@ -87,9 +87,9 @@ let check_param_has_hint env param ty =
  *)
 let make_param_local_ty ~dynamic_mode env decl_hint param =
   let r = Reason.Rwitness param.param_pos in
-  let (env, ty) =
+  let ((env, ty_err_opt), ty) =
     match decl_hint with
-    | None -> (env, mk (r, TUtils.tany env))
+    | None -> ((env, None), mk (r, TUtils.tany env))
     | Some ty ->
       let { et_type = ty; et_enforced } =
         Typing_enforceability.compute_enforced_and_pessimize_ty
@@ -107,6 +107,7 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
       in
       Phase.localize_no_subst env ~ignore_errors:false ty
   in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
   let ty =
     match get_node ty with
     | t when param.param_is_variadic ->

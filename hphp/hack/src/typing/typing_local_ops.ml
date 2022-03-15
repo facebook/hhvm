@@ -59,8 +59,12 @@ module Capabilities = struct
 
   let mk special_name env =
     let r = Reason.Rnone in
-    Typing_make_type.apply r (Reason.to_pos r, special_name) []
-    |> Typing_phase.localize_no_subst ~ignore_errors:true env
+    let ((env, ty_err_opt), res) =
+      Typing_make_type.apply r (Reason.to_pos r, special_name) []
+      |> Typing_phase.localize_no_subst ~ignore_errors:true env
+    in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    (env, res)
 end
 
 let enforce_static_property_access =

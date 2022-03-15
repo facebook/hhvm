@@ -140,7 +140,8 @@ and get_spread_attributes env pos onto_xhp cty =
         substs = TUtils.make_locl_subst_for_class_tparams xhp_info tparams;
       }
     in
-    List.map_env
+    List.map_env_ty_err_opt
+      ~combine_ty_errs:Typing_error.multiple_opt
       ~f:
         begin
           fun env (k, ce) ->
@@ -151,7 +152,14 @@ and get_spread_attributes env pos onto_xhp cty =
       env
       attrs
   in
-  let (env, attrs) = List.map_env ~f:xhp_to_attrs env possible_xhp in
+  let ((env, ty_err_opt), attrs) =
+    List.map_env_ty_err_opt
+      ~f:xhp_to_attrs
+      env
+      possible_xhp
+      ~combine_ty_errs:Typing_error.multiple_opt
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (env, List.concat attrs)
 
 (**

@@ -58,9 +58,10 @@ let enum_base_type env cid =
     (match Cls.enum_type cls with
     | None -> (env, None)
     | Some te ->
-      let (env, ty) =
+      let ((env, ty_err_opt), ty) =
         Typing_phase.localize_no_subst env ~ignore_errors:true te.te_base
       in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
       (env, Some ty))
 
 let opaque_enum_expander expanded =

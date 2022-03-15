@@ -44,7 +44,10 @@ let print_error_ty = Typing_print.error
 let print_ty_with_identity env phase_ty sym_occurrence sym_definition =
   match phase_ty with
   | Typing_defs.DeclTy ty ->
-    let (env, ty) = Typing_phase.localize_no_subst env ~ignore_errors:true ty in
+    let ((env, ty_err_opt), ty) =
+      Typing_phase.localize_no_subst env ~ignore_errors:true ty
+    in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
     Typing_print.full_with_identity env ty sym_occurrence sym_definition
   | Typing_defs.LoclTy ty ->
     Typing_print.full_with_identity env ty sym_occurrence sym_definition
@@ -164,9 +167,17 @@ let assert_nullable = Typing_equality_check.assert_nullable
 
 let hint_to_ty env = Decl_hint.hint env.Typing_env_types.decl_env
 
-let localize env ety_env = Typing_phase.localize ~ety_env env
+let localize env ety_env dty =
+  let ((env, ty_err_opt), lty) = Typing_phase.localize ~ety_env env dty in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  (env, lty)
 
-let localize_no_subst = Typing_phase.localize_no_subst
+let localize_no_subst env ~ignore_errors dty =
+  let ((env, ty_err_opt), lty) =
+    Typing_phase.localize_no_subst env ~ignore_errors dty
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  (env, lty)
 
 let get_upper_bounds = Typing_env.get_upper_bounds
 

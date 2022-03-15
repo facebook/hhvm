@@ -194,9 +194,10 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
   in
   let check_tapply r class_sid type_args =
     let decl_ty = Typing_make_type.apply r class_sid type_args in
-    let (env, locl_ty) =
+    let ((env, ty_err_opt), locl_ty) =
       TUtils.localize_no_subst env ~ignore_errors:true decl_ty
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     match get_node (TUtils.get_base_type env locl_ty) with
     | Tclass (cls_name, _, tyl) when not (List.is_empty tyl) ->
       (match Env.get_class env (snd cls_name) with
@@ -209,12 +210,15 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
           begin
             fun { tp_name = (_p, x); tp_constraints = cstrl; _ } ty ->
             List.iter cstrl ~f:(fun (ck, cstr_ty) ->
-                let (env, cstr_ty) = TUtils.localize ~ety_env env cstr_ty in
-                let (_env, ty_err_opt) =
+                let ((env, ty_err1), cstr_ty) =
+                  TUtils.localize ~ety_env env cstr_ty
+                in
+                Option.iter ~f:Errors.add_typing_error ty_err1;
+                let (_env, ty_err2) =
                   TGenConstraint.check_constraint env ck ty ~cstr_ty
                   @@ report_constraint ty cls_name x
                 in
-                Option.iter ty_err_opt ~f:Errors.add_typing_error)
+                Option.iter ty_err2 ~f:Errors.add_typing_error)
           end
           tc_tparams
           tyl

@@ -70,7 +70,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
     in
     let (env, expanded_ty) =
       if should_expand then
-        Phase.localize_with_ty_err ~ety_env env td_type
+        Phase.localize ~ety_env env td_type
       else
         let (env, td_constraint) =
           match td_constraint with
@@ -80,7 +80,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
             in
             let cstr = MakeType.mixed r_cstr in
             ((env, None), cstr)
-          | Some cstr -> Phase.localize_with_ty_err ~ety_env env cstr
+          | Some cstr -> Phase.localize ~ety_env env cstr
         in
         (env, mk (r, Tnewtype (x, argl, td_constraint)))
     in

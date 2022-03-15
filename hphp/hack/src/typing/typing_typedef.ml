@@ -26,13 +26,14 @@ let typedef_def ctx typedef =
     Env.set_module env
     @@ Naming_attributes_params.get_module_attribute typedef.t_file_attributes
   in
-  let env =
+  let (env, ty_err_opt1) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
       ~ignore_errors:false
       typedef.t_tparams
       []
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt1;
   List.iter ~f:Errors.add_typing_error
   @@ Typing_type_wellformedness.typedef env typedef;
   Typing_variance.typedef env typedef;
@@ -53,28 +54,33 @@ let typedef_def ctx typedef =
   } =
     typedef
   in
-  let (env, ty) =
+  let ((env, ty_err_opt2), ty) =
     Phase.localize_hint_no_subst
       env
       ~ignore_errors:false
       ~report_cycle:(t_pos, t_name)
       hint
   in
-  let (env, ty_err_opt) =
+  Option.iter ~f:Errors.add_typing_error ty_err_opt2;
+  let (env, ty_err_opt3) =
     match tcstr with
     | Some tcstr ->
-      let (env, cstr) =
+      let ((env, ty_err_opt1), cstr) =
         Phase.localize_hint_no_subst env ~ignore_errors:false tcstr
       in
-      Typing_ops.sub_type
-        t_pos
-        Reason.URnewtype_cstr
-        env
-        ty
-        cstr
-        Typing_error.Callback.newtype_alias_must_satisfy_constraint
+      let (env, ty_err_opt2) =
+        Typing_ops.sub_type
+          t_pos
+          Reason.URnewtype_cstr
+          env
+          ty
+          cstr
+          Typing_error.Callback.newtype_alias_must_satisfy_constraint
+      in
+      (env, Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
     | _ -> (env, None)
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt3;
   let env =
     match hint with
     | (_pos, Hshape { nsi_allows_unknown_fields = _; nsi_field_map }) ->
@@ -96,7 +102,6 @@ let typedef_def ctx typedef =
   let (env, file_attributes) =
     Typing.file_attributes env typedef.t_file_attributes
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   {
     Aast.t_annotation = Env.save (Env.get_tpenv env) env;
     Aast.t_name = typedef.t_name;

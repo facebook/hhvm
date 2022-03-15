@@ -180,20 +180,29 @@ let subtype_method_decl
   (* First extend the environment with the type parameters from the supertype, along
    * with their bounds and the function's where constraints
    *)
-  let env =
+  let (env, ty_err1) =
     Phase.localize_and_add_generic_parameters_and_where_constraints
       ~ety_env
       env
       ft_super.ft_tparams
       ft_super.ft_where_constraints
   in
+  Option.iter ~f:Errors.add_typing_error ty_err1;
   (* Localize the function type itself *)
-  let (env, locl_ft_sub) =
+  let ((env, ty_err2), locl_ft_sub) =
     Phase.localize_ft ~ety_env ~def_pos:p_sub env ft_sub
   in
-  let (env, locl_ft_super) =
+  Option.iter ~f:Errors.add_typing_error ty_err2;
+  let ((env, ty_err3), locl_ft_super) =
     Phase.localize_ft ~ety_env ~def_pos:p_super env ft_super
   in
+  Option.iter ~f:Errors.add_typing_error ty_err3;
+  let add_where_constraints env (cstrl : locl_where_constraint list) =
+    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
+        Typing_subtype.add_constraint env ck ty1 ty2 (Some on_error))
+  in
+  (* Now extend the environment with `where` constraints from the supertype *)
+  let env = add_where_constraints env locl_ft_super.ft_where_constraints in
   (* Finally apply contra/co subtyping on the function type, and check that
    * the constraints on the supertype entail the constraints on the subtype *)
   let env =

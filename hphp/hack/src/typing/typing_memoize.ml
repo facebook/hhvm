@@ -154,9 +154,10 @@ let check_param : env -> Nast.fun_param -> unit =
   | None -> ()
   | Some hint ->
     let (hint_pos, _) = hint in
-    let (env, ty) =
+    let ((env, ty_err_opt), ty) =
       Typing_phase.localize_hint_no_subst env ~ignore_errors:true hint
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     check_memoizable env hint_pos ty
 
 let check : env -> Nast.user_attribute list -> Nast.fun_param list -> unit =

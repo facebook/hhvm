@@ -1684,10 +1684,7 @@ and simplify_subtype_i
                           match c with
                           | Ast_defs.Constraint_as ->
                             let (_env, ty) =
-                              Phase.localize_no_subst_with_ty_err
-                                env
-                                ~ignore_errors:true
-                                ty
+                              Phase.localize_no_subst env ~ignore_errors:true ty
                             in
                             Some ty
                           | _ -> None)
@@ -1747,7 +1744,7 @@ and simplify_subtype_i
                             match c with
                             | Ast_defs.Constraint_super ->
                               let (_env, ty) =
-                                Phase.localize_no_subst_with_ty_err
+                                Phase.localize_no_subst
                                   env
                                   ~ignore_errors:true
                                   ty
@@ -1772,7 +1769,7 @@ and simplify_subtype_i
               | Ast_defs.Cenum_class _ ->
                 (match Cls.enum_type class_sub with
                 | Some enum_type ->
-                  let (env, subtype) =
+                  let ((env, _ty_err_opt), subtype) =
                     Typing_utils.localize_no_subst
                       ~ignore_errors:true
                       env
@@ -2135,7 +2132,7 @@ and simplify_subtype_i
                 (* Since we have provided no `Typing_error.Reasons_callback.t` in the
                    `expand_env`, this will not generate any errors *)
                 let ((env, _ty_err_opt), up_obj) =
-                  Phase.localize_with_ty_err ~ety_env env up_obj
+                  Phase.localize ~ety_env env up_obj
                 in
                 simplify_subtype ~subtype_env ~this_ty up_obj ty_super env
               | None ->
@@ -2156,7 +2153,7 @@ and simplify_subtype_i
                       (* Since we have provided no `Typing_error.Reasons_callback.t` in the
                          `expand_env`, this will not generate any errors *)
                       let ((env, _ty_err_opt), ub_obj_typ) =
-                        Phase.localize_with_ty_err ~ety_env env ub_obj_typ
+                        Phase.localize ~ety_env env ub_obj_typ
                       in
                       env
                       |> simplify_subtype

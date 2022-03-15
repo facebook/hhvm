@@ -130,7 +130,7 @@ type localize_no_subst =
   Typing_env_types.env ->
   ignore_errors:bool ->
   Typing_defs.decl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 val localize_no_subst_ref : localize_no_subst ref
 
@@ -138,13 +138,13 @@ val localize_no_subst :
   Typing_env_types.env ->
   ignore_errors:bool ->
   Typing_defs.decl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 type localize =
   ety_env:Typing_defs.expand_env ->
   Typing_env_types.env ->
   Typing_defs.decl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 val localize_ref : localize ref
 
@@ -152,7 +152,7 @@ val localize :
   Typing_env_types.env ->
   ety_env:Typing_defs.expand_env ->
   Typing_defs.decl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 val is_mixed_i : Typing_env_types.env -> Typing_defs.internal_type -> bool
 

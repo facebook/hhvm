@@ -70,10 +70,21 @@ class virtual type_validator =
             Option.value
               ~default:acc
               ( Env.get_class env class_name >>= fun class_ ->
-                Decl_provider.Class.get_typeconst class_ (snd id)
+                let (id_pos, id_name) = id in
+                Decl_provider.Class.get_typeconst class_ id_name
                 >>= fun typeconst ->
-                let ety_env = { acc.ety_env with this_ty = ty } in
-                Some (this#on_typeconst { acc with ety_env } class_ typeconst)
+                let (ety_env, has_cycle) =
+                  Typing_defs.add_type_expansion_check_cycles
+                    { acc.ety_env with this_ty = ty }
+                    (id_pos, class_name ^ "::" ^ id_name)
+                in
+                match has_cycle with
+                | Some _ ->
+                  (* This type is cyclic, give up checking it. We've
+                     already reported an error. *)
+                  None
+                | None ->
+                  Some (this#on_typeconst { acc with ety_env } class_ typeconst)
               )
           | _ -> acc)
 

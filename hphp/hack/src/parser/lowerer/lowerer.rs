@@ -2842,20 +2842,9 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         ExpressionStatement(c) => p_expression_stmt(env, pos, c, node),
         CompoundStatement(c) => handle_loop_body(pos, &c.statements, env),
         SyntaxList(_) => handle_loop_body(pos, node, env),
-        ThrowStatement(c) => lift_awaits_in_statement(node, env, |e| {
-            Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
-        }),
-        DoStatement(c) => Ok(new(
-            pos,
-            S_::mk_do(
-                p_block(false /* remove noop */, &c.body, env)?,
-                p_expr(&c.condition, env)?,
-            ),
-        )),
-        WhileStatement(c) => Ok(new(
-            pos,
-            S_::mk_while(p_expr(&c.condition, env)?, p_block(true, &c.body, env)?),
-        )),
+        ThrowStatement(c) => p_throw_stmt(env, pos, c, node),
+        DoStatement(c) => p_do_stmt(env, pos, c, node),
+        WhileStatement(c) => p_while_stmt(env, pos, c, node),
         UsingStatementBlockScoped(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 Ok(new(
@@ -3084,6 +3073,50 @@ fn check_mutate_class_const<'a>(e: &ast::Expr, node: S<'a>, env: &mut Env<'a>) {
         _ => {}
     }
 }
+
+fn p_while_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a WhileStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    _node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+    Ok(new(
+        pos,
+        S_::mk_while(p_expr(&c.condition, env)?, p_block(true, &c.body, env)?),
+    ))
+}
+
+fn p_throw_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a ThrowStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+    lift_awaits_in_statement(node, env, |e| {
+        Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
+    })
+}
+
+fn p_do_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a DoStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    _node: S<'a>,
+) -> Result<ast::Stmt> {
+    use ast::{Stmt, Stmt_ as S_};
+    let new = Stmt::new;
+
+    Ok(new(
+        pos,
+        S_::mk_do(
+            p_block(false /* remove noop */, &c.body, env)?,
+            p_expr(&c.condition, env)?,
+        ),
+    ))}
 
 fn p_expression_stmt<'a>(
     env: &mut Env<'a>,

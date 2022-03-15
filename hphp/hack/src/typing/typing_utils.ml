@@ -732,3 +732,24 @@ and strip_dynamic env ty =
   match try_strip_dynamic env ty with
   | None -> ty
   | Some ty -> ty
+
+let rec make_supportdyn r env ty =
+  let (env, ty) = Env.expand_type env ty in
+  match deref ty with
+  | (r', Tintersection tyl) ->
+    let (env, tyl) = List.map_env env tyl ~f:(make_supportdyn r) in
+    (env, mk (r', Tintersection tyl))
+  | (r', Tunion tyl) ->
+    let (env, tyl) = List.map_env env tyl ~f:(make_supportdyn r) in
+    (env, mk (r', Tunion tyl))
+  | _ ->
+    if
+      is_sub_type_for_union
+        ~coerce:(Some Typing_logic.CoerceToDynamic)
+        env
+        ty
+        (MakeType.dynamic r)
+    then
+      (env, ty)
+    else
+      (env, Typing_make_type.supportdyn r ty)

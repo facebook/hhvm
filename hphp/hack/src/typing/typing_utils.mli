@@ -469,3 +469,12 @@ val try_strip_dynamic :
  * otherwise return type unchanged. *)
 val strip_dynamic :
   Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty
+
+(* Wrap supportdyn<_> around a type. Push through intersections
+ * and unions, and leave type alone if it is a subtype of dynamic.
+ *)
+val make_supportdyn :
+  Typing_reason.t ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty

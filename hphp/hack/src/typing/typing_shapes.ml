@@ -150,8 +150,7 @@ let shapes_idx_not_null_with_ty_err env shape_ty (ty, p, field) =
       | (r, Tnewtype (n, _, ty))
         when String.equal n Naming_special_names.Classes.cSupportDyn ->
         let (env, ty) = refine_type env ty in
-        let (env, ty) = Env.expand_type env ty in
-        (env, MakeType.supportdyn r ty)
+        TUtils.make_supportdyn r env ty
       | (r, Tshape (shape_kind, ftm)) ->
         let (env, field_type) =
           match TShapeMap.find_opt field ftm with

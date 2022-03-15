@@ -17,6 +17,7 @@ use std::ops::Deref;
 use tyvar_info::TyvarInfo;
 use tyvar_occurrences::TyvarOccurrences;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InferenceEnv<R: Reason> {
     tyvar_info: HashMap<Tyvar, TyvarInfo<R>>,
     occurrences: TyvarOccurrences,
@@ -31,6 +32,13 @@ impl<R: Reason> Default for InferenceEnv<R> {
             subtype_prop: Prop::valid(),
         }
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum ResolveStep<T> {
+    Bound(T),
+    Unbound(Tyvar),
+    CircularRef(Tyvar),
 }
 
 impl<R: Reason> InferenceEnv<R> {
@@ -52,6 +60,11 @@ impl<R: Reason> InferenceEnv<R> {
         CollectUnsolved::new(self, t).acc
     }
 
+    /// Get the type bound to [tv], if any
+    pub fn binding(&self, tv: &Tyvar) -> Option<&Ty<R>> {
+        self.tyvar_info.get(tv).and_then(|info| info.binding())
+    }
+
     /// Bind the type [Ty<R>] to the type variable [tv]
     pub fn bind(&mut self, pos: Option<R::Pos>, tv: Tyvar, ty: Ty<R>) {
         self.tyvar_info.entry(tv).or_default().bind(pos, ty)
@@ -66,6 +79,58 @@ impl<R: Reason> InferenceEnv<R> {
         self.occurrences.unbind(tv);
         tvs.into_iter()
             .for_each(|tv_occ| self.occurrences.add_occurrence(tv_occ, tv));
+    }
+
+    fn resolve_step(
+        &self,
+        aliases: &HashSet<Tyvar>,
+        tv: Tyvar,
+    ) -> Result<ResolveStep<&Ty<R>>, (Tyvar, Tyvar)> {
+        use ResolveStep::*;
+        if let Some(ty) = self.binding(&tv) {
+            match *ty.deref() {
+                Ty_::Tvar(tv) if aliases.contains(&tv) => Ok(CircularRef(tv)),
+                Ty_::Tvar(tv_out) => Err((tv, tv_out)),
+                _ => Ok(Bound(ty)),
+            }
+        } else {
+            Ok(Unbound(tv))
+        }
+    }
+
+    /// Follow the bindings of a tyvar until we reach any of
+    /// i) A dead-end i.e. an unbound tyvar
+    /// ii) A ciricular ref i.e. we have already seen the tyvar earlier in the chain
+    /// iii) A concrete type
+    fn resolve_help(&self, tv: Tyvar) -> (HashSet<Tyvar>, ResolveStep<&Ty<R>>) {
+        let mut aliases = HashSet::default();
+        let mut next = self.resolve_step(&aliases, tv);
+        while let Err((alias, tv)) = next {
+            aliases.insert(alias);
+            next = self.resolve_step(&aliases, tv);
+        }
+        // We should now have one of the above cases, if not we should panic
+        if let Ok(step) = next {
+            (aliases, step)
+        } else {
+            panic!("Encountered unfollowed alias during resolve")
+        }
+    }
+
+    pub fn resolve(&mut self, reason: R, tv: Tyvar) -> Result<Ty<R>, Tyvar> {
+        let (aliases, step) = self.resolve_help(tv);
+        use ResolveStep::*;
+        let ty_res = match step {
+            Unbound(tv) => Ok(Ty::var(reason, tv)),
+            Bound(ty) => Ok(ty.clone()),
+            CircularRef(tv) => Err(tv),
+        };
+        if let Ok(ref ty) = ty_res {
+            for tv in aliases.into_iter() {
+                self.add(None, tv, ty.clone())
+            }
+        }
+        ty_res
     }
 }
 
@@ -188,5 +253,69 @@ mod tests {
         let ty_int = Ty::int(NReason::none());
         env.add(None, tv1, ty_int);
         assert!(!env.occurrences.occurs_in(&tv2, &tv1));
+    }
+
+    fn test_resolve_bound() {
+        let mut env = InferenceEnv::default();
+        let gen = IdentGen::new();
+        let tv1: Tyvar = gen.make().into();
+        let tv2: Tyvar = gen.make().into();
+        let tv3: Tyvar = gen.make().into();
+        let ty_v2 = Ty::var(NReason::none(), tv2);
+        let ty_v3 = Ty::var(NReason::none(), tv2);
+        let ty_int = Ty::int(NReason::none());
+
+        // #1 -> #2 -> #3 -> int
+        env.add(None, tv1, ty_v2);
+        env.add(None, tv2, ty_v3);
+        env.add(None, tv3, ty_int);
+
+        let (aliases, res) = env.resolve_help(tv1);
+        assert!(aliases.contains(&tv1));
+        assert!(aliases.contains(&tv2));
+        assert!(!aliases.contains(&tv3));
+        assert!(matches!(res, ResolveStep::Bound(_)));
+    }
+
+    fn test_resolve_unbound() {
+        let mut env = InferenceEnv::default();
+        let gen = IdentGen::new();
+        let tv1: Tyvar = gen.make().into();
+        let tv2: Tyvar = gen.make().into();
+        let tv3: Tyvar = gen.make().into();
+        let ty_v2 = Ty::var(NReason::none(), tv2);
+        let ty_v3 = Ty::var(NReason::none(), tv2);
+
+        // #1 -> #2 -> #3
+        env.add(None, tv1, ty_v2);
+        env.add(None, tv2, ty_v3);
+
+        let (aliases, res) = env.resolve_help(tv1);
+        assert!(aliases.contains(&tv1));
+        assert!(aliases.contains(&tv2));
+        assert!(!aliases.contains(&tv3));
+        assert!(matches!(res, ResolveStep::Unbound(_)));
+    }
+
+    fn test_resolve_ciricular_ref() {
+        let mut env = InferenceEnv::default();
+        let gen = IdentGen::new();
+        let tv1: Tyvar = gen.make().into();
+        let tv2: Tyvar = gen.make().into();
+        let tv3: Tyvar = gen.make().into();
+        let ty_v1 = Ty::var(NReason::none(), tv1);
+        let ty_v2 = Ty::var(NReason::none(), tv2);
+        let ty_v3 = Ty::var(NReason::none(), tv2);
+
+        // #1 -> #2 -> #3 -> #1
+        env.add(None, tv1, ty_v2);
+        env.add(None, tv2, ty_v3);
+        env.add(None, tv3, ty_v1);
+
+        let (aliases, res) = env.resolve_help(tv1);
+        assert!(aliases.contains(&tv1));
+        assert!(aliases.contains(&tv2));
+        assert!(!aliases.contains(&tv3));
+        assert!(matches!(res, ResolveStep::CircularRef(_)));
     }
 }

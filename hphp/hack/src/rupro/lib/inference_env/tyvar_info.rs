@@ -69,6 +69,14 @@ impl<R: Reason> TyvarState<R> {
         matches!(self, TyvarState::Bound(_))
     }
 
+    pub fn binding(&self) -> Option<&Ty<R>> {
+        if let Self::Bound(ty) = self {
+            Some(ty)
+        } else {
+            None
+        }
+    }
+
     pub fn is_informative(&self) -> bool {
         match self {
             TyvarState::Bound(_) => true,
@@ -121,5 +129,9 @@ impl<R: Reason> TyvarInfo<R> {
     pub fn bind(&mut self, pos: Option<R::Pos>, ty: Ty<R>) {
         self.pos = pos;
         self.state = TyvarState::Bound(ty);
+    }
+
+    pub fn binding(&self) -> Option<&Ty<R>> {
+        self.state.binding()
     }
 }

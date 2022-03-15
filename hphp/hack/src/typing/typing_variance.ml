@@ -343,6 +343,12 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
     let params =
       List.fold_left ft.ft_params ~init:empty ~f:get_typarams_param
     in
+    let implicit_params =
+      let { capability } = ft.ft_implicit_params in
+      match capability with
+      | CapDefaults _ -> empty
+      | CapTy ty -> get_typarams ty
+    in
     let ret = get_typarams ft.ft_ret.et_type in
     let get_typarams_constraint acc (ck, ty) =
       union
@@ -380,7 +386,13 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
     in
 
     (* Result so far: bounds, constraints, return, parameters *)
-    let result = union bounds (union constrs (union ret params)) in
+    let result =
+      params
+      |> union implicit_params
+      |> union ret
+      |> union constrs
+      |> union bounds
+    in
 
     (* Get the lower bounds of a type parameter, including where constraints
      * of the form `where t as T` or `where T super t`

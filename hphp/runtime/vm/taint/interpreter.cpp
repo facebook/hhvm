@@ -667,9 +667,18 @@ void iopRetC(PC& /* pc */) {
     stack.replaceTop(path);
   }
 
-  // Return value overrides top of stack.
-  // TODO(T93549800): we may want to keep a set of traces.
   if (saved) {
+    const auto sinks = state->sinks(func);
+    FTRACE(3, "taint: {} sinks\n", sinks.size());
+    auto sink = std::find_if(sinks.begin(), sinks.end(),
+                             [](auto& sink) { return sink.index == -1; });
+    if (sink != sinks.end()) {
+      FTRACE(1, "taint: tainted value flows into return sink\n");
+      state->paths.push_back(saved);
+    }
+
+    // Return value overrides top of stack.
+    // TODO(T93549800): we may want to keep a set of traces.
     FTRACE(1, "taint: function returns source\n");
     stack.replaceTop(saved);
   }
@@ -1103,7 +1112,7 @@ void iopFCall(const Func* func, const FCallArgs& fca, Value last_this) {
   FTRACE(
       1,
       "taint: entering {} ({} arguments) with last_this {}\n",
-      yellow(func->fullName()->data()),
+      yellow(quote(func->fullName()->data())),
       fca.numArgs,
       last_this);
 

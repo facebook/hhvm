@@ -10,6 +10,8 @@
     {"name": "__sink_in_second_parameter", "index": 1 },
     {"name": ".*Logger::genLog", "index": 0 },
     {"name": "xhp_.*::__construct", "index": 1 },
-    {"name": "any_argument_is_sink" }
+    {"name": "any_argument_is_sink" },
+    {"name": "source_to_return_sink", "index": "return" },
+    {"name": "return_is_sink", "index": -1 }
   ]
 }

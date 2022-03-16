@@ -996,27 +996,15 @@ fn p_afield<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Afield> {
 }
 
 // We lower readonly lambda declarations as making the inner lambda have readonly_this.
-fn process_readonly_expr<'a>(env: &mut Env<'a>, mut e: ast::Expr) -> Expr_ {
+fn process_readonly_expr<'a>(mut e: ast::Expr) -> Expr_ {
     match &mut e {
         ast::Expr(_, _, Expr_::Efun(ref mut efun)) if efun.0.readonly_this.is_none() => {
             efun.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
-            // The first readonly expression simply makes the closure readonly
-            if env.is_typechecker() {
-                // remove once HHVM is released
-                Expr_::mk_readonly_expr(e)
-            } else {
-                e.2
-            }
+            e.2
         }
         ast::Expr(_, _, Expr_::Lfun(ref mut l)) if l.0.readonly_this.is_none() => {
             l.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
-            // The first readonly expression simply makes the closure readonly
-            if env.is_typechecker() {
-                // remove once HHVM is released
-                Expr_::mk_readonly_expr(e)
-            } else {
-                e.2
-            }
+            e.2
         }
         _ => Expr_::mk_readonly_expr(e),
     }
@@ -1856,7 +1844,7 @@ fn p_pre_post_unary_decorated_expr<'a>(
             Some(TK::Plus) => mk_unop(Uplus, expr),
             Some(TK::Minus) => mk_unop(Uminus, expr),
             Some(TK::Await) => Ok(lift_await(pos, expr, env, location)),
-            Some(TK::Readonly) => Ok(process_readonly_expr(env, expr)),
+            Some(TK::Readonly) => Ok(process_readonly_expr(expr)),
             Some(TK::Clone) => Ok(Expr_::mk_clone(expr)),
             Some(TK::Print) => Ok(Expr_::mk_call(
                 Expr::new(

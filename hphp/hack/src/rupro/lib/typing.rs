@@ -5,6 +5,7 @@
 
 use pos::Symbol;
 
+use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use crate::tast;
 use crate::typing_defs::{ParamMode, Ty};
@@ -31,6 +32,8 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 pub enum Error {
     #[error("{0}")]
     DeclProvider(#[from] crate::typing_decl_provider::Error),
+    #[error("Decl Not Found: {0:?}")]
+    DeclNotFound(DeclName),
 }
 
 pub struct Typing;

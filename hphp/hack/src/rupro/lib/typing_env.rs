@@ -10,12 +10,15 @@ use std::rc::Rc;
 use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use crate::tast::SavedEnv;
+use crate::typing::{Error, Result};
 use crate::typing_ctx::TypingCtx;
+use crate::typing_decl_provider::Class;
 use crate::typing_defs::{ParamMode, Ty};
 use crate::typing_error::TypingError;
 use crate::typing_local_types::{Local, LocalMap};
 use crate::typing_return::TypingReturnInfo;
 use crate::utils::core::{IdentGen, LocalId};
+use pos::TypeName;
 
 use pos::FunName;
 
@@ -30,6 +33,12 @@ pub struct TEnv<R: Reason> {
     idents: IdentGen,
     errors: Rc<RefCell<Vec<TypingError<R>>>>,
 
+    dependent: DeclName,
+    decls: TEnvDecls<R>,
+}
+
+pub struct TEnvDecls<R: Reason> {
+    ctx: Rc<TypingCtx<R>>,
     dependent: DeclName,
 }
 
@@ -107,7 +116,7 @@ impl<R: Reason> TEnv<R> {
     pub fn new(dependent: DeclName, ctx: Rc<TypingCtx<R>>) -> Self {
         let genv = Rc::new(TGEnv::new());
         Self {
-            ctx,
+            ctx: Rc::clone(&ctx),
 
             genv,
             lenv: Rc::new(TLEnv::new()),
@@ -115,6 +124,7 @@ impl<R: Reason> TEnv<R> {
             idents: IdentGen::new(),
             errors: Rc::new(RefCell::new(Vec::new())),
             dependent,
+            decls: TEnvDecls::new(Rc::clone(&ctx), dependent),
         }
     }
 
@@ -132,12 +142,21 @@ impl<R: Reason> TEnv<R> {
         empty
     }
 
+    pub fn decls(&self) -> &TEnvDecls<R> {
+        &self.decls
+    }
+
     pub fn add_error(&self, error: TypingError<R>) {
         self.errors.borrow_mut().push(error)
     }
 
     pub fn fun_env(ctx: Rc<TypingCtx<R>>, fd: &oxidized::aast::FunDef<(), ()>) -> Self {
         Self::new(FunName::new(&fd.fun.name.1).into(), ctx)
+    }
+
+    pub fn class_env(ctx: Rc<TypingCtx<R>>, cd: &oxidized::aast::Class_<(), ()>) -> Self {
+        // TODO(hrust): set_self, set_parent
+        Self::new(TypeName::new(&cd.name.1).into(), ctx)
     }
 
     pub fn set_param(&self, id: LocalId, ty: Ty<R>, pos: R::Pos, param_mode: ParamMode) {
@@ -185,5 +204,23 @@ impl<R: Reason> TEnv<R> {
 
     pub fn save(&self, _local_tpenv: ()) -> SavedEnv {
         SavedEnv
+    }
+}
+
+impl<R: Reason> TEnvDecls<R> {
+    pub fn new(ctx: Rc<TypingCtx<R>>, dependent: DeclName) -> Self {
+        Self { ctx, dependent }
+    }
+
+    pub fn get_class(&self, name: TypeName) -> Result<Option<Rc<dyn Class<R>>>> {
+        self.ctx
+            .typing_decl_provider
+            .get_class(self.dependent, name)
+            .map_err(|e| e.into())
+    }
+
+    pub fn get_class_or_error(&self, name: TypeName) -> Result<Rc<dyn Class<R>>> {
+        self.get_class(name)
+            .and_then(|cls| cls.ok_or_else(|| Error::DeclNotFound(name.into())))
     }
 }

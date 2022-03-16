@@ -58,6 +58,8 @@ namespace detail {
 // Scoped timing in debug builds. The emitted messages are supplied
 // with lambdas to avoid overhead when the code is compiled out.
 struct Timer {
+  // For when you're going to use stopWithMessage and don't want to
+  // provide an initial message.
   Timer() : m_msg{nullptr} {
     ONTRACE(2, [this] { m_begin = std::chrono::steady_clock::now(); }());
   }

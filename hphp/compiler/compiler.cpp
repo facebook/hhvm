@@ -543,22 +543,22 @@ int process(const CompilerOptions &po) {
 
   Timer timer(Timer::WallTime);
   // prepare a package
-  Package package(po.inputDir.c_str());
+  Package package{po.inputDir.c_str()};
   AnalysisResultPtr ar = package.getAnalysisResult();
 
   hhbcTargetInit(po, ar);
 
-  bool processInitRan = false;
-  SCOPE_EXIT {
-    if (processInitRan) {
-      hphp_process_exit();
-    }
-  };
-
   BuiltinSymbols::s_systemAr = ar;
   hphp_process_init();
-  processInitRan = true;
+  SCOPE_EXIT { hphp_process_exit(); };
   BuiltinSymbols::s_systemAr.reset();
+
+  if (po.target != "filecache") package.createAsyncState();
+  SCOPE_EXIT {
+    // We need to do this manually, and not rely on ~Package, because
+    // it has to be done *before* we call hphp_process_exit().
+    if (auto clearer = package.clearAsyncState()) clearer->join();
+  };
 
   // This should be set before parsing anything
   RuntimeOption::EvalLowStaticArrays = false;
@@ -569,7 +569,7 @@ int process(const CompilerOptions &po) {
   LitarrayTable::get().setWriting();
 
   {
-    Timer timer2(Timer::WallTime, "parsing inputs");
+    Timer timer2(Timer::WallTime, "parsing");
     ar->setPackage(&package);
     ar->setParseOnDemand(po.parseOnDemand);
     if (!po.parseOnDemand) {
@@ -602,16 +602,23 @@ int process(const CompilerOptions &po) {
       }
     }
     if (po.target != "filecache") {
-      if (!package.parse(!po.force)) return 1;
+      if (!package.parse()) return 1;
 
-      Logger::Info(
-        "%ld total parses, %ld cache hits, %ld actual file loads",
+      Logger::FInfo(
+        "{} files parsed, {} cached, {} files read, {} files stored",
         package.getTotalParses(),
         package.getParseCacheHits(),
-        package.getParseFileLoads()
+        package.getFileReads(),
+        package.getFileStores()
       );
     }
   }
+
+  // Start asynchronously destroying the async state, since it may
+  // take a long time. We'll do it in the background while the rest of
+  // the compile pipeline runs.
+  auto clearer = package.clearAsyncState();
+  SCOPE_EXIT { if (clearer) clearer->join(); };
 
   // saving file cache
   AsyncFileCacheSaver fileCacheThread(&package, po.filecache.c_str());

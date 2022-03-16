@@ -128,8 +128,27 @@ struct Option {
    */
   static bool AllVolatile;
 
+  /*
+   * The number of files (on average) we'll group together for a
+   * worker during parsing. Files in directories (including sub-dirs)
+   * with more than ParserDirGroupSizeLimit files won't be grouped
+   * with files outside of those directories.
+   */
+  static int ParserGroupSize;
+  static int ParserDirGroupSizeLimit;
+
+  /* Config passed to extern_worker::Client */
+  static std::string ExternWorkerUseCase;
+  static bool ExternWorkerForceSubprocess;
+  static int ExternWorkerTimeoutSecs;
+  static bool ExternWorkerUseExecCache;
+  static bool ExternWorkerCleanup;
+
 private:
   static StringBag OptionStrings;
+
+  static const int kDefaultParserGroupSize;
+  static const int kDefaultParserDirGroupSizeLimit;
 
   static void LoadRootHdf(const IniSettingMap& ini, const Hdf &roots,
                           const std::string& name,

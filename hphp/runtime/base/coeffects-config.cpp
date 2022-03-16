@@ -316,6 +316,10 @@ void CoeffectsConfig::initCapabilities() {
   s_instance->m_warningMask = warningMask;
 }
 
+void CoeffectsConfig::importForParse(const CoeffectsConfig& c) {
+  s_instance = std::make_unique<CoeffectsConfig>(c);
+}
+
 std::string CoeffectsConfig::mangle() {
   assertx(s_instance);
   return folly::to<std::string>(

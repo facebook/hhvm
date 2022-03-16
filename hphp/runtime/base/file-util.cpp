@@ -348,7 +348,7 @@ size_t dirname_impl(char *path, int len) {
   }
 
   /* Strip trailing slashes */
-  register char *end = path + len - 1;
+  char *end = path + len - 1;
   while (end >= path && FileUtil::isDirSeparator(*end)) {
     end--;
   }
@@ -632,7 +632,7 @@ void FileUtil::find(std::vector<std::string> &out,
                     const std::set<std::string> *excludeFiles /* = NULL */) {
 
   find(root, path, php,
-       [&] (const std::string& rpath, bool isDir) {
+       [&] (const std::string& rpath, bool isDir, size_t) {
          if (isDir) {
            return !excludeDirs || !excludeDirs->count(rpath);
          }

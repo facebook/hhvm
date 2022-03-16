@@ -83,7 +83,10 @@ bool AnalysisResult::inParseOnDemandDirs(const std::string& filename) const {
   return false;
 }
 
-void AnalysisResult::parseOnDemand(const std::string& name) const {
+void
+AnalysisResult::parseOnDemand(
+    const std::string& name,
+    const Reporter& report) const {
   if (m_package) {
     auto const& root = m_package->getRoot();
     auto rname = name;
@@ -94,39 +97,43 @@ void AnalysisResult::parseOnDemand(const std::string& name) const {
         Option::PackageExcludeFiles.find(rname) ==
         Option::PackageExcludeFiles.end() &&
         !Option::IsFileExcluded(rname, Option::PackageExcludePatterns)) {
-      m_package->addSourceFile(rname);
+      report(std::move(rname));
     }
   }
 }
 
 template <class Map>
-void AnalysisResult::parseOnDemandBy(const CompactVector<std::string>& syms,
-                                     const Map& amap) const {
+void AnalysisResult::parseOnDemandBy(
+    const CompactVector<std::string>& syms,
+    const Map& amap,
+    const Reporter& report) const {
   if (m_package) {
     for (auto const& name : syms) {
       auto it = amap.find(name);
       if (it != amap.end()) {
-        parseOnDemand(Option::AutoloadRoot + it->second);
+        parseOnDemand(Option::AutoloadRoot + it->second, report);
       }
     }
   }
 }
 
 void AnalysisResult::parseOnDemandBy(
-    SymbolRef kind, const CompactVector<std::string>& syms) const {
+    SymbolRef kind,
+    const CompactVector<std::string>& syms,
+    const Reporter& report) const {
   switch (kind) {
     case SymbolRef::Include:
-      for (auto const& name : syms) parseOnDemand(name);
+      for (auto const& name : syms) parseOnDemand(name, report);
       return;
 
     case SymbolRef::Class:
-      return parseOnDemandBy(syms, Option::AutoloadClassMap);
+      return parseOnDemandBy(syms, Option::AutoloadClassMap, report);
 
     case SymbolRef::Function:
-      return parseOnDemandBy(syms, Option::AutoloadFuncMap);
+      return parseOnDemandBy(syms, Option::AutoloadFuncMap, report);
 
     case SymbolRef::Constant:
-      return parseOnDemandBy(syms, Option::AutoloadConstMap);
+      return parseOnDemandBy(syms, Option::AutoloadConstMap, report);
   }
   not_reached();
 }

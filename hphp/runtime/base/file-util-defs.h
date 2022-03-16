@@ -45,7 +45,7 @@ void find(const std::string &root, const std::string& path,
   if (fullPath.empty()) {
     return;
   }
-  if (!callback(spath, true)) {
+  if (!callback(spath, true, 0)) {
     return;
   }
 
@@ -95,7 +95,7 @@ void find(const std::string &root, const std::string& path,
     }
 
     if (isPHP == php) {
-      callback(spath + ename, false);
+      callback(spath + ename, false, se.st_size);
     }
   }
 
@@ -132,4 +132,3 @@ bool runRelative(std::string suffix, String cmd,
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
-

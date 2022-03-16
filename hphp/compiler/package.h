@@ -19,11 +19,16 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <thread>
 #include <vector>
 
+#include "hphp/util/coro.h"
+#include "hphp/util/extern-worker.h"
 #include "hphp/util/file-cache.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/mutex.h"
+#include "hphp/util/optional.h"
+
 #include "hphp/hhbbc/hhbbc.h"
 
 namespace HPHP {
@@ -40,19 +45,25 @@ using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
  * Therefore, a package is really toppest entry point for parsing.
  */
 struct Package {
-  explicit Package(const char *root, bool bShortTags = true);
+  explicit Package(const char* root);
 
   void addAllFiles(bool force); // add from Option::PackageDirectories/Files
+
+  // Set up the async portion of Package. This cannot be done in the
+  // constructor because it must be done after hphp_process_init().
+  void createAsyncState();
+  // Optionally return a running thread clearing the async state
+  // (which can take a long time). If std::nullopt is returned, the
+  // state is already cleared.
+  Optional<std::thread> clearAsyncState();
 
   void addSourceFile(const std::string& fileName, bool check = false);
   void addInputList(const std::string& listFileName);
   void addStaticFile(const std::string& fileName);
   void addDirectory(const std::string &path, bool force);
   void addStaticDirectory(const std::string& path);
-  void addSourceDirectory(const std::string& path, bool force);
 
-  bool parse(bool check);
-  bool parseImpl(const std::string* fileName);
+  bool parse();
 
   AnalysisResultPtr getAnalysisResult() { return m_ar;}
   void resetAr() { m_ar.reset(); }
@@ -60,42 +71,87 @@ struct Package {
   int getLineCount() const { return m_lineCount;}
   int getCharCount() const { return m_charCount;}
 
-  size_t getTotalParses() const { return m_totalParses.load(); }
-  size_t getParseCacheHits() const { return m_parseCacheHits.load(); }
-  size_t getParseFileLoads() const { return m_parseFileLoads.load(); }
+  size_t getTotalParses() const { return m_total.load(); }
+  size_t getParseCacheHits() const { return m_cacheHits.load(); }
+  size_t getFileStores() const { return m_storedFiles.load(); }
+  size_t getFileReads() const { return m_readFiles.load(); }
 
   void saveStatsToFile(const char *filename, int totalSeconds) const;
 
   const std::string& getRoot() const { return m_root;}
   std::shared_ptr<FileCache> getFileCache();
 
-  void addUnitEmitter(std::unique_ptr<UnitEmitter> ue);
+  struct Config;
+
 private:
 
-  std::unique_ptr<UnitEmitter> createSymlinkWrapper(
-    const std::string& full_path, const std::string& file_name,
-    std::unique_ptr<UnitEmitter> org_ue);
+  struct FileAndSize {
+    folly::fs::path m_path;
+    size_t size;
+  };
+  using FileAndSizeVec = std::vector<FileAndSize>;
+
+  struct ParseGroup {
+    explicit ParseGroup(bool b) : m_check{b} {}
+    std::vector<folly::fs::path> m_files;
+    bool m_check;
+    size_t m_size{0};
+  };
+
+  using ParseGroups = std::vector<ParseGroup>;
+
+  struct GroupResult {
+    ParseGroups m_grouped;
+    FileAndSizeVec m_ungrouped;
+  };
+
+  void parseAll();
+
+  coro::Task<GroupResult> groupDirectories(std::string, bool);
+  void groupFiles(ParseGroups&, FileAndSizeVec, bool);
+
+  coro::Task<FileAndSizeVec> parseGroups(ParseGroups);
+  coro::Task<FileAndSizeVec> parseGroup(ParseGroup);
+
+  void addUnitEmitter(std::unique_ptr<UnitEmitter> ue);
 
   std::string m_root;
-  folly_concurrent_hash_map_simd<
-    std::string, std::unique_ptr<std::string>
-  > m_filesToParse;
-  void *m_dispatcher;
 
-  Mutex m_mutex;
+  folly_concurrent_hash_map_simd<std::string, bool> m_parsedFiles;
+
+  std::atomic<bool> m_parseFailed;
+
   AnalysisResultPtr m_ar;
-  int m_lineCount;
-  int m_charCount;
+  std::atomic<int> m_lineCount;
+  std::atomic<int> m_charCount;
 
-  std::atomic<size_t> m_parseCacheHits;
-  std::atomic<size_t> m_parseFileLoads;
-  std::atomic<size_t> m_totalParses;
+  std::atomic<size_t> m_cacheHits;
+  std::atomic<size_t> m_readFiles;
+  std::atomic<size_t> m_storedFiles;
+  std::atomic<size_t> m_total;
 
+  folly_concurrent_hash_map_simd<std::string, bool> m_filesToParse;
   std::shared_ptr<FileCache> m_fileCache;
   std::map<std::string,bool> m_directories;
   std::set<std::string> m_staticDirectories;
-  std::set<std::string> m_extraStaticFiles;
-  std::map<std::string,std::string> m_discoveredStaticFiles;
+  hphp_fast_set<std::string> m_extraStaticFiles;
+  folly_concurrent_hash_map_simd<
+    std::string, std::string
+  > m_discoveredStaticFiles;
+
+  struct AsyncState {
+    AsyncState();
+
+    static extern_worker::Options makeOptions();
+
+    coro::TicketExecutor m_executor;
+    extern_worker::Client m_client;
+
+    coro::AsyncValue<extern_worker::Ref<Config>> m_config;
+
+    extern_worker::RefCache<SHA1, RepoOptionsFlags> m_repoOptions;
+  };
+  std::unique_ptr<AsyncState> m_async;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

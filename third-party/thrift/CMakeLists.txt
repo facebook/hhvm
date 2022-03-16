@@ -21,9 +21,9 @@ find_package(BISON 3.0 REQUIRED)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   THRIFT_SOURCE_ARGS
   SOURCE_URL
-  "https://github.com/facebook/fbthrift/archive/refs/tags/v2022.03.14.00.tar.gz"
+  "https://github.com/facebook/fbthrift/archive/refs/tags/v2022.01.31.00.tar.gz"
   SOURCE_HASH
-  "SHA256=20d1efabb57678f8fe4aa3ae49c620ede5c2f154ea068a54b3c048394f9a691e"
+  "SHA256=6194127fd9e6771bd34f502a84b292278bf3a6ee7b87377afd1ae287a5572f48"
   FILENAME_PREFIX
   "fbthrift-"
 )

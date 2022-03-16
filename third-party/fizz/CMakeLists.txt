@@ -23,9 +23,9 @@ get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   FIZZ_SOURCE_ARGS
   SOURCE_URL
-  "https://github.com/facebookincubator/fizz/releases/download/v2022.03.14.00/fizz-v2022.03.14.00.tar.gz"
+  "https://github.com/facebookincubator/fizz/releases/download/v2022.01.31.00/fizz-v2022.01.31.00.tar.gz"
   SOURCE_HASH
-  "SHA256=10fe63db9ac8ee06723d1aa95101f0f156a8db677a729170bca0bab12f1cc279"
+  "SHA256=32a60e78d41ea2682ce7e5d741b964f0ea83642656e42d4fea90c0936d6d0c7d"
 )
 
 set(

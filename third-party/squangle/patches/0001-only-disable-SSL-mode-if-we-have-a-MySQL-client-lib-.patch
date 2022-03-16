@@ -28,10 +28,10 @@ Index: bundled_squangle/squangle/mysql_client/Connection.cpp
 ===================================================================
 --- bundled_squangle.orig/squangle/mysql_client/Connection.cpp
 +++ bundled_squangle/squangle/mysql_client/Connection.cpp
-@@ -46,9 +46,11 @@ void Connection::initMysqlOnly() {
-   if (!mysql_client_->supportsLocalFiles()) {
-     mysql_connection_->mysql()->options.client_flag &= ~CLIENT_LOCAL_FILES;
-   }
+@@ -44,9 +44,11 @@ void Connection::initMysqlOnly() {
+   mysql_connection_ = std::make_unique<MysqlConnectionHolder>(
+       mysql_client_, mysql_init(nullptr), conn_key_);
+   mysql_connection_->mysql()->options.client_flag &= ~CLIENT_LOCAL_FILES;
 +#ifdef MYSQL_OPT_SSL_MODE
    // Turn off SSL by default for tests that rely on this.
    enum mysql_ssl_mode ssl_mode = SSL_MODE_DISABLED;

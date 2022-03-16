@@ -16,8 +16,8 @@ function hphpd_auth_token(): string;
 function hphp_debug_session_auth(): string;
 <<__PHPStdLib>>
 function hphpd_get_user_commands();
-function hphpd_break(bool $condition = true): void;
-function hphp_debug_break(bool $condition = true): bool;
+function hphpd_break(bool $condition = true)[]: void;
+function hphp_debug_break(bool $condition = true)[]: bool;
 <<__PHPStdLib>>
 function hphp_debugger_attached()[read_globals]: bool;
 <<__PHPStdLib>>

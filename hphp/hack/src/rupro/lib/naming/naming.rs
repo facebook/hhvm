@@ -97,6 +97,11 @@ impl Naming {
         self.fun_paraml(&mut m.params);
     }
 
+    fn class_prop(&self, p: &mut aast::ClassVar<(), ()>) {
+        // TODO(hrust): all the rest
+        self.hint(false, &mut p.type_);
+    }
+
     fn interface(&self, c: &mut aast::Class_<(), ()>) {
         // TODO(hrust): all the rest
         if matches!(c.kind, oxidized::ast_defs::ClassishKind::Cinterface) {
@@ -107,6 +112,7 @@ impl Naming {
     fn class_(&self, c: &mut aast::Class_<(), ()>) {
         // TODO(hrust): all the rest
         c.methods.iter_mut().for_each(|m| self.method_(m));
+        c.vars.iter_mut().for_each(|v| self.class_prop(v));
         self.interface(c);
     }
 

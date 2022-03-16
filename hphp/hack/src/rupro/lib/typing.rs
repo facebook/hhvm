@@ -7,7 +7,7 @@ use pos::Symbol;
 
 use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
-use crate::tast;
+use crate::tast::{self, Tast};
 use crate::typing_defs::{ParamMode, Ty};
 use crate::typing_env::TEnv;
 use crate::typing_return::TypingReturnInfo;
@@ -47,6 +47,11 @@ pub struct BindParamFlags {
 pub struct TypingFunFlags {
     pub abstract_: bool,
     pub disable: bool,
+}
+
+#[derive(Debug)]
+pub struct TypingExprFlags<R> {
+    _data: std::marker::PhantomData<R>,
 }
 
 impl Typing {
@@ -117,6 +122,39 @@ impl Typing {
         stl
     }
 
+    fn make_result<R: Reason>(
+        _env: &TEnv<R>,
+        p: oxidized::pos::Pos,
+        te: tast::Expr_<R>,
+        ty: Ty<R>,
+    ) -> (tast::Expr<R>, Ty<R>) {
+        // TODO(hrust): Env.set_tyvar_variance
+        (Tast::make_typed_expr(p, te, ty.clone()), ty)
+    }
+
+    fn expr_<R: Reason>(
+        env: &TEnv<R>,
+        _flags: TypingExprFlags<R>,
+        outer: &oxidized::aast::Expr<(), ()>,
+    ) -> (tast::Expr<R>, Ty<R>) {
+        use oxidized::aast::Expr_::*;
+        let p_ox = &outer.1;
+        let p = R::Pos::from(p_ox);
+        let e = &outer.2;
+        match e {
+            Int(s) => Self::make_result(env, p_ox.clone(), Int(s.clone()), Ty::int(R::witness(p))),
+            _ => unimplemented!("{:?}", e),
+        }
+    }
+
+    fn expr<R: Reason>(
+        env: &TEnv<R>,
+        flags: TypingExprFlags<R>,
+        e: &oxidized::aast::Expr<(), ()>,
+    ) -> (tast::Expr<R>, Ty<R>) {
+        // TODO(hrust): inconsistent tyvar state, expected_ty
+        Self::expr_(env, flags, e)
+    }
 
     fn fun_impl<R: Reason>(
         env: &TEnv<R>,
@@ -175,6 +213,23 @@ impl Typing {
             constraints: t.constraints.clone(),
             reified: t.reified.clone(),
             user_attributes: vec![],
+        }
+    }
+
+    pub fn expr_with_pure_coeffects<R: Reason>(
+        env: &TEnv<R>,
+        _expected: Option<Ty<R>>,
+        e: &oxidized::aast::Expr<(), ()>,
+    ) -> (tast::Expr<R>, Ty<R>) {
+        // TODO(hrust): expected, coeffects
+        Self::expr(env, Default::default(), e)
+    }
+}
+
+impl<R> Default for TypingExprFlags<R> {
+    fn default() -> Self {
+        Self {
+            _data: std::marker::PhantomData,
         }
     }
 }

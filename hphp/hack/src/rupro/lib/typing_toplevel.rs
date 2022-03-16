@@ -192,6 +192,41 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         Ok((return_, ret_ty))
     }
 
+    fn class_var_def(
+        &mut self,
+        _is_static: bool,
+        _cls: &dyn Class<R>,
+        cv: &oxidized::aast::ClassVar<(), ()>,
+    ) -> Result<tast::ClassVar<R>> {
+        // TODO(hrust): missing type hint
+        let decl_cty = self.decl_hint_env().hint(cv.type_.1.as_ref().unwrap());
+        // TODO(hrust): enforcability
+        let cty = Phase::localize_no_subst(self.env, false, None, decl_cty)?;
+        // TODO(hrust): coerce_type, user_attributes
+        let typed_cv_expr = cv
+            .expr
+            .as_ref()
+            .map(|e| Typing::expr_with_pure_coeffects(self.env, Some(cty.clone()), e))
+            .map(|(typed_cv_expr, _expr_ty)| typed_cv_expr);
+        assert!(cv.user_attributes.is_empty());
+        // TODO(hrust): sound dynamic
+        Ok(tast::ClassVar {
+            final_: cv.final_,
+            xhp_attr: cv.xhp_attr.clone(),
+            abstract_: cv.abstract_,
+            readonly: cv.readonly,
+            visibility: cv.visibility.clone(),
+            type_: oxidized::aast::TypeHint(cty, cv.type_.1.clone()),
+            id: cv.id.clone(),
+            expr: typed_cv_expr,
+            user_attributes: vec![],
+            doc_comment: cv.doc_comment.clone(),
+            is_promoted_variadic: cv.is_promoted_variadic,
+            is_static: cv.is_static,
+            span: cv.span.clone(),
+        })
+    }
+
     fn method_def(
         &mut self,
         _cls: &dyn Class<R>,
@@ -318,6 +353,25 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         (constructor, static_methods, methods)
     }
 
+    fn split_vars<'aast>(
+        &self,
+        all_vars: impl Iterator<Item = &'aast oxidized::aast::ClassVar<(), ()>>,
+    ) -> (
+        Vec<&'aast oxidized::aast::ClassVar<(), ()>>,
+        Vec<&'aast oxidized::aast::ClassVar<(), ()>>,
+    ) {
+        let mut static_vars = vec![];
+        let mut vars = vec![];
+        for v in all_vars {
+            if v.is_static {
+                static_vars.push(v);
+            } else {
+                vars.push(v);
+            }
+        }
+        (static_vars, vars)
+    }
+
     fn check_class_members(
         &mut self,
         cd: &oxidized::aast::Class_<(), ()>,
@@ -329,6 +383,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         Vec<tast::ClassVar<R>>,
         Vec<tast::Method_<R>>,
     )> {
+        let (static_vars, vars) = self.split_vars(cd.vars.iter());
         let (constructor, static_methods, methods) = self.split_methods(cd.methods.iter());
 
         // TODO(hrust): is_disposable_class
@@ -342,11 +397,19 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             }
         }
 
+        let typed_vars: Vec<_> = vars
+            .into_iter()
+            .map(|v| self.class_var_def(true, tc, v))
+            .collect::<Result<_>>()?;
+        let typed_static_vars: Vec<_> = static_vars
+            .into_iter()
+            .map(|v| self.class_var_def(false, tc, v))
+            .collect::<Result<_>>()?;
+
         assert!(constructor.is_none());
-        assert!(cd.vars.is_empty());
         assert!(cd.typeconsts.is_empty());
         assert!(cd.consts.is_empty());
-        Ok((vec![], vec![], vec![], vec![], typed_methods))
+        Ok((vec![], vec![], typed_vars, typed_static_vars, typed_methods))
     }
 
     fn class_def_impl(

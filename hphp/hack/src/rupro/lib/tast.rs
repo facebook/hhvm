@@ -2,10 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use crate::reason::Reason;
 use crate::typing_defs::Ty;
-
 use bumpalo::Bump;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
+
+pub struct Tast;
 
 #[derive(Clone, Debug)]
 pub struct SavedEnv;
@@ -35,6 +37,12 @@ pub type ClassConst<R> = oxidized::aast::ClassConst<Ty<R>, SavedEnv>;
 pub type Tparam<R> = oxidized::aast::Tparam<Ty<R>, SavedEnv>;
 pub type Typedef<R> = oxidized::aast::Typedef<Ty<R>, SavedEnv>;
 pub type Gconst<R> = oxidized::aast::Gconst<Ty<R>, SavedEnv>;
+
+impl Tast {
+    pub fn make_typed_expr<R: Reason>(p: oxidized::pos::Pos, te: Expr_<R>, ty: Ty<R>) -> Expr<R> {
+        oxidized::aast::Expr(ty, p, te)
+    }
+}
 
 impl ToOcamlRep for SavedEnv {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {

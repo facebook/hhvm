@@ -1269,189 +1269,20 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                 add_generic(env, &mut self.state, id.name());
                 convert_id(env, *id)
             }
-            Expr_::Call(mut x)
-                if {
-                    if let Expr_::Id(ref id) = (x.0).2 {
-                        strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller")
-                            || strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
-                    } else {
-                        false
-                    }
-                } =>
-            {
-                let force = if let Expr_::Id(ref id) = (x.0).2 {
-                    strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
-                } else {
-                    false
-                };
-                if let [(pk_c, cexpr), (pk_f, fexpr)] = &mut *x.2 {
-                    ensure_normal_paramkind(pk_c)?;
-                    ensure_normal_paramkind(pk_f)?;
-                    let mut res = make_dyn_meth_caller_lambda(&*pos, cexpr, fexpr, force);
-                    res.recurse(env, self.object())?;
-                    res
-                } else {
-                    let mut res = Expr_::Call(x);
-                    res.recurse(env, self.object())?;
-                    res
-                }
+            Expr_::Call(x) if is_dyn_meth_caller(&x) => {
+                self.visit_dyn_meth_caller(env, x, &*pos)?
             }
-            Expr_::Call(mut x)
-                if {
-                    if let Expr_::Id(ref id) = (x.0).2 {
-                        let name = strip_id(id);
-                        ["hh\\meth_caller", "meth_caller"]
-                            .iter()
-                            .any(|n| n.eq_ignore_ascii_case(name))
-                            && env
-                                .options
-                                .hhvm
-                                .flags
-                                .contains(HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS)
-                    } else {
-                        false
-                    }
-                } =>
+            Expr_::Call(x)
+                if is_meth_caller(&x)
+                    && env
+                        .options
+                        .hhvm
+                        .flags
+                        .contains(HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS) =>
             {
-                if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
-                    ensure_normal_paramkind(pk_cls)?;
-                    ensure_normal_paramkind(pk_f)?;
-                    match (&cls, func.as_string()) {
-                        (Expr_::ClassConst(cc), Some(fname))
-                            if string_utils::is_class(&(cc.1).1) =>
-                        {
-                            let mut cls_const = cls.as_class_const_mut();
-                            let (cid, _) = match cls_const {
-                                None => unreachable!(),
-                                Some((ref mut cid, (_, cs))) => (cid, cs),
-                            };
-                            visit_class_id(env, self, cid)?;
-                            match &cid.2 {
-                                cid if cid.as_ciexpr().and_then(|x| x.as_id()).map_or(
-                                    false,
-                                    |id| {
-                                        !(string_utils::is_self(id)
-                                            || string_utils::is_parent(id)
-                                            || string_utils::is_static(id))
-                                    },
-                                ) =>
-                                {
-                                    let alloc = bumpalo::Bump::new();
-                                    let id = cid.as_ciexpr().unwrap().as_id().unwrap();
-                                    let mangled_class_name =
-                                        class::ClassType::from_ast_name_and_mangle(
-                                            &alloc,
-                                            id.as_ref(),
-                                        );
-                                    let mangled_class_name = mangled_class_name.unsafe_as_str();
-                                    convert_meth_caller_to_func_ptr(
-                                        env,
-                                        self,
-                                        &*pos,
-                                        pc,
-                                        mangled_class_name,
-                                        pf,
-                                        // FIXME: This is not safe--string literals are binary
-                                        // strings. There's no guarantee that they're valid UTF-8.
-                                        unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
-                                    )
-                                }
-                                _ => {
-                                    return Err(emit_fatal::raise_fatal_parse(pc, "Invalid class"));
-                                }
-                            }
-                        }
-                        (Expr_::String(cls_name), Some(fname)) => convert_meth_caller_to_func_ptr(
-                            env,
-                            self,
-                            &*pos,
-                            pc,
-                            // FIXME: This is not safe--string literals are binary strings.
-                            // There's no guarantee that they're valid UTF-8.
-                            unsafe { std::str::from_utf8_unchecked(cls_name.as_slice()) },
-                            pf,
-                            // FIXME: This is not safe--string literals are binary strings.
-                            // There's no guarantee that they're valid UTF-8.
-                            unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
-                        ),
-                        (_, Some(_)) => {
-                            return Err(emit_fatal::raise_fatal_parse(
-                                pc,
-                                "Class must be a Class or string type",
-                            ));
-                        }
-                        (_, _) => {
-                            return Err(emit_fatal::raise_fatal_parse(
-                                pf,
-                                "Method name must be a literal string",
-                            ));
-                        }
-                    }
-                } else {
-                    let mut res = Expr_::Call(x);
-                    res.recurse(env, self.object())?;
-                    res
-                }
+                self.visit_meth_caller_funcptr(env, x, &*pos)?
             }
-            Expr_::Call(mut x)
-                if {
-                    if let Expr_::Id(ref id) = (x.0).2 {
-                        let name = strip_id(id);
-                        ["hh\\meth_caller", "meth_caller"]
-                            .iter()
-                            .any(|n| n.eq_ignore_ascii_case(name))
-                    } else {
-                        false
-                    }
-                } =>
-            {
-                if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
-                    ensure_normal_paramkind(pk_cls)?;
-                    ensure_normal_paramkind(pk_f)?;
-                    match (&cls, func.as_string()) {
-                        (Expr_::ClassConst(cc), Some(_)) if string_utils::is_class(&(cc.1).1) => {
-                            let mut cls_const = cls.as_class_const_mut();
-                            let cid = match cls_const {
-                                None => unreachable!(),
-                                Some((ref mut cid, (_, _))) => cid,
-                            };
-                            #[allow(clippy::blocks_in_if_conditions)]
-                            if cid.as_ciexpr().and_then(|x| x.as_id()).map_or(false, |id| {
-                                !(string_utils::is_self(id)
-                                    || string_utils::is_parent(id)
-                                    || string_utils::is_static(id))
-                            }) {
-                                let mut res = Expr_::Call(x);
-                                res.recurse(env, self.object())?;
-                                res
-                            } else {
-                                return Err(emit_fatal::raise_fatal_parse(pc, "Invalid class"));
-                            }
-                        }
-                        (Expr_::String(_), Some(_)) => {
-                            let mut res = Expr_::Call(x);
-                            res.recurse(env, self.object())?;
-                            res
-                        }
-                        (_, Some(_)) => {
-                            return Err(emit_fatal::raise_fatal_parse(
-                                pc,
-                                "Class must be a Class or string type",
-                            ));
-                        }
-                        (_, _) => {
-                            return Err(emit_fatal::raise_fatal_parse(
-                                pf,
-                                "Method name must be a literal string",
-                            ));
-                        }
-                    }
-                } else {
-                    let mut res = Expr_::Call(x);
-                    res.recurse(env, self.object())?;
-                    res
-                }
-            }
+            Expr_::Call(x) if is_meth_caller(&x) => self.visit_meth_caller(env, x)?,
             Expr_::Call(x)
                 if (x.0)
                     .as_class_get()
@@ -1552,6 +1383,174 @@ fn strip_unsafe_casts(e: &mut Expr_) -> Expr_ {
             }
             _ => break e_owned,
         };
+    }
+}
+
+type CallExpr = Box<(Expr, Vec<Targ>, Vec<(ParamKind, Expr)>, Option<Expr>)>;
+
+fn is_dyn_meth_caller(x: &CallExpr) -> bool {
+    if let Expr_::Id(ref id) = (x.0).2 {
+        let name = strip_id(id);
+        name.eq_ignore_ascii_case("hh\\dynamic_meth_caller")
+            || name.eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
+    } else {
+        false
+    }
+}
+
+fn is_meth_caller(x: &CallExpr) -> bool {
+    if let Expr_::Id(ref id) = (x.0).2 {
+        let name = strip_id(id);
+        name.eq_ignore_ascii_case("hh\\meth_caller") || name.eq_ignore_ascii_case("meth_caller")
+    } else {
+        false
+    }
+}
+
+impl<'a, 'arena> ClosureConvertVisitor<'a, 'arena> {
+    #[inline(never)]
+    fn visit_dyn_meth_caller(
+        &mut self,
+        env: &mut Env<'a, 'arena>,
+        mut x: CallExpr,
+        pos: &Pos,
+    ) -> Result<Expr_> {
+        let force = if let Expr_::Id(ref id) = (x.0).2 {
+            strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
+        } else {
+            false
+        };
+        if let [(pk_c, cexpr), (pk_f, fexpr)] = &mut *x.2 {
+            ensure_normal_paramkind(pk_c)?;
+            ensure_normal_paramkind(pk_f)?;
+            let mut res = make_dyn_meth_caller_lambda(pos, cexpr, fexpr, force);
+            res.recurse(env, self.object())?;
+            Ok(res)
+        } else {
+            let mut res = Expr_::Call(x);
+            res.recurse(env, self.object())?;
+            Ok(res)
+        }
+    }
+
+    #[inline(never)]
+    fn visit_meth_caller_funcptr(
+        &mut self,
+        env: &mut Env<'a, 'arena>,
+        mut x: CallExpr,
+        pos: &Pos,
+    ) -> Result<Expr_> {
+        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
+            ensure_normal_paramkind(pk_cls)?;
+            ensure_normal_paramkind(pk_f)?;
+            match (&cls, func.as_string()) {
+                (Expr_::ClassConst(cc), Some(fname)) if string_utils::is_class(&(cc.1).1) => {
+                    let mut cls_const = cls.as_class_const_mut();
+                    let (cid, _) = match cls_const {
+                        None => unreachable!(),
+                        Some((ref mut cid, (_, cs))) => (cid, cs),
+                    };
+                    visit_class_id(env, self, cid)?;
+                    match &cid.2 {
+                        cid if cid.as_ciexpr().and_then(|x| x.as_id()).map_or(false, |id| {
+                            !(string_utils::is_self(id)
+                                || string_utils::is_parent(id)
+                                || string_utils::is_static(id))
+                        }) =>
+                        {
+                            let alloc = bumpalo::Bump::new();
+                            let id = cid.as_ciexpr().unwrap().as_id().unwrap();
+                            let mangled_class_name =
+                                class::ClassType::from_ast_name_and_mangle(&alloc, id.as_ref());
+                            let mangled_class_name = mangled_class_name.unsafe_as_str();
+                            Ok(convert_meth_caller_to_func_ptr(
+                                env,
+                                self,
+                                &*pos,
+                                pc,
+                                mangled_class_name,
+                                pf,
+                                // FIXME: This is not safe--string literals are binary
+                                // strings. There's no guarantee that they're valid UTF-8.
+                                unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
+                            ))
+                        }
+                        _ => Err(emit_fatal::raise_fatal_parse(pc, "Invalid class")),
+                    }
+                }
+                (Expr_::String(cls_name), Some(fname)) => Ok(convert_meth_caller_to_func_ptr(
+                    env,
+                    self,
+                    &*pos,
+                    pc,
+                    // FIXME: This is not safe--string literals are binary strings.
+                    // There's no guarantee that they're valid UTF-8.
+                    unsafe { std::str::from_utf8_unchecked(cls_name.as_slice()) },
+                    pf,
+                    // FIXME: This is not safe--string literals are binary strings.
+                    // There's no guarantee that they're valid UTF-8.
+                    unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
+                )),
+                (_, Some(_)) => Err(emit_fatal::raise_fatal_parse(
+                    pc,
+                    "Class must be a Class or string type",
+                )),
+                (_, _) => Err(emit_fatal::raise_fatal_parse(
+                    pf,
+                    "Method name must be a literal string",
+                )),
+            }
+        } else {
+            let mut res = Expr_::Call(x);
+            res.recurse(env, self.object())?;
+            Ok(res)
+        }
+    }
+
+    #[inline(never)]
+    fn visit_meth_caller(&mut self, env: &mut Env<'a, 'arena>, mut x: CallExpr) -> Result<Expr_> {
+        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
+            ensure_normal_paramkind(pk_cls)?;
+            ensure_normal_paramkind(pk_f)?;
+            match (&cls, func.as_string()) {
+                (Expr_::ClassConst(cc), Some(_)) if string_utils::is_class(&(cc.1).1) => {
+                    let mut cls_const = cls.as_class_const_mut();
+                    let cid = match cls_const {
+                        None => unreachable!(),
+                        Some((ref mut cid, (_, _))) => cid,
+                    };
+                    #[allow(clippy::blocks_in_if_conditions)]
+                    if cid.as_ciexpr().and_then(|x| x.as_id()).map_or(false, |id| {
+                        !(string_utils::is_self(id)
+                            || string_utils::is_parent(id)
+                            || string_utils::is_static(id))
+                    }) {
+                        let mut res = Expr_::Call(x);
+                        res.recurse(env, self.object())?;
+                        Ok(res)
+                    } else {
+                        Err(emit_fatal::raise_fatal_parse(pc, "Invalid class"))
+                    }
+                }
+                (Expr_::String(_), Some(_)) => {
+                    let mut res = Expr_::Call(x);
+                    res.recurse(env, self.object())?;
+                    Ok(res)
+                }
+                (_, Some(_)) => Err(emit_fatal::raise_fatal_parse(
+                    pc,
+                    "Class must be a Class or string type",
+                )),
+                (_, _) => Err(emit_fatal::raise_fatal_parse(
+                    pf,
+                    "Method name must be a literal string",
+                )),
+            }
+        } else {
+            let mut res = Expr_::Call(x);
+            res.recurse(env, self.object())?;
+            Ok(res)
+        }
     }
 }
 

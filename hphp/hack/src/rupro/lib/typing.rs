@@ -105,6 +105,21 @@ impl Typing {
                 // TODO(hrust): exits
                 OS::Expr(Box::new(te))
             }
+            OS::Return(e) => match (&**e).as_ref() {
+                None => unimplemented!(),
+                Some(e) => {
+                    // TODO(hrust): check_inout_return
+                    let _return_type = env.get_return().return_type();
+                    // TODO(hrust): strip_awaitable
+                    // TODO(hrust): return_explicit
+                    // TODO(hrust): return_disposable
+                    // TODO(hrust): expected_ty
+                    let (te, _rty) = Self::expr(env, Default::default(), e);
+                    // TODO(hrust, mjt): subtyping
+                    // TODO(hrust): move_and_merge_next_in_cont
+                    OS::Return(Box::new(Some(te)))
+                }
+            },
             s => unimplemented!("stmt_: {:?}", s),
         }
     }

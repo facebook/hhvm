@@ -61,6 +61,10 @@ pub trait Reason:
         Self::mk(|| ReasonImpl::RclassClass(pos, ty_name))
     }
 
+    fn no_return(pos: Self::Pos) -> Self {
+        Self::mk(|| ReasonImpl::RnoReturn(pos))
+    }
+
     fn pos(&self) -> &Self::Pos;
 
     fn decl_ty_conser() -> &'static Conser<DeclTy_<Self>>;

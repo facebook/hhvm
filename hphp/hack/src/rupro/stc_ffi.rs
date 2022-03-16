@@ -10,7 +10,7 @@
 use hackrs::ast_provider::AstProvider;
 use hackrs::decl_parser::DeclParser;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
-use hackrs::reason::{NReason, Reason};
+use hackrs::reason::{BReason, NReason, Reason};
 use hackrs::shallow_decl_provider::EagerShallowDeclProvider;
 use hackrs::special_names::SpecialNames;
 use hackrs::tast;
@@ -54,6 +54,10 @@ unsafe fn to_ocaml<T: ocamlrep::ToOcamlRep>(value: &T) -> usize {
 
 #[derive(StructOpt, Debug)]
 struct CliOptions {
+    /// Enable positions
+    #[structopt(long("--with-pos"))]
+    with_pos: bool,
+
     /// Hack source files
     #[structopt(value_name("FILEPATH"))]
     filenames: Vec<PathBuf>,
@@ -63,14 +67,22 @@ struct CliOptions {
 pub extern "C" fn stc_main() {
     let cli_options = CliOptions::from_args();
 
+    if cli_options.with_pos {
+        main_impl::<BReason>(cli_options);
+    } else {
+        main_impl::<NReason>(cli_options);
+    };
+}
+
+fn main_impl<R: Reason>(cli_options: CliOptions) {
     let relative_path_ctx = Arc::new(RelativePathCtx {
         root: PathBuf::new(),
         hhi: PathBuf::new(),
         dummy: PathBuf::new(),
         tmp: PathBuf::new(),
     });
-
     let options = Arc::new(oxidized::global_options::GlobalOptions::default());
+
     let special_names = SpecialNames::new();
     let ast_provider = AstProvider::new(
         Arc::clone(&relative_path_ctx),
@@ -113,8 +125,7 @@ pub extern "C" fn stc_main() {
 
     for fln in filenames {
         let (ast, errs) = ast_provider.get_ast(fln).unwrap();
-        let (tast, errs) =
-            TypingCheckUtils::type_file::<NReason>(Rc::clone(&ctx), &ast, errs).unwrap();
+        let (tast, errs) = TypingCheckUtils::type_file::<R>(Rc::clone(&ctx), &ast, errs).unwrap();
         if !errs.is_empty() {
             unimplemented!()
         }

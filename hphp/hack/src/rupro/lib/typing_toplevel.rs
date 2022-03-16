@@ -236,7 +236,9 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         let name = Symbol::new(&m.name.1);
 
         // TODO(hrust): FunUtils.check_params
-        // TODO(hrust): tyvars, reinitialize_locals, callable
+        // TODO(hrust): tyvars
+        self.env.reinitialize_locals();
+        // TODO(hrust): callable
         assert!(m.user_attributes.is_empty());
         // TODO(hrust): support_dynamic, coeefects
         // TODO(hrust): is_constructor

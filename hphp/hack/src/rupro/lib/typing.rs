@@ -10,7 +10,7 @@ use crate::reason::Reason;
 use crate::tast::{self, Tast};
 use crate::typing_defs::{ParamMode, Ty};
 use crate::typing_env::TEnv;
-use crate::typing_return::TypingReturnInfo;
+use crate::typing_return::{TypingReturn, TypingReturnInfo};
 use crate::utils::core::LocalId;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -136,6 +136,7 @@ impl Typing {
         let x = LocalId::from(x);
         env.set_local(false, x, ty, p);
         // TODO(hverr): set_local_expr_id
+        // TODO(hverr): not check_defined
     }
 
     fn assign<R: Reason>(
@@ -212,6 +213,14 @@ impl Typing {
                 }
                 _ => unimplemented!("{:?}", e),
             },
+            Lvar(id) => {
+                // TODO(hrust): accept_using_var
+                // TODO(hrust): !check_defined
+                let pos = R::Pos::from(&id.0);
+                let lid = LocalId::from(&id.1);
+                let ty = env.get_local_check_defined(pos, &lid);
+                Self::make_result(env, id.0.clone(), Lvar(id.clone()), ty)
+            }
             _ => unimplemented!("{:?}", e),
         }
     }
@@ -229,9 +238,9 @@ impl Typing {
         env: &TEnv<R>,
         flags: TypingFunFlags,
         return_: TypingReturnInfo<R>,
-        _pos: R::Pos,
+        pos: R::Pos,
         named_body: &oxidized::aast::FuncBody<(), ()>,
-        _f_kind: &oxidized::ast_defs::FunKind,
+        f_kind: &oxidized::ast_defs::FunKind,
     ) -> tast::Block<R> {
         env.set_return(return_);
         let tb = if flags.disable {
@@ -242,8 +251,8 @@ impl Typing {
         let has_implicit_return = env.has_next();
         // TODO(hrust): hhi
         if has_implicit_return && !flags.abstract_ {
-            // TODO(hrust): fun_implicit_return
-            unimplemented!()
+            let ret = env.get_return().return_type();
+            TypingReturn::fun_implicit_return(env, pos, ret, f_kind);
         }
         // TODO(hrust): set_fun_tast_info
         tb
@@ -291,6 +300,7 @@ impl Typing {
         e: &oxidized::aast::Expr<(), ()>,
     ) -> (tast::Expr<R>, Ty<R>) {
         // TODO(hrust): expected, coeffects
+        env.reinitialize_locals();
         Self::expr(env, Default::default(), e)
     }
 }

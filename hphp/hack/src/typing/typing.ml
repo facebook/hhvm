@@ -846,18 +846,27 @@ let requires_consistent_construct = function
  * strip nullables, so ?t becomes t, as context will always accept a t if a ?t
  * is expected.
  *
- * If allow_supportdyn is true, then decompose supportdyn<t> and return true to
+ * If for_lambda is true, then we are expecting a function type for the expected type,
+ * and we should decompose supportdyn<t>, and like-push, and return true to
  * indicate that the type supports dynamic.
  *
  * Note: we currently do not generally expand ?t into (null | t), so ~?t is (dynamic | Toption t).
  *)
 let expand_expected_and_get_node
-    ?(allow_supportdyn = false) env (expected : ExpectedTy.t option) =
+    ?(for_lambda = false) env (expected : ExpectedTy.t option) =
   let rec unbox env ty =
     match TUtils.try_strip_dynamic env ty with
     | Some stripped_ty ->
       if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-        let (env, opt_ty) = Typing_dynamic.try_push_like env stripped_ty in
+        let (env, opt_ty) =
+          if
+            (not for_lambda)
+            && TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
+          then
+            (env, None)
+          else
+            Typing_dynamic.try_push_like env stripped_ty
+        in
         match opt_ty with
         | None -> unbox env stripped_ty
         | Some ty ->
@@ -891,7 +900,7 @@ let expand_expected_and_get_node
   | Some ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } ->
     let (env, ty) = Env.expand_type env ty in
     let (env, uty, supportdyn) = unbox env ty in
-    if supportdyn && not allow_supportdyn then
+    if supportdyn && not for_lambda then
       (env, None)
     else
       (env, Some (p, ur, supportdyn, uty, get_node uty))
@@ -4924,7 +4933,7 @@ and lambda ~is_anon ?expected p env f idl =
     (env, tefun, inferred_ty)
   in
   let (env, eexpected) =
-    expand_expected_and_get_node ~allow_supportdyn:true env expected
+    expand_expected_and_get_node ~for_lambda:true env expected
   in
   match eexpected with
   | Some (_pos, _ur, _, tdyn, Tdynamic)

@@ -61,6 +61,8 @@ type rollout_flags = {
   hulk_lite: bool;
   specify_manifold_api_key: bool;
   populate_member_heaps: bool;
+  shm_use_sharded_hashtbl: bool;
+  shm_cache_size: int;
 }
 
 let flush () = ()

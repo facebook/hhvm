@@ -1245,36 +1245,7 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
     //TODO(hrust): do we need special handling for Awaitall?
     fn visit_expr(&mut self, env: &mut Env<'a, 'arena>, Expr(_, pos, e): &mut Expr) -> Result<()> {
         env.stack_limit.panic_if_exceeded();
-        let null = Expr_::mk_null();
-        let mut e_owned = std::mem::replace(e, null);
-        /*
-            If this is a call of the form
-              HH\FIXME\UNSAFE_CAST(e, ...)
-            then treat as a no-op by transforming it to
-              e
-            Repeat in case there are nested occurrences
-        */
-        loop {
-            match e_owned {
-            Expr_::Call(mut x)
-              // Must have at least one argument
-              if !x.2.is_empty() && {
-                // Function name should be HH\FIXME\UNSAFE_CAST
-                if let Expr_::Id(ref id) = (x.0).2 {
-                  id.1 == pseudo_functions::UNSAFE_CAST
-                } else {
-                  false
-                }
-              } =>{
-                // Select first argument
-                let Expr(_, _, e) = x.2.swap_remove(0).1;
-                e_owned = e;
-              }
-            _ => { break; }
-           };
-        }
-
-        *e = match e_owned {
+        *e = match strip_unsafe_casts(e) {
             Expr_::Efun(x) => convert_lambda(self.alloc, env, self, x.0, Some(x.1))?,
             Expr_::Lfun(x) => convert_lambda(self.alloc, env, self, x.0, None)?,
             Expr_::Lvar(id_orig) => {
@@ -1548,6 +1519,39 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
             }
         };
         Ok(())
+    }
+}
+
+/// Swap *e with Expr_::Null, then return it with UNSAFE_CAST stripped off.
+fn strip_unsafe_casts(e: &mut Expr_) -> Expr_ {
+    let null = Expr_::mk_null();
+    let mut e_owned = std::mem::replace(e, null);
+    /*
+        If this is a call of the form
+          HH\FIXME\UNSAFE_CAST(e, ...)
+        then treat as a no-op by transforming it to
+          e
+        Repeat in case there are nested occurrences
+    */
+    loop {
+        match e_owned {
+            // Must have at least one argument
+            Expr_::Call(mut x)
+                if !x.2.is_empty() && {
+                    // Function name should be HH\FIXME\UNSAFE_CAST
+                    if let Expr_::Id(ref id) = (x.0).2 {
+                        id.1 == pseudo_functions::UNSAFE_CAST
+                    } else {
+                        false
+                    }
+                } =>
+            {
+                // Select first argument
+                let Expr(_, _, e) = x.2.swap_remove(0).1;
+                e_owned = e;
+            }
+            _ => break e_owned,
+        };
     }
 }
 

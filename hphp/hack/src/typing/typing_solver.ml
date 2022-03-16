@@ -522,9 +522,21 @@ let solve_tyvar_wrt_variance env r var =
     | (true, false)
     | (false, false) ->
       (* As in Local Type Inference by Pierce & Turner, if type variable does
-       * not appear at all, or only appears covariantly, solve to lower bound
+       * not appear at all, or only appears covariantly, solve to lower bound.
+       * If there are no lower bounds, and we've got type constant projections
+       * on the type variable, then solve to the upper bound anyway, hoping that
+       * this resolves the projections. Only do in dynamic checking mode,
+       * as otherwise this introduces a type soundness issue, for reasons
+       * that I don't understand. (See T78983983)
        *)
-      bind_to_lower_bound ~freshen:false env r var lower_bounds
+      if
+        Typing_env_types.(env.in_support_dynamic_type_method_check)
+        && ITySet.is_empty lower_bounds
+        && not (SMap.is_empty (Env.get_tyvar_type_consts env var))
+      then
+        bind_to_upper_bound env r var upper_bounds
+      else
+        bind_to_lower_bound ~freshen:false env r var lower_bounds
     | (false, true) ->
       (* As in Local Type Inference by Pierce & Turner, if type variable
        * appears only contravariantly, solve to upper bound

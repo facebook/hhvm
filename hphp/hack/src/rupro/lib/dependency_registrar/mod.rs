@@ -75,5 +75,7 @@ pub enum DependencyName {
 /// Organize and administer dependency records.
 pub trait DependencyRegistrar: Debug + Send + Sync {
     /// Record a dependency.
-    fn add_dependency(&mut self, dependency: DependencyName, dependent: DeclName) -> Result<()>;
+    // e.g. If class B extends A {} then A <- B (B depends on A). So here,
+    // dependent is B and dependency is A.
+    fn add_dependency(&self, dependent: DeclName, dependency: DependencyName) -> Result<()>;
 }

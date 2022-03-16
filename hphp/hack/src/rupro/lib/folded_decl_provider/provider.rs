@@ -6,6 +6,7 @@
 use super::{fold::DeclFolder, DeclName, Error, Result, TypeDecl};
 use crate::cache::Cache;
 use crate::decl_defs::{ConstDecl, DeclTy, DeclTy_, FoldedClass, FunDecl, ShallowClass};
+use crate::dependency_registrar::DependencyName;
 use crate::dependency_registrar::DependencyRegistrar;
 use crate::reason::Reason;
 use crate::shallow_decl_provider::{self, ShallowDeclProvider};
@@ -30,7 +31,6 @@ pub struct LazyFoldedDeclProvider<R: Reason> {
     cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
     special_names: &'static SpecialNames,
     shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
-    #[allow(dead_code)] // TODO: remove on first use
     dependency_registrar: Arc<dyn DependencyRegistrar>,
 }
 
@@ -204,6 +204,16 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         }
     }
 
+    fn register_extends_dependency(&self, ty: &DeclTy<R>, sc: &ShallowClass<R>) -> Result<()> {
+        if let Some((_, p, _)) = ty.unwrap_class_type() {
+            let child = sc.name.id();
+            let parent = p.id();
+            self.dependency_registrar
+                .add_dependency(DeclName::Type(child), DependencyName::Extends(parent))?;
+        }
+        Ok(())
+    }
+
     // note(sf, 2022-03-02): c.f. Decl_folded_class.class_parents_decl
     fn decl_class_parents(
         &self,
@@ -215,35 +225,40 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         for ty in sc.extends.iter() {
             self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
+            self.register_extends_dependency(ty, sc)?;
         }
         for ty in sc.implements.iter() {
             self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
+            self.register_extends_dependency(ty, sc)?;
         }
         for ty in sc.uses.iter() {
             self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
+            self.register_extends_dependency(ty, sc)?;
         }
         for ty in sc.xhp_attr_uses.iter() {
             self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
+            self.register_extends_dependency(ty, sc)?;
         }
         for ty in sc.req_extends.iter() {
             self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
+            self.register_extends_dependency(ty, sc)?;
         }
         for ty in sc.req_implements.iter() {
             self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
+            self.register_extends_dependency(ty, sc)?;
         }
-        for ty in sc
-            .enum_type
-            .as_ref()
+        for ty in (sc.enum_type.as_ref())
             .map_or([].as_slice(), |et| &et.includes)
             .iter()
         {
             self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
+            self.register_extends_dependency(ty, sc)?;
         }
 
         Ok(acc)

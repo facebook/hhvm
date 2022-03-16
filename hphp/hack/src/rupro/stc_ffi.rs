@@ -83,7 +83,7 @@ pub extern "C" fn stc_main() {
         &shallow_decl_cache,
     )));
     let folded_decl_cache = Arc::new(NonEvictingCache::new());
-    let dependency_registrar = Arc::new(hackrs_test_utils::registrar::DependencyMap::new());
+    let dependency_registrar = Arc::new(hackrs_test_utils::registrar::DependencyGraph::new());
     let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
         Arc::clone(&options),
         folded_decl_cache,

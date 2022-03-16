@@ -68,7 +68,7 @@ impl TestContext {
                 decl_parser.clone(),
             ));
         let dependency_registrar: Arc<dyn DependencyRegistrar> =
-            Arc::new(hackrs_test_utils::registrar::DependencyMap::new());
+            Arc::new(hackrs_test_utils::registrar::DependencyGraph::new());
         let folded_decl_provider: Arc<dyn FoldedDeclProvider<_>> =
             Arc::new(LazyFoldedDeclProvider::new(
                 Arc::new(oxidized::global_options::GlobalOptions::default()),

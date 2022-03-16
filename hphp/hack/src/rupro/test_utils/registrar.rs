@@ -10,23 +10,29 @@ use std::collections::HashSet;
 type DeclNameSet = HashSet<DeclName>;
 
 #[derive(Debug, Clone)]
-pub struct DependencyMap {
-    // e.g. Extends(Bar) <- {Type(Foo), ...}
-    deps: DashMap<DependencyName, DeclNameSet>,
+pub struct DependencyGraph {
+    // We store the dependency edges in "reverse dependency" fashion (rdeps)
+    // e.g.
+    // ```
+    //   class A {}
+    //   class B extends A {}
+    // ```
+    // would result in
+    //   Extends(A) : {Type(B)}
+    rdeps: DashMap<DependencyName, DeclNameSet>,
 }
 
-impl DependencyMap {
-    #[allow(dead_code)] // TODO: remove on first use
+impl DependencyGraph {
     pub fn new() -> Self {
         Self {
-            deps: DashMap::new(),
+            rdeps: DashMap::new(),
         }
     }
 }
 
-impl DependencyRegistrar for DependencyMap {
-    fn add_dependency(&mut self, dependency: DependencyName, dependent: DeclName) -> Result<()> {
-        match self.deps.entry(dependency) {
+impl DependencyRegistrar for DependencyGraph {
+    fn add_dependency(&self, dependent: DeclName, dependency: DependencyName) -> Result<()> {
+        match self.rdeps.entry(dependency) {
             Entry::Vacant(e) => {
                 let mut dependents: DeclNameSet = DeclNameSet::new();
                 dependents.insert(dependent);

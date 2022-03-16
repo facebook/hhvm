@@ -12,9 +12,9 @@ if [ -z "$1" ] || [ -z "$2" ]; then
   exit 0
 fi
 
-sed -i "s/$OLD/$NEW/g" -- */CMakeLists.txt
+sed -i.orig -e "s/$OLD/$NEW/g" -- */CMakeLists.txt
 
-grep --only-matching -P  "https://github.com/.+$NEW.+\.gz" -- */CMakeLists.txt | \
+egrep --only-matching "https://github.com/.+$NEW.+\.gz" -- */CMakeLists.txt | \
 while read -r MATCH; do
   CMAKE_FILE="${MATCH%%:*}"
   URL="${MATCH#*:}"

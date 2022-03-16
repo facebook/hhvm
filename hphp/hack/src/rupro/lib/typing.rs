@@ -92,7 +92,7 @@ impl Typing {
     }
 
     fn stmt_<R: Reason>(
-        _env: &TEnv<R>,
+        env: &TEnv<R>,
         _pos: &oxidized::pos::Pos,
         stmt: &oxidized::aast::Stmt_<(), ()>,
     ) -> tast::Stmt_<R> {
@@ -100,6 +100,11 @@ impl Typing {
         use tast::Stmt_ as TS;
         match stmt {
             OS::Noop => TS::Noop,
+            OS::Expr(e) => {
+                let (te, _) = Self::expr(env, Default::default(), e);
+                // TODO(hrust): exits
+                OS::Expr(Box::new(te))
+            }
             s => unimplemented!("stmt_: {:?}", s),
         }
     }
@@ -120,6 +125,50 @@ impl Typing {
             };
         }
         stl
+    }
+
+    fn set_valid_rvalue<R: Reason>(
+        env: &TEnv<R>,
+        p: R::Pos,
+        x: &oxidized::local_id::LocalId,
+        ty: Ty<R>,
+    ) {
+        let x = LocalId::from(x);
+        env.set_local(false, x, ty, p);
+        // TODO(hverr): set_local_expr_id
+    }
+
+    fn assign<R: Reason>(
+        env: &TEnv<R>,
+        p: R::Pos,
+        e1: &oxidized::aast::Expr<(), ()>,
+        pos2: &oxidized::pos::Pos,
+        ty2: Ty<R>,
+    ) -> (tast::Expr<R>, Ty<R>, Option<(Ty<R>, Ty<R>)>) {
+        Self::assign_with_subtype_err_(env, p, (), e1, pos2, ty2)
+    }
+
+    fn assign_with_subtype_err_<R: Reason>(
+        env: &TEnv<R>,
+        p: R::Pos,
+        _ur: (),
+        e1: &oxidized::aast::Expr<(), ()>,
+        _pos2: &oxidized::pos::Pos,
+        ty2: Ty<R>,
+    ) -> (tast::Expr<R>, Ty<R>, Option<(Ty<R>, Ty<R>)>) {
+        // TODO(hrust): Reason.URassign
+        // TODO(hrust): Hole
+        // TODO(hrust): awaitable
+        use oxidized::aast::Expr_::*;
+        // TODO(hrust): members
+        match &e1.2 {
+            Lvar(x) => {
+                Self::set_valid_rvalue(env, p, &x.1, ty2.clone());
+                let (te, ty) = Self::make_result(env, e1.1.clone(), Lvar(x.clone()), ty2);
+                (te, ty, None)
+            }
+            e => unimplemented!("{:?}", e),
+        }
     }
 
     fn make_result<R: Reason>(
@@ -143,6 +192,26 @@ impl Typing {
         let e = &outer.2;
         match e {
             Int(s) => Self::make_result(env, p_ox.clone(), Int(s.clone()), Ty::int(R::witness(p))),
+            Binop(e) => match &**e {
+                (oxidized::ast_defs::Bop::Eq(op_opt), e1, e2) => {
+                    let make_result = |env, p, te, ty| {
+                        // TODO(hrust): check_assignment
+                        Self::make_result::<R>(env, p, te, ty)
+                    };
+                    match op_opt {
+                        Some(_) => unimplemented!("{:?}", e),
+                        None => {
+                            let (te2, ty2) = Self::expr_(env, Default::default(), e2);
+                            let (te1, ty, err_opt) = Self::assign(env, p, e1, &e2.1, ty2);
+                            // TODO(hrust): hole_on_err
+                            assert!(err_opt.is_none());
+                            let te = Binop(Box::new((oxidized::ast_defs::Bop::Eq(None), te1, te2)));
+                            make_result(env, p_ox.clone(), te, ty)
+                        }
+                    }
+                }
+                _ => unimplemented!("{:?}", e),
+            },
             _ => unimplemented!("{:?}", e),
         }
     }

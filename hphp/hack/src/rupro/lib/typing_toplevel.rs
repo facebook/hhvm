@@ -84,18 +84,13 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             return_ty.clone(),
             return_decl_ty,
         );
-        let param_tys: Vec<_> = params_decl_ty
-            .iter()
-            .map(|(param, hint)| {
-                Ok((
-                    param,
-                    TypingParam::make_param_local_ty(self.env, hint.clone(), param)?,
-                ))
-            })
-            .collect::<Result<Vec<_>>>()?;
-        param_tys
-            .iter()
-            .for_each(|(param, ty)| TypingParam::check_param_has_hint(self.env, param, ty));
+        let param_tys = TypingParam::make_param_local_tys(
+            TypingParamFlags {
+                dynamic_mode: false,
+            },
+            self.env,
+            params_decl_ty.into_iter(),
+        )?;
         // TOOD(hrust): capabilities, immutable
         let typed_params: Vec<_> = param_tys
             .iter()

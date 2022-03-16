@@ -365,56 +365,7 @@ where
             }
             TokenKind::Name => {
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
-                let qualified_name = self.scan_remaining_qualified_name(token);
-                let mut parser1 = self.clone();
-                let str_maybe = parser1.next_token_no_trailing();
-                match str_maybe.kind() {
-                    TokenKind::NowdocStringLiteral | TokenKind::HeredocStringLiteral => {
-                        // for now, try generic type argument list with attributes before
-                        // resorting to bad prefix
-                        match self.try_parse_specified_function_call(&qualified_name) {
-                            Some((type_arguments, p)) => {
-                                self.continue_from(p);
-                                let result = self.do_parse_specified_function_call(
-                                    qualified_name,
-                                    type_arguments,
-                                );
-                                self.parse_remaining_expression(result)
-                            }
-                            _ => {
-                                self.with_error(Errors::prefixed_invalid_string_kind);
-                                self.parse_name_or_collection_literal_expression(qualified_name)
-                            }
-                        }
-                    }
-                    TokenKind::HeredocStringLiteralHead => {
-                        // Treat as an attempt to prefix a non-double-quoted string
-                        self.with_error(Errors::prefixed_invalid_string_kind);
-                        self.parse_name_or_collection_literal_expression(qualified_name)
-                    }
-                    TokenKind::SingleQuotedStringLiteral | TokenKind::DoubleQuotedStringLiteral => {
-                        // This name prefixes a double-quoted string or a single
-                        // quoted string
-                        self.continue_from(parser1);
-                        let str_ = S!(make_token, self, str_maybe);
-                        let str_ = S!(make_literal_expression, self, str_);
-                        S!(make_prefixed_string_expression, self, qualified_name, str_)
-                    }
-                    TokenKind::DoubleQuotedStringLiteralHead => {
-                        self.continue_from(parser1);
-                        // This name prefixes a double-quoted string containing embedded expressions
-                        let str_ = self.parse_double_quoted_like_string(
-                            str_maybe,
-                            StringLiteralKind::LiteralDoubleQuoted,
-                        );
-                        S!(make_prefixed_string_expression, self, qualified_name, str_)
-                    }
-                    _ => {
-                        // Not a prefixed string or an attempt at one
-                        self.parse_name_or_collection_literal_expression(qualified_name)
-                    }
-                }
+                self.parse_name(token)
             }
             TokenKind::Backslash => {
                 self.continue_from(parser1);
@@ -489,6 +440,57 @@ where
                 S!(make_missing, self, self.pos())
             }
             _ => self.parse_as_name_or_error(),
+        }
+    }
+
+    fn parse_name(&mut self, token: Token<S>) -> S::R {
+        let token = S!(make_token, self, token);
+        let qualified_name = self.scan_remaining_qualified_name(token);
+        let mut parser1 = self.clone();
+        let str_maybe = parser1.next_token_no_trailing();
+        match str_maybe.kind() {
+            TokenKind::NowdocStringLiteral | TokenKind::HeredocStringLiteral => {
+                // for now, try generic type argument list with attributes before
+                // resorting to bad prefix
+                match self.try_parse_specified_function_call(&qualified_name) {
+                    Some((type_arguments, p)) => {
+                        self.continue_from(p);
+                        let result =
+                            self.do_parse_specified_function_call(qualified_name, type_arguments);
+                        self.parse_remaining_expression(result)
+                    }
+                    _ => {
+                        self.with_error(Errors::prefixed_invalid_string_kind);
+                        self.parse_name_or_collection_literal_expression(qualified_name)
+                    }
+                }
+            }
+            TokenKind::HeredocStringLiteralHead => {
+                // Treat as an attempt to prefix a non-double-quoted string
+                self.with_error(Errors::prefixed_invalid_string_kind);
+                self.parse_name_or_collection_literal_expression(qualified_name)
+            }
+            TokenKind::SingleQuotedStringLiteral | TokenKind::DoubleQuotedStringLiteral => {
+                // This name prefixes a double-quoted string or a single
+                // quoted string
+                self.continue_from(parser1);
+                let str_ = S!(make_token, self, str_maybe);
+                let str_ = S!(make_literal_expression, self, str_);
+                S!(make_prefixed_string_expression, self, qualified_name, str_)
+            }
+            TokenKind::DoubleQuotedStringLiteralHead => {
+                self.continue_from(parser1);
+                // This name prefixes a double-quoted string containing embedded expressions
+                let str_ = self.parse_double_quoted_like_string(
+                    str_maybe,
+                    StringLiteralKind::LiteralDoubleQuoted,
+                );
+                S!(make_prefixed_string_expression, self, qualified_name, str_)
+            }
+            _ => {
+                // Not a prefixed string or an attempt at one
+                self.parse_name_or_collection_literal_expression(qualified_name)
+            }
         }
     }
 

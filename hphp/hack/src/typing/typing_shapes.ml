@@ -284,6 +284,15 @@ let idx
         in
         ((env, Option.merge e1 e2 ~f:Typing_error.both), res))
   in
+  let (env, res) =
+    match get_node shape_ty with
+    | Tnewtype (n, _, _)
+      when String.equal n Naming_special_names.Classes.cSupportDyn ->
+      let r = get_reason shape_ty in
+      TUtils.make_supportdyn r env res
+    | _ -> (env, res)
+  in
+
   Option.iter ty_err_opt ~f:Errors.add_typing_error;
   make_locl_like_type env res
 

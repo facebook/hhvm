@@ -436,7 +436,9 @@ let go_quarantined
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  let env_and_ty = ServerInferType.expanded_type_at_pos ctx tast line column in
+  let env_and_ty =
+    ServerInferType.human_friendly_type_at_pos ctx tast line column
+  in
   (* There are legitimate cases where we expect to have no identities returned,
      so just format the type. *)
   match identities with

@@ -79,7 +79,7 @@ let class_const_ty env (cc : Tast.class_const) : Tast.ty option =
  * cannot assume that the structure of the CST is reflected in the TAST.
  *)
 
-let base_visitor line char =
+let base_visitor ~human_friendly line char =
   object (self)
     inherit [_] Tast_visitor.reduce as super
 
@@ -108,14 +108,14 @@ let base_visitor line char =
     method! on_expr env ((ty, pos, _) as expr) =
       if Pos.inside pos line char then
         match shape_indexing_receiver env expr with
-        | Some recv ->
+        | Some recv when human_friendly ->
           (* If we're looking at a shape indexing expression, we don't
              want to recurse on the string literal.
 
              For example, if we have the code $user['age'] and hover
              over 'age', we want the hover type to be int, not string. *)
           self#merge_opt (Some (pos, env, ty)) (self#on_expr env recv)
-        | None -> self#merge_opt (Some (pos, env, ty)) (super#on_expr env expr)
+        | _ -> self#merge_opt (Some (pos, env, ty)) (super#on_expr env expr)
       else
         super#on_expr env expr
 
@@ -215,13 +215,17 @@ let range_visitor startl startc endl endc =
 let type_at_pos
     (ctx : Provider_context.t) (tast : Tast.program) (line : int) (char : int) :
     (Tast_env.env * Tast.ty) option =
-  (base_visitor line char)#go ctx tast >>| fun (_, env, ty) -> (env, ty)
+  (base_visitor ~human_friendly:false line char)#go ctx tast
+  >>| fun (_, env, ty) -> (env, ty)
 
-let expanded_type_at_pos
+(* Return the expanded type of smallest expression at this
+   position. Skips string literals in shape indexing expressions so
+   hover results are more relevant. *)
+let human_friendly_type_at_pos
     (ctx : Provider_context.t) (tast : Tast.program) (line : int) (char : int) :
     (Tast_env.env * Tast.ty) option =
-  type_at_pos ctx tast line char
-  |> Option.map ~f:(fun (env, ty) -> (env, Tast_expand.expand_ty env ty))
+  (base_visitor ~human_friendly:true line char)#go ctx tast
+  |> Option.map ~f:(fun (_, env, ty) -> (env, Tast_expand.expand_ty env ty))
 
 let type_at_range
     (ctx : Provider_context.t)

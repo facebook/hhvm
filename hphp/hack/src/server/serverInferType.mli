@@ -13,7 +13,7 @@ val type_at_pos :
   int ->
   (Tast_env.env * Tast.ty) option
 
-val expanded_type_at_pos :
+val human_friendly_type_at_pos :
   Provider_context.t ->
   Tast.program ->
   int ->

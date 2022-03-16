@@ -15,7 +15,9 @@ let go_common
     (tast : Tast.program)
     ~(line : int)
     ~(column : int) : ServerCommandTypes.Go_to_type_definition.result =
-  let env_and_ty = ServerInferType.expanded_type_at_pos ctx tast line column in
+  let env_and_ty =
+    ServerInferType.human_friendly_type_at_pos ctx tast line column
+  in
   match env_and_ty with
   | None -> []
   | Some (env, ty) ->

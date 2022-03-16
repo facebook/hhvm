@@ -61,7 +61,6 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/assertions.h"
-#include "hphp/util/build-info.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/logger.h"
@@ -75,6 +74,10 @@ TRACE_SET_MOD(facts);
 namespace HPHP {
 namespace Facts {
 namespace {
+
+// SQLFacts version number representing the DB's schema. We change this number
+// when we make a breaking change to the DB's contents or schema.
+constexpr size_t kSchemaVersion = 3413321234;
 
 constexpr std::string_view kEUIDPlaceholder = "%{euid}";
 constexpr std::string_view kSchemaPlaceholder = "%{schema}";
@@ -96,16 +99,14 @@ folly::fs::path getRepoRoot(const RepoOptions& options) {
 
 std::string
 getCacheBreakerSchemaHash(std::string_view root, const RepoOptions& opts) {
-  std::string repoSchemaIdHash = repoSchemaId().toString();
   std::string optsHash = opts.flags().cacheKeySha1().toString();
   XLOG(INFO) << "Native Facts DB cache breaker:"
-             << "\n Repo Schema ID: " << repoSchemaIdHash << "\n Root: " << root
+             << "\n Version: " << kSchemaVersion << "\n Root: " << root
              << "\n RepoOpts hash: " << optsHash;
   std::string rootHash = string_sha1(root);
-  repoSchemaIdHash.resize(10);
   optsHash.resize(10);
   rootHash.resize(10);
-  return folly::to<std::string>(repoSchemaIdHash, '_', optsHash, '_', rootHash);
+  return folly::to<std::string>(kSchemaVersion, '_', optsHash, '_', rootHash);
 }
 
 folly::fs::path getDBPath(const RepoOptions& repoOptions) {

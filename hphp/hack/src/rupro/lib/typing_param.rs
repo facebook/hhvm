@@ -13,7 +13,24 @@ use crate::typing_phase::Phase;
 
 pub struct TypingParam;
 
+pub struct TypingParamFlags {
+    pub dynamic_mode: bool,
+}
+
 impl TypingParam {
+    pub fn make_param_local_tys<'a, R: Reason>(
+        flags: TypingParamFlags,
+        env: &TEnv<R>,
+        tys: impl Iterator<Item = (&'a oxidized::aast::FunParam<(), ()>, Option<DeclTy<R>>)>,
+    ) -> Result<Vec<(&'a oxidized::aast::FunParam<(), ()>, Ty<R>)>> {
+        tys.map(|(param, decl_hint)| {
+            assert!(!flags.dynamic_mode);
+            let ty = Self::make_param_local_ty(env, decl_hint, param)?;
+            Ok((param, ty))
+        })
+        .collect()
+    }
+
     pub fn make_param_local_ty<R: Reason>(
         env: &TEnv<R>,
         decl_hint: Option<DeclTy<R>>,
@@ -28,6 +45,7 @@ impl TypingParam {
                 Phase::localize_no_subst(env, false, None, ty)?
             }
         })
+        // TODO(hrust): integrate check_param_has_hint here
     }
 
     pub fn check_param_has_hint<R: Reason>(

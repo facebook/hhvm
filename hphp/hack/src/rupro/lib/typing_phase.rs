@@ -17,7 +17,7 @@ use pos::{Positioned, TypeName};
 pub struct Phase;
 
 impl Phase {
-    fn localize<R: Reason>(
+    pub fn localize<R: Reason>(
         env: &TEnv<R>,
         ety_env: &mut ExpandEnv<'_, R>,
         ty: DeclTy<R>,

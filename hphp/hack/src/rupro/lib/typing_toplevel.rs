@@ -15,11 +15,12 @@ use crate::tast;
 use crate::typing::{BindParamFlags, Result, Typing};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::Class;
+use crate::typing_defs::{ExpandEnv, Ty};
 use crate::typing_env::TEnv;
 use crate::typing_error::{Primary, TypingError};
-use crate::typing_param::TypingParam;
+use crate::typing_param::{TypingParam, TypingParamFlags};
 use crate::typing_phase::Phase;
-use crate::typing_return::TypingReturn;
+use crate::typing_return::{TypingReturn, TypingReturnInfo};
 use pos::TypeName;
 
 pub struct TypingToplevel<'a, R: Reason> {
@@ -161,6 +162,136 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         Ok((def, env.destruct()))
     }
 
+    fn method_return(
+        &mut self,
+        pos: &R::Pos,
+        name: Symbol,
+        m: &oxidized::aast::Method_<(), ()>,
+        ret_decl_ty: Option<DeclTy<R>>,
+    ) -> Result<(TypingReturnInfo<R>, Ty<R>)> {
+        let ret_ty = match ret_decl_ty.clone() {
+            None => TypingReturn::make_default_return(self.env, false, pos, name),
+            Some(ty) => {
+                // TODO(hrust): empty_expand_env_with_on_error
+                TypingReturn::make_return_type(
+                    self.env,
+                    |env, ty| Phase::localize(env, &mut ExpandEnv::new(&env.ctx), ty),
+                    ty,
+                )?
+            }
+        };
+        // TODO(hrust): force_return_kind
+        let ret_pos = match &m.ret.1 {
+            Some(h) => R::Pos::from(&h.0),
+            None => R::Pos::from(m.name.pos()),
+        };
+        let return_ = TypingReturn::make_info(
+            self.env,
+            ret_pos,
+            &m.fun_kind,
+            &m.user_attributes,
+            m.ret.1.is_some(),
+            ret_ty.clone(),
+            ret_decl_ty,
+        );
+        Ok((return_, ret_ty))
+    }
+
+    fn method_def(
+        &mut self,
+        _cls: &dyn Class<R>,
+        m: &oxidized::aast::Method_<(), ()>,
+    ) -> Result<Option<tast::Method_<R>>> {
+        let pos = R::Pos::from(&m.name.0);
+        let name = Symbol::new(&m.name.1);
+
+        // TODO(hrust): FunUtils.check_params
+        // TODO(hrust): tyvars, reinitialize_locals, callable
+        assert!(m.user_attributes.is_empty());
+        // TODO(hrust): support_dynamic, coeefects
+        // TODO(hrust): is_constructor
+        // TODO(hrust): localize_and_add_ast_generic_parameters_and_where_constraints
+        // TODO(hrust): get_self_ty
+        // TODO(hrust): is_disposable
+        self.env.clear_params();
+        let (ret_decl_ty, params_decl_ty) = self.hint_fun_header(&m.params, &m.ret);
+        // TODO(hrust): set_fn_kind
+        let (return_, return_ty) = self.method_return(&pos, name, m, ret_decl_ty)?;
+        let param_tys = TypingParam::make_param_local_tys(
+            TypingParamFlags {
+                dynamic_mode: false,
+            },
+            self.env,
+            params_decl_ty.into_iter(),
+        )?;
+        // TODO(hrust): memoize, coeefects, can_read_globals
+        let typed_params: Vec<_> = param_tys
+            .iter()
+            .map(|(param, ty)| {
+                Typing::bind_param(
+                    self.env,
+                    BindParamFlags {
+                        immutable: false,
+                        can_read_globals: true,
+                    },
+                    ty.clone(),
+                    param,
+                )
+            })
+            .collect();
+        // TODO(hrust): variance, tpenv, disable
+        let tb = Typing::fun_(
+            self.env,
+            Default::default(),
+            return_,
+            pos.clone(),
+            &m.body,
+            &m.fun_kind,
+        );
+        // TODO(hrust): construct return type
+        match m.ret.1 {
+            Some(_) => {}
+            None => {
+                assert_ne!(
+                    m.name.1,
+                    self.ctx.special_names.members.__construct.as_str()
+                );
+                self.env
+                    .add_error(TypingError::primary(Primary::ExpectingReturnTypeHint(pos)))
+            }
+        };
+        // TODO(hrust): tparams
+        assert!(m.tparams.is_empty());
+        // TODO(hrust): tyvar close and solve
+        // TODO(hrust): check_support_dynamic_type
+        let _ = typed_params;
+        let _ = tb;
+        let _ = return_ty;
+        let m = oxidized::aast::Method_ {
+            span: m.span.clone(),
+            annotation: self.env.save(()),
+            final_: m.final_,
+            abstract_: m.abstract_,
+            static_: m.static_,
+            readonly_this: m.readonly_this,
+            visibility: m.visibility.clone(),
+            name: m.name.clone(),
+            tparams: vec![],
+            where_constraints: m.where_constraints.clone(),
+            params: typed_params,
+            ctxs: m.ctxs.clone(),
+            unsafe_ctxs: m.unsafe_ctxs.clone(),
+            body: oxidized::aast::FuncBody { fb_ast: tb },
+            fun_kind: m.fun_kind.clone(),
+            user_attributes: vec![],
+            readonly_ret: m.readonly_ret.clone(),
+            ret: oxidized::aast::TypeHint(return_ty, m.ret.1.clone()),
+            external: m.external,
+            doc_comment: m.doc_comment.clone(),
+        };
+        Ok(Some(m))
+    }
+
     fn setup_env_for_class_def_check(
         ctx: Rc<TypingCtx<R>>,
         cd: &oxidized::aast::Class_<(), ()>,
@@ -169,22 +300,58 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         TEnv::class_env(ctx, cd)
     }
 
+    fn split_methods<'aast>(
+        &self,
+        all_methods: impl Iterator<Item = &'aast oxidized::aast::Method_<(), ()>>,
+    ) -> (
+        Option<&'aast oxidized::aast::Method_<(), ()>>,
+        Vec<&'aast oxidized::aast::Method_<(), ()>>,
+        Vec<&'aast oxidized::aast::Method_<(), ()>>,
+    ) {
+        let mut constructor = None;
+        let mut static_methods = vec![];
+        let mut methods = vec![];
+        for m in all_methods {
+            if m.name.1 == self.ctx.special_names.members.__construct.as_str() {
+                constructor = Some(m);
+            } else if m.static_ {
+                static_methods.push(m);
+            } else {
+                methods.push(m);
+            }
+        }
+        (constructor, static_methods, methods)
+    }
+
     fn check_class_members(
         &mut self,
         cd: &oxidized::aast::Class_<(), ()>,
-        _tc: &dyn Class<R>,
-    ) -> (
+        tc: &dyn Class<R>,
+    ) -> Result<(
         Vec<tast::ClassConst<R>>,
         Vec<tast::ClassTypeconstDef<R>>,
         Vec<tast::ClassVar<R>>,
         Vec<tast::ClassVar<R>>,
         Vec<tast::Method_<R>>,
-    ) {
+    )> {
+        let (constructor, static_methods, methods) = self.split_methods(cd.methods.iter());
+
+        // TODO(hrust): is_disposable_class
+        let mut typed_methods: Vec<_> = static_methods
+            .into_iter()
+            .filter_map(|m| self.method_def(tc, m).transpose())
+            .collect::<Result<_>>()?;
+        for m in methods {
+            if let Some(tm) = self.method_def(tc, m)? {
+                typed_methods.push(tm);
+            }
+        }
+
+        assert!(constructor.is_none());
         assert!(cd.vars.is_empty());
-        assert!(cd.methods.is_empty());
         assert!(cd.typeconsts.is_empty());
         assert!(cd.consts.is_empty());
-        (vec![], vec![], vec![], vec![], vec![])
+        Ok((vec![], vec![], vec![], vec![], typed_methods))
     }
 
     fn class_def_impl(
@@ -198,7 +365,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         assert!(cd.file_attributes.is_empty());
 
         let (typed_consts, typed_typeconsts, typed_vars, mut typed_static_vars, typed_methods) =
-            self.check_class_members(cd, tc);
+            self.check_class_members(cd, tc)?;
         typed_static_vars.extend(typed_vars);
 
         // TODO(hrust): class_type_params

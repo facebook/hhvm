@@ -91,12 +91,31 @@ impl Naming {
         self.fun_(&mut fd.fun);
     }
 
+    fn method_(&self, m: &mut aast::Method_<(), ()>) {
+        // TODO(hrust): all the rest
+        self.hint(true, &mut m.ret);
+        self.fun_paraml(&mut m.params);
+    }
+
+    fn interface(&self, c: &mut aast::Class_<(), ()>) {
+        // TODO(hrust): all the rest
+        if matches!(c.kind, oxidized::ast_defs::ClassishKind::Cinterface) {
+            c.methods.iter_mut().for_each(|m| m.abstract_ = true);
+        }
+    }
+
+    fn class_(&self, c: &mut aast::Class_<(), ()>) {
+        // TODO(hrust): all the rest
+        c.methods.iter_mut().for_each(|m| self.method_(m));
+        self.interface(c);
+    }
+
     fn program_(&self, p: &mut aast::Program<(), ()>) {
         use aast::Def::*;
         for def in p {
             match def {
                 Fun(fd) => self.fun_def(&mut **fd),
-                Class(_) => {}
+                Class(c) => self.class_(&mut **c),
                 Stmt(_) => {}
                 Typedef(_) => {}
                 Constant(_) => {}

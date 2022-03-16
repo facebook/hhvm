@@ -174,6 +174,10 @@ impl<R: Reason> TEnv<R> {
         *self.genv.params.borrow_mut() = m;
     }
 
+    pub fn clear_params(&self) {
+        self.set_params(Default::default());
+    }
+
     fn set_local_(&self, x: LocalId, ty: Local<R>) {
         self.lenv.per_cont_env.add(TypingContKey::Next, x, ty);
     }

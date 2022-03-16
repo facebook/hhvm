@@ -8,4 +8,4 @@ trait T {}
 class A {
   use T;
 }
-class B extends A implements I {}
+class B<T> extends A implements I {}

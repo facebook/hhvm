@@ -96,9 +96,10 @@ let make_hover_attr_docs name =
   | "__Deprecated" ->
     [
       "Mark a function/method as deprecated. "
-      ^ " The type checker will show an error at call sites, and a runtime warning is logged if this function/method is called."
-      ^ "\n\nThe optional second argument specifies a rate limit for warning logs."
-      ^ " If the rate limit is 100, a warning is only issued every 1/100 calls.";
+      ^ " The type checker will show an error at call sites, and a runtime notice is raised if this function/method is called."
+      ^ "\n\nThe optional second argument specifies a sampling rate for raising notices at runtime."
+      ^ " If the sampling rate is 100, a notice is only raised every 1/100 calls. If omitted, the default sampling rate is 1 (i.e. all calls raise notices)."
+      ^ " To disable runtime notices, use a sampling rate of 0.";
     ]
   | "__DynamicallyCallable" ->
     [

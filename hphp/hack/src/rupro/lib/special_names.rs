@@ -8,6 +8,7 @@
 
 use naming_special_names_rust as sn;
 use pos::{ClassConstName, Symbol, TypeConstName, TypeName};
+use std::collections::HashSet;
 
 #[derive(Debug)]
 pub struct SpecialNames {
@@ -322,6 +323,8 @@ pub struct Typehints {
     pub supportdyn: Symbol,
     pub hh_sypportdyn: Symbol,
     pub wildcard: Symbol,
+
+    pub reserved_typehints: HashSet<Symbol>,
 }
 
 #[derive(Debug)]
@@ -740,7 +743,7 @@ impl StdlibFunctions {
 
 impl Typehints {
     fn new() -> Self {
-        Self {
+        let mut this = Self {
             null: Symbol::new(sn::typehints::NULL),
             void: Symbol::new(sn::typehints::VOID),
             resource: Symbol::new(sn::typehints::RESOURCE),
@@ -766,7 +769,34 @@ impl Typehints {
             supportdyn: Symbol::new(sn::typehints::SUPPORTDYN),
             hh_sypportdyn: Symbol::new(sn::typehints::HH_SUPPORTDYN),
             wildcard: Symbol::new(sn::typehints::WILDCARD),
-        }
+
+            reserved_typehints: HashSet::default(),
+        };
+
+        this.reserved_typehints = HashSet::from([
+            this.null,
+            this.void,
+            this.resource,
+            this.num,
+            this.arraykey,
+            this.noreturn,
+            this.mixed,
+            this.nonnull,
+            this.this,
+            this.dynamic,
+            this.nothing,
+            this.int,
+            this.bool,
+            this.float,
+            this.string,
+            this.darray,
+            this.varray,
+            this.varray_or_darray,
+            this.vec_or_dict,
+            this.callable,
+            this.wildcard,
+        ]);
+        this
     }
 }
 

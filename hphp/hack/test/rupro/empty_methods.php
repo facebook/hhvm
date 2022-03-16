@@ -1,5 +1,9 @@
 <?hh
 
+interface J {
+  public function a(): A;
+}
+
 interface I {
   public function foo(): void;
 }

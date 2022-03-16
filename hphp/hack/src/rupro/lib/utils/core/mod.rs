@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod ident;
 mod local_id;
+pub mod utils;
 
 pub use ident::{Ident, IdentGen};
 pub use local_id::LocalId;

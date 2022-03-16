@@ -5,6 +5,7 @@
 
 use oxidized::aast;
 
+use crate::naming::naming_elaborate_namespaces::ElaborateNamespaces;
 use crate::special_names::SpecialNames;
 
 pub struct Naming {
@@ -111,6 +112,7 @@ impl Naming {
 
     fn class_(&self, c: &mut aast::Class_<(), ()>) {
         // TODO(hrust): all the rest
+        ElaborateNamespaces::new(self.sn).on_class_(c);
         c.methods.iter_mut().for_each(|m| self.method_(m));
         c.vars.iter_mut().for_each(|v| self.class_prop(v));
         self.interface(c);

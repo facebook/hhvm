@@ -502,14 +502,15 @@ class SrcKeyPrinter(object):
         self.val = val
 
     def to_string(self):
-        func_id = self.val['m_funcID']
-        if func_id == -1:
+        func_id = self.val['m_s']['m_funcID']
+        # Complicated cast to overcome "Invalid type combination in equality test"
+        if int(func_id.cast(gdb.lookup_type('uint32'))) == -1:
             return '<invalid SrcKey>'
 
         func = nameof(lookup_func(func_id))
-        offset = self.val['m_offset']
+        offset = self.val['m_s']['m_offset']
 
-        rmp = self.val['m_resumeModeAndPrologue']
+        rmp = self.val['m_s']['m_resumeModeAndTags']
         resume = prologue = ''
         if rmp == 0:
             # ResumeMode::None

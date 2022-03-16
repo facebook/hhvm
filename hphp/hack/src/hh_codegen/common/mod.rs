@@ -72,7 +72,7 @@ pub mod gen_helpers {
     pub fn gen_module_uses(ms: impl Iterator<Item = impl AsRef<str>>) -> TokenStream {
         let mods = ms.map(|m| format_ident!("{}", m.as_ref()));
         quote! {
-            use crate::{#(#mods::*,)*};
+            use crate::{*, #(#mods::{self, *},)*};
         }
     }
 }

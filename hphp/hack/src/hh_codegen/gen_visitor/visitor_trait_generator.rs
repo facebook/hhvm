@@ -29,6 +29,7 @@ pub trait VisitorTrait {
         let lifetime = make_lifetime(&lifetime);
 
         Ok(quote! {
+            #![allow(unused_imports)]
             #![allow(unused_variables)]
 
             #uses

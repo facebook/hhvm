@@ -1799,7 +1799,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "hex",
- "itertools 0.10.3",
  "md-5",
  "proc-macro2",
  "quote",

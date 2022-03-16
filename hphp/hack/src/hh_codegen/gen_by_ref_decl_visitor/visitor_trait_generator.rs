@@ -15,6 +15,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
     let visit_functions = ctx.types().map(gen_visit_function).collect::<Vec<_>>();
 
     quote! {
+        #![allow(unused_imports)]
         #![allow(unused_variables)]
 
         #uses

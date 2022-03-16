@@ -11,16 +11,19 @@ open Hh_prelude
 open Option.Monad_infix
 
 (* Is this expression indexing into a value of type shape?
- * E.g. $some_shope['foo'] *)
-let is_shape_indexing env (_, _, expr_) =
+ * E.g. $some_shope['foo'].
+ *
+ * If so, return the receiver. 
+ *)
+let shape_indexing_receiver env (_, _, expr_) : Tast.expr option =
   match expr_ with
-  | Aast.Array_get ((recv_ty, _, _), _) ->
+  | Aast.Array_get (((recv_ty, _, _) as recv), _) ->
     let ty = Tast_env.fully_expand env recv_ty in
     let (_, ty_) = Typing_defs_core.deref ty in
     (match ty_ with
-    | Typing_defs_core.Tshape _ -> true
-    | _ -> false)
-  | _ -> false
+    | Typing_defs_core.Tshape _ -> Some recv
+    | _ -> None)
+  | _ -> None
 
 let class_const_ty env (cc : Tast.class_const) : Tast.ty option =
   let open Aast in
@@ -104,15 +107,15 @@ let base_visitor line char =
 
     method! on_expr env ((ty, pos, _) as expr) =
       if Pos.inside pos line char then
-        if is_shape_indexing env expr then
+        match shape_indexing_receiver env expr with
+        | Some recv ->
           (* If we're looking at a shape indexing expression, we don't
-             want to show the type of the literal on hover.
+             want to recurse on the string literal.
 
              For example, if we have the code $user['age'] and hover
              over 'age', we want the hover type to be int, not string. *)
-          Some (pos, env, ty)
-        else
-          self#merge_opt (Some (pos, env, ty)) (super#on_expr env expr)
+          self#merge_opt (Some (pos, env, ty)) (self#on_expr env recv)
+        | None -> self#merge_opt (Some (pos, env, ty)) (super#on_expr env expr)
       else
         super#on_expr env expr
 

@@ -60,7 +60,8 @@ module Dep : sig
         (** Like [GConst], but used only in conservative redecl. May not be
         necessary anymore. *)
     | Module : string -> 'a variant
-        (** Represents a Hack module depending on another *)
+        (** Represents a toplevel symbol being defined as a member of
+        this module *)
 
   type dep_kind =
     | KGConst [@value 0]

@@ -2065,14 +2065,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         })
     }
 
-    fn set_module(&mut self, attributes: &Node<'a>) {
-        for attr in attributes.iter() {
-            if let Node::Attribute(attr) = attr {
-                if attr.name.1 == "__Module" {
-                    self.module = attr.string_literal_params.first().map(|&(p, m)| {
-                        oxidized_by_ref::ast::Id(p, self.str_from_utf8_for_bytes_in_arena(m))
-                    });
-                    break;
+    fn set_module_if_unset(&mut self, attributes: &Node<'a>) {
+        // TODO(T113116708) We shouldn't need this check here, really; it should be
+        // illegal to have more than one attribute named `__Module`, but file attrs are
+        // weird.
+        if self.module.is_none() {
+            for attr in attributes.iter() {
+                if let Node::Attribute(attr) = attr {
+                    if attr.name.1 == "__Module" {
+                        self.module = attr.string_literal_params.first().map(|&(p, m)| {
+                            oxidized_by_ref::ast::Id(p, self.str_from_utf8_for_bytes_in_arena(m))
+                        });
+                        break;
+                    }
                 }
             }
         }
@@ -5462,7 +5467,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 }
             }
         }
-        self.set_module(&attributes);
+        self.set_module_if_unset(&attributes);
         Node::Ignored(SK::FileAttributeSpecification)
     }
 

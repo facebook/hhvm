@@ -1,0 +1,24 @@
+[("A", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [5:8-9] }));
+  ("B", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [6:8-9] }));
+  ("\\h",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_module = (Some ([8:17-20], "A")); fe_internal = false;
+        fe_type =
+        (Rwitness_from_decl ([14:10-11]),
+         (Tfun
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+              ft_implicit_params = { capability = (CapDefaults [14:10-11]) };
+              ft_ret =
+              { et_enforced = Typing_defs_core.Unenforced;
+                et_type = (Rhint ([14:15-19]), (Tprim Tvoid)) };
+              ft_flags =
+              (make_ft_flags FSync ~return_disposable:false
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [14:10-11]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false }))
+  ]
+
+They matched!

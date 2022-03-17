@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9d42de83572fc85fb656c1d7c3581a65>>
+// @generated SignedSource<<26ab1db7ab3e97793327f5a15810e581>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -211,6 +211,26 @@ pub struct ClassConst {
     pub origin: String,
     /// references to the constants used in the initializer
     pub refs: Vec<ClassConstRef>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct ModuleDefType {
+    pub mdt_pos: pos_or_decl::PosOrDecl,
 }
 
 /// The position is that of the hint in the `use` / `implements` AST node

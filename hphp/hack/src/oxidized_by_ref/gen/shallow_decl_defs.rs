@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f1f13f3e71b8d7c8a83f169805bb6a18>>
+// @generated SignedSource<<4885e863635a1738c85a46aa5d131567>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -222,6 +222,8 @@ pub type FunDecl<'a> = FunElt<'a>;
 pub type ClassDecl<'a> = ShallowClass<'a>;
 
 pub type TypedefDecl<'a> = TypedefType<'a>;
+
+pub type ModuleDecl<'a> = typing_defs::ModuleDefType<'a>;
 
 #[derive(
     Clone,

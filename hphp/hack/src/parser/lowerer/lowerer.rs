@@ -5606,6 +5606,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             })])
         }
         ModuleDeclaration(md) => Ok(vec![ast::Def::mk_module(ast::ModuleDef {
+            annotation: (),
             name: pos_name(&md.name, env)?,
             user_attributes: p_user_attributes(&md.attribute_spec, env)?,
             span: p_pos(node, env),

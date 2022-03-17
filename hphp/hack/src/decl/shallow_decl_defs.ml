@@ -268,6 +268,8 @@ type typedef_decl = typedef_type [@@deriving show]
 
 type const_decl = Typing_defs.const_decl [@@deriving show]
 
+type module_decl = Typing_defs.module_def_type [@@deriving show]
+
 type decl =
   | Class of class_decl
   | Fun of fun_decl

@@ -99,6 +99,8 @@ type xhp_attr_hint = Aast.xhp_attr_hint
 
 type type_hint = unit Aast.type_hint
 
+type module_def = (unit, unit) Aast.module_def
+
 module ShapeMap = Ast_defs.ShapeMap
 
 let class_id_to_str = function

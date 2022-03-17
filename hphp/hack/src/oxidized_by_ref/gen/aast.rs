@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<37fd5d3ffa844ecaf185ceb94d57229b>>
+// @generated SignedSource<<8ddac4edb2353881e684323214c2ffaf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2312,6 +2312,8 @@ arena_deserializer::impl_deserialize_in_arena!(FunDef<'arena, Ex, En>);
 ))]
 #[repr(C)]
 pub struct ModuleDef<'a, Ex, En> {
+    #[serde(deserialize_with = "arena_deserializer::arena")]
+    pub annotation: En,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: ast_defs::Id<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

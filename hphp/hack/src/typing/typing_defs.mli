@@ -82,6 +82,8 @@ type class_const = {
 }
 [@@deriving show]
 
+type module_def_type = { mdt_pos: Pos_or_decl.t } [@@deriving show]
+
 type requirement = Pos_or_decl.t * decl_ty
 
 and abstract_typeconst = {

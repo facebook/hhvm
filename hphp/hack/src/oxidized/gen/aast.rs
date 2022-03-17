@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<79d27e1750dce9903db07cc02311cbbe>>
+// @generated SignedSource<<fc1bd2fbacf0737fae86709fecb4073c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1824,6 +1824,7 @@ pub struct FunDef<Ex, En> {
 )]
 #[repr(C)]
 pub struct ModuleDef<Ex, En> {
+    pub annotation: En,
     pub name: ast_defs::Id,
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
     pub span: Pos,

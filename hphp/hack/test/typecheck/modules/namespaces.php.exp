@@ -1,0 +1,2 @@
+File "namespaces.php--a-foo.php", line 3, characters 54-61:
+Unbound name: `A\foo` (a module) (Naming[2049])

@@ -1,3 +1,7 @@
+File root|module_hint.php--modules.php
+[("here", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [4:8-12] }));
+  ("there", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [5:8-13] }))]
+
 File root|module_hint.php--here.php
 [("\\C",
   (Shallow_decl_defs.Class

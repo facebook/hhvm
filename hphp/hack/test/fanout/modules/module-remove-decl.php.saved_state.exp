@@ -1,0 +1,10 @@
+=== base errors ===
+No errors!
+=== changed errors ===
+a-use.php:2:55,57: Unbound name: `A` (a module) (Naming[2049])
+b-use.php:2:55,57: Unbound name: `A` (a module) (Naming[2049])
+c-use.php:2:55,57: Unbound name: `A` (a module) (Naming[2049])
+=== fanout ===
+Fun foobar
+Type Foo
+Type FooA

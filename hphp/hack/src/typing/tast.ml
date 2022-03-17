@@ -108,6 +108,8 @@ type typedef = (ty, saved_env) Aast.typedef
 
 type gconst = (ty, saved_env) Aast.gconst
 
+type module_def = (ty, saved_env) Aast.module_def
+
 let empty_saved_env tcopt : saved_env =
   {
     tcopt;

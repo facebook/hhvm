@@ -1026,6 +1026,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     fn add_const(&mut self, name: &'a str, decl: &'a typing_defs::ConstDecl<'a>) {
         self.decls.add(name, Decl::Const(decl), self.arena);
     }
+    fn add_module(&mut self, name: &'a str, decl: &'a typing_defs::ModuleDefType<'a>) {
+        self.decls.add(name, Decl::Module(decl), self.arena)
+    }
 
     #[inline]
     fn concat(&self, str1: &str, str2: &str) -> &'a str {
@@ -5519,5 +5522,23 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         _right_paren: Self::R,
     ) -> Self::R {
         Node::Ignored(SK::ListExpression)
+    }
+
+    fn make_module_declaration(
+        &mut self,
+        _attributes: Self::R,
+        _module_keyword: Self::R,
+        name: Self::R,
+        _left_brace: Self::R,
+        _right_brace: Self::R,
+    ) -> Self::R {
+        match name {
+            Node::Name(&(name, mdt_pos)) => {
+                let module = self.alloc(shallow_decl_defs::ModuleDefType { mdt_pos });
+                self.add_module(name, module);
+            }
+            _ => {}
+        }
+        Node::Ignored(SK::ModuleDeclaration)
     }
 }

@@ -14,6 +14,7 @@ type t =
      traits. *)
   | TraitContext
   | ClassContext
+  | ModuleNamespace
 
 let to_string = function
   | FunctionNamespace -> "function"
@@ -21,3 +22,4 @@ let to_string = function
   | TypeNamespace -> "type"
   | TraitContext -> "trait"
   | ClassContext -> "class"
+  | ModuleNamespace -> "module"

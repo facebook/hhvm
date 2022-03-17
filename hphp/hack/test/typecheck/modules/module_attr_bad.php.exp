@@ -1,2 +1,2 @@
-File "module_attr_bad.php", line 4, characters 8-23:
+File "module_attr_bad.php--main.php", line 4, characters 8-23:
 Cannot use unstable feature: `modules` (Parsing[1002])

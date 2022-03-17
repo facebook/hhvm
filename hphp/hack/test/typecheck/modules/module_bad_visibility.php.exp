@@ -1,4 +1,4 @@
-File "module_bad_visibility.php", line 6, characters 5-14:
-`__Internal` methods must be public, they cannot be `private` (NastCheck[3095])
 File "module_bad_visibility.php", line 8, characters 5-14:
+`__Internal` methods must be public, they cannot be `private` (NastCheck[3095])
+File "module_bad_visibility.php", line 10, characters 5-14:
 `__Internal` methods must be public, they cannot be `protected` (NastCheck[3095])

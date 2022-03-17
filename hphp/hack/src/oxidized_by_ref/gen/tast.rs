@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e7ddabb7c318eef4aec17d92369d82ab>>
+// @generated SignedSource<<85759ed368774534541b44f9fc3f383a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -124,3 +124,5 @@ pub type Tparam<'a> = aast::Tparam<'a, &'a Ty<'a>, &'a SavedEnv<'a>>;
 pub type Typedef<'a> = aast::Typedef<'a, &'a Ty<'a>, &'a SavedEnv<'a>>;
 
 pub type Gconst<'a> = aast::Gconst<'a, &'a Ty<'a>, &'a SavedEnv<'a>>;
+
+pub type ModuleDef<'a> = aast::ModuleDef<'a, &'a Ty<'a>, &'a SavedEnv<'a>>;

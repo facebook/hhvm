@@ -1,3 +1,10 @@
+//// modules.php
+<?hh
+<<file:__EnableUnstableFeatures('modules')>>
+
+module A {}
+module B {}
+
 //// A.php
 <?hh
 <<file:__EnableUnstableFeatures('modules'), __Module("A")>>

@@ -1,3 +1,9 @@
+//// modules.php
+<?hh
+<<file:__EnableUnstableFeatures('modules')>>
+
+module A {}
+module B {}
 //// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.

@@ -51,6 +51,15 @@ let files =
     ("qux.php", {|<?hh
     const int Qux = 5;
   |});
+    ("qux.php", {|<?hh
+    const int Qux = 5;
+  |});
+    ( "corge.php",
+      {|<?hh
+    <<file: __EnableUnstableFeatures('modules')>>
+    module Corge {}
+  |}
+    );
   ]
 
 let write_and_parse_test_files ctx =
@@ -78,12 +87,15 @@ let write_and_parse_test_files ctx =
         Errors.empty,
         Relative_path.Set.empty )
     else
+      let po =
+        ParserOptions.with_allow_unstable_features ParserOptions.default true
+      in
       Parsing_service.go_DEPRECATED
         ctx
         None
         Relative_path.Set.empty
         ~get_next
-        ParserOptions.default
+        po
         ~trace:true
   in
   if not (Errors.is_empty errors) then (
@@ -122,7 +134,9 @@ let run_naming_table_test f =
             compression = 0;
           }
       in
-      let popt = ParserOptions.default in
+      let popt =
+        ParserOptions.with_allow_unstable_features ParserOptions.default true
+      in
       let tcopt = TypecheckerOptions.default in
       let ctx =
         Provider_context.empty_for_tool
@@ -136,7 +150,7 @@ let run_naming_table_test f =
       let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
       let save_results = Naming_table.save unbacked_naming_table db_name in
       Asserter.Int_asserter.assert_equals
-        8
+        10
         Naming_sqlite.(save_results.files_added + save_results.symbols_added)
         "Expected to add eight rows (four files and four symbols)";
 
@@ -208,7 +222,13 @@ let test_get_pos () =
            (FileInfo.File
               (FileInfo.Const, Relative_path.from_root ~suffix:"qux.php")))
         (Naming_provider.get_const_pos ctx "\\Qux")
-        "Check for const")
+        "Check for const";
+      Pos_asserter.assert_option_equals
+        (Some
+           (FileInfo.File
+              (FileInfo.Module, Relative_path.from_root ~suffix:"corge.php")))
+        (Naming_provider.get_module_pos ctx "Corge")
+        "Check for module")
 
 let test_get_canon_name () =
   run_naming_table_test

@@ -152,6 +152,7 @@ let fun_def ctx fd :
       env
   in
   List.iter ~f:Errors.add_typing_error @@ Typing_type_wellformedness.fun_ env f;
+  Typing_env.make_depend_on_module env;
   let (env, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
@@ -2051,6 +2052,7 @@ let class_def ctx c =
   let (name_pos, name) = c.c_name in
   let tc = Env.get_class env name in
   Typing_helpers.add_decl_errors (Option.bind tc ~f:Cls.decl_errors);
+  Typing_env.make_depend_on_module env;
   match tc with
   | None ->
     (* This can happen if there was an error during the declaration
@@ -2124,6 +2126,21 @@ let gconst_def ctx cst =
     Aast.cst_emit_id = cst.cst_emit_id;
   }
 
+let module_def ctx md =
+  Counters.count Counters.Category.Typecheck @@ fun () ->
+  Errors.run_with_span md.md_span @@ fun () ->
+  let env = EnvFromDef.module_env ~origin:Decl_counters.TopLevel ctx md in
+  let env = Env.set_env_pessimize env in
+  let (env, user_attributes) =
+    (* TODO(T108642332) *)
+    Typing.attributes_check_def env SN.AttributeKinds.file md.md_user_attributes
+  in
+  {
+    md with
+    Aast.md_annotation = Env.save (Env.get_tpenv env) env;
+    Aast.md_user_attributes = user_attributes;
+  }
+
 let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
     _ * Typing_inference_env.t_global_with_pos list =
   let convert_def = function
@@ -2151,12 +2168,11 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
     | Stmt s ->
       let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
       Some (Aast.Stmt (snd (Typing.stmt env s)), [])
+    | Module md -> Some (Aast.Module (module_def ctx md), [])
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _
-    | FileAttributes _
-    (* TODO(T108206307) *)
-    | Module _ ->
+    | FileAttributes _ ->
       failwith
         "Invalid nodes in NAST. These nodes should be removed during naming."
   in

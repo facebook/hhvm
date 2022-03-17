@@ -2,6 +2,8 @@
 
 <<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
+module A {}
+
 class A {
   <<__Internal>>
   private function bad1(): void {}

@@ -112,3 +112,8 @@ let gconst_env ?origin ctx cst =
   let env = Typing_env_types.empty ?origin ctx file ~mode:cst.cst_mode ~droot in
   Typing_inference_env.Identifier_provider.reinitialize ();
   env
+
+let module_env ?origin ctx md =
+  let file = Pos.filename (fst md.md_name) in
+  let droot = Some (Typing_deps.Dep.Module (snd md.md_name)) in
+  Typing_env_types.empty ?origin ctx file ~mode:md.md_mode ~droot

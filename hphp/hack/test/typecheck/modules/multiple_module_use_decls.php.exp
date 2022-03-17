@@ -1,0 +1,4 @@
+File "multiple_module_use_decls.php--A1.php", line 3, characters 60-67:
+You cannot reuse the attribute `__Module` (Naming[2062])
+  File "multiple_module_use_decls.php--A1.php", line 3, characters 45-52:
+  `__Module` was already used here

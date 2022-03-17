@@ -36,6 +36,7 @@ let typedef_def ctx typedef =
   Option.iter ~f:Errors.add_typing_error ty_err_opt1;
   List.iter ~f:Errors.add_typing_error
   @@ Typing_type_wellformedness.typedef env typedef;
+  Typing_env.make_depend_on_module env;
   Typing_variance.typedef env typedef;
   let {
     t_annotation = ();

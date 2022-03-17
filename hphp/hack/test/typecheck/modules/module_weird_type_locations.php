@@ -1,3 +1,11 @@
+//// decls.php
+<?hh
+
+<<file:__EnableUnstableFeatures('modules')>>
+
+module A {}
+module B {}
+
 //// A.php
 <?hh
 

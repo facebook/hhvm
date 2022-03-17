@@ -91,3 +91,15 @@ let check_const (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
         let def = Aast.Constant (Typing_toplevel.gconst_def ctx cst) in
         Tast_check.def ctx def;
         Some def)
+
+let check_module (ctx : Provider_context.t) (fn : Relative_path.t) (x : string)
+    : Tast.def option =
+  match Ast_provider.find_module_in_file ~full:true ctx fn x with
+  | None -> None
+  | Some md ->
+    handle_exn_as_error (fst md.Aast.md_name) (fun () ->
+        let md = Naming.module_ ctx md in
+        Nast_check.def ctx (Aast.Module md);
+        let def = Aast.Module (Typing_toplevel.module_def ctx md) in
+        Tast_check.def ctx def;
+        Some def)

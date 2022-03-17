@@ -1,0 +1,7 @@
+=== base errors ===
+No errors!
+=== changed errors ===
+g.php:5:5,5: Cannot access an internal element from module `B` in module `A` (Typing[4444])
+  f.php:5:10,10: This is from module `B`
+=== fanout ===
+Fun g

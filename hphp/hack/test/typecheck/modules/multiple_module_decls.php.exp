@@ -1,0 +1,4 @@
+File "multiple_module_decls.php", line 5, characters 8-8:
+Name already bound: `A` (Naming[2012])
+  File "multiple_module_decls.php", line 4, characters 8-8:
+  Previous definition is here

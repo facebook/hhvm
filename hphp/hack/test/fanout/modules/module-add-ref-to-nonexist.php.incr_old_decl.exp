@@ -1,0 +1,6 @@
+=== base errors ===
+foobar.php:2:55,57: Unbound name: `A` (a module) (Naming[2049])
+=== changed errors ===
+No errors!
+=== fanout ===
+Type Foobar

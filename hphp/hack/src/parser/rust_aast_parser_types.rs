@@ -37,5 +37,6 @@ pub struct ParserResult {
     pub lint_errors: Vec<LintError>,
     pub parse_peak: i64,
     pub lower_peak: i64,
+    pub error_peak: i64,
     pub arena_bytes: i64,
 }

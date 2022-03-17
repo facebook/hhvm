@@ -17,5 +17,6 @@ itertools = "0.10.3"
 naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
+stack_limit = { path = "../../../utils/stack_limit" }
 strum = "0.21"
 strum_macros = "0.21"

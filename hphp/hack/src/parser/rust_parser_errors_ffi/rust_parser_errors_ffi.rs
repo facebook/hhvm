@@ -113,6 +113,7 @@ ocaml_ffi! {
             hhi_mode,
             codegen,
             is_systemlib,
+            None,
         );
         errors
     }

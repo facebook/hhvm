@@ -107,6 +107,11 @@ fn report(wall: Duration, count: usize, profile: Option<ProfileAcc>, total: usiz
             profile.max_lower_file.display()
         );
         eprintln!(
+            "check_error stack peak {} in {}",
+            profile.max_error.error_peak,
+            profile.max_error_file.display()
+        );
+        eprintln!(
             "rewrite stack peak {} in {}",
             profile.max_rewrite.rewrite_peak,
             profile.max_rewrite_file.display()
@@ -141,6 +146,8 @@ struct ProfileAcc {
     max_parse_file: PathBuf,
     max_lower: Profile,
     max_lower_file: PathBuf,
+    max_error: Profile,
+    max_error_file: PathBuf,
     max_rewrite: Profile,
     max_rewrite_file: PathBuf,
     max_emitter: Profile,
@@ -157,6 +164,10 @@ impl ProfileAcc {
         if other.max_lower.lower_peak > self.max_lower.lower_peak {
             self.max_lower = other.max_lower;
             self.max_lower_file = other.max_lower_file;
+        }
+        if other.max_error.error_peak > self.max_error.error_peak {
+            self.max_error = other.max_error;
+            self.max_error_file = other.max_error_file;
         }
         if other.max_rewrite.rewrite_peak > self.max_rewrite.rewrite_peak {
             self.max_rewrite = other.max_rewrite;
@@ -196,6 +207,8 @@ fn crc_files(writer: &SyncWrite, files: &[PathBuf], num_threads: usize) -> Resul
             max_parse_file: f.clone(),
             max_lower: profile.clone(),
             max_lower_file: f.clone(),
+            max_error: profile.clone(),
+            max_error_file: f.clone(),
             max_rewrite: profile.clone(),
             max_rewrite_file: f.clone(),
             max_emitter: profile,

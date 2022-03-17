@@ -267,6 +267,7 @@ pub struct Profile {
 
     /// Peak stack size during parsing and lowering.
     pub lower_peak: i64,
+    pub error_peak: i64,
 
     /// Peak stack size during codegen
     pub rewrite_peak: i64,
@@ -281,6 +282,7 @@ impl std::ops::AddAssign for Profile {
         self.codegen_bytes += p.codegen_bytes;
         self.parse_peak += p.parse_peak;
         self.lower_peak += p.lower_peak;
+        self.error_peak += p.error_peak;
         self.rewrite_peak += p.rewrite_peak;
         self.emitter_peak += p.emitter_peak;
     }
@@ -658,6 +660,7 @@ fn parse_file(
                 scoured_comments,
                 parse_peak,
                 lower_peak,
+                error_peak,
                 arena_bytes,
                 ..
             } => {
@@ -679,6 +682,7 @@ fn parse_file(
                             Profile {
                                 parse_peak,
                                 lower_peak,
+                                error_peak,
                                 parsing_bytes: arena_bytes,
                                 ..Default::default()
                             },

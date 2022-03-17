@@ -13,9 +13,12 @@ test = false
 find_utils = { path = "../../../utils/find_utils" }
 hackrs = { path = "../hackrs" }
 hackrs_test_utils = { path = "../hackrs_test_utils" }
+hhi = { path = "../../../hhi/rust" }
 indicatif = { version = "0.15", features = ["with_rayon"] }
 jwalk = "0.6"
+names = { path = "../../../facebook/hh_decl/cargo/names" }
 pos = { path = "../../lib/pos" }
 procfs = "0.9"
 rayon = "1.2"
 structopt = "0.3.23"
+tempdir = "0.3"

@@ -915,7 +915,7 @@ mod tests {
     fn bench_hash1_ocaml(b: &mut Bencher) {
         let arena = Arena::new();
         let dep_type = crate::DepType::Type;
-        let name1 = arena.add(&String::from(LONG_CLASS_NAME));
+        let name1 = arena.add(LONG_CLASS_NAME);
         b.iter(|| unsafe {
             crate::hash1_ocaml(Value::int(dep_type as isize).to_bits(), name1.to_bits())
         });
@@ -926,7 +926,7 @@ mod tests {
         let arena = Arena::new();
         let dep_type = crate::DepType::Const;
         let type_hash = crate::hash1(crate::DepType::Type, LONG_CLASS_NAME.as_bytes());
-        let member_name = arena.add(&String::from("\\TSomeTypeConstant"));
+        let member_name = arena.add("\\TSomeTypeConstant");
         b.iter(|| unsafe {
             crate::hash2_ocaml(
                 Value::int(dep_type as isize).to_bits(),

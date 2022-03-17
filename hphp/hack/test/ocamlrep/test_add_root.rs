@@ -8,45 +8,14 @@
 use ocamlrep::{Allocator, Arena, FromOcamlRep, ToOcamlRep};
 
 #[test]
-fn mutated_reference() {
-    // If we didn't clear the arena's caches after invoking `add_root`, then the
-    // arena would memoize the first conversion, and return the OCaml
-    // representation of the integer 1 for every conversion of x_ref.
-    let arena = Arena::new();
-    let x_mut: &mut i32 = &mut 1;
-    let x_ref: &i32 = x_mut;
-    let ocaml_1 = arena.add_root(&x_ref);
-    *x_mut = 2;
-    let x_ref: &i32 = x_mut;
-    let ocaml_2 = arena.add_root(&x_ref);
-    assert_eq!(ocaml_1.as_int(), Some(1));
-    assert_eq!(ocaml_2.as_int(), Some(2));
-}
-
-#[test]
-fn mutated_reference_with_add() {
-    // The implementation of `ToOcamlRep` for `&T` uses `Allocator::memoize`,
-    // but allocators should not memoize outside of an invocation of `add_root`,
-    // else this test case would fail.
-    let arena = Arena::new();
-    let x_mut: &mut i32 = &mut 1;
-    let x_ref: &i32 = x_mut;
-    let ocaml_1 = arena.add(&x_ref);
-    *x_mut = 2;
-    let x_ref: &i32 = x_mut;
-    let ocaml_2 = arena.add(&x_ref);
-    assert_eq!(ocaml_1.as_int(), Some(1));
-    assert_eq!(ocaml_2.as_int(), Some(2));
-}
-
-#[test]
 fn shared_str() {
     // Without `add_root`, converting this tuple would convert the string
     // "hello" to its OCaml representation and copy it into the ocamlrep::Arena
     // twice.
     let arena = Arena::new();
     let s = "hello";
-    let ocaml_tuple = arena.add_root(&(s, s));
+    let tuple = (s, s);
+    let ocaml_tuple = arena.add_root(&tuple);
     let ocaml_block = ocaml_tuple.as_block().unwrap();
 
     assert_eq!(
@@ -69,7 +38,8 @@ fn shared_slice() {
     // OCaml representation and copy it into the ocamlrep::Arena twice.
     let arena = Arena::new();
     let s = &[1usize, 2, 3][..];
-    let ocaml_tuple = arena.add_root(&(s, s));
+    let tuple = (s, s);
+    let ocaml_tuple = arena.add_root(&tuple);
 
     assert_eq!(
         <(Vec<usize>, Vec<usize>)>::from_ocamlrep(ocaml_tuple),
@@ -91,7 +61,8 @@ fn overlapping_substrs() {
     let arena = Arena::new();
     let s1 = "hello";
     let s2 = &s1[..4];
-    let ocaml_tuple = arena.add_root(&(s1, s2));
+    let tuple = (s1, s2);
+    let ocaml_tuple = arena.add_root(&tuple);
 
     assert_eq!(
         <(String, String)>::from_ocamlrep(ocaml_tuple),
@@ -108,7 +79,8 @@ fn overlapping_subslices() {
     let arena = Arena::new();
     let s1 = &[1usize, 2, 3][..];
     let s2 = &s1[..2];
-    let ocaml_tuple = arena.add_root(&(s1, s2));
+    let tuple = (s1, s2);
+    let ocaml_tuple = arena.add_root(&tuple);
 
     assert_eq!(
         <(Vec<usize>, Vec<usize>)>::from_ocamlrep(ocaml_tuple),
@@ -137,8 +109,11 @@ impl U32Pair {
     }
 }
 impl ToOcamlRep for U32Pair {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
-        alloc.add(&(self.fst(), self.snd()))
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+        let mut block = alloc.block_with_size(2);
+        alloc.set_field(&mut block, 0, alloc.add_copy(self.fst()));
+        alloc.set_field(&mut block, 1, alloc.add_copy(self.snd()));
+        block.build()
     }
 }
 impl FromOcamlRep for U32Pair {

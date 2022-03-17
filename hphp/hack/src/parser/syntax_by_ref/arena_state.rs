@@ -19,7 +19,7 @@ impl<'a> HasArena<'a> for State<'a> {
 }
 
 impl ToOcamlRep for State<'_> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
         ().to_ocamlrep(alloc)
     }
 }

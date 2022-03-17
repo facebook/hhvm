@@ -75,11 +75,15 @@ impl<'a> ToOxidized<'a> for RelativePath {
 }
 
 impl ToOcamlRep for RelativePath {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
-        alloc.add(&(
-            self.prefix,
-            Path::new(OsStr::from_bytes(self.suffix.as_bytes())),
-        ))
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
+        let mut block = alloc.block_with_size(2);
+        let suffix = Path::new(OsStr::from_bytes(self.suffix.as_bytes()));
+        alloc.set_field(&mut block, 0, alloc.add(&self.prefix));
+        alloc.set_field(&mut block, 1, alloc.add(suffix));
+        block.build()
     }
 }
 

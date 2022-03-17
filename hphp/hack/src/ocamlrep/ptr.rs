@@ -49,7 +49,7 @@ impl fmt::Debug for UnsafeOcamlPtr {
 }
 
 impl ToOcamlRep for UnsafeOcamlPtr {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, _alloc: &'a A) -> OpaqueValue<'a> {
         unsafe { OpaqueValue::from_bits(self.0.get()) }
     }
 }
@@ -103,7 +103,7 @@ impl<T> fmt::Debug for NakedPtr<T> {
 }
 
 impl<T> ToOcamlRep for NakedPtr<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, _alloc: &'a A) -> OpaqueValue<'a> {
         unsafe { OpaqueValue::from_bits(self.0 as usize) }
     }
 }

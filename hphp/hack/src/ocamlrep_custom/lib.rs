@@ -159,7 +159,7 @@ const CUSTOM_BLOCK_SIZE_IN_WORDS: usize =
     CUSTOM_BLOCK_SIZE_IN_BYTES / std::mem::size_of::<OpaqueValue<'_>>();
 
 impl<T: CamlSerialize> ToOcamlRep for Custom<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
         let ops: &'static CustomOperations = <T as CamlSerialize>::operations();
 
         let mut block = alloc.block_with_size_and_tag(CUSTOM_BLOCK_SIZE_IN_WORDS, CUSTOM_TAG);

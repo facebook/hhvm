@@ -48,7 +48,7 @@ impl FromOcamlRep for Dep {
 }
 
 impl ToOcamlRep for Dep {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, _alloc: &'a A) -> OpaqueValue<'a> {
         let x: u64 = self.0;
         // In Rust, a numeric cast between two integers of the same size
         // is a no-op. We require a 64-bit word size.

@@ -13,7 +13,18 @@ pub type PrimKind = oxidized_by_ref::aast_defs::Tprim;
 pub struct SavedEnv;
 
 impl ToOcamlRep for SavedEnv {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
-        oxidized_by_ref::tast::SavedEnv::default().to_ocamlrep(alloc)
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+        let saved_env = oxidized_by_ref::tast::SavedEnv::default();
+        // SAFETY: Transmute away the lifetime to allow the stack-allocated
+        // value to be converted to OCaml. Won't break type safety in Rust, but
+        // may produce broken OCaml values if used with an invocation of
+        // `ocamlrep::Allocator::add_root` higher up.
+        let saved_env = unsafe {
+            std::mem::transmute::<
+                &'_ oxidized_by_ref::tast::SavedEnv<'_>,
+                &'a oxidized_by_ref::tast::SavedEnv<'a>,
+            >(&saved_env)
+        };
+        saved_env.to_ocamlrep(alloc)
     }
 }

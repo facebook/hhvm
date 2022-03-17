@@ -39,7 +39,10 @@ impl MethodFlags {
 }
 
 impl ocamlrep::ToOcamlRep for MethodFlags {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        _alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
         ocamlrep::OpaqueValue::int(self.bits() as isize)
     }
 }

@@ -444,7 +444,7 @@ impl Allocator for SlabAllocator {
         unsafe { OpaqueValue::from_bits(bits) }
     }
 
-    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> OpaqueValue<'_> {
+    fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a> {
         self.cache.with_cache(|| value.to_ocamlrep(self))
     }
 }
@@ -473,7 +473,12 @@ fn with_slab_allocator(f: impl Fn(&SlabAllocator) -> OpaqueValue<'_>) -> Option<
 }
 
 pub fn to_slab<T: ToOcamlRep>(value: &T) -> Option<OwnedSlab> {
-    with_slab_allocator(|alloc| alloc.add_root(value))
+    // SAFETY: I'm not sure how else to express that the borrow of `T` we have
+    // in `value` is sure to outlive the `SlabAllocator` we borrow in our
+    // closure here, so transmute away the lifetime.
+    with_slab_allocator(|alloc| unsafe {
+        std::mem::transmute::<OpaqueValue<'_>, OpaqueValue<'_>>(alloc.add_root(value))
+    })
 }
 
 /// Copy the slab stored in `src` into `dest`, then fix up the slab's internal

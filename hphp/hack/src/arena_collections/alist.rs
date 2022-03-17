@@ -951,7 +951,10 @@ impl<'a, K: Ord, V> From<AssocListMut<'a, K, V>> for SortedAssocList<'a, K, V> {
 }
 
 impl<K: ToOcamlRep + Ord, V: ToOcamlRep> ToOcamlRep for SortedAssocList<'_, K, V> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
         let len = self.len();
         let mut iter = self.iter();
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);

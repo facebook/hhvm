@@ -45,7 +45,7 @@ impl Tast {
 }
 
 impl ToOcamlRep for SavedEnv {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
         // This implementation of `to_ocamlrep` (which allocates in an arena,
         // converts to OCaml, then drops the arena) violates a `ToOcamlRep`
         // requirement: we may not drop values after passing them to `alloc.add`
@@ -74,6 +74,16 @@ impl ToOcamlRep for SavedEnv {
             condition_types: Default::default(),
             pessimize: false,
             fun_tast_info: None,
+        };
+        // SAFETY: Transmute away the lifetime to allow the arena-allocated
+        // value to be converted to OCaml. Won't break type safety in Rust, but
+        // will produce broken OCaml values if used with `add_root` (see comment
+        // on impl of ToOcamlRep for Ty).
+        let saved_env = unsafe {
+            std::mem::transmute::<
+                &'_ oxidized_by_ref::tast::SavedEnv<'_>,
+                &'a oxidized_by_ref::tast::SavedEnv<'a>,
+            >(&saved_env)
         };
         saved_env.to_ocamlrep(alloc)
     }

@@ -215,7 +215,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
 }
 
 impl<R: Reason> ToOcamlRep for Ty<R> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
         // This implementation of `to_ocamlrep` (which allocates in an arena,
         // converts to OCaml, then drops the arena) violates a `ToOcamlRep`
         // requirement: we may not drop values after passing them to `alloc.add`
@@ -243,6 +243,17 @@ impl<R: Reason> ToOcamlRep for Ty<R> {
         // (including indirectly, through macros like `ocaml_ffi`) on values
         // containing this type.
         let arena = &bumpalo::Bump::new();
-        self.to_oxidized(arena).to_ocamlrep(alloc)
+        let ty = self.to_oxidized(arena);
+        // SAFETY: Transmute away the lifetime to allow the arena-allocated
+        // value to be converted to OCaml. Won't break type safety in Rust, but
+        // will produce broken OCaml values if used with `add_root` (see above
+        // comment).
+        let ty = unsafe {
+            std::mem::transmute::<
+                &'_ oxidized_by_ref::typing_defs::Ty<'_>,
+                &'a oxidized_by_ref::typing_defs::Ty<'a>,
+            >(&ty)
+        };
+        ty.to_ocamlrep(alloc)
     }
 }

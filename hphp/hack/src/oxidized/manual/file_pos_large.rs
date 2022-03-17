@@ -146,11 +146,14 @@ impl From<FilePosSmall> for FilePosLarge {
 }
 
 impl ToOcamlRep for FilePosLarge {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
         let mut block = alloc.block_with_size(3);
         alloc.set_field(&mut block, 0, alloc.add(&self.lnum));
         alloc.set_field(&mut block, 1, alloc.add(&self.bol));
-        alloc.set_field(&mut block, 2, alloc.add(&(self.offset as isize)));
+        alloc.set_field(&mut block, 2, alloc.add_copy(self.offset as isize));
         block.build()
     }
 }

@@ -121,13 +121,13 @@ impl Arena {
     }
 
     #[inline(always)]
-    pub fn add<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
+    pub fn add<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> Value<'a> {
         // SAFETY: We just allocated this value using `self`, which is an `Arena`.
         unsafe { Self::make_transparent(value.to_ocamlrep(self)) }
     }
 
     #[inline(always)]
-    pub fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
+    pub fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> Value<'a> {
         // SAFETY: We just allocated this value using `self`, which is an `Arena`.
         unsafe { Self::make_transparent(Allocator::add_root(self, value)) }
     }
@@ -172,7 +172,7 @@ impl Allocator for Arena {
         unsafe { OpaqueValue::from_bits(bits) }
     }
 
-    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> OpaqueValue<'_> {
+    fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a> {
         self.cache.with_cache(|| value.to_ocamlrep(self))
     }
 }

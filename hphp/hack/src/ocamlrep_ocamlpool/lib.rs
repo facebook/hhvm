@@ -44,7 +44,7 @@ impl Pool {
     }
 
     #[inline(always)]
-    pub fn add<T: ToOcamlRep + ?Sized>(&mut self, value: &T) -> OpaqueValue<'_> {
+    pub fn add<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a> {
         value.to_ocamlrep(self)
     }
 }
@@ -98,7 +98,7 @@ impl Allocator for Pool {
         unsafe { OpaqueValue::from_bits(bits) }
     }
 
-    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> OpaqueValue<'_> {
+    fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a> {
         self.cache.with_cache(|| value.to_ocamlrep(self))
     }
 }

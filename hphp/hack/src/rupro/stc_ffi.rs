@@ -47,7 +47,7 @@ fn print_tast<R: Reason>(opts: &GlobalOptions, tast: &tast::Program<R>) {
 /// No other thread may interact with the OCaml runtime or ocamlpool library
 /// during the execution of `to_ocaml`.
 unsafe fn to_ocaml<T: ocamlrep::ToOcamlRep>(value: &T) -> usize {
-    let mut pool = ocamlrep_ocamlpool::Pool::new();
+    let pool = ocamlrep_ocamlpool::Pool::new();
     let result = pool.add(value);
     result.to_bits()
 }

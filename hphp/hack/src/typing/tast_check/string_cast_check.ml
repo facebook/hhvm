@@ -24,7 +24,9 @@ let check__toString m =
     if (not (Aast.equal_visibility m.m_visibility Public)) || m.m_static then
       Errors.add_nast_check_error @@ Nast_check_error.ToString_visibility pos;
     match hint_of_type_hint m.m_ret with
-    | Some (_, Hprim Tstring) -> ()
+    | Some (_, Hprim Tstring)
+    | Some (_, Hlike (_, Hprim Tstring)) ->
+      ()
     | Some (p, _) ->
       Errors.add_nast_check_error @@ Nast_check_error.ToString_returns_string p
     | None -> ()

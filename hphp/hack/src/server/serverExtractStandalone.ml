@@ -2416,6 +2416,6 @@ let go ctx target =
     @@ Extract.collect_dependencies ctx target
   with
   | DependencyNotFound d -> Printf.sprintf "Dependency not found: %s" d
-  | Unsupported
-  | UnexpectedDependency ->
-    Printexc.get_backtrace ()
+  | (Unsupported | UnexpectedDependency) as exn ->
+    let e = Exception.wrap exn in
+    Exception.to_string e

@@ -104,11 +104,11 @@ let unsafe_opt_note note = function
 
 let unsafe_opt x = unsafe_opt_note "unsafe_opt got None" x
 
-let try_with_stack (f : unit -> 'a) : ('a, exn * callstack) result =
+let try_with_stack (f : unit -> 'a) : ('a, Exception.t) result =
   try Ok (f ()) with
   | exn ->
-    let stack = Callstack (Printexc.get_backtrace ()) in
-    Error (exn, stack)
+    let e = Exception.wrap exn in
+    Error e
 
 let set_of_list l = List.fold_right l ~f:SSet.add ~init:SSet.empty
 
@@ -119,7 +119,7 @@ let strip_xhp_ns s = String.chop_prefix_if_exists s ~prefix:":"
 
 let strip_both_ns s = s |> strip_ns |> strip_xhp_ns
 
-(* \HH\C -> C 
+(* \HH\C -> C
  * \HH\Lib\C -> C
  * \A\B\C -> \A\B\C
  *)
@@ -211,9 +211,10 @@ end
 let try_finally ~f ~(finally : unit -> unit) =
   let res =
     try f () with
-    | e ->
+    | exn ->
+      let e = Exception.wrap exn in
       finally ();
-      raise e
+      Exception.reraise e
   in
   finally ();
   res
@@ -223,10 +224,10 @@ let with_context
   enter ();
   let result =
     try do_ () with
-    | e ->
-      let stack = Printexc.get_raw_backtrace () in
+    | exn ->
+      let e = Exception.wrap exn in
       exit ();
-      Printexc.raise_with_backtrace e stack
+      Exception.reraise e
   in
   exit ();
   result

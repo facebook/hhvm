@@ -383,7 +383,7 @@ let save_decls_failure _ = ()
 
 let load_decls_end _ = ()
 
-let load_decls_failure _ _ = ()
+let load_decls_failure _ = ()
 
 let saved_state_load_ok _ ~start_time:_ = ()
 

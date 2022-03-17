@@ -215,15 +215,14 @@ let process_file
         in
         { file_errors = Errors.empty; deferred_decls }
     with
-    | WorkerCancel.Worker_should_exit as e ->
+    | WorkerCancel.Worker_should_exit as exn ->
       (* Cancellation requests must be re-raised *)
-      raise e
-    | e ->
-      let stack = Caml.Printexc.get_raw_backtrace () in
-      let () =
-        prerr_endline ("Exception on file " ^ Relative_path.S.to_string fn)
-      in
-      Caml.Printexc.raise_with_backtrace e stack
+      let e = Exception.wrap exn in
+      Exception.reraise e
+    | exn ->
+      let e = Exception.wrap exn in
+      prerr_endline ("Exception on file " ^ Relative_path.S.to_string fn);
+      Exception.reraise e
 
 module ProcessFilesTally = struct
   (** Counters for the [check_file_workitem] of each sort being processed *)

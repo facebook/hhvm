@@ -43,7 +43,7 @@ val log_and_get_sharedmem_load_telemetry : unit -> Telemetry.t
 
 (** Exit with exit code corresponding to given exception.
     Perform any necessary cleanups. *)
-val exit_on_exception : exn -> stack:Utils.callstack -> 'result
+val exit_on_exception : Exception.t -> 'result
 
 (** Execute given function. If function raises and exception,
     exit with exit code corresponding to given exception.

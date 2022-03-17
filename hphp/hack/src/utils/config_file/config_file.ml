@@ -7,7 +7,6 @@
  *
  *)
 
-open Core_kernel
 include Config_file_version
 
 type t = Config_file_common.t
@@ -25,9 +24,9 @@ let parse_contents = Config_file_common.parse_contents
 
 let parse_hhconfig (fn : string) : string * t =
   try Config_file_common.parse fn with
-  | e ->
-    let stack = Printexc.get_backtrace () in
-    Hh_logger.exc ~prefix:".hhconfig deleted: " ~stack e;
+  | exn ->
+    let e = Exception.wrap exn in
+    Hh_logger.exception_ ~prefix:".hhconfig deleted: " e;
     Exit.exit Exit_status.Hhconfig_deleted
 
 let parse_local_config = Config_file_common.parse_local_config

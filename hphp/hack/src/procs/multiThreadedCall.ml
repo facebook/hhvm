@@ -55,10 +55,9 @@ let call_id = ref 0
  * them is to log and exit. Setting on_exception handler allows you to do it
  * before any caller has a chance to catch the exception and attempt to handle
  * it. *)
-let nested_exception : (exn * Utils.callstack) option ref = ref None
+let nested_exception : Exception.t option ref = ref None
 
-let on_exception_ref =
-  ref (fun (e, stack) -> nested_exception := Some (e, stack))
+let on_exception_ref = ref (fun e -> nested_exception := Some e)
 
 let multi_threaded_call
     (type job_input job_output acc env)
@@ -115,7 +114,7 @@ let multi_threaded_call
           else
             let (env, decision) = handler env in
             (* Re-raise the exception even if handler have caught and ignored it *)
-            Option.iter !nested_exception ~f:(fun (x, _stack) -> raise x);
+            Option.iter !nested_exception ~f:(fun e -> Exception.reraise e);
 
             (* running a handler could have changed the handlers,
              * so need to regenerate them based on new environment *)
@@ -217,10 +216,10 @@ let multi_threaded_call
       handles
       (neutral, interrupt.env, interrupt.handlers interrupt.env)
   with
-  | e ->
-    let stack = Utils.Callstack (Printexc.get_backtrace ()) in
-    !on_exception_ref (e, stack);
-    raise e
+  | exn ->
+    let e = Exception.wrap exn in
+    !on_exception_ref e;
+    Exception.reraise e
 
 let call_with_worker_id workers job merge neutral next =
   let ((res, ()), unfinished) =

@@ -688,9 +688,10 @@ let save_file_infos db_name file_info_map ~base_content_version =
       failwith @@ Printf.sprintf "Could not close database at %s" db_name;
     save_result
   with
-  | e ->
+  | exn ->
+    let e = Exception.wrap exn in
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
-    raise e
+    Exception.reraise e
 
 let copy_and_update
     ~(existing_db : db_path) ~(new_db : db_path) (local_changes : local_changes)
@@ -819,11 +820,12 @@ database fails. *)
 let sqlite_exn_wrapped_get_db_and_stmt_cache db_path name =
   try get_db_and_stmt_cache db_path with
   | Sqlite3.Error _ as exn ->
+    let e = Exception.wrap exn in
     Hh_logger.info
       "Sqlite_db_open_bug: couldn't open the DB at `%s` while getting the position of `%s`"
       (show_db_path db_path)
       name;
-    raise exn
+    Exception.reraise e
 
 let get_type_wrapper
     (result : (Relative_path.t * Naming_types.name_kind * string) option) :

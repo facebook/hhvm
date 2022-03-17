@@ -102,15 +102,13 @@ module Watchman_process_helpers = struct
             (Hh_json.json_to_string json));
         response
       with
-      | e ->
-        let raw_stack = Caml.Printexc.get_raw_backtrace () in
-        let stack = Caml.Printexc.raw_backtrace_to_string raw_stack in
+      | exn ->
+        let e = Exception.wrap exn in
         Hh_logger.error
-          "Failed to parse string as JSON: %s\nEXCEPTION:%s\nSTACK:%s\n"
+          "Failed to parse string as JSON: %s\n%s"
           output
-          (Exn.to_string e)
-          stack;
-        Caml.Printexc.raise_with_backtrace e raw_stack
+          (Exception.to_string e);
+        Exception.reraise e
     in
     assert_no_error response;
     response
@@ -246,10 +244,10 @@ end = struct
     let conn = open_connection ~timeout ~sockname in
     let result =
       try f conn with
-      | e ->
-        let stack = Caml.Printexc.get_raw_backtrace () in
+      | exn ->
+        let e = Exception.wrap exn in
         Unix.close @@ Buffered_line_reader.get_fd @@ fst conn;
-        Caml.Printexc.raise_with_backtrace e stack
+        Exception.reraise e
     in
     Unix.close @@ Buffered_line_reader.get_fd @@ fst conn;
     result

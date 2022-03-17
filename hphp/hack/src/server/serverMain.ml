@@ -1017,8 +1017,7 @@ let serve genv env in_fds =
     Typing_deps.allow_dependency_table_reads env.deps_mode false
   in
   let () = Errors.set_allow_errors_in_default_path false in
-  MultiThreadedCall.on_exception (fun (e, stack) ->
-      ServerUtils.exit_on_exception e ~stack);
+  MultiThreadedCall.on_exception (fun e -> ServerUtils.exit_on_exception e);
   let client_provider = ClientProvider.provider_from_file_descriptors in_fds in
 
   (* This is needed when typecheck_after_init option is disabled.

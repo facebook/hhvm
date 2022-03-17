@@ -258,9 +258,10 @@ let try_finally ~(f : unit -> 'a Lwt.t) ~(finally : unit -> unit Lwt.t) :
       let%lwt result = f () in
       Lwt.return result
     with
-    | e ->
+    | exn ->
+      let e = Exception.wrap exn in
       let%lwt () = finally () in
-      raise e
+      Exception.reraise e
   in
   let%lwt () = finally () in
   Lwt.return res

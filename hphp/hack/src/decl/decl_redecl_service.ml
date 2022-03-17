@@ -191,10 +191,11 @@ let compute_deps ctx fast (filel : Relative_path.t list) =
 
 let load_and_on_the_fly_decl_files ctx _ filel =
   try on_the_fly_decl_files ctx filel with
-  | e ->
-    Printf.printf "Error: %s\n" (Exn.to_string e);
+  | exn ->
+    let e = Exception.wrap exn in
+    Printf.printf "Error: %s\n" (Exception.get_ctor_string e);
     Out_channel.flush stdout;
-    raise e
+    Exception.reraise e
 
 let load_and_compute_deps ctx _acc (filel : Relative_path.t list) :
     (DepSet.t * DepSet.t * DepSet.t * int) * int =
@@ -205,10 +206,11 @@ let load_and_compute_deps ctx _acc (filel : Relative_path.t list) :
     in
     ((changed, to_redecl, to_recheck, List.length filel), old_decl_missing_count)
   with
-  | e ->
-    Printf.printf "Error: %s\n" (Exn.to_string e);
+  | exn ->
+    let e = Exception.wrap exn in
+    Printf.printf "Error: %s\n" (Exception.get_ctor_string e);
     Out_channel.flush stdout;
-    raise e
+    Exception.reraise e
 
 (*****************************************************************************)
 (* Merges the results coming back from the different workers *)
@@ -303,11 +305,12 @@ let parallel_on_the_fly_decl
     OnTheFlyStore.clear ();
     ((errors, changed, to_redecl, to_recheck), old_decl_missing_count)
   with
-  | e ->
+  | exn ->
+    let e = Exception.wrap exn in
     if SharedMem.SMTelemetry.is_heap_overflow () then
       Exit.exit Exit_status.Redecl_heap_overflow
     else
-      raise e
+      Exception.reraise e
 
 (*****************************************************************************)
 (* Code invalidating the heap *)

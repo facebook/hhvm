@@ -53,6 +53,12 @@ type remote_exception_data = {
 }
 [@@deriving eq]
 
+let of_exception e =
+  {
+    message = Exception.get_ctor_string e;
+    stack = Exception.get_backtrace_string e;
+  }
+
 type error =
   | Rpc_absent of Exception.t
   | Rpc_disconnected of Exception.t

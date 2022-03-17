@@ -83,9 +83,9 @@ let load_class_decls
     ignore @@ Hh_logger.log_duration msg start_t
   with
   | exn ->
-    let stack = Printexc.get_backtrace () in
-    HackEventLogger.load_decls_failure exn stack;
-    Hh_logger.exc exn ~stack ~prefix:"Failed to load class declarations: "
+    let e = Exception.wrap exn in
+    HackEventLogger.load_decls_failure e;
+    Hh_logger.exception_ e ~prefix:"Failed to load class declarations: "
 
 (* Loads the file info and the errors, if any. *)
 let load_saved_state
@@ -382,7 +382,7 @@ let go_naming (naming_table : Naming_table.t) (output_filename : string) :
           nt_files_added = save_result.Naming_sqlite.files_added;
           nt_symbols_added = save_result.Naming_sqlite.symbols_added;
         })
-  |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
+  |> Result.map_error ~f:(fun e -> Exception.get_ctor_string e)
 
 (* If successful, returns the # of edges from the dependency table that were written. *)
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
@@ -393,4 +393,4 @@ let go
     (output_filename : string) : (save_state_result, string) result =
   Utils.try_with_stack (fun () ->
       save_state ~save_decls genv env output_filename)
-  |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
+  |> Result.map_error ~f:(fun e -> Exception.get_ctor_string e)

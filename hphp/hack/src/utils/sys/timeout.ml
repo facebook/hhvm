@@ -74,10 +74,10 @@ module Alarm_timeout = struct
       let ret =
         try do_ id with
         | exn ->
-          let stack = Stdlib.Printexc.get_raw_backtrace () in
+          let e = Exception.wrap exn in
           (* Any uncaught exception will cancel the timeout *)
           Timer.cancel_timer timer;
-          Stdlib.Printexc.raise_with_backtrace exn stack
+          Exception.reraise e
       in
       Timer.cancel_timer timer;
       ret
@@ -110,10 +110,11 @@ module Alarm_timeout = struct
      * raise End_of_file if the pipe has closed
      * http://caml.inria.fr/mantis/view.php?id=7142 *)
     try Stdlib.input_value ic with
-    | Failure msg as e ->
+    | Failure msg as exn ->
+      let e = Exception.wrap exn in
       if String.equal msg "input_value: truncated object" then
         Stdlib.input_char ic |> ignore;
-      raise e
+      Exception.reraise e
 
   let input_value = ignore_timeout input_value_with_workaround
 
@@ -179,9 +180,10 @@ module Alarm_timeout = struct
     with_timeout ~timeout ~on_timeout ~do_:(fun timeout ->
         try reader timeout ic oc with
         | exn ->
+          let e = Exception.wrap exn in
           close_in ic;
           Out_channel.close oc;
-          raise exn)
+          Exception.reraise e)
 
   let open_connection ?timeout:_ sockaddr =
     (* timeout isn't used in this Alarm_timeout implementation, but is used in Select_timeout *)
@@ -522,11 +524,12 @@ module Select_timeout = struct
     with_timeout ~timeout ~on_timeout ~do_:(fun timeout ->
         try reader timeout tic oc with
         | exn ->
+          let e = Exception.wrap exn in
           Option.iter ~f:Sys_utils.terminate_process tic.pid;
           tic.pid <- None;
           close_in tic;
           Out_channel.close oc;
-          raise exn)
+          Exception.reraise e)
 
   (** Socket *)
 
@@ -556,8 +559,9 @@ module Select_timeout = struct
           | (_, _, _) -> assert false
         end
       | exn ->
+        let e = Exception.wrap exn in
         Unix.close sock;
-        raise exn
+        Exception.reraise e
     in
     let sock =
       Unix.socket (Unix.domain_of_sockaddr sockaddr) Unix.SOCK_STREAM 0
@@ -653,5 +657,6 @@ let read_connection ~timeout ~on_timeout ~reader sockaddr =
       let (tic, oc) = open_connection ~timeout sockaddr in
       try reader timeout tic oc with
       | exn ->
+        let e = Exception.wrap exn in
         Out_channel.close oc;
-        raise exn)
+        Exception.reraise e)

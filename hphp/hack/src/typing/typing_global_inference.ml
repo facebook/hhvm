@@ -52,15 +52,14 @@ let catch_exc
     List.iter (Errors.get_error_list other_errors) ~f:on_error;
     v
   with
-  | Inf.InconsistentTypeVarState _ as e ->
-    if verbose then (
-      let stack = Caml.Printexc.get_raw_backtrace () in
-      prerr_endline (Caml.Printexc.to_string e);
-      Caml.Printexc.print_raw_backtrace stderr stack
-    );
-    let e = Printf.sprintf "Exception: %s" (Exn.to_string e) in
+  | Inf.InconsistentTypeVarState _ as exn ->
+    let e = Exception.wrap exn in
+    if verbose then prerr_endline (Exception.to_string e);
     on_error
-      (User_error.make Error_codes.Typing.(err_code UnifyError) (pos, e) []);
+      (User_error.make
+         Error_codes.Typing.(err_code UnifyError)
+         (pos, Exception.get_ctor_string e)
+         []);
     r
 
 let is_ordered_solving env = GlobalOptions.tco_ordered_solving env.genv.tcopt

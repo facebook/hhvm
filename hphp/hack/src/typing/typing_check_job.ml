@@ -25,13 +25,14 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     =
  fun pos f ->
   try f () with
-  | (WorkerCancel.Worker_should_exit | Deferred_decl.Defer) as e ->
+  | (WorkerCancel.Worker_should_exit | Deferred_decl.Defer) as exn ->
     (* Cancellation requests must be re-raised *)
-    raise e
-  | e ->
+    let e = Exception.wrap exn in
+    Exception.reraise e
+  | exn ->
+    let e = Exception.wrap exn in
     Errors.add_typing_error
-      Typing_error.(
-        primary @@ Primary.Exception_occurred { pos; exn = Exception.wrap e });
+      Typing_error.(primary @@ Primary.Exception_occurred { pos; exn = e });
     None
 
 let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :

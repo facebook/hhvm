@@ -24,7 +24,7 @@ type text_edit = {
 }
 
 val edit_file :
-  string -> text_edit list -> (string, string * Utils.callstack) result
+  string -> text_edit list -> (string, string * Exception.t) result
 
 val edit_file_unsafe : string -> text_edit list -> string
 

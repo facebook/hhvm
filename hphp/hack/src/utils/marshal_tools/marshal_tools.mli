@@ -27,6 +27,8 @@ type remote_exception_data = {
 }
 [@@deriving eq]
 
+val of_exception : Exception.t -> remote_exception_data
+
 (** Some say we should represent network communications failures with results,
 not exceptions. Here we go for those who favor results... *)
 type error =

@@ -735,10 +735,9 @@ let read_message_from_server (server : server_conn) : event Lwt.t =
     | Monitor_failed_to_handoff ->
       failwith "unexpected monitor_failed_to_handoff on persistent connection"
   with
-  | e ->
-    let message = Exn.to_string e in
-    let stack = Printexc.get_backtrace () in
-    raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
+  | exn ->
+    let e = Exception.wrap exn in
+    raise (Server_fatal_connection_exception (Marshal_tools.of_exception e))
 
 (** get_next_event: picks up the next available message from either client or
 server. The way it's implemented, at the first character of a message
@@ -4797,11 +4796,10 @@ let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
       in
       Lwt.return_unit
     with
-    | e ->
-      let message = Exn.to_string e in
-      let stack = Printexc.get_backtrace () in
-      log "connect_after_hello exception %s\n%s" message stack;
-      raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
+    | exn ->
+      let e = Exception.wrap exn in
+      log "connect_after_hello exception %s" (Exception.to_string e);
+      raise (Server_fatal_connection_exception (Marshal_tools.of_exception e))
   in
   Lwt.return_unit
 

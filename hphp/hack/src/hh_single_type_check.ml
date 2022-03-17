@@ -1732,20 +1732,15 @@ let handle_mode
           let ifc_errors = time @@ lazy (Ifc_main.do_ ifc_opts file_info ctx) in
           if not (List.is_empty ifc_errors) then print_errors ifc_errors
         with
-        | exc ->
-          (* get the backtrace before doing anything else to be sure
-             to get the one corresponding to exc *)
-          let backtrace = Stdlib.Printexc.get_backtrace () in
+        | exn ->
+          let e = Exception.wrap exn in
           Stdlib.Printexc.register_printer (function
               | Ifc_types.IFCError err ->
                 Some
                   (Printf.sprintf "IFCError(%s)"
                   @@ Ifc_types.show_ifc_error_ty err)
               | _ -> None);
-          Printf.printf
-            "Uncaught exception: %s\n%s"
-            (Stdlib.Printexc.to_string exc)
-            backtrace
+          Printf.printf "Uncaught exception: %s" (Exception.to_string e)
     in
     iter_over_files (fun filename ->
         Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->

@@ -1,6 +1,14 @@
-File "module_traits.php--A.php", line 26, characters 21-21:
+File "module_traits.php--A.php", line 11, characters 14-19:
+You cannot make this trait member `internal` (NastCheck[3099])
+  File "module_traits.php--A.php", line 8, characters 7-8:
+  Only `internal` traits can have `internal` members
+File "module_traits.php--A.php", line 13, characters 3-49:
+You cannot make this trait member `internal` (NastCheck[3099])
+  File "module_traits.php--A.php", line 8, characters 7-8:
+  Only `internal` traits can have `internal` members
+File "module_traits.php--A.php", line 28, characters 21-21:
 You cannot use this type in a public declaration. (Typing[4446])
-  File "module_traits.php--A.php", line 23, characters 7-7:
+  File "module_traits.php--A.php", line 25, characters 7-7:
   It is declared as `internal` here
 File "module_traits.php--B.php", line 6, characters 7-8:
 Cannot access an internal element from module `A` in module `B` (Typing[4444])
@@ -14,9 +22,9 @@ File "module_traits.php--E.php", line 6, characters 5-9:
 Typing error (Typing[4112])
   File "module_traits.php--E.php", line 6, characters 12-12:
   You cannot access internal members outside of a module
-  File "module_traits.php--A.php", line 10, characters 10-12:
+  File "module_traits.php--A.php", line 11, characters 10-12:
   This member is internal
 File "module_traits.php--E.php", line 7, characters 12-14:
 You cannot access internal members outside of a module (Typing[4112])
-  File "module_traits.php--A.php", line 12, characters 19-21:
+  File "module_traits.php--A.php", line 14, characters 19-21:
   This member is internal

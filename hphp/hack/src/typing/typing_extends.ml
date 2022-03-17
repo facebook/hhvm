@@ -411,23 +411,6 @@ let add_member_dep
       (Dep.Type (Cls.name class_))
       dep
 
-let detect_multiple_concrete_defs class_elt class_ parent_class_elt parent_class
-    =
-  (* We want to check if there are conflicting trait declarations of a class member.
-   * If the parent we are checking is a trait and the member's origin both isn't
-   * that parent and isn't the class itself, then it must come from another trait
-   * and there is a conflict.
-   *
-   * We rule out cases where any of the traits' member
-   * is synthetic (from a requirement) or abstract. *)
-  match Cls.kind parent_class with
-  | Ast_defs.Ctrait ->
-    (not (get_ce_synthesized class_elt))
-    && (not (get_ce_abstract class_elt))
-    && (not (get_ce_abstract parent_class_elt))
-    && String.( <> ) class_elt.ce_origin (Cls.name class_)
-  | Ast_defs.(Cinterface | Cclass _ | Cenum | Cenum_class _) -> false
-
 let check_compatible_sound_dynamic_attributes
     env member_name member_kind parent_class_elt class_elt on_error =
   if
@@ -483,17 +466,34 @@ let check_abstract_overrides_concrete env member_kind parent_class_elt class_elt
                    `property);
              })
 
+let detect_multiple_concrete_defs
+    (class_elt, class_) (parent_class_elt, parent_class) =
+  (* We want to check if there are conflicting trait declarations of a class member.
+   * If the parent we are checking is a trait and the member's origin both isn't
+   * that parent and isn't the class itself, then it must come from another trait
+   * and there is a conflict.
+   *
+   * We rule out cases where any of the traits' member
+   * is synthetic (from a requirement) or abstract. *)
+  match Cls.kind parent_class with
+  | Ast_defs.Ctrait ->
+    (not (get_ce_synthesized class_elt))
+    && (not (get_ce_abstract class_elt))
+    && (not (get_ce_abstract parent_class_elt))
+    && String.( <> ) class_elt.ce_origin (Cls.name class_)
+  | Ast_defs.(Cinterface | Cclass _ | Cenum | Cenum_class _) -> false
+
 let check_multiple_concrete_definitions
-    check_member_unique
-    class_
     member_name
     member_kind
-    parent_class_elt
-    class_elt
+    (class_elt, class_)
+    (parent_class_elt, parent_class)
     on_error =
   if
-    check_member_unique
-    && (MemberKind.is_functional member_kind || get_ce_const class_elt)
+    (MemberKind.is_functional member_kind || get_ce_const class_elt)
+    && detect_multiple_concrete_defs
+         (class_elt, class_)
+         (parent_class_elt, parent_class)
   then
     (* Multiple concrete trait definitions, error *)
     Errors.add_typing_error
@@ -574,14 +574,13 @@ let check_override
     Typing_error.Reasons_callback.prepend_on_apply on_error snd_err
   in
 
-  check_multiple_concrete_definitions
-    check_member_unique
-    class_
-    member_name
-    member_kind
-    parent_class_elt
-    class_elt
-    on_error;
+  if check_member_unique then
+    check_multiple_concrete_definitions
+      member_name
+      member_kind
+      (class_elt, class_)
+      (parent_class_elt, parent_class)
+      on_error;
   check_compatible_sound_dynamic_attributes
     env
     member_name
@@ -974,12 +973,7 @@ let check_class_against_parent_class_elt
       (* We can skip this check if the class elements have the same origin, as we are
          essentially comparing a method against itself *)
       check_override
-        ~check_member_unique:
-          (detect_multiple_concrete_defs
-             class_elt
-             class_
-             parent_class_elt
-             parent_class)
+        ~check_member_unique:true
         env
         member_name
         member_kind

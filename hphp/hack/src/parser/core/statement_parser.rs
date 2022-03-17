@@ -16,6 +16,7 @@ use parser_core_types::syntax_error::{self as Errors, SyntaxError};
 use parser_core_types::token_kind::TokenKind;
 use parser_core_types::trivia_kind::TriviaKind;
 
+#[derive(Clone)]
 pub struct StatementParser<'a, S>
 where
     S: SmartConstructors,
@@ -26,22 +27,6 @@ where
     context: Context<'a, Token<S>>,
     errors: Vec<SyntaxError>,
     sc: S,
-}
-
-impl<'a, S> Clone for StatementParser<'a, S>
-where
-    S: SmartConstructors,
-    S::R: NodeType,
-{
-    fn clone(&self) -> Self {
-        Self {
-            lexer: self.lexer.clone(),
-            env: self.env.clone(),
-            context: self.context.clone(),
-            errors: self.errors.clone(),
-            sc: self.sc.clone(),
-        }
-    }
 }
 
 impl<'a, S> ParserTrait<'a, S> for StatementParser<'a, S>

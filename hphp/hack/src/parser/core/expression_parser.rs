@@ -49,6 +49,7 @@ enum ParseContinuation<NT, P> {
     Reparse(NT),
 }
 
+#[derive(Clone)]
 pub struct ExpressionParser<'a, S>
 where
     S: SmartConstructors,
@@ -63,26 +64,6 @@ where
     allow_as_expressions: bool,
     in_expression_tree: bool,
     _phantom: PhantomData<S>,
-}
-
-impl<'a, S> std::clone::Clone for ExpressionParser<'a, S>
-where
-    S: SmartConstructors,
-    S::R: NodeType,
-{
-    fn clone(&self) -> Self {
-        Self {
-            lexer: self.lexer.clone(),
-            context: self.context.clone(),
-            env: self.env.clone(),
-            errors: self.errors.clone(),
-            sc: self.sc.clone(),
-            precedence: self.precedence,
-            _phantom: self._phantom,
-            allow_as_expressions: self.allow_as_expressions,
-            in_expression_tree: self.in_expression_tree,
-        }
-    }
 }
 
 impl<'a, S> ParserTrait<'a, S> for ExpressionParser<'a, S>

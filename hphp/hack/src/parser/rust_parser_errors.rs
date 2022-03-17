@@ -206,6 +206,7 @@ impl UsedNames {
 
 type S<'a> = &'a Syntax<'a, PositionedToken<'a>, PositionedValue<'a>>;
 
+#[derive(Clone)]
 struct Context<'a> {
     pub active_classish: Option<S<'a>>,
     pub active_methodish: Option<S<'a>>,
@@ -214,21 +215,6 @@ struct Context<'a> {
     pub active_const: Option<S<'a>>,
     pub active_unstable_features: HashSet<UnstableFeatures>,
     pub active_expression_tree: bool,
-}
-
-// TODO: why can't this be auto-derived?
-impl<'a> std::clone::Clone for Context<'a> {
-    fn clone(&self) -> Self {
-        Self {
-            active_classish: self.active_classish,
-            active_methodish: self.active_methodish,
-            active_callable: self.active_callable,
-            active_callable_attr_spec: self.active_callable_attr_spec,
-            active_const: self.active_const,
-            active_unstable_features: self.active_unstable_features.clone(),
-            active_expression_tree: self.active_expression_tree,
-        }
-    }
 }
 
 struct Env<'a, State> {

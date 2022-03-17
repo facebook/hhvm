@@ -6,7 +6,7 @@ Invalid return type (Typing[4336])
   But got `void` because this function does not always return a value
 File "non_string_literal.php", line 5, characters 40-43:
 Invalid argument (Typing[4110])
-  File "soundness.hhi", line 7, characters 72-96:
+  File "soundness.hhi", line 31, characters 72-96:
   Expected `HH\FormatString<nothing>`
   File "non_string_literal.php", line 4, characters 10-16:
   But got `string`

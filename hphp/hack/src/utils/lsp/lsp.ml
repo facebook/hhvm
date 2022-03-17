@@ -379,6 +379,7 @@ module Initialize = struct
     useTextEditAutocomplete: bool;
     namingTableSavedStatePath: string option;
     namingTableSavedStateTestDelay: float;
+    delayUntilDoneInit: bool;
   }
 
   and client_capabilities = {

@@ -255,6 +255,9 @@ module Initialize : sig
         a naming-sqlite file and so clientIdeDaemon completes instantly, but we still want
         a little bit of a delay before it reports readiness so as to exercise race conditions.
         This is the delay in seconds. *)
+    delayUntilDoneInit: bool;
+        (** used for test scenarios where we want clientLsp to delay receiving any
+        further LSP requests until clientIdeDaemon has done its init. *)
   }
 
   and client_capabilities = {

@@ -757,7 +757,18 @@ let get_next_event
     (state : state)
     (client : Jsonrpc.t)
     (ide_service : ClientIdeService.t ref option) : event Lwt.t =
-  let can_use_client = true in
+  let can_use_client =
+    match (ide_service, !initialize_params_ref) with
+    | (Some ide_service, Some { Initialize.initializationOptions; _ })
+      when initializationOptions.Initialize.delayUntilDoneInit ->
+      begin
+        match ClientIdeService.get_status !ide_service with
+        | ClientIdeService.Status.(Initializing | Processing_files _ | Rpc _) ->
+          false
+        | ClientIdeService.Status.(Ready | Stopped _) -> true
+      end
+    | _ -> true
+  in
   let client = Option.some_if can_use_client client in
   let from_server (server : server_conn) : event Lwt.t =
     if Queue.is_empty server.pending_messages then

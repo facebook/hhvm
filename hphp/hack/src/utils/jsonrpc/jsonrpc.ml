@@ -84,8 +84,10 @@ let internal_run_daemon' (oc : queue_message Daemon.out_channel) : unit =
             true
           with
           | e ->
-            let message = Printexc.to_string e in
+            (* CARE! We have to get the backtrace first. Even something as simple
+               as Printexc.to_string has the potential to overwrite the backtrace. *)
             let stack = Printexc.get_backtrace () in
+            let message = Printexc.to_string e in
             let edata = { Marshal_tools.message; stack } in
             let (should_continue, marshal) =
               match e with
@@ -118,8 +120,8 @@ let internal_run_daemon
   | e ->
     (* An exception that's gotten here is not simply a parse error, but
        something else, so we should terminate the daemon at this point. *)
-    let message = Printexc.to_string e in
     let stack = Printexc.get_backtrace () in
+    let message = Printexc.to_string e in
     (try
        let out_fd = Daemon.descr_of_out_channel oc in
        Marshal_tools.to_fd_with_preamble
@@ -169,8 +171,8 @@ let read_single_message_into_queue_wait (message_queue : queue) :
     | (End_of_file | Unix.Unix_error (Unix.EBADF, _, _)) as e ->
       (* This is different from when the client hangs up. It handles the case
          that the daemon process exited: for example, if it was killed. *)
-      let message = Printexc.to_string e in
       let stack = Printexc.get_backtrace () in
+      let message = Printexc.to_string e in
       Lwt.return (Fatal_exception { Marshal_tools.message; stack })
   in
   Queue.push message message_queue.messages;

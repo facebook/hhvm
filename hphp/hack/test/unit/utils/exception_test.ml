@@ -50,8 +50,56 @@ let test_exception_stack () =
     expect "test/unit/utils/exception_test.ml" stack;
     true
 
-let test_clean_stack () =
-  let stack =
+let test_clean_stack1 () =
+  let stack1 =
+    {|Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
+Called from Stdlib__list.fold_left in file "list.ml", line 121, characters 24-34
+Called from Base__List0.fold in file "src/list0.ml" (inlined), line 21, characters 22-52
+Called from Dune__exe__Fiddle.inner in file "src/ftrial/fiddle.ml" (inlined), line 13, characters 10-66
+Called from Dune__exe__Fiddle in file "src/ftrial/fiddle.ml", line 24, characters 6-14|}
+  in
+  Asserter.String_asserter.assert_equals
+    {|src/ftrial/fiddle.ml @ 13
+src/ftrial/fiddle.ml @ 24|}
+    (Exception.clean_stack stack1)
+    "Expected stack1 to be cleaned like this";
+  true
+
+let test_clean_stack2 () =
+  let stack2 =
+    {|Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
+Called from Stdlib__list.fold_left in file "list.ml", line 121, characters 24-34
+Called from Base__List0.fold in file "src/list0.ml" (inlined), line 21, characters 22-52
+Called from Fiddle.inner in file "/data/users/ljw/fbsource/fbcode/hphp/hack/src/ftrial/fiddle.ml", line 13, characters 10-66
+Called from Fiddle in file "/data/users/ljw/fbsource/fbcode/hphp/hack/src/ftrial/fiddle.ml", line 24, characters 6-14|}
+  in
+  Asserter.String_asserter.assert_equals
+    {|src/ftrial/fiddle.ml @ 13
+src/ftrial/fiddle.ml @ 24|}
+    (Exception.clean_stack stack2)
+    "Expected stack2 to be cleaned like this";
+  true
+
+let test_clean_stack3 () =
+  let stack3 =
+    {|Raised by primitive operation at Fiddle.nested in file "fbcode/hphp/hack/src/ftrial/fiddle.ml", line 13, characters 13-18
+Re-raised at Exception.reraise in file "fbcode/hphp/hack/src/utils/core/exception.ml", line 36, characters 33-76
+Called from Stdlib__list.fold_left in file "list.ml", line 121, characters 24-34
+Called from Base__List0.fold in file "src/list0.ml" (inlined), line 21, characters 22-52
+Called from Fiddle.inner in file "fbcode/hphp/hack/src/ftrial/fiddle.ml", line 21, characters 10-66
+Called from Fiddle in file "fbcode/hphp/hack/src/ftrial/fiddle.ml", line 32, characters 6-14|}
+  in
+  Asserter.String_asserter.assert_equals
+    {|src/ftrial/fiddle.ml @ 13
+src/utils/core/exception.ml @ 36
+src/ftrial/fiddle.ml @ 21
+src/ftrial/fiddle.ml @ 32|}
+    (Exception.clean_stack stack3)
+    "Expected stack3 to be cleaned like this";
+  true
+
+let test_clean_stack4 () =
+  let stack4 =
     {|Raised by primitive operation at file "stdlib.ml", line 390, characters 28-54
 Called from file "stdlib.ml" (inlined), line 398, characters 2-47
 Called from file "/data/sandcastle/boxes/eden-trunk-hg-fbcode-fbsource/fbcode/hphp/hack/src/utils/disk/realDisk.ml", line 5, characters 11-31
@@ -108,15 +156,18 @@ src/providers/provider_utils.ml @ 164
 src/server/serverCommand.ml @ 243
 src/server/serverCommand.ml @ 248
 src/server/serverCommand.ml @ 276|}
-    (Exception.clean_stack stack)
-    "Expected the stack to be cleaned like this";
+    (Exception.clean_stack stack4)
+    "Expected the stack4 to be cleaned like this";
   true
 
 let tests =
   [
     ("test_current_stack", test_current_stack);
     ("test_exception_stack", test_exception_stack);
-    ("test_clean_stack", test_clean_stack);
+    ("test_clean_stack1", test_clean_stack1);
+    ("test_clean_stack2", test_clean_stack2);
+    ("test_clean_stack3", test_clean_stack3);
+    ("test_clean_stack4", test_clean_stack4);
   ]
 
 let () = Unit_test.run_all tests

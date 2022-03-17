@@ -52,14 +52,6 @@ module Functor (Reader : Buffered_line_reader_sig.READER) :
 
   let set_buffer r b = r.unconsumed_buffer := b
 
-  (** A non-throwing version of String.index. *)
-  let index s c =
-    try
-      let i = String.index s c in
-      `First_appearance i
-    with
-    | Not_found -> `No_appearance
-
   let trim_trailing_cr = function
     | "" -> ""
     | s ->
@@ -85,9 +77,9 @@ module Functor (Reader : Buffered_line_reader_sig.READER) :
     Reader.read r.fd ~buffer:b ~offset:0 ~size:chunk_size >>= fun bytes_read ->
     if bytes_read == 0 then raise End_of_file;
     let b = Bytes.sub_string b 0 bytes_read in
-    match index b '\n' with
-    | `No_appearance -> read_line (b :: chunks) r
-    | `First_appearance i ->
+    match String.index_opt b '\n' with
+    | None -> read_line (b :: chunks) r
+    | Some i ->
       let tail = String.sub b 0 i in
       let result = merge_chunks tail chunks in
       let () =
@@ -108,11 +100,11 @@ module Functor (Reader : Buffered_line_reader_sig.READER) :
     | None -> read_line [] r
     | Some remainder ->
       begin
-        match index remainder '\n' with
-        | `No_appearance ->
+        match String.index_opt remainder '\n' with
+        | None ->
           let () = set_buffer r None in
           read_line [remainder] r
-        | `First_appearance i ->
+        | Some i ->
           let result = String.sub remainder 0 i in
           let () =
             if i + 1 < String.length remainder then

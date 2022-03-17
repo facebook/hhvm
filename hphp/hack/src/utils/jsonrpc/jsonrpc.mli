@@ -14,22 +14,22 @@ type timestamped_json = {
   timestamp: float;
 }
 
-type queue
+type t
 
 (** must call Daemon.entry_point at start of your main *)
-val make_queue : unit -> queue
+val make_t : unit -> t
 
-val get_read_fd : queue -> Unix.file_descr (* can be used for 'select' *)
+val get_read_fd : t -> Unix.file_descr (* can be used for 'select' *)
 
 (** says whether there's already an item on the queue, or stdin is readable meaning that there's something pending on it *)
-val has_message : queue -> bool
+val has_message : t -> bool
 
 (** says whether the things we've already enqueued from stdin contain a message that matches the predicate *)
 val find_already_queued_message :
-  f:(timestamped_json -> bool) -> queue -> timestamped_json option
+  f:(timestamped_json -> bool) -> t -> timestamped_json option
 
 val get_message :
-  queue ->
+  t ->
   [> `Message of timestamped_json
   | `Fatal_exception of Marshal_tools.remote_exception_data
   | `Recoverable_exception of Marshal_tools.remote_exception_data

@@ -657,7 +657,7 @@ let pop_from_ide_service (ide_service : ClientIdeService.t ref option) :
 server (hh_server), or whether neither is ready within 1s. *)
 let get_message_source
     (server : server_conn)
-    (client : Jsonrpc.queue)
+    (client : Jsonrpc.t)
     (ide_service : ClientIdeService.t ref option) :
     [ `From_server | `From_client | `From_ide_service of event | `No_source ]
     Lwt.t =
@@ -695,7 +695,7 @@ let get_message_source
 
 (** A simplified version of get_message_source which only looks at client *)
 let get_client_message_source
-    (client : Jsonrpc.queue) (ide_service : ClientIdeService.t ref option) :
+    (client : Jsonrpc.t) (ide_service : ClientIdeService.t ref option) :
     [ `From_client | `From_ide_service of event | `No_source ] Lwt.t =
   if Jsonrpc.has_message client then
     Lwt.return `From_client
@@ -746,7 +746,7 @@ received. Note: if server is None (meaning we haven't yet established
 connection with server) then we'll just block waiting for client. *)
 let get_next_event
     (state : state)
-    (client : Jsonrpc.queue)
+    (client : Jsonrpc.t)
     (ide_service : ClientIdeService.t ref option) : event Lwt.t =
   let from_server (server : server_conn) : event Lwt.t =
     if Queue.is_empty server.pending_messages then
@@ -754,7 +754,7 @@ let get_next_event
     else
       Lwt.return (Server_message (Queue.dequeue_exn server.pending_messages))
   in
-  let from_client (client : Jsonrpc.queue) : event Lwt.t =
+  let from_client (client : Jsonrpc.t) : event Lwt.t =
     let%lwt message = Jsonrpc.get_message client in
     match message with
     | `Message { Jsonrpc.json; timestamp } ->
@@ -3795,9 +3795,8 @@ let short_timeout = 2.5
 
 let long_timeout = 15.0
 
-let cancel_if_stale
-    (client : Jsonrpc.queue) (timestamp : float) (timeout : float) : unit Lwt.t
-    =
+let cancel_if_stale (client : Jsonrpc.t) (timestamp : float) (timeout : float) :
+    unit Lwt.t =
   let time_elapsed = Unix.gettimeofday () -. timestamp in
   if Float.(time_elapsed >= timeout) && Jsonrpc.has_message client then
     raise
@@ -3817,7 +3816,7 @@ There are races, e.g. we might start handling this request because we haven't
 yet gotten around to reading a cancellation message off stdin. But
 that's inevitable. Think of this only as best-effort. *)
 let cancel_if_has_pending_cancel_request
-    (client : Jsonrpc.queue) (message : lsp_message) : unit =
+    (client : Jsonrpc.t) (message : lsp_message) : unit =
   match message with
   | ResponseMessage _ -> ()
   | NotificationMessage _ -> ()
@@ -4002,7 +4001,7 @@ let set_verbose_to_file
 let handle_client_message
     ~(env : env)
     ~(state : state ref)
-    ~(client : Jsonrpc.queue)
+    ~(client : Jsonrpc.t)
     ~(ide_service : ClientIdeService.t ref option)
     ~(metadata : incoming_metadata)
     ~(message : lsp_message)
@@ -4964,7 +4963,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
       None
   in
 
-  let client = Jsonrpc.make_queue () in
+  let client = Jsonrpc.make_t () in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
   let state = ref Pre_init in
   let ref_event = ref None in

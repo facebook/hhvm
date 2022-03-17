@@ -3,8 +3,36 @@
 (* Practical readbable guide: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#base-protocol-json-structures *)
 
 open Hh_prelude
-module Queue = Stdlib.Queue
-module Printexc = Stdlib.Printexc
+
+(**************************************************************
+HOW THIS ALL WORKS.
+GOAL 1: is to always be ready to read on stdin so we can timestamp
+accurately the moment that a request was delivered to us. If our
+stdin pipe gets so full that a client can't write requests to us,
+or if we're busy doing something else before we read on stdin,
+both things would result in incorrect timestamps.
+GOAL 2: when we process a message, then all subsequent messages that
+have already been presented to our stdin should already be in our own
+queue data-structure (rather than an OS pipe buffer) in case any
+of the messages involved cancellation.
+GOAL 3: we're in ocaml, so our threading possibilties are limited,
+and unfortunately our caller has cpu-blocking chunks of code.
+
+We kick off single background process called "daemon", running a loop
+in [internal_run_daemon]. It will take in messages from stdin,
+queue them up in its queue `let messages_to_send = Queue.create ()`,
+and write them over a pipe to the main (calling) process.
+See type [daemon_next_action] how it choses what to do.
+
+Callers of this library will invoke an Lwt API [get_message].
+This maintains its own queue [queue.messages] of items that it has
+so far received over the pipe from the daemon. When a caller invokes
+[get_message] then we block if necessary until at least one message
+has come over the pipe into the queue, but we also slurp up any further
+messages that have come over the pipe as well. This way, if the client
+calls [find_already_queued_message] then they have a better chance of
+success.
+***************************************************************)
 
 type writer = Hh_json.json -> unit
 
@@ -13,24 +41,41 @@ type timestamped_json = {
   timestamp: float;
 }
 
-(***************************************************************)
-(* Internal queue functions that run in the daemon process.    *)
-(***************************************************************)
+(** These messages are the ones stored in the daemon's internal queue,
+that are marshalled between daemon and main process, that are stored
+in the main process queue, and that are handed to callers. *)
+type queue_message =
+  | Timestamped_json of timestamped_json
+  | Fatal_exception of Marshal_tools.remote_exception_data
+  | Recoverable_exception of Marshal_tools.remote_exception_data
 
-type queue = {
+(** This is the abstraction that callers use to get messages. It resides
+in the caller's process. The fd is where we read from the pipe with the daemon,
+and the queue holds all messages that we've read from the daemon's pipe so far. *)
+type t = {
   daemon_in_fd: Unix.file_descr;
   (* fd used by main process to read messages from queue *)
   messages: queue_message Queue.t;
 }
 
-and queue_message =
-  | Timestamped_json of timestamped_json
-  | Fatal_exception of Marshal_tools.remote_exception_data
-  | Recoverable_exception of Marshal_tools.remote_exception_data
-
-and daemon_operation =
-  | Read
-  | Write
+(** The daemon uses a 'select' syscall. It has to deal with stdin pipe
+of messages from client that it has to read whenever available (but which might
+be blocked if the client hasn't yet provided any further messages); it has to
+deal with its queue of messages which it wants to write to the main process
+(but not if such a write would be blocking). This type says which option
+it will chose based on (1) what the 'select' syscall says is available,
+(2) its own further logic. *)
+type daemon_next_action =
+  | Daemon_end_due_to_stdin_eof_and_empty_queue
+      (** We received an EOF on stdin, and our queue is empty, so the daemon has nothing left to do. *)
+  | Daemon_write_to_main_process_pipe
+      (** There is no data to be read from stdin,
+      and there are items in the daemon queue,
+      and the pipe to the main process is open enough for us to write them without blocking. *)
+  | Daemon_read_from_stdin
+      (** EITHER there is data to be read from stdin so we prioritize that above all else,
+      OR there are no items in the daemon queue so we might as well block on stdin until
+      something arrives. *)
 
 (* Try to read a message from the daemon's stdin, which is where all of the
    editor messages can be read from. May throw if the message is malformed. *)
@@ -49,71 +94,71 @@ let internal_run_daemon' (oc : queue_message Daemon.out_channel) : unit =
   let out_fd = Daemon.descr_of_out_channel oc in
   let reader = Buffered_line_reader.create Unix.stdin in
   let messages_to_send = Queue.create () in
-  let rec loop () =
-    let operation =
+  let rec loop ~allowed_to_read : unit =
+    let daemon_next_action =
       if Buffered_line_reader.has_buffered_content reader then
-        Read
+        Daemon_read_from_stdin
       else
-        let read_fds = [Unix.stdin] in
-        let has_messages_to_send = not (Queue.is_empty messages_to_send) in
+        let read_fds =
+          if allowed_to_read then
+            [Unix.stdin]
+          else
+            []
+        in
         let write_fds =
-          if has_messages_to_send then
+          if not (Queue.is_empty messages_to_send) then
             [out_fd]
           else
             []
         in
-        (* Note that if there are no queued messages, this will always block
-           until we're ready to read, rather than returning `Write`, even if
-           stdout is capable of being written to. Furthermore, we will never
-           need to queue a message to be written until we have read
-           something. *)
-        let (readable_fds, _, _) = Unix.select read_fds write_fds [] (-1.0) in
-        let ready_for_read = not (List.is_empty readable_fds) in
-        if ready_for_read then
-          Read
+        if List.is_empty read_fds && List.is_empty write_fds then
+          Daemon_end_due_to_stdin_eof_and_empty_queue
         else
-          Write
+          (* An indefinite wait until we're able to either read or write.
+             Reading will always take priority. *)
+          let (readable_fds, _, _) = Unix.select read_fds write_fds [] (-1.0) in
+          let ready_for_read = not (List.is_empty readable_fds) in
+          if ready_for_read then
+            Daemon_read_from_stdin
+          else
+            Daemon_write_to_main_process_pipe
     in
-    let should_continue =
-      match operation with
-      | Read ->
-        begin
-          try
-            let timestamped_json = internal_read_message reader in
-            Queue.push timestamped_json messages_to_send;
-            true
-          with
-          | exn ->
-            let e = Exception.wrap exn in
-            let edata = Marshal_tools.of_exception e in
-            let (should_continue, marshal) =
-              match Exception.to_exn e with
-              | Hh_json.Syntax_error _ -> (true, Recoverable_exception edata)
-              | _ -> (false, Fatal_exception edata)
-            in
-            if not should_continue then
-              Queue.iter
-                (fun tj ->
-                  Marshal_tools.to_fd_with_preamble out_fd (Timestamped_json tj)
-                  |> ignore)
-                messages_to_send;
-            Marshal_tools.to_fd_with_preamble out_fd marshal |> ignore;
-            should_continue
-        end
-      | Write ->
+    let (should_continue, allowed_to_read) =
+      match daemon_next_action with
+      | Daemon_read_from_stdin ->
+        (try
+           let timestamped_json = internal_read_message reader in
+           Queue.enqueue messages_to_send (Timestamped_json timestamped_json);
+           (true, allowed_to_read)
+         with
+        | exn ->
+          let e = Exception.wrap exn in
+          let edata = Marshal_tools.of_exception e in
+          let (allowed_to_read, message) =
+            match exn with
+            | Hh_json.Syntax_error _ -> (true, Recoverable_exception edata)
+            | End_of_file
+            | _ ->
+              (false, Fatal_exception edata)
+          in
+          Queue.enqueue messages_to_send message;
+          (true, allowed_to_read))
+      | Daemon_write_to_main_process_pipe ->
         assert (not (Queue.is_empty messages_to_send));
-        let timestamped_json = Queue.pop messages_to_send in
+        let message = Queue.dequeue_exn messages_to_send in
         (* We can assume that the entire write will succeed, since otherwise
-           Marshal_tools.to_fd_with_preamble will throw an exception. *)
-        Marshal_tools.to_fd_with_preamble
-          out_fd
-          (Timestamped_json timestamped_json)
-        |> ignore;
-        true
+            Marshal_tools.to_fd_with_preamble will throw an exception. *)
+        Marshal_tools.to_fd_with_preamble out_fd message |> ignore;
+        (true, allowed_to_read)
+      | Daemon_end_due_to_stdin_eof_and_empty_queue -> (false, false)
     in
-    if should_continue then loop ()
+    if should_continue then
+      loop ~allowed_to_read
+    else
+      ()
   in
-  loop ()
+  loop ~allowed_to_read:true;
+  ()
 
 (*  Main function for the daemon process. *)
 let internal_run_daemon
@@ -121,9 +166,9 @@ let internal_run_daemon
   Printexc.record_backtrace true;
   try internal_run_daemon' oc with
   | exn ->
+    let e = Exception.wrap exn in
     (* An exception that's gotten here is not simply a parse error, but
        something else, so we should terminate the daemon at this point. *)
-    let e = Exception.wrap exn in
     (try
        let out_fd = Daemon.descr_of_out_channel oc in
        Marshal_tools.to_fd_with_preamble
@@ -143,7 +188,7 @@ let internal_entry_point : (unit, unit, queue_message) Daemon.entry =
 (* Queue functions that run in the main process *)
 (************************************************)
 
-let make_queue () : queue =
+let make_t () : t =
   let handle =
     Daemon.spawn
       ~channel_mode:`pipe
@@ -157,37 +202,36 @@ let make_queue () : queue =
   let (ic, _) = handle.Daemon.channels in
   { daemon_in_fd = Daemon.descr_of_in_channel ic; messages = Queue.create () }
 
-let get_read_fd (queue : queue) : Unix.file_descr = queue.daemon_in_fd
+let get_read_fd (t : t) : Unix.file_descr = t.daemon_in_fd
 
 (* Read a message into the queue, and return the just-read message. *)
-let read_single_message_into_queue_wait (message_queue : queue) :
-    queue_message Lwt.t =
+let read_single_message_into_queue_wait (t : t) : queue_message Lwt.t =
   let%lwt message =
     try%lwt
       let%lwt message =
         Marshal_tools_lwt.from_fd_with_preamble
-          (Lwt_unix.of_unix_file_descr message_queue.daemon_in_fd)
+          (Lwt_unix.of_unix_file_descr t.daemon_in_fd)
       in
       Lwt.return message
     with
     | (End_of_file | Unix.Unix_error (Unix.EBADF, _, _)) as exn ->
+      let e = Exception.wrap exn in
       (* This is different from when the client hangs up. It handles the case
          that the daemon process exited: for example, if it was killed. *)
-      let e = Exception.wrap exn in
       Lwt.return (Fatal_exception (Marshal_tools.of_exception e))
   in
-  Queue.push message message_queue.messages;
+  Queue.enqueue t.messages message;
   Lwt.return message
 
-let rec read_messages_into_queue_no_wait (message_queue : queue) : unit Lwt.t =
+let rec read_messages_into_queue_no_wait (t : t) : unit Lwt.t =
   let is_readable =
-    Lwt_unix.readable (Lwt_unix.of_unix_file_descr message_queue.daemon_in_fd)
+    Lwt_unix.readable (Lwt_unix.of_unix_file_descr t.daemon_in_fd)
   in
   let%lwt () =
     if is_readable then
       (* We're expecting this not to block because we just checked
          to make sure that there's something there. *)
-      let%lwt message = read_single_message_into_queue_wait message_queue in
+      let%lwt message = read_single_message_into_queue_wait t in
       (* Now read any more messages that might be queued up. Only try to read more
          messages if the daemon is still available to read from. Otherwise, we may
          infinite loop as a result of `Unix.select` returning that a file
@@ -195,36 +239,36 @@ let rec read_messages_into_queue_no_wait (message_queue : queue) : unit Lwt.t =
       match message with
       | Fatal_exception _ -> Lwt.return_unit
       | _ ->
-        let%lwt () = read_messages_into_queue_no_wait message_queue in
+        let%lwt () = read_messages_into_queue_no_wait t in
         Lwt.return_unit
     else
       Lwt.return_unit
   in
   Lwt.return_unit
 
-let has_message (queue : queue) : bool =
+let has_message (t : t) : bool =
   let is_readable =
-    Lwt_unix.readable (Lwt_unix.of_unix_file_descr queue.daemon_in_fd)
+    Lwt_unix.readable (Lwt_unix.of_unix_file_descr t.daemon_in_fd)
   in
-  is_readable || not (Queue.is_empty queue.messages)
+  is_readable || not (Queue.is_empty t.messages)
 
-let find_already_queued_message ~(f : timestamped_json -> bool) (queue : queue)
-    : timestamped_json option =
+let find_already_queued_message ~(f : timestamped_json -> bool) (t : t) :
+    timestamped_json option =
   Queue.fold
-    (fun found message ->
+    ~f:(fun found message ->
       match (found, message) with
       | (Some found, _) -> Some found
       | (None, Timestamped_json message) when f message -> Some message
       | _ -> None)
-    None
-    queue.messages
+    ~init:None
+    t.messages
 
-let get_message (queue : queue) =
+let get_message (t : t) =
   (* Read one in a blocking manner to ensure that we have one. *)
   let%lwt () =
-    if Queue.is_empty queue.messages then
+    if Queue.is_empty t.messages then
       let%lwt (_message : queue_message) =
-        read_single_message_into_queue_wait queue
+        read_single_message_into_queue_wait t
       in
       Lwt.return_unit
     else
@@ -232,8 +276,8 @@ let get_message (queue : queue) =
   in
   (* Then read any others that got queued up so that we can see the maximum
      number of messages at once for invalidation purposes. *)
-  let%lwt () = read_messages_into_queue_no_wait queue in
-  let item = Queue.pop queue.messages in
+  let%lwt () = read_messages_into_queue_no_wait t in
+  let item = Queue.dequeue_exn t.messages in
   match item with
   | Timestamped_json timestamped_json -> Lwt.return (`Message timestamped_json)
   | Fatal_exception data -> Lwt.return (`Fatal_exception data)

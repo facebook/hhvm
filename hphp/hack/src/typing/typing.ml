@@ -579,8 +579,20 @@ let as_expr env ty1 pe e =
       in
       (env, union_coercion_errs errs)
     | _ ->
-      if SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
-      then (
+      let is_dynamic =
+        if
+          TCO.enable_sound_dynamic (Env.get_tcopt env)
+          && env.in_support_dynamic_type_method_check
+        then
+          SubType.is_sub_type_for_union env (MakeType.dynamic Reason.Rnone) ty
+          && SubType.is_sub_type_for_union
+               env
+               ty
+               (MakeType.dynamic Reason.Rnone)
+        else
+          SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
+      in
+      if is_dynamic then (
         let (env, e1) =
           SubType.sub_type env ty tk
           @@ Some (Typing_error.Reasons_callback.unify_error_at pe)

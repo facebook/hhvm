@@ -667,8 +667,14 @@ let wait_until_client_has_data (client : Jsonrpc.t option) : unit Lwt.t =
   match client with
   | None -> Lwt.task () |> fst (* a never-fulfilled, cancellable promise *)
   | Some client ->
-    let fd = Jsonrpc.get_read_fd client |> Lwt_unix.of_unix_file_descr in
-    let%lwt () = Lwt_unix.wait_read fd in
+    let%lwt () =
+      match Jsonrpc.await_until_message client with
+      | `Already_has_message -> Lwt.return_unit
+      | `Wait_for_data_here fd ->
+        let fd = Lwt_unix.of_unix_file_descr fd in
+        let%lwt () = Lwt_unix.wait_read fd in
+        Lwt.return_unit
+    in
     Lwt.return_unit
 
 (** Determine whether to read a message from the client (the editor) or the

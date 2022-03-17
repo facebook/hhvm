@@ -19,10 +19,13 @@ type t
 (** must call Daemon.entry_point at start of your main *)
 val make_t : unit -> t
 
-val get_read_fd : t -> Unix.file_descr (* can be used for 'select' *)
-
 (** says whether there's already an item on the queue, or stdin is readable meaning that there's something pending on it *)
 val has_message : t -> bool
+
+(** similar to [has_message], but can be used to power a 'select' syscall
+which will fire when a message is available. *)
+val await_until_message :
+  t -> [> `Already_has_message | `Wait_for_data_here of Unix.file_descr ]
 
 (** says whether the things we've already enqueued from stdin contain a message that matches the predicate *)
 val find_already_queued_message :

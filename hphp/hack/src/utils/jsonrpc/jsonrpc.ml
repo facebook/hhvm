@@ -32,6 +32,19 @@ has come over the pipe into the queue, but we also slurp up any further
 messages that have come over the pipe as well. This way, if the client
 calls [find_already_queued_message] then they have a better chance of
 success.
+
+CARE!!! Jsonrpc is vulnerable to incomplete requests and malformed
+Content-length headers...
+The way it works around lack of threading in ocaml is with the
+assumption that if any data is available on stdin then a complete
+jsonrpc request can be read from stdin. If this is violated e.g.
+if the Content-length header is one byte short, then Jsonrpc will
+read a json string that lacks the final }, and will report this as
+a recoverable error (malformed json). Next, Jsonrpc will see that
+there is more data available on stdin, namely that final }, and so
+will block until a header+body has been read on stdin -- but nothing
+further will come beyond that }, so it blocks indefinitely.
+The only solution is to take care that Content-length is exact!
 ***************************************************************)
 
 type writer = Hh_json.json -> unit
@@ -202,8 +215,6 @@ let make_t () : t =
   let (ic, _) = handle.Daemon.channels in
   { daemon_in_fd = Daemon.descr_of_in_channel ic; messages = Queue.create () }
 
-let get_read_fd (t : t) : Unix.file_descr = t.daemon_in_fd
-
 (* Read a message into the queue, and return the just-read message. *)
 let read_single_message_into_queue_wait (t : t) : queue_message Lwt.t =
   let%lwt message =
@@ -251,6 +262,14 @@ let has_message (t : t) : bool =
     Lwt_unix.readable (Lwt_unix.of_unix_file_descr t.daemon_in_fd)
   in
   is_readable || not (Queue.is_empty t.messages)
+
+let await_until_message (t : t) =
+  (* The next message will come either from the queue or (if it's empty) then
+     from some data coming in from [daemon_in_fd]. *)
+  if Queue.is_empty t.messages then
+    `Wait_for_data_here t.daemon_in_fd
+  else
+    `Already_has_message
 
 let find_already_queued_message ~(f : timestamped_json -> bool) (t : t) :
     timestamped_json option =

@@ -50,7 +50,7 @@ CMD3=$(cat <<EOF
       }
 EOF
 )
-printf "Content-Length: %s\r\n\r\n%s" "${#CMD3}" "$CMD3"
+printf "Content-Length: %s\r\n\r\n%s" "$(printf "%s" "$CMD3" | wc -c)" "$CMD3"
 
 CMD4=$(cat <<EOF
       {

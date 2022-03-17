@@ -69,8 +69,6 @@ exception Syntax_error of string
    cleaner
  *)
 
-let peek env = env.data.[env.pos]
-
 let has_more env = String.length env.data > env.pos
 
 let syntax_error env msg =
@@ -81,6 +79,10 @@ let syntax_error env msg =
       Printf.sprintf "%s after the last character" msg
   in
   raise (Syntax_error err_msg)
+
+let peek env =
+  try env.data.[env.pos] with
+  | Invalid_argument _ -> syntax_error env "peek"
 
 (* skip all blank and new line characters *)
 let skip_blank_chars env =

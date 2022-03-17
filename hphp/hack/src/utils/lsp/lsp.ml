@@ -375,17 +375,10 @@ module Initialize = struct
     | Messages
     | Verbose
 
-  (* These hack-specific options they're all optional in initialize request,
-     and we pick a default if necessary while parsing. *)
   and initializationOptions = {
     useTextEditAutocomplete: bool;
-    liveSyntaxErrors: bool;
     namingTableSavedStatePath: string option;
     namingTableSavedStateTestDelay: float;
-        (** synthetic delay for test purposes *)
-    sendServerStatusEvents: bool;
-        (** do we send telemetry whenever hh_server status changes, e.g. doing-local-typecheck,
-        done-typecheck. Used by HackAst. *)
   }
 
   and client_capabilities = {

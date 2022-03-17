@@ -239,12 +239,22 @@ module Initialize : sig
     | Messages
     | Verbose
 
+  (** These are hack-specific options. They're all optional in initialize request,
+  and we pick a default if necessary while parsing. *)
   and initializationOptions = {
     useTextEditAutocomplete: bool;
-    liveSyntaxErrors: bool;
+        (** LSP recommends that we send autocomplete as TextEdits. Our
+        main client (VSCode) sends this parameter set to true. I can't imagine
+        why anyone would want it false. Maybe there are some clients (vim? emacs?)
+        which aren't yet ready to have TextEdit autocompletes? *)
     namingTableSavedStatePath: string option;
+        (** used for test scenarios where we pass a naming-table sqlite file,
+        rather than leaving clientIdeDaemon to find and download one itself. *)
     namingTableSavedStateTestDelay: float;
-    sendServerStatusEvents: bool;
+        (** used for test scenarios where we've passed
+        a naming-sqlite file and so clientIdeDaemon completes instantly, but we still want
+        a little bit of a delay before it reports readiness so as to exercise race conditions.
+        This is the delay in seconds. *)
   }
 
   and client_capabilities = {

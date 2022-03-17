@@ -91,6 +91,12 @@ let internal_run_daemon' (oc : queue_message Daemon.out_channel) : unit =
               | Hh_json.Syntax_error _ -> (true, Recoverable_exception edata)
               | _ -> (false, Fatal_exception edata)
             in
+            if not should_continue then
+              Queue.iter
+                (fun tj ->
+                  Marshal_tools.to_fd_with_preamble out_fd (Timestamped_json tj)
+                  |> ignore)
+                messages_to_send;
             Marshal_tools.to_fd_with_preamble out_fd marshal |> ignore;
             should_continue
         end

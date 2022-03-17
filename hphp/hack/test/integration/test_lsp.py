@@ -20,11 +20,6 @@ from test_case import TestCase
 from utils import Json, JsonObject, interpolate_variables
 
 
-class InsertTextFormat(enum.Enum):
-    PlainText = 1
-    Snippet = 2
-
-
 class LspTestDriver(common_tests.CommonTestDriver):
     def write_load_config(
         self, use_serverless_ide: bool = False, use_saved_state: bool = False
@@ -413,8 +408,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "literal",
                             "inlineDetail": "literal",
                             "sortText": "'x'",
-                            "insertText": "'x'",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 22, "character": 13},
+                                    "end": {"line": 22, "character": 14},
+                                },
+                                "newText": "'x'",
+                            },
                             "data": {
                                 "fullname": "'x'",
                                 "filename": "${root_path}/completion.php",
@@ -428,8 +429,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "literal",
                             "inlineDetail": "literal",
                             "sortText": "'y'",
-                            "insertText": "'y'",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 22, "character": 13},
+                                    "end": {"line": 22, "character": 14},
+                                },
+                                "newText": "'y'",
+                            },
                             "data": {
                                 "fullname": "'y'",
                                 "filename": "${root_path}/completion.php",
@@ -474,8 +481,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "literal",
                             "inlineDetail": "literal",
                             "sortText": "'x",
-                            "insertText": "'x",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 22, "character": 13},
+                                    "end": {"line": 22, "character": 13},
+                                },
+                                "newText": "'x",
+                            },
                             "data": {
                                 "fullname": "'x'",
                                 "filename": "${root_path}/completion.php",
@@ -489,8 +502,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "literal",
                             "inlineDetail": "literal",
                             "sortText": "'y",
-                            "insertText": "'y",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 22, "character": 13},
+                                    "end": {"line": 22, "character": 13},
+                                },
+                                "newText": "'y",
+                            },
                             "data": {
                                 "fullname": "'y'",
                                 "filename": "${root_path}/completion.php",
@@ -535,8 +554,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
-                            "insertText": "ab:cd:alpha",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 6},
+                                },
+                                "newText": "ab:cd:alpha",
+                            },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
@@ -545,8 +570,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:text",
-                            "insertText": "ab:cd:text",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 6},
+                                },
+                                "newText": "ab:cd:text",
+                            },
                             "data": {"fullname": ":ab:cd:text"},
                         },
                         {
@@ -555,8 +586,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "xhp:enum-attribute",
-                            "insertText": "xhp:enum-attribute",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 6},
+                                },
+                                "newText": "xhp:enum-attribute",
+                            },
                             "data": {"fullname": ":xhp:enum-attribute"},
                         },
                         {
@@ -565,8 +602,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "xhp:generic",
-                            "insertText": "xhp:generic",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 6},
+                                },
+                                "newText": "xhp:generic",
+                            },
                             "data": {"fullname": ":xhp:generic"},
                         },
                     ],
@@ -606,8 +649,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
-                            "insertText": "ab:cd:alpha",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 7},
+                                },
+                                "newText": "ab:cd:alpha",
+                            },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
@@ -616,8 +665,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:text",
-                            "insertText": "ab:cd:text",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 7},
+                                },
+                                "newText": "ab:cd:text",
+                            },
                             "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
@@ -657,8 +712,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
-                            "insertText": "ab:cd:alpha",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 9},
+                                },
+                                "newText": "ab:cd:alpha",
+                            },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
@@ -667,8 +728,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:text",
-                            "insertText": "ab:cd:text",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 9},
+                                },
+                                "newText": "ab:cd:text",
+                            },
                             "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
@@ -708,8 +775,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": "width",
-                            "insertText": "width",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "width",
+                            },
                             "data": {
                                 "fullname": ":width",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -724,8 +797,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": "color",
-                            "insertText": "color",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "color",
+                            },
                             "data": {
                                 "fullname": ":color",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -771,8 +850,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": "width",
-                            "insertText": "width",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 18},
+                                },
+                                "newText": "width",
+                            },
                             "data": {
                                 "fullname": ":width",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -787,8 +872,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": "color",
-                            "insertText": "color",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 18},
+                                },
+                                "newText": "color",
+                            },
                             "data": {
                                 "fullname": ":color",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -834,8 +925,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
-                            "insertText": ":ab:cd:alpha",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": ":ab:cd:alpha",
+                            },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
@@ -844,8 +941,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
-                            "insertText": ":ab:cd:text",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": ":ab:cd:text",
+                            },
                             "data": {"fullname": ":ab:cd:text"},
                         },
                         {
@@ -854,8 +957,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":xhp:enum-attribute",
-                            "insertText": ":xhp:enum-attribute",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": ":xhp:enum-attribute",
+                            },
                             "data": {"fullname": ":xhp:enum-attribute"},
                         },
                         {
@@ -864,8 +973,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":xhp:generic",
-                            "insertText": ":xhp:generic",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": ":xhp:generic",
+                            },
                             "data": {"fullname": ":xhp:generic"},
                         },
                     ],
@@ -905,8 +1020,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
-                            "insertText": ":ab:cd:alpha",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 11},
+                                },
+                                "newText": ":ab:cd:alpha",
+                            },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
@@ -915,8 +1036,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
-                            "insertText": ":ab:cd:text",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 11},
+                                },
+                                "newText": ":ab:cd:text",
+                            },
                             "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
@@ -935,7 +1062,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "inlineDetail": "class",
                     "itemType": ":ab:cd:alpha",
                     "insertText": ":ab:cd:alpha",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
                 },
                 result={
@@ -949,7 +1076,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "value": ":ab:cd:alpha docblock",
                     },
                     "insertText": ":ab:cd:alpha",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
                 },
                 powered_by="serverless_ide",
@@ -988,8 +1115,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
-                            "insertText": "ab:cd:alpha",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 7},
+                                },
+                                "newText": "ab:cd:alpha",
+                            },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
@@ -998,8 +1131,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:text",
-                            "insertText": "ab:cd:text",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 7},
+                                },
+                                "newText": "ab:cd:text",
+                            },
                             "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
@@ -1016,7 +1155,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "class",
                     "inlineDetail": "class",
                     "insertText": "ab:cd:alpha",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
                 },
                 result={
@@ -1029,7 +1168,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "value": ":ab:cd:alpha docblock",
                     },
                     "insertText": "ab:cd:alpha",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
                 },
                 powered_by="serverless_ide",
@@ -1067,8 +1206,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": ":width",
-                            "insertText": ":width",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 29},
+                                },
+                                "newText": ":width",
+                            },
                             "data": {
                                 "fullname": ":width",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -1083,8 +1228,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": ":color",
-                            "insertText": ":color",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 29},
+                                },
+                                "newText": ":color",
+                            },
                             "data": {
                                 "fullname": ":color",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -1130,8 +1281,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": ":width",
-                            "insertText": ":width",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 30},
+                                },
+                                "newText": ":width",
+                            },
                             "data": {
                                 "fullname": ":width",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -1146,8 +1303,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": ":color",
-                            "insertText": ":color",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 30},
+                                },
+                                "newText": ":color",
+                            },
                             "data": {
                                 "fullname": ":color",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -1193,8 +1356,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "function",
                             "inlineDetail": "function",
                             "sortText": "test_function",
-                            "insertText": "test_function",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 0},
+                                    "end": {"line": 3, "character": 8},
+                                },
+                                "newText": "test_function",
+                            },
                             "data": {"fullname": "test_function"},
                         }
                     ],
@@ -1212,7 +1381,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "inlineDetail": "()",
                     "itemType": "void",
                     "insertText": "test_function",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "data": {
                         "filename": "${root_path}/completion.php",
                         "line": 8,
@@ -1230,7 +1399,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "value": "test_function docblock.",
                     },
                     "insertText": "test_function",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "data": {
                         "filename": "${root_path}/completion.php",
                         "line": 8,
@@ -1299,8 +1468,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "classname<this>",
                             "inlineDetail": "classname<this>",
                             "sortText": "class",
-                            "insertText": "class",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "class",
+                            },
                             "data": {
                                 "fullname": "class",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1315,8 +1490,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "Elsa",
                             "inlineDetail": "Elsa",
                             "sortText": "Bard",
-                            "insertText": "Bard",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "Bard",
+                            },
                             "data": {
                                 "fullname": "Bard",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1331,8 +1512,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "Elsa",
                             "inlineDetail": "Elsa",
                             "sortText": "Alonso",
-                            "insertText": "Alonso",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "Alonso",
+                            },
                             "data": {
                                 "fullname": "Alonso",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1349,7 +1536,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "bool",
                             "sortText": "isValid",
                             "insertText": "isValid(${1:\\$value})",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "isValid",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1366,7 +1553,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "dict<string, Elsa>",
                             "sortText": "getValues",
                             "insertText": "getValues()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "getValues",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1383,7 +1570,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "dict<Elsa, string>",
                             "sortText": "getNames",
                             "insertText": "getNames()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "getNames",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1400,7 +1587,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "?Elsa",
                             "sortText": "coerce",
                             "insertText": "coerce(${1:\\$value})",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "coerce",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1417,7 +1604,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "Container<Elsa>",
                             "sortText": "assertAll",
                             "insertText": "assertAll(${1:\\$values})",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "assertAll",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1434,7 +1621,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "Elsa",
                             "sortText": "assert",
                             "insertText": "assert(${1:\\$value})",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "assert",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1473,7 +1660,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "function(mixed $value): bool",
                     "inlineDetail": "(mixed $value)",
                     "itemType": "bool",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
                             "start": {"line": 3, "character": 35},
@@ -1497,7 +1684,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "kind": "markdown",
                         "value": "Returns whether or not the value is defined as a constant.",
                     },
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
                             "start": {"line": 3, "character": 35},
@@ -1557,8 +1744,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "function",
                             "inlineDetail": "function",
                             "sortText": "test_func",
-                            "insertText": "test_func",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 7},
+                                    "end": {"line": 3, "character": 7},
+                                },
+                                "newText": "test_func",
+                            },
                             "data": {"fullname": "TestNS\\test_func"},
                         }
                     ],
@@ -1600,7 +1793,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "void",
                             "sortText": "interfaceDocBlockMethod",
                             "insertText": "interfaceDocBlockMethod()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "interfaceDocBlockMethod",
                                 "filename": "${root_path}/completion.php",
@@ -1623,7 +1816,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "function(): void",
                     "inlineDetail": "()",
                     "itemType": "void",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
                             "start": {"line": 3, "character": 34},
@@ -1643,7 +1836,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "function(): void",
                     "inlineDetail": "()",
                     "itemType": "void",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
                             "start": {"line": 3, "character": 34},
@@ -1692,8 +1885,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "classname<this>",
                             "inlineDetail": "classname<this>",
                             "sortText": "class",
-                            "insertText": "class",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "class",
+                            },
                             "data": {
                                 "fullname": "class",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1710,7 +1909,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "void",
                             "sortText": "~test_do_not_use",
                             "insertText": "test_do_not_use()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "test_do_not_use",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1727,7 +1926,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "void",
                             "sortText": "getName",
                             "insertText": "getName()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "getName",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1744,7 +1943,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "void",
                             "sortText": "~getAttributes_DO_NOT_USE",
                             "insertText": "getAttributes_DO_NOT_USE()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "getAttributes_DO_NOT_USE",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1761,7 +1960,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "void",
                             "sortText": "~__getLoader",
                             "insertText": "__getLoader()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "__getLoader",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1808,8 +2007,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "(num $n)",
                             "itemType": "int",
                             "sortText": "$mylambda",
-                            "insertText": "$mylambda",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 30, "character": 17},
+                                    "end": {"line": 30, "character": 19},
+                                },
+                                "newText": "$mylambda",
+                            },
                             "data": {
                                 "fullname": "$mylambda",
                                 "filename": "${root_path}/completion.php",
@@ -1831,7 +2036,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "local variable",
                     "inlineDetail": "(num $n)",
                     "itemType": "int",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
                             "start": {"line": 30, "character": 17},
@@ -1851,7 +2056,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "local variable",
                     "inlineDetail": "(num $n)",
                     "itemType": "int",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
                             "start": {"line": 30, "character": 17},
@@ -1901,8 +2106,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "enum",
                             "inlineDetail": "enum",
                             "sortText": "MyEnum::TYPE_C",
-                            "insertText": "MyEnum::TYPE_C",
                             "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 36},
+                                    "end": {"line": 3, "character": 36},
+                                },
+                                "newText": "MyEnum::TYPE_C",
+                            },
                             "data": {
                                 "fullname": "MyEnum::TYPE_C",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -1918,7 +2129,13 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "enum",
                             "sortText": "MyEnum::TYPE_A",
                             "insertTextFormat": 1,
-                            "insertText": "MyEnum::TYPE_A",
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 36},
+                                    "end": {"line": 3, "character": 36},
+                                },
+                                "newText": "MyEnum::TYPE_A",
+                            },
                             "data": {
                                 "fullname": "MyEnum::TYPE_A",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -1934,7 +2151,13 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "enum",
                             "sortText": "MyEnum::TYPE_B",
                             "insertTextFormat": 1,
-                            "insertText": "MyEnum::TYPE_B",
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 36},
+                                    "end": {"line": 3, "character": 36},
+                                },
+                                "newText": "MyEnum::TYPE_B",
+                            },
                             "data": {
                                 "fullname": "MyEnum::TYPE_B",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -1975,48 +2198,72 @@ class TestLsp(TestCase[LspTestDriver]):
                     "isIncomplete": False,
                     "items": [
                         {
-                            "data": {"fullname": "string"},
+                            "label": "string",
+                            "kind": 25,
                             "detail": "builtin",
+                            "inlineDetail": "builtin",
                             "documentation": {
                                 "kind": "markdown",
                                 "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
                             },
-                            "inlineDetail": "builtin",
-                            "insertText": "string",
-                            "insertTextFormat": 1,
-                            "kind": 25,
-                            "label": "string",
                             "sortText": "string",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 5},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": "string",
+                            },
+                            "data": {"fullname": "string"},
                         },
                         {
-                            "data": {"fullname": "StringBuffer"},
+                            "label": "StringBuffer",
+                            "kind": 7,
                             "detail": "class",
                             "inlineDetail": "class",
-                            "insertText": "StringBuffer",
-                            "insertTextFormat": 1,
-                            "kind": 7,
-                            "label": "StringBuffer",
                             "sortText": "StringBuffer",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 5},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": "StringBuffer",
+                            },
+                            "data": {"fullname": "StringBuffer"},
                         },
                         {
-                            "data": {"fullname": "Stringish"},
-                            "detail": "interface",
-                            "inlineDetail": "interface",
-                            "insertText": "Stringish",
-                            "insertTextFormat": 1,
-                            "kind": 8,
                             "label": "Stringish",
-                            "sortText": "Stringish",
-                        },
-                        {
-                            "data": {"fullname": "StringishObject"},
+                            "kind": 8,
                             "detail": "interface",
                             "inlineDetail": "interface",
-                            "insertText": "StringishObject",
+                            "sortText": "Stringish",
                             "insertTextFormat": 1,
-                            "kind": 8,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 5},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": "Stringish",
+                            },
+                            "data": {"fullname": "Stringish"},
+                        },
+                        {
                             "label": "StringishObject",
+                            "kind": 8,
+                            "detail": "interface",
+                            "inlineDetail": "interface",
                             "sortText": "StringishObject",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 5},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": "StringishObject",
+                            },
+                            "data": {"fullname": "StringishObject"},
                         },
                     ],
                 },
@@ -2099,7 +2346,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="autocomplete after '$x = <'",
+                comment="autocomplete after '$x = <' legacy",
                 method="textDocument/completion",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -2114,8 +2361,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
-                            "insertText": "ab:cd:alpha",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 6},
+                                },
+                                "newText": "ab:cd:alpha",
+                            },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
@@ -2124,8 +2377,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:text",
-                            "insertText": "ab:cd:text",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 6},
+                                },
+                                "newText": "ab:cd:text",
+                            },
                             "data": {"fullname": ":ab:cd:text"},
                         },
                         {
@@ -2134,8 +2393,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "xhp:enum-attribute",
-                            "insertText": "xhp:enum-attribute",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 6},
+                                },
+                                "newText": "xhp:enum-attribute",
+                            },
                             "data": {"fullname": ":xhp:enum-attribute"},
                         },
                         {
@@ -2144,8 +2409,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "xhp:generic",
-                            "insertText": "xhp:generic",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 6},
+                                },
+                                "newText": "xhp:generic",
+                            },
                             "data": {"fullname": ":xhp:generic"},
                         },
                     ],
@@ -2185,8 +2456,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
-                            "insertText": "ab:cd:alpha",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 7},
+                                },
+                                "newText": "ab:cd:alpha",
+                            },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
@@ -2195,8 +2472,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:text",
-                            "insertText": "ab:cd:text",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 7},
+                                },
+                                "newText": "ab:cd:text",
+                            },
                             "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
@@ -2236,8 +2519,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
-                            "insertText": "ab:cd:alpha",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 9},
+                                },
+                                "newText": "ab:cd:alpha",
+                            },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
@@ -2246,8 +2535,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": "ab:cd:text",
-                            "insertText": "ab:cd:text",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 9},
+                                },
+                                "newText": "ab:cd:text",
+                            },
                             "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
@@ -2287,8 +2582,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": "width",
-                            "insertText": "width",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "width",
+                            },
                             "data": {
                                 "fullname": ":width",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -2303,8 +2604,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": "color",
-                            "insertText": "color",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "color",
+                            },
                             "data": {
                                 "fullname": ":color",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -2350,8 +2657,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": "width",
-                            "insertText": "width",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 18},
+                                },
+                                "newText": "width",
+                            },
                             "data": {
                                 "fullname": ":width",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -2366,8 +2679,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": "color",
-                            "insertText": "color",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 18},
+                                },
+                                "newText": "color",
+                            },
                             "data": {
                                 "fullname": ":color",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -2413,8 +2732,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
-                            "insertText": ":ab:cd:alpha",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": ":ab:cd:alpha",
+                            },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
@@ -2423,8 +2748,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
-                            "insertText": ":ab:cd:text",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": ":ab:cd:text",
+                            },
                             "data": {"fullname": ":ab:cd:text"},
                         },
                         {
@@ -2433,8 +2764,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":xhp:enum-attribute",
-                            "insertText": ":xhp:enum-attribute",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": ":xhp:enum-attribute",
+                            },
                             "data": {"fullname": ":xhp:enum-attribute"},
                         },
                         {
@@ -2443,8 +2780,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":xhp:generic",
-                            "insertText": ":xhp:generic",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": ":xhp:generic",
+                            },
                             "data": {"fullname": ":xhp:generic"},
                         },
                     ],
@@ -2484,8 +2827,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
-                            "insertText": ":ab:cd:alpha",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 11},
+                                },
+                                "newText": ":ab:cd:alpha",
+                            },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
@@ -2494,8 +2843,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "class",
                             "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
-                            "insertText": ":ab:cd:text",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 11},
+                                },
+                                "newText": ":ab:cd:text",
+                            },
                             "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
@@ -2514,7 +2869,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "inlineDetail": "class",
                     "itemType": ":ab:cd:alpha",
                     "insertText": ":ab:cd:alpha",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
                 },
                 result={
@@ -2528,7 +2883,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "value": ":ab:cd:alpha docblock",
                     },
                     "insertText": ":ab:cd:alpha",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
                 },
                 powered_by="serverless_ide",
@@ -2566,8 +2921,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": ":width",
-                            "insertText": ":width",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 29},
+                                },
+                                "newText": ":width",
+                            },
                             "data": {
                                 "fullname": ":width",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -2582,8 +2943,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": ":color",
-                            "insertText": ":color",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 29},
+                                },
+                                "newText": ":color",
+                            },
                             "data": {
                                 "fullname": ":color",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -2629,8 +2996,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": ":width",
-                            "insertText": ":width",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 30},
+                                },
+                                "newText": ":width",
+                            },
                             "data": {
                                 "fullname": ":width",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -2645,8 +3018,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": ":color",
-                            "insertText": ":color",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 30},
+                                },
+                                "newText": ":color",
+                            },
                             "data": {
                                 "fullname": ":color",
                                 "filename": "${root_path}/xhp_class_definitions.php",
@@ -2692,8 +3071,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "function",
                             "inlineDetail": "function",
                             "sortText": "test_function",
-                            "insertText": "test_function",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 0},
+                                    "end": {"line": 3, "character": 8},
+                                },
+                                "newText": "test_function",
+                            },
                             "data": {"fullname": "test_function"},
                         }
                     ],
@@ -2711,7 +3096,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "inlineDetail": "()",
                     "itemType": "void",
                     "insertText": "test_function",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "data": {
                         "filename": "${root_path}/completion.php",
                         "line": 8,
@@ -2729,7 +3114,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "value": "test_function docblock.",
                     },
                     "insertText": "test_function",
-                    "insertTextFormat": InsertTextFormat.PlainText.value,
+                    "insertTextFormat": 1,
                     "data": {
                         "filename": "${root_path}/completion.php",
                         "line": 8,
@@ -2798,8 +3183,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "classname<this>",
                             "inlineDetail": "classname<this>",
                             "sortText": "class",
-                            "insertText": "class",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "class",
+                            },
                             "data": {
                                 "fullname": "class",
                                 "filename": "${root_path}/completion_extras.php",
@@ -2814,8 +3205,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "Elsa",
                             "inlineDetail": "Elsa",
                             "sortText": "Bard",
-                            "insertText": "Bard",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "Bard",
+                            },
                             "data": {
                                 "fullname": "Bard",
                                 "filename": "${root_path}/completion_extras.php",
@@ -2830,8 +3227,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "Elsa",
                             "inlineDetail": "Elsa",
                             "sortText": "Alonso",
-                            "insertText": "Alonso",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "Alonso",
+                            },
                             "data": {
                                 "fullname": "Alonso",
                                 "filename": "${root_path}/completion_extras.php",
@@ -2848,7 +3251,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "bool",
                             "sortText": "isValid",
                             "insertText": "isValid(${1:\\$value})",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "isValid",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -2865,7 +3268,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "dict<string, Elsa>",
                             "sortText": "getValues",
                             "insertText": "getValues()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "getValues",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -2882,7 +3285,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "dict<Elsa, string>",
                             "sortText": "getNames",
                             "insertText": "getNames()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "getNames",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -2899,7 +3302,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "?Elsa",
                             "sortText": "coerce",
                             "insertText": "coerce(${1:\\$value})",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "coerce",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -2916,7 +3319,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "Container<Elsa>",
                             "sortText": "assertAll",
                             "insertText": "assertAll(${1:\\$values})",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "assertAll",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -2933,7 +3336,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "Elsa",
                             "sortText": "assert",
                             "insertText": "assert(${1:\\$value})",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "assert",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -3006,8 +3409,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "classname<this>",
                             "inlineDetail": "classname<this>",
                             "sortText": "class",
-                            "insertText": "class",
-                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "class",
+                            },
                             "data": {
                                 "fullname": "class",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3024,7 +3433,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "void",
                             "sortText": "~test_do_not_use",
                             "insertText": "test_do_not_use()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "test_do_not_use",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3041,7 +3450,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "void",
                             "sortText": "getName",
                             "insertText": "getName()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "getName",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3058,7 +3467,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "void",
                             "sortText": "~getAttributes_DO_NOT_USE",
                             "insertText": "getAttributes_DO_NOT_USE()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "getAttributes_DO_NOT_USE",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3075,7 +3484,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "itemType": "void",
                             "sortText": "~__getLoader",
                             "insertText": "__getLoader()",
-                            "insertTextFormat": InsertTextFormat.Snippet.value,
+                            "insertTextFormat": 2,
                             "data": {
                                 "fullname": "__getLoader",
                                 "filename": "${root_path}/completion_extras.php",

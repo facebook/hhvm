@@ -376,7 +376,6 @@ module Initialize = struct
     | Verbose
 
   and initializationOptions = {
-    useTextEditAutocomplete: bool;
     namingTableSavedStatePath: string option;
     namingTableSavedStateTestDelay: float;
     delayUntilDoneInit: bool;

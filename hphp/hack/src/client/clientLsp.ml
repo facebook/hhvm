@@ -2463,11 +2463,8 @@ let make_ide_completion_response
   let hack_to_insert (completion : complete_autocomplete_result) :
       [ `InsertText of string | `TextEdit of TextEdit.t list ]
       * Completion.insertTextFormat =
-    let use_textedits =
-      Initialize.(p.initializationOptions.useTextEditAutocomplete)
-    in
-    match (completion.func_details, use_textedits) with
-    | (Some details, _)
+    match completion.func_details with
+    | Some details
       when Lsp_helpers.supports_snippets p
            && (not is_caret_followed_by_lparen)
            && not
@@ -2482,8 +2479,7 @@ let make_ide_completion_response
       let params = String.concat ~sep:", " (List.mapi details.params ~f) in
       ( `InsertText (Printf.sprintf "%s(%s)" completion.res_name params),
         SnippetFormat )
-    | (_, false) -> (`InsertText completion.res_name, PlainText)
-    | (_, true) ->
+    | _ ->
       ( `TextEdit
           [
             TextEdit.

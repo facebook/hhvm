@@ -242,11 +242,6 @@ module Initialize : sig
   (** These are hack-specific options. They're all optional in initialize request,
   and we pick a default if necessary while parsing. *)
   and initializationOptions = {
-    useTextEditAutocomplete: bool;
-        (** LSP recommends that we send autocomplete as TextEdits. Our
-        main client (VSCode) sends this parameter set to true. I can't imagine
-        why anyone would want it false. Maybe there are some clients (vim? emacs?)
-        which aren't yet ready to have TextEdit autocompletes? *)
     namingTableSavedStatePath: string option;
         (** used for test scenarios where we pass a naming-table sqlite file,
         rather than leaving clientIdeDaemon to find and download one itself. *)

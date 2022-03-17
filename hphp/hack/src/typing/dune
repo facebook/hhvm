@@ -89,8 +89,8 @@
 (library
  (name nast_visitor)
  (wrapped false)
- (modules nast_check_env nast_visitor stateful_aast_visitor)
- (libraries nast provider_context)
+ (modules nast_check_env nast_visitor stateful_aast_visitor )
+ (libraries nast provider_context naming_attributes_params)
  (preprocess
   (pps ppx_deriving.std)))
 

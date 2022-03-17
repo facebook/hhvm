@@ -111,6 +111,7 @@ type t =
       vis: Ast_defs.visibility;
     }
   | Private_and_final of Pos.t
+  | Internal_outside_module of Pos.t
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.NastCheck

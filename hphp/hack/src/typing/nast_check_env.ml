@@ -25,6 +25,7 @@ type env = {
   is_finally: bool;
   control_context: control_context;
   array_append_allowed: bool;
+  module_: Ast_defs.id option;
 }
 
 let get_tcopt env = Provider_context.get_tcopt env.ctx
@@ -36,7 +37,13 @@ let fun_env env f =
     function_kind = Some f.f_fun_kind;
   }
 
-let fun_def_env env fd = { (fun_env env fd.fd_fun) with file_mode = fd.fd_mode }
+let fun_def_env env fd =
+  {
+    (fun_env env fd.fd_fun) with
+    file_mode = fd.fd_mode;
+    module_ =
+      Naming_attributes_params.get_module_attribute fd.fd_file_attributes;
+  }
 
 let method_env env m =
   {
@@ -51,9 +58,15 @@ let class_env env c =
     classish_kind = Some c.c_kind;
     class_name = Some (snd c.c_name);
     file_mode = c.c_mode;
+    module_ = Naming_attributes_params.get_module_attribute c.c_file_attributes;
   }
 
-let typedef_env env t = { env with file_mode = t.t_mode }
+let typedef_env env t =
+  {
+    env with
+    file_mode = t.t_mode;
+    module_ = Naming_attributes_params.get_module_attribute t.t_file_attributes;
+  }
 
 let get_empty_env ctx =
   {
@@ -66,6 +79,7 @@ let get_empty_env ctx =
     is_finally = false;
     control_context = Toplevel;
     array_append_allowed = false;
+    module_ = None;
   }
 
 let def_env ctx x =

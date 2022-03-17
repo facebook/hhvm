@@ -640,24 +640,42 @@ let update_hh_server_state_if_necessary (event : event) : unit =
   | _ -> ()
 
 (** This cancellable async function will block indefinitely until a notification is
-available from ide_service. *)
+available from ide_service, and return. If there's no ide_service then it awaits indefinitely. *)
 let pop_from_ide_service (ide_service : ClientIdeService.t ref option) :
     event Lwt.t =
   match ide_service with
-  | None -> Lwt.wait () |> fst (* a never-fulfilled promise *)
+  | None -> Lwt.task () |> fst (* a never-fulfilled, cancellable promise *)
   | Some ide_service ->
     let%lwt notification_opt =
       Lwt_message_queue.pop (ClientIdeService.get_notifications !ide_service)
     in
     (match notification_opt with
-    | None -> Lwt.wait () |> fst (* a never-fulfilled promise *)
+    | None -> Lwt.task () |> fst (* a never-fulfilled, cancellable promise *)
     | Some notification -> Lwt.return (Client_ide_notification notification))
+
+(** This cancellable async function will block indefinitely until
+data is available from the server, but won't read from it. *)
+let wait_until_server_has_data (server : server_conn) : unit Lwt.t =
+  let fd = Unix.descr_of_out_channel server.oc |> Lwt_unix.of_unix_file_descr in
+  let%lwt () = Lwt_unix.wait_read fd in
+  Lwt.return_unit
+
+(** This cancellable async function will block indefinitely until data is
+available from the client, but won't read from it. If there's no client
+then it awaits indefinitely. *)
+let wait_until_client_has_data (client : Jsonrpc.t option) : unit Lwt.t =
+  match client with
+  | None -> Lwt.task () |> fst (* a never-fulfilled, cancellable promise *)
+  | Some client ->
+    let fd = Jsonrpc.get_read_fd client |> Lwt_unix.of_unix_file_descr in
+    let%lwt () = Lwt_unix.wait_read fd in
+    Lwt.return_unit
 
 (** Determine whether to read a message from the client (the editor) or the
 server (hh_server), or whether neither is ready within 1s. *)
 let get_message_source
     (server : server_conn)
-    (client : Jsonrpc.t)
+    (client : Jsonrpc.t option)
     (ide_service : ClientIdeService.t ref option) :
     [ `From_server | `From_client | `From_ide_service of event | `No_source ]
     Lwt.t =
@@ -668,24 +686,18 @@ let get_message_source
   let has_server_messages = not (Queue.is_empty server.pending_messages) in
   if has_server_messages then
     Lwt.return `From_server
-  else if Jsonrpc.has_message client then
+  else if Option.value_map client ~default:false ~f:Jsonrpc.has_message then
     Lwt.return `From_client
   else
     (* If no immediate messages are available, then wait up to 1 second. *)
-    let server_read_fd =
-      Unix.descr_of_out_channel server.oc |> Lwt_unix.of_unix_file_descr
-    in
-    let client_read_fd =
-      Jsonrpc.get_read_fd client |> Lwt_unix.of_unix_file_descr
-    in
     let%lwt message_source =
       Lwt.pick
         [
           (let%lwt () = Lwt_unix.sleep 1.0 in
            Lwt.return `No_source);
-          (let%lwt () = Lwt_unix.wait_read server_read_fd in
+          (let%lwt () = wait_until_server_has_data server in
            Lwt.return `From_server);
-          (let%lwt () = Lwt_unix.wait_read client_read_fd in
+          (let%lwt () = wait_until_client_has_data client in
            Lwt.return `From_client);
           (let%lwt notification = pop_from_ide_service ide_service in
            Lwt.return (`From_ide_service notification));
@@ -695,20 +707,17 @@ let get_message_source
 
 (** A simplified version of get_message_source which only looks at client *)
 let get_client_message_source
-    (client : Jsonrpc.t) (ide_service : ClientIdeService.t ref option) :
+    (client : Jsonrpc.t option) (ide_service : ClientIdeService.t ref option) :
     [ `From_client | `From_ide_service of event | `No_source ] Lwt.t =
-  if Jsonrpc.has_message client then
+  if Option.value_map client ~default:false ~f:Jsonrpc.has_message then
     Lwt.return `From_client
   else
-    let client_read_fd =
-      Jsonrpc.get_read_fd client |> Lwt_unix.of_unix_file_descr
-    in
     let%lwt message_source =
       Lwt.pick
         [
           (let%lwt () = Lwt_unix.sleep 1.0 in
            Lwt.return `No_source);
-          (let%lwt () = Lwt_unix.wait_read client_read_fd in
+          (let%lwt () = wait_until_client_has_data client in
            Lwt.return `From_client);
           (let%lwt notification = pop_from_ide_service ide_service in
            Lwt.return (`From_ide_service notification));
@@ -748,6 +757,8 @@ let get_next_event
     (state : state)
     (client : Jsonrpc.t)
     (ide_service : ClientIdeService.t ref option) : event Lwt.t =
+  let can_use_client = true in
+  let client = Option.some_if can_use_client client in
   let from_server (server : server_conn) : event Lwt.t =
     if Queue.is_empty server.pending_messages then
       read_message_from_server server
@@ -789,18 +800,20 @@ let get_next_event
     let%lwt message_source = get_message_source conn client ide_service in
     (match message_source with
     | `From_client ->
-      let%lwt message = from_client client in
+      let%lwt message = from_client (Option.value_exn client) in
       Lwt.return message
     | `From_server ->
       let%lwt message = from_server conn in
       Lwt.return message
     | `From_ide_service message -> Lwt.return message
     | `No_source -> Lwt.return Tick)
-  | _ ->
+  | Pre_init
+  | Lost_server _
+  | Post_shutdown ->
     let%lwt message_source = get_client_message_source client ide_service in
     (match message_source with
     | `From_client ->
-      let%lwt message = from_client client in
+      let%lwt message = from_client (Option.value_exn client) in
       Lwt.return message
     | `From_ide_service message -> Lwt.return message
     | `No_source -> Lwt.return Tick)

@@ -138,7 +138,7 @@ let constructor_is_consistent kind =
 (*****************************************************************************)
 
 (* Rules for visibility *)
-let check_visibility parent_vis c_vis parent_pos pos on_error =
+let check_visibility env parent_vis c_vis parent_pos pos on_error =
   match (parent_vis, c_vis) with
   | (Vprivate _, _) ->
     (* The only time this case should come into play is when the
@@ -159,6 +159,7 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
     let err_opt =
       match
         Typing_modules.can_access
+          ~env
           ~current:(Some child_m)
           ~target:(Some parent_m)
       with
@@ -176,6 +177,28 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
         Some
           (Typing_error.Secondary.Visibility_override_internal
              { pos; module_name = None; parent_pos; parent_module = target })
+      (* TODO(T109499403) This case *is* possible, but because it refers to
+       * class members in traits, any code that runs afoul of this rule will
+       * also violate the nast check requiring that any trait member in a
+       * non-internal trait must also be non-internal. I can't even figure out
+       * a test case where this also doesn't violate _other_ rules about
+       * referencing internal symbols in modules, e.g.:
+       *
+       * <<__Internal>>
+       * trait Quuz {
+       *   <<__Internal>> public function lol(): void {}
+       * }
+       *
+       * trait Corge {
+       *   use Quuz;
+       *   <<__Internal>> public function lol(): void {}
+       * }
+       *
+       * This code snippet alone raises two errors. One for `use Quuz`,
+       * and one for `Corge::lol`.
+       *
+       *)
+      | `OutsideViaTrait _ -> None
     in
     Option.iter err_opt ~f:(fun err ->
         Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err))
@@ -188,12 +211,12 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
     in
     Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err)
 
-let check_class_elt_visibility parent_class_elt class_elt on_error =
+let check_class_elt_visibility env parent_class_elt class_elt on_error =
   let parent_vis = parent_class_elt.ce_visibility in
   let c_vis = class_elt.ce_visibility in
   let (lazy parent_pos) = parent_class_elt.ce_pos in
   let (lazy pos) = class_elt.ce_pos in
-  check_visibility parent_vis c_vis parent_pos pos on_error
+  check_visibility env parent_vis c_vis parent_pos pos on_error
 
 let stub_meth_quickfix
     ~(class_name : string)
@@ -552,7 +575,7 @@ let check_override
     on_error;
   check_lateinit parent_class_elt class_elt on_error;
   check_xhp_attr_required env parent_class_elt class_elt on_error;
-  check_class_elt_visibility parent_class_elt class_elt on_error;
+  check_class_elt_visibility env parent_class_elt class_elt on_error;
   check_prop_const_mismatch parent_class_elt class_elt on_error;
   check_abstract_overrides_concrete env member_kind parent_class_elt class_elt;
 
@@ -1118,7 +1141,7 @@ let check_constructors env parent_class class_ psubst on_error =
       | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> ()
       | (Some parent_cstr, Some child_cstr) ->
         check_override_final_method parent_cstr child_cstr on_error;
-        check_class_elt_visibility parent_cstr child_cstr on_error
+        check_class_elt_visibility env parent_cstr child_cstr on_error
       | (_, _) -> ()
     end;
     env

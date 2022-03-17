@@ -1405,6 +1405,10 @@ module Primary = struct
           decl_pos: Pos_or_decl.t;
           target_module: string;
         }
+      | Module_unsafe_trait_access of {
+          access_pos: Pos.t;
+          trait_pos: Pos_or_decl.t;
+        }
 
     let module_hint pos decl_pos =
       let claim = lazy (pos, "You cannot use this type in a public declaration.")
@@ -1427,10 +1431,25 @@ module Primary = struct
       in
       (Error_code.ModuleError, claim, reason, [])
 
+    let module_unsafe_trait_access access_pos trait_pos =
+      ( Error_code.ModuleError,
+        lazy
+          ( access_pos,
+            "Cannot access `internal` members inside a non-internal trait" ),
+        lazy
+          [
+            ( trait_pos,
+              "This trait must be made `internal` to access other internal members"
+            );
+          ],
+        [] )
+
     let to_error : t -> error = function
       | Module_hint { pos; decl_pos } -> module_hint pos decl_pos
       | Module_mismatch { pos; current_module_opt; decl_pos; target_module } ->
         module_mismatch pos current_module_opt decl_pos target_module
+      | Module_unsafe_trait_access { access_pos; trait_pos } ->
+        module_unsafe_trait_access access_pos trait_pos
   end
 
   module Xhp = struct

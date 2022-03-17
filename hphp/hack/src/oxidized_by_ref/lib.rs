@@ -9,6 +9,7 @@ pub use manual::ast;
 pub use manual::blame_set;
 pub use manual::decl_counters;
 pub use manual::decl_env;
+pub use manual::decl_provider;
 pub use manual::direct_decl_parser;
 pub use manual::doc_comment;
 pub use manual::i_map;
@@ -32,6 +33,7 @@ pub use manual::t_shape_map;
 pub use manual::tany_sentinel;
 pub use manual::typing_continuations;
 pub use manual::typing_defs_flags;
+pub use manual::typing_env;
 pub use manual::typing_logic;
 pub use manual::typing_set;
 

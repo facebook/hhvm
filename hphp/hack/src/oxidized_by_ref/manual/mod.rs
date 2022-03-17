@@ -7,6 +7,7 @@ pub mod ast;
 pub mod blame_set;
 pub mod decl_counters;
 pub mod decl_env;
+pub mod decl_provider;
 pub mod direct_decl_parser;
 pub mod doc_comment;
 pub mod i_map;
@@ -30,6 +31,7 @@ pub mod t_shape_map;
 pub mod tany_sentinel;
 pub mod typing_continuations;
 pub mod typing_defs_flags;
+pub mod typing_env;
 pub mod typing_logic;
 pub mod typing_set;
 

@@ -1114,6 +1114,7 @@ let fun_type_of_id env x tal el =
         if fe_internal then
           match
             Typing_modules.can_access
+              ~env
               ~current:(Env.get_module env)
               ~target:(Option.map fe_module ~f:snd)
           with
@@ -1136,6 +1137,8 @@ let fun_type_of_id env x tal el =
                    current_module_opt = None;
                    target_module = target;
                  })
+          | `OutsideViaTrait trait_pos ->
+            Some (Module_unsafe_trait_access { access_pos = fst x; trait_pos })
         else
           None
       in

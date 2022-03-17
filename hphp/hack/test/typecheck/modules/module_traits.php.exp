@@ -7,9 +7,9 @@ You cannot make this trait member `internal` (NastCheck[3099])
   File "module_traits.php--A.php", line 8, characters 7-8:
   Only `internal` traits can have `internal` members
 File "module_traits.php--A.php", line 28, characters 21-21:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "module_traits.php--A.php", line 25, characters 7-7:
-  It is declared as `internal` here
+Cannot access `internal` members inside a non-internal trait (Typing[4444])
+  File "module_traits.php--A.php", line 27, characters 7-8:
+  This trait must be made `internal` to access other internal members
 File "module_traits.php--B.php", line 6, characters 7-8:
 Cannot access an internal element from module `A` in module `B` (Typing[4444])
   File "module_traits.php--A.php", line 6, characters 7-8:

@@ -340,6 +340,10 @@ module Primary : sig
           decl_pos: Pos_or_decl.t;
           target_module: string;
         }
+      | Module_unsafe_trait_access of {
+          access_pos: Pos.t;
+          trait_pos: Pos_or_decl.t;
+        }
   end
 
   module Xhp : sig

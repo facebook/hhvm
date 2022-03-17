@@ -528,29 +528,38 @@ let naming_from_saved_state
       (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
          any dirty files to make sure we properly handle file deletes. *)
       Relative_path.Set.iter parsing_files ~f:(fun k ->
+          let open FileInfo in
           match Naming_table.get_file_info old_naming_table k with
           | None ->
             (* If we can't find the file in [old_naming_table] we don't consider that an error, since
              * it could be a new file that was added. *)
             ()
-          | Some v ->
+          | Some
+              {
+                hash = _;
+                file_mode = _;
+                funs;
+                classes;
+                typedefs;
+                consts;
+                modules;
+                comments = _;
+              } ->
             let backend = Provider_context.get_backend ctx in
             let snd (_, x, _) = x in
             Naming_provider.remove_type_batch
               backend
-              (v.FileInfo.classes |> List.map ~f:snd);
+              (classes |> List.map ~f:snd);
             Naming_provider.remove_type_batch
               backend
-              (v.FileInfo.typedefs |> List.map ~f:snd);
-            Naming_provider.remove_fun_batch
-              backend
-              (v.FileInfo.funs |> List.map ~f:snd);
+              (typedefs |> List.map ~f:snd);
+            Naming_provider.remove_fun_batch backend (funs |> List.map ~f:snd);
             Naming_provider.remove_const_batch
               backend
-              (v.FileInfo.consts |> List.map ~f:snd);
+              (consts |> List.map ~f:snd);
             Naming_provider.remove_module_batch
               backend
-              (v.FileInfo.modules |> List.map ~f:snd))
+              (modules |> List.map ~f:snd))
     | None ->
       (* Name all the files from the old naming-table (except the new ones we parsed since
          they'll be named by our caller, next). We assume the old naming-table came from a clean

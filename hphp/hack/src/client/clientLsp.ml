@@ -3822,7 +3822,11 @@ let long_timeout = 15.0
 let cancel_if_stale (client : Jsonrpc.t) (timestamp : float) (timeout : float) :
     unit Lwt.t =
   let time_elapsed = Unix.gettimeofday () -. timestamp in
-  if Float.(time_elapsed >= timeout) && Jsonrpc.has_message client then
+  if
+    Float.(time_elapsed >= timeout)
+    && Jsonrpc.has_message client
+    && not (Sys_utils.deterministic_behavior_for_tests ())
+  then
     raise
       (Error.LspException
          {

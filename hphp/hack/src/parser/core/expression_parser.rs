@@ -325,8 +325,7 @@ where
             | TokenKind::BooleanLiteral
             | TokenKind::NullLiteral => {
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
-                S!(make_literal_expression, self, token)
+                self.parse_null(token)
             }
             TokenKind::HeredocStringLiteral => {
                 // We have a heredoc string literal but it might contain embedded
@@ -341,8 +340,7 @@ where
             TokenKind::Variable => self.parse_variable_or_lambda(),
             TokenKind::XHPClassName => {
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
-                self.parse_name_or_collection_literal_expression(token)
+                self.parse_xhp_class_name(token)
             }
             TokenKind::Name => {
                 self.continue_from(parser1);
@@ -350,11 +348,7 @@ where
             }
             TokenKind::Backslash => {
                 self.continue_from(parser1);
-                let missing = S!(make_missing, self, self.pos());
-                let backslash = S!(make_token, self, token);
-
-                let qualified_name = self.scan_qualified_name(missing, backslash);
-                self.parse_name_or_collection_literal_expression(qualified_name)
+                self.parse_backslash(token)
             }
             TokenKind::SelfToken | TokenKind::Parent => self.parse_scope_resolution_or_name(),
             TokenKind::Static => self.parse_anon_or_awaitable_or_scope_resolution_or_name(),
@@ -386,14 +380,10 @@ where
             TokenKind::Keyset => self.parse_keyset_intrinsic_expression(),
             TokenKind::Tuple => self.parse_tuple_expression(),
             TokenKind::Shape => self.parse_shape_expression(),
-            TokenKind::Function => {
-                let attribute_spec = S!(make_missing, self, self.pos());
-                self.parse_anon(attribute_spec)
-            }
+            TokenKind::Function => self.parse_function(),
             TokenKind::DollarDollar => {
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
-                S!(make_pipe_variable_expression, self, token)
+                self.parse_dollar_dollar(token)
             }
             // LessThanLessThan start attribute spec that is allowed on anonymous
             // functions or lambdas
@@ -408,20 +398,54 @@ where
             TokenKind::Isset => self.parse_isset_expression(),
             TokenKind::Eval => self.parse_eval_expression(),
             TokenKind::Hash => self.parse_enum_class_label(),
-            TokenKind::Empty => {
-                self.with_error(Errors::empty_expression_illegal);
-                let token = self.next_token_non_reserved_as_name();
-                S!(make_token, self, token)
-            }
+            TokenKind::Empty => self.parse_empty(),
             kind if self.expects(kind) => {
                 // ERROR RECOVERY: if we've prematurely found a token we're expecting
                 // later, mark the expression missing, throw an error, and do not advance
                 // the parser.
-                self.with_error(Errors::error1015);
-                S!(make_missing, self, self.pos())
+                self.parse_error1015()
             }
             _ => self.parse_as_name_or_error(),
         }
+    }
+
+    fn parse_null(&mut self, token: Token<S>) -> S::R {
+        let token = S!(make_token, self, token);
+        S!(make_literal_expression, self, token)
+    }
+
+    fn parse_xhp_class_name(&mut self, token: Token<S>) -> S::R {
+        let token = S!(make_token, self, token);
+        self.parse_name_or_collection_literal_expression(token)
+    }
+
+    fn parse_backslash(&mut self, token: Token<S>) -> S::R {
+        let missing = S!(make_missing, self, self.pos());
+        let backslash = S!(make_token, self, token);
+
+        let qualified_name = self.scan_qualified_name(missing, backslash);
+        self.parse_name_or_collection_literal_expression(qualified_name)
+    }
+
+    fn parse_function(&mut self) -> S::R {
+        let attribute_spec = S!(make_missing, self, self.pos());
+        self.parse_anon(attribute_spec)
+    }
+
+    fn parse_dollar_dollar(&mut self, token: Token<S>) -> S::R {
+        let token = S!(make_token, self, token);
+        S!(make_pipe_variable_expression, self, token)
+    }
+
+    fn parse_empty(&mut self) -> S::R {
+        self.with_error(Errors::empty_expression_illegal);
+        let token = self.next_token_non_reserved_as_name();
+        S!(make_token, self, token)
+    }
+
+    fn parse_error1015(&mut self) -> S::R {
+        self.with_error(Errors::error1015);
+        S!(make_missing, self, self.pos())
     }
 
     fn parse_name(&mut self, token: Token<S>) -> S::R {

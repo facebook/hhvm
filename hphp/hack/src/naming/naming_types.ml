@@ -15,6 +15,7 @@ type name_kind =
   | Type_kind of kind_of_type
   | Fun_kind
   | Const_kind
+  | Module_kind
 [@@deriving show, eq]
 
 let type_kind_to_name_type (kind_of_type : kind_of_type) : FileInfo.name_type =
@@ -27,6 +28,7 @@ let name_kind_to_name_type (name_kind : name_kind) : FileInfo.name_type =
   | Type_kind type_kind -> type_kind_to_name_type type_kind
   | Fun_kind -> FileInfo.Fun
   | Const_kind -> FileInfo.Const
+  | Module_kind -> FileInfo.Module
 
 let name_kind_of_name_type (name_type : FileInfo.name_type) : name_kind =
   match name_type with
@@ -34,6 +36,7 @@ let name_kind_of_name_type (name_type : FileInfo.name_type) : name_kind =
   | FileInfo.Typedef -> Type_kind TTypedef
   | FileInfo.Fun -> Fun_kind
   | FileInfo.Const -> Const_kind
+  | FileInfo.Module -> Module_kind
 
 let type_kind_of_name_type (name_type : FileInfo.name_type) :
     kind_of_type option =
@@ -41,7 +44,8 @@ let type_kind_of_name_type (name_type : FileInfo.name_type) :
   | FileInfo.Class -> Some TClass
   | FileInfo.Typedef -> Some TTypedef
   | FileInfo.Fun
-  | FileInfo.Const ->
+  | FileInfo.Const
+  | FileInfo.Module ->
     None
 
 let name_kind_to_enum (name_kind : name_kind) : int =

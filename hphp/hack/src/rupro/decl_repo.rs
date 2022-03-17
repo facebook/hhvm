@@ -170,6 +170,7 @@ fn make_shallow_cache<R: Reason>(opts: &CliOptions) -> ShallowDeclCache<R> {
             Arc::new(SerializingCache::with_compression(opts.compression)), // types
             Box::new(SerializingCache::with_compression(opts.compression)), // funs
             Box::new(SerializingCache::with_compression(opts.compression)), // consts
+            Box::new(SerializingCache::with_compression(opts.compression)), // modules
             Box::new(SerializingCache::with_compression(opts.compression)), // properties
             Box::new(SerializingCache::with_compression(opts.compression)), // static_properties
             Box::new(SerializingCache::with_compression(opts.compression)), // methods
@@ -179,6 +180,7 @@ fn make_shallow_cache<R: Reason>(opts: &CliOptions) -> ShallowDeclCache<R> {
     } else {
         ShallowDeclCache::with_no_member_caches(
             Arc::new(NonEvictingCache::default()),
+            Box::new(NonEvictingCache::default()),
             Box::new(NonEvictingCache::default()),
             Box::new(NonEvictingCache::default()),
         )

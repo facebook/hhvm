@@ -164,7 +164,9 @@ let process_file
     { file_errors; deferred_decls = [] }
   else
     let opts = Provider_context.get_tcopt ctx in
-    let (funs, classes, typedefs, gconsts) = Nast.get_defs ast in
+    let (funs, classes, typedefs, gconsts, (* TODO(T98356219) *) _modules) =
+      Nast.get_defs ast
+    in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
     let ignore_check_typedef opts fn name =
       ignore (check_typedef opts fn name)

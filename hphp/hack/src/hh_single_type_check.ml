@@ -1176,13 +1176,14 @@ let parse_and_name ctx files_contents =
         let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
         (* If the feature is turned on, deregister functions with attribute
            __PHPStdLib. This does it for all functions, not just hhi files *)
-        let (funs, classes, typedefs, consts) = Nast.get_defs ast in
+        let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
         {
           FileInfo.file_mode;
           funs;
           classes;
           typedefs;
           consts;
+          modules;
           comments = Some comments;
           hash = None;
         })
@@ -2596,7 +2597,8 @@ let decl_and_run_mode
                 ~funs:(ids_to_strings file_info.FileInfo.funs)
                 ~classes:(ids_to_strings file_info.FileInfo.classes)
                 ~typedefs:(ids_to_strings file_info.FileInfo.typedefs)
-                ~consts:(ids_to_strings file_info.FileInfo.consts))));
+                ~consts:(ids_to_strings file_info.FileInfo.consts)
+                ~modules:(ids_to_strings file_info.FileInfo.modules))));
 
   let (errors, files_info) = parse_name_and_decl ctx to_decl in
   handle_mode

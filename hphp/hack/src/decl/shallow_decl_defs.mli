@@ -181,4 +181,5 @@ type decl =
   | Fun of fun_decl
   | Typedef of typedef_decl
   | Const of const_decl
+  | Module of module_decl
 [@@deriving show]

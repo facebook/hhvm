@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<87a4454c21e490aa135bbc8c54679ecb>>
+// @generated SignedSource<<ebd7a3a41cd7ff39793f2466615cbcad>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -85,6 +85,8 @@ pub struct SavedNames<'a> {
     pub types: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub consts: s_set::SSet<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub modules: s_set::SSet<'a>,
 }
 impl<'a> TrivialDrop for SavedNames<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(SavedNames<'arena>);
@@ -121,6 +123,10 @@ pub struct Diff<'a> {
     pub removed_consts: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub added_consts: s_set::SSet<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub removed_modules: s_set::SSet<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub added_modules: s_set::SSet<'a>,
 }
 impl<'a> TrivialDrop for Diff<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Diff<'arena>);

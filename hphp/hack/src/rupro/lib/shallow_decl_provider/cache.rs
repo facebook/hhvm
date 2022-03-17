@@ -5,9 +5,11 @@
 
 use super::TypeDecl;
 use crate::cache::Cache;
-use crate::decl_defs::{shallow::Decl, ConstDecl, DeclTy, FunDecl, ShallowClass, TypedefDecl};
+use crate::decl_defs::{
+    shallow::Decl, shallow::ModuleDecl, ConstDecl, DeclTy, FunDecl, ShallowClass, TypedefDecl,
+};
 use crate::reason::Reason;
-use pos::{ConstName, FunName, MethodName, PropName, TypeName};
+use pos::{ConstName, FunName, MethodName, ModuleName, PropName, TypeName};
 use std::sync::Arc;
 
 /// A cache for shallow declarations (i.e., the information we get from
@@ -24,6 +26,7 @@ pub struct ShallowDeclCache<R: Reason> {
     types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
     funs: Box<dyn Cache<FunName, Arc<FunDecl<R>>>>,
     consts: Box<dyn Cache<ConstName, Arc<ConstDecl<R>>>>,
+    modules: Box<dyn Cache<ModuleName, Arc<ModuleDecl<R>>>>,
 
     // The below tables are intended to be index tables for information stored
     // in the `types` table (the underlying data is shared via the `Hc` in
@@ -41,6 +44,7 @@ impl<R: Reason> ShallowDeclCache<R> {
         types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
         funs: Box<dyn Cache<FunName, Arc<FunDecl<R>>>>,
         consts: Box<dyn Cache<ConstName, Arc<ConstDecl<R>>>>,
+        modules: Box<dyn Cache<ModuleName, Arc<ModuleDecl<R>>>>,
         properties: Box<dyn Cache<(TypeName, PropName), DeclTy<R>>>,
         static_properties: Box<dyn Cache<(TypeName, PropName), DeclTy<R>>>,
         methods: Box<dyn Cache<(TypeName, MethodName), DeclTy<R>>>,
@@ -51,6 +55,7 @@ impl<R: Reason> ShallowDeclCache<R> {
             types,
             funs,
             consts,
+            modules,
             properties,
             static_properties,
             methods,
@@ -69,6 +74,7 @@ impl<R: Reason> ShallowDeclCache<R> {
         types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
         funs: Box<dyn Cache<FunName, Arc<FunDecl<R>>>>,
         consts: Box<dyn Cache<ConstName, Arc<ConstDecl<R>>>>,
+        modules: Box<dyn Cache<ModuleName, Arc<ModuleDecl<R>>>>,
     ) -> Self {
         Self {
             properties: Box::new(PropFinder {
@@ -90,6 +96,7 @@ impl<R: Reason> ShallowDeclCache<R> {
             types,
             funs,
             consts,
+            modules,
         }
     }
 
@@ -102,6 +109,7 @@ impl<R: Reason> ShallowDeclCache<R> {
                     self.types.insert(name, TypeDecl::Typedef(Arc::new(decl)))
                 }
                 Decl::Const(name, decl) => self.consts.insert(name, Arc::new(decl)),
+                Decl::Module(name, decl) => self.modules.insert(name, Arc::new(decl)),
             }
         }
     }

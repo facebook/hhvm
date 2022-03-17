@@ -131,6 +131,20 @@ let compute_gconsts_deps
   ((changed, to_redecl, to_recheck), old_gconsts_missing)
 
 (*****************************************************************************)
+(* Whatever we need to do for modules, here *)
+(*****************************************************************************)
+
+let compute_module_deps
+    ctx old_modules new_modules (changed, to_redecl, to_recheck) modules =
+  let ((rc, rdd, rdc), old_modules_missing) =
+    Decl_compare.get_module_deps ~ctx ~old_modules ~new_modules ~modules
+  in
+  let changed = DepSet.union rc changed in
+  let to_redecl = DepSet.union rdd to_redecl in
+  let to_recheck = DepSet.union rdc to_recheck in
+  ((changed, to_redecl, to_recheck), old_modules_missing)
+
+(*****************************************************************************)
 (* Redeclares a list of files
  * And then computes the files that must be redeclared/rechecked by looking
  * at what changed in the signatures of the classes/functions.
@@ -154,7 +168,7 @@ let compute_deps ctx fast (filel : Relative_path.t list) =
   let names =
     List.fold_left infol ~f:FileInfo.merge_names ~init:FileInfo.empty_names
   in
-  let { FileInfo.n_classes; n_funs; n_types; n_consts } = names in
+  let { FileInfo.n_classes; n_funs; n_types; n_consts; n_modules } = names in
   let empty = DepSet.make () in
   let acc = (empty, empty, empty) in
   (* Fetching everything at once is faster *)
@@ -176,11 +190,18 @@ let compute_deps ctx fast (filel : Relative_path.t list) =
       compute_classes_deps ctx old_classes new_classes acc n_classes
   in
 
+  let (acc, old_modules_missing) =
+    let old_modules = Decl_heap.Modules.get_old_batch n_modules in
+    let new_modules = Decl_heap.Modules.get_batch n_modules in
+    compute_module_deps ctx old_modules new_modules acc n_modules
+  in
+
   let old_decl_missing_count =
     old_funs_missing
     + old_types_missing
     + old_gconsts_missing
     + old_classes_missing
+    + old_modules_missing
   in
   let (changed, to_redecl, to_recheck) = acc in
   ((changed, to_redecl, to_recheck), old_decl_missing_count)
@@ -317,7 +338,7 @@ let parallel_on_the_fly_decl
 (*****************************************************************************)
 let oldify_defs
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_types; n_consts }
+    { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
   Decl_heap.Funs.oldify_batch n_funs;
@@ -326,12 +347,13 @@ let oldify_defs
   Shallow_classes_provider.oldify_batch ctx n_classes;
   Decl_heap.Typedefs.oldify_batch n_types;
   Decl_heap.GConsts.oldify_batch n_consts;
+  Decl_heap.Modules.oldify_batch n_modules;
   if collect_garbage then SharedMem.GC.collect `gentle;
   ()
 
 let remove_old_defs
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_types; n_consts }
+    { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
     (elems : Decl_class_elements.t SMap.t) : unit =
   Decl_heap.Funs.remove_old_batch n_funs;
   Decl_class_elements.remove_old_all elems;
@@ -339,12 +361,13 @@ let remove_old_defs
   Shallow_classes_provider.remove_old_batch ctx n_classes;
   Decl_heap.Typedefs.remove_old_batch n_types;
   Decl_heap.GConsts.remove_old_batch n_consts;
+  Decl_heap.Modules.remove_old_batch n_modules;
   SharedMem.GC.collect `gentle;
   ()
 
 let remove_defs
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_types; n_consts }
+    { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
   Decl_heap.Funs.remove_batch n_funs;
@@ -354,6 +377,7 @@ let remove_defs
   Linearization_provider.remove_batch ctx n_classes;
   Decl_heap.Typedefs.remove_batch n_types;
   Decl_heap.GConsts.remove_batch n_consts;
+  Decl_heap.Modules.remove_batch n_modules;
   if collect_garbage then SharedMem.GC.collect `gentle;
   ()
 

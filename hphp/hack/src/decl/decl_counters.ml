@@ -15,6 +15,7 @@ type decl_kind =
   | Fun
   | GConst
   | Typedef
+  | Module_decl
 [@@deriving show { with_path = false }]
 
 type origin =

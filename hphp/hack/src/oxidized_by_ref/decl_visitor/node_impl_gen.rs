@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<09837f1ea8067c43e9347c5ddb2d28bb>>
+// @generated SignedSource<<ec9c18c18cd53bd06d6532e122e7839a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -207,6 +207,7 @@ impl<'a> Node<'a> for Decl<'a> {
             Decl::Fun(ref __binding_0) => __binding_0.accept(v),
             Decl::Typedef(ref __binding_0) => __binding_0.accept(v),
             Decl::Const(ref __binding_0) => __binding_0.accept(v),
+            Decl::Module(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -439,6 +440,18 @@ impl<'a> Node<'a> for IfcFunDecl<'a> {
         match self {
             IfcFunDecl::FDPolicied(ref __binding_0) => __binding_0.accept(v),
             IfcFunDecl::FDInferFlows => {}
+        }
+    }
+}
+impl<'a> Node<'a> for ModuleDefType<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_module_def_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ModuleDefType {
+                mdt_pos: ref __binding_0,
+            } => __binding_0.accept(v),
         }
     }
 }

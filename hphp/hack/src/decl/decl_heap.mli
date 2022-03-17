@@ -22,6 +22,8 @@ module Typedef : SharedMem.Value with type t = typedef_type
 
 module GConst : SharedMem.Value with type t = const_decl
 
+module Module : SharedMem.Value with type t = module_def_type
+
 module Property : SharedMem.Value with type t = decl_ty
 
 module StaticProperty : SharedMem.Value with type t = decl_ty
@@ -60,6 +62,13 @@ module GConsts :
       SharedMem.HeapWithLocalCache
         (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
         (GConst)
+        (Capacity)
+
+module Modules :
+    module type of
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+        (Module)
         (Capacity)
 
 module Props :

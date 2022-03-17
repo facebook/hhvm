@@ -65,6 +65,9 @@ module Decl : sig
     Provider_context.t -> Decl_provider.gconst_key -> Pos.t option
 
   val get_class_or_typedef_pos : Provider_context.t -> string -> Pos.t option
+
+  val get_module_pos :
+    Provider_context.t -> Decl_provider.module_key -> Pos.t option
 end = struct
   let get_class_exn ctx name =
     let not_found_msg = Printf.sprintf "Class %s" name in
@@ -101,6 +104,11 @@ end = struct
 
   let get_class_or_typedef_pos ctx name =
     Option.first_some (get_class_pos ctx name) (get_typedef_pos ctx name)
+
+  let get_module_pos ctx name =
+    Decl_provider.get_module ctx name
+    |> Option.map ~f:(fun mdt ->
+           mdt.Typing_defs.mdt_pos |> Naming_provider.resolve_position ctx)
 end
 
 (* -- Nast helpers ---------------------------------------------------------- *)
@@ -135,6 +143,8 @@ module Nast_helper : sig
     (unit, unit) Aast.class_typeconst_def option
 
   val get_prop : Provider_context.t -> string -> string -> Nast.class_var option
+
+  val get_module : Provider_context.t -> string -> Nast.module_def option
 
   val is_tydef : Provider_context.t -> string -> bool
 
@@ -231,6 +241,12 @@ end = struct
         ~get_elements:(fun class_ -> class_.c_vars)
         ~get_element_name:(fun class_var -> snd class_var.cv_id))
 
+  let get_module =
+    make_nast_getter
+      ~get_pos:Decl.get_module_pos
+      ~find_in_file:Ast_provider.find_module_in_file
+      ~naming:Naming.module_
+
   let is_tydef ctx nm = Option.is_some @@ get_typedef ctx nm
 
   let is_class ctx nm = Option.is_some @@ get_class ctx nm
@@ -289,6 +305,7 @@ end = struct
       | Constructor cls -> Some cls
       | AllMembers cls -> Some cls
       | Extends cls -> Some cls
+      | Module md -> Some md
       | Fun _
       | GConst _
       | GConstName _ ->
@@ -311,6 +328,7 @@ end = struct
     | GConst name
     | GConstName name ->
       Decl.get_gconst_pos ctx name
+    | Module name -> Decl.get_module_pos ctx name
 
   let get_relative_path ctx dep =
     Option.map ~f:(fun pos -> Pos.filename pos) @@ get_dep_pos ctx dep
@@ -334,6 +352,9 @@ end = struct
   let get_class_or_typedef_mode ctx name =
     Option.first_some (get_class_mode ctx name) (get_typedef_mode ctx name)
 
+  let get_module_mode ctx name =
+    Nast_helper.get_module ctx name |> Option.map ~f:(fun md -> md.Aast.md_mode)
+
   let get_mode ctx dep =
     let open Typing_deps.Dep in
     match dep with
@@ -351,6 +372,7 @@ end = struct
     | GConst name
     | GConstName name ->
       get_gconst_mode ctx name
+    | Module name -> get_module_mode ctx name
 
   let get_origin ctx cls (dep : 'a Typing_deps.Dep.variant) =
     let open Typing_deps.Dep in
@@ -2056,7 +2078,9 @@ end = struct
       | Prop _
       | SProp _
       | AllMembers _
-      | Extends _ ->
+      | Extends _
+      (* TODO(T108206307) *)
+      | Module _ ->
         PartIgnore)
 
   let of_deps ctx target_opt deps =

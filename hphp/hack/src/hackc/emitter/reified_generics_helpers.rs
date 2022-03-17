@@ -251,7 +251,7 @@ pub(crate) fn happly_decl_has_reified_generics<'arena, 'decl>(
                     .iter()
                     .any(|tparam| tparam.reified != ReifyKind::Erased)
             }
-            Ok(x @ Decl::Fun(_) | x @ Decl::Const(_)) => {
+            Ok(x @ Decl::Fun(_) | x @ Decl::Const(_) | x @ Decl::Module(_)) => {
                 // We asked for a NameType::Class and got something weird back.
                 // This must be a bug because types/funcs/constants have different
                 // name kinds.

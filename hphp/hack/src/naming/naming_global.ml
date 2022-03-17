@@ -58,6 +58,11 @@ module GEnv = struct
     | Some pos -> (pos, name)
     | None -> file_disappeared_under_our_feet (pos, name)
 
+  let get_module_full_pos ctx (pos, name) =
+    match Naming_provider.get_module_full_pos ctx (pos, name) with
+    | Some pos -> (pos, name)
+    | None -> file_disappeared_under_our_feet (pos, name)
+
   let type_pos ctx name =
     match Naming_provider.get_type_pos ctx name with
     | Some pos ->
@@ -172,6 +177,10 @@ let should_report_duplicate
     | ((File ((Class | Typedef), _) as a), Full b)
     | (Full b, (File ((Class | Typedef), _) as a)) ->
       let a = fst (GEnv.get_type_full_pos ctx (a, canonical)) in
+      Pos.compare a b = 0
+    | ((File (Module, _) as a), Full b)
+    | (Full b, (File (Module, _) as a)) ->
+      let a = fst (GEnv.get_module_full_pos ctx (a, canonical)) in
       Pos.compare a b = 0
     | (File (a, fna), File (b, fnb)) ->
       Relative_path.equal fna fnb && equal_name_type a b
@@ -323,15 +332,52 @@ module Env = struct
       let backend = Provider_context.get_backend ctx in
       Naming_provider.add_const backend name p;
       p :: current_file_symbols_acc
+
+  let new_module_skip_if_already_bound ctx fn (_p, name, _) =
+    let backend = Provider_context.get_backend ctx in
+    Naming_provider.add_module
+      backend
+      name
+      (FileInfo.File (FileInfo.Module, fn))
+
+  let new_module_error_if_already_bound
+      (ctx : Provider_context.t)
+      (fi : FileInfo.t)
+      (current_file_symbols_acc : FileInfo.pos list)
+      (id : FileInfo.id) : FileInfo.pos list =
+    let (p, name, _) = id in
+    match Naming_provider.get_module_pos ctx name with
+    | Some pc ->
+      begin
+        if
+        should_report_duplicate
+          ctx
+          fi
+          current_file_symbols_acc
+          ~id
+          ~canonical_id:(pc, name, None)
+       then
+          let (pos, name) = GEnv.get_module_full_pos ctx (p, name) in
+          let (prev_pos, name) = GEnv.get_module_full_pos ctx (pc, name) in
+          Errors.add_naming_error
+          @@ Naming_error.Error_name_already_bound
+               { name; prev_name = name; pos; prev_pos }
+      end;
+      current_file_symbols_acc
+    | None ->
+      let backend = Provider_context.get_backend ctx in
+      Naming_provider.add_module backend name p;
+      p :: current_file_symbols_acc
 end
 
 (*****************************************************************************)
 (* Updating the environment *)
 (*****************************************************************************)
-let remove_decls ~backend ~funs ~classes ~typedefs ~consts =
+let remove_decls ~backend ~funs ~classes ~typedefs ~consts ~modules =
   Naming_provider.remove_type_batch backend (typedefs @ classes);
   Naming_provider.remove_fun_batch backend funs;
-  Naming_provider.remove_const_batch backend consts
+  Naming_provider.remove_const_batch backend consts;
+  Naming_provider.remove_module_batch backend modules
 
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
@@ -373,6 +419,13 @@ let make_env_error_if_already_bound ctx fileinfo =
       ~init:[]
       ~f:(Env.new_global_const_error_if_already_bound ctx fileinfo)
   in
+  (* modules *)
+  let (_ : FileInfo.pos list) =
+    List.fold
+      fileinfo.FileInfo.modules
+      ~init:[]
+      ~f:(Env.new_module_error_if_already_bound ctx fileinfo)
+  in
   ()
 
 let make_env_skip_if_already_bound ctx fn fileinfo =
@@ -386,6 +439,9 @@ let make_env_skip_if_already_bound ctx fn fileinfo =
   List.iter
     fileinfo.FileInfo.consts
     ~f:(Env.new_global_const_skip_if_already_bound ctx fn);
+  List.iter
+    fileinfo.FileInfo.modules
+    ~f:(Env.new_module_skip_if_already_bound ctx fn);
   ()
 
 (*****************************************************************************)

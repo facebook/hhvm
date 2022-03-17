@@ -75,7 +75,7 @@ let lint ctx fn content =
   Errors.ignore_ (fun () ->
       let parser_return = parse_and_lint fn content ctx in
       let { Parser_return.file_mode; comments; ast; _ } = parser_return in
-      let (funs, classes, typedefs, consts) = Nast.get_defs ast in
+      let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
       (* naming and typing currently don't produce any lint errors *)
       let fi =
         {
@@ -84,6 +84,7 @@ let lint ctx fn content =
           classes;
           typedefs;
           consts;
+          modules;
           comments = Some comments;
           hash = None;
         }

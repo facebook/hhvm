@@ -193,7 +193,8 @@ module FileInfoTable = struct
         CLASSES TEXT,
         CONSTS TEXT,
         FUNS TEXT,
-        TYPEDEFS TEXT
+        TYPEDEFS TEXT,
+        MODULES TEXT
       );
       "
       table_name
@@ -216,9 +217,10 @@ module FileInfoTable = struct
           CLASSES,
           CONSTS,
           FUNS,
-          TYPEDEFS
+          TYPEDEFS,
+          MODULES
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
       "
       table_name
 
@@ -246,7 +248,7 @@ module FileInfoTable = struct
     Printf.sprintf
       "
         SELECT
-          TYPE_CHECKER_MODE, DECL_HASH, CLASSES, CONSTS, FUNS, TYPEDEFS
+          TYPE_CHECKER_MODE, DECL_HASH, CLASSES, CONSTS, FUNS, TYPEDEFS, MODULES
         FROM %s
         WHERE PATH_PREFIX_TYPE = ? AND PATH_SUFFIX = ?;
       "
@@ -263,7 +265,8 @@ module FileInfoTable = struct
           CLASSES,
           CONSTS,
           FUNS,
-          TYPEDEFS
+          TYPEDEFS,
+          MODULES
         FROM %s
         ORDER BY PATH_PREFIX_TYPE, PATH_SUFFIX;
       "
@@ -290,7 +293,8 @@ module FileInfoTable = struct
       ~(classes : FileInfo.id list)
       ~(consts : FileInfo.id list)
       ~(funs : FileInfo.id list)
-      ~(typedefs : FileInfo.id list) =
+      ~(typedefs : FileInfo.id list)
+      ~(modules : FileInfo.id list) =
     let prefix_type =
       Sqlite3.Data.INT
         (Int64.of_int
@@ -330,6 +334,7 @@ module FileInfoTable = struct
     Sqlite3.bind insert_stmt 6 (names_to_data_type consts) |> check_rc db;
     Sqlite3.bind insert_stmt 7 (names_to_data_type funs) |> check_rc db;
     Sqlite3.bind insert_stmt 8 (names_to_data_type typedefs) |> check_rc db;
+    Sqlite3.bind insert_stmt 9 (names_to_data_type modules) |> check_rc db;
     Sqlite3.step insert_stmt |> check_rc db
 
   let read_row ~stmt ~path ~base_index =
@@ -367,8 +372,22 @@ module FileInfoTable = struct
         ~value:(Sqlite3.column stmt (base_index + 5))
         ~name_type:FileInfo.Typedef
     in
+    let modules =
+      to_ids
+        ~value:(Sqlite3.column stmt (base_index + 6))
+        ~name_type:FileInfo.Module
+    in
     FileInfo.
-      { hash; file_mode; funs; classes; typedefs; consts; comments = None }
+      {
+        hash;
+        file_mode;
+        funs;
+        classes;
+        typedefs;
+        consts;
+        modules;
+        comments = None;
+      }
 
   let get_file_info db stmt_cache path =
     let get_stmt = StatementCache.make_stmt stmt_cache get_sqlite in
@@ -576,7 +595,8 @@ let save_file_info db stmt_cache relative_path file_info :
     ~consts:file_info.FileInfo.consts
     ~classes:file_info.FileInfo.classes
     ~funs:file_info.FileInfo.funs
-    ~typedefs:file_info.FileInfo.typedefs;
+    ~typedefs:file_info.FileInfo.typedefs
+    ~modules:file_info.FileInfo.modules;
   let file_info_id = ref None in
   Sqlite3.exec_not_null_no_headers
     db
@@ -653,6 +673,14 @@ let save_file_info db stmt_cache relative_path file_info :
       ~f:
         (insert ~name_kind:Naming_types.Const_kind ~dep_ctor:(fun name ->
              Typing_deps.Dep.GConst name))
+  in
+  let results =
+    List.fold
+      file_info.FileInfo.modules
+      ~init:results
+      ~f:
+        (insert ~name_kind:Naming_types.Module_kind ~dep_ctor:(fun name ->
+             Typing_deps.Dep.Module name))
   in
   results
 
@@ -852,6 +880,14 @@ let get_const_wrapper
   | Some (filename, Naming_types.Const_kind, _) -> Some filename
   | Some (_, _, _) -> failwith "wrong symbol kind"
 
+let get_module_wrapper
+    (result : (Relative_path.t * Naming_types.name_kind * string) option) :
+    Relative_path.t option =
+  match result with
+  | None -> None
+  | Some (filename, Naming_types.Module_kind, _) -> Some filename
+  | Some (_, _, _) -> failwith "wrong symbol kind"
+
 let get_decl_hash_wrapper
     (result : (Relative_path.t * Naming_types.name_kind * string) option) :
     string option =
@@ -909,6 +945,15 @@ let get_const_path_by_name (db_path : db_path) name =
     (Typing_deps.Dep.GConst name |> Typing_deps.Dep.make)
     SymbolTable.get_sqlite
   |> get_const_wrapper
+
+let get_module_path_by_name (db_path : db_path) name =
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+  SymbolTable.get
+    db
+    stmt_cache
+    (Typing_deps.Dep.Module name |> Typing_deps.Dep.make)
+    SymbolTable.get_sqlite
+  |> get_module_wrapper
 
 let get_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in

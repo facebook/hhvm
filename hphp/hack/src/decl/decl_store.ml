@@ -38,6 +38,8 @@ type decl_store = {
   get_typedef: string -> Typing_defs.typedef_type option;
   add_gconst: string -> Typing_defs.const_decl -> unit;
   get_gconst: string -> Typing_defs.const_decl option;
+  add_module: string -> Typing_defs.module_def_type -> unit;
+  get_module: string -> Typing_defs.module_def_type option;
   push_local_changes: unit -> unit;
   pop_local_changes: unit -> unit;
 }
@@ -52,6 +54,7 @@ let push_local_changes () : unit =
   Decl_heap.Classes.LocalChanges.push_stack ();
   Decl_heap.Typedefs.LocalChanges.push_stack ();
   Decl_heap.GConsts.LocalChanges.push_stack ();
+  Decl_heap.Modules.LocalChanges.push_stack ();
   ()
 
 let pop_local_changes () : unit =
@@ -64,6 +67,7 @@ let pop_local_changes () : unit =
   Decl_heap.Classes.LocalChanges.pop_stack ();
   Decl_heap.Typedefs.LocalChanges.pop_stack ();
   Decl_heap.GConsts.LocalChanges.pop_stack ();
+  Decl_heap.Modules.LocalChanges.pop_stack ();
   ()
 
 let store =
@@ -87,6 +91,8 @@ let store =
       get_typedef = Decl_heap.Typedefs.get;
       add_gconst = Decl_heap.GConsts.add;
       get_gconst = Decl_heap.GConsts.get;
+      add_module = Decl_heap.Modules.add;
+      get_module = Decl_heap.Modules.get;
       push_local_changes;
       pop_local_changes;
     }

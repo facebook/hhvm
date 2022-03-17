@@ -21,6 +21,7 @@ let dedup_decls decls =
   let seen_types = String.Table.create () in
   let seen_funs = String.Table.create () in
   let seen_consts = String.Table.create () in
+  let seen_modules = String.Table.create () in
   Sequence.filter decls ~f:(fun decl ->
       match decl with
       | (name, Class _)
@@ -41,6 +42,12 @@ let dedup_decls decls =
           false
         else
           let () = String.Table.add_exn seen_consts ~key:name ~data:() in
+          true
+      | (name, Module _) ->
+        if String.Table.mem seen_modules name then
+          false
+        else
+          let () = String.Table.add_exn seen_modules ~key:name ~data:() in
           true)
 
 (* If a symbol was also declared in another file, and that file was determined
@@ -68,6 +75,10 @@ let remove_naming_conflict_losers ctx file decls =
       | (name, Const _) ->
         (match Naming_provider.get_const_path ctx name with
         | Some nfile -> Relative_path.equal nfile file
+        | None -> true)
+      | (name, Module _) ->
+        (match Naming_provider.get_module_path ctx name with
+        | Some nfile -> Relative_path.equal nfile file
         | None -> true))
 
 let cache_decls ctx file decls =
@@ -94,7 +105,8 @@ let cache_decls ctx file decls =
             Shallow_classes_heap.MemberFilters.add decl
         | (name, Fun decl) -> Decl_store.((get ()).add_fun name decl)
         | (name, Typedef decl) -> Decl_store.((get ()).add_typedef name decl)
-        | (name, Const decl) -> Decl_store.((get ()).add_gconst name decl))
+        | (name, Const decl) -> Decl_store.((get ()).add_gconst name decl)
+        | (name, Module decl) -> Decl_store.((get ()).add_module name decl))
   | Provider_backend.(Local_memory { decl_cache; shallow_decl_cache; _ }) ->
     Sequence.iter decls ~f:(function
         | (name, Class decl) ->
@@ -128,6 +140,14 @@ let cache_decls ctx file decls =
             Provider_backend.Decl_cache.find_or_add
               decl_cache
               ~key:(Provider_backend.Decl_cache_entry.Gconst_decl name)
+              ~default:(fun () -> Some decl)
+          in
+          ()
+        | (name, Module decl) ->
+          let (_ : module_decl option) =
+            Provider_backend.Decl_cache.find_or_add
+              decl_cache
+              ~key:(Provider_backend.Decl_cache_entry.Module_decl name)
               ~default:(fun () -> Some decl)
           in
           ())

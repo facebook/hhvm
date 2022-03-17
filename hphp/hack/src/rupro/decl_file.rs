@@ -140,6 +140,7 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
                 shallow::Decl::Fun(_, decl) => println!("{:#?}", decl),
                 shallow::Decl::Typedef(_, decl) => println!("{:#?}", decl),
                 shallow::Decl::Const(_, decl) => println!("{:#?}", decl),
+                shallow::Decl::Module(_, decl) => println!("{:#?}", decl),
             }
         }
     }

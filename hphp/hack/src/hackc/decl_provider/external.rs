@@ -92,6 +92,9 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
             NameType::Typedef => 3, // HPHP::AutoloadMap::KindOf::TypeAlias
             NameType::Fun => 1,     // HPHP::AutoloadMap::KindOf::Function
             NameType::Const => 2,   // HPHP::AutoloadMap::KindOf::Constant
+            // TODO(T108206307, T111380364) During decls in compilation pretend like modules don't
+            // exist
+            NameType::Module => return Err(Error::NotFound),
         };
         let result = unsafe {
             // Invoke extern C/C++ provider implementation.

@@ -68,7 +68,7 @@ let invalidate_local_decl_caches_for_entries
     match entry.Provider_context.parser_return with
     | None -> () (* hasn't been parsed, hence nothing to invalidate *)
     | Some { Parser_return.ast; _ } ->
-      let (funs, classes, typedefs, consts) = Nast.get_defs ast in
+      let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
       invalidate_local_decl_caches_for_file
         local_memory
         {
@@ -76,6 +76,7 @@ let invalidate_local_decl_caches_for_entries
           classes;
           typedefs;
           consts;
+          modules;
           hash = None;
           comments = None;
           file_mode = None;

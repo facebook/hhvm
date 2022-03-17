@@ -14,6 +14,8 @@ type type_key = string
 
 type gconst_key = string
 
+type module_key = string
+
 module Class : sig
   include module type of Typing_classes_heap.Api
 end
@@ -25,6 +27,8 @@ type class_decl = Class.t
 type typedef_decl = Typing_defs.typedef_type
 
 type gconst_decl = Typing_defs.const_decl
+
+type module_decl = Typing_defs.module_def_type
 
 val prepare_for_typecheck :
   Provider_context.t -> Relative_path.t -> string -> unit
@@ -52,6 +56,12 @@ val get_gconst :
   Provider_context.t ->
   gconst_key ->
   gconst_decl option
+
+val get_module :
+  ?tracing_info:Decl_counters.tracing_info ->
+  Provider_context.t ->
+  module_key ->
+  module_decl option
 
 val local_changes_push_sharedmem_stack : unit -> unit
 

@@ -228,3 +228,12 @@ let const_naming_and_decl_DEPRECATED
   let cst = Errors.ignore_ (fun () -> Naming.global_const ctx cst) in
   let hint_ty = const_decl ctx cst in
   (snd cst.cst_name, hint_ty)
+
+(*****************************************************************************)
+(* Modules *)
+(*****************************************************************************)
+
+let module_naming_and_decl_DEPRECATED
+    (_ : Provider_context.t) (md : Nast.module_def) :
+    string * Typing_defs.module_def_type =
+  (snd md.md_name, { mdt_pos = Pos_or_decl.of_raw_pos @@ fst md.md_name })

@@ -24,6 +24,7 @@ type decl = Shallow_decl_defs.decl =
   | Fun of Shallow_decl_defs.fun_decl
   | Typedef of Shallow_decl_defs.typedef_decl
   | Const of Shallow_decl_defs.const_decl
+  | Module of Shallow_decl_defs.module_decl
 
 module Decls =
   SharedMem.FreqCache
@@ -118,6 +119,20 @@ let rpc_get_gconst (t : t) (name : string) : Typing_defs.const_decl option =
       | Some (Const c) -> Some c
       | _ -> None))
 
+let rpc_get_module (t : t) (name : string) : Typing_defs.module_def_type option
+    =
+  let key = Typing_deps.(Dep.make (Dep.Module name)) in
+  match SymbolMap.find_opt t.current_file_decls key with
+  | Some (Module decl) -> Some decl
+  | _ ->
+    (match Decls.get key with
+    | Some (Some (Module decl)) -> Some decl
+    | Some _ -> None
+    | None ->
+      (match get_and_cache_decl t key with
+      | Some (Module decl) -> Some decl
+      | _ -> None))
+
 let get_filename (t : t) (key : Typing_deps.Dep.t) :
     (FileInfo.pos * FileInfo.name_type) option =
   let opt =
@@ -144,6 +159,10 @@ let rpc_get_type_path t name =
   let key = Typing_deps.(Dep.make (Dep.Type name)) in
   get_filename t key
 
+let rpc_get_module_path t name =
+  let key = Typing_deps.(Dep.make (Dep.Type name)) in
+  get_filename t key
+
 let rpc_get_fun_canon_name (t : t) (name : string) : string option =
   Decl_ipc_ffi_externs.get_fun_canon_name t.client name
 
@@ -163,5 +182,6 @@ let parse_and_cache_decls_in
           | Class _ -> hash (Typing_deps.Dep.Type name)
           | Typedef _ -> hash (Typing_deps.Dep.Type name)
           | Const _ -> hash (Typing_deps.Dep.GConst name)
+          | Module _ -> hash (Typing_deps.Dep.Module name)
         in
         SymbolMap.add map ~key ~data:decl)

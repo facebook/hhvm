@@ -293,6 +293,8 @@ let class_big_diff class1 class2 =
   || SSet.compare class1.dc_extends class2.dc_extends <> 0
   || SSet.compare class1.dc_xhp_attr_deps class2.dc_xhp_attr_deps <> 0
   || class1.dc_enum_type <> class2.dc_enum_type
+  || class1.dc_internal <> class2.dc_internal
+  || Option.map ~f:snd class1.dc_module <> Option.map ~f:snd class2.dc_module
 
 and get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck) =
   let dep = Dep.Type cid in
@@ -532,4 +534,30 @@ let get_classes_deps ~ctx old_classes new_classes classes =
   SSet.fold
     (get_class_deps ctx old_classes new_classes (VisitedSet.make ()))
     classes
+    ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)
+
+let get_all_module_dependencies ~mode _ mid (changed, to_redecl, to_recheck) =
+  let dep = Dep.Module mid in
+  let where_module_referenced = Typing_deps.get_ideps mode dep in
+  let to_recheck = DepSet.union where_module_referenced to_recheck in
+  (add_changed changed dep, to_redecl, to_recheck)
+
+let get_module_deps ~ctx ~old_modules ~new_modules ~modules =
+  let mode = Provider_context.get_deps_mode ctx in
+  let get_module_deps_
+      _old_modules
+      _new_modules
+      trace
+      mid
+      ((changed, to_redecl, to_recheck), old_modules_missing) =
+    ( get_all_module_dependencies
+        ~mode
+        trace
+        mid
+        (changed, to_redecl, to_recheck),
+      old_modules_missing + 1 )
+  in
+  SSet.fold
+    (get_module_deps_ old_modules new_modules (VisitedSet.make ()))
+    modules
     ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)

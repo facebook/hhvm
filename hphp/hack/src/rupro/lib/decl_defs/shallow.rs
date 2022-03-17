@@ -16,7 +16,7 @@ use pos::{
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-pub use crate::decl_defs::ty::ConstDecl;
+pub use crate::decl_defs::ty::{ConstDecl, ModuleDefType};
 pub use oxidized::ast_defs::Visibility;
 pub use oxidized_by_ref::{method_flags::MethodFlags, prop_flags::PropFlags};
 
@@ -147,11 +147,19 @@ pub type TypedefDecl<R> = TypedefType<R>;
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
+pub struct ModuleDecl<R: Reason> {
+    pub pos: R::Pos,
+}
+walkable!(ModuleDecl<R> => []);
+
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub enum Decl<R: Reason> {
     Class(TypeName, ClassDecl<R>),
     Fun(FunName, FunDecl<R>),
     Typedef(TypeName, TypedefDecl<R>),
     Const(ConstName, ConstDecl<R>),
+    Module(ModuleName, ModuleDecl<R>),
 }
 
 walkable!(Decl<R> => {
@@ -159,4 +167,5 @@ walkable!(Decl<R> => {
     Decl::Fun(_, x) => [x],
     Decl::Typedef(_, x) => [x],
     Decl::Const(_, x) => [x],
+    Decl::Module(_, x) =>  [x],
 });

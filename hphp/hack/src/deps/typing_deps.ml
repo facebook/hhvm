@@ -38,6 +38,7 @@ module Dep = struct
     | SMethod : string * string -> dependency variant
     | AllMembers : string -> dependency variant
     | GConstName : string -> 'a variant
+    | Module : string -> 'a variant
 
   (** NOTE: keep in sync with `typing_deps_hash.rs`. *)
   type dep_kind =
@@ -53,6 +54,7 @@ module Dep = struct
     | KSMethod [@value 10]
     | KAllMembers [@value 11]
     | KGConstName [@value 12]
+    | KModule [@value 13]
   [@@deriving enum]
 
   external hash1 : int -> string -> int = "hash1_ocaml" [@@noalloc]
@@ -119,6 +121,7 @@ module Dep = struct
         name2
     | AllMembers name1 -> hash1 (dep_kind_to_enum KAllMembers) name1
     | GConstName name1 -> hash1 (dep_kind_to_enum KGConstName) name1
+    | Module mname -> hash1 (dep_kind_to_enum KModule) mname
 
   let make_dep_with_type_hash : t -> string -> dep_kind -> t =
    fun type_hash member_name -> function
@@ -134,6 +137,7 @@ module Dep = struct
     | KSMethod -> hash2 (dep_kind_to_enum KSMethod) type_hash member_name
     | KAllMembers -> type_hash
     | KGConstName -> type_hash
+    | KModule -> type_hash
 
   let is_class x = x land 1 = 1
 
@@ -154,6 +158,7 @@ module Dep = struct
     | Constructor s -> Utils.strip_ns s
     | AllMembers s -> Utils.strip_ns s
     | Extends s -> Utils.strip_ns s
+    | Module m -> m
 
   let to_decl_reference : type a. a variant -> Decl_reference.t = function
     | Type s -> Decl_reference.Type s
@@ -169,6 +174,7 @@ module Dep = struct
     | GConstName s ->
       Decl_reference.GlobalConstant s
     | Fun s -> Decl_reference.Function s
+    | Module m -> Decl_reference.Module m
 
   let to_debug_string = string_of_int
 
@@ -194,6 +200,7 @@ module Dep = struct
       | Constructor _ -> "Constructor"
       | AllMembers _ -> "AllMembers"
       | Extends _ -> "Extends"
+      | Module _ -> "Module"
     in
     prefix ^ " " ^ extract_name dep
 end
@@ -564,6 +571,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
     classes;
     typedefs;
     consts;
+    modules;
     comments = _;
     file_mode = _;
     hash = _;
@@ -607,6 +615,16 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
         begin
           fun acc (_, type_id, _) ->
           Dep.make (Dep.Type type_id) :: acc
+        end
+      ~init:defs
+  in
+  let defs =
+    List.fold_left
+      modules
+      ~f:
+        begin
+          fun acc (_, type_id, _) ->
+          Dep.make (Dep.Module type_id) :: acc
         end
       ~init:defs
   in

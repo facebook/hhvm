@@ -58,12 +58,16 @@ let split_defs defs split_if_in_defs =
     let (n_consts1, n_consts2) =
       split_sets defs.n_consts split_if_in_defs.n_consts
     in
+    let (n_modules1, n_modules2) =
+      split_sets defs.n_modules split_if_in_defs.n_modules
+    in
     let r1 =
       {
         n_funs = n_funs1;
         n_classes = n_classes1;
         n_types = n_types1;
         n_consts = n_consts1;
+        n_modules = n_modules1;
       }
     in
     let r2 =
@@ -72,6 +76,7 @@ let split_defs defs split_if_in_defs =
         n_classes = n_classes2;
         n_types = n_types2;
         n_consts = n_consts2;
+        n_modules = n_modules2;
       }
     in
     (r1, r2))

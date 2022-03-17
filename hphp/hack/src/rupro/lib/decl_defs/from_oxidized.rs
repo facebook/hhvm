@@ -413,6 +413,14 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ConstDecl<'_>> for shallow::ConstD
     }
 }
 
+impl<R: Reason> From<&obr::shallow_decl_defs::ModuleDefType<'_>> for shallow::ModuleDecl<R> {
+    fn from(x: &obr::shallow_decl_defs::ModuleDefType<'_>) -> Self {
+        Self {
+            pos: x.mdt_pos.into(),
+        }
+    }
+}
+
 impl<R: Reason> From<(&str, obr::shallow_decl_defs::Decl<'_>)> for shallow::Decl<R> {
     fn from(decl: (&str, obr::shallow_decl_defs::Decl<'_>)) -> Self {
         use obr::shallow_decl_defs::Decl as Obr;
@@ -421,6 +429,7 @@ impl<R: Reason> From<(&str, obr::shallow_decl_defs::Decl<'_>)> for shallow::Decl
             (name, Obr::Fun(x)) => Self::Fun(name.into(), x.into()),
             (name, Obr::Typedef(x)) => Self::Typedef(name.into(), x.into()),
             (name, Obr::Const(x)) => Self::Const(name.into(), x.into()),
+            (name, Obr::Module(x)) => Self::Module(name.into(), x.into()),
         }
     }
 }

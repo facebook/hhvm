@@ -50,6 +50,12 @@ module GConst = struct
   let description = "Decl_GConst"
 end
 
+module Module = struct
+  type t = Typing_defs.module_def_type
+
+  let description = "Decl_Module"
+end
+
 module Funs =
   SharedMem.HeapWithLocalCache
     (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
@@ -86,6 +92,11 @@ module GConsts =
   SharedMem.HeapWithLocalCache
     (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
     (GConst)
+    (Capacity)
+module Modules =
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+    (Module)
     (Capacity)
 
 module Property = struct

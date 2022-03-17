@@ -547,7 +547,10 @@ let naming_from_saved_state
               (v.FileInfo.funs |> List.map ~f:snd);
             Naming_provider.remove_const_batch
               backend
-              (v.FileInfo.consts |> List.map ~f:snd))
+              (v.FileInfo.consts |> List.map ~f:snd);
+            Naming_provider.remove_module_batch
+              backend
+              (v.FileInfo.modules |> List.map ~f:snd))
     | None ->
       (* Name all the files from the old naming-table (except the new ones we parsed since
          they'll be named by our caller, next). We assume the old naming-table came from a clean
@@ -595,7 +598,7 @@ let get_dirty_fast
 
 let names_to_deps (names : FileInfo.names) : Typing_deps.DepSet.t =
   let open Typing_deps in
-  let { FileInfo.n_funs; n_classes; n_types; n_consts } = names in
+  let { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } = names in
   let add_deps_of_sset dep_ctor sset depset =
     SSet.fold sset ~init:depset ~f:(fun n acc ->
         DepSet.add acc (Dep.make (dep_ctor n)))
@@ -605,6 +608,7 @@ let names_to_deps (names : FileInfo.names) : Typing_deps.DepSet.t =
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_types deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConst n) n_consts deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConstName n) n_consts deps in
+  let deps = add_deps_of_sset (fun n -> Dep.Module n) n_modules deps in
   deps
 
 let log_fanout_information to_recheck_deps files_to_recheck =

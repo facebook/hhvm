@@ -13,6 +13,7 @@ module Decl_cache_entry : sig
     | Class_decl : string -> Obj.t t
     | Typedef_decl : string -> Typing_defs.typedef_type t
     | Gconst_decl : string -> Typing_defs.const_decl t
+    | Module_decl : string -> Typing_defs.module_def_type t
 
   type 'a key = 'a t
 
@@ -124,6 +125,7 @@ module Reverse_naming_table_delta : sig
     consts: pos_or_deleted SMap.t ref;
     funs: pos_or_deleted SMap.t ref;
     types: pos_or_deleted SMap.t ref;
+    modules: pos_or_deleted SMap.t ref;
     funs_canon_key: pos_or_deleted SMap.t ref;
     types_canon_key: pos_or_deleted SMap.t ref;
   }

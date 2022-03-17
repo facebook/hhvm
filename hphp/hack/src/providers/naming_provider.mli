@@ -159,3 +159,17 @@ val resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t
 
 val get_files :
   Provider_context.t -> Typing_deps.DepSet.t -> Relative_path.Set.t
+
+(** Resolve the given name & FileInfo.pos into an actual position*)
+val get_module_full_pos :
+  Provider_context.t -> FileInfo.pos * string -> Pos.t option
+
+val get_module_pos : Provider_context.t -> string -> FileInfo.pos option
+
+val get_module_path : Provider_context.t -> string -> Relative_path.t option
+
+val module_exists : Provider_context.t -> string -> bool
+
+val add_module : Provider_backend.t -> string -> FileInfo.pos -> unit
+
+val remove_module_batch : Provider_backend.t -> string list -> unit

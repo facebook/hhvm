@@ -57,6 +57,7 @@ type name_type =
   | Class [@value 0]
   | Typedef [@value 1]
   | Const [@value 4]
+  | Module [@value 5]
 [@@deriving eq, show, enum, ord]
 
 (** We define two types of positions establishing the location of a given name:
@@ -93,6 +94,7 @@ type t = {
   classes: id list;
   typedefs: id list;
   consts: id list;
+  modules: id list;
   comments: (Pos.t * comment) list option;
       (** None if loaded from saved state *)
 }
@@ -106,6 +108,7 @@ let empty_t =
     classes = [];
     typedefs = [];
     consts = [];
+    modules = [];
     comments = Some [];
   }
 
@@ -125,6 +128,7 @@ type names = {
   n_classes: SSet.t;
   n_types: SSet.t;
   n_consts: SSet.t;
+  n_modules: SSet.t;
 }
 
 (** The simplified record stored in saved-state.*)
@@ -133,6 +137,7 @@ type saved_names = {
   sn_classes: SSet.t;
   sn_types: SSet.t;
   sn_consts: SSet.t;
+  sn_modules: SSet.t;
 }
 
 (** Data structure stored in the saved state *)
@@ -148,6 +153,7 @@ let empty_names =
     n_classes = SSet.empty;
     n_types = SSet.empty;
     n_consts = SSet.empty;
+    n_modules = SSet.empty;
   }
 
 (*****************************************************************************)
@@ -158,15 +164,24 @@ let name_set_of_idl idl =
   List.fold_left idl ~f:(fun acc (_, x, _) -> SSet.add x acc) ~init:SSet.empty
 
 let simplify info =
-  let { funs; classes; typedefs; consts; file_mode = _; comments = _; hash = _ }
-      =
+  let {
+    funs;
+    classes;
+    typedefs;
+    consts;
+    modules;
+    file_mode = _;
+    comments = _;
+    hash = _;
+  } =
     info
   in
   let n_funs = name_set_of_idl funs in
   let n_classes = name_set_of_idl classes in
   let n_types = name_set_of_idl typedefs in
   let n_consts = name_set_of_idl consts in
-  { n_funs; n_classes; n_types; n_consts }
+  let n_modules = name_set_of_idl modules in
+  { n_funs; n_classes; n_types; n_consts; n_modules }
 
 let to_saved info =
   let {
@@ -174,6 +189,7 @@ let to_saved info =
     classes;
     typedefs;
     consts;
+    modules;
     file_mode = s_mode;
     hash = s_hash;
     comments = _;
@@ -184,12 +200,13 @@ let to_saved info =
   let sn_classes = name_set_of_idl classes in
   let sn_types = name_set_of_idl typedefs in
   let sn_consts = name_set_of_idl consts in
-  let s_names = { sn_funs; sn_classes; sn_types; sn_consts } in
+  let sn_modules = name_set_of_idl modules in
+  let s_names = { sn_funs; sn_classes; sn_types; sn_consts; sn_modules } in
   { s_names; s_mode; s_hash }
 
 let from_saved fn saved =
   let { s_names; s_mode; s_hash } = saved in
-  let { sn_funs; sn_classes; sn_types; sn_consts } = s_names in
+  let { sn_funs; sn_classes; sn_types; sn_consts; sn_modules } = s_names in
   let funs =
     List.map (SSet.elements sn_funs) ~f:(fun x -> (File (Fun, fn), x, None))
   in
@@ -204,6 +221,10 @@ let from_saved fn saved =
   let consts =
     List.map (SSet.elements sn_consts) ~f:(fun x -> (File (Const, fn), x, None))
   in
+  let modules =
+    List.map (SSet.elements sn_modules) ~f:(fun m ->
+        (File (Module, fn), m, None))
+  in
   {
     file_mode = s_mode;
     hash = s_hash;
@@ -211,6 +232,7 @@ let from_saved fn saved =
     classes;
     typedefs;
     consts;
+    modules;
     comments = None;
   }
 
@@ -220,15 +242,17 @@ let saved_to_names saved =
     n_classes = saved.s_names.sn_classes;
     n_types = saved.s_names.sn_types;
     n_consts = saved.s_names.sn_consts;
+    n_modules = saved.s_names.sn_modules;
   }
 
 let merge_names t_names1 t_names2 =
-  let { n_funs; n_classes; n_types; n_consts } = t_names1 in
+  let { n_funs; n_classes; n_types; n_consts; n_modules } = t_names1 in
   {
     n_funs = SSet.union n_funs t_names2.n_funs;
     n_classes = SSet.union n_classes t_names2.n_classes;
     n_types = SSet.union n_types t_names2.n_types;
     n_consts = SSet.union n_consts t_names2.n_consts;
+    n_modules = SSet.union n_modules t_names2.n_modules;
   }
 
 let to_string fast =
@@ -236,11 +260,13 @@ let to_string fast =
   let classes = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.classes in
   let typedefs = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.typedefs in
   let consts = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.consts in
+  let modules = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.modules in
   [
     ("funs", funs);
     ("classes", classes);
     ("typedefs", typedefs);
     ("consts", consts);
+    ("modules", modules);
   ]
   |> List.filter ~f:(fun (_, l) -> not @@ List.is_empty l)
   |> List.map ~f:(fun (kind, l) ->
@@ -262,6 +288,8 @@ type diff = {
   added_types: SSet.t;
   removed_consts: SSet.t;
   added_consts: SSet.t;
+  removed_modules: SSet.t;
+  added_modules: SSet.t;
 }
 
 let diff f1 f2 =
@@ -284,6 +312,7 @@ let diff f1 f2 =
     let (removed_classes, added_classes) = diff_ids f1.n_classes f2.n_classes in
     let (removed_types, added_types) = diff_ids f1.n_types f2.n_types in
     let (removed_consts, added_consts) = diff_ids f1.n_consts f2.n_consts in
+    let (removed_modules, added_modules) = diff_ids f1.n_modules f2.n_modules in
     let is_empty =
       List.fold
         ~f:(fun acc s -> (not (SSet.is_empty s)) || acc)
@@ -296,6 +325,8 @@ let diff f1 f2 =
           added_types;
           removed_consts;
           added_consts;
+          removed_modules;
+          added_modules;
         ]
         ~init:false
     in
@@ -312,4 +343,6 @@ let diff f1 f2 =
           added_types;
           removed_consts;
           added_consts;
+          removed_modules;
+          added_modules;
         }

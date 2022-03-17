@@ -10,4 +10,5 @@ type t =
   | GlobalConstant of string
   | Function of string
   | Type of string
+  | Module of string
 [@@deriving eq, show, ord]

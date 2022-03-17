@@ -83,6 +83,8 @@ val get_ifun_path_by_name : db_path -> string -> Relative_path.t option
 
 val get_const_path_by_name : db_path -> string -> Relative_path.t option
 
+val get_module_path_by_name : db_path -> string -> Relative_path.t option
+
 (** The canonical name (and assorted *Canon heaps) store the canonical name for a
     symbol, keyed off of the lowercase version of its name. We use the canon
     heaps to check for symbols which are redefined using different

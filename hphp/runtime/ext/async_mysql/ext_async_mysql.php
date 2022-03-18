@@ -701,6 +701,19 @@ class MySSLContextProvider {
    */
   <<__Native>>
   public function isValid(): bool;
+
+  /**
+   * Allows to disable TLS session resumption for the connections
+   * created using this provider.
+   * The resumption is enabled by default. Disabling sesison resumption
+   * can be helpful in test scenarios. It allows to force full TLS
+   * handshake for every newly created connection.
+   *
+   * @param $allow - Pass `true` to enable session resumption; `false`
+   *                 otherwise.
+   */
+  <<__Native>>
+  public function allowSessionResumption(bool $allow): void;
 }
 
 /**

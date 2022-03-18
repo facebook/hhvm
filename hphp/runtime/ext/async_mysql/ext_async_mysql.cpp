@@ -385,6 +385,13 @@ static bool HHVM_METHOD(MySSLContextProvider, isValid) {
   return data->m_provider != nullptr;
 }
 
+static void HHVM_METHOD(MySSLContextProvider, allowSessionResumption, bool allow) {
+  auto* data = Native::data<MySSLContextProvider>(this_);
+  if (data->m_provider) {
+    data->m_provider->allowSessionResumption(allow);
+  }
+}
+
 Class* MySSLContextProvider::s_class = nullptr;
 const StaticString MySSLContextProvider::s_className("MySSLContextProvider");
 IMPLEMENT_GET_CLASS(MySSLContextProvider)
@@ -2296,6 +2303,7 @@ static struct AsyncMysqlExtension final : Extension {
     Native::registerNativeDataInfo<MySSLContextProvider>(
         MySSLContextProvider::s_className.get());
     HHVM_ME(MySSLContextProvider, isValid);
+    HHVM_ME(MySSLContextProvider, allowSessionResumption);
 
     HHVM_ME(AsyncMysqlConnection, query);
     HHVM_ME(AsyncMysqlConnection, queryf);

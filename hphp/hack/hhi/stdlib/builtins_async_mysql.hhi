@@ -129,6 +129,7 @@ class AsyncMysqlConnectionPool {
 class MySSLContextProvider {
   private function __construct(): void { }
   public function isValid(): bool { }
+  public function allowSessionResumption(bool $allow): void { }
 }
 
 class AsyncMysqlConnectionOptions {

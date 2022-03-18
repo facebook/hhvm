@@ -1,5 +1,7 @@
 Change to `void`
 
+<?hh
+
 function foo(): void {
   echo "hello world\n";
 }

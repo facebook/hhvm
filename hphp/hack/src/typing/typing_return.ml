@@ -159,9 +159,6 @@ let make_default_return ~is_method env name =
 
 let implicit_return env pos ~expected ~actual ~hint_pos ~is_async=
   let reason = Reason.URreturn in
-  (* getting called here *)
-  (* @@ Primary.Wellformedness.Void_usage
-               { pos = p; reason = lazy (Reason.to_string "This is `void`" r) } *)
   let error =
     Typing_error.Primary.(Wellformedness (Wellformedness.Missing_return {pos; hint_pos; is_async}))
   in

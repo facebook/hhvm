@@ -22,19 +22,14 @@ use std::io::{Error, ErrorKind, Result, Write};
 
 #[derive(PrintOpcode)]
 #[print_opcode(override = "SSwitch")]
-pub(crate) struct PrintOpcode<'a, 'b, 'c> {
+pub(crate) struct PrintOpcode<'a, 'b> {
     pub(crate) opcode: &'b Opcode<'a>,
     pub(crate) dv_labels: &'b HashSet<Label>,
-    pub(crate) phantom: std::marker::PhantomData<&'c i8>,
 }
 
-impl<'a, 'b, 'c> PrintOpcode<'a, 'b, 'c> {
+impl<'a, 'b> PrintOpcode<'a, 'b> {
     pub(crate) fn new(opcode: &'b Opcode<'a>, dv_labels: &'b HashSet<Label>) -> Self {
-        Self {
-            opcode,
-            dv_labels,
-            phantom: Default::default(),
-        }
+        Self { opcode, dv_labels }
     }
 
     fn get_opcode(&self) -> &'b Opcode<'a> {
@@ -285,7 +280,7 @@ fn print_str(w: &mut dyn Write, s: &ffi::Str<'_>) -> Result<()> {
     w.write_all(s.as_bytes())
 }
 
-impl<'a, 'b, 'c> PrintOpcodeTypes for PrintOpcode<'a, 'b, 'c> {
-    type Write = dyn Write + 'c;
+impl<'a, 'b> PrintOpcodeTypes for PrintOpcode<'a, 'b> {
+    type Write = dyn Write + 'b;
     type Error = Error;
 }

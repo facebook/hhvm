@@ -140,7 +140,7 @@ and 'b worker_handle =
   | Processing of 'b job
   | Cached of 'b * worker
   | Canceled
-  | Failed of exn
+  | Failed of Exception.t
 
 (* The controller's job has a worker. The worker is a single process on Windows.
  * On Unix, the worker consists of a main and a clone worker processes. *)
@@ -440,23 +440,25 @@ let call ?(call_id = 0) w (type a b) (f : a -> b) (x : a) : (a, b) handle =
 let with_worker_exn (handle : ('a, 'b) handle) job f =
   try f () with
   | Worker_failed (pid, status) as exn ->
+    let e = Exception.wrap exn in
     mark_free job.worker;
-    handle := (fst !handle, Failed exn);
+    handle := (fst !handle, Failed e);
     begin
       match status with
       | Worker_quit (Unix.WSIGNALED -7) ->
         raise (Worker_failed (pid, Worker_oomed))
-      | _ -> raise exn
+      | _ -> Exception.reraise e
     end
   | exn ->
+    let e = Exception.wrap exn in
     mark_free job.worker;
-    handle := (fst !handle, Failed exn);
-    raise exn
+    handle := (fst !handle, Failed e);
+    Exception.reraise e
 
 let get_result d =
   match snd !d with
   | Cached (x, _) -> x
-  | Failed exn -> raise exn
+  | Failed e -> Exception.reraise e
   | Canceled -> raise End_of_file
   | Processing s ->
     with_worker_exn d s (fun () ->

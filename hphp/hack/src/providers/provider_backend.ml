@@ -26,6 +26,7 @@ module Decl_cache_entry = struct
     | Class_decl : string -> Obj.t t
     | Typedef_decl : string -> Typing_defs.typedef_type t
     | Gconst_decl : string -> Typing_defs.const_decl t
+    | Module_decl : string -> Typing_defs.module_def_type t
 
   type 'a key = 'a t
 
@@ -40,6 +41,7 @@ module Decl_cache_entry = struct
     | Class_decl s -> "ClassDecl" ^ s
     | Typedef_decl s -> "TypedefDecl" ^ s
     | Gconst_decl s -> "GconstDecl" ^ s
+    | Module_decl s -> "ModuleDecl" ^ s
 end
 
 module Decl_cache = Lru_cache.Cache (Decl_cache_entry)
@@ -143,6 +145,7 @@ module Reverse_naming_table_delta = struct
     consts: pos_or_deleted SMap.t ref;
     funs: pos_or_deleted SMap.t ref;
     types: pos_or_deleted SMap.t ref;
+    modules: pos_or_deleted SMap.t ref;
     funs_canon_key: pos_or_deleted SMap.t ref;
     types_canon_key: pos_or_deleted SMap.t ref;
   }
@@ -152,6 +155,7 @@ module Reverse_naming_table_delta = struct
       consts = ref SMap.empty;
       funs = ref SMap.empty;
       types = ref SMap.empty;
+      modules = ref SMap.empty;
       funs_canon_key = ref SMap.empty;
       types_canon_key = ref SMap.empty;
     }
@@ -161,7 +165,8 @@ module Reverse_naming_table_delta = struct
     let consts = SMap.cardinal !(t.consts) in
     let funs = SMap.cardinal !(t.funs) in
     let types = SMap.cardinal !(t.types) in
-    if consts + funs + types = 0 then
+    let modules = SMap.cardinal !(t.modules) in
+    if consts + funs + types + modules = 0 then
       telemetry
     else
       let sub_telemetry =
@@ -169,6 +174,7 @@ module Reverse_naming_table_delta = struct
         |> Telemetry.int_ ~key:"consts" ~value:consts
         |> Telemetry.int_ ~key:"funs" ~value:funs
         |> Telemetry.int_ ~key:"types" ~value:types
+        |> Telemetry.int_ ~key:"modules" ~value:modules
       in
       Telemetry.object_ telemetry ~key ~value:sub_telemetry
 end

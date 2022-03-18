@@ -92,9 +92,19 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
             NameType::Typedef => 3, // HPHP::AutoloadMap::KindOf::TypeAlias
             NameType::Fun => 1,     // HPHP::AutoloadMap::KindOf::Function
             NameType::Const => 2,   // HPHP::AutoloadMap::KindOf::Constant
+            // TODO(T108206307, T111380364) During decls-in-compilation, we should actively panic
+            // if we're asking for a module. We *could* just say that all modules are not found,
+            // defensively, but that might make it harder to debug in the future if we try to
+            // use modules for decls-in-compilation.
+            NameType::Module => panic!(
+                "Cannot request `{}` as a module decl; fetching module decls is not supported",
+                symbol
+            ),
         };
-        let result =
-            unsafe { (self.provider)(self.data, code, symbol.as_ptr() as _, symbol.len()) };
+        let result = unsafe {
+            // Invoke extern C/C++ provider implementation.
+            (self.provider)(self.data, code, symbol.as_ptr() as _, symbol.len())
+        };
         match result {
             ExternalDeclProviderResult::Missing => Err(Error::NotFound),
             ExternalDeclProviderResult::Decls(p) => {

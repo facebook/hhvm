@@ -19,8 +19,6 @@ val print_with_newline :
 
 val print_duration : string -> float -> float
 
-val exc : ?prefix:string -> stack:string -> exn -> unit
-
 val exception_ : ?prefix:string -> Exception.t -> unit
 
 module Level : sig

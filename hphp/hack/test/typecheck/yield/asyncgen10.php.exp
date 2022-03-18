@@ -2,7 +2,5 @@ File "asyncgen10.php", line 4, characters 3-18:
 Invalid `yield` (Typing[4110])
   File "asyncgen10.php", line 3, characters 36-41:
   Expected `string`
-  File "asyncgen10.php", line 3, characters 36-41:
-  This type argument to `AsyncGenerator` must match exactly (it is invariant)
   File "asyncgen10.php", line 4, characters 9-9:
   But got `int`

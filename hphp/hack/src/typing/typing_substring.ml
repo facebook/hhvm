@@ -36,19 +36,23 @@ let sub_string_err (p : Pos.t) (env : env) (ty : locl_ty) :
   in
   let stringish = MakeType.class_type r SN.Classes.cStringish [] in
   let stringlike = MakeType.nullable_locl r (MakeType.union r tyl) in
-  let (env, ty_err_opt) =
-    Typing_subtype.sub_type_or_fail env ty stringlike
-    @@ Some
-         Typing_error.(
-           primary
-           @@
-           if Typing_solver.is_sub_type env ty stringish then
-             Primary.Object_string_deprecated p
-           else
-             Primary.Invalid_substring
-               { pos = p; ty_name = lazy (Typing_print.error env ty) })
+  let (is_sub_stringish, e1) = Typing_solver.is_sub_type env ty stringish in
+  let err =
+    Typing_error.(
+      primary
+      @@
+      if is_sub_stringish then
+        Primary.Object_string_deprecated p
+      else
+        Primary.Invalid_substring
+          { pos = p; ty_name = lazy (Typing_print.error env ty) })
   in
-  let ty_mismatch = Option.map ty_err_opt ~f:(Fn.const (ty, stringlike)) in
+  let (env, e2) =
+    Typing_subtype.sub_type_or_fail env ty stringlike @@ Some err
+  in
+
+  let ty_mismatch = Option.map e2 ~f:(Fn.const (ty, stringlike)) in
+  let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (env, ty_mismatch)
 

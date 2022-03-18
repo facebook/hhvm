@@ -3,15 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<981babac54b01f2cffeb47a3cb607a3b>>
+// @generated SignedSource<<40991d03dd962a9529a1e843444ee9ff>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
+#![allow(unused_imports)]
 #![allow(unused_variables)]
 use super::node_mut::NodeMut;
 use super::type_params::Params;
-use crate::{aast::*, aast_defs::*, ast_defs::*, doc_comment::*};
+use crate::{
+    aast::{self, *},
+    aast_defs::{self, *},
+    ast_defs::{self, *},
+    doc_comment::{self, *},
+    *,
+};
 pub fn visit<'node, P: Params>(
     v: &mut impl VisitorMut<'node, Params = P>,
     c: &mut P::Context,

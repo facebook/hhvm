@@ -106,10 +106,20 @@ fn report(wall: Duration, count: usize, profile: Option<ProfileAcc>, total: usiz
             profile.max_lower.lower_peak,
             profile.max_lower_file.display()
         );
+        eprintln!(
+            "check_error stack peak {} in {}",
+            profile.max_error.error_peak,
+            profile.max_error_file.display()
+        );
+        eprintln!(
+            "rewrite stack peak {} in {}",
+            profile.max_rewrite.rewrite_peak,
+            profile.max_rewrite_file.display()
+        );
         eprint!(
             "emitter stack peak {} in {}",
-            profile.max_codegen.codegen_peak,
-            profile.max_codegen_file.display()
+            profile.max_emitter.emitter_peak,
+            profile.max_emitter_file.display()
         );
     } else {
         let remaining = if wall_per_sec > 0 {
@@ -136,8 +146,12 @@ struct ProfileAcc {
     max_parse_file: PathBuf,
     max_lower: Profile,
     max_lower_file: PathBuf,
-    max_codegen: Profile,
-    max_codegen_file: PathBuf,
+    max_error: Profile,
+    max_error_file: PathBuf,
+    max_rewrite: Profile,
+    max_rewrite_file: PathBuf,
+    max_emitter: Profile,
+    max_emitter_file: PathBuf,
 }
 
 impl ProfileAcc {
@@ -151,9 +165,17 @@ impl ProfileAcc {
             self.max_lower = other.max_lower;
             self.max_lower_file = other.max_lower_file;
         }
-        if other.max_codegen.codegen_peak > self.max_codegen.codegen_peak {
-            self.max_codegen = other.max_codegen;
-            self.max_codegen_file = other.max_codegen_file;
+        if other.max_error.error_peak > self.max_error.error_peak {
+            self.max_error = other.max_error;
+            self.max_error_file = other.max_error_file;
+        }
+        if other.max_rewrite.rewrite_peak > self.max_rewrite.rewrite_peak {
+            self.max_rewrite = other.max_rewrite;
+            self.max_rewrite_file = other.max_rewrite_file;
+        }
+        if other.max_emitter.emitter_peak > self.max_emitter.emitter_peak {
+            self.max_emitter = other.max_emitter;
+            self.max_emitter_file = other.max_emitter_file;
         }
         self
     }
@@ -185,8 +207,12 @@ fn crc_files(writer: &SyncWrite, files: &[PathBuf], num_threads: usize) -> Resul
             max_parse_file: f.clone(),
             max_lower: profile.clone(),
             max_lower_file: f.clone(),
-            max_codegen: profile,
-            max_codegen_file: f.clone(),
+            max_error: profile.clone(),
+            max_error_file: f.clone(),
+            max_rewrite: profile.clone(),
+            max_rewrite_file: f.clone(),
+            max_emitter: profile,
+            max_emitter_file: f.clone(),
         }))
     };
 

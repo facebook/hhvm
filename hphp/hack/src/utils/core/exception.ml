@@ -72,31 +72,54 @@ let get_current_callstack_string n =
 
 let record_backtrace = Printexc.record_backtrace
 
-let stack_re =
-  Str.regexp
-    {|^\(Called\|Raised\|Re-raised\) .* file "\([^"]*\)"\( (inlined)\)?, line \([0-9]+\), character.*$|}
-
-let filename_re = Str.regexp {|^.*hack/\(.*\)$|}
+(** We want to include all stack lines that come from our code,
+and exclude ones that come from the standard library.
+That's easy for stack lines that include a module: if the module starts "Stdlib" or "Base"
+then exclude it; if it starts with anything else then include it.
+But for stack lines that don't include a module then we'll use a heuristic that
+only works on some build systems. Some build systems like buck include absolute pathnames
+so that "/.../hack/src/hh_client.ml" implies it's our code and "src/list.ml" implies it's not.
+Other build systems like dune are relative and there's no way we can distinguish "src/hh_client.ml" from "src/list.ml".
+These regular expressions extract all that information.
+Our heuristic in [clean_stack] will simply assume buck-style absolute pathnames. *)
+let (stack_re, file_re) =
+  ( Str.regexp
+      {|^\(Called from\|Raised by primitive operation at\|Raised at\|Re-raised at\)\( \([^ ]*\) in\)? file "\([^"]*\)"\( (inlined)\)?, line \([0-9]+\), character.*$|},
+    Str.regexp {|^.*/hack/\(.*\)$|} )
 
 let clean_stack (stack : string) : string =
-  let format_one_line (s : string) : string =
+  let format_one_line (s : string) : string option =
     if Str.string_match stack_re s 0 then
-      let filename = Str.matched_group 2 s in
-      let line_number = Str.matched_group 4 s in
-      if Str.string_match filename_re filename 0 then
-        (* keep lines under hack source directory *)
-        let filename = Str.matched_group 1 filename in
-        Printf.sprintf "%s @ %s" filename line_number
+      let module_ =
+        try Str.matched_group 3 s with
+        | _ -> ""
+      in
+      let file = Str.matched_group 4 s in
+      let line = Str.matched_group 6 s in
+      let (file, file_is_in_hack_src_tree) =
+        if Str.string_match file_re file 0 then
+          (Str.matched_group 1 file, true)
+        else
+          (file, false)
+      in
+      if String.equal module_ "" then
+        if file_is_in_hack_src_tree then
+          Some (Printf.sprintf "%s @ %s" file line)
+        else
+          None
+      else if
+        String_utils.string_starts_with module_ "Base"
+        || String_utils.string_starts_with module_ "Stdlib"
+        || String_utils.string_starts_with module_ "Lwt"
+      then
+        None
       else
-        (* skip lines not under hack, e.g. those in core libraries *)
-        ""
+        Some (Printf.sprintf "%s @ %s" file line)
     else
-      (* reproduce exactly the non-source lines *)
-      s
+      Some s
   in
   String_utils.split_on_newlines stack
-  |> List.map format_one_line
-  |> List.filter (fun s -> String.length s > 0)
+  |> List.filter_map format_one_line
   |> String.concat "\n"
 
 let pp ppf t =

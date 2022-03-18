@@ -3,18 +3,27 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<393d23ec65204c2046531180c7a7f369>>
+// @generated SignedSource<<ec9c18c18cd53bd06d6532e122e7839a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
-#![allow(unused_variables)]
 #![allow(unused_braces)]
+#![allow(unused_imports)]
+#![allow(unused_variables)]
 use super::node::Node;
 use super::visitor::Visitor;
 use crate::{
-    aast_defs::*, ast_defs::*, direct_decl_parser::*, shallow_decl_defs::*, t_shape_map::*,
-    typing_defs::*, typing_defs_core::*, typing_reason::*, xhp_attribute::*,
+    aast_defs::{self, *},
+    ast_defs::{self, *},
+    direct_decl_parser::{self, *},
+    shallow_decl_defs::{self, *},
+    t_shape_map::{self, *},
+    typing_defs::{self, *},
+    typing_defs_core::{self, *},
+    typing_reason::{self, *},
+    xhp_attribute::{self, *},
+    *,
 };
 impl<'a> Node<'a> for AbstractTypeconst<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
@@ -198,6 +207,7 @@ impl<'a> Node<'a> for Decl<'a> {
             Decl::Fun(ref __binding_0) => __binding_0.accept(v),
             Decl::Typedef(ref __binding_0) => __binding_0.accept(v),
             Decl::Const(ref __binding_0) => __binding_0.accept(v),
+            Decl::Module(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -433,6 +443,18 @@ impl<'a> Node<'a> for IfcFunDecl<'a> {
         }
     }
 }
+impl<'a> Node<'a> for ModuleDefType<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_module_def_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ModuleDefType {
+                mdt_pos: ref __binding_0,
+            } => __binding_0.accept(v),
+        }
+    }
+}
 impl<'a> Node<'a> for NegType<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_neg_type(self)
@@ -527,17 +549,18 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 xhp_enum_values: ref __binding_13,
                 req_extends: ref __binding_14,
                 req_implements: ref __binding_15,
-                implements: ref __binding_16,
-                support_dynamic_type: ref __binding_17,
-                consts: ref __binding_18,
-                typeconsts: ref __binding_19,
-                props: ref __binding_20,
-                sprops: ref __binding_21,
-                constructor: ref __binding_22,
-                static_methods: ref __binding_23,
-                methods: ref __binding_24,
-                user_attributes: ref __binding_25,
-                enum_type: ref __binding_26,
+                req_class: ref __binding_16,
+                implements: ref __binding_17,
+                support_dynamic_type: ref __binding_18,
+                consts: ref __binding_19,
+                typeconsts: ref __binding_20,
+                props: ref __binding_21,
+                sprops: ref __binding_22,
+                constructor: ref __binding_23,
+                static_methods: ref __binding_24,
+                methods: ref __binding_25,
+                user_attributes: ref __binding_26,
+                enum_type: ref __binding_27,
             } => {
                 {
                     __binding_0.accept(v)
@@ -617,7 +640,10 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 {
                     __binding_25.accept(v)
                 }
-                { __binding_26.accept(v) }
+                {
+                    __binding_26.accept(v)
+                }
+                { __binding_27.accept(v) }
             }
         }
     }

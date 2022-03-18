@@ -64,7 +64,7 @@ public:
   /* implicit */ StringData(std::string&& s) : m_impl{std::move(s)} {
   }
 
-  explicit StringData(const std::string_view& s) : m_impl{s} {
+  explicit StringData(std::string_view s) : m_impl{s} {
   }
 
   std::string* impl() const {
@@ -165,7 +165,7 @@ StringPtr makeStringPtr(const StringData& s) {
       s_stringTable.insert(strKey, std::move(staticStr)).first->first};
 }
 
-StringPtr makeStringPtr(const std::string_view sv) {
+StringPtr makeStringPtr(std::string_view sv) {
   return makeStringPtr(StringData{sv});
 }
 

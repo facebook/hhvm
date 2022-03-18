@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use eq_modulo_pos::EqModuloPos;
 use hcons::Conser;
 use once_cell::sync::Lazy;
 use pos::{BPos, NPos, Pos, Positioned, Symbol, ToOxidized, TypeConstName, TypeName};
@@ -11,13 +12,14 @@ use std::hash::Hash;
 
 use crate::decl_defs::DeclTy_;
 use crate::typing_defs::{Ty, Ty_};
-use crate::typing_prop::{Constraint, ConstraintF, Prop, PropF};
+use crate::typing_prop::{Prop, PropF};
 use crate::visitor::Walkable;
 
 pub use oxidized::typing_reason::{ArgPosition, BlameSource};
 
 pub trait Reason:
     Eq
+    + EqModuloPos
     + Hash
     + Clone
     + Walkable<Self>
@@ -59,12 +61,15 @@ pub trait Reason:
         Self::mk(|| ReasonImpl::RclassClass(pos, ty_name))
     }
 
+    fn no_return(pos: Self::Pos) -> Self {
+        Self::mk(|| ReasonImpl::RnoReturn(pos))
+    }
+
     fn pos(&self) -> &Self::Pos;
 
     fn decl_ty_conser() -> &'static Conser<DeclTy_<Self>>;
     fn ty_conser() -> &'static Conser<Ty_<Self, Ty<Self>>>;
     fn prop_conser() -> &'static Conser<PropF<Self, Prop<Self>>>;
-    fn constraint_conser() -> &'static Conser<ConstraintF<Self, Constraint<Self>>>;
 
     fn from_oxidized(reason: oxidized_by_ref::typing_reason::T_<'_>) -> Self {
         Self::mk(|| {
@@ -198,10 +203,10 @@ pub trait Reason:
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
 pub struct Blame<P>(pub P, pub BlameSource);
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
 pub enum ExprDepTypeReason {
     ERexpr(isize),
     ERstatic,
@@ -241,7 +246,7 @@ impl<'a> ToOxidized<'a> for ExprDepTypeReason {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
 pub enum ReasonImpl<R, P> {
     Rnone,
     Rwitness(P),
@@ -340,7 +345,7 @@ pub enum ReasonImpl<R, P> {
     RrigidTvarEscape(P, Symbol, Symbol, R),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
 pub struct BReason(Box<ReasonImpl<BReason, BPos>>);
 
 impl Reason for BReason {
@@ -379,13 +384,6 @@ impl Reason for BReason {
     #[inline]
     fn prop_conser() -> &'static Conser<PropF<BReason, Prop<BReason>>> {
         static CONSER: Lazy<Conser<PropF<BReason, Prop<BReason>>>> = Lazy::new(Conser::new);
-        &CONSER
-    }
-
-    #[inline]
-    fn constraint_conser() -> &'static Conser<ConstraintF<BReason, Constraint<BReason>>> {
-        static CONSER: Lazy<Conser<ConstraintF<BReason, Constraint<BReason>>>> =
-            Lazy::new(Conser::new);
         &CONSER
     }
 }
@@ -585,7 +583,7 @@ impl<'a> ToOxidized<'a> for BReason {
 }
 
 /// A stateless sentinal Reason.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
 pub struct NReason;
 
 impl Reason for NReason {
@@ -618,13 +616,6 @@ impl Reason for NReason {
     #[inline]
     fn prop_conser() -> &'static Conser<PropF<NReason, Prop<NReason>>> {
         static CONSER: Lazy<Conser<PropF<NReason, Prop<NReason>>>> = Lazy::new(Conser::new);
-        &CONSER
-    }
-
-    #[inline]
-    fn constraint_conser() -> &'static Conser<ConstraintF<NReason, Constraint<NReason>>> {
-        static CONSER: Lazy<Conser<ConstraintF<NReason, Constraint<NReason>>>> =
-            Lazy::new(Conser::new);
         &CONSER
     }
 }

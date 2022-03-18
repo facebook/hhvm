@@ -14,7 +14,12 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/hash.h"
+
+#include "hphp/util/assertions.h"
+
 #include <folly/CpuId.h>
+
+#include <random>
 
 namespace HPHP {
 
@@ -58,5 +63,27 @@ strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength) {
 }
 
 #endif
+
+///////////////////////////////////////////////////////////////////////////////
+
+// This hash is based on "A Fast, Minimal Memory, Consistent Hash
+// Algorithm" by John Lamping and Eric Veach.
+size_t consistent_hash(int64_t key, size_t buckets, int64_t salt) {
+  assertx(buckets > 0);
+  assertx(buckets < std::numeric_limits<size_t>::max());
+  std::seed_seq seed{key, salt};
+  std::minstd_rand gen{seed};
+  size_t b;
+  size_t j = 0;
+  do {
+    b = j;
+    auto const r =
+      std::generate_canonical<double, std::numeric_limits<double>::digits>(gen);
+    j = std::floor((b + 1) / r);
+  } while (j < buckets);
+  return b;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 }

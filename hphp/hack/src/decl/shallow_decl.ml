@@ -342,6 +342,7 @@ let class_DEPRECATED ctx c =
     let sc_uses = List.map ~f:hint c.c_uses in
     let sc_req_extends = List.map ~f:hint req_extends in
     let sc_req_implements = List.map ~f:hint req_implements in
+    let sc_req_class = [] in
     let sc_implements = List.map ~f:hint c.c_implements in
     let sc_user_attributes =
       List.map
@@ -382,6 +383,7 @@ let class_DEPRECATED ctx c =
       sc_xhp_enum_values;
       sc_req_extends;
       sc_req_implements;
+      sc_req_class;
       sc_implements;
       sc_support_dynamic_type = support_dynamic_type;
       sc_consts = List.filter_map c.c_consts ~f:(class_const env);

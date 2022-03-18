@@ -59,6 +59,9 @@ module Dep : sig
     | GConstName : string -> 'a variant
         (** Like [GConst], but used only in conservative redecl. May not be
         necessary anymore. *)
+    | Module : string -> 'a variant
+        (** Represents a toplevel symbol being defined as a member of
+        this module *)
 
   type dep_kind =
     | KGConst [@value 0]
@@ -73,6 +76,7 @@ module Dep : sig
     | KSMethod [@value 10]
     | KAllMembers [@value 11]
     | KGConstName [@value 12]
+    | KModule [@value 13]
   [@@deriving enum]
 
   (** A 63bit hash *)

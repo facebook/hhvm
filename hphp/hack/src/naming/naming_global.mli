@@ -37,6 +37,7 @@ val remove_decls :
   classes:string list ->
   typedefs:string list ->
   consts:string list ->
+  modules:string list ->
   unit
 
 (** This function "declares" top-level names, i.e. adds them into the naming-table provider

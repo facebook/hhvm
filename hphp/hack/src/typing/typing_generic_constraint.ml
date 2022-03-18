@@ -13,7 +13,7 @@ module Env = Typing_env
 open Typing_defs
 open Typing_env_types
 
-let check_constraint_with_ty_err
+let check_constraint
     env ck ty ~cstr_ty (on_error : Typing_error.Reasons_callback.t option) =
   Typing_log.(
     log_with_level env "sub" ~level:1 (fun () ->
@@ -69,40 +69,15 @@ let check_constraint_with_ty_err
         ty
         on_error
 
-let check_tparams_constraint_with_ty_err (env : env) ~use_pos ck ~cstr_ty ty =
-  check_constraint_with_ty_err env ck ty ~cstr_ty
+let check_tparams_constraint (env : env) ~use_pos ck ~cstr_ty ty =
+  check_constraint env ck ty ~cstr_ty
   @@ Some (Typing_error.Reasons_callback.explain_constraint use_pos)
 
-let check_where_constraint_with_ty_err
+let check_where_constraint
     ~in_class (env : env) ~use_pos ~definition_pos ck ~cstr_ty ty =
-  check_constraint_with_ty_err env ck ty ~cstr_ty
+  check_constraint env ck ty ~cstr_ty
   @@ Some
        (Typing_error.Reasons_callback.explain_where_constraint
           use_pos
           ~in_class
           ~decl_pos:definition_pos)
-
-(* == Side effecting variants =============================================== *)
-
-let discharge_ty_err (env, ty_err_opt) =
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  env
-
-let check_constraint env ck ty ~cstr_ty on_error =
-  discharge_ty_err @@ check_constraint_with_ty_err env ck ty ~cstr_ty on_error
-
-let check_tparams_constraint (env : env) ~use_pos ck ~cstr_ty ty =
-  discharge_ty_err
-  @@ check_tparams_constraint_with_ty_err (env : env) ~use_pos ck ~cstr_ty ty
-
-let check_where_constraint
-    ~in_class (env : env) ~use_pos ~definition_pos ck ~cstr_ty ty =
-  discharge_ty_err
-  @@ check_where_constraint_with_ty_err
-       ~in_class
-       (env : env)
-       ~use_pos
-       ~definition_pos
-       ck
-       ~cstr_ty
-       ty

@@ -3,16 +3,25 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<028a9187451d04ce3dab5091bc49b535>>
+// @generated SignedSource<<791a177595aa44e51b4be7427fbbbd77>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
+#![allow(unused_imports)]
 #![allow(unused_variables)]
 use super::node::Node;
 use crate::{
-    aast_defs::*, ast_defs::*, direct_decl_parser::*, shallow_decl_defs::*, t_shape_map::*,
-    typing_defs::*, typing_defs_core::*, typing_reason::*, xhp_attribute::*,
+    aast_defs::{self, *},
+    ast_defs::{self, *},
+    direct_decl_parser::{self, *},
+    shallow_decl_defs::{self, *},
+    t_shape_map::{self, *},
+    typing_defs::{self, *},
+    typing_defs_core::{self, *},
+    typing_reason::{self, *},
+    xhp_attribute::{self, *},
+    *,
 };
 pub trait Visitor<'a> {
     fn object(&mut self) -> &mut dyn Visitor<'a>;
@@ -95,6 +104,9 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_ifc_fun_decl(&mut self, p: &'a IfcFunDecl<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_module_def_type(&mut self, p: &'a ModuleDefType<'a>) {
         p.recurse(self.object())
     }
     fn visit_neg_type(&mut self, p: &'a NegType<'a>) {

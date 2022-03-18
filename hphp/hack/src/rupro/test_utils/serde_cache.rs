@@ -94,14 +94,12 @@ where
 
 fn serialize<T: Serialize>(val: &T) -> Vec<u8> {
     let mut serialized = Vec::new();
-    let _guard = intern::SerGuard::default();
-    bincode::serialize_into(&mut serialized, val).unwrap();
+    bincode::serialize_into(&mut serialized, &intern::WithIntern(val)).unwrap();
     serialized
 }
 
 fn deserialize<T: DeserializeOwned>(serialized: &[u8]) -> T {
-    let _guard = intern::DeGuard::default();
-    bincode::deserialize(serialized).unwrap()
+    intern::WithIntern::strip(bincode::deserialize(serialized)).unwrap()
 }
 
 fn zstd_compress(mut bytes: &[u8]) -> Vec<u8> {

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b55e5bc574e9c429f62b89ff7bc66c36>>
+// @generated SignedSource<<3348c8907ec905ff4bb78c9e74a5e404>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -224,6 +224,29 @@ pub struct ClassConst<'a> {
 }
 impl<'a> TrivialDrop for ClassConst<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassConst<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct ModuleDefType<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub mdt_pos: &'a pos_or_decl::PosOrDecl<'a>,
+}
+impl<'a> TrivialDrop for ModuleDefType<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ModuleDefType<'arena>);
 
 /// The position is that of the hint in the `use` / `implements` AST node
 /// that causes a class to have this requirement applied to it. E.g.

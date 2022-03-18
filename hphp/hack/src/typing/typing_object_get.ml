@@ -230,7 +230,7 @@ let sound_dynamic_err_opt args env ((_, id_str) as id) read_context =
       when not args.is_method ->
       if read_context then
         let ((env, lclz_ty_err_opt), locl_ty) =
-          Phase.localize_no_subst_with_ty_err ~ignore_errors:true env ty
+          Phase.localize_no_subst ~ignore_errors:true env ty
         in
         Option.merge ~f:Typing_error.both lclz_ty_err_opt
         @@ Typing_dynamic.check_property_sound_for_dynamic_read
@@ -292,9 +292,7 @@ let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
                   this_ty = ty;
                 }
               in
-              let (env, basety) =
-                Phase.localize_with_ty_err ~ety_env env basety
-              in
+              let (env, basety) = Phase.localize ~ety_env env basety in
               (env, Some basety)
           )
         | None -> ((env, None), None))
@@ -511,7 +509,7 @@ and get_member_from_constraints
     List.map_env_ty_err_opt
       env
       upper_bounds
-      ~f:(fun env up -> Phase.localize_with_ty_err ~ety_env env up)
+      ~f:(fun env up -> Phase.localize ~ety_env env up)
       ~combine_ty_errs:Typing_error.multiple_opt
   in
   let (env, inter_ty) =
@@ -690,7 +688,7 @@ and obj_get_concrete_class_with_member_info
       (* We special case function types here to be able to pass explicit type
        * parameters. *)
       let ((env, lclz_ty_err_opt), explicit_targs) =
-        Phase.localize_targs_with_ty_err
+        Phase.localize_targs
           ~check_well_kinded:true
           ~is_method:args.is_method
           ~use_pos:id_pos
@@ -705,7 +703,7 @@ and obj_get_concrete_class_with_member_info
       in
       let ((env, ft1_ty_err_opt), ft1) =
         Phase.(
-          localize_ft_with_ty_err
+          localize_ft
             ~instantiation:
               { use_name = strip_ns id_str; use_pos = id_pos; explicit_targs }
             ~ety_env:{ ety_env with on_error = None }
@@ -725,7 +723,7 @@ and obj_get_concrete_class_with_member_info
           let ety_env = { ety_env with this_ty = args.this_ty_conjunct } in
           let ((env, ft2_ty_err_opt), ft2) =
             Phase.(
-              localize_ft_with_ty_err
+              localize_ft
                 ~instantiation:
                   {
                     use_name = strip_ns id_str;
@@ -762,7 +760,7 @@ and obj_get_concrete_class_with_member_info
           member_decl_ty
           ~explicitly_untrusted:is_xhp_attr
       in
-      let (env, member_ty) = Phase.localize_with_ty_err ~ety_env env et_type in
+      let (env, member_ty) = Phase.localize ~ety_env env et_type in
       (* TODO(T52753871): same as for class_get *)
       (env, member_ty, [], et_enforced)
   in
@@ -1070,13 +1068,13 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
         let (env, ty) = Env.expand_type env receiver_ty in
         ((env, None), ty)
       else
-        Typing_solver.expand_type_and_solve_with_ty_err
+        Typing_solver.expand_type_and_solve
           env
           ~description_of_expected:"an object"
           args.obj_pos
           receiver_ty
     else
-      Typing_solver.expand_type_and_narrow_with_ty_err
+      Typing_solver.expand_type_and_narrow
         env
         ~description_of_expected:"an object"
         (widen_class_for_obj_get
@@ -1115,7 +1113,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
       if args.is_nonnull then
         (true, None)
       else
-        Typing_solver.is_sub_type_with_ty_err
+        Typing_solver.is_sub_type
           env
           receiver_ty
           (Typing_make_type.nonnull Reason.none)
@@ -1316,13 +1314,13 @@ let obj_get_with_mismatches
         let (env, rec_ty) = Env.expand_type env receiver_ty in
         ((env, None), rec_ty)
       else
-        Typing_solver.expand_type_and_solve_with_ty_err
+        Typing_solver.expand_type_and_solve
           env
           ~description_of_expected:"an object"
           obj_pos
           receiver_ty
     else
-      Typing_solver.expand_type_and_narrow_with_ty_err
+      Typing_solver.expand_type_and_narrow
         env
         ~description_of_expected:"an object"
         (widen_class_for_obj_get ~is_method ~nullsafe (snd member_id))

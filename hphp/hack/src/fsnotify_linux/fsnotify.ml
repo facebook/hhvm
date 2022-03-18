@@ -18,7 +18,9 @@ let wrap f () =
       Printf.sprintf "%s: %s: %s" func msg (Unix.error_message err)
     in
     raise (Error (reason, err))
-  | e -> raise e
+  | exn ->
+    let e = Exception.wrap exn in
+    Exception.reraise e
 
 type watch = Inotify.watch
 

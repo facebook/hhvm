@@ -35,12 +35,15 @@ FoldedClass {
             deprecated: None,
         },
     },
-    constructor: FoldedElement {
-        flags: (empty),
-        origin: "\\Bag",
-        visibility: Public,
-        deprecated: None,
-    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\Bag",
+            visibility: Public,
+            deprecated: None,
+        },
+        Inconsistent,
+    ),
     consts: {
         "class": ClassConst {
             is_synthesized: true,
@@ -81,12 +84,15 @@ FoldedClass {
             deprecated: None,
         },
     },
-    constructor: FoldedElement {
-        flags: (empty),
-        origin: "\\ContravariantBag",
-        visibility: Public,
-        deprecated: None,
-    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\ContravariantBag",
+            visibility: Public,
+            deprecated: None,
+        },
+        Inconsistent,
+    ),
     consts: {
         "class": ClassConst {
             is_synthesized: true,
@@ -135,12 +141,15 @@ FoldedClass {
             deprecated: None,
         },
     },
-    constructor: FoldedElement {
-        flags: (empty),
-        origin: "\\CovariantBag",
-        visibility: Public,
-        deprecated: None,
-    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\CovariantBag",
+            visibility: Public,
+            deprecated: None,
+        },
+        Inconsistent,
+    ),
     consts: {
         "class": ClassConst {
             is_synthesized: true,

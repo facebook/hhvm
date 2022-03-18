@@ -20,6 +20,7 @@ type name_kind =
   | Type_kind of kind_of_type
   | Fun_kind
   | Const_kind
+  | Module_kind
 [@@deriving show, eq]
 
 val name_kind_to_enum : name_kind -> int

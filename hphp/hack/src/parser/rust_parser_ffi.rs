@@ -38,8 +38,7 @@ where
         + std::panic::UnwindSafe
         + std::panic::RefUnwindSafe
         + 'static,
-    Node: 'a,
-    for<'r> WithContext<'r, Node>: ToOcamlRep,
+    Node: ToOcaml + 'a,
     State: ToOcamlRep + 'a,
 {
     let ocaml_source_text = ocaml_source_text_ptr.as_usize();
@@ -78,15 +77,9 @@ where
         let (root, errors, state) = parse_fn(arena_ref, &source_text, env, Some(stack_limit_ref));
         // traversing the parsed syntax tree uses about 1/3 of the stack
 
-
-        let context = WithContext {
-            t: &(),
-            source_text: ocaml_source_text_ptr,
-        };
-
-        let ocaml_root = pool.add(&context.with(&root));
-        let ocaml_errors = pool.add(&errors);
-        let ocaml_state = pool.add(&state);
+        let ocaml_root = root.to_ocaml(&pool, ocaml_source_text_ptr).to_bits();
+        let ocaml_errors = pool.add(&errors).to_bits();
+        let ocaml_state = pool.add(&state).to_bits();
         let tree = if leak_rust_tree {
             let (_, mode) = parse_mode(&source_text);
             let tree = Box::new(SyntaxTree::build(
@@ -109,9 +102,21 @@ where
         let ocaml_tree = pool.add(&tree);
 
         let mut res = pool.block_with_size(4);
-        pool.set_field(&mut res, 0, ocaml_state);
-        pool.set_field(&mut res, 1, ocaml_root);
-        pool.set_field(&mut res, 2, ocaml_errors);
+        // SAFETY: The to_bits/from_bits dance works around a lifetime issue:
+        // we're not allowed to drop `root`, `errors`, or `state` while the
+        // `Pool` is in scope (because otherwise, its memoization behavior would
+        // work incorrectly in `ocamlrep::Allocator::add_root`). We are moving
+        // those values, but since we're not using `add_root` here, it should be
+        // okay.
+        pool.set_field(&mut res, 0, unsafe {
+            ocamlrep::OpaqueValue::from_bits(ocaml_state)
+        });
+        pool.set_field(&mut res, 1, unsafe {
+            ocamlrep::OpaqueValue::from_bits(ocaml_root)
+        });
+        pool.set_field(&mut res, 2, unsafe {
+            ocamlrep::OpaqueValue::from_bits(ocaml_errors)
+        });
         pool.set_field(&mut res, 3, ocaml_tree);
         // Safety: The UnsafeOcamlPtr must point to the first field in
         // the block. It must be handed back to OCaml before the garbage

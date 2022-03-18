@@ -172,6 +172,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
       typedefs = [];
       consts = [];
       comments = Some [];
+      modules = [];
     }
   in
   let foo3fileinfo =
@@ -183,6 +184,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
       typedefs = [];
       consts = [];
       comments = Some [];
+      modules = [];
     }
   in
   let changelist =

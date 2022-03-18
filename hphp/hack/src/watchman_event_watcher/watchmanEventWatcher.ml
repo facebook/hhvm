@@ -313,9 +313,9 @@ let init root =
 
 let to_channel_no_exn oc data =
   try Daemon.to_channel oc ~flush:true data with
-  | e ->
-    let stack = Printexc.get_backtrace () in
-    Hh_logger.exc ~prefix:"Warning: writing to channel failed" ~stack e
+  | exn ->
+    let e = Exception.wrap exn in
+    Hh_logger.exception_ ~prefix:"Warning: writing to channel failed" e
 
 let main root =
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
@@ -324,16 +324,14 @@ let main root =
   | Ok env ->
     begin
       try serve env with
-      | e ->
-        let raw_stack = Caml.Printexc.get_raw_backtrace () in
-        let stack = Caml.Printexc.raw_backtrace_to_string raw_stack in
+      | exn ->
+        let e = Exception.wrap exn in
         let () =
-          Hh_logger.exc
+          Hh_logger.exception_
             ~prefix:"WatchmanEventWatcher uncaught exception. exiting."
-            ~stack
             e
         in
-        Caml.Printexc.raise_with_backtrace e raw_stack
+        Exception.reraise e
     end
   | Error Failure_daemon_already_running
   | Error Failure_watchman_init ->

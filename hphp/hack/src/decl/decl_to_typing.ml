@@ -38,7 +38,10 @@ let base_visibility origin_class_name module_ = function
   | Internal ->
     (match module_ with
     | Some m -> Vinternal m
-    | None -> failwith "internal outside of a module")
+    | None ->
+      (* TODO(T111608277) We probably want to emit `public` here, just because
+       * it "works" and is likely to be the least confusing option. *)
+      Vpublic)
 
 let shallow_method_to_class_elt child_class mname mro subst meth : class_elt =
   let {

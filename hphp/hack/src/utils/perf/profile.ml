@@ -107,12 +107,13 @@ let profile_longer_than run ?(min_runs = 1) ?(retry = true) min_time =
         run ();
         1
       with
-      | e ->
+      | exn ->
+        let e = Exception.wrap exn in
         if retry then
           0
         (* distinguish failures by letting run count stay 0 *)
         else
-          raise e
+          Exception.reraise e
     in
     let dt_user = query_user_time () -. t_user0 in
     let dt_user_tot = dt_user_tot +. dt_user in

@@ -5,8 +5,9 @@
 
 use super::subst::{Subst, Substitution};
 use crate::decl_defs::{
-    AbstractTypeconst, Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass,
-    FoldedElement, ShallowClass, SubstContext, TypeConst, Typeconst,
+    folded::Constructor, ty::ConsistentKind, AbstractTypeconst, Abstraction, ClassConst,
+    ClassConstKind, ClassishKind, DeclTy, FoldedClass, FoldedElement, ShallowClass, SubstContext,
+    TypeConst, Typeconst,
 };
 use crate::reason::Reason;
 use indexmap::map::Entry;
@@ -26,7 +27,7 @@ pub struct Inherited<R: Reason> {
     pub static_props: PropNameIndexMap<FoldedElement>,
     pub methods: MethodNameIndexMap<FoldedElement>,
     pub static_methods: MethodNameIndexMap<FoldedElement>,
-    pub constructor: Option<FoldedElement>,
+    pub constructor: Constructor,
     pub consts: ClassConstNameIndexMap<ClassConst<R>>,
     pub type_consts: TypeConstNameIndexMap<TypeConst<R>>,
 }
@@ -39,7 +40,7 @@ impl<R: Reason> Default for Inherited<R> {
             static_props: Default::default(),
             methods: Default::default(),
             static_methods: Default::default(),
-            constructor: Default::default(),
+            constructor: Constructor::new(None, ConsistentKind::Inconsistent),
             consts: Default::default(),
             type_consts: Default::default(),
         }
@@ -63,13 +64,20 @@ impl<R: Reason> Inherited<R> {
                 && new_sig.is_synthesized()
     }
 
-    fn add_constructor(&mut self, constructor: Option<FoldedElement>) {
-        match (constructor.as_ref(), self.constructor.as_ref()) {
-            (None, _) => {}
+    fn add_constructor(&mut self, constructor: Constructor) {
+        let elt = match (constructor.elt.as_ref(), self.constructor.elt.take()) {
+            (None, self_ctor) => self_ctor,
             (Some(other_ctor), Some(self_ctor))
-                if Self::should_keep_old_sig(other_ctor, self_ctor) => {}
-            (_, _) => self.constructor = constructor,
-        }
+                if Self::should_keep_old_sig(other_ctor, &self_ctor) =>
+            {
+                Some(self_ctor)
+            }
+            (_, _) => constructor.elt,
+        };
+        self.constructor = Constructor::new(
+            elt,
+            ConsistentKind::coalesce(self.constructor.consistency, constructor.consistency),
+        );
     }
 
     fn add_substs(&mut self, other_substs: TypeNameIndexMap<SubstContext<R>>) {
@@ -283,7 +291,7 @@ impl<R: Reason> Inherited<R> {
         for ctx in self.substs.values_mut() {
             ctx.from_req_extends = true;
         }
-        if let Some(ref mut elt) = self.constructor {
+        if let Some(ref mut elt) = self.constructor.elt {
             elt.set_is_synthesized(true);
         }
         for prop in self.props.values_mut() {

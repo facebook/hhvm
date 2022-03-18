@@ -16,8 +16,9 @@ pub fn gen(ctx: &Context) -> TokenStream {
     let impls = ctx.type_structures().map(gen_node_impl).collect::<Vec<_>>();
 
     quote! {
-        #![allow(unused_variables)]
         #![allow(unused_braces)]
+        #![allow(unused_imports)]
+        #![allow(unused_variables)]
 
         use super::node::Node;
         use super::visitor::Visitor;

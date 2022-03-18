@@ -1,98 +1,97 @@
---- ocaml
-+++ rupro
-@@ -1,95 +1,92 @@
- FoldedClass {
-     name: "\\C",
-     pos: Pos(root|class_level_where.php, 14:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|class_level_where.php, 14:7-8),
-             ty: HH\classname<this>,
-             origin: "\\C",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\I",
-     pos: Pos(root|class_level_where.php, 16:11-12),
-     kind: Cinterface,
-     where_constraints: [
-         WhereConstraint(
-             this,
-             ConstraintAs,
-             C,
-         ),
-     ],
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|class_level_where.php, 16:11-12),
-             ty: HH\classname<this>,
-             origin: "\\I",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\PartialC",
-     pos: Pos(root|class_level_where.php, 18:7-15),
-     kind: Ctrait,
-     where_constraints: [
-         WhereConstraint(
-             this,
-             ConstraintEq,
-             C,
-         ),
-     ],
-     substs: {
-         "\\I": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\PartialC",
-             from_req_extends: false,
-         },
-     },
--    ancestors: {
--        "\\I": I,
--    },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|class_level_where.php, 18:7-15),
-             ty: HH\classname<this>,
-             origin: "\\PartialC",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\J",
-     pos: Pos(root|class_level_where.php, 20:11-12),
-     kind: Cinterface,
-     where_constraints: [
-         WhereConstraint(
-             C,
-             ConstraintSuper,
-             this,
-         ),
-     ],
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|class_level_where.php, 20:11-12),
-             ty: HH\classname<this>,
-             origin: "\\J",
-             refs: [],
-         },
-     },
- }
+FoldedClass {
+    name: "\\C",
+    pos: Pos(root|class_level_where.php, 14:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|class_level_where.php, 14:7-8),
+            ty: HH\classname<this>,
+            origin: "\\C",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\I",
+    pos: Pos(root|class_level_where.php, 16:11-12),
+    kind: Cinterface,
+    where_constraints: [
+        WhereConstraint(
+            this,
+            ConstraintAs,
+            C,
+        ),
+    ],
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|class_level_where.php, 16:11-12),
+            ty: HH\classname<this>,
+            origin: "\\I",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\PartialC",
+    pos: Pos(root|class_level_where.php, 18:7-15),
+    kind: Ctrait,
+    where_constraints: [
+        WhereConstraint(
+            this,
+            ConstraintEq,
+            C,
+        ),
+    ],
+    substs: {
+        "\\I": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\PartialC",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\I": I,
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|class_level_where.php, 18:7-15),
+            ty: HH\classname<this>,
+            origin: "\\PartialC",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\J",
+    pos: Pos(root|class_level_where.php, 20:11-12),
+    kind: Cinterface,
+    where_constraints: [
+        WhereConstraint(
+            C,
+            ConstraintSuper,
+            this,
+        ),
+    ],
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|class_level_where.php, 20:11-12),
+            ty: HH\classname<this>,
+            origin: "\\J",
+            refs: [],
+        },
+    },
+}
+
+They matched!

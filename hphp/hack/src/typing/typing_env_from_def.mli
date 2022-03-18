@@ -32,4 +32,10 @@ val gconst_env :
   ('a, 'b) Aast.gconst ->
   Typing_env_types.env
 
+val module_env :
+  ?origin:Decl_counters.origin ->
+  Provider_context.t ->
+  ('a, 'b) Aast.module_def ->
+  Typing_env_types.env
+
 val get_self_from_c : ('a, 'b) Aast.class_ -> Typing_defs.decl_ty

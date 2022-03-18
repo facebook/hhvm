@@ -577,6 +577,15 @@ let make_depend_on_class_def env x cd =
   | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
   | _ -> make_depend_on_class env x
 
+let make_depend_on_module env =
+  let f (_, mid) =
+    let dep = Dep.Module mid in
+    Option.iter env.decl_env.droot ~f:(fun root ->
+        Typing_deps.add_idep (get_deps_mode env) root dep);
+    ()
+  in
+  Option.iter ~f env.genv.this_module
+
 let get_typedef env x =
   let res =
     Decl_provider.get_typedef

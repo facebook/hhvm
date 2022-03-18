@@ -2,10 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use crate::reason::Reason;
 use crate::typing_defs::Ty;
-
 use bumpalo::Bump;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
+
+pub struct Tast;
 
 #[derive(Clone, Debug)]
 pub struct SavedEnv;
@@ -36,8 +38,14 @@ pub type Tparam<R> = oxidized::aast::Tparam<Ty<R>, SavedEnv>;
 pub type Typedef<R> = oxidized::aast::Typedef<Ty<R>, SavedEnv>;
 pub type Gconst<R> = oxidized::aast::Gconst<Ty<R>, SavedEnv>;
 
+impl Tast {
+    pub fn make_typed_expr<R: Reason>(p: oxidized::pos::Pos, te: Expr_<R>, ty: Ty<R>) -> Expr<R> {
+        oxidized::aast::Expr(ty, p, te)
+    }
+}
+
 impl ToOcamlRep for SavedEnv {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
         // This implementation of `to_ocamlrep` (which allocates in an arena,
         // converts to OCaml, then drops the arena) violates a `ToOcamlRep`
         // requirement: we may not drop values after passing them to `alloc.add`
@@ -66,6 +74,16 @@ impl ToOcamlRep for SavedEnv {
             condition_types: Default::default(),
             pessimize: false,
             fun_tast_info: None,
+        };
+        // SAFETY: Transmute away the lifetime to allow the arena-allocated
+        // value to be converted to OCaml. Won't break type safety in Rust, but
+        // will produce broken OCaml values if used with `add_root` (see comment
+        // on impl of ToOcamlRep for Ty).
+        let saved_env = unsafe {
+            std::mem::transmute::<
+                &'_ oxidized_by_ref::tast::SavedEnv<'_>,
+                &'a oxidized_by_ref::tast::SavedEnv<'a>,
+            >(&saved_env)
         };
         saved_env.to_ocamlrep(alloc)
     }

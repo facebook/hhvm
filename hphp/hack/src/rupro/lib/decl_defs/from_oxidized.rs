@@ -413,6 +413,14 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ConstDecl<'_>> for shallow::ConstD
     }
 }
 
+impl<R: Reason> From<&obr::shallow_decl_defs::ModuleDefType<'_>> for shallow::ModuleDecl<R> {
+    fn from(x: &obr::shallow_decl_defs::ModuleDefType<'_>) -> Self {
+        Self {
+            pos: x.mdt_pos.into(),
+        }
+    }
+}
+
 impl<R: Reason> From<(&str, obr::shallow_decl_defs::Decl<'_>)> for shallow::Decl<R> {
     fn from(decl: (&str, obr::shallow_decl_defs::Decl<'_>)) -> Self {
         use obr::shallow_decl_defs::Decl as Obr;
@@ -421,6 +429,7 @@ impl<R: Reason> From<(&str, obr::shallow_decl_defs::Decl<'_>)> for shallow::Decl
             (name, Obr::Fun(x)) => Self::Fun(name.into(), x.into()),
             (name, Obr::Typedef(x)) => Self::Typedef(name.into(), x.into()),
             (name, Obr::Const(x)) => Self::Const(name.into(), x.into()),
+            (name, Obr::Module(x)) => Self::Module(name.into(), x.into()),
         }
     }
 }
@@ -480,7 +489,16 @@ impl<R: Reason> From<&obr::typing_defs::ClassConst<'_>> for folded::ClassConst<R
 
 impl<R: Reason> From<&obr::decl_defs::Requirement<'_>> for folded::Requirement<R> {
     fn from(req: &obr::decl_defs::Requirement<'_>) -> Self {
-        Self(req.0.into(), req.1.into())
+        Self {
+            pos: req.0.into(),
+            ty: req.1.into(),
+        }
+    }
+}
+
+impl From<(Option<&obr::decl_defs::Element<'_>>, ty::ConsistentKind)> for folded::Constructor {
+    fn from(construct: (Option<&obr::decl_defs::Element<'_>>, ty::ConsistentKind)) -> Self {
+        Self::new(construct.0.map(Into::into), construct.1)
     }
 }
 
@@ -506,7 +524,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             static_props: map(cls.sprops.iter()),
             methods: map(cls.methods.iter()),
             static_methods: map(cls.smethods.iter()),
-            constructor: cls.construct.0.map(Into::into), // TODO: ConsistentKind
+            constructor: cls.construct.into(),
             consts: map(cls.consts.iter()),
             type_consts: map(cls.typeconsts.iter()),
             xhp_enum_values: (cls.xhp_enum_values.iter())

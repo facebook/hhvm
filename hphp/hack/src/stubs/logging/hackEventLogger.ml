@@ -61,6 +61,8 @@ type rollout_flags = {
   hulk_lite: bool;
   specify_manifold_api_key: bool;
   populate_member_heaps: bool;
+  shm_use_sharded_hashtbl: bool;
+  shm_cache_size: int;
 }
 
 let flush () = ()
@@ -381,7 +383,7 @@ let save_decls_failure _ = ()
 
 let load_decls_end _ = ()
 
-let load_decls_failure _ _ = ()
+let load_decls_failure _ = ()
 
 let saved_state_load_ok _ ~start_time:_ = ()
 

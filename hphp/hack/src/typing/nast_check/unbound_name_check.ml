@@ -46,6 +46,7 @@ let handle_unbound_name env (pos, name) kind =
       | ConstantNamespace -> Typing_deps.Dep.GConst name
       | TraitContext -> Typing_deps.Dep.Type name
       | ClassContext -> Typing_deps.Dep.Type name
+      | ModuleNamespace -> Typing_deps.Dep.Module name
     in
     Typing_deps.add_idep (Provider_context.get_deps_mode env.ctx) env.droot dep
   end
@@ -84,6 +85,12 @@ let check_const_name env ((_, name) as id) =
     ()
   else
     handle_unbound_name env id Name_context.ConstantNamespace
+
+let check_module_name env ((_, name) as id) =
+  if Naming_provider.module_exists env.ctx name then
+    ()
+  else
+    handle_unbound_name env id Name_context.ModuleNamespace
 
 let check_type_name
     ?(kind = Name_context.TypeNamespace)
@@ -216,7 +223,22 @@ let handler ctx =
       in
       new_env
 
-    method! at_file_attribute env _ =
+    method! at_file_attribute env attrs =
+      let () =
+        attrs.Aast.fa_user_attributes
+        |> Naming_attributes.find Naming_special_names.UserAttributes.uaModule
+        |> function
+        | None
+        | Some { Aast.ua_name = _; Aast.ua_params = [] } ->
+          ()
+        | Some { Aast.ua_name = _; Aast.ua_params = ((_, p, _) as name) :: _ }
+          ->
+          begin
+            match Nast_eval.static_string name with
+            | Ok name -> check_module_name env (p, name)
+            | Error _ -> () (* TODO(T110227532) *)
+          end
+      in
       let new_env =
         { env with droot = Typing_deps.Dep.Fun ""; type_params = SMap.empty }
       in

@@ -11,6 +11,7 @@ pub mod cache;
 pub mod decl_defs;
 pub mod decl_hint;
 pub mod decl_parser;
+pub mod dependency_registrar;
 pub mod errors;
 pub mod folded_decl_provider;
 pub mod inference_env;

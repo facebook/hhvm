@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b8f36414411e5112fe5b365c395b4f3d>>
+// @generated SignedSource<<306c2590559242c188cda9a67fcad814>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -43,6 +43,8 @@ pub enum DeclReference<'a> {
     Function(&'a str),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Type(&'a str),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Module(&'a str),
 }
 impl<'a> TrivialDrop for DeclReference<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(DeclReference<'arena>);

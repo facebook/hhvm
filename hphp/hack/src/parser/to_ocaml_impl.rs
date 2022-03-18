@@ -19,56 +19,62 @@ pub struct WithContext<'a, T: ?Sized> {
     pub source_text: UnsafeOcamlPtr,
 }
 
-impl<T: ?Sized> WithContext<'_, T> {
-    pub fn with<'a, S: ?Sized>(&self, s: &'a S) -> WithContext<'a, S> {
-        WithContext {
-            t: s,
-            source_text: self.source_text,
+pub trait ToOcaml {
+    fn to_ocaml<'a, A: Allocator>(
+        &'a self,
+        alloc: &'a A,
+        source_text: UnsafeOcamlPtr,
+    ) -> OpaqueValue<'a>;
+}
+
+impl<T: ToOcaml> ToOcaml for [T] {
+    fn to_ocaml<'a, A: Allocator>(
+        &'a self,
+        alloc: &'a A,
+        source_text: UnsafeOcamlPtr,
+    ) -> OpaqueValue<'a> {
+        let mut hd = alloc.add(&());
+        for val in self.iter().rev() {
+            let mut block = alloc.block_with_size(2);
+            alloc.set_field(&mut block, 0, val.to_ocaml(alloc, source_text));
+            alloc.set_field(&mut block, 1, hd);
+            hd = block.build();
         }
+        hd
     }
 }
 
-fn from_list<'a, 'r, A: Allocator, T>(l: &WithContext<'r, [T]>, alloc: &'a A) -> OpaqueValue<'a>
-where
-    WithContext<'r, T>: ToOcamlRep,
-{
-    let mut hd = alloc.add(&());
-    for val in l.t.iter().rev() {
-        let mut block = alloc.block_with_size(2);
-        alloc.set_field(&mut block, 0, l.with(val).to_ocamlrep(alloc));
-        alloc.set_field(&mut block, 1, hd);
-        hd = block.build();
-    }
-    hd
-}
+impl ToOcaml for Syntax<'_, PositionedToken<'_>, PositionedValue<'_>> {
+    fn to_ocaml<'a, A: Allocator>(
+        &'a self,
+        alloc: &'a A,
+        source_text: UnsafeOcamlPtr,
+    ) -> OpaqueValue<'a> {
+        let value = self.value.to_ocaml(alloc, source_text);
 
-impl<'r> ToOcamlRep for WithContext<'r, Syntax<'_, PositionedToken<'_>, PositionedValue<'_>>> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
-        let value = self.with(&self.t.value).to_ocamlrep(alloc);
-
-        let syntax = match &self.t.children {
-            SyntaxVariant::Missing => (SyntaxKind::Missing.ocaml_tag() as usize).to_ocamlrep(alloc),
+        let syntax = match &self.children {
+            SyntaxVariant::Missing => alloc.add_copy(SyntaxKind::Missing.ocaml_tag() as usize),
             SyntaxVariant::Token(t) => {
                 let kind = t.kind();
-                let t = self.with(t).to_ocamlrep(alloc);
+                let t = t.to_ocaml(alloc, source_text);
                 let mut block =
                     alloc.block_with_size_and_tag(1, SyntaxKind::Token(kind).ocaml_tag());
                 alloc.set_field(&mut block, 0, t);
                 block.build()
             }
             SyntaxVariant::SyntaxList(l) => {
-                let l = from_list(&self.with(*l), alloc);
+                let l = l.to_ocaml(alloc, source_text);
                 let mut block =
                     alloc.block_with_size_and_tag(1, SyntaxKind::SyntaxList.ocaml_tag());
                 alloc.set_field(&mut block, 0, l);
                 block.build()
             }
             _ => {
-                let tag = self.t.kind().ocaml_tag();
-                let n = self.t.iter_children().count();
+                let tag = self.kind().ocaml_tag();
+                let n = self.iter_children().count();
                 let mut block = alloc.block_with_size_and_tag(n, tag);
-                self.t.iter_children().fold(0, |i, field| {
-                    let field = self.with(field).to_ocamlrep(alloc);
+                self.iter_children().fold(0, |i, field| {
+                    let field = field.to_ocaml(alloc, source_text);
                     alloc.set_field(&mut block, i, field);
                     i + 1
                 });
@@ -82,8 +88,12 @@ impl<'r> ToOcamlRep for WithContext<'r, Syntax<'_, PositionedToken<'_>, Position
     }
 }
 
-impl<'r> ToOcamlRep for WithContext<'r, PositionedTrivium> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+impl ToOcaml for PositionedTrivium {
+    fn to_ocaml<'a, A: Allocator>(
+        &'a self,
+        alloc: &'a A,
+        source_text: UnsafeOcamlPtr,
+    ) -> OpaqueValue<'a> {
         // From full_fidelity_positioned_trivia.ml:
         // type t = {
         //   kind: TriviaKind.t;
@@ -92,16 +102,20 @@ impl<'r> ToOcamlRep for WithContext<'r, PositionedTrivium> {
         //   width : int
         // }
         let mut block = alloc.block_with_size_and_tag(4, 0);
-        alloc.set_field(&mut block, 0, self.t.kind.to_ocamlrep(alloc));
-        alloc.set_field(&mut block, 1, self.source_text.to_ocamlrep(alloc));
-        alloc.set_field(&mut block, 2, self.t.offset.to_ocamlrep(alloc));
-        alloc.set_field(&mut block, 3, self.t.width.to_ocamlrep(alloc));
+        alloc.set_field(&mut block, 0, self.kind.to_ocamlrep(alloc));
+        alloc.set_field(&mut block, 1, alloc.add_copy(source_text));
+        alloc.set_field(&mut block, 2, self.offset.to_ocamlrep(alloc));
+        alloc.set_field(&mut block, 3, self.width.to_ocamlrep(alloc));
         block.build()
     }
 }
 
-impl<'r> ToOcamlRep for WithContext<'r, PositionedToken<'r>> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+impl ToOcaml for PositionedToken<'_> {
+    fn to_ocaml<'a, A: Allocator>(
+        &'a self,
+        alloc: &'a A,
+        source_text: UnsafeOcamlPtr,
+    ) -> OpaqueValue<'a> {
         // From full_fidelity_positioned_token.ml:
         // type t = {
         //   kind: TokenKind.t;
@@ -113,17 +127,16 @@ impl<'r> ToOcamlRep for WithContext<'r, PositionedToken<'r>> {
         //   trivia: LazyTrivia.t;
         // }
         let mut block = alloc.block_with_size_and_tag(7, 0);
-        alloc.set_field(&mut block, 0, self.t.kind().to_ocamlrep(alloc));
-        alloc.set_field(&mut block, 1, self.source_text.to_ocamlrep(alloc));
-        alloc.set_field(&mut block, 2, self.t.offset().to_ocamlrep(alloc));
-        alloc.set_field(&mut block, 3, self.t.leading_width().to_ocamlrep(alloc));
-        alloc.set_field(&mut block, 4, self.t.width().to_ocamlrep(alloc));
-        alloc.set_field(&mut block, 5, self.t.trailing_width().to_ocamlrep(alloc));
+        alloc.set_field(&mut block, 0, alloc.add_copy(self.kind()));
+        alloc.set_field(&mut block, 1, alloc.add_copy(source_text));
+        alloc.set_field(&mut block, 2, alloc.add_copy(self.offset()));
+        alloc.set_field(&mut block, 3, alloc.add_copy(self.leading_width()));
+        alloc.set_field(&mut block, 4, alloc.add_copy(self.width()));
+        alloc.set_field(&mut block, 5, alloc.add_copy(self.trailing_width()));
         alloc.set_field(
             &mut block,
             6,
-            ((self.t.leading_kinds().bits() | self.t.trailing_kinds().bits()) as usize)
-                .to_ocamlrep(alloc),
+            alloc.add_copy((self.leading_kinds().bits() | self.trailing_kinds().bits()) as usize),
         );
         block.build()
     }
@@ -133,23 +146,27 @@ const TOKEN_VALUE_VARIANT: u8 = 0;
 const TOKEN_SPAN_VARIANT: u8 = 1;
 const MISSING_VALUE_VARIANT: u8 = 2;
 
-impl<'r> ToOcamlRep for WithContext<'r, PositionedValue<'r>> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
-        match self.t {
+impl ToOcaml for PositionedValue<'_> {
+    fn to_ocaml<'a, A: Allocator>(
+        &'a self,
+        alloc: &'a A,
+        source_text: UnsafeOcamlPtr,
+    ) -> OpaqueValue<'a> {
+        match self {
             PositionedValue::TokenValue(t) => {
                 let mut block = alloc.block_with_size_and_tag(1, TOKEN_VALUE_VARIANT);
-                alloc.set_field(&mut block, 0, self.with(t).to_ocamlrep(alloc));
+                alloc.set_field(&mut block, 0, t.to_ocaml(alloc, source_text));
                 block.build()
             }
             PositionedValue::TokenSpan(l, r) => {
                 let mut block = alloc.block_with_size_and_tag(2, TOKEN_SPAN_VARIANT);
-                alloc.set_field(&mut block, 0, self.with(l).to_ocamlrep(alloc));
-                alloc.set_field(&mut block, 1, self.with(r).to_ocamlrep(alloc));
+                alloc.set_field(&mut block, 0, l.to_ocaml(alloc, source_text));
+                alloc.set_field(&mut block, 1, r.to_ocaml(alloc, source_text));
                 block.build()
             }
             PositionedValue::Missing { offset } => {
                 let mut block = alloc.block_with_size_and_tag(2, MISSING_VALUE_VARIANT);
-                alloc.set_field(&mut block, 0, self.source_text.to_ocamlrep(alloc));
+                alloc.set_field(&mut block, 0, alloc.add_copy(source_text));
                 alloc.set_field(&mut block, 1, offset.to_ocamlrep(alloc));
                 block.build()
             }

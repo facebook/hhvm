@@ -9,7 +9,7 @@
         sc_name = ([12:7-10], "\\Foo"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-        sc_req_implements = [];
+        sc_req_implements = []; sc_req_class = [];
         sc_implements =
         [(Rhint ([12:22-43]),
           (Tapply (([12:22-43], "\\HH\\TypeAliasAttribute"), [])))];
@@ -58,7 +58,7 @@
          sc_name = ([13:7-10], "\\Bar"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([13:22-43]),
            (Tapply (([13:22-43], "\\HH\\TypeAliasAttribute"), [])))];
@@ -74,7 +74,7 @@
          sc_name = ([14:7-22], "\\SingleAttribute"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([14:34-55]),
            (Tapply (([14:34-55], "\\HH\\TypeAliasAttribute"), [])))];
@@ -90,7 +90,7 @@
          sc_name = ([15:7-34], "\\SingleAttributeWithOneParam");
          sc_tparams = []; sc_where_constraints = []; sc_extends = [];
          sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-         sc_req_extends = []; sc_req_implements = [];
+         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([15:46-67]),
            (Tapply (([15:46-67], "\\HH\\TypeAliasAttribute"), [])))];
@@ -144,7 +144,7 @@
          sc_name = ([16:7-35], "\\SingleAttributeWithTwoParams");
          sc_tparams = []; sc_where_constraints = []; sc_extends = [];
          sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-         sc_req_extends = []; sc_req_implements = [];
+         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([16:47-68]),
            (Tapply (([16:47-68], "\\HH\\TypeAliasAttribute"), [])))];
@@ -213,7 +213,7 @@
          sc_name = ([17:7-15], "\\Multiple"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([17:27-48]),
            (Tapply (([17:27-48], "\\HH\\TypeAliasAttribute"), [])))];
@@ -266,7 +266,7 @@
          sc_name = ([18:7-17], "\\Attributes"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-         sc_req_implements = [];
+         sc_req_implements = []; sc_req_class = [];
          sc_implements =
          [(Rhint ([18:29-50]),
            (Tapply (([18:29-50], "\\HH\\TypeAliasAttribute"), [])))];

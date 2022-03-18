@@ -53,6 +53,12 @@ module Consts : sig
   include ReverseNamingTable with type pos = FileInfo.pos
 end
 
+module Modules : sig
+  module ModulePosHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
+
+  include ReverseNamingTable with type pos = FileInfo.pos
+end
+
 (** This function searches all three namespaces (types, funs, consts) to
 find which one contains each Dep.t. The earlier functions in this module
 only search one specified namespace. Note: this function doesn't

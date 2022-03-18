@@ -81,6 +81,19 @@ int Option::ParserThreadCount = 0;
 
 bool Option::AllVolatile = false;
 
+// These default sizes were selected by experimentation
+const int Option::kDefaultParserGroupSize = 500;
+const int Option::kDefaultParserDirGroupSizeLimit = 50000;
+
+int Option::ParserGroupSize = kDefaultParserGroupSize;
+int Option::ParserDirGroupSizeLimit = kDefaultParserDirGroupSizeLimit;
+
+std::string Option::ExternWorkerUseCase;
+bool Option::ExternWorkerForceSubprocess = false;
+int Option::ExternWorkerTimeoutSecs = 0;
+bool Option::ExternWorkerUseExecCache = true;
+bool Option::ExternWorkerCleanup = true;
+
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
 
@@ -233,6 +246,27 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   // Temporary, during file-cache migration.
   Config::Bind(FileCache::UseNewCache, ini, config, "UseNewCache", false);
 
+  Config::Bind(ParserGroupSize, ini, config,
+               "ParserGroupSize", kDefaultParserGroupSize);
+  Config::Bind(ParserDirGroupSizeLimit, ini, config,
+               "ParserDirGroupSizeLimit", kDefaultParserDirGroupSizeLimit);
+  if (ParserGroupSize <= 0) ParserGroupSize = kDefaultParserGroupSize;
+  if (ParserDirGroupSizeLimit <= 0) {
+    ParserDirGroupSizeLimit = kDefaultParserDirGroupSizeLimit;
+  }
+
+  Config::Bind(ExternWorkerUseCase, ini, config, "ExternWorker.UseCase",
+               ExternWorkerUseCase);
+  // Kill switch for extern-worker. Disable all implementations except
+  // the builtin one.
+  Config::Bind(ExternWorkerForceSubprocess, ini, config,
+               "ExternWorker.ForceSubprocess", ExternWorkerForceSubprocess);
+  Config::Bind(ExternWorkerTimeoutSecs, ini, config, "ExternWorker.TimeoutSecs",
+               ExternWorkerTimeoutSecs);
+  Config::Bind(ExternWorkerUseExecCache, ini, config,
+               "ExternWorker.UseExecCache", ExternWorkerUseExecCache);
+  Config::Bind(ExternWorkerCleanup, ini, config, "ExternWorker.Cleanup",
+               ExternWorkerCleanup);
 }
 
 void Option::Load() {

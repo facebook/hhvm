@@ -926,15 +926,12 @@ let parse_initialize (params : json option) : Initialize.params =
       | _ -> Off
     and parse_initializationOptions json =
       {
-        useTextEditAutocomplete =
-          Jget.bool_d json "useTextEditAutocomplete" ~default:false;
-        liveSyntaxErrors = Jget.bool_d json "liveSyntaxErrors" ~default:true;
         namingTableSavedStatePath =
           Jget.string_opt json "namingTableSavedStatePath";
         namingTableSavedStateTestDelay =
           Jget.float_d json "namingTableSavedStateTestDelay" ~default:0.0;
-        sendServerStatusEvents =
-          Jget.bool_d json "sendServerStatusEvents" ~default:false;
+        delayUntilDoneInit =
+          Jget.bool_d json "delayUntilDoneInit" ~default:false;
       }
     and parse_capabilities json =
       {

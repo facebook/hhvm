@@ -1,290 +1,287 @@
---- ocaml
-+++ rupro
-@@ -1,285 +1,285 @@
- FoldedClass {
-     name: "\\TestC",
-     pos: Pos(root|consts_misc2.php, 3:22-27),
-     kind: Cclass(
-         Abstract,
-     ),
-     is_final: true,
-     static_methods: {
-         "i": FoldedElement {
-             flags: (empty),
-             origin: "\\TestC",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 3:22-27),
-             ty: HH\classname<this>,
-             origin: "\\TestC",
-             refs: [],
-         },
-         "i": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 5:13-14),
-             ty: int,
-             origin: "\\TestC",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\TestE",
-     pos: Pos(root|consts_misc2.php, 7:6-11),
-     kind: Cenum,
-     enum_type: EnumType {
-         base: int,
-         constraint: Some(
-             int,
-         ),
-         includes: [],
-     },
-     ancestors: {
-         "\\HH\\BuiltinEnum": HH\BuiltinEnum<TestE>,
-     },
-     consts: {
-         "X": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 7:25-26),
--            ty: TestE,
-+            ty: int,
-             origin: "\\TestE",
-             refs: [],
-         },
-         "Y": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 7:32-33),
--            ty: TestE,
-+            ty: int,
-             origin: "\\TestE",
-             refs: [],
-         },
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 7:6-11),
-             ty: HH\classname<this>,
-             origin: "\\TestE",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\HH\\BuiltinEnum",
-     },
- }
- FoldedClass {
-     name: "\\TestRefs1",
-     pos: Pos(root|consts_misc2.php, 9:22-31),
-     kind: Cclass(
-         Abstract,
-     ),
-     is_final: true,
-     consts: {
-         "A": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 10:15-16),
-             ty: mixed,
-             origin: "\\TestRefs1",
-             refs: [
-                 ClassConstRef(
-                     From(
-                         "\\TestE",
-                     ),
-                     "X",
-                 ),
-             ],
-         },
-         "B": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 11:15-16),
-             ty: mixed,
-             origin: "\\TestRefs1",
-             refs: [
-                 ClassConstRef(
-                     From(
-                         "\\TestE",
-                     ),
-                     "X",
-                 ),
-                 ClassConstRef(
-                     From(
-                         "\\TestE",
-                     ),
-                     "Y",
-                 ),
-             ],
-         },
-         "C": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 12:15-16),
-             ty: mixed,
-             origin: "\\TestRefs1",
-             refs: [
-                 ClassConstRef(
-                     From(
-                         "\\TestE",
-                     ),
-                     "X",
-                 ),
-             ],
-         },
-         "D": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 13:15-16),
-             ty: mixed,
-             origin: "\\TestRefs1",
-             refs: [
-                 ClassConstRef(
-                     From(
-                         "\\TestE",
-                     ),
-                     "X",
-                 ),
-             ],
-         },
-         "E": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 14:15-16),
-             ty: mixed,
-             origin: "\\TestRefs1",
-             refs: [
-                 ClassConstRef(
-                     From(
-                         "\\TestC",
-                     ),
-                     "class",
-                 ),
-             ],
-         },
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 9:22-31),
-             ty: HH\classname<this>,
-             origin: "\\TestRefs1",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\TestRefs2",
-     pos: Pos(root|consts_misc2.php, 17:12-21),
-     kind: CenumClass(
-         Concrete,
-     ),
-     enum_type: EnumType {
-         base: mixed,
-         constraint: None,
-         includes: [],
-     },
-     ancestors: {
-         "\\HH\\BuiltinEnumClass": HH\BuiltinEnumClass<HH\MemberOf<TestRefs2, mixed>>,
-     },
-     consts: {
-         "B": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 20:9-10),
-             ty: HH\MemberOf<TestRefs2, mixed>,
-             origin: "\\TestRefs2",
-             refs: [
-                 ClassConstRef(
-                     Self_,
-                     "K2",
-                 ),
-                 ClassConstRef(
-                     From(
-                         "\\TestRefs2",
-                     ),
-                     "K1",
-                 ),
-             ],
-         },
-         "F": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 21:9-10),
-             ty: HH\MemberOf<TestRefs2, mixed>,
-             origin: "\\TestRefs2",
-             refs: [
-                 ClassConstRef(
-                     From(
-                         "\\TestC",
-                     ),
-                     "i",
-                 ),
-             ],
-         },
-         "G": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 22:9-10),
-             ty: HH\MemberOf<TestRefs2, mixed>,
-             origin: "\\TestRefs2",
-             refs: [
-                 ClassConstRef(
-                     From(
-                         "\\TestC",
-                     ),
-                     "i",
-                 ),
-             ],
-         },
-         "H": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 23:9-10),
-             ty: HH\MemberOf<TestRefs2, mixed>,
-             origin: "\\TestRefs2",
-             refs: [
-                 ClassConstRef(
-                     From(
-                         "\\TestC",
-                     ),
-                     "i",
-                 ),
-             ],
-         },
-         "K1": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 18:10-12),
-             ty: HH\MemberOf<TestRefs2, string>,
-             origin: "\\TestRefs2",
-             refs: [],
-         },
-         "K2": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 19:10-12),
-             ty: HH\MemberOf<TestRefs2, string>,
-             origin: "\\TestRefs2",
-             refs: [],
-         },
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|consts_misc2.php, 17:12-21),
-             ty: HH\classname<this>,
-             origin: "\\TestRefs2",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\HH\\BuiltinEnumClass",
-     },
- }
+FoldedClass {
+    name: "\\TestC",
+    pos: Pos(root|consts_misc2.php, 3:22-27),
+    kind: Cclass(
+        Abstract,
+    ),
+    is_final: true,
+    static_methods: {
+        "i": FoldedElement {
+            flags: (empty),
+            origin: "\\TestC",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 3:22-27),
+            ty: HH\classname<this>,
+            origin: "\\TestC",
+            refs: [],
+        },
+        "i": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 5:13-14),
+            ty: int,
+            origin: "\\TestC",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\TestE",
+    pos: Pos(root|consts_misc2.php, 7:6-11),
+    kind: Cenum,
+    enum_type: EnumType {
+        base: int,
+        constraint: Some(
+            int,
+        ),
+        includes: [],
+    },
+    ancestors: {
+        "\\HH\\BuiltinEnum": HH\BuiltinEnum<TestE>,
+    },
+    consts: {
+        "X": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 7:25-26),
+            ty: TestE,
+            origin: "\\TestE",
+            refs: [],
+        },
+        "Y": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 7:32-33),
+            ty: TestE,
+            origin: "\\TestE",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 7:6-11),
+            ty: HH\classname<this>,
+            origin: "\\TestE",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\HH\\BuiltinEnum",
+    },
+}
+FoldedClass {
+    name: "\\TestRefs1",
+    pos: Pos(root|consts_misc2.php, 9:22-31),
+    kind: Cclass(
+        Abstract,
+    ),
+    is_final: true,
+    consts: {
+        "A": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 10:15-16),
+            ty: mixed,
+            origin: "\\TestRefs1",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\TestE",
+                    ),
+                    "X",
+                ),
+            ],
+        },
+        "B": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 11:15-16),
+            ty: mixed,
+            origin: "\\TestRefs1",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\TestE",
+                    ),
+                    "X",
+                ),
+                ClassConstRef(
+                    From(
+                        "\\TestE",
+                    ),
+                    "Y",
+                ),
+            ],
+        },
+        "C": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 12:15-16),
+            ty: mixed,
+            origin: "\\TestRefs1",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\TestE",
+                    ),
+                    "X",
+                ),
+            ],
+        },
+        "D": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 13:15-16),
+            ty: mixed,
+            origin: "\\TestRefs1",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\TestE",
+                    ),
+                    "X",
+                ),
+            ],
+        },
+        "E": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 14:15-16),
+            ty: mixed,
+            origin: "\\TestRefs1",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\TestC",
+                    ),
+                    "class",
+                ),
+            ],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 9:22-31),
+            ty: HH\classname<this>,
+            origin: "\\TestRefs1",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\TestRefs2",
+    pos: Pos(root|consts_misc2.php, 17:12-21),
+    kind: CenumClass(
+        Concrete,
+    ),
+    enum_type: EnumType {
+        base: mixed,
+        constraint: None,
+        includes: [],
+    },
+    ancestors: {
+        "\\HH\\BuiltinEnumClass": HH\BuiltinEnumClass<HH\MemberOf<TestRefs2, mixed>>,
+    },
+    consts: {
+        "B": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 20:9-10),
+            ty: HH\MemberOf<TestRefs2, mixed>,
+            origin: "\\TestRefs2",
+            refs: [
+                ClassConstRef(
+                    Self_,
+                    "K2",
+                ),
+                ClassConstRef(
+                    From(
+                        "\\TestRefs2",
+                    ),
+                    "K1",
+                ),
+            ],
+        },
+        "F": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 21:9-10),
+            ty: HH\MemberOf<TestRefs2, mixed>,
+            origin: "\\TestRefs2",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\TestC",
+                    ),
+                    "i",
+                ),
+            ],
+        },
+        "G": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 22:9-10),
+            ty: HH\MemberOf<TestRefs2, mixed>,
+            origin: "\\TestRefs2",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\TestC",
+                    ),
+                    "i",
+                ),
+            ],
+        },
+        "H": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 23:9-10),
+            ty: HH\MemberOf<TestRefs2, mixed>,
+            origin: "\\TestRefs2",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\TestC",
+                    ),
+                    "i",
+                ),
+            ],
+        },
+        "K1": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 18:10-12),
+            ty: HH\MemberOf<TestRefs2, string>,
+            origin: "\\TestRefs2",
+            refs: [],
+        },
+        "K2": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 19:10-12),
+            ty: HH\MemberOf<TestRefs2, string>,
+            origin: "\\TestRefs2",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|consts_misc2.php, 17:12-21),
+            ty: HH\classname<this>,
+            origin: "\\TestRefs2",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\HH\\BuiltinEnumClass",
+    },
+}
+
+They matched!

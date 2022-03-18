@@ -12,9 +12,9 @@ if [ -z "$1" ] || [ -z "$2" ]; then
   exit 0
 fi
 
-sed -i "s/$OLD/$NEW/g" -- */CMakeLists.txt
+sed -i.orig -e "s/$OLD/$NEW/g" -- */CMakeLists.txt
 
-grep --only-matching -P  "https://github.com/.+$NEW.+\.gz" -- */CMakeLists.txt | \
+egrep --only-matching "https://github.com/.+$NEW.+\.gz" -- */CMakeLists.txt | \
 while read -r MATCH; do
   CMAKE_FILE="${MATCH%%:*}"
   URL="${MATCH#*:}"
@@ -23,5 +23,5 @@ while read -r MATCH; do
   wget -O "$FILE" "$URL"
   HASH="$(openssl dgst -sha256 "$FILE" | awk '{print $NF}')"
   rm "$FILE"
-  sed -i 's/SHA[0-9]\+=[0-9a-z]\+/SHA256='"$HASH/" "$CMAKE_FILE"
+  sed -i.orig -e 's/SHA[0-9]\+=[0-9a-z]\+/SHA256='"$HASH/" "$CMAKE_FILE"
 done

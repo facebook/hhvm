@@ -24,3 +24,6 @@ val check_typedef :
 
 val check_const :
   Provider_context.t -> Relative_path.t -> string -> Tast.def option
+
+val check_module :
+  Provider_context.t -> Relative_path.t -> string -> Tast.def option

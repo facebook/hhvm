@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{
-    ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, EnumType,
-    Tparam, Typeconst, WhereConstraint, XhpAttribute,
+    ty::ConsistentKind, ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef,
+    ClassEltFlags, DeclTy, EnumType, Tparam, Typeconst, WhereConstraint, XhpAttribute,
 };
 use crate::reason::Reason;
 use crate::typing_error::TypingError;
@@ -18,6 +18,7 @@ use pos::{
     TypeNameIndexSet,
 };
 use std::collections::BTreeMap;
+use std::fmt;
 
 pub use crate::folded_decl_provider::Subst;
 pub use oxidized::ast_defs::{Abstraction, ClassishKind};
@@ -123,9 +124,18 @@ impl<R: Reason> ClassConst<R> {
 /// class Baz extends Foo implements Bar { <- position of the `implements`
 /// }
 /// ```
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
-pub struct Requirement<R: Reason>(pub R::Pos, pub DeclTy<R>);
+pub struct Requirement<R: Reason> {
+    pub pos: R::Pos,
+    pub ty: DeclTy<R>,
+}
+
+#[derive(Clone, Debug, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+pub struct Constructor {
+    pub elt: Option<FoldedElement>,
+    pub consistency: ConsistentKind,
+}
 
 #[derive(Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
@@ -150,7 +160,7 @@ pub struct FoldedClass<R: Reason> {
     pub static_props: PropNameIndexMap<FoldedElement>,
     pub methods: MethodNameIndexMap<FoldedElement>,
     pub static_methods: MethodNameIndexMap<FoldedElement>,
-    pub constructor: Option<FoldedElement>,
+    pub constructor: Constructor,
     pub consts: ClassConstNameIndexMap<ClassConst<R>>,
     pub type_consts: TypeConstNameIndexMap<TypeConst<R>>,
     pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
@@ -176,7 +186,7 @@ impl<R: Reason> FoldedClass<R> {
 
     // c.f. `Decl_defs.dc_need_init`, via `has_concrete_cstr` in `Decl_folded_class.class_decl`
     pub fn has_concrete_constructor(&self) -> bool {
-        match &self.constructor {
+        match &self.constructor.elt {
             Some(elt) => elt.is_concrete(),
             None => false,
         }
@@ -278,5 +288,26 @@ impl FoldedElement {
 
     pub fn get_xhp_attr(&self) -> Option<XhpAttribute> {
         self.flags.get_xhp_attr()
+    }
+}
+
+impl<R: Reason> Requirement<R> {
+    pub fn new(pos: R::Pos, ty: DeclTy<R>) -> Self {
+        Self { pos, ty }
+    }
+}
+
+impl<R: Reason> fmt::Debug for Requirement<R> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Requirement")
+            .field(&self.pos)
+            .field(&self.ty)
+            .finish()
+    }
+}
+
+impl Constructor {
+    pub fn new(elt: Option<FoldedElement>, consistency: ConsistentKind) -> Self {
+        Self { elt, consistency }
     }
 }

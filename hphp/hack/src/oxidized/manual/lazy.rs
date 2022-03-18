@@ -24,7 +24,10 @@ use serde::{Deserialize, Serialize};
 pub struct Lazy<T>(pub T);
 
 impl<T: ToOcamlRep> ToOcamlRep for Lazy<T> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        _alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
         unimplemented!()
     }
 }

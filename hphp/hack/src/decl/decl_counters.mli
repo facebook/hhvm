@@ -17,6 +17,7 @@ type decl_kind =
   | Fun
   | GConst
   | Typedef
+  | Module_decl
 
 (** The idea of [origin] is so that callsites have a way of characterizing
 what they are, and have this characterization end up in telemetry.

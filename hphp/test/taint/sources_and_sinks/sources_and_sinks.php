@@ -69,6 +69,18 @@ function source_to_any_argument_sink(): void {
   any_argument_is_sink($data, 1);
 }
 
+function return_is_sink(int $data): int { return $data; }
+
+function source_to_return_sink(): int {
+  return __source_returned_from_function();
+}
+
+function parameter_as_source_to_return_sink(): void {
+  $foo = __source_returned_from_function();
+  $bar = return_is_sink($foo);
+  __sink($bar);
+}
+
 <<__EntryPoint>> async function main(): Awaitable<void> {
   source_returned_from_function();
   source_returned_from_method();
@@ -79,4 +91,7 @@ function source_to_any_argument_sink(): void {
   parameter_as_source_to_sink(1);
   await source_to_xhp_sink();
   source_to_any_argument_sink();
+  source_to_return_sink();
+  parameter_as_source_to_return_sink();
+  return_is_sink(1);
 }

@@ -17,3 +17,4 @@ lz4 = "1.23.1"
 oxidized = { path = "../../../oxidized" }
 pos = { path = "../../lib/pos" }
 serde = { version = "1.0.126", features = ["derive", "rc"] }
+zstd = "=0.8.0+zstd.1.4.9"

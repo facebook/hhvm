@@ -12,29 +12,11 @@ type expand_typedef =
   Typing_reason.t ->
   string ->
   Typing_defs.locl_ty list ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 val expand_typedef_ref : expand_typedef ref
 
 val expand_typedef :
-  Typing_defs.expand_env ->
-  Typing_env_types.env ->
-  Typing_reason.t ->
-  string ->
-  Typing_defs.locl_ty list ->
-  Typing_env_types.env * Typing_defs.locl_ty
-
-type expand_typedef_with_ty_err =
-  Typing_defs.expand_env ->
-  Typing_env_types.env ->
-  Typing_reason.t ->
-  string ->
-  Typing_defs.locl_ty list ->
-  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
-
-val expand_typedef_with_ty_err_ref : expand_typedef_with_ty_err ref
-
-val expand_typedef_with_ty_err :
   Typing_defs.expand_env ->
   Typing_env_types.env ->
   Typing_reason.t ->
@@ -148,7 +130,7 @@ type localize_no_subst =
   Typing_env_types.env ->
   ignore_errors:bool ->
   Typing_defs.decl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 val localize_no_subst_ref : localize_no_subst ref
 
@@ -156,13 +138,13 @@ val localize_no_subst :
   Typing_env_types.env ->
   ignore_errors:bool ->
   Typing_defs.decl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 type localize =
   ety_env:Typing_defs.expand_env ->
   Typing_env_types.env ->
   Typing_defs.decl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 val localize_ref : localize ref
 
@@ -170,7 +152,7 @@ val localize :
   Typing_env_types.env ->
   ety_env:Typing_defs.expand_env ->
   Typing_defs.decl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 val is_mixed_i : Typing_env_types.env -> Typing_defs.internal_type -> bool
 
@@ -257,35 +239,11 @@ type expand_typeconst =
   Typing_defs.pos_id ->
   root_pos:Pos_or_decl.t ->
   allow_abstract_tconst:bool ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 val expand_typeconst_ref : expand_typeconst ref
 
 val expand_typeconst :
-  Typing_defs.expand_env ->
-  Typing_env_types.env ->
-  ?ignore_errors:bool ->
-  ?as_tyvar_with_cnstr:Pos.t option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.pos_id ->
-  root_pos:Pos_or_decl.t ->
-  allow_abstract_tconst:bool ->
-  Typing_env_types.env * Typing_defs.locl_ty
-
-type expand_typeconst_with_ty_err =
-  Typing_defs.expand_env ->
-  Typing_env_types.env ->
-  ?ignore_errors:bool ->
-  ?as_tyvar_with_cnstr:Pos.t option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.pos_id ->
-  root_pos:Pos_or_decl.t ->
-  allow_abstract_tconst:bool ->
-  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
-
-val expand_typeconst_with_ty_err_ref : expand_typeconst_with_ty_err ref
-
-val expand_typeconst_with_ty_err :
   Typing_defs.expand_env ->
   Typing_env_types.env ->
   ?ignore_errors:bool ->
@@ -511,3 +469,12 @@ val try_strip_dynamic :
  * otherwise return type unchanged. *)
 val strip_dynamic :
   Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty
+
+(* Wrap supportdyn<_> around a type. Push through intersections
+ * and unions, and leave type alone if it is a subtype of dynamic.
+ *)
+val make_supportdyn :
+  Typing_reason.t ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty

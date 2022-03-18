@@ -196,11 +196,11 @@ pub mod instr {
     }
 
     pub fn iterinit<'a>(args: IterArgs<'a>, label: Label) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IterInit(args, label)))
+        instr(Instruct::Opcode(Opcode::IterInit(args, label)))
     }
 
     pub fn iternext<'a>(args: IterArgs<'a>, label: Label) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IterNext(args, label)))
+        instr(Instruct::Opcode(Opcode::IterNext(args, label)))
     }
 
     pub fn iternextk<'a>(
@@ -214,31 +214,31 @@ pub mod instr {
             key_id: Just(key),
             val_id: value,
         };
-        instr(Instruct::Opcode(Opcodes::IterNext(args, label)))
+        instr(Instruct::Opcode(Opcode::IterNext(args, label)))
     }
 
     pub fn iterfree<'a>(id: IterId) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IterFree(id)))
+        instr(Instruct::Opcode(Opcode::IterFree(id)))
     }
 
     pub fn whresult<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::WHResult))
+        instr(Instruct::Opcode(Opcode::WHResult))
     }
 
     pub fn jmp<'a>(label: Label) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Jmp(label)))
+        instr(Instruct::Opcode(Opcode::Jmp(label)))
     }
 
     pub fn jmpz<'a>(label: Label) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::JmpZ(label)))
+        instr(Instruct::Opcode(Opcode::JmpZ(label)))
     }
 
     pub fn jmpnz<'a>(label: Label) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::JmpNZ(label)))
+        instr(Instruct::Opcode(Opcode::JmpNZ(label)))
     }
 
     pub fn jmpns<'a>(label: Label) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::JmpNS(label)))
+        instr(Instruct::Opcode(Opcode::JmpNS(label)))
     }
 
     pub fn continue_<'a>(level: isize) -> InstrSeq<'a> {
@@ -252,424 +252,424 @@ pub mod instr {
     pub fn iter_break<'a>(label: Label, iters: Vec<IterId>) -> InstrSeq<'a> {
         let mut vec: Vec<Instruct<'a>> = iters
             .into_iter()
-            .map(|i| Instruct::Opcode(Opcodes::IterFree(i)))
+            .map(|i| Instruct::Opcode(Opcode::IterFree(i)))
             .collect();
-        vec.push(Instruct::Opcode(Opcodes::Jmp(label)));
+        vec.push(Instruct::Opcode(Opcode::Jmp(label)));
         instrs(vec)
     }
 
     pub fn false_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::False))
+        instr(Instruct::Opcode(Opcode::False))
     }
 
     pub fn true_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::True))
+        instr(Instruct::Opcode(Opcode::True))
     }
 
     pub fn clscnsd<'a>(const_id: ConstId<'a>, cid: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ClsCnsD(const_id, cid)))
+        instr(Instruct::Opcode(Opcode::ClsCnsD(const_id, cid)))
     }
 
     pub fn clscns<'a>(const_id: ConstId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ClsCns(const_id)))
+        instr(Instruct::Opcode(Opcode::ClsCns(const_id)))
     }
 
     pub fn clscnsl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ClsCnsL(local)))
+        instr(Instruct::Opcode(Opcode::ClsCnsL(local)))
     }
 
     pub fn eq<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Eq))
+        instr(Instruct::Opcode(Opcode::Eq))
     }
 
     pub fn neq<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Neq))
+        instr(Instruct::Opcode(Opcode::Neq))
     }
 
     pub fn gt<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Gt))
+        instr(Instruct::Opcode(Opcode::Gt))
     }
 
     pub fn gte<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Gte))
+        instr(Instruct::Opcode(Opcode::Gte))
     }
 
     pub fn lt<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Lt))
+        instr(Instruct::Opcode(Opcode::Lt))
     }
 
     pub fn lte<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Lte))
+        instr(Instruct::Opcode(Opcode::Lte))
     }
 
     pub fn concat<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Concat))
+        instr(Instruct::Opcode(Opcode::Concat))
     }
 
     pub fn concatn<'a>(n: u32) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ConcatN(n)))
+        instr(Instruct::Opcode(Opcode::ConcatN(n)))
     }
 
     pub fn print<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Print))
+        instr(Instruct::Opcode(Opcode::Print))
     }
 
     pub fn cast_dict<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CastDict))
+        instr(Instruct::Opcode(Opcode::CastDict))
     }
 
     pub fn cast_string<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CastString))
+        instr(Instruct::Opcode(Opcode::CastString))
     }
 
     pub fn cast_int<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CastInt))
+        instr(Instruct::Opcode(Opcode::CastInt))
     }
 
     pub fn cast_bool<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CastBool))
+        instr(Instruct::Opcode(Opcode::CastBool))
     }
 
     pub fn cast_double<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CastDouble))
+        instr(Instruct::Opcode(Opcode::CastDouble))
     }
 
     pub fn retc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::RetC))
+        instr(Instruct::Opcode(Opcode::RetC))
     }
 
     pub fn retc_suspended<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::RetCSuspended))
+        instr(Instruct::Opcode(Opcode::RetCSuspended))
     }
 
     pub fn retm<'a>(p: NumParams) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::RetM(p)))
+        instr(Instruct::Opcode(Opcode::RetM(p)))
     }
 
     pub fn null<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Null))
+        instr(Instruct::Opcode(Opcode::Null))
     }
 
     pub fn nulluninit<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::NullUninit))
+        instr(Instruct::Opcode(Opcode::NullUninit))
     }
 
     pub fn chain_faults<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ChainFaults))
+        instr(Instruct::Opcode(Opcode::ChainFaults))
     }
 
     pub fn dup<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Dup))
+        instr(Instruct::Opcode(Opcode::Dup))
     }
 
     pub fn nop<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Nop))
+        instr(Instruct::Opcode(Opcode::Nop))
     }
 
     pub fn instanceofd<'a>(s: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::InstanceOfD(s)))
+        instr(Instruct::Opcode(Opcode::InstanceOfD(s)))
     }
 
     pub fn instanceof<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::InstanceOf))
+        instr(Instruct::Opcode(Opcode::InstanceOf))
     }
 
     pub fn islateboundcls<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IsLateBoundCls))
+        instr(Instruct::Opcode(Opcode::IsLateBoundCls))
     }
 
     pub fn istypestructc<'a>(mode: TypeStructResolveOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IsTypeStructC(mode)))
+        instr(Instruct::Opcode(Opcode::IsTypeStructC(mode)))
     }
 
     pub fn throwastypestructexception<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ThrowAsTypeStructException))
+        instr(Instruct::Opcode(Opcode::ThrowAsTypeStructException))
     }
 
     pub fn throw_non_exhaustive_switch<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ThrowNonExhaustiveSwitch))
+        instr(Instruct::Opcode(Opcode::ThrowNonExhaustiveSwitch))
     }
 
     pub fn raise_class_string_conversion_warning<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::RaiseClassStringConversionWarning))
+        instr(Instruct::Opcode(Opcode::RaiseClassStringConversionWarning))
     }
 
     pub fn combine_and_resolve_type_struct<'a>(i: u32) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CombineAndResolveTypeStruct(i)))
+        instr(Instruct::Opcode(Opcode::CombineAndResolveTypeStruct(i)))
     }
 
     pub fn record_reified_generic<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::RecordReifiedGeneric))
+        instr(Instruct::Opcode(Opcode::RecordReifiedGeneric))
     }
 
     pub fn check_reified_generic_mismatch<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CheckReifiedGenericMismatch))
+        instr(Instruct::Opcode(Opcode::CheckReifiedGenericMismatch))
     }
 
     pub fn int<'a>(i: i64) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Int(i)))
+        instr(Instruct::Opcode(Opcode::Int(i)))
     }
 
     pub fn double<'a>(f: f64) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Double(f)))
+        instr(Instruct::Opcode(Opcode::Double(f)))
     }
 
     pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl Into<String>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::String(Str::from(
+        instr(Instruct::Opcode(Opcode::String(Str::from(
             bumpalo::collections::String::from_str_in(litstr.into().as_str(), alloc)
                 .into_bump_str(),
         ))))
     }
 
     pub fn this<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::This))
+        instr(Instruct::Opcode(Opcode::This))
     }
 
     pub fn istypec<'a>(op: IsTypeOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IsTypeC(op)))
+        instr(Instruct::Opcode(Opcode::IsTypeC(op)))
     }
 
     pub fn istypel<'a>(id: Local<'a>, op: IsTypeOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IsTypeL(id, op)))
+        instr(Instruct::Opcode(Opcode::IsTypeL(id, op)))
     }
 
     pub fn add<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Add))
+        instr(Instruct::Opcode(Opcode::Add))
     }
 
     pub fn addo<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::AddO))
+        instr(Instruct::Opcode(Opcode::AddO))
     }
 
     pub fn sub<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Sub))
+        instr(Instruct::Opcode(Opcode::Sub))
     }
 
     pub fn subo<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::SubO))
+        instr(Instruct::Opcode(Opcode::SubO))
     }
 
     pub fn mul<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Mul))
+        instr(Instruct::Opcode(Opcode::Mul))
     }
 
     pub fn mulo<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::MulO))
+        instr(Instruct::Opcode(Opcode::MulO))
     }
 
     pub fn shl<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Shl))
+        instr(Instruct::Opcode(Opcode::Shl))
     }
 
     pub fn shr<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Shr))
+        instr(Instruct::Opcode(Opcode::Shr))
     }
 
     pub fn cmp<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Cmp))
+        instr(Instruct::Opcode(Opcode::Cmp))
     }
 
     pub fn mod_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Mod))
+        instr(Instruct::Opcode(Opcode::Mod))
     }
 
     pub fn div<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Div))
+        instr(Instruct::Opcode(Opcode::Div))
     }
 
     pub fn same<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Same))
+        instr(Instruct::Opcode(Opcode::Same))
     }
 
     pub fn pow<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Pow))
+        instr(Instruct::Opcode(Opcode::Pow))
     }
 
     pub fn nsame<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::NSame))
+        instr(Instruct::Opcode(Opcode::NSame))
     }
 
     pub fn not<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Not))
+        instr(Instruct::Opcode(Opcode::Not))
     }
 
     pub fn bitnot<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::BitNot))
+        instr(Instruct::Opcode(Opcode::BitNot))
     }
 
     pub fn bitand<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::BitAnd))
+        instr(Instruct::Opcode(Opcode::BitAnd))
     }
 
     pub fn bitor<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::BitOr))
+        instr(Instruct::Opcode(Opcode::BitOr))
     }
 
     pub fn bitxor<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::BitXor))
+        instr(Instruct::Opcode(Opcode::BitXor))
     }
 
     pub fn sets<'a>(readonly_op: ReadonlyOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::SetS(readonly_op)))
+        instr(Instruct::Opcode(Opcode::SetS(readonly_op)))
     }
 
     pub fn setl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::SetL(local)))
+        instr(Instruct::Opcode(Opcode::SetL(local)))
     }
 
     pub fn setg<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::SetG))
+        instr(Instruct::Opcode(Opcode::SetG))
     }
 
     pub fn unsetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::UnsetL(local)))
+        instr(Instruct::Opcode(Opcode::UnsetL(local)))
     }
 
     pub fn unsetg<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::UnsetG))
+        instr(Instruct::Opcode(Opcode::UnsetG))
     }
 
     pub fn incdecl<'a>(local: Local<'a>, op: IncDecOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IncDecL(local, op)))
+        instr(Instruct::Opcode(Opcode::IncDecL(local, op)))
     }
 
     pub fn incdecg<'a>(op: IncDecOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IncDecG(op)))
+        instr(Instruct::Opcode(Opcode::IncDecG(op)))
     }
 
     pub fn incdecs<'a>(op: IncDecOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IncDecS(op)))
+        instr(Instruct::Opcode(Opcode::IncDecS(op)))
     }
 
     pub fn setopg<'a>(op: SetOpOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::SetOpG(op)))
+        instr(Instruct::Opcode(Opcode::SetOpG(op)))
     }
 
     pub fn setopl<'a>(local: Local<'a>, op: SetOpOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::SetOpL(local, op)))
+        instr(Instruct::Opcode(Opcode::SetOpL(local, op)))
     }
 
     pub fn setops<'a>(op: SetOpOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::SetOpS(op)))
+        instr(Instruct::Opcode(Opcode::SetOpS(op)))
     }
 
     pub fn issetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IssetL(local)))
+        instr(Instruct::Opcode(Opcode::IssetL(local)))
     }
 
     pub fn issetg<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IssetG))
+        instr(Instruct::Opcode(Opcode::IssetG))
     }
 
     pub fn issets<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IssetS))
+        instr(Instruct::Opcode(Opcode::IssetS))
     }
 
     pub fn isunsetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IsUnsetL(local)))
+        instr(Instruct::Opcode(Opcode::IsUnsetL(local)))
     }
 
     pub fn cgets<'a>(readonly_op: ReadonlyOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CGetS(readonly_op)))
+        instr(Instruct::Opcode(Opcode::CGetS(readonly_op)))
     }
 
     pub fn cgetg<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CGetG))
+        instr(Instruct::Opcode(Opcode::CGetG))
     }
 
     pub fn cgetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CGetL(local)))
+        instr(Instruct::Opcode(Opcode::CGetL(local)))
     }
 
     pub fn cugetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CUGetL(local)))
+        instr(Instruct::Opcode(Opcode::CUGetL(local)))
     }
 
     pub fn cgetl2<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CGetL2(local)))
+        instr(Instruct::Opcode(Opcode::CGetL2(local)))
     }
 
     pub fn cgetquietl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CGetQuietL(local)))
+        instr(Instruct::Opcode(Opcode::CGetQuietL(local)))
     }
 
     pub fn classgetc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ClassGetC))
+        instr(Instruct::Opcode(Opcode::ClassGetC))
     }
 
     pub fn classgetts<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ClassGetTS))
+        instr(Instruct::Opcode(Opcode::ClassGetTS))
     }
 
     pub fn classname<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ClassName))
+        instr(Instruct::Opcode(Opcode::ClassName))
     }
 
     pub fn lazyclassfromclass<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::LazyClassFromClass))
+        instr(Instruct::Opcode(Opcode::LazyClassFromClass))
     }
 
     pub fn selfcls<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::SelfCls))
+        instr(Instruct::Opcode(Opcode::SelfCls))
     }
 
     pub fn lateboundcls<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::LateBoundCls))
+        instr(Instruct::Opcode(Opcode::LateBoundCls))
     }
 
     pub fn parentcls<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ParentCls))
+        instr(Instruct::Opcode(Opcode::ParentCls))
     }
 
     pub fn popu<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::PopU))
+        instr(Instruct::Opcode(Opcode::PopU))
     }
 
     pub fn popc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::PopC))
+        instr(Instruct::Opcode(Opcode::PopC))
     }
 
     pub fn popl<'a>(l: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::PopL(l)))
+        instr(Instruct::Opcode(Opcode::PopL(l)))
     }
 
     pub fn initprop<'a>(pid: PropId<'a>, op: InitPropOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::InitProp(pid, op)))
+        instr(Instruct::Opcode(Opcode::InitProp(pid, op)))
     }
 
     pub fn checkprop<'a>(pid: PropId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CheckProp(pid)))
+        instr(Instruct::Opcode(Opcode::CheckProp(pid)))
     }
 
     pub fn pushl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::PushL(local)))
+        instr(Instruct::Opcode(Opcode::PushL(local)))
     }
 
     pub fn throw<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Throw))
+        instr(Instruct::Opcode(Opcode::Throw))
     }
 
     pub fn new_vec_array<'a>(i: u32) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::NewVec(i)))
+        instr(Instruct::Opcode(Opcode::NewVec(i)))
     }
 
     pub fn new_pair<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::NewPair))
+        instr(Instruct::Opcode(Opcode::NewPair))
     }
 
     pub fn add_elemc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::AddElemC))
+        instr(Instruct::Opcode(Opcode::AddElemC))
     }
 
     pub fn add_new_elemc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::AddNewElemC))
+        instr(Instruct::Opcode(Opcode::AddNewElemC))
     }
 
     pub fn switch<'a>(
         alloc: &'a bumpalo::Bump,
         targets: bumpalo::collections::Vec<'a, Label>,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Switch(
+        instr(Instruct::Opcode(Opcode::Switch(
             SwitchKind::Unbounded,
             0,
             BumpSliceMut::new(alloc, targets.into_bump_slice_mut()),
@@ -677,7 +677,7 @@ pub mod instr {
     }
 
     pub fn newobj<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::NewObj))
+        instr(Instruct::Opcode(Opcode::NewObj))
     }
 
     pub fn sswitch<'a>(
@@ -692,76 +692,76 @@ pub mod instr {
             alloc,
             alloc.alloc_slice_fill_iter(cases.into_iter().map(|(s, _)| Str::from(s))),
         );
-        instr(Instruct::Opcode(Opcodes::SSwitch { cases, targets }))
+        instr(Instruct::Opcode(Opcode::SSwitch { cases, targets }))
     }
 
     pub fn newobjr<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::NewObjR))
+        instr(Instruct::Opcode(Opcode::NewObjR))
     }
 
     pub fn newobjd<'a>(id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::NewObjD(id)))
+        instr(Instruct::Opcode(Opcode::NewObjD(id)))
     }
 
     pub fn vec<'a>(id: AdataId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Vec(id)))
+        instr(Instruct::Opcode(Opcode::Vec(id)))
     }
 
     pub fn dict<'a>(id: AdataId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Dict(id)))
+        instr(Instruct::Opcode(Opcode::Dict(id)))
     }
 
     pub fn keyset<'a>(id: AdataId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Keyset(id)))
+        instr(Instruct::Opcode(Opcode::Keyset(id)))
     }
 
     pub fn newobjrd<'a>(id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::NewObjRD(id)))
+        instr(Instruct::Opcode(Opcode::NewObjRD(id)))
     }
 
     pub fn newobjs<'a>(scref: SpecialClsRef) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::NewObjS(scref)))
+        instr(Instruct::Opcode(Opcode::NewObjS(scref)))
     }
 
     pub fn lockobj<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::LockObj))
+        instr(Instruct::Opcode(Opcode::LockObj))
     }
 
     pub fn clone<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Clone))
+        instr(Instruct::Opcode(Opcode::Clone))
     }
 
     pub fn newstructdict<'a>(alloc: &'a bumpalo::Bump, keys: &'a [&'a str]) -> InstrSeq<'a> {
         let keys = Slice::new(alloc.alloc_slice_fill_iter(keys.iter().map(|s| Str::from(*s))));
-        instr(Instruct::Opcode(Opcodes::NewStructDict(keys)))
+        instr(Instruct::Opcode(Opcode::NewStructDict(keys)))
     }
 
     pub fn newcol<'a>(collection_type: CollectionType) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::NewCol(collection_type)))
+        instr(Instruct::Opcode(Opcode::NewCol(collection_type)))
     }
 
     pub fn colfromarray<'a>(collection_type: CollectionType) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ColFromArray(collection_type)))
+        instr(Instruct::Opcode(Opcode::ColFromArray(collection_type)))
     }
 
     pub fn entrynop<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::EntryNop))
+        instr(Instruct::Opcode(Opcode::EntryNop))
     }
 
     pub fn basel<'a>(local: Local<'a>, mode: MOpMode, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::BaseL(local, mode, readonly_op)))
+        instr(Instruct::Opcode(Opcode::BaseL(local, mode, readonly_op)))
     }
 
     pub fn basec<'a>(stack_index: StackIndex, mode: MOpMode) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::BaseC(stack_index, mode)))
+        instr(Instruct::Opcode(Opcode::BaseC(stack_index, mode)))
     }
 
     pub fn basegc<'a>(stack_index: StackIndex, mode: MOpMode) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::BaseGC(stack_index, mode)))
+        instr(Instruct::Opcode(Opcode::BaseGC(stack_index, mode)))
     }
 
     pub fn basegl<'a>(local: Local<'a>, mode: MOpMode) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::BaseGL(local, mode)))
+        instr(Instruct::Opcode(Opcode::BaseGL(local, mode)))
     }
 
     pub fn basesc<'a>(
@@ -770,74 +770,74 @@ pub mod instr {
         mode: MOpMode,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::BaseSC(y, z, mode, readonly_op)))
+        instr(Instruct::Opcode(Opcode::BaseSC(y, z, mode, readonly_op)))
     }
 
     pub fn baseh<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::BaseH))
+        instr(Instruct::Opcode(Opcode::BaseH))
     }
 
     pub fn cgetcunop<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CGetCUNop))
+        instr(Instruct::Opcode(Opcode::CGetCUNop))
     }
 
     pub fn ugetcunop<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::UGetCUNop))
+        instr(Instruct::Opcode(Opcode::UGetCUNop))
     }
 
     pub fn memoget<'a>(label: Label, range: LocalRange) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::MemoGet(label, range)))
+        instr(Instruct::Opcode(Opcode::MemoGet(label, range)))
     }
 
     pub fn memoget_eager<'a>(label1: Label, label2: Label, range: LocalRange) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::MemoGetEager(
+        instr(Instruct::Opcode(Opcode::MemoGetEager(
             [label1, label2],
             range,
         )))
     }
 
     pub fn memoset<'a>(range: LocalRange) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::MemoSet(range)))
+        instr(Instruct::Opcode(Opcode::MemoSet(range)))
     }
 
     pub fn memoset_eager<'a>(range: LocalRange) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::MemoSetEager(range)))
+        instr(Instruct::Opcode(Opcode::MemoSetEager(range)))
     }
 
     pub fn getmemokeyl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::GetMemoKeyL(local)))
+        instr(Instruct::Opcode(Opcode::GetMemoKeyL(local)))
     }
 
     pub fn barethis<'a>(notice: BareThisOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::BareThis(notice)))
+        instr(Instruct::Opcode(Opcode::BareThis(notice)))
     }
 
     pub fn checkthis<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CheckThis))
+        instr(Instruct::Opcode(Opcode::CheckThis))
     }
 
     pub fn verify_ret_type_c<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::VerifyRetTypeC))
+        instr(Instruct::Opcode(Opcode::VerifyRetTypeC))
     }
 
     pub fn verify_ret_type_ts<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::VerifyRetTypeTS))
+        instr(Instruct::Opcode(Opcode::VerifyRetTypeTS))
     }
 
     pub fn verify_out_type<'a>(i: ParamId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::VerifyOutType(i)))
+        instr(Instruct::Opcode(Opcode::VerifyOutType(i)))
     }
 
     pub fn verify_param_type<'a>(i: ParamId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::VerifyParamType(i)))
+        instr(Instruct::Opcode(Opcode::VerifyParamType(i)))
     }
 
     pub fn verify_param_type_ts<'a>(i: ParamId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::VerifyParamTypeTS(i)))
+        instr(Instruct::Opcode(Opcode::VerifyParamTypeTS(i)))
     }
 
     pub fn dim<'a>(op: MOpMode, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Dim(op, key)))
+        instr(Instruct::Opcode(Opcode::Dim(op, key)))
     }
 
     pub fn dim_warn_pt<'a>(key: PropId<'a>, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
@@ -852,7 +852,7 @@ pub mod instr {
         log: IsLogAsDynamicCallOp,
         fcall_args: FCallArgs<'a>,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallClsMethod(
+        instr(Instruct::Opcode(Opcode::FCallClsMethod(
             fcall_args,
             Default::default(),
             log,
@@ -864,7 +864,7 @@ pub mod instr {
         method: MethodId<'a>,
         class: ClassId<'a>,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallClsMethodD(
+        instr(Instruct::Opcode(Opcode::FCallClsMethodD(
             fcall_args,
             Default::default(),
             class,
@@ -873,7 +873,7 @@ pub mod instr {
     }
 
     pub fn fcallclsmethods<'a>(fcall_args: FCallArgs<'a>, clsref: SpecialClsRef) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallClsMethodS(
+        instr(Instruct::Opcode(Opcode::FCallClsMethodS(
             fcall_args,
             Default::default(),
             clsref,
@@ -885,7 +885,7 @@ pub mod instr {
         clsref: SpecialClsRef,
         method: MethodId<'a>,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallClsMethodSD(
+        instr(Instruct::Opcode(Opcode::FCallClsMethodSD(
             fcall_args,
             Default::default(),
             clsref,
@@ -894,22 +894,22 @@ pub mod instr {
     }
 
     pub fn fcallctor<'a>(fcall_args: FCallArgs<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallCtor(
+        instr(Instruct::Opcode(Opcode::FCallCtor(
             fcall_args,
             Default::default(),
         )))
     }
 
     pub fn fcallfunc<'a>(fcall_args: FCallArgs<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallFunc(fcall_args)))
+        instr(Instruct::Opcode(Opcode::FCallFunc(fcall_args)))
     }
 
     pub fn fcallfuncd<'a>(fcall_args: FCallArgs<'a>, func: FunctionId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallFuncD(fcall_args, func)))
+        instr(Instruct::Opcode(Opcode::FCallFuncD(fcall_args, func)))
     }
 
     pub fn fcallobjmethod<'a>(fcall_args: FCallArgs<'a>, flavor: ObjMethodOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallObjMethod(
+        instr(Instruct::Opcode(Opcode::FCallObjMethod(
             fcall_args,
             Default::default(),
             flavor,
@@ -921,7 +921,7 @@ pub mod instr {
         method: MethodId<'a>,
         flavor: ObjMethodOp,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallObjMethodD(
+        instr(Instruct::Opcode(Opcode::FCallObjMethodD(
             fcall_args,
             Default::default(),
             flavor,
@@ -937,7 +937,7 @@ pub mod instr {
     }
 
     pub fn querym<'a>(num_params: NumParams, op: QueryMOp, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::QueryM(num_params, op, key)))
+        instr(Instruct::Opcode(Opcode::QueryM(num_params, op, key)))
     }
 
     pub fn querym_cget_pt<'a>(
@@ -949,19 +949,19 @@ pub mod instr {
     }
 
     pub fn setm<'a>(num_params: NumParams, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::SetM(num_params, key)))
+        instr(Instruct::Opcode(Opcode::SetM(num_params, key)))
     }
 
     pub fn unsetm<'a>(num_params: NumParams, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::UnsetM(num_params, key)))
+        instr(Instruct::Opcode(Opcode::UnsetM(num_params, key)))
     }
 
     pub fn setopm<'a>(num_params: NumParams, op: SetOpOp, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::SetOpM(num_params, op, key)))
+        instr(Instruct::Opcode(Opcode::SetOpM(num_params, op, key)))
     }
 
     pub fn incdecm<'a>(num_params: NumParams, op: IncDecOp, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IncDecM(num_params, op, key)))
+        instr(Instruct::Opcode(Opcode::IncDecM(num_params, op, key)))
     }
 
     pub fn setm_pt<'a>(
@@ -973,83 +973,83 @@ pub mod instr {
     }
 
     pub fn resolve_func<'a>(func_id: FunctionId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ResolveFunc(func_id)))
+        instr(Instruct::Opcode(Opcode::ResolveFunc(func_id)))
     }
 
     pub fn resolve_rfunc<'a>(func_id: FunctionId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ResolveRFunc(func_id)))
+        instr(Instruct::Opcode(Opcode::ResolveRFunc(func_id)))
     }
 
     pub fn resolveclsmethod<'a>(method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ResolveClsMethod(method_id)))
+        instr(Instruct::Opcode(Opcode::ResolveClsMethod(method_id)))
     }
 
     pub fn resolveclsmethodd<'a>(class_id: ClassId<'a>, method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ResolveClsMethodD(
+        instr(Instruct::Opcode(Opcode::ResolveClsMethodD(
             class_id, method_id,
         )))
     }
 
     pub fn resolveclsmethods<'a>(scref: SpecialClsRef, method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ResolveClsMethodS(
+        instr(Instruct::Opcode(Opcode::ResolveClsMethodS(
             scref, method_id,
         )))
     }
 
     pub fn resolverclsmethod<'a>(method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ResolveRClsMethod(method_id)))
+        instr(Instruct::Opcode(Opcode::ResolveRClsMethod(method_id)))
     }
 
     pub fn resolverclsmethodd<'a>(class_id: ClassId<'a>, method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ResolveRClsMethodD(
+        instr(Instruct::Opcode(Opcode::ResolveRClsMethodD(
             class_id, method_id,
         )))
     }
 
     pub fn resolverclsmethods<'a>(scref: SpecialClsRef, method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ResolveRClsMethodS(
+        instr(Instruct::Opcode(Opcode::ResolveRClsMethodS(
             scref, method_id,
         )))
     }
 
     pub fn resolve_meth_caller<'a>(fun_id: FunctionId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ResolveMethCaller(fun_id)))
+        instr(Instruct::Opcode(Opcode::ResolveMethCaller(fun_id)))
     }
 
     pub fn resolveclass<'a>(class_id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ResolveClass(class_id)))
+        instr(Instruct::Opcode(Opcode::ResolveClass(class_id)))
     }
 
     pub fn lazyclass<'a>(class_id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::LazyClass(class_id)))
+        instr(Instruct::Opcode(Opcode::LazyClass(class_id)))
     }
 
     pub fn oodeclexists<'a>(class_kind: OODeclExistsOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::OODeclExists(class_kind)))
+        instr(Instruct::Opcode(Opcode::OODeclExists(class_kind)))
     }
 
     pub fn fatal<'a>(op: FatalOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Fatal(op)))
+        instr(Instruct::Opcode(Opcode::Fatal(op)))
     }
 
     pub fn await_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Await))
+        instr(Instruct::Opcode(Opcode::Await))
     }
 
     pub fn yield_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Yield))
+        instr(Instruct::Opcode(Opcode::Yield))
     }
 
     pub fn yieldk<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::YieldK))
+        instr(Instruct::Opcode(Opcode::YieldK))
     }
 
     pub fn createcont<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CreateCont))
+        instr(Instruct::Opcode(Opcode::CreateCont))
     }
 
     pub fn awaitall<'a>(range: LocalRange) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::AwaitAll(range)))
+        instr(Instruct::Opcode(Opcode::AwaitAll(range)))
     }
 
     pub fn label<'a>(label: Label) -> InstrSeq<'a> {
@@ -1075,91 +1075,91 @@ pub mod instr {
     }
 
     pub fn exit<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Exit))
+        instr(Instruct::Opcode(Opcode::Exit))
     }
 
     pub fn idx<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Idx))
+        instr(Instruct::Opcode(Opcode::Idx))
     }
 
     pub fn array_idx<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ArrayIdx))
+        instr(Instruct::Opcode(Opcode::ArrayIdx))
     }
 
     pub fn createcl<'a>(param_num: NumParams, cls_num: ClassNum) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::CreateCl(param_num, cls_num)))
+        instr(Instruct::Opcode(Opcode::CreateCl(param_num, cls_num)))
     }
 
     pub fn eval<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Eval))
+        instr(Instruct::Opcode(Opcode::Eval))
     }
 
     pub fn incl<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Incl))
+        instr(Instruct::Opcode(Opcode::Incl))
     }
 
     pub fn inclonce<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::InclOnce))
+        instr(Instruct::Opcode(Opcode::InclOnce))
     }
 
     pub fn req<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Req))
+        instr(Instruct::Opcode(Opcode::Req))
     }
 
     pub fn reqdoc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ReqDoc))
+        instr(Instruct::Opcode(Opcode::ReqDoc))
     }
 
     pub fn reqonce<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ReqOnce))
+        instr(Instruct::Opcode(Opcode::ReqOnce))
     }
 
     pub fn silence_start<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Silence(local, SilenceOp::Start)))
+        instr(Instruct::Opcode(Opcode::Silence(local, SilenceOp::Start)))
     }
 
     pub fn silence_end<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Silence(local, SilenceOp::End)))
+        instr(Instruct::Opcode(Opcode::Silence(local, SilenceOp::End)))
     }
 
     pub fn contcheck_check<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ContCheck(
+        instr(Instruct::Opcode(Opcode::ContCheck(
             ContCheckOp::CheckStarted,
         )))
     }
 
     pub fn contcheck_ignore<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ContCheck(
+        instr(Instruct::Opcode(Opcode::ContCheck(
             ContCheckOp::IgnoreStarted,
         )))
     }
 
     pub fn contenter<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ContEnter))
+        instr(Instruct::Opcode(Opcode::ContEnter))
     }
 
     pub fn contraise<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ContRaise))
+        instr(Instruct::Opcode(Opcode::ContRaise))
     }
 
     pub fn contvalid<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ContValid))
+        instr(Instruct::Opcode(Opcode::ContValid))
     }
 
     pub fn contcurrent<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ContCurrent))
+        instr(Instruct::Opcode(Opcode::ContCurrent))
     }
 
     pub fn contkey<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ContKey))
+        instr(Instruct::Opcode(Opcode::ContKey))
     }
 
     pub fn contgetreturn<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::ContGetReturn))
+        instr(Instruct::Opcode(Opcode::ContGetReturn))
     }
 
     pub fn nativeimpl<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::NativeImpl))
+        instr(Instruct::Opcode(Opcode::NativeImpl))
     }
 
     pub fn srcloc<'a>(
@@ -1177,13 +1177,13 @@ pub mod instr {
     }
 
     pub fn is_type_structc_resolve<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IsTypeStructC(
+        instr(Instruct::Opcode(Opcode::IsTypeStructC(
             TypeStructResolveOp::Resolve,
         )))
     }
 
     pub fn is_type_structc_dontresolve<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::IsTypeStructC(
+        instr(Instruct::Opcode(Opcode::IsTypeStructC(
             TypeStructResolveOp::DontResolve,
         )))
     }
@@ -1268,7 +1268,7 @@ impl<'a> InstrSeq<'a> {
             if skip_throw {
                 instr::empty()
             } else {
-                instr::instr(Instruct::Opcode(Opcodes::Throw))
+                instr::instr(Instruct::Opcode(Opcode::Throw))
             },
             instr::instr(Instruct::Pseudo(Pseudo::TryCatchEnd)),
             instr::label(done_label),

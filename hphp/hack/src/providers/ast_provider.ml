@@ -192,8 +192,8 @@ let compute_comments ~(popt : ParserOptions.t) ~(entry : Provider_context.entry)
 let compute_file_info
     ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) : FileInfo.t =
   let ast = compute_ast ~popt ~entry in
-  let (funs, classes, typedefs, consts) = Nast.get_defs ast in
-  { FileInfo.empty_t with FileInfo.funs; classes; typedefs; consts }
+  let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
+  { FileInfo.empty_t with FileInfo.funs; classes; typedefs; consts; modules }
 
 let get_ast_with_error ?(full = false) ctx path =
   Counters.count Counters.Category.Get_ast @@ fun () ->
@@ -290,6 +290,11 @@ let find_const_impl def =
   | Aast.Constant cst -> Some (cst, snd cst.Aast.cst_name)
   | _ -> None
 
+let find_module_impl def =
+  match def with
+  | Aast.Module md -> Some (md, snd md.Aast.md_name)
+  | _ -> None
+
 let iequal name =
   let name = Caml.String.lowercase_ascii name in
   (fun s -> String.equal name (Caml.String.lowercase_ascii s))
@@ -314,6 +319,9 @@ let find_itypedef_in_file ctx file_name iname =
 
 let find_gconst_in_file ?(full = false) ctx file_name name =
   get_def ~full ctx file_name find_const_impl (String.equal name)
+
+let find_module_in_file ?(full = false) ctx file_name name =
+  get_def ~full ctx file_name find_module_impl (String.equal name)
 
 let local_changes_push_sharedmem_stack () =
   ParserHeap.LocalChanges.push_stack ()

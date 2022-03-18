@@ -101,8 +101,8 @@ FoldedClass {
     },
     ancestors: {
         "\\HH\\BuiltinAbstractEnumClass": HH\BuiltinAbstractEnumClass,
-        "\\HH\\BuiltinEnumClass": HH\BuiltinEnumClass<HH\MemberOf<E, string>>,
         "\\A": A,
+        "\\HH\\BuiltinEnumClass": HH\BuiltinEnumClass<HH\MemberOf<E, string>>,
     },
     static_methods: {
         "nameOf": FoldedElement {

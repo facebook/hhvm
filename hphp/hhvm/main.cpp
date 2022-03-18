@@ -26,6 +26,7 @@
 
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/embedded-vfs.h"
+#include "hphp/util/extern-worker.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/process-exec.h"
@@ -76,6 +77,10 @@ int main(int argc, char** argv) {
   if (argc > 1 && !strcmp(argv[1], "--hhbbc")) {
     argv[1] = "hhbbc";
     return HPHP::HHBBC::main(argc - 1, argv + 1);
+  }
+
+  if (argc > 1 && !strcmp(argv[1], HPHP::extern_worker::s_option)) {
+    return HPHP::extern_worker::main(argc, argv);
   }
 
   HPHP::register_process_init();

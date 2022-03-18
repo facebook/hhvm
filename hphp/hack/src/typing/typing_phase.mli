@@ -43,11 +43,7 @@ type method_instantiation = {
 
  Errors are handled using [ety_env.on_error]. If you want to ignore errors
  during localization, set this to [Errors.ignore_error]. *)
-val localize : ety_env:expand_env -> env -> decl_ty -> env * locl_ty
-
-(** A pure variant of [localize] returning an optional `Typing_error.t` rather
-   than side-effecting *)
-val localize_with_ty_err :
+val localize :
   ety_env:expand_env ->
   env ->
   decl_ty ->
@@ -59,11 +55,7 @@ val localize_with_ty_err :
 
  [ignore_errors] silences errors because those errors have already fired
  and/or are not appropriate at the time we call localize. *)
-val localize_no_subst : env -> ignore_errors:bool -> decl_ty -> env * locl_ty
-
-(** A pure variant of [localize_no_subst] returning an optional `Typing_error.t`
-    rather than side effecting *)
-val localize_no_subst_with_ty_err :
+val localize_no_subst :
   env ->
   ignore_errors:bool ->
   decl_ty ->
@@ -79,7 +71,7 @@ val localize_possibly_enforced_no_subst :
   env ->
   ignore_errors:bool ->
   decl_possibly_enforced_ty ->
-  env * locl_possibly_enforced_ty
+  (env * Typing_error.t option) * locl_possibly_enforced_ty
 
 (**
  Transform a type hint into a localized type, with no substitution for generic
@@ -92,17 +84,9 @@ val localize_hint_no_subst :
   ignore_errors:bool ->
   ?report_cycle:Pos.t * string ->
   Aast.hint ->
-  env * locl_ty
+  (env * Typing_error.t option) * locl_ty
 
 val localize_ft :
-  ?instantiation:method_instantiation ->
-  ety_env:expand_env ->
-  def_pos:Pos_or_decl.t ->
-  env ->
-  decl_fun_type ->
-  env * locl_fun_type
-
-val localize_ft_with_ty_err :
   ?instantiation:method_instantiation ->
   ety_env:expand_env ->
   def_pos:Pos_or_decl.t ->
@@ -126,20 +110,6 @@ val localize_targs :
   env ->
   decl_tparam list ->
   Aast.hint list ->
-  env * Tast.targ list
-
-(** Like [localize_targs] but returns an optional `Typing_error.t` rather
-    than side-effecting *)
-val localize_targs_with_ty_err :
-  check_well_kinded:bool ->
-  is_method:bool ->
-  def_pos:Pos_or_decl.t ->
-  use_pos:Pos.t ->
-  use_name:string ->
-  ?check_explicit_targs:bool ->
-  env ->
-  decl_tparam list ->
-  Aast.hint list ->
   (env * Typing_error.t option) * Tast.targ list
 
 (** Like [localize_targs], but acts on kinds. *)
@@ -154,7 +124,7 @@ val localize_targs_with_kinds :
   env ->
   Typing_kinding_defs.Simple.named_kind list ->
   Aast.hint list ->
-  env * Tast.targ list
+  (env * Typing_error.t option) * Tast.targ list
 
 (** Same as [localize_targs] but also check constraints on type parameters
     (though not `where` constraints) *)
@@ -168,19 +138,30 @@ val localize_targs_and_check_constraints :
   Ast_defs.id ->
   decl_tparam list ->
   Aast.hint list ->
-  env * locl_ty * Tast.targ list
+  (env * Typing_error.t option) * locl_ty * Tast.targ list
 
 (** Declare and localize a single explicit type argument *)
 val localize_targ :
-  check_well_kinded:bool -> env -> Aast.hint -> env * Tast.targ
+  check_well_kinded:bool ->
+  env ->
+  Aast.hint ->
+  (env * Typing_error.t option) * Tast.targ
 
 val sub_type_decl :
-  env -> decl_ty -> decl_ty -> Typing_error.Reasons_callback.t option -> env
+  env ->
+  decl_ty ->
+  decl_ty ->
+  Typing_error.Reasons_callback.t option ->
+  env * Typing_error.t option
 
 (** Add some [as] or [super] constraint to the environment.
     Raise an error if any inconsistency is detected. *)
 val check_tparams_constraints :
-  use_pos:Pos.t -> ety_env:expand_env -> env -> decl_tparam list -> env
+  use_pos:Pos.t ->
+  ety_env:expand_env ->
+  env ->
+  decl_tparam list ->
+  env * Typing_error.t option
 
 (** Add some [where] constraints to the environment.
     Raise an error if any inconsistency is detected. *)
@@ -191,7 +172,7 @@ val check_where_constraints :
   definition_pos:Pos_or_decl.t ->
   env ->
   decl_where_constraint list ->
-  env
+  env * Typing_error.t option
 
 val decl : decl_ty -> phase_ty
 
@@ -204,7 +185,7 @@ val localize_and_add_generic_parameters_and_where_constraints :
   env ->
   decl_tparam list ->
   decl_where_constraint list ->
-  env
+  env * Typing_error.t option
 
 (** Add generic parameters to the environment, with localized bounds,
     and also add any consequences of `where` constraints.
@@ -216,4 +197,4 @@ val localize_and_add_ast_generic_parameters_and_where_constraints :
   ignore_errors:bool ->
   Nast.tparam list ->
   (Aast.hint * Ast_defs.constraint_kind * Aast.hint) list ->
-  env
+  env * Typing_error.t option

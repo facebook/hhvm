@@ -42,8 +42,8 @@ inline bool SparseHeap::empty() const {
 struct MemoryManager::MaskAlloc {
   explicit MaskAlloc(MemoryManager& mm)
     : m_mm(mm)
-    , startAlloc(s_statsEnabled ? *mm.m_allocated : 0)
-    , startDealloc(s_statsEnabled ? *mm.m_deallocated : 0)
+    , startAlloc(*mm.m_allocated)
+    , startDealloc(*mm.m_deallocated)
   {
     // capture all mallocs prior to construction
     FTRACE(1, "MaskAlloc()\n");
@@ -53,16 +53,14 @@ struct MemoryManager::MaskAlloc {
   ~MaskAlloc() {
     FTRACE(1, "~MaskAlloc()\n");
     // exclude mallocs and frees since construction
-    if (s_statsEnabled) {
-      FTRACE(1, "old: reset alloc: {} reset dealloc: {}\n",
-        m_mm.m_resetAllocated, m_mm.m_resetDeallocated);
+    FTRACE(1, "old: reset alloc: {} reset dealloc: {}\n",
+           m_mm.m_resetAllocated, m_mm.m_resetDeallocated);
 
-      m_mm.m_resetAllocated += *m_mm.m_allocated - startAlloc;
-      m_mm.m_resetDeallocated += *m_mm.m_deallocated - startDealloc;
+    m_mm.m_resetAllocated += *m_mm.m_allocated - startAlloc;
+    m_mm.m_resetDeallocated += *m_mm.m_deallocated - startDealloc;
 
-      FTRACE(1, "new: reset alloc: {} prev dealloc: {}\n\n",
-        m_mm.m_resetAllocated, m_mm.m_resetDeallocated);
-    }
+    FTRACE(1, "new: reset alloc: {} prev dealloc: {}\n\n",
+           m_mm.m_resetAllocated, m_mm.m_resetDeallocated);
   }
 
   MaskAlloc(const MaskAlloc&) = delete;
@@ -78,16 +76,12 @@ struct MemoryManager::CountMalloc {
   explicit CountMalloc(MemoryManager& mm, uint64_t& allocated)
     : m_mm(mm)
     , m_allocated(allocated)
-    , startAlloc(s_statsEnabled ? *mm.m_allocated : 0)
+    , startAlloc(*mm.m_allocated)
   {}
 
   ~CountMalloc() {
-    if (s_statsEnabled) {
-      assertx(*m_mm.m_allocated >= startAlloc);
-      m_allocated = *m_mm.m_allocated - startAlloc;
-    } else {
-      m_allocated = 0;
-    }
+    assertx(*m_mm.m_allocated >= startAlloc);
+    m_allocated = *m_mm.m_allocated - startAlloc;
   }
 
   CountMalloc(const CountMalloc&) = delete;
@@ -309,20 +303,13 @@ void MemoryManager::objFreeIndex(void* ptr, size_t index) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline int64_t MemoryManager::getAllocated() const {
-  if (use_jemalloc) {
-    assertx(m_allocated);
-    return *m_allocated;
-  }
-  return 0;
+  assertx(m_allocated);
+  return *m_allocated;
 }
 
 inline int64_t MemoryManager::getDeallocated() const {
-  if (use_jemalloc) {
-    assertx(m_deallocated);
-    return *m_deallocated;
-  } else {
-    return 0;
-  }
+  assertx(m_deallocated);
+  return *m_deallocated;
 }
 
 inline int64_t MemoryManager::currentUsage() const {

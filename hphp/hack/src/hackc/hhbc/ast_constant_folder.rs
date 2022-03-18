@@ -317,53 +317,22 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
     allow_maps: bool,
     force_class_const: bool,
 ) -> Result<TypedValue<'arena>, Error> {
+    if let Some(sl) = emitter.stack_limit.as_ref() {
+        sl.panic_if_exceeded();
+    }
     // TODO: ML equivalent has this as an implicit parameter that defaults to false.
-    use ast::{Expr, Expr_};
+    use ast::Expr_;
     match &expr.2 {
         Expr_::Int(s) => int_expr_to_typed_value(s),
         Expr_::True => Ok(TypedValue::Bool(true)),
         Expr_::False => Ok(TypedValue::Bool(false)),
         Expr_::Null => Ok(TypedValue::Null),
-        Expr_::String(s) => {
-            // FIXME: This is not safe--string literals are binary strings.
-            // There's no guarantee that they're valid UTF-8.
-            Ok(TypedValue::mk_string(
-                emitter
-                    .alloc
-                    .alloc_str(unsafe { std::str::from_utf8_unchecked(s) }),
-            ))
-        }
-        Expr_::Float(s) => {
-            if s == math::INF {
-                Ok(TypedValue::double(std::f64::INFINITY))
-            } else if s == math::NEG_INF {
-                Ok(TypedValue::double(std::f64::NEG_INFINITY))
-            } else if s == math::NAN {
-                Ok(TypedValue::double(std::f64::NAN))
-            } else {
-                s.parse()
-                    .map(TypedValue::double)
-                    .map_err(|_| Error::NotLiteral)
-            }
-        }
+        Expr_::String(s) => string_expr_to_typed_value(emitter, s),
+        Expr_::Float(s) => float_expr_to_typed_value(emitter, s),
         Expr_::Call(id)
-            if id
-                .0
-                .as_id()
-                .map_or(false, |x| x.1 == special_functions::HHAS_ADATA) =>
+            if (id.0.as_id()).map_or(false, |x| x.1 == special_functions::HHAS_ADATA) =>
         {
-            match id.2[..] {
-                [(ast_defs::ParamKind::Pnormal, Expr(_, _, Expr_::String(ref data)))] => {
-                    // FIXME: This is not safe--string literals are binary strings.
-                    // There's no guarantee that they're valid UTF-8.
-                    Ok(TypedValue::mk_hhas_adata(
-                        emitter
-                            .alloc
-                            .alloc_str(unsafe { std::str::from_utf8_unchecked(data) }),
-                    ))
-                }
-                _ => Err(Error::NotLiteral),
-            }
+            call_expr_to_typed_value(emitter, id)
         }
 
         Expr_::Varray(fields) => varray_to_typed_value(emitter, &fields.1),
@@ -374,125 +343,252 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
         Expr_::Id(_) => Err(Error::UserDefinedConstant),
 
         Expr_::Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, &x.2),
-        Expr_::Collection(x) if x.0.name().eq("keyset") => {
-            let keys = emitter.alloc.alloc_slice_fill_iter(
-                x.2.iter()
-                    .map(|x| keyset_value_afield_to_typed_value(emitter, x))
-                    .collect::<Result<Vec<_>, _>>()?
-                    .into_iter()
-                    .unique()
-                    .collect::<Vec<_>>()
-                    .into_iter(),
-            );
-            Ok(TypedValue::mk_keyset(keys))
-        }
+        Expr_::Collection(x) if x.0.name().eq("keyset") => keyset_expr_to_typed_value(emitter, x),
         Expr_::Collection(x)
             if x.0.name().eq("dict")
                 || allow_maps
                     && (string_utils::cmp(&(x.0).1, "Map", false, true)
                         || string_utils::cmp(&(x.0).1, "ImmMap", false, true)) =>
         {
-            let values = emitter
-                .alloc
-                .alloc_slice_fill_iter(update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|x| afield_to_typed_value_pair(emitter, x))
-                        .collect::<Result<_, _>>()?,
-                ));
-            Ok(TypedValue::mk_dict(values))
+            dict_expr_to_typed_value(emitter, x)
         }
         Expr_::Collection(x)
             if allow_maps
                 && (string_utils::cmp(&(x.0).1, "Set", false, true)
                     || string_utils::cmp(&(x.0).1, "ImmSet", false, true)) =>
         {
-            let values = emitter
-                .alloc
-                .alloc_slice_fill_iter(update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|x| set_afield_to_typed_value_pair(emitter, x))
-                        .collect::<Result<_, _>>()?,
-                ));
-            Ok(TypedValue::mk_dict(values))
+            set_expr_to_typed_value(emitter, x)
         }
-        Expr_::Tuple(x) => {
-            let v: Vec<_> = x
-                .iter()
-                .map(|e| expr_to_typed_value(emitter, e))
-                .collect::<Result<_, _>>()?;
-            Ok(TypedValue::mk_vec(
-                emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
-            ))
-        }
+        Expr_::Tuple(x) => tuple_expr_to_typed_value(emitter, x),
         Expr_::ValCollection(x) if x.0 == ast::VcKind::Vec || x.0 == ast::VcKind::Vector => {
-            let v: Vec<_> =
-                x.2.iter()
-                    .map(|e| expr_to_typed_value(emitter, e))
-                    .collect::<Result<_, _>>()?;
-            Ok(TypedValue::mk_vec(
-                emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
-            ))
+            valcollection_vec_expr_to_typed_value(emitter, x)
         }
         Expr_::ValCollection(x) if x.0 == ast::VcKind::Keyset => {
-            let keys = emitter.alloc.alloc_slice_fill_iter(
-                x.2.iter()
-                    .map(|e| {
-                        expr_to_typed_value(emitter, e).and_then(|tv| match tv {
-                            TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
-                            TypedValue::LazyClass(_)
-                                if emitter
-                                    .options()
-                                    .hhvm
-                                    .flags
-                                    .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS) =>
-                            {
-                                Ok(tv)
-                            }
-                            _ => Err(Error::NotLiteral),
-                        })
-                    })
-                    .collect::<Result<Vec<_>, _>>()?
-                    .into_iter()
-                    .unique()
-                    .collect::<Vec<_>>()
-                    .into_iter(),
-            );
-            Ok(TypedValue::mk_keyset(keys))
+            valcollection_keyset_expr_to_typed_value(emitter, x)
         }
         Expr_::ValCollection(x) if x.0 == ast::VcKind::Set || x.0 == ast::VcKind::ImmSet => {
-            let values = emitter
-                .alloc
-                .alloc_slice_fill_iter(update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|e| set_afield_value_to_typed_value_pair(emitter, e))
-                        .collect::<Result<Vec<_>, _>>()?,
-                ));
-            Ok(TypedValue::mk_dict(values))
+            valcollection_set_expr_to_typed_value(emitter, x)
         }
-        Expr_::KeyValCollection(x) => {
-            let values = emitter
-                .alloc
-                .alloc_slice_fill_iter(update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|e| kv_to_typed_value_pair(emitter, &e.0, &e.1))
-                        .collect::<Result<Vec<_>, _>>()?,
-                ));
-            Ok(TypedValue::mk_dict(values))
-        }
+        Expr_::KeyValCollection(x) => keyvalcollection_expr_to_typed_value(emitter, x),
         Expr_::Shape(fields) => shape_to_typed_value(emitter, fields),
-        Expr_::ClassConst(x) => {
-            if emitter.options().emit_class_pointers() == 1 && !force_class_const {
-                Err(Error::NotLiteral)
-            } else {
-                class_const_to_typed_value(emitter, &x.0, &x.1)
-            }
-        }
+        Expr_::ClassConst(x) => class_const_expr_to_typed_value(emitter, x, force_class_const),
+
         Expr_::ClassGet(_) => Err(Error::UserDefinedConstant),
         ast::Expr_::As(x) if (x.1).1.is_hlike() => {
             expr_to_typed_value_(emitter, &x.0, allow_maps, false)
         }
         _ => Err(Error::NotLiteral),
     }
+}
+
+fn class_const_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(ast::ClassId, ast::Pstring),
+    force_class_const: bool,
+) -> Result<TypedValue<'arena>, Error> {
+    if emitter.options().emit_class_pointers() == 1 && !force_class_const {
+        Err(Error::NotLiteral)
+    } else {
+        class_const_to_typed_value(emitter, &x.0, &x.1)
+    }
+}
+
+fn call_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    id: &(
+        ast::Expr,
+        Vec<ast::Targ>,
+        Vec<(ast_defs::ParamKind, ast::Expr)>,
+        Option<ast::Expr>,
+    ),
+) -> Result<TypedValue<'arena>, Error> {
+    use ast::{Expr, Expr_};
+    match id.2[..] {
+        [(ast_defs::ParamKind::Pnormal, Expr(_, _, Expr_::String(ref data)))] => {
+            // FIXME: This is not safe--string literals are binary strings.
+            // There's no guarantee that they're valid UTF-8.
+            Ok(TypedValue::mk_hhas_adata(
+                emitter
+                    .alloc
+                    .alloc_str(unsafe { std::str::from_utf8_unchecked(data) }),
+            ))
+        }
+        _ => Err(Error::NotLiteral),
+    }
+}
+
+fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+) -> Result<TypedValue<'arena>, Error> {
+    let keys = emitter.alloc.alloc_slice_fill_iter(
+        x.2.iter()
+            .map(|e| {
+                expr_to_typed_value(emitter, e).and_then(|tv| match tv {
+                    TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
+                    TypedValue::LazyClass(_)
+                        if emitter
+                            .options()
+                            .hhvm
+                            .flags
+                            .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS) =>
+                    {
+                        Ok(tv)
+                    }
+                    _ => Err(Error::NotLiteral),
+                })
+            })
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .unique()
+            .collect::<Vec<_>>()
+            .into_iter(),
+    );
+    Ok(TypedValue::mk_keyset(keys))
+}
+
+fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(
+        ast::KvcKind,
+        Option<(ast::Targ, ast::Targ)>,
+        Vec<ast::Field>,
+    ),
+) -> Result<TypedValue<'arena>, Error> {
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|e| kv_to_typed_value_pair(emitter, &e.0, &e.1))
+                .collect::<Result<Vec<_>, _>>()?,
+        ));
+    Ok(TypedValue::mk_dict(values))
+}
+
+fn valcollection_set_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+) -> Result<TypedValue<'arena>, Error> {
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|e| set_afield_value_to_typed_value_pair(emitter, e))
+                .collect::<Result<Vec<_>, _>>()?,
+        ));
+    Ok(TypedValue::mk_dict(values))
+}
+
+fn valcollection_vec_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+) -> Result<TypedValue<'arena>, Error> {
+    let v: Vec<_> =
+        x.2.iter()
+            .map(|e| expr_to_typed_value(emitter, e))
+            .collect::<Result<_, _>>()?;
+    Ok(TypedValue::mk_vec(
+        emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
+    ))
+}
+
+fn tuple_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &[ast::Expr],
+) -> Result<TypedValue<'arena>, Error> {
+    let v: Vec<_> = x
+        .iter()
+        .map(|e| expr_to_typed_value(emitter, e))
+        .collect::<Result<_, _>>()?;
+    Ok(TypedValue::mk_vec(
+        emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
+    ))
+}
+
+fn set_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(
+        ast::ClassName,
+        Option<ast::CollectionTarg>,
+        Vec<ast::Afield>,
+    ),
+) -> Result<TypedValue<'arena>, Error> {
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|x| set_afield_to_typed_value_pair(emitter, x))
+                .collect::<Result<_, _>>()?,
+        ));
+    Ok(TypedValue::mk_dict(values))
+}
+
+fn dict_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(
+        ast::ClassName,
+        Option<ast::CollectionTarg>,
+        Vec<ast::Afield>,
+    ),
+) -> Result<TypedValue<'arena>, Error> {
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|x| afield_to_typed_value_pair(emitter, x))
+                .collect::<Result<_, _>>()?,
+        ));
+    Ok(TypedValue::mk_dict(values))
+}
+
+fn keyset_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    x: &(
+        ast::ClassName,
+        Option<ast::CollectionTarg>,
+        Vec<ast::Afield>,
+    ),
+) -> Result<TypedValue<'arena>, Error> {
+    let keys = emitter.alloc.alloc_slice_fill_iter(
+        x.2.iter()
+            .map(|x| keyset_value_afield_to_typed_value(emitter, x))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .unique()
+            .collect::<Vec<_>>()
+            .into_iter(),
+    );
+    Ok(TypedValue::mk_keyset(keys))
+}
+
+fn float_expr_to_typed_value<'arena, 'decl>(
+    _emitter: &Emitter<'arena, 'decl>,
+    s: &str,
+) -> Result<TypedValue<'arena>, Error> {
+    if s == math::INF {
+        Ok(TypedValue::double(std::f64::INFINITY))
+    } else if s == math::NEG_INF {
+        Ok(TypedValue::double(std::f64::NEG_INFINITY))
+    } else if s == math::NAN {
+        Ok(TypedValue::double(std::f64::NAN))
+    } else {
+        s.parse()
+            .map(TypedValue::double)
+            .map_err(|_| Error::NotLiteral)
+    }
+}
+
+fn string_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    s: &[u8],
+) -> Result<TypedValue<'arena>, Error> {
+    // FIXME: This is not safe--string literals are binary strings.
+    // There's no guarantee that they're valid UTF-8.
+    Ok(TypedValue::mk_string(
+        emitter
+            .alloc
+            .alloc_str(unsafe { std::str::from_utf8_unchecked(s) }),
+    ))
 }
 
 fn int_expr_to_typed_value<'arena>(s: &str) -> Result<TypedValue<'arena>, Error> {

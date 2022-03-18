@@ -44,6 +44,13 @@ val find_gconst_in_file :
   string ->
   Nast.gconst option
 
+val find_module_in_file :
+  ?full:bool ->
+  Provider_context.t ->
+  Relative_path.t ->
+  string ->
+  Nast.module_def option
+
 val get_ast :
   ?full:bool -> Provider_context.t -> Relative_path.t -> Nast.program
 

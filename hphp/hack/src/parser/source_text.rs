@@ -97,11 +97,14 @@ impl<'a> SourceText<'a> {
 }
 
 impl<'content> ToOcamlRep for SourceText<'content> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
         // A SourceText with no associated ocaml_source_text cannot be converted
         // to OCaml yet (we'd need to construct the OffsetMap). We still
         // construct some in test cases, so just panic upon attempts to convert.
-        alloc.add(&self.0.ocaml_source_text.unwrap())
+        alloc.add_copy(self.0.ocaml_source_text.unwrap())
     }
 }
 

@@ -11,6 +11,11 @@
   * [target] under [env].
   *)
 val can_access :
+  env:Typing_env_types.env ->
   current:string option ->
   target:string option ->
-  [ `Yes | `Disjoint of string * string | `Outside of string ]
+  [ `Yes
+  | `Disjoint of string * string
+  | `Outside of string
+  | `OutsideViaTrait of Pos_or_decl.t
+  ]

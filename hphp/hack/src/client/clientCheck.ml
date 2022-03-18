@@ -553,8 +553,11 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
             "Invalid argument; expected an argument of the form [filename](:[any|typing|cast])? or [any|typing|cast]\n";
           raise Exit_status.(Exit_with Input_error)
         | exn ->
-          Printf.eprintf "An unexpected error occured: %s" (Exn.to_string exn);
-          raise exn
+          let e = Exception.wrap exn in
+          Printf.eprintf
+            "An unexpected error occured: %s"
+            (Exception.get_ctor_string e);
+          Exception.reraise e
       in
       let%lwt (ty, telemetry) =
         rpc args @@ Rpc.TAST_HOLES (filename, hole_src_opt)

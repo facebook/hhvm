@@ -1,60 +1,59 @@
---- ocaml
-+++ rupro
-@@ -1,57 +1,51 @@
- FoldedClass {
-     name: "\\X\\Foo",
-     pos: Pos(root|user_attributes_in_namespaces.php, 4:9-12),
-     kind: Cclass(
-         Concrete,
-     ),
--    ancestors: {
--        "\\HH\\ClassAttribute": HH\ClassAttribute,
--    },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|user_attributes_in_namespaces.php, 4:9-12),
-             ty: HH\classname<this>,
-             origin: "\\X\\Foo",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\X\\Y\\Bar",
-     pos: Pos(root|user_attributes_in_namespaces.php, 7:11-14),
-     kind: Cclass(
-         Concrete,
-     ),
--    ancestors: {
--        "\\HH\\ClassAttribute": HH\ClassAttribute,
--    },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|user_attributes_in_namespaces.php, 7:11-14),
-             ty: HH\classname<this>,
-             origin: "\\X\\Y\\Bar",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\X\\C",
-     pos: Pos(root|user_attributes_in_namespaces.php, 11:9-10),
-     kind: Cclass(
-         Concrete,
-     ),
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|user_attributes_in_namespaces.php, 11:9-10),
-             ty: HH\classname<this>,
-             origin: "\\X\\C",
-             refs: [],
-         },
-     },
- }
+FoldedClass {
+    name: "\\X\\Foo",
+    pos: Pos(root|user_attributes_in_namespaces.php, 4:9-12),
+    kind: Cclass(
+        Concrete,
+    ),
+    ancestors: {
+        "\\HH\\ClassAttribute": HH\ClassAttribute,
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|user_attributes_in_namespaces.php, 4:9-12),
+            ty: HH\classname<this>,
+            origin: "\\X\\Foo",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\X\\Y\\Bar",
+    pos: Pos(root|user_attributes_in_namespaces.php, 7:11-14),
+    kind: Cclass(
+        Concrete,
+    ),
+    ancestors: {
+        "\\HH\\ClassAttribute": HH\ClassAttribute,
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|user_attributes_in_namespaces.php, 7:11-14),
+            ty: HH\classname<this>,
+            origin: "\\X\\Y\\Bar",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\X\\C",
+    pos: Pos(root|user_attributes_in_namespaces.php, 11:9-10),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|user_attributes_in_namespaces.php, 11:9-10),
+            ty: HH\classname<this>,
+            origin: "\\X\\C",
+            refs: [],
+        },
+    },
+}
+
+They matched!

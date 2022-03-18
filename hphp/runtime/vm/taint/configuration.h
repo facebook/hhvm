@@ -38,11 +38,13 @@ namespace HPHP {
 namespace taint {
 
 struct Source {
-  Optional<int> index; // If set indicates a parameter source.
+  // Indicates a parameter source if set.
+  Optional<int> index;
 };
 
 struct Sink {
-  Optional<int> index; // If set indicates a parameter source.
+  // Indicates a parameter sink if set >= 0 or a return sink if set -1.
+  Optional<int> index;
 };
 
 /**

@@ -92,8 +92,9 @@ let rec shallow_declare_ast ctx decls prog =
       | Constant cst ->
         let (name, decl) = Decl_nast.const_naming_and_decl_DEPRECATED ctx cst in
         (name, Shallow_decl_defs.Const decl) :: decls
-      (* TODO(T108206307) *)
-      | Module _ -> decls)
+      | Module md ->
+        let (name, decl) = Decl_nast.module_naming_and_decl_DEPRECATED ctx md in
+        (name, Shallow_decl_defs.Module decl) :: decls)
 
 let compare_decls ctx fn text =
   let (ctx, _entry) =

@@ -26,6 +26,9 @@ FoldedClass {
             from_req_extends: false,
         },
     },
+    ancestors: {
+        "\\T": T,
+    },
     consts: {
         "class": ClassConst {
             is_synthesized: true,
@@ -62,6 +65,7 @@ FoldedClass {
         },
     },
     ancestors: {
+        "\\T": T,
         "\\A": A,
     },
     consts: {

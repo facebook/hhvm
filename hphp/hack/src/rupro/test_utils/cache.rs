@@ -96,5 +96,6 @@ pub fn make_non_eviction_shallow_decl_cache<R: Reason>() -> ShallowDeclCache<R> 
         Arc::new(NonEvictingCache::default()),
         Box::new(NonEvictingCache::default()),
         Box::new(NonEvictingCache::default()),
+        Box::new(NonEvictingCache::default()),
     )
 }

@@ -257,7 +257,7 @@ impl<T> fmt::Pointer for RcOc<T> {
 }
 
 impl<T: ToOcamlRep> ToOcamlRep for RcOc<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
         let generation = alloc.generation();
         match self.get_cached_value_in_generation(generation) {
             Some(value) => unsafe {

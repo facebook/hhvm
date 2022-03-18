@@ -267,9 +267,11 @@ pub struct Profile {
 
     /// Peak stack size during parsing and lowering.
     pub lower_peak: i64,
+    pub error_peak: i64,
 
     /// Peak stack size during codegen
-    pub codegen_peak: i64,
+    pub rewrite_peak: i64,
+    pub emitter_peak: i64,
 }
 
 impl std::ops::AddAssign for Profile {
@@ -280,7 +282,9 @@ impl std::ops::AddAssign for Profile {
         self.codegen_bytes += p.codegen_bytes;
         self.parse_peak += p.parse_peak;
         self.lower_peak += p.lower_peak;
-        self.codegen_peak += p.codegen_peak;
+        self.error_peak += p.error_peak;
+        self.rewrite_peak += p.rewrite_peak;
+        self.emitter_peak += p.emitter_peak;
     }
 }
 
@@ -368,13 +372,20 @@ fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
     env: &Env<S>,
     namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
+    stack_limit: &'decl StackLimit,
+    profile: &'p mut Profile,
 ) -> Result<HackCUnit<'arena>, Error> {
     // First rewrite.
-    let result = rewrite(emitter, ast, RcOc::clone(&namespace_env)); // Modifies `ast` in place.
+    stack_limit.reset();
+    let result = rewrite(emitter, ast, RcOc::clone(&namespace_env), stack_limit); // Modifies `ast` in place.
+    profile.rewrite_peak = stack_limit.peak() as i64;
+    stack_limit.reset();
     match result {
         Ok(()) => {
             // Rewrite ok, now emit.
-            emit_unit_from_ast(emitter, env, namespace_env, ast)
+            let unit = emit_unit_from_ast(emitter, env, namespace_env, ast)?;
+            profile.emitter_peak = stack_limit.peak() as i64;
+            Ok(unit)
         }
         Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
             emit_unit::emit_fatal_unit(emitter.alloc, op, &pos, msg)
@@ -387,8 +398,9 @@ fn rewrite<'p, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     ast: &'p mut ast::Program,
     namespace_env: RcOc<NamespaceEnv>,
+    stack_limit: &'decl StackLimit,
 ) -> Result<(), Error> {
-    rewrite_program(emitter, ast, namespace_env)
+    rewrite_program(emitter, ast, namespace_env, stack_limit)
 }
 
 pub fn unit_from_text<'arena, 'decl, S: AsRef<str>>(
@@ -448,7 +460,7 @@ fn emit_unit_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
 fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
-    stack_limit: &StackLimit,
+    stack_limit: &'decl StackLimit,
     source_text: SourceText<'_>,
 ) -> anyhow::Result<(HackCUnit<'arena>, Option<Profile>)> {
     let log_extern_compiler_perf = emitter.options().log_extern_compiler_perf();
@@ -479,11 +491,12 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
         Ok((mut ast, mut profile)) => {
             profile.parsing_t = parsing_t;
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
-            stack_limit.reset();
-            match time(move || rewrite_and_emit(emitter, env, namespace_env, &mut ast)) {
+            let prof = &mut profile;
+            match time(move || {
+                rewrite_and_emit(emitter, env, namespace_env, &mut ast, stack_limit, prof)
+            }) {
                 (Ok(unit), codegen_t) => {
                     profile.codegen_t = codegen_t;
-                    profile.codegen_peak = stack_limit.peak() as i64;
                     (unit, profile)
                 }
                 (Err(e), _) => return Err(anyhow!("Unhandled Emitter error: {}", e)),
@@ -647,6 +660,7 @@ fn parse_file(
                 scoured_comments,
                 parse_peak,
                 lower_peak,
+                error_peak,
                 arena_bytes,
                 ..
             } => {
@@ -668,6 +682,7 @@ fn parse_file(
                             Profile {
                                 parse_peak,
                                 lower_peak,
+                                error_peak,
                                 parsing_bytes: arena_bytes,
                                 ..Default::default()
                             },

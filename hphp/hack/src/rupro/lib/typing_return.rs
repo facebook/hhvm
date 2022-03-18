@@ -56,6 +56,29 @@ impl TypingReturn {
             return_type: locl_ty,
         }
     }
+
+    fn implicit_return<R: Reason>(_env: &TEnv<R>, _pos: R::Pos, _expected: Ty<R>, _actual: Ty<R>) {
+        // TODO(hrust): sound dynamic
+        // TODO(hrust, mjt): subtype
+    }
+
+    pub fn fun_implicit_return<R: Reason>(
+        env: &TEnv<R>,
+        pos: R::Pos,
+        ret: Ty<R>,
+        fun_kind: &oxidized::ast_defs::FunKind,
+    ) {
+        // TODO(hrust): sound dynamic
+        use oxidized::ast_defs::FunKind;
+        match fun_kind {
+            FunKind::FSync => {
+                // TODO(hrust): check_inout_return
+                let rty = Ty::void(R::no_return(pos.clone()));
+                Self::implicit_return(env, pos, rty, ret);
+            }
+            _ => unimplemented!(),
+        }
+    }
 }
 
 impl<R: Reason> TypingReturnInfo<R> {
@@ -65,5 +88,9 @@ impl<R: Reason> TypingReturnInfo<R> {
         Self {
             return_type: Ty::any(R::none()),
         }
+    }
+
+    pub fn return_type(&self) -> Ty<R> {
+        self.return_type.clone()
     }
 }

@@ -338,6 +338,7 @@ dependencies = [
  "local",
  "ocaml_helper",
  "oxidized",
+ "print_opcode",
  "runtime",
  "thiserror",
  "write_bytes",
@@ -436,6 +437,7 @@ dependencies = [
  "ocamlrep",
  "options",
  "oxidized",
+ "stack_limit",
  "unique_id_builder",
 ]
 
@@ -552,6 +554,12 @@ dependencies = [
  "unicode-width",
  "winapi",
 ]
+
+[[package]]
+name = "convert_case"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
 
 [[package]]
 name = "core_utils_rust"
@@ -752,6 +760,18 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "dashmap"
+version = "4.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e77a43b28d0668df09411cb0bc9a8c2adc40f9a048afe863e05fd43251e8e39c"
+dependencies = [
+ "cfg-if",
+ "num_cpus",
+ "rayon",
+ "serde",
 ]
 
 [[package]]
@@ -1485,6 +1505,7 @@ dependencies = [
  "arena_collections",
  "bstr",
  "eq_modulo_pos_derive",
+ "hcons",
  "indexmap",
 ]
 
@@ -1720,6 +1741,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "hcons"
+version = "0.0.0"
+dependencies = [
+ "dashmap",
+ "fnv",
+ "once_cell",
+ "serde",
+]
+
+[[package]]
 name = "heapless"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1768,7 +1799,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "hex",
- "itertools 0.10.3",
  "md-5",
  "proc-macro2",
  "quote",
@@ -2904,6 +2934,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "print_opcode"
+version = "0.0.0"
+dependencies = [
+ "print_opcode_impl",
+ "print_opcode_macro",
+]
+
+[[package]]
+name = "print_opcode_impl"
+version = "0.0.0"
+dependencies = [
+ "convert_case",
+ "hhbc",
+ "macro_test_util",
+ "opcode_test_data",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "print_opcode_macro"
+version = "0.0.0"
+dependencies = [
+ "hhbc",
+ "print_opcode_impl",
+]
+
+[[package]]
 name = "proc-macro-error"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3094,6 +3153,7 @@ dependencies = [
  "ocamlrep",
  "oxidized",
  "rewrite_xml",
+ "stack_limit",
 ]
 
 [[package]]
@@ -3194,6 +3254,7 @@ dependencies = [
  "naming_special_names_rust",
  "oxidized",
  "parser_core_types",
+ "stack_limit",
  "strum",
  "strum_macros",
 ]

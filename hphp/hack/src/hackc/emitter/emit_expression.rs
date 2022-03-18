@@ -408,45 +408,15 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::Varray(e) => emit_varray(emitter, env, pos, e, expression),
         Expr_::Collection(e) => emit_named_collection_str(emitter, env, expression, e),
         Expr_::ValCollection(e) => emit_val_collection(emitter, env, pos, e, expression),
-        Expr_::Pair(e) => {
-            let (_, e1, e2) = (**e).to_owned();
-            let fields = mk_afvalues(&[e1, e2]);
-            emit_named_collection(emitter, env, pos, expression, &fields, CollectionType::Pair)
-        }
-        Expr_::KeyValCollection(e) => {
-            let (kind, _, fields) = &**e;
-            let fields = mk_afkvalues(
-                fields
-                    .to_owned()
-                    .into_iter()
-                    .map(|ast::Field(e1, e2)| (e1, e2))
-                    .collect::<Vec<_>>()
-                    .as_slice(),
-            );
-            let collection_typ = match kind {
-                aast_defs::KvcKind::Map => CollectionType::Map,
-                aast_defs::KvcKind::ImmMap => CollectionType::ImmMap,
-                _ => return emit_collection(emitter, env, expression, &fields, None),
-            };
-            emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
-        }
+        Expr_::Pair(e) => emit_pair(emitter, env, pos, e, expression),
+        Expr_::KeyValCollection(e) => emit_keyval_collection_expr(emitter, env, pos, e, expression),
         Expr_::Clone(e) => Ok(emit_pos_then(pos, emit_clone(emitter, env, e)?)),
         Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(emitter, env, expression, e)?)),
         Expr_::Await(e) => emit_await(emitter, env, pos, e),
         Expr_::ReadonlyExpr(e) => emit_readonly_expr(emitter, env, pos, e),
         Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
         Expr_::Efun(e) => Ok(emit_pos_then(pos, emit_lambda(emitter, env, &e.0, &e.1)?)),
-        Expr_::ClassGet(e) => {
-            // class gets without a readonly expression must be mutable
-            emit_class_get(
-                emitter,
-                env,
-                QueryMOp::CGet,
-                &e.0,
-                &e.1,
-                ReadonlyOp::Mutable,
-            )
-        }
+        Expr_::ClassGet(e) => emit_class_get_expr(emitter, env, pos, e),
 
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
@@ -536,11 +506,11 @@ fn emit_id<'a, 'arena, 'decl>(
     let alloc = env.arena; // Should this be emitter.alloc?
     let ast_defs::Id(p, s) = id;
     match s.as_str() {
-        pseudo_consts::G__FILE__ => Ok(instr::instr(Instruct::Opcode(Opcodes::File))),
-        pseudo_consts::G__DIR__ => Ok(instr::instr(Instruct::Opcode(Opcodes::Dir))),
-        pseudo_consts::G__METHOD__ => Ok(instr::instr(Instruct::Opcode(Opcodes::Method))),
+        pseudo_consts::G__FILE__ => Ok(instr::instr(Instruct::Opcode(Opcode::File))),
+        pseudo_consts::G__DIR__ => Ok(instr::instr(Instruct::Opcode(Opcode::Dir))),
+        pseudo_consts::G__METHOD__ => Ok(instr::instr(Instruct::Opcode(Opcode::Method))),
         pseudo_consts::G__FUNCTION_CREDENTIAL__ => {
-            Ok(instr::instr(Instruct::Opcode(Opcodes::FuncCred)))
+            Ok(instr::instr(Instruct::Opcode(Opcode::FuncCred)))
         }
         pseudo_consts::G__CLASS__ => {
             Ok(InstrSeq::gather(vec![instr::selfcls(), instr::classname()]))
@@ -564,7 +534,7 @@ fn emit_id<'a, 'arena, 'decl>(
             emit_symbol_refs::add_constant(emitter, cid.clone());
             Ok(emit_pos_then(
                 p,
-                instr::instr(Instruct::Opcode(Opcodes::CnsE(cid))),
+                instr::instr(Instruct::Opcode(Opcode::CnsE(cid))),
             ))
         }
     }
@@ -1000,9 +970,9 @@ fn emit_vec_collection<'a, 'arena, 'decl>(
             let instr = emit_adata::typed_value_to_instr(e, &tv)?;
             emit_static_collection(env, None, pos, instr)
         }
-        Err(_) => emit_value_only_collection(e, env, pos, fields, |v| {
-            Instruct::Opcode(Opcodes::NewVec(v))
-        }),
+        Err(_) => {
+            emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
+        }
     }
 }
 
@@ -1418,7 +1388,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 Ok(instr::newstructdict(alloc, x))
             })
         } else {
-            let ctor = Instruct::Opcode(Opcodes::NewDictArray(count));
+            let ctor = Instruct::Opcode(Opcode::NewDictArray(count));
             emit_array(e, env, pos, fields, ctor)
         }
     };
@@ -1432,33 +1402,29 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 instr::colfromarray(ctype),
             ]))
         } else {
-            let ctor = Instruct::Opcode(Opcodes::NewDictArray(count));
+            let ctor = Instruct::Opcode(Opcode::NewDictArray(count));
             emit_keyvalue_collection(e, env, pos, fields, ctype, ctor)
         }
     };
     use ast::Expr_;
     match &expr.2 {
         Expr_::ValCollection(v) if v.0 == ast::VcKind::Vec => {
-            emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcodes::NewVec(v))
-            })
+            emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
         }
         Expr_::Collection(v) if (v.0).1 == "vec" => {
-            emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcodes::NewVec(v))
-            })
+            emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
         }
-        Expr_::Tuple(_) => emit_value_only_collection(e, env, pos, fields, |v| {
-            Instruct::Opcode(Opcodes::NewVec(v))
-        }),
+        Expr_::Tuple(_) => {
+            emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
+        }
         Expr_::ValCollection(v) if v.0 == ast::VcKind::Keyset => {
             emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcodes::NewKeysetArray(v))
+                Instruct::Opcode(Opcode::NewKeysetArray(v))
             })
         }
         Expr_::Collection(v) if (v.0).1 == "keyset" => {
             emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcodes::NewKeysetArray(v))
+                Instruct::Opcode(Opcode::NewKeysetArray(v))
             })
         }
         Expr_::Collection(v) if (v.0).1 == "dict" => emit_dict(e),
@@ -1489,7 +1455,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
         }
         Expr_::Varray(_) => {
             let instrs = emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcodes::NewVec(v))
+                Instruct::Opcode(Opcode::NewVec(v))
             });
             Ok(instrs?)
         }
@@ -1501,7 +1467,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 });
                 Ok(instrs?)
             } else {
-                let constr = Instruct::Opcode(Opcodes::NewDictArray(count));
+                let constr = Instruct::Opcode(Opcode::NewDictArray(count));
                 let instrs = emit_array(e, env, pos, fields, constr);
                 Ok(instrs?)
             }
@@ -1698,9 +1664,9 @@ fn emit_array_mark_legacy<'a, 'arena, 'decl>(
         instr::empty()
     };
     let mark = if legacy {
-        instr::instr(Instruct::Opcode(Opcodes::ArrayMarkLegacy))
+        instr::instr(Instruct::Opcode(Opcode::ArrayMarkLegacy))
     } else {
-        instr::instr(Instruct::Opcode(Opcodes::ArrayUnmarkLegacy))
+        instr::instr(Instruct::Opcode(Opcode::ArrayUnmarkLegacy))
     };
     Ok(InstrSeq::gather(vec![
         emit_exprs_and_error_on_inout(e, env, es, "HH\\array_mark_legacy")?,
@@ -3012,24 +2978,24 @@ fn get_call_builtin_func_info<'arena, 'decl>(
     id: impl AsRef<str>,
 ) -> Option<(usize, Instruct<'arena>)> {
     match id.as_ref() {
-        "array_key_exists" => Some((2, Instruct::Opcode(Opcodes::AKExists))),
-        "hphp_array_idx" => Some((3, Instruct::Opcode(Opcodes::ArrayIdx))),
-        "intval" => Some((1, Instruct::Opcode(Opcodes::CastInt))),
-        "boolval" => Some((1, Instruct::Opcode(Opcodes::CastBool))),
-        "strval" => Some((1, Instruct::Opcode(Opcodes::CastString))),
-        "floatval" | "doubleval" => Some((1, Instruct::Opcode(Opcodes::CastDouble))),
-        "HH\\vec" => Some((1, Instruct::Opcode(Opcodes::CastVec))),
-        "HH\\keyset" => Some((1, Instruct::Opcode(Opcodes::CastKeyset))),
-        "HH\\dict" => Some((1, Instruct::Opcode(Opcodes::CastDict))),
-        "HH\\varray" => Some((1, Instruct::Opcode(Opcodes::CastVec))),
-        "HH\\darray" => Some((1, Instruct::Opcode(Opcodes::CastDict))),
+        "array_key_exists" => Some((2, Instruct::Opcode(Opcode::AKExists))),
+        "hphp_array_idx" => Some((3, Instruct::Opcode(Opcode::ArrayIdx))),
+        "intval" => Some((1, Instruct::Opcode(Opcode::CastInt))),
+        "boolval" => Some((1, Instruct::Opcode(Opcode::CastBool))),
+        "strval" => Some((1, Instruct::Opcode(Opcode::CastString))),
+        "floatval" | "doubleval" => Some((1, Instruct::Opcode(Opcode::CastDouble))),
+        "HH\\vec" => Some((1, Instruct::Opcode(Opcode::CastVec))),
+        "HH\\keyset" => Some((1, Instruct::Opcode(Opcode::CastKeyset))),
+        "HH\\dict" => Some((1, Instruct::Opcode(Opcode::CastDict))),
+        "HH\\varray" => Some((1, Instruct::Opcode(Opcode::CastVec))),
+        "HH\\darray" => Some((1, Instruct::Opcode(Opcode::CastDict))),
         "HH\\ImplicitContext\\_Private\\set_implicit_context_by_value" if e.systemlib() => {
-            Some((1, Instruct::Opcode(Opcodes::SetImplicitContextByValue)))
+            Some((1, Instruct::Opcode(Opcode::SetImplicitContextByValue)))
         }
         // TODO: enforce that this returns readonly
-        "HH\\global_readonly_get" => Some((1, Instruct::Opcode(Opcodes::CGetG))),
-        "HH\\global_get" => Some((1, Instruct::Opcode(Opcodes::CGetG))),
-        "HH\\global_isset" => Some((1, Instruct::Opcode(Opcodes::IssetG))),
+        "HH\\global_readonly_get" => Some((1, Instruct::Opcode(Opcode::CGetG))),
+        "HH\\global_get" => Some((1, Instruct::Opcode(Opcode::CGetG))),
+        "HH\\global_isset" => Some((1, Instruct::Opcode(Opcode::IssetG))),
         _ => None,
     }
 }
@@ -3187,10 +3153,10 @@ fn emit_lvar<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     _pos: &Pos,
-    e: &'a Box<aast_defs::Lid>,
+    e: &'a aast_defs::Lid,
 ) -> Result<InstrSeq<'arena>> {
     use aast_defs::Lid;
-    let Lid(pos, _) = &**e;
+    let Lid(pos, _) = e;
     Ok(InstrSeq::gather(vec![
         emit_pos(pos),
         emit_local(emitter, env, BareThisOp::Notice, e)?,
@@ -3215,9 +3181,9 @@ fn emit_is_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    is_expr: &Box<(ast::Expr, aast::Hint)>,
+    is_expr: &'a (ast::Expr, aast::Hint),
 ) -> Result<InstrSeq<'arena>> {
-    let (e, h) = &**is_expr;
+    let (e, h) = is_expr;
     let is = emit_is(emitter, env, pos, h)?;
     Ok(InstrSeq::gather(vec![emit_expr(emitter, env, e)?, is]))
 }
@@ -3226,9 +3192,9 @@ fn emit_array_get_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &'a Box<(ast::Expr, Option<ast::Expr>)>,
+    e: &'a (ast::Expr, Option<ast::Expr>),
 ) -> Result<InstrSeq<'arena>> {
-    let (base_expr, opt_elem_expr) = &**e;
+    let (base_expr, opt_elem_expr) = e;
     Ok(emit_array_get(
         emitter,
         env,
@@ -3243,14 +3209,54 @@ fn emit_array_get_expr<'a, 'arena, 'decl>(
     .0)
 }
 
+fn emit_pair<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    e: &'a (Option<(ast::Targ, ast::Targ)>, ast::Expr, ast::Expr),
+    expression: &ast::Expr,
+) -> Result<InstrSeq<'arena>> {
+    let (_, e1, e2) = e.to_owned();
+    let fields = mk_afvalues(&[e1, e2]);
+    emit_named_collection(emitter, env, pos, expression, &fields, CollectionType::Pair)
+}
+
+fn emit_keyval_collection_expr<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    e: &'a (
+        ast::KvcKind,
+        Option<(ast::Targ, ast::Targ)>,
+        Vec<ast::Field>,
+    ),
+    expression: &ast::Expr,
+) -> Result<InstrSeq<'arena>> {
+    let (kind, _, fields) = e;
+    let fields = mk_afkvalues(
+        fields
+            .to_owned()
+            .into_iter()
+            .map(|ast::Field(e1, e2)| (e1, e2))
+            .collect::<Vec<_>>()
+            .as_slice(),
+    );
+    let collection_typ = match kind {
+        aast_defs::KvcKind::Map => CollectionType::Map,
+        aast_defs::KvcKind::ImmMap => CollectionType::ImmMap,
+        _ => return emit_collection(emitter, env, expression, &fields, None),
+    };
+    emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
+}
+
 fn emit_val_collection<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &Box<(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>)>,
+    e: &'a (ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let (kind, _, es) = &**e;
+    let (kind, _, es) = e;
     let fields = mk_afvalues(es);
     let collection_typ = match kind {
         aast_defs::VcKind::Vector => CollectionType::Vector,
@@ -3266,7 +3272,7 @@ fn emit_varray<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &Box<(Option<ast::Targ>, Vec<ast::Expr>)>,
+    e: &'a (Option<ast::Targ>, Vec<ast::Expr>),
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     Ok(emit_pos_then(
@@ -3275,11 +3281,28 @@ fn emit_varray<'a, 'arena, 'decl>(
     ))
 }
 
+fn emit_class_get_expr<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    _pos: &Pos,
+    e: &'a (ast::ClassId, ast::ClassGetExpr, ast::PropOrMethod),
+) -> Result<InstrSeq<'arena>> {
+    // class gets without a readonly expression must be mutable
+    emit_class_get(
+        emitter,
+        env,
+        QueryMOp::CGet,
+        &e.0,
+        &e.1,
+        ReadonlyOp::Mutable,
+    )
+}
+
 fn emit_darray<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &Box<(Option<(ast::Targ, ast::Targ)>, Vec<(ast::Expr, ast::Expr)>)>,
+    e: &'a (Option<(ast::Targ, ast::Targ)>, Vec<(ast::Expr, ast::Expr)>),
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     Ok(emit_pos_then(
@@ -3292,12 +3315,12 @@ fn emit_obj_get_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &Box<(
+    e: &'a (
         ast::Expr,
         ast::Expr,
         aast_defs::OgNullFlavor,
         aast_defs::PropOrMethod,
-    )>,
+    ),
 ) -> Result<InstrSeq<'arena>> {
     Ok(emit_obj_get(
         emitter,
@@ -3317,7 +3340,7 @@ fn emit_label<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    label: &'a Box<(Option<aast_defs::ClassName>, String)>,
+    label: &'a (Option<aast_defs::ClassName>, String),
 ) -> Result<InstrSeq<'arena>> {
     use ast::Expr_;
 
@@ -5085,7 +5108,7 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
         emit_expr(e, env, src)?,
         count_instrs,
         base_setup,
-        instr::instr(Instruct::Opcode(Opcodes::SetRangeM(
+        instr::instr(Instruct::Opcode(Opcode::SetRangeM(
             (base_stack + cls_stack)
                 .try_into()
                 .expect("StackIndex overflow"),

@@ -528,26 +528,38 @@ let naming_from_saved_state
       (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
          any dirty files to make sure we properly handle file deletes. *)
       Relative_path.Set.iter parsing_files ~f:(fun k ->
+          let open FileInfo in
           match Naming_table.get_file_info old_naming_table k with
           | None ->
             (* If we can't find the file in [old_naming_table] we don't consider that an error, since
              * it could be a new file that was added. *)
             ()
-          | Some v ->
+          | Some
+              {
+                hash = _;
+                file_mode = _;
+                funs;
+                classes;
+                typedefs;
+                consts;
+                modules;
+                comments = _;
+              } ->
             let backend = Provider_context.get_backend ctx in
             let snd (_, x, _) = x in
             Naming_provider.remove_type_batch
               backend
-              (v.FileInfo.classes |> List.map ~f:snd);
+              (classes |> List.map ~f:snd);
             Naming_provider.remove_type_batch
               backend
-              (v.FileInfo.typedefs |> List.map ~f:snd);
-            Naming_provider.remove_fun_batch
-              backend
-              (v.FileInfo.funs |> List.map ~f:snd);
+              (typedefs |> List.map ~f:snd);
+            Naming_provider.remove_fun_batch backend (funs |> List.map ~f:snd);
             Naming_provider.remove_const_batch
               backend
-              (v.FileInfo.consts |> List.map ~f:snd))
+              (consts |> List.map ~f:snd);
+            Naming_provider.remove_module_batch
+              backend
+              (modules |> List.map ~f:snd))
     | None ->
       (* Name all the files from the old naming-table (except the new ones we parsed since
          they'll be named by our caller, next). We assume the old naming-table came from a clean
@@ -595,7 +607,7 @@ let get_dirty_fast
 
 let names_to_deps (names : FileInfo.names) : Typing_deps.DepSet.t =
   let open Typing_deps in
-  let { FileInfo.n_funs; n_classes; n_types; n_consts } = names in
+  let { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } = names in
   let add_deps_of_sset dep_ctor sset depset =
     SSet.fold sset ~init:depset ~f:(fun n acc ->
         DepSet.add acc (Dep.make (dep_ctor n)))
@@ -605,6 +617,7 @@ let names_to_deps (names : FileInfo.names) : Typing_deps.DepSet.t =
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_types deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConst n) n_consts deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConstName n) n_consts deps in
+  let deps = add_deps_of_sset (fun n -> Dep.Module n) n_modules deps in
   deps
 
 let log_fanout_information to_recheck_deps files_to_recheck =

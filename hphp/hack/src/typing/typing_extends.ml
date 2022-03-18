@@ -138,7 +138,7 @@ let constructor_is_consistent kind =
 (*****************************************************************************)
 
 (* Rules for visibility *)
-let check_visibility parent_vis c_vis parent_pos pos on_error =
+let check_visibility env parent_vis c_vis parent_pos pos on_error =
   match (parent_vis, c_vis) with
   | (Vprivate _, _) ->
     (* The only time this case should come into play is when the
@@ -159,6 +159,7 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
     let err_opt =
       match
         Typing_modules.can_access
+          ~env
           ~current:(Some child_m)
           ~target:(Some parent_m)
       with
@@ -176,6 +177,28 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
         Some
           (Typing_error.Secondary.Visibility_override_internal
              { pos; module_name = None; parent_pos; parent_module = target })
+      (* TODO(T109499403) This case *is* possible, but because it refers to
+       * class members in traits, any code that runs afoul of this rule will
+       * also violate the nast check requiring that any trait member in a
+       * non-internal trait must also be non-internal. I can't even figure out
+       * a test case where this also doesn't violate _other_ rules about
+       * referencing internal symbols in modules, e.g.:
+       *
+       * <<__Internal>>
+       * trait Quuz {
+       *   <<__Internal>> public function lol(): void {}
+       * }
+       *
+       * trait Corge {
+       *   use Quuz;
+       *   <<__Internal>> public function lol(): void {}
+       * }
+       *
+       * This code snippet alone raises two errors. One for `use Quuz`,
+       * and one for `Corge::lol`.
+       *
+       *)
+      | `OutsideViaTrait _ -> None
     in
     Option.iter err_opt ~f:(fun err ->
         Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err))
@@ -188,12 +211,12 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
     in
     Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err)
 
-let check_class_elt_visibility parent_class_elt class_elt on_error =
+let check_class_elt_visibility env parent_class_elt class_elt on_error =
   let parent_vis = parent_class_elt.ce_visibility in
   let c_vis = class_elt.ce_visibility in
   let (lazy parent_pos) = parent_class_elt.ce_pos in
   let (lazy pos) = class_elt.ce_pos in
-  check_visibility parent_vis c_vis parent_pos pos on_error
+  check_visibility env parent_vis c_vis parent_pos pos on_error
 
 let stub_meth_quickfix
     ~(class_name : string)
@@ -411,23 +434,6 @@ let add_member_dep
       (Dep.Type (Cls.name class_))
       dep
 
-let detect_multiple_concrete_defs class_elt class_ parent_class_elt parent_class
-    =
-  (* We want to check if there are conflicting trait declarations of a class member.
-   * If the parent we are checking is a trait and the member's origin both isn't
-   * that parent and isn't the class itself, then it must come from another trait
-   * and there is a conflict.
-   *
-   * We rule out cases where any of the traits' member
-   * is synthetic (from a requirement) or abstract. *)
-  match Cls.kind parent_class with
-  | Ast_defs.Ctrait ->
-    (not (get_ce_synthesized class_elt))
-    && (not (get_ce_abstract class_elt))
-    && (not (get_ce_abstract parent_class_elt))
-    && String.( <> ) class_elt.ce_origin (Cls.name class_)
-  | Ast_defs.(Cinterface | Cclass _ | Cenum | Cenum_class _) -> false
-
 let check_compatible_sound_dynamic_attributes
     env member_name member_kind parent_class_elt class_elt on_error =
   if
@@ -483,17 +489,34 @@ let check_abstract_overrides_concrete env member_kind parent_class_elt class_elt
                    `property);
              })
 
+let detect_multiple_concrete_defs
+    (class_elt, class_) (parent_class_elt, parent_class) =
+  (* We want to check if there are conflicting trait declarations of a class member.
+   * If the parent we are checking is a trait and the member's origin both isn't
+   * that parent and isn't the class itself, then it must come from another trait
+   * and there is a conflict.
+   *
+   * We rule out cases where any of the traits' member
+   * is synthetic (from a requirement) or abstract. *)
+  match Cls.kind parent_class with
+  | Ast_defs.Ctrait ->
+    (not (get_ce_synthesized class_elt))
+    && (not (get_ce_abstract class_elt))
+    && (not (get_ce_abstract parent_class_elt))
+    && String.( <> ) class_elt.ce_origin (Cls.name class_)
+  | Ast_defs.(Cinterface | Cclass _ | Cenum | Cenum_class _) -> false
+
 let check_multiple_concrete_definitions
-    check_member_unique
-    class_
     member_name
     member_kind
-    parent_class_elt
-    class_elt
+    (class_elt, class_)
+    (parent_class_elt, parent_class)
     on_error =
   if
-    check_member_unique
-    && (MemberKind.is_functional member_kind || get_ce_const class_elt)
+    (MemberKind.is_functional member_kind || get_ce_const class_elt)
+    && detect_multiple_concrete_defs
+         (class_elt, class_)
+         (parent_class_elt, parent_class)
   then
     (* Multiple concrete trait definitions, error *)
     Errors.add_typing_error
@@ -552,7 +575,7 @@ let check_override
     on_error;
   check_lateinit parent_class_elt class_elt on_error;
   check_xhp_attr_required env parent_class_elt class_elt on_error;
-  check_class_elt_visibility parent_class_elt class_elt on_error;
+  check_class_elt_visibility env parent_class_elt class_elt on_error;
   check_prop_const_mismatch parent_class_elt class_elt on_error;
   check_abstract_overrides_concrete env member_kind parent_class_elt class_elt;
 
@@ -574,14 +597,13 @@ let check_override
     Typing_error.Reasons_callback.prepend_on_apply on_error snd_err
   in
 
-  check_multiple_concrete_definitions
-    check_member_unique
-    class_
-    member_name
-    member_kind
-    parent_class_elt
-    class_elt
-    on_error;
+  if check_member_unique then
+    check_multiple_concrete_definitions
+      member_name
+      member_kind
+      (class_elt, class_)
+      (parent_class_elt, parent_class)
+      on_error;
   check_compatible_sound_dynamic_attributes
     env
     member_name
@@ -625,10 +647,10 @@ let check_override
         class_elt.ce_origin
         on_error)
   | _ ->
-    if get_ce_const class_elt then
-      Typing_phase.sub_type_decl env fty_child fty_parent @@ Some on_error
-    else
-      let (env, ty_err_opt) =
+    let (env, ty_err_opt) =
+      if get_ce_const class_elt then
+        Typing_phase.sub_type_decl env fty_child fty_parent @@ Some on_error
+      else
         Typing_ops.unify_decl
           pos
           Typing_reason.URnone
@@ -636,9 +658,9 @@ let check_override
           on_error
           fty_parent
           fty_child
-      in
-      Option.iter ~f:Errors.add_typing_error ty_err_opt;
-      env
+    in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    env
 
 (* Constants and type constants with declared values in declared interfaces can never be
  * overridden by other inherited constants.
@@ -813,7 +835,7 @@ let check_const_override
         parent_class_const.cc_type
     in
 
-    let err_opt =
+    let ty_err_opt1 =
       if const_interface_or_trait_member_not_unique then
         let snd_err =
           Typing_error.Secondary.Interface_or_trait_const_multiple_defs
@@ -853,11 +875,14 @@ let check_const_override
       else
         None
     in
-    Option.iter err_opt ~f:Errors.add_typing_error;
-
-    Phase.sub_type_decl env class_const_type parent_class_const_type
-    @@ Some
-         (Typing_error.Reasons_callback.class_constant_type_mismatch on_error)
+    Option.iter ty_err_opt1 ~f:Errors.add_typing_error;
+    let (env, ty_err_opt2) =
+      Phase.sub_type_decl env class_const_type parent_class_const_type
+      @@ Some
+           (Typing_error.Reasons_callback.class_constant_type_mismatch on_error)
+    in
+    Option.iter ty_err_opt2 ~f:Errors.add_typing_error;
+    env
 
 let check_inherited_member_is_dynamically_callable
     env
@@ -971,12 +996,7 @@ let check_class_against_parent_class_elt
       (* We can skip this check if the class elements have the same origin, as we are
          essentially comparing a method against itself *)
       check_override
-        ~check_member_unique:
-          (detect_multiple_concrete_defs
-             class_elt
-             class_
-             parent_class_elt
-             parent_class)
+        ~check_member_unique:true
         env
         member_name
         member_kind
@@ -1121,7 +1141,7 @@ let check_constructors env parent_class class_ psubst on_error =
       | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> ()
       | (Some parent_cstr, Some child_cstr) ->
         check_override_final_method parent_cstr child_cstr on_error;
-        check_class_elt_visibility parent_cstr child_cstr on_error
+        check_class_elt_visibility env parent_cstr child_cstr on_error
       | (_, _) -> ()
     end;
     env

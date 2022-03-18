@@ -226,8 +226,8 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         if !static_methods.is_empty() {
             s.field("static_methods", static_methods);
         }
-        if let Some(constructor) = constructor {
-            s.field("constructor", constructor);
+        if let Some(elt) = &constructor.elt {
+            s.field("constructor", &(elt, constructor.consistency));
         }
         if !consts.is_empty() {
             s.field("consts", consts);

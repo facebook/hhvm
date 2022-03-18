@@ -33,3 +33,5 @@ useful for performance in cases where we want the TAST, but don't need a correct
 list of errors. *)
 val nast_to_tast :
   do_tast_checks:bool -> Provider_context.t -> Nast.program -> Tast.program
+
+val module_def : Provider_context.t -> Nast.module_def -> Tast.module_def

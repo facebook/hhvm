@@ -477,10 +477,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             (Printf.sprintf
                "Worker failures - check the logs for more details:\n%s\n"
                failures) )
-      | e ->
-        let msg = Exn.to_string e in
-        let stack = Printexc.get_backtrace () in
-        (env, Error (Printf.sprintf "%s\n%s" msg stack))
+      | exn ->
+        let e = Exception.wrap exn in
+        (env, Error (Exception.to_string e))
     end
   | NO_PRECHECKED_FILES -> (ServerPrecheckedFiles.expand_all env, ())
   | GEN_HOT_CLASSES threshold ->

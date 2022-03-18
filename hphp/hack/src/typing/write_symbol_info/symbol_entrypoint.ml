@@ -59,9 +59,10 @@ let write_json
            in
            write_file file_dir 1 xref_json_chunks)
    with
-  | WorkerCancel.Worker_should_exit as e ->
+  | WorkerCancel.Worker_should_exit as exn ->
     (* Cancellation requests must be re-raised *)
-    raise e
+    let e = Exception.wrap exn in
+    Exception.reraise e
   | e ->
     Printf.eprintf "WARNING: symbol write failure: \n%s\n" (Exn.to_string e));
   let elapsed = Unix.gettimeofday () -. start_time in

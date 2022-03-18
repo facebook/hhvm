@@ -29,7 +29,6 @@
   typing_defs
   typing_defs_core
   typing_defs_flags
-  typing_modules
   tanySentinel
   typing_reason
   xhp_attribute)
@@ -89,8 +88,8 @@
 (library
  (name nast_visitor)
  (wrapped false)
- (modules nast_check_env nast_visitor stateful_aast_visitor)
- (libraries nast provider_context)
+ (modules nast_check_env nast_visitor stateful_aast_visitor )
+ (libraries nast provider_context naming_attributes_params)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -143,6 +142,12 @@
   (pps ppx_deriving.std)))
 
 (library
+  (name typing_modules)
+  (wrapped false)
+  (modules typing_modules)
+  (libraries typing_env typing_env_types decl_provider))
+
+(library
  (name typing)
  (wrapped false)
  (modules
@@ -184,7 +189,8 @@
   pcre
   procs_procs
   typing_common
-  type_mapper)
+  type_mapper
+  typing_modules)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -216,7 +222,7 @@
   typing_requirements
   typing_subtype_method
   typing_type_wellformedness)
- (libraries typing_algebra typing_common typing_skeleton)
+ (libraries typing_algebra typing_common typing_modules typing_skeleton)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -275,7 +281,7 @@
  (name typing_visibility)
  (wrapped false)
  (modules typing_visibility)
- (libraries typing_utils)
+ (libraries typing_modules typing_utils)
  (preprocess
   (pps ppx_deriving.std)))
 

@@ -156,16 +156,27 @@ impl<'src> AastParser {
             arena,
         );
         let ret = lower(&mut lowerer_env, tree.root());
-        let lower_peak = stack_limit.map_or(0, |sl| sl.peak());
+        let lower_peak = stack_limit.map_or(0, |sl| {
+            let x = sl.peak();
+            sl.reset();
+            x
+        });
         let mut ret = if env.elaborate_namespaces {
             ret.map(|ast| namespaces::toplevel_elaborator::elaborate_toplevel_defs(ns, ast))
         } else {
             ret
         };
         let syntax_errors = match &mut ret {
-            Ok(aast) => Self::check_syntax_error(env, indexed_source_text, &tree, Some(aast)),
-            Err(_) => Self::check_syntax_error(env, indexed_source_text, &tree, None),
+            Ok(aast) => {
+                Self::check_syntax_error(env, indexed_source_text, &tree, Some(aast), stack_limit)
+            }
+            Err(_) => Self::check_syntax_error(env, indexed_source_text, &tree, None, stack_limit),
         };
+        let error_peak = stack_limit.map_or(0, |sl| {
+            let x = sl.peak();
+            sl.reset();
+            x
+        });
         let lowpri_errors = lowerer_env.lowpri_errors().borrow().to_vec();
         let errors = lowerer_env.hh_errors().borrow().to_vec();
         let lint_errors = lowerer_env.lint_errors().borrow().to_vec();
@@ -180,6 +191,7 @@ impl<'src> AastParser {
             lint_errors,
             parse_peak: 0,
             lower_peak: lower_peak as i64,
+            error_peak: error_peak as i64,
             arena_bytes: arena.allocated_bytes() as i64,
         })
     }
@@ -189,6 +201,7 @@ impl<'src> AastParser {
         indexed_source_text: &'src IndexedSourceText<'src>,
         tree: &PositionedSyntaxTree<'src, 'arena>,
         aast: Option<&mut Program<(), ()>>,
+        stack_limit: Option<&StackLimit>,
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
             let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();
@@ -201,6 +214,7 @@ impl<'src> AastParser {
                 hhi_mode,
                 env.codegen,
                 env.is_systemlib,
+                stack_limit,
             );
             errors.extend(parse_errors);
             errors.sort_by(SyntaxError::compare_offset);

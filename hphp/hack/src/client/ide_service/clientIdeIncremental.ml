@@ -72,11 +72,11 @@ let compute_fileinfo_for_path
         ~filename:path
         ~text:contents
     in
-    let (funs, classes, typedefs, consts) =
+    let (funs, classes, typedefs, consts, modules) =
       match facts with
       | None ->
         (* File failed to parse or was not a Hack file. *)
-        ([], [], [], [])
+        ([], [], [], [], (* TODO(T111380364) *) [])
       | Some facts ->
         let to_ids name_type names =
           List.map names ~f:(fun name ->
@@ -125,7 +125,7 @@ let compute_fileinfo_for_path
           |> to_ids FileInfo.Typedef
         in
         let consts = facts.Facts.constants |> to_ids FileInfo.Const in
-        (funs, classes, typedefs, consts)
+        (funs, classes, typedefs, consts, (* TODO(T111380364) *) [])
     in
     let fi_mode =
       Full_fidelity_parser.parse_mode
@@ -140,6 +140,7 @@ let compute_fileinfo_for_path
           classes;
           typedefs;
           consts;
+          modules;
           hash = None;
           comments = None;
         },

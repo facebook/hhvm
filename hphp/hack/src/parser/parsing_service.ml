@@ -52,7 +52,7 @@ let process_parse_result_DEPRECATED
       File_provider.Disk content
   in
   if Option.is_some file_mode then (
-    let (funs, classes, typedefs, consts) = Nast.get_defs ast in
+    let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
     (* If this file was parsed from a tmp directory,
        save it to the main directory instead *)
     let fn =
@@ -82,7 +82,16 @@ let process_parse_result_DEPRECATED
     let decls = Decl.nast_to_decls_DEPRECATED [] ctx ast in
     let hash = Some (Direct_decl_parser.decls_hash decls) in
     let defs =
-      { FileInfo.hash; funs; classes; typedefs; consts; comments; file_mode }
+      {
+        FileInfo.hash;
+        funs;
+        classes;
+        typedefs;
+        consts;
+        comments;
+        file_mode;
+        modules;
+      }
     in
     let acc = Relative_path.Map.add acc ~key:fn ~data:defs in
     let errorl = Errors.merge errorl' errorl in

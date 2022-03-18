@@ -57,4 +57,7 @@ let decls_to_fileinfo fn (parsed_file : parsed_file_with_hashes) =
         FileInfo.{ acc with typedefs = info :: acc.typedefs }
       | Shallow_decl_defs.Const c ->
         let info = (pos c.Typing_defs.cd_pos, name, Some hash) in
-        FileInfo.{ acc with consts = info :: acc.consts })
+        FileInfo.{ acc with consts = info :: acc.consts }
+      | Shallow_decl_defs.Module m ->
+        let info = (pos m.Typing_defs.mdt_pos, name, Some hash) in
+        FileInfo.{ acc with modules = info :: acc.modules })

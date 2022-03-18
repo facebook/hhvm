@@ -13,24 +13,47 @@ use crate::typing_phase::Phase;
 
 pub struct TypingParam;
 
+pub struct TypingParamFlags {
+    pub dynamic_mode: bool,
+}
+
 impl TypingParam {
-    pub fn make_param_local_ty<R: Reason>(
+    pub fn make_param_local_tys<'a, R: Reason>(
+        flags: TypingParamFlags,
+        env: &TEnv<R>,
+        tys: impl Iterator<Item = (&'a oxidized::aast::FunParam<(), ()>, Option<DeclTy<R>>)>,
+    ) -> Result<Vec<(&'a oxidized::aast::FunParam<(), ()>, Ty<R>)>> {
+        tys.map(|(param, decl_hint)| {
+            assert!(!flags.dynamic_mode);
+            let ty = Self::make_param_local_ty(&flags, env, decl_hint, param)?;
+            Ok((param, ty))
+        })
+        .collect()
+    }
+
+    fn make_param_local_ty<R: Reason>(
+        flags: &TypingParamFlags,
         env: &TEnv<R>,
         decl_hint: Option<DeclTy<R>>,
         param: &oxidized::aast::FunParam<(), ()>,
     ) -> Result<Ty<R>> {
         let r = R::witness(R::Pos::from(&param.pos));
-        Ok(match decl_hint {
+        let ty = match decl_hint {
             None => Ty::any(r),
             Some(ty) => {
                 // TODO(hrust): enforceability
                 // TODO(hrust): variadic
                 Phase::localize_no_subst(env, false, None, ty)?
             }
-        })
+        };
+        // TODO(hrust): integrate check_param_has_hint here
+        if !flags.dynamic_mode {
+            Self::check_param_has_hint(env, param, &ty);
+        }
+        Ok(ty)
     }
 
-    pub fn check_param_has_hint<R: Reason>(
+    fn check_param_has_hint<R: Reason>(
         env: &TEnv<R>,
         param: &oxidized::aast::FunParam<(), ()>,
         _ty: &Ty<R>,

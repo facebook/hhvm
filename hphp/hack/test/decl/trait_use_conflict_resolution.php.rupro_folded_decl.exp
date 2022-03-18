@@ -1,26 +1,25 @@
---- ocaml
-+++ rupro
-@@ -1,23 +1,20 @@
- FoldedClass {
-     name: "\\C",
-     pos: Pos(root|trait_use_conflict_resolution.php, 3:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
--    ancestors: {
--        "\\T": T,
--    },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|trait_use_conflict_resolution.php, 3:7-8),
-             ty: HH\classname<this>,
-             origin: "\\C",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\T",
-     },
- }
+FoldedClass {
+    name: "\\C",
+    pos: Pos(root|trait_use_conflict_resolution.php, 3:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    ancestors: {
+        "\\T": T,
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|trait_use_conflict_resolution.php, 3:7-8),
+            ty: HH\classname<this>,
+            origin: "\\C",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\T",
+    },
+}
+
+They matched!

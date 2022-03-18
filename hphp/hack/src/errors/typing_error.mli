@@ -344,6 +344,10 @@ module Primary : sig
           decl_pos: Pos_or_decl.t;
           target_module: string;
         }
+      | Module_unsafe_trait_access of {
+          access_pos: Pos.t;
+          trait_pos: Pos_or_decl.t;
+        }
   end
 
   module Xhp : sig
@@ -986,6 +990,7 @@ module Primary : sig
     | Unbound_name of {
         pos: Pos.t;
         name: string;
+        class_exists: bool;
       }
     | Previous_default of Pos.t
     | Return_in_void of {

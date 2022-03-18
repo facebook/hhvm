@@ -4,5 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod naming;
+mod naming_elaborate_namespaces;
 
 pub use naming::Naming;

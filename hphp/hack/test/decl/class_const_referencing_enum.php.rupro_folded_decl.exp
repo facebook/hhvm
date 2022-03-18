@@ -1,87 +1,84 @@
---- ocaml
-+++ rupro
-@@ -1,82 +1,82 @@
- FoldedClass {
-     name: "\\Words",
-     pos: Pos(root|class_const_referencing_enum.php, 3:6-11),
-     kind: Cenum,
-     enum_type: EnumType {
-         base: string,
-         constraint: Some(
-             string,
-         ),
-         includes: [],
-     },
-     ancestors: {
-         "\\HH\\BuiltinEnum": HH\BuiltinEnum<Words>,
-     },
-     consts: {
-         "BAR": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|class_const_referencing_enum.php, 5:3-6),
--            ty: Words,
-+            ty: string,
-             origin: "\\Words",
-             refs: [],
-         },
-         "FOO": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|class_const_referencing_enum.php, 4:3-6),
--            ty: Words,
-+            ty: string,
-             origin: "\\Words",
-             refs: [],
-         },
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|class_const_referencing_enum.php, 3:6-11),
-             ty: HH\classname<this>,
-             origin: "\\Words",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\HH\\BuiltinEnum",
-     },
- }
- FoldedClass {
-     name: "\\TestClassConstReferencingEnum",
-     pos: Pos(root|class_const_referencing_enum.php, 9:16-45),
-     kind: Cclass(
-         Abstract,
-     ),
-     consts: {
-         "WORD_VALUES": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|class_const_referencing_enum.php, 10:28-39),
-             ty: HH\dict<Words, float>,
-             origin: "\\TestClassConstReferencingEnum",
-             refs: [
-                 ClassConstRef(
-                     From(
-                         "\\Words",
-                     ),
-                     "BAR",
-                 ),
-                 ClassConstRef(
-                     From(
-                         "\\Words",
-                     ),
-                     "FOO",
-                 ),
-             ],
-         },
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|class_const_referencing_enum.php, 9:16-45),
-             ty: HH\classname<this>,
-             origin: "\\TestClassConstReferencingEnum",
-             refs: [],
-         },
-     },
- }
+FoldedClass {
+    name: "\\Words",
+    pos: Pos(root|class_const_referencing_enum.php, 3:6-11),
+    kind: Cenum,
+    enum_type: EnumType {
+        base: string,
+        constraint: Some(
+            string,
+        ),
+        includes: [],
+    },
+    ancestors: {
+        "\\HH\\BuiltinEnum": HH\BuiltinEnum<Words>,
+    },
+    consts: {
+        "BAR": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|class_const_referencing_enum.php, 5:3-6),
+            ty: Words,
+            origin: "\\Words",
+            refs: [],
+        },
+        "FOO": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|class_const_referencing_enum.php, 4:3-6),
+            ty: Words,
+            origin: "\\Words",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|class_const_referencing_enum.php, 3:6-11),
+            ty: HH\classname<this>,
+            origin: "\\Words",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\HH\\BuiltinEnum",
+    },
+}
+FoldedClass {
+    name: "\\TestClassConstReferencingEnum",
+    pos: Pos(root|class_const_referencing_enum.php, 9:16-45),
+    kind: Cclass(
+        Abstract,
+    ),
+    consts: {
+        "WORD_VALUES": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|class_const_referencing_enum.php, 10:28-39),
+            ty: HH\dict<Words, float>,
+            origin: "\\TestClassConstReferencingEnum",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\Words",
+                    ),
+                    "BAR",
+                ),
+                ClassConstRef(
+                    From(
+                        "\\Words",
+                    ),
+                    "FOO",
+                ),
+            ],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|class_const_referencing_enum.php, 9:16-45),
+            ty: HH\classname<this>,
+            origin: "\\TestClassConstReferencingEnum",
+            refs: [],
+        },
+    },
+}
+
+They matched!

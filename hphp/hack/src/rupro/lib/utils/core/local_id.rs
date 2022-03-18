@@ -8,6 +8,10 @@ use pos::Symbol;
 pub struct LocalId(u64, Symbol);
 
 impl LocalId {
+    pub fn new(x: u64, name: Symbol) -> Self {
+        LocalId(x, name)
+    }
+
     pub fn new_unscoped(x: Symbol) -> Self {
         Self(0, x)
     }
@@ -18,5 +22,11 @@ impl LocalId {
 
     pub fn to_string(&self) -> &Symbol {
         &self.1
+    }
+}
+
+impl From<&oxidized::local_id::LocalId> for LocalId {
+    fn from(li: &oxidized::local_id::LocalId) -> Self {
+        LocalId::new(li.0.try_into().unwrap(), Symbol::new(&li.1))
     }
 }

@@ -87,93 +87,16 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     stmt: &ast::Stmt,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let pos = &stmt.0;
     match &stmt.1 {
-        a::Stmt_::YieldBreak => Ok(InstrSeq::gather(vec![instr::null(), emit_return(e, env)?])),
+        a::Stmt_::YieldBreak => emit_yieldbreak(e, env, pos),
         a::Stmt_::Expr(e_) => match &e_.2 {
-            a::Expr_::Await(a) => Ok(InstrSeq::gather(vec![
-                emit_await(e, env, &e_.1, a)?,
-                instr::popc(),
-            ])),
-            a::Expr_::Call(c) => {
-                if let (a::Expr(_, _, a::Expr_::Id(sid)), _, exprs, None) = c.as_ref() {
-                    let ft = hhbc_id::function::FunctionType::from_ast_name(alloc, &sid.1);
-                    let fname = ft.unsafe_as_str();
-                    if fname.eq_ignore_ascii_case("unset") {
-                        Ok(InstrSeq::gather(
-                            exprs
-                                .iter()
-                                .map(|ex| {
-                                    emit_expr::emit_unset_expr(e, env, expect_normal_paramkind(ex)?)
-                                })
-                                .collect::<std::result::Result<Vec<_>, _>>()?,
-                        ))
-                    } else if let Some(kind) = set_bytes_kind(fname) {
-                        emit_expr::emit_set_range_expr(e, env, &e_.1, fname, kind, exprs)
-                    } else {
-                        emit_expr::emit_ignored_expr(e, env, &e_.1, e_)
-                    }
-                } else {
-                    emit_expr::emit_ignored_expr(e, env, &e_.1, e_)
-                }
-            }
-            a::Expr_::Binop(bop) => {
-                if let (ast_defs::Bop::Eq(None), e_lhs, e_rhs) = bop.as_ref() {
-                    if let Some(e_await) = e_rhs.2.as_await() {
-                        let await_pos = &e_rhs.1;
-                        if let Some(l) = e_lhs.2.as_list() {
-                            let awaited_instrs = emit_await(e, env, await_pos, e_await)?;
-                            let has_elements = l.iter().any(|e| !e.2.is_omitted());
-                            if has_elements {
-                                scope::with_unnamed_local(e, |e, temp| {
-                                    let (init, assign) = emit_expr::emit_lval_op_list(
-                                        e,
-                                        env,
-                                        pos,
-                                        Some(&temp),
-                                        &[],
-                                        e_lhs,
-                                        false,
-                                        is_readonly_expr(e_rhs),
-                                    )?;
-                                    Ok((
-                                        InstrSeq::gather(vec![awaited_instrs, instr::popl(temp)]),
-                                        InstrSeq::gather(vec![init, assign]),
-                                        instr::unsetl(temp),
-                                    ))
-                                })
-                            } else {
-                                Ok(InstrSeq::gather(vec![awaited_instrs, instr::popc()]))
-                            }
-                        } else {
-                            emit_await_assignment(e, env, await_pos, e_lhs, e_await)
-                        }
-                    } else {
-                        emit_expr::emit_ignored_expr(e, env, pos, e_)
-                    }
-                } else {
-                    emit_expr::emit_ignored_expr(e, env, pos, e_)
-                }
-            }
+            a::Expr_::Await(a) => emit_await_(e, env, e_, pos, a),
+            a::Expr_::Call(c) => emit_call(e, env, e_, pos, c),
+            a::Expr_::Binop(bop) => emit_binop(e, env, e_, pos, bop),
             _ => emit_expr::emit_ignored_expr(e, env, pos, e_),
         },
-        a::Stmt_::Return(r_opt) => match r_opt.as_ref() {
-            Some(r) => {
-                let ret = emit_return(e, env)?;
-                let expr_instr = if let Some(e_) = r.2.as_await() {
-                    emit_await(e, env, &r.1, e_)?
-                } else {
-                    emit_expr(e, env, r)?
-                };
-                Ok(InstrSeq::gather(vec![expr_instr, emit_pos(pos), ret]))
-            }
-            None => Ok(InstrSeq::gather(vec![
-                instr::null(),
-                emit_pos(pos),
-                emit_return(e, env)?,
-            ])),
-        },
+        a::Stmt_::Return(r_opt) => emit_return_(e, env, (&**r_opt).as_ref(), pos),
         a::Stmt_::Block(b) => emit_block(env, e, b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
         a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),
@@ -182,27 +105,166 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
         a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
         a::Stmt_::Do(x) => emit_do(e, env, &x.0, &x.1),
         a::Stmt_::For(x) => emit_for(e, env, &x.0, x.1.as_ref(), &x.2, &x.3),
-        a::Stmt_::Throw(x) => Ok(InstrSeq::gather(vec![
-            emit_expr::emit_expr(e, env, x)?,
-            emit_pos(pos),
-            instr::throw(),
-        ])),
-        a::Stmt_::Try(x) => {
-            let (try_block, catch_list, finally_block) = &**x;
-            if catch_list.is_empty() {
-                emit_try_finally(e, env, pos, try_block, finally_block)
-            } else if finally_block.is_empty() {
-                emit_try_catch(e, env, pos, try_block, &catch_list[..])
-            } else {
-                emit_try_catch_finally(e, env, pos, try_block, &catch_list[..], finally_block)
-            }
-        }
+        a::Stmt_::Throw(x) => emit_throw(e, env, x, pos),
+        a::Stmt_::Try(x) => emit_try(e, env, x, pos),
         a::Stmt_::Switch(x) => emit_switch(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::Foreach(x) => emit_foreach(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::Awaitall(x) => emit_awaitall(e, env, pos, &x.0, &x.1),
         a::Stmt_::Markup(x) => emit_markup(e, env, x, false),
         a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(instr::empty()),
         a::Stmt_::AssertEnv(_) => Ok(instr::empty()),
+    }
+}
+
+fn emit_await_<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    e_: &ast::Expr,
+    _pos: &Pos,
+    a: &ast::Expr,
+) -> Result<InstrSeq<'arena>> {
+    Ok(InstrSeq::gather(vec![
+        emit_await(e, env, &e_.1, a)?,
+        instr::popc(),
+    ]))
+}
+
+fn emit_binop<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    e_: &ast::Expr,
+    pos: &Pos,
+    bop: &(ast_defs::Bop, ast::Expr, ast::Expr),
+) -> Result<InstrSeq<'arena>> {
+    if let (ast_defs::Bop::Eq(None), e_lhs, e_rhs) = bop {
+        if let Some(e_await) = e_rhs.2.as_await() {
+            let await_pos = &e_rhs.1;
+            if let Some(l) = e_lhs.2.as_list() {
+                let awaited_instrs = emit_await(e, env, await_pos, e_await)?;
+                let has_elements = l.iter().any(|e| !e.2.is_omitted());
+                if has_elements {
+                    scope::with_unnamed_local(e, |e, temp| {
+                        let (init, assign) = emit_expr::emit_lval_op_list(
+                            e,
+                            env,
+                            pos,
+                            Some(&temp),
+                            &[],
+                            e_lhs,
+                            false,
+                            is_readonly_expr(e_rhs),
+                        )?;
+                        Ok((
+                            InstrSeq::gather(vec![awaited_instrs, instr::popl(temp)]),
+                            InstrSeq::gather(vec![init, assign]),
+                            instr::unsetl(temp),
+                        ))
+                    })
+                } else {
+                    Ok(InstrSeq::gather(vec![awaited_instrs, instr::popc()]))
+                }
+            } else {
+                emit_await_assignment(e, env, await_pos, e_lhs, e_await)
+            }
+        } else {
+            emit_expr::emit_ignored_expr(e, env, pos, e_)
+        }
+    } else {
+        emit_expr::emit_ignored_expr(e, env, pos, e_)
+    }
+}
+
+fn emit_yieldbreak<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    _pos: &Pos,
+) -> Result<InstrSeq<'arena>> {
+    Ok(InstrSeq::gather(vec![instr::null(), emit_return(e, env)?]))
+}
+
+fn emit_try<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    x: &(ast::Block, Vec<ast::Catch>, ast::Block),
+    pos: &Pos,
+) -> Result<InstrSeq<'arena>> {
+    let (try_block, catch_list, finally_block) = x;
+    if catch_list.is_empty() {
+        emit_try_finally(e, env, pos, try_block, finally_block)
+    } else if finally_block.is_empty() {
+        emit_try_catch(e, env, pos, try_block, &catch_list[..])
+    } else {
+        emit_try_catch_finally(e, env, pos, try_block, &catch_list[..], finally_block)
+    }
+}
+
+fn emit_throw<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    x: &ast::Expr,
+    pos: &Pos,
+) -> Result<InstrSeq<'arena>> {
+    Ok(InstrSeq::gather(vec![
+        emit_expr::emit_expr(e, env, x)?,
+        emit_pos(pos),
+        instr::throw(),
+    ]))
+}
+
+fn emit_return_<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    r_opt: Option<&ast::Expr>,
+    pos: &Pos,
+) -> Result<InstrSeq<'arena>> {
+    match r_opt {
+        Some(r) => {
+            let ret = emit_return(e, env)?;
+            let expr_instr = if let Some(e_) = r.2.as_await() {
+                emit_await(e, env, &r.1, e_)?
+            } else {
+                emit_expr(e, env, r)?
+            };
+            Ok(InstrSeq::gather(vec![expr_instr, emit_pos(pos), ret]))
+        }
+        None => Ok(InstrSeq::gather(vec![
+            instr::null(),
+            emit_pos(pos),
+            emit_return(e, env)?,
+        ])),
+    }
+}
+
+fn emit_call<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    e_: &ast::Expr,
+    _pos: &Pos,
+    c: &(
+        ast::Expr,
+        Vec<ast::Targ>,
+        Vec<(ast_defs::ParamKind, ast::Expr)>,
+        Option<ast::Expr>,
+    ),
+) -> Result<InstrSeq<'arena>> {
+    let alloc = env.arena;
+    if let (a::Expr(_, _, a::Expr_::Id(sid)), _, exprs, None) = c {
+        let ft = hhbc_id::function::FunctionType::from_ast_name(alloc, &sid.1);
+        let fname = ft.unsafe_as_str();
+        if fname.eq_ignore_ascii_case("unset") {
+            Ok(InstrSeq::gather(
+                exprs
+                    .iter()
+                    .map(|ex| emit_expr::emit_unset_expr(e, env, expect_normal_paramkind(ex)?))
+                    .collect::<std::result::Result<Vec<_>, _>>()?,
+            ))
+        } else if let Some(kind) = set_bytes_kind(fname) {
+            emit_expr::emit_set_range_expr(e, env, &e_.1, fname, kind, exprs)
+        } else {
+            emit_expr::emit_ignored_expr(e, env, &e_.1, e_)
+        }
+    } else {
+        emit_expr::emit_ignored_expr(e, env, &e_.1, e_)
     }
 }
 

@@ -218,6 +218,7 @@ type shallow_class = {
   sc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
   sc_req_extends: decl_ty list;
   sc_req_implements: decl_ty list;
+  sc_req_class: decl_ty list;
   sc_implements: decl_ty list;
   sc_support_dynamic_type: bool;
   sc_consts: shallow_class_const list;
@@ -267,9 +268,12 @@ type typedef_decl = typedef_type [@@deriving show]
 
 type const_decl = Typing_defs.const_decl [@@deriving show]
 
+type module_decl = Typing_defs.module_def_type [@@deriving show]
+
 type decl =
   | Class of class_decl
   | Fun of fun_decl
   | Typedef of typedef_decl
   | Const of const_decl
+  | Module of module_decl
 [@@deriving show]

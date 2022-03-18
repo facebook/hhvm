@@ -4,7 +4,7 @@ function __source(): int {
   return 1;
 }
 
-function __sink($input): void {}
+function __sink(mixed $input): void {}
 
 function identity(int $input, bool $flag): int {
   return $input;
@@ -75,6 +75,8 @@ function source_through_global_into_sink(): void {
 
 <<__EntryPoint>> function main(): void {
   source_through_assignment_to_sink();
+  // Ensure parameters don't pick up taint from prior locals on the stack
+  into_sink(0);
   source_through_function_to_sink();
   source_stopped();
   source_through_indirection_to_sink();

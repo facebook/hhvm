@@ -273,6 +273,9 @@ void Configuration::reset(const std::string& contents) {
       if (indexElement.isInt()) {
         value.index = indexElement.asInt();
       }
+      if (indexElement.isString() && indexElement.asString() == "return") {
+        value.index = -1;
+      }
       auto name = sink["name"].asString();
       sinks.push_back(std::make_pair(sink["name"].asString(), value));
     }

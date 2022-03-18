@@ -96,9 +96,10 @@ let make_hover_attr_docs name =
   | "__Deprecated" ->
     [
       "Mark a function/method as deprecated. "
-      ^ " The type checker will show an error at call sites, and a runtime warning is logged if this function/method is called."
-      ^ "\n\nThe optional second argument specifies a rate limit for warning logs."
-      ^ " If the rate limit is 100, a warning is only issued every 1/100 calls.";
+      ^ " The type checker will show an error at call sites, and a runtime notice is raised if this function/method is called."
+      ^ "\n\nThe optional second argument specifies a sampling rate for raising notices at runtime."
+      ^ " If the sampling rate is 100, a notice is only raised every 1/100 calls. If omitted, the default sampling rate is 1 (i.e. all calls raise notices)."
+      ^ " To disable runtime notices, use a sampling rate of 0.";
     ]
   | "__DynamicallyCallable" ->
     [
@@ -435,7 +436,9 @@ let go_quarantined
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  let env_and_ty = ServerInferType.expanded_type_at_pos ctx tast line column in
+  let env_and_ty =
+    ServerInferType.human_friendly_type_at_pos ctx tast line column
+  in
   (* There are legitimate cases where we expect to have no identities returned,
      so just format the type. *)
   match identities with

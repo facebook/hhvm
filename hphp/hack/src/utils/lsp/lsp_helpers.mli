@@ -40,7 +40,7 @@ val lsp_edit_to_fc :
 val apply_changes :
   string ->
   Lsp.DidChange.textDocumentContentChangeEvent list ->
-  (string, string * Utils.callstack) result
+  (string, string * Exception.t) result
 
 val get_char_from_lsp_position : string -> Lsp.position -> char
 

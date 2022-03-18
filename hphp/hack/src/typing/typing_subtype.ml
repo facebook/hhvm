@@ -1576,7 +1576,7 @@ and simplify_subtype_i
         | ( _,
             Tprim
               ( Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey | Tvoid
-              | Tnoreturn ) ) ->
+              | Tnoreturn | Tresource ) ) ->
           valid env
         | (_, Tnewtype (name_sub, [_tyarg_sub], _))
           when String.equal name_sub SN.Classes.cSupportDyn ->
@@ -1587,7 +1587,6 @@ and simplify_subtype_i
           | (_, Tnonnull) -> invalid_env env
           | _ -> simplify_subtype ~subtype_env ty ty_super env)
         | (_, (Tdynamic | Tprim Tnull)) -> valid env
-        | (_, Tprim Tresource)
         | (_, Tnonnull)
         | (_, Tshape (Open_shape, _))
         | (_, Tvar _)
@@ -1684,10 +1683,7 @@ and simplify_subtype_i
                           match c with
                           | Ast_defs.Constraint_as ->
                             let (_env, ty) =
-                              Phase.localize_no_subst_with_ty_err
-                                env
-                                ~ignore_errors:true
-                                ty
+                              Phase.localize_no_subst env ~ignore_errors:true ty
                             in
                             Some ty
                           | _ -> None)
@@ -1747,7 +1743,7 @@ and simplify_subtype_i
                             match c with
                             | Ast_defs.Constraint_super ->
                               let (_env, ty) =
-                                Phase.localize_no_subst_with_ty_err
+                                Phase.localize_no_subst
                                   env
                                   ~ignore_errors:true
                                   ty
@@ -1772,7 +1768,7 @@ and simplify_subtype_i
               | Ast_defs.Cenum_class _ ->
                 (match Cls.enum_type class_sub with
                 | Some enum_type ->
-                  let (env, subtype) =
+                  let ((env, _ty_err_opt), subtype) =
                     Typing_utils.localize_no_subst
                       ~ignore_errors:true
                       env
@@ -2135,7 +2131,7 @@ and simplify_subtype_i
                 (* Since we have provided no `Typing_error.Reasons_callback.t` in the
                    `expand_env`, this will not generate any errors *)
                 let ((env, _ty_err_opt), up_obj) =
-                  Phase.localize_with_ty_err ~ety_env env up_obj
+                  Phase.localize ~ety_env env up_obj
                 in
                 simplify_subtype ~subtype_env ~this_ty up_obj ty_super env
               | None ->
@@ -2156,7 +2152,7 @@ and simplify_subtype_i
                       (* Since we have provided no `Typing_error.Reasons_callback.t` in the
                          `expand_env`, this will not generate any errors *)
                       let ((env, _ty_err_opt), ub_obj_typ) =
-                        Phase.localize_with_ty_err ~ety_env env ub_obj_typ
+                        Phase.localize ~ety_env env ub_obj_typ
                       in
                       env
                       |> simplify_subtype
@@ -2568,7 +2564,7 @@ and simplify_subtype_has_member
             match get_var fresh_tyvar with
             | Some var ->
               (* TODO: can this actually generate an error? *)
-              Typing_solver.solve_to_equal_bound_or_wrt_variance_with_ty_err
+              Typing_solver.solve_to_equal_bound_or_wrt_variance
                 env
                 Reason.Rnone
                 var
@@ -3228,7 +3224,7 @@ and add_tyvar_upper_bound_and_close
     ITySet.fold
       (fun upper_bound (env, prop) ->
         let (env, ty_err_opt) =
-          Typing_subtype_tconst.make_all_type_consts_equal_with_ty_err
+          Typing_subtype_tconst.make_all_type_consts_equal
             env
             var
             upper_bound
@@ -3283,7 +3279,7 @@ and add_tyvar_lower_bound_and_close
     ITySet.fold
       (fun lower_bound (env, prop) ->
         let (env, ty_err_opt) =
-          Typing_subtype_tconst.make_all_type_consts_equal_with_ty_err
+          Typing_subtype_tconst.make_all_type_consts_equal
             env
             var
             lower_bound
@@ -3354,50 +3350,95 @@ and simplify_subtype_arraykey_union ~this_ty ~subtype_env env ty_sub tyl_super =
   | _ -> (env, None)
 
 (* Traverse a list of disjuncts and remove obviously redundant ones.
-   t1 <: #1 is considered redundant if t2 <: #1 is also a disjunct and
-   t2 <: t1. It does not preserve the ordering. *)
+     t1 <: #1 is considered redundant if t2 <: #1 is also a disjunct and t2 <: t1.
+   Dually,
+     #1 <: t1 is considered redundant if #1 <: t2 is also a disjunct and t1 <: t2.
+   It does not preserve the ordering.
+ *)
 and simplify_disj env disj =
-  let rec add_new_lower_bound ~coerce ~constr ty bounds =
+  let rec add_new_bound ~is_lower ~coerce ~constr ty bounds =
     match bounds with
-    | [] -> [(ty, constr)]
-    | ((bound_ty, _) as b) :: bounds ->
-      if is_sub_type_for_union_i ~coerce env bound_ty ty then
+    | [] -> [(is_lower, ty, constr)]
+    | ((is_lower', bound_ty, _) as b) :: bounds ->
+      if
+        is_lower && is_lower' && is_sub_type_for_union_i ~coerce env bound_ty ty
+      then
         b :: bounds
-      else if is_sub_type_for_union_i ~coerce env ty bound_ty then
-        add_new_lower_bound ~coerce ~constr ty bounds
+      else if
+        is_lower && is_lower' && is_sub_type_for_union_i ~coerce env ty bound_ty
+      then
+        add_new_bound ~is_lower ~coerce ~constr ty bounds
+      else if
+        (not is_lower)
+        && (not is_lower')
+        && is_sub_type_for_union_i ~coerce env ty bound_ty
+      then
+        b :: bounds
+      else if
+        (not is_lower)
+        && (not is_lower')
+        && is_sub_type_for_union_i ~coerce env bound_ty ty
+      then
+        add_new_bound ~is_lower ~coerce ~constr ty bounds
       else
-        b :: add_new_lower_bound ~coerce ~constr ty bounds
+        b :: add_new_bound ~is_lower ~coerce ~constr ty bounds
   in
-  (* Map a type variable to a list of lower bound types. For any two types
-     t1 and t2 in the list, it is not the case that t1 <: t2 or t2 <: t1. *)
-  let lower_bound_map = ref IMap.empty in
-  let process_lower_bound ~coerce ~constr ty var =
-    match IMap.find_opt var !lower_bound_map with
-    | None -> lower_bound_map := IMap.add var [(ty, constr)] !lower_bound_map
+  (* Map a type variable to a list of lower and upper bound types. For any two types
+     t1 and t2 both lower or upper in the list, it is not the case that t1 <: t2 or t2 <: t1.
+  *)
+  let bound_map = ref IMap.empty in
+  let process_bound ~is_lower ~coerce ~constr ty var =
+    match IMap.find_opt var !bound_map with
+    | None -> bound_map := IMap.add var [(is_lower, ty, constr)] !bound_map
     | Some bounds ->
-      let new_bounds = add_new_lower_bound ~coerce ~constr ty bounds in
-      lower_bound_map := IMap.add var new_bounds !lower_bound_map
+      let new_bounds = add_new_bound ~is_lower ~coerce ~constr ty bounds in
+      bound_map := IMap.add var new_bounds !bound_map
   in
-  let rec fill_lower_bound_map disj =
+  let rec fill_bound_map disj =
     match disj with
     | [] -> []
     | d :: disj ->
       (match d with
-      | TL.Conj _ -> d :: fill_lower_bound_map disj
-      | TL.Disj (_, props) -> fill_lower_bound_map (props @ disj)
+      | TL.Conj _ -> d :: fill_bound_map disj
+      | TL.Disj (_, props) -> fill_bound_map (props @ disj)
       | TL.IsSubtype (ty_sub, ty_super) ->
         (match get_tyvar_opt ty_super with
         | Some var_super ->
-          process_lower_bound ~coerce:None ~constr:d ty_sub var_super;
-          fill_lower_bound_map disj
-        | _ -> d :: fill_lower_bound_map disj)
+          process_bound ~is_lower:true ~coerce:None ~constr:d ty_sub var_super;
+          fill_bound_map disj
+        | None ->
+          (match get_tyvar_opt ty_sub with
+          | Some var_sub ->
+            process_bound
+              ~is_lower:false
+              ~coerce:None
+              ~constr:d
+              ty_super
+              var_sub;
+            fill_bound_map disj
+          | None -> d :: fill_bound_map disj))
       | TL.Coerce (cd, ty_sub, ty_super) ->
         let coerce = Some cd in
         (match get_node ty_super with
         | Tvar var_super ->
-          process_lower_bound ~coerce ~constr:d (LoclType ty_sub) var_super;
-          fill_lower_bound_map disj
-        | _ -> d :: fill_lower_bound_map disj))
+          process_bound
+            ~is_lower:true
+            ~coerce
+            ~constr:d
+            (LoclType ty_sub)
+            var_super;
+          fill_bound_map disj
+        | _ ->
+          (match get_node ty_sub with
+          | Tvar var_sub ->
+            process_bound
+              ~is_lower:false
+              ~coerce
+              ~constr:d
+              (LoclType ty_super)
+              var_sub;
+            fill_bound_map disj
+          | _ -> d :: fill_bound_map disj)))
   in
   (* Get the constraints from the table that were not removed, and add them to
      the remaining constraints that were not of the form we were looking for. *)
@@ -3405,10 +3446,11 @@ and simplify_disj env disj =
     match to_process with
     | [] -> remaining
     | (_, bounds) :: to_process ->
-      List.map ~f:(fun (_, c) -> c) bounds @ rebuild_disj remaining to_process
+      List.map ~f:(fun (_, _, c) -> c) bounds
+      @ rebuild_disj remaining to_process
   in
-  let remaining = fill_lower_bound_map disj in
-  let bounds = IMap.elements !lower_bound_map in
+  let remaining = fill_bound_map disj in
+  let bounds = IMap.elements !bound_map in
   rebuild_disj remaining bounds
 
 and props_to_env

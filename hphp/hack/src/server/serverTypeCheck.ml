@@ -123,6 +123,7 @@ let remove_decls env fast_parsed =
             classes;
             typedefs;
             consts;
+            modules;
             file_mode = _;
             comments = _;
             hash = _;
@@ -134,7 +135,8 @@ let remove_decls env fast_parsed =
           ~funs:(List.map funs ~f:snd)
           ~classes:(List.map classes ~f:snd)
           ~typedefs:(List.map typedefs ~f:snd)
-          ~consts:(List.map consts ~f:snd))
+          ~consts:(List.map consts ~f:snd)
+          ~modules:(List.map modules ~f:snd))
 
 (* If the only things that would change about file analysis are positions,
  * we're not going to recheck it, and positions in its error list might

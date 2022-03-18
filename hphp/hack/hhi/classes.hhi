@@ -56,7 +56,7 @@ namespace HH {
  *
  * @guide /hack/asynchronous-operations/generators
  */
-final class AsyncGenerator<Tk, +Tv, -Ts>
+final class AsyncGenerator<+Tk, +Tv, -Ts>
     implements AsyncKeyedIterator<Tk, Tv> {
   /**
    * Return the `Awaitable` associated with the next key/value tuple in the

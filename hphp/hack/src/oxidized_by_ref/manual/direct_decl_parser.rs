@@ -123,7 +123,7 @@ impl<'a> Decls<'a> {
     pub fn types(&self) -> impl Iterator<Item = (&'a str, Decl<'a>)> {
         self.iter().filter(|(_, decl)| match decl.kind() {
             NameType::Class | NameType::Typedef => true,
-            NameType::Fun | NameType::Const => false,
+            NameType::Fun | NameType::Const | NameType::Module => false,
         })
     }
 }
@@ -150,6 +150,7 @@ impl<'a> Decl<'a> {
             Decl::Fun(..) => NameType::Fun,
             Decl::Typedef(..) => NameType::Typedef,
             Decl::Const(..) => NameType::Const,
+            Decl::Module(..) => NameType::Module,
         }
     }
 
@@ -158,6 +159,7 @@ impl<'a> Decl<'a> {
             Decl::Fun(..) => typing_deps_hash::DepType::Fun,
             Decl::Const(..) => typing_deps_hash::DepType::GConst,
             Decl::Class(..) | Decl::Typedef(..) => typing_deps_hash::DepType::Type,
+            Decl::Module(..) => typing_deps_hash::DepType::Module,
         }
     }
 

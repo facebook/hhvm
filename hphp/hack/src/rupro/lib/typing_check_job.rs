@@ -22,18 +22,18 @@ impl TypingCheckJob {
         ctx: Rc<TypingCtx<R>>,
         ast: &nast::FunDef,
     ) -> Result<(tast::Def<R>, Vec<HackError<R>>)> {
-        let mut errors = Vec::new();
         let (def, typing_errors) = TypingToplevel::fun_def(ctx, ast)?;
-        errors.extend(typing_errors.into_iter().map(|e| e.into()));
         let def = oxidized::aast::Def::Fun(Box::new(def));
-        Ok((def, errors))
+        Ok((def, typing_errors.into_iter().map(Into::into).collect()))
     }
 
     pub fn type_class<R: Reason>(
-        _ctx: Rc<TypingCtx<R>>,
-        _ast: &nast::Class_,
+        ctx: Rc<TypingCtx<R>>,
+        ast: &nast::Class_,
     ) -> Result<(tast::Def<R>, Vec<HackError<R>>)> {
-        todo!()
+        let (def, typing_errors) = TypingToplevel::class_def(ctx, ast)?;
+        let def = oxidized::aast::Def::Class(Box::new(def));
+        Ok((def, typing_errors.into_iter().map(Into::into).collect()))
     }
 
     pub fn type_typedef<R: Reason>(

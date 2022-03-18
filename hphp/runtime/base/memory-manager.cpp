@@ -60,7 +60,6 @@ TRACE_SET_MOD(mm);
 std::atomic<MemoryManager::ReqProfContext*>
   MemoryManager::s_trigger{nullptr};
 
-bool MemoryManager::s_statsEnabled = false;
 std::atomic<ssize_t> MemoryManager::s_req_heap_usage;
 
 static std::atomic<size_t> s_heap_id; // global counter of heap instances
@@ -68,46 +67,55 @@ static std::atomic<size_t> s_heap_id; // global counter of heap instances
 #ifdef USE_JEMALLOC
 static size_t threadAllocatedpMib[2];
 static size_t threadDeallocatedpMib[2];
-static pthread_once_t threadStatsOnce = PTHREAD_ONCE_INIT;
+#endif
 
-void MemoryManager::threadStatsInit() {
-  if (!mallctlnametomib) return;
+#ifndef USE_JEMALLOC
+__thread uint64_t MemoryManager::g_threadAllocated{0};
+__thread uint64_t MemoryManager::g_threadDeallocated{0};
+#endif
+
+static bool threadStatsInit() {
+#if USE_JEMALLOC
+  if (!mallctlnametomib) return false;
   size_t miblen = sizeof(threadAllocatedpMib) / sizeof(size_t);
   if (mallctlnametomib("thread.allocatedp", threadAllocatedpMib, &miblen)) {
-    return;
+    return false;
   }
   miblen = sizeof(threadDeallocatedpMib) / sizeof(size_t);
   if (mallctlnametomib("thread.deallocatedp", threadDeallocatedpMib, &miblen)) {
-    return;
+    return false;
   }
-  MemoryManager::s_statsEnabled = true;
+#endif
+  return true;
 }
 
 inline
 void MemoryManager::threadStats(uint64_t*& allocated, uint64_t*& deallocated) {
-  pthread_once(&threadStatsOnce, threadStatsInit);
-  if (!MemoryManager::s_statsEnabled) return;
+  static auto const inited = threadStatsInit();
+  if (!inited) return;
 
+#ifdef USE_JEMALLOC
   size_t len = sizeof(allocated);
   if (mallctlbymib(threadAllocatedpMib,
                    sizeof(threadAllocatedpMib) / sizeof(size_t),
                    &allocated, &len, nullptr, 0)) {
-    not_reached();
+    always_assert(false);
   }
 
   len = sizeof(deallocated);
   if (mallctlbymib(threadDeallocatedpMib,
                    sizeof(threadDeallocatedpMib) / sizeof(size_t),
                    &deallocated, &len, nullptr, 0)) {
-    not_reached();
+    always_assert(false);
   }
-}
+#else
+  allocated = &MemoryManager::g_threadAllocated;
+  deallocated = &MemoryManager::g_threadDeallocated;
 #endif
+}
 
 MemoryManager::MemoryManager() {
-#ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated);
-#endif
   rl_gcdata.getCheck();
   resetAllStats();
   setMemoryLimit(std::numeric_limits<int64_t>::max());
@@ -182,11 +190,9 @@ void MemoryManager::resetAllStats() {
   m_lastUsage = 0;
 
   if (Trace::enabled) tl_heap_id = ++s_heap_id;
-  if (s_statsEnabled) {
-    m_resetDeallocated = *m_deallocated;
-    m_resetAllocated = *m_allocated;
-    m_freedOnOtherThread = 0;
-  }
+  m_resetDeallocated = *m_deallocated;
+  m_resetAllocated = *m_allocated;
+  m_freedOnOtherThread = 0;
   traceStats("resetAllStats post");
 }
 
@@ -202,15 +208,13 @@ void MemoryManager::resetExternalStats() {
   // enable until after this has been called.
   assertx(m_enableStatsSync ||
          (m_stats.extUsage == 0 && m_stats.totalAlloc == 0));
-  m_enableStatsSync = s_statsEnabled; // false if !use_jemalloc
-  if (s_statsEnabled) {
-    m_resetDeallocated = *m_deallocated;
-    // By subtracting malloc_cap here, the next call to refreshStatsImpl()
-    // will correctly include m_stats.malloc_cap in extUsage and totalAlloc.
-    m_resetAllocated = *m_allocated - m_stats.malloc_cap;
-    // takeCreditForFreeOnOtherThread should not have been used yet
-    assertx(m_freedOnOtherThread == 0);
-  }
+  m_enableStatsSync = true;
+  m_resetDeallocated = *m_deallocated;
+  // By subtracting malloc_cap here, the next call to refreshStatsImpl()
+  // will correctly include m_stats.malloc_cap in extUsage and totalAlloc.
+  m_resetAllocated = *m_allocated - m_stats.malloc_cap;
+  // takeCreditForFreeOnOtherThread should not have been used yet
+  assertx(m_freedOnOtherThread == 0);
   traceStats("resetExternalStats post");
 }
 

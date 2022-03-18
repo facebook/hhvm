@@ -64,7 +64,7 @@ let lsp_edit_to_fc (edit : Lsp.DidChange.textDocumentContentChangeEvent) :
 let apply_changes
     (text : string)
     (contentChanges : DidChange.textDocumentContentChangeEvent list) :
-    (string, string * Utils.callstack) result =
+    (string, string * Exception.t) result =
   let edits = List.map lsp_edit_to_fc contentChanges in
   File_content.edit_file text edits
 

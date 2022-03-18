@@ -49,7 +49,7 @@ val unsafe_opt_note : string -> 'a option -> 'a
 
 val unsafe_opt : 'a option -> 'a
 
-val try_with_stack : (unit -> 'a) -> ('a, exn * callstack) result
+val try_with_stack : (unit -> 'a) -> ('a, Exception.t) result
 
 val set_of_list : SSet.elt list -> SSet.t
 

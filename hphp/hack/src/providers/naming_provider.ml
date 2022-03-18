@@ -494,6 +494,73 @@ let add_typedef
     (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
   add_type backend name pos Naming_types.TTypedef
 
+let get_module_pos (ctx : Provider_context.t) (name : string) :
+    FileInfo.pos option =
+  let open Option.Monad_infix in
+  find_symbol_in_context_with_suppression
+    ~ctx
+    ~get_entry_symbols:(fun { FileInfo.modules; _ } ->
+      List.map modules ~f:(attach_name_type FileInfo.Module))
+    ~is_symbol:(String.equal name)
+    ~fallback:(fun () ->
+      match Provider_context.get_backend ctx with
+      | Provider_backend.Analysis
+      | Provider_backend.Shared_memory ->
+        Naming_heap.Modules.get_pos (db_path_of_ctx ctx) name
+        >>| attach_name_type FileInfo.Module
+      | Provider_backend.Local_memory
+          { Provider_backend.reverse_naming_table_delta; _ } ->
+        let open Provider_backend.Reverse_naming_table_delta in
+        get_and_cache
+          ~ctx
+          ~name
+          ~cache:reverse_naming_table_delta.modules
+          ~fallback:(fun db_path ->
+            Naming_sqlite.get_module_path_by_name db_path name
+            |> Option.map ~f:(fun path -> (FileInfo.Module, path)))
+        >>| attach_name_type_to_tuple
+      | Provider_backend.Decl_service { decl; _ } ->
+        Decl_service_client.rpc_get_module_path decl name)
+  >>| remove_name_type
+
+let get_module_path (ctx : Provider_context.t) (name : string) :
+    Relative_path.t option =
+  get_module_pos ctx name |> Option.map ~f:FileInfo.get_pos_filename
+
+let module_exists (ctx : Provider_context.t) (name : string) : bool =
+  get_module_pos ctx name |> Option.is_some
+
+let add_module backend name pos =
+  match backend with
+  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Shared_memory -> Naming_heap.Modules.add name pos
+  | Provider_backend.Local_memory
+      { Provider_backend.reverse_naming_table_delta; _ } ->
+    let open Provider_backend.Reverse_naming_table_delta in
+    let data = Pos ((FileInfo.Module, FileInfo.get_pos_filename pos), []) in
+    reverse_naming_table_delta.modules :=
+      SMap.add !(reverse_naming_table_delta.modules) ~key:name ~data
+  | Provider_backend.Decl_service _ as backend -> not_implemented backend
+
+let remove_module_batch backend names =
+  match backend with
+  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Shared_memory ->
+    Naming_heap.Modules.remove_batch
+      (Db_path_provider.get_naming_db_path backend)
+      names
+  | Provider_backend.Local_memory
+      { Provider_backend.reverse_naming_table_delta; _ } ->
+    let open Provider_backend.Reverse_naming_table_delta in
+    reverse_naming_table_delta.modules :=
+      List.fold
+        names
+        ~init:!(reverse_naming_table_delta.modules)
+        ~f:(fun acc name -> SMap.add acc ~key:name ~data:Deleted)
+  | Provider_backend.Decl_service _ as backend ->
+    (* Removing cache items is not the responsibility of hh_worker. *)
+    not_implemented backend
+
 let resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t =
  fun ctx pos ->
   match Pos_or_decl.get_raw_pos_or_decl_reference pos with
@@ -503,11 +570,28 @@ let resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t =
       (match decl with
       | Decl_reference.Function name -> get_fun_path ctx name
       | Decl_reference.Type name -> get_type_path ctx name
-      | Decl_reference.GlobalConstant name -> get_const_path ctx name)
+      | Decl_reference.GlobalConstant name -> get_const_path ctx name
+      | Decl_reference.Module name -> get_module_path ctx name)
       |> Option.value ~default:Relative_path.default
       (* TODO: what to do if decl not found? *)
     in
     Pos_or_decl.fill_in_filename filename pos
+
+let get_module_full_pos ctx (pos, name) =
+  match pos with
+  | FileInfo.Full p -> Some p
+  | FileInfo.File (FileInfo.Module, md) ->
+    begin
+      match Provider_context.get_backend ctx with
+      | Provider_backend.Decl_service { decl = decl_service; _ } ->
+        Decl_service_client.rpc_get_module decl_service name
+        |> Option.map ~f:(fun decl ->
+               decl.Typing_defs.mdt_pos |> resolve_position ctx)
+      | _ ->
+        Ast_provider.find_module_in_file ctx md name
+        |> Option.map ~f:(fun md -> fst md.Aast.md_name)
+    end
+  | _ -> None
 
 let get_const_full_pos ctx (pos, name) =
   match pos with
@@ -658,6 +742,9 @@ let add
             Naming_sqlite.get_fun_path_by_name db_path name
         in
         Option.map pos ~f:(fun sqlite_path -> (FileInfo.Fun, sqlite_path))
+      | FileInfo.Module ->
+        let pos = Naming_sqlite.get_module_path_by_name db_path name in
+        Option.map pos ~f:(fun sqlite_path -> (FileInfo.Module, sqlite_path))
       | FileInfo.Class
       | FileInfo.Typedef ->
         let pos =
@@ -695,7 +782,8 @@ let update
         remove_type_batch backend (strip_positions old_file_info.classes);
         remove_type_batch backend (strip_positions old_file_info.typedefs);
         remove_fun_batch backend (strip_positions old_file_info.funs);
-        remove_const_batch backend (strip_positions old_file_info.consts));
+        remove_const_batch backend (strip_positions old_file_info.consts);
+        remove_module_batch backend (strip_positions old_file_info.modules));
     (* Add new entries. Note: the caller is expected to have a solution
        for duplicate names. Note: can't use [Naming_global.ndecl_file_skip_if_already_bound]
        because it attempts to look up the symbol by doing a file parse, but
@@ -708,7 +796,9 @@ let update
         List.iter new_file_info.typedefs ~f:(fun (pos, name, _) ->
             add_typedef backend name pos);
         List.iter new_file_info.consts ~f:(fun (pos, name, _) ->
-            add_const backend name pos));
+            add_const backend name pos);
+        List.iter new_file_info.modules ~f:(fun (pos, name, _) ->
+            add_module backend name pos));
     ()
   | Provider_backend.Local_memory
       {
@@ -755,6 +845,7 @@ let update
     update oldfi.consts newfi.consts deltas.consts FileInfo.Const;
     update oldfi.classes newfi.classes deltas.types FileInfo.Class;
     update oldfi.typedefs newfi.typedefs deltas.types FileInfo.Typedef;
+    update oldfi.modules newfi.modules deltas.modules FileInfo.Module;
     (* update canon names too *)
     let updatei = update ~case_insensitive:true in
     updatei oldfi.funs newfi.funs deltas.funs_canon_key FileInfo.Fun;
@@ -764,6 +855,7 @@ let update
       newfi.typedefs
       deltas.types_canon_key
       FileInfo.Typedef;
+    updatei oldfi.modules newfi.modules deltas.modules FileInfo.Module;
     ()
 
 let local_changes_push_sharedmem_stack () : unit =

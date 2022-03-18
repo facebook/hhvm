@@ -335,7 +335,9 @@ pub trait ToOcamlRep {
     ///
     /// Implementors of this method must not mutate or drop any values after
     /// passing them to `Allocator::add` (or invoking `to_ocamlrep` on them),
-    /// else `Allocator::memoized` may return incorrect results.
+    /// else `Allocator::memoized` may return incorrect results (this can
+    /// generally only be done using internal-mutability types like `RefCell`,
+    /// `Mutex`, or atomics, or by using `unsafe`).
     ///
     /// Non-immediate `OpaqueValue`s may be either a pointer or an offset into
     /// some container. The `Allocator` chooses whether values will be
@@ -343,7 +345,7 @@ pub trait ToOcamlRep {
     /// offsets. Therefore, implementations of `ToOcamlRep` which return a block
     /// value *must* return an `OpaqueValue` allocated by `alloc`, and that
     /// value must *only* reference other values allocated by `alloc`.
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a>;
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a>;
 }
 
 /// An interface for allocating OCaml values in some allocator-defined memory region.
@@ -391,8 +393,18 @@ pub trait Allocator: Sized {
     /// overhead of maintaining a cache that comes with it), consider using
     /// `ocamlrep::rc::RcOc` instead of `Rc`.
     #[inline(always)]
-    fn add<T: ToOcamlRep + ?Sized>(&self, value: &T) -> OpaqueValue<'_> {
+    fn add<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a> {
         value.to_ocamlrep(self)
+    }
+
+    /// Convert the given `Copy` data structure to an OCaml value.
+    #[inline(always)]
+    fn add_copy<'a, T: ToOcamlRep + Copy + 'static>(&'a self, value: T) -> OpaqueValue<'a> {
+        let value_ref = &value;
+        // SAFETY: add/to_ocamlrep cannot reference `value` in the `OpaqueValue`
+        // they return, and the `Copy + 'static` bounds ensure that we're not
+        // working with a reference or Rc which might be invalidated.
+        self.add(unsafe { std::mem::transmute::<&'_ T, &'a T>(value_ref) })
     }
 
     /// Given the address and size of some value, and a function to convert the
@@ -435,7 +447,7 @@ pub trait Allocator: Sized {
     /// # Panics
     ///
     /// `add_root` is not re-entrant, and panics upon attempts to do so.
-    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> OpaqueValue<'_>;
+    fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a>;
 }
 
 /// A type which can be reconstructed from an OCaml value.

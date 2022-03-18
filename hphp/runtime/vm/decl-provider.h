@@ -19,6 +19,7 @@
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/util/hash-map.h"
 
 #include <map>
 #include <memory>
@@ -27,8 +28,10 @@
 
 namespace HPHP {
 
-// keep this in sync with `enum ExternalDeclProviderResult` in
-// 'hack/src/hackc/decl_provider/external.rs'.
+struct RepoOptionsFlags;
+
+// This must be kept in sync with `enum ExternalDeclProviderResult` in
+// 'hhbc/decl_provider/external.rs' so they both are layout compatible.
 struct DeclProviderResult {
     enum class Tag {
       Missing,
@@ -49,17 +52,26 @@ struct DeclProviderResult {
 };
 
 struct HhvmDeclProvider {
-  explicit HhvmDeclProvider(int32_t flags, std::string const& aliased_namespaces)
-    : opts{hackc_create_direct_decl_parse_options(flags, aliased_namespaces)}
-  {}
+  HhvmDeclProvider(int32_t flags, std::string const& aliased_namespaces,
+                   AutoloadMap*);
   HhvmDeclProvider(HhvmDeclProvider const&) = delete;
   HhvmDeclProvider& operator=(HhvmDeclProvider const&) = delete;
 
+  // Factory to create the provider. Constructor is only public
+  // for use by std::unique_ptr within create().
+  static std::unique_ptr<HhvmDeclProvider> create(const RepoOptionsFlags&);
+
+  // Callback invoked by hackc's ExternalDeclProvider.
   DeclProviderResult getDecl(HPHP::AutoloadMap::KindOf kind, std::string_view symbol);
 
  private:
-  ::rust::Box<DeclParserOptions> opts;
-  std::map<std::string, DeclResult> m_cache;
+  rust::Box<DeclParserOptions> m_opts;
+
+  // Map from filename to DeclResult containing the cached results of calling
+  // hackc_direct_decl_parse().
+  hphp_hash_map<std::string, DeclResult> m_cache;
+
+  AutoloadMap* m_map;
 };
 
 extern "C" {

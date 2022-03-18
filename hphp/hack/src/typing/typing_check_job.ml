@@ -25,13 +25,14 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     =
  fun pos f ->
   try f () with
-  | (WorkerCancel.Worker_should_exit | Deferred_decl.Defer) as e ->
+  | (WorkerCancel.Worker_should_exit | Deferred_decl.Defer) as exn ->
     (* Cancellation requests must be re-raised *)
-    raise e
-  | e ->
+    let e = Exception.wrap exn in
+    Exception.reraise e
+  | exn ->
+    let e = Exception.wrap exn in
     Errors.add_typing_error
-      Typing_error.(
-        primary @@ Primary.Exception_occurred { pos; exn = Exception.wrap e });
+      Typing_error.(primary @@ Primary.Exception_occurred { pos; exn = e });
     None
 
 let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
@@ -88,5 +89,17 @@ let check_const (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
         let cst = Naming.global_const ctx cst in
         Nast_check.def ctx (Aast.Constant cst);
         let def = Aast.Constant (Typing_toplevel.gconst_def ctx cst) in
+        Tast_check.def ctx def;
+        Some def)
+
+let check_module (ctx : Provider_context.t) (fn : Relative_path.t) (x : string)
+    : Tast.def option =
+  match Ast_provider.find_module_in_file ~full:true ctx fn x with
+  | None -> None
+  | Some md ->
+    handle_exn_as_error (fst md.Aast.md_name) (fun () ->
+        let md = Naming.module_ ctx md in
+        Nast_check.def ctx (Aast.Module md);
+        let def = Aast.Module (Typing_toplevel.module_def ctx md) in
         Tast_check.def ctx def;
         Some def)

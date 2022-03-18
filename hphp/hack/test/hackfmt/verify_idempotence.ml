@@ -148,13 +148,11 @@ let verify_hackfmt_idempotence args filename =
       assert_reformatting_idempotent filename formatted_text reformatted_text
     with
     | exn ->
-      let backtrace = Printexc.get_backtrace () in
-      let msg = Printexc.to_string exn in
+      let e = Exception.wrap exn in
       Printf.printf
-        "\nEXCEPTION WHILE FORMATTING: %s\n\n%s\n\n%s\n"
+        "\nEXCEPTION WHILE FORMATTING: %s\n\n%s\n\n"
         filename
-        msg
-        backtrace;
+        (Exception.to_string e);
       exit 1
   )
 

@@ -1,32 +1,31 @@
---- ocaml
-+++ rupro
-@@ -1,29 +1,26 @@
- FoldedClass {
-     name: "\\Bar",
-     pos: Pos(root|return_disposable.php, 3:13-16),
-     kind: Cclass(
-         Concrete,
-     ),
-     is_final: true,
--    ancestors: {
--        "\\IDisposable": IDisposable,
--    },
-     methods: {
-         "__dispose": FoldedElement {
-             flags: (empty),
-             origin: "\\Bar",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|return_disposable.php, 3:13-16),
-             ty: HH\classname<this>,
-             origin: "\\Bar",
-             refs: [],
-         },
-     },
- }
+FoldedClass {
+    name: "\\Bar",
+    pos: Pos(root|return_disposable.php, 3:13-16),
+    kind: Cclass(
+        Concrete,
+    ),
+    is_final: true,
+    ancestors: {
+        "\\IDisposable": IDisposable,
+    },
+    methods: {
+        "__dispose": FoldedElement {
+            flags: (empty),
+            origin: "\\Bar",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|return_disposable.php, 3:13-16),
+            ty: HH\classname<this>,
+            origin: "\\Bar",
+            refs: [],
+        },
+    },
+}
+
+They matched!

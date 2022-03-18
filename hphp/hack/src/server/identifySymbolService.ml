@@ -222,6 +222,8 @@ let visitor =
       let ( + ) = self#plus in
       let acc =
         match expr_ with
+        | Aast.Hole (_e, _ty, _ty2, Aast.UnsafeCast _) ->
+          process_fun_id (pos, SN.PseudoFunctions.unsafe_cast)
         | Aast.New ((ty, p, _), _, _, _, _) -> typed_constructor env ty p
         | Aast.Obj_get ((ty, _, _), (_, _, Aast.Id mid), _, _) ->
           typed_property env ty mid

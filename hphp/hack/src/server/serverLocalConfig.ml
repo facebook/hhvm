@@ -1558,4 +1558,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       hulk_lite = options.hulk_lite;
       specify_manifold_api_key = options.specify_manifold_api_key;
       populate_member_heaps = options.populate_member_heaps;
+      shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;
+      shm_cache_size = options.shm_cache_size;
     }

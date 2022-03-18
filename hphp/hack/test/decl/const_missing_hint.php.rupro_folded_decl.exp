@@ -1,38 +1,36 @@
---- ocaml
-+++ rupro
-@@ -1,34 +1,34 @@
- FoldedClass {
-     name: "\\E",
-     pos: Pos(root|const_missing_hint.php, 23:6-7),
-     kind: Cenum,
-     enum_type: EnumType {
-         base: int,
-         constraint: None,
-         includes: [],
-     },
-     ancestors: {
-         "\\HH\\BuiltinEnum": HH\BuiltinEnum<E>,
-     },
-     consts: {
-         "FromConst": ClassConst {
-             is_synthesized: false,
-             kind: CCConcrete,
-             pos: Pos(root|const_missing_hint.php, 24:3-12),
--            ty: E,
-+            ty: _,
-             origin: "\\E",
-             refs: [],
-         },
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|const_missing_hint.php, 23:6-7),
-             ty: HH\classname<this>,
-             origin: "\\E",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\HH\\BuiltinEnum",
-     },
- }
+FoldedClass {
+    name: "\\E",
+    pos: Pos(root|const_missing_hint.php, 23:6-7),
+    kind: Cenum,
+    enum_type: EnumType {
+        base: int,
+        constraint: None,
+        includes: [],
+    },
+    ancestors: {
+        "\\HH\\BuiltinEnum": HH\BuiltinEnum<E>,
+    },
+    consts: {
+        "FromConst": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|const_missing_hint.php, 24:3-12),
+            ty: E,
+            origin: "\\E",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|const_missing_hint.php, 23:6-7),
+            ty: HH\classname<this>,
+            origin: "\\E",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\HH\\BuiltinEnum",
+    },
+}
+
+They matched!

@@ -25,7 +25,7 @@ fn derive_to_ocamlrep(mut s: synstructure::Structure<'_>) -> TokenStream {
     s.gen_impl(quote! {
         gen impl ::ocamlrep::ToOcamlRep for @Self {
             fn to_ocamlrep<'__ocamlrep_derive_allocator, Alloc: ::ocamlrep::Allocator>(
-                &self,
+                &'__ocamlrep_derive_allocator self,
                 arena: &'__ocamlrep_derive_allocator Alloc,
             ) -> ::ocamlrep::OpaqueValue<'__ocamlrep_derive_allocator> {
                 use ::ocamlrep::Allocator;

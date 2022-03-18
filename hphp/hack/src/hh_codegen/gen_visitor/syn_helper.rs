@@ -45,7 +45,7 @@ pub fn get_field_and_type_from_named<'a>(
 pub fn get_field_and_type_from_unnamed(
     FieldsUnnamed { unnamed, .. }: &FieldsUnnamed,
 ) -> impl Iterator<Item = (usize, &Type)> {
-    itertools::enumerate(unnamed.into_iter().map(|f| &f.ty))
+    unnamed.into_iter().map(|f| &f.ty).enumerate()
 }
 
 struct TypeParamCollector(Vec<String>);
@@ -66,7 +66,7 @@ impl<'ast> visit::Visit<'ast> for TypeParamCollector {
 
 pub fn try_get_types_from_box_tuple(
     FieldsUnnamed { unnamed, .. }: &FieldsUnnamed,
-) -> Option<impl Iterator<Item = (usize, &Type)>> {
+) -> Option<(usize, impl Iterator<Item = (usize, &Type)>)> {
     let fields = unnamed.into_iter().collect::<Vec<_>>();
     if fields.len() == 1 {
         if let Type::Path(TypePath { path, .. }) = &fields[0].ty {
@@ -78,7 +78,7 @@ pub fn try_get_types_from_box_tuple(
                             ..
                         }))) = args.args.first()
                         {
-                            return Some(itertools::enumerate(elems.iter()));
+                            return Some((elems.len(), elems.iter().enumerate()));
                         }
                     }
                 }

@@ -57,6 +57,7 @@ void SparseHeap::reset() {
 #endif
 #else
         free(ptr);
+        MemoryManager::g_threadDeallocated += size;
 #endif
       }
   };
@@ -131,6 +132,7 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
   assertx(sallocx(slab, flags) == kSlabSize);
 #else
   auto slab = safe_aligned_alloc(kSlabAlign, kSlabSize);
+  MemoryManager::g_threadAllocated += kSlabSize;
 #endif
   m_bigs.insert((HeapObject*)slab, kSlabSize);
   stats.malloc_cap += kSlabSize;
@@ -155,6 +157,7 @@ void* SparseHeap::allocBig(size_t bytes, bool zero, MemoryUsageStats& stats) {
     // to slightly overestimate the block size
     cap += kSmallSizeAlign - cap % kSmallSizeAlign;
   }
+  MemoryManager::g_threadAllocated += cap;
 #endif
   m_bigs.insert(n, cap);
   stats.mm_udebt -= cap;
@@ -185,6 +188,7 @@ void SparseHeap::freeBig(void* ptr, MemoryUsageStats& stats) {
 #endif
   }
 #else
+  MemoryManager::g_threadDeallocated += cap;
   free(ptr);
 #endif
 }
@@ -209,6 +213,8 @@ void* SparseHeap::resizeBig(void* ptr, size_t new_size,
     // adjust to satisfy RadixMap (see justification in allocBig())
     new_cap += kSmallSizeAlign - new_cap % kSmallSizeAlign;
   }
+  MemoryManager::g_threadDeallocated += old_cap;
+  MemoryManager::g_threadAllocated += new_cap;
 #endif
   if (newNode != old || new_cap != old_cap) {
     m_bigs.erase(old);

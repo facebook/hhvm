@@ -1,0 +1,4 @@
+File "module_parent_call.php--f.php", line 6, characters 13-18:
+You cannot access internal members outside of a module (Typing[4112])
+  File "module_parent_call.php--A.php", line 7, characters 19-24:
+  This member is internal

@@ -1,0 +1,6 @@
+File "case_insensitive.php--A.php", line 5, characters 3-3:
+Cannot access an internal element from module `a` in module `A` (Typing[4444])
+  File "case_insensitive.php--a.php", line 6, characters 10-10:
+  This is from module `a`
+File "case_insensitive.php--b.php", line 2, characters 54-56:
+Unbound name: `b` (a module) (Naming[2049])

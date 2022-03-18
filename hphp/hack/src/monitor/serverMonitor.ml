@@ -832,31 +832,31 @@ struct
       ?(consecutive_throws = 0) env monitor_config (socket : Unix.file_descr) =
     let (env, consecutive_throws) =
       try (check_and_run_loop_ env monitor_config socket, 0) with
-      | Unix.Unix_error (Unix.ECHILD, _, _) ->
-        let stack = Printexc.get_backtrace () in
+      | Unix.Unix_error (Unix.ECHILD, _, _) as exn ->
+        let e = Exception.wrap exn in
         ignore
           (Hh_logger.log
              "check_and_run_loop_ threw with Unix.ECHILD. Exiting. - %s"
-             stack);
+             (Exception.get_backtrace_string e));
         Exit.exit Exit_status.No_server_running_should_retry
       | Watchman.Watchman_restarted ->
         Exit.exit Exit_status.Watchman_fresh_instance
-      | Exit_status.Exit_with _ as e -> raise e
+      | Exit_status.Exit_with _ as exn ->
+        let e = Exception.wrap exn in
+        Exception.reraise e
       | exn ->
         let e = Exception.wrap exn in
-        let stack = Printexc.get_backtrace () in
         if consecutive_throws > 500 then (
           Hh_logger.log "Too many consecutive exceptions.";
           Hh_logger.log
             "Probably an uncaught exception rethrown each retry. Exiting. %s"
-            stack;
+            (Exception.to_string e);
           HackEventLogger.monitor_giving_up_exception e;
           Exit.exit Exit_status.Uncaught_exception
         );
         Hh_logger.log
-          "check_and_run_loop_ threw with exception: %s - %s"
-          (Exception.to_string e)
-          stack;
+          "check_and_run_loop_ threw with exception: %s"
+          (Exception.to_string e);
         (env, consecutive_throws + 1)
     in
     check_and_run_loop ~consecutive_throws env monitor_config socket
@@ -894,7 +894,9 @@ struct
       try
         let (fd, _) = Unix.accept socket in
         try ack_and_handoff_client env fd with
-        | Exit_status.Exit_with _ as e -> raise e
+        | Exit_status.Exit_with _ as exn ->
+          let e = Exception.wrap exn in
+          Exception.reraise e
         | exn ->
           let e = Exception.wrap exn in
           Hh_logger.log
@@ -903,7 +905,9 @@ struct
           ensure_fd_closed fd;
           env
       with
-      | Exit_status.Exit_with _ as e -> raise e
+      | Exit_status.Exit_with _ as exn ->
+        let e = Exception.wrap exn in
+        Exception.reraise e
       | exn ->
         let e = Exception.wrap exn in
         HackEventLogger.accepting_on_socket_exception e;

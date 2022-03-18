@@ -1,0 +1,8 @@
+File "readonly_closure_advanced.php", line 27, characters 18-19:
+Invalid argument (Typing[4411])
+  File "readonly_closure_advanced.php", line 23, characters 8-51:
+  Function readonly mismatch
+  File "readonly_closure_advanced.php", line 23, characters 8-51:
+  This function is not marked readonly
+  File "readonly_closure_advanced.php", line 10, characters 12-38:
+  This function is marked readonly

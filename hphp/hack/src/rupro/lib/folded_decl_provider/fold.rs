@@ -5,14 +5,15 @@
 
 use super::{inherit::Inherited, subst::Subst, subst::Substitution};
 use crate::decl_defs::{
-    AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs,
-    ClassishKind, ConsistentKind, DeclTy, FoldedClass, FoldedElement, Requirement, ShallowClass,
-    ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst, TaccessType, TypeConst,
-    Typeconst, UserAttribute, Visibility,
+    folded::Constructor, AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind,
+    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind, DeclTy, FoldedClass,
+    FoldedElement, Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,
+    ShallowTypeconst, TaccessType, TypeConst, Typeconst, Visibility,
 };
 use crate::reason::Reason;
 use crate::special_names::SpecialNames;
 use crate::typing_error::{Primary, TypingError};
+use eq_modulo_pos::EqModuloPos;
 use oxidized::global_options::GlobalOptions;
 use pos::{
     ClassConstName, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned, PropName,
@@ -20,6 +21,8 @@ use pos::{
     TypeNameIndexMap, TypeNameIndexSet,
 };
 use std::sync::Arc;
+
+mod decl_enum;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
 
@@ -97,10 +100,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             origin: name,
             refs: Box::default(),
         };
-        consts.insert(
-            ClassConstName(self.special_names.members.mClass),
-            class_const,
-        );
+        consts.insert(self.special_names.members.mClass, class_const);
     }
 
     /// Each concrete type constant `T = τ` implicitly defines a class
@@ -108,7 +108,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     fn type_const_structure(&self, stc: &ShallowTypeconst<R>) -> ClassConst<R> {
         let pos = stc.name.pos();
         let r = R::witness_from_decl(pos.clone());
-        let tsid = Positioned::new(pos.clone(), TypeName(self.special_names.fb.cTypeStructure));
+        let tsid = Positioned::new(pos.clone(), self.special_names.fb.cTypeStructure);
         // The type `this`.
         let tthis = DeclTy::this(r.clone());
         // The type `this::T`.
@@ -244,7 +244,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             is_dynamicallycallable: false,
             is_readonly_prop: prop_flags.is_readonly(),
             supports_dynamic_type: false,
-            needs_init: prop_flags.needs_init(),
+            needs_init: false,
         };
         let elt = FoldedElement {
             origin: self.child.name.id(),
@@ -294,24 +294,19 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         methods.insert(meth, elt);
     }
 
-    fn decl_constructor(&self, constructor: &mut Option<FoldedElement>) {
+    fn decl_constructor(&self, constructor: &mut Constructor) {
         // Constructors in children of `self.child` must be consistent?
-        let _consistent_kind = if self.child.is_final {
+        let consistency = if self.child.is_final {
             ConsistentKind::FinalClass
-        } else if self
-            .child
-            .user_attributes
-            .iter()
-            .any(|UserAttribute { name, .. }| {
-                name.id() == self.special_names.user_attributes.uaConsistentConstruct
-            })
+        } else if (self.child.user_attributes.iter())
+            .any(|ua| ua.name.id() == self.special_names.user_attributes.uaConsistentConstruct)
         {
             ConsistentKind::ConsistentConstruct
         } else {
             ConsistentKind::Inconsistent
         };
 
-        if let Some(sm) = &self.child.constructor {
+        let elt = self.child.constructor.as_ref().map(|sm| {
             let cls = self.child.name.id();
             let vis = self.visibility(
                 cls,
@@ -333,14 +328,17 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 supports_dynamic_type: false,
                 needs_init: false,
             };
-            let elt = FoldedElement {
+            FoldedElement {
                 origin: self.child.name.id(),
                 visibility: vis,
                 deprecated: sm.deprecated,
                 flags: ClassEltFlags::new(flag_args),
-            };
-            *constructor = Some(elt)
-        }
+            }
+        });
+        *constructor = Constructor::new(
+            elt,
+            ConsistentKind::coalesce(constructor.consistency, consistency),
+        )
     }
 
     fn get_implements(&self, ty: &DeclTy<R>, ancestors: &mut TypeNameIndexMap<DeclTy<R>>) {
@@ -372,12 +370,9 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         &mut self,
         parent_pos: &R::Pos,
         parent_kind: ClassishKind,
-        parent_name: &TypeName,
-        child_pos: &R::Pos,
-        child_kind: ClassishKind,
-        child_name: &TypeName,
+        parent_name: TypeName,
     ) {
-        match (parent_kind, child_kind) {
+        match (parent_kind, self.child.kind) {
             // What is allowed
             (ClassishKind::Cclass(_), ClassishKind::Cclass(_))
             | (ClassishKind::Ctrait, ClassishKind::Ctrait)
@@ -392,10 +387,10 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 .push(TypingError::primary(Primary::WrongExtendKind {
                     parent_pos: parent_pos.clone(),
                     parent_kind,
-                    parent_name: *parent_name,
-                    pos: child_pos.clone(),
-                    kind: child_kind,
-                    name: *child_name,
+                    parent_name,
+                    pos: self.child.name.pos().clone(),
+                    kind: self.child.kind,
+                    name: self.child.name.id(),
                 })),
         }
     }
@@ -410,14 +405,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             extends.insert(pos_id.id());
             if let Some(cls) = self.parents.get(&pos_id.id()) {
                 if pass == Pass::Extends {
-                    self.check_extend_kind(
-                        pos_id.pos(),
-                        cls.kind,
-                        &cls.name,
-                        self.child.name.pos(),
-                        self.child.kind,
-                        &self.child.name.id(),
-                    );
+                    self.check_extend_kind(pos_id.pos(), cls.kind, cls.name);
                 }
 
                 if pass == Pass::Xhp {
@@ -462,11 +450,12 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             if let Some(cls) = self.parents.get(&pos_id.id()) {
                 let subst = Subst::new(&cls.tparams, parent_params);
                 let substitution = Substitution { subst: &subst };
-                // TODO: Do we need to rev? Or was that just a limitation of OCaml's library?
-                cls.req_ancestors.iter().rev().for_each(|req_ancestor| {
-                    let ty = substitution.instantiate(&req_ancestor.1);
-                    req_ancestors.push(Requirement(pos_id.pos().clone(), ty));
-                });
+                req_ancestors.extend(
+                    cls.req_ancestors
+                        .iter()
+                        .map(|req| substitution.instantiate(&req.ty))
+                        .map(|ty| Requirement::new(pos_id.pos().clone(), ty)),
+                );
                 match self.child.kind {
                     ClassishKind::Cclass(_) => {
                         // Not necessary to accumulate req_ancestors_extends for classes --
@@ -493,7 +482,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             // Since the req is declared on this class, we should
             // emphatically *not* substitute: a require extends Foo<T> is
             // going to be this class's <T>
-            req_ancestors.push(Requirement(pos_id.pos().clone(), req_ty.clone()));
+            req_ancestors.push(Requirement::new(pos_id.pos().clone(), req_ty.clone()));
             req_ancestors_extends.insert(pos_id.id());
 
             if let Some(cls) = self.parents.get(&pos_id.id()) {
@@ -520,39 +509,32 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     /// that prunes the list via proper subtyping, but that's a little more work
     /// than I'm willing to do now.
     fn naive_dedup(&self, req_ancestors: &mut Vec<Requirement<R>>) {
-        let mut seen_extends: TypeNameIndexMap<Vec<DeclTy<R>>> = TypeNameIndexMap::new();
-        // TODO: Do we need to rev. Seems the logic works forwards or backwards...
+        let mut seen_reqs: TypeNameIndexMap<Vec<DeclTy<R>>> = TypeNameIndexMap::new();
+        // Reverse to match the OCaml ordering for building the seen_reqs map
+        // (since OCaml uses `rev_filter_map` for perf reasons)
         req_ancestors.reverse();
         req_ancestors.retain(|req_extend| {
-            if let Some((_, pos_id, hl)) = req_extend.1.unwrap_class_type() {
-                let mut normalized_hl = vec![];
-                for h in hl {
-                    // TODO: Decl_pos_utils.NormalizeSig.ty h
-                    normalized_hl.push(h.clone());
-                }
-
-                if let Some(seen_hl) = seen_extends.get(&pos_id.id()) {
-                    // TODO: List.equal equal_decl_ty hl hl_
-                    if normalized_hl.len() == seen_hl.len()
-                        && normalized_hl.iter().zip(seen_hl).all(|(h1, h2)| {
-                            // TODO: equal_decl_ty h1 h2
-                            h1 == h2
-                        })
-                    {
+            if let Some((_, pos_id, targs)) = req_extend.ty.unwrap_class_type() {
+                if let Some(seen_targs) = seen_reqs.get(&pos_id.id()) {
+                    if targs.eq_modulo_pos(seen_targs) {
                         false
                     } else {
-                        // TN: Replacing an existing hl_ that we didn't match seems not ideal
-                        seen_extends.insert(pos_id.id().clone(), normalized_hl);
+                        // Seems odd to replace the existing targs list when we
+                        // see a different one, but the OCaml does it, so we
+                        // need to as well
+                        seen_reqs.insert(pos_id.id(), targs.to_vec());
                         true
                     }
                 } else {
-                    seen_extends.insert(pos_id.id().clone(), normalized_hl);
+                    seen_reqs.insert(pos_id.id(), targs.to_vec());
                     true
                 }
             } else {
                 true
             }
         });
+        // Reverse again to match the OCaml ordering for the returned list
+        req_ancestors.reverse();
     }
 
     fn get_class_requirements(&self) -> (Vec<Requirement<R>>, TypeNameIndexSet) {
@@ -598,27 +580,19 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     }
 
     fn get_sealed_whitelist(&self) -> Option<TypeNameIndexSet> {
-        self.child
-            .user_attributes
-            .iter()
+        (self.child.user_attributes.iter())
             .find(|ua| ua.name.id() == self.special_names.user_attributes.uaSealed)
             .map(|ua| ua.classname_params.iter().copied().collect())
     }
 
     fn get_deferred_init_members_helper(&self) -> PropNameIndexSet {
-        let shallow_props = self
-            .child
-            .props
-            .iter()
+        let shallow_props = (self.child.props.iter())
             .filter(|prop| prop.xhp_attr.is_none())
             .filter(|prop| !prop.flags.is_lateinit())
             .filter(|prop| prop.flags.needs_init())
             .map(|prop| prop.name.id());
 
-        let extends_props = self
-            .child
-            .extends
-            .iter()
+        let extends_props = (self.child.extends.iter())
             .filter_map(|extend| extend.unwrap_class_type())
             .filter_map(|(_, pos_id, _)| self.parents.get(&pos_id.id()))
             .flat_map(|ty| ty.deferred_init_members.iter().copied());
@@ -661,77 +635,77 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     }
 
     fn decl_class_impl(mut self) -> Arc<FoldedClass<R>> {
-        let inh = Inherited::make(self.child, self.parents);
+        let Inherited {
+            substs,
+            mut props,
+            mut static_props,
+            mut methods,
+            mut static_methods,
+            mut constructor,
+            mut consts,
+            mut type_consts,
+        } = Inherited::make(self.child, self.parents);
 
-        let mut props = inh.props;
-        self.child
-            .props
-            .iter()
-            .for_each(|sp| self.decl_prop(&mut props, sp));
+        for sp in self.child.props.iter() {
+            self.decl_prop(&mut props, sp);
+        }
+        for sp in self.child.static_props.iter() {
+            self.decl_static_prop(&mut static_props, sp);
+        }
+        for sm in self.child.methods.iter() {
+            self.decl_method(&mut methods, sm);
+        }
+        for sm in self.child.static_methods.iter() {
+            self.decl_method(&mut static_methods, sm);
+        }
 
-        let mut static_props = inh.static_props;
-        self.child
-            .static_props
-            .iter()
-            .for_each(|ssp| self.decl_static_prop(&mut static_props, ssp));
-
-        let mut methods = inh.methods;
-        self.child
-            .methods
-            .iter()
-            .for_each(|sm| self.decl_method(&mut methods, sm));
-
-        let mut static_methods = inh.static_methods;
-        self.child
-            .static_methods
-            .iter()
-            .for_each(|sm| self.decl_method(&mut static_methods, sm));
-
-        let mut constructor = inh.constructor;
         self.decl_constructor(&mut constructor);
 
-        let mut ancestors = Default::default();
-        self.child
-            .extends
-            .iter()
-            .for_each(|ty| self.get_implements(ty, &mut ancestors));
-
-        let mut consts = inh.consts;
-        self.child
-            .consts
-            .iter()
-            .for_each(|c| self.decl_class_const(&mut consts, c));
+        for c in self.child.consts.iter() {
+            self.decl_class_const(&mut consts, c);
+        }
         self.decl_class_class(&mut consts);
 
-        let mut type_consts = inh.type_consts;
-        self.child
-            .typeconsts
-            .iter()
-            .for_each(|tc| self.decl_type_const(&mut type_consts, &mut consts, tc));
+        for tc in self.child.typeconsts.iter() {
+            self.decl_type_const(&mut type_consts, &mut consts, tc);
+        }
+
+        let direct_ancestors = (self.child.extends.iter())
+            .chain(self.child.implements.iter())
+            .chain(self.child.uses.iter());
+
+        let mut ancestors = Default::default();
+        for ty in direct_ancestors.rev() {
+            self.get_implements(ty, &mut ancestors);
+        }
 
         let extends = self.get_extends();
         let xhp_attr_deps = self.get_xhp_attr_deps();
 
         let (req_ancestors, req_ancestors_extends) = self.get_class_requirements();
 
+        // TODO(T88552052) can make logic more explicit now, enum members appear to
+        // only need abstract without default and concrete type consts
+        let enum_inner_ty = type_consts
+            .get(&self.special_names.fb.tInner)
+            .and_then(|tc| match &tc.kind {
+                Typeconst::TCConcrete(tc) => Some(&tc.ty),
+                Typeconst::TCAbstract(atc) => atc.default.as_ref(),
+            });
+        self.rewrite_class_consts_for_enum(enum_inner_ty, &ancestors, &mut consts);
+
         let sealed_whitelist = self.get_sealed_whitelist();
 
-        let deferred_init_members = self.get_deferred_init_members(&constructor);
+        let deferred_init_members = self.get_deferred_init_members(&constructor.elt);
 
         Arc::new(FoldedClass {
             name: self.child.name.id(),
             pos: self.child.name.pos().clone(),
             kind: self.child.kind,
             is_final: self.child.is_final,
-            is_const: self
-                .child
-                .user_attributes
-                .iter()
+            is_const: (self.child.user_attributes.iter())
                 .any(|ua| ua.name.id() == self.special_names.user_attributes.uaConst),
-            is_internal: self
-                .child
-                .user_attributes
-                .iter()
+            is_internal: (self.child.user_attributes.iter())
                 .any(|ua| ua.name.id() == self.special_names.user_attributes.uaInternal),
             is_xhp: self.child.is_xhp,
             support_dynamic_type: self.child.support_dynamic_type,
@@ -740,7 +714,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             module: self.child.module.clone(),
             tparams: self.child.tparams.clone(),
             where_constraints: self.child.where_constraints.clone(),
-            substs: inh.substs,
+            substs,
             ancestors,
             props,
             static_props,

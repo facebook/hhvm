@@ -167,7 +167,7 @@ template <typename T> struct AsyncValue {
   template <typename F>
   AsyncValue(F f, folly::Executor::KeepAlive<> executor) {
     auto work = folly::coro::co_invoke(
-      [this, f = std::move(f)] () -> Task<void> {
+      [this, f = std::move(f)] () mutable -> Task<void> {
         try {
           m_try.emplace(co_await f());
         } catch (...) {
@@ -250,7 +250,7 @@ struct DummyTask {
     return DummyTask<T>{std::move(val)};
   }
 
-  T&& take() && { return std::move(val); }
+  T take() && { return std::move(val); }
 private:
   T val;
 };

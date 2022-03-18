@@ -1,229 +1,228 @@
---- ocaml
-+++ rupro
-@@ -1,226 +1,221 @@
- FoldedClass {
-     name: "\\A",
-     pos: Pos(root|classes_inheritance.php, 3:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
-     methods: {
-         "a": FoldedElement {
-             flags: (empty),
-             origin: "\\A",
-             visibility: Public,
-             deprecated: None,
-         },
-         "b": FoldedElement {
-             flags: (empty),
-             origin: "\\A",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes_inheritance.php, 3:7-8),
-             ty: HH\classname<this>,
-             origin: "\\A",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\B",
-     pos: Pos(root|classes_inheritance.php, 8:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
-     substs: {
-         "\\A": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\B",
-             from_req_extends: false,
-         },
-     },
-     ancestors: {
-         "\\A": A,
-     },
-     methods: {
-         "a": FoldedElement {
-             flags: (empty),
-             origin: "\\A",
-             visibility: Public,
-             deprecated: None,
-         },
-         "b": FoldedElement {
-             flags: (empty),
-             origin: "\\B",
-             visibility: Public,
-             deprecated: None,
-         },
-         "c": FoldedElement {
-             flags: (empty),
-             origin: "\\B",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes_inheritance.php, 8:7-8),
-             ty: HH\classname<this>,
-             origin: "\\B",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\A",
-     },
- }
- FoldedClass {
-     name: "\\C",
-     pos: Pos(root|classes_inheritance.php, 13:11-12),
-     kind: Cinterface,
-     methods: {
-         "c": FoldedElement {
-             flags: ABSTRACT,
-             origin: "\\C",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes_inheritance.php, 13:11-12),
-             ty: HH\classname<this>,
-             origin: "\\C",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\D",
-     pos: Pos(root|classes_inheritance.php, 17:11-12),
-     kind: Cinterface,
-     substs: {
-         "\\C": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\D",
-             from_req_extends: false,
-         },
-     },
-     ancestors: {
-         "\\C": C,
-     },
-     methods: {
-         "c": FoldedElement {
-             flags: ABSTRACT,
-             origin: "\\C",
-             visibility: Public,
-             deprecated: None,
-         },
-         "d": FoldedElement {
-             flags: ABSTRACT,
-             origin: "\\D",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes_inheritance.php, 17:11-12),
-             ty: HH\classname<this>,
-             origin: "\\D",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\C",
-     },
- }
- FoldedClass {
-     name: "\\E",
-     pos: Pos(root|classes_inheritance.php, 21:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
--    ancestors: {
--        "\\C": C,
--    },
-     methods: {
-         "c": FoldedElement {
-             flags: (empty),
-             origin: "\\E",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes_inheritance.php, 21:7-8),
-             ty: HH\classname<this>,
-             origin: "\\E",
-             refs: [],
-         },
-     },
- }
- FoldedClass {
-     name: "\\F",
-     pos: Pos(root|classes_inheritance.php, 25:7-8),
-     kind: Cclass(
-         Concrete,
-     ),
-     substs: {
-         "\\E": SubstContext {
-             subst: Subst(
-                 {},
-             ),
-             class_context: "\\F",
-             from_req_extends: false,
-         },
-     },
-     ancestors: {
--        "\\C": C,
--        "\\D": D,
-         "\\E": E,
-     },
-     methods: {
-         "c": FoldedElement {
-             flags: (empty),
-             origin: "\\E",
-             visibility: Public,
-             deprecated: None,
-         },
-         "d": FoldedElement {
-             flags: (empty),
-             origin: "\\F",
-             visibility: Public,
-             deprecated: None,
-         },
-     },
-     consts: {
-         "class": ClassConst {
-             is_synthesized: true,
-             kind: CCConcrete,
-             pos: Pos(root|classes_inheritance.php, 25:7-8),
-             ty: HH\classname<this>,
-             origin: "\\F",
-             refs: [],
-         },
-     },
-     extends: {
-         "\\E",
-     },
- }
+FoldedClass {
+    name: "\\A",
+    pos: Pos(root|classes_inheritance.php, 3:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    methods: {
+        "a": FoldedElement {
+            flags: (empty),
+            origin: "\\A",
+            visibility: Public,
+            deprecated: None,
+        },
+        "b": FoldedElement {
+            flags: (empty),
+            origin: "\\A",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_inheritance.php, 3:7-8),
+            ty: HH\classname<this>,
+            origin: "\\A",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\B",
+    pos: Pos(root|classes_inheritance.php, 8:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    substs: {
+        "\\A": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\B",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\A": A,
+    },
+    methods: {
+        "a": FoldedElement {
+            flags: (empty),
+            origin: "\\A",
+            visibility: Public,
+            deprecated: None,
+        },
+        "b": FoldedElement {
+            flags: (empty),
+            origin: "\\B",
+            visibility: Public,
+            deprecated: None,
+        },
+        "c": FoldedElement {
+            flags: (empty),
+            origin: "\\B",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_inheritance.php, 8:7-8),
+            ty: HH\classname<this>,
+            origin: "\\B",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\A",
+    },
+}
+FoldedClass {
+    name: "\\C",
+    pos: Pos(root|classes_inheritance.php, 13:11-12),
+    kind: Cinterface,
+    methods: {
+        "c": FoldedElement {
+            flags: ABSTRACT,
+            origin: "\\C",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_inheritance.php, 13:11-12),
+            ty: HH\classname<this>,
+            origin: "\\C",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\D",
+    pos: Pos(root|classes_inheritance.php, 17:11-12),
+    kind: Cinterface,
+    substs: {
+        "\\C": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\D",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\C": C,
+    },
+    methods: {
+        "c": FoldedElement {
+            flags: ABSTRACT,
+            origin: "\\C",
+            visibility: Public,
+            deprecated: None,
+        },
+        "d": FoldedElement {
+            flags: ABSTRACT,
+            origin: "\\D",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_inheritance.php, 17:11-12),
+            ty: HH\classname<this>,
+            origin: "\\D",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\C",
+    },
+}
+FoldedClass {
+    name: "\\E",
+    pos: Pos(root|classes_inheritance.php, 21:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    ancestors: {
+        "\\C": C,
+    },
+    methods: {
+        "c": FoldedElement {
+            flags: (empty),
+            origin: "\\E",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_inheritance.php, 21:7-8),
+            ty: HH\classname<this>,
+            origin: "\\E",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\F",
+    pos: Pos(root|classes_inheritance.php, 25:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    substs: {
+        "\\E": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\F",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\C": C,
+        "\\D": D,
+        "\\E": E,
+    },
+    methods: {
+        "c": FoldedElement {
+            flags: (empty),
+            origin: "\\E",
+            visibility: Public,
+            deprecated: None,
+        },
+        "d": FoldedElement {
+            flags: (empty),
+            origin: "\\F",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_inheritance.php, 25:7-8),
+            ty: HH\classname<this>,
+            origin: "\\F",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\E",
+    },
+}
+
+They matched!

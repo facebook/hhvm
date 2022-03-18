@@ -52,15 +52,14 @@ let catch_exc
     List.iter (Errors.get_error_list other_errors) ~f:on_error;
     v
   with
-  | Inf.InconsistentTypeVarState _ as e ->
-    if verbose then (
-      let stack = Caml.Printexc.get_raw_backtrace () in
-      prerr_endline (Caml.Printexc.to_string e);
-      Caml.Printexc.print_raw_backtrace stderr stack
-    );
-    let e = Printf.sprintf "Exception: %s" (Exn.to_string e) in
+  | Inf.InconsistentTypeVarState _ as exn ->
+    let e = Exception.wrap exn in
+    if verbose then prerr_endline (Exception.to_string e);
     on_error
-      (User_error.make Error_codes.Typing.(err_code UnifyError) (pos, e) []);
+      (User_error.make
+         Error_codes.Typing.(err_code UnifyError)
+         (pos, Exception.get_ctor_string e)
+         []);
     r
 
 let is_ordered_solving env = GlobalOptions.tco_ordered_solving env.genv.tcopt
@@ -243,11 +242,19 @@ module StateConstraintGraph = struct
     in
     let env =
       catch_exc on_err env (fun _ ->
-          Typing_solver.try_bind_to_equal_bound env var')
+          let (env, ty_err_opt) =
+            Typing_solver.try_bind_to_equal_bound env var'
+          in
+          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          env)
     in
     let env =
       catch_exc on_err env (fun _ ->
-          Typing_solver.try_bind_to_equal_bound env var)
+          let (env, ty_err_opt) =
+            Typing_solver.try_bind_to_equal_bound env var
+          in
+          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          env)
     in
     let env =
       Env.remove_var
@@ -327,9 +334,13 @@ module StateSolvedGraph = struct
     let vars = Env.get_all_tyvars env in
     let env =
       List.fold vars ~init:env ~f:(fun env var ->
-          if StateErrors.has_error errors var then
-            Typing_solver.bind env var (MakeType.err Typing_reason.Rnone)
-          else
+          if StateErrors.has_error errors var then (
+            let (env, ty_err_opt) =
+              Typing_solver.bind env var (MakeType.err Typing_reason.Rnone)
+            in
+            Option.iter ~f:Errors.add_typing_error ty_err_opt;
+            env
+          ) else
             env)
     in
     let make_on_error = StateErrors.add errors in
@@ -339,7 +350,11 @@ module StateSolvedGraph = struct
       if is_ordered_solving env then
         Typing_ordered_solver.solve_env env make_on_error
       else
-        Typing_solver.solve_all_unsolved_tyvars_gi env
+        let (env, ty_err_opt) =
+          Typing_solver.solve_all_unsolved_tyvars_gi env
+        in
+        Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        env
     in
     (env, errors, type_map)
 end

@@ -314,7 +314,18 @@ inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
 }
 
 struct StringData;
+
 ///////////////////////////////////////////////////////////////////////////////
+
+// Map an integer into one of N buckets. The mapping is calculated
+// such that increasing or decreasing the number of buckets causes
+// minimal disturbance to the mapping. (Most keys will continue to map
+// to the same bucket they did previously). Salt can be used to
+// calculate different mappings for the same set of keys.
+size_t consistent_hash(int64_t key, size_t buckets, int64_t salt = 0);
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #if defined(USE_HWCRC) && !defined(__SSE4_2__) && !defined(_MSC_VER)
@@ -326,4 +337,3 @@ extern "C" {
   HPHP::strhash_t hash_string_i_unaligned_crc(const char*, uint32_t);
 }
 #endif
-

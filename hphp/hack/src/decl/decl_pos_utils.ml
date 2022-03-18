@@ -323,6 +323,7 @@ struct
       sc_xhp_enum_values = sc.sc_xhp_enum_values;
       sc_req_extends = List.map sc.sc_req_extends ~f:ty;
       sc_req_implements = List.map sc.sc_req_implements ~f:ty;
+      sc_req_class = List.map sc.sc_req_class ~f:ty;
       sc_implements = List.map sc.sc_implements ~f:ty;
       sc_support_dynamic_type = sc.sc_support_dynamic_type;
       sc_consts = List.map sc.sc_consts ~f:shallow_class_const;

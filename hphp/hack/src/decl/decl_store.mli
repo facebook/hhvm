@@ -42,6 +42,8 @@ type decl_store = {
   get_typedef: string -> Typing_defs.typedef_type option;
   add_gconst: string -> Typing_defs.const_decl -> unit;
   get_gconst: string -> Typing_defs.const_decl option;
+  add_module: string -> Typing_defs.module_def_type -> unit;
+  get_module: string -> Typing_defs.module_def_type option;
   push_local_changes: unit -> unit;
   pop_local_changes: unit -> unit;
 }

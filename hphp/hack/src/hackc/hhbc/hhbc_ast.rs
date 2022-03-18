@@ -10,7 +10,7 @@ use iterator::IterId;
 use label::Label;
 use local::{Local, LocalId};
 
-pub use opcodes::Opcodes;
+pub use opcodes::Opcode;
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
@@ -257,7 +257,7 @@ pub trait Targets {
 #[repr(C)]
 pub enum Instruct<'arena> {
     // HHVM opcodes.
-    Opcode(Opcodes<'arena>),
+    Opcode(Opcode<'arena>),
     // HHAS pseudo-instructions.
     Pseudo(Pseudo<'arena>),
 }

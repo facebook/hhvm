@@ -31,7 +31,10 @@ let check_param : env -> Nast.fun_param -> unit =
      fun env ty ->
       let (env, ty) = Env.expand_type env ty in
       let ety_env = empty_expand_env in
-      let (env, ty, _) = Typing_tdef.force_expand_typedef ~ety_env env ty in
+      let ((env, ty_err_opt), ty, _) =
+        Typing_tdef.force_expand_typedef ~ety_env env ty
+      in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
       match get_node ty with
       | Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum) -> ()
       | Tnonnull
@@ -111,7 +114,8 @@ let check_param : env -> Nast.fun_param -> unit =
             env
         in
         let env = Env.set_tyvar_variance env container_type in
-        let env = Typing_solver.close_tyvars_and_solve env in
+        let (env, e1) = Typing_solver.close_tyvars_and_solve env in
+        Option.iter ~f:Errors.add_typing_error e1;
         if is_container then
           check_memoizable env type_param
         else
@@ -150,9 +154,10 @@ let check_param : env -> Nast.fun_param -> unit =
   | None -> ()
   | Some hint ->
     let (hint_pos, _) = hint in
-    let (env, ty) =
+    let ((env, ty_err_opt), ty) =
       Typing_phase.localize_hint_no_subst env ~ignore_errors:true hint
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     check_memoizable env hint_pos ty
 
 let check : env -> Nast.user_attribute list -> Nast.fun_param list -> unit =

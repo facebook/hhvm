@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::rc::Rc;
+use std::sync::Arc;
 
 pub use eq_modulo_pos_derive::EqModuloPos;
 
@@ -33,6 +34,12 @@ impl<T: EqModuloPos> EqModuloPos for [T] {
             }
             true
         }
+    }
+}
+
+impl<T: EqModuloPos> EqModuloPos for hcons::Hc<T> {
+    fn eq_modulo_pos(&self, rhs: &Self) -> bool {
+        (**self).eq_modulo_pos(&**rhs)
     }
 }
 
@@ -83,6 +90,7 @@ impl_deref! { &T }
 impl_deref! { &mut T }
 impl_deref! { Box<T> }
 impl_deref! { Rc<T> }
+impl_deref! { Arc<T> }
 
 macro_rules! impl_tuple {
     () => (

@@ -1176,13 +1176,14 @@ let parse_and_name ctx files_contents =
         let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
         (* If the feature is turned on, deregister functions with attribute
            __PHPStdLib. This does it for all functions, not just hhi files *)
-        let (funs, classes, typedefs, consts) = Nast.get_defs ast in
+        let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
         {
           FileInfo.file_mode;
           funs;
           classes;
           typedefs;
           consts;
+          modules;
           comments = Some comments;
           hash = None;
         })
@@ -1732,20 +1733,15 @@ let handle_mode
           let ifc_errors = time @@ lazy (Ifc_main.do_ ifc_opts file_info ctx) in
           if not (List.is_empty ifc_errors) then print_errors ifc_errors
         with
-        | exc ->
-          (* get the backtrace before doing anything else to be sure
-             to get the one corresponding to exc *)
-          let backtrace = Stdlib.Printexc.get_backtrace () in
+        | exn ->
+          let e = Exception.wrap exn in
           Stdlib.Printexc.register_printer (function
               | Ifc_types.IFCError err ->
                 Some
                   (Printf.sprintf "IFCError(%s)"
                   @@ Ifc_types.show_ifc_error_ty err)
               | _ -> None);
-          Printf.printf
-            "Uncaught exception: %s\n%s"
-            (Stdlib.Printexc.to_string exc)
-            backtrace
+          Printf.printf "Uncaught exception: %s" (Exception.to_string e)
     in
     iter_over_files (fun filename ->
         Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -2601,7 +2597,8 @@ let decl_and_run_mode
                 ~funs:(ids_to_strings file_info.FileInfo.funs)
                 ~classes:(ids_to_strings file_info.FileInfo.classes)
                 ~typedefs:(ids_to_strings file_info.FileInfo.typedefs)
-                ~consts:(ids_to_strings file_info.FileInfo.consts))));
+                ~consts:(ids_to_strings file_info.FileInfo.consts)
+                ~modules:(ids_to_strings file_info.FileInfo.modules))));
 
   let (errors, files_info) = parse_name_and_decl ctx to_decl in
   handle_mode

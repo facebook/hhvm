@@ -19,12 +19,15 @@ FoldedClass {
             deprecated: None,
         },
     },
-    constructor: FoldedElement {
-        flags: (empty),
-        origin: "\\A",
-        visibility: Public,
-        deprecated: None,
-    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\A",
+            visibility: Public,
+            deprecated: None,
+        },
+        Inconsistent,
+    ),
     consts: {
         "class": ClassConst {
             is_synthesized: true,
@@ -50,12 +53,15 @@ FoldedClass {
             deprecated: None,
         },
     },
-    constructor: FoldedElement {
-        flags: (empty),
-        origin: "\\B",
-        visibility: Public,
-        deprecated: None,
-    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\B",
+            visibility: Public,
+            deprecated: None,
+        },
+        Inconsistent,
+    ),
     consts: {
         "class": ClassConst {
             is_synthesized: true,
@@ -83,12 +89,15 @@ FoldedClass {
             deprecated: None,
         },
     },
-    constructor: FoldedElement {
-        flags: (empty),
-        origin: "\\C",
-        visibility: Public,
-        deprecated: None,
-    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\C",
+            visibility: Public,
+            deprecated: None,
+        },
+        Inconsistent,
+    ),
     consts: {
         "class": ClassConst {
             is_synthesized: true,

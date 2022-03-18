@@ -7,7 +7,7 @@ mod constraint;
 use crate::reason::Reason;
 use crate::typing_defs::Ty;
 use crate::typing_error::TypingError;
-pub use constraint::{Constraint, ConstraintF};
+pub use constraint::Constraint;
 use hcons::{Conser, Hc};
 use std::ops::Deref;
 
@@ -20,7 +20,6 @@ pub enum CTy<R: Reason> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropF<R: Reason, A> {
     Conj(Vec<A>),
-    // The i32 is placeholder for error callbacks
     Disj(Option<TypingError<R>>, Vec<A>),
     Subtype(CTy<R>, CTy<R>),
 }

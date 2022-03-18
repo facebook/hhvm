@@ -67,12 +67,13 @@ let check_property_sound_for_dynamic_write ~on_error env classname id decl_ty ty
   (* If the property type isn't enforceable, but is a supertype of dynamic,
      then the property will still be safe to write via a receiver expression of type
      dynamic. *)
-  if not te_check then
-    let (env, ty) =
+  if not te_check then (
+    let ((env, ty_err_opt), ty) =
       match ty with
-      | Some ty -> (env, ty)
+      | Some ty -> ((env, None), ty)
       | None -> Typing_phase.localize_no_subst ~ignore_errors:true env decl_ty
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     if
       not
         (Typing_utils.is_sub_type_for_union
@@ -91,7 +92,7 @@ let check_property_sound_for_dynamic_write ~on_error env classname id decl_ty ty
            (pos, Typing_print.full_strip_ns_decl env decl_ty))
     ) else
       None
-  else
+  ) else
     None
 
 let sound_dynamic_interface_check env params_decl_ty ret_locl_ty =
@@ -126,7 +127,13 @@ let sound_dynamic_interface_check_from_fun_ty env fun_ty =
   let ret_locl_ty =
     snd
       (Typing_return.make_return_type
-         (Typing_phase.localize ~ety_env)
+         (fun env dty ->
+           let ((env, ty_err_opt), lty) =
+             Typing_phase.localize ~ety_env env dty
+           in
+
+           Option.iter ~f:Errors.add_typing_error ty_err_opt;
+           (env, lty))
          env
          fun_ty.ft_ret.et_type)
   in

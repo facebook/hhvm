@@ -164,12 +164,13 @@ let process_file
     { file_errors; deferred_decls = [] }
   else
     let opts = Provider_context.get_tcopt ctx in
-    let (funs, classes, typedefs, gconsts) = Nast.get_defs ast in
+    let (funs, classes, typedefs, gconsts, modules) = Nast.get_defs ast in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
     let ignore_check_typedef opts fn name =
       ignore (check_typedef opts fn name)
     in
     let ignore_check_const opts fn name = ignore (check_const opts fn name) in
+    let ignore_check_module opts fn name = ignore (check_module opts fn name) in
     try
       let result =
         Deferred_decl.with_deferred_decls
@@ -193,6 +194,7 @@ let process_file
         let class_global_tvenvs = List.concat class_global_tvenvs in
         List.map typedefs ~f:snd |> List.iter ~f:(ignore_check_typedef ctx fn);
         List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const ctx fn);
+        List.map modules ~f:snd |> List.iter ~f:(ignore_check_module ctx fn);
         (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs)
       in
       match result with
@@ -215,15 +217,14 @@ let process_file
         in
         { file_errors = Errors.empty; deferred_decls }
     with
-    | WorkerCancel.Worker_should_exit as e ->
+    | WorkerCancel.Worker_should_exit as exn ->
       (* Cancellation requests must be re-raised *)
-      raise e
-    | e ->
-      let stack = Caml.Printexc.get_raw_backtrace () in
-      let () =
-        prerr_endline ("Exception on file " ^ Relative_path.S.to_string fn)
-      in
-      Caml.Printexc.raise_with_backtrace e stack
+      let e = Exception.wrap exn in
+      Exception.reraise e
+    | exn ->
+      let e = Exception.wrap exn in
+      prerr_endline ("Exception on file " ^ Relative_path.S.to_string fn);
+      Exception.reraise e
 
 module ProcessFilesTally = struct
   (** Counters for the [check_file_workitem] of each sort being processed *)

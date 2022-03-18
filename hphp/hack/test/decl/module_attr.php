@@ -1,3 +1,11 @@
+//// modules.php
+<?hh
+<<file:__EnableUnstableFeatures('modules')>>
+
+module here {}
+module there {}
+module elsewhere {}
+
 //// here.php
 <?hh
 <<file:__EnableUnstableFeatures('modules'), __Module('here')>>

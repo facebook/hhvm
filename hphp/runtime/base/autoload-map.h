@@ -16,7 +16,10 @@
 
 #pragma once
 
+#include <string_view>
+#include <utility>
 #include <vector>
+#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/util/assertions.h"
@@ -72,8 +75,25 @@ struct AutoloadMap {
    * of the file defining that symbol.
    *
    * Return None if the file is defined in zero or more than one place.
+   *
+   * In general this is only safe to call on request threads because the
+   * resulting string (absolute path) may be allocated on the request heap.
    */
   Optional<String> getFile(KindOf kind, const String& symbol) {
+    switch (kind) {
+      case AutoloadMap::KindOf::Type: return getTypeFile(symbol);
+      case AutoloadMap::KindOf::Function: return getFunctionFile(symbol);
+      case AutoloadMap::KindOf::Constant: return getConstantFile(symbol);
+      case AutoloadMap::KindOf::TypeAlias: return getTypeAliasFile(symbol);
+    }
+    not_reached();
+  }
+
+  /**
+   * This overload takes std::string_view and returns folly::fs::path
+   * to avoid request heap allocation.
+   */
+  Optional<folly::fs::path> getFile(KindOf kind, std::string_view symbol) {
     switch (kind) {
       case AutoloadMap::KindOf::Type: return getTypeFile(symbol);
       case AutoloadMap::KindOf::Function: return getFunctionFile(symbol);
@@ -106,7 +126,12 @@ struct AutoloadMap {
   virtual Optional<String> getTypeFile(const String& typeName) = 0;
   virtual Optional<String> getFunctionFile(const String& functionName) = 0;
   virtual Optional<String> getConstantFile(const String& constantName) = 0;
-  virtual Optional<String> getTypeAliasFile(const String& typeAliasName) = 0;
+  virtual Optional<String> getTypeAliasFile(const String& aliasName) = 0;
+
+  virtual Optional<folly::fs::path> getTypeFile(std::string_view name) = 0;
+  virtual Optional<folly::fs::path> getFunctionFile(std::string_view name) = 0;
+  virtual Optional<folly::fs::path> getConstantFile(std::string_view name) = 0;
+  virtual Optional<folly::fs::path> getTypeAliasFile(std::string_view name) = 0;
 
   /**
    * Map path to symbols

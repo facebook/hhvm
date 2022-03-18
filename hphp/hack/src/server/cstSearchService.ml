@@ -628,15 +628,15 @@ let go
           | Some result -> (path, result) :: acc
           | None -> acc
         with
-        | e ->
-          let stack = Printexc.get_backtrace () in
+        | exn ->
+          let e = Exception.wrap exn in
           let prefix =
             Printf.sprintf
               "Error while running CST search on path %s:\n"
               (Relative_path.to_absolute path)
           in
-          Hh_logger.exc e ~prefix ~stack;
-          raise e)
+          Hh_logger.exception_ e ~prefix;
+          Exception.reraise e)
   in
   let results =
     MultiWorker.call

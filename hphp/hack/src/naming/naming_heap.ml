@@ -393,6 +393,80 @@ module Consts = struct
       ()
 end
 
+module Modules = struct
+  type pos = FileInfo.pos
+
+  module Position = struct
+    type t = pos
+
+    let description = "Naming_ModulePos"
+  end
+
+  (** This module isn't actually used. It's here only for uniformity with the other ReverseNamingTables. *)
+  module CanonName = struct
+    type t = string
+
+    let description = "Naming_ModulePos"
+  end
+
+  module ModulePosHeap =
+    SharedMem.Heap
+      (SharedMem.ImmediateBackend
+         (SharedMem.NonEvictable))
+         (Typing_deps.DepHashKey)
+      (Position)
+
+  module BlockedEntries =
+    SharedMem.Heap
+      (SharedMem.ImmediateBackend
+         (SharedMem.NonEvictable))
+         (Typing_deps.DepHashKey)
+      (struct
+        type t = blocked_entry
+
+        let description = "Naming_ModuleBlocked"
+      end)
+
+  let hash name = Typing_deps.Dep.Module name |> Typing_deps.Dep.make
+
+  let canon_hash name =
+    Typing_deps.Dep.Module (Naming_sqlite.to_canon_name_key name)
+    |> Typing_deps.Dep.make
+
+  let add id pos = ModulePosHeap.add (hash id) pos
+
+  let get_pos db_path_opt id =
+    let map_result path = Some (FileInfo.File (FileInfo.Module, path)) in
+    let fallback_get_func_opt =
+      Option.map db_path_opt ~f:(fun db_path hash ->
+          Naming_sqlite.get_path_by_64bit_dep db_path hash |> Option.map ~f:fst)
+    in
+    get_and_cache
+      ~map_result
+      ~get_func:ModulePosHeap.get
+      ~check_block_func:BlockedEntries.get
+      ~fallback_get_func_opt
+      ~cache_func:ModulePosHeap.add
+      ~key:(hash id)
+
+  let get_canon_name ctx name =
+    let db_path_opt =
+      Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
+    in
+    match get_pos db_path_opt name with
+    | Some _ -> Some name
+    | None -> None
+
+  let remove_batch db_path_opt consts =
+    let hashes = consts |> List.map ~f:hash in
+    ModulePosHeap.remove_batch (ModulePosHeap.KeySet.of_list hashes);
+    match db_path_opt with
+    | None -> ()
+    | Some _ ->
+      List.iter hashes ~f:(fun hash -> BlockedEntries.add hash Blocked);
+      ()
+end
+
 let get_filename_by_hash
     (db_path_opt : Naming_sqlite.db_path option) (hash : Typing_deps.Dep.t) :
     Relative_path.t option =
@@ -428,6 +502,7 @@ let get_filename_by_hash
         | Naming_types.Type_kind _ -> Types.BlockedEntries.get hash
         | Naming_types.Fun_kind -> Funs.BlockedEntries.get hash
         | Naming_types.Const_kind -> Consts.BlockedEntries.get hash
+        | Naming_types.Module_kind -> Modules.BlockedEntries.get hash
       in
       (match is_blocked with
       | Some Blocked -> None
@@ -452,7 +527,10 @@ let push_local_changes () =
   Funs.FunCanonHeap.LocalChanges.push_stack ();
   Funs.BlockedEntries.LocalChanges.push_stack ();
   Consts.ConstPosHeap.LocalChanges.push_stack ();
-  Consts.BlockedEntries.LocalChanges.push_stack ()
+  Consts.BlockedEntries.LocalChanges.push_stack ();
+  Modules.ModulePosHeap.LocalChanges.push_stack ();
+  Modules.BlockedEntries.LocalChanges.push_stack ();
+  ()
 
 let pop_local_changes () =
   Types.TypePosHeap.LocalChanges.pop_stack ();
@@ -462,4 +540,7 @@ let pop_local_changes () =
   Funs.FunCanonHeap.LocalChanges.pop_stack ();
   Funs.BlockedEntries.LocalChanges.pop_stack ();
   Consts.ConstPosHeap.LocalChanges.pop_stack ();
-  Consts.BlockedEntries.LocalChanges.pop_stack ()
+  Consts.BlockedEntries.LocalChanges.pop_stack ();
+  Modules.ModulePosHeap.LocalChanges.pop_stack ();
+  Modules.BlockedEntries.LocalChanges.pop_stack ();
+  ()

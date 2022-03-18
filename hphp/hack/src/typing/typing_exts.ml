@@ -74,7 +74,10 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
     in
     begin
       match ce_type with
-      | Some (env, { ft_params = pars; ft_ret = { et_type = ty; _ }; _ }) ->
+      | Some
+          ( (env, ty_err_opt),
+            { ft_params = pars; ft_ret = { et_type = ty; _ }; _ } ) ->
+        Option.iter ty_err_opt ~f:Errors.add_typing_error;
         let (env, ty) = Env.expand_type env ty in
         let ty_opt =
           match get_node (Typing_utils.strip_dynamic env ty) with

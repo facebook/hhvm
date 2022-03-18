@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c5448129a4b61055fd04b512dab5beba>>
+// @generated SignedSource<<f4f0a379c961327aa767c46acd32662c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -71,6 +71,7 @@ pub enum NameType {
     Class = 0,
     Typedef = 1,
     Const = 4,
+    Module = 5,
 }
 impl TrivialDrop for NameType {}
 arena_deserializer::impl_deserialize_in_arena!(NameType);
@@ -120,6 +121,7 @@ pub struct Names {
     pub classes: s_set::SSet,
     pub types: s_set::SSet,
     pub consts: s_set::SSet,
+    pub modules: s_set::SSet,
 }
 
 /// The simplified record stored in saved-state.
@@ -143,6 +145,7 @@ pub struct SavedNames {
     pub classes: s_set::SSet,
     pub types: s_set::SSet,
     pub consts: s_set::SSet,
+    pub modules: s_set::SSet,
 }
 
 #[derive(
@@ -169,4 +172,6 @@ pub struct Diff {
     pub added_types: s_set::SSet,
     pub removed_consts: s_set::SSet,
     pub added_consts: s_set::SSet,
+    pub removed_modules: s_set::SSet,
+    pub added_modules: s_set::SSet,
 }

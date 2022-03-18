@@ -109,22 +109,23 @@ let declared_class_req env class_cache (requirements, req_extends) req_ty =
  * than I'm willing to do now. *)
 let naive_dedup req_extends =
   (* maps class names to type params *)
-  let h = Caml.Hashtbl.create 0 in
+  let h = String.Table.create () in
   List.rev_filter_map req_extends ~f:(fun (parent_pos, ty) ->
       match get_node ty with
-      | Tapply (name, hl) ->
+      | Tapply ((_, name), hl) ->
         let hl = List.map hl ~f:Decl_pos_utils.NormalizeSig.ty in
         begin
           try
-            let hl' = Caml.Hashtbl.find h name in
+            let hl' = String.Table.find_exn h name in
             if not (List.equal equal_decl_ty hl hl') then
               raise Exit
             else
               None
           with
           | Exit
-          | Caml.Not_found ->
-            Caml.Hashtbl.add h name hl;
+          | Caml.Not_found
+          | Not_found_s _ ->
+            String.Table.set h ~key:name ~data:hl;
             Some (parent_pos, ty)
         end
       | _ -> Some (parent_pos, ty))

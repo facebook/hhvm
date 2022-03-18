@@ -554,12 +554,10 @@ let connect (env : env) : conn Lwt.t =
       ServerCommandLwt.send_connection_type oc ServerCommandTypes.Non_persistent;
     Lwt.return { conn with t_sent_connection_type = Unix.gettimeofday () }
   with
-  | e ->
-    (* we'll log this exception, then re-raise the exception, but using the *)
-    (* original backtrace of "e" rather than generating a new backtrace.    *)
-    let backtrace = Caml.Printexc.get_raw_backtrace () in
+  | exn ->
+    let e = Exception.wrap exn in
     HackEventLogger.client_establish_connection_exception e;
-    Caml.Printexc.raise_with_backtrace e backtrace
+    Exception.reraise e
 
 let rpc :
     type a.

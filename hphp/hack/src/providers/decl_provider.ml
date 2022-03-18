@@ -15,6 +15,8 @@ type type_key = string
 
 type gconst_key = string
 
+type module_key = string
+
 type fun_decl = Typing_defs.fun_elt
 
 type class_decl = Typing_classes_heap.Api.t
@@ -22,6 +24,8 @@ type class_decl = Typing_classes_heap.Api.t
 type typedef_decl = Typing_defs.typedef_type
 
 type gconst_decl = Typing_defs.const_decl
+
+type module_decl = Typing_defs.module_def_type
 
 let err_not_found (file : Relative_path.t) (name : string) : 'a =
   let err_str =
@@ -338,6 +342,53 @@ let prepare_for_typecheck
      extreme cases. *)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.parse_and_cache_decls_in decl path content
+
+let declare_module_in_file_DEPRECATED
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : module_key) :
+    module_decl =
+  match Ast_provider.find_module_in_file ctx file name with
+  | Some md ->
+    let (_name, decl) = Decl_nast.module_naming_and_decl_DEPRECATED ctx md in
+    decl
+  | None -> err_not_found file name
+
+let get_module
+    ?(tracing_info : Decl_counters.tracing_info option)
+    (ctx : Provider_context.t)
+    (module_name : module_key) : module_decl option =
+  Decl_counters.count_decl Decl_counters.Module_decl ?tracing_info module_name
+  @@ fun _counter ->
+  let fetch_from_backing_store () =
+    Naming_provider.get_module_path ctx module_name
+    |> Option.bind ~f:(fun filename ->
+           if use_direct_decl_parser ctx then
+             direct_decl_parse_and_cache ctx filename module_name
+             |> List.find_map ~f:(function
+                    | (name, Shallow_decl_defs.Module decl, _)
+                      when String.equal module_name name ->
+                      Some decl
+                    | _ -> None)
+           else
+             let module_ =
+               Errors.run_in_decl_mode filename (fun () ->
+                   declare_module_in_file_DEPRECATED ctx filename module_name)
+             in
+             Decl_store.((get ()).add_module module_name module_);
+             Some module_)
+  in
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> Decl_store.((get ()).get_module module_name)
+  | Provider_backend.Shared_memory ->
+    Option.first_some
+      Decl_store.((get ()).get_module module_name)
+      (fetch_from_backing_store ())
+  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
+    Provider_backend.Decl_cache.find_or_add
+      decl_cache
+      ~key:(Provider_backend.Decl_cache_entry.Module_decl module_name)
+      ~default:fetch_from_backing_store
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_module decl module_name
 
 let local_changes_push_sharedmem_stack () =
   Decl_store.((get ()).push_local_changes ())

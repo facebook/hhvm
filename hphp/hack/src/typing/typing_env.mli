@@ -109,6 +109,10 @@ val get_enum_constraint : env -> type_key -> decl_ty option
     of the class being checked. *)
 val make_depend_on_constructor : env -> type_key -> unit
 
+(** Register the current top-level structure as being dependent on the current
+    module *)
+val make_depend_on_module : env -> unit
+
 (** Get class declaration from the appropriate backend and add dependency. *)
 val get_class : env -> type_key -> class_decl option
 

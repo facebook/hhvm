@@ -27,4 +27,5 @@ naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../options" }
 oxidized = { path = "../../../../oxidized" }
+stack_limit = { path = "../../../../utils/stack_limit" }
 unique_id_builder = { path = "../../../utils/cargo/unique_id_builder" }

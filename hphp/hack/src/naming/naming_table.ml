@@ -509,7 +509,10 @@ let update_reverse_entries_helper
           (fi.FileInfo.funs |> List.map ~f:(fun (_, x, _) -> x));
         Naming_provider.remove_const_batch
           backend
-          (fi.FileInfo.consts |> List.map ~f:(fun (_, x, _) -> x))
+          (fi.FileInfo.consts |> List.map ~f:(fun (_, x, _) -> x));
+        Naming_provider.remove_module_batch
+          backend
+          (fi.FileInfo.modules |> List.map ~f:(fun (_, x, _) -> x))
       | None -> ())
     changed_file_infos;
 
@@ -530,7 +533,10 @@ let update_reverse_entries_helper
           fi.FileInfo.funs;
         List.iter
           ~f:(fun (pos, name, _) -> Naming_provider.add_const backend name pos)
-          fi.FileInfo.consts
+          fi.FileInfo.consts;
+        List.iter
+          ~f:(fun (pos, name, _) -> Naming_provider.add_module backend name pos)
+          fi.FileInfo.modules
       | None -> ())
     changed_file_infos
 

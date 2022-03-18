@@ -25,14 +25,6 @@ let not_implemented s _ =
   failwith (Printf.sprintf "Function %s not implemented" s)
 
 type expand_typedef =
-  expand_env -> env -> Reason.t -> string -> locl_ty list -> env * locl_ty
-
-let (expand_typedef_ref : expand_typedef ref) =
-  ref (not_implemented "expand_typedef")
-
-let expand_typedef x = !expand_typedef_ref x
-
-type expand_typedef_with_ty_err =
   expand_env ->
   env ->
   Reason.t ->
@@ -40,10 +32,10 @@ type expand_typedef_with_ty_err =
   locl_ty list ->
   (env * Typing_error.t option) * locl_ty
 
-let (expand_typedef_with_ty_err_ref : expand_typedef_with_ty_err ref) =
-  ref (not_implemented "expand_typedef_with_ty_err")
+let (expand_typedef_ref : expand_typedef ref) =
+  ref (not_implemented "expand_typedef")
 
-let expand_typedef_with_ty_err x = !expand_typedef_with_ty_err_ref x
+let expand_typedef x = !expand_typedef_ref x
 
 type sub_type =
   env ->
@@ -148,28 +140,12 @@ type expand_typeconst =
   pos_id ->
   root_pos:Pos_or_decl.t ->
   allow_abstract_tconst:bool ->
-  env * locl_ty
+  (env * Typing_error.t option) * locl_ty
 
 let (expand_typeconst_ref : expand_typeconst ref) =
   ref (not_implemented "expand_typeconst")
 
 let expand_typeconst x = !expand_typeconst_ref x
-
-type expand_typeconst_with_ty_err =
-  expand_env ->
-  env ->
-  ?ignore_errors:bool ->
-  ?as_tyvar_with_cnstr:Pos.t option ->
-  locl_ty ->
-  pos_id ->
-  root_pos:Pos_or_decl.t ->
-  allow_abstract_tconst:bool ->
-  (env * Typing_error.t option) * locl_ty
-
-let (expand_typeconst_with_ty_err_ref : expand_typeconst_with_ty_err ref) =
-  ref (not_implemented "expand_typeconst_with_ty_err")
-
-let expand_typeconst_with_ty_err x = !expand_typeconst_with_ty_err_ref x
 
 type union =
   env -> ?approx_cancel_neg:bool -> locl_ty -> locl_ty -> env * locl_ty
@@ -248,14 +224,22 @@ let (simplify_intersections_ref : simplify_intersections ref) =
 
 let simplify_intersections x = !simplify_intersections_ref x
 
-type localize_no_subst = env -> ignore_errors:bool -> decl_ty -> env * locl_ty
+type localize_no_subst =
+  env ->
+  ignore_errors:bool ->
+  decl_ty ->
+  (env * Typing_error.t option) * locl_ty
 
 let (localize_no_subst_ref : localize_no_subst ref) =
   ref (not_implemented "localize_no_subst")
 
 let localize_no_subst x = !localize_no_subst_ref x
 
-type localize = ety_env:expand_env -> env -> decl_ty -> env * locl_ty
+type localize =
+  ety_env:expand_env ->
+  env ->
+  decl_ty ->
+  (env * Typing_error.t option) * locl_ty
 
 let (localize_ref : localize ref) =
   ref (fun ~ety_env:_ -> not_implemented "localize")
@@ -756,3 +740,24 @@ and strip_dynamic env ty =
   match try_strip_dynamic env ty with
   | None -> ty
   | Some ty -> ty
+
+let rec make_supportdyn r env ty =
+  let (env, ty) = Env.expand_type env ty in
+  match deref ty with
+  | (r', Tintersection tyl) ->
+    let (env, tyl) = List.map_env env tyl ~f:(make_supportdyn r) in
+    (env, mk (r', Tintersection tyl))
+  | (r', Tunion tyl) ->
+    let (env, tyl) = List.map_env env tyl ~f:(make_supportdyn r) in
+    (env, mk (r', Tunion tyl))
+  | _ ->
+    if
+      is_sub_type_for_union
+        ~coerce:(Some Typing_logic.CoerceToDynamic)
+        env
+        ty
+        (MakeType.dynamic r)
+    then
+      (env, ty)
+    else
+      (env, Typing_make_type.supportdyn r ty)

@@ -109,6 +109,7 @@ namespace Trace {
       TM(dispatchBB)    \
       TM(ehframe)       \
       TM(emitter)       \
+      TM(extern_worker) \
       TM(facts)         \
       TM(fixup)         \
       TM(fr)            \

@@ -72,6 +72,20 @@ struct CoeffectsConfig {
   static std::vector<std::string> toStringList(const StaticCoeffects data);
   static std::string mangle();
 
+  static CoeffectsConfig exportForParse() {
+    assertx(s_instance);
+    return *s_instance;
+  }
+  static void importForParse(const CoeffectsConfig&);
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(m_escapeMask)
+      (m_warningMask)
+      (m_pureLevel)
+      (m_rxLevel)
+      (m_zonedLevel)
+      (m_numUsedBits);
+  }
 
 private:
   static void initEnforcementLevel(const std::unordered_map<std::string, int>&);

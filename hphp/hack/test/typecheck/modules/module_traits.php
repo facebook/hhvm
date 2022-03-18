@@ -1,3 +1,9 @@
+//// modules.php
+<?hh
+<<file:__EnableUnstableFeatures('modules')>>
+
+module A {}
+module B {}
 //// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
@@ -7,8 +13,10 @@
 trait T1 {}
 
 trait T2 {
+  // Error: cannot have __Internal members in public traits
   <<__Internal>>
   public int $x = 0;
+  // Error: cannot have __Internal members in public traits
   <<__Internal>>
   public function lol(): void {}
 }

@@ -163,6 +163,10 @@ impl<R: Reason> DeclTy<R> {
         &self.1
     }
 
+    pub fn node_ref(&self) -> &DeclTy_<R> {
+        &self.1
+    }
+
     pub fn unwrap_class_type(&self) -> Option<(&R, &Positioned<TypeName, R::Pos>, &[DeclTy<R>])> {
         use DeclTy_::*;
         let r = self.reason();
@@ -521,3 +525,10 @@ pub struct TypedefType<R: Reason> {
 walkable!(TypedefType<R> => [tparams, constraint, ty]);
 
 walkable!(ast_defs::ConstraintKind);
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct ModuleDefType<R: Reason> {
+    pub pos: R::Pos,
+}
+
+walkable!(ModuleDefType<R> => []);

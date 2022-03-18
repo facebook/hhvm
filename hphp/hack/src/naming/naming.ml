@@ -59,6 +59,8 @@ module Env : sig
     Provider_context.t -> FileInfo.mode -> Aast.nsenv -> genv
 
   val make_const_env : Provider_context.t -> Nast.gconst -> genv
+
+  val make_module_env : Provider_context.t -> Nast.module_def -> genv
 end = struct
   let get_tparam_names paraml =
     List.fold_right
@@ -155,6 +157,19 @@ end = struct
 
   let make_const_env ctx cst =
     let genv = make_const_genv ctx cst in
+    genv
+
+  let make_module_genv ctx _module =
+    {
+      in_mode = FileInfo.Mstrict;
+      ctx;
+      type_params = SSet.empty;
+      current_cls = None;
+      namespace = Namespace_env.empty_with_default;
+    }
+
+  let make_module_env ctx module_ =
+    let genv = make_module_genv ctx module_ in
     genv
 end
 
@@ -2415,6 +2430,24 @@ let global_const ctx cst =
   }
 
 (**************************************************************************)
+(* Module declarations *)
+(**************************************************************************)
+
+let module_ ctx module_ =
+  let open Aast in
+  let env = Env.make_module_env ctx module_ in
+  let module_ =
+    elaborate_namespaces#on_module_def
+      (Naming_elaborate_namespaces_endo.make_env env.namespace)
+      module_
+  in
+  {
+    module_ with
+    md_annotation = ();
+    md_user_attributes = user_attributes env module_.md_user_attributes;
+  }
+
+(**************************************************************************)
 (* The entry point to CHECK the program, and transform the program *)
 (**************************************************************************)
 
@@ -2443,10 +2476,8 @@ let program ctx ast =
       let genv = { genv with namespace = nsenv } in
       top_level_env := genv;
       acc
-    | Aast.FileAttributes _
-    (* TODO(T108206307) *)
-    | Aast.Module _ ->
-      acc
+    | Aast.Module md -> N.Module (module_ ctx md) :: acc
+    | Aast.FileAttributes _ -> acc
   in
   let on_program aast =
     let nast = List.fold_left ~f:aux ~init:[] aast in

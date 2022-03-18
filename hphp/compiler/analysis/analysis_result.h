@@ -61,12 +61,12 @@ struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
 
   Mutex &getMutex() { return m_mutex; }
 
-  /**
-   * Parser creates a FileScope upon parsing a new file.
-   */
-  void parseOnDemand(const std::string& name) const;
+  using Reporter = std::function<void(std::string)>;
+
+  /* Report demanded files via the given callback */
   void parseOnDemandBy(SymbolRef kind,
-                       const CompactVector<std::string>& syms) const;
+                       const CompactVector<std::string>& syms,
+                       const Reporter& report) const;
 
   /**
    * For function declaration parsing.
@@ -99,9 +99,13 @@ private:
    * Checks whether the file is in one of the on-demand parsing directories.
    */
   bool inParseOnDemandDirs(const std::string &filename) const;
+
+  void parseOnDemand(const std::string& name, const Reporter&) const;
+
   template <class Map>
   void parseOnDemandBy(const CompactVector<std::string>& syms,
-                       const Map& amap) const;
+                       const Map& amap,
+                       const Reporter&) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

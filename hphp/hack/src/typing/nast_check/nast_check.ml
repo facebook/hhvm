@@ -30,6 +30,8 @@ let visitor =
       Enum_supertyping_check.handler;
       List_rvalue_check.handler;
       Private_final_check.handler;
+      Internal_outside_module.handler;
+      Well_formed_internal_trait.handler;
     ]
 
 let stateful_visitor ctx =

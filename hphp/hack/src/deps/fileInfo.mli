@@ -45,6 +45,7 @@ type name_type =
   | Class [@value 0]
   | Typedef [@value 1]
   | Const [@value 4]
+  | Module [@value 5]
 [@@deriving eq, show, enum, ord]
 
 type pos =
@@ -73,6 +74,7 @@ type t = {
   classes: id list;
   typedefs: id list;
   consts: id list;
+  modules: id list;
   comments: (Pos.t * comment) list option;
 }
 [@@deriving show]
@@ -90,6 +92,7 @@ type names = {
   n_classes: SSet.t;
   n_types: SSet.t;
   n_consts: SSet.t;
+  n_modules: SSet.t;
 }
 
 (*****************************************************************************)
@@ -127,6 +130,8 @@ type diff = {
   added_types: SSet.t;
   removed_consts: SSet.t;
   added_consts: SSet.t;
+  removed_modules: SSet.t;
+  added_modules: SSet.t;
 }
 
 val diff : t -> t -> diff option

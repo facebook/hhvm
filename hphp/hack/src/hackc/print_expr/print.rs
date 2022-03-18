@@ -15,7 +15,7 @@ use hhbc_string_utils::{
     integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
     strip_global_ns, strip_ns, types,
 };
-use instruction_sequence::Error::Unrecoverable;
+use instruction_sequence::ErrorKind;
 use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
 use oxidized::{
@@ -869,8 +869,8 @@ fn print_bop(w: &mut dyn Write, bop: &ast_defs::Bop) -> Result<()> {
 
 fn print_hint(w: &mut dyn Write, ns: bool, hint: &ast::Hint) -> Result<()> {
     let alloc = bumpalo::Bump::new();
-    let h = emit_type_hint::fmt_hint(&alloc, &[], false, hint).map_err(|e| match e {
-        Unrecoverable(s) => Error::fail(s),
+    let h = emit_type_hint::fmt_hint(&alloc, &[], false, hint).map_err(|e| match e.kind() {
+        ErrorKind::Unrecoverable(s) => Error::fail(s),
         _ => Error::fail("Error printing hint"),
     })?;
     if ns {

@@ -8,6 +8,5 @@ edition = "2021"
 path = "../../assertion_utils.rs"
 
 [dependencies]
-emit_fatal = { path = "../../../emitter/cargo/emit_fatal" }
 instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }

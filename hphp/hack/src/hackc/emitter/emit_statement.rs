@@ -9,7 +9,7 @@ use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Slice, Str};
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
-use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
+use instruction_sequence::{instr, Error, InstrSeq, Result};
 use label::Label;
 use lazy_static::lazy_static;
 use local::Local;
@@ -598,7 +598,7 @@ fn block_pos(block: &[ast::Stmt]) -> Result<Pos> {
     let mut last = block.len() - 1;
     loop {
         if !block[first].0.is_none() && !block[last].0.is_none() {
-            return Pos::btw(&block[first].0, &block[last].0).map_err(Unrecoverable);
+            return Pos::btw(&block[first].0, &block[last].0).map_err(Error::unrecoverable);
         }
         if block[first].0.is_none() {
             first += 1;
@@ -1086,7 +1086,7 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl>(
         if let Some(ast::Lid(pos, id)) = lvar.as_lvar() {
             let name = local_id::get_name(id);
             if name == special_idents::THIS {
-                return Err(emit_fatal::raise_fatal_parse(pos, "Cannot re-assign $this"));
+                return Err(Error::fatal_parse(pos, "Cannot re-assign $this"));
             } else if !(superglobals::is_superglobal(name)) {
                 return Ok(Some(name));
             }
@@ -1150,8 +1150,8 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl>(
                 )
             }
         }),
-        _ => Err(Unrecoverable(
-            "emit_iterator_key_value_storage with iterator using await".into(),
+        _ => Err(Error::unrecoverable(
+            "emit_iterator_key_value_storage with iterator using await",
         )),
     }
 }
@@ -1163,7 +1163,7 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl>(
     local: Local<'arena>,
 ) -> Result<(Vec<InstrSeq<'arena>>, Vec<InstrSeq<'arena>>)> {
     match &lvalue.2 {
-        ast::Expr_::Call(_) => Err(emit_fatal::raise_fatal_parse(
+        ast::Expr_::Call(_) => Err(Error::fatal_parse(
             &lvalue.1,
             "Can't use return value in write context",
         )),

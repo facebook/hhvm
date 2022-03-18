@@ -21,7 +21,7 @@ use hhbc_id::class::ClassType;
 use hhbc_id::{self as hhbc_id, class, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
-use instruction_sequence::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, Error, InstrSeq, Result};
 use itertools::Itertools;
 use local::{Local, LocalId};
 use naming_special_names_rust as special_names;
@@ -369,7 +369,7 @@ fn validate_class_name(ns: &namespace_env::Env, ast::Id(p, class_name): &ast::Id
         && (is_reserved_global_name
             || (check_hh_name && special_names::typehints::is_reserved_hh_name(&lower_name)));
     if name_is_reserved {
-        Err(emit_fatal::raise_fatal_parse(
+        Err(Error::fatal_parse(
             p,
             format!(
                 "Cannot use '{}' as class name as it is reserved",
@@ -589,10 +589,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         .filter_map(|Hint(pos, hint)| match hint.as_ref() {
             ast::Hint_::Happly(ast::Id(_, name), _) => {
                 if is_interface {
-                    Some(Err(emit_fatal::raise_fatal_parse(
-                        pos,
-                        "Interfaces cannot use traits",
-                    )))
+                    Some(Err(Error::fatal_parse(pos, "Interfaces cannot use traits")))
                 } else {
                     Some(Ok(string_utils::strip_global_ns(name.as_str())))
                 }
@@ -699,7 +696,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         })
     };
     if !is_closure && base_is_closure() {
-        return Err(emit_fatal::raise_fatal_runtime(
+        return Err(Error::fatal_runtime(
             &ast_class.name.0,
             "Class cannot extend Closure",
         ));

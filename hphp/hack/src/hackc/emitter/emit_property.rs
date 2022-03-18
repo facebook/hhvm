@@ -11,7 +11,7 @@ use hhbc_ast::InitPropOp;
 use hhbc_id::prop;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, Error, InstrSeq, Result};
 use naming_special_names_rust::{pseudo_consts, user_attributes as ua};
 use oxidized::{aast_defs, ast, ast_defs, doc_comment};
 use runtime::TypedValue;
@@ -62,7 +62,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
         _ => false,
     };
     if !args.is_static && class.final_ && is_cabstract {
-        return Err(emit_fatal::raise_fatal_parse(
+        return Err(Error::fatal_parse(
             pos,
             format!(
                 "Class {} contains non-static property declaration and therefore cannot be declared 'abstract final'",
@@ -83,7 +83,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
         )?,
     };
     if !(valid_for_prop(&type_info.type_constraint)) {
-        return Err(emit_fatal::raise_fatal_parse(
+        return Err(Error::fatal_parse(
             pos,
             format!(
                 "Invalid property type hint for '{}::${}'",
@@ -104,7 +104,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
             (initial_value, None, Attr::AttrSystemInitialValue)
         }
         Some(_) if is_late_init => {
-            return Err(emit_fatal::raise_fatal_parse(
+            return Err(Error::fatal_parse(
                 pos,
                 format!(
                     "<<__LateInit>> property '{}::${}' cannot have an initial value",

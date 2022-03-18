@@ -6,7 +6,7 @@
 use ffi::Pair;
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
-use instruction_sequence::{unrecoverable, Result};
+use instruction_sequence::{Error, Result};
 use naming_special_names_rust::classes;
 use options::Options;
 use oxidized::{
@@ -324,7 +324,7 @@ fn hint_to_type_constant_list<'arena>(
                 r
             }
             _ => {
-                return Err(unrecoverable(
+                return Err(Error::unrecoverable(
                     "Structure not translated according to ast_to_nast",
                 ));
             }
@@ -384,7 +384,11 @@ fn hint_to_type_constant_list<'arena>(
             TypedValue::string("kind", alloc),
             TypedValue::Int(get_kind_num(tparams, "HH\\mixed")),
         ).into()],
-        _ => return Err(unrecoverable("Hints not available on the original AST")),
+        _ => {
+            return Err(Error::unrecoverable(
+                "Hints not available on the original AST",
+            ));
+        }
     })
 }
 

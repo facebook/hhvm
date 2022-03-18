@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ast_scope::{self as ast_scope, Lambda, Scope, ScopeItem};
-use emit_fatal::{emit_fatal_runtimeomitframe, raise_fatal_parse};
 use env::emitter::Emitter;
 use ffi::Slice;
 use hhas_attribute::*;
@@ -15,7 +14,7 @@ use hhbc_ast::Visibility;
 use hhbc_id::method;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::{instr, Result};
+use instruction_sequence::{instr, Error, Result};
 use naming_special_names_rust::{classes, user_attributes};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
@@ -112,7 +111,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let is_async = method.fun_kind.is_fasync() || method.fun_kind.is_fasync_generator();
 
     if class.kind.is_cinterface() && !method.body.fb_ast.is_empty() {
-        return Err(raise_fatal_parse(
+        return Err(Error::fatal_parse(
             &method.name.0,
             format!(
                 "Interface method {}::{} cannot contain body",
@@ -125,7 +124,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         _ => false,
     };
     if !method.static_ && class.final_ && is_cabstract {
-        return Err(raise_fatal_parse(
+        return Err(Error::fatal_parse(
             &method.name.0,
             format!(
                 "Class {} contains non-static method {} and therefore cannot be declared 'abstract final'",
@@ -147,7 +146,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         hhas_attribute::deprecation_info(attributes.iter())
     };
     let default_dropthrough = if method.abstract_ {
-        Some(emit_fatal_runtimeomitframe(
+        Some(emit_fatal::emit_fatal_runtimeomitframe(
             emitter.alloc,
             &method.name.0,
             format!(

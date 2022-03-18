@@ -423,7 +423,6 @@ dependencies = [
  "ast_scope",
  "bumpalo",
  "decl_vars",
- "emit_fatal",
  "env",
  "global_state",
  "hash",
@@ -959,7 +958,6 @@ dependencies = [
  "ast_constant_folder",
  "bumpalo",
  "emit_expression",
- "emit_fatal",
  "env",
  "ffi",
  "hhas_attribute",
@@ -1028,7 +1026,6 @@ dependencies = [
  "emit_body",
  "emit_constant",
  "emit_expression",
- "emit_fatal",
  "emit_memoize_method",
  "emit_method",
  "emit_pos",
@@ -1182,7 +1179,6 @@ name = "emit_memoize_helpers"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "emit_fatal",
  "ffi",
  "hhas_param",
  "hhbc_ast",
@@ -1202,7 +1198,6 @@ dependencies = [
  "bumpalo",
  "emit_attribute",
  "emit_body",
- "emit_fatal",
  "emit_memoize_helpers",
  "emit_method",
  "emit_param",
@@ -1263,7 +1258,6 @@ dependencies = [
  "ast_scope",
  "bumpalo",
  "emit_body",
- "emit_fatal",
  "emit_param",
  "env",
  "ffi",
@@ -1301,7 +1295,6 @@ dependencies = [
  "bumpalo",
  "emit_attribute",
  "emit_expression",
- "emit_fatal",
  "emit_pos",
  "emit_type_hint",
  "env",
@@ -1330,7 +1323,6 @@ dependencies = [
  "ast_constant_folder",
  "emit_attribute",
  "emit_expression",
- "emit_fatal",
  "emit_pos",
  "emit_type_hint",
  "env",
@@ -2062,7 +2054,6 @@ dependencies = [
 name = "hhbc_assertion_utils"
 version = "0.0.0"
 dependencies = [
- "emit_fatal",
  "instruction_sequence",
  "oxidized",
 ]
@@ -3147,7 +3138,6 @@ name = "rewrite_program"
 version = "0.0.0"
 dependencies = [
  "closure_convert",
- "emit_fatal",
  "env",
  "instruction_sequence",
  "ocamlrep",

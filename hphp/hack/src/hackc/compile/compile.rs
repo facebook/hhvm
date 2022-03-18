@@ -17,7 +17,7 @@ use emit_unit::{emit_unit, FromAstFlags};
 use env::emitter::Emitter;
 use hackc_unit::HackCUnit;
 use hhbc_ast::FatalOp;
-use instruction_sequence::Error;
+use instruction_sequence::{Error, ErrorKind};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use options::{Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, RepoFlags};
@@ -320,7 +320,7 @@ pub fn emit_fatal_unit<S: AsRef<str>>(
         None,
     );
 
-    let prog = emit_unit::emit_fatal_unit(&alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
+    let prog = emit_unit::emit_fatal_unit(&alloc, FatalOp::Parse, Pos::make_none(), err_msg);
     let prog = prog.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
     print_unit(
         &Context::new(
@@ -375,9 +375,9 @@ fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
     stack_limit: &'decl StackLimit,
     profile: &'p mut Profile,
 ) -> Result<HackCUnit<'arena>, Error> {
-    // First rewrite.
     stack_limit.reset();
-    let result = rewrite(emitter, ast, RcOc::clone(&namespace_env), stack_limit); // Modifies `ast` in place.
+    // First rewrite and modify `ast` in place.
+    let result = rewrite(emitter, ast, RcOc::clone(&namespace_env), stack_limit);
     profile.rewrite_peak = stack_limit.peak() as i64;
     stack_limit.reset();
     match result {
@@ -387,10 +387,12 @@ fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
             profile.emitter_peak = stack_limit.peak() as i64;
             Ok(unit)
         }
-        Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
-            emit_unit::emit_fatal_unit(emitter.alloc, op, &pos, msg)
-        }
-        Err(e) => Err(e),
+        Err(e) => match e.into_kind() {
+            ErrorKind::IncludeTimeFatalException(op, pos, msg) => {
+                emit_unit::emit_fatal_unit(emitter.alloc, op, pos, msg)
+            }
+            ErrorKind::Unrecoverable(x) => Err(Error::unrecoverable(x)),
+        },
     }
 }
 
@@ -507,7 +509,7 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
                 parsing_t,
                 ..Default::default()
             };
-            match time(|| emit_fatal(emitter.alloc, is_runtime_error, &pos, msg)) {
+            match time(|| emit_fatal(emitter.alloc, is_runtime_error, pos, msg)) {
                 (Ok(unit), codegen_t) => {
                     profile.codegen_t = codegen_t;
                     (unit, profile)
@@ -526,7 +528,7 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
 fn emit_fatal<'arena>(
     alloc: &'arena bumpalo::Bump,
     is_runtime_error: bool,
-    pos: &Pos,
+    pos: Pos,
     msg: impl AsRef<str> + 'arena,
 ) -> Result<HackCUnit<'arena>, Error> {
     let op = if is_runtime_error {

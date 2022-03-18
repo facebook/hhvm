@@ -13,7 +13,6 @@ ast_constant_folder = { path = "../../../hhbc/cargo/ast_constant_folder" }
 ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
 bumpalo = { version = "3.8", features = ["collections"] }
 decl_vars = { path = "../../../hhbc/cargo/decl_vars" }
-emit_fatal = { path = "../../../emitter/cargo/emit_fatal" }
 env = { path = "../../../emitter/cargo/env" }
 global_state = { path = "../../../emitter/cargo/global_state" }
 hash = { path = "../../../../utils/hash" }

@@ -16,7 +16,7 @@ pub fn typed_value_to_instr<'arena, 'decl>(
     tv: &TypedValue<'arena>,
 ) -> Result<InstrSeq<'arena>> {
     match &tv {
-        TypedValue::Uninit => Err(Error::Unrecoverable("rewrite_typed_value: uninit".into())),
+        TypedValue::Uninit => Err(Error::unrecoverable("rewrite_typed_value: uninit")),
         TypedValue::Null => Ok(instr::null()),
         TypedValue::Bool(true) => Ok(instr::true_()),
         TypedValue::Bool(false) => Ok(instr::false_()),
@@ -41,7 +41,7 @@ pub fn typed_value_to_instr<'arena, 'decl>(
             Ok(instr::dict(arrayid))
         }
         TypedValue::HhasAdata(d) if d.is_empty() => {
-            Err(Error::Unrecoverable("HhasAdata may not be empty".into()))
+            Err(Error::unrecoverable("HhasAdata may not be empty"))
         }
         TypedValue::HhasAdata(d) => {
             let arrayid = Str::from(get_array_identifier(e, tv));
@@ -50,7 +50,7 @@ pub fn typed_value_to_instr<'arena, 'decl>(
                 VARRAY_PREFIX | VEC_PREFIX => Ok(instr::vec(arrayid)),
                 DARRAY_PREFIX | DICT_PREFIX => Ok(instr::dict(arrayid)),
                 KEYSET_PREFIX => Ok(instr::keyset(arrayid)),
-                _ => Err(Error::Unrecoverable(format!(
+                _ => Err(Error::unrecoverable(format!(
                     "Unknown HhasAdata data: {}",
                     d,
                 ))),

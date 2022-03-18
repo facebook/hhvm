@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
-use instruction_sequence::{unrecoverable, Result};
+use instruction_sequence::{Error, Result};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env};
 use rewrite_xml::rewrite_xml;
@@ -24,7 +24,7 @@ fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
         .and_then(|x| x.as_stmt())
         .map_or(true, |x| !x.1.is_markup())
     {
-        return Err(unrecoverable(
+        return Err(Error::unrecoverable(
             "Lowered AST did not start with a Markup statement",
         ));
     }
@@ -53,7 +53,7 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
             }
         });
         if let Some(pos) = contains_toplevel_code {
-            return Err(emit_fatal::raise_fatal_parse(pos, "Found top-level code"));
+            return Err(Error::fatal_parse(pos, "Found top-level code"));
         }
     }
 

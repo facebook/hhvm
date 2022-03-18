@@ -11,7 +11,6 @@ path = "../../emit_property.rs"
 ast_constant_folder = { path = "../../../hhbc/cargo/ast_constant_folder" }
 emit_attribute = { path = "../emit_attribute" }
 emit_expression = { path = "../emit_expression" }
-emit_fatal = { path = "../emit_fatal" }
 emit_pos = { path = "../emit_pos" }
 emit_type_hint = { path = "../emit_type_hint" }
 env = { path = "../env" }

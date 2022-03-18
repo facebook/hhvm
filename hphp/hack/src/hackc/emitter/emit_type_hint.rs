@@ -7,7 +7,7 @@ use hhas_type::{constraint, HhasTypeInfo};
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
-use instruction_sequence::{Error::Unrecoverable, Result};
+use instruction_sequence::{Error, Result};
 use naming_special_names_rust::{classes, typehints};
 use oxidized::{
     aast_defs::{Hint, Hint_, Hint_::*, NastShapeInfo, ShapeFieldInfo, Tprim},
@@ -61,7 +61,7 @@ pub fn fmt_hint<'arena>(
     tparams: &[&str],
     strip_tparams: bool,
     hint: &Hint,
-) -> std::result::Result<String, instruction_sequence::Error> {
+) -> Result<String> {
     let Hint(_, h) = hint;
     Ok(match h.as_ref() {
         Habstr(id, args) | Happly(Id(_, id), args) => {
@@ -92,8 +92,8 @@ pub fn fmt_hint<'arena>(
                         .join("::")
                 )
             } else {
-                return Err(Unrecoverable(
-                    "ast_to_nast error. Should be Haccess(Happly())".into(),
+                return Err(Error::unrecoverable(
+                    "ast_to_nast error. Should be Haccess(Happly())",
                 ));
             }
         }
@@ -137,8 +137,8 @@ pub fn fmt_hint<'arena>(
         Hlike(t) => format!("~{}", fmt_hint(alloc, tparams, false, t)?),
         Hsoft(t) => format!("@{}", fmt_hint(alloc, tparams, false, t)?),
         Herr | Hany => {
-            return Err(Unrecoverable(
-                "This should be an error caught in naming".into(),
+            return Err(Error::unrecoverable(
+                "This should be an error caught in naming",
             ));
         }
         h => fmt_name_or_prim(alloc, tparams, hint_to_string(h)).into(),
@@ -161,7 +161,7 @@ fn fmt_hints<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     hints: &[Hint],
-) -> std::result::Result<String, instruction_sequence::Error> {
+) -> Result<String> {
     hints
         .iter()
         .map(|h| fmt_hint(alloc, tparams, false, h))
@@ -193,7 +193,7 @@ fn hint_to_type_constraint<'arena>(
     tparams: &[&str],
     skipawaitable: bool,
     h: &Hint,
-) -> std::result::Result<constraint::Constraint<'arena>, instruction_sequence::Error> {
+) -> Result<constraint::Constraint<'arena>> {
     use constraint::Constraint;
     let Hint(_, hint) = h;
     Ok(match &**hint {
@@ -220,8 +220,8 @@ fn hint_to_type_constraint<'arena>(
             TypeConstraintFlags::Soft | TypeConstraintFlags::ExtendedHint,
         )?,
         Herr | Hany => {
-            return Err(Unrecoverable(
-                "This should be an error caught in naming".into(),
+            return Err(Error::unrecoverable(
+                "This should be an error caught in naming",
             ));
         }
         Hoption(t) => {
@@ -302,7 +302,7 @@ fn make_tc_with_flags_if_non_empty_flags<'arena>(
     skipawaitable: bool,
     hint: &Hint,
     flags: TypeConstraintFlags,
-) -> std::result::Result<constraint::Constraint<'arena>, instruction_sequence::Error> {
+) -> Result<constraint::Constraint<'arena>> {
     let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
     Ok(match (&tc.name, u16::from(&tc.flags)) {
         (Nothing, 0) => tc,
@@ -316,7 +316,7 @@ fn type_application_helper<'arena>(
     tparams: &[&str],
     kind: &Kind,
     name: &str,
-) -> std::result::Result<constraint::Constraint<'arena>, instruction_sequence::Error> {
+) -> Result<constraint::Constraint<'arena>> {
     use constraint::Constraint;
     if tparams.contains(&name) {
         let tc_name = match kind {
@@ -360,7 +360,7 @@ fn make_type_info<'arena>(
     h: &Hint,
     tc_name: Maybe<Str<'arena>>,
     tc_flags: TypeConstraintFlags,
-) -> std::result::Result<HhasTypeInfo<'arena>, instruction_sequence::Error> {
+) -> Result<HhasTypeInfo<'arena>> {
     let type_info_user_type = fmt_hint(alloc, tparams, false, h)?;
     let type_info_type_constraint = constraint::Constraint::make(tc_name, tc_flags);
     Ok(HhasTypeInfo::make(
@@ -376,7 +376,7 @@ fn param_hint_to_type_info<'arena>(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> std::result::Result<HhasTypeInfo<'arena>, instruction_sequence::Error> {
+) -> Result<HhasTypeInfo<'arena>> {
     let Hint(_, h) = hint;
     let is_simple_hint = match h.as_ref() {
         Hsoft(_) | Hoption(_) | Haccess(_, _) | Hfun(_) | Hdynamic | Hnonnull | Hmixed => false,
@@ -389,8 +389,8 @@ fn param_hint_to_type_info<'arena>(
         }
         Habstr(s, hs) => hs.is_empty() && !tparams.contains(&s.as_str()),
         Herr | Hany => {
-            return Err(Unrecoverable(
-                "Expected error on Tany in naming: param_hint_to_type_info".into(),
+            return Err(Error::unrecoverable(
+                "Expected error on Tany in naming: param_hint_to_type_info",
             ));
         }
         _ => true,
@@ -420,7 +420,7 @@ pub fn hint_to_type_info<'arena>(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> std::result::Result<HhasTypeInfo<'arena>, instruction_sequence::Error> {
+) -> Result<HhasTypeInfo<'arena>> {
     if let Kind::Param = kind {
         return param_hint_to_type_info(alloc, kind, skipawaitable, nullable, tparams, hint);
     };

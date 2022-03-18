@@ -10,7 +10,7 @@ use ffi::{Maybe, Nothing, Slice, Str};
 use hhas_param::HhasParam;
 use hhas_type::HhasTypeInfo;
 use hhbc_string_utils::locals::strip_dollar;
-use instruction_sequence::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, Error, InstrSeq, Result};
 use label::Label;
 use local::Local;
 use oxidized::{
@@ -133,7 +133,7 @@ fn from_ast<'a, 'arena, 'decl>(
         if let Some(err_msg) =
             default_type_check(&param.name, type_info.as_ref(), param.expr.as_ref())
         {
-            return Err(emit_fatal::raise_fatal_parse(&param.pos, err_msg));
+            return Err(Error::fatal_parse(&param.pos, err_msg));
         }
     }
     aast_visitor::visit(

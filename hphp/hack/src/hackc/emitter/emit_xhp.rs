@@ -9,7 +9,7 @@ use hhas_method::HhasMethod;
 use hhas_xhp_attribute::HhasXhpAttribute;
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
-use instruction_sequence::{unrecoverable, Result};
+use instruction_sequence::{Error, Result};
 use oxidized::{ast::*, ast_defs, local_id, pos::Pos};
 
 pub fn properties_for_cache<'a, 'arena, 'decl>(
@@ -117,7 +117,11 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
                 ));
                 args.push((ParamKind::Pnormal, arg));
             }
-            _ => return Err(unrecoverable("Xhp use attribute - unexpected attribute")),
+            _ => {
+                return Err(Error::unrecoverable(
+                    "Xhp use attribute - unexpected attribute",
+                ));
+            }
         }
     }
     args.push((
@@ -227,7 +231,7 @@ fn emit_xhp_children_array(children: &[&XhpChild]) -> Result<Expr_> {
             }
             None => emit_xhp_children_paren_expr(c),
         },
-        _ => Err(unrecoverable(
+        _ => Err(Error::unrecoverable(
             "HHVM does not support multiple children declarations",
         )),
     }
@@ -242,7 +246,7 @@ fn emit_xhp_children_paren_expr(child: &XhpChild) -> Result<Expr_> {
     {
         (l, xhp_child_op_to_int(Some(op)))
     } else {
-        return Err(unrecoverable(concat!(
+        return Err(Error::unrecoverable(concat!(
             "Xhp children declarations cannot be plain id, ",
             "plain binary or unary without an inside list"
         )));
@@ -253,7 +257,7 @@ fn emit_xhp_children_paren_expr(child: &XhpChild) -> Result<Expr_> {
 
 fn emit_xhp_children_decl_expr(unary: &str, children: &[XhpChild]) -> Result<Expr_> {
     match children {
-        [] => Err(unrecoverable("xhp children: unexpected empty list")),
+        [] => Err(Error::unrecoverable("xhp children: unexpected empty list")),
         [c] => emit_xhp_child_decl(unary, c),
         [c1, c2, cs @ ..] => {
             let first_two = get_array3(
@@ -349,7 +353,7 @@ fn emit_xhp_attribute_array<'arena>(
     }
     fn get_enum_attributes(enum_opt: Option<&Vec<Expr>>) -> Result<Expr> {
         match enum_opt {
-            None => Err(unrecoverable(
+            None => Err(Error::unrecoverable(
                 "Xhp attribute that's supposed to be an enum but not really",
             )),
             Some(es) => Ok(mk_expr(Expr_::mk_varray(None, es.to_vec()))),
@@ -385,7 +389,7 @@ fn emit_xhp_attribute_array<'arena>(
             Hint_::Happly(ast_defs::Id(_, id), _) => {
                 get_attribute_array_values(alloc, id, enum_opt)
             }
-            _ => Err(unrecoverable(
+            _ => Err(Error::unrecoverable(
                 "There are no other possible xhp attribute hints",
             )),
         }

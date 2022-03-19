@@ -169,6 +169,11 @@ void Package::createAsyncState() {
 
 Optional<std::thread> Package::clearAsyncState() {
   if (!m_async) return std::nullopt;
+  if (!Option::ParserAsyncCleanup) {
+    // If we don't want to cleanup asynchronously, do so now.
+    m_async.reset();
+    return std::nullopt;
+  }
   // All the thread does is reset the unique_ptr to run the dtor.
   return std::thread{
     [a = std::move(m_async)] () mutable { a.reset(); }

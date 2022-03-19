@@ -137,6 +137,13 @@ struct Option {
   static int ParserGroupSize;
   static int ParserDirGroupSizeLimit;
 
+  /*
+   * If true, we'll free async state (which can take a while) in
+   * another thread asynchronously. If false, it will be done
+   * synchronously.
+   */
+  static bool ParserAsyncCleanup;
+
   /* Config passed to extern_worker::Client */
   static std::string ExternWorkerUseCase;
   static bool ExternWorkerForceSubprocess;

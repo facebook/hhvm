@@ -193,7 +193,7 @@ class TestGlobalInferenceCorrectness(TestCase[GlobalInferenceDriver]):
     def get_test_driver(cls) -> GlobalInferenceDriver:
         return GlobalInferenceDriver()
 
-    def execute_once(self):
+    def execute_once(self) -> None:
         temp_dir = tempfile.mkdtemp()
 
         self.test_driver.start_hh_server(args=["--config", "global_inference=true"])

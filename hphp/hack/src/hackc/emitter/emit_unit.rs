@@ -14,7 +14,7 @@ use ffi::{Maybe::*, Slice, Str};
 use hackc_unit::HackCUnit;
 use hhas_symbol_refs::HhasSymbolRefs;
 use hhbc_ast::FatalOp;
-use instruction_sequence::{Error, Result};
+use instruction_sequence::{Error, ErrorKind, Result};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env, pos::Pos};
 
@@ -24,11 +24,11 @@ use oxidized::{ast, namespace_env, pos::Pos};
 pub fn emit_fatal_unit<'arena>(
     alloc: &'arena bumpalo::Bump,
     op: FatalOp,
-    pos: &Pos,
+    pos: Pos,
     msg: impl AsRef<str> + 'arena,
 ) -> Result<HackCUnit<'arena>> {
     Ok(HackCUnit {
-        fatal: Just((op, pos.clone().into(), Str::new_str(alloc, msg.as_ref())).into()),
+        fatal: Just((op, pos.into(), Str::new_str(alloc, msg.as_ref())).into()),
         ..HackCUnit::default()
     })
 }
@@ -42,9 +42,12 @@ pub fn emit_unit<'a, 'arena, 'decl>(
 ) -> Result<HackCUnit<'arena>> {
     let result = emit_unit_(emitter, flags, namespace, tast);
     match result {
-        Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
-            emit_fatal_unit(emitter.alloc, op, &pos, msg)
-        }
+        Err(e) => match e.into_kind() {
+            ErrorKind::IncludeTimeFatalException(op, pos, msg) => {
+                emit_fatal_unit(emitter.alloc, op, pos, msg)
+            }
+            ErrorKind::Unrecoverable(x) => Err(Error::unrecoverable(x)),
+        },
         _ => result,
     }
 }

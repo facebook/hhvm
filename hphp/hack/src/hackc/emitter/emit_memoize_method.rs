@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ast_scope::{self as ast_scope, Scope, ScopeItem};
-use emit_fatal::{raise_fatal_parse, raise_fatal_runtime};
 use emit_method::get_attrs_for_method;
 use emit_pos::emit_pos_then;
 use env::{emitter::Emitter, Env};
@@ -19,7 +18,7 @@ use hhas_type::HhasTypeInfo;
 use hhbc_ast::{FCallArgs, FCallArgsFlags, LocalRange, SpecialClsRef, Visibility};
 use hhbc_id::{class, method};
 use hhbc_string_utils::reified;
-use instruction_sequence::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, Error, InstrSeq, Result};
 use label::Label;
 use local::{Local, LocalId};
 use naming_special_names_rust::{members, user_attributes as ua};
@@ -62,12 +61,12 @@ pub fn make_info<'arena>(
             emit_memoize_helpers::check_memoize_possible(&m.name.0, &m.params[..], true)?;
             let pos = &m.name.0;
             if class.kind.is_cinterface() {
-                return Err(raise_fatal_runtime(
+                return Err(Error::fatal_runtime(
                     pos,
                     "<<__Memoize>> cannot be used in interfaces",
                 ));
             } else if m.abstract_ {
-                return Err(raise_fatal_parse(
+                return Err(Error::fatal_parse(
                     pos,
                     format!(
                         "Abstract method {}::{} cannot be memoized",

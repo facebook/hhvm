@@ -3,12 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use emit_fatal::raise_fatal_runtime;
 use ffi::Str;
 use hhas_param::HhasParam;
 use hhbc_ast::{FCallArgs, FCallArgsFlags};
 use hhbc_id::function;
-use instruction_sequence::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, Error, InstrSeq, Result};
 use label::Label;
 use local::{Local, LocalId};
 use oxidized::{aast::FunParam, ast::Expr, pos::Pos};
@@ -77,7 +76,7 @@ pub fn check_memoize_possible<Ex, En>(
     is_method: bool,
 ) -> Result<()> {
     if !is_method && params.iter().any(|param| param.is_variadic) {
-        return Err(raise_fatal_runtime(
+        return Err(Error::fatal_runtime(
             pos,
             String::from("<<__Memoize>> cannot be used on functions with variable arguments"),
         ));

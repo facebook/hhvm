@@ -21,7 +21,7 @@ use hhas_type::HhasTypeInfo;
 use hhbc_ast::{FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, ParamId, Pseudo};
 use hhbc_id::function;
 use hhbc_string_utils as string_utils;
-use instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
+use instruction_sequence::{instr, Error, InstrSeq, Result};
 use label::Label;
 use local::{Local, LocalId};
 use options::CompilerFlags;
@@ -291,7 +291,7 @@ fn make_decl_vars<'a, 'arena, 'decl>(
     let explicit_use_set = &emitter.emit_global_state().explicit_use_set;
 
     let mut decl_vars =
-        decl_vars::from_ast(params, body, explicit_use_set).map_err(unrecoverable)?;
+        decl_vars::from_ast(params, body, explicit_use_set).map_err(Error::unrecoverable)?;
 
     let mut decl_vars = if arg_flags.contains(Flags::CLOSURE_BODY) {
         let mut captured_vars = scope.get_captured_vars();
@@ -617,7 +617,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                             RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
                         }
                     }
-                    _ => Err(unrecoverable("impossible")),
+                    _ => Err(Error::unrecoverable("impossible")),
                 }
             }
         };
@@ -627,7 +627,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
         .filter(|p| !(p.is_variadic && p.name == "..."))
         .collect::<Vec<_>>();
     if params.len() != ast_params.len() {
-        return Err(Error::Unrecoverable("length mismatch".into()));
+        return Err(Error::unrecoverable("length mismatch"));
     }
 
     let mut instrs = Vec::with_capacity(1 + params.len());
@@ -669,9 +669,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                 Some(ScopeItem::Function(f)) => strip_id(f.get_name()),
                 Some(ScopeItem::Method(m)) => strip_id(m.get_name()),
                 _ => {
-                    return Err(Error::Unrecoverable(
-                        "deprecated functions must have names".into(),
-                    ));
+                    return Err(Error::unrecoverable("deprecated functions must have names"));
                 }
             };
             let deprecation_string = class_name
@@ -682,8 +680,8 @@ pub fn emit_deprecation_info<'a, 'arena>(
                 } else if let TypedValue::String(s) = &args[0] {
                     s.unsafe_as_str()
                 } else {
-                    return Err(Error::Unrecoverable(
-                        "deprecated attribute first argument is not a string".into(),
+                    return Err(Error::unrecoverable(
+                        "deprecated attribute first argument is not a string",
                     ));
                 });
             let sampling_rate = if args.len() <= 1 {
@@ -691,8 +689,8 @@ pub fn emit_deprecation_info<'a, 'arena>(
             } else if let Some(TypedValue::Int(i)) = args.get(1) {
                 *i
             } else {
-                return Err(Error::Unrecoverable(
-                    "deprecated attribute second argument is not an integer".into(),
+                return Err(Error::unrecoverable(
+                    "deprecated attribute second argument is not an integer",
                 ));
             };
             let error_code = if is_systemlib {

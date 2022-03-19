@@ -17,17 +17,17 @@ from hh_paths import watchman_event_watcher
 from libfb.py.testutil import flaky
 
 
-def err_print_ln(msg):
+def err_print_ln(msg) -> None:
     print("{0}\n".format(msg), file=sys.stderr)
     return
 
 
-def cat_file(filename):
+def cat_file(filename) -> str:
     with open(filename, "r") as f:
         return f.read()
 
 
-def run_watcher(daemonize=False, enable_watchman_event_watcher=True):
+def run_watcher(daemonize: bool = False, enable_watchman_event_watcher: bool = True):
     # Creates a decorator with named arguments. Runs the watcher
     # and retrieves the socket name. Hands these as named arguments
     # to the test function.
@@ -92,11 +92,13 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
     template_repo = "hphp/hack/test/integration/data/simple_repo"
 
     @classmethod
-    def setUpClass(cls):
+    # pyre-fixme[14]: `setUpClass` overrides method defined in `CommonTestDriver`
+    #  inconsistently.
+    def setUpClass(cls) -> None:
         super().setUpClass(cls.template_repo)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         super().tearDownClass()
 
     def setUp(self) -> None:
@@ -105,7 +107,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
-    def check_call(self, cmd, timeout=None):
+    def check_call(self, cmd, timeout=None) -> None:
         subprocess.check_call(
             cmd, cwd=self.repo_dir, env=self.test_env, timeout=timeout
         )
@@ -119,21 +121,21 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
             env=self.test_env,
         )
 
-    def hg_commit(self, msg):
+    def hg_commit(self, msg) -> None:
         cmd = ["hg", "commit", "-m", msg]
         self.check_call(cmd)
 
-    def write_watchman_config(self, contents):
+    def write_watchman_config(self, contents: str) -> None:
         with open(os.path.join(self.repo_dir, ".watchmanconfig"), "w") as f:
             f.write(contents)
 
-    def write_enable_watchman_event_watcher_file(self):
+    def write_enable_watchman_event_watcher_file(self) -> None:
         with open(
             os.path.join(self.repo_dir, ".hh_enable_watchman_event_watcher"), "w"
         ) as f:
             f.write("")
 
-    def init_hg_repo(self):
+    def init_hg_repo(self) -> None:
         cmd = ["hg", "init"]
         self.check_call(cmd)
         with open(os.path.join(self.repo_dir, ".hg", "hgrc"), "w") as f:
@@ -146,13 +148,13 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
         self.hg_commit("starting")
         self.check_call(cmd)
 
-    def run_watchman_event_watcher(self, daemonize=False):
+    def run_watchman_event_watcher(self, daemonize: bool = False):
         cmd = [watchman_event_watcher, self.repo_dir]
         if daemonize:
             cmd.append("--daemonize")
         return self.open_subprocess(cmd)
 
-    def get_sockname(self):
+    def get_sockname(self) -> str:
         cmd = [watchman_event_watcher, "--get-sockname", self.repo_dir]
         output = subprocess.check_output(
             cmd, cwd=self.repo_dir, env=self.test_env, timeout=5
@@ -161,7 +163,14 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
         return sockname
 
     # Read a line from the file, ignoring all lines in 'ignore'
-    def poll_line(self, f, retry_wait=0.1, retries=100, retry_eof=False, ignore=None):
+    def poll_line(
+        self,
+        f,
+        retry_wait: float = 0.1,
+        retries: int = 100,
+        retry_eof: bool = False,
+        ignore=None,
+    ):
         while retries > 0:
             line = f.readline()
             if retry_eof and not line:
@@ -180,7 +189,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
                 return result
         raise TimeoutError
 
-    def connect_socket(self, sockname, retry_wait=0.1, retries=100):
+    def connect_socket(self, sockname, retry_wait: float = 0.1, retries: int = 100):
         while retries > 0:
             try:
                 sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -198,10 +207,10 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
         sockname,
         # If auto_close is False, keeps the socket open and returns
         # a (result, socket) pair
-        auto_close=True,
-        ignore_unknown=False,
-        retry_wait=0.1,
-        retries=100,
+        auto_close: bool = True,
+        ignore_unknown: bool = False,
+        retry_wait: float = 0.1,
+        retries: int = 100,
     ):
         # Connect to the socket and read a line.
         # If connection fails, retry.
@@ -229,7 +238,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
                 return (result, sock)
         raise TimeoutError
 
-    def write_new_file_and_commit(self, filename, content, commit_msg):
+    def write_new_file_and_commit(self, filename, content: str, commit_msg) -> None:
         with open(os.path.join(self.repo_dir, filename), "w") as f:
             f.write(content)
         self.check_call(["hg", "add"])
@@ -246,7 +255,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
 
     @flaky
     @run_watcher(daemonize=True)
-    def test_sockname(self, log_file=None, sockname=None, starter_process=None):
+    def test_sockname(self, log_file=None, sockname=None, starter_process=None) -> None:
         with open(log_file, "r") as f:
             initialized_msg = self.poll_line(f)
             self.assertIn("initialized", initialized_msg, "initialized message")
@@ -257,7 +266,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
     @run_watcher(daemonize=False, enable_watchman_event_watcher=False)
     def test_always_get_settled_message_when_watcher_disabled(
         self, sockname=None, watcher_process=None
-    ):
+    ) -> None:
         result = self.connect_socket_get_output(sockname)
         # Initially, watcher doesn't know the repo's state
         self.assertIn(
@@ -269,7 +278,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
 
     @flaky
     @run_watcher(daemonize=False)
-    def test_one_update_on_socket(self, sockname=None, watcher_process=None):
+    def test_one_update_on_socket(self, sockname=None, watcher_process=None) -> None:
         result = self.connect_socket_get_output(sockname)
         # Initially, watcher doesn't know the repo's state
         self.assertIn("unknown", result, "state enter")
@@ -289,7 +298,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
 
     @flaky
     @run_watcher(daemonize=False)
-    def test_notify_waiting_client(self, sockname=None, watcher_process=None):
+    def test_notify_waiting_client(self, sockname=None, watcher_process=None) -> None:
         # After getting the 'unknown' message, the client should get the 'settled'
         # notification after the repo settles.
         (sock, _) = self.connect_socket(sockname)
@@ -313,7 +322,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
     @run_watcher(daemonize=False)
     def test_notify_waiting_client_after_midupdate(
         self, sockname=None, watcher_process=None
-    ):
+    ) -> None:
         # Same as test above, but the client connected to the watcher while
         # it was in mid_update state.
         (sock, _) = self.connect_socket(sockname)

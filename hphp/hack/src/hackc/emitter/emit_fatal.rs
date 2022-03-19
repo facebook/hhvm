@@ -5,16 +5,8 @@
 
 use emit_pos::emit_pos;
 use hhbc_ast::FatalOp;
-use instruction_sequence::{instr, Error, InstrSeq};
+use instruction_sequence::{instr, InstrSeq};
 use oxidized::pos::Pos;
-
-pub fn raise_fatal_runtime(pos: &Pos, msg: impl Into<String>) -> Error {
-    Error::IncludeTimeFatalException(FatalOp::Runtime, pos.clone(), msg.into())
-}
-
-pub fn raise_fatal_parse(pos: &Pos, msg: impl Into<String>) -> Error {
-    Error::IncludeTimeFatalException(FatalOp::Parse, pos.clone(), msg.into())
-}
 
 pub fn emit_fatal<'arena>(
     alloc: &'arena bumpalo::Bump,

@@ -3,11 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use ast_scope::Scope;
-use emit_fatal::raise_fatal_runtime;
 use env::emitter::Emitter;
 use ffi::{Maybe::Just, Slice, Str};
 use hhas_body::HhasBody;
-use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
+use instruction_sequence::{instr, Error, InstrSeq, Result};
 use local::Local;
 use oxidized::{aast, ast, pos::Pos};
 
@@ -59,7 +58,7 @@ fn emit_native_opcode_impl<'arena>(
             };
         }
     };
-    Err(emit_fatal::raise_fatal_runtime(
+    Err(Error::fatal_runtime(
         &Pos::make_none(),
         format!("OpCodeImpl attribute is not applicable to {}", name),
     ))
@@ -97,7 +96,7 @@ fn emit_generator_method<'arena>(
         "key" => instr::contkey(),
         "getReturn" => instr::contgetreturn(),
         _ => {
-            return Err(raise_fatal_runtime(
+            return Err(Error::fatal_runtime(
                 &Pos::make_none(),
                 "incorrect native generator function",
             ));
@@ -109,8 +108,6 @@ fn emit_generator_method<'arena>(
 fn get_first_param_name(params: &[ast::FunParam]) -> Result<&str> {
     match params {
         [p, ..] => Ok(&p.name),
-        _ => Err(Unrecoverable(String::from(
-            "native generator requires params",
-        ))),
+        _ => Err(Error::unrecoverable("native generator requires params")),
     }
 }

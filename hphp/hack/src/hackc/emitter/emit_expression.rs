@@ -13,11 +13,7 @@ use hhbc_ast::*;
 use hhbc_id::{class, constant, function, method, prop};
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
-use instruction_sequence::{
-    instr, unrecoverable,
-    Error::{self, Unrecoverable},
-    InstrSeq, Result,
-};
+use instruction_sequence::{instr, Error, InstrSeq, Result};
 use itertools::Either;
 use label::Label;
 use lazy_static::lazy_static;
@@ -420,15 +416,15 @@ pub fn emit_expr<'a, 'arena, 'decl>(
 
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
-        Expr_::Xml(_) => Err(unrecoverable(
+        Expr_::Xml(_) => Err(Error::unrecoverable(
             "emit_xhp: syntax should have been converted during rewriting",
         )),
         Expr_::Import(e) => emit_import(emitter, env, pos, &e.0, &e.1),
         Expr_::Omitted => Ok(instr::empty()),
-        Expr_::Lfun(_) => Err(unrecoverable(
+        Expr_::Lfun(_) => Err(Error::unrecoverable(
             "expected Lfun to be converted to Efun during closure conversion emit_expr",
         )),
-        Expr_::List(_) => Err(emit_fatal::raise_fatal_parse(
+        Expr_::List(_) => Err(Error::fatal_parse(
             pos,
             "list() can only be used as an lvar. Did you mean to use tuple()?",
         )),
@@ -441,7 +437,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
         }
         Expr_::ExpressionTree(et) => emit_expr(emitter, env, &et.runtime_expr),
-        Expr_::ETSplice(_) => Err(unrecoverable(
+        Expr_::ETSplice(_) => Err(Error::unrecoverable(
             "expression trees: splice should be erased during rewriting",
         )),
         Expr_::FunId(_)
@@ -468,8 +464,8 @@ fn emit_exprs_and_error_on_inout<'a, 'arena, 'decl>(
                 .iter()
                 .map(|(pk, expr)| match pk {
                     ParamKind::Pnormal => emit_expr(e, env, expr),
-                    ParamKind::Pinout(p) => Err(emit_fatal::raise_fatal_parse(
-                        &Pos::merge(p, expr.pos()).map_err(Error::Unrecoverable)?,
+                    ParamKind::Pinout(p) => Err(Error::fatal_parse(
+                        &Pos::merge(p, expr.pos()).map_err(Error::unrecoverable)?,
                         format!(
                             "Unexpected `inout` argument on pseudofunction: `{}`",
                             fn_name
@@ -517,9 +513,7 @@ fn emit_id<'a, 'arena, 'decl>(
         }
         pseudo_consts::G__COMPILER_FRONTEND__ => Ok(instr::string(alloc, "hackc")),
         pseudo_consts::G__LINE__ => Ok(instr::int(p.info_pos_extended().1.try_into().map_err(
-            |_| {
-                emit_fatal::raise_fatal_parse(p, "error converting end of line from usize to isize")
-            },
+            |_| Error::fatal_parse(p, "error converting end of line from usize to isize"),
         )?)),
         pseudo_consts::G__NAMESPACE__ => Ok(instr::string(
             alloc,
@@ -683,7 +677,9 @@ fn emit_string2<'a, 'arena, 'decl>(
     es: &[ast::Expr],
 ) -> Result<InstrSeq<'arena>> {
     if es.is_empty() {
-        Err(unrecoverable("String2 with zero araguments is impossible"))
+        Err(Error::unrecoverable(
+            "String2 with zero araguments is impossible",
+        ))
     } else if es.len() == 1 {
         Ok(InstrSeq::gather(vec![
             emit_expr(e, env, &es[0])?,
@@ -734,7 +730,7 @@ fn emit_lambda<'a, 'arena, 'decl>(
     let fndef_name = &(fndef.name).1;
     let cls_num = fndef_name
         .parse::<isize>()
-        .map_err(|err| Unrecoverable(err.to_string()))?;
+        .map_err(|err| Error::unrecoverable(err.to_string()))?;
     let explicit_use = e.emit_global_state().explicit_use_set.contains(fndef_name);
     let is_in_lambda = env.scope.is_in_lambda();
     Ok(InstrSeq::gather(vec![
@@ -924,7 +920,7 @@ fn emit_shape<'a, 'arena, 'decl>(
                 if is_reified_tparam(env, true, &id.1).is_some()
                     || is_reified_tparam(env, false, &id.1).is_some()
                 {
-                    return Err(emit_fatal::raise_fatal_parse(
+                    return Err(Error::fatal_parse(
                         &id.0,
                         "Reified generics cannot be used in shape keys",
                     ));
@@ -1011,13 +1007,13 @@ fn emit_named_collection<'a, 'arena, 'decl>(
                     .iter()
                     .map(|f| match f {
                         ast::Afield::AFvalue(v) => emit_expr(e, env, v),
-                        _ => Err(unrecoverable("impossible Pair argument")),
+                        _ => Err(Error::unrecoverable("impossible Pair argument")),
                     })
                     .collect::<Result<_>>()?,
             ),
             instr::new_pair(),
         ])),
-        _ => Err(unrecoverable("Unexpected named collection type")),
+        _ => Err(Error::unrecoverable("Unexpected named collection type")),
     }
 }
 
@@ -1046,7 +1042,7 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
             return Ok(emit_pos_then(pos, instr));
         }
         _ => {
-            return Err(unrecoverable(format!(
+            return Err(Error::unrecoverable(format!(
                 "collection: {} does not exist",
                 name
             )));
@@ -1289,7 +1285,7 @@ fn is_struct_init<'arena, 'decl>(
             // TODO(hrust): if key is String, don't clone and call fold_expr
             let mut key = key.clone();
             ast_constant_folder::fold_expr(&mut key, e)
-                .map_err(|e| unrecoverable(format!("{}", e)))?;
+                .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
             if let ast::Expr(_, _, ast::Expr_::String(s)) = key {
                 are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
                     && non_numeric(
@@ -1344,7 +1340,7 @@ fn emit_struct_array<
                 _ => {
                     let mut k = k.clone();
                     ast_constant_folder::fold_expr(&mut k, e)
-                        .map_err(|e| unrecoverable(format!("{}", e)))?;
+                        .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
                     match k {
                         Expr(_, _, Expr_::String(s)) => Ok((
                             // FIXME: This is not safe--string literals are binary strings.
@@ -1352,11 +1348,11 @@ fn emit_struct_array<
                             unsafe { String::from_utf8_unchecked(s.into()) },
                             emit_expr(e, env, v)?,
                         )),
-                        _ => Err(unrecoverable("Key must be a string")),
+                        _ => Err(Error::unrecoverable("Key must be a string")),
                     }
                 }
             },
-            _ => Err(unrecoverable("impossible")),
+            _ => Err(Error::unrecoverable("impossible")),
         })
         .collect::<Result<Vec<(String, InstrSeq<'arena>)>>>()?
         .into_iter()
@@ -1472,7 +1468,9 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 Ok(instrs?)
             }
         }
-        _ => Err(unrecoverable("plain PHP arrays cannot be constructed")),
+        _ => Err(Error::unrecoverable(
+            "plain PHP arrays cannot be constructed",
+        )),
     }
 }
 
@@ -1526,7 +1524,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     if pk.is_pinout() {
-        return Err(emit_fatal::raise_fatal_parse(
+        return Err(Error::fatal_parse(
             outer_pos,
             "`isset` cannot take an argument by `inout`",
         ));
@@ -1599,7 +1597,7 @@ fn emit_call_isset_exprs<'a, 'arena, 'decl>(
     exprs: &[(ParamKind, ast::Expr)],
 ) -> Result<InstrSeq<'arena>> {
     match exprs {
-        [] => Err(emit_fatal::raise_fatal_parse(
+        [] => Err(Error::fatal_parse(
             pos,
             "Cannot use isset() without any arguments",
         )),
@@ -2368,7 +2366,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                     }
                 })
             }
-            (ParamKind::Pinout(_), _) => Err(unrecoverable(
+            (ParamKind::Pinout(_), _) => Err(Error::unrecoverable(
                 "emit_arg_and_inout_setter: Unexpected inout expression type",
             )),
             _ => Ok((emit_expr(e, env, arg)?, instr::empty())),
@@ -2568,7 +2566,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 "class_exists" => OODeclExistsOp::Class,
                 "interface_exists" => OODeclExistsOp::Interface,
                 "trait_exists" => OODeclExistsOp::Trait,
-                _ => return Err(unrecoverable("emit_special_function: class_kind")),
+                _ => return Err(Error::unrecoverable("emit_special_function: class_kind")),
             };
             Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, expect_normal_paramkind(arg1)?)?,
@@ -2593,7 +2591,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
             if fun_and_clsmeth_disabled {
                 match args {
                     [(_, ast::Expr(_, _, ast::Expr_::String(func_name)))] => {
-                        Err(emit_fatal::raise_fatal_parse(
+                        Err(Error::fatal_parse(
                             pos,
                             format!(
                                 "`fun()` is disabled; switch to first-class references like `{}<>`",
@@ -2601,13 +2599,13 @@ fn emit_special_function<'a, 'arena, 'decl>(
                             ),
                         ))
                     }
-                    _ => Err(emit_fatal::raise_fatal_runtime(
+                    _ => Err(Error::fatal_runtime(
                         pos,
                         "Constant string expected in fun()",
                     )),
                 }
             } else if nargs != 1 {
-                Err(emit_fatal::raise_fatal_runtime(
+                Err(Error::fatal_runtime(
                     pos,
                     format!("fun() expects exactly 1 parameter, {} given", nargs),
                 ))
@@ -2626,7 +2624,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                             unsafe { std::str::from_utf8_unchecked(func_name.as_slice()) },
                         )?))
                     }
-                    _ => Err(emit_fatal::raise_fatal_runtime(
+                    _ => Err(Error::fatal_runtime(
                         pos,
                         "Constant string expected in fun()",
                     )),
@@ -2636,7 +2634,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
         ("__systemlib\\meth_caller", _) => {
             // used by meth_caller() to directly emit func ptr
             if nargs != 1 {
-                return Err(emit_fatal::raise_fatal_runtime(
+                return Err(Error::fatal_runtime(
                     pos,
                     format!("fun() expects exactly 1 parameter, {} given", nargs),
                 ));
@@ -2656,7 +2654,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                         )),
                     )))
                 }
-                _ => Err(emit_fatal::raise_fatal_runtime(
+                _ => Err(Error::fatal_runtime(
                     pos,
                     "Constant string expected in fun()",
                 )),
@@ -2664,7 +2662,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
         }
         ("__systemlib\\__debugger_is_uninit", _) => {
             if nargs != 1 {
-                Err(emit_fatal::raise_fatal_runtime(
+                Err(Error::fatal_runtime(
                     pos,
                     format!(
                         "__debugger_is_uninit() expects exactly 1 parameter {} given",
@@ -2678,7 +2676,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                     [(_, Expr(_, _, Expr_::Lvar(id)))] => {
                         Ok(Some(instr::isunsetl(get_local(e, env, pos, id.name())?)))
                     }
-                    _ => Err(emit_fatal::raise_fatal_runtime(
+                    _ => Err(Error::fatal_runtime(
                         pos,
                         "Local variable expected in __debugger_is_uninit()",
                     )),
@@ -2691,7 +2689,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                     ensure_normal_paramkind(pk)?;
                     get_local(e, env, pos, id.name())
                 }
-                _ => Err(emit_fatal::raise_fatal_runtime(
+                _ => Err(Error::fatal_runtime(
                     pos,
                     "Argument must be the label argument",
                 )),
@@ -2708,12 +2706,12 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 expect_normal_paramkind(obj_expr)?,
                 expect_normal_paramkind(method_name)?,
             )?)),
-            _ => Err(emit_fatal::raise_fatal_runtime(
+            _ => Err(Error::fatal_runtime(
                 pos,
                 format!("inst_meth() expects exactly 2 parameters, {} given", nargs),
             )),
         },
-        ("HH\\class_meth", _) if fun_and_clsmeth_disabled => Err(emit_fatal::raise_fatal_parse(
+        ("HH\\class_meth", _) if fun_and_clsmeth_disabled => Err(Error::fatal_parse(
             pos,
             "`class_meth()` is disabled; switch to first-class references like `C::bar<>`",
         )),
@@ -2734,7 +2732,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                     return Ok(Some(emit_class_meth(e, env, cls, meth)?));
                 }
             }
-            Err(emit_fatal::raise_fatal_runtime(
+            Err(Error::fatal_runtime(
                 pos,
                 concat!(
                     "class_meth() expects a literal class name or ::class constant, ",
@@ -2743,7 +2741,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 ),
             ))
         }
-        ("HH\\class_meth", _) => Err(emit_fatal::raise_fatal_runtime(
+        ("HH\\class_meth", _) => Err(Error::fatal_runtime(
             pos,
             format!("class_meth() expects exactly 2 parameters, {} given", nargs),
         )),
@@ -2756,7 +2754,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 instr::popc(),
                 instr::null(),
             ]))),
-            _ => Err(emit_fatal::raise_fatal_runtime(
+            _ => Err(Error::fatal_runtime(
                 pos,
                 format!("global_set() expects exactly 2 parameters, {} given", nargs),
             )),
@@ -2768,7 +2766,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 instr::unsetg(),
                 instr::null(),
             ]))),
-            _ => Err(emit_fatal::raise_fatal_runtime(
+            _ => Err(Error::fatal_runtime(
                 pos,
                 format!(
                     "global_unset() expects exactly 1 parameter, {} given",
@@ -2877,7 +2875,7 @@ fn emit_class_meth<'a, 'arena, 'decl>(
             Expr_::String(method_name) => {
                 method::MethodType::new(Str::new_str(alloc, method_name.to_string().as_str()))
             }
-            _ => return Err(unrecoverable("emit_class_meth: unhandled method")),
+            _ => return Err(Error::unrecoverable("emit_class_meth: unhandled method")),
         };
         if let Some((cid, (_, id))) = cls.2.as_class_const() {
             if string_utils::is_class(id) {
@@ -2902,7 +2900,7 @@ fn emit_class_meth<'a, 'arena, 'decl>(
                 method_id,
             ));
         }
-        Err(unrecoverable("emit_class_meth: unhandled method"))
+        Err(Error::unrecoverable("emit_class_meth: unhandled method"))
     } else {
         let instrs = InstrSeq::gather(vec![
             emit_expr(e, env, cls)?,
@@ -2966,7 +2964,7 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
             instr::resolverclsmethod(method_id),
         ]),
         ClassExpr::Expr(_) => {
-            return Err(unrecoverable(
+            return Err(Error::unrecoverable(
                 "emit_class_meth_native: ClassExpr::Expr should be impossible",
             ));
         }
@@ -3170,7 +3168,7 @@ fn emit_lit<'a, 'arena, 'decl>(
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let tv = ast_constant_folder::expr_to_typed_value(emitter, expression)
-        .map_err(|_| unrecoverable("expr_to_typed_value failed"))?;
+        .map_err(|_| Error::unrecoverable("expr_to_typed_value failed"))?;
     Ok(emit_pos_then(
         pos,
         emit_adata::typed_value_to_instr(emitter, &tv)?,
@@ -3517,7 +3515,7 @@ fn emit_reified_type<'a, 'arena>(
     name: &str,
 ) -> Result<InstrSeq<'arena>> {
     emit_reified_type_opt(env, pos, name)?
-        .ok_or_else(|| emit_fatal::raise_fatal_runtime(&Pos::make_none(), "Invalid reified param"))
+        .ok_or_else(|| Error::fatal_runtime(&Pos::make_none(), "Invalid reified param"))
 }
 
 fn emit_reified_type_opt<'a, 'arena>(
@@ -3535,7 +3533,7 @@ fn emit_reified_type_opt<'a, 'arena>(
     };
     let check = |is_soft| -> Result<()> {
         if is_soft {
-            Err(emit_fatal::raise_fatal_parse(
+            Err(Error::fatal_parse(
                 pos,
                 format!(
                     "{} is annotated to be a soft reified generic, it cannot be used until the __Soft annotation is removed",
@@ -3643,7 +3641,7 @@ fn emit_new<'a, 'arena, 'decl>(
                 if targs.is_empty() {
                     (ClassExpr::Reified(instrs), H::MaybeGenerics)
                 } else {
-                    return Err(emit_fatal::raise_fatal_parse(
+                    return Err(Error::fatal_parse(
                         pos,
                         "Cannot have higher kinded reified generics",
                     ));
@@ -3685,7 +3683,7 @@ fn emit_new<'a, 'arena, 'decl>(
                         instr::newobjrd(id),
                     ]),
                     H::MaybeGenerics => {
-                        return Err(unrecoverable(
+                        return Err(Error::unrecoverable(
                             "Internal error: This case should have been transformed",
                         ));
                     }
@@ -3758,10 +3756,7 @@ fn emit_obj_get<'a, 'arena, 'decl>(
         if local_id::get_name(id) == special_idents::THIS
             && nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe)
         {
-            return Err(emit_fatal::raise_fatal_parse(
-                pos,
-                "?-> is not allowed with $this",
-            ));
+            return Err(Error::fatal_parse(pos, "?-> is not allowed with $this"));
         }
     }
     if let Some(ast_defs::Id(_, s)) = prop.2.as_id() {
@@ -3896,7 +3891,7 @@ fn emit_prop_expr<'a, 'arena, 'decl>(
         MemberKey::PL(_, _) | MemberKey::PC(_, _)
             if nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe) =>
         {
-            return Err(emit_fatal::raise_fatal_parse(
+            return Err(Error::fatal_parse(
                 &prop.1,
                 "?-> can only be used with scalar property names",
             ));
@@ -3970,7 +3965,7 @@ fn emit_array_get<'a, 'arena, 'decl>(
     )?;
     match result {
         (ArrayGetInstr::Regular(i), querym_n_unpopped) => Ok((i, querym_n_unpopped)),
-        (ArrayGetInstr::Inout { .. }, _) => Err(unrecoverable("unexpected inout")),
+        (ArrayGetInstr::Inout { .. }, _) => Err(Error::unrecoverable("unexpected inout")),
     }
 }
 
@@ -3989,9 +3984,9 @@ fn emit_array_get_<'a, 'arena, 'decl>(
     use ast::Expr;
 
     match (base_expr, elem) {
-        (Expr(_, pos, _), None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => Err(
-            emit_fatal::raise_fatal_runtime(pos, "Can't use [] for reading"),
-        ),
+        (Expr(_, pos, _), None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => {
+            Err(Error::fatal_runtime(pos, "Can't use [] for reading"))
+        }
         _ => {
             let local_temp_kind = get_local_temp_kind(env, false, inout_param_info, elem);
             let mode = if null_coalesce_assignment {
@@ -4253,7 +4248,10 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
             // Special case for literal integer
             Expr_::Int(s) => match ast_constant_folder::expr_to_typed_value(e, elem_expr) {
                 Ok(TypedValue::Int(i)) => Ok((MemberKey::EI(i, ReadonlyOp::Any), instr::empty())),
-                _ => Err(Unrecoverable(format!("{} is not a valid integer index", s))),
+                _ => Err(Error::unrecoverable(format!(
+                    "{} is not a valid integer index",
+                    s
+                ))),
             },
             // Special case for literal string
             Expr_::String(s) => {
@@ -4274,9 +4272,8 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                     }
                     (CI_::CI(id), _) => string_utils::strip_global_ns(&id.1),
                     _ => {
-                        return Err(Unrecoverable(
-                            "Unreachable due to is_special_class_constant_accessed_with_class_id"
-                                .into(),
+                        return Err(Error::unrecoverable(
+                            "Unreachable due to is_special_class_constant_accessed_with_class_id",
                         ));
                     }
                 };
@@ -4363,9 +4360,9 @@ fn emit_class_get<'a, 'arena, 'decl>(
             QueryMOp::CGet => instr::cgets(readonly_op),
             QueryMOp::Isset => instr::issets(),
             QueryMOp::CGetQuiet => {
-                return Err(Unrecoverable("emit_class_get: CGetQuiet".into()));
+                return Err(Error::unrecoverable("emit_class_get: CGetQuiet"));
             }
-            QueryMOp::InOut => return Err(Unrecoverable("emit_class_get: InOut".into())),
+            QueryMOp::InOut => return Err(Error::unrecoverable("emit_class_get: InOut")),
             _ => panic!("Enum value does not match one of listed variants"),
         },
     ]))
@@ -4580,7 +4577,7 @@ fn unop_to_incdec_op(opts: &Options, op: &ast_defs::Uop) -> Result<IncDecOp> {
         Uop::Udecr => if_check_or(IncDecOp::PreDecO, IncDecOp::PreDec),
         Uop::Upincr => if_check_or(IncDecOp::PostIncO, IncDecOp::PostInc),
         Uop::Updecr => if_check_or(IncDecOp::PostDecO, IncDecOp::PostDec),
-        _ => Err(Unrecoverable("invalid incdec op".into())),
+        _ => Err(Error::unrecoverable("invalid incdec op")),
     }
 }
 
@@ -4604,8 +4601,8 @@ fn from_unop<'arena>(opts: &Options, op: &ast_defs::Uop) -> Result<InstrSeq<'are
             }
         }
         _ => {
-            return Err(Unrecoverable(
-                "this unary operation cannot be translated".into(),
+            return Err(Error::unrecoverable(
+                "this unary operation cannot be translated",
             ));
         }
     })
@@ -4690,15 +4687,17 @@ fn from_binop<'arena>(opts: &Options, op: &ast_defs::Bop) -> Result<InstrSeq<'ar
         B::Cmp => instr::cmp(),
         B::Percent => instr::mod_(),
         B::Xor => instr::bitxor(),
-        B::Eq(_) => return Err(Unrecoverable("assignment is emitted differently".into())),
+        B::Eq(_) => {
+            return Err(Error::unrecoverable("assignment is emitted differently"));
+        }
         B::QuestionQuestion => {
-            return Err(Unrecoverable(
-                "null coalescence is emitted differently".into(),
+            return Err(Error::unrecoverable(
+                "null coalescence is emitted differently",
             ));
         }
         B::Barbar | B::Ampamp => {
-            return Err(Unrecoverable(
-                "short-circuiting operator cannot be generated as a simple binop".into(),
+            return Err(Error::unrecoverable(
+                "short-circuiting operator cannot be generated as a simple binop",
             ));
         }
     })
@@ -4886,7 +4885,7 @@ fn emit_binop<'a, 'arena, 'decl>(
             emit_null_coalesce_assignment(e, env, pos, e1, e2)
         }
         B::Eq(Some(eop)) => match binop_to_setopop(e.options(), eop) {
-            None => Err(Unrecoverable("illegal eq op".into())),
+            None => Err(Error::unrecoverable("illegal eq op")),
             Some(op) => emit_lval_op(e, env, pos, LValOp::SetOp(op), e1, Some(e2), false),
         },
         B::QuestionQuestion => {
@@ -5022,14 +5021,14 @@ fn emit_cast<'a, 'arena, 'decl>(
                 typehints::STRING => instr::cast_string(),
                 typehints::FLOAT => instr::cast_double(),
                 _ => {
-                    return Err(emit_fatal::raise_fatal_parse(
+                    return Err(Error::fatal_parse(
                         pos,
                         format!("Invalid cast type: {}", id),
                     ));
                 }
             }
         }
-        _ => return Err(emit_fatal::raise_fatal_parse(pos, "Invalid cast type")),
+        _ => return Err(Error::fatal_parse(pos, "Invalid cast type")),
     };
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
@@ -5064,12 +5063,7 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
     kind: SetRange,
     args: &[(ParamKind, ast::Expr)],
 ) -> Result<InstrSeq<'arena>> {
-    let raise_fatal = |msg: &str| {
-        Err(emit_fatal::raise_fatal_parse(
-            pos,
-            format!("{} {}", name, msg),
-        ))
-    };
+    let raise_fatal = |msg: &str| Err(Error::fatal_parse(pos, format!("{} {}", name, msg)));
 
     // TODO(hgoldstein) Weirdly enough, we *ignore* when the first argument is `inout`
     // unconditionally. We probably want to either _always_ require it or never require it.
@@ -5220,7 +5214,7 @@ fn emit_base<'a, 'arena, 'decl>(
             i.base_stack_size as u32,
             i.cls_stack_size as u32,
         )),
-        ArrayGetBase::Inout { .. } => Err(unrecoverable("unexpected input")),
+        ArrayGetBase::Inout { .. } => Err(Error::unrecoverable("unexpected input")),
     }
 }
 
@@ -5448,9 +5442,9 @@ fn emit_base_<'a, 'arena, 'decl>(
         }
         Expr_::ArrayGet(x) => match (&(x.0).1, x.1.as_ref()) {
             // $a[] can not be used as the base of an array get unless as an lval
-            (_, None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => Err(
-                emit_fatal::raise_fatal_runtime(pos, "Can't use [] for reading"),
-            ),
+            (_, None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => {
+                Err(Error::fatal_runtime(pos, "Can't use [] for reading"))
+            }
             // base is in turn array_get - do a specific handling for inout params
             // if necessary
             (_, opt_elem_expr) => {
@@ -6089,10 +6083,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
             }
             Expr_::ArrayGet(x) => match (&(x.0).1, x.1.as_ref()) {
                 (_, None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => {
-                    return Err(emit_fatal::raise_fatal_runtime(
-                        pos,
-                        "Can't use [] for reading",
-                    ));
+                    return Err(Error::fatal_runtime(pos, "Can't use [] for reading"));
                 }
                 (_, opt_elem_expr) => {
                     let mode = match op {
@@ -6161,7 +6152,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
             Expr_::ObjGet(x) if x.as_ref().3 == ast::PropOrMethod::IsProp => {
                 let (e1, e2, nullflavor, _) = &**x;
                 if nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe) {
-                    return Err(emit_fatal::raise_fatal_parse(
+                    return Err(Error::fatal_parse(
                         pos,
                         "?-> is not allowed in write context",
                     ));
@@ -6264,7 +6255,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                 ]),
             ),
             _ => {
-                return Err(emit_fatal::raise_fatal_parse(
+                return Err(Error::fatal_parse(
                     pos,
                     "Can't use return value in write context",
                 ));
@@ -6357,7 +6348,7 @@ pub fn fixup_type_arg<'a, 'b, 'arena>(
                 H_::Happly(Id(_, id), _)
                     if self.erased_tparams.contains(&id.as_str()) && self.isas =>
                 {
-                    return Err(Some(emit_fatal::raise_fatal_parse(
+                    return Err(Some(Error::fatal_parse(
                         &h.0,
                         "Erased generics are not allowed in is/as expressions",
                     )));
@@ -6519,7 +6510,7 @@ pub fn get_local<'a, 'arena, 'decl>(
     let alloc: &'arena bumpalo::Bump = env.arena;
     if s == special_idents::DOLLAR_DOLLAR {
         match &env.pipe_var {
-            None => Err(emit_fatal::raise_fatal_runtime(
+            None => Err(Error::fatal_runtime(
                 pos,
                 "Pipe variables must occur only in the RHS of pipe expressions",
             )),

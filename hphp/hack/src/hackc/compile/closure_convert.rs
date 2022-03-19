@@ -12,7 +12,7 @@ use hhas_coeffects::HhasCoeffects;
 use hhbc_assertion_utils::*;
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
-use instruction_sequence::{unrecoverable, Error, Result};
+use instruction_sequence::{Error, Result};
 use itertools::{Either, EitherOrBoth::*, Itertools};
 use naming_special_names_rust::{
     fb, pseudo_consts, pseudo_functions, special_idents, superglobals,
@@ -199,7 +199,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
     fn check_if_in_async_context(&self) -> Result<()> {
         let check_valid_fun_kind = |name, kind: FunKind| {
             if !kind.is_async() {
-                Err(emit_fatal::raise_fatal_parse(
+                Err(Error::fatal_parse(
                     &self.pos,
                     format!(
                         "Function '{}' contains 'await' but is not declared as async.",
@@ -212,7 +212,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         };
         let check_lambda = |is_async: bool| {
             if !is_async {
-                Err(emit_fatal::raise_fatal_parse(
+                Err(Error::fatal_parse(
                     &self.pos,
                     "Await may only appear in an async function",
                 ))
@@ -223,7 +223,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         let head = self.scope.iter().next();
         use ScopeItem as S;
         match head {
-            None => Err(emit_fatal::raise_fatal_parse(
+            None => Err(Error::fatal_parse(
                 &self.pos,
                 "'await' can only be used inside a function",
             )),
@@ -387,7 +387,7 @@ fn add_generic(env: &mut Env<'_, '_>, st: &mut State<'_>, var: &str) {
 }
 
 fn get_vars(params: &[FunParam], body: ast_body::AstBody<'_>) -> Result<HashSet<String>> {
-    decl_vars::vars_from_ast(params, &body).map_err(unrecoverable)
+    decl_vars::vars_from_ast(params, &body).map_err(Error::unrecoverable)
 }
 
 fn get_parameter_names(params: &[FunParam]) -> HashSet<String> {
@@ -640,7 +640,7 @@ fn convert_lambda<'a, 'arena>(
     if let Some(user_vars) = &use_vars_opt {
         for aast_defs::Lid(p, id) in user_vars.iter() {
             if local_id::get_name(id) == special_idents::THIS {
-                return Err(emit_fatal::raise_fatal_parse(
+                return Err(Error::fatal_parse(
                     p,
                     "Cannot use $this as lexical variable",
                 ));
@@ -1118,7 +1118,7 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
 
     fn visit_method_(&mut self, env: &mut Env<'a, 'arena>, md: &mut Method_) -> Result<()> {
         let cls = env.scope.get_class().ok_or_else(|| {
-            unrecoverable("unexpected scope shape - method is not inside the class")
+            Error::unrecoverable("unexpected scope shape - method is not inside the class")
         })?;
         // TODO(hrust): not great to have to clone env constantly
         let mut env = env.clone();
@@ -1475,7 +1475,7 @@ impl<'a, 'arena> ClosureConvertVisitor<'a, 'arena> {
                                 unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
                             ))
                         }
-                        _ => Err(emit_fatal::raise_fatal_parse(pc, "Invalid class")),
+                        _ => Err(Error::fatal_parse(pc, "Invalid class")),
                     }
                 }
                 (Expr_::String(cls_name), Some(fname)) => Ok(convert_meth_caller_to_func_ptr(
@@ -1491,11 +1491,11 @@ impl<'a, 'arena> ClosureConvertVisitor<'a, 'arena> {
                     // There's no guarantee that they're valid UTF-8.
                     unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
                 )),
-                (_, Some(_)) => Err(emit_fatal::raise_fatal_parse(
+                (_, Some(_)) => Err(Error::fatal_parse(
                     pc,
                     "Class must be a Class or string type",
                 )),
-                (_, _) => Err(emit_fatal::raise_fatal_parse(
+                (_, _) => Err(Error::fatal_parse(
                     pf,
                     "Method name must be a literal string",
                 )),
@@ -1529,7 +1529,7 @@ impl<'a, 'arena> ClosureConvertVisitor<'a, 'arena> {
                         res.recurse(env, self.object())?;
                         Ok(res)
                     } else {
-                        Err(emit_fatal::raise_fatal_parse(pc, "Invalid class"))
+                        Err(Error::fatal_parse(pc, "Invalid class"))
                     }
                 }
                 (Expr_::String(_), Some(_)) => {
@@ -1537,11 +1537,11 @@ impl<'a, 'arena> ClosureConvertVisitor<'a, 'arena> {
                     res.recurse(env, self.object())?;
                     Ok(res)
                 }
-                (_, Some(_)) => Err(emit_fatal::raise_fatal_parse(
+                (_, Some(_)) => Err(Error::fatal_parse(
                     pc,
                     "Class must be a Class or string type",
                 )),
-                (_, _) => Err(emit_fatal::raise_fatal_parse(
+                (_, _) => Err(Error::fatal_parse(
                     pf,
                     "Method name must be a literal string",
                 )),
@@ -1740,7 +1740,8 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
         .hack_compiler_flags
         .contains(CompilerFlags::CONSTANT_FOLDING)
     {
-        ast_constant_folder::fold_program(defs, e).map_err(|e| unrecoverable(format!("{}", e)))?;
+        ast_constant_folder::fold_program(defs, e)
+            .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
     }
     let defs = &mut defs.0;
 
@@ -1754,7 +1755,7 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
     )?;
     *defs = flatten_ns(defs);
     if e.for_debugger_eval {
-        extract_debugger_main(&namespace_env, defs).map_err(unrecoverable)?;
+        extract_debugger_main(&namespace_env, defs).map_err(Error::unrecoverable)?;
     }
 
     let mut visitor = ClosureConvertVisitor {

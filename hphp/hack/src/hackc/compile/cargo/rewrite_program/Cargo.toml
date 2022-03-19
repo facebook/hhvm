@@ -9,7 +9,6 @@ path = "../../rewrite_program.rs"
 
 [dependencies]
 closure_convert = { path = "../closure_convert" }
-emit_fatal = { path = "../../../emitter/cargo/emit_fatal" }
 env = { path = "../../../emitter/cargo/env" }
 instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 ocamlrep = { path = "../../../../ocamlrep" }

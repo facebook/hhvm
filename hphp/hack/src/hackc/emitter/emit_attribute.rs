@@ -5,7 +5,7 @@
 
 use env::{emitter::Emitter, Env};
 use hhas_attribute::HhasAttribute;
-use instruction_sequence::Result;
+use instruction_sequence::{Error, Result};
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::ast as a;
@@ -32,7 +32,7 @@ pub fn from_ast<'arena, 'decl>(
             ast_constant_folder::Error::UserDefinedConstant,
             "literals_from_expr should have panicked for an error other than UserDefinedConstant"
         );
-        emit_fatal::raise_fatal_parse(&attr.name.0, "Attribute arguments must be literals")
+        Error::fatal_parse(&attr.name.0, "Attribute arguments must be literals")
     })?;
     let fully_qualified_id = if attr.name.1.starts_with("__") {
         // don't do anything to builtin attributes

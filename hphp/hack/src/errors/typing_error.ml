@@ -7551,7 +7551,7 @@ end = struct
     | With_code (code, qfs) ->
       with_code
         (Option.value ~default:code st.code_opt)
-        { st with quickfixes = qfs }
+        { st with quickfixes = qfs @ st.quickfixes}
 
   let apply ?code ?(reasons = lazy []) ?(quickfixes = []) t ~claim =
     let st = { code_opt = code; claim_opt = Some claim; reasons; quickfixes } in

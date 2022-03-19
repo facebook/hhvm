@@ -3,9 +3,9 @@
 
 async function gena<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
-): Awaitable<darray<Tk, Tv>> {
-  $awaitables = darray($awaitables);
-  await AwaitAllWaitHandle::fromDArray($awaitables);
+): Awaitable<dict<Tk, Tv>> {
+  $awaitables = dict($awaitables);
+  await AwaitAllWaitHandle::fromDict($awaitables);
   foreach ($awaitables as $index => $value) {
     $awaitables[$index] = HH\Asio\result($value);
   }
@@ -15,12 +15,12 @@ async function gena<Tk as arraykey, Tv>(
 async function f() { return 1; }
 
 async function test() {
-  $x = darray(vec[f(), f(), f()]);
+  $x = vec[f(), f(), f()];
   await gena($x);
 }
 
 <<__EntryPoint>>
 function main_gena() {
-HH\Asio\join(test());
-echo "DONE\n";
+  HH\Asio\join(test());
+  echo "DONE\n";
 }

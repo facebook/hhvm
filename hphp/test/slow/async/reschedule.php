@@ -14,33 +14,33 @@ async function re($e) {
     }
     echo "$e\t(2**$e)+$diff\t$priority\n";
   };
-  await AwaitAllWaitHandle::fromVArray(varray[$r(-1), $r(0), $r(1)]);
+  await AwaitAllWaitHandle::fromVec(vec[$r(-1), $r(0), $r(1)]);
 }
 
 <<__EntryPoint>>
 function main_reschedule() {
-\HH\Asio\join(AwaitAllWaitHandle::fromDArray(darray(array_map(
-  async $e ==> await re($e),
-  varray[ 1, 10, 20 ],
-))));
-echo "\n\n";
-\HH\Asio\join(AwaitAllWaitHandle::fromDArray(darray(array_map(
-  async $e ==> await re($e),
-  varray[ 1, 30, 31, 32, 33, 48, 62, 63 ],
-))));
+  \HH\Asio\join(AwaitAllWaitHandle::fromDict(dict(array_map(
+    async $e ==> await re($e),
+    vec[ 1, 10, 20 ],
+  ))));
+  echo "\n\n";
+  \HH\Asio\join(AwaitAllWaitHandle::fromDict(dict(array_map(
+    async $e ==> await re($e),
+    vec[ 1, 30, 31, 32, 33, 48, 62, 63 ],
+  ))));
 
-\HH\Asio\join(RescheduleWaitHandle::create(
-  RescheduleWaitHandle::QUEUE_DEFAULT,
-  PHP_INT_MAX,
-));
-try {
   \HH\Asio\join(RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_DEFAULT,
-    PHP_INT_MAX + 1,
+    PHP_INT_MAX,
   ));
-} catch (Exception $ex) {
-  echo "caught expected exception\n";
-}
+  try {
+    \HH\Asio\join(RescheduleWaitHandle::create(
+      RescheduleWaitHandle::QUEUE_DEFAULT,
+      PHP_INT_MAX + 1,
+    ));
+  } catch (Exception $ex) {
+    echo "caught expected exception\n";
+  }
 
-echo "fin.";
+  echo "fin.";
 }

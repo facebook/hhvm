@@ -3,7 +3,7 @@
 // Test showing async stacks in Xenon.
 
 async function genList(...$args) {
-  await AwaitAllWaitHandle::fromVArray($args);
+  await AwaitAllWaitHandle::fromVec($args);
   return array_map($wh ==> \HH\Asio\result($wh), $args);
 }
 
@@ -56,7 +56,7 @@ function entrypoint_xenon(): void {
   } else {
     $stacks = xenon_get_data();
   }
-  $required_functions = varray[
+  $required_functions = vec[
     'array_map',
     'HH\Asio\join',
     'HH\Asio\result',
@@ -71,10 +71,10 @@ function entrypoint_xenon(): void {
     'apc_fetch',
     'entrypoint_xenon',
   ];
-  $optional_functions = varray[
+  $optional_functions = vec[
     'include',
     'is_callable',
-    AwaitAllWaitHandle::class.'::fromVArray',
+    AwaitAllWaitHandle::class.'::fromVec',
     RescheduleWaitHandle::class.'::create',
     Awaitable::class.'::result',
   ];

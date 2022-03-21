@@ -5106,12 +5106,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
                 }
             }
-            AnonymousFunction(x) => {
-                self.lambda_context(node, &x.attribute_spec, &mut prev_context)
-            }
-            LambdaExpression(x) => {
-                self.lambda_context(node, &x.attribute_spec, &mut prev_context)
-            }
+            AnonymousFunction(x) => self.lambda_context(node, &x.attribute_spec, &mut prev_context),
+            LambdaExpression(x) => self.lambda_context(node, &x.attribute_spec, &mut prev_context),
             AwaitableCreationExpression(x) => {
                 self.lambda_context(node, &x.attribute_spec, &mut prev_context)
             }
@@ -5119,42 +5115,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 prev_context = Some(self.env.context.clone());
                 self.env.context.active_classish = Some(node)
             }
-            FileAttributeSpecification(_) => attr_spec_to_node_list(node).for_each(|node| {
-                match self.attr_name(node) {
-                    Some(sn::user_attributes::ENABLE_UNSTABLE_FEATURES) =>
-                {
-                    if let Some(args) = self.attr_args(node) {
-                        let mut args = args.peekable();
-                        if args.peek().is_none() {
-                            self.errors.push(make_error_from_node(
-                                node,
-                                errors::invalid_use_of_enable_unstable_feature(
-                                    format!(
-                                        "you didn't select a feature. Available features are:\n\t{}",
-                                        UnstableFeatures::iter().join("\n\t")
-                                    )
-                                    .as_str(),
-                                ),
-                            ))
-                        } else {
-                            args.for_each(|arg| self.enable_unstable_feature(node, arg))
-                        }
-                    }
-                }
-                Some(name) if self.is_module_attribute(name) => {
-                    self.check_can_use_feature(node, &UnstableFeatures::Modules);
-                    if let Some(args) = self.attr_args(node) {
-                        let arity = args.count();
-                        if arity != 1 {
-                            self.errors.push(make_error_from_node(node, errors::module_attr_arity(arity)));
-                        }
-                    }
-                },
-                Some(_) | None => ()
-            }
-            }),
+            FileAttributeSpecification(_) => self.file_attribute_spec(node),
             ModuleDeclaration(_) => self.check_can_use_feature(node, &UnstableFeatures::Modules),
-            _ => (),
+            _ => {}
         };
 
         self.parameter_errors(node);
@@ -5290,25 +5253,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.is_in_concurrent_block = prev_is_in_concurrent_block;
             }
 
-            NamespaceBody(x) => {
-                if self.namespace_type == Unspecified {
-                    self.namespace_type = Bracketed(make_location(&x.left_brace, &x.right_brace))
-                }
-
-                let old_namespace_name = self.namespace_name.clone();
-                let old_names = self.names.clone();
-                // reset names before diving into namespace body,
-                // keeping global function names
-                self.namespace_name = self.get_namespace_name();
-                let names_copy = std::mem::replace(&mut self.names, UsedNames::empty());
-                self.names.functions = names_copy.functions.filter(|x| x.global);
-                self.fold_child_nodes(node);
-
-                // resume with old set of names and pull back
-                // accumulated errors/last seen namespace type
-                self.names = old_names;
-                self.namespace_name = old_namespace_name;
-            }
+            NamespaceBody(x) => self.namespace_body(node, &x.left_brace, &x.right_brace),
             NamespaceEmptyBody(x) => {
                 if self.namespace_type == Unspecified {
                     self.namespace_type = Unbracketed(make_location_of_node(&x.semicolon))
@@ -5401,6 +5346,43 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
+    fn file_attribute_spec(&mut self, node: S<'a>) {
+        for node in attr_spec_to_node_list(node) {
+            match self.attr_name(node) {
+                Some(sn::user_attributes::ENABLE_UNSTABLE_FEATURES) => {
+                    if let Some(args) = self.attr_args(node) {
+                        let mut args = args.peekable();
+                        if args.peek().is_none() {
+                            self.errors.push(make_error_from_node(
+                            node,
+                            errors::invalid_use_of_enable_unstable_feature(
+                                format!(
+                                    "you didn't select a feature. Available features are:\n\t{}",
+                                    UnstableFeatures::iter().join("\n\t")
+                                )
+                                .as_str(),
+                            ),
+                        ))
+                        } else {
+                            args.for_each(|arg| self.enable_unstable_feature(node, arg))
+                        }
+                    }
+                }
+                Some(name) if self.is_module_attribute(name) => {
+                    self.check_can_use_feature(node, &UnstableFeatures::Modules);
+                    if let Some(args) = self.attr_args(node) {
+                        let arity = args.count();
+                        if arity != 1 {
+                            self.errors
+                                .push(make_error_from_node(node, errors::module_attr_arity(arity)));
+                        }
+                    }
+                }
+                Some(_) | None => {}
+            }
+        }
+    }
+
     fn named_function_context(
         &mut self,
         node: S<'a>,
@@ -5419,6 +5401,26 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         // preserve context when entering lambdas (and anonymous functions)
         self.env.context.active_callable = Some(node);
         self.env.context.active_callable_attr_spec = Some(s);
+    }
+
+    fn namespace_body(&mut self, node: S<'a>, left_brace: S<'a>, right_brace: S<'a>) {
+        if self.namespace_type == Unspecified {
+            self.namespace_type = Bracketed(make_location(left_brace, right_brace))
+        }
+
+        let old_namespace_name = self.namespace_name.clone();
+        let old_names = self.names.clone();
+        // reset names before diving into namespace body,
+        // keeping global function names
+        self.namespace_name = self.get_namespace_name();
+        let names_copy = std::mem::replace(&mut self.names, UsedNames::empty());
+        self.names.functions = names_copy.functions.filter(|x| x.global);
+        self.fold_child_nodes(node);
+
+        // resume with old set of names and pull back
+        // accumulated errors/last seen namespace type
+        self.names = old_names;
+        self.namespace_name = old_namespace_name;
     }
 
     fn fold_child_nodes(&mut self, node: S<'a>) {

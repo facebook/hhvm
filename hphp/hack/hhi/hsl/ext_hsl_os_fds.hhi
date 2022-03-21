@@ -157,6 +157,8 @@ function write(FileDescriptor $fd, string $data): int;
 
 function close(FileDescriptor $fd): void;
 
+function dup(FileDescriptor $fd): FileDescriptor;
+
 function pipe(): (FileDescriptor, FileDescriptor);
 
 const int AF_UNSPEC = 0;

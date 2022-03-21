@@ -56,6 +56,9 @@ function write(FileDescriptor $fd, string $data): int;
 function close(FileDescriptor $fd): void;
 
 <<__Native>>
+function dup(FileDescriptor $fd): FileDescriptor;
+
+<<__Native>>
 function pipe(): varray<FileDescriptor>;
 
 <<__Native>>

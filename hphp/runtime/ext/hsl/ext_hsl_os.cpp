@@ -82,10 +82,11 @@ void throw_errno_exception(int number, const String& message = String()) {
 }
 
 template<class T>
-void throw_errno_if_minus_one(T var) {
+T&& throw_errno_if_minus_one(T&& var) {
   if (var == -1) {
     throw_errno_exception(errno);
   }
+  return std::forward<T>(var);
 }
 
 template<class TRet, class ...Args, class TFn>
@@ -585,6 +586,13 @@ int64_t HHVM_FUNCTION(HSL_os_write, const Object& obj, const String& data) {
 
 void HHVM_FUNCTION(HSL_os_close, const Object& obj) {
   HSLFileDescriptor::get(obj)->close();
+}
+
+Object HHVM_FUNCTION(HSL_os_dup, const Object& fd_wrapper) {
+  // Not using CLI client/server proxying as `dup()` preserves SO_PEERCRED
+  auto in = HSLFileDescriptor::fd(fd_wrapper);
+  auto out = throw_errno_if_minus_one(::dup(in));
+  return HSLFileDescriptor::newInstance(out);
 }
 
 Array HHVM_FUNCTION(HSL_os_pipe) {
@@ -1214,6 +1222,7 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\read, HSL_os_read);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\write, HSL_os_write);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\close, HSL_os_close);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\dup, HSL_os_dup);
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\request_stdio_fd, HSL_os_request_stdio_fd);
     HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\STDIN_FILENO, STDIN_FILENO);

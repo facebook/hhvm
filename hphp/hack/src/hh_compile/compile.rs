@@ -221,7 +221,7 @@ fn process_single_file_impl(
     Ok((output, profile))
 }
 
-fn process_single_file_with_retry(
+pub(crate) fn process_single_file(
     opts: &SingleFileOpts,
     filepath: PathBuf,
     content: Vec<u8>,
@@ -232,20 +232,6 @@ fn process_single_file_with_retry(
         let (opts, filepath, content) = new_ctx.as_ref();
         process_single_file_impl(opts, filepath, content.as_slice(), stack_limit)
     })?
-}
-
-pub(crate) fn process_single_file(
-    opts: &SingleFileOpts,
-    filepath: PathBuf,
-    content: Vec<u8>,
-) -> Result<(Vec<u8>, Profile)> {
-    match std::panic::catch_unwind(|| process_single_file_with_retry(opts, filepath, content)) {
-        Ok(r) => r,
-        Err(panic) => match panic.downcast::<String>() {
-            Ok(msg) => Err(anyhow!("panic: {}", msg)),
-            Err(_) => Err(anyhow!("panic: unknown")),
-        },
-    }
 }
 
 fn assert_regular_file(filepath: impl AsRef<Path>) {
@@ -273,20 +259,6 @@ impl Config {
                 .expect("failed to open config file");
             ret.jsons.push(config_json);
         };
-        ret
-    }
-
-    #[allow(dead_code)] // will be used if --daemon (by HHVM)
-    fn with_merged<T>(
-        &mut self,
-        json: String,
-        cli_args: &[String],
-        f: impl FnOnce(&Options) -> T,
-    ) -> T {
-        self.jsons.push(json);
-        let hhbc_options = self.to_options(cli_args);
-        let ret = f(&hhbc_options);
-        self.jsons.pop();
         ret
     }
 

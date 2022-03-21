@@ -13,7 +13,10 @@ use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::Sou
 extern "C" fn from_text(env: usize, source_text: usize) -> usize {
     ocamlrep_ocamlpool::catch_unwind(|| {
         let env = unsafe { Env::from_ocaml(env).unwrap() };
-        let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
+        let source_text = match unsafe { SourceText::from_ocaml(source_text) } {
+            Ok(source_text) => source_text,
+            Err(e) => panic!("SourceText::from_ocaml failed: {:#?}", e),
+        };
         let indexed_source_text = IndexedSourceText::new(source_text);
 
         match stack_limit::with_elastic_stack(|stack_limit| {

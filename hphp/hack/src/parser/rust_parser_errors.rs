@@ -5233,67 +5233,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         match &node.children {
             // todo: lambda
             LambdaExpression(_) | AwaitableCreationExpression(_) | AnonymousFunction(_) => {
-                let prev_is_in_concurrent_block = self.is_in_concurrent_block;
-                // reset is_in_concurrent_block for functions
-                self.is_in_concurrent_block = false;
-                // analyze the body of lambda block
-                self.fold_child_nodes(node);
-                // adjust is_in_concurrent_block in final result
-                self.is_in_concurrent_block = prev_is_in_concurrent_block;
+                self.lambda(node)
             }
-
-            ConcurrentStatement(_) => {
-                self.concurrent_statement_errors(node);
-                // adjust is_in_concurrent_block in accumulator to dive into the
-                let prev_is_in_concurrent_block = self.is_in_concurrent_block;
-                self.is_in_concurrent_block = true;
-                // analyze the body of concurrent block
-                self.fold_child_nodes(node);
-                // adjust is_in_concurrent_block in final result
-                self.is_in_concurrent_block = prev_is_in_concurrent_block;
-            }
-
+            ConcurrentStatement(_) => self.concurrent_stmt(node),
             NamespaceBody(x) => self.namespace_body(node, &x.left_brace, &x.right_brace),
-            NamespaceEmptyBody(x) => {
-                if self.namespace_type == Unspecified {
-                    self.namespace_type = Unbracketed(make_location_of_node(&x.semicolon))
-                }
-                self.namespace_name = self.get_namespace_name();
-                self.names = UsedNames::empty();
-                self.fold_child_nodes(node);
-            }
-            ClassishDeclaration(_) | AnonymousClass(_) => {
-                // Reset the trait require clauses
-                // Reset the const declarations
-                // Reset the function declarations
-
-                let constants =
-                    std::mem::replace(&mut self.names.constants, YesCase(HashMap::default()));
-                let functions =
-                    std::mem::replace(&mut self.names.functions, NoCase(HashMap::default()));
-                let trait_require_clauses = std::mem::replace(
-                    &mut self.trait_require_clauses,
-                    empty_trait_require_clauses(),
-                );
-
-                self.fold_child_nodes(node);
-
-                self.trait_require_clauses = trait_require_clauses;
-                self.names.functions = functions;
-                self.names.constants = constants;
-            }
-            PrefixedCodeExpression(_) => {
-                prev_context = Some(self.env.context.clone());
-                self.env.context.active_expression_tree = true;
-
-                self.fold_child_nodes(node)
-            }
-            ETSpliceExpression(_) => {
-                let previous_state = self.env.context.active_expression_tree;
-                self.env.context.active_expression_tree = false;
-                self.fold_child_nodes(node);
-                self.env.context.active_expression_tree = previous_state;
-            }
+            NamespaceEmptyBody(x) => self.namespace_empty_body(node, &x.semicolon),
+            ClassishDeclaration(_) | AnonymousClass(_) => self.classes(node),
+            PrefixedCodeExpression(_) => self.prefixed_code_expr(node, &mut prev_context),
+            ETSpliceExpression(_) => self.et_splice_expr(node),
             _ => self.fold_child_nodes(node),
         }
 
@@ -5403,6 +5350,27 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.env.context.active_callable_attr_spec = Some(s);
     }
 
+    fn lambda(&mut self, node: S<'a>) {
+        let prev_is_in_concurrent_block = self.is_in_concurrent_block;
+        // reset is_in_concurrent_block for functions
+        self.is_in_concurrent_block = false;
+        // analyze the body of lambda block
+        self.fold_child_nodes(node);
+        // adjust is_in_concurrent_block in final result
+        self.is_in_concurrent_block = prev_is_in_concurrent_block;
+    }
+
+    fn concurrent_stmt(&mut self, node: S<'a>) {
+        self.concurrent_statement_errors(node);
+        // adjust is_in_concurrent_block in accumulator to dive into the
+        let prev_is_in_concurrent_block = self.is_in_concurrent_block;
+        self.is_in_concurrent_block = true;
+        // analyze the body of concurrent block
+        self.fold_child_nodes(node);
+        // adjust is_in_concurrent_block in final result
+        self.is_in_concurrent_block = prev_is_in_concurrent_block;
+    }
+
     fn namespace_body(&mut self, node: S<'a>, left_brace: S<'a>, right_brace: S<'a>) {
         if self.namespace_type == Unspecified {
             self.namespace_type = Bracketed(make_location(left_brace, right_brace))
@@ -5421,6 +5389,47 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         // accumulated errors/last seen namespace type
         self.names = old_names;
         self.namespace_name = old_namespace_name;
+    }
+
+    fn namespace_empty_body(&mut self, node: S<'a>, semi: S<'a>) {
+        if self.namespace_type == Unspecified {
+            self.namespace_type = Unbracketed(make_location_of_node(semi))
+        }
+        self.namespace_name = self.get_namespace_name();
+        self.names = UsedNames::empty();
+        self.fold_child_nodes(node);
+    }
+
+    fn classes(&mut self, node: S<'a>) {
+        // Reset the trait require clauses
+        // Reset the const declarations
+        // Reset the function declarations
+
+        let constants = std::mem::replace(&mut self.names.constants, YesCase(HashMap::default()));
+        let functions = std::mem::replace(&mut self.names.functions, NoCase(HashMap::default()));
+        let trait_require_clauses = std::mem::replace(
+            &mut self.trait_require_clauses,
+            empty_trait_require_clauses(),
+        );
+
+        self.fold_child_nodes(node);
+
+        self.trait_require_clauses = trait_require_clauses;
+        self.names.functions = functions;
+        self.names.constants = constants;
+    }
+
+    fn prefixed_code_expr(&mut self, node: S<'a>, prev_context: &mut Option<Context<'a>>) {
+        *prev_context = Some(self.env.context.clone());
+        self.env.context.active_expression_tree = true;
+        self.fold_child_nodes(node)
+    }
+
+    fn et_splice_expr(&mut self, node: S<'a>) {
+        let previous_state = self.env.context.active_expression_tree;
+        self.env.context.active_expression_tree = false;
+        self.fold_child_nodes(node);
+        self.env.context.active_expression_tree = previous_state;
     }
 
     fn fold_child_nodes(&mut self, node: S<'a>) {

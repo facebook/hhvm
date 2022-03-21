@@ -5,7 +5,7 @@
 
 mod opcodes;
 
-use ffi::{BumpSliceMut, Maybe, Slice, Str};
+use ffi::{BumpSliceMut, Slice, Str};
 use iterator::IterId;
 use label::Label;
 use local::{Local, LocalId};
@@ -122,11 +122,12 @@ impl<'arena> FCallArgs<'arena> {
 #[repr(C)]
 pub struct IterArgs<'arena> {
     pub iter_id: IterId,
-    pub key_id: Maybe<Local<'arena>>,
+    pub key_id: Local<'arena>,
     pub val_id: Local<'arena>,
 }
 
 pub type ClassrefId = isize;
+
 /// Conventionally this is "A_" followed by an integer
 pub type AdataId<'arena> = Str<'arena>;
 pub type ParamLocations<'arena> = Slice<'arena, isize>;

@@ -6,7 +6,7 @@
 use ast_class_expr::ClassExpr;
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env, Flags as EnvFlags};
-use ffi::{Maybe::Just, Slice, Str};
+use ffi::{Slice, Str};
 use hash::HashSet;
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
@@ -880,7 +880,7 @@ fn emit_iter<'arena, 'decl, F: FnOnce(Local<'arena>, Local<'arena>) -> InstrSeq<
         let loop_next = e.label_gen_mut().next_regular();
         let iter_args = IterArgs {
             iter_id,
-            key_id: Just(key_id),
+            key_id,
             val_id,
         };
         let iter_init = InstrSeq::gather(vec![

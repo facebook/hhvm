@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::print;
-use ffi::{Maybe, Str};
+use ffi::Str;
 use hash::HashSet;
 use hhbc_ast::{
     AdataId, BareThisOp, ClassId, ClassNum, CollectionType, ConstId, ContCheckOp, FCallArgs,
@@ -162,16 +162,13 @@ fn print_function_id(w: &mut dyn Write, id: &FunctionId<'_>) -> Result<()> {
 
 fn print_iter_args(w: &mut dyn Write, iter_args: &IterArgs<'_>) -> Result<()> {
     print_iterator_id(w, &iter_args.iter_id)?;
-    w.write_all(b" ")?;
-    match &iter_args.key_id {
-        Maybe::Nothing => w.write_all(b"NK")?,
-        Maybe::Just(k) => {
-            w.write_all(b"K:")?;
-            print_local(w, k)?;
-        }
-    };
-    w.write_all(b" ")?;
-    w.write_all(b"V:")?;
+    if iter_args.key_id.is_valid() {
+        w.write_all(b" K:")?;
+        print_local(w, &iter_args.key_id)?;
+    } else {
+        w.write_all(b" NK")?;
+    }
+    w.write_all(b" V:")?;
     print_local(w, &iter_args.val_id)
 }
 

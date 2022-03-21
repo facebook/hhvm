@@ -38,6 +38,12 @@ pub enum Local<'arena> {
 }
 
 impl Local<'_> {
+    pub const INVALID: Self = Self::Unnamed(LocalId { idx: u32::MAX });
+
+    pub fn is_valid(&self) -> bool {
+        !matches!(self, Self::Unnamed(LocalId { idx: u32::MAX }))
+    }
+
     pub fn expect_unnamed(&self) -> LocalId {
         match self {
             Local::Unnamed(id) => *id,

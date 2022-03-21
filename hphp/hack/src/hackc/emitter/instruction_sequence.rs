@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{BumpSliceMut, Maybe::*, Slice, Str};
+use ffi::{BumpSliceMut, Slice, Str};
 use hhbc_ast::*;
 use iterator::IterId;
 use label::Label;
@@ -230,20 +230,6 @@ pub mod instr {
     }
 
     pub fn iternext<'a>(args: IterArgs<'a>, label: Label) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcode::IterNext(args, label)))
-    }
-
-    pub fn iternextk<'a>(
-        id: IterId,
-        label: Label,
-        value: Local<'a>,
-        key: Local<'a>,
-    ) -> InstrSeq<'a> {
-        let args = IterArgs {
-            iter_id: id,
-            key_id: Just(key),
-            val_id: value,
-        };
         instr(Instruct::Opcode(Opcode::IterNext(args, label)))
     }
 

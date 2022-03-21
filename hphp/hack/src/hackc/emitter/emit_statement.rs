@@ -6,7 +6,7 @@ use crate::try_finally_rewriter as tfr;
 use emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, SetRange};
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
-use ffi::{Maybe, Slice, Str};
+use ffi::{Slice, Str};
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use instruction_sequence::{instr, Error, InstrSeq, Result};
@@ -969,7 +969,7 @@ fn emit_foreach_<'a, 'arena, 'decl>(
         let (key_id, val_id, preamble) = emit_iterator_key_value_storage(e, env, iterator)?;
         let iter_args = IterArgs {
             iter_id,
-            key_id: Maybe::from(key_id),
+            key_id: key_id.unwrap_or(Local::INVALID),
             val_id,
         };
         let body = env.do_in_loop_body(

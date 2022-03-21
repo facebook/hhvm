@@ -5086,32 +5086,16 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         let mut prev_context = None;
         let mut pushed_nested_namespace = false;
 
-        let named_function_context =
-            |self_: &mut Self, node, s, prev_context: &mut Option<Context<'a>>| {
-                *prev_context = Some(self_.env.context.clone());
-                // a _single_ variable suffices as they cannot be nested
-                self_.env.context.active_methodish = Some(node);
-                self_.env.context.active_callable = Some(node);
-                self_.env.context.active_callable_attr_spec = Some(s);
-            };
-
-        let lambda_context = |self_: &mut Self, node, s, prev_context: &mut Option<Context<'a>>| {
-            *prev_context = Some(self_.env.context.clone());
-            //preserve context when entering lambdas (and anonymous functions)
-            self_.env.context.active_callable = Some(node);
-            self_.env.context.active_callable_attr_spec = Some(s);
-        };
-
         match &node.children {
             ConstDeclaration(_) => {
                 prev_context = Some(self.env.context.clone());
                 self.env.context.active_const = Some(node)
             }
             FunctionDeclaration(x) => {
-                named_function_context(self, node, &x.attribute_spec, &mut prev_context)
+                self.named_function_context(node, &x.attribute_spec, &mut prev_context)
             }
             MethodishDeclaration(x) => {
-                named_function_context(self, node, &x.attribute, &mut prev_context)
+                self.named_function_context(node, &x.attribute, &mut prev_context)
             }
             NamespaceDeclaration(x) => {
                 if let NamespaceDeclarationHeader(x) = &x.header.children {
@@ -5123,13 +5107,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
             AnonymousFunction(x) => {
-                lambda_context(self, node, &x.attribute_spec, &mut prev_context)
+                self.lambda_context(node, &x.attribute_spec, &mut prev_context)
             }
             LambdaExpression(x) => {
-                lambda_context(self, node, &x.attribute_spec, &mut prev_context)
+                self.lambda_context(node, &x.attribute_spec, &mut prev_context)
             }
             AwaitableCreationExpression(x) => {
-                lambda_context(self, node, &x.attribute_spec, &mut prev_context)
+                self.lambda_context(node, &x.attribute_spec, &mut prev_context)
             }
             ClassishDeclaration(_) => {
                 prev_context = Some(self.env.context.clone());
@@ -5415,6 +5399,26 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 Some(node as *const _)
             );
         }
+    }
+
+    fn named_function_context(
+        &mut self,
+        node: S<'a>,
+        s: S<'a>,
+        prev_context: &mut Option<Context<'a>>,
+    ) {
+        *prev_context = Some(self.env.context.clone());
+        // a _single_ variable suffices as they cannot be nested
+        self.env.context.active_methodish = Some(node);
+        self.env.context.active_callable = Some(node);
+        self.env.context.active_callable_attr_spec = Some(s);
+    }
+
+    fn lambda_context(&mut self, node: S<'a>, s: S<'a>, prev_context: &mut Option<Context<'a>>) {
+        *prev_context = Some(self.env.context.clone());
+        // preserve context when entering lambdas (and anonymous functions)
+        self.env.context.active_callable = Some(node);
+        self.env.context.active_callable_attr_spec = Some(s);
     }
 
     fn fold_child_nodes(&mut self, node: S<'a>) {

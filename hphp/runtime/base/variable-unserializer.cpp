@@ -303,12 +303,12 @@ void VariableUnserializer::reserveForAdd(size_t count) {
   auto const capacity = m_refs.capacity();
   if (newSize <= capacity) return;
   auto const total =
-    (folly::nextPowTwo(newSize) - capacity) *
-    sizeof(decltype(m_refs)::value_type);
+    folly::nextPowTwo(newSize) * sizeof(decltype(m_refs)::value_type);
   if (UNLIKELY(total > kMaxSmallSize && tl_heap->preAllocOOM(total))) {
     check_non_safepoint_surprise();
   }
   m_refs.reserve(newSize);
+  check_non_safepoint_surprise();
 }
 
 TypedValue VariableUnserializer::getByVal(int id) {

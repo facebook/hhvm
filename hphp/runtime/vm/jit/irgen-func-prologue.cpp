@@ -455,13 +455,6 @@ void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
   // We have updated stack and entered the context of the callee.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
-
-  // Increment the count for the latest call for optimized translations if we're
-  // going to serialize the profile data.
-  if (env.context.kind == TransKind::OptPrologue && isJitSerializing() &&
-      RuntimeOption::EvalJitPGOOptCodeCallGraph) {
-    gen(env, IncCallCounter, fp(env));
-  }
 }
 
 void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {

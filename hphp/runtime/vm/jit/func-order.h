@@ -48,9 +48,9 @@ FuncId getCallFuncId(TCA callRetAddr);
 void   clearCallFuncId(TCA callRetAddr);
 
 /*
- * Increment the count for the top-most call in the stack at `fp'.
+ * Increment the count for the top-most call in the stack at `callee' and its `fp'.
  */
-void incCount(const ActRec* fp);
+void incCount(const Func* callee, const ActRec* fp);
 
 /*
  * Record that a translation is emitted so that the size of functions can be

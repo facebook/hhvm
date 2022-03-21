@@ -2551,11 +2551,11 @@ To string conversions:
 
   Increment the profiling counter associated with translation TransID.
 
-| IncCallCounter, ND, S(FramePtr), NF
+| IncCallCounter<callee>, ND, S(FramePtr), NF
 
   Increment the counter associated associated with the last call, namely from
   the function containing the previous translation in the call stack into the
-  current function.
+  current function given by `callee'.
 
 | DbgAssertRefCount<AssertReason>, ND, S(Cell), NF
 

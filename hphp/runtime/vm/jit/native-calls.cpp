@@ -374,7 +374,7 @@ static CallMap s_callMap {
     {ProfileProp,        &PropertyProfile::incCount, DNone, SNone,
                            {{SSA, 0}, {SSA, 1}}},
 
-    {IncCallCounter,     FuncOrder::incCount, DNone, SNone, {{SSA, 0}}},
+    {IncCallCounter,     FuncOrder::incCount, DNone, SNone, {{extra(&FuncData::func)}, {SSA, 0}}},
 
     /* Global helpers */
     {LdGblAddrDef,       ldGblAddrDefHelper, DSSA, SSync,

@@ -249,6 +249,14 @@ void emitGuards(irgen::IRGS& irgs,
         irgen::incProfCounter(irgs, transID);
       }
     }
+
+    // Increment the count for the latest call for optimized translations if we're
+    // going to serialize the profile data.
+    if (irgs.context.kind == TransKind::Optimize && isJitSerializing() &&
+        sk.funcEntry() && RuntimeOption::EvalJitPGOOptCodeCallGraph) {
+      irgen::gen(irgs, IncCallCounter, FuncData { curFunc(irgs) }, irgen::fp(irgs));
+    }
+
     irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletBody, sk);
 
     // In the entry block, hhbc-translator gets a chance to emit some code

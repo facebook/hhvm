@@ -367,14 +367,13 @@ void clearCallFuncId(TCA callRetAddr) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void incCount(const ActRec* fp) {
+void incCount(const Func* callee, const ActRec* fp) {
   auto const callerRip = reinterpret_cast<TCA>(fp->m_savedRip);
   if (callerRip == nullptr) return;
-  auto const callee = fp->func()->getFuncId();
   auto const caller = getCallFuncId(callerRip);
   if (caller.isInvalid()) return;
 
-  auto pair = FuncPair(caller.toInt(), callee.toInt());
+  auto pair = FuncPair(caller.toInt(), callee->getFuncId().toInt());
   {
     CallCounters::accessor acc;
     if (!s_callCounters.insert(acc, CallCounters::value_type(pair, 1))) {

@@ -2747,6 +2747,7 @@ X(ReqRetranslate,               IRSPRelOffsetData);
 X(ReqRetranslateOpt,            IRSPRelOffsetData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
+X(IncCallCounter,               FuncData);
 X(LogArrayReach,                SinkProfileData);
 X(NewLoggingArray,              LoggingProfileData);
 X(BespokeGet,                   BespokeGetData);

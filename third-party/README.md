@@ -27,7 +27,7 @@ Some tips:
 
 Some Facebook-employee-specific tips:
 
-- you can allocate a VM with a recent prebuilt environment via `i opensource/ondemand/facebook/hhvm`; when prompted, slect the most recent successfull built for the oldest Ubuntu listed.
+- you can allocate a VM with a recent prebuilt environment via `i opensource/ondemand/facebook/hhvm`; when prompted, select the most recent successfull built for the oldest Ubuntu listed.
 - if the Mac CI is unable to find a dependency but it's found locally, uninstall it with `brew uninstall --force --ignore-dependencies FOO`; you can then install the same package used in the CI with `yum install`; find the package with `yum search foo` - you probably want the most recent `nix2rpm` package, though you can check exactly which is used in `hphp/facebook/autobuild/cmake/mac/cmake.sh`
 
 Overall process:

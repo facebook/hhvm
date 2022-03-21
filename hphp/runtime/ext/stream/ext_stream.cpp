@@ -397,7 +397,7 @@ Variant HHVM_FUNCTION(stream_get_line,
 Variant HHVM_FUNCTION(stream_get_meta_data,
                       const Resource& stream) {
   if (auto f = dyn_cast_or_null<File>(stream)) {
-    return f->getMetaData();
+    if (!f->isClosed()) return f->getMetaData();
   }
   if (auto d = dyn_cast_or_null<Directory>(stream)) {
     return d->getMetaData();

@@ -227,7 +227,7 @@ let push_like_tyargs env tyl tparams =
 
     List.map2_env false tyl tparams ~f:make_like
 
-let try_push_like env ty =
+let rec try_push_like env ty =
   match deref ty with
   | (r, Ttuple tyl) ->
     let (changed, tyl) = List.map_env false tyl ~f:make_like in
@@ -272,5 +272,11 @@ let try_push_like env ty =
             Some (mk (r, Tclass ((p, n), exact, tyl)))
           else
             None )
+    end
+  | (r, Toption ty) ->
+    begin
+      match try_push_like env ty with
+      | (env, Some ty) -> (env, Some (mk (r, Toption ty)))
+      | (env, None) -> (env, None)
     end
   | _ -> (env, None)

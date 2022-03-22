@@ -73,6 +73,33 @@ function source_through_global_into_sink(): void {
   __sink($foo);
 }
 
+class IdentityFunctor {
+  public function __invoke($x) {
+    return $x;
+  }
+}
+
+class FunctorToSink {
+  public function __invoke($x, $y) {
+    __sink($x);
+  }
+}
+
+function source_through_functor_into_sink(): void {
+  $a = __source();
+  $b = 2;
+  $identity = new IdentityFunctor();
+  $to_sink = new FunctorToSink();
+  // This is a flow
+  __sink($identity($a));
+  // This is not
+  __sink($identity($b));
+  // This is a flow
+  $to_sink($a, $b);
+  // This is not
+  $to_sink($b, $a);
+}
+
 <<__EntryPoint>> function main(): void {
   source_through_assignment_to_sink();
   // Ensure parameters don't pick up taint from prior locals on the stack
@@ -82,4 +109,5 @@ function source_through_global_into_sink(): void {
   source_through_indirection_to_sink();
   source_through_mutations_into_sink();
   source_through_global_into_sink();
+  source_through_functor_into_sink();
 }

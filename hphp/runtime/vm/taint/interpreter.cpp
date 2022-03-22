@@ -1104,6 +1104,8 @@ void iopLockObj() {
   iopPreamble("LockObj");
 }
 
+namespace {
+
 void iopFCall(const Func* func, const FCallArgs& fca, Value last_this) {
   if (func == nullptr) {
     return;
@@ -1147,6 +1149,10 @@ void iopFCall(const Func* func, const FCallArgs& fca, Value last_this) {
     auto path = value->to(state->arena.get(), Hop{vmfp()->func(), func});
     state->paths.push_back(path);
   }
+}
+
+const StaticString s___invoke("__invoke");
+
 }
 
 TCA iopFCallClsMethod(
@@ -1242,8 +1248,63 @@ TCA iopFCallFunc(
     bool /* retToJit */,
     PC /* origpc */,
     PC& /* pc */,
-    const FCallArgs& /* fca */) {
-  iopUnhandled("FCallFunc");
+    const FCallArgs& fca) {
+  iopPreamble("FCallFunc");
+
+  auto state = State::instance;
+
+  // Look up object methods (closures and functors) and call them
+  const auto type = vmStack().topC()->m_type;
+  if (isObjectType(type)) {
+    // Pop the object from the stack
+    state->stack.pop();
+    auto obj = vmStack().topC()->m_data.pobj;
+    const auto cls = obj->getVMClass();
+    const auto func = cls->lookupMethod(s___invoke.get());
+    if (func != nullptr) {
+      FTRACE(
+        2,
+        "taint: Calling {} on object {} with {} locals and {} params and {} slots. vmfp is {} and vmsp is {}\n",
+        func->isClosureBody() ? "closure" : "functor",
+        obj,
+        func->isClosureBody() ? func->numClosureUseLocals() : 0,
+        func->numParams(),
+        func->numSlotsInFrame(),
+        (size_t)vmfp(),
+        (size_t)vmsp()
+      );
+      auto sp = vmsp();
+      // Unlike other bytecodes, the `from` here is the *current* function because
+      // the interpreter has not yet had a chance to update the current function.
+      const Func* from = vmfp()->func();
+      const auto params = func->numParams();
+      // Params go up on the stack from where vmsp is, the interpreter will adjust vmsp
+      // later when it actually processes this opcode, to make things line up properly.
+      for (size_t i = 0; i < params; i++) {
+        auto value = state->stack.peek(params - i - 1);
+        if (value) {
+          value = value->to(state->arena.get(), Hop{from, func});
+        }
+        auto address = sp + i + 1;
+        FTRACE(
+          2,
+          "taint: Setting parameter index {} ({}) to `{}` (from stack offset {})\n",
+          i,
+          (size_t)address,
+          value,
+          params - i - 1
+        );
+        state->heap_locals.set(address, value);
+      }
+      // We don't care if the functor/closure *itself* is tainted (what would that even look like?)
+      auto this_taint = nullptr;
+      iopFCall(func, fca, this_taint);
+    } else {
+      // interpreter will fatal here, so we can ignore this case
+    }
+  }
+
+  // TODO: Support more types of function calls
   return nullptr;
 }
 

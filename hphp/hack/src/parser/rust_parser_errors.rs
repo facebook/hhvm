@@ -5486,28 +5486,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             systemlib,
             stack_limit,
         };
-
-        match tree.required_stack_size() {
-            None => Self::new(env).parse_errors_impl(),
-            Some(stack_size) => {
-                // We want to use new thread ONLY for it's capability of adjustable stack size.
-                // Rust is against it because SyntaxTree is not a thread safe structure. Moreover,
-                // spawned thread could outlive the 'a lifetime.
-                // Since the only thing the main thread will do after spawning the child is to wait
-                // for it to finish, there will be no actual concurrency, and we can "safely" unsafe
-                // it. The usize cast is to fool the borrow checker about the thread lifetime and 'a.
-                let raw_pointer = Box::leak(Box::new(Self::new(env))) as *mut Self as usize;
-                std::thread::Builder::new()
-                    .stack_size(stack_size)
-                    .spawn(move || {
-                        let self_ = unsafe { Box::from_raw(raw_pointer as *mut Self) };
-                        self_.parse_errors_impl()
-                    })
-                    .expect("ERROR: thread::spawn")
-                    .join()
-                    .expect("ERROR: failed to wait on new thread")
-            }
-        }
+        Self::new(env).parse_errors_impl()
     }
 }
 

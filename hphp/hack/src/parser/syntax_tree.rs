@@ -17,7 +17,6 @@ pub struct SyntaxTree<'a, Syntax, State> {
     errors: Vec<SyntaxError>,
     mode: Option<Mode>,
     state: State,
-    required_stack_size: Option<usize>,
 }
 
 impl<'arena, T, V, State> SyntaxTree<'_, Syntax<'arena, T, V>, State>
@@ -102,7 +101,6 @@ where
         errors: Vec<SyntaxError>,
         mode: Option<Mode>,
         state: State,
-        required_stack_size: Option<usize>,
     ) -> Self {
         Self {
             text,
@@ -110,7 +108,6 @@ where
             errors,
             mode,
             state,
-            required_stack_size,
         }
     }
 
@@ -155,10 +152,9 @@ where
         mut errors: Vec<SyntaxError>,
         mode: Option<Mode>,
         state: State,
-        required_stack_size: Option<usize>,
     ) -> Self {
         Self::process_errors(&mut errors);
-        Self::build(text, root, errors, mode, state, required_stack_size)
+        Self::build(text, root, errors, mode, state)
     }
 
     fn remove_duplicates<F>(errors: &mut Vec<impl Borrow<SyntaxError>>, equals: F)
@@ -207,10 +203,6 @@ where
         self.mode == Some(Mode::Mhhi)
     }
 
-    pub fn required_stack_size(&self) -> Option<usize> {
-        self.required_stack_size
-    }
-
     // "unsafe" because it can break the invariant that text is consistent with other syntax
     // tree members
     pub fn replace_text_unsafe(&mut self, text: &'a SourceText<'a>) {
@@ -224,7 +216,6 @@ where
             errors: self.errors,
             mode: self.mode,
             state: (),
-            required_stack_size: self.required_stack_size,
         }
     }
 

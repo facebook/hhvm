@@ -46,7 +46,7 @@ where
     let leak_rust_tree = env.leak_rust_tree;
     let env = ParserEnv::from(env);
 
-    let retryable = |stack_limit: &StackLimit, nonmain_stack_size: Option<usize>| {
+    let retryable = |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
         let env = env.clone();
         let parse_fn = parse_fn.clone();
         // Safety: Requires no concurrent interaction with OCaml runtime
@@ -82,14 +82,7 @@ where
         let ocaml_state = pool.add(&state).to_bits();
         let tree = if leak_rust_tree {
             let (_, mode) = parse_mode(&source_text);
-            let tree = Box::new(SyntaxTree::build(
-                &source_text,
-                root,
-                errors,
-                mode,
-                (),
-                /* required_stack_size= */ nonmain_stack_size,
-            ));
+            let tree = Box::new(SyntaxTree::build(&source_text, root, errors, mode, ()));
             // A rust pointer of (&SyntaxTree, &Arena) is passed to Ocaml,
             // Ocaml will pass it back to `rust_parser_errors::rust_parser_errors_positioned`
             // PLEASE ENSURE TYPE SAFETY MANUALLY!!!

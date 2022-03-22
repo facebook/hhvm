@@ -59,12 +59,12 @@ std::string Path::jsonLine() const {
     auto hop = hops[i];
 
     if (last != hop.from && hop.from != nullptr) {
-      jsonHops.push_back(hop.from->fullName()->data());
+      jsonHops.push_back(hop.from->fullNameWithClosureName().data());
     }
     last = hop.from;
 
     if (last != hop.to && hop.to != nullptr) {
-      jsonHops.push_back(hop.to->fullName()->data());
+      jsonHops.push_back(hop.to->fullNameWithClosureName().data());
     }
     last = hop.to;
   }

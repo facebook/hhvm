@@ -88,7 +88,7 @@ where
                 errors,
                 mode,
                 (),
-                nonmain_stack_size,
+                /* required_stack_size= */ nonmain_stack_size,
             ));
             // A rust pointer of (&SyntaxTree, &Arena) is passed to Ocaml,
             // Ocaml will pass it back to `rust_parser_errors::rust_parser_errors_positioned`
@@ -151,27 +151,6 @@ where
             );
         }
     }
-}
-
-#[macro_export]
-macro_rules! parse {
-    ($name:ident, $parse_script:expr $(,)?) => {
-        // We don't use the ocaml_ffi! macro here because we want precise
-        // control over the Pool--when a parse fails, we want to free the old
-        // pool and create a new one.
-        #[no_mangle]
-        pub extern "C" fn $name<'a>(ocaml_source_text: usize, env: usize) -> usize {
-            ocamlrep_ocamlpool::catch_unwind(|| {
-                use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
-                use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
-
-                let ocaml_source_text = unsafe { UnsafeOcamlPtr::new(ocaml_source_text) };
-                let env = unsafe { FullFidelityParserEnv::from_ocaml(env).unwrap() };
-                $crate::parse(ocaml_source_text, env, |_, s, e, l| $parse_script(s, e, l))
-                    .as_usize()
-            })
-        }
-    };
 }
 
 #[macro_export]

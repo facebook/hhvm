@@ -100,6 +100,34 @@ function source_through_functor_into_sink(): void {
   $to_sink($b, $a);
 }
 
+function source_through_closure_into_sink(): void {
+  $a = __source();
+  $b = 2;
+  $c = 3;
+  $tito = $foo ==> __sink($foo);
+  // This is not a flow
+  $tito(4);
+  // This is a flow
+  $tito($a);
+  $end = $foo ==> $foo + 1;
+  // This is not
+  $end($a);
+  // This is
+  $tito_capture = ($foo) ==> {
+    $b + $foo + $c;
+    __sink($a);
+  };
+  $tito_capture(5);
+  // This is a flow
+  $identity = $x ==> $x;
+  __sink($identity($a));
+  // This is not a flow
+  $multi_arg = ($foo, $bar) ==> __sink($bar);
+  $multi_arg($a, 1);
+  // This is, though
+  $multi_arg(1, $a);
+}
+
 <<__EntryPoint>> function main(): void {
   source_through_assignment_to_sink();
   // Ensure parameters don't pick up taint from prior locals on the stack
@@ -110,4 +138,5 @@ function source_through_functor_into_sink(): void {
   source_through_mutations_into_sink();
   source_through_global_into_sink();
   source_through_functor_into_sink();
+  source_through_closure_into_sink();
 }

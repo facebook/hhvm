@@ -335,6 +335,26 @@ void IteratorsHeap::clear() {
   m_heap.clear();
 }
 
+void ClosuresHeap::set(
+    ObjectData* object,
+    std::vector<Value> values) {
+  m_heap[object] = std::move(values);
+}
+
+const std::vector<Value>& ClosuresHeap::get(ObjectData* object) const {
+  auto maybe_object = m_heap.find(object);
+  if (maybe_object != m_heap.end()) {
+    return maybe_object->second;
+  }
+
+  thread_local std::vector<Value> empty;
+  return empty;
+}
+
+void ClosuresHeap::clear() {
+  m_heap.clear();
+}
+
 namespace {
 
 struct SingletonTag {};
@@ -366,7 +386,9 @@ void State::initialize() {
   heap_classes.clear();
   heap_globals.clear();
   heap_iterators.clear();
+  heap_closures.clear();
   paths.clear();
+  last_closure_capture.clear();
   arena = std::make_unique<PathArena>();
   m_function_metadata = Configuration::get()->functionMetadata();
   post_op = PostOpcodeOp::NOP;

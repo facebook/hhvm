@@ -181,11 +181,27 @@ struct IteratorsHeap {
   hphp_fast_map<Iter*, Value> m_heap;
 };
 
+// Model closures, which are identified by `ObjectData*`s
+// and have their tainted locals stored as a vector
+struct ClosuresHeap {
+  void set(ObjectData* object, std::vector<Value> values);
+
+  // NOTE: Returning by reference to avoid copies.
+  // Caller must be careful here.
+  const std::vector<Value>& get(ObjectData* object) const;
+
+  void clear();
+
+ private:
+  hphp_fast_map<ObjectData*, std::vector<Value>> m_heap;
+};
+
 // Enum defining operations we may want to run *after* a given opcode is
 // run, i.e. at the start of the next opcode. This makes certain implementations
 // much easier.
 enum class PostOpcodeOp : uint8_t {
-  NOP = 1,
+  CREATE_CL = 1,
+  NOP = 2,
 };
 
 struct State {
@@ -205,9 +221,12 @@ struct State {
   ClassesHeap heap_classes;
   GlobalsHeap heap_globals;
   IteratorsHeap heap_iterators;
+  ClosuresHeap heap_closures;
   FCallArgs last_fcall;
   // Taint on the last 'this' from a method call
   Value last_this;
+  // Taint on the last created closure's arguments
+  std::vector<Value> last_closure_capture;
 
   // Arena to hold all the paths
   std::unique_ptr<PathArena> arena;

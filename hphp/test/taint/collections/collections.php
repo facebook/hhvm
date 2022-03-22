@@ -145,6 +145,24 @@ function iterators_do_not_collide_across_calls() {
   }
 }
 
+function iteration_builtins_work_properly() {
+  $tainted = vec[__source()];
+  $untainted = 1;
+  // This is not tainted
+  HH\Lib\Vec\map($tainted,
+    $x ==> {
+      __sink($untainted);
+    }
+  );
+  // This is tainted
+  HH\Lib\Vec\map($tainted,
+    $x ==> {
+      $untainted + 1;
+      __sink($x);
+    }
+  );
+}
+
 <<__EntryPoint>> function main(): void {
   no_flow_to_sink();
   source_through_vec_to_sink();
@@ -157,6 +175,7 @@ function iterators_do_not_collide_across_calls() {
   source_through_dict_tainted_value_to_sink();
   source_through_dict_iteration_to_sink();
   source_through_dict_with_initializer_to_sink();
+  iteration_builtins_work_properly();
   // Tests for older collections below. These are not as comprehensive
   // as the implementations are similar to the above - we just test
   // basic behavior and try to ensure things don't crash.

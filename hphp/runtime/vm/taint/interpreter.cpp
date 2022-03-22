@@ -113,7 +113,16 @@ void iopPreamble(folly::StringPiece name) {
   // Handle any leftover processing from the last opcode
   switch (state->post_op) {
     case PostOpcodeOp::NOP: break;
+    case PostOpcodeOp::CREATE_CL: {
+      // Save the closure on the heap now that we know how to identify it
+      auto obj = vmStack().topC()->m_data.pobj;
+      FTRACE(1, "taint: saving closure {} on the heap\n", obj);
+      state->heap_closures.set(obj, std::move(state->last_closure_capture));
+      state->last_closure_capture.clear();
+    }
+    break;
   }
+  state->post_op = PostOpcodeOp::NOP;
 
   auto& stack = state->stack;
   auto shadow_stack_size = stack.size();
@@ -1303,6 +1312,30 @@ TCA iopFCallFunc(
         );
         state->heap_locals.set(address, value);
       }
+      // Captures go down on the stack from where vmsp is, the interpreter will adjust vmsp
+      // later when it actually processes this opcode, to make things line up properly.
+      if (func->isClosureBody()) {
+        const auto& locals = state->heap_closures.get(obj);
+        assertx(locals.size() == func->numClosureUseLocals());
+        for (size_t i = 0; i < locals.size(); i++) {
+          auto value = locals[i];
+          if (value) {
+            value = value->to(state->arena.get(), Hop{from, func});
+          }
+          auto address = sp - i;
+          FTRACE(
+            2,
+            "taint: Setting captured value index {} ({}) to `{}`\n",
+            i,
+            (size_t)address,
+            value);
+          state->heap_locals.set(address, value);
+        }
+        // Keep stack sizes in sync
+        for (size_t i = 0; i < locals.size(); i++) {
+          state->stack.push(nullptr);
+        }
+      }
       // We don't care if the functor/closure *itself* is tainted (what would that even look like?)
       auto this_taint = nullptr;
       iopFCall(func, fca, this_taint);
@@ -1654,8 +1687,34 @@ void iopNativeImpl(PC& /* pc */) {
   }
 }
 
-void iopCreateCl(uint32_t /* numArgs */, uint32_t /* clsIx */) {
-  iopUnhandled("CreateCl");
+void iopCreateCl(uint32_t numArgs, uint32_t /* clsIx */) {
+  iopPreamble("CreateCl");
+
+  FTRACE(3, "taint: Creating closure with {} args\n", numArgs);
+
+  auto state = State::instance;
+
+  state->last_closure_capture.clear();
+  state->last_closure_capture.reserve(numArgs);
+
+  // We need to capture these in reverse order
+  for (size_t i = 0; i < numArgs; i++) {
+    auto value = state->stack.peek(numArgs - i - 1);
+    FTRACE(
+      3,
+      "taint: Capturing local {} for address {} with taint {}\n",
+      i,
+      (size_t)(vmStack().top() + numArgs - i - 1),
+      value
+    );
+    state->last_closure_capture.push_back(value);
+  }
+
+  state->stack.pop(numArgs);
+  // The closure itself is not tainted
+  state->stack.push(nullptr);
+
+  state->post_op = PostOpcodeOp::CREATE_CL;
 }
 
 void iopCreateCont(PC /* origpc */, PC& /* pc */) {

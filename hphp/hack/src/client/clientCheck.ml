@@ -696,7 +696,10 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
         | _ -> ServerCommandTypes.FileName (expand_path filename)
       in
       let%lwt ((error_list, dropped_count), telemetry) =
-        rpc args (Rpc.STATUS_SINGLE (file_input, args.max_errors))
+        rpc
+          args
+          (Rpc.STATUS_SINGLE
+             { file_name = file_input; max_errors = args.max_errors })
       in
       let status =
         {
@@ -716,9 +719,11 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
           args.max_errors
       in
       Lwt.return (exit_status, telemetry)
-    | MODE_STATUS_REMOTE_EXECUTION x ->
+    | MODE_STATUS_REMOTE_EXECUTION mode ->
       let%lwt ((error_list, dropped_count), telemetry) =
-        rpc args (Rpc.STATUS_REMOTE_EXECUTION (x, args.max_errors))
+        rpc
+          args
+          (Rpc.STATUS_REMOTE_EXECUTION { mode; max_errors = args.max_errors })
       in
       let status =
         {
@@ -739,9 +744,9 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       in
       Lwt.return (exit_status, telemetry)
     | MODE_STATUS_SINGLE_REMOTE_EXECUTION filename ->
-      let file_input = expand_path filename in
+      let file_name = expand_path filename in
       let%lwt ((error_list, deps), telemetry) =
-        rpc args (Rpc.STATUS_SINGLE_REMOTE_EXECUTION file_input)
+        rpc args (Rpc.STATUS_SINGLE_REMOTE_EXECUTION { file_name })
       in
       print_endline "DISCOVERED DEP EDGES:";
       print_endline deps;

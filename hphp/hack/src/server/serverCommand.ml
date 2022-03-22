@@ -143,8 +143,8 @@ let force_remote = function
   | _ -> false
 
 let rpc_files : type a. a t -> Relative_path.Set.t = function
-  | STATUS_SINGLE_REMOTE_EXECUTION fn ->
-    Relative_path.Set.singleton (Relative_path.create_detect_prefix fn)
+  | STATUS_SINGLE_REMOTE_EXECUTION { file_name } ->
+    Relative_path.Set.singleton (Relative_path.create_detect_prefix file_name)
   | STATUS_MULTI_REMOTE_EXECUTION fns ->
     List.fold fns ~init:Relative_path.Set.empty ~f:(fun acc fn ->
         Relative_path.Set.add acc (Relative_path.create_detect_prefix fn))
@@ -155,7 +155,7 @@ let force_remote_execution_files = function
   | _ -> Relative_path.Set.empty
 
 let rpc_remote_execution : type a. a t -> ReEnv.t option = function
-  | STATUS_REMOTE_EXECUTION (mode, _) ->
+  | STATUS_REMOTE_EXECUTION { mode; _ } ->
     let re_env =
       if String.equal mode "warm" then
         Re.initialize_lease false ~num_re_workers_opt:None

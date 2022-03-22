@@ -22,7 +22,8 @@ function foo(): int {
 |}
 
 let status_single_request =
-  ServerCommandTypes.(STATUS_SINGLE (FileName "/foo.php", None))
+  ServerCommandTypes.(
+    STATUS_SINGLE { file_name = FileName "/foo.php"; max_errors = None })
 
 let check_status_single_response = function
   | None -> Test.fail "Expected STATUS_SINGLE response"

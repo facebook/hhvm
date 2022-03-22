@@ -333,12 +333,19 @@ type _ t =
       max_errors: int option;
     }
       -> Server_status.t t
-  | STATUS_SINGLE :
-      file_input * int option
+  | STATUS_SINGLE : {
+      file_name: file_input;
+      max_errors: int option;
+    }
       -> (Errors.finalized_error list * int) t
-  | STATUS_SINGLE_REMOTE_EXECUTION : string -> (string * string) t
-  | STATUS_REMOTE_EXECUTION :
-      string * int option
+  | STATUS_SINGLE_REMOTE_EXECUTION : {
+      file_name: string;
+    }
+      -> (string * string) t
+  | STATUS_REMOTE_EXECUTION : {
+      mode: string;
+      max_errors: int option;
+    }
       -> (Errors.finalized_error list * int) t
   | STATUS_MULTI_REMOTE_EXECUTION : string list -> (string * string) t
   | INFER_TYPE : file_input * int * int -> InferAtPosService.result t

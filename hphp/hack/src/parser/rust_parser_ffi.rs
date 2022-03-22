@@ -16,7 +16,7 @@ use parser_core_types::{
     syntax_by_ref::positioned_trivia::PositionedTrivia, syntax_error::SyntaxError,
     syntax_tree::SyntaxTree, token_kind::TokenKind,
 };
-use stack_limit::{StackLimit, KI, MI};
+use stack_limit::{self, StackLimit, KI};
 
 use to_ocaml_impl::*;
 
@@ -46,7 +46,10 @@ where
     let leak_rust_tree = env.leak_rust_tree;
     let env = ParserEnv::from(env);
 
-    let retryable = |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
+    // Syntax::to_ocaml is deeply & mutually recursive and uses nearly 2.5x of stack
+    // TODO: rewrite to_ocaml iteratively & reduce it to "stack_size - MB" as in HHVM
+    // (https://github.com/facebook/hhvm/blob/master/hphp/runtime/base/request-info.h)
+    let ocaml_result = stack_limit::with_elastic_stack(|stack_limit| {
         let env = env.clone();
         let parse_fn = parse_fn.clone();
         // Safety: Requires no concurrent interaction with OCaml runtime
@@ -115,32 +118,13 @@ where
         // the block. It must be handed back to OCaml before the garbage
         // collector is given an opportunity to run.
         unsafe { UnsafeOcamlPtr::new(res.build().to_bits()) }
-    };
-
-    fn stack_slack_for_traversal_and_parsing(stack_size: usize) -> usize {
-        // Syntax::to_ocaml is deeply & mutually recursive and uses nearly 2.5x of stack
-        // TODO: rewrite to_ocaml iteratively & reduce it to "stack_size - MB" as in HHVM
-        // (https://github.com/facebook/hhvm/blob/master/hphp/runtime/base/request-info.h)
-        stack_size * 6 / 10
-    }
-
-    const MAX_STACK_SIZE: usize = 1024 * MI;
-
-    let on_retry = &mut |_| ();
-
-    use stack_limit::retry;
-    let job = retry::Job {
-        nonmain_stack_min: 13 * MI, // assume we need much more if default stack size isn't enough
-        nonmain_stack_max: Some(MAX_STACK_SIZE),
-        ..Default::default()
-    };
-
-    match job.with_elastic_stack(retryable, on_retry, stack_slack_for_traversal_and_parsing) {
+    });
+    match ocaml_result {
         Ok(ocaml_result) => ocaml_result,
-        Err(failure) => {
+        Err(e) => {
             panic!(
                 "Rust parser FFI exceeded maximum allowed stack of {} KiB",
-                failure.max_stack_size_tried / KI
+                e.max_stack_size_tried / KI
             );
         }
     }

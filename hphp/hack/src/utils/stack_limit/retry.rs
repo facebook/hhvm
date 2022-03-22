@@ -150,12 +150,6 @@ pub type NonMainStackSize = Option<usize>;
 /// because it would have really hit the stack limit; i.e., cushion space.
 pub type StackSlackFunction = fn(usize) -> usize;
 
-/// Computes stack slack the same way as HHVM does it in
-/// https://github.com/facebook/hhvm/blob/master/hphp/runtime/base/request-info.h
-pub fn hhvm_stack_slack(_stack_size: usize) -> usize {
-    MI
-}
-
 #[derive(Error, Debug)]
 pub struct JobFailed {
     pub max_stack_size_tried: usize,

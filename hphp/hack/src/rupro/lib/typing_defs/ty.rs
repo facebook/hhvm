@@ -82,6 +82,7 @@ pub enum Ty_<R: Reason, TY> {
     Tvar(Tyvar),
 
     Tunion(Vec<TY>),
+    Toption(TY),
 }
 
 walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
@@ -93,6 +94,7 @@ walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
     Ty_::Tgeneric(_, args) => [args],
     Ty_::Tclass(_, _, args) => [args],
     Ty_::Tunion(args) => [args],
+    Ty_::Toption(arg) => [arg],
     Ty_::Tvar(_) => [],
 });
 
@@ -153,6 +155,10 @@ impl<R: Reason> Ty<R> {
         Self::new(r, Ty_::Tfun(ft))
     }
 
+    pub fn option(r: R, ty: Ty<R>) -> Self {
+        Self::new(r, Ty_::Toption(ty))
+    }
+
     pub fn union(r: R, tys: Vec<Ty<R>>) -> Self {
         let ln = tys.len();
         if ln == 0 {
@@ -198,6 +204,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
             Ty_::Tprim(x) => OTy_::Tprim(arena.alloc(*x)),
             Ty_::Tmixed => OTy_::Tmixed,
             Ty_::Tnothing => todo!(),
+            Ty_::Toption(_) => todo!(),
             Ty_::Tunion(_) => todo!(),
             Ty_::Tfun(_) => todo!(),
             Ty_::Tany => todo!(),

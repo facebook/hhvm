@@ -15,7 +15,7 @@ use oxidized::{
 };
 use parser_core_types::{
     syntax_error,
-    syntax_error::{Error as ErrorMsg, SyntaxError},
+    syntax_error::{Error as ErrorMsg, SyntaxError, SyntaxQuickfix},
 };
 
 /// Does this hint look like `Awaitable<Foo>` or `<<__Soft>> Awaitable<Foo>`?
@@ -78,6 +78,22 @@ impl Checker {
             .push(SyntaxError::make(start_offset, end_offset, msg, vec![]));
     }
 
+    fn add_error_with_quickfix(
+      &mut self, 
+      start_offset: &usize,
+      end_offset: &usize,
+      msg: ErrorMsg, 
+      quickfix_title: &str, 
+      new_text: &str,
+    ) {
+        let quickfixes = vec![SyntaxQuickfix {
+            title: quickfix_title.into(),
+            edits: vec![(*start_offset, *end_offset, new_text.into())],
+        }];
+       self.errors
+            .push(SyntaxError::make(*start_offset, *end_offset, msg, quickfixes)); 
+    }
+
     fn name_eq_this_and_in_static_method(c: &Context, name: impl AsRef<str>) -> bool {
         c.in_classish
             && c.in_static_methodish
@@ -92,7 +108,23 @@ impl Checker {
                         self.add_error(&hint.0, syntax_error::invalid_awaitable_arity)
                     }
                 }
-                None => self.add_error(&hint.0, syntax_error::invalid_async_return_hint),
+                None => {
+                  let (start_offset, end_offset) = &hint.0.info_raw(); 
+                  self.add_error_with_quickfix(
+                    start_offset,
+                    start_offset, 
+                    syntax_error::invalid_async_return_hint,
+                    "Make return type Awaitable",
+                    "Awaitable<"
+                  );
+                  self.add_error_with_quickfix(
+                    end_offset,
+                    end_offset, 
+                    syntax_error::invalid_async_return_hint,
+                    "Make return type Awaitable",
+                    ">"
+                  );
+                },
             },
             None => {}
         }

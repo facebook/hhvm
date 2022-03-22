@@ -79,18 +79,13 @@ impl Checker {
     }
 
     fn add_error_with_quickfix(
-      &mut self, 
+      &mut self,
       start_offset: &usize,
       end_offset: &usize,
-      msg: ErrorMsg, 
-      quickfix_title: &str, 
-      new_text: &str,
+      msg: ErrorMsg,
+      quickfixes: Vec<SyntaxQuickfix>,
     ) {
-        let quickfixes = vec![SyntaxQuickfix {
-            title: quickfix_title.into(),
-            edits: vec![(*start_offset, *end_offset, new_text.into())],
-        }];
-       self.errors
+        self.errors
             .push(SyntaxError::make(*start_offset, *end_offset, msg, quickfixes)); 
     }
 
@@ -110,19 +105,18 @@ impl Checker {
                 }
                 None => {
                   let (start_offset, end_offset) = &hint.0.info_raw(); 
+                  let quickfixes = vec![SyntaxQuickfix {
+                      title: "Make return type Awaitable".into(),
+                      edits: vec![
+                          (*start_offset, *start_offset, "Awaitable<".into()),
+                          (*end_offset, *end_offset, ">".into())
+                      ],
+                  }];
                   self.add_error_with_quickfix(
                     start_offset,
-                    start_offset, 
-                    syntax_error::invalid_async_return_hint,
-                    "Make return type Awaitable",
-                    "Awaitable<"
-                  );
-                  self.add_error_with_quickfix(
                     end_offset,
-                    end_offset, 
                     syntax_error::invalid_async_return_hint,
-                    "Make return type Awaitable",
-                    ">"
+                    quickfixes
                   );
                 },
             },

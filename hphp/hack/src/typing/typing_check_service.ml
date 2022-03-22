@@ -179,7 +179,7 @@ let process_file
             (GlobalOptions.tco_defer_class_declaration_threshold opts)
           ~memory_mb_threshold_opt:decl_cap_mb
         @@ fun () ->
-        Errors.do_with_context fn Errors.Typing @@ fun () ->
+        Errors.do_with_context ~drop_fixmed:false fn Errors.Typing @@ fun () ->
         let snd (_, x, _) = x in
         let (fun_tasts, fun_global_tvenvs) =
           List.map funs ~f:snd

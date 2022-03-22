@@ -74,6 +74,8 @@ Invalid argument (Typing[4110])
   Expected `int`
   File \"/foo.php\", line 5, characters 25-30:
   But got `string`
+
+/foo.php:
 "
 
 let root = "/"

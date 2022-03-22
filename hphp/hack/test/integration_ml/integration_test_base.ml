@@ -292,8 +292,13 @@ let assert_errors_in_phase
     fail (Printf.sprintf "Expected %d" expected_count);
   env
 
+let drop_fixmes_in_list (errors : ('a, 'b) User_error.t list) :
+    ('a, 'b) User_error.t list =
+  List.filter errors ~f:(fun err -> not err.User_error.is_fixmed)
+
 let error_strings err_list =
-  List.map ~f:(fun x -> Errors.to_string (User_error.to_absolute x)) err_list
+  drop_fixmes_in_list err_list
+  |> List.map ~f:(fun x -> Errors.to_string (User_error.to_absolute x))
 
 let assertSingleError expected err_list =
   let error_strings = error_strings err_list in
@@ -465,7 +470,11 @@ let start_initial_full_check env =
 
 let assert_no_diagnostics loop_output =
   match loop_output.push_messages with
-  | DIAGNOSTIC _ :: _ -> fail "Did not expect to receive push diagnostics."
+  | DIAGNOSTIC d :: _ ->
+    fail
+      (Printf.sprintf
+         "Did not expect to receive push diagnostics (paths: %s)"
+         (String.concat ~sep:", " (SMap.keys d.errors)))
   | NEW_CLIENT_CONNECTED :: _ -> fail "Unexpected push message"
   | _ -> ()
 
@@ -483,8 +492,9 @@ let assert_has_diagnostics loop_output =
          (ServerCommandTypes.show_pushes loop_output.push_messages))
 
 let errors_to_string buf x =
-  List.iter x ~f:(fun error ->
-      Printf.bprintf buf "%s\n" (Errors.to_string error))
+  drop_fixmes_in_list x
+  |> List.iter ~f:(fun error ->
+         Printf.bprintf buf "%s\n" (Errors.to_string error))
 
 let print_telemetries env =
   Printf.eprintf "\n==Telemetries==\n";
@@ -746,6 +756,7 @@ let diagnostics_to_strings (diagnostics : ServerCommandTypes.diagnostic_errors)
     : error_messages_per_file =
   FileMap.map diagnostics ~f:(fun errors ->
       errors
+      |> drop_fixmes_in_list
       |> List.map ~f:(fun err -> err |> Errors.to_string |> String.strip)
       |> ErrorSet.of_list)
 

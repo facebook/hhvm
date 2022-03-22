@@ -13,10 +13,11 @@ module Test = Integration_test_base
 let foo_name = "foo.php"
 
 let foo_contents =
-  Printf.sprintf "<?hh // strict
-/* HH_FIXME[4336] */
-function foo(): %s {
+  Printf.sprintf
+    "<?hh // strict
 
+function foo(): %s {
+  return vec[][0]; // nothing
 }"
 
 let foo_returns_int_contents = foo_contents "int"

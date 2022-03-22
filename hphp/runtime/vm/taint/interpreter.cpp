@@ -653,7 +653,7 @@ void iopRetC(PC& /* pc */) {
   auto saved = stack.top();
 
   auto func = vmfp()->func();
-  stack.pop(2 + func->params().size());
+  stack.pop(kNumActRecCells + func->numSlotsInFrame());
 
   FTRACE(1, "taint: leaving {}\n", yellow(quote(func->fullName()->data())));
 

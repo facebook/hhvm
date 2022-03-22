@@ -124,7 +124,7 @@ impl<'src> AastParser {
         )
     }
 
-    pub fn from_tree_with_namespace_env<'arena>(
+    fn from_tree_with_namespace_env<'arena>(
         env: &Env,
         ns: RcOc<NamespaceEnv>,
         indexed_source_text: &'src IndexedSourceText<'src>,

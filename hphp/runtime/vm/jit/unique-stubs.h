@@ -256,32 +256,41 @@ struct UniqueStubs {
    * Restart execution based on the value of vmpc.  Used, e.g., to resume
    * execution after an InterpOne.
    *
-   * Expects that all VM registers are synced.
+   * The NoTranslate variants will continue interpreting basic blocks until
+   * encountering a basic block with an already existing translation.
+   *
+   * The interpHelper variants will interpret a basic block first to ensure
+   * we make forward progress.
+   *
+   * The FromInterp variants expect a state like in the interpreter, with all
+   * VM registers synced.
+   *
+   * The FromTC variants expect a state compatible with entering a translation.
+   * However, vmpc is required to be synced and rvmsp to point to the top
+   * of the stack.
    *
    * @reached:  entry from jit::enterTC
    *            jmp from fcallHelperThunk
+   *            jmp from TC
    *            call from enterTCHelper
    * @context:  func body
    */
-  TCA resumeHelper;
-  TCA resumeHelperFuncEntry;
-  TCA resumeHelperNoTranslate;
-  TCA resumeHelperNoTranslateFuncEntry;
-
-  /*
-   * Like resumeHelper, but interpret a basic block first to ensure we make
-   * forward progress.
-   *
-   * Expects vmpc to be synced. Both stubs will sync the vmsp and vmfp registers
-   * to vmRegs before passing control to the interpreter.
-   *
-   * @reached:  jmp from TC
-   * @context:  func body
-   */
-  TCA interpHelper;
-  TCA interpHelperFuncEntry;
-  TCA interpHelperNoTranslate;
-  TCA interpHelperNoTranslateFuncEntry;
+  TCA resumeHelperFromInterp;
+  TCA resumeHelperFromTC;
+  TCA resumeHelperFuncEntryFromInterp;
+  TCA resumeHelperFuncEntryFromTC;
+  TCA resumeHelperNoTranslateFromInterp;
+  TCA resumeHelperNoTranslateFromTC;
+  TCA resumeHelperNoTranslateFuncEntryFromInterp;
+  TCA resumeHelperNoTranslateFuncEntryFromTC;
+  TCA interpHelperFromInterp;
+  TCA interpHelperFromTC;
+  TCA interpHelperFuncEntryFromInterp;
+  TCA interpHelperFuncEntryFromTC;
+  TCA interpHelperNoTranslateFromInterp;
+  TCA interpHelperNoTranslateFromTC;
+  TCA interpHelperNoTranslateFuncEntryFromInterp;
+  TCA interpHelperNoTranslateFuncEntryFromTC;
 
   /*
    * Stubs for each bytecode with the CF flag, which InterpOne the bytecode and

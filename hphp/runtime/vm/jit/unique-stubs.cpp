@@ -480,8 +480,8 @@ TCA emitFCallHelperThunkImpl(CodeBlock& main, CodeBlock& cold,
     v << stubtophp{};
     v << jmpi{
       translate
-        ? us.resumeHelperFuncEntry
-        : us.resumeHelperNoTranslateFuncEntry,
+        ? us.resumeHelperFuncEntryFromInterp
+        : us.resumeHelperNoTranslateFuncEntryFromInterp,
       RegSet(rvmtl())
     };
   });
@@ -545,17 +545,14 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
     unlikelyIfThen(v, vc, CC_NZ, sf, [&] (Vout& v) {
       // The event hook has already cleaned up the stack and popped the
       // callee's frame, so we're ready to continue from the original call
-      // site.  We just need to grab the fp from the VM reg and sync rvmsp().
-      loadVmfp(v);
+      // site.  We just need to sync the rvmfp() and rvmsp() regs, and load
+      // the return regs.  Spurious loads if resume helper is used.
+      loadVMRegs(v);
+      loadReturnRegs(v);
 
       // Drop our call frame; the stublogue{} instruction guarantees that this
       // is exactly 16 bytes.
       v << lea{rsp()[kNativeFrameSize], rsp()};
-
-      // Sync vmsp and the return regs.
-      v << load{rvmtl()[rds::kVmspOff], rvmsp()};
-      v << load{rvmsp()[TVOFF(m_data)], rret_data()};
-      v << load{rvmsp()[TVOFF(m_type)], rret_type()};
 
       // Return to the caller.  This unbalances the return stack buffer, but if
       // we're intercepting, we probably don't care.
@@ -695,9 +692,10 @@ TCA emitHandleServiceRequest(CodeBlock& cb, DataBlock& data, Handler handler) {
       DestType::SSA
     };
 
-    // We did not initialize rvmsp(), but it might be needed by the next
-    // translation. Luckily, handleRetranslateOpt() synced vmsp(), so load
-    // it from there.
+    // We are going to jump either to a translation, or to a resume helper
+    // operating in a TC context. The latter requires rvmsp(), the former may
+    // require it as well in case of resumables. Luckily, the `handler' synced
+    // vmsp(), so load it from there.
     loadVmsp(v);
 
     v << jmpr{ret, vm_regs_with_sp()};
@@ -724,9 +722,9 @@ TCA emitHandleServiceRequestFE(CodeBlock& cb, DataBlock& data,
       DestType::SSA
     };
 
-    // We did not initialize rvmsp(), but it might be needed by the next
-    // translation. Luckily, handleRetranslateOpt() synced vmsp(), so load
-    // it from there.
+    // We are going to jump either to a translation, or to a resume helper
+    // operating in a TC context. The latter requires rvmsp(). Luckily,
+    // the `handler' synced vmsp(), so load it from there.
     loadVmsp(v);
 
     v << jmpr{ret, vm_regs_with_sp()};
@@ -792,7 +790,7 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ResumeHelperEntryPoints {
-  TCA resumeHelper;
+  TCA resumeHelperFromInterp;
   TCA reenterTC;
 };
 
@@ -819,31 +817,32 @@ TCA emitResumeHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
     v << jmpr{target, php_return_regs()};
   });
 
-  auto const emitOne = [&] (svcreq::ResumeFlags flags, bool syncVMRegs) {
-    return vwrap(cb, data, [&] (Vout& v) {
-      if (syncVMRegs) storeVMRegs(v);
+  auto const emitOne = [&] (svcreq::ResumeFlags flags, TCA& interp, TCA& tc) {
+    tc = vwrap(cb, data, [&] (Vout& v) {
+      storeVMRegs(v);
+      v << fallthru{vm_regs_with_sp()};
+    });
+    interp = vwrap(cb, data, [&] (Vout& v) {
       v << ldimmb{flags.m_asByte, rarg(0)};
-      v << jmpi{handleResume, arg_regs(1)};
+      v << jmpi{handleResume, vm_regs_with_sp() | rarg(0)};
     });
   };
 
-  us.resumeHelper = rh.resumeHelper = emitOne(
-    svcreq::ResumeFlags(), false);
-  us.resumeHelperFuncEntry = emitOne(
-    svcreq::ResumeFlags().funcEntry(), false);
-  us.resumeHelperNoTranslate = emitOne(
-    svcreq::ResumeFlags().noTranslate(), false);
-  us.resumeHelperNoTranslateFuncEntry = emitOne(
-    svcreq::ResumeFlags().noTranslate().funcEntry(), false);
-  us.interpHelper = emitOne(
-     svcreq::ResumeFlags().interpFirst(), true);
-  us.interpHelperFuncEntry = emitOne(
-     svcreq::ResumeFlags().interpFirst().funcEntry(), true);
-  us.interpHelperNoTranslate = emitOne(
-     svcreq::ResumeFlags().noTranslate().interpFirst(), true);
-  us.interpHelperNoTranslateFuncEntry = emitOne(
-     svcreq::ResumeFlags().noTranslate().interpFirst().funcEntry(), true);
+#define EMIT(F, N) emitOne(F, us.N##FromInterp, us.N##FromTC)
+  EMIT(svcreq::ResumeFlags(), resumeHelper);
+  EMIT(svcreq::ResumeFlags().funcEntry(), resumeHelperFuncEntry);
+  EMIT(svcreq::ResumeFlags().noTranslate(), resumeHelperNoTranslate);
+  EMIT(svcreq::ResumeFlags().noTranslate().funcEntry(),
+       resumeHelperNoTranslateFuncEntry);
+  EMIT(svcreq::ResumeFlags().interpFirst(), interpHelper);
+  EMIT(svcreq::ResumeFlags().interpFirst().funcEntry(), interpHelperFuncEntry);
+  EMIT(svcreq::ResumeFlags().noTranslate().interpFirst(),
+       interpHelperNoTranslate);
+  EMIT(svcreq::ResumeFlags().noTranslate().interpFirst().funcEntry(),
+       interpHelperNoTranslateFuncEntry);
+#undef EMIT
 
+  rh.resumeHelperFromInterp = us.resumeHelperFromInterp;
   return handleResume;
 }
 
@@ -868,7 +867,7 @@ TCA emitInterpOneCFHelper(CodeBlock& cb, DataBlock& data, Op op,
     ifThenElse(
       v, CC_NZ, sf,
       [&] (Vout& v) { v << jmpi{rh.reenterTC}; },
-      [&] (Vout& v) { v << jmpi{rh.resumeHelper}; }
+      [&] (Vout& v) { v << jmpi{rh.resumeHelperFromInterp}; }
     );
   });
 }
@@ -1410,8 +1409,8 @@ RegSet interp_one_cf_regs() {
 
 void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff) {
   auto const helper = sk.funcEntry()
-    ? tc::ustubs().interpHelperFuncEntry
-    : tc::ustubs().interpHelper;
+    ? tc::ustubs().interpHelperFuncEntryFromTC
+    : tc::ustubs().interpHelperFromTC;
   if (sk.funcEntry()) sk.advance();
   if (sk.resumeMode() == ResumeMode::None) {
     auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
@@ -1423,8 +1422,8 @@ void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff) {
 
 void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
   auto const helper = sk.funcEntry()
-    ? tc::ustubs().interpHelperNoTranslateFuncEntry
-    : tc::ustubs().interpHelperNoTranslate;
+    ? tc::ustubs().interpHelperNoTranslateFuncEntryFromTC
+    : tc::ustubs().interpHelperNoTranslateFromTC;
   if (sk.funcEntry()) sk.advance();
   if (sk.resumeMode() == ResumeMode::None) {
     auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();

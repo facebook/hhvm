@@ -191,8 +191,8 @@ void SrcRec::newTranslation(TransLoc loc,
 
 /*
  * Smash the fallbacks to a particular stub (not a translation). Used
- * to smash all of the fallback jumps to resumeHelperNoTranslate when
- * we stop translating.
+ * to smash all of the fallback jumps to interpHelperNoTranslateFromTC
+ * when we stop translating.
  */
 void SrcRec::smashFallbacksToStub(TCA stub) {
   assertx(stub);

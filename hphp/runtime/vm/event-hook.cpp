@@ -744,7 +744,8 @@ uint64_t EventHook::onFunctionCallJit(const ActRec* ar, int funcType) {
   // as the retHelper logic has been already performed and the frame has
   // been overwritten by the return value.
   if (isReturnHelper(savedRip)) {
-    return reinterpret_cast<uintptr_t>(jit::tc::ustubs().resumeHelper);
+    return
+      reinterpret_cast<uintptr_t>(jit::tc::ustubs().resumeHelperFromInterp);
   }
   return savedRip;
 }

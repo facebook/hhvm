@@ -313,7 +313,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
           }
           regState() = VMRegState::DIRTY;
           FTRACE(1, "Resuming from resumeHelper with fp {}\n", fp);
-          return {tc::ustubs().resumeHelper, fp};
+          return {tc::ustubs().resumeHelperFromInterp, fp};
         }
       }
     }

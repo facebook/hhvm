@@ -180,26 +180,26 @@ TCA getFuncEntry(const Func* func) {
   if (tca != nullptr) return tca;
 
   LeaseHolder writer(func, TransKind::Profile);
-  if (!writer) return tc::ustubs().resumeHelperFuncEntry;
+  if (!writer) return tc::ustubs().resumeHelperFuncEntryFromTC;
 
   tca = func->getFuncEntry();
   if (tca != nullptr) return tca;
 
   if (func->numRequiredParams() != func->numNonVariadicParams()) {
-    tca = tc::ustubs().resumeHelperFuncEntry;
+    tca = tc::ustubs().resumeHelperFuncEntryFromTC;
     const_cast<Func*>(func)->setFuncEntry(tca);
   } else {
     SrcKey sk{func, 0, SrcKey::FuncEntryTag{}};
     auto const trans = getTranslation(sk);
     tca = trans.isRequestPersistentFailure()
-      ? tc::ustubs().interpHelperNoTranslateFuncEntry
+      ? tc::ustubs().interpHelperNoTranslateFuncEntryFromTC
       : trans.addr();
     if (trans.isProcessPersistentFailure()) {
       const_cast<Func*>(func)->setFuncEntry(tca);
     }
   }
 
-  return tca != nullptr ? tca : tc::ustubs().resumeHelperFuncEntry;
+  return tca != nullptr ? tca : tc::ustubs().resumeHelperFuncEntryFromTC;
 }
 
 namespace {
@@ -211,13 +211,13 @@ TCA resume(SrcKey sk, TranslationResult transResult) noexcept {
       sk.advance();
       vmpc() = sk.pc();
       return transResult.scope() == TranslationResult::Scope::Transient
-        ? tc::ustubs().interpHelperFuncEntry
-        : tc::ustubs().interpHelperNoTranslateFuncEntry;
+        ? tc::ustubs().interpHelperFuncEntryFromTC
+        : tc::ustubs().interpHelperNoTranslateFuncEntryFromTC;
     }
     vmpc() = sk.pc();
     return transResult.scope() == TranslationResult::Scope::Transient
-      ? tc::ustubs().interpHelper
-      : tc::ustubs().interpHelperNoTranslate;
+      ? tc::ustubs().interpHelperFromTC
+      : tc::ustubs().interpHelperNoTranslateFromTC;
   }();
 
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
@@ -288,16 +288,19 @@ TCA handleRetranslateOpt(Offset bcOff) noexcept {
   FTRACE(1, "handleRetranslateOpt {}\n", vmfp()->func()->fullName()->data());
 
   auto const sk = SrcKey { liveFunc(), bcOff, SrcKey::FuncEntryTag {} };
-  if (mcgen::retranslateOpt(sk.funcID())) {
-    // Retranslation was successful. Resume execution at the new Optimize
+  auto const translated = mcgen::retranslateOpt(sk.funcID());
+  vmpc() = sk.advanced().pc();
+  regState() = VMRegState::DIRTY;
+
+  if (translated) {
+    // Retranslation was successful. Resume execution at the new optimized
     // translation.
-    vmpc() = sk.advanced().pc();
-    return resume(sk, TranslationResult{tc::ustubs().resumeHelperFuncEntry});
+    return tc::ustubs().resumeHelperFuncEntryFromTC;
   } else {
     // Retranslation failed, probably because we couldn't get the write
     // lease. Interpret a BB before running more Profile translations, to
     // avoid spinning through this path repeatedly.
-    return resume(sk, TranslationResult::failTransiently());
+    return tc::ustubs().interpHelperFuncEntryFromTC;
   }
 }
 
@@ -341,7 +344,7 @@ TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs) {
   if (trans.isProcessPersistentFailure()) {
     // We can't get a translation for this and we can't create any new
     // ones any longer. Smash the call site with a stub which will
-    // interp the prologue, then run resumeHelperNoTranslate.
+    // interp the prologue, then run resumeHelperNoTranslateFromInterp.
     tc::bindCall(
       toSmash,
       tc::ustubs().fcallHelperNoTranslateThunk,
@@ -393,8 +396,8 @@ TCA handleResume(ResumeFlags flags) {
       if (auto const addr = trans.addr()) return addr;
       if (!trans.isRequestPersistentFailure()) return nullptr;
       return sk.funcEntry()
-        ? tc::ustubs().interpHelperNoTranslateFuncEntry
-        : tc::ustubs().interpHelperNoTranslate;
+        ? tc::ustubs().interpHelperNoTranslateFuncEntryFromTC
+        : tc::ustubs().interpHelperNoTranslateFromTC;
     }
 
     if (auto const sr = tc::findSrcRec(sk)) {
@@ -433,7 +436,9 @@ TCA handleResume(ResumeFlags flags) {
         // use the resumeHelper, as the retHelper logic has been already
         // performed and the frame has been overwritten by the return value.
         regState() = VMRegState::DIRTY;
-        if (isReturnHelper(savedRip)) return jit::tc::ustubs().resumeHelper;
+        if (isReturnHelper(savedRip)) {
+          return jit::tc::ustubs().resumeHelperFromInterp;
+        }
         return TCA(savedRip);
       }
       sk.advance();

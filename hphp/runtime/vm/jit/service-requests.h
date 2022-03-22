@@ -72,7 +72,7 @@ TCA getOrEmitStub(StubType type, SrcKey sk, SBInvOffset spOff);
 
 /*
  * Emit a stub which syncs vmsp and vmpc and then calls
- * resumeHelperNoTranslate. Call are smashed to this when we know we
+ * interpHelperNoTranslateFromTC. Call are smashed to this when we know we
  * can no longer create new translations. The address of the stub is
  * returned if successful, nullptr otherwise (the creation can fail if
  * there's no space in the TC for it).

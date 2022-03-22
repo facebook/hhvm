@@ -890,7 +890,7 @@ void enterVMAtCurPC() {
   assertx(vmfp()->func()->contains(vmpc()));
   Stats::inc(Stats::VMEnter);
   if (RID().getJit()) {
-    jit::enterTC(jit::tc::ustubs().resumeHelper);
+    jit::enterTC(jit::tc::ustubs().resumeHelperFromInterp);
   } else {
     dispatch();
   }
@@ -1937,7 +1937,7 @@ OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
   // live VM frame in %rbp.
   if (vmJitCalledFrame() == retInfo.fp) {
     FTRACE(1, "Returning from frame {}; resuming", vmJitCalledFrame());
-    return jit::tc::ustubs().resumeHelper;
+    return jit::tc::ustubs().resumeHelperFromInterp;
   }
 
   return nullptr;
@@ -3498,7 +3498,7 @@ TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
   if (retToJit) {
     // Let JIT handle FuncEntry if possible.
     pc = vmpc();
-    return jit::tc::ustubs().resumeHelperFuncEntry;
+    return jit::tc::ustubs().resumeHelperFuncEntryFromInterp;
   }
 
   funcEntry();

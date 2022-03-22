@@ -49,7 +49,6 @@ type t = {
   tco_force_load_hot_shallow_decls: bool;
   tco_populate_member_heaps: bool;
   tco_skip_hierarchy_checks: bool;
-  po_rust_parser_errors: bool;
   tco_like_type_hints: bool;
   tco_union_intersection_type_hints: bool;
   tco_coeffects: bool;
@@ -233,7 +232,6 @@ let default =
     tco_force_load_hot_shallow_decls = false;
     tco_populate_member_heaps = true;
     tco_skip_hierarchy_checks = false;
-    po_rust_parser_errors = false;
     tco_like_type_hints = false;
     tco_union_intersection_type_hints = false;
     tco_coeffects = true;
@@ -364,7 +362,6 @@ let make
       default.tco_force_load_hot_shallow_decls)
     ?(tco_populate_member_heaps = default.tco_populate_member_heaps)
     ?(tco_skip_hierarchy_checks = default.tco_skip_hierarchy_checks)
-    ?(po_rust_parser_errors = default.po_rust_parser_errors)
     ?(tco_like_type_hints = default.tco_like_type_hints)
     ?(tco_union_intersection_type_hints =
       default.tco_union_intersection_type_hints)
@@ -514,7 +511,6 @@ let make
     tco_force_load_hot_shallow_decls;
     tco_populate_member_heaps;
     tco_skip_hierarchy_checks;
-    po_rust_parser_errors;
     tco_like_type_hints;
     tco_union_intersection_type_hints;
     tco_coeffects;
@@ -682,8 +678,6 @@ let tco_force_load_hot_shallow_decls t = t.tco_force_load_hot_shallow_decls
 let tco_populate_member_heaps t = t.tco_populate_member_heaps
 
 let tco_skip_hierarchy_checks t = t.tco_skip_hierarchy_checks
-
-let po_rust_parser_errors t = t.po_rust_parser_errors
 
 let tco_like_type_hints t = t.tco_like_type_hints
 

@@ -213,7 +213,6 @@ let parse_options () =
   let like_casts = ref false in
   let simple_pessimize = ref 0.0 in
   let complex_coercion = ref false in
-  let rust_parser_errors = ref false in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
   let check_redundant_generics = ref false in
@@ -525,9 +524,6 @@ let parse_options () =
             set_float_ simple_pessimize 1.0;
             set_bool_ complex_coercion ()),
         " Enables all like types features" );
-      ( "--rust-parser-errors",
-        Arg.Bool (fun x -> rust_parser_errors := x),
-        " Use rust parser error checker" );
       ( "--symbolindex-file",
         Arg.String (fun str -> symbolindex_file := Some str),
         " Load the symbol index from this file" );
@@ -838,7 +834,6 @@ let parse_options () =
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_complex_coercion:!complex_coercion
       ~log_levels:!log_levels
-      ~po_rust_parser_errors:!rust_parser_errors
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
       ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
       ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax

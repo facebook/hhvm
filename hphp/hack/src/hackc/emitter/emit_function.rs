@@ -99,6 +99,11 @@ pub fn emit_function<'a, 'arena, 'decl>(
     {
         coeffects = coeffects.with_backdoor(alloc)
     }
+    if e.systemlib()
+        && (f.name.1 == "\\HH\\Coeffects\\fb\\backdoor_to_globals_leak_safe__DO_NOT_USE")
+    {
+        coeffects = coeffects.with_backdoor_globals_leak_safe(alloc)
+    }
     let ast_body = &f.body.fb_ast;
     let deprecation_info = hhas_attribute::deprecation_info(user_attrs.iter());
     let (body, is_gen, is_pair_gen) = {

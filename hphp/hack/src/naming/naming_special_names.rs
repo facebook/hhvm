@@ -889,6 +889,8 @@ pub mod coeffects {
 
     pub const BACKDOOR: &str = "86backdoor";
 
+    pub const BACKDOOR_GLOBALS_LEAK_SAFE: &str = "86backdoor_globals_leak_safe";
+
     pub const CONTEXTS: &str = "HH\\Contexts";
 
     pub const CAPABILITIES: &str = "HH\\Capabilities";

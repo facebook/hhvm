@@ -76,6 +76,8 @@ struct Coeffects {
   static constexpr auto s_pure = "pure";
 
   static constexpr auto s_86backdoor = "86backdoor";
+  static constexpr auto s_86backdoor_globals_leak_safe =
+    "86backdoor_globals_leak_safe";
 
 #define X(x) static constexpr auto s_##x = #x;
   COEFFECTS
@@ -355,7 +357,10 @@ StaticCoeffects CoeffectsConfig::fromName(const std::string& coeffect) {
 #undef X
   }
 
-  if (coeffect == C::s_86backdoor) return CoeffectsConfig::fromName(C::s_pure);
+  if (coeffect == C::s_86backdoor ||
+      coeffect == C::s_86backdoor_globals_leak_safe) {
+    return CoeffectsConfig::fromName(C::s_pure);
+  }
 
   auto const it = s_coeffects_to_capabilities.find(coeffect);
   if (it == s_coeffects_to_capabilities.end() || it->second.empty()) {
@@ -379,6 +384,9 @@ RuntimeCoeffects CoeffectsConfig::escapesTo(const std::string& coeffect) {
     if (coeffect == C::s_zoned_local) return RuntimeCoeffects::defaults();
   }
   if (coeffect == C::s_86backdoor) return RuntimeCoeffects::defaults();
+  if (coeffect == C::s_86backdoor_globals_leak_safe) {
+    return RuntimeCoeffects::globals_leak_safe();
+  }
   return RuntimeCoeffects::none();
 }
 

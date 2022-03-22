@@ -102,7 +102,10 @@ const StaticString
   s_AlwaysInline("__ALWAYS_INLINE"),
   s_NeverInline("__NEVER_INLINE"),
   s_HH_Coeffects_Backdoor("HH\\Coeffects\\backdoor"),
-  s_HH_Coeffects_Backdoor_Async("HH\\Coeffects\\backdoor_async");
+  s_HH_Coeffects_Backdoor_Async("HH\\Coeffects\\backdoor_async"),
+  s_HH_Coeffects_FB_Backdoor_to_globals_leak_safe__DO_NOT_USE(
+    "HH\\Coeffects\\fb\\backdoor_to_globals_leak_safe__DO_NOT_USE"
+  );
 
 #define COEFFECTS_BACKDOOR_WRAPPERS \
   X(pure)                           \
@@ -486,14 +489,21 @@ int costOfInlining(SrcKey callerSk,
 }
 
 bool isCoeffectsBackdoor(SrcKey callerSk, const Func* callee) {
-  #define X(x)                                                                \
-    if (callee->fullName()->isame(s_HH_Coeffects_FB_Backdoor_from_##x.get())) \
-    return true;
+  auto const callee_name = callee->fullName();
+#define X(x)                                                                \
+  if (callee_name->isame(s_HH_Coeffects_FB_Backdoor_from_##x.get())) {      \
+    return true;                                                            \
+  }
   COEFFECTS_BACKDOOR_WRAPPERS
-  #undef X
+#undef X
 
-  if (callee->fullName()->isame(s_HH_Coeffects_Backdoor.get()) ||
-      callee->fullName()->isame(s_HH_Coeffects_Backdoor_Async.get()) ||
+  if (callee_name->isame(
+        s_HH_Coeffects_FB_Backdoor_to_globals_leak_safe__DO_NOT_USE.get())) {
+    return true;
+  }
+
+  if (callee_name->isame(s_HH_Coeffects_Backdoor.get()) ||
+      callee_name->isame(s_HH_Coeffects_Backdoor_Async.get()) ||
       (callee->isClosureBody() &&
        (callerSk.func()->fullName()->isame(s_HH_Coeffects_Backdoor.get()) ||
         callerSk.func()->fullName()->isame(s_HH_Coeffects_Backdoor_Async.get())))) {

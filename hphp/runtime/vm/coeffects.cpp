@@ -47,10 +47,20 @@ RuntimeCoeffects RuntimeCoeffects::defaults() {
   return StaticCoeffects::defaults().toRequired();
 }
 
+RuntimeCoeffects RuntimeCoeffects::globals_leak_safe() {
+  static RuntimeCoeffects c = RuntimeCoeffects::fromValue(
+    CoeffectsConfig::fromName("globals").toRequired().value() |
+    CoeffectsConfig::fromName("leak_safe").toRequired().value() |
+    CoeffectsConfig::escapesTo("globals").value() |
+    CoeffectsConfig::escapesTo("leak_safe").value()
+  );
+  return c;
+}
+
 #define COEFFECTS     \
   X(pure)             \
-  X(zoned_with)      \
-  X(write_this_props) \
+  X(zoned_with)       \
+  X(write_this_props)
 
 #define X(x)                                                             \
 RuntimeCoeffects RuntimeCoeffects::x() {                                 \

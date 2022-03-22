@@ -100,7 +100,7 @@ std::vector<T> functionMetadataLookup(
   std::vector<T> result;
 
   // Do we have a precomputed result? If so, just go ahead and use it
-  auto precomputed = (*seen_functions)[id].load(std::memory_order_release);
+  auto precomputed = (*seen_functions)[id].load(std::memory_order_seq_cst);
   if (precomputed & flag) {
     mutex->lock();
     auto it = cache->find(id);
@@ -190,7 +190,7 @@ void FunctionMetadataTracker::dumpFunctionCoverageTo(std::string path) {
   std::ofstream stream;
   stream.open(path);
   for (FuncId::Int i = 0; i < m_seen_functions.size(); i++) {
-    auto flag = m_seen_functions[i].load(std::memory_order_release);
+    auto flag = m_seen_functions[i].load(std::memory_order_seq_cst);
     if (flag & kSeen) {
       auto id = FuncId::fromInt(i);
       auto func = Func::fromFuncId(id);
@@ -244,7 +244,7 @@ FunctionMetadataTracker::onCacheMiss(const Func* func, FuncId::Int id) {
     m_sinks_cache.insert(std::move(insert));
     m_mutex.unlock();
   }
-  m_seen_functions[id].fetch_or(flag, std::memory_order_release);
+  m_seen_functions[id].fetch_or(flag, std::memory_order_seq_cst);
   return std::make_pair(std::move(sources), std::move(sinks));
 }
 
@@ -257,7 +257,7 @@ void Configuration::reset(const std::string& contents) {
     auto parsed = folly::parseJson(contents);
 
     std::vector<std::pair<std::string, Source>> sources;
-    for (const auto source : parsed["sources"]) {
+    for (const auto& source : parsed["sources"]) {
       Source value{.index = std::nullopt};
       auto indexElement = source.getDefault("index");
       if (indexElement.isInt()) {
@@ -267,7 +267,7 @@ void Configuration::reset(const std::string& contents) {
     }
 
     std::vector<std::pair<std::string, Sink>> sinks;
-    for (const auto sink : parsed["sinks"]) {
+    for (const auto& sink : parsed["sinks"]) {
       Sink value{.index = std::nullopt};
       auto indexElement = sink.getDefault("index");
       if (indexElement.isInt()) {

@@ -482,8 +482,7 @@ final class ImmSet<<<__RequireDynamic>> +Tv as arraykey> implements \ConstSet<Tv
    *           `ImmSet` is empty.
    */
   public readonly function lastKey()[]: ?arraykey;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
+  public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<Tv, Tv>;
 }
 

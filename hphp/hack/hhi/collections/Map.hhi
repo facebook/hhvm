@@ -643,8 +643,8 @@ namespace HH {
    *
    * @return - The `Iterable` view of the current `Map`.
    */
-  public function items()[]: \HH\Rx\Iterable<Pair<Tk, Tv>>; /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
+  public function items()[]: \HH\Rx\Iterable<Pair<Tk, Tv>>;
+  public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<Tk, Tv>;
 }
 

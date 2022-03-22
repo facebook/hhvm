@@ -543,8 +543,7 @@ final class ImmVector<<<__RequireDynamic>> +Tv> implements \ConstVector<Tv> {
    *           if the current `ImmVector` is empty.
    */
   public readonly function lastKey()[]: ?int;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
+  public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<int, Tv>;
 }
 

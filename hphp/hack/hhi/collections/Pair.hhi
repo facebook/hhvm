@@ -467,8 +467,7 @@ final class Pair<<<__RequireDynamic>> +Tv1, <<__RequireDynamic>> +Tv2> implement
    * @return - The `string` "Pair".
    */
   public function __toString()[]: string;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray; /* HH_FIXME[0001] */
+  public function toVArray()[]: varray;
   public function toDArray()[]: darray<int, mixed>;
 }
 

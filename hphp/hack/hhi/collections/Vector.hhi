@@ -735,8 +735,7 @@ final class Vector<<<__RequireDynamic>> Tv> implements \MutableVector<Tv> {
    * @return - The `Iterable` view of the current `Vector`.
    */
   public function items()[]: \HH\Rx\Iterable<Tv>;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
+  public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<int, Tv>;
 }
 

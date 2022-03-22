@@ -369,6 +369,7 @@ void State::initialize() {
   paths.clear();
   arena = std::make_unique<PathArena>();
   m_function_metadata = Configuration::get()->functionMetadata();
+  post_op = PostOpcodeOp::NOP;
 
   // Stack is initialized with 4 values before any operation happens.
   // We don't care about these values but mirroring simplifies

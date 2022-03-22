@@ -181,6 +181,13 @@ struct IteratorsHeap {
   hphp_fast_map<Iter*, Value> m_heap;
 };
 
+// Enum defining operations we may want to run *after* a given opcode is
+// run, i.e. at the start of the next opcode. This makes certain implementations
+// much easier.
+enum class PostOpcodeOp : uint8_t {
+  NOP = 1,
+};
+
 struct State {
   static rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> instance;
 
@@ -210,6 +217,8 @@ struct State {
   std::shared_ptr<FunctionMetadataTracker> m_function_metadata = nullptr;
 
   std::chrono::time_point<std::chrono::system_clock> m_request_start;
+
+  PostOpcodeOp post_op = PostOpcodeOp::NOP;
 };
 
 } // namespace taint

@@ -105,10 +105,17 @@ std::string gray(const std::string& string) {
 void iopPreamble(folly::StringPiece name) {
   auto vm_stack_size = vmStack().count();
 
-  FTRACE(1, "taint: {}\n", gray(folly::sformat("iop{}", name)));
-  FTRACE(4, "taint: stack: {}\n", State::instance->stack.show());
+  auto state = State::instance;
 
-  auto& stack = State::instance->stack;
+  FTRACE(1, "taint: {}\n", gray(folly::sformat("iop{}", name)));
+  FTRACE(4, "taint: stack: {}\n", state->stack.show());
+
+  // Handle any leftover processing from the last opcode
+  switch (state->post_op) {
+    case PostOpcodeOp::NOP: break;
+  }
+
+  auto& stack = state->stack;
   auto shadow_stack_size = stack.size();
   if (vm_stack_size != shadow_stack_size) {
     FTRACE(

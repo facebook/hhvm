@@ -1317,7 +1317,8 @@ void fullDCE(IRUnit& unit) {
         if (inst->is(DecRef)) {
           rcInsts[srcInst].decs.emplace_back(inst);
         }
-        if (inst->is(InitVecElem, InitStructElem, StClosureArg)) {
+        if (inst->is(InitVecElem, InitStructElem, InitStructPositions,
+                     StClosureArg)) {
           if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
         }
       }

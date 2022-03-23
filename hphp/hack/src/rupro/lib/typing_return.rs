@@ -6,6 +6,7 @@
 #![allow(dead_code)]
 use crate::decl_defs::DeclTy;
 use crate::reason::Reason;
+use crate::special_names;
 use crate::typing::Result;
 use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
@@ -19,14 +20,9 @@ pub struct TypingReturnInfo<R: Reason> {
 }
 
 impl TypingReturn {
-    pub fn make_default_return<R: Reason>(
-        env: &TEnv<R>,
-        is_method: bool,
-        fpos: &R::Pos,
-        fname: Symbol,
-    ) -> Ty<R> {
+    pub fn make_default_return<R: Reason>(is_method: bool, fpos: &R::Pos, fname: Symbol) -> Ty<R> {
         let reason = R::witness(fpos.clone());
-        if is_method && fname == env.ctx.special_names.members.__construct {
+        if is_method && fname == special_names::members::__construct.as_symbol() {
             Ty::void(reason)
         } else {
             Ty::any(reason)

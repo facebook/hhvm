@@ -5,7 +5,7 @@
 
 #![allow(dead_code)]
 use crate::reason::Reason;
-use crate::typing_ctx::TypingCtx;
+use crate::special_names;
 use crate::typing_defs::{Ty, Ty_};
 use crate::typing_error::ReasonsCallback;
 use pos::{Symbol, SymbolMap, TypeName};
@@ -43,14 +43,14 @@ impl<R: Reason> TypeExpansions<R> {
 }
 
 impl<'a, R: Reason> ExpandEnv<'a, R> {
-    pub fn new(ctx: &TypingCtx<R>) -> Self {
+    pub fn new() -> Self {
         Self {
             type_expansions: TypeExpansions::new(),
             expand_visible_newtype: true,
             substs: Default::default(),
             this_ty: Ty::new(
                 R::none(),
-                Ty_::Tgeneric(TypeName(ctx.special_names.special_idents.this), vec![]),
+                Ty_::Tgeneric(TypeName(*special_names::special_idents::this), vec![]),
             ),
             on_error: ReasonsCallback::new(&|| ReasonsCallback::ignore()),
         }

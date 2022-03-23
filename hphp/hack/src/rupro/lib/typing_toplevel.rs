@@ -11,6 +11,7 @@ use pos::Symbol;
 use crate::decl_defs::DeclTy;
 use crate::decl_hint::DeclHintEnv;
 use crate::reason::Reason;
+use crate::special_names;
 use crate::tast;
 use crate::typing::{BindParamFlags, Result, Typing};
 use crate::typing_ctx::TypingCtx;
@@ -64,7 +65,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
 
         let (return_decl_ty, params_decl_ty) = self.hint_fun_header(&f.params, &f.ret);
         let return_ty = match return_decl_ty.clone() {
-            None => TypingReturn::make_default_return(self.env, false, &fpos, fname),
+            None => TypingReturn::make_default_return(false, &fpos, fname),
             Some(ty) => TypingReturn::make_return_type(
                 self.env,
                 |env, ty| Phase::localize_no_subst(env, false, None, ty),
@@ -165,12 +166,12 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         ret_decl_ty: Option<DeclTy<R>>,
     ) -> Result<(TypingReturnInfo<R>, Ty<R>)> {
         let ret_ty = match ret_decl_ty.clone() {
-            None => TypingReturn::make_default_return(self.env, false, pos, name),
+            None => TypingReturn::make_default_return(false, pos, name),
             Some(ty) => {
                 // TODO(hrust): empty_expand_env_with_on_error
                 TypingReturn::make_return_type(
                     self.env,
-                    |env, ty| Phase::localize(env, &mut ExpandEnv::new(&env.ctx), ty),
+                    |env, ty| Phase::localize(env, &mut ExpandEnv::new(), ty),
                     ty,
                 )?
             }
@@ -284,10 +285,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         match m.ret.1 {
             Some(_) => {}
             None => {
-                assert_ne!(
-                    m.name.1,
-                    self.ctx.special_names.members.__construct.as_str()
-                );
+                assert_ne!(m.name.1, special_names::members::__construct.as_str());
                 self.env
                     .add_error(TypingError::primary(Primary::ExpectingReturnTypeHint(pos)))
             }
@@ -344,7 +342,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         let mut static_methods = vec![];
         let mut methods = vec![];
         for m in all_methods {
-            if m.name.1 == self.ctx.special_names.members.__construct.as_str() {
+            if m.name.1 == special_names::members::__construct.as_str() {
                 constructor = Some(m);
             } else if m.static_ {
                 static_methods.push(m);

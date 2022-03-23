@@ -12,7 +12,6 @@ use hackrs::decl_parser::DeclParser;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::reason::{BReason, NReason, Reason};
 use hackrs::shallow_decl_provider::EagerShallowDeclProvider;
-use hackrs::special_names::SpecialNames;
 use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
@@ -83,12 +82,7 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
     });
     let options = Arc::new(oxidized::global_options::GlobalOptions::default());
 
-    let special_names = SpecialNames::new();
-    let ast_provider = AstProvider::new(
-        Arc::clone(&relative_path_ctx),
-        special_names,
-        Arc::clone(&options),
-    );
+    let ast_provider = AstProvider::new(Arc::clone(&relative_path_ctx), Arc::clone(&options));
     let decl_parser = DeclParser::new(relative_path_ctx);
     let shallow_decl_cache = Arc::new(make_non_eviction_shallow_decl_cache());
     let shallow_decl_provider = Arc::new(EagerShallowDeclProvider::new(Arc::clone(
@@ -99,7 +93,6 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
     let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
         Arc::clone(&options),
         folded_decl_cache,
-        special_names,
         shallow_decl_provider,
         dependency_registrar,
     ));
@@ -108,7 +101,7 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
         typing_decl_cache,
         folded_decl_provider,
     ));
-    let ctx = Rc::new(TypingCtx::new(typing_decl_provider, special_names));
+    let ctx = Rc::new(TypingCtx::new(typing_decl_provider));
 
     let filenames: Vec<RelativePath> = cli_options
         .filenames

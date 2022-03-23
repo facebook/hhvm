@@ -6,4 +6,4 @@
 mod naming;
 mod naming_elaborate_namespaces;
 
-pub use naming::Naming;
+pub use naming::program;

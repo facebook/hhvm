@@ -10,7 +10,6 @@ use crate::dependency_registrar::DependencyName;
 use crate::dependency_registrar::DependencyRegistrar;
 use crate::reason::Reason;
 use crate::shallow_decl_provider::{self, ShallowDeclProvider};
-use crate::special_names::SpecialNames;
 use crate::typing_error::{Primary, TypingError};
 use oxidized::global_options::GlobalOptions;
 use pos::{
@@ -29,7 +28,6 @@ use std::sync::Arc;
 pub struct LazyFoldedDeclProvider<R: Reason> {
     opts: Arc<GlobalOptions>,
     cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
-    special_names: &'static SpecialNames,
     shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
     dependency_registrar: Arc<dyn DependencyRegistrar>,
 }
@@ -38,14 +36,12 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     pub fn new(
         opts: Arc<GlobalOptions>,
         cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
-        special_names: &'static SpecialNames,
         shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
         dependency_registrar: Arc<dyn DependencyRegistrar>,
     ) -> Self {
         Self {
             opts,
             cache,
-            special_names,
             shallow_decl_provider,
             dependency_registrar,
         }
@@ -280,7 +276,6 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         Ok(Some(DeclFolder::decl_class(
             &self.opts,
             &*self.dependency_registrar,
-            self.special_names,
             &shallow_class,
             &parents,
             errors,

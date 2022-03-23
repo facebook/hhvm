@@ -11,7 +11,7 @@ use crate::ToOxidized;
 use eq_modulo_pos::EqModuloPos;
 use indexmap::{IndexMap, IndexSet};
 use intern::{
-    string::{BytesId, StringId},
+    string::{BytesId, IntoUtf8Bytes, StringId},
     BuildIdHasher,
 };
 use serde::{Deserialize, Serialize};
@@ -30,7 +30,7 @@ pub struct Symbol(pub StringId);
 // using the underlying string after a fast check for equal ids.
 
 impl Symbol {
-    pub fn new<S: intern::string::IntoUtf8Bytes>(s: S) -> Self {
+    pub fn new<S: IntoUtf8Bytes>(s: S) -> Self {
         Self(intern::string::intern(s))
     }
 }
@@ -67,8 +67,8 @@ impl std::fmt::Display for Symbol {
     }
 }
 
-impl From<&str> for Symbol {
-    fn from(s: &str) -> Self {
+impl<T: IntoUtf8Bytes> From<T> for Symbol {
+    fn from(s: T) -> Self {
         Self::new(s)
     }
 }
@@ -170,7 +170,7 @@ impl<'a> ToOxidized<'a> for Bytes {
 macro_rules! common_impls {
     ($name:ident) => {
         impl $name {
-            pub fn new<S: intern::string::IntoUtf8Bytes>(s: S) -> Self {
+            pub fn new<S: IntoUtf8Bytes>(s: S) -> Self {
                 Self(Symbol::new(s))
             }
 
@@ -209,8 +209,8 @@ macro_rules! common_impls {
             }
         }
 
-        impl From<&str> for $name {
-            fn from(s: &str) -> Self {
+        impl<T: IntoUtf8Bytes> From<T> for $name {
+            fn from(s: T) -> Self {
                 Self::new(s)
             }
         }

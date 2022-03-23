@@ -12,12 +12,12 @@ use crate::decl_defs::{
 };
 use crate::dependency_registrar::DependencyRegistrar;
 use crate::reason::Reason;
-use crate::special_names::SpecialNames;
+use crate::special_names as sn;
 use crate::typing_error::{Primary, TypingError};
 use eq_modulo_pos::EqModuloPos;
 use oxidized::global_options::GlobalOptions;
 use pos::{
-    ClassConstName, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned, PropName,
+    ClassConstName, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned,
     PropNameIndexMap, PropNameIndexSet, TypeConstName, TypeConstNameIndexMap, TypeName,
     TypeNameIndexMap, TypeNameIndexSet,
 };
@@ -29,7 +29,6 @@ mod decl_enum;
 
 #[derive(Debug)]
 pub struct DeclFolder<'a, R: Reason> {
-    special_names: &'static SpecialNames,
     #[allow(dead_code)] // This can be removed after this field's first use.
     /// Options affecting typechecking behaviors.
     opts: &'a GlobalOptions,
@@ -54,7 +53,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     pub fn decl_class(
         opts: &'a GlobalOptions,
         dependency_registrar: &'a dyn DependencyRegistrar,
-        special_names: &'static SpecialNames,
         child: &'a ShallowClass<R>,
         parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
         errors: Vec<TypingError<R>>,
@@ -62,7 +60,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let this = Self {
             opts,
             dependency_registrar,
-            special_names,
             child,
             parents,
             errors,
@@ -95,7 +92,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let reason = R::class_class(pos.clone(), name);
         let classname_ty = DeclTy::apply(
             reason.clone(),
-            Positioned::new(pos.clone(), self.special_names.classes.cClassname),
+            Positioned::new(pos.clone(), *sn::classes::cClassname),
             [DeclTy::this(reason)].into(),
         );
         let class_const = ClassConst {
@@ -106,7 +103,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             origin: name,
             refs: Box::default(),
         };
-        consts.insert(self.special_names.members.mClass, class_const);
+        consts.insert(*sn::members::mClass, class_const);
     }
 
     /// Each concrete type constant `T = τ` implicitly defines a class
@@ -114,7 +111,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     fn type_const_structure(&self, stc: &ShallowTypeconst<R>) -> ClassConst<R> {
         let pos = stc.name.pos();
         let r = R::witness_from_decl(pos.clone());
-        let tsid = Positioned::new(pos.clone(), self.special_names.fb.cTypeStructure);
+        let tsid = Positioned::new(pos.clone(), *sn::fb::cTypeStructure);
         // The type `this`.
         let tthis = DeclTy::this(r.clone());
         // The type `this::T`.
@@ -305,7 +302,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let consistency = if self.child.is_final {
             ConsistentKind::FinalClass
         } else if (self.child.user_attributes.iter())
-            .any(|ua| ua.name.id() == self.special_names.user_attributes.uaConsistentConstruct)
+            .any(|ua| ua.name.id() == *sn::user_attributes::uaConsistentConstruct)
         {
             ConsistentKind::ConsistentConstruct
         } else {
@@ -587,7 +584,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
     fn get_sealed_whitelist(&self) -> Option<TypeNameIndexSet> {
         (self.child.user_attributes.iter())
-            .find(|ua| ua.name.id() == self.special_names.user_attributes.uaSealed)
+            .find(|ua| ua.name.id() == *sn::user_attributes::uaSealed)
             .map(|ua| ua.classname_params.iter().copied().collect())
     }
 
@@ -614,7 +611,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             .filter_map(|ty| ty.unwrap_class_type())
             .filter_map(|(_, pos_id, _)| self.parents.get(&pos_id.id()))
             .find(|parent| parent.has_concrete_constructor())
-            .map(|_| PropName(self.special_names.members.parentConstruct))
+            .map(|_| *sn::members::parentConstruct)
         };
 
         shallow_props
@@ -693,7 +690,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         // TODO(T88552052) can make logic more explicit now, enum members appear to
         // only need abstract without default and concrete type consts
         let enum_inner_ty = type_consts
-            .get(&self.special_names.fb.tInner)
+            .get(&*sn::fb::tInner)
             .and_then(|tc| match &tc.kind {
                 Typeconst::TCConcrete(tc) => Some(&tc.ty),
                 Typeconst::TCAbstract(atc) => atc.default.as_ref(),
@@ -710,9 +707,9 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             kind: self.child.kind,
             is_final: self.child.is_final,
             is_const: (self.child.user_attributes.iter())
-                .any(|ua| ua.name.id() == self.special_names.user_attributes.uaConst),
+                .any(|ua| ua.name.id() == *sn::user_attributes::uaConst),
             is_internal: (self.child.user_attributes.iter())
-                .any(|ua| ua.name.id() == self.special_names.user_attributes.uaInternal),
+                .any(|ua| ua.name.id() == *sn::user_attributes::uaInternal),
             is_xhp: self.child.is_xhp,
             support_dynamic_type: self.child.support_dynamic_type,
             enum_type: self.child.enum_type.clone(),

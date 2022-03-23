@@ -13,7 +13,6 @@ use hackrs::{
     shallow_decl_provider::{
         EagerShallowDeclProvider, LazyShallowDeclProvider, ShallowDeclProvider,
     },
-    special_names::SpecialNames,
 };
 use pos::RelativePath;
 use std::path::PathBuf;
@@ -50,7 +49,6 @@ pub fn make_folded_decl_provider<R: Reason>(
     Arc::new(LazyFoldedDeclProvider::new(
         Arc::new(oxidized::global_options::GlobalOptions::default()),
         Arc::new(NonEvictingCache::new()),
-        SpecialNames::new(),
         shallow_decl_provider,
         Arc::new(DependencyGraph::new()),
     ))

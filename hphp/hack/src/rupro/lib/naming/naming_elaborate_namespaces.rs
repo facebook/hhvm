@@ -3,18 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::special_names::SpecialNames;
+use crate::special_names as sn;
 use crate::utils::core::utils;
 use oxidized::aast_visitor::{Params, VisitorMut};
 use oxidized::{aast::*, ast_defs::*};
 use std::collections::HashSet;
 
-pub struct ElaborateNamespaces {
-    special_names: &'static SpecialNames,
-}
-
 struct ElaborateNamespacesVisitor<'node> {
-    special_names: &'static SpecialNames,
     type_params: HashSet<&'node str>,
 }
 
@@ -28,9 +23,8 @@ impl Params for ElaborateNamespacesVisitorParams {
 }
 
 impl<'node> ElaborateNamespacesVisitor<'node> {
-    fn new(special_names: &'static SpecialNames) -> Self {
+    fn new() -> Self {
         Self {
-            special_names,
             type_params: HashSet::new(),
         }
     }
@@ -38,9 +32,7 @@ impl<'node> ElaborateNamespacesVisitor<'node> {
 
     fn is_reserved_type_hint(&self, name: &str) -> bool {
         let name = utils::strip_ns(name);
-        self.special_names
-            .typehints
-            .reserved_typehints
+        sn::typehints::reserved_typehints
             .iter()
             .any(|s| s.as_str() == name)
     }
@@ -81,12 +73,7 @@ impl<'node> VisitorMut<'node> for ElaborateNamespacesVisitor<'node> {
     }
 }
 
-impl ElaborateNamespaces {
-    pub fn new(special_names: &'static SpecialNames) -> Self {
-        Self { special_names }
-    }
-    pub fn on_class_(&self, cls: &mut Class_<(), ()>) {
-        let mut vis = ElaborateNamespacesVisitor::new(self.special_names);
-        vis.visit_class_(&mut (), cls).unwrap();
-    }
+pub fn elaborate_class(cls: &mut Class_<(), ()>) {
+    let mut vis = ElaborateNamespacesVisitor::new();
+    vis.visit_class_(&mut (), cls).unwrap();
 }

@@ -11,7 +11,7 @@ use crate::decl_defs::{
     ty, DeclTy, DeclTy_,
 };
 use crate::reason::Reason;
-use crate::special_names::SpecialNames;
+use crate::special_names as sn;
 use pos::{ClassConstName, ClassConstNameIndexMap, Positioned, TypeName, TypeNameIndexMap};
 use std::sync::Arc;
 
@@ -41,22 +41,21 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         inner_ty: Option<&DeclTy<R>>,
         ancestors: &TypeNameIndexMap<DeclTy<R>>,
     ) -> Option<EnumKind<R>> {
-        let sn = self.special_names;
         let is_enum_class = matches!(self.child.kind, ty::ClassishKind::CenumClass(..));
         match &self.child.enum_type {
             None => {
-                let enum_ty = match ancestors.get(&sn.fb.cEnum) {
+                let enum_ty = match ancestors.get(&*sn::fb::cEnum) {
                     None => return None,
                     Some(ty) => ty,
                 };
                 match enum_ty.unwrap_class_type() {
-                    Some((_, name, [ty_exp])) if name.id() == sn.fb.cEnum => Some(EnumKind {
+                    Some((_, name, [ty_exp])) if name.id() == *sn::fb::cEnum => Some(EnumKind {
                         // base: ty_exp.clone(),
                         ty: ty_exp.clone(),
                         // constraint: None,
                         interface: None,
                     }),
-                    Some((_, name, _)) if name.id() == sn.fb.cEnum => {
+                    Some((_, name, _)) if name.id() == *sn::fb::cEnum => {
                         // The fallback if the class does not declare `TInner` (i.e.
                         // it is abstract) is to use `this::TInner`
                         let r = || enum_ty.reason().clone();
@@ -68,7 +67,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                                     ty: DeclTy::this(r()),
                                     type_const: Positioned::new(
                                         enum_ty.pos().clone(),
-                                        sn.fb.tInner,
+                                        *sn::fb::tInner,
                                     ),
                                 },
                             ),
@@ -92,7 +91,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                     // TODO(T77095784) make a new reason !
                     let te_base = DeclTy::apply(
                         reason.clone(),
-                        Positioned::new(pos.clone(), sn.classes.cMemberOf),
+                        Positioned::new(pos.clone(), *sn::classes::cMemberOf),
                         [enum_ty, enum_type.base.clone()].into(),
                     );
                     (te_base, Some(te_interface))
@@ -145,7 +144,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         // want to rewrite its type.
         // Also for enum class, the type is set in the lowerer.
         for (&name, c) in consts.iter_mut() {
-            if name != self.special_names.members.mClass {
+            if name != *sn::members::mClass {
                 c.ty = ty.clone();
             }
         }

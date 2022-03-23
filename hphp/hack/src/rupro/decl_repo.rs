@@ -198,7 +198,6 @@ fn make_folded_provider<R: Reason>(
         } else {
             Arc::new(NonEvictingCache::default())
         },
-        hackrs::special_names::SpecialNames::new(),
         Arc::new(EagerShallowDeclProvider::new(Arc::new(shallow_decl_cache))),
         Arc::new(hackrs_test_utils::registrar::DependencyGraph::new()),
     )

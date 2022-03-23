@@ -139,7 +139,7 @@ impl Phase {
                 ReasonsCallback::invalid_type_hint(ty_clone.pos().clone())
             }
         };
-        let mut ety_env = ExpandEnv::new(&env.ctx);
+        let mut ety_env = ExpandEnv::new();
         ety_env
             .set_type_expansions(TypeExpansions::with_report_cycle(report_cycle))
             .set_on_error(ReasonsCallback::<R>::new(&on_error));

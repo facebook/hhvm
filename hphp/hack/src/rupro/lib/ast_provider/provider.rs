@@ -3,9 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::naming::Naming;
+use crate::naming;
 use crate::parsing_error::ParsingError;
-use crate::special_names::SpecialNames;
 use aast_parser::{AastParser, Error as ParserError};
 use lint_rust::LintError;
 use ocamlrep::rc::RcOc;
@@ -53,19 +52,16 @@ impl Default for MakeParserEnv {
 #[derive(Debug)]
 pub struct AstProvider {
     relative_path_ctx: Arc<RelativePathCtx>,
-    special_names: &'static SpecialNames,
     parser_options: Arc<oxidized::parser_options::ParserOptions>,
 }
 
 impl AstProvider {
     pub fn new(
         relative_path_ctx: Arc<RelativePathCtx>,
-        special_names: &'static SpecialNames,
         parser_options: Arc<oxidized::parser_options::ParserOptions>,
     ) -> Self {
         Self {
             relative_path_ctx,
-            special_names,
             parser_options,
         }
     }
@@ -177,7 +173,7 @@ impl AstProvider {
             msg,
         })?;
 
-        Naming::program(self.special_names, &mut ast);
+        naming::program(&mut ast);
 
         Ok((ast, errs))
     }

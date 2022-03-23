@@ -4,1000 +4,486 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 // These use the same casing as naming_special_names.ml for now.
-#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
 
 use naming_special_names_rust as sn;
-use pos::{ClassConstName, Symbol, TypeConstName, TypeName};
-use std::collections::HashSet;
+use once_cell::sync::Lazy;
+use pos::{
+    ClassConstName, ConstName, FunName, MethodName, PropName, Symbol, TypeConstName, TypeName,
+    TypeNameSet,
+};
 
-#[derive(Debug)]
-pub struct SpecialNames {
-    pub classes: Classes,
-    pub collections: Collections,
-    pub members: Members,
-    pub attribute_kinds: AttributeKinds,
-    pub user_attributes: UserAttributes,
-    pub special_functions: SpecialFunctions,
-    pub autoimported_functions: AutoimportedFunctions,
-    pub special_idents: SpecialIdents,
-    pub pseudo_functions: PseudoFunctions,
-    pub stdlib_functions: StdlibFunctions,
-    pub typehints: Typehints,
-    pub pseudo_consts: PseudoConsts,
-    pub fb: Fb,
-    pub hh: Hh,
-    pub shapes: Shapes,
-    pub superglobals: Superglobals,
-    pub regex: Regex,
-    pub emitter_special_functions: EmitterSpecialFunctions,
-    pub xhp: Xhp,
-    pub unstable_features: UnstableFeatures,
-    pub coeffects: Coeffects,
-    pub readonly: Readonly,
-    pub capabilities: Capabilities,
-    pub expression_trees: ExpressionTrees,
+macro_rules! lazy {
+    ($value:expr) => {
+        Lazy::new(|| $value.into())
+    };
 }
 
-impl SpecialNames {
-    pub fn new() -> &'static Self {
-        let coeffects = Coeffects::new();
-        let capabilities = Capabilities::new(&coeffects);
-        Box::leak(Box::new(Self {
-            classes: Classes::new(),
-            collections: Collections::new(),
-            members: Members::new(),
-            attribute_kinds: AttributeKinds::new(),
-            user_attributes: UserAttributes::new(),
-            special_functions: SpecialFunctions::new(),
-            autoimported_functions: AutoimportedFunctions::new(),
-            special_idents: SpecialIdents::new(),
-            pseudo_functions: PseudoFunctions::new(),
-            stdlib_functions: StdlibFunctions::new(),
-            typehints: Typehints::new(),
-            pseudo_consts: PseudoConsts::new(),
-            fb: Fb::new(),
-            hh: Hh::new(),
-            shapes: Shapes::new(),
-            superglobals: Superglobals::new(),
-            regex: Regex::new(),
-            emitter_special_functions: EmitterSpecialFunctions::new(),
-            xhp: Xhp::new(),
-            unstable_features: UnstableFeatures::new(),
-            coeffects,
-            readonly: Readonly::new(),
-            capabilities,
-            expression_trees: ExpressionTrees::new(),
-        }))
-    }
+fn concat<S1: AsRef<str>, S2: AsRef<str>>(s1: S1, s2: S2) -> String {
+    format!("{}{}", s1.as_ref(), s2.as_ref())
 }
 
-#[derive(Debug)]
-pub struct Classes {
-    pub cParent: TypeName,
-    pub cStatic: TypeName,
-    pub cSelf: TypeName,
-    pub cUnknown: TypeName,
+pub mod classes {
+    use super::*;
 
-    // Used for dynamic classnames, e.g. new $foo();
-    pub cAwaitable: TypeName,
-    pub cGenerator: TypeName,
-    pub cAsyncGenerator: TypeName,
-    pub cHHFormatString: TypeName,
-    pub cHH_BuiltinEnum: TypeName,
-    pub cHH_BuiltinEnumClass: TypeName,
-    pub cHH_BuiltinAbstractEnumClass: TypeName,
-    pub cThrowable: TypeName,
-    pub cStdClass: TypeName,
-    pub cDateTime: TypeName,
-    pub cDateTimeImmutable: TypeName,
-    pub cAsyncIterator: TypeName,
-    pub cAsyncKeyedIterator: TypeName,
-    pub cStringish: TypeName,
-    pub cStringishObject: TypeName,
-    pub cXHPChild: TypeName,
-    pub cIMemoizeParam: TypeName,
-    pub cUNSAFESingletonMemoizeParam: TypeName,
-    pub cClassname: TypeName,
-    pub cTypename: TypeName,
-    pub cIDisposable: TypeName,
-    pub cIAsyncDisposable: TypeName,
-    pub cMemberOf: TypeName,
-    pub cEnumClassLabel: TypeName,
-
-    /// Classes that can be spliced into ExpressionTrees
-    pub cSpliceable: TypeName,
-    pub cSupportDyn: TypeName,
+    pub static cParent: Lazy<TypeName> = lazy!(sn::classes::PARENT);
+    pub static cStatic: Lazy<TypeName> = lazy!(sn::classes::STATIC);
+    pub static cSelf: Lazy<TypeName> = lazy!(sn::classes::SELF);
+    pub static cUnknown: Lazy<TypeName> = lazy!(sn::classes::UNKNOWN);
+    pub static cAwaitable: Lazy<TypeName> = lazy!(sn::classes::AWAITABLE);
+    pub static cGenerator: Lazy<TypeName> = lazy!(sn::classes::GENERATOR);
+    pub static cAsyncGenerator: Lazy<TypeName> = lazy!(sn::classes::ASYNC_GENERATOR);
+    pub static cHHFormatString: Lazy<TypeName> = lazy!(sn::classes::HH_FORMAT_STRING);
+    pub static cHH_BuiltinEnum: Lazy<TypeName> = lazy!(sn::classes::HH_BUILTIN_ENUM);
+    pub static cHH_BuiltinEnumClass: Lazy<TypeName> = lazy!(sn::classes::HH_BUILTIN_ENUM_CLASS);
+    pub static cHH_BuiltinAbstractEnumClass: Lazy<TypeName> =
+        lazy!(sn::classes::HH_BUILTIN_ABSTRACT_ENUM_CLASS);
+    pub static cThrowable: Lazy<TypeName> = lazy!(sn::classes::THROWABLE);
+    pub static cStdClass: Lazy<TypeName> = lazy!(sn::classes::STD_CLASS);
+    pub static cDateTime: Lazy<TypeName> = lazy!(sn::classes::DATE_TIME);
+    pub static cDateTimeImmutable: Lazy<TypeName> = lazy!(sn::classes::DATE_TIME_IMMUTABLE);
+    pub static cAsyncIterator: Lazy<TypeName> = lazy!(sn::classes::ASYNC_ITERATOR);
+    pub static cAsyncKeyedIterator: Lazy<TypeName> = lazy!(sn::classes::ASYNC_KEYED_ITERATOR);
+    pub static cStringish: Lazy<TypeName> = lazy!(sn::classes::STRINGISH);
+    pub static cStringishObject: Lazy<TypeName> = lazy!(sn::classes::STRINGISH_OBJECT);
+    pub static cXHPChild: Lazy<TypeName> = lazy!(sn::classes::XHP_CHILD);
+    pub static cIMemoizeParam: Lazy<TypeName> = lazy!(sn::classes::IMEMOIZE_PARAM);
+    pub static cUNSAFESingletonMemoizeParam: Lazy<TypeName> =
+        lazy!(sn::classes::UNSAFE_SINGLETON_MEMOIZE_PARAM);
+    pub static cClassname: Lazy<TypeName> = lazy!(sn::classes::CLASS_NAME);
+    pub static cTypename: Lazy<TypeName> = lazy!(sn::classes::TYPE_NAME);
+    pub static cIDisposable: Lazy<TypeName> = lazy!(sn::classes::IDISPOSABLE);
+    pub static cIAsyncDisposable: Lazy<TypeName> = lazy!(sn::classes::IASYNC_DISPOSABLE);
+    pub static cMemberOf: Lazy<TypeName> = lazy!(sn::classes::MEMBER_OF);
+    pub static cEnumClassLabel: Lazy<TypeName> = lazy!(sn::classes::ENUM_CLASS_LABEL);
+    pub static cSpliceable: Lazy<TypeName> = lazy!(sn::classes::SPLICEABLE);
+    pub static cSupportDyn: Lazy<TypeName> = lazy!(sn::classes::SUPPORT_DYN);
 }
 
-#[derive(Debug)]
-pub struct Collections {
+pub mod collections {
+    use super::*;
+
     // concrete classes
-    pub cVector: Symbol,
-    pub cMutableVector: Symbol,
-    pub cImmVector: Symbol,
-    pub cSet: Symbol,
-    pub cConstSet: Symbol,
-    pub cMutableSet: Symbol,
-    pub cImmSet: Symbol,
-    pub cMap: Symbol,
-    pub cMutableMap: Symbol,
-    pub cImmMap: Symbol,
-    pub cPair: Symbol,
+    pub static cVector: Lazy<TypeName> = lazy!(sn::collections::VECTOR);
+    pub static cMutableVector: Lazy<TypeName> = lazy!(sn::collections::MUTABLE_VECTOR);
+    pub static cImmVector: Lazy<TypeName> = lazy!(sn::collections::IMM_VECTOR);
+    pub static cSet: Lazy<TypeName> = lazy!(sn::collections::SET);
+    pub static cConstSet: Lazy<TypeName> = lazy!(sn::collections::CONST_SET);
+    pub static cMutableSet: Lazy<TypeName> = lazy!(sn::collections::MUTABLE_SET);
+    pub static cImmSet: Lazy<TypeName> = lazy!(sn::collections::IMM_SET);
+    pub static cMap: Lazy<TypeName> = lazy!(sn::collections::MAP);
+    pub static cMutableMap: Lazy<TypeName> = lazy!(sn::collections::MUTABLE_MAP);
+    pub static cImmMap: Lazy<TypeName> = lazy!(sn::collections::IMM_MAP);
+    pub static cPair: Lazy<TypeName> = lazy!(sn::collections::PAIR);
 
     // interfaces
-    pub cContainer: Symbol,
-    pub cKeyedContainer: Symbol,
-    pub cTraversable: Symbol,
-    pub cKeyedTraversable: Symbol,
-    pub cCollection: Symbol,
-    pub cConstVector: Symbol,
-    pub cConstMap: Symbol,
-    pub cConstCollection: Symbol,
-    pub cAnyArray: Symbol,
-    pub cDict: Symbol,
-    pub cVec: Symbol,
-    pub cKeyset: Symbol,
+    pub static cContainer: Lazy<TypeName> = lazy!(sn::collections::CONTAINER);
+    pub static cKeyedContainer: Lazy<TypeName> = lazy!(sn::collections::KEYED_CONTAINER);
+    pub static cTraversable: Lazy<TypeName> = lazy!(sn::collections::TRAVERSABLE);
+    pub static cKeyedTraversable: Lazy<TypeName> = lazy!(sn::collections::KEYED_TRAVERSABLE);
+    pub static cCollection: Lazy<TypeName> = lazy!(sn::collections::COLLECTION);
+    pub static cConstVector: Lazy<TypeName> = lazy!(sn::collections::CONST_VECTOR);
+    pub static cConstMap: Lazy<TypeName> = lazy!(sn::collections::CONST_MAP);
+    pub static cConstCollection: Lazy<TypeName> = lazy!(sn::collections::CONST_COLLECTION);
+    pub static cAnyArray: Lazy<TypeName> = lazy!(sn::collections::ANY_ARRAY);
+    pub static cDict: Lazy<TypeName> = lazy!(sn::collections::DICT);
+    pub static cVec: Lazy<TypeName> = lazy!(sn::collections::VEC);
+    pub static cKeyset: Lazy<TypeName> = lazy!(sn::collections::KEYSET);
 }
 
-#[derive(Debug)]
-pub struct Members {
-    pub mGetInstanceKey: Symbol,
-    pub mClass: ClassConstName,
-    pub parentConstruct: Symbol,
-    pub __construct: Symbol,
-    pub __destruct: Symbol,
-    pub __call: Symbol,
-    pub __callStatic: Symbol,
-    pub __clone: Symbol,
-    pub __debugInfo: Symbol,
-    pub __dispose: Symbol,
-    pub __disposeAsync: Symbol,
-    pub __get: Symbol,
-    pub __invoke: Symbol,
-    pub __isset: Symbol,
-    pub __set: Symbol,
-    pub __set_state: Symbol,
-    pub __sleep: Symbol,
-    pub __toString: Symbol,
-    pub __unset: Symbol,
-    pub __wakeup: Symbol,
+pub mod members {
+    use super::*;
+
+    pub static mGetInstanceKey: Lazy<MethodName> = lazy!(sn::members::M_GET_INSTANCE_KEY);
+    pub static mClass: Lazy<ClassConstName> = lazy!(sn::members::M_CLASS);
+    pub static __construct: Lazy<MethodName> = lazy!(sn::members::__CONSTRUCT);
+    pub static __destruct: Lazy<MethodName> = lazy!(sn::members::__DESTRUCT);
+    pub static __call: Lazy<MethodName> = lazy!(sn::members::__CALL);
+    pub static __callStatic: Lazy<MethodName> = lazy!(sn::members::__CALL_STATIC);
+    pub static __clone: Lazy<MethodName> = lazy!(sn::members::__CLONE);
+    pub static __debugInfo: Lazy<MethodName> = lazy!(sn::members::__DEBUG_INFO);
+    pub static __dispose: Lazy<MethodName> = lazy!(sn::members::__DISPOSE);
+    pub static __disposeAsync: Lazy<MethodName> = lazy!(sn::members::__DISPOSE_ASYNC);
+    pub static __get: Lazy<MethodName> = lazy!(sn::members::__GET);
+    pub static __invoke: Lazy<MethodName> = lazy!(sn::members::__INVOKE);
+    pub static __isset: Lazy<MethodName> = lazy!(sn::members::__ISSET);
+    pub static __set: Lazy<MethodName> = lazy!(sn::members::__SET);
+    pub static __set_state: Lazy<MethodName> = lazy!(sn::members::__SET_STATE);
+    pub static __sleep: Lazy<MethodName> = lazy!(sn::members::__SLEEP);
+    pub static __toString: Lazy<MethodName> = lazy!(sn::members::__TO_STRING);
+    pub static __unset: Lazy<MethodName> = lazy!(sn::members::__UNSET);
+    pub static __wakeup: Lazy<MethodName> = lazy!(sn::members::__WAKEUP);
+
+    /// Not really a PropName, but it's treated as one in deferred_init_members
+    /// of folded decls.
+    pub static parentConstruct: Lazy<PropName> = lazy!(concat(&"parent::", *__construct));
 }
 
-#[derive(Debug)]
-pub struct AttributeKinds {
-    pub cls: Symbol,
-    pub clscst: Symbol,
-    pub enum_: Symbol,
-    pub typealias: Symbol,
-    pub fn_: Symbol,
-    pub mthd: Symbol,
-    pub instProperty: Symbol,
-    pub staticProperty: Symbol,
-    pub parameter: Symbol,
-    pub typeparam: Symbol,
-    pub file: Symbol,
-    pub typeconst: Symbol,
-    pub lambda: Symbol,
-    pub enumcls: Symbol,
+pub mod attribute_kinds {
+    use super::*;
+
+    pub static cls: Lazy<TypeName> = lazy!(sn::attribute_kinds::CLS);
+    pub static clscst: Lazy<TypeName> = lazy!(sn::attribute_kinds::CLS_CST);
+    pub static enum_: Lazy<TypeName> = lazy!(sn::attribute_kinds::ENUM);
+    pub static typealias: Lazy<TypeName> = lazy!(sn::attribute_kinds::TYPE_ALIAS);
+    pub static fn_: Lazy<TypeName> = lazy!(sn::attribute_kinds::FN);
+    pub static mthd: Lazy<TypeName> = lazy!(sn::attribute_kinds::MTHD);
+    pub static instProperty: Lazy<TypeName> = lazy!(sn::attribute_kinds::INST_PROPERTY);
+    pub static staticProperty: Lazy<TypeName> = lazy!(sn::attribute_kinds::STATIC_PROPERTY);
+    pub static parameter: Lazy<TypeName> = lazy!(sn::attribute_kinds::PARAMETER);
+    pub static typeparam: Lazy<TypeName> = lazy!(sn::attribute_kinds::TYPE_PARAM);
+    pub static file: Lazy<TypeName> = lazy!(sn::attribute_kinds::FILE);
+    pub static typeconst: Lazy<TypeName> = lazy!(sn::attribute_kinds::TYPE_CONST);
+    pub static lambda: Lazy<TypeName> = lazy!(sn::attribute_kinds::LAMBDA);
+    pub static enumcls: Lazy<TypeName> = lazy!(sn::attribute_kinds::ENUM_CLS);
 }
 
-#[derive(Debug)]
-pub struct UserAttributes {
-    pub uaOverride: TypeName,
-    pub uaConsistentConstruct: TypeName,
-    pub uaConst: TypeName,
-    pub uaDeprecated: TypeName,
-    pub uaEntryPoint: TypeName,
-    pub uaMemoize: TypeName,
-    pub uaMemoizeLSB: TypeName,
-    pub uaPolicyShardedMemoize: TypeName,
-    pub uaPolicyShardedMemoizeLSB: TypeName,
-    pub uaPHPStdLib: TypeName,
-    pub uaAcceptDisposable: TypeName,
-    pub uaReturnDisposable: TypeName,
-    pub uaLSB: TypeName,
-    pub uaSealed: TypeName,
-    pub uaLateInit: TypeName,
-    pub uaNewable: TypeName,
-    pub uaEnforceable: TypeName,
-    pub uaExplicit: TypeName,
-    pub uaNonDisjoint: TypeName,
-    pub uaSoft: TypeName,
-    pub uaWarn: TypeName,
-    pub uaMockClass: TypeName,
-    pub uaProvenanceSkipFrame: TypeName,
-    pub uaDynamicallyCallable: TypeName,
-    pub uaDynamicallyConstructible: TypeName,
-    pub uaReifiable: TypeName,
-    pub uaNeverInline: TypeName,
-    pub uaDisableTypecheckerInternal: TypeName,
-    pub uaHasTopLevelCode: TypeName,
-    pub uaIsFoldable: TypeName,
-    pub uaNative: TypeName,
-    pub uaOutOnly: TypeName,
-    pub uaAlwaysInline: TypeName,
-    pub uaEnableUnstableFeatures: TypeName,
-    pub uaEnumClass: TypeName,
-    pub uaPolicied: TypeName,
-    pub uaInferFlows: TypeName,
-    pub uaExternal: TypeName,
-    pub uaCanCall: TypeName,
-    pub uaSupportDynamicType: TypeName,
-    pub uaRequireDynamic: TypeName,
-    pub uaModule: TypeName,
-    pub uaInternal: TypeName,
-    pub uaEnableMethodTraitDiamond: TypeName,
-    pub uaIgnoreReadonlyLocalErrors: TypeName,
-    pub uaIgnoreCoeffectLocalErrors: TypeName,
+pub mod user_attributes {
+    use super::*;
+
+    pub static uaOverride: Lazy<TypeName> = lazy!(sn::user_attributes::OVERRIDE);
+    pub static uaConsistentConstruct: Lazy<TypeName> =
+        lazy!(sn::user_attributes::CONSISTENT_CONSTRUCT);
+    pub static uaConst: Lazy<TypeName> = lazy!(sn::user_attributes::CONST);
+    pub static uaDeprecated: Lazy<TypeName> = lazy!(sn::user_attributes::DEPRECATED);
+    pub static uaEntryPoint: Lazy<TypeName> = lazy!(sn::user_attributes::ENTRY_POINT);
+    pub static uaMemoize: Lazy<TypeName> = lazy!(sn::user_attributes::MEMOIZE);
+    pub static uaMemoizeLSB: Lazy<TypeName> = lazy!(sn::user_attributes::MEMOIZE_LSB);
+    pub static uaPolicyShardedMemoize: Lazy<TypeName> =
+        lazy!(sn::user_attributes::POLICY_SHARDED_MEMOIZE);
+    pub static uaPolicyShardedMemoizeLSB: Lazy<TypeName> =
+        lazy!(sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB);
+    pub static uaPHPStdLib: Lazy<TypeName> = lazy!(sn::user_attributes::PHP_STD_LIB);
+    pub static uaAcceptDisposable: Lazy<TypeName> = lazy!(sn::user_attributes::ACCEPT_DISPOSABLE);
+    pub static uaReturnDisposable: Lazy<TypeName> = lazy!(sn::user_attributes::RETURN_DISPOSABLE);
+    pub static uaLSB: Lazy<TypeName> = lazy!(sn::user_attributes::LSB);
+    pub static uaSealed: Lazy<TypeName> = lazy!(sn::user_attributes::SEALED);
+    pub static uaLateInit: Lazy<TypeName> = lazy!(sn::user_attributes::LATE_INIT);
+    pub static uaNewable: Lazy<TypeName> = lazy!(sn::user_attributes::NEWABLE);
+    pub static uaEnforceable: Lazy<TypeName> = lazy!(sn::user_attributes::ENFORCEABLE);
+    pub static uaExplicit: Lazy<TypeName> = lazy!(sn::user_attributes::EXPLICIT);
+    pub static uaNonDisjoint: Lazy<TypeName> = lazy!(sn::user_attributes::NON_DISJOINT);
+    pub static uaSoft: Lazy<TypeName> = lazy!(sn::user_attributes::SOFT);
+    pub static uaWarn: Lazy<TypeName> = lazy!(sn::user_attributes::WARN);
+    pub static uaMockClass: Lazy<TypeName> = lazy!(sn::user_attributes::MOCK_CLASS);
+    pub static uaProvenanceSkipFrame: Lazy<TypeName> =
+        lazy!(sn::user_attributes::PROVENANCE_SKIP_FRAME);
+    pub static uaDynamicallyCallable: Lazy<TypeName> =
+        lazy!(sn::user_attributes::DYNAMICALLY_CALLABLE);
+    pub static uaDynamicallyConstructible: Lazy<TypeName> =
+        lazy!(sn::user_attributes::DYNAMICALLY_CONSTRUCTIBLE);
+    pub static uaReifiable: Lazy<TypeName> = lazy!(sn::user_attributes::REIFIABLE);
+    pub static uaNeverInline: Lazy<TypeName> = lazy!(sn::user_attributes::NEVER_INLINE);
+    pub static uaDisableTypecheckerInternal: Lazy<TypeName> =
+        lazy!(sn::user_attributes::DISABLE_TYPECHECKER_INTERNAL);
+    pub static uaHasTopLevelCode: Lazy<TypeName> = lazy!(sn::user_attributes::HAS_TOP_LEVEL_CODE);
+    pub static uaIsFoldable: Lazy<TypeName> = lazy!(sn::user_attributes::IS_FOLDABLE);
+    pub static uaNative: Lazy<TypeName> = lazy!(sn::user_attributes::NATIVE);
+    pub static uaOutOnly: Lazy<TypeName> = lazy!(sn::user_attributes::OUT_ONLY);
+    pub static uaAlwaysInline: Lazy<TypeName> = lazy!(sn::user_attributes::ALWAYS_INLINE);
+    pub static uaEnableUnstableFeatures: Lazy<TypeName> =
+        lazy!(sn::user_attributes::ENABLE_UNSTABLE_FEATURES);
+    pub static uaEnumClass: Lazy<TypeName> = lazy!(sn::user_attributes::ENUM_CLASS);
+    pub static uaPolicied: Lazy<TypeName> = lazy!(sn::user_attributes::POLICIED);
+    pub static uaInferFlows: Lazy<TypeName> = lazy!(sn::user_attributes::INFERFLOWS);
+    pub static uaExternal: Lazy<TypeName> = lazy!(sn::user_attributes::EXTERNAL);
+    pub static uaCanCall: Lazy<TypeName> = lazy!(sn::user_attributes::CAN_CALL);
+    pub static uaSupportDynamicType: Lazy<TypeName> =
+        lazy!(sn::user_attributes::SUPPORT_DYNAMIC_TYPE);
+    pub static uaRequireDynamic: Lazy<TypeName> = lazy!(sn::user_attributes::REQUIRE_DYNAMIC);
+    pub static uaModule: Lazy<TypeName> = lazy!(sn::user_attributes::MODULE);
+    pub static uaInternal: Lazy<TypeName> = lazy!(sn::user_attributes::INTERNAL);
+    pub static uaEnableMethodTraitDiamond: Lazy<TypeName> =
+        lazy!(sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND);
+    pub static uaIgnoreReadonlyLocalErrors: Lazy<TypeName> =
+        lazy!(sn::user_attributes::IGNORE_READONLY_LOCAL_ERRORS);
+    pub static uaIgnoreCoeffectLocalErrors: Lazy<TypeName> =
+        lazy!(sn::user_attributes::IGNORE_COEFFECT_LOCAL_ERRORS);
 }
 
-/// Tested before \\-prepending name-canonicalization
-#[derive(Debug)]
-pub struct SpecialFunctions {
-    pub echo: Symbol,
-    pub hhas_adata: Symbol,
+pub mod special_functions {
+    use super::*;
+
+    pub static echo: Lazy<FunName> = lazy!(sn::special_functions::ECHO);
+    pub static hhas_adata: Lazy<FunName> = lazy!(sn::special_functions::HHAS_ADATA);
 }
 
-/// There are a number of functions that are automatically imported into the
-/// namespace. The full list can be found in hh_autoimport.ml.
-#[derive(Debug)]
-pub struct AutoimportedFunctions {
-    pub invariant_violation: Symbol,
-    pub invariant: Symbol,
-    pub fun_: Symbol,
-    pub inst_meth: Symbol,
-    pub class_meth: Symbol,
-    pub meth_caller: Symbol,
+pub mod autoimported_functions {
+    use super::*;
+
+    pub static invariant_violation: Lazy<FunName> =
+        lazy!(sn::autoimported_functions::INVARIANT_VIOLATION);
+    pub static invariant: Lazy<FunName> = lazy!(sn::autoimported_functions::INVARIANT);
+    pub static fun: Lazy<FunName> = lazy!(sn::autoimported_functions::FUN_);
+    pub static inst_meth: Lazy<FunName> = lazy!(sn::autoimported_functions::INST_METH);
+    pub static class_meth: Lazy<FunName> = lazy!(sn::autoimported_functions::CLASS_METH);
+    pub static meth_caller: Lazy<FunName> = lazy!(sn::autoimported_functions::METH_CALLER);
 }
 
-#[derive(Debug)]
-pub struct SpecialIdents {
-    pub this: Symbol,
-    pub placeholder: Symbol,
-    pub dollardollar: Symbol,
-    /// Intentionally uses an invalid variable name to ensure it's translated
-    pub tmp_var_prefix: Symbol,
+pub mod special_idents {
+    use super::*;
+
+    pub static this: Lazy<Symbol> = lazy!(sn::special_idents::THIS);
+    pub static placeholder: Lazy<Symbol> = lazy!(sn::special_idents::PLACEHOLDER);
+    pub static dollardollar: Lazy<Symbol> = lazy!(sn::special_idents::DOLLAR_DOLLAR);
+    pub static tmp_var_prefix: Lazy<Symbol> = lazy!(sn::special_idents::TMP_VAR_PREFIX);
 }
 
-/// PseudoFunctions are functions (or items that are parsed like functions)
-/// that are treated like builtins that do not have a public HHI or interface.
-#[derive(Debug)]
-pub struct PseudoFunctions {
-    pub isset: Symbol,
-    pub unset: Symbol,
-    pub hh_show: Symbol,
-    pub hh_expect: Symbol,
-    pub hh_expect_equivalent: Symbol,
-    pub hh_show_env: Symbol,
-    pub hh_log_level: Symbol,
-    pub hh_force_solve: Symbol,
-    pub hh_loop_forever: Symbol,
-    pub echo: Symbol,
-    pub empty: Symbol,
-    pub exit: Symbol,
-    pub die: Symbol,
-    pub unsafe_cast: Symbol,
-    pub enforced_cast: Symbol,
+pub mod pseudo_functions {
+    use super::*;
+
+    pub static isset: Lazy<FunName> = lazy!(sn::pseudo_functions::ISSET);
+    pub static unset: Lazy<FunName> = lazy!(sn::pseudo_functions::UNSET);
+    pub static hh_show: Lazy<FunName> = lazy!(sn::pseudo_functions::HH_SHOW);
+    pub static hh_expect: Lazy<FunName> = lazy!(sn::pseudo_functions::HH_EXPECT);
+    pub static hh_expect_equivalent: Lazy<FunName> =
+        lazy!(sn::pseudo_functions::HH_EXPECT_EQUIVALENT);
+    pub static hh_show_env: Lazy<FunName> = lazy!(sn::pseudo_functions::HH_SHOW_ENV);
+    pub static hh_log_level: Lazy<FunName> = lazy!(sn::pseudo_functions::HH_LOG_LEVEL);
+    pub static hh_force_solve: Lazy<FunName> = lazy!(sn::pseudo_functions::HH_FORCE_SOLVE);
+    pub static hh_loop_forever: Lazy<FunName> = lazy!(sn::pseudo_functions::HH_LOOP_FOREVER);
+    pub static echo: Lazy<FunName> = lazy!(sn::pseudo_functions::ECHO);
+    pub static empty: Lazy<FunName> = lazy!(sn::pseudo_functions::EMPTY);
+    pub static exit: Lazy<FunName> = lazy!(sn::pseudo_functions::EXIT);
+    pub static die: Lazy<FunName> = lazy!(sn::pseudo_functions::DIE);
+    pub static unsafe_cast: Lazy<FunName> = lazy!(sn::pseudo_functions::UNSAFE_CAST);
+    pub static enforced_cast: Lazy<FunName> = lazy!(sn::pseudo_functions::ENFORCED_CAST);
 }
 
-#[derive(Debug)]
-pub struct StdlibFunctions {
-    pub is_array: Symbol,
-    pub is_null: Symbol,
-    pub get_class: Symbol,
-    pub array_filter: Symbol,
-    pub call_user_func: Symbol,
-    pub type_structure: Symbol,
-    pub array_mark_legacy: Symbol,
-    pub array_unmark_legacy: Symbol,
-    pub is_php_array: Symbol,
-    pub is_any_array: Symbol,
-    pub is_dict_or_darray: Symbol,
-    pub is_vec_or_varray: Symbol,
+pub mod stdlib_functions {
+    use super::*;
+
+    pub static is_array: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_ARRAY);
+    pub static is_null: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_NULL);
+    pub static get_class: Lazy<FunName> = lazy!(sn::std_lib_functions::GET_CLASS);
+    pub static array_filter: Lazy<FunName> = lazy!(sn::std_lib_functions::ARRAY_FILTER);
+    pub static call_user_func: Lazy<FunName> = lazy!(sn::std_lib_functions::CALL_USER_FUNC);
+    pub static type_structure: Lazy<FunName> = lazy!(sn::std_lib_functions::TYPE_STRUCTURE);
+    pub static array_mark_legacy: Lazy<FunName> = lazy!(sn::std_lib_functions::ARRAY_MARK_LEGACY);
+    pub static array_unmark_legacy: Lazy<FunName> =
+        lazy!(sn::std_lib_functions::ARRAY_UNMARK_LEGACY);
+    pub static is_php_array: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_PHP_ARRAY);
+    pub static is_any_array: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_ANY_ARRAY);
+    pub static is_dict_or_darray: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_DICT_OR_DARRAY);
+    pub static is_vec_or_varray: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_VEC_OR_VARRAY);
 }
 
-#[derive(Debug)]
-pub struct Typehints {
-    pub null: Symbol,
-    pub void: Symbol,
-    pub resource: Symbol,
-    pub num: Symbol,
-    pub arraykey: Symbol,
-    pub noreturn: Symbol,
-    pub mixed: Symbol,
-    pub nonnull: Symbol,
-    pub this: Symbol,
-    pub dynamic: Symbol,
-    pub supportdynamic: Symbol,
-    pub nothing: Symbol,
-    pub int: Symbol,
-    pub bool: Symbol,
-    pub float: Symbol,
-    pub string: Symbol,
-    pub darray: Symbol,
-    pub varray: Symbol,
-    pub varray_or_darray: Symbol,
-    pub vec_or_dict: Symbol,
-    pub callable: Symbol,
-    pub object_cast: Symbol,
-    pub supportdyn: Symbol,
-    pub hh_sypportdyn: Symbol,
-    pub wildcard: Symbol,
+pub mod typehints {
+    use super::*;
 
-    pub reserved_typehints: HashSet<Symbol>,
+    pub static null: Lazy<TypeName> = lazy!(sn::typehints::NULL);
+    pub static void: Lazy<TypeName> = lazy!(sn::typehints::VOID);
+    pub static resource: Lazy<TypeName> = lazy!(sn::typehints::RESOURCE);
+    pub static num: Lazy<TypeName> = lazy!(sn::typehints::NUM);
+    pub static arraykey: Lazy<TypeName> = lazy!(sn::typehints::ARRAYKEY);
+    pub static noreturn: Lazy<TypeName> = lazy!(sn::typehints::NORETURN);
+    pub static mixed: Lazy<TypeName> = lazy!(sn::typehints::MIXED);
+    pub static nonnull: Lazy<TypeName> = lazy!(sn::typehints::NONNULL);
+    pub static this: Lazy<TypeName> = lazy!(sn::typehints::THIS);
+    pub static dynamic: Lazy<TypeName> = lazy!(sn::typehints::DYNAMIC);
+    pub static supportdynamic: Lazy<TypeName> = lazy!(sn::typehints::SUPPORTDYNAMIC);
+    pub static nothing: Lazy<TypeName> = lazy!(sn::typehints::NOTHING);
+    pub static int: Lazy<TypeName> = lazy!(sn::typehints::INT);
+    pub static bool: Lazy<TypeName> = lazy!(sn::typehints::BOOL);
+    pub static float: Lazy<TypeName> = lazy!(sn::typehints::FLOAT);
+    pub static string: Lazy<TypeName> = lazy!(sn::typehints::STRING);
+    pub static darray: Lazy<TypeName> = lazy!(sn::typehints::DARRAY);
+    pub static varray: Lazy<TypeName> = lazy!(sn::typehints::VARRAY);
+    pub static varray_or_darray: Lazy<TypeName> = lazy!(sn::typehints::VARRAY_OR_DARRAY);
+    pub static vec_or_dict: Lazy<TypeName> = lazy!(sn::typehints::VEC_OR_DICT);
+    pub static callable: Lazy<TypeName> = lazy!(sn::typehints::CALLABLE);
+    pub static object_cast: Lazy<TypeName> = lazy!(sn::typehints::OBJECT_CAST);
+    pub static supportdyn: Lazy<TypeName> = lazy!(sn::typehints::SUPPORTDYN);
+    pub static hh_sypportdyn: Lazy<TypeName> = lazy!(sn::typehints::HH_SUPPORTDYN);
+    pub static wildcard: Lazy<TypeName> = lazy!(sn::typehints::WILDCARD);
+
+    pub static reserved_typehints: Lazy<TypeNameSet> = Lazy::new(|| {
+        [
+            *null,
+            *void,
+            *resource,
+            *num,
+            *arraykey,
+            *noreturn,
+            *mixed,
+            *nonnull,
+            *this,
+            *dynamic,
+            *nothing,
+            *int,
+            *bool,
+            *float,
+            *string,
+            *darray,
+            *varray,
+            *varray_or_darray,
+            *vec_or_dict,
+            *callable,
+            *wildcard,
+        ]
+        .into_iter()
+        .collect()
+    });
 }
 
-#[derive(Debug)]
-pub struct PseudoConsts {
-    pub g__LINE__: Symbol,
-    pub g__CLASS__: Symbol,
-    pub g__TRAIT__: Symbol,
-    pub g__FILE__: Symbol,
-    pub g__DIR__: Symbol,
-    pub g__FUNCTION__: Symbol,
-    pub g__METHOD__: Symbol,
-    pub g__NAMESPACE__: Symbol,
-    pub g__COMPILER_FRONTEND__: Symbol,
-    pub g__FUNCTION_CREDENTIAL__: Symbol,
+pub mod pseudo_consts {
+    use super::*;
 
-    // exit and die are not pseudo consts, but they are currently parsed as such.
-    // Would be more correct to parse them as special statements like return
-    pub exit: Symbol,
-    pub die: Symbol,
+    pub static g__LINE__: Lazy<ConstName> = lazy!(sn::pseudo_consts::G__LINE__);
+    pub static g__CLASS__: Lazy<ConstName> = lazy!(sn::pseudo_consts::G__CLASS__);
+    pub static g__TRAIT__: Lazy<ConstName> = lazy!(sn::pseudo_consts::G__TRAIT__);
+    pub static g__FILE__: Lazy<ConstName> = lazy!(sn::pseudo_consts::G__FILE__);
+    pub static g__DIR__: Lazy<ConstName> = lazy!(sn::pseudo_consts::G__DIR__);
+    pub static g__FUNCTION__: Lazy<ConstName> = lazy!(sn::pseudo_consts::G__FUNCTION__);
+    pub static g__METHOD__: Lazy<ConstName> = lazy!(sn::pseudo_consts::G__METHOD__);
+    pub static g__NAMESPACE__: Lazy<ConstName> = lazy!(sn::pseudo_consts::G__NAMESPACE__);
+    pub static g__COMPILER_FRONTEND__: Lazy<ConstName> =
+        lazy!(sn::pseudo_consts::G__COMPILER_FRONTEND__);
+    pub static g__FUNCTION_CREDENTIAL__: Lazy<ConstName> =
+        lazy!(sn::pseudo_consts::G__FUNCTION_CREDENTIAL__);
+    pub static exit: Lazy<ConstName> = lazy!(sn::pseudo_consts::EXIT);
+    pub static die: Lazy<ConstName> = lazy!(sn::pseudo_consts::DIE);
 }
 
-#[derive(Debug)]
-pub struct Fb {
-    pub cEnum: TypeName,
-    pub tInner: TypeConstName,
-    pub idx: Symbol,
-    pub cTypeStructure: TypeName,
-    pub cIncorrectType: TypeName,
+pub mod fb {
+    use super::*;
+
+    pub static cEnum: Lazy<TypeName> = lazy!(sn::fb::ENUM);
+    pub static tInner: Lazy<TypeConstName> = lazy!(sn::fb::INNER);
+    pub static idx: Lazy<FunName> = lazy!(sn::fb::IDX);
+    pub static cTypeStructure: Lazy<TypeName> = lazy!(sn::fb::TYPE_STRUCTURE);
+    pub static cIncorrectType: Lazy<TypeName> = lazy!(sn::fb::INCORRECT_TYPE);
 }
 
-#[derive(Debug)]
-pub struct Hh {
-    pub contains: Symbol,
-    pub contains_key: Symbol,
+pub mod hh {
+    use super::*;
+
+    pub static contains: Lazy<FunName> = lazy!(sn::hh::CONTAINS);
+    pub static contains_key: Lazy<FunName> = lazy!(sn::hh::CONTAINS_KEY);
 }
 
-#[derive(Debug)]
-pub struct Shapes {
-    pub cShapes: Symbol,
-    pub idx: Symbol,
-    pub at: Symbol,
-    pub keyExists: Symbol,
-    pub removeKey: Symbol,
-    pub toArray: Symbol,
-    pub toDict: Symbol,
+pub mod shapes {
+    use super::*;
+
+    pub static cShapes: Lazy<TypeName> = lazy!(sn::shapes::SHAPES);
+    pub static idx: Lazy<MethodName> = lazy!(sn::shapes::IDX);
+    pub static at: Lazy<MethodName> = lazy!(sn::shapes::AT);
+    pub static keyExists: Lazy<MethodName> = lazy!(sn::shapes::KEY_EXISTS);
+    pub static removeKey: Lazy<MethodName> = lazy!(sn::shapes::REMOVE_KEY);
+    pub static toArray: Lazy<MethodName> = lazy!(sn::shapes::TO_ARRAY);
+    pub static toDict: Lazy<MethodName> = lazy!(sn::shapes::TO_DICT);
 }
 
-#[derive(Debug)]
-pub struct Superglobals {
-    pub globals: Symbol,
+pub mod superglobals {
+    use super::*;
+
+    pub static globals: Lazy<Symbol> = lazy!(sn::superglobals::GLOBALS);
 }
 
-#[derive(Debug)]
-pub struct Regex {
-    pub tPattern: Symbol,
+pub mod regex {
+    use super::*;
+
+    pub static tPattern: Lazy<TypeName> = lazy!(sn::regex::T_PATTERN);
 }
 
-/// These are functions treated by the emitter specially. They are not
-/// autoimported (see hh_autoimport.ml) nor are they consider PseudoFunctions
-/// so they can be overridden by namespacing (at least currently)
-#[derive(Debug)]
-pub struct EmitterSpecialFunctions {
-    pub eval: Symbol,
-    pub set_frame_metadata: Symbol,
-    pub systemlib_reified_generics: Symbol,
+pub mod emitter_special_functions {
+    use super::*;
+
+    pub static eval: Lazy<FunName> = lazy!(sn::emitter_special_functions::EVAL);
+    pub static set_frame_metadata: Lazy<FunName> =
+        lazy!(sn::emitter_special_functions::SET_FRAME_METADATA);
+    pub static systemlib_reified_generics: Lazy<FunName> =
+        lazy!(sn::emitter_special_functions::SYSTEMLIB_REIFIED_GENERICS);
 }
 
-#[derive(Debug)]
-pub struct Xhp {
-    pub pcdata: Symbol,
-    pub any: Symbol,
-    pub empty: Symbol,
+pub mod xhp {
+    use super::*;
+
+    pub static pcdata: Lazy<Symbol> = lazy!(sn::xhp::PCDATA);
+    pub static any: Lazy<Symbol> = lazy!(sn::xhp::ANY);
+    pub static empty: Lazy<Symbol> = lazy!(sn::xhp::EMPTY);
 }
 
-/// This should be a subset of rust_parser_errors::UnstableFeatures that is relevant
-/// to the typechecker
-#[derive(Debug)]
-pub struct UnstableFeatures {
-    pub coeffects_provisional: Symbol,
-    pub ifc: Symbol,
-    pub readonly: Symbol,
-    pub expression_trees: Symbol,
-    pub modules: Symbol,
+pub mod unstable_features {
+    use super::*;
+
+    pub static coeffects_provisional: Lazy<Symbol> =
+        lazy!(sn::unstable_features::COEFFECTS_PROVISIONAL);
+    pub static ifc: Lazy<Symbol> = lazy!(sn::unstable_features::IFC);
+    pub static readonly: Lazy<Symbol> = lazy!(sn::unstable_features::READONLY);
+    pub static expression_trees: Lazy<Symbol> = lazy!(sn::unstable_features::EXPRESSION_TREES);
+    pub static modules: Lazy<Symbol> = lazy!(sn::unstable_features::MODULES);
 }
 
-#[derive(Debug)]
-pub struct Coeffects {
-    pub capability: Symbol,
-    pub local_capability: Symbol,
-    pub contexts: Symbol,
-    pub unsafe_contexts: Symbol,
-    pub generated_generic_prefix: Symbol,
+pub mod coeffects {
+    use super::*;
+
+    pub static capability: Lazy<Symbol> = lazy!("$#capability");
+    pub static local_capability: Lazy<Symbol> = lazy!("$#local_capability");
+    pub static contexts: Lazy<TypeName> = lazy!("\\HH\\Contexts");
+    pub static unsafe_contexts: Lazy<TypeName> = lazy!(concat(*contexts, "\\Unsafe"));
+    pub static generated_generic_prefix: Lazy<Symbol> = lazy!("T/");
 }
 
-#[derive(Debug)]
-pub struct Readonly {
-    pub idx: Symbol,
-    pub as_mut: Symbol,
+pub mod readonly {
+    use super::*;
+
+    pub static idx: Lazy<FunName> = lazy!(sn::readonly::IDX);
+    pub static as_mut: Lazy<FunName> = lazy!(sn::readonly::AS_MUT);
 }
 
-#[derive(Debug)]
-pub struct Capabilities {
-    pub defaults: Symbol,
-    pub write_props: Symbol,
-    pub writeProperty: Symbol,
-    pub accessGlobals: Symbol,
-    pub readGlobals: Symbol,
-    pub system: Symbol,
-    pub implicitPolicy: Symbol,
-    pub implicitPolicyLocal: Symbol,
-    pub io: Symbol,
-    pub rx: Symbol,
-    pub rxLocal: Symbol,
+pub mod capabilities {
+    use super::*;
+
+    pub static defaults: Lazy<TypeName> = lazy!(concat(*coeffects::contexts, "\\defaults"));
+    pub static write_props: Lazy<TypeName> = lazy!(concat(*coeffects::contexts, "\\write_props"));
+
+    const prefix: &str = "\\HH\\Capabilities\\";
+    pub static writeProperty: Lazy<TypeName> = lazy!(concat(prefix, "WriteProperty"));
+    pub static accessGlobals: Lazy<TypeName> = lazy!(concat(prefix, "AccessGlobals"));
+    pub static readGlobals: Lazy<TypeName> = lazy!(concat(prefix, "ReadGlobals"));
+    pub static system: Lazy<TypeName> = lazy!(concat(prefix, "System"));
+    pub static implicitPolicy: Lazy<TypeName> = lazy!(concat(prefix, "ImplicitPolicy"));
+    pub static implicitPolicyLocal: Lazy<TypeName> = lazy!(concat(prefix, "ImplicitPolicyLocal"));
+    pub static io: Lazy<TypeName> = lazy!(concat(prefix, "IO"));
+    pub static rx: Lazy<TypeName> = lazy!(concat(prefix, "Rx"));
+    pub static rxLocal: Lazy<TypeName> = lazy!(concat(*rx, "Local"));
 }
 
-#[derive(Debug)]
-pub struct ExpressionTrees {
-    pub makeTree: Symbol,
-    pub intType: Symbol,
-    pub floatType: Symbol,
-    pub boolType: Symbol,
-    pub stringType: Symbol,
-    pub nullType: Symbol,
-    pub voidType: Symbol,
-    pub symbolType: Symbol,
-    pub visitInt: Symbol,
-    pub visitFloat: Symbol,
-    pub visitBool: Symbol,
-    pub visitString: Symbol,
-    pub visitNull: Symbol,
-    pub visitBinop: Symbol,
-    pub visitUnop: Symbol,
-    pub visitLocal: Symbol,
-    pub visitLambda: Symbol,
-    pub visitGlobalFunction: Symbol,
-    pub visitStaticMethod: Symbol,
-    pub visitCall: Symbol,
-    pub visitAssign: Symbol,
-    pub visitTernary: Symbol,
-    pub visitIf: Symbol,
-    pub visitWhile: Symbol,
-    pub visitReturn: Symbol,
-    pub visitFor: Symbol,
-    pub visitBreak: Symbol,
-    pub visitContinue: Symbol,
-    pub splice: Symbol,
-    pub dollardollarTmpVar: Symbol,
-}
+pub mod expression_trees {
+    use super::*;
 
-impl Classes {
-    fn new() -> Self {
-        Self {
-            cParent: TypeName::new(sn::classes::PARENT),
-            cStatic: TypeName::new(sn::classes::STATIC),
-            cSelf: TypeName::new(sn::classes::SELF),
-            cUnknown: TypeName::new(sn::classes::UNKNOWN),
-            cAwaitable: TypeName::new(sn::classes::AWAITABLE),
-            cGenerator: TypeName::new(sn::classes::GENERATOR),
-            cAsyncGenerator: TypeName::new(sn::classes::ASYNC_GENERATOR),
-            cHHFormatString: TypeName::new(sn::classes::HH_FORMAT_STRING),
-            cHH_BuiltinEnum: TypeName::new(sn::classes::HH_BUILTIN_ENUM),
-            cHH_BuiltinEnumClass: TypeName::new(sn::classes::HH_BUILTIN_ENUM_CLASS),
-            cHH_BuiltinAbstractEnumClass: TypeName::new(
-                sn::classes::HH_BUILTIN_ABSTRACT_ENUM_CLASS,
-            ),
-            cThrowable: TypeName::new(sn::classes::THROWABLE),
-            cStdClass: TypeName::new(sn::classes::STD_CLASS),
-            cDateTime: TypeName::new(sn::classes::DATE_TIME),
-            cDateTimeImmutable: TypeName::new(sn::classes::DATE_TIME_IMMUTABLE),
-            cAsyncIterator: TypeName::new(sn::classes::ASYNC_ITERATOR),
-            cAsyncKeyedIterator: TypeName::new(sn::classes::ASYNC_KEYED_ITERATOR),
-            cStringish: TypeName::new(sn::classes::STRINGISH),
-            cStringishObject: TypeName::new(sn::classes::STRINGISH_OBJECT),
-            cXHPChild: TypeName::new(sn::classes::XHP_CHILD),
-            cIMemoizeParam: TypeName::new(sn::classes::IMEMOIZE_PARAM),
-            cUNSAFESingletonMemoizeParam: TypeName::new(
-                sn::classes::UNSAFE_SINGLETON_MEMOIZE_PARAM,
-            ),
-            cClassname: TypeName::new(sn::classes::CLASS_NAME),
-            cTypename: TypeName::new(sn::classes::TYPE_NAME),
-            cIDisposable: TypeName::new(sn::classes::IDISPOSABLE),
-            cIAsyncDisposable: TypeName::new(sn::classes::IASYNC_DISPOSABLE),
-            cMemberOf: TypeName::new(sn::classes::MEMBER_OF),
-            cEnumClassLabel: TypeName::new(sn::classes::ENUM_CLASS_LABEL),
-            cSpliceable: TypeName::new(sn::classes::SPLICEABLE),
-            cSupportDyn: TypeName::new(sn::classes::SUPPORT_DYN),
-        }
-    }
-}
+    pub static makeTree: Lazy<MethodName> = lazy!(sn::expression_trees::MAKE_TREE);
+    pub static intType: Lazy<MethodName> = lazy!(sn::expression_trees::INT_TYPE);
+    pub static floatType: Lazy<MethodName> = lazy!(sn::expression_trees::FLOAT_TYPE);
+    pub static boolType: Lazy<MethodName> = lazy!(sn::expression_trees::BOOL_TYPE);
+    pub static stringType: Lazy<MethodName> = lazy!(sn::expression_trees::STRING_TYPE);
+    pub static nullType: Lazy<MethodName> = lazy!(sn::expression_trees::NULL_TYPE);
+    pub static voidType: Lazy<MethodName> = lazy!(sn::expression_trees::VOID_TYPE);
+    pub static symbolType: Lazy<MethodName> = lazy!(sn::expression_trees::SYMBOL_TYPE);
+    pub static visitInt: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_INT);
+    pub static visitFloat: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_FLOAT);
+    pub static visitBool: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_BOOL);
+    pub static visitString: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_STRING);
+    pub static visitNull: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_NULL);
+    pub static visitBinop: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_BINOP);
+    pub static visitUnop: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_UNOP);
+    pub static visitLocal: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_LOCAL);
+    pub static visitLambda: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_LAMBDA);
+    pub static visitGlobalFunction: Lazy<MethodName> =
+        lazy!(sn::expression_trees::VISIT_GLOBAL_FUNCTION);
+    pub static visitStaticMethod: Lazy<MethodName> =
+        lazy!(sn::expression_trees::VISIT_STATIC_METHOD);
+    pub static visitCall: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_CALL);
+    pub static visitAssign: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_ASSIGN);
+    pub static visitTernary: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_TERNARY);
+    pub static visitIf: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_IF);
+    pub static visitWhile: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_WHILE);
+    pub static visitReturn: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_RETURN);
+    pub static visitFor: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_FOR);
+    pub static visitBreak: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_BREAK);
+    pub static visitContinue: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_CONTINUE);
+    pub static splice: Lazy<MethodName> = lazy!(sn::expression_trees::SPLICE);
 
-impl Collections {
-    fn new() -> Self {
-        Self {
-            // concrete classes
-            cVector: Symbol::new(sn::collections::VECTOR),
-            cMutableVector: Symbol::new(sn::collections::MUTABLE_VECTOR),
-            cImmVector: Symbol::new(sn::collections::IMM_VECTOR),
-            cSet: Symbol::new(sn::collections::SET),
-            cConstSet: Symbol::new(sn::collections::CONST_SET),
-            cMutableSet: Symbol::new(sn::collections::MUTABLE_SET),
-            cImmSet: Symbol::new(sn::collections::IMM_SET),
-            cMap: Symbol::new(sn::collections::MAP),
-            cMutableMap: Symbol::new(sn::collections::MUTABLE_MAP),
-            cImmMap: Symbol::new(sn::collections::IMM_MAP),
-            cPair: Symbol::new(sn::collections::PAIR),
-
-            // interfaces
-            cContainer: Symbol::new(sn::collections::CONTAINER),
-            cKeyedContainer: Symbol::new(sn::collections::KEYED_CONTAINER),
-            cTraversable: Symbol::new(sn::collections::TRAVERSABLE),
-            cKeyedTraversable: Symbol::new(sn::collections::KEYED_TRAVERSABLE),
-            cCollection: Symbol::new(sn::collections::COLLECTION),
-            cConstVector: Symbol::new(sn::collections::CONST_VECTOR),
-            cConstMap: Symbol::new(sn::collections::CONST_MAP),
-            cConstCollection: Symbol::new(sn::collections::CONST_COLLECTION),
-            cAnyArray: Symbol::new(sn::collections::ANY_ARRAY),
-            cDict: Symbol::new(sn::collections::DICT),
-            cVec: Symbol::new(sn::collections::VEC),
-            cKeyset: Symbol::new(sn::collections::KEYSET),
-        }
-    }
-}
-
-impl Members {
-    fn new() -> Self {
-        Self {
-            mGetInstanceKey: Symbol::new(sn::members::M_GET_INSTANCE_KEY),
-            mClass: ClassConstName::new(sn::members::M_CLASS),
-            parentConstruct: Symbol::new("parent::".to_owned() + sn::members::__CONSTRUCT),
-            __construct: Symbol::new(sn::members::__CONSTRUCT),
-            __destruct: Symbol::new(sn::members::__DESTRUCT),
-            __call: Symbol::new(sn::members::__CALL),
-            __callStatic: Symbol::new(sn::members::__CALL_STATIC),
-            __clone: Symbol::new(sn::members::__CLONE),
-            __debugInfo: Symbol::new(sn::members::__DEBUG_INFO),
-            __dispose: Symbol::new(sn::members::__DISPOSE),
-            __disposeAsync: Symbol::new(sn::members::__DISPOSE_ASYNC),
-            __get: Symbol::new(sn::members::__GET),
-            __invoke: Symbol::new(sn::members::__INVOKE),
-            __isset: Symbol::new(sn::members::__ISSET),
-            __set: Symbol::new(sn::members::__SET),
-            __set_state: Symbol::new(sn::members::__SET_STATE),
-            __sleep: Symbol::new(sn::members::__SLEEP),
-            __toString: Symbol::new(sn::members::__TO_STRING),
-            __unset: Symbol::new(sn::members::__UNSET),
-            __wakeup: Symbol::new(sn::members::__WAKEUP),
-        }
-    }
-}
-
-impl AttributeKinds {
-    fn new() -> Self {
-        Self {
-            cls: Symbol::new(sn::attribute_kinds::CLS),
-            clscst: Symbol::new(sn::attribute_kinds::CLS_CST),
-            enum_: Symbol::new(sn::attribute_kinds::ENUM),
-            typealias: Symbol::new(sn::attribute_kinds::TYPE_ALIAS),
-            fn_: Symbol::new(sn::attribute_kinds::FN),
-            mthd: Symbol::new(sn::attribute_kinds::MTHD),
-            instProperty: Symbol::new(sn::attribute_kinds::INST_PROPERTY),
-            staticProperty: Symbol::new(sn::attribute_kinds::STATIC_PROPERTY),
-            parameter: Symbol::new(sn::attribute_kinds::PARAMETER),
-            typeparam: Symbol::new(sn::attribute_kinds::TYPE_PARAM),
-            file: Symbol::new(sn::attribute_kinds::FILE),
-            typeconst: Symbol::new(sn::attribute_kinds::TYPE_CONST),
-            lambda: Symbol::new(sn::attribute_kinds::LAMBDA),
-            enumcls: Symbol::new(sn::attribute_kinds::ENUM_CLS),
-        }
-    }
-}
-
-impl UserAttributes {
-    fn new() -> Self {
-        Self {
-            uaOverride: TypeName(Symbol::new(sn::user_attributes::OVERRIDE)),
-            uaConsistentConstruct: TypeName(Symbol::new(sn::user_attributes::CONSISTENT_CONSTRUCT)),
-            uaConst: TypeName(Symbol::new(sn::user_attributes::CONST)),
-            uaDeprecated: TypeName(Symbol::new(sn::user_attributes::DEPRECATED)),
-            uaEntryPoint: TypeName(Symbol::new(sn::user_attributes::ENTRY_POINT)),
-            uaMemoize: TypeName(Symbol::new(sn::user_attributes::MEMOIZE)),
-            uaMemoizeLSB: TypeName(Symbol::new(sn::user_attributes::MEMOIZE_LSB)),
-            uaPolicyShardedMemoize: TypeName(Symbol::new(
-                sn::user_attributes::POLICY_SHARDED_MEMOIZE,
-            )),
-            uaPolicyShardedMemoizeLSB: TypeName(Symbol::new(
-                sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB,
-            )),
-            uaPHPStdLib: TypeName(Symbol::new(sn::user_attributes::PHP_STD_LIB)),
-            uaAcceptDisposable: TypeName(Symbol::new(sn::user_attributes::ACCEPT_DISPOSABLE)),
-            uaReturnDisposable: TypeName(Symbol::new(sn::user_attributes::RETURN_DISPOSABLE)),
-            uaLSB: TypeName(Symbol::new(sn::user_attributes::LSB)),
-            uaSealed: TypeName(Symbol::new(sn::user_attributes::SEALED)),
-            uaLateInit: TypeName(Symbol::new(sn::user_attributes::LATE_INIT)),
-            uaNewable: TypeName(Symbol::new(sn::user_attributes::NEWABLE)),
-            uaEnforceable: TypeName(Symbol::new(sn::user_attributes::ENFORCEABLE)),
-            uaExplicit: TypeName(Symbol::new(sn::user_attributes::EXPLICIT)),
-            uaNonDisjoint: TypeName(Symbol::new(sn::user_attributes::NON_DISJOINT)),
-            uaSoft: TypeName(Symbol::new(sn::user_attributes::SOFT)),
-            uaWarn: TypeName(Symbol::new(sn::user_attributes::WARN)),
-            uaMockClass: TypeName(Symbol::new(sn::user_attributes::MOCK_CLASS)),
-            uaProvenanceSkipFrame: TypeName(Symbol::new(
-                sn::user_attributes::PROVENANCE_SKIP_FRAME,
-            )),
-            uaDynamicallyCallable: TypeName(Symbol::new(sn::user_attributes::DYNAMICALLY_CALLABLE)),
-            uaDynamicallyConstructible: TypeName(Symbol::new(
-                sn::user_attributes::DYNAMICALLY_CONSTRUCTIBLE,
-            )),
-            uaReifiable: TypeName(Symbol::new(sn::user_attributes::REIFIABLE)),
-            uaNeverInline: TypeName(Symbol::new(sn::user_attributes::NEVER_INLINE)),
-            uaDisableTypecheckerInternal: TypeName(Symbol::new(
-                sn::user_attributes::DISABLE_TYPECHECKER_INTERNAL,
-            )),
-            uaHasTopLevelCode: TypeName(Symbol::new(sn::user_attributes::HAS_TOP_LEVEL_CODE)),
-            uaIsFoldable: TypeName(Symbol::new(sn::user_attributes::IS_FOLDABLE)),
-            uaNative: TypeName(Symbol::new(sn::user_attributes::NATIVE)),
-            uaOutOnly: TypeName(Symbol::new(sn::user_attributes::OUT_ONLY)),
-            uaAlwaysInline: TypeName(Symbol::new(sn::user_attributes::ALWAYS_INLINE)),
-            uaEnableUnstableFeatures: TypeName(Symbol::new(
-                sn::user_attributes::ENABLE_UNSTABLE_FEATURES,
-            )),
-            uaEnumClass: TypeName(Symbol::new(sn::user_attributes::ENUM_CLASS)),
-            uaPolicied: TypeName(Symbol::new(sn::user_attributes::POLICIED)),
-            uaInferFlows: TypeName(Symbol::new(sn::user_attributes::INFERFLOWS)),
-            uaExternal: TypeName(Symbol::new(sn::user_attributes::EXTERNAL)),
-            uaCanCall: TypeName(Symbol::new(sn::user_attributes::CAN_CALL)),
-            uaSupportDynamicType: TypeName(Symbol::new(sn::user_attributes::SUPPORT_DYNAMIC_TYPE)),
-            uaRequireDynamic: TypeName(Symbol::new(sn::user_attributes::REQUIRE_DYNAMIC)),
-            uaModule: TypeName(Symbol::new(sn::user_attributes::MODULE)),
-            uaInternal: TypeName(Symbol::new(sn::user_attributes::INTERNAL)),
-            uaEnableMethodTraitDiamond: TypeName(Symbol::new(
-                sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND,
-            )),
-            uaIgnoreReadonlyLocalErrors: TypeName(Symbol::new(
-                sn::user_attributes::IGNORE_READONLY_LOCAL_ERRORS,
-            )),
-            uaIgnoreCoeffectLocalErrors: TypeName(Symbol::new(
-                sn::user_attributes::IGNORE_COEFFECT_LOCAL_ERRORS,
-            )),
-        }
-    }
-}
-
-impl SpecialFunctions {
-    fn new() -> Self {
-        Self {
-            echo: Symbol::new(sn::special_functions::ECHO),
-            hhas_adata: Symbol::new(sn::special_functions::HHAS_ADATA),
-        }
-    }
-}
-
-impl AutoimportedFunctions {
-    fn new() -> Self {
-        Self {
-            invariant_violation: Symbol::new(sn::autoimported_functions::INVARIANT_VIOLATION),
-            invariant: Symbol::new(sn::autoimported_functions::INVARIANT),
-            fun_: Symbol::new(sn::autoimported_functions::FUN_),
-            inst_meth: Symbol::new(sn::autoimported_functions::INST_METH),
-            class_meth: Symbol::new(sn::autoimported_functions::CLASS_METH),
-            meth_caller: Symbol::new(sn::autoimported_functions::METH_CALLER),
-        }
-    }
-}
-
-impl SpecialIdents {
-    fn new() -> Self {
-        Self {
-            this: Symbol::new(sn::special_idents::THIS),
-            placeholder: Symbol::new(sn::special_idents::PLACEHOLDER),
-            dollardollar: Symbol::new(sn::special_idents::DOLLAR_DOLLAR),
-            tmp_var_prefix: Symbol::new(sn::special_idents::TMP_VAR_PREFIX),
-        }
-    }
-}
-
-impl PseudoFunctions {
-    fn new() -> Self {
-        Self {
-            isset: Symbol::new(sn::pseudo_functions::ISSET),
-            unset: Symbol::new(sn::pseudo_functions::UNSET),
-            hh_show: Symbol::new(sn::pseudo_functions::HH_SHOW),
-            hh_expect: Symbol::new(sn::pseudo_functions::HH_EXPECT),
-            hh_expect_equivalent: Symbol::new(sn::pseudo_functions::HH_EXPECT_EQUIVALENT),
-            hh_show_env: Symbol::new(sn::pseudo_functions::HH_SHOW_ENV),
-            hh_log_level: Symbol::new(sn::pseudo_functions::HH_LOG_LEVEL),
-            hh_force_solve: Symbol::new(sn::pseudo_functions::HH_FORCE_SOLVE),
-            hh_loop_forever: Symbol::new(sn::pseudo_functions::HH_LOOP_FOREVER),
-            echo: Symbol::new(sn::pseudo_functions::ECHO),
-            empty: Symbol::new(sn::pseudo_functions::EMPTY),
-            exit: Symbol::new(sn::pseudo_functions::EXIT),
-            die: Symbol::new(sn::pseudo_functions::DIE),
-            unsafe_cast: Symbol::new(sn::pseudo_functions::UNSAFE_CAST),
-            enforced_cast: Symbol::new(sn::pseudo_functions::ENFORCED_CAST),
-        }
-    }
-}
-
-impl StdlibFunctions {
-    fn new() -> Self {
-        Self {
-            is_array: Symbol::new(sn::std_lib_functions::IS_ARRAY),
-            is_null: Symbol::new(sn::std_lib_functions::IS_NULL),
-            get_class: Symbol::new(sn::std_lib_functions::GET_CLASS),
-            array_filter: Symbol::new(sn::std_lib_functions::ARRAY_FILTER),
-            call_user_func: Symbol::new(sn::std_lib_functions::CALL_USER_FUNC),
-            type_structure: Symbol::new(sn::std_lib_functions::TYPE_STRUCTURE),
-            array_mark_legacy: Symbol::new(sn::std_lib_functions::ARRAY_MARK_LEGACY),
-            array_unmark_legacy: Symbol::new(sn::std_lib_functions::ARRAY_UNMARK_LEGACY),
-            is_php_array: Symbol::new(sn::std_lib_functions::IS_PHP_ARRAY),
-            is_any_array: Symbol::new(sn::std_lib_functions::IS_ANY_ARRAY),
-            is_dict_or_darray: Symbol::new(sn::std_lib_functions::IS_DICT_OR_DARRAY),
-            is_vec_or_varray: Symbol::new(sn::std_lib_functions::IS_VEC_OR_VARRAY),
-        }
-    }
-}
-
-impl Typehints {
-    fn new() -> Self {
-        let mut this = Self {
-            null: Symbol::new(sn::typehints::NULL),
-            void: Symbol::new(sn::typehints::VOID),
-            resource: Symbol::new(sn::typehints::RESOURCE),
-            num: Symbol::new(sn::typehints::NUM),
-            arraykey: Symbol::new(sn::typehints::ARRAYKEY),
-            noreturn: Symbol::new(sn::typehints::NORETURN),
-            mixed: Symbol::new(sn::typehints::MIXED),
-            nonnull: Symbol::new(sn::typehints::NONNULL),
-            this: Symbol::new(sn::typehints::THIS),
-            dynamic: Symbol::new(sn::typehints::DYNAMIC),
-            supportdynamic: Symbol::new(sn::typehints::SUPPORTDYNAMIC),
-            nothing: Symbol::new(sn::typehints::NOTHING),
-            int: Symbol::new(sn::typehints::INT),
-            bool: Symbol::new(sn::typehints::BOOL),
-            float: Symbol::new(sn::typehints::FLOAT),
-            string: Symbol::new(sn::typehints::STRING),
-            darray: Symbol::new(sn::typehints::DARRAY),
-            varray: Symbol::new(sn::typehints::VARRAY),
-            varray_or_darray: Symbol::new(sn::typehints::VARRAY_OR_DARRAY),
-            vec_or_dict: Symbol::new(sn::typehints::VEC_OR_DICT),
-            callable: Symbol::new(sn::typehints::CALLABLE),
-            object_cast: Symbol::new(sn::typehints::OBJECT_CAST),
-            supportdyn: Symbol::new(sn::typehints::SUPPORTDYN),
-            hh_sypportdyn: Symbol::new(sn::typehints::HH_SUPPORTDYN),
-            wildcard: Symbol::new(sn::typehints::WILDCARD),
-
-            reserved_typehints: HashSet::default(),
-        };
-
-        this.reserved_typehints = HashSet::from([
-            this.null,
-            this.void,
-            this.resource,
-            this.num,
-            this.arraykey,
-            this.noreturn,
-            this.mixed,
-            this.nonnull,
-            this.this,
-            this.dynamic,
-            this.nothing,
-            this.int,
-            this.bool,
-            this.float,
-            this.string,
-            this.darray,
-            this.varray,
-            this.varray_or_darray,
-            this.vec_or_dict,
-            this.callable,
-            this.wildcard,
-        ]);
-        this
-    }
-}
-
-impl PseudoConsts {
-    fn new() -> Self {
-        Self {
-            g__LINE__: Symbol::new(sn::pseudo_consts::G__LINE__),
-            g__CLASS__: Symbol::new(sn::pseudo_consts::G__CLASS__),
-            g__TRAIT__: Symbol::new(sn::pseudo_consts::G__TRAIT__),
-            g__FILE__: Symbol::new(sn::pseudo_consts::G__FILE__),
-            g__DIR__: Symbol::new(sn::pseudo_consts::G__DIR__),
-            g__FUNCTION__: Symbol::new(sn::pseudo_consts::G__FUNCTION__),
-            g__METHOD__: Symbol::new(sn::pseudo_consts::G__METHOD__),
-            g__NAMESPACE__: Symbol::new(sn::pseudo_consts::G__NAMESPACE__),
-            g__COMPILER_FRONTEND__: Symbol::new(sn::pseudo_consts::G__COMPILER_FRONTEND__),
-            g__FUNCTION_CREDENTIAL__: Symbol::new(sn::pseudo_consts::G__FUNCTION_CREDENTIAL__),
-            exit: Symbol::new(sn::pseudo_consts::EXIT),
-            die: Symbol::new(sn::pseudo_consts::DIE),
-        }
-    }
-}
-
-impl Fb {
-    fn new() -> Self {
-        Self {
-            cEnum: TypeName::new(sn::fb::ENUM),
-            tInner: TypeConstName::new(sn::fb::INNER),
-            idx: Symbol::new(sn::fb::IDX),
-            cTypeStructure: TypeName::new(sn::fb::TYPE_STRUCTURE),
-            cIncorrectType: TypeName::new(sn::fb::INCORRECT_TYPE),
-        }
-    }
-}
-
-impl Hh {
-    fn new() -> Self {
-        Self {
-            contains: Symbol::new(sn::hh::CONTAINS),
-            contains_key: Symbol::new(sn::hh::CONTAINS_KEY),
-        }
-    }
-}
-
-impl Shapes {
-    fn new() -> Self {
-        Self {
-            cShapes: Symbol::new(sn::shapes::SHAPES),
-            idx: Symbol::new(sn::shapes::IDX),
-            at: Symbol::new(sn::shapes::AT),
-            keyExists: Symbol::new(sn::shapes::KEY_EXISTS),
-            removeKey: Symbol::new(sn::shapes::REMOVE_KEY),
-            toArray: Symbol::new(sn::shapes::TO_ARRAY),
-            toDict: Symbol::new(sn::shapes::TO_DICT),
-        }
-    }
-}
-
-impl Superglobals {
-    fn new() -> Self {
-        Self {
-            globals: Symbol::new(sn::superglobals::GLOBALS),
-        }
-    }
-}
-
-impl Regex {
-    fn new() -> Self {
-        Self {
-            tPattern: Symbol::new(sn::regex::T_PATTERN),
-        }
-    }
-}
-
-impl EmitterSpecialFunctions {
-    fn new() -> Self {
-        Self {
-            eval: Symbol::new(sn::emitter_special_functions::EVAL),
-            set_frame_metadata: Symbol::new(sn::emitter_special_functions::SET_FRAME_METADATA),
-            systemlib_reified_generics: Symbol::new(
-                sn::emitter_special_functions::SYSTEMLIB_REIFIED_GENERICS,
-            ),
-        }
-    }
-}
-
-impl Xhp {
-    fn new() -> Self {
-        Self {
-            pcdata: Symbol::new(sn::xhp::PCDATA),
-            any: Symbol::new(sn::xhp::ANY),
-            empty: Symbol::new(sn::xhp::EMPTY),
-        }
-    }
-}
-
-impl UnstableFeatures {
-    fn new() -> Self {
-        Self {
-            coeffects_provisional: Symbol::new(sn::unstable_features::COEFFECTS_PROVISIONAL),
-            ifc: Symbol::new(sn::unstable_features::IFC),
-            readonly: Symbol::new(sn::unstable_features::READONLY),
-            expression_trees: Symbol::new(sn::unstable_features::EXPRESSION_TREES),
-            modules: Symbol::new(sn::unstable_features::MODULES),
-        }
-    }
-}
-
-fn concat<S1: AsRef<str>, S2: AsRef<str>>(s1: S1, s2: S2) -> Symbol {
-    let s1 = s1.as_ref();
-    let s2 = s2.as_ref();
-    Symbol::new(format!("{}{}", s1, s2))
-}
-
-impl Coeffects {
-    fn new() -> Self {
-        let contexts = Symbol::new("\\HH\\Contexts");
-        let unsafe_contexts = concat(&contexts, "\\Unsafe");
-        Self {
-            capability: Symbol::new("$#capability"),
-            local_capability: Symbol::new("$#local_capability"),
-            contexts,
-            unsafe_contexts,
-            generated_generic_prefix: Symbol::new("T/"),
-        }
-    }
-}
-
-impl Readonly {
-    fn new() -> Self {
-        Self {
-            idx: Symbol::new(sn::readonly::IDX),
-            as_mut: Symbol::new(sn::readonly::AS_MUT),
-        }
-    }
-}
-
-impl Capabilities {
-    fn new(coeffects: &Coeffects) -> Self {
-        let defaults = concat(&coeffects.contexts, "\\defaults");
-        let write_props = concat(&coeffects.contexts, "\\write_props");
-
-        let prefix = Symbol::new("\\HH\\Capabilities\\");
-        let writeProperty = concat(&prefix, "WriteProperty");
-        let accessGlobals = concat(&prefix, "AccessGlobals");
-        let readGlobals = concat(&prefix, "ReadGlobals");
-        let system = concat(&prefix, "System");
-        let implicitPolicy = concat(&prefix, "ImplicitPolicy");
-        let implicitPolicyLocal = concat(&prefix, "ImplicitPolicyLocal");
-        let io = concat(&prefix, "IO");
-        let rx = concat(&prefix, "Rx");
-        let rxLocal = concat(&rx, "Local");
-
-        Self {
-            defaults,
-            write_props,
-            writeProperty,
-            accessGlobals,
-            readGlobals,
-            system,
-            implicitPolicy,
-            implicitPolicyLocal,
-            io,
-            rx,
-            rxLocal,
-        }
-    }
-}
-
-impl ExpressionTrees {
-    fn new() -> Self {
-        Self {
-            makeTree: Symbol::new(sn::expression_trees::MAKE_TREE),
-            intType: Symbol::new(sn::expression_trees::INT_TYPE),
-            floatType: Symbol::new(sn::expression_trees::FLOAT_TYPE),
-            boolType: Symbol::new(sn::expression_trees::BOOL_TYPE),
-            stringType: Symbol::new(sn::expression_trees::STRING_TYPE),
-            nullType: Symbol::new(sn::expression_trees::NULL_TYPE),
-            voidType: Symbol::new(sn::expression_trees::VOID_TYPE),
-            symbolType: Symbol::new(sn::expression_trees::SYMBOL_TYPE),
-            visitInt: Symbol::new(sn::expression_trees::VISIT_INT),
-            visitFloat: Symbol::new(sn::expression_trees::VISIT_FLOAT),
-            visitBool: Symbol::new(sn::expression_trees::VISIT_BOOL),
-            visitString: Symbol::new(sn::expression_trees::VISIT_STRING),
-            visitNull: Symbol::new(sn::expression_trees::VISIT_NULL),
-            visitBinop: Symbol::new(sn::expression_trees::VISIT_BINOP),
-            visitUnop: Symbol::new(sn::expression_trees::VISIT_UNOP),
-            visitLocal: Symbol::new(sn::expression_trees::VISIT_LOCAL),
-            visitLambda: Symbol::new(sn::expression_trees::VISIT_LAMBDA),
-            visitGlobalFunction: Symbol::new(sn::expression_trees::VISIT_GLOBAL_FUNCTION),
-            visitStaticMethod: Symbol::new(sn::expression_trees::VISIT_STATIC_METHOD),
-            visitCall: Symbol::new(sn::expression_trees::VISIT_CALL),
-            visitAssign: Symbol::new(sn::expression_trees::VISIT_ASSIGN),
-            visitTernary: Symbol::new(sn::expression_trees::VISIT_TERNARY),
-            visitIf: Symbol::new(sn::expression_trees::VISIT_IF),
-            visitWhile: Symbol::new(sn::expression_trees::VISIT_WHILE),
-            visitReturn: Symbol::new(sn::expression_trees::VISIT_RETURN),
-            visitFor: Symbol::new(sn::expression_trees::VISIT_FOR),
-            visitBreak: Symbol::new(sn::expression_trees::VISIT_BREAK),
-            visitContinue: Symbol::new(sn::expression_trees::VISIT_CONTINUE),
-            splice: Symbol::new(sn::expression_trees::SPLICE),
-            dollardollarTmpVar: Symbol::new(sn::expression_trees::DOLLARDOLLAR_TMP_VAR),
-        }
-    }
+    pub static dollardollarTmpVar: Lazy<Symbol> = lazy!(sn::expression_trees::DOLLARDOLLAR_TMP_VAR);
 }

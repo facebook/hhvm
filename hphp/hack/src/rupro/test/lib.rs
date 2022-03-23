@@ -15,7 +15,6 @@ use hackrs::{
     naming_provider::{NamingProvider, SqliteNamingTable},
     reason::BReason,
     shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider},
-    special_names::SpecialNames,
     typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };
 use hackrs_test_utils::registrar::DependencyGraph;
@@ -77,7 +76,6 @@ impl TestContext {
             Arc::new(LazyFoldedDeclProvider::new(
                 Arc::new(oxidized::global_options::GlobalOptions::default()),
                 Arc::new(hackrs_test_utils::cache::NonEvictingCache::new()),
-                SpecialNames::new(),
                 Arc::clone(&shallow_decl_provider),
                 Arc::clone(&dependency_graph) as _,
             ));

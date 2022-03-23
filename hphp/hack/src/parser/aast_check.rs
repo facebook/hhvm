@@ -84,7 +84,7 @@ impl Checker {
       end_offset: usize,
       msg: ErrorMsg,
       quickfix_title: &str,
-      edits: Vec<(usize, usize, std::string::String)>,
+      edits: Vec<(usize, usize, String)>,
     ) {
         let quickfixes = vec![SyntaxQuickfix {
             title: quickfix_title.into(),
@@ -109,14 +109,14 @@ impl Checker {
                     }
                 }
                 None => {
-                  let (start_offset, end_offset) = &hint.0.info_raw(); 
+                  let (start_offset, end_offset) = hint.0.info_raw(); 
                   let edits = vec![
-                      (*start_offset, *start_offset, "Awaitable<".into()),
-                      (*end_offset, *end_offset, ">".into())
+                      (start_offset, start_offset, "Awaitable<".into()),
+                      (end_offset, end_offset, ">".into())
                   ];
                   self.add_error_with_quickfix(
-                    *start_offset,
-                    *end_offset,
+                    start_offset,
+                    end_offset,
                     syntax_error::invalid_async_return_hint,
                     "Make return type Awaitable",
                     edits

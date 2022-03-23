@@ -101,6 +101,11 @@ let enforce_enum_class_variant =
     Capabilities.(mk writeProperty)
     "Accessing an enum class constant"
 
+let enforce_enum_class_label =
+  enforce_local_capability
+    Capabilities.(mk defaults)
+    "Using an enum class label"
+
 (* basic local mutability checks *)
 let rec is_byval_collection_or_string_or_any_type env ty =
   let check ty =

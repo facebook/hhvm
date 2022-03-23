@@ -1,0 +1,4 @@
+File "coeffects.php", line 22, characters 28-31:
+Using an enum class label requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, System, WriteProperty}, which is not provided by the context. (Typing[4401])
+  File "coeffects.php", line 21, characters 33-43:
+  The local (enclosing) context provides the capability WriteProperty

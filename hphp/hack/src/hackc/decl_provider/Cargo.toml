@@ -12,6 +12,6 @@ arena_deserializer = { path = "../../utils/arena_deserializer" }
 bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 ffi = { path = "../../utils/ffi" }
-libc = "0.2.98"
+libc = "0.2.121"
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 thiserror = "1.0.29"

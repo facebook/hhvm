@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{Env, EnvFlags, ParseError};
+use crate::{Env, EnvFlags, ParseError, Profile};
 // use crate::compile_rust as compile;
 use ocamlrep::rc::RcOc;
 use options::{LangFlags, Options};
@@ -112,9 +112,17 @@ pub fn desugar_and_print<S: AsRef<str>>(env: &Env<S>) {
             .flags
             .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
     ));
-    match crate::parse_file(&opts, &limit, source_text, false, ns, is_systemlib) {
+    match crate::parse_file(
+        &opts,
+        &limit,
+        source_text,
+        false,
+        ns,
+        is_systemlib,
+        &mut Profile::default(),
+    ) {
         Err(ParseError(_, msg, _)) => panic!("Parsing failed: {}", msg),
-        Ok((ast, _profile)) => {
+        Ok(ast) => {
             let old_src = String::from_utf8_lossy(&content);
             let new_src = desugar_and_replace_et_literals(env, ast, &old_src);
             print!("{}", new_src);

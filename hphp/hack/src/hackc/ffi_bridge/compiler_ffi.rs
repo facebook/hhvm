@@ -309,6 +309,7 @@ fn hackc_compile_from_text_cpp_ffi(
             decl_provider
                 .as_ref()
                 .map(|provider| provider as &dyn DeclProvider<'_>),
+            &mut Default::default(),
         )?;
         Ok(output)
     })
@@ -502,10 +503,11 @@ fn hackc_compile_unit_from_text_cpp_ffi(
             decl_provider
                 .as_ref()
                 .map(|provider| provider as &dyn DeclProvider<'_>),
+            &mut Default::default(),
         );
 
         match compile_result {
-            Ok((unit, _)) => Ok(Box::new(HackCUnitWrapper(unit, bump))),
+            Ok(unit) => Ok(Box::new(HackCUnitWrapper(unit, bump))),
             Err(e) => Err(anyhow!("{}", e)),
         }
     })

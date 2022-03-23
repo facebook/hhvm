@@ -40,10 +40,9 @@ pub struct Opts {
     paths: Vec<PathBuf>,
 }
 
-fn process_one_file(writer: &SyncWrite, f: &Path) -> Result<Profile> {
+fn process_one_file(writer: &SyncWrite, f: &Path, profile: &mut Profile) -> Result<()> {
     let content = utils::read_file(f)?;
     let files = multifile::to_files(f, content)?;
-    let mut profile = Profile::default();
     for (f, content) in files {
         let f = f.as_ref();
         let compile_opts = crate::compile::SingleFileOpts {
@@ -51,10 +50,14 @@ fn process_one_file(writer: &SyncWrite, f: &Path) -> Result<Profile> {
             disable_toplevel_elaboration: false,
             verbosity: 0,
         };
-        match crate::compile::process_single_file(&compile_opts, f.into(), content) {
-            Err(e) => writeln!(writer.lock().unwrap(), "{}: error ({})", f.display(), e)?,
-            Ok((output, prof)) => {
-                profile += prof;
+        let mut profile1 = Profile::default();
+        match crate::compile::process_single_file(&compile_opts, f.into(), content, &mut profile1) {
+            Err(e) => {
+                *profile += profile1;
+                writeln!(writer.lock().unwrap(), "{}: error ({})", f.display(), e)?
+            }
+            Ok(output) => {
+                *profile += profile1;
                 let mut hasher = std::collections::hash_map::DefaultHasher::new();
                 output.hash(&mut hasher);
                 let crc = hasher.finish();
@@ -62,7 +65,7 @@ fn process_one_file(writer: &SyncWrite, f: &Path) -> Result<Profile> {
             }
         }
     }
-    Ok(profile)
+    Ok(())
 }
 
 fn to_hms(time: usize) -> String {
@@ -199,7 +202,8 @@ fn crc_files(writer: &SyncWrite, files: &[PathBuf], num_threads: usize) -> Resul
     };
 
     let count_one_file = |acc: ProfileAcc, f: &PathBuf| -> Result<ProfileAcc> {
-        let profile = process_one_file(writer, f.as_path())?;
+        let mut profile = Profile::default();
+        process_one_file(writer, f.as_path(), &mut profile)?;
         count.fetch_add(1, Ordering::Release);
         Ok(acc.fold(ProfileAcc {
             sum: profile.clone(),

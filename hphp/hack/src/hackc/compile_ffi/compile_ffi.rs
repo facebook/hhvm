@@ -51,13 +51,26 @@ extern "C" fn compile_from_text_ffi(
                 let env = unsafe { compile::Env::<OcamlStr<'_>>::from_ocaml(env).unwrap() };
                 let mut w = Vec::new();
                 let alloc = bumpalo::Bump::new();
-                match compile::from_text(&alloc, &env, stack_limit, &mut w, source_text, None, None)
-                {
-                    Ok(profile) => print_output(
+                let mut profile = Default::default();
+                match compile::from_text(
+                    &alloc,
+                    &env,
+                    stack_limit,
+                    &mut w,
+                    source_text,
+                    None,
+                    None,
+                    &mut profile,
+                ) {
+                    Ok(()) => print_output(
                         w,
                         output_config,
                         &env.filepath,
-                        profile.map(|p| (p.parsing_t, p.codegen_t, p.parsing_t)),
+                        if profile.log_enabled {
+                            Some((profile.parsing_t, profile.codegen_t, profile.parsing_t))
+                        } else {
+                            None
+                        },
                     ),
                     Err(e) => Err(anyhow!("{}", e)),
                 }

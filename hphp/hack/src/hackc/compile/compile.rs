@@ -272,6 +272,9 @@ pub struct Profile {
     /// Peak stack size during codegen
     pub rewrite_peak: i64,
     pub emitter_peak: i64,
+
+    /// Was the log_extern_compiler_perf flag set?
+    pub log_enabled: bool,
 }
 
 impl std::ops::AddAssign for Profile {
@@ -334,7 +337,9 @@ pub fn emit_fatal_unit<S: AsRef<str>>(
     Ok(())
 }
 
-/// Compile Hack source code and write HHAS text to `writer`.
+/// Compile Hack source code, write HHAS text to `writer`.
+/// Update `profile` with stats from any passes that run,
+/// even if the compiler ultimately returns Err.
 pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
@@ -343,9 +348,10 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
-) -> anyhow::Result<Option<Profile>> {
+    mut profile: &mut Profile,
+) -> anyhow::Result<()> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc, Some(stack_limit))?;
-    let (unit, profile) = emit_unit_from_text(&mut emitter, env, stack_limit, source_text)?;
+    let unit = emit_unit_from_text(&mut emitter, env, stack_limit, source_text, profile)?;
 
     let (print_result, printing_t) = time(|| {
         print_unit(
@@ -359,12 +365,9 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
         )
     });
     print_result?;
-
-    Ok(profile.map(|mut prof| {
-        prof.printing_t = printing_t;
-        prof.codegen_bytes = alloc.allocated_bytes() as i64;
-        prof
-    }))
+    profile.printing_t = printing_t;
+    profile.codegen_bytes = alloc.allocated_bytes() as i64;
+    Ok(())
 }
 
 fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
@@ -380,12 +383,10 @@ fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
     let result = rewrite(emitter, ast, RcOc::clone(&namespace_env), stack_limit);
     profile.rewrite_peak = stack_limit.peak() as i64;
     stack_limit.reset();
-    match result {
+    let unit = match result {
         Ok(()) => {
             // Rewrite ok, now emit.
-            let unit = emit_unit_from_ast(emitter, env, namespace_env, ast)?;
-            profile.emitter_peak = stack_limit.peak() as i64;
-            Ok(unit)
+            emit_unit_from_ast(emitter, env, namespace_env, ast)
         }
         Err(e) => match e.into_kind() {
             ErrorKind::IncludeTimeFatalException(op, pos, msg) => {
@@ -393,7 +394,9 @@ fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
             }
             ErrorKind::Unrecoverable(x) => Err(Error::unrecoverable(x)),
         },
-    }
+    };
+    profile.emitter_peak = stack_limit.peak() as i64;
+    unit
 }
 
 fn rewrite<'p, 'arena, 'decl>(
@@ -412,9 +415,10 @@ pub fn unit_from_text<'arena, 'decl, S: AsRef<str>>(
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
-) -> anyhow::Result<(HackCUnit<'arena>, Option<Profile>)> {
+    profile: &mut Profile,
+) -> anyhow::Result<HackCUnit<'arena>> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc, Some(stack_limit))?;
-    emit_unit_from_text(&mut emitter, env, stack_limit, source_text)
+    emit_unit_from_text(&mut emitter, env, stack_limit, source_text, profile)
 }
 
 pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
@@ -464,8 +468,9 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
     env: &Env<S>,
     stack_limit: &'decl StackLimit,
     source_text: SourceText<'_>,
-) -> anyhow::Result<(HackCUnit<'arena>, Option<Profile>)> {
-    let log_extern_compiler_perf = emitter.options().log_extern_compiler_perf();
+    profile: &mut Profile,
+) -> anyhow::Result<HackCUnit<'arena>> {
+    profile.log_enabled = emitter.options().log_extern_compiler_perf();
 
     let namespace_env = RcOc::new(NamespaceEnv::empty(
         emitter.options().hhvm.aliased_namespaces_cloned().collect(),
@@ -486,43 +491,32 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
             !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
             RcOc::clone(&namespace_env),
             env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+            profile,
         )
     });
+    profile.parsing_t = parsing_t;
 
-    let (unit, profile) = match parse_result {
-        Ok((mut ast, mut profile)) => {
-            profile.parsing_t = parsing_t;
+    let ((unit, profile), codegen_t) = match parse_result {
+        Ok(mut ast) => {
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
-            let prof = &mut profile;
-            match time(move || {
-                rewrite_and_emit(emitter, env, namespace_env, &mut ast, stack_limit, prof)
-            }) {
-                (Ok(unit), codegen_t) => {
-                    profile.codegen_t = codegen_t;
-                    (unit, profile)
-                }
-                (Err(e), _) => return Err(anyhow!("Unhandled Emitter error: {}", e)),
-            }
+            time(move || {
+                let u =
+                    rewrite_and_emit(emitter, env, namespace_env, &mut ast, stack_limit, profile);
+                (u, profile)
+            })
         }
-        Err(ParseError(pos, msg, is_runtime_error)) => {
-            let mut profile = Profile {
-                parsing_t,
-                ..Default::default()
-            };
-            match time(|| emit_fatal(emitter.alloc, is_runtime_error, pos, msg)) {
-                (Ok(unit), codegen_t) => {
-                    profile.codegen_t = codegen_t;
-                    (unit, profile)
-                }
-                (Err(e), _) => return Err(anyhow!("Unhandled Emitter error: {}", e)),
-            }
-        }
+        Err(ParseError(pos, msg, is_runtime_error)) => time(move || {
+            (
+                emit_fatal(emitter.alloc, is_runtime_error, pos, msg),
+                profile,
+            )
+        }),
     };
-    let profile = match log_extern_compiler_perf {
-        true => Some(profile),
-        false => None,
-    };
-    Ok((unit, profile))
+    profile.codegen_t = codegen_t;
+    match unit {
+        Ok(unit) => Ok(unit),
+        Err(e) => Err(anyhow!("Unhandled Emitter error: {}", e)),
+    }
 }
 
 fn emit_fatal<'arena>(
@@ -606,7 +600,8 @@ fn parse_file(
     elaborate_namespaces: bool,
     namespace_env: RcOc<NamespaceEnv>,
     is_systemlib: bool,
-) -> Result<(ast::Program, Profile), ParseError> {
+    profile: &mut Profile,
+) -> Result<ast::Program, ParseError> {
     let aast_env = AastEnv {
         codegen: true,
         fail_open: false,
@@ -666,6 +661,10 @@ fn parse_file(
                 arena_bytes,
                 ..
             } => {
+                profile.parse_peak = parse_peak;
+                profile.lower_peak = lower_peak;
+                profile.error_peak = error_peak;
+                profile.parsing_bytes = arena_bytes;
                 let mut errors = errors.iter().filter(|e| {
                     scoured_comments.get_fixme(e.pos(), e.code()).is_none()
                         /* Ignore these errors to match legacy AST behavior */
@@ -679,16 +678,7 @@ fn parse_file(
                     Err(ParseError(Pos::make_none(), String::new(), false))
                 } else {
                     match aast {
-                        Ok(aast) => Ok((
-                            aast,
-                            Profile {
-                                parse_peak,
-                                lower_peak,
-                                error_peak,
-                                parsing_bytes: arena_bytes,
-                                ..Default::default()
-                            },
-                        )),
+                        Ok(aast) => Ok(aast),
                         Err(msg) => Err(ParseError(Pos::make_none(), msg, false)),
                     }
                 }

@@ -122,7 +122,12 @@ pub fn run(opts: Opts) -> Result<()> {
                 .into_iter()
                 .map(|(f, content)| {
                     let f = f.as_ref();
-                    match process_single_file(&opts.single_file_opts, f.into(), content) {
+                    match process_single_file(
+                        &opts.single_file_opts,
+                        f.into(),
+                        content,
+                        &mut Profile::default(),
+                    ) {
                         Err(e) => {
                             writeln!(
                                 writer.lock().unwrap(),
@@ -132,7 +137,7 @@ pub fn run(opts: Opts) -> Result<()> {
                             )?;
                             Err(e)
                         }
-                        Ok((output, _profile)) => {
+                        Ok(output) => {
                             writer.lock().unwrap().write_all(&output)?;
                             Ok(())
                         }
@@ -167,7 +172,8 @@ fn process_single_file_impl(
     filepath: &Path,
     content: &[u8],
     stack_limit: &StackLimit,
-) -> Result<(Vec<u8>, Profile)> {
+    profile: &mut Profile,
+) -> Result<Vec<u8>> {
     use compile::{Env, EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
     if opts.verbosity > 1 {
         eprintln!("processing file: {}", filepath.display());
@@ -204,7 +210,7 @@ fn process_single_file_impl(
         flags: native_env.flags,
     };
     let alloc = bumpalo::Bump::new();
-    let profile = compile::from_text(
+    compile::from_text(
         &alloc,
         &env,
         stack_limit,
@@ -212,25 +218,25 @@ fn process_single_file_impl(
         source_text,
         Some(&native_env),
         None,
-    )?
-    .expect("LOG_EXTERN_COMPILE_PERF was set");
+        profile,
+    )?;
     if opts.verbosity >= 1 {
         eprintln!("{}: {:#?}", filepath.display(), profile);
     }
-
-    Ok((output, profile))
+    Ok(output)
 }
 
 pub(crate) fn process_single_file(
     opts: &SingleFileOpts,
     filepath: PathBuf,
     content: Vec<u8>,
-) -> Result<(Vec<u8>, Profile)> {
+    profile: &mut Profile,
+) -> Result<Vec<u8>> {
     let ctx = &Arc::new((opts.clone(), filepath, content));
     stack_limit::with_elastic_stack(|stack_limit| {
         let new_ctx = Arc::clone(ctx);
         let (opts, filepath, content) = new_ctx.as_ref();
-        process_single_file_impl(opts, filepath, content.as_slice(), stack_limit)
+        process_single_file_impl(opts, filepath, content.as_slice(), stack_limit, profile)
     })?
 }
 

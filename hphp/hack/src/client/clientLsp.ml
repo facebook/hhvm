@@ -1134,10 +1134,9 @@ let hack_errors_to_lsp_diagnostic
     in
     let severity =
       User_error.(
-        match (error.is_fixmed, get_severity error) with
-        | (true, _) -> Some PublishDiagnostics.Hint
-        | (false, Error) -> Some PublishDiagnostics.Error
-        | (false, Warning) -> Some PublishDiagnostics.Warning)
+        match get_severity error with
+        | Error -> Some PublishDiagnostics.Error
+        | Warning -> Some PublishDiagnostics.Warning)
     in
     {
       Lsp.PublishDiagnostics.range;
@@ -3502,12 +3501,6 @@ let fix_empty_paths_in_error_map errors_per_file =
     SMap.remove "" errors_per_file
     |> SMap.add ~combine:( @ ) default_path errors
 
-let skip_hhis_in_error_map
-    (errors_per_file : Errors.finalized_error list SMap.t) =
-  SMap.filter
-    (fun path _ -> not @@ String.is_suffix path ~suffix:".hhi")
-    errors_per_file
-
 let update_uris_with_diagnostics uris_with_diagnostics errors_per_file =
   let default_path = get_root_exn () |> Path.to_string in
   let is_error_free _uri errors = List.is_empty errors in
@@ -3535,9 +3528,7 @@ let do_diagnostics
     (uris_with_diagnostics : UriSet.t)
     (errors_per_file : Errors.finalized_error list SMap.t)
     ~(is_truncated : int option) : UriSet.t =
-  let errors_per_file =
-    skip_hhis_in_error_map (fix_empty_paths_in_error_map errors_per_file)
-  in
+  let errors_per_file = fix_empty_paths_in_error_map errors_per_file in
   let send_diagnostic_notification file errors =
     let params = hack_errors_to_lsp_diagnostic file errors in
     let notification = PublishDiagnosticsNotification params in

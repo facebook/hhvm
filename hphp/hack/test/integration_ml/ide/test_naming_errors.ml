@@ -73,7 +73,6 @@ Invalid return type (Typing[4110])
   But got `string`
 
 /bar_expects_string.php:
-/foo_returns_string_name.php:
 "
 
 let foo_duplicate_diagnostics =
@@ -97,7 +96,7 @@ Invalid return type (Typing[4110])
   But got `int`
 
 /foo_returns_int.php:
-/foo_returns_string_name.php:
+
 "
 
 let root = "/"

@@ -47,6 +47,8 @@ pub trait Pos:
             (pos.filename().into(), start, end)
         })
     }
+
+    fn is_hhi(&self) -> bool;
 }
 
 /// Represents a closed-ended range [start, end] in a file.
@@ -82,6 +84,16 @@ impl Pos for BPos {
 
     fn none() -> Self {
         BPos::none()
+    }
+
+    fn is_hhi(&self) -> bool {
+        let BPos(pos_impl) = self;
+        let prefix = match *pos_impl {
+            PosImpl::Small { prefix, .. } => prefix,
+            PosImpl::Large { prefix, .. } => prefix,
+            PosImpl::Tiny { prefix, .. } => prefix,
+        };
+        prefix == Prefix::Hhi
     }
 }
 
@@ -248,6 +260,17 @@ impl Pos for NPos {
 
     fn none() -> Self {
         NPos
+    }
+
+    fn is_hhi(&self) -> bool {
+        false // See T81321312.
+        // Note(SF, 2022-03-23): Jake advises "This definition will lead to a
+        // small behavior difference between `NPos` and `BPos`: when
+        // typechecking in posisition-free mode we'll register depedencies on
+        // hhi files but in positioned mode we won't. If this turns out to be
+        // problematic, one solution is to make `NPos` store a `u8` rather than
+        // being zero-sized and in that we can store a bit for whether the
+        // position is in a hhi file."
     }
 }
 

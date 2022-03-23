@@ -16,7 +16,7 @@ use crate::dependency_registrar::{DeclName, DependencyName, DependencyRegistrar}
 use crate::reason::Reason;
 use indexmap::map::Entry;
 use pos::{
-    ClassConstNameIndexMap, MethodName, MethodNameIndexMap, PropNameIndexMap,
+    ClassConstNameIndexMap, MethodName, MethodNameIndexMap, Pos, PropNameIndexMap,
     TypeConstNameIndexMap, TypeNameIndexMap,
 };
 use std::sync::Arc;
@@ -403,14 +403,12 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
                 );
 
                 let constructor = parent_folded_decl.constructor.clone();
-                // TODO: How do we deal with `is_hhi` and make this registration
-                // conditional?
-                //if !(is_hhi(parent_folded_decl)) {
-                self.dependency_registrar.add_dependency(
-                    DeclName::Type(self.child.name.id()),
-                    DependencyName::Constructor(parent_folded_decl.name),
-                )?;
-                //}
+                if !parent_folded_decl.pos.is_hhi() {
+                    self.dependency_registrar.add_dependency(
+                        DeclName::Type(self.child.name.id()),
+                        DependencyName::Constructor(parent_folded_decl.name),
+                    )?;
+                }
 
                 return Ok(Inherited {
                     substs,

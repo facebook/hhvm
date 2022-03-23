@@ -60,3 +60,63 @@ class B extends A implements I {
 
     Ok(())
 }
+
+#[fbinit::test]
+fn constructor_relation(fb: FacebookInit) -> Result<()> {
+    let ctx = TestContext::new(
+        fb,
+        btreemap! {
+            "a.php" => "class A {  public function __construct(int $x = 0)[] {} }",
+            "b.php" => "class B extends A {}",
+        },
+    )?;
+    let (A, B) = (TypeName::new(r#"\A"#), TypeName::new(r#"\B"#));
+
+    // Fold `B`.
+    ctx.folded_decl_provider.get_class(B.into(), B)?;
+    // Retrieve the dependency graph.
+    let depgraph: &DependencyGraph = &ctx.dependency_graph;
+    // Doing the comparisons on binary search trees avoids issues with hash
+    // map/set orderings.
+    let expected = btreemap! {
+        DependencyName::Constructor(A) => btreeset!{DeclName::Type(B)},
+    };
+    let actual: std::collections::BTreeMap<DependencyName, std::collections::BTreeSet<DeclName>> =
+        (depgraph.rdeps.iter())
+            .map(|e| (*e.key(), e.value().iter().copied().collect()))
+            .filter(|(k, _)| matches!(k, DependencyName::Constructor(..)))
+            .collect();
+    // Finally, compare.
+    assert_eq!(expected, actual);
+
+    Ok(())
+}
+
+#[fbinit::test]
+fn no_constructor_relation_on_hhi_parent(fb: FacebookInit) -> Result<()> {
+    // This test assumes `BReason` mode.
+    let ctx = TestContext::new(
+        fb,
+        btreemap! {
+            "no_constructor_relation_on_hhi_parent.php" => "class A extends Exception {}"
+        },
+    )?;
+    let A = TypeName::new(r#"\A"#);
+
+    // Fold `A`.
+    ctx.folded_decl_provider.get_class(A.into(), A)?;
+    // Retrieve the dependency graph.
+    let depgraph: &DependencyGraph = &ctx.dependency_graph;
+    // Doing the comparisons on binary search trees avoids issues with hash
+    // map/set orderings (not that it matters here).
+    let actual: std::collections::BTreeMap<DependencyName, std::collections::BTreeSet<DeclName>> =
+        (depgraph.rdeps.iter())
+            .map(|e| (*e.key(), e.value().iter().copied().collect()))
+            .filter(|(k, _)| matches!(k, DependencyName::Constructor(..)))
+            .collect();
+    // The constructor relation of child on parent isn't observed when parent is
+    // an hhi.
+    assert!(actual.is_empty());
+
+    Ok(())
+}

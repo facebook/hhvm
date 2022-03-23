@@ -1921,3 +1921,6 @@ val multiple_opt : t list -> t option
 (** Report two errors at a single type; `both t1 t2` is the same as
     `multiple [t1;t2]`*)
 val both : t -> t -> t
+
+(** Modify the code that will be reported when evaluated to a `User_error.t`  *)
+val with_code : t -> code:Error_code.t -> t

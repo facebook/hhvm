@@ -5914,6 +5914,8 @@ module rec Error : sig
   val multiple_opt : t list -> t option
 
   val both : t -> t -> t
+
+  val with_code : t -> code:Error_code.t -> t
 end = struct
   type t =
     | Primary of Primary.t
@@ -5923,6 +5925,7 @@ end = struct
     | Multiple of t list
     | Union of t list
     | Intersection of t list
+    | With_code of t * Error_code.t
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function
@@ -5939,6 +5942,7 @@ end = struct
       | Union ts
       | Intersection ts ->
         List.iter ~f:aux ts
+      | With_code (t, _) -> aux t
     in
     aux t
 
@@ -5947,6 +5951,11 @@ end = struct
   let eval t ~current_span =
     let rec aux ~k = function
       | Primary base -> k @@ Eval_result.of_option @@ Primary.to_error base
+      | With_code (t, code) ->
+        aux t ~k:(fun res ->
+            k
+            @@ Eval_result.map res ~f:(fun (_, claim, reason, qfx) ->
+                   (code, claim, reason, qfx)))
       | Intersection ts -> auxs ~k:(fun xs -> k @@ Eval_result.intersect xs) ts
       | Union ts -> auxs ~k:(fun xs -> k @@ Eval_result.union xs) ts
       | Multiple ts -> auxs ~k:(fun xs -> k @@ Eval_result.multiple xs) ts
@@ -6044,6 +6053,8 @@ end = struct
   let multiple_opt = group_opt multiple
 
   let both t1 t2 = Multiple [t1; t2]
+
+  let with_code t ~code = With_code (t, code)
 end
 
 and Secondary : sig

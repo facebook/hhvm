@@ -1,4 +1,4 @@
-# ----- Generate C++ sources from .thrfit files -----
+# ----- Generate C++ sources from .thrift files -----
 
 add_custom_target(mcrouter_thrift1_codegen)
 

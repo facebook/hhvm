@@ -1,7 +1,7 @@
 # Due to HHVM's size, we need to use the native 64-bit toolchain to get a decent link time,
 # and, in fact, it's also needed to be able to link at all in debug mode, due to the size of
 # the hphp_runtime_static static library. However, Visual Studio defaults to using the 32-bit
-# hosted cross compiler targetting 64-bit. Unfortunately, CMake doesn't provide us a way to
+# hosted cross compiler targeting 64-bit. Unfortunately, CMake doesn't provide us a way to
 # do this, so we have to resort to a hack-around in order to make this possible. Because the
 # toolset value is put into the project file unescaped, we can use it to add the PreferredToolArchitecture
 # value that we need, as long as we make sure to properly close and re-open the current tags.

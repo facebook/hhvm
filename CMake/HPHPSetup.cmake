@@ -14,7 +14,7 @@ set(HHVM_WRAP_SYMS)
 # oniguruma has some of its own implementations of POSIX regex functions,
 # like regcomp() and regexec(). We use onig everywhere, for both its own
 # special functions and for the POSIX replacements. This means that the
-# linker needs to pick the implementions of the POSIX regex functions from
+# linker needs to pick the implementations of the POSIX regex functions from
 # onig, not libc.
 #
 # On Linux, that works out fine, since the linker sees onig on the link
@@ -23,7 +23,7 @@ set(HHVM_WRAP_SYMS)
 # include one of the libs here that pull in libSystem.B, the linker will
 # pick the implementations of those functions from libc, not from onig.
 # And since we've included the onig headers, which have very slightly
-# different definintions for some of the key data structures, things go
+# different definitions for some of the key data structures, things go
 # quite awry -- this manifests as infinite loops or crashes when calling
 # the PHP split() function.
 #

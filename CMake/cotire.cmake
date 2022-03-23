@@ -230,7 +230,7 @@ function (cotire_get_source_file_property_values _valuesVar _property)
 	set (${_valuesVar} ${_values} PARENT_SCOPE)
 endfunction()
 
-function (cotire_resolve_config_properites _configurations _propertiesVar)
+function (cotire_resolve_config_properties _configurations _propertiesVar)
 	set (_properties "")
 	foreach (_property ${ARGN})
 		if ("${_property}" MATCHES "<CONFIG>")
@@ -246,8 +246,8 @@ function (cotire_resolve_config_properites _configurations _propertiesVar)
 	set (${_propertiesVar} ${_properties} PARENT_SCOPE)
 endfunction()
 
-function (cotire_copy_set_properites _configurations _type _source _target)
-	cotire_resolve_config_properites("${_configurations}" _properties ${ARGN})
+function (cotire_copy_set_properties _configurations _type _source _target)
+	cotire_resolve_config_properties("${_configurations}" _properties ${ARGN})
 	foreach (_property ${_properties})
 		get_property(_isSet ${_type} ${_source} PROPERTY ${_property} SET)
 		if (_isSet)
@@ -839,12 +839,12 @@ macro (cotire_find_closest_relative_path _headerFile _includeDirs _relPathVar)
 	endforeach()
 endmacro()
 
-macro (cotire_check_header_file_location _headerFile _insideIncudeDirs _outsideIncudeDirs _headerIsInside)
+macro (cotire_check_header_file_location _headerFile _insideIncludeDirs _outsideIncludeDirs _headerIsInside)
 	# check header path against ignored and honored include directories
-	cotire_find_closest_relative_path("${_headerFile}" "${_insideIncudeDirs}" _insideRelPath)
+	cotire_find_closest_relative_path("${_headerFile}" "${_insideIncludeDirs}" _insideRelPath)
 	if (_insideRelPath)
 		# header is inside, but could be become outside if there is a shorter outside match
-		cotire_find_closest_relative_path("${_headerFile}" "${_outsideIncudeDirs}" _outsideRelPath)
+		cotire_find_closest_relative_path("${_headerFile}" "${_outsideIncludeDirs}" _outsideRelPath)
 		if (_outsideRelPath)
 			string (LENGTH "${_insideRelPath}" _insideRelPathLen)
 			string (LENGTH "${_outsideRelPath}" _outsideRelPathLen)
@@ -919,7 +919,7 @@ macro (cotire_parse_line _line _headerFileVar _headerDepthVar)
 	endif()
 endmacro()
 
-function (cotire_parse_includes _language _scanOutput _ignoredIncudeDirs _honoredIncudeDirs _ignoredExtensions _selectedIncludesVar _unparsedLinesVar)
+function (cotire_parse_includes _language _scanOutput _ignoredIncludeDirs _honoredIncludeDirs _ignoredExtensions _selectedIncludesVar _unparsedLinesVar)
 	if (WIN32)
 		# prevent CMake macro invocation errors due to backslash characters in Windows paths
 		string (REPLACE "\\" "/" _scanOutput "${_scanOutput}")
@@ -939,11 +939,11 @@ function (cotire_parse_includes _language _scanOutput _ignoredIncudeDirs _honore
 		if (_ignoredExtensions)
 			message (STATUS "Ignored extensions: ${_ignoredExtensions}")
 		endif()
-		if (_ignoredIncudeDirs)
-			message (STATUS "Ignored paths: ${_ignoredIncudeDirs}")
+		if (_ignoredIncludeDirs)
+			message (STATUS "Ignored paths: ${_ignoredIncludeDirs}")
 		endif()
-		if (_honoredIncudeDirs)
-			message (STATUS "Included paths: ${_honoredIncudeDirs}")
+		if (_honoredIncludeDirs)
+			message (STATUS "Included paths: ${_honoredIncludeDirs}")
 		endif()
 	endif()
 	set (_sourceFiles ${ARGN})
@@ -955,7 +955,7 @@ function (cotire_parse_includes _language _scanOutput _ignoredIncudeDirs _honore
 		if (_line)
 			cotire_parse_line("${_line}" _headerFile _headerDepth)
 			if (_headerFile)
-				cotire_check_header_file_location("${_headerFile}" "${_ignoredIncudeDirs}" "${_honoredIncudeDirs}" _headerIsInside)
+				cotire_check_header_file_location("${_headerFile}" "${_ignoredIncludeDirs}" "${_honoredIncludeDirs}" _headerIsInside)
 				if (COTIRE_DEBUG)
 					message (STATUS "${_headerDepth}: ${_headerFile} ${_headerIsInside}")
 				endif()
@@ -2196,7 +2196,7 @@ function (cotire_setup_unity_generation_commands _language _targetSourceDir _tar
 			set_property (SOURCE "${_unityFile}" PROPERTY OBJECT_DEPENDS ${_dependencySources})
 		endif()
 		if (WIN32 AND CMAKE_${_language}_COMPILER_ID MATCHES "MSVC|Intel")
-			# unity file compilation results in potentially huge object file, thus use /bigobj by default unter MSVC and Windows Intel
+			# unity file compilation results in potentially huge object file, thus use /bigobj by default under MSVC and Windows Intel
 			set_property (SOURCE "${_unityFile}" APPEND_STRING PROPERTY COMPILE_FLAGS "/bigobj")
 		endif()
 		cotire_set_cmd_to_prologue(_unityCmd)
@@ -2671,8 +2671,8 @@ function (cotire_setup_unity_build_target _languages _configurations _targetSour
 		if (IS_ABSOLUTE "${COTIRE_UNITY_OUTPUT_DIRECTORY}")
 			set (_outputDir "${COTIRE_UNITY_OUTPUT_DIRECTORY}")
 		else()
-			cotire_copy_set_properites("${_configurations}" TARGET ${_target} ${_unityTargetName} ${_outputDirProperties})
-			cotire_resolve_config_properites("${_configurations}" _properties ${_outputDirProperties})
+			cotire_copy_set_properties("${_configurations}" TARGET ${_target} ${_unityTargetName} ${_outputDirProperties})
+			cotire_resolve_config_properties("${_configurations}" _properties ${_outputDirProperties})
 			foreach (_property ${_properties})
 				get_property(_outputDir TARGET ${_target} PROPERTY ${_property})
 				if (_outputDir)
@@ -2692,17 +2692,17 @@ function (cotire_setup_unity_build_target _languages _configurations _targetSour
 				RUNTIME_OUTPUT_DIRECTORY "${_outputDir}")
 		endif()
 	else()
-		cotire_copy_set_properites("${_configurations}" TARGET ${_target} ${_unityTargetName} ${_outputDirProperties})
+		cotire_copy_set_properties("${_configurations}" TARGET ${_target} ${_unityTargetName} ${_outputDirProperties})
 	endif()
 	# copy output name
-	cotire_copy_set_properites("${_configurations}" TARGET ${_target} ${_unityTargetName}
+	cotire_copy_set_properties("${_configurations}" TARGET ${_target} ${_unityTargetName}
 		ARCHIVE_OUTPUT_NAME ARCHIVE_OUTPUT_NAME_<CONFIG>
 		LIBRARY_OUTPUT_NAME LIBRARY_OUTPUT_NAME_<CONFIG>
 		OUTPUT_NAME OUTPUT_NAME_<CONFIG>
 		RUNTIME_OUTPUT_NAME RUNTIME_OUTPUT_NAME_<CONFIG>
 		PREFIX <CONFIG>_POSTFIX SUFFIX)
 	# copy compile stuff
-	cotire_copy_set_properites("${_configurations}" TARGET ${_target} ${_unityTargetName}
+	cotire_copy_set_properties("${_configurations}" TARGET ${_target} ${_unityTargetName}
 		COMPILE_DEFINITIONS COMPILE_DEFINITIONS_<CONFIG>
 		COMPILE_FLAGS COMPILE_OPTIONS
 		Fortran_FORMAT Fortran_MODULE_DIRECTORY
@@ -2711,13 +2711,13 @@ function (cotire_setup_unity_build_target _languages _configurations _targetSour
 		POSITION_INDEPENDENT_CODE
 		C_VISIBILITY_PRESET CXX_VISIBILITY_PRESET VISIBILITY_INLINES_HIDDEN)
 	# copy interface stuff
-	cotire_copy_set_properites("${_configurations}" TARGET ${_target} ${_unityTargetName}
+	cotire_copy_set_properties("${_configurations}" TARGET ${_target} ${_unityTargetName}
 		COMPATIBLE_INTERFACE_BOOL COMPATIBLE_INTERFACE_NUMBER_MAX COMPATIBLE_INTERFACE_NUMBER_MIN COMPATIBLE_INTERFACE_STRING
 		INTERFACE_COMPILE_DEFINITIONS INTERFACE_COMPILE_OPTIONS INTERFACE_INCLUDE_DIRECTORIES
 		INTERFACE_POSITION_INDEPENDENT_CODE INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
 		INTERFACE_AUTOUIC_OPTIONS)
 	# copy link stuff
-	cotire_copy_set_properites("${_configurations}" TARGET ${_target} ${_unityTargetName}
+	cotire_copy_set_properties("${_configurations}" TARGET ${_target} ${_unityTargetName}
 		BUILD_WITH_INSTALL_RPATH INSTALL_RPATH INSTALL_RPATH_USE_LINK_PATH SKIP_BUILD_RPATH
 		LINKER_LANGUAGE LINK_DEPENDS LINK_DEPENDS_NO_SHARED
 		LINK_FLAGS LINK_FLAGS_<CONFIG>
@@ -2727,18 +2727,18 @@ function (cotire_setup_unity_build_target _languages _configurations _targetSour
 		STATIC_LIBRARY_FLAGS STATIC_LIBRARY_FLAGS_<CONFIG>
 		NO_SONAME SOVERSION VERSION)
 	# copy Qt stuff
-	cotire_copy_set_properites("${_configurations}" TARGET ${_target} ${_unityTargetName}
+	cotire_copy_set_properties("${_configurations}" TARGET ${_target} ${_unityTargetName}
 		AUTOMOC AUTOMOC_MOC_OPTIONS AUTOUIC AUTOUIC_OPTIONS AUTORCC AUTORCC_OPTIONS
 		AUTOGEN_TARGET_DEPENDS)
 	# copy cmake stuff
-	cotire_copy_set_properites("${_configurations}" TARGET ${_target} ${_unityTargetName}
+	cotire_copy_set_properties("${_configurations}" TARGET ${_target} ${_unityTargetName}
 		IMPLICIT_DEPENDS_INCLUDE_TRANSFORM RULE_LAUNCH_COMPILE RULE_LAUNCH_CUSTOM RULE_LAUNCH_LINK)
 	# copy Apple platform specific stuff
-	cotire_copy_set_properites("${_configurations}" TARGET ${_target} ${_unityTargetName}
+	cotire_copy_set_properties("${_configurations}" TARGET ${_target} ${_unityTargetName}
 		BUNDLE BUNDLE_EXTENSION FRAMEWORK INSTALL_NAME_DIR MACOSX_BUNDLE MACOSX_BUNDLE_INFO_PLIST MACOSX_FRAMEWORK_INFO_PLIST
 		MACOSX_RPATH OSX_ARCHITECTURES OSX_ARCHITECTURES_<CONFIG> PRIVATE_HEADER PUBLIC_HEADER RESOURCE)
 	# copy Windows platform specific stuff
-	cotire_copy_set_properites("${_configurations}" TARGET ${_target} ${_unityTargetName}
+	cotire_copy_set_properties("${_configurations}" TARGET ${_target} ${_unityTargetName}
 		GNUtoMS
 		PDB_NAME PDB_NAME_<CONFIG> PDB_OUTPUT_DIRECTORY PDB_OUTPUT_DIRECTORY_<CONFIG>
 		VS_DOTNET_REFERENCES VS_GLOBAL_KEYWORD VS_GLOBAL_PROJECT_TYPES VS_GLOBAL_ROOTNAMESPACE VS_KEYWORD

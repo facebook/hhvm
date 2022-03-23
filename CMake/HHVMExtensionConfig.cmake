@@ -108,7 +108,7 @@ include(Options)
 # Using more than one will result in undefined behavior.
 #
 # [PRETTY_NAME string]
-# If passed, use this name when naming the extension in mesages. If this is
+# If passed, use this name when naming the extension in messages. If this is
 # not passed, default to NAME.
 #
 # [IS_ENABLED VARNAME]
@@ -134,7 +134,7 @@ include(Options)
 #
 # [DEPENDS ...]
 # The dependencies of the extension. Extensions are prefixed
-# with "ext_", and external libaries with "lib".
+# with "ext_", and external libraries with "lib".
 # "systemlib" is a special dependency that represents the
 # systemlib header.
 #
@@ -563,7 +563,7 @@ endfunction()
 function(HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY extensionID failedDependency)
   list(FIND HHVM_EXTENSION_${extensionID}_DEPENDENCIES ${failedDependency} depIdx)
   if (depIdx EQUAL -1)
-    message(FATAL_ERROR "An issue occured while processing the '${failedDependency}' dependency of the ${HHVM_EXTENSION_${extensionID}_PRETTY_NAME} extension!")
+    message(FATAL_ERROR "An issue occurred while processing the '${failedDependency}' dependency of the ${HHVM_EXTENSION_${extensionID}_PRETTY_NAME} extension!")
   endif()
   list(GET HHVM_EXTENSION_${extensionID}_DEPENDENCIES_OPTIONAL ${depIdx} isOptional)
 

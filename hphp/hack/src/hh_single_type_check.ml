@@ -1389,7 +1389,7 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
     ()
 
 (* Returns a list of Tast defs, along with associated type environments. *)
-let compute_tasts ctx files_info interesting_files :
+let compute_tasts ?(drop_fixmed = true) ctx files_info interesting_files :
     Errors.t
     * (Tast.program Relative_path.Map.t
       * Typing_inference_env.t_global_with_pos list) =
@@ -1398,7 +1398,7 @@ let compute_tasts ctx files_info interesting_files :
     | (Some nast, Some _) -> Some nast
     | _ -> None
   in
-  Errors.do_ (fun () ->
+  Errors.do_ ~drop_fixmed (fun () ->
       let nasts = create_nasts ctx files_info in
       (* Interesting files are usually the non hhi ones. *)
       let filter_non_interesting nasts =
@@ -2391,10 +2391,12 @@ let handle_mode
   | Apply_quickfixes ->
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-    let (errors, _) = compute_tasts ctx files_info files_contents in
+    let (errors, _) =
+      compute_tasts ~drop_fixmed:false ctx files_info files_contents
+    in
     let src = Relative_path.Map.find files_contents path in
     let quickfixes =
-      Errors.get_error_list errors
+      Errors.get_error_list ~drop_fixmed:false errors
       |> List.map ~f:User_error.quickfixes
       |> List.concat
     in

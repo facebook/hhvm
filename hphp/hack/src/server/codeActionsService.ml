@@ -127,7 +127,7 @@ let actions_for_errors
     (classish_starts : Pos.t SMap.t)
     ~(start_line : int)
     ~(start_col : int) : Lsp.CodeAction.command_or_action list =
-  let errors = Errors.get_error_list errors in
+  let errors = Errors.get_error_list ~drop_fixmed:false errors in
   let errors_here =
     List.filter errors ~f:(fun e ->
         let e_pos = User_error.get_pos e in

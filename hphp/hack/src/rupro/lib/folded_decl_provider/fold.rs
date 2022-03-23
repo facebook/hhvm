@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{inherit::Inherited, subst::Subst, subst::Substitution};
+use super::{inherit::Inherited, subst::Subst, subst::Substitution, Result};
 use crate::decl_defs::{
     folded::Constructor, AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind,
     ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind, DeclTy, FoldedClass,
     FoldedElement, Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,
     ShallowTypeconst, TaccessType, TypeConst, Typeconst, Visibility,
 };
+use crate::dependency_registrar::DependencyRegistrar;
 use crate::reason::Reason;
 use crate::special_names::SpecialNames;
 use crate::typing_error::{Primary, TypingError};
@@ -30,7 +31,10 @@ mod decl_enum;
 pub struct DeclFolder<'a, R: Reason> {
     special_names: &'static SpecialNames,
     #[allow(dead_code)] // This can be removed after this field's first use.
+    /// Options affecting typechecking behaviors.
     opts: &'a GlobalOptions,
+    /// An observer of dependencies.
+    dependency_registrar: &'a dyn DependencyRegistrar,
     /// The class whose folded decl we are producing.
     child: &'a ShallowClass<R>,
     /// The folded decls of all (recursive) ancestors of `child`.
@@ -49,13 +53,15 @@ enum Pass {
 impl<'a, R: Reason> DeclFolder<'a, R> {
     pub fn decl_class(
         opts: &'a GlobalOptions,
+        dependency_registrar: &'a dyn DependencyRegistrar,
         special_names: &'static SpecialNames,
         child: &'a ShallowClass<R>,
         parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
         errors: Vec<TypingError<R>>,
-    ) -> Arc<FoldedClass<R>> {
+    ) -> Result<Arc<FoldedClass<R>>> {
         let this = Self {
             opts,
+            dependency_registrar,
             special_names,
             child,
             parents,
@@ -634,7 +640,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
     }
 
-    fn decl_class_impl(mut self) -> Arc<FoldedClass<R>> {
+    fn decl_class_impl(mut self) -> Result<Arc<FoldedClass<R>>> {
         let Inherited {
             substs,
             mut props,
@@ -644,7 +650,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             mut constructor,
             mut consts,
             mut type_consts,
-        } = Inherited::make(self.child, self.parents);
+        } = Inherited::make(self.child, self.parents, self.dependency_registrar)?;
 
         for sp in self.child.props.iter() {
             self.decl_prop(&mut props, sp);
@@ -698,7 +704,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
         let deferred_init_members = self.get_deferred_init_members(&constructor.elt);
 
-        Arc::new(FoldedClass {
+        Ok(Arc::new(FoldedClass {
             name: self.child.name.id(),
             pos: self.child.name.pos().clone(),
             kind: self.child.kind,
@@ -731,6 +737,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             sealed_whitelist,
             deferred_init_members,
             decl_errors: self.errors.into_boxed_slice(),
-        })
+        }))
     }
 }

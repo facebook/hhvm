@@ -279,11 +279,12 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         stack.remove(&name);
         Ok(Some(DeclFolder::decl_class(
             &self.opts,
+            &*self.dependency_registrar,
             self.special_names,
             &shallow_class,
             &parents,
             errors,
-        )))
+        )?))
     }
 
     fn get_folded_class_impl(

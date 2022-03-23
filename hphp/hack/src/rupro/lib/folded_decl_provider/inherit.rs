@@ -3,12 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::subst::{Subst, Substitution};
+use super::{
+    subst::{Subst, Substitution},
+    Result,
+};
 use crate::decl_defs::{
     folded::Constructor, ty::ConsistentKind, AbstractTypeconst, Abstraction, ClassConst,
     ClassConstKind, ClassishKind, DeclTy, FoldedClass, FoldedElement, ShallowClass, SubstContext,
     TypeConst, Typeconst,
 };
+use crate::dependency_registrar::{DeclName, DependencyName, DependencyRegistrar};
 use crate::reason::Reason;
 use indexmap::map::Entry;
 use pos::{
@@ -317,41 +321,66 @@ impl<R: Reason> Inherited<R> {
 struct MemberFolder<'a, R: Reason> {
     child: &'a ShallowClass<R>,
     parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
+    dependency_registrar: &'a dyn DependencyRegistrar,
     members: Inherited<R>,
 }
 
 impl<'a, R: Reason> MemberFolder<'a, R> {
     // c.f. Decl_inherit.from_class
-    fn members_from_class(&self, parent_ty: &DeclTy<R>) -> Inherited<R> {
+    fn members_from_class(&self, parent_ty: &DeclTy<R>) -> Result<Inherited<R>> {
         if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
             if let Some(parent_folded_decl) = self.parents.get(&parent_pos_id.id()) {
-                let subst = Subst::new(&parent_folded_decl.tparams, parent_tyl);
+                // TODO: don't we need to `filter_privates` on class and
+                // interface parents and `chown_private_and_protected` on trait
+                // parents here?
+
+                let sig = Subst::new(&parent_folded_decl.tparams, parent_tyl);
+                let subst = Substitution { subst: &sig };
+
+                let consts: ClassConstNameIndexMap<_> = (parent_folded_decl.consts.iter())
+                    .map(|(name, cc)| (*name, subst.instantiate_class_const(cc)))
+                    .collect();
+                let type_consts: TypeConstNameIndexMap<_> = (parent_folded_decl.type_consts.iter())
+                    .map(|(name, tc)| (*name, subst.instantiate_type_const(tc)))
+                    .collect();
+
                 // TODO(hrust): Do we need sharing?
                 let mut substs = parent_folded_decl.substs.clone();
                 substs.insert(
                     parent_folded_decl.name,
                     SubstContext {
-                        subst,
+                        subst: sig,
                         class_context: self.child.name.id(),
                         from_req_extends: false,
                     },
                 );
-                return Inherited {
+
+                // TODO: How do we deal with `is_hhi` and make this registration
+                // conditional?
+                //if !(is_hhi(parent_folded_decl)) {
+                self.dependency_registrar.add_dependency(
+                    DeclName::Type(self.child.name.id()),
+                    DependencyName::Constructor(parent_folded_decl.name),
+                )?;
+                //}
+
+                return Ok(Inherited {
                     substs,
                     props: parent_folded_decl.props.clone(),
                     static_props: parent_folded_decl.static_props.clone(),
                     methods: parent_folded_decl.methods.clone(),
                     static_methods: parent_folded_decl.static_methods.clone(),
                     constructor: parent_folded_decl.constructor.clone(),
-                    consts: parent_folded_decl.consts.clone(),
-                    type_consts: parent_folded_decl.type_consts.clone(),
-                };
+                    consts,
+                    type_consts,
+                });
             }
         }
-        Default::default()
+
+        Ok(Default::default())
     }
 
-    fn class_constants_from_class(&self, ty: &DeclTy<R>) -> Inherited<R> {
+    fn class_constants_from_class(&self, ty: &DeclTy<R>) -> Result<Inherited<R>> {
         if let Some((_, pos_id, tyl)) = ty.unwrap_class_type() {
             if let Some(class) = self.parents.get(&pos_id.id()) {
                 let sig = Subst::new(&class.tparams, tyl);
@@ -366,24 +395,25 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
                     .iter()
                     .map(|(name, tc)| (*name, subst.instantiate_type_const(tc)))
                     .collect();
-                return Inherited {
+                return Ok(Inherited {
                     consts,
                     type_consts,
                     ..Default::default()
-                };
+                });
             }
         }
-        Default::default()
+
+        Ok(Default::default())
     }
 
     // This logic deals with importing XHP attributes from an XHP class via the
     // "attribute :foo" syntax.
     // c.f. Decl_inherit.from_class_xhp_attrs_only
-    fn xhp_attrs_from_class(&self, ty: &DeclTy<R>) -> Inherited<R> {
+    fn xhp_attrs_from_class(&self, ty: &DeclTy<R>) -> Result<Inherited<R>> {
         if let Some((_, pos_id, _tyl)) = ty.unwrap_class_type() {
             if let Some(class) = self.parents.get(&pos_id.id()) {
                 // Filter out properties that are not XHP attributes.
-                return Inherited {
+                return Ok(Inherited {
                     props: class
                         .props
                         .iter()
@@ -391,33 +421,40 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
                         .map(|(name, prop)| (name.clone(), prop.clone()))
                         .collect(),
                     ..Default::default()
-                };
+                });
             }
         }
-        Default::default()
+
+        Ok(Default::default())
     }
 
-    fn add_from_interface_constants(&mut self) {
+    fn add_from_interface_constants(&mut self) -> Result<()> {
         for ty in self.child.req_implements.iter() {
             self.members
-                .add_inherited(self.class_constants_from_class(ty))
+                .add_inherited(self.class_constants_from_class(ty)?)
         }
+
+        Ok(())
     }
 
-    fn add_from_implements_constants(&mut self) {
+    fn add_from_implements_constants(&mut self) -> Result<()> {
         for ty in self.child.implements.iter() {
             self.members
-                .add_inherited(self.class_constants_from_class(ty))
+                .add_inherited(self.class_constants_from_class(ty)?)
         }
+
+        Ok(())
     }
 
-    fn add_from_xhp_attr_uses(&mut self) {
+    fn add_from_xhp_attr_uses(&mut self) -> Result<()> {
         for ty in self.child.xhp_attr_uses.iter() {
-            self.members.add_inherited(self.xhp_attrs_from_class(ty))
+            self.members.add_inherited(self.xhp_attrs_from_class(ty)?)
         }
+
+        Ok(())
     }
 
-    fn add_from_parents(&mut self) {
+    fn add_from_parents(&mut self) -> Result<()> {
         let mut tys: Vec<&DeclTy<R>> = Vec::new();
         match self.child.kind {
             ClassishKind::Cclass(Abstraction::Abstract) => {
@@ -440,49 +477,62 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
         // Interfaces implemented, classes extended and interfaces required to
         // be implemented.
         for ty in tys.iter().rev() {
-            self.members.add_inherited(self.members_from_class(ty));
+            self.members.add_inherited(self.members_from_class(ty)?);
         }
+
+        Ok(())
     }
 
-    fn add_from_requirements(&mut self) {
+    fn add_from_requirements(&mut self) -> Result<()> {
         for ty in self.child.req_extends.iter() {
-            let mut inherited = self.members_from_class(ty);
+            let mut inherited = self.members_from_class(ty)?;
             inherited.mark_as_synthesized();
             self.members.add_inherited(inherited);
         }
+
+        Ok(())
     }
 
-    fn add_from_traits(&mut self) {
+    fn add_from_traits(&mut self) -> Result<()> {
         for ty in self.child.uses.iter() {
-            self.members.add_inherited(self.members_from_class(ty));
+            self.members.add_inherited(self.members_from_class(ty)?);
         }
+
+        Ok(())
     }
 
-    fn add_from_included_enums_constants(&mut self) {
+    fn add_from_included_enums_constants(&mut self) -> Result<()> {
         if let Some(et) = self.child.enum_type.as_ref() {
             for ty in et.includes.iter() {
                 self.members
-                    .add_inherited(self.class_constants_from_class(ty));
+                    .add_inherited(self.class_constants_from_class(ty)?);
             }
         }
+
+        Ok(())
     }
 }
 
 impl<R: Reason> Inherited<R> {
-    pub fn make(child: &ShallowClass<R>, parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>) -> Self {
+    pub fn make(
+        child: &ShallowClass<R>,
+        parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
+        dependency_registrar: &dyn DependencyRegistrar,
+    ) -> Result<Self> {
         let mut folder = MemberFolder {
             child,
             parents,
+            dependency_registrar,
             members: Self::default(),
         };
-        folder.add_from_parents(); // Members inherited from parents ...
-        folder.add_from_requirements();
-        folder.add_from_traits(); // ... can be overridden by traits.
-        folder.add_from_xhp_attr_uses();
-        folder.add_from_interface_constants();
-        folder.add_from_included_enums_constants();
-        folder.add_from_implements_constants();
+        folder.add_from_parents()?; // Members inherited from parents ...
+        folder.add_from_requirements()?;
+        folder.add_from_traits()?; // ... can be overridden by traits.
+        folder.add_from_xhp_attr_uses()?;
+        folder.add_from_interface_constants()?;
+        folder.add_from_included_enums_constants()?;
+        folder.add_from_implements_constants()?;
 
-        folder.members
+        Ok(folder.members)
     }
 }

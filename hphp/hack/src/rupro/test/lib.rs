@@ -11,7 +11,6 @@ use tempdir::TempDir;
 use fbinit::FacebookInit;
 use hackrs::{
     decl_parser::DeclParser,
-    dependency_registrar::DependencyRegistrar,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
     naming_provider::{NamingProvider, SqliteNamingTable},
     reason::BReason,
@@ -19,10 +18,12 @@ use hackrs::{
     special_names::SpecialNames,
     typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };
+use hackrs_test_utils::registrar::DependencyGraph;
 use hh24_test::TestRepo;
 use pos::RelativePathCtx;
 use std::{path::PathBuf, rc::Rc, sync::Arc};
 
+mod dependency_registrar;
 mod folded_decl_provider;
 
 struct TestContext {
@@ -31,6 +32,9 @@ struct TestContext {
 
     #[allow(dead_code)]
     pub decl_parser: DeclParser<BReason>,
+
+    #[allow(dead_code)]
+    pub dependency_graph: Arc<DependencyGraph>,
 
     #[allow(dead_code)]
     pub naming_provider: Arc<dyn NamingProvider>,
@@ -67,7 +71,7 @@ impl TestContext {
                 Arc::clone(&naming_provider),
                 decl_parser.clone(),
             ));
-        let dependency_registrar: Arc<dyn DependencyRegistrar> =
+        let dependency_graph: Arc<DependencyGraph> =
             Arc::new(hackrs_test_utils::registrar::DependencyGraph::new());
         let folded_decl_provider: Arc<dyn FoldedDeclProvider<_>> =
             Arc::new(LazyFoldedDeclProvider::new(
@@ -75,7 +79,7 @@ impl TestContext {
                 Arc::new(hackrs_test_utils::cache::NonEvictingCache::new()),
                 SpecialNames::new(),
                 Arc::clone(&shallow_decl_provider),
-                Arc::clone(&dependency_registrar),
+                Arc::clone(&dependency_graph) as _,
             ));
         let typing_decl_provider: Rc<dyn TypingDeclProvider<_>> =
             Rc::new(FoldingTypingDeclProvider::new(
@@ -86,6 +90,7 @@ impl TestContext {
         Ok(Self {
             root,
             decl_parser,
+            dependency_graph,
             naming_provider,
             shallow_decl_provider,
             folded_decl_provider,

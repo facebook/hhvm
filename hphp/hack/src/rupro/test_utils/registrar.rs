@@ -7,7 +7,7 @@ use dashmap::{mapref::entry::Entry, DashMap};
 use hackrs::dependency_registrar::{DeclName, DependencyName, DependencyRegistrar, Result};
 use std::collections::HashSet;
 
-type DeclNameSet = HashSet<DeclName>;
+pub type DeclNameSet = HashSet<DeclName>;
 
 #[derive(Debug, Clone)]
 pub struct DependencyGraph {
@@ -19,7 +19,7 @@ pub struct DependencyGraph {
     // ```
     // would result in
     //   Extends(A) : {Type(B)}
-    rdeps: DashMap<DependencyName, DeclNameSet>,
+    pub rdeps: DashMap<DependencyName, DeclNameSet>,
 }
 
 impl DependencyGraph {

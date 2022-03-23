@@ -57,8 +57,8 @@ fn rewrite_xml_<'arena, 'decl>(
     pos: &Pos,
     (id, attributes, children): (ast::Sid, Vec<ast::XhpAttribute>, Vec<ast::Expr>),
 ) -> Result<ast::Expr> {
-    use ast::{ClassId, ClassId_, Expr as E, Expr_ as E_, XhpAttribute};
-    use ast_defs::{Id, ShapeFieldName as SF};
+    use ast::{ClassId, ClassId_, Expr, Expr_, XhpAttribute};
+    use ast_defs::{Id, ShapeFieldName};
 
     let (_, attributes) =
         attributes
@@ -67,11 +67,17 @@ fn rewrite_xml_<'arena, 'decl>(
                 match attr {
                     XhpAttribute::XhpSimple(xhp_simple) => {
                         let (pos, name) = xhp_simple.name;
-                        attrs.push((SF::SFlitStr((pos, name.into())), xhp_simple.expr));
+                        attrs.push((
+                            ShapeFieldName::SFlitStr((pos, name.into())),
+                            xhp_simple.expr,
+                        ));
                     }
                     XhpAttribute::XhpSpread(expr) => {
                         attrs.push((
-                            SF::SFlitStr((expr.1.clone(), format!("...${}", spread_id).into())),
+                            ShapeFieldName::SFlitStr((
+                                expr.1.clone(),
+                                format!("...${}", spread_id).into(),
+                            )),
                             expr,
                         ));
                         spread_id += 1;
@@ -79,17 +85,17 @@ fn rewrite_xml_<'arena, 'decl>(
                 }
                 (spread_id, attrs)
             });
-    let attribute_map = E((), pos.clone(), E_::mk_shape(attributes));
-    let children_vec = E((), pos.clone(), E_::mk_varray(None, children));
-    let filename = E(
+    let attribute_map = Expr((), pos.clone(), Expr_::mk_shape(attributes));
+    let children_vec = Expr((), pos.clone(), Expr_::mk_varray(None, children));
+    let filename = Expr(
         (),
         pos.clone(),
-        E_::mk_id(Id(pos.clone(), pseudo_consts::G__FILE__.into())),
+        Expr_::mk_id(Id(pos.clone(), pseudo_consts::G__FILE__.into())),
     );
-    let line = E(
+    let line = Expr(
         (),
         pos.clone(),
-        E_::mk_id(Id(pos.clone(), pseudo_consts::G__LINE__.into())),
+        Expr_::mk_id(Id(pos.clone(), pseudo_consts::G__LINE__.into())),
     );
     let renamed_id = class::ClassType::from_ast_name_and_mangle(e.alloc, &id.1);
     let cid = ClassId(
@@ -100,10 +106,10 @@ fn rewrite_xml_<'arena, 'decl>(
 
     emit_symbol_refs::add_class(e, renamed_id);
 
-    Ok(E(
+    Ok(Expr(
         (),
         pos.clone(),
-        E_::New(Box::new((
+        Expr_::New(Box::new((
             cid,
             vec![],
             vec![attribute_map, children_vec, filename, line],

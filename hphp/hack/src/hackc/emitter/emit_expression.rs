@@ -14,7 +14,6 @@ use hhbc_id::{class, constant, function, method, prop};
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::{instr, Error, InstrSeq, Result};
-use itertools::Either;
 use label::Label;
 use lazy_static::lazy_static;
 use local::Local;
@@ -33,7 +32,7 @@ use oxidized::{
 };
 use regex::Regex;
 use runtime::TypedValue;
-use std::{collections::BTreeMap, iter, result::Result as StdResult, str::FromStr};
+use std::{borrow::Cow, collections::BTreeMap, iter, result::Result as StdResult, str::FromStr};
 use symbol_refs_state::IncludePath;
 
 #[derive(Debug)]
@@ -6317,11 +6316,11 @@ fn emit_class_expr<'a, 'arena, 'decl>(
     })
 }
 
-pub fn fixup_type_arg<'a, 'b, 'arena>(
+fn fixup_type_arg<'a, 'b, 'arena>(
     env: &Env<'b, 'arena>,
     isas: bool,
     hint: &'a ast::Hint,
-) -> Result<impl AsRef<ast::Hint> + 'a> {
+) -> Result<Cow<'a, ast::Hint>> {
     struct Checker<'s> {
         erased_tparams: &'s [&'s str],
         isas: bool,
@@ -6400,13 +6399,13 @@ pub fn fixup_type_arg<'a, 'b, 'arena>(
         isas,
     };
     match visit(&mut checker, &mut (), hint) {
-        Ok(()) => Ok(Either::Left(hint)),
+        Ok(()) => Ok(Cow::Borrowed(hint)),
         Err(Some(error)) => Err(error),
         Err(None) => {
             let mut updater = Updater { erased_tparams };
             let mut hint = hint.clone();
             visit_mut(&mut updater, &mut (), &mut hint).unwrap();
-            Ok(Either::Right(hint))
+            Ok(Cow::Owned(hint))
         }
     }
 }
@@ -6451,7 +6450,6 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
         }
     }
     let hint = fixup_type_arg(env, isas, hint)?;
-    let hint = hint.as_ref();
     fn f<'a>(mut acc: HashSet<&'a str>, tparam: &'a ast::Tparam) -> HashSet<&'a str> {
         if tparam.reified != ast::ReifyKind::Erased {
             acc.insert(&tparam.name.1);
@@ -6471,7 +6469,7 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
         current_tags: &current_tags,
         acc: IndexSet::new(),
     };
-    visit(&mut collector, &mut (), hint).unwrap();
+    visit(&mut collector, &mut (), &hint as &ast::Hint).unwrap();
     match hint.1.as_ref() {
         ast::Hint_::Happly(ast::Id(_, name), hs)
             if hs.is_empty() && current_tags.contains(name.as_str()) =>
@@ -6479,7 +6477,7 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
             Ok((emit_reified_type(env, pos, name)?, false))
         }
         _ => {
-            let ts = get_type_structure_for_hint(e, &[], &collector.acc, hint)?;
+            let ts = get_type_structure_for_hint(e, &[], &collector.acc, &hint)?;
             let ts_list = if collector.acc.is_empty() {
                 ts
             } else {

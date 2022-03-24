@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ast_body::AstBody;
 use ast_scope::{self as ast_scope, Lambda, Scope, ScopeItem};
 use env::emitter::Emitter;
 use ffi::Slice;
@@ -20,7 +21,6 @@ use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
 use oxidized::{ast as T, ast_defs};
 
-use itertools::Either;
 use std::borrow::Cow;
 
 pub fn from_asts<'a, 'arena, 'decl>(
@@ -257,7 +257,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
             emitter.alloc,
             emitter,
             namespace,
-            Either::Right(ast_body_block),
+            AstBody::Stmts(ast_body_block),
             instr::null(),
             scope,
             emit_body::Args {

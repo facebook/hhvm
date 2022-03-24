@@ -51,8 +51,7 @@ use serde_derive::{Deserialize, Serialize};
 use serde_json::{json, value::Value as Json};
 
 use bstr::BString;
-use itertools::Either;
-use std::{cell::RefCell, collections::BTreeMap, iter::empty};
+use std::{cell::RefCell, collections::BTreeMap};
 
 /// Provides uniform access to bitflags-generated structs in JSON SerDe
 trait PrefixedFlags:
@@ -293,22 +292,12 @@ impl Default for Hhvm {
 }
 
 impl Hhvm {
-    pub fn aliased_namespaces_iter(&self) -> impl Iterator<Item = (&str, &str)> {
-        match self.aliased_namespaces.get() {
-            BTreeMapOrEmptyVec::Nonempty(m) => {
-                Either::Right(m.iter().map(|(x, y)| (x.as_str(), y.as_str())))
-            }
-            _ => Either::Left(empty()),
-        }
-    }
-
     pub fn aliased_namespaces_cloned(&self) -> impl Iterator<Item = (String, String)> + '_ {
-        match self.aliased_namespaces.get() {
-            BTreeMapOrEmptyVec::Nonempty(m) => {
-                Either::Right(m.iter().map(|(x, y)| (x.clone(), y.clone())))
-            }
-            _ => Either::Left(empty()),
-        }
+        let x = match self.aliased_namespaces.get() {
+            BTreeMapOrEmptyVec::Nonempty(m) => Some(m.iter().map(|(x, y)| (x.clone(), y.clone()))),
+            _ => None,
+        };
+        x.into_iter().flatten()
     }
 }
 

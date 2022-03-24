@@ -36,7 +36,6 @@ use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 
 use bitflags::bitflags;
 use indexmap::IndexSet;
-use itertools::Either;
 
 static THIS: &str = "$this";
 
@@ -89,7 +88,7 @@ pub fn emit_body_with_default_args<'b, 'arena, 'decl>(
         alloc,
         emitter,
         namespace,
-        Either::Left(body.as_slice()),
+        AstBody::Defs(body.as_slice()),
         return_value,
         Scope::toplevel(),
         args,
@@ -482,8 +481,8 @@ fn emit_ast_body<'a, 'arena, 'decl>(
     body: &AstBody<'_>,
 ) -> Result<InstrSeq<'arena>> {
     match body {
-        Either::Left(p) => emit_defs(env, e, p),
-        Either::Right(b) => emit_final_stmts(e, env, b),
+        AstBody::Defs(p) => emit_defs(env, e, p),
+        AstBody::Stmts(b) => emit_final_stmts(e, env, b),
     }
 }
 

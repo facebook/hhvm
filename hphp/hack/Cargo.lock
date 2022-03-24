@@ -161,7 +161,6 @@ dependencies = [
 name = "ast_body"
 version = "0.0.0"
 dependencies = [
- "itertools 0.10.3",
  "oxidized",
 ]
 
@@ -203,7 +202,6 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "hhas_coeffects",
- "itertools 0.10.3",
  "oxidized",
 ]
 
@@ -998,7 +996,6 @@ dependencies = [
  "indexmap",
  "instruction_sequence",
  "iterator",
- "itertools 0.10.3",
  "label",
  "label_rewriter",
  "lazy_static",
@@ -1104,7 +1101,6 @@ dependencies = [
  "hhbc_string_utils",
  "indexmap",
  "instruction_sequence",
- "itertools 0.10.3",
  "label",
  "lazy_static",
  "local",
@@ -1144,6 +1140,7 @@ dependencies = [
 name = "emit_function"
 version = "0.0.0"
 dependencies = [
+ "ast_body",
  "ast_scope",
  "emit_attribute",
  "emit_body",
@@ -1164,7 +1161,6 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_types_ffi",
  "instruction_sequence",
- "itertools 0.10.3",
  "label",
  "local",
  "naming_special_names_rust",
@@ -1227,6 +1223,7 @@ dependencies = [
 name = "emit_method"
 version = "0.0.0"
 dependencies = [
+ "ast_body",
  "ast_scope",
  "emit_attribute",
  "emit_body",
@@ -1244,7 +1241,6 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_types_ffi",
  "instruction_sequence",
- "itertools 0.10.3",
  "naming_special_names_rust",
  "ocamlrep",
  "options",
@@ -2649,7 +2645,6 @@ dependencies = [
  "bitflags",
  "bstr",
  "fnv",
- "itertools 0.10.3",
  "lazy_static",
  "lru",
  "options_serde",

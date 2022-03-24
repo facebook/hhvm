@@ -5,6 +5,7 @@
 
 mod emit_memoize_function;
 
+use ast_body::AstBody;
 use ast_scope::{self as ast_scope, Scope, ScopeItem};
 use emit_body::{self as emit_body};
 use env::emitter::Emitter;
@@ -18,8 +19,6 @@ use instruction_sequence::{instr, Result};
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, ast_defs};
-
-use itertools::Either;
 
 pub fn emit_function<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
@@ -132,7 +131,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
             alloc,
             e,
             RcOc::clone(&fd.namespace),
-            Either::Right(ast_body),
+            AstBody::Stmts(ast_body),
             instr::null(),
             scope,
             EmitBodyArgs {

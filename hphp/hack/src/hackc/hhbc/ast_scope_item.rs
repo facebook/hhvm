@@ -6,7 +6,6 @@
 use hhas_coeffects::HhasCoeffects;
 use oxidized::{ast, file_info, pos::Pos};
 
-use itertools::Either;
 use std::rc::Rc;
 
 #[derive(Clone, Debug)]
@@ -36,108 +35,130 @@ impl<'a, 'arena> ScopeItem<'a, 'arena> {
     }
 }
 
-#[derive(Debug)]
-pub struct E<'a, AST, BRIEF>(Either<&'a AST, Rc<BRIEF>>);
+#[derive(Clone, Debug)]
+pub enum Class<'a> {
+    Borrowed(&'a ast::Class_),
+    Counted(Rc<Class_>),
+}
 
-impl<'a, AST, BRIEF> E<'a, AST, BRIEF> {
-    pub fn new_ref(ast: &'a AST) -> Self {
-        E(Either::Left(ast))
+impl<'a> Class<'a> {
+    pub fn new_ref(ast: &'a ast::Class_) -> Self {
+        Self::Borrowed(ast)
     }
 
-    fn new_rc_(ast: &AST, f: impl Fn(&AST) -> BRIEF) -> Self {
-        E(Either::Right(Rc::new(f(ast))))
+    pub fn new_rc(x: &ast::Class_) -> Self {
+        Self::Counted(Rc::new(Class_::new(x)))
     }
 
-    fn either<'r, R: 'r>(
-        &'r self,
-        l: impl FnOnce(&'a AST) -> R,
-        r: impl FnOnce(&'r BRIEF) -> R,
-    ) -> R {
-        match &self.0 {
-            Either::Left(x) => l(x),
-            Either::Right(x) => r(x.as_ref()),
+    pub(in crate) fn get_tparams(&self) -> &[ast::Tparam] {
+        match self {
+            Self::Borrowed(x) => &x.tparams,
+            Self::Counted(x) => &x.tparams,
+        }
+    }
+
+    pub fn get_span(&self) -> &Pos {
+        match self {
+            Self::Borrowed(x) => &x.span,
+            Self::Counted(x) => &x.span,
+        }
+    }
+
+    pub fn get_name(&self) -> &ast::Id {
+        match self {
+            Self::Borrowed(x) => &x.name,
+            Self::Counted(x) => &x.name,
+        }
+    }
+
+    pub fn get_name_str(&self) -> &str {
+        &self.get_name().1
+    }
+
+    pub fn get_mode(&self) -> file_info::Mode {
+        match self {
+            Self::Borrowed(x) => x.mode,
+            Self::Counted(x) => x.mode,
+        }
+    }
+
+    pub fn get_kind(&self) -> ast::ClassishKind {
+        match self {
+            Self::Borrowed(x) => x.kind,
+            Self::Counted(x) => x.kind,
+        }
+    }
+
+    pub fn get_extends(&self) -> &[ast::Hint] {
+        match self {
+            Self::Borrowed(x) => &x.extends,
+            Self::Counted(x) => &x.extends,
+        }
+    }
+
+    pub fn get_vars(&self) -> &[ast::ClassVar] {
+        match self {
+            Self::Borrowed(x) => &x.vars,
+            Self::Counted(x) => &x.vars,
         }
     }
 }
 
-impl<'a, AST, BRIEF> Clone for E<'a, AST, BRIEF> {
-    fn clone(&self) -> Self {
-        E(self.0.clone())
-    }
-}
-
-pub type Class<'a> = E<'a, ast::Class_, Class_>;
-pub type Fun<'a> = E<'a, ast::FunDef, Fun_>;
-pub type Method<'a> = E<'a, ast::Method_, Method_>;
-
-impl<'a> Class<'a> {
-    pub fn new_rc(x: &ast::Class_) -> Self {
-        Self::new_rc_(x, Class_::new)
-    }
-
-    pub(in crate) fn get_tparams(&self) -> &[ast::Tparam] {
-        self.either(|x| &x.tparams[..], |x| &x.tparams[..])
-    }
-
-    pub fn get_span(&self) -> &Pos {
-        self.either(|x| &x.span, |x| &x.span)
-    }
-
-    pub fn get_name(&self) -> &ast::Id {
-        self.either(|x| &x.name, |x| &x.name)
-    }
-
-    pub fn get_name_str(&self) -> &str {
-        &self.get_name().1
-    }
-
-    pub fn get_mode(&self) -> file_info::Mode {
-        self.either(|x| x.mode, |x| x.mode)
-    }
-
-    pub fn get_kind(&self) -> ast::ClassishKind {
-        self.either(|x| x.kind.clone(), |x| x.kind.clone())
-    }
-
-    pub fn get_extends(&self) -> &[ast::Hint] {
-        self.either(|x| &x.extends[..], |x| &x.extends[..])
-    }
-
-    pub fn get_vars(&self) -> &[ast::ClassVar] {
-        self.either(|x| &x.vars[..], |x| &x.vars[..])
-    }
+#[derive(Clone, Debug)]
+pub enum Fun<'a> {
+    Borrowed(&'a ast::FunDef),
+    Counted(Rc<Fun_>),
 }
 
 impl<'a> Fun<'a> {
+    pub fn new_ref(ast: &'a ast::FunDef) -> Self {
+        Self::Borrowed(ast)
+    }
+
     pub fn new_rc(x: &ast::FunDef) -> Self {
-        Self::new_rc_(x, Fun_::new)
+        Self::Counted(Rc::new(Fun_::new(x)))
     }
 
     pub(in crate) fn get_tparams(&self) -> &[ast::Tparam] {
-        self.either(
-            |x: &'a ast::FunDef| &x.fun.tparams[..],
-            |x: &Fun_| &x.tparams[..],
-        )
+        match self {
+            Self::Borrowed(x) => &x.fun.tparams,
+            Self::Counted(x) => &x.tparams,
+        }
     }
 
     pub(in crate) fn get_user_attributes(&self) -> &[ast::UserAttribute] {
-        self.either(|x| &x.fun.user_attributes[..], |x| &x.user_attributes[..])
+        match self {
+            Self::Borrowed(x) => &x.fun.user_attributes,
+            Self::Counted(x) => &x.user_attributes,
+        }
     }
 
     pub fn get_ctxs(&self) -> Option<&ast::Contexts> {
-        self.either(|x| &x.fun.ctxs, |x| &x.ctxs).as_ref()
+        match self {
+            Self::Borrowed(x) => x.fun.ctxs.as_ref(),
+            Self::Counted(x) => x.ctxs.as_ref(),
+        }
     }
 
     pub fn get_params(&self) -> &[ast::FunParam] {
-        self.either(|x| &x.fun.params[..], |x| &x.params[..])
+        match self {
+            Self::Borrowed(x) => &x.fun.params,
+            Self::Counted(x) => &x.params,
+        }
     }
 
     pub fn get_span(&self) -> &Pos {
-        self.either(|x| &x.fun.span, |x| &x.span)
+        match self {
+            Self::Borrowed(x) => &x.fun.span,
+            Self::Counted(x) => &x.span,
+        }
     }
 
     pub fn get_name(&self) -> &ast::Id {
-        self.either(|x| &x.fun.name, |x| &x.name)
+        match self {
+            Self::Borrowed(x) => &x.fun.name,
+            Self::Counted(x) => &x.name,
+        }
     }
 
     pub fn get_name_str(&self) -> &str {
@@ -145,45 +166,82 @@ impl<'a> Fun<'a> {
     }
 
     pub fn get_mode(&self) -> file_info::Mode {
-        self.either(|x| x.mode, |x| x.mode)
+        match self {
+            Self::Borrowed(x) => x.mode,
+            Self::Counted(x) => x.mode,
+        }
     }
 
     pub fn get_fun_kind(&self) -> ast::FunKind {
-        self.either(|x| x.fun.fun_kind, |x| x.fun_kind)
+        match self {
+            Self::Borrowed(x) => x.fun.fun_kind,
+            Self::Counted(x) => x.fun_kind,
+        }
     }
 }
 
+#[derive(Clone, Debug)]
+pub enum Method<'a> {
+    Borrowed(&'a ast::Method_),
+    Counted(Rc<Method_>),
+}
+
 impl<'a> Method<'a> {
+    pub fn new_ref(ast: &'a ast::Method_) -> Self {
+        Self::Borrowed(ast)
+    }
+
     pub fn new_rc(x: &ast::Method_) -> Self {
-        Self::new_rc_(x, Method_::new)
+        Self::Counted(Rc::new(Method_::new(x)))
     }
 
     pub(in crate) fn get_tparams(&self) -> &[ast::Tparam] {
-        self.either(|x| &x.tparams[..], |x| &x.tparams[..])
+        match self {
+            Self::Borrowed(m) => &m.tparams,
+            Self::Counted(m) => &m.tparams,
+        }
     }
 
     pub(in crate) fn is_static(&self) -> bool {
-        self.either(|x| x.static_, |x| x.static_)
+        match self {
+            Self::Borrowed(m) => m.static_,
+            Self::Counted(m) => m.static_,
+        }
     }
 
     pub(in crate) fn get_user_attributes(&self) -> &[ast::UserAttribute] {
-        self.either(|x| &x.user_attributes[..], |x| &x.user_attributes[..])
+        match self {
+            Self::Borrowed(x) => &x.user_attributes,
+            Self::Counted(x) => &x.user_attributes,
+        }
     }
 
     pub fn get_ctxs(&self) -> Option<&ast::Contexts> {
-        self.either(|x| &x.ctxs, |x| &x.ctxs).as_ref()
+        match self {
+            Self::Borrowed(x) => x.ctxs.as_ref(),
+            Self::Counted(x) => x.ctxs.as_ref(),
+        }
     }
 
     pub fn get_params(&self) -> &[ast::FunParam] {
-        self.either(|x| &x.params[..], |x| &x.params[..])
+        match self {
+            Self::Borrowed(x) => &x.params,
+            Self::Counted(x) => &x.params,
+        }
     }
 
     pub fn get_span(&self) -> &Pos {
-        self.either(|x| &x.span, |x| &x.span)
+        match self {
+            Self::Borrowed(x) => &x.span,
+            Self::Counted(x) => &x.span,
+        }
     }
 
     pub fn get_name(&self) -> &ast::Id {
-        self.either(|x| &x.name, |x| &x.name)
+        match self {
+            Self::Borrowed(x) => &x.name,
+            Self::Counted(x) => &x.name,
+        }
     }
 
     pub fn get_name_str(&self) -> &str {
@@ -191,7 +249,10 @@ impl<'a> Method<'a> {
     }
 
     pub fn get_fun_kind(&self) -> ast::FunKind {
-        self.either(|x| x.fun_kind, |x| x.fun_kind)
+        match self {
+            Self::Borrowed(x) => x.fun_kind,
+            Self::Counted(x) => x.fun_kind,
+        }
     }
 }
 

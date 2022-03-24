@@ -3,17 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_scope::{Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem};
+use ast_body::AstBody;
+use ast_scope::{Lambda, LongLambda, Scope, ScopeItem};
 use env::emitter::Emitter;
 use global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hash::HashSet;
 use hash::IndexSet;
 use hhas_coeffects::HhasCoeffects;
-use hhbc_assertion_utils::*;
+use hhbc_assertion_utils::ensure_normal_paramkind;
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{Error, Result};
-use itertools::{Either, EitherOrBoth::*, Itertools};
+use itertools::{EitherOrBoth, Itertools};
 use naming_special_names_rust::{
     fb, pseudo_consts, pseudo_functions, special_idents, superglobals,
 };
@@ -22,7 +23,12 @@ use options::{CompilerFlags, HhvmFlags, Options};
 use oxidized::{
     aast_defs,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
-    ast::*,
+    ast::{
+        Abstraction, Bop, Catch, ClassGetExpr, ClassId, ClassId_, ClassVar, Class_, ClassishKind,
+        Contexts, Def, EmitId, Expr, Expr_, FunDef, FunKind, FunParam, Fun_, FuncBody, Hint, Hint_,
+        Id, Lid, LocalId, Method_, OgNullFlavor, Pos, Program, PropOrMethod, ReifyKind, Stmt,
+        Stmt_, Targ, Tparam, TypeHint, UserAttribute, Visibility,
+    },
     ast_defs::ParamKind,
     file_info::Mode,
     local_id, namespace_env,
@@ -31,10 +37,9 @@ use oxidized::{
 };
 use stack_limit::StackLimit;
 use std::path::PathBuf;
-use unique_id_builder::*;
-
-type Scope<'a, 'arena> = AstScope<'a, 'arena>;
-type ScopeItem<'a, 'arena> = AstScopeItem<'a, 'arena>;
+use unique_id_builder::{
+    get_unique_id_for_function, get_unique_id_for_main, get_unique_id_for_method,
+};
 
 #[derive(Debug, Clone)] // TODO(hrust): Clone is used when bactracking now, can we somehow avoid it?
 struct Variables {
@@ -49,7 +54,7 @@ struct Env<'a, 'arena> {
     /// What is the current context?
     // TODO(hrust) VisitorMut doesn't provide an interface
     // where a reference to visited NodeMut outlives the Context type (in this case Env<'a>),
-    // so we have no choice but to clone in ach ScopeItem (i.e., can't se Borrowed for 'a)
+    // so we have no choice but to clone in ach ScopeItem (i.e., can't use Borrowed for 'a)
 
     /// Span of function/method body
     pos: Pos, // TODO(hrust) change to &'a Pos after dependent Visitor/Node lifetime is fixed.
@@ -74,11 +79,11 @@ struct Env<'a, 'arena> {
 
 #[derive(Default, Clone)]
 struct PerFunctionState {
-    pub has_finally: bool,
+    has_finally: bool,
 }
 
 impl<'a, 'arena> Env<'a, 'arena> {
-    pub fn toplevel(
+    fn toplevel(
         class_count: usize,
         function_count: usize,
         defs: &[Def],
@@ -87,7 +92,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         stack_limit: &'a StackLimit,
     ) -> Result<Self> {
         let scope = Scope::toplevel();
-        let all_vars = get_vars(&[], Either::Left(defs))?;
+        let all_vars = get_vars(&[], AstBody::Defs(defs))?;
 
         Ok(Self {
             pos: Pos::make_none(),
@@ -115,7 +120,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
     ) -> Result<()> {
         self.pos = pos;
         self.scope.push_item(e);
-        let all_vars = get_vars(params, Either::Right(body))?;
+        let all_vars = get_vars(params, AstBody::Stmts(body))?;
         Ok(self.variable_scopes.push(Variables {
             parameter_names: get_parameter_names(params),
             all_vars,
@@ -258,7 +263,7 @@ struct State<'arena> {
 }
 
 impl<'arena> State<'arena> {
-    pub fn initial_state(empty_namespace: RcOc<namespace_env::Env>) -> Self {
+    fn initial_state(empty_namespace: RcOc<namespace_env::Env>) -> Self {
         Self {
             namespace: RcOc::clone(&empty_namespace),
             empty_namespace,
@@ -273,11 +278,11 @@ impl<'arena> State<'arena> {
         }
     }
 
-    pub fn reset_function_counts(&mut self) {
+    fn reset_function_counts(&mut self) {
         self.closure_cnt_per_fun = 0;
     }
 
-    pub fn record_function_state(
+    fn record_function_state(
         &mut self,
         key: String,
         fun: PerFunctionState,
@@ -299,13 +304,13 @@ impl<'arena> State<'arena> {
     }
 
     // Clear the variables, upon entering a lambda
-    pub fn enter_lambda(&mut self) {
+    fn enter_lambda(&mut self) {
         self.captured_vars = Default::default();
         self.captured_this = false;
         self.captured_generics = Default::default();
     }
 
-    pub fn set_namespace(&mut self, namespace: RcOc<namespace_env::Env>) {
+    fn set_namespace(&mut self, namespace: RcOc<namespace_env::Env>) {
         self.namespace = namespace;
     }
 }
@@ -333,8 +338,8 @@ fn should_capture_var(env: &Env<'_, '_>, var: &str) -> bool {
         .skip(1)
     {
         match x {
-            Right(vars) => return vars.all_vars.contains(var),
-            Both(scope, vars) => {
+            EitherOrBoth::Right(vars) => return vars.all_vars.contains(var),
+            EitherOrBoth::Both(scope, vars) => {
                 if vars.all_vars.contains(var) || vars.parameter_names.contains(var) {
                     return true;
                 }
@@ -342,7 +347,7 @@ fn should_capture_var(env: &Env<'_, '_>, var: &str) -> bool {
                     return false;
                 }
             }
-            Left(_) => return false,
+            EitherOrBoth::Left(_) => return false,
         }
     }
     false
@@ -1575,7 +1580,7 @@ fn extract_debugger_main(
     all_defs: &mut Vec<Def>,
 ) -> std::result::Result<(), String> {
     let (stmts, mut defs): (Vec<Def>, Vec<Def>) = all_defs.drain(..).partition(|x| x.is_stmt());
-    let mut vars = decl_vars::vars_from_ast(&[], &Either::Left(&stmts))?
+    let mut vars = decl_vars::vars_from_ast(&[], &AstBody::Defs(&stmts))?
         .into_iter()
         .collect::<Vec<_>>();
     // TODO(hrust) sort is only required when comparing Rust/Ocaml, remove sort after emitter shipped

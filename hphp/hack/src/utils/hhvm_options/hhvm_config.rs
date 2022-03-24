@@ -12,7 +12,7 @@ pub enum CompilerMode {
 
 impl Default for CompilerMode {
     fn default() -> Self {
-        // Default to being noncommital.
+        // Default to being noncommittal.
         CompilerMode::Both
     }
 }

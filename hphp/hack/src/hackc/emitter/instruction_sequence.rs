@@ -1162,7 +1162,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::ContValid))
     }
 
-    pub fn contcurrent<'a>() -> InstrSeq<'a> {
+    pub fn concurrent<'a>() -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ContCurrent))
     }
 

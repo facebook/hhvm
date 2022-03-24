@@ -306,7 +306,7 @@ LoopBlocks findLoopBlocks(const Vunit& unit,
 /*
  * This SSA restoration algorithm is based on "Simple and Efficient Construction
  * of Static Single Assignment Form" by Matthias Braun, Sebastian Buchwald,
- * Sebastian Hack, et all (with a few tweaks).
+ * Sebastian Hack, et al. (with a few tweaks).
  *
  * The idea is to walk the blocks of the unit in RPO order. For each eligible
  * Vreg which is being defined, we assign a fresh Vreg and keep a mapping of the

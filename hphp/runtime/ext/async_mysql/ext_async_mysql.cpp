@@ -175,7 +175,7 @@ static std::vector<std::string> certLoggingImpl(
     const std::vector<std::string>& extNames,
     am::ConnectOperation& op,
     bool validated) {
-  // Capture the certificare Common Name
+  // Capture the certificate Common Name
   std::string cn =
     folly::ssl::OpenSSLCertUtils::getCommonName(*cert).value_or("none");
   // Capture cert extension values for the extensions requested by the

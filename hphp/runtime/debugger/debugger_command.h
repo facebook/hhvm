@@ -91,7 +91,7 @@ struct DebuggerCommand {
 
     // Internal testing only
     KindOfInternalTesting     = 20000, // The real test command
-    KindOfInternalTestingBad  = 20001, // A command type we never recgonize
+    KindOfInternalTestingBad  = 20001, // A command type we never recognize
   };
 
   static bool Receive(DebuggerThriftBuffer &thrift, DebuggerCommandPtr &cmd,

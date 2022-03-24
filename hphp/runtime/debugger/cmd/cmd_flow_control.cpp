@@ -140,7 +140,7 @@ bool CmdFlowControl::atStepOutOffset(const Func* func, Offset o) {
 // Some instructions can cause PHP to be invoked without an explicit call. A set
 // which causes a destructor to run, a iteration init which causes an object's
 // next() method to run, a RetC which causes destructors to run, etc. This
-// recgonizes such cases and ensures we have internal breakpoints to cover the
+// recognizes such cases and ensures we have internal breakpoints to cover the
 // destination(s) of such instructions.
 void CmdFlowControl::setupStepOuts() {
   // Existing step outs should be cleaned up before making new ones.

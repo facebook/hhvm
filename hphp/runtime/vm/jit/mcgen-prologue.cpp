@@ -91,7 +91,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
 
   {
     // The prologue translator may hold the code and metadata locks after a
-    // succesuful translation.
+    // successful translation.
     auto translatorPtr = std::make_unique<tc::PrologueTranslator>(
       func, nArgs, TransKind::OptPrologue
     );

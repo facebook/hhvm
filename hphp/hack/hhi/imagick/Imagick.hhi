@@ -250,7 +250,7 @@ class Imagick
   const int DECORATION_NO = 1;
   const int DECORATION_UNDERLINE = 2;
   const int DECORATION_OVERLINE = 3;
-  const int DECORATION_LINETROUGH = 4;
+  const int DECORATION_LINETHROUGH = 4;
   const int NOISE_UNIFORM = 1;
   const int NOISE_GAUSSIAN = 2;
   const int NOISE_IMPULSE = 4;

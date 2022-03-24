@@ -341,7 +341,7 @@ void loadImagickConstants() {
   HHVM_RCC_INT(Imagick, DECORATION_NO, NoDecoration);
   HHVM_RCC_INT(Imagick, DECORATION_UNDERLINE, UnderlineDecoration);
   HHVM_RCC_INT(Imagick, DECORATION_OVERLINE, OverlineDecoration);
-  HHVM_RCC_INT(Imagick, DECORATION_LINETROUGH, LineThroughDecoration);
+  HHVM_RCC_INT(Imagick, DECORATION_LINETHROUGH, LineThroughDecoration);
 
   // NOISE constants
   HHVM_RCC_INT(Imagick, NOISE_UNIFORM, UniformNoise);

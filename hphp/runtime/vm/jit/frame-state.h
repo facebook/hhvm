@@ -139,7 +139,7 @@ struct FrameState {
   std::string show() const;
 
   /*
-   * FrameState Accesors.
+   * FrameState Accessors.
    */
   SSATmp*     fp()                const { return fpValue; }
   SSATmp*     fixupFP()           const { return fixupFPValue; }

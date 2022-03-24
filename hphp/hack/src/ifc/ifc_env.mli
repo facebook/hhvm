@@ -104,7 +104,7 @@ val throw : expr_env -> PSet.t -> expr_env
 
 (* analyze_lambda_body is used to check the body of a lambda; it
    is necessary to transition to a stmt_env in an expr_env
-   (the environment in which the lambda occured) without having
+   (the environment in which the lambda occurred) without having
    to close the expr_env *)
 val analyze_lambda_body : expr_env -> (blank_env -> blank_env) -> expr_env
 

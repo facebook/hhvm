@@ -278,7 +278,7 @@ function stream_select(inout mixed $read,
  * @return int - Result code
  *               STREAM_AWAIT_CLOSED: Stream is closed
  *               STREAM_AWAIT_READY: Activity on the provided stream
- *               STREAM_AWAIT_TIMEOUT: No activity (timeout occured)
+ *               STREAM_AWAIT_TIMEOUT: No activity (timeout occurred)
  *               STREAM_AWAIT_ERROR: Error
  */
 <<__Native>>

@@ -7544,7 +7544,7 @@ void PublicSPropMutations::mergeUnknown(Context ctx) {
     "NOTE: had to mark everything unknown for public static "
     "property types due to dynamic code.  -fanalyze-public-statics "
     "will not help for this program.\n"
-    "NOTE: The offending code occured in this context: %s\n",
+    "NOTE: The offending code occurred in this context: %s\n",
     show(ctx).c_str()
   );
   get().m_nothing_known = true;

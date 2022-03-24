@@ -111,7 +111,7 @@ pub fn run(opts: Opts) -> Result<()> {
         // process_single_file().
         //
         // If an error occurs then continue to process as much as possible,
-        // returning the first error that occured.
+        // returning the first error that occurred.
         let process_one_file = |f: &PathBuf| -> Result<()> {
             let content = utils::read_file(f)?;
             let files = multifile::to_files(f, content)?;

@@ -3093,7 +3093,7 @@ void Generator::genScannerFunc(std::ostream& os,
   const auto* offset_str = layout.suffix ? "" : "+offset";
 
   // First generate calls to the scanner to record all the pointers. We use the
-  // version of insert() which takes an initializator list because it is more
+  // version of insert() which takes an initializer list because it is more
   // efficient.
   if (layout.ptrs.size() == 1) {
     indent(2) << "scanner.m_addrs.emplace_back(\n";

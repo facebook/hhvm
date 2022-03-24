@@ -1956,7 +1956,7 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
     if (!pi.hasDefaultValue() || pi.funcletOff == kInvalidOffset) continue;
     auto inst = fe->bc() + pi.funcletOff;
 
-    // Check that the DV intitializer is actually setting the local for the
+    // Check that the DV initializer is actually setting the local for the
     // parameter being initialized.
     auto checkloc = [&] (PC pc, const Captures&) {
       auto const UNUSED op = decode_op(pc);

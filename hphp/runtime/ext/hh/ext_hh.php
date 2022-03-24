@@ -696,7 +696,7 @@ function create_opaque_value_internal(int $id, mixed $val)[]: resource;
  * allocated once and will always compare as equal.
  */
 <<__Memoize, __NoInjection>>
-function create_opaque_value(int $id, mixed $val): mixed {
+function create_opaque_value(int $id, mixed $val)[]: mixed {
   return create_opaque_value_internal($id, $val);
 }
 
@@ -706,6 +706,6 @@ function create_opaque_value(int $id, mixed $val): mixed {
  * to construct it throw an exception.
  */
 <<__Native, __NoInjection>>
-function unwrap_opaque_value(int $id, resource $res): mixed;
+function unwrap_opaque_value(int $id, resource $res)[]: mixed;
 
 }

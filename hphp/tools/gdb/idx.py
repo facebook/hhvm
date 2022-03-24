@@ -244,14 +244,20 @@ def _un_quick_index(qi):
 
 def tv_layout_at(layout_type, props_base, idx):
     try:
-        idx = int(idx)
-        quot = idx // 7
-        rem = idx % 7
-        chunk = props_base + T("HPHP::Value").sizeof * 8 * quot
-        ty = (chunk + rem).cast(T("HPHP::DataType").pointer()).dereference()
-        valaddr = chunk + T("HPHP::Value").sizeof * (1 + rem)
-        val = valaddr.cast(T("HPHP::Value").pointer()).dereference()
-        return pretty_tv(ty, val)
+        if layout_type == T("HPHP::tv_layout::UnalignedTVLayout"):
+            idx = int(idx)
+            utv_addr = props_base + T("HPHP::UnalignedTypedValue").sizeof * idx
+            utv = utv_addr.cast(T("HPHP::UnalignedTypedValue").pointer()).dereference()
+            return pretty_tv(utv["m_type"], utv["m_data"])
+        else:
+            idx = int(idx)
+            quot = idx // 7
+            rem = idx % 7
+            chunk = props_base + T("HPHP::Value").sizeof * 8 * quot
+            ty = (chunk + rem).cast(T("HPHP::DataType").pointer()).dereference()
+            valaddr = chunk + T("HPHP::Value").sizeof * (1 + rem)
+            val = valaddr.cast(T("HPHP::Value").pointer()).dereference()
+            return pretty_tv(ty, val)
     except:
         pass
 

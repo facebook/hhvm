@@ -669,7 +669,7 @@ void loadImagickConstants() {
   HHVM_RCC_INT(Imagick, SPARSECOLORMETHOD_BILINEAR, BilinearColorInterpolate);
   HHVM_RCC_INT(Imagick, SPARSECOLORMETHOD_POLYNOMIAL,
                         PolynomialColorInterpolate);
-  HHVM_RCC_INT(Imagick, SPARSECOLORMETHOD_SPEPARDS, ShepardsColorInterpolate);
+  HHVM_RCC_INT(Imagick, SPARSECOLORMETHOD_SHEPHERDS, ShepardsColorInterpolate);
   HHVM_RCC_INT(Imagick, SPARSECOLORMETHOD_VORONOI, VoronoiColorInterpolate);
 
   // FUNCTION constants

@@ -1,4 +1,2 @@
---ffile=test/zend/good/ext/standard/tests/serialize/autoload_interface.p5c
 --ffile=hphp/test/zend/good/ext/standard/tests/serialize/autoload_interface.p5c
---ffile=test/zend/good/ext/standard/tests/serialize/autoload_implements.p5c
 --ffile=hphp/test/zend/good/ext/standard/tests/serialize/autoload_implements.p5c

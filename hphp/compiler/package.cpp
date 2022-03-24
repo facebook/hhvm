@@ -180,12 +180,12 @@ Optional<std::thread> Package::clearAsyncState() {
   };
 }
 
-void Package::addAllFiles(bool force) {
+void Package::addAllFiles() {
   if (Option::PackageDirectories.empty() && Option::PackageFiles.empty()) {
-    addDirectory("/", force);
+    addDirectory("/");
   } else {
     for (auto const& dir : Option::PackageDirectories) {
-      addDirectory(dir, force);
+      addDirectory(dir);
     }
     for (auto const& file : Option::PackageFiles) {
       addSourceFile(file);
@@ -207,7 +207,7 @@ void Package::addInputList(const std::string& listFileName) {
     len = strlen(fileName);
     if (len) {
       if (FileUtil::isDirSeparator(fileName[len - 1])) {
-        addDirectory(fileName, false);
+        addDirectory(fileName);
       } else {
         addSourceFile(fileName);
       }
@@ -225,22 +225,21 @@ void Package::addStaticDirectory(const std::string& path) {
   m_staticDirectories.insert(path);
 }
 
-void Package::addDirectory(const std::string &path, bool force) {
-  m_directories[path] |= force;
+void Package::addDirectory(const std::string& path) {
+  m_directories.emplace(path);
 }
 
-void Package::addSourceFile(const std::string& fileName,
-                            bool check /* = false */) {
+void Package::addSourceFile(const std::string& fileName) {
   if (fileName.empty()) return;
   auto canonFileName =
     FileUtil::canonicalize(String(fileName)).toCppString();
-  m_filesToParse.emplace(std::move(canonFileName), check);
+  m_filesToParse.emplace(std::move(canonFileName), true);
 }
 
 std::shared_ptr<FileCache> Package::getFileCache() {
   for (auto const& dir : m_directories) {
     std::vector<std::string> files;
-    FileUtil::find(files, m_root, dir.first, /* php */ false,
+    FileUtil::find(files, m_root, dir, /* php */ false,
                    &Option::PackageExcludeStaticDirs,
                    &Option::PackageExcludeStaticFiles);
     Option::FilterFiles(files, Option::PackageExcludeStaticPatterns);
@@ -611,7 +610,7 @@ Job<ParseJob> g_parseJob;
 // Given the path of a directory, find all (relevant) files in that
 // directory (and sub-directories), and attempt to group them.
 coro::Task<Package::GroupResult>
-Package::groupDirectories(std::string path, bool force) {
+Package::groupDirectories(std::string path) {
   // We're not going to be blocking on I/O here, so make sure we're
   // running on the thread pool.
   HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
@@ -623,11 +622,9 @@ Package::groupDirectories(std::string path, bool force) {
     m_root, path, /* php */ true,
     [&] (const std::string& name, bool dir, size_t size) {
       if (!dir) {
-        if (!force) {
-          if (Option::PackageExcludeFiles.count(name) ||
-              Option::IsFileExcluded(name, Option::PackageExcludePatterns)) {
-            return false;
-          }
+        if (Option::PackageExcludeFiles.count(name) ||
+            Option::IsFileExcluded(name, Option::PackageExcludePatterns)) {
+          return false;
         }
 
         if (!name.empty()) {
@@ -639,9 +636,7 @@ Package::groupDirectories(std::string path, bool force) {
         }
         return true;
       }
-      if (!force && Option::PackageExcludeDirs.count(name)) {
-        return false;
-      }
+      if (Option::PackageExcludeDirs.count(name)) return false;
       if (path == name ||
           (name.size() == path.size() + 1 &&
            name.back() == FileUtil::getDirSeparator() &&
@@ -653,7 +648,7 @@ Package::groupDirectories(std::string path, bool force) {
       }
 
       // Process the directory as a new job
-      dirs.emplace_back(groupDirectories(name, force));
+      dirs.emplace_back(groupDirectories(name));
 
       // Don't iterate the directory in this job.
       return false;
@@ -676,7 +671,7 @@ Package::groupDirectories(std::string path, bool force) {
 
   // Have we gathered enough files to assign them to groups?
   if (result.m_ungrouped.size() >= Option::ParserDirGroupSizeLimit) {
-    groupFiles(result.m_grouped, std::move(result.m_ungrouped), true);
+    groupFiles(result.m_grouped, std::move(result.m_ungrouped));
     assertx(result.m_ungrouped.empty());
   }
   HPHP_CORO_MOVE_RETURN(result);
@@ -684,8 +679,7 @@ Package::groupDirectories(std::string path, bool force) {
 
 // Group sets of files together using consistent hashing
 void Package::groupFiles(ParseGroups& groups,
-                         FileAndSizeVec files,
-                         bool check) {
+                         FileAndSizeVec files) {
   if (files.empty()) return;
 
   assertx(Option::ParserGroupSize > 0);
@@ -694,7 +688,7 @@ void Package::groupFiles(ParseGroups& groups,
     (files.size() + (Option::ParserGroupSize - 1)) / Option::ParserGroupSize;
 
   auto const origSize = groups.size();
-  groups.resize(origSize + numNew, ParseGroup{check});
+  groups.resize(origSize + numNew);
 
   // Assign to buckets
   for (auto& [file, size] : files) {
@@ -740,9 +734,7 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroups(ParseGroups groups) {
       if (a.m_files.size() != b.m_files.size()) {
         return b.m_files.size() < a.m_files.size();
       }
-      return
-        std::tie(a.m_check, a.m_files) <
-        std::tie(b.m_check, b.m_files);
+      return a.m_files < b.m_files;
     }
   );
 
@@ -784,9 +776,7 @@ void Package::parseAll() {
 
         std::vector<coro::Task<GroupResult>> tasks;
         for (auto& dir : m_directories) {
-          tasks.emplace_back(
-            groupDirectories(std::move(dir.first), dir.second)
-          );
+          tasks.emplace_back(groupDirectories(std::move(dir)));
         }
 
         // Gather together all top level files
@@ -806,24 +796,17 @@ void Package::parseAll() {
         }
 
         // If there's any ungrouped files left over, group those now
-        groupFiles(top.m_grouped, std::move(top.m_ungrouped), true);
+        groupFiles(top.m_grouped, std::move(top.m_ungrouped));
         assertx(top.m_ungrouped.empty());
 
         // Finally add in any files explicitly added via configuration
-        // and group. We need to distinguish them according to their
-        // requested error handling.
-        FileAndSizeVec checkFiles;
-        FileAndSizeVec noCheckFiles;
+        // and group them.
+        FileAndSizeVec extraFiles;
         for (auto& file : m_filesToParse) {
-          if (!m_parsedFiles.emplace(file.first, true).second) continue;
-          if (file.second) {
-            checkFiles.emplace_back(FileAndSize{std::move(file.first), 0});
-          } else {
-            noCheckFiles.emplace_back(FileAndSize{std::move(file.first), 0});
-          }
+          if (!m_parsedFiles.insert(file).second) continue;
+          extraFiles.emplace_back(FileAndSize{std::move(file.first), 0});
         }
-        groupFiles(top.m_grouped, std::move(checkFiles), true);
-        groupFiles(top.m_grouped, std::move(noCheckFiles), false);
+        groupFiles(top.m_grouped, std::move(extraFiles));
 
         HPHP_CORO_RETURN(std::move(top.m_grouped));
       }));
@@ -842,7 +825,7 @@ void Package::parseAll() {
       // more to parse.
       do {
         assertx(groups.empty());
-        groupFiles(groups, std::move(ondemand), false);
+        groupFiles(groups, std::move(ondemand));
         ondemand = HPHP_CORO_AWAIT(parseGroups(std::move(groups)));
       } while (!ondemand.empty());
 
@@ -928,10 +911,8 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
         return true;
       }();
       if (!doStat) {
-        if (group.m_check) {
-          Logger::FError("Fatal: Unable to stat/parse {}", fileName.native());
-          m_parseFailed.store(true);
-        }
+        Logger::FError("Fatal: Unable to stat/parse {}", fileName.native());
+        m_parseFailed.store(true);
         continue;
       }
 

@@ -47,7 +47,7 @@ using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
 struct Package {
   explicit Package(const char* root);
 
-  void addAllFiles(bool force); // add from Option::PackageDirectories/Files
+  void addAllFiles();
 
   // Set up the async portion of Package. This cannot be done in the
   // constructor because it must be done after hphp_process_init().
@@ -57,10 +57,10 @@ struct Package {
   // state is already cleared.
   Optional<std::thread> clearAsyncState();
 
-  void addSourceFile(const std::string& fileName, bool check = false);
+  void addSourceFile(const std::string& fileName);
   void addInputList(const std::string& listFileName);
   void addStaticFile(const std::string& fileName);
-  void addDirectory(const std::string &path, bool force);
+  void addDirectory(const std::string& path);
   void addStaticDirectory(const std::string& path);
 
   bool parse();
@@ -92,9 +92,7 @@ private:
   using FileAndSizeVec = std::vector<FileAndSize>;
 
   struct ParseGroup {
-    explicit ParseGroup(bool b) : m_check{b} {}
     std::vector<folly::fs::path> m_files;
-    bool m_check;
     size_t m_size{0};
   };
 
@@ -107,8 +105,8 @@ private:
 
   void parseAll();
 
-  coro::Task<GroupResult> groupDirectories(std::string, bool);
-  void groupFiles(ParseGroups&, FileAndSizeVec, bool);
+  coro::Task<GroupResult> groupDirectories(std::string);
+  void groupFiles(ParseGroups&, FileAndSizeVec);
 
   coro::Task<FileAndSizeVec> parseGroups(ParseGroups);
   coro::Task<FileAndSizeVec> parseGroup(ParseGroup);
@@ -132,7 +130,7 @@ private:
 
   folly_concurrent_hash_map_simd<std::string, bool> m_filesToParse;
   std::shared_ptr<FileCache> m_fileCache;
-  std::map<std::string,bool> m_directories;
+  std::set<std::string> m_directories;
   std::set<std::string> m_staticDirectories;
   hphp_fast_set<std::string> m_extraStaticFiles;
   folly_concurrent_hash_map_simd<

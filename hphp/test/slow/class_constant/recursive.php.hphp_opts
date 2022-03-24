@@ -1,6 +1,3 @@
---ffile=test/slow/class_constant/recursive-1.inc
 --ffile=hphp/test/slow/class_constant/recursive-1.inc
---ffile=test/slow/class_constant/recursive-2.inc
 --ffile=hphp/test/slow/class_constant/recursive-2.inc
---ffile=test/slow/class_constant/recursive-3.inc
 --ffile=hphp/test/slow/class_constant/recursive-3.inc

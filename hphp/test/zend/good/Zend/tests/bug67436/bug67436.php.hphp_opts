@@ -1,6 +1,3 @@
---ffile=test/zend/good/Zend/tests/bug67436/a.inc
 --ffile=hphp/test/zend/good/Zend/tests/bug67436/a.inc
---ffile=test/zend/good/Zend/tests/bug67436/b.inc
 --ffile=hphp/test/zend/good/Zend/tests/bug67436/b.inc
---ffile=test/zend/good/Zend/tests/bug67436/c.inc
 --ffile=hphp/test/zend/good/Zend/tests/bug67436/c.inc

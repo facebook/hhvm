@@ -104,7 +104,6 @@ struct CompilerOptions {
   bool genStats;
   bool keepTempDir;
   int logLevel;
-  bool force;
   std::string filecache;
   bool coredump;
 };
@@ -230,6 +229,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   options_description desc("HipHop Compiler for PHP Usage:\n\n"
                            "\thphp <options> <inputs>\n\n"
                            "Options");
+
+  bool dummy;
+
   desc.add_options()
     ("help", "display this message")
     ("version", "display version number")
@@ -315,7 +317,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "-1: (default); 0: no logging; 1: errors only; 2: warnings and errors; "
      "3: informational as well; 4: really verbose.")
     ("force",
-     value<bool>(&po.force)->default_value(true),
+     value<bool>(&dummy)->default_value(true), // TODO: T115189426 remove this
      "force to ignore code generation errors and continue compilations")
     ("file-cache",
      value<std::string>(&po.filecache),
@@ -577,13 +579,13 @@ int process(const CompilerOptions &po) {
     }
     if (po.modules.empty() && po.fmodules.empty() &&
         po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
-      package.addAllFiles(false);
+      package.addAllFiles();
     } else {
       for (auto const& module : po.modules) {
-        package.addDirectory(module, false /*force*/);
+        package.addDirectory(module);
       }
       for (auto const& fmodule : po.fmodules) {
-        package.addDirectory(fmodule, true /*force*/);
+        package.addDirectory(fmodule);
       }
       for (auto const& ffile : po.ffiles) {
         package.addSourceFile(ffile);

@@ -300,7 +300,7 @@ fn strip_hh_ns(name: &str) -> &str {
     name.trim_start_matches("\\HH\\")
 }
 
-// test a node is a syntaxlist and that the list contains an element
+// test a node is a syntax list and that the list contains an element
 // satisfying a given predicate
 fn list_contains_predicate<P>(p: P, node: S<'_>) -> bool
 where

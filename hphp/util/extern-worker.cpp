@@ -397,7 +397,7 @@ folly::fs::path SubprocessImpl::newExec() {
 // Ensure we always have an unique root under the working directory.
 folly::fs::path SubprocessImpl::newRoot(const Options& opts) {
   auto const base = opts.m_workingDir / "hphp-extern-worker";
-  folly::fs::create_directory(base);
+  folly::fs::create_directories(base);
   auto const full = base /  boost::filesystem::unique_path(
     "%%%%-%%%%-%%%%-%%%%-%%%%-%%%%"
   ).native();

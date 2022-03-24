@@ -94,6 +94,7 @@ bool Option::ExternWorkerForceSubprocess = false;
 int Option::ExternWorkerTimeoutSecs = 0;
 bool Option::ExternWorkerUseExecCache = true;
 bool Option::ExternWorkerCleanup = true;
+std::string Option::ExternWorkerWorkingDir;
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
@@ -271,6 +272,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                "ExternWorker.UseExecCache", ExternWorkerUseExecCache);
   Config::Bind(ExternWorkerCleanup, ini, config, "ExternWorker.Cleanup",
                ExternWorkerCleanup);
+  Config::Bind(ExternWorkerWorkingDir, ini, config, "ExternWorker.WorkingDir",
+               ExternWorkerWorkingDir);
 }
 
 void Option::Load() {

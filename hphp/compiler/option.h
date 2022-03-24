@@ -150,6 +150,7 @@ struct Option {
   static int ExternWorkerTimeoutSecs;
   static bool ExternWorkerUseExecCache;
   static bool ExternWorkerCleanup;
+  static std::string ExternWorkerWorkingDir;
 
 private:
   static StringBag OptionStrings;

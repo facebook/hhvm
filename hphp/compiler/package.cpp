@@ -147,6 +147,9 @@ Options Package::AsyncState::makeOptions() {
   if (Option::ExternWorkerTimeoutSecs > 0) {
     options.setTimeout(std::chrono::seconds{Option::ExternWorkerTimeoutSecs});
   }
+  if (!Option::ExternWorkerWorkingDir.empty()) {
+    options.setWorkingDir(Option::ExternWorkerWorkingDir);
+  }
   return options;
 }
 

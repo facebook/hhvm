@@ -1188,7 +1188,7 @@ function hphp_cmd(
     '-thhbc -l1 -k1',
     '-o "' . test_repo($options, $test) . '"',
     "--program $program.hhbc \"$test\"",
-    "-vRuntime.UnitFileCache.Path=".unit_cache_file(),
+    "-vExternWorker.WorkingDir=".Status::getTestTmpPath($test, 'work'),
     $extra_args,
     $compiler_args,
     read_opts_file("$test.hphp_opts"),

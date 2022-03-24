@@ -128,7 +128,7 @@ let exit_on_exception (e : Exception.t) =
         exit i
       | None -> failwith failure_msg)
   (* In single-threaded mode, WorkerController exceptions are raised directly
-   * instead of being grouped into MultiThreaadedCall.Coalesced_failures *)
+   * instead of being grouped into MultiThreadedCall.Coalesced_failures *)
   | WorkerController.(Worker_failed (_, Worker_oomed)) ->
     Hh_logger.exception_ e;
     Exit.exit Exit_status.Worker_oomed

@@ -86,7 +86,7 @@ module Simple : sig
 
   val named_kinds_of_decl_tparams : decl_tparam list -> named_kind list
 
-  val get_wilcard_bounds : kind -> bounds_for_wildcard
+  val get_wildcard_bounds : kind -> bounds_for_wildcard
 
   val to_full_kind_without_bounds : kind -> full_kind
 

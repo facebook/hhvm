@@ -160,10 +160,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
 
     auto const oldSize = ObjectProps::sizeFor(m_size);
 
-    // TODO(jgriego) this is a kludge to preserve invariants of
-    // ObjectProps (when using 7up layouts) and should be replaced
-    // with some kind of `grow` fn on the layout class
-    memset(newData + oldSize, 0, props_size - oldSize);
+    ObjectProps::setInvariantsAfterGrow(newData, oldSize, props_size);
 
     if (m_data) {
       // these two memcpys are separate because we're going from

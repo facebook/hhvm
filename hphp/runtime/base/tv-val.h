@@ -139,7 +139,11 @@ public:
   }
 
   /* implicit */ tv_val(UnalignedTypedValue* utv)
-      : tv_val{&utv->m_type, &utv->m_data}
+    : tv_val{&utv->m_type, &utv->m_data}
+  {}
+
+  /* implicit */ tv_val(const UnalignedTypedValue* utv)
+    : tv_val{&utv->m_type, &utv->m_data}
   {}
 
 private:

@@ -17,6 +17,9 @@
 #pragma once
 
 #include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/unaligned-typed-value.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/util/type-traits.h"
 
 #include "folly/Range.h"
@@ -30,6 +33,8 @@ void tvDecRefCountable(TypedValue);
 
 namespace tv_layout {
 
+constexpr bool stores_unaligned_typed_values = arch() == Arch::X64;
+
 /* A TV layout represents a integer-indexed aggregate of TypedValues.
  *
  * The intended way to use one is to reinterpret_cast a region of memory
@@ -42,45 +47,54 @@ namespace tv_layout {
  * - iterator, const_iterator: a (const) forward iterator over the container,
  *                             producing TypedValues with the additional
  *                             constraint that tv_lval{iter} is well-formed as
- *                             long as the iterator is derefenecable
+ *                             long as the iterator is dereferencable
  * - quick_index: some type, implicitly coercible to index_t, designed to allow
  *                faster access to the collection. This may be the same as
  *                index_t
  *
  * Static members:
  * size_t max_index
- * The maximum index in the container accessible both by index_t and
- * quick_index
+ *     The maximum index in the container accessible both by index_t and
+ *     quick_index
  *
  * Static functions:
- * size_t size_for(index_t size);
- * Produces the size in bytes to be allocated for a container of the given size.
- * This must be aligned to a multiple of 16 as there's several optimizations
- * that rely on this fact.
- *
- * quick_index quickIndex(index_t idx);
- * Produce the quick index corresponding to the given index
- *
- * Member functions:
- * void init(index_t size); Establishes any invariants the container needs to
- * operatate, for a container of the given size
+ * size_t sizeFor(index_t size);
+ *     Produces the size in bytes to be allocated for a container of the given size.
+ *     This must be aligned to a multiple of 16 as there are several optimizations
+ *     that rely on this fact.
  *
  * tv_val_offset offsetOf(index_t idx) const;
  * tv_val_offset offsetOf(quick_index idx) const; (optional)
- * Produces a tv_val_offset to the given index's typed value.
+ *     Produces a tv_val_offset to the given index's typed value.
  *
- * void checkInvariants(index_t size) const;
- * Asserts if any invariant of the container is not met
+ * quick_index quickIndex(index_t idx);
+ *     Produces the quick index corresponding to the given index
+ *
+ * static index_t offset2Idx(size_t offset);
+ *     Produces the index of an element corresponding to the given byte offset
+ *
+ * static void setInvariantsAfterGrow(char *data, size_t size_old_data, size_t size_new_data);
+ *     Called after the region of data has been expanded from size_old_data
+ *     to size_new_data, so that the particular layout class can format the newly allocated
+ *     portion as need to meet its invariants.
+ *
+ * Member functions:
+ * void init(index_t size);
+ *    Establishes any invariants the container needs to operate,
+ *    for a container of the given size
+ *
+ * bool checkInvariants(index_t size) const;
+ *     Asserts if any invariant of the container is not met
  *
  * void scan(quick_index size, type_scan::Scanner&) const;
- * Scans the countable values in the container
+ *     Scans the countable values in the container
  *
  * void release(quick_index size);
- * Decrefs the countable values in the container
+ *     Decrefs the countable values in the container
  *
- * iterator iteratorAt(index_t);
- * const_iterator iteratorAt(index_t);
- * Produce an iterator starting at the given index
+ * iterator iteratorAt(index_t pos);
+ * const_iterator iteratorAt(index_t pos);
+ *     Produce an iterator starting at the given index
  */
 
 template <typename Impl,
@@ -100,7 +114,7 @@ struct LayoutBase {
   const Impl& impl() const { return *static_cast<const Impl*>(this); }
 
   /*
-   * Produce a range over the conainer, for use in for-each loops
+   * Produce a range over the container, for use in for-each loops
    */
   folly::Range<iterator>
   range(index_t begin, index_t end) {
@@ -169,7 +183,7 @@ struct LayoutBase {
  * 7-up packed layout
  *
  * This implements a flavor of an array layout but instead of wasting space on
- * padding for the type byte (out to a whole quardowrd), we aggregate 7 of these
+ * padding for the type byte (out to a whole quadword), we aggregate 7 of these
  * types together (and then aggregate 7 values together) resulting in a
  * repeating layout (a "chunk") of 64 bytes. The layout is like:
  *
@@ -192,13 +206,13 @@ struct LayoutBase {
  *                            except for the last which is always unconstrained
  *
  * Iterating over the 7-up layout efficiently requires that the container be
- * aligned to a 16-byte boundary, and checkInvariants ensures this is the case
+ * aligned to a 16-byte boundary, and checkInvariants ensures this is the case.
  *
  * Yet another invariant of the 7-up layout is that any additional types in the
  * **last** chunk (which might have 1-7 valid types) must be initialized to
  * KindOfUninit. The 8th byte of the type word is always allowed to contain any
  * value. This allows us to unroll both type scanning and release in a way that
- * prevents having treat the last, possibly incomplete, type word in a special
+ * prevents having to treat the last, possibly incomplete, type word in a special
  * way.
  */
 
@@ -288,10 +302,14 @@ struct Tv7Up : public LayoutBase<Tv7Up,
     *lastTypeWord = uint64_t{0};
   }
 
+  static void setInvariantsAfterGrow(char *data, size_t size_old_data, size_t size_new_data) {
+    memset(data + size_old_data, 0, size_new_data - size_old_data);
+  }
+
   bool checkInvariants(index_t size) const {
     assertx(reinterpret_cast<uintptr_t>(this) % 16 == 0);
     /* we require any of the first bytes in the type word that do not correspond
-     * to types in the container (i.e. if the last type word only has 4 types,
+     * to types in the container to be zero (i.e. if the last type word only has 4 types,
      * the next 3 bytes are required to be zero.) */
     DEBUG_ONLY auto const checkTypeByte = [&]{
       auto const chunks = size / 7;
@@ -347,12 +365,12 @@ struct Tv7Up : public LayoutBase<Tv7Up,
     auto const chunks = len / 7;
     auto const extra = len % 7;
 
-    auto const chunkSize = 8 * sizeof(Value);
+    auto constexpr chunkSize = 8 * sizeof(Value);
 
     auto const ret = chunks * chunkSize +
       extra * (sizeof(DataType) + sizeof(Value)); // <- the underestimate
 
-    constexpr auto const mask = 16 - 1;
+    auto constexpr mask = 16 - 1;
     return (ret + mask) & ~mask;
   }
 
@@ -462,6 +480,156 @@ struct Tv7Up : public LayoutBase<Tv7Up,
   }
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Unaligned typed-value layout
+ *
+ * This implements a flavor of an array layout storing unaligned typed values, which
+ * occupy 9 bytes and are stored one after another (no padding for alignment between
+ * elements; extra padding at end to align entire thing to 16 byte boundary).
+ *
+ *  ______________9 * N bytes________________   extra
+ * /                                         \   / \
+ *  9 bytes  9 bytes   ............   9 bytes   /   \
+ * /       \/       \                /       \ /     \
+ * +--------+--------+---------------+--------+------+
+ * | v1  |t1| v1  |t2| ............  | vN  |tN|      |
+ * +--------+--------+---------------+--------+------+
+ *
+ * where extra = ((9 * N + 15) & 15) - 9 * N, i.e. enough to make entire block 16-byte aligned.
+ */
+
+namespace detail_utv {
+
+template <bool is_const>
+struct iterator_impl {
+  using tv_val_t = tv_val<is_const>;
+
+  // iterator_traits member types
+  using value_type = UnalignedTypedValue;
+  using reference = UnalignedTypedValue&;
+  using pointer = void;
+  using difference_type = ptrdiff_t;
+  using iterator_category = std::forward_iterator_tag;
+
+  /* implicit */ iterator_impl(UnalignedTypedValue *utv)
+    : utv(utv)
+  {}
+
+  UnalignedTypedValue operator*() const {
+    return *utv;
+  }
+
+  operator tv_val_t() const {
+    return utv;
+  }
+
+  iterator_impl& operator++() {
+    utv += 1;
+    return *this;
+  }
+
+  iterator_impl operator++(int) {
+    auto const ret = *this;
+    ++(*this);
+    return ret;
+  }
+
+  bool operator==(const iterator_impl& other) const {
+    return utv == other.utv;
+  }
+
+  bool operator!=(const iterator_impl& other) const {
+    return !(*this == other);
+  }
+
+private:
+  UnalignedTypedValue *utv;
+};
+
+}
+
+struct UnalignedTVLayout :
+  public LayoutBase<UnalignedTVLayout,
+                    detail_utv::iterator_impl<false>,
+                    detail_utv::iterator_impl<true>,
+                    uint16_t,
+                    uint16_t> {
+
+  static size_t constexpr max_index = UINT16_MAX - 1;
+
+  static size_t constexpr sizeFor(index_t len) {
+    // For optimization reasons (see LayoutBase comments), align to 16 bytes
+    auto const bytes = len * sizeof(UnalignedTypedValue);
+    auto constexpr mask = 16 - 1;
+    return (bytes + mask) & ~mask;
+  }
+
+  // Since index_t == quick_index, don't define functions on the second type
+
+  static tv_val_offset offsetOf(index_t idx) {
+    auto const base = idx * sizeof(UnalignedTypedValue);
+    return {
+      ptrdiff_t(base + offsetof(UnalignedTypedValue, m_type)),
+      ptrdiff_t(base + offsetof(UnalignedTypedValue, m_data))
+    };
+  }
+
+  static quick_index quickIndex(size_t idx) {
+    return idx;
+  }
+
+  static index_t offset2Idx(size_t offset) {
+    return offset / sizeof(UnalignedTypedValue);
+  }
+
+  void init(index_t) {
+    static_assert(VanillaVec::stores_unaligned_typed_values);
+  }
+
+  static void setInvariantsAfterGrow(char *, size_t, size_t) {
+    return;
+  }
+
+  bool checkInvariants(index_t) const {
+    return true;
+  }
+
+  void scan(index_t count, type_scan::Scanner& scanner) const {
+    foreach(count, [&](const auto &elm) {
+      if (isRefcountedType(elm.type())) {
+        scanner.scan(elm.val().pcnt);
+      }
+    });
+  }
+
+  void release(index_t count) {
+    foreach(count, [](auto elm) {
+      tvDecRefGen(*elm);
+    });
+  }
+
+  iterator iteratorAt(index_t pos) {
+    auto const elm = &as_utv()[pos];
+    return iterator{elm};
+  }
+
+  const_iterator iteratorAt(index_t pos) const {
+    auto const elm = &as_utv()[pos];
+    return const_iterator{const_cast<UnalignedTypedValue*>(elm)};
+  }
+
+private:
+
+  UnalignedTypedValue* as_utv() {
+    return reinterpret_cast<UnalignedTypedValue*>(this);
+  }
+
+  const UnalignedTypedValue* as_utv() const {
+    return const_cast<UnalignedTVLayout*>(this)->as_utv();
+  }
+
+};
 } // namespace tv_layout
 } // namespace HPHP
-

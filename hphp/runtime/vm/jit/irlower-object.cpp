@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/tv-layout.h"
 #include "hphp/runtime/vm/class.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -58,11 +59,14 @@ namespace {
 void objectPropsRawInit(Vout& v, Vreg base, size_t props) {
   if (props == 0) return;
 
-  auto const last_type_word_offset =
-    sizeof(ObjectData) +
-    8 * sizeof(uint64_t) * ((props - 1) / 7);
+  if constexpr (std::is_same_v<ObjectProps, tv_layout::Tv7Up>) {
+    // Maintain 7-up invariant
+    auto const last_type_word_offset =
+      sizeof(ObjectData) +
+      8 * sizeof(uint64_t) * ((props - 1) / 7);
 
-  v << storeqi{0, base[last_type_word_offset]};
+    v << storeqi{0, base[last_type_word_offset]};
+  }
 }
 
 }

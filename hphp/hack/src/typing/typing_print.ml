@@ -259,7 +259,7 @@ module Full = struct
     (fuel, tparam_doc)
 
   and tparam_constraint ~fuel ~ty to_doc st penv (ck, cty) =
-    let (fuel, contraint_ty_doc) = ty ~fuel to_doc st penv cty in
+    let (fuel, constraint_ty_doc) = ty ~fuel to_doc st penv cty in
     let constraint_doc =
       Concat
         [
@@ -270,7 +270,7 @@ module Full = struct
             | Ast_defs.Constraint_super -> "super"
             | Ast_defs.Constraint_eq -> "=");
           Space;
-          contraint_ty_doc;
+          constraint_ty_doc;
         ]
     in
     (fuel, constraint_doc)

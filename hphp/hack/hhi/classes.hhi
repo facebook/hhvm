@@ -137,6 +137,20 @@ final class AsyncGeneratorWaitHandle<<<__RequireDynamic>> +Tk, <<__RequireDynami
   extends ResumableWaitHandle<?(Tk, Tv)> {
 }
 
+/**
+ * An `Awaitable` value represents a value that is fetched
+ * asynchronously, such as a database access. `Awaitable` values are
+ * usually returned by `async` functions.
+ *
+ * Use `await` to wait for a single `Awaitable` value. If you have
+ * multiple `Awaitable`s and you want to wait for all of them
+ * together, use `concurrent` or helper functions like
+ * `Vec\map_async`.
+ * 
+ * `Awaitable` is not multithreading. Hack is single threaded, so
+ * `Awaitable` allows you to wait for multiple external results at
+ * once, rather than sequentially.
+ */
 <<__Sealed(StaticWaitHandle::class, WaitableWaitHandle::class),
 __SupportDynamicType>>
 abstract class Awaitable<<<__RequireDynamic>> +T> {

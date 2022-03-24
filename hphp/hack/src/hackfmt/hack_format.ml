@@ -31,7 +31,7 @@ let is_trivia_kind_white_space = function
   | TriviaKind.WhiteSpace -> true
   | _ -> false
 
-let is_syntax_kind_parenthesized_exprression = function
+let is_syntax_kind_parenthesized_expression = function
   | SyntaxKind.ParenthesizedExpression -> true
   | _ -> false
 
@@ -1294,7 +1294,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       (match Syntax.syntax expr_list with
       | Syntax.SyntaxList
           [Syntax.{ syntax = ListItem { list_item = expr; _ }; _ }]
-        when is_syntax_kind_parenthesized_exprression (Syntax.kind expr) ->
+        when is_syntax_kind_parenthesized_expression (Syntax.kind expr) ->
         Concat [t env kw; t env expr; t env semi; Newline]
       | _ -> transform_keyword_expr_list_statement env kw expr_list semi)
     | Syntax.ConcurrentStatement

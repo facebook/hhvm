@@ -3023,7 +3023,7 @@ where
 
     fn parse_anon_or_awaitable_or_scope_resolution_or_name(&mut self) -> S::R {
         // static is a legal identifier, if next token is scope resolution operatpr
-        // - parse expresson as scope resolution operator, otherwise try to interpret
+        // - parse expression as scope resolution operator, otherwise try to interpret
         // it as anonymous function (will fallback to name in case of failure)
         if self.peek_token_kind_with_lookahead(1) == TokenKind::ColonColon {
             self.parse_scope_resolution_or_name()

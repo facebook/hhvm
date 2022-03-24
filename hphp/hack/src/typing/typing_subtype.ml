@@ -1618,7 +1618,7 @@ and simplify_subtype_i
                    { subtype_env with coerce = Some TL.CoerceToDynamic }
                  ft_sub.ft_params
                  ty_dyn_enf
-            &&& (* Finally do covariant subtryping on return type *)
+            &&& (* Finally do covariant subtyping on return type *)
             simplify_dynamic_aware_subtype
               ~subtype_env
               ft_sub.ft_ret.et_type
@@ -3193,13 +3193,13 @@ and simplify_subtype_funs
         ft_super.ft_implicit_params
         ft_sub.ft_implicit_params
   &&&
-  (* Finally do covariant subtryping on return type *)
+  (* Finally do covariant subtyping on return type *)
   if check_return then
     simplify_subtype_possibly_enforced ft_sub.ft_ret ft_super.ft_ret
   else
     valid
 
-(* Add a new upper bound ty on var.  Apply transitivity of sutyping,
+(* Add a new upper bound ty on var.  Apply transitivity of subtyping,
  * so if we already have tyl <: var, then check that for each ty_sub
  * in tyl we have ty_sub <: ty.
  *)

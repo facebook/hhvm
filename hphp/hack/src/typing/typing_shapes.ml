@@ -285,7 +285,7 @@ let idx
         ((env, Option.merge e1 e2 ~f:Typing_error.both), res))
   in
   let (env, res) =
-    match get_node shape_ty with
+    match get_node (TUtils.strip_dynamic env shape_ty) with
     | Tnewtype (n, _, _)
       when String.equal n Naming_special_names.Classes.cSupportDyn ->
       let r = get_reason shape_ty in

@@ -1454,17 +1454,24 @@ void find_alias_sets(Env& env) {
   FTRACE(2, "   {} must alias sets\n", num_sets);
 
   // Populate the may-alias-sets for each must-alias-set.
+  jit::vector<jit::flat_set<ASetID>::sequence_type> v(num_sets);
   for (auto i = uint32_t{0}; i < num_sets; ++i) {
+    v[i].reserve(num_sets);
     for (auto j = i + 1; j < num_sets; ++j) {
       auto& ai = env.asets[i];
       auto& aj = env.asets[j];
       bool const may_alias =
         (ai.widestType & aj.widestType).maybe(TCounted);
       if (may_alias) {
-        ai.may_alias.insert(j);
-        aj.may_alias.insert(i);
+        v[i].emplace_back(j);
+        v[j].emplace_back(i);
       }
     }
+  }
+
+  for (auto i = uint32_t{0}; i < num_sets; ++i) {
+    env.asets[i].may_alias.adopt_sequence(
+        boost::container::ordered_unique_range, std::move(v[i]));
   }
 
   FTRACE(3, "may-alias-info:\n{}\n",

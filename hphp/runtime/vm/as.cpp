@@ -1271,7 +1271,7 @@ Id create_litstr_id(AsmState& as) {
  *
  *  $x0      // Used by HackC, which does not distinguish slot and name
  *
- *  $x0;"x1" // Used by our output, which can undertands the difference
+ *  $x0;"x1" // Used by our output, which can understand the difference
  *
  *  $x0;_    // Used by our output, if the local name is unused (e.g. if the
  *           // name is only used for errors and we prove the op is nothrow)

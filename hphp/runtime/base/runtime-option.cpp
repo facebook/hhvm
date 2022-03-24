@@ -2834,34 +2834,23 @@ void RuntimeOption::Load(
   // **************************************************************************
   //                                  DANGER
   //
-  // Do not bind any PHP_INI_ALL or PHP_INI_USER settings here! These settings
-  // are process-wide, while those need to be thread-local since they are
-  // per-request. They should go into RequestInjectionData. Getting this wrong
-  // will cause subtle breakage -- in particular, it probably will not show up
-  // in CLI mode, since everything there tends to be single theaded.
-  //
-  // Per-dir INI settings are bound here, but that seems really questionable
-  // since they can change per request too. TODO(#7757602) this should be
-  // investigated.
+  // Do not bind any PHP_INI_ALL, PHP_INI_USER or PHP_INI_PERDIR settings here!
+  // These settings are process-wide, while those need to be thread-local since
+  // they are per-request. They should go into RequestInjectionData. Getting
+  // this wrong will cause subtle breakage -- in particular, it probably will
+  // not show up in CLI mode, since everything there tends to be single
+  // theaded.
   // **************************************************************************
-
-  // Enables the hotfixing of a bug that occurred with D1797805 where
-  // per request user settings (like upload_max_filesize) were not able to be
-  // accessed on a server request any longer. The longer term fix is in review
-  // D2099778, but we want that to simmer in Master for a while and we need
-  // a hotfix for our current 3.6 LTS (Github Issue #4993)
-  Config::Bind(EnableZendIniCompat, ini, config, "Eval.EnableZendIniCompat",
-               true);
   // Language and Misc Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
                    &RuntimeOption::ExposeHPHP);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "auto_prepend_file", &RuntimeOption::AutoPrependFile);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "auto_append_file", &RuntimeOption::AutoAppendFile);
 
   // Data Handling
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "post_max_size",
                    IniSetting::SetAndGet<int64_t>(
                      nullptr,
@@ -2870,7 +2859,7 @@ void RuntimeOption::Load(
                      }
                    ),
                    &RuntimeOption::MaxPostSize);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "always_populate_raw_post_data",
                    &RuntimeOption::AlwaysPopulateRawPostData);
 
@@ -2890,7 +2879,7 @@ void RuntimeOption::Load(
                    &RuntimeOption::EnableFileUploads);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "upload_max_filesize",
                    IniSetting::SetAndGet<std::string>(
                      [](const std::string& value) {

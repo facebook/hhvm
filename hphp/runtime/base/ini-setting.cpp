@@ -925,44 +925,21 @@ void IniSetting::Bind(
    * Note that Mode value PHP_INI_SET_USER and PHP_INI_SET_EVERY are bit
    * sets; "SET" in this use means "bitset", and not "assignment".
    */
-  bool is_thread_local;
-  if (RuntimeOption::EnableZendIniCompat) {
-    is_thread_local = (
+  bool is_thread_local =
     (mode == PHP_INI_USER) ||
     (mode == PHP_INI_PERDIR) ||
-    (mode == PHP_INI_ALL) ||  /* See note above */
-    (mode &  PHP_INI_USER) ||
-    (mode &  PHP_INI_PERDIR) ||
-    (mode &  PHP_INI_ALL)
-    );
-  } else {
-    is_thread_local = (mode == PHP_INI_USER || mode == PHP_INI_ALL);
-    assertx(is_thread_local || !ExtensionRegistry::modulesInitialised() ||
-           !s_system_settings_are_set);
-  }
-  //
+    (mode == PHP_INI_ALL);
+  assertx(is_thread_local || !ExtensionRegistry::modulesInitialised() ||
+         !s_system_settings_are_set);
+
   // When the debugger is loading its configuration, there will be some
   // cases where Extension::ModulesInitialised(), but the name appears
   // in neither s_user_callbacks nor s_system_ini_callbacks. The bottom
   // line is that we can't really use ModulesInitialised() to help steer
   // the choices here.
-  //
   auto const staticName = String::attach(makeStaticString(name));
+  assertx(IMPLIES(!is_thread_local, !s_user_callbacks->count(staticName)));
 
-  bool use_user = is_thread_local;
-  if (RuntimeOption::EnableZendIniCompat && !use_user) {
-    //
-    // If it is already in the user callbacks, continue to use it from
-    // there. We don't expect it to be already there, but it has been
-    // observed during development.
-    //
-    bool in_user_callbacks =
-      (s_user_callbacks->find(staticName) != s_user_callbacks->end());
-    assert (!in_user_callbacks);  // See note above
-    use_user = in_user_callbacks;
-  }
-
-  //
   // For now, we require the extensions to use their own thread local
   // memory for user-changeable settings. This means you need to use
   // the default field to Bind and can't statically initialize them.
@@ -977,10 +954,8 @@ void IniSetting::Bind(
   // We could conceivably let you use static memory and have our own
   // thread local here that users can change and then reset it back to
   // the default, but we haven't built that yet.
-  //
-
-  IniCallbackData &data = use_user ? (*s_user_callbacks)[staticName]
-                                   : s_system_ini_callbacks[staticName];
+  IniCallbackData &data = is_thread_local ? (*s_user_callbacks)[staticName]
+                                          : s_system_ini_callbacks[staticName];
 
   data.extension = extension;
   data.mode = mode;

@@ -29,7 +29,7 @@ val default_ifc_fun_decl : ifc_fun_decl
 
 type exact =
   | Exact
-  | Nonexact
+  | Inexact
 [@@deriving eq, ord, show]
 
 (* All the possible types, reason is a trace of why a type
@@ -306,7 +306,7 @@ and _ ty_ =
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_
   (* An instance of a class or interface, ty list are the arguments
    * If exact=Exact, then this represents instances of *exactly* this class
-   * If exact=Nonexact, this also includes subclasses
+   * If exact=Inexact, this also includes subclasses
    *)
   | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
   | Tneg : neg_type -> locl_phase ty_

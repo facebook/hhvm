@@ -149,7 +149,7 @@ impl<'a> TypeBuilder<'a> {
     ) -> &'a Ty<'a> {
         self.mk(
             reason,
-            Ty_::Tclass(self.alloc((name, Exact::Nonexact, tys))),
+            Ty_::Tclass(self.alloc((name, Exact::Inexact, tys))),
         )
     }
     pub fn traversable(&'a self, reason: &'a Reason<'a>, ty: &'a Ty<'a>) -> &'a Ty<'a> {

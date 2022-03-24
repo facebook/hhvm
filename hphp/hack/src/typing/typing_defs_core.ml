@@ -31,7 +31,7 @@ let default_ifc_fun_decl = FDPolicied (Some "PUBLIC")
 
 type exact =
   | Exact
-  | Nonexact
+  | Inexact
 [@@deriving eq, ord, show]
 
 (* All the possible types, reason is a trace of why a type
@@ -345,7 +345,7 @@ and _ ty_ =
   | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
       (** An instance of a class or interface, ty list are the arguments
        * If exact=Exact, then this represents instances of *exactly* this class
-       * If exact=Nonexact, this also includes subclasses
+       * If exact=Inexact, this also includes subclasses
        *)
   | Tneg : neg_type -> locl_phase ty_
       (** The negation of the type in neg_type *)

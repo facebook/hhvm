@@ -210,7 +210,7 @@ let make_union env r tyl reason_nullable_opt reason_dyn_opt =
 let exact_least_upper_bound e1 e2 =
   match (e1, e2) with
   | (Exact, Exact) -> Exact
-  | (_, _) -> Nonexact
+  | (_, _) -> Inexact
 
 let rec union env ?(approx_cancel_neg = false) ty1 ty2 =
   let r1 = get_reason ty1 in
@@ -335,8 +335,8 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
     | ((_, Tclass ((_, c2), Exact, [])), (_, Tneg (Neg_class (_, c1))))
       when String.equal c1 c2 ->
       (env, Some (MakeType.mixed r))
-    | ((_, Tneg (Neg_class (_, c1))), (_, Tclass ((_, c2), Nonexact, [])))
-    | ((_, Tclass ((_, c2), Nonexact, [])), (_, Tneg (Neg_class (_, c1))))
+    | ((_, Tneg (Neg_class (_, c1))), (_, Tclass ((_, c2), Inexact, [])))
+    | ((_, Tclass ((_, c2), Inexact, [])), (_, Tneg (Neg_class (_, c1))))
       when Typing_utils.is_sub_class_refl env c1 c2 ->
       (* This union is mixed iff for all objects o,
          o not in complement (union tyl. c1<tyl>) implies o in c2,
@@ -346,8 +346,8 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
          c2 has no type parameters.
       *)
       (env, Some (MakeType.mixed r))
-    | ((_, Tneg (Neg_class (_, c1))), (_, Tclass ((_, c2), Nonexact, _ :: _)))
-    | ((_, Tclass ((_, c2), Nonexact, _ :: _)), (_, Tneg (Neg_class (_, c1))))
+    | ((_, Tneg (Neg_class (_, c1))), (_, Tclass ((_, c2), Inexact, _ :: _)))
+    | ((_, Tclass ((_, c2), Inexact, _ :: _)), (_, Tneg (Neg_class (_, c1))))
       when approx_cancel_neg && Typing_utils.is_sub_class_refl env c1 c2 ->
       (* Unlike the case where c2 has no parameters, here we can get a situation
          where c1 is a sub-class of c2, but they don't union to mixed. For example,

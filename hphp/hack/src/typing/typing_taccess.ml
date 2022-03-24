@@ -157,7 +157,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
         (* Legacy behavior is to preserve exactness only on `this` and not
            through `this::T` *)
         map_ty ty ~f:(function
-            | Tclass (cid, _, tyl) -> Tclass (cid, Nonexact, tyl)
+            | Tclass (cid, _, tyl) -> Tclass (cid, Inexact, tyl)
             | ty -> ty)
       in
       let ety_env =

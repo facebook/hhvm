@@ -89,7 +89,7 @@ pub enum IfcFunDecl {
 #[repr(u8)]
 pub enum Exact {
     Exact,
-    Nonexact,
+    Inexact,
 }
 impl TrivialDrop for Exact {}
 arena_deserializer::impl_deserialize_in_arena!(Exact);
@@ -605,7 +605,7 @@ pub enum Ty_ {
     Tdependent(DependentType, Ty),
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
-    /// If exact=Nonexact, this also includes subclasses
+    /// If exact=Inexact, this also includes subclasses
     Tclass(PosId, Exact, Vec<Ty>),
     /// The negation of the type in neg_type
     Tneg(NegType),

@@ -1571,7 +1571,7 @@ let safely_refine_class_type
   (* Type of variable in block will be class name
    * with fresh type parameters *)
   let obj_ty =
-    mk (get_reason obj_ty, Tclass (class_name, Nonexact, tyl_fresh))
+    mk (get_reason obj_ty, Tclass (class_name, Inexact, tyl_fresh))
   in
   let tparams = Cls.tparams class_info in
   (* Add in constraints as assumptions on those type parameters *)
@@ -1653,7 +1653,7 @@ let safely_refine_class_type
         | Some (_tp, name) -> SMap.find name tparam_substs)
   in
   let obj_ty_simplified =
-    mk (get_reason obj_ty, Tclass (class_name, Nonexact, tyl_fresh))
+    mk (get_reason obj_ty, Tclass (class_name, Inexact, tyl_fresh))
   in
   (env, obj_ty_simplified)
 
@@ -4605,7 +4605,7 @@ and expr_
   | Xml (sid, attrl, el) ->
     let cid = CI sid in
     let (env, _tal, _te, classes) =
-      class_id_for_new ~exact:Nonexact p env cid []
+      class_id_for_new ~exact:Inexact p env cid []
     in
     (* OK to ignore rest of list; class_info only used for errors, and
        * cid = CI sid cannot produce a union of classes anyhow *)
@@ -5811,7 +5811,7 @@ and new_object
         begin
           match class_type_opt with
           | Some (_, Exact, _) -> (env, Tclass (cname, Exact, params), params)
-          | _ -> (env, Tclass (cname, Nonexact, params), params)
+          | _ -> (env, Tclass (cname, Inexact, params), params)
         end
     in
     if
@@ -6017,7 +6017,7 @@ and attributes_check_def env kind attrs =
     are inhabited, but not instantiable.
     To make this work with classname, we likely need to add something like
     concrete_classname<T>, where T cannot be an interface. *)
-and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs :
+and instantiable_cid ?(exact = Inexact) p env cid explicit_targs :
     newable_class_info =
   let (env, tal, te, classes) =
     class_id_for_new ~exact p env cid explicit_targs
@@ -7803,7 +7803,7 @@ and this_for_method env (_, p, cid) default_ty =
  *)
 and class_expr
     ?(check_targs_well_kinded = false)
-    ?(exact = Nonexact)
+    ?(exact = Inexact)
     ?(check_explicit_targs = false)
     (env : env)
     (tal : Nast.targ list)
@@ -7919,7 +7919,7 @@ and class_expr
           (* Don't add Exact superfluously to class type if it's final *)
           let exact =
             if Cls.final class_ then
-              Nonexact
+              Inexact
             else
               exact
           in

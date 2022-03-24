@@ -33,7 +33,7 @@ let negate_type env r ty ~approx =
     | Tneg (Neg_class (_, c)) when Typing_utils.class_has_no_params env c ->
       MkType.class_type r c []
     | Tnonnull -> MkType.null r
-    | Tclass (c, Nonexact, _) -> MkType.neg r (Neg_class c)
+    | Tclass (c, Inexact, _) -> MkType.neg r (Neg_class c)
     | _ ->
       if Utils.equal_approx approx Utils.ApproxUp then
         MkType.mixed r

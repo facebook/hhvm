@@ -271,7 +271,7 @@ impl<'a> Node<'a> for Exact {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             Exact::Exact => {}
-            Exact::Nonexact => {}
+            Exact::Inexact => {}
         }
     }
 }

@@ -76,7 +76,7 @@ pub enum Ty_<R: Reason, TY> {
 
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
-    /// If exact=Nonexact, this also includes subclasses
+    /// If exact=Inexact, this also includes subclasses
     Tclass(Positioned<TypeName, R::Pos>, Exact, Vec<TY>),
 
     Tvar(Tyvar),

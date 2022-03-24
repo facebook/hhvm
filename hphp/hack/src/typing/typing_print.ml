@@ -1003,7 +1003,7 @@ module ErrorString = struct
     | Tclass ((_, x), Exact, tyl) ->
       let (fuel, tyl_str) = inst ~fuel env tyl in
       (fuel, "an object of exactly the class " ^ strip_ns x ^ tyl_str)
-    | Tclass ((_, x), Nonexact, tyl) ->
+    | Tclass ((_, x), Inexact, tyl) ->
       let (fuel, tyl_str) = inst ~fuel env tyl in
       (fuel, "an object of type " ^ strip_ns x ^ tyl_str)
     | Tshape _ -> (fuel, "a shape")
@@ -1379,7 +1379,7 @@ module Json = struct
           aux_args args ~keytrace >>= fun tyl ->
           (* NB: "class" could have come from either a `Tapply` or a `Tclass`. Right
            * now, we always return a `Tclass`. *)
-          ty (Tclass ((class_pos, name), Nonexact, tyl))
+          ty (Tclass ((class_pos, name), Inexact, tyl))
         | "shape" ->
           get_array "fields" (json, keytrace)
           >>= fun (fields, fields_keytrace) ->

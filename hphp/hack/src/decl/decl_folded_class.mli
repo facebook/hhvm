@@ -29,6 +29,7 @@ val class_decl :
   Provider_context.t ->
   Shallow_decl_defs.shallow_class ->
   parents:Decl_store.class_entries SMap.t ->
+  Decl_defs.decl_error list ->
   Decl_defs.decl_class_type * Decl_store.class_members
 
 (** Extract the constructor signature from the shallow class.

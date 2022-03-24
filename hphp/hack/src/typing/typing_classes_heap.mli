@@ -95,7 +95,7 @@ module Api : sig
 
   val sealed_whitelist : t -> SSet.t option
 
-  val decl_errors : t -> Errors.t option
+  val decl_errors : t -> Decl_defs.decl_error list
 
   val get_ancestor : t -> string -> decl_ty option
 

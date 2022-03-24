@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cb5d2973128511517f229a63ef614cc7>>
+// @generated SignedSource<<9aef358df7d244baf9218bf0cdb69daf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -83,6 +83,46 @@ pub use oxidized::decl_defs::LinearizationKind;
 
 #[derive(
     Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum DeclError<'a> {
+    WrongExtendKind {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        pos: &'a pos::Pos<'a>,
+        kind: oxidized::ast_defs::ClassishKind,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        name: &'a str,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        parent_pos: &'a pos_or_decl::PosOrDecl<'a>,
+        parent_kind: oxidized::ast_defs::ClassishKind,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        parent_name: &'a str,
+    },
+    CyclicClassDef {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        pos: &'a pos::Pos<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        stack: s_set::SSet<'a>,
+    },
+}
+impl<'a> TrivialDrop for DeclError<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(DeclError<'arena>);
+
+#[derive(
+    Clone,
     Debug,
     Deserialize,
     Eq,
@@ -153,7 +193,7 @@ pub struct DeclClassType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub enum_type: Option<&'a EnumType<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub decl_errors: Option<&'a errors::Errors<'a>>,
+    pub decl_errors: &'a [DeclError<'a>],
 }
 impl<'a> TrivialDrop for DeclClassType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(DeclClassType<'arena>);

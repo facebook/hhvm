@@ -1,0 +1,4 @@
+File "cyclic.php", line 3, characters 7-7:
+Cyclic class definition : `B` `A`  (Typing[4013])
+File "cyclic.php", line 4, characters 7-7:
+Cyclic class definition : `B` `A`  (Typing[4013])

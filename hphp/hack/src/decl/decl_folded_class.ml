@@ -44,33 +44,30 @@ let check_extend_kind
     (parent_name : string)
     (child_pos : Pos_or_decl.t)
     (child_kind : Ast_defs.classish_kind)
-    (child_name : string) : unit =
+    (child_name : string) : decl_error option =
   match (parent_kind, child_kind) with
   (* What is allowed *)
   | (Ast_defs.Cclass _, Ast_defs.Cclass _)
   | (Ast_defs.Ctrait, Ast_defs.Ctrait)
   | (Ast_defs.Cinterface, Ast_defs.Cinterface) ->
-    ()
+    None
   (* enums extend BuiltinEnum under the hood *)
   | (Ast_defs.Cclass k, (Ast_defs.Cenum | Ast_defs.Cenum_class _))
     when Ast_defs.is_abstract k ->
-    ()
-  | (Ast_defs.Cenum_class _, Ast_defs.Cenum_class _) -> ()
+    None
+  | (Ast_defs.Cenum_class _, Ast_defs.Cenum_class _) -> None
   | _ ->
     (* What is disallowed *)
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Wrong_extend_kind
-             {
-               parent_pos;
-               parent_kind;
-               parent_name;
-               pos =
-                 Pos_or_decl.unsafe_to_raw_pos child_pos (* TODO: T87242856 *);
-               kind = child_kind;
-               name = child_name;
-             })
+    Some
+      (Wrong_extend_kind
+         {
+           parent_pos;
+           parent_kind;
+           parent_name;
+           pos = Pos_or_decl.unsafe_to_raw_pos child_pos (* TODO: T87242856 *);
+           kind = child_kind;
+           name = child_name;
+         })
 
 (*****************************************************************************)
 (* Functions used retrieve everything implemented in parent classes
@@ -101,20 +98,29 @@ let member_heaps_enabled (ctx : Provider_context.t) : bool =
 let add_grand_parents_or_traits
     (parent_pos : Pos_or_decl.t)
     (shallow_class : Shallow_decl_defs.shallow_class)
-    (acc : SSet.t * [> `Extends_pass | `Xhp_pass ])
-    (parent_type : Decl_defs.decl_class_type) : SSet.t * 'a =
-  let (extends, pass) = acc in
+    (acc :
+      SSet.t * [ `Extends_pass | `Traits_pass | `Xhp_pass ] * decl_error list)
+    (parent_type : Decl_defs.decl_class_type) : SSet.t * 'a * decl_error list =
+  let (extends, pass, decl_errors) = acc in
   let class_pos = fst shallow_class.sc_name in
   let classish_kind = shallow_class.sc_kind in
   let class_name = snd shallow_class.sc_name in
-  if phys_equal pass `Extends_pass then
-    check_extend_kind
-      parent_pos
-      parent_type.dc_kind
-      parent_type.dc_name
-      class_pos
-      classish_kind
-      class_name;
+  let decl_errors =
+    if phys_equal pass `Extends_pass then
+      match
+        check_extend_kind
+          parent_pos
+          parent_type.dc_kind
+          parent_type.dc_name
+          class_pos
+          classish_kind
+          class_name
+      with
+      | Some err -> err :: decl_errors
+      | None -> decl_errors
+    else
+      decl_errors
+  in
 
   (* If we are crawling the xhp attribute deps, we need to merge their xhp deps
    * as well *)
@@ -125,14 +131,16 @@ let add_grand_parents_or_traits
       parent_type.dc_extends
   in
   let extends' = SSet.union extends parent_deps in
-  (extends', pass)
+  (extends', pass, decl_errors)
 
 let get_class_parent_or_trait
     (env : Decl_env.env)
     (shallow_class : Shallow_decl_defs.shallow_class)
     (parent_cache : Decl_store.class_entries SMap.t)
-    ((parents, pass) : SSet.t * [> `Extends_pass | `Xhp_pass ])
-    (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * 'a =
+    ((parents, pass, decl_errors) :
+      SSet.t * [ `Extends_pass | `Traits_pass | `Xhp_pass ] * decl_error list)
+    (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * 'a * decl_error list
+    =
   let (_, (parent_pos, parent), _) = Decl_utils.unwrap_class_type ty in
   (* If we already had this exact trait, we need to flag trait reuse *)
   let parents = SSet.add parent parents in
@@ -145,55 +153,56 @@ let get_class_parent_or_trait
       parent
   in
   match parent_type with
-  | None -> (parents, pass)
+  | None -> (parents, pass, decl_errors)
   | Some parent_type ->
-    let acc = (parents, pass) in
+    let acc = (parents, pass, decl_errors) in
     add_grand_parents_or_traits parent_pos shallow_class acc parent_type
 
 let get_class_parents_and_traits
     (env : Decl_env.env)
     (shallow_class : Shallow_decl_defs.shallow_class)
-    parent_cache : SSet.t * SSet.t =
+    parent_cache
+    decl_errors : SSet.t * SSet.t * decl_error list =
   let parents = SSet.empty in
   (* extends parents *)
-  let acc = (parents, `Extends_pass) in
-  let (parents, _) =
+  let acc = (parents, `Extends_pass, decl_errors) in
+  let (parents, _, decl_errors) =
     List.fold_left
       shallow_class.sc_extends
       ~f:(get_class_parent_or_trait env shallow_class parent_cache)
       ~init:acc
   in
   (* traits *)
-  let acc = (parents, `Traits_pass) in
-  let (parents, _) =
+  let acc = (parents, `Traits_pass, decl_errors) in
+  let (parents, _, decl_errors) =
     List.fold_left
       shallow_class.sc_uses
       ~f:(get_class_parent_or_trait env shallow_class parent_cache)
       ~init:acc
   in
   (* XHP classes whose attributes were imported via "attribute :foo;" syntax *)
-  let acc = (SSet.empty, `Xhp_pass) in
-  let (xhp_parents, _) =
+  let acc = (SSet.empty, `Xhp_pass, decl_errors) in
+  let (xhp_parents, _, decl_errors) =
     List.fold_left
       shallow_class.sc_xhp_attr_uses
       ~f:(get_class_parent_or_trait env shallow_class parent_cache)
       ~init:acc
   in
-  (parents, xhp_parents)
+  (parents, xhp_parents, decl_errors)
 
 type class_env = {
   ctx: Provider_context.t;
   stack: SSet.t;
 }
 
-let check_if_cyclic (class_env : class_env) ((pos, cid) : Pos.t * string) : bool
-    =
+let check_if_cyclic (class_env : class_env) ((pos, cid) : Pos.t * string) :
+    decl_error option =
   let stack = class_env.stack in
   let is_cyclic = SSet.mem cid stack in
   if is_cyclic then
-    Errors.add_typing_error
-      Typing_error.(primary @@ Primary.Cyclic_class_def { stack; pos });
-  is_cyclic
+    Some (Cyclic_class_def { stack; pos })
+  else
+    None
 
 let class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =
   match c.sc_kind with
@@ -701,33 +710,33 @@ let rec declare_class_and_parents
     =
   let (_, name) = shallow_class.sc_name in
   let class_env = { class_env with stack = SSet.add name class_env.stack } in
-  let (errors, (tc, member_heaps_values)) =
-    Errors.do_ (fun () ->
-        let parents = class_parents_decl ~sh class_env shallow_class in
-        class_decl ~sh class_env.ctx shallow_class ~parents)
+  let (class_, member_heaps_values) =
+    let (parents, errors) = class_parents_decl ~sh class_env shallow_class in
+    class_decl ~sh class_env.ctx shallow_class ~parents errors
   in
-  let class_ = { tc with dc_decl_errors = Some errors } in
   (class_, Some member_heaps_values)
 
 and class_parents_decl
     ~(sh : SharedMem.uses)
     (class_env : class_env)
-    (c : Shallow_decl_defs.shallow_class) : Decl_store.class_entries SMap.t =
-  let class_type_decl acc class_ty =
+    (c : Shallow_decl_defs.shallow_class) :
+    Decl_store.class_entries SMap.t * decl_error list =
+  let class_type_decl (parents, errs) class_ty =
     match get_node class_ty with
     | Tapply ((pos, class_name), _) ->
-      if
-        check_if_cyclic class_env (Pos_or_decl.unsafe_to_raw_pos pos, class_name)
-      then
-        acc
-      else (
-        match class_decl_if_missing ~sh class_env class_name with
-        | None -> acc
-        | Some decls -> SMap.add class_name decls acc
-      )
-    | _ -> acc
+      (match
+         check_if_cyclic
+           class_env
+           (Pos_or_decl.unsafe_to_raw_pos pos, class_name)
+       with
+      | Some err -> (parents, err :: errs)
+      | None ->
+        (match class_decl_if_missing ~sh class_env class_name with
+        | None -> (parents, errs)
+        | Some decls -> (SMap.add class_name decls parents, errs)))
+    | _ -> (parents, errs)
   in
-  let acc = SMap.empty in
+  let acc = (SMap.empty, []) in
   let acc = List.fold c.sc_extends ~f:class_type_decl ~init:acc in
   let acc = List.fold c.sc_implements ~f:class_type_decl ~init:acc in
   let acc = List.fold c.sc_uses ~f:class_type_decl ~init:acc in
@@ -749,10 +758,6 @@ and class_decl_if_missing
     (match Shallow_classes_provider.get class_env.ctx class_name with
     | None -> None
     | Some shallow_class ->
-      let fn =
-        Pos.filename (fst shallow_class.sc_name |> Pos_or_decl.unsafe_to_raw_pos)
-      in
-      Errors.run_in_context fn Errors.Decl @@ fun () ->
       let ((class_, _) as result) =
         declare_class_and_parents ~sh class_env shallow_class
       in
@@ -763,7 +768,8 @@ and class_decl
     ~(sh : SharedMem.uses)
     (ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
-    ~(parents : Decl_store.class_entries SMap.t) :
+    ~(parents : Decl_store.class_entries SMap.t)
+    (decl_errors : decl_error list) :
     Decl_defs.decl_class_type * Decl_store.class_members =
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
@@ -851,7 +857,9 @@ and class_decl
   in
   let impl = List.map impl ~f:(get_implements env parents) in
   let impl = List.fold_right impl ~f:(SMap.fold SMap.add) ~init:SMap.empty in
-  let (extends, xhp_attr_deps) = get_class_parents_and_traits env c parents in
+  let (extends, xhp_attr_deps, decl_errors) =
+    get_class_parents_and_traits env c parents decl_errors
+  in
   let (req_ancestors, req_ancestors_extends) =
     Decl_requirements.get_class_requirements env parents c
   in
@@ -923,7 +931,7 @@ and class_decl
       dc_req_ancestors = req_ancestors;
       dc_req_ancestors_extends = req_ancestors_extends;
       dc_enum_type = enum;
-      dc_decl_errors = None;
+      dc_decl_errors = decl_errors;
     }
   in
   let member_heaps_values =

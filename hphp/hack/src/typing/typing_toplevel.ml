@@ -2051,7 +2051,6 @@ let class_def ctx c =
   let env = setup_env_for_class_def_check ctx c in
   let (name_pos, name) = c.c_name in
   let tc = Env.get_class env name in
-  Typing_helpers.add_decl_errors (Option.bind tc ~f:Cls.decl_errors);
   Typing_env.make_depend_on_module env;
   match tc with
   | None ->
@@ -2059,6 +2058,7 @@ let class_def ctx c =
      * of the class. *)
     None
   | Some tc ->
+    Typing_helpers.add_decl_errors (Cls.decl_errors tc);
     (* If there are duplicate definitions of the class then we will end up
      * checking one AST with respect to the decl corresponding to the other definition.
      * Naming has already detected duplicates, so let's just avoid cascading unhelpful

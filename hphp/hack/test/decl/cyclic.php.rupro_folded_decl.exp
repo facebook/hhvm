@@ -1,0 +1,70 @@
+FoldedClass {
+    name: "\\A",
+    pos: Pos(root|cyclic.php, 3:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    ancestors: {
+        "\\B": B,
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|cyclic.php, 3:7-8),
+            ty: HH\classname<this>,
+            origin: "\\A",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\B",
+    },
+    decl_errors: [
+        Primary(
+            CyclicClassDef(
+                Pos(root|cyclic.php, 3:17-18),
+                [
+                    "\\A",
+                    "\\B",
+                ],
+            ),
+        ),
+    ],
+}
+FoldedClass {
+    name: "\\B",
+    pos: Pos(root|cyclic.php, 4:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    substs: {
+        "\\A": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\B",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\A": A,
+        "\\B": B,
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|cyclic.php, 4:7-8),
+            ty: HH\classname<this>,
+            origin: "\\B",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\A",
+        "\\B",
+    },
+}
+
+They matched!

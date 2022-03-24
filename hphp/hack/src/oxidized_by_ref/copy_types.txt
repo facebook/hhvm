@@ -40,6 +40,7 @@ ast_defs::ShapeFieldName
 ast_defs::XhpEnumValue
 user_error::Severity
 decl_defs::ConditionTypeName
+decl_defs::DeclError
 decl_defs::LinearizationKind
 decl_defs::MethodReactivity
 decl_defs::SourceType

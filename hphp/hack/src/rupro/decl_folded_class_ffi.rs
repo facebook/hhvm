@@ -10,7 +10,7 @@ use hackrs::{
 };
 use ocamlrep_ocamlpool::{ocaml_ffi_with_arena, Bump};
 use oxidized_by_ref::decl_defs::DeclClassType;
-use pos::{RelativePath, RelativePathCtx, ToOxidized};
+use pos::{RelativePath, RelativePathCtx, ToOxidized, TypeName};
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::Arc;
@@ -36,20 +36,32 @@ ocaml_ffi_with_arena! {
         files
             .into_iter()
             .map(|filename| {
+                let classes: Vec<TypeName> = decl_parser
+                    .parse(filename)
+                    .expect("failed to parse")
+                    .into_iter()
+                    .filter_map(|decl| match decl {
+                        shallow::Decl::Class(name, _) => Some(name),
+                        _ => None,
+                    })
+                    .collect();
+                // Declare the classes in the reverse of their order in the file, to
+                // match the OCaml behavior. This should only matter when emitting
+                // errors for cyclic definitions.
+                for &name in classes.iter().rev() {
+                    folded_decl_provider
+                        .get_class(name.into(), name)
+                        .expect("failed to fold class");
+                }
                 (
                     filename,
-                    decl_parser
-                        .parse(filename)
-                        .expect("failed to parse")
+                    classes
                         .into_iter()
-                        .filter_map(|decl| match decl {
-                            shallow::Decl::Class(name, _) => Some(
-                                folded_decl_provider
-                                    .get_class(name.into(), name)
-                                    .expect("failed to fold class")
-                                    .expect("failed to look up class"),
-                            ),
-                            _ => None,
+                        .map(|name| {
+                            folded_decl_provider
+                                .get_class(name.into(), name)
+                                .expect("failed to fold class")
+                                .expect("failed to look up class")
                         })
                         .map(|cls| cls.to_oxidized(arena))
                         .collect(),

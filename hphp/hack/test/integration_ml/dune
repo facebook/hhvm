@@ -47,7 +47,6 @@
   test_delete_file
   test_duplicate_parent
   test_duplicated_file
-  test_failed_decl
   test_failed_naming
   test_funptr
   test_gconst_file
@@ -138,12 +137,6 @@
  (deps test_all.exe)
  (action
   (run ./test_all.exe duplicated_file)))
-
-(rule
- (alias failed_decl)
- (deps test_all.exe)
- (action
-  (run ./test_all.exe failed_decl)))
 
 (rule
  (alias duplicate_parent)
@@ -349,7 +342,6 @@
   (alias modify_file)
   (alias delete_file)
   (alias duplicated_file)
-  (alias failed_decl)
   (alias duplicate_parent)
   (alias added_parent)
   (alias get_dependent_classes)

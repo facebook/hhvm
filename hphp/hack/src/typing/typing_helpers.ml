@@ -82,9 +82,22 @@ end = struct
     | Some coerce -> { res with coerce }
 end
 
-let add_decl_errors = function
-  | None -> ()
-  | Some errors -> Errors.merge_into_current errors
+let decl_error_to_typing_error decl_error =
+  let primary =
+    match decl_error with
+    | Decl_defs.Wrong_extend_kind
+        { pos; kind; name; parent_pos; parent_kind; parent_name } ->
+      Typing_error.Primary.Wrong_extend_kind
+        { pos; kind; name; parent_pos; parent_kind; parent_name }
+    | Decl_defs.Cyclic_class_def { pos; stack } ->
+      Typing_error.Primary.Cyclic_class_def { pos; stack }
+  in
+  Typing_error.primary primary
+
+let add_decl_error decl_error =
+  Errors.add_typing_error (decl_error_to_typing_error decl_error)
+
+let add_decl_errors = List.iter ~f:add_decl_error
 
 (*****************************************************************************)
 (* Handling function/method arguments *)

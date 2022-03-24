@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e381fdffc3ee471f71e072ae2fda1677>>
+// @generated SignedSource<<d6fbb3363323b867ca7bd6b983cf06a7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -145,6 +145,37 @@ arena_deserializer::impl_deserialize_in_arena!(LinearizationKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C, u8)]
+pub enum DeclError {
+    WrongExtendKind {
+        pos: pos::Pos,
+        kind: ast_defs::ClassishKind,
+        name: String,
+        parent_pos: pos_or_decl::PosOrDecl,
+        parent_kind: ast_defs::ClassishKind,
+        parent_name: String,
+    },
+    CyclicClassDef {
+        pos: pos::Pos,
+        stack: s_set::SSet,
+    },
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 #[repr(C)]
 pub struct DeclClassType {
     pub need_init: bool,
@@ -179,7 +210,7 @@ pub struct DeclClassType {
     pub xhp_attr_deps: s_set::SSet,
     pub xhp_enum_values: s_map::SMap<Vec<ast_defs::XhpEnumValue>>,
     pub enum_type: Option<EnumType>,
-    pub decl_errors: Option<errors::Errors>,
+    pub decl_errors: Vec<DeclError>,
 }
 
 #[derive(

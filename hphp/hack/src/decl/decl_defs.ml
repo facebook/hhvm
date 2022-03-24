@@ -155,6 +155,21 @@ type linearization_kind =
   | Ancestor_types
 [@@deriving show, ord]
 
+type decl_error =
+  | Wrong_extend_kind of {
+      pos: Pos.t;
+      kind: Ast_defs.classish_kind;
+      name: string;
+      parent_pos: Pos_or_decl.t;
+      parent_kind: Ast_defs.classish_kind;
+      parent_name: string;
+    }
+  | Cyclic_class_def of {
+      pos: Pos.t;
+      stack: SSet.t;
+    }
+[@@deriving show]
+
 type decl_class_type = {
   dc_need_init: bool;
   dc_abstract: bool;
@@ -188,7 +203,7 @@ type decl_class_type = {
   dc_xhp_attr_deps: SSet.t;
   dc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
   dc_enum_type: enum_type option;
-  dc_decl_errors: Errors.t option; [@opaque]
+  dc_decl_errors: decl_error list;
 }
 [@@deriving show]
 

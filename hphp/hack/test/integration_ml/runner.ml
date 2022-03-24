@@ -49,7 +49,6 @@ let tests =
     ("delete_file", run Test_delete_file.test);
     ("duplicated_file", run Test_duplicated_file.test);
     ("duplicate_parent", run Test_duplicate_parent.test);
-    ("failed_decl", run Test_failed_decl.test);
     ("failed_naming", run Test_failed_naming.test);
     ("funptr", run Test_funptr.test);
     ("gconst_file", run Test_gconst_file.test);

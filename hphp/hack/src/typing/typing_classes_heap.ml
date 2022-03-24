@@ -257,7 +257,7 @@ module ApiShallow = struct
   let decl_errors (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Decl_errors @@ fun () ->
     match t with
-    | Lazy _ -> None
+    | Lazy _ -> []
     | Eager (c, _) -> c.Decl_defs.dc_decl_errors
 
   let get_support_dynamic_type (decl, t, _ctx) =

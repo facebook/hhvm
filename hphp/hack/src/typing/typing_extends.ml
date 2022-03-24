@@ -1577,7 +1577,7 @@ let check_class_extends_parent_consts
 
 (** Eliminate all synthesized members (those from requirements) plus
 all private members unless they're from traits. *)
-let filter_privates_and_synthethized
+let filter_privates_and_synthesized
     ~(is_trait : bool) (members : ('a * class_elt) list) : ('a * class_elt) list
     =
   let eliminate class_elt =
@@ -1595,7 +1595,7 @@ let make_parent_member_map
   |> MemberKindMap.of_list
   |> MemberKindMap.map (fun members ->
          members
-         |> filter_privates_and_synthethized
+         |> filter_privates_and_synthesized
               ~is_trait:(Ast_defs.is_c_trait (Cls.kind parent_class))
          |> SMap.of_list
          |> SMap.map (fun member ->

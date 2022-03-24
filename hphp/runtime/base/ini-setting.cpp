@@ -843,18 +843,13 @@ struct IniCallbackData {
   IniCallbackData() {
     extension = nullptr;
     mode = IniSetting::PHP_INI_NONE;
-    iniData = nullptr;
     updateCallback = nullptr;
     getCallback = nullptr;
   }
-  virtual ~IniCallbackData() {
-    delete iniData;
-    iniData = nullptr;
-  }
+  virtual ~IniCallbackData() {}
 public:
   const Extension* extension;
   IniSetting::Mode mode;
-  UserIniData *iniData;
   std::function<bool(const Variant& value)> updateCallback;
   std::function<Variant()> getCallback;
 };
@@ -918,8 +913,7 @@ void IniSetting::Bind(
   const Mode mode,
   const std::string& name,
   std::function<bool(const Variant&)> updateCallback,
-  std::function<Variant()> getCallback,
-  std::function<struct UserIniData *(void)> userDataCallback
+  std::function<Variant()> getCallback
 ) {
   assertx(!name.empty());
 
@@ -992,9 +986,6 @@ void IniSetting::Bind(
   data.mode = mode;
   data.updateCallback = updateCallback;
   data.getCallback = getCallback;
-  if (data.iniData == nullptr && userDataCallback != nullptr) {
-    data.iniData = userDataCallback();
-  }
 }
 
 void IniSetting::Unbind(const std::string& name) {

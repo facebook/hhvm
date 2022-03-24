@@ -103,24 +103,7 @@ const IniSettingMap ini_iterate(const IniSettingMap& ini,
  * mappings from names of ini settings to actual IniCallbackData
  * is done privately with the statics s_user_callbacks and
  * s_system_ini_callbacks.
- *
- * In addition, a unique instance of the struct UserIniData can be
- * associated with the IniCallbackData. The IniCallbackData instance
- * is the point of ownership of the instance of UserIniData, and is
- * responsible for firing the destructor.
- *
- * The struct UserIniData should be subclassed to hold data specific
- * to an initialization regime, such as the zend compatibility layer
- * implementation of zend_ini_entry. That subclass is responsible for
- * allocating/freeing its own internal data.
- *
- * There's a mechanism for registering an initter, which is a factory to
- * produce UserIniData. This registration is done at the same time that
- * the setter and getter are established; see the class SetAndGet
  */
-struct UserIniData {
-  virtual ~UserIniData() {}
-};
 
 struct IniSettingMap {
   // placeholder to allow the form:
@@ -302,17 +285,14 @@ public:
   struct SetAndGet {
     explicit SetAndGet(
       std::function<bool (const T&)> setter,
-      std::function<T ()> getter,
-      std::function<struct UserIniData *()>initter = nullptr)
+      std::function<T ()> getter)
       : setter(setter),
-        getter(getter),
-        initter(initter) {}
+        getter(getter) {}
 
     explicit SetAndGet() {}
 
     std::function<bool (const T&)> setter;
     std::function<T ()> getter;
-    std::function<struct UserIniData *()> initter;
   };
 
   /**
@@ -362,7 +342,7 @@ public:
       }
       return ini_get(v);
     };
-    Bind(extension, mode, name, setter, getter, callbacks.initter);
+    Bind(extension, mode, name, setter, getter);
     auto hasSystemDefault = ResetSystemDefault(name);
     if (!hasSystemDefault && defaultValue) {
       setter(defaultValue);
@@ -429,8 +409,7 @@ private:
     const Mode mode,
     const std::string& name,
     std::function<bool(const Variant&)>updateCallback,
-    std::function<Variant()> getCallback,
-    std::function<UserIniData *(void)> userDataCallback = nullptr);
+    std::function<Variant()> getCallback);
 };
 
 int64_t convert_bytes_to_long(folly::StringPiece value);

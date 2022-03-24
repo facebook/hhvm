@@ -950,7 +950,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
         }
         ReifiedTypeArgument(_) => {
             raise_parsing_error(node, env, &syntax_error::invalid_reified);
-            missing_syntax("refied type", node, env)
+            missing_syntax("reified type", node, env)
         }
         _ => missing_syntax("type hint", node, env),
     }

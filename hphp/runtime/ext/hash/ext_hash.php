@@ -60,7 +60,7 @@ function hash_file(string $algo, string $filename,
  *                  of the message digest is returned.
  */
 <<__Native>>
-function hash_final(resource $context, bool $raw_output = false): mixed;
+function hash_final(resource $context, bool $raw_output = false)[write_props]: mixed;
 
 /**
  * hash() - http://php.net/function.hash
@@ -82,7 +82,7 @@ function hash_final(resource $context, bool $raw_output = false): mixed;
 function hash_hmac(string $algo,
                    mixed $data,
                    string $key,
-                   ?bool $raw_output = false): mixed {
+                   ?bool $raw_output = false)[write_props]: mixed {
   // hash_init() doesn't allow empty keys (for good reason)
   // but hash_hmac() needs to support them.
   // Rely on the fact that HMAC keys are null padded
@@ -148,7 +148,7 @@ function hash_hmac_file(string $algo,
  */
 <<__Native>>
 function hash_init(string $algo, int $options = 0,
-                   string $key = ""): mixed;
+                   string $key = "")[]: mixed;
 
 /**
  * hash_update() - http://php.net/function.hash-update
@@ -159,7 +159,7 @@ function hash_init(string $algo, int $options = 0,
  * @return bool - Returns TRUE on success, FALSE on failure.
  */
 <<__Native>>
-function hash_update(resource $context, string $data): bool;
+function hash_update(resource $context, string $data)[write_props]: bool;
 
 /**
  * hash_update_file() - http://php.net/function.hash-update-file

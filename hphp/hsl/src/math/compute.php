@@ -254,7 +254,7 @@ function tan(num $arg)[]: float {
  *
  * To base convert a string to an int, see `Math\from_base()`.
  */
-function to_base(int $number, int $to_base): string {
+function to_base(int $number, int $to_base)[]: string {
   invariant(
     $to_base >= 2 && $to_base <= 36,
     'Expected $to_base to be between 2 and 36, got %d',

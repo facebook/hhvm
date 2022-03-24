@@ -388,8 +388,8 @@ module Typing = struct
     (* | MissingOptionalFieldDEPRECATED [@value 4140] *)
     | ShapeFieldUnset [@value 4141]
     | AbstractConcreteOverride [@value 4142]
-    | LocalVariableModifedAndUsed [@value 4143]
-    | LocalVariableModifedTwice [@value 4144]
+    | LocalVariableModifiedAndUsed [@value 4143]
+    | LocalVariableModifiedTwice [@value 4144]
     | AssignDuringCase [@value 4145]
     | CyclicEnumConstraint [@value 4146]
     | UnpackingDisallowed [@value 4147]

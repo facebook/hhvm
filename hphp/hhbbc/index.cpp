@@ -7056,7 +7056,7 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
   if (t.strictlyMoreRefined(finfo->returnTy)) {
     if (finfo->returnRefinements < options.returnTypeRefineLimit) {
       finfo->returnTy = t;
-      // We've modifed the return type, so reset any cached FuncFamily
+      // We've modified the return type, so reset any cached FuncFamily
       // return types.
       for (auto const ff : finfo->families) ff->m_returnTy.reset();
       dep = is_scalar(t) ?

@@ -171,10 +171,9 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
       ~f:(fun path naming_table ->
         let { ClientIdeIncremental.naming_table; _ } =
           ClientIdeIncremental.update_naming_tables_for_changed_file
+            ~ctx:setup_result.ctx
             ~naming_table
             ~sienv:SearchUtils.quiet_si_env
-            ~backend:(Provider_context.get_backend setup_result.ctx)
-            ~popt:(Provider_context.get_popt setup_result.ctx)
             ~path
         in
         naming_table)

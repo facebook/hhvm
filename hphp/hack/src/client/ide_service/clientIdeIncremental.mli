@@ -27,8 +27,7 @@ and those that fail FindUtils.path_filter.
 
 IO: this function uses File_provider to read the file. *)
 val update_naming_tables_for_changed_file :
-  backend:Provider_backend.t ->
-  popt:ParserOptions.t ->
+  ctx:Provider_context.t ->
   naming_table:Naming_table.t ->
   sienv:SearchUtils.si_env ->
   path:Relative_path.t ->

@@ -26,7 +26,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
 
   let { Common_setup.ctx; foo_path; foo_contents; _ } =
-    Common_setup.setup ~sqlite tcopt_with_shallow
+    Common_setup.setup ~sqlite tcopt_with_shallow ~xhp_as:`Namespaces
   in
 
   (* Compute tast as-is *)
@@ -160,7 +160,7 @@ let test_canon_names_internal
 let test_canon_names_in_entries () =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let { Common_setup.ctx; foo_path; foo_contents; _ } =
-    Common_setup.setup tcopt_with_shallow ~sqlite:false
+    Common_setup.setup tcopt_with_shallow ~sqlite:false ~xhp_as:`Namespaces
   in
 
   test_canon_names_internal
@@ -217,7 +217,9 @@ let test_canon_names_in_entries () =
 
 let test_dupe_setup ~(sqlite : bool) =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
-  let setup = Common_setup.setup ~sqlite tcopt_with_shallow in
+  let setup =
+    Common_setup.setup ~sqlite tcopt_with_shallow ~xhp_as:`Namespaces
+  in
   let sienv = SearchUtils.quiet_si_env in
   let ctx = setup.Common_setup.ctx in
 
@@ -237,8 +239,7 @@ let test_dupe_setup ~(sqlite : bool) =
     ~contents;
   let dupe =
     ClientIdeIncremental.update_naming_tables_for_changed_file
-      ~backend:(Provider_context.get_backend ctx)
-      ~popt:(Provider_context.get_popt ctx)
+      ~ctx
       ~naming_table:setup.Common_setup.naming_table
       ~sienv
       ~path:setup.Common_setup.nonexistent_path
@@ -268,8 +269,7 @@ let test_dupe_then_delete_dupe ~(sqlite : bool) () =
     (Relative_path.to_absolute setup.Common_setup.nonexistent_path);
   let (_unduped : ClientIdeIncremental.changed_file_results) =
     ClientIdeIncremental.update_naming_tables_for_changed_file
-      ~backend:(Provider_context.get_backend ctx)
-      ~popt:(Provider_context.get_popt ctx)
+      ~ctx
       ~naming_table:dupe.ClientIdeIncremental.naming_table
       ~sienv:dupe.ClientIdeIncremental.sienv
       ~path:setup.Common_setup.nonexistent_path
@@ -297,8 +297,7 @@ let test_dupe_then_delete_original ~(sqlite : bool) () =
   Sys_utils.rm_dir_tree (Relative_path.to_absolute setup.Common_setup.foo_path);
   let (_unduped : ClientIdeIncremental.changed_file_results) =
     ClientIdeIncremental.update_naming_tables_for_changed_file
-      ~backend:(Provider_context.get_backend ctx)
-      ~popt:(Provider_context.get_popt ctx)
+      ~ctx
       ~naming_table:dupe.ClientIdeIncremental.naming_table
       ~sienv:dupe.ClientIdeIncremental.sienv
       ~path:setup.Common_setup.foo_path
@@ -318,6 +317,40 @@ let test_dupe_then_delete_original ~(sqlite : bool) () =
     "unduped: expected this canonical spelling of 'foo'";
   true
 
+let test_xhp_name_mangling ~(sqlite : bool) () =
+  Provider_backend.set_local_memory_backend_with_defaults_for_test ();
+  let setup =
+    Common_setup.setup ~sqlite tcopt_with_shallow ~xhp_as:`MangledSymbols
+  in
+  let sienv = SearchUtils.quiet_si_env in
+  let ctx = setup.Common_setup.ctx in
+  let xhp_class = {|
+  class :my:xhp:cls {}
+|} in
+
+  (* Let's take the original contents and add an XHP class *)
+  let contents = setup.Common_setup.foo_contents ^ xhp_class in
+  Disk.write_file
+    ~file:(Relative_path.to_absolute setup.Common_setup.nonexistent_path)
+    ~contents;
+  let { ClientIdeIncremental.new_file_info; _ } =
+    ClientIdeIncremental.update_naming_tables_for_changed_file
+      ~ctx
+      ~naming_table:setup.Common_setup.naming_table
+      ~sienv
+      ~path:setup.Common_setup.nonexistent_path
+  in
+
+  Asserter.String_asserter.assert_option_equals
+    (Some "\\:my:xhp:cls")
+    Option.(
+      new_file_info
+      >>| (fun info -> info.FileInfo.classes)
+      >>= List.find ~f:(fun (_, name, _) -> String.equal name "\\:my:xhp:cls")
+      >>| fun (_, n, _) -> n)
+    "xhp_name_mangling: expected new file info to contain `\\:my:xhp:cls`";
+  true
+
 let tests =
   [
     ("test_unsaved_symbol_change_mem", test_unsaved_symbol_change ~sqlite:false);
@@ -331,6 +364,8 @@ let tests =
       test_dupe_then_delete_original ~sqlite:false );
     ( "test_dupe_then_delete_original_sqlite",
       test_dupe_then_delete_original ~sqlite:true );
+    ("test_xhp_name_mangling_mem", test_xhp_name_mangling ~sqlite:false);
+    ("test_xhp_name_mangling_sqlite", test_xhp_name_mangling ~sqlite:true);
   ]
 
 let () =

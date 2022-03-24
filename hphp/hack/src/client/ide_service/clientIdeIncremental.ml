@@ -48,103 +48,19 @@ let log_file_info_change
 Returns (new_file_info * new_facts) *)
 let compute_fileinfo_for_path
     (popt : ParserOptions.t) (contents : string option) (path : Relative_path.t)
-    : FileInfo.t option * Facts.facts option =
+    : FileInfo.t option =
   match contents with
-  | None -> (None, None)
+  | None -> None
   (* The file couldn't be read from disk. Assume it's been deleted or is
      otherwise inaccessible. Our caller will delete the entries from the
      naming and reverse naming table; there's nothing for us to do here. *)
   | Some contents ->
-    (* We don't want our symbols to be mangled for export.  Mangling would
-       * convert :xhp:myclass to __xhp_myclass, which would fail name lookup *)
-    Facts_parser.mangle_xhp_mode := false;
-    let facts =
-      Facts_parser.from_text
-        ~php5_compat_mode:false
-        ~hhvm_compat_mode:true
-        ~disable_legacy_soft_typehints:false
-        ~allow_new_attribute_syntax:false
-        ~disable_legacy_attribute_syntax:false
-        ~enable_xhp_class_modifier:
-          (ParserOptions.enable_xhp_class_modifier popt)
-        ~disable_xhp_element_mangling:
-          (ParserOptions.disable_xhp_element_mangling popt)
-        ~filename:path
-        ~text:contents
-    in
-    let (funs, classes, typedefs, consts, modules) =
-      match facts with
-      | None ->
-        (* File failed to parse or was not a Hack file. *)
-        ([], [], [], [], (* TODO(T111380364) *) [])
-      | Some facts ->
-        let to_ids name_type names =
-          List.map names ~f:(fun name ->
-              let fixed_name = Utils.add_ns name in
-              let pos = FileInfo.File (name_type, path) in
-              (pos, fixed_name, None))
-        in
-        let funs = facts.Facts.functions |> to_ids FileInfo.Fun in
-        (* Classes and typedefs are both stored under `types`. There's also a
-           `typeAliases` field which only stores typedefs that we could use if we
-           wanted, but we write out the pattern-matches here for
-           exhaustivity-checking. *)
-        let classes =
-          facts.Facts.types
-          |> Facts.InvSMap.filter (fun _k v ->
-                 Facts.(
-                   match v.kind with
-                   | TKClass
-                   | TKInterface
-                   | TKEnum
-                   | TKTrait
-                   | TKUnknown
-                   | TKMixed ->
-                     true
-                   | TKTypeAlias
-                   | TKRecord ->
-                     false))
-          |> Facts.InvSMap.keys
-          |> to_ids FileInfo.Class
-        in
-        let typedefs =
-          facts.Facts.types
-          |> Facts.InvSMap.filter (fun _k v ->
-                 Facts.(
-                   match v.kind with
-                   | TKTypeAlias -> true
-                   | TKClass
-                   | TKInterface
-                   | TKEnum
-                   | TKTrait
-                   | TKUnknown
-                   | TKMixed
-                   | TKRecord ->
-                     false))
-          |> Facts.InvSMap.keys
-          |> to_ids FileInfo.Typedef
-        in
-        let consts = facts.Facts.constants |> to_ids FileInfo.Const in
-        (funs, classes, typedefs, consts, (* TODO(T111380364) *) [])
-    in
-    let fi_mode =
-      Full_fidelity_parser.parse_mode
-        (Full_fidelity_source_text.make path contents)
-      |> Option.value (* TODO: is this a reasonable default? *)
-           ~default:FileInfo.Mstrict
-    in
-    ( Some
-        {
-          FileInfo.file_mode = Some fi_mode;
-          funs;
-          classes;
-          typedefs;
-          consts;
-          modules;
-          hash = None;
-          comments = None;
-        },
-      facts )
+    Some
+      (Direct_decl_parser.parse_and_hash_decls
+         (DeclParserOptions.from_parser_options popt)
+         path
+         contents
+      |> Direct_decl_parser.decls_to_fileinfo path)
 
 type changed_file_results = {
   naming_table: Naming_table.t;
@@ -154,8 +70,7 @@ type changed_file_results = {
 }
 
 let update_naming_tables_for_changed_file
-    ~(backend : Provider_backend.t)
-    ~(popt : ParserOptions.t)
+    ~(ctx : Provider_context.t)
     ~(naming_table : Naming_table.t)
     ~(sienv : SearchUtils.si_env)
     ~(path : Relative_path.t) : changed_file_results =
@@ -168,11 +83,17 @@ let update_naming_tables_for_changed_file
         ~writeback_disk_contents_in_shmem_provider:false
         path
     in
-    let (new_file_info, facts) = compute_fileinfo_for_path popt contents path in
+    let new_file_info =
+      compute_fileinfo_for_path (Provider_context.get_popt ctx) contents path
+    in
     let old_file_info = Naming_table.get_file_info naming_table path in
     log_file_info_change ~old_file_info ~new_file_info ~path;
     (* update the reverse-naming-table, which is mutable storage owned by backend *)
-    Naming_provider.update ~backend ~path ~old_file_info ~new_file_info;
+    Naming_provider.update
+      ~backend:(Provider_context.get_backend ctx)
+      ~path
+      ~old_file_info
+      ~new_file_info;
     (* remove old FileInfo from forward-naming-table, then add new FileInfo *)
     let naming_table =
       match old_file_info with
@@ -187,12 +108,16 @@ let update_naming_tables_for_changed_file
     in
     (* update search index *)
     let sienv =
-      match facts with
+      match new_file_info with
       | None ->
         SymbolIndexCore.remove_files
           ~sienv
           ~paths:(Relative_path.Set.singleton path)
-      | Some facts -> SymbolIndexCore.update_from_facts ~sienv ~path ~facts
+      | Some info ->
+        SymbolIndexCore.update_files
+          ~ctx
+          ~sienv
+          ~paths:[(path, info, SearchUtils.TypeChecker)]
     in
     { naming_table; sienv; old_file_info; new_file_info }
   end else begin

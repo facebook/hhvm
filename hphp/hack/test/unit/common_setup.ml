@@ -53,7 +53,10 @@ Sets up the provider's reverse naming table. Returns an empty context, plus
 information about the files on disk. The [sqlite] flag determines
 whether we return a ctx where the naming table is backed by sqlite, or
 all in memory. *)
-let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
+let setup
+    ~(sqlite : bool)
+    (tcopt : GlobalOptions.t)
+    ~(xhp_as : [ `Namespaces | `MangledSymbols ]) : setup =
   (* Set up a simple fake repo *)
   Disk.mkdir_p @@ in_fake_dir "root/";
   Relative_path.set_path_prefix
@@ -69,7 +72,15 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
   let nonexistent_path = Relative_path.from_root ~suffix:"Nonexistent.php" in
   (* Parsing produces the file infos that the naming table module can use
      to construct the forward naming table (files-to-symbols) *)
-  let popt = ParserOptions.default in
+  let popt =
+    {
+      ParserOptions.default with
+      GlobalOptions.po_disable_xhp_element_mangling =
+        (match xhp_as with
+        | `Namespaces -> true
+        | `MangledSymbols -> false);
+    }
+  in
   let deps_mode = Typing_deps_mode.InMemoryMode None in
   let ctx =
     Provider_context.empty_for_tool

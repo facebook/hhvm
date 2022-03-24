@@ -1035,8 +1035,7 @@ let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
   in
   let { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
     ClientIdeIncremental.update_naming_tables_for_changed_file
-      ~backend:(Provider_backend.Local_memory istate.icommon.local_memory)
-      ~popt:istate.icommon.popt
+      ~ctx:(make_empty_ctx istate)
       ~naming_table:istate.naming_table
       ~sienv:istate.icommon.sienv
       ~path:next_file

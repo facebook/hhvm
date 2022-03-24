@@ -24,7 +24,7 @@
  (name client_ide_message)
  (wrapped false)
  (modules clientIdeMessage)
- (libraries facts lwt_utils server_command_types server_services sys_utils)
+ (libraries lwt_utils server_command_types server_services sys_utils)
  (preprocess
   (pps lwt_ppx)))
 

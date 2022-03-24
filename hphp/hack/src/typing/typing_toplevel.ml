@@ -124,7 +124,6 @@ let fun_def ctx fd :
   let decl_header = get_decl_function_header env (snd f.f_name) in
   let env = Env.open_tyvars env (fst f.f_name) in
   let env = Env.set_env_callable_pos env pos in
-  let env = Env.set_env_pessimize env in
   let (env, user_attributes) =
     Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
   in
@@ -2026,7 +2025,6 @@ let class_def_ env c tc =
 
 let setup_env_for_class_def_check ctx c =
   let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in
-  let env = Env.set_env_pessimize env in
   let env =
     Env.set_module env
     @@ Naming_attributes_params.get_module_attribute c.c_file_attributes
@@ -2076,7 +2074,6 @@ let gconst_def ctx cst =
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span cst.cst_span @@ fun () ->
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.TopLevel ctx cst in
-  let env = Env.set_env_pessimize env in
   List.iter ~f:Errors.add_typing_error
   @@ Typing_type_wellformedness.global_constant env cst;
   let (typed_cst_value, (env, ty_err_opt)) =
@@ -2130,7 +2127,6 @@ let module_def ctx md =
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span md.md_span @@ fun () ->
   let env = EnvFromDef.module_env ~origin:Decl_counters.TopLevel ctx md in
-  let env = Env.set_env_pessimize env in
   let (env, user_attributes) =
     (* TODO(T108642332) *)
     Typing.attributes_check_def env SN.AttributeKinds.file md.md_user_attributes

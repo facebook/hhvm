@@ -326,7 +326,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         ctx: Rc<TypingCtx<R>>,
         cd: &oxidized::aast::Class_<(), ()>,
     ) -> TEnv<R> {
-        // TODO(hrust): pessimize, file_attributes, user_attributes, support_dynamic_type
+        // TODO(hrust): file_attributes, user_attributes, support_dynamic_type
         TEnv::class_env(ctx, cd)
     }
 

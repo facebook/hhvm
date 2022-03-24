@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eb4ffa22ab807863b30e7bcc0ed101f6>>
+// @generated SignedSource<<0dd38db730a725981b1a6b7af1d2698b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -61,7 +61,6 @@ pub struct SavedEnv {
     pub inference_env: typing_inference_env::TypingInferenceEnv,
     pub tpenv: type_parameter_env::TypeParameterEnv,
     pub condition_types: s_map::SMap<Ty>,
-    pub pessimize: bool,
     pub fun_tast_info: Option<FunTastInfo>,
 }
 

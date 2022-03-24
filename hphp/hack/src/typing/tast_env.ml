@@ -230,7 +230,6 @@ let restore_saved_env env saved_env =
   {
     env with
     Env.decl_env;
-    Env.pessimize = saved_env.Tast.pessimize;
     Env.genv =
       {
         env.Env.genv with

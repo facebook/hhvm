@@ -39,7 +39,6 @@ impl Default for SavedEnv<'_> {
             inference_env: &INFERENCE_ENV,
             tpenv: &TPENV,
             condition_types: Default::default(),
-            pessimize: Default::default(),
             fun_tast_info: Default::default(),
         }
     }

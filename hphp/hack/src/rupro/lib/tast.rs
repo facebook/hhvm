@@ -72,7 +72,6 @@ impl ToOcamlRep for SavedEnv {
                 consistent: false,
             }),
             condition_types: Default::default(),
-            pessimize: false,
             fun_tast_info: None,
         };
         // SAFETY: Transmute away the lifetime to allow the arena-allocated

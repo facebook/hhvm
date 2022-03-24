@@ -530,15 +530,6 @@ let reinitialize_locals env =
     env
     LEnvC.(initial_locals { empty_entry with tpenv = get_tpenv env })
 
-let set_env_pessimize env =
-  let pessimize_coefficient =
-    TypecheckerOptions.simple_pessimize (get_tcopt env)
-  in
-  let pessimize =
-    Pos.pessimize_enabled env.genv.callable_pos pessimize_coefficient
-  in
-  { env with pessimize }
-
 let set_env_callable_pos env callable_pos =
   { env with genv = { env.genv with callable_pos } }
 
@@ -1323,7 +1314,6 @@ let save local_tpenv env =
     Tast.inference_env = env.inference_env;
     Tast.tpenv = TPEnv.union local_tpenv env.tpenv;
     Tast.condition_types = env.genv.condition_types;
-    Tast.pessimize = env.pessimize;
     Tast.fun_tast_info = env.fun_tast_info;
   }
 

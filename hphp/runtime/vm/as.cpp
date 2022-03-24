@@ -2549,7 +2549,7 @@ void check_native(AsmState& as, bool is_construct) {
           as.error("No NativeFunctionInfo for function {}",
                    as.fe->nativeFullname());
         } else {
-          // Allow builtins to have mising NativeFunctionInfo, to support
+          // Allow builtins to have missing NativeFunctionInfo, to support
           // conditional compilation. Calling such a function will Fatal.
         }
       }

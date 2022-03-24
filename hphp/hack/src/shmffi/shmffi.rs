@@ -558,7 +558,7 @@ pub extern "C" fn shmffi_get_and_deserialize(hash: u64) -> usize {
                     // Safety: we are not holding on to unrooted OCaml values.
                     //
                     // This value itself is unrooted, but we are not calling into
-                    // the OCalm runtime after this. The option that will be allocated
+                    // the OCaml runtime after this. The option that will be allocated
                     // later is allocated via ocamlpool, which cannot trigger the GC.
                     let deserialized_value = unsafe { heap_value.to_ocaml_value() };
 

@@ -677,7 +677,8 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     int prevLineNum = -1;
     while (it < stop) {
       if (opts.showLines) {
-        int lineNum = getLineNumber(offsetOf(it));
+        auto const lineNum =
+          SourceLocation::getLineNumber(getOrLoadLineTable(), offsetOf(it));
         if (lineNum != prevLineNum) {
           out << "  // line " << lineNum << std::endl;
           prevLineNum = lineNum;

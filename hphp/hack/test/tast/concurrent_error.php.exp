@@ -1,6 +1,10 @@
 Errors:
   [8:14-11:4] Statement without an `await` in a concurrent block
   [10:5-21] Statement without an `await` in a concurrent block
+  [12:10-19] Invalid return type
+  [7:34-37] Expected `int`
+  [12:10-19] But got `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
+  [3:27-41] Here is why I think the argument is a `num`: this is a `num`
   [12:16-19] Typing error
   [12:10-19] Expected `num` because this is used in an arithmetic operation
   [3:27-41] But got `Awaitable<int>`
@@ -42,9 +46,12 @@ Errors:
                 )));
              ([12:3-20],
               (Return
-                 (Some ((int), [12:10-19],
-                        (Binop (Plus, ((int), [12:10-13], (Lvar ([12:10-13], $v1))),
-                           ((Awaitable<int>), [12:16-19], (Hole (((Awaitable<int>), [12:16-19], (Lvar ([12:16-19], $v2))), (Awaitable<int>), (num), Typing)))))))))
+                 (Some ((num), [12:10-19],
+                        (Hole (
+                           ((num), [12:10-19],
+                            (Binop (Plus, ((int), [12:10-13], (Lvar ([12:10-13], $v1))),
+                               ((Awaitable<int>), [12:16-19], (Hole (((Awaitable<int>), [12:16-19], (Lvar ([12:16-19], $v2))), (Awaitable<int>), (num), Typing)))))),
+                           (num), (int), Typing))))))
              ]
            };
          f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 

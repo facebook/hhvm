@@ -9,7 +9,9 @@ Invalid return type (Typing[4110])
   File "inferred_variadic_type.php", line 15, characters 48-50:
   Expected `int`
   File "inferred_variadic_type.php", line 37, characters 14-26:
-  But got `num` because this is the result of an arithmetic operation
+  But got `num` because this is the result of an arithmetic operation with a `num` as the first argument, and no `float`s.
+  File "inferred_variadic_type.php", line 36, characters 9-10:
+  Here is why I think the argument is a `num`: this is a `num` (variadic argument)
 File "inferred_variadic_type.php", line 37, characters 22-26:
 Typing error (Typing[4110])
   File "inferred_variadic_type.php", line 37, characters 14-26:

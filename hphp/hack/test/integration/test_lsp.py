@@ -2004,7 +2004,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "$mylambda",
                             "kind": 6,
                             "detail": "local variable",
-                            "inlineDetail": "(num $n)",
+                            "inlineDetail": "(int $n)",
                             "itemType": "int",
                             "sortText": "$mylambda",
                             "insertTextFormat": 1,

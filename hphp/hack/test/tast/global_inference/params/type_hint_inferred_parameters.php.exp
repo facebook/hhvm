@@ -40,13 +40,13 @@ Errors:
          f_readonly_ret = None; f_ret = ((int), (Some ([10:20-23], (Hprim Tint)))); 
          f_name = ([10:10-13], "\\bar"); f_tparams = []; f_where_constraints = [];
          f_params =
-         [{ param_annotation = (num); param_type_hint = ((num), None); 
+         [{ param_annotation = (int); param_type_hint = ((int), None); 
             param_is_variadic = false; param_pos = [10:14-16]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([11:3-17], (Return (Some ((int), [11:10-16], (Binop (Plus, ((num), [11:10-12], (Lvar ([11:10-12], $x))), ((int), [11:15-16], (Int "4"))))))))] }; 
+         f_body = { fb_ast = [([11:3-17], (Return (Some ((int), [11:10-16], (Binop (Plus, ((int), [11:10-12], (Lvar ([11:10-12], $x))), ((int), [11:15-16], (Int "4"))))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

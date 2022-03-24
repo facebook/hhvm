@@ -36,6 +36,8 @@ val expand_type_and_solve_eq :
 val expand_type_and_narrow :
   env ->
   ?default:locl_ty ->
+  ?allow_nothing:bool ->
+  ?force_solve:bool ->
   description_of_expected:string ->
   (env -> locl_ty -> (env * Typing_error.t option) * locl_ty option) ->
   Pos.t ->

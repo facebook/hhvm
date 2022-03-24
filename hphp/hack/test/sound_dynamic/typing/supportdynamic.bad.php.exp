@@ -34,8 +34,8 @@ File "supportdynamic.bad.php", line 12, characters 3-5:
 Typing error (Typing[4110])
   File "supportdynamic.bad.php", line 12, characters 3-9:
   Expected `num` because this is used in an arithmetic operation
-  File "supportdynamic.bad.php", line 3, characters 15-28:
-  But got `supportdyn<nonnull>`
+  File "supportdynamic.hhi", line 7, characters 36-42:
+  But got `nonnull`
 File "supportdynamic.bad.php", line 16, characters 12-14:
 Invalid `foreach` (Typing[4110])
   File "supportdynamic.bad.php", line 16, characters 12-14:

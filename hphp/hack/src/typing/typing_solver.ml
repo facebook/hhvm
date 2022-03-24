@@ -762,7 +762,14 @@ let is_nothing env ty =
  * if `widen_concrete_type` does not produce a result.
  *)
 let expand_type_and_narrow
-    env ?default ~description_of_expected widen_concrete_type p ty =
+    env
+    ?default
+    ?(allow_nothing = false)
+    ?(force_solve = true)
+    ~description_of_expected
+    widen_concrete_type
+    p
+    ty =
   let ((env, ty_err_opt), ty) =
     let ((env, ty_err_opt1), ty) = expand_type_and_solve_eq env ty in
     (* Deconstruct the type into union elements (if it's a union). For variables,
@@ -794,27 +801,29 @@ let expand_type_and_narrow
       let ((env, ty_err_opt2), widened_ty) =
         widen env widen_concrete_type concretized_ty
       in
-      let widened_ty =
-        match (is_nothing env widened_ty, default) with
-        | (true, Some t) -> t
-        | _ -> widened_ty
-      in
       let ((env, ty_err_opt3), ty) =
-        (* We really don't want to just guess `nothing` if none of the types can be widened *)
-        if
-          is_nothing env widened_ty
-          (* Default behaviour is currently to force solve *)
-        then
-          expand_type_and_solve env ~description_of_expected p ty
-        else
+        match
+          ((not allow_nothing) && is_nothing env widened_ty, default, widened_ty)
+        with
+        | (true, None, _) ->
+          if force_solve then
+            expand_type_and_solve env ~description_of_expected p ty
+          else
+            ((env, None), ty)
+        | (true, Some widened_ty, _)
+        | (false, _, widened_ty) ->
+          (* We really don't want to just guess `nothing` if none of the types can be widened *)
           let res =
             Typing_utils.sub_type env ty widened_ty
             @@ Some (Typing_error.Reasons_callback.unify_error_at p)
           in
-          match res with
+          (match res with
           | (env, None) -> ((env, None), widened_ty)
-          | _ when Option.is_some default -> ((env, None), widened_ty)
-          | _ -> expand_type_and_solve env ~description_of_expected p ty
+          | _ ->
+            if force_solve then
+              expand_type_and_solve env ~description_of_expected p ty
+            else
+              ((env, None), ty))
       in
       let ty_err_opt =
         Typing_error.union_opt

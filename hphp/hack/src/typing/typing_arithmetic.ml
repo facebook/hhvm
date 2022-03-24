@@ -31,17 +31,6 @@ let is_float_or_like_float env t =
   Option.iter ~f:Errors.add_typing_error e;
   r && not (is_sub_dynamic env t)
 
-let is_int_or_like_int env t =
-  let (env, like_int) =
-    Typing_union.union
-      env
-      (MakeType.dynamic Reason.Rnone)
-      (MakeType.int Reason.Rnone)
-  in
-  let (r, e) = Typing_solver.is_sub_type env t like_int in
-  Option.iter ~f:Errors.add_typing_error e;
-  r && not (is_sub_dynamic env t)
-
 let is_float env t =
   let (r, e) = Typing_solver.is_sub_type env t (MakeType.float Reason.Rnone) in
   Option.iter ~f:Errors.add_typing_error e;
@@ -51,23 +40,6 @@ let is_int env t =
   let (r, e) = Typing_solver.is_sub_type env t (MakeType.int Reason.Rnone) in
   Option.iter ~f:Errors.add_typing_error e;
   r
-
-let is_num env t =
-  let is_tyvar_with_num_upper_bound ty =
-    let (env, ty) = Env.expand_type env ty in
-    match get_node ty with
-    | Tvar v ->
-      Internal_type_set.mem
-        (LoclType (MakeType.num Reason.Rnone))
-        (Env.get_tyvar_upper_bounds env v)
-    | _ -> false
-  in
-  let (r, e) = Typing_solver.is_sub_type env t (MakeType.num Reason.Rnone) in
-  Option.iter ~f:Errors.add_typing_error e;
-  r || is_tyvar_with_num_upper_bound t
-
-let is_super_num env t =
-  Typing_subtype.is_sub_type_for_union env (MakeType.num Reason.Rnone) t
 
 (* Checking of numeric operands for arithmetic operators:
  *    (1) Enforce that it coerces to num
@@ -127,22 +99,95 @@ let check_dynamic_or_enforce_int env p t r err =
   let ty_mismatch = Option.map ty_err_opt ~f:Fn.(const (t, et_type)) in
   (env, Typing_utils.is_dynamic env t, ty_mismatch)
 
-(* Secondary check of numeric operand for arithmetic operators. We've
- * already enforced num and tried to infer a float. Now let's
- * solve to int if it's a type variable with int as lower bound, or
- * solve to int if it's a type variable with no lower bounds.
- *)
-let expand_type_and_narrow_to_int env p ty =
-  (* Now narrow for type variables *)
+(** [check_like_num p_exp p env ty] ensures that [ty] is a subtype of num or ~num.
+  In the former case, it returns false and the type, in the latter, it returns
+  true, and the type with the ~ removed. If it is not a subtype of either, the
+  error generated refers to the attempt to make [ty] <: num. If there were errors
+  in both cases, we return the errors from the non ~ case. *)
+let check_like_num p_exp p env ty =
+  let err =
+    if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
+      Typing_error.Callback.math_invalid_argument
+    else
+      Typing_error.Callback.unify_error
+  in
+  let et_type = MakeType.num (Reason.Rarith p_exp) in
+  let (env1, ty_err_opt) =
+    Typing_coercion.coerce_type
+      p
+      Reason.URnone
+      env
+      ty
+      { et_type; et_enforced = Unenforced }
+      err
+  in
+  match ty_err_opt with
+  | None -> (env1, None, false, ty)
+  | Some _ ->
+    let (env2, fresh_ty) = Env.fresh_type env p in
+    let like_ty = MakeType.locl_like (get_reason fresh_ty) fresh_ty in
+    let (env2, _impossible_error) =
+      Typing_subtype.sub_type env2 fresh_ty et_type
+      @@ Some
+           Typing_error.(
+             Reasons_callback.always
+             @@ primary
+             @@ Primary.Internal_error
+                  { pos = p; msg = "Subtype of fresh type variable" })
+    in
+    let (env2, ty_err_opt_like) =
+      Typing_coercion.coerce_type
+        p
+        Reason.URnone
+        env2
+        ty
+        { et_type = like_ty; et_enforced = Unenforced }
+        Typing_error.Callback.unify_error
+    in
+    (match ty_err_opt_like with
+    | None -> (env2, None, true, fresh_ty)
+    | Some _ ->
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
+      let ty_mismatch = Option.map ty_err_opt ~f:Fn.(const (ty, et_type)) in
+      (env1, ty_mismatch, false, ty))
+
+(** [expand_type_and_narrow_to_numeric ~allow_nothing env p ty] forces the
+  solving of [ty] to a numeric type, based on its lower bounds. If allow_nothing
+  is set, then it is allowed to return nothing when [ty] doesn't have numeric.
+  Otherwise the default type of int will be solved to. *)
+let expand_type_and_narrow_to_numeric ~allow_nothing env p ty =
   let widen_for_arithmetic env ty =
     match get_node ty with
-    | Tprim Tast.Tint -> ((env, None), Some ty)
+    | Tprim Tast.Tnum
+    | Tprim Tast.Tfloat
+    | Tprim Tast.Tint ->
+      ((env, None), Some ty)
     | _ -> ((env, None), None)
   in
   let default = MakeType.int (Reason.Rarith p) in
   Typing_solver.expand_type_and_narrow
     env
     ~default
+    ~force_solve:true
+    ~allow_nothing
+    ~description_of_expected:"a number"
+    widen_for_arithmetic
+    p
+    ty
+
+(** [expand_type_and_try_narrow_to_float env p ty] tries to solve [ty] to
+  float, based on its lower bounds. If it isn't solved to float, no narrowing
+  is done. *)
+let expand_type_and_try_narrow_to_float env p ty =
+  let widen_for_arithmetic env ty =
+    match get_node ty with
+    | Tprim Tast.Tfloat -> ((env, None), Some ty)
+    | _ -> ((env, None), None)
+  in
+  Typing_solver.expand_type_and_narrow
+    env
+    ~force_solve:false
+    ~allow_nothing:false
     ~description_of_expected:"a number"
     widen_for_arithmetic
     p
@@ -154,7 +199,13 @@ let hole_on_err ((_, pos, _) as expr) err_opt =
       @@ Aast.(Hole (expr, ty_have, ty_expect, Typing)))
 
 let binop p env bop p1 te1 ty1 p2 te2 ty2 =
-  let make_result env te1 err_opt1 te2 err_opt2 ty =
+  let make_result ?(is_like = false) env te1 err_opt1 te2 err_opt2 ty =
+    let ty =
+      if is_like then
+        MakeType.locl_like (Reason.Rwitness p) ty
+      else
+        ty
+    in
     let hte1 = hole_on_err te1 err_opt1 and hte2 = hole_on_err te2 err_opt2 in
     (env, Tast.make_typed_expr p ty (Aast.Binop (bop, hte1, hte2)), ty)
   in
@@ -172,120 +223,125 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Minus
   | Ast_defs.Star
     when not contains_any ->
-    let err =
-      if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
-        Typing_error.Callback.math_invalid_argument
+    let make_float_type ~use_ty1_reason =
+      MakeType.float
+        (if use_ty1_reason then
+          Reason.Rarith_ret_float (p, get_reason ty1, Reason.Afirst)
+        else
+          Reason.Rarith_ret_float (p, get_reason ty2, Reason.Asecond))
+    in
+    let make_int_type () = MakeType.int (Reason.Rarith_ret_int p) in
+    let make_num_type ~use_ty1_reason =
+      let (r, apos) =
+        if use_ty1_reason then
+          (get_reason ty1, Reason.Afirst)
+        else
+          (get_reason ty2, Reason.Asecond)
+      in
+      MakeType.num (Reason.Rarith_ret_num (p, r, apos))
+    in
+    let make_nothing_type ~use_ty1_reason =
+      MakeType.nothing
+        (if use_ty1_reason then
+          get_reason ty1
+        else
+          get_reason ty2)
+    in
+    let float_no_reason = MakeType.float Reason.none in
+    let int_no_reason = MakeType.int Reason.none in
+    let num_no_reason = MakeType.num Reason.none in
+    let nothing_no_reason = MakeType.nothing Reason.none in
+    let (env, ty_mismatch1, is_like1, ty1) = check_like_num p p1 env ty1 in
+    let (env, ty_mismatch2, is_like2, ty2) = check_like_num p p2 env ty2 in
+    (* We'll compute the type ignoring whether one of the arguments was a like-type,
+       but we'll add the like type to the result type in the end if one was. *)
+    let is_like = is_like1 || is_like2 in
+    let (env, result_ty) =
+      (* We try narrowing to float, because if one argument is float, then the
+         result is float. However, we don't want to do early solving otherwise,
+         before we've detected the other cases that don't require full solving. *)
+      let ((env, ty_err_opt), ty1) =
+        expand_type_and_try_narrow_to_float env p1 ty1
+      in
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
+      if Typing_subtype.is_sub_type env ty1 float_no_reason then
+        (env, make_float_type ~use_ty1_reason:true)
       else
-        Typing_error.Callback.unify_error
-    in
-    let (env, is_dynamic1, err_opt1) =
-      check_dynamic_or_enforce_num env p1 ty1 (Reason.Rarith p) err
-    in
-    let (env, is_dynamic2, err_opt2) =
-      check_dynamic_or_enforce_num env p2 ty2 (Reason.Rarith p) err
-    in
-    (* TODO: extend this behaviour to other operators. Consider producing dynamic
-     * result if *either* operand is dynamic
-     *)
-    if is_float_or_like_float env ty1 then
-      let ty =
-        MakeType.float
-          (Reason.Rarith_ret_float (p, get_reason ty1, Reason.Afirst))
-      in
-      let (env, ty) =
-        (* If either operand is exactly float. This way defers checking
-         * subtyping on the second operand except in the case of ~float + float = float. *)
-        if
-          (not is_dynamic1)
-          || ((not is_dynamic2) && is_float_or_like_float env ty2)
-        then
-          (env, ty)
-        else
-          Typing_union.union env (MakeType.dynamic (Reason.Rwitness p)) ty
-      in
-      make_result env te1 err_opt1 te2 err_opt2 ty
-    else if is_float_or_like_float env ty2 then
-      let ty =
-        MakeType.float
-          (Reason.Rarith_ret_float (p, get_reason ty2, Reason.Asecond))
-      in
-      let (env, ty) =
-        (* We know the left operand is not float or ~float, so the result only depends on ty2 *)
-        if not is_dynamic2 then
-          (env, ty)
-        else
-          Typing_union.union env (MakeType.dynamic (Reason.Rwitness p)) ty
-      in
-      make_result env te1 err_opt1 te2 err_opt2 ty
-    else
-      let num1 = is_super_num env ty1 in
-      if
-        (* If either operand is num or ~num (and neither is float or ~float), return num *)
-        num1 || is_super_num env ty2
-      then
-        let (r, apos) =
-          if num1 then
-            (get_reason ty1, Reason.Afirst)
-          else
-            (get_reason ty2, Reason.Asecond)
+        let ((env, ty_err_opt), ty2) =
+          expand_type_and_try_narrow_to_float env p2 ty2
         in
-        make_result
-          env
-          te1
-          err_opt1
-          te2
-          err_opt2
-          (MakeType.num (Reason.Rarith_ret_num (p, r, apos)))
-      (* The only remaining cases return ~int, except for int + int = int and dynamic + dynamic = dynamic *)
-      else if is_sub_dynamic env ty1 && is_sub_dynamic env ty2 then
-        make_result
-          env
-          te1
-          err_opt1
-          te2
-          err_opt2
-          (MakeType.dynamic (Reason.Rarith_dynamic p))
-      else if is_int_or_like_int env ty1 || is_int_or_like_int env ty2 then
-        let ty = MakeType.int (Reason.Rarith_ret_int p) in
-        let (env, ty) =
-          if is_dynamic1 || is_dynamic2 then
-            Typing_union.union env (MakeType.dynamic (Reason.Rwitness p)) ty
-          else
-            (env, ty)
-        in
-        make_result env te1 err_opt1 te2 err_opt2 ty
-      else
-        let is_global_inference_mode =
-          TypecheckerOptions.global_inference (Env.get_tcopt env)
-        in
-        (* If ty1 is int, the result has the same type as ty2. *)
-        if is_global_inference_mode && is_int env ty1 && is_num env ty2 then
-          make_result env te1 err_opt1 te2 err_opt2 ty2
-        else if is_global_inference_mode && is_int env ty2 && is_num env ty1
-        then
-          make_result env te1 err_opt1 te2 err_opt2 ty1
+        Option.iter ty_err_opt ~f:Errors.add_typing_error;
+        if Typing_subtype.is_sub_type env ty2 float_no_reason then
+          (env, make_float_type ~use_ty1_reason:false)
         else
-          (* Otherwise try narrowing any type variable, with default int *)
-          let ((env, e1), ty1) = expand_type_and_narrow_to_int env p ty1 in
-          let ((env, e2), ty2) = expand_type_and_narrow_to_int env p ty2 in
-          let ty_err_opt = Option.merge ~f:Typing_error.both e1 e2 in
-          Option.iter ~f:Errors.add_typing_error ty_err_opt;
-          if is_int env ty1 && is_int env ty2 then
-            make_result
-              env
-              te1
-              err_opt1
-              te2
-              err_opt2
-              (MakeType.int (Reason.Rarith_ret_int p))
+          let is_int1 = Typing_subtype.is_sub_type env ty1 int_no_reason in
+          let is_int2 = Typing_subtype.is_sub_type env ty2 int_no_reason in
+          (* If both of the arguments is definitely int, then the return is int *)
+          if is_int1 && is_int2 then
+            (env, make_int_type ())
           else
-            make_result
-              env
-              te1
-              err_opt1
-              te2
-              err_opt2
-              (MakeType.num (Reason.Rarith_ret p))
+            let is_num1 = Typing_subtype.is_sub_type env num_no_reason ty1 in
+            let is_num2 = Typing_subtype.is_sub_type env num_no_reason ty2 in
+            (* If one argument is definitely num, then the return is num, since
+               neither type could narrow to float (and it's always sound to return
+               num). *)
+            if is_num1 || is_num2 then
+              (env, make_num_type ~use_ty1_reason:is_num1)
+            else
+              (* Otherwise, at least one of the arguments is unsolved, and we need
+                 to take care to not solve too eagerly.
+                 Put the first one to try in ty1,
+                 and the second, if any in ty2. Keep the result of the previous
+                 check whether the second type was an int. *)
+              let ((ty1, p1, is_like1), (ty2, p2, is_int2, is_like2), swapped) =
+                if is_int1 then
+                  ((ty2, p2, is_like2), (ty1, p1, is_int1, is_like1), true)
+                else
+                  ((ty1, p1, is_like1), (ty2, p2, is_int2, is_like2), false)
+              in
+              let ((env, ty_err_opt), ty1) =
+                expand_type_and_narrow_to_numeric
+                  ~allow_nothing:is_like1
+                  env
+                  p1
+                  ty1
+              in
+              Option.iter ty_err_opt ~f:Errors.add_typing_error;
+              (* If the first type solved to int (or nothing), and the second was
+                 already int, then it is sound to return int. *)
+              let is_int1 = Typing_subtype.is_sub_type env ty1 int_no_reason in
+              if is_int1 && is_int2 then
+                (env, make_int_type ())
+              else
+                (* If the first type solved to num, then we can just return that *)
+                let is_num1 =
+                  Typing_subtype.is_sub_type env num_no_reason ty1
+                in
+                if is_num1 then
+                  (env, make_num_type ~use_ty1_reason:swapped)
+                else
+                  (* The second type needs solving too *)
+                  let ((env, ty_err_opt), ty2) =
+                    expand_type_and_narrow_to_numeric
+                      ~allow_nothing:is_like2
+                      env
+                      p2
+                      ty2
+                  in
+                  Option.iter ty_err_opt ~f:Errors.add_typing_error;
+                  if
+                    Typing_subtype.is_sub_type env ty1 nothing_no_reason
+                    && Typing_subtype.is_sub_type env ty2 nothing_no_reason
+                  then
+                    (env, make_nothing_type ~use_ty1_reason:swapped)
+                  else if
+                    is_int1 && Typing_subtype.is_sub_type env ty2 int_no_reason
+                  then
+                    (env, make_int_type ())
+                  else
+                    (env, make_num_type ~use_ty1_reason:(not swapped))
+    in
+    make_result ~is_like env te1 ty_mismatch1 te2 ty_mismatch2 result_ty
   (* Type of division and exponentiation is essentially
    *    (float,num):float
    *  & (num,float):float
@@ -656,18 +712,15 @@ let unop p env uop te ty =
     if is_any ty then
       make_result env te None ty
     else
-      (* args isn't any or a variant thereof so can actually do stuff *)
-      let (env, _, err_opt) =
-        check_dynamic_or_enforce_num
-          env
-          p
-          ty
-          (Reason.Rarith p)
-          Typing_error.Callback.unify_error
+      let (env, ty_mismatch, is_like, ty) = check_like_num p p env ty in
+      let ((env, ty_err_opt), (ty : locl_ty)) =
+        expand_type_and_narrow_to_numeric ~allow_nothing:is_like env p ty
       in
-      let ((env, ty_err_opt), ty) = expand_type_and_narrow_to_int env p ty in
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
       let result_ty =
-        if is_float env ty then
+        if Typing_subtype.is_sub_type env ty (MakeType.nothing Reason.none) then
+          MakeType.nothing (get_reason ty)
+        else if is_float env ty then
           MakeType.float
             (Reason.Rarith_ret_float (p, get_reason ty, Reason.Aonly))
         else if is_int env ty then
@@ -675,8 +728,13 @@ let unop p env uop te ty =
         else
           MakeType.num (Reason.Rarith_ret_num (p, get_reason ty, Reason.Aonly))
       in
-      Option.iter ~f:Errors.add_typing_error ty_err_opt;
-      make_result env te err_opt result_ty
+      let result_ty =
+        if is_like then
+          MakeType.locl_like (get_reason result_ty) result_ty
+        else
+          result_ty
+      in
+      make_result env te ty_mismatch result_ty
   | Ast_defs.Usilence ->
     (* Silencing does not change the type *)
     (* any check omitted because would return the same anyway *)

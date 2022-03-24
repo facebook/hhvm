@@ -9,7 +9,7 @@ File "math.php", line 11, characters 3-13:
 File "math.php", line 13, characters 3-13:
   num
 File "math.php", line 15, characters 3-13:
-  dynamic
+  (dynamic | nothing)
 File "math.php", line 17, characters 3-13:
-  dynamic
+  (dynamic | nothing)
 No errors

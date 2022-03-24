@@ -85,16 +85,16 @@ function testints():void {
 function testint(): void {
   $m = Vector {};
   expectNum($m[0] + 1);
-  $m[] = 0.1; // ok
+  $m[] = 0.1; // ok, but can't infer
   $m[] = 1; // ok
 
   $m = Vector {};
   expectFloat($m[0] + 1);
-  $m[] = 0.1; // ok
+  $m[] = 0.1; // ok, but can't infer
   $m[] = 1; // nok
 
   $m = Vector {};
   expectInt($m[0] + 1);
-  $m[] = 1; // ok
+  $m[] = 1; // ok, but can't infer
   $m[] = 0.1; // nok
 }

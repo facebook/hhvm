@@ -24,7 +24,7 @@ module Nast = Aast
 module ITySet = Internal_type_set
 
 (* Fuel ensures that types are curtailed while printing them. This avoids
-   performance regressions and increases readibility of errors overall. *)
+   performance regressions and increases readability of errors overall. *)
 module Fuel : sig
   type t
 

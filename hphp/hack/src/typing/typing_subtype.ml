@@ -1293,7 +1293,7 @@ and simplify_subtype_i
                   res
                   ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super)
             in
-            (* Heuristicky logic to decide whether to "break" the intersection
+            (* Heuristically logic to decide whether to "break" the intersection
                or the union first, based on observing that the following cases often occur:
                  - A & B <: (A & B) | C
                    In which case we want to "break" the union on the right first

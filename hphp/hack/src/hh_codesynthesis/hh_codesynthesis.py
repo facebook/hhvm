@@ -173,7 +173,7 @@ def main() -> None:
         agent = agents[agent_number]
         number_of_parent_agents = len(edge)
 
-        # If this agent is root agent, no parents exisit.
+        # If this agent is root agent, no parents exist.
         if number_of_parent_agents == 0:
             continue
 

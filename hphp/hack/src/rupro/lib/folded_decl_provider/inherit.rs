@@ -310,11 +310,12 @@ impl<R: Reason> Inherited<R> {
         for static_method in self.static_methods.values_mut() {
             static_method.set_is_synthesized(true);
         }
-        for classconst in self.consts.values_mut() {
-            classconst.set_is_synthesized(true);
+        for class_const in self.consts.values_mut() {
+            class_const.set_is_synthesized(true);
         }
-
-        //TODO typeconsts
+        for type_const in self.type_consts.values_mut() {
+            type_const.set_is_synthesized(true);
+        }
     }
 }
 

@@ -111,6 +111,12 @@ impl<R: Reason> ClassConst<R> {
     }
 }
 
+impl<R: Reason> TypeConst<R> {
+    pub fn set_is_synthesized(&mut self, p: bool) {
+        self.is_synthesized = p;
+    }
+}
+
 /// The position is that of the hint in the `use` / `implements` AST node
 /// that causes a class to have this requirement applied to it. E.g.
 ///

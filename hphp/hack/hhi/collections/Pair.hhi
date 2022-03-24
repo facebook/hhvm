@@ -36,7 +36,7 @@ namespace HH {
  *
  * `Pair` keys are always 0 and 1, respectively.
  *
- * You may notice that many methods affecting the instace of `Pair` return an
+ * You may notice that many methods affecting the instance of `Pair` return an
  * `ImmVector` -- `Pair`s are essentially backed by 2-element `ImmVector`s.
  *
  * @guide /hack/collections/introduction
@@ -188,7 +188,7 @@ final class Pair<<<__RequireDynamic>> +Tv1, <<__RequireDynamic>> +Tv2> implement
    * `mapWithKey()`, unlike `filterWithKey()` where only values that meet a
    * certain criteria are affected.
    *
-   * @param $fn - The $allback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `Pair` keys and values.
    *
    * @return - an `ImmVector` containing the values after a user-specified
@@ -446,7 +446,7 @@ final class Pair<<<__RequireDynamic>> +Tv1, <<__RequireDynamic>> +Tv2> implement
    * This will only return `true` for provided keys of 0 and 1 since those are
    * the only two keys that can exist in a `Pair`.
    *
-   * @param $k - the key to check existance for in the `Pair`.
+   * @param $k - the key to check existence for in the `Pair`.
    *
    * @return - `true` if the provided key exists in the `Pair`; `false`
    *           otherwise. This will only return `true` if the provided key is

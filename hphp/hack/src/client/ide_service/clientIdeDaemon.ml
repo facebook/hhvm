@@ -56,7 +56,7 @@ There are two concepts to understand.
 The key algorithms which read from these data-structures are:
 1. Ast_provider.get_ast will fetch the cached AST for an entry in ctx, or if
    the entry is present but as yet lacks an AST then it will parse and cache,
-   or if it's lookinng for the AST of a file not in ctx then it will parse
+   or if it's looking for the AST of a file not in ctx then it will parse
    off disk but decline to cache.
 2. Naming_provider.get_* will get_ast for ctx entry to see if symbol is there.
    If not it will look in reverse-delta-and-cache or read from sqlite
@@ -560,10 +560,10 @@ let make_singleton_ctx (istate : istate) (entry : Provider_context.entry) :
   let ctx = Provider_context.add_or_overwrite_entry ~ctx entry in
   ctx
 
-(** This funtion is about papering over a bug. Sometimes, rarely, we're
+(** This function is about papering over a bug. Sometimes, rarely, we're
 failing to receive DidOpen messages from clientLsp. Our model is to
 only ever answer IDE requests on open files, so we know we'll eventually
-reveive a DidClose even for them and be able to clear their TAST cache
+receive a DidClose even for them and be able to clear their TAST cache
 at that time. But for now, to paper over the bug, we'll call this
 function to log the event and we'll assume that we just missed a DidOpen. *)
 let log_missing_open_file_BUG (path : Relative_path.t) : unit =
@@ -602,7 +602,7 @@ let change_file (files : open_files_state) (path : Relative_path.t) :
     open_file files path ""
 
 (** Closes a file, in response to DidClose event, by removing the
-entry in open_files. If the LSP client sents us multile DidCloses,
+entry in open_files. If the LSP client sents us multiple DidCloses,
 or DidClose for an unopen file, we won't complain. *)
 let close_file (files : open_files_state) (path : Relative_path.t) :
     open_files_state =

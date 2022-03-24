@@ -136,7 +136,7 @@ type _ t_ =
   | Rcstr_on_generics : Pos_or_decl.t * pos_id -> 'phase t_
   | Rlambda_param : Pos.t * locl_phase t_ -> locl_phase t_
   | Rshape : Pos.t * string -> locl_phase t_
-  | Renforceable : Pos_or_decl.t -> 'phase t_
+  | Reinforceable : Pos_or_decl.t -> 'phase t_
   | Rdestructure : Pos.t -> locl_phase t_
   | Rkey_value_collection_key : Pos.t -> locl_phase t_
   | Rglobal_class_prop : Pos_or_decl.t -> 'phase t_
@@ -175,7 +175,7 @@ let rec localize : decl_phase t_ -> locl_phase t_ = function
   | Rclass_class (p, r) -> Rclass_class (p, r)
   | Rvar_param_from_decl p -> Rvar_param_from_decl p
   | Rglobal_fun_param p -> Rglobal_fun_param p
-  | Renforceable p -> Renforceable p
+  | Reinforceable p -> Reinforceable p
   | Rimplicit_upper_bound (p, q) -> Rimplicit_upper_bound (p, q)
   | Rsolve_fail p -> Rsolve_fail p
   | Rmissing_optional_field (p, q) -> Rmissing_optional_field (p, q)
@@ -560,7 +560,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
         ^ Markdown_lite.md_codify fun_name
         ^ " expects a shape" );
     ]
-  | Renforceable _ -> [(p, prefix ^ " because it is an unenforceable type")]
+  | Reinforceable _ -> [(p, prefix ^ " because it is an unenforceable type")]
   | Rdestructure _ ->
     [(p, prefix ^ " resulting from a list destructuring assignment or a splat")]
   | Rkey_value_collection_key _ ->
@@ -614,7 +614,7 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rvar_param_from_decl p
   | Rglobal_fun_param p
   | Rglobal_fun_ret p
-  | Renforceable p
+  | Reinforceable p
   | Rimplicit_upper_bound (p, _)
   | Rsolve_fail p
   | Rmissing_optional_field (p, _)
@@ -811,7 +811,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rcstr_on_generics _ -> "Rcstr_on_generics"
   | Rlambda_param _ -> "Rlambda_param"
   | Rshape _ -> "Rshape"
-  | Renforceable _ -> "Renforceable"
+  | Reinforceable _ -> "Reinforceable"
   | Rdestructure _ -> "Rdestructure"
   | Rkey_value_collection_key _ -> "Rkey_value_collection_key"
   | Rglobal_class_prop _ -> "Rglobal_class_prop"

@@ -100,7 +100,7 @@ in some initialization scenarios, the decl heap module is now capable of refusin
 a file and instead adding the file to a list of deferments.
 
 The type checker worker is then able to return that list and the file which was being type
-checked when deferments occured back to the master process. The master process is then
+checked when deferments occurred back to the master process. The master process is then
 able to distribute the declaration of the files and the (re)checking of the original
 file to all of its workers, thus achieving parallelism and better type checking times overall.
 

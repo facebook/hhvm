@@ -150,7 +150,7 @@ For example, adding a new effect domain (e.g., what exception is thrown,
 whether it is deterministic, what type of IO, etc.) would require:
 - inferring the new capability in existing code for every call site,
   essentially regressing type-checking whenever a new effect domain is added;
-- new syntax to be placed whenver we want to account for the new domain.
+- new syntax to be placed whenever we want to account for the new domain.
 
 The classic example is Java, where in order to consider a new
 domain of effects such as Exceptions, you need to add a new version of
@@ -255,7 +255,7 @@ the developers of Hack.
 To decouple this proposal from others, this proposal uses a
 self-contained *desugared* syntax as explained above. To repeat, the
 `@{Capability}` part is *not* the user syntax and neither is the
-`__Contexful` attribute — it is just the way how typechecker sees the
+`__Contextful` attribute — it is just the way how typechecker sees the
 signatures of functions and methods.
 
 All syntax used in this proposal is for explanatory purposes and a
@@ -425,7 +425,7 @@ function nondeterministic_context()@{NonDet nondet}: void {
   eagerly_call($get_int);
 }
 
-function eagely_call(<<__Contextful>> (function(): int) $f) {
+function eagerly_call(<<__Contextful>> (function(): int) $f) {
   $f(); ...
 }
 ```
@@ -540,7 +540,7 @@ class CachedNonDetFactory {
     ): T) $continuation
   ) {
     return $continuation(()@{CanNonDet} ==> {
-      // captures the outer capability: required for mutatting $seed
+      // captures the outer capability: required for mutating $seed
       self::$seed ??=/*{CanMutateUntracked}*/ currentUnixTime();
 
       // passes the explicit as well as the captured capability
@@ -891,7 +891,7 @@ also Haskell and others (E-lang, EffScript).
 
 * ScalaSpec: [Scala Language Specification](https://www.scala-lang.org/files/archive/spec/2.11/) (M. Odersky et al.)
 * **ScalaDays’15**: [**Scala** - where it came from, where it is going](https://www.slideshare.net/Odersky/scala-days-san-francisco-45917092) (M. Odersky), pages 44-46
-* **POPL’18**: [Simplicitly](https://dl.acm.org/doi/pdf/10.1145/3158130) (M. Odersky et al.)
+* **POPL’18**: [Simplicity](https://dl.acm.org/doi/pdf/10.1145/3158130) (M. Odersky et al.)
 * **OOPSLA’16**: [...Affordable 2nd-Class Values for Fun and **(Co-)Effect**](https://dl.acm.org/doi/pdf/10.1145/2983990.2984009) (Leo Osvald et al.)
     * https://www.dropbox.com/s/iag4gho34ewzk57/OOPSLA16-coeffects_code-changes%2Bresults_README.pdf?dl=1
     * https://github.com/losvald/scala/compare/2.11.x...losvald:esc#files_bucket

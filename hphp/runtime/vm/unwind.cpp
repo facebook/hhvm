@@ -82,7 +82,7 @@ void discardStackTemps(const ActRec* const fp, Stack& stack) {
 /**
  * Discard the current frame, assuming that a PHP exception given in
  * phpException argument, or C++ exception (phpException == nullptr)
- * is being thrown. Returns an exception to propagate, or nulltpr
+ * is being thrown. Returns an exception to propagate, or nullptr
  * if the VM execution should be resumed.
  */
 ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
@@ -285,7 +285,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
   // resulting chained fault object.
   std::unordered_set<uintptr_t> seen;
 
-  // Walk head's previous pointers untill we find an unset one, or determine
+  // Walk head's previous pointers until we find an unset one, or determine
   // they form a cycle.
   auto findAcyclicPrev = [&](ObjectData* head) {
     tv_lval foundLval;

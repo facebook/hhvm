@@ -52,7 +52,7 @@ bool control_flow_opts(const FuncAnalysis&, php::WideFunc& func);
  *  B3
  *
  * Suppose in B1 we have local l1 holding a counted value.  B2 may leave local
- * l1 uninit (after a move optisation is applied during a call).  Inserting an
+ * l1 uninit (after a move optimisation is applied during a call).  Inserting an
  * UnsetL(l1) at the start of block B3 will require a decref of
  * Union(TCnt, TUninit), which is not great.  If we split critical edges, the
  * UnsetL(l1) (and its decref) could sit on the edge from B1 to B2 making it

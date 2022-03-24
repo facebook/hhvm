@@ -52,7 +52,7 @@ struct InterruptSite;
  *    breakpoint is hit without forcing us to interpret everything.
  *
  * The cmd may get interrupted for other reasons, such as an exception, reaching
- * a breakpoint, a hard break, etc. All flow cmds are designed to tollerate this
+ * a breakpoint, a hard break, etc. All flow cmds are designed to tolerate this
  * and remember enough state to determine if they should really transition their
  * state or not.
  */
@@ -109,7 +109,7 @@ protected:
   std::string m_loc; // last break's source location
 
   // Represents the destination of an internal stepping operation by
-  // unit and offset. Implictly maintains the breakpoint filter.
+  // unit and offset. Implicitly maintains the breakpoint filter.
   struct StepDestination {
     StepDestination();
     StepDestination(const HPHP::Func* func, Offset offset);

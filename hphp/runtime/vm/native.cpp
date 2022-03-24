@@ -225,7 +225,7 @@ void callFunc(const Func* const func,
   // spilled arguments come after the GP registers, in line with them. We can
   // spill to the stack without exhausting the GP registers, in two ways:
   //
-  //  1. If we exceeed the number of SIMD arguments and spill doubles.
+  //  1. If we exceed the number of SIMD arguments and spill doubles.
   //
   //  2. If we fill all but 1 GP register and then need to pass a TypedValue
   //     (two registers in size) by value.
@@ -331,7 +331,7 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
         // No need to coerce when passed a null for a nullable type
         continue;
       }
-      // Arg isn't null, so treat it like the underlying type for coersion
+      // Arg isn't null, so treat it like the underlying type for coercion
       // purposes.  The ABI-passed type will still be mixed/Variant.
       targetType = tc.underlyingDataType();
     }

@@ -329,7 +329,7 @@ module CustomGraph = struct
   let add_all_deps mode x = x |> add_extend_deps mode |> add_typing_deps mode
 
   type dep_edge = {
-    idependent: Dep.t;
+    independent: Dep.t;
     idependency: Dep.t;
   }
 
@@ -337,7 +337,7 @@ module CustomGraph = struct
     type t = dep_edge
 
     let compare x y =
-      let d1 = Int.compare x.idependent y.idependent in
+      let d1 = Int.compare x.independent y.independent in
       if d1 = 0 then
         Int.compare x.idependency y.idependency
       else
@@ -362,8 +362,8 @@ module CustomGraph = struct
     let s =
       Hashtbl.fold
         begin
-          fun ({ idependent; idependency } as edge) () s ->
-          if not (hh_custom_dep_graph_has_edge mode idependent idependency) then
+          fun ({ independent; idependency } as edge) () s ->
+          if not (hh_custom_dep_graph_has_edge mode independent idependency) then
             DepEdgeSet.add edge s
           else
             s
@@ -379,29 +379,29 @@ module CustomGraph = struct
     assert_master ();
     DepEdgeSet.iter
       begin
-        fun { idependent; idependency } ->
-        register_discovered_dep_edge idependent idependency
+        fun { independent; idependency } ->
+        register_discovered_dep_edge independent idependency
       end
       s
 
   let add_idep mode dependent dependency =
-    let idependent = Dep.make dependent in
+    let independent = Dep.make dependent in
     let idependency = Dep.make dependency in
-    if idependent = idependency then
+    if independent = idependency then
       ()
     else (
       Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
       if !trace then begin
-        Hashtbl.replace discovered_deps_batch { idependent; idependency } ();
+        Hashtbl.replace discovered_deps_batch { independent; idependency } ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
           filter_discovered_deps_batch mode
       end
     )
 
   let idep_exists mode dependent dependency =
-    let idependent = Dep.make dependent in
+    let independent = Dep.make dependent in
     let idependency = Dep.make dependency in
-    hh_custom_dep_graph_has_edge mode idependent idependency
+    hh_custom_dep_graph_has_edge mode independent idependency
 end
 
 module SaveHumanReadableDepMap = struct
@@ -517,19 +517,19 @@ module SaveCustomGraph = struct
     let handle = destination_file_handle mode in
     Hashtbl.iter
       begin
-        fun CustomGraph.{ idependent; idependency } () ->
+        fun CustomGraph.{ independent; idependency } () ->
         if
           not
             (CustomGraph.hh_custom_dep_graph_has_edge
                mode
-               idependent
+               independent
                idependency)
         then begin
           (* To be kept in sync with typing_deps.rs::hh_custom_dep_graph_save_delta! *)
           (* output_binary_int outputs the lower 4-bytes only, regardless
            * of architecture. It outputs in big-endian format.*)
-          Out_channel.output_binary_int handle (idependent lsr 32);
-          Out_channel.output_binary_int handle idependent;
+          Out_channel.output_binary_int handle (independent lsr 32);
+          Out_channel.output_binary_int handle independent;
           Out_channel.output_binary_int handle (idependency lsr 32);
           Out_channel.output_binary_int handle idependency
         end
@@ -539,21 +539,21 @@ module SaveCustomGraph = struct
     Hashtbl.clear discovered_deps_batch
 
   let add_idep mode dependent dependency =
-    let idependent = Dep.make dependent in
+    let independent = Dep.make dependent in
     let idependency = Dep.make dependency in
-    if idependent = idependency then
+    if independent = idependency then
       ()
     else (
       Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
       if !trace then begin
         Hashtbl.replace
           discovered_deps_batch
-          CustomGraph.{ idependent; idependency }
+          CustomGraph.{ independent; idependency }
           ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
           filter_discovered_deps_batch ~flush:false mode
       end;
-      let () = SaveHumanReadableDepMap.add mode (dependent, idependent) in
+      let () = SaveHumanReadableDepMap.add mode (dependent, independent) in
       SaveHumanReadableDepMap.add mode (dependency, idependency)
     )
 
@@ -562,7 +562,7 @@ module SaveCustomGraph = struct
     hh_save_custom_dep_graph_save_delta source dest
 end
 
-(** Registeres Rust custom types with the OCaml runtime, supporting deserialization *)
+(** Registers Rust custom types with the OCaml runtime, supporting deserialization *)
 let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
 let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =

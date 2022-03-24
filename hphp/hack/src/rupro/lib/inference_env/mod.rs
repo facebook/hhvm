@@ -100,7 +100,7 @@ impl<R: Reason> InferenceEnv<R> {
 
     /// Follow the bindings of a tyvar until we reach any of
     /// i) A dead-end i.e. an unbound tyvar
-    /// ii) A ciricular ref i.e. we have already seen the tyvar earlier in the chain
+    /// ii) A curricular ref i.e. we have already seen the tyvar earlier in the chain
     /// iii) A concrete type
     fn resolve_help(&self, tv: Tyvar) -> (HashSet<Tyvar>, ResolveStep<&Ty<R>>) {
         let mut aliases = HashSet::default();
@@ -297,7 +297,7 @@ mod tests {
         assert!(matches!(res, ResolveStep::Unbound(_)));
     }
 
-    fn test_resolve_ciricular_ref() {
+    fn test_resolve_curricular_ref() {
         let mut env = InferenceEnv::default();
         let gen = IdentGen::new();
         let tv1: Tyvar = gen.make().into();

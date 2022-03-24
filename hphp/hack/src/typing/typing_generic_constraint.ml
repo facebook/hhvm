@@ -42,7 +42,7 @@ let check_constraint
       (* An equality constraint is the same as two commuting `as`
        * constraints, i.e. X=Y is { X as Y, Y as X }. Thus, add
        * add both expansions to the environment. We don't expand
-       * both sides of the equation simultaniously, to preserve an
+       * both sides of the equation simultaneously, to preserve an
        * easier convergence indication. *)
       let (env, e1) =
         TUtils.sub_type

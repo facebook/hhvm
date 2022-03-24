@@ -58,7 +58,7 @@ let init_with_options () =
       Arg.Unit
         (fun () ->
           debug_config := { !debug_config with print_rule_dependencies = true }),
-      " Print out a representation of the rule dependenies below each chunk group"
+      " Print out a representation of the rule dependencies below each chunk group"
     );
   ]
 

@@ -166,7 +166,7 @@ let collect_infos_methods_functions context_id =
       infos @ super#on_expr env exp
   end
 
-(** Reduction to collect all Tany/Terr information. It calls the reudction for
+(** Reduction to collect all Tany/Terr information. It calls the reduction for
     functions and methods with the context information attached. *)
 let collect_infos =
   object

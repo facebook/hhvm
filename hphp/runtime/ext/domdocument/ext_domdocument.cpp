@@ -1387,7 +1387,7 @@ static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) {
   if (tree == nullptr || ns == nullptr || ns->type != XML_NAMESPACE_DECL) {
     return nullptr;
   }
-  /* Code taken from libxml2 (2.6.20) xmlNewReconciliedNs
+  /* Code taken from libxml2 (2.6.20) xmlNewReconciledNs
    *
    * Find a close prefix which is not already in use.
    * Let's strip namespace prefixes longer than 20 chars!
@@ -1756,7 +1756,7 @@ static Variant domnode_nodename_read(const Object& obj) {
 static Variant domnode_nodevalue_read(const Object& obj) {
   CHECK_NODE(nodep);
   char *str = nullptr;
-  /* Access to Element node is implemented as a convience method */
+  /* Access to Element node is implemented as a convenience method */
   switch (nodep->type) {
   case XML_ATTRIBUTE_NODE:
   case XML_TEXT_NODE:
@@ -1784,7 +1784,7 @@ static Variant domnode_nodevalue_read(const Object& obj) {
 
 static void domnode_nodevalue_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_NODE(nodep);
-  /* Access to Element node is implemented as a convience method */
+  /* Access to Element node is implemented as a convenience method */
   switch (nodep->type) {
   case XML_ELEMENT_NODE:
   case XML_ATTRIBUTE_NODE:
@@ -3273,7 +3273,7 @@ DOCPROP_READ_WRITE(validateonparse,    validate_on_parse     );
 DOCPROP_READ_WRITE(resolveexternals,   resolve_externals     );
 DOCPROP_READ_WRITE(preservewhitespace, preserve_whitespace   );
 DOCPROP_READ_WRITE(recover,            recover               );
-DOCPROP_READ_WRITE(substituteentities, substitue_entities    );
+DOCPROP_READ_WRITE(substituteentities, substitute_entities    );
 
 static Variant dom_document_document_uri_read(const Object& obj) {
   CHECK_DOC(docp);
@@ -3331,8 +3331,8 @@ static DOMPropertyAccessor domdocument_properties[] = {
     dom_document_preserve_whitespace_write },
   { "recover",             dom_document_recover_read,
     dom_document_recover_write },
-  { "substituteEntities",  dom_document_substitue_entities_read,
-    dom_document_substitue_entities_write },
+  { "substituteEntities",  dom_document_substitute_entities_read,
+    dom_document_substitute_entities_write },
   { nullptr, nullptr, nullptr}
 };
 static DOMPropertyAccessorMap domdocument_properties_map
@@ -5794,7 +5794,7 @@ Variant HHVM_METHOD(DOMNodeIterator, next) {
       }
       curnode = libxml_register_node(curnode->nodep()->next);
     } else {
-      /* Nav the tree evey time as this is LIVE */
+      /* Nav the tree every time as this is LIVE */
       xmlNodePtr basenode =
         data->m_objmap->getBaseNodeData()->nodep();
       if (!basenode) {

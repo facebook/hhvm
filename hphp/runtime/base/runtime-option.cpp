@@ -428,7 +428,7 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   if (!g_context.isNull()) {
     if (auto const opts = g_context->getRepoOptionsForRequest()) {
       // If path() is empty we have the default() options, which means we have
-      // negatively cached the existance of a .hhvmconfig.hdf for this request.
+      // negatively cached the existence of a .hhvmconfig.hdf for this request.
       if (opts->path().empty()) return *opts;
 
       if (isParentOf(opts->path(), fpath)) {
@@ -1535,7 +1535,7 @@ void RuntimeOption::Load(
   std::vector<std::string>* messages /* = nullptr */,
   std::string cmd /* = "" */) {
 
-  // Intialize the memory manager here because various settings and
+  // Initialize the memory manager here because various settings and
   // initializations that we do here need it
   tl_heap.getCheck();
 
@@ -2040,7 +2040,7 @@ void RuntimeOption::Load(
       if (EvalJitSerdesMode != JitSerdesMode::Off) {
         if (ServerMode) {
           Logger::Warning("Eval.JitSerdesMode reset from " + jitSerdesMode +
-                          " to off, becasue JitRetranslateAll isn't enabled.");
+                          " to off, because JitRetranslateAll isn't enabled.");
         }
         EvalJitSerdesMode = JitSerdesMode::Off;
       }
@@ -2702,7 +2702,7 @@ void RuntimeOption::Load(
     if (CoreDumpReport) {
       install_crash_reporter();
     }
-    // Binding default dependenant on whether we are using an OSS build or
+    // Binding default dependent on whether we are using an OSS build or
     // not, and that is set at initialization time of CoreDumpReportDirectory.
     Config::Bind(CoreDumpReportDirectory, ini, config,
                  "Debug.CoreDumpReportDirectory", CoreDumpReportDirectory);
@@ -2827,7 +2827,7 @@ void RuntimeOption::Load(
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
-  // Run initializers depedent on options, e.g., resizing atomic maps/vectors.
+  // Run initializers dependent on options, e.g., resizing atomic maps/vectors.
   refineStaticStringTableSize();
   InitFiniNode::ProcessPostRuntimeOptions();
 

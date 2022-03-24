@@ -1195,7 +1195,7 @@ let tconst_subsumption
      * parent has a constraint then the child must also have a constraint if it
      * is abstract.
      *
-     * Check that the child's assigned type satisifies parent constraint
+     * Check that the child's assigned type satisfies parent constraint
      *)
     let default =
       MakeType.generic (Reason.Rtconst_no_cstr child_typeconst.ttc_name) name
@@ -1410,7 +1410,7 @@ let check_typeconst_override
     let parent_pos = fst parent_tconst.ttc_name in
     (* Temporarily skip checks on context constants
      *
-     * TODO(T89366955) elimninate this check *)
+     * TODO(T89366955) eliminate this check *)
     let is_context_constant =
       match (parent_tconst.ttc_kind, tconst.ttc_kind) with
       | ( TCAbstract { atc_default = Some hint1; _ },
@@ -1577,7 +1577,7 @@ let check_class_extends_parent_consts
 
 (** Eliminate all synthesized members (those from requirements) plus
 all private members unless they're from traits. *)
-let filter_privates_and_synthethized
+let filter_privates_and_synthesized
     ~(is_trait : bool) (members : ('a * class_elt) list) : ('a * class_elt) list
     =
   let eliminate class_elt =
@@ -1595,7 +1595,7 @@ let make_parent_member_map
   |> MemberKindMap.of_list
   |> MemberKindMap.map (fun members ->
          members
-         |> filter_privates_and_synthethized
+         |> filter_privates_and_synthesized
               ~is_trait:(Ast_defs.is_c_trait (Cls.kind parent_class))
          |> SMap.of_list
          |> SMap.map (fun member ->

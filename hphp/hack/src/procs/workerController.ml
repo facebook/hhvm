@@ -116,7 +116,7 @@ type worker = {
   mutable force_quit: bool;
   (* Sanity check: is the worker currently busy ? *)
   mutable busy: bool;
-  (* If the worker is currently busy, handle of the job it's execuing *)
+  (* If the worker is currently busy, handle of the job it's executing *)
   mutable handle: 'a 'b. ('a, 'b) handle option;
   (* On Unix, a reference to the 'prespawned' worker. *)
   prespawned: (void, request) Daemon.handle option;

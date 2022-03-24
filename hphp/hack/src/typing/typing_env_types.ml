@@ -188,7 +188,7 @@ let get_tparams_in_ty_and_acc env acc ty =
         (* as for tnewtype: not traversing args, although they may contain Tgenerics *)
         SSet.add s acc
 
-      (* Perserving behavior but this seems incorrect to me since a newtype may
+      (* Preserving behavior but this seems incorrect to me since a newtype may
        * contain type arguments with generics
        *)
       method! on_tdependent acc _ _ _ = acc

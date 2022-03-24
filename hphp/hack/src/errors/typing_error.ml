@@ -3586,7 +3586,7 @@ module Primary = struct
 
   let local_variable_modified_and_used pos_modified pos_used_l =
     let used_msg p = (Pos_or_decl.of_raw_pos p, "And accessed here") in
-    ( Error_code.LocalVariableModifedAndUsed,
+    ( Error_code.LocalVariableModifiedAndUsed,
       lazy
         ( pos_modified,
           "Unsequenced modification and access to local variable. Modified here"
@@ -3596,7 +3596,7 @@ module Primary = struct
 
   let local_variable_modified_twice pos_modified pos_modified_l =
     let modified_msg p = (Pos_or_decl.of_raw_pos p, "And also modified here") in
-    ( Error_code.LocalVariableModifedTwice,
+    ( Error_code.LocalVariableModifiedTwice,
       lazy
         ( pos_modified,
           "Unsequenced modifications to local variable. Modified here" ),

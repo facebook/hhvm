@@ -41,9 +41,9 @@ using DebuggerProxyPtr = std::shared_ptr<DebuggerProxy>;
 using DebuggerCommandPtr = std::shared_ptr<DebuggerCommand>;
 
 /*
- * A DebuggerProxy provides a conection thru which a client may talk to a VM
+ * A DebuggerProxy provides a connection thru which a client may talk to a VM
  * which is being debugged.  The VM can also send messages to the client via the
- * proxy, either in reponse to messages from the client, or to poll the client
+ * proxy, either in response to messages from the client, or to poll the client
  * for information.
  *
  * In an basic scenario where a client is debugging a remote VM, the VM will

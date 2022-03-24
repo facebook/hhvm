@@ -1757,7 +1757,7 @@ static bool do_fetch(sp_PDOStatement stmt,
     if (stmt->column_count != 2) {
       pdo_raise_impl_error(stmt->dbh, stmt, "HY000",
                            "PDO::FETCH_KEY_PAIR fetch mode requires the "
-                           "result set to contain extactly 2 columns.");
+                           "result set to contain exactly 2 columns.");
       return false;
     }
     if (!return_all) {
@@ -2805,7 +2805,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
 }
 
 static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
-                           int64_t column_numner /* = 0 */) {
+                           int64_t column_number /* = 0 */) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return false;
@@ -2817,7 +2817,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
     return false;
   }
   Variant ret;
-  fetch_value(data->m_stmt, ret, column_numner, nullptr);
+  fetch_value(data->m_stmt, ret, column_number, nullptr);
   return ret;
 }
 

@@ -204,7 +204,7 @@ namespace {
 
   template<class TFirst, class TSecond, class... TRest>
   void validate_cli_arg_types() {
-    // TSecond, TRest is a bit weird, but conditional recurssion doesn't work on
+    // TSecond, TRest is a bit weird, but conditional recursion doesn't work on
     // GCC5 :(
     validate_cli_arg_types<TFirst>();
     validate_cli_arg_types<TSecond, TRest...>();

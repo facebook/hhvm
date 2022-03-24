@@ -1367,7 +1367,7 @@ struct RuntimeOption {
   F(bool, UseXedAssembler, false)                                       \
   /* Record the first N units loaded via StructuredLog::log()        */ \
   F(uint64_t, RecordFirstUnits, 0)                                      \
-  /* More aggresively reuse already compiled units based on SHA1     */ \
+  /* More aggressively reuse already compiled units based on SHA1     */ \
   F(bool, CheckUnitSHA1, true)                                          \
   F(bool, ReuseUnitsByHash, false)                                      \
   F(bool, UseEdenFS, true)                                              \

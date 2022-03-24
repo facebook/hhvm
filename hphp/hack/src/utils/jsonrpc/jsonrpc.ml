@@ -1,6 +1,6 @@
 (* Wrapper for handling JSON-RPC *)
 (* Spec: http://www.jsonrpc.org/specification *)
-(* Practical readbable guide: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#base-protocol-json-structures *)
+(* Practical readable guide: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#base-protocol-json-structures *)
 
 open Hh_prelude
 
@@ -15,7 +15,7 @@ GOAL 2: when we process a message, then all subsequent messages that
 have already been presented to our stdin should already be in our own
 queue data-structure (rather than an OS pipe buffer) in case any
 of the messages involved cancellation.
-GOAL 3: we're in ocaml, so our threading possibilties are limited,
+GOAL 3: we're in ocaml, so our threading possibilities are limited,
 and unfortunately our caller has cpu-blocking chunks of code.
 
 We kick off single background process called "daemon", running a loop

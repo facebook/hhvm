@@ -748,7 +748,7 @@ struct SimpleParser {
    * re-parse and push as an int64_t if possible, otherwise as a double.
    */
   const char* parseBigInt(const char* p, int len) {
-    assertx(*p > '9' || *p < '0');  // Aleady read maximal digit sequence.
+    assertx(*p > '9' || *p < '0');  // Already read maximal digit sequence.
     errno = 0;
     const int64_t sx = strtoll(p - len, nullptr, 10);
     if (errno == ERANGE) {
@@ -1299,7 +1299,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   auto reset_type = [&] { type = kInvalidDataType; };
 
   json->depth = depth;
-  // Since the stack is maintainined on a per request basis, for performance
+  // Since the stack is maintained on a per request basis, for performance
   // reasons, it only makes sense to expand if necessary and cycles are wasted
   // contracting. Calls with a depth other than default should be rare.
   if (depth > json->stack.size()) {

@@ -168,7 +168,7 @@ struct FBUnserializer : private FBSerializeBase {
   typename V::VectorType unserializeVector(size_t depth);
   typename V::VectorType unserializeList(size_t depth);
   typename V::SetType unserializeSet(size_t depth);
-  // read the next map but don't unserialze it (for lazy or delay
+  // read the next map but don't unserialize it (for lazy or delay
   // unserialization)
   folly::StringPiece getSerializedMap();
   typename V::VariantType unserializeThing(size_t depth);

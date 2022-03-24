@@ -42,7 +42,7 @@ namespace tv_layout {
  * - iterator, const_iterator: a (const) forward iterator over the container,
  *                             producing TypedValues with the additional
  *                             constraint that tv_lval{iter} is well-formed as
- *                             long as the iterator is derefenecable
+ *                             long as the iterator is dereferencable
  * - quick_index: some type, implicitly coercible to index_t, designed to allow
  *                faster access to the collection. This may be the same as
  *                index_t
@@ -63,7 +63,7 @@ namespace tv_layout {
  *
  * Member functions:
  * void init(index_t size); Establishes any invariants the container needs to
- * operatate, for a container of the given size
+ * operate, for a container of the given size
  *
  * tv_val_offset offsetOf(index_t idx) const;
  * tv_val_offset offsetOf(quick_index idx) const; (optional)
@@ -100,7 +100,7 @@ struct LayoutBase {
   const Impl& impl() const { return *static_cast<const Impl*>(this); }
 
   /*
-   * Produce a range over the conainer, for use in for-each loops
+   * Produce a range over the container, for use in for-each loops
    */
   folly::Range<iterator>
   range(index_t begin, index_t end) {
@@ -169,7 +169,7 @@ struct LayoutBase {
  * 7-up packed layout
  *
  * This implements a flavor of an array layout but instead of wasting space on
- * padding for the type byte (out to a whole quardowrd), we aggregate 7 of these
+ * padding for the type byte (out to a whole quadword), we aggregate 7 of these
  * types together (and then aggregate 7 values together) resulting in a
  * repeating layout (a "chunk") of 64 bytes. The layout is like:
  *

@@ -120,7 +120,7 @@ let blame_as_log_value (Reason.Blame (p, blame_source)) =
   | Reason.BSlambda ->
     Typing_log_value.(make_map [("Blame_lambda", pos_as_value p)])
   | Reason.BSassignment ->
-    Typing_log_value.(make_map [("Blame_assigment", pos_as_value p)])
+    Typing_log_value.(make_map [("Blame_assignment", pos_as_value p)])
   | Reason.BSout_of_scope ->
     Typing_log_value.(make_map [("Blame_out_of_scope", pos_as_value p)])
 

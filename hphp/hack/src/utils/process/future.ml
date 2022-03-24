@@ -40,7 +40,7 @@ module type Error_instance = sig
   val this : Error.t
 end
 
-(* Future error can be categorized into interanl errors and external
+(* Future error can be categorized into internal errors and external
    environment specific errors. For external errors, the environment
    specific handlers will be used to convert the error into string *)
 type error =
@@ -129,7 +129,7 @@ let create_default_error_instance (error : string) =
   create_error_instance (module DefaultError) error
 
 (* Given an optional deadline, constructs a timeout time span, in seconds,
-    relative to the current time (dealine - now). If the current time is past
+    relative to the current time (deadline - now). If the current time is past
     the deadline, the timeout is 0. If the deadline is not specified,
     the max timeout value is returned. *)
 let timeout_of_deadline deadline ~max_timeout =
@@ -277,7 +277,7 @@ let rec is_ready : 'value. 'value t -> bool =
     promise := Delayed { tapped = tapped + 1; remaining = remaining - 1; value };
     false
   | Merged (a, b, _) ->
-    (* Prevent the && operator from short-cirtuiting the is-ready check for
+    (* Prevent the && operator from short-circuiting the is-ready check for
         the second future: *)
     let is_a_ready = is_ready a in
     let is_b_ready = is_ready b in

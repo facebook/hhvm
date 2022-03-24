@@ -148,7 +148,7 @@ struct ImapRequestData final : RequestEventHandler {
   unsigned long m_status_messages;
   unsigned long m_status_recent;
   unsigned long m_status_unseen;
-  unsigned long m_status_uidnext;
+  unsigned long m_status_uindext;
   unsigned long m_status_uidvalidity;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(ImapRequestData, s_imap_data);
@@ -206,7 +206,7 @@ static int _php_imap_address_size (ADDRESS *addresslist) {
 
   /*
    * rfc822_write_address_full() needs some extra space for '<>,', etc.
-   * for this perpouse we allocate additional PHP_IMAP_ADDRESS_SIZE_BUF bytes
+   * for this purpose we allocate additional PHP_IMAP_ADDRESS_SIZE_BUF bytes
    * by default this buffer is 10 bytes long
   */
   ret += (ret) ? num_ent*PHP_IMAP_ADDRESS_SIZE_BUF : 0;
@@ -629,7 +629,7 @@ void mm_status(MAILSTREAM* /*stream*/, char* /*mailbox*/, MAILSTATUS* status) {
     IMAPG(status_unseen)=status->unseen;
   }
   if (IMAPG(status_flags) & SA_UIDNEXT) {
-    IMAPG(status_uidnext)=status->uidnext;
+    IMAPG(status_uindext)=status->uindext;
   }
   if (IMAPG(status_flags) & SA_UIDVALIDITY) {
     IMAPG(status_uidvalidity)=status->uidvalidity;
@@ -1447,7 +1447,7 @@ static Variant HHVM_FUNCTION(imap_status, const Resource& imap_stream,
     props.set(LAZY_STATIC_STRING("unseen"), (int64_t)IMAPG(status_unseen));
   }
   if (IMAPG(status_flags) & SA_UIDNEXT) {
-    props.set(LAZY_STATIC_STRING("uidnext"), (int64_t)IMAPG(status_uidnext));
+    props.set(LAZY_STATIC_STRING("uindext"), (int64_t)IMAPG(status_uindext));
   }
   if (IMAPG(status_flags) & SA_UIDVALIDITY) {
     props.set(LAZY_STATIC_STRING("uidvalidity"), (int64_t)IMAPG(status_uidvalidity));

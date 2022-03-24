@@ -12,7 +12,7 @@ use quote::{format_ident, quote};
 trait NodeTrait {
     fn filename() -> String;
     fn trait_name() -> syn::Ident;
-    fn receiver(lifttime: &Ident) -> TokenStream;
+    fn receiver(lifetime: &Ident) -> TokenStream;
     fn visitor() -> syn::Ident;
     fn use_visitor() -> TokenStream;
 

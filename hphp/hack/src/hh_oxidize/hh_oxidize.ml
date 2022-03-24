@@ -209,7 +209,7 @@ let parse_args () =
         ^ " are defined within the set of files being oxidized" );
       ( "--owned-types-file",
         Arg.String (fun s -> owned_types_file := Some s),
-        " Do not add a lifetime parameter to the types listend in this file"
+        " Do not add a lifetime parameter to the types listed in this file"
         ^ " (when --by-ref is enabled)" );
       ( "--copy-types-file",
         Arg.String (fun s -> copy_types_file := Some s),

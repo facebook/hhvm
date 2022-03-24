@@ -65,7 +65,7 @@ bool heapObjIsUncounted(HeapObject* obj) {
 
 HeapObject* findHeapObjStart(HeapObject* ptr) {
   if (ptr->kind() == HeaderKind::Object) {
-    // Find memo slots when enqueueing an object.
+    // Find memo slots when enqueuing an object.
     auto const obj = reinterpret_cast<ObjectData*>(ptr);
     auto const objOff = obj->getVMClass()->memoSize();
 
@@ -79,16 +79,16 @@ HeapObject* findHeapObjStart(HeapObject* ptr) {
 }
 //////////////////////////////////////////////////////////////////////////////
 // Scanner is a heap object walking utility that calls lambdas with references
-// to areas in the heap that are relevant for SIB manipulaitons.
+// to areas in the heap that are relevant for SIB manipulations.
 // For now we have ProcessTV and ProcessHeapPtr lambdas:
 //   - ProcessHeapPtr receives a reference to all HeapObjects*
-//   - ProcessTV receives a tv_lval referencins all TVs
+//   - ProcessTV receives a tv_lval referencing all TVs
 // For tracking heap object starts we also have the StartHeapObject lambda.
 // StartHeapObject and ProcessTV can return an object that will be held as
 // an RAII guard until done with the heap object or tv processing.
 //
-// In combination with Tracer (which just visits heap obects) we can walk the
-// heap and perform maniputations or inspection as we go.
+// In combination with Tracer (which just visits heap objects) we can walk the
+// heap and perform manipulations or inspection as we go.
 //
 // Rough usage:
 // Scanner strScanner([&](tv_lval tv) {
@@ -306,7 +306,7 @@ private:
     }
     for (auto slot = obj->getVMClass()->declPropInit().size(); slot-- > 0;) {
       // TODO: Handle modification of slot ordering during serde.
-      // handle class seriailization as well.
+      // handle class serialization as well.
       scan(obj->propLvalAtOffset(slot));
     }
   }

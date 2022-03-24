@@ -94,8 +94,8 @@ pub fn emit_constants_from_program<'a, 'arena, 'decl>(
         .iter()
         .filter_map(|d| d.as_constant().map(|c| emit_constant(e, env, c)))
         .collect::<Result<Vec<_>>>()?;
-    let (contants, inits): (Vec<_>, Vec<_>) = const_tuples.into_iter().unzip();
-    Ok((contants, inits.into_iter().flatten().collect()))
+    let (constants, inits): (Vec<_>, Vec<_>) = const_tuples.into_iter().unzip();
+    Ok((constants, inits.into_iter().flatten().collect()))
 }
 
 pub fn from_ast<'a, 'arena, 'decl>(

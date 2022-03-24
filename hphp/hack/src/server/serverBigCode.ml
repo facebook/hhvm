@@ -245,7 +245,7 @@ class visitor ~ctx ~entry ~filename ~source_text =
       extract ~cst
 
     (* Helper functions to extract candidate list
-     * These are borrowed from autcompleteService.ml
+     * These are borrowed from autocompleteService.ml
      *)
     method get_class_elt_types ~is_method env class_ cid elts =
       let is_visible (_, elt) =
@@ -439,7 +439,7 @@ let go_ctx ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  (* Visit the TAST and extract autocompleteion items for Acclass_get, Acprop *)
+  (* Visit the TAST and extract autocompletion items for Acclass_get, Acprop *)
   let filename = Relative_path.suffix entry.path in
   let source_text = Provider_context.read_file_contents_exn entry in
   let data =

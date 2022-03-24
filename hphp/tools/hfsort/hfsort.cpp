@@ -174,7 +174,7 @@ std::string getNameWithoutSuffix(std::string str) {
     // if no suffix is found, just add the wildcard
     return str + "*";
   } else {
-    // replace sufix with wildcard
+    // replace suffix with wildcard
     return str.substr(0, suffixStartPosition) + "*";
   }
 }

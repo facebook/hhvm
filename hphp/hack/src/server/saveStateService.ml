@@ -18,7 +18,7 @@ let get_errors_filename_json (filename : string) : string =
 let get_legacy_decls_filename (filename : string) : string = filename ^ ".decls"
 
 let get_shallow_decls_filename (filename : string) : string =
-  filename ^ ".shallowdecls"
+  filename ^ ".shallowedecls"
 
 (* Writes some OCaml object to a file with the given filename. *)
 let save_contents (output_filename : string) (contents : 'a) : unit =

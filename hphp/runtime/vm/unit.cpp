@@ -129,8 +129,8 @@ Unit::~Unit() {
 
   for (auto const func : funcs()) Func::destroy(func);
 
-  // ExecutionContext and the TC may retain references to Class'es, so
-  // it is possible for Class'es to outlive their Unit.
+  // ExecutionContext and the TC may retain references to Classes, so
+  // it is possible for Classes to outlive their Unit.
   for (auto const& pcls : m_preClasses) {
     Class* cls = pcls->namedEntity()->clsList();
     while (cls) {

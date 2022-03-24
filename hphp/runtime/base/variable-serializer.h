@@ -276,7 +276,7 @@ private:
   bool m_edWarn{false};          // warn when attempting on empty darrays
   bool m_vdWarn{false};          // warn when attempting on vec-like darrays
   bool m_ddWarn{false};          // warn when attempting on non-vec-like darrays
-  bool m_ignoreLateInit{false};  // ignore uninitalized late init props
+  bool m_ignoreLateInit{false};  // ignore uninitialized late init props
   bool m_hasHackWarned{false};   // have we already warned on Hack arrays?
   bool m_hasDictWarned{false};   // have we already warned on dicts?
   bool m_hasKeysetWarned{false};   // have we already warned on dicts?
@@ -292,7 +292,7 @@ private:
   int m_maxCount;                // for max recursive levels
   int m_levelDebugger{0};        // keep track of levels for DebuggerSerialize
   int m_maxLevelDebugger{0};     // for max level of DebuggerSerialize
-  size_t m_currentDepth{0};      // current depth (nasted objects/arrays)
+  size_t m_currentDepth{0};      // current depth (nested objects/arrays)
   size_t m_maxDepth{0};          // max depth limit before an error (0 -> none)
   bool m_keyPrinted{false};
 

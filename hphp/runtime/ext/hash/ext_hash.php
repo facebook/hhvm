@@ -141,7 +141,7 @@ function hash_hmac_file(string $algo,
  *                       a shared secret key to be used with the HMAC
  *                       hashing method must be supplied in this parameter.
  *
- * @return resrouce - Returns a Hashing Context resource for use with
+ * @return resource - Returns a Hashing Context resource for use with
  *                    hash_update(), hash_update_stream(), hash_update_file(),
  *                    and hash_final().
  *                    Returns FALSE on failure.
@@ -285,7 +285,7 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
   }
   $key_blocks = ceil($length / $hash_length);
   for ($i = 1; $i <= $key_blocks; $i++) {
-    // Note: $i encoded with most siginificant octet first.
+    // Note: $i encoded with most significant octet first.
     $xor = hash_hmac($algo, $salt.pack("N", $i), $password, true);
     $prev = $xor;
     for ($j = 1; $j < $iterations; $j++) {

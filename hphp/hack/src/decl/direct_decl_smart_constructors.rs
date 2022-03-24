@@ -69,7 +69,7 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
     pub file_attributes: List<'a, &'a typing_defs::UserAttribute<'a>>,
-    // const_refs will accumulate all scope-resolution-expressions it enconuters while it's "Some"
+    // const_refs will accumulate all scope-resolution-expressions it encounters while it's "Some"
     const_refs: Option<arena_collections::set::Set<'a, typing_defs::ClassConstRef<'a>>>,
     opts: &'a DeclParserOptions<'a>,
     filename: &'a RelativePath<'a>,

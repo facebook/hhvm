@@ -80,7 +80,7 @@ pub fn decode<'a>(s: &'a [u8]) -> Vec<u8> {
                 if m[1] == b'#' {
                     decode_u32(m)
                 } else {
-                    // Have to alloc memory, this is contrainted by
+                    // Have to alloc memory, this is constrained by
                     // the return type of this closure, AsRef<[u8]>.
                     Vec::from(decode_charref(m))
                 }

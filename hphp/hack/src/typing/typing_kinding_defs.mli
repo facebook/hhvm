@@ -39,7 +39,7 @@ val dummy_name : pos_id
   In other words, simple kinds can be seen as kinds that are just built from * and ->,
   whereas full kinds *additionally* also carry constraints.
   For technical reasons, simple kinds must, however, carry some degree of information about
-  bounds: During localiazation, we may come across a type like T<_>, where the user provided
+  bounds: During localization, we may come across a type like T<_>, where the user provided
   a wildcard for the type argument and T is either a (higher-kinded) type parameter or a
   class/type name. In this case, we introduce a fresh type parameter in the environment, which
   is used as an abstract type standing in for the type argument. We then add those constraints
@@ -86,7 +86,7 @@ module Simple : sig
 
   val named_kinds_of_decl_tparams : decl_tparam list -> named_kind list
 
-  val get_wilcard_bounds : kind -> bounds_for_wildcard
+  val get_wildcard_bounds : kind -> bounds_for_wildcard
 
   val to_full_kind_without_bounds : kind -> full_kind
 

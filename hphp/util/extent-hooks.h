@@ -26,7 +26,7 @@
 
 /*
  * Recent versions of jemalloc (specifically, jemalloc 5.x here) allow us to
- * write hooks that specifiy how an arena interacts with the OS.  We use the
+ * write hooks that specify how an arena interacts with the OS.  We use the
  * mechanism to customize the arena for various purposes, for example,
  * limiting the address ranges, managing huge pages, logging, etc.
  *

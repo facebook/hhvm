@@ -401,7 +401,7 @@ let inout_params_memoize pos param_pos =
 
 let inout_in_transformed_pseudofunction pos fn_name =
   User_error.make
-    Error_code.(to_enum InoutInTransformedPsuedofunction)
+    Error_code.(to_enum InoutInTransformedPseudofunction)
     (pos, Printf.sprintf "Unexpected `inout` argument for `%s`" fn_name)
     []
 

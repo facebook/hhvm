@@ -14,7 +14,7 @@ use std::{
 use syn::*;
 
 pub struct Context<'a> {
-    /// type declerations, no visit function will be generated for
+    /// type declarations, no visit function will be generated for
     /// any type *not* in this map.
     pub defs: HashMap<String, &'a Item>,
     /// modules contain the `defs`.

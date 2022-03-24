@@ -37,9 +37,9 @@ type checked_stats = {
 type result = (Pos.absolute * Ide_api_types.coverage_level) list * checked_stats
 
 type pos_stats_entry = {
-  (* How many times this reason position has occured. *)
+  (* How many times this reason position has occurred. *)
   pos_count: int;
-  (* Random sample of expressions where this reason position has occured, for
+  (* Random sample of expressions where this reason position has occurred, for
    * debugging purposes *)
   samples: Pos.t list;
 }

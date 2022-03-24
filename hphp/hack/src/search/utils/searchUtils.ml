@@ -326,7 +326,7 @@ type si_env = {
   sql_select_namespaced_symbols_stmt: Sqlite3.stmt option ref;
   (* NamespaceSearchService *)
   nss_root_namespace: nss_node;
-  (* AutocomleteRankService *)
+  (* AutocompleteRankService *)
   use_ranked_autocomplete: bool;
 }
 
@@ -359,7 +359,7 @@ let default_si_env =
         nss_full_namespace = "\\";
         nss_children = Hashtbl.create 0;
       };
-    (* AutocomleteRankService *)
+    (* AutocompleteRankService *)
     use_ranked_autocomplete = false;
   }
 

@@ -26,7 +26,7 @@ namespace jit {
 
 /*
  * Main entry point for the translator from the bytecode interpreter.  It
- * operates on behalf of a given nested invocation of the intepreter (calling
+ * operates on behalf of a given nested invocation of the interpreter (calling
  * back into it as necessary for blocks that need to be interpreted).
  */
 void enterTC(TCA start);

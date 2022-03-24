@@ -46,7 +46,7 @@ type server_process =
    * Monitor might want to start a Server because the last one died (crashed,
    * or exited due to hhconfig change), or the Informant has decided to start
    * a new instance on a better saved state. Because the .hhconfig file has
-   * indicated a version change is occuring and the logic to parse this version
+   * indicated a version change is occurring and the logic to parse this version
    * change and locate the binaries for that version are not inside server
    * code, we need to force that logic to be exercised on the user side, and
    * only start a new server after we've confirmed that it has been exercised

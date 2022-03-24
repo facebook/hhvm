@@ -540,7 +540,7 @@ module StdlibFunctions = struct
 
   let is_vec_or_varray = "\\HH\\is_vec_or_varray"
 
-  (* All Id funcions that Typing.dispatch_call handles specially *)
+  (* All Id functions that Typing.dispatch_call handles specially *)
   let special_dispatch =
     String.Hash_set.of_list
       ~growth_allowed:false

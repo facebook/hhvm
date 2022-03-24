@@ -1010,7 +1010,7 @@ let serve genv env in_fds =
     Ide_parser_cache.enable ();
   (* During server lifetime dependency table can be not up-to-date. Because of
    * that, we ban access to it be default, forcing the code trying to read it to
-   * take it into account, either by explcitely enabling reads (and being fine
+   * take it into account, either by explicitly enabling reads (and being fine
    * with stale results), or declaring (in ServerCommand) that it requires full
    * check to be completed before being executed. *)
   let (_ : bool) =

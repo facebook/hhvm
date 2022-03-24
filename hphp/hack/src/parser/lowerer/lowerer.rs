@@ -950,7 +950,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
         }
         ReifiedTypeArgument(_) => {
             raise_parsing_error(node, env, &syntax_error::invalid_reified);
-            missing_syntax("refied type", node, env)
+            missing_syntax("reified type", node, env)
         }
         _ => missing_syntax("type hint", node, env),
     }
@@ -1102,11 +1102,11 @@ fn prep_string2<'a>(
     env: &mut Env<'a>,
 ) -> Result<(TokenOp, TokenOp)> {
     use TokenOp::*;
-    let is_qoute = |c| c == b'\"' || c == b'`';
-    let start_is_qoute = |s: &[u8]| {
-        (!s.is_empty() && is_qoute(s[0])) || (s.len() > 1 && (s[0] == b'b' && s[1] == b'\"'))
+    let is_quote = |c| c == b'\"' || c == b'`';
+    let start_is_quote = |s: &[u8]| {
+        (!s.is_empty() && is_quote(s[0])) || (s.len() > 1 && (s[0] == b'b' && s[1] == b'\"'))
     };
-    let last_is_qoute = |s: &[u8]| !s.is_empty() && is_qoute(s[s.len() - 1]);
+    let last_is_quote = |s: &[u8]| !s.is_empty() && is_quote(s[s.len() - 1]);
     let is_heredoc = |s: &[u8]| (s.len() > 3 && &s[0..3] == b"<<<");
     let mut nodes = nodes.iter();
     let first = nodes.next();
@@ -1116,15 +1116,15 @@ fn prep_string2<'a>(
                 raise_parsing_error(first.unwrap(), env, "Malformed String2 SyntaxList");
             };
             let text = t.text_raw(env.source_text());
-            if start_is_qoute(text) {
+            if start_is_quote(text) {
                 let first_token_op = match text[0] {
                     b'b' if text.len() > 2 => LeftTrim(2),
-                    _ if is_qoute(text[0]) && text.len() > 1 => LeftTrim(1),
+                    _ if is_quote(text[0]) && text.len() > 1 => LeftTrim(1),
                     _ => Skip,
                 };
                 if let Some(Token(t)) = nodes.last().map(|n| &n.children) {
                     let last_text = t.text_raw(env.source_text());
-                    if last_is_qoute(last_text) {
+                    if last_is_quote(last_text) {
                         let last_taken_op = match last_text.len() {
                             n if n > 1 => RightTrim(1),
                             _ => Skip,
@@ -1384,7 +1384,7 @@ fn p_expr_lit<'a>(
             }
         }
         SyntaxList(ts) => Ok(Expr_::String2(p_string2(ts, env)?)),
-        _ => missing_syntax("literal expressoin", expr, env),
+        _ => missing_syntax("literal expression", expr, env),
     }
 }
 
@@ -1813,9 +1813,9 @@ fn p_pre_post_unary_decorated_expr<'a>(
     };
 
     /**
-     * FFP does not destinguish between ++$i and $i++ on the level of token
+     * FFP does not distinguish between ++$i and $i++ on the level of token
      * kind annotation. Prevent duplication by switching on `postfix` for
-     * the two operatores for which AST /does/ differentiate between
+     * the two operators for which AST /does/ differentiate between
      * fixities.
      */
     use ast::Uop::*;
@@ -5229,7 +5229,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 typeconsts: vec![],
                 vars: vec![],
                 methods: vec![],
-                // TODO: what is this attbiute? check ast_to_aast
+                // TODO: what is this attribute? check ast_to_aast
                 attributes: vec![],
                 xhp_children: vec![],
                 xhp_attrs: vec![],

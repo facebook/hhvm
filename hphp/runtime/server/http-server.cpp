@@ -476,7 +476,7 @@ void HttpServer::runOrExitProcess() {
         runAfterDelay(RuntimeOption::ServerExtendedWarmupRequests,
                       nTimes, delay);
     }
-    // continously running until /stop is received on admin server, or
+    // continuously running until /stop is received on admin server, or
     // takeover is requested.
     while (!m_stopped) {
       wait();

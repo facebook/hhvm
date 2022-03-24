@@ -44,7 +44,7 @@ TRACE_SET_MOD(mcg);
  * relocation: for ARM, this includes the following
  *
  *   PC Relative
- *     ADR/ADRP - Builds PC relatative addresses.
+ *     ADR/ADRP - Builds PC relative addresses.
  *     B[.<cc>] (immediate) - Branch to a PC relative address.
  *     BL (immediate) - Branch with link to a PC relative address.
  *     LDR (literal) - Loads a literal from a PC relative address.
@@ -107,7 +107,7 @@ struct Env {
 
   /*
    * Maintains a list of any instruction that failed to be adjusted because
-   * it was too far. Failing to adjust will trigger a retry and that insruction
+   * it was too far. Failing to adjust will trigger a retry and that instruction
    * will be relocated to a PIC form.
    */
   InstrSet& far;
@@ -521,7 +521,7 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
  * Returns true if the source is a PC relative instruction. Relocates the
  * that instruction, adjusting the offsets in the instruction. If the new
  * offset cannot be encoded, then the instruction is changed into a multi-
- * instruction sequence, overwritting the original PC relative instruction
+ * instruction sequence, overwriting the original PC relative instruction
  * that was initially copied. The following are the PC relative instructions:
  *   ADR/ADRP
  *   LDR (literal)
@@ -553,7 +553,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
       env.meta.fallthru != srcAddr) {
     /*
      * Calculate the new offset and determine if it can be encoded
-     * in a PC relative instruciton or if it needs to be converted
+     * in a PC relative instruction or if it needs to be converted
      * to make use of an absolute target.
      * Note: Use the VIXL scratch registers when transforming. Their
      *       scope is just a single macroassembler directive, whereas
@@ -886,7 +886,7 @@ size_t relocateImpl(Env& env) {
   /*
    * These sets track instruction words within the source sequence which should
    * be ignored during the analysis. Literals are copied and ignored even though
-   * they sometimes coincedently hold valid encodings of instructions. Any
+   * they sometimes coincidentally hold valid encodings of instructions. Any
    * source instructions which are transformed should also be ignored when
    * adjusting internal refs since they have correct PC relative offsets and
    * immediate already.
@@ -911,13 +911,13 @@ size_t relocateImpl(Env& env) {
       alignCount = 0;
       auto destAddr = env.destBlock.frontier();
 
-      // Align the frontier to follow any potential aligment constraints.
+      // Align the frontier to follow any potential alignment constraints.
       auto af = env.meta.alignments.equal_range(srcAddr);
       while (af.first != af.second) {
         auto const alignPair = af.first->second;
         auto const alignInfo = alignment_info(alignPair.first);
 
-        // We want to prevent resizing of intstruction that are protected by
+        // We want to prevent resizing of instruction that are protected by
         // this alignment constraint.  Save the range of bytes that should
         // be protected.
         auto const low = srcAddr + alignInfo.offset;
@@ -949,7 +949,7 @@ size_t relocateImpl(Env& env) {
       env.destBlock.bytes(kInstructionSize,
                           env.srcBlock.toDestAddress(srcAddr));
 
-      // If it's not a literal, and we don't need to satisfy an aligment
+      // If it's not a literal, and we don't need to satisfy an alignment
       // constraint, then attempt any special relocations.
       if (!literals.count(src) && !preserveAlignment) {
         // Remove nops that are not necessary for alignment constraints.

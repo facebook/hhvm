@@ -22,7 +22,7 @@ module Jget = struct
   (* Helpers for the various "option" monads in use for Json, to succinctly
      capture the spirit of JSON (tolerance for missing values) and the spirit
      of LSP (loads of nested optional members with obvious defaults)
-     and the usefuless of error-checking (in case a required field is absent)...
+     and the usefulness of error-checking (in case a required field is absent)...
      - We use "json option" throughout. Things which you might expect to return
        a json are instead lifted to return a json option, so you can use all the
        accessors on them more easily. When you attempt to get string "o.m", either

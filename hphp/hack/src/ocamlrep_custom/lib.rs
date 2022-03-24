@@ -168,7 +168,7 @@ impl<T: CamlSerialize> ToOcamlRep for Custom<T> {
         let block_ptr: *mut OpaqueValue<'_> = unsafe { alloc.block_ptr_mut(&mut block) };
 
         // Safety: `alloc` guarantees that the `block_ptr` returned by
-        // `block_ptr_mut` is aligend to `align_of::<OpaqueValue>()` and valid
+        // `block_ptr_mut` is aligned to `align_of::<OpaqueValue>()` and valid
         // for reads and writes of `CUSTOM_BLOCK_SIZE_IN_WORDS *
         // size_of::<OpaqueValue>()` bytes. Since `CustomBlockOcamlRep` has size
         // `CUSTOM_BLOCK_SIZE_IN_WORDS * size_of::<OpaqueValue>()`, its

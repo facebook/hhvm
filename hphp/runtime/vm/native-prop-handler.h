@@ -151,15 +151,15 @@ struct BasePropHandler {
   }
 };
 
-#define CHECK_ACCESSOR(accesor, opstr, classname, propname)                    \
-  if (!accesor) {                                                              \
+#define CHECK_ACCESSOR(accessor, opstr, classname, propname)                    \
+  if (!accessor) {                                                              \
     raise_error("Cannot directly %s the property %s::$%s",                     \
                  opstr, classname->data(), propname.data());                   \
   }
 
 /**
  * Base prop handler class, that uses `Native::PropAccessorMap`.
- * Derived classes provide the handling map with accessort per each property.
+ * Derived classes provide the handling map with accessor per each property.
  */
 template <class Derived>
 struct MapPropHandler : BasePropHandler {

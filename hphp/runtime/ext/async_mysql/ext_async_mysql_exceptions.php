@@ -44,7 +44,7 @@ class AsyncMysqlException extends Exception {
    * Explicitly construct an `AsyncMysqlException`.
    *
    * Normally, you will `catch` an `AsyncMysqlException`, but if you want to
-   * explictly construct one and, for example, `throw` it for some given reason,
+   * explicitly construct one and, for example, `throw` it for some given reason,
    * then you pass it an `AsyncMysqlErrorResult`.
    *
    * @param $result - An `AsyncMysqlErrorResult` that contains the error

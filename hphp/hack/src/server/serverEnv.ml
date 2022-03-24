@@ -197,7 +197,7 @@ type env = {
           corresponding phases. Note that this is different from HAVING errors -
           it's possible for checking of A to generate error in B - in this case
           Errors.get_failed_files Typing should contain A, not B.
-          Conversly, if declaring A will require declaring B, we should put
+          Conversely, if declaring A will require declaring B, we should put
           B in failed decl. Same if checking A will cause declaring B (via lazy
           decl).
 

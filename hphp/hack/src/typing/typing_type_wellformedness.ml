@@ -376,7 +376,7 @@ let typedef tenv t =
   } =
     t
   in
-  (* We don't allow constraints on typdef parameters, but we still
+  (* We don't allow constraints on typedef parameters, but we still
      need to record their kinds in the generic var environment *)
   let where_constraints = [] in
   let tenv_with_typedef_tparams =
@@ -390,7 +390,7 @@ let typedef tenv t =
     Option.iter ~f:Errors.add_typing_error ty_err_opt;
     env
   in
-  (* For typdefs, we do want to do the simple kind checks on the body
+  (* For typedefs, we do want to do the simple kind checks on the body
      (e.g., arities match up), but no constraint checks. We need to check the
      kinds of typedefs separately, because check_happly replaces all the generic
      parameters of typedefs by Tany, which makes the kind check moot *)

@@ -247,7 +247,7 @@ void Collector::exactEnqueue(const void* p) {
   }
 }
 
-// mark ambigous pointers in the range [start,start+len). If the start or
+// mark ambiguous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
 void FOLLY_DISABLE_ADDRESS_SANITIZER
 Collector::conservativeScan(const void* start, size_t len) {
@@ -476,9 +476,9 @@ NEVER_INLINE void Collector::sweep() {
     if (type == KindOfObject) {
       auto h = find(wr_data->pointee.m_data.pobj);
       if (!marked(h)) {
-        // Its important we invalidate the pointer stored in the weakref, and
+        // It's important we invalidate the pointer stored in the weakref, and
         // not the start of the allocation.  In the case of objects with
-        // native datas, the start of allocation may not be the start of the
+        // native data, the start of allocation may not be the start of the
         // ObjectData*.
         WeakRefData::invalidateWeakRef(uintptr_t(wr_data->pointee.m_data.pobj));
         mm.reinitFree();

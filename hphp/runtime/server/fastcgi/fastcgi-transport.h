@@ -176,7 +176,7 @@ struct FastCGITransport final : Transport, private Synchronizable {
   void getTransportParams(HeaderMap& serverParams) override; // FCGI parameters
 
   // Modified properties
-  // These paramaters are also passed as FCGI_PARAMS but require modifications
+  // These parameters are also passed as FCGI_PARAMS but require modifications
   // which cause them to differ from their original parameters
   const std::string getDocumentRoot()   override { return m_docRoot; }
   const std::string getScriptFilename() override { return m_scriptName; }
@@ -240,7 +240,7 @@ private:
   // Header manipulation and lookup
   //
   // Headers come from FastCGI webservers via the FCGI_PARAMS record in mangled
-  // form and need to be transfomred into their more familiar HTTP header form
+  // form and need to be transformed into their more familiar HTTP header form
   // before passing them into the VM.
   //
   // (mangled) HTTP_IF_UNMODIFIED_SINCE <-> If-Unmodified-Since (normal)

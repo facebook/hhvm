@@ -99,7 +99,7 @@ impl<'arena> TryFrom<TypedValue<'arena>> for i64 {
     fn try_from(x: TypedValue<'arena>) -> std::result::Result<i64, Self::Error> {
         match x {
             TypedValue::Uninit => Err(()), // Should not happen
-            // Unreachable - the only calliste of to_int is cast_to_arraykey, which never
+            // Unreachable - the only callsite of to_int is cast_to_arraykey, which never
             // calls it with String
             TypedValue::String(_) => Err(()),    // not worth it
             TypedValue::LazyClass(_) => Err(()), // not worth it

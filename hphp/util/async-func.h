@@ -31,14 +31,14 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Invokes a function asynchrously. For example,
+ * Invokes a function asynchronously. For example,
  *
  *   struct MyClass {
  *     void doJob();
  *   };
  *
  *   MyClass obj;
- *   AsyncFunc<MyClass> func(&obj, &MyClasss::doJob);
+ *   AsyncFunc<MyClass> func(&obj, &MyClass::doJob);
  *   func.start(); // this will call obj.doJob() in a separate thread
  *   // do something else
  *   func.waitForEnd();
@@ -203,7 +203,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * We could have written AysncFunc<T> directly with those methods implemented
+ * We could have written AsyncFunc<T> directly with those methods implemented
  * inside AsyncFuncImpl class, but this way we reduce sizes of our code by
  * only templatizing a very minimal piece of code, sharing everything inside
  * AsyncFuncImpl by all AsyncFunc<T> classes.

@@ -121,7 +121,7 @@ class Transliterator {
    * @param int $start -
    * @param int $end -
    *
-   * @return string - The transfomed string on success, .
+   * @return string - The transformed string on success, .
    */
   <<__Native>>
   public function transliterate(string $subject,
@@ -206,7 +206,7 @@ function transliterator_list_ids(): varray {
  * @param int $start -
  * @param int $end -
  *
- * @return  - The transfomed string on success, .
+ * @return  - The transformed string on success, .
  */
 function transliterator_transliterate(mixed $tOrId,
                                       string $subject,

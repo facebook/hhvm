@@ -519,7 +519,7 @@ struct killeffects {};
 struct fallthru { RegSet args; };
 
 /*
- * Load an immedate value without mutating status flags.
+ * Load an immediate value without mutating status flags.
  */
 struct ldimmb { Immed s; Vreg d; };
 struct ldimmw { Immed s; Vreg16 d; };
@@ -901,7 +901,7 @@ struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
  *    +-----------------------+   <- native stack pointer
  *
  * i.e., the native stack pointer will be misaligned coming in (but must, of
- * course, be aliged once phplogue{} finishes executing).  Using a native call
+ * course, be aligned once phplogue{} finishes executing).  Using a native call
  * in the implementation (and likewise, using native returns for leavetc{}) is
  * recommended, in order to take advantage of return branch predictions.
  *
@@ -1363,7 +1363,7 @@ struct Vinstr {
   const IRInstruction* origin{nullptr};
 
   /*
-   * A union of all possible instructions, descriminated by the op field.
+   * A union of all possible instructions, discriminated by the op field.
    */
 #define O(name, imms, uses, defs) jit::name name##_;
   union { VASM_OPCODES };

@@ -30,7 +30,7 @@ open Hh_prelude
  *   'settled' - repo is settled (not undergoing an update)
  *
  * After sending 'settled' message, the socket is closed.
- * An 'unknown' or 'mid_updat' message is eventually followed by a
+ * An 'unknown' or 'mid_update' message is eventually followed by a
  * 'settled' message when the repo is settled.
  *
  * The Hack Monitor uses the watcher when first starting up to delay
@@ -206,7 +206,7 @@ let process_changes changes env =
       Hh_logger.log "Changes: %s" files;
       env
     | Watchman_synchronous _ ->
-      Hh_logger.log "Watchman unexpectd synchronous response. Exiting";
+      Hh_logger.log "Watchman unexpected synchronous response. Exiting";
       exit 1)
 
 let check_subscription env =
@@ -364,8 +364,8 @@ let daemon_main root (_ic, oc) =
     let e = Exception.wrap exn in
     HackEventLogger.watchman_uncaught_exception e
 
-(** Typechecker canont infer this type since the input channel
- * is never used so its phantom type is never ineferred. We annotate
+(** Typechecker cannot infer this type since the input channel
+ * is never used so its phantom type is never inferred. We annotate
  * the type manually to "unit" here to help it out. *)
 let daemon_entry : (Path.t, unit, daemon_init_result) Daemon.entry =
   Daemon.register_entry_point "Watchman_event_watcher_daemon_main" daemon_main

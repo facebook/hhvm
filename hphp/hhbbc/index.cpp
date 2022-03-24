@@ -566,7 +566,7 @@ struct ClassInfo {
   std::unique_ptr<PreResolveState> preResolveState;
 
   /*
-   * Flags to track if this class is mocked, or if any of its dervied classes
+   * Flags to track if this class is mocked, or if any of its derived classes
    * are mocked.
    */
   bool isMocked{false};
@@ -709,7 +709,7 @@ bool Class::mustBeInterface() const {
   );
 }
 
-bool Class::couldBeOverriden() const {
+bool Class::couldBeOverridden() const {
   return val.match(
     [] (SString) { return true; },
     [] (ClassInfo* cinfo) {
@@ -1249,7 +1249,7 @@ struct Index::IndexData {
    * frozen (during the final optimization pass), calls to
    * lookup_return_type with a CallContext can't look at the bytecode
    * bodies of functions other than the calling function.  So we need
-   * to know what we determined the last time we were alloewd to do
+   * to know what we determined the last time we were allowed to do
    * that so we can return it again.
    */
   ContextRetTyMap contextualReturnTypes{};
@@ -1632,7 +1632,7 @@ bool build_class_constants(const php::Program* program, ClassInfo* cinfo, ClsPre
       // (Excluding constants from interfaces a trait implements)
       // Need this check otherwise constants from traits that conflict with
       // declared interfaces will silently lose and not conflict in the runtime
-      // Type and Context constants can be overriden.
+      // Type and Context constants can be overridden.
       if (cns->kind == ConstModifiers::Kind::Value &&
           !existing->isAbstract &&
           existing->cls->attrs & AttrInterface &&
@@ -4624,7 +4624,7 @@ Index::~Index() {}
 void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
   /*
    * Keep a list of properties which have not yet been found to redeclare
-   * anything inequivalently. Start out by putting everything on the list. Then
+   * anything unequivalently. Start out by putting everything on the list. Then
    * walk up the inheritance chain, removing collisions as we find them.
    */
   std::vector<php::Prop*> props;
@@ -5805,10 +5805,10 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
 
   // If this lookup is safe to cache. Some classes can have a huge
   // number of subclasses and unioning together all possible constants
-  // can become very expensive. We can aleviate some of this expense
+  // can become very expensive. We can alleviate some of this expense
   // by caching results. We cannot cache a result we use 86cinit
   // analysis since that can change.
-  auto cachable = true;
+  auto cacheable = true;
 
   auto const process = [&] (const ClassInfo* ci) {
     ITRACE(4, "{}:\n", ci->cls->name);
@@ -5830,7 +5830,7 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
         // Constant is defined by a 86cinit. Use the result from
         // analysis and add a dependency. We cannot cache in this
         // case.
-        cachable = false;
+        cacheable = false;
         if (ctx.func) {
           auto const cinit = cns.cls->methods.back().get();
           assertx(cinit->name == s_86cinit.get());
@@ -5884,7 +5884,7 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
       if (!result) return notFound();
 
       // Save this for future lookups if we can
-      if (cachable) {
+      if (cacheable) {
         m_data->clsConstLookupCache.emplace(
           std::make_pair(cinfo->cls, sname),
           *result
@@ -6540,7 +6540,7 @@ PropLookupResult<> Index::lookup_static(Context ctx,
       // subclass. For every subclass (including dcls.type itself),
       // start the property lookup from there, and union together all
       // the potential results. This could potentially visit a lot of
-      // parent classes redundently, so tell it not to look into
+      // parent classes redundantly, so tell it not to look into
       // parent classes, unless we're processing dcls.type.
       Optional<PropLookupResult<>> result;
       for (auto const sub : cinfo->subclassList) {
@@ -6751,7 +6751,7 @@ PropMergeResult<> Index::merge_static_type(
       // itself), do the merge starting from it. To avoid redundant
       // work, only iterate into parent classes if we're dcls.type
       // (this is only a matter of efficiency. The merge is
-      // idiompotent).
+      // idempotent).
       Optional<PropMergeResult<>> result;
       for (auto const sub : cinfo->subclassList) {
         auto r = merge_static_type_impl(
@@ -7056,7 +7056,7 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
   if (t.strictlyMoreRefined(finfo->returnTy)) {
     if (finfo->returnRefinements < options.returnTypeRefineLimit) {
       finfo->returnTy = t;
-      // We've modifed the return type, so reset any cached FuncFamily
+      // We've modified the return type, so reset any cached FuncFamily
       // return types.
       for (auto const ff : finfo->families) ff->m_returnTy.reset();
       dep = is_scalar(t) ?
@@ -7544,7 +7544,7 @@ void PublicSPropMutations::mergeUnknown(Context ctx) {
     "NOTE: had to mark everything unknown for public static "
     "property types due to dynamic code.  -fanalyze-public-statics "
     "will not help for this program.\n"
-    "NOTE: The offending code occured in this context: %s\n",
+    "NOTE: The offending code occurred in this context: %s\n",
     show(ctx).c_str()
   );
   get().m_nothing_known = true;

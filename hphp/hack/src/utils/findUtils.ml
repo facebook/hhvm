@@ -26,7 +26,7 @@ let extensions =
     ".hck";
     (* open source hack: bikeshed entry *)
     ".hh";
-    (* open source hack: biekshed entry *)
+    (* open source hack: bikeshed entry *)
     ".hhi";
     (* interface files only visible to the type checker *)
     ".xhp";

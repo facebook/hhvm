@@ -75,10 +75,10 @@ void CmdInternalTesting::onClient(DebuggerClient &client) {
     client.sendToServer(this);
     // Spin here and wait for the client to be marked as stopped
     // before going back to the event loop. This will give the local
-    // proxy time to recgonize the bad cmd, terminate, and wait for
+    // proxy time to recognize the bad cmd, terminate, and wait for
     // the client to stop. This will ensure that we always exit on the
     // same path on both proxy and client threads, and remove any
-    // spurious output form ths test case.
+    // spurious output from this test case.
     while (!client.internalTestingIsClientStopped()) {
       sleep(1);
     }

@@ -287,7 +287,7 @@ TypedValue IterImpl::secondVal() const {
 
 bool Iter::init(TypedValue* base) {
   // Get easy cases out of the way. Class methods promote to arrays and both
-  // of them are just an IterImpl contructor. end() never throws for arrays.
+  // of them are just an IterImpl constructor. end() never throws for arrays.
   if (isClsMethType(base->m_type)) {
     new (&m_iter) IterImpl(tvAsVariant(base).toArray().get());
     return !m_iter.end();

@@ -65,7 +65,7 @@ private:
   std::atomic<bool> m_terminating;
 
   // Indicates if a thread is currently inside processCommands(). The same
-  // thread may enter processCommands multiple times recurisvely when it is
+  // thread may enter processCommands multiple times recursively when it is
   // evaluating an expression, if the eval hits a breakpoint.
   std::atomic<int> m_threadProcessingCount {0};
 

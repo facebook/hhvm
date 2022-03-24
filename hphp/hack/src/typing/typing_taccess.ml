@@ -157,7 +157,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
         (* Legacy behavior is to preserve exactness only on `this` and not
            through `this::T` *)
         map_ty ty ~f:(function
-            | Tclass (cid, _, tyl) -> Tclass (cid, Nonexact, tyl)
+            | Tclass (cid, _, tyl) -> Tclass (cid, Inexact, tyl)
             | ty -> ty)
       in
       let ety_env =
@@ -451,8 +451,8 @@ let rec expand ctx env root =
       update_class_name env ctx.id (DependentKind.to_string dep_ty) res )
   | Tintersection tyl ->
     (* Terrible hack (compatible with previous behaviour) that first attempts to project off the
-     * non-type-variable conjunects. If this doesn't succeed, then try the type variable
-     * conjunects, which will cause type-const constraints to be added to the type variables.
+     * non-type-variable conjuncts. If this doesn't succeed, then try the type variable
+     * conjuncts, which will cause type-const constraints to be added to the type variables.
      *)
     let (tyl_vars, tyl_nonvars) =
       List.partition_tf tyl ~f:(fun t ->

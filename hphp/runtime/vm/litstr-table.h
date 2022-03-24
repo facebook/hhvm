@@ -28,7 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Singleton global table of literal strings and NamedEntitys.
+ * Singleton global table of literal strings and NamedEntities.
  *
  * This can only be safely used when the repo is built in WholeProgram mode and
  * run in RepoAuthoritative mode.

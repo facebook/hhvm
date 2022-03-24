@@ -73,7 +73,7 @@ void php_gd_error(const char *format, ...);
   pixels are represented by integers, which
   must be 32 bits wide or more.
 
-  True colors are repsented as follows:
+  True colors are represented as follows:
 
   ARGB
 
@@ -774,7 +774,7 @@ void* gdDPExtractData(struct gdIOCtx* ctx, int *size);
 
 /* filters section
  *
- * Negate the imag src, white becomes black,
+ * Negate the image src, white becomes black,
  * The red, green, and blue intensities of an image are negated.
  * White becomes black, yellow becomes blue, etc.
  */
@@ -814,7 +814,7 @@ void gdImageFlipHorizontal(gdImagePtr im);
 void gdImageFlipVertical(gdImagePtr im);
 void gdImageFlipBoth(gdImagePtr im);
 
-#define GD_FLIP_HORINZONTAL 1
+#define GD_FLIP_HORIZONTAL 1
 #define GD_FLIP_VERTICAL 2
 #define GD_FLIP_BOTH 3
 

@@ -567,7 +567,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
   if (!RepoFile::globalData().HardPrivatePropInference) return;
 
   /*
-   * We assume for performance reasons in repo authoriative mode that
+   * We assume for performance reasons in repo authoritative mode that
    * we can see all the sets to private properties in a class.
    *
    * It's a hole in this if we don't check unserialization doesn't

@@ -2604,7 +2604,7 @@ static Variant to_zval_map(encodeType* /*type*/, xmlNodePtr data) {
         ret.set(key, value);
       } else {
         throw SoapException( "Encoding: Can't decode map, only Strings or "
-                       "Longs are allowd as keys");
+                       "Longs are allowed as keys");
       }
     }
     ENDFOREACH(trav);
@@ -2778,7 +2778,7 @@ xmlNodePtr to_xml_datetime(encodeType* type, const Variant& data, int style,
 
 static xmlNodePtr to_xml_time(encodeType* type, const Variant& data, int style,
                               xmlNodePtr parent) {
-  /* TODO: microsecconds */
+  /* TODO: microseconds */
   return to_xml_datetime_ex(type, data, "%H:%M:%S", style, parent);
 }
 

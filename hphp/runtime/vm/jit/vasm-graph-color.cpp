@@ -137,7 +137,7 @@ using Color = boost::variant<None, PhysReg, SpillSlot, SpillSlotWide>;
 struct RematInfo {
   // The instruction which potentially can rematerialize it. May be a
   // reload to indicate there's no rematerialization available. The
-  // instruction may not necessarily be usuable. A context sensitive
+  // instruction may not necessarily be usable. A context sensitive
   // check is required.
   Vinstr instr;
   // The block where the instruction where the instruction came
@@ -160,7 +160,7 @@ struct RegInfo {
   // Can this Vreg be potentially rematerialized (instead of reloaded)
   // by this instruction? This field is calculated lazily and then
   // cached. Even if there's information here, we may still need to do
-  // context sensitive checks to see if it's usuable.
+  // context sensitive checks to see if it's usable.
   Optional<RematInfo> cachedRemat;
 };
 
@@ -992,7 +992,7 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
       g |= uses;
       u |= uses;
       if (inst.op == Vinstr::recordbasenativesp) {
-        assert_flog(!spRecorded, "Block B{} {} initiailizes native SP, "
+        assert_flog(!spRecorded, "Block B{} {} initializes native SP, "
                     "but already initialized.", b, show(unit, inst));
         spRecorded = true;
       }
@@ -1335,7 +1335,7 @@ size_t block_loop_depth(const State& state, Vlabel b) {
 // executed.
 int64_t block_weight(const State& state, Vlabel b) {
   // Weight cannot be zero, as that means doing anything in it is
-  // "free" (leads to nonesense decisions).
+  // "free" (leads to nonsense decisions).
   return std::max<int64_t>(state.unit.blocks[b].weight, 1);
 }
 
@@ -3333,7 +3333,7 @@ PhysRecoverableResult physical_register_is_recoverable(
    * result from the target block, and making sure the result is the
    * same at merge points.
    *
-   * This is potentially expensive, so we imploy a number of
+   * This is potentially expensive, so we employ a number of
    * optimizations. First we utilize some pre-calculated metadata
    * about physical register definitions to avoid having to process
    * every instruction in a block, or even cut the search short
@@ -3715,7 +3715,7 @@ bool fold_offset_into_instr(Vinstr& instr, int64_t offset) {
   if (offset == 0) return true;
 
   if (instr.op == Vinstr::copy) {
-    // copys can be turned into leas with the offset as the
+    // copies can be turned into leas with the offset as the
     // displacement
     if (!can_merge_disps(0, offset)) return false;
     auto const src = instr.copy_.s;
@@ -4009,7 +4009,7 @@ bool mem_read_available_recurse(State& state,
         // the fixup. We can skip the fixup if the block has only one
         // successor. If it does, it cannot participate in a loop.
 
-        // fixup_mem_read_available_cache assumes any processably
+        // fixup_mem_read_available_cache assumes any processable
         // block has a TriBool::Yes entry, so temporarily change it to
         // that.
         it->second = TriBool::Yes;
@@ -4040,7 +4040,7 @@ bool mem_read_available_recurse(State& state,
       // conflicting writes.
       auto& block = state.unit.blocks[b];
 
-      // Check if any the aggregated writes in this block interfer
+      // Check if any the aggregated writes in this block interfere
       // with the load. If they do, do a per-instruction check. This
       // is for two reasons. The first is that unioning together the
       // locations can sometimes create larger than desired
@@ -4246,7 +4246,7 @@ Vinstr reload_with_remat(State& state,
   // If the rematerialization instruction is a reload, we'll just
   // return it, so no further checks are needed. Otherwise we can
   // cache an instruction which may be situationally usable, so we
-  // need to do these checks everytime (if the instruction is never
+  // need to do these checks every time (if the instruction is never
   // useful, we should have a reload stored here already).
   if (remat.instr.op == Vinstr::reload) return reload{src, dst};
 
@@ -6273,7 +6273,7 @@ ProcessCopyResults process_copy_spills(State& state,
    * The rational for #3 is as follows: If the src and dst are both
    * spilled, and the src is live across the copy, we'll *have* to
    * lower this to a memory to memory copy (we'll never be able to
-   * coalesce the two slots together as they naturally interfer). By
+   * coalesce the two slots together as they naturally interfere). By
    * initially assuming the dst is non-spilled, we have to chance to
    * load it into a register (avoiding the store), or possibly
    * rematerialize it directly into the destination spill slot
@@ -6331,7 +6331,7 @@ ProcessCopyResults process_copy_spills(State& state,
     for (auto const r : spills) always_assert(spiller.forReg(r));
   }
 
-  // We know which Vregs we want to spill. Copys can handle copying between
+  // We know which Vregs we want to spill. Copies can handle copying between
   // spilled Vregs on both sides and non-spilled Vregs on both sides (but not
   // mixing). Moving between spilled and non-spilled Vregs is the job of the
   // spill and reload instructions. So, if we need to spill one side of the copy
@@ -9510,7 +9510,7 @@ void calculate_penalties(State& state) {
       // vectors can't change. We only have to update the liveness
       // information.
       if (state.spilled || defs.containsPhys()) {
-        // Add acrosses to the live set, since they interfer with the
+        // Add acrosses to the live set, since they interfere with the
         // defs. The defs will be checked directly when needed rather
         // than being added to the live set.
         live |= acrosses_set_cached(state, inst);
@@ -11039,7 +11039,7 @@ void assign_colors(State& state) {
 
   BlockSet processed(state.unit.blocks.size());
 
-  // Since the block order is dominance preserving, we'll always encouter a
+  // Since the block order is dominance preserving, we'll always encounter a
   // Vreg's def before any of its usages. This means we can color in a single
   // pass over the unit.
   for (auto const b : order) {
@@ -11643,7 +11643,7 @@ void lower_copies(const State& state,
 
 // Return the amount an instruction will move the stack pointer. Negative is
 // moving away from the frame pointer, and positive is moving towards it. This
-// only supports the type of instructions we expect to see, and not abitrary
+// only supports the type of instructions we expect to see, and not arbitrary
 // ones.
 int sp_change(const State& state, const Vinstr& inst) {
   switch (inst.op) {
@@ -11710,7 +11710,7 @@ SPOffsets calculate_sp_offsets(const State& state) {
         assertx(!spOffset);
         spOffset = 0;
       } else if (inst.op == Vinstr::unrecordbasenativesp) {
-        assert_flog(spOffset, "Block B{} Instr {} uninitiailizes native SP, "
+        assert_flog(spOffset, "Block B{} Instr {} uninitializes native SP, "
                     "but already uninitialized.", b, i);
         spOffset = std::nullopt;
       } else if (spOffset) {

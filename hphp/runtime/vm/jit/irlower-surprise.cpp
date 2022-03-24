@@ -90,7 +90,7 @@ void cgCheckSurpriseFlags(IRLS& env, const IRInstruction* inst) {
 
 static void handleSurpriseCheck() {
   size_t flags = handle_request_surprise();
-  // Memory Threhsold callback should also be fired here
+  // Memory Threshold callback should also be fired here
   if (flags & MemThresholdFlag) {
     EventHook::DoMemoryThresholdCallback();
   }

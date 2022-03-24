@@ -25,7 +25,7 @@ pub struct Job {
 impl Job {
     /// Repeatedly runs a retryable computation produced by `make_retryable`,
     /// guarding each attempt by _exponentially_ increasing stack limits
-    /// in order to keep the asymoptic time complexity the same; it assumes that
+    /// in order to keep the asymptotic time complexity the same; it assumes that
     /// retryable calls `StackLimit::panic_if_exceeded` before it's too late.
     /// Since the stack size it being doubled, the time is: t + 2*t + 4*t + ...
     /// where the total time with unbounded stack is T=k*t; therefore it is

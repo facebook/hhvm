@@ -69,7 +69,7 @@ let make_locl_like_type env ty =
     env.Typing_env_types.pessimize
     || TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
   then
-    let dyn = MakeType.dynamic (Reason.Renforceable (get_pos ty)) in
+    let dyn = MakeType.dynamic (Reason.Reinforceable (get_pos ty)) in
     Typing_union.union env dyn ty
   else
     (env, ty)

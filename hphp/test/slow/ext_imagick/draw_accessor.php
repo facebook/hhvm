@@ -61,8 +61,8 @@ var_dump($draw->getTextAlignment() === Imagick::ALIGN_CENTER);
 $draw->setTextAntialias(false);
 var_dump($draw->getTextAntialias());
 
-$draw->setTextDecoration(Imagick::DECORATION_LINETROUGH);
-var_dump($draw->getTextDecoration() === Imagick::DECORATION_LINETROUGH);
+$draw->setTextDecoration(Imagick::DECORATION_LINETHROUGH);
+var_dump($draw->getTextDecoration() === Imagick::DECORATION_LINETHROUGH);
 
 $draw->setTextEncoding('UTF-8');
 var_dump($draw->getTextEncoding());

@@ -27,7 +27,7 @@ clean:
 # Second argument is a suffix for the rules name. Optional
 #
 # The only supported configuration are:
-# 1=exe 2=        (literaly nothing, not even a space)
+# 1=exe 2=        (literally nothing, not even a space)
 # 1=bc 2=-debug
 define build_hack
 $(eval ext := $(if $(filter $(2),-debug),".bc",""))

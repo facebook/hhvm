@@ -300,7 +300,7 @@ fn strip_hh_ns(name: &str) -> &str {
     name.trim_start_matches("\\HH\\")
 }
 
-// test a node is a syntaxlist and that the list contains an element
+// test a node is a syntax list and that the list contains an element
 // satisfying a given predicate
 fn list_contains_predicate<P>(p: P, node: S<'_>) -> bool
 where
@@ -2854,7 +2854,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     continue;
                 }
                 // test part of conditional expression is considered legal location if
-                //  onditional expression itself is in legal location
+                // conditional expression itself is in legal location
                 ConditionalExpression(x) if std::ptr::eq(node, &x.test) => {
                     continue;
                 }
@@ -4876,7 +4876,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             PrefixUnaryExpression(x) => check_unary_expression(self, &x.operator),
             PostfixUnaryExpression(x) => check_unary_expression(self, &x.operator),
             // FIXME: Array_get ((_, Class_const _), _) is not a valid lvalue. *)
-            _ => {} // Ideally we should put all the rest of the syntax here so everytime
+            _ => {} // Ideally we should put all the rest of the syntax here so every time
             // a new syntax is added people need to consider whether the syntax
             // can be a valid lvalue or not. However, there are too many of them.
         }

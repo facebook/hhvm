@@ -101,7 +101,7 @@ impl StackLimit {
 
 pub const STACK_SLACK_1K: retry::StackSlackFunction = |_| KI;
 
-/// Initializes the global state, more precisely modifes panic hook such that:
+/// Initializes the global state, more precisely modifies panic hook such that:
 /// - panics raised from StackLimit::panic_if_exceeded() are silenced;
 /// - other panics are passed through the original panic hook.
 pub fn init() {
@@ -131,7 +131,7 @@ where
     let job = retry::Job {
         nonmain_stack_min: 13 * MI,
         // TODO(hrust) compile_ffi needs as much as 7 * GI, but aast_parser_ffi
-        // only requies 1 * GI. Why? it's like rust compiler produce inconsistent binary.
+        // only requires 1 * GI. Why? it's like rust compiler produce inconsistent binary.
         nonmain_stack_max: Some(7 * GI),
         ..Default::default()
     };

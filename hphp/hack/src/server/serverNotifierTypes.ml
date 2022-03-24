@@ -1,4 +1,4 @@
-(** Notifer results come in 3 flavors:
+(** Notifier results come in 3 flavors:
  *
  * 1) Notifier is not available (Dfind not available or watchman
  *    subscription is down)

@@ -559,7 +559,7 @@ Job<ParseJob> g_parseJob;
  * group). Furthermore, to maximize cache effectiveness, we want to
  * group files together in a deterministic way. Finally, there may be
  * different "subsections" of the source tree, which are only parsed
- * depending on the input files configeration (for example, some
+ * depending on the input files configuration (for example, some
  * builds may discard test directories and some might not). Again, we
  * want to maximize caching across these different "flavor" of builds
  * and try to avoid grouping together files from these different

@@ -190,7 +190,7 @@ interpOutputLocals(IRGS& env,
   auto setLocType = [&](uint32_t id, Type t) {
     // Relax the type to something guardable.  For InterpOne we don't bother to
     // keep track of specialized types or inner-ref types.  (And note that for
-    // psuedomains we may in fact have to guard on the local type after this.)
+    // pseudomains we may in fact have to guard on the local type after this.)
     locals.emplace_back(id, relaxToGuardable(t));
   };
   auto setImmLocType = [&](uint32_t id, Type t) {

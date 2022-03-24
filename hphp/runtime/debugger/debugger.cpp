@@ -346,7 +346,7 @@ bool Debugger::isThreadDebugging(int64_t tid) {
   return false;
 }
 
-// Remeber this thread's VM RequestInfo so we can find it later via
+// Remember this thread's VM RequestInfo so we can find it later via
 // isThreadDebugging(). This is called when a thread interrupts for
 // either session- or request-started, as these each signal the start
 // of debugging for request and other threads.

@@ -23,7 +23,7 @@ pub enum Error {
     #[error("Invalid boolean value '{0}'")]
     BadBool(String),
 
-    #[error("Filename contained an embeded nul")]
+    #[error("Filename contained an embedded nul")]
     BadNul(#[from] ffi::NulError),
 
     #[error("I/O Error")]

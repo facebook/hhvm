@@ -44,7 +44,7 @@ val check_non_blocking : ServerEnv.env -> unit
  * - attributing incremental file changes to rebases is based on timing and
  *   there is a risk that we would precheck a real local change
  * - even if we just want to treat files as prechecked, without fully processing
- *   them, it can require quiet a lot of work in incrmental mode to invalidate all
+ *   them, it can require quiet a lot of work in incremental mode to invalidate all
  *   things that need to be invalidated (which are absent during init)
  * *)
 val files_changed : ServerLocalConfig.t -> int -> unit

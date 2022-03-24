@@ -153,11 +153,11 @@ std::unique_lock<std::mutex> lockData() {
 }
 
 /*
- * Removes meta-data about a caller to a proflogue from prof-data to ensure that
+ * Removes meta-data about a caller to a prologue from prof-data to ensure that
  * a call to an optimized translation isn't wrongly smashed later.
  */
 void clearProfCaller(TCA toSmash, ProfTransRec* rec) {
-  if (!rec || !rec->isProflogue()) return;
+  if (!rec || !rec->isPrologue()) return;
 
   auto lock = rec->lockCallerList();
   rec->removeMainCaller(toSmash);

@@ -70,7 +70,7 @@ pub enum InstrSeq<'a> {
 
 // The following iterator implementations produce streams of instruction lists
 // (vecs or slices) and use an internal stack to flatten InstrSeq. The
-// instruction lists can be manipulated directly, doing bulk opertaions like
+// instruction lists can be manipulated directly, doing bulk operations like
 // extend() or retain(), or flatten()'d once more into streams of instructions.
 //
 // Some tricks that were done for speed:
@@ -1162,7 +1162,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::ContValid))
     }
 
-    pub fn contcurrent<'a>() -> InstrSeq<'a> {
+    pub fn concurrent<'a>() -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ContCurrent))
     }
 

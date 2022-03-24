@@ -42,7 +42,7 @@ struct HostHealthMonitorExtension final : public Extension {
     Config::Bind(Enabled, ini, globalConfig,
                  "HealthMonitor.EnableHealthMonitor", true);
     Config::Bind(MaxUpdatePeriod, ini, globalConfig,
-                 "HealthMonitor.MaxUpdatePeriod", 100 /* miliseconds */);
+                 "HealthMonitor.MaxUpdatePeriod", 100 /* milliseconds */);
     auto const dampenMs =
       Config::GetInt32(ini, globalConfig, "HealthMonitor.DampenTimeMs", 0);
     if (dampenMs > 0) DampenTime = std::chrono::milliseconds(dampenMs);

@@ -152,7 +152,7 @@ private:
 
   /*
    * Wide storage type: separate pointers for the type and the value. m_type is
-   * only meangingful is m_val != nullptr.
+   * only meaningful is m_val != nullptr.
    */
   struct wide_storage {
     INLINE_FLATTEN wide_storage()

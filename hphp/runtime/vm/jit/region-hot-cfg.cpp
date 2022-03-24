@@ -144,7 +144,7 @@ struct Former {
     }
 
     // Add to the region any arc involving the blocks that were added to the
-    // region and that satisty the minimum probability (m_minArcProb).
+    // region and that satisfy the minimum probability (m_minArcProb).
     auto const blocks = m_region->blocks();
     for (auto const& block : blocks) {
       auto const src = block->id();
@@ -373,7 +373,7 @@ private:
  *
  * Attempt to scale the prof counts in the blocks to reflect this (in an
  * approximate way). For each block, sum together the combined prof count of all
- * its original predecessors, as well as sum only the precessors in the
+ * its original predecessors, as well as sum only the predecessors in the
  * region. Scale the block's prof count by the ratio between the two.
  */
 void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {

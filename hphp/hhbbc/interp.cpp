@@ -1321,7 +1321,7 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
   auto isect = intersection_of(ty0, ty1);
 
   // Unfortunately, floating point negative zero and positive zero are
-  // different, but are identical using as far as Same is concerened. We should
+  // different, but are identical using as far as Same is concerned. We should
   // avoid refining a value to 0.0 because it compares identically to 0.0
   if (isect.couldBe(dval(0.0)) || isect.couldBe(dval(-0.0))) {
     isect = union_of(isect, TDbl);
@@ -2516,7 +2516,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       break;
   }
 
-  // No type constraint, or one that isn't usuable. Use the generic memoization
+  // No type constraint, or one that isn't usable. Use the generic memoization
   // scheme which can handle any type:
 
   if (auto const val = tv(inTy)) {
@@ -4357,7 +4357,7 @@ void newObjDImpl(ISS& env, const StringData* className, bool rflavor) {
   if (rflavor && !rcls->couldHaveReifiedGenerics()) {
     return reduce(env, bc::PopC {}, bc::NewObjD { className });
   }
-  auto const isCtx = !rcls->couldBeOverriden() && env.ctx.cls &&
+  auto const isCtx = !rcls->couldBeOverridden() && env.ctx.cls &&
     rcls->same(env.index.resolve_class(env.ctx.cls));
   if (rflavor) popC(env);
   push(env, setctx(objExact(*rcls), isCtx));
@@ -4378,7 +4378,7 @@ void in(ISS& env, const bc::NewObjS& op) {
   auto const dcls = dcls_of(cls);
   auto const exact = dcls.type == DCls::Exact;
   if (exact && !dcls.cls.couldHaveReifiedGenerics() &&
-      (!dcls.cls.couldBeOverriden() || equivalently_refined(cls, unctx(cls)))) {
+      (!dcls.cls.couldBeOverridden() || equivalently_refined(cls, unctx(cls)))) {
     return reduce(env, bc::NewObjD { dcls.cls.name() });
   }
 

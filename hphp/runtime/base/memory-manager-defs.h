@@ -137,7 +137,7 @@ private:
   // Start-bit state:
   // 1 = a HeapObject starts at corresponding address AND it has had its header
   //     kind initialized at least once (not necessarily currently accurate but
-  //     definetly does not contain never initialized data)
+  //     definitely does not contain never initialized data)
   // 0 = in the middle of an object OR free space OR a heap object with
   //     uninitialized headers OR a heap object not created through split tail
   uint64_t startsCache_[kNumStarts];

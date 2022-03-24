@@ -324,7 +324,7 @@ DEBUG_ONLY std::string show(const SSATmpSet& s) {
   Data-flow state for each block. We keep track of the various sets
   using bitsets, indexed by the SSATmp id defined (we don't attempt to
   sink multi-def instructions currently). If these sets prove to be
-  sufficiently sparse, a different represention may be called for. The
+  sufficiently sparse, a different representation may be called for. The
   conflict sets aren't stored, as they are calculated on demand.
 */
 struct BlockState {
@@ -1081,7 +1081,7 @@ State make_state(IRUnit& unit,
     if (!instr->block() || !reachable[instr->block()->id()]) continue;
 
     /*
-     * Instructions with multiple defs could potentialy be dealt with, but not
+     * Instructions with multiple defs could potentially be dealt with, but not
      * worth the effort now. Assume that if an instruction cannot be DCE'd, it
      * also cannot be sunk.
      */
@@ -1286,7 +1286,7 @@ void find_delayed(State& state) {
       block->forEachPred(
         [&] (Block* pred) {
           if (rworklist.push(state.block_state[pred].rpo_order)) {
-            ITRACE(3, "Enqueing block {} for re-processing\n", pred->id());
+            ITRACE(3, "Enqueuing block {} for re-processing\n", pred->id());
           }
         }
       );
@@ -1351,7 +1351,7 @@ void find_delayed(State& state) {
       block->forEachSucc(
         [&] (Block* succ) {
           if (worklist.push(state.block_state[succ].rpo_order)) {
-            ITRACE(3, "Enqueing block {} for re-processing\n", succ->id());
+            ITRACE(3, "Enqueuing block {} for re-processing\n", succ->id());
           }
         }
       );

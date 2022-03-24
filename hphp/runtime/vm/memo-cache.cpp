@@ -370,7 +370,7 @@ using UnboundKey = Key<UnboundStorage>;
  * KeyProxy is a wrapper around the pointer to the TypedValue array passed into the
  * get/set function. It allows us to do lookups in the memo cache without having
  * to move or transform those Cells. It comes in two flavors: KeyProxy, where
- * the key types are not known and must be checked at runtme, and
+ * the key types are not known and must be checked at runtime, and
  * KeyProxyWithTypes, where the key types are known statically.
  */
 struct KeyProxy {

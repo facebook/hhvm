@@ -34,8 +34,8 @@ There are four states of ownership:
 
 The main differences between each state are the operations allowed on an object
 of that state. Ownership is a property of the linearity of an object. Owned and
-Borrowed objects are enforcibly linear, Unowned objects are not, though they may
-be natuarally, and MaybeOwned may or may not be forcibly linear.
+Borrowed objects are enforceably linear, Unowned objects are not, though they may
+be naturally, and MaybeOwned may or may not be forcibly linear.
 
 Described in terms of the operations allowed on them, the states are as follows:
 1. Unowned - The default state in hack. May already have aliases
@@ -103,10 +103,10 @@ usecase for not being able to pass unowned into borrowed is enabling of mutation
 on linear objects (when they'd be banned on nonlinear ones).
 
 Consider Rust. They have locally mutable values, which are analogous to our
-Owned values, and `mut &`s and `&`s, respectively analoglous to our Borrowed and
+Owned values, and `mut &`s and `&`s, respectively analogous to our Borrowed and
 MaybeOwned. The key is that rust does not have an unowned state - all values are
 owned by a single reference. When a system requires linearity to enable
-mutability, passing an unowned value into the equivilant to a `mut &` is obviously
+mutability, passing an unowned value into the equivalent to a `mut &` is obviously
 unsafe, as that would result in mutations happening to nonlinear values.
 
 Under this proposal, systems that require linearity for the purpose of tracked
@@ -115,10 +115,10 @@ unowned values to parameters etc marked as borrowed. Developers would get an
 error specifically about this telling them why and they will merely need to
 conform to these restrictions, often via use of the MaybeOwned state.
 
-One may note that this is in fact the main reason for the existance of the
+One may note that this is in fact the main reason for the existence of the
 otherwise quite similar Borrowed and MaybeOwned state. For systems that don't
 require this stricter ruleset, those states are functionally identical (although
-still not interchangable). For the most part, developers should not need to know
+still not interchangeable). For the most part, developers should not need to know
 or care about this.
 
 #### Concurrent uses of tracked objects
@@ -172,7 +172,7 @@ public function foo(maybeowned IFoo $foo): Foo { return new Foo(); }
 
 #### Return Types
 
-Return values may be delared as either unowned or Owned
+Return values may be declared as either unowned or Owned
 
 ```
 public function foo(IFoo $foo): Foo { return new Foo(); }
@@ -184,7 +184,7 @@ alias. Returning an owned value implicitly transfers ownership to the caller.
 
 #### Method Objects
 
-The object on which a method is called may be delared as Unowned, Borrowed, or MaybeOwned
+The object on which a method is called may be declared as Unowned, Borrowed, or MaybeOwned
 
 ```
 public function foo(IFoo $foo): Foo { return new Foo(); }
@@ -221,7 +221,7 @@ function creates_owned(): void {
 }
 ```
 
-Ownership transferrance is done via the `move` keyword
+Ownership transference is done via the `move` keyword
 
 ```
 function creates_owned(): void {
@@ -538,7 +538,7 @@ exactly `$this`.
 
 ## IDE experience
 
-The new keywords will be supported in a first class manner with respect to syntax highlighing.
+The new keywords will be supported in a first class manner with respect to syntax highlighting.
 
 There will be a large number of new error types both in the typechecker and parser.
 
@@ -876,7 +876,7 @@ return $this for the purpose of chaining.
 
 An alternative to the `disown` keyword is to use `release`. Bikeshedding welcome.
 
-The __ReturnsBorrowedThis attribute is technically unecessary as the emitter
+The __ReturnsBorrowedThis attribute is technically unnecessary as the emitter
 can infer when it would be required and handle the situation appropriately. We
 think it's better to be explicit here.
 
@@ -892,7 +892,7 @@ It is complicated and requires significant runtime and typechecker support.
 
 At present, there is only one major language implementing an ownership system.
 There are a handful of languages implementing Linearity systems, however that
-does not map particularly well to an imperitive language like our own.
+does not map particularly well to an imperative language like our own.
 
 Rust's ownership tracking is more robust and allows for nested ownership
 tracking (such as owned properties) and explicit lifetimes. This is made
@@ -905,13 +905,13 @@ merely being utilized multiple times at once (and so must be immutable).
 In general, our requirements are flipped. They want everything owned. We want
 most things unowned with specific things being owned.
 
-Additionally, there a handful of other languages actively exporing this space:
+Additionally, there a handful of other languages actively exploring this space:
 
 [Swift's ownership manifesto](https://github.com/apple/swift/blob/master/docs/OwnershipManifesto.md)
 is designed based on different constraints and purposes. Ours is mostly to unblock other features,
 while also enabling some performance gains. Their purposes are flipped.
 
-[Haskel](https://github.com/ghc-proposals/ghc-proposals/blob/master/proposals/0111-linear-types.rst#id22)
+[Haskell](https://github.com/ghc-proposals/ghc-proposals/blob/master/proposals/0111-linear-types.rst#id22)
 with [tech talk](https://www.youtube.com/watch?v=o0z-qlb5xbI&t=1s):
 Rather than discussing linearity of values, they describe linearity of functions,
 such that for a fn a -> b, if b is consumed exactly once, then a is consumed
@@ -921,19 +921,19 @@ passed function. Further, they do not have the concept of borrowing linear
 values, which is extremely important to our system.
 
 [Clean](https://clean.cs.ru.nl/download/html_report/CleanRep.2.2_11.htm):
-Clean has a similar system to haskell except that it's type-based rather than
+Clean has a similar system to Haskell except that it's type-based rather than
 function based. It has some similar properties to our system, but considers
 non-unique <: unique because of its functional nature, such that you can
 pass uniq values into a function accepting non-uniq, but what you get out is
 nonuniq. In general, these all apply to consumed inputs, thus they don't have
-the borrowed state. They do have a generic on types to specify propogation
-of uniqness, but again, this requires the move in -> move out scenario.
+the borrowed state. They do have a generic on types to specify propagation
+of uniqueness, but again, this requires the move in -> move out scenario.
 
 [Idris](http://docs.idris-lang.org/en/latest/reference/uniqueness-types.html):
 They use dependent typing for this and have discovered the need for a borrowed
 state but have not yet handled the polymorphic MaybeOwned state. They have a
 representation for Owned V Unowned, but specifically note that it doesn't allow
-for representation of borrowed. It's more similar to haskel's polymorphism due
+for representation of borrowed. It's more similar to Haskell's polymorphism due
 to its lack of a borrowed state.
 
 Also, from another paper or note:
@@ -1023,7 +1023,7 @@ Their system of ownership and borrowing seems *very* similar to our own
 They recommend using `borrowed` to refer to a value that may either by a dynamic alias
 to an owned object or an unowned object.
 
-However, they further recognize that the existance of a union state of this
+However, they further recognize that the existence of a union state of this
 description results in issues with tracking mutations.
 > Weakening a uniqueness variant to admit dynamic aliases makes it easier to
 > program with unique variables than with destructive reads alone, but this
@@ -1039,7 +1039,7 @@ linear values because you don't need dynamic aliases that are required to be ref
 to unique objects. They allow modifications to Borrowed objects. This seems to
 generally safe only because they mark mutating methods as `synchronized`, which
 alleviates any interleaving concerns automagically. I'm not quite clear on how
-that works, however, given tht reads can happen in nonsynchronized methods.
+that works, however, given that reads can happen in nonsynchronized methods.
 
 > When a unique field of an object is read, all aliases of the field are made undefined.
 > If we can determine statically that no alias is ‘buried alive’, no dynamic
@@ -1050,7 +1050,7 @@ unique properties _must_ actually be unique dynamically. We prove that via a
 combination of static and dynamic checks (because we can't trust types, therefor
 disallowing us to trust that function invocations comply).
 
-Their hiearchy of states is Unique/Owned <: Owned/Shared <: Borrowed/Shared <: undefined
+Their hierarchy of states is Unique/Owned <: Owned/Shared <: Borrowed/Shared <: undefined
 
 Unique/Owned: only allows for explicitly unique values and they must be moved in
 destructively.
@@ -1060,14 +1060,14 @@ them as shared. After passing a unique value to this, one can no longer presume
 uniqueness
 
 Borrowed/Shared: May be unique or shared, but my not generate new aliases except
-to pass to other borrowedly notated states.
+to pass to other borrowed notated states.
 
 > A shared (that is, not unique) parameter may be declared borrowed
 
 This sentence in isolation is somewhat inscrutable. Based on context and later
 descriptions, I believe this is noting that a shared value may pass into a parameter
 declared as accepting borrowed. This seems *potentially* fine considering it's
-specificalyl stricter, but it doesn't allow making any assumptions about borrowed parameters
+specifically stricter, but it doesn't allow making any assumptions about borrowed parameters
 
 > a unique value may be passed to a procedure expecting a shared parameter, but
 > a borrowed value cannot be
@@ -1190,7 +1190,7 @@ but is quite analogous to our own.
 
 [Deny Capabilities for Safe, Fast Actors](https://www.ponylang.io/media/papers/fast-cheap.pdf)
 
-The overall goal of this system is to allow staticly checkable safe shared memory.
+The overall goal of this system is to allow statically checkable safe shared memory.
 Their system is interesting. It is effectively a matrix of whether
 local/global/both aliases are allow to read and/or write to a reference.
 
@@ -1203,7 +1203,7 @@ This seems unenforceable statically (box being disallows global writes):
 > (although not both: if the actor can write to the object, other actors cannot
 > read from it)
 
-Like us, they separate between methods that can be run asynchornously and ones that don't.
+Like us, they separate between methods that can be run asynchronously and ones that don't.
 It's not safe to give a `box` to a method that can run asynchronously, because the
 caller can retain a locally mutable instance, so the async method could read while
 the caller does some writes. We ban this via strict limits on borrowed objects
@@ -1259,19 +1259,19 @@ An important quote that also applies to our own system:
 
 These modes are/work as follows:
 
-arg: The state visible externaly.
+arg: The state visible externally.
 > only provide access to the immutable interface of the objects to which they
 > refer. There are no restrictions upon the transfer or use of arg expressions
 > around a program
 
-rep: The state inivisible externally.
+rep: The state invisible externally.
 > Can change and be changed, can be stored and retrieved from internal containers
 > but can never be exported from the object to which they belong
 
 free: Objects with a reference count of exactly 1 (such as recently created objects).
 
 var: "provides a loophole for auxiliary objects which provide weaker aliasing guarantees"
-Works like the default symantics of non-alias checking languages except for the
+Works like the default semantics of non-alias checking languages except for the
 assignment compatibility constraints.
 > a mutable object which may be aliased. Expressions with mode var may be changed
 > freely, may change asynchronously, and can be passed into or returned from
@@ -1319,7 +1319,7 @@ with a better theoretical background take a look at this.
 
 The overall goal of this paper is to describe a system by which two method calls
 can ensure that neither mutates state available to the other, allowing things
-like better interleaving. This is an obvious corralary with our goals in doing
+like better interleaving. This is an obvious corollary with our goals in doing
 ownership tracking to ensure sound purity enforcement.
 
 They define "regions", which can be thought of as similar to namespaces except that
@@ -1328,9 +1328,9 @@ When defining a property, the region they are within is specified. Lack of speci
 implies the `Instance` region, which lives inside the global `All` region.
 They also include the concept of static regions containing static members (and
 doesn't live inside the Instance region). Following this, methods specify which
-regions (if any) they act (read and/or write) on. The typechecker guarentees
+regions (if any) they act (read and/or write) on. The typechecker guarantees
 both that these are true statements locally and that they are transitively true.
-Overall, this is effectively another layer of privat/public/protected specifiers
+Overall, this is effectively another layer of private/public/protected specifiers
 that typically exist for more fine control over encapsulation layers.
 
 They additionally allow for members to be marked as `unshared`, stating that
@@ -1365,7 +1365,7 @@ it be explicit? e.g. in a function that is marked as returning owned, do we have
 of `new Foo()` we were invoking another function that returning an owned value.
 
 For the initial rollout, should we only allow usage of this feature in the
-precense of cases that require the feature (i.e. const classes, disposables, and Pure/Rx)?
+presence of cases that require the feature (i.e. const classes, disposables, and Pure/Rx)?
 This would ensure a tighter rollout that wouldn't affect quite as many
 developers.
 
@@ -1403,7 +1403,7 @@ From the user perspective, it is nonobvious what restricted means here.
 Further, we can imagine that restricted is a bit too vague considering
 potential restrictions other than ownership.
 
-Suggestion: rename "UnKnowed" to '_' or '_&'.
+Suggestion: rename "UnOwned" to '_' or '_&'.
 MaybeOwned feels similar in concept to a polymorphic type/generic, and it works
 out to being roughly the same as a "top" type.
 The problem for this is similar to the above reasoning for restricted. Without
@@ -1459,7 +1459,7 @@ Hack Native has specifically requested we don't close the door on the possibilit
 of utilizing this system to globally track Arrays and strings in order to avoid
 the need for refcounting them. The major blocker for this is that for that to
 work, those types would need to *never* be unowned, which would result in a huge
-usability degredation.
+usability degradation.
 
 ### Deeper Tracking
 
@@ -1490,7 +1490,7 @@ system strict _unless_ explicitly opted out.
 
 **A** This makes the system more complicated and is probably the wrong default.
 
-**Q** Do we need a __Soft equivilant?
+**Q** Do we need a __Soft equivalent?
 
 **A** Since unowned can flow into most things, a __Soft doesn't buy much.
 
@@ -1506,12 +1506,12 @@ is fully reified regardless of the static types themselves.
 specifically the "borrowed" state? More specifically, how does this apply when
 mixing normal objects and disposables?
 
-**A** A combination of strong and weak lifetime guarentees. The important piece is
+**A** A combination of strong and weak lifetime guarantees. The important piece is
 that these objects don't get mixed. Const classes and disposables are
-perma-opted-in to stricter tracking, so they get "strong" lifetime guarentees.
-Further, anything in the `owned` state has a strong guarentee. The only weak
-guarentee comes into play with the borrowed state, since that can actually be
-nonlinear, but the guarentee there is from that point on it will stay linear.
+perma-opted-in to stricter tracking, so they get "strong" lifetime guarantees.
+Further, anything in the `owned` state has a strong guarantee. The only weak
+guarantee comes into play with the borrowed state, since that can actually be
+nonlinear, but the guarantee there is from that point on it will stay linear.
 
 **Q** can `own` be implied by `new` or is the `own` keyword just there for clarity?
 
@@ -1545,7 +1545,7 @@ look for in their code that will make them want to track ownership?
 We give most of the "worry free" parallelism rust gives by using an
 asynchronous model rather a true parallel one. There will likely be rare cases
 where users want to maintain linearity for the lifetime of an object, in which
-case this can be used to give them type-and-runtime level guarentees. The most
+case this can be used to give them type-and-runtime level guarantees. The most
 likely scenario for use will be very hot code that uses these annotations to
 tell the runtime that it may safely elide reference counts and do other
 optimizations.
@@ -1574,7 +1574,7 @@ it wouldn't make sense to write say `type OwnedC = owned C`? How about
 **A** ownership is conceptually a parallel concept to typing in most cases. Ownership
 is an attribute of an object the same way the type is, but ownership state isn't
 a type. It's possible we could implement aliases, but because we rely strongly
-on compile-time guarentees for efficiency, that has not been investigated for
+on compile-time guarantees for efficiency, that has not been investigated for
 the first iteration of this feature. `vec<owned C>` doesn't make sense because
 we only have shallow ownership tracking. If we some day allow for deep tracking,
 we will likely revisit this.
@@ -1583,12 +1583,12 @@ we will likely revisit this.
 placed on parameters? Can they be inferred?
 
 **A** Ownership annotations will be required. From the perspective of this feature,
-they are equivilant to any other function declaration. Types in compilation may
+they are equivalent to any other function declaration. Types in compilation may
 allow us to avoid this requirement.
 
 **Q** How does this relate to projects like Co-Effects?
 
-**A** This is mostly orthogal to Co-effects. There will likely be some co-effects
+**A** This is mostly orthogonal to Co-effects. There will likely be some co-effects
 that add/remove capabilities based on ownership state (such as mutability in
 pure code), but otherwise one does not depend on the other. Co-effects are about
 function-level contexts and ownership tracking is object/instance/variable specific.

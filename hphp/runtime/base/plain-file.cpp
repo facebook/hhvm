@@ -103,7 +103,7 @@ bool PlainFile::open(const String& filename, const String& mode) {
   assertx(m_stream == nullptr);
   assertx(getFd() == -1);
 
-  // For these definded in php fopen but C stream have different modes
+  // For these defined in php fopen but C stream have different modes
   switch (mode[0]) {
     case 'x':
       if (mode.find('+') == -1) {

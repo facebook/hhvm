@@ -9,7 +9,7 @@
 
 
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-% Genrating n symbols.
+% Generating n symbols.
 % =============================================================================
 % The actual symbol created in Python interface is internal_symbols/2,
 % The first arity is a string, the second arity is a number.
@@ -22,7 +22,7 @@ symbols(X) :- internal_symbols(X, _).
 
 
 % We separated the below part to Python interface to avoid "grounding bottleneck."
-% And we are using normal distrubution to create a sequence of "extends_to" among
+% And we are using normal distribution to create a sequence of "extends_to" among
 % n nodes. For n = 100, we can use
 % extends_to(1, 11).
 % extends_to(11, 21).
@@ -62,12 +62,12 @@ out_degree(X, D) :- symbols(X), D = #count{ Y : extends_to(X, Y) }.
 
 
 % If class X has no parent class, we consider it as a "stub" class, which could
-% be servered as a "cut" node to connet this agent with other agents.
+% be served as a "cut" node to connect this agent with other agents.
 has_parent_class(X) :- extends_to(Y, X), class(Y), class(X).
 :- #count{X: class(X), not has_parent_class(X)} < number_of_stub_classes.
 
 % If interface X has no parent interfaces, we consider it as a "stub" interface
-% which could be servered as a "cut" node to connect this agent with others.
+% which could be served as a "cut" node to connect this agent with others.
 :- #count{X: in_degree(X, 0), interface(X)} < number_of_stub_interfaces.
 
 

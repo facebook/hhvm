@@ -199,7 +199,7 @@ fn print_include_region(
     if !includes.is_empty() {
         w.write_all(b"\n.includes {")?;
         for inc in includes.as_ref().iter() {
-            // TODO(hrust): avoid clone. Rethink onwership of inc in
+            // TODO(hrust): avoid clone. Rethink ownership of inc in
             // hhas_symbol_refs_rust::IncludePath::into_doc_root_relative
             print_include(ctx, w, inc.clone())?;
         }

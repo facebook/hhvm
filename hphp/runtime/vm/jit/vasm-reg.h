@@ -400,7 +400,7 @@ public:
   // common. This is more efficient than computing the actual
   // intersection and checking if it's non-empty.
   bool intersects(const VregSet& o) const {
-    // Hopefuly common case, just AND the inline storage blocks.
+    // Hopefully common case, just AND the inline storage blocks.
     if (LIKELY(!isExtended() && !o.isExtended())) {
       return blocks.intersects(o.blocks);
     }

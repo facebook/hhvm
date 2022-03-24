@@ -216,7 +216,7 @@ pub struct RwLockReadGuard<'a, T> {
 }
 
 /// The address to the underlying lock referenced by this lock guard is
-/// stable, i.e. it will not move even if you move around the gaurd itself.
+/// stable, i.e. it will not move even if you move around the guard itself.
 unsafe impl<T> StableAddress for RwLockReadGuard<'_, T> {}
 
 impl<T> Deref for RwLockReadGuard<'_, T> {
@@ -243,7 +243,7 @@ pub struct RwLockWriteGuard<'a, T> {
 }
 
 /// The address to the underlying lock referenced by this lock guard is
-/// stable, i.e. it will not move even if you move around the gaurd itself.
+/// stable, i.e. it will not move even if you move around the guard itself.
 unsafe impl<T> StableAddress for RwLockWriteGuard<'_, T> {}
 
 impl<T> Deref for RwLockWriteGuard<'_, T> {

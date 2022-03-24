@@ -1336,7 +1336,7 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
     (*   (3) server failed to load saved-state but was required to do so.     *)
     (* Exit_with Monitor_connection_failure: raised when the lockfile is      *)
     (*   present but connection-attempt to the monitor times out - maybe it's *)
-    (*   under DDOS, or maybe it's declining to answer new connections.       *)
+    (*   under DDoS, or maybe it's declining to answer new connections.       *)
     let message =
       match Exception.unwrap exn with
       | Exit_status.Exit_with code -> Exit_status.show code
@@ -1768,7 +1768,7 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
     (* [progress] comes from ServerProgress.ml, sent to the monitor, and now we've fetched
        it from the monitor. It's a string "op X/Y units (%)" e.g. "typechecking 5/16 files (78%)",
        or "connecting", if there is no relevant progress to show.
-       [warning] comes from the same place, and if pressent is a human-readable string
+       [warning] comes from the same place, and if present is a human-readable string
        that warns about saved-state-init failure. *)
     let warning =
       if Option.is_some warning then
@@ -1906,7 +1906,7 @@ let publish_hh_server_status_diagnostic
     | _ -> state
   in
   let open PublishDiagnostics in
-  (* The following match emboodies these rules:
+  (* The following match embodies these rules:
      (1) we only publish hh_server_status diagnostics in In_init and Lost_server states,
      (2) we'll remove the old PublishDiagnostic if necessary and add a new one if necessary
      (3) to avoid extra LSP messages, if the diagnostic hasn't changed then we won't send anything
@@ -2387,8 +2387,8 @@ let do_definition
           ~default_path:filename)
   in
   let has_xhp_attribute =
-    List.exists results ~f:(fun (occurence, _) ->
-        SymbolOccurrence.is_xhp_literal_attr occurence)
+    List.exists results ~f:(fun (occurrence, _) ->
+        SymbolOccurrence.is_xhp_literal_attr occurrence)
   in
   Lwt.return (locations, has_xhp_attribute)
 
@@ -2416,8 +2416,8 @@ let do_definition_local
             (document_location.ClientIdeMessage.file_path |> Path.to_string))
   in
   let has_xhp_attribute =
-    List.exists results ~f:(fun (occurence, _) ->
-        SymbolOccurrence.is_xhp_literal_attr occurence)
+    List.exists results ~f:(fun (occurrence, _) ->
+        SymbolOccurrence.is_xhp_literal_attr occurrence)
   in
   Lwt.return (locations, has_xhp_attribute)
 
@@ -4838,7 +4838,7 @@ let handle_client_ide_notification
      (1) in case of Done_init, we might have to announce the failure to the user
      (2) in a few other cases, we send telemetry events so that test harnesses
      get insight into the internal state of the ide_service
-     (3) after every single event, includinng client_ide_notification events,
+     (3) after every single event, including client_ide_notification events,
      our caller queries the ide_service for what status it wants to display to
      the user, so these notifications have the goal of triggering that refresh. *)
   match notification with

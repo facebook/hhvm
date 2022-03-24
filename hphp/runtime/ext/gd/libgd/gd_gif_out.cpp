@@ -6,7 +6,7 @@
 
 /* Code drawn from ppmtogif.c, from the pbmplus package
 **
-** Based on GIFENCOD by David Rowley <mgardi@watdscu.waterloo.edu>. A
+** Based on GIFENCOD by David Rowley <mgardi@watdcsu.waterloo.edu>. A
 ** Lempel-Zim compression based on "compress".
 **
 ** Modified by Marcel Wijkstra <wijkstra@fwi.uva.nl>

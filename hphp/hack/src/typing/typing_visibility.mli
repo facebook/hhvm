@@ -75,7 +75,7 @@ val check_classname_access :
   Decl_provider.class_decl ->
   Typing_error.t option
 
-(* Can the typdef in a type hint be accessed from code or signature checked under [env]?
+(* Can the typedef in a type hint be accessed from code or signature checked under [env]?
  *   If type is public, then yes
  *   If type is internal, then only if modules match, and in the case that
  *     we are in a signature, the signature had better be internal too.

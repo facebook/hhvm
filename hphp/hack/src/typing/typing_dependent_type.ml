@@ -51,7 +51,7 @@ module ExprDepTy = struct
       (* If it is a local variable then we look up the expression id associated
        * with it. If one doesn't exist we generate a new one. We are being
        * conservative here because the new expression id we create isn't
-       * added to the local enviornment.
+       * added to the local environment.
        *)
       | N.CIexpr (_, p, N.Lvar (_, x)) ->
         let (ereason, dep) =
@@ -100,7 +100,7 @@ module ExprDepTy = struct
       let (env, ty) = Env.expand_type env ty in
       match deref ty with
       | (_, Tclass (_, Exact, _)) -> (env, ty)
-      | (_, Tclass (((_, x) as c), Nonexact, tyl)) ->
+      | (_, Tclass (((_, x) as c), Inexact, tyl)) ->
         let class_ = Env.get_class env x in
         (* If a class is both final and variant, we must treat it as non-final
            * since we can't statically guarantee what the runtime type

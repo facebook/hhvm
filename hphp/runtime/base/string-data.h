@@ -271,7 +271,7 @@ struct StringData final : MaybeCountable,
   /*
    * StringData should not generally be allocated on the stack,
    * because references to it could escape.  This function is for
-   * debugging: it asserts that the addres of this doesn't point into
+   * debugging: it asserts that the address of this doesn't point into
    * the C++ stack.
    */
   void checkStack() const;
@@ -322,7 +322,7 @@ struct StringData final : MaybeCountable,
    * undocumented.
    *
    * If overflow is set its value is initialized to either zero to
-   * indicate that no overflow occurred or 1/-1 to inidicate the direction
+   * indicate that no overflow occurred or 1/-1 to indicate the direction
    * of overflow.
    *
    * Returns: KindOfNull, KindOfInt64 or KindOfDouble.  The int64_t or

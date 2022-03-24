@@ -137,7 +137,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
    *
    *   - A jump target
    *
-   *   - Immediatelly following a control flow instruction, other than
+   *   - Immediately following a control flow instruction, other than
    *     a call.
    */
   auto offset = 0;
@@ -187,7 +187,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     }
   }
 
-  // Now, each interval in blockStarts delinates a basic block.
+  // Now, each interval in blockStarts delineates a basic block.
   blockStarts.insert(fe.bcPos());
 
   if (traceBc) {

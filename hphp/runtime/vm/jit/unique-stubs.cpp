@@ -1138,7 +1138,7 @@ TCA emitEndCatchStublogueHelpers(CodeBlock& cb, DataBlock& data,
 
   us.endCatchStublogueHelper = vwrap(cb, data, [&] (Vout& v) {
     // End catch situation in stublogue context: pop the native frame and
-    // pass the curent rvmfp() and saved RIP from the native frame to
+    // pass the current rvmfp() and saved RIP from the native frame to
     // tc_unwind_resume_stublogue(),which returns the catch trace (or null)
     // in the first return register, and the new vmfp in the second.
     v << copy{rvmfp(), rarg(0)};

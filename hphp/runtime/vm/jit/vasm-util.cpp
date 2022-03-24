@@ -304,9 +304,9 @@ LoopBlocks findLoopBlocks(const Vunit& unit,
 //////////////////////////////////////////////////////////////////////
 
 /*
- * This SSA restoration algorithm is based on "Simple and Efficent Construction
+ * This SSA restoration algorithm is based on "Simple and Efficient Construction
  * of Static Single Assignment Form" by Matthias Braun, Sebastian Buchwald,
- * Sebastian Hack, et all (with a few tweaks).
+ * Sebastian Hack, et al. (with a few tweaks).
  *
  * The idea is to walk the blocks of the unit in RPO order. For each eligible
  * Vreg which is being defined, we assign a fresh Vreg and keep a mapping of the
@@ -372,7 +372,7 @@ struct SSAConverter {
   // it at this label, chase backwards until we find a definition.
   Vreg read(Vlabel label, Vreg pre) {
     while (true) {
-      // Look for a defintiion at this point
+      // Look for a definition at this point
       auto const it = defAtBlock.find({label, pre});
       if (it != defAtBlock.end()) {
         // We found a definition. If it's valid, we can use it,

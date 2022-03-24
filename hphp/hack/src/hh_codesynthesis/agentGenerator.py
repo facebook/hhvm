@@ -114,7 +114,7 @@ def generate_logic_rules(
 
     # Creating backbone hierarchy with minimum depth using normal Distribution.
     # We separated the below part from "graph_generator.lp" to avoid "grounding bottleneck."
-    # And we are using normal distrubution to create a sequence of extends_to among n nodes.
+    # And we are using normal distribution to create a sequence of extends_to among n nodes.
     interval = solving_context.number_of_nodes // solving_context.min_depth or 1
     for i in range(interval, solving_context.number_of_nodes, interval):
         rules.append(f'extends_to("S{i-interval}", "S{i}").')
@@ -322,7 +322,7 @@ def main() -> int:
     combined_rules = generate_logic_rules(solving_context) + extract_logic_rules(graph)
 
     logging.info("Extracted all rules.")
-    logging.info(f"Number of depedency edges extracted: {len(combined_rules)}")
+    logging.info(f"Number of dependency edges extracted: {len(combined_rules)}")
 
     do_reasoning(combined_rules, generator)
     logging.info("Finished reasoning.")

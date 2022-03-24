@@ -260,7 +260,7 @@ let legacy_hot_decls_path_for_target_info { naming_table_path; _ } =
   naming_table_path ^ ".decls"
 
 let shallow_hot_decls_path_for_target_info { naming_table_path; _ } =
-  naming_table_path ^ ".shallowdecls"
+  naming_table_path ^ ".shallowedecls"
 
 let naming_sqlite_path_for_target_info { naming_table_path; _ } =
   naming_table_path ^ "_naming.sql"

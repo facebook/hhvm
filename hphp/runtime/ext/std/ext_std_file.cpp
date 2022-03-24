@@ -608,7 +608,7 @@ Variant HHVM_FUNCTION(file_put_contents,
     mode[0] = 'a';
   } else if (flags & LOCK_EX) {
     // Open in "create" mode (writing only, create if needed, no truncate)
-    // so that the file is not modified before we attempt to aquire the
+    // so that the file is not modified before we attempt to acquire the
     // requested lock.
     mode[0] = 'c';
   }
@@ -1829,7 +1829,7 @@ Variant HHVM_FUNCTION(glob,
       basedir_limit = true;
       continue;
     }
-    /* we need to do this everytime since GLOB_ONLYDIR does not guarantee that
+    /* we need to do this every time since GLOB_ONLYDIR does not guarantee that
      * all directories will be filtered. GNU libc documentation states the
      * following:
      * If the information about the type of the file is easily available

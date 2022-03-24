@@ -147,7 +147,7 @@ struct Server : IHostHealthObserver {
   static bool StackTraceOnError;
 
   /**
-   * ...so that we can grarefully stop these servers on signals.
+   * ...so that we can gracefully stop these servers on signals.
    */
   static void InstallStopSignalHandlers(ServerPtr server);
 

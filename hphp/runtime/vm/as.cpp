@@ -1271,7 +1271,7 @@ Id create_litstr_id(AsmState& as) {
  *
  *  $x0      // Used by HackC, which does not distinguish slot and name
  *
- *  $x0;"x1" // Used by our output, which can undertands the difference
+ *  $x0;"x1" // Used by our output, which can understand the difference
  *
  *  $x0;_    // Used by our output, if the local name is unused (e.g. if the
  *           // name is only used for errors and we prove the op is nothrow)
@@ -1690,7 +1690,7 @@ void parse_numiters(AsmState& as) {
  *                    ;
  *
  * Variables are usually allocated when first seen, but
- * declvars can be used to preallocate varibles for when
+ * declvars can be used to preallocate variables for when
  * the exact assignment matters (like for closures).
  */
 void parse_declvars(AsmState& as) {
@@ -1956,7 +1956,7 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
     if (!pi.hasDefaultValue() || pi.funcletOff == kInvalidOffset) continue;
     auto inst = fe->bc() + pi.funcletOff;
 
-    // Check that the DV intitializer is actually setting the local for the
+    // Check that the DV initializer is actually setting the local for the
     // parameter being initialized.
     auto checkloc = [&] (PC pc, const Captures&) {
       auto const UNUSED op = decode_op(pc);
@@ -2528,7 +2528,7 @@ MaybeDataType type_constraint_to_data_type(
 
 /*
  * Checks whether the current function is native by looking at the user
- * attribute map and sets the isNative flag accoringly
+ * attribute map and sets the isNative flag accordingly
  * If the give function is op code implementation, then isNative is not set
  */
 void check_native(AsmState& as, bool is_construct) {
@@ -2549,7 +2549,7 @@ void check_native(AsmState& as, bool is_construct) {
           as.error("No NativeFunctionInfo for function {}",
                    as.fe->nativeFullname());
         } else {
-          // Allow builtins to have mising NativeFunctionInfo, to support
+          // Allow builtins to have missing NativeFunctionInfo, to support
           // conditional compilation. Calling such a function will Fatal.
         }
       }
@@ -3004,8 +3004,8 @@ void parse_enum_ty(AsmState& as) {
 }
 
 /*
- * directive-require : 'extends' '<' indentifier '>' ';'
- *                   | 'implements' '<' indentifier '>' ';'
+ * directive-require : 'extends' '<' identifier '>' ';'
+ *                   | 'implements' '<' identifier '>' ';'
  *                   ;
  *
  */

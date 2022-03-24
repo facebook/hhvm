@@ -678,7 +678,7 @@ fn emit_string2<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     if es.is_empty() {
         Err(Error::unrecoverable(
-            "String2 with zero araguments is impossible",
+            "String2 with zero arguments is impossible",
         ))
     } else if es.len() == 1 {
         Ok(InstrSeq::gather(vec![
@@ -4480,8 +4480,8 @@ fn emit_class_const<'a, 'arena, 'decl>(
                 }
             } else {
                 emit_symbol_refs::add_class(e, cid.clone());
-                // TODO(hrust) enabel `let const_id = constant::ConstType::from_ast_name(&id.1);`,
-                // `from_ast_name` should be able to accpet Cow<str>
+                // TODO(hrust) enable `let const_id = constant::ConstType::from_ast_name(&id.1);`,
+                // `from_ast_name` should be able to accept Cow<str>
                 let const_id = constant::ConstType::new(Str::new_str(
                     alloc,
                     string_utils::strip_global_ns(&id.1),
@@ -4498,7 +4498,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
                 }
             } else {
                 // TODO(hrust) enable `let const_id = constant::ConstType::from_ast_name(&id.1);`,
-                // `from_ast_name` should be able to accpet Cow<str>
+                // `from_ast_name` should be able to accept Cow<str>
                 let const_id = constant::ConstType::new(Str::new_str(
                     alloc,
                     string_utils::strip_global_ns(&id.1),

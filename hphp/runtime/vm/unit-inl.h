@@ -183,7 +183,7 @@ Unit::getLastTouch() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Litstrs and NamedEntitys.
+// Litstrs and NamedEntities.
 
 inline size_t Unit::numLitstrs() const {
   if (!m_extended) return 0;

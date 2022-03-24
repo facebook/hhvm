@@ -85,7 +85,7 @@ constexpr char HACKARR_COMPAT_ARR_HACK_ARR_CMP[] =
 constexpr char HACKARR_COMPAT_VARR_IS_VEC[] = "is_vec() called on varray";
 constexpr char HACKARR_COMPAT_DARR_IS_DICT[] = "is_dict() called on darray";
 constexpr char DATATYPE_SPECIALIZED_DVARR[] =
-  "Dataype-specialized array currently unsupported";
+  "Datatype-specialized array currently unsupported";
 constexpr char FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE[] =
   "'%s' called dynamically but is not __DynamicallyCallable";
 constexpr char FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE[] =

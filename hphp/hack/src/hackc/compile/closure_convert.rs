@@ -36,7 +36,7 @@ use unique_id_builder::*;
 type Scope<'a, 'arena> = AstScope<'a, 'arena>;
 type ScopeItem<'a, 'arena> = AstScopeItem<'a, 'arena>;
 
-#[derive(Debug, Clone)] // TODO(hrust): Clone is used when bactracking now, can we somehow avoid it?
+#[derive(Debug, Clone)] // TODO(hrust): Clone is used when backtracking now, can we somehow avoid it?
 struct Variables {
     /// all variables declared/used in the scope
     all_vars: HashSet<String>,
@@ -1073,7 +1073,7 @@ fn add_reified_property(tparams: &[Tparam], vars: &mut Vec<ClassVar>) {
     if !tparams.iter().all(|t| t.reified == ReifyKind::Erased) {
         let p = Pos::make_none();
         // varray/vec that holds a list of type structures
-        // this prop will be initilized during runtime
+        // this prop will be initialized during runtime
         let hint = Hint(
             p.clone(),
             Box::new(Hint_::Happly(Id(p.clone(), "\\HH\\varray".into()), vec![])),
@@ -1148,7 +1148,7 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
 
     fn visit_def(&mut self, env: &mut Env<'a, 'arena>, def: &mut Def) -> Result<()> {
         match def {
-            // need to handle it ourselvses, because visit_fun_ is
+            // need to handle it ourselves, because visit_fun_ is
             // called both for toplevel functions and lambdas
             Def::Fun(x) => {
                 let mut env = env.clone();

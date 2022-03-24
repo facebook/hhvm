@@ -34,13 +34,13 @@
 namespace HPHP {
 
 /*
- * Handle some asynchronous signals in a syncrhonous way.
+ * Handle some asynchronous signals in a synchronous way.
  *
  * It is hard to write a nontrivial signal handler. A signal can arrive any
  * time, including when a signal handler is already executing; it can be
- * delievered to any of the threads in the current process (except a few cases
+ * delivered to any of the threads in the current process (except a few cases
  * when the signal is directed to a specific thread. As a result, the set of
- * things a singal handler can safely do is very limited, e.g., it cannot
+ * things a signal handler can safely do is very limited, e.g., it cannot
  * allocate memory (thus not use lots of library functions including many in
  * STL), cannot use pthread mutexes and condition variables.
  *

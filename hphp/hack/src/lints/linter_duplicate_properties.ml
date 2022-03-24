@@ -25,7 +25,7 @@ let traits c : (Pos.t * string) list =
       | Happly ((_, trait_name), _) -> Some (pos, trait_name)
       | _ -> None)
 
-(* All the properites of class or trait [type name], flattened *)
+(* All the properties of class or trait [type name], flattened *)
 let properties ctx (type_name : string) : (string * Typing_defs.class_elt) list
     =
   let decl = Decl_provider.get_class ctx type_name in
@@ -116,7 +116,7 @@ let handler =
                   ~data:prop_elt.ce_origin));
 
       (* if the props_seen reports multiple origins for a property,
-       * ensure that in none of the origins it is initialisedl
+       * ensure that in none of the origins it is initialised
        * with an enum or class constant *)
       Hashtbl.iteri props_seen ~f:(fun ~key ~data ->
           if more_than_one data then
@@ -145,7 +145,7 @@ let handler =
             let dedup_data = List.dedup_and_sort data ~compare:String.compare in
 
             if is_initialised_with_class_constant then
-              (* HHVM will unconditinally fatal, so report a linter error *)
+              (* HHVM will unconditionally fatal, so report a linter error *)
               Lints_errors.duplicate_property_class_constant_init
                 cls_pos
                 ~class_name:cls_name

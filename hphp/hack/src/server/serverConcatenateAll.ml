@@ -211,7 +211,7 @@ let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
           | None -> true)
     in
     (if Relative_path.Set.is_empty files_without_deps then
-      (* everything has an unsatisifed dependency, so error out *)
+      (* everything has an unsatisfied dependency, so error out *)
       let visited_pretty =
         List.map ~f:Relative_path.to_absolute visited |> String.concat ~sep:", "
       in

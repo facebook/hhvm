@@ -198,7 +198,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  public function querysingle(string $sql, bool $entire_row = false): mixed;
+  public function queriesingle(string $sql, bool $entire_row = false): mixed;
 
   /**
    * Registers a PHP function or user-defined function for use as an SQL

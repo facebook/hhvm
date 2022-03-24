@@ -155,7 +155,7 @@ type t = {
   (* Perform global inference globally on the code base to infer missing type annotations. *)
   tco_global_inference: bool;
   tco_gi_reinfer_types: string list;
-      (** Types we want to remove and replace by infered types during global inference. *)
+      (** Types we want to remove and replace by inferred types during global inference. *)
   tco_ordered_solving: bool;
       (** Whether to solve typing inference constraints using ordered solving or transitive closure. *)
   (* Enable const static properties *)
@@ -252,7 +252,7 @@ type t = {
      (a list containing the empty string would denote all files,
      an empty list denotes no files) *)
   tco_global_write_check_enabled: string list;
-  (* Enable global write check on the spcified set of functions
+  (* Enable global write check on the specified set of functions
      (Empty denotes no functions) *)
   tco_global_write_check_functions_enabled: SSet.t;
   (* Enables the enum supertyping extension *)
@@ -287,7 +287,7 @@ type t = {
   tco_strict_value_equality: bool;
   (* All member of the __Sealed whitelist should be subclasses*)
   tco_enforce_sealed_subclasses: bool;
-  (* All classes are implcitly marked <<__SupportDynamicType>> *)
+  (* All classes are implicitly marked <<__SupportDynamicType>> *)
   tco_everything_sdt: bool;
   (* All collections and Hack arrays are treated as containing ~T *)
   tco_pessimise_builtins: bool;

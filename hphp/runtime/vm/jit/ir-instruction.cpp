@@ -466,7 +466,7 @@ Type setElemReturn(const IRInstruction* inst) {
   auto const baseType = inst->typeParam();
 
   // If the base is a Str, the result will always be a StaticStr (or
-  // an exception). If the base might be a str, the result wil be
+  // an exception). If the base might be a str, the result will be
   // StaticStr or Nullptr. Otherwise, the result is always Nullptr.
   if (baseType <= TStr) {
     return TStaticStr;

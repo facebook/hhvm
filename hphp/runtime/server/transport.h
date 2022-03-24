@@ -326,7 +326,7 @@ public:
   virtual bool isServerStopping() { return false;}
 
   ///////////////////////////////////////////////////////////////////////////
-  // Pre-implemented utitlity functions.
+  // Pre-implemented utility functions.
 
   /**
    * We define a "server object" as the part of URL without domain name:
@@ -452,7 +452,7 @@ public:
 protected:
   /**
    * Parameter parsing in this class is done by making just one copy of the
-   * entire query (either URL or post data), then insert termintaing NULLs
+   * entire query (either URL or post data), then insert terminating NULLs
    * at end of tokens (name and value), url decode in-place and then store
    * token's start char * addresses in ParamMaps. Therefore, this entire
    * process is very efficient without excessive string copying.

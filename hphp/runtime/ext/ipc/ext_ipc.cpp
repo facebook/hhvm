@@ -581,7 +581,7 @@ bool HHVM_FUNCTION(sem_remove,
   }
 
   if (semctl(sem_ptr->semid, 0, IPC_RMID, un) < 0) {
-    raise_warning("failed for SysV sempphore %d: %s",
+    raise_warning("failed for SysV semaphore %d: %s",
                     sem_identifier->getId(),
                     folly::errnoStr(errno).c_str());
     return false;
@@ -680,7 +680,7 @@ static int put_shm_data(sysvshm_chunk_head *ptr, long key, char *data,
   long shm_varpos;
 
   total_size = ((long) (len + sizeof(sysvshm_chunk) - 1) / 4) * 4 +
-    4; /* 4-byte alligment */
+    4; /* 4-byte alignment */
 
   if ((shm_varpos = check_shm_data(ptr, key)) > 0) {
     remove_shm_data(ptr, shm_varpos);

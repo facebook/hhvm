@@ -469,7 +469,7 @@ start_of_next_period(time_t time_now, PERIODICITY periodicity, int period_multip
 /* Determine the time of the start of the period containing a given time.
  * Break down the time with localtime and subtract the number of
  * seconds since the start of the period.  If the length of period is
- * equal or longer than a day then we have to check tht the
+ * equal or longer than a day then we have to check that the
  * calculation is not thrown out by the start or end of daylight
  * saving time.
  */
@@ -648,7 +648,7 @@ check_end(const char *p)
    it to eat all white space up to (and including) a newline, and
    the function fails (!) if there is no newline.
 
-   Let's hope all strptime-s use ` ' to skipp *all* whitespace
+   Let's hope all strptime-s use ` ' to skip *all* whitespace
    instead of just one (it works that way on all the systems I've
    tested it on). */
 

@@ -240,7 +240,7 @@ bool isInitialized(const State& state) {
 //
 // Some of the ops here require justification:
 //  - Fatal: this op throws, but not in a way that can be caught by exn
-//  - Jmp: this op may check suprise flags and reenter, but reentry for suprise
+//  - Jmp: this op may check surprise flags and reenter, but reentry for surprise
 //    checks is guarded by try-catch blocks, so we won't take the exn edge
 //  - Ret*: these ops check surprise flags and the return hook may throw, but
 //    before we run it, we set localsDecRefd, so we won't run the exn edge
@@ -585,7 +585,7 @@ bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
 bool FuncChecker::checkImmVSA(PC& pc, PC const /*instr*/) {
   auto const len = decode_iva(pc);
   if (len < 1 || len > ArrayData::MaxElemsOnStack) {
-    error("invalid length of immedate VSA vector %d at offset %d\n",
+    error("invalid length of immediate VSA vector %d at offset %d\n",
           len, offset(pc));
     throw unknown_length{};
   }

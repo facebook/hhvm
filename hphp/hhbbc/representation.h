@@ -79,7 +79,7 @@ struct Block {
   ExnNodeId exnNodeId{NoExnNodeId};
 
   /*
-   * Edges coming out of blocks are repesented in three ways:
+   * Edges coming out of blocks are represented in three ways:
    *
    *  - fallthrough edges (the end of the block unconditionally jumps
    *    to the named block).  If fallthroughNS is true, this edge
@@ -346,7 +346,7 @@ struct Func : FuncBase {
   Unit* originalUnit{};
 
   /*
-   * The refernece of the trait where the method was originally defined.
+   * The reference of the trait where the method was originally defined.
    * This is used to detected if a method is imported multiple
    * times via different use-chains as the pair (name, originalClass)
    * uniquely identifies a method.

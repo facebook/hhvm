@@ -1113,7 +1113,7 @@ and type_paraml ?(forbid_this = false) env tparams =
   class C<T1 ... , T2 ... , Tn ...>,
   all type parameters are in scope in the constraints of all other ones (and the where constraints,
   in case of functions).
-  For consitency, the same holds for nested type parameters (i.e., type parameters of type
+  For consistency, the same holds for nested type parameters (i.e., type parameters of type
   parameters). Given
   class Foo<T<T1 ... , ...., Tn ... > ... >
   every Ti is in scope of the constraints of all other Tj, and in the constraints on T itself.

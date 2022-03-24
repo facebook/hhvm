@@ -34,7 +34,7 @@ typedef hphp_string_imap<std::string> ConfigIMap;
 
 /**
  * Parts of the language can individually be made stricter, warning or
- * erroring when there's dangerous/unintuive usage; for example,
+ * erroring when there's dangerous/unintuitive usage; for example,
  * array_fill_keys() with non-int/string keys: Hack.Lang.StrictArrayFillKeys
  */
 enum class HackStrictOption {

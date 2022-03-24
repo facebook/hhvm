@@ -477,7 +477,7 @@ class HackCodeGenerator(CodeGenerator):
             degree = len(node.extends)
             in_degrees[degree] += 1
 
-        # Validate the degrees are greater than the specified deistribution.
+        # Validate the degrees are greater than the specified distribution.
         assert functools.reduce(
             lambda x, y: x and y,
             map(

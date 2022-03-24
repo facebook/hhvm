@@ -149,7 +149,7 @@ HDF* hdf_obj_next (HDF *hdf);
 
 /*
  * Function: hdf_obj_name - Return the name of a node
- * Description: hdf_obj_name is an accessor function for a datset node
+ * Description: hdf_obj_name is an accessor function for a dataset node
  *              which returns the name of the node.  This is just the
  *              local name, and not the full path.
  * Input: hdf -> the hdf dataset node

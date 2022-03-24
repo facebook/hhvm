@@ -55,7 +55,7 @@ struct Block {
   int rpo_id;         // reverse postorder number. 0 = entry.
   Block* next_linear; // next block in linear order
   Block* next_rpo;    // next block in reverse postorder
-  Block** succs;      // array of succesors (can have nulls)
+  Block** succs;      // array of successors (can have nulls)
   Block* exn;         // exception edge (can be null)
 };
 

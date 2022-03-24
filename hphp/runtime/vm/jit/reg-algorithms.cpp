@@ -91,9 +91,9 @@ jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
   {
     PhysReg q[N];
     int qBack = 0;
-    auto enque = [&](PhysReg r) { assertx(qBack < N); q[qBack++] = r; };
+    auto enqueue = [&](PhysReg r) { assertx(qBack < N); q[qBack++] = r; };
     for (auto node : outDegree) {
-      if (outDegree[node] == 0) enque(node);
+      if (outDegree[node] == 0) enqueue(node);
     }
     for (int i = 0; i < qBack; ++i) {
       auto node = q[i];
@@ -101,7 +101,7 @@ jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
       auto nextNode = moves[node];
       howTo.push_back({MoveInfo::Kind::Move, nextNode, node});
       --outDegree[nextNode];
-      if (outDegree[nextNode] == 0) enque(nextNode);
+      if (outDegree[nextNode] == 0) enqueue(nextNode);
     }
   }
 

@@ -518,6 +518,6 @@ let go_ide ctx (filename, line, column) new_name genv env =
           }
       in
       Ok (go ctx command genv env)
-    | (_, _) -> Error "Tried to rename a non-renameable symbol")
+    | (_, _) -> Error "Tried to rename a non-renamable symbol")
   (* We have 0 or >1 definitions so correct behavior is unknown *)
-  | _ -> Error "Tried to rename a non-renameable symbol"
+  | _ -> Error "Tried to rename a non-renamable symbol"

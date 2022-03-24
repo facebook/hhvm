@@ -32,7 +32,7 @@ let sql_select_all_symbols =
  * This feature should be removed if we decide to add back in the original backslash when generating
  * symbol indexes.
  *
- * In SQLite, `||` is the string concatentation operator; it is not the logical OR operator you
+ * In SQLite, `||` is the string concatenation operator; it is not the logical OR operator you
  * might be expecting.
  *)
 let sql_select_namespaced_symbols =

@@ -260,7 +260,7 @@ GzipCompressor::compress(const char *data, int &len, bool trailer) {
     s2[3] = s2[4] = s2[5] = s2[6] = s2[7] = s2[8] = 0; /* time set to 0 */
     s2[9] = 0x03; // OS_CODE
     m_stream.next_out = (Bytef*)&(s2[GZIP_HEADER_LENGTH]);
-    m_header = false; // only the 1st chunnk got it
+    m_header = false; // only the 1st chunk got it
   } else {
     m_stream.next_out = (Bytef*)s2;
   }

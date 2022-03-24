@@ -83,13 +83,13 @@ impl Phase {
                         .map(|ty| Self::localize(env, ety_env, ty.clone()))
                         .collect::<Result<Vec<_>>>()
                 })?;
-                Ty::new(r, Tclass(sid, Exact::Nonexact, tyl))
+                Ty::new(r, Tclass(sid, Exact::Inexact, tyl))
             }
             Some(_class_info) => {
                 // TODO(hrust): enum_type
                 // TODO(hrust): tparams
                 assert!(ty_args.is_empty());
-                Ty::new(r, Tclass(sid, Exact::Nonexact, vec![]))
+                Ty::new(r, Tclass(sid, Exact::Inexact, vec![]))
             }
         })
     }

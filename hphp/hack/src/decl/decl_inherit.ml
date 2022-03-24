@@ -211,7 +211,7 @@ let add_inherited inherited acc =
           | (None, Some s) ->
             Some s
           (* If the old subst_contexts came via required extends then we want to use
-           * the substitutios from the actual extends instead. I.e.
+           * the substitutions from the actual extends instead. I.e.
            *
            * class Base<+T> {}
            *

@@ -72,7 +72,7 @@ Variant HHVM_METHOD(SQLite3, prepare,
                     const String& sql);
 Variant HHVM_METHOD(SQLite3, query,
                     const String& sql);
-Variant HHVM_METHOD(SQLite3, querysingle,
+Variant HHVM_METHOD(SQLite3, queriesingle,
                     const String& sql,
                     bool entire_row /* = false */);
 bool HHVM_METHOD(SQLite3, createfunction,

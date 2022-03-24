@@ -279,7 +279,7 @@ struct assert_sizeof_class {
 template struct assert_sizeof_class<sizeof_Class>;
 
 /*
- * R/W lock for caching scopings of closures.
+ * R/W lock for caching scopes of closures.
  */
 ReadWriteMutex s_scope_cache_mutex;
 
@@ -392,7 +392,7 @@ Class* Class::rescope(Class* ctx) {
     // lock held, since it's very expensive.)
     //
     // This race should be far less likely than a race between two attempted
-    // first-scopings for `template_cls', which is why we don't do an test-and-
+    // first-scopes for `template_cls', which is why we don't do an test-and-
     // set when we first check `m_scoped' before acquiring the lock.
     s_scope_cache_mutex.release();
     SCOPE_EXIT { s_scope_cache_mutex.acquireWrite(); };
@@ -1299,7 +1299,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
     // If the property could not be located on the current class, and this
     // class has a parent class, and the current evaluation is a debugger
     // eval with bypassCheck == true, search for the property as a member of
-    // the parent class. The debugger access is not subject to visibilty checks.
+    // the parent class. The debugger access is not subject to visibility checks.
     return m_parent->getDeclPropSlot(ctx, key);
   }
 
@@ -1505,7 +1505,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
   auto& cns = m_constants[clsCnsInd];
   // When a child extends a parent, rather than the child having
   // distinct copies of the constants defined by their parent we prefer
-  // those constants be shared. Aside from saving memeory and avoiding
+  // those constants be shared. Aside from saving memory and avoiding
   // multiple initializations of the same logical constant, this
   // establishes the property that a constant accessed through a child
   // class will compare equal to the same constant accessed through the
@@ -1660,7 +1660,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
 
   // Wrap the call to 'invokeFuncFew' and call 'raise_error' if an
   // 'Object' exception is encountered. The effect of this is to treat
-  // constant intialization errors as terminal.
+  // constant initialization errors as terminal.
   auto invokeFuncFew = [&]() -> TypedValue {
     try {
       return g_context->invokeFuncFew(
@@ -2384,7 +2384,7 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
       // in declInterfaces
       if (isFromInterface) return;
 
-      // Type and Context constants in interfaces can be overriden.
+      // Type and Context constants in interfaces can be overridden.
       if (tConst.kind() == ConstModifiers::Kind::Type ||
           tConst.kind() == ConstModifiers::Kind::Context)  {
         return;
@@ -3558,7 +3558,7 @@ void Class::addTraitPropInitializers(std::vector<const Func*>& thisInitVec,
     for (unsigned m = 0; m < traitInitVec.size(); m++) {
       // Clone 86[psl]init methods, and set the class to the current class.
       // This allows 86[psl]init to determine the property offset for the
-      // initializer array corectly.
+      // initializer array correctly.
       Func *f = traitInitVec[m]->clone(this);
       f->setBaseCls(this);
       f->setHasPrivateAncestor(false);

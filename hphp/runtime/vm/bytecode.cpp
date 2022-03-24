@@ -1740,7 +1740,7 @@ OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
   if (offset <= 0 && UNLIKELY(checkSurpriseFlags())) {
     auto const flags = handle_request_surprise();
 
-    // Memory Threhsold callback should also be fired here
+    // Memory Threshold callback should also be fired here
     if (flags & MemThresholdFlag) {
       EventHook::DoMemoryThresholdCallback();
     }
@@ -4888,7 +4888,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
 
   if (!func->isGenerator()) {  // Async function.
     // Create the AsyncFunctionWaitHandle object. Create takes care of
-    // copying local variables and itertors.
+    // copying local variables and iterators.
     auto waitHandle = c_AsyncFunctionWaitHandle::Create(
       fp, func->numSlotsInFrame(), nullptr, suspendOffset, child);
 

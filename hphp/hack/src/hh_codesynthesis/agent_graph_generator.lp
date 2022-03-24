@@ -86,7 +86,7 @@ out_degree_of_agent(X, OutDegree) :- agents(X, _), OutDegree = #count{ Y : depen
 % "agent 1 at most can have two other agents depend on it". The solver have to 
 % pick one pair of agents from {2, 3}, {2, 4}, {2, 5}, {3, 4}, {3, 5}, {4, 5} 
 % combinations. We can adjust @agent_connector to add more randomness.
-% For instance, instead of using consective number 2, 3, 4, 5; we could use a
+% For instance, instead of using consecutive number 2, 3, 4, 5; we could use a
 % set of random agent number like 17, 29, 42, 75.
 {depends_on(Y, X) : @agent_connector(Y, X, YLevel, XLevel) != 0} :- 
     agents(X, XLevel), agents(Y, YLevel).

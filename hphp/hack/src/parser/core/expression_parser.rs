@@ -1451,7 +1451,7 @@ where
         //
         // In order to preserve backward compatibility we can parse
         // variable/subscript expressions and treat them as if
-        // braced expressions to enfore PHP5 semantics
+        // braced expressions to enforce PHP5 semantics
         // $$a[1][2] => ${$a[1][2]}
         // $a=>$b[c] => $a=>{$b[c]}
         // X::$a[b]() => X::{$a[b]}()
@@ -2305,7 +2305,7 @@ where
         // We will not attempt to determine if the names give the name of an
         // appropriate type here. That's for the type checker.
         //
-        // The argumment lists are:
+        // The argument lists are:
         //
         //  * for keyed, an optional comma-separated list of
         //    expression => expression pairs
@@ -2631,7 +2631,7 @@ where
     }
 
     fn parse_optional_return(&mut self) -> (S::R, S::R, S::R) {
-        // Parse an optional "colon-folowed-by-return-type"
+        // Parse an optional "colon-followed-by-return-type"
         let colon = self.optional_token(TokenKind::Colon);
         let (readonly_opt, return_type) = if colon.is_missing() {
             let missing1 = S!(make_missing, self, self.pos());
@@ -3022,8 +3022,8 @@ where
     }
 
     fn parse_anon_or_awaitable_or_scope_resolution_or_name(&mut self) -> S::R {
-        // static is a legal identifier, if next token is scope resolution operatpr
-        // - parse expresson as scope resolution operator, otherwise try to interpret
+        // static is a legal identifier, if next token is scope resolution operator
+        // - parse expression as scope resolution operator, otherwise try to interpret
         // it as anonymous function (will fallback to name in case of failure)
         if self.peek_token_kind_with_lookahead(1) == TokenKind::ColonColon {
             self.parse_scope_resolution_or_name()

@@ -295,7 +295,7 @@ let dummy_closure () = ()
  * running and waiting for the next incoming job before forking a new clone.
  *
  * If the clone exits with a non-zero code, the main worker process also exits
- * with the same code. Thus, the contoller process of this worker can just
+ * with the same code. Thus, the controller process of this worker can just
  * waitpid directly on the main worker process and see correct exit codes.
  *
  * NOTE: `WSIGNALED i` and `WSTOPPED i` are all coalesced into `exit 2`
@@ -304,7 +304,7 @@ let dummy_closure () = ()
  * be aware of this.
  *
  * To regain this lost resolution, controller_fd can be optionally set. The
- * real exit status (includinng WSIGNALED and WSTOPPED) will be sent over
+ * real exit status (including WSIGNALED and WSTOPPED) will be sent over
  * this file descriptor to the controller when the clone worker exits
  * abnormally (with a non-zero exit code).
  *)

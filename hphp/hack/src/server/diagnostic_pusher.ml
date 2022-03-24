@@ -115,7 +115,7 @@ end = struct
   [@@deriving eq, show]
 
   (** Limit on the number of errors we want to have in the IDE.
-      The IDE may not be very resonsive beyond this limit. *)
+      The IDE may not be very responsive beyond this limit. *)
   let default_error_limit = 1000
 
   let error_limit : int ref = ref default_error_limit
@@ -210,7 +210,7 @@ end = struct
    fun to_push_candidates ~errors_in_ide ~priority_files ->
     let error_count_in_ide = error_count_in_file_map errors_in_ide in
     let to_push = FileMap.empty in
-    (* First push errors in prority files, regardless of error limit. *)
+    (* First push errors in priority files, regardless of error limit. *)
     let (to_push, to_push_candidates, error_count_in_ide) =
       Relative_path.Set.fold
         (priority_files |> Option.value ~default:Relative_path.Set.empty)

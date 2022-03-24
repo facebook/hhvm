@@ -43,7 +43,7 @@ exception Reading_Payload_Exception
 (* We want to marshal exceptions (or at least their message+stacktrace) over  *)
 (* the wire. This type ensures that no one will attempt to pattern-match on   *)
 (* the thing we marshal: 'Values of extensible variant types, for example     *)
-(* exceptions (of extensible type exn), returned by the unmarhsaller should   *)
+(* exceptions (of extensible type exn), returned by the unmarshaller should   *)
 (* not be pattern-matched over, because unmarshalling does not preserve the   *)
 (* information required for matching their constructors.'                     *)
 (* https://caml.inria.fr/pub/docs/manual-ocaml/libref/Marshal.html            *)

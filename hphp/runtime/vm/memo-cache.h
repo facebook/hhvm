@@ -54,7 +54,7 @@
  * function to obtain the appropriate getter and setter. For a particular memo
  * cache, the same specialized get/set function must always be used! It is not
  * legal to sometimes use a specialized get/set function it, and a generic one
- * elesewhere.
+ * elsewhere.
  */
 
 namespace HPHP {

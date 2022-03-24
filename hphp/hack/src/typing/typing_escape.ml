@@ -105,7 +105,7 @@ type remove_map = rigid_tvar -> elim_info option
 type refresh_env = {
   env: Typing_env_types.env;  (** the underlying typing env *)
   tvars: Typing_error.Reasons_callback.t IMap.t;
-      (** an accumulator used to remember all the type variabes
+      (** an accumulator used to remember all the type variables
           that appeared when refreshing a type; the map is used as a
           set, and error callbacks are merely used for reporting *)
   remove: remove_map;
@@ -138,7 +138,7 @@ type changed =
    temporary fresh objects will sit root-less in the minor heap and get
    collected for very cheap. If we instead used the fresh results as
    replacements of the originals we would create roots for them and may
-   eventually have to collect the original copies with a constly compaction
+   eventually have to collect the original copies with a costly compaction
    of the major heap *)
 let with_default ~default (renv, res, changed) =
   match changed with

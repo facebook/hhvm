@@ -373,7 +373,7 @@ bool DebuggerProxy::sendToClient(DebuggerCommand *cmd) {
 }
 
 // Allow the signal polling thread to send CmdSignal messages to the
-// client to see if it there is a signal to repond to.
+// client to see if it there is a signal to respond to.
 void DebuggerProxy::enableSignalPolling() {
   Lock lock(m_signalMutex);
   m_okayToPoll = true;
@@ -476,7 +476,7 @@ void DebuggerProxy::pollSignal() {
     }
   }
   if (!m_stopped) {
-    // We've noticed that the socket has closed. Stop and destory this proxy.
+    // We've noticed that the socket has closed. Stop and destroy this proxy.
     TRACE_RB(2, "DebuggerProxy::pollSignal: "
              "lost communication with the client, stopping proxy\n");
     Debugger::UsageLog("server", getSandboxId(), "ProxyError", "Signal poll");

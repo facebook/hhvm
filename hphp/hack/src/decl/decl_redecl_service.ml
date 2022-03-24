@@ -9,7 +9,7 @@
 
 (*****************************************************************************)
 (* On the fly type-declaration are called when the user modified a file
- * we are not at initilalization time anymore. Therefore, we have a bit more
+ * we are not at initialization time anymore. Therefore, we have a bit more
  * work to do. We need calculate what must be re-checked.
  *)
 (*****************************************************************************)
@@ -592,7 +592,7 @@ let redo_type_decl
     Relative_path.Map.fold defs ~init:FileInfo.empty_names ~f:(fun _ ->
         FileInfo.merge_names)
   in
-  (* Some of the defintions are already in the old heap, left there by a
+  (* Some of the definitions are already in the old heap, left there by a
    * previous lazy check *)
   let (oldified_defs, current_defs) =
     Decl_utils.split_defs all_defs previously_oldified_defs

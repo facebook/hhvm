@@ -66,7 +66,7 @@ class IntlDateFormatter {
    *   (possibly fractional) number of seconds since epoch or an array in
    *   the format output by localtime().   If a DateTime or an IntlCalendar
    *   object is passed, its timezone is not considered. The object will be
-   *   formatted using the formater's configured timezone. If one wants to
+   *   formatted using the formatter's configured timezone. If one wants to
    *   use the timezone of the object to be formatted,
    *   IntlDateFormatter::setTimezone() must be called before with the
    *   object's timezone. Alternatively, the static function
@@ -346,7 +346,7 @@ function datefmt_create($locale,
  *   fractional) number of seconds since epoch or an array in the format
  *   output by localtime().   If a DateTime or an IntlCalendar object is
  *   passed, its timezone is not considered. The object will be formatted
- *   using the formater's configured timezone. If one wants to use the
+ *   using the formatter's configured timezone. If one wants to use the
  *   timezone of the object to be formatted,
  *   IntlDateFormatter::setTimezone() must be called before with the
  *   object's timezone. Alternatively, the static function

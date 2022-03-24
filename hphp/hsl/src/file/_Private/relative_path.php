@@ -15,7 +15,7 @@ use namespace HH\Lib\Str;
 // Resolve a path relative to some directory.
 // This function is expected to be used internally in HSL only, instead of as a
 // general utility.
-// We need a sophiticated path library based on std::filesystem::canonical or
+// We need a sophisticated path library based on std::filesystem::canonical or
 // something in folly in the future.
 function relative_path(string $path, ?string $relative_to = null): string {
   if (

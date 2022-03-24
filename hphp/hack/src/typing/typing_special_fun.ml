@@ -17,7 +17,7 @@ let update_param : decl_fun_param -> decl_ty -> decl_fun_param =
 
 let wrap_with_like_type (pessimise : bool) (ty : decl_ty) =
   if pessimise then
-    MakeType.like (Reason.Renforceable (get_pos ty)) ty
+    MakeType.like (Reason.Reinforceable (get_pos ty)) ty
   else
     ty
 

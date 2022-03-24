@@ -352,7 +352,7 @@ protected:
     assertx(!e.isInvalid());
     /*
      * We do not have to check e.hasStrKey() because it is
-     * implicitely done by the check on the hash.
+     * implicitly done by the check on the hash.
      */
     return e.hash() == h && (ks == e.strKey() || ks->same(e.strKey()));
   }

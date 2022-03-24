@@ -156,7 +156,7 @@ void usage() {
     "Pass a comma-separated list of events to replace the default set.\n"
     "    -b              : prints bytecode stats\n"
     "    -B <OPCODE>     : used in conjunction with -e, prints the top "
-    "bytecode translationc event type. Pass '%s' to get a "
+    "bytecode translation event type. Pass '%s' to get a "
     "list of valid opcodes.\n"
     "    -i              : reports inclusive stats by including helpers "
     "(perf data must include call graph information)\n"

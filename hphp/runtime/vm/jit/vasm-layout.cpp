@@ -166,7 +166,7 @@ static bool is_catch(const Vblock& block) {
 void Scale::computeArcWeights() {
   FTRACE(3, "[vasm-layout] computeArcWeights:\n");
 
-  // First, we can easily compute the weight of the non-crititical arcs by
+  // First, we can easily compute the weight of the non-critical arcs by
   // looking at its incident blocks.
   for (auto b : m_blocks) {
     auto succSet = succs(m_unit.blocks[b]);

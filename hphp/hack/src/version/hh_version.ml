@@ -9,9 +9,9 @@
 (* Monotonically increasing identifier that can be used when we introduce
  * backward incompatible changes in hh_client commands, and to signal
  * new capabilities to clients.
- * v1 (hvvm 3.15, 11 May 2016) - persistent connection introduced
- * v4 (hvvm 3.18, 7 Nov 2016) - persistent connection stable
- * v5 (hvvm 3.23, 17 Nov 2017) - 'hh_client lsp' stable
+ * v1 (hhvm 3.15, 11 May 2016) - persistent connection introduced
+ * v4 (hhvm 3.18, 7 Nov 2016) - persistent connection stable
+ * v5 (hhvm 3.23, 17 Nov 2017) - 'hh_client lsp' stable
  *)
 let api_version = 5
 

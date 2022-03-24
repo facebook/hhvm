@@ -329,7 +329,7 @@ fn is_special_builtin(f_name: &str) -> bool {
         | "HH\\vec"
         | "hphp_array_idx"
         | "HH\\FIXME\\UNSAFE_CAST" => true,
-        /* all other special builtins listed in emit_expresion.rs return mutable:
+        /* all other special builtins listed in emit_expression.rs return mutable:
         specifically, these:
         "array_key_exists" => Some((2, IMisc(AKExists))),
         "intval" => Some((1, IOp(CastInt))),

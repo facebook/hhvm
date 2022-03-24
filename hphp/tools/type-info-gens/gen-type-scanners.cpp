@@ -374,7 +374,7 @@ struct Generator {
   > m_unique_objects;
 
   // Mapping of object types to their computed actions. We could compute the
-  // action everytime we needed it, but they're stored in this table for
+  // action every time we needed it, but they're stored in this table for
   // memoization. This table is mutable as well since its a cache.
   mutable node_map<const Object*, Action> m_actions; // XXX must be node
 
@@ -1113,7 +1113,7 @@ void Generator::sanityCheckTemplateParams(const Object& object) {
   }
 }
 
-// Given a Mark[Scannable]CollectiblCollectable<> marker instantiation, extract
+// Given a Mark[Scannable]CollectibleCollectable<> marker instantiation, extract
 // the object-type its marking. Actually very simple, but do a lot of sanity
 // checking on the result.
 const Object& Generator::getMarkedCollectable(const Object& mark) const {
@@ -2775,7 +2775,7 @@ void Generator::genAllLayouts() {
         if (indexed.errors) continue;
 
         // If this indexed type's action is conservative, examine guards (if
-        // any) to see if we want to ignore or conserative scan it.
+        // any) to see if we want to ignore or conservative scan it.
         if (indexed.conservative) {
           // If ignore isn't set, the issue has already been decided
           // (conservative scan).
@@ -3093,7 +3093,7 @@ void Generator::genScannerFunc(std::ostream& os,
   const auto* offset_str = layout.suffix ? "" : "+offset";
 
   // First generate calls to the scanner to record all the pointers. We use the
-  // version of insert() which takes an initializator list because it is more
+  // version of insert() which takes an initializer list because it is more
   // efficient.
   if (layout.ptrs.size() == 1) {
     indent(2) << "scanner.m_addrs.emplace_back(\n";

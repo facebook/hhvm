@@ -361,7 +361,7 @@ struct Class {
    * When returning false the class is guaranteed to be final.  When returning
    * true the system cannot tell though the class may still be final.
    */
-  bool couldBeOverriden() const;
+  bool couldBeOverridden() const;
 
   /*
    * Whether this class (or its subtypes) could possibly have have
@@ -392,7 +392,7 @@ struct Class {
   bool mightCareAboutDynConstructs() const;
 
   /*
-   * Whether this class (or clases derived from it) could have const props.
+   * Whether this class (or classes derived from it) could have const props.
    */
   bool couldHaveConstProp() const;
   bool derivedCouldHaveConstProp() const;
@@ -1115,12 +1115,12 @@ struct Index {
 
 
   /*
-   * If we resolve the intial value of a public property, we need to
+   * If we resolve the initial value of a public property, we need to
    * tell the refine_public_statics phase about it, because the init
    * value won't be included in the mutations any more.
    *
    * Note that we can't modify the initial value here, because other
-   * threads might be reading it (via loookup_public_static), so we
+   * threads might be reading it (via lookup_public_static), so we
    * set a flag to tell us to update it during the next
    * refine_public_statics pass.
    */

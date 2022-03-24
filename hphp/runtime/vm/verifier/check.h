@@ -85,7 +85,7 @@ bool checkUnit(const UnitEmitter*, ErrorMode mode = kStderr);
  *    check or make the spec say what uninitialized optional params
  *    are set to (Uninit null like uninitialized locals?).
  * -- Function attributes (static, abstract, etc) must all make sense,
- *    certian attributes are mutually exclusive, others aren't, some
+ *    certain attributes are mutually exclusive, others aren't, some
  *    imply bytecode restrictions.  (access This from static? etc).
  */
 bool checkFunc(const FuncEmitter*, ErrorMode mode = kStderr);
@@ -104,7 +104,7 @@ bool checkFunc(const FuncEmitter*, ErrorMode mode = kStderr);
  * -- Return types are also correct
  * -- Functions declared as ActRec take an ActRec* as their sole argument
  * -- Functions with a variadic parameter take an Array as the final argument,
- *    and PHP 5 compatibility functions are registred appropriately.
+ *    and PHP 5 compatibility functions are registered appropriately.
  * -- Methods take an ObjectData* as their first argument
  * -- Static methods take a const Class* as their first argument
  */

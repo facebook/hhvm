@@ -164,7 +164,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                       HeaderKind = HeaderKind::Object);
   ~ObjectData();
 
-  // Disallow copy construction and assignemt
+  // Disallow copy construction and assignment
   ObjectData(const ObjectData&) = delete;
   ObjectData& operator=(const ObjectData&) = delete;
 

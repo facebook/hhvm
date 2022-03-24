@@ -379,14 +379,14 @@ module type CheckKindType = sig
     enable_type_check_filter_files:bool ->
     Relative_path.Set.t * Relative_path.Set.t
 
-  (* Update the global state based on resuts of parsing, naming and decl *)
+  (* Update the global state based on results of parsing, naming and decl *)
   val get_env_after_decl :
     old_env:ServerEnv.env ->
     naming_table:Naming_table.t ->
     failed_naming:Relative_path.Set.t ->
     ServerEnv.env
 
-  (* Update the global state based on resuts of typing *)
+  (* Update the global state based on results of typing *)
   val get_env_after_typing :
     old_env:ServerEnv.env ->
     errorl:Errors.t ->
@@ -1044,7 +1044,7 @@ functor
         ~(cgroup_steps : CgroupProfiler.step_group) : type_checking_result =
       let telemetry = Telemetry.create () in
       if Relative_path.(Set.mem files_to_check default) then
-        Hh_logger.log "WARNING: rechecking defintion in a dummy file";
+        Hh_logger.log "WARNING: rechecking definition in a dummy file";
       let interrupt = get_interrupt_config genv env in
       let memory_cap =
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
@@ -1633,7 +1633,7 @@ functor
         Typing_deps.allow_dependency_table_reads env.deps_mode deptable_unlocked
       in
 
-      (* Checking this before starting typechecking because we want to attribtue
+      (* Checking this before starting typechecking because we want to attribute
        * big rechecks to rebases, even when restarting is disabled *)
       if
         genv.local_config.ServerLocalConfig.hg_aware_recheck_restart_threshold

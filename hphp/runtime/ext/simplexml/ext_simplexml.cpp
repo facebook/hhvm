@@ -1691,7 +1691,7 @@ struct SimpleXMLElementPropHandler: Native::BasePropHandler {
 
   static bool isPropSupported(const String&, const String&) {
     // TODO: we really ought to pull out checking of whether a prop is supported
-    // to here, but it's currently very entagled in the normal functionality
+    // to here, but it's currently very entangled in the normal functionality
     // so defer that tech debt to later :p
     return true;
   }

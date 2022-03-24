@@ -1306,7 +1306,7 @@ public:
    * The instance bits are a bitfield cache for instanceof checks.  During
    * warmup, we profile the classes and interfaces most commonly checked
    * against in instanceof checks.  Then we cache whether or not this Class
-   * satisifes the check in the corresponding bit.
+   * satisfies the check in the corresponding bit.
    */
   void setInstanceBits();
   void setInstanceBitsAndParents();
@@ -1518,7 +1518,7 @@ private:
     ReifiedGenericsInfo m_reifiedGenericsInfo{0, false, 0, {}};
 
     /*
-     * Cache for Closure subclass scopings.
+     * Cache for Closure subclass scopes.
      *
      * Only meaningful when `this' is the "template" for a family of Closure
      * subclasses.  When we need to create a closure in the scope of a Class C
@@ -1849,7 +1849,7 @@ private:
    */
   bool m_hasReifiedGenerics      : 1;
   /*
-   * This class has a refied parent.
+   * This class has a reified parent.
    */
   bool m_hasReifiedParent        : 1;
   /*

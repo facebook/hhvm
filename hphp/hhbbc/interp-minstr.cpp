@@ -866,7 +866,7 @@ Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
   );
 }
 
-// Helper function for SetOpNewElem/IncDecNewElemm final
+// Helper function for SetOpNewElem/IncDecNewElem final
 // operations. These all either throw or push null.
 Effects setOpNewElemHelper(ISS& env, int32_t nDiscard) {
   auto& base = env.collect.mInstrState.base.type;
@@ -1703,7 +1703,7 @@ Effects miFinalSetElem(ISS& env,
     pushed |= rhs;
   }
   if (base.couldBe(BArrLike)) {
-    // Arrays will set the value and push the right hande side of the
+    // Arrays will set the value and push the right hand side of the
     // assignment (keysets will always fatal because you can't do a
     // set on them).
     auto const doesThrow = array_do_set(env, key, rhs);
@@ -2300,7 +2300,7 @@ void in(ISS& env, const bc::QueryM& op) {
   assertx(!env.state.unreachable);
 
   // If the QueryM produced a constant without any possible
-  // side-ffects, we can replace the entire thing with the constant.
+  // side-effects, we can replace the entire thing with the constant.
   if (env.collect.mInstrState.effectFree && is_scalar(topC(env))) {
     for (int i = 0; ; i++) {
       auto const last = last_op(env, i);

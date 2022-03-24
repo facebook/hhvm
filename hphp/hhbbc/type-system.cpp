@@ -3134,7 +3134,7 @@ Type subObj(res::Class val) {
   auto t = Type { BObj, HAMSandwich::None };
   construct(
     t.m_data.dobj,
-    val.couldBeOverriden() ? DObj::Sub : DObj::Exact,
+    val.couldBeOverridden() ? DObj::Sub : DObj::Exact,
     val
   );
   t.m_dataTag = DataTag::Obj;
@@ -3153,7 +3153,7 @@ Type objExact(res::Class val) {
 Type subCls(res::Class val) {
   auto r        = Type { BCls, HAMSandwich::None };
   construct(r.m_data.dcls,
-            val.couldBeOverriden() ? DCls::Sub : DCls::Exact,
+            val.couldBeOverridden() ? DCls::Sub : DCls::Exact,
             val);
   r.m_dataTag = DataTag::Cls;
   assertx(r.checkInvariants());
@@ -5901,7 +5901,7 @@ std::pair<Type, bool> array_like_set(Type base,
   // Sets aren't allowed on a keyset.
   if (arr.subtypeOf(BKeyset)) return std::make_pair(std::move(rest), true);
 
-  // Otherwise split the array intoits specific array types, do the
+  // Otherwise split the array into its specific array types, do the
   // set on each one, then union the results back together.
   auto result = TBottom;
   auto mightThrow = false;
@@ -6467,7 +6467,7 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
    *   assume). This raises a notice.
    *
    * Since HHBBC does not attempt to track m_nextKI for arrays, we
-   * have to be pessimistic and assume that any append on a darry or
+   * have to be pessimistic and assume that any append on a darray or
    * dict can throw. However we can avoid it in certain situations:
    *
    * Since HHBBC pessimizes its knowledge of inner array structure

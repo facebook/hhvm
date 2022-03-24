@@ -89,7 +89,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
              ~codegen:env.codegen)
       | None ->
         failwith
-          "expected to find Rust tree. ~leak_rust_tree was not set correctly somwhere earlier"
+          "expected to find Rust tree. ~leak_rust_tree was not set correctly somewhere earlier"
 
     let parse_errors env =
       (*

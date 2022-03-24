@@ -10,7 +10,7 @@
 
 namespace HH\Lib\IO;
 
-use namespace HH\Lib\Fileystem;
+use namespace HH\Lib\Filesystem;
 use namespace HH\Lib\_Private;
 
 /** An interface for a writable Handle.
@@ -47,7 +47,7 @@ interface WriteHandle extends Handle {
 
   /** Write all of the requested data.
    *
-   * A wrapper aroudn `writeAsync()` that will:
+   * A wrapper around `writeAsync()` that will:
    * - do multiple writes if necessary to write the entire provided buffer
    * - fail with EPIPE if it is not possible to write all the requested data
    *

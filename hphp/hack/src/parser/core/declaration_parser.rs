@@ -378,12 +378,12 @@ where
             }
             TokenKind::Name => {
                 let token = S!(make_token, parser, token);
-                let roken_ref = &token as *const _;
+                let token_ref = &token as *const _;
                 let (name, is_backslash) = parser.scan_remaining_qualified_name_extended(token);
                 // Here we rely on the implementation details of
                 // scan_remaining_qualified_name_extended. It's returning
                 // *exactly* token if there is nothing except it in the name.
-                is_backslash && (&name as *const _ == roken_ref)
+                is_backslash && (&name as *const _ == token_ref)
                     || parser.peek_token_kind() == TokenKind::LeftBrace
             }
             _ => false,
@@ -1616,7 +1616,7 @@ where
         //
         // variadic-parameter:
         //   ...
-        //   attribute-specification-opt visiblity-modifier-opt type-specifier \
+        //   attribute-specification-opt visibility-modifier-opt type-specifier \
         //     ...  variable-name
         //
         // This function parses the parens as well.
@@ -1705,10 +1705,10 @@ where
         }
     }
 
-    // TODO: This is wrong. The variable here is not anexpression* that has
+    // TODO: This is wrong. The variable here is not an expression* that has
     // an optional decoration on it.  It's a declaration. We shouldn't be using the
     // same data structure for a decorated expression as a declaration; one
-    // is ause* and the other is a *definition*.
+    // is a *use* and the other is a *definition*.
     fn parse_decorated_variable(&mut self) -> S::R {
         // ERROR RECOVERY
         // Detection of (variadic, byRef) inout params happens in post-parsing.

@@ -30,7 +30,7 @@ type ('has_locals, 'can_throw) env
 
 (* blank_env, stmt_env, and expr_env are handy aliases; a
    blank_env cannot do much, stmt_env and expr_env are used
-   to typecheck statements and expressions, respecitively *)
+   to typecheck statements and expressions, respectively *)
 type blank_env = (no, no) env
 
 type stmt_env = (yes, no) env
@@ -104,7 +104,7 @@ val throw : expr_env -> PSet.t -> expr_env
 
 (* analyze_lambda_body is used to check the body of a lambda; it
    is necessary to transition to a stmt_env in an expr_env
-   (the environment in which the lambda occured) without having
+   (the environment in which the lambda occurred) without having
    to close the expr_env *)
 val analyze_lambda_body : expr_env -> (blank_env -> blank_env) -> expr_env
 

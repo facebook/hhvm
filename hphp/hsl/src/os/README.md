@@ -77,7 +77,7 @@ inspiration for several decisions in this library.
   when the object is deallocated
 - Use a CLI server handler whenever the man page refers to EPERM, EAUTH,
   etc (e.g. `open()`). If a function mentions "the current process"
-  (e.g. `flock()`), seek advise - this can be intrincate.
+  (e.g. `flock()`), seek advise - this can be intricate.
 - Do not implement non-portable functionality. For example, non-portable errno
   constants are not defined, and the Linux concept of "abstract unix sockets"
   is not implemented. This is likely to be revisited in the future.

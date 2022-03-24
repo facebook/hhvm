@@ -521,7 +521,7 @@ where
         // TODO: Can the list be empty?
         // TODO: The list has to be expressions which evaluate as variables;
         // add an error checking pass.
-        // TODO: TokenKind::Unset is case-insentive. Should non-lowercase be an error?
+        // TODO: TokenKind::Unset is case-insensitive. Should non-lowercase be an error?
         let keyword = self.assert_token(TokenKind::Unset);
         let (left_paren, variables, right_paren) =
             self.parse_parenthesized_comma_list_opt_allow_trailing(|x| x.parse_expression());

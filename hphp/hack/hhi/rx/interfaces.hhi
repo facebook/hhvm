@@ -205,7 +205,7 @@ interface Iterable<+Tv>
    * `filter()`, while all values are affected by a call to `map()`.
    *
    * @param $fn - The callback containing the condition to apply to the
-   *              `Itearble` values.
+   *              `Iterable` values.
    *
    * @return - an `Iterable` containing the values after a user-specified
    *           condition is applied.
@@ -228,7 +228,7 @@ interface Iterable<+Tv>
    *                        elements of the current `Iterable`.
    *
    *  @return - The `Iterable` that combines the values of the current
-   *            `Itearable` with the provided `Traversable`.
+   *            `Iterable` with the provided `Traversable`.
    */
   public function zip<Tu>(
     \HH\Traversable<Tu> $traversable,
@@ -455,7 +455,7 @@ interface KeyedIterable<Tk, +Tv>
    * `filter()`, while all values are affected by a call to `map()`.
    *
    * @param $fn - The callback containing the condition to apply to the
-   *              `KeyedItearble` values.
+   *              `KeyedIterable` values.
    *
    * @return - a `KeyedIterable` containing the values after a user-specified
    *           condition is applied.
@@ -498,7 +498,7 @@ interface KeyedIterable<Tk, +Tv>
    *                        elements of the current `KeyedIterable`.
    *
    *  @return - The `KeyedIterable` that combines the values of the current
-   *            `KeyedItearable` with the provided `Traversable`.
+   *            `KeyedIterable` with the provided `Traversable`.
    */
   public function zip<Tu>(
     \HH\Traversable<Tu> $traversable,

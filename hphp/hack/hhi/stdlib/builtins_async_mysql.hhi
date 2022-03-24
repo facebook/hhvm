@@ -233,7 +233,7 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
  /* Can't put a return type for rowBlocks as it will ask that the type is
   * iterable because of the usage and then we can't have the AsyncMysqlRowBlock
   * implement the Iterable interface because mocks will complain they don't
-  * implemplement the functions in the interface.
+  * implement the functions in the interface.
   **/
   public function rowBlocks() { }
   public function noIndexUsed() : bool { }
@@ -380,7 +380,7 @@ namespace HH\Lib\SQL {
     // %=[fds] - comparison
     public function format_0x3d(): ScalarFormat;
 
-    /* INTENTIONALLY NOT IMPLEMEMENTED: %U, %W, %V, %m
+    /* INTENTIONALLY NOT IMPLEMENTED: %U, %W, %V, %m
      *
      * %U %W are `dict<column, value>`, and %V is
      * `vec<n-tuple(value, value...)>`, with `mixed` values. Use `%Q` instead

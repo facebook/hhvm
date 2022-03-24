@@ -783,7 +783,7 @@ and simplify_subtype_i
          let (ty_super_descr, ty_sub_descr) =
            if String.equal ty_super_descr ty_sub_descr then
              ( "exactly the type " ^ ty_super_descr,
-               "the nonexact type " ^ ty_sub_descr )
+               "the inexact type " ^ ty_sub_descr )
            else
              (ty_super_descr, ty_sub_descr)
          in
@@ -1293,7 +1293,7 @@ and simplify_subtype_i
                   res
                   ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super)
             in
-            (* Heuristicky logic to decide whether to "break" the intersection
+            (* Heuristically logic to decide whether to "break" the intersection
                or the union first, based on observing that the following cases often occur:
                  - A & B <: (A & B) | C
                    In which case we want to "break" the union on the right first
@@ -1618,7 +1618,7 @@ and simplify_subtype_i
                    { subtype_env with coerce = Some TL.CoerceToDynamic }
                  ft_sub.ft_params
                  ty_dyn_enf
-            &&& (* Finally do covariant subtryping on return type *)
+            &&& (* Finally do covariant subtyping on return type *)
             simplify_dynamic_aware_subtype
               ~subtype_env
               ft_sub.ft_ret.et_type
@@ -1978,7 +1978,7 @@ and simplify_subtype_i
             invalid_env env
         | (_, Tclass ((_, cname), ex, _))
           when String.equal cname SN.Classes.cStringish
-               && equal_exact ex Nonexact
+               && equal_exact ex Inexact
                && Aast.(
                     equal_tprim tprim_super Tstring
                     || equal_tprim tprim_super Tarraykey) ->
@@ -2015,7 +2015,7 @@ and simplify_subtype_i
         (match deref ty_sub with
         | (_, Tnewtype (enum_name, _, _))
           when String.equal enum_name class_name
-               && equal_exact exact_super Nonexact
+               && equal_exact exact_super Inexact
                && Env.is_enum env enum_name ->
           valid env
         | (_, Tnewtype (cid, _, _))
@@ -2031,18 +2031,18 @@ and simplify_subtype_i
           valid env
         | (_, Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum))
           when String.equal class_name SN.Classes.cXHPChild
-               && equal_exact exact_super Nonexact ->
+               && equal_exact exact_super Inexact ->
           valid env
         | (_, Tprim Nast.Tstring)
           when String.equal class_name SN.Classes.cStringish
-               && equal_exact exact_super Nonexact ->
+               && equal_exact exact_super Inexact ->
           valid env
         (* Match what's done in unify for non-strict code *)
         | (r_sub, Tclass (x_sub, exact_sub, tyl_sub)) ->
           let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
           let exact_match =
             match (exact_sub, exact_super) with
-            | (Nonexact, Exact) -> false
+            | (Inexact, Exact) -> false
             | (_, _) -> true
           in
           if String.equal cid_super cid_sub then
@@ -2169,7 +2169,7 @@ and simplify_subtype_i
                   invalid_env env))
         | (_r_sub, Tvec_or_dict (_, tv)) ->
           (match (exact_super, tyl_super) with
-          | (Nonexact, [tv_super])
+          | (Inexact, [tv_super])
             when String.equal class_name SN.Collections.cTraversable
                  || String.equal class_name SN.Collections.cContainer ->
             (* vec<tv> <: Traversable<tv_super>
@@ -2179,7 +2179,7 @@ and simplify_subtype_i
              *          and map<_,tv> <: Container<tv_super>
              *)
             simplify_subtype ~subtype_env ~this_ty tv tv_super env
-          | (Nonexact, [tk_super; tv_super])
+          | (Inexact, [tk_super; tv_super])
             when String.equal class_name SN.Collections.cKeyedTraversable
                  || String.equal class_name SN.Collections.cKeyedContainer
                  || String.equal class_name SN.Collections.cAnyArray ->
@@ -2189,7 +2189,7 @@ and simplify_subtype_i
               |> simplify_subtype ~subtype_env ~this_ty tk tk_super
               &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
             | _ -> default_subtype env)
-          | (Nonexact, [])
+          | (Inexact, [])
             when String.equal class_name SN.Collections.cKeyedTraversable
                  || String.equal class_name SN.Collections.cKeyedContainer
                  || String.equal class_name SN.Collections.cAnyArray ->
@@ -3193,13 +3193,13 @@ and simplify_subtype_funs
         ft_super.ft_implicit_params
         ft_sub.ft_implicit_params
   &&&
-  (* Finally do covariant subtryping on return type *)
+  (* Finally do covariant subtyping on return type *)
   if check_return then
     simplify_subtype_possibly_enforced ft_sub.ft_ret ft_super.ft_ret
   else
     valid
 
-(* Add a new upper bound ty on var.  Apply transitivity of sutyping,
+(* Add a new upper bound ty on var.  Apply transitivity of subtyping,
  * so if we already have tyl <: var, then check that for each ty_sub
  * in tyl we have ty_sub <: ty.
  *)
@@ -3314,7 +3314,7 @@ and add_tyvar_lower_bound_and_close
   not arraykey | tvar. By only applying if B is a type variable, we avoid oscillating
   forever between this rule and the generic one that moves from t1 & arraykey <: t2.
   to t1 <: t2 | not arraykey. This is similar to our treatment of A <: ?B iff
-  A & nonnull <: B. This returns a subtyp_prop if the pattern this rule looks for matched,
+  A & nonnull <: B. This returns a subtype_prop if the pattern this rule looks for matched,
   and returns None if it did not, so that this rule does not apply. ) *)
 and simplify_subtype_arraykey_union ~this_ty ~subtype_env env ty_sub tyl_super =
   match tyl_super with
@@ -3963,7 +3963,7 @@ let is_type_disjoint env ty1 ty2 =
          c2<_tyl> subset Union tyl'. c1<tyl'>. If c2 is a subclass of c1, then
          whatever _tyl is, we can chase up the hierarchy to find an instantiation
          for tyl'. If c2 is not a subclass of c1, then no matter what the tyl' are
-         the subset realtionship cannot hold, since either c1 and c2 are disjoint tags,
+         the subset relationship cannot hold, since either c1 and c2 are disjoint tags,
          or c1 is a non-equal subclass of c2, and so objects that are exact c2,
          can't inhabit c1. NB, we aren't allowing abstractness of a class to cause
          types to be considered disjoint.
@@ -3977,7 +3977,7 @@ let is_type_disjoint env ty1 ty2 =
     | (Tprim tp1, Tprim tp2) -> is_tprim_disjoint tp1 tp2
     | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
     | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))
-      when String.equal cname SN.Classes.cStringish && equal_exact ex Nonexact
+      when String.equal cname SN.Classes.cStringish && equal_exact ex Inexact
       ->
       false
     | (Tprim _, (Tfun _ | Tclass _))

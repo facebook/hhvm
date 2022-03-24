@@ -23,7 +23,7 @@ namespace php { struct Unit; }
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Returns true if a unit repesents a portion of systemlib, or one of
+ * Returns true if a unit represents a portion of systemlib, or one of
  * the native units.
  */
 bool is_systemlib_part(const php::Unit&);

@@ -160,7 +160,7 @@ template <typename F> void forEachLocalAlloc(F);
 extern __thread void* tl_base;
 
 /*
- * An async singal safe way to determine if the current thread has a fully
+ * An async signal safe way to determine if the current thread has a fully
  * initialized RDS (including the initialization of rds::local).
  */
 bool isFullyInitialized();

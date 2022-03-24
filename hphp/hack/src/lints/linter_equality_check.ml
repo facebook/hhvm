@@ -188,7 +188,7 @@ let equatability env ty1 ty2 =
     else
       NonEquatableDueToOpaqueEnums equatable_if_these_are_made_transparent
 
-let error_if_inequatable env p ty1 ty2 err =
+let error_if_inequitable env p ty1 ty2 err =
   match equatability env ty1 ty2 with
   | Equatable -> ()
   | NonEquatable -> err (Env.print_ty env ty1) (Env.print_ty env ty2)
@@ -208,7 +208,7 @@ let ensure_valid_equality_check env p bop e1 e2 =
         TrivialStrictEq (error 4118). *)
     ()
   | _ ->
-    error_if_inequatable
+    error_if_inequitable
       env
       p
       ty1
@@ -221,7 +221,7 @@ let ensure_valid_null_check ~nonnull env p e =
     Lints_errors.invalid_null_check p nonnull (Env.print_ty env ty)
 
 let ensure_valid_contains_check env p trv_val_ty val_ty =
-  error_if_inequatable
+  error_if_inequitable
     env
     p
     trv_val_ty
@@ -229,7 +229,7 @@ let ensure_valid_contains_check env p trv_val_ty val_ty =
     (Lints_errors.invalid_contains_check p)
 
 let ensure_valid_contains_key_check env p trv_key_ty key_ty =
-  error_if_inequatable
+  error_if_inequitable
     env
     p
     trv_key_ty

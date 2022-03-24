@@ -341,7 +341,7 @@ void loadImagickConstants() {
   HHVM_RCC_INT(Imagick, DECORATION_NO, NoDecoration);
   HHVM_RCC_INT(Imagick, DECORATION_UNDERLINE, UnderlineDecoration);
   HHVM_RCC_INT(Imagick, DECORATION_OVERLINE, OverlineDecoration);
-  HHVM_RCC_INT(Imagick, DECORATION_LINETROUGH, LineThroughDecoration);
+  HHVM_RCC_INT(Imagick, DECORATION_LINETHROUGH, LineThroughDecoration);
 
   // NOISE constants
   HHVM_RCC_INT(Imagick, NOISE_UNIFORM, UniformNoise);
@@ -669,7 +669,7 @@ void loadImagickConstants() {
   HHVM_RCC_INT(Imagick, SPARSECOLORMETHOD_BILINEAR, BilinearColorInterpolate);
   HHVM_RCC_INT(Imagick, SPARSECOLORMETHOD_POLYNOMIAL,
                         PolynomialColorInterpolate);
-  HHVM_RCC_INT(Imagick, SPARSECOLORMETHOD_SPEPARDS, ShepardsColorInterpolate);
+  HHVM_RCC_INT(Imagick, SPARSECOLORMETHOD_SHEPHERDS, ShepardsColorInterpolate);
   HHVM_RCC_INT(Imagick, SPARSECOLORMETHOD_VORONOI, VoronoiColorInterpolate);
 
   // FUNCTION constants

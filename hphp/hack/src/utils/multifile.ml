@@ -11,7 +11,7 @@ open Hh_prelude
 
 (* This allows one to fake having multiple files in one file. This
  * is used only in unit test files.
- * Indeed, there are some features that require mutliple files to be tested.
+ * Indeed, there are some features that require multiple files to be tested.
  * For example, newtype has a different meaning depending on the file.
  *)
 let rec make_files = function

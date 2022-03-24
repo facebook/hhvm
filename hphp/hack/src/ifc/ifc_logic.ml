@@ -188,7 +188,7 @@ let simplify (c : prop) =
     | ITE ((pos, p, x), t1, t2) -> ITE ((pos, shift p, x), pop t1, pop t2)
   in
   let rec elim_exists_ift = function
-    (* Same as exelim above, but for if_tree constraints *)
+    (* Same as elim_exists above, but for if_tree constraints *)
     | FLW l -> FLW (dedup (elim_exists l))
     | ITE (((_, pol, _) as c), t1, t2) ->
       assert (not (equal_policy pol (Pbound_var 0)));
@@ -203,7 +203,7 @@ let simplify (c : prop) =
       ITE (c, cat t t1, cat t t2)
   in
   let rec elim_forall_ift max = function
-    (* Same as alelim above, but for if_tree constraints *)
+    (* Same as elim_forall above, but for if_tree constraints *)
     | FLW l -> FLW (elim_forall ~max l)
     | ITE ((pos, Pbound_var 0, x), t1, t2) ->
       let max_if =
@@ -274,7 +274,7 @@ let rec entailment_violations lattice = function
   | Cquant _ -> failwith "Cquant"
   | Chole _ -> failwith "Chole"
 
-(* Flatten a prop into a set of flows. Note: this only works for conjuctions of
+(* Flatten a prop into a set of flows. Note: this only works for conjunctions of
  * simple flows. Quantifiers, conditions, and holes are not allowed
  *)
 let rec flatten_prop = function

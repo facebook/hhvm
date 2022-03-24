@@ -65,7 +65,7 @@
   killed by a later store.  We represent these two criteria via alteredAnt and
   alteredAvl (see below).
 
-  This also affects local availabilty; a store may not be available in the
+  This also affects local availability; a store may not be available in the
   sense that it can be moved to the end of the block (because of a possible
   conflicting write), but it may still be available in the sense that it can be
   killed by a later store.  We split this out into AvlLoc (can be moved to the
@@ -1193,9 +1193,9 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
     if (i1->op() != i2->op()) return Compat::Bad;
     if (i1->numSrcs() != i2->numSrcs()) return Compat::Bad;
     for (auto i = i1->numSrcs(); i--; ) {
-      // Ptr and Lval types are imcompatible, as one requires two register,
-      // while the other requires only one.  This stops us from phiing the
-      // two types together to elimnate a store.
+      // Ptr and Lval types are incompatible, as one requires two register,
+      // while the other requires only one.  This stops us from phi-ing the
+      // two types together to eliminate a store.
       auto const& t1 = i1->src(i)->type();
       auto const& t2 = i2->src(i)->type();
       if ((t1.maybe(TPtr) && t2.maybe(TLval)) ||

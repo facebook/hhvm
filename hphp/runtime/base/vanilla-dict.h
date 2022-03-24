@@ -44,7 +44,7 @@ struct VanillaDictElm {
   // We store values here, but also some information local to this array:
   // data.m_aux.u_hash contains either a negative number (for an int key) or
   // a string hashcode (31-bit and thus non-negative); the high bit is the
-  // int/string key descriminator. data.m_type == kInvalidDataType if this is
+  // int/string key discriminator. data.m_type == kInvalidDataType if this is
   // an empty slot in the array (e.g. after a key is deleted).  It is
   // critical that when we return &data to clients, that they not read or
   // write the m_aux field!
@@ -101,7 +101,7 @@ struct VanillaDictElm {
     if (isRefcountedType(data.m_type)) scanner.scan(data.m_data.pcnt);
   }
 
-  // Members below here are required for HashTable implemenation.
+  // Members below here are required for HashTable implementation.
   ALWAYS_INLINE const TypedValue* datatv() const {
     return &data;
   }

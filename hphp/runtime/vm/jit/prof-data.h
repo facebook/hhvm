@@ -100,7 +100,7 @@ struct ProfTransRec {
   FuncId    funcId()      const { return m_sk.funcID(); }
   Func*     func()        const { return const_cast<Func*>(m_sk.func()); }
   bool      isProfile()   const { return m_kind == TransKind::Profile; }
-  bool      isProflogue() const { return m_kind == TransKind::ProfPrologue; }
+  bool      isPrologue() const { return m_kind == TransKind::ProfPrologue; }
   uint32_t  asmSize()     const { return m_asmSize; }
 
   /*
@@ -132,7 +132,7 @@ struct ProfTransRec {
   }
 
   /*
-   * Number of arguments for this proflogue.
+   * Number of arguments for this prologue.
    *
    * Precondition: kind() == TransKind::ProfPrologue
    */
@@ -142,7 +142,7 @@ struct ProfTransRec {
   }
 
   /*
-   * All calls in the TC which target this proflogue directly.
+   * All calls in the TC which target this prologue directly.
    *
    * The vector can only be used while the caller list is locked.
    *
@@ -170,7 +170,7 @@ struct ProfTransRec {
   }
 
   /*
-   * (Record|Erase) a call at address caller directly to this proflogue.
+   * (Record|Erase) a call at address caller directly to this prologue.
    *
    * These functions may only be called when the caller list is locked.
    *
@@ -184,7 +184,7 @@ struct ProfTransRec {
   void removeMainCaller(TCA caller) { removeCaller(m_callers->main, caller); }
 
   /*
-   * Erase the record of all calls to this proflogue.
+   * Erase the record of all calls to this prologue.
    *
    * This function may only be called when the caller list is locked.
    *
@@ -376,9 +376,9 @@ struct ProfData {
    * arguments.  (kInvalidTransID|nullptr) is returned if the prologue is not
    * associated with a TransID.
    */
-  TransID proflogueTransId(const Func* func, int nArgs) const;
+  TransID prologueTransId(const Func* func, int nArgs) const;
   ProfTransRec* prologueTransRec(const Func* func, int nArgs) {
-    auto tid = proflogueTransId(func, nArgs);
+    auto tid = prologueTransId(func, nArgs);
     return tid != kInvalidTransID ? transRec(tid) : nullptr;
   }
   const ProfTransRec* prologueTransRec(const Func* func, int nArgs) const {
@@ -619,7 +619,7 @@ struct ProfData {
   /*
    * Map from (FuncId, nArgs) pairs to prologue TransID.
    */
-  folly::AtomicHashMap<uint64_t, TransID> m_proflogueDB;
+  folly::AtomicHashMap<uint64_t, TransID> m_prologueDB;
 
   /*
    * Map from SrcKey.toAtomicInt() to DV funclet TransID.

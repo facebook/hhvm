@@ -66,12 +66,12 @@ static Variant HHVM_FUNCTION(
   logical_str_len = logical_str.length();
 
   if (!_direction_is_valid(direction)) {
-    raise_warning("Uknown direction.");
+    raise_warning("Unknown direction.");
     return false;
   }
 
   if (!_charset_is_valid(charset)) {
-    raise_warning("Uknown charset.");
+    raise_warning("Unknown charset.");
     return false;
   }
 

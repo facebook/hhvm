@@ -132,7 +132,7 @@ ETCH_LABEL(cmplength\MANGLED_NAME):
         jne       ETCH_LABEL(nextprobe\MANGLED_NAME)
 
         neg       %rcx
-        jz        ETCH_LABEL(found\MANGLED_NAME)     // both emtpy strings
+        jz        ETCH_LABEL(found\MANGLED_NAME)     // both empty strings
 
         push      %rdi
         lea       SD_DATA(%r11), %r11      // s->data()

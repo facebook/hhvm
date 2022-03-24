@@ -47,7 +47,7 @@ namespace vixl {
 // hardware.
 //
 // Each debug pseudo instruction is represented by a HLT instruction. The HLT
-// immediate field is used to identify the type of debug pseudo isntruction.
+// immediate field is used to identify the type of debug pseudo instruction.
 // Each pseudo instruction use a custom encoding for additional arguments, as
 // described below.
 

@@ -52,7 +52,7 @@ void* mmap_1g(void* addr, int node, bool map_fixed);
 // nullptr upon failure. If node is set to -1, no NUMA policy is enforced.
 void* mmap_2m(int node);
 
-// remap_2m() is simiar to mmap_2m(), except that it is used to replace an
+// remap_2m() is similar to mmap_2m(), except that it is used to replace an
 // existing memory range [addr, addr + size2m) using hugetlb pages.  All data in
 // that range will be erased.
 void* remap_2m(void* addr, int node);

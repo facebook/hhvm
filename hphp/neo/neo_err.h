@@ -136,7 +136,7 @@ NEOERR *nerr_passf (const char *func, const char *file, int lineno,
  * arguments: with the macro, the function name, file and lineno are
  *            automagically recorded.  Just pass the error and
  *            a printf format string giving more information about where
- *            the error is occuring.
+ *            the error is occurring.
  * returns: a pointer to an error
  */
 #if defined(USE_C99_VARARG_MACROS)

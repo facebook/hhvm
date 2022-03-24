@@ -85,7 +85,7 @@ let get_lower_bounds tpenv name tyargs =
      Eventually, we need to instantiate the parameters with the provided args.
      We must support the case here that the number of provided tyargs does not
      match the number of expected arguments for the named type parameter. In this
-     case, chop off superfluous argumnents and fill in Tany for missing ones. *)
+     case, chop off superfluous arguments and fill in Tany for missing ones. *)
   match (get name tpenv, tyargs) with
   | (_, _ :: _)
   | (None, _) ->
@@ -97,7 +97,7 @@ let get_upper_bounds tpenv name tyargs =
      Eventually, we need to instantiate the parameters with the provided args.
      We must support the case here that the number of provided tyargs does not
      match the number of expected arguments for the named type parameter. In this
-     case, chop off superfluous argumnents and fill in Tany for missing ones. *)
+     case, chop off superfluous arguments and fill in Tany for missing ones. *)
   match (get name tpenv, tyargs) with
   | (_, _ :: _)
   | (None, _) ->

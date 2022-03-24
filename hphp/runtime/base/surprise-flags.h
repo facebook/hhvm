@@ -105,7 +105,7 @@ enum SurpriseFlag : size_t {
 /*
  * Code within this scope must never handle any of the specified flags, and is
  * furthermore not even allowed to check for them using, e.g. `getSurpriseFlag',
- * regardess of whether they actually are set.
+ * regardless of whether they actually are set.
  */
 struct NoHandleSurpriseScope {
 #ifndef NDEBUG

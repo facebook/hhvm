@@ -975,7 +975,7 @@ Type remove_bits(Type, trep);
 /*
  * Returns the best known instantiation of a class type.
  *
- * Pre: t.subypeOf(TCls)
+ * Pre: t.subtypeOf(TCls)
  */
 Type toobj(const Type& t);
 

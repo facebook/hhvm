@@ -97,7 +97,7 @@ impl<'a> Reason<'a> {
             | RcstrOnGenerics((p, _))
             | RlambdaParam((p, _))
             | Rshape((p, _))
-            | Renforceable(p)
+            | Reinforceable(p)
             | Rdestructure(p)
             | RkeyValueCollectionKey(p)
             | RglobalClassProp(p)

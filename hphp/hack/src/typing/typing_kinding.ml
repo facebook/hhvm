@@ -300,8 +300,8 @@ module Simple = struct
       (nkinds : Simple.named_kind list) =
     let exp_len = List.length nkinds in
     let act_len = List.length tyargs in
-    let arity_mistmatch_okay = Int.equal act_len 0 && allow_missing_targs in
-    if Int.( <> ) exp_len act_len && not arity_mistmatch_okay then
+    let arity_mismatch_okay = Int.equal act_len 0 && allow_missing_targs in
+    if Int.( <> ) exp_len act_len && not arity_mismatch_okay then
       Errors.add_typing_error
         Typing_error.(
           primary

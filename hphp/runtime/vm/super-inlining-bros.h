@@ -58,7 +58,7 @@ struct ROMRenderer {
  */
 struct ROMData;
 
-// A smart poitner handle to the ROM.
+// A smart pointer handle to the ROM.
 struct ROMHandle {
   ROMHandle();
   explicit ROMHandle(std::unique_ptr<ROMData>&& data);

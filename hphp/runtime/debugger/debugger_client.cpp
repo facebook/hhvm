@@ -1185,7 +1185,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
 // This function is only entered when the machine being debugged is paused.
 //
 // If this function returns it means the process is running again.
-// NB: exceptions derived from DebuggerException or DebuggerClientExeption
+// NB: exceptions derived from DebuggerException or DebuggerClientException
 // indicate the machine remains paused.
 void DebuggerClient::console() {
   TRACE(2, "DebuggerClient::console\n");
@@ -1686,7 +1686,7 @@ DebuggerCommandPtr DebuggerClient::createCommand() {
     case 'v': return match_cmd<CmdVariable>("variable");
     case 'w': return match_cmd<CmdWhere>("where");
 
-    // these single lettter commands allow "x{cmd}" and "x {cmd}"
+    // these single letter commands allow "x{cmd}" and "x {cmd}"
     case 'x': shiftCommand(); return new_cmd<CmdExtended>("extended");
     case '!': shiftCommand(); return new_cmd<CmdShell>("shell");
     case '&': shiftCommand(); return new_cmd<CmdMacro>("macro");
@@ -1886,7 +1886,7 @@ std::string DebuggerClient::lineRest(int index) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// comunication with DebuggerProxy
+// communication with DebuggerProxy
 
 DebuggerCommandPtr DebuggerClient::xend(DebuggerCommand *cmd,
                                         EventLoopKind loopKind) {

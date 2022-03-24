@@ -105,7 +105,7 @@ module Simple = struct
 
   let to_full_kind_without_bounds kind = remove_bounds (fst kind)
 
-  let get_wilcard_bounds = snd
+  let get_wildcard_bounds = snd
 
   (* not public *)
   let rec named_internal_kind_of_decl_tparam decl_tparam : named_full_kind =

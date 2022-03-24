@@ -220,7 +220,7 @@ creates_in_body(FnX, TypeY) :-
         type(TypeY, FnX), funcs(FnX), class(TypeY),
         not method(TypeY, _, FnX), not static_method(TypeY, _, FnX).
 
-% If TypeY is an inferface, we could only pass by parameter. And the caller must
+% If TypeY is an interface, we could only pass by parameter. And the caller must
 % create a TypeZ object where TypeZ implements TypeY, as the argument before
 % calling this function.
 1 {has_parameter_and_argument(FnX, TypeY, ClassZ)} 1 :-

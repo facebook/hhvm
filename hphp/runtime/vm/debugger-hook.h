@@ -242,7 +242,7 @@ void phpDebuggerInterceptRegisterHook(const String& name);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Flow commands
-// Commands manipulating control flow. Calling any one of these short-cicruits
+// Commands manipulating control flow. Calling any one of these short-circuits
 // the others.
 
 // Continues execution until the next breakpoint or program exit

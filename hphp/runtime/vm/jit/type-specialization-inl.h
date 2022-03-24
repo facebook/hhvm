@@ -190,7 +190,7 @@ inline const RepoAuthType::Array* ArraySpec::type() const {
 IMPLEMENT_SPEC_OPERS(ArraySpec)
 
 ///////////////////////////////////////////////////////////////////////////////
-// ClasssSpec.
+// ClassSpec.
 
 constexpr inline ClassSpec::ClassSpec()
   : m_sort(IsTop)

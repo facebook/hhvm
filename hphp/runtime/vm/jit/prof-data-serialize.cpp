@@ -652,7 +652,7 @@ void write_prof_data(ProfDataSerializer& ser, ProfData* pd) {
     [&] (const ProfTransRec* ptr) {
       auto const transID = ptr->isProfile() ?
         ptr->region()->entry()->profTransID() :
-        pd->proflogueTransId(ptr->func(), ptr->prologueArgs());
+        pd->prologueTransId(ptr->func(), ptr->prologueArgs());
       write_raw(ser, transID);
       write_prof_trans_rec(ser, ptr, pd);
       // forEachTransRec already grabs a read lock, and we're not
@@ -945,8 +945,8 @@ void merge_loaded_units(int numWorkers) {
 
   std::vector<VMWorker> workers;
   // Compute a batch size that causes each thread to process approximately 16
-  // batches.  Even if the batches are somewhat imbalanced in what they contain,
-  // the straggler workers are very unlikey to take more than 10% longer than
+  // batches.  Even if the batches are somewhat unbalanced in what they contain,
+  // the straggler workers are very unlikely to take more than 10% longer than
   // the first worker to finish.
   auto const batchSize{std::max(units.size() / numWorkers / 16, size_t(1))};
   std::atomic<size_t> index{0};
@@ -1904,7 +1904,7 @@ std::string deserializeProfData(const std::string& filename,
           "Stale profile data (check Eval.ProfDataTTLHours)");
     } else if (buildTime > currTime) {
       throw std::runtime_error(
-          folly::sformat("profile data build timestame: {}, currTime: {}",
+          folly::sformat("profile data build timestamp: {}, currTime: {}",
                          buildTime, currTime).c_str());
     }
 
@@ -1967,7 +1967,7 @@ std::string deserializeProfData(const std::string& filename,
     // During deserialization we didn't merge the loaded units because
     // we wanted to pick and choose the hot Funcs and Classes. But we
     // need to merge them before we start serving traffic to ensure we
-    // don't have inconsistentcies (eg a persistent memoized Func
+    // don't have inconsistencies (eg a persistent memoized Func
     // wrapper might have been merged, while its implementation was
     // not; since the implementation has an internal name, there won't
     // be an autoload entry for it, so unless something else causes

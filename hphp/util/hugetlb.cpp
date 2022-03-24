@@ -290,7 +290,7 @@ NEVER_INLINE void* mmap_2m_impl(void* addr, bool fixed) {
     return nullptr;
   }
 
-  // Fault the page in.  This guarantees availablility of memory, and avoids
+  // Fault the page in.  This guarantees availability of memory, and avoids
   // subsequent errors when the huge page isn't really available.  Ideally the
   // kernel should've failed mmap() in such a case, but it doesn't seem to even
   // with MAP_LOCKED | MAP_POPULATE.
@@ -378,7 +378,7 @@ inline void* mmap_1g_impl(void* addr, bool map_fixed) {
     return nullptr;
   }
 
-  // Fault the page in.  This guarantees availablility of memory, and avoids
+  // Fault the page in.  This guarantees availability of memory, and avoids
   // SIGBUS when the huge page isn't really available.  In many cases
   // RLIMIT_MEMLOCK isn't big enough for us to lock 1G.  Fortunately that
   // is unnecessary here; a byte should work equally well.

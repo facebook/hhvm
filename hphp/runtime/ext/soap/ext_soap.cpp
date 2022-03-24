@@ -2347,7 +2347,7 @@ void HHVM_METHOD(SoapServer, handle,
   }
 
   // 7. throw away all buffered output so far, so we can send back a clean
-  //    soap resposne
+  //    soap response
   HHVM_FN(ob_end_clean)();
 
   // 8. special case

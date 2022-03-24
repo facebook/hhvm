@@ -63,7 +63,7 @@ pub enum Ty_<R: Reason, TY> {
     /// Any type
     /// TODO: any and err are a bit weird in that they are not actually types
     /// but rather they represent a set of inconsistent bounds on a tyvar
-    /// we might want to rethink them prefering a sum type _or_
+    /// we might want to rethink them preferring a sum type _or_
     /// distinguishing types with `Tany` from those without
     Tany,
 
@@ -76,7 +76,7 @@ pub enum Ty_<R: Reason, TY> {
 
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
-    /// If exact=Nonexact, this also includes subclasses
+    /// If exact=Inexact, this also includes subclasses
     Tclass(Positioned<TypeName, R::Pos>, Exact, Vec<TY>),
 
     Tvar(Tyvar),

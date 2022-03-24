@@ -257,7 +257,7 @@ let rpc
 
       (* when might t.active_rpc_count <> 0? well, if the caller did
          Lwt.pick [rpc t message1, rpc t message2], then active_rpc_count will
-         reach a peak of 2, then when the first rpc has finished it will go dowwn
+         reach a peak of 2, then when the first rpc has finished it will go down
          to 1, then when the second rpc has finished it will go down to 0. *)
 
       (* Discussion about why the following is safe, even if multiple people call rpc:
@@ -473,7 +473,7 @@ let stop
      synchronously force quit the daemon handle and close the message queue.
      The interleaving we have to worry about is: what will other code
      do while the state is still "Initialized", after we've sent the shutdown
-     message to the daemon, and we're let%lwt awaiting for a responnse?
+     message to the daemon, and we're let%lwt awaiting for a response?
      Will anything go wrong?
      Well, the daemon has responded to 'shutdown' by deleting its hhi dir
      but leaving itself in its "Initialized" state.
@@ -516,7 +516,7 @@ let rec serve (t : t) : unit Lwt.t =
      (3) keep doing this until we discover that a queue has been closed, which
      is the "cancellation" signal for us to stop our loop.
      The code looks a bit funny because the only way to tell if a queue is closed
-     is when we attemept to awaitingly-read or synchronously-write to it. *)
+     is when we attempt to awaitingly-read or synchronously-write to it. *)
   try%lwt
     (* We mutate the data in `t` which is why we don't return a new `t` here. *)
     let%lwt next_action =

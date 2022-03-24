@@ -209,7 +209,7 @@ However, if we see an instruction that could DecRef one of these objects
 through a pointer in memory and its lower_bound is currently above its
 unsupported component, we can be sure we've accounted for that may-DecRef
 by balancing it with a IncRef of some sort that we've already observed.
-In this situation, we can remove the memory support bit to avoid futher
+In this situation, we can remove the memory support bit to avoid further
 reductions in the lower bound of that set via that memory location.
 
 Since this is may-information that makes analysis more conservative, the memory
@@ -232,13 +232,13 @@ IncRef instructions that raise the lower bound for that new pointer.
 
 Most of the complexity in this analysis is related to instructions that load or
 store from memory, and therefore interacts with memory support.  There are
-enough details to discuss it futher in next several sections of this doc.
+enough details to discuss it further in next several sections of this doc.
 
 
 -- About Loads --
 
 On entry to a region, it is assumed that normal VM reference count invariants
-hold for all memory---specificaly, each reference count on each object in the
+hold for all memory---specifically, each reference count on each object in the
 heap is exactly the number of live pointers to that object.  And in general,
 accesses to memory must maintain this invariant when they are done outside of
 small regions that may temporarily break that invariant.  We make use of this
@@ -1028,7 +1028,7 @@ void mrinfo_step_impl(Env& env,
      * It's safe not to add it to the kill set, though, because if the IR
      * program is destroying a memory location, it is already malformed if it
      * loads the location again and then uses it in a way that relies on the
-     * pointer still being dereferenceable.  Moreover, in these situations,
+     * pointer still being dereferencable.  Moreover, in these situations,
      * even though the avail bit from mrinfo will be set on the second load, we
      * won't be able to remove support from the previous aset, and won't raise
      * the lower bound on the new loaded value.
@@ -1188,7 +1188,7 @@ DEBUG_ONLY std::string show(const BitsetRef& bs) {
  * freed.
  *
  * PureStores are allowed to store the address of an object which has
- * been destroyed (this allowes store-elim to sink stores without
+ * been destroyed (this allows store-elim to sink stores without
  * worrying about moving them past DecRefs); otherwise a use of an
  * SSATmp indicates that its refcount has not yet hit zero.
  */
@@ -1593,7 +1593,7 @@ bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
     if (dst.unbalanced_decrefs.size()) {
       // Need to merge the unbalanced_decrefs. For each aset in
       // either, we want the destination to end up with max(aset in
-      // dst, aset in src) occurrances of aset (a kind of "union with
+      // dst, aset in src) occurrences of aset (a kind of "union with
       // counts").
       std::sort(tmp.begin(), tmp.end());
       std::sort(dst.unbalanced_decrefs.begin(), dst.unbalanced_decrefs.end());
@@ -2554,7 +2554,7 @@ bool sink_incs(Env& env) {
 // This pass chooses a direction - either look for Incs followed by
 // Decs or Decs followed by Incs. It then computes availability for
 // the kind that comes first, and anticipability for the kind that
-// comes second. Lets assume we're doing Incs follwed by Decs.
+// comes second. Lets assume we're doing Incs followed by Decs.
 //
 // An I is partially redundant if it's locally available, and
 // partially anticipated out, because on some of the paths from here
@@ -3491,7 +3491,7 @@ void optimizeForReleaseShallow(IRUnit& unit, IRInstruction* inst) {
 
 /*
  * This optimization selectively transforms DecRefs into DecRefNZs, which is
- * valid when destructors are disallowed.  This tranformation avoids checking if
+ * valid when destructors are disallowed.  This transformation avoids checking if
  * the count got to zero and immediately releasing the object. This will use
  * more memory, but it is still OK to do because the tracing GC can later
  * collect the garbage produced.  This transformation can also trigger more

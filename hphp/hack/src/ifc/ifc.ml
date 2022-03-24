@@ -373,7 +373,7 @@ let refine renv tyori pos ltyref =
   *)
   replace_vars tyref
 
-(* Generates a fresh sub/super policy of the argument polic *)
+(* Generates a fresh sub/super policy of the argument policy *)
 let adjust_policy ?(prefix = "weak") ~pos ~adjustment renv env policy =
   match (adjustment, policy) with
   | (Astrengthen, Pbot _)
@@ -1734,7 +1734,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let (env, out) = List.fold_left ~f:(seq ~run:discarding_expr) ~init inits in
     let env = Env.prep_stmt env (KMap.find K.Next out) in
 
-    (* Use the position of the condition if awailable; entire loop's position
+    (* Use the position of the condition if available; entire loop's position
        otherwise. *)
     let pos =
       match cond_opt with
@@ -1940,7 +1940,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let out_try_catch = clear_pc_deps out_try_catch in
     (* for each continuation in out_try_catch we will perform an
        analysis of the finally block; this improves precision of
-       the analysis a bit and mimicks what Hack does *)
+       the analysis a bit and mimics what Hack does *)
     KMap.fold
       (fun k cont (env, out_finally) ->
         (* analyze the finally block for the outcome k *)

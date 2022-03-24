@@ -63,7 +63,7 @@ void DebuggerHook::detach(RequestInfo* ti /* = nullptr */) {
     ti->m_reqInjectionData.m_retBreakPointFilter.clear();
   }
 
-  // Disble function entry/exit events
+  // Disable function entry/exit events
   ti->m_reqInjectionData.clearFlag(DebuggerHookFlag);
 
   // If there are no more hooks attached, clear the blacklist.
@@ -502,7 +502,7 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
   }
 
   // One source line may refer to multiple bytecodes. We want to set the
-  // breakpoint only on the first bytecode. There are two exeptions:
+  // breakpoint only on the first bytecode. There are two exceptions:
   // 1. If the first bytecode is EntryNop, set the breakpoint at the next
   // bytecode because EntryOp is outside the loop the source line refers to.
   // 2. If the bytecodes refer to different functions, set breakpoints on

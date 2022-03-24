@@ -291,12 +291,12 @@ std::string dot_cfg(const php::WideFunc& func) {
     ret += folly::format(
       "B{} [ label = \"blk:{}\\n\"+{} ]\n",
       bid, bid, dot_instructions(*func, *b)).str();
-    bool outputed = false;
+    bool outputted = false;
     forEachNormalSuccessor(*b, [&] (BlockId target) {
       ret += folly::format("B{} -> B{};", bid, target).str();
-      outputed = true;
+      outputted = true;
     });
-    if (outputed) ret += "\n";
+    if (outputted) ret += "\n";
     if (!is_single_nop(*b) && b->throwExit != NoBlockId) {
       ret += folly::sformat("B{} -> B{} [color=red];\n", bid, b->throwExit);
     }
@@ -446,7 +446,7 @@ std::string show(const Type& t) {
    * ?{{Dict|Keyset}(Int:Int)|Bool|Obj}
    */
 
-  // NB: We want this function be usuable even on invalid/malformed
+  // NB: We want this function be usable even on invalid/malformed
   // types (for example if we want to print the type from within
   // checkInvariants()). Therefore we don't make any assumptions about
   // the Type being sane and don't assert anything. We also just deal
@@ -469,7 +469,7 @@ std::string show(const Type& t) {
         if (pop1 != pop2) return pop1 > pop2;
         // Special case here: The static/counted axis of array bits
         // has the same size as the empty/non-empty axis of array
-        // bits. We want to give preferencial treatment to the
+        // bits. We want to give preferential treatment to the
         // empty/non-empty bits to break this symmetric, and also
         // because it produces more natural looking unions. This is
         // purely an aesthetic choice.
@@ -550,7 +550,7 @@ std::string show(const Type& t) {
   // remaining (non-support) bits. If there's no specialization, just
   // delegate to gather().
   auto const gatherForSpec = [&] (trep bits) {
-    // Gather the supoprt and the non-support bits, then combine them
+    // Gather the support and the non-support bits, then combine them
     // into a string (with the spec in the middle).
     auto const impl = [&] (trep mask, const std::string& spec) {
       auto const [specPart, specMatches] = gather(bits & mask);

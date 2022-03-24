@@ -684,7 +684,7 @@ To string conversions:
 
 | IsTypeStructCached, D(Bool), S(Dict) S(Cell), B|LA
 
-  Checks if S0 is cached in TSClassCache and if so, returns whehter S1 is a
+  Checks if S0 is cached in TSClassCache and if so, returns whether S1 is a
   subtype of S0. Otherwise, it branches.
 
 | ProfileIsTypeStruct<handle>, ND, S(Dict), LA|ND
@@ -1670,7 +1670,7 @@ To string conversions:
   `asyncSwitchCtrl` unique stub, which tries to resume a pending fast runnable
   ResumableWaitHandle (fast path) if possible, otherwise it will exit VM and
   return control to the asio scheduler (slow path). As with AsyncRetFast, the
-  stack must contain exactly one cell containing uninitialied garbage.
+  stack must contain exactly one cell containing uninitialized garbage.
 
 | LdRetVal<T>, DParam(InitCell), S(FramePtr), NF
 
@@ -2628,7 +2628,7 @@ To string conversions:
   iterId, keyId and valId.
 
   If the new iterator is at its end (i.e., has no elements to iterate over),
-  this instruction decrements the refcount of S0 and returns false; otheriwse,
+  this instruction decrements the refcount of S0 and returns false; otherwise,
   it stores a reference to S0 in the new iterator and returns true. If the
   iterator is not at its end, then this instruction stores the iterator's first
   value (and key) into the local variable with index valId (and keyId,
@@ -2819,7 +2819,7 @@ fields of that struct for holding intermediate values.
 
 | SetOpProp<op>, D(InitCell), S(Cell) S(Cell) S(Cell), PRc
 
-  Set op propery with key S1 in base S0, using S2 as the right hand side.
+  Set op property with key S1 in base S0, using S2 as the right hand side.
 
 | IncDecProp<op>, D(InitCell), S(Cell) S(Cell), PRc
 
@@ -3071,12 +3071,12 @@ fields of that struct for holding intermediate values.
 
 | BespokeIterFirstPos, D(Int), S(ArrLike), LA
 
-  Obtain the pos coresponding to the first valid element in the non-empty
+  Obtain the pos corresponding to the first valid element in the non-empty
   array S0, which may have an arbitrary layout.
 
 | BespokeIterLastPos, D(Int), S(ArrLike), LA
 
-  Obtain the pos coresponding to the last valid element in the non-empty
+  Obtain the pos corresponding to the last valid element in the non-empty
   array S0, which may have an arbitrary layout.
 
 | BespokeIterEnd, D(Int), S(ArrLike), LA

@@ -635,7 +635,7 @@ static bool HHVM_METHOD(Imagick, contrastStretchImage,
   auto status = MagickContrastStretchImageChannel(
     wand->getWand(), (ChannelType)channel, black_point, white_point);
   if (status == MagickFalse) {
-    IMAGICK_THROW("Unable to contrast strech image");
+    IMAGICK_THROW("Unable to contrast stretch image");
   }
   return true;
 }
@@ -837,7 +837,7 @@ static bool HHVM_METHOD(Imagick, enhanceImage) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickEnhanceImage(wand->getWand());
   if (status == MagickFalse) {
-    IMAGICK_THROW("Unable to enchance image");
+    IMAGICK_THROW("Unable to enhance image");
   }
   return true;
 }
@@ -1934,7 +1934,7 @@ static bool HHVM_METHOD(Imagick, linearStretchImage,
   auto status = MagickLinearStretchImage(
     wand->getWand(), blackPoint, whitePoint);
   if (status == MagickFalse) {
-    IMAGICK_THROW("Unable to linear strech image");
+    IMAGICK_THROW("Unable to linear stretch image");
   }
   return true;
 }

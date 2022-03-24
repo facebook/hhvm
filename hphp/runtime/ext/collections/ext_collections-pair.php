@@ -274,7 +274,7 @@ final class Pair implements \ConstVector {
    * `mapWithKey()`, unlike `filterWithKey()` where only values that meet a
    * certain criteria are affected.
    *
-   * @param $callback - The $allback containing the operation to apply to the
+   * @param $callback - The callback containing the operation to apply to the
    *                    current `Pair` keys and values.
    *
    * @return - an `ImmVector` containing the values after a user-specified
@@ -583,7 +583,7 @@ final class Pair implements \ConstVector {
    * This will only return `true` for provided keys of 0 and 1 since those are
    * the only two keys that can exist in a `Pair`.
    *
-   * @param $k - the key to check existance for in the `Pair`.
+   * @param $k - the key to check existence for in the `Pair`.
    *
    * @return - `true` if the provided key exists in the `Pair`; `false`
    *           otherwise. This will only return `true` if the provided key is

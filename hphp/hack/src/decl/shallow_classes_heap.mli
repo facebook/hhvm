@@ -39,7 +39,7 @@ module MemberFilters : sig
 
   (**
    * Computes a Bloom Filter of the name of the members in the shallow class
-   * and stores it in shared memory, using the name of the resptive class as
+   * and stores it in shared memory, using the name of the respective class as
    * the key *)
   val add : shallow_class -> unit
 end

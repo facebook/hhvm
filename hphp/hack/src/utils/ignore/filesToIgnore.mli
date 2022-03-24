@@ -7,11 +7,11 @@ to determine whether hh_server recognizes a given file as part of the project. *
 val should_ignore : string -> bool
 
 (** [get_paths_to_ignore] retrieves the current global mutable list of ignore paths,
-in preparation for marshalling it to a different proess. *)
+in preparation for marshalling it to a different process. *)
 val get_paths_to_ignore : unit -> Str.regexp list
 
 (** [set_paths_to_ignore] is for when we've unmarshalled a list of ignore paths,
-and wish to store it in the global mutable list of ingore paths. *)
+and wish to store it in the global mutable list of ignore paths. *)
 val set_paths_to_ignore : Str.regexp list -> unit
 
 val watchman_monitor_expression_terms : Hh_json.json list

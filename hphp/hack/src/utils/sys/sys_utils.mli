@@ -15,7 +15,7 @@ external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
 (** E.g. freopen "file.txt" "a" Unix.stdout will redirect stdout to the file. *)
 external freopen : string -> string -> Unix.file_descr -> unit = "hh_freopen"
 
-(** Option type intead of exception throwing. *)
+(** Option type instead of exception throwing. *)
 val get_env : string -> string option
 
 val getenv_user : unit -> string option
@@ -188,7 +188,7 @@ If you're on a platform without /proc/cpuinfo, you won't even be able to call th
 It will throw of /proc/cpuinfo is malformed. *)
 val ncores_linux_only : string -> int
 
-(** in bytes, as reported by sysinifo().totalram *)
+(** in bytes, as reported by sysinfo().totalram *)
 val total_ram : int
 
 val nbr_procs : int
@@ -227,7 +227,7 @@ type processor_info = {
 external processor_info : unit -> processor_info = "hh_processor_info"
 
 (** Calls Unix.select but ignores EINTR, i.e. retries select with
-    an adjusted timout upon EINTR.
+    an adjusted timeout upon EINTR.
     We implement timers using sigalarm which means selects can be
     interrupted. This is a wrapper around EINTR which continues the select if it
     gets interrupted by a signal *)

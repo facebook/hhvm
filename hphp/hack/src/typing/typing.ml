@@ -179,7 +179,7 @@ let pack_errs pos ty subtyping_errs =
          continuation *)
       aux (([], var_opt), tys) ~k:(fun tys -> k (ty :: tys))
     (* Case 4: we have a variadic parameter but no error - we're done so
-       pass the remaining unchanged type parameters into the contination
+       pass the remaining unchanged type parameters into the continuation
        to rebuild corrected type params in the right order *)
     | ((_, None), tys) -> k tys
     (* Case 5: no more type parameters - again we're done so pass empty
@@ -187,9 +187,9 @@ let pack_errs pos ty subtyping_errs =
        order *)
     | (_, []) -> k []
   in
-  (* The only types that _can_ be upacked are tuples and pairs; match on the
+  (* The only types that _can_ be unpacked are tuples and pairs; match on the
      type to get the type parameters, pass them to our recursive function
-     aux to subsitute the expected type where we have a type error
+     aux to substitute the expected type where we have a type error
      then reconstruct the type in the continuation *)
   match deref ty with
   | (r, Ttuple tys) ->
@@ -656,7 +656,7 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
     let right_expected_ty =
       if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
         MakeType.locl_like
-          (Reason.Renforceable (get_pos expected_ty))
+          (Reason.Reinforceable (get_pos expected_ty))
           expected_ty
       else
         expected_ty
@@ -1455,7 +1455,7 @@ let strip_supportdyn ty =
  *
  * All refinement functions return, in addition to the updated
  * environment, a (conservative) set of all the locals that got
- * refined. This set is used to construct AssertEnv statmements in
+ * refined. This set is used to construct AssertEnv statements in
  * the typed AST.
  *)
 let refine_lvalue_type env ((ty, _, _) as te) ~refine =
@@ -1571,7 +1571,7 @@ let safely_refine_class_type
   (* Type of variable in block will be class name
    * with fresh type parameters *)
   let obj_ty =
-    mk (get_reason obj_ty, Tclass (class_name, Nonexact, tyl_fresh))
+    mk (get_reason obj_ty, Tclass (class_name, Inexact, tyl_fresh))
   in
   let tparams = Cls.tparams class_info in
   (* Add in constraints as assumptions on those type parameters *)
@@ -1634,7 +1634,7 @@ let safely_refine_class_type
    * then $x is C should refine to $x:C<t>.
    * We take a simple approach:
    *    For a fresh type parameter T#1, if
-   *      - There is an eqality constraint T#1 = t,
+   *      - There is an equality constraint T#1 = t,
    *      - T#1 is covariant, and T#1 has upper bound t (or mixed if absent)
    *      - T#1 is contravariant, and T#1 has lower bound t (or nothing if absent)
    *    then replace T#1 with t.
@@ -1653,7 +1653,7 @@ let safely_refine_class_type
         | Some (_tp, name) -> SMap.find name tparam_substs)
   in
   let obj_ty_simplified =
-    mk (get_reason obj_ty, Tclass (class_name, Nonexact, tyl_fresh))
+    mk (get_reason obj_ty, Tclass (class_name, Inexact, tyl_fresh))
   in
   (env, obj_ty_simplified)
 
@@ -2495,7 +2495,7 @@ and stmt_ env pos st =
     in
     let (env, (te1, te2, te3, tb, refinement_map)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
-          (* For loops leak their initalizer, but nothing that's defined in the
+          (* For loops leak their initializer, but nothing that's defined in the
              body
           *)
           let (env, te1, _) = exprs env e1 in
@@ -2644,7 +2644,7 @@ and finally env fb =
        * We don't want to record errors during this phase, because certain types
        * of errors will fire wrongly. For example, if $x is nullable in some
        * continuations but not in others, then we must use `?->` on $x, but an
-       * error will fire when typechecking the finally block againts continuations
+       * error will fire when typechecking the finally block against continuations
        * where $x is non-null. *)
     let finally_cont env _key = finally_cont fb env in
     let (env, locals_map) =
@@ -4605,7 +4605,7 @@ and expr_
   | Xml (sid, attrl, el) ->
     let cid = CI sid in
     let (env, _tal, _te, classes) =
-      class_id_for_new ~exact:Nonexact p env cid []
+      class_id_for_new ~exact:Inexact p env cid []
     in
     (* OK to ignore rest of list; class_info only used for errors, and
        * cid = CI sid cannot produce a union of classes anyhow *)
@@ -4645,7 +4645,7 @@ and expr_
         (* Typing_xhp.rewrite_xml_into_new generates an AST node for a `varray[]` literal, which is interpreted as a vec[]  *)
         children
       | _ ->
-        (* We end up in this case when the cosntructed new expression does
+        (* We end up in this case when the constructed new expression does
            not typecheck. *)
         []
     in
@@ -5811,7 +5811,7 @@ and new_object
         begin
           match class_type_opt with
           | Some (_, Exact, _) -> (env, Tclass (cname, Exact, params), params)
-          | _ -> (env, Tclass (cname, Nonexact, params), params)
+          | _ -> (env, Tclass (cname, Inexact, params), params)
         end
     in
     if
@@ -6017,7 +6017,7 @@ and attributes_check_def env kind attrs =
     are inhabited, but not instantiable.
     To make this work with classname, we likely need to add something like
     concrete_classname<T>, where T cannot be an interface. *)
-and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs :
+and instantiable_cid ?(exact = Inexact) p env cid explicit_targs :
     newable_class_info =
   let (env, tal, te, classes) =
     class_id_for_new ~exact p env cid explicit_targs
@@ -6122,7 +6122,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
          in the error case, we add a `Hole` with expected type `nothing` since
          there is no type we can suggest was expected
 
-         in the ok case were the destrucutring succeeded, the fresh vars
+         in the ok case were the destructuring succeeded, the fresh vars
          now have types so we can subtype each element, accumulate the errors
          and pack back into the rhs structure as our expected type *)
       let (env, ty_err_opt) =
@@ -7803,7 +7803,7 @@ and this_for_method env (_, p, cid) default_ty =
  *)
 and class_expr
     ?(check_targs_well_kinded = false)
-    ?(exact = Nonexact)
+    ?(exact = Inexact)
     ?(check_explicit_targs = false)
     (env : env)
     (tal : Nast.targ list)
@@ -7919,7 +7919,7 @@ and class_expr
           (* Don't add Exact superfluously to class type if it's final *)
           let exact =
             if Cls.final class_ then
-              Nonexact
+              Inexact
             else
               exact
           in
@@ -8620,7 +8620,7 @@ and call
           @@ Typing_error.Callback.always base_error
       in
       let should_forget_fakes =
-        (* If the function doesn't have write priveleges to properties, fake
+        (* If the function doesn't have write privileges to properties, fake
            members cannot be reassigned, so their refinements stand. *)
         let capability =
           Typing_coeffects.get_type ft.ft_implicit_params.capability

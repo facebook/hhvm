@@ -23,7 +23,7 @@ use crate::typing_reason::*;
 use typing_collections_rust::{SMap, Vec};
 
 // Struct off which we call type builder methods
-// This gives us the option to keep some state here e.g. for hash consing
+// This gives us the option to keep some state here e.g. for hash consting
 pub struct TypeBuilder<'a> {
     // Well-known identifiers
     // We could initialize the positions to their actual definition site in hhi
@@ -149,7 +149,7 @@ impl<'a> TypeBuilder<'a> {
     ) -> &'a Ty<'a> {
         self.mk(
             reason,
-            Ty_::Tclass(self.alloc((name, Exact::Nonexact, tys))),
+            Ty_::Tclass(self.alloc((name, Exact::Inexact, tys))),
         )
     }
     pub fn traversable(&'a self, reason: &'a Reason<'a>, ty: &'a Ty<'a>) -> &'a Ty<'a> {

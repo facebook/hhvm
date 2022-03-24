@@ -38,7 +38,7 @@ FOLLY_PACK_POP
 }
 
 /* FastCGI sends all data over the wire in big-endian format. These helper types
- * marshal data within records for transmition.
+ * marshal data within records for transmission.
  */
 using wshort = detail::wire<uint16_t>;
 using wlong  = detail::wire<uint32_t>;
@@ -59,10 +59,10 @@ enum class Version : uint8_t {
  * Structured streams contain name-value pairs encoded as a length followed
  * by an ascii string. Numeric values are encoded as strings.
  *
- * Streams of the same type are to be concatentated together.
+ * Streams of the same type are to be concatenated together.
  */
 enum Type : uint8_t {
-  /* FastCGI BEGIN_REQUEST intiates a new http request. The contentData for
+  /* FastCGI BEGIN_REQUEST initiates a new http request. The contentData for
    * such records is structured as follows-
    *
    * uint16: role
@@ -76,7 +76,7 @@ enum Type : uint8_t {
 
   /* FastCGI ABORT_REQUEST prematurely terminates a request, signaling that
    * the webserver is no longer interested in processing it. The contentData
-   * for such recoreds is empty. The application server must reply with
+   * for such records is empty. The application server must reply with
    * an END_REQUEST record to indicate that it has aborted.
    */
   ABORT_REQUEST = 2, // [in]
@@ -116,7 +116,7 @@ enum Type : uint8_t {
   /* FastCGI GET_VALUES and GET_VALUES_RESULT are used to communicate the
    * capabilities of the application server to the webserver.
    *
-   * - These records should be associated with the null reqeuestId.
+   * - These records should be associated with the null requestId.
    * - The contentData of GET_VALUES contains name-value pairs with only
    *   names, while the contentData of GET_VALUES_RESULT contains name-value
    *   pairs containing the values of the requested parameters.

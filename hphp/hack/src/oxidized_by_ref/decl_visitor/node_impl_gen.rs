@@ -271,7 +271,7 @@ impl<'a> Node<'a> for Exact {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             Exact::Exact => {}
-            Exact::Nonexact => {}
+            Exact::Inexact => {}
         }
     }
 }
@@ -884,7 +884,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RcstrOnGenerics(ref __binding_0) => __binding_0.accept(v),
             T_::RlambdaParam(ref __binding_0) => __binding_0.accept(v),
             T_::Rshape(ref __binding_0) => __binding_0.accept(v),
-            T_::Renforceable(ref __binding_0) => __binding_0.accept(v),
+            T_::Reinforceable(ref __binding_0) => __binding_0.accept(v),
             T_::Rdestructure(ref __binding_0) => __binding_0.accept(v),
             T_::RkeyValueCollectionKey(ref __binding_0) => __binding_0.accept(v),
             T_::RglobalClassProp(ref __binding_0) => __binding_0.accept(v),

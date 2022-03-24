@@ -227,7 +227,7 @@ struct encodeStatic {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/* Master functions all encode/decode should be called thur these functions */
+/* Master functions all encode/decode should be called thru these functions */
 xmlNodePtr master_to_xml(encodePtr encode, const Variant& data, int style,
                          xmlNodePtr parent);
 Variant master_to_zval(encodePtr encode, xmlNodePtr data);

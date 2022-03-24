@@ -421,7 +421,7 @@ and stmt env acc st =
   | Switch (e, cl, dfl) ->
     let acc = expr acc e in
     (* Filter out cases that fallthrough *)
-    (* NOTE: 'default' never fallthough *)
+    (* NOTE: 'default' never fallthrough *)
     let cl_body = List.filter cl ~f:case_has_body in
     let cl = List.map cl_body ~f:(case acc) in
     let cdfl = dfl |> Option.map ~f:(default_case acc) in

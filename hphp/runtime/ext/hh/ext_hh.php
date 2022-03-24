@@ -144,7 +144,7 @@ function serialize_memoize_param(mixed $param): arraykey;
 
 /**
  * Clear memoization data
- *  - if $cls is non-null, clear memoziation cache for $cls::$func,
+ *  - if $cls is non-null, clear memoization cache for $cls::$func,
  *    or for all static memoized methods if $func is null
  *  - if $cls is null, clear memoization cache for $func
  */
@@ -282,7 +282,7 @@ interface TypeConstantAttribute {}
  * Begin collecting code coverage on all subsequent calls into files in $files
  * during this request.
  *
- * The requst must be executing in non-RepoAuthoritative mode and the server
+ * The request must be executing in non-RepoAuthoritative mode and the server
  * must be configured with Eval.EnablePerFileCoverage = true.
  *
  * @param $files a list of paths to collect coverage from
@@ -308,7 +308,7 @@ function get_files_with_coverage(): keyset<string>;
 /**
  * Extract coverage data for the file at path $file. The returned vector
  * contains a list of line numbers that were seen at least once while coverage
- * was enablgc_enabled for the file.
+ * was enablegc_enabled for the file.
  *
  * @return a list of covered line numbers
  */
@@ -378,7 +378,7 @@ function set_implicit_context(
 )[zoned]: object /* ImplicitContextData */;
 
 /*
- * Returns the currently implicit context hash or emptry string if
+ * Returns the currently implicit context hash or empty string if
  * no implicit context is set
  */
 <<__Native>>
@@ -523,14 +523,14 @@ function all_request_stats(): mixed; /* darray<string, EventStats>*/
 function all_process_stats(): mixed; /*darray<string, EventStats>*/
 
 /**
- * Return stats for occurences of $event during the current requests up to the
+ * Return stats for occurrences of $event during the current requests up to the
  * call of this function.
  */
 <<__Native>>
 function request_event_stats(string $event): mixed /* EventStats */;
 
 /**
- * Return stats for all occurences of $event during previously completed
+ * Return stats for all occurrences of $event during previously completed
  * requests when this function was called.
  */
 <<__Native>>

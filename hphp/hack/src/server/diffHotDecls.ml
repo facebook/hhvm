@@ -22,7 +22,7 @@ let decls_type_match (decls1, decls2) suffix =
 let legacy decls1 decls2 : bool = decls_type_match (decls1, decls2) ".decls"
 
 let shallow decls1 decls2 : bool =
-  decls_type_match (decls1, decls2) ".shallowdecls"
+  decls_type_match (decls1, decls2) ".shallowedecls"
 
 (*
   Print the diff of decls1_str and decls2_str, and

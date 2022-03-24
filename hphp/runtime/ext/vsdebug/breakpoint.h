@@ -175,7 +175,7 @@ struct BreakpointManager {
 
   const std::unordered_set<int> getFunctionBreakpoints() const;
 
-  bool isBreakConditionSatisified(
+  bool isBreakConditionSatisfied(
     DebuggerRequestInfo* ri,
     Breakpoint* bp
   );
@@ -230,7 +230,7 @@ private:
 
   ExceptionBreakpointSettings m_exceptionSettings;
 
-  // The authoratative list of the current breakpoints set by the client.
+  // The authoritative list of the current breakpoints set by the client.
   std::unordered_map<int, Breakpoint*> m_breakpoints;
 
   // Map of source file name to list of breakpoints in that file.

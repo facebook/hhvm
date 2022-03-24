@@ -24,7 +24,7 @@ module Nast = Aast
 module ITySet = Internal_type_set
 
 (* Fuel ensures that types are curtailed while printing them. This avoids
-   performance regressions and increases readibility of errors overall. *)
+   performance regressions and increases readability of errors overall. *)
 module Fuel : sig
   type t
 
@@ -259,7 +259,7 @@ module Full = struct
     (fuel, tparam_doc)
 
   and tparam_constraint ~fuel ~ty to_doc st penv (ck, cty) =
-    let (fuel, contraint_ty_doc) = ty ~fuel to_doc st penv cty in
+    let (fuel, constraint_ty_doc) = ty ~fuel to_doc st penv cty in
     let constraint_doc =
       Concat
         [
@@ -270,7 +270,7 @@ module Full = struct
             | Ast_defs.Constraint_super -> "super"
             | Ast_defs.Constraint_eq -> "=");
           Space;
-          contraint_ty_doc;
+          constraint_ty_doc;
         ]
     in
     (fuel, constraint_doc)
@@ -1003,7 +1003,7 @@ module ErrorString = struct
     | Tclass ((_, x), Exact, tyl) ->
       let (fuel, tyl_str) = inst ~fuel env tyl in
       (fuel, "an object of exactly the class " ^ strip_ns x ^ tyl_str)
-    | Tclass ((_, x), Nonexact, tyl) ->
+    | Tclass ((_, x), Inexact, tyl) ->
       let (fuel, tyl_str) = inst ~fuel env tyl in
       (fuel, "an object of type " ^ strip_ns x ^ tyl_str)
     | Tshape _ -> (fuel, "a shape")
@@ -1379,7 +1379,7 @@ module Json = struct
           aux_args args ~keytrace >>= fun tyl ->
           (* NB: "class" could have come from either a `Tapply` or a `Tclass`. Right
            * now, we always return a `Tclass`. *)
-          ty (Tclass ((class_pos, name), Nonexact, tyl))
+          ty (Tclass ((class_pos, name), Inexact, tyl))
         | "shape" ->
           get_array "fields" (json, keytrace)
           >>= fun (fields, fields_keytrace) ->

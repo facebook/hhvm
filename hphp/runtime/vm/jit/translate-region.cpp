@@ -476,7 +476,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     auto const blockId = optBlockId.value();
     auto const& block  = *region.block(blockId);
     auto sk            = block.start();
-    bool emitedSurpriseCheck = false;
+    bool emittedSurpriseCheck = false;
     auto const surprise = scheduleSurprise(block);
 
     SCOPE_ASSERT_DETAIL("IRGS") { return show(irgs); };
@@ -537,13 +537,13 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       inst.interp = irgs.retryContext->toInterp.count(psk);
 
       if (surprise && *surprise == i) {
-        emitedSurpriseCheck = true;
+        emittedSurpriseCheck = true;
         inst.forceSurpriseCheck = true;
       }
 
       // Emit IR for the body of the instruction.
       try {
-        irgs.skipSurpriseCheck = emitedSurpriseCheck;
+        irgs.skipSurpriseCheck = emittedSurpriseCheck;
         translateInstr(irgs, inst);
       } catch (const RetryIRGen& e) {
         return TranslateResult::Retry;
@@ -786,7 +786,7 @@ bool irGenTrySuperInlineFCall(irgen::IRGS& irgs, const Func* callee,
   //  - Cache ROM or failures
   //  - Log refusal reason
   if (dynamicCall) {
-    // TODO what does this bool even meean.  Pretty sure it is the same as the
+    // TODO what does this bool even mean.  Pretty sure it is the same as the
     // call context value which we set to false in inlineInterp, so for now
     // this is correct.
     return refuse("dynamic call");
@@ -898,7 +898,7 @@ bool irGenTrySuperInlineFCall(irgen::IRGS& irgs, const Func* callee,
   }
 
   // Let's-a-go!
-  FTRACE_MOD(Trace::sib, 1, "Built ROM succesfully\n");
+  FTRACE_MOD(Trace::sib, 1, "Built ROM successfully\n");
   FTRACE_MOD(Trace::sib, 1, "!!! ROM {} interps:{} {}\n",
              cached ? "(cached)" : "",
              numOps,

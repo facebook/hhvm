@@ -37,7 +37,7 @@ pub unsafe fn named_value<S: AsRef<str>>(name: S) -> Option<Value> {
 }
 #[derive(Debug)]
 pub enum Error {
-    NotInvokable,
+    NotInvocable,
     Exception(Value),
 }
 
@@ -54,10 +54,10 @@ pub enum Error {
 pub unsafe fn callback_exn(f: Value, arg: Value) -> Result<Value, Error> {
     let f_block = match ocamlrep::Value::from_bits(f).as_block() {
         Some(block) => block,
-        None => return Err(Error::NotInvokable),
+        None => return Err(Error::NotInvocable),
     };
     if f_block.tag() != CLOSURE_TAG {
-        return Err(Error::NotInvokable);
+        return Err(Error::NotInvocable);
     }
     let res = caml_callback_exn(f, arg);
 

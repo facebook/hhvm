@@ -23,7 +23,7 @@ type process_id = int
 type worker_id = int
 
 type worker_failure =
-  (* Worker foce quit by Out Of Memory. *)
+  (* Worker force quit by Out Of Memory. *)
   | Worker_oomed
   | Worker_quit of Unix.process_status
 

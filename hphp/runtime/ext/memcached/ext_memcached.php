@@ -319,7 +319,7 @@ class Memcached {
   /**
    * Invalidate all items in the cache
    *
-   * @param int $delay - Numer of seconds to wait before invalidating the
+   * @param int $delay - Number of seconds to wait before invalidating the
    *   items.
    *
    * @return bool -
@@ -581,7 +581,7 @@ class Memcached {
                                  int $expiry = 0): mixed;
 
   /**
-   * Check if a persitent connection to memcache is being used.
+   * Check if a persistent connection to memcache is being used.
    *
    * @return bool - Returns true if Memcache instance uses a persistent
    * connection, false otherwise.

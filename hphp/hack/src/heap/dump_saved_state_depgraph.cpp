@@ -43,7 +43,7 @@ stmt_ptr_t prepare_stmt(dbconn_ptr_t db, std::string const& sql) {
   int err = sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, NULL);
   if (stmt == nullptr || err != SQLITE_OK) {
     throw(std::runtime_error(
-      "Error: Couldn't prepare statment \"" + sql +
+      "Error: Couldn't prepare statement \"" + sql +
       "\". Error code " + boost::lexical_cast<std::string>(err)));
   }
 

@@ -53,7 +53,7 @@ void DebugTransport::setTransportFd(int fd) {
 }
 
 void DebugTransport::shutdownInputThread() {
-  // Singal to the read thread that we are shutting down by writing to
+  // Signal to the read thread that we are shutting down by writing to
   // the abort pipe.
   char value = '\0';
   write(m_abortPipeFd[1], &value, 1);
@@ -150,7 +150,7 @@ void DebugTransport::enqueueOutgoingMessageForClient(
 
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelVerbose,
-    "Enqueueing outgoing message: %s\n",
+    "Enqueuing outgoing message: %s\n",
     folly::toJson(message).c_str()
   );
 

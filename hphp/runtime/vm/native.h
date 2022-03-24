@@ -412,7 +412,7 @@ struct NativeFunctionInfo {
 
 /*
  * Known output types for inout parameters on builtins and optional default
- * values to be passed to builtins which use inout paramaters purely as out
+ * values to be passed to builtins which use inout parameters purely as out
  * values, ignoring their inputs.
  */
 MaybeDataType builtinOutType(const TypeConstraint&, const UserAttributeMap&);

@@ -227,7 +227,7 @@ function imap_fetchstructure(resource $imap_stream,
  * @param resource $imap_stream - An IMAP stream returned by imap_open().
  * @param int $caches - Specifies the cache to purge. It may one or a
  * combination of the following constants: IMAP_GC_ELT (message cache
- * elements), IMAP_GC_ENV (enveloppe and bodies), IMAP_GC_TEXTS (texts).
+ * elements), IMAP_GC_ENV (envelope and bodies), IMAP_GC_TEXTS (texts).
  * @return bool - Returns TRUE.
  */
 <<__Native>>
@@ -570,12 +570,12 @@ function imap_setflag_full(resource $imap_stream,
  * to the number of messages in the mailbox SA_RECENT - set $status->recent to
  * the number of recent messages in the mailbox SA_UNSEEN - set
  * $status->unseen to the number of unseen (new) messages in the mailbox
- * SA_UIDNEXT - set $status->uidnext to the next uid to be used in the mailbox
+ * SA_UIDNEXT - set $status->uindext to the next uid to be used in the mailbox
  * SA_UIDVALIDITY - set $status->uidvalidity to a constant that changes when
  * uids for the mailbox may no longer be valid SA_ALL - set all of the above
  * @return mixed - This function returns an object containing status
  * information. The object has the following properties: messages, recent,
- * unseen, uidnext, and uidvalidity.  flags is also set, which contains a
+ * unseen, uindext, and uidvalidity.  flags is also set, which contains a
  * bitmask which can be checked against any of the above constants.
  */
 <<__Native>>

@@ -470,7 +470,7 @@ let symlink =
   (* Dummy implementation of `symlink` on Windows: we create a text
      file containing the targeted-file's path. Symlink are available
      on Windows since Vista, but until Seven (included), one should
-     have administratrive rights in order to create symlink. *)
+     have administrative rights in order to create symlink. *)
   let win32_symlink source dest = write_file ~file:dest source in
   if Sys.win32 then
     win32_symlink

@@ -294,7 +294,7 @@ pub mod typehints {
     pub static callable: Lazy<TypeName> = lazy!(sn::typehints::CALLABLE);
     pub static object_cast: Lazy<TypeName> = lazy!(sn::typehints::OBJECT_CAST);
     pub static supportdyn: Lazy<TypeName> = lazy!(sn::typehints::SUPPORTDYN);
-    pub static hh_sypportdyn: Lazy<TypeName> = lazy!(sn::typehints::HH_SUPPORTDYN);
+    pub static hh_supportdyn: Lazy<TypeName> = lazy!(sn::typehints::HH_SUPPORTDYN);
     pub static wildcard: Lazy<TypeName> = lazy!(sn::typehints::WILDCARD);
 
     pub static reserved_typehints: Lazy<TypeNameSet> = Lazy::new(|| {

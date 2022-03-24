@@ -119,7 +119,7 @@ static int64_t get_cpu_frequency() {
   uint64_t tsc_start = cpuCycles();
   uint64_t tsc_end;
   volatile int i;
-  // Busy loop for 5 miliseconds. Don't use usleep() here since it causes the
+  // Busy loop for 5 milliseconds. Don't use usleep() here since it causes the
   // CPU to halt which will generate meaningless results.
   do {
     for (i = 0; i < 1000000; i++);
@@ -765,7 +765,7 @@ struct TraceProfiler final : Profiler {
   }
 
  private:
-  // Data measued on function entry and exit
+  // Data measured on function entry and exit
   struct TraceData {
     int64_t wall_time;
     int64_t cpu;

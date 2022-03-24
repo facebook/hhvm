@@ -147,7 +147,7 @@ module Process_failure = struct
           (Exit_status.exit_code_to_string exit_code)
       | Unix.WSIGNALED exit_code ->
         Printf.sprintf
-          "WSIGNALLED %d (%s)%s"
+          "WSIGNALED %d (%s)%s"
           exit_code
           (PrintSignal.string_of_signal exit_code)
           (if exit_code = Sys.sigkill then

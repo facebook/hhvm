@@ -802,7 +802,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       else if within_backoff_time dead_env.reinit_attempts dead_env.dead_since
       then (
         let () =
-          Hh_logger.log "Attemping to reestablish watchman subscription"
+          Hh_logger.log "Attempting to reestablish watchman subscription"
         in
         re_init
           ~prior_clockspec:dead_env.prior_clockspec
@@ -864,7 +864,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
             (* This happens when watchman is tearing itself down after we
              * retrieved a sock address and connected to the sock address. That's
              * because Unix.open_connection (via Timeout.open_connection) doesn't
-             * error even when the sock adddress is no longer valid and actually -
+             * error even when the sock address is no longer valid and actually -
              * it returns a channel that will error at some later time when you
              * actually try to do anything with it (write to it, or even get the
              * file descriptor of it). I'm pretty sure we don't need to close the

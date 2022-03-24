@@ -1011,7 +1011,7 @@ inline tv_lval NewElemEmptyish(tv_lval base) {
 
 /**
  * NewElem when base is an invalid type (number, boolean, string, etc.) and is
- * not falsey. We can use immutable_null_base here because updates will raise.
+ * not falsy. We can use immutable_null_base here because updates will raise.
  */
 inline tv_lval NewElemInvalid() {
   raise_warning("Cannot use a scalar value as an array");

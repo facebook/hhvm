@@ -689,14 +689,14 @@ struct JEMallocInitializer {
     setenv("GLIBCXX_FORCE_NEW", "1", false /* no overwrite*/);
 
     // Now we need to make the setenv 'stick', which it may not do since
-    // the env is flakey before main() is called.  But luckily stl only
+    // the env is flaky before main() is called.  But luckily stl only
     // looks at this env var the first time it tries to do an alloc, and
     // caches what it finds.  So we just cause an stl alloc here.
     std::string dummy("I need to be allocated");
     dummy += "!";         // so the definition of dummy isn't optimized out
 #endif  /* __GLIBC__ */
 
-    // Enable backtracing through PHP frames (t9814472).
+    // Enable backtracking through PHP frames (t9814472).
     setenv("UNW_RBP_ALWAYS_VALID", "1", false);
 
     init_numa();

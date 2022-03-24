@@ -502,7 +502,7 @@ void runAnalysis(
  * We do this by computing the Partial-Anticipability of the candidate
  * instructions (Orig, Rep1 and Rep2 in the example). After each
  * candidate instruction we insert an IncRef if a candidate is
- * Partially-Anticipated-out. If a candidateis
+ * Partially-Anticipated-out. If a candidate is
  * Partially-Anticipated-out in a predecessor, but not
  * Partially-Anticipated-in in the successor, then a DecRef is
  * inserted in the successor. Since critical edges are split, this

@@ -435,7 +435,7 @@ void VanillaKeyset::compact() {
  */
 bool VanillaKeyset::checkInvariants() const {
   static_assert(sizeof(VanillaKeyset) % 16 == 0, "Some memcpy16 can fail.");
-  static_assert(sizeof(Elm) <= 16, "Don't loose the precious memory gainz!");
+  static_assert(sizeof(Elm) <= 16, "Don't lose the precious memory gainz!");
 
   // All arrays:
   assertx(checkCount());

@@ -92,7 +92,7 @@ fn emit_generator_method<'arena>(
             instr::contenter(),
         ]),
         "valid" => instr::contvalid(),
-        "current" => instr::contcurrent(),
+        "current" => instr::concurrent(),
         "key" => instr::contkey(),
         "getReturn" => instr::contgetreturn(),
         _ => {

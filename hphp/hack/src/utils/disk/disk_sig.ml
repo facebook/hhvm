@@ -17,7 +17,7 @@ module type S = sig
 
   val file_exists : string -> bool
 
-  (* Delete the given path - if it is a directory, delete recurisvely. *)
+  (* Delete the given path - if it is a directory, delete recursively. *)
   val rm_dir_tree : string -> unit
 
   val is_directory : string -> bool

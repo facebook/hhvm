@@ -114,7 +114,7 @@ struct Translator {
   TransID transId{kInvalidTransID};
   // For OptPrologues, this holds the corresponding ProfPrologue's ID.  This is
   // used to smash the callers of the ProfPrologue.
-  TransID proflogueTransId{kInvalidTransID};
+  TransID prologueTransId{kInvalidTransID};
   Annotations annotations{};
 
   explicit Translator(SrcKey sk, TransKind kind = TransKind::Invalid);
@@ -259,7 +259,7 @@ struct FuncMetaInfo {
     translators.clear();
   }
 
-  // For now these are prolgoue translators.
+  // For now these are prologue translators.
   std::vector<std::unique_ptr<Translator>> translators;
 };
 

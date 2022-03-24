@@ -125,7 +125,7 @@ gdCacheGet (gdCache_head_t * head, void *keydata)
     }
   else
     {       /* cache full - replace least-recently-used */
-      /* preveprev becomes new end of list */
+      /* prevprev becomes new end of list */
       prevprev->next = NULL;
       elem = prev;
       (*(head->gdCacheRelease)) (elem->userdata);
@@ -207,4 +207,4 @@ main (char *argv[], int argc)
 }
 
 #endif /* TEST */
-#endif /* HAVE_NEECACHE */
+#endif /* NEED_CACHE */

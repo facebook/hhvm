@@ -929,7 +929,7 @@ end = struct
     let ancs = List.fold ~init ~f @@ Class.all_ancestor_names cls in
     List.fold ~f ~init:ancs @@ Class.all_ancestor_req_names cls
 
-  (** Add implementation depedencies of all class dependencies until we reach
+  (** Add implementation dependencies of all class dependencies until we reach
     a fixed point *)
   let rec add_implementation_dependencies ctx env =
     let size = HashSet.length env.dependencies in
@@ -1260,7 +1260,7 @@ end = struct
 
   let pp_fun_params ppf = Fmt.(parens @@ list ~sep:comma pp_fun_param) ppf
 
-  (* -- Single element depdencies ------------------------------------------- *)
+  (* -- Single element dependencies ----------------------------------------- *)
 
   module Single : sig
     type t
@@ -1385,7 +1385,7 @@ end = struct
 
     (* -- Type definitions -------------------------------------------------- *)
 
-    let pp_typedef_visiblity ppf = function
+    let pp_typedef_visibility ppf = function
       | Aast_defs.Transparent -> Fmt.string ppf "type"
       | Aast_defs.Tinternal -> Fmt.string ppf "type"
       | Aast_defs.Opaque -> Fmt.string ppf "newtype"
@@ -1406,7 +1406,7 @@ end = struct
           fixmes
           pp_user_attrs
           t_user_attributes
-          pp_typedef_visiblity
+          pp_typedef_visibility
           t_vis
           (strip_ns nm)
           pp_tparams
@@ -1874,7 +1874,7 @@ end = struct
     let pp_class_ancestors class_or_intf ppf = function
       | [] ->
         (* because we are prefixing the list with a constant string, we
-           match on the empty list here and noop to avoid priting "extends "
+           match on the empty list here and noop to avoid printing "extends "
            ("implements ") with no class (interface) *)
         ()
       | hints ->
@@ -2159,7 +2159,7 @@ end = struct
   }
 
   let rec pp_ ppf { deps; children; _ } =
-    (* We guard against empty list of depedencies or nested namespaces here
+    (* We guard against empty list of dependencies or nested namespaces here
        since we should add a cut between them only when both are non-empty
     *)
     match (deps, children) with
@@ -2331,7 +2331,7 @@ end = struct
   let pp ~is_multifile = Fmt.of_to_string (to_string ~is_multifile)
 end
 
-(* -- All releveant dependencies organized by file -------------------------- *)
+(* -- All relevant dependencies organized by file -------------------------- *)
 module Standalone : sig
   type t
 

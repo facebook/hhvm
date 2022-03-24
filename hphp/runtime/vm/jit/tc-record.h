@@ -90,7 +90,7 @@ void logFrames(const Vunit& unit);
 /*
  * Record smashed calls in the TC that may need to be re-smashed in the event
  * that a prologue is reused-- additionally any information in ProfData will
- * need to be erased before a translation with a call to a Proflogue is
+ * need to be erased before a translation with a call to a Prologue is
  * reclaimed.
  */
 void recordFuncCaller(const Func* func, TCA toSmash, ProfTransRec* rec);

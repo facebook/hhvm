@@ -26,7 +26,7 @@ let filter_locl_types types =
 
 (** If a type variable appear in one of its own lower bounds under a combination
     of unions and intersections, it can be simplified away from this lower bound by
-    replacing any of its occurences with nothing.
+    replacing any of its occurrences with nothing.
     E.g.
     - if #1 has lower bound (#1 | A), the lower bound can be simplified to
     (nothing | A) = A.
@@ -82,7 +82,7 @@ let remove_tyvar_from_lower_bounds env var lower_bounds =
 
 (** If a type variable appear in one of its own upper bounds under a combination
     of unions and intersections, it can be simplified away from this upper bound by
-    replacing any of its occurences with mixed.
+    replacing any of its occurrences with mixed.
     E.g.
     - if #1 has upper bound (#1 & A), the upper bound can be simplified to
     (mixed & A) = A.

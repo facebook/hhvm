@@ -201,7 +201,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
     ) -> Result<tast::ClassVar<R>> {
         // TODO(hrust): missing type hint
         let decl_cty = self.decl_hint_env().hint(cv.type_.1.as_ref().unwrap());
-        // TODO(hrust): enforcability
+        // TODO(hrust): enforceability
         let cty = Phase::localize_no_subst(self.env, false, None, decl_cty)?;
         // TODO(hrust): coerce_type, user_attributes
         let typed_cv_expr = cv
@@ -241,7 +241,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         self.env.reinitialize_locals();
         // TODO(hrust): callable
         assert!(m.user_attributes.is_empty());
-        // TODO(hrust): support_dynamic, coeefects
+        // TODO(hrust): support_dynamic, coeffects
         // TODO(hrust): is_constructor
         // TODO(hrust): localize_and_add_ast_generic_parameters_and_where_constraints
         // TODO(hrust): get_self_ty
@@ -257,7 +257,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             self.env,
             params_decl_ty.into_iter(),
         )?;
-        // TODO(hrust): memoize, coeefects, can_read_globals
+        // TODO(hrust): memoize, coeffects, can_read_globals
         let typed_params: Vec<_> = param_tys
             .iter()
             .map(|(param, ty)| {

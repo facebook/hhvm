@@ -84,7 +84,7 @@ let shallow_method_to_class_elt child_class mname mro subst meth : class_elt =
         ~readonly_prop:false
         ~support_dynamic_type:(sm_support_dynamic_type meth)
         ~needs_init:false
-      (* The readonliness of the method is on the type *);
+      (* The readonlyness of the method is on the type *);
   }
 
 let shallow_method_to_telt child_class mname mro subst meth : tagged_elt =

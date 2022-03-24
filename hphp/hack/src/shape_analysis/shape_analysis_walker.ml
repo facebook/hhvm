@@ -54,7 +54,7 @@ let collect_analysis_targets :
   in
   reducer#go
 
-(* Is the type a suitable dict that can be coverted into shape. For the moment,
+(* Is the type a suitable dict that can be converted into shape. For the moment,
    that's only the case if the key is a string. *)
 let is_suitable_target_ty tast_env ty =
   let ty = Tast_env.fully_expand tast_env ty in

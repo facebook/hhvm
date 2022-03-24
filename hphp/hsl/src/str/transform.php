@@ -195,7 +195,7 @@ function replace_ci(
  * `dict['a' => 'b', 'b' => 'c']` is equivalent to `dict['a' => 'c']`, but
  * `dict['b' => 'c', 'a' => 'b']` is not, despite having the same elements.
  *
- * If there are multiple overlapping matches, the match occuring earlier in
+ * If there are multiple overlapping matches, the match occurring earlier in
  * `$replacements` (not in `$haystack`) takes precedence.
  *
  * - For a single case-sensitive search/replace, see `Str\replace()`.
@@ -219,7 +219,7 @@ function replace_every(
  * `dict['a' => 'b', 'b' => 'c']` is equivalent to `dict['a' => 'c']`, but
  * `dict['b' => 'c', 'a' => 'b']` is not, despite having the same elements.
  *
- * If there are multiple overlapping matches, the match occuring earlier in
+ * If there are multiple overlapping matches, the match occurring earlier in
  * `$replacements` (not in `$haystack`) takes precedence.
  *
  * - For a single case-sensitive search/replace, see `Str\replace()`.
@@ -239,7 +239,7 @@ function replace_every_ci(
  * `$replacements` replaced by the corresponding values. Once a substring has
  * been replaced, its new value will not be searched again.
  *
- * If there are multiple overlapping matches, the match occuring earlier in
+ * If there are multiple overlapping matches, the match occurring earlier in
  * `$haystack` takes precedence. If a replacer is a prefix of another (like
  * "car" and "carpet"), the longer one (carpet) takes precedence. The ordering
  * of `$replacements` therefore doesn't matter.
@@ -259,7 +259,7 @@ function replace_every_nonrecursive(
  * Once a substring has been replaced, its new value will not be searched
  * again.
  *
- * If there are multiple overlapping matches, the match occuring earlier in
+ * If there are multiple overlapping matches, the match occurring earlier in
  * `$haystack` takes precedence. If a replacer is a case-insensitive prefix of
  * another (like "Car" and "CARPET"), the longer one (carpet) takes precedence.
  * The ordering of `$replacements` therefore doesn't matter.

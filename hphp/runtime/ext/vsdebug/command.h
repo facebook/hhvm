@@ -34,7 +34,7 @@ struct Debugger;
 struct DebuggerSession;
 
 // Enum describing the target to which a debugger command needs to
-// be dispatched for exection.
+// be dispatched for execution.
 enum CommandTarget {
   // A command targeting "Request" needs to be handed off to a particular
   // request thread that is the target of the command.
@@ -370,7 +370,7 @@ private:
     folly::dynamic* vars
   );
 
-  // Adds array indicies.
+  // Adds array indices.
   static int addArrayChildren(
     DebuggerSession* session,
     Debugger* debugger,

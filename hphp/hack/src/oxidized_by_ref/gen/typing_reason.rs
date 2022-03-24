@@ -277,7 +277,7 @@ pub enum T_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Rshape(&'a (&'a pos::Pos<'a>, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Renforceable(&'a pos_or_decl::PosOrDecl<'a>),
+    Reinforceable(&'a pos_or_decl::PosOrDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Rdestructure(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

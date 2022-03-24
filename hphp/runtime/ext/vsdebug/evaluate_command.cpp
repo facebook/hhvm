@@ -252,7 +252,7 @@ std::string EvaluateCommand::prepareEvalExpression(const std::string& expr) {
   }
 
   // HPHPD users are used to having to prefix variable requests with a leading
-  // = character. We don't require that, but tolorate that syntax to maintain
+  // = character. We don't require that, but tolerate that syntax to maintain
   // compatibility for those users.
   if (expression[0] == '=') {
     return "<?hh " + expression.substr(1) + ";";

@@ -68,14 +68,14 @@
 */
 
 #define SCAN_MAX_ARGS   0xFF    // Maximum number of variable which can be
-                                // passed to (f|s)scanf. This is an artifical
+                                // passed to (f|s)scanf. This is an artificial
                                 // upper limit to keep resources in check and
                                 // minimize the possibility of exploits
 
 #define SCAN_ERROR_INTERNAL           (SCAN_ERROR_WRONG_PARAM_COUNT - 1)
 
 /*
- * Flag values used internally by [f|s]canf.
+ * Flag values used internally by [f]scanf.
  */
 #define SCAN_NOSKIP     0x1       /* Don't skip blanks. */
 #define SCAN_SUPPRESS   0x2       /* Suppress assignment. */

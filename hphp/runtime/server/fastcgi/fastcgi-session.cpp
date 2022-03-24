@@ -72,7 +72,7 @@ bool KVParser::consume(std::unique_ptr<IOBuf> chain) {
   m_readBuf.append(std::move(chain));
 
   // Can only process new data if we aren't currently waiting on a call to
-  // readNext() to free up the key/value beffers
+  // readNext() to free up the key/value buffers
   if (m_phase != Phase::READY) {
     process();
   }
@@ -482,7 +482,7 @@ void FastCGISession::onRecordImpl(const fcgi::abort_record* rec) {
   m_aborting = true; // don't try to write REQUEST_COMPLETE again
 
   // There may still be a pending eventCount from an onComplete call from the
-  // open tranport. We can't clear it here as there is no way to abort the
+  // open transport. We can't clear it here as there is no way to abort the
   // transport and we need to be around to receive any data it may try to send
   shutdown();
 }

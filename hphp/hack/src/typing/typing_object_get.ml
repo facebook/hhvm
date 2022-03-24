@@ -98,11 +98,11 @@ let mk_mismatch_union env =
       let (env, ty) = Typing_union.union_list env Reason.none tys in
       (env, Ok ty))
     ~error:(fun (actuals, expecteds) ->
-      let (env, ty_acutal) = Typing_union.union_list env Reason.none actuals in
+      let (env, ty_actual) = Typing_union.union_list env Reason.none actuals in
       let (env, ty_expect) =
         Typing_union.union_list env Reason.none expecteds
       in
-      (env, Error (ty_acutal, ty_expect)))
+      (env, Error (ty_actual, ty_expect)))
 
 let fold_mismatches mismatches =
   List.fold_left mismatches ~init:(Ok []) ~f:(fun acc err ->
@@ -267,7 +267,7 @@ let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
       ((env, None), None)
   | (r2, Tclass (((_, class_name) as class_id), _, tyl)) ->
     let default () =
-      let ty = mk (r2, Tclass (class_id, Nonexact, tyl)) in
+      let ty = mk (r2, Tclass (class_id, Inexact, tyl)) in
       ((env, None), Some ty)
     in
     begin
@@ -300,7 +300,7 @@ let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
   | _ -> ((env, None), None)
 
 (* `ty` is expected to be the type for a property or method that has been
- * accessed using the nullsafe operatore e.g. $x?->prop or $x?->foo(...).
+ * accessed using the nullsafe operator e.g. $x?->prop or $x?->foo(...).
  *
  * For properties, just make the type nullable.
  * For methods, we expect a function type, and make the return type nullable.
@@ -1041,7 +1041,7 @@ and nullable_obj_get
       Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty )
 
 (* Helper method for obj_get that decomposes the type ty1.
- * The additional parameter this_ty represents the type that will be substitued
+ * The additional parameter this_ty represents the type that will be substituted
  * for `this` in the method signature.
  *
  * If ty1 is an intersection type, we distribute the member access through the

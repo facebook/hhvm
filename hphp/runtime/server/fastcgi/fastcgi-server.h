@@ -76,7 +76,7 @@ private:
  * which use transports to track state and share data with the VM.
  *
  * The transport is responsible for processing the parameter and POST data for
- * consumtion by the VM and preparing headers and standard output to be sent
+ * consumption by the VM and preparing headers and standard output to be sent
  * back by the session; it manages HTTP specific protocol communication.
  *
  * The session and transport borrow the server's thread-pool, however, with the
@@ -95,8 +95,8 @@ struct FastCGIServer : public Server,
   }
 
   // These are currently unimplemented (TODO(#4129))
-  void addTakeoverListener(TakeoverListener* /*lisener*/) override {}
-  void removeTakeoverListener(TakeoverListener* /*lisener*/) override {}
+  void addTakeoverListener(TakeoverListener* /*listener*/) override {}
+  void removeTakeoverListener(TakeoverListener* /*listener*/) override {}
 
   // Increases the size of the thread-pool for dispatching requests
   void saturateWorkers() override {

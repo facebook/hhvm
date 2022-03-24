@@ -383,7 +383,7 @@ struct DceState {
   std::bitset<kMaxTrackedLocals> willBeUnsetLocals;
 
   /*
-   * Locals that may need to be unset in successor blocks are accumlated into
+   * Locals that may need to be unset in successor blocks are accumulated into
    * this bitset.
    *
    * A successor may need to unset a local for us if we are unable to because
@@ -393,7 +393,7 @@ struct DceState {
   std::bitset<kMaxTrackedLocals> mayNeedUnsettingExn;
 
   /*
-   * The set of local names thate were ever referenced in this block.  This set
+   * The set of local names that were ever referenced in this block.  This set
    * is used by global DCE to remove local names that are completely unused
    * in the entire function.
    */
@@ -580,7 +580,7 @@ bool maybePop(Env& env, const UseInfo& ui, const Args&... args) {
 
 /*
  * Determine whether its worth inserting PopCs after an instruction
- * that can't be dced in order to execute the dependent actions.
+ * that can't be DCEd in order to execute the dependent actions.
  */
 template<typename... Args>
 bool shouldPopOutputs(Env& env, const Args&... args) {
@@ -615,7 +615,7 @@ void addInterference(LocalRemappingIndex* index,
 }
 
 void addInterference(Env& env, const std::bitset<kMaxTrackedLocals>& live) {
-  // We don't track interfrence until the optimize round of the global dce.
+  // We don't track interference until the optimize round of the global dce.
   if (!env.dceState.remappingIndex) return;
   addInterference(env.dceState.remappingIndex, live);
 }
@@ -2134,7 +2134,7 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
           std::move(bcs)
         ));
 
-        // We flag that we shoud rerun DCE since this Unset might be redudant if
+        // We flag that we should rerun DCE since this Unset might be redundant if
         // a CGetL gets replaced with a PushL.
         visit_env.dceState.didAddOpts = true;
       }
@@ -2661,7 +2661,7 @@ void remap_locals(const FuncAnalysis& ainfo, php::WideFunc& func,
     if (remapping[i] != i) {
       identityMapping = false;
       // We only have to check one deep because we know that all earlier locals
-      // are already cononicalized.
+      // are already canonicalized.
       auto const newId = remapping[remapping[i]];
       assertx(remapping[newId] == newId);
       remapping[i] = newId;
@@ -2905,7 +2905,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
   }
 
   /*
-   * The set of locals that may need to be unset by a succesor block.
+   * The set of locals that may need to be unset by a successor block.
    */
   std::vector<std::bitset<kMaxTrackedLocals>>
     locMayNeedUnsetting(func.blocks().size());
@@ -3093,7 +3093,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
           std::move(bcs)
         ));
 
-        // We flag that we shoud rerun DCE since this Unset might be redudant if
+        // We flag that we should rerun DCE since this Unset might be redundant if
         // a CGetL gets replaced with a PushL.
         didAddOpts = true;
       }

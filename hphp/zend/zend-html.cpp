@@ -235,7 +235,7 @@ static entity_table_t ent_uni_8592_9002[] = {
   "ang", "angmsd", "angsph", "mid", "nmid", "par", "npar", "and",
   "or", "cap", "cup", "int", nullptr, nullptr, "conint", nullptr,
   /* 8752 (0x2230) */
-  nullptr, nullptr, nullptr, nullptr, "there4", "becaus", nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, "there4", "because", nullptr, nullptr,
   nullptr, nullptr, nullptr, nullptr, "sim", "bsim", nullptr, nullptr,
   /* 8768 (0x2240) */
   "wreath", "nsim", nullptr, "sime", "nsime", "cong", nullptr, "ncong",
@@ -652,7 +652,7 @@ char *string_html_encode(const char *input, int &len,
    * time this function is called with small strings, or fragments of HTMLs.
    * Allocating/deallocating anything less than 1K is trivial these days, and
    * we want avoid string copying as much as possible. Of course, the return
-   * char * is really sent back at large, occupying unnessary space for
+   * char * is really sent back at large, occupying unnecessary space for
    * potentially longer time than we need, we have to realize the two closest
    * solutions are not that much better, either:
    *
@@ -923,7 +923,7 @@ char *string_html_encode_extra(const char *input, int &len,
    * time this function is called with small strings, or fragments of HTMLs.
    * Allocating/deallocating anything less than 1K is trivial these days, and
    * we want avoid string copying as much as possible. Of course, the return
-   * char * is really sent back at large, occupying unnessary space for
+   * char * is really sent back at large, occupying unnecessary space for
    * potentially longer time than we need, we have to realize the two closest
    * solutions are not that much better, either:
    *

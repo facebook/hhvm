@@ -392,7 +392,7 @@ and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
           env
       in
       let (env, ty_errs) =
-        match KindDefs.Simple.get_wilcard_bounds kind with
+        match KindDefs.Simple.get_wildcard_bounds kind with
         | KindDefs.Simple.NonLocalized decl_cstrs ->
           List.fold_left
             decl_cstrs
@@ -445,7 +445,7 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
         ~f:(localize ~ety_env:{ ety_env with expand_visible_newtype = true })
         ~combine_ty_errs:Typing_error.multiple_opt
     in
-    (env, mk (r, Tclass (sid, Nonexact, tyl)))
+    (env, mk (r, Tclass (sid, Inexact, tyl)))
   | Some class_info ->
     if Option.is_some (Cls.enum_type class_info) then
       let (ety_env, has_cycle) =
@@ -470,7 +470,7 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
            * the enum set and the type of elements, so the enum class
            * itself is seen as a Tclass
            *)
-          ((env, None), mk (r, Tclass (sid, Nonexact, [])))
+          ((env, None), mk (r, Tclass (sid, Inexact, [])))
         else
           let (env, cstr) =
             match Env.get_enum_constraint env name with
@@ -507,7 +507,7 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
             tyargs
             nkinds
       in
-      (env, mk (r, Tclass (sid, Nonexact, tyl)))
+      (env, mk (r, Tclass (sid, Inexact, tyl)))
 
 and localize_typedef_instantiation ~ety_env env r type_name tyargs typedef_info
     =
@@ -555,7 +555,7 @@ and localize_with_kind
           in
           if Kinding.Simple.is_subkind env ~sub:classish_kind ~sup:expected_kind
           then
-            ((env, None), mk (r, Tclass (id, Nonexact, [])))
+            ((env, None), mk (r, Tclass (id, Inexact, [])))
           else
             ((env, None), mk (Reason.none, Terr))
         | Some (Env.TypedefResult typedef) ->
@@ -828,7 +828,7 @@ and localize_ft
  * the constraints on the corresponding generic parameter.
  *
  * Note that the constraints may contain occurrences of the generic
- * parameters, but the subsitution will be applied to them. e.g. if tparams is
+ * parameters, but the substitution will be applied to them. e.g. if tparams is
  *   <Tu as MyCovariant<Tu>, Tv super Tu>
  * and ety_env.substs is
  *   Tu :-> C
@@ -915,7 +915,7 @@ and check_where_constraints
  * for them and apply constraints.
  *
  * This is not used for local inference on constructors, but rather for global inference
- * for partial files where function signatures are allowed to contain types ommitting type
+ * for partial files where function signatures are allowed to contain types omitting type
  * arguments.
  *)
 and localize_missing_tparams_class_for_global_inference env r sid class_ =
@@ -932,7 +932,7 @@ and localize_missing_tparams_class_for_global_inference env r sid class_ =
         in
         ((env, i + 1), ty))
   in
-  let c_ty = mk (r, Tclass (sid, Nonexact, tyl)) in
+  let c_ty = mk (r, Tclass (sid, Inexact, tyl)) in
   let ety_env =
     {
       empty_expand_env with

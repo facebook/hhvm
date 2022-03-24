@@ -616,7 +616,7 @@ public:
 
   /*
    * Array of named locals.  Includes parameter names.
-   * May contain nullptrs for unammed locals that mixed in with named ones.
+   * May contain nullptrs for unnamed locals that mixed in with named ones.
    *
    * Should not be indexed past numNamedLocals() - 1.
    */
@@ -779,7 +779,7 @@ public:
   ArFunction arFuncPtr() const;
 
   /*
-   * The nativeFuncPtr is a type-punned function pointer to the unerlying
+   * The nativeFuncPtr is a type-punned function pointer to the underlying
    * function which takes the actual argument types, and does the actual work.
    *
    * These are the functions with names prefixed by f_ or t_.

@@ -2395,7 +2395,7 @@ getstr(struct magic_set *ms, struct magic *m, const char *s, int warn)
       case '^':
       case '=':
       case '!':
-      /* and baskslash itself */
+      /* and backslash itself */
       case '\\':
         *p++ = (char) c;
         break;

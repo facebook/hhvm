@@ -483,11 +483,11 @@ let symlink =
 let make_link_of_timestamped linkname =
   Unix.(
     let dir = Filename.dirname linkname in
-    mkdir_no_fail dir;
+    mkdir_p dir;
     let base = Filename.basename linkname in
     let (base, ext) = splitext base in
     let dir = Filename.concat dir (Printf.sprintf "%ss" ext) in
-    mkdir_no_fail dir;
+    mkdir_p dir;
     let tm = localtime (time ()) in
     let year = tm.tm_year + 1900 in
     let time_str =

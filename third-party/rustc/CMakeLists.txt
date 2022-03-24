@@ -34,7 +34,9 @@ ExternalProject_Add(
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   INSTALL_COMMAND
-  "<SOURCE_DIR>/install.sh" "--prefix=<INSTALL_DIR>"
+  # rust-docs aren't needed, and installing them takes more time than installing
+  # everything else and building the rust parts of hack combined
+  "<SOURCE_DIR>/install.sh" "--prefix=<INSTALL_DIR>" --without=rust-docs
 )
 
 add_executable(rustc IMPORTED GLOBAL)

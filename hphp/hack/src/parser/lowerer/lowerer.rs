@@ -1102,11 +1102,11 @@ fn prep_string2<'a>(
     env: &mut Env<'a>,
 ) -> Result<(TokenOp, TokenOp)> {
     use TokenOp::*;
-    let is_qoute = |c| c == b'\"' || c == b'`';
-    let start_is_qoute = |s: &[u8]| {
-        (!s.is_empty() && is_qoute(s[0])) || (s.len() > 1 && (s[0] == b'b' && s[1] == b'\"'))
+    let is_quote = |c| c == b'\"' || c == b'`';
+    let start_is_quote = |s: &[u8]| {
+        (!s.is_empty() && is_quote(s[0])) || (s.len() > 1 && (s[0] == b'b' && s[1] == b'\"'))
     };
-    let last_is_qoute = |s: &[u8]| !s.is_empty() && is_qoute(s[s.len() - 1]);
+    let last_is_quote = |s: &[u8]| !s.is_empty() && is_quote(s[s.len() - 1]);
     let is_heredoc = |s: &[u8]| (s.len() > 3 && &s[0..3] == b"<<<");
     let mut nodes = nodes.iter();
     let first = nodes.next();
@@ -1116,15 +1116,15 @@ fn prep_string2<'a>(
                 raise_parsing_error(first.unwrap(), env, "Malformed String2 SyntaxList");
             };
             let text = t.text_raw(env.source_text());
-            if start_is_qoute(text) {
+            if start_is_quote(text) {
                 let first_token_op = match text[0] {
                     b'b' if text.len() > 2 => LeftTrim(2),
-                    _ if is_qoute(text[0]) && text.len() > 1 => LeftTrim(1),
+                    _ if is_quote(text[0]) && text.len() > 1 => LeftTrim(1),
                     _ => Skip,
                 };
                 if let Some(Token(t)) = nodes.last().map(|n| &n.children) {
                     let last_text = t.text_raw(env.source_text());
-                    if last_is_qoute(last_text) {
+                    if last_is_quote(last_text) {
                         let last_taken_op = match last_text.len() {
                             n if n > 1 => RightTrim(1),
                             _ => Skip,

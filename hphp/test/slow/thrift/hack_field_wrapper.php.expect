@@ -6,6 +6,8 @@ string(32) "26cc06895b4bb7b431b2580f9443bb12"
 		 value = 42
 ----OuterStructNoWrappedFields----
 		 value = 42
+----OuterStructWithWrapperAndAdapter----
+		 value = Int value is 42
 --- compact ---
 ----OuterStruct----
 		 value = 42
@@ -14,3 +16,5 @@ string(32) "633119f2b60fec192ff10759cf557234"
 		 value = 42
 ----OuterStructNoWrappedFields----
 		 value = 42
+----OuterStructWithWrapperAndAdapter----
+		 value = Int value is 42

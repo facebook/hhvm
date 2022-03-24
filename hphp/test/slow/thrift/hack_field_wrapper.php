@@ -67,6 +67,59 @@ final class MyFieldWrapper<TThriftType, TStruct as IThriftStruct>  extends IThri
   }
 }
 
+interface IThriftAdapter {
+  abstract const type THackType;
+  abstract const type TThriftType;
+  public static function toThrift(
+    this::THackType $hack_obj,
+  )[write_props]: this::TThriftType;
+  public static function fromThrift(
+    this::TThriftType $thrift_obj,
+  )[]: this::THackType;
+}
+
+class StringToIntPrimitiveAdapter {
+  const type THackType = string;
+
+  public static function toThrift(string $hack_value): int {
+    return (int)$hack_value;
+  }
+  public static function fromThrift(int $thrift_value): string {
+    return "Int value is ". $thrift_value;
+  }
+}
+
+class OuterStructWithWrapperAndAdapter implements IThriftStruct {
+  const SPEC = darray[
+    1 => darray[
+      'var' => 'value',
+      'type' => \TType::I32,
+      'is_wrapped' => true,
+      'adapter' => \StringToIntPrimitiveAdapter::class
+    ]
+  ];
+  private ?\MyFieldWrapper<?\MyAdapter::THackType> $value;
+
+  public function get_value()[]: \MyFieldWrapper<?\StringToIntPrimitiveAdapter::THackType> {
+    return $this->value as nonnull;
+  }
+
+  public function __construct()[] {
+    $this->value = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?\StringToIntPrimitiveAdapter::THackType, OuterStruct>(null, 1, $this);
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public async function print(): Awaitable<void> {
+    echo "----OuterStructWithWrapperAndAdapter----\n";
+    echo "\t\t value = ";
+    echo await $this->get_value()->genUnwrap();
+    echo "\n";
+  }
+}
+
 class OuterStruct implements IThriftStruct{
   const SPEC = darray[
     1 => darray[
@@ -77,7 +130,7 @@ class OuterStruct implements IThriftStruct{
   ];
   private ?\MyFieldWrapper<?int> $value;
 
-  public function get_value()[]: \MyFieldWrapper<int> {
+  public function get_value()[]: \MyFieldWrapper<?int> {
     return $this->value as nonnull;
   }
 
@@ -139,6 +192,11 @@ async function testBinary() {
   $p->getTransport()->pos = 0;
   $new_value = thrift_protocol_read_binary($p, 'OuterStructNoWrappedFields', true);
   $new_value->print();
+
+  // Peek at what the serialized data actually looks like.
+  $p->getTransport()->pos = 0;
+  $new_value = thrift_protocol_read_binary($p, 'OuterStructWithWrapperAndAdapter', true);
+  $new_value->print();
 }
 
 async function testCompact() {
@@ -153,6 +211,11 @@ async function testCompact() {
   // Peek at what the serialized data actually looks like.
   $p->getTransport()->pos = 0;
   $new_value = thrift_protocol_read_compact($p, 'OuterStructNoWrappedFields');
+  $new_value->print();
+
+  // Peek at what the serialized data actually looks like.
+  $p->getTransport()->pos = 0;
+  $new_value = thrift_protocol_read_compact($p, 'OuterStructWithWrapperAndAdapter');
   $new_value->print();
 }
 

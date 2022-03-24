@@ -1660,7 +1660,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
 
   // Wrap the call to 'invokeFuncFew' and call 'raise_error' if an
   // 'Object' exception is encountered. The effect of this is to treat
-  // constant intialization errors as terminal.
+  // constant initialization errors as terminal.
   auto invokeFuncFew = [&]() -> TypedValue {
     try {
       return g_context->invokeFuncFew(

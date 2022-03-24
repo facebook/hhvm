@@ -45,7 +45,7 @@ val get_initial_reading : unit -> initial_reading
 (** This module doesn't actually respect the [initial_reading] it took upon program startup;
 it only uses a reading that was passed to it by this function. Why? imagine if after
 some heavy allocation, serverMain used Daemon.spawn to spawn a child process;
-we'd usually prefer that child process to record numbers relative to the intial_reading
+we'd usually prefer that child process to record numbers relative to the initial_reading
 that was captured by the initial process upon its initial startup, not the one captured
 by the child upon child process startup. *)
 val use_initial_reading : initial_reading -> unit

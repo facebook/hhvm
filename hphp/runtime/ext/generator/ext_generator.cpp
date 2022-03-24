@@ -143,7 +143,7 @@ bool Generator::successfullyFinishedExecuting() {
   // `getReturn` wants to throw an exception if the generator threw an
   // exception. Since we use the same variable to store the yield result and
   // the return value, and since we dont have a separate state to represent a
-  // failed generator, we use an unintialized value to flag that the generator
+  // failed generator, we use an uninitialized value to flag that the generator
   // failed (rather than NULL, which we use for a successful generator without
   // a return value).
   return getState() == State::Done &&

@@ -1115,7 +1115,7 @@ struct Index {
 
 
   /*
-   * If we resolve the intial value of a public property, we need to
+   * If we resolve the initial value of a public property, we need to
    * tell the refine_public_statics phase about it, because the init
    * value won't be included in the mutations any more.
    *

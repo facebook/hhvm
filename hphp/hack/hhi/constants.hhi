@@ -22,6 +22,7 @@ const string PHP_EXTRA_VERSION = 'hhvm';
 
 const string HHVM_VERSION = 'typechecker placeholder, see runtime';
 const string HHVM_COMPILER_ID = 'typechecker placeholder, see runtime';
+const int HHVM_COMPILER_TIMESTAMP = 0; // typechecker placeholder, see runtime
 const string HHVM_REPO_SCHEMA = 'typechecker placeholder, see runtime';
 const int HHVM_VERSION_ID = 0;
 const int HHVM_VERSION_MAJOR = 0;

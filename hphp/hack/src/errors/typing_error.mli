@@ -1776,7 +1776,7 @@ module Reasons_callback : sig
       `(fun ?code:_ ?quickfixes:_ _ -> error)`
 
       This is also the same as:
-      `retain_code @@ retain_reasons @@ reatain_quickfixes @@ of_error error`
+      `retain_code @@ retain_reasons @@ retain_quickfixes @@ of_error error`
   *)
   val always : Error.t -> t
 

@@ -36,7 +36,7 @@ namespace HPHP {
 static int s_pcre_has_jit = 0;
 
 Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Variant& input,
-                      int flags /* = 0 */) {
+                      int64_t flags /* = 0 */) {
   if (!isContainer(input)) {
     raise_warning("input to preg_grep must be an array or collection");
     return init_null();
@@ -45,7 +45,7 @@ Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Variant& input,
 }
 
 Variant HHVM_FUNCTION(preg_grep_with_error, const String& pattern,
-                      const Variant& input, Variant& error, int flags /* = 0 */) {
+                      const Variant& input, Variant& error, int64_t flags /* = 0 */) {
   PregWithErrorGuard guard(error);
   return HHVM_FN(preg_grep)(pattern, input, flags);
 }
@@ -54,14 +54,14 @@ Variant HHVM_FUNCTION(preg_grep_with_error, const String& pattern,
 
 TypedValue HHVM_FUNCTION(preg_match,
                          StringArg pattern, StringArg subject,
-                         int flags /* = 0 */, int offset /* = 0 */) {
+                         int64_t flags /* = 0 */, int64_t offset /* = 0 */) {
   return tvReturn(preg_match(pattern.get(), subject.get(),
                              nullptr, flags, offset));
 }
 
 TypedValue HHVM_FUNCTION(preg_match_with_error, StringArg pattern,
                          StringArg subject, Variant& error,
-                         int flags /* = 0 */, int offset /* = 0 */) {
+                         int64_t flags /* = 0 */, int64_t offset /* = 0 */) {
   PregWithErrorGuard guard(error);
   return tvReturn(preg_match(pattern.get(), subject.get(),
                              nullptr, flags, offset));
@@ -70,7 +70,7 @@ TypedValue HHVM_FUNCTION(preg_match_with_error, StringArg pattern,
 TypedValue HHVM_FUNCTION(preg_match_with_matches,
                          StringArg pattern, StringArg subject,
                          Variant& matches,
-                         int flags /* = 0 */, int offset /* = 0 */) {
+                         int64_t flags /* = 0 */, int64_t offset /* = 0 */) {
   return tvReturn(preg_match(pattern.get(), subject.get(),
                              &matches, flags, offset));
 }
@@ -78,7 +78,7 @@ TypedValue HHVM_FUNCTION(preg_match_with_matches,
 TypedValue HHVM_FUNCTION(preg_match_with_matches_and_error,
                          StringArg pattern, StringArg subject,
                          Variant& matches, Variant& error,
-                         int flags /* = 0 */, int offset /* = 0 */) {
+                         int64_t flags /* = 0 */, int64_t offset /* = 0 */) {
   PregWithErrorGuard guard(error);
   return tvReturn(preg_match(pattern.get(), subject.get(),
                              &matches, flags, offset));
@@ -87,8 +87,8 @@ TypedValue HHVM_FUNCTION(preg_match_with_matches_and_error,
 TypedValue HHVM_FUNCTION(preg_match_all,
                          StringArg pattern,
                          StringArg subject,
-                         int flags /* = 0 */,
-                         int offset /* = 0 */) {
+                         int64_t flags /* = 0 */,
+                         int64_t offset /* = 0 */) {
   return tvReturn(preg_match_all(pattern.get(), subject.get(),
                                  nullptr, flags, offset));
 }
@@ -97,8 +97,8 @@ TypedValue HHVM_FUNCTION(preg_match_all_with_error,
                          StringArg pattern,
                          StringArg subject,
                          Variant& error,
-                         int flags /* = 0 */,
-                         int offset /* = 0 */) {
+                         int64_t flags /* = 0 */,
+                         int64_t offset /* = 0 */) {
   PregWithErrorGuard guard(error);
   return tvReturn(preg_match_all(pattern.get(), subject.get(),
                                  nullptr, flags, offset));
@@ -108,8 +108,8 @@ TypedValue HHVM_FUNCTION(preg_match_all_with_matches,
                          StringArg pattern,
                          StringArg subject,
                          Variant& matches,
-                         int flags /* = 0 */,
-                         int offset /* = 0 */) {
+                         int64_t flags /* = 0 */,
+                         int64_t offset /* = 0 */) {
   return tvReturn(preg_match_all(pattern.get(), subject.get(),
                                  &matches, flags, offset));
 }
@@ -119,8 +119,8 @@ TypedValue HHVM_FUNCTION(preg_match_all_with_matches_and_error,
                          StringArg subject,
                          Variant& matches,
                          Variant& error,
-                         int flags /* = 0 */,
-                         int offset /* = 0 */) {
+                         int64_t flags /* = 0 */,
+                         int64_t offset /* = 0 */) {
   PregWithErrorGuard guard(error);
   return tvReturn(preg_match_all(pattern.get(), subject.get(),
                                  &matches, flags, offset));
@@ -130,14 +130,14 @@ TypedValue HHVM_FUNCTION(preg_match_all_with_matches_and_error,
 
 
 Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& replacement,
-                                    const Variant& subject, int limit /* = -1 */) {
+                                    const Variant& subject, int64_t limit /* = -1 */) {
   return preg_replace_impl(pattern, replacement, subject,
                            limit, nullptr, false, false);
 }
 
 Variant HHVM_FUNCTION(preg_replace_with_error, const Variant& pattern,
                       const Variant& replacement, const Variant& subject,
-                      Variant& error, int limit /* = -1 */) {
+                      Variant& error, int64_t limit /* = -1 */) {
   PregWithErrorGuard guard(error);
   return preg_replace_impl(pattern, replacement, subject,
                            limit, nullptr, false, false);
@@ -147,7 +147,7 @@ Variant HHVM_FUNCTION(preg_replace_with_count,
                       const Variant& pattern,
                       const Variant& replacement,
                       const Variant& subject,
-                      int limit,
+                      int64_t limit,
                       int64_t& count) {
   return preg_replace_impl(pattern, replacement, subject,
                            limit, &count, false, false);
@@ -157,7 +157,7 @@ Variant HHVM_FUNCTION(preg_replace_with_count_and_error,
                       const Variant& pattern,
                       const Variant& replacement,
                       const Variant& subject,
-                      int limit,
+                      int64_t limit,
                       int64_t& count,
                       Variant& error) {
   PregWithErrorGuard guard(error);
@@ -169,7 +169,7 @@ Variant HHVM_FUNCTION(preg_replace_callback,
                       const Variant& pattern,
                       const Variant& callback,
                       const Variant& subject,
-                      int limit,
+                      int64_t limit,
                       int64_t& count) {
   if (!is_callable(callback)) {
     raise_warning("Not a valid callback function %s",
@@ -184,7 +184,7 @@ Variant HHVM_FUNCTION(preg_replace_callback_with_error,
                       const Variant& pattern,
                       const Variant& callback,
                       const Variant& subject,
-                      int limit,
+                      int64_t limit,
                       int64_t& count,
                       Variant& error) {
   PregWithErrorGuard guard(error);
@@ -233,7 +233,7 @@ static Variant preg_replace_callback_array_impl(
 Variant HHVM_FUNCTION(preg_replace_callback_array,
                       const Variant& patterns_and_callbacks,
                       const Variant& subject,
-                      int limit,
+                      int64_t limit,
                       int64_t& count) {
   if (!patterns_and_callbacks.isArray()) {
     raise_warning(
@@ -276,7 +276,7 @@ Variant HHVM_FUNCTION(preg_replace_callback_array,
 Variant HHVM_FUNCTION(preg_replace_callback_array_with_error,
                       const Variant& patterns_and_callbacks,
                       const Variant& subject,
-                      int limit,
+                      int64_t limit,
                       int64_t& count,
                       Variant& error) {
   PregWithErrorGuard guard(error);
@@ -285,7 +285,7 @@ Variant HHVM_FUNCTION(preg_replace_callback_array_with_error,
 }
 
 Variant HHVM_FUNCTION(preg_filter, const Variant& pattern, const Variant& callback,
-                                   const Variant& subject, int limit,
+                                   const Variant& subject, int64_t limit,
                                    int64_t& count) {
   return preg_replace_impl(pattern, callback, subject,
                            limit, &count, false, true);
@@ -294,14 +294,14 @@ Variant HHVM_FUNCTION(preg_filter, const Variant& pattern, const Variant& callba
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
-                                  const Variant& limit, int flags /* = 0 */) {
+                                  const Variant& limit, int64_t flags /* = 0 */) {
   //NOTE: .toInt64() returns 0 for null
   return preg_split(pattern, subject, limit.toInt64(), flags);
 }
 
 Variant HHVM_FUNCTION(preg_split_with_error, const String& pattern,
                       const String& subject, Variant& error,
-                      const Variant& limit /* = null */, int flags /* = 0 */) {
+                      const Variant& limit /* = null */, int64_t flags /* = 0 */) {
   PregWithErrorGuard guard(error);
   //NOTE: .toInt64() returns 0 for null
   return preg_split(pattern, subject, limit.toInt64(), flags);
@@ -337,12 +337,12 @@ String HHVM_FUNCTION(eregi_replace, const String& pattern,
 // regexec
 
 Variant HHVM_FUNCTION(split, const String& pattern, const String& str,
-                             int limit /* = -1 */) {
+                             int64_t limit /* = -1 */) {
   return php_split(pattern, str, limit, false);
 }
 
 Variant HHVM_FUNCTION(spliti, const String& pattern, const String& str,
-                              int limit /* = -1 */) {
+                              int64_t limit /* = -1 */) {
   return php_split(pattern, str, limit, true);
 }
 

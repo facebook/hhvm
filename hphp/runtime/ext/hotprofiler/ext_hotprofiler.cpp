@@ -1350,7 +1350,7 @@ IMPLEMENT_REQUEST_LOCAL(ProfilerFactory, s_profiler_factory);
 ///////////////////////////////////////////////////////////////////////////////
 // main functions
 
-void f_hotprofiler_enable(int ikind) {
+void f_hotprofiler_enable(int64_t ikind) {
   auto kind = static_cast<ProfilerKind>(ikind);
   long flags = 0;
   if (kind == ProfilerKind::Hierarchical) {
@@ -1368,7 +1368,7 @@ Variant f_hotprofiler_disable() {
   return s_profiler_factory->stop();
 }
 
-void f_phprof_enable(int flags /* = 0 */) {
+void f_phprof_enable(int64_t flags /* = 0 */) {
   if (RuntimeOption::EnableHotProfiler) {
     s_profiler_factory->start(ProfilerKind::Hierarchical, flags);
   }

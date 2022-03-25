@@ -1946,7 +1946,7 @@ String HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_push,
                      Variant& state_inout,
                      const String& plaintext,
                      const String& ad,
-                     int tag) {
+                     int64_t tag) {
   // parse state string into the struct
   if (!state_inout.isString()) {
     throwSodiumException(s_crypto_secretstream_xchacha20poly130_state_string_required);

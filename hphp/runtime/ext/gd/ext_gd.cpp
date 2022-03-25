@@ -73,7 +73,7 @@
 #define IMAGE_TYPE_WBMP 8
 #define IMAGE_TYPE_XPM 16
 
-// #define IM_MEMORY_CHECK
+//#define IM_MEMORY_CHECK
 
 namespace HPHP {
 
@@ -6089,7 +6089,9 @@ static void exif_thumbnail_extract(image_info_type *ImageInfo,
     return;
   }
   /* Check to make sure we are not going to go past the ExifLength */
-  if ((ImageInfo->Thumbnail.offset + ImageInfo->Thumbnail.size) > length) {
+  if (((ImageInfo->Thumbnail.offset + ImageInfo->Thumbnail.size) <
+       ImageInfo->Thumbnail.offset) ||
+      ((ImageInfo->Thumbnail.offset + ImageInfo->Thumbnail.size) > length)) {
     raise_warning("Thumbnail goes IFD boundary or end of file reached");
     return;
   }
@@ -6321,7 +6323,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
                                 int ReadNextIFD, tag_table_type tag_table) {
   size_t length;
   int tag, format, components;
-  char *value_ptr, tagname[64], cbuf[32], *outside=nullptr;
+  char *value_ptr, *value_ptr_end, tagname[64], cbuf[32], *outside=nullptr;
   size_t byte_count, offset_val, fpos, fgot;
   int64_t byte_count_signed;
   xp_field_type *tmp_xp;
@@ -6372,6 +6374,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
     offset_val = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
     /* If its bigger than 4 bytes, the dir entry contains an offset. */
     value_ptr = offset_base+offset_val;
+    value_ptr_end = end;
     if (byte_count > IFDlength ||
         offset_val > IFDlength-byte_count ||
         value_ptr < dir_entry ||
@@ -6409,6 +6412,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
         /* mark as outside range and get buffer */
         value_ptr = (char *)IM_MALLOC(byte_count);
         CHECK_ALLOC_R(value_ptr, byte_count, 0);
+        value_ptr_end = value_ptr + byte_count;
         outside = value_ptr;
       } else {
         /*
@@ -6420,6 +6424,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
         */
         memset(&cbuf, 0, sizeof(cbuf));
         value_ptr = cbuf;
+        value_ptr_end = value_ptr + sizeof(cbuf);
       }
 
       fpos = ImageInfo->infile->tell();
@@ -6444,6 +6449,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
   } else {
     /* 4 bytes or less and value is in the dir entry itself */
     value_ptr = dir_entry+8;
+    value_ptr_end = end;
     offset_val= value_ptr-offset_base;
   }
 
@@ -6673,7 +6679,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
               sub_section_index = SECTION_INTEROP;
               break;
           }
-          CHECK_BUFFER_R(value_ptr, end, 4, 0);
+          CHECK_BUFFER_R(value_ptr, value_ptr_end, 4, 0);
           Subdir_start = offset_base +
                          php_ifd_get32u(value_ptr, ImageInfo->motorola_intel);
           if (Subdir_start < offset_base ||

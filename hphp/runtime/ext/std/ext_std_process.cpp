@@ -964,7 +964,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
 
 bool HHVM_FUNCTION(proc_terminate,
                    const Resource& process,
-                   int signal /* = SIGTERM */) {
+                   int64_t signal /* = SIGTERM */) {
 #ifdef _WIN32
   // 255 is what PHP sends, so we do the same.
   return TerminateProcess(cast<ChildProcess>(process)->childHandle, 255);
@@ -1039,7 +1039,7 @@ Array HHVM_FUNCTION(proc_get_status,
 
 #ifndef _WIN32
 bool HHVM_FUNCTION(proc_nice,
-                   int increment) {
+                   int64_t increment) {
   errno = 0;
   if (nice(increment) == -1 && errno) {
     raise_warning("Only a super user may attempt to increase the "

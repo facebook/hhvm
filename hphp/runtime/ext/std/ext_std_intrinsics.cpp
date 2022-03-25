@@ -198,7 +198,7 @@ void HHVM_FUNCTION(hhbbc_fail_verification) {
  *   string $s,
  *   inout string $str,
  *   inout int $num,
- *   int $i,
+ *   int64_t $i,
  *   inout object $obj
  *   object $o,
  *   mixed $m,
@@ -214,7 +214,7 @@ Array HHVM_FUNCTION(
   StringArg s,
   String& str,
   int64_t& num,
-  int i,
+  int64_t i,
   Object& obj,
   ObjectArg o,
   const Variant& m,

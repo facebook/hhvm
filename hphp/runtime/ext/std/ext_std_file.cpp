@@ -519,7 +519,7 @@ static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
 bool HHVM_FUNCTION(flock,
                    const Resource& handle,
-                   int operation,
+                   int64_t operation,
                    bool& wouldblock) {
   CHECK_HANDLE(handle, f);
   int act;
@@ -527,7 +527,7 @@ bool HHVM_FUNCTION(flock,
 
   act = operation & 3;
   if (act < 1 || act > 3) {
-    raise_invalid_argument_warning("operation: %d", operation);
+    raise_invalid_argument_warning("operation: %ld", operation);
     return false;
   }
   act = flock_values[act - 1] | (operation & 4 ? LOCK_NB : 0);
@@ -599,7 +599,7 @@ Variant HHVM_FUNCTION(file_get_contents,
 Variant HHVM_FUNCTION(file_put_contents,
                       const String& filename,
                       const Variant& data,
-                      int flags /* = 0 */,
+                      int64_t flags /* = 0 */,
                       const Variant& context /* = null */) {
   CHECK_PATH(filename, 1);
 
@@ -730,7 +730,7 @@ Variant HHVM_FUNCTION(file_put_contents,
 
 Variant HHVM_FUNCTION(file,
                       const String& filename,
-                      int flags /* = 0 */,
+                      int64_t flags /* = 0 */,
                       const Variant& context /* = null */) {
   CHECK_PATH(filename, 1);
   Variant contents = HHVM_FN(file_get_contents)(filename,
@@ -869,7 +869,7 @@ String resolve_parse_ini_filename(const String& filename) {
 Variant HHVM_FUNCTION(parse_ini_file,
                       const String& filename,
                       bool process_sections /* = false */,
-                      int scanner_mode /* = k_INI_SCANNER_NORMAL */) {
+                      int64_t scanner_mode /* = k_INI_SCANNER_NORMAL */) {
   CHECK_PATH_FALSE(filename, 1);
   if (filename.empty()) {
     raise_invalid_argument_warning("Filename cannot be empty!");
@@ -907,7 +907,7 @@ Variant HHVM_FUNCTION(parse_ini_file,
 Variant HHVM_FUNCTION(parse_ini_string,
                       const String& ini,
                       bool process_sections /* = false */,
-                      int scanner_mode /* = k_INI_SCANNER_NORMAL */) {
+                      int64_t scanner_mode /* = k_INI_SCANNER_NORMAL */) {
   return IniSetting::FromString(ini, "", process_sections, scanner_mode);
 }
 
@@ -1322,7 +1322,7 @@ const StaticString
 
 Variant HHVM_FUNCTION(pathinfo,
                       const String& path,
-                      int opt /* = 15 */) {
+                      int64_t opt /* = 15 */) {
   DictInit ret{4};
 
   if (opt == 0) {
@@ -1738,7 +1738,7 @@ String HHVM_FUNCTION(basename,
 
 bool HHVM_FUNCTION(fnmatch,
                    const String& pattern,
-                   const String& filename, int flags /* = 0 */) {
+                   const String& filename, int64_t flags /* = 0 */) {
   CHECK_PATH_FALSE(pattern, 1);
   CHECK_PATH_FALSE(filename, 2);
   if (filename.size() >= PATH_MAX) {
@@ -1758,7 +1758,7 @@ bool HHVM_FUNCTION(fnmatch,
 
 Variant HHVM_FUNCTION(glob,
                       const String& pattern,
-                      int flags /* = 0 */) {
+                      int64_t flags /* = 0 */) {
   CHECK_PATH(pattern, 1);
   glob_t globbuf;
   int cwd_skip = 0;

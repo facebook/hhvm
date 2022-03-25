@@ -200,7 +200,7 @@ Array HHVM_FUNCTION(error_get_last) {
   );
 }
 
-bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,
+bool HHVM_FUNCTION(error_log, const String& message, int64_t message_type /* = 0 */,
                    const Variant& destination /* = null */,
                    const Variant& /*extra_headers*/ /* = null */) {
   // error_log() should not invoke the user error handler,
@@ -228,7 +228,7 @@ bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,
   }
   case 2: // not used per PHP
   default:
-    Logger::Error("error_log does not support message_type %d!", message_type);
+    Logger::Error("error_log does not support message_type %ld!", message_type);
     break;
   }
   return false;
@@ -254,7 +254,7 @@ bool HHVM_FUNCTION(restore_exception_handler) {
 }
 
 Variant HHVM_FUNCTION(set_error_handler, const Variant& error_handler,
-                      int error_types /* = ErrorMode::PHP_ALL | STRICT */) {
+                      int64_t error_types /* = ErrorMode::PHP_ALL | STRICT */) {
   if (!is_null(error_handler.asTypedValue())) {
     return g_context->pushUserErrorHandler(error_handler, error_types);
   } else {
@@ -283,7 +283,7 @@ void HHVM_FUNCTION(hphp_clear_unflushed) {
 }
 
 bool HHVM_FUNCTION(trigger_error, const String& error_msg,
-                   int error_type /* = ErrorMode::USER_NOTICE */) {
+                   int64_t error_type /* = ErrorMode::USER_NOTICE */) {
   std::string msg = error_msg.data(); // not toCppString()
   if (UNLIKELY(g_context->getThrowAllErrors())) {
     throw Exception(folly::sformat("throwAllErrors: {}", error_type));
@@ -350,8 +350,8 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
 }
 
 bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
-                   int sample_rate,
-                   int error_type /* = (int)ErrorMode::USER_NOTICE */) {
+                   int64_t sample_rate,
+                   int64_t error_type /* = (int)ErrorMode::USER_NOTICE */) {
   if (!folly::Random::oneIn(sample_rate)) {
     return true;
   }
@@ -359,7 +359,7 @@ bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
 }
 
 bool HHVM_FUNCTION(user_error, const String& error_msg,
-                   int error_type /* = (int)ErrorMode::USER_NOTICE */) {
+                   int64_t error_type /* = (int)ErrorMode::USER_NOTICE */) {
   return HHVM_FN(trigger_error)(error_msg, error_type);
 }
 

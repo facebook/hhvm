@@ -606,7 +606,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;
     case KindOfUninit:
     case KindOfNull:         return ty == T::Void;
-    case KindOfInt64:        return ty == T::Int64    || ty == T::Int32;
+    case KindOfInt64:        return ty == T::Int64;
     case KindOfRFunc:        return false; // TODO(T66903859)
     case KindOfFunc:         return ty == T::Func;
     case KindOfClass:        return ty == T::Class;
@@ -786,7 +786,6 @@ void FuncTable::dump() const {
 static std::string nativeTypeString(NativeSig::Type ty) {
   using T = NativeSig::Type;
   switch (ty) {
-  case T::Int32:
   case T::Int64:      return "int";
   case T::Double:     return "double";
   case T::Bool:       return "bool";

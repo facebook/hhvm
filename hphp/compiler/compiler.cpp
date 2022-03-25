@@ -76,7 +76,6 @@ struct CompilerOptions {
   std::string target;
   std::string format;
   std::string outputDir;
-  std::string syncDir;
   std::vector<std::string> config;
   std::string configDir;
   std::vector<std::string> confStrings;
@@ -231,6 +230,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   bool dummy;
   bool dummy2;
+  std::string dummy3;
 
   desc.add_options()
     ("help", "display this message")
@@ -292,7 +292,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("branch", value<std::string>(&po.branch), "SVN branch")
     ("revision", value<int>(&po.revision), "SVN revision")
     ("output-dir,o", value<std::string>(&po.outputDir), "output directory")
-    ("sync-dir", value<std::string>(&po.syncDir),
+    ("sync-dir", value<std::string>(&dummy3), // TODO: T115189426 remove this
      "Files will be created in this directory first, then sync with output "
      "directory without overwriting identical files. Great for incremental "
      "compilation and build.")
@@ -654,11 +654,7 @@ int process(const CompilerOptions &po) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
-  if (po.syncDir.empty()) {
-    ar->setOutputPath(po.outputDir);
-  } else {
-    ar->setOutputPath(po.syncDir);
-  }
+  ar->setOutputPath(po.outputDir);
   // Propagate relevant compiler-specific options to the runtime.
   RuntimeOption::RepoPath = ar->getOutputPath() + '/' + po.program;
   if (po.format.find("exe") != std::string::npos) {
@@ -712,14 +708,6 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
 
   Timer timer(Timer::WallTime, type);
   Compiler::emitAllHHBC(std::move(ar));
-
-  if (!po.syncDir.empty()) {
-    if (!po.filecache.empty()) {
-      fcThread.waitForEnd();
-    }
-    FileUtil::syncdir(po.outputDir, po.syncDir);
-    boost::filesystem::remove_all(po.syncDir);
-  }
 
   if (!ret && po.format.find("exe") != std::string::npos) {
     /*
@@ -796,12 +784,6 @@ void createOutputDirectory(CompilerOptions &po) {
     Logger::Info("creating temporary directory %s ...", po.outputDir.c_str());
   }
   mkdir(po.outputDir.c_str(), 0777);
-
-  if (!po.syncDir.empty()) {
-    Logger::Info("re-creating sync directory %s ...", po.syncDir.c_str());
-    boost::filesystem::remove_all(po.syncDir);
-    mkdir(po.syncDir.c_str(), 0777);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

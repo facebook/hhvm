@@ -47,13 +47,13 @@ Variant HHVM_FUNCTION(proc_open,
                       const Variant& other_options = uninit_variant);
 bool HHVM_FUNCTION(proc_terminate,
                    const Resource& process,
-                   int signal = SIGTERM);
+                   int64_t signal = SIGTERM);
 int64_t HHVM_FUNCTION(proc_close,
                       const Resource& process);
 Array HHVM_FUNCTION(proc_get_status,
                     const Resource& process);
 bool HHVM_FUNCTION(proc_nice,
-                   int increment);
+                   int64_t increment);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -64,4 +64,3 @@ String HHVM_FUNCTION(escapeshellcmd,
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

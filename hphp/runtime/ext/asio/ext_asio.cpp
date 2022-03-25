@@ -64,7 +64,7 @@ int64_t HHVM_FUNCTION(asio_get_current_context_idx) {
   return AsioSession::Get()->getCurrentContextIdx();
 }
 
-Object HHVM_FUNCTION(asio_get_running_in_context, int ctx_idx) {
+Object HHVM_FUNCTION(asio_get_running_in_context, int64_t ctx_idx) {
   auto session = AsioSession::Get();
 
   if (ctx_idx <= 0) {

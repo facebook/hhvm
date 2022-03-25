@@ -1014,7 +1014,7 @@ static bool HHVM_METHOD(ReflectionMethod, isReadonly) {
   return func->attrs() & AttrReadonlyThis;
 }
 
-static int HHVM_METHOD(ReflectionMethod, getModifiers) {
+static int64_t HHVM_METHOD(ReflectionMethod, getModifiers) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return get_modifiers(func->attrs(), false, false);
 }
@@ -1217,7 +1217,7 @@ static String HHVM_METHOD(ReflectionClass, getEnumUnderlyingType) {
   return StrNR(cls->preClass()->enumBaseTy().typeName());
 }
 
-static int HHVM_METHOD(ReflectionClass, getModifiers) {
+static int64_t HHVM_METHOD(ReflectionClass, getModifiers) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return get_modifiers(cls->attrs(), true, false);
 }
@@ -1980,7 +1980,7 @@ static bool HHVM_METHOD(ReflectionProperty, isDefault) {
   }
 }
 
-static int HHVM_METHOD(ReflectionProperty, getModifiers) {
+static int64_t HHVM_METHOD(ReflectionProperty, getModifiers) {
   auto const data = Native::data<ReflectionPropHandle>(this_);
   switch (data->getType()) {
     case ReflectionPropHandle::Type::Instance:

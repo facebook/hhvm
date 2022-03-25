@@ -125,8 +125,8 @@ static bool isServerReachable(const String& host, int port /*= 0*/) {
 ///////////////////////////////////////////////////////////////////////////////
 // methods
 
-static bool HHVM_METHOD(Memcache, connect, const String& host, int port /*= 0*/,
-                        int /*timeout*/ /*= 0*/, int /*timeoutms*/ /*= 0*/) {
+static bool HHVM_METHOD(Memcache, connect, const String& host, int64_t port /*= 0*/,
+                        int64_t /*timeout*/ /*= 0*/, int64_t /*timeoutms*/ /*= 0*/) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
 
@@ -192,7 +192,7 @@ static void memcache_set_type_from_flag(Variant& var, uint32_t flags) {
 
 static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
                                                       const Variant& var,
-                                                      int &flag) {
+                                                      int64_t &flag) {
   String v;
   if (var.isString()) {
     v = var.toString();
@@ -300,7 +300,7 @@ static Variant memcache_fetch_from_storage(const char *payload,
 }
 
 static bool HHVM_METHOD(Memcache, add, const String& key, const Variant& var,
-                                       int flag /*= 0*/, int expire /*= 0*/) {
+                                       int64_t flag /*= 0*/, int64_t expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -326,7 +326,7 @@ static bool HHVM_METHOD(Memcache, add, const String& key, const Variant& var,
 }
 
 static bool HHVM_METHOD(Memcache, set, const String& key, const Variant& var,
-                                       int flag /*= 0*/, int expire /*= 0*/) {
+                                       int64_t flag /*= 0*/, int64_t expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -356,8 +356,8 @@ static bool HHVM_METHOD(Memcache, set, const String& key, const Variant& var,
 }
 
 static bool HHVM_METHOD(Memcache, replace, const String& key,
-                                           const Variant& var, int flag /*= 0*/,
-                                           int expire /*= 0*/) {
+                                           const Variant& var, int64_t flag /*= 0*/,
+                                           int64_t expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -483,7 +483,7 @@ HHVM_METHOD(Memcache, get, const Variant& key) {
 }
 
 static bool HHVM_METHOD(Memcache, delete, const String& key,
-                                          int expire /*= 0*/) {
+                                          int64_t expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -504,7 +504,7 @@ static bool HHVM_METHOD(Memcache, delete, const String& key,
 }
 
 static Variant HHVM_METHOD(Memcache, increment, const String& key,
-                                                int offset /*= 1*/) {
+                                                int64_t offset /*= 1*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -531,7 +531,7 @@ static Variant HHVM_METHOD(Memcache, increment, const String& key,
 }
 
 static Variant HHVM_METHOD(Memcache, decrement, const String& key,
-                                                int offset /*= 1*/) {
+                                                int64_t offset /*= 1*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -593,12 +593,12 @@ static Variant HHVM_METHOD(Memcache, getversion) {
   return false;
 }
 
-static bool HHVM_METHOD(Memcache, flush, int expire /*= 0*/) {
+static bool HHVM_METHOD(Memcache, flush, int64_t expire /*= 0*/) {
   auto data = Native::data<MemcacheData>(this_);
   return memcached_flush(&data->m_memcache, expire) == MEMCACHED_SUCCESS;
 }
 
-static bool HHVM_METHOD(Memcache, setcompressthreshold, int threshold,
+static bool HHVM_METHOD(Memcache, setcompressthreshold, int64_t threshold,
                                         double min_savings /* = 0.2 */) {
   if (threshold < 0) {
     raise_warning("threshold must be a positive integer");
@@ -652,7 +652,7 @@ static Array memcache_build_stats(const memcached_st *ptr,
 
 static Array HHVM_METHOD(Memcache, getstats,
                          const String& type /* = null_string */,
-                         int slabid /* = 0 */, int limit /* = 100 */) {
+                         int64_t slabid /* = 0 */, int64_t limit /* = 100 */) {
   auto data = Native::data<MemcacheData>(this_);
   if (!memcached_server_count(&data->m_memcache)) {
     return Array();
@@ -661,7 +661,7 @@ static Array HHVM_METHOD(Memcache, getstats,
   char extra_args[30] = {0};
 
   if (slabid) {
-    snprintf(extra_args, sizeof(extra_args), "%s %d %d", type.c_str(),
+    snprintf(extra_args, sizeof(extra_args), "%s %ld %ld", type.c_str(),
              slabid, limit);
   } else if (!type.empty()) {
     snprintf(extra_args, sizeof(extra_args), "%s", type.c_str());
@@ -684,7 +684,7 @@ static Array HHVM_METHOD(Memcache, getstats,
 
 static Array HHVM_METHOD(Memcache, getextendedstats,
                          const String& /*type*/ /* = null_string */,
-                         int /*slabid*/ /* = 0 */, int /*limit*/ /* = 100 */) {
+                         int64_t /*slabid*/ /* = 0 */, int64_t /*limit*/ /* = 100 */) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
   memcached_stat_st *stats;
@@ -729,12 +729,12 @@ static Array HHVM_METHOD(Memcache, getextendedstats,
 }
 
 static bool
-HHVM_METHOD(Memcache, addserver, const String& host, int port /* = 11211 */,
-            bool /*persistent*/ /* = false */, int weight /* = 0 */,
-            int /*timeout*/ /* = 0 */, int /*retry_interval*/ /* = 0 */,
+HHVM_METHOD(Memcache, addserver, const String& host, int64_t port /* = 11211 */,
+            bool /*persistent*/ /* = false */, int64_t weight /* = 0 */,
+            int64_t /*timeout*/ /* = 0 */, int64_t /*retry_interval*/ /* = 0 */,
             bool /*status*/ /* = true */,
             const Variant& /*failure_callback*/ /* = uninit_variant */,
-            int /*timeoutms*/ /* = 0 */) {
+            int64_t /*timeoutms*/ /* = 0 */) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
 

@@ -52,8 +52,8 @@ const int64_t k_PHP_OUTPUT_HANDLER_STDFLAGS =
   k_PHP_OUTPUT_HANDLER_REMOVABLE;
 
 bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
-                             int chunk_size /* = 0 */,
-                             int flags /* = k_PHP_OUTPUT_HANDLER_STDFLAGS */) {
+                             int64_t chunk_size /* = 0 */,
+                             int64_t flags /* = k_PHP_OUTPUT_HANDLER_STDFLAGS */) {
   // Note: the only flag which is implemented is FLUSHABLE
 
   if (!callback.isNull()) {

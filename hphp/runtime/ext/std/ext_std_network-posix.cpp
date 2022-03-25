@@ -484,13 +484,13 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
   return cp;
 }
 
-Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type,
+Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
                       Variant& authnsRef,
                       Variant& addtlRef) {
   IOStatusHelper io("dns_get_record", hostname.data(), type);
   if (type < 0) type = PHP_DNS_ALL;
   if (type & ~PHP_DNS_ALL && type != PHP_DNS_ANY) {
-    raise_warning("Type '%d' not supported", type);
+    raise_warning("Type '%ld' not supported", type);
     return false;
   }
 

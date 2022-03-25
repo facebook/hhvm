@@ -13,4 +13,4 @@
  (modules full_fidelity_schema)
  (libraries parser_schema_def)
  (flags
-  (:standard -w @a-29-44-50)))
+  (:standard -w @a-29-44-50-70)))

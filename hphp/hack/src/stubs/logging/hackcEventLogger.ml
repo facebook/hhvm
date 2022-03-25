@@ -11,8 +11,8 @@ let init _ = ()
 
 let init_sync _ = ()
 
-let success ~filename ~parsing_t ~codegen_t ~printing_t ~mode = ()
+let success ~filename:_ ~parsing_t:_ ~codegen_t:_ ~printing_t:_ ~mode:_ = ()
 
-let fail ~filename ~mode ~exc = ()
+let fail ~filename:_ ~mode:_ ~exc:_ = ()
 
-let log_peak_mem ~filename vm_rss vm_hwm action = ()
+let log_peak_mem ~filename:_ _vm_rss _vm_hwm _action = ()

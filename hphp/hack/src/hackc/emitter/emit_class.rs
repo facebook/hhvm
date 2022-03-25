@@ -318,12 +318,13 @@ fn from_class_elt_requirements<'a, 'arena>(
     class_
         .reqs
         .iter()
-        .map(|(h, req_kind)| {
-            let kind = match *req_kind {
-                RequireKind::RequireExtends => TraitReqKind::MustExtend,
-                RequireKind::RequireImplements => TraitReqKind::MustImplement,
-            };
-            (emit_type_hint::hint_to_class(alloc, h), kind)
+        .filter_map(|(h, req_kind)| {
+            let class = emit_type_hint::hint_to_class(alloc, h);
+            match *req_kind {
+                RequireKind::RequireExtends => Some((class, TraitReqKind::MustExtend)),
+                RequireKind::RequireImplements => Some((class, TraitReqKind::MustImplement)),
+                RequireKind::RequireClass => None,
+            }
         })
         .collect()
 }

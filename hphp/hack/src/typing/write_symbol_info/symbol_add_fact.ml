@@ -63,7 +63,8 @@ let container_defn ctx source_text clss decl_id member_decls prog =
       ("typeParams", JSON_Array tparams);
     ]
   in
-  let (req_extends_hints, req_implements_hints) =
+  (* TODO T112092175: export require class requirements to Facts *)
+  let (req_extends_hints, req_implements_hints, _) =
     Aast.partition_map_require_kind ~f:(fun x -> x) clss.c_reqs
   in
   let (req_extends, prog) =

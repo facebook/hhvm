@@ -560,7 +560,7 @@ let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
     List.fold_left
       ~f:(from_requirements env c parents)
       ~init:acc
-      c.sc_req_extends
+      (c.sc_req_class @ c.sc_req_extends)
   in
   (* ... are overridden with those inherited from used traits *)
   let (acc, methods, smethods) =

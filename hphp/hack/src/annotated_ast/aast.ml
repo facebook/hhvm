@@ -802,6 +802,7 @@ and insteadof_alias = sid * pstring * sid list
 and require_kind =
   | RequireExtends
   | RequireImplements
+  | RequireClass
 
 and emit_id =
   (* For globally defined type, the ID used in the .main function. *)
@@ -1093,18 +1094,32 @@ let split_vars c_vars =
   in
   (List.rev statics, List.rev res)
 
-(* Splits `require`s into extends, implements *)
+(* Splits `require`s into extends, implements, class *)
 let split_reqs c_reqs =
-  let (extends, implements) =
+  let (extends, implements, class_) =
     List.fold_left
-      (fun (extends, implements) (h, require_kind) ->
+      (fun (extends, implements, class_) (h, require_kind) ->
         match require_kind with
-        | RequireExtends -> (h :: extends, implements)
-        | RequireImplements -> (extends, h :: implements))
-      ([], [])
+        | RequireExtends -> (h :: extends, implements, class_)
+        | RequireImplements -> (extends, h :: implements, class_)
+        | RequireClass -> (extends, implements, h :: class_))
+      ([], [], [])
       c_reqs
   in
-  (List.rev extends, List.rev implements)
+  (List.rev extends, List.rev implements, List.rev class_)
+
+let partition_map_require_kind ~f trait_reqs =
+  let rec partition req_extends req_implements req_class c_reqs =
+    match c_reqs with
+    | [] -> (List.rev req_extends, List.rev req_implements, List.rev req_class)
+    | ((_, RequireExtends) as req) :: tl ->
+      partition (f req :: req_extends) req_implements req_class tl
+    | ((_, RequireImplements) as req) :: tl ->
+      partition req_extends (f req :: req_implements) req_class tl
+    | ((_, RequireClass) as req) :: tl ->
+      partition req_extends req_implements (f req :: req_class) tl
+  in
+  partition [] [] [] trait_reqs
 
 type break_continue_level =
   | Level_ok of int option
@@ -1144,17 +1159,6 @@ let enum_includes_map ?(default = []) ~f includes =
   | Some includes -> f includes
 
 let is_enum_class c = Ast_defs.is_c_enum_class c.c_kind
-
-let partition_map_require_kind ~f trait_reqs =
-  let rec partition req_extends req_implements c_reqs =
-    match c_reqs with
-    | [] -> (List.rev req_extends, List.rev req_implements)
-    | ((_, RequireExtends) as req) :: tl ->
-      partition (f req :: req_extends) req_implements tl
-    | ((_, RequireImplements) as req) :: tl ->
-      partition req_extends (f req :: req_implements) tl
-  in
-  partition [] [] trait_reqs
 
 (* Combinators for folding / iterating over all of a switch statement *)
 module GenCase : sig

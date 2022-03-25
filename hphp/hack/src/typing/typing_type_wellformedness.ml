@@ -323,13 +323,22 @@ let class_ tenv c =
   } =
     c
   in
+
   (* Add type parameters to typing environment and localize the bounds *)
   let (tenv, ty_err_opt) =
+    let req_class_constraints =
+      List.filter_map c.c_reqs ~f:(fun req ->
+          match req with
+          | (t, RequireClass) ->
+            let pos = fst t in
+            Some ((pos, Hthis), Ast_defs.Constraint_eq, t)
+          | _ -> None)
+    in
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       tenv
       ~ignore_errors:true
       c_tparams
-      c_where_constraints
+      (req_class_constraints @ c_where_constraints)
   in
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   let env = { env with tenv } in

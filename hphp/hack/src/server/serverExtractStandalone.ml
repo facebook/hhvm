@@ -1918,6 +1918,7 @@ end = struct
       uses: Aast.trait_hint list;
       req_extends: Aast.class_hint list;
       req_implements: Aast.class_hint list;
+      req_class: Aast.class_hint list;
       elements: Class_elt.t list;
     }
 
@@ -1934,45 +1935,46 @@ end = struct
           @@ Class_elt.prop_name elt)
 
     let of_class Aast.{ c_uses; c_reqs; _ } class_elts =
-      let (req_extends, req_implements) =
+      let (req_extends, req_implements, req_class) =
         Aast.partition_map_require_kind ~f:fst c_reqs
       in
       let elements =
         filter_constructor_props
         @@ List.sort ~compare:Class_elt.compare class_elts
       in
-      { uses = c_uses; req_extends; req_implements; elements }
+      { uses = c_uses; req_extends; req_implements; req_class; elements }
 
     let pp_use_extend ppf = function
-      | ([], [], []) ->
+      | ([], [], [], []) ->
         (* In the presence of any traits or trait/interface requirements
            we add a cut after them to match the Hack style given in the docs
            (line breaks are not added by HackFmt). We need to check that
            we have no traits or requirements here else we end up with
            an unnecessary line break in this case *)
         ()
-      | (uses, req_extends, req_implements) ->
+      | (uses, req_extends, req_implements, req_class) ->
         let pp_elem pfx ppf hint =
           Fmt.(prefix pfx @@ suffix semicolon @@ pp_hint ~is_ctx:false) ppf hint
         in
         Fmt.(
           suffix cut
           @@ pair ~sep:nop (list @@ pp_elem @@ const string "use ")
-          @@ pair
+          @@ triple
                ~sep:nop
                (list @@ pp_elem @@ const string "require extends ")
-               (list @@ pp_elem @@ const string "require implements "))
+               (list @@ pp_elem @@ const string "require implements ")
+               (list @@ pp_elem @@ const string "require is"))
           ppf
-          (uses, (req_extends, req_implements))
+          (uses, (req_extends, req_implements, req_class))
 
     let pp_elts ppf = function
       | [] -> ()
       | elts -> Fmt.(list ~sep:cut @@ prefix cut Class_elt.pp) ppf elts
 
-    let pp ppf { uses; req_extends; req_implements; elements } =
+    let pp ppf { uses; req_extends; req_implements; req_class; elements } =
       Fmt.(pair ~sep:nop pp_use_extend pp_elts)
         ppf
-        ((uses, req_extends, req_implements), elements)
+        ((uses, req_extends, req_implements, req_class), elements)
   end
 
   type t =

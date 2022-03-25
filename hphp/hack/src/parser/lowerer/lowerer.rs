@@ -4789,11 +4789,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             let require_kind = match token_kind(&c.kind) {
                 Some(TK::Implements) => RequireImplements,
                 Some(TK::Extends) => RequireExtends,
-                Some(TK::Class) => missing_syntax(
-                    "extends/implements trait attribute.  The experimental feature `require class` is not supported yet",
-                    &c.kind,
-                    env,
-                )?,
+                Some(TK::Class) => RequireClass,
                 _ => missing_syntax("trait require kind", &c.kind, env)?,
             };
             Ok(class.reqs.push((hint, require_kind)))

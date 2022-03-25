@@ -10,3 +10,5 @@ trait T {
 class C {
   use T;
 }
+
+class D extends C {}

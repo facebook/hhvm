@@ -60,6 +60,7 @@ type source_type =
   | IncludedEnum
   | ReqImpl
   | ReqExtends
+  | ReqClass
 [@@deriving eq, show]
 
 (* Is this bit set in the flags? *)
@@ -107,6 +108,10 @@ let mro_copy_private_members = 1 lsl 5
     from an ancestor with this flag not set, should be inherited as a concrete
     type constant instead. *)
 let mro_passthrough_abstract_typeconst = 1 lsl 6
+
+(** True if this element is included in the linearization (directly or
+    indirectly) because of a require class relationship. *)
+let mro_via_req_class = 1 lsl 7
 
 type mro_element = {
   mro_name: string;  (** The class's name *)
@@ -198,6 +203,12 @@ type decl_class_type = {
   dc_support_dynamic_type: bool;
   dc_req_ancestors: requirement list;
   dc_req_ancestors_extends: SSet.t;
+  dc_req_class_ancestors: requirement list;
+      (** dc_req_class_ancestors gathers all the `require class`
+        * requirements declared in ancestors.  Remark that `require class`
+        * requirements are _not_ stored in `dc_req_ancestors` or
+        *`dc_req_ancestors_extends` fields.
+        *)
   dc_extends: SSet.t;
   dc_sealed_whitelist: SSet.t option;
   dc_xhp_attr_deps: SSet.t;

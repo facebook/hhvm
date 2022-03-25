@@ -145,6 +145,7 @@ type t =
   | Illegal_constant of Pos.t
   | Invalid_require_implements of Pos.t
   | Invalid_require_extends of Pos.t
+  | Invalid_require_class of Pos.t
   | Did_you_mean of {
       pos: Pos.t;
       name: string;

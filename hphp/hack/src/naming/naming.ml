@@ -832,7 +832,9 @@ let rec class_ ctx c =
   let methods = List.map ~f:(method_ env) methods in
   let uses = List.map ~f:(hint env) c.Aast.c_uses in
   let xhp_attr_uses = List.map ~f:(hint env) c.Aast.c_xhp_attr_uses in
-  let (c_req_extends, c_req_implements) = Aast.split_reqs c.Aast.c_reqs in
+  let (c_req_extends, c_req_implements, c_req_class) =
+    Aast.split_reqs c.Aast.c_reqs
+  in
   if
     (not (List.is_empty c_req_implements))
     && not (Ast_defs.is_c_trait c.Aast.c_kind)
@@ -840,6 +842,12 @@ let rec class_ ctx c =
     Errors.add_naming_error
     @@ Naming_error.Invalid_require_implements
          (fst (List.hd_exn c_req_implements));
+  if
+    (not (List.is_empty c_req_class)) && not (Ast_defs.is_c_trait c.Aast.c_kind)
+  then
+    Errors.add_naming_error
+    @@ Naming_error.Invalid_require_class (fst (List.hd_exn c_req_class));
+
   let e =
     TypecheckerOptions.explicit_consistent_constructors
       (Provider_context.get_tcopt ctx)
@@ -874,6 +882,8 @@ let rec class_ ctx c =
     @@ Naming_error.Invalid_require_extends (fst (List.hd_exn c_req_extends));
   let req_extends = List.map ~f:(hint env) c_req_extends in
   let req_extends = List.map ~f:(fun h -> (h, N.RequireExtends)) req_extends in
+  let req_class = List.map ~f:(hint env) c_req_class in
+  let req_class = List.map ~f:(fun h -> (h, N.RequireClass)) req_class in
   (* Setting a class type parameters constraint to the 'this' type is weird
    * so lets forbid it for now.
    *)
@@ -926,7 +936,7 @@ let rec class_ ctx c =
     N.c_insteadof_alias = [];
     N.c_xhp_attr_uses = xhp_attr_uses;
     N.c_xhp_category = c.Aast.c_xhp_category;
-    N.c_reqs = req_extends @ req_implements;
+    N.c_reqs = req_extends @ req_implements @ req_class;
     N.c_implements = implements;
     N.c_where_constraints = where_constraints;
     N.c_consts = consts;

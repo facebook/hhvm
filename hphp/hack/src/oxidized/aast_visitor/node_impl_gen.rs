@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1201a214173cd6863965e72b441db43e>>
+// @generated SignedSource<<cb0ba0ffe823474e4202428d30a4c0e7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1732,6 +1732,7 @@ impl<P: Params> Node<P> for RequireKind {
         match self {
             RequireKind::RequireExtends => Ok(()),
             RequireKind::RequireImplements => Ok(()),
+            RequireKind::RequireClass => Ok(()),
         }
     }
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9aef358df7d244baf9218bf0cdb69daf>>
+// @generated SignedSource<<ed878f0db873438ff7a17da865ea1f3d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -182,6 +182,12 @@ pub struct DeclClassType<'a> {
     pub req_ancestors: &'a [&'a Requirement<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub req_ancestors_extends: s_set::SSet<'a>,
+    /// dc_req_class_ancestors gathers all the `require class`
+    /// requirements declared in ancestors.  Remark that `require class`
+    /// requirements are _not_ stored in `dc_req_ancestors` or
+    /// `dc_req_ancestors_extends` fields.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub req_class_ancestors: &'a [&'a Requirement<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub extends: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

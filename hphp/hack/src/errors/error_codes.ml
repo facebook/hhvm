@@ -149,6 +149,7 @@ module Naming = struct
     (* | CallingAssert [@value 2116] *)
     | InvalidWildcardContext [@value 2117]
     | ExplicitConsistentConstructor [@value 2118]
+    | InvalidReqClass [@value 2119]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

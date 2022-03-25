@@ -1710,14 +1710,22 @@ let check_sealed env c =
   else
     sealed_subtype (Env.get_ctx env) c ~is_enum:false ~hard_error
 
-let check_class_where_constraints env c tc =
+let check_class_where_require_class_constraints env c tc =
   let (pc, _) = c.c_name in
+  let req_class_constraints =
+    List.filter_map c.c_reqs ~f:(fun req ->
+        match req with
+        | (t, RequireClass) ->
+          let pos = fst t in
+          Some ((pos, Hthis), Ast_defs.Constraint_eq, t)
+        | _ -> None)
+  in
   let (env, ty_err_opt1) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
       ~ignore_errors:false
       c.c_tparams
-      c.c_where_constraints
+      (c.c_where_constraints @ req_class_constraints)
   in
   Option.iter ty_err_opt1 ~f:Errors.add_typing_error;
   let (env, ty_err_opt2) =
@@ -1740,6 +1748,7 @@ type class_parents = {
   uses: (Aast.hint * decl_ty) list;
   req_extends: (Aast.hint * decl_ty) list;
   req_implements: (Aast.hint * decl_ty) list;
+  req_class: (Aast.hint * decl_ty) list;
   enum_includes: (Aast.hint * decl_ty) list option;
 }
 
@@ -1750,18 +1759,34 @@ let class_parents_hints_to_types env c : class_parents =
   let extends = hints_and_decl_tys c.c_extends in
   let implements = hints_and_decl_tys c.c_implements in
   let uses = hints_and_decl_tys c.c_uses in
-  let (req_extends, req_implements) = split_reqs c.c_reqs in
+  let (req_extends, req_implements, req_class) = split_reqs c.c_reqs in
   let req_extends = hints_and_decl_tys req_extends in
   let req_implements = hints_and_decl_tys req_implements in
+  let req_class = hints_and_decl_tys req_class in
   let enum_includes =
     Option.map c.c_enum ~f:(fun e -> hints_and_decl_tys e.e_includes)
   in
-  { extends; implements; uses; req_extends; req_implements; enum_includes }
+  {
+    extends;
+    implements;
+    uses;
+    req_extends;
+    req_implements;
+    req_class;
+    enum_includes;
+  }
 
 (** Add dependencies to parent constructors or produce errors if they're not a Tapply. *)
 let check_parents_are_tapply_add_constructor_deps env c parents =
-  let { extends; implements; uses; req_extends; req_implements; enum_includes }
-      =
+  let {
+    extends;
+    implements;
+    uses;
+    req_extends;
+    req_implements;
+    req_class;
+    enum_includes;
+  } =
     parents
   in
   let additional_parents =
@@ -1775,7 +1800,7 @@ let check_parents_are_tapply_add_constructor_deps env c parents =
   in
   check_is_tapply_add_constructor_dep env extends;
   check_is_tapply_add_constructor_dep env uses;
-  check_is_tapply_add_constructor_dep env req_extends;
+  check_is_tapply_add_constructor_dep env (req_class @ req_extends);
   check_is_tapply_add_constructor_dep env additional_parents;
   Option.iter enum_includes ~f:(check_is_tapply_add_constructor_dep env);
   ()
@@ -1797,7 +1822,7 @@ let check_class_attributes env c =
 
 (** Check type parameter definition, including variance, and add constraints to the environment. *)
 let check_class_type_parameters_add_constraints env c tc =
-  let env = check_class_where_constraints env c tc in
+  let env = check_class_where_require_class_constraints env c tc in
   Typing_variance.class_def env c;
   env
 
@@ -1867,6 +1892,7 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
       uses;
       req_extends;
       req_implements;
+      req_class = _;
       enum_includes = _;
     } =
       parents

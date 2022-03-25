@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d6fbb3363323b867ca7bd6b983cf06a7>>
+// @generated SignedSource<<8a4e87f55860aac00d466a14d8888c84>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -101,6 +101,7 @@ pub enum SourceType {
     IncludedEnum,
     ReqImpl,
     ReqExtends,
+    ReqClass,
 }
 impl TrivialDrop for SourceType {}
 arena_deserializer::impl_deserialize_in_arena!(SourceType);
@@ -205,6 +206,11 @@ pub struct DeclClassType {
     pub support_dynamic_type: bool,
     pub req_ancestors: Vec<Requirement>,
     pub req_ancestors_extends: s_set::SSet,
+    /// dc_req_class_ancestors gathers all the `require class`
+    /// requirements declared in ancestors.  Remark that `require class`
+    /// requirements are _not_ stored in `dc_req_ancestors` or
+    /// `dc_req_ancestors_extends` fields.
+    pub req_class_ancestors: Vec<Requirement>,
     pub extends: s_set::SSet,
     pub sealed_whitelist: Option<s_set::SSet>,
     pub xhp_attr_deps: s_set::SSet,

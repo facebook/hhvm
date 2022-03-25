@@ -860,7 +860,7 @@ and class_decl
   let (extends, xhp_attr_deps, decl_errors) =
     get_class_parents_and_traits env c parents decl_errors
   in
-  let (req_ancestors, req_ancestors_extends) =
+  let (req_ancestors, req_ancestors_extends, req_class_ancestors) =
     Decl_requirements.get_class_requirements env parents c
   in
   let enum = c.sc_enum_type in
@@ -930,6 +930,7 @@ and class_decl
       dc_xhp_enum_values = c.sc_xhp_enum_values;
       dc_req_ancestors = req_ancestors;
       dc_req_ancestors_extends = req_ancestors_extends;
+      dc_req_class_ancestors = req_class_ancestors;
       dc_enum_type = enum;
       dc_decl_errors = decl_errors;
     }

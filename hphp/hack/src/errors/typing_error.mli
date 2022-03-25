@@ -449,6 +449,12 @@ module Primary : sig
         req_pos: Pos_or_decl.t;
         req_name: string;
       }
+    | Unsatisfied_req_class of {
+        pos: Pos.t;
+        trait_pos: Pos_or_decl.t;
+        req_pos: Pos_or_decl.t;
+        req_name: string;
+      }
     | Invalid_echo_argument of Pos.t
     | Index_type_mismatch of {
         pos: Pos.t;

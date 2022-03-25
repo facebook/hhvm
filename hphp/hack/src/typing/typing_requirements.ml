@@ -40,15 +40,36 @@ let check_fulfillment env class_pos get_impl (trait_pos, req_ty) =
       Option.iter ~f:Errors.add_typing_error ty_err_opt;
       env)
 
+let check_require_class env class_pos class_name (trait_pos, req_ty) =
+  match TUtils.try_unwrap_class_type req_ty with
+  | None -> env
+  | Some (_r, (_p, req_name), _paraml) ->
+    if String.equal req_name class_name then
+      env
+    else
+      let req_pos = Typing_defs.get_pos req_ty in
+      (Errors.add_typing_error
+      @@ Typing_error.(
+           primary
+           @@ Primary.Unsatisfied_req_class
+                { pos = class_pos; trait_pos; req_pos; req_name }));
+      env
+
 (** Check whether a class satifies all the requirements of the traits it uses,
     namely [require extends] and [require implements]. *)
 let check_class env class_pos tc =
   match Cls.kind tc with
   | Ast_defs.Cclass _ ->
+    let env =
+      List.fold
+        (Cls.all_ancestor_reqs tc)
+        ~f:(fun env req ->
+          check_fulfillment env class_pos (Cls.get_ancestor tc) req)
+        ~init:env
+    in
     List.fold
-      (Cls.all_ancestor_reqs tc)
-      ~f:(fun env req ->
-        check_fulfillment env class_pos (Cls.get_ancestor tc) req)
+      (Cls.all_ancestor_req_class_requirements tc)
+      ~f:(fun env req -> check_require_class env class_pos (Cls.name tc) req)
       ~init:env
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface

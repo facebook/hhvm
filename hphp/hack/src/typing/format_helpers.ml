@@ -30,6 +30,13 @@ let pair ?sep:(pp_sep = sp) pp_a pp_b ppf (a, b) =
   pp_sep ppf ();
   pp_b ppf b
 
+let triple ?sep:(pp_sep = sp) pp_a pp_b pp_c ppf (a, b, c) =
+  pp_a ppf a;
+  pp_sep ppf ();
+  pp_b ppf b;
+  pp_sep ppf ();
+  pp_c ppf c
+
 let prefix pp_pfx pp_v ppf v =
   pp_pfx ppf ();
   pp_v ppf v

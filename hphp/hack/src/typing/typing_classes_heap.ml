@@ -21,7 +21,8 @@ type lazy_class_type = {
   ih: inherited_members;
   ancestors: decl_ty LSTable.t;  (** Types of parents, interfaces, and traits *)
   req_ancestor_names: unit LSTable.t;
-  all_requirements: (Pos_or_decl.t * decl_ty) Sequence.t;
+  all_req_extends_implements_requirements: (Pos_or_decl.t * decl_ty) Sequence.t;
+  all_req_class_requirements: (Pos_or_decl.t * decl_ty) Sequence.t;
 }
 
 type eager_members = {
@@ -84,8 +85,12 @@ let make_lazy_class_type ctx class_name =
                (Decl_ancestors.req_ancestor_names ~lin_members:lin_members_seq)
                ~is_canonical
                ~merge;
-           all_requirements =
-             Decl_ancestors.all_requirements ~lin_members:lin_members_seq;
+           all_req_extends_implements_requirements =
+             Decl_ancestors.all_req_extends_implements_requirements
+               ~lin_members:lin_members_seq;
+           all_req_class_requirements =
+             Decl_ancestors.all_req_class_requirements
+               ~lin_members:lin_members_seq;
          })
     in
     Some (Lazy (sc, remainder))
@@ -527,8 +532,18 @@ module ApiEager = struct
     Decl_counters.count_subdecl decl Decl_counters.All_ancestor_reqs
     @@ fun () ->
     match t with
-    | Lazy (_sc, lc) -> (Lazy.force lc).all_requirements |> Sequence.to_list
+    | Lazy (_sc, lc) ->
+      (Lazy.force lc).all_req_extends_implements_requirements
+      |> Sequence.to_list
     | Eager (c, _) -> c.Decl_defs.dc_req_ancestors
+
+  let all_ancestor_req_class_requirements (decl, t, _ctx) =
+    Decl_counters.count_subdecl decl Decl_counters.All_ancestor_reqs
+    @@ fun () ->
+    match t with
+    | Lazy (_sc, lc) ->
+      (Lazy.force lc).all_req_class_requirements |> Sequence.to_list
+    | Eager (c, _) -> c.Decl_defs.dc_req_class_ancestors
 
   let upper_bounds_on_this t =
     (* tally is already done by all_ancestors and upper_bounds *)

@@ -109,9 +109,18 @@ module Api : sig
 
   val all_ancestor_names : t -> string list
 
+  (** All the require extends and require implements requirements
+    * These requirements impose a strict subtype constraint
+    *)
   val all_ancestor_reqs : t -> requirement list
 
   val all_ancestor_req_names : t -> string list
+
+  (** All the require class requirements
+    * These requirements impose an equality constraint and are not
+    * included in all_ancestor_reqs or all_ancestor_req_names
+    *)
+  val all_ancestor_req_class_requirements : t -> requirement list
 
   val get_const : t -> string -> class_const option
 

@@ -260,6 +260,7 @@ struct
       dc_xhp_enum_values = dc.dc_xhp_enum_values;
       dc_req_ancestors = List.map dc.dc_req_ancestors ~f:requirement;
       dc_req_ancestors_extends = dc.dc_req_ancestors_extends;
+      dc_req_class_ancestors = List.map dc.dc_req_class_ancestors ~f:requirement;
       dc_tparams = List.map dc.dc_tparams ~f:type_param;
       dc_where_constraints =
         List.map dc.dc_where_constraints ~f:where_constraint;

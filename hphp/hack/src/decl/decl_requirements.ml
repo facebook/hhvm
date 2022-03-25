@@ -96,6 +96,36 @@ let declared_class_req env class_cache (requirements, req_extends) req_ty =
     in
     (requirements, req_extends)
 
+let declared_class_req_classes required_classes req_ty =
+  let (_, (req_pos, _), _) = Decl_utils.unwrap_class_type req_ty in
+  (req_pos, req_ty) :: required_classes
+
+let flatten_parent_class_class_reqs
+    env class_cache req_classes_ancestors parent_ty =
+  let (_, (parent_pos, parent_name), parent_params) =
+    Decl_utils.unwrap_class_type parent_ty
+  in
+  let parent_type =
+    Decl_env.get_class_and_add_dep
+      ~cache:class_cache
+      ~shmem_fallback:false
+      ~fallback:Decl_env.no_fallback
+      env
+      parent_name
+  in
+  match parent_type with
+  | None ->
+    (* The class lives in PHP *)
+    req_classes_ancestors
+  | Some parent_type ->
+    let subst = make_substitution parent_type parent_params in
+    List.rev_map_append
+      parent_type.dc_req_class_ancestors
+      req_classes_ancestors
+      ~f:(fun (_p, ty) ->
+        let ty = Inst.instantiate subst ty in
+        (parent_pos, ty))
+
 (* Cheap hack: we cannot do unification / subtyping in the decl phase because
  * the type arguments of the types that we are trying to unify may not have
  * been declared yet. See the test iface_require_circular.php for details.
@@ -162,4 +192,19 @@ let get_class_requirements env class_cache shallow_class =
   in
   let (req_extends, req_ancestors_extends) = acc in
   let req_extends = naive_dedup req_extends in
-  (req_extends, req_ancestors_extends)
+
+  let req_classes =
+    List.fold_left
+      ~f:declared_class_req_classes
+      ~init:[]
+      shallow_class.sc_req_class
+  in
+  let req_classes =
+    List.fold_left
+      ~f:(flatten_parent_class_class_reqs env class_cache)
+      ~init:req_classes
+      shallow_class.sc_uses
+  in
+  let req_classes = naive_dedup req_classes in
+
+  (req_extends, req_ancestors_extends, req_classes)

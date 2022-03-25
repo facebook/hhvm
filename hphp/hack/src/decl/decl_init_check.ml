@@ -56,7 +56,7 @@ let parent ~(get_class_add_dep : get_class_add_dep) decl_env c acc =
   if FileInfo.is_hhi c.c_mode then
     acc
   else if Ast_defs.is_c_trait c.c_kind then
-    let (req_extends, _req_implements) = split_reqs c.c_reqs in
+    let (req_extends, _req_implements, _req_class) = split_reqs c.c_reqs in
     List.fold_left
       req_extends
       ~init:acc

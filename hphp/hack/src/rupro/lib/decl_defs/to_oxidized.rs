@@ -419,6 +419,9 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             deferred_init_members: self.deferred_init_members.to_oxidized(arena),
             req_ancestors: self.req_ancestors.to_oxidized(arena),
             req_ancestors_extends: self.req_ancestors_extends.to_oxidized(arena),
+            req_class_ancestors: &[],
+            /* TODO: req_class_ancestors field has been added to support the experimental
+             * require class trait requirements.  These requirements are not exported to rupro. */
             extends: self.extends.to_oxidized(arena),
             sealed_whitelist: self.sealed_whitelist.to_oxidized(arena),
             xhp_attr_deps: self.xhp_attr_deps.to_oxidized(arena),

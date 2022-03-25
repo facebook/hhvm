@@ -15,6 +15,15 @@ val all_ancestors :
 val req_ancestor_names :
   lin_members:Decl_defs.linearization -> (string * unit) Sequence.t
 
-val all_requirements :
+(** All the requirements appearing in `require extends` and `require implements`
+  * trait constraints. Does not include `require class` constraints.
+  *)
+val all_req_extends_implements_requirements :
+  lin_members:Decl_defs.linearization ->
+  (Pos_or_decl.t * Typing_defs.decl_ty) Sequence.t
+
+(** All the classes appearing in `require class` constraints along `use` chains.
+  *)
+val all_req_class_requirements :
   lin_members:Decl_defs.linearization ->
   (Pos_or_decl.t * Typing_defs.decl_ty) Sequence.t

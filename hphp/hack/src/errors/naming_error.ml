@@ -149,6 +149,7 @@ type t =
   | Illegal_constant of Pos.t
   | Invalid_require_implements of Pos.t
   | Invalid_require_extends of Pos.t
+  | Invalid_require_class of Pos.t
   | Did_you_mean of {
       pos: Pos.t;
       name: string;
@@ -275,6 +276,12 @@ let invalid_req_extends pos =
   User_error.make
     Error_code.(to_enum InvalidReqExtends)
     (pos, "Only traits and interfaces may use `require extends`")
+    []
+
+let invalid_req_class pos =
+  User_error.make
+    Error_code.(to_enum InvalidReqClass)
+    (pos, "Only traits may use `require class`")
     []
 
 let did_you_mean_naming pos name suggest_pos suggest_name =
@@ -1126,6 +1133,7 @@ let to_user_error = function
     prop_without_typehint pos prop_name vis
   | Invalid_require_implements pos -> invalid_req_implements pos
   | Invalid_require_extends pos -> invalid_req_extends pos
+  | Invalid_require_class pos -> invalid_req_class pos
   | Invalid_wildcard_context pos -> invalid_wildcard_context pos
   | Did_you_mean { name; suggest_pos; suggest_name; pos } ->
     did_you_mean_naming pos name suggest_pos suggest_name

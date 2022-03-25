@@ -140,7 +140,8 @@ let empty_mro_element =
 let is_requirement (source : source_type) =
   match source with
   | ReqImpl
-  | ReqExtends ->
+  | ReqExtends
+  | ReqClass ->
     true
   | Child
   | Parent
@@ -160,6 +161,7 @@ let is_interface (source : source_type) =
   | Trait
   | XHPAttr
   | ReqExtends
+  | ReqClass
   | IncludedEnum ->
     false
 
@@ -167,12 +169,13 @@ let is_includedEnum (source : source_type) =
   match source with
   | IncludedEnum -> true
   | Interface
-  | ReqImpl
   | Child
   | Parent
   | Trait
   | XHPAttr
-  | ReqExtends ->
+  | ReqExtends
+  | ReqImpl
+  | ReqClass ->
     false
 
 let ancestor_from_ty (source : source_type) (ty : decl_ty) : ancestor =
@@ -199,6 +202,7 @@ let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
   let xhp_attr_uses c = get_ancestors XHPAttr c.sc_xhp_attr_uses in
   let traits c = get_ancestors Trait c.sc_uses in
   let req_extends c = get_ancestors ReqExtends c.sc_req_extends in
+  let req_class c = get_ancestors ReqClass c.sc_req_class in
   let parents c = get_ancestors Parent (from_parent c) in
   let extends c = get_ancestors Parent c.sc_extends in
   let includes c =
@@ -237,6 +241,7 @@ let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
         List.rev (xhp_attr_uses c);
         List.rev (traits c);
         List.rev (req_extends c);
+        List.rev (req_class c);
         parents c;
       ]
   | Ancestor_types ->
@@ -247,6 +252,9 @@ let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
          and require-implements relationships need to be included only to
          support StringishObject (and can be removed here if we remove support for the
          magic StringishObject type, or require it to be explicitly implemented). *)
+    (* Require-class relationships are omitted from ancestor_types because an explicit
+       `this = C` constraint is added when typechecking a trait with a require-class
+       constraint: it is thus not necessary to explicitly update the subtype relation *)
     List.concat
       [
         extends c;
@@ -264,7 +272,26 @@ let rec ancestor_linearization
     ancestor
   in
   Decl_env.add_extends_dependency env.decl_env class_name;
-  let lin = get_linearization env class_name in
+  let lin =
+    (* If we followed a require class constraint, there is no need to add the parents
+        of class_name to the linearisation order, because because an explicit
+       `this = C` constraint is added when typechecking the trait body.  By not adding them,
+        we ensure that the cyclic class check is not mistakenly triggered when a class C uses
+        a trait T that requires class C. *)
+    if equal_source_type source ReqClass then
+      [
+        {
+          empty_mro_element with
+          mro_name = class_name;
+          mro_use_pos = use_pos;
+          mro_ty_pos = ty_pos;
+          mro_flags =
+            empty_mro_element.mro_flags |> set_bit mro_via_req_class true;
+        };
+      ]
+    else
+      get_linearization env class_name
+  in
   let lin =
     List.map lin ~f:(fun c ->
         let via_req_extends =
@@ -292,6 +319,10 @@ let rec ancestor_linearization
           is_set mro_passthrough_abstract_typeconst c.mro_flags
           && not child_class_concrete
         in
+        let via_req_class =
+          is_set mro_via_req_class c.mro_flags
+          || equal_source_type source ReqClass
+        in
         let mro_flags =
           c.mro_flags
           |> set_bit mro_via_req_extends via_req_extends
@@ -302,6 +333,7 @@ let rec ancestor_linearization
           |> set_bit
                mro_passthrough_abstract_typeconst
                passthrough_abstract_typeconst
+          |> set_bit mro_via_req_class via_req_class
         in
         {
           c with

@@ -7471,8 +7471,15 @@ and class_get_inner
         }
       in
       let get_smember_from_constraints env class_info =
-        let upper_bounds =
+        let upper_bounds_from_where_constraints =
           Cls.upper_bounds_on_this_from_constraints class_info
+        in
+        let upper_bounds_from_require_class_constraints =
+          List.map (Cls.all_ancestor_req_class_requirements class_info) ~f:snd
+        in
+        let upper_bounds =
+          upper_bounds_from_where_constraints
+          @ upper_bounds_from_require_class_constraints
         in
         let ((env, ty_err_opt), upper_bounds) =
           List.map_env_ty_err_opt
@@ -7567,7 +7574,11 @@ and class_get_inner
           Env.get_static_member is_method env class_ mid
         in
         (match static_member_opt with
-        | None when Cls.has_upper_bounds_on_this_from_constraints class_ ->
+        | None
+          when Cls.has_upper_bounds_on_this_from_constraints class_
+               || not
+                    (List.is_empty
+                       (Cls.all_ancestor_req_class_requirements class_)) ->
           try_get_smember_from_constraints env class_
         | None ->
           Errors.add_typing_error

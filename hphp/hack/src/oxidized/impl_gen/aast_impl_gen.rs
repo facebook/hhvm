@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ba03be6dc4c94cd4fe701cc1aedd981a>>
+// @generated SignedSource<<37563f32b317103d84f046d9d5cef8f8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2670,6 +2670,9 @@ impl RequireKind {
     pub fn mk_require_implements() -> Self {
         RequireKind::RequireImplements
     }
+    pub fn mk_require_class() -> Self {
+        RequireKind::RequireClass
+    }
     pub fn is_require_extends(&self) -> bool {
         match self {
             RequireKind::RequireExtends => true,
@@ -2679,6 +2682,12 @@ impl RequireKind {
     pub fn is_require_implements(&self) -> bool {
         match self {
             RequireKind::RequireImplements => true,
+            _ => false,
+        }
+    }
+    pub fn is_require_class(&self) -> bool {
+        match self {
+            RequireKind::RequireClass => true,
             _ => false,
         }
     }

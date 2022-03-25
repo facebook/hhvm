@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fc1bd2fbacf0737fae86709fecb4073c>>
+// @generated SignedSource<<d016518b21d492e7a17cc28d71cd4d2e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1306,6 +1306,7 @@ pub struct InsteadofAlias(pub Sid, pub Pstring, pub Vec<Sid>);
 pub enum RequireKind {
     RequireExtends,
     RequireImplements,
+    RequireClass,
 }
 impl TrivialDrop for RequireKind {}
 arena_deserializer::impl_deserialize_in_arena!(RequireKind);

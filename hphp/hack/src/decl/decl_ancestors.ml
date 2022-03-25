@@ -27,10 +27,21 @@ let req_ancestor_names ~lin_members =
          || is_set mro_via_req_impl mro.mro_flags)
   |> Sequence.map ~f:(fun mro -> (mro.mro_name, ()))
 
-let all_requirements ~lin_members =
+let all_req_extends_implements_requirements ~lin_members =
   lin_members
   |> Sequence.filter ~f:(fun mro ->
          not (is_set mro_xhp_attrs_only mro.mro_flags))
+  |> Sequence.filter ~f:(fun mro ->
+         not (is_set mro_via_req_class mro.mro_flags))
+  |> Sequence.filter_map ~f:(fun mro ->
+         Option.map mro.mro_required_at ~f:(fun pos ->
+             (pos, type_of_mro_element mro)))
+
+let all_req_class_requirements ~lin_members =
+  lin_members
+  |> Sequence.filter ~f:(fun mro ->
+         not (is_set mro_xhp_attrs_only mro.mro_flags))
+  |> Sequence.filter ~f:(fun mro -> is_set mro_via_req_class mro.mro_flags)
   |> Sequence.filter_map ~f:(fun mro ->
          Option.map mro.mro_required_at ~f:(fun pos ->
              (pos, type_of_mro_element mro)))

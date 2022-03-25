@@ -12,7 +12,7 @@ open Base
 module Env = Tast_env
 module Cls = Decl_provider.Class
 
-let check_is_class env (p, h) =
+let check_is_class env ~require_class_check (p, h) =
   match h with
   | Aast.Happly ((_, name), _) ->
     begin
@@ -22,7 +22,7 @@ let check_is_class env (p, h) =
         let kind = Cls.kind cls in
         let name = Cls.name cls in
         if Ast_defs.is_c_class kind then (
-          if Cls.final cls then
+          if Cls.final cls && not require_class_check then
             Errors.add_nast_check_error
             @@ Nast_check_error.Requires_final_class { pos = p; name }
         ) else
@@ -110,10 +110,11 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_class_ env c =
-      let (req_extends, req_implements) = split_reqs c.c_reqs in
+      let (req_extends, req_implements, req_class) = split_reqs c.c_reqs in
       List.iter c.c_uses ~f:(check_is_trait env);
       duplicated_used_traits c;
-      List.iter req_extends ~f:(check_is_class env);
+      List.iter req_extends ~f:(check_is_class ~require_class_check:false env);
       List.iter c.c_implements ~f:(check_is_interface (env, `implement));
-      List.iter req_implements ~f:(check_is_interface (env, `req_implement))
+      List.iter req_implements ~f:(check_is_interface (env, `req_implement));
+      List.iter req_class ~f:(check_is_class ~require_class_check:true env)
   end

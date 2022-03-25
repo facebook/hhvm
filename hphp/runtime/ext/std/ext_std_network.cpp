@@ -247,7 +247,7 @@ String HHVM_FUNCTION(long2ip, const String& proper_address) {
 // http
 
 void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
-                   int http_response_code /* = 0 */) {
+                   int64_t http_response_code /* = 0 */) {
   if (HHVM_FN(headers_sent)()) {
     raise_warning("Cannot modify header information - headers already sent");
   }
@@ -315,7 +315,7 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
 
 static RDS_LOCAL(int, s_response_code);
 
-Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
+Variant HHVM_FUNCTION(http_response_code, int64_t response_code /* = 0 */) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     *s_response_code = transport->getResponseCode();
@@ -441,7 +441,7 @@ bool HHVM_FUNCTION(setrawcookie, const String& name,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(openlog, const String& ident, int option, int facility) {
+bool HHVM_FUNCTION(openlog, const String& ident, int64_t option, int64_t facility) {
   openlog(ident.data(), option, facility);
   return true;
 }
@@ -451,7 +451,7 @@ bool HHVM_FUNCTION(closelog) {
   return true;
 }
 
-bool HHVM_FUNCTION(syslog, int priority, const String& message) {
+bool HHVM_FUNCTION(syslog, int64_t priority, const String& message) {
   syslog(priority, "%s", message.data());
   return true;
 }

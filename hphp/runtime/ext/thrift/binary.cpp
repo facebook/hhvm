@@ -669,7 +669,7 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
                    const String& method_name,
                    int64_t msgtype,
                    const Object& request_struct,
-                   int seqid,
+                   int64_t seqid,
                    bool strict_write,
                    bool oneway) {
   CoeffectsAutoGuard _;
@@ -705,7 +705,7 @@ Object HHVM_FUNCTION(thrift_protocol_read_binary,
                      const Object& transportobj,
                      const String& obj_typename,
                      bool strict_read,
-                     int options) {
+                     int64_t options) {
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
@@ -756,7 +756,7 @@ Object HHVM_FUNCTION(thrift_protocol_read_binary,
 Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
                       const Object& transportobj,
                       const String& obj_typename,
-                      int options) {
+                      int64_t options) {
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
   SuppressClassConversionWarning suppressor;

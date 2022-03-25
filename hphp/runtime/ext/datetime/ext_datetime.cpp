@@ -806,8 +806,8 @@ bool HHVM_FUNCTION(date_default_timezone_set,
 
 Variant HHVM_FUNCTION(timezone_name_from_abbr,
                       const String& abbr,
-                      int gmtoffset /* = -1 */,
-                      int isdst /* = 1 */) {
+                      int64_t gmtoffset /* = -1 */,
+                      int64_t isdst /* = 1 */) {
   String ret = TimeZone::AbbreviationToName(abbr, gmtoffset, isdst);
   if (ret.isNull()) {
     return false;
@@ -823,9 +823,9 @@ String HHVM_FUNCTION(timezone_version_get) {
 // datetime
 
 bool HHVM_FUNCTION(checkdate,
-                   int month,
-                   int day,
-                   int year) {
+                   int64_t month,
+                   int64_t day,
+                   int64_t year) {
   return DateTime::IsValid(year, month, day);
 }
 

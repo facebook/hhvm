@@ -731,7 +731,7 @@ bool HHVM_FUNCTION(HH_watchman_check_sub, const String& _name) {
 // (PHP entry-point)
 Object HHVM_FUNCTION(HH_watchman_sync_sub,
   const String& _name,
-  int timeout_ms)
+  int64_t timeout_ms)
 {
   std::lock_guard<std::mutex> g(s_sharedDataMutex);
 

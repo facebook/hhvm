@@ -125,7 +125,9 @@ let check_like_num p_exp p env ty =
   | None -> (env1, None, false, ty)
   | Some _ ->
     let (env2, fresh_ty) = Env.fresh_type env p in
-    let like_ty = MakeType.locl_like (get_reason fresh_ty) fresh_ty in
+    let (env2, like_ty) =
+      Typing_union.union env2 fresh_ty (MakeType.dynamic (get_reason fresh_ty))
+    in
     let (env2, _impossible_error) =
       Typing_subtype.sub_type env2 fresh_ty et_type
       @@ Some
@@ -200,11 +202,11 @@ let hole_on_err ((_, pos, _) as expr) err_opt =
 
 let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   let make_result ?(is_like = false) env te1 err_opt1 te2 err_opt2 ty =
-    let ty =
+    let (env, ty) =
       if is_like then
-        MakeType.locl_like (Reason.Rwitness p) ty
+        Typing_union.union env ty (MakeType.dynamic (Reason.Rwitness p))
       else
-        ty
+        (env, ty)
     in
     let hte1 = hole_on_err te1 err_opt1 and hte2 = hole_on_err te2 err_opt2 in
     (env, Tast.make_typed_expr p ty (Aast.Binop (bop, hte1, hte2)), ty)
@@ -276,15 +278,14 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         else
           let is_int1 = Typing_subtype.is_sub_type env ty1 int_no_reason in
           let is_int2 = Typing_subtype.is_sub_type env ty2 int_no_reason in
-          (* If both of the arguments is definitely int, then the return is int *)
+          (* If both of the arguments is definitely subtypes of int,
+             then the return is int *)
           if is_int1 && is_int2 then
             (env, make_int_type ())
           else
             let is_num1 = Typing_subtype.is_sub_type env num_no_reason ty1 in
             let is_num2 = Typing_subtype.is_sub_type env num_no_reason ty2 in
-            (* If one argument is definitely num, then the return is num, since
-               neither type could narrow to float (and it's always sound to return
-               num). *)
+            (* If one argument is exactly num, then the return is num. *)
             if is_num1 || is_num2 then
               (env, make_num_type ~use_ty1_reason:is_num1)
             else
@@ -307,13 +308,13 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
                   ty1
               in
               Option.iter ty_err_opt ~f:Errors.add_typing_error;
-              (* If the first type solved to int (or nothing), and the second was
+              (* If the first type solved a subtype of int, and the second was
                  already int, then it is sound to return int. *)
               let is_int1 = Typing_subtype.is_sub_type env ty1 int_no_reason in
               if is_int1 && is_int2 then
                 (env, make_int_type ())
               else
-                (* If the first type solved to num, then we can just return that *)
+                (* If the first type solved to exactly num, then we can just return that *)
                 let is_num1 =
                   Typing_subtype.is_sub_type env num_no_reason ty1
                 in
@@ -728,11 +729,14 @@ let unop p env uop te ty =
         else
           MakeType.num (Reason.Rarith_ret_num (p, get_reason ty, Reason.Aonly))
       in
-      let result_ty =
+      let (env, result_ty) =
         if is_like then
-          MakeType.locl_like (get_reason result_ty) result_ty
+          Typing_union.union
+            env
+            result_ty
+            (MakeType.dynamic (get_reason result_ty))
         else
-          result_ty
+          (env, result_ty)
       in
       make_result env te ty_mismatch result_ty
   | Ast_defs.Usilence ->

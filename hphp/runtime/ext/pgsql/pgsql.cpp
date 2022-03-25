@@ -608,7 +608,7 @@ std::vector<PGSQLConnectionPool*>& PGSQLConnectionPoolContainer::GetPools() {
 //////////////////// Connection functions /////////////////////////
 
 static Variant HHVM_FUNCTION(pg_connect,
-  const String& connection_string, int connect_type /* = 0 */
+  const String& connection_string, int64_t connect_type /* = 0 */
 ) {
   auto pgsql = req::make<PGSQL>(connection_string);
 
@@ -620,7 +620,7 @@ static Variant HHVM_FUNCTION(pg_connect,
 
 
 static Variant HHVM_FUNCTION(pg_pconnect,
-  const String& connection_string, int connect_type /* = 0 */
+  const String& connection_string, int64_t connect_type /* = 0 */
 ) {
   PGSQLConnectionPool& pool =
     s_connectionPoolContainer.GetPool(connection_string.toCppString());
@@ -821,7 +821,7 @@ static Variant HHVM_FUNCTION(pg_client_encoding, const Resource& connection) {
   return ret;
 }
 
-static int HHVM_FUNCTION(pg_set_client_encoding,
+static int64_t HHVM_FUNCTION(pg_set_client_encoding,
   const Resource& connection, const String& enc) {
   auto pgsql = PGSQL::Get(connection);
 

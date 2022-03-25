@@ -79,12 +79,12 @@ bool HHVM_FUNCTION(bzclose, const Resource& bz) {
   return HHVM_FN(fclose)(bz);
 }
 
-Variant HHVM_FUNCTION(bzread, const Resource& bz, int length /* = 1024 */) {
+Variant HHVM_FUNCTION(bzread, const Resource& bz, int64_t length /* = 1024 */) {
   return HHVM_FN(fread)(bz, length);
 }
 
 Variant HHVM_FUNCTION(bzwrite, const Resource& bz, const String& data,
-                               int length /* = 0 */) {
+                               int64_t length /* = 0 */) {
   return HHVM_FN(fwrite)(bz, data, length);
 }
 
@@ -176,8 +176,8 @@ Variant HHVM_FUNCTION(bzerrno, const Resource& bz) {
   return f->errnu();
 }
 
-Variant HHVM_FUNCTION(bzcompress, const String& source, int blocksize /* = 4 */,
-                                  int workfactor /* = 0 */) {
+Variant HHVM_FUNCTION(bzcompress, const String& source, int64_t blocksize /* = 4 */,
+                                  int64_t workfactor /* = 0 */) {
   unsigned int source_len, dest_len;
 
   source_len = source.length();
@@ -197,7 +197,7 @@ Variant HHVM_FUNCTION(bzcompress, const String& source, int blocksize /* = 4 */,
   }
 }
 
-Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
+Variant HHVM_FUNCTION(bzdecompress, const String& source, int64_t small /* = 0 */) {
   int source_len = source.length();
   int error;
   uint64_t size = 0;

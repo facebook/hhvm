@@ -88,7 +88,7 @@ const StaticString
   s_libz_version("libz_version"),
   s_protocols("protocols");
 
-Variant HHVM_FUNCTION(curl_version, int uversion /* = CURLVERSION_NOW */) {
+Variant HHVM_FUNCTION(curl_version, int64_t uversion /* = CURLVERSION_NOW */) {
   curl_version_info_data *d = curl_version_info((CURLversion)uversion);
   if (d == nullptr) {
     return false;
@@ -114,7 +114,7 @@ Variant HHVM_FUNCTION(curl_version, int uversion /* = CURLVERSION_NOW */) {
   return ret.toVariant();
 }
 
-bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, const Variant& value) {
+bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int64_t option, const Variant& value) {
   CHECK_RESOURCE(curl);
   return curl->setOption(option, value);
 }
@@ -195,7 +195,7 @@ const StaticString
   s_certinfo("certinfo"),
   s_request_header("request_header");
 
-Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
+Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int64_t opt /* = 0 */) {
   CHECK_RESOURCE(curl);
   CURL *cp = curl->get();
 
@@ -391,7 +391,7 @@ Variant HHVM_FUNCTION(curl_error, const Resource& ch) {
   return curl->getErrorString();
 }
 
-String HHVM_FUNCTION(curl_strerror, int code) {
+String HHVM_FUNCTION(curl_strerror, int64_t code) {
   return curl_easy_strerror((CURLcode)code);
 }
 
@@ -484,7 +484,7 @@ Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh,
 }
 
 bool HHVM_FUNCTION(curl_multi_setopt, const Resource& mh,
-                   int option, const Variant& value) {
+                   int64_t option, const Variant& value) {
   CHECK_MULTI_RESOURCE_THROW(curlm);
   return curlm->setOption(option, value);
 }
@@ -647,7 +647,7 @@ void HHVM_FUNCTION(curl_share_close, const Resource& sh) {
 }
 
 bool HHVM_FUNCTION(curl_share_setopt, const Resource& sh,
-                   int option, const Variant& value) {
+                   int64_t option, const Variant& value) {
   auto curlsh = dyn_cast_or_null<CurlShareResource>(sh);
   if (!curlsh || curlsh->isInvalid())
     SystemLib::throwExceptionObject(CURL_SHARE_Warning);

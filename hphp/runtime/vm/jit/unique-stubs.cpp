@@ -803,18 +803,27 @@ TCA emitResumeHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
 
     auto const handler = reinterpret_cast<TCA>(svcreq::handleResume);
     v << call{handler, arg_regs(1)};
-    v << fallthru{RegSet{rret()}};
+    v << fallthru{rret(0) | rret(1)};
   });
 
   rh.reenterTC = vwrap(cb, data, [] (Vout& v) {
     // Save the return of handleResume(), then sync regs.
-    auto const target = v.makeReg();
-    v << copy{rret(), target};
+    auto const handler = v.makeReg();
+    auto const arg = v.makeReg();
+    v << copy{rret(0), handler};
+    v << copy{rret(1), arg};
 
     loadVMRegs(v);
-    loadReturnRegs(v);  // spurious load if we're not returning
 
-    v << jmpr{target, php_return_regs()};
+    v << copy{arg, rret(1)};
+    v << jmpr{handler, vm_regs_with_sp() | rret(1)};
+  });
+
+  us.interpToTCRet = vwrap(cb, data, [] (Vout& v) {
+      auto const handler = v.makeReg();
+    v << copy{rret(1), handler};
+    loadReturnRegs(v);
+    v << jmpr{handler, php_return_regs()};
   });
 
   auto const emitOne = [&] (svcreq::ResumeFlags flags, TCA& interp, TCA& tc) {
@@ -863,10 +872,10 @@ TCA emitInterpOneCFHelper(CodeBlock& cb, DataBlock& data, Op op,
     v << call{handler, arg_regs(3)};
 
     auto const sf = v.makeReg();
-    v << testq{rret(), rret(), sf};
+    v << testq{rret(0), rret(0), sf};
     ifThenElse(
       v, CC_NZ, sf,
-      [&] (Vout& v) { v << jmpi{rh.reenterTC}; },
+      [&] (Vout& v) { v << jmpi{rh.reenterTC, rret(0) | rret(1)}; },
       [&] (Vout& v) { v << jmpi{rh.resumeHelperFromInterp}; }
     );
   });

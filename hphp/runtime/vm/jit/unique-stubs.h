@@ -293,6 +293,15 @@ struct UniqueStubs {
   TCA interpHelperNoTranslateFuncEntryFromTC;
 
   /*
+   * JitResumeAddr handlers that convert a state compatible with an interpreter
+   * to one that is compatible with TC, then transfers control to the TC
+   * at rret(1). Assumes that reenterTC already synced rvmfp() and rvmsp().
+   *
+   * interpToTCRet: loads caller's return value to rret_data() and rret_type()
+   */
+  TCA interpToTCRet;
+
+  /*
    * Stubs for each bytecode with the CF flag, which InterpOne the bytecode and
    * then call resumeHelper.
    *

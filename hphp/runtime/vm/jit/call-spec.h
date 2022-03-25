@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 
+#include "hphp/runtime/vm/jit/jit-resume-addr.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
@@ -51,6 +52,7 @@ namespace detail {
   T(ActRec*, TFramePtr)          \
   T(AsioBlockableChain, TABC)    \
   T(Class*, TCls)                \
+  T(JitResumeAddr, TTop)         \
   T(LazyClassData, TLazyCls)     \
   T(Func*, TFunc)                \
   T(RFuncData*, TRFunc)          \

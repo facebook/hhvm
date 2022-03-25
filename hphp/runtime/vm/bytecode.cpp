@@ -127,6 +127,7 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
+#include "hphp/runtime/vm/jit/jit-resume-addr-defs.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/service-request-handlers.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -146,6 +147,7 @@ TRACE_SET_MOD(bcinterp);
 // to be closer to other bytecode.cpp data.
 bool RuntimeOption::RepoAuthoritative = false;
 
+using jit::JitResumeAddr;
 using jit::TCA;
 
 // GCC 4.8 has some real problems with all the inlining in this file, so don't
@@ -976,8 +978,8 @@ static UNUSED int innerCount(TypedValue tv) {
  * One iop* function exists for every bytecode. They all take a single PC&
  * argument, which should be left pointing to the next bytecode to execute when
  * the instruction is complete. Most return void, though a few return a
- * jit::TCA. The ones that return a TCA return a non-nullptr value to indicate
- * that the caller must resume execution in the TC at the returned
+ * jit::JitResumeAddr. The ones that return a JitReturnAddr return a true value
+ * to indicate that the caller must resume execution in the TC at the returned
  * address. This is used to maintain certain invariants about how we get into
  * and out of VM frames in jitted code; see comments on jitReturnPre() for more
  * details.
@@ -1886,38 +1888,25 @@ struct JitReturn {
 };
 
 OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
-  auto savedRip = fp->m_savedRip;
-  auto const isRetHelper = isReturnHelper(savedRip);
-  if (isRetHelper) {
-    // This frame was called from the interpreter, so it's ok to also return
-    // using the interpreter.
-    savedRip = 0;
-  }
-  assertx(isRetHelper || isCallToExit(savedRip) || RID().getJit());
-
-  return {savedRip, fp, fp->sfp(), fp->callOffset()};
+  assertx(fp->m_savedRip);
+  return {fp->m_savedRip, fp, fp->sfp(), fp->callOffset()};
 }
 
-OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
-  if (retInfo.savedRip) {
-    // This frame was called by translated code so we can't interpret out of
-    // it. Resume in the TC right after our caller. This situation most
-    // commonly happens when we interpOne a RetC due to having a VarEnv or some
-    // other weird case.
-    return TCA(retInfo.savedRip);
+OPTBLD_INLINE JitResumeAddr jitReturnPost(JitReturn retInfo) {
+  assertx(isCallToExit(retInfo.savedRip) == (retInfo.sfp == nullptr));
+  assertx(isCallToExit(retInfo.savedRip) == (vmfp() == nullptr));
+
+  if (!isReturnHelper(retInfo.savedRip)) {
+    // This frame is either the first frame in this VM nesting level, or it was
+    // called by a translated code so we can't interpret out of it. Either way,
+    // use the saved rip, which will either use the callToExit helper to exit
+    // the TC, or resume in the TC right after the call to us. This situation
+    // most commonly happens when we interpOne a RetC due to some weird case.
+    assertx(isCallToExit(retInfo.savedRip) || RID().getJit());
+    return JitResumeAddr::ret(TCA(retInfo.savedRip));
   }
 
-  if (!retInfo.sfp) {
-    // If we don't have an sfp, we're returning from the first frame in this VM
-    // nesting level. The vmJitCalledFrame() check below is only important if
-    // we might throw before returning to the TC, which is guaranteed to not
-    // happen in this situation.
-    assertx(vmfp() == nullptr);
-    return nullptr;
-  }
-
-
-  // Consider a situation with a PHP function f() that calls another function
+  // Consider a situation with a Hack function f() that calls another function
   // g(). If the call is interpreted, then we spend some time in the TC inside
   // g(), then eventually end in dispatchBB() (called by
   // MCGenerator::handleResume()) for g()'s RetC, the logic here kicks in.
@@ -1937,10 +1926,12 @@ OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
   // live VM frame in %rbp.
   if (vmJitCalledFrame() == retInfo.fp) {
     FTRACE(1, "Returning from frame {}; resuming", vmJitCalledFrame());
-    return jit::tc::ustubs().resumeHelperFromInterp;
+    return JitResumeAddr::helper(jit::tc::ustubs().resumeHelperFromInterp);
   }
 
-  return nullptr;
+  // This frame was called from the interpreter, so it's ok to also return
+  // using the interpreter.
+  return JitResumeAddr::none();
 }
 
 OPTBLD_INLINE void returnToCaller(PC& pc, ActRec* sfp, Offset callOff) {
@@ -1953,7 +1944,7 @@ OPTBLD_INLINE void returnToCaller(PC& pc, ActRec* sfp, Offset callOff) {
 }
 
 template <bool suspended>
-OPTBLD_INLINE TCA ret(PC& pc) {
+OPTBLD_INLINE JitResumeAddr ret(PC& pc) {
   assertx(!suspended || vmfp()->func()->isAsyncFunction());
   assertx(!suspended || !isResumed(vmfp()));
 
@@ -2039,17 +2030,17 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE TCA iopRetC(PC& pc) {
+OPTBLD_INLINE JitResumeAddr iopRetC(PC& pc) {
   return ret<false>(pc);
 }
 
-OPTBLD_INLINE TCA iopRetCSuspended(PC& pc) {
+OPTBLD_INLINE JitResumeAddr iopRetCSuspended(PC& pc) {
   assertx(vmfp()->func()->isAsyncFunction());
   assertx(!isResumed(vmfp()));
   return ret<true>(pc);
 }
 
-OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
+OPTBLD_INLINE JitResumeAddr iopRetM(PC& pc, uint32_t numRet) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   req::vector<TypedValue> retvals;
@@ -3452,9 +3443,9 @@ void* takeCtx(NoCtx) {
 }
 
 template<bool dynamic, typename Ctx>
-TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
-              const Func* func, Ctx&& ctx, bool logAsDynamicCall = true,
-              bool isCtor = false) {
+JitResumeAddr fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
+                        const Func* func, Ctx&& ctx,
+                        bool logAsDynamicCall = true, bool isCtor = false) {
   if (fca.enforceInOut()) checkInOutMismatch(func, fca.numArgs, fca.inoutArgs);
   if (fca.enforceReadonly()) {
     checkReadonlyMismatch(func, fca.numArgs, fca.readonlyArgs);
@@ -3498,19 +3489,20 @@ TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
   if (retToJit) {
     // Let JIT handle FuncEntry if possible.
     pc = vmpc();
-    return jit::tc::ustubs().resumeHelperFuncEntryFromInterp;
+    return
+      JitResumeAddr::helper(jit::tc::ustubs().resumeHelperFuncEntryFromInterp);
   }
 
   funcEntry();
   pc = vmpc();
-  return nullptr;
+  return JitResumeAddr::none();
 }
 
 const StaticString s___invoke("__invoke");
 
 // This covers both closures and functors.
-OPTBLD_INLINE TCA fcallFuncObj(bool retToJit, PC origpc, PC& pc,
-                               const FCallArgs& fca) {
+OPTBLD_INLINE JitResumeAddr fcallFuncObj(bool retToJit, PC origpc, PC& pc,
+                                         const FCallArgs& fca) {
   assertx(tvIsObject(vmStack().topC()));
   auto obj = Object::attach(vmStack().topC()->m_data.pobj);
   vmStack().discard();
@@ -3541,8 +3533,8 @@ OPTBLD_INLINE TCA fcallFuncObj(bool retToJit, PC origpc, PC& pc,
  *   array(Class*, Func*),
  *   array(ObjectData*, Func*),
  */
-OPTBLD_INLINE TCA fcallFuncArr(bool retToJit, PC origpc, PC& pc,
-                               const FCallArgs& fca) {
+OPTBLD_INLINE JitResumeAddr fcallFuncArr(bool retToJit, PC origpc, PC& pc,
+                                         const FCallArgs& fca) {
   assertx(tvIsArrayLike(vmStack().topC()));
   auto arr = Array::attach(vmStack().topC()->m_data.parr);
   vmStack().discard();
@@ -3575,8 +3567,8 @@ OPTBLD_INLINE TCA fcallFuncArr(bool retToJit, PC origpc, PC& pc,
  *   'func_name'
  *   'class::method'
  */
-OPTBLD_INLINE TCA fcallFuncStr(bool retToJit, PC origpc, PC& pc,
-                               const FCallArgs& fca) {
+OPTBLD_INLINE JitResumeAddr fcallFuncStr(bool retToJit, PC origpc, PC& pc,
+                                         const FCallArgs& fca) {
   assertx(tvIsString(vmStack().topC()));
   auto str = String::attach(vmStack().topC()->m_data.pstr);
   vmStack().discard();
@@ -3604,8 +3596,8 @@ OPTBLD_INLINE TCA fcallFuncStr(bool retToJit, PC origpc, PC& pc,
   }
 }
 
-OPTBLD_INLINE TCA fcallFuncFunc(bool retToJit, PC origpc, PC& pc,
-                                const FCallArgs& fca) {
+OPTBLD_INLINE JitResumeAddr fcallFuncFunc(bool retToJit, PC origpc, PC& pc,
+                                          const FCallArgs& fca) {
   assertx(tvIsFunc(vmStack().topC()));
   auto func = vmStack().topC()->m_data.pfunc;
   vmStack().discard();
@@ -3617,8 +3609,8 @@ OPTBLD_INLINE TCA fcallFuncFunc(bool retToJit, PC origpc, PC& pc,
   return fcallImpl<false>(retToJit, origpc, pc, fca, func, NoCtx{});
 }
 
-OPTBLD_INLINE TCA fcallFuncRFunc(bool retToJit, PC origpc, PC& pc,
-                                 FCallArgs& fca) {
+OPTBLD_INLINE JitResumeAddr fcallFuncRFunc(bool retToJit, PC origpc, PC& pc,
+                                           FCallArgs& fca) {
   assertx(tvIsRFunc(vmStack().topC()));
   auto const rfunc = vmStack().topC()->m_data.prfunc;
   auto const func = rfunc->m_func;
@@ -3630,8 +3622,8 @@ OPTBLD_INLINE TCA fcallFuncRFunc(bool retToJit, PC origpc, PC& pc,
     fcallImpl<false>(retToJit, origpc, pc, fca.withGenerics(), func, NoCtx{});
 }
 
-OPTBLD_INLINE TCA fcallFuncClsMeth(bool retToJit, PC origpc, PC& pc,
-                                   const FCallArgs& fca) {
+OPTBLD_INLINE JitResumeAddr fcallFuncClsMeth(bool retToJit, PC origpc, PC& pc,
+                                             const FCallArgs& fca) {
   assertx(tvIsClsMeth(vmStack().topC()));
   auto const clsMeth = vmStack().topC()->m_data.pclsmeth;
   vmStack().discard();
@@ -3643,8 +3635,8 @@ OPTBLD_INLINE TCA fcallFuncClsMeth(bool retToJit, PC origpc, PC& pc,
   return fcallImpl<false>(retToJit, origpc, pc, fca, func, cls);
 }
 
-OPTBLD_INLINE TCA fcallFuncRClsMeth(bool retToJit, PC origpc, PC& pc,
-                                    const FCallArgs& fca) {
+OPTBLD_INLINE JitResumeAddr fcallFuncRClsMeth(bool retToJit, PC origpc, PC& pc,
+                                              const FCallArgs& fca) {
   assertx(tvIsRClsMeth(vmStack().topC()));
   auto const rclsMeth = vmStack().topC()->m_data.prclsmeth;
   auto const cls = rclsMeth->m_cls;
@@ -3710,8 +3702,8 @@ OPTBLD_INLINE void iopResolveRFunc(Id id) {
   }
 }
 
-OPTBLD_INLINE TCA iopFCallFunc(bool retToJit, PC origpc, PC& pc,
-                               FCallArgs fca) {
+OPTBLD_INLINE JitResumeAddr iopFCallFunc(bool retToJit, PC origpc, PC& pc,
+                                         FCallArgs fca) {
   auto const type = vmStack().topC()->m_type;
   if (isObjectType(type)) return fcallFuncObj(retToJit, origpc, pc, fca);
   if (isArrayLikeType(type)) return fcallFuncArr(retToJit, origpc, pc, fca);
@@ -3724,8 +3716,8 @@ OPTBLD_INLINE TCA iopFCallFunc(bool retToJit, PC origpc, PC& pc,
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
-OPTBLD_INLINE TCA iopFCallFuncD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
-                                Id id) {
+OPTBLD_INLINE JitResumeAddr iopFCallFuncD(bool retToJit, PC origpc, PC& pc,
+                                          FCallArgs fca, Id id) {
   auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
   auto const func = Func::load(nep.second, nep.first);
   if (UNLIKELY(func == nullptr)) {
@@ -3741,8 +3733,8 @@ const StaticString
   s_DynamicContextOverrideUnsafe("__SystemLib\\DynamicContextOverrideUnsafe");
 
 template<bool dynamic>
-TCA fcallObjMethodImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
-                       StringData* methName) {
+JitResumeAddr fcallObjMethodImpl(bool retToJit, PC origpc, PC& pc,
+                                 const FCallArgs& fca, StringData* methName) {
   const Func* func;
   LookupResult res;
   assertx(tvIsObject(vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))));
@@ -3848,7 +3840,7 @@ fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
 
 } // namespace
 
-OPTBLD_INLINE TCA
+OPTBLD_INLINE JitResumeAddr
 iopFCallObjMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                   const StringData*, ObjMethodOp op) {
   TypedValue* c1 = vmStack().topC(); // Method name.
@@ -3857,18 +3849,22 @@ iopFCallObjMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
   }
 
   StringData* methName = c1->m_data.pstr;
-  if (fcallObjMethodHandleInput(fca, op, methName, true)) return nullptr;
+  if (fcallObjMethodHandleInput(fca, op, methName, true)) {
+    return JitResumeAddr::none();
+  }
 
   // We handle decReffing method name in fcallObjMethodImpl
   vmStack().discard();
   return fcallObjMethodImpl<true>(retToJit, origpc, pc, fca, methName);
 }
 
-OPTBLD_INLINE TCA
+OPTBLD_INLINE JitResumeAddr
 iopFCallObjMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                    const StringData*, ObjMethodOp op,
                    const StringData* methName) {
-  if (fcallObjMethodHandleInput(fca, op, methName, false)) return nullptr;
+  if (fcallObjMethodHandleInput(fca, op, methName, false)) {
+    return JitResumeAddr::none();
+  }
   auto const methNameC = const_cast<StringData*>(methName);
   return fcallObjMethodImpl<false>(retToJit, origpc, pc, fca, methNameC);
 }
@@ -3997,9 +3993,10 @@ OPTBLD_INLINE void iopResolveRClsMethodS(SpecialClsRef ref,
 namespace {
 
 template<bool dynamic>
-TCA fcallClsMethodImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
-                       Class* cls, StringData* methName, bool forwarding,
-                       bool logAsDynamicCall = true) {
+JitResumeAddr fcallClsMethodImpl(bool retToJit, PC origpc, PC& pc,
+                                 const FCallArgs& fca, Class* cls,
+                                 StringData* methName, bool forwarding,
+                                 bool logAsDynamicCall = true) {
   auto const ctx = [&] {
     if (!fca.context) return liveClass();
     if (fca.context->isame(s_DynamicContextOverrideUnsafe.get())) {
@@ -4052,7 +4049,7 @@ TCA fcallClsMethodImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
 
 } // namespace
 
-OPTBLD_INLINE TCA
+OPTBLD_INLINE JitResumeAddr
 iopFCallClsMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                   const StringData*, IsLogAsDynamicCallOp op) {
   auto const c1 = vmStack().topC();
@@ -4076,7 +4073,7 @@ iopFCallClsMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
     retToJit, origpc, pc, fca, cls, methName, false, logAsDynamicCall);
 }
 
-OPTBLD_INLINE TCA
+OPTBLD_INLINE JitResumeAddr
 iopFCallClsMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                    const StringData*, Id classId, const StringData* methName) {
   const NamedEntityPair &nep =
@@ -4090,7 +4087,7 @@ iopFCallClsMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
     retToJit, origpc, pc, fca, cls, methNameC, false);
 }
 
-OPTBLD_INLINE TCA
+OPTBLD_INLINE JitResumeAddr
 iopFCallClsMethodS(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                    const StringData*, SpecialClsRef ref) {
   auto const c1 = vmStack().topC(); // Method name.
@@ -4108,7 +4105,7 @@ iopFCallClsMethodS(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
     retToJit, origpc, pc, fca, cls, methName, fwd);
 }
 
-OPTBLD_INLINE TCA
+OPTBLD_INLINE JitResumeAddr
 iopFCallClsMethodSD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                     const StringData*, SpecialClsRef ref,
                     const StringData* methName) {
@@ -4213,8 +4210,8 @@ OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
   vmStack().pushObjectNoRc(this_);
 }
 
-OPTBLD_INLINE TCA iopFCallCtor(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
-                               const StringData*) {
+OPTBLD_INLINE JitResumeAddr iopFCallCtor(bool retToJit, PC origpc, PC& pc,
+                                         FCallArgs fca, const StringData*) {
   assertx(fca.numRets == 1);
   assertx(fca.asyncEagerOffset == kInvalidOffset);
   assertx(tvIsObject(vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))));
@@ -4633,7 +4630,7 @@ OPTBLD_INLINE void iopVerifyRetNonNullC() {
   tc.verifyReturnNonNull(vmStack().topC(), ctx, func);
 }
 
-OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
+OPTBLD_INLINE JitResumeAddr iopNativeImpl(PC& pc) {
   auto const fp = vmfp();
   auto const func = vmfp()->func();
   auto const sfp = fp->sfp();
@@ -4699,7 +4696,7 @@ static inline Generator* this_generator(const ActRec* fp) {
 
 const StaticString s_this("this");
 
-OPTBLD_INLINE TCA iopCreateCont(PC origpc, PC& pc) {
+OPTBLD_INLINE JitResumeAddr iopCreateCont(PC origpc, PC& pc) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   auto const fp = vmfp();
@@ -4741,7 +4738,7 @@ OPTBLD_INLINE TCA iopCreateCont(PC origpc, PC& pc) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE TCA contEnterImpl(PC origpc) {
+OPTBLD_INLINE JitResumeAddr contEnterImpl(PC origpc) {
   // The stack must have one cell! Or else resumableStackBase() won't work!
   assertx(vmStack().top() + 1 ==
          (TypedValue*)vmfp() - vmfp()->func()->numSlotsInFrame());
@@ -4768,10 +4765,10 @@ OPTBLD_INLINE TCA contEnterImpl(PC origpc) {
 
   EventHook::FunctionResumeYield(vmfp(), EventHook::Source::Interpreter);
 
-  return gen->resumable()->resumeAddr();
+  return JitResumeAddr::trans(gen->resumable()->resumeAddr());
 }
 
-OPTBLD_INLINE TCA iopContEnter(PC origpc, PC& pc) {
+OPTBLD_INLINE JitResumeAddr iopContEnter(PC origpc, PC& pc) {
   auto const retAddr = contEnterImpl(origpc);
   pc = vmpc();
   return retAddr;
@@ -4783,7 +4780,8 @@ OPTBLD_INLINE void iopContRaise(PC origpc, PC& pc) {
   iopThrow(pc);
 }
 
-OPTBLD_INLINE TCA yield(PC origpc, PC& pc, const TypedValue* key, const TypedValue value) {
+OPTBLD_INLINE JitResumeAddr yield(PC origpc, PC& pc, const TypedValue* key,
+                                  const TypedValue value) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   auto const fp = vmfp();
@@ -4823,13 +4821,13 @@ OPTBLD_INLINE TCA yield(PC origpc, PC& pc, const TypedValue* key, const TypedVal
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE TCA iopYield(PC origpc, PC& pc) {
+OPTBLD_INLINE JitResumeAddr iopYield(PC origpc, PC& pc) {
   auto const value = *vmStack().topC();
   vmStack().discard();
   return yield(origpc, pc, nullptr, value);
 }
 
-OPTBLD_INLINE TCA iopYieldK(PC origpc, PC& pc) {
+OPTBLD_INLINE JitResumeAddr iopYieldK(PC origpc, PC& pc) {
   auto const key = *vmStack().indC(1);
   auto const value = *vmStack().topC();
   vmStack().ndiscard(2);
@@ -4983,7 +4981,7 @@ OPTBLD_INLINE void asyncSuspendR(PC origpc, PC& pc) {
 
 namespace {
 
-TCA suspendStack(PC origpc, PC &pc) {
+JitResumeAddr suspendStack(PC origpc, PC &pc) {
   auto const jitReturn = jitReturnPre(vmfp());
   if (resumeModeFromActRec(vmfp()) == ResumeMode::Async) {
     // suspend resumed execution
@@ -4997,7 +4995,7 @@ TCA suspendStack(PC origpc, PC &pc) {
 
 }
 
-OPTBLD_INLINE TCA iopAwait(PC origpc, PC& pc) {
+OPTBLD_INLINE JitResumeAddr iopAwait(PC origpc, PC& pc) {
   auto const awaitable = vmStack().topC();
   auto wh = c_Awaitable::fromTV(*awaitable);
   if (UNLIKELY(wh == nullptr)) {
@@ -5008,12 +5006,12 @@ OPTBLD_INLINE TCA iopAwait(PC origpc, PC& pc) {
   }
   if (wh->isSucceeded()) {
     tvSet(wh->getResult(), *vmStack().topC());
-    return nullptr;
+    return JitResumeAddr::none();
   }
   return suspendStack(origpc, pc);
 }
 
-OPTBLD_INLINE TCA iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {
+OPTBLD_INLINE JitResumeAddr iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {
   uint32_t cnt = 0;
   for (auto i = locals.first; i < locals.first + locals.count; ++i) {
     auto const local = *frame_local(vmfp(), i);
@@ -5029,7 +5027,7 @@ OPTBLD_INLINE TCA iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {
 
   if (!cnt) {
     vmStack().pushNull();
-    return nullptr;
+    return JitResumeAddr::none();
   }
 
   auto obj = Object::attach(
@@ -5040,7 +5038,7 @@ OPTBLD_INLINE TCA iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {
   if (UNLIKELY(static_cast<c_Awaitable*>(obj.get())->isFinished())) {
     // A profiler hook may have finished the AAWH.
     vmStack().pushNull();
-    return nullptr;
+    return JitResumeAddr::none();
   }
 
   vmStack().pushObjectNoRc(obj.detach());
@@ -5298,42 +5296,45 @@ namespace {
 
 /*
  * iopWrapReturn() calls a function pointer and forwards its return value if it
- * returns TCA, or nullptr if returns void.
+ * returns JitResumeAddr, or JitResumeAddr::none() if returns void.
  * Some opcodes need the original PC by value, and some do not. We have wrappers
  * for both flavors. Some opcodes (FCall*) may want to return to the JIT in the
  * middle of an instruction, so we pass the breakOnCtlFlow flag. When this flag
  * is true in control flow instructions such as FCall*, we are guaranteed to
- * use the returned TCA to return to the JIT and so it is safe to return in
- * the middle of an instruction.
+ * use the returned JitResumeAddr to return to the JIT and so it is safe to
+ * return in the middle of an instruction.
  */
 template<typename... Params, typename... Args>
-OPTBLD_INLINE TCA iopWrapReturn(void(fn)(Params...), bool, PC, Args&&... args) {
+OPTBLD_INLINE JitResumeAddr
+iopWrapReturn(void(fn)(Params...), bool, PC, Args&&... args) {
   fn(std::forward<Args>(args)...);
-  return nullptr;
+  return JitResumeAddr::none();
 }
 
 template<typename... Params, typename... Args>
-OPTBLD_INLINE TCA iopWrapReturn(TCA(fn)(Params...), bool, PC, Args&&... args) {
+OPTBLD_INLINE JitResumeAddr
+iopWrapReturn(JitResumeAddr(fn)(Params...), bool, PC, Args&&... args) {
   return fn(std::forward<Args>(args)...);
 }
 
 template<typename... Params, typename... Args>
-OPTBLD_INLINE TCA iopWrapReturn(void(fn)(PC, Params...), bool, PC origpc,
-                                Args&&... args) {
+OPTBLD_INLINE JitResumeAddr
+iopWrapReturn(void(fn)(PC, Params...), bool, PC origpc, Args&&... args) {
   fn(origpc, std::forward<Args>(args)...);
-  return nullptr;
+  return JitResumeAddr::none();
 }
 
 template<typename... Params, typename... Args>
-OPTBLD_INLINE TCA iopWrapReturn(TCA(fn)(PC, Params...), bool, PC origpc,
-                                Args&&... args) {
+OPTBLD_INLINE JitResumeAddr
+iopWrapReturn(JitResumeAddr(fn)(PC, Params...),
+              bool, PC origpc, Args&&... args) {
   return fn(origpc, std::forward<Args>(args)...);
 }
 
 template<typename... Params, typename... Args>
-OPTBLD_INLINE TCA iopWrapReturn(TCA(fn)(bool, PC, Params...),
-                                bool breakOnCtlFlow, PC origpc,
-                                Args&&... args) {
+OPTBLD_INLINE JitResumeAddr
+iopWrapReturn(JitResumeAddr(fn)(bool, PC, Params...),
+              bool breakOnCtlFlow, PC origpc, Args&&... args) {
   return fn(breakOnCtlFlow, origpc, std::forward<Args>(args)...);
 }
 
@@ -5413,7 +5414,7 @@ struct litstr_id {
 
 #define O(name, imm, in, out, flags)                                 \
   template<bool breakOnCtlFlow>                                      \
-  OPTBLD_INLINE TCA iopWrap##name(PC& pc) {                          \
+  OPTBLD_INLINE JitResumeAddr iopWrap##name(PC& pc) {                \
     UNUSED auto constexpr op = Op::name;                             \
     UNUSED auto const origpc = pc - encoded_op_size(op);             \
     DECODE_##imm                                                     \
@@ -5469,47 +5470,47 @@ OPCODES
  * The interpOne functions are fat wrappers around the iop* functions, mostly
  * adding a bunch of debug-only logging and stats tracking.
  */
-#define O(opcode, imm, push, pop, flags)                                \
-  TCA interpOne##opcode(ActRec* fp, TypedValue* sp, Offset pcOff) {     \
-  interp_set_regs(fp, sp, pcOff);                                       \
-  SKTRACE(5, liveSK(),                                                  \
-          "%40s %p %p\n",                                               \
-          "interpOne" #opcode " before (fp,sp)", vmfp(), vmsp());       \
-  if (Stats::enableInstrCount()) {                                      \
-    Stats::inc(Stats::Instr_Transl##opcode, -1);                        \
-    Stats::inc(Stats::Instr_InterpOne##opcode);                         \
-  }                                                                     \
-  if (Trace::moduleEnabled(Trace::interpOne, 1)) {                      \
-    static const StringData* cat = makeStaticString("interpOne");       \
-    static const StringData* name = makeStaticString(#opcode);          \
-    Stats::incStatGrouped(cat, name, 1);                                \
-  }                                                                     \
-  if (Trace::moduleEnabled(Trace::ringbuffer)) {                        \
-    auto sk = liveSK().toAtomicInt();                                   \
-    Trace::ringbufferEntry(Trace::RBTypeInterpOne, sk, 0);              \
-  }                                                                     \
-  INC_TPC(interp_one)                                                   \
-  /* Correct for over-counting in TC-stats. */                          \
-  Stats::inc(Stats::Instr_TC, -1);                                      \
-  condStackTraceSep(Op##opcode);                                        \
-  COND_STACKTRACE("op"#opcode" pre:  ");                                \
-  PC pc = vmpc();                                                       \
-  ONTRACE(1, auto offset = vmfp()->func()->offsetOf(pc);                \
-          Trace::trace("op"#opcode" offset: %d\n", offset));            \
-  assertx(peek_op(pc) == Op::opcode);                                   \
-  pc += encoded_op_size(Op::opcode);                                    \
-  auto const retAddr = iopWrap##opcode<true>(pc);                       \
-  vmpc() = pc;                                                          \
-  COND_STACKTRACE("op"#opcode" post: ");                                \
-  condStackTraceSep(Op##opcode);                                        \
+#define O(opcode, imm, push, pop, flags)                                       \
+JitResumeAddr interpOne##opcode(ActRec* fp, TypedValue* sp, Offset pcOff) {    \
+  interp_set_regs(fp, sp, pcOff);                                              \
+  SKTRACE(5, liveSK(),                                                         \
+          "%40s %p %p\n",                                                      \
+          "interpOne" #opcode " before (fp,sp)", vmfp(), vmsp());              \
+  if (Stats::enableInstrCount()) {                                             \
+    Stats::inc(Stats::Instr_Transl##opcode, -1);                               \
+    Stats::inc(Stats::Instr_InterpOne##opcode);                                \
+  }                                                                            \
+  if (Trace::moduleEnabled(Trace::interpOne, 1)) {                             \
+    static const StringData* cat = makeStaticString("interpOne");              \
+    static const StringData* name = makeStaticString(#opcode);                 \
+    Stats::incStatGrouped(cat, name, 1);                                       \
+  }                                                                            \
+  if (Trace::moduleEnabled(Trace::ringbuffer)) {                               \
+    auto sk = liveSK().toAtomicInt();                                          \
+    Trace::ringbufferEntry(Trace::RBTypeInterpOne, sk, 0);                     \
+  }                                                                            \
+  INC_TPC(interp_one)                                                          \
+  /* Correct for over-counting in TC-stats. */                                 \
+  Stats::inc(Stats::Instr_TC, -1);                                             \
+  condStackTraceSep(Op##opcode);                                               \
+  COND_STACKTRACE("op"#opcode" pre:  ");                                       \
+  PC pc = vmpc();                                                              \
+  ONTRACE(1, auto offset = vmfp()->func()->offsetOf(pc);                       \
+          Trace::trace("op"#opcode" offset: %d\n", offset));                   \
+  assertx(peek_op(pc) == Op::opcode);                                          \
+  pc += encoded_op_size(Op::opcode);                                           \
+  auto const retAddr = iopWrap##opcode<true>(pc);                              \
+  vmpc() = pc;                                                                 \
+  COND_STACKTRACE("op"#opcode" post: ");                                       \
+  condStackTraceSep(Op##opcode);                                               \
   /*
    * Only set regstate back to dirty if an exception is not
    * propagating.  If an exception is throwing, regstate for this call
    * is actually still correct, and we don't have information in the
    * fixup map for interpOne calls anyway.
-   */ \
-  regState() = VMRegState::DIRTY;                                       \
-  return retAddr;                                                       \
+   */                                                                          \
+  regState() = VMRegState::DIRTY;                                              \
+  return retAddr;                                                              \
 }
 OPCODES
 #undef O
@@ -5534,7 +5535,7 @@ PcPair lookup_cti(const Func* func, PC pc) {
 }
 
 template <bool breakOnCtlFlow>
-TCA dispatchThreaded(bool coverage) {
+JitResumeAddr dispatchThreaded(bool coverage) {
   auto modes = breakOnCtlFlow ? ExecMode::BB : ExecMode::Normal;
   if (coverage) {
     modes = modes | ExecMode::Coverage;
@@ -5544,11 +5545,11 @@ TCA dispatchThreaded(bool coverage) {
   CALLEE_SAVED_BARRIER();
   auto retAddr = g_enterCti(modes, target, rds::header());
   CALLEE_SAVED_BARRIER();
-  return retAddr;
+  return JitResumeAddr::trans(retAddr);
 }
 
 template <bool breakOnCtlFlow>
-TCA dispatchImpl() {
+JitResumeAddr dispatchImpl() {
   auto const checkCoverage = [&] {
     return !RO::EvalEnablePerFileCoverage
       ? RID().getCoverage()
@@ -5605,7 +5606,7 @@ TCA dispatchImpl() {
 #endif
 
   bool isCtlFlow = false;
-  TCA retAddr = nullptr;
+  auto retAddr = JitResumeAddr::none();
   Op op;
 
 #ifdef _MSC_VER
@@ -5651,7 +5652,8 @@ TCA dispatchImpl() {
         case InlineInterpHookResult::NONE: break;             \
         case InlineInterpHookResult::SKIP:                    \
           pc = vmpc(); goto name##Done;                       \
-        case InlineInterpHookResult::STOP: return nullptr;    \
+        case InlineInterpHookResult::STOP:                    \
+          return JitResumeAddr::none();                       \
       }                                                       \
     }                                                         \
     retAddr = iopWrap##name<breakOnCtlFlow>(pc);              \
@@ -5673,12 +5675,12 @@ name##Done:                                                   \
        * m_savedRip in our ActRec must have been callToExit, which should've
        * been returned by jitReturnPost(), whether or not we were called from
        * the TC. We only actually return callToExit to our caller if that
-       * caller is dispatchBB(). */                           \
-      assertx(retAddr == jit::tc::ustubs().callToExit);       \
-      return breakOnCtlFlow ? retAddr : nullptr;              \
-    }                                                         \
-    assertx(isCtlFlow || !retAddr);                           \
-    DISPATCH();                                               \
+       * caller is dispatchBB(). */                             \
+      assertx(isCallToExit((uint64_t)retAddr.arg));             \
+      return breakOnCtlFlow ? retAddr : JitResumeAddr::none();  \
+    }                                                           \
+    assertx(isCtlFlow || !retAddr);                             \
+    DISPATCH();                                                 \
   }
 
 #ifdef _MSC_VER
@@ -5721,10 +5723,10 @@ static void dispatch() {
   tracing::BlockNoTrace _{"dispatch"};
 
   DEBUG_ONLY auto const retAddr = dispatchImpl<false>();
-  assertx(retAddr == nullptr);
+  assertx(!retAddr);
 }
 
-TCA dispatchBB() {
+JitResumeAddr dispatchBB() {
   auto sk = [] {
     return SrcKey(vmfp()->func(), vmpc(), resumeModeFromActRec(vmfp()));
   };
@@ -5815,7 +5817,8 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
     // TODO: t6019406 use surprise checks to eliminate BB mode
     if (modes & ExecMode::BB) {
       *returnaddr = g_exitCti;
-      return {nullptr, (PC)retAddr};  // exit stub will return retAddr
+      // FIXME(T115315816): properly handle JitResumeAddr
+      return {nullptr, (PC)retAddr.handler};  // exit stub will return retAddr
     }
     return {nullptr, pc};
   }
@@ -5828,12 +5831,14 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
     // been returned by jitReturnPost(), whether or not we were called from
     // the TC. We only actually return callToExit to our caller if that
     // caller is dispatchBB().
-    assert(retAddr == jit::tc::ustubs().callToExit);
-    if (!(modes & ExecMode::BB)) retAddr = nullptr;
-    return {g_exitCti, (PC)retAddr};
+    assert(isCallToExit((uint64_t)retAddr.arg));
+    if (!(modes & ExecMode::BB)) retAddr = JitResumeAddr::none();
+    // FIXME(T115315816): properly handle JitResumeAddr
+    return {g_exitCti, (PC)retAddr.handler};
   }
   if (instrIsControlFlow(opcode) && (modes & ExecMode::BB)) {
-    return {g_exitCti, (PC)retAddr};
+    // FIXME(T115315816): properly handle JitResumeAddr
+    return {g_exitCti, (PC)retAddr.handler};
   }
   if (isReturnish(opcode)) {
     auto target = popPrediction();

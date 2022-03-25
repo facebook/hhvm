@@ -137,7 +137,7 @@ static_assert(sizeof(ResumeFlags) == 1, "ustubs pass m_asByte to handleResume");
  * If no translation can be found or created, execute code in the interpreter
  * until we find one, possibly throwing exceptions or reentering the VM.
  */
-TCA handleResume(ResumeFlags flags);
+JitResumeAddr handleResume(ResumeFlags flags);
 
 /*
  * Look up (or create) the translation for the body of func.

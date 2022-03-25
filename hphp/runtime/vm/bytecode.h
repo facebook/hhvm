@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/prologue-flags.h"
 #include "hphp/runtime/vm/unit.h"
 
+#include "hphp/runtime/vm/jit/jit-resume-addr.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/arena.h"
@@ -654,13 +655,13 @@ void resetCoverageCounters();
 Class* specialClsRefToCls(SpecialClsRef ref);
 
 // The interpOne*() methods implement individual opcode handlers.
-using InterpOneFunc = jit::TCA (*) (ActRec*, TypedValue*, Offset);
+using InterpOneFunc = jit::JitResumeAddr (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
 void doFCall(PrologueFlags prologueFlags, const Func* func,
              uint32_t numArgsInclUnpack, void* ctx, jit::TCA retAddr);
 bool funcEntry();
-jit::TCA dispatchBB();
+jit::JitResumeAddr dispatchBB();
 Array getDefinedVariables(const ActRec*);
 
 /*

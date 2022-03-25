@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/jit-resume-addr-defs.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -375,13 +376,12 @@ std::string ResumeFlags::show() const {
   return folly::join(", ", flags);
 }
 
-TCA handleResume(ResumeFlags flags) {
+JitResumeAddr handleResume(ResumeFlags flags) {
   assert_native_stack_aligned();
   FTRACE(1, "handleResume({})\n", flags.show());
 
-  if (!vmRegsUnsafe().pc) return tc::ustubs().callToExit;
-
   regState() = VMRegState::CLEAN;
+  assertx(vmpc());
 
   auto sk = liveSK();
   if (flags.m_funcEntry) {
@@ -390,28 +390,34 @@ TCA handleResume(ResumeFlags flags) {
   }
   FTRACE(2, "handleResume: sk: {}\n", showShort(sk));
 
-  auto const findOrTranslate = [&] () -> TCA {
+  auto const findOrTranslate = [&] () -> JitResumeAddr {
     if (!flags.m_noTranslate) {
       auto const trans = getTranslation(sk);
-      if (auto const addr = trans.addr()) return addr;
-      if (!trans.isRequestPersistentFailure()) return nullptr;
-      return sk.funcEntry()
-        ? tc::ustubs().interpHelperNoTranslateFuncEntryFromTC
-        : tc::ustubs().interpHelperNoTranslateFromTC;
+      if (auto const addr = trans.addr()) {
+        if (sk.funcEntry()) return JitResumeAddr::transFuncEntry(addr);
+        return JitResumeAddr::trans(addr);
+      }
+      if (!trans.isRequestPersistentFailure()) return JitResumeAddr::none();
+      return JitResumeAddr::helper(
+        sk.funcEntry()
+          ? tc::ustubs().interpHelperNoTranslateFuncEntryFromInterp
+          : tc::ustubs().interpHelperNoTranslateFromInterp
+      );
     }
 
     if (auto const sr = tc::findSrcRec(sk)) {
       if (auto const tca = sr->getTopTranslation()) {
         if (LIKELY(RID().getJit())) {
           SKTRACE(2, sk, "handleResume: found %p\n", tca);
-          return tca;
+          if (sk.funcEntry()) return JitResumeAddr::transFuncEntry(tca);
+          return JitResumeAddr::trans(tca);
         }
       }
     }
-    return nullptr;
+    return JitResumeAddr::none();
   };
 
-  TCA start = nullptr;
+  auto start = JitResumeAddr::none();
   if (!flags.m_interpFirst) start = findOrTranslate();
   if (!flags.m_noTranslate && flags.m_interpFirst) INC_TPC(interp_bb_force);
 
@@ -437,9 +443,10 @@ TCA handleResume(ResumeFlags flags) {
         // performed and the frame has been overwritten by the return value.
         regState() = VMRegState::DIRTY;
         if (isReturnHelper(savedRip)) {
-          return jit::tc::ustubs().resumeHelperFromInterp;
+          return
+            JitResumeAddr::helper(jit::tc::ustubs().resumeHelperFromInterp);
         }
-        return TCA(savedRip);
+        return JitResumeAddr::ret(TCA(savedRip));
       }
       sk.advance();
     }
@@ -458,7 +465,8 @@ TCA handleResume(ResumeFlags flags) {
 
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
     auto skData = sk.valid() ? sk.toAtomicInt() : uint64_t(-1LL);
-    Trace::ringbufferEntry(Trace::RBTypeResumeTC, skData, (uint64_t)start);
+    Trace::ringbufferEntry(Trace::RBTypeResumeTC, skData,
+                           (uint64_t)start.handler);
   }
 
   regState() = VMRegState::DIRTY;

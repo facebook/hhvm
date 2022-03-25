@@ -165,20 +165,6 @@ void AliasClass::framelike_union_set(AIter cls) {
   m_iter = cls;
 }
 
-namespace detail {
-
-uint32_t frame_depth_index(SSATmp* fp) {
-  always_assert(fp->isA(TFramePtr));
-  fp = canonical(fp);
-  if (fp->inst()->is(BeginInlining)) {
-    auto const extra = fp->inst()->extra<BeginInlining>();
-    return extra->depth;
-  }
-  return 0;
-}
-
-}
-
 //////////////////////////////////////////////////////////////////////
 
 size_t AliasClass::Hash::operator()(AliasClass acls) const {

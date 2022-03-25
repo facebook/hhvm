@@ -84,16 +84,7 @@ AliasClass livefp(const IRInstruction& inst) {
 
 std::pair<const Func*, uint32_t> func_and_depth_from_fp(SSATmp* fp) {
   if (!fp) return {nullptr, 0};
-  auto fpInst = fp->inst();
-  if (fpInst->is(DefFP)) return {fpInst->marker().func(), 0};
-  if (fpInst->is(DefFuncEntryFP)) {
-    return {fpInst->extra<DefFuncEntryFP>()->func, 0};
-  }
-  if (fpInst->is(BeginInlining)) {
-    auto const extra = fpInst->extra<BeginInlining>();
-    return {extra->func, extra->depth};
-  }
-  always_assert(false);
+  return {funcFromFP(fp), frameDepthIndex(fp)};
 }
 
 AliasClass backtrace_locals(const IRInstruction& inst) {

@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/analysis.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -125,13 +126,70 @@ SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
 
 //////////////////////////////////////////////////////////////////////
 
-Optional<IRSPRelOffset> offsetOfFrame(SSATmp *fp) {
+const Func* funcFromFP(const SSATmp* fp) {
+  auto const inst = canonical(fp)->inst();
+  if (inst->is(DefFP)) return inst->marker().func();
+  if (inst->is(DefFuncEntryFP)) return inst->extra<DefFuncEntryFP>()->func;
+  if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->func;
+  always_assert(false);
+}
+
+uint32_t frameDepthIndex(const SSATmp* fp) {
+  always_assert(fp->isA(TFramePtr));
+  fp = canonical(fp);
+  if (fp->inst()->is(BeginInlining)) {
+    auto const extra = fp->inst()->extra<BeginInlining>();
+    return extra->depth;
+  }
+  return 0;
+}
+
+Optional<IRSPRelOffset> offsetOfFrame(const SSATmp *fp) {
   assertx(fp->isA(TFramePtr));
   auto const inst = canonical(fp)->inst();
-  if (inst->is(DefFP)) return inst->extra<DefFP>()->offset;
-  if (inst->is(DefFuncEntryFP)) return IRSPRelOffset { 0 };
   if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->spOffset;
+  auto const resumed = inst->marker().sk().resumeMode() != ResumeMode::None;
+  if (inst->is(DefFP)) {
+    if (resumed) return std::nullopt;
+    return inst->extra<DefFP>()->offset;
+  }
+  if (inst->is(DefFuncEntryFP)) {
+    if (resumed) return std::nullopt;
+    return IRSPRelOffset { 0 };
+  }
   always_assert(false);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::pair<const IRInstruction*, const SSATmp*>
+EveryDefiningInstVisitor::next() {
+  if (m_stack.empty()) return {nullptr, nullptr};
+  auto const t = m_stack.back();
+  m_stack.pop_back();
+
+  if (t->isA(TBottom)) return next();
+
+  auto const canonT = canonical(t);
+  auto const inst = canonT->inst();
+
+  if (!inst->is(DefLabel)) return {inst, t};
+  if (m_visited.count(inst)) return next();
+  m_visited.emplace(inst);
+
+  auto const dsts = inst->dsts();
+  auto const dstIdx =
+    std::find(dsts.begin(), dsts.end(), canonT) - dsts.begin();
+  always_assert(dstIdx >= 0 && dstIdx < inst->numDsts());
+
+  inst->block()->forEachSrc(
+    dstIdx,
+    [&] (const IRInstruction*, const SSATmp* s) {
+      m_stack.emplace_back(s);
+    }
+  );
+
+  return next();
 }
 
 //////////////////////////////////////////////////////////////////////

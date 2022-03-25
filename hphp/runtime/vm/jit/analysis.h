@@ -15,13 +15,23 @@
 */
 #pragma once
 
-#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/util/optional.h"
 
-namespace HPHP::jit {
+namespace HPHP {
 
-struct SSATmp;
-struct IRInstruction;
+struct Func;
+
+namespace jit {
+
 struct Block;
+struct IRInstruction;
+struct SSATmp;
+
+template<typename T1, typename T2>
+struct StateVector;
+using IdomVector = StateVector<Block,Block*>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -89,12 +99,30 @@ bool is_tmp_usable(const IdomVector&, const SSATmp* tmp, const Block* where);
 SSATmp* least_common_ancestor(SSATmp*, SSATmp*);
 
 /*
+ * Return the func owning the frame pointed to by fp.
+ */
+const Func* funcFromFP(const SSATmp* fp);
+
+/*
+ * Return the frame depth of the frame pointed to by fp.
+ */
+uint32_t frameDepthIndex(const SSATmp* fp);
+
+/*
  * If a frame specified by its frame pointer lives on the stack and its offset
  * is known, return its offset relative to SP.
  */
-Optional<IRSPRelOffset> offsetOfFrame(SSATmp *fp);
+Optional<IRSPRelOffset> offsetOfFrame(const SSATmp *fp);
 
 //////////////////////////////////////////////////////////////////////
+
+struct EveryDefiningInstVisitor {
+  explicit EveryDefiningInstVisitor(const SSATmp* t) : m_stack({t}) {}
+  std::pair<const IRInstruction*, const SSATmp*> next();
+private:
+  jit::vector<const SSATmp*> m_stack;
+  jit::fast_set<const IRInstruction*> m_visited;
+};
 
 /*
  * Visit all instructions responsible for defining the given SSATmp,
@@ -105,42 +133,15 @@ Optional<IRSPRelOffset> offsetOfFrame(SSATmp *fp);
  * returns false, visitation stops.
  */
 template <typename V>
-bool visitEveryDefiningInst(
-  const SSATmp* t,
-  V v,
-  jit::fast_set<const IRInstruction*>* visited = nullptr
-) {
-  if (t->isA(TBottom)) return true;
-  auto const canonT = canonical(t);
-  auto const inst = canonT->inst();
+void visitEveryDefiningInst(const SSATmp* t, V v) {
+  EveryDefiningInstVisitor visitor{t};
 
-  if (!inst->is(DefLabel)) return v(inst, t);
-  if (visited && visited->count(inst)) return true;
-
-  auto const dsts = inst->dsts();
-  auto const dstIdx =
-    std::find(dsts.begin(), dsts.end(), canonT) - dsts.begin();
-  always_assert(dstIdx >= 0 && dstIdx < inst->numDsts());
-
-  Optional<jit::fast_set<const IRInstruction*>> visitedStorage;
-  if (!visited) {
-    visitedStorage.emplace();
-    visited = &visitedStorage.value();
+  while (true) {
+    auto const [inst, tmp] = visitor.next();
+    if (tmp == nullptr) break;
+    if (!v(inst, tmp)) break;
   }
-  visited->emplace(inst);
-
-  auto stop = false;
-  inst->block()->forEachSrc(
-    dstIdx,
-    [&] (const IRInstruction*, const SSATmp* s) {
-      if (stop) return;
-      if (!visitEveryDefiningInst(s, v, visited)) stop = true;
-    }
-  );
-
-  return !stop;
 }
-
 //////////////////////////////////////////////////////////////////////
 
-}
+}}

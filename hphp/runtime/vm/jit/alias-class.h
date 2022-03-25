@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/minstr-state.h"
 
 #include "hphp/runtime/vm/jit/alias-id-set.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
 #include <bitset>
@@ -89,7 +90,6 @@ struct ALocal;
 struct AIter;
 
 namespace detail {
-u_int32_t frame_depth_index(SSATmp* fp);
 
 static constexpr uint32_t kSlotsPerAIter = 4;
 static constexpr uint32_t kAIterBaseOffset = 0;
@@ -100,7 +100,7 @@ static constexpr uint32_t kAIterEndOffset = 3;
 }
 
 struct UFrameBase {
-  explicit UFrameBase(SSATmp* fp) : frameIdx{detail::frame_depth_index(fp)} {}
+  explicit UFrameBase(SSATmp* fp) : frameIdx{frameDepthIndex(fp)} {}
   explicit UFrameBase(uint32_t frameIdx) : frameIdx{frameIdx} {}
   uint32_t frameIdx;
 };

@@ -69,6 +69,21 @@ let validate_state fun_kind env s =
     Option.value_map ret_type_hint_locl_opt ~default:false ~f:Typing_defs.is_any
   in
   let is_bad_supertype sub sup =
+    let sup =
+      if TypecheckerOptions.enable_sound_dynamic (Tast_env.get_tcopt env) then
+        Typing_defs.(
+          map_ty sup ~f:(function
+              | Tclass (cid, ex, [ty])
+                when String.equal
+                       (snd cid)
+                       Naming_special_names.Classes.cAwaitable ->
+                let tenv = Tast_env.tast_env_as_typing_env env in
+                Tclass (cid, ex, [Typing_utils.strip_dynamic tenv ty])
+              | x -> x))
+      else
+        sup
+    in
+
     (* returns false if sup is TAny, which implements the special behavior for
        functions annotated with variations of TAny *)
     Tast_env.is_sub_type env sub sup && not (Tast_env.is_sub_type env sup sub)

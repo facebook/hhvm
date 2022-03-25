@@ -292,30 +292,14 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn mark_as_synthesized(&mut self) {
-        for ctx in self.substs.values_mut() {
-            ctx.from_req_extends = true;
-        }
-        if let Some(ref mut elt) = self.constructor.elt {
-            elt.set_is_synthesized(true);
-        }
-        for prop in self.props.values_mut() {
-            prop.set_is_synthesized(true);
-        }
-        for static_prop in self.static_props.values_mut() {
-            static_prop.set_is_synthesized(true);
-        }
-        for method in self.methods.values_mut() {
-            method.set_is_synthesized(true);
-        }
-        for static_method in self.static_methods.values_mut() {
-            static_method.set_is_synthesized(true);
-        }
-        for class_const in self.consts.values_mut() {
-            class_const.set_is_synthesized(true);
-        }
-        for type_const in self.type_consts.values_mut() {
-            type_const.set_is_synthesized(true);
-        }
+        (self.substs.values_mut()).for_each(|s| s.set_from_req_extends(true));
+        (self.constructor.elt.iter_mut()).for_each(|e| e.set_is_synthesized(true));
+        (self.props.values_mut()).for_each(|p| p.set_is_synthesized(true));
+        (self.static_props.values_mut()).for_each(|p| p.set_is_synthesized(true));
+        (self.methods.values_mut()).for_each(|m| m.set_is_synthesized(true));
+        (self.static_methods.values_mut()).for_each(|m| m.set_is_synthesized(true));
+        (self.consts.values_mut()).for_each(|c| c.set_is_synthesized(true));
+        (self.type_consts.values_mut()).for_each(|c| c.set_is_synthesized(true));
     }
 }
 

@@ -70,6 +70,12 @@ pub struct SubstContext<R: Reason> {
     pub from_req_extends: bool,
 }
 
+impl<R: Reason> SubstContext<R> {
+    pub fn set_from_req_extends(&mut self, p: bool) {
+        self.from_req_extends = p;
+    }
+}
+
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
 pub struct TypeConst<R: Reason> {

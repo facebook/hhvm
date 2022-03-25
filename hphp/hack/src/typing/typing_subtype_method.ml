@@ -15,102 +15,6 @@ open Typing_subtype
 module Reason = Typing_reason
 module Env = Typing_env
 module Phase = Typing_phase
-module MakeType = Typing_make_type
-
-(* Helper method for subtype_method_decl. See below *)
-let subtype_method
-    ~(check_return : bool)
-    (env : env)
-    (r_sub : Reason.t)
-    (ft_sub : locl_fun_type)
-    (r_super : Reason.t)
-    (ft_super : locl_fun_type)
-    (on_error : Typing_error.Reasons_callback.t) : env =
-  (* This is (1) and (2) below *)
-  let (env, ty_err1) =
-    subtype_funs
-      ~on_error:(Some on_error)
-      ~check_return
-      r_sub
-      ft_sub
-      r_super
-      ft_super
-      env
-  in
-  (* This is (3) below *)
-  let check_tparams_constraints env tparams =
-    let check_tparam_constraints
-        env { tp_name = (p, name); tp_constraints = cstrl; _ } =
-      let (env, ty_errs) =
-        List.fold_left
-          cstrl
-          ~init:(env, [])
-          ~f:(fun (env, ty_errs) (ck, cstr_ty) ->
-            (* TODO(T70068435) Revisit this when implementing bounds on HK generic vars.
-               For now it's safe to produce a Tgeneric with empty args here, because
-               if [name] were higher-kinded, then the constraints must be empty. *)
-            let tgeneric =
-              MakeType.generic (Reason.Rwitness_from_decl p) name
-            in
-            match
-              Typing_generic_constraint.check_constraint
-                env
-                ck
-                tgeneric
-                ~cstr_ty
-              @@ Some on_error
-            with
-            | (env, Some ty_err) -> (env, ty_err :: ty_errs)
-            | (env, _) -> (env, ty_errs))
-      in
-      (env, Typing_error.multiple_opt ty_errs)
-    in
-    let (env, ty_errs) =
-      List.fold_left tparams ~init:(env, []) ~f:(fun (env, ty_errs) tparam ->
-          match check_tparam_constraints env tparam with
-          | (env, Some ty_err) -> (env, ty_err :: ty_errs)
-          | (env, _) -> (env, ty_errs))
-    in
-    (env, Typing_error.multiple_opt ty_errs)
-  in
-  let check_where_constraints env cstrl =
-    let (env, ty_errs) =
-      List.fold_left
-        cstrl
-        ~init:(env, [])
-        ~f:(fun (env, ty_errs) (ty1, ck, ty2) ->
-          match
-            Typing_generic_constraint.check_constraint env ck ty1 ~cstr_ty:ty2
-            @@ Some on_error
-          with
-          | (env, Some ty_err) -> (env, ty_err :: ty_errs)
-          | (env, _) -> (env, ty_errs))
-    in
-    (env, Typing_error.multiple_opt ty_errs)
-  in
-  (* We only do this if the ft_tparam lengths match. Currently we don't even
-   * report this as an error, indeed different names for type parameters.
-   * TODO: make it an error to override with wrong number of type parameters
-   *)
-  let (env, ty_err2) =
-    if
-      Int.( <> )
-        (List.length ft_sub.ft_tparams)
-        (List.length ft_super.ft_tparams)
-    then
-      (env, None)
-    else
-      check_tparams_constraints env ft_sub.ft_tparams
-  in
-  let (env, ty_err3) =
-    check_where_constraints env ft_sub.ft_where_constraints
-  in
-  let ty_err_opt =
-    Typing_error.multiple_opt
-    @@ List.filter_map ~f:Fn.id [ty_err1; ty_err2; ty_err3]
-  in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  env
 
 (** Check that the method decl with signature ft_sub can be used to override
  * (is a subtype of) method decl with signature ft_super.
@@ -177,6 +81,8 @@ let subtype_method_decl
    * restore tpenv afterwards *)
   let old_tpenv = Env.get_tpenv env in
   let old_global_tpenv = Env.get_global_tpenv env in
+  let env = Env.open_tyvars env Pos.none in
+
   (* First extend the environment with the type parameters from the supertype, along
    * with their bounds and the function's where constraints
    *)
@@ -188,32 +94,134 @@ let subtype_method_decl
       ft_super.ft_where_constraints
   in
   Option.iter ~f:Errors.add_typing_error ty_err1;
-  (* Localize the function type itself *)
-  let ((env, ty_err2), locl_ft_sub) =
-    Phase.localize_ft ~ety_env ~def_pos:p_sub env ft_sub
+  (* Reified type parameters should match those in the overridden method (TODO).
+   * For non-reified parameters, we allow a generic method to override
+   * a method whose signature is an instance of the generic type. For example,
+   *   foo(int):int
+   * can be overridden by
+   *   foo<T>(T):T
+   * To implement this, we use localize_targs to generate fresh type variables for the
+   * generic parameters, and add bounds and where constraints.
+   * A more complex example is the following:
+   *   interface I { abstract const type TC as num; }
+   * Now consider
+   * class B {
+   *   function foo(num):void;
+   * }
+   * overridden by
+   * class C<T as I> extends B {
+   *   function foo<TF>(TF):void where TF super T::TC;
+   * }
+   * We need to find type variable #1 with T::TC <: #1 such that
+   * (by contravariance of parameter types) num <: #1.
+   * Clearly #1:=num is a solution, as T::TC <: num from the type constant bound.
+   * Dually, suppose we have
+   * class C<T as I> extends B {
+   *   function foo<TF>(TF):void where TF as T::TC;
+   * }
+   * This time, we need to find type variable #1 with #1 <: T::TC
+   * such that num <: #1.
+   * There is no solution, as by transitivity we need num <: T::TC which does not hold.
+   *)
+  let non_reified_tparams =
+    List.filter ft_sub.ft_tparams ~f:(fun tp ->
+        match tp.tp_reified with
+        | Aast.Erased -> true
+        | _ -> false)
+  in
+  let ((env, ty_err2), explicit_targs) =
+    Phase.localize_targs
+      ~check_well_kinded:true
+      ~is_method:true
+      ~def_pos:p_sub
+      ~use_pos:Pos.none
+      ~use_name:"overriding"
+      ~check_explicit_targs:false
+      env
+      non_reified_tparams
+      []
   in
   Option.iter ~f:Errors.add_typing_error ty_err2;
-  let ((env, ty_err3), locl_ft_super) =
-    Phase.localize_ft ~ety_env ~def_pos:p_super env ft_super
+  let tvarl = List.map ~f:fst explicit_targs in
+  let substs = Decl_subst.make_locl non_reified_tparams tvarl in
+  let (env, ty_err3) =
+    Typing_phase.check_tparams_constraints
+      ~use_pos:Pos.none
+      ~ety_env:{ ety_env with substs }
+      env
+      ft_sub.ft_tparams
   in
   Option.iter ~f:Errors.add_typing_error ty_err3;
+
+  (* Localize the function type for the method in the subtype.
+   * Non-reified generic method parameters will be replaced by the type
+   * variables generated by localize_targs *)
+  let ((env, ty_err4), locl_ft_sub) =
+    Phase.localize_ft ~ety_env:{ ety_env with substs } ~def_pos:p_sub env ft_sub
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err4;
+  (* Localize the function type for the method in the supertype.
+   * Generic method parameters will be left alone.
+   *)
+  let ((env, ty_err5), locl_ft_super) =
+    Phase.localize_ft ~ety_env ~def_pos:p_super env ft_super
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err5;
   let add_where_constraints env (cstrl : locl_where_constraint list) =
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
         Typing_subtype.add_constraint env ck ty1 ty2 (Some on_error))
   in
   (* Now extend the environment with `where` constraints from the supertype *)
   let env = add_where_constraints env locl_ft_super.ft_where_constraints in
-  (* Finally apply contra/co subtyping on the function type, and check that
-   * the constraints on the supertype entail the constraints on the subtype *)
-  let env =
-    subtype_method
-      ~check_return
+  (* Check the where constraints from the subtype. *)
+  (* Localize the where constraints here rather than using locl_ft_sub.ft_where_constraints,
+   * as localize_ft loses changes to tpenv (see comments in code for localize_ft) *)
+  let check_where_constraints ~ety_env env cstrl =
+    let (env, ty_errs) =
+      List.fold_left
+        cstrl
+        ~init:(env, [])
+        ~f:(fun (env, ty_errs) (ty, ck, cstr_ty) ->
+          let ((env, e1), ty) = Phase.localize ~ety_env env ty in
+          let ((env, e2), cstr_ty) = Phase.localize ~ety_env env cstr_ty in
+          let (env, e3) =
+            Typing_generic_constraint.check_constraint env ck ~cstr_ty ty
+            @@ Some on_error
+          in
+          let ty_err_opt =
+            Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3]
+          in
+          let ty_errs =
+            Option.value_map
+              ~default:ty_errs
+              ~f:(fun e -> e :: ty_errs)
+              ty_err_opt
+          in
+          (env, ty_errs))
+    in
+    (env, Typing_error.multiple_opt ty_errs)
+  in
+  let (env, ty_err6) =
+    check_where_constraints
+      ~ety_env:{ ety_env with substs }
       env
+      ft_sub.ft_where_constraints
+  in
+
+  Option.iter ~f:Errors.add_typing_error ty_err6;
+  (* Finally apply ordinary contra/co subtyping on the function types *)
+  let (env, ty_err7) =
+    subtype_funs
+      ~on_error:(Some on_error)
+      ~check_return
       r_sub
       locl_ft_sub
       r_super
       locl_ft_super
-      on_error
+      env
   in
+  Option.iter ~f:Errors.add_typing_error ty_err7;
+  let (env, ty_err8) = Typing_solver.close_tyvars_and_solve env in
+  Option.iter ~f:Errors.add_typing_error ty_err8;
   (* Restore the type parameter environment *)
   Env.env_with_tpenv (Env.env_with_global_tpenv env old_global_tpenv) old_tpenv

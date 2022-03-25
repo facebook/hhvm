@@ -6,5 +6,5 @@ The method `f` is not compatible with the overridden method (Typing[4341])
   This type constraint is violated
   File "generic_incompatible_implementation2.php", line 6, characters 26-28:
   Expected `num`
-  File "generic_incompatible_implementation2.php", line 6, characters 21-21:
+  File "generic_incompatible_implementation2.php", line 10, characters 26-26:
   But got `T`

@@ -6,5 +6,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   This type constraint is violated
   File "t13262460.php", line 18, characters 28-28:
   Expected `C`
-  File "t13262460.php", line 18, characters 23-23:
+  File "t13262460.php", line 13, characters 41-41:
   But got `T as B`
+  File "t13262460.php", line 13, characters 41-41:
+  This type argument to `Action` only allows supertypes (it is contravariant)

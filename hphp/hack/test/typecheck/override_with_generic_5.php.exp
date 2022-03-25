@@ -1,0 +1,24 @@
+File "override_with_generic_5.php", line 52, characters 19-36:
+The method `numInContravar_Sub` is not compatible with the overridden method (Typing[4341])
+  File "override_with_generic_5.php", line 52, characters 70-74:
+  Expected `T::Ti`
+  File "override_with_generic_5.php", line 17, characters 38-40:
+  But got `num`
+File "override_with_generic_5.php", line 57, characters 19-35:
+The method `numInContravar_Eq` is not compatible with the overridden method (Typing[4341])
+  File "override_with_generic_5.php", line 57, characters 68-72:
+  Expected `T::Ti`
+  File "override_with_generic_5.php", line 18, characters 37-39:
+  But got `num`
+File "override_with_generic_5.php", line 62, characters 19-34:
+The method `numInInvar_Super` is not compatible with the overridden method (Typing[4341])
+  File "override_with_generic_5.php", line 62, characters 72-76:
+  Expected `T::Ti`
+  File "override_with_generic_5.php", line 20, characters 39-41:
+  But got `num`
+File "override_with_generic_5.php", line 72, characters 19-31:
+The method `numInInvar_Eq` is not compatible with the overridden method (Typing[4341])
+  File "override_with_generic_5.php", line 72, characters 68-72:
+  Expected `T::Ti`
+  File "override_with_generic_5.php", line 22, characters 36-38:
+  But got `num`

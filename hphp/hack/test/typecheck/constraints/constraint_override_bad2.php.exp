@@ -6,5 +6,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   This type constraint is violated
   File "constraint_override_bad2.php", line 20, characters 28-28:
   Expected `C`
-  File "constraint_override_bad2.php", line 20, characters 23-23:
+  File "constraint_override_bad2.php", line 15, characters 41-41:
   But got `T as B`
+  File "constraint_override_bad2.php", line 15, characters 41-41:
+  This type argument to `Action` only allows supertypes (it is contravariant)

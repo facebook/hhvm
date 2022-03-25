@@ -4,7 +4,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   `T` is a constrained type parameter
   File "constraint_override_bad.php", line 10, characters 31-31:
   This type constraint is violated
-  File "constraint_override_bad.php", line 10, characters 23-23:
+  File "constraint_override_bad.php", line 5, characters 37-37:
   Expected `T`
   File "constraint_override_bad.php", line 10, characters 31-31:
   But got `B`

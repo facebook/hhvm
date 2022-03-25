@@ -645,16 +645,7 @@ and localize_ft
       let tvarl = List.map ~f:fst explicit_targs in
       let ft_subst = Subst.make_locl ft.ft_tparams tvarl in
       ((env, ty_err_opt), SMap.union ft_subst ety_env.substs)
-    | None ->
-      ( (env, None),
-        List.fold_left
-          ft.ft_tparams
-          ~f:
-            begin
-              fun subst t ->
-              SMap.remove (snd t.tp_name) subst
-            end
-          ~init:ety_env.substs )
+    | None -> ((env, None), ety_env.substs)
   in
   let ety_env = { ety_env with substs } in
   (* Localize the constraints for a type parameter declaration *)

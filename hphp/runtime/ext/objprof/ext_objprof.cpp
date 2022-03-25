@@ -920,7 +920,7 @@ void getObjStrings(
 ///////////////////////////////////////////////////////////////////////////////
 // Function that traverses objects and counts metrics per strings
 
-Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
+Array HHVM_FUNCTION(objprof_get_strings, int64_t min_dup) {
   ObjprofStrings metrics;
 
   std::unordered_set<void*> pointers;
@@ -953,7 +953,7 @@ Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
 // Function that inits the scan of the memory and count of class pointers
 
 Array HHVM_FUNCTION(objprof_get_data,
-  int flags = ObjprofFlags::DEFAULT,
+  int64_t flags = ObjprofFlags::DEFAULT,
   const Array& exclude_list = Array()
 ) {
   std::unordered_map<ClassProp, ObjprofMetrics> histogram;
@@ -1024,7 +1024,7 @@ Array HHVM_FUNCTION(objprof_get_data,
 }
 
 Array HHVM_FUNCTION(objprof_get_paths,
-  int flags = ObjprofFlags::DEFAULT,
+  int64_t flags = ObjprofFlags::DEFAULT,
   const Array& exclude_list = Array()
 ) {
   std::unordered_map<ClassProp, ObjprofMetrics> histogram;

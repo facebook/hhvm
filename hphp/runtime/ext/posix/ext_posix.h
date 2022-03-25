@@ -27,7 +27,7 @@ namespace HPHP {
 
 bool HHVM_FUNCTION(posix_access,
                    const String& file,
-                   int mode = 0);
+                   int64_t mode = 0);
 
 String HHVM_FUNCTION(posix_ctermid);
 
@@ -44,7 +44,7 @@ int64_t HHVM_FUNCTION(posix_geteuid);
 int64_t HHVM_FUNCTION(posix_getgid);
 
 Variant HHVM_FUNCTION(posix_getgrgid,
-                      int gid);
+                      int64_t gid);
 
 Variant HHVM_FUNCTION(posix_getgrnam,
                       const String& name);
@@ -54,7 +54,7 @@ Variant HHVM_FUNCTION(posix_getgroups);
 Variant HHVM_FUNCTION(posix_getlogin);
 
 Variant HHVM_FUNCTION(posix_getpgid,
-                      int pid);
+                      int64_t pid);
 
 int64_t HHVM_FUNCTION(posix_getpgrp);
 
@@ -66,56 +66,56 @@ Variant HHVM_FUNCTION(posix_getpwnam,
                       const String& username);
 
 Variant HHVM_FUNCTION(posix_getpwuid,
-                      int uid);
+                      int64_t uid);
 
 Variant HHVM_FUNCTION(posix_getrlimit);
 
 Variant HHVM_FUNCTION(posix_getsid,
-                      int pid);
+                      int64_t pid);
 
 int64_t HHVM_FUNCTION(posix_getuid);
 
 bool HHVM_FUNCTION(posix_initgroups,
                    const String& name,
-                   int base_group_id);
+                   int64_t base_group_id);
 
 bool HHVM_FUNCTION(posix_isatty,
                    const Variant& fd);
 
 bool HHVM_FUNCTION(posix_kill,
-                   int pid,
-                   int sig);
+                   int64_t pid,
+                   int64_t sig);
 
 bool HHVM_FUNCTION(posix_mkfifo,
                    const String& pathname,
-                   int mode);
+                   int64_t mode);
 
 bool HHVM_FUNCTION(posix_mknod,
                    const String& pathname,
-                   int mode,
-                   int major = 0,
-                   int minor = 0);
+                   int64_t mode,
+                   int64_t major = 0,
+                   int64_t minor = 0);
 
 bool HHVM_FUNCTION(posix_setegid,
-                   int gid);
+                   int64_t gid);
 
 bool HHVM_FUNCTION(posix_seteuid,
-                   int uid);
+                   int64_t uid);
 
 bool HHVM_FUNCTION(posix_setgid,
-                   int gid);
+                   int64_t gid);
 
 bool HHVM_FUNCTION(posix_setpgid,
-                   int pid,
-                   int pgid);
+                   int64_t pid,
+                   int64_t pgid);
 
 int64_t HHVM_FUNCTION(posix_setsid);
 
 bool HHVM_FUNCTION(posix_setuid,
-                   int uid);
+                   int64_t uid);
 
 String HHVM_FUNCTION(posix_strerror,
-                     int errnum);
+                     int64_t errnum);
 
 Variant HHVM_FUNCTION(posix_times);
 
@@ -126,4 +126,3 @@ Variant HHVM_FUNCTION(posix_uname);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

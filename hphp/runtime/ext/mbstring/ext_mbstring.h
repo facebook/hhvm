@@ -32,7 +32,7 @@ bool HHVM_FUNCTION(mb_check_encoding,
                    const Variant& opt_encoding = uninit_variant);
 Variant HHVM_FUNCTION(mb_convert_case,
                       const String& str,
-                      int mode,
+                      int64_t mode,
                       const Variant& opt_encoding = uninit_variant);
 Variant HHVM_FUNCTION(mb_convert_encoding,
                       const String& str,
@@ -64,7 +64,7 @@ Variant HHVM_FUNCTION(mb_encode_mimeheader,
                       const Variant& opt_charset = uninit_variant,
                       const Variant& opt_transfer_encoding = uninit_variant,
                       const String& linefeed = "\r\n",
-                      int indent = 0);
+                      int64_t indent = 0);
 Variant HHVM_FUNCTION(mb_encode_numericentity,
                       const String& str,
                       const Variant& convmap,
@@ -94,7 +94,7 @@ Variant HHVM_FUNCTION(mb_ereg_search_regs,
                       const Variant& opt_pattern = uninit_variant,
                       const Variant& opt_option = uninit_variant);
 bool HHVM_FUNCTION(mb_ereg_search_setpos,
-                   int position);
+                   int64_t position);
 Variant HHVM_FUNCTION(mb_ereg_search,
                       const Variant& opt_pattern = uninit_variant,
                       const Variant& opt_option = uninit_variant);
@@ -123,7 +123,7 @@ Variant HHVM_FUNCTION(mb_language,
                       const Variant& opt_language = uninit_variant);
 String HHVM_FUNCTION(mb_output_handler,
                      const String& contents,
-                     int status);
+                     int64_t status);
 bool HHVM_FUNCTION(mb_parse_str,
                    const String& encoded_string,
                    Array& result);
@@ -142,22 +142,22 @@ bool HHVM_FUNCTION(mb_send_mail,
 Variant HHVM_FUNCTION(mb_split,
                       const String& pattern,
                       const String& str,
-                      int count = -1);
+                      int64_t count = -1);
 Variant HHVM_FUNCTION(mb_strcut,
                       const String& str,
-                      int start,
+                      int64_t start,
                       const Variant& length = uninit_null(),
                       const Variant& opt_encoding = uninit_variant);
 Variant HHVM_FUNCTION(mb_strimwidth,
                       const String& str,
-                      int start,
-                      int width,
+                      int64_t start,
+                      int64_t width,
                       const Variant& opt_trimmarker = uninit_variant,
                       const Variant& opt_encoding = uninit_variant);
 Variant HHVM_FUNCTION(mb_stripos,
                       const String& haystack,
                       const String& needle,
-                      int offset = 0,
+                      int64_t offset = 0,
                       const Variant& opt_encoding = uninit_variant);
 Variant HHVM_FUNCTION(mb_stristr,
                       const String& haystack,
@@ -170,7 +170,7 @@ Variant HHVM_FUNCTION(mb_strlen,
 Variant HHVM_FUNCTION(mb_strpos,
                       const String& haystack,
                       const String& needle,
-                      int offset = 0,
+                      int64_t offset = 0,
                       const Variant& opt_encoding = uninit_variant);
 Variant HHVM_FUNCTION(mb_strrchr,
                       const String& haystack,
@@ -185,7 +185,7 @@ Variant HHVM_FUNCTION(mb_strrichr,
 Variant HHVM_FUNCTION(mb_strripos,
                       const String& haystack,
                       const String& needle,
-                      int offset = 0,
+                      int64_t offset = 0,
                       const Variant& opt_encoding = uninit_variant);
 Variant HHVM_FUNCTION(mb_strrpos,
                       const String& haystack,
@@ -214,10 +214,9 @@ Variant HHVM_FUNCTION(mb_substr_count,
                       const Variant& opt_encoding = uninit_variant);
 Variant HHVM_FUNCTION(mb_substr,
                       const String& str,
-                      int start,
+                      int64_t start,
                       const Variant& length = uninit_null(),
                       const Variant& opt_encoding = uninit_variant);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

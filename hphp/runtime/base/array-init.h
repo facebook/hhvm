@@ -146,8 +146,9 @@ protected:
    * Only used by the constructors of derived classes.
    */
   ArrayInitBase(size_t n, CheckAllocation)
+    : m_arr{nullptr}
 #ifndef NDEBUG
-    : m_addCount(0)
+    , m_addCount(0)
     , m_expectedCount(n)
 #endif
   {}

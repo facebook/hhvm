@@ -22,6 +22,8 @@ use namespace HH\Lib\_Private\_Str;
  * offset is out-of-bounds, a ViolationException will be thrown.
  *
  * Previously known as `substr` in PHP.
+ *
+ * @guide /hack/built-in-types/string
  */
 function slice(
   string $string,
@@ -34,6 +36,8 @@ function slice(
 /**
  * Returns the string with the given prefix removed, or the string itself if
  * it doesn't start with the prefix.
+ *
+ * @guide /hack/built-in-types/string
  */
 function strip_prefix(
   string $string,
@@ -45,6 +49,8 @@ function strip_prefix(
 /**
  * Returns the string with the given suffix removed, or the string itself if
  * it doesn't end with the suffix.
+ *
+ * @guide /hack/built-in-types/string
  */
 function strip_suffix(
   string $string,
@@ -61,6 +67,8 @@ function strip_suffix(
  *
  * - To only strip from the left, see `Str\trim_left()`.
  * - To only strip from the right, see `Str\trim_right()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function trim(
   string $string,
@@ -77,6 +85,8 @@ function trim(
  * - To only strip from the right, see `Str\trim_right()`.
  * - To strip a specific prefix (instead of all characters matching a mask),
  *   see `Str\strip_prefix()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function trim_left(
   string $string,
@@ -93,6 +103,8 @@ function trim_left(
  * - To only strip from the left, see `Str\trim_left()`.
  * - To strip a specific suffix (instead of all characters matching a mask),
  *   see `Str\strip_suffix()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function trim_right(
   string $string,

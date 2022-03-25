@@ -20,6 +20,8 @@ use namespace HH\Lib\{_Private, C, Keyset, Vec, _Private\_Str};
  *
  * - To capitalize all characters, see `Str\uppercase()`.
  * - To capitalize all words, see `Str\capitalize_words()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function capitalize(
   string $string,
@@ -38,6 +40,8 @@ function capitalize(
  *
  * - To capitalize all characters, see `Str\uppercase()`.
  * - To capitalize only the first character, see `Str\capitalize()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function capitalize_words(
   string $string,
@@ -76,6 +80,8 @@ function capitalize_words(
  * If `$decimals` is provided, the string will contain that many decimal places.
  * The optional `$decimal_point` and `$thousands_separator` arguments define the
  * strings used for decimals and commas, respectively.
+ *
+ * @guide /hack/built-in-types/string
  */
 function format_number(
   num $number,
@@ -93,6 +99,8 @@ function format_number(
 
 /**
  * Returns the string with all alphabetic characters converted to lowercase.
+ *
+ * @guide /hack/built-in-types/string
  */
 function lowercase(
   string $string,
@@ -110,6 +118,8 @@ function lowercase(
  *
  * To pad the string on the right, see `Str\pad_right()`.
  * To pad the string to a fixed number of characters, see `Str\pad_left_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function pad_left(
   string $string,
@@ -129,6 +139,8 @@ function pad_left(
  *
  * To pad the string on the left, see `Str\pad_left()`.
  * To pad the string to a fixed number of characters, see `Str\pad_right_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function pad_right(
   string $string,
@@ -142,6 +154,8 @@ function pad_right(
  * Returns the input string repeated `$multiplier` times.
  *
  * If the multiplier is 0, the empty string will be returned.
+ *
+ * @guide /hack/built-in-types/string
  */
 function repeat(
   string $string,
@@ -160,6 +174,8 @@ function repeat(
  * - For a case-insensitive search/replace, see `Str\replace_ci()`.
  * - For multiple case-sensitive searches/replacements, see `Str\replace_every()`.
  * - For multiple case-insensitive searches/replacements, see `Str\replace_every_ci()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace(
   string $haystack,
@@ -176,6 +192,8 @@ function replace(
  * - For a case-sensitive search/replace, see `Str\replace()`.
  * - For multiple case-sensitive searches/replacements, see `Str\replace_every()`.
  * - For multiple case-insensitive searches/replacements, see `Str\replace_every_ci()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 // not pure: str_ireplace uses global locale for capitalization
 function replace_ci(
@@ -202,6 +220,8 @@ function replace_ci(
  * - For a single case-insensitive search/replace, see `Str\replace_ci()`.
  * - For multiple case-insensitive searches/replacements, see `Str\replace_every_ci()`.
  * - For not having new values searched again, see `Str\replace_every_nonrecursive()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace_every(
   string $haystack,
@@ -226,6 +246,8 @@ function replace_every(
  * - For a single case-insensitive search/replace, see `Str\replace_ci()`.
  * - For multiple case-sensitive searches/replacements, see `Str\replace_every()`.
  * - For not having new values searched again, see `Str\replace_every_nonrecursive_ci()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace_every_ci(
   string $haystack,
@@ -245,6 +267,8 @@ function replace_every_ci(
  * of `$replacements` therefore doesn't matter.
  *
  * - For having new values searched again, see `Str\replace_every()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace_every_nonrecursive(
   string $haystack,
@@ -271,6 +295,8 @@ function replace_every_nonrecursive(
  * b is the sum of distinct key lengths (length is the length of `$haystack`)
  *
  * - For having new values searched again, see `Str\replace_every_ci()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace_every_nonrecursive_ci(
   string $haystack,
@@ -282,6 +308,8 @@ function replace_every_nonrecursive_ci(
 /** Reverse a string by bytes.
  *
  * @see `Str\reverse_l()` to reverse by characters instead.
+ *
+ * @guide /hack/built-in-types/string
  */
 function reverse(string $string)[]: string {
   for ($lo = 0, $hi = namespace\length($string) - 1; $lo < $hi; $lo++, $hi--) {
@@ -311,6 +339,8 @@ function reverse(string $string)[]: string {
  * - `Str\splice("apple", "orange", 5, 0)` with `$length` `0`, `$replacement` is appended at `$offset` `5` and resolves to `"appleorange"`
  *
  * Previously known in PHP as `substr_replace`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function splice(
   string $string,
@@ -323,6 +353,8 @@ function splice(
 
 /**
  * Returns the given string as an integer, or null if the string isn't numeric.
+ *
+ * @guide /hack/built-in-types/string
  */
 function to_int(
   string $string,
@@ -335,6 +367,8 @@ function to_int(
 
 /**
  * Returns the string with all alphabetic characters converted to uppercase.
+ *
+ * @guide /hack/built-in-types/string
  */
 function uppercase(
   string $string,

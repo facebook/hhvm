@@ -17,12 +17,14 @@ use namespace HH\Lib\{_Private, Str};
  * and an optional offset at which to start the search.
  * The regex pattern follows the PCRE library: https://www.pcre.org/original/doc/html/pcresyntax.html.
  *
- * Throws Invariant[Violation]Exception if `$offset` is not within plus/minus the length of `$haystack`.
+ * Throws `InvariantException` if `$offset` is not within plus/minus the length of `$haystack`.
  * Returns null if there is no match, or a Match containing
  *    - the entire matching string, at key 0,
  *    - the results of unnamed capture groups, at integer keys corresponding to
  *        the groups' occurrence within the pattern, and
  *    - the results of named capture groups, at string keys matching their respective names.
+ *
+ * @guide /hack/built-in-types/string
  */
 function first_match<T as Match>(
   string $haystack,
@@ -37,7 +39,9 @@ function first_match<T as Match>(
  * and an optional offset at which to start the search.
  * The regex pattern follows the PCRE library: https://www.pcre.org/original/doc/html/pcresyntax.html.
  *
- * Throws Invariant[Violation]Exception if `$offset` is not within plus/minus the length of `$haystack`.
+ * Throws `InvariantException` if `$offset` is not within plus/minus the length of `$haystack`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function every_match<T as Match>(
   string $haystack,
@@ -70,7 +74,9 @@ function every_match<T as Match>(
  * and an optional offset at which to start the search.
  * The regex pattern follows the PCRE library: https://www.pcre.org/original/doc/html/pcresyntax.html.
  *
- * Throws Invariant[Violation]Exception if `$offset` is not within plus/minus the length of `$haystack`.
+ * Throws `InvariantException` if `$offset` is not within plus/minus the length of `$haystack`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function matches(
   string $haystack,
@@ -86,7 +92,9 @@ function matches(
  * only starting from `$offset`.
  * The regex pattern follows the PCRE library: https://www.pcre.org/original/doc/html/pcresyntax.html.
  *
- * Throws Invariant[Violation]Exception if `$offset` is not within plus/minus the length of `$haystack`.
+ * Throws `InvariantException` if `$offset` is not within plus/minus the length of `$haystack`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace(
   string $haystack,
@@ -125,7 +133,9 @@ function replace(
  * If `$offset` is given, replacements are made only starting from `$offset`.
  * The regex pattern follows the PCRE library: https://www.pcre.org/original/doc/html/pcresyntax.html.
  *
- * Throws Invariant[Violation]Exception if `$offset` is not within plus/minus the length of `$haystack`.
+ * Throws `InvariantException` if `$offset` is not within plus/minus the length of `$haystack`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace_with<T as Match>(
   string $haystack,
@@ -170,7 +180,9 @@ function replace_with<T as Match>(
  * If no substrings of `$haystack` match `$delimiter`, a vec containing only `$haystack` will be returned.
  * The regex pattern follows the PCRE library: https://www.pcre.org/original/doc/html/pcresyntax.html.
  *
- * Throws Invariant[Violation]Exception if `$limit` < 2.
+ * Throws `InvariantException` if `$limit` < 2.
+ *
+ * @guide /hack/built-in-types/string
  */
 function split(
   string $haystack,
@@ -217,6 +229,8 @@ function split(
 /**
  * Renders a Regex Pattern to a string.
  * The regex pattern follows the PCRE library: https://www.pcre.org/original/doc/html/pcresyntax.html.
+ *
+ * @guide /hack/built-in-types/string
  */
 function to_string(Pattern<Match> $pattern)[]: string {
   return $pattern as string;

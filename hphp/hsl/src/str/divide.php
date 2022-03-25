@@ -16,6 +16,8 @@ use namespace HH\Lib\{Locale, _Private\_Str};
  * Returns a vec containing the string split into chunks of the given size.
  *
  * To split the string on a delimiter, see `Str\split()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function chunk(
   string $string,
@@ -35,6 +37,8 @@ function chunk(
  * To use a pattern as delimiter, see `Regex\split()`.
  *
  * Previously known as `explode` in PHP.
+ *
+ * @guide /hack/built-in-types/string
  */
 function split(
   string $string,

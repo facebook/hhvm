@@ -13,14 +13,16 @@ namespace HH\Lib\Str;
 use namespace HH\Lib\{Locale, _Private, _Private\_Str};
 
 /**
- * Returns < 0 if `$string1` is less than `$string2`, > 0 if `$string1` is
- * greater than `$string2`, and 0 if they are equal.
+ * Returns `< 0` if `$string1` is less than `$string2`, `> 0` if `$string1` is
+ * greater than `$string2`, and `0` if they are equal.
  *
  * For a case-insensitive comparison, see `Str\compare_ci_l()`.
  *
  * Locale-specific collation rules will be followed, and strings will be
  * normalized in encodings that support multiple representations of the same
  * characters, such as UTF8.
+ *
+ * @guide /hack/built-in-types/string
  */
 function compare_l(
   Locale\Locale $locale,
@@ -31,14 +33,16 @@ function compare_l(
 }
 
 /**
- * Returns < 0 if `$string1` is less than `$string2`, > 0 if `$string1` is
- * greater than `$string2`, and 0 if they are equal (case-insensitive).
+ * Returns `< 0` if `$string1` is less than `$string2`, `> 0` if `$string1` is
+ * greater than `$string2`, and `0` if they are equal (case-insensitive).
  *
  * For a case-sensitive comparison, see `Str\compare_l()`.
  *
  * Locale-specific collation and case-sensitivity rules will be used. For
  * example, case-insensitive comparisons between `i`, `I`, `ı`, and `İ` vary
  * by locale.
+ *
+ * @guide /hack/built-in-types/string
  */
 function compare_ci_l(
   Locale\Locale $locale,
@@ -61,6 +65,8 @@ function compare_ci_l(
  *
  * - To get the position of the needle, see `Str\search_l()`.
  * - To search for the needle case-insensitively, see `Str\contains_ci_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function contains_l(
   Locale\Locale $locale,
@@ -99,6 +105,8 @@ function contains_l(
  *
  * - To search for the needle case-sensitively, see `Str\contains_l()`.
  * - To get the position of the needle case-insensitively, see `Str\search_ci_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function contains_ci_l(
   Locale\Locale $locale,
@@ -129,6 +137,8 @@ function contains_ci_l(
  * as UTF-8.
  *
  * For a case-insensitive check, see `Str\ends_with_ci_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function ends_with_l(
   Locale\Locale $locale,
@@ -147,6 +157,8 @@ function ends_with_l(
  * as UTF-8.
  *
  * For a case-sensitive check, see `Str\ends_with_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function ends_with_ci_l(
   Locale\Locale $locale,
@@ -162,7 +174,9 @@ function ends_with_ci_l(
  * This function may be `O(1)` or `O(n)` depending on the encoding specified
  * by the locale (LC_CTYPE).
  *
- * @see `Str\length()` (or pass `Locale\c()`) for the length in bytes.
+ * See `Str\length()` (or pass `Locale\c()`) for the length in bytes.
+ *
+ * @guide /hack/built-in-types/string
  */
 function length_l(
   Locale\Locale $locale,
@@ -183,6 +197,8 @@ function length_l(
  * - To simply check if the haystack contains the needle, see `Str\contains_l()`.
  * - To get the case-insensitive position, see `Str\search_ci_l()`.
  * - To get the last position of the needle, see `Str\search_last_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function search_l(
   Locale\Locale $locale,
@@ -211,6 +227,8 @@ function search_l(
  * - To simply check if the haystack contains the needle, see `Str\contains()`.
  * - To get the case-sensitive position, see `Str\search()`.
  * - To get the last position of the needle, see `Str\search_last()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function search_ci_l(
   Locale\Locale $locale,
@@ -238,6 +256,8 @@ function search_ci_l(
  * - To get the first position of the needle, see `Str\search()`.
  *
  * Previously known in PHP as `strrpos`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function search_last_l(
   Locale\Locale $locale,
@@ -261,6 +281,8 @@ function search_last_l(
  *
  * For a case-insensitive check, see `Str\starts_with_ci_l()`.
  * For a byte-wise check, see `Str\starts_with()`
+ *
+ * @guide /hack/built-in-types/string
  */
 function starts_with_l(
   Locale\Locale $locale,
@@ -278,6 +300,8 @@ function starts_with_l(
  * characters, such as UTF8.
  *
  * For a case-sensitive check, see `Str\starts_with()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function starts_with_ci_l(
   Locale\Locale $locale,

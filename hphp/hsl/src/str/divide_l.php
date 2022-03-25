@@ -16,9 +16,11 @@ use namespace HH\Lib\{Locale, _Private\_Str};
  * Returns a vec containing the string split into chunks with the given number
  * of characters.
  *
- * $chunk_size is in characters,
+ * `$chunk_size` is in characters.
  *
  * To split the string on a delimiter, see `Str\split_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function chunk_l(
   Locale\Locale $locale,
@@ -37,6 +39,8 @@ function chunk_l(
  *
  * To split the string into equally-sized chunks, see `Str\chunk_l()`.
  * To use a pattern as delimiter, see `Regex\split()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function split_l(
   Locale\Locale $locale,

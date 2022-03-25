@@ -23,6 +23,8 @@ use namespace HH\Lib\{_Private, C, Keyset, Locale, Vec, _Private\_Str};
  *
  * - To capitalize all characters, see `Str\uppercase_l()`.
  * - To capitalize all words, see `Str\capitalize_words_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function capitalize_l(
   Locale\Locale $locale,
@@ -44,6 +46,8 @@ function capitalize_l(
  *
  * - To capitalize all characters, see `Str\uppercase_l()`.
  * - To capitalize only the first character, see `Str\capitalize_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function capitalize_words_l(
   Locale\Locale $locale,
@@ -57,6 +61,8 @@ function capitalize_words_l(
  *
  * Locale-specific capitalization rules will be respected, e.g. `I` -> `i` vs
  * `I` -> `ı`
+ *
+ * @guide /hack/built-in-types/string
  */
 function lowercase_l(
   Locale\Locale $locale,
@@ -75,6 +81,8 @@ function lowercase_l(
  *
  * To pad the string on the right, see `Str\pad_right_l()`.
  * To pad the string to a fixed number of bytes, see `Str\pad_left()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function pad_left_l(
   Locale\Locale $locale,
@@ -95,6 +103,8 @@ function pad_left_l(
  *
  * To pad the string on the left, see `Str\pad_left()`.
  * To pad the string to a fixed number of bytes, see `Str\pad_right()`
+ *
+ * @guide /hack/built-in-types/string
  */
 function pad_right_l(
   Locale\Locale $locale,
@@ -115,6 +125,8 @@ function pad_right_l(
  * - For a case-insensitive search/replace, see `Str\replace_ci_l()`.
  * - For multiple case-sensitive searches/replacements, see `Str\replace_every_l()`.
  * - For multiple case-insensitive searches/replacements, see `Str\replace_every_ci_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace_l(
   Locale\Locale $locale,
@@ -137,6 +149,8 @@ function replace_l(
  * - For a case-sensitive search/replace, see `Str\replace_l()`.
  * - For multiple case-sensitive searches/replacements, see `Str\replace_every_l()`.
  * - For multiple case-insensitive searches/replacements, see `Str\replace_every_ci_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace_ci_l(
   Locale\Locale $locale,
@@ -166,6 +180,8 @@ function replace_ci_l(
  * - For a single case-insensitive search/replace, see `Str\replace_ci_l()`.
  * - For multiple case-insensitive searches/replacements, see `Str\replace_every_ci_l()`.
  * - For not having new values searched again, see `Str\replace_every_nonrecursive_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace_every_l(
   Locale\Locale $locale,
@@ -196,6 +212,8 @@ function replace_every_l(
  * - For a single case-insensitive search/replace, see `Str\replace_ci_l()`.
  * - For multiple case-sensitive searches/replacements, see `Str\replace_every_l()`.
  * - For not having new values searched again, see `Str\replace_every_nonrecursive_ci_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace_every_ci_l(
   Locale\Locale $locale,
@@ -219,6 +237,8 @@ function replace_every_ci_l(
  * of `$replacements` therefore doesn't matter.
  *
  * - For having new values searched again, see `Str\replace_every_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace_every_nonrecursive_l(
   Locale\Locale $locale,
@@ -251,6 +271,8 @@ function replace_every_nonrecursive_l(
  * b is the sum of distinct key lengths (length is the length of `$haystack`)
  *
  * - For having new values searched again, see `Str\replace_every_ci_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function replace_every_nonrecursive_ci_l(
   Locale\Locale $locale,
@@ -263,6 +285,8 @@ function replace_every_nonrecursive_ci_l(
 /** Reverse a string by characters.
  *
  * @see `Str\reverse()` to reverse by bytes instead.
+ *
+ * @guide /hack/built-in-types/string
  */
 function reverse_l(Locale\Locale $locale, string $string)[]: string {
   return _Str\reverse_l($string, $locale);
@@ -287,6 +311,7 @@ function reverse_l(Locale\Locale $locale, string $string)[]: string {
  * - `Str\splice_l($l, "apple", "orange", 0, 0)` with `$length` `0`, `$replacement` is appended at `$offset` `0` and resolves to `"orangeapple"`
  * - `Str\splice_l($l, "apple", "orange", 5, 0)` with `$length` `0`, `$replacement` is appended at `$offset` `5` and resolves to `"appleorange"`
  *
+ * @guide /hack/built-in-types/string
  */
 function splice_l(
   Locale\Locale $locale,
@@ -303,6 +328,8 @@ function splice_l(
  *
  * Locale-specific capitalization rules will be respected, e.g. `i` -> `I` vs
  * `i` -> `İ`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function uppercase_l(
   Locale\Locale $locale,

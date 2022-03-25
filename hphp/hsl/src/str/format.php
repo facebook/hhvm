@@ -54,6 +54,9 @@ interface SprintfFormat {
 /**
  * Accessory interface for `SprintfFormat`
  * Note: This should really be a wildcard. It's only used once (with '=').
+ *
+ * @guide /hack/built-in-types/string
+ * @guide /hack/functions/format-strings
  */
 interface SprintfFormatQuote {
   public function format_0x3d(): SprintfFormat;
@@ -64,6 +67,9 @@ type SprintfFormatString = \HH\FormatString<SprintfFormat>;
 /**
  * Given a valid format string (defined by `SprintfFormatString`), return a
  * formatted string using `$format_args`
+ *
+ * @guide /hack/built-in-types/string
+ * @guide /hack/functions/format-strings
  */
 function format(
   SprintfFormatString $format_string,

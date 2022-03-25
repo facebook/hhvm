@@ -23,6 +23,8 @@ use namespace HH\Lib\{Locale, _Private, _Private\_Str};
  * offset is out-of-bounds, an InvalidArgumentException will be thrown.
  *
  * See `slice()` for a byte-based operation.
+ *
+ * @guide /hack/built-in-types/string
  */
 function slice_l(
   Locale\Locale $locale,
@@ -39,6 +41,8 @@ function slice_l(
  *
  * Strings will be normalized for comparison in encodings that support multiple
  * representations, such as UTF-8.
+ *
+ * @guide /hack/built-in-types/string
  */
 function strip_prefix_l(
   Locale\Locale $locale,
@@ -54,6 +58,8 @@ function strip_prefix_l(
  *
  * Strings will be normalized for comparison in encodings that support multiple
  * representations, such as UTF-8.
+ *
+ * @guide /hack/built-in-types/string
  */
 function strip_suffix_l(
   Locale\Locale $locale,
@@ -71,6 +77,8 @@ function strip_suffix_l(
  *
  * - To only strip from the left, see `Str\trim_left_l()`.
  * - To only strip from the right, see `Str\trim_right_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function trim_l(
   Locale\Locale $locale,
@@ -88,6 +96,8 @@ function trim_l(
  * - To only strip from the right, see `Str\trim_right_l()`.
  * - To strip a specific prefix (instead of all characters matching a mask),
  *   see `Str\strip_prefix_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function trim_left_l(
   Locale\Locale $locale,
@@ -105,6 +115,8 @@ function trim_left_l(
  * - To only strip from the left, see `Str\trim_left_l()`.
  * - To strip a specific suffix (instead of all characters matching a mask),
  *   see `Str\strip_suffix_l()`.
+ *
+ * @guide /hack/built-in-types/string
  */
 function trim_right_l(
   Locale\Locale $locale,

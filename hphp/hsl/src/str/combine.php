@@ -17,6 +17,8 @@ use namespace HH\Lib\Vec;
  * given `$glue` string.
  *
  * Previously known as `implode` in PHP.
+ *
+ * @guide /hack/built-in-types/string
  */
 function join(
   readonly Traversable<arraykey> $pieces,

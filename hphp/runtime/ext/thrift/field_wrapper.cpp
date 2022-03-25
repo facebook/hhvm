@@ -35,7 +35,7 @@ void setThriftType(Variant value, const Object& obj, const String& fieldName) {
     auto wrapped_obj = field_val.toObject();
     wrapped_obj->o_invoke_few_args(
         "setValue_DO_NOT_USE_THRIFT_INTERNAL",
-        RuntimeCoeffects::write_this_props(),
+        RuntimeCoeffects::fixme(),
         1,
         value);
   } else {
@@ -53,7 +53,7 @@ Variant getThriftType(const Object& obj, const String& fieldName) {
     auto wrapped_obj = field_val.toObject();
     return wrapped_obj->o_invoke_few_args(
         "getValue_DO_NOT_USE_THRIFT_INTERNAL",
-        RuntimeCoeffects::write_this_props(),
+        RuntimeCoeffects::pure(),
         0);
   }
   thrift_error(

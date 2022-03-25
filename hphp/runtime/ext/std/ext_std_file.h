@@ -134,7 +134,7 @@ bool HHVM_FUNCTION(ftruncate,
                    int64_t size);
 bool HHVM_FUNCTION(flock,
                    const Resource& handle,
-                   int operation,
+                   int64_t operation,
                    bool& wouldblock);
 Variant HHVM_FUNCTION(fputcsv,
                       const Resource& handle,
@@ -161,11 +161,11 @@ Variant HHVM_FUNCTION(file_get_contents,
 Variant HHVM_FUNCTION(file_put_contents,
                       const String& filename,
                       const Variant& data,
-                      int flags = 0,
+                      int64_t flags = 0,
                       const Variant& context = uninit_null());
 Variant HHVM_FUNCTION(file,
                       const String& filename,
-                      int flags = 0,
+                      int64_t flags = 0,
                       const Variant& context = uninit_null());
 Variant HHVM_FUNCTION(readfile,
                       const String& filename,
@@ -177,11 +177,11 @@ bool HHVM_FUNCTION(move_uploaded_file,
 Variant HHVM_FUNCTION(parse_ini_file,
                       const String& filename,
                       bool process_sections = false,
-                      int scanner_mode = k_INI_SCANNER_NORMAL);
+                      int64_t scanner_mode = k_INI_SCANNER_NORMAL);
 Variant HHVM_FUNCTION(parse_ini_string,
                       const String& ini,
                       bool process_sections = false,
-                      int scanner_mode = k_INI_SCANNER_NORMAL);
+                      int64_t scanner_mode = k_INI_SCANNER_NORMAL);
 Variant HHVM_FUNCTION(md5_file,
                       const String& filename,
                       bool raw_output = false);
@@ -236,10 +236,10 @@ String HHVM_FUNCTION(basename,
 bool HHVM_FUNCTION(fnmatch,
                    const String& pattern,
                    const String& filename,
-                   int flags = 0);
+                   int64_t flags = 0);
 Variant HHVM_FUNCTION(glob,
                       const String& pattern,
-                      int flags = 0);
+                      int64_t flags = 0);
 Variant HHVM_FUNCTION(tempnam,
                       const String& dir,
                       const String& prefix);
@@ -302,7 +302,7 @@ Variant HHVM_FUNCTION(realpath,
                       const String& path);
 Variant HHVM_FUNCTION(pathinfo,
                       const String& path,
-                      int opt = 15);
+                      int64_t opt = 15);
 Variant HHVM_FUNCTION(disk_free_space,
                       const String& directory);
 Variant HHVM_FUNCTION(diskfreespace,
@@ -346,4 +346,3 @@ void HHVM_FUNCTION(closedir,
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

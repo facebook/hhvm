@@ -1222,7 +1222,7 @@ bool HHVM_FUNCTION(mb_check_encoding,
 
 Variant HHVM_FUNCTION(mb_convert_case,
                       const String& str,
-                      int mode,
+                      int64_t mode,
                       const Variant& opt_encoding) {
   const String encoding = convertArg(opt_encoding);
 
@@ -1653,7 +1653,7 @@ Variant HHVM_FUNCTION(mb_encode_mimeheader,
                       const Variant& opt_charset,
                       const Variant& opt_transfer_encoding,
                       const String& linefeed /* = "\r\n" */,
-                      int indent /* = 0 */) {
+                      int64_t indent /* = 0 */) {
   const String charset = convertArg(opt_charset);
   const String transfer_encoding = convertArg(opt_transfer_encoding);
 
@@ -2017,7 +2017,7 @@ Variant HHVM_FUNCTION(mb_language,
 
 String HHVM_FUNCTION(mb_output_handler,
                      const String& contents,
-                     int status) {
+                     int64_t status) {
   mbfl_string string, result;
   int last_feed;
 
@@ -2379,7 +2379,7 @@ static Variant php_mb_substr(const String& str, int from,
 
 Variant HHVM_FUNCTION(mb_substr,
                       const String& str,
-                      int start,
+                      int64_t start,
                       const Variant& length /*= uninit_null() */,
                       const Variant& opt_encoding) {
   const String encoding = convertArg(opt_encoding);
@@ -2388,7 +2388,7 @@ Variant HHVM_FUNCTION(mb_substr,
 
 Variant HHVM_FUNCTION(mb_strcut,
                       const String& str,
-                      int start,
+                      int64_t start,
                       const Variant& length /*= uninit_null() */,
                       const Variant& opt_encoding) {
   const String encoding = convertArg(opt_encoding);
@@ -2397,8 +2397,8 @@ Variant HHVM_FUNCTION(mb_strcut,
 
 Variant HHVM_FUNCTION(mb_strimwidth,
                       const String& str,
-                      int start,
-                      int width,
+                      int64_t start,
+                      int64_t width,
                       const Variant& opt_trimmarker,
                       const Variant& opt_encoding) {
   const String trimmarker = convertArg(opt_trimmarker);
@@ -2450,7 +2450,7 @@ Variant HHVM_FUNCTION(mb_strimwidth,
 Variant HHVM_FUNCTION(mb_stripos,
                       const String& haystack,
                       const String& needle,
-                      int offset /* = 0 */,
+                      int64_t offset /* = 0 */,
                       const Variant& opt_encoding) {
   const String encoding = convertArg(opt_encoding);
 
@@ -2477,7 +2477,7 @@ Variant HHVM_FUNCTION(mb_stripos,
 Variant HHVM_FUNCTION(mb_strripos,
                       const String& haystack,
                       const String& needle,
-                      int offset /* = 0 */,
+                      int64_t offset /* = 0 */,
                       const Variant& opt_encoding) {
   const String encoding = convertArg(opt_encoding);
 
@@ -2587,7 +2587,7 @@ Variant HHVM_FUNCTION(mb_strlen,
 Variant HHVM_FUNCTION(mb_strpos,
                       const String& haystack,
                       const String& needle,
-                      int offset /* = 0 */,
+                      int64_t offset /* = 0 */,
                       const Variant& opt_encoding) {
   const String encoding = convertArg(opt_encoding);
 
@@ -3687,7 +3687,7 @@ int64_t HHVM_FUNCTION(mb_ereg_search_getpos) {
 }
 
 bool HHVM_FUNCTION(mb_ereg_search_setpos,
-                   int position) {
+                   int64_t position) {
   if (position < 0 || position >= (int)MBSTRG(search_str).size()) {
     raise_warning("Position is out of range");
     MBSTRG(search_pos) = 0;
@@ -4016,7 +4016,7 @@ String HHVM_FUNCTION(mb_regex_set_options,
 Variant HHVM_FUNCTION(mb_split,
                       const String& pattern,
                       const String& str,
-                      int count /* = -1 */) {
+                      int64_t count /* = -1 */) {
   php_mb_regex_t *re;
   OnigRegion *regs = nullptr;
 

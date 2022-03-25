@@ -224,17 +224,17 @@ bool HHVM_FUNCTION(date_default_timezone_set,
                    const String& name);
 Variant HHVM_FUNCTION(timezone_name_from_abbr,
                       const String& abbr,
-                      int gmtoffset = -1,
-                      int isdst = 1);
+                      int64_t gmtoffset = -1,
+                      int64_t isdst = 1);
 String HHVM_FUNCTION(timezone_version_get);
 
 ///////////////////////////////////////////////////////////////////////////////
 // datetime
 
 bool HHVM_FUNCTION(checkdate,
-                   int month,
-                   int day,
-                   int year);
+                   int64_t month,
+                   int64_t day,
+                   int64_t year);
 Variant HHVM_FUNCTION(date_create,
                       const Variant& time = uninit_variant,
                       const Variant& timezone = uninit_variant);
@@ -254,4 +254,3 @@ Array HHVM_FUNCTION(date_sun_info,
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

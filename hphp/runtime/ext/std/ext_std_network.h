@@ -42,15 +42,15 @@ Variant HHVM_FUNCTION(ip2long, const String& ip_address);
 String HHVM_FUNCTION(long2ip, const String& proper_address);
 bool HHVM_FUNCTION(checkdnsrr, const String& host,
                                const String& type = null_string);
-Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type,
+Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
                                       Variant& authnsRef,
                                       Variant& addtlRef);
 bool HHVM_FUNCTION(getmxrr, const String& hostname,
                             Variant& mxhostsRef,
                             Variant& weightsRef);
 void HHVM_FUNCTION(header, const String& str, bool replace = true,
-                   int http_response_code = 0);
-Variant HHVM_FUNCTION(http_response_code, int response_code = 0);
+                   int64_t http_response_code = 0);
+Variant HHVM_FUNCTION(http_response_code, int64_t response_code = 0);
 Array HHVM_FUNCTION(headers_list);
 bool HHVM_FUNCTION(headers_sent);
 Variant HHVM_FUNCTION(header_register_callback, const Variant& callback);
@@ -70,11 +70,10 @@ bool HHVM_FUNCTION(setrawcookie, const String& name,
                                  const String& domain = null_string,
                                  bool secure = false,
                                  bool httponly = false);
-bool HHVM_FUNCTION(openlog, const String& ident, int option, int facility);
+bool HHVM_FUNCTION(openlog, const String& ident, int64_t option, int64_t facility);
 bool HHVM_FUNCTION(closelog);
-bool HHVM_FUNCTION(syslog, int priority, const String& message);
+bool HHVM_FUNCTION(syslog, int64_t priority, const String& message);
 
 bool validate_dns_arguments(const String& host, const String& type,
                             int& ntype);
 }
-

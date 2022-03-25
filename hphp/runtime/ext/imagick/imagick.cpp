@@ -3770,7 +3770,7 @@ static bool HHVM_METHOD(Imagick, writeImagesFile,
 }
 
 // Countable interface
-static int HHVM_METHOD(Imagick, count) {
+static int64_t HHVM_METHOD(Imagick, count) {
   return HHVM_MN(Imagick, getNumberImages)(this_);
 }
 
@@ -3779,7 +3779,7 @@ static Object HHVM_METHOD(Imagick, current) {
   return Object{this_};
 }
 
-static int HHVM_METHOD(Imagick, key) {
+static int64_t HHVM_METHOD(Imagick, key) {
   return HHVM_MN(Imagick, getIteratorIndex)(this_);
 }
 

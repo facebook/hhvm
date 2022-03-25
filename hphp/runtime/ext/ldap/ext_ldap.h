@@ -24,14 +24,14 @@ namespace HPHP {
 
 Variant HHVM_FUNCTION(ldap_connect,
                       const Variant& hostname = uninit_variant,
-                      int port = 389);
+                      int64_t port = 389);
 Variant HHVM_FUNCTION(ldap_explode_dn,
                       const String& dn,
-                      int with_attrib);
+                      int64_t with_attrib);
 Variant HHVM_FUNCTION(ldap_dn2ufn,
                       const String& db);
 String HHVM_FUNCTION(ldap_err2str,
-                     int errnum);
+                     int64_t errnum);
 bool HHVM_FUNCTION(ldap_add,
                    const Resource& link,
                    const String& dn,
@@ -73,11 +73,11 @@ bool HHVM_FUNCTION(ldap_unbind,
                    const Resource& link);
 bool HHVM_FUNCTION(ldap_get_option,
                    const Resource& link,
-                   int option,
+                   int64_t option,
                    Variant& retval);
 bool HHVM_FUNCTION(ldap_set_option,
                    const Variant& link,
-                   int option,
+                   int64_t option,
                    const Variant& newval);
 bool HHVM_FUNCTION(ldap_close,
                    const Resource& link);
@@ -86,28 +86,28 @@ Variant HHVM_FUNCTION(ldap_list,
                       const Variant& base_dn,
                       const Variant& filter,
                       const Variant& attributes = uninit_variant,
-                      int attrsonly = 0,
-                      int sizelimit = -1,
-                      int timelimit = -1,
-                      int deref = -1);
+                      int64_t attrsonly = 0,
+                      int64_t sizelimit = -1,
+                      int64_t timelimit = -1,
+                      int64_t deref = -1);
 Variant HHVM_FUNCTION(ldap_read,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
                       const Variant& attributes = uninit_variant,
-                      int attrsonly = 0,
-                      int sizelimit = -1,
-                      int timelimit = -1,
-                      int deref = -1);
+                      int64_t attrsonly = 0,
+                      int64_t sizelimit = -1,
+                      int64_t timelimit = -1,
+                      int64_t deref = -1);
 Variant HHVM_FUNCTION(ldap_search,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
                       const Variant& attributes = uninit_variant,
-                      int attrsonly = 0,
-                      int sizelimit = -1,
-                      int timelimit = -1,
-                      int deref = -1);
+                      int64_t attrsonly = 0,
+                      int64_t sizelimit = -1,
+                      int64_t timelimit = -1,
+                      int64_t deref = -1);
 bool HHVM_FUNCTION(ldap_rename,
                    const Resource& link,
                    const String& dn,
@@ -179,7 +179,7 @@ Variant HHVM_FUNCTION(ldap_get_values,
                       const String& attribute);
 bool HHVM_FUNCTION(ldap_control_paged_result,
                    const Resource& link,
-                   int pagesize,
+                   int64_t pagesize,
                    bool iscritical = false,
                    const String& cookie = empty_string_ref);
 bool HHVM_FUNCTION(ldap_control_paged_result_response,
@@ -190,8 +190,7 @@ bool HHVM_FUNCTION(ldap_control_paged_result_response,
 String HHVM_FUNCTION(ldap_escape,
                      const String& value,
                      const String& ignores = empty_string(),
-                     int flags = 0);
+                     int64_t flags = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

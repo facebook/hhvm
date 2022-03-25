@@ -155,7 +155,7 @@ static struct ProcessExtension final : Extension {
 } s_process_extension;
 
 int64_t HHVM_FUNCTION(pcntl_alarm,
-                      int seconds) {
+                      int64_t seconds) {
   return alarm(seconds);
 }
 
@@ -255,8 +255,8 @@ int64_t HHVM_FUNCTION(pcntl_fork) {
 }
 
 Variant HHVM_FUNCTION(pcntl_getpriority,
-                      int pid /* = 0 */,
-                      int process_identifier /* = 0 */) {
+                      int64_t pid /* = 0 */,
+                      int64_t process_identifier /* = 0 */) {
   if (pid == 0) {
     pid = getpid();
   }
@@ -286,9 +286,9 @@ Variant HHVM_FUNCTION(pcntl_getpriority,
 }
 
 bool HHVM_FUNCTION(pcntl_setpriority,
-                   int priority,
-                   int pid /* = 0 */,
-                   int process_identifier /* = 0 */) {
+                   int64_t priority,
+                   int64_t pid /* = 0 */,
+                   int64_t process_identifier /* = 0 */) {
   if (pid == 0) {
     pid = getpid();
   }
@@ -444,7 +444,7 @@ bool HHVM_FUNCTION(pcntl_signal_dispatch) {
 }
 
 bool HHVM_FUNCTION(pcntl_signal,
-                   int signo,
+                   int64_t signo,
                    const Variant& handler,
                    bool restart_syscalls /* = true */) {
   /* Special long value case for SIG_DFL and SIG_IGN */
@@ -482,7 +482,7 @@ bool HHVM_FUNCTION(pcntl_signal,
 }
 
 bool HHVM_FUNCTION(pcntl_sigprocmask,
-                   int how,
+                   int64_t how,
                    const Array& set,
                    Array& oldset) {
   auto const invalid_argument = [&] {
@@ -531,7 +531,7 @@ bool HHVM_FUNCTION(pcntl_sigprocmask,
 
 int64_t HHVM_FUNCTION(pcntl_wait,
                       int64_t& status,
-                      int options /* = 0 */) {
+                      int64_t options /* = 0 */) {
   int nstatus = -1;
   auto const child_id = LightProcess::waitpid(-1, &nstatus, options);
 /*  if (options) {
@@ -544,9 +544,9 @@ int64_t HHVM_FUNCTION(pcntl_wait,
 }
 
 int64_t HHVM_FUNCTION(pcntl_waitpid,
-                      int pid,
+                      int64_t pid,
                       int64_t& status,
-                      int options /* = 0 */) {
+                      int64_t options /* = 0 */) {
   int nstatus = -1;
   auto const child_id = LightProcess::waitpid(
     (pid_t)pid,
@@ -558,32 +558,32 @@ int64_t HHVM_FUNCTION(pcntl_waitpid,
 }
 
 int64_t HHVM_FUNCTION(pcntl_wexitstatus,
-                      int status) {
+                      int64_t status) {
   return WEXITSTATUS(status);
 }
 
 bool HHVM_FUNCTION(pcntl_wifexited,
-                   int status) {
+                   int64_t status) {
   return WIFEXITED(status);
 }
 
 bool HHVM_FUNCTION(pcntl_wifsignaled,
-                   int status) {
+                   int64_t status) {
   return WIFSIGNALED(status);
 }
 
 bool HHVM_FUNCTION(pcntl_wifstopped,
-                   int status) {
+                   int64_t status) {
   return WIFSTOPPED(status);
 }
 
 int64_t HHVM_FUNCTION(pcntl_wstopsig,
-                      int status) {
+                      int64_t status) {
   return WSTOPSIG(status);
 }
 
 int64_t HHVM_FUNCTION(pcntl_wtermsig,
-                      int status) {
+                      int64_t status) {
   return WTERMSIG(status);
 }
 

@@ -40,10 +40,10 @@ Resource HHVM_FUNCTION(xml_parser_create_ns,
                        const Variant& separator = uninit_variant);
 Variant HHVM_FUNCTION(xml_parser_get_option,
                       const Resource& parser,
-                      int option);
+                      int64_t option);
 bool HHVM_FUNCTION(xml_parser_set_option,
                    const Resource& parser,
-                   int option,
+                   int64_t option,
                    const Variant& value);
 bool HHVM_FUNCTION(xml_set_character_data_handler,
                    const Resource& parser,
@@ -85,7 +85,7 @@ int64_t HHVM_FUNCTION(xml_get_current_line_number,
 int64_t HHVM_FUNCTION(xml_get_error_code,
                       const Resource& parser);
 String HHVM_FUNCTION(xml_error_string,
-                     int code);
+                     int64_t code);
 String HHVM_FUNCTION(utf8_decode,
                      const String& data);
 String HHVM_FUNCTION(utf8_encode,
@@ -93,4 +93,3 @@ String HHVM_FUNCTION(utf8_encode,
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

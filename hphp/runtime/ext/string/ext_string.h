@@ -121,7 +121,7 @@ TypedValue HHVM_FUNCTION(str_split,
                          int64_t split_length = 1);
 TypedValue HHVM_FUNCTION(chunk_split,
                          const String& body,
-                         int chunklen = 76,
+                         int64_t chunklen = 76,
                          const String& end = "\r\n");
 TypedValue HHVM_FUNCTION(strtok,
                          const String& str,
@@ -141,9 +141,9 @@ TypedValue HHVM_FUNCTION(substr_replace,
                          const Variant& length = 0x7FFFFFFF);
 String HHVM_FUNCTION(str_pad,
                      const String& input,
-                     int pad_length,
+                     int64_t pad_length,
                      const String& pad_string = " ",
-                     int pad_type = k_STR_PAD_RIGHT);
+                     int64_t pad_type = k_STR_PAD_RIGHT);
 String HHVM_FUNCTION(str_repeat,
                      const String& input,
                      int64_t multiplier);
@@ -153,24 +153,24 @@ String HHVM_FUNCTION(str_repeat,
 
 String HHVM_FUNCTION(html_entity_decode,
                      const String& str,
-                     int quote_style = k_ENT_HTML_QUOTE_DOUBLE,
+                     int64_t quote_style = k_ENT_HTML_QUOTE_DOUBLE,
                      const String& charset = "UTF-8");
 String HHVM_FUNCTION(htmlentities,
                      const String& str,
-                     int quote_style = k_ENT_HTML_QUOTE_DOUBLE,
+                     int64_t quote_style = k_ENT_HTML_QUOTE_DOUBLE,
                      const String& charset = "UTF-8",
                      bool double_encode = true);
 String HHVM_FUNCTION(htmlspecialchars_decode,
                      const String& str,
-                     int quote_style = k_ENT_HTML_QUOTE_DOUBLE);
+                     int64_t quote_style = k_ENT_HTML_QUOTE_DOUBLE);
 String HHVM_FUNCTION(htmlspecialchars,
                      const String& str,
-                     int quote_style = k_ENT_HTML_QUOTE_DOUBLE,
+                     int64_t quote_style = k_ENT_HTML_QUOTE_DOUBLE,
                      const String& charset = "UTF-8",
                      bool double_encode = true);
 String HHVM_FUNCTION(fb_htmlspecialchars,
                      const String& str,
-                     int quote_style,
+                     int64_t quote_style,
                      const String& charset,
                      const Variant& extra);
 String HHVM_FUNCTION(quoted_printable_encode,
@@ -201,31 +201,31 @@ String HHVM_FUNCTION(convert_cyr_string,
                      const String& from,
                      const String& to);
 Array HHVM_FUNCTION(get_html_translation_table,
-                    int table = 0,
-                    int quote_style = k_ENT_HTML_QUOTE_DOUBLE,
+                    int64_t table = 0,
+                    int64_t quote_style = k_ENT_HTML_QUOTE_DOUBLE,
                     const String& encoding = "UTF-8");
 String HHVM_FUNCTION(hebrev,
                      const String& hebrew_text,
-                     int max_chars_per_line = 0);
+                     int64_t max_chars_per_line = 0);
 String HHVM_FUNCTION(hebrevc,
                      const String& hebrew_text,
-                     int max_chars_per_line = 0);
+                     int64_t max_chars_per_line = 0);
 Variant HHVM_FUNCTION(setlocale,
-                      int category,
+                      int64_t category,
                       const Variant& locale,
                       const Array& _argv = null_array);
 Array HHVM_FUNCTION(localeconv);
-Variant HHVM_FUNCTION(nl_langinfo, int item);
+Variant HHVM_FUNCTION(nl_langinfo, int64_t item);
 
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
 
-Variant f_printf(int _argc,
+Variant f_printf(int64_t _argc,
                  const String& format,
                  const Array& _argv = null_array);
 Variant f_vprintf(const String& format,
                   const Array& args);
-Variant f_sprintf(int _argc,
+Variant f_sprintf(int64_t _argc,
                   const String& format,
                   const Array& _argv = null_array);
 Variant f_vsprintf(const String& format,
@@ -243,7 +243,7 @@ Variant HHVM_FUNCTION(money_format,
                       double number);
 String HHVM_FUNCTION(number_format,
                      double number,
-                     int decimals = 0,
+                     int64_t decimals = 0,
                      const Variant& dec_point = ".",
                      const Variant& thousands_sep = ",");
 
@@ -258,7 +258,7 @@ int64_t HHVM_FUNCTION(strcmp,
 TypedValue HHVM_FUNCTION(strncmp,
                          const String& str1,
                          const String& str2,
-                         int len);
+                         int64_t len);
 int64_t HHVM_FUNCTION(strnatcmp,
                       const String& str1,
                       const String& str2);
@@ -268,7 +268,7 @@ int64_t HHVM_FUNCTION(strcasecmp,
 TypedValue HHVM_FUNCTION(strncasecmp,
                          const String& str1,
                          const String& str2,
-                         int len);
+                         int64_t len);
 int64_t HHVM_FUNCTION(strnatcasecmp,
                       const String& str1,
                       const String& str2);
@@ -278,8 +278,8 @@ int64_t HHVM_FUNCTION(strcoll,
 TypedValue HHVM_FUNCTION(substr_compare,
                          const String& main_str,
                          const String& str,
-                         int offset,
-                         int length = INT_MAX,
+                         int64_t offset,
+                         int64_t length = INT_MAX,
                          bool case_insensitivity = false);
 TypedValue HHVM_FUNCTION(strchr,
                          const String& haystack,
@@ -301,34 +301,34 @@ TypedValue HHVM_FUNCTION(strpbrk,
 TypedValue HHVM_FUNCTION(strpos,
                          const String& haystack,
                          const Variant& needle,
-                         int offset = 0);
+                         int64_t offset = 0);
 TypedValue HHVM_FUNCTION(stripos,
                          const String& haystack,
                          const Variant& needle,
-                         int offset = 0);
+                         int64_t offset = 0);
 TypedValue HHVM_FUNCTION(strrpos,
                         const String& haystack,
                         const Variant& needle,
-                        int offset = 0);
+                        int64_t offset = 0);
 TypedValue HHVM_FUNCTION(strripos,
                         const String& haystack,
                         const Variant& needle,
-                        int offset = 0);
+                        int64_t offset = 0);
 TypedValue HHVM_FUNCTION(substr_count,
                          const String& haystack,
                          const String& needle,
-                         int offset = 0,
-                         int length = 0x7FFFFFFF);
+                         int64_t offset = 0,
+                         int64_t length = 0x7FFFFFFF);
 TypedValue HHVM_FUNCTION(strspn,
                          const String& str1,
                          const String& str2,
-                         int start = 0,
-                         int length = 0x7FFFFFFF);
+                         int64_t start = 0,
+                         int64_t length = 0x7FFFFFFF);
 TypedValue HHVM_FUNCTION(strcspn,
                          const String& str1,
                          const String& str2,
-                         int start = 0,
-                         int length = 0x7FFFFFFF);
+                         int64_t start = 0,
+                         int64_t length = 0x7FFFFFFF);
 Array HHVM_FUNCTION(str_getcsv,
                     const String& str,
                     const String& delimiter = ",",
@@ -344,9 +344,9 @@ Variant HHVM_FUNCTION(str_word_count,
 int64_t HHVM_FUNCTION(levenshtein,
                       const String& str1,
                       const String& str2,
-                      int cost_ins = 1,
-                      int cost_rep = 1,
-                      int cost_del = 1);
+                      int64_t cost_ins = 1,
+                      int64_t cost_rep = 1,
+                      int64_t cost_del = 1);
 int64_t HHVM_FUNCTION(similar_text,
                       const String& first,
                       const String& second,
@@ -355,7 +355,7 @@ Variant HHVM_FUNCTION(soundex,
                       const String& str);
 Variant HHVM_FUNCTION(metaphone,
                       const String& str,
-                      int phones = 0);
+                      int64_t phones = 0);
 bool HHVM_FUNCTION(HH_str_number_coercible,
                    const String& str);
 Variant HHVM_FUNCTION(HH_str_to_numeric,

@@ -1,0 +1,41 @@
+
+Warning: Process tag(x8825=GPS_IFD_Poi): Illegal format code 0xFFB6, suppose BYTE in %s on line 6
+
+Warning: Process tag(x8825=UndefinedTa): Illegal format code 0xFFB6, suppose BYTE in %s on line 6
+
+Warning: Process tag(x87AD=UndefinedTa): Illegal format code 0xD7FB, suppose BYTE in %s on line 6
+
+Warning: Process tag(x87AD=UndefinedTa): Illegal components(-1) in %s on line 6
+
+Warning: Process tag(x0117=UndefinedTa): Illegal format code 0xF708, suppose BYTE in %s on line 6
+
+Warning: Process tag(x8825=GPS_IFD_Poi): Illegal format code 0xFFB6, suppose BYTE in %s on line 6
+
+Warning: Process tag(x87AD=UndefinedTa): Illegal format code 0xD7FB, suppose BYTE in %s on line 6
+
+Warning: Process tag(x87AD=UndefinedTa): Illegal components(-1) in %s on line 6
+
+Warning: Process tag(x0117=StripByteCo): Illegal format code 0xF708, suppose BYTE in %s on line 6
+
+Warning: Thumbnail goes IFD boundary or end of file reached in %s on line 6
+
+Warning: Process tag(x87AD=UndefinedTa): Illegal format code 0xD7FB, suppose BYTE in %s on line 6
+
+Warning: Process tag(x87AD=UndefinedTa): Illegal components(-1) in %s on line 6
+
+Warning: Process tag(x0117=StripByteCo): Illegal format code 0xF708, suppose BYTE in %s on line 6
+
+Warning: Process tag(x8825=GPS_IFD_Poi): Illegal format code 0xFFB6, suppose BYTE in %s on line 6
+
+Warning: Process tag(x87AD=UndefinedTa): Illegal format code 0xD7FB, suppose BYTE in %s on line 6
+
+Warning: Process tag(x87AD=UndefinedTa): Illegal components(-1) in %s on line 6
+
+Warning: Process tag(x0117=StripByteCo): Illegal format code 0xF708, suppose BYTE in %s on line 6
+
+Warning: Thumbnail goes IFD boundary or end of file reached in %s on line 6
+
+Warning: File structure corrupted in %s on line 6
+
+Warning: Invalid JPEG file in %s on line 6
+bool(false)

@@ -91,9 +91,9 @@ Variant HHVM_FUNCTION(openssl_csr_new,
 Variant HHVM_FUNCTION(openssl_csr_sign,
                       const Variant& csr,
                       const Variant& cacert,
-                      const Variant& priv_key, int days,
+                      const Variant& priv_key, int64_t days,
                       const Variant& configargs = uninit_variant,
-                      int serial = 0);
+                      int64_t serial = 0);
 Variant HHVM_FUNCTION(openssl_error_string);
 bool HHVM_FUNCTION(openssl_open, const String& sealed_data, Variant& open_data,
                                  const String& env_key,
@@ -119,14 +119,14 @@ bool HHVM_FUNCTION(openssl_pkcs7_encrypt, const String& infilename,
                                           const String& outfilename,
                                           const Variant& recipcerts,
                                           const Array& headers,
-                                          int flags = 0,
-                                int cipherid = PHP_OPENSSL_CIPHER_RC2_40);
+                                          int64_t flags = 0,
+                                int64_t cipherid = PHP_OPENSSL_CIPHER_RC2_40);
 bool HHVM_FUNCTION(openssl_pkcs7_sign, const String& infilename,
                                        const String& outfilename,
                                        const Variant& signcert,
                                        const Variant& privkey,
                                        const Variant& headers,
-                                       int flags = PKCS7_DETACHED,
+                                       int64_t flags = PKCS7_DETACHED,
                                 const String& extracerts = null_string);
 Variant openssl_pkcs7_verify_core(const String& filename, int flags,
                                 const Variant& voutfilename /* = null_string */,
@@ -134,13 +134,13 @@ Variant openssl_pkcs7_verify_core(const String& filename, int flags,
                                 const Variant& vextracerts /* = null_string */,
                                 const Variant& vcontent /* = null_string */,
                                 bool ignore_cert_expiration);
-Variant HHVM_FUNCTION(openssl_pkcs7_verify, const String& filename, int flags,
+Variant HHVM_FUNCTION(openssl_pkcs7_verify, const String& filename, int64_t flags,
                                const Variant& outfilename = null_string,
                                const Variant& cainfo = null_array,
                                const Variant& extracerts = null_string,
                                const Variant& content = null_string);
 Variant HHVM_FUNCTION(fb_unsafe_openssl_pkcs7_verify_ignore_cert_expiration,
-                               const String& filename, int flags,
+                               const String& filename, int64_t flags,
                                const Variant& outfilename = null_string,
                                const Variant& cainfo = null_array,
                                const Variant& extracerts = null_string,
@@ -161,19 +161,19 @@ Variant HHVM_FUNCTION(openssl_pkey_new,
 bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
                                             Variant& decrypted,
                                             const Variant& key,
-                                  int padding = k_OPENSSL_PKCS1_PADDING);
+                                  int64_t padding = k_OPENSSL_PKCS1_PADDING);
 bool HHVM_FUNCTION(openssl_private_encrypt, const String& data,
                                             Variant& crypted,
                                             const Variant& key,
-                                  int padding = k_OPENSSL_PKCS1_PADDING);
+                                  int64_t padding = k_OPENSSL_PKCS1_PADDING);
 bool HHVM_FUNCTION(openssl_public_decrypt, const String& data,
                                            Variant& decrypted,
                                            const Variant& key,
-                                  int padding = k_OPENSSL_PKCS1_PADDING);
+                                  int64_t padding = k_OPENSSL_PKCS1_PADDING);
 bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
                                            Variant& crypted,
                                            const Variant& key,
-                                  int padding = k_OPENSSL_PKCS1_PADDING);
+                                  int64_t padding = k_OPENSSL_PKCS1_PADDING);
 Variant HHVM_FUNCTION(openssl_seal, const String& data, Variant& sealed_data,
                                     Variant& env_keys,
                                     const Array& pub_key_ids,
@@ -189,7 +189,7 @@ Variant HHVM_FUNCTION(openssl_verify, const String& data,
 bool HHVM_FUNCTION(openssl_x509_check_private_key, const Variant& cert,
                                                    const Variant& key);
 Variant HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
-                      int purpose,
+                      int64_t purpose,
                       const Array& cainfo = null_array,
                       const String& untrustedfile = null_string);
 bool HHVM_FUNCTION(openssl_x509_export_to_file, const Variant& x509,
@@ -200,18 +200,18 @@ bool HHVM_FUNCTION(openssl_x509_export, const Variant& x509, Variant& output,
 Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
                                           bool shortnames = true);
 Variant HHVM_FUNCTION(openssl_x509_read, const Variant& x509certdata);
-Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int length,
+Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int64_t length,
                                         bool& crypto_strong);
 Variant HHVM_FUNCTION(openssl_cipher_iv_length, const String& method);
 Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
                                        const String& password,
-                                       int options = 0,
+                                       int64_t options = 0,
                                        const String& iv = null_string,
                                        const String& aad = null_string,
-                                       int tag_length = 16);
+                                       int64_t tag_length = 16);
 Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
                                        const String& password,
-                                       int options = 0,
+                                       int64_t options = 0,
                                        const String& iv = null_string,
                                        const String& tag = null_string,
                                        const String& aad = null_string);
@@ -223,4 +223,3 @@ Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -35,8 +35,8 @@ extern const int64_t k_PHP_OUTPUT_HANDLER_REMOVABLE;
 extern const int64_t k_PHP_OUTPUT_HANDLER_STDFLAGS;
 
 bool HHVM_FUNCTION(ob_start, const Variant& output_callback = uninit_null(),
-                             int chunk_size = 0,
-                             int flags = k_PHP_OUTPUT_HANDLER_STDFLAGS);
+                             int64_t chunk_size = 0,
+                             int64_t flags = k_PHP_OUTPUT_HANDLER_STDFLAGS);
 void HHVM_FUNCTION(ob_clean);
 bool HHVM_FUNCTION(ob_flush);
 bool HHVM_FUNCTION(ob_end_clean);
@@ -67,4 +67,3 @@ void HHVM_FUNCTION(hphp_clear_hardware_events, void);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

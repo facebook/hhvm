@@ -198,7 +198,7 @@ static double HHVM_METHOD(ImagickDraw, getFontSize) {
   return DrawGetFontSize(wand->getWand());
 }
 
-static int HHVM_METHOD(ImagickDraw, getFontStretch) {
+static int64_t HHVM_METHOD(ImagickDraw, getFontStretch) {
   auto wand = getDrawingWandResource(Object{this_});
   return DrawGetFontStretch(wand->getWand());
 }

@@ -739,7 +739,7 @@ static void get_attributes(Array &ret, LDAP *ldap,
 
 Variant HHVM_FUNCTION(ldap_connect,
                       const Variant& hostname /* = uninit_variant */,
-                      int port /* = 389 */) {
+                      int64_t port /* = 389 */) {
   const String& str_hostname = hostname.isNull()
                              ? null_string
                              : hostname.toString();
@@ -774,7 +774,7 @@ Variant HHVM_FUNCTION(ldap_connect,
 
 Variant HHVM_FUNCTION(ldap_explode_dn,
                       const String& dn,
-                      int with_attrib) {
+                      int64_t with_attrib) {
   char **ldap_value;
   if (!(ldap_value = ldap_explode_dn((char*)dn.data(), with_attrib))) {
     /* Invalid parameters were passed to ldap_explode_dn */
@@ -807,7 +807,7 @@ Variant HHVM_FUNCTION(ldap_dn2ufn,
 }
 
 String HHVM_FUNCTION(ldap_err2str,
-                     int errnum) {
+                     int64_t errnum) {
   return String(ldap_err2string(errnum), CopyString);
 }
 
@@ -1255,7 +1255,7 @@ bool HHVM_FUNCTION(ldap_unbind, const Resource& link) {
 
 bool HHVM_FUNCTION(ldap_get_option,
                    const Resource& link,
-                   int option,
+                   int64_t option,
                    Variant& retval) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -1349,7 +1349,7 @@ const StaticString
 
 bool HHVM_FUNCTION(ldap_set_option,
                    const Variant& link,
-                   int option,
+                   int64_t option,
                    const Variant& newval) {
   LDAP *ldap = nullptr;
   if (!link.isNull()) {
@@ -1508,10 +1508,10 @@ Variant HHVM_FUNCTION(ldap_list,
                       const Variant& base_dn,
                       const Variant& filter,
                       const Variant& attributes /* = uninit_variant */,
-                      int attrsonly /* = 0 */,
-                      int sizelimit /* = -1 */,
-                      int timelimit /* = -1 */,
-                      int deref /* = -1 */) {
+                      int64_t attrsonly /* = 0 */,
+                      int64_t sizelimit /* = -1 */,
+                      int64_t timelimit /* = -1 */,
+                      int64_t deref /* = -1 */) {
   return php_ldap_do_search(link, base_dn, filter, attributes, attrsonly,
                             sizelimit, timelimit, deref, LDAP_SCOPE_ONELEVEL);
 }
@@ -1521,10 +1521,10 @@ Variant HHVM_FUNCTION(ldap_read,
                       const Variant& base_dn,
                       const Variant& filter,
                       const Variant& attributes /* = uninit_variant */,
-                      int attrsonly /* = 0 */,
-                      int sizelimit /* = -1 */,
-                      int timelimit /* = -1 */,
-                      int deref /* = -1 */) {
+                      int64_t attrsonly /* = 0 */,
+                      int64_t sizelimit /* = -1 */,
+                      int64_t timelimit /* = -1 */,
+                      int64_t deref /* = -1 */) {
   return php_ldap_do_search(link, base_dn, filter, attributes, attrsonly,
                             sizelimit, timelimit, deref, LDAP_SCOPE_BASE);
 }
@@ -1534,10 +1534,10 @@ Variant HHVM_FUNCTION(ldap_search,
                       const Variant& base_dn,
                       const Variant& filter,
                       const Variant& attributes /* = uninit_variant */,
-                      int attrsonly /* = 0 */,
-                      int sizelimit /* = -1 */,
-                      int timelimit /* = -1 */,
-                      int deref /* = -1 */) {
+                      int64_t attrsonly /* = 0 */,
+                      int64_t sizelimit /* = -1 */,
+                      int64_t timelimit /* = -1 */,
+                      int64_t deref /* = -1 */) {
   return php_ldap_do_search(link, base_dn, filter, attributes, attrsonly,
                             sizelimit, timelimit, deref, LDAP_SCOPE_SUBTREE);
 }
@@ -1993,7 +1993,7 @@ Variant HHVM_FUNCTION(ldap_get_values,
 
 bool HHVM_FUNCTION(ldap_control_paged_result,
                    const Resource& link,
-                   int pagesize,
+                   int64_t pagesize,
                    bool iscritical,
                    const String& cookie) {
   auto ld = get_valid_ldap_link_resource(link);
@@ -2121,7 +2121,7 @@ bool HHVM_FUNCTION(ldap_control_paged_result_response,
 String HHVM_FUNCTION(ldap_escape,
                      const String& value,
                      const String& ignores /* = "" */,
-                     int flags /* = 0 */) {
+                     int64_t flags /* = 0 */) {
   char esc[256] = {};
 
   if (flags & k_LDAP_ESCAPE_FILTER) { // llvm.org/bugs/show_bug.cgi?id=18389

@@ -188,7 +188,7 @@ Variant HHVM_FUNCTION(stream_select,
                       Variant& write,
                       Variant& except,
                       const Variant& vtv_sec,
-                      int tv_usec = 0);
+                      int64_t tv_usec = 0);
 
 Object HHVM_FUNCTION(stream_await,
                      const Resource& stream,
@@ -209,8 +209,8 @@ Variant HHVM_FUNCTION(stream_set_chunk_size,
 
 bool HHVM_FUNCTION(stream_set_timeout,
                    const Resource& stream,
-                   int seconds,
-                   int microseconds = 0);
+                   int64_t seconds,
+                   int64_t microseconds = 0);
 
 int64_t HHVM_FUNCTION(stream_set_write_buffer,
                       const Resource& stream,
@@ -232,7 +232,7 @@ Variant HHVM_FUNCTION(stream_socket_server,
                       const String& local_socket,
                       Variant& errnum,
                       Variant& errstr,
-                      int flags = k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
+                      int64_t flags = k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
                       const Variant& context = uninit_variant);
 
 Variant HHVM_FUNCTION(stream_socket_client,
@@ -240,13 +240,13 @@ Variant HHVM_FUNCTION(stream_socket_client,
                       Variant& errnum,
                       Variant& errstr,
                       double timeout = -1.0,
-                      int flags = 0,
+                      int64_t flags = 0,
                       const Variant& context = uninit_variant);
 
 bool HHVM_FUNCTION(stream_socket_enable_crypto,
                    const Resource& socket,
                    bool enable,
-                   int cryptotype,
+                   int64_t cryptotype,
                    const Variant& sessionstream);
 
 Variant HHVM_FUNCTION(stream_socket_get_name,
@@ -254,26 +254,25 @@ Variant HHVM_FUNCTION(stream_socket_get_name,
                       bool want_peer);
 
 Variant HHVM_FUNCTION(stream_socket_pair,
-                      int domain,
-                      int type,
-                      int protocol);
+                      int64_t domain,
+                      int64_t type,
+                      int64_t protocol);
 
 Variant HHVM_FUNCTION(stream_socket_recvfrom,
                       const Resource& socket,
                       int64_t length,
-                      int flags,
+                      int64_t flags,
                       Variant& address);
 
 Variant HHVM_FUNCTION(stream_socket_sendto,
                       const Resource& socket,
                       const String& data,
-                      int flags = 0,
+                      int64_t flags = 0,
                       const Variant& address = uninit_variant);
 
 bool HHVM_FUNCTION(stream_socket_shutdown,
                    const Resource& stream,
-                   int how);
+                   int64_t how);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

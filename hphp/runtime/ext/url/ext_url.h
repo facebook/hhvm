@@ -37,14 +37,14 @@ Variant HHVM_FUNCTION(base64_decode, const String& data,
                                      bool strict /* = false */);
 String HHVM_FUNCTION(base64_encode, const String& data);
 
-Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */);
+Variant HHVM_FUNCTION(get_headers, const String& url, int64_t format /* = 0 */);
 Array HHVM_FUNCTION(get_meta_tags, const String& filename,
                                    bool use_include_path /* = false */);
 
 Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
                            const Variant& numeric_prefix /* = null_string */,
                            const String& arg_separator /* = null_string */,
-                           int enc_type = k_PHP_QUERY_RFC1738);
+                           int64_t enc_type = k_PHP_QUERY_RFC1738);
 Variant HHVM_FUNCTION(parse_url, const String& url,
                                  int64_t component /* = -1 */);
 
@@ -55,4 +55,3 @@ String HHVM_FUNCTION(urlencode, const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

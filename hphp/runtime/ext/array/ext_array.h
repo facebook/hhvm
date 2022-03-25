@@ -27,7 +27,7 @@ namespace HPHP {
 
 TypedValue HHVM_FUNCTION(array_chunk,
                          const Variant& input,
-                         int size,
+                         int64_t size,
                          bool preserve_keys = false);
 TypedValue HHVM_FUNCTION(array_combine,
                          const Variant& keys,
@@ -36,8 +36,8 @@ Array HHVM_FUNCTION(array_fill_keys,
                     const Variant& keys,
                     const Variant& value);
 TypedValue HHVM_FUNCTION(array_fill,
-                         int start_index,
-                         int num,
+                         int64_t start_index,
+                         int64_t num,
                          const Variant& value);
 TypedValue HHVM_FUNCTION(array_flip,
                          const Variant& trans);
@@ -63,7 +63,7 @@ TypedValue HHVM_FUNCTION(array_replace,
                          const Array& args = null_array);
 TypedValue HHVM_FUNCTION(array_pad,
                          const Variant& input,
-                         int pad_size,
+                         int64_t pad_size,
                          const Variant& pad_value);
 TypedValue HHVM_FUNCTION(array_product,
                          const Variant& array);
@@ -73,7 +73,7 @@ TypedValue HHVM_FUNCTION(array_push,
                          const Array& args = null_array);
 TypedValue HHVM_FUNCTION(array_rand,
                          const Variant& input,
-                         int num_req = 1);
+                         int64_t num_req = 1);
 TypedValue HHVM_FUNCTION(array_search,
                          const Variant& needle,
                          const Variant& haystack,
@@ -82,14 +82,14 @@ TypedValue HHVM_FUNCTION(array_shift,
                          Variant& array);
 TypedValue HHVM_FUNCTION(array_splice,
                          Variant& input,
-                         int offset,
+                         int64_t offset,
                          const Variant& length = uninit_variant,
                          const Variant& replacement = uninit_variant);
 TypedValue HHVM_FUNCTION(array_sum,
                          const Variant& array);
 TypedValue HHVM_FUNCTION(array_unique,
                          const Variant& array,
-                         int sort_flags = 2);
+                         int64_t sort_flags = 2);
 TypedValue HHVM_FUNCTION(array_unshift,
                          Variant& array,
                          const Variant& var,
@@ -189,22 +189,22 @@ TypedValue HHVM_FUNCTION(array_intersect_ukey,
                          const Array& args = null_array);
 bool HHVM_FUNCTION(sort,
                    Variant& array,
-                   int sort_flags = 0);
+                   int64_t sort_flags = 0);
 bool HHVM_FUNCTION(rsort,
                    Variant& array,
-                   int sort_flags = 0);
+                   int64_t sort_flags = 0);
 bool HHVM_FUNCTION(asort,
                    Variant& array,
-                   int sort_flags = 0);
+                   int64_t sort_flags = 0);
 bool HHVM_FUNCTION(arsort,
                    Variant& array,
-                   int sort_flags = 0);
+                   int64_t sort_flags = 0);
 bool HHVM_FUNCTION(ksort,
                    Variant& array,
-                   int sort_flags = 0);
+                   int64_t sort_flags = 0);
 bool HHVM_FUNCTION(krsort,
                    Variant& array,
-                   int sort_flags = 0);
+                   int64_t sort_flags = 0);
 bool HHVM_FUNCTION(usort,
                    Variant& array,
                    const Variant& cmp_function);

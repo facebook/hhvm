@@ -1204,7 +1204,7 @@ struct CompactReader {
 };
 
 int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version,
-                      int version) {
+                      int64_t version) {
   int result = s_compact_request_data->version;
   s_compact_request_data->version = (uint8_t)version;
   return result;
@@ -1215,7 +1215,7 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
                    const String& method_name,
                    int64_t msgtype,
                    const Object& request_struct,
-                   int seqid,
+                   int64_t seqid,
                    bool oneway) {
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
@@ -1239,7 +1239,7 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
 Variant HHVM_FUNCTION(thrift_protocol_read_compact,
                       const Object& transportobj,
                       const String& obj_typename,
-                      int options) {
+                      int64_t options) {
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
@@ -1253,7 +1253,7 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
 Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const Object& transportobj,
                      const String& obj_typename,
-                     int options) {
+                     int64_t options) {
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
   SuppressClassConversionWarning suppressor;

@@ -176,9 +176,19 @@ impl<R: Reason> Ty<R> {
         Self::new(r, Ty_::Tany)
     }
 
+    pub fn generic(r: R, ty_name: TypeName, args: Vec<Ty<R>>) -> Self {
+        Self::new(r, Ty_::Tgeneric(ty_name, args))
+    }
 
     pub fn reason(&self) -> &R {
         &self.0
+    }
+
+    pub fn generic_name(&self) -> Option<&TypeName> {
+        match self.deref() {
+            Ty_::Tgeneric(name, _) => Some(name),
+            _ => None,
+        }
     }
 
     pub fn node(&self) -> &Hc<Ty_<R, Ty<R>>> {

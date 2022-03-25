@@ -22,6 +22,7 @@ pub mod reason;
 pub mod shallow_decl_provider;
 pub mod special_names;
 pub mod tast;
+pub mod typaram_env;
 pub mod typing;
 pub mod typing_check_job;
 pub mod typing_check_utils;

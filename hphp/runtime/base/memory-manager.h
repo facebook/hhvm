@@ -723,11 +723,6 @@ struct MemoryManager {
    */
   void resetAllocator();
 
-  /*
-   * Reset all runtime options for MemoryManager.
-   */
-  void resetRuntimeOptions();
-
   /////////////////////////////////////////////////////////////////////////////
   // Heap introspection.
 

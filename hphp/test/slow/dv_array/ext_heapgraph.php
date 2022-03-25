@@ -82,6 +82,7 @@ function edgeName($hg, $edge) {
   $n = heapgraph_node($hg, $from);
   $kind = $n['kind'];
   if ($kind === 'Root') {
+    if (!isset($n['type'])) return 'conservative-root';
     $ty = $n['type'];
     if ($ty === 'HPHP::CppStack') return 'onsome-stack';
     if ($ty === 'HPHP::PhpStack') return 'onsome-stack';

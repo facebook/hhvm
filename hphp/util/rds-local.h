@@ -243,6 +243,9 @@ void RDSInit();
 void init();
 // fini deallocates the rdslocals.
 void fini(bool inrds = false);
+// Return true if this rds local section is configured appropriately for
+// entering the TC.
+bool tcCheck();
 
 template<typename Fn>
 void iterateRoots(Fn fn) {

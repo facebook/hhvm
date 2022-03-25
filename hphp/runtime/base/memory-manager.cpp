@@ -140,13 +140,6 @@ MemoryManager::~MemoryManager() {
   // ~SparseHeap releases its slabs/bigs.
 }
 
-void MemoryManager::resetRuntimeOptions() {
-  if (debug) checkHeap("resetRuntimeOptions");
-  void* mem = this;
-  this->~MemoryManager();
-  new (mem) MemoryManager();
-}
-
 void MemoryManager::traceStats(const char* event) {
   FTRACE(1, "heap-id {} {} ", tl_heap_id, event);
   if (use_jemalloc) {

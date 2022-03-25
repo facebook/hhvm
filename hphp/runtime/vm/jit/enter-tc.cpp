@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/vm/runtime.h"
 
+#include "hphp/util/rds-local.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"
 
@@ -61,6 +62,7 @@ void enterTC(TCA start) {
   tracing::BlockNoTrace _{"enter-tc"};
 
   preEnter(start);
+  assertx(rds::local::tcCheck());
   assert_flog(tc::isValidCodeAddress(start), "start = {} ; func = {} ({})\n",
               start, vmfp()->func(), vmfp()->func()->fullName());
   auto& regs = vmRegsUnsafe();

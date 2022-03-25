@@ -86,4 +86,10 @@ void fini(bool inrds) {
   detail::rl_hotSection.rdslocal_base = nullptr;
 }
 
+bool tcCheck() {
+  if (!detail::g_config.inRdsFunc) return false;
+  return detail::g_config.inRdsFunc(detail::rl_hotSection.rdslocal_base,
+                                    detail::s_usedbytes);
+}
+
 }}}

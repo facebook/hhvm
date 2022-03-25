@@ -1935,7 +1935,10 @@ static int execute_program_impl(int argc, char** argv) {
     RuntimeOption::SafeFileAccess = false;
   }
   IniSetting::s_system_settings_are_set = true;
-  tl_heap->resetRuntimeOptions();
+  if (debug) tl_heap->checkHeap("resetRuntimeOptions");
+  tl_heap.destroy();
+  rds::local::fini();
+  // From this point on there is no tl_heap until hphp_process_init is called.
 
   auto opened_logs = open_server_log_files();
   if (po.mode == "daemon") {
@@ -2046,6 +2049,7 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (vm.count("check-repo")) {
+    hphp_thread_init();
     always_assert(RO::RepoAuthoritative);
     init_repo_file();
     LitstrTable::init();
@@ -2165,6 +2169,10 @@ static int execute_program_impl(int argc, char** argv) {
     if (RuntimeOption::EvalUseRemoteUnixServer != "no" &&
         !RuntimeOption::EvalUnixServerPath.empty() &&
         (!po.file.empty() || !po.args.empty()) && po.mode != "eval") {
+      // CLI server clients use a wacky delayed initialization scheme for
+      // RDS, and therefore requires RDS_LOCALS be outside RDS.
+      rds::local::init();
+      SCOPE_EXIT { rds::local::fini(); };
       std::vector<std::string> args;
       if (!po.file.empty()) {
         args.emplace_back(po.file);

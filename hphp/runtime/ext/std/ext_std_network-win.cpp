@@ -273,7 +273,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store,
 
 }
 
-Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type,
+Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
                       Variant& authnsRef,
                       Variant& addtlRef) {
   IOStatusHelper io("dns_get_record", hostname.data(), type);

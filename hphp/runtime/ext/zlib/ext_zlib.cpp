@@ -192,11 +192,11 @@ Variant HHVM_FUNCTION(gzcompress, const String& data,
                                   int64_t level) {
   return hhvm_zlib_encode(data, level, k_ZLIB_ENCODING_DEFLATE);
 }
-Variant HHVM_FUNCTION(gzdeflate, const String& data, int level) {
+Variant HHVM_FUNCTION(gzdeflate, const String& data, int64_t level) {
   return hhvm_zlib_encode(data, level, k_ZLIB_ENCODING_RAW);
 }
-Variant HHVM_FUNCTION(gzencode, const String& data, int level,
-                                int encoding_mode) {
+Variant HHVM_FUNCTION(gzencode, const String& data, int64_t level,
+                                int64_t encoding_mode) {
   return hhvm_zlib_encode(data, level, encoding_mode);
 }
 
@@ -303,13 +303,13 @@ Variant HHVM_FUNCTION(zlib_decode, const String& data,
   return hhvm_zlib_decode(data, limit, k_ZLIB_ENCODING_ANY);
 }
 Variant HHVM_FUNCTION(gzuncompress, const String& data,
-                                    int limit) {
+                                    int64_t limit) {
   return hhvm_zlib_decode(data, limit, k_ZLIB_ENCODING_DEFLATE);
 }
-Variant HHVM_FUNCTION(gzinflate, const String& data, int limit) {
+Variant HHVM_FUNCTION(gzinflate, const String& data, int64_t limit) {
   return hhvm_zlib_decode(data, limit, k_ZLIB_ENCODING_RAW);
 }
-Variant HHVM_FUNCTION(gzdecode, const String& data, int limit) {
+Variant HHVM_FUNCTION(gzdecode, const String& data, int64_t limit) {
   return hhvm_zlib_decode(data, limit, k_ZLIB_ENCODING_GZIP);
 }
 
@@ -579,7 +579,7 @@ void HHVM_METHOD(ChunkedInflator, close) {
   return data->close();
 }
 
-int HHVM_METHOD(ChunkedInflator, getUndecompressedByteCount) {
+int64_t HHVM_METHOD(ChunkedInflator, getUndecompressedByteCount) {
   FETCH_CHUNKED_INFLATOR(data, this_);
   assertx(data);
   return data->getUndecompressedByteCount();
@@ -608,7 +608,7 @@ void HHVM_METHOD(ChunkedGunzipper, close) {
   return data->close();
 }
 
-int HHVM_METHOD(ChunkedGunzipper, getUndecompressedByteCount) {
+int64_t HHVM_METHOD(ChunkedGunzipper, getUndecompressedByteCount) {
   FETCH_CHUNKED_GUNZIPPER(data, this_);
   assertx(data);
   return data->getUndecompressedByteCount();

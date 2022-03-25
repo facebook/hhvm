@@ -430,7 +430,7 @@ Variant HHVM_FUNCTION(stream_select,
                       Variant& write,
                       Variant& except,
                       const Variant& vtv_sec,
-                      int tv_usec /* = 0 */) {
+                      int64_t tv_usec /* = 0 */) {
   return HHVM_FN(socket_select)(read, write, except,
                                 vtv_sec, tv_usec);
 }
@@ -497,8 +497,8 @@ const StaticString
 
 bool HHVM_FUNCTION(stream_set_timeout,
                    const Resource& stream,
-                   int seconds,
-                   int microseconds /* = 0 */) {
+                   int64_t seconds,
+                   int64_t microseconds /* = 0 */) {
   if (isa<Socket>(stream)) {
     return HHVM_FN(socket_set_option)
       (stream, SOL_SOCKET, SO_RCVTIMEO,
@@ -688,7 +688,7 @@ Variant HHVM_FUNCTION(stream_socket_server,
                       const String& local_socket,
                       Variant& errnum,
                       Variant& errstr,
-                      int flags /* = 0 */,
+                      int64_t flags /* = 0 */,
                       const Variant& context /* = uninit_variant */) {
   HostURL hosturl(static_cast<const std::string>(local_socket));
   return socket_server_impl(hosturl, flags, errnum, errstr, context);
@@ -699,7 +699,7 @@ Variant HHVM_FUNCTION(stream_socket_client,
                       Variant& errnum,
                       Variant& errstr,
                       double timeout /* = -1.0 */,
-                      int flags /* = 0 */,
+                      int64_t flags /* = 0 */,
                       const Variant& context /* = uninit_variant */) {
   HostURL hosturl(static_cast<const std::string>(remote_socket));
   bool persistent = (flags & k_STREAM_CLIENT_PERSISTENT) ==
@@ -711,7 +711,7 @@ Variant HHVM_FUNCTION(stream_socket_client,
 bool HHVM_FUNCTION(stream_socket_enable_crypto,
                    const Resource& socket,
                    bool enable,
-                   int cryptotype,
+                   int64_t cryptotype,
                    const Variant& sessionstream) {
   auto sock = cast<SSLSocket>(socket);
   if (!enable) {
@@ -788,9 +788,9 @@ Variant HHVM_FUNCTION(stream_socket_get_name,
 }
 
 Variant HHVM_FUNCTION(stream_socket_pair,
-                      int domain,
-                      int type,
-                      int protocol) {
+                      int64_t domain,
+                      int64_t type,
+                      int64_t protocol) {
   Variant fd;
   if (!socket_create_pair_impl(domain, type, protocol, fd, true)) {
     return false;
@@ -801,7 +801,7 @@ Variant HHVM_FUNCTION(stream_socket_pair,
 Variant HHVM_FUNCTION(stream_socket_recvfrom,
                       const Resource& socket,
                       int64_t length,
-                      int flags,
+                      int64_t flags,
                       Variant& address) {
   Variant ret, host, port;
   Variant retval = HHVM_FN(socket_recvfrom)(socket, ret, length, flags,
@@ -821,7 +821,7 @@ Variant HHVM_FUNCTION(stream_socket_recvfrom,
 Variant HHVM_FUNCTION(stream_socket_sendto,
                       const Resource& socket,
                       const String& data,
-                      int flags /* = 0 */,
+                      int64_t flags /* = 0 */,
                       const Variant& address /* = uninit_variant */) {
   String host; int port;
   const String& strAddress = address.isNull()
@@ -843,7 +843,7 @@ Variant HHVM_FUNCTION(stream_socket_sendto,
 
 bool HHVM_FUNCTION(stream_socket_shutdown,
                    const Resource& stream,
-                   int how) {
+                   int64_t how) {
   return HHVM_FN(socket_shutdown)(stream, how);
 }
 

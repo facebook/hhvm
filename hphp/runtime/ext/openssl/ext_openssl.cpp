@@ -1095,9 +1095,9 @@ Variant HHVM_FUNCTION(openssl_csr_new,
 
 Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
                                         const Variant& cacert,
-                                        const Variant& priv_key, int days,
+                                        const Variant& priv_key, int64_t days,
                                         const Variant& configargs /* = null */,
-                                        int serial /* = 0 */) {
+                                        int64_t serial /* = 0 */) {
   auto pcsr = CSRequest::Get(csr);
   if (!pcsr) return false;
 
@@ -1524,8 +1524,8 @@ bool HHVM_FUNCTION(openssl_pkcs7_encrypt, const String& infilename,
                                           const String& outfilename,
                                           const Variant& recipcerts,
                                           const Array& headers,
-                                          int flags /* = 0 */,
-                                int cipherid /* = k_OPENSSL_CIPHER_RC2_40 */) {
+                                          int64_t flags /* = 0 */,
+                                int64_t cipherid /* = k_OPENSSL_CIPHER_RC2_40 */) {
   bool ret = false;
   BIO *infile = nullptr, *outfile = nullptr;
   STACK_OF(X509) *precipcerts = nullptr;
@@ -1557,7 +1557,7 @@ bool HHVM_FUNCTION(openssl_pkcs7_encrypt, const String& infilename,
   case PHP_OPENSSL_CIPHER_3DES:    cipher = EVP_des_ede3_cbc(); break;
 #endif
   default:
-    raise_warning("Invalid cipher type `%d'", cipherid);
+    raise_warning("Invalid cipher type `%ld'", cipherid);
     goto clean_exit;
   }
   if (cipher == nullptr) {
@@ -1586,7 +1586,7 @@ bool HHVM_FUNCTION(openssl_pkcs7_sign, const String& infilename,
                                        const Variant& signcert,
                                        const Variant& privkey,
                                        const Variant& headers,
-                                       int flags /* = k_PKCS7_DETACHED */,
+                                       int64_t flags /* = k_PKCS7_DETACHED */,
                                 const String& extracerts /* = null_string */) {
   bool ret = false;
   STACK_OF(X509) *others = nullptr;
@@ -1771,7 +1771,7 @@ Variant openssl_pkcs7_verify_core(
   return ret;
 }
 
-Variant HHVM_FUNCTION(openssl_pkcs7_verify, const String& filename, int flags,
+Variant HHVM_FUNCTION(openssl_pkcs7_verify, const String& filename, int64_t flags,
                                const Variant& voutfilename /* = null_string */,
                                const Variant& vcainfo /* = null_array */,
                                const Variant& vextracerts /* = null_string */,
@@ -2045,7 +2045,7 @@ Variant HHVM_FUNCTION(openssl_pkey_new,
 bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
                                             Variant& decrypted,
                                             const Variant& key,
-                                  int padding /* = k_OPENSSL_PKCS1_PADDING */) {
+                                  int64_t padding /* = k_OPENSSL_PKCS1_PADDING */) {
   auto okey = Key::Get(key, false);
   if (!okey) {
     raise_warning("key parameter is not a valid private key");
@@ -2085,7 +2085,7 @@ bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
 bool HHVM_FUNCTION(openssl_private_encrypt, const String& data,
                                             Variant& crypted,
                                             const Variant& key,
-                                  int padding /* = k_OPENSSL_PKCS1_PADDING */) {
+                                  int64_t padding /* = k_OPENSSL_PKCS1_PADDING */) {
   auto okey = Key::Get(key, false);
   if (!okey) {
     raise_warning("key param is not a valid private key");
@@ -2121,7 +2121,7 @@ bool HHVM_FUNCTION(openssl_private_encrypt, const String& data,
 bool HHVM_FUNCTION(openssl_public_decrypt, const String& data,
                                            Variant& decrypted,
                                            const Variant& key,
-                                  int padding /* = k_OPENSSL_PKCS1_PADDING */) {
+                                  int64_t padding /* = k_OPENSSL_PKCS1_PADDING */) {
   auto okey = Key::Get(key, true);
   if (!okey) {
     raise_warning("key parameter is not a valid public key");
@@ -2161,7 +2161,7 @@ bool HHVM_FUNCTION(openssl_public_decrypt, const String& data,
 bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
                                            Variant& crypted,
                                            const Variant& key,
-                                  int padding /* = k_OPENSSL_PKCS1_PADDING */) {
+                                  int64_t padding /* = k_OPENSSL_PKCS1_PADDING */) {
   auto okey = Key::Get(key, true);
   if (!okey) {
     raise_warning("key parameter is not a valid public key");
@@ -2441,7 +2441,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain,
 }
 
 Variant HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
-                      int purpose,
+                      int64_t purpose,
                       const Array& cainfo /* = null_array */,
                       const String& untrustedfile /* = null_string */) {
   int ret = -1;
@@ -2804,7 +2804,7 @@ Variant HHVM_FUNCTION(openssl_x509_read, const Variant& x509certdata) {
   return Variant(ocert);
 }
 
-Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int length,
+Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int64_t length,
                       bool& crypto_strong) {
   if (length <= 0) {
     return false;
@@ -3103,10 +3103,10 @@ Variant HHVM_FUNCTION(openssl_encrypt,
                       const String& data,
                       const String& method,
                       const String& password,
-                      int options /* = 0 */,
+                      int64_t options /* = 0 */,
                       const String& iv /* = null_string */,
                       const String& aad /* = null_string */,
-                      int tag_length /* = 16 */) {
+                      int64_t tag_length /* = 16 */) {
   return openssl_encrypt_impl(data, method, password, options, iv,
                               nullptr, aad, tag_length);
 }
@@ -3115,18 +3115,18 @@ Variant HHVM_FUNCTION(openssl_encrypt_with_tag,
                       const String& data,
                       const String& method,
                       const String& password,
-                      int options,
+                      int64_t options,
                       const String& iv,
                       Variant& tag_out,
                       const String& aad /* = null_string */,
-                      int tag_length /* = 16 */) {
+                      int64_t tag_length /* = 16 */) {
   return openssl_encrypt_impl(data, method, password, options, iv,
                               &tag_out, aad, tag_length);
 }
 
 Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
                                        const String& password,
-                                       int options /* = 0 */,
+                                       int64_t options /* = 0 */,
                                        const String& iv /* = null_string */,
                                        const String& tag /* = null_string */,
                                        const String& aad /* = null_string */) {

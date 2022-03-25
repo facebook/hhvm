@@ -423,7 +423,7 @@ Variant HHVM_FUNCTION(pack, const String& format, const Array& argv) {
   return ZendPack().pack(format, argv);
 }
 
-int64_t HHVM_FUNCTION(sleep, int seconds) {
+int64_t HHVM_FUNCTION(sleep, int64_t seconds) {
   IOStatusHelper io("sleep");
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -433,7 +433,7 @@ int64_t HHVM_FUNCTION(sleep, int seconds) {
   return 0;
 }
 
-void HHVM_FUNCTION(usleep, int micro_seconds) {
+void HHVM_FUNCTION(usleep, int64_t micro_seconds) {
   IOStatusHelper io("usleep");
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -473,7 +473,7 @@ const StaticString
   s_seconds("seconds"),
   s_nanoseconds("nanoseconds");
 
-Variant HHVM_FUNCTION(time_nanosleep, int seconds, int nanoseconds) {
+Variant HHVM_FUNCTION(time_nanosleep, int64_t seconds, int64_t nanoseconds) {
   if (seconds < 0) {
     raise_invalid_argument_warning("seconds: cannot be negative");
     return false;

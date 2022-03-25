@@ -125,7 +125,7 @@ static struct POSIXExtension final : Extension {
 
 bool HHVM_FUNCTION(posix_access,
                    const String& file,
-                   int mode /* = 0 */) {
+                   int64_t mode /* = 0 */) {
   if (!FileUtil::checkPathAndWarn(file, __FUNCTION__ + 2, 1)) {
     return false;
   }
@@ -209,7 +209,7 @@ static Variant php_posix_group_to_array(group* gr) {
 }
 
 Variant HHVM_FUNCTION(posix_getgrgid,
-                      int gid) {
+                      int64_t gid) {
   if (gid < 0) return false;
 
   auto buf = GroupBuffer{};
@@ -261,7 +261,7 @@ Variant HHVM_FUNCTION(posix_getlogin) {
 }
 
 Variant HHVM_FUNCTION(posix_getpgid,
-                      int pid) {
+                      int64_t pid) {
   int ret = getpgid(pid);
   if (ret < 0) return false;
   return ret;
@@ -308,7 +308,7 @@ Variant HHVM_FUNCTION(posix_getpwnam,
 }
 
 Variant HHVM_FUNCTION(posix_getpwuid,
-                      int uid) {
+                      int64_t uid) {
   if (uid < 0) return false;
 
   auto buf = PasswdBuffer{};
@@ -386,7 +386,7 @@ Variant HHVM_FUNCTION(posix_getrlimit) {
 }
 
 Variant HHVM_FUNCTION(posix_getsid,
-                      int pid) {
+                      int64_t pid) {
   int ret = getsid(pid);
   if (ret < 0) return false;
   return ret;
@@ -400,7 +400,7 @@ int64_t HHVM_FUNCTION(posix_getuid) {
 
 bool HHVM_FUNCTION(posix_initgroups,
                    const String& name,
-                   int base_group_id) {
+                   int64_t base_group_id) {
   if (name.empty()) return false;
   return !initgroups(name.data(), base_group_id);
 }
@@ -425,8 +425,8 @@ bool HHVM_FUNCTION(posix_isatty,
 }
 
 bool HHVM_FUNCTION(posix_kill,
-                   int pid,
-                   int sig) {
+                   int64_t pid,
+                   int64_t sig) {
   if (pid == 0 || pid == getpid()) {
     if (is_sync_signal(sig)) {
       // Only send to the current thread, and invoke signal handlers in PHP, if
@@ -440,7 +440,7 @@ bool HHVM_FUNCTION(posix_kill,
 
 bool HHVM_FUNCTION(posix_mkfifo,
                    const String& pathname,
-                   int mode) {
+                   int64_t mode) {
   if (!FileUtil::checkPathAndWarn(pathname, __FUNCTION__ + 2, 1)) {
     return false;
   }
@@ -450,9 +450,9 @@ bool HHVM_FUNCTION(posix_mkfifo,
 
 bool HHVM_FUNCTION(posix_mknod,
                    const String& pathname,
-                   int mode,
-                   int major /* = 0 */,
-                   int minor /* = 0 */) {
+                   int64_t mode,
+                   int64_t major /* = 0 */,
+                   int64_t minor /* = 0 */) {
   if (!FileUtil::checkPathAndWarn(pathname, __FUNCTION__ + 2, 1)) {
     return false;
   }
@@ -476,23 +476,23 @@ bool HHVM_FUNCTION(posix_mknod,
 }
 
 bool HHVM_FUNCTION(posix_setegid,
-                   int gid) {
+                   int64_t gid) {
   return setegid(gid);
 }
 
 bool HHVM_FUNCTION(posix_seteuid,
-                   int uid) {
+                   int64_t uid) {
   return seteuid(uid);
 }
 
 bool HHVM_FUNCTION(posix_setgid,
-                   int gid) {
+                   int64_t gid) {
   return setgid(gid);
 }
 
 bool HHVM_FUNCTION(posix_setpgid,
-                   int pid,
-                   int pgid) {
+                   int64_t pid,
+                   int64_t pgid) {
   return setpgid(pid, pgid) >= 0;
 }
 
@@ -501,12 +501,12 @@ int64_t HHVM_FUNCTION(posix_setsid) {
 }
 
 bool HHVM_FUNCTION(posix_setuid,
-                   int uid) {
+                   int64_t uid) {
   return setuid(uid);
 }
 
 String HHVM_FUNCTION(posix_strerror,
-                     int errnum) {
+                     int64_t errnum) {
   return String(folly::errnoStr(errnum));
 }
 

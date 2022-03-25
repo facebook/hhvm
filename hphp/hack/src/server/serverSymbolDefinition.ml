@@ -218,7 +218,7 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
         | (SymbolDefinition.LocalVar, SyntaxKind.VariableExpression)
         | (SymbolDefinition.Typeconst, SyntaxKind.TypeConstDeclaration)
         | (SymbolDefinition.Param, SyntaxKind.ParameterDeclaration)
-        | (SymbolDefinition.Typedef, SyntaxKind.SimpleTypeSpecifier) ->
+        | (SymbolDefinition.Typedef, SyntaxKind.AliasDeclaration) ->
           true
         | _ -> false)
   with

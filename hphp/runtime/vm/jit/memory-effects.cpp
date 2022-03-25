@@ -382,8 +382,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SuspendHookAwaitR:
   case SuspendHookCreateCont:
   case SuspendHookYield:
-    // TODO: may-load here probably doesn't need to include ALocalAny normally.
-    return may_load_store_kill(AUnknown, AHeapAny, AMIStateAny);
+    // We rely on the may_reenter effects to add the appropriate local asets.
+    return may_load_store_kill(
+      AHeapAny | AActRec {inst.src(0)}, AHeapAny, AMIStateAny);
 
   /*
    * If we're returning from a function, it's ReturnEffects.  The RetCtrl

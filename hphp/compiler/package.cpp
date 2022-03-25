@@ -33,7 +33,6 @@
 #include <folly/portability/Unistd.h>
 
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/json.h"
 #include "hphp/compiler/option.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/base/coeffects-config.h"
@@ -157,7 +156,6 @@ Options Package::AsyncState::makeOptions() {
 
 Package::Package(const char* root)
   : m_parseFailed{false}
-  , m_lineCount(0), m_charCount(0)
   , m_cacheHits{0}, m_readFiles{0}, m_storedFiles{0}, m_total{0}
 {
   m_root = FileUtil::normalizeDir(root);
@@ -919,7 +917,6 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
         continue;
       }
 
-      m_charCount += sb.st_size;
       if (!m_extraStaticFiles.count(fileName)) {
         m_discoveredStaticFiles.emplace(
           fileName,
@@ -1077,23 +1074,3 @@ void Package::addUnitEmitter(std::unique_ptr<UnitEmitter> ue) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void Package::saveStatsToFile(const char *filename, int totalSeconds) const {
-  std::ofstream f(filename);
-  if (f) {
-    JSON::CodeError::OutputStream o(f);
-    JSON::CodeError::MapStream ms(o);
-
-    ms.add("FileCount", getFileCount())
-      .add("LineCount", getLineCount())
-      .add("CharCount", getCharCount())
-      .add("TotalTime", totalSeconds);
-
-    if (getLineCount()) {
-      ms.add("AvgCharPerLine", getCharCount() / getLineCount());
-    }
-
-    ms.done();
-    f.close();
-  }
-}

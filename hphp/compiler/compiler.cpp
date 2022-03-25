@@ -101,7 +101,6 @@ struct CompilerOptions {
   std::string programArgs;
   std::string branch;
   int revision;
-  bool genStats;
   bool keepTempDir;
   int logLevel;
   std::string filecache;
@@ -231,6 +230,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
                            "Options");
 
   bool dummy;
+  bool dummy2;
 
   desc.add_options()
     ("help", "display this message")
@@ -296,7 +296,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "Files will be created in this directory first, then sync with output "
      "directory without overwriting identical files. Great for incremental "
      "compilation and build.")
-    ("gen-stats", value<bool>(&po.genStats)->default_value(false),
+    ("gen-stats", value<bool>(&dummy2)->default_value(false), // TODO: T115189426 remove this
      "whether to generate code errors")
     ("keep-tempdir,k", value<bool>(&po.keepTempDir)->default_value(false),
      "whether to keep the temporary directory")
@@ -629,14 +629,6 @@ int process(const CompilerOptions &po) {
   }
 
   ar->setFinish([&po,&timer,&package](AnalysisResultPtr res) {
-      // saving stats
-      if (po.genStats) {
-        int seconds = timer.getMicroSeconds() / 1000000;
-
-        Logger::Info("saving code errors and stats...");
-        Timer timer(Timer::WallTime, "saving stats");
-        package.saveStatsToFile((po.outputDir + "/Stats.js").c_str(), seconds);
-      }
       package.resetAr();
     });
 

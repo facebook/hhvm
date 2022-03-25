@@ -67,16 +67,11 @@ struct Package {
 
   AnalysisResultPtr getAnalysisResult() { return m_ar;}
   void resetAr() { m_ar.reset(); }
-  int getFileCount() const { return m_filesToParse.size();}
-  int getLineCount() const { return m_lineCount;}
-  int getCharCount() const { return m_charCount;}
 
   size_t getTotalParses() const { return m_total.load(); }
   size_t getParseCacheHits() const { return m_cacheHits.load(); }
   size_t getFileStores() const { return m_storedFiles.load(); }
   size_t getFileReads() const { return m_readFiles.load(); }
-
-  void saveStatsToFile(const char *filename, int totalSeconds) const;
 
   const std::string& getRoot() const { return m_root;}
   std::shared_ptr<FileCache> getFileCache();
@@ -120,8 +115,6 @@ private:
   std::atomic<bool> m_parseFailed;
 
   AnalysisResultPtr m_ar;
-  std::atomic<int> m_lineCount;
-  std::atomic<int> m_charCount;
 
   std::atomic<size_t> m_cacheHits;
   std::atomic<size_t> m_readFiles;

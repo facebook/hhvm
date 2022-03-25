@@ -255,7 +255,7 @@ class OptionalPrinter(object):
 class ArrayDataPrinter(object):
     RECOGNIZE = '^HPHP::(ArrayData|VanillaDict)$'
 
-    class _packed_iterator(_BaseIterator):
+    class _vec_iterator(_BaseIterator):
         def __init__(self, base, size):
             self.base = base
             self.size = size
@@ -267,7 +267,7 @@ class ArrayDataPrinter(object):
 
             key = '%d' % self.cur
             try:
-                val = idx.packed_array_at(self.base, self.cur)
+                val = idx.vec_at(self.base, self.cur)
             except gdb.MemoryError:
                 data = '<invalid>'
 
@@ -275,7 +275,7 @@ class ArrayDataPrinter(object):
 
             return (key, val)
 
-    class _mixed_iterator(_BaseIterator):
+    class _dict_iterator(_BaseIterator):
         def __init__(self, begin, end):
             self.cur = begin
             self.end = end
@@ -309,7 +309,7 @@ class ArrayDataPrinter(object):
             self.cur = self.cur + 1
             return (key, data)
 
-    class _set_iterator(_BaseIterator):
+    class _keyset_iterator(_BaseIterator):
         def __init__(self, begin, end):
             self.cur = begin
             self.end = end
@@ -335,10 +335,10 @@ class ArrayDataPrinter(object):
         kind_ty = T('HPHP::ArrayData::ArrayKind')
         self.kind = val['m_kind'].cast(kind_ty)
 
-        if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
+        if self.kind == self._kind('Dict'):
             self.val = val.cast(T('HPHP::VanillaDict'))
         elif self.kind == self._kind('Keyset'):
-            self.val = val.cast(T('HPHP::SetArray'))
+            self.val = val.cast(T('HPHP::VanillaKeyset'))
         else:
             self.val = val
 
@@ -360,15 +360,15 @@ class ArrayDataPrinter(object):
         data = (self.val.address.cast(T('char').pointer())
                 + self.val.type.sizeof)
 
-        if self.kind == self._kind('Packed') or self.kind == self._kind('Vec'):
-            pelm = data.cast(T('HPHP::TypedValue').pointer())
-            return self._packed_iterator(pelm, self.val['m_size'])
-        if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
+        if self.kind == self._kind('Vec'):
+            pelm = data.cast(T('char').pointer())
+            return self._vec_iterator(pelm, self.val['m_size'])
+        if self.kind == self._kind('Dict'):
             pelm = data.cast(T('HPHP::VanillaDictElm').pointer())
-            return self._mixed_iterator(pelm, pelm + self.val['m_used'])
+            return self._dict_iterator(pelm, pelm + self.val['m_used'])
         if self.kind == self._kind('Keyset'):
-            pelm = data.cast(T('HPHP::SetArrayElm').pointer())
-            return self._set_iterator(pelm, pelm + self.val['m_used'])
+            pelm = data.cast(T('HPHP::VanillaKeysetElm').pointer())
+            return self._keyset_iterator(pelm, pelm + self.val['m_used'])
         return self._packed_iterator(0, 0)
 
     def _kind(self, kind):

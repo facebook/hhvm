@@ -242,13 +242,17 @@ def _un_quick_index(qi):
         return None
 
 
+def _utv_at_pos_to_tv(base, idx):
+    utv_addr = base + T("HPHP::UnalignedTypedValue").sizeof * idx
+    utv = utv_addr.cast(T("HPHP::UnalignedTypedValue").pointer()).dereference()
+    return pretty_tv(utv["m_type"], utv["m_data"])
+
+
 def tv_layout_at(layout_type, props_base, idx):
     try:
         if layout_type == T("HPHP::tv_layout::UnalignedTVLayout"):
             idx = int(idx)
-            utv_addr = props_base + T("HPHP::UnalignedTypedValue").sizeof * idx
-            utv = utv_addr.cast(T("HPHP::UnalignedTypedValue").pointer()).dereference()
-            return pretty_tv(utv["m_type"], utv["m_data"])
+            return _utv_at_pos_to_tv(props_base, idx)
         else:
             idx = int(idx)
             quot = idx // 7
@@ -284,18 +288,23 @@ def object_data_at(obj, cls, prop_name_or_slot, hasher=None):
     return tv_layout_at(T("HPHP::ObjectProps"), props_base, idx)
 
 
-def packed_array_at(base, idx):
+def vec_at(base, idx):
     try:
-        idx = int(idx)
-        base = base.cast(T('char').pointer())
-        quot = idx // 8
-        rem = idx % 8
-        chunk = base + T("HPHP::PackedBlock").sizeof * quot
-        tyaddr = chunk + rem
-        ty = tyaddr.cast(T("HPHP::DataType").pointer()).dereference()
-        valaddr = chunk + T("HPHP::Value").sizeof * (1 + rem)
-        val = valaddr.cast(T("HPHP::Value").pointer()).dereference()
-        return pretty_tv(ty, val)
+        if V('HPHP::VanillaVec::stores_unaligned_typed_values'):
+            idx = int(idx)
+            base = base.cast(T('char').pointer())
+            return _utv_at_pos_to_tv(base, idx)
+        else:
+            idx = int(idx)
+            base = base.cast(T('char').pointer())
+            quot = idx // 8
+            rem = idx % 8
+            chunk = base + T("HPHP::PackedBlock").sizeof * quot
+            tyaddr = chunk + rem
+            ty = tyaddr.cast(T("HPHP::DataType").pointer()).dereference()
+            valaddr = chunk + T("HPHP::Value").sizeof * (1 + rem)
+            val = valaddr.cast(T("HPHP::Value").pointer()).dereference()
+            return pretty_tv(ty, val)
     except:
         pass
 

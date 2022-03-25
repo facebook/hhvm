@@ -235,8 +235,8 @@ def vstr(value):
 def alt_form_enum(str, enum_name):
     """Convert gcc-style enum symbol to clang-style."""
 
-    # for example: alt_form_enum("HPHP::ArrayData::kMixedKind", "KindOfArray")
-    # -> "#HPHP::ArrayData::KindOfArray::kMixedKind"
+    # for example: alt_form_enum("HPHP::ArrayData::kDictKind", "KindOfArray")
+    # -> "#HPHP::ArrayData::KindOfArray::kDictKind"
     a = str.split("::")
     b = a[:-1] + [enum_name] + a[-1:]
     return "::".join(b)

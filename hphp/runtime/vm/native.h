@@ -225,7 +225,6 @@ void coerceFCallArgsFromLocals(const ActRec* fp,
 
 #define NATIVE_TYPES                                  \
   /* kind       arg type              return type */  \
-  X(Int32,      int32_t,              int32_t)        \
   X(Int64,      int64_t,              int64_t)        \
   X(Double,     double,               double)         \
   X(Bool,       bool,                 bool)           \
@@ -651,4 +650,3 @@ const ConstantMap* getClassConstants(const StringData* clsName) {
 
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native
-

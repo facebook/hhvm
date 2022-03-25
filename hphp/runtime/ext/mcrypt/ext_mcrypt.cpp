@@ -368,7 +368,7 @@ bool HHVM_FUNCTION(mcrypt_module_self_test, const String& algorithm,
                                  (char*)dir.data()) == 0;
 }
 
-Variant HHVM_FUNCTION(mcrypt_create_iv, int size, int source /* = 0 */) {
+Variant HHVM_FUNCTION(mcrypt_create_iv, int64_t size, int64_t source /* = 0 */) {
   if (size <= 0 || size >= INT_MAX) {
     raise_warning("Can not create an IV with a size of less than 1 or "
                     "greater than %d", INT_MAX);

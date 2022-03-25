@@ -37,8 +37,8 @@ using std::string;
 
 static Variant
 HHVM_FUNCTION(mysql_connect, const String& server, const String& username,
-              const String& password, bool /*new_link*/, int client_flags,
-              int connect_timeout_ms, int query_timeout_ms,
+              const String& password, bool /*new_link*/, int64_t client_flags,
+              int64_t connect_timeout_ms, int64_t query_timeout_ms,
               const Array& conn_attrs) {
   return Variant(php_mysql_do_connect(
       server,
@@ -58,9 +58,9 @@ static Variant HHVM_FUNCTION(
     const String& username,
     const String& password,
     const String& database,
-    int client_flags,
-    int connect_timeout_ms,
-    int query_timeout_ms,
+    int64_t client_flags,
+    int64_t connect_timeout_ms,
+    int64_t query_timeout_ms,
     const Variant& sslContextProvider, /* = null */
     const Array& conn_attrs) {
   return Variant(php_mysql_do_connect_with_ssl(
@@ -78,8 +78,8 @@ static Variant HHVM_FUNCTION(
 static Variant HHVM_FUNCTION(mysql_connect_with_db, const String& server,
                              const String& username, const String& password,
                              const String& database, bool /*new_link*/,
-                             int client_flags, int connect_timeout_ms,
-                             int query_timeout_ms, const Array& conn_attrs) {
+                             int64_t client_flags, int64_t connect_timeout_ms,
+                             int64_t query_timeout_ms, const Array& conn_attrs) {
   return Variant(php_mysql_do_connect(
       server,
       username,
@@ -96,9 +96,9 @@ static Variant HHVM_FUNCTION(mysql_pconnect,
   const String& server,
   const String& username,
   const String& password,
-  int client_flags,
-  int connect_timeout_ms,
-  int query_timeout_ms,
+  int64_t client_flags,
+  int64_t connect_timeout_ms,
+  int64_t query_timeout_ms,
   const Array& conn_attrs) {
   return php_mysql_do_connect(
     server,
@@ -118,9 +118,9 @@ static Variant HHVM_FUNCTION(mysql_pconnect_with_db,
   const String& username,
   const String& password,
   const String& database,
-  int client_flags,
-  int connect_timeout_ms,
-  int query_timeout_ms,
+  int64_t client_flags,
+  int64_t connect_timeout_ms,
+  int64_t query_timeout_ms,
   const Array& conn_attrs) {
   return php_mysql_do_connect(
     server,
@@ -135,7 +135,7 @@ static Variant HHVM_FUNCTION(mysql_pconnect_with_db,
   );
 }
 
-static bool HHVM_FUNCTION(mysql_set_timeout, int query_timeout_ms /* = -1 */,
+static bool HHVM_FUNCTION(mysql_set_timeout, int64_t query_timeout_ms /* = -1 */,
                           const Variant& /*link_identifier*/ /* = null */) {
   MySQL::SetDefaultReadTimeout(query_timeout_ms);
   return true;
@@ -431,7 +431,7 @@ static Variant HHVM_FUNCTION(mysql_list_processes,
 ///////////////////////////////////////////////////////////////////////////////
 // row operations
 
-static bool HHVM_FUNCTION(mysql_data_seek, const Resource& result, int row) {
+static bool HHVM_FUNCTION(mysql_data_seek, const Resource& result, int64_t row) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
 
@@ -439,7 +439,7 @@ static bool HHVM_FUNCTION(mysql_data_seek, const Resource& result, int row) {
 }
 
 static Variant HHVM_FUNCTION(mysql_fetch_array, const Resource& result,
-                                         int result_type /* = 3 */) {
+                                         int64_t result_type /* = 3 */) {
   return php_mysql_fetch_hash(result, result_type);
 }
 
@@ -510,7 +510,7 @@ Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result) {
   return ret;
 }
 
-static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int row,
+static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int64_t row,
                                     const Variant& field /* = 0 */) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
@@ -525,7 +525,7 @@ static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int row,
   } else {
     mysql_result = res->get();
     if (row < 0 || row >= (int)mysql_num_rows(mysql_result)) {
-      raise_warning("Unable to jump to row %d on MySQL result index %d",
+      raise_warning("Unable to jump to row %ld on MySQL result index %d",
                       row, result->getId());
       return false;
     }
@@ -648,7 +648,7 @@ StaticString
 }
 
 static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
-                                         int field /* = -1 */) {
+                                         int64_t field /* = -1 */) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
 
@@ -675,30 +675,30 @@ static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
   return ObjectData::FromArray(props.create());
 }
 
-static bool HHVM_FUNCTION(mysql_field_seek, const Resource& result, int field) {
+static bool HHVM_FUNCTION(mysql_field_seek, const Resource& result, int64_t field) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
   return res->seekField(field);
 }
 
 static Variant HHVM_FUNCTION(mysql_field_name, const Resource& result,
-                                               int field) {
+                                               int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_NAME);
 }
 static Variant HHVM_FUNCTION(mysql_field_table, const Resource& result,
-                                                int field) {
+                                                int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_TABLE);
 }
 static Variant HHVM_FUNCTION(mysql_field_len, const Resource& result,
-                                              int field) {
+                                              int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_LEN);
 }
 static Variant HHVM_FUNCTION(mysql_field_type, const Resource& result,
-                                               int field) {
+                                               int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_TYPE);
 }
 static Variant HHVM_FUNCTION(mysql_field_flags, const Resource& result,
-                                                int field) {
+                                                int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_FLAGS);
 }
 

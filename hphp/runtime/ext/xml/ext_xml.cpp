@@ -835,7 +835,7 @@ int64_t HHVM_FUNCTION(xml_parse_into_struct,
 
 Variant HHVM_FUNCTION(xml_parser_get_option,
                       const Resource& parser,
-                      int option) {
+                      int64_t option) {
   auto p = cast<XmlParser>(parser);
   switch (option) {
   case PHP_XML_OPTION_CASE_FOLDING:
@@ -851,7 +851,7 @@ Variant HHVM_FUNCTION(xml_parser_get_option,
 
 bool HHVM_FUNCTION(xml_parser_set_option,
                    const Resource& parser,
-                   int option,
+                   int64_t option,
                    const Variant& value) {
   auto p = cast<XmlParser>(parser);
   switch (option) {
@@ -1000,7 +1000,7 @@ int64_t HHVM_FUNCTION(xml_get_error_code,
 }
 
 String HHVM_FUNCTION(xml_error_string,
-                     int code) {
+                     int64_t code) {
   char * str = (char *)XML_ErrorString((XML_Error)/*(int)*/code);
   return String(str, CopyString);
 }

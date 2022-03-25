@@ -164,7 +164,7 @@ static Array HHVM_METHOD(ImagickPixelIterator, current) {
   return HHVM_MN(ImagickPixelIterator, getCurrentIteratorRow)(this_);
 }
 
-static int HHVM_METHOD(ImagickPixelIterator, key) {
+static int64_t HHVM_METHOD(ImagickPixelIterator, key) {
   return HHVM_MN(ImagickPixelIterator, getIteratorRow)(this_);
 }
 

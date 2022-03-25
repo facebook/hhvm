@@ -47,7 +47,7 @@ void HHVM_FUNCTION(
     const String& method_name,
     int64_t msgtype,
     const Object& request_struct,
-    int seqid,
+    int64_t seqid,
     bool strict_write,
     bool oneway = false);
 
@@ -56,15 +56,15 @@ Object HHVM_FUNCTION(
     const Object& transportobj,
     const String& obj_typename,
     bool strict_read,
-    int options);
+    int64_t options);
 
 Variant HHVM_FUNCTION(
     thrift_protocol_read_binary_struct,
     const Object& transportobj,
     const String& obj_typename,
-    int options);
+    int64_t options);
 
-int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version, int version);
+int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version, int64_t version);
 
 void HHVM_FUNCTION(
     thrift_protocol_write_compact,
@@ -72,20 +72,20 @@ void HHVM_FUNCTION(
     const String& method_name,
     int64_t msgtype,
     const Object& request_struct,
-    int seqid,
+    int64_t seqid,
     bool oneway = false);
 
 Variant HHVM_FUNCTION(
     thrift_protocol_read_compact,
     const Object& transportobj,
     const String& obj_typename,
-    int options);
+    int64_t options);
 
 Object HHVM_FUNCTION(
     thrift_protocol_read_compact_struct,
     const Object& transportobj,
     const String& obj_typename,
-    int options);
+    int64_t options);
 
 ///////////////////////////////////////////////////////////////////////////////
 

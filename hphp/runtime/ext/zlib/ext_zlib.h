@@ -40,16 +40,16 @@ Variant HHVM_FUNCTION(zlib_decode, const String& data,
 Variant HHVM_FUNCTION(gzcompress, const String& data,
                                   int64_t level = -1);
 Variant HHVM_FUNCTION(gzuncompress, const String& data,
-                                    int limit = 0);
-Variant HHVM_FUNCTION(gzdeflate, const String& data, int level = -1);
-Variant HHVM_FUNCTION(gzinflate, const String& data, int limit = 0);
-Variant HHVM_FUNCTION(gzencode, const String& data, int level = -1,
-                                int encoding_mode = k_FORCE_GZIP);
-Variant HHVM_FUNCTION(gzdecode, const String& data, int limit = 0);
+                                    int64_t limit = 0);
+Variant HHVM_FUNCTION(gzdeflate, const String& data, int64_t level = -1);
+Variant HHVM_FUNCTION(gzinflate, const String& data, int64_t limit = 0);
+Variant HHVM_FUNCTION(gzencode, const String& data, int64_t level = -1,
+                                int64_t encoding_mode = k_FORCE_GZIP);
+Variant HHVM_FUNCTION(gzdecode, const String& data, int64_t limit = 0);
 String HHVM_FUNCTION(zlib_get_coding_type);
 #ifdef HAVE_QUICKLZ
-Variant HHVM_FUNCTION(qlzcompress, const String& data, int level = 1);
-Variant HHVM_FUNCTION(qlzuncompress, const String& data, int level = 1);
+Variant HHVM_FUNCTION(qlzcompress, const String& data, int64_t level = 1);
+Variant HHVM_FUNCTION(qlzuncompress, const String& data, int64_t level = 1);
 #endif
 Variant HHVM_FUNCTION(nzcompress, const String& uncompressed);
 Variant HHVM_FUNCTION(nzuncompress, const String& compressed);
@@ -77,4 +77,3 @@ Variant HHVM_FUNCTION(gzwrite, const Resource& zp, const String& str,
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

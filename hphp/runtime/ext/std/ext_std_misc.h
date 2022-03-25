@@ -37,9 +37,9 @@ bool HHVM_FUNCTION(define, const String& name, const Variant& value,
 bool HHVM_FUNCTION(defined, const String& name, bool autoload = true);
 int64_t HHVM_FUNCTION(ignore_user_abort, bool setting = false);
 Variant HHVM_FUNCTION(pack, const String& format, const Array& argv);
-int64_t HHVM_FUNCTION(sleep, int seconds);
-void HHVM_FUNCTION(usleep, int micro_seconds);
-Variant HHVM_FUNCTION(time_nanosleep, int seconds, int nanoseconds);
+int64_t HHVM_FUNCTION(sleep, int64_t seconds);
+void HHVM_FUNCTION(usleep, int64_t micro_seconds);
+Variant HHVM_FUNCTION(time_nanosleep, int64_t seconds, int64_t nanoseconds);
 bool HHVM_FUNCTION(time_sleep_until, double timestamp);
 String HHVM_FUNCTION(uniqid, const String& prefix = null_string,
                      bool more_entropy = false);
@@ -58,4 +58,3 @@ extern const double k_NAN;
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

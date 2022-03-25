@@ -423,7 +423,7 @@ HHVM_METHOD(AsyncMysqlConnectionOptions, setConnectTcpTimeout, int64_t timeout) 
 }
 
 static void
-HHVM_METHOD(AsyncMysqlConnectionOptions, setConnectAttempts, int32_t attempts) {
+HHVM_METHOD(AsyncMysqlConnectionOptions, setConnectAttempts, int64_t attempts) {
   auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
   data->m_conn_opts.setConnectAttempts(attempts);
 }
@@ -668,7 +668,7 @@ Object HHVM_STATIC_METHOD(
     AsyncMysqlClient,
     connect,
     const String& host,
-    int port,
+    int64_t port,
     const String& dbname,
     const String& user,
     const String& password,
@@ -720,7 +720,7 @@ Object HHVM_STATIC_METHOD(
     AsyncMysqlClient,
     connectWithOpts,
     const String& host,
-    int port,
+    int64_t port,
     const String& dbname,
     const String& user,
     const String& password,
@@ -745,7 +745,7 @@ Object HHVM_STATIC_METHOD(
     connectAndQuery,
     const Variant& queries,
     const String& host,
-    int port,
+    int64_t port,
     const String& dbname,
     const String& user,
     const String& password,
@@ -877,7 +877,7 @@ static Object HHVM_METHOD(
     AsyncMysqlConnectionPool,
     connect,
     const String& host,
-    int port,
+    int64_t port,
     const String& dbname,
     const String& user,
     const String& password,
@@ -931,7 +931,7 @@ static Object HHVM_METHOD(
     AsyncMysqlConnectionPool,
     connectWithOpts,
     const String& host,
-    int port,
+    int64_t port,
     const String& dbname,
     const String& user,
     const String& password,
@@ -959,7 +959,7 @@ static Object HHVM_METHOD(
     connectAndQuery,
     const Variant& queries,
     const String& host,
-    int port,
+    int64_t port,
     const String& dbname,
     const String& user,
     const String& password,
@@ -1229,7 +1229,7 @@ static bool HHVM_METHOD(AsyncMysqlConnection, isSSL) {
   return data->m_conn->isSSL();
 }
 
-static int HHVM_METHOD(AsyncMysqlConnection, warningCount) {
+static int64_t HHVM_METHOD(AsyncMysqlConnection, warningCount) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   int count = 0;
@@ -1246,7 +1246,7 @@ static String HHVM_METHOD(AsyncMysqlConnection, host) {
   return data->m_host;
 }
 
-static int HHVM_METHOD(AsyncMysqlConnection, port) {
+static int64_t HHVM_METHOD(AsyncMysqlConnection, port) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
   return data->m_port;
 }
@@ -1519,7 +1519,7 @@ Object AsyncMysqlErrorResult::newInstance(std::shared_ptr<am::Operation> op,
 
 EXTENDS_ASYNC_MYSQL_RESULT(AsyncMysqlErrorResult)
 
-static int HHVM_METHOD(AsyncMysqlErrorResult, mysql_errno) {
+static int64_t HHVM_METHOD(AsyncMysqlErrorResult, mysql_errno) {
   auto* data = Native::data<AsyncMysqlErrorResult>(this_);
   return data->m_op->mysql_errno();
 }
@@ -1575,7 +1575,7 @@ void AsyncMysqlQueryErrorResult::create(std::shared_ptr<am::Operation> op,
   m_query_results = results;
 }
 
-static int HHVM_METHOD(AsyncMysqlQueryErrorResult, numSuccessfulQueries) {
+static int64_t HHVM_METHOD(AsyncMysqlQueryErrorResult, numSuccessfulQueries) {
   auto* data = Native::data<AsyncMysqlQueryErrorResult>(this_);
   return std::dynamic_pointer_cast<am::FetchOperation>(data->m_parent.m_op)
       ->numQueriesExecuted();

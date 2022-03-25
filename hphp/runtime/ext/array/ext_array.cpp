@@ -129,7 +129,7 @@ TypedValue HHVM_FUNCTION(array_change_key_case,
 
 TypedValue HHVM_FUNCTION(array_chunk,
                          const Variant& input,
-                         int chunkSize,
+                         int64_t chunkSize,
                          bool preserve_keys /* = false */) {
   const auto& cellInput = *input.asTypedValue();
   if (UNLIKELY(!isClsMethCompactContainer(cellInput))) {
@@ -139,7 +139,7 @@ TypedValue HHVM_FUNCTION(array_chunk,
   }
 
   if (chunkSize < 1) {
-    raise_invalid_argument_warning("size: %d", chunkSize);
+    raise_invalid_argument_warning("size: %ld", chunkSize);
     return make_tv<KindOfNull>();
   }
 
@@ -332,8 +332,8 @@ Array HHVM_FUNCTION(array_fill_keys,
 }
 
 TypedValue HHVM_FUNCTION(array_fill,
-                         int start_index,
-                         int num,
+                         int64_t start_index,
+                         int64_t num,
                          const Variant& value) {
   if (num < 0) {
     raise_invalid_argument_warning("Number of elements can't be negative");
@@ -351,7 +351,7 @@ TypedValue HHVM_FUNCTION(array_fill,
   } else {
     DictInit ret(num, CheckAllocation{});
     ret.set(start_index, value);
-    auto const base = std::max(start_index + 1, 0);
+    auto const base = std::max<int64_t>(start_index + 1, 0);
     for (auto i = 1; i < num; i++) {
       ret.set(base + i - 1, value);
     }
@@ -721,7 +721,7 @@ TypedValue HHVM_FUNCTION(array_replace_recursive,
 
 TypedValue HHVM_FUNCTION(array_pad,
                          const Variant& input,
-                         int pad_size,
+                         int64_t pad_size,
                          const Variant& pad_value) {
   getCheckedArray(input);
   auto arr = arr_input.isKeyset() ? arr_input.toDict() : arr_input;
@@ -890,7 +890,7 @@ TypedValue HHVM_FUNCTION(array_push,
 
 TypedValue HHVM_FUNCTION(array_rand,
                          const Variant& input,
-                         int num_req /* = 1 */) {
+                         int64_t num_req /* = 1 */) {
   getCheckedArray(input);
   return tvReturn(ArrayUtil::RandomKeys(arr_input, num_req));
 }
@@ -1011,7 +1011,7 @@ TypedValue HHVM_FUNCTION(array_slice,
   return tvReturn(std::move(ret));
 }
 
-Variant array_splice(Variant& input, int offset,
+Variant array_splice(Variant& input, int64_t offset,
                      const Variant& length, const Variant& replacement) {
   getCheckedArrayVariant(input);
   Array ret = Array::CreateDict();
@@ -1022,7 +1022,7 @@ Variant array_splice(Variant& input, int offset,
 
 TypedValue HHVM_FUNCTION(array_splice,
                          Variant& input,
-                         int offset,
+                         int64_t offset,
                          const Variant& length,
                          const Variant& replacement) {
   return tvReturn(array_splice(input, offset, length, replacement));
@@ -2604,42 +2604,42 @@ php_ksort(Variant& container, int sort_flags, bool ascending) {
 
 bool HHVM_FUNCTION(sort,
                   Variant& array,
-                  int sort_flags /* = 0 */) {
+                  int64_t sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_sort(array, sort_flags, true);
 }
 
 bool HHVM_FUNCTION(rsort,
                    Variant& array,
-                   int sort_flags /* = 0 */) {
+                   int64_t sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_sort(array, sort_flags, false);
 }
 
 bool HHVM_FUNCTION(asort,
                    Variant& array,
-                   int sort_flags /* = 0 */) {
+                   int64_t sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_asort(array, sort_flags, true);
 }
 
 bool HHVM_FUNCTION(arsort,
                    Variant& array,
-                   int sort_flags /* = 0 */) {
+                   int64_t sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_asort(array, sort_flags, false);
 }
 
 bool HHVM_FUNCTION(ksort,
                    Variant& array,
-                   int sort_flags /* = 0 */) {
+                   int64_t sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_ksort(array, sort_flags, true);
 }
 
 bool HHVM_FUNCTION(krsort,
                    Variant& array,
-                   int sort_flags /* = 0 */) {
+                   int64_t sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_ksort(array, sort_flags, false);
 }
@@ -2739,7 +2739,7 @@ bool HHVM_FUNCTION(uksort,
 
 TypedValue HHVM_FUNCTION(array_unique,
                          const Variant& array,
-                         int sort_flags /* = 2 */) {
+                         int64_t sort_flags /* = 2 */) {
   getCheckedArray(array);
   switch (sort_flags) {
   case SORT_STRING:

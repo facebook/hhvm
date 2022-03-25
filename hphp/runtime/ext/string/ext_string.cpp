@@ -522,7 +522,7 @@ TypedValue HHVM_FUNCTION(str_split, const String& str, int64_t split_length) {
 }
 
 TypedValue HHVM_FUNCTION(chunk_split, const String& body,
-                      int chunklen, const String& end) {
+                      int64_t chunklen, const String& end) {
   return tvReturn(StringUtil::ChunkSplit(body, chunklen, end));
 }
 
@@ -827,7 +827,7 @@ TypedValue HHVM_FUNCTION(substr_replace,
  * This function determines how those two parameters are interpreted in
  * f_substr.
  */
-static bool string_substr_check(int len, int& f, int& l) {
+static bool string_substr_check(int len, int64_t& f, int64_t& l) {
   assertx(len >= 0);
 
   if (l < 0 && -l > len) {
@@ -871,7 +871,7 @@ static bool string_substr_check(int len, int& f, int& l) {
   return true;
 }
 
-TypedValue HHVM_FUNCTION(substr, StringArg str, int start, int length) {
+TypedValue HHVM_FUNCTION(substr, StringArg str, int64_t start, int64_t length) {
   auto const size = str.get()->size();
   if (!string_substr_check(size, start, length)) {
     if (RuntimeOption::PHP7_Substr && size == start) {
@@ -885,9 +885,9 @@ TypedValue HHVM_FUNCTION(substr, StringArg str, int start, int length) {
 
 String HHVM_FUNCTION(str_pad,
                      const String& input,
-                     int pad_length,
+                     int64_t pad_length,
                      const String& pad_string /* = " " */,
-                     int pad_type /* = k_STR_PAD_RIGHT */) {
+                     int64_t pad_type /* = k_STR_PAD_RIGHT */) {
   return StringUtil::Pad(input, pad_length, pad_string,
                          (StringUtil::PadType)pad_type);
 }
@@ -987,7 +987,7 @@ Variant HHVM_FUNCTION(money_format,
 
 String HHVM_FUNCTION(number_format,
                      double number,
-                     int decimals /* = 0 */,
+                     int64_t decimals /* = 0 */,
                      const Variant& dec_point_in /* = "." */,
                      const Variant& thousands_sep_in /* = "," */) {
 
@@ -1012,7 +1012,7 @@ int64_t HHVM_FUNCTION(strcmp,
 TypedValue HHVM_FUNCTION(strncmp,
                          const String& str1,
                          const String& str2,
-                         int len) {
+                         int64_t len) {
   if (len < 0) {
     raise_warning("Length must be greater than or equal to 0");
     return make_tv<KindOfBoolean>(false);
@@ -1039,7 +1039,7 @@ int64_t HHVM_FUNCTION(strcasecmp,
 TypedValue HHVM_FUNCTION(strncasecmp,
                          const String& str1,
                          const String& str2,
-                         int len) {
+                         int64_t len) {
   if (len < 0) {
     raise_warning("Length must be greater than or equal to 0");
     return make_tv<KindOfBoolean>(false);
@@ -1066,8 +1066,8 @@ int64_t HHVM_FUNCTION(strcoll,
 TypedValue HHVM_FUNCTION(substr_compare,
                          const String& main_str,
                          const String& str,
-                         int offset,
-                         int length /* = INT_MAX */,
+                         int64_t offset,
+                         int64_t length /* = INT_MAX */,
                          bool case_insensitivity /* = false */) {
   int s1_len = main_str.size();
   int s2_len = str.size();
@@ -1087,7 +1087,7 @@ TypedValue HHVM_FUNCTION(substr_compare,
     return make_tv<KindOfBoolean>(false);
   }
 
-  auto const cmp_len = std::min(s1_len - offset, std::min(s2_len, length));
+  auto const cmp_len = std::min(s1_len - offset, std::min<int64_t>(s2_len, length));
 
   auto const ret = [&] {
     const char *s1 = main_str.data();
@@ -1098,7 +1098,7 @@ TypedValue HHVM_FUNCTION(substr_compare,
   }();
   if (ret == 0) {
     auto const m1 = std::min(s1_len - offset, length);
-    auto const m2 = std::min(s2_len, length);
+    auto const m2 = std::min<int64_t>(s2_len, length);
     if (m1 > m2) return tvReturn(1);
     if (m1 < m2) return tvReturn(-1);
     return tvReturn(0);
@@ -1249,7 +1249,7 @@ TypedValue HHVM_FUNCTION(strpbrk,
 TypedValue HHVM_FUNCTION(strpos,
                          const String& haystack,
                          const Variant& needle,
-                         int offset /* = 0 */) {
+                         int64_t offset /* = 0 */) {
   if (offset < 0 || offset > haystack.size()) {
     raise_warning("Offset not contained in string");
     return make_tv<KindOfBoolean>(false);
@@ -1272,7 +1272,7 @@ TypedValue HHVM_FUNCTION(strpos,
 TypedValue HHVM_FUNCTION(stripos,
                          const String& haystack,
                          const Variant& needle,
-                         int offset /* = 0 */) {
+                         int64_t offset /* = 0 */) {
   if (offset < 0 || offset > haystack.size()) {
     raise_warning("Offset not contained in string");
     return make_tv<KindOfBoolean>(false);
@@ -1330,7 +1330,7 @@ TypedValue HHVM_FUNCTION(strrchr,
 TypedValue HHVM_FUNCTION(strrpos,
                          const String& haystack,
                          const Variant& needle,
-                         int offset /* = 0 */) {
+                         int64_t offset /* = 0 */) {
   if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return make_tv<KindOfBoolean>(false);
   }
@@ -1347,7 +1347,7 @@ TypedValue HHVM_FUNCTION(strrpos,
 TypedValue HHVM_FUNCTION(strripos,
                          const String& haystack,
                          const Variant& needle,
-                         int offset /* = 0 */) {
+                         int64_t offset /* = 0 */) {
   if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return make_tv<KindOfBoolean>(false);
   }
@@ -1364,8 +1364,8 @@ TypedValue HHVM_FUNCTION(strripos,
 TypedValue HHVM_FUNCTION(substr_count,
                          const String& haystack,
                          const String& needle,
-                         int offset /* = 0 */,
-                         int length /* = 0x7FFFFFFF */) {
+                         int64_t offset /* = 0 */,
+                         int64_t length /* = 0x7FFFFFFF */) {
   int lenNeedle = needle.size();
   if (lenNeedle == 0) {
     raise_invalid_argument_warning("needle: (empty)");
@@ -1394,7 +1394,7 @@ TypedValue HHVM_FUNCTION(substr_count,
 }
 
 namespace {
-  bool string_strspn_check(int inputLength, int &start, int &scanLength) {
+  bool string_strspn_check(int inputLength, int64_t &start, int64_t &scanLength) {
     if (start < 0) {
       start += inputLength;
       if (start < 0) {
@@ -1420,8 +1420,8 @@ namespace {
 TypedValue HHVM_FUNCTION(strspn,
                          const String& str1,
                          const String& str2,
-                         int start /* = 0 */,
-                         int length /* = 0x7FFFFFFF */) {
+                         int64_t start /* = 0 */,
+                         int64_t length /* = 0x7FFFFFFF */) {
   const char *s1 = str1.data();
   const char *s2 = str2.data();
   int s1_len = str1.size();
@@ -1444,8 +1444,8 @@ TypedValue HHVM_FUNCTION(strspn,
 TypedValue HHVM_FUNCTION(strcspn,
                          const String& str1,
                          const String& str2,
-                         int start /* = 0 */,
-                         int length /* = 0x7FFFFFFF */) {
+                         int64_t start /* = 0 */,
+                         int64_t length /* = 0x7FFFFFFF */) {
   const char *s1 = str1.data();
   const char *s2 = str2.data();
   int s1_len = str1.size();
@@ -1634,9 +1634,9 @@ Variant HHVM_FUNCTION(str_word_count,
 int64_t HHVM_FUNCTION(levenshtein,
                       const String& str1,
                       const String& str2,
-                      int cost_ins /* = 1 */,
-                      int cost_rep /* = 1 */,
-                      int cost_del /* = 1 */) {
+                      int64_t cost_ins /* = 1 */,
+                      int64_t cost_rep /* = 1 */,
+                      int64_t cost_del /* = 1 */) {
   return string_levenshtein(str1.data(), str1.size(), str2.data(), str2.size(),
                             cost_ins, cost_rep, cost_del);
 }
@@ -1656,13 +1656,13 @@ Variant HHVM_FUNCTION(soundex,
   return string_soundex(str);
 }
 
-Variant HHVM_FUNCTION(metaphone, const String& str, int /*phones*/ /* = 0 */) {
+Variant HHVM_FUNCTION(metaphone, const String& str, int64_t /*phones*/ /* = 0 */) {
   return string_metaphone(str.data(), str.size(), 0, 1);
 }
 
 String HHVM_FUNCTION(html_entity_decode,
                      const String& str,
-                     int flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
+                     int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
                      const String& charset /* = "UTF-8" */) {
   const char *scharset = charset.data();
   if (!*scharset) scharset = "ISO-8859-1";
@@ -1672,7 +1672,7 @@ String HHVM_FUNCTION(html_entity_decode,
 
 String HHVM_FUNCTION(htmlentities,
                      const String& str,
-                     int flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
+                     int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
                      const String& charset /* = "UTF-8" */,
                      bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
@@ -1684,14 +1684,14 @@ String HHVM_FUNCTION(htmlentities,
 
 String HHVM_FUNCTION(htmlspecialchars_decode,
                      const String& str,
-                     int flags /* = k_ENT_HTML_QUOTE_DOUBLE */) {
+                     int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */) {
   return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
                                 "UTF-8", false);
 }
 
 String HHVM_FUNCTION(htmlspecialchars,
                      const String& str,
-                     int flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
+                     int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
                      const String& charset /* = "UTF-8" */,
                      bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
@@ -1703,7 +1703,7 @@ String HHVM_FUNCTION(htmlspecialchars,
 
 String HHVM_FUNCTION(fb_htmlspecialchars,
                      const String& str,
-                     int flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
+                     int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
                      const String& charset /* = "ISO-8859-1" */,
                      const Variant& extra /* = varray[] */) {
   if (!extra.isNull() && !extra.isArray()) {
@@ -2121,7 +2121,7 @@ Variant HHVM_FUNCTION(strtr,
 }
 
 Variant HHVM_FUNCTION(setlocale,
-                      int category,
+                      int64_t category,
                       const Variant& locale,
                       const Array& _argv /* = null_array */) {
   Array argv = _argv;
@@ -2225,7 +2225,7 @@ Array HHVM_FUNCTION(localeconv) {
   return ret;
 }
 
-Variant HHVM_FUNCTION(nl_langinfo, int item) {
+Variant HHVM_FUNCTION(nl_langinfo, int64_t item) {
 #ifdef _MSC_VER
   raise_warning("nl_langinfo is not yet implemented on Windows!");
   return empty_string();
@@ -2391,7 +2391,7 @@ Variant HHVM_FUNCTION(nl_langinfo, int item) {
 #endif
       break;
     default:
-      raise_warning("Item '%d' is not valid", item);
+      raise_warning("Item '%ld' is not valid", item);
       return false;
   }
 
@@ -2471,8 +2471,8 @@ String encode_as_utf8(int code_point) {
 }
 
 Array HHVM_FUNCTION(get_html_translation_table,
-                    int table /* = 0 */,
-                    int flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
+                    int64_t table /* = 0 */,
+                    int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
                     const String& encoding /* = "UTF-8" */) {
   using namespace entity_charset_enum;
   auto charset = determine_charset(encoding.data());
@@ -2547,14 +2547,14 @@ Array HHVM_FUNCTION(get_html_translation_table,
 
 String HHVM_FUNCTION(hebrev,
                      const String& hebrew_text,
-                     int max_chars_per_line /* = 0 */) {
+                     int64_t max_chars_per_line /* = 0 */) {
   if (hebrew_text.empty()) return hebrew_text;
   return string_convert_hebrew_string(hebrew_text, max_chars_per_line, false);
 }
 
 String HHVM_FUNCTION(hebrevc,
                      const String& hebrew_text,
-                     int max_chars_per_line /* = 0 */) {
+                     int64_t max_chars_per_line /* = 0 */) {
   if (hebrew_text.empty()) return hebrew_text;
   return string_convert_hebrew_string(hebrew_text, max_chars_per_line, true);
 }

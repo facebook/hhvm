@@ -26,23 +26,23 @@ namespace HPHP {
 Variant HHVM_FUNCTION(preg_filter, const Variant& pattern,
                                    const Variant& replacement,
                                    const Variant& subject,
-                                   int limit,
+                                   int64_t limit,
                                    int64_t& count);
 Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Variant& input,
-                                 int flags = 0);
+                                 int64_t flags = 0);
 Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& replacement,
-                                    const Variant& subject, int limit = -1);
+                                    const Variant& subject, int64_t limit = -1);
 Variant HHVM_FUNCTION(preg_replace_callback, const Variant& pattern,
                                              const Variant& callback,
                                              const Variant& subject,
-                                             int limit,
+                                             int64_t limit,
                                              int64_t& count);
 Variant HHVM_FUNCTION(
     preg_replace_callback_array, const Variant& patterns_and_callbacks,
-                                 const Variant& subject, int limit,
+                                 const Variant& subject, int64_t limit,
                                  int64_t& count);
 Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
-                                  const Variant& limit, int flags = 0);
+                                  const Variant& limit, int64_t flags = 0);
 String HHVM_FUNCTION(preg_quote, const String& str,
                                  const Variant& = null_string);
 
@@ -54,9 +54,9 @@ String HHVM_FUNCTION(ereg_replace, const String& pattern,
 String HHVM_FUNCTION(eregi_replace, const String& pattern,
                                 const String& replacement, const String& str);
 Variant HHVM_FUNCTION(split, const String& pattern, const String& str,
-                             int limit = -1);
+                             int64_t limit = -1);
 Variant HHVM_FUNCTION(spliti, const String& pattern, const String& str,
-                              int limit = -1);
+                              int64_t limit = -1);
 String HHVM_FUNCTION(sql_regcase, const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////

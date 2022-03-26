@@ -59,6 +59,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrIsReadonly,               P,       "readonly");             \
   X(AttrReadonlyReturn,           F,       "readonly_return");      \
   X(AttrReadonlyThis,             F,       "readonly_this");        \
+  X(AttrModule,                   C,       "module");               \
   X(AttrForbidDynamicProps,       C,       "no_dynamic_props");     \
   X(AttrDynamicallyConstructible, C,       "dyn_constructible");    \
   X(AttrProvenanceSkipFrame,      F,       "prov_skip_frame");      \

@@ -951,6 +951,40 @@ pub fn emit_class<'a, 'arena, 'decl>(
     })
 }
 
+pub fn emit_module<'a, 'arena, 'decl>(
+    alloc: &'arena bumpalo::Bump,
+    emitter: &mut Emitter<'arena, 'decl>,
+    ast_module: &'a ast::Module,
+) -> Result<HhasClass<'arena>> {
+    // TODO (T115359287): We will revisit whether modules should be first class
+    // or reuse classes
+    let attributes = emit_attribute::from_asts(emitter, &ast_module.user_attributes)?;
+    let name = class::ClassType::from_ast_name_and_mangle_for_module(alloc, &ast_module.name.1);
+    let span = HhasSpan::from_pos(&ast_module.span);
+    let flags = Attr::AttrModule;
+    Ok(HhasClass {
+        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
+        base: Maybe::Nothing,
+        implements: Slice::empty(),
+        enum_includes: Slice::empty(),
+        name,
+        span,
+        flags,
+        doc_comment: Maybe::Nothing,
+        uses: Slice::empty(),
+        use_aliases: Slice::empty(),
+        use_precedences: Slice::empty(),
+        methods: Slice::empty(),
+        enum_type: Maybe::Nothing,
+        upper_bounds: Slice::empty(),
+        properties: Slice::empty(),
+        requirements: Slice::empty(),
+        type_constants: Slice::empty(),
+        ctx_constants: Slice::empty(),
+        constants: Slice::empty(),
+    })
+}
+
 pub fn emit_classes_from_program<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
@@ -960,6 +994,8 @@ pub fn emit_classes_from_program<'a, 'arena, 'decl>(
         .filter_map(|class| {
             if let ast::Def::Class(cd) = class {
                 Some(emit_class(alloc, emitter, cd))
+            } else if let ast::Def::Module(md) = class {
+                Some(emit_module(alloc, emitter, md))
             } else {
                 None
             }

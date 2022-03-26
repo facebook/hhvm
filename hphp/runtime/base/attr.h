@@ -124,6 +124,9 @@ enum Attr {
   // Indicates that the function returns readonly value
   AttrReadonlyReturn       = (1u << 15), //       |          |    X    //
                                          //       |          |         //
+  // Indicates that this class is a module declaration
+  AttrModule               = (1u << 16), //    X  |          |         //
+                                         //       |          |         //
   // Indicates that the function, class or static property can be loaded
   // once and then persisted across all requests. |          |         //
   AttrPersistent           = (1u << 18), //    X  |    X     |    X    //

@@ -240,7 +240,9 @@ MaybeDataType get_datatype(
   }
   if (!strcasecmp(name.c_str(), "null") ||
       !strcasecmp(name.c_str(), "HH\\null") ||
-      !strcasecmp(name.c_str(), "HH\\void")) {
+      !strcasecmp(name.c_str(), "HH\\void") ||
+      !strcasecmp(name.c_str(), "HH\\noreturn") ||
+      !strcasecmp(name.c_str(), "HH\\nothing")) {
     return KindOfNull;
   }
   if (!strcasecmp(name.c_str(), "HH\\bool"))     return KindOfBoolean;

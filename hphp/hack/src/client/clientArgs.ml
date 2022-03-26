@@ -151,6 +151,12 @@ let parse_check_args cmd =
       ()
     end
   in
+  let add_single x =
+    match !mode with
+    | Some (MODE_STATUS_SINGLE xs) ->
+      mode := Some (MODE_STATUS_SINGLE (x :: xs))
+    | _ -> set_mode (MODE_STATUS_SINGLE [x])
+  in
   (* parse args *)
   let usage =
     match cmd with
@@ -649,7 +655,7 @@ let parse_check_args cmd =
         Arg.Bool (fun x -> show_spinner := Some x),
         " shows a spinner while awaiting the typechecker" );
       ( "--single",
-        Arg.String (fun x -> set_mode (MODE_STATUS_SINGLE x)),
+        Arg.String add_single,
         "<path> Return errors in file with provided name (give '-' for stdin)"
       );
       ( "--single-remote-execution",

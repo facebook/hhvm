@@ -67,9 +67,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         dropped_count;
         last_recheck_stats;
       } )
-  | STATUS_SINGLE { file_name; max_errors } ->
+  | STATUS_SINGLE { file_names; max_errors } ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    (env, take_max_errors (ServerStatusSingle.go file_name ctx) max_errors)
+    (env, take_max_errors (ServerStatusSingle.go file_names ctx) max_errors)
   | STATUS_SINGLE_REMOTE_EXECUTION { file_name } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     let (errors, dep_edges) =

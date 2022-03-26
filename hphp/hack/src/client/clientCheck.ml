@@ -688,18 +688,19 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
              ~value:status.Rpc.Server_status.last_recheck_stats
       in
       Lwt.return (exit_status, telemetry)
-    | MODE_STATUS_SINGLE filename ->
-      let file_input =
+    | MODE_STATUS_SINGLE filenames ->
+      let file_input filename =
         match filename with
         | "-" ->
           ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
         | _ -> ServerCommandTypes.FileName (expand_path filename)
       in
+      let file_inputs = List.map ~f:file_input filenames in
       let%lwt ((error_list, dropped_count), telemetry) =
         rpc
           args
           (Rpc.STATUS_SINGLE
-             { file_name = file_input; max_errors = args.max_errors })
+             { file_names = file_inputs; max_errors = args.max_errors })
       in
       let status =
         {

@@ -334,7 +334,7 @@ type _ t =
     }
       -> Server_status.t t
   | STATUS_SINGLE : {
-      file_name: file_input;
+      file_names: file_input list;
       max_errors: int option;
     }
       -> (Errors.finalized_error list * int) t

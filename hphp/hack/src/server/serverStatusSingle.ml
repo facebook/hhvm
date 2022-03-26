@@ -9,8 +9,8 @@
 open Hh_prelude
 open ServerCommandTypes
 
-let go file_input ctx =
-  let errors =
+let go file_inputs ctx =
+  let errors acc file_input =
     match file_input with
     | FileName file_name ->
       let path = Relative_path.create_detect_prefix file_name in
@@ -18,7 +18,7 @@ let go file_input ctx =
       let { Tast_provider.Compute_tast_and_errors.errors; _ } =
         Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
       in
-      errors
+      Errors.merge errors acc
     | FileContent contents ->
       let (ctx, entry) =
         Provider_context.add_or_overwrite_entry_contents
@@ -32,6 +32,8 @@ let go file_input ctx =
         Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
             Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry)
       in
-      errors
+      Errors.merge errors acc
   in
-  errors |> Errors.get_sorted_error_list |> List.map ~f:User_error.to_absolute
+  List.fold ~f:errors ~init:Errors.empty file_inputs
+  |> Errors.get_sorted_error_list
+  |> List.map ~f:User_error.to_absolute

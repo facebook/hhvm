@@ -59,7 +59,7 @@ type client_mode =
   | MODE_SERVER_RAGE
   | MODE_STATS
   | MODE_STATUS
-  | MODE_STATUS_SINGLE of string (* filename *)
+  | MODE_STATUS_SINGLE of string list (* filenames *)
   | MODE_STATUS_SINGLE_REMOTE_EXECUTION of string (* filename *)
   | MODE_STATUS_REMOTE_EXECUTION of string (* "warm" or "cold" *)
   | MODE_STATUS_MULTI_REMOTE_EXECUTION

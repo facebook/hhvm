@@ -640,6 +640,7 @@ struct Unit {
   CompactVector<SrcLoc> srcLocs;
   UserAttributeMap metaData;
   UserAttributeMap fileAttributes;
+  LSString moduleName;
 };
 
 /*

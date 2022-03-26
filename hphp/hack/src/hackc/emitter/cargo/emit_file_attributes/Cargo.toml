@@ -10,6 +10,7 @@ path = "../../emit_file_attributes.rs"
 [dependencies]
 emit_attribute = { path = "../emit_attribute" }
 env = { path = "../env" }
+ffi = { path = "../../../../utils/ffi" }
 hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
 instruction_sequence = { path = "../instruction_sequence" }
 itertools = "0.10.3"

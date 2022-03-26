@@ -22,6 +22,7 @@ pub struct HackCUnit<'arena> {
     pub classes: Slice<'arena, HhasClass<'arena>>,
     pub typedefs: Slice<'arena, HhasTypedef<'arena>>,
     pub file_attributes: Slice<'arena, HhasAttribute<'arena>>,
+    pub module: Maybe<Str<'arena>>,
     pub symbol_refs: HhasSymbolRefs<'arena>,
     pub constants: Slice<'arena, HhasConstant<'arena>>,
     pub fatal: Maybe<Triple<FatalOp, HhasPos, Str<'arena>>>,

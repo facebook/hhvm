@@ -424,6 +424,11 @@ public:
   const UserAttributeMap& fileAttributes() const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // Modules.
+
+  const StringData* moduleName() const;
+
+  /////////////////////////////////////////////////////////////////////////////
   // Merge.
 
   /*
@@ -544,6 +549,7 @@ private:
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
   std::unique_ptr<FatalInfo> m_fatalInfo{nullptr};
+  const StringData* m_moduleName{nullptr};
 
   rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
 

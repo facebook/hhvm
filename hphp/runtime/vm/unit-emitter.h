@@ -257,6 +257,7 @@ public:
   Location::Range m_fatalLoc;
   FatalOp m_fatalOp;
   std::string m_fatalMsg;
+  const StringData* m_moduleName{nullptr};
 
 private:
   SHA1 m_sha1;

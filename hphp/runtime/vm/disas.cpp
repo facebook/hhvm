@@ -924,11 +924,19 @@ void print_fatal(Output& out, const Unit* unit) {
   }
 }
 
+void print_module(Output& out, const Unit* unit) {
+  if (auto const name = unit->moduleName()) {
+    out.nl();
+    out.fmtln(".module \"{}\";", name);
+  }
+}
+
 void print_unit_metadata(Output& out, const Unit* unit) {
   out.nl();
 
   out.fmtln(".filepath {};", escaped(unit->origFilepath()));
   print_fatal(out, unit);
+  print_module(out, unit);
   if (!unit->fileAttributes().empty()) {
     out.nl();
     out.fmtln(".file_attributes [{}] ;", user_attrs(&unit->fileAttributes()));

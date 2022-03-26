@@ -377,6 +377,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_constants = m_constants;
   u->m_metaData = m_metaData;
   u->m_fileAttributes = m_fileAttributes;
+  u->m_moduleName = m_moduleName;
   u->m_ICE = m_ICE;
 
   size_t ix = 0;
@@ -444,6 +445,7 @@ template<class SerDe>
 void UnitEmitter::serdeMetaData(SerDe& sd) {
   sd(m_metaData)
     (m_fileAttributes)
+    (m_moduleName)
     (m_symbol_refs)
     (m_bcSha1)
     (m_fatalUnit)

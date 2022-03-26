@@ -6,7 +6,7 @@
 use bitflags::bitflags;
 use emit_class::emit_classes_from_program;
 use emit_constant::emit_constants_from_program;
-use emit_file_attributes::emit_file_attributes_from_program;
+use emit_file_attributes::{emit_file_attributes_from_program, emit_module_from_program};
 use emit_function::emit_functions_from_program;
 use emit_typedef::emit_typedefs_from_program;
 use env::{self, emitter::Emitter, Env};
@@ -69,6 +69,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     functions.append(&mut const_inits);
     let file_attributes = emit_file_attributes_from_program(emitter, prog)?;
     let adata = emit_adata::take(emitter).adata;
+    let module = emit_module_from_program(emitter, prog);
     let symbol_refs =
         HhasSymbolRefs::from_symbol_refs_state(emitter.alloc, emit_symbol_refs::take(emitter));
     let fatal = Nothing;
@@ -80,6 +81,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
         constants: Slice::fill_iter(emitter.alloc, constants.into_iter()),
         adata: Slice::fill_iter(emitter.alloc, adata.into_iter()),
         file_attributes: Slice::fill_iter(emitter.alloc, file_attributes.into_iter()),
+        module,
         symbol_refs,
         fatal,
     })

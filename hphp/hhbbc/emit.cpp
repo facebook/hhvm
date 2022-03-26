@@ -1286,6 +1286,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
   ue->m_filepath = unit.filename;
   ue->m_metaData = unit.metaData;
   ue->m_fileAttributes = unit.fileAttributes;
+  ue->m_moduleName = unit.moduleName;
 
   if (unit.fatalInfo) {
     ue->m_fatalUnit = true;

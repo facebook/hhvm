@@ -128,6 +128,7 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Re
     }
 
     newline(w)?;
+    print_module(w, &prog.module)?;
     concat(w, &prog.adata, |w, a| print_adata_region(ctx, w, a))?;
     concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
     concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
@@ -829,6 +830,15 @@ fn print_file_attributes(
     print_attributes(ctx, w, al)?;
     w.write_all(b"] ;")?;
     newline(w)
+}
+
+fn print_module(w: &mut dyn Write, m_opt: &Maybe<Str<'_>>) -> Result<()> {
+    if let Just(m) = m_opt {
+        newline(w)?;
+        write_bytes!(w, ".module \"{}\";", m)?;
+        newline(w)?;
+    }
+    Ok(())
 }
 
 fn is_bareword_char(c: &u8) -> bool {

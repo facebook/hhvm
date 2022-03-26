@@ -3303,6 +3303,22 @@ void parse_fatal(AsmState& as) {
 }
 
 /*
+ * directive-module : string ';'
+ */
+void parse_module(AsmState& as) {
+  as.in.skipWhitespace();
+  std::string name;
+  if (!as.in.readQuotedStr(name)) {
+    as.error(".module must have a name");
+  }
+  as.in.expectWs(';');
+  if (as.ue->m_moduleName) {
+    as.error("One file may not use multiple modules");
+  }
+  as.ue->m_moduleName = makeStaticString(name);
+}
+
+/*
  * directive-symbols : '{' identifier identifier* '}'
  */
 void parse_symbol_refs(AsmState& as, SymbolRef symbol_kind) {
@@ -3421,6 +3437,7 @@ void parse(AsmState& as) {
     if (directive == ".metadata")      { parse_metadata(as)      ; continue; }
     if (directive == ".file_attributes") { parse_file_attributes(as); continue;}
     if (directive == ".fatal")         { parse_fatal(as)         ; continue; }
+    if (directive == ".module")        { parse_module(as)        ; continue; }
 
     as.error("unrecognized top-level directive `" + directive + "'");
   }

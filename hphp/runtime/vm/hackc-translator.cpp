@@ -491,6 +491,11 @@ void translateConstant(TranslationState& ts, const HhasConstant& c) {
   ts.ue->addConstant(constant);
 }
 
+void translateModule(TranslationState& ts, const Optional<Str>& name) {
+  if (!name) return;
+  ts.ue->m_moduleName = toStaticString(name.value());
+}
+
 void translate(TranslationState& ts, const HackCUnit& unit) {
   auto classes = range(unit.classes);
   for (auto const& c : classes) {
@@ -506,6 +511,7 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
   for (auto const& t : typedefs) {
     translateTypedef(ts, t);
   }
+  translateModule(ts, maybe(unit.module));
 }
 }
 

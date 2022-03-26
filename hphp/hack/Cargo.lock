@@ -1130,6 +1130,7 @@ version = "0.0.0"
 dependencies = [
  "emit_attribute",
  "env",
+ "ffi",
  "hhas_attribute",
  "instruction_sequence",
  "itertools 0.10.3",

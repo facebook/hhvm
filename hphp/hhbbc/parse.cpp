@@ -1107,6 +1107,7 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
   ret->filename = ue.m_filepath;
   ret->metaData = ue.m_metaData;
   ret->fileAttributes = ue.m_fileAttributes;
+  ret->moduleName = ue.m_moduleName;
 
   if (ue.m_fatalUnit) {
     php::FatalInfo fi{ue.m_fatalLoc, ue.m_fatalOp, ue.m_fatalMsg};

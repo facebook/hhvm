@@ -73,7 +73,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CompilerOptions {
-  std::string target;
   std::string format;
   std::string outputDir;
   std::vector<std::string> config;
@@ -139,7 +138,6 @@ int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar);
 void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar);
 int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
                AsyncFileCacheSaver &fcThread);
-int runTarget(const CompilerOptions &po);
 void pcre_init();
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -157,11 +155,6 @@ int compiler_main(int argc, char **argv) {
     Timer totalTimer(Timer::WallTime, "running hphp");
     createOutputDirectory(po);
     if (ret == 0) ret = process(po);
-    if (ret == 0) {
-      if (po.target == "run") {
-        ret = runTarget(po);
-      }
-    }
     if (ret) {
       Logger::Error("hphp failed");
     } else {
@@ -231,18 +224,15 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   bool dummy;
   bool dummy2;
   std::string dummy3;
+  std::string dummy4;
 
   desc.add_options()
     ("help", "display this message")
     ("version", "display version number")
-    ("target,t", value<std::string>(&po.target)->default_value("run"),
-     "hhbc | "
-     "cache | "
-     "filecache | "
-     "run (default)")
+    ("target,t", value<std::string>(&dummy4)->default_value("hhbc"),
+     "hhbc") // TODO: T115189426 remove this
     ("format,f", value<std::string>(&po.format),
-     "hhbc: binary (default) | hhas | text | exe; \n"
-     "run: binary (default) | hhas | text | exe")
+     "hhbc: binary (default) | hhas | text")
     ("input-dir", value<std::string>(&po.inputDir), "input directory")
     ("program", value<std::string>(&po.program)->default_value("program"),
      "final program name to use")
@@ -391,29 +381,13 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     return 1;
   }
 
-  if (po.target != "run" &&
-      po.target != "hhbc" &&
-      po.target != "cache" &&
-      po.target != "filecache") {
-    Logger::Error("Error in command line: target '%s' is not supported.",
-                  po.target.c_str());
-    // desc[ription] is the --help output
-    cout << desc << "\n";
-    return -1;
-  }
-
-  if ((po.target == "hhbc" || po.target == "run") &&
-      po.format.find("exe") == std::string::npos) {
-    if (po.program == "program") {
-      po.program = "hhvm.hhbc";
-    }
+  if (po.program == "program") {
+    po.program = "hhvm.hhbc";
   }
 
   // log level
   if (po.logLevel != -1) {
     Logger::LogLevel = (Logger::LogLevelType)po.logLevel;
-  } else if (po.target == "run") {
-    Logger::LogLevel = Logger::LogNone;
   } else {
     Logger::LogLevel = Logger::LogInfo;
   }
@@ -499,10 +473,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   Option::ProgramName = po.program;
 
-  if (po.format.empty() && (po.target == "run" || po.target == "hhbc")) {
-    po.format = "binary";
-  }
-
+  if (po.format.empty()) po.format = "binary";
   return 0;
 }
 
@@ -555,7 +526,7 @@ int process(const CompilerOptions &po) {
   SCOPE_EXIT { hphp_process_exit(); };
   BuiltinSymbols::s_systemAr.reset();
 
-  if (po.target != "filecache") package.createAsyncState();
+  package.createAsyncState();
   SCOPE_EXIT {
     // We need to do this manually, and not rely on ~Package, because
     // it has to be done *before* we call hphp_process_exit().
@@ -603,17 +574,15 @@ int process(const CompilerOptions &po) {
         package.addInputList(po.inputList);
       }
     }
-    if (po.target != "filecache") {
-      if (!package.parse()) return 1;
+    if (!package.parse()) return 1;
 
-      Logger::FInfo(
-        "{} files parsed, {} cached, {} files read, {} files stored",
-        package.getTotalParses(),
-        package.getParseCacheHits(),
-        package.getFileReads(),
-        package.getFileStores()
-      );
-    }
+    Logger::FInfo(
+      "{} files parsed, {} cached, {} files read, {} files stored",
+      package.getTotalParses(),
+      package.getParseCacheHits(),
+      package.getFileReads(),
+      package.getFileStores()
+    );
   }
 
   // Start asynchronously destroying the async state, since it may
@@ -638,17 +607,7 @@ int process(const CompilerOptions &po) {
     }
   };
 
-  int ret = 0;
-  if (po.target == "hhbc" || po.target == "run") {
-    ret = hhbcTarget(po, std::move(ar), fileCacheThread);
-  } else if (po.target == "filecache" || po.target == "cache") {
-    ar->finish();
-  } else {
-    Logger::Error("Unknown target: %s", po.target.c_str());
-    return 1;
-  }
-
-  return ret;
+  return hhbcTarget(po, std::move(ar), fileCacheThread);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -657,9 +616,6 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   ar->setOutputPath(po.outputDir);
   // Propagate relevant compiler-specific options to the runtime.
   RuntimeOption::RepoPath = ar->getOutputPath() + '/' + po.program;
-  if (po.format.find("exe") != std::string::npos) {
-    RuntimeOption::RepoPath += ".hhbc";
-  }
   unlink(RuntimeOption::RepoPath.c_str());
 }
 
@@ -679,11 +635,6 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
     formatCount++;
   }
   if (po.format.find("binary") != std::string::npos) {
-    Option::GenerateBinaryHHBC = true;
-    type = "creating binary HHBC files";
-    formatCount++;
-  }
-  if (po.format.find("exe") != std::string::npos) {
     Option::GenerateBinaryHHBC = true;
     type = "creating binary HHBC files";
     formatCount++;
@@ -709,66 +660,10 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
   Timer timer(Timer::WallTime, type);
   Compiler::emitAllHHBC(std::move(ar));
 
-  if (!ret && po.format.find("exe") != std::string::npos) {
-    /*
-     * We need to create an executable with the repo
-     * embedded in it.
-     * Copy ourself, and embed the repo as a section
-     * named "repo".
-     */
-    std::string exe = po.outputDir + '/' + po.program;
-    std::string repo = "repo=" + exe + ".hhbc";
-    std::string buf = current_executable_path();
-    if (buf.empty()) return -1;
-
-    const char *argv[] = { "objcopy", "--add-section", repo.c_str(),
-                           buf.c_str(), exe.c_str(), 0 };
-    std::string out;
-    ret = proc::exec(argv[0], argv, nullptr, out, nullptr) ? 0 : 1;
-  }
-
   return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-int runTarget(const CompilerOptions &po) {
-  int ret = 0;
-
-  // If there are more than one input files, we need one extra arg to run.
-  // If it's missing, we will stop right here, with compiled code.
-  if ((po.inputs.size() != 1 && po.programArgs.empty()) ||
-      !po.inputList.empty()) {
-    return 0;
-  }
-
-  // run the executable
-  std::string cmd;
-  if (po.format.find("exe") == std::string::npos) {
-    std::string buf = current_executable_path();
-    if (buf.empty()) return -1;
-
-    cmd += buf;
-    cmd += " -vRepo.Authoritative=true";
-    if (getenv("HPHP_DUMP_BYTECODE")) cmd += " -vEval.DumpBytecode=1";
-    if (getenv("HPHP_INTERP"))        cmd += " -vEval.Jit=0";
-    cmd += " -vRepo.Path=";
-  }
-  cmd += po.outputDir + '/' + po.program;
-  cmd += std::string(" --file ") +
-    (po.inputs.size() == 1 ? po.inputs[0] : "") +
-    " " + po.programArgs;
-  Logger::Info("running executable: %s", cmd.c_str());
-  ret = FileUtil::ssystem(cmd.c_str());
-  if (ret && ret != -1) ret = 1;
-
-  // delete the temporary directory if not needed
-  if (!po.keepTempDir) {
-    Logger::Info("deleting temporary directory %s...", po.outputDir.c_str());
-    boost::filesystem::remove_all(po.outputDir);
-  }
-  return ret;
-}
 
 void createOutputDirectory(CompilerOptions &po) {
   if (po.outputDir.empty()) {

@@ -1,0 +1,6 @@
+File "enum_class_names.bad.php", line 20, characters 19-23:
+Typing error (Typing[4110])
+  File "enum_class_names.bad.php", line 4, characters 7-10:
+  Expected `dynamic`
+  File "enum_class_names.bad.php", line 4, characters 7-10:
+  Type `HH\EnumClass\Label<E, int>` is not a subtype of `dynamic` under dynamic-aware subtyping

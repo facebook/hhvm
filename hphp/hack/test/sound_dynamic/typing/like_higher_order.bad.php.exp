@@ -1,0 +1,6 @@
+File "like_higher_order.bad.php", line 20, characters 14-30:
+Typing error (Typing[4110])
+  File "like_higher_order.bad.php", line 20, characters 14-30:
+  Expected `dynamic`
+  File "like_higher_order.bad.php", line 20, characters 14-30:
+  Type `(function(C $x): bool)` is not a subtype of `dynamic` under dynamic-aware subtyping

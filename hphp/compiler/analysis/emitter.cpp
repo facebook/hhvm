@@ -59,7 +59,7 @@ void genText(UnitEmitter* ue, const std::string& outputPath) {
   std::unique_ptr<Unit> unit(ue->create());
   auto const basePath = AnalysisResult::prepareFile(
     outputPath.c_str(),
-    Option::UserFilePrefix + unit->filepath()->toCppString(),
+    "php/" + unit->filepath()->toCppString(),
     true, false);
 
   if (Option::GenerateTextHHBC) {

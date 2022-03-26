@@ -24,7 +24,6 @@ static const char* kTestData = "some test data for serialization";
 struct TestFileCache : testing::Test {
  protected:
   void SetUp() override {
-    FileCache::UseNewCache = true;
   }
 
   bool makeTempDir(std::string* dir) {

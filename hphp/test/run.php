@@ -1097,7 +1097,7 @@ function hhvm_cmd(
 
     $program = "hhvm";
     $hhbbc_repo =
-      "\"" . test_repo($options, $test) . "/$program.$repo_suffix\"";
+      "\"" . test_repo($options, $test) . "/hhvm.$repo_suffix\"";
     $cmd .= ' -vRepo.Authoritative=true';
     $cmd .= " -vRepo.Path=$hhbbc_repo";
   }
@@ -1187,7 +1187,7 @@ function hphp_cmd(
     '-vParserThreadCount=' . ($options->repo_threads ?? 1),
     '-thhbc -l1 -k1',
     '-o "' . test_repo($options, $test) . '"',
-    "--program $program.hhbc \"$test\"",
+    "\"$test\"",
     "-vExternWorker.WorkingDir=".Status::getTestTmpPath($test, 'work'),
     $extra_args,
     $compiler_args,
@@ -1221,7 +1221,7 @@ function hhbbc_cmd(
     '--parallel-num-threads=' . ($options->repo_threads ?? 1),
     '--parallel-final-threads=' . ($options->repo_threads ?? 1),
     read_opts_file("$test.hhbbc_opts"),
-    "-o \"$test_repo/$program.hhbbc\" \"$test_repo/$program.hhbc\"",
+    "-o \"$test_repo/hhvm.hhbbc\" \"$test_repo/hhvm.hhbc\"",
   ]);
 }
 
@@ -3235,7 +3235,7 @@ function run_test(Options $options, string $test): mixed {
         Status::writeDiff($test, "dumping hhas after first hhbbc pass failed");
         return false;
       }
-      shell_exec("mv $test_repo/$program.hhbbc $test_repo/$program.hhbc");
+      shell_exec("mv $test_repo/hhvm.hhbbc $test_repo/hhvm.hhbc");
       $hhbbc = hhbbc_cmd($options, $test, $program);
       $result = exec_with_stack($hhbbc);
       if ($result is string) {
@@ -3359,7 +3359,7 @@ function print_commands(
         }
         $test_repo = test_repo($options, $test);
         $hhbbc_cmds .=
-          "mv $test_repo/$program.hhbbc $test_repo/$program.hhbc\n";
+          "mv $test_repo/hhvm.hhbbc $test_repo/hhvm.hhbc\n";
         $hhbbc_cmds .= $hhbbc_cmd;
         foreach ($commands as $c) {
           $hhbbc_cmds .=

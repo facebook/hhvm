@@ -26,11 +26,8 @@
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/version.h"
-#include "hphp/runtime/vm/unit-parser.h"
-#include "hphp/system/systemlib.h"
 
 #include "hphp/util/async-func.h"
 #include "hphp/util/build-info.h"
@@ -67,7 +64,6 @@
 #include <folly/portability/SysStat.h>
 
 using namespace boost::program_options;
-using std::cout;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,13 +72,11 @@ struct CompilerOptions {
   std::string format;
   std::string outputDir;
   std::vector<std::string> config;
-  std::string configDir;
   std::vector<std::string> confStrings;
   std::vector<std::string> iniStrings;
   std::string inputDir;
   std::vector<std::string> inputs;
   std::string inputList;
-  std::vector<std::string> includePaths;
   std::vector<std::string> modules;
   std::vector<std::string> excludeDirs;
   std::vector<std::string> excludeFiles;
@@ -95,10 +89,6 @@ struct CompilerOptions {
   std::vector<std::string> cfiles;
   std::vector<std::string> cmodules;
   bool parseOnDemand;
-  std::string program;
-  std::string programArgs;
-  std::string branch;
-  int revision;
   bool keepTempDir;
   int logLevel;
   std::string filecache;
@@ -132,12 +122,9 @@ private:
 // forward declarations
 
 int prepareOptions(CompilerOptions &po, int argc, char **argv);
-void createOutputDirectory(CompilerOptions &po);
 int process(const CompilerOptions &po);
-int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar);
 void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar);
-int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
-               AsyncFileCacheSaver &fcThread);
+int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar);
 void pcre_init();
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -153,7 +140,7 @@ int compiler_main(int argc, char **argv) {
     if (ret == -1) return -1; // command line error
 
     Timer totalTimer(Timer::WallTime, "running hphp");
-    createOutputDirectory(po);
+    mkdir(po.outputDir.c_str(), 0777);
     if (ret == 0) ret = process(po);
     if (ret) {
       Logger::Error("hphp failed");
@@ -234,17 +221,10 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("format,f", value<std::string>(&po.format),
      "hhbc: binary (default) | hhas | text")
     ("input-dir", value<std::string>(&po.inputDir), "input directory")
-    ("program", value<std::string>(&po.program)->default_value("program"),
-     "final program name to use")
-    ("args", value<std::string>(&po.programArgs), "program arguments")
     ("inputs,i", value<std::vector<std::string>>(&po.inputs),
      "input file names")
     ("input-list", value<std::string>(&po.inputList),
      "file containing list of file names, one per line")
-    ("include-path",
-     value<std::vector<std::string>>(&po.includePaths)->composing(),
-     "a list of full paths to search for files being included in includes "
-     "or requires but cannot be found assuming relative paths")
     ("module", value<std::vector<std::string>>(&po.modules)->composing(),
      "directories containing all input files")
     ("exclude-dir",
@@ -279,8 +259,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "extra directories for static files without exclusion checking")
     ("parse-on-demand", value<bool>(&po.parseOnDemand)->default_value(true),
      "whether to parse files that are not specified from command line")
-    ("branch", value<std::string>(&po.branch), "SVN branch")
-    ("revision", value<int>(&po.revision), "SVN revision")
     ("output-dir,o", value<std::string>(&po.outputDir), "output directory")
     ("sync-dir", value<std::string>(&dummy3), // TODO: T115189426 remove this
      "Files will be created in this directory first, then sync with output "
@@ -292,9 +270,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "whether to keep the temporary directory")
     ("config,c", value<std::vector<std::string>>(&po.config)->composing(),
      "config file name")
-    ("config-dir", value<std::string>(&po.configDir),
-     "root directory configuration is based on (for example, "
-     "excluded directories may be relative path in configuration.")
     ("config-value,v",
      value<std::vector<std::string>>(&po.confStrings)->composing(),
      "individual configuration string in a format of name=value, where "
@@ -337,52 +312,48 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
         boost::replace_all(message, wrong_name, right_name);
       }
       Logger::Error("Error in command line: %s", message.c_str());
-      cout << desc << "\n";
+      std::cout << desc << "\n";
       return -1;
 #endif
     } catch (const error& e) {
       Logger::Error("Error in command line: %s", e.what());
-      cout << desc << "\n";
+      std::cout << desc << "\n";
       return -1;
     }
   } catch (const unknown_option& e) {
     Logger::Error("Error in command line: %s", e.what());
-    cout << desc << "\n";
+    std::cout << desc << "\n";
     return -1;
   } catch (const error& e) {
     Logger::Error("Error in command line: %s", e.what());
-    cout << desc << "\n";
+    std::cout << desc << "\n";
     return -1;
   } catch (...) {
     Logger::Error("Error in command line parsing.");
-    cout << desc << "\n";
+    std::cout << desc << "\n";
     return -1;
   }
   if (argc <= 1 || vm.count("help")) {
-    cout << desc << "\n";
+    std::cout << desc << "\n";
     return 1;
   }
   if (vm.count("version")) {
-    cout << "HipHop Repo Compiler";
-    cout << " " << HHVM_VERSION;
-    cout << " (" << (debug ? "dbg" : "rel") << ")\n";
-    cout << "Compiler: " << compilerId() << "\n";
-    cout << "Repo schema: " << repoSchemaId() << "\n";
+    std::cout << "HipHop Repo Compiler";
+    std::cout << " " << HHVM_VERSION;
+    std::cout << " (" << (debug ? "dbg" : "rel") << ")\n";
+    std::cout << "Compiler: " << compilerId() << "\n";
+    std::cout << "Repo schema: " << repoSchemaId() << "\n";
     return 1;
   }
 
   if (vm.count("compiler-id")) {
-    cout << compilerId() << "\n";
+    std::cout << compilerId() << "\n";
     return 1;
   }
 
   if (vm.count("repo-schema")) {
-    cout << repoSchemaId() << "\n";
+    std::cout << repoSchemaId() << "\n";
     return 1;
-  }
-
-  if (po.program == "program") {
-    po.program = "hhvm.hhbc";
   }
 
   // log level
@@ -443,12 +414,12 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     po.inputDir = '.';
   }
   po.inputDir = FileUtil::normalizeDir(po.inputDir);
-  if (po.configDir.empty()) {
-    po.configDir = po.inputDir;
+
+  if (po.outputDir.empty()) {
+    Logger::Error("Error in command line: output-dir must be provided.");
+    std::cout << desc << "\n";
+    return -1;
   }
-  po.configDir = FileUtil::normalizeDir(po.configDir);
-  Option::RootDirectory = po.configDir;
-  Option::IncludeSearchPaths = po.includePaths;
 
   for (auto const& dir : po.excludeDirs) {
     Option::PackageExcludeDirs.insert(FileUtil::normalizeDir(dir));
@@ -470,8 +441,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Option::PackageExcludeStaticPatterns.insert(
       format_pattern(pattern, true /* prefixSlash */));
   }
-
-  Option::ProgramName = po.program;
 
   if (po.format.empty()) po.format = "binary";
   return 0;
@@ -545,12 +514,9 @@ int process(const CompilerOptions &po) {
     Timer timer2(Timer::WallTime, "parsing");
     ar->setPackage(&package);
     ar->setParseOnDemand(po.parseOnDemand);
-    if (!po.parseOnDemand) {
-      ar->setParseOnDemandDirs(Option::ParseOnDemandDirs);
-    }
     if (po.modules.empty() && po.fmodules.empty() &&
         po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
-      package.addAllFiles();
+      package.addDirectory("/");
     } else {
       for (auto const& module : po.modules) {
         package.addDirectory(module);
@@ -607,7 +573,7 @@ int process(const CompilerOptions &po) {
     }
   };
 
-  return hhbcTarget(po, std::move(ar), fileCacheThread);
+  return hhbcTarget(po, std::move(ar));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -615,12 +581,11 @@ int process(const CompilerOptions &po) {
 void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   ar->setOutputPath(po.outputDir);
   // Propagate relevant compiler-specific options to the runtime.
-  RuntimeOption::RepoPath = ar->getOutputPath() + '/' + po.program;
+  RuntimeOption::RepoPath = ar->getOutputPath() + "/hhvm.hhbc";
   unlink(RuntimeOption::RepoPath.c_str());
 }
 
-int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
-               AsyncFileCacheSaver &fcThread) {
+int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar) {
   int ret = 0;
   int formatCount = 0;
   const char *type = 0;
@@ -665,21 +630,4 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void createOutputDirectory(CompilerOptions &po) {
-  if (po.outputDir.empty()) {
-    const char *t = getenv("TEMP");
-    if (!t) {
-      t = "/tmp";
-    }
-    std::string temp = t;
-    temp += "/hphp_XXXXXX";
-    std::vector<char> path(begin(temp), end(temp));
-    path.push_back('\0');
-    po.outputDir = mkdtemp(&path[0]);
-    Logger::Info("creating temporary directory %s ...", po.outputDir.c_str());
-  }
-  mkdir(po.outputDir.c_str(), 0777);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }

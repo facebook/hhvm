@@ -47,8 +47,6 @@ using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
 struct Package {
   explicit Package(const char* root);
 
-  void addAllFiles();
-
   // Set up the async portion of Package. This cannot be done in the
   // constructor because it must be done after hphp_process_init().
   void createAsyncState();

@@ -14,13 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef COMPILER_H
-#define COMPILER_H
+#pragma once
 
 namespace HPHP {
 
 int compiler_main(int argc, char** argv);
 
 }
-
-#endif

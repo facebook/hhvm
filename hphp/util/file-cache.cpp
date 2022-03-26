@@ -29,11 +29,9 @@ using std::set;
 using std::string;
 
 string FileCache::SourceRoot;
-bool FileCache::UseNewCache = true;
 
 FileCache::FileCache()
     : cache_manager_(new CacheManager) {
-  UseNewCache = true;
 }
 
 FileCache::~FileCache() {}

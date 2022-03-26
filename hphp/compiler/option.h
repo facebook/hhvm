@@ -18,10 +18,10 @@
 
 #include <map>
 #include <set>
+#include <string>
 #include <vector>
+
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map.h"
-#include "hphp/util/string-bag.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,18 +35,6 @@ struct Option {
    * Load options from different sources.
    */
   static void Load(const IniSettingMap& ini, Hdf &config);
-  static void Load(); // load default options
-
-  /**
-   * Directories to add to a package.
-   */
-  static std::string RootDirectory;
-  static std::set<std::string> PackageDirectories;
-
-  /**
-   * Files to add to a package.
-   */
-  static std::set<std::string> PackageFiles;
 
   /**
    * File path patterns for excluding files from a package scan of programs.
@@ -64,69 +52,29 @@ struct Option {
                           const std::set<std::string> &patterns);
 
   /**
-   * Directories in which files are parsed on-demand, when parse-on-demand
-   * is off.
-   */
-  static std::vector<std::string> ParseOnDemandDirs;
-
-  /**
    * Whether to store PHP source files in static file cache.
    */
   static bool CachePHPFile;
 
-  static std::vector<std::string> IncludeSearchPaths;
-
-  /**
-   * PHP functions that can be assumed to always return a certain constant
-   * value.
+  /*
+   * Autoload information for resolving parse on-demand
    */
-  static hphp_string_imap<std::string> ConstantFunctions;
-
-  static std::set<std::string> VolatileClasses;
   static std::map<std::string,std::string, stdltistr> AutoloadClassMap;
   static std::map<std::string,std::string, stdltistr> AutoloadFuncMap;
   static std::map<std::string,std::string> AutoloadConstMap;
   static std::string AutoloadRoot;
 
-  /**
-   * CodeGenerator options for HHBC.
+  /*
+   * Whether to generate HHBC, HHAS, or a textual dump of HHBC
    */
   static bool GenerateTextHHBC;
   static bool GenerateHhasHHBC;
   static bool GenerateBinaryHHBC;
 
-  /**
-   * A somewhat unique prefix for system identifiers.
+  /*
+   * Number of threads to use for parsing
    */
-  static std::string IdPrefix;
-  static std::string LambdaPrefix;
-  static std::string Tab;
-
-  /**
-   * Name resolution helpers.
-   */
-  static const char *UserFilePrefix;
-
-  /**
-   * Turn it off for cleaner unit tests.
-   */
-  static bool KeepStatementsWithNoEffect;
-
-  /**
-   * Turning a file name into an identifier. When id is false, preserve
-   * "/" in file paths.
-   */
-  static std::string MangleFilename(const std::string &name, bool id);
-
-  static std::string ProgramName;
-
-  static bool EnableShortTags;
   static int ParserThreadCount;
-
-  /**
-   * "Volatile" means a class or a function can be declared dynamically.
-   */
-  static bool AllVolatile;
 
   /*
    * The number of files (on average) we'll group together for a
@@ -153,8 +101,6 @@ struct Option {
   static std::string ExternWorkerWorkingDir;
 
 private:
-  static StringBag OptionStrings;
-
   static const int kDefaultParserGroupSize;
   static const int kDefaultParserDirGroupSizeLimit;
 

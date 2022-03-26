@@ -33,7 +33,6 @@ namespace HPHP {
 
 struct FileCache {
   static std::string SourceRoot;
-  static bool UseNewCache;
 
  public:
   FileCache();
@@ -83,4 +82,3 @@ struct FileCache {
 
 ////////////////////////////////////////////////////////////////////////////////
 }
-

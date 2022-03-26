@@ -50,7 +50,6 @@ FOLLY_ATTR_WEAK void Test::RunTestsImpl(bool& allPassed, std::string& suite,
 
 bool Test::RunTests(std::string &suite, std::string &which, std::string &set) {
   bool allPassed = true;
-  Option::Load();
 
   size_t pos = suite.find("::");
   if (pos != std::string::npos) {

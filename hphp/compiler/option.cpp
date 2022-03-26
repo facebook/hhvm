@@ -22,27 +22,18 @@
 #include <string>
 #include <vector>
 
-#include "hphp/compiler/analysis/analysis_result.h"
-
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 
-#include "hphp/util/file-cache.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/util/text-util.h"
-
-#include "hphp/hhbbc/hhbbc.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string Option::RootDirectory;
-std::set<std::string> Option::PackageDirectories;
-std::set<std::string> Option::PackageFiles;
 std::set<std::string> Option::PackageExcludeDirs;
 std::set<std::string> Option::PackageExcludeFiles;
 std::set<std::string> Option::PackageExcludePatterns;
@@ -51,11 +42,6 @@ std::set<std::string> Option::PackageExcludeStaticFiles;
 std::set<std::string> Option::PackageExcludeStaticPatterns;
 bool Option::CachePHPFile = false;
 
-std::vector<std::string> Option::ParseOnDemandDirs;
-
-std::vector<std::string> Option::IncludeSearchPaths;
-
-std::set<std::string> Option::VolatileClasses;
 std::map<std::string,std::string,stdltistr> Option::AutoloadClassMap;
 std::map<std::string,std::string,stdltistr> Option::AutoloadFuncMap;
 std::map<std::string,std::string> Option::AutoloadConstMap;
@@ -65,21 +51,7 @@ bool Option::GenerateTextHHBC = false;
 bool Option::GenerateHhasHHBC = false;
 bool Option::GenerateBinaryHHBC = false;
 
-std::string Option::IdPrefix = "$$";
-
-std::string Option::LambdaPrefix = "df_";
-std::string Option::Tab = "  ";
-
-const char *Option::UserFilePrefix = "php/";
-
-bool Option::KeepStatementsWithNoEffect = false;
-
-std::string Option::ProgramName;
-
-bool Option::EnableShortTags = true;
 int Option::ParserThreadCount = 0;
-
-bool Option::AllVolatile = false;
 
 // These default sizes were selected by experimentation
 const int Option::kDefaultParserGroupSize = 500;
@@ -115,9 +87,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   LoadRootHdf(ini, config, "IncludeRoots", RuntimeOption::IncludeRoots);
   LoadRootHdf(ini, config, "AutoloadRoots", RuntimeOption::AutoloadRoots);
 
-  Config::Bind(PackageFiles, ini, config, "PackageFiles", PackageFiles);
-  Config::Bind(IncludeSearchPaths, ini, config, "IncludeSearchPaths");
-  Config::Bind(PackageDirectories, ini, config, "PackageDirectories");
   Config::Bind(PackageExcludeDirs, ini, config, "PackageExcludeDirs");
   Config::Bind(PackageExcludeFiles, ini, config, "PackageExcludeFiles");
   Config::Bind(PackageExcludePatterns, ini, config, "PackageExcludePatterns");
@@ -128,16 +97,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(PackageExcludeStaticFiles, ini,
                config, "PackageExcludeStaticPatterns");
   Config::Bind(CachePHPFile, ini, config, "CachePHPFile");
-
-  Config::Bind(ParseOnDemandDirs, ini, config, "ParseOnDemandDirs");
-
-  Config::Bind(IdPrefix, ini, config, "CodeGeneration.IdPrefix", IdPrefix);
-  Config::Bind(LambdaPrefix, ini, config,
-               "CodeGeneration.LambdaPrefix", LambdaPrefix);
-
-  Config::Bind(VolatileClasses, ini, config, "VolatileClasses");
-
-  Config::GetBool(ini, config, "FlattenTraits");
 
   for (auto& str : Config::GetStrVector(ini, config, "ConstantFunctions")) {
     std::string func;
@@ -187,7 +146,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalJitEnableRenameFunction,
                ini, config, "JitEnableRenameFunction",
                RuntimeOption::EvalJitEnableRenameFunction);
-  Config::Bind(EnableShortTags, ini, config, "EnableShortTags", true);
   Config::Bind(RuntimeOption::EvalHackArrCompatSerializeNotices,
                ini, config, "HackArrCompatSerializeNotices",
                RuntimeOption::EvalHackArrCompatSerializeNotices);
@@ -234,19 +192,10 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     ParserThreadCount = Process::GetCPUCount();
   }
 
-  // Just to silence warnings until we remove them from various config files
-  (void)Config::GetByte(ini, config, "EnableEval", 0);
-  (void)Config::GetBool(ini, config, "AllDynamic", true);
-
-  Config::Bind(AllVolatile, ini, config, "AllVolatile");
-
   Config::Bind(RuntimeOption::EvalGenerateDocComments, ini, config,
                "GenerateDocComments", RuntimeOption::EvalGenerateDocComments);
   Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",
                RuntimeOption::EvalUseHHBBC);
-
-  // Temporary, during file-cache migration.
-  Config::Bind(FileCache::UseNewCache, ini, config, "UseNewCache", false);
 
   Config::Bind(ParserGroupSize, ini, config,
                "ParserGroupSize", kDefaultParserGroupSize);
@@ -276,22 +225,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                ExternWorkerWorkingDir);
 }
 
-void Option::Load() {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-
-std::string Option::MangleFilename(const std::string &name, bool id) {
-  std::string ret = UserFilePrefix;
-  ret += name;
-
-  if (id) {
-    replaceAll(ret, "/", "$");
-    replaceAll(ret, "-", "_");
-    replaceAll(ret, ".", "_");
-  }
-  return ret;
-}
 
 bool Option::IsFileExcluded(const std::string &file,
                             const std::set<std::string> &patterns) {

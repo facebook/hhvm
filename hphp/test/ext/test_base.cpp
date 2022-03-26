@@ -24,7 +24,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 TestBase::TestBase() {
-  Option::KeepStatementsWithNoEffect = true;
 }
 
 bool TestBase::Count(bool result) {

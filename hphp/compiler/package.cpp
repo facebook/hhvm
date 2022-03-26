@@ -181,19 +181,6 @@ Optional<std::thread> Package::clearAsyncState() {
   };
 }
 
-void Package::addAllFiles() {
-  if (Option::PackageDirectories.empty() && Option::PackageFiles.empty()) {
-    addDirectory("/");
-  } else {
-    for (auto const& dir : Option::PackageDirectories) {
-      addDirectory(dir);
-    }
-    for (auto const& file : Option::PackageFiles) {
-      addSourceFile(file);
-    }
-  }
-}
-
 void Package::addInputList(const std::string& listFileName) {
   assert(!listFileName.empty());
   auto const f = fopen(listFileName.c_str(), "r");

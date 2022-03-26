@@ -91,7 +91,10 @@ function get_categories() {
     'Arrays' => Vector {
       '/Elem/i',
       '/::array/',
-      '/(Mixed|Packed)Array/',
+      '/(Mixed|Packed|Bespoke)Array/',
+      '/Vanilla(Dict|Vec)/',
+      '/ArrayData/',
+      '/^HPHP::bespoke::/',
       '/^HPHP::f_(.?.?sort|array)/',
       '/NameValueTable/',
       '/jit::dict/',

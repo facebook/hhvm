@@ -54,8 +54,10 @@ function read_perf_samples($file, $desired_binary_prefix = 'hhvmworker') {
     if (
       preg_match_with_matches('/^[a-f0-9]+ (.+)$/', $line, inout $matches) === 1
     ) {
-      if (!$stack) $stack = Vector {};
-      $stack[] = filter_func($matches[1]);
+      if (!starts_with($matches[0], "ffffffff")) { // skip kernel frames
+        if (!$stack) $stack = Vector {};
+        $stack[] = filter_func($matches[1]);
+      }
     } else {
       if ($stack !== null) throw new Exception("Unexpected line $line");
       $binary = $line;

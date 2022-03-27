@@ -18,6 +18,9 @@
 
 #include "hphp/runtime/base/type-variant.h"
 
+#include "hphp/util/hash-map.h"
+#include "hphp/util/hash-set.h"
+
 #include <folly/Range.h>
 
 #include <cstdint>
@@ -60,6 +63,12 @@ bool ini_on_update(const Variant& value,
                    boost::container::flat_set<std::string>& p);
 bool ini_on_update(const Variant& value,
                    hphp_string_imap<std::string>& p);
+bool ini_on_update(const Variant& value,
+                   hphp_fast_string_map<std::string>& p);
+bool ini_on_update(const Variant& value,
+                   hphp_fast_string_imap<std::string>& p);
+bool ini_on_update(const Variant& value, hphp_fast_string_set& p);
+
 Variant ini_get(bool& p);
 Variant ini_get(double& p);
 Variant ini_get(char& p);
@@ -82,6 +91,9 @@ Variant ini_get(std::map<std::string, std::string, stdltistr>& p);
 Variant ini_get(std::set<std::string, stdltistr>& p);
 Variant ini_get(boost::container::flat_set<std::string>& p);
 Variant ini_get(hphp_string_imap<std::string>& p);
+Variant ini_get(hphp_fast_string_map<std::string>& p);
+Variant ini_get(hphp_fast_string_imap<std::string>& p);
+Variant ini_get(hphp_fast_string_set& p);
 
 /**
  * If given an ini setting like "hhvm.abc[def][ghi]=yyy" and we have
@@ -421,4 +433,3 @@ void add_default_config_files_globbed(
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

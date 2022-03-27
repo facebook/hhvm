@@ -325,11 +325,14 @@ CONTAINER_CONFIG_BODY(std::vector<std::string>, StrVector)
 namespace { using simap = std::unordered_map<std::string, int>; }
 CONTAINER_CONFIG_BODY(simap, IntMap)
 CONTAINER_CONFIG_BODY(ConfigMap, Map)
+CONTAINER_CONFIG_BODY(ConfigFastMap, FastMap)
 CONTAINER_CONFIG_BODY(ConfigMapC, MapC)
 CONTAINER_CONFIG_BODY(ConfigSet, Set)
 CONTAINER_CONFIG_BODY(ConfigSetC, SetC)
 CONTAINER_CONFIG_BODY(ConfigFlatSet, FlatSet)
 CONTAINER_CONFIG_BODY(ConfigIMap, IMap)
+CONTAINER_CONFIG_BODY(ConfigIFastMap, IFastMap)
+CONTAINER_CONFIG_BODY(ConfigFastSet, FastSet);
 
 static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
                                             const Hdf& config,

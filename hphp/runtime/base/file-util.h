@@ -19,6 +19,7 @@
 #pragma once
 
 #include "hphp/util/file.h"
+#include "hphp/util/hash-set.h"
 
 #include "hphp/runtime/base/type-string.h"
 
@@ -98,8 +99,8 @@ String dirname(const String& path);
  */
 void find(std::vector<std::string> &out,
           const std::string &root, const std::string& path, bool php,
-          const std::set<std::string> *excludeDirs = nullptr,
-          const std::set<std::string> *excludeFiles = nullptr);
+          const hphp_fast_string_set *excludeDirs = nullptr,
+          const hphp_fast_string_set *excludeFiles = nullptr);
 
 /**
  * Search for PHP or non-PHP files under a directory, calling callback for
@@ -141,4 +142,3 @@ bool isSystemName(folly::StringPiece path);
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
-

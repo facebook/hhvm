@@ -17,11 +17,11 @@
 #pragma once
 
 #include <map>
-#include <set>
 #include <string>
 #include <vector>
 
-#include "hphp/util/functional.h"
+#include "hphp/util/hash-map.h"
+#include "hphp/util/hash-set.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,17 +39,17 @@ struct Option {
   /**
    * File path patterns for excluding files from a package scan of programs.
    */
-  static std::set<std::string> PackageExcludeDirs;
-  static std::set<std::string> PackageExcludeFiles;
-  static std::set<std::string> PackageExcludePatterns;
-  static std::set<std::string> PackageExcludeStaticFiles;
-  static std::set<std::string> PackageExcludeStaticDirs;
-  static std::set<std::string> PackageExcludeStaticPatterns;
+  static hphp_fast_string_set PackageExcludeDirs;
+  static hphp_fast_string_set PackageExcludeFiles;
+  static hphp_fast_string_set PackageExcludePatterns;
+  static hphp_fast_string_set PackageExcludeStaticFiles;
+  static hphp_fast_string_set PackageExcludeStaticDirs;
+  static hphp_fast_string_set PackageExcludeStaticPatterns;
 
-  static bool IsFileExcluded(const std::string &file,
-                             const std::set<std::string> &patterns);
-  static void FilterFiles(std::vector<std::string> &files,
-                          const std::set<std::string> &patterns);
+  static bool IsFileExcluded(const std::string& file,
+                             const hphp_fast_string_set& patterns);
+  static void FilterFiles(std::vector<std::string>& files,
+                          const hphp_fast_string_set& patterns);
 
   /**
    * Whether to store PHP source files in static file cache.
@@ -59,9 +59,9 @@ struct Option {
   /*
    * Autoload information for resolving parse on-demand
    */
-  static std::map<std::string,std::string, stdltistr> AutoloadClassMap;
-  static std::map<std::string,std::string, stdltistr> AutoloadFuncMap;
-  static std::map<std::string,std::string> AutoloadConstMap;
+  static hphp_fast_string_imap<std::string> AutoloadClassMap;
+  static hphp_fast_string_imap<std::string> AutoloadFuncMap;
+  static hphp_fast_string_map<std::string> AutoloadConstMap;
   static std::string AutoloadRoot;
 
   /*

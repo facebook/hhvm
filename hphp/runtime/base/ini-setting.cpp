@@ -322,6 +322,34 @@ bool ini_on_update(const Variant& value,
   return true;
 }
 
+bool ini_on_update(const Variant& value,
+                   hphp_fast_string_map<std::string>& p) {
+  INI_ASSERT_ARR_INNER(value, String);
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p[iter.first().toString().toCppString()] =
+      iter.second().toString().toCppString();
+  }
+  return true;
+}
+
+bool ini_on_update(const Variant& value,
+                   hphp_fast_string_imap<std::string>& p) {
+  INI_ASSERT_ARR_INNER(value, String);
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p[iter.first().toString().toCppString()] =
+      iter.second().toString().toCppString();
+  }
+  return true;
+}
+
+bool ini_on_update(const Variant& value, hphp_fast_string_set& p) {
+  INI_ASSERT_ARR_INNER(value, String);
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p.insert(iter.second().toString().toCppString());
+  }
+  return true;
+}
+
 Variant ini_get(bool& p) {
   return p ? "1" : "";
 }
@@ -417,6 +445,22 @@ Variant ini_get(hphp_string_imap<std::string>& p) {
   return ret.toArray();
 }
 
+Variant ini_get(hphp_fast_string_map<std::string>& p) {
+  DictInit ret(p.size());
+  for (auto& pair : p) {
+    set(ret, pair.first, pair.second);
+  }
+  return ret.toArray();
+}
+
+Variant ini_get(hphp_fast_string_imap<std::string>& p) {
+  DictInit ret(p.size());
+  for (auto& pair : p) {
+    set(ret, pair.first, pair.second);
+  }
+  return ret.toArray();
+}
+
 Variant ini_get(Array& p) {
   return p;
 }
@@ -447,6 +491,14 @@ Variant ini_get(boost::container::flat_set<std::string>& p) {
 
 template<typename T>
 Variant ini_get(std::vector<T>& p) {
+  VecInit ret(p.size());
+  for (auto& s : p) {
+    ret.append(s);
+  }
+  return ret.toArray();
+}
+
+Variant ini_get(hphp_fast_string_set& p) {
   VecInit ret(p.size());
   for (auto& s : p) {
     ret.append(s);

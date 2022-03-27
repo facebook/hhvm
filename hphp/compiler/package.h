@@ -45,7 +45,7 @@ using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
  * Therefore, a package is really toppest entry point for parsing.
  */
 struct Package {
-  explicit Package(const char* root);
+  Package(const char* root, bool parseOnDemand);
 
   // Set up the async portion of Package. This cannot be done in the
   // constructor because it must be done after hphp_process_init().
@@ -106,6 +106,8 @@ private:
 
   void addUnitEmitter(std::unique_ptr<UnitEmitter> ue);
 
+  void resolveOnDemand(FileAndSizeVec&, const SymbolRefs&, bool report = false);
+
   std::string m_root;
 
   folly_concurrent_hash_map_simd<std::string, bool> m_parsedFiles;
@@ -113,6 +115,8 @@ private:
   std::atomic<bool> m_parseFailed;
 
   AnalysisResultPtr m_ar;
+
+  bool m_parseOnDemand;
 
   std::atomic<size_t> m_cacheHits;
   std::atomic<size_t> m_readFiles;

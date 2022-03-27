@@ -395,6 +395,27 @@ void Hdf::configGet(hphp_string_imap<std::string> &values) const {
   }
 }
 
+void Hdf::configGet(hphp_fast_string_map<std::string> &values) const {
+  values.clear();
+  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
+    values[hdf.getName()] = hdf.configGetString("");
+  }
+}
+
+void Hdf::configGet(hphp_fast_string_imap<std::string> &values) const {
+  values.clear();
+  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
+    values[hdf.getName()] = hdf.configGetString("");
+  }
+}
+
+void Hdf::configGet(hphp_fast_string_set& values) const {
+  values.clear();
+  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
+    values.insert(hdf.configGetString(""));
+  }
+}
+
 bool Hdf::convertRawConfigToBool(const char *v) {
   return *v && strcmp(v, "0") &&
     strcasecmp(v, "false") && strcasecmp(v, "no") && strcasecmp(v, "off");

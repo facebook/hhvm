@@ -47,26 +47,10 @@ struct UnitEmitter;
 struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
   AnalysisResult();
   ~AnalysisResult();
-  void setPackage(Package *package) { m_package = package;}
-  void setParseOnDemand(bool v) { m_parseOnDemand = v;}
-  bool isParseOnDemand() const { return m_package && m_parseOnDemand;}
-  void setParseOnDemandDirs(const std::vector<std::string> &dirs) {
-    assert(m_package && !m_parseOnDemand);
-    m_parseOnDemandDirs = dirs;
-  }
   void setFinish(std::function<void(AnalysisResultPtr)>&& fn) {
     m_finish = std::move(fn);
   }
   void finish();
-
-  Mutex &getMutex() { return m_mutex; }
-
-  using Reporter = std::function<void(std::string)>;
-
-  /* Report demanded files via the given callback */
-  void parseOnDemandBy(SymbolRef kind,
-                       const CompactVector<std::string>& syms,
-                       const Reporter& report) const;
 
   /**
    * For function declaration parsing.
@@ -86,27 +70,12 @@ struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
   HHBBC::php::ProgramPtr& program() { return m_program; }
 private:
   std::function<void(AnalysisResultPtr)> m_finish;
-  Package *m_package;
-  bool m_parseOnDemand;
-  std::vector<std::string> m_parseOnDemandDirs;
   std::vector<std::unique_ptr<UnitEmitter>> m_hhasFiles;
   std::string m_outputPath;
   HHBBC::php::ProgramPtr m_program;
 
   Mutex m_mutex;
-
-  /**
-   * Checks whether the file is in one of the on-demand parsing directories.
-   */
-  bool inParseOnDemandDirs(const std::string &filename) const;
-
-  void parseOnDemand(const std::string& name, const Reporter&) const;
-
-  template <class Map>
-  void parseOnDemandBy(const CompactVector<std::string>& syms,
-                       const Map& amap,
-                       const Reporter&) const;
-};
+ };
 
 ///////////////////////////////////////////////////////////////////////////////
 }

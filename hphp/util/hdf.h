@@ -29,6 +29,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map.h"
+#include "hphp/util/hash-set.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -149,6 +150,9 @@ struct Hdf {
   void configGet(std::map<std::string, std::string> &values) const;
   void configGet(std::map<std::string, std::string, stdltistr> &values) const;
   void configGet(hphp_string_imap<std::string> &values) const;
+  void configGet(hphp_fast_string_map<std::string> &values) const;
+  void configGet(hphp_fast_string_imap<std::string> &values) const;
+  void configGet(hphp_fast_string_set& values) const;
 
   /**
    * Helper function to convert a config string value to bool.
@@ -420,4 +424,3 @@ struct HdfInvalidOperation : HdfException {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

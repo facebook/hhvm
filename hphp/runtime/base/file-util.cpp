@@ -628,8 +628,8 @@ std::string FileUtil::normalizeDir(const std::string &dirname) {
 
 void FileUtil::find(std::vector<std::string> &out,
                     const std::string &root, const std::string& path, bool php,
-                    const std::set<std::string> *excludeDirs /* = NULL */,
-                    const std::set<std::string> *excludeFiles /* = NULL */) {
+                    const hphp_fast_string_set *excludeDirs /* = NULL */,
+                    const hphp_fast_string_set *excludeFiles /* = NULL */) {
 
   find(root, path, php,
        [&] (const std::string& rpath, bool isDir, size_t) {

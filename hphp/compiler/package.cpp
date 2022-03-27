@@ -154,9 +154,13 @@ Options Package::AsyncState::makeOptions() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Package::Package(const char* root)
+Package::Package(const char* root, bool parseOnDemand)
   : m_parseFailed{false}
-  , m_cacheHits{0}, m_readFiles{0}, m_storedFiles{0}, m_total{0}
+  , m_parseOnDemand{parseOnDemand}
+  , m_cacheHits{0}
+  , m_readFiles{0}
+  , m_storedFiles{0}
+  , m_total{0}
 {
   m_root = FileUtil::normalizeDir(root);
   m_ar = std::make_shared<AnalysisResult>();
@@ -842,13 +846,9 @@ bool Package::parse() {
   // Treat any symbol refs from systemlib as if they were part of the
   // original Package.
   for (auto& ue : syslib_ues) {
-    for (auto const& ent : ue->m_symbol_refs) {
-      m_ar->parseOnDemandBy(
-        ent.first,
-        ent.second,
-        [this] (const std::string& s) { addSourceFile(s); }
-      );
-    }
+    FileAndSizeVec ondemand;
+    resolveOnDemand(ondemand, ue->m_symbol_refs, true);
+    for (auto const& p : ondemand) addSourceFile(p.m_path);
     addUnitEmitter(std::move(ue));
   }
   syslib_ues.clear();
@@ -995,21 +995,8 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
     if (cached) m_cacheHits += workItems;
     m_total += workItems;
 
-    FileAndSizeVec ondemand;
-    AnalysisResult::Reporter report{
-      [&] (std::string f) {
-        if (f.empty()) return;
-        auto canonFileName =
-          FileUtil::canonicalize(String(std::move(f))).toCppString();
-        // Only parse a file once. This ensures we eventually run out
-        // of things to parse.
-        if (m_parsedFiles.emplace(canonFileName, true).second) {
-          ondemand.emplace_back(FileAndSize{std::move(canonFileName), 0});
-        }
-      }
-    };
-
     // Process the outputs
+    FileAndSizeVec ondemand;
     for (auto& [meta, wrapper] : outputs) {
       // The Unit had an ICE and we're configured to treat that as a
       // fatal error. Here is where we die on it.
@@ -1017,14 +1004,11 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
         fprintf(stderr, "%s", meta.m_abort.c_str());
         _Exit(1);
       }
-      // Hand off any symbol refs to AnalysisResult. It will execute
-      // the "report" callback for any files it discovers.
-      for (auto const& ent : meta.m_symbol_refs) {
-        m_ar->parseOnDemandBy(ent.first, ent.second, report);
-      }
       // If we produced an UnitEmitter, hand it off for whatever
       // processing we need to do with it.
       if (wrapper.m_ue) addUnitEmitter(std::move(wrapper.m_ue));
+      // Resolve any symbol refs into files to parse ondemand
+      resolveOnDemand(ondemand, meta.m_symbol_refs);
     }
 
     HPHP_CORO_MOVE_RETURN(ondemand);
@@ -1057,6 +1041,74 @@ void Package::addUnitEmitter(std::unique_ptr<UnitEmitter> ue) {
     HHBBC::add_unit_to_program(ue.get(), *m_ar->program());
   } else {
     m_ar->addHhasFile(std::move(ue));
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Package::resolveOnDemand(FileAndSizeVec& out,
+                              const SymbolRefs& symbolRefs,
+                              bool report) {
+  if (!m_parseOnDemand) return;
+
+  auto const& onPath = [&] (const std::string& path) {
+    auto rpath = [&] {
+      if (path.compare(0, m_root.length(), m_root) == 0) {
+        return path.substr(m_root.length());
+      }
+      return path;
+    }();
+    if (rpath.empty()) return;
+    if (Option::PackageExcludeFiles.count(rpath) > 0) return;
+    if (Option::IsFileExcluded(rpath, Option::PackageExcludePatterns)) return;
+
+    auto canon = FileUtil::canonicalize(String(std::move(rpath))).toCppString();
+    assertx(!canon.empty());
+
+    // Only parse a file once. This ensures we eventually run out
+    // of things to parse.
+    if (report || m_parsedFiles.emplace(canon, true).second) {
+      auto const absolute = [&] {
+        if (FileUtil::isDirSeparator(canon.front())) {
+          return canon;
+        } else {
+          return m_root + canon;
+        }
+      }();
+
+      struct stat sb;
+      if (stat(absolute.c_str(), &sb)) {
+        Logger::FError("Unable to stat {}", absolute);
+        m_parseFailed.store(true);
+        return;
+      }
+      out.emplace_back(FileAndSize{std::move(canon), (size_t)sb.st_size});
+    }
+  };
+
+  auto const onMap = [&] (auto const& syms, auto const& m) {
+    for (auto const& sym : syms) {
+      auto const it = m.find(sym);
+      if (it == m.end()) continue;
+      onPath(Option::AutoloadRoot + it->second);
+    }
+  };
+
+  for (auto const& [kind, syms] : symbolRefs) {
+    switch (kind) {
+      case SymbolRef::Include:
+        for (auto const& name : syms) onPath(name);
+        break;
+      case SymbolRef::Class:
+        onMap(syms, Option::AutoloadClassMap);
+        break;
+      case SymbolRef::Function:
+        onMap(syms, Option::AutoloadFuncMap);
+        break;
+      case SymbolRef::Constant:
+        onMap(syms, Option::AutoloadConstMap);
+        break;
+    }
   }
 }
 

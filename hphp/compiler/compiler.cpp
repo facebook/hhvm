@@ -485,7 +485,7 @@ int process(const CompilerOptions &po) {
 
   Timer timer(Timer::WallTime);
   // prepare a package
-  Package package{po.inputDir.c_str()};
+  Package package{po.inputDir.c_str(), po.parseOnDemand};
   AnalysisResultPtr ar = package.getAnalysisResult();
 
   hhbcTargetInit(po, ar);
@@ -512,8 +512,6 @@ int process(const CompilerOptions &po) {
 
   {
     Timer timer2(Timer::WallTime, "parsing");
-    ar->setPackage(&package);
-    ar->setParseOnDemand(po.parseOnDemand);
     if (po.modules.empty() && po.fmodules.empty() &&
         po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
       package.addDirectory("/");
@@ -621,6 +619,12 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar) {
   // `compile_systemlib_string` will try to load systemlib from repo, while we
   // are building it.
   RuntimeOption::RepoAuthoritative = true;
+
+  // We don't need these anymore, and since they can consume a lot of
+  // memory, free them before doing anything else.
+  decltype(Option::AutoloadClassMap){}.swap(Option::AutoloadClassMap);
+  decltype(Option::AutoloadFuncMap){}.swap(Option::AutoloadFuncMap);
+  decltype(Option::AutoloadConstMap){}.swap(Option::AutoloadConstMap);
 
   Timer timer(Timer::WallTime, type);
   Compiler::emitAllHHBC(std::move(ar));

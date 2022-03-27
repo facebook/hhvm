@@ -34,17 +34,18 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-std::set<std::string> Option::PackageExcludeDirs;
-std::set<std::string> Option::PackageExcludeFiles;
-std::set<std::string> Option::PackageExcludePatterns;
-std::set<std::string> Option::PackageExcludeStaticDirs;
-std::set<std::string> Option::PackageExcludeStaticFiles;
-std::set<std::string> Option::PackageExcludeStaticPatterns;
+hphp_fast_string_set Option::PackageExcludeDirs;
+hphp_fast_string_set Option::PackageExcludeFiles;
+hphp_fast_string_set Option::PackageExcludePatterns;
+hphp_fast_string_set Option::PackageExcludeStaticDirs;
+hphp_fast_string_set Option::PackageExcludeStaticFiles;
+hphp_fast_string_set Option::PackageExcludeStaticPatterns;
+
 bool Option::CachePHPFile = false;
 
-std::map<std::string,std::string,stdltistr> Option::AutoloadClassMap;
-std::map<std::string,std::string,stdltistr> Option::AutoloadFuncMap;
-std::map<std::string,std::string> Option::AutoloadConstMap;
+hphp_fast_string_imap<std::string> Option::AutoloadClassMap;
+hphp_fast_string_imap<std::string> Option::AutoloadFuncMap;
+hphp_fast_string_map<std::string> Option::AutoloadConstMap;
 std::string Option::AutoloadRoot;
 
 bool Option::GenerateTextHHBC = false;
@@ -131,9 +132,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     // AutoloadMap
     // not using Bind here because those maps are enormous and cause performance
     // problems when showing up later
-    AutoloadClassMap = Config::GetMapC(ini, config, "AutoloadMap.class");
-    AutoloadFuncMap = Config::GetMapC(ini, config, "AutoloadMap.function");
-    AutoloadConstMap = Config::GetMap(ini, config, "AutoloadMap.constant");
+    AutoloadClassMap = Config::GetIFastMap(ini, config, "AutoloadMap.class");
+    AutoloadFuncMap = Config::GetIFastMap(ini, config, "AutoloadMap.function");
+    AutoloadConstMap = Config::GetFastMap(ini, config, "AutoloadMap.constant");
     AutoloadRoot = Config::GetString(ini, config, "AutoloadMap.root");
   }
 
@@ -227,8 +228,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Option::IsFileExcluded(const std::string &file,
-                            const std::set<std::string> &patterns) {
+bool Option::IsFileExcluded(const std::string& file,
+                            const hphp_fast_string_set& patterns) {
   String sfile(file.c_str(), file.size(), CopyString);
   for (auto const& pattern : patterns) {
     Variant matches;
@@ -241,8 +242,8 @@ bool Option::IsFileExcluded(const std::string &file,
   return false;
 }
 
-void Option::FilterFiles(std::vector<std::string> &files,
-                         const std::set<std::string> &patterns) {
+void Option::FilterFiles(std::vector<std::string>& files,
+                         const hphp_fast_string_set& patterns) {
   auto const it = std::remove_if(
     files.begin(),
     files.end(),

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/jit-resume-addr.h"
 
 namespace HPHP {
 
@@ -29,6 +29,6 @@ namespace jit {
  * operates on behalf of a given nested invocation of the intepreter (calling
  * back into it as necessary for blocks that need to be interpreted).
  */
-void enterTC(TCA start);
+void enterTC(JitResumeAddr start);
 
 }}

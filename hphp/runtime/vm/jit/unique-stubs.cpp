@@ -1024,11 +1024,10 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& /*us*/) {
 TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   alignCacheLine(cb);
 
-  auto const start    = rarg(0);
-  auto const fp       = rarg(1);
-  auto const tl       = rarg(2);
-  auto const sp       = rarg(3);
-  auto const firstAR  = rarg(4);
+  auto const handler = rarg(0);
+  auto const arg     = rarg(1);
+  auto const tl      = rarg(2);
+  auto const firstAR = rarg(3);
 
   return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
     // Architecture-specific setup for entering the TC.
@@ -1049,14 +1048,16 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     );
 
     // Set up the VM registers.
-    v << copy{fp, rvmfp()};
     v << copy{tl, rvmtl()};
-    v << copy{sp, rvmsp()};
+    loadVMRegs(v);
 
     // Unalign the native stack.
     if (!(cross_jit.size() & 1)) alignNativeStack(v, false);
 
-    v << resumetc{start, us.enterTCExit, vm_regs_with_sp()};
+    // The handler expects its argument in the rret(1) register (see reenterTC).
+    v << copy{arg, rret(1)};
+
+    v << resumetc{handler, us.enterTCExit, vm_regs_with_sp() | rret(1)};
   });
 }
 

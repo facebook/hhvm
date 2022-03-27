@@ -358,8 +358,7 @@ struct UniqueStubs {
    *
    * enterTCExit is the address returned to when we leave the TC.
    */
-  void (*enterTCHelper)(TCA start, ActRec* fp, void* tl, TypedValue* sp,
-                        ActRec* firstAR);
+  void (*enterTCHelper)(TCA handler, TCA arg, void* tl, ActRec* firstAR);
   TCA enterTCExit;
 
   /*

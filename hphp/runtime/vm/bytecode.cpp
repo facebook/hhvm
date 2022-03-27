@@ -875,11 +875,7 @@ void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
   assertx(vmfp()->func()->contains(vmpc()));
 
   if (RID().getJit() && !RID().getJitFolding()) {
-    jit::TCA start = jit::svcreq::getFuncEntry(enterFnAr->func());
-    assert_flog(jit::tc::isValidCodeAddress(start),
-                "start = {} ; func = {} ({})\n",
-                start, enterFnAr->func(), enterFnAr->func()->fullName());
-    jit::enterTC(start);
+    jit::enterTC(jit::svcreq::getFuncEntry(enterFnAr->func()));
   } else {
     if (!funcEntry()) return;
     dispatch();
@@ -892,7 +888,8 @@ void enterVMAtCurPC() {
   assertx(vmfp()->func()->contains(vmpc()));
   Stats::inc(Stats::VMEnter);
   if (RID().getJit()) {
-    jit::enterTC(jit::tc::ustubs().resumeHelperFromInterp);
+    jit::enterTC(JitResumeAddr::helper(
+      jit::tc::ustubs().resumeHelperFromInterp));
   } else {
     dispatch();
   }

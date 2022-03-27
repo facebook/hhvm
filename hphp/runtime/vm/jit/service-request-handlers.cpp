@@ -176,31 +176,46 @@ TranslationResult getTranslation(SrcKey sk) {
 
 }
 
-TCA getFuncEntry(const Func* func) {
-  auto tca = func->getFuncEntry();
-  if (tca != nullptr) return tca;
-
-  LeaseHolder writer(func, TransKind::Profile);
-  if (!writer) return tc::ustubs().resumeHelperFuncEntryFromTC;
-
-  tca = func->getFuncEntry();
-  if (tca != nullptr) return tca;
-
-  if (func->numRequiredParams() != func->numNonVariadicParams()) {
-    tca = tc::ustubs().resumeHelperFuncEntryFromTC;
-    const_cast<Func*>(func)->setFuncEntry(tca);
-  } else {
-    SrcKey sk{func, 0, SrcKey::FuncEntryTag{}};
-    auto const trans = getTranslation(sk);
-    tca = trans.isRequestPersistentFailure()
-      ? tc::ustubs().interpHelperNoTranslateFuncEntryFromTC
-      : trans.addr();
-    if (trans.isProcessPersistentFailure()) {
-      const_cast<Func*>(func)->setFuncEntry(tca);
-    }
+JitResumeAddr getFuncEntry(const Func* func) {
+  if (auto const addr = func->getFuncEntry()) {
+    return JitResumeAddr::transFuncEntry(addr);
   }
 
-  return tca != nullptr ? tca : tc::ustubs().resumeHelperFuncEntryFromTC;
+  LeaseHolder writer(func, TransKind::Profile);
+  if (!writer) {
+    return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
+  }
+
+  if (auto const addr = func->getFuncEntry()) {
+    return JitResumeAddr::transFuncEntry(addr);
+  }
+
+  if (func->numRequiredParams() != func->numNonVariadicParams()) {
+    const_cast<Func*>(func)
+      ->setFuncEntry(tc::ustubs().resumeHelperFuncEntryFromTC);
+    return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
+  }
+
+  SrcKey sk{func, 0, SrcKey::FuncEntryTag{}};
+  auto const trans = getTranslation(sk);
+
+  if (auto const addr = trans.addr()) {
+    const_cast<Func*>(func)->setFuncEntry(addr);
+    return JitResumeAddr::transFuncEntry(addr);
+  }
+
+  if (trans.isProcessPersistentFailure()) {
+    const_cast<Func*>(func)
+      ->setFuncEntry(tc::ustubs().interpHelperNoTranslateFuncEntryFromTC);
+    // implies request persistent failure below
+  }
+
+  if (trans.isRequestPersistentFailure()) {
+    return JitResumeAddr::helper(
+      tc::ustubs().interpHelperNoTranslateFuncEntryFromInterp);
+  }
+
+  return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
 }
 
 namespace {

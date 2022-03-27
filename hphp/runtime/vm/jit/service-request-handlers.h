@@ -142,6 +142,6 @@ JitResumeAddr handleResume(ResumeFlags flags);
 /*
  * Look up (or create) the translation for the body of func.
  */
-TCA getFuncEntry(const Func* func);
+JitResumeAddr getFuncEntry(const Func* func);
 
 }}

@@ -63,6 +63,7 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
+#include "hphp/runtime/vm/jit/jit-resume-addr-defs.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -1754,7 +1755,7 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
       const bool useJit = RID().getJit();
       if (LIKELY(useJit && resumable->resumeAddr())) {
         Stats::inc(Stats::VMEnter);
-        jit::enterTC(resumable->resumeAddr());
+        jit::enterTC(jit::JitResumeAddr::trans(resumable->resumeAddr()));
       } else {
         enterVMAtCurPC();
       }

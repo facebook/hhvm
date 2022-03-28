@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{Class, Error, Result};
-use crate::decl_defs::{ty::ConsistentKind, DeclTy, EnumType, FoldedClass};
+use crate::decl_defs::{ty::ConsistentKind, DeclTy, EnumType, FoldedClass, Tparam};
 use crate::dependency_registrar::DeclName;
 use crate::folded_decl_provider::{FoldedDeclProvider, Substitution};
 use crate::reason::Reason;
@@ -242,5 +242,9 @@ impl<R: Reason> Class<R> for ClassType<R> {
 
     fn get_enum_type(&self) -> Option<&EnumType<R>> {
         self.class.enum_type.as_ref()
+    }
+
+    fn get_tparams(&self) -> &[Tparam<R, DeclTy<R>>] {
+        &self.class.tparams
     }
 }

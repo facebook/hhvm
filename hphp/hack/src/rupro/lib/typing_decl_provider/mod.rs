@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{ty::ConsistentKind, ConstDecl, EnumType, FunDecl, TypedefDecl};
+use crate::decl_defs::{
+    ty::ConsistentKind, ConstDecl, DeclTy, EnumType, FunDecl, Tparam, TypedefDecl,
+};
 use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use defs::ClassType;
@@ -95,4 +97,5 @@ pub trait Class<R: Reason>: Debug {
     ) -> Result<(Option<Rc<ClassElt<R>>>, ConsistentKind)>;
 
     fn get_enum_type(&self) -> Option<&EnumType<R>>;
+    fn get_tparams(&self) -> &[Tparam<R, DeclTy<R>>];
 }

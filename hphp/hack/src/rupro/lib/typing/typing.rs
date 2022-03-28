@@ -6,7 +6,7 @@
 use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use crate::tast;
-use crate::typing::typing_trait::TC;
+use crate::typing::ast::TC;
 use crate::typing_env::TEnv;
 use crate::typing_return::{TypingReturn, TypingReturnInfo};
 

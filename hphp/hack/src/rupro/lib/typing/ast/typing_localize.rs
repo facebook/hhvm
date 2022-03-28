@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::decl_defs::{self, DeclTy, DeclTy_};
 use crate::reason::Reason;
+use crate::typing::ast::typing_trait::TC;
 use crate::typing::typing_env::TEnv;
 use crate::typing::typing_error::Result;
-use crate::typing::typing_trait::TC;
 use crate::typing_decl_provider::{Class, TypeDecl};
 use crate::typing_defs::{Exact, FunParam, FunType, Ty, Ty_};
 use pos::{Positioned, TypeName};

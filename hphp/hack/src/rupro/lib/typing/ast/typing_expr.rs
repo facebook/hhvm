@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::reason::Reason;
 use crate::tast;
+use crate::typing::ast::typing_trait::TC;
 use crate::typing::typing_env::TEnv;
 use crate::typing::typing_error::Result;
-use crate::typing::typing_trait::TC;
 use crate::typing_defs::Ty;
 use crate::utils::core::LocalId;
 

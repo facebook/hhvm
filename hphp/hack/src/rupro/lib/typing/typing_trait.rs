@@ -12,3 +12,16 @@ pub trait TC<R: Reason> {
 
     fn infer(&self, env: &TEnv<R>, params: Self::Params) -> Result<Self::Typed>;
 }
+
+impl<R: Reason, T> TC<R> for [T]
+where
+    T: TC<R>,
+    T::Params: Clone,
+{
+    type Typed = Vec<T::Typed>;
+    type Params = T::Params;
+
+    fn infer(&self, env: &TEnv<R>, params: Self::Params) -> Result<Self::Typed> {
+        self.iter().map(|x| x.infer(env, params.clone())).collect()
+    }
+}

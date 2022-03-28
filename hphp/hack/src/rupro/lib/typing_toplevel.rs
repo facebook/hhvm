@@ -428,11 +428,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         typed_static_vars.extend(typed_vars);
 
         // TODO(hrust): class_type_params
-        let tparams = cd
-            .tparams
-            .iter()
-            .map(|tp| Typing::type_param(self.env, tp))
-            .collect();
+        let tparams = cd.tparams.infer(self.env, ())?;
 
         Ok(oxidized::aast::Class_ {
             span: cd.span.clone(),

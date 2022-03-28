@@ -5,6 +5,7 @@
 pub mod typing_env;
 pub mod typing_error;
 pub mod typing_localize;
+pub mod typing_tparam;
 pub mod typing_trait;
 
 // TODO(hverr): clean up, fully remove typing.rs

@@ -289,26 +289,6 @@ impl Typing {
         res
     }
 
-    pub fn type_param<R: Reason>(
-        env: &TEnv<R>,
-        t: &oxidized::aast::Tparam<(), ()>,
-    ) -> tast::Tparam<R> {
-        assert!(t.user_attributes.is_empty());
-        let parameters = t
-            .parameters
-            .iter()
-            .map(|t| Self::type_param(env, t))
-            .collect();
-        tast::Tparam {
-            variance: t.variance.clone(),
-            name: t.name.clone(),
-            parameters,
-            constraints: t.constraints.clone(),
-            reified: t.reified.clone(),
-            user_attributes: vec![],
-        }
-    }
-
     pub fn expr_with_pure_coeffects<R: Reason>(
         env: &TEnv<R>,
         _expected: Option<Ty<R>>,

@@ -211,7 +211,6 @@ void initialize_reg_states(Env& env) {
   auto& state = env.block_states[env.unit.entry];
 
   for (auto const r : state.phys) {
-    if (!env.abi.reserved().contains(r)) continue;
     state.phys[r] = PhysExpr { r, 0 };
   }
   state.virt_seen = boost::dynamic_bitset<>(env.unit.next_vr);
@@ -285,13 +284,6 @@ DEBUG_ONLY std::string show_fixed_point(Env& env) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Whether `r' is a reserved physical register.
- */
-bool is_phys_tracked(const Env& env, Vreg r) {
-  return r.isPhys() && env.abi.reserved().contains(r);
-}
-
-/*
  * "Chase" the def metadata for `r' through its sources until we arrive at a
  * physical source, then compute a PhysExpr.
  *
@@ -325,7 +317,7 @@ PhysExpr chase_thru(const Env& env, Vreg r) {
  * Get or compute a PhysExpr for `s', else return an invalid PhysExpr.
  */
 PhysExpr expr_for(const Env& env, RegState& state, Vreg s) {
-  return is_phys_tracked(env, s)
+  return s.isPhys()
     ? state.phys[s]
     : chase_thru(env, s);
 }
@@ -338,7 +330,7 @@ PhysExpr expr_for(const Env& env, RegState& state, Vreg s) {
  * Returns true if no further analysis is needed for the def to `d'.
  */
 bool analyze_phys_copy(const Env& env, RegState& state, Vreg d, Vreg s) {
-  if (!is_phys_tracked(env, d)) return true;
+  if (!d.isPhys()) return true;
 
   auto const expr = expr_for(env, state, s);
   if (expr == PhysExpr{}) return false;
@@ -355,7 +347,7 @@ bool analyze_phys_copy(const Env& env, RegState& state, Vreg d, Vreg s) {
  */
 bool analyze_phys_disp(const Env& env, RegState& state,
                        Vreg d, Vreg s, int32_t disp) {
-  if (!is_phys_tracked(env, d)) return true;
+  if (!d.isPhys()) return true;
 
   auto const expr = expr_for(env, state, s);
   if (expr == PhysExpr{}) return false;
@@ -372,7 +364,7 @@ bool analyze_phys_disp(const Env& env, RegState& state,
  * Always returns true, for easy chaining of analysis routines.
  */
 bool analyze_phys_def(const Env& env, RegState& state, Vreg d) {
-  if (!is_phys_tracked(env, d)) return true;
+  if (!d.isPhys()) return true;
 
   FTRACE(3, "      kill {}\n", show(d));
   state.phys[d] = PhysExpr{};
@@ -614,7 +606,7 @@ void if_rewritable(const Env& env, const RegState& state, Vreg r, F f) {
 
   auto const try_phys_rewrite = [&] (DefInfo def) {
     // We can't fold defs relative to unreserved physical registers.
-    if (!is_phys_tracked(env, def.base)) return false;
+    if (!def.base.isPhys()) return false;
 
     // If we don't know anything about the physical register's value, we can't
     // do any rewriting.

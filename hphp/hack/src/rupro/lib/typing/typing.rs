@@ -6,6 +6,7 @@
 use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use crate::tast;
+use crate::typing::typing_block::TCBlock;
 use crate::typing::typing_trait::TC;
 use crate::typing_env::TEnv;
 use crate::typing_return::{TypingReturn, TypingReturnInfo};
@@ -52,21 +53,6 @@ pub struct TypingExprFlags<R> {
 }
 
 impl Typing {
-    fn block<R: Reason>(
-        env: &TEnv<R>,
-        block: &[oxidized::aast::Stmt<(), ()>],
-    ) -> Result<tast::Block<R>> {
-        let mut stl = Vec::new();
-        for st in block {
-            let st = st.infer(env, ())?;
-            match st.1 {
-                oxidized::aast::Stmt_::Block(new_stl) => stl.extend(new_stl),
-                _ => stl.push(st),
-            };
-        }
-        Ok(stl)
-    }
-
     fn fun_impl<R: Reason>(
         env: &TEnv<R>,
         flags: TypingFunFlags,
@@ -79,7 +65,7 @@ impl Typing {
         let tb = if flags.disable {
             unimplemented!()
         } else {
-            Self::block(env, &named_body.fb_ast)?
+            TCBlock(&named_body.fb_ast).infer(env, ())?
         };
         let has_implicit_return = env.has_next();
         // TODO(hrust): hhi

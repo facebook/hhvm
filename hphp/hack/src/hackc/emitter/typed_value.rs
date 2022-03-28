@@ -96,7 +96,7 @@ pub type CastError = ();
 /// or won't produce the correct value
 impl<'arena> TryFrom<TypedValue<'arena>> for i64 {
     type Error = CastError;
-    fn try_from(x: TypedValue<'arena>) -> std::result::Result<i64, Self::Error> {
+    fn try_from(x: TypedValue<'arena>) -> Result<i64, Self::Error> {
         match x {
             TypedValue::Uninit => Err(()), // Should not happen
             // Unreachable - the only calliste of to_int is cast_to_arraykey, which never
@@ -123,7 +123,7 @@ impl<'arena> TryFrom<TypedValue<'arena>> for i64 {
 /// or won't produce the correct value
 impl<'arena> TryFrom<TypedValue<'arena>> for f64 {
     type Error = CastError;
-    fn try_from(v: TypedValue<'arena>) -> std::result::Result<f64, Self::Error> {
+    fn try_from(v: TypedValue<'arena>) -> Result<f64, Self::Error> {
         match v {
             TypedValue::Uninit => Err(()),       // Should not happen
             TypedValue::String(_) => Err(()),    // not worth it
@@ -137,9 +137,9 @@ impl<'arena> TryFrom<TypedValue<'arena>> for f64 {
 
 /// Cast to a string: the (string) operator in PHP. Return Err if we can't
 /// or won't produce the correct value *)
-impl<'arena> TryFrom<TypedValue<'arena>> for std::string::String {
+impl<'arena> TryFrom<TypedValue<'arena>> for String {
     type Error = CastError;
-    fn try_from(x: TypedValue<'arena>) -> std::result::Result<std::string::String, Self::Error> {
+    fn try_from(x: TypedValue<'arena>) -> Result<String, Self::Error> {
         match x {
             TypedValue::Uninit => Err(()), // Should not happen
             TypedValue::Bool(false) => Ok("".into()),
@@ -157,9 +157,7 @@ struct WithBump<'arena, T>(&'arena bumpalo::Bump, T);
 
 impl<'arena> TryFrom<WithBump<'arena, TypedValue<'arena>>> for Str<'arena> {
     type Error = CastError;
-    fn try_from(
-        x: WithBump<'arena, TypedValue<'arena>>,
-    ) -> std::result::Result<Str<'arena>, Self::Error> {
+    fn try_from(x: WithBump<'arena, TypedValue<'arena>>) -> Result<Str<'arena>, Self::Error> {
         let alloc = x.0;
         match x.1 {
             TypedValue::Uninit => Err(()), // Should not happen
@@ -314,8 +312,8 @@ impl<'arena> TypedValue<'arena> {
             return None;
         }
 
-        let s1: Option<std::string::String> = self.try_into().ok();
-        let s2: Option<std::string::String> = v2.try_into().ok();
+        let s1: Option<String> = self.try_into().ok();
+        let s2: Option<String> = v2.try_into().ok();
         match (s1, s2) {
             (Some(l), Some(r)) => Some(Self::String((alloc.alloc_str(&(l + &r)) as &str).into())),
             _ => None,

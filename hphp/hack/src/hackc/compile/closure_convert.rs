@@ -1578,7 +1578,7 @@ fn flatten_ns(defs: &mut Vec<Def>) -> Vec<Def> {
 fn extract_debugger_main(
     empty_namespace: &RcOc<namespace_env::Env>,
     all_defs: &mut Vec<Def>,
-) -> std::result::Result<(), String> {
+) -> Result<(), String> {
     let (stmts, mut defs): (Vec<Def>, Vec<Def>) = all_defs.drain(..).partition(|x| x.is_stmt());
     let mut vars = decl_vars::vars_from_ast(&[], &AstBody::Defs(&stmts))?
         .into_iter()

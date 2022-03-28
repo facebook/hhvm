@@ -256,7 +256,7 @@ fn emit_call<'a, 'arena, 'decl>(
                 exprs
                     .iter()
                     .map(|ex| emit_expr::emit_unset_expr(e, env, expect_normal_paramkind(ex)?))
-                    .collect::<std::result::Result<Vec<_>, _>>()?,
+                    .collect::<Result<Vec<_>, _>>()?,
             ))
         } else if let Some(kind) = set_bytes_kind(fname) {
             emit_expr::emit_set_range_expr(e, env, &e_.1, fname, kind, exprs)

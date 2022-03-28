@@ -231,11 +231,7 @@ impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a
         self
     }
 
-    fn visit_expr(
-        &mut self,
-        c: &mut Ctx<'a, 'arena, 'decl>,
-        p: &a::Expr,
-    ) -> std::result::Result<(), ()> {
+    fn visit_expr(&mut self, c: &mut Ctx<'a, 'arena, 'decl>, p: &a::Expr) -> Result<(), ()> {
         p.recurse(c, self.object())
         // TODO(hrust) implement on_CIexpr & remove dead_code on struct Ctx
     }

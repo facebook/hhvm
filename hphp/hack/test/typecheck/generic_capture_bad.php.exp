@@ -1,0 +1,12 @@
+File "generic_capture_bad.php", line 13, characters 19-22:
+The method `cast` is not compatible with the overridden method (Typing[4341])
+  File "generic_capture_bad.php", line 5, characters 33-34:
+  Expected `TF#0`
+  File "generic_capture_bad.php", line 5, characters 43-44:
+    via this generic `TF`
+  File "generic_capture_bad.php", line 12, characters 24-28:
+  But got `mixed`
+  File "generic_capture_bad.php", line 9, characters 37-38:
+    via this generic `TF`
+  File "generic_capture_bad.php", line 5, characters 37-37:
+    via this generic `T`

@@ -13,6 +13,20 @@ module Subst = Decl_subst
 
 let make_subst tparams tyl = Subst.make_decl tparams tyl
 
+let get_tparams_in_ty_and_acc acc ty =
+  let tparams_visitor =
+    object (this)
+      inherit [SSet.t] Type_visitor.decl_type_visitor
+
+      method! on_tgeneric acc _ s tyl =
+        List.fold_left tyl ~f:this#on_type ~init:(SSet.add s acc)
+    end
+  in
+  tparams_visitor#on_type acc ty
+
+let get_tparams_in_subst subst =
+  SMap.fold (fun _ ty acc -> get_tparams_in_ty_and_acc acc ty) subst SSet.empty
+
 (*****************************************************************************)
 (* Code dealing with instantiation. *)
 (*****************************************************************************)
@@ -86,7 +100,12 @@ and instantiate_ subst x =
   | Tlike ty -> Tlike (instantiate subst ty)
   | Tfun ft ->
     let tparams = ft.ft_tparams in
-    let outer_subst = subst in
+    (* First remove shadowed type parameters from the substitution.
+     * For example, for
+     *   class C<T> { public function foo<T>(T $x):void }
+     *   class B extends C<int> { }
+     * we do not want to replace T by int in foo's signature.
+     *)
     let subst =
       List.fold_left
         ~f:
@@ -96,6 +115,33 @@ and instantiate_ subst x =
           end
         ~init:subst
         tparams
+    in
+    (* Now collect up all generic parameters that appear in the target of the substitution *)
+    let target_generics = get_tparams_in_subst subst in
+    (* For generic parameters in the function type, rename them "away" from the parameters
+     * that appear in the target of the substitituion, and extend the substitution with
+     * the renaming.
+     *
+     * For example, consider
+     *    class Base<T> { public function cast<TF>(T $x):TF; }
+     *    class Derived<TF> extends Base<TF> { }
+     * Now we start with a substitution T:=TF
+     * But when going "under" the generic parameter to the cast method,
+     * we must rename it to avoid capture: T:=TF, TF:=TF#0
+     * and so we end up with
+     *   function cast<TF#0>(TF $x):TF#0
+     *)
+    let (subst, tparams) =
+      List.fold_map ft.ft_tparams ~init:subst ~f:(fun subst tp ->
+          let (pos, name) = tp.tp_name in
+          if SSet.mem name target_generics then
+            (* Fresh only because we don't support nesting of generic function types *)
+            let fresh_tp_name = name ^ "#0" in
+            let reason = Typing_reason.Rwitness_from_decl pos in
+            ( SMap.add name (mk (reason, Tgeneric (fresh_tp_name, []))) subst,
+              { tp with tp_name = (pos, fresh_tp_name) } )
+          else
+            (subst, tp))
     in
     let params =
       List.map ft.ft_params ~f:(fun param ->
@@ -114,7 +160,7 @@ and instantiate_ subst x =
     in
     let where_constraints =
       List.map ft.ft_where_constraints ~f:(fun (ty1, ck, ty2) ->
-          (instantiate subst ty1, ck, instantiate outer_subst ty2))
+          (instantiate subst ty1, ck, instantiate subst ty2))
     in
     Tfun
       {

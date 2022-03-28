@@ -7,6 +7,8 @@
 pub enum RuproTodo {
     /// AST nodes or variants of AST nodes that are not yet supported.
     AST,
+    /// An error should be registered in certain situations.
+    MissingError,
     /// Variance annotations, or propagation (during type inference) is not yet
     /// implemented.
     Variance,
@@ -48,6 +50,17 @@ pub enum RuproTodo {
     Flow,
     /// Terminality checks are not implemented, see `Typing_func_terminality.ml`.
     Terminality,
+    /// Some logic that is specialized for hhi files is not implemented.
+    Hhi,
+    /// Logic that registered information in the environment to be saved in the
+    /// `SavedEnv` is not yet implemented.
+    SavedEnv,
+    /// The `DisableTypecheckerInternal` attribute is not yet implemented.
+    DisableTypecheckerInternalAttribute,
+    /// Abstract functions/methods are not yet implemented.
+    Abstract,
+    /// Generators are not yet implemented.
+    Generators,
 }
 
 macro_rules! rupro_todo_assert {

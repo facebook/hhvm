@@ -16,13 +16,13 @@ use crate::typing::ast::typing_expr::TCExprParams;
 use crate::typing::ast::typing_localize::LocalizeEnv;
 use crate::typing::ast::TC;
 use crate::typing::hint_utils::HintUtils;
-use crate::typing::{Result, Typing};
+use crate::typing::shared::typing_return::{TypingReturn, TypingReturnInfo};
+use crate::typing::Result;
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::Class;
 use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
 use crate::typing_error::{Primary, TypingError};
-use crate::typing_return::{TypingReturn, TypingReturnInfo};
 use pos::TypeName;
 
 pub struct TypingToplevel<'a, R: Reason> {
@@ -58,18 +58,12 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             return_ty.clone(),
             return_decl_ty,
         );
+        self.env.set_return(return_);
         let typed_params = f.params.infer(self.env, ())?;
 
         rupro_todo_mark!(Variance);
         rupro_todo_mark!(Memoization);
-        let tb = Typing::fun_(
-            self.env,
-            Default::default(),
-            return_,
-            fpos.clone(),
-            &f.body,
-            &f.fun_kind,
-        )?;
+        let tb = f.body.infer(self.env, ())?;
         match f.ret.1 {
             Some(_) => {}
             None => self
@@ -206,17 +200,11 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         let ret_decl_ty = HintUtils::type_hint(&m.ret);
         // TODO(hrust): set_fn_kind
         let (return_, return_ty) = self.method_return(&pos, name, m, ret_decl_ty)?;
+        self.env.set_return(return_);
         // TODO(hrust): memoize, coeefects, can_read_globals
         let typed_params: Vec<_> = m.params.infer(self.env, ())?;
         // TODO(hrust): variance, tpenv, disable
-        let tb = Typing::fun_(
-            self.env,
-            Default::default(),
-            return_,
-            pos.clone(),
-            &m.body,
-            &m.fun_kind,
-        )?;
+        let tb = m.body.infer(self.env, ())?;
         // TODO(hrust): construct return type
         match m.ret.1 {
             Some(_) => {}

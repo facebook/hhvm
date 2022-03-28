@@ -10,13 +10,13 @@ use std::rc::Rc;
 use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use crate::tast::SavedEnv;
+use crate::typing::shared::typing_return::TypingReturnInfo;
 use crate::typing::{Error, Result};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::{Class, TypeDecl};
 use crate::typing_defs::{ParamMode, Ty};
 use crate::typing_error::TypingError;
 use crate::typing_local_types::{Local, LocalMap};
-use crate::typing_return::TypingReturnInfo;
 use crate::utils::core::{IdentGen, LocalId};
 use pos::TypeName;
 

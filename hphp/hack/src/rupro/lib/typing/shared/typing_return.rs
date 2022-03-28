@@ -53,27 +53,13 @@ impl TypingReturn {
         }
     }
 
-    fn implicit_return<R: Reason>(_env: &TEnv<R>, _pos: R::Pos, _expected: Ty<R>, _actual: Ty<R>) {
-        // TODO(hrust): sound dynamic
-        // TODO(hrust, mjt): subtype
-    }
-
-    pub fn fun_implicit_return<R: Reason>(
-        env: &TEnv<R>,
-        pos: R::Pos,
-        ret: Ty<R>,
-        fun_kind: &oxidized::ast_defs::FunKind,
-    ) {
-        // TODO(hrust): sound dynamic
-        use oxidized::ast_defs::FunKind;
-        match fun_kind {
-            FunKind::FSync => {
-                // TODO(hrust): check_inout_return
-                let rty = Ty::void(R::no_return(pos.clone()));
-                Self::implicit_return(env, pos, rty, ret);
-            }
-            _ => unimplemented!(),
-        }
+    pub fn fun_implicit_return<R: Reason>(_env: &TEnv<R>) {
+        rupro_todo_mark!(Dynamic);
+        rupro_todo_mark!(Awaitable);
+        rupro_todo_mark!(Generators);
+        rupro_todo_mark!(InoutParameters);
+        rupro_todo_mark!(SubtypeCheck);
+        rupro_todo_mark!(MissingError);
     }
 }
 

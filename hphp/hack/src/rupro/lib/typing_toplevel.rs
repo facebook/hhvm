@@ -6,9 +6,6 @@
 #![allow(dead_code)]
 use std::rc::Rc;
 
-use pos::Symbol;
-
-use crate::decl_defs::DeclTy;
 use crate::reason::Reason;
 use crate::special_names;
 use crate::tast;
@@ -16,14 +13,11 @@ use crate::typing::ast::typing_expr::TCExprParams;
 use crate::typing::ast::typing_localize::LocalizeEnv;
 use crate::typing::ast::TC;
 use crate::typing::env::typing_env::TEnv;
-use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing::hint_utils::HintUtils;
-use crate::typing::shared::typing_return::TypingReturn;
 use crate::typing::typing_error::Result;
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::Class;
-use crate::typing_defs::Ty;
-use crate::typing_error::{Primary, TypingError};
+use crate::typing_error::TypingError;
 use pos::TypeName;
 
 pub struct TypingToplevel<'a, R: Reason> {
@@ -39,33 +33,6 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         let env = TEnv::fun_env(Rc::clone(&ctx), fd);
         let def = fd.infer(&env, ())?;
         Ok((def, env.destruct()))
-    }
-
-    fn method_return(
-        &mut self,
-        pos: &R::Pos,
-        name: Symbol,
-        m: &oxidized::aast::Method_<(), ()>,
-        ret_decl_ty: Option<DeclTy<R>>,
-    ) -> Result<(TypingReturnInfo<R>, Ty<R>)> {
-        let ret_ty = match ret_decl_ty.clone() {
-            None => TypingReturn::make_default_return(false, pos, name),
-            Some(ty) => {
-                // TODO(hrust): empty_expand_env_with_on_error
-                TypingReturn::make_return_type(
-                    self.env,
-                    |env, ty| ty.infer(env, LocalizeEnv::no_subst()),
-                    ty,
-                )?
-            }
-        };
-        // TODO(hrust): force_return_kind
-        let _ret_pos = match &m.ret.1 {
-            Some(h) => R::Pos::from(&h.0),
-            None => R::Pos::from(m.name.pos()),
-        };
-        let return_ = TypingReturn::make_info(ret_ty.clone());
-        Ok((return_, ret_ty))
     }
 
     fn class_var_def(
@@ -104,74 +71,6 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             is_static: cv.is_static,
             span: cv.span.clone(),
         })
-    }
-
-    fn method_def(
-        &mut self,
-        _cls: &dyn Class<R>,
-        m: &oxidized::aast::Method_<(), ()>,
-    ) -> Result<Option<tast::Method_<R>>> {
-        let pos = R::Pos::from(&m.name.0);
-        let name = Symbol::new(&m.name.1);
-
-        // TODO(hrust): FunUtils.check_params
-        // TODO(hrust): tyvars
-        self.env.reinitialize_locals();
-        // TODO(hrust): callable
-        assert!(m.user_attributes.is_empty());
-        // TODO(hrust): support_dynamic, coeefects
-        // TODO(hrust): is_constructor
-        // TODO(hrust): localize_and_add_ast_generic_parameters_and_where_constraints
-        // TODO(hrust): get_self_ty
-        // TODO(hrust): is_disposable
-        self.env.clear_params();
-        let ret_decl_ty = HintUtils::type_hint(&m.ret);
-        // TODO(hrust): set_fn_kind
-        let (return_, return_ty) = self.method_return(&pos, name, m, ret_decl_ty)?;
-        self.env.set_return(return_);
-        // TODO(hrust): memoize, coeefects, can_read_globals
-        let typed_params: Vec<_> = m.params.infer(self.env, ())?;
-        // TODO(hrust): variance, tpenv, disable
-        let tb = m.body.infer(self.env, ())?;
-        // TODO(hrust): construct return type
-        match m.ret.1 {
-            Some(_) => {}
-            None => {
-                assert_ne!(m.name.1, special_names::members::__construct.as_str());
-                self.env
-                    .add_error(TypingError::primary(Primary::ExpectingReturnTypeHint(pos)))
-            }
-        };
-        // TODO(hrust): tparams
-        assert!(m.tparams.is_empty());
-        // TODO(hrust): tyvar close and solve
-        // TODO(hrust): check_support_dynamic_type
-        let _ = typed_params;
-        let _ = tb;
-        let _ = return_ty;
-        let m = oxidized::aast::Method_ {
-            span: m.span.clone(),
-            annotation: self.env.save(()),
-            final_: m.final_,
-            abstract_: m.abstract_,
-            static_: m.static_,
-            readonly_this: m.readonly_this,
-            visibility: m.visibility.clone(),
-            name: m.name.clone(),
-            tparams: vec![],
-            where_constraints: m.where_constraints.clone(),
-            params: typed_params,
-            ctxs: m.ctxs.clone(),
-            unsafe_ctxs: m.unsafe_ctxs.clone(),
-            body: tb,
-            fun_kind: m.fun_kind.clone(),
-            user_attributes: vec![],
-            readonly_ret: m.readonly_ret.clone(),
-            ret: oxidized::aast::TypeHint(return_ty, m.ret.1.clone()),
-            external: m.external,
-            doc_comment: m.doc_comment.clone(),
-        };
-        Ok(Some(m))
     }
 
     fn setup_env_for_class_def_check(
@@ -239,15 +138,11 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         let (constructor, static_methods, methods) = self.split_methods(cd.methods.iter());
 
         // TODO(hrust): is_disposable_class
-        let mut typed_methods: Vec<_> = static_methods
-            .into_iter()
-            .filter_map(|m| self.method_def(tc, m).transpose())
+        let typed_methods: Vec<_> = static_methods
+            .iter()
+            .chain(methods.iter())
+            .map(|m| m.infer(self.env, ()))
             .collect::<Result<_>>()?;
-        for m in methods {
-            if let Some(tm) = self.method_def(tc, m)? {
-                typed_methods.push(tm);
-            }
-        }
 
         let typed_vars: Vec<_> = vars
             .into_iter()

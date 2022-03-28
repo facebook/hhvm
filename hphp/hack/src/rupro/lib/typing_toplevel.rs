@@ -9,19 +9,18 @@ use std::rc::Rc;
 use pos::Symbol;
 
 use crate::decl_defs::DeclTy;
-use crate::decl_hint::DeclHintEnv;
 use crate::reason::Reason;
 use crate::special_names;
 use crate::tast;
+use crate::typing::hint_utils::HintUtils;
 use crate::typing::typing_localize::LocalizeEnv;
 use crate::typing::typing_trait::TC;
-use crate::typing::{BindParamFlags, Result, Typing};
+use crate::typing::{Result, Typing};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::Class;
 use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
 use crate::typing_error::{Primary, TypingError};
-use crate::typing_param::{TypingParam, TypingParamFlags};
 use crate::typing_return::{TypingReturn, TypingReturnInfo};
 use pos::TypeName;
 
@@ -31,40 +30,12 @@ pub struct TypingToplevel<'a, R: Reason> {
 }
 
 impl<'a, R: Reason> TypingToplevel<'a, R> {
-    fn decl_hint_env(&self) -> DeclHintEnv<R> {
-        DeclHintEnv::new()
-    }
-
-    fn hint_fun_header<'ast>(
-        &self,
-        params: &'ast [oxidized::aast::FunParam<(), ()>],
-        ret: &oxidized::aast::TypeHint<()>,
-    ) -> (
-        Option<DeclTy<R>>,
-        Vec<(&'ast oxidized::aast::FunParam<(), ()>, Option<DeclTy<R>>)>,
-    ) {
-        let ret = ret.1.as_ref().map(|h| self.decl_hint_env().hint(h));
-        let params = params
-            .iter()
-            .map(|fp| {
-                (
-                    fp,
-                    fp.type_hint
-                        .1
-                        .as_ref()
-                        .map(|h| self.decl_hint_env().hint(h)),
-                )
-            })
-            .collect();
-        (ret, params)
-    }
-
     fn fun_def_impl(&mut self, fd: &oxidized::aast::FunDef<(), ()>) -> Result<tast::FunDef<R>> {
         let f = &fd.fun;
         let fname = Symbol::new(&f.name.1);
         let fpos = R::Pos::from(&f.name.0);
 
-        let (return_decl_ty, params_decl_ty) = self.hint_fun_header(&f.params, &f.ret);
+        let return_decl_ty = HintUtils::type_hint(&f.ret);
         let return_ty = match return_decl_ty.clone() {
             None => TypingReturn::make_default_return(false, &fpos, fname),
             Some(ty) => TypingReturn::make_return_type(
@@ -86,28 +57,8 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             return_ty.clone(),
             return_decl_ty,
         );
-        let param_tys = TypingParam::make_param_local_tys(
-            TypingParamFlags {
-                dynamic_mode: false,
-            },
-            self.env,
-            params_decl_ty.into_iter(),
-        )?;
-        // TOOD(hrust): capabilities, immutable
-        let typed_params: Vec<_> = param_tys
-            .iter()
-            .map(|(param, ty)| {
-                Typing::bind_param(
-                    self.env,
-                    BindParamFlags {
-                        immutable: false,
-                        can_read_globals: true,
-                    },
-                    ty.clone(),
-                    param,
-                )
-            })
-            .collect();
+        let typed_params = f.params.infer(self.env, ())?;
+
         // TODO(variance)
         // TODO(memoize)
         let tb = Typing::fun_(
@@ -201,7 +152,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         cv: &oxidized::aast::ClassVar<(), ()>,
     ) -> Result<tast::ClassVar<R>> {
         // TODO(hrust): missing type hint
-        let decl_cty = self.decl_hint_env().hint(cv.type_.1.as_ref().unwrap());
+        let decl_cty = HintUtils::type_hint(&cv.type_).unwrap();
         // TODO(hrust): enforcability
         let cty = decl_cty.infer(self.env, LocalizeEnv::no_subst())?;
         // TODO(hrust): coerce_type, user_attributes
@@ -248,31 +199,11 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         // TODO(hrust): get_self_ty
         // TODO(hrust): is_disposable
         self.env.clear_params();
-        let (ret_decl_ty, params_decl_ty) = self.hint_fun_header(&m.params, &m.ret);
+        let ret_decl_ty = HintUtils::type_hint(&m.ret);
         // TODO(hrust): set_fn_kind
         let (return_, return_ty) = self.method_return(&pos, name, m, ret_decl_ty)?;
-        let param_tys = TypingParam::make_param_local_tys(
-            TypingParamFlags {
-                dynamic_mode: false,
-            },
-            self.env,
-            params_decl_ty.into_iter(),
-        )?;
         // TODO(hrust): memoize, coeefects, can_read_globals
-        let typed_params: Vec<_> = param_tys
-            .iter()
-            .map(|(param, ty)| {
-                Typing::bind_param(
-                    self.env,
-                    BindParamFlags {
-                        immutable: false,
-                        can_read_globals: true,
-                    },
-                    ty.clone(),
-                    param,
-                )
-            })
-            .collect();
+        let typed_params: Vec<_> = m.params.infer(self.env, ())?;
         // TODO(hrust): variance, tpenv, disable
         let tb = Typing::fun_(
             self.env,

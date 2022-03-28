@@ -3,12 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use pos::Symbol;
-
 use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use crate::tast::{self, Tast};
-use crate::typing_defs::{ParamMode, Ty};
+use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
 use crate::typing_return::{TypingReturn, TypingReturnInfo};
 use crate::utils::core::LocalId;
@@ -55,42 +53,6 @@ pub struct TypingExprFlags<R> {
 }
 
 impl Typing {
-    pub fn bind_param<R: Reason>(
-        env: &TEnv<R>,
-        flags: BindParamFlags,
-        ty1: Ty<R>,
-        param: &oxidized::aast::FunParam<(), ()>,
-    ) -> tast::FunParam<R> {
-        let (param_te, ty1) = match param.expr {
-            None => (None, ty1),
-            Some(_) => unimplemented!(),
-        };
-        if !param.user_attributes.is_empty() {
-            unimplemented!()
-        }
-        let name = Symbol::new(&param.name);
-        let pos = R::Pos::from(&param.pos);
-        let id = LocalId::new_unscoped(name);
-        let param_mode = ParamMode::from(&param.callconv);
-        env.set_param(id.clone(), ty1.clone(), pos.clone(), param_mode);
-        env.set_local(flags.immutable, id, ty1.clone(), pos);
-        if !param.user_attributes.is_empty() {
-            unimplemented!()
-        }
-        tast::FunParam {
-            annotation: ty1.clone(),
-            type_hint: oxidized::aast::TypeHint(ty1, param.type_hint.1.clone()),
-            is_variadic: param.is_variadic,
-            pos: param.pos.clone(),
-            name: param.name.clone(),
-            expr: param_te,
-            readonly: param.readonly,
-            callconv: param.callconv.clone(),
-            user_attributes: vec![],
-            visibility: param.visibility,
-        }
-    }
-
     fn stmt_<R: Reason>(
         env: &TEnv<R>,
         _pos: &oxidized::pos::Pos,

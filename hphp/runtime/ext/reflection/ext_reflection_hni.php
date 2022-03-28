@@ -229,6 +229,12 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native>>
   public function getCoeffects()[]: vec;
 
+  /*
+   * Returns the module associated with the given function.
+   */
+  <<__Native>>
+  public function getModule()[]: ?string;
+
   <<__Native>>
   public function returnsReadonly()[]: bool;
 

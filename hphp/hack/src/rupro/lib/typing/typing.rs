@@ -82,7 +82,7 @@ impl Typing {
                     OS::Return(Box::new(Some(te)))
                 }
             },
-            s => unimplemented!("stmt_: {:?}", s),
+            s => rupro_todo!(AST, "stmt_: {:?}", s),
         }
     }
 
@@ -182,7 +182,7 @@ impl Typing {
                             let (te2, ty2) = Self::expr_(env, Default::default(), e2);
                             let (te1, ty, err_opt) = Self::assign(env, p, e1, &e2.1, ty2);
                             // TODO(hrust): hole_on_err
-                            assert!(err_opt.is_none());
+                            rupro_todo_assert!(err_opt.is_none(), Holes);
                             let te = Binop(Box::new((oxidized::ast_defs::Bop::Eq(None), te1, te2)));
                             make_result(env, p_ox.clone(), te, ty)
                         }

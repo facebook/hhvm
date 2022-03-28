@@ -59,8 +59,8 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         );
         let typed_params = f.params.infer(self.env, ())?;
 
-        // TODO(variance)
-        // TODO(memoize)
+        rupro_todo_mark!(Variance);
+        rupro_todo_mark!(Memoization);
         let tb = Typing::fun_(
             self.env,
             Default::default(),

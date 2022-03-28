@@ -71,6 +71,8 @@ pub enum RuproTodo {
     GenericParameters,
     /// Bind the `$this` variable in the local environment.
     BindThis,
+    /// Class hierarchy checks are not yet implemented.
+    ClassHierarchyChecks,
 }
 
 macro_rules! rupro_todo_assert {

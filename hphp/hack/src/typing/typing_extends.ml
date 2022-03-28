@@ -1589,7 +1589,7 @@ let filter_privates_and_synthethized
 
 let make_parent_member_map
     ((parent_name_pos, _parent_name), parent_tparaml, parent_class) :
-    ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t =
+    ClassEltWParent.t MemberNameMap.t MemberKindMap.t =
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
   make_all_members ~parent_class
   |> MemberKindMap.of_list
@@ -1600,23 +1600,29 @@ let make_parent_member_map
          |> SMap.of_list
          |> SMap.map (fun member ->
                 let member : class_elt = Inst.instantiate_ce psubst member in
-                ClassEltWParentSet.singleton
-                  (member, (parent_name_pos, parent_class))))
+                (member, (parent_name_pos, parent_class))))
 
-let merge_member_maps acc_map map =
+let merge_member_maps
+    (acc_map : ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t)
+    (map : ClassEltWParent.t MemberNameMap.t MemberKindMap.t) :
+    ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t =
   MemberKindMap.fold
-    (fun mem_kind members acc_map ->
+    (fun mem_kind
+         (members : ClassEltWParent.t MemberNameMap.t)
+         (acc_map : ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t) ->
       let new_entry =
         match MemberKindMap.find_opt mem_kind acc_map with
-        | None -> members
+        | None -> MemberNameMap.map ClassEltWParentSet.singleton members
         | Some prev_members ->
-          let new_members =
-            MemberNameMap.merge
-              (fun _member_name -> Option.merge ~f:ClassEltWParentSet.union)
-              prev_members
-              members
-          in
-          new_members
+          MemberNameMap.merge
+            (fun _member_name elt elts ->
+              match (elt, elts) with
+              | (None, None) -> None
+              | (Some elt, None) -> Some (ClassEltWParentSet.singleton elt)
+              | (None, (Some _ as elts)) -> elts
+              | (Some elt, Some elts) -> Some (ClassEltWParentSet.add elt elts))
+            members
+            prev_members
       in
       MemberKindMap.add mem_kind new_entry acc_map)
     map

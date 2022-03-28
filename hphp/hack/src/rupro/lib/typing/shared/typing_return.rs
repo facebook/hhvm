@@ -34,16 +34,9 @@ impl TypingReturn {
         localize(env, ty)
     }
 
-    pub fn make_info<R: Reason>(
-        _env: &TEnv<R>,
-        _ret_pos: R::Pos,
-        _fun_kind: &oxidized::ast_defs::FunKind,
-        _attributes: &[oxidized::aast::UserAttribute<(), ()>],
-        _is_explicit: bool,
-        locl_ty: Ty<R>,
-        _decl_ty: Option<DeclTy<R>>,
-    ) -> TypingReturnInfo<R> {
-        // TODO(hrust): everything
+    pub fn make_info<R: Reason>(locl_ty: Ty<R>) -> TypingReturnInfo<R> {
+        rupro_todo_mark!(Disposable);
+        rupro_todo_mark!(Dynamic);
         TypingReturnInfo {
             return_type: locl_ty,
         }

@@ -4,9 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 pub mod typing_block;
 pub mod typing_expr;
+pub mod typing_fun;
+pub mod typing_fun_def;
 pub mod typing_func_body;
 pub mod typing_localize;
 pub mod typing_param;
+pub mod typing_return_type_hint;
 pub mod typing_stmt;
 pub mod typing_tparam;
 pub mod typing_trait;

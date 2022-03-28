@@ -32,77 +32,12 @@ pub struct TypingToplevel<'a, R: Reason> {
 }
 
 impl<'a, R: Reason> TypingToplevel<'a, R> {
-    fn fun_def_impl(&mut self, fd: &oxidized::aast::FunDef<(), ()>) -> Result<tast::FunDef<R>> {
-        let f = &fd.fun;
-        let fname = Symbol::new(&f.name.1);
-        let fpos = R::Pos::from(&f.name.0);
-
-        let return_decl_ty = HintUtils::type_hint(&f.ret);
-        let return_ty = match return_decl_ty.clone() {
-            None => TypingReturn::make_default_return(false, &fpos, fname),
-            Some(ty) => TypingReturn::make_return_type(
-                self.env,
-                |env, ty| ty.infer(env, LocalizeEnv::no_subst()),
-                ty,
-            )?,
-        };
-        let ret_pos = match &f.ret.1 {
-            Some(h) => R::Pos::from(&h.0),
-            None => R::Pos::from(f.name.pos()),
-        };
-        let return_ = TypingReturn::make_info(
-            self.env,
-            ret_pos,
-            &f.fun_kind,
-            &f.user_attributes,
-            f.ret.1.is_some(),
-            return_ty.clone(),
-            return_decl_ty,
-        );
-        self.env.set_return(return_);
-        let typed_params = f.params.infer(self.env, ())?;
-
-        rupro_todo_mark!(Variance);
-        rupro_todo_mark!(Memoization);
-        let tb = f.body.infer(self.env, ())?;
-        match f.ret.1 {
-            Some(_) => {}
-            None => self
-                .env
-                .add_error(TypingError::primary(Primary::ExpectingReturnTypeHint(fpos))),
-        }
-        let fun = oxidized::aast::Fun_ {
-            annotation: self.env.save(()),
-            readonly_this: f.readonly_this.clone(),
-            span: f.span.clone(),
-            readonly_ret: f.readonly_ret.clone(),
-            ret: oxidized::aast::TypeHint(return_ty, f.ret.1.clone()),
-            name: f.name.clone(),
-            tparams: vec![],
-            where_constraints: vec![],
-            params: typed_params,
-            ctxs: f.ctxs.clone(),
-            unsafe_ctxs: f.unsafe_ctxs.clone(),
-            fun_kind: f.fun_kind.clone(),
-            user_attributes: vec![],
-            body: tb,
-            external: f.external.clone(),
-            doc_comment: f.doc_comment.clone(),
-        };
-        Ok(oxidized::aast::FunDef {
-            namespace: fd.namespace.clone(),
-            file_attributes: vec![],
-            mode: fd.mode,
-            fun,
-        })
-    }
-
     pub fn fun_def(
         ctx: Rc<TypingCtx<R>>,
         fd: &oxidized::aast::FunDef<(), ()>,
     ) -> Result<(tast::FunDef<R>, Vec<TypingError<R>>)> {
         let env = TEnv::fun_env(Rc::clone(&ctx), fd);
-        let def = TypingToplevel { ctx, env: &env }.fun_def_impl(fd)?;
+        let def = fd.infer(&env, ())?;
         Ok((def, env.destruct()))
     }
 
@@ -125,19 +60,11 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             }
         };
         // TODO(hrust): force_return_kind
-        let ret_pos = match &m.ret.1 {
+        let _ret_pos = match &m.ret.1 {
             Some(h) => R::Pos::from(&h.0),
             None => R::Pos::from(m.name.pos()),
         };
-        let return_ = TypingReturn::make_info(
-            self.env,
-            ret_pos,
-            &m.fun_kind,
-            &m.user_attributes,
-            m.ret.1.is_some(),
-            ret_ty.clone(),
-            ret_decl_ty,
-        );
+        let return_ = TypingReturn::make_info(ret_ty.clone());
         Ok((return_, ret_ty))
     }
 

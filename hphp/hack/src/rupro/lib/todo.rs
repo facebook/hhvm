@@ -44,7 +44,7 @@ pub enum RuproTodo {
     Disposable,
     /// No calls into subtyping from within typing yet.
     SubtypeCheck,
-    /// No legacy or sound dynamic.
+    /// No legacy or sound dynamic (or enforceability concept).
     Dynamic,
     /// No flow-based continuation typing yet.
     Flow,
@@ -61,6 +61,16 @@ pub enum RuproTodo {
     Abstract,
     /// Generators are not yet implemented.
     Generators,
+    /// A collection of random wellformedness checks. Such as the ones in
+    /// `Typing_type_wellformedness{.fun,...}` and
+    /// `Decl_fun_utils.{check_param,...}`
+    Wellformedness,
+    /// Typing logic related to modules.
+    Modules,
+    /// Generic parameters and there where constraints.
+    GenericParameters,
+    /// Bind the `$this` variable in the local environment.
+    BindThis,
 }
 
 macro_rules! rupro_todo_assert {

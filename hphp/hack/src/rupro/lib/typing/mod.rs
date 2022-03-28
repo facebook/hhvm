@@ -7,7 +7,3 @@ pub mod hint_utils;
 pub mod shared;
 pub mod typing_env;
 pub mod typing_error;
-
-// TODO(hverr): clean up, fully remove typing.rs
-mod typing;
-pub use typing::*;

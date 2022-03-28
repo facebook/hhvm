@@ -17,7 +17,7 @@ use crate::typing::ast::typing_localize::LocalizeEnv;
 use crate::typing::ast::TC;
 use crate::typing::hint_utils::HintUtils;
 use crate::typing::shared::typing_return::{TypingReturn, TypingReturnInfo};
-use crate::typing::Result;
+use crate::typing::typing_error::Result;
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::Class;
 use crate::typing_defs::Ty;

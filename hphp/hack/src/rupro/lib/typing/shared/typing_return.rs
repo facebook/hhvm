@@ -7,7 +7,7 @@
 use crate::decl_defs::DeclTy;
 use crate::reason::Reason;
 use crate::special_names;
-use crate::typing::Result;
+use crate::typing::typing_error::Result;
 use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
 use pos::Symbol;

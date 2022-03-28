@@ -13,6 +13,15 @@ pub trait TC<R: Reason> {
     fn infer(&self, env: &TEnv<R>, params: Self::Params) -> Result<Self::Typed>;
 }
 
+impl<R: Reason, T: TC<R>> TC<R> for &T {
+    type Typed = T::Typed;
+    type Params = T::Params;
+
+    fn infer(&self, env: &TEnv<R>, params: Self::Params) -> Result<Self::Typed> {
+        (*self).infer(env, params)
+    }
+}
+
 impl<R: Reason, T> TC<R> for [T]
 where
     T: TC<R>,

@@ -9,16 +9,11 @@ use std::rc::Rc;
 use crate::reason::Reason;
 use crate::special_names;
 use crate::tast;
-use crate::typing::ast::typing_expr::TCExprParams;
-use crate::typing::ast::typing_localize::LocalizeEnv;
 use crate::typing::ast::TC;
 use crate::typing::env::typing_env::TEnv;
-use crate::typing::hint_utils::HintUtils;
 use crate::typing::typing_error::Result;
 use crate::typing_ctx::TypingCtx;
-use crate::typing_decl_provider::Class;
 use crate::typing_error::TypingError;
-use pos::TypeName;
 
 pub struct TypingToplevel<'a, R: Reason> {
     ctx: Rc<TypingCtx<R>>,
@@ -33,44 +28,6 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         let env = TEnv::fun_env(Rc::clone(&ctx), fd);
         let def = fd.infer(&env, ())?;
         Ok((def, env.destruct()))
-    }
-
-    fn class_var_def(
-        &mut self,
-        _is_static: bool,
-        _cls: &dyn Class<R>,
-        cv: &oxidized::aast::ClassVar<(), ()>,
-    ) -> Result<tast::ClassVar<R>> {
-        // TODO(hrust): missing type hint
-        let decl_cty = HintUtils::type_hint(&cv.type_).unwrap();
-        // TODO(hrust): enforcability
-        let cty = decl_cty.infer(self.env, LocalizeEnv::no_subst())?;
-        // TODO(hrust): coerce_type, user_attributes
-        let typed_cv_expr = cv
-            .expr
-            .as_ref()
-            .map(|e| {
-                rupro_todo_mark!(BidirectionalTC);
-                e.infer(self.env, TCExprParams::empty_locals())
-            })
-            .transpose()?;
-        assert!(cv.user_attributes.is_empty());
-        // TODO(hrust): sound dynamic
-        Ok(tast::ClassVar {
-            final_: cv.final_,
-            xhp_attr: cv.xhp_attr.clone(),
-            abstract_: cv.abstract_,
-            readonly: cv.readonly,
-            visibility: cv.visibility.clone(),
-            type_: oxidized::aast::TypeHint(cty, cv.type_.1.clone()),
-            id: cv.id.clone(),
-            expr: typed_cv_expr,
-            user_attributes: vec![],
-            doc_comment: cv.doc_comment.clone(),
-            is_promoted_variadic: cv.is_promoted_variadic,
-            is_static: cv.is_static,
-            span: cv.span.clone(),
-        })
     }
 
     fn setup_env_for_class_def_check(
@@ -126,7 +83,6 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
     fn check_class_members(
         &mut self,
         cd: &oxidized::aast::Class_<(), ()>,
-        tc: &dyn Class<R>,
     ) -> Result<(
         Vec<tast::ClassConst<R>>,
         Vec<tast::ClassTypeconstDef<R>>,
@@ -144,14 +100,8 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             .map(|m| m.infer(self.env, ()))
             .collect::<Result<_>>()?;
 
-        let typed_vars: Vec<_> = vars
-            .into_iter()
-            .map(|v| self.class_var_def(true, tc, v))
-            .collect::<Result<_>>()?;
-        let typed_static_vars: Vec<_> = static_vars
-            .into_iter()
-            .map(|v| self.class_var_def(false, tc, v))
-            .collect::<Result<_>>()?;
+        let typed_vars: Vec<_> = vars.infer(self.env, ())?;
+        let typed_static_vars: Vec<_> = static_vars.infer(self.env, ())?;
 
         assert!(constructor.is_none());
         assert!(cd.typeconsts.is_empty());
@@ -159,18 +109,14 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         Ok((vec![], vec![], typed_vars, typed_static_vars, typed_methods))
     }
 
-    fn class_def_impl(
-        &mut self,
-        cd: &oxidized::aast::Class_<(), ()>,
-        tc: &dyn Class<R>,
-    ) -> Result<tast::Class_<R>> {
+    fn class_def_impl(&mut self, cd: &oxidized::aast::Class_<(), ()>) -> Result<tast::Class_<R>> {
         // TODO(hrust): class_wellformedness_checks
         // TODO(hrust): class_hierarchy_checks
         assert!(cd.user_attributes.is_empty());
         assert!(cd.file_attributes.is_empty());
 
         let (typed_consts, typed_typeconsts, typed_vars, mut typed_static_vars, typed_methods) =
-            self.check_class_members(cd, tc)?;
+            self.check_class_members(cd)?;
         typed_static_vars.extend(typed_vars);
 
         // TODO(hrust): class_type_params
@@ -220,8 +166,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         // TODO(hrust): add_decl_errors
         // TODO(hrust): duplicate check
         let env = Self::setup_env_for_class_def_check(Rc::clone(&ctx), cd);
-        let tc = env.decls().get_class_or_error(TypeName::new(&cd.name.1))?;
-        let def = TypingToplevel { ctx, env: &env }.class_def_impl(cd, &*tc)?;
+        let def = TypingToplevel { ctx, env: &env }.class_def_impl(cd)?;
 
         Ok((def, env.destruct()))
     }

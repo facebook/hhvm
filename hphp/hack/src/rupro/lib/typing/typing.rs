@@ -6,7 +6,6 @@
 use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use crate::tast;
-use crate::typing::typing_block::TCBlock;
 use crate::typing::typing_trait::TC;
 use crate::typing_env::TEnv;
 use crate::typing_return::{TypingReturn, TypingReturnInfo};
@@ -60,12 +59,12 @@ impl Typing {
         pos: R::Pos,
         named_body: &oxidized::aast::FuncBody<(), ()>,
         f_kind: &oxidized::ast_defs::FunKind,
-    ) -> Result<tast::Block<R>> {
+    ) -> Result<tast::FuncBody<R>> {
         env.set_return(return_);
         let tb = if flags.disable {
             unimplemented!()
         } else {
-            TCBlock(&named_body.fb_ast).infer(env, ())?
+            named_body.infer(env, ())?
         };
         let has_implicit_return = env.has_next();
         // TODO(hrust): hhi
@@ -84,7 +83,7 @@ impl Typing {
         pos: R::Pos,
         named_body: &oxidized::aast::FuncBody<(), ()>,
         f_kind: &oxidized::ast_defs::FunKind,
-    ) -> Result<tast::Block<R>> {
+    ) -> Result<tast::FuncBody<R>> {
         let ret = env.get_return();
         let params = env.get_params();
         let res = Self::fun_impl(env, flags, return_, pos, named_body, f_kind)?;

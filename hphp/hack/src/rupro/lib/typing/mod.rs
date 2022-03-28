@@ -7,6 +7,7 @@ pub mod typing_block;
 pub mod typing_env;
 pub mod typing_error;
 pub mod typing_expr;
+pub mod typing_func_body;
 pub mod typing_localize;
 pub mod typing_param;
 pub mod typing_stmt;

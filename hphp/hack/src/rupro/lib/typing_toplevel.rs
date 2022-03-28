@@ -90,7 +90,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             unsafe_ctxs: f.unsafe_ctxs.clone(),
             fun_kind: f.fun_kind.clone(),
             user_attributes: vec![],
-            body: oxidized::aast::FuncBody { fb_ast: tb },
+            body: tb,
             external: f.external.clone(),
             doc_comment: f.doc_comment.clone(),
         };
@@ -247,7 +247,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             params: typed_params,
             ctxs: m.ctxs.clone(),
             unsafe_ctxs: m.unsafe_ctxs.clone(),
-            body: oxidized::aast::FuncBody { fb_ast: tb },
+            body: tb,
             fun_kind: m.fun_kind.clone(),
             user_attributes: vec![],
             readonly_ret: m.readonly_ret.clone(),

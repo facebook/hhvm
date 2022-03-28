@@ -38,9 +38,8 @@ impl<'node> ElaborateNamespacesVisitor<'node> {
     }
 
     fn elaborate_type_name(&self, id: &mut Id) {
-        // TODO(hrust): special_identifier, $
+        rupro_todo_mark!(Naming, "special identifiers, $, namespaces");
         if !self.type_params.contains(id.1.as_str()) {
-            // TODO(hrust): namespaces
             if id.1.chars().next().map_or(false, |c| c != '\\') {
                 id.1 = utils::add_ns(&id.1);
             }
@@ -60,7 +59,7 @@ impl<'node> VisitorMut<'node> for ElaborateNamespacesVisitor<'node> {
         _c: &mut <Self::Params as Params>::Context,
         p: &'node mut Hint_,
     ) -> Result<(), <Self::Params as Params>::Error> {
-        // TODO(hrust): is_xhp_screwup, codegen
+        rupro_todo_mark!(Naming, "xhp, codegen");
         match p {
             Hint_::Happly(id, _hl) => {
                 if !self.is_reserved_type_hint(&id.1) {

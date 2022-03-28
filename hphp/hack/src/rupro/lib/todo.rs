@@ -25,8 +25,8 @@ pub enum RuproTodo {
     Coeffects,
     /// Fake members and refinements are not yet implemented.
     FakeMembersAndRefinement,
-    /// Awaitable is not yet impelemented.
-    Awaitable,
+    /// Awaitable/Async is not yet impelemented.
+    AwaitableAsync,
     /// Using variables are not yet implemented.
     UsingVar,
     /// Dependent type of a local expression is not yet implemented.
@@ -73,6 +73,12 @@ pub enum RuproTodo {
     BindThis,
     /// Class hierarchy checks are not yet implemented.
     ClassHierarchyChecks,
+    /// Union and intersection simplification is not yet implemented.
+    UnionsIntersections,
+    /// Naming logic that is missing.
+    Naming,
+    /// Some specialized localization logic.
+    Localization,
 }
 
 macro_rules! rupro_todo_assert {

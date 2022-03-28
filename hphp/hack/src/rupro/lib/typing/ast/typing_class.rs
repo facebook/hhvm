@@ -87,9 +87,9 @@ fn check_class_members<R: Reason>(
     let typed_vars: Vec<_> = vars.infer(env, ())?;
     let typed_static_vars: Vec<_> = static_vars.infer(env, ())?;
 
-    assert!(constructor.is_none());
-    assert!(cd.typeconsts.is_empty());
-    assert!(cd.consts.is_empty());
+    rupro_todo_assert!(constructor.is_none(), AST);
+    rupro_todo_assert!(cd.typeconsts.is_empty(), AST);
+    rupro_todo_assert!(cd.consts.is_empty(), AST);
     Ok((vec![], vec![], typed_vars, typed_static_vars, typed_methods))
 }
 

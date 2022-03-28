@@ -65,7 +65,7 @@ impl<R: Reason> TEnv<R> {
 
     /// Initialize an environment to type check a toplevel class.
     pub fn class_env(ctx: Rc<TypingCtx<R>>, cd: &oxidized::aast::Class_<(), ()>) -> Self {
-        // TODO(hrust): set_self, set_parent
+        rupro_todo_mark!(BindThis);
         Self::new(TypeName::new(&cd.name.1).into(), ctx)
     }
 }
@@ -138,14 +138,12 @@ impl<R: Reason> TEnv<R> {
     /// Reuses the expression ID if the local was already bound in the
     /// environment. Generates an expression ID if not.
     pub fn set_local(&self, immutable: bool, x: LocalId, ty: Ty<R>, pos: R::Pos) {
-        // TODO(hrust): union simplification
+        rupro_todo_mark!(UnionsIntersections);
+        rupro_todo_assert!(!immutable, Readonly);
         let expr_id = match self.lenv.per_cont_env.get(TypingContKey::Next, &x) {
             None => self.idents.make(),
             Some(l) => l.expr_id,
         };
-        if immutable {
-            unimplemented!()
-        }
         self.set_local_(x, Local { ty, pos, expr_id });
     }
 
@@ -162,11 +160,13 @@ impl<R: Reason> TEnv<R> {
         if !self.lenv.per_cont_env.has_cont(TypingContKey::Next) {
             // If the continuation is absent, we are in dead code so the
             // variable should have type nothing
-            unimplemented!("{:?}", error_if_undefined_at_pos)
+            rupro_todo!(MissingError, "{:?}", error_if_undefined_at_pos)
         } else {
             let lty = self.lenv.per_cont_env.get(TypingContKey::Next, x);
-            // TODO(hrust): error
-            assert!(lty.is_some() || error_if_undefined_at_pos.is_none());
+            rupro_todo_assert!(
+                lty.is_some() || error_if_undefined_at_pos.is_none(),
+                MissingError
+            );
             (true, lty.unwrap().ty)
         }
     }

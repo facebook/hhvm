@@ -42,7 +42,7 @@ fn infer_return<R: Reason>(
         None => rupro_todo!(AST),
         Some(e) => {
             rupro_todo_mark!(InoutParameters);
-            rupro_todo_mark!(Awaitable);
+            rupro_todo_mark!(AwaitableAsync);
             rupro_todo_mark!(BidirectionalTC);
             rupro_todo_mark!(Disposable);
             rupro_todo_mark!(Dynamic);

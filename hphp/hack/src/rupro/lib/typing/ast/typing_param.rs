@@ -23,9 +23,9 @@ impl<R: Reason> TC<R> for oxidized::aast::FunParam<(), ()> {
             None => Ty::any(R::witness(R::Pos::from(&self.pos))),
             Some(ty) => ty.infer(env, LocalizeEnv::no_subst())?,
         };
-        assert!(self.expr.is_none(), "unimplemented");
-        assert!(self.user_attributes.is_empty(), "unimplemented");
-        assert!(self.type_hint.1.is_some(), "unimplemented");
+        rupro_todo_assert!(self.expr.is_none(), AST);
+        rupro_todo_assert!(self.user_attributes.is_empty(), AST);
+        rupro_todo_assert!(self.type_hint.1.is_some(), AST);
 
         let name = Symbol::new(&self.name);
         let pos = R::Pos::from(&self.pos);

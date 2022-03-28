@@ -73,6 +73,6 @@ fn make_return_type<R: Reason>(
     params: TCReturnTypeHintParams<R>,
     ty: DeclTy<R>,
 ) -> Result<Ty<R>> {
-    rupro_todo_mark!(Awaitable);
+    rupro_todo_mark!(AwaitableAsync);
     ty.infer(env, params.localize_env)
 }

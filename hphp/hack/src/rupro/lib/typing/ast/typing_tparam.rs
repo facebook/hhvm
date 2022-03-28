@@ -13,7 +13,7 @@ impl<R: Reason> TC<R> for oxidized::aast::Tparam<(), ()> {
     type Typed = tast::Tparam<R>;
 
     fn infer(&self, env: &TEnv<R>, params: ()) -> Result<Self::Typed> {
-        assert!(self.user_attributes.is_empty(), "unimplemented");
+        rupro_todo_assert!(self.user_attributes.is_empty(), AST);
         let parameters = self.parameters.infer(env, params)?;
         let tp = tast::Tparam {
             variance: self.variance.clone(),

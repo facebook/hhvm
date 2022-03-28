@@ -101,7 +101,7 @@ fn infer_assign<R: Reason>(
     trhs: &tast::Expr<R>,
 ) -> Result<tast::Expr<R>> {
     rupro_todo_mark!(Holes);
-    rupro_todo_mark!(Awaitable);
+    rupro_todo_mark!(AwaitableAsync);
     rupro_todo_mark!(FakeMembersAndRefinement);
     use oxidized::aast::Expr_::*;
     let (te, ty) = match &lhs.2 {

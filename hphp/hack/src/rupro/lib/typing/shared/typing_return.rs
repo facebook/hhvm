@@ -30,7 +30,7 @@ impl TypingReturn {
         localize: impl FnOnce(&TEnv<R>, DeclTy<R>) -> Result<Ty<R>>,
         ty: DeclTy<R>,
     ) -> Result<Ty<R>> {
-        // TODO(hrust): async
+        rupro_todo_mark!(AwaitableAsync);
         localize(env, ty)
     }
 
@@ -44,7 +44,7 @@ impl TypingReturn {
 
     pub fn fun_implicit_return<R: Reason>(_env: &TEnv<R>) {
         rupro_todo_mark!(Dynamic);
-        rupro_todo_mark!(Awaitable);
+        rupro_todo_mark!(AwaitableAsync);
         rupro_todo_mark!(Generators);
         rupro_todo_mark!(InoutParameters);
         rupro_todo_mark!(SubtypeCheck);

@@ -12,13 +12,12 @@ fn hint_id(allow_retonly: bool, cls: &aast::ClassName, _hl: &[aast::Hint]) -> Op
     use aast::Hint_::*;
     use aast::Tprim::*;
 
-    // TODO(hrust): so much more
     let cls = &cls.1;
     if cls == sn::typehints::void.as_str() {
         if allow_retonly {
             Some(Hprim(Tvoid))
         } else {
-            unimplemented!()
+            rupro_todo!(Naming);
         }
     } else if cls == sn::typehints::int.as_str() {
         Some(Hprim(Tint))
@@ -28,7 +27,7 @@ fn hint_id(allow_retonly: bool, cls: &aast::ClassName, _hl: &[aast::Hint]) -> Op
 }
 
 fn hint_(allow_retonly: bool, h: &mut aast::Hint_) {
-    // TODO(hrust): so much more
+    rupro_todo_mark!(AST);
     use aast::Hint_::*;
     match h {
         Happly(cls, hl) => {
@@ -36,7 +35,7 @@ fn hint_(allow_retonly: bool, h: &mut aast::Hint_) {
 
             if !hl.is_empty() {
                 match new_h.as_ref().unwrap_or(h) {
-                    Hprim(..) | Hmixed | Hnonnull | Hdynamic | Hnothing => unimplemented!(),
+                    Hprim(..) | Hmixed | Hnonnull | Hdynamic | Hnothing => rupro_todo!(Naming),
                     _ => {}
                 }
             }
@@ -45,9 +44,7 @@ fn hint_(allow_retonly: bool, h: &mut aast::Hint_) {
                 *h = new_h;
             }
         }
-        _ => {
-            // TODO(hrust)
-        }
+        _ => {}
     }
 }
 
@@ -56,47 +53,46 @@ fn hint(allow_retonly: bool, h: &mut aast::TypeHint<()>) {
 }
 
 fn fun_param(p: &mut aast::FunParam<(), ()>) {
-    // TODO(hrust): all the rest
+    rupro_todo_mark!(AST);
     hint(false, &mut p.type_hint);
 }
 
 fn fun_paraml(pl: &mut Vec<aast::FunParam<(), ()>>) {
-    // TODO(hrust): check repetition
-    // TODO(hrust): variadicity
+    rupro_todo_mark!(MissingError, "check repitition");
     pl.iter_mut().for_each(fun_param);
 }
 
 fn fun_(f: &mut aast::Fun_<(), ()>) {
-    // TODO(hrust): all the rest
+    rupro_todo_mark!(AST);
     hint(true, &mut f.ret);
     fun_paraml(&mut f.params);
 }
 
 fn fun_def(fd: &mut aast::FunDef<(), ()>) {
-    // TODO(hrust): all the rest
+    rupro_todo_mark!(AST);
     fun_(&mut fd.fun);
 }
 
 fn method_(m: &mut aast::Method_<(), ()>) {
-    // TODO(hrust): all the rest
+    rupro_todo_mark!(AST);
     hint(true, &mut m.ret);
     fun_paraml(&mut m.params);
 }
 
 fn class_prop(p: &mut aast::ClassVar<(), ()>) {
-    // TODO(hrust): all the rest
+    rupro_todo_mark!(AST);
     hint(false, &mut p.type_);
 }
 
 fn interface(c: &mut aast::Class_<(), ()>) {
-    // TODO(hrust): all the rest
+    rupro_todo_mark!(AST);
     if matches!(c.kind, oxidized::ast_defs::ClassishKind::Cinterface) {
         c.methods.iter_mut().for_each(|m| m.abstract_ = true);
     }
 }
 
 fn class_(c: &mut aast::Class_<(), ()>) {
-    // TODO(hrust): all the rest
+    rupro_todo_mark!(AST);
     naming_elaborate_namespaces::elaborate_class(c);
     c.methods.iter_mut().for_each(method_);
     c.vars.iter_mut().for_each(class_prop);

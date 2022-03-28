@@ -6,7 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-[@@@warning "-missing-mli"]
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)

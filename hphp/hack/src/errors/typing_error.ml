@@ -1818,7 +1818,7 @@ module Primary = struct
     | Trait_reuse_with_final_method of {
         pos: Pos.t;
         trait_name: string;
-        parent_cls_name: string;
+        parent_cls_name: string Lazy.t;
         trace: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Trait_reuse_inside_class of {
@@ -5491,8 +5491,8 @@ module Primary = struct
         hint
         quickfixes
     | Cyclic_class_def { pos; stack } -> cyclic_class_def pos stack
-    | Trait_reuse_with_final_method { pos; trait_name; parent_cls_name; trace }
-      ->
+    | Trait_reuse_with_final_method
+        { pos; trait_name; parent_cls_name = (lazy parent_cls_name); trace } ->
       trait_reuse_with_final_method pos trait_name parent_cls_name trace
     | Trait_reuse_inside_class { pos; class_name; trait_name; occurrences } ->
       trait_reuse_inside_class pos class_name trait_name occurrences

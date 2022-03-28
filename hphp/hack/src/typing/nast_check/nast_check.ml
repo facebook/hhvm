@@ -26,7 +26,6 @@ let visitor =
       Php_lambda_check.handler;
       Duplicate_xhp_attribute_check.handler;
       Attribute_nast_checks.handler;
-      Trait_reuse_check.handler;
       Enum_supertyping_check.handler;
       List_rvalue_check.handler;
       Private_final_check.handler;

@@ -668,7 +668,7 @@ module Primary : sig
     | Trait_reuse_with_final_method of {
         pos: Pos.t;
         trait_name: string;
-        parent_cls_name: string;
+        parent_cls_name: string Lazy.t;
         trace: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Trait_reuse_inside_class of {

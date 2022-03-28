@@ -33,13 +33,21 @@ module MemberKind = struct
     | Constructor of { is_consistent: bool }
   [@@deriving eq, ord]
 
-  let is_method member_kind =
-    match member_kind with
+  let is_method = function
     | Method
     | Static_method ->
       true
     | Property
     | Static_property
+    | Constructor _ ->
+      false
+
+  let is_property = function
+    | Property
+    | Static_property ->
+      true
+    | Method
+    | Static_method
     | Constructor _ ->
       false
 
@@ -70,13 +78,26 @@ end
 module MemberKindMap = WrappedMap.Make (MemberKind)
 module MemberNameMap = SMap
 
-(* This is used to merge members from all parents of a class.
+(* This is used to merge members from all parents (direct ancestors) of a class.
  * Certain class hierarchies are heavy in diamond patterns so merging members avoids doing the
  * same member subtyping multiple times. *)
-module ClassEltWParent = struct
+module ParentClassElt = struct
   type parent = Pos.t * Cls.t
 
-  type t = class_elt * parent
+  type t = {
+    class_elt: class_elt;
+    parent: parent;  (** The parent this class element is from. *)
+    errors_if_not_overriden: Typing_error.t Lazy.t list;
+        (** A list of errors to be added if that class element
+            is not overridden in the class being checked. *)
+  }
+
+  let make ?errors_if_not_overriden (class_elt, parent) =
+    {
+      class_elt;
+      parent;
+      errors_if_not_overriden = Option.value errors_if_not_overriden ~default:[];
+    }
 
   (* Class elements with the same names and origins should be equal
      modulo type instantiations, which is why we also need to compare types.
@@ -94,7 +115,7 @@ module ClassEltWParent = struct
      When unioning members of I1 and I2, we have two `foo` members with the same
      origin (`I`) but with different types. *)
   let compare : t -> t -> int =
-   fun (elt1, _) (elt2, _) ->
+   fun { class_elt = elt1; _ } { class_elt = elt2; _ } ->
     let {
       ce_visibility = _;
       ce_type = type1;
@@ -120,7 +141,7 @@ module ClassEltWParent = struct
     | x -> x
 end
 
-module ClassEltWParentSet = Caml.Set.Make (ClassEltWParent)
+module ParentClassEltSet = Caml.Set.Make (ParentClassElt)
 
 let constructor_is_consistent kind =
   match kind with
@@ -976,7 +997,11 @@ let check_class_against_parent_class_elt
     (class_pos, class_)
     member_kind
     member_name
-    (parent_class_elt, (parent_name_pos, parent_class))
+    {
+      ParentClassElt.class_elt = parent_class_elt;
+      parent = (parent_name_pos, parent_class);
+      errors_if_not_overriden;
+    }
     env =
   match get_member member_kind class_ member_name with
   | Some class_elt ->
@@ -991,6 +1016,8 @@ let check_class_against_parent_class_elt
       check_abstract_member_in_concrete_class
         (class_pos, class_)
         (member_kind, member_name, class_elt);
+      errors_if_not_overriden
+      |> List.iter ~f:(fun err -> err |> Lazy.force |> Errors.add_typing_error);
       env
     ) else
       (* We can skip this check if the class elements have the same origin, as we are
@@ -1022,9 +1049,9 @@ let check_members_from_all_parents
     env
     ((class_pos : Pos.t), class_)
     (on_error : Pos.t * string -> Typing_error.Reasons_callback.t)
-    (parent_members : ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t) =
+    (parent_members : ParentClassEltSet.t MemberNameMap.t MemberKindMap.t) =
   let check member_kind member_map env =
-    let check member_name class_elts_w_parents env =
+    let check member_name class_elts env =
       let check =
         check_class_against_parent_class_elt
           on_error
@@ -1032,7 +1059,7 @@ let check_members_from_all_parents
           member_kind
           member_name
       in
-      ClassEltWParentSet.fold check class_elts_w_parents env
+      ParentClassEltSet.fold check class_elts env
     in
     MemberNameMap.fold check member_map env
   in
@@ -1589,60 +1616,258 @@ let filter_privates_and_synthethized
 
 let make_parent_member_map
     ((parent_name_pos, _parent_name), parent_tparaml, parent_class) :
-    ClassEltWParent.t MemberNameMap.t MemberKindMap.t =
+    ParentClassElt.parent * class_elt MemberNameMap.t MemberKindMap.t =
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
-  make_all_members ~parent_class
-  |> MemberKindMap.of_list
-  |> MemberKindMap.map (fun members ->
-         members
-         |> filter_privates_and_synthethized
-              ~is_trait:(Ast_defs.is_c_trait (Cls.kind parent_class))
-         |> SMap.of_list
-         |> SMap.map (fun member ->
-                let member : class_elt = Inst.instantiate_ce psubst member in
-                (member, (parent_name_pos, parent_class))))
+  let member_map =
+    make_all_members ~parent_class
+    |> MemberKindMap.of_list
+    |> MemberKindMap.map (fun members ->
+           members
+           |> filter_privates_and_synthethized
+                ~is_trait:(Ast_defs.is_c_trait (Cls.kind parent_class))
+           |> SMap.of_list
+           |> SMap.map (Inst.instantiate_ce psubst))
+  in
+  ((parent_name_pos, parent_class), member_map)
+
+(** Check for multiple kinds of forbidden hierarchy diamonds involving traits:
+  - Any kind of diamond involving final methods is forbidden unless the class has __EnableMethodTraitDiamond
+    and the diamond involves only traits.
+  - Diamonds involving only traits, with the trait at the top of the diamond containing at least one method,
+    are only allowed if the classish has __EnableMethodTraitDiamond attribute.
+  - Any kind of diamond involving properties with a generic type instantiated differently along the
+    two paths of the diamond is forbidden.
+  [check_trait_diamonds env ~allow_diamonds ~class_name ~member_name elt elts member_kind] considers [elt] and [elts].
+  Members from [elt] union [elts] have the same name [member_name]. [elts] represents all the members with this member name
+  that we've seen so far from the parents we are merging. In this function, we'll detect diamonds by checking if
+  [elt] has the same origin as one of the elements in [elts] and produce an error if that diamond is forbidden. *)
+let check_trait_diamonds
+    env
+    ~(allow_diamonds : bool)
+    ~class_name
+    ~member_name
+    ((class_elt, (pos, parent)) as parent_class_elt)
+    elts
+    member_kind :
+    (ParentClassElt.t * ParentClassEltSet.t)
+    * ((string * string) * Typing_error.t) option =
+  let default_parent_class_elt () = ParentClassElt.make parent_class_elt in
+  if
+    (* We'll check some of those conditions later but check them first
+       here to avoid an expensive set lookup if we can. *)
+    (* Note that we never check that the origin of class_elt is a trait, because that
+       would require a decl heap lookup which is expensive. But that should follow from the
+       following facts: 1) the parent from which class_elt comes from is a trait - 2) the member
+       is not synthetic, i.e. not from a `require extends`, since we've filtered those out earlier -
+       3) the member is not abstract, so not from a `require implements` either. *)
+    Ast_defs.is_c_trait (Cls.kind parent)
+    && (not (get_ce_abstract class_elt))
+    && (MemberKind.is_method member_kind
+        && ((not allow_diamonds) || get_ce_final class_elt)
+       || MemberKind.is_property member_kind)
+  then
+    (* Let's search for a diamond. *)
+    match
+      ParentClassEltSet.find_first_opt
+        (fun { ParentClassElt.class_elt = prev_class_elt; _ } ->
+          String.equal class_elt.ce_origin prev_class_elt.ce_origin)
+        elts
+    with
+    | None -> ((default_parent_class_elt (), elts), None)
+    | Some
+        ({
+           ParentClassElt.class_elt = prev_class_elt;
+           parent = (_, prev_parent);
+           errors_if_not_overriden = err;
+         } as prev_parent_class_elt) ->
+      if
+        MemberKind.is_method member_kind
+        && get_ce_final class_elt
+        && ((not allow_diamonds) || Cls.kind prev_parent |> Ast_defs.is_c_class)
+      then
+        let error =
+          (* We want only one such error per diamond (instead of one per diamond per final method),
+             so let's return the diamond corners and the error and let the caller aggregate per diamond. *)
+          Some
+            ( (Cls.name prev_parent, class_elt.ce_origin),
+              Trait_reuse_check.trait_reuse_with_final_method_error
+                env
+                class_elt
+                ~class_name:(snd class_name)
+                ~first_using_parent_or_trait:prev_parent
+                ~second_using_trait:(pos, parent) )
+        in
+        (* Let's keep the previous parent class element, whose parent is a class,
+           to detect additional such errors if there are more diamonds. *)
+        ((prev_parent_class_elt, elts), error)
+      else if
+        MemberKind.is_method member_kind
+        && (not allow_diamonds)
+        && Cls.kind prev_parent |> Ast_defs.is_c_trait
+      then
+        let parent_class_elt =
+          ParentClassElt.make
+            parent_class_elt
+            ~errors_if_not_overriden:
+              (lazy
+                 (Trait_reuse_check.method_import_via_diamond_error
+                    env
+                    class_name
+                    (member_name, class_elt)
+                    ~first_using_trait:prev_parent
+                    ~second_using_trait:parent)
+               :: err)
+        in
+        let elts =
+          ParentClassEltSet.remove (default_parent_class_elt ()) elts
+        in
+        ((parent_class_elt, elts), None)
+      else if
+        MemberKind.is_property member_kind
+        && not
+           @@ ty_equal
+                (Lazy.force class_elt.ce_type)
+                (Lazy.force prev_class_elt.ce_type)
+      then (
+        Trait_reuse_check.generic_property_import_via_diamond_error
+          env
+          class_name
+          (member_name, class_elt)
+          ~first_using_trait:prev_parent
+          ~second_using_trait:parent;
+        ((default_parent_class_elt (), elts), None)
+      ) else
+        ((default_parent_class_elt (), elts), None)
+  else
+    ((default_parent_class_elt (), elts), None)
+
+(** Selects the minimum classes out of a list using the partial ordering
+  provided by the subtyping relationship. *)
+let minimum_classes env classes =
+  let is_sub_type x y =
+    Decl_provider.get_class (Env.get_ctx env) x
+    >>= (fun x -> Cls.get_ancestor x y)
+    |> Option.is_some
+  in
+  let add_min is_lower x mins =
+    let rec go mins result =
+      match mins with
+      | [] -> x :: result
+      | y :: ys ->
+        if is_lower x y then
+          go ys result
+        else if is_lower y x then
+          List.rev_append result mins
+        else
+          go ys (y :: result)
+    in
+    go mins []
+  in
+  List.fold classes ~init:[] ~f:(fun minimum_classes class_ ->
+      add_min is_sub_type class_ minimum_classes)
 
 let merge_member_maps
-    (acc_map : ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t)
-    (map : ClassEltWParent.t MemberNameMap.t MemberKindMap.t) :
-    ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t =
-  MemberKindMap.fold
-    (fun mem_kind
-         (members : ClassEltWParent.t MemberNameMap.t)
-         (acc_map : ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t) ->
-      let new_entry =
-        match MemberKindMap.find_opt mem_kind acc_map with
-        | None -> MemberNameMap.map ClassEltWParentSet.singleton members
-        | Some prev_members ->
-          MemberNameMap.merge
-            (fun _member_name elt elts ->
-              match (elt, elts) with
-              | (None, None) -> None
-              | (Some elt, None) -> Some (ClassEltWParentSet.singleton elt)
-              | (None, (Some _ as elts)) -> elts
-              | (Some elt, Some elts) -> Some (ClassEltWParentSet.add elt elts))
+    env
+    ~allow_diamonds
+    ~class_name
+    (acc_map : ParentClassEltSet.t MemberNameMap.t MemberKindMap.t)
+    ((parent, map) :
+      ParentClassElt.parent * class_elt MemberNameMap.t MemberKindMap.t) :
+    ParentClassEltSet.t MemberNameMap.t MemberKindMap.t =
+  let errors_per_diamond = ref SMap.empty in
+  let members =
+    MemberKindMap.fold
+      (fun mem_kind
+           (members : class_elt MemberNameMap.t)
+           (acc_map : ParentClassEltSet.t MemberNameMap.t MemberKindMap.t) ->
+        let members_for_mem_kind =
+          match MemberKindMap.find_opt mem_kind acc_map with
+          | None ->
+            MemberNameMap.map
+              (fun elt ->
+                ParentClassElt.make (elt, parent) |> ParentClassEltSet.singleton)
+              members
+          | Some prev_members ->
+            let members =
+              MemberNameMap.merge
+                (fun member_name elt elts ->
+                  match (elt, elts) with
+                  | (None, None) -> None
+                  | (Some elt, None) ->
+                    Some
+                      (ParentClassElt.make (elt, parent)
+                      |> ParentClassEltSet.singleton)
+                  | (None, (Some _ as elts)) -> elts
+                  | (Some elt, Some elts) ->
+                    let ((elt, elts), error) =
+                      check_trait_diamonds
+                        env
+                        ~allow_diamonds
+                        ~class_name
+                        ~member_name
+                        (elt, parent)
+                        elts
+                        mem_kind
+                    in
+                    (* We want only one error per diamond, so we aggregate errors in
+                       `errors_per_diamond` before adding them later. *)
+                    Option.iter error ~f:(fun ((parent, origin), error) ->
+                        errors_per_diamond :=
+                          SMap.add
+                            parent
+                            (SMap.add
+                               ~combine:(fun x _ -> x)
+                               origin
+                               error
+                               (SMap.find_opt parent !errors_per_diamond
+                               |> Option.value ~default:SMap.empty))
+                            !errors_per_diamond);
+                    Some (ParentClassEltSet.add elt elts))
+                members
+                prev_members
+            in
             members
-            prev_members
-      in
-      MemberKindMap.add mem_kind new_entry acc_map)
-    map
-    acc_map
+        in
+        MemberKindMap.add mem_kind members_for_mem_kind acc_map)
+      map
+      acc_map
+  in
+  SMap.iter
+    (fun _ errors_per_origin ->
+      SMap.keys errors_per_origin
+      |> minimum_classes env
+      |> List.iter ~f:(fun origin ->
+             SMap.find origin errors_per_origin |> Errors.add_typing_error))
+    !errors_per_diamond;
+  members
 
-let union_parent_members parents :
-    ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t =
+let union_parent_members env class_ast parents :
+    ParentClassEltSet.t MemberNameMap.t MemberKindMap.t =
+  let allow_diamonds =
+    Naming_attributes.mem
+      SN.UserAttributes.uaEnableMethodTraitDiamond
+      class_ast.Aast.c_user_attributes
+  in
+  let class_name = class_ast.Aast.c_name in
   parents
   |> List.map ~f:make_parent_member_map
-  |> List.fold ~init:MemberKindMap.empty ~f:merge_member_maps
+  |> List.fold
+       ~init:MemberKindMap.empty
+       ~f:(merge_member_maps env ~allow_diamonds ~class_name)
 
 let check_class_extends_parents_members
     env
-    ((class_name_pos : Pos.t), class_)
+    (class_ast, class_)
     (parents : ((Pos.t * string) * decl_ty list * Cls.t) list)
     (on_error : Pos.t * string -> Typing_error.Reasons_callback.t) =
-  let members : ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t =
-    union_parent_members parents
+  let members : ParentClassEltSet.t MemberNameMap.t MemberKindMap.t =
+    union_parent_members env class_ast parents
   in
-  check_members_from_all_parents env (class_name_pos, class_) on_error members
+  check_members_from_all_parents
+    env
+    (fst class_ast.Aast.c_name, class_)
+    on_error
+    members
 
 let check_consts_are_not_abstract
     ~is_final ~class_name_pos (consts : Nast.class_const list) =
@@ -1799,7 +2024,7 @@ let check_implements_extends_uses
           (on_error parent_name))
   in
   let env =
-    check_class_extends_parents_members env (name_pos, class_) parents on_error
+    check_class_extends_parents_members env (class_ast, class_) parents on_error
   in
   check_concrete_has_no_abstract_members class_ast;
   env

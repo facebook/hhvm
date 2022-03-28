@@ -57,8 +57,8 @@ inline JitResumeAddr JitResumeAddr::trans(TCA tca) {
 }
 
 inline JitResumeAddr JitResumeAddr::transFuncEntry(TCA tca) {
-  // Currently the same as trans().
-  return {tca, nullptr};
+  // Load the frame into the func entry registers.
+  return {tc::ustubs().interpToTCFuncEntry, tca};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

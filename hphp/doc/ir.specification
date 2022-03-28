@@ -1552,19 +1552,25 @@ To string conversions:
   The caller frame pointer is passed as S1. This is used to keep track of the
   call chain of inlined functions for simplification and dead code elimination.
 
-| DefFuncEntryFP<func>,
-|   D(FramePtr),
-|   S(FramePtr) S(StkPtr) S(Int) S(Cls|Obj|Nullptr) S(Int),
-|   NF
+| InitFrame<func>, ND, S(StkPtr) S(Int) S(Cls|Obj|Nullptr) S(Int), NF
 
-  Writes a callee's frame and defines a frame pointer.
+  Initializes non-native portion of the callee's frame.
+
+  Temporary opcode that combines the behavior of StFrame{Ctx,Func,Meta},
+  but works with a stack pointer rather than a well-defined frame pointer.
 
   `func': the function being called
-  S0: frame pointer of the caller
-  S1: stack pointer pointing to the space reserved for the callee's frame
-  S2: prologue flags (see PrologueFlags)
-  S3: prologue context
-  S4: callee func id
+  S0: stack pointer pointing to the space reserved for the callee's frame
+  S1: ActRec flags (see ActRec::m_callOffAndFlags)
+  S2: prologue context
+  S3: callee func id
+
+| DefFuncEntryFP<func>, D(FramePtr), NA, NF
+
+  Initializes native portion of the callee's frame at rvmsp(), links it to the
+  previous frame at rvmfp(), and defines the new frame pointer.
+
+  The function being called is specified in `func'.
 
 | Call<offset,numParams,callOff,destroyLocals>,
 |   DCall,
@@ -3451,6 +3457,15 @@ fields of that struct for holding intermediate values.
 
   Enter prologue context, which operates in the same mode as unique stubs.
   Makes sure the native stack is properly aligned.
+
+| ExitPrologue, ND, NA, NF
+
+  Exit prologue context. Undoes the work of EnterPrologue and prepares for
+  a jump to FuncEntry.
+
+| EnterTranslation, ND, NA, NF
+
+  Enter translation context. Makes sure the native stack is properly set up.
 
 | CheckStackOverflow, ND, S(StkPtr), NF
 

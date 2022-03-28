@@ -158,7 +158,7 @@ bool checkCfg(const IRUnit& unit) {
 
   // Entry block starts with DefFP.
   always_assert(!unit.entry()->empty() &&
-                unit.entry()->begin()->op() == DefFP);
+                unit.entry()->begin()->is(DefFP, DefFuncEntryFP));
 
   // Check valid successor/predecessor edges, and identify reachable blocks.
   for (Block* b : blocks) {

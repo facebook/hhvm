@@ -154,8 +154,7 @@ inline RegSet cross_trace_regs_resumed()  { return vm_regs_with_sp(); }
 inline RegSet leave_trace_regs() { return vm_regs_no_sp(); }
 
 /*
- * Registers that are live between the caller and the callee when making a PHP
- * function call.
+ * Registers that are live when calling a prologue of a VM function.
  */
 inline RegSet func_prologue_regs(bool withCtx) {
   auto regs =
@@ -165,6 +164,13 @@ inline RegSet func_prologue_regs(bool withCtx) {
     r_func_prologue_num_args();
   if (withCtx) regs |= r_func_prologue_ctx();
   return regs;
+}
+
+/*
+ * Registers that are live when calling a func entry of a VM function.
+ */
+inline RegSet func_entry_regs() {
+  return vm_regs_with_sp();
 }
 
 /*

@@ -75,6 +75,17 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
 
     auto const irSPOff = bcSPOff;
     gen(env, DefRegSP, DefStackData { irSPOff, bcSPOff });
+  } else if (curSrcKey(env).funcEntry()) {
+    // - frames of functions that are being called do not exist yet
+    // - new native frame will be initialized at rvmsp() and linked to rvmfp()
+    // - fp(env) and sp(env) will be backed by the same rvmfp() register
+    // - stack base is numSlotsInFrame() away from sp(env)
+    gen(env, DefFuncEntryFP, FuncData { curFunc(env) });
+    updateMarker(env);
+
+    assertx(bcSPOff == spOffEmpty(env));
+    auto const irSPOff = SBInvOffset { -curFunc(env)->numSlotsInFrame() };
+    gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
   } else {
     // - frames of regular functions live on the stack
     // - fp(env) and sp(env) are backed by the same rvmfp() register
@@ -90,6 +101,8 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
   // initial sync of the exception stack boundary.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
+
+  gen(env, EnterTranslation);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     // Assert that we're in the correct function.

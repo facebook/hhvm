@@ -486,6 +486,7 @@ bool canDCE(const IRInstruction& inst) {
   case DefFuncEntryFP:
   case DefFrameRelSP:
   case DefRegSP:
+  case InitFrame:
   case Count:
   case VerifyParamCls:
   case VerifyParamCallable:
@@ -644,6 +645,8 @@ bool canDCE(const IRInstruction& inst) {
   case DbgTrashFrame:
   case DbgTrashMem:
   case EnterPrologue:
+  case ExitPrologue:
+  case EnterTranslation:
   case CheckStackOverflow:
   case CheckSurpriseFlagsEnter:
   case JmpPlaceholder:

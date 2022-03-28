@@ -177,7 +177,6 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
 
     if (block == unit.entry() && kind == CodeKind::Trace) {
       v.setOrigin(&block->instrs().front());
-      v << recordbasenativesp{};
     }
     genBlock(env, v, vcold, *block);
 

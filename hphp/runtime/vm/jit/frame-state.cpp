@@ -350,20 +350,21 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case DefFP:
+  case DefFuncEntryFP:
     cur().fpValue = inst->dst();
     cur().fixupFPValue = inst->dst();
     break;
 
-  case DefFuncEntryFP:
-    cur().fpValue = inst->dst();
-    cur().fixupFPValue = inst->dst();
-    cur().ctx = inst->src(3);
-    cur().ctxType = inst->src(3)->type();
-    cur().stublogue = false;
+  case InitFrame:
+    /* The last opcode of prologues. Does not modify any defined frame. */
     break;
 
   case EnterPrologue:
     cur().stublogue = true;
+    break;
+
+  case ExitPrologue:
+    cur().stublogue = false;
     break;
 
   case RetCtrl:

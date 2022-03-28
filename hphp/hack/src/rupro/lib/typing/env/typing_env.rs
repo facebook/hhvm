@@ -2,28 +2,26 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-#![allow(dead_code)]
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use crate::tast::SavedEnv;
-use crate::typing::shared::typing_return::TypingReturnInfo;
-use crate::typing::typing_error::{Error, Result};
+use crate::typing::env::typing_env_decls::TEnvDecls;
+use crate::typing::env::typing_genv::TGEnv;
+use crate::typing::env::typing_lenv::TLEnv;
+use crate::typing::env::typing_local_types::Local;
+use crate::typing::env::typing_per_cont_env::TypingContKey;
+use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing_ctx::TypingCtx;
-use crate::typing_decl_provider::{Class, TypeDecl};
 use crate::typing_defs::{ParamMode, Ty};
 use crate::typing_error::TypingError;
-use crate::typing_local_types::{Local, LocalMap};
 use crate::utils::core::{IdentGen, LocalId};
-use pos::TypeName;
-
-use pos::FunName;
-
 use im::HashMap;
+use pos::FunName;
+use pos::TypeName;
+use std::cell::RefCell;
+use std::rc::Rc;
 
+/// The main typing environment.
 #[derive(Debug)]
 pub struct TEnv<R: Reason> {
     genv: Rc<TGEnv<R>>,
@@ -36,99 +34,15 @@ pub struct TEnv<R: Reason> {
     decls: TEnvDecls<R>,
 }
 
-#[derive(Debug)]
-pub struct TEnvDecls<R: Reason> {
-    ctx: Rc<TypingCtx<R>>,
-    dependent: DeclName,
-}
-
-#[derive(Debug)]
-struct TGEnv<R: Reason> {
-    return_: RefCell<TypingReturnInfo<R>>,
-    params: RefCell<HashMap<LocalId, (Ty<R>, R::Pos, ParamMode)>>,
-}
-
-#[derive(Debug)]
-struct TLEnv<R: Reason> {
-    per_cont_env: PerContEnv<R>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum TypingContKey {
-    Next,
-    Continue,
-    Break,
-    Catch,
-    Do,
-    Exit,
-    Fallthrough,
-    Finally,
-}
-
-#[derive(Debug)]
-struct PerContEnv<R: Reason>(RefCell<HashMap<TypingContKey, PerContEntry<R>>>);
-
-#[derive(Debug, Clone)]
-struct PerContEntry<R: Reason> {
-    local_types: LocalMap<R>,
-}
-
-impl<R: Reason> TGEnv<R> {
-    fn new() -> Self {
-        Self {
-            return_: RefCell::new(TypingReturnInfo::placeholder()),
-            params: RefCell::new(HashMap::new()),
-        }
-    }
-}
-
-impl<R: Reason> TLEnv<R> {
-    fn new() -> Self {
-        Self {
-            per_cont_env: PerContEnv::new(),
-        }
-    }
-}
-
-impl<R: Reason> PerContEnv<R> {
-    fn new() -> Self {
-        Self(RefCell::new(HashMap::new()))
-    }
-
-    fn initial_locals(&self) {
-        self.0
-            .borrow_mut()
-            .insert(TypingContKey::Next, PerContEntry::new());
-    }
-
-    fn add(&self, key: TypingContKey, x: LocalId, ty: Local<R>) {
-        if let Some(cont) = self.0.borrow_mut().get_mut(&key) {
-            cont.local_types.add(x, ty);
-        }
-    }
-
-    fn get(&self, key: TypingContKey, x: &LocalId) -> Option<Local<R>> {
-        self.0
-            .borrow()
-            .get(&key)
-            .and_then(|env| env.local_types.get(x))
-            .cloned()
-    }
-
-    fn has_cont(&self, key: TypingContKey) -> bool {
-        self.0.borrow().get(&key).is_some()
-    }
-}
-
-impl<R: Reason> PerContEntry<R> {
-    fn new() -> Self {
-        Self {
-            local_types: LocalMap::new(),
-        }
-    }
-}
-
+/// Functions for constructing environments.
 impl<R: Reason> TEnv<R> {
+    /// Create a new environment.
+    ///
+    /// The `dependent` is the current toplevel entity that is being type
+    /// checked. It is used to do dependency tracking.
+    ///
+    /// This function should not directly be called. Rather, you should
+    /// use auxiliary methods in `typing_env_from_def`.
     pub fn new(dependent: DeclName, ctx: Rc<TypingCtx<R>>) -> Self {
         let genv = Rc::new(TGEnv::new());
         let env = Self {
@@ -144,6 +58,19 @@ impl<R: Reason> TEnv<R> {
         env
     }
 
+    /// Initialize an environment to type check a toplevel function.
+    pub fn fun_env(ctx: Rc<TypingCtx<R>>, fd: &oxidized::aast::FunDef<(), ()>) -> Self {
+        Self::new(FunName::new(&fd.fun.name.1).into(), ctx)
+    }
+
+    /// Initialize an environment to type check a toplevel class.
+    pub fn class_env(ctx: Rc<TypingCtx<R>>, cd: &oxidized::aast::Class_<(), ()>) -> Self {
+        // TODO(hrust): set_self, set_parent
+        Self::new(TypeName::new(&cd.name.1).into(), ctx)
+    }
+}
+
+impl<R: Reason> TEnv<R> {
     // The "dependency root" (`droot` in OCaml). That is, the symbol getting
     // typed so that we might record any dependencies of that symbol on other
     // symbols we encounter as we do so.
@@ -151,6 +78,7 @@ impl<R: Reason> TEnv<R> {
         self.dependent
     }
 
+    /// Destruct the environment and extract the errors and other artifacts.
     pub fn destruct(self) -> Vec<TypingError<R>> {
         let mut empty = Vec::new();
         let mut full = self.errors.borrow_mut();
@@ -158,23 +86,20 @@ impl<R: Reason> TEnv<R> {
         empty
     }
 
+    /// Access to the decl provider.
     pub fn decls(&self) -> &TEnvDecls<R> {
         &self.decls
     }
 
+    /// Register a typing error.
     pub fn add_error(&self, error: TypingError<R>) {
         self.errors.borrow_mut().push(error)
     }
 
-    pub fn fun_env(ctx: Rc<TypingCtx<R>>, fd: &oxidized::aast::FunDef<(), ()>) -> Self {
-        Self::new(FunName::new(&fd.fun.name.1).into(), ctx)
-    }
-
-    pub fn class_env(ctx: Rc<TypingCtx<R>>, cd: &oxidized::aast::Class_<(), ()>) -> Self {
-        // TODO(hrust): set_self, set_parent
-        Self::new(TypeName::new(&cd.name.1).into(), ctx)
-    }
-
+    /// Store a function parameter in the global environment.
+    ///
+    /// Access to parameter configuration is necessary for inout-checks when
+    /// typing return statements.
     pub fn set_param(&self, id: LocalId, ty: Ty<R>, pos: R::Pos, param_mode: ParamMode) {
         self.genv
             .params
@@ -182,18 +107,24 @@ impl<R: Reason> TEnv<R> {
             .insert(id, (ty, pos, param_mode));
     }
 
+    /// Retrieve all function parameters.
     pub fn get_params(&self) -> HashMap<LocalId, (Ty<R>, R::Pos, ParamMode)> {
         self.genv.params.borrow().clone()
     }
 
+    /// Set all function parameters in the global environment.
+    ///
+    /// See `set_param` for more information.
     pub fn set_params(&self, m: HashMap<LocalId, (Ty<R>, R::Pos, ParamMode)>) {
         *self.genv.params.borrow_mut() = m;
     }
 
+    /// Clear all function parameters.
     pub fn clear_params(&self) {
         self.set_params(Default::default());
     }
 
+    /// Reset the locals environments for all continuations.
     pub fn reinitialize_locals(&self) {
         self.lenv.per_cont_env.initial_locals();
     }
@@ -202,6 +133,10 @@ impl<R: Reason> TEnv<R> {
         self.lenv.per_cont_env.add(TypingContKey::Next, x, ty);
     }
 
+    /// Bind a local in the `Next` typing continuation environment.
+    ///
+    /// Reuses the expression ID if the local was already bound in the
+    /// environment. Generates an expression ID if not.
     pub fn set_local(&self, immutable: bool, x: LocalId, ty: Ty<R>, pos: R::Pos) {
         // TODO(hrust): union simplification
         let expr_id = match self.lenv.per_cont_env.get(TypingContKey::Next, &x) {
@@ -236,50 +171,34 @@ impl<R: Reason> TEnv<R> {
         }
     }
 
+    /// Get the type of a local in the `Next` continuation.
+    ///
+    /// If the variable is not defined, add a typing error and return `Tnothing`.
     pub fn get_local_check_defined(&self, p: R::Pos, x: &LocalId) -> Ty<R> {
         rupro_todo_mark!(CheckLocalDefined);
         let (_, lty) = self.get_local_(Some(p), x);
         lty
     }
 
+    /// Get the return type information for the current function.
     pub fn get_return(&self) -> TypingReturnInfo<R> {
         self.genv.return_.borrow().clone()
     }
 
+    /// Store return type information in the global environment.
     pub fn set_return(&self, ret: TypingReturnInfo<R>) {
         *self.genv.return_.borrow_mut() = ret;
     }
 
+    /// Check whether we have a `Next` continuation.
+    ///
+    /// E.g., a `return` statement will remove the `Next` continuation.
     pub fn has_next(&self) -> bool {
         self.lenv.per_cont_env.has_cont(TypingContKey::Next)
     }
 
+    /// Save the typing environment to be attached to TAST nodes.
     pub fn save(&self, _local_tpenv: ()) -> SavedEnv {
         SavedEnv
-    }
-}
-
-impl<R: Reason> TEnvDecls<R> {
-    pub fn new(ctx: Rc<TypingCtx<R>>, dependent: DeclName) -> Self {
-        Self { ctx, dependent }
-    }
-
-    pub fn get_class(&self, name: TypeName) -> Result<Option<Rc<dyn Class<R>>>> {
-        self.ctx
-            .typing_decl_provider
-            .get_class(self.dependent, name)
-            .map_err(|e| e.into())
-    }
-
-    pub fn get_class_or_error(&self, name: TypeName) -> Result<Rc<dyn Class<R>>> {
-        self.get_class(name)
-            .and_then(|cls| cls.ok_or_else(|| Error::DeclNotFound(name.into())))
-    }
-
-    pub fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
-        self.ctx
-            .typing_decl_provider
-            .get_type(self.dependent, name)
-            .map_err(Into::into)
     }
 }

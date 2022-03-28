@@ -15,13 +15,14 @@ use crate::tast;
 use crate::typing::ast::typing_expr::TCExprParams;
 use crate::typing::ast::typing_localize::LocalizeEnv;
 use crate::typing::ast::TC;
+use crate::typing::env::typing_env::TEnv;
+use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing::hint_utils::HintUtils;
-use crate::typing::shared::typing_return::{TypingReturn, TypingReturnInfo};
+use crate::typing::shared::typing_return::TypingReturn;
 use crate::typing::typing_error::Result;
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::Class;
 use crate::typing_defs::Ty;
-use crate::typing_env::TEnv;
 use crate::typing_error::{Primary, TypingError};
 use pos::TypeName;
 

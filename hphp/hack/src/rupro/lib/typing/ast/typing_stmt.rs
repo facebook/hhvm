@@ -6,7 +6,7 @@ use crate::reason::Reason;
 use crate::tast;
 use crate::typing::ast::typing_expr::TCExprParams;
 use crate::typing::ast::typing_trait::TC;
-use crate::typing::typing_env::TEnv;
+use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 
 impl<R: Reason> TC<R> for oxidized::aast::Stmt<(), ()> {

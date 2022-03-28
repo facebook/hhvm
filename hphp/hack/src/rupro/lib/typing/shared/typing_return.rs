@@ -7,17 +7,13 @@
 use crate::decl_defs::DeclTy;
 use crate::reason::Reason;
 use crate::special_names;
+use crate::typing::env::typing_env::TEnv;
+use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing::typing_error::Result;
 use crate::typing_defs::Ty;
-use crate::typing_env::TEnv;
 use pos::Symbol;
 
 pub struct TypingReturn;
-
-#[derive(Debug, Clone)]
-pub struct TypingReturnInfo<R: Reason> {
-    return_type: Ty<R>,
-}
 
 impl TypingReturn {
     pub fn make_default_return<R: Reason>(is_method: bool, fpos: &R::Pos, fname: Symbol) -> Ty<R> {
@@ -60,19 +56,5 @@ impl TypingReturn {
         rupro_todo_mark!(InoutParameters);
         rupro_todo_mark!(SubtypeCheck);
         rupro_todo_mark!(MissingError);
-    }
-}
-
-impl<R: Reason> TypingReturnInfo<R> {
-    #[allow(unused_variables)]
-    pub fn placeholder() -> Self {
-        // TODO(hrust): Tunion []
-        Self {
-            return_type: Ty::any(R::none()),
-        }
-    }
-
-    pub fn return_type(&self) -> Ty<R> {
-        self.return_type.clone()
     }
 }

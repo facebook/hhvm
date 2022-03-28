@@ -33,10 +33,6 @@ pub mod typing_ctx;
 pub mod typing_decl_provider;
 pub mod typing_defs;
 pub mod typing_error;
-pub mod typing_local_types;
 pub mod typing_prop;
 pub mod typing_toplevel;
 pub mod utils;
-
-// TODO(hverr): clean up imports
-pub use typing::typing_env;

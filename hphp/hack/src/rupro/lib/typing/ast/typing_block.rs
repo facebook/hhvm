@@ -5,7 +5,7 @@
 use crate::reason::Reason;
 use crate::tast;
 use crate::typing::ast::typing_trait::TC;
-use crate::typing::typing_env::TEnv;
+use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 
 /// We already have a blanket implementation for [T], however,

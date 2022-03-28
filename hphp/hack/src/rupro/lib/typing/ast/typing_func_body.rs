@@ -6,8 +6,8 @@ use crate::reason::Reason;
 use crate::tast;
 use crate::typing::ast::typing_block::TCBlock;
 use crate::typing::ast::typing_trait::TC;
+use crate::typing::env::typing_env::TEnv;
 use crate::typing::shared::typing_return::TypingReturn;
-use crate::typing::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 
 impl<'a, R: Reason> TC<R> for oxidized::aast::FuncBody<(), ()> {

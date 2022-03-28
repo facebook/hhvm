@@ -157,7 +157,7 @@ function with_argument_dependent_context_callee(
   $f();
 }
 
-function with_argument_dependent_context()[ defaults, policied]: void {
+function with_argument_dependent_context()[ defaults, zoned]: void {
   with_argument_dependent_context_callee(()[defaults] ==> {
     echo "write";
   });

@@ -89,45 +89,39 @@ namespace HH\Contexts {
 
   // TODO(cipp): deal with not giving it WriteProperty (or some other mechanism of turning on IFC)
 
-  type controlled = (
+  type leak_safe = (
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\System &
   );
 
-  type policied = (
+  type zoned = (
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\ImplicitPolicy &
     \HH\Capabilities\System &
   );
-  // type policied_shallow = (\HH\Capabilities\ImplicitPolicyShallow & policied);
-  type policied_shallow = (
+  // type zoned_shallow = (\HH\Capabilities\ImplicitPolicyShallow & policied);
+  type zoned_shallow = (
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\ImplicitPolicyShallow &
     \HH\Capabilities\System &
   );
-  // type policied_local = (\HH\Capabilities\ImplicitPolicyLocal & policied_shallow);
-  type policied_local = (
+  // type zoned_local = (\HH\Capabilities\ImplicitPolicyLocal & policied_shallow);
+  type zoned_local = (
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\ImplicitPolicyLocal &
     \HH\Capabilities\System &
   );
-  // type policied_of<T> = (\HH\Capabilities\ImplicitPolicyOf<T> & policied);
-  type policied_of<T> = (
+  // type zoned_with<T> = (\HH\Capabilities\ImplicitPolicyOf<T> & policied);
+  type zoned_with<T> = (
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\ImplicitPolicyOf<T> &
     \HH\Capabilities\System &
   );
-
-  type leak_safe = controlled;
-  type zoned = policied;
-  type zoned_shallow = policied_shallow;
-  type zoned_local = policied_local;
-  type zoned_with<T> = policied_of<T>;
 
   type read_globals = \HH\Capabilities\ReadGlobals;
   type globals = \HH\Capabilities\AccessGlobals;

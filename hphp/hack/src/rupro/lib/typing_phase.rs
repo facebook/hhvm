@@ -29,11 +29,7 @@ impl Phase {
             DTprim(p) => Ty::prim(r, *p),
             DTapply(id_and_args) => {
                 let (pos_id, tyl) = &**id_and_args;
-                match env
-                    .ctx
-                    .typing_decl_provider
-                    .get_type(env.get_dependent(), pos_id.id())?
-                {
+                match env.decls().get_type(pos_id.id())? {
                     Some(TypeDecl::Class(cls)) => Self::localize_class_instantiation(
                         env,
                         ety_env,

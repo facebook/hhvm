@@ -12,7 +12,7 @@ use crate::reason::Reason;
 use crate::tast::SavedEnv;
 use crate::typing::{Error, Result};
 use crate::typing_ctx::TypingCtx;
-use crate::typing_decl_provider::Class;
+use crate::typing_decl_provider::{Class, TypeDecl};
 use crate::typing_defs::{ParamMode, Ty};
 use crate::typing_error::TypingError;
 use crate::typing_local_types::{Local, LocalMap};
@@ -26,8 +26,6 @@ use im::HashMap;
 
 #[derive(Debug)]
 pub struct TEnv<R: Reason> {
-    pub ctx: Rc<TypingCtx<R>>,
-
     genv: Rc<TGEnv<R>>,
     lenv: Rc<TLEnv<R>>,
 
@@ -134,8 +132,6 @@ impl<R: Reason> TEnv<R> {
     pub fn new(dependent: DeclName, ctx: Rc<TypingCtx<R>>) -> Self {
         let genv = Rc::new(TGEnv::new());
         let env = Self {
-            ctx: Rc::clone(&ctx),
-
             genv,
             lenv: Rc::new(TLEnv::new()),
 
@@ -268,5 +264,12 @@ impl<R: Reason> TEnvDecls<R> {
     pub fn get_class_or_error(&self, name: TypeName) -> Result<Rc<dyn Class<R>>> {
         self.get_class(name)
             .and_then(|cls| cls.ok_or_else(|| Error::DeclNotFound(name.into())))
+    }
+
+    pub fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
+        self.ctx
+            .typing_decl_provider
+            .get_type(self.dependent, name)
+            .map_err(Into::into)
     }
 }

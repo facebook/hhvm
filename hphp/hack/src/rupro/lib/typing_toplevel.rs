@@ -13,14 +13,15 @@ use crate::decl_hint::DeclHintEnv;
 use crate::reason::Reason;
 use crate::special_names;
 use crate::tast;
+use crate::typing::typing_localize::LocalizeEnv;
+use crate::typing::typing_trait::TC;
 use crate::typing::{BindParamFlags, Result, Typing};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::Class;
-use crate::typing_defs::{ExpandEnv, Ty};
+use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
 use crate::typing_error::{Primary, TypingError};
 use crate::typing_param::{TypingParam, TypingParamFlags};
-use crate::typing_phase::Phase;
 use crate::typing_return::{TypingReturn, TypingReturnInfo};
 use pos::TypeName;
 
@@ -68,7 +69,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             None => TypingReturn::make_default_return(false, &fpos, fname),
             Some(ty) => TypingReturn::make_return_type(
                 self.env,
-                |env, ty| Phase::localize_no_subst(env, false, None, ty),
+                |env, ty| ty.infer(env, LocalizeEnv::no_subst()),
                 ty,
             )?,
         };
@@ -171,7 +172,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
                 // TODO(hrust): empty_expand_env_with_on_error
                 TypingReturn::make_return_type(
                     self.env,
-                    |env, ty| Phase::localize(env, &mut ExpandEnv::new(), ty),
+                    |env, ty| ty.infer(env, LocalizeEnv::no_subst()),
                     ty,
                 )?
             }
@@ -202,7 +203,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         // TODO(hrust): missing type hint
         let decl_cty = self.decl_hint_env().hint(cv.type_.1.as_ref().unwrap());
         // TODO(hrust): enforcability
-        let cty = Phase::localize_no_subst(self.env, false, None, decl_cty)?;
+        let cty = decl_cty.infer(self.env, LocalizeEnv::no_subst())?;
         // TODO(hrust): coerce_type, user_attributes
         let typed_cv_expr = cv
             .expr

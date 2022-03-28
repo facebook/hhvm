@@ -5,11 +5,12 @@
 
 use crate::decl_defs::DeclTy;
 use crate::reason::Reason;
+use crate::typing::typing_localize::LocalizeEnv;
+use crate::typing::typing_trait::TC;
 use crate::typing::Result;
 use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
 use crate::typing_error::{Primary, TypingError};
-use crate::typing_phase::Phase;
 
 pub struct TypingParam;
 
@@ -43,7 +44,7 @@ impl TypingParam {
             Some(ty) => {
                 // TODO(hrust): enforceability
                 // TODO(hrust): variadic
-                Phase::localize_no_subst(env, false, None, ty)?
+                ty.infer(env, LocalizeEnv::no_subst())?
             }
         };
         // TODO(hrust): integrate check_param_has_hint here

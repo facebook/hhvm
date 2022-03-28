@@ -13,6 +13,7 @@ use crate::reason::Reason;
 use crate::special_names;
 use crate::tast;
 use crate::typing::hint_utils::HintUtils;
+use crate::typing::typing_expr::TCExprParams;
 use crate::typing::typing_localize::LocalizeEnv;
 use crate::typing::typing_trait::TC;
 use crate::typing::{Result, Typing};
@@ -68,7 +69,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             fpos.clone(),
             &f.body,
             &f.fun_kind,
-        );
+        )?;
         match f.ret.1 {
             Some(_) => {}
             None => self
@@ -159,8 +160,11 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         let typed_cv_expr = cv
             .expr
             .as_ref()
-            .map(|e| Typing::expr_with_pure_coeffects(self.env, Some(cty.clone()), e))
-            .map(|(typed_cv_expr, _expr_ty)| typed_cv_expr);
+            .map(|e| {
+                rupro_todo_mark!(BidirectionalTC);
+                e.infer(self.env, TCExprParams::empty_locals())
+            })
+            .transpose()?;
         assert!(cv.user_attributes.is_empty());
         // TODO(hrust): sound dynamic
         Ok(tast::ClassVar {
@@ -212,7 +216,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             pos.clone(),
             &m.body,
             &m.fun_kind,
-        );
+        )?;
         // TODO(hrust): construct return type
         match m.ret.1 {
             Some(_) => {}

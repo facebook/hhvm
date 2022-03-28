@@ -5,6 +5,7 @@
 pub mod hint_utils;
 pub mod typing_env;
 pub mod typing_error;
+pub mod typing_expr;
 pub mod typing_localize;
 pub mod typing_param;
 pub mod typing_tparam;

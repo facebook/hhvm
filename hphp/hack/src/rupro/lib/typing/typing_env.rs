@@ -214,6 +214,15 @@ impl<R: Reason> TEnv<R> {
         self.set_local_(x, Local { ty, pos, expr_id });
     }
 
+    /// Set the local to the given value type.
+    ///
+    /// Also assign a new expression ID.
+    pub fn set_local_new_value(&self, immutable: bool, x: LocalId, ty: Ty<R>, pos: R::Pos) {
+        let expr_id = self.idents.make();
+        rupro_todo_assert!(!immutable, Readonly);
+        self.set_local_(x, Local { ty, pos, expr_id });
+    }
+
     fn get_local_(&self, error_if_undefined_at_pos: Option<R::Pos>, x: &LocalId) -> (bool, Ty<R>) {
         if !self.lenv.per_cont_env.has_cont(TypingContKey::Next) {
             // If the continuation is absent, we are in dead code so the
@@ -228,6 +237,7 @@ impl<R: Reason> TEnv<R> {
     }
 
     pub fn get_local_check_defined(&self, p: R::Pos, x: &LocalId) -> Ty<R> {
+        rupro_todo_mark!(CheckLocalDefined);
         let (_, lty) = self.get_local_(Some(p), x);
         lty
     }

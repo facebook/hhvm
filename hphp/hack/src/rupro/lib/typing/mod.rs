@@ -8,6 +8,7 @@ pub mod typing_error;
 pub mod typing_expr;
 pub mod typing_localize;
 pub mod typing_param;
+pub mod typing_stmt;
 pub mod typing_tparam;
 pub mod typing_trait;
 

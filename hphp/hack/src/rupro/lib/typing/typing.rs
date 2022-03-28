@@ -5,8 +5,7 @@
 
 use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
-use crate::tast::{self};
-use crate::typing::typing_expr::TCExprParams;
+use crate::tast;
 use crate::typing::typing_trait::TC;
 use crate::typing_env::TEnv;
 use crate::typing_return::{TypingReturn, TypingReturnInfo};
@@ -53,56 +52,13 @@ pub struct TypingExprFlags<R> {
 }
 
 impl Typing {
-    fn stmt_<R: Reason>(
-        env: &TEnv<R>,
-        _pos: &oxidized::pos::Pos,
-        stmt: &oxidized::aast::Stmt_<(), ()>,
-    ) -> Result<tast::Stmt_<R>> {
-        use oxidized::aast::Stmt_ as OS;
-        use tast::Stmt_ as TS;
-        let stmt = match stmt {
-            OS::Noop => TS::Noop,
-            OS::Expr(e) => {
-                let te = e.infer(env, TCExprParams::default())?;
-                // TODO(hrust): exits
-                OS::Expr(Box::new(te))
-            }
-            OS::Return(e) => match (&**e).as_ref() {
-                None => unimplemented!(),
-                Some(e) => {
-                    // TODO(hrust): check_inout_return
-                    let _return_type = env.get_return().return_type();
-                    // TODO(hrust): strip_awaitable
-                    // TODO(hrust): return_explicit
-                    // TODO(hrust): return_disposable
-                    // TODO(hrust): expected_ty
-                    let te = e.infer(env, TCExprParams::default())?;
-                    // TODO(hrust, mjt): subtyping
-                    // TODO(hrust): move_and_merge_next_in_cont
-                    OS::Return(Box::new(Some(te)))
-                }
-            },
-            s => rupro_todo!(AST, "stmt_: {:?}", s),
-        };
-        Ok(stmt)
-    }
-
-    fn stmt<R: Reason>(
-        env: &TEnv<R>,
-        stmt: &oxidized::aast::Stmt<(), ()>,
-    ) -> Result<tast::Stmt<R>> {
-        let pos = &stmt.0;
-        let st = Self::stmt_(env, pos, &stmt.1)?;
-        Ok(oxidized::aast::Stmt(pos.clone(), st))
-    }
-
     fn block<R: Reason>(
         env: &TEnv<R>,
         block: &[oxidized::aast::Stmt<(), ()>],
     ) -> Result<tast::Block<R>> {
         let mut stl = Vec::new();
         for st in block {
-            let st = Self::stmt(env, st)?;
+            let st = st.infer(env, ())?;
             match st.1 {
                 oxidized::aast::Stmt_::Block(new_stl) => stl.extend(new_stl),
                 _ => stl.push(st),

@@ -16,5 +16,5 @@ ocaml_runtime = { path = "../../../utils/ocaml_runtime" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
-pos = { path = "../../lib/pos" }
+pos = { path = "../../pos/cargo/pos" }
 structopt = "0.3.23"

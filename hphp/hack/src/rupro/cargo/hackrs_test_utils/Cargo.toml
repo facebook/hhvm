@@ -15,6 +15,6 @@ hash = { path = "../../../utils/hash" }
 intern = { path = "../../../../../../relay/oss/crates/intern" }
 lz4 = "1.23.1"
 oxidized = { path = "../../../oxidized" }
-pos = { path = "../../lib/pos" }
+pos = { path = "../../pos/cargo/pos" }
 serde = { version = "1.0.126", features = ["derive", "rc"] }
 zstd = "0.9.0+zstd.1.5.0"

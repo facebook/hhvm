@@ -14,7 +14,7 @@ hackrs = { path = "../hackrs" }
 hackrs_test_utils = { path = "../hackrs_test_utils" }
 hh24_test = { path = "../../../facebook/utils/cargo/hh24_test" }
 oxidized = { path = "../../../oxidized" }
-pos = { path = "../../lib/pos" }
+pos = { path = "../../pos/cargo/pos" }
 tempdir = "0.3"
 
 [dev-dependencies]

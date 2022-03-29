@@ -247,7 +247,7 @@ pub struct TypeName(pub Symbol);
 common_impls!(TypeName);
 
 /// ModuleName is introduced by the experimental Modules feature and `internal`
-/// visibility. ModuleNames are not bindable names and are not indended
+/// visibility. ModuleNames are not bindable names and are not intended
 /// to be interchangeable with any other kind of name.
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]

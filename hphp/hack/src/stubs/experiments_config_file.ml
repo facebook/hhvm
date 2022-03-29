@@ -6,7 +6,8 @@
  *
  *)
 
-let update ~(file : string) ~(source : string option) ~(ttl : float) :
+let update
+    ~(silent : bool) ~(file : string) ~(source : string option) ~(ttl : float) :
     (string, string) result =
-  ignore (file, source, ttl);
+  ignore (silent, file, source, ttl);
   Ok "Experiments config update: nothing to do"

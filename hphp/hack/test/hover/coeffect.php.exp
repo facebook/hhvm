@@ -1,0 +1,6 @@
+Contexts\write_props
+The `write_props` context allows your function to write to instance
+variables.
+
+`write_props` is not necessary on `__construct` methods that only
+write to `$this`.

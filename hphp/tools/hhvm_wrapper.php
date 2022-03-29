@@ -269,6 +269,12 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
     |> preg_replace("/-v\s*/", "-vRuntime.", $$)
     |> preg_replace("/--count=[0-9]+\s*/", "", $$);
   $hphp_out='/tmp/hphp_out'.posix_getpid();
+
+  $output_dir='/tmp/hphp_'.posix_getpid();
+  $hphpc_flags .=
+    '--output-dir='.$output_dir.' '.
+    '';
+
   $cmd = get_hhvm_path($opts).' '.
     '--hphp '.
     ($unoptimized ? '-v UseHHBBC=0 ' : '').
@@ -283,17 +289,13 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
   $return_var = -1;
   system($cmd, inout $return_var);
 
-  $compile_dir = rtrim(shell_exec(
-    'grep "all files saved in" '.$hphp_out.
-    '| perl -pe \'s@.*(/tmp[^ ]*).*@$1@g\''
-  ));
-  $repo=$compile_dir.'/hhvm.hhbc';
+  $repo=$output_dir.'/hhvm.hhbc';
   system("rm -f $hphp_out", inout $return_var);
   if ($echo_command !== true) {
     register_shutdown_function(
-      function() use ($compile_dir) {
+      function() use ($output_dir) {
         $return_var = -1;
-        system("rm -fr $compile_dir", inout $return_var);
+        system("rm -fr $output_dir", inout $return_var);
       },
     );
   }

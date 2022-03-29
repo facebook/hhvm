@@ -837,21 +837,16 @@ bool Package::parse() {
     coro::using_coros ? "" : " (coros disabled!)"
   );
 
-  // process system lib files which were deferred during process-init
-  // (if necessary).
-  auto syslib_ues = m_ar->getHhasFiles();
-
   HphpSession _{Treadmill::SessionKind::CompilerEmit};
 
   // Treat any symbol refs from systemlib as if they were part of the
   // original Package.
-  for (auto& ue : syslib_ues) {
+  for (auto& ue : SystemLib::claimRegisteredUnitEmitters()) {
     FileAndSizeVec ondemand;
     resolveOnDemand(ondemand, ue->m_symbol_refs, true);
     for (auto const& p : ondemand) addSourceFile(p.m_path);
     addUnitEmitter(std::move(ue));
   }
-  syslib_ues.clear();
   parseAll();
   return !m_parseFailed.load();
 }

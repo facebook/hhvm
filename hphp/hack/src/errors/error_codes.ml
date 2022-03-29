@@ -455,7 +455,7 @@ module Typing = struct
     | EnumTypeTypedefNonnull [@value 4219]
     | AmbiguousLambda [@value 4222]
     | EllipsisStrictMode [@value 4223]
-    | UntypedLambdaStrictMode [@value 4224]
+    (* | UntypedLambdaStrictModeDEPRECATED [@value 4224] *)
     (* | BindingRefInArrayDEPRECATED [@value 4225] *)
     | OutputInWrongContext [@value 4226]
     | StaticPropertyInWrongContext [@value 4228]

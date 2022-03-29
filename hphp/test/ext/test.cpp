@@ -15,9 +15,10 @@
 */
 
 #include "hphp/test/ext/test.h"
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/compiler/option.h"
+
 #include <folly/Format.h>
 
 using namespace HPHP;

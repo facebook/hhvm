@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/base/unit-cache.h"
 
-#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
@@ -192,13 +191,7 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
       return result;
     }
 #endif
-    auto unit = ue->create();
-    if (BuiltinSymbols::s_systemAr) {
-      assertx(ue->m_filepath->data()[0] == '/' &&
-              ue->m_filepath->data()[1] == ':');
-      BuiltinSymbols::RecordSystemlibFile(std::move(ue));
-    }
-    return unit;
+    return ue->create();
   };
 
   auto const load = [&] {

@@ -10,7 +10,7 @@ path = "../../decl_file.rs"
 
 [dependencies]
 hackrs = { path = "../../hackrs/cargo/hackrs" }
-hackrs_test_utils = { path = "../hackrs_test_utils" }
+hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hhi = { path = "../../../hhi/rust" }
 jwalk = "0.6"
 pos = { path = "../../pos/cargo/pos" }

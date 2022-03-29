@@ -5,8 +5,8 @@
 
 #![allow(dead_code)]
 
-use crate::typing_defs::Tyvar;
 use im::{HashMap, HashSet};
+use ty::typing_defs::Tyvar;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct TyvarOccurrences {
@@ -95,7 +95,7 @@ impl TyvarOccurrences {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::core::IdentGen;
+    use utils::core::IdentGen;
 
     #[test]
     fn test_add_remove_id() {

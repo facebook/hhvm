@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::reason::Reason;
 use crate::typing::env::typing_per_cont_env::PerContEnv;
+use ty::reason::Reason;
 
 /// The local environment, where things might change often.
 #[derive(Debug)]

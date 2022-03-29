@@ -20,7 +20,7 @@ use pos::{
 use std::collections::BTreeMap;
 use std::fmt;
 
-pub use crate::folded_decl_provider::Subst;
+pub use crate::decl_defs::subst::Subst;
 pub use oxidized::ast_defs::{Abstraction, ClassishKind};
 
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]

@@ -9,10 +9,10 @@ use oxidized::{aast, nast};
 
 use crate::errors::HackError;
 use crate::parsing_error::ParsingError;
-use crate::reason::Reason;
 use crate::typing::typing_error::Result;
 use crate::typing_check_job::TypingCheckJob;
 use crate::typing_ctx::TypingCtx;
+use ty::reason::Reason;
 
 use crate::tast;
 

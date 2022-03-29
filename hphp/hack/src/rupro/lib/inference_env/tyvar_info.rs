@@ -5,9 +5,9 @@
 
 #![allow(dead_code)]
 
-use crate::reason::Reason;
-use crate::typing_defs::{Ty, Variance};
 use im::HashSet;
+use ty::reason::Reason;
+use ty::typing_defs::{Ty, Variance};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TyvarConstraints<R: Reason> {

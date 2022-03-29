@@ -4,12 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod debug;
+pub mod folded;
 mod from_oxidized;
 mod printer;
-mod to_oxidized;
-
-pub mod folded;
 pub mod shallow;
+pub mod subst;
+mod to_oxidized;
 pub mod ty;
 
 pub use folded::{ClassConst, FoldedClass, FoldedElement, Requirement, SubstContext, TypeConst};

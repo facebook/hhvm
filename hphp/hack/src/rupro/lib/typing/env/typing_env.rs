@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::dependency_registrar::DeclName;
-use crate::reason::Reason;
 use crate::tast::SavedEnv;
 use crate::typing::env::typing_env_decls::TEnvDecls;
 use crate::typing::env::typing_genv::TGEnv;
@@ -12,14 +11,15 @@ use crate::typing::env::typing_local_types::Local;
 use crate::typing::env::typing_per_cont_env::TypingContKey;
 use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing_ctx::TypingCtx;
-use crate::typing_defs::{ParamMode, Ty};
-use crate::typing_error::TypingError;
-use crate::utils::core::{IdentGen, LocalId};
 use im::HashMap;
 use pos::FunName;
 use pos::TypeName;
 use std::cell::RefCell;
 use std::rc::Rc;
+use ty::reason::Reason;
+use ty::typing_defs::{ParamMode, Ty};
+use ty::typing_error::TypingError;
+use utils::core::{IdentGen, LocalId};
 
 /// The main typing environment.
 #[derive(Debug)]

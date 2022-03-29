@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::dependency_registrar::DeclName;
-use crate::reason::Reason;
 use crate::typing::typing_error::{Error, Result};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::{Class, TypeDecl};
 use pos::TypeName;
 use std::rc::Rc;
+use ty::reason::Reason;
 
 /// Provides access to the decl provider, but enforcing dependency tracking.
 #[derive(Debug)]

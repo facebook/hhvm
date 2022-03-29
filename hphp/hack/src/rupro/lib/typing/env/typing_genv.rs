@@ -2,12 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::reason::Reason;
 use crate::typing::env::typing_return_info::TypingReturnInfo;
-use crate::typing_defs::{ParamMode, Ty};
-use crate::utils::core::LocalId;
 use im::HashMap;
 use std::cell::RefCell;
+use ty::reason::Reason;
+use ty::typing_defs::{ParamMode, Ty};
+use utils::core::LocalId;
 
 /// A subenvironment containing "global" (i.e. on the scope of toplevel
 /// definitions) configuration.

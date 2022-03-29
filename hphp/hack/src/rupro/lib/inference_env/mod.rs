@@ -8,12 +8,12 @@
 mod tyvar_info;
 mod tyvar_occurrences;
 
-use crate::reason::Reason;
-use crate::typing_defs::{Ty, Ty_, Tyvar};
-use crate::typing_prop::Prop;
-use crate::visitor::{Visitor, Walkable};
 use im::{HashMap, HashSet};
 use std::ops::Deref;
+use ty::reason::Reason;
+use ty::typing_defs::{Ty, Ty_, Tyvar};
+use ty::typing_prop::Prop;
+use ty::visitor::{Visitor, Walkable};
 use tyvar_info::TyvarInfo;
 use tyvar_occurrences::TyvarOccurrences;
 
@@ -171,10 +171,10 @@ impl<'a, R: Reason> Visitor<R> for CollectUnsolved<'a, R> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::reason::NReason;
-    use crate::typing_defs::{FunParam, FunType};
-    use crate::utils::core::IdentGen;
     use pos::NPos;
+    use ty::reason::NReason;
+    use ty::typing_defs::{FunParam, FunType};
+    use utils::core::IdentGen;
 
     #[test]
     fn test_unsolved_empty_env() {

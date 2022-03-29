@@ -5,9 +5,9 @@
 #![allow(dead_code)]
 use im::HashMap;
 
-use crate::reason::Reason;
-use crate::typing_defs::Ty;
-use crate::utils::core::{Ident, LocalId};
+use ty::reason::Reason;
+use ty::typing_defs::Ty;
+use utils::core::{Ident, LocalId};
 
 #[derive(Debug, Clone)]
 pub struct Local<R: Reason> {

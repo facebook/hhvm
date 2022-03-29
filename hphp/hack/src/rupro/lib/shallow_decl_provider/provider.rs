@@ -4,12 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{Error, Result, ShallowDeclCache, TypeDecl};
-use crate::decl_defs::{ConstDecl, DeclTy, FunDecl};
 use crate::decl_parser::DeclParser;
 use crate::naming_provider::NamingProvider;
-use crate::reason::Reason;
 use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::sync::Arc;
+use ty::decl_defs::{ConstDecl, DeclTy, FunDecl};
+use ty::reason::Reason;
 
 /// A `ShallowDeclProvider` which, if the requested name is not present in its
 /// cache, uses the given naming table to find the file containing the requested

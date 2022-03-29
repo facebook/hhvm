@@ -3,21 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{ConstDecl, DeclTy, FoldedClass, FunDecl, TypedefDecl};
 use crate::dependency_registrar::DeclName;
 
-use crate::reason::Reason;
 use itertools::Itertools;
 use pos::{ConstName, FunName, MethodName, PropName, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;
+use ty::{
+    decl_defs::{ConstDecl, DeclTy, FoldedClass, FunDecl, TypedefDecl},
+    reason::Reason,
+};
 
 mod fold;
 mod inherit;
 mod provider;
 mod subst;
 
-pub use subst::Subst;
 pub use subst::Substitution;
 
 pub use provider::LazyFoldedDeclProvider;

@@ -2,16 +2,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::reason::Reason;
 use crate::tast;
 use crate::typing::ast::typing_localize::LocalizeEnv;
 use crate::typing::ast::typing_trait::TC;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::hint_utils::HintUtils;
 use crate::typing::typing_error::Result;
-use crate::typing_defs::{ParamMode, Ty};
-use crate::utils::core::LocalId;
 use pos::Symbol;
+use ty::reason::Reason;
+use ty::typing_defs::{ParamMode, Ty};
+use utils::core::LocalId;
 
 /// Type function parameters and bind the variables in the environment.
 impl<R: Reason> TC<R> for oxidized::aast::FunParam<(), ()> {

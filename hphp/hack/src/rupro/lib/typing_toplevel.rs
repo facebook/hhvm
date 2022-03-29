@@ -2,14 +2,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::reason::Reason;
 use crate::tast;
 use crate::typing::ast::TC;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use crate::typing_ctx::TypingCtx;
-use crate::typing_error::TypingError;
 use std::rc::Rc;
+use ty::reason::Reason;
+use ty::typing_error::TypingError;
 
 pub struct TypingToplevel;
 

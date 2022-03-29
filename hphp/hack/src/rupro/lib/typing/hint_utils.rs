@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::DeclTy;
-use crate::reason::Reason;
+use ty::decl_defs::DeclTy;
+use ty::reason::Reason;
 
 /// Expose some utility functions to work with AST type hints.
 ///

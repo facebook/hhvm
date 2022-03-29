@@ -3,58 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{
+use pos::TypeName;
+use std::collections::BTreeMap;
+use ty::decl_defs::subst::Subst;
+use ty::decl_defs::{
     AbstractTypeconst, ClassConst, ConcreteTypeconst, DeclTy, DeclTy_, FunParam, FunType,
     PossiblyEnforcedTy, ShapeFieldType, TaccessType, Tparam, TypeConst, Typeconst, WhereConstraint,
 };
-use crate::reason::Reason;
-use eq_modulo_pos::EqModuloPos;
-use pos::{TypeName, TypeNameMap};
-use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use ty::reason::Reason;
 
 // note(sf, 2022-02-14): c.f. `Decl_subst`, `Decl_instantiate`
-
-/// Maps type names to types with which to replace them.
-#[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
-#[serde(bound = "R: Reason")]
-pub struct Subst<R: Reason>(pub TypeNameMap<DeclTy<R>>);
-
-impl<R: Reason> From<TypeNameMap<DeclTy<R>>> for Subst<R> {
-    fn from(map: TypeNameMap<DeclTy<R>>) -> Self {
-        Self(map)
-    }
-}
-
-impl<R: Reason> From<Subst<R>> for TypeNameMap<DeclTy<R>> {
-    fn from(subst: Subst<R>) -> Self {
-        subst.0
-    }
-}
 
 #[derive(Debug, Clone)]
 pub struct Substitution<'a, R: Reason> {
     pub subst: &'a Subst<R>,
-}
-
-impl<R: Reason> Subst<R> {
-    pub fn new(tparams: &[Tparam<R, DeclTy<R>>], targs: &[DeclTy<R>]) -> Self {
-        // If there are fewer type arguments than type parameters, we'll have
-        // emitted an error elsewhere. We bind missing types to `Tany` (rather
-        // than `Terr`) here to keep parity with the OCaml implementation, which
-        // produces `Tany` because of a now-dead feature called "silent_mode".
-        let targs = targs
-            .iter()
-            .cloned()
-            .chain(std::iter::repeat(DeclTy::any(R::none())));
-        Self(
-            tparams
-                .iter()
-                .map(|tparam| tparam.name.id())
-                .zip(targs)
-                .collect(),
-        )
-    }
 }
 
 impl<'a, R: Reason> Substitution<'a, R> {

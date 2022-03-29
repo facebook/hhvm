@@ -6,14 +6,13 @@
 #![allow(unused_imports)]
 
 use super::DeclFolder;
-use crate::decl_defs::{
-    folded::{self, FoldedClass},
-    ty, DeclTy, DeclTy_,
-};
-use crate::reason::Reason;
 use crate::special_names as sn;
 use pos::{ClassConstName, ClassConstNameIndexMap, Positioned, TypeName, TypeNameIndexMap};
 use std::sync::Arc;
+use ty::decl_defs::folded::{ClassConst, FoldedClass};
+use ty::decl_defs::ty::DeclTy;
+use ty::decl_defs::ty::DeclTy_;
+use ty::reason::Reason;
 
 struct EnumKind<R: Reason> {
     /// Underlying type of the enum, e.g. int or string. For subclasses of
@@ -41,7 +40,10 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         inner_ty: Option<&DeclTy<R>>,
         ancestors: &TypeNameIndexMap<DeclTy<R>>,
     ) -> Option<EnumKind<R>> {
-        let is_enum_class = matches!(self.child.kind, ty::ClassishKind::CenumClass(..));
+        let is_enum_class = matches!(
+            self.child.kind,
+            ty::decl_defs::ty::ClassishKind::CenumClass(..)
+        );
         match &self.child.enum_type {
             None => {
                 let enum_ty = match ancestors.get(&*sn::fb::cEnum) {
@@ -63,7 +65,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                             Some(ty) => ty.clone(),
                             None => DeclTy::access(
                                 r(),
-                                ty::TaccessType {
+                                ty::decl_defs::TaccessType {
                                     ty: DeclTy::this(r()),
                                     type_const: Positioned::new(
                                         enum_ty.pos().clone(),
@@ -115,7 +117,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         &self,
         inner_ty: Option<&DeclTy<R>>,
         ancestors: &TypeNameIndexMap<DeclTy<R>>,
-        consts: &mut ClassConstNameIndexMap<folded::ClassConst<R>>,
+        consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
     ) {
         let EnumKind {
             // base: _,
@@ -135,7 +137,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         // Don't rewrite `Enum<mixed>` or `Enum<arraykey>`.
         if matches!(
             ty.node_ref(),
-            DeclTy_::DTmixed | DeclTy_::DTprim(ty::Prim::Tarraykey)
+            DeclTy_::DTmixed | DeclTy_::DTprim(ty::decl_defs::ty::Prim::Tarraykey)
         ) {
             return;
         }

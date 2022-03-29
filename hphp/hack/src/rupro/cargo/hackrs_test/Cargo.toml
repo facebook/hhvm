@@ -16,6 +16,7 @@ hh24_test = { path = "../../../facebook/utils/cargo/hh24_test" }
 oxidized = { path = "../../../oxidized" }
 pos = { path = "../../pos/cargo/pos" }
 tempdir = "0.3"
+ty = { path = "../../ty/cargo/ty" }
 
 [dev-dependencies]
 itertools = "0.10.3"

@@ -3,16 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{inherit::Inherited, subst::Subst, subst::Substitution, Result};
-use crate::decl_defs::{
-    folded::Constructor, AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind,
-    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind, DeclTy, FoldedClass,
-    FoldedElement, Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,
-    ShallowTypeconst, TaccessType, TypeConst, Typeconst, Visibility,
-};
-use crate::decl_error::DeclError;
+use super::{inherit::Inherited, Result, Substitution};
 use crate::dependency_registrar::DependencyRegistrar;
-use crate::reason::Reason;
 use crate::special_names as sn;
 use eq_modulo_pos::EqModuloPos;
 use oxidized::global_options::GlobalOptions;
@@ -22,6 +14,15 @@ use pos::{
     TypeNameIndexMap, TypeNameIndexSet,
 };
 use std::sync::Arc;
+use ty::decl_defs::subst::Subst;
+use ty::decl_defs::{
+    folded::Constructor, AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind,
+    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind, DeclTy, FoldedClass,
+    FoldedElement, Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,
+    ShallowTypeconst, TaccessType, TypeConst, Typeconst, Visibility,
+};
+use ty::decl_error::DeclError;
+use ty::reason::Reason;
 
 mod decl_enum;
 

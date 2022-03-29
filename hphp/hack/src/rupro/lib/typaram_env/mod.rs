@@ -3,13 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::reason::Reason;
-use crate::typing_defs::Kind;
-use crate::typing_defs::{Ty, Ty_};
 use im::{HashMap, HashSet};
 use pos::Pos;
 use pos::TypeName;
 use std::ops::Deref;
+use ty::reason::Reason;
+use ty::typing_defs::Kind;
+use ty::typing_defs::{Ty, Ty_};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TyparamEnv<R: Reason> {
@@ -242,8 +242,8 @@ impl<R: Reason> Default for TyparamEnv<R> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::reason::NReason;
     use pos::NPos;
+    use ty::reason::NReason;
 
     #[test]
     fn test_add() {

@@ -8,10 +8,10 @@ use std::rc::Rc;
 use oxidized::nast;
 
 use crate::errors::HackError;
-use crate::reason::Reason;
 use crate::typing::typing_error::Result;
 use crate::typing_ctx::TypingCtx;
 use crate::typing_toplevel::TypingToplevel;
+use ty::reason::Reason;
 
 use crate::tast;
 

@@ -2,16 +2,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::decl_defs::DeclTy;
-use crate::reason::Reason;
 use crate::special_names;
 use crate::typing::ast::typing_localize::LocalizeEnv;
 use crate::typing::ast::typing_trait::TC;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::hint_utils::HintUtils;
 use crate::typing::typing_error::Result;
-use crate::typing_defs::Ty;
 use pos::Symbol;
+use ty::decl_defs::DeclTy;
+use ty::reason::Reason;
+use ty::typing_defs::Ty;
 
 /// This trait provides typing for return type hints.
 ///

@@ -5,11 +5,8 @@
 
 use super::{fold::DeclFolder, DeclName, Error, Result, TypeDecl};
 use crate::cache::Cache;
-use crate::decl_defs::{ConstDecl, DeclTy, FoldedClass, FunDecl, ShallowClass};
-use crate::decl_error::DeclError;
 use crate::dependency_registrar::DependencyName;
 use crate::dependency_registrar::DependencyRegistrar;
-use crate::reason::Reason;
 use crate::shallow_decl_provider::{self, ShallowDeclProvider};
 use oxidized::global_options::GlobalOptions;
 use pos::{
@@ -17,6 +14,9 @@ use pos::{
     TypeNameIndexSet,
 };
 use std::sync::Arc;
+use ty::decl_defs::{ConstDecl, DeclTy, FoldedClass, FunDecl, ShallowClass};
+use ty::decl_error::DeclError;
+use ty::reason::Reason;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
 

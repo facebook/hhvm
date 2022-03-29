@@ -4,10 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hackrs::{
-    decl_defs::shallow,
     decl_parser::DeclParser,
     folded_decl_provider::FoldedDeclProvider,
-    reason::{BReason, NReason, Reason},
     typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };
 use jwalk::WalkDir;
@@ -15,6 +13,8 @@ use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
 use std::sync::Arc;
 use structopt::StructOpt;
+use ty::decl_defs::shallow;
+use ty::reason::{BReason, NReason, Reason};
 
 #[derive(StructOpt, Debug)]
 struct CliOptions {

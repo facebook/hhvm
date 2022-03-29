@@ -3,14 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{
-    shallow::{ConstDecl, FunDecl, TypedefDecl},
-    DeclTy, ShallowClass,
-};
-use crate::reason::Reason;
 use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;
+use ty::decl_defs::{
+    shallow::{ConstDecl, FunDecl, TypedefDecl},
+    DeclTy, ShallowClass,
+};
+use ty::reason::Reason;
 
 mod cache;
 mod provider;

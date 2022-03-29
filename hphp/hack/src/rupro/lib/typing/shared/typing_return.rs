@@ -4,14 +4,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![allow(dead_code)]
-use crate::decl_defs::DeclTy;
-use crate::reason::Reason;
 use crate::special_names;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing::typing_error::Result;
-use crate::typing_defs::Ty;
 use pos::Symbol;
+use ty::decl_defs::DeclTy;
+use ty::reason::Reason;
+use ty::typing_defs::Ty;
 
 pub struct TypingReturn;
 

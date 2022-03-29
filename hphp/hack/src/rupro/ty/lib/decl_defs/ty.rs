@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::reason::{self, Reason};
-use crate::utils::core::Ident;
 use eq_modulo_pos::EqModuloPos;
 use hcons::Hc;
 use oxidized::{aast, ast_defs};
@@ -12,6 +11,7 @@ use pos::{Bytes, ModuleName, Positioned, Symbol, TypeConstName, TypeName};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fmt;
+use utils::core::Ident;
 
 pub use oxidized::{
     aast_defs::{ReifyKind, Tprim as Prim},

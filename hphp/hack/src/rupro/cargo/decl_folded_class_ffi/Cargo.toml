@@ -16,3 +16,4 @@ hackrs_test_utils = { path = "../hackrs_test_utils" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 pos = { path = "../../pos/cargo/pos" }
+ty = { path = "../../ty/cargo/ty" }

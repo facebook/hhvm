@@ -7,10 +7,10 @@
 
 use crate::{FacebookInit, TestContext};
 use anyhow::Result;
-use hackrs::{decl_defs::shallow, decl_error::DeclError};
 use maplit::btreemap;
 use pos::{Prefix, RelativePath, TypeName};
 use std::fs;
+use ty::{decl_defs::shallow, decl_error::DeclError};
 
 #[fbinit::test]
 fn when_cyclic_class_error(fb: FacebookInit) -> Result<()> {

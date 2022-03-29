@@ -5,12 +5,12 @@
 
 use super::TypeDecl;
 use crate::cache::Cache;
-use crate::decl_defs::{
-    shallow::Decl, shallow::ModuleDecl, ConstDecl, DeclTy, FunDecl, ShallowClass, TypedefDecl,
-};
-use crate::reason::Reason;
 use pos::{ConstName, FunName, MethodName, ModuleName, PropName, TypeName};
 use std::sync::Arc;
+use ty::decl_defs::{
+    shallow::Decl, shallow::ModuleDecl, ConstDecl, DeclTy, FunDecl, ShallowClass, TypedefDecl,
+};
+use ty::reason::Reason;
 
 /// A cache for shallow declarations (i.e., the information we get from
 /// decl-parsing a file). The backing caches are permitted to evict their

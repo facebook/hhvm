@@ -4,18 +4,18 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{Class, Error, Result};
-use crate::decl_defs::{ty::ConsistentKind, DeclTy, EnumType, FoldedClass, Tparam};
-use crate::decl_error::DeclError;
 use crate::dependency_registrar::DeclName;
 use crate::folded_decl_provider::{FoldedDeclProvider, Substitution};
-use crate::reason::Reason;
-use crate::typing_defs::ClassElt;
 use once_cell::unsync::OnceCell;
 use pos::{MethodName, MethodNameMap, PropName, PropNameMap, TypeName};
 use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 use std::sync::Arc;
+use ty::decl_defs::{ty::ConsistentKind, DeclTy, EnumType, FoldedClass, Tparam};
+use ty::decl_error::DeclError;
+use ty::reason::Reason;
+use ty::typing_defs::ClassElt;
 
 /// c.f. OCaml type `Typing_classes_heap.eager_members`
 #[derive(Debug)]

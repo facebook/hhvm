@@ -2,18 +2,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hackrs::{
-    decl_defs::{folded::FoldedClass, shallow},
-    decl_parser::DeclParser,
-    folded_decl_provider,
-    reason::BReason,
-};
+use hackrs::{decl_parser::DeclParser, folded_decl_provider};
 use ocamlrep_ocamlpool::{ocaml_ffi_with_arena, Bump};
 use oxidized_by_ref::decl_defs::DeclClassType;
 use pos::{RelativePath, RelativePathCtx, ToOxidized, TypeName};
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::Arc;
+use ty::decl_defs::{folded::FoldedClass, shallow};
+use ty::reason::BReason;
 
 ocaml_ffi_with_arena! {
     fn fold_classes_in_files_ffi<'a>(

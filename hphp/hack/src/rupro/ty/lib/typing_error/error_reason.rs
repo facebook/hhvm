@@ -7,7 +7,7 @@
 use crate::reason::Reason;
 use crate::typing_error::TypingErrorCode;
 use crate::typing_error::{Primary, TypingError};
-use crate::utils::Lazy;
+use utils::Lazy;
 
 #[derive(Clone, Debug)]
 enum Component {

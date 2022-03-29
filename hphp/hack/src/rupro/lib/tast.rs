@@ -2,9 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::typing_defs::Ty;
 use bumpalo::Bump;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
+use ty::typing_defs::Ty;
 
 #[derive(Clone, Debug)]
 pub struct SavedEnv;

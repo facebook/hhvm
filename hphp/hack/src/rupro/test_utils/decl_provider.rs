@@ -9,7 +9,6 @@ use hackrs::{
     decl_parser::DeclParser,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
     naming_provider::SqliteNamingTable,
-    reason::Reason,
     shallow_decl_provider::{
         EagerShallowDeclProvider, LazyShallowDeclProvider, ShallowDeclProvider,
     },
@@ -17,6 +16,7 @@ use hackrs::{
 use pos::RelativePath;
 use std::path::PathBuf;
 use std::sync::Arc;
+use ty::reason::Reason;
 
 fn make_shallow_decl_provider<R: Reason>(
     naming_table_path_opt: Option<&PathBuf>,

@@ -2,13 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::reason::Reason;
 use crate::tast;
 use crate::typing::ast::typing_block::TCBlock;
 use crate::typing::ast::typing_trait::TC;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::shared::typing_return::TypingReturn;
 use crate::typing::typing_error::Result;
+use ty::reason::Reason;
 
 impl<'a, R: Reason> TC<R> for oxidized::aast::FuncBody<(), ()> {
     type Params = ();

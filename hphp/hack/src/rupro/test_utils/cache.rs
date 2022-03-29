@@ -6,7 +6,6 @@
 use dashmap::DashMap;
 use hackrs::{
     cache::{Cache, LocalCache},
-    reason::Reason,
     shallow_decl_provider::ShallowDeclCache,
 };
 use hash::HashMap;
@@ -14,6 +13,7 @@ use std::cmp::Eq;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::sync::Arc;
+use ty::reason::Reason;
 
 pub struct NonEvictingCache<K: Hash + Eq, V> {
     cache: DashMap<K, V>,

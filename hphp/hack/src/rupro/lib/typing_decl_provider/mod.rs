@@ -3,23 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{
-    ty::ConsistentKind, ConstDecl, DeclTy, EnumType, FunDecl, Tparam, TypedefDecl,
-};
-use crate::decl_error::DeclError;
 use crate::dependency_registrar::DeclName;
-use crate::reason::Reason;
 use defs::ClassType;
 use pos::{ConstName, FunName, MethodName, PropName, TypeName};
 use std::fmt::Debug;
 use std::rc::Rc;
 use std::sync::Arc;
+use ty::decl_defs::{
+    ty::ConsistentKind, ConstDecl, DeclTy, EnumType, FunDecl, Tparam, TypedefDecl,
+};
+use ty::decl_error::DeclError;
+use ty::reason::Reason;
 
 mod defs;
 mod provider;
 
-pub use crate::typing_defs::ClassElt;
 pub use provider::FoldingTypingDeclProvider;
+pub use ty::typing_defs::ClassElt;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 

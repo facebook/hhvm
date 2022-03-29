@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::reason::Reason;
-use crate::typing_defs::Ty;
+use ty::reason::Reason;
+use ty::typing_defs::Ty;
 
 /// Return type information as gathered from explicit hints or inferred.
 #[derive(Debug, Clone)]

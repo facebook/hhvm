@@ -4,10 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::special_names as sn;
-use crate::utils::core::utils;
 use oxidized::aast_visitor::{Params, VisitorMut};
 use oxidized::{aast::*, ast_defs::*};
 use std::collections::HashSet;
+use utils::core::ns;
 
 struct ElaborateNamespacesVisitor<'node> {
     type_params: HashSet<&'node str>,
@@ -31,7 +31,7 @@ impl<'node> ElaborateNamespacesVisitor<'node> {
 
 
     fn is_reserved_type_hint(&self, name: &str) -> bool {
-        let name = utils::strip_ns(name);
+        let name = ns::strip_ns(name);
         sn::typehints::reserved_typehints
             .iter()
             .any(|s| s.as_str() == name)
@@ -41,7 +41,7 @@ impl<'node> ElaborateNamespacesVisitor<'node> {
         rupro_todo_mark!(Naming, "special identifiers, $, namespaces");
         if !self.type_params.contains(id.1.as_str()) {
             if id.1.chars().next().map_or(false, |c| c != '\\') {
-                id.1 = utils::add_ns(&id.1);
+                id.1 = ns::add_ns(&id.1);
             }
         }
     }

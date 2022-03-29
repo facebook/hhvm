@@ -5,8 +5,8 @@
 
 use std::rc::Rc;
 
-use crate::reason::Reason;
 use crate::typing_decl_provider::TypingDeclProvider;
+use ty::reason::Reason;
 
 #[derive(Debug)]
 pub struct TypingCtx<R: Reason> {

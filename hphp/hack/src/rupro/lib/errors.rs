@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::parsing_error::ParsingError;
-use crate::reason::Reason;
-use crate::typing_error::TypingError;
+use ty::reason::Reason;
+use ty::typing_error::TypingError;
 
 #[derive(Debug)]
 pub enum HackError<R: Reason> {

@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::shallow;
-use crate::reason::Reason;
 use names::FileSummary;
 use pos::{RelativePath, RelativePathCtx};
 use std::marker::PhantomData;
 use std::sync::Arc;
+use ty::decl_defs::shallow;
+use ty::reason::Reason;
 
 #[derive(Debug, Clone)]
 pub struct DeclParser<R: Reason> {

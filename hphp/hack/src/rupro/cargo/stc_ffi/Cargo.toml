@@ -18,3 +18,4 @@ ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
 pos = { path = "../../pos/cargo/pos" }
 structopt = "0.3.23"
+ty = { path = "../../ty/cargo/ty" }

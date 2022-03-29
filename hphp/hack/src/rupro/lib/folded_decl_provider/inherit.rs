@@ -3,23 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{
-    subst::{Subst, Substitution},
-    Result,
-};
-use crate::decl_defs::{
-    folded::Constructor, ty::ConsistentKind, AbstractTypeconst, Abstraction, CeVisibility,
-    ClassConst, ClassConstKind, ClassEltFlags, ClassishKind, DeclTy, FoldedClass, FoldedElement,
-    ShallowClass, SubstContext, TypeConst, Typeconst,
-};
+use super::{subst::Substitution, Result};
 use crate::dependency_registrar::{DeclName, DependencyName, DependencyRegistrar};
-use crate::reason::Reason;
 use indexmap::map::Entry;
 use pos::{
     ClassConstNameIndexMap, MethodName, MethodNameIndexMap, Pos, PropNameIndexMap,
     TypeConstNameIndexMap, TypeNameIndexMap,
 };
 use std::sync::Arc;
+use ty::decl_defs::{
+    folded::Constructor, subst::Subst, ty::ConsistentKind, AbstractTypeconst, Abstraction,
+    CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassishKind, DeclTy, FoldedClass,
+    FoldedElement, ShallowClass, SubstContext, TypeConst, Typeconst,
+};
+use ty::reason::Reason;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_inherit.ml
 

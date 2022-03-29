@@ -5,14 +5,14 @@
 
 use super::{ClassType, Result, TypeDecl, TypingDeclProvider};
 use crate::cache::LocalCache;
-use crate::decl_defs::{ConstDecl, FunDecl};
 use crate::dependency_registrar::DeclName;
 use crate::folded_decl_provider::{self, FoldedDeclProvider};
-use crate::reason::Reason;
 use pos::{ConstName, FunName, TypeName};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
+use ty::decl_defs::{ConstDecl, FunDecl};
+use ty::reason::Reason;
 
 /// An implementation of TypingDeclProvider designed after the hh_server
 /// implementation. We take the decls from a `FoldedDeclProvider` (which is

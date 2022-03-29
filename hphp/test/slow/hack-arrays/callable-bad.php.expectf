@@ -70,7 +70,7 @@ Warning: Invalid argument: function: class not found in %s/test/slow/hack-arrays
 NULL
 ===== call2/07 =====
 
-Warning: Invalid argument: function: class not found in %s/test/slow/hack-arrays/callable-bad.php on line 10
+Warning: Invalid argument: function: not a valid callback array %s/test/slow/hack-arrays/callable-bad.php on line 10
 NULL
 ===== call2/08 =====
 

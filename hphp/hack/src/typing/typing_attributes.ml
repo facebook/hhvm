@@ -66,14 +66,14 @@ let check_implements
         let all_user_attribute =
           let bindings = SMap.bindings SN.UserAttributes.as_map in
           List.map
-            ~f:(fun tc ->
-              let (tc_name, _) = tc in
-              tc_name)
+            ~f:(fun attr ->
+              let (attr_name, _) = attr in
+              attr_name)
             bindings
         in
 
         let closest_attr_name =
-          Typing_env.most_similar attr_name all_user_attribute (fun nam -> nam)
+          Typing_env.most_similar attr_name all_user_attribute (fun name -> name)
         in
 
         Errors.add_naming_error

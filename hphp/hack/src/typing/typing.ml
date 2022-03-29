@@ -5118,17 +5118,7 @@ and lambda ~is_anon ?expected p env f idl =
           env
           ~ret_ty:param_and_ret_type
           expected_ft
-      | Some _ ->
-        (* If the expected type is something concrete but not a function
-         * then we should reject in strict mode. Check body anyway.
-         * Note: we should be using 'nothing' to type the arguments. *)
-        Errors.add_typing_error
-          Typing_error.(primary @@ Primary.Untyped_lambda_strict_mode p);
-        Typing_log.increment_feature_count
-          env
-          FL.Lambda.non_function_typed_context;
-        check_body_under_known_params ~supportdyn:false env declared_ft
-      | None ->
+      | _ ->
         Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
 
         (* Replace uses of Tany that originated from "untyped" parameters or return type

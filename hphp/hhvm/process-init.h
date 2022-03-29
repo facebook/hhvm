@@ -16,8 +16,6 @@
 #ifndef incl_HPHP_HHVM_PROCESS_INIT_H_
 #define incl_HPHP_HHVM_PROCESS_INIT_H_
 
-#include "hphp/compiler/analysis/emitter.h"
-
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/program-functions.h"
 
@@ -35,7 +33,6 @@ void ProcessInitNoSystemLib();
  */
 inline void register_process_init(bool noSystemLib = false) {
   g_vmProcessInit = noSystemLib ? &ProcessInitNoSystemLib : &ProcessInit;
-  g_hphp_compiler_parse = &HPHP::Compiler::hphp_compiler_parse;
 }
 
 /*

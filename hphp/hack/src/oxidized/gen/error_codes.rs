@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<44931077a5e2bfd020f7b89a4602ef5e>>
+// @generated SignedSource<<b08495a42342c54eafe0cc5ae9737eee>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -398,7 +398,6 @@ pub enum Typing {
     EnumTypeTypedefNonnull = 4219,
     AmbiguousLambda = 4222,
     EllipsisStrictMode = 4223,
-    UntypedLambdaStrictMode = 4224,
     OutputInWrongContext = 4226,
     StaticPropertyInWrongContext = 4228,
     WrongExpressionKindAttribute = 4231,

@@ -15,32 +15,134 @@
 */
 
 #include "hphp/runtime/vm/runtime-compiler.h"
-#include "hphp/runtime/vm/native.h"
+
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/zend/zend-string.h"
+
+#include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/runtime/vm/unit-parser.h"
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/sha1.h"
+
+#include "hphp/zend/zend-string.h"
+
 #include <folly/Range.h>
 
 namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
-CompileStringFn g_hphp_compiler_parse;
+namespace {
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
+                                   const char* filename,
+                                   const Native::FuncTable& nativeFuncs,
+                                   Unit** releaseUnit,
+                                   bool isSystemLib,
+                                   bool forDebuggerEval) {
+  if (!filename) filename = "";
+
+  tracing::Block _{
+    "parse",
+    [&] {
+      return tracing::Props{}
+        .add("filename", filename ? filename : "")
+        .add("code_size", loader.fileLength());
+    }
+  };
+  auto const wasLoaded = loader.didLoad();
+  SCOPE_EXIT {
+    if (!wasLoaded && loader.didLoad()) {
+      tracing::updateName("parse-load");
+    }
+  };
+
+  // Do not count memory used during parsing/emitting towards OOM.
+  MemoryManager::SuppressOOM so(*tl_heap);
+
+  SCOPE_ASSERT_DETAIL("parsing file") { return filename; };
+  std::unique_ptr<Unit> unit;
+  SCOPE_EXIT {
+    if (unit && releaseUnit) *releaseUnit = unit.release();
+  };
+
+  // We don't want to invoke the JIT when trying to run PHP code.
+  auto const prevFolding = RID().getJitFolding();
+  RID().setJitFolding(true);
+  SCOPE_EXIT { RID().setJitFolding(prevFolding); };
+
+  std::unique_ptr<UnitEmitter> ue;
+  // Check if this file contains raw hip hop bytecode instead of
+  // php.  This is dictated by a special file extension.
+  if (RuntimeOption::EvalAllowHhas) {
+    if (const char* dot = strrchr(filename, '.')) {
+      const char hhbc_ext[] = "hhas";
+      if (!strcmp(dot + 1, hhbc_ext)) {
+        auto const& contents = loader.contents();
+        ue = assemble_string(
+          contents.data(),
+          contents.size(),
+          filename,
+          loader.sha1(),
+          nativeFuncs
+        );
+      }
+    }
+  }
+
+  // If ue != nullptr then we assembled it above, so don't feed it into
+  // the extern compiler
+  if (!ue) {
+    auto uc = UnitCompiler::create(
+      loader,
+      filename,
+      nativeFuncs,
+      isSystemLib,
+      forDebuggerEval
+    );
+    assertx(uc);
+    tracing::BlockNoTrace _{"unit-compiler-run"};
+    SCOPE_EXIT {
+      if (!wasLoaded && loader.didLoad()) {
+        tracing::updateName("unit-compiler-run-load");
+      }
+    };
+    try {
+      bool ignore;
+      ue = uc->compile(ignore);
+    } catch (const CompilerAbort& exn) {
+      fprintf(stderr, "%s", exn.what());
+      _Exit(1);
+    }
+  }
+
+  assertx(ue);
+  return ue;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
 
 Unit* compile_file(LazyUnitContentsLoader& loader,
                    const char* filename,
                    const Native::FuncTable& nativeFuncs,
                    Unit** releaseUnit) {
-  return g_hphp_compiler_parse(
+  assertx(!filename || filename[0] != '/' || filename[1] != ':');
+  return parse(
     loader,
     filename,
     nativeFuncs,
     releaseUnit,
     false,
     false
-  );
+  )->create().release();
 }
 
 Unit* compile_string(const char* s,
@@ -51,38 +153,51 @@ Unit* compile_string(const char* s,
                      bool isSystemLib,
                      bool forDebuggerEval) {
   // If the file is too large it may OOM the request
-  MemoryManager::SuppressOOM so(*tl_heap);
+  MemoryManager::SuppressOOM so{*tl_heap};
 
   auto const name = fname ? fname : "";
   auto const sha1 = SHA1{mangleUnitSha1(
     string_sha1(folly::StringPiece{s, sz}), name, options.flags()
   )};
-  // NB: fname needs to be long-lived if generating a bytecode repo because it
-  // can be cached via a Location ultimately contained by ErrorInfo for printing
-  // code errors.
   LazyUnitContentsLoader loader{sha1, {s, sz}, options.flags()};
-  return g_hphp_compiler_parse(
+  return parse(
     loader,
     fname,
     nativeFuncs,
     nullptr,
     isSystemLib,
     forDebuggerEval
-  );
+  )->create().release();
 }
 
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
                                const Native::FuncTable& nativeFuncs) {
-  assertx(fname[0] == '/' && fname[1] == ':');
+  assertx(fname && fname[0] == '/' && fname[1] == ':');
   if (RuntimeOption::RepoAuthoritative) {
     if (auto u = lookupSyslibUnit(makeStaticString(fname), nativeFuncs)) {
       return u;
     }
   }
-  auto const u =
-    compile_string(s, sz, fname, nativeFuncs, RepoOptions::defaults(), true);
-  always_assert(u);
-  return u;
+
+  auto const sha1 = SHA1{mangleUnitSha1(
+    string_sha1(folly::StringPiece{s, sz}),
+    fname,
+    RepoOptions::defaults().flags()
+  )};
+  LazyUnitContentsLoader loader{sha1, {s, sz}, RepoOptions::defaults().flags()};
+  auto ue = parse(
+    loader,
+    fname,
+    nativeFuncs,
+    nullptr,
+    true,
+    false
+  );
+  always_assert(ue);
+
+  auto u = ue->create();
+  SystemLib::registerUnitEmitter(std::move(ue));
+  return u.release();
 }
 
 Unit* compile_debugger_string(

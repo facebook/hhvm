@@ -15,7 +15,6 @@
 */
 
 #include "hphp/test/ext/test_base.h"
-#include "hphp/compiler/option.h"
 #include "hphp/test/ext/test.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/array/ext_array.h"

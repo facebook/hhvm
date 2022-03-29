@@ -18,7 +18,6 @@
 
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/emitter.h"
-#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/package.h"
 
@@ -490,10 +489,12 @@ int process(const CompilerOptions &po) {
 
   hhbcTargetInit(po, ar);
 
-  BuiltinSymbols::s_systemAr = ar;
+  // Track the unit-emitters created for system during
+  // hphp_process_init().
+  SystemLib::keepRegisteredUnitEmitters(true);
   hphp_process_init();
   SCOPE_EXIT { hphp_process_exit(); };
-  BuiltinSymbols::s_systemAr.reset();
+  SystemLib::keepRegisteredUnitEmitters(false);
 
   package.createAsyncState();
   SCOPE_EXIT {

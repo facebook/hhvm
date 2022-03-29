@@ -1175,7 +1175,6 @@ module Primary : sig
         pos: Pos.t;
         require: [ `Param_name | `Type_and_param_name ];
       }
-    | Untyped_lambda_strict_mode of Pos.t
     | Object_string of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;

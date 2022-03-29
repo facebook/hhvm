@@ -447,37 +447,35 @@ impl<'a> ToOxidized<'a> for folded::FoldedElement {
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for crate::typing_error::TypingError<R> {
+impl<'a, P: ToOxidized<'a, Output = &'a obr::pos::Pos<'a>>> ToOxidized<'a>
+    for crate::decl_error::DeclError<P>
+{
     type Output = obr::decl_defs::DeclError<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use crate::typing_error::Primary;
         use obr::decl_defs::DeclError;
         match self {
-            Self::Primary(primary) => match primary {
-                Primary::WrongExtendKind {
-                    pos,
-                    kind,
-                    name,
-                    parent_pos,
-                    parent_kind,
-                    parent_name,
-                } => DeclError::WrongExtendKind {
-                    pos: pos.to_oxidized(arena),
-                    kind: *kind,
-                    name: name.to_oxidized(arena),
-                    parent_pos: parent_pos.to_oxidized(arena),
-                    parent_kind: *parent_kind,
-                    parent_name: parent_name.to_oxidized(arena),
-                },
-                Primary::CyclicClassDef(pos, stack) => DeclError::CyclicClassDef {
-                    pos: pos.to_oxidized(arena),
-                    stack: oxidized_by_ref::s_set::SSet::from(
-                        arena,
-                        stack.iter().map(|s| s.to_oxidized(arena)),
-                    ),
-                },
-                _ => unimplemented!(),
+            &Self::WrongExtendKind {
+                ref pos,
+                kind,
+                name,
+                ref parent_pos,
+                parent_kind,
+                parent_name,
+            } => DeclError::WrongExtendKind {
+                pos: pos.to_oxidized(arena),
+                kind,
+                name: name.to_oxidized(arena),
+                parent_pos: parent_pos.to_oxidized(arena),
+                parent_kind,
+                parent_name: parent_name.to_oxidized(arena),
+            },
+            Self::CyclicClassDef(pos, stack) => DeclError::CyclicClassDef {
+                pos: pos.to_oxidized(arena),
+                stack: oxidized_by_ref::s_set::SSet::from(
+                    arena,
+                    stack.iter().map(|s| s.to_oxidized(arena)),
+                ),
             },
         }
     }

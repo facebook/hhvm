@@ -6,11 +6,11 @@
 use super::{fold::DeclFolder, DeclName, Error, Result, TypeDecl};
 use crate::cache::Cache;
 use crate::decl_defs::{ConstDecl, DeclTy, FoldedClass, FunDecl, ShallowClass};
+use crate::decl_error::DeclError;
 use crate::dependency_registrar::DependencyName;
 use crate::dependency_registrar::DependencyRegistrar;
 use crate::reason::Reason;
 use crate::shallow_decl_provider::{self, ShallowDeclProvider};
-use crate::typing_error::{Primary, TypingError};
 use oxidized::global_options::GlobalOptions;
 use pos::{
     ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameIndexMap,
@@ -135,14 +135,14 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     fn detect_cycle(
         &self,
         stack: &mut TypeNameIndexSet,
-        errors: &mut Vec<TypingError<R>>,
+        errors: &mut Vec<DeclError<R::Pos>>,
         pos_id: &Positioned<TypeName, R::Pos>,
     ) -> bool {
         if stack.contains(&pos_id.id()) {
-            errors.push(TypingError::primary(Primary::CyclicClassDef(
+            errors.push(DeclError::CyclicClassDef(
                 pos_id.pos().clone(),
                 stack.iter().copied().collect(),
-            )));
+            ));
             true
         } else {
             false
@@ -152,7 +152,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     fn decl_class_type(
         &self,
         stack: &mut TypeNameIndexSet,
-        errors: &mut Vec<TypingError<R>>,
+        errors: &mut Vec<DeclError<R::Pos>>,
         ty: &DeclTy<R>,
     ) -> Result<Option<(TypeName, Arc<FoldedClass<R>>)>> {
         if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
@@ -209,7 +209,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     fn decl_class_parents(
         &self,
         stack: &mut TypeNameIndexSet,
-        errors: &mut Vec<TypingError<R>>,
+        errors: &mut Vec<DeclError<R::Pos>>,
         sc: &ShallowClass<R>,
     ) -> Result<TypeNameIndexMap<Arc<FoldedClass<R>>>> {
         (sc.extends.iter())

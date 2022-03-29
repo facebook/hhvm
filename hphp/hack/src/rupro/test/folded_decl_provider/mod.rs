@@ -7,7 +7,7 @@
 
 use crate::{FacebookInit, TestContext};
 use anyhow::Result;
-use hackrs::{decl_defs::shallow, typing_error::Primary, typing_error::TypingError};
+use hackrs::{decl_defs::shallow, decl_error::DeclError};
 use maplit::btreemap;
 use pos::{Prefix, RelativePath, TypeName};
 use std::fs;
@@ -30,7 +30,7 @@ fn when_cyclic_class_error(fb: FacebookInit) -> Result<()> {
     let decl = ctx.folded_decl_provider.get_class(a.into(), a)?.unwrap();
     // Now check that A has recorded the cyclic class error as we predict.
     match decl.decl_errors.first().unwrap() {
-        TypingError::Primary(Primary::CyclicClassDef(_, ts)) => {
+        DeclError::CyclicClassDef(_, ts) => {
             itertools::assert_equal(ts.iter().copied(), [b, a].into_iter())
         }
         _ => panic!(),

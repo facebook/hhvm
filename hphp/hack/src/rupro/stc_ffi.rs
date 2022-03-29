@@ -120,7 +120,9 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
         let (ast, errs) = ast_provider.get_ast(fln).unwrap();
         let (tast, errs) = TypingCheckUtils::type_file::<R>(Rc::clone(&ctx), &ast, errs).unwrap();
         if !errs.is_empty() {
-            unimplemented!()
+            for err in errs {
+                println!("{:#?}", err);
+            }
         }
         print_tast(&options, &tast);
     }

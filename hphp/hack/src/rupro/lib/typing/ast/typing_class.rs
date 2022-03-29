@@ -7,7 +7,7 @@ use crate::special_names;
 use crate::tast;
 use crate::typing::ast::typing_trait::TC;
 use crate::typing::env::typing_env::TEnv;
-use crate::typing::typing_error::Result;
+use crate::typing::typing_error::{Error, Result};
 
 impl<R: Reason> TC<R> for oxidized::aast::Class_<(), ()> {
     type Params = ();
@@ -18,6 +18,16 @@ impl<R: Reason> TC<R> for oxidized::aast::Class_<(), ()> {
         rupro_todo_assert!(self.file_attributes.is_empty(), AST);
         rupro_todo_mark!(Wellformedness);
         rupro_todo_mark!(ClassHierarchyChecks);
+
+        let class_name = pos::TypeName::from(&self.name.1);
+        let tc = env
+            .decls()
+            .get_class(class_name)?
+            .ok_or_else(|| Error::DeclNotFound(class_name.into()))?;
+
+        for err in tc.decl_errors() {
+            env.add_error(err.into());
+        }
 
         let (typed_consts, typed_typeconsts, typed_vars, mut typed_static_vars, typed_methods) =
             check_class_members(env, self)?;

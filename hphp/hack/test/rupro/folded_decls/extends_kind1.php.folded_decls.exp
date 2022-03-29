@@ -43,17 +43,15 @@ FoldedClass {
         "\\I",
     },
     decl_errors: [
-        Primary(
-            WrongExtendKind {
-                parent_pos: NPos,
-                parent_kind: Cinterface,
-                parent_name: "\\I",
-                pos: NPos,
-                kind: Cclass(
-                    Concrete,
-                ),
-                name: "\\A",
-            },
-        ),
+        WrongExtendKind {
+            parent_pos: NPos,
+            parent_kind: Cinterface,
+            parent_name: "\\I",
+            pos: NPos,
+            kind: Cclass(
+                Concrete,
+            ),
+            name: "\\A",
+        },
     ],
 }

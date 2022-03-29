@@ -10,6 +10,7 @@ pub use error_code::TypingErrorCode;
 pub use error_primary::Primary;
 pub use error_reason::ReasonsCallback;
 
+use crate::decl_error::DeclError;
 use crate::reason::Reason;
 use eq_modulo_pos::EqModuloPos;
 use serde::{Deserialize, Serialize};
@@ -26,5 +27,30 @@ pub enum TypingError<R: Reason> {
 impl<R: Reason> TypingError<R> {
     pub fn primary(primary: Primary<R>) -> Self {
         TypingError::Primary(primary)
+    }
+}
+
+impl<R: Reason> From<&DeclError<R::Pos>> for TypingError<R> {
+    fn from(decl_error: &DeclError<R::Pos>) -> Self {
+        match decl_error {
+            &DeclError::WrongExtendKind {
+                ref pos,
+                kind,
+                name,
+                ref parent_pos,
+                parent_kind,
+                parent_name,
+            } => Self::Primary(Primary::WrongExtendKind {
+                pos: pos.clone(),
+                kind,
+                name,
+                parent_pos: parent_pos.clone(),
+                parent_kind,
+                parent_name,
+            }),
+            DeclError::CyclicClassDef(pos, stack) => {
+                Self::Primary(Primary::CyclicClassDef(pos.clone(), stack.clone()))
+            }
+        }
     }
 }

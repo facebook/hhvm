@@ -43,12 +43,10 @@ let check_implements
           TypecheckerOptions.check_attribute_locations
             (Typing_env.get_tcopt env)
         in
-        
         if
           check_locations
           && (not @@ List.mem intfs attr_interface ~equal:String.equal)
         then
-        
           Errors.add_typing_error
             Typing_error.(
               primary

@@ -3897,6 +3897,14 @@ and expr_
         (match expand_expected_and_get_node env expected with
         | (env, Some (pos, reason, _, _ty, Tclass ((_, k), _, [ty1; ty2])))
           when String.equal k SN.Collections.cPair ->
+          let pessimise_type env ty =
+            if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+              Typing_array_access.pessimise_type env ty
+            else
+              (env, ty)
+          in
+          let (env, ty1) = pessimise_type env ty1 in
+          let (env, ty2) = pessimise_type env ty2 in
           let ty1_expected = ExpectedTy.make pos reason ty1 in
           let ty2_expected = ExpectedTy.make pos reason ty2 in
           (env, Some ty1_expected, Some ty2_expected, None)
@@ -3924,6 +3932,14 @@ and expr_
         env
         [ty2]
     in
+    let pessimise_tup_assign env ty =
+      if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+        Typing_array_access.pessimised_tup_assign p env ty
+      else
+        (env, ty)
+    in
+    let (env, ty1) = pessimise_tup_assign env ty1 in
+    let (env, ty2) = pessimise_tup_assign env ty2 in
     let ty = MakeType.pair (Reason.Rwitness p) ty1 ty2 in
     make_result
       env

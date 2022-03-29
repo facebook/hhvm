@@ -43,10 +43,12 @@ let check_implements
           TypecheckerOptions.check_attribute_locations
             (Typing_env.get_tcopt env)
         in
+        
         if
           check_locations
           && (not @@ List.mem intfs attr_interface ~equal:String.equal)
         then
+        
           Errors.add_typing_error
             Typing_error.(
               primary
@@ -63,8 +65,19 @@ let check_implements
       then
         ()
       else
+        let all_user_attribute =
+          let bindings = SMap.bindings SN.UserAttributes.as_map in
+          List.map
+          ~f:(fun tc ->
+            let (tc_name, _) = tc in
+            tc_name)
+          (bindings)
+        in
+
+        let closest_attr_name = Typing_env.most_similar attr_name all_user_attribute (fun nam -> nam) in
+
         Errors.add_naming_error
-        @@ Naming_error.Unbound_attribute_name { pos = attr_pos; attr_name }
+        @@ Naming_error.Unbound_attribute_name { pos = attr_pos; attr_name; closest_attr_name }
     in
 
     env
@@ -109,7 +122,7 @@ let check_implements
         check_new_object attr_pos env attr_cid params
     | _ ->
       Errors.add_naming_error
-      @@ Naming_error.Unbound_attribute_name { pos = attr_pos; attr_name };
+      @@ Naming_error.Unbound_attribute_name { pos = attr_pos; attr_name; closest_attr_name = None };
       env
 
 let check_def env check_new_object (kind : attribute_interface_name) attributes

@@ -916,7 +916,7 @@ let expand_expected_and_get_node
   | Some ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } ->
     let (env, ty) = Env.expand_type env ty in
     let (env, uty, supportdyn) = unbox env ty in
-    if supportdyn && not for_lambda then
+    if (supportdyn && not for_lambda) || is_tyvar uty then
       (env, None)
     else
       (env, Some (p, ur, supportdyn, uty, get_node uty))

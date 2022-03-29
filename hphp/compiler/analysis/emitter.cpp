@@ -17,7 +17,6 @@
 #include "hphp/compiler/analysis/emitter.h"
 
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/option.h"
 #include "hphp/hhbbc/hhbbc.h"
 
@@ -433,106 +432,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     unexpectedException("non-standard-exception");
   }
 }
-
-extern "C" {
-
-/**
- * This is the entry point from the runtime; i.e. online bytecode generation.
- */
-
-Unit* hphp_compiler_parse(LazyUnitContentsLoader& loader,
-                          const char* filename,
-                          const Native::FuncTable& nativeFuncs,
-                          Unit** releaseUnit,
-                          bool isSystemLib,
-                          bool forDebuggerEval) {
-  if (!filename) filename = "";
-
-  tracing::Block _{
-    "parse",
-    [&] {
-      return tracing::Props{}
-        .add("filename", filename ? filename : "")
-        .add("code_size", loader.fileLength());
-    }
-  };
-  auto const wasLoaded = loader.didLoad();
-  SCOPE_EXIT {
-    if (!wasLoaded && loader.didLoad()) {
-      tracing::updateName("parse-load");
-    }
-  };
-
-  // Do not count memory used during parsing/emitting towards OOM.
-  MemoryManager::SuppressOOM so(*tl_heap);
-
-  SCOPE_ASSERT_DETAIL("hphp_compiler_parse") { return filename; };
-  std::unique_ptr<Unit> unit;
-  SCOPE_EXIT {
-    if (unit && releaseUnit) *releaseUnit = unit.release();
-  };
-
-  // We don't want to invoke the JIT when trying to run PHP code.
-  auto const prevFolding = RID().getJitFolding();
-  RID().setJitFolding(true);
-  SCOPE_EXIT { RID().setJitFolding(prevFolding); };
-
-  std::unique_ptr<UnitEmitter> ue;
-  // Check if this file contains raw hip hop bytecode instead of
-  // php.  This is dictated by a special file extension.
-  if (RuntimeOption::EvalAllowHhas) {
-    if (const char* dot = strrchr(filename, '.')) {
-      const char hhbc_ext[] = "hhas";
-      if (!strcmp(dot + 1, hhbc_ext)) {
-        auto const& contents = loader.contents();
-        ue = assemble_string(
-          contents.data(),
-          contents.size(),
-          filename,
-          loader.sha1(),
-          nativeFuncs
-        );
-      }
-    }
-  }
-
-  // If ue != nullptr then we assembled it above, so don't feed it into
-  // the extern compiler
-  if (!ue) {
-    auto uc = UnitCompiler::create(
-      loader,
-      filename,
-      nativeFuncs,
-      isSystemLib,
-      forDebuggerEval
-    );
-    assertx(uc);
-    tracing::BlockNoTrace _{"unit-compiler-run"};
-    SCOPE_EXIT {
-      if (!wasLoaded && loader.didLoad()) {
-        tracing::updateName("unit-compiler-run-load");
-      }
-    };
-    try {
-      bool ignore;
-      ue = uc->compile(ignore);
-    } catch (const CompilerAbort& exn) {
-      fprintf(stderr, "%s", exn.what());
-      _Exit(1);
-    }
-  }
-
-  unit = ue->create();
-  if (BuiltinSymbols::s_systemAr) {
-    assertx(ue->m_filepath->data()[0] == '/' &&
-            ue->m_filepath->data()[1] == ':');
-    BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
-  }
-
-  return unit.release();
-}
-
-} // extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////
 }

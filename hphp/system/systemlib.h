@@ -21,12 +21,15 @@
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/util/portability.h"
 
+#include <memory>
+
 namespace HPHP {
 struct ObjectData;
 struct Unit;
 struct Class;
 struct Func;
 struct Object;
+struct UnitEmitter;
 } //namespace HPHP
 
 namespace HPHP::SystemLib {
@@ -187,6 +190,18 @@ void setupNullCtor(Class* cls);
  * Return a fresh 86reifiedinit method.
  */
 Func* getNull86reifiedinit(Class* cls);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Keep a list of unit-emitters for systemlib units. Used by HPHPc so
+ * it can put the unit-emitters into the repo.
+ */
+void keepRegisteredUnitEmitters(bool);
+
+void registerUnitEmitter(std::unique_ptr<UnitEmitter>);
+
+std::vector<std::unique_ptr<UnitEmitter>> claimRegisteredUnitEmitters();
 
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP::SystemLib

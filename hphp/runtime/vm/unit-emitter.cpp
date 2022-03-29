@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/unit-emitter.h"
 
-#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/system/systemlib.h"
 
 #include "hphp/runtime/base/array-data.h"

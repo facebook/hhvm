@@ -15,6 +15,7 @@
 */
 
 #include "hphp/system/systemlib.h"
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
@@ -25,9 +26,12 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/types.h"
+
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
+#include <memory>
 #include <vector>
 
 namespace HPHP::SystemLib {
@@ -412,4 +416,43 @@ Func* getNull86reifiedinit(Class* cls) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+struct Registered {
+  std::atomic<bool> m_keep{false};
+  std::mutex m_lock;
+  std::vector<std::unique_ptr<UnitEmitter>> m_ues;
+};
+
+Registered& registered() {
+  static Registered r;
+  return r;
+}
+
+}
+
+void keepRegisteredUnitEmitters(bool b) {
+  registered().m_keep.store(b);
+}
+
+void registerUnitEmitter(std::unique_ptr<UnitEmitter> ue) {
+  assertx(ue->m_filepath->data()[0] == '/' &&
+          ue->m_filepath->data()[1] == ':');
+  auto& r = registered();
+  if (!r.m_keep) return;
+  std::scoped_lock<std::mutex> _{r.m_lock};
+  r.m_ues.emplace_back(std::move(ue));
+}
+
+std::vector<std::unique_ptr<UnitEmitter>> claimRegisteredUnitEmitters() {
+  auto& r = registered();
+  std::scoped_lock<std::mutex> _{r.m_lock};
+  auto out = std::move(r.m_ues);
+  assertx(r.m_ues.empty());
+  return out;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 } // namespace HPHP::SystemLib

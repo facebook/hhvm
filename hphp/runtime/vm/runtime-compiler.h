@@ -51,21 +51,4 @@ Unit* compile_debugger_string(const char* s, size_t sz, const RepoOptions&);
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
                                const Native::FuncTable& nativeFuncs);
 
-/*
- * A few functions are exposed by libhphp_analysis and used in
- * VM-specific parts of the runtime.
- *
- * Currently we handle this by using these global pointers, which must
- * be set up before you use those parts of the runtime.
- */
-
-using CompileStringFn = Unit* (*)(LazyUnitContentsLoader&,
-                                  const char*,
-                                  const Native::FuncTable&,
-                                  Unit**,
-                                  bool,
-                                  bool);
-
-extern CompileStringFn g_hphp_compiler_parse;
-
 }

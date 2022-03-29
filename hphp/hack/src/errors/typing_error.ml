@@ -2325,7 +2325,6 @@ module Primary = struct
         pos: Pos.t;
         require: [ `Param_name | `Type_and_param_name ];
       }
-    | Untyped_lambda_strict_mode of Pos.t
     | Object_string of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
@@ -4922,15 +4921,6 @@ module Primary = struct
     in
     (Error_code.EllipsisStrictMode, claim, lazy [], [])
 
-  let untyped_lambda_strict_mode pos =
-    let claim =
-      lazy
-        ( pos,
-          "Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters."
-        )
-    in
-    (Error_code.UntypedLambdaStrictMode, claim, lazy [], [])
-
   let object_string pos1 pos2 =
     ( Error_code.ObjectString,
       lazy (pos1, "You cannot use this object as a string"),
@@ -5813,7 +5803,6 @@ module Primary = struct
         member_name
     | Generic_static { pos; typaram_name } -> generic_static pos typaram_name
     | Ellipsis_strict_mode { pos; require } -> ellipsis_strict_mode pos require
-    | Untyped_lambda_strict_mode pos -> untyped_lambda_strict_mode pos
     | Object_string { pos; decl_pos } -> object_string pos decl_pos
     | Cyclic_typedef { pos; decl_pos } -> cyclic_typedef pos decl_pos
     | Require_args_reify { pos; decl_pos } -> require_args_reify pos decl_pos

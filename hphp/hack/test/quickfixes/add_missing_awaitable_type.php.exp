@@ -1,0 +1,8 @@
+Make return type Awaitable
+Change to `Awaitable<void>`
+
+<?hh
+
+async function foo(): Awaitable<void> {
+
+}

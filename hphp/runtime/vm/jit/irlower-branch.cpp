@@ -70,6 +70,13 @@ RegSet cross_trace_args(const BCMarker& marker) {
     ? cross_trace_regs_resumed() : cross_trace_regs();
 }
 
+void popFrameToFuncEntryRegs(Vout& v) {
+  v << unrecordbasenativesp{};
+  v << copy{rvmfp(), rvmsp()};
+  v << pushm{Vreg(rvmsp()) + AROFF(m_savedRip)};
+  v << load{Vreg(rvmsp()) + AROFF(m_sfp), rvmfp()};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -388,7 +395,13 @@ void cgJmpSSwitchDest(IRLS& env, const IRInstruction* inst) {
 void cgReqBindJmp(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ReqBindJmp>();
   auto& v = vmain(env);
-  maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
+
+  if (extra->target.funcEntry()) {
+    if (!inst->marker().prologue()) popFrameToFuncEntryRegs(v);
+  } else {
+    maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
+  }
+
   v << bindjmp{
     extra->target,
     extra->invSPOff,
@@ -401,7 +414,12 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
   auto const extra  = inst->extra<ReqRetranslate>();
   auto& v = vmain(env);
 
-  maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->offset);
+  if (destSK.funcEntry()) {
+    popFrameToFuncEntryRegs(v);
+  } else {
+    maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->offset);
+  }
+
   v << fallback{
     destSK,
     inst->marker().bcSPOff(),
@@ -423,7 +441,13 @@ void cgReqRetranslateOpt(IRLS& env, const IRInstruction* inst) {
 void cgReqInterpBBNoTranslate(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ReqInterpBBNoTranslate>();
   auto& v = vmain(env);
-  maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
+
+  if (extra->target.funcEntry()) {
+    popFrameToFuncEntryRegs(v);
+  } else {
+    maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
+  }
+
   emitInterpReqNoTranslate(v, extra->target, extra->invSPOff);
 }
 

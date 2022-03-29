@@ -62,7 +62,10 @@ let from_raw_client
   { client; opts; current_file_decls = SymbolMap.empty }
 
 let get_and_cache_decl (t : t) (symbol_hash : Typing_deps.Dep.t) =
-  let decl_opt = Decl_ipc_ffi_externs.get_decl t.client symbol_hash in
+  (* TODO: pass in the real checksum *)
+  let decl_opt =
+    Decl_ipc_ffi_externs.get_decl t.client symbol_hash Int64.zero
+  in
   Decls.add symbol_hash decl_opt;
   decl_opt
 

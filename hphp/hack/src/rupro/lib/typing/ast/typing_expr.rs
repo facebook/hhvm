@@ -5,7 +5,7 @@
 use crate::reason::Reason;
 use crate::tast;
 use crate::typing::ast::typing_trait::TC;
-use crate::typing::typing_env::TEnv;
+use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use crate::typing_defs::Ty;
 use crate::utils::core::LocalId;
@@ -101,7 +101,7 @@ fn infer_assign<R: Reason>(
     trhs: &tast::Expr<R>,
 ) -> Result<tast::Expr<R>> {
     rupro_todo_mark!(Holes);
-    rupro_todo_mark!(Awaitable);
+    rupro_todo_mark!(AwaitableAsync);
     rupro_todo_mark!(FakeMembersAndRefinement);
     use oxidized::aast::Expr_::*;
     let (te, ty) = match &lhs.2 {

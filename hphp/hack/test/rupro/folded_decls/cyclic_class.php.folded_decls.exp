@@ -53,14 +53,12 @@ FoldedClass {
         "\\A",
     },
     decl_errors: [
-        Primary(
-            CyclicClassDef(
-                NPos,
-                [
-                    "\\A",
-                    "\\C",
-                ],
-            ),
+        CyclicClassDef(
+            NPos,
+            [
+                "\\A",
+                "\\C",
+            ],
         ),
     ],
 }

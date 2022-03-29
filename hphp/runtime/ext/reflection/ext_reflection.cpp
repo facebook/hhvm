@@ -928,6 +928,13 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getCoeffects) {
   return arr.toArray();
 }
 
+static Variant HHVM_METHOD(ReflectionFunctionAbstract, getModule) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  auto const name = func->unit()->moduleName();
+  if (!name) return init_null_variant;
+  return String::attach(const_cast<StringData*>(name));
+}
+
 static bool HHVM_METHOD(ReflectionFunctionAbstract, returnsReadonly) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return func->attrs() & AttrReadonlyReturn;
@@ -2206,6 +2213,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionFunctionAbstract, getRetTypeInfo);
     HHVM_ME(ReflectionFunctionAbstract, getReifiedTypeParamInfo);
     HHVM_ME(ReflectionFunctionAbstract, getCoeffects);
+    HHVM_ME(ReflectionFunctionAbstract, getModule);
     HHVM_ME(ReflectionFunctionAbstract, returnsReadonly);
 
     HHVM_ME(ReflectionMethod, __init);

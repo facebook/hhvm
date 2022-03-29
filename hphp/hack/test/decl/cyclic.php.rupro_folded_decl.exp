@@ -21,14 +21,12 @@ FoldedClass {
         "\\B",
     },
     decl_errors: [
-        Primary(
-            CyclicClassDef(
-                Pos(root|cyclic.php, 3:17-18),
-                [
-                    "\\A",
-                    "\\B",
-                ],
-            ),
+        CyclicClassDef(
+            Pos(root|cyclic.php, 3:17-18),
+            [
+                "\\A",
+                "\\B",
+            ],
         ),
     ],
 }

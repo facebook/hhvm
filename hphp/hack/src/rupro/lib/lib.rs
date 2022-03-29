@@ -13,6 +13,7 @@ pub mod todo;
 pub mod ast_provider;
 pub mod cache;
 pub mod decl_defs;
+pub mod decl_error;
 pub mod decl_parser;
 pub mod dependency_registrar;
 pub mod errors;
@@ -33,11 +34,6 @@ pub mod typing_ctx;
 pub mod typing_decl_provider;
 pub mod typing_defs;
 pub mod typing_error;
-pub mod typing_local_types;
 pub mod typing_prop;
-pub mod typing_return;
 pub mod typing_toplevel;
 pub mod utils;
-
-// TODO(hverr): clean up imports
-pub use typing::typing_env;

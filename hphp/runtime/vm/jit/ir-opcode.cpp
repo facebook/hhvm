@@ -598,6 +598,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EndInlining:
   case EnterPrologue:
   case EnterTCUnwind:
+  case EnterTranslation:
   case EqArrayDataPtr:
   case EqBool:
   case EqCls:
@@ -609,6 +610,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EqRes:
   case EqStr:
   case EqStrPtr:
+  case ExitPrologue:
   case ExtendsClass:
   case FinishMemberOp:
   case Floor:
@@ -636,6 +638,7 @@ bool opcodeMayRaise(Opcode opc) {
   case IncRef:
   case IncStat:
   case InitDictElem:
+  case InitFrame:
   case InitObjMemoSlots:
   case InitObjProps:
   case InitStructElem:

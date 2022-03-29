@@ -502,7 +502,10 @@ impl From<(Option<&obr::decl_defs::Element<'_>>, ty::ConsistentKind)> for folded
     }
 }
 
-impl<R: Reason> From<obr::decl_defs::DeclError<'_>> for crate::typing_error::TypingError<R> {
+impl<P> From<obr::decl_defs::DeclError<'_>> for crate::decl_error::DeclError<P>
+where
+    P: for<'a> From<&'a obr::pos::Pos<'a>>,
+{
     fn from(decl_error: obr::decl_defs::DeclError<'_>) -> Self {
         use obr::decl_defs::DeclError as Obr;
         match decl_error {
@@ -513,19 +516,16 @@ impl<R: Reason> From<obr::decl_defs::DeclError<'_>> for crate::typing_error::Typ
                 parent_pos,
                 parent_kind,
                 parent_name,
-            } => Self::primary(crate::typing_error::Primary::WrongExtendKind {
+            } => Self::WrongExtendKind {
                 pos: pos.into(),
                 kind,
                 name: name.into(),
                 parent_pos: parent_pos.into(),
                 parent_kind,
                 parent_name: parent_name.into(),
-            }),
+            },
             Obr::CyclicClassDef { pos, stack } => {
-                Self::primary(crate::typing_error::Primary::CyclicClassDef(
-                    pos.into(),
-                    stack.iter().copied().map(Into::into).collect(),
-                ))
+                Self::CyclicClassDef(pos.into(), stack.iter().copied().map(Into::into).collect())
             }
         }
     }

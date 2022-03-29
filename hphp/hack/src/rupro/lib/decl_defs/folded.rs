@@ -7,8 +7,8 @@ use crate::decl_defs::{
     ty::ConsistentKind, ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef,
     ClassEltFlags, DeclTy, EnumType, Tparam, Typeconst, WhereConstraint, XhpAttribute,
 };
+use crate::decl_error::DeclError;
 use crate::reason::Reason;
-use crate::typing_error::TypingError;
 use serde::{Deserialize, Serialize};
 
 use eq_modulo_pos::EqModuloPos;
@@ -182,7 +182,7 @@ pub struct FoldedClass<R: Reason> {
     pub req_ancestors_extends: TypeNameIndexSet,
     pub sealed_whitelist: Option<TypeNameIndexSet>,
     pub deferred_init_members: PropNameIndexSet,
-    pub decl_errors: Box<[TypingError<R>]>,
+    pub decl_errors: Box<[DeclError<R::Pos>]>,
 }
 
 impl<R: Reason> FoldedClass<R> {

@@ -236,6 +236,15 @@ let rec try_push_like env ty =
         Some (mk (r, Ttuple tyl))
       else
         None )
+  | (r, Tfun ft) ->
+    let (changed, ret_ty) = make_like false ft.ft_ret.et_type in
+    ( env,
+      if changed then
+        Some
+          (mk
+             (r, Tfun { ft with ft_ret = { ft.ft_ret with et_type = ret_ty } }))
+      else
+        None )
   | (r, Tshape (kind, fields)) ->
     let add_like_to_shape_field changed _name { sft_optional; sft_ty } =
       let (changed, sft_ty) = make_like changed sft_ty in

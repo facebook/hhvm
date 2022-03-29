@@ -6,8 +6,8 @@ use crate::reason::Reason;
 use crate::tast;
 use crate::typing::ast::typing_localize::LocalizeEnv;
 use crate::typing::ast::typing_trait::TC;
+use crate::typing::env::typing_env::TEnv;
 use crate::typing::hint_utils::HintUtils;
-use crate::typing::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use crate::typing_defs::{ParamMode, Ty};
 use crate::utils::core::LocalId;
@@ -23,9 +23,9 @@ impl<R: Reason> TC<R> for oxidized::aast::FunParam<(), ()> {
             None => Ty::any(R::witness(R::Pos::from(&self.pos))),
             Some(ty) => ty.infer(env, LocalizeEnv::no_subst())?,
         };
-        assert!(self.expr.is_none(), "unimplemented");
-        assert!(self.user_attributes.is_empty(), "unimplemented");
-        assert!(self.type_hint.1.is_some(), "unimplemented");
+        rupro_todo_assert!(self.expr.is_none(), AST);
+        rupro_todo_assert!(self.user_attributes.is_empty(), AST);
+        rupro_todo_assert!(self.type_hint.1.is_some(), AST);
 
         let name = Symbol::new(&self.name);
         let pos = R::Pos::from(&self.pos);

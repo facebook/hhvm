@@ -27,7 +27,7 @@ impl HintUtils {
         match &*hint.1 {
             Happly(id, argl) => DeclTy::apply(r, id.into(), argl.iter().map(Self::hint).collect()),
             Hprim(p) => DeclTy::prim(r, *p),
-            h => unimplemented!("{:?}", h),
+            h => rupro_todo!(AST, "{:?}", h),
         }
     }
 }

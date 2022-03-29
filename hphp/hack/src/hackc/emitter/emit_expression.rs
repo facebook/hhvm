@@ -32,7 +32,7 @@ use oxidized::{
 };
 use regex::Regex;
 use runtime::TypedValue;
-use std::{borrow::Cow, collections::BTreeMap, iter, result::Result as StdResult, str::FromStr};
+use std::{borrow::Cow, collections::BTreeMap, iter, str::FromStr};
 use symbol_refs_state::IncludePath;
 
 #[derive(Debug)]
@@ -223,7 +223,7 @@ mod inout_locals {
             &mut self,
             c: &mut Ctx<'r, 'ast, 'arena>,
             p: &'ast ast::Expr_,
-        ) -> std::result::Result<(), ()> {
+        ) -> Result<(), ()> {
             // f(inout $v) or f(&$v)
             if let ast::Expr_::Call(expr) = p {
                 let (_, _, args, uarg) = &**expr;
@@ -284,7 +284,7 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
     tparams: &[&str],
     targ_map: &IndexSet<&str>,
     hint: &aast::Hint,
-) -> std::result::Result<InstrSeq<'arena>, instruction_sequence::Error> {
+) -> Result<InstrSeq<'arena>> {
     let targ_map: BTreeMap<&str, i64> = targ_map
         .iter()
         .enumerate()
@@ -1213,7 +1213,7 @@ fn non_numeric(s: &str) -> bool {
         static ref OCTAL_RADIX: u32 = 8;
         static ref BINARY_RADIX: u32 = 2;
     }
-    fn int_from_str(s: &str) -> std::result::Result<i64, ()> {
+    fn int_from_str(s: &str) -> Result<i64, ()> {
         // Note(hrust): OCaml Int64.of_string reads decimal, hexadecimal, octal, and binary
         (if HEX.is_match(s) {
             u64::from_str_radix(&HEX.replace(s, "${sign}${digits}"), *HEX_RADIX).map(|x| x as i64)
@@ -1228,7 +1228,7 @@ fn non_numeric(s: &str) -> bool {
         })
         .map_err(|_| ())
     }
-    fn float_from_str_radix(s: &str, radix: u32) -> std::result::Result<f64, ()> {
+    fn float_from_str_radix(s: &str, radix: u32) -> Result<f64, ()> {
         let i = i64::from_str_radix(&s.replace(".", ""), radix).map_err(|_| ())?;
         Ok(match s.matches('.').count() {
             0 => i as f64,
@@ -1250,7 +1250,7 @@ fn non_numeric(s: &str) -> bool {
             false
         }
     }
-    fn float_from_str(s: &str) -> std::result::Result<f64, ()> {
+    fn float_from_str(s: &str) -> Result<f64, ()> {
         // Note(hrust): OCaml float_of_string ignores leading whitespace,
         // reads decimal and hexadecimal
         let s = s.trim_start();
@@ -6332,16 +6332,12 @@ fn fixup_type_arg<'a, 'b, 'arena>(
             self
         }
 
-        fn visit_hint_fun(
-            &mut self,
-            c: &mut (),
-            hf: &ast::HintFun,
-        ) -> StdResult<(), Option<Error>> {
+        fn visit_hint_fun(&mut self, c: &mut (), hf: &ast::HintFun) -> Result<(), Option<Error>> {
             hf.param_tys.accept(c, self.object())?;
             hf.return_ty.accept(c, self.object())
         }
 
-        fn visit_hint(&mut self, c: &mut (), h: &ast::Hint) -> StdResult<(), Option<Error>> {
+        fn visit_hint(&mut self, c: &mut (), h: &ast::Hint) -> Result<(), Option<Error>> {
             use ast::{Hint_ as H_, Id};
             match h.1.as_ref() {
                 H_::Happly(Id(_, id), _)
@@ -6358,7 +6354,7 @@ fn fixup_type_arg<'a, 'b, 'arena>(
             h.recurse(c, self.object())
         }
 
-        fn visit_hint_(&mut self, c: &mut (), h: &ast::Hint_) -> StdResult<(), Option<Error>> {
+        fn visit_hint_(&mut self, c: &mut (), h: &ast::Hint_) -> Result<(), Option<Error>> {
             use ast::{Hint_ as H_, Id};
             match h {
                 H_::Happly(Id(_, id), _) if self.erased_tparams.contains(&id.as_str()) => Err(None),
@@ -6377,12 +6373,12 @@ fn fixup_type_arg<'a, 'b, 'arena>(
             self
         }
 
-        fn visit_hint_fun(&mut self, c: &mut (), hf: &mut ast::HintFun) -> StdResult<(), ()> {
+        fn visit_hint_fun(&mut self, c: &mut (), hf: &mut ast::HintFun) -> Result<(), ()> {
             <Vec<ast::Hint> as NodeMut<Self::Params>>::accept(&mut hf.param_tys, c, self.object())?;
             <ast::Hint as NodeMut<Self::Params>>::accept(&mut hf.return_ty, c, self.object())
         }
 
-        fn visit_hint_(&mut self, c: &mut (), h: &mut ast::Hint_) -> StdResult<(), ()> {
+        fn visit_hint_(&mut self, c: &mut (), h: &mut ast::Hint_) -> Result<(), ()> {
             use ast::{Hint_ as H_, Id};
             match h {
                 H_::Happly(Id(_, id), _) if self.erased_tparams.contains(&id.as_str()) => {
@@ -6437,7 +6433,7 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
             self
         }
 
-        fn visit_hint_(&mut self, c: &mut (), h_: &'ast ast::Hint_) -> StdResult<(), ()> {
+        fn visit_hint_(&mut self, c: &mut (), h_: &'ast ast::Hint_) -> Result<(), ()> {
             use ast::{Hint_ as H_, Id};
             match h_ {
                 H_::Haccess(_, sids) => Ok(sids.iter().for_each(|Id(_, name)| self.add_name(name))),
@@ -6504,7 +6500,7 @@ pub fn get_local<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     s: &str,
-) -> std::result::Result<Local<'arena>, instruction_sequence::Error> {
+) -> Result<Local<'arena>> {
     let alloc: &'arena bumpalo::Bump = env.arena;
     if s == special_idents::DOLLAR_DOLLAR {
         match &env.pipe_var {
@@ -6666,7 +6662,7 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expr: &ast::Expr,
     label: Label,
-) -> std::result::Result<EmitJmpResult<'arena>, instruction_sequence::Error> {
+) -> Result<EmitJmpResult<'arena>> {
     let ast::Expr(_, pos, expr_) = expr;
     let opt = optimize_null_checks(e);
     Ok(match ast_constant_folder::expr_to_typed_value(e, expr) {

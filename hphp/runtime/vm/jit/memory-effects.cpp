@@ -1302,7 +1302,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AFBasePtr, AFBasePtr);
 
   case DefFuncEntryFP:
-    return may_load_store(livefp(inst.src(0)), livefp(inst.dst()));
+    return may_load_store(AFBasePtr, AFBasePtr | AFMeta { inst.dst() });
+
+  case InitFrame:
+    /* The last opcode of prologues. Does not modify any defined frame. */
+    return may_load_store(AEmpty, AEmpty);
 
   case LdARFlags:
     return PureLoad { AFMeta { inst.src(0) }};
@@ -1354,6 +1358,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefRegSP:
   case EndGuards:
   case EnterPrologue:
+  case EnterTranslation:
   case EqBool:
   case EqCls:
   case EqLazyCls:
@@ -1363,6 +1368,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqDbl:
   case EqInt:
   case EqPtrIter:
+  case ExitPrologue:
   case GetDictPtrIter:
   case GetVecPtrIter:
   case GteBool:

@@ -754,7 +754,7 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
       let source = string_opt "experiments_config_source" config in
       let meta =
         if update then
-          match Experiments_config_file.update ~file ~source ~ttl with
+          match Experiments_config_file.update ~silent ~file ~source ~ttl with
           | Ok meta -> meta
           | Error message -> message
         else

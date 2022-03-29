@@ -113,6 +113,24 @@ void storeVmsp(Vout& v) { v << store{rvmsp(), rvmtl()[rds::kVmspOff]}; }
 void storeVMRegs(Vout& v) { storeVmfp(v); storeVmsp(v); }
 
 /*
+ * Pop frame from the VM stack to the func entry registers and unlink it.
+ */
+void popFrameToFuncEntryRegs(Vout& v) {
+  v << copy{rvmfp(), rvmsp()};
+  v << pushm{Vreg(rvmsp()) + AROFF(m_savedRip)};
+  v << load{Vreg(rvmsp()) + AROFF(m_sfp), rvmfp()};
+}
+
+/*
+ * Push frame from the func entry registers to the VM stack and link it.
+ */
+void pushFrameFromFuncEntryRegs(Vout& v) {
+  v << store{rvmfp(), Vreg(rvmsp()) + AROFF(m_sfp)};
+  v << popm{Vreg(rvmsp()) + AROFF(m_savedRip)};
+  v << copy{rvmsp(), rvmfp()};
+}
+
+/*
  * Load and store the PHP return registers from/to the top of the VM stack.
  *
  * Note that we don't do loadb{}/storeb{} for the type register, because we
@@ -704,13 +722,14 @@ TCA emitHandleServiceRequest(CodeBlock& cb, DataBlock& data, Handler handler) {
 
 template<class Handler>
 TCA emitHandleServiceRequestFE(CodeBlock& cb, DataBlock& data,
-                               Handler handler) {
+                               Handler handler, bool pushFrame) {
   alignCacheLine(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
     auto const bcOff = v.makeReg();
     v << copy{rarg(0), bcOff};
 
+    if (pushFrame) pushFrameFromFuncEntryRegs(v);
     storeVmfp(v);
 
     auto const ret = v.makeReg();
@@ -723,11 +742,10 @@ TCA emitHandleServiceRequestFE(CodeBlock& cb, DataBlock& data,
     };
 
     // We are going to jump either to a translation, or to a resume helper
-    // operating in a TC context. The latter requires rvmsp(). Luckily,
-    // the `handler' synced vmsp(), so load it from there.
-    loadVmsp(v);
-
-    v << jmpr{ret, vm_regs_with_sp()};
+    // operating in a TC context. Both expect the callee frame in func entry
+    // regs, so move it there from the VM stack.
+    popFrameToFuncEntryRegs(v);
+    v << jmpr{ret, func_entry_regs()};
   });
 }
 
@@ -735,17 +753,19 @@ TCA emitHandleTranslate(CodeBlock& cb, DataBlock& data) {
   return emitHandleServiceRequest(cb, data, svcreq::handleTranslate);
 }
 TCA emitHandleTranslateFE(CodeBlock& cb, DataBlock& data) {
-  return emitHandleServiceRequestFE(cb, data, svcreq::handleTranslateFuncEntry);
+  return emitHandleServiceRequestFE(
+    cb, data, svcreq::handleTranslateFuncEntry, true);
 }
 TCA emitHandleRetranslate(CodeBlock& cb, DataBlock& data) {
   return emitHandleServiceRequest(cb, data, svcreq::handleRetranslate);
 }
 TCA emitHandleRetranslateFE(CodeBlock& cb, DataBlock& data) {
   return emitHandleServiceRequestFE(
-    cb, data, svcreq::handleRetranslateFuncEntry);
+    cb, data, svcreq::handleRetranslateFuncEntry, true);
 }
 TCA emitHandleRetranslateOpt(CodeBlock& cb, DataBlock& data) {
-  return emitHandleServiceRequestFE(cb, data, svcreq::handleRetranslateOpt);
+  return emitHandleServiceRequestFE(
+    cb, data, svcreq::handleRetranslateOpt, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -819,8 +839,15 @@ TCA emitResumeHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
     v << jmpr{handler, vm_regs_with_sp() | rret(1)};
   });
 
+  us.interpToTCFuncEntry = vwrap(cb, data, [&] (Vout& v) {
+    auto const handler = v.makeReg();
+    v << copy{rret(1), handler};
+    popFrameToFuncEntryRegs(v);
+    v << jmpr{handler, func_entry_regs()};
+  });
+
   us.interpToTCRet = vwrap(cb, data, [] (Vout& v) {
-      auto const handler = v.makeReg();
+    auto const handler = v.makeReg();
     v << copy{rret(1), handler};
     loadReturnRegs(v);
     v << jmpr{handler, php_return_regs()};
@@ -828,7 +855,13 @@ TCA emitResumeHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
 
   auto const emitOne = [&] (svcreq::ResumeFlags flags, TCA& interp, TCA& tc) {
     tc = vwrap(cb, data, [&] (Vout& v) {
-      storeVMRegs(v);
+      if (flags.m_funcEntry) {
+        pushFrameFromFuncEntryRegs(v);
+        storeVmfp(v);
+        // vmsp() will be synced by handleResume()
+      } else {
+        storeVMRegs(v);
+      }
       v << fallthru{vm_regs_with_sp()};
     });
     interp = vwrap(cb, data, [&] (Vout& v) {
@@ -1421,8 +1454,9 @@ void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff) {
   auto const helper = sk.funcEntry()
     ? tc::ustubs().interpHelperFuncEntryFromTC
     : tc::ustubs().interpHelperFromTC;
-  if (sk.funcEntry()) sk.advance();
-  if (sk.resumeMode() == ResumeMode::None) {
+  if (sk.funcEntry()) {
+    sk.advance();
+  } else if (sk.resumeMode() == ResumeMode::None) {
     auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
     v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
   }
@@ -1434,8 +1468,9 @@ void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
   auto const helper = sk.funcEntry()
     ? tc::ustubs().interpHelperNoTranslateFuncEntryFromTC
     : tc::ustubs().interpHelperNoTranslateFromTC;
-  if (sk.funcEntry()) sk.advance();
-  if (sk.resumeMode() == ResumeMode::None) {
+  if (sk.funcEntry()) {
+    sk.advance();
+  } else if (sk.resumeMode() == ResumeMode::None) {
     auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
     v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
   }

@@ -7,6 +7,8 @@
 pub enum RuproTodo {
     /// AST nodes or variants of AST nodes that are not yet supported.
     AST,
+    /// An error should be registered in certain situations.
+    MissingError,
     /// Variance annotations, or propagation (during type inference) is not yet
     /// implemented.
     Variance,
@@ -23,8 +25,8 @@ pub enum RuproTodo {
     Coeffects,
     /// Fake members and refinements are not yet implemented.
     FakeMembersAndRefinement,
-    /// Awaitable is not yet impelemented.
-    Awaitable,
+    /// Awaitable/Async is not yet impelemented.
+    AwaitableAsync,
     /// Using variables are not yet implemented.
     UsingVar,
     /// Dependent type of a local expression is not yet implemented.
@@ -42,12 +44,41 @@ pub enum RuproTodo {
     Disposable,
     /// No calls into subtyping from within typing yet.
     SubtypeCheck,
-    /// No legacy or sound dynamic.
+    /// No legacy or sound dynamic (or enforceability concept).
     Dynamic,
     /// No flow-based continuation typing yet.
     Flow,
     /// Terminality checks are not implemented, see `Typing_func_terminality.ml`.
     Terminality,
+    /// Some logic that is specialized for hhi files is not implemented.
+    Hhi,
+    /// Logic that registered information in the environment to be saved in the
+    /// `SavedEnv` is not yet implemented.
+    SavedEnv,
+    /// The `DisableTypecheckerInternal` attribute is not yet implemented.
+    DisableTypecheckerInternalAttribute,
+    /// Abstract functions/methods are not yet implemented.
+    Abstract,
+    /// Generators are not yet implemented.
+    Generators,
+    /// A collection of random wellformedness checks. Such as the ones in
+    /// `Typing_type_wellformedness{.fun,...}` and
+    /// `Decl_fun_utils.{check_param,...}`
+    Wellformedness,
+    /// Typing logic related to modules.
+    Modules,
+    /// Generic parameters and there where constraints.
+    GenericParameters,
+    /// Bind the `$this` variable in the local environment.
+    BindThis,
+    /// Class hierarchy checks are not yet implemented.
+    ClassHierarchyChecks,
+    /// Union and intersection simplification is not yet implemented.
+    UnionsIntersections,
+    /// Naming logic that is missing.
+    Naming,
+    /// Some specialized localization logic.
+    Localization,
 }
 
 macro_rules! rupro_todo_assert {

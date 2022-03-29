@@ -402,6 +402,7 @@ JitResumeAddr handleResume(ResumeFlags flags) {
   if (flags.m_funcEntry) {
     assertx(sk.resumeMode() == ResumeMode::None);
     sk = SrcKey { sk.func(), sk.offset(), SrcKey::FuncEntryTag {} };
+    vmsp() = Stack::frameStackBase(vmfp());
   }
   FTRACE(2, "handleResume: sk: {}\n", showShort(sk));
 

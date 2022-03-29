@@ -5,12 +5,12 @@
 
 use super::{fold::DeclFolder, DeclName, Error, Result, TypeDecl};
 use crate::cache::Cache;
-use crate::decl_defs::{ConstDecl, DeclTy, DeclTy_, FoldedClass, FunDecl, ShallowClass};
+use crate::decl_defs::{ConstDecl, DeclTy, FoldedClass, FunDecl, ShallowClass};
+use crate::decl_error::DeclError;
 use crate::dependency_registrar::DependencyName;
 use crate::dependency_registrar::DependencyRegistrar;
 use crate::reason::Reason;
 use crate::shallow_decl_provider::{self, ShallowDeclProvider};
-use crate::typing_error::{Primary, TypingError};
 use oxidized::global_options::GlobalOptions;
 use pos::{
     ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameIndexMap,
@@ -135,14 +135,14 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     fn detect_cycle(
         &self,
         stack: &mut TypeNameIndexSet,
-        errors: &mut Vec<TypingError<R>>,
+        errors: &mut Vec<DeclError<R::Pos>>,
         pos_id: &Positioned<TypeName, R::Pos>,
     ) -> bool {
         if stack.contains(&pos_id.id()) {
-            errors.push(TypingError::primary(Primary::CyclicClassDef(
+            errors.push(DeclError::CyclicClassDef(
                 pos_id.pos().clone(),
                 stack.iter().copied().collect(),
-            )));
+            ));
             true
         } else {
             false
@@ -152,22 +152,17 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     fn decl_class_type(
         &self,
         stack: &mut TypeNameIndexSet,
-        acc: &mut TypeNameIndexMap<Arc<FoldedClass<R>>>,
-        errors: &mut Vec<TypingError<R>>,
+        errors: &mut Vec<DeclError<R::Pos>>,
         ty: &DeclTy<R>,
-    ) -> Result<()> {
-        match &**ty.node() {
-            DeclTy_::DTapply(id_and_args) => {
-                let pos_id = &id_and_args.0;
-                if !self.detect_cycle(stack, errors, pos_id) {
-                    if let Some(folded_decl) = self.get_folded_class_impl(stack, pos_id.id())? {
-                        acc.insert(pos_id.id(), folded_decl);
-                    }
+    ) -> Result<Option<(TypeName, Arc<FoldedClass<R>>)>> {
+        if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
+            if !self.detect_cycle(stack, errors, pos_id) {
+                if let Some(folded_decl) = self.get_folded_class_impl(stack, pos_id.id())? {
+                    return Ok(Some((pos_id.id(), folded_decl)));
                 }
             }
-            _ => {}
         }
-        Ok(())
+        Ok(None)
     }
 
     fn parent_error(sc: &ShallowClass<R>, parent: &DeclTy<R>, err: Error) -> Error {
@@ -214,50 +209,27 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     fn decl_class_parents(
         &self,
         stack: &mut TypeNameIndexSet,
-        errors: &mut Vec<TypingError<R>>,
+        errors: &mut Vec<DeclError<R::Pos>>,
         sc: &ShallowClass<R>,
     ) -> Result<TypeNameIndexMap<Arc<FoldedClass<R>>>> {
-        let mut acc = Default::default();
-        for ty in sc.extends.iter() {
-            self.decl_class_type(stack, &mut acc, errors, ty)
-                .map_err(|err| Self::parent_error(sc, ty, err))?;
-            self.register_extends_dependency(ty, sc)?;
-        }
-        for ty in sc.implements.iter() {
-            self.decl_class_type(stack, &mut acc, errors, ty)
-                .map_err(|err| Self::parent_error(sc, ty, err))?;
-            self.register_extends_dependency(ty, sc)?;
-        }
-        for ty in sc.uses.iter() {
-            self.decl_class_type(stack, &mut acc, errors, ty)
-                .map_err(|err| Self::parent_error(sc, ty, err))?;
-            self.register_extends_dependency(ty, sc)?;
-        }
-        for ty in sc.xhp_attr_uses.iter() {
-            self.decl_class_type(stack, &mut acc, errors, ty)
-                .map_err(|err| Self::parent_error(sc, ty, err))?;
-            self.register_extends_dependency(ty, sc)?;
-        }
-        for ty in sc.req_extends.iter() {
-            self.decl_class_type(stack, &mut acc, errors, ty)
-                .map_err(|err| Self::parent_error(sc, ty, err))?;
-            self.register_extends_dependency(ty, sc)?;
-        }
-        for ty in sc.req_implements.iter() {
-            self.decl_class_type(stack, &mut acc, errors, ty)
-                .map_err(|err| Self::parent_error(sc, ty, err))?;
-            self.register_extends_dependency(ty, sc)?;
-        }
-        for ty in (sc.enum_type.as_ref())
-            .map_or([].as_slice(), |et| &et.includes)
-            .iter()
-        {
-            self.decl_class_type(stack, &mut acc, errors, ty)
-                .map_err(|err| Self::parent_error(sc, ty, err))?;
-            self.register_extends_dependency(ty, sc)?;
-        }
-
-        Ok(acc)
+        (sc.extends.iter())
+            .chain(sc.implements.iter())
+            .chain(sc.uses.iter())
+            .chain(sc.xhp_attr_uses.iter())
+            .chain(sc.req_extends.iter())
+            .chain(sc.req_implements.iter())
+            .chain(
+                (sc.enum_type.as_ref())
+                    .map_or([].as_slice(), |et| &et.includes)
+                    .iter(),
+            )
+            .map(|ty| {
+                self.register_extends_dependency(ty, sc)?;
+                self.decl_class_type(stack, errors, ty)
+                    .map_err(|err| Self::parent_error(sc, ty, err))
+            })
+            .filter_map(Result::transpose)
+            .collect()
     }
 
     fn decl_class(

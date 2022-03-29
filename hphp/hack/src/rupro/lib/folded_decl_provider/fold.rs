@@ -10,10 +10,10 @@ use crate::decl_defs::{
     FoldedElement, Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,
     ShallowTypeconst, TaccessType, TypeConst, Typeconst, Visibility,
 };
+use crate::decl_error::DeclError;
 use crate::dependency_registrar::DependencyRegistrar;
 use crate::reason::Reason;
 use crate::special_names as sn;
-use crate::typing_error::{Primary, TypingError};
 use eq_modulo_pos::EqModuloPos;
 use oxidized::global_options::GlobalOptions;
 use pos::{
@@ -39,7 +39,7 @@ pub struct DeclFolder<'a, R: Reason> {
     /// The folded decls of all (recursive) ancestors of `child`.
     parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
     /// Hack errors which will be written to `child`'s folded decl.
-    errors: Vec<TypingError<R>>,
+    errors: Vec<DeclError<R::Pos>>,
 }
 
 #[derive(PartialEq)]
@@ -55,7 +55,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         dependency_registrar: &'a dyn DependencyRegistrar,
         child: &'a ShallowClass<R>,
         parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
-        errors: Vec<TypingError<R>>,
+        errors: Vec<DeclError<R::Pos>>,
     ) -> Result<Arc<FoldedClass<R>>> {
         let this = Self {
             opts,
@@ -385,16 +385,14 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             (ClassishKind::Cclass(k), ClassishKind::Cenum | ClassishKind::CenumClass(_))
                 if k.is_abstract() => {}
             // What is disallowed
-            _ => self
-                .errors
-                .push(TypingError::primary(Primary::WrongExtendKind {
-                    parent_pos: parent_pos.clone(),
-                    parent_kind,
-                    parent_name,
-                    pos: self.child.name.pos().clone(),
-                    kind: self.child.kind,
-                    name: self.child.name.id(),
-                })),
+            _ => self.errors.push(DeclError::WrongExtendKind {
+                parent_pos: parent_pos.clone(),
+                parent_kind,
+                parent_name,
+                pos: self.child.name.pos().clone(),
+                kind: self.child.kind,
+                name: self.child.name.id(),
+            }),
         }
     }
 

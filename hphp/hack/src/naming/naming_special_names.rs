@@ -861,16 +861,6 @@ pub mod coeffects {
 
     pub const WRITE_PROPS: &str = "write_props";
 
-    pub const CONTROLLED: &str = "controlled";
-
-    pub const POLICIED_LOCAL: &str = "policied_local";
-
-    pub const POLICIED_SHALLOW: &str = "policied_shallow";
-
-    pub const POLICIED: &str = "policied";
-
-    pub const POLICIED_OF: &str = "policied_of";
-
     pub const LEAK_SAFE: &str = "leak_safe";
 
     pub const ZONED_LOCAL: &str = "zoned_local";
@@ -898,9 +888,7 @@ pub mod coeffects {
     pub fn is_any_zoned(x: &str) -> bool {
         lazy_static! {
             static ref ZONED_SET: HashSet<&'static str> =
-                vec![POLICIED, POLICIED_OF, ZONED, ZONED_WITH]
-                    .into_iter()
-                    .collect();
+                vec![ZONED, ZONED_WITH].into_iter().collect();
         }
         ZONED_SET.contains(x)
     }
@@ -966,11 +954,11 @@ pub mod coeffects {
             RX => Some(Ctx::Rx),
             WRITE_THIS_PROPS => Some(Ctx::WriteThisProps),
             WRITE_PROPS => Some(Ctx::WriteProps),
-            POLICIED_OF | ZONED_WITH => Some(Ctx::ZonedWith),
-            POLICIED_LOCAL | ZONED_LOCAL => Some(Ctx::ZonedLocal),
-            POLICIED_SHALLOW | ZONED_SHALLOW => Some(Ctx::ZonedShallow),
-            POLICIED | ZONED => Some(Ctx::Zoned),
-            CONTROLLED | LEAK_SAFE => Some(Ctx::LeakSafe),
+            ZONED_WITH => Some(Ctx::ZonedWith),
+            ZONED_LOCAL => Some(Ctx::ZonedLocal),
+            ZONED_SHALLOW => Some(Ctx::ZonedShallow),
+            ZONED => Some(Ctx::Zoned),
+            LEAK_SAFE => Some(Ctx::LeakSafe),
             GLOBALS => Some(Ctx::Globals),
             READ_GLOBALS => Some(Ctx::ReadGlobals),
             _ => None,

@@ -6,7 +6,7 @@ use crate::reason::Reason;
 use crate::tast;
 use crate::typing::ast::typing_expr::TCExprParams;
 use crate::typing::ast::typing_trait::TC;
-use crate::typing::typing_env::TEnv;
+use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 
 impl<R: Reason> TC<R> for oxidized::aast::Stmt<(), ()> {
@@ -42,7 +42,7 @@ fn infer_return<R: Reason>(
         None => rupro_todo!(AST),
         Some(e) => {
             rupro_todo_mark!(InoutParameters);
-            rupro_todo_mark!(Awaitable);
+            rupro_todo_mark!(AwaitableAsync);
             rupro_todo_mark!(BidirectionalTC);
             rupro_todo_mark!(Disposable);
             rupro_todo_mark!(Dynamic);

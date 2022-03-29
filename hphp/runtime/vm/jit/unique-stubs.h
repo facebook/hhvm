@@ -297,8 +297,10 @@ struct UniqueStubs {
    * to one that is compatible with TC, then transfers control to the TC
    * at rret(1). Assumes that reenterTC already synced rvmfp() and rvmsp().
    *
+   * interpToTCFuncEntry: pops frame into func entry registers
    * interpToTCRet: loads caller's return value to rret_data() and rret_type()
    */
+  TCA interpToTCFuncEntry;
   TCA interpToTCRet;
 
   /*

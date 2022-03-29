@@ -446,18 +446,13 @@ void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
   auto const arFlags = gen(env, ConvFuncPrologueFlagsToARFlags, prologueFlags);
   auto const calleeId = cns(env, callee->getFuncId().toInt());
 
-  gen(env, DefFuncEntryFP, FuncData { callee },
-      fp(env), sp(env), arFlags, prologueCtx, calleeId);
-  auto const irSPOff = SBInvOffset { -callee->numSlotsInFrame() };
-  auto const bcSPOff = SBInvOffset { 0 };
-  gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
-
-  // We have updated stack and entered the context of the callee.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  gen(env, InitFrame, FuncData { callee },
+      sp(env), arFlags, prologueCtx, calleeId);
 }
 
 void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
+  gen(env, ExitPrologue);
+
   // Emit the bindjmp for the function body.
   auto const entryOffset = callee->getEntryForNumArgs(argc);
   gen(

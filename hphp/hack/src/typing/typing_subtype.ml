@@ -1581,6 +1581,9 @@ and simplify_subtype_i
         | (_, Tnewtype (name_sub, [_tyarg_sub], _))
           when String.equal name_sub SN.Classes.cSupportDyn ->
           valid env
+        | (_, Tnewtype (name_sub, _, _))
+          when String.equal name_sub SN.Classes.cEnumClassLabel ->
+          valid env
         | (_, Toption ty) ->
           (match deref ty with
           (* Special case mixed <: dynamic for better error message *)

@@ -5,7 +5,7 @@
 use crate::decl_defs::{self, DeclTy, DeclTy_};
 use crate::reason::Reason;
 use crate::typing::ast::typing_trait::TC;
-use crate::typing::typing_env::TEnv;
+use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use crate::typing_decl_provider::{Class, TypeDecl};
 use crate::typing_defs::{Exact, FunParam, FunType, Ty, Ty_};
@@ -47,7 +47,7 @@ fn localize<R: Reason>(env: &TEnv<R>, localize_env: &LocalizeEnv, ty: DeclTy<R>)
         DTprim(p) => Ty::prim(r, *p),
         DTapply(box (pos_id, tyl)) => localize_tapply(env, localize_env, r, pos_id.clone(), tyl)?,
         DTfun(box ft) => localize_ft(env, localize_env, r, ft)?,
-        t => unimplemented!("{:?}", t),
+        t => rupro_todo!(AST, "{:?}", t),
     };
     Ok(res)
 }
@@ -77,11 +77,11 @@ fn localize_class_instantiation<R: Reason>(
 ) -> Result<Ty<R>> {
     use Ty_::*;
     let res = match class_info {
-        None => unimplemented!(),
+        None => rupro_todo!(Localization),
         Some(class_info) => {
-            assert!(class_info.get_enum_type().is_none(), "unimplemented");
-            assert!(class_info.get_tparams().is_empty(), "unimplemented");
-            assert!(ty_args.is_empty(), "unimplemented");
+            rupro_todo_assert!(class_info.get_enum_type().is_none(), AST);
+            rupro_todo_assert!(class_info.get_tparams().is_empty(), AST);
+            rupro_todo_assert!(ty_args.is_empty(), AST);
             Ty::new(r, Tclass(sid, Exact::Nonexact, vec![]))
         }
     };
@@ -94,7 +94,7 @@ fn localize_ft<R: Reason>(
     r: R,
     ft: &decl_defs::FunType<R, DeclTy<R>>,
 ) -> Result<Ty<R>> {
-    assert!(ft.params.is_empty(), "unimplemented");
+    rupro_todo_assert!(ft.params.is_empty(), AST);
     let params: Vec<_> = ft
         .params
         .iter()

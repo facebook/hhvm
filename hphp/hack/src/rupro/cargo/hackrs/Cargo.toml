@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../lib/mod.rs"
+path = "../../lib/lib.rs"
 
 [dependencies]
 aast_parser = { path = "../../../parser/cargo/aast_parser" }

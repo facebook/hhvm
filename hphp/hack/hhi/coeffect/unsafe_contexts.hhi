@@ -31,18 +31,12 @@ namespace HH\Contexts\Unsafe {
   type read_globals = mixed;
   type globals = mixed;
 
-  type controlled = mixed;
+  type leak_safe = mixed;
 
-  type policied = mixed;
-  type policied_shallow = \HH\Capabilities\ImplicitPolicyLocal;
-  type policied_local = \HH\Contexts\defaults;
-  type policied_of<T> = mixed;
-
-  type leak_safe = controlled;
-  type zoned = policied;
-  type zoned_shallow = policied_shallow;
-  type zoned_local = policied_local;
-  type zoned_with<T> = policied_of<T>;
+  type zoned = mixed;
+  type zoned_shallow = \HH\Capabilities\ImplicitPolicyLocal;
+  type zoned_local = \HH\Contexts\defaults;
+  type zoned_with<T> = mixed;
 
   type rx = \HH\Contexts\defaults;
   type rx_shallow = \HH\Contexts\defaults;

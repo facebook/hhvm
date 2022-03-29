@@ -433,6 +433,15 @@ void cgEnterPrologue(IRLS& env, const IRInstruction*) {
   vmain(env) << recordbasenativesp{};
 }
 
+void cgExitPrologue(IRLS& env, const IRInstruction*) {
+  vmain(env) << unrecordbasenativesp{};
+  vmain(env) << unstublogue{};
+}
+
+void cgEnterTranslation(IRLS& env, const IRInstruction*) {
+  vmain(env) << recordbasenativesp{};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(NewRFunc)

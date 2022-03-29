@@ -114,8 +114,7 @@ fn shape_field_to_pair<'arena>(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     sfi: &ShapeFieldInfo,
-) -> std::result::Result<Pair<TypedValue<'arena>, TypedValue<'arena>>, instruction_sequence::Error>
-{
+) -> Result<Pair<TypedValue<'arena>, TypedValue<'arena>>> {
     let (name, is_class_const) = shape_field_name(alloc, &sfi.name);
     let mut r = bumpalo::vec![in alloc;];
     if is_class_const {
@@ -146,7 +145,7 @@ fn shape_info_to_typed_value<'arena>(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     si: &NastShapeInfo,
-) -> std::result::Result<TypedValue<'arena>, instruction_sequence::Error> {
+) -> Result<TypedValue<'arena>> {
     let info = si
         .field_map
         .iter()
@@ -211,10 +210,7 @@ fn get_generic_types<'arena>(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     hints: &[Hint],
-) -> std::result::Result<
-    bumpalo::collections::vec::Vec<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>,
-    instruction_sequence::Error,
-> {
+) -> Result<bumpalo::collections::vec::Vec<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>> {
     Ok(if hints.is_empty() {
         bumpalo::vec![in alloc;]
     } else {
@@ -264,10 +260,7 @@ fn hint_to_type_constant_list<'arena>(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     Hint(_, hint): &Hint,
-) -> std::result::Result<
-    bumpalo::collections::Vec<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>,
-    instruction_sequence::Error,
-> {
+) -> Result<bumpalo::collections::Vec<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>> {
     use aast_defs::Hint_;
     Ok(match hint.as_ref() {
         Hint_::Happly(s, hints) => {
@@ -400,7 +393,7 @@ pub fn hint_to_type_constant<'arena>(
     hint: &Hint,
     is_typedef: bool,
     is_opaque: bool,
-) -> std::result::Result<TypedValue<'arena>, instruction_sequence::Error> {
+) -> Result<TypedValue<'arena>> {
     let mut tconsts = hint_to_type_constant_list(alloc, opts, tparams, targ_map, hint)?;
     if is_typedef {
         tconsts.append(&mut get_typevars(alloc, tparams));
@@ -417,7 +410,7 @@ fn hints_to_type_constant<'arena>(
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     hints: &[Hint],
-) -> std::result::Result<TypedValue<'arena>, instruction_sequence::Error> {
+) -> Result<TypedValue<'arena>> {
     hints
         .iter()
         .map(|h| hint_to_type_constant(alloc, opts, tparams, targ_map, h, false, false))

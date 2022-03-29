@@ -63,31 +63,32 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgInitFrame(IRLS& env, const IRInstruction* inst) {
+  auto const func = inst->extra<InitFrame>()->func;
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const arFlags = srcLoc(env, inst, 1).reg();
+  auto const ctx = srcLoc(env, inst, 2).reg();
+  auto const calleeId = srcLoc(env, inst, 3).reg();
+  auto& v = vmain(env);
+
+  v << storel{calleeId, fp + AROFF(m_funcId)};
+  v << storel{arFlags, fp + AROFF(m_callOffAndFlags)};
+
+  if (func->cls() || func->isClosureBody()) {
+    v << store{ctx, fp + AROFF(m_thisUnsafe)};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedThisSlot, fp + AROFF(m_thisUnsafe));
+  }
+}
+
 void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
-  auto const func = inst->extra<DefFuncEntryFP>()->func;
-  auto const prevFP = srcLoc(env, inst, 0).reg();
-  auto const newFP = srcLoc(env, inst, 1).reg();
-  auto const arFlags = srcLoc(env, inst, 2).reg();
-  auto const ctx = srcLoc(env, inst, 3).reg();
-  auto const calleeId = srcLoc(env, inst, 4).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  v << store{prevFP, newFP + AROFF(m_sfp)};
-  v << unrecordbasenativesp{};
-  v << unstublogue{};
-  v << phplogue{newFP};
-  v << storel{calleeId, newFP + AROFF(m_funcId)};
-  v << storel{arFlags, newFP + AROFF(m_callOffAndFlags)};
-
-  if (func->cls() || func->isClosureBody()) {
-    v << store{ctx, newFP + AROFF(m_thisUnsafe)};
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedThisSlot, newFP + AROFF(m_thisUnsafe));
-  }
-
-  v << copy{newFP, dst};
-  v << pushvmfp{dst};
+  v << store{rvmfp(), Vreg(rvmsp()) + AROFF(m_sfp)};
+  v << phplogue{rvmsp()};
+  v << copy{rvmsp(), rvmfp()};
+  v << defvmfp{dst};
 }
 
 void cgConvFuncPrologueFlagsToARFlags(IRLS& env, const IRInstruction* inst) {

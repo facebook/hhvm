@@ -6,6 +6,7 @@
 use crate::decl_defs::{
     ty::ConsistentKind, ConstDecl, DeclTy, EnumType, FunDecl, Tparam, TypedefDecl,
 };
+use crate::decl_error::DeclError;
 use crate::dependency_registrar::DeclName;
 use crate::reason::Reason;
 use defs::ClassType;
@@ -98,4 +99,5 @@ pub trait Class<R: Reason>: Debug {
 
     fn get_enum_type(&self) -> Option<&EnumType<R>>;
     fn get_tparams(&self) -> &[Tparam<R, DeclTy<R>>];
+    fn decl_errors(&self) -> &[DeclError<R::Pos>];
 }

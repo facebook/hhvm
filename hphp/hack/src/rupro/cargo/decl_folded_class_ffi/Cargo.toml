@@ -11,7 +11,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-hackrs = { path = "../hackrs" }
+hackrs = { path = "../../hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../hackrs_test_utils" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }

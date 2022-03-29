@@ -11,7 +11,7 @@ test = false
 
 [dependencies]
 find_utils = { path = "../../../utils/find_utils" }
-hackrs = { path = "../hackrs" }
+hackrs = { path = "../../hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../hackrs_test_utils" }
 hhi = { path = "../../../hhi/rust" }
 indicatif = { version = "0.15", features = ["with_rayon"] }

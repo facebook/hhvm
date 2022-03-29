@@ -8593,12 +8593,21 @@ and call
               | EnumClassLabelOps.LabelNotFound (te, ty) ->
                 (env, te, ty)
               | _ ->
+                let (env, pess_type) =
+                  match dynamic_func with
+                  | Some Supportdyn_function ->
+                    Typing_array_access.pessimise_type env param.fp_type.et_type
+                  | _ -> (env, param.fp_type.et_type)
+                in
                 let expected =
                   ExpectedTy.make_and_allow_coercion_opt
                     env
                     pos
                     Reason.URparam
-                    param.fp_type
+                    {
+                      et_type = pess_type;
+                      et_enforced = param.fp_type.et_enforced;
+                    }
                 in
                 expr
                   ~accept_using_var:(get_fp_accept_disposable param)

@@ -10,10 +10,6 @@ type cas_failure =
   | Process_failure of string
   | Parse_failure of string
 
-type cas_upload_result
-
-type cas_download_result
-
 type digest = Cas_digest of string [@@deriving show, eq]
 
 type cas_result = {

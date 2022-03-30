@@ -283,15 +283,8 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     in
     let allow_abstract_tconst = allow_abstract_tconst root_ty in
     let ((env, e1), root_ty) = localize ~ety_env env root_ty in
-    let root_pos = get_pos root_ty in
     let ((env, e2), ty) =
-      TUtils.expand_typeconst
-        ety_env
-        env
-        root_ty
-        id
-        ~root_pos
-        ~allow_abstract_tconst
+      TUtils.expand_typeconst ety_env env root_ty id ~allow_abstract_tconst
     in
     (* Elaborate reason with information about expression dependent types and
      * the original location of the Taccess type

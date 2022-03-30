@@ -70,12 +70,7 @@ type aast_result = {
   fi_mode: FileInfo.mode;
   ast: (unit, unit) Aast.program;
   content: string;
-  file: Relative_path.t;
   comments: Scoured_comments.t;
-  (*
-    lowpri_errors_ are exposed to test, it shouldn't be used in prod
-  *)
-  lowpri_errors_: (Pos.t * string) list ref;
 }
 
 (* TODO: Make these not default to positioned_syntax *)
@@ -211,8 +206,6 @@ let process_lowerer_result
           else
             SourceText.text source_text);
         comments = r.scoured_comments;
-        file = env.file;
-        lowpri_errors_ = ref r.lowpri_errors;
       })
 
 let from_text (env : env) (source_text : SourceText.t) : aast_result =

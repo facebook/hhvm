@@ -9,7 +9,6 @@
 open Hh_prelude
 
 type env = {
-  from: string;
   client_id: string;
   root: Path.t;
   ignore_hh_version: bool;
@@ -500,7 +499,6 @@ let env
   let state_path = Option.map ~f:Path.make state_path in
 
   {
-    from;
     client_id;
     root;
     ignore_hh_version;

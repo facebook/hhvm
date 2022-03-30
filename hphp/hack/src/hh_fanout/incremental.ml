@@ -25,10 +25,6 @@ type client_config = {
 }
 
 type typecheck_result = {
-  fanout_files_deps: dep_graph_delta;
-      (** The delta to the dependency graph saved-state. This field is not
-      cumulative, so it must be merged with any previous `fanout_files_deps`.
-      *)
   errors: Errors.t;
       (** The errors in the codebase at this point in time. This field is
       cumulative, so previous cursors need not be consulted. TODO: is that
@@ -327,7 +323,7 @@ class cursor ~client_id ~cursor_state =
           "Got %d new dependency edges as a result of typechecking %d files"
           (HashSet.length fanout_files_deps)
           (Relative_path.Set.cardinal files_to_typecheck);
-        let typecheck_result = { fanout_files_deps; errors } in
+        let typecheck_result = { errors } in
         let cursor =
           new cursor
             ~client_id

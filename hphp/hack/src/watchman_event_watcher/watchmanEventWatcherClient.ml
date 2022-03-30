@@ -36,10 +36,7 @@ module Client_actual = struct
     (* Connection to the Watcher has failed. Cannot read further updates. *)
     | Failed
 
-  type t_ = {
-    state: state ref;
-    root: Path.t;
-  }
+  type t_ = { state: state ref }
 
   type t = t_ option
 
@@ -65,7 +62,7 @@ module Client_actual = struct
       let reader =
         Buffered_line_reader.create @@ Timeout.descr_of_in_channel @@ tic
       in
-      Some { state = ref @@ Unknown reader; root }
+      Some { state = ref @@ Unknown reader }
     with
     | Unix.Unix_error (Unix.ENOENT, _, _) -> None
     | Unix.Unix_error (Unix.ECONNREFUSED, _, _) -> None

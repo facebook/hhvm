@@ -125,8 +125,6 @@ module Nast_helper : sig
 
   val get_typedef_exn : Provider_context.t -> string -> Nast.typedef
 
-  val get_gconst : Provider_context.t -> string -> Nast.gconst option
-
   val get_gconst_exn : Provider_context.t -> string -> Nast.gconst
 
   val get_method : Provider_context.t -> string -> string -> Nast.method_ option
@@ -143,8 +141,6 @@ module Nast_helper : sig
     (unit, unit) Aast.class_typeconst_def option
 
   val get_prop : Provider_context.t -> string -> string -> Nast.class_var option
-
-  val get_module : Provider_context.t -> string -> Nast.module_def option
 
   val is_tydef : Provider_context.t -> string -> bool
 
@@ -241,12 +237,6 @@ end = struct
         ~get_elements:(fun class_ -> class_.c_vars)
         ~get_element_name:(fun class_var -> snd class_var.cv_id))
 
-  let get_module =
-    make_nast_getter
-      ~get_pos:Decl.get_module_pos
-      ~find_in_file:Ast_provider.find_module_in_file
-      ~naming:Naming.module_
-
   let is_tydef ctx nm = Option.is_some @@ get_typedef ctx nm
 
   let is_class ctx nm = Option.is_some @@ get_class ctx nm
@@ -270,11 +260,6 @@ module Dep : sig
     Provider_context.t ->
     Typing_deps.Dep.dependency Typing_deps.Dep.variant ->
     Relative_path.t Hh_prelude.Option.t
-
-  val get_mode :
-    Provider_context.t ->
-    Typing_deps.Dep.dependency Typing_deps.Dep.variant ->
-    FileInfo.mode Hh_prelude.Option.t
 
   val get_origin :
     Provider_context.t ->
@@ -332,47 +317,6 @@ end = struct
 
   let get_relative_path ctx dep =
     Option.map ~f:(fun pos -> Pos.filename pos) @@ get_dep_pos ctx dep
-
-  let get_fun_mode ctx name =
-    Nast_helper.get_fun ctx name
-    |> Option.map ~f:(fun fun_ -> fun_.Aast.fd_mode)
-
-  let get_class_mode ctx name =
-    Nast_helper.get_class ctx name
-    |> Option.map ~f:(fun class_ -> class_.Aast.c_mode)
-
-  let get_typedef_mode ctx name =
-    Nast_helper.get_typedef ctx name
-    |> Option.map ~f:(fun typedef -> typedef.Aast.t_mode)
-
-  let get_gconst_mode ctx name =
-    Nast_helper.get_gconst ctx name
-    |> Option.map ~f:(fun gconst -> gconst.Aast.cst_mode)
-
-  let get_class_or_typedef_mode ctx name =
-    Option.first_some (get_class_mode ctx name) (get_typedef_mode ctx name)
-
-  let get_module_mode ctx name =
-    Nast_helper.get_module ctx name |> Option.map ~f:(fun md -> md.Aast.md_mode)
-
-  let get_mode ctx dep =
-    let open Typing_deps.Dep in
-    match dep with
-    | Fun name -> get_fun_mode ctx name
-    | Type name
-    | Const (name, _)
-    | Method (name, _)
-    | SMethod (name, _)
-    | Prop (name, _)
-    | SProp (name, _)
-    | Constructor name
-    | AllMembers name
-    | Extends name ->
-      get_class_or_typedef_mode ctx name
-    | GConst name
-    | GConstName name ->
-      get_gconst_mode ctx name
-    | Module name -> get_module_mode ctx name
 
   let get_origin ctx cls (dep : 'a Typing_deps.Dep.variant) =
     let open Typing_deps.Dep in
@@ -1820,7 +1764,6 @@ end = struct
       line: int;
       user_attrs: Nast.user_attribute list;
       is_final: bool;
-      is_xhp: bool;
       kind: Ast_defs.classish_kind;
       tparams: Nast.tparam list;
       extends: Aast.class_hint list;
@@ -1836,7 +1779,6 @@ end = struct
           {
             c_name = (pos, name);
             c_user_attributes;
-            c_is_xhp;
             c_final;
             c_kind;
             c_tparams;
@@ -1849,7 +1791,6 @@ end = struct
         line = Pos.line pos;
         user_attrs = c_user_attributes;
         is_final = c_final;
-        is_xhp = c_is_xhp;
         kind = c_kind;
         tparams = c_tparams;
         extends = c_extends;
@@ -2280,8 +2221,6 @@ end = struct
   type t = {
     is_target: bool;
     name: string;
-    mode: FileInfo.mode;
-    path: Relative_path.t option;
     content: Namespaced.t;
   }
 
@@ -2304,10 +2243,6 @@ end = struct
       is_target;
       name =
         Option.value_map ~default:__UNKNOWN_FILE__ ~f:Relative_path.suffix path;
-      mode =
-        Option.(
-          List.hd deps >>= Dep.get_mode ctx |> value ~default:FileInfo.Mstrict);
-      path;
       content =
         Namespaced.unfold
         @@ Grouped.of_deps

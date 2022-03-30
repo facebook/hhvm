@@ -20,7 +20,6 @@ open Hh_prelude
 
 type env = {
   droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant;
-  mode: FileInfo.mode;
   ctx: Provider_context.t;
   type_params: Aast.reify_kind SMap.t;
   (* Need some context to differentiate global consts and other Id's *)
@@ -169,7 +168,6 @@ let handler ctx =
     (* The following are all setting the environments / context correctly *)
     method initial_state =
       {
-        mode = FileInfo.Mstrict;
         droot = Typing_deps.Dep.Fun "";
         ctx;
         type_params = SMap.empty;
@@ -184,7 +182,6 @@ let handler ctx =
         {
           env with
           droot = Typing_deps.Dep.Type (snd c.Aast.c_name);
-          mode = c.Aast.c_mode;
           type_params = extend_type_params SMap.empty c.Aast.c_tparams;
         }
       in
@@ -195,7 +192,6 @@ let handler ctx =
         {
           env with
           droot = Typing_deps.Dep.Type (snd td.Aast.t_name);
-          mode = FileInfo.Mstrict;
           type_params = extend_type_params SMap.empty td.Aast.t_tparams;
         }
       in
@@ -207,7 +203,6 @@ let handler ctx =
         {
           env with
           droot = Typing_deps.Dep.Fun (snd f.Aast.f_name);
-          mode = fd.Aast.fd_mode;
           type_params = extend_type_params env.type_params f.Aast.f_tparams;
         }
       in
@@ -215,11 +210,7 @@ let handler ctx =
 
     method! at_gconst env gconst =
       let new_env =
-        {
-          env with
-          droot = Typing_deps.Dep.GConst (snd gconst.Aast.cst_name);
-          mode = gconst.Aast.cst_mode;
-        }
+        { env with droot = Typing_deps.Dep.GConst (snd gconst.Aast.cst_name) }
       in
       new_env
 

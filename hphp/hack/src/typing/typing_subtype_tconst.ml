@@ -25,7 +25,6 @@ let make_type_const_equal
           ~as_tyvar_with_cnstr
           ty
           tconstid
-          ~root_pos:(get_pos ty)
           ~allow_abstract_tconst:true
           ~ignore_errors:(Option.is_some as_tyvar_with_cnstr)
       in

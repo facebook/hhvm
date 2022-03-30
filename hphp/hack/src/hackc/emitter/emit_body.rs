@@ -65,37 +65,6 @@ bitflags! {
     }
 }
 
-pub fn emit_body_with_default_args<'b, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl>,
-    namespace: RcOc<namespace_env::Env>,
-    body: &'b ast::Program,
-    return_value: InstrSeq<'arena>,
-) -> Result<HhasBody<'arena>> {
-    let args = Args {
-        immediate_tparams: &vec![],
-        class_tparam_names: &[],
-        ast_params: &vec![],
-        ret: None,
-        pos: &Pos::make_none(),
-        deprecation_info: &None,
-        doc_comment: None,
-        default_dropthrough: None,
-        call_context: None,
-        flags: Flags::empty(),
-    };
-    emit_body(
-        alloc,
-        emitter,
-        namespace,
-        AstBody::Defs(body.as_slice()),
-        return_value,
-        Scope::toplevel(),
-        args,
-    )
-    .map(|r| r.0)
-}
-
 pub fn emit_body<'b, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,

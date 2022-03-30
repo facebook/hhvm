@@ -5812,7 +5812,13 @@ and et_splice env p e =
   let (env, ty_res) = Env.fresh_type env p in
   let (env, ty_infer) = Env.fresh_type env p in
   let spliceable_type =
-    MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
+    let raw_spliceable_type =
+      MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
+    in
+    if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+      MakeType.locl_like (Reason.Rsplice p) raw_spliceable_type
+    else
+      raw_spliceable_type
   in
   let (env, ty_err_opt) =
     SubType.sub_type env ty spliceable_type

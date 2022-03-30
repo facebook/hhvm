@@ -404,26 +404,6 @@ let is_has_member t =
   | (_, Thas_member _) -> true
   | _ -> false
 
-let rec is_denotable ty =
-  match get_node ty with
-  | Toption ty -> is_denotable ty
-  | Tunion [ty; ty'] ->
-    begin
-      match (get_node ty, get_node ty') with
-      | (Tprim Aast.(Tfloat | Tstring), Tprim Aast.Tint)
-      | (Tprim Aast.Tint, Tprim Aast.(Tfloat | Tstring)) ->
-        true
-      | _ -> false
-    end
-  | Tunion _
-  | Tintersection _
-  | Tneg _
-  | Tany _
-  | Terr
-  | Tvar _ ->
-    false
-  | _ -> true
-
 let show_phase_ty _ = "<phase_ty>"
 
 let pp_phase_ty _ _ = Printf.printf "%s\n" "<phase_ty>"
@@ -509,6 +489,27 @@ module DependentKind = struct
     String_utils.is_substring "::" s
     || String.equal s Naming_special_names.Typehints.this
 end
+
+let rec is_denotable ty =
+  match get_node ty with
+  | Toption ty -> is_denotable ty
+  | Tunion [ty; ty'] ->
+    begin
+      match (get_node ty, get_node ty') with
+      | (Tprim Aast.(Tfloat | Tstring), Tprim Aast.Tint)
+      | (Tprim Aast.Tint, Tprim Aast.(Tfloat | Tstring)) ->
+        true
+      | _ -> false
+    end
+  | Tunion _
+  | Tintersection _
+  | Tneg _
+  | Tany _
+  | Terr
+  | Tvar _ ->
+    false
+  | Tgeneric (nm, _) -> not (DependentKind.is_generic_dep_ty nm)
+  | _ -> true
 
 module ShapeFieldMap = struct
   include TShapeMap

@@ -8,13 +8,13 @@ use crate::dependency_registrar::{DeclName, DependencyName, DependencyRegistrar}
 use indexmap::map::Entry;
 use pos::{
     ClassConstNameIndexMap, MethodName, MethodNameIndexMap, Pos, PropNameIndexMap,
-    TypeConstNameIndexMap, TypeNameIndexMap,
+    TypeConstNameIndexMap, TypeName, TypeNameIndexMap,
 };
 use std::sync::Arc;
 use ty::decl_defs::{
     folded::Constructor, subst::Subst, ty::ConsistentKind, AbstractTypeconst, Abstraction,
-    CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassishKind, DeclTy, FoldedClass,
-    FoldedElement, ShallowClass, SubstContext, TypeConst, Typeconst,
+    CeVisibility, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass, FoldedElement,
+    ShallowClass, SubstContext, TypeConst, Typeconst,
 };
 use ty::reason::Reason;
 
@@ -312,9 +312,22 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     fn members_from_class(&self, parent_ty: &DeclTy<R>) -> Result<Inherited<R>> {
         fn is_not_private<N>((_, elt): &(&N, &FoldedElement)) -> bool {
             match elt.visibility {
-                CeVisibility::Private(_) if elt.flags.contains(ClassEltFlags::LSB) => true,
+                CeVisibility::Private(_) if elt.is_lsb() => true,
                 CeVisibility::Private(_) => false,
                 _ => true,
+            }
+        }
+        fn chown(elt: FoldedElement, owner: TypeName) -> FoldedElement {
+            match elt.visibility {
+                CeVisibility::Private(_) => FoldedElement {
+                    visibility: CeVisibility::Private(owner),
+                    ..elt
+                },
+                CeVisibility::Protected(_) if !elt.is_synthesized() => FoldedElement {
+                    visibility: CeVisibility::Protected(owner),
+                    ..elt
+                },
+                _ => elt,
             }
         }
 
@@ -332,13 +345,21 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
 
                 let parent_inh = match parent_folded_decl.kind {
                     ClassishKind::Ctrait => Inherited {
-                        // TODO: `chown_private_and_protected`
                         consts,
                         type_consts,
-                        props: parent_folded_decl.props.clone(),
-                        static_props: parent_folded_decl.static_props.clone(),
-                        methods: parent_folded_decl.methods.clone(),
-                        static_methods: parent_folded_decl.static_methods.clone(),
+                        props: (parent_folded_decl.props.iter())
+                            .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
+                            .collect(),
+                        static_props: (parent_folded_decl.static_props.iter())
+                            .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
+                            .collect(),
+                        methods: (parent_folded_decl.methods)
+                            .iter()
+                            .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
+                            .collect(),
+                        static_methods: (parent_folded_decl.static_methods.iter())
+                            .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
+                            .collect(),
                         ..Default::default()
                     },
                     ClassishKind::Cclass(_) | ClassishKind::Cinterface => Inherited {

@@ -53,10 +53,12 @@ pub fn emit_function<'a, 'arena, 'decl>(
     let is_meth_caller = f.name.1.starts_with("\\MethCaller$");
     let call_context = if is_meth_caller {
         match &f.user_attributes[..] {
-            [ast::UserAttribute {
-                name: ast_defs::Id(_, ref s),
-                params,
-            }] if s == "__MethCaller" => match &params[..] {
+            [
+                ast::UserAttribute {
+                    name: ast_defs::Id(_, ref s),
+                    params,
+                },
+            ] if s == "__MethCaller" => match &params[..] {
                 [ast::Expr(_, _, ast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
                     ClassType::from_ast_name_and_mangle(
                         alloc,

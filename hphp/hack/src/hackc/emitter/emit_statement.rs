@@ -513,12 +513,11 @@ fn emit_using<'a, 'arena, 'decl>(
                 tfr::cleanup_try_body(body)
             };
 
-            let emit_finally = |
-                e: &mut Emitter<'arena, 'decl>,
-                local: Local<'arena>,
-                has_await: bool,
-                is_block_scoped: bool,
-            | -> InstrSeq<'arena> {
+            let emit_finally = |e: &mut Emitter<'arena, 'decl>,
+                                local: Local<'arena>,
+                                has_await: bool,
+                                is_block_scoped: bool|
+             -> InstrSeq<'arena> {
                 let (epilogue, async_eager_label) = if has_await {
                     let after_await = e.label_gen_mut().next_regular();
                     (

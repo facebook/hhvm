@@ -3572,16 +3572,14 @@ fn rewrite_effect_polymorphism<'a>(
     // let Tg denote $g's final type (must be a type parameter).
     // add a type parameter "T/[$g::C]"
     // add a where constraint T/[$g::C] = Tg :: C
-    let rewrite_arg_ctx = |
-        env: &mut Env<'a>,
-        tparams: &mut Vec<ast::Tparam>,
-        where_constraints: &mut Vec<ast::WhereConstraintHint>,
-        hint: &mut Hint,
-        param_pos: &Pos,
-        name: &str,
-        context_pos: &Pos,
-        cst: &ast::Id,
-    | match *hint.1 {
+    let rewrite_arg_ctx = |env: &mut Env<'a>,
+                           tparams: &mut Vec<ast::Tparam>,
+                           where_constraints: &mut Vec<ast::WhereConstraintHint>,
+                           hint: &mut Hint,
+                           param_pos: &Pos,
+                           name: &str,
+                           context_pos: &Pos,
+                           cst: &ast::Id| match *hint.1 {
         Happly(ast::Id(_, ref type_name), _) => {
             if !tparams.iter().any(|h| h.name.1 == *type_name) {
                 // If the parameter is X $g, create tparam `T$g as X` and replace $g's type hint
@@ -4841,9 +4839,9 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                                             Ok(n) => enum_vals.push(ast::XhpEnumValue::XEVInt(n)),
                                             Err(_) =>
                                                 // Since we have parse checks for
-                                                // malformed integer literals already,
-                                                // we assume this won't happen and ignore
-                                                // the case.
+                                            // malformed integer literals already,
+                                            // we assume this won't happen and ignore
+                                            // the case.
                                                 {}
                                         },
                                         _ => {}

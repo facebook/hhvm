@@ -781,9 +781,10 @@ where
                     match x.peek_token_kind() {
                         TokenKind::Ctx => {
                             let ctx = x.assert_token(TokenKind::Ctx);
-                            let var = x.with_expression_parser(|p: &mut ExpressionParser<'a, S>| {
-                                p.parse_simple_variable()
-                            });
+                            let var =
+                                x.with_expression_parser(|p: &mut ExpressionParser<'a, S>| {
+                                    p.parse_simple_variable()
+                                });
                             S!(make_function_ctx_type_specifier, x, ctx, var)
                         }
                         TokenKind::Variable => {

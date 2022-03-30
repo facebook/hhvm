@@ -17,5 +17,5 @@ use emit_opcodes_macro::Targets;
 #[repr(C)]
 pub enum Opcode<'arena> {
     // This is filled in by the emit_opcodes macro.  It can be printed using the
-    // "//hphp/hack/src/hackc/hhbc:dump-opcodes" binary.
+// "//hphp/hack/src/hackc/hhbc:dump-opcodes" binary.
 }

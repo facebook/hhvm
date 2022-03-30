@@ -574,52 +574,52 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
     tparams: &[ast::Tparam],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let mut make_param_instr =
-        |param: &HhasParam<'arena>, ast_param: &ast::FunParam| -> Result<InstrSeq<'arena>> {
-            let param_name =
-                || ParamId::ParamNamed(Str::new_str(alloc, param.name.unsafe_as_str()));
-            if param.is_variadic {
-                Ok(instr::empty())
-            } else {
-                use RGH::ReificationLevel as L;
-                match has_type_constraint(env, Option::from(param.type_info.as_ref()), ast_param) {
-                    (L::Unconstrained, _) => Ok(instr::empty()),
-                    (L::Not, _) => Ok(instr::verify_param_type(param_name())),
-                    (L::Maybe, Some(h)) => {
-                        if !RGH::happly_decl_has_reified_generics(emitter, &h) {
-                            Ok(instr::verify_param_type(param_name()))
-                        } else {
-                            Ok(InstrSeq::gather(vec![
-                                emit_expression::get_type_structure_for_hint(
-                                    emitter,
-                                    tparams
-                                        .iter()
-                                        .map(|fp| fp.name.1.as_str())
-                                        .collect::<Vec<_>>()
-                                        .as_slice(),
-                                    &IndexSet::new(),
-                                    &h,
-                                )?,
-                                instr::verify_param_type_ts(param_name()),
-                            ]))
-                        }
+    let mut make_param_instr = |param: &HhasParam<'arena>,
+                                ast_param: &ast::FunParam|
+     -> Result<InstrSeq<'arena>> {
+        let param_name = || ParamId::ParamNamed(Str::new_str(alloc, param.name.unsafe_as_str()));
+        if param.is_variadic {
+            Ok(instr::empty())
+        } else {
+            use RGH::ReificationLevel as L;
+            match has_type_constraint(env, Option::from(param.type_info.as_ref()), ast_param) {
+                (L::Unconstrained, _) => Ok(instr::empty()),
+                (L::Not, _) => Ok(instr::verify_param_type(param_name())),
+                (L::Maybe, Some(h)) => {
+                    if !RGH::happly_decl_has_reified_generics(emitter, &h) {
+                        Ok(instr::verify_param_type(param_name()))
+                    } else {
+                        Ok(InstrSeq::gather(vec![
+                            emit_expression::get_type_structure_for_hint(
+                                emitter,
+                                tparams
+                                    .iter()
+                                    .map(|fp| fp.name.1.as_str())
+                                    .collect::<Vec<_>>()
+                                    .as_slice(),
+                                &IndexSet::new(),
+                                &h,
+                            )?,
+                            instr::verify_param_type_ts(param_name()),
+                        ]))
                     }
-                    (L::Definitely, Some(h)) => {
-                        if !RGH::happly_decl_has_reified_generics(emitter, &h) {
-                            Ok(instr::verify_param_type(param_name()))
-                        } else {
-                            let check = instr::istypel(
-                                Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
-                                IsTypeOp::Null,
-                            );
-                            let verify_instr = instr::verify_param_type_ts(param_name());
-                            RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
-                        }
-                    }
-                    _ => Err(Error::unrecoverable("impossible")),
                 }
+                (L::Definitely, Some(h)) => {
+                    if !RGH::happly_decl_has_reified_generics(emitter, &h) {
+                        Ok(instr::verify_param_type(param_name()))
+                    } else {
+                        let check = instr::istypel(
+                            Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
+                            IsTypeOp::Null,
+                        );
+                        let verify_instr = instr::verify_param_type_ts(param_name());
+                        RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
+                    }
+                }
+                _ => Err(Error::unrecoverable("impossible")),
             }
-        };
+        }
+    };
 
     let ast_params = ast_params
         .iter()

@@ -260,9 +260,7 @@ impl<T: ToOcamlRep> ToOcamlRep for RcOc<T> {
     fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
         let generation = alloc.generation();
         match self.get_cached_value_in_generation(generation) {
-            Some(value) => unsafe {
-                OpaqueValue::from_bits(value)
-            },
+            Some(value) => unsafe { OpaqueValue::from_bits(value) },
             None => {
                 let value = alloc.add(self.as_ref());
                 self.set_cached_value(value.to_bits(), generation);

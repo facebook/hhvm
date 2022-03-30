@@ -1908,13 +1908,12 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             }
         };
 
-    let emit_fcall_func = |
-        e: &mut Emitter<'arena, 'decl>,
-        env,
-        expr: &ast::Expr,
-        fcall_args: FCallArgs<'arena>,
-        caller_readonly_opt: Option<&Pos>,
-    | -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
+    let emit_fcall_func = |e: &mut Emitter<'arena, 'decl>,
+                           env,
+                           expr: &ast::Expr,
+                           fcall_args: FCallArgs<'arena>,
+                           caller_readonly_opt: Option<&Pos>|
+     -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
         let tmp = e.local_gen_mut().get_unnamed();
         // if the original expression was wrapped in readonly, emit a readonly expression here
         let res = if let Some(p) = caller_readonly_opt {
@@ -1944,13 +1943,11 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         Expr_::ObjGet(o) if o.as_ref().3 == ast::PropOrMethod::IsMethod => {
             // Case $x->foo(...).
             // TODO: utilize caller_readonly_opt here for method calls
-            let emit_id = |
-                e: &mut Emitter<'arena, 'decl>,
-                obj,
-                id,
-                null_flavor: &ast::OgNullFlavor,
-                mut fcall_args,
-            | {
+            let emit_id = |e: &mut Emitter<'arena, 'decl>,
+                           obj,
+                           id,
+                           null_flavor: &ast::OgNullFlavor,
+                           mut fcall_args| {
                 let name =
                     method::MethodType::new(Str::new_str(alloc, string_utils::strip_global_ns(id)));
                 let obj = emit_object_expr(e, env, obj)?;
@@ -5279,14 +5276,12 @@ fn emit_base_<'a, 'arena, 'decl>(
         mode
     };
     let local_temp_kind = get_local_temp_kind(env, true, inout_param_info, Some(expr));
-    let emit_default = |
-        e: &mut Emitter<'arena, 'decl>,
-        base_instrs,
-        cls_instrs,
-        setup_instrs,
-        base_stack_size,
-        cls_stack_size,
-    | {
+    let emit_default = |e: &mut Emitter<'arena, 'decl>,
+                        base_instrs,
+                        cls_instrs,
+                        setup_instrs,
+                        base_stack_size,
+                        cls_stack_size| {
         match local_temp_kind {
             Some(local_temp) => {
                 let local = e.local_gen_mut().get_unnamed();

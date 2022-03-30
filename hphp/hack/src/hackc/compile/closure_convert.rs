@@ -7,7 +7,6 @@ use ast_body::AstBody;
 use ast_scope::{Lambda, LongLambda, Scope, ScopeItem};
 use env::emitter::Emitter;
 use global_state::{ClosureEnclosingClassInfo, GlobalState};
-use hash::HashSet;
 use hash::IndexSet;
 use hhas_coeffects::HhasCoeffects;
 use hhbc_assertion_utils::ensure_normal_paramkind;
@@ -36,17 +35,20 @@ use oxidized::{
     s_map::SMap,
 };
 use stack_limit::StackLimit;
-use std::path::PathBuf;
+use std::{borrow::Borrow, path::PathBuf};
 use unique_id_builder::{
     get_unique_id_for_function, get_unique_id_for_main, get_unique_id_for_method,
 };
 
-#[derive(Debug, Clone)] // TODO(hrust): Clone is used when bactracking now, can we somehow avoid it?
+#[derive(Debug, Clone, Default)]
 struct Variables {
     /// all variables declared/used in the scope
-    all_vars: HashSet<String>,
+    all_vars: IndexSet<String>,
     /// names of parameters if scope correspond to a function
-    parameter_names: HashSet<String>,
+    parameter_names: IndexSet<String>,
+    /// If this is a long lambda then the list of explicitly captured vars (if
+    /// any).
+    explicit_capture: IndexSet<String>,
 }
 
 #[derive(Debug, Clone)] // TODO(hrust): do we need clone
@@ -99,7 +101,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
             scope,
             variable_scopes: vec![Variables {
                 all_vars,
-                parameter_names: HashSet::default(),
+                ..Default::default()
             }],
             defined_class_count: class_count,
             defined_function_count: function_count,
@@ -110,53 +112,44 @@ impl<'a, 'arena> Env<'a, 'arena> {
         })
     }
 
-    fn with_function_like_(
+    fn with_function_like(
         &mut self,
         e: ScopeItem<'a, 'arena>,
-        _is_closure_body: bool,
         params: &[FunParam],
         pos: Pos,
         body: &[Stmt],
+        explicit_capture: IndexSet<String>,
     ) -> Result<()> {
         self.pos = pos;
         self.scope.push_item(e);
         let all_vars = get_vars(params, AstBody::Stmts(body))?;
-        Ok(self.variable_scopes.push(Variables {
+        let variables = Variables {
             parameter_names: get_parameter_names(params),
             all_vars,
-        }))
-    }
+            explicit_capture,
+        };
 
-    fn with_function_like(
-        &mut self,
-        e: ScopeItem<'a, 'arena>,
-        is_closure_body: bool,
-        fd: &Fun_,
-    ) -> Result<()> {
-        self.with_function_like_(
-            e,
-            is_closure_body,
-            &fd.params,
-            fd.span.clone(),
-            fd.body.fb_ast.as_slice(),
-        )
+        self.variable_scopes.push(variables);
+        Ok(())
     }
 
     fn with_function(&mut self, fd: &FunDef) -> Result<()> {
         self.with_function_like(
             ScopeItem::Function(ast_scope::Fun::new_rc(fd)),
-            false,
-            &fd.fun,
+            &fd.fun.params,
+            fd.fun.span.clone(),
+            fd.fun.body.fb_ast.as_slice(),
+            Default::default(),
         )
     }
 
     fn with_method(&mut self, md: &Method_) -> Result<()> {
-        self.with_function_like_(
+        self.with_function_like(
             ScopeItem::Method(ast_scope::Method::new_rc(md)),
-            false,
             &md.params,
             md.span.clone(),
             &md.body.fb_ast,
+            Default::default(),
         )
     }
 
@@ -169,19 +162,43 @@ impl<'a, 'arena> Env<'a, 'arena> {
             is_async,
             coeffects,
         };
-        self.with_function_like(ScopeItem::Lambda(lambda), true, fd)
+        self.with_function_like(
+            ScopeItem::Lambda(lambda),
+            &fd.params,
+            fd.span.clone(),
+            fd.body.fb_ast.as_slice(),
+            Default::default(),
+        )
     }
 
-    fn with_longlambda(&mut self, alloc: &'arena bumpalo::Bump, fd: &Fun_) -> Result<()> {
+    fn with_longlambda(
+        &mut self,
+        alloc: &'arena bumpalo::Bump,
+        fd: &Fun_,
+        use_vars_opt: Option<&[Lid]>,
+    ) -> Result<()> {
         let is_async = fd.fun_kind.is_async();
         let coeffects =
             HhasCoeffects::from_ast(alloc, fd.ctxs.as_ref(), &fd.params, vec![], vec![]);
+
+        let explicit_capture: IndexSet<String> =
+            use_vars_opt.map_or_else(Default::default, |vars| {
+                vars.iter()
+                    .map(|Lid(_, (_, name))| name.to_string())
+                    .collect()
+            });
 
         let long_lambda = LongLambda {
             is_async,
             coeffects,
         };
-        self.with_function_like(ScopeItem::LongLambda(long_lambda), true, fd)
+        self.with_function_like(
+            ScopeItem::LongLambda(long_lambda),
+            &fd.params,
+            fd.span.clone(),
+            fd.body.fb_ast.as_slice(),
+            explicit_capture,
+        )
     }
 
     fn with_class(&mut self, cd: &Class_) {
@@ -340,10 +357,17 @@ fn should_capture_var(env: &Env<'_, '_>, var: &str) -> bool {
         match x {
             EitherOrBoth::Right(vars) => return vars.all_vars.contains(var),
             EitherOrBoth::Both(scope, vars) => {
-                if vars.all_vars.contains(var) || vars.parameter_names.contains(var) {
+                if vars.all_vars.contains(var)
+                    || vars.parameter_names.contains(var)
+                    || vars.explicit_capture.contains(var)
+                {
                     return true;
                 }
-                if !scope.is_in_lambda() {
+                if !scope.is_in_lambda() || scope.is_in_long_lambda() {
+                    // A lambda contained within an anonymous function (a 'long'
+                    // lambda) shouldn't capture variables from outside the
+                    // anonymous function unless they're explicitly mentioned in
+                    // the function's use clause.
                     return false;
                 }
             }
@@ -391,11 +415,11 @@ fn add_generic(env: &mut Env<'_, '_>, st: &mut State<'_>, var: &str) {
     }
 }
 
-fn get_vars(params: &[FunParam], body: ast_body::AstBody<'_>) -> Result<HashSet<String>> {
+fn get_vars(params: &[FunParam], body: ast_body::AstBody<'_>) -> Result<IndexSet<String>> {
     decl_vars::vars_from_ast(params, &body).map_err(Error::unrecoverable)
 }
 
-fn get_parameter_names(params: &[FunParam]) -> HashSet<String> {
+fn get_parameter_names(params: &[FunParam]) -> IndexSet<String> {
     params.iter().map(|p| p.name.to_string()).collect()
 }
 
@@ -655,7 +679,7 @@ fn convert_lambda<'a, 'arena>(
     let lambda_env = &mut env.clone();
 
     if use_vars_opt.is_some() {
-        lambda_env.with_longlambda(alloc, &fd)?
+        lambda_env.with_longlambda(alloc, &fd, use_vars_opt.as_ref().map(Borrow::borrow))?
     } else {
         lambda_env.with_lambda(alloc, &fd)?
     };

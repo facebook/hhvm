@@ -67,6 +67,7 @@ type options = {
   custom_hhi_path: string option;
   profile_type_check_twice: bool;
   memtrace: string option;
+  pessimise_builtins: bool;
 }
 
 (** If the user passed --root, then all pathnames have to be canonicalized.
@@ -86,9 +87,23 @@ let magic_builtins =
     ( "hh_single_type_check_magic.hhi",
       "<?hh\n"
       ^ "namespace {\n"
-      ^ "function hh_show<T>(<<__AcceptDisposable>> T $val):T {}\n"
-      ^ "function hh_expect<T>(<<__AcceptDisposable>> T $val):T {}\n"
-      ^ "function hh_expect_equivalent<T>(<<__AcceptDisposable>> T $val):T {}\n"
+      ^ "function hh_show<T>(<<__AcceptDisposable>> readonly T $val):T {}\n"
+      ^ "function hh_expect<T>(<<__AcceptDisposable>> readonly T $val):T {}\n"
+      ^ "function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val):T {}\n"
+      ^ "function hh_show_env():void {}\n"
+      ^ "function hh_log_level(string $key, int $level):void {}\n"
+      ^ "function hh_force_solve():void {}"
+      ^ "}\n" );
+  |]
+
+let pessimised_magic_builtins =
+  [|
+    ( "hh_single_type_check_magic.hhi",
+      "<?hh\n"
+      ^ "namespace {\n"
+      ^ "function hh_show<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val):~T {}\n"
+      ^ "function hh_expect<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val):~T {}\n"
+      ^ "function hh_expect_equivalent<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val):~T {}\n"
       ^ "function hh_show_env():void {}\n"
       ^ "function hh_log_level(string $key, int $level):void {}\n"
       ^ "function hh_force_solve():void {}"
@@ -965,6 +980,7 @@ let parse_options () =
       custom_hhi_path = !custom_hhi_path;
       profile_type_check_twice = !profile_type_check_twice;
       memtrace = !memtrace;
+      pessimise_builtins = !pessimise_builtins;
     },
     root,
     !naming_table,
@@ -2441,6 +2457,7 @@ let decl_and_run_mode
       custom_hhi_path;
       profile_type_check_twice;
       memtrace;
+      pessimise_builtins;
     }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
@@ -2461,6 +2478,12 @@ let decl_and_run_mode
         extra_builtins
         |> List.fold ~f:add_file_content ~init:[]
         |> Array.of_list
+      in
+      let magic_builtins =
+        if pessimise_builtins then
+          pessimised_magic_builtins
+        else
+          magic_builtins
       in
       let magic_builtins = Array.append magic_builtins extra_builtins in
       let hhi_builtins =

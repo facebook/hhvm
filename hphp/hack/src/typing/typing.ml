@@ -3982,9 +3982,9 @@ and expr_
          ( hole_on_err ~err_opt:arr_err_opt te1,
            Some (hole_on_err ~err_opt:key_err_opt te2) ))
       ty
-  | Call ((_, pos_id, Id ((_, s) as id)), explicit_targs, el, None)
+  | Call (((_, pos_id, Id (_, s)) as e), explicit_targs, el, None)
     when Hash_set.mem typing_env_pseudofunctions s ->
-    let (env, tel, tys) =
+    let (env, _tel, tys) =
       argument_list_exprs (expr ~accept_using_var:true) env el
     in
     let env =
@@ -4023,16 +4023,24 @@ and expr_
       else
         env
     in
-    let ty = MakeType.void (Reason.Rwitness p) in
-    make_result
-      env
-      p
-      (Aast.Call
-         ( Tast.make_typed_expr pos_id (TUtils.mk_tany env pos_id) (Aast.Id id),
-           [],
-           tel,
-           None ))
-      ty
+    (* Discard the environment and whether fake members should be forgotten to
+       make sure that pseudo functions don't change the typechecker behaviour.
+    *)
+    let ((_env, te, ty), _should_forget_fakes) =
+      let env = might_throw env in
+      dispatch_call
+        ~is_using_clause
+        ~expected
+        ~valkind
+        ?in_await
+        p
+        env
+        e
+        explicit_targs
+        el
+        None
+    in
+    (env, te, ty)
   | Call (e, explicit_targs, el, unpacked_element) ->
     let env = might_throw env in
     let ((env, te, ty), should_forget_fakes) =

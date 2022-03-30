@@ -648,6 +648,7 @@ let typing_env_pseudofunctions =
         hh_log_level;
         hh_force_solve;
         hh_loop_forever;
+        hh_time;
       ])
 
 let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
@@ -709,6 +710,51 @@ let loop_forever env =
   done;
   Utils.assert_false_log_backtrace
     (Some "hh_loop_forever was looping for more than 10 minutes")
+
+let hh_time_start_times = ref SMap.empty
+
+(* Wrap the code you'd like to profile with `hh_time` annotations, e.g.,
+
+     hh_time('start');
+     // Expensive to typecheck code
+     hh_time('stop');
+
+   `hh_time` admits an optional tag parameter to allow for multiple timings in
+   the same file.
+
+     hh_time('start', 'Timing 1');
+     // Expensive to typecheck code
+     hh_time('stop', 'Timinig 1');
+
+     hh_time('start', 'Timing 2');
+     // Some more expensive to typecheck code
+     hh_time('stop', 'Timinig 2');
+
+   Limitation: Timings are not scoped, so multiple uses of the same tag
+   with `hh_time('start', tag)` will overwrite the beginning time of the
+   previous timing.
+ *)
+let do_hh_time el =
+  let go command tag =
+    match command with
+    | String "start" ->
+      let start_time = Unix.gettimeofday () in
+      hh_time_start_times := SMap.add tag start_time !hh_time_start_times
+    | String "stop" ->
+      let stop_time = Unix.gettimeofday () in
+      begin
+        match SMap.find_opt tag !hh_time_start_times with
+        | Some start_time ->
+          let elapsed_time_ms = (stop_time -. start_time) *. 1000. in
+          Printf.printf "%s: %0.2fms\n" tag elapsed_time_ms
+        | None -> ()
+      end
+    | _ -> ()
+  in
+  match el with
+  | [(_, (_, _, command))] -> go command "_"
+  | [(_, (_, _, command)); (_, (_, _, String tag))] -> go command tag
+  | _ -> ()
 
 let is_parameter env x = Local_id.Map.mem x (Env.get_params env)
 
@@ -4020,7 +4066,10 @@ and expr_
       ) else if String.equal s SN.PseudoFunctions.hh_loop_forever then
         let _ = loop_forever env in
         env
-      else
+      else if String.equal s SN.PseudoFunctions.hh_time then begin
+        do_hh_time el;
+        env
+      end else
         env
     in
     (* Discard the environment and whether fake members should be forgotten to

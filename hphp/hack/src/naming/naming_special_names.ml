@@ -481,6 +481,8 @@ module PseudoFunctions = struct
 
   let hh_loop_forever = "\\hh_loop_forever"
 
+  let hh_time = "\\hh_time"
+
   let echo = "\\echo"
 
   let empty = "\\empty"

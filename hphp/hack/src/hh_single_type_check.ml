@@ -93,6 +93,7 @@ let magic_builtins =
       ^ "function hh_show_env():void {}\n"
       ^ "function hh_log_level(string $key, int $level):void {}\n"
       ^ "function hh_force_solve():void {}"
+      ^ "function hh_time(string $command, string $tag = '_'):void {}\n"
       ^ "}\n" );
   |]
 

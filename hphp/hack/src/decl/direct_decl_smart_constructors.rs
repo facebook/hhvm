@@ -290,9 +290,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     ));
                 }
                 // Not allowed
-                nast::ClassId_::CIparent
-                | nast::ClassId_::CIstatic
-                | nast::ClassId_::CIexpr(_) => {}
+                nast::ClassId_::CIparent | nast::ClassId_::CIstatic | nast::ClassId_::CIexpr(_) => {
+                }
             }
         }
     }
@@ -2238,15 +2237,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // Then, for each polymorphic context with form `$g::C`,
         //   - add a type parameter `T/[$g::C]`
         //   - add a where constraint `T/[$g::C] = T$g :: C`
-        let rewrite_arg_ctx = |
-            tparams: &mut Vec<'_, &'a Tparam<'a>>,
-            where_constraints: &mut Vec<'_, &'a WhereConstraint<'a>>,
-            ty: &Ty<'a>,
-            param_pos: &'a Pos<'a>,
-            name: &str,
-            context_reason: &'a Reason<'a>,
-            cst: PosId<'a>,
-        | -> Ty<'a> {
+        let rewrite_arg_ctx = |tparams: &mut Vec<'_, &'a Tparam<'a>>,
+                               where_constraints: &mut Vec<'_, &'a WhereConstraint<'a>>,
+                               ty: &Ty<'a>,
+                               param_pos: &'a Pos<'a>,
+                               name: &str,
+                               context_reason: &'a Reason<'a>,
+                               cst: PosId<'a>|
+         -> Ty<'a> {
             let rewritten_ty = match ty.1 {
                 // If the type hint for this function parameter is a type
                 // parameter introduced in this function declaration, don't add
@@ -5365,10 +5363,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         match attributes {
             Node::BracketedList((
                 ltlt_pos,
-                [Node::Attribute(UserAttributeNode {
-                    name: Id(_, "__Soft"),
-                    ..
-                })],
+                [
+                    Node::Attribute(UserAttributeNode {
+                        name: Id(_, "__Soft"),
+                        ..
+                    }),
+                ],
                 gtgt_pos,
             )) => {
                 let attributes_pos = self.merge(*ltlt_pos, *gtgt_pos);

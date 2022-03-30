@@ -84,7 +84,7 @@ pub fn with_unnamed_local<'arena, 'decl, F>(
 where
     F: FnOnce(
         &mut Emitter<'arena, 'decl>,
-        Local<'arena>,
+        Local,
     ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>)>,
 {
     with_unnamed_locals(e, |e| {

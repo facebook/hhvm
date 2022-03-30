@@ -69,7 +69,7 @@ pub fn is_local_this<'a, 'arena>(env: &Env<'a, 'arena>, lid: &local_id::LocalId)
 }
 
 mod inout_locals {
-    use crate::{Env, Local, ParamKind};
+    use crate::{Emitter, Env, Local, ParamKind};
     use hash::HashMap;
     use oxidized::{aast_defs::Lid, aast_visitor, aast_visitor::Node, ast, ast_defs};
     use std::marker::PhantomData;
@@ -146,14 +146,18 @@ mod inout_locals {
             .map_or(false, |alias| alias.in_range(i as isize))
     }
 
-    pub(super) fn should_move_local_value<'arena>(
-        local: &Local<'arena>,
+    pub(super) fn should_move_local_value(
+        e: &Emitter<'_, '_>,
+        local: Local,
         aliases: &AliasInfoMap<'_>,
     ) -> bool {
         match local {
-            Local::Named(name) => aliases
-                .get(name.unsafe_as_str())
-                .map_or(true, |alias| alias.has_single_ref()),
+            Local::Named(_) => {
+                let name = e.local_name(local);
+                aliases
+                    .get(name.unsafe_as_str())
+                    .map_or(true, |alias| alias.has_single_ref())
+            }
             Local::Unnamed(_) => false,
         }
     }
@@ -328,7 +332,7 @@ pub enum StoredValueKind {
 ///      throw
 ///    }
 ///    unsetl l
-type InstrSeqWithLocals<'arena> = Vec<(InstrSeq<'arena>, Option<(Local<'arena>, StoredValueKind)>)>;
+type InstrSeqWithLocals<'arena> = Vec<(InstrSeq<'arena>, Option<(Local, StoredValueKind)>)>;
 
 /// result of emit_array_get
 enum ArrayGetInstr<'arena> {
@@ -723,7 +727,6 @@ fn emit_lambda<'a, 'arena, 'decl>(
     fndef: &ast::Fun_,
     ids: &[aast_defs::Lid],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena; // etc.
     // Closure conversion puts the class number used for CreateCl in the "name"
     // of the function definition
     let fndef_name = &(fndef.name).1;
@@ -739,16 +742,13 @@ fn emit_lambda<'a, 'arena, 'decl>(
                     match string_utils::reified::is_captured_generic(local_id::get_name(id)) {
                         Some((is_fun, i)) => {
                             if is_in_lambda {
-                                Ok(instr::cgetl(Local::Named(Str::new_str(
-                                    alloc,
-                                    string_utils::reified::reified_generic_captured_name(
-                                        is_fun, i as usize,
-                                    )
-                                    .as_str(),
-                                ))))
+                                let name = string_utils::reified::reified_generic_captured_name(
+                                    is_fun, i as usize,
+                                );
+                                Ok(instr::cgetl(e.named_local(name.as_str().into())))
                             } else {
                                 emit_reified_generic_instrs(
-                                    alloc,
+                                    e,
                                     &Pos::make_none(),
                                     is_fun,
                                     i as usize,
@@ -866,7 +866,7 @@ fn inline_gena_call<'a, 'arena, 'decl>(
     })
 }
 
-fn emit_iter<'arena, 'decl, F: FnOnce(Local<'arena>, Local<'arena>) -> InstrSeq<'arena>>(
+fn emit_iter<'arena, 'decl, F: FnOnce(Local, Local) -> InstrSeq<'arena>>(
     e: &mut Emitter<'arena, 'decl>,
     collection: InstrSeq<'arena>,
     f: F,
@@ -1799,10 +1799,7 @@ pub fn emit_reified_targs<'a, 'arena, 'decl>(
             })
     };
     Ok(if !is_in_lambda && same_as_targs(current_fun_tparams) {
-        instr::cgetl(Local::Named(Str::new_str(
-            alloc,
-            string_utils::reified::GENERICS_LOCAL_NAME,
-        )))
+        instr::cgetl(e.named_local(string_utils::reified::GENERICS_LOCAL_NAME.into()))
     } else if !is_in_lambda && same_as_targs(current_cls_tparams) {
         InstrSeq::gather(vec![
             instr::checkthis(),
@@ -2047,7 +2044,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             let (cid, (_, id)) = &**cls_const;
             let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
             if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-                if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, name)? {
+                if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
                     cexpr = reified_var_cexpr;
                 }
             }
@@ -2120,15 +2117,14 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             let (cid, cls_get_expr, _) = &**c;
             let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
             if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-                if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, name)? {
+                if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
                     cexpr = reified_var_cexpr;
                 }
             }
             let emit_meth_name = |e: &mut Emitter<'arena, 'decl>| match &cls_get_expr {
-                ast::ClassGetExpr::CGstring((pos, id)) => Ok(emit_pos_then(
-                    pos,
-                    instr::cgetl(Local::Named(Str::new_str(alloc, id.as_str()))),
-                )),
+                ast::ClassGetExpr::CGstring((pos, id)) => {
+                    Ok(emit_pos_then(pos, instr::cgetl(e.named_local(id.into()))))
+                }
                 ast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
             };
             Ok(match cexpr {
@@ -2250,11 +2246,12 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
 }
 
 fn get_reified_var_cexpr<'a, 'arena>(
+    e: &Emitter<'arena, '_>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
     name: &str,
 ) -> Result<Option<ClassExpr<'arena>>> {
-    Ok(emit_reified_type_opt(env, pos, name)?.map(|instrs| {
+    Ok(emit_reified_type_opt(e, env, pos, name)?.map(|instrs| {
         ClassExpr::Reified(InstrSeq::gather(vec![
             instrs,
             instr::basec(0, MOpMode::Warn),
@@ -2292,7 +2289,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
             (ParamKind::Pinout(_), Expr_::Lvar(l)) => {
                 let local = get_local(e, env, &l.0, local_id::get_name(&l.1))?;
                 let move_instrs = if !env.flags.contains(env::Flags::IN_TRY)
-                    && inout_locals::should_move_local_value(&local, aliases)
+                    && inout_locals::should_move_local_value(e, local, aliases)
                 {
                     InstrSeq::gather(vec![instr::null(), instr::popl(local)])
                 } else {
@@ -2775,10 +2772,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
         {
             ensure_normal_paramkind(pk)?;
             Ok(Some(InstrSeq::gather(vec![
-                instr::cgetl(Local::Named(Str::new_str(
-                    alloc,
-                    local_id::get_name(&param.1),
-                ))),
+                instr::cgetl(e.named_local(local_id::get_name(&param.1).into())),
                 instr::whresult(),
             ])))
         }
@@ -2918,7 +2912,7 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, true, &env.scope, cid);
     if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-        if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, name)? {
+        if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
             cexpr = reified_var_cexpr;
         }
     }
@@ -3416,7 +3410,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
             Ok(InstrSeq::gather(vec![
                 emit_expr(e, env, arg1)?,
                 emit_pos(pos),
-                instr::popl(Local::Named(Slice::new("$86metadata".as_bytes()))),
+                instr::popl(e.named_local("$86metadata".into())),
                 instr::null(),
             ]))
         }
@@ -3468,17 +3462,14 @@ fn emit_call_expr<'a, 'arena, 'decl>(
 }
 
 pub fn emit_reified_generic_instrs<'arena>(
-    alloc: &'arena bumpalo::Bump,
+    e: &Emitter<'arena, '_>,
     pos: &Pos,
     is_fun: bool,
     index: usize,
 ) -> Result<InstrSeq<'arena>> {
     let base = if is_fun {
         instr::basel(
-            Local::Named(Str::new_str(
-                alloc,
-                string_utils::reified::GENERICS_LOCAL_NAME,
-            )),
+            e.named_local(string_utils::reified::GENERICS_LOCAL_NAME.into()),
             MOpMode::Warn,
             ReadonlyOp::Any,
         )
@@ -3487,7 +3478,7 @@ pub fn emit_reified_generic_instrs<'arena>(
             instr::checkthis(),
             instr::baseh(),
             instr::dim_warn_pt(
-                prop::from_raw_string(alloc, string_utils::reified::PROP_NAME),
+                prop::from_raw_string(e.alloc, string_utils::reified::PROP_NAME),
                 ReadonlyOp::Any,
             ),
         ])
@@ -3506,26 +3497,30 @@ pub fn emit_reified_generic_instrs<'arena>(
 }
 
 fn emit_reified_type<'a, 'arena>(
+    e: &Emitter<'arena, '_>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
     name: &str,
 ) -> Result<InstrSeq<'arena>> {
-    emit_reified_type_opt(env, pos, name)?
+    emit_reified_type_opt(e, env, pos, name)?
         .ok_or_else(|| Error::fatal_runtime(&Pos::make_none(), "Invalid reified param"))
 }
 
 fn emit_reified_type_opt<'a, 'arena>(
+    e: &Emitter<'arena, '_>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
     name: &str,
 ) -> Result<Option<InstrSeq<'arena>>> {
-    let alloc = env.arena;
     let is_in_lambda = env.scope.is_in_lambda();
     let cget_instr = |is_fun, i| {
-        instr::cgetl(Local::Named(Str::new_str(
-            alloc,
-            string_utils::reified::reified_generic_captured_name(is_fun, i).as_str(),
-        )))
+        instr::cgetl(
+            e.named_local(
+                string_utils::reified::reified_generic_captured_name(is_fun, i)
+                    .as_str()
+                    .into(),
+            ),
+        )
     };
     let check = |is_soft| -> Result<()> {
         if is_soft {
@@ -3545,7 +3540,7 @@ fn emit_reified_type_opt<'a, 'arena>(
         Ok(Some(if is_in_lambda {
             cget_instr(is_fun, i)
         } else {
-            emit_reified_generic_instrs(alloc, pos, is_fun, i)?
+            emit_reified_generic_instrs(e, pos, is_fun, i)?
         }))
     };
     match is_reified_tparam(env, true, name) {
@@ -3632,7 +3627,7 @@ fn emit_new<'a, 'arena, 'decl>(
     use HasGenericsOp as H;
     let cexpr = ClassExpr::class_id_to_class_expr(e, false, resolve_self, &env.scope, cid);
     let (cexpr, has_generics) = match &cexpr {
-        ClassExpr::Id(ast_defs::Id(_, name)) => match emit_reified_type_opt(env, pos, name)? {
+        ClassExpr::Id(ast_defs::Id(_, name)) => match emit_reified_type_opt(e, env, pos, name)? {
             Some(instrs) => {
                 if targs.is_empty() {
                     (ClassExpr::Reified(instrs), H::MaybeGenerics)
@@ -4301,7 +4296,7 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl>(
     pos: &Pos,
     elem_stack_size: StackIndex,
     base: &ast::Expr,
-    local: Local<'arena>,
+    local: Local,
     is_base: bool,
     readonly_op: ReadonlyOp,
 ) -> Result<InstrSeq<'arena>> {
@@ -4437,11 +4432,11 @@ fn emit_local<'a, 'arena, 'decl>(
             instr::cgetg(),
         ]))
     } else {
-        let local = get_local(e, env, pos, id_name)?;
         Ok(
             if is_local_this(env, id) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
                 emit_pos_then(pos, instr::barethis(notice))
             } else {
+                let local = get_local(e, env, pos, id_name)?;
                 instr::cgetl(local)
             },
         )
@@ -4458,7 +4453,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, true, &env.scope, cid);
     if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-        if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, name)? {
+        if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
             cexpr = reified_var_cexpr;
         }
     }
@@ -5808,7 +5803,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
 //   QueryM 0 CGet EI:i_1
 fn emit_array_get_fixed<'arena>(
     last_usage: bool,
-    local: Local<'arena>,
+    local: Local,
     indices: &[isize],
 ) -> InstrSeq<'arena> {
     let (base, stack_count) = if last_usage {
@@ -5852,7 +5847,7 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     outer_pos: &Pos,
-    local: Option<&Local<'arena>>,
+    local: Option<&Local>,
     indices: &[isize],
     expr: &ast::Expr,
     last_usage: bool,
@@ -5983,7 +5978,7 @@ pub fn emit_final_global_op<'arena>(pos: &Pos, op: LValOp) -> InstrSeq<'arena> {
     }
 }
 
-pub fn emit_final_local_op<'arena>(pos: &Pos, op: LValOp, lid: Local<'arena>) -> InstrSeq<'arena> {
+pub fn emit_final_local_op<'arena>(pos: &Pos, op: LValOp, lid: Local) -> InstrSeq<'arena> {
     use LValOp as L;
     emit_pos_then(
         pos,
@@ -6465,7 +6460,7 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
         ast::Hint_::Happly(ast::Id(_, name), hs)
             if hs.is_empty() && current_tags.contains(name.as_str()) =>
         {
-            Ok((emit_reified_type(env, pos, name)?, false))
+            Ok((emit_reified_type(e, env, pos, name)?, false))
         }
         _ => {
             let ts = get_type_structure_for_hint(e, &[], &collector.acc, &hint)?;
@@ -6475,7 +6470,7 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
                 let values = collector
                     .acc
                     .iter()
-                    .map(|v| emit_reified_type(env, pos, v))
+                    .map(|v| emit_reified_type(e, env, pos, v))
                     .collect::<Result<Vec<_>>>()?;
                 InstrSeq::gather(vec![InstrSeq::gather(values), ts])
             };
@@ -6495,8 +6490,7 @@ pub fn get_local<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     s: &str,
-) -> Result<Local<'arena>> {
-    let alloc: &'arena bumpalo::Bump = env.arena;
+) -> Result<Local> {
     if s == special_idents::DOLLAR_DOLLAR {
         match &env.pipe_var {
             None => Err(Error::fatal_runtime(
@@ -6508,7 +6502,7 @@ pub fn get_local<'a, 'arena, 'decl>(
     } else if special_idents::is_tmp_var(s) {
         Ok(*e.local_gen().get_unnamed_for_tempname(s))
     } else {
-        Ok(Local::Named(Str::new_str(alloc, s)))
+        Ok(e.named_local(s.into()))
     }
 }
 

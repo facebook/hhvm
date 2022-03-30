@@ -182,24 +182,21 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
     pos: &Pos,
     params: &[(HhasParam<'arena>, Option<(Label, a::Expr)>)],
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
-    let alloc = env.arena; // Hmm, should this be emitter.alloc?
-    let mut to_setter = |(param, default_value): &(HhasParam<'arena>, Option<(Label, a::Expr)>)| {
-        default_value.as_ref().map(|(lbl, expr)| {
-            let instrs = InstrSeq::gather(vec![
-                emit_expression::emit_expr(emitter, env, expr)?,
-                emit_pos::emit_pos(pos),
-                instr::setl(Local::Named(Str::new_str(
-                    alloc,
-                    param.name.unsafe_as_str(),
-                ))),
-                instr::popc(),
-            ]);
-            Ok(InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]))
-        })
-    };
     let setters = params
         .iter()
-        .filter_map(|p| to_setter(p))
+        .enumerate()
+        .filter_map(|(i, (_, dv))| {
+            // LocalIds for params are numbered from 0.
+            dv.as_ref().map(|(lbl, expr)| {
+                let instrs = InstrSeq::gather(vec![
+                    emit_expression::emit_expr(emitter, env, expr)?,
+                    emit_pos::emit_pos(pos),
+                    instr::setl(Local::named(i)),
+                    instr::popc(),
+                ]);
+                Ok(InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]))
+            })
+        })
         .collect::<Result<Vec<_>>>()?;
     if setters.is_empty() {
         Ok((instr::empty(), instr::empty()))

@@ -79,7 +79,7 @@ pub(super) fn emit_jump_to_label<'arena>(l: Label, iters: Vec<IterId>) -> InstrS
 }
 
 pub(super) fn emit_save_label_id<'arena>(
-    local_gen: &mut local::Gen<'arena>,
+    local_gen: &mut local::Gen,
     id: jt::StateId,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(vec![

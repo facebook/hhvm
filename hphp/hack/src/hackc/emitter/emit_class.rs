@@ -417,12 +417,13 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     num_reified: usize,
     ast_class: &'a ast::Class_,
+    init_meth_param_local: Local,
 ) -> Result<InstrSeq<'arena>> {
-    use string_utils::reified::{INIT_METH_NAME, INIT_METH_PARAM_NAME, PROP_NAME};
+    use string_utils::reified::{INIT_METH_NAME, PROP_NAME};
 
     let alloc = env.arena;
     let check_length = InstrSeq::gather(vec![
-        instr::cgetl(Local::Named(Slice::new(INIT_METH_PARAM_NAME.as_bytes()))),
+        instr::cgetl(init_meth_param_local),
         instr::check_reified_generic_mismatch(),
     ]);
     let set_prop = if num_reified == 0 {
@@ -431,7 +432,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
         InstrSeq::gather(vec![
             check_length,
             instr::checkthis(),
-            instr::cgetl(Local::Named(Slice::new(INIT_METH_PARAM_NAME.as_bytes()))),
+            instr::cgetl(init_meth_param_local),
             instr::baseh(),
             instr::setm_pt(0, prop::from_raw_string(alloc, PROP_NAME), ReadonlyOp::Any),
             instr::popc(),
@@ -486,6 +487,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
         Ok(None)
     } else {
         let tc = Constraint::make(Just("HH\\varray".into()), TypeConstraintFlags::NoFlags);
+        let param_local = Local::named(0);
         let params = vec![HhasParam {
             name: Str::new_str(alloc, string_utils::reified::INIT_METH_PARAM_NAME),
             is_variadic: false,
@@ -496,7 +498,8 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
             default_value: Nothing,
         }];
 
-        let body_instrs = emit_reified_init_body(emitter, env, num_reified, ast_class)?;
+        let body_instrs =
+            emit_reified_init_body(emitter, env, num_reified, ast_class, param_local)?;
         let instrs = emit_pos::emit_pos_then(&ast_class.span, body_instrs);
         Ok(Some(make_86method(
             alloc,
@@ -785,7 +788,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         None
     } else {
         let param_name = Str::new_str(alloc, "$constName");
-        let param_local = Local::Named(param_name);
+        let param_local = Local::named(0);
         let params = vec![HhasParam {
             name: param_name,
             is_variadic: false,

@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use ast_scope::Scope;
 use env::emitter::Emitter;
-use ffi::{Maybe::Just, Slice, Str};
+use ffi::{Maybe::Just, Slice};
 use hhas_body::HhasBody;
 use instruction_sequence::{instr, Error, InstrSeq, Result};
 use local::Local;
@@ -18,7 +18,7 @@ pub fn emit_body<'a, 'arena, 'decl>(
     params: &[ast::FunParam],
     ret: Option<&aast::Hint>,
 ) -> Result<HhasBody<'arena>> {
-    let body_instrs = emit_native_opcode_impl(emitter.alloc, &name.1, params, class_attrs);
+    let body_instrs = emit_native_opcode_impl(&name.1, params, class_attrs);
     let mut tparams = scope
         .get_tparams()
         .iter()
@@ -41,7 +41,6 @@ pub fn emit_body<'a, 'arena, 'decl>(
 }
 
 fn emit_native_opcode_impl<'arena>(
-    alloc: &'arena bumpalo::Bump,
     name: &str,
     params: &[ast::FunParam],
     user_attrs: &[ast::UserAttribute],
@@ -51,7 +50,7 @@ fn emit_native_opcode_impl<'arena>(
             if let [p] = ua.params.as_slice() {
                 match p.2.as_string() {
                     Some(s) if s == "HH\\AsyncGenerator" || s == "Generator" => {
-                        return emit_generator_method(alloc, name, params);
+                        return emit_generator_method(name, params);
                     }
                     _ => {}
                 }
@@ -64,14 +63,10 @@ fn emit_native_opcode_impl<'arena>(
     ))
 }
 
-fn emit_generator_method<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    name: &str,
-    params: &[ast::FunParam],
-) -> Result<InstrSeq<'arena>> {
+fn emit_generator_method<'arena>(name: &str, params: &[ast::FunParam]) -> Result<InstrSeq<'arena>> {
     let instrs = match name {
         "send" => {
-            let local = Local::Named(Str::new_str(alloc, get_first_param_name(params)?));
+            let local = get_first_param_local(params)?;
             InstrSeq::gather(vec![
                 instr::contcheck_check(),
                 instr::pushl(local),
@@ -79,7 +74,7 @@ fn emit_generator_method<'arena>(
             ])
         }
         "raise" | "throw" => {
-            let local = Local::Named(Str::new_str(alloc, get_first_param_name(params)?));
+            let local = get_first_param_local(params)?;
             InstrSeq::gather(vec![
                 instr::contcheck_check(),
                 instr::pushl(local),
@@ -105,9 +100,9 @@ fn emit_generator_method<'arena>(
     Ok(InstrSeq::gather(vec![instrs, instr::retc()]))
 }
 
-fn get_first_param_name(params: &[ast::FunParam]) -> Result<&str> {
+fn get_first_param_local(params: &[ast::FunParam]) -> Result<Local> {
     match params {
-        [p, ..] => Ok(&p.name),
+        [_, ..] => Ok(Local::named(0)),
         _ => Err(Error::unrecoverable("native generator requires params")),
     }
 }

@@ -106,10 +106,13 @@ pub fn emit_body<'b, 'arena, 'decl>(
         &body,
         args.flags,
     )?;
+    let decl_vars: Vec<Str<'arena>> = decl_vars
+        .into_iter()
+        .map(|name| Str::new_str(alloc, &name))
+        .collect();
     let mut env = make_env(alloc, namespace, scope, args.call_context);
 
     set_emit_statement_state(
-        alloc,
         emitter,
         return_value,
         &params,
@@ -122,6 +125,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     );
     env.jump_targets_gen.reset();
 
+    // Params are numbered starting from 0, followed by decl_vars.
     let should_reserve_locals = set_function_jmp_targets(emitter, &mut env);
     let local_gen = emitter.local_gen_mut();
     let num_locals = params.len() + decl_vars.len();
@@ -129,12 +133,17 @@ pub fn emit_body<'b, 'arena, 'decl>(
     if should_reserve_locals {
         local_gen.reserve_retval_and_label_id_locals();
     };
+    emitter.init_named_locals(
+        params
+            .iter()
+            .map(|(param, _)| param.name)
+            .chain(decl_vars.iter().copied()),
+    );
     let body_instrs = make_body_instrs(
         emitter,
         &mut env,
         &params,
         &tparams,
-        &decl_vars,
         body,
         is_generator,
         args.deprecation_info.clone(),
@@ -167,7 +176,6 @@ fn make_body_instrs<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
-    decl_vars: &[String],
     body: AstBody<'_>,
     is_generator: bool,
     deprecation_info: Option<&[TypedValue<'arena>]>,
@@ -189,7 +197,6 @@ fn make_body_instrs<'a, 'arena, 'decl>(
         env,
         params,
         tparams,
-        decl_vars,
         is_generator,
         deprecation_info,
         pos,
@@ -218,7 +225,6 @@ fn make_header_content<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
-    _decl_vars: &[String],
     is_generator: bool,
     deprecation_info: Option<&[TypedValue<'arena>]>,
     pos: &Pos,
@@ -354,7 +360,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     mut body_instrs: InstrSeq<'arena>,
-    decl_vars: Vec<String>,
+    decl_vars: Vec<Str<'arena>>,
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
     upper_bounds: Vec<Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>,
@@ -421,12 +427,12 @@ pub fn make_body<'a, 'arena, 'decl>(
         );
     });
 
+    // Now that we're done with this function, clear the named_local table.
+    emitter.clear_named_locals();
+
     Ok(HhasBody {
         body_instrs: body_instrs.compact(alloc),
-        decl_vars: Slice::fill_iter(
-            alloc,
-            decl_vars.into_iter().map(|s| Str::new_str(alloc, &s)),
-        ),
+        decl_vars: Slice::fill_iter(alloc, decl_vars.into_iter()),
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
@@ -577,10 +583,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                     if !RGH::happly_decl_has_reified_generics(emitter, &h) {
                         Ok(instr::verify_param_type(param_name()))
                     } else {
-                        let check = instr::istypel(
-                            Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
-                            IsTypeOp::Null,
-                        );
+                        let check = instr::istypel(emitter.named_local(param.name), IsTypeOp::Null);
                         let verify_instr = instr::verify_param_type_ts(param_name());
                         RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
                     }
@@ -700,7 +703,6 @@ pub fn emit_deprecation_info<'a, 'arena>(
 }
 
 fn set_emit_statement_state<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     default_return_value: InstrSeq<'arena>,
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
@@ -727,7 +729,7 @@ fn set_emit_statement_state<'arena, 'decl>(
     } else {
         None
     };
-    let (num_out, verify_out) = emit_verify_out(alloc, params);
+    let (num_out, verify_out) = emit_verify_out(params);
 
     emit_statement::set_state(
         emitter,
@@ -743,7 +745,6 @@ fn set_emit_statement_state<'arena, 'decl>(
 }
 
 fn emit_verify_out<'arena>(
-    alloc: &'arena bumpalo::Bump,
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
 ) -> (usize, InstrSeq<'arena>) {
     let param_instrs: Vec<InstrSeq<'arena>> = params
@@ -752,7 +753,7 @@ fn emit_verify_out<'arena>(
         .filter_map(|(i, (p, _))| {
             if p.is_inout {
                 Some(InstrSeq::gather(vec![
-                    instr::cgetl(Local::Named(Str::new_str(alloc, p.name.unsafe_as_str()))),
+                    instr::cgetl(Local::named(i)),
                     match p.type_info.as_ref() {
                         Just(HhasTypeInfo { user_type, .. })
                             if user_type.as_ref().map_or(true, |t| {

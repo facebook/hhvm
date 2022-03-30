@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Str;
-
 /// Local variable numbers are ultimately encoded as IVA, limited to u32.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
@@ -26,18 +24,17 @@ impl LocalId {
 }
 
 /// Type of locals as they appear in instructions. Named variables are
-/// those appearing in the .declvars declaration. These can also be
-/// referenced by number (0 to n-1), but we use Unnamed only for
-/// variables n and above not appearing in .declvars
+/// those appearing in parameters and the HHAS .declvars directive.
+/// These can also be referenced by number [0 to N-1]. Use Unnamed
+/// only for variables N and above not appearing in parameters or .declvars.
 #[derive(Clone, Copy, Debug)]
 #[repr(C)]
-pub enum Local<'arena> {
+pub enum Local {
     Unnamed(LocalId),
-    /// Named local, necessarily starting with `$`
-    Named(Str<'arena>),
+    Named(LocalId),
 }
 
-impl Local<'_> {
+impl Local {
     pub const INVALID: Self = Self::Unnamed(LocalId { idx: u32::MAX });
 
     pub fn is_valid(&self) -> bool {
@@ -46,24 +43,39 @@ impl Local<'_> {
 
     pub fn expect_unnamed(&self) -> LocalId {
         match self {
-            Local::Unnamed(id) => *id,
-            Local::Named(_) => panic!("Expected unnamed local"),
+            Self::Unnamed(id) => *id,
+            Self::Named(_) => panic!("Expected unnamed local"),
         }
+    }
+
+    pub fn expect_named(&self) -> LocalId {
+        match self {
+            Self::Named(id) => *id,
+            Self::Unnamed(_) => panic!("Expected named local"),
+        }
+    }
+
+    pub fn named(i: usize) -> Self {
+        Self::Named(LocalId { idx: i as u32 })
+    }
+
+    pub fn unnamed(i: usize) -> Self {
+        Self::Unnamed(LocalId { idx: i as u32 })
     }
 }
 
 #[derive(Default, Debug)]
-pub struct Gen<'arena> {
+pub struct Gen {
     pub counter: Counter,
-    pub dedicated: Dedicated<'arena>,
+    pub dedicated: Dedicated,
 }
 
-impl<'arena> Gen<'arena> {
-    pub fn get_unnamed(&mut self) -> Local<'arena> {
+impl Gen {
+    pub fn get_unnamed(&mut self) -> Local {
         Local::Unnamed(self.counter.next_unnamed(&self.dedicated))
     }
 
-    pub fn get_unnamed_for_tempname(&self, s: &str) -> &Local<'arena> {
+    pub fn get_unnamed_for_tempname(&self, s: &str) -> &Local {
         naming_special_names_rust::special_idents::assert_tmp_var(s);
         self.dedicated
             .temp_map
@@ -71,7 +83,7 @@ impl<'arena> Gen<'arena> {
             .expect("Unnamed local never init'ed")
     }
 
-    pub fn init_unnamed_for_tempname(&mut self, s: &str) -> &Local<'arena> {
+    pub fn init_unnamed_for_tempname(&mut self, s: &str) -> &Local {
         naming_special_names_rust::special_idents::assert_tmp_var(s);
         let new_local = self.get_unnamed();
         if self.dedicated.temp_map.insert(s, new_local).is_some() {
@@ -80,7 +92,7 @@ impl<'arena> Gen<'arena> {
         self.dedicated.temp_map.get(s).unwrap()
     }
 
-    pub fn get_label(&mut self) -> &Local<'arena> {
+    pub fn get_label(&mut self) -> &Local {
         let mut counter = self.counter;
         let mut new_counter = self.counter;
         let new_id = new_counter.next_unnamed(&self.dedicated);
@@ -92,7 +104,7 @@ impl<'arena> Gen<'arena> {
         ret
     }
 
-    pub fn get_retval(&mut self) -> &Local<'arena> {
+    pub fn get_retval(&mut self) -> &Local {
         // This and above body cannot be factored out because of nasty
         // aliasing of `&self.dedicated` and `&mut
         // self.dedicated.field`.
@@ -123,21 +135,17 @@ impl<'arena> Gen<'arena> {
 }
 
 #[derive(Debug, Default)]
-pub struct TempMap<'arena> {
-    stack: std::vec::Vec<usize>,
-    map: indexmap::IndexMap<String, Local<'arena>>,
+pub struct TempMap {
+    stack: Vec<usize>,
+    map: indexmap::IndexMap<String, Local>,
 }
 
-impl<'arena> TempMap<'arena> {
-    pub fn get(&self, temp: impl AsRef<str>) -> Option<&Local<'arena>> {
+impl TempMap {
+    pub fn get(&self, temp: impl AsRef<str>) -> Option<&Local> {
         self.map.get(temp.as_ref())
     }
 
-    pub fn insert(
-        &mut self,
-        temp: impl Into<String>,
-        local: Local<'arena>,
-    ) -> Option<Local<'arena>> {
+    pub fn insert(&mut self, temp: impl Into<String>, local: Local) -> Option<Local> {
         self.map.insert(temp.into(), local)
     }
 
@@ -156,10 +164,10 @@ impl<'arena> TempMap<'arena> {
 // implementation details
 
 #[derive(Default, Debug)]
-pub struct Dedicated<'arena> {
-    label: Option<Local<'arena>>,
-    retval: Option<Local<'arena>>,
-    pub temp_map: TempMap<'arena>,
+pub struct Dedicated {
+    label: Option<Local>,
+    retval: Option<Local>,
+    pub temp_map: TempMap,
 }
 
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
@@ -168,7 +176,7 @@ pub struct Counter {
 }
 
 impl Counter {
-    fn next_unnamed(&mut self, dedicated: &Dedicated<'_>) -> LocalId {
+    fn next_unnamed(&mut self, dedicated: &Dedicated) -> LocalId {
         loop {
             let curr = self.next;
             self.next.idx += 1;

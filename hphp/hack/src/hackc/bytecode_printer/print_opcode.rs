@@ -25,11 +25,20 @@ use std::io::{Error, ErrorKind, Result, Write};
 pub(crate) struct PrintOpcode<'a, 'b> {
     pub(crate) opcode: &'b Opcode<'a>,
     pub(crate) dv_labels: &'b HashSet<Label>,
+    pub(crate) local_names: &'b [Str<'a>],
 }
 
 impl<'a, 'b> PrintOpcode<'a, 'b> {
-    pub(crate) fn new(opcode: &'b Opcode<'a>, dv_labels: &'b HashSet<Label>) -> Self {
-        Self { opcode, dv_labels }
+    pub(crate) fn new(
+        opcode: &'b Opcode<'a>,
+        dv_labels: &'b HashSet<Label>,
+        local_names: &'b [Str<'a>],
+    ) -> Self {
+        Self {
+            opcode,
+            dv_labels,
+            local_names,
+        }
     }
 
     fn get_opcode(&self) -> &'b Opcode<'a> {
@@ -59,6 +68,18 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
         self.print_label(w, label1)?;
         w.write_all(b" ")?;
         self.print_label(w, label2)
+    }
+
+    fn print_local(&self, w: &mut dyn Write, local: &Local) -> Result<()> {
+        print_local(w, local, self.local_names)
+    }
+
+    fn print_iter_args(&self, w: &mut dyn Write, iter_args: &IterArgs) -> Result<()> {
+        print_iter_args(w, iter_args, self.local_names)
+    }
+
+    fn print_member_key(&self, w: &mut dyn Write, member_key: &MemberKey<'_>) -> Result<()> {
+        print_member_key(w, member_key, self.local_names)
     }
 
     fn print_s_switch(
@@ -160,26 +181,26 @@ fn print_function_id(w: &mut dyn Write, id: &FunctionId<'_>) -> Result<()> {
     print_quoted_str(w, &id.as_ffi_str())
 }
 
-fn print_iter_args(w: &mut dyn Write, iter_args: &IterArgs<'_>) -> Result<()> {
+fn print_iter_args(w: &mut dyn Write, iter_args: &IterArgs, local_names: &[Str<'_>]) -> Result<()> {
     print_iterator_id(w, &iter_args.iter_id)?;
     if iter_args.key_id.is_valid() {
         w.write_all(b" K:")?;
-        print_local(w, &iter_args.key_id)?;
+        print_local(w, &iter_args.key_id, local_names)?;
     } else {
         w.write_all(b" NK")?;
     }
     w.write_all(b" V:")?;
-    print_local(w, &iter_args.val_id)
+    print_local(w, &iter_args.val_id, local_names)
 }
 
 fn print_iterator_id(w: &mut dyn Write, i: &IterId) -> Result<()> {
     write!(w, "{}", i)
 }
 
-fn print_local(w: &mut dyn Write, local: &Local<'_>) -> Result<()> {
+fn print_local(w: &mut dyn Write, local: &Local, local_names: &[Str<'_>]) -> Result<()> {
     match local {
         Local::Unnamed(id) => write!(w, "_{}", id),
-        Local::Named(id) => w.write_all(id),
+        Local::Named(id) => write!(w, "{}", local_names[id.idx as usize].unsafe_as_str()),
     }
 }
 
@@ -187,7 +208,7 @@ fn print_local_range(w: &mut dyn Write, locrange: &LocalRange) -> Result<()> {
     write!(w, "L:{}+{}", locrange.start, locrange.len)
 }
 
-fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>) -> Result<()> {
+fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[Str<'_>]) -> Result<()> {
     use MemberKey as M;
     match mk {
         M::EC(si, op) => {
@@ -198,7 +219,7 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>) -> Result<()> {
         }
         M::EL(local, op) => {
             w.write_all(b"EL:")?;
-            print_local(w, local)?;
+            print_local(w, local, local_names)?;
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
@@ -220,7 +241,7 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>) -> Result<()> {
         }
         M::PL(local, op) => {
             w.write_all(b"PL:")?;
-            print_local(w, local)?;
+            print_local(w, local, local_names)?;
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }

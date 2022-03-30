@@ -6,7 +6,7 @@ use crate::try_finally_rewriter as tfr;
 use emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, SetRange};
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
-use ffi::{Slice, Str};
+use ffi::Slice;
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use instruction_sequence::{instr, Error, InstrSeq, Result};
@@ -380,7 +380,7 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
         }
         let load_args = InstrSeq::gather(instrs);
 
-        let mut locals: Vec<Local<'_>> = vec![];
+        let mut locals: Vec<Local> = vec![];
         for (lvar, _) in el.iter() {
             locals.push(match lvar {
                 None => e.local_gen_mut().get_unnamed(),
@@ -461,7 +461,7 @@ fn emit_using<'a, 'arena, 'decl>(
             let (local, preamble) = match &(using.exprs.1[0].2) {
                 ast::Expr_::Binop(x) => match (&x.0, (x.1).2.as_lvar()) {
                     (ast_defs::Bop::Eq(None), Some(ast::Lid(_, id))) => (
-                        Local::Named(Str::new_str(alloc, local_id::get_name(id).as_str())),
+                        e.named_local(local_id::get_name(id).into()),
                         InstrSeq::gather(vec![
                             emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                             emit_pos(&block_pos),
@@ -481,7 +481,7 @@ fn emit_using<'a, 'arena, 'decl>(
                     }
                 },
                 ast::Expr_::Lvar(lid) => (
-                    Local::Named(Str::new_str(alloc, local_id::get_name(&lid.1).as_str())),
+                    e.named_local(local_id::get_name(&lid.1).into()),
                     InstrSeq::gather(vec![
                         emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                         emit_pos(&block_pos),
@@ -514,7 +514,7 @@ fn emit_using<'a, 'arena, 'decl>(
             };
 
             let emit_finally = |e: &mut Emitter<'arena, 'decl>,
-                                local: Local<'arena>,
+                                local: Local,
                                 has_await: bool,
                                 is_block_scoped: bool|
              -> InstrSeq<'arena> {
@@ -845,7 +845,7 @@ fn emit_try_finally_<
 
 fn make_finally_catch<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    exn_local: Local<'arena>,
+    exn_local: Local,
     finally_body: InstrSeq<'arena>,
 ) -> InstrSeq<'arena> {
     let l2 = instr::unsetl(*e.local_gen_mut().get_retval());
@@ -914,20 +914,21 @@ fn emit_catch<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     end_label: Label,
-    catch: &ast::Catch,
+    ast::Catch(catch_ty, catch_lid, catch_block): &ast::Catch,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     // Note that this is a "regular" label; we're not going to branch to
     // it directly in the event of an exception.
     let next_catch = e.label_gen_mut().next_regular();
-    let id = hhbc_id::class::ClassType::from_ast_name_and_mangle(alloc, &(catch.0).1);
+    let class_id = hhbc_id::class::ClassType::from_ast_name_and_mangle(alloc, &catch_ty.1);
+    let ast::Lid(_pos, catch_local_id) = catch_lid;
     Ok(InstrSeq::gather(vec![
         instr::dup(),
-        instr::instanceofd(id),
+        instr::instanceofd(class_id),
         instr::jmpz(next_catch),
-        instr::setl(Local::Named(Str::new_str(alloc, &((catch.1).1).1))),
+        instr::setl(e.named_local(local_id::get_name(catch_local_id).into())),
         instr::popc(),
-        emit_stmts(e, env, &catch.2)?,
+        emit_stmts(e, env, catch_block)?,
         emit_pos(pos),
         instr::jmp(end_label),
         instr::label(next_catch),
@@ -1078,9 +1079,8 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     iterator: &ast::AsExpr,
-) -> Result<(Option<Local<'arena>>, Local<'arena>, InstrSeq<'arena>)> {
+) -> Result<(Option<Local>, Local, InstrSeq<'arena>)> {
     use ast::AsExpr as A;
-    let alloc = env.arena;
     fn get_id_of_simple_lvar_opt(lvar: &ast::Expr_) -> Result<Option<&str>> {
         if let Some(ast::Lid(pos, id)) = lvar.as_lvar() {
             let name = local_id::get_name(id);
@@ -1099,8 +1099,8 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl>(
                 get_id_of_simple_lvar_opt(&v.2)?,
             ) {
                 (Some(key_id), Some(val_id)) => (
-                    Some(Local::Named(Slice::new(alloc.alloc_str(key_id).as_bytes()))),
-                    Local::Named(Slice::new(alloc.alloc_str(val_id).as_bytes())),
+                    Some(e.named_local(key_id.into())),
+                    e.named_local(val_id.into()),
                     instr::empty(),
                 ),
                 _ => {
@@ -1131,11 +1131,7 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl>(
             },
         ),
         A::AsV(v) => Ok(match get_id_of_simple_lvar_opt(&v.2)? {
-            Some(val_id) => (
-                None,
-                Local::Named(Str::new_str(alloc, val_id)),
-                instr::empty(),
-            ),
+            Some(val_id) => (None, e.named_local(val_id.into()), instr::empty()),
             None => {
                 let val_local = e.local_gen_mut().get_unnamed();
                 let (val_preamble, val_load) = emit_iterator_lvalue_storage(e, env, v, val_local)?;
@@ -1159,7 +1155,7 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     lvalue: &ast::Expr,
-    local: Local<'arena>,
+    local: Local,
 ) -> Result<(Vec<InstrSeq<'arena>>, Vec<InstrSeq<'arena>>)> {
     match &lvalue.2 {
         ast::Expr_::Call(_) => Err(Error::fatal_parse(
@@ -1233,7 +1229,6 @@ fn emit_load_list_element<'a, 'arena, 'decl>(
     i: usize,
     elem: &ast::Expr,
 ) -> Result<(Vec<InstrSeq<'arena>>, Vec<InstrSeq<'arena>>)> {
-    let alloc = env.arena;
     let query_value = |path| {
         InstrSeq::gather(vec![
             InstrSeq::gather(path),
@@ -1244,10 +1239,7 @@ fn emit_load_list_element<'a, 'arena, 'decl>(
         ast::Expr_::Lvar(lid) => {
             let load_value = InstrSeq::gather(vec![
                 query_value(path),
-                instr::setl(Local::Named(Str::new_str(
-                    alloc,
-                    local_id::get_name(&lid.1),
-                ))),
+                instr::setl(e.named_local(local_id::get_name(&lid.1).into())),
                 instr::popc(),
             ]);
             (vec![], vec![load_value])

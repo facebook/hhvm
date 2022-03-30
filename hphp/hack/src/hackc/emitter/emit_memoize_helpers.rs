@@ -3,68 +3,44 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Str;
-use hhas_param::HhasParam;
+use ffi::Slice;
 use hhbc_ast::{FCallArgs, FCallArgsFlags};
 use hhbc_id::function;
 use instruction_sequence::{instr, Error, InstrSeq, Result};
-use label::Label;
 use local::{Local, LocalId};
-use oxidized::{aast::FunParam, ast::Expr, pos::Pos};
-
-use ffi::Slice;
+use oxidized::{aast::FunParam, pos::Pos};
 
 pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";
 
-pub fn get_memo_key_list<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    local: LocalId,
-    index: u32,
-    name: impl AsRef<str>,
-) -> Vec<InstrSeq<'arena>> {
+pub fn get_memo_key_list<'arena>(temp_local: Local, param_local: Local) -> Vec<InstrSeq<'arena>> {
     vec![
-        instr::getmemokeyl(Local::Named(Str::new_str(alloc, name.as_ref()))),
-        instr::setl(Local::Unnamed(LocalId {
-            idx: local.idx + index,
-        })),
+        instr::getmemokeyl(param_local),
+        instr::setl(temp_local),
         instr::popc(),
     ]
 }
 
-pub fn param_code_sets<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    params: &[(HhasParam<'arena>, Option<(Label, Expr)>)],
-    local: LocalId,
-) -> InstrSeq<'arena> {
+pub fn param_code_sets<'arena>(num_params: usize, first_unnamed: LocalId) -> InstrSeq<'arena> {
     InstrSeq::gather(
-        params
-            .iter()
-            .enumerate()
-            .map(|(i, (param, _))| {
-                get_memo_key_list(
-                    alloc,
-                    local,
-                    i.try_into().unwrap(),
-                    &param.name.unsafe_as_str(),
-                )
+        (0..num_params)
+            .flat_map(|i| {
+                let idx = i as u32;
+                let param_local = Local::Named(LocalId { idx });
+                let temp_local = Local::Unnamed(LocalId {
+                    idx: first_unnamed.idx + idx,
+                });
+                get_memo_key_list(temp_local, param_local)
             })
-            .flatten()
             .collect(),
     )
 }
 
-pub fn param_code_gets<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    params: &[(HhasParam<'arena>, Option<(Label, Expr)>)],
-) -> InstrSeq<'arena> {
+pub fn param_code_gets<'arena>(num_params: usize) -> InstrSeq<'arena> {
     InstrSeq::gather(
-        params
-            .iter()
-            .map(|(param, _)| {
-                instr::cgetl(Local::Named(Str::new_str(
-                    alloc,
-                    param.name.unsafe_as_str(),
-                )))
+        (0..num_params)
+            .map(|i| {
+                let param_local = Local::Named(LocalId { idx: i as u32 });
+                instr::cgetl(param_local)
             })
             .collect(),
     )

@@ -881,14 +881,21 @@ fn print_body(
         w.write_all(b";")?;
     }
     coeffects::coeffects_to_hhas(ctx, w, coeffects)?;
-    print_instructions(ctx, w, &body.body_instrs, dv_labels)
+    let local_names: Vec<Str<'_>> = body
+        .params
+        .iter()
+        .map(|param| param.name)
+        .chain(body.decl_vars.iter().copied())
+        .collect();
+    print_instructions(ctx, w, &body.body_instrs, dv_labels, &local_names)
 }
 
-fn print_instructions(
+fn print_instructions<'a, 'b>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    instrs: &[Instruct<'_>],
-    dv_labels: &HashSet<Label>,
+    instrs: &'b [Instruct<'a>],
+    dv_labels: &'b HashSet<Label>,
+    local_names: &'b [Str<'a>],
 ) -> Result<()> {
     let mut ctx = ctx.clone();
     for instr in instrs {
@@ -899,29 +906,29 @@ fn print_instructions(
             Instruct::Pseudo(Pseudo::Comment(_)) => {
                 // indentation = 0
                 newline(w)?;
-                print_instr(w, instr, dv_labels)?;
+                print_instr(w, instr, dv_labels, local_names)?;
             }
             Instruct::Pseudo(Pseudo::Label(_)) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
-                print_instr(w, instr, dv_labels)
+                print_instr(w, instr, dv_labels, local_names)
             })?,
             Instruct::Pseudo(Pseudo::TryCatchBegin) => {
                 ctx.newline(w)?;
-                print_instr(w, instr, dv_labels)?;
+                print_instr(w, instr, dv_labels, local_names)?;
                 ctx.indent_inc();
             }
             Instruct::Pseudo(Pseudo::TryCatchMiddle) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
-                print_instr(w, instr, dv_labels)
+                print_instr(w, instr, dv_labels, local_names)
             })?,
             Instruct::Pseudo(Pseudo::TryCatchEnd) => {
                 ctx.indent_dec();
                 ctx.newline(w)?;
-                print_instr(w, instr, dv_labels)?;
+                print_instr(w, instr, dv_labels, local_names)?;
             }
             _ => {
                 ctx.newline(w)?;
-                print_instr(w, instr, dv_labels)?;
+                print_instr(w, instr, dv_labels, local_names)?;
             }
         }
     }
@@ -991,10 +998,15 @@ fn print_pseudo(w: &mut dyn Write, instr: &Pseudo<'_>, dv_labels: &HashSet<Label
     }
 }
 
-fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
+fn print_instr<'a, 'b>(
+    w: &mut dyn Write,
+    instr: &'b Instruct<'a>,
+    dv_labels: &'b HashSet<Label>,
+    local_names: &'b [Str<'a>],
+) -> Result<()> {
     match instr {
         Instruct::Opcode(opcode) => {
-            crate::print_opcode::PrintOpcode::new(opcode, dv_labels).print_opcode(w)
+            crate::print_opcode::PrintOpcode::new(opcode, dv_labels, local_names).print_opcode(w)
         }
         Instruct::Pseudo(pseudo) => print_pseudo(w, pseudo, dv_labels),
     }

@@ -35,7 +35,7 @@ pub struct Env<'a, 'arena> {
     pub scope: Scope<'a, 'arena>,
     pub namespace: RcOc<NamespaceEnv>,
     pub call_context: Option<String>,
-    pub pipe_var: Option<Local<'arena>>,
+    pub pipe_var: Option<Local>,
 }
 
 impl<'a, 'arena> Env<'a, 'arena> {
@@ -68,7 +68,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         }
     }
 
-    pub fn with_pipe_var(&mut self, local: Local<'arena>) {
+    pub fn with_pipe_var(&mut self, local: Local) {
         self.pipe_var = Some(local);
     }
 

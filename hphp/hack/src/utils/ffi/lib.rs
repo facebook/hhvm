@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-
 //! There are basically two kinds of types can't be made `repr(C)`:
 //!   * builtin types making no guaratees about binary layout (e.g.
 //!     wide pointers, tuples)

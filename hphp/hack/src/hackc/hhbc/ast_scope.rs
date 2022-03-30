@@ -258,7 +258,6 @@ impl<'a, 'arena> Scope<'a, 'arena> {
         }
     }
 
-
     pub fn is_in_debugger_eval_fun(&self) -> bool {
         for x in self.iter() {
             match x {

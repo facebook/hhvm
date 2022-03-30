@@ -101,7 +101,6 @@ where
         token.with_kind(kind)
     }
 
-
     fn trivia_factory_mut(&mut self) -> &mut Self::TriviaFactory {
         &mut self.1
     }

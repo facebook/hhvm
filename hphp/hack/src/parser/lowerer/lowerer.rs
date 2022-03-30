@@ -3617,7 +3617,6 @@ fn rewrite_effect_polymorphism<'a>(
         );
     }
 
-
     for context_hint in context_hints {
         match *context_hint.1 {
             HfunContext(ref name) => match hint_by_param.get_mut::<str>(name) {

@@ -1865,8 +1865,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         })
     }
 
-
-
     fn make_t_shape_field_name(&mut self, ShapeField(field): &ShapeField<'a>) -> TShapeField<'a> {
         TShapeField(match field {
             ShapeFieldName::SFlitInt(&(pos, x)) => {

@@ -1655,7 +1655,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-
     fn is_immediately_in_lambda(&self) -> bool {
         self.env
             .context

@@ -28,7 +28,9 @@ let filter_class_and_constructor results =
 
 let make_hover_doc_block ctx entry occurrence def_opt =
   match def_opt with
-  | Some def ->
+  | Some def when not occurrence.SymbolOccurrence.is_declaration ->
+    (* The docblock is useful at the call site, but it's redundant at
+       the definition site. *)
     let base_class_name = SymbolOccurrence.enclosing_class occurrence in
     ServerDocblockAt.go_comments_for_symbol_ctx
       ~ctx
@@ -36,7 +38,9 @@ let make_hover_doc_block ctx entry occurrence def_opt =
       ~def
       ~base_class_name
     |> Option.to_list
-  | None -> []
+  | None
+  | Some _ ->
+    []
 
 let make_hover_const_definition entry def_opt =
   match def_opt with

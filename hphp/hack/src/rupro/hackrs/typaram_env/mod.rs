@@ -69,7 +69,6 @@ impl<R: Reason> TyparamEnv<R> {
             .map(|(_, kind)| kind.lower_bounds())
     }
 
-
     fn remove_lower_bound(&mut self, tp_name: &TypeName, ty: &Ty<R>) {
         self.typarams.entry(*tp_name).and_modify(|(_, k)| {
             k.remove_lower_bound(ty);
@@ -91,7 +90,6 @@ impl<R: Reason> TyparamEnv<R> {
                 .add_upper_bound(ty);
         }
     }
-
 
     fn add_lower_bound_help(&mut self, tp_name: &TypeName, ty: Ty<R>) {
         if !Self::is_generic_param(&ty, tp_name, true) {
@@ -202,7 +200,6 @@ impl<R: Reason> TyparamEnv<R> {
             .1
             .set_lower_bounds(lower_bounds);
     }
-
 
     pub fn remove(&mut self, tp_name: TypeName) {
         let bound = Ty::generic(R::none(), tp_name, vec![]);

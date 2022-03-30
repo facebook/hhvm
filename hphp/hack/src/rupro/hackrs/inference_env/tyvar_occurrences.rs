@@ -75,7 +75,6 @@ impl TyvarOccurrences {
         }
     }
 
-
     /// Remove a type variable from the binding structure i.e. remove any
     /// occurrence of the type variable from any binding in which it appears
     /// and remove the occurrence of any type variables which appear in its

@@ -70,7 +70,6 @@ impl<R: Reason> InferenceEnv<R> {
         self.tyvar_info.entry(tv).or_default().bind(pos, ty)
     }
 
-
     /// Bind the type [ty] to the type variable [tv] and update the occurrences
     /// of each type variable contained in [ty]
     pub fn add(&mut self, pos: Option<R::Pos>, tv: Tyvar, ty: Ty<R>) {

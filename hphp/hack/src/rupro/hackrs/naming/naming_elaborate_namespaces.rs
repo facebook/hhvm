@@ -29,7 +29,6 @@ impl<'node> ElaborateNamespacesVisitor<'node> {
         }
     }
 
-
     fn is_reserved_type_hint(&self, name: &str) -> bool {
         let name = ns::strip_ns(name);
         sn::typehints::reserved_typehints

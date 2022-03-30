@@ -191,7 +191,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
                 let instrs = InstrSeq::gather(vec![
                     emit_expression::emit_expr(emitter, env, expr)?,
                     emit_pos::emit_pos(pos),
-                    instr::setl(Local::named(i)),
+                    instr::setl(Local::new(i)),
                     instr::popc(),
                 ]);
                 Ok(InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]))

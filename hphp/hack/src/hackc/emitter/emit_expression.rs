@@ -151,15 +151,10 @@ mod inout_locals {
         local: Local,
         aliases: &AliasInfoMap<'_>,
     ) -> bool {
-        match local {
-            Local::Named(_) => {
-                let name = e.local_name(local);
-                aliases
-                    .get(name.unsafe_as_str())
-                    .map_or(true, |alias| alias.has_single_ref())
-            }
-            Local::Unnamed(_) => false,
-        }
+        let name = e.local_name(local);
+        aliases
+            .get(name.unsafe_as_str())
+            .map_or(true, |alias| alias.has_single_ref())
     }
 
     pub(super) fn collect_written_variables<'ast, 'arena>(

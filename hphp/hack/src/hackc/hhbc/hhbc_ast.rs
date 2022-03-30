@@ -8,7 +8,7 @@ mod opcodes;
 use ffi::{BumpSliceMut, Slice, Str};
 use iterator::IterId;
 use label::Label;
-use local::{Local, LocalId};
+use local::Local;
 
 pub use opcodes::Opcode;
 
@@ -206,12 +206,13 @@ impl AsRef<str> for Visibility {
     }
 }
 
-/// A Contiguous range of unnamed locals. The canonical (default) empty
-/// range is {0, 0}. Ranges of named locals cannot be represented.
+/// A Contiguous range of locals. The canonical (default) empty
+/// range is {0, 0}. This is normally only used for unnamed locals
+/// but nothing prevents arbitrary ranges.
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
 pub struct LocalRange {
-    pub start: LocalId,
+    pub start: Local,
     pub len: u32,
 }
 

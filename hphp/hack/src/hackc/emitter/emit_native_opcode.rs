@@ -102,7 +102,7 @@ fn emit_generator_method<'arena>(name: &str, params: &[ast::FunParam]) -> Result
 
 fn get_first_param_local(params: &[ast::FunParam]) -> Result<Local> {
     match params {
-        [_, ..] => Ok(Local::named(0)),
+        [_, ..] => Ok(Local::new(0)),
         _ => Err(Error::unrecoverable("native generator requires params")),
     }
 }

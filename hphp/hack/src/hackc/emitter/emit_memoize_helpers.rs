@@ -7,7 +7,7 @@ use ffi::Slice;
 use hhbc_ast::{FCallArgs, FCallArgsFlags};
 use hhbc_id::function;
 use instruction_sequence::{instr, Error, InstrSeq, Result};
-use local::{Local, LocalId};
+use local::Local;
 use oxidized::{aast::FunParam, pos::Pos};
 
 pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";
@@ -20,15 +20,12 @@ pub fn get_memo_key_list<'arena>(temp_local: Local, param_local: Local) -> Vec<I
     ]
 }
 
-pub fn param_code_sets<'arena>(num_params: usize, first_unnamed: LocalId) -> InstrSeq<'arena> {
+pub fn param_code_sets<'arena>(num_params: usize, first_unnamed: Local) -> InstrSeq<'arena> {
     InstrSeq::gather(
         (0..num_params)
             .flat_map(|i| {
-                let idx = i as u32;
-                let param_local = Local::Named(LocalId { idx });
-                let temp_local = Local::Unnamed(LocalId {
-                    idx: first_unnamed.idx + idx,
-                });
+                let param_local = Local::new(i);
+                let temp_local = Local::new(first_unnamed.idx as usize + i);
                 get_memo_key_list(temp_local, param_local)
             })
             .collect(),
@@ -38,10 +35,7 @@ pub fn param_code_sets<'arena>(num_params: usize, first_unnamed: LocalId) -> Ins
 pub fn param_code_gets<'arena>(num_params: usize) -> InstrSeq<'arena> {
     InstrSeq::gather(
         (0..num_params)
-            .map(|i| {
-                let param_local = Local::Named(LocalId { idx: i as u32 });
-                instr::cgetl(param_local)
-            })
+            .map(|i| instr::cgetl(Local::new(i)))
             .collect(),
     )
 }
@@ -62,7 +56,7 @@ pub fn check_memoize_possible<Ex, En>(
 
 pub fn get_implicit_context_memo_key<'arena>(
     alloc: &'arena bumpalo::Bump,
-    local: LocalId,
+    local: Local,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(vec![
         instr::nulluninit(),
@@ -82,7 +76,7 @@ pub fn get_implicit_context_memo_key<'arena>(
                 "HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
             ),
         ),
-        instr::setl(Local::Unnamed(local)),
+        instr::setl(local),
         instr::popc(),
     ])
 }

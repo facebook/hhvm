@@ -7,7 +7,7 @@ use ffi::{BumpSliceMut, Slice, Str};
 use hhbc_ast::*;
 use iterator::IterId;
 use label::Label;
-use local::{Local, LocalId};
+use local::Local;
 use oxidized::ast_defs::Pos;
 use thiserror::Error;
 
@@ -1072,11 +1072,11 @@ pub mod instr {
         instr(Instruct::Pseudo(Pseudo::Label(label)))
     }
 
-    pub fn awaitall_list<'a>(unnamed_locals: Vec<LocalId>) -> InstrSeq<'a> {
+    pub fn awaitall_list<'a>(unnamed_locals: Vec<Local>) -> InstrSeq<'a> {
         match unnamed_locals.split_first() {
             None => panic!("Expected at least one await"),
             Some((head, tail)) => {
-                // Assert that the LocalIds are sequentially numbered.
+                // Assert that the Locals are sequentially numbered.
                 let mut prev_id = head;
                 for id in tail {
                     assert_eq!(prev_id.idx + 1, id.idx);

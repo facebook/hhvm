@@ -131,7 +131,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     /// indicating a logic bug in the compiler; all params and named locals must
     /// be provided in advance to init_named_locals().
     pub fn named_local(&self, name: Str<'_>) -> Local {
-        match self.named_locals.get_index_of(&name).map(Local::named) {
+        match self.named_locals.get_index_of(&name).map(Local::new) {
             Some(local) => local,
             None => panic!(
                 "{}: local not found among {:#?}",
@@ -147,8 +147,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     /// Given a named local, return its name. Panic for unnamed locals
     /// indicating a logic bug in the compiler.
     pub fn local_name(&self, local: Local) -> &Str<'_> {
-        let idx = local.expect_named().idx as usize;
-        self.named_locals.get_index(idx).unwrap()
+        self.named_locals.get_index(local.idx as usize).unwrap()
     }
 
     pub fn local_scope<R, F: FnOnce(&mut Self) -> R>(&mut self, f: F) -> R {

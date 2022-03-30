@@ -198,9 +198,9 @@ fn print_iterator_id(w: &mut dyn Write, i: &IterId) -> Result<()> {
 }
 
 fn print_local(w: &mut dyn Write, local: &Local, local_names: &[Str<'_>]) -> Result<()> {
-    match local {
-        Local::Unnamed(id) => write!(w, "_{}", id),
-        Local::Named(id) => write!(w, "{}", local_names[id.idx as usize].unsafe_as_str()),
+    match local_names.get(local.idx as usize) {
+        Some(name) => write!(w, "{}", name.unsafe_as_str()),
+        None => write!(w, "_{}", local.idx),
     }
 }
 

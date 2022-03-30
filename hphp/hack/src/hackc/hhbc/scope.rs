@@ -5,7 +5,7 @@
 use env::emitter::Emitter;
 use instruction_sequence::{instr, InstrSeq, Result};
 use iterator::IterId;
-use local::{Local, LocalId};
+use local::Local;
 
 /// Run emit () in a new unnamed local scope, which produces three instruction
 /// blocks -- before, inner, after. If emit () registered any unnamed locals, the
@@ -106,11 +106,11 @@ where
     })
 }
 
-fn unset_unnamed_locals<'arena>(start: LocalId, end: LocalId) -> InstrSeq<'arena> {
+fn unset_unnamed_locals<'arena>(start: Local, end: Local) -> InstrSeq<'arena> {
     InstrSeq::gather(
         (start.idx..end.idx)
             .into_iter()
-            .map(|idx| instr::unsetl(Local::Unnamed(LocalId { idx })))
+            .map(|idx| instr::unsetl(Local::new(idx as usize)))
             .collect(),
     )
 }

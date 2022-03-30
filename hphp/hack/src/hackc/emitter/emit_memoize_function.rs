@@ -20,7 +20,7 @@ use hhbc_string_utils::reified;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
-use local::{Local, LocalId};
+use local::Local;
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options, RepoFlags};
 use oxidized::{ast as T, pos::Pos};
@@ -191,7 +191,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     // so the first unnamed local is parameter count + 1 when there are reified generics.
     let add_reified = usize::from(is_reified);
     let add_implicit_context = usize::from(should_emit_implicit_context);
-    let generics_local = Local::named(param_count); // only used if is_reified == true.
+    let generics_local = Local::new(param_count); // only used if is_reified == true.
     let decl_vars = match is_reified {
         true => vec![reified::GENERICS_LOCAL_NAME.into()],
         false => Vec::new(),
@@ -227,7 +227,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         (
             instr::cgetl(generics_local),
             InstrSeq::gather(emit_memoize_helpers::get_memo_key_list(
-                Local::unnamed(param_count + first_unnamed_idx),
+                Local::new(param_count + first_unnamed_idx),
                 generics_local,
             )),
         )
@@ -236,23 +236,20 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         instr::empty()
     } else {
         // Last unnamed local slot
-        let local = first_unnamed_idx + param_count + add_reified;
-        emit_memoize_helpers::get_implicit_context_memo_key(alloc, LocalId::from_usize(local))
+        let local = Local::new(first_unnamed_idx + param_count + add_reified);
+        emit_memoize_helpers::get_implicit_context_memo_key(alloc, local)
     };
-    let first_unnamed_local = Local::unnamed(first_unnamed_idx);
+    let first_unnamed_local = Local::new(first_unnamed_idx);
     let key_count = (param_count + add_reified + add_implicit_context) as isize;
     let local_range = LocalRange {
-        start: first_unnamed_local.expect_unnamed(),
+        start: first_unnamed_local,
         len: key_count.try_into().unwrap(),
     };
     let instrs = InstrSeq::gather(vec![
         begin_label,
         emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[])?,
         deprecation_body,
-        emit_memoize_helpers::param_code_sets(
-            hhas_params.len(),
-            LocalId::from_usize(first_unnamed_idx),
-        ),
+        emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
         if is_async {

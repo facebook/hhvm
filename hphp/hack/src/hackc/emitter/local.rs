@@ -4,63 +4,30 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 /// Local variable numbers are ultimately encoded as IVA, limited to u32.
+/// Locals with idx < num_params + num_decl_vars are considered named,
+/// higher numbered locals are considered unnamed.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
-pub struct LocalId {
+pub struct Local {
     /// 0-based index into HHBC stack frame locals.
     pub idx: u32,
 }
 
-impl std::fmt::Display for LocalId {
+impl std::fmt::Display for Local {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.idx.fmt(f)
     }
 }
 
-impl LocalId {
-    pub fn from_usize(x: usize) -> Self {
+impl Local {
+    pub const INVALID: Self = Self { idx: u32::MAX };
+
+    pub fn new(x: usize) -> Self {
         Self { idx: x as u32 }
     }
-}
 
-/// Type of locals as they appear in instructions. Named variables are
-/// those appearing in parameters and the HHAS .declvars directive.
-/// These can also be referenced by number [0 to N-1]. Use Unnamed
-/// only for variables N and above not appearing in parameters or .declvars.
-#[derive(Clone, Copy, Debug)]
-#[repr(C)]
-pub enum Local {
-    Unnamed(LocalId),
-    Named(LocalId),
-}
-
-impl Local {
-    pub const INVALID: Self = Self::Unnamed(LocalId { idx: u32::MAX });
-
-    pub fn is_valid(&self) -> bool {
-        !matches!(self, Self::Unnamed(LocalId { idx: u32::MAX }))
-    }
-
-    pub fn expect_unnamed(&self) -> LocalId {
-        match self {
-            Self::Unnamed(id) => *id,
-            Self::Named(_) => panic!("Expected unnamed local"),
-        }
-    }
-
-    pub fn expect_named(&self) -> LocalId {
-        match self {
-            Self::Named(id) => *id,
-            Self::Unnamed(_) => panic!("Expected named local"),
-        }
-    }
-
-    pub fn named(i: usize) -> Self {
-        Self::Named(LocalId { idx: i as u32 })
-    }
-
-    pub fn unnamed(i: usize) -> Self {
-        Self::Unnamed(LocalId { idx: i as u32 })
+    pub fn is_valid(self) -> bool {
+        self != Self::INVALID
     }
 }
 
@@ -72,7 +39,7 @@ pub struct Gen {
 
 impl Gen {
     pub fn get_unnamed(&mut self) -> Local {
-        Local::Unnamed(self.counter.next_unnamed(&self.dedicated))
+        self.counter.next_unnamed(&self.dedicated)
     }
 
     pub fn get_unnamed_for_tempname(&self, s: &str) -> &Local {
@@ -84,21 +51,22 @@ impl Gen {
     }
 
     pub fn init_unnamed_for_tempname(&mut self, s: &str) -> &Local {
+        use indexmap::map::Entry::*;
         naming_special_names_rust::special_idents::assert_tmp_var(s);
         let new_local = self.get_unnamed();
-        if self.dedicated.temp_map.insert(s, new_local).is_some() {
-            panic!("Attempted to double init");
+        match self.dedicated.temp_map.map.entry(s.to_owned()) {
+            Occupied(_) => panic!("Attempted to double init: {}", s),
+            Vacant(e) => e.insert(new_local),
         }
-        self.dedicated.temp_map.get(s).unwrap()
     }
 
     pub fn get_label(&mut self) -> &Local {
         let mut counter = self.counter;
         let mut new_counter = self.counter;
-        let new_id = new_counter.next_unnamed(&self.dedicated);
+        let new_local = new_counter.next_unnamed(&self.dedicated);
         let ret = self.dedicated.label.get_or_insert_with(|| {
             counter = new_counter;
-            Local::Unnamed(new_id)
+            new_local
         });
         self.counter = counter;
         ret
@@ -110,10 +78,10 @@ impl Gen {
         // self.dedicated.field`.
         let mut counter = self.counter;
         let mut new_counter = self.counter;
-        let new_id = new_counter.next_unnamed(&self.dedicated);
+        let new_local = new_counter.next_unnamed(&self.dedicated);
         let ret = self.dedicated.retval.get_or_insert_with(|| {
             counter = new_counter;
-            Local::Unnamed(new_id)
+            new_local
         });
         self.counter = counter;
         ret
@@ -126,7 +94,7 @@ impl Gen {
         self.get_retval();
     }
 
-    pub fn reset(&mut self, next: LocalId) {
+    pub fn reset(&mut self, next: Local) {
         *self = Self {
             counter: Counter { next },
             ..Default::default()
@@ -172,20 +140,20 @@ pub struct Dedicated {
 
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Counter {
-    pub next: LocalId,
+    pub next: Local,
 }
 
 impl Counter {
-    fn next_unnamed(&mut self, dedicated: &Dedicated) -> LocalId {
+    fn next_unnamed(&mut self, dedicated: &Dedicated) -> Local {
         loop {
             let curr = self.next;
             self.next.idx += 1;
 
             // make sure that newly allocated local don't stomp on dedicated locals
             match dedicated.label {
-                Some(Local::Unnamed(id)) if curr == id => continue,
+                Some(id) if curr == id => continue,
                 _ => match dedicated.retval {
-                    Some(Local::Unnamed(id)) if curr == id => continue,
+                    Some(id) if curr == id => continue,
                     _ => return curr,
                 },
             }

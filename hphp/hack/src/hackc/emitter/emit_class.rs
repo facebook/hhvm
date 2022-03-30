@@ -23,7 +23,7 @@ use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
 use instruction_sequence::{instr, Error, InstrSeq, Result};
 use itertools::Itertools;
-use local::{Local, LocalId};
+use local::Local;
 use naming_special_names_rust as special_names;
 use oxidized::{
     ast,
@@ -301,7 +301,7 @@ fn from_class_elt_constants<'a, 'arena, 'decl>(
         .iter()
         .map(|x| {
             // start unnamed local numbers at 1 for constants to not clobber $constVars
-            emitter.local_gen_mut().reset(LocalId { idx: 1 });
+            emitter.local_gen_mut().reset(Local::new(1));
             let (is_abstract, init_opt) = match &x.kind {
                 ClassConstKind::CCAbstract(default) => (true, default.as_ref()),
                 ClassConstKind::CCConcrete(expr) => (false, Some(expr)),
@@ -487,7 +487,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
         Ok(None)
     } else {
         let tc = Constraint::make(Just("HH\\varray".into()), TypeConstraintFlags::NoFlags);
-        let param_local = Local::named(0);
+        let param_local = Local::new(0);
         let params = vec![HhasParam {
             name: Str::new_str(alloc, string_utils::reified::INIT_METH_PARAM_NAME),
             is_variadic: false,
@@ -788,7 +788,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         None
     } else {
         let param_name = Str::new_str(alloc, "$constName");
-        let param_local = Local::named(0);
+        let param_local = Local::new(0);
         let params = vec![HhasParam {
             name: param_name,
             is_variadic: false,

@@ -23,7 +23,7 @@ use hhbc_id::function;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{instr, Error, InstrSeq, Result};
 use label::Label;
-use local::{Local, LocalId};
+use local::Local;
 use options::CompilerFlags;
 use runtime::TypedValue;
 use statement_state::StatementState;
@@ -129,7 +129,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     let should_reserve_locals = set_function_jmp_targets(emitter, &mut env);
     let local_gen = emitter.local_gen_mut();
     let num_locals = params.len() + decl_vars.len();
-    local_gen.reset(LocalId::from_usize(num_locals));
+    local_gen.reset(Local::new(num_locals));
     if should_reserve_locals {
         local_gen.reserve_retval_and_label_id_locals();
     };
@@ -753,7 +753,7 @@ fn emit_verify_out<'arena>(
         .filter_map(|(i, (p, _))| {
             if p.is_inout {
                 Some(InstrSeq::gather(vec![
-                    instr::cgetl(Local::named(i)),
+                    instr::cgetl(Local::new(i)),
                     match p.type_info.as_ref() {
                         Just(HhasTypeInfo { user_type, .. })
                             if user_type.as_ref().map_or(true, |t| {

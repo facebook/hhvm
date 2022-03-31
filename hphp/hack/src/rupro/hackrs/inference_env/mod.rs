@@ -10,9 +10,9 @@ mod tyvar_occurrences;
 
 use im::{HashMap, HashSet};
 use std::ops::Deref;
+use ty::prop::Prop;
 use ty::reason::Reason;
 use ty::typing_defs::{Ty, Ty_, Tyvar};
-use ty::typing_prop::Prop;
 use ty::visitor::{Visitor, Walkable};
 use tyvar_info::TyvarInfo;
 use tyvar_occurrences::TyvarOccurrences;

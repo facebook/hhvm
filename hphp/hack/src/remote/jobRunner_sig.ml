@@ -50,7 +50,7 @@ module type S = sig
 
   val begin_heartbeat : Types.job_id -> (status, string) result Future.t
 
-  val begin_run : command:command -> (Types.job_id, string) result Future.t
+  val begin_run : command:command -> (Types.job_id list, string) result Future.t
 
-  val run : command:command -> (Types.job_id, string) result
+  val run : command:command -> (Types.job_id list, string) result
 end

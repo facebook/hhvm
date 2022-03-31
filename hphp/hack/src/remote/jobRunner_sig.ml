@@ -26,7 +26,7 @@ module type S = sig
      It can be used later in `begin_cancel` to cancel a group of commands, for example. *)
   val create_command :
     nonce:string ->
-    key:string ->
+    keys:string list ->
     hash:string ->
     check_id:string ->
     transport_channel:string option ->

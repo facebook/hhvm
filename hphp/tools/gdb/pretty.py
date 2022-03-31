@@ -15,6 +15,7 @@ from gdbutils import *
 from lookup import lookup_func
 from sizeof import sizeof
 import idx
+from hhbc import as_idx
 
 
 #------------------------------------------------------------------------------
@@ -424,6 +425,25 @@ class ObjectDataPrinter(object):
         return self._iterator(self.val)
 
 #------------------------------------------------------------------------------
+# HHBC ops.
+#
+# Helpful for converting raw signed integers that GDB would typically
+# print for enum values of type Op
+
+
+class HhbcOpsPrinter(object):
+    RECOGNIZE = '^HPHP::Op$'
+
+    def __init__(self, val):
+        int2enum = {
+            field.enumval: field.name for field in T('HPHP::Op').fields()
+        }
+        self.val = int2enum[int(as_idx(val))]
+
+    def to_string(self):
+        return str(self.val)
+
+#------------------------------------------------------------------------------
 # HHBBC::Bytecode
 
 
@@ -539,6 +559,7 @@ printer_classes = [
     StringDataPrinter,
     ArrayDataPrinter,
     ObjectDataPrinter,
+    HhbcOpsPrinter,
     HhbbcBytecodePrinter,
     CompactVectorPrinter,
     SrcKeyPrinter,

@@ -42,6 +42,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrPublic,                   F|P|T,   "public");               \
   X(AttrProtected,                F|P|T,   "protected");            \
   X(AttrPrivate,                  F|P|T,   "private");              \
+  X(AttrInternal,                 F|P|C,   "internal");             \
   X(AttrStatic,                   F|P,     "static");               \
   X(AttrEnum,                     C,       "enum");                 \
   X(AttrDeepInit,                 P,       "deep_init");            \

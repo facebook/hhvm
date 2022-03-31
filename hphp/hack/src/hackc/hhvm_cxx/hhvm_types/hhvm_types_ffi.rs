@@ -42,6 +42,7 @@ pub mod ffi {
         AttrReadonlyThis = 0x4000,
         AttrReadonlyReturn = 0x8000,
         AttrModule = 0x10000,
+        AttrInternal = 0x20000,
         AttrPersistent = 0x40000,
         AttrDynamicallyCallable = 0x80000,
         AttrDynamicallyConstructible = 0x80000,

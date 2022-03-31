@@ -181,3 +181,8 @@ final class ReadonlyViolationException extends LogicException {}
  * Exception thrown when a coeffect violation occurs.
  */
 final class CoeffectViolationException extends LogicException {}
+
+/**
+ * Exception thrown when a module boundary violation occurs.
+ */
+final class ModuleBoundaryViolationException extends LogicException {}

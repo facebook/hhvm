@@ -127,6 +127,9 @@ enum Attr {
   // Indicates that this class is a module declaration
   AttrModule               = (1u << 16), //    X  |          |         //
                                          //       |          |         //
+  // Indicates that this symbol is internal to the module it is declared in
+  AttrInternal             = (1u << 17), //    X  |    X     |    X    //
+                                         //       |          |         //
   // Indicates that the function, class or static property can be loaded
   // once and then persisted across all requests. |          |         //
   AttrPersistent           = (1u << 18), //    X  |    X     |    X    //

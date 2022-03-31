@@ -10,8 +10,8 @@ use crate::typing::hint_utils::HintUtils;
 use crate::typing::typing_error::Result;
 use pos::Symbol;
 use ty::decl::DeclTy;
+use ty::local::Ty;
 use ty::reason::Reason;
-use ty::typing_defs::Ty;
 
 /// This trait provides typing for return type hints.
 ///

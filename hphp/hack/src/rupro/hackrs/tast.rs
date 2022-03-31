@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use bumpalo::Bump;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-use ty::typing_defs::Ty;
+use ty::local::Ty;
 
 #[derive(Clone, Debug)]
 pub struct SavedEnv;

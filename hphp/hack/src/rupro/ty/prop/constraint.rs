@@ -9,8 +9,8 @@
 
 #![allow(dead_code)]
 
+use crate::local::Ty;
 use crate::reason::Reason;
-use crate::typing_defs::Ty;
 use pos::Symbol;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

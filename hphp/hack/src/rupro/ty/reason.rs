@@ -11,8 +11,8 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::hash::Hash;
 
 use crate::decl::DeclTy_;
+use crate::local::{Ty, Ty_};
 use crate::prop::{Prop, PropF};
-use crate::typing_defs::{Ty, Ty_};
 use crate::visitor::Walkable;
 
 pub use oxidized::typing_reason::{ArgPosition, BlameSource};

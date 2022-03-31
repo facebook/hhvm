@@ -8,8 +8,8 @@ use crate::typing::typing_error::Result;
 use crate::typing_decl_provider::{Class, TypeDecl};
 use pos::{Positioned, TypeName};
 use ty::decl::{self, DeclTy, DeclTy_};
+use ty::local::{Exact, FunParam, FunType, Ty, Ty_};
 use ty::reason::Reason;
-use ty::typing_defs::{Exact, FunParam, FunType, Ty, Ty_};
 
 /// Localization environment, controlling localization.
 ///

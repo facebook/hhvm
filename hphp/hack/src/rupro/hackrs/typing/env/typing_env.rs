@@ -16,8 +16,8 @@ use pos::FunName;
 use pos::TypeName;
 use std::cell::RefCell;
 use std::rc::Rc;
+use ty::local::{ParamMode, Ty};
 use ty::reason::Reason;
-use ty::typing_defs::{ParamMode, Ty};
 use ty::typing_error::TypingError;
 use utils::core::{IdentGen, LocalId};
 

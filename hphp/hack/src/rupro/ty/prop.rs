@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod constraint;
 
+use crate::local::Ty;
 use crate::reason::Reason;
-use crate::typing_defs::Ty;
 use crate::typing_error::TypingError;
 pub use constraint::Constraint;
 use hcons::{Conser, Hc};

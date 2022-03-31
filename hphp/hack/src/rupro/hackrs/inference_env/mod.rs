@@ -10,9 +10,9 @@ mod tyvar_occurrences;
 
 use im::{HashMap, HashSet};
 use std::ops::Deref;
+use ty::local::{Ty, Ty_, Tyvar};
 use ty::prop::Prop;
 use ty::reason::Reason;
-use ty::typing_defs::{Ty, Ty_, Tyvar};
 use ty::visitor::{Visitor, Walkable};
 use tyvar_info::TyvarInfo;
 use tyvar_occurrences::TyvarOccurrences;
@@ -171,8 +171,8 @@ impl<'a, R: Reason> Visitor<R> for CollectUnsolved<'a, R> {
 mod tests {
     use super::*;
     use pos::NPos;
+    use ty::local::{FunParam, FunType};
     use ty::reason::NReason;
-    use ty::typing_defs::{FunParam, FunType};
     use utils::core::IdentGen;
 
     #[test]

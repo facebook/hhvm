@@ -5,8 +5,8 @@
 #![allow(dead_code)]
 use im::HashMap;
 
+use ty::local::Ty;
 use ty::reason::Reason;
-use ty::typing_defs::Ty;
 use utils::core::{Ident, LocalId};
 
 #[derive(Debug, Clone)]

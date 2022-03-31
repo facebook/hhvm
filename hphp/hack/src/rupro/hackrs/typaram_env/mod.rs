@@ -7,9 +7,9 @@ use im::{HashMap, HashSet};
 use pos::Pos;
 use pos::TypeName;
 use std::ops::Deref;
+use ty::local::Kind;
+use ty::local::{Ty, Ty_};
 use ty::reason::Reason;
-use ty::typing_defs::Kind;
-use ty::typing_defs::{Ty, Ty_};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TyparamEnv<R: Reason> {

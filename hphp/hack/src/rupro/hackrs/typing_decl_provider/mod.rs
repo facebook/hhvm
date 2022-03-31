@@ -17,7 +17,7 @@ mod defs;
 mod provider;
 
 pub use provider::FoldingTypingDeclProvider;
-pub use ty::typing_defs::ClassElt;
+pub use ty::local::ClassElt;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 

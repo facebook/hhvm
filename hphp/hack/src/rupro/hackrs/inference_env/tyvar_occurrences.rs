@@ -6,7 +6,7 @@
 #![allow(dead_code)]
 
 use im::{HashMap, HashSet};
-use ty::typing_defs::Tyvar;
+use ty::local::Tyvar;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct TyvarOccurrences {

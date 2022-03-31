@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub use crate::decl::ty::{Exact, Prim};
+use crate::local::tyvar::Tyvar;
 use crate::reason::Reason;
-use crate::typing_defs::tyvar::Tyvar;
 use hcons::Hc;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 use pos::{Positioned, Symbol, ToOxidized, TypeName};

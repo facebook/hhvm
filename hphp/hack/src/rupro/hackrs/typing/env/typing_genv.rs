@@ -5,8 +5,8 @@
 use crate::typing::env::typing_return_info::TypingReturnInfo;
 use im::HashMap;
 use std::cell::RefCell;
+use ty::local::{ParamMode, Ty};
 use ty::reason::Reason;
-use ty::typing_defs::{ParamMode, Ty};
 use utils::core::LocalId;
 
 /// A subenvironment containing "global" (i.e. on the scope of toplevel

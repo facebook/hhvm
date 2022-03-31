@@ -6,8 +6,8 @@
 #![allow(dead_code)]
 
 use im::HashSet;
+use ty::local::{Ty, Variance};
 use ty::reason::Reason;
-use ty::typing_defs::{Ty, Variance};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TyvarConstraints<R: Reason> {

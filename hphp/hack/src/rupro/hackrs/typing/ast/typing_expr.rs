@@ -6,8 +6,8 @@ use crate::tast;
 use crate::typing::ast::typing_trait::TC;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
+use ty::local::Ty;
 use ty::reason::Reason;
-use ty::typing_defs::Ty;
 use utils::core::LocalId;
 
 /// Parameters that affect the typing of expressions.

@@ -14,8 +14,8 @@ use std::rc::Rc;
 use std::sync::Arc;
 use ty::decl::{ty::ConsistentKind, DeclTy, EnumType, FoldedClass, Tparam};
 use ty::decl_error::DeclError;
+use ty::local::ClassElt;
 use ty::reason::Reason;
-use ty::typing_defs::ClassElt;
 
 /// c.f. OCaml type `Typing_classes_heap.eager_members`
 #[derive(Debug)]

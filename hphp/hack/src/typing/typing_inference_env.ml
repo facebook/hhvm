@@ -1472,14 +1472,14 @@ let replace_var_by_ty_in_prop prop v ty =
       TL.IsSubtype (ty1, ty2)
     | TL.Coerce (cd, ty1, ty2) ->
       let ty1 =
-        if is_var_v ty1 v then
-          ty
+        if InternalType.is_var_v ty1 ~v then
+          LoclType ty
         else
           ty1
       in
       let ty2 =
-        if is_var_v ty2 v then
-          ty
+        if InternalType.is_var_v ty2 ~v then
+          LoclType ty
         else
           ty2
       in

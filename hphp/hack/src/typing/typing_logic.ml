@@ -17,7 +17,7 @@ type coercion_direction =
 
 (* See comment in .mli file *)
 type subtype_prop =
-  | Coerce of coercion_direction * locl_ty * locl_ty
+  | Coerce of coercion_direction * internal_type * internal_type
   | IsSubtype of internal_type * internal_type
   | Conj of subtype_prop list
   | Disj of Typing_error.t option * subtype_prop list
@@ -25,7 +25,7 @@ type subtype_prop =
 let rec equal_subtype_prop p1 p2 =
   match (p1, p2) with
   | (Coerce (_, ty1, ty1'), Coerce (_, ty2, ty2')) ->
-    ty_equal ty1 ty2 && ty_equal ty1' ty2'
+    equal_internal_type ty1 ty2 && equal_internal_type ty1' ty2'
   | (IsSubtype (ty1, ty1'), IsSubtype (ty2, ty2')) ->
     equal_internal_type ty1 ty2 && equal_internal_type ty1' ty2'
   | (Conj ps1, Conj ps2)

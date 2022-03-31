@@ -16,7 +16,7 @@ type coercion_direction =
 
 (* Logical proposition about types *)
 type subtype_prop =
-  | Coerce of coercion_direction * locl_ty * locl_ty
+  | Coerce of coercion_direction * internal_type * internal_type
       (** Coerce(cd, ty1, ty2), if ty1 is a subtype of ty2 while potentially
           coercing to or from dynamic (depending on cd), written ty1 ~> ty2. *)
   | IsSubtype of internal_type * internal_type

@@ -2059,7 +2059,7 @@ let subtype_prop env prop =
       "(" ^ String.concat ~sep:" || " (List.map ~f:subtype_prop ps) ^ ")"
     | IsSubtype (ty1, ty2) -> debug_i env ty1 ^ " <: " ^ debug_i env ty2
     | Coerce (cd, ty1, ty2) ->
-      debug env ty1 ^ " " ^ coercion_direction cd ^ "~> " ^ debug env ty2
+      debug_i env ty1 ^ " " ^ coercion_direction cd ^ "~> " ^ debug_i env ty2
   in
   let p_str = subtype_prop prop in
   p_str

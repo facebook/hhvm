@@ -5,8 +5,8 @@
 mod constraint;
 
 use crate::local::Ty;
+use crate::local_error::TypingError;
 use crate::reason::Reason;
-use crate::typing_error::TypingError;
 pub use constraint::Constraint;
 use hcons::{Conser, Hc};
 use std::ops::Deref;

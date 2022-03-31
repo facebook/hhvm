@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![allow(dead_code)]
 
+use crate::local_error::TypingErrorCode;
+use crate::local_error::{Primary, TypingError};
 use crate::reason::Reason;
-use crate::typing_error::TypingErrorCode;
-use crate::typing_error::{Primary, TypingError};
 use utils::Lazy;
 
 #[derive(Clone, Debug)]

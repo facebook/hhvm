@@ -8,8 +8,8 @@ use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use crate::typing_ctx::TypingCtx;
 use std::rc::Rc;
+use ty::local_error::TypingError;
 use ty::reason::Reason;
-use ty::typing_error::TypingError;
 
 pub struct TypingToplevel;
 

@@ -17,8 +17,8 @@ use pos::TypeName;
 use std::cell::RefCell;
 use std::rc::Rc;
 use ty::local::{ParamMode, Ty};
+use ty::local_error::TypingError;
 use ty::reason::Reason;
-use ty::typing_error::TypingError;
 use utils::core::{IdentGen, LocalId};
 
 /// The main typing environment.

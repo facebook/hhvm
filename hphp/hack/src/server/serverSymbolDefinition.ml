@@ -149,6 +149,7 @@ let go ctx ast result =
     )
   | SO.Method (SO.UnknownClass, _) -> None
   | SO.Keyword _ -> None
+  | SO.PureFunctionContext -> None
   | SO.BuiltInType _ -> None
   | SO.Property (SO.ClassName c_name, property_name)
   | SO.XhpLiteralAttr (c_name, property_name) ->

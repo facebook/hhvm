@@ -685,6 +685,15 @@ let keywords ctx entry : Result_set.elt list =
       (offset + t.Token.width)
   in
 
+  let syntax_pos s =
+    let offset = start_offset s + leading_width s in
+    Full_fidelity_source_text.relative_pos
+      entry.Provider_context.path
+      (source_text s)
+      offset
+      (offset + width s)
+  in
+
   let rec aux ctx acc s =
     match s.syntax with
     | ClassishDeclaration cd ->
@@ -704,12 +713,29 @@ let keywords ctx entry : Result_set.elt list =
     | FunctionDeclarationHeader fdh ->
       let acc = aux ctx acc fdh.function_modifiers in
       let acc = aux ctx acc fdh.function_parameter_list in
+      let acc = aux ctx acc fdh.function_contexts in
       aux (Some ReturnType) acc fdh.function_readonly_return
     | ParameterDeclaration pd -> aux (Some Parameter) acc pd.parameter_readonly
     | AwaitableCreationExpression ace ->
       let acc = aux ctx acc ace.awaitable_attribute_spec in
       let acc = aux (Some AsyncBlockHeader) acc ace.awaitable_async in
       aux ctx acc ace.awaitable_compound_statement
+    | Contexts c ->
+      let is_empty =
+        match c.contexts_types.syntax with
+        | Missing -> true
+        | _ -> false
+      in
+      if is_empty then
+        {
+          name = "pure function";
+          type_ = PureFunctionContext;
+          is_declaration = false;
+          pos = syntax_pos s;
+        }
+        :: acc
+      else
+        acc
     | Token t ->
       (match t.Token.kind with
       | Token.TokenKind.Extends ->

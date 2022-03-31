@@ -243,6 +243,10 @@ let make_hover_attr_docs name =
     ]
   | _ -> []
 
+let pure_context_info =
+  "This function has an empty context list, so it has no capabilities."
+  ^ "\nIt may only read properties, access constants, or call other pure functions."
+
 let built_in_type_info (bt : SymbolOccurrence.built_in_type_hint) : string =
   match bt with
   | SymbolOccurrence.BIprimitive prim ->
@@ -385,6 +389,7 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
               make_hover_const_definition entry def_opt;
             ]
         | { type_ = Keyword info; _ } -> [keyword_info info]
+        | { type_ = PureFunctionContext; _ } -> [pure_context_info]
         | { type_ = BuiltInType bt; _ } -> [built_in_type_info bt]
         | _ ->
           List.concat

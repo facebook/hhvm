@@ -716,8 +716,9 @@ type prop_to_env_acc = env * Equiv.t * cc_dep_list
 let rec prop_to_env_cc (acc : prop_to_env_acc) (prop : TL.subtype_prop) :
     prop_to_env_acc =
   match prop with
-  | TL.IsSubtype (ty_sub, ty_super) -> is_sub_prop_to_env_cc acc ty_sub ty_super
-  | TL.Coerce (_cd, _ty_sub, _ty_super) ->
+  | TL.IsSubtype (None, ty_sub, ty_super) ->
+    is_sub_prop_to_env_cc acc ty_sub ty_super
+  | TL.IsSubtype (_dd, _ty_sub, _ty_super) ->
     (* For global inference, for now, we don't do coercion. *)
     assert false
   | TL.Conj props -> conj_prop_to_env_cc acc props

@@ -477,12 +477,9 @@ let rec null_not_subtype ty =
     i.e. empty disjunction with error functions we call here. *)
 let process_simplify_subtype_result prop =
   let rec aux ~k = function
-    | TL.IsSubtype (_ty1, _ty2) ->
+    | TL.IsSubtype (_, _ty1, _ty2) ->
       (* All subtypes should have been resolved *)
       failwith "unexpected subtype assertion"
-    | TL.Coerce _ ->
-      (* All coercions should have been resolved *)
-      failwith "unexpected coercions assertion"
     | TL.Conj props ->
       (* Evaluates list from left-to-right so preserves order of conjuncts *)
       auxs props ~k:(fun xs ->
@@ -520,10 +517,7 @@ and simplify_dynamic_aware_subtype ~subtype_env =
 and default_subtype
     ~subtype_env ~(this_ty : locl_ty option) ~fail env ty_sub ty_super =
   let default env =
-    ( env,
-      match subtype_env.coerce with
-      | None -> TL.IsSubtype (ty_sub, ty_super)
-      | Some c -> TL.Coerce (c, ty_sub, ty_super) )
+    (env, TL.IsSubtype (subtype_env.coerce, ty_sub, ty_super))
   in
   let ( ||| ) = ( ||| ) ~fail in
   let (env, ty_super) = Env.expand_internal_type env ty_super in
@@ -709,7 +703,7 @@ and default_subtype
           begin
             match subtype_env.coerce with
             | Some cd ->
-              (env, TL.Coerce (cd, LoclType lty_sub, LoclType lty_super))
+              (env, TL.IsSubtype (Some cd, LoclType lty_sub, LoclType lty_super))
             | None -> default_subtype_inner env ty_sub ty_super
           end
         | (r_sub, Tprim Nast.Tvoid) ->
@@ -837,10 +831,7 @@ and simplify_subtype_i
   let invalid_env_with env f = invalid ~fail:f env in
   (* We don't know whether the assertion is valid or not *)
   let default env =
-    ( env,
-      match subtype_env.coerce with
-      | None -> TL.IsSubtype (ety_sub, ety_super)
-      | Some c -> TL.Coerce (c, ety_sub, ety_super) )
+    (env, TL.IsSubtype (subtype_env.coerce, ety_sub, ety_super))
   in
   let default_subtype env =
     default_subtype ~subtype_env ~this_ty ~fail env ety_sub ety_super
@@ -1159,7 +1150,7 @@ and simplify_subtype_i
           begin
             match subtype_env.coerce with
             | Some cd ->
-              (env, TL.Coerce (cd, LoclType ty_sub, LoclType ty_super))
+              (env, TL.IsSubtype (Some cd, LoclType ty_sub, LoclType ty_super))
             | None -> default env
           end))
     | (_, Tintersection tyl) ->
@@ -3224,6 +3215,23 @@ and add_tyvar_upper_bound_and_close
     var
     ty
     (on_error : Typing_error.Reasons_callback.t option) =
+  (* At present, we don't distinguish between coercions (<:D) and subtyping (<:) in the
+   * environment. When closing the environment we use subtyping (<:). To mitigate against
+   * this, when adding a dynamic upper bound wrt coercion, transform it first into ?supportdynamic,
+   * as t <:D dynamic iff t <: ?supportdynamic.
+   *)
+  let ty =
+    match (coerce, ty) with
+    | (Some TL.CoerceToDynamic, LoclType lty_super) ->
+      begin
+        match get_node lty_super with
+        | Tdynamic ->
+          let r = get_reason lty_super in
+          LoclType (MakeType.nullablesupportdynamic r)
+        | _ -> ty
+      end
+    | _ -> ty
+  in
   let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
   let env =
     Env.add_tyvar_upper_bound_and_update_variances
@@ -3416,24 +3424,7 @@ and simplify_disj env disj =
       (match d with
       | TL.Conj _ -> d :: fill_bound_map disj
       | TL.Disj (_, props) -> fill_bound_map (props @ disj)
-      | TL.IsSubtype (ty_sub, ty_super) ->
-        (match get_tyvar_opt ty_super with
-        | Some var_super ->
-          process_bound ~is_lower:true ~coerce:None ~constr:d ty_sub var_super;
-          fill_bound_map disj
-        | None ->
-          (match get_tyvar_opt ty_sub with
-          | Some var_sub ->
-            process_bound
-              ~is_lower:false
-              ~coerce:None
-              ~constr:d
-              ty_super
-              var_sub;
-            fill_bound_map disj
-          | None -> d :: fill_bound_map disj))
-      | TL.Coerce (cd, ty_sub, ty_super) ->
-        let coerce = Some cd in
+      | TL.IsSubtype (coerce, ty_sub, ty_super) ->
         (match get_tyvar_opt ty_super with
         | Some var_super ->
           process_bound ~is_lower:true ~coerce ~constr:d ty_sub var_super;
@@ -3497,13 +3488,13 @@ and props_to_env
       log_non_singleton_disj "before simplification" disj_props;
       log_non_singleton_disj "after simplification" simplified_disj_props;
       try_disj simplified_disj_props
-    | TL.IsSubtype (ty_sub, ty_super) ->
+    | TL.IsSubtype (coerce, ty_sub, ty_super) ->
       begin
         match (get_tyvar_opt ty_sub, get_tyvar_opt ty_super) with
         | (Some var_sub, Some var_super) ->
           let (env, prop1) =
             add_tyvar_upper_bound_and_close
-              ~coerce:None
+              ~coerce
               (valid env)
               var_sub
               ty_super
@@ -3511,7 +3502,7 @@ and props_to_env
           in
           let (env, prop2) =
             add_tyvar_lower_bound_and_close
-              ~coerce:None
+              ~coerce
               (valid env)
               var_super
               ty_sub
@@ -3521,7 +3512,7 @@ and props_to_env
         | (Some var, _) ->
           let (env, prop) =
             add_tyvar_upper_bound_and_close
-              ~coerce:None
+              ~coerce
               (valid env)
               var
               ty_super
@@ -3531,7 +3522,7 @@ and props_to_env
         | (_, Some var) ->
           let (env, prop) =
             add_tyvar_lower_bound_and_close
-              ~coerce:None
+              ~coerce
               (valid env)
               var
               ty_sub
@@ -3539,67 +3530,6 @@ and props_to_env
           in
           props_to_env pos env remain (prop :: props) on_error
         | _ -> props_to_env pos env (prop :: remain) props on_error
-      end
-    | TL.Coerce (cd, ty_sub, ty_super) ->
-      let coerce = Some cd in
-      begin
-        match (get_tyvar_opt ty_sub, get_tyvar_opt ty_super) with
-        | (Some var_sub, Some var_super) ->
-          let (env, prop1) =
-            add_tyvar_upper_bound_and_close
-              ~coerce
-              (valid env)
-              var_sub
-              ty_super
-              on_error
-          in
-          let (env, prop2) =
-            add_tyvar_lower_bound_and_close
-              ~coerce
-              (valid env)
-              var_super
-              ty_sub
-              on_error
-          in
-          props_to_env pos env remain (prop1 :: prop2 :: props) on_error
-        | (Some var, _) ->
-          (* At present, we don't distinguish between coercions (<:D) and subtyping (<:) in the
-           * environment. When closing the environment we use subtyping (<:). To mitigate against
-           * this, when adding a dynamic upper bound wrt coercion, transform it first into ?supportdynamic,
-           * as t <:D dynamic iff t <: ?supportdynamic.
-           *)
-          let ty_super =
-            match ty_super with
-            | LoclType lty_super ->
-              begin
-                match get_node lty_super with
-                | Tdynamic ->
-                  let r = get_reason lty_super in
-                  LoclType (MakeType.nullablesupportdynamic r)
-                | _ -> ty_super
-              end
-            | _ -> ty_super
-          in
-          let (env, prop) =
-            add_tyvar_upper_bound_and_close
-              ~coerce
-              (valid env)
-              var
-              ty_super
-              on_error
-          in
-          props_to_env pos env remain (prop :: props) on_error
-        | (_, Some var) ->
-          let (env, prop) =
-            add_tyvar_lower_bound_and_close
-              ~coerce
-              (valid env)
-              var
-              ty_sub
-              on_error
-          in
-          props_to_env pos env remain (prop :: props) on_error
-        | _ -> failwith "Coercion not expected"
       end)
 
 (* Move any top-level conjuncts of the form Tvar v <: t or t <: Tvar v to
@@ -4125,10 +4055,7 @@ and decompose_subtype_add_prop env prop =
       env
       prop;
     env
-  | TL.Coerce (TL.CoerceToDynamic, LoclType ty1, LoclType ty2) ->
-    decompose_subtype_add_bound env ty1 ty2
-  | TL.Coerce _ -> failwith "Coercions should have been resolved beforehand"
-  | TL.IsSubtype (LoclType ty1, LoclType ty2) ->
+  | TL.IsSubtype (_, LoclType ty1, LoclType ty2) ->
     decompose_subtype_add_bound env ty1 ty2
   | TL.IsSubtype _ ->
     failwith

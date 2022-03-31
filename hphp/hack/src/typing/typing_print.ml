@@ -2057,8 +2057,8 @@ let subtype_prop env prop =
     | Disj (_, []) -> "FALSE"
     | Disj (_, ps) ->
       "(" ^ String.concat ~sep:" || " (List.map ~f:subtype_prop ps) ^ ")"
-    | IsSubtype (ty1, ty2) -> debug_i env ty1 ^ " <: " ^ debug_i env ty2
-    | Coerce (cd, ty1, ty2) ->
+    | IsSubtype (None, ty1, ty2) -> debug_i env ty1 ^ " <: " ^ debug_i env ty2
+    | IsSubtype (Some cd, ty1, ty2) ->
       debug_i env ty1 ^ " " ^ coercion_direction cd ^ "~> " ^ debug_i env ty2
   in
   let p_str = subtype_prop prop in

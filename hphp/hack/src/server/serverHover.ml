@@ -109,7 +109,7 @@ let make_hover_attr_docs name =
     [
       "Allows this function/method to be called dynamically, based on a string of its name. "
       ^ " HHVM will warn or error (depending on settings) on dynamic calls to functions without this attribute."
-      ^ "\n\nSee also `HH\\dynamic_fun()` and `HH\\dynamic_fun()`.";
+      ^ "\n\nSee also `HH\\dynamic_fun()` and `HH\\dynamic_class_meth()`.";
     ]
   | "__DynamicallyConstructible" ->
     [

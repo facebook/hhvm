@@ -268,6 +268,8 @@ namespace HH {
   *
   * Options:
   *
+  * disallowObjects - If true, throw an InvalidOperationException if serializing
+  *                    an object. Note that this doesn't trigger on Collections
   * warnOnHackArrays - If true, emit a Hack array compat notice if serializing a
   *                    Hack array
   * warnOnPHPArrays  - If true, emit a Hack array compat notice if serializing a

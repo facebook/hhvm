@@ -439,6 +439,7 @@ struct SerializeOptions {
   bool warnOnPHPArrays = false;
   bool ignoreLateInit = false;
   bool serializeProvenanceAndLegacy = false;
+  bool disallowObjects = false;
 };
 
 ALWAYS_INLINE String serialize_impl(const Variant& value,
@@ -493,6 +494,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
   if (opts.warnOnPHPArrays)     vs.setPHPWarn();
   if (opts.ignoreLateInit)      vs.setIgnoreLateInit();
   if (opts.serializeProvenanceAndLegacy) vs.setSerializeProvenanceAndLegacy();
+  if (opts.disallowObjects)      vs.setDisallowObjects();
   if (pure) vs.setPure();
   // Keep the count so recursive calls to serialize() embed references properly.
   return vs.serialize(value, true, true);
@@ -514,6 +516,7 @@ const StaticString
   s_warnOnHackArrays("warnOnHackArrays"),
   s_warnOnPHPArrays("warnOnPHPArrays"),
   s_ignoreLateInit("ignoreLateInit"),
+  s_disallowObjects("disallowObjects"),
   s_serializeProvenanceAndLegacy("serializeProvenanceAndLegacy");
 
 String HHVM_FUNCTION(HH_serialize_with_options,
@@ -532,6 +535,8 @@ String HHVM_FUNCTION(HH_serialize_with_options,
   opts.serializeProvenanceAndLegacy =
     options.exists(s_serializeProvenanceAndLegacy) &&
     options[s_serializeProvenanceAndLegacy].toBoolean();
+  opts.disallowObjects = options.exists(s_disallowObjects) &&
+    options[s_disallowObjects].toBoolean();
   return serialize_impl(value, opts, false);
 }
 

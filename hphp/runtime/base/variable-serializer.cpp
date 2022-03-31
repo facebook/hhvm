@@ -653,7 +653,8 @@ void VariableSerializer::write(const String& v) {
 
 const StaticString
   s_invalidMethCallerAPC("Cannot store meth_caller in APC"),
-  s_invalidMethCallerSerde("Cannot serialize meth_caller");
+  s_invalidMethCallerSerde("Cannot serialize meth_caller"),
+  s_disallowedObjectSerde("Cannot serialize object due to options");
 
 void VariableSerializer::write(const Object& v) {
   if (!v.isNull() && m_type == Type::JSON) {
@@ -667,6 +668,9 @@ void VariableSerializer::write(const Object& v) {
         );
       }
     }
+
+    // m_disallowObjects not relevent in JSON path bc it's only
+    //setable via serialize_with_options
 
     if (v.instanceof(s_JsonSerializable)) {
       assertx(!v->isCollection());
@@ -2112,6 +2116,12 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         VarNR{s_invalidMethCallerSerde.get()}
       );
     }
+  }
+
+  if (m_disallowObjects) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      VarNR{s_disallowedObjectSerde.get()}
+    );
   }
 
   if (LIKELY(type == VariableSerializer::Type::Serialize ||

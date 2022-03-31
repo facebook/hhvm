@@ -13,32 +13,29 @@ open Typing_defs
 type coercion_direction =
   | CoerceToDynamic
   | CoerceFromDynamic
-[@@deriving show]
+[@@deriving show, eq]
 
 (* See comment in .mli file *)
 type subtype_prop =
-  | Coerce of coercion_direction * locl_ty * locl_ty
-  | IsSubtype of internal_type * internal_type
+  | IsSubtype of coercion_direction option * internal_type * internal_type
   | Conj of subtype_prop list
   | Disj of Typing_error.t option * subtype_prop list
 
 let rec equal_subtype_prop p1 p2 =
   match (p1, p2) with
-  | (Coerce (_, ty1, ty1'), Coerce (_, ty2, ty2')) ->
-    ty_equal ty1 ty2 && ty_equal ty1' ty2'
-  | (IsSubtype (ty1, ty1'), IsSubtype (ty2, ty2')) ->
-    equal_internal_type ty1 ty2 && equal_internal_type ty1' ty2'
+  | (IsSubtype (c1, ty1, ty1'), IsSubtype (c2, ty2, ty2')) ->
+    Option.equal equal_coercion_direction c1 c2
+    && equal_internal_type ty1 ty2
+    && equal_internal_type ty1' ty2'
   | (Conj ps1, Conj ps2)
   | (Disj (_, ps1), Disj (_, ps2)) ->
     Int.equal (List.length ps1) (List.length ps2)
     && List.for_all2_exn ps1 ps2 ~f:equal_subtype_prop
-  | (_, (Coerce _ | IsSubtype _ | Conj _ | Disj _)) -> false
+  | (_, (IsSubtype _ | Conj _ | Disj _)) -> false
 
 let rec size (p : subtype_prop) : int =
   match p with
-  | Coerce _
-  | IsSubtype _ ->
-    1
+  | IsSubtype _ -> 1
   | Conj l
   | Disj (_, l) ->
     let sizes = List.map l ~f:size in
@@ -47,9 +44,7 @@ let rec size (p : subtype_prop) : int =
 (** Sum of the sizes of the disjunctions. *)
 let rec n_disj (p : subtype_prop) : int =
   match p with
-  | Coerce _
-  | IsSubtype _ ->
-    0
+  | IsSubtype _ -> 0
   | Conj l ->
     let n_disjs = List.map l ~f:n_disj in
     List.fold ~init:0 ~f:( + ) n_disjs
@@ -60,9 +55,7 @@ let rec n_disj (p : subtype_prop) : int =
 (** Sum of the sizes of the conjunctions. *)
 let rec n_conj (p : subtype_prop) : int =
   match p with
-  | Coerce _
-  | IsSubtype _ ->
-    0
+  | IsSubtype _ -> 0
   | Disj (_, l) ->
     let n_conjs = List.map l ~f:n_conj in
     List.fold ~init:0 ~f:( + ) n_conjs
@@ -81,9 +74,7 @@ let rec is_valid p =
   match p with
   | Conj ps -> List.for_all ps ~f:is_valid
   | Disj (_, ps) -> List.exists ps ~f:is_valid
-  | Coerce _
-  | IsSubtype (_, _) ->
-    false
+  | IsSubtype _ -> false
 
 (* Is this proposition always false? e.g. Unsat _ but also Conj [Conj []; Disj (_, [])]
 * if not simplified
@@ -92,9 +83,7 @@ and is_unsat p =
   match p with
   | Conj ps -> List.exists ps ~f:is_unsat
   | Disj (_, ps) -> List.for_all ps ~f:is_unsat
-  | Coerce _
-  | IsSubtype (_, _) ->
-    false
+  | IsSubtype _ -> false
 
 (* Smart constructor for binary conjunction *)
 let conj p1 p2 =

@@ -8,7 +8,7 @@ mod opcodes;
 use ffi::{BumpSliceMut, Slice, Str};
 use iterator::IterId;
 use label::Label;
-use local::{Local, LocalId};
+use local::Local;
 
 pub use opcodes::Opcode;
 
@@ -120,10 +120,10 @@ impl<'arena> FCallArgs<'arena> {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub struct IterArgs<'arena> {
+pub struct IterArgs {
     pub iter_id: IterId,
-    pub key_id: Local<'arena>,
-    pub val_id: Local<'arena>,
+    pub key_id: Local,
+    pub val_id: Local,
 }
 
 pub type ClassrefId = isize;
@@ -136,11 +136,11 @@ pub type ParamLocations<'arena> = Slice<'arena, isize>;
 #[repr(C)]
 pub enum MemberKey<'arena> {
     EC(StackIndex, ReadonlyOp),
-    EL(Local<'arena>, ReadonlyOp),
+    EL(Local, ReadonlyOp),
     ET(Str<'arena>, ReadonlyOp),
     EI(i64, ReadonlyOp),
     PC(StackIndex, ReadonlyOp),
-    PL(Local<'arena>, ReadonlyOp),
+    PL(Local, ReadonlyOp),
     PT(PropId<'arena>, ReadonlyOp),
     QT(PropId<'arena>, ReadonlyOp),
     W,
@@ -206,12 +206,13 @@ impl AsRef<str> for Visibility {
     }
 }
 
-/// A Contiguous range of unnamed locals. The canonical (default) empty
-/// range is {0, 0}. Ranges of named locals cannot be represented.
+/// A Contiguous range of locals. The canonical (default) empty
+/// range is {0, 0}. This is normally only used for unnamed locals
+/// but nothing prevents arbitrary ranges.
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
 pub struct LocalRange {
-    pub start: LocalId,
+    pub start: Local,
     pub len: u32,
 }
 

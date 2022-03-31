@@ -323,6 +323,12 @@ impl<'a> write_bytes::DisplayBytes for Str<'a> {
     }
 }
 
+impl<'a> std::convert::From<&'a String> for Slice<'a, u8> {
+    fn from(s: &'a String) -> Self {
+        Self::new(s.as_bytes())
+    }
+}
+
 impl<'a> std::convert::From<&'a str> for Slice<'a, u8> {
     fn from(s: &'a str) -> Self {
         Self::new(s.as_bytes())

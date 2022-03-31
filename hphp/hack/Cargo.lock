@@ -1177,11 +1177,9 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "ffi",
- "hhas_param",
  "hhbc_ast",
  "hhbc_id",
  "instruction_sequence",
- "label",
  "local",
  "oxidized",
 ]
@@ -1253,7 +1251,6 @@ name = "emit_native_opcode"
 version = "0.0.0"
 dependencies = [
  "ast_scope",
- "bumpalo",
  "emit_body",
  "emit_param",
  "env",
@@ -1451,7 +1448,9 @@ dependencies = [
  "bitflags",
  "bumpalo",
  "decl_provider",
+ "ffi",
  "global_state",
+ "hash",
  "iterator",
  "label",
  "local",
@@ -2307,7 +2306,6 @@ dependencies = [
 name = "local"
 version = "0.0.0"
 dependencies = [
- "ffi",
  "indexmap",
  "naming_special_names_rust",
 ]

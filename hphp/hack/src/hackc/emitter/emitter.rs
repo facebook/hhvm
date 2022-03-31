@@ -5,8 +5,11 @@
 
 use adata_state::AdataState;
 use decl_provider::{DeclProvider, Result};
+use ffi::Str;
 use global_state::GlobalState;
+use hash::IndexSet;
 use iterator::Iter;
+use local::Local;
 use options::Options;
 use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
 use stack_limit::StackLimit;
@@ -23,8 +26,9 @@ pub struct Emitter<'arena, 'decl> {
 
     // the rest is being mutated during emittance
     label_gen: label::Gen,
-    local_gen: local::Gen<'arena>,
+    local_gen: local::Gen,
     iterator: Iter,
+    named_locals: IndexSet<Str<'arena>>,
 
     pub for_debugger_eval: bool,
 
@@ -66,6 +70,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             label_gen: Default::default(),
             local_gen: Default::default(),
             iterator: Default::default(),
+            named_locals: Default::default(),
 
             adata_state_: None,
             statement_state_: None,
@@ -101,12 +106,48 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         &mut self.label_gen
     }
 
-    pub fn local_gen_mut(&mut self) -> &mut local::Gen<'arena> {
+    pub fn local_gen_mut(&mut self) -> &mut local::Gen {
         &mut self.local_gen
     }
 
-    pub fn local_gen(&self) -> &local::Gen<'arena> {
+    pub fn local_gen(&self) -> &local::Gen {
         &self.local_gen
+    }
+
+    /// Initialize the named locals table. Canonical HHBC numbering
+    /// puts the parameters first in left-to-right order, then local varables
+    /// that have names from the source text. In HHAS those names must appear
+    /// in the `.decl_vars` directive.
+    pub fn init_named_locals(&mut self, names: impl IntoIterator<Item = Str<'arena>>) {
+        assert!(self.named_locals.is_empty());
+        self.named_locals = names.into_iter().collect();
+    }
+
+    pub fn clear_named_locals(&mut self) {
+        self.named_locals = Default::default();
+    }
+
+    /// Given a name, return corresponding local. Panic if the local is unknown,
+    /// indicating a logic bug in the compiler; all params and named locals must
+    /// be provided in advance to init_named_locals().
+    pub fn named_local(&self, name: Str<'_>) -> Local {
+        match self.named_locals.get_index_of(&name).map(Local::new) {
+            Some(local) => local,
+            None => panic!(
+                "{}: local not found among {:#?}",
+                name.unsafe_as_str(),
+                self.named_locals
+                    .iter()
+                    .map(|name| name.unsafe_as_str())
+                    .collect::<Vec<_>>()
+            ),
+        }
+    }
+
+    /// Given a named local, return its name. Panic for unnamed locals
+    /// indicating a logic bug in the compiler.
+    pub fn local_name(&self, local: Local) -> &Str<'_> {
+        self.named_locals.get_index(local.idx as usize).unwrap()
     }
 
     pub fn local_scope<R, F: FnOnce(&mut Self) -> R>(&mut self, f: F) -> R {

@@ -1,7 +1,7 @@
 (env
  (_
   (flags
-   (:standard -w @a-4-29-35-41-42-44-45-48-50-69-70 \ -strict-sequence))))
+   (:standard -w @a-4-29-35-41-42-44-45-48-50-70 \ -strict-sequence))))
 
 
 (executable

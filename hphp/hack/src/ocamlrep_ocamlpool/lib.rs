@@ -52,9 +52,7 @@ impl Pool {
 impl Drop for Pool {
     #[inline(always)]
     fn drop(&mut self) {
-        unsafe {
-            ocamlpool_leave()
-        };
+        unsafe { ocamlpool_leave() };
     }
 }
 

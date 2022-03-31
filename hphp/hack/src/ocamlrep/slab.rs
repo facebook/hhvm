@@ -464,9 +464,7 @@ fn with_slab_allocator(f: impl Fn(&SlabAllocator) -> OpaqueValue<'_>) -> Option<
     // aligned to WORD_SIZE.
     data.push(unsafe { OpaqueValue::from_bits(0) });
     let mut slab = data.into_boxed_slice();
-    unsafe {
-        slab.rebase_to(slab.current_address())
-    };
+    unsafe { slab.rebase_to(slab.current_address()) };
     slab.set_root_value_offset(root_value_byte_offset / WORD_SIZE);
     slab.mark_initialized();
     Some(OwnedSlab(slab))
@@ -760,9 +758,7 @@ mod test {
         // which provides space for the slab to be realigned when embedded in a
         // byte slice.
         slab.copy_from_slice(&tuple_slab.0[..tuple_slab.0.len() - 1]);
-        unsafe {
-            slab.rebase_to(slab.current_address())
-        };
+        unsafe { slab.rebase_to(slab.current_address()) };
     }
 
     #[test]
@@ -862,9 +858,7 @@ mod test_integrity_check {
         assert!(slab.check_integrity().is_err());
         slab.set_base(original_base);
 
-        unsafe {
-            slab.rebase_to(0)
-        };
+        unsafe { slab.rebase_to(0) };
         assert_eq!(slab.base(), 0);
         assert!(slab.check_integrity().is_ok());
 

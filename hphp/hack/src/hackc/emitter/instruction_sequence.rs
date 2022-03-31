@@ -7,7 +7,7 @@ use ffi::{BumpSliceMut, Slice, Str};
 use hhbc_ast::*;
 use iterator::IterId;
 use label::Label;
-use local::{Local, LocalId};
+use local::Local;
 use oxidized::ast_defs::Pos;
 use thiserror::Error;
 
@@ -225,11 +225,11 @@ pub mod instr {
         InstrSeq::List(is)
     }
 
-    pub fn iterinit<'a>(args: IterArgs<'a>, label: Label) -> InstrSeq<'a> {
+    pub fn iterinit<'a>(args: IterArgs, label: Label) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::IterInit(args, label)))
     }
 
-    pub fn iternext<'a>(args: IterArgs<'a>, label: Label) -> InstrSeq<'a> {
+    pub fn iternext<'a>(args: IterArgs, label: Label) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::IterNext(args, label)))
     }
 
@@ -290,7 +290,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::ClsCns(const_id)))
     }
 
-    pub fn clscnsl<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn clscnsl<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ClsCnsL(local)))
     }
 
@@ -445,7 +445,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::IsTypeC(op)))
     }
 
-    pub fn istypel<'a>(id: Local<'a>, op: IsTypeOp) -> InstrSeq<'a> {
+    pub fn istypel<'a>(id: Local, op: IsTypeOp) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::IsTypeL(id, op)))
     }
 
@@ -529,7 +529,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::SetS(readonly_op)))
     }
 
-    pub fn setl<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn setl<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::SetL(local)))
     }
 
@@ -537,7 +537,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::SetG))
     }
 
-    pub fn unsetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn unsetl<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::UnsetL(local)))
     }
 
@@ -545,7 +545,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::UnsetG))
     }
 
-    pub fn incdecl<'a>(local: Local<'a>, op: IncDecOp) -> InstrSeq<'a> {
+    pub fn incdecl<'a>(local: Local, op: IncDecOp) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::IncDecL(local, op)))
     }
 
@@ -561,7 +561,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::SetOpG(op)))
     }
 
-    pub fn setopl<'a>(local: Local<'a>, op: SetOpOp) -> InstrSeq<'a> {
+    pub fn setopl<'a>(local: Local, op: SetOpOp) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::SetOpL(local, op)))
     }
 
@@ -569,7 +569,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::SetOpS(op)))
     }
 
-    pub fn issetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn issetl<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::IssetL(local)))
     }
 
@@ -581,7 +581,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::IssetS))
     }
 
-    pub fn isunsetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn isunsetl<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::IsUnsetL(local)))
     }
 
@@ -593,19 +593,19 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::CGetG))
     }
 
-    pub fn cgetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn cgetl<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::CGetL(local)))
     }
 
-    pub fn cugetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn cugetl<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::CUGetL(local)))
     }
 
-    pub fn cgetl2<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn cgetl2<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::CGetL2(local)))
     }
 
-    pub fn cgetquietl<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn cgetquietl<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::CGetQuietL(local)))
     }
 
@@ -645,7 +645,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::PopC))
     }
 
-    pub fn popl<'a>(l: Local<'a>) -> InstrSeq<'a> {
+    pub fn popl<'a>(l: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::PopL(l)))
     }
 
@@ -657,7 +657,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::CheckProp(pid)))
     }
 
-    pub fn pushl<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn pushl<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::PushL(local)))
     }
 
@@ -764,7 +764,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::EntryNop))
     }
 
-    pub fn basel<'a>(local: Local<'a>, mode: MOpMode, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
+    pub fn basel<'a>(local: Local, mode: MOpMode, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::BaseL(local, mode, readonly_op)))
     }
 
@@ -776,7 +776,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::BaseGC(stack_index, mode)))
     }
 
-    pub fn basegl<'a>(local: Local<'a>, mode: MOpMode) -> InstrSeq<'a> {
+    pub fn basegl<'a>(local: Local, mode: MOpMode) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::BaseGL(local, mode)))
     }
 
@@ -820,7 +820,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::MemoSetEager(range)))
     }
 
-    pub fn getmemokeyl<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn getmemokeyl<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::GetMemoKeyL(local)))
     }
 
@@ -1072,11 +1072,11 @@ pub mod instr {
         instr(Instruct::Pseudo(Pseudo::Label(label)))
     }
 
-    pub fn awaitall_list<'a>(unnamed_locals: Vec<LocalId>) -> InstrSeq<'a> {
+    pub fn awaitall_list<'a>(unnamed_locals: Vec<Local>) -> InstrSeq<'a> {
         match unnamed_locals.split_first() {
             None => panic!("Expected at least one await"),
             Some((head, tail)) => {
-                // Assert that the LocalIds are sequentially numbered.
+                // Assert that the Locals are sequentially numbered.
                 let mut prev_id = head;
                 for id in tail {
                     assert_eq!(prev_id.idx + 1, id.idx);
@@ -1130,11 +1130,11 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::ReqOnce))
     }
 
-    pub fn silence_start<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn silence_start<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::Silence(local, SilenceOp::Start)))
     }
 
-    pub fn silence_end<'a>(local: Local<'a>) -> InstrSeq<'a> {
+    pub fn silence_end<'a>(local: Local) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::Silence(local, SilenceOp::End)))
     }
 

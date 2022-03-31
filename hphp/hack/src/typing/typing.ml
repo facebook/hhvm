@@ -648,6 +648,7 @@ let typing_env_pseudofunctions =
         hh_log_level;
         hh_force_solve;
         hh_loop_forever;
+        hh_time;
       ])
 
 let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
@@ -709,6 +710,51 @@ let loop_forever env =
   done;
   Utils.assert_false_log_backtrace
     (Some "hh_loop_forever was looping for more than 10 minutes")
+
+let hh_time_start_times = ref SMap.empty
+
+(* Wrap the code you'd like to profile with `hh_time` annotations, e.g.,
+
+     hh_time('start');
+     // Expensive to typecheck code
+     hh_time('stop');
+
+   `hh_time` admits an optional tag parameter to allow for multiple timings in
+   the same file.
+
+     hh_time('start', 'Timing 1');
+     // Expensive to typecheck code
+     hh_time('stop', 'Timinig 1');
+
+     hh_time('start', 'Timing 2');
+     // Some more expensive to typecheck code
+     hh_time('stop', 'Timinig 2');
+
+   Limitation: Timings are not scoped, so multiple uses of the same tag
+   with `hh_time('start', tag)` will overwrite the beginning time of the
+   previous timing.
+ *)
+let do_hh_time el =
+  let go command tag =
+    match command with
+    | String "start" ->
+      let start_time = Unix.gettimeofday () in
+      hh_time_start_times := SMap.add tag start_time !hh_time_start_times
+    | String "stop" ->
+      let stop_time = Unix.gettimeofday () in
+      begin
+        match SMap.find_opt tag !hh_time_start_times with
+        | Some start_time ->
+          let elapsed_time_ms = (stop_time -. start_time) *. 1000. in
+          Printf.printf "%s: %0.2fms\n" tag elapsed_time_ms
+        | None -> ()
+      end
+    | _ -> ()
+  in
+  match el with
+  | [(_, (_, _, command))] -> go command "_"
+  | [(_, (_, _, command)); (_, (_, _, String tag))] -> go command tag
+  | _ -> ()
 
 let is_parameter env x = Local_id.Map.mem x (Env.get_params env)
 
@@ -3897,6 +3943,14 @@ and expr_
         (match expand_expected_and_get_node env expected with
         | (env, Some (pos, reason, _, _ty, Tclass ((_, k), _, [ty1; ty2])))
           when String.equal k SN.Collections.cPair ->
+          let pessimise_type env ty =
+            if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+              Typing_array_access.pessimise_type env ty
+            else
+              (env, ty)
+          in
+          let (env, ty1) = pessimise_type env ty1 in
+          let (env, ty2) = pessimise_type env ty2 in
           let ty1_expected = ExpectedTy.make pos reason ty1 in
           let ty2_expected = ExpectedTy.make pos reason ty2 in
           (env, Some ty1_expected, Some ty2_expected, None)
@@ -3924,6 +3978,14 @@ and expr_
         env
         [ty2]
     in
+    let pessimise_tup_assign env ty =
+      if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+        Typing_array_access.pessimised_tup_assign p env ty
+      else
+        (env, ty)
+    in
+    let (env, ty1) = pessimise_tup_assign env ty1 in
+    let (env, ty2) = pessimise_tup_assign env ty2 in
     let ty = MakeType.pair (Reason.Rwitness p) ty1 ty2 in
     make_result
       env
@@ -3966,9 +4028,9 @@ and expr_
          ( hole_on_err ~err_opt:arr_err_opt te1,
            Some (hole_on_err ~err_opt:key_err_opt te2) ))
       ty
-  | Call ((_, pos_id, Id ((_, s) as id)), explicit_targs, el, None)
+  | Call (((_, pos_id, Id (_, s)) as e), explicit_targs, el, None)
     when Hash_set.mem typing_env_pseudofunctions s ->
-    let (env, tel, tys) =
+    let (env, _tel, tys) =
       argument_list_exprs (expr ~accept_using_var:true) env el
     in
     let env =
@@ -4004,19 +4066,30 @@ and expr_
       ) else if String.equal s SN.PseudoFunctions.hh_loop_forever then
         let _ = loop_forever env in
         env
-      else
+      else if String.equal s SN.PseudoFunctions.hh_time then begin
+        do_hh_time el;
+        env
+      end else
         env
     in
-    let ty = MakeType.void (Reason.Rwitness p) in
-    make_result
-      env
-      p
-      (Aast.Call
-         ( Tast.make_typed_expr pos_id (TUtils.mk_tany env pos_id) (Aast.Id id),
-           [],
-           tel,
-           None ))
-      ty
+    (* Discard the environment and whether fake members should be forgotten to
+       make sure that pseudo functions don't change the typechecker behaviour.
+    *)
+    let ((_env, te, ty), _should_forget_fakes) =
+      let env = might_throw env in
+      dispatch_call
+        ~is_using_clause
+        ~expected
+        ~valkind
+        ?in_await
+        p
+        env
+        e
+        explicit_targs
+        el
+        None
+    in
+    (env, te, ty)
   | Call (e, explicit_targs, el, unpacked_element) ->
     let env = might_throw env in
     let ((env, te, ty), should_forget_fakes) =
@@ -5739,7 +5812,13 @@ and et_splice env p e =
   let (env, ty_res) = Env.fresh_type env p in
   let (env, ty_infer) = Env.fresh_type env p in
   let spliceable_type =
-    MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
+    let raw_spliceable_type =
+      MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
+    in
+    if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+      MakeType.locl_like (Reason.Rsplice p) raw_spliceable_type
+    else
+      raw_spliceable_type
   in
   let (env, ty_err_opt) =
     SubType.sub_type env ty spliceable_type
@@ -8593,12 +8672,21 @@ and call
               | EnumClassLabelOps.LabelNotFound (te, ty) ->
                 (env, te, ty)
               | _ ->
+                let (env, pess_type) =
+                  match dynamic_func with
+                  | Some Supportdyn_function ->
+                    Typing_array_access.pessimise_type env param.fp_type.et_type
+                  | _ -> (env, param.fp_type.et_type)
+                in
                 let expected =
                   ExpectedTy.make_and_allow_coercion_opt
                     env
                     pos
                     Reason.URparam
-                    param.fp_type
+                    {
+                      et_type = pess_type;
+                      et_enforced = param.fp_type.et_enforced;
+                    }
                 in
                 expr
                   ~accept_using_var:(get_fp_accept_disposable param)

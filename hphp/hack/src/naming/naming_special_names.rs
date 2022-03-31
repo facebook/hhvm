@@ -510,7 +510,7 @@ pub mod special_idents {
     pub const TMP_VAR_PREFIX: &str = "__tmp$";
 
     pub fn is_tmp_var(name: &str) -> bool {
-        name.len() > 6 && &name.as_bytes()[..6] == TMP_VAR_PREFIX.as_bytes()
+        name.len() > TMP_VAR_PREFIX.len() && name.starts_with(TMP_VAR_PREFIX)
     }
 
     pub fn assert_tmp_var(name: &str) {

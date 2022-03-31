@@ -33,6 +33,10 @@ impl<'a, 'arena> ScopeItem<'a, 'arena> {
     pub fn is_in_lambda(&self) -> bool {
         matches!(self, ScopeItem::Lambda(_) | ScopeItem::LongLambda(_))
     }
+
+    pub fn is_in_long_lambda(&self) -> bool {
+        matches!(self, ScopeItem::LongLambda(_))
+    }
 }
 
 #[derive(Clone, Debug)]

@@ -207,14 +207,14 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
         ImmType::FCA => quote!(self.print_fcall_args(w, #name)?;),
         ImmType::I64A => quote!(write!(w, "{}", #name)?;),
         ImmType::IA => quote!(print_iterator_id(w, #name)?;),
-        ImmType::ILA => quote!(print_local(w, #name)?;),
-        ImmType::ITA => quote!(print_iter_args(w, #name)?;),
+        ImmType::ILA => quote!(self.print_local(w, #name)?;),
+        ImmType::ITA => quote!(self.print_iter_args(w, #name)?;),
         ImmType::IVA => quote!(write!(w, "{}", #name)?;),
-        ImmType::KA => quote!(print_member_key(w, #name)?;),
-        ImmType::LA => quote!(print_local(w, #name)?;),
+        ImmType::KA => quote!(self.print_member_key(w, #name)?;),
+        ImmType::LA => quote!(self.print_local(w, #name)?;),
         ImmType::LAR => quote!(print_local_range(w, #name)?;),
         ImmType::NA => panic!("NA is not expected"),
-        ImmType::NLA => quote!(print_local(w, #name)?;),
+        ImmType::NLA => quote!(self.print_local(w, #name)?;),
         ImmType::OA(ty) | ImmType::OAL(ty) => {
             use convert_case::{Case, Casing};
             let handler = Ident::new(
@@ -358,11 +358,11 @@ mod tests {
                             }
                             Opcode::TestILA(loc1) => {
                                 w.write_all(b"TestILA ")?;
-                                print_local(w, loc1)?;
+                                self.print_local(w, loc1)?;
                             }
                             Opcode::TestITA(ita) => {
                                 w.write_all(b"TestITA ")?;
-                                print_iter_args(w, ita)?;
+                                self.print_iter_args(w, ita)?;
                             }
                             Opcode::TestIVA(arg1) => {
                                 w.write_all(b"TestIVA ")?;
@@ -370,11 +370,11 @@ mod tests {
                             }
                             Opcode::TestKA(mkey) => {
                                 w.write_all(b"TestKA ")?;
-                                print_member_key(w, mkey)?;
+                                self.print_member_key(w, mkey)?;
                             }
                             Opcode::TestLA(loc1) => {
                                 w.write_all(b"TestLA ")?;
-                                print_local(w, loc1)?;
+                                self.print_local(w, loc1)?;
                             }
                             Opcode::TestLAR(locrange) => {
                                 w.write_all(b"TestLAR ")?;
@@ -382,7 +382,7 @@ mod tests {
                             }
                             Opcode::TestNLA(nloc1) => {
                                 w.write_all(b"TestNLA ")?;
-                                print_local(w, nloc1)?;
+                                self.print_local(w, nloc1)?;
                             }
                             Opcode::TestOA(subop1) => {
                                 w.write_all(b"TestOA ")?;

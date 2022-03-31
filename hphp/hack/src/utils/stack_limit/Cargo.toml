@@ -9,4 +9,4 @@ path = "lib.rs"
 
 [dependencies]
 crossbeam = "0.8"
-thiserror = "1.0.29"
+thiserror = "1.0.30"

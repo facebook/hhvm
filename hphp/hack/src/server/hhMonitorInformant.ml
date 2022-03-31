@@ -112,7 +112,6 @@ module Revision_tracker = struct
     watchman: Watchman.watchman_instance ref;
     root: Path.t;
     min_distance_restart: int;
-    ignore_hh_version: bool;
     is_saved_state_precomputed: bool;
   }
 
@@ -160,18 +159,12 @@ module Revision_tracker = struct
   let is_hg_updating env =
     !(env.is_in_hg_update_state) || !(env.is_in_hg_transaction_state)
 
-  let init
-      ~min_distance_restart
-      ~ignore_hh_version
-      ~is_saved_state_precomputed
-      watchman
-      root =
+  let init ~min_distance_restart ~is_saved_state_precomputed watchman root =
     let init_settings =
       {
         watchman = ref watchman;
         root;
         min_distance_restart;
-        ignore_hh_version;
         is_saved_state_precomputed;
       }
     in
@@ -574,7 +567,7 @@ let init
       use_dummy;
       min_distance_restart;
       watchman_debug_logging;
-      ignore_hh_version;
+      ignore_hh_version = _;
       is_saved_state_precomputed;
     } =
   if use_dummy then
@@ -611,7 +604,6 @@ let init
           revision_tracker =
             Revision_tracker.init
               ~min_distance_restart
-              ~ignore_hh_version
               ~is_saved_state_precomputed
               (Watchman.Watchman_alive watchman_env)
               root;

@@ -90,7 +90,6 @@ pub fn apply_tier_overrides(mut config: hdf::Value) -> Result<hdf::Value> {
         }
     }
 
-
     Ok(config)
 }
 

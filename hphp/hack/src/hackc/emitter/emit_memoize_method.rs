@@ -7,7 +7,7 @@ use ast_scope::{self as ast_scope, Scope, ScopeItem};
 use emit_method::get_attrs_for_method;
 use emit_pos::emit_pos_then;
 use env::{emitter::Emitter, Env};
-use ffi::Slice;
+use ffi::{Slice, Str};
 use hhas_attribute::deprecation_info;
 use hhas_body::HhasBody;
 use hhas_coeffects::HhasCoeffects;
@@ -20,7 +20,7 @@ use hhbc_id::{class, method};
 use hhbc_string_utils::reified;
 use instruction_sequence::{instr, Error, InstrSeq, Result};
 use label::Label;
-use local::{Local, LocalId};
+use local::Local;
 use naming_special_names_rust::{members, user_attributes as ua};
 use options::HhvmFlags;
 use oxidized::{ast as T, pos::Pos};
@@ -227,9 +227,17 @@ fn emit<'a, 'arena, 'decl>(
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<HhasBody<'arena>> {
     let pos = &args.method.span;
-    let instrs = make_memoize_method_code(emitter, env, pos, &hhas_params[..], args)?;
+    let (instrs, decl_vars) = make_memoize_method_code(emitter, env, pos, &hhas_params, args)?;
     let instrs = emit_pos_then(pos, instrs);
-    make_wrapper(emitter, env, instrs, hhas_params, return_type_info, args)
+    make_wrapper(
+        emitter,
+        env,
+        instrs,
+        hhas_params,
+        decl_vars,
+        return_type_info,
+        args,
+    )
 }
 
 fn make_memoize_method_code<'a, 'arena, 'decl>(
@@ -238,7 +246,7 @@ fn make_memoize_method_code<'a, 'arena, 'decl>(
     pos: &Pos,
     hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
     args: &Args<'_, 'a, 'arena>,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     if args.params.is_empty()
         && !args.flags.contains(Flags::IS_REIFIED)
         && !args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT)
@@ -256,18 +264,30 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
     pos: &Pos,
     hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
     args: &Args<'_, 'a, 'arena>,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     let alloc = env.arena;
     let param_count = hhas_params.len();
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
     let eager_set = emitter.label_gen_mut().next_regular();
     // The local that contains the reified generics is the first non parameter local,
-    // so the first local is parameter count + 1 when there are reified = generics
-    let add_reified = usize::from(args.flags.contains(Flags::IS_REIFIED));
+    // so the first unnamed local is parameter count + 1 when there are reified generics.
+    let is_reified = args.flags.contains(Flags::IS_REIFIED);
+    let add_reified = usize::from(is_reified);
     let should_emit_implicit_context = args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT);
     let add_implicit_context = usize::from(should_emit_implicit_context);
-    let first_local_idx = param_count + add_reified;
+    let first_unnamed_idx = param_count + add_reified;
+    let generics_local = Local::new(param_count); // only used if is_reified == true.
+    let decl_vars = match is_reified {
+        true => vec![reified::GENERICS_LOCAL_NAME.into()],
+        false => Vec::new(),
+    };
+    emitter.init_named_locals(
+        hhas_params
+            .iter()
+            .map(|(param, _)| param.name)
+            .chain(decl_vars.iter().copied()),
+    );
     let deprecation_body = emit_body::emit_deprecation_info(
         alloc,
         args.scope,
@@ -279,7 +299,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         emit_param::emit_param_default_value_setter(emitter, env, pos, hhas_params)?;
     let fcall_args = {
         let mut fcall_flags = FCallArgsFlags::default();
-        if args.flags.contains(Flags::IS_REIFIED) {
+        if is_reified {
             fcall_flags |= FCallArgsFlags::HasGenerics;
         };
         let async_eager_target = if args.flags.contains(Flags::IS_ASYNC) {
@@ -297,18 +317,14 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
             None,
         )
     };
-    let (reified_get, reified_memokeym) = if !args.flags.contains(Flags::IS_REIFIED) {
+    let (reified_get, reified_memokeym) = if !is_reified {
         (instr::empty(), instr::empty())
     } else {
         (
-            instr::cgetl(Local::Named(Slice::new(
-                reified::GENERICS_LOCAL_NAME.as_bytes(),
-            ))),
+            instr::cgetl(generics_local),
             InstrSeq::gather(emit_memoize_helpers::get_memo_key_list(
-                alloc,
-                LocalId::from_usize(param_count),
-                first_local_idx.try_into().unwrap(),
-                reified::GENERICS_LOCAL_NAME,
+                Local::new(param_count + first_unnamed_idx),
+                generics_local,
             )),
         )
     };
@@ -316,16 +332,16 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         instr::empty()
     } else {
         // Last unnamed local slot
-        let local = first_local_idx + param_count + add_reified;
-        emit_memoize_helpers::get_implicit_context_memo_key(alloc, LocalId::from_usize(local))
+        let local = Local::new(first_unnamed_idx + param_count + add_reified);
+        emit_memoize_helpers::get_implicit_context_memo_key(alloc, local)
     };
-    let first_local = Local::Unnamed(LocalId::from_usize(first_local_idx));
+    let first_unnamed_local = Local::new(first_unnamed_idx);
     let key_count = (param_count + add_reified + add_implicit_context) as isize;
     let local_range = LocalRange {
-        start: first_local.expect_unnamed(),
+        start: first_unnamed_local,
         len: key_count.try_into().unwrap(),
     };
-    Ok(InstrSeq::gather(vec![
+    let instrs = InstrSeq::gather(vec![
         begin_label,
         emit_body::emit_method_prolog(emitter, env, pos, hhas_params, args.params, &[])?,
         deprecation_body,
@@ -334,11 +350,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         } else {
             instr::checkthis()
         },
-        emit_memoize_helpers::param_code_sets(
-            alloc,
-            hhas_params,
-            LocalId::from_usize(first_local_idx),
-        ),
+        emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
         if args.flags.contains(Flags::IS_ASYNC) {
@@ -358,7 +370,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
             instr::this()
         },
         instr::nulluninit(),
-        emit_memoize_helpers::param_code_gets(alloc, hhas_params),
+        emit_memoize_helpers::param_code_gets(hhas_params.len()),
         reified_get,
         if args.method.static_ {
             call_cls_method(alloc, fcall_args, args)
@@ -382,13 +394,14 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
             instr::retc()
         },
         default_value_setters,
-    ]))
+    ]);
+    Ok((instrs, decl_vars))
 }
 
 fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     args: &Args<'_, 'a, 'arena>,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
     let eager_set = emitter.label_gen_mut().next_regular();
@@ -413,7 +426,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         },
         None,
     );
-    Ok(InstrSeq::gather(vec![
+    let instrs = InstrSeq::gather(vec![
         deprecation_body,
         if args.method.static_ {
             instr::empty()
@@ -461,7 +474,8 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         } else {
             instr::retc()
         },
-    ]))
+    ]);
+    Ok((instrs, Vec::new()))
 }
 
 // Construct the wrapper function
@@ -470,16 +484,12 @@ fn make_wrapper<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     instrs: InstrSeq<'arena>,
     params: Vec<(HhasParam<'arena>, Option<(Label, T::Expr)>)>,
+    decl_vars: Vec<Str<'arena>>,
     return_type_info: HhasTypeInfo<'arena>,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<HhasBody<'arena>> {
-    let alloc = env.arena; // Hmm, should we be using the emitter allocator? Do these point to the same thing?
-    let mut decl_vars = vec![];
-    if args.flags.contains(Flags::IS_REIFIED) {
-        decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
-    }
     emit_body::make_body(
-        alloc,
+        env.arena,
         emitter,
         instrs,
         decl_vars,

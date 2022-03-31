@@ -26,7 +26,6 @@ impl Errno {
         unsafe { *libc::__error() }
     }
 
-
     /// Get the global errno info by reading in errno and calling strerror.
     pub fn get_global() -> Self {
         Self {

@@ -1223,7 +1223,7 @@ struct RuntimeOption {
   /* Raise a notice if a Class type is used as a memo key */            \
   F(bool, ClassMemoNotices, false)                                      \
   /* When this options is on, classname type-hints accepts classes */   \
-  F(bool, ClassPassesClassname, false)                                  \
+  F(bool, ClassPassesClassname, true)                                   \
   /* Raise notice if a Class type is passed to a classname type-hint */ \
   F(bool, ClassnameNotices, false)                                      \
   /*  Raise a notice if a ClsMeth type is passed to is_vec/is_array */  \
@@ -1245,7 +1245,7 @@ struct RuntimeOption {
    * 0 => convert Foo::class to string "Foo"
    * 1 => convert Foo::class to class pointer
    * 2 => convert Foo::class to lazy class */                           \
-  F(int32_t, EmitClassPointers, 0)                                      \
+  F(int32_t, EmitClassPointers, 2)                                      \
   /* When this flag is on, var_dump for
    * classes and lazy classes outputs string(...). */                   \
   F(bool, ClassAsStringVarDump, true)                                   \
@@ -1318,6 +1318,13 @@ struct RuntimeOption {
    */                                                                   \
   F(StringToIntMap, CoeffectEnforcementLevels, coeffectEnforcementLevelsDefaults()) \
   F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
+  /*                                                                    \
+   * Enforce top level and method level internal keyword                \
+   * 0 - Nothing                                                        \
+   * 1 - Warn                                                           \
+   * 2 - Throw exception                                                \
+   */                                                                   \
+  F(uint64_t, EnforceModules, 0)                                        \
   /*                                                                    \
    * Controls behavior on reflection to default value expressions       \
    * that throw during evaluation                                       \

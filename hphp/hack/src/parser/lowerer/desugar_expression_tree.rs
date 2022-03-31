@@ -1563,7 +1563,6 @@ fn rewrite_stmt(
             let (virtual_body_stmts, desugar_body) =
                 rewrite_stmts(temps, body, visitor_name, errors);
 
-
             let desugar_expr = v_meth_call(
                 et::VISIT_WHILE,
                 vec![

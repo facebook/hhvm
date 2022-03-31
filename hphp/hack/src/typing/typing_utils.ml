@@ -138,7 +138,6 @@ type expand_typeconst =
   ?as_tyvar_with_cnstr:Pos.t option ->
   locl_ty ->
   pos_id ->
-  root_pos:Pos_or_decl.t ->
   allow_abstract_tconst:bool ->
   (env * Typing_error.t option) * locl_ty
 

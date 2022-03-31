@@ -5,7 +5,7 @@
 
 use ast_body::AstBody;
 use ffi::{Just, Maybe};
-use hash::{HashSet, IndexSet};
+use hash::IndexSet;
 use hhas_param::HhasParam;
 use label::Label;
 use naming_special_names_rust::{emitter_special_functions, special_idents};
@@ -259,7 +259,7 @@ pub fn from_ast<'arena>(
     Ok(decl_vars.collect())
 }
 
-pub fn vars_from_ast(params: &[FunParam], b: &AstBody<'_>) -> Result<HashSet<String>, String> {
+pub fn vars_from_ast(params: &[FunParam], b: &AstBody<'_>) -> Result<IndexSet<String>, String> {
     let decl_vars = uls_from_ast(
         params,
         |p| &p.name,                      // get_param_name

@@ -9,6 +9,6 @@ function foo(bool $b): void {
   $g2 = () ==> { $x = $b ? vec[3] : vec["a"]; return $x; };
   $g3 = () ==> $b ? vec[3] : vec["a"];
   $g4 = () ==> { if ($b) return vec[3]; return vec["a"]; };
-  hh_show($f1, $f2, $f3);
-  hh_show($g1, $g2, $g3, $g4);
+  hh_show($f1); hh_show($f2); hh_show($f3);
+  hh_show($g1); hh_show($g2); hh_show($g3); hh_show($g4);
 }

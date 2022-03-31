@@ -962,12 +962,10 @@ where
             }
         };
 
-        let handle_left_brace = |
-            parser: &mut Self,
-            left_brace: Token<S>,
-            head: Option<Token<S>>,
-            acc: &mut Vec<S::R>,
-        | {
+        let handle_left_brace = |parser: &mut Self,
+                                 left_brace: Token<S>,
+                                 head: Option<Token<S>>,
+                                 acc: &mut Vec<S::R>| {
             // Note that here we use next_token_in_string because we need to know
             // whether there is trivia between the left brace and the $x which follows.
             let mut parser1 = parser.clone();

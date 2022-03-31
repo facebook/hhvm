@@ -10,7 +10,6 @@
 use hackrs::ast_provider::AstProvider;
 use hackrs::decl_parser::DeclParser;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
-use hackrs::reason::{BReason, NReason, Reason};
 use hackrs::shallow_decl_provider::EagerShallowDeclProvider;
 use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
@@ -25,6 +24,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
 use structopt::StructOpt;
+use ty::reason::{BReason, NReason, Reason};
 
 // fn create_nast(path: PathBuf) -> oxidized::aast::Program<(), ()> {}
 

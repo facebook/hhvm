@@ -237,7 +237,6 @@ type expand_typeconst =
   ?as_tyvar_with_cnstr:Pos.t option ->
   Typing_defs.locl_ty ->
   Typing_defs.pos_id ->
-  root_pos:Pos_or_decl.t ->
   allow_abstract_tconst:bool ->
   (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
@@ -250,7 +249,6 @@ val expand_typeconst :
   ?as_tyvar_with_cnstr:Pos.t option ->
   Typing_defs.locl_ty ->
   Typing_defs.pos_id ->
-  root_pos:Pos_or_decl.t ->
   allow_abstract_tconst:bool ->
   (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 

@@ -25,7 +25,6 @@ module MakeType = Typing_make_type
 
 type context = {
   id: pos_id;  (** The T in the type access C::T *)
-  root_pos: Pos_or_decl.t;
   ety_env: expand_env;
       (** The expand environment as passed in by Typing_phase.localize *)
   generics_seen: TySet.t;
@@ -525,7 +524,6 @@ let expand_with_env
     ?(as_tyvar_with_cnstr = None)
     root
     (id : pos_id)
-    ~root_pos
     ~allow_abstract_tconst =
   let ((env, ty_err_opt), ty) =
     let ctx =
@@ -536,7 +534,6 @@ let expand_with_env
         generics_seen = TySet.empty;
         allow_abstract = allow_abstract_tconst;
         abstract_as_tyvar_at_pos = as_tyvar_with_cnstr;
-        root_pos;
       }
     in
     let ((env, e1), res) = expand ctx env root in
@@ -583,7 +580,6 @@ let referenced_typeconsts env ety_env (root, ids) =
             ~as_tyvar_with_cnstr:None
             root
             (Pos_or_decl.of_raw_pos pos, tconst)
-            ~root_pos:(get_pos root)
             ~allow_abstract_tconst:true
         in
         let ty_errs =

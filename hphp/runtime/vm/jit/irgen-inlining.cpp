@@ -383,12 +383,17 @@ void conjureBeginInlining(IRGS& env,
     push(env, conjure(argType));
   }
 
+  if (func->hasReifiedGenerics()) {
+    push(env, conjure(TVec));
+  }
+
   // beginInlining() assumes synced state.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  auto const flags = hasUnpack
-    ? FCallArgsFlags::HasUnpack : FCallArgsFlags::FCANone;
+  auto flags = FCallArgsFlags::FCANone;
+  if (hasUnpack) flags = flags | FCallArgsFlags::HasUnpack;
+  if (func->hasReifiedGenerics()) flags = flags | FCallArgsFlags::HasGenerics;
 
   // thisType is the context type inside the closure, but beginInlining()'s ctx
   // is a context given to the prologue.
@@ -396,9 +401,6 @@ void conjureBeginInlining(IRGS& env,
     ? conjure(Type::ExactObj(func->implCls()))
     : conjure(thisType);
 
-  // FIXME: conjure generics; otherwise this translation will have tiny cost
-  // as it will fail early due to generics mismatch, causing us to inline
-  // huge functions if they have reified generics
   beginInlining(
     env,
     func,

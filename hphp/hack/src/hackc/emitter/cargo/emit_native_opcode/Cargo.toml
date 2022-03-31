@@ -9,7 +9,6 @@ path = "../../emit_native_opcode.rs"
 
 [dependencies]
 ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
-bumpalo = { version = "3.8", features = ["collections"] }
 emit_body = { path = "../emit_body" }
 emit_param = { path = "../emit_param" }
 env = { path = "../env" }

@@ -26,7 +26,7 @@ module type S = sig
      It can be used later in `begin_cancel` to cancel a group of commands, for example. *)
   val create_command :
     nonce:string ->
-    key:string ->
+    keys:string list ->
     hash:string ->
     check_id:string ->
     transport_channel:string option ->
@@ -50,7 +50,7 @@ module type S = sig
 
   val begin_heartbeat : Types.job_id -> (status, string) result Future.t
 
-  val begin_run : command:command -> (Types.job_id, string) result Future.t
+  val begin_run : command:command -> (Types.job_id list, string) result Future.t
 
-  val run : command:command -> (Types.job_id, string) result
+  val run : command:command -> (Types.job_id list, string) result
 end

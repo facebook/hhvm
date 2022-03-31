@@ -379,31 +379,31 @@ class DocBlockDerived extends DocBlockBase {}
 
 // We don't want the line comment above to be part of this docblock.
 // We do want both these lines though.
-function line_comment_with_break(): void {}
-//       89^:10
+function line_comment_with_break(): void { line_comment_with_break(); }
+//                                       89^:44
 
 // This is another special case.
 /** Only this should be part of the docblock. */
-function two_comment_types(): void {}
-//       ^94:10
+function two_comment_types(): void { two_comment_types(); }
+//                                   ^94:38
 
 // There are too many blank lines between this comment and what it's commenting
 // on.
 
 
-function too_many_blank_lines(): void {}
-//       ^101:10
+function too_many_blank_lines(): void { too_many_blank_lines(); }
+//                                      ^101:41
 
 // For legacy reasons, we have to support a single linebreak between a docblock
 // and the item the docblock is for.
 
-function one_linebreak_is_okay(): void {}
-//       ^107:10
+function one_linebreak_is_okay(): void { one_linebreak_is_okay(); }
+//                                       ^107:42
 
 /** A function with an HH_FIXME. */
 /* HH_FIXME[4030] Missing return type hint. */
-function needs_fixing() {}
-//       ^112:10
+function needs_fixing() { needs_fixing(); }
+//                        ^112:27
 "
 
 let docblock_cases =
@@ -536,50 +536,50 @@ the other stars.";
           pos = pos_at (27, 14) (27, 28);
         };
       ] );
-    ( ("docblock.php", 89, 10),
+    ( ("docblock.php", 89, 44),
       [
         {
-          snippet = "line_comment_with_break";
+          snippet = "function line_comment_with_break(): void";
           addendum =
             [
               "We don't want the line comment above to be part of this docblock.\nWe do want both these lines though.";
             ];
-          pos = pos_at (89, 10) (89, 32);
+          pos = pos_at (89, 44) (89, 66);
         };
       ] );
-    ( ("docblock.php", 94, 10),
+    ( ("docblock.php", 94, 38),
       [
         {
-          snippet = "two_comment_types";
+          snippet = "function two_comment_types(): void";
           addendum = ["Only this should be part of the docblock."];
-          pos = pos_at (94, 10) (94, 26);
+          pos = pos_at (94, 38) (94, 54);
         };
       ] );
-    ( ("docblock.php", 101, 10),
+    ( ("docblock.php", 101, 41),
       [
         {
-          snippet = "too_many_blank_lines";
+          snippet = "function too_many_blank_lines(): void";
           addendum = [];
-          pos = pos_at (101, 10) (101, 29);
+          pos = pos_at (101, 41) (101, 60);
         };
       ] );
-    ( ("docblock.php", 107, 10),
+    ( ("docblock.php", 107, 42),
       [
         {
-          snippet = "one_linebreak_is_okay";
+          snippet = "function one_linebreak_is_okay(): void";
           addendum =
             [
               "For legacy reasons, we have to support a single linebreak between a docblock\nand the item the docblock is for.";
             ];
-          pos = pos_at (107, 10) (107, 30);
+          pos = pos_at (107, 42) (107, 62);
         };
       ] );
-    ( ("docblock.php", 112, 10),
+    ( ("docblock.php", 112, 27),
       [
         {
-          snippet = "needs_fixing";
+          snippet = "function needs_fixing(): _";
           addendum = ["A function with an HH_FIXME."];
-          pos = pos_at (112, 10) (112, 21);
+          pos = pos_at (112, 27) (112, 38);
         };
       ] );
   ]

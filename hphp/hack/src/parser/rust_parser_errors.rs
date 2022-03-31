@@ -421,11 +421,9 @@ fn syntax_to_list<'a>(
         Missing => Left(Left(empty())),
         SyntaxList(s) => Left(Right(
             s.iter()
-                .map(move |x| {
-                    match &x.children {
-                        ListItem(x) => Left(on_list_item(x)),
-                        _ => Right(once(x)),
-                    }
+                .map(move |x| match &x.children {
+                    ListItem(x) => Left(on_list_item(x)),
+                    _ => Right(once(x)),
                 })
                 .flatten(),
         )),
@@ -1654,7 +1652,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             _ => false,
         }
     }
-
 
     fn is_immediately_in_lambda(&self) -> bool {
         self.env
@@ -4093,45 +4090,45 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 };
                 let short_name = get_short_name_from_qualified_name(name_text, self.text(&x.alias));
 
-                let do_check = |
-                    self_: &mut Self,
-                    error_on_global_redefinition,
-                    get_names: &dyn Fn(&mut UsedNames) -> &mut Strmap<FirstUseOrDef>,
-                    report_error,
-                | {
-                    let is_global_namespace = self_.is_global_namespace();
-                    let names = get_names(&mut self_.names);
-                    match names.get(short_name) {
-                        Some(FirstUseOrDef {
-                            location,
-                            kind,
-                            global,
-                            ..
-                        }) => {
-                            if *kind != NameDef
-                                || error_on_global_redefinition && (is_global_namespace || *global)
-                            {
-                                self_.errors.push(make_name_already_used_error(
-                                    name,
-                                    name_text,
-                                    short_name,
-                                    location,
-                                    report_error,
-                                ))
+                let do_check =
+                    |self_: &mut Self,
+                     error_on_global_redefinition,
+                     get_names: &dyn Fn(&mut UsedNames) -> &mut Strmap<FirstUseOrDef>,
+                     report_error| {
+                        let is_global_namespace = self_.is_global_namespace();
+                        let names = get_names(&mut self_.names);
+                        match names.get(short_name) {
+                            Some(FirstUseOrDef {
+                                location,
+                                kind,
+                                global,
+                                ..
+                            }) => {
+                                if *kind != NameDef
+                                    || error_on_global_redefinition
+                                        && (is_global_namespace || *global)
+                                {
+                                    self_.errors.push(make_name_already_used_error(
+                                        name,
+                                        name_text,
+                                        short_name,
+                                        location,
+                                        report_error,
+                                    ))
+                                }
+                            }
+                            None => {
+                                let new_use = make_first_use_or_def(
+                                    false,
+                                    NameUse,
+                                    make_location_of_node(name),
+                                    GLOBAL_NAMESPACE_NAME,
+                                    &qualified_name,
+                                );
+                                names.add(short_name, new_use)
                             }
                         }
-                        None => {
-                            let new_use = make_first_use_or_def(
-                                false,
-                                NameUse,
-                                make_location_of_node(name),
-                                GLOBAL_NAMESPACE_NAME,
-                                &qualified_name,
-                            );
-                            names.add(short_name, new_use)
-                        }
-                    }
-                };
+                    };
 
                 match &kind.children {
                     Token(token) => match token.kind() {
@@ -4628,12 +4625,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn class_property_declarator_errors(&mut self, node: S<'a>) {
-        let check_decls = |
-            self_: &mut Self,
-            f: &dyn Fn(S<'a>) -> bool,
-            error: errors::Error,
-            property_declarators,
-        | {
+        let check_decls = |self_: &mut Self,
+                           f: &dyn Fn(S<'a>) -> bool,
+                           error: errors::Error,
+                           property_declarators| {
             syntax_to_list_no_separators(property_declarators).for_each(|decl| {
                 if let PropertyDeclarator(x) = &decl.children {
                     if f(&x.initializer) {
@@ -4726,10 +4721,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let mut is_first_decl = true;
                 let mut has_code_outside_namespace = false;
 
-                if let [Syntax {
-                    children: Script(_),
-                    ..
-                }, syntax_list] = self.parents.as_slice()
+                if let [
+                    Syntax {
+                        children: Script(_),
+                        ..
+                    },
+                    syntax_list,
+                ] = self.parents.as_slice()
                 {
                     if let SyntaxList(_) = syntax_list.children {
                         is_first_decl = false;
@@ -4875,8 +4873,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             PostfixUnaryExpression(x) => check_unary_expression(self, &x.operator),
             // FIXME: Array_get ((_, Class_const _), _) is not a valid lvalue. *)
             _ => {} // Ideally we should put all the rest of the syntax here so everytime
-            // a new syntax is added people need to consider whether the syntax
-            // can be a valid lvalue or not. However, there are too many of them.
+                    // a new syntax is added people need to consider whether the syntax
+                    // can be a valid lvalue or not. However, there are too many of them.
         }
     }
 

@@ -326,16 +326,11 @@ pub mod closures {
 }
 
 pub mod reified {
-    #[allow(clippy::redundant_static_lifetimes)]
-    pub static PROP_NAME: &'static str = "86reified_prop";
-    #[allow(clippy::redundant_static_lifetimes)]
-    pub static INIT_METH_NAME: &'static str = "86reifiedinit";
-    #[allow(clippy::redundant_static_lifetimes)]
-    pub static INIT_METH_PARAM_NAME: &'static str = "$__typestructures";
-    #[allow(clippy::redundant_static_lifetimes)]
-    pub static GENERICS_LOCAL_NAME: &'static str = "$0ReifiedGenerics";
-    #[allow(clippy::redundant_static_lifetimes)]
-    pub static CAPTURED_PREFIX: &'static str = "$__captured$reifiedgeneric$";
+    pub static PROP_NAME: &str = "86reified_prop";
+    pub static INIT_METH_NAME: &str = "86reifiedinit";
+    pub static INIT_METH_PARAM_NAME: &str = "$__typestructures";
+    pub static GENERICS_LOCAL_NAME: &str = "$0ReifiedGenerics";
+    pub static CAPTURED_PREFIX: &str = "$__captured$reifiedgeneric$";
 
     pub fn reified_generic_captured_name(is_fun: bool, i: usize) -> String {
         let type_ = if is_fun { "function" } else { "class" };

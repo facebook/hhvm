@@ -92,10 +92,12 @@ pub fn from_ast<'a, 'arena, 'decl>(
     };
     let call_context = if is_closure_body {
         match &method.user_attributes[..] {
-            [T::UserAttribute {
-                name: ast_defs::Id(_, ref s),
-                params: _,
-            }] if s.eq_ignore_ascii_case("__DynamicMethCallerForce") => {
+            [
+                T::UserAttribute {
+                    name: ast_defs::Id(_, ref s),
+                    params: _,
+                },
+            ] if s.eq_ignore_ascii_case("__DynamicMethCallerForce") => {
                 Some("__SystemLib\\DynamicContextOverrideUnsafe".to_string())
             }
             _ => None,

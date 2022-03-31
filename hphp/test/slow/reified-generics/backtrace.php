@@ -8,6 +8,7 @@ class C<reify Ta, reify Tb> {
       echo $e->getTraceAsString() . "\n";
     }
   }
+  <<__NEVER_INLINE>>
   function f<reify T1>() {
     $this->g<T1>();
   }

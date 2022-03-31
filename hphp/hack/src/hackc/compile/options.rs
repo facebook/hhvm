@@ -589,8 +589,8 @@ enum GlobalValue {
     VecStr(Vec<String>),
     MapStr(BTreeMap<String, String>),
     Json(Json), // support HHVM options with arbitrary layout
-    // (A poorer alternative that risks silent HHVM breakage
-    // would be to explicitly enumerate all possible layouts.)
+                // (A poorer alternative that risks silent HHVM breakage
+                // would be to explicitly enumerate all possible layouts.)
 }
 
 fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(

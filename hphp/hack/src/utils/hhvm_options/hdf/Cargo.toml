@@ -12,4 +12,4 @@ hash = { path = "../../hash" }
 indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
 libc = "0.2.121"
 once_cell = "1.8"
-thiserror = "1.0.29"
+thiserror = "1.0.30"

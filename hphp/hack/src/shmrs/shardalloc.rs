@@ -47,9 +47,7 @@ impl ChunkPtr {
         let chunk_next_ptr = self.next_chunk_ptr();
 
         // Safety: ptr is (1) valid (2) aligned
-        unsafe {
-            chunk_next_ptr.write(value)
-        };
+        unsafe { chunk_next_ptr.write(value) };
     }
 }
 

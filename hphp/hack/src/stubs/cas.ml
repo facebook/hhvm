@@ -18,17 +18,6 @@ type cas_failure =
   | Process_failure of string
   | Parse_failure of string
 
-type cas_upload_result = {
-  dir: Path.t;
-  stdout: string;
-}
-
-type cas_download_result = {
-  digest: digest;
-  dir: Path.t;
-  stdout: string;
-}
-
 type cas_result = {
   digest: digest;
   dir: Path.t;

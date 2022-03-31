@@ -347,7 +347,6 @@ fn main(
         }
     }
 
-
     info!(
         "Building graph with {} unique hashes",
         all_edges.count_hashes()

@@ -966,14 +966,10 @@ module FreqCache (Key : Key) (Value : Value) (Capacity : Capacity) :
   let (cache : (key, int ref * value) Hashtbl.t) =
     Hashtbl.create (2 * Capacity.capacity)
 
-  let size = ref 0
-
   let get_telemetry_items_and_keys () =
     (Obj.repr cache, Hashtbl.to_seq_keys cache)
 
-  let clear () =
-    Hashtbl.clear cache;
-    size := 0
+  let clear () = Hashtbl.clear cache
 
   (** The collection function is called when we reach twice original
       capacity in size. When the collection is triggered, we only keep
@@ -982,7 +978,7 @@ module FreqCache (Key : Key) (Value : Value) (Capacity : Capacity) :
       After collection: size = capacity (with the most frequently
       used objects) *)
   let collect () =
-    if !size < 2 * Capacity.capacity then
+    if Hashtbl.length cache < 2 * Capacity.capacity then
       ()
     else
       let l = ref [] in
@@ -1003,7 +999,6 @@ module FreqCache (Key : Key) (Value : Value) (Capacity : Capacity) :
           l := rl;
           incr i
       done;
-      size := Capacity.capacity;
       ()
 
   let add x y =
@@ -1016,7 +1011,6 @@ module FreqCache (Key : Key) (Value : Value) (Capacity : Capacity) :
       else
         Hashtbl.replace cache x (freq, y)
     | None ->
-      incr size;
       let elt = (ref 0, y) in
       Hashtbl.replace cache x elt;
       ()
@@ -1028,9 +1022,7 @@ module FreqCache (Key : Key) (Value : Value) (Capacity : Capacity) :
       incr freq;
       Some value
 
-  let remove x =
-    if Hashtbl.mem cache x then decr size;
-    Hashtbl.remove cache x
+  let remove = Hashtbl.remove cache
 
   let get_telemetry (telemetry : Telemetry.t) : Telemetry.t =
     let (objs, keys) = get_telemetry_items_and_keys () in

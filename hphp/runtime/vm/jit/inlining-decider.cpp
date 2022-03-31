@@ -138,9 +138,6 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   if (callee == callSK.func()) {
     return refuse("call is recursive");
   }
-  if (callee->hasReifiedGenerics() && !callee->cls()) {
-    return refuse("reified generics on non-method");
-  }
   if (callee->isGenerator()) {
     return refuse("callee is generator");
   }

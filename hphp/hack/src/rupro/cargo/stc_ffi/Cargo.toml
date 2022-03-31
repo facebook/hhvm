@@ -10,11 +10,12 @@ test = false
 doctest = false
 
 [dependencies]
-hackrs = { path = "../hackrs" }
-hackrs_test_utils = { path = "../hackrs_test_utils" }
+hackrs = { path = "../../hackrs/cargo/hackrs" }
+hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 ocaml_runtime = { path = "../../../utils/ocaml_runtime" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
-pos = { path = "../../lib/pos" }
+pos = { path = "../../pos/cargo/pos" }
 structopt = "0.3.23"
+ty = { path = "../../ty/cargo/ty" }

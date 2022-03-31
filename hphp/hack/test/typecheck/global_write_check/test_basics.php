@@ -22,6 +22,8 @@ class Test {
 
   public function test_method_call(): void {
     self::$static_prop = 1; // A global variable is written.
+    /* HH_FIXME[11001] Test HH_FIXME to ignore the error of global variable write */
+    self::$static_prop = 1;
 
     Foo::$static_prop = 2; // A global variable is written.
     Foo::$static_prop++; // A global variable is written.
@@ -39,6 +41,8 @@ class Test {
 
     $c = $b;
     call_mixed($c); // A global variable is passed to (or returned from) a function call.
+    /* HH_FIXME[11002] Test HH_FIXME to ignore the error of passing global variables to function calls */
+    call_mixed($c);
     call_mixed(Foo::$static_prop);
 
     $d = $c->prop;

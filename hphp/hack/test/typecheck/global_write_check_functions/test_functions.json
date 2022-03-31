@@ -1,1 +1,1 @@
-["Foo::set_bar", "test_fun_call"]
+["Foo::set_bar", "Foo::memoized_lsb", "test_fun_call"]

@@ -1,1 +1,2 @@
 --enable-global-write-check "/"
+--allowed-fixme-codes-strict 11001,11002

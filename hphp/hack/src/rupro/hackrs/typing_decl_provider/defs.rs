@@ -12,7 +12,7 @@ use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 use std::sync::Arc;
-use ty::decl_defs::{ty::ConsistentKind, DeclTy, EnumType, FoldedClass, Tparam};
+use ty::decl::{ty::ConsistentKind, DeclTy, EnumType, FoldedClass, Tparam};
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
 use ty::typing_defs::ClassElt;

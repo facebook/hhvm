@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{self, folded, shallow, ty, DeclTy, DeclTy_};
+use crate::decl::{self, folded, shallow, ty, DeclTy, DeclTy_};
 use crate::reason::Reason;
 use pos::Pos;
 
@@ -208,7 +208,7 @@ impl<R: Reason> From<&obr::typing_defs::FunType<'_>> for ty::FunType<R, DeclTy<R
 }
 
 impl<R: Reason> From<&obr::typing_defs_core::PossiblyEnforcedTy<'_>>
-    for decl_defs::ty::PossiblyEnforcedTy<DeclTy<R>>
+    for decl::ty::PossiblyEnforcedTy<DeclTy<R>>
 {
     fn from(ty: &obr::typing_defs_core::PossiblyEnforcedTy<'_>) -> Self {
         Self {

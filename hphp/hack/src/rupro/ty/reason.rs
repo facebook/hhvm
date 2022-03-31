@@ -10,7 +10,7 @@ use pos::{BPos, NPos, Pos, Positioned, Symbol, ToOxidized, TypeConstName, TypeNa
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::hash::Hash;
 
-use crate::decl_defs::DeclTy_;
+use crate::decl::DeclTy_;
 use crate::typing_defs::{Ty, Ty_};
 use crate::typing_prop::{Prop, PropF};
 use crate::visitor::Walkable;

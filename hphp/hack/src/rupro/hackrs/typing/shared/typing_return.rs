@@ -9,7 +9,7 @@ use crate::typing::env::typing_env::TEnv;
 use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing::typing_error::Result;
 use pos::Symbol;
-use ty::decl_defs::DeclTy;
+use ty::decl::DeclTy;
 use ty::reason::Reason;
 use ty::typing_defs::Ty;
 

@@ -10,7 +10,7 @@ use anyhow::Result;
 use maplit::btreemap;
 use pos::{Prefix, RelativePath, TypeName};
 use std::fs;
-use ty::{decl_defs::shallow, decl_error::DeclError};
+use ty::{decl::shallow, decl_error::DeclError};
 
 #[fbinit::test]
 fn when_cyclic_class_error(fb: FacebookInit) -> Result<()> {

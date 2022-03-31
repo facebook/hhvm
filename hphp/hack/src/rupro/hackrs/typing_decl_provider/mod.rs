@@ -9,9 +9,7 @@ use pos::{ConstName, FunName, MethodName, PropName, TypeName};
 use std::fmt::Debug;
 use std::rc::Rc;
 use std::sync::Arc;
-use ty::decl_defs::{
-    ty::ConsistentKind, ConstDecl, DeclTy, EnumType, FunDecl, Tparam, TypedefDecl,
-};
+use ty::decl::{ty::ConsistentKind, ConstDecl, DeclTy, EnumType, FunDecl, Tparam, TypedefDecl};
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
 

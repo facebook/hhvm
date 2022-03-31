@@ -9,7 +9,7 @@ use pos::{RelativePath, RelativePathCtx, ToOxidized, TypeName};
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::Arc;
-use ty::decl_defs::{folded::FoldedClass, shallow};
+use ty::decl::{folded::FoldedClass, shallow};
 use ty::reason::BReason;
 
 ocaml_ffi_with_arena! {

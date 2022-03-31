@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::decl_defs::{folded, DeclTy};
+use crate::decl::{folded, DeclTy};
 use crate::reason::Reason;
 use pos::TypeName;
 

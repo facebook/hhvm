@@ -6,7 +6,7 @@
 use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;
-use ty::decl_defs::{
+use ty::decl::{
     shallow::{ConstDecl, FunDecl, TypedefDecl},
     DeclTy, ShallowClass,
 };

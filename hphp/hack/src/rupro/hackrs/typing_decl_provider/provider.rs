@@ -11,7 +11,7 @@ use pos::{ConstName, FunName, TypeName};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
-use ty::decl_defs::{ConstDecl, FunDecl};
+use ty::decl::{ConstDecl, FunDecl};
 use ty::reason::Reason;
 
 /// An implementation of TypingDeclProvider designed after the hh_server

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{
+use crate::decl::{
     ty::ConsistentKind, ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef,
     ClassEltFlags, DeclTy, EnumType, Tparam, Typeconst, WhereConstraint, XhpAttribute,
 };
@@ -20,7 +20,7 @@ use pos::{
 use std::collections::BTreeMap;
 use std::fmt;
 
-pub use crate::decl_defs::subst::Subst;
+pub use crate::decl::subst::Subst;
 pub use oxidized::ast_defs::{Abstraction, ClassishKind};
 
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]

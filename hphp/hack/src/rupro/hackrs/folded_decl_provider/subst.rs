@@ -5,8 +5,8 @@
 
 use pos::TypeName;
 use std::collections::BTreeMap;
-use ty::decl_defs::subst::Subst;
-use ty::decl_defs::{
+use ty::decl::subst::Subst;
+use ty::decl::{
     AbstractTypeconst, ClassConst, ConcreteTypeconst, DeclTy, DeclTy_, FunParam, FunType,
     PossiblyEnforcedTy, ShapeFieldType, TaccessType, Tparam, TypeConst, Typeconst, WhereConstraint,
 };

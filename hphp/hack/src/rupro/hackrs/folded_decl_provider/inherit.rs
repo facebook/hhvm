@@ -11,7 +11,7 @@ use pos::{
     TypeConstNameIndexMap, TypeName, TypeNameIndexMap,
 };
 use std::sync::Arc;
-use ty::decl_defs::{
+use ty::decl::{
     folded::Constructor, subst::Subst, ty::ConsistentKind, AbstractTypeconst, Abstraction,
     CeVisibility, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass, FoldedElement,
     ShallowClass, SubstContext, TypeConst, Typeconst,

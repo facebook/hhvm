@@ -8,7 +8,7 @@ use crate::decl_parser::DeclParser;
 use crate::naming_provider::NamingProvider;
 use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::sync::Arc;
-use ty::decl_defs::{ConstDecl, DeclTy, FunDecl};
+use ty::decl::{ConstDecl, DeclTy, FunDecl};
 use ty::reason::Reason;
 
 /// A `ShallowDeclProvider` which, if the requested name is not present in its

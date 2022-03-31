@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs;
+use crate::decl;
 use crate::reason::Reason;
 use crate::typing_defs;
 
@@ -20,7 +20,7 @@ pub trait Visitor<R: Reason> {
     /// Must return `self`.
     fn object(&mut self) -> &mut dyn Visitor<R>;
 
-    fn visit_decl_ty(&mut self, o: &decl_defs::DeclTy<R>) {
+    fn visit_decl_ty(&mut self, o: &decl::DeclTy<R>) {
         o.recurse(self.object());
     }
     fn visit_ty(&mut self, o: &typing_defs::Ty<R>) {

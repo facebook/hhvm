@@ -7,7 +7,7 @@ use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use crate::typing_decl_provider::{Class, TypeDecl};
 use pos::{Positioned, TypeName};
-use ty::decl_defs::{self, DeclTy, DeclTy_};
+use ty::decl::{self, DeclTy, DeclTy_};
 use ty::reason::Reason;
 use ty::typing_defs::{Exact, FunParam, FunType, Ty, Ty_};
 
@@ -92,7 +92,7 @@ fn localize_ft<R: Reason>(
     env: &TEnv<R>,
     localize_env: &LocalizeEnv,
     r: R,
-    ft: &decl_defs::FunType<R, DeclTy<R>>,
+    ft: &decl::FunType<R, DeclTy<R>>,
 ) -> Result<Ty<R>> {
     rupro_todo_assert!(ft.params.is_empty(), AST);
     let params: Vec<_> = ft
@@ -117,7 +117,7 @@ fn localize_ft<R: Reason>(
 fn localize_possibly_enforced_ty<R: Reason>(
     env: &TEnv<R>,
     localize_env: &LocalizeEnv,
-    ty: decl_defs::PossiblyEnforcedTy<DeclTy<R>>,
+    ty: decl::PossiblyEnforcedTy<DeclTy<R>>,
 ) -> Result<Ty<R>> {
     localize(env, localize_env, ty.ty)
 }

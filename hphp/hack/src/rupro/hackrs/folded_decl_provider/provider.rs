@@ -14,7 +14,7 @@ use pos::{
     TypeNameIndexSet,
 };
 use std::sync::Arc;
-use ty::decl_defs::{ConstDecl, DeclTy, FoldedClass, FunDecl, ShallowClass};
+use ty::decl::{ConstDecl, DeclTy, FoldedClass, FunDecl, ShallowClass};
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
 

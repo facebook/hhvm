@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::ty::{
+use crate::decl::ty::{
     ClassConstKind, ClassConstRef, DeclTy, EnumType, FunElt, Tparam, Typeconst, TypedefType,
     UserAttribute, WhereConstraint, XhpAttribute, XhpEnumValue,
 };
@@ -16,7 +16,7 @@ use pos::{
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-pub use crate::decl_defs::ty::{ConstDecl, ModuleDefType};
+pub use crate::decl::ty::{ConstDecl, ModuleDefType};
 pub use oxidized::ast_defs::Visibility;
 pub use oxidized_by_ref::{method_flags::MethodFlags, prop_flags::PropFlags};
 

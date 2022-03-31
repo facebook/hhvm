@@ -13,7 +13,7 @@ use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
 use std::sync::Arc;
 use structopt::StructOpt;
-use ty::decl_defs::shallow;
+use ty::decl::shallow;
 use ty::reason::{BReason, NReason, Reason};
 
 #[derive(StructOpt, Debug)]

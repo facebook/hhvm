@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{
-    decl_defs::{DeclTy, Tparam},
+    decl::{DeclTy, Tparam},
     reason::Reason,
 };
 

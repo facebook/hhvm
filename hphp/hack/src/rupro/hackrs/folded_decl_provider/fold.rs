@@ -14,8 +14,8 @@ use pos::{
     TypeNameIndexMap, TypeNameIndexSet,
 };
 use std::sync::Arc;
-use ty::decl_defs::subst::Subst;
-use ty::decl_defs::{
+use ty::decl::subst::Subst;
+use ty::decl::{
     folded::Constructor, AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind,
     ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind, DeclTy, FoldedClass,
     FoldedElement, Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,

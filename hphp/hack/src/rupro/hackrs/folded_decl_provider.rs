@@ -10,7 +10,7 @@ use pos::{ConstName, FunName, MethodName, PropName, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;
 use ty::{
-    decl_defs::{ConstDecl, DeclTy, FoldedClass, FunDecl, TypedefDecl},
+    decl::{ConstDecl, DeclTy, FoldedClass, FunDecl, TypedefDecl},
     reason::Reason,
 };
 

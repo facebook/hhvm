@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub use crate::decl_defs::ty::{Exact, Prim};
+pub use crate::decl::ty::{Exact, Prim};
 use crate::reason::Reason;
 use crate::typing_defs::tyvar::Tyvar;
 use hcons::Hc;

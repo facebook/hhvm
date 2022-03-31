@@ -7,7 +7,7 @@ use names::FileSummary;
 use pos::{RelativePath, RelativePathCtx};
 use std::marker::PhantomData;
 use std::sync::Arc;
-use ty::decl_defs::shallow;
+use ty::decl::shallow;
 use ty::reason::Reason;
 
 #[derive(Debug, Clone)]

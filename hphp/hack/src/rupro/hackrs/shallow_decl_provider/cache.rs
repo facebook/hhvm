@@ -7,7 +7,7 @@ use super::TypeDecl;
 use crate::cache::Cache;
 use pos::{ConstName, FunName, MethodName, ModuleName, PropName, TypeName};
 use std::sync::Arc;
-use ty::decl_defs::{
+use ty::decl::{
     shallow::Decl, shallow::ModuleDecl, ConstDecl, DeclTy, FunDecl, ShallowClass, TypedefDecl,
 };
 use ty::reason::Reason;

@@ -14,4 +14,4 @@ bumpalo = { version = "3.8", features = ["collections"] }
 ffi = { path = "../../utils/ffi" }
 libc = "0.2.121"
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
-thiserror = "1.0.29"
+thiserror = "1.0.30"

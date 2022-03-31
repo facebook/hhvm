@@ -3043,12 +3043,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     if token.kind() == TokenKind::DecimalLiteral
                         || token.kind() == TokenKind::DecimalLiteral
                     {
-                        let text = self.text(&x.expression);
+                        let text = self.text(&x.expression).replace('_', "");
                         if text.parse::<i64>().is_err() {
                             let error_text = if token.kind() == TokenKind::DecimalLiteral {
-                                errors::error2071(text)
+                                errors::error2071(&text)
                             } else {
-                                errors::error2072(text)
+                                errors::error2072(&text)
                             };
                             self.errors.push(make_error_from_node(node, error_text))
                         }

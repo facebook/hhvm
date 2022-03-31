@@ -1,0 +1,8 @@
+File "parse_float_with_underscore_bad3.php", line 5, characters 22-24:
+Encountered unexpected token `_e1`. (Parsing[1002])
+File "parse_float_with_underscore_bad3.php", line 5, characters 15-17:
+Wrong type hint (Typing[4338])
+  File "parse_float_with_underscore_bad3.php", line 5, characters 9-13:
+  Expected `float`
+  File "parse_float_with_underscore_bad3.php", line 5, characters 21-21:
+  But got `int`

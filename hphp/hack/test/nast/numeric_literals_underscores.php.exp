@@ -1,0 +1,39 @@
+[(Class
+    { c_span = [4:1-20:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+      c_name = ([4:7-20], "\\BigNumbersRUs"); c_tparams = []; c_extends = []; 
+      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = [];
+      c_consts =
+      [{ cc_user_attributes = []; cc_type = (Some ([5:9-14], (Hprim Tfloat))); cc_id = ([5:15-17], "fp"); cc_kind = (CCConcrete ((), [5:20-31], (Float "123.456"))); cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([6:9-14], (Hprim Tfloat))); cc_id = ([6:15-20], "fpexp"); cc_kind = (CCConcrete ((), [6:23-35], (Float "123e-456"))); cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([7:9-14], (Hprim Tfloat))); cc_id = ([7:15-20], "fpdot"); cc_kind = (CCConcrete ((), [7:23-36], (Float ".123e-456"))); cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([8:9-14], (Hprim Tfloat))); cc_id = ([8:15-24], "fpleading"); cc_kind = (CCConcrete ((), [8:27-41], (Float "0.1234e+25"))); cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([9:9-14], (Hprim Tfloat))); cc_id = ([9:15-27], "fpleadingexp"); cc_kind = (CCConcrete ((), [9:30-36], (Float "0e-15"))); cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([10:9-14], (Hprim Tfloat))); cc_id = ([10:15-20], "fpoct"); cc_kind = (CCConcrete ((), [10:23-34], (Float "0341.5136"))); cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([12:9-12], (Hprim Tint))); cc_id = ([12:13-16], "dec"); cc_kind = (CCConcrete ((), [12:19-32], (Int "1234567890"))); cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([13:9-12], (Hprim Tint))); cc_id = ([13:13-16], "hex"); cc_kind = (CCConcrete ((), [13:19-32], (Int "0xffcc1234"))); cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([14:9-12], (Hprim Tint))); cc_id = ([14:13-16], "bin"); cc_kind = (CCConcrete ((), [14:19-32], (Int "0b11001100"))); cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([15:9-12], (Hprim Tint))); cc_id = ([15:13-16], "oct"); cc_kind = (CCConcrete ((), [15:19-31], (Int "0666555444"))); cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([16:9-12], (Hprim Tint))); 
+          cc_id = ([16:13-20], "neg_dec"); cc_kind = (CCConcrete ((), [16:23-37], (Unop (Uminus, ((), [16:24-37], (Int "1234567890")))))); 
+          cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([17:9-12], (Hprim Tint))); 
+          cc_id = ([17:13-20], "neg_hex"); cc_kind = (CCConcrete ((), [17:23-37], (Unop (Uminus, ((), [17:24-37], (Int "0xffcc1234")))))); 
+          cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([18:9-12], (Hprim Tint))); 
+          cc_id = ([18:13-20], "neg_bin"); cc_kind = (CCConcrete ((), [18:23-37], (Unop (Uminus, ((), [18:24-37], (Int "0b11001100")))))); 
+          cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([19:9-12], (Hprim Tint))); 
+          cc_id = ([19:13-20], "neg_oct"); cc_kind = (CCConcrete ((), [19:23-36], (Unop (Uminus, ((), [19:24-36], (Int "0666555444")))))); 
+          cc_doc_comment = None }
+        ];
+      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
+      c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_doc_comment = None; c_emit_id = None })
+  ]

@@ -661,8 +661,8 @@ module Typing = struct
     | HigherKindedTypesUnsupportedFeature [@value 4456]
     | ThisFinal [@value 4457]
     | ExactClassFinal [@value 4458]
-    | GlobalVariableWrite [@value 4459]
-    | GlobalVariableInFunctionCall [@value 4460]
+    (* | GlobalVariableWrite [@value 4459] *)
+    (* | GlobalVariableInFunctionCall [@value 4460] *)
     | DiamondTraitProperty [@value 4462]
     | ConstructNotInstanceMethod [@value 4463]
     | InvalidMethCallerReadonlyReturn [@value 4464]
@@ -687,3 +687,17 @@ end
 
 (* 9xxx: reserved for FB ai *)
 (* 10xxx: reserved for FB ai *)
+
+(* 11xxx: reserved for global write check (fbcode/hphp/hack/src/typing/tast_check/global_write_check.ml),
+ * which is used to detect data leaks through global variable access.
+ * 11001 represents the error when a global variable is written.
+ * 11002 represents the error when a global variable is passed to (or returned from) a function call.
+ *)
+module GlobalWriteCheck = struct
+  type t =
+    | GlobalVariableWrite [@value 11001]
+    | GlobalVariableInFunctionCall [@value 11002]
+  [@@deriving enum, show { with_path = false }]
+
+  let err_code = to_enum
+end

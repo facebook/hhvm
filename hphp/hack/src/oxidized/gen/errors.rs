@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1981e4aa2baaf0340c5308ea35709991>>
+// @generated SignedSource<<6c346673c3703063a7969f255b6e489a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -20,6 +20,7 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
+pub use crate::error_codes::GlobalWriteCheck;
 pub use crate::error_codes::Naming;
 pub use crate::error_codes::NastCheck;
 pub use crate::error_codes::Parsing;

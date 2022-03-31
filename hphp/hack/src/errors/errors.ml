@@ -536,6 +536,7 @@ module Parsing = Error_codes.Parsing
 module Naming = Error_codes.Naming
 module NastCheck = Error_codes.NastCheck
 module Typing = Error_codes.Typing
+module GlobalWriteCheck = Error_codes.GlobalWriteCheck
 
 (*****************************************************************************)
 (* Types *)
@@ -1122,13 +1123,13 @@ let method_is_not_dynamically_callable
 
 let global_var_write_error pos fun_name =
   add
-    (Typing.err_code Typing.GlobalVariableWrite)
+    (GlobalWriteCheck.err_code GlobalWriteCheck.GlobalVariableWrite)
     pos
     ("[" ^ fun_name ^ "] A global variable is written.")
 
 let global_var_in_fun_call_error pos fun_name =
   add
-    (Typing.err_code Typing.GlobalVariableInFunctionCall)
+    (GlobalWriteCheck.err_code GlobalWriteCheck.GlobalVariableInFunctionCall)
     pos
     ("["
     ^ fun_name

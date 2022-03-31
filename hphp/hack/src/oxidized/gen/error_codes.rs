@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b08495a42342c54eafe0cc5ae9737eee>>
+// @generated SignedSource<<260c827553e264d66ff949a0833069a2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -564,8 +564,6 @@ pub enum Typing {
     HigherKindedTypesUnsupportedFeature = 4456,
     ThisFinal = 4457,
     ExactClassFinal = 4458,
-    GlobalVariableWrite = 4459,
-    GlobalVariableInFunctionCall = 4460,
     DiamondTraitProperty = 4462,
     ConstructNotInstanceMethod = 4463,
     InvalidMethCallerReadonlyReturn = 4464,
@@ -598,3 +596,28 @@ pub enum Init {
 }
 impl TrivialDrop for Init {}
 arena_deserializer::impl_deserialize_in_arena!(Init);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub enum GlobalWriteCheck {
+    GlobalVariableWrite = 11001,
+    GlobalVariableInFunctionCall = 11002,
+}
+impl TrivialDrop for GlobalWriteCheck {}
+arena_deserializer::impl_deserialize_in_arena!(GlobalWriteCheck);

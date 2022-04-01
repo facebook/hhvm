@@ -91,7 +91,7 @@ let print_diff ~expected_name ~actual_name ~expected_contents ~actual_contents =
     ~file2:actual
     ()
 
-let compare_folded ctx rupro_decls filename text =
+let compare_folded ctx rupro_decls multifile filename text =
   let class_names =
     direct_decl_parse ctx filename text
     |> List.rev_filter_map ~f:(function
@@ -114,14 +114,17 @@ let compare_folded ctx rupro_decls filename text =
   let folded = show_folded_decls ocaml_folded_classes in
   let rupro_folded = show_folded_decls rupro_folded_classes in
   let matched = String.equal folded rupro_folded in
-  if matched then
-    Printf.eprintf "%s\n%!" rupro_folded
-  else
+  if not matched then (
+    (* All output is printed to stderr because that's the output
+       channel Ppxlib_print_diff prints to. *)
+    if multifile then
+      Printf.eprintf "File %s\n%!" (Relative_path.storage_to_string filename);
     print_diff
       ~expected_name:"ocaml"
       ~actual_name:"rupro"
       ~expected_contents:folded
-      ~actual_contents:rupro_folded;
+      ~actual_contents:rupro_folded
+  );
   matched
 
 let () =
@@ -288,28 +291,12 @@ let () =
     in
     let ctx = init popt in
     let iter_files f =
-      let num_files = List.length files in
-      let (all_matched, _) =
-        List.fold
-          files
-          ~init:(true, true)
-          ~f:(fun (matched, is_first) (filename, contents) ->
-            (* All output is printed to stderr because that's the output
-               channel Ppxlib_print_diff prints to. *)
-            if not is_first then Printf.eprintf "\n%!";
-            if num_files > 1 then
-              Printf.eprintf
-                "File %s\n%!"
-                (Relative_path.storage_to_string filename);
-            let matched =
-              Provider_utils.respect_but_quarantine_unsaved_changes
-                ~ctx
-                ~f:(fun () -> f filename contents)
-              && matched
-            in
-            (matched, false))
-      in
-      all_matched
+      let multifile = List.length files > 1 in
+      List.fold files ~init:true ~f:(fun matched (filename, contents) ->
+          Provider_utils.respect_but_quarantine_unsaved_changes
+            ~ctx
+            ~f:(fun () -> f multifile filename contents)
+          && matched)
     in
     let all_matched =
       let files = List.map files ~f:fst in
@@ -325,7 +312,4 @@ let () =
       in
       iter_files (compare_folded ctx rupro_decls)
     in
-    if all_matched then
-      Printf.eprintf "\nThey matched!\n%!"
-    else
-      exit 1
+    if not all_matched then exit 1

@@ -32,6 +32,7 @@ function attempt(mixed $in): void {
 function main() {
   attempt(new A());
   attempt(new B());
+  attempt(new C());
   $x = 1;
   attempt(() ==> {});
   attempt(() ==> $x);
@@ -47,4 +48,6 @@ function main() {
   attempt(false);
   attempt(null);
   attempt(meth_caller(A::class, 'serialize'));
+  attempt(vec[new A()]);
+  attempt(Vector{new B()});
 }

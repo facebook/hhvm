@@ -2,6 +2,7 @@ threw InvalidOperationException: Cannot serialize object due to options
 threw InvalidOperationException: Cannot serialize object due to options
 threw InvalidOperationException: Cannot serialize object due to options
 threw InvalidOperationException: Cannot serialize object due to options
+threw InvalidOperationException: Cannot serialize object due to options
 string(6) "v:0:{}"
 string(20) "V:9:"HH\Vector":0:{}"
 string(24) "V:12:"HH\ImmVector":0:{}"
@@ -13,4 +14,6 @@ string(26) "V:7:"HH\Pair":2:{i:1;i:2;}"
 string(5) "i:42;"
 string(4) "b:0;"
 string(2) "N;"
+threw InvalidOperationException: Cannot serialize object due to options
+threw InvalidOperationException: Cannot serialize object due to options
 threw InvalidOperationException: Cannot serialize object due to options

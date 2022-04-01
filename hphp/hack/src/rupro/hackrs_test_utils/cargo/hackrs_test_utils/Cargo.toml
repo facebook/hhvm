@@ -14,6 +14,7 @@ hackrs = { path = "../../../hackrs/cargo/hackrs" }
 hash = { path = "../../../../utils/hash" }
 intern = { path = "../../../../../../../relay/oss/crates/intern" }
 lz4 = "1.23.1"
+moka = { version = "0.8", features = ["future"] }
 oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
 serde = { version = "1.0.126", features = ["derive", "rc"] }

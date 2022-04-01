@@ -4,17 +4,18 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use dashmap::DashMap;
-use hackrs::cache::Cache;
 use serde::{de::DeserializeOwned, Serialize};
 use std::cmp::Eq;
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::marker::PhantomData;
 
 pub struct SerializingCache<K: Hash + Eq, V: Serialize + DeserializeOwned> {
+    /// A non-evicting cache for serialized values.
     cache: DashMap<K, Box<[u8]>>,
+    /// An LRU cache of hashconsed values, in front of the non-evicting
+    /// serialized cache.
+    evicting_cache: moka::sync::SegmentedCache<K, V>,
     compression: Compression,
-    _phantom: PhantomData<V>,
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -26,14 +27,14 @@ pub enum Compression {
 
 impl<K, V> Default for SerializingCache<K, V>
 where
-    K: Hash + Eq,
-    V: Serialize + DeserializeOwned,
+    K: Copy + Hash + Eq + Send + Sync + 'static,
+    V: Clone + Serialize + DeserializeOwned + Send + Sync + 'static,
 {
     fn default() -> Self {
         Self {
             cache: Default::default(),
+            evicting_cache: moka::sync::SegmentedCache::new(1024, 32),
             compression: Default::default(),
-            _phantom: PhantomData,
         }
     }
 }
@@ -46,8 +47,8 @@ impl Default for Compression {
 
 impl<K, V> SerializingCache<K, V>
 where
-    K: Hash + Eq,
-    V: Serialize + DeserializeOwned,
+    K: Copy + Hash + Eq + Send + Sync + 'static,
+    V: Clone + Serialize + DeserializeOwned + Send + Sync + 'static,
 {
     pub fn new() -> Self {
         Default::default()
@@ -55,20 +56,22 @@ where
 
     pub fn with_compression(compression: Compression) -> Self {
         Self {
-            cache: Default::default(),
             compression,
-            _phantom: PhantomData,
+            ..Default::default()
         }
     }
 }
 
-impl<K, V> Cache<K, V> for SerializingCache<K, V>
+impl<K, V> hackrs::cache::Cache<K, V> for SerializingCache<K, V>
 where
-    K: Copy + Send + Sync + Hash + Eq,
-    V: Clone + Send + Sync + Serialize + DeserializeOwned,
+    K: Copy + Hash + Eq + Send + Sync + 'static,
+    V: Clone + Serialize + DeserializeOwned + Send + Sync + 'static,
 {
     fn get(&self, key: K) -> Option<V> {
-        self.cache.get(&key).map(|val| match self.compression {
+        if let val @ Some(..) = self.evicting_cache.get(&key) {
+            return val;
+        }
+        let val_opt: Option<V> = self.cache.get(&key).map(|val| match self.compression {
             Compression::None => deserialize(&val),
             Compression::Zstd => {
                 let serialized = zstd_decompress(&val);
@@ -78,17 +81,19 @@ where
                 let serialized = lz4_decompress(&val);
                 deserialize(&serialized)
             }
-        })
+        });
+        val_opt.map(|val| self.evicting_cache.get_with(key, || val))
     }
 
     fn insert(&self, key: K, val: V) {
-        let val = serialize(&val);
-        let val = match self.compression {
-            Compression::None => val,
-            Compression::Zstd => zstd_compress(&val),
-            Compression::Lz4 => lz4_compress(&val),
+        let serialized = serialize(&val);
+        self.evicting_cache.insert(key, val);
+        let compressed = match self.compression {
+            Compression::None => serialized,
+            Compression::Zstd => zstd_compress(&serialized),
+            Compression::Lz4 => lz4_compress(&serialized),
         };
-        self.cache.insert(key, val.into_boxed_slice());
+        self.cache.insert(key, compressed.into_boxed_slice());
     }
 }
 

@@ -18,6 +18,8 @@ ExternalProject_add(
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_LIBDIR=lib
+    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 )
 cmake_minimum_required(VERSION 2.8.0)
 ExternalProject_get_property(bundled_fmt INSTALL_DIR)

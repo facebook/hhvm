@@ -65,16 +65,15 @@ namespace irgen { struct IRGS; }
 // Core API.
 
 /*
- * Can we perform inlining of `callee' at `callSK' from within `region'?
+ * Can we perform inlining of `entry' at `callSK'?
  *
  * This is a shallow check---it asks whether `callSK' is an appropriate FCall*
- * and verifies that the call does not block inlining (e.g., due to missing
- * arguments, recursion, resumable callee, etc.).  It does not peek into the
- * callee's bytecode or regions, and it is insensitive to inlining costs.
+ * and verifies that the call does not block inlining (e.g., due to recursion,
+ * resumable callee, etc.).  It does not peek into the callee's bytecode or
+ * regions, and it is insensitive to inlining costs.
  */
 bool canInlineAt(SrcKey callSK,
-                 const Func* callee,
-                 const FCallArgs& fca,
+                 SrcKey entry,
                  AnnotationData* annotations);
 
 /*
@@ -101,10 +100,9 @@ int costOfInlining(SrcKey callerSk,
  * Select an inlining region for the call to `callee' at `sk'.
  */
 RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
-                                 const Func* callee,
-                                 const FCallArgs& fca,
+                                 SrcKey entry,
                                  Type ctxType,
-                                 const SrcKey& sk);
+                                 SrcKey callerSk);
 
 void setBaseInliningProfCount(uint64_t value);
 

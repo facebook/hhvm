@@ -442,6 +442,7 @@ bool canDCE(const IRInstruction& inst) {
   case Clone:
   case InlineCall:
   case Call:
+  case CallFuncEntry:
   case NativeImpl:
   case CallBuiltin:
   case RetCtrl:

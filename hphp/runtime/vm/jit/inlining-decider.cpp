@@ -127,7 +127,6 @@ COEFFECTS_BACKDOOR_WRAPPERS
  */
 bool isCalleeInlinable(SrcKey callSK, const Func* callee,
                        AnnotationData* annotations) {
-  assertx(isFCall(callSK.op()));
   auto refuse = [&] (const char* why) {
     return traceRefusal(callSK, callee, why, annotations);
   };
@@ -151,69 +150,14 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   return true;
 }
 
-/*
- * Check that we don't have any missing or extra arguments.
- */
-bool checkNumArgs(SrcKey callSK,
-                  const Func* callee,
-                  const FCallArgs& fca,
-                  AnnotationData* annotations) {
-  assertx(callee);
-
-  auto refuse = [&] (const char* why) {
-    return traceRefusal(callSK, callee, why, annotations);
-  };
-
-  assertx(fca.numArgs <= callee->numNonVariadicParams());
-  assertx(!fca.hasUnpack() || fca.numArgs == callee->numNonVariadicParams());
-
-  if (fca.hasUnpack() && !callee->hasVariadicCaptureParam()) {
-    return refuse("callee called with too many arguments");
-  }
-
-  if (fca.numArgs < callee->numRequiredParams()) {
-    return refuse("callee called with too few arguments");
-  }
-
-  if (fca.enforceInOut()) {
-    for (auto i = 0; i < fca.numArgs; ++i) {
-      if (callee->isInOut(i) != fca.isInOut(i)) {
-        return refuse("callee called with arguments with mismatched inout");
-      }
-    }
-  }
-
-  if (fca.enforceReadonly()) {
-    for (auto i = 0; i < fca.numArgs; ++i) {
-      if (fca.isReadonly(i) && !callee->isReadonly(i)) {
-        return refuse("callee called with arguments with mismatched readonly");
-      }
-    }
-  }
-
-  if (fca.enforceMutableReturn() && (callee->attrs() & AttrReadonlyReturn)) {
-    return refuse("caller requries mutable return but callee is readonly return");
-  }
-
-  if (fca.enforceReadonlyThis() && !(callee->attrs() & AttrReadonlyThis)) {
-    return refuse("caller expects no modifications to the instance but callee does modify");
-  }
-
-  return true;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-bool canInlineAt(SrcKey callSK,
-                 const Func* callee,
-                 const FCallArgs& fca,
-                 AnnotationData* annotations) {
-  assertx(isFCall(callSK.op()));
+bool canInlineAt(SrcKey callSK, SrcKey entry, AnnotationData* annotations) {
+  assertx(entry.func());
+  assertx(entry.funcEntry());
+  auto const callee = entry.func();
 
-  if (!callee) {
-    return traceRefusal(callSK, callee, "unknown callee", annotations);
-  }
   if (!RuntimeOption::EvalHHIREnableGenTimeInlining) {
     return traceRefusal(callSK, callee, "disabled via runtime option",
                         annotations);
@@ -226,8 +170,7 @@ bool canInlineAt(SrcKey callSK,
     return traceRefusal(callSK, callee, "callee is interceptable", annotations);
   }
 
-  if (!isCalleeInlinable(callSK, callee, annotations) ||
-      !checkNumArgs(callSK, callee, fca, annotations)) {
+  if (!isCalleeInlinable(callSK, callee, annotations)) {
     return false;
   }
 
@@ -675,33 +618,19 @@ bool shouldInline(const irgen::IRGS& irgs,
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-RegionDescPtr selectCalleeTracelet(const Func* callee,
+RegionDescPtr selectCalleeTracelet(SrcKey entry,
                                    Type ctxType,
-                                   std::vector<Type>& argTypes,
+                                   std::vector<Type>& inputTypes,
                                    int32_t maxBCInstrs) {
-  // Set up the RegionContext for the tracelet selector.
-  auto const entryOff = callee->getEntryForNumArgs(argTypes.size());
-  RegionContext ctx{
-    SrcKey { callee, entryOff, SrcKey::FuncEntryTag {} },
-    SBInvOffset{0},
-  };
+  assertx(entry.funcEntry());
 
-  for (uint32_t i = 0; i < argTypes.size(); ++i) {
-    auto type = argTypes[i];
+  // Set up the RegionContext for the tracelet selector.
+  RegionContext ctx{entry, SBInvOffset{0}};
+
+  for (uint32_t i = 0; i < inputTypes.size(); ++i) {
+    auto type = inputTypes[i];
     assertx(type <= TCell);
     ctx.liveTypes.push_back({Location::Local{i}, type});
-  }
-
-  auto const numParams = callee->numNonVariadicParams();
-  for (uint32_t i = argTypes.size(); i < numParams; ++i) {
-    // These params are populated by DV init funclets, so set them to Uninit.
-    ctx.liveTypes.push_back({Location::Local{i}, TUninit});
-  }
-  if (argTypes.size() <= numParams && callee->hasVariadicCaptureParam()) {
-    // There's no DV init funclet for the case where all non-variadic params
-    // have already been passed, so the caller must handle it instead.
-    auto const vargs = Type::cns(ArrayData::CreateVec());
-    ctx.liveTypes.push_back({Location::Local{numParams}, vargs});
   }
 
   // Produce a tracelet for the callee.
@@ -712,22 +641,21 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
     true /* inlining */
   );
   if (r) {
-    r->setInlineContext(ctxType, argTypes);
+    r->setInlineContext(ctxType, inputTypes);
   }
   return r;
 }
 
-TransIDSet findTransIDsForCallee(const ProfData* profData, const Func* callee,
-                                 Type ctxType, std::vector<Type>& argTypes) {
-  auto const idvec = profData->funcProfTransIDs(callee->getFuncId());
+TransIDSet findTransIDsForCallee(const ProfData* profData, SrcKey entry,
+                                 Type ctxType, std::vector<Type>& inputTypes) {
+  assertx(entry.funcEntry());
+  auto const idvec = profData->funcProfTransIDs(entry.funcID());
 
-  auto const offset = callee->getEntryForNumArgs(argTypes.size());
-  auto const sk = SrcKey { callee, offset, SrcKey::FuncEntryTag {} };
   TransIDSet ret;
-  FTRACE(2, "findTransIDForCallee: offset={}\n", offset);
+  FTRACE(2, "findTransIDForCallee: entry={}\n", showShort(entry));
   for (auto const id : idvec) {
     auto const rec = profData->transRec(id);
-    if (rec->srcKey() != sk) continue;
+    if (rec->srcKey() != entry) continue;
     auto const region = rec->region();
 
     auto const isvalid = [&] () {
@@ -738,7 +666,8 @@ TransIDSet findTransIDsForCallee(const ProfData* profData, const Func* callee,
         if (typeloc.location.tag() != LTag::Local) continue;
         auto const locId = typeloc.location.localId();
 
-        if (locId < argTypes.size() && !(argTypes[locId].maybe(typeloc.type))) {
+        if (locId < inputTypes.size() &&
+            !(inputTypes[locId].maybe(typeloc.type))) {
           return false;
         }
       }
@@ -750,10 +679,13 @@ TransIDSet findTransIDsForCallee(const ProfData* profData, const Func* callee,
   return ret;
 }
 
-RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
-                              Type ctxType, std::vector<Type>& argTypes,
+RegionDescPtr selectCalleeCFG(SrcKey callerSk, SrcKey entry,
+                              Type ctxType, std::vector<Type>& inputTypes,
                               int32_t maxBCInstrs,
                               AnnotationData* annotations) {
+  assertx(entry.funcEntry());
+  auto const callee = entry.func();
+
   auto const profData = jit::profData();
   if (!profData) {
     traceRefusal(callerSk, callee, "no profData", annotations);
@@ -768,7 +700,8 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
     return nullptr;
   }
 
-  auto const dvIDs = findTransIDsForCallee(profData, callee, ctxType, argTypes);
+  auto const dvIDs = findTransIDsForCallee(profData, entry, ctxType,
+                                           inputTypes);
 
   if (dvIDs.empty()) {
     traceRefusal(callerSk, callee, "didn't find entry TransID for callee",
@@ -784,7 +717,7 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
   ctx.profData = profData;
   ctx.maxBCInstrs = maxBCInstrs;
   ctx.inlining = true;
-  ctx.inputTypes = &argTypes;
+  ctx.inputTypes = &inputTypes;
 
   bool truncated = false;
   auto r = selectHotCFG(ctx, &truncated);
@@ -794,7 +727,7 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
     return nullptr;
   }
   if (r) {
-    r->setInlineContext(ctxType, argTypes);
+    r->setInlineContext(ctxType, inputTypes);
   } else {
     traceRefusal(callerSk, callee, "failed selectHotCFG for callee",
                  annotations);
@@ -804,11 +737,12 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
 }
 
 RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
-                                 const Func* callee,
-                                 const FCallArgs& fca,
+                                 SrcKey entry,
                                  Type ctxType,
-                                 const SrcKey& sk) {
-  assertx(isFCall(sk.op()));
+                                 SrcKey callerSk) {
+  assertx(entry.funcEntry());
+  auto const callee = entry.func();
+
   auto static inlineAttempts = ServiceData::createTimeSeries(
     "jit.inline.attempts", {ServiceData::StatsType::COUNT});
   inlineAttempts->addValue(1);
@@ -818,7 +752,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                         irgs.unit.annotationData.get() : nullptr;
 
   if (ctxType == TBottom) {
-    traceRefusal(sk, callee, "ctx is TBottom", annotationsPtr);
+    traceRefusal(callerSk, callee, "ctx is TBottom", annotationsPtr);
     return nullptr;
   }
   if (callee->isClosureBody()) {
@@ -833,8 +767,8 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     // Bail out if calling a static methods with an object ctx.
     if (ctxType.maybe(TObj) &&
         (callee->isStaticInPrologue() ||
-         (!sk.hasThis() && isFCallClsMethod(sk.op())))) {
-      traceRefusal(sk, callee, "calling static method with an object",
+         (!callerSk.hasThis() && isFCallClsMethod(callerSk.op())))) {
+      traceRefusal(callerSk, callee, "calling static method with an object",
                    annotationsPtr);
       return nullptr;
     }
@@ -842,55 +776,41 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
 
   if (callee->cls()) {
     if (callee->isStatic() && !ctxType.maybe(TCls)) {
-      traceRefusal(sk, callee, "calling a static method with an instance",
+      traceRefusal(callerSk, callee, "calling a static method with an instance",
                    annotationsPtr);
       return nullptr;
     }
     if (!callee->isStatic() && !ctxType.maybe(TObj)) {
-      traceRefusal(sk, callee, "calling an instance method without an instance",
+      traceRefusal(callerSk, callee,
+                   "calling an instance method without an instance",
                    annotationsPtr);
       return nullptr;
     }
   }
 
   FTRACE(2, "selectCalleeRegion: callee = {}\n", callee->fullName()->data());
-  auto const firstArgPos = static_cast<int32_t>(fca.numInputs()) - 1;
-  std::vector<Type> argTypes;
-  auto const numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
-  for (int32_t i = 0; i < numArgsInclUnpack; ++i) {
+  auto const firstInputPos = callee->numFuncEntryInputs() - 1;
+  std::vector<Type> inputTypes;
+  for (uint32_t i = 0; i < callee->numFuncEntryInputs(); ++i) {
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee.  It's up to the callee to constrain further if needed.
-    auto type = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - i});
+    auto const offset = BCSPRelOffset{safe_cast<int32_t>(firstInputPos - i)};
+    auto const type = irgen::publicTopType(irgs, offset);
     assertx(type <= TCell);
 
     // If we don't have sufficient type information to inline the region return
     // early
     if (type == TBottom) return nullptr;
-    FTRACE(2, "arg {}: {}\n", i + 1, type);
-    argTypes.push_back(type);
-  }
-
-  if (fca.hasUnpack()) {
-    const int32_t ix = fca.numArgs;
-    auto const ty = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - ix});
-    if (!(ty <= TVec)) {
-      traceRefusal(
-        sk,
-        callee,
-        folly::sformat("unpacked argument has a wrong type ({})",
-                       ty.toString()),
-        annotationsPtr
-      );
-      return nullptr;
-    }
+    FTRACE(2, "input {}: {}\n", i + 1, type);
+    inputTypes.push_back(type);
   }
 
   const auto depth = inlineDepth(irgs);
   if (profData()) {
-    auto region = selectCalleeCFG(sk, callee, ctxType, argTypes,
+    auto region = selectCalleeCFG(callerSk, entry, ctxType, inputTypes,
                                   RO::EvalJitMaxRegionInstrs, annotationsPtr);
     if (region) {
-      if (shouldInline(irgs, sk, callee, *region,
+      if (shouldInline(irgs, callerSk, callee, *region,
                        adjustedMaxVasmCost(irgs, *region, depth))) {
         return region;
       }
@@ -901,19 +821,19 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     // it takes no arguments and returns a constant, it might be a
     // trivial function (IE, "return 123;"). Attempt to inline it
     // anyways using the tracelet selector.
-    if (numArgsInclUnpack > 0) return nullptr;
+    if (callee->numFuncEntryInputs() > 0) return nullptr;
     auto const retType =
-      typeFromRAT(callee->repoReturnType(), sk.func()->cls());
+      typeFromRAT(callee->repoReturnType(), callerSk.func()->cls());
     // Deliberately using hasConstVal, not admitsSingleVal, since we
     // don't want TInitNull, etc.
     if (!retType.hasConstVal()) return nullptr;
   }
 
-  auto region = selectCalleeTracelet(callee, ctxType, argTypes,
+  auto region = selectCalleeTracelet(entry, ctxType, inputTypes,
                                      RO::EvalJitMaxRegionInstrs);
 
   if (region &&
-      shouldInline(irgs, sk, callee, *region,
+      shouldInline(irgs, callerSk, callee, *region,
                    adjustedMaxVasmCost(irgs, *region, depth))) {
     return region;
   }

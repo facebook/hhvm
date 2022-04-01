@@ -49,6 +49,7 @@ struct RelocationInfo;
  */
 struct IncomingBranch {
   enum class Tag : int16_t {
+    CALL,
     JMP,
     JCC,
     ADDR,
@@ -57,6 +58,9 @@ struct IncomingBranch {
 
   using Opaque = CompactTaggedPtr<void>::Opaque;
 
+  static IncomingBranch callFrom(TCA from) {
+    return IncomingBranch(Tag::CALL, from);
+  }
   static IncomingBranch jmpFrom(TCA from) {
     return IncomingBranch(Tag::JMP, from);
   }

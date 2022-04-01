@@ -1577,10 +1577,20 @@ To string conversions:
 |   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr) S(Int),
 |   CRc|PRc
 
-  Transfer control to a callee S2, based on the pre-live activation record and
-  set of args on the stack pointed to by S0 at `offset'. S1 is the current
-  caller frame pointer. S3 is the context (nullptr, $this or static::class).
-  S4 is the ambient coeffects.
+  Transfer control to the prologue of a callee S2, based on the pre-live
+  activation record and set of args on the stack pointed to by S0 at `offset'.
+  S1 is the current caller frame pointer. S3 is the context (nullptr, $this or
+  static::class). S4 is the ambient coeffects.
+
+| CallFuncEntry<target,spOffset,arFlags>,
+|   DCall,
+|   S(StkPtr) S(FramePtr) S(Cls|Obj|Nullptr),
+|   CRc|PRc
+
+  Transfer control to the func entry at `target' SrcKey, based on the pre-live
+  activation record and set of args on the stack pointed to by S0 at `spOffset'.
+  S1 is the current caller frame pointer. S2 is the context (nullptr, $this or
+  static::class).
 
 | NativeImpl<func>, ND, S(FramePtr) S(StkPtr), NF
 

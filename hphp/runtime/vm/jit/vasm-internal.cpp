@@ -186,6 +186,16 @@ bool emit(Venv& env, const callphps& i) {
   return true;
 }
 
+bool emit(Venv& env, const callphpfe& i) {
+  assertx(i.target.funcEntry());
+  auto const call = emitSmashableCall(*env.cb, env.meta, env.cb->frontier());
+  setJmpTransID(env, call);
+  env.meta.smashableBinds.push_back({
+    IncomingBranch::callFrom(call), i.target, SBInvOffset{0},
+    false /* fallback */});
+  return true;
+}
+
 bool emit(Venv& env, const bindjmp& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   setJmpTransID(env, jmp);

@@ -207,6 +207,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       break;
 
     case Vinstr::callphp:
+    case Vinstr::callphpfe:
     case Vinstr::callphpr:
     case Vinstr::callphps:
     case Vinstr::contenter:

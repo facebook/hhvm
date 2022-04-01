@@ -258,6 +258,7 @@ bool opcodeMayRaise(Opcode opc) {
   case BespokeUnset:
   case Call:
   case CallBuiltin:
+  case CallFuncEntry:
   case CGetElem:
   case CGetProp:
   case CGetPropQ:

@@ -108,8 +108,15 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
     check_catch_stack_state(env, inst);
     auto const offsetToAdjustSPForCall = [&]() -> int32_t {
       if (inst->is(Call)) {
-        auto const extra = inst->extra<CallData>();
+        auto const extra = inst->extra<Call>();
         return extra->numInputs() + kNumActRecCells + extra->numOut;
+      }
+      if (inst->is(CallFuncEntry)) {
+        auto const callee = inst->extra<CallFuncEntry>()->target.func();
+        return
+          callee->numFuncEntryInputs() +
+          kNumActRecCells +
+          callee->numInOutParams();
       }
       return 0;
     }();
@@ -146,7 +153,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
     inst->maySyncVMRegsWithSources() &&
     !inst->marker().prologue() &&
     !inst->marker().sk().funcEntry() &&
-    !inst->is(CallBuiltin, Call, ContEnter) &&
+    !inst->is(CallBuiltin, Call, CallFuncEntry, ContEnter) &&
     (env.unit.numInsts() % 3 == 0);
 
   if (shouldStressEagerSync) {

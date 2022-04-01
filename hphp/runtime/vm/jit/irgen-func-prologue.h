@@ -43,6 +43,9 @@ struct IRGS;
 void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
                               SSATmp* prologueFlags, bool pushed);
 
+void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
+                                   uint32_t argc);
+
 void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
                                 SSATmp* prologueFlags);
 

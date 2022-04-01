@@ -187,7 +187,6 @@ Outer:                                 | Inner:
 #include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
-#include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -205,57 +204,27 @@ uint16_t inlineDepth(const IRGS& env) {
 }
 
 void beginInlining(IRGS& env,
-                   const Func* target,
-                   const FCallArgs& fca,
+                   SrcKey entry,
                    SSATmp* ctx,
-                   bool dynamicCall,
-                   Op writeArOpc,
-                   SrcKey startSk,
                    Offset callBcOffset,
                    InlineReturnTarget returnTarget,
                    int cost) {
+  assertx(entry.funcEntry());
   assertx(callBcOffset >= 0 && "callBcOffset before beginning of caller");
   // curFunc is null when called from conjureBeginInlining
   assertx((!curFunc(env) ||
           callBcOffset < curFunc(env)->bclen()) &&
          "callBcOffset past end of caller");
-  assertx(fca.numArgs >= target->numRequiredParams());
-  assertx(fca.numArgs <= target->numNonVariadicParams());
-  assertx(!fca.hasUnpack() || fca.numArgs == target->numNonVariadicParams());
-  assertx(!fca.hasUnpack() || target->hasVariadicCaptureParam());
+  auto const callee = entry.func();
 
-  FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
-
-  auto const numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
-
-  // For cost calculation, use the most permissive coeffect
-  auto const coeffects = curFunc(env)
-    ? curCoeffects(env) : cns(env, RuntimeCoeffects::none().value());
-
-  auto const prologueFlags = cns(env, PrologueFlags(
-    fca.hasGenerics(),
-    dynamicCall,
-    false, // inline return stub doesn't support async eager return
-    0, // call offset unused by the logic below
-    0,
-    RuntimeCoeffects::none() // coeffects may not be known statically
-  ).value());
-
-  // Callee checks and input initialization.
-  emitCalleeGenericsChecks(env, target, prologueFlags, fca.hasGenerics());
-  emitCalleeDynamicCallChecks(env, target, prologueFlags);
-  emitCalleeCoeffectChecks(env, target, prologueFlags, coeffects,
-                           fca.skipCoeffectsCheck(),
-                           numArgsInclUnpack, ctx);
-  emitCalleeRecordFuncCoverage(env, target);
-  emitInitFuncInputs(env, target, numArgsInclUnpack);
+  FTRACE(1, "[[[ begin inlining: {}\n", callee->fullName()->data());
 
   ctx = [&] () -> SSATmp* {
-    if (target->isClosureBody()) {
-      return gen(env, AssertType, Type::ExactObj(target->implCls()), ctx);
+    if (callee->isClosureBody()) {
+      return gen(env, AssertType, Type::ExactObj(callee->implCls()), ctx);
     }
 
-    if (!target->cls()) {
+    if (!callee->cls()) {
       assertx(ctx->isA(TNullptr));
       return ctx;
     }
@@ -263,27 +232,25 @@ void beginInlining(IRGS& env,
 
     if (ctx->isA(TBottom)) return ctx;
 
-    if (target->isStatic()) {
+    if (callee->isStatic()) {
       assertx(ctx->isA(TCls));
       if (ctx->hasConstVal(TCls)) {
         return ctx;
       }
 
-      auto const ty = ctx->type() & Type::SubCls(target->cls());
+      auto const ty = ctx->type() & Type::SubCls(callee->cls());
       if (ctx->type() <= ty) return ctx;
       return gen(env, AssertType, ty, ctx);
     }
 
     assertx(ctx->type().maybe(TObj));
-    auto const ty = ctx->type() & thisTypeFromFunc(target);
+    auto const ty = ctx->type() & thisTypeFromFunc(callee);
     if (ctx->type() <= ty) return ctx;
     return gen(env, AssertType, ty, ctx);
   }();
 
-  auto const numTotalInputs =
-    target->numParams()
-    + (target->hasReifiedGenerics() ? 1U : 0U)
-    + (target->hasCoeffectsLocal() ? 1U : 0U);
+  auto const numTotalInputs = callee->numFuncEntryInputs();
+
   jit::vector<SSATmp*> inputs{numTotalInputs};
   for (auto i = 0; i < numTotalInputs; ++i) {
     inputs[numTotalInputs - i - 1] = popCU(env);
@@ -298,28 +265,21 @@ void beginInlining(IRGS& env,
 
   // The top of the stack now points to the space for ActRec.
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env);
-  IRSPRelOffset calleeSBOff = calleeAROff - target->numSlotsInFrame();
+  IRSPRelOffset calleeSBOff = calleeAROff - callee->numSlotsInFrame();
 
   auto const calleeFP = gen(
     env,
     BeginInlining,
     BeginInliningData{
       calleeAROff,
-      target,
+      callee,
       static_cast<uint32_t>(env.inlineState.depth + 1),
       nextSrcKey(env),
       calleeSBOff,
       spOffBCFromStackBase(env) - kNumActRecCells + 1,
-      cost,
-      int(numArgsInclUnpack)
+      cost
     },
     sp(env)
-  );
-
-  assertx(
-    startSk.funcEntry() &&
-    startSk.func() == target &&
-    startSk.entryOffset() == target->getEntryForNumArgs(numArgsInclUnpack)
   );
 
   env.inlineState.depth++;
@@ -327,8 +287,8 @@ void beginInlining(IRGS& env,
   env.inlineState.returnTarget.emplace_back(returnTarget);
   env.inlineState.bcStateStack.emplace_back(env.bcState);
   env.inlineState.cost += cost;
-  env.inlineState.stackDepth += target->maxStackCells();
-  env.bcState = startSk;
+  env.inlineState.stackDepth += callee->maxStackCells();
+  env.bcState = entry;
 
   // We have entered a new frame.
   updateMarker(env);
@@ -341,78 +301,58 @@ void beginInlining(IRGS& env,
   meta.asyncEagerReturn = false;
 
   gen(env, StFrameMeta, meta, calleeFP);
-  gen(env, StFrameFunc, FuncData { target }, calleeFP);
+  gen(env, StFrameFunc, FuncData { callee }, calleeFP);
   if (!(ctx->type() <= TNullptr)) gen(env, StFrameCtx, fp(env), ctx);
 
   for (auto i = 0; i < numTotalInputs; ++i) {
     stLocRaw(env, i, calleeFP, inputs[i]);
   }
 
-  assertx(startSk.hasThis() == startSk.func()->hasThisInBody());
+  assertx(entry.hasThis() == callee->hasThisInBody());
   assertx(
     ctx->isA(TBottom) ||
-    (ctx->isA(TNullptr) && !target->cls()) ||
-    (ctx->isA(TCls) && target->cls() && target->isStatic()) ||
-    (ctx->isA(TObj) && target->cls() && !target->isStatic()) ||
-    (ctx->isA(TObj) && target->isClosureBody())
+    (ctx->isA(TNullptr) && !callee->cls()) ||
+    (ctx->isA(TCls) && callee->cls() && callee->isStatic()) ||
+    (ctx->isA(TObj) && callee->cls() && !callee->isStatic()) ||
+    (ctx->isA(TObj) && callee->isClosureBody())
   );
 }
 
 void conjureBeginInlining(IRGS& env,
-                          const Func* func,
-                          SrcKey startSk,
+                          SrcKey entry,
                           Type thisType,
-                          const std::vector<Type>& args,
+                          const std::vector<Type>& inputs,
                           InlineReturnTarget returnTarget) {
+  assertx(entry.funcEntry());
+  auto const callee = entry.func();
+
   auto conjure = [&](Type t) {
     return t.admitsSingleVal() ? cns(env, t) : gen(env, Conjure, t);
   };
 
-  always_assert(isFCall(env.context.initSrcKey.op()));
-  always_assert(thisType != TBottom);
-  auto const hasUnpack = args.size() > func->numNonVariadicParams();
-  auto const numParams = safe_cast<uint32_t>(args.size()) - (hasUnpack ? 1 : 0);
-
   // Push space for out parameters
-  for (auto i = 0; i < func->numInOutParams(); i++) {
+  for (auto i = 0; i < callee->numInOutParams(); i++) {
     push(env, cns(env, TUninit));
   }
 
   allocActRec(env);
-  for (auto const argType : args) {
-    push(env, conjure(argType));
-  }
-
-  if (func->hasReifiedGenerics()) {
-    push(env, conjure(TVec));
+  for (auto const inputType : inputs) {
+    push(env, conjure(inputType));
   }
 
   // beginInlining() assumes synced state.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  auto flags = FCallArgsFlags::FCANone;
-  if (hasUnpack) flags = flags | FCallArgsFlags::HasUnpack;
-  if (func->hasReifiedGenerics()) flags = flags | FCallArgsFlags::HasGenerics;
-
   // thisType is the context type inside the closure, but beginInlining()'s ctx
   // is a context given to the prologue.
-  auto const ctx = func->isClosureBody()
-    ? conjure(Type::ExactObj(func->implCls()))
+  always_assert(thisType != TBottom);
+  auto const ctx = callee->isClosureBody()
+    ? conjure(Type::ExactObj(callee->implCls()))
     : conjure(thisType);
 
-  beginInlining(
-    env,
-    func,
-    FCallArgs(flags, numParams, 1, nullptr, nullptr, kInvalidOffset, nullptr),
-    ctx,
-    false,
-    env.context.initSrcKey.op(),
-    startSk,
-    0 /* callBcOffset */,
-    returnTarget,
-    9 /* cost */
-  );
+  beginInlining(env, entry, ctx, 0 /* callBcOffset */, returnTarget,
+                9 /* cost */);
 }
 
 namespace {

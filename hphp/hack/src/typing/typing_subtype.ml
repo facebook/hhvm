@@ -2949,9 +2949,9 @@ and simplify_param_readonly ~subtype_env sub super env =
                       {
                         pos = pos1;
                         kind = `param;
-                        reason_sub = lazy [(pos1, "This parameter is mutable")];
+                        reason_sub = lazy [(pos2, "This parameter is mutable")];
                         reason_super =
-                          lazy [(pos2, "But this parameter is readonly")];
+                          lazy [(pos1, "But this parameter is readonly")];
                       }))
       env
   else

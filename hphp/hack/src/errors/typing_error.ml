@@ -6849,15 +6849,8 @@ end = struct
           (parent_pos, Markdown_lite.md_codify parent_vis ^ " was expected");
         ]
     in
-    let quickfixes = 
-      [
-        Quickfix.make
-          ~title:("Change to " ^ Markdown_lite.md_codify parent_vis)
-          ~new_text: parent_vis
-          (Pos_or_decl.unsafe_to_raw_pos pos);
-      ]
-    in
-    (Error_code.VisibilityExtends, reasons, quickfixes)
+
+    (Error_code.VisibilityExtends, reasons, [])
 
   let visibility_override_internal pos module_name parent_module parent_pos =
     let reasons =

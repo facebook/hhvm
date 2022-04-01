@@ -353,7 +353,7 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
     "A `public` method or property has no restrictions on access. It can be accessed from any part of the codebase."
     ^ "\n\nSee also `protected` and `private`."
   | SymbolOccurrence.Protected ->
-    "A `protected` method or property can only be accessed from methods defined on the current class, or methods on subclasses."
+    "A `protected` method or property can only be accessed from methods defined on the current class, or methods on subclasses, or methods on super classes that declare a method with the same name."
     ^ "\n\nIf the current class `use`s a trait, the trait methods can also access `protected` methods and properties."
     ^ "\n\nSee also `public` and `private`."
   | SymbolOccurrence.Private ->

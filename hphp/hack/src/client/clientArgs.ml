@@ -679,7 +679,7 @@ let parse_check_args cmd =
         " set the timeout in seconds (default: no timeout)" );
       ( "--type-at-pos",
         Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x)),
-        " (mode) show type at a given position in file [line:character]" );
+        " (mode) show type at a given position in file [file:line:character]" );
       ( "--type-at-pos-batch",
         Arg.Rest
           begin

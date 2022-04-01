@@ -366,6 +366,26 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
     }
 
+    // HHVM implicitly adds StringishObject interface for every class/interface/trait
+    // with a __toString method; "string" also implements this interface
+    fn add_stringish_object(&self, ancestors: &mut TypeNameIndexMap<DeclTy<R>>) {
+        if self.child.name.id() != *sn::classes::cStringishObject {
+            if let Some(meth) =
+                (self.child.methods.iter()).find(|meth| meth.name.id() == *sn::members::__toString)
+            {
+                let declty = DeclTy::apply(
+                    R::hint(meth.name.pos().clone()),
+                    Positioned::new(
+                        meth.name.pos().clone(),
+                        sn::classes::cStringishObject.clone(),
+                    ),
+                    Box::new([]),
+                );
+                ancestors.insert(sn::classes::cStringishObject.clone(), declty);
+            }
+        }
+    }
+
     /// Check that the kind of a class is compatible with its parent
     /// For example, a class cannot extend an interface, an interface cannot
     /// extend a trait etc ...
@@ -680,6 +700,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         for ty in direct_ancestors.rev() {
             self.get_implements(ty, &mut ancestors);
         }
+        self.add_stringish_object(&mut ancestors);
 
         let extends = self.get_extends();
         let xhp_attr_deps = self.get_xhp_attr_deps();

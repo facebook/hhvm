@@ -1,0 +1,178 @@
+File root|trait_bad_pos.php--tboth_traits.php
+--- ocaml
++++ rupro
+@@ -1,173 +1,173 @@
+ FoldedClass {
+     name: "\\TBothTraits",
+     pos: Pos(root|trait_bad_pos.php--tboth_traits.php, 2:7-18),
+     kind: Ctrait,
+     substs: {
+         "\\Child": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TReqExtChild",
+             from_req_extends: true,
+         },
+         "\\Foo": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\TReqExtFoo",
++            class_context: "\\Child",
+             from_req_extends: true,
+         },
+         "\\TReqExtChild": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TBothTraits",
+             from_req_extends: false,
+         },
+         "\\TReqExtFoo": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TBothTraits",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\TReqExtChild": TReqExtChild,
+         "\\TReqExtFoo": TReqExtFoo,
+     },
+     methods: {
+         "f": FoldedElement {
+             flags: SYNTHESIZED,
+             origin: "\\Foo",
+             visibility: Public,
+             deprecated: None,
+         },
+         "g": FoldedElement {
+             flags: (empty),
+             origin: "\\TBothTraits",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_bad_pos.php--tboth_traits.php, 2:7-18),
+             ty: HH\classname<this>,
+             origin: "\\TBothTraits",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\TReqExtChild",
+         "\\TReqExtFoo",
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|trait_bad_pos.php--tboth_traits.php, 3:7-19),
+             Child,
+         ),
+         Requirement(
+             Pos(root|trait_bad_pos.php--tboth_traits.php, 4:7-17),
+             Foo,
+         ),
+     ],
+     req_ancestors_extends: {
+         "\\Child",
+         "\\Foo",
+     },
+ }
+ FoldedClass {
+     name: "\\A",
+     pos: Pos(root|trait_bad_pos.php--tboth_traits.php, 11:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\Child": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\A",
+             from_req_extends: false,
+         },
+         "\\Foo": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Child",
+             from_req_extends: false,
+         },
+         "\\TBothTraits": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\A",
+             from_req_extends: false,
+         },
+         "\\TReqExtChild": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TBothTraits",
+             from_req_extends: false,
+         },
+         "\\TReqExtFoo": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TBothTraits",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\Child": Child,
+         "\\Foo": Foo,
+         "\\TBothTraits": TBothTraits,
+         "\\TReqExtChild": TReqExtChild,
+         "\\TReqExtFoo": TReqExtFoo,
+     },
+     methods: {
+         "f": FoldedElement {
+             flags: (empty),
+             origin: "\\Child",
+             visibility: Public,
+             deprecated: None,
+         },
+         "g": FoldedElement {
+             flags: (empty),
+             origin: "\\TBothTraits",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_bad_pos.php--tboth_traits.php, 11:7-8),
+             ty: HH\classname<this>,
+             origin: "\\A",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\Child",
+         "\\Foo",
+         "\\TBothTraits",
+         "\\TReqExtChild",
+         "\\TReqExtFoo",
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|trait_bad_pos.php--tboth_traits.php, 12:7-18),
+             Child,
+         ),
+         Requirement(
+             Pos(root|trait_bad_pos.php--tboth_traits.php, 12:7-18),
+             Foo,
+         ),
+     ],
+ }

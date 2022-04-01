@@ -1,0 +1,153 @@
+--- ocaml
++++ rupro
+@@ -1,150 +1,141 @@
+ FoldedClass {
+     name: "\\CExplicit",
+     pos: Pos(root|stringish.php, 12:7-16),
+     kind: Cclass(
+         Concrete,
+     ),
+     ancestors: {
+         "\\StringishObject": StringishObject,
+     },
+     methods: {
+         "__toString": FoldedElement {
+             flags: (empty),
+             origin: "\\CExplicit",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|stringish.php, 12:7-16),
+             ty: HH\classname<this>,
+             origin: "\\CExplicit",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\CImplicit",
+     pos: Pos(root|stringish.php, 18:7-16),
+     kind: Cclass(
+         Concrete,
+     ),
+-    ancestors: {
+-        "\\StringishObject": StringishObject,
+-    },
+     methods: {
+         "__toString": FoldedElement {
+             flags: (empty),
+             origin: "\\CImplicit",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|stringish.php, 18:7-16),
+             ty: HH\classname<this>,
+             origin: "\\CImplicit",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\IImplicit",
+     pos: Pos(root|stringish.php, 24:11-20),
+     kind: Cinterface,
+-    ancestors: {
+-        "\\StringishObject": StringishObject,
+-    },
+     methods: {
+         "__toString": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\IImplicit",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|stringish.php, 24:11-20),
+             ty: HH\classname<this>,
+             origin: "\\IImplicit",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\TStringish",
+     pos: Pos(root|stringish.php, 47:7-17),
+     kind: Ctrait,
+-    ancestors: {
+-        "\\StringishObject": StringishObject,
+-    },
+     methods: {
+         "__toString": FoldedElement {
+             flags: (empty),
+             origin: "\\TStringish",
+             visibility: Public,
+             deprecated: None,
+         },
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\TStringish",
+             visibility: Private(
+                 "\\TStringish",
+             ),
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|stringish.php, 47:7-17),
+             ty: HH\classname<this>,
+             origin: "\\TStringish",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\TReq",
+     pos: Pos(root|stringish.php, 57:7-11),
+     kind: Ctrait,
+     methods: {
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\TReq",
+             visibility: Private(
+                 "\\TReq",
+             ),
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|stringish.php, 57:7-11),
+             ty: HH\classname<this>,
+             origin: "\\TReq",
+             refs: [],
+         },
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|stringish.php, 58:22-37),
+             StringishObject,
+         ),
+     ],
+     req_ancestors_extends: {
+         "\\StringishObject",
+     },
+ }

@@ -1,0 +1,48 @@
+--- ocaml
++++ rupro
+@@ -1,45 +1,42 @@
+ FoldedClass {
+     name: "\\Test",
+     pos: Pos(root|heredoc.php, 38:7-11),
+     kind: Cclass(
+         Concrete,
+     ),
+-    ancestors: {
+-        "\\StringishObject": StringishObject,
+-    },
+     props: {
+         "a": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\Test",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     methods: {
+         "__toString": FoldedElement {
+             flags: (empty),
+             origin: "\\Test",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\Test",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|heredoc.php, 38:7-11),
+             ty: HH\classname<this>,
+             origin: "\\Test",
+             refs: [],
+         },
+     },
+ }

@@ -1,0 +1,155 @@
+--- ocaml
++++ rupro
+@@ -1,151 +1,151 @@
+ FoldedClass {
+     name: "\\I1",
+     pos: Pos(root|delayed_subst4.php, 4:11-13),
+     kind: Cinterface,
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|delayed_subst4.php, 4:14-15),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     methods: {
+         "call": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\I1",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|delayed_subst4.php, 4:11-13),
+             ty: HH\classname<this>,
+             origin: "\\I1",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\I2",
+     pos: Pos(root|delayed_subst4.php, 8:11-13),
+     kind: Cinterface,
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|delayed_subst4.php, 8:14-15),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     substs: {
+         "\\I1": SubstContext {
+             subst: Subst(
+                 {
+                     "T": T,
+                 },
+             ),
+             class_context: "\\I2",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\I1": I1<T>,
+     },
+     methods: {
+         "call": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\I1",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|delayed_subst4.php, 8:11-13),
+             ty: HH\classname<this>,
+             origin: "\\I2",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\I1",
+     },
+ }
+ FoldedClass {
+     name: "\\TestXXX",
+     pos: Pos(root|delayed_subst4.php, 10:16-23),
+     kind: Cclass(
+         Abstract,
+     ),
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|delayed_subst4.php, 10:24-25),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     substs: {
+         "\\I1": SubstContext {
+             subst: Subst(
+                 {
+                     "T": T,
+                 },
+             ),
+-            class_context: "\\TestXXX",
++            class_context: "\\I2",
+             from_req_extends: false,
+         },
+         "\\I2": SubstContext {
+             subst: Subst(
+                 {
+                     "T": T,
+                 },
+             ),
+             class_context: "\\TestXXX",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\I1": I1<T>,
+         "\\I2": I2<T>,
+     },
+     methods: {
+         "call": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\I1",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|delayed_subst4.php, 10:16-23),
+             ty: HH\classname<this>,
+             origin: "\\TestXXX",
+             refs: [],
+         },
+     },
+ }

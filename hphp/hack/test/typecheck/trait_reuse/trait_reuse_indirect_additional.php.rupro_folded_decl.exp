@@ -1,0 +1,190 @@
+--- ocaml
++++ rupro
+@@ -1,186 +1,186 @@
+ FoldedClass {
+     name: "\\TraitOne",
+     pos: Pos(root|trait_reuse_indirect_additional.php, 3:7-15),
+     kind: Ctrait,
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\TraitOne",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_indirect_additional.php, 3:7-15),
+             ty: HH\classname<this>,
+             origin: "\\TraitOne",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\ReusedTrait",
+     pos: Pos(root|trait_reuse_indirect_additional.php, 6:7-18),
+     kind: Ctrait,
+     substs: {
+         "\\TraitOne": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\ReusedTrait",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\TraitOne": TraitOne,
+     },
+     methods: {
+         "bar": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\TraitOne",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_indirect_additional.php, 6:7-18),
+             ty: HH\classname<this>,
+             origin: "\\ReusedTrait",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\TraitOne",
+     },
+ }
+ FoldedClass {
+     name: "\\MyBase",
+     pos: Pos(root|trait_reuse_indirect_additional.php, 11:7-13),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyBase",
+             from_req_extends: false,
+         },
+         "\\TraitOne": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\ReusedTrait",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\ReusedTrait": ReusedTrait,
+         "\\TraitOne": TraitOne,
+     },
+     methods: {
+         "bar": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\TraitOne",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_indirect_additional.php, 11:7-13),
+             ty: HH\classname<this>,
+             origin: "\\MyBase",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\ReusedTrait",
+         "\\TraitOne",
+     },
+ }
+ FoldedClass {
+     name: "\\BadClass",
+     pos: Pos(root|trait_reuse_indirect_additional.php, 22:7-15),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\MyBase": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\BadClass",
+             from_req_extends: false,
+         },
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\BadClass",
++            class_context: "\\MyBase",
+             from_req_extends: false,
+         },
+         "\\TraitOne": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\ReusedTrait",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\MyBase": MyBase,
+         "\\ReusedTrait": ReusedTrait,
+         "\\TraitOne": TraitOne,
+     },
+     methods: {
+         "bar": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\TraitOne",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_indirect_additional.php, 22:7-15),
+             ty: HH\classname<this>,
+             origin: "\\BadClass",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\MyBase",
+         "\\ReusedTrait",
+         "\\TraitOne",
+     },
+ }

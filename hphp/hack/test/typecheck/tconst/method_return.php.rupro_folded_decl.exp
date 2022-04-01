@@ -1,0 +1,363 @@
+--- ocaml
++++ rupro
+@@ -1,357 +1,360 @@
+ FoldedClass {
+     name: "\\X",
+     pos: Pos(root|method_return.php, 3:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     props: {
+         "val": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\X",
+             visibility: Private(
+                 "\\X",
+             ),
+             deprecated: None,
+         },
+     },
+     methods: {
+         "alias_lvar_get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "alias_this_get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "new_static_get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     static_methods: {
+         "static_get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: FINAL,
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 true,
+             ),
+             pos: Pos(root|method_return.php, 4:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\X",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|method_return.php, 3:16-17),
+             ty: HH\classname<this>,
+             origin: "\\X",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|method_return.php, 4:23-24),
+                 "T",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     arraykey,
+                 ),
+                 super_constraint: None,
+                 default: Some(
+                     arraykey,
+                 ),
+             },
+             origin: "\\X",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\Y",
+     pos: Pos(root|method_return.php, 31:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\X": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Y",
+             from_req_extends: false,
+         },
+         "\\X_Trait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Y",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\X": X,
+         "\\X_Trait": X_Trait,
+     },
+     methods: {
+         "alias_lvar_get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "alias_this_get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "get_int": FoldedElement {
+             flags: (empty),
+             origin: "\\Y",
+             visibility: Public,
+             deprecated: None,
+         },
+         "new_static_get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "parent_get": FoldedElement {
+             flags: (empty),
+             origin: "\\Y",
+             visibility: Public,
+             deprecated: None,
+         },
+         "trait_get": FoldedElement {
+             flags: (empty),
+             origin: "\\X_Trait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     static_methods: {
+         "static_get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: FINAL,
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|method_return.php, 32:14-15),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\Y",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|method_return.php, 31:7-8),
+             ty: HH\classname<this>,
+             origin: "\\Y",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|method_return.php, 32:14-15),
+                 "T",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: int,
+             },
+             origin: "\\Y",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\X",
+         "\\X_Trait",
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|method_return.php, 34:7-14),
+             X,
+         ),
+     ],
+ }
+ FoldedClass {
+     name: "\\X_Trait",
+     pos: Pos(root|method_return.php, 45:7-14),
+     kind: Ctrait,
+     substs: {
+         "\\X": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\X_Trait",
+             from_req_extends: true,
+         },
+     },
+     methods: {
+         "alias_lvar_get": FoldedElement {
+             flags: SYNTHESIZED,
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "alias_this_get": FoldedElement {
+             flags: SYNTHESIZED,
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "get": FoldedElement {
+             flags: SYNTHESIZED,
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "new_static_get": FoldedElement {
+             flags: SYNTHESIZED,
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "parent_get": FoldedElement {
+             flags: (empty),
+             origin: "\\X_Trait",
+             visibility: Public,
+             deprecated: None,
+         },
+         "trait_get": FoldedElement {
+             flags: (empty),
+             origin: "\\X_Trait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     static_methods: {
+         "static_get": FoldedElement {
+             flags: SYNTHESIZED,
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: FINAL | SYNTHESIZED,
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 true,
+             ),
+             pos: Pos(root|method_return.php, 4:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\X",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|method_return.php, 45:7-14),
+             ty: HH\classname<this>,
+             origin: "\\X_Trait",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: true,
+             name: (
+                 Pos(root|method_return.php, 4:23-24),
+                 "T",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     arraykey,
+                 ),
+                 super_constraint: None,
+                 default: Some(
+                     arraykey,
+                 ),
+             },
+             origin: "\\X",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|method_return.php, 46:19-20),
+             X,
+         ),
+     ],
+     req_ancestors_extends: {
+         "\\X",
+     },
++    deferred_init_members: {
++        "parent::__construct",
++    },
+ }

@@ -1,0 +1,143 @@
+--- ocaml
++++ rupro
+@@ -1,138 +1,138 @@
+ FoldedClass {
+     name: "\\I",
+     pos: Pos(root|multi_inherit2.php, 4:11-12),
+     kind: Cinterface,
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|multi_inherit2.php, 4:13-14),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multi_inherit2.php, 4:11-12),
+             ty: HH\classname<this>,
+             origin: "\\I",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\K",
+     pos: Pos(root|multi_inherit2.php, 5:11-12),
+     kind: Cinterface,
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|multi_inherit2.php, 5:13-14),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multi_inherit2.php, 5:11-12),
+             ty: HH\classname<this>,
+             origin: "\\K",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\L",
+     pos: Pos(root|multi_inherit2.php, 6:11-12),
+     kind: Cinterface,
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|multi_inherit2.php, 6:13-14),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multi_inherit2.php, 6:11-12),
+             ty: HH\classname<this>,
+             origin: "\\L",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\J",
+     pos: Pos(root|multi_inherit2.php, 8:11-12),
+     kind: Cinterface,
+     substs: {
+         "\\I": SubstContext {
+             subst: Subst(
+                 {
+-                    "T": string,
++                    "T": bool,
+                 },
+             ),
+             class_context: "\\J",
+             from_req_extends: false,
+         },
+         "\\K": SubstContext {
+             subst: Subst(
+                 {
+-                    "T": float,
++                    "T": string,
+                 },
+             ),
+             class_context: "\\J",
+             from_req_extends: false,
+         },
+         "\\L": SubstContext {
+             subst: Subst(
+                 {
+                     "T": int,
+                 },
+             ),
+             class_context: "\\J",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\I": I<string>,
+         "\\K": K<float>,
+         "\\L": L<int>,
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multi_inherit2.php, 8:11-12),
+             ty: HH\classname<this>,
+             origin: "\\J",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\I",
+         "\\K",
+         "\\L",
+     },
+ }

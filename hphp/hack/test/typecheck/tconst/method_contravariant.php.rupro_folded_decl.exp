@@ -1,0 +1,279 @@
+--- ocaml
++++ rupro
+@@ -1,264 +1,272 @@
+ FoldedClass {
+     name: "\\X",
+     pos: Pos(root|method_contravariant.php, 3:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     props: {
+         "val": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\X",
+             visibility: Private(
+                 "\\X",
+             ),
+             deprecated: None,
+         },
+     },
+     methods: {
+         "get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+         "test": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Private(
+                 "\\X",
+             ),
+             deprecated: None,
+         },
+     },
+     static_methods: {
+         "create": FoldedElement {
+             flags: FINAL,
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Private(
+                 "\\X",
+             ),
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 true,
+             ),
+             pos: Pos(root|method_contravariant.php, 4:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\X",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|method_contravariant.php, 3:16-17),
+             ty: HH\classname<this>,
+             origin: "\\X",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|method_contravariant.php, 4:23-24),
+                 "T",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     arraykey,
+                 ),
+                 super_constraint: None,
+                 default: Some(
+                     string,
+                 ),
+             },
+             origin: "\\X",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\XConcrete",
+     pos: Pos(root|method_contravariant.php, 22:13-22),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_final: true,
+     substs: {
+         "\\X": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\XConcrete",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\X": X,
+     },
+     methods: {
+         "get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     static_methods: {
+         "create": FoldedElement {
+             flags: FINAL,
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Private(
+                 "\\X",
+             ),
+             deprecated: None,
+         },
+         FinalClass,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+-            kind: CCConcrete,
++            kind: CCAbstract(
++                true,
++            ),
+             pos: Pos(root|method_contravariant.php, 4:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\X",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|method_contravariant.php, 22:13-22),
+             ty: HH\classname<this>,
+             origin: "\\XConcrete",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|method_contravariant.php, 4:23-24),
+                 "T",
+             ),
+-            kind: ConcreteTypeconst {
+-                ty: string,
++            kind: AbstractTypeconst {
++                as_constraint: Some(
++                    arraykey,
++                ),
++                super_constraint: None,
++                default: Some(
++                    string,
++                ),
+             },
+             origin: "\\X",
+             enforceable: None,
+             reifiable: None,
+-            is_concretized: true,
++            is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\X",
+     },
+ }
+ FoldedClass {
+     name: "\\Y",
+     pos: Pos(root|method_contravariant.php, 24:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\X": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Y",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\X": X,
+     },
+     methods: {
+         "get": FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     static_methods: {
+         "create": FoldedElement {
+             flags: FINAL,
+             origin: "\\X",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\X",
+             visibility: Private(
+                 "\\X",
+             ),
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|method_contravariant.php, 25:14-15),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\Y",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|method_contravariant.php, 24:7-8),
+             ty: HH\classname<this>,
+             origin: "\\Y",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|method_contravariant.php, 25:14-15),
+                 "T",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: int,
+             },
+             origin: "\\Y",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\X",
+     },
+ }

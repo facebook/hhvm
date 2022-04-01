@@ -17,7 +17,7 @@ ocaml_ffi_with_arena! {
         arena: &'a Bump,
         root: &'a Path,
         files: &'a [oxidized_by_ref::relative_path::RelativePath<'a>],
-    ) -> BTreeMap<RelativePath, Vec<DeclClassType<'a>>> {
+    ) -> Result<BTreeMap<RelativePath, Vec<DeclClassType<'a>>>, String> {
         let files: Vec<RelativePath> = files.iter().map(Into::into).collect();
         let path_ctx = Arc::new(RelativePathCtx {
             root: root.into(),
@@ -30,41 +30,32 @@ ocaml_ffi_with_arena! {
                 &decl_parser,
                 files.iter().copied(),
             );
-        files
-            .into_iter()
-            .map(|filename| {
-                let classes: Vec<TypeName> = decl_parser
-                    .parse(filename)
-                    .expect("failed to parse")
-                    .into_iter()
-                    .filter_map(|decl| match decl {
-                        shallow::Decl::Class(name, _) => Some(name),
-                        _ => None,
-                    })
-                    .collect();
-                // Declare the classes in the reverse of their order in the file, to
-                // match the OCaml behavior. This should only matter when emitting
-                // errors for cyclic definitions.
-                for &name in classes.iter().rev() {
-                    folded_decl_provider
-                        .get_class(name.into(), name)
-                        .expect("failed to fold class");
-                }
-                (
-                    filename,
-                    classes
-                        .into_iter()
-                        .map(|name| {
-                            folded_decl_provider
-                                .get_class(name.into(), name)
-                                .expect("failed to fold class")
-                                .expect("failed to look up class")
-                        })
-                        .map(|cls| cls.to_oxidized(arena))
-                        .collect(),
-                )
-            })
-            .collect()
+        files.into_iter().map(|filename| {
+            let classes: Vec<TypeName> = decl_parser
+                .parse(filename)
+                .map_err(|e| format!("Failed to parse {:?}: {:?}", filename, e))?
+                .into_iter()
+                .filter_map(|decl| match decl {
+                    shallow::Decl::Class(name, _) => Some(name),
+                    _ => None,
+                })
+                .collect();
+            // Declare the classes in the reverse of their order in the file, to
+            // match the OCaml behavior. This should only matter when emitting
+            // errors for cyclic definitions.
+            for &name in classes.iter().rev() {
+                folded_decl_provider.get_class(name.into(), name)
+                    .map_err(|e| format!("Failed to fold class {}: {:?}", name, e))?;
+            }
+            Ok((filename, classes.into_iter().map(|name| {
+                Ok(folded_decl_provider
+                    .get_class(name.into(), name)
+                    .map_err(|e| format!("Failed to fold class {}: {:?}", name, e))?
+                    .ok_or_else(|| format!("Decl not found: class {}", name))?
+                    .to_oxidized(arena))
+            }).collect::<Result<_, String>>()?))
+        })
+        .collect()
     }
 
     fn show_decl_class_type_ffi<'a>(arena: &'a Bump, decl: &'a DeclClassType<'a>) -> String {

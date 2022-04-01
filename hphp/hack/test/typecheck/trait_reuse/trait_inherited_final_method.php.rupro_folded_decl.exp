@@ -1,0 +1,189 @@
+--- ocaml
++++ rupro
+@@ -1,185 +1,185 @@
+ FoldedClass {
+     name: "\\One",
+     pos: Pos(root|trait_inherited_final_method.php, 3:7-10),
+     kind: Ctrait,
+     substs: {
+         "\\MyClass": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\One",
+             from_req_extends: true,
+         },
+     },
+     methods: {
+         "get": FoldedElement {
+             flags: FINAL | SYNTHESIZED,
+             origin: "\\MyClass",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_inherited_final_method.php, 3:7-10),
+             ty: HH\classname<this>,
+             origin: "\\One",
+             refs: [],
+         },
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|trait_inherited_final_method.php, 4:19-26),
+             MyClass,
+         ),
+     ],
+     req_ancestors_extends: {
+         "\\MyClass",
+     },
+ }
+ FoldedClass {
+     name: "\\MyClass",
+     pos: Pos(root|trait_inherited_final_method.php, 7:7-14),
+     kind: Cclass(
+         Concrete,
+     ),
+     methods: {
+         "get": FoldedElement {
+             flags: FINAL,
+             origin: "\\MyClass",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_inherited_final_method.php, 7:7-14),
+             ty: HH\classname<this>,
+             origin: "\\MyClass",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\MyParent",
+     pos: Pos(root|trait_inherited_final_method.php, 13:7-15),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\MyClass": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyParent",
+             from_req_extends: false,
+         },
+         "\\One": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyParent",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\MyClass": MyClass,
+         "\\One": One,
+     },
+     methods: {
+         "get": FoldedElement {
+             flags: FINAL,
+             origin: "\\MyClass",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_inherited_final_method.php, 13:7-15),
+             ty: HH\classname<this>,
+             origin: "\\MyParent",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\MyClass",
+         "\\One",
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|trait_inherited_final_method.php, 14:7-10),
+             MyClass,
+         ),
+     ],
+ }
+ FoldedClass {
+     name: "\\MyChild",
+     pos: Pos(root|trait_inherited_final_method.php, 16:7-14),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\MyClass": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyParent",
+             from_req_extends: false,
+         },
+         "\\MyParent": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyChild",
+             from_req_extends: false,
+         },
+         "\\One": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\MyChild",
++            class_context: "\\MyParent",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\MyClass": MyClass,
+         "\\MyParent": MyParent,
+         "\\One": One,
+     },
+     methods: {
+         "get": FoldedElement {
+             flags: FINAL,
+             origin: "\\MyClass",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_inherited_final_method.php, 16:7-14),
+             ty: HH\classname<this>,
+             origin: "\\MyChild",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\MyClass",
+         "\\MyParent",
+         "\\One",
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|trait_inherited_final_method.php, 17:7-10),
+             MyClass,
+         ),
+     ],
+ }

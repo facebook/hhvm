@@ -1,0 +1,183 @@
+--- ocaml
++++ rupro
+@@ -1,179 +1,179 @@
+ FoldedClass {
+     name: "\\T",
+     pos: Pos(root|use_trait_partial_override.php, 3:7-8),
+     kind: Ctrait,
+     methods: {
+         "bar": FoldedElement {
+             flags: (empty),
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|use_trait_partial_override.php, 3:7-8),
+             ty: HH\classname<this>,
+             origin: "\\T",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\T1",
+     pos: Pos(root|use_trait_partial_override.php, 8:7-9),
+     kind: Ctrait,
+     substs: {
+         "\\T": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\T1",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\T": T,
+     },
+     methods: {
+         "bar": FoldedElement {
+             flags: (empty),
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|use_trait_partial_override.php, 8:7-9),
+             ty: HH\classname<this>,
+             origin: "\\T1",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\T",
+     },
+ }
+ FoldedClass {
+     name: "\\T2",
+     pos: Pos(root|use_trait_partial_override.php, 9:7-9),
+     kind: Ctrait,
+     substs: {
+         "\\T": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\T2",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\T": T,
+     },
+     methods: {
+         "bar": FoldedElement {
+             flags: (empty),
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|use_trait_partial_override.php, 9:7-9),
+             ty: HH\classname<this>,
+             origin: "\\T2",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\T",
+     },
+ }
+ FoldedClass {
+     name: "\\TP",
+     pos: Pos(root|use_trait_partial_override.php, 11:7-9),
+     kind: Ctrait,
+     substs: {
+         "\\T": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\T2",
++            class_context: "\\T1",
+             from_req_extends: false,
+         },
+         "\\T1": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TP",
+             from_req_extends: false,
+         },
+         "\\T2": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TP",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\T": T,
+         "\\T1": T1,
+         "\\T2": T2,
+     },
+     methods: {
+         "bar": FoldedElement {
+             flags: (empty),
+             origin: "\\TP",
+             visibility: Public,
+             deprecated: None,
+         },
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|use_trait_partial_override.php, 11:7-9),
+             ty: HH\classname<this>,
+             origin: "\\TP",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\T",
+         "\\T1",
+         "\\T2",
+     },
+ }

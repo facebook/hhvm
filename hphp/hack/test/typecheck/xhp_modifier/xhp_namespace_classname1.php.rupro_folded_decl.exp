@@ -1,0 +1,30 @@
+--- ocaml
++++ rupro
+@@ -1,25 +1,25 @@
+ FoldedClass {
+-    name: "\\foo\\bar",
++    name: "\\foo:bar",
+     pos: Pos(root|xhp_namespace_classname1.php, 4:13-20),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     has_xhp_keyword: true,
+     ancestors: {
+         "\\XHPTest": XHPTest,
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_namespace_classname1.php, 4:13-20),
+             ty: HH\classname<this>,
+-            origin: "\\foo\\bar",
++            origin: "\\foo:bar",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\XHPTest",
+     },
+ }

@@ -1,0 +1,59 @@
+--- ocaml
++++ rupro
+@@ -1,50 +1,50 @@
+ FoldedClass {
+     name: "\\Foo",
+-    pos: Pos(root|duplicate_class_declaration.php, 3:7-10),
++    pos: Pos(root|duplicate_class_declaration.php, 4:7-10),
+     kind: Cclass(
+         Concrete,
+     ),
+     methods: {
+-        "foo": FoldedElement {
++        "bar": FoldedElement {
+             flags: (empty),
+             origin: "\\Foo",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+-            pos: Pos(root|duplicate_class_declaration.php, 3:7-10),
++            pos: Pos(root|duplicate_class_declaration.php, 4:7-10),
+             ty: HH\classname<this>,
+             origin: "\\Foo",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\Foo",
+-    pos: Pos(root|duplicate_class_declaration.php, 3:7-10),
++    pos: Pos(root|duplicate_class_declaration.php, 4:7-10),
+     kind: Cclass(
+         Concrete,
+     ),
+     methods: {
+-        "foo": FoldedElement {
++        "bar": FoldedElement {
+             flags: (empty),
+             origin: "\\Foo",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+-            pos: Pos(root|duplicate_class_declaration.php, 3:7-10),
++            pos: Pos(root|duplicate_class_declaration.php, 4:7-10),
+             ty: HH\classname<this>,
+             origin: "\\Foo",
+             refs: [],
+         },
+     },
+ }

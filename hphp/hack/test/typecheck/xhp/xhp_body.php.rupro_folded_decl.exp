@@ -1,0 +1,128 @@
+--- ocaml
++++ rupro
+@@ -1,125 +1,122 @@
+ FoldedClass {
+     name: "\\:xhp",
+     pos: Pos(root|xhp_body.php, 3:7-11),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     ancestors: {
+         "\\XHPChild": XHPChild,
+         "\\XHPTest": XHPTest,
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_body.php, 3:7-11),
+             ty: HH\classname<this>,
+             origin: "\\:xhp",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\XHPTest",
+     },
+ }
+ FoldedClass {
+     name: "\\:foo",
+     pos: Pos(root|xhp_body.php, 4:7-11),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     substs: {
+         "\\:xhp": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\:foo",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\:xhp": :xhp,
+         "\\XHPChild": XHPChild,
+         "\\XHPTest": XHPTest,
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_body.php, 4:7-11),
+             ty: HH\classname<this>,
+             origin: "\\:foo",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\:xhp",
+         "\\XHPTest",
+     },
+ }
+ FoldedClass {
+     name: "\\:bar",
+     pos: Pos(root|xhp_body.php, 5:7-11),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     substs: {
+         "\\:xhp": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\:bar",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\:xhp": :xhp,
+         "\\XHPChild": XHPChild,
+         "\\XHPTest": XHPTest,
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_body.php, 5:7-11),
+             ty: HH\classname<this>,
+             origin: "\\:bar",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\:xhp",
+         "\\XHPTest",
+     },
+ }
+ FoldedClass {
+     name: "\\A",
+     pos: Pos(root|xhp_body.php, 7:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+-    ancestors: {
+-        "\\StringishObject": StringishObject,
+-    },
+     methods: {
+         "__toString": FoldedElement {
+             flags: (empty),
+             origin: "\\A",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_body.php, 7:7-8),
+             ty: HH\classname<this>,
+             origin: "\\A",
+             refs: [],
+         },
+     },
+ }

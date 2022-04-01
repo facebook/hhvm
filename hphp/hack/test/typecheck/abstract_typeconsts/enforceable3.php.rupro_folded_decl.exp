@@ -1,0 +1,84 @@
+File root|enforceable3.php--file3.php
+--- ocaml
++++ rupro
+@@ -1,68 +1,76 @@
+ FoldedClass {
+     name: "\\F",
+     pos: Pos(root|enforceable3.php--file3.php, 3:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\C": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\D",
+             from_req_extends: false,
+         },
+         "\\D": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\F",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\C": C,
+         "\\D": D,
+     },
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+-            kind: CCConcrete,
++            kind: CCAbstract(
++                true,
++            ),
+             pos: Pos(root|enforceable3.php--file2.php, 3:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\D",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|enforceable3.php--file3.php, 3:7-8),
+             ty: HH\classname<this>,
+             origin: "\\F",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|enforceable3.php--file2.php, 3:23-24),
+                 "T",
+             ),
+-            kind: ConcreteTypeconst {
+-                ty: HH\vec<int>,
++            kind: AbstractTypeconst {
++                as_constraint: Some(
++                    HH\vec<arraykey>,
++                ),
++                super_constraint: None,
++                default: Some(
++                    HH\vec<int>,
++                ),
+             },
+             origin: "\\D",
+             enforceable: Some(
+                 Pos(root|enforceable3.php--file1.php, 5:5-18),
+             ),
+             reifiable: None,
+-            is_concretized: true,
++            is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\C",
+         "\\D",
+     },
+ }

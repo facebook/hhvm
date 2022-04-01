@@ -1,0 +1,303 @@
+--- ocaml
++++ rupro
+@@ -1,294 +1,300 @@
+ FoldedClass {
+     name: "\\Base",
+     pos: Pos(root|this_refine_intersect.php, 4:7-11),
+     kind: Cclass(
+         Concrete,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|this_refine_intersect.php, 4:7-11),
+             ty: HH\classname<this>,
+             origin: "\\Base",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\Derived",
+     pos: Pos(root|this_refine_intersect.php, 5:7-14),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\Base": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Derived",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\Base": Base,
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|this_refine_intersect.php, 5:7-14),
+             ty: HH\classname<this>,
+             origin: "\\Derived",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\Base",
+     },
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|this_refine_intersect.php, 7:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     props: {
+         "item": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "TC": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|this_refine_intersect.php, 8:23-25),
+             ty: HH\TypeStructure<this::TC>,
+             origin: "\\C",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|this_refine_intersect.php, 7:16-17),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TC": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|this_refine_intersect.php, 8:23-25),
+                 "TC",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     Base,
+                 ),
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\A",
+     pos: Pos(root|this_refine_intersect.php, 12:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     substs: {
+         "\\C": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\A",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\C": C,
+     },
+     props: {
+         "item": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "TC": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|this_refine_intersect.php, 13:23-25),
+             ty: HH\TypeStructure<this::TC>,
+             origin: "\\A",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|this_refine_intersect.php, 12:16-17),
+             ty: HH\classname<this>,
+             origin: "\\A",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TC": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|this_refine_intersect.php, 13:23-25),
+                 "TC",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     Derived,
+                 ),
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\A",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\C",
+     },
++    deferred_init_members: {
++        "parent::__construct",
++    },
+ }
+ FoldedClass {
+     name: "\\D",
+     pos: Pos(root|this_refine_intersect.php, 15:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     substs: {
+         "\\C": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\D",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\C": C,
+     },
+     props: {
+         "item": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     methods: {
+         "testit": FoldedElement {
+             flags: (empty),
+             origin: "\\D",
+             visibility: Public,
+             deprecated: None,
+         },
+         "testit1": FoldedElement {
+             flags: (empty),
+             origin: "\\D",
+             visibility: Public,
+             deprecated: None,
+         },
+         "testit2": FoldedElement {
+             flags: (empty),
+             origin: "\\D",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "TC": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|this_refine_intersect.php, 8:23-25),
+             ty: HH\TypeStructure<this::TC>,
+             origin: "\\C",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|this_refine_intersect.php, 15:16-17),
+             ty: HH\classname<this>,
+             origin: "\\D",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TC": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|this_refine_intersect.php, 8:23-25),
+                 "TC",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     Base,
+                 ),
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\C",
+     },
++    deferred_init_members: {
++        "parent::__construct",
++    },
+ }

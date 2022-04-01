@@ -1,0 +1,264 @@
+File root|dup_class_bad_pos.php--file1.php
+--- ocaml
++++ rupro
+@@ -1,65 +1,118 @@
+ FoldedClass {
+     name: "\\A",
+     pos: Pos(root|dup_class_bad_pos.php--file1.php, 4:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|dup_class_bad_pos.php--file1.php, 5:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\A",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|dup_class_bad_pos.php--file1.php, 4:16-17),
+             ty: HH\classname<this>,
+             origin: "\\A",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|dup_class_bad_pos.php--file1.php, 5:23-24),
+                 "T",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     mixed,
+                 ),
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\A",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\C",
+-    pos: Pos(root|dup_class_bad_pos.php--file1.php, 7:16-17),
++    pos: Pos(root|dup_class_bad_pos.php--file2.php, 6:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
++    substs: {
++        "\\A": SubstContext {
++            subst: Subst(
++                {},
++            ),
++            class_context: "\\MyTrait",
++            from_req_extends: true,
++        },
++        "\\MyTrait": SubstContext {
++            subst: Subst(
++                {},
++            ),
++            class_context: "\\C",
++            from_req_extends: false,
++        },
++    },
++    ancestors: {
++        "\\MyTrait": MyTrait,
++    },
+     consts: {
++        "T": ClassConst {
++            is_synthesized: true,
++            kind: CCConcrete,
++            pos: Pos(root|dup_class_bad_pos.php--file2.php, 8:14-15),
++            ty: HH\TypeStructure<this::T>,
++            origin: "\\C",
++            refs: [],
++        },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+-            pos: Pos(root|dup_class_bad_pos.php--file1.php, 7:16-17),
++            pos: Pos(root|dup_class_bad_pos.php--file2.php, 6:16-17),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
++    type_consts: {
++        "T": TypeConst {
++            is_synthesized: false,
++            name: (
++                Pos(root|dup_class_bad_pos.php--file2.php, 8:14-15),
++                "T",
++            ),
++            kind: ConcreteTypeconst {
++                ty: int,
++            },
++            origin: "\\C",
++            enforceable: None,
++            reifiable: None,
++            is_concretized: false,
++            is_ctx: false,
++        },
++    },
++    extends: {
++        "\\MyTrait",
++    },
++    req_ancestors: [
++        Requirement(
++            Pos(root|dup_class_bad_pos.php--file2.php, 7:7-14),
++            A,
++        ),
++    ],
+ }
+File root|dup_class_bad_pos.php--file2.php
+--- ocaml
++++ rupro
+@@ -1,81 +1,134 @@
+ FoldedClass {
+     name: "\\MyTrait",
+     pos: Pos(root|dup_class_bad_pos.php--file2.php, 3:7-14),
+     kind: Ctrait,
+     substs: {
+         "\\A": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyTrait",
+             from_req_extends: true,
+         },
+     },
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|dup_class_bad_pos.php--file1.php, 5:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\A",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|dup_class_bad_pos.php--file2.php, 3:7-14),
+             ty: HH\classname<this>,
+             origin: "\\MyTrait",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: true,
+             name: (
+                 Pos(root|dup_class_bad_pos.php--file1.php, 5:23-24),
+                 "T",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     mixed,
+                 ),
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\A",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|dup_class_bad_pos.php--file2.php, 4:19-20),
+             A,
+         ),
+     ],
+     req_ancestors_extends: {
+         "\\A",
+     },
+ }
+ FoldedClass {
+     name: "\\C",
+-    pos: Pos(root|dup_class_bad_pos.php--file1.php, 7:16-17),
++    pos: Pos(root|dup_class_bad_pos.php--file2.php, 6:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
++    substs: {
++        "\\A": SubstContext {
++            subst: Subst(
++                {},
++            ),
++            class_context: "\\MyTrait",
++            from_req_extends: true,
++        },
++        "\\MyTrait": SubstContext {
++            subst: Subst(
++                {},
++            ),
++            class_context: "\\C",
++            from_req_extends: false,
++        },
++    },
++    ancestors: {
++        "\\MyTrait": MyTrait,
++    },
+     consts: {
++        "T": ClassConst {
++            is_synthesized: true,
++            kind: CCConcrete,
++            pos: Pos(root|dup_class_bad_pos.php--file2.php, 8:14-15),
++            ty: HH\TypeStructure<this::T>,
++            origin: "\\C",
++            refs: [],
++        },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+-            pos: Pos(root|dup_class_bad_pos.php--file1.php, 7:16-17),
++            pos: Pos(root|dup_class_bad_pos.php--file2.php, 6:16-17),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
++    type_consts: {
++        "T": TypeConst {
++            is_synthesized: false,
++            name: (
++                Pos(root|dup_class_bad_pos.php--file2.php, 8:14-15),
++                "T",
++            ),
++            kind: ConcreteTypeconst {
++                ty: int,
++            },
++            origin: "\\C",
++            enforceable: None,
++            reifiable: None,
++            is_concretized: false,
++            is_ctx: false,
++        },
++    },
++    extends: {
++        "\\MyTrait",
++    },
++    req_ancestors: [
++        Requirement(
++            Pos(root|dup_class_bad_pos.php--file2.php, 7:7-14),
++            A,
++        ),
++    ],
+ }

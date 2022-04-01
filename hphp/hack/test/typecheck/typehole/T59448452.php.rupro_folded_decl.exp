@@ -1,0 +1,396 @@
+--- ocaml
++++ rupro
+@@ -1,390 +1,393 @@
+ FoldedClass {
+     name: "\\Box",
+     pos: Pos(root|T59448452.php, 4:7-10),
+     kind: Cclass(
+         Concrete,
+     ),
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|T59448452.php, 4:11-12),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     props: {
+         "data": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\Box",
+             visibility: Private(
+                 "\\Box",
+             ),
+             deprecated: None,
+         },
+     },
+     methods: {
+         "get": FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+         "set": FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|T59448452.php, 4:7-10),
+             ty: HH\classname<this>,
+             origin: "\\Box",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|T59448452.php, 10:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     substs: {
+         "\\Box": SubstContext {
+             subst: Subst(
+                 {
+                     "T": this::T,
+                 },
+             ),
+             class_context: "\\C",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\Box": Box<this::T>,
+     },
+     methods: {
+         "get": FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+         "set": FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|T59448452.php, 11:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\C",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|T59448452.php, 10:16-17),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|T59448452.php, 11:23-24),
+                 "T",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     arraykey,
+                 ),
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\Box",
+     },
++    deferred_init_members: {
++        "parent::__construct",
++    },
+ }
+ FoldedClass {
+     name: "\\CS",
+     pos: Pos(root|T59448452.php, 13:7-9),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\Box": SubstContext {
+             subst: Subst(
+                 {
+                     "T": this::T,
+                 },
+             ),
+             class_context: "\\C",
+             from_req_extends: false,
+         },
+         "\\C": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\CS",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\Box": Box<this::T>,
+         "\\C": C,
+     },
+     methods: {
+         "get": FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+         "set": FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|T59448452.php, 13:33-34),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\CS",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|T59448452.php, 13:7-9),
+             ty: HH\classname<this>,
+             origin: "\\CS",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|T59448452.php, 13:33-34),
+                 "T",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: string,
+             },
+             origin: "\\CS",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\Box",
+         "\\C",
+     },
+ }
+ FoldedClass {
+     name: "\\CI",
+     pos: Pos(root|T59448452.php, 14:7-9),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\Box": SubstContext {
+             subst: Subst(
+                 {
+                     "T": this::T,
+                 },
+             ),
+             class_context: "\\C",
+             from_req_extends: false,
+         },
+         "\\C": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\CI",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\Box": Box<this::T>,
+         "\\C": C,
+     },
+     methods: {
+         "get": FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+         "set": FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\Box",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|T59448452.php, 14:33-34),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\CI",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|T59448452.php, 14:7-9),
+             ty: HH\classname<this>,
+             origin: "\\CI",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|T59448452.php, 14:33-34),
+                 "T",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: int,
+             },
+             origin: "\\CI",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\Box",
+         "\\C",
+     },
+ }
+ FoldedClass {
+     name: "\\Cov",
+     pos: Pos(root|T59448452.php, 16:7-10),
+     kind: Cclass(
+         Concrete,
+     ),
+     tparams: [
+         Tparam {
+             variance: Covariant,
+             name: (
+                 Pos(root|T59448452.php, 16:12-13),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     props: {
+         "data": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\Cov",
+             visibility: Private(
+                 "\\Cov",
+             ),
+             deprecated: None,
+         },
+     },
+     methods: {
+         "boxed": FoldedElement {
+             flags: (empty),
+             origin: "\\Cov",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\Cov",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|T59448452.php, 16:7-10),
+             ty: HH\classname<this>,
+             origin: "\\Cov",
+             refs: [],
+         },
+     },
+ }

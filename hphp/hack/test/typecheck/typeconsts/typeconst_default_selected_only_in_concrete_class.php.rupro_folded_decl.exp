@@ -1,0 +1,302 @@
+--- ocaml
++++ rupro
+@@ -1,287 +1,295 @@
+ FoldedClass {
+     name: "\\A",
+     pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 3:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 true,
+             ),
+             pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 4:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\A",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 3:16-17),
+             ty: HH\classname<this>,
+             origin: "\\A",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|typeconst_default_selected_only_in_concrete_class.php, 4:23-24),
+                 "T",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     nonnull,
+                 ),
+                 super_constraint: None,
+                 default: Some(
+                     int,
+                 ),
+             },
+             origin: "\\A",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\ReqExtA",
+     pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 7:7-14),
+     kind: Ctrait,
+     substs: {
+         "\\A": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\ReqExtA",
+             from_req_extends: true,
+         },
+     },
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 true,
+             ),
+             pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 4:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\A",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 7:7-14),
+             ty: HH\classname<this>,
+             origin: "\\ReqExtA",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: true,
+             name: (
+                 Pos(root|typeconst_default_selected_only_in_concrete_class.php, 4:23-24),
+                 "T",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     nonnull,
+                 ),
+                 super_constraint: None,
+                 default: Some(
+                     int,
+                 ),
+             },
+             origin: "\\A",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|typeconst_default_selected_only_in_concrete_class.php, 8:19-20),
+             A,
+         ),
+     ],
+     req_ancestors_extends: {
+         "\\A",
+     },
+ }
+ FoldedClass {
+     name: "\\B",
+     pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 11:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     substs: {
+         "\\A": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\B",
+             from_req_extends: false,
+         },
+         "\\ReqExtA": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\B",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\A": A,
+         "\\ReqExtA": ReqExtA,
+     },
+     static_methods: {
+         "get": FoldedElement {
+             flags: (empty),
+             origin: "\\B",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 true,
+             ),
+             pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 4:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\A",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 11:16-17),
+             ty: HH\classname<this>,
+             origin: "\\B",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: true,
+             name: (
+                 Pos(root|typeconst_default_selected_only_in_concrete_class.php, 4:23-24),
+                 "T",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     nonnull,
+                 ),
+                 super_constraint: None,
+                 default: Some(
+                     int,
+                 ),
+             },
+             origin: "\\A",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\A",
+         "\\ReqExtA",
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|typeconst_default_selected_only_in_concrete_class.php, 12:7-14),
+             A,
+         ),
+     ],
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 26:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\A": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\B",
+             from_req_extends: false,
+         },
+         "\\B": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\C",
+             from_req_extends: false,
+         },
+         "\\ReqExtA": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\B",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\A": A,
+         "\\B": B,
+         "\\ReqExtA": ReqExtA,
+     },
+     static_methods: {
+         "get": FoldedElement {
+             flags: (empty),
+             origin: "\\B",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+-            kind: CCConcrete,
++            kind: CCAbstract(
++                true,
++            ),
+             pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 4:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\A",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|typeconst_default_selected_only_in_concrete_class.php, 26:7-8),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: true,
+             name: (
+                 Pos(root|typeconst_default_selected_only_in_concrete_class.php, 4:23-24),
+                 "T",
+             ),
+-            kind: ConcreteTypeconst {
+-                ty: int,
++            kind: AbstractTypeconst {
++                as_constraint: Some(
++                    nonnull,
++                ),
++                super_constraint: None,
++                default: Some(
++                    int,
++                ),
+             },
+             origin: "\\A",
+             enforceable: None,
+             reifiable: None,
+-            is_concretized: true,
++            is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\A",
+         "\\B",
+         "\\ReqExtA",
+     },
+ }

@@ -1,0 +1,313 @@
+--- ocaml
++++ rupro
+@@ -1,309 +1,309 @@
+ FoldedClass {
+     name: "\\ReusedTrait",
+     pos: Pos(root|trait_reuse_long_chain.php, 3:7-18),
+     kind: Ctrait,
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_long_chain.php, 3:7-18),
+             ty: HH\classname<this>,
+             origin: "\\ReusedTrait",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\TraitTwo",
+     pos: Pos(root|trait_reuse_long_chain.php, 7:7-15),
+     kind: Ctrait,
+     substs: {
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TraitTwo",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\ReusedTrait": ReusedTrait,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_long_chain.php, 7:7-15),
+             ty: HH\classname<this>,
+             origin: "\\TraitTwo",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\ReusedTrait",
+     },
+ }
+ FoldedClass {
+     name: "\\TraitThree",
+     pos: Pos(root|trait_reuse_long_chain.php, 11:7-17),
+     kind: Ctrait,
+     substs: {
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TraitTwo",
+             from_req_extends: false,
+         },
+         "\\TraitTwo": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TraitThree",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\ReusedTrait": ReusedTrait,
+         "\\TraitTwo": TraitTwo,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_long_chain.php, 11:7-17),
+             ty: HH\classname<this>,
+             origin: "\\TraitThree",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\ReusedTrait",
+         "\\TraitTwo",
+     },
+ }
+ FoldedClass {
+     name: "\\GrandParent",
+     pos: Pos(root|trait_reuse_long_chain.php, 15:7-18),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TraitTwo",
+             from_req_extends: false,
+         },
+         "\\TraitThree": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\GrandParent",
+             from_req_extends: false,
+         },
+         "\\TraitTwo": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TraitThree",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\ReusedTrait": ReusedTrait,
+         "\\TraitThree": TraitThree,
+         "\\TraitTwo": TraitTwo,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_long_chain.php, 15:7-18),
+             ty: HH\classname<this>,
+             origin: "\\GrandParent",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\ReusedTrait",
+         "\\TraitThree",
+         "\\TraitTwo",
+     },
+ }
+ FoldedClass {
+     name: "\\MyParent",
+     pos: Pos(root|trait_reuse_long_chain.php, 19:7-15),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\GrandParent": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyParent",
+             from_req_extends: false,
+         },
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TraitTwo",
+             from_req_extends: false,
+         },
+         "\\TraitThree": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\GrandParent",
+             from_req_extends: false,
+         },
+         "\\TraitTwo": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TraitThree",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\GrandParent": GrandParent,
+         "\\ReusedTrait": ReusedTrait,
+         "\\TraitThree": TraitThree,
+         "\\TraitTwo": TraitTwo,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_long_chain.php, 19:7-15),
+             ty: HH\classname<this>,
+             origin: "\\MyParent",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\GrandParent",
+         "\\ReusedTrait",
+         "\\TraitThree",
+         "\\TraitTwo",
+     },
+ }
+ FoldedClass {
+     name: "\\BadClass",
+     pos: Pos(root|trait_reuse_long_chain.php, 22:7-15),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\GrandParent": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyParent",
+             from_req_extends: false,
+         },
+         "\\MyParent": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\BadClass",
+             from_req_extends: false,
+         },
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\BadClass",
++            class_context: "\\TraitTwo",
+             from_req_extends: false,
+         },
+         "\\TraitThree": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\GrandParent",
+             from_req_extends: false,
+         },
+         "\\TraitTwo": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TraitThree",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\GrandParent": GrandParent,
+         "\\MyParent": MyParent,
+         "\\ReusedTrait": ReusedTrait,
+         "\\TraitThree": TraitThree,
+         "\\TraitTwo": TraitTwo,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_long_chain.php, 22:7-15),
+             ty: HH\classname<this>,
+             origin: "\\BadClass",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\GrandParent",
+         "\\MyParent",
+         "\\ReusedTrait",
+         "\\TraitThree",
+         "\\TraitTwo",
+     },
+ }

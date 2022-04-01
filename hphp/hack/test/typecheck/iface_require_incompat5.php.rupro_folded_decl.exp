@@ -1,0 +1,123 @@
+--- ocaml
++++ rupro
+@@ -1,119 +1,119 @@
+ FoldedClass {
+     name: "\\Super",
+     pos: Pos(root|iface_require_incompat5.php, 3:7-12),
+     kind: Cclass(
+         Concrete,
+     ),
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|iface_require_incompat5.php, 3:13-14),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [
+                 (
+                     ConstraintAs,
+                     num,
+                 ),
+             ],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|iface_require_incompat5.php, 3:7-12),
+             ty: HH\classname<this>,
+             origin: "\\Super",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\I1",
+     pos: Pos(root|iface_require_incompat5.php, 5:11-13),
+     kind: Cinterface,
+     substs: {
+         "\\Super": SubstContext {
+             subst: Subst(
+                 {
+-                    "T": float,
++                    "T": int,
+                 },
+             ),
+             class_context: "\\I1",
+             from_req_extends: true,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|iface_require_incompat5.php, 5:11-13),
+             ty: HH\classname<this>,
+             origin: "\\I1",
+             refs: [],
+         },
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|iface_require_incompat5.php, 6:19-24),
+             Super<int>,
+         ),
+         Requirement(
+             Pos(root|iface_require_incompat5.php, 7:19-24),
+             Super<float>,
+         ),
+     ],
+     req_ancestors_extends: {
+         "\\Super",
+     },
+ }
+ FoldedClass {
+     name: "\\Sub",
+     pos: Pos(root|iface_require_incompat5.php, 10:7-10),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\Super": SubstContext {
+             subst: Subst(
+                 {
+                     "T": num,
+                 },
+             ),
+             class_context: "\\Sub",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\I1": I1,
+         "\\Super": Super<num>,
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|iface_require_incompat5.php, 10:7-10),
+             ty: HH\classname<this>,
+             origin: "\\Sub",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\Super",
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|iface_require_incompat5.php, 10:41-43),
+             Super<int>,
+         ),
+         Requirement(
+             Pos(root|iface_require_incompat5.php, 10:41-43),
+             Super<float>,
+         ),
+     ],
+ }

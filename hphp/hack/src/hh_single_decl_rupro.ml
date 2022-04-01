@@ -234,6 +234,7 @@ let () =
       ignored_flag "--enable-sound-dynamic-type";
       ignored_flag "--pessimise-builtins";
       ignored_arg "--explicit-consistent-constructors";
+      ignored_arg "--require-types-class-consts";
     ]
     set_file
     usage;
@@ -306,9 +307,15 @@ let () =
               Decl.make_env ~sh:SharedMem.Uses ctx filename));
       (* Compute rupro folded decls *)
       let rupro_decls =
-        Decl_folded_class_rupro.fold_classes_in_files
-          ~root:(Path.to_string tmpdir)
-          files
+        match
+          Decl_folded_class_rupro.fold_classes_in_files
+            ~root:(Path.to_string tmpdir)
+            files
+        with
+        | Ok rupro_decls -> rupro_decls
+        | Error e ->
+          Printf.eprintf "%s\n%!" e;
+          exit 1
       in
       iter_files (compare_folded ctx rupro_decls)
     in

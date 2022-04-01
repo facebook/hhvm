@@ -1,0 +1,112 @@
+--- ocaml
++++ rupro
+@@ -1,108 +1,108 @@
+ FoldedClass {
+     name: "\\MyTrait1",
+     pos: Pos(root|trait_diamond_abstract_1.good.php, 6:7-15),
+     kind: Ctrait,
+     methods: {
+         "testFun": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\MyTrait1",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_diamond_abstract_1.good.php, 6:7-15),
+             ty: HH\classname<this>,
+             origin: "\\MyTrait1",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\MyTrait2",
+     pos: Pos(root|trait_diamond_abstract_1.good.php, 9:7-15),
+     kind: Ctrait,
+     substs: {
+         "\\MyTrait1": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyTrait2",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\MyTrait1": MyTrait1,
+     },
+     methods: {
+         "testFun": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\MyTrait1",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_diamond_abstract_1.good.php, 9:7-15),
+             ty: HH\classname<this>,
+             origin: "\\MyTrait2",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\MyTrait1",
+     },
+ }
+ FoldedClass {
+     name: "\\MyTrait3",
+     pos: Pos(root|trait_diamond_abstract_1.good.php, 13:7-15),
+     kind: Ctrait,
+     substs: {
+         "\\MyTrait1": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\MyTrait2",
++            class_context: "\\MyTrait3",
+             from_req_extends: false,
+         },
+         "\\MyTrait2": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyTrait3",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\MyTrait1": MyTrait1,
+         "\\MyTrait2": MyTrait2,
+     },
+     methods: {
+         "testFun": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\MyTrait1",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_diamond_abstract_1.good.php, 13:7-15),
+             ty: HH\classname<this>,
+             origin: "\\MyTrait3",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\MyTrait1",
+         "\\MyTrait2",
+     },
+ }

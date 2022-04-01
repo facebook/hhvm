@@ -1,0 +1,281 @@
+--- ocaml
++++ rupro
+@@ -1,278 +1,277 @@
+ FoldedClass {
+     name: "\\GIComparable",
+     pos: Pos(root|recursive_constraint_good.php, 4:11-23),
+     kind: Cinterface,
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|recursive_constraint_good.php, 4:24-25),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     methods: {
+         "Compare": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\GIComparable",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|recursive_constraint_good.php, 4:11-23),
+             ty: HH\classname<this>,
+             origin: "\\GIComparable",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\IComparable",
+     pos: Pos(root|recursive_constraint_good.php, 7:11-22),
+     kind: Cinterface,
+     methods: {
+         "Compare": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\IComparable",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|recursive_constraint_good.php, 7:11-22),
+             ty: HH\classname<this>,
+             origin: "\\IComparable",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\MinMax",
+     pos: Pos(root|recursive_constraint_good.php, 11:7-13),
+     kind: Cclass(
+         Concrete,
+     ),
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|recursive_constraint_good.php, 11:14-15),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [
+                 (
+                     ConstraintAs,
+                     GIComparable<T>,
+                 ),
+             ],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     props: {
+         "max": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\MinMax",
+             visibility: Private(
+                 "\\MinMax",
+             ),
+             deprecated: None,
+         },
+         "min": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\MinMax",
+             visibility: Private(
+                 "\\MinMax",
+             ),
+             deprecated: None,
+         },
+     },
+     methods: {
+         "Add": FoldedElement {
+             flags: (empty),
+             origin: "\\MinMax",
+             visibility: Public,
+             deprecated: None,
+         },
+         "GetMax": FoldedElement {
+             flags: (empty),
+             origin: "\\MinMax",
+             visibility: Public,
+             deprecated: None,
+         },
+         "GetMin": FoldedElement {
+             flags: (empty),
+             origin: "\\MinMax",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\MinMax",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|recursive_constraint_good.php, 11:7-13),
+             ty: HH\classname<this>,
+             origin: "\\MinMax",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\MyInt",
+     pos: Pos(root|recursive_constraint_good.php, 35:7-12),
+     kind: Cclass(
+         Concrete,
+     ),
+     ancestors: {
+         "\\GIComparable": GIComparable<MyInt>,
+-        "\\StringishObject": StringishObject,
+     },
+     props: {
+         "item": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\MyInt",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     methods: {
+         "Compare": FoldedElement {
+             flags: (empty),
+             origin: "\\MyInt",
+             visibility: Public,
+             deprecated: None,
+         },
+         "__toString": FoldedElement {
+             flags: (empty),
+             origin: "\\MyInt",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\MyInt",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|recursive_constraint_good.php, 35:7-12),
+             ty: HH\classname<this>,
+             origin: "\\MyInt",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\MyPair",
+     pos: Pos(root|recursive_constraint_good.php, 46:7-13),
+     kind: Cclass(
+         Concrete,
+     ),
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|recursive_constraint_good.php, 46:14-16),
+                 "Tx",
+             ),
+             tparams: [],
+             constraints: [
+                 (
+                     ConstraintAs,
+                     GIComparable<Tx>,
+                 ),
+             ],
+             reified: Erased,
+             user_attributes: [],
+         },
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|recursive_constraint_good.php, 46:38-40),
+                 "Ty",
+             ),
+             tparams: [],
+             constraints: [
+                 (
+                     ConstraintAs,
+                     GIComparable<Ty>,
+                 ),
+             ],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     ancestors: {
+         "\\GIComparable": GIComparable<MyPair<Tx, Ty>>,
+     },
+     props: {
+         "fst": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\MyPair",
+             visibility: Public,
+             deprecated: None,
+         },
+         "snd": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\MyPair",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     methods: {
+         "Compare": FoldedElement {
+             flags: (empty),
+             origin: "\\MyPair",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\MyPair",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|recursive_constraint_good.php, 46:7-13),
+             ty: HH\classname<this>,
+             origin: "\\MyPair",
+             refs: [],
+         },
+     },
+ }

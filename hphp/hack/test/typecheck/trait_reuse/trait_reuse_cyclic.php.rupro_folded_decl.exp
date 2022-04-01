@@ -1,0 +1,183 @@
+--- ocaml
++++ rupro
+@@ -1,179 +1,179 @@
+ FoldedClass {
+     name: "\\ReusedTrait",
+     pos: Pos(root|trait_reuse_cyclic.php, 5:7-18),
+     kind: Ctrait,
+     substs: {
+         "\\OtherTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\ReusedTrait",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\OtherTrait": OtherTrait,
+         "\\ReusedTrait": ReusedTrait,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_cyclic.php, 5:7-18),
+             ty: HH\classname<this>,
+             origin: "\\ReusedTrait",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\OtherTrait",
+         "\\ReusedTrait",
+     },
+ }
+ FoldedClass {
+     name: "\\OtherTrait",
+     pos: Pos(root|trait_reuse_cyclic.php, 10:7-17),
+     kind: Ctrait,
+     ancestors: {
+         "\\ReusedTrait": ReusedTrait,
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_cyclic.php, 10:7-17),
+             ty: HH\classname<this>,
+             origin: "\\OtherTrait",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\ReusedTrait",
+     },
+     decl_errors: [
+         CyclicClassDef(
+             Pos(root|trait_reuse_cyclic.php, 11:7-18),
+             [
+                 "\\BadClass",
+                 "\\MyParent",
+                 "\\OtherTrait",
+                 "\\ReusedTrait",
+             ],
+         ),
+     ],
+ }
+ FoldedClass {
+     name: "\\MyParent",
+     pos: Pos(root|trait_reuse_cyclic.php, 14:7-15),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\OtherTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\ReusedTrait",
+             from_req_extends: false,
+         },
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyParent",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\OtherTrait": OtherTrait,
+         "\\ReusedTrait": ReusedTrait,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_cyclic.php, 14:7-15),
+             ty: HH\classname<this>,
+             origin: "\\MyParent",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\OtherTrait",
+         "\\ReusedTrait",
+     },
+ }
+ FoldedClass {
+     name: "\\BadClass",
+     pos: Pos(root|trait_reuse_cyclic.php, 18:7-15),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\MyParent": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\BadClass",
+             from_req_extends: false,
+         },
+         "\\OtherTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\ReusedTrait",
+             from_req_extends: false,
+         },
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\BadClass",
++            class_context: "\\MyParent",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\MyParent": MyParent,
+         "\\OtherTrait": OtherTrait,
+         "\\ReusedTrait": ReusedTrait,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_cyclic.php, 18:7-15),
+             ty: HH\classname<this>,
+             origin: "\\BadClass",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\MyParent",
+         "\\OtherTrait",
+         "\\ReusedTrait",
+     },
+ }

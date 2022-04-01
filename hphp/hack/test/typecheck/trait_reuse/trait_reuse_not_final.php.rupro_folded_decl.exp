@@ -1,0 +1,116 @@
+--- ocaml
++++ rupro
+@@ -1,112 +1,112 @@
+ FoldedClass {
+     name: "\\MyTrait",
+     pos: Pos(root|trait_reuse_not_final.php, 3:7-14),
+     kind: Ctrait,
+     methods: {
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\MyTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_not_final.php, 3:7-14),
+             ty: HH\classname<this>,
+             origin: "\\MyTrait",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\MyBase",
+     pos: Pos(root|trait_reuse_not_final.php, 8:7-13),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\MyTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyBase",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\MyTrait": MyTrait,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\MyTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_not_final.php, 8:7-13),
+             ty: HH\classname<this>,
+             origin: "\\MyBase",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\MyTrait",
+     },
+ }
+ FoldedClass {
+     name: "\\MyClass",
+     pos: Pos(root|trait_reuse_not_final.php, 13:7-14),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\MyBase": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyClass",
+             from_req_extends: false,
+         },
+         "\\MyTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\MyClass",
++            class_context: "\\MyBase",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\MyBase": MyBase,
+         "\\MyTrait": MyTrait,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\MyTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_not_final.php, 13:7-14),
+             ty: HH\classname<this>,
+             origin: "\\MyClass",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\MyBase",
+         "\\MyTrait",
+     },
+ }

@@ -1,0 +1,138 @@
+--- ocaml
++++ rupro
+@@ -1,133 +1,133 @@
+ FoldedClass {
+     name: "\\xhp",
+     pos: Pos(root|xhp_xhp_name.php, 3:11-14),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     has_xhp_keyword: true,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_xhp_name.php, 3:11-14),
+             ty: HH\classname<this>,
+             origin: "\\xhp",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\nochildren",
+     pos: Pos(root|xhp_xhp_name.php, 5:11-21),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     has_xhp_keyword: true,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_xhp_name.php, 5:11-21),
+             ty: HH\classname<this>,
+             origin: "\\nochildren",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\foo",
+     pos: Pos(root|xhp_xhp_name.php, 9:11-14),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     has_xhp_keyword: true,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_xhp_name.php, 9:11-14),
+             ty: HH\classname<this>,
+             origin: "\\foo",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+-    name: "\\foo\\bar",
++    name: "\\foo:bar",
+     pos: Pos(root|xhp_xhp_name.php, 11:11-18),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     has_xhp_keyword: true,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_xhp_name.php, 11:11-18),
+             ty: HH\classname<this>,
+-            origin: "\\foo\\bar",
++            origin: "\\foo:bar",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\xhpchildren",
+     pos: Pos(root|xhp_xhp_name.php, 13:11-22),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     has_xhp_keyword: true,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_xhp_name.php, 13:11-22),
+             ty: HH\classname<this>,
+             origin: "\\xhpchildren",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\foochildren",
+     pos: Pos(root|xhp_xhp_name.php, 17:11-22),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     has_xhp_keyword: true,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_xhp_name.php, 17:11-22),
+             ty: HH\classname<this>,
+             origin: "\\foochildren",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\foobarchildren",
+     pos: Pos(root|xhp_xhp_name.php, 21:11-25),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     has_xhp_keyword: true,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_xhp_name.php, 21:11-25),
+             ty: HH\classname<this>,
+             origin: "\\foobarchildren",
+             refs: [],
+         },
+     },
+ }

@@ -1,0 +1,188 @@
+--- ocaml
++++ rupro
+@@ -1,173 +1,181 @@
+ FoldedClass {
+     name: "\\A",
+     pos: Pos(root|skip_one.php, 4:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 true,
+             ),
+             pos: Pos(root|skip_one.php, 5:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\A",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|skip_one.php, 4:16-17),
+             ty: HH\classname<this>,
+             origin: "\\A",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|skip_one.php, 5:23-24),
+                 "T",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     arraykey,
+                 ),
+                 super_constraint: None,
+                 default: Some(
+                     int,
+                 ),
+             },
+             origin: "\\A",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\B",
+     pos: Pos(root|skip_one.php, 8:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\A": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\B",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\A": A,
+     },
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+-            kind: CCConcrete,
++            kind: CCAbstract(
++                true,
++            ),
+             pos: Pos(root|skip_one.php, 5:23-24),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\A",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|skip_one.php, 8:7-8),
+             ty: HH\classname<this>,
+             origin: "\\B",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|skip_one.php, 5:23-24),
+                 "T",
+             ),
+-            kind: ConcreteTypeconst {
+-                ty: int,
++            kind: AbstractTypeconst {
++                as_constraint: Some(
++                    arraykey,
++                ),
++                super_constraint: None,
++                default: Some(
++                    int,
++                ),
+             },
+             origin: "\\A",
+             enforceable: None,
+             reifiable: None,
+-            is_concretized: true,
++            is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\A",
+     },
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|skip_one.php, 10:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\A": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\B",
+             from_req_extends: false,
+         },
+         "\\B": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\C",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\A": A,
+         "\\B": B,
+     },
+     consts: {
+         "T": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|skip_one.php, 11:14-15),
+             ty: HH\TypeStructure<this::T>,
+             origin: "\\C",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|skip_one.php, 10:7-8),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "T": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|skip_one.php, 11:14-15),
+                 "T",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: string,
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\A",
+         "\\B",
+     },
+ }

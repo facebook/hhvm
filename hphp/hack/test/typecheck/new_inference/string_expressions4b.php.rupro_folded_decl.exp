@@ -1,0 +1,71 @@
+--- ocaml
++++ rupro
+@@ -1,68 +1,65 @@
+ FoldedClass {
+     name: "\\Other",
+     pos: Pos(root|string_expressions4b.php, 12:7-12),
+     kind: Cclass(
+         Concrete,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|string_expressions4b.php, 12:7-12),
+             ty: HH\classname<this>,
+             origin: "\\Other",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\Meh",
+     pos: Pos(root|string_expressions4b.php, 18:7-10),
+     kind: Cclass(
+         Concrete,
+     ),
+-    ancestors: {
+-        "\\StringishObject": StringishObject,
+-    },
+     props: {
+         "blah": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\Meh",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     methods: {
+         "__toString": FoldedElement {
+             flags: (empty),
+             origin: "\\Meh",
+             visibility: Public,
+             deprecated: None,
+         },
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\Meh",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\Meh",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|string_expressions4b.php, 18:7-10),
+             ty: HH\classname<this>,
+             origin: "\\Meh",
+             refs: [],
+         },
+     },
+ }

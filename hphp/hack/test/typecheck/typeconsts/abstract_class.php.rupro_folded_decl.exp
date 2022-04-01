@@ -1,0 +1,244 @@
+--- ocaml
++++ rupro
+@@ -1,240 +1,240 @@
+ FoldedClass {
+     name: "\\BN",
+     pos: Pos(root|abstract_class.php, 3:16-18),
+     kind: Cclass(
+         Abstract,
+     ),
+     consts: {
+         "TUniverseRenderer": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|abstract_class.php, 4:14-31),
+             ty: HH\TypeStructure<this::TUniverseRenderer>,
+             origin: "\\BN",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|abstract_class.php, 3:16-18),
+             ty: HH\classname<this>,
+             origin: "\\BN",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TUniverseRenderer": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|abstract_class.php, 4:14-31),
+                 "TUniverseRenderer",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: string,
+             },
+             origin: "\\BN",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\FBN",
+     pos: Pos(root|abstract_class.php, 7:16-19),
+     kind: Cclass(
+         Abstract,
+     ),
+     substs: {
+         "\\BN": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\FBN",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\BN": BN,
+     },
+     consts: {
+         "TUniverseRenderer": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|abstract_class.php, 8:14-31),
+             ty: HH\TypeStructure<this::TUniverseRenderer>,
+             origin: "\\FBN",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|abstract_class.php, 7:16-19),
+             ty: HH\classname<this>,
+             origin: "\\FBN",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TUniverseRenderer": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|abstract_class.php, 8:14-31),
+                 "TUniverseRenderer",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: string,
+             },
+             origin: "\\FBN",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\BN",
+     },
+ }
+ FoldedClass {
+     name: "\\IN",
+     pos: Pos(root|abstract_class.php, 11:11-13),
+     kind: Cinterface,
+     substs: {
+         "\\BN": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\IN",
+             from_req_extends: true,
+         },
+     },
+     consts: {
+         "TUniverseRenderer": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|abstract_class.php, 4:14-31),
+             ty: HH\TypeStructure<this::TUniverseRenderer>,
+             origin: "\\BN",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|abstract_class.php, 11:11-13),
+             ty: HH\classname<this>,
+             origin: "\\IN",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TUniverseRenderer": TypeConst {
+             is_synthesized: true,
+             name: (
+                 Pos(root|abstract_class.php, 4:14-31),
+                 "TUniverseRenderer",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: string,
+             },
+             origin: "\\BN",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|abstract_class.php, 12:19-21),
+             BN,
+         ),
+     ],
+     req_ancestors_extends: {
+         "\\BN",
+     },
+ }
+ FoldedClass {
+     name: "\\I",
+     pos: Pos(root|abstract_class.php, 15:11-12),
+     kind: Cinterface,
+     substs: {
+         "\\BN": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\FBN",
++            class_context: "\\IN",
+             from_req_extends: true,
+         },
+         "\\FBN": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\I",
+             from_req_extends: true,
+         },
+         "\\IN": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\I",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\IN": IN,
+     },
+     consts: {
+         "TUniverseRenderer": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|abstract_class.php, 8:14-31),
+             ty: HH\TypeStructure<this::TUniverseRenderer>,
+             origin: "\\FBN",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|abstract_class.php, 15:11-12),
+             ty: HH\classname<this>,
+             origin: "\\I",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TUniverseRenderer": TypeConst {
+             is_synthesized: true,
+             name: (
+                 Pos(root|abstract_class.php, 8:14-31),
+                 "TUniverseRenderer",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: string,
+             },
+             origin: "\\FBN",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\IN",
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|abstract_class.php, 16:19-22),
+             FBN,
+         ),
+         Requirement(
+             Pos(root|abstract_class.php, 15:21-23),
+             BN,
+         ),
+     ],
+     req_ancestors_extends: {
+         "\\BN",
+         "\\FBN",
+     },
+ }

@@ -1,0 +1,373 @@
+--- ocaml
++++ rupro
+@@ -1,360 +1,366 @@
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|reifiable3.php, 5:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     consts: {
+         "Ta": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|reifiable3.php, 7:23-25),
+             ty: HH\TypeStructure<this::Ta>,
+             origin: "\\C",
+             refs: [],
+         },
+         "Tb": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 true,
+             ),
+             pos: Pos(root|reifiable3.php, 10:23-25),
+             ty: HH\TypeStructure<this::Tb>,
+             origin: "\\C",
+             refs: [],
+         },
+         "Tc": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|reifiable3.php, 12:14-16),
+             ty: HH\TypeStructure<this::Tc>,
+             origin: "\\C",
+             refs: [],
+         },
+         "Td": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|reifiable3.php, 14:23-25),
+             ty: HH\TypeStructure<this::Td>,
+             origin: "\\C",
+             refs: [],
+         },
+         "Te": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|reifiable3.php, 17:14-16),
+             ty: HH\TypeStructure<this::Te>,
+             origin: "\\C",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|reifiable3.php, 5:16-17),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "Ta": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|reifiable3.php, 7:23-25),
+                 "Ta",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: None,
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: Some(
+                 Pos(root|reifiable3.php, 6:5-16),
+             ),
+             is_concretized: false,
+             is_ctx: false,
+         },
+         "Tb": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|reifiable3.php, 10:23-25),
+                 "Tb",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: None,
+                 super_constraint: None,
+                 default: Some(
+                     HH\vec<HH\vec<int>>,
+                 ),
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: Some(
+                 Pos(root|reifiable3.php, 9:5-16),
+             ),
+             is_concretized: false,
+             is_ctx: false,
+         },
+         "Tc": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|reifiable3.php, 12:14-16),
+                 "Tc",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: this::Ta,
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+         "Td": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|reifiable3.php, 14:23-25),
+                 "Td",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: None,
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+         "Te": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|reifiable3.php, 17:14-16),
+                 "Te",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: this::Td,
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: Some(
+                 Pos(root|reifiable3.php, 16:5-16),
+             ),
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\D",
+     pos: Pos(root|reifiable3.php, 20:13-14),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_final: true,
+     substs: {
+         "\\C": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\D",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\C": C,
+     },
+     consts: {
+         "Ta": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|reifiable3.php, 21:14-16),
+             ty: HH\TypeStructure<this::Ta>,
+             origin: "\\D",
+             refs: [],
+         },
+         "Tb": ClassConst {
+             is_synthesized: true,
+-            kind: CCConcrete,
++            kind: CCAbstract(
++                true,
++            ),
+             pos: Pos(root|reifiable3.php, 10:23-25),
+             ty: HH\TypeStructure<this::Tb>,
+             origin: "\\C",
+             refs: [],
+         },
+         "Tc": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|reifiable3.php, 12:14-16),
+             ty: HH\TypeStructure<this::Tc>,
+             origin: "\\C",
+             refs: [],
+         },
+         "Td": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|reifiable3.php, 22:14-16),
+             ty: HH\TypeStructure<this::Td>,
+             origin: "\\D",
+             refs: [],
+         },
+         "Te": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|reifiable3.php, 17:14-16),
+             ty: HH\TypeStructure<this::Te>,
+             origin: "\\C",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|reifiable3.php, 20:13-14),
+             ty: HH\classname<this>,
+             origin: "\\D",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "Ta": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|reifiable3.php, 21:14-16),
+                 "Ta",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: (int, HH\vec<int>),
+             },
+             origin: "\\D",
+             enforceable: None,
+             reifiable: Some(
+                 Pos(root|reifiable3.php, 6:5-16),
+             ),
+             is_concretized: false,
+             is_ctx: false,
+         },
+         "Tb": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|reifiable3.php, 10:23-25),
+                 "Tb",
+             ),
+-            kind: ConcreteTypeconst {
+-                ty: HH\vec<HH\vec<int>>,
++            kind: AbstractTypeconst {
++                as_constraint: None,
++                super_constraint: None,
++                default: Some(
++                    HH\vec<HH\vec<int>>,
++                ),
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: Some(
+                 Pos(root|reifiable3.php, 9:5-16),
+             ),
+-            is_concretized: true,
++            is_concretized: false,
+             is_ctx: false,
+         },
+         "Tc": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|reifiable3.php, 12:14-16),
+                 "Tc",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: this::Ta,
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+         "Td": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|reifiable3.php, 22:14-16),
+                 "Td",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: int,
+             },
+             origin: "\\D",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+         "Te": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|reifiable3.php, 17:14-16),
+                 "Te",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: this::Td,
+             },
+             origin: "\\C",
+             enforceable: None,
+             reifiable: Some(
+                 Pos(root|reifiable3.php, 16:5-16),
+             ),
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\C",
+     },
+ }
+ FoldedClass {
+     name: "\\E",
+     pos: Pos(root|reifiable3.php, 25:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     consts: {
+         "Tb": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|reifiable3.php, 27:23-25),
+             ty: HH\TypeStructure<this::Tb>,
+             origin: "\\E",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|reifiable3.php, 25:16-17),
+             ty: HH\classname<this>,
+             origin: "\\E",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "Tb": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|reifiable3.php, 27:23-25),
+                 "Tb",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     Foo,
+                 ),
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\E",
+             enforceable: None,
+             reifiable: Some(
+                 Pos(root|reifiable3.php, 26:5-16),
+             ),
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }

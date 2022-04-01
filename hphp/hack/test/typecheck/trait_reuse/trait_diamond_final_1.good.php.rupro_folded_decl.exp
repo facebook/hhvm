@@ -1,0 +1,161 @@
+--- ocaml
++++ rupro
+@@ -1,157 +1,157 @@
+ FoldedClass {
+     name: "\\T",
+     pos: Pos(root|trait_diamond_final_1.good.php, 6:7-8),
+     kind: Ctrait,
+     methods: {
+         "f": FoldedElement {
+             flags: FINAL,
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_diamond_final_1.good.php, 6:7-8),
+             ty: HH\classname<this>,
+             origin: "\\T",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\T1",
+     pos: Pos(root|trait_diamond_final_1.good.php, 10:7-9),
+     kind: Ctrait,
+     substs: {
+         "\\T": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\T1",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\T": T,
+     },
+     methods: {
+         "f": FoldedElement {
+             flags: FINAL,
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_diamond_final_1.good.php, 10:7-9),
+             ty: HH\classname<this>,
+             origin: "\\T1",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\T",
+     },
+ }
+ FoldedClass {
+     name: "\\T2",
+     pos: Pos(root|trait_diamond_final_1.good.php, 11:7-9),
+     kind: Ctrait,
+     substs: {
+         "\\T": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\T2",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\T": T,
+     },
+     methods: {
+         "f": FoldedElement {
+             flags: FINAL,
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_diamond_final_1.good.php, 11:7-9),
+             ty: HH\classname<this>,
+             origin: "\\T2",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\T",
+     },
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|trait_diamond_final_1.good.php, 14:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\T": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\T2",
++            class_context: "\\T1",
+             from_req_extends: false,
+         },
+         "\\T1": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\C",
+             from_req_extends: false,
+         },
+         "\\T2": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\C",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\T": T,
+         "\\T1": T1,
+         "\\T2": T2,
+     },
+     methods: {
+         "f": FoldedElement {
+             flags: FINAL,
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_diamond_final_1.good.php, 14:7-8),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\T",
+         "\\T1",
+         "\\T2",
+     },
+ }

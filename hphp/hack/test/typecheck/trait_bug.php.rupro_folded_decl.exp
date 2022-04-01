@@ -1,0 +1,274 @@
+--- ocaml
++++ rupro
+@@ -1,270 +1,270 @@
+ FoldedClass {
+     name: "\\QSIC",
+     pos: Pos(root|trait_bug.php, 4:16-20),
+     kind: Cclass(
+         Abstract,
+     ),
+     substs: {
+         "\\QIC": SubstContext {
+             subst: Subst(
+                 {
+                     "TCoerced": this::TCoerced,
+                 },
+             ),
+             class_context: "\\QSIC",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\QIC": QIC<this::TCoerced>,
+     },
+     consts: {
+         "TCoerced": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|trait_bug.php, 5:23-31),
+             ty: HH\TypeStructure<this::TCoerced>,
+             origin: "\\QSIC",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_bug.php, 4:16-20),
+             ty: HH\classname<this>,
+             origin: "\\QSIC",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TCoerced": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|trait_bug.php, 5:23-31),
+                 "TCoerced",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     nonnull,
+                 ),
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\QSIC",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\QIC",
+     },
+ }
+ FoldedClass {
+     name: "\\TQSIC",
+     pos: Pos(root|trait_bug.php, 9:7-12),
+     kind: Ctrait,
+     substs: {
+         "\\QIC": SubstContext {
+             subst: Subst(
+                 {
+                     "TCoerced": this::TCoerced,
+                 },
+             ),
+-            class_context: "\\TQSIC",
++            class_context: "\\QSIC",
+             from_req_extends: true,
+         },
+         "\\QSIC": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\TQSIC",
+             from_req_extends: true,
+         },
+     },
+     static_methods: {
+         "nonNullable": FoldedElement {
+             flags: FINAL,
+             origin: "\\TQSIC",
+             visibility: Public,
+             deprecated: None,
+         },
+         "nullable": FoldedElement {
+             flags: FINAL,
+             origin: "\\TQSIC",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\TQSIC",
+             visibility: Private(
+                 "\\TQSIC",
+             ),
+             deprecated: None,
+         },
+         ConsistentConstruct,
+     ),
+     consts: {
+         "TCoerced": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|trait_bug.php, 5:23-31),
+             ty: HH\TypeStructure<this::TCoerced>,
+             origin: "\\QSIC",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_bug.php, 9:7-12),
+             ty: HH\classname<this>,
+             origin: "\\TQSIC",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TCoerced": TypeConst {
+             is_synthesized: true,
+             name: (
+                 Pos(root|trait_bug.php, 5:23-31),
+                 "TCoerced",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     nonnull,
+                 ),
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\QSIC",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|trait_bug.php, 11:19-23),
+             QSIC,
+         ),
+         Requirement(
+             Pos(root|trait_bug.php, 12:19-22),
+             QIC<this::TCoerced>,
+         ),
+     ],
+     req_ancestors_extends: {
+         "\\QIC",
+         "\\QSIC",
+     },
+ }
+ FoldedClass {
+     name: "\\GNIC",
+     pos: Pos(root|trait_bug.php, 26:13-17),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_final: true,
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|trait_bug.php, 26:18-24),
+                 "TInner",
+             ),
+             tparams: [],
+             constraints: [
+                 (
+                     ConstraintAs,
+                     nonnull,
+                 ),
+             ],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     substs: {
+         "\\QIC": SubstContext {
+             subst: Subst(
+                 {
+                     "TCoerced": ?TInner,
+                 },
+             ),
+             class_context: "\\GNIC",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\QIC": QIC<?TInner>,
+     },
+     props: {
+         "innerCoercer": FoldedElement {
+             flags: FINAL | NEEDS_INIT,
+             origin: "\\GNIC",
+             visibility: Private(
+                 "\\GNIC",
+             ),
+             deprecated: None,
+         },
+     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\GNIC",
+             visibility: Public,
+             deprecated: None,
+         },
+         FinalClass,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_bug.php, 26:13-17),
+             ty: HH\classname<this>,
+             origin: "\\GNIC",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\QIC",
+     },
+ }
+ FoldedClass {
+     name: "\\QIC",
+     pos: Pos(root|trait_bug.php, 34:16-19),
+     kind: Cclass(
+         Abstract,
+     ),
+     tparams: [
+         Tparam {
+             variance: Covariant,
+             name: (
+                 Pos(root|trait_bug.php, 34:21-29),
+                 "TCoerced",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_bug.php, 34:16-19),
+             ty: HH\classname<this>,
+             origin: "\\QIC",
+             refs: [],
+         },
+     },
+ }

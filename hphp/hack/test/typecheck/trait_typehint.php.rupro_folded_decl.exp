@@ -1,0 +1,218 @@
+--- ocaml
++++ rupro
+@@ -1,214 +1,214 @@
+ FoldedClass {
+     name: "\\IParent",
+     pos: Pos(root|trait_typehint.php, 3:11-18),
+     kind: Cinterface,
+     consts: {
+         "CBAR": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|trait_typehint.php, 4:9-13),
+             ty: string,
+             origin: "\\IParent",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_typehint.php, 3:11-18),
+             ty: HH\classname<this>,
+             origin: "\\IParent",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\CParent",
+     pos: Pos(root|trait_typehint.php, 7:16-23),
+     kind: Cclass(
+         Abstract,
+     ),
+     substs: {
+         "\\IParent": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\CParent",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\IParent": IParent,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\CParent",
+             visibility: Protected(
+                 "\\CParent",
+             ),
+             deprecated: None,
+         },
+     },
+     consts: {
+         "CBAR": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|trait_typehint.php, 4:9-13),
+             ty: string,
+             origin: "\\IParent",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_typehint.php, 7:16-23),
+             ty: HH\classname<this>,
+             origin: "\\CParent",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\Kid",
+     pos: Pos(root|trait_typehint.php, 13:16-19),
+     kind: Cclass(
+         Abstract,
+     ),
+     substs: {
+         "\\CParent": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Kid",
+             from_req_extends: false,
+         },
+         "\\IParent": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\CParent",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\CParent": CParent,
+         "\\IParent": IParent,
+     },
+     methods: {
+         "bar": FoldedElement {
+             flags: (empty),
+             origin: "\\Kid",
+             visibility: Protected(
+                 "\\Kid",
+             ),
+             deprecated: None,
+         },
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\CParent",
+             visibility: Protected(
+                 "\\CParent",
+             ),
+             deprecated: None,
+         },
+     },
+     consts: {
+         "CBAR": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|trait_typehint.php, 4:9-13),
+             ty: string,
+             origin: "\\IParent",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_typehint.php, 13:16-19),
+             ty: HH\classname<this>,
+             origin: "\\Kid",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\CParent",
+     },
+ }
+ FoldedClass {
+     name: "\\KidTrait",
+     pos: Pos(root|trait_typehint.php, 17:7-15),
+     kind: Ctrait,
+     substs: {
+         "\\CParent": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\KidTrait",
++            class_context: "\\Kid",
+             from_req_extends: true,
+         },
+         "\\IParent": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\CParent",
+             from_req_extends: true,
+         },
+         "\\Kid": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\KidTrait",
+             from_req_extends: true,
+         },
+     },
+     methods: {
+         "bar": FoldedElement {
+             flags: SYNTHESIZED,
+             origin: "\\Kid",
+             visibility: Protected(
+                 "\\Kid",
+             ),
+             deprecated: None,
+         },
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\KidTrait",
+             visibility: Protected(
+                 "\\CParent",
+             ),
+             deprecated: None,
+         },
+     },
+     consts: {
+         "CBAR": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_typehint.php, 4:9-13),
+             ty: string,
+             origin: "\\IParent",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_typehint.php, 17:7-15),
+             ty: HH\classname<this>,
+             origin: "\\KidTrait",
+             refs: [],
+         },
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|trait_typehint.php, 18:19-22),
+             Kid,
+         ),
+         Requirement(
+             Pos(root|trait_typehint.php, 19:19-26),
+             CParent,
+         ),
+     ],
+     req_ancestors_extends: {
+         "\\CParent",
+         "\\Kid",
+     },
+ }

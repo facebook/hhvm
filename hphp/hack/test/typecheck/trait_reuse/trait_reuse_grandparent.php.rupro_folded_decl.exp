@@ -1,0 +1,174 @@
+--- ocaml
++++ rupro
+@@ -1,170 +1,170 @@
+ FoldedClass {
+     name: "\\ReusedTrait",
+     pos: Pos(root|trait_reuse_grandparent.php, 3:7-18),
+     kind: Ctrait,
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_grandparent.php, 3:7-18),
+             ty: HH\classname<this>,
+             origin: "\\ReusedTrait",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\One",
+     pos: Pos(root|trait_reuse_grandparent.php, 7:7-10),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\One",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\ReusedTrait": ReusedTrait,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_grandparent.php, 7:7-10),
+             ty: HH\classname<this>,
+             origin: "\\One",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\ReusedTrait",
+     },
+ }
+ FoldedClass {
+     name: "\\Two",
+     pos: Pos(root|trait_reuse_grandparent.php, 11:7-10),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\One": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Two",
+             from_req_extends: false,
+         },
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\One",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\One": One,
+         "\\ReusedTrait": ReusedTrait,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_grandparent.php, 11:7-10),
+             ty: HH\classname<this>,
+             origin: "\\Two",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\One",
+         "\\ReusedTrait",
+     },
+ }
+ FoldedClass {
+     name: "\\BadClass",
+     pos: Pos(root|trait_reuse_grandparent.php, 14:7-15),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\One": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Two",
+             from_req_extends: false,
+         },
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\BadClass",
++            class_context: "\\One",
+             from_req_extends: false,
+         },
+         "\\Two": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\BadClass",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\One": One,
+         "\\ReusedTrait": ReusedTrait,
+         "\\Two": Two,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_grandparent.php, 14:7-15),
+             ty: HH\classname<this>,
+             origin: "\\BadClass",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\One",
+         "\\ReusedTrait",
+         "\\Two",
+     },
+ }

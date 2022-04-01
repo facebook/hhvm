@@ -1,0 +1,217 @@
+--- ocaml
++++ rupro
+@@ -1,213 +1,213 @@
+ FoldedClass {
+     name: "\\ReusedTrait",
+     pos: Pos(root|trait_reuse_multiple_routes.php, 3:7-18),
+     kind: Ctrait,
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_multiple_routes.php, 3:7-18),
+             ty: HH\classname<this>,
+             origin: "\\ReusedTrait",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\XOne",
+     pos: Pos(root|trait_reuse_multiple_routes.php, 7:7-11),
+     kind: Ctrait,
+     substs: {
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\XOne",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\ReusedTrait": ReusedTrait,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_multiple_routes.php, 7:7-11),
+             ty: HH\classname<this>,
+             origin: "\\XOne",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\ReusedTrait",
+     },
+ }
+ FoldedClass {
+     name: "\\YOne",
+     pos: Pos(root|trait_reuse_multiple_routes.php, 11:7-11),
+     kind: Ctrait,
+     substs: {
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\YOne",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\ReusedTrait": ReusedTrait,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_multiple_routes.php, 11:7-11),
+             ty: HH\classname<this>,
+             origin: "\\YOne",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\ReusedTrait",
+     },
+ }
+ FoldedClass {
+     name: "\\YTwo",
+     pos: Pos(root|trait_reuse_multiple_routes.php, 12:7-11),
+     kind: Ctrait,
+     substs: {
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\YOne",
+             from_req_extends: false,
+         },
+         "\\YOne": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\YTwo",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\ReusedTrait": ReusedTrait,
+         "\\YOne": YOne,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_multiple_routes.php, 12:7-11),
+             ty: HH\classname<this>,
+             origin: "\\YTwo",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\ReusedTrait",
+         "\\YOne",
+     },
+ }
+ FoldedClass {
+     name: "\\MyParent",
+     pos: Pos(root|trait_reuse_multiple_routes.php, 17:7-15),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\ReusedTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+-            class_context: "\\XOne",
++            class_context: "\\YOne",
+             from_req_extends: false,
+         },
+         "\\XOne": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyParent",
+             from_req_extends: false,
+         },
+         "\\YOne": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\YTwo",
+             from_req_extends: false,
+         },
+         "\\YTwo": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\MyParent",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\ReusedTrait": ReusedTrait,
+         "\\XOne": XOne,
+         "\\YOne": YOne,
+         "\\YTwo": YTwo,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: FINAL,
+             origin: "\\ReusedTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_reuse_multiple_routes.php, 17:7-15),
+             ty: HH\classname<this>,
+             origin: "\\MyParent",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\ReusedTrait",
+         "\\XOne",
+         "\\YOne",
+         "\\YTwo",
+     },
+ }

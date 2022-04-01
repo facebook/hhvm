@@ -1,0 +1,40 @@
+File root|xhp_modifier_extend_colon_syntax.php--xhp_modifier_extend_colon_syntax_usage.php
+--- ocaml
++++ rupro
+@@ -1,34 +1,25 @@
+ FoldedClass {
+     name: "\\user\\usesfoobar",
+     pos: Pos(root|xhp_modifier_extend_colon_syntax.php--xhp_modifier_extend_colon_syntax_usage.php, 5:11-21),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_xhp: true,
+     has_xhp_keyword: true,
+-    substs: {
+-        "\\foo\\bar": SubstContext {
+-            subst: Subst(
+-                {},
+-            ),
+-            class_context: "\\user\\usesfoobar",
+-            from_req_extends: false,
+-        },
+-    },
+     ancestors: {
+-        "\\foo\\bar": foo\bar,
++        "\\user\\:foo:bar": user\:foo:bar,
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|xhp_modifier_extend_colon_syntax.php--xhp_modifier_extend_colon_syntax_usage.php, 5:11-21),
+             ty: HH\classname<this>,
+             origin: "\\user\\usesfoobar",
+             refs: [],
+         },
+     },
+     extends: {
+-        "\\foo\\bar",
++        "\\user\\:foo:bar",
+     },
+ }

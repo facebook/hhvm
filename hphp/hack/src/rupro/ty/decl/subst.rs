@@ -9,21 +9,21 @@ use crate::{
 };
 
 use eq_modulo_pos::EqModuloPos;
-use pos::TypeNameMap;
+use pos::TypeNameIndexMap;
 use serde::{Deserialize, Serialize};
 
 /// Maps type names to types with which to replace them.
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
-pub struct Subst<R: Reason>(pub TypeNameMap<DeclTy<R>>);
+pub struct Subst<R: Reason>(pub TypeNameIndexMap<DeclTy<R>>);
 
-impl<R: Reason> From<TypeNameMap<DeclTy<R>>> for Subst<R> {
-    fn from(map: TypeNameMap<DeclTy<R>>) -> Self {
+impl<R: Reason> From<TypeNameIndexMap<DeclTy<R>>> for Subst<R> {
+    fn from(map: TypeNameIndexMap<DeclTy<R>>) -> Self {
         Self(map)
     }
 }
 
-impl<R: Reason> From<Subst<R>> for TypeNameMap<DeclTy<R>> {
+impl<R: Reason> From<Subst<R>> for TypeNameIndexMap<DeclTy<R>> {
     fn from(subst: Subst<R>) -> Self {
         subst.0
     }

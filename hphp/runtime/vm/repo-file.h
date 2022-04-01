@@ -185,22 +185,20 @@ struct RepoFile {
                   const Native::FuncTable& nativeFuncs,
                   bool lazy);
 
-  // Load the bytecode for the UnitEmitter given by the SN. The token
-  // gives the offset of the bytecode. The bytecode will be read into
-  // the given buffer (the given buffer length must match the size of
-  // the bytecode). This is used for lazy bytecode loading (if lazy
-  // loading was specified when the UnitEmitter was loaded).
-  static void loadBytecode(int64_t unitSn,
-                           Token token,
-                           unsigned char* bc,
-                           size_t bclen);
+  // Given an unit's SN, and a token for that unit, return the amount
+  // of data after that token for the unit. This is used for lazy
+  // loading various data out of the unit, where the amount of
+  // remaining space needs to be known.
+  static size_t remainingSizeOfUnit(int64_t unitSn, Token token);
 
-  // Load the line table for the UnitEmitter given by the SN. The
-  // token gives the offset of the line table. This is used for lazy
-  // loading line tables (if lazy loading was specified when the
-  // UnitEmitter was loaded).
-  static LineTable loadLineTable(int64_t unitSn,
-                                 Token token);
+  // Read "len" bytes of data (into "data") from an unit given by a
+  // SN, and a token for that unit. The pointer must be allocated with
+  // at least len free space. This is used for lazy loading various
+  // bits of UnitEmitters.
+  static void readRawFromUnit(int64_t unitSn,
+                              Token token,
+                              unsigned char* data,
+                              size_t len);
 
   // Map an UnitEmitter's path to its associated SN (returning -1 if
   // no such UnitEmitter exists).

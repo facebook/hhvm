@@ -108,11 +108,9 @@ struct FuncEmitter {
   // BlobDecoder must be at the correct offset).
   static void deserializeLineTable(BlobDecoder&, LineTable&);
 
-  // Like deserializeLineTable, but allows for the BlobDecoder to not
-  // have enough data. Returns the size of the encoded LineTable. If
-  // the returned size is greater than the size of the given
-  // BlobDecoder, nothing is read.
-  static size_t optDeserializeLineTable(BlobDecoder&, LineTable&);
+  // Load a line table out of the unit given by the SN at the given
+  // token. The token is the offset of the line table within the unit.
+  static LineTable loadLineTableFromRepo(int64_t, RepoFile::Token);
 
   /////////////////////////////////////////////////////////////////////////////
   // Metadata.

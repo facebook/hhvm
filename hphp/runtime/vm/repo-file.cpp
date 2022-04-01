@@ -237,7 +237,6 @@ constexpr size_t kArrayTableSizeLimit        = 1ull << 33;
 constexpr size_t kArrayTypesSizeLimit        = 1ull << 28;
 constexpr size_t kLiteralTableSizeLimit      = 1ull << 33;
 constexpr size_t kUnitEmitterSizeLimit       = 1ull << 33;
-constexpr size_t kLineTableSizeLimit         = 1ull << 32;
 
 // Blob of data containing the sizes of the various sections. This is
 // stored near the beginning of the file and can be used to compute
@@ -1061,10 +1060,7 @@ RepoFile::loadUnitEmitter(const StringData* searchPath,
   return ue;
 }
 
-void RepoFile::loadBytecode(int64_t unitSn,
-                            Token token,
-                            unsigned char* bc,
-                            size_t bclen) {
+size_t RepoFile::remainingSizeOfUnit(int64_t unitSn, Token token) {
   assertx(s_repoFileData);
   assertx(s_repoFileData->loadedUnitEmitterIndices.load());
   assertx(unitSn >= 0);
@@ -1072,61 +1068,24 @@ void RepoFile::loadBytecode(int64_t unitSn,
   assertx(unitSn < data.unitInfo.size());
   auto const& info = data.unitInfo[unitSn];
   assertx(info.valid());
-  assertx(token + bclen <= info.location.size);
-  data.fd.pread(
-    bc, bclen, data.unitEmittersOffset + info.location.offset + token
-  );
+  assertx(token <= info.location.size);
+  return info.location.size - token;
 }
 
-LineTable RepoFile::loadLineTable(int64_t unitSn,
-                                  Token token) {
+void RepoFile::readRawFromUnit(int64_t unitSn, Token token,
+                               unsigned char* ptr, size_t len) {
   assertx(s_repoFileData);
   assertx(s_repoFileData->loadedUnitEmitterIndices.load());
   assertx(unitSn >= 0);
-  auto& data = *s_repoFileData;
+  auto const& data = *s_repoFileData;
   assertx(unitSn < data.unitInfo.size());
-  auto& info = data.unitInfo[unitSn];
+  auto const& info = data.unitInfo[unitSn];
   assertx(info.valid());
-
   assertx(token <= info.location.size);
-  auto const size = std::min<size_t>(info.location.size - token, 128);
-  size_t actualSize;
-
-  {
-    auto blob = loadBlob(
-      data.fd,
-      data.unitEmittersOffset + info.location.offset + token,
-      size,
-      false
-    );
-
-    LineTable lineTable;
-    actualSize = FuncEmitter::optDeserializeLineTable(blob.decoder, lineTable);
-    if (actualSize <= size) return lineTable;
-  }
-  always_assert_flog(
-    actualSize <= kLineTableSizeLimit,
-    "Invalid line table size for {} in {}: "
-    "{} exceeds maximum line table size of {}",
-    info.getPath(data), data.path, actualSize, kLineTableSizeLimit
+  always_assert(token + len <= info.location.size);
+  data.fd.pread(
+    ptr, len, data.unitEmittersOffset + info.location.offset + token
   );
-  always_assert_flog(
-    actualSize <= info.location.size - token,
-    "Invalid line table size for {} in {}: "
-    "{} exceeds remaining unit-emitter size of {}",
-    info.getPath(data), data.path, actualSize, info.location.size - token
-  );
-
-  auto blob = loadBlob(
-    data.fd,
-    data.unitEmittersOffset + info.location.offset + token,
-    actualSize,
-    false
-  );
-  LineTable lineTable;
-  FuncEmitter::deserializeLineTable(blob.decoder, lineTable);
-  blob.decoder.assertDone();
-  return lineTable;
 }
 
 int64_t RepoFile::findUnitSN(const StringData* path) {

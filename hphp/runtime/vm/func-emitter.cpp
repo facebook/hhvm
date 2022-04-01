@@ -593,7 +593,7 @@ Optional<Func::BCPtr::Token> FuncEmitter::loadBc() {
   assertx(RO::RepoAuthoritative);
   auto const old = m_bc.token();
   auto bc = (unsigned char*)malloc(m_bclen);
-  RepoFile::loadBytecode(m_ue.m_sn, old, bc, m_bclen);
+  RepoFile::readRawFromUnit(m_ue.m_sn, old, bc, m_bclen);
   m_bc = Func::BCPtr::FromPtr(bc);
   return old;
 }
@@ -786,14 +786,42 @@ void FuncEmitter::deserializeLineTable(BlobDecoder& decoder,
   );
 }
 
-size_t FuncEmitter::optDeserializeLineTable(BlobDecoder& decoder,
-                                            LineTable& lineTable) {
-  // We encoded the size of the line table along with the table. So,
-  // peek its size and bail if the decoder doesn't have enough data
-  // remaining.
-  auto const size = decoder.peekSize();
-  if (size <= decoder.remaining()) deserializeLineTable(decoder, lineTable);
-  return size;
+LineTable FuncEmitter::loadLineTableFromRepo(int64_t unitSn,
+                                             RepoFile::Token token) {
+  assertx(RO::RepoAuthoritative);
+
+  auto const remaining = RepoFile::remainingSizeOfUnit(unitSn, token);
+  always_assert(remaining >= sizeof(uint64_t));
+  auto const size = std::min<size_t>(remaining, 128);
+
+  auto data = std::make_unique<unsigned char[]>(size);
+  RepoFile::readRawFromUnit(unitSn, token, data.get(), size);
+
+  size_t actualSize;
+  {
+    // We encoded the size of the line table along with the table. So,
+    // peek its size and bail if the decoder doesn't have enough data
+    // remaining.
+    BlobDecoder decoder{data.get(), size, false};
+    actualSize = decoder.peekSize();
+    if (actualSize <= decoder.remaining()) {
+      LineTable lineTable;
+      deserializeLineTable(decoder, lineTable);
+      return lineTable;
+    }
+  }
+
+  constexpr const size_t kLineTableSizeLimit = 1ull << 32;
+  always_assert(actualSize <= kLineTableSizeLimit);
+  always_assert(actualSize <= remaining);
+
+  LineTable lineTable;
+  data = std::make_unique<unsigned char[]>(actualSize);
+  RepoFile::readRawFromUnit(unitSn, token, data.get(), actualSize);
+  BlobDecoder decoder{data.get(), actualSize, false};
+  deserializeLineTable(decoder, lineTable);
+  decoder.assertDone();
+  return lineTable;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

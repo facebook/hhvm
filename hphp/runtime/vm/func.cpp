@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/cti.h"
+#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -975,8 +976,9 @@ const LineTable& Func::getOrLoadLineTable() const {
     return *table.ptr();
   }
 
-  auto newTable =
-    new LineTable{RepoFile::loadLineTable(m_unit->sn(), table.token())};
+  auto newTable = new LineTable{
+    FuncEmitter::loadLineTableFromRepo(m_unit->sn(), table.token())
+  };
   wrapper.update_and_unlock(LineTablePtr::FromPtr(newTable));
   return *newTable;
 }
@@ -988,7 +990,7 @@ LineTable Func::getOrLoadLineTableCopy() const {
     return *table.ptr();
   }
   assertx(RO::RepoAuthoritative);
-  return RepoFile::loadLineTable(m_unit->sn(), table.token());
+  return FuncEmitter::loadLineTableFromRepo(m_unit->sn(), table.token());
 }
 
 int Func::getLineNumber(Offset offset) const {
@@ -1124,7 +1126,7 @@ PC Func::loadBytecode() {
   auto const length = bclen();
   g_hhbc_size->addValue(length);
   auto mem = (unsigned char*)bytecode_arena().allocate(length);
-  RepoFile::loadBytecode(m_unit->sn(), bc.token(), mem, length);
+  RepoFile::readRawFromUnit(m_unit->sn(), bc.token(), mem, length);
   wrapper.update_and_unlock(BCPtr::FromPtr(mem));
   return mem;
 }

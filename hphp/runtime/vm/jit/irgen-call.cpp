@@ -1004,8 +1004,10 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
       if (cls) {
         assertx(!isInterface(cls));
         obj = gen(env, AssertType, Type::SubObj(cls), obj);
+        auto const callCtx =
+          MethodLookupCallContext(callContext(env, fca, cls), curFunc(env));
         return lookupImmutableObjMethod(cls, methodName->strVal(),
-                                        callContext(env, fca, cls), true);
+                                        callCtx, true);
       }
     }
 
@@ -1016,8 +1018,10 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
         // case the class isn't known exactly.
         auto const exactClass =
           obj->type().clsSpec().exact() || cls->attrs() & AttrNoOverride;
+        auto const callCtx =
+          MethodLookupCallContext(callContext(env, fca, cls), curFunc(env));
         return lookupImmutableObjMethod(cls, methodName->strVal(),
-                                        callContext(env, fca, cls), exactClass);
+                                        callCtx, exactClass);
       }
     }
 
@@ -1242,7 +1246,8 @@ void emitResolveMethCaller(IRGS& env, const StringData* name) {
   auto const ok = [&] () -> bool {
     auto const cls = lookupUniqueClass(env, className);
     if (cls && !isTrait(cls)) {
-      auto const res = lookupImmutableObjMethod(cls, methodName, curClass(env),
+      auto const callCtx = MethodLookupCallContext(curClass(env), curFunc(env));
+      auto const res = lookupImmutableObjMethod(cls, methodName, callCtx,
                                                 false);
       return res.func && checkMethCallerTarget(res.func, curClass(env), false);
     }
@@ -1463,7 +1468,8 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
     return obj->type().clsSpec().exactCls();
   }();
   if (exactCls) {
-    if (auto const ctor = lookupImmutableCtor(exactCls, curClass(env))) {
+    auto const callCtx = MethodLookupCallContext(curClass(env), curFunc(env));
+    if (auto const ctor = lookupImmutableCtor(exactCls, callCtx)) {
       return prepareAndCallKnown(env, ctor, fca, obj, false, false);
     }
   }
@@ -1577,8 +1583,9 @@ void emitFCallClsMethodD(IRGS& env,
   // TODO: take advantage of classHint if it is unique, but className is not
   auto const cls = lookupUniqueClass(env, className);
   if (cls) {
-    auto const func = lookupImmutableClsMethod(cls, methodName,
-                                               callContext(env, fca, cls), true);
+    auto const callCtx =
+      MethodLookupCallContext(callContext(env, fca, cls), curFunc(env));
+    auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
     if (func) {
       if (!classIsPersistentOrCtxParent(env, cls)) {
         gen(env, LdClsCached, cns(env, className));
@@ -1632,8 +1639,9 @@ SSATmp* lookupClsMethodKnown(IRGS& env,
                              bool forward,
                              SSATmp*& calleeCtx,
                              const Class* ctx) {
+  auto const callCtx = MethodLookupCallContext(ctx, curFunc(env));
   auto const func = lookupImmutableClsMethod(
-    baseClass, methodName, ctx, exact);
+    baseClass, methodName, callCtx, exact);
   if (!func) return nullptr;
 
   auto funcTmp = exact || func->isImmutableFrom(baseClass)
@@ -1724,8 +1732,8 @@ void emitResolveClsMethodD(IRGS& env, const StringData* className,
                            const StringData* methodName) {
   auto const cls = lookupUniqueClass(env, className, false /* trustUnit */);
   if (cls) {
-    auto const func = lookupImmutableClsMethod(cls, methodName, curClass(env),
-                                               true);
+    auto const callCtx = MethodLookupCallContext(curClass(env), curFunc(env));
+    auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
     if (func) {
       checkClsMethodAndLdCtx(env, cls, func, className);
 
@@ -1768,7 +1776,8 @@ void emitResolveRClsMethodD(IRGS& env, const StringData* className,
 
   auto const cls = lookupUniqueClass(env, className, false /* trustUnit */);
   if (cls) {
-    auto const func = lookupImmutableClsMethod(cls, methodName, curClass(env), true);
+    auto const callCtx = MethodLookupCallContext(curClass(env), curFunc(env));
+    auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
     if (func) {
       checkClsMethodAndLdCtx(env, cls, func, className);
 

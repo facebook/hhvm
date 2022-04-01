@@ -1925,6 +1925,7 @@ bool checkForKnownInstanceMethod(SrcKey sk) {
   }
 
   auto const ctx = vmfp() ? vmfp()->func()->cls() : nullptr;
+  auto const callCtx = MethodLookupCallContext(ctx, vmfp()->func());
   auto const spec = box->type.clsSpec();
   auto const hint = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
   auto const hinted = !hint->empty()
@@ -1933,8 +1934,8 @@ bool checkForKnownInstanceMethod(SrcKey sk) {
 
   auto const func = [&]() -> const Func* {
     if (op == Op::FCallCtor) {
-      return hinted ? lookupImmutableCtor(hinted, ctx)
-                    : lookupImmutableCtor(spec.exactCls(), ctx);
+      return hinted ? lookupImmutableCtor(hinted, callCtx)
+                    : lookupImmutableCtor(spec.exactCls(), callCtx);
     }
     auto const name = [&]{
       if (op == Op::FCallObjMethodD) {
@@ -1945,8 +1946,8 @@ bool checkForKnownInstanceMethod(SrcKey sk) {
     }();
     if (!name) return nullptr;
     auto const result = hinted
-      ? lookupImmutableObjMethod(hinted, name, ctx, true)
-      : lookupImmutableObjMethod(spec.cls(), name, ctx, spec.exact());
+      ? lookupImmutableObjMethod(hinted, name, callCtx, true)
+      : lookupImmutableObjMethod(spec.cls(), name, callCtx, spec.exact());
     if (result.type != ImmutableObjMethodLookup::Type::Func) return nullptr;
     if (result.func->isStaticInPrologue()) return nullptr;
     return result.func;

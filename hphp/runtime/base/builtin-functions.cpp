@@ -293,7 +293,10 @@ const Func* vm_decode_func_from_name(
   Class* cc,
   DecodeFlags flags) {
   CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
-  auto f = lookupMethodCtx(cc, funcName.get(), ctx, lookupType,
+  auto const moduleName =
+    ar ? ar->func()->unit()->moduleName() : (const StringData*)nullptr;
+  auto const callCtx = MethodLookupCallContext(ctx, moduleName);
+  auto f = lookupMethodCtx(cc, funcName.get(), callCtx, lookupType,
                            MethodLookupErrorOptions::None);
   if (f && (f->attrs() & AttrStatic)) {
     // If we found a method and its static, null out this_

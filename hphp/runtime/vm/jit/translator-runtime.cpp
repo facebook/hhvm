@@ -467,8 +467,10 @@ void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck) {
 const Func* loadClassCtor(Class* cls, Class* ctx) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
+    // TODO(T115356820): Pass module name to the context
+    auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
     UNUSED auto func =
-      lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod,
+      lookupMethodCtx(cls, nullptr, callCtx, CallType::CtorMethod,
                       MethodLookupErrorOptions::RaiseOnNotFound);
     assertx(func == f);
   }
@@ -478,7 +480,9 @@ const Func* loadClassCtor(Class* cls, Class* ctx) {
 const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
                                   ObjectData* obj, const Class* ctx) {
   const Func* f;
-  auto const res = lookupClsMethod(f, cls, methName, obj, ctx,
+  // TODO(T115356820): Pass module name to the context
+  auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
+  auto const res = lookupClsMethod(f, cls, methName, obj, callCtx,
                                    MethodLookupErrorOptions::RaiseOnNotFound);
 
   if (res == LookupResult::MethodFoundWithThis) {

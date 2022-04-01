@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "hphp/util/either.h"
+
 namespace HPHP {
 
 struct Func;
@@ -41,16 +43,26 @@ enum class MethodLookupErrorOptions {
   RaiseOnNotFound            = (1u << 0),
 };
 
+struct MethodLookupCallContext {
+  MethodLookupCallContext(const Class*, const Func*);
+  MethodLookupCallContext(const Class*, const StringData*);
+
+  const Class* cls() const;
+  const StringData* moduleName() const;
+private:
+  Either<const Class*, const StringData*> m_data;
+};
+
 const Func* lookupMethodCtx(const Class* cls,
                             const StringData* methodName,
-                            const Class* pctx,
+                            const MethodLookupCallContext& callCtx,
                             CallType lookupType,
                             MethodLookupErrorOptions raise);
 
 LookupResult lookupObjMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
-                             const Class* ctx,
+                             const MethodLookupCallContext& callCtx,
                              MethodLookupErrorOptions raise);
 
 /*
@@ -86,14 +98,16 @@ struct ImmutableObjMethodLookup {
 };
 
 ImmutableObjMethodLookup
-lookupImmutableObjMethod(const Class* cls, const StringData* name,
-                         const Class* ctx, bool exactClass);
+lookupImmutableObjMethod(const Class* cls,
+                         const StringData* name,
+                         const MethodLookupCallContext& callCtx,
+                         bool exactClass);
 
 LookupResult lookupClsMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
                              ObjectData* this_,
-                             const Class* ctx,
+                             const MethodLookupCallContext& callCtx,
                              MethodLookupErrorOptions raise);
 
 /*
@@ -114,12 +128,14 @@ LookupResult lookupClsMethod(const Func*& f,
  *
  * Returns nullptr if we can't determine the Func*.
  */
-const Func* lookupImmutableClsMethod(const Class* cls, const StringData* name,
-                                     const Class* ctx, bool exactClass);
+const Func* lookupImmutableClsMethod(const Class* cls,
+                                     const StringData* name,
+                                     const MethodLookupCallContext& callCtx,
+                                     bool exactClass);
 
 LookupResult lookupCtorMethod(const Func*& f,
                               const Class* cls,
-                              const Class* ctx,
+                              const MethodLookupCallContext& callCtx,
                               MethodLookupErrorOptions raise);
 
 /*
@@ -130,7 +146,8 @@ LookupResult lookupCtorMethod(const Func*& f,
  * that cls is the right Class* (ie its AttrUnique or bound to the
  * ctx, or otherwise guaranteed by guards).
  */
-const Func* lookupImmutableCtor(const Class* cls, const Class* ctx);
+const Func* lookupImmutableCtor(const Class* cls,
+                                const MethodLookupCallContext& callCtx);
 
 /*
  * Find a function which always uniquely maps to the given name in the context

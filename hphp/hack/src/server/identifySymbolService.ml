@@ -775,6 +775,30 @@ let keywords ctx entry : Result_set.elt list =
           pos = token_pos t;
         }
         :: acc
+      | Token.TokenKind.Public ->
+        {
+          name = "public";
+          type_ = Keyword Public;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
+      | Token.TokenKind.Protected ->
+        {
+          name = "protected";
+          type_ = Keyword Protected;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
+      | Token.TokenKind.Private ->
+        {
+          name = "private";
+          type_ = Keyword Private;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
       | Token.TokenKind.Async ->
         {
           name = "async";

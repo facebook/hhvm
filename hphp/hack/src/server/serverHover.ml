@@ -349,6 +349,19 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
     ^ await_explanation
   | SymbolOccurrence.Concurrent ->
     "`concurrent` allows you to `await` multiple values at once. This is similar to `Vec\\map_async`, but `concurrent` allows awaiting unrelated values of different types."
+  | SymbolOccurrence.Public ->
+    "A `public` method or property has no restrictions on access. It can be accessed from any part of the codebase."
+    ^ "\n\nSee also `protected` and `private`."
+  | SymbolOccurrence.Protected ->
+    "A `protected` method or property can only be accessed from methods defined on the current class, or methods on subclasses."
+    ^ "\n\nIf the current class `use`s a trait, the trait methods can also access `protected` methods and properties."
+    ^ "\n\nSee also `public` and `private`."
+  | SymbolOccurrence.Private ->
+    "A `private` method or property can only be accessed from methods defined on the current class."
+    ^ "\n\nPrivate items can be accessed on any instance of the current class. "
+    ^ "For example, if you have a private property `name`, you can access both `$this->name` and `$other_instance->name`."
+    ^ "\n\nIf the current class `use`s a trait, the trait methods can also access `private` methods and properties."
+    ^ "\n\nSee also `public` and `protected`."
 
 let make_hover_info ctx env_and_ty entry occurrence def_opt =
   SymbolOccurrence.(

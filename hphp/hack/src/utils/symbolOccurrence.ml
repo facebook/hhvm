@@ -39,6 +39,9 @@ type keyword_with_hover_docs =
   | AsyncBlock
   | Await
   | Concurrent
+  | Public
+  | Protected
+  | Private
 [@@deriving ord, eq]
 
 type built_in_type_hint =

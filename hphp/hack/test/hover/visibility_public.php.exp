@@ -1,0 +1,4 @@
+public
+A `public` method or property has no restrictions on access. It can be accessed from any part of the codebase.
+
+See also `protected` and `private`.

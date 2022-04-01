@@ -339,10 +339,15 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 flags: ClassEltFlags::new(flag_args),
             }
         });
-        *constructor = Constructor::new(
-            elt,
-            ConsistentKind::coalesce(constructor.consistency, consistency),
-        )
+
+        let consistency = ConsistentKind::coalesce(constructor.consistency, consistency);
+        if elt.is_none() {
+            // Child class doesn't define ctor; just update consistency.
+            constructor.consistency = consistency;
+        } else {
+            // Child constructor exists, replace wholesale.
+            *constructor = Constructor::new(elt, consistency)
+        }
     }
 
     fn get_implements(&self, ty: &DeclTy<R>, ancestors: &mut TypeNameIndexMap<DeclTy<R>>) {

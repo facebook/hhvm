@@ -49,6 +49,7 @@
 # having the $k_* locals in test_unwind_dirty_stack_regs()
 # getting caught in the $context parameter to handler()
 .function get_undefined_var() {
+  .declvars $k_99;
   CGetL $k_99  # undefined variable
   RetC
 }
@@ -61,6 +62,7 @@
 # stack.
 
 .function test_unwind_dirty_stack_regs() {
+  .declvars $k_0 $k_1 $k_2;
   NullUninit
   NullUninit
     Int 0

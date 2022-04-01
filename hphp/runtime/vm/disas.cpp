@@ -427,7 +427,11 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
       if (!std::all_of(local.begin(), local.end(), is_bareword())) {
         local = escaped(local);
       }
-      locals.push_back(local);
+      if (local[0] != '_') {
+        // Unnamed locals are assigned a null name.
+        // Skip them here so .declvars only lists real named locals.
+        locals.push_back(local);
+      }
     }
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }

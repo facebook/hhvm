@@ -20,6 +20,7 @@
 
 .function ["__EntryPoint"("""y:0:{}""")] main {
   .numiters 1;
+  .declvars $i;
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "R"

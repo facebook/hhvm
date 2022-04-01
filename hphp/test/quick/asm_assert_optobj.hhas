@@ -27,6 +27,7 @@
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $object;
   NewObjD "Foo"
   Dup
   NullUninit

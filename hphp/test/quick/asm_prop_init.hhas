@@ -52,6 +52,7 @@
 }
 
 .function do_test($who) {
+  .declvars $obj;
   CGetL $who
   ClassGetC
   ClsCns "BAR"

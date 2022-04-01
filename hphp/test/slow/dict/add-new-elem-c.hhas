@@ -3,6 +3,7 @@
 #
 
 .function ["__EntryPoint"("""y:0:{}""")] main {
+  .declvars $v;
   NewDictArray 1
   Int 100
   AddNewElemC

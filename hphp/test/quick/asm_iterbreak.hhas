@@ -1,5 +1,6 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   .numiters 2;
+  .declvars $0 $1 $2 $3 $4;
   NewDictArray 3
 
   String "hello"

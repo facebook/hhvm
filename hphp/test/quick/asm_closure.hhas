@@ -10,6 +10,7 @@
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] main {
+  .declvars $x;
   Int 20
   SetL $x
   PopC

@@ -2,6 +2,7 @@
 # NSame opcode.
 
 .function foo($a, $b) {
+  .declvars $k $k2;
   CGetL $a
   Dup
   CGetL $b
@@ -26,6 +27,7 @@
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $a $b;
   Int 1
   Int 2
   Int 3

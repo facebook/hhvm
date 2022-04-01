@@ -46,6 +46,7 @@ end:
 }
 
 .function test_outer($type, $x) {
+  .declvars $obj;
   CGetL $type
   JmpZ cls2
 
@@ -84,6 +85,7 @@ cls2:
 }
 
 .function loop($type, $total) {
+  .declvars $count;
   Int 0
   SetL $count
   PopC

@@ -10,6 +10,7 @@
 }
 
 .function ArrayMember() {
+  .declvars $x;
   NullUninit
   NullUninit
     String "arr"
@@ -38,6 +39,7 @@
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $arr $key;
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "ArrayMember"

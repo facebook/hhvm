@@ -3,6 +3,7 @@
 #
 
 .function ["__EntryPoint"("""y:0:{}""")] main {
+  .declvars $x;
 
   Jmp real_function
 

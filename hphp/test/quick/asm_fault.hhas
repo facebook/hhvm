@@ -62,6 +62,7 @@
 }
 
 .function throw_various() {
+  .declvars $counter;
            Int 0
            SetL $counter
            PopC
@@ -128,6 +129,7 @@ on_three:    String "three\n"
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $ever_caught $ex;
          False
          SetL $ever_caught
          PopC

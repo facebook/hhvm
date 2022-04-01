@@ -1,5 +1,5 @@
 Fatal error: Uncaught exception 'BadMethodCallException' with message 'Await on a non-Awaitable' in %s:6
 Stack trace:
-#0 %s(24): foo()
+#0 %s(25): foo()
 #1 (): main()
 #2 {main}

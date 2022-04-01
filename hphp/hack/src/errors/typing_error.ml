@@ -6849,7 +6849,6 @@ end = struct
           (parent_pos, Markdown_lite.md_codify parent_vis ^ " was expected");
         ]
     in
-
     (Error_code.VisibilityExtends, reasons, [])
 
   let visibility_override_internal pos module_name parent_module parent_pos =

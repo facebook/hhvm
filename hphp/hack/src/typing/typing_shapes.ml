@@ -65,10 +65,7 @@ let refine_shape field_name pos env shape =
     (mk (Reason.Rnone, Tshape (Open_shape, TShapeMap.singleton field_name sft)))
 
 let make_locl_like_type env ty =
-  if
-    env.Typing_env_types.pessimize
-    || TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
-  then
+  if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
     let dyn = MakeType.dynamic (Reason.Renforceable (get_pos ty)) in
     Typing_union.union env dyn ty
   else

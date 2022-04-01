@@ -11,12 +11,7 @@ open Hh_prelude
 open Typing_defs
 open Typing_env_types
 module Cls = Decl_provider.Class
-module MakeType = Typing_make_type
 module Env = Typing_env
-
-let wrap_like ty =
-  let r = Typing_reason.Renforceable (get_pos ty) in
-  MakeType.like r ty
 
 let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
   let enable_sound_dynamic =
@@ -151,30 +146,13 @@ let get_enforced env ~explicitly_untrusted ty =
   else
     get_enforcement env ty
 
-let pessimize_type env { et_type; et_enforced } =
-  let is_fully_enforced e =
-    match e with
-    | Enforced -> true
-    | Unenforced -> false
-  in
-  let et_type =
-    if is_fully_enforced et_enforced || not env.pessimize then
-      et_type
-    else
-      match get_node et_type with
-      | Tprim (Aast.Tvoid | Aast.Tnoreturn) -> et_type
-      | _ -> wrap_like et_type
-  in
-  { et_type; et_enforced }
-
 let compute_enforced_ty env ?(explicitly_untrusted = false) (ty : decl_ty) =
   let et_enforced = get_enforced env ~explicitly_untrusted ty in
   { et_type = ty; et_enforced }
 
 let compute_enforced_and_pessimize_ty
     env ?(explicitly_untrusted = false) (ty : decl_ty) =
-  let ety = compute_enforced_ty env ~explicitly_untrusted ty in
-  pessimize_type env ety
+  compute_enforced_ty env ~explicitly_untrusted ty
 
 let handle_awaitable_return env ft_fun_kind (ft_ret : decl_possibly_enforced_ty)
     =
@@ -183,7 +161,7 @@ let handle_awaitable_return env ft_fun_kind (ft_ret : decl_possibly_enforced_ty)
   | (Ast_defs.FAsync, Tapply ((_, name), [inner_ty]))
     when String.equal name Naming_special_names.Classes.cAwaitable ->
     let { et_enforced; _ } = compute_enforced_ty env inner_ty in
-    pessimize_type env { et_type = return_type; et_enforced }
+    { et_type = return_type; et_enforced }
   | _ -> compute_enforced_and_pessimize_ty env return_type
 
 let compute_enforced_and_pessimize_fun_type env (ft : decl_fun_type) =

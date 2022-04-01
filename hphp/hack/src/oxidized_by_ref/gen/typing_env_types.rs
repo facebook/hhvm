@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cd017ba08cab92e8dc4f3e945038d664>>
+// @generated SignedSource<<615be1ac2593e579eb640175cf0c1980>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -85,7 +85,6 @@ pub struct Env<'a> {
     pub allow_wildcards: bool,
     #[serde(skip)]
     pub big_envs: std::cell::Cell<&'a [(&'a pos::Pos<'a>, &'a Env<'a>)]>,
-    pub pessimize: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub fun_tast_info: Option<&'a tast::FunTastInfo>,
 }

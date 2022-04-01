@@ -39,7 +39,6 @@ type env = {
   inference_env: Typing_inference_env.t;
   allow_wildcards: bool;
   big_envs: (Pos.t * env) list ref;
-  pessimize: bool;
   fun_tast_info: Tast.fun_tast_info option;
       (** This is only filled in after type-checking the function in question *)
 }

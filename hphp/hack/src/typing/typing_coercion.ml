@@ -77,10 +77,7 @@ let coerce_type_impl
         ty_have
         ty_expect.et_type
         on_error
-    | _
-      when (((not is_expected_enforced) && env.Typing_env_types.pessimize)
-           || Typing_utils.is_dynamic env ety_expect)
-           && complex_coercion ->
+    | _ when Typing_utils.is_dynamic env ety_expect && complex_coercion ->
       Typing_utils.sub_type_with_dynamic_as_bottom
         env
         ty_have

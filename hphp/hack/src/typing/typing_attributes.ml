@@ -39,6 +39,9 @@ let check_implements
     let check_attr map =
       match SMap.find_opt attr_name map with
       | Some intfs ->
+        let () =
+          List.iter ~f:(printf "INTFS: %s \n") intfs
+        in
         let check_locations =
           TypecheckerOptions.check_attribute_locations
             (Typing_env.get_tcopt env)
@@ -63,17 +66,20 @@ let check_implements
       then
         ()
       else
-        let all_user_attribute =
+        
+        let all_valid_user_attributes = 
           let bindings = SMap.bindings SN.UserAttributes.as_map in
-          List.map
-            ~f:(fun attr ->
-              let (attr_name, _) = attr in
-              attr_name)
+          let filtered_bindings = List.filter
+            ~f:(fun (_, list) -> List.mem list attr_interface ~equal:String.equal)
             bindings
+          in
+          List.map
+            ~f:fst
+            filtered_bindings
         in
 
         let closest_attr_name =
-          Typing_env.most_similar attr_name all_user_attribute (fun name -> name)
+          Typing_env.most_similar attr_name all_valid_user_attributes (fun name -> name)
         in
 
         Errors.add_naming_error

@@ -645,15 +645,18 @@ let unbound_attribute_name pos attr_name closest_attr_name =
   in
 
   let quickfixes =
-    match closest_attr_name with
-    | None -> []
-    | Some close_name ->
-      [
-        Quickfix.make
-          ~title:("Change to " ^ Markdown_lite.md_codify close_name)
-          ~new_text:close_name
-          pos;
-      ]
+    if string_starts_with attr_name "__" then
+      match closest_attr_name with
+      | None -> []
+      | Some close_name ->
+        [
+          Quickfix.make
+            ~title:("Change to " ^ Markdown_lite.md_codify close_name)
+            ~new_text:close_name
+            pos;
+        ]
+    else
+      []
   in
 
   User_error.make

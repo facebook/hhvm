@@ -407,7 +407,7 @@ where
             let ch = self.peek(i);
             if accepted_char(ch) {
                 i += 1
-            } else if ch == ' ' && accepted_char(peek_def(i + 1)) {
+            } else if ch == '_' && accepted_char(peek_def(i + 1)) {
                 i += 2;
             } else {
                 break;
@@ -416,16 +416,8 @@ where
         self.with_offset(i);
     }
 
-    fn scan_decimal_digits(&mut self) {
-        self.skip_while(&Self::is_decimal_digit)
-    }
-
     fn scan_decimal_digits_with_underscores(&mut self) {
         self.scan_with_underscores(&Self::is_decimal_digit);
-    }
-
-    fn scan_octal_digits(&mut self) {
-        self.skip_while(&Self::is_octal_digit)
     }
 
     fn scan_octal_digits_with_underscores(&mut self) {
@@ -466,7 +458,7 @@ where
         }
     }
 
-    fn scan_exponent(&mut self) -> TokenKind {
+    fn scan_exponent_with_underscores(&mut self) -> TokenKind {
         let ch = self.peek_char(1);
         if ch == '+' || ch == '-' {
             self.advance(2)
@@ -478,19 +470,24 @@ where
             self.with_error(Errors::error0003);
             TokenKind::FloatingLiteral
         } else {
-            self.scan_decimal_digits();
+            self.scan_decimal_digits_with_underscores();
             TokenKind::FloatingLiteral
         }
     }
 
-    fn scan_after_decimal_point(&mut self) -> TokenKind {
+    fn scan_after_decimal_point_with_underscores(&mut self) -> TokenKind {
         self.advance(1);
-        self.scan_decimal_digits();
         let ch = self.peek_char(0);
-        if ch == 'e' || ch == 'E' {
-            self.scan_exponent()
-        } else {
+        if ch == '_' {
             TokenKind::FloatingLiteral
+        } else {
+            self.scan_decimal_digits_with_underscores();
+            let ch = self.peek_char(0);
+            if ch == 'e' || ch == 'E' {
+                self.scan_exponent_with_underscores()
+            } else {
+                TokenKind::FloatingLiteral
+            }
         }
     }
 
@@ -504,36 +501,32 @@ where
             '.' =>
             // 0.
             {
-                self.scan_after_decimal_point()
+                self.scan_after_decimal_point_with_underscores()
             }
             'e' | 'E' =>
             // 0e
             {
-                self.scan_exponent()
+                self.scan_exponent_with_underscores()
             }
             _ if ('0'..='9').contains(&ch) => {
                 // 05
                 let mut lexer_oct = self.clone();
-                lexer_oct.scan_octal_digits();
+                lexer_oct.scan_octal_digits_with_underscores();
 
                 let mut lexer_dec = self.clone();
-                lexer_dec.scan_decimal_digits();
+                lexer_dec.scan_decimal_digits_with_underscores();
                 if (lexer_oct.width()) == (lexer_dec.width()) {
                     // Only octal digits. Could be an octal literal, or could
                     // be a float.
                     let ch = lexer_oct.peek_char(0);
                     if ch == 'e' || ch == 'E' {
                         self.continue_from(lexer_oct);
-                        self.scan_exponent()
+                        self.scan_exponent_with_underscores()
                     } else if ch == '.' {
                         self.continue_from(lexer_oct);
-                        self.scan_after_decimal_point()
+                        self.scan_after_decimal_point_with_underscores()
                     } else {
-                        // This is irritating - we only want to allow underscores for integer
-                        // literals. Deferring the lexing with underscores here allows us to
-                        // make sure we're not dealing with floats.
                         self.continue_from(lexer_oct);
-                        self.scan_octal_digits_with_underscores();
                         TokenKind::OctalLiteral
                     }
                 } else {
@@ -543,13 +536,12 @@ where
                     let ch = lexer_dec.peek_char(0);
                     if ch == 'e' || ch == 'E' {
                         self.continue_from(lexer_dec);
-                        self.scan_exponent()
+                        self.scan_exponent_with_underscores()
                     } else if ch == '.' {
                         self.continue_from(lexer_dec);
-                        self.scan_after_decimal_point()
+                        self.scan_after_decimal_point_with_underscores()
                     } else {
                         // an octal to be truncated at the first non-octal digit
-                        // Again we differ the lexing with underscores here
                         self.scan_decimal_digits_with_underscores();
                         TokenKind::OctalLiteral
                     }
@@ -565,28 +557,22 @@ where
 
     fn scan_decimal_or_float(&mut self) -> TokenKind {
         // We've scanned a leading non-zero digit.
-        let mut lexer_no_underscores = self.clone();
-        lexer_no_underscores.scan_decimal_digits();
-        let mut lexer_with_underscores = self.clone();
-        lexer_with_underscores.scan_decimal_digits_with_underscores();
-        let ch = lexer_no_underscores.peek_char(0);
+        self.scan_decimal_digits_with_underscores();
+        let ch = self.peek_char(0);
         match ch {
             '.' =>
             // 123.
             {
-                self.continue_from(lexer_no_underscores);
-                self.scan_after_decimal_point()
+                self.scan_after_decimal_point_with_underscores()
             }
             'e' | 'E' =>
             // 123e
             {
-                self.continue_from(lexer_no_underscores);
-                self.scan_exponent()
+                self.scan_exponent_with_underscores()
             }
             _ =>
             // 123
             {
-                self.continue_from(lexer_with_underscores);
                 TokenKind::DecimalLiteral
             }
         }
@@ -1394,7 +1380,7 @@ where
                     self.advance(2);
                     TokenKind::DotEqual
                 }
-                ch if ('0'..='9').contains(&ch) => self.scan_after_decimal_point(),
+                ch if ('0'..='9').contains(&ch) => self.scan_after_decimal_point_with_underscores(),
                 '.' => {
                     if (self.peek_char(2)) == '.' {
                         self.advance(3);

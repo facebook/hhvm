@@ -3174,6 +3174,7 @@ and expr_
    *)
   let compute_exprs_and_supertype
       ~(expected : ExpectedTy.t option)
+      ?(add_holes = true)
       ?(reason = Reason.URarray_value)
       ?(can_pessimise = false)
       ~bound
@@ -3213,12 +3214,16 @@ and expr_
         env
         tys
     in
-    ( env,
-      List.map2_exn
-        ~f:(fun te err_opt -> hole_on_err te ~err_opt)
+    let exprs =
+      if add_holes then
+        List.map2_exn
+          ~f:(fun te err_opt -> hole_on_err te ~err_opt)
+          exprs
+          err_opts
+      else
         exprs
-        err_opts,
-      supertype )
+    in
+    (env, exprs, supertype)
   in
   let check_collection_tparams env name tys =
     (* varrays and darrays are not classes but they share the same
@@ -3365,6 +3370,7 @@ and expr_
         ~can_pessimise:true
         ~coerce_for_op
         ~bound:key_bound
+        ~add_holes:false
         (Reason.Rtype_variable_generics (p, "T", strip_ns name))
         env
         el

@@ -584,7 +584,6 @@ let env_as_value env =
     allow_wildcards;
     inference_env;
     big_envs = _;
-    pessimize = _;
     fun_tast_info;
   } =
     env

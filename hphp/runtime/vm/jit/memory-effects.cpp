@@ -570,6 +570,31 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       };
     }
 
+  case CallFuncEntry:
+    {
+      auto const extra = inst.extra<CallFuncEntry>();
+      auto const callee = extra->target.func();
+      return CallEffects {
+        // Kills. Everything on the stack below the incoming parameters.
+        stack_below(extra->spOffset) | AMIStateAny | AVMRegAny,
+        // Input arguments.
+        callee->numFuncEntryInputs() == 0 ? AEmpty : AStack::range(
+          extra->spOffset,
+          extra->spOffset + callee->numFuncEntryInputs()
+        ),
+        // ActRec.
+        actrec(inst.src(0), extra->spOffset + callee->numFuncEntryInputs()),
+        // Inout outputs.
+        callee->numInOutParams() == 0 ? AEmpty : AStack::range(
+          extra->spOffset + callee->numFuncEntryInputs() + kNumActRecCells,
+          extra->spOffset + callee->numFuncEntryInputs() + kNumActRecCells +
+            callee->numInOutParams()
+        ),
+        // Locals.
+        backtrace_locals(inst)
+      };
+    }
+
   case CallBuiltin:
     {
       auto const extra = inst.extra<CallBuiltin>();

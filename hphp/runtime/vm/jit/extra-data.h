@@ -994,7 +994,7 @@ struct ReqBindJmpData : IRExtraData {
   std::string show() const {
     return folly::sformat(
       "{}, SBInv {}, IRSP {}",
-      target.printableOffset(), invSPOff.offset, irSPOff.offset
+      showShort(target), invSPOff.offset, irSPOff.offset
     );
   }
 
@@ -1156,6 +1156,51 @@ struct CallData : IRExtraData {
   bool skipRepack;
   bool dynamicCall;
   bool asyncEagerReturn;
+  bool formingRegion;
+};
+
+struct CallFuncEntryData : IRExtraData {
+  explicit CallFuncEntryData(const SrcKey& target,
+                             IRSPRelOffset spOffset,
+                             uint32_t arFlags,
+                             bool formingRegion)
+    : target(target)
+    , spOffset(spOffset)
+    , arFlags(arFlags)
+    , formingRegion(formingRegion)
+  {}
+
+  std::string show() const {
+    return folly::sformat(
+      "{}, IRSP {}, arFlags {}{}",
+      showShort(target), spOffset.offset, arFlags,
+      formingRegion ? ",formingRegion" :""
+    );
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      SrcKey::StableHasher()(target),
+      std::hash<int32_t>()(spOffset.offset),
+      std::hash<uint32_t>()(arFlags),
+      std::hash<bool>()(formingRegion)
+    );
+  }
+
+  bool equals(const CallFuncEntryData& o) const {
+    return target == o.target &&
+           spOffset == o.spOffset &&
+           arFlags == o.arFlags &&
+           formingRegion == o.formingRegion;
+  }
+
+  bool asyncEagerReturn() const {
+    return arFlags & (1 << ActRec::AsyncEagerRet);
+  }
+
+  SrcKey target;
+  IRSPRelOffset spOffset;
+  uint32_t arFlags;
   bool formingRegion;
 };
 
@@ -2276,7 +2321,7 @@ struct ProfileCallTargetData : IRExtraData {
 struct BeginInliningData : IRExtraData {
   BeginInliningData(IRSPRelOffset offset, const Func* func, unsigned depth,
                     SrcKey returnSk, IRSPRelOffset sbOffset,
-                    SBInvOffset returnSPOff, int cost, int numArgs)
+                    SBInvOffset returnSPOff, int cost)
     : spOffset(offset)
     , func(func)
     , depth(depth)
@@ -2284,7 +2329,6 @@ struct BeginInliningData : IRExtraData {
     , sbOffset(sbOffset)
     , returnSPOff(returnSPOff)
     , cost(cost)
-    , numArgs(numArgs)
   {}
 
   std::string show() const {
@@ -2300,8 +2344,7 @@ struct BeginInliningData : IRExtraData {
       SrcKey::StableHasher()(returnSk),
       std::hash<int32_t>()(sbOffset.offset),
       std::hash<int32_t>()(returnSPOff.offset),
-      std::hash<int>()(cost),
-      std::hash<int>()(numArgs)
+      std::hash<int>()(cost)
     );
   }
 
@@ -2309,7 +2352,7 @@ struct BeginInliningData : IRExtraData {
     return
       spOffset == o.spOffset && func == o.func && depth == o.depth &&
       returnSk == o.returnSk && sbOffset == o.sbOffset &&
-      returnSPOff == o.returnSPOff && cost == o.cost && numArgs == o.numArgs;
+      returnSPOff == o.returnSPOff && cost == o.cost;
   }
 
   IRSPRelOffset spOffset;  // offset from SP to the bottom of callee's ActRec
@@ -2319,7 +2362,6 @@ struct BeginInliningData : IRExtraData {
   IRSPRelOffset sbOffset;  // offset from SP to the callee's stack base
   SBInvOffset returnSPOff; // offset from caller's stack base to return slot
   int cost;
-  int numArgs;
 };
 
 struct ParamData : IRExtraData {
@@ -2755,6 +2797,7 @@ X(DefFuncEntryFP,               FuncData);
 X(InitFrame,                    FuncData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);
+X(CallFuncEntry,                CallFuncEntryData);
 X(RetCtrl,                      RetCtrlData);
 X(AsyncFuncRet,                 IRSPRelOffsetData);
 X(AsyncFuncRetSlow,             IRSPRelOffsetData);

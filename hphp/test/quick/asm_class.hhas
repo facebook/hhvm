@@ -75,6 +75,7 @@
   .property [public] funk;
 
   .method [public] print_funk {
+    .declvars $name;
     String "funk"
     SetL $name
     PopC
@@ -117,6 +118,7 @@
 }
 
 .function prop_test {
+  .declvars $obj;
   NewObjD "WithProps"
   Dup
   NullUninit
@@ -147,6 +149,7 @@
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] main {
+  .declvars $base $derived;
   NewObjD "Base"
   Dup
   NullUninit

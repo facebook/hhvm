@@ -425,6 +425,7 @@ private:
     }
   };
 
+  [[noreturn]]
   void error(const std::string& what) {
     throw AssemblerError(getLineNumber(), what);
   }
@@ -725,19 +726,40 @@ struct AsmState {
     maxUnnamed = -1;
   }
 
+  int declareLocalId(const std::string& name) {
+    if (name.empty() || name[0] != '$') {
+      error("named local variables must be prefixed with `$`");
+    }
+    const StringData* sd = makeStaticString(
+        folly::StringPiece(name.data() + 1, name.size() - 1)
+    );
+    if (fe->hasVar(sd)) {
+      error("local variable `" + name + "' was already declared.");
+    }
+    fe->allocVarId(sd);
+    return fe->lookupVarId(sd);
+  }
+
   int getLocalId(const std::string& name) {
-    if (name[0] == '_') {
+    if (!name.empty() && name[0] == '_') {
       int id = folly::to<int>(name.substr(1));
+      if (!allowAliasedLocals && id < fe->numNamedLocals()) {
+        error("Unnamed local `" + name + "' cannot refer to named local");
+      }
       if (id > maxUnnamed) maxUnnamed = id;
       return id;
     }
 
-    if (name[0] != '$') {
-      error("local variables must be prefixed with $ or _");
+    if (name.empty() || name[0] != '$') {
+      error("local variables must be prefixed with `$` or `_`");
     }
 
-    const StringData* sd = makeStaticString(name.c_str() + 1);
-    fe->allocVarId(sd);
+    const StringData* sd = makeStaticString(
+        folly::StringPiece(name.data() + 1, name.size() - 1)
+    );
+    if (!fe->hasVar(sd)) {
+      error("Use of undeclared named local `" + name + "'");
+    }
     return fe->lookupVarId(sd);
   }
 
@@ -778,6 +800,7 @@ struct AsmState {
   std::map<std::string,Label> labelMap;
   bool numItersSet{false};
   bool enumTySet{false};
+  bool allowAliasedLocals{false};
   StackDepth initStackDepth;
   StackDepth* currentStackDepth{&initStackDepth};
   std::vector<std::unique_ptr<StackDepth>> unnamedStackDepths;
@@ -1689,21 +1712,33 @@ void parse_numiters(AsmState& as) {
  * directive-declvars : var-name* ';'
  *                    ;
  *
- * Variables are usually allocated when first seen, but
- * declvars can be used to preallocate varibles for when
- * the exact assignment matters (like for closures).
+ * Named local variables prefixed with `$` must be declared
+ * first using a .declvars directive, and unnamed local variables
+ * referred to with a `_` prefix must be numbered starting equal
+ * to or higher than the number of parameters and declvars.
  */
 void parse_declvars(AsmState& as) {
   while (true) {
     as.in.skipWhitespace();
     std::string var;
     if (as.in.readQuotedStr(var) || as.in.readword(var)) {
-      as.getLocalId(var);
+      as.declareLocalId(var);
     }
     else {
       break;
     }
   }
+  as.in.expectWs(';');
+}
+
+/*
+ * directive-allow_aliased_locals : ';'
+ *
+ * Allow unnamed locals prefixed with `_` to refer to params
+ * or named locals. Used only for testing.
+ */
+void parse_allow_aliased_locals(AsmState& as) {
+  as.allowAliasedLocals = true;
   as.in.expectWs(';');
 }
 
@@ -2119,6 +2154,10 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       }
       if (word == ".coeffects_caller") {
         parse_coeffects_caller(as);
+        continue;
+      }
+      if (word == ".allow_aliased_locals") {
+        parse_allow_aliased_locals(as);
         continue;
       }
       as.error("unrecognized directive `" + word + "' in function");

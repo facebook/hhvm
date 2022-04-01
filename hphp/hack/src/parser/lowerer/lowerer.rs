@@ -1348,8 +1348,9 @@ fn p_expr_lit<'a>(
                 (_, Some(TK::FloatingLiteral)) => {
                     // f64::from_str accepts more string than Hacklang, invalid Hack float literal
                     // is caught in lexer.
-                    if f64::from_str(s).is_err() {
-                        raise_parsing_error(expr, env, &syntax_error::out_of_float_range(s))
+                    let s = s.replace('_', "");
+                    if f64::from_str(&s).is_err() {
+                        raise_parsing_error(expr, env, &syntax_error::out_of_float_range(&s))
                     }
                     Ok(Expr_::Float(s.into()))
                 }

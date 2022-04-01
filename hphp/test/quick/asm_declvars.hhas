@@ -5,6 +5,7 @@
 .function foo($x) {
   # $y should get assigned to _1 even though $z is used first
   .declvars $y $z;
+  .allow_aliased_locals;
 
   String "a"
   SetL $z

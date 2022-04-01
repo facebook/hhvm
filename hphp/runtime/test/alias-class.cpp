@@ -485,7 +485,7 @@ TEST(AliasClass, FrameUnion) {
   auto const dsData = DefStackData { SBInvOffset { 0 }, SBInvOffset { 0 } };
   auto const biData = BeginInliningData {
     IRSPRelOffset { 0 }, nullptr, 1, SrcKey {}, IRSPRelOffset { 0 },
-    SBInvOffset { 0 }, 0, 0
+    SBInvOffset { 0 }, 0
   };
   auto const SP = unit.gen(DefRegSP, bcctx, dsData)->dst();
   auto const FP1 = unit.gen(DefFP, bcctx, DefFPData { std::nullopt })->dst();

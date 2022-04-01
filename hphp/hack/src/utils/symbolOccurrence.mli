@@ -82,6 +82,7 @@ type kind =
   | Attribute of override_info option
   | EnumClassLabel of string * string
   | Keyword of keyword_with_hover_docs
+  | PureFunctionContext
 [@@deriving eq]
 
 type 'a t = {

@@ -1,0 +1,2 @@
+File "parse_float_with_underscore_bad2.php", line 5, characters 23-24:
+Encountered unexpected token `_4`. (Parsing[1002])

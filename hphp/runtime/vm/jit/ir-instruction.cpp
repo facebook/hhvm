@@ -164,6 +164,9 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case Call:
       return move != MustMove && srcNo == 3;
 
+    case CallFuncEntry:
+      return move != MustMove && srcNo == 2;
+
     case EnterTCUnwind:
       return srcNo == 2;
 
@@ -499,8 +502,10 @@ Type builtinReturn(const IRInstruction* inst) {
 }
 
 Type callReturn(const IRInstruction* inst) {
-  assertx(inst->is(Call));
+  assertx(inst->is(Call, CallFuncEntry));
 
+  // Async eager return needs to load TVAux.
+  //
   // Do not use the inferred Func* if we are forming a region. We may have
   // inferred the target of the call based on specialized type information
   // that won't be available when the region is translated. If we allow the
@@ -508,12 +513,19 @@ Type callReturn(const IRInstruction* inst) {
   // for the return value, erroneously preventing the region from breaking
   // on unknown type.
 
-  // Async eager return needs to load TVAux
-  if (inst->extra<Call>()->asyncEagerReturn) return TInitCell;
-  if (inst->extra<Call>()->numOut) return TInitCell;
-  if (inst->extra<Call>()->formingRegion) return TInitCell;
-  return inst->src(2)->hasConstVal(TFunc)
-    ? irgen::callReturnType(inst->src(2)->funcVal()) : TInitCell;
+  if (inst->is(Call)) {
+    auto const extra = inst->extra<Call>();
+    if (extra->asyncEagerReturn) return TInitCell;
+    if (extra->formingRegion) return TInitCell;
+    return inst->src(2)->hasConstVal(TFunc)
+      ? irgen::callReturnType(inst->src(2)->funcVal()) : TInitCell;
+  }
+
+  assertx(inst->is(CallFuncEntry));
+  auto const extra = inst->extra<CallFuncEntry>();
+  if (extra->asyncEagerReturn()) return TInitCell;
+  if (extra->formingRegion) return TInitCell;
+  return irgen::callReturnType(extra->target.func());
 }
 
 Type genIterReturn(const IRInstruction* inst) {

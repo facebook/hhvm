@@ -192,8 +192,6 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
   );
 }
 
-namespace {
-
 /*
  * Check for too few or too many arguments and trim extra args.
  */
@@ -223,8 +221,6 @@ void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
     gen(env, RaiseTooManyArg, FuncData { callee }, unpackArgsArr);
   }
 }
-
-} // namespace
 
 void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
                                  SSATmp* prologueFlags) {
@@ -437,6 +433,9 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
   // Place generics and coeffects in the correct position.
   if (generics != nullptr) push(env, generics);
   if (coeffects != nullptr) push(env, coeffects);
+
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
 }
 
 namespace {

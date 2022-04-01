@@ -208,12 +208,8 @@ uint16_t inlineDepth(const IRGS& env);
  *     EndInlining fp2
  */
 void beginInlining(IRGS& env,
-                   const Func* target,
-                   const FCallArgs& fca,
+                   SrcKey entry,
                    SSATmp* ctx,
-                   bool dynamicCall,
-                   Op writeArOpc,
-                   SrcKey startSk,
                    Offset callBcOffset,
                    InlineReturnTarget returnTarget,
                    int cost);
@@ -235,10 +231,9 @@ bool endInlining(IRGS& env, const RegionDesc& calleeRegion);
  * we are able to elide it) and any effects that may have on alias analysis.
  */
 void conjureBeginInlining(IRGS& env,
-                          const Func* func,
-                          SrcKey startSk,
+                          SrcKey entry,
                           Type thisType,
-                          const std::vector<Type>& args,
+                          const std::vector<Type>& inputs,
                           InlineReturnTarget returnTarget);
 
 /*

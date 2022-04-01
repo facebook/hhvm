@@ -3,6 +3,7 @@
 #
 
 .function caller($who, $arg) {
+  .declvars $ret;
   NullUninit
   NullUninit
   CGetL $arg
@@ -49,6 +50,7 @@
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $funk;
   NullUninit
   NullUninit
   String "a"

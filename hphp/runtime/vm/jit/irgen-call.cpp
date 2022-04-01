@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -273,9 +274,36 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   );
 }
 
-void handleCallReturn(IRGS& env, const Func* callee, const FCallArgs& fca,
-                      SSATmp* retVal, bool asyncEagerReturn, bool unlikely) {
-  if (!asyncEagerReturn) {
+SSATmp* callFuncEntry(IRGS& env, SrcKey entry, SSATmp* objOrClass,
+                      bool asyncEagerReturn) {
+  assertx(entry.funcEntry());
+  if (objOrClass == nullptr) objOrClass = cns(env, TNullptr);
+  assertx(objOrClass->isA(TNullptr) || objOrClass->isA(TObj|TCls));
+
+  auto const pubFP = env.irb->fs()[0].fp();
+  auto pubBcOff = bcOff(env);
+  if (env.irb->fs().inlineDepth()) {
+    auto const firstUnpubFP = env.irb->fs()[1].fp();
+    pubBcOff = firstUnpubFP->inst()->marker().sk().offset();
+  }
+
+  auto const arFlags = ActRec::encodeCallOffsetAndFlags(
+    pubBcOff,
+    asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0
+  );
+
+  auto const data = CallFuncEntryData {
+    entry,
+    spOffBCFromIRSP(env),
+    arFlags,
+    env.formingRegion
+  };
+  return gen(env, CallFuncEntry, data, sp(env), pubFP, objOrClass);
+}
+
+void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
+                      Offset asyncEagerOffset, bool unlikely) {
+  if (asyncEagerOffset == kInvalidOffset) {
     push(env, retVal);
     if (unlikely) gen(env, Jmp, makeExit(env, nextSrcKey(env)));
     return;
@@ -298,11 +326,11 @@ void handleCallReturn(IRGS& env, const Func* callee, const FCallArgs& fca,
     [&] {
       auto const ty = callee ? awaitedCallReturnType(callee) : TInitCell;
       push(env, gen(env, AssertType, ty, retVal));
-      auto const asyncEagerOffset = bcOff(env) + fca.asyncEagerOffset;
+      auto const absAEOffset = bcOff(env) + asyncEagerOffset;
       if (unlikely) {
-        gen(env, Jmp, makeExit(env, SrcKey{curSrcKey(env), asyncEagerOffset}));
+        gen(env, Jmp, makeExit(env, SrcKey{curSrcKey(env), absAEOffset}));
       } else {
-        jmpImpl(env, asyncEagerOffset);
+        jmpImpl(env, absAEOffset);
       }
     },
     [&] {
@@ -384,8 +412,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
 
 //////////////////////////////////////////////////////////////////////
 
-bool hasConstParamMemoCache(IRGS& env, const Func* callee, const FCallArgs& fca,
-                            SSATmp* objOrClass) {
+bool hasConstParamMemoCache(IRGS& env, const Func* callee, SSATmp* objOrClass) {
   if (!callee->isMemoizeWrapper() || callee->isPolicyShardedMemoize()) {
     return false;
   }
@@ -401,7 +428,7 @@ bool hasConstParamMemoCache(IRGS& env, const Func* callee, const FCallArgs& fca,
     return false;
   }
   if (callee->numParams() == 0) return false;
-  for (auto i = 0; i < fca.numInputs(); ++i) {
+  for (auto i = 0; i < callee->numFuncEntryInputs(); ++i) {
     auto const t = publicTopType(env, BCSPRelOffset {i});
     if (!t.admitsSingleVal()) return false;
     if (t.hasConstVal(TCls) && !t.clsVal()->isPersistent()) return false;
@@ -414,18 +441,15 @@ bool hasConstParamMemoCache(IRGS& env, const Func* callee, const FCallArgs& fca,
 }
 
 rds::Link<TypedValue, rds::Mode::Normal>
-constParamCacheLink(IRGS& env, const Func* callee, const FCallArgs& fca,
-                    SSATmp* cls, bool asyncEagerReturn) {
+constParamCacheLink(IRGS& env, const Func* callee, SSATmp* cls,
+                    bool asyncEagerReturn) {
   auto const clsVal = cls ? cls->clsVal() : nullptr;;
   auto arr = Array::CreateVec();
-  for (auto i = 0; i < fca.numInputs(); ++i) {
+  for (auto i = 0; i < callee->numFuncEntryInputs(); ++i) {
     auto const t = publicTopType(env, BCSPRelOffset {i});
-    assertx(t.hasConstVal() || t <= TInitNull);
-    auto const tv =
-      t.hasConstVal() ?
-      make_tv_of_type(make_value(t.rawVal()), t.toDataType()) :
-      make_tv<KindOfNull>();
-    arr.append(tv);
+    auto const tvOpt = t.tv();
+    assertx(tvOpt);
+    arr.append(*tvOpt);
   }
   auto const paramVals = ArrayData::GetScalarArray(arr);
   return rds::bindConstMemoCache(callee, clsVal, paramVals, asyncEagerReturn);
@@ -443,29 +467,68 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     emitCallerDynamicCallChecksKnown(env, callee);
   }
   auto const doCall = [&](const FCallArgs& fca, bool skipRepack) {
+    auto const asyncEagerOffset = callee->supportsAsyncEagerReturn()
+      ? fca.asyncEagerOffset : kInvalidOffset;
+    auto const asyncEagerReturn = asyncEagerOffset != kInvalidOffset;
+
+    if (!skipRepack) {
+      // Use the generic prologue method dispatch that can handle arg repacking.
+      auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
+                                   skipRepack, dynamicCall, asyncEagerReturn);
+      handleCallReturn(env, callee, retVal, asyncEagerOffset,
+                       false /* unlikely */);
+      return;
+    }
+
     assertx(
-      !skipRepack ||
       (!fca.hasUnpack() && fca.numArgs <= callee->numNonVariadicParams()) ||
       (fca.hasUnpack() && fca.numArgs == callee->numNonVariadicParams()));
 
     updateStackOffset(env);
 
-    auto const asyncEagerReturn =
-      fca.asyncEagerOffset != kInvalidOffset &&
-      callee->supportsAsyncEagerReturn();
+    if (isFCall(curSrcKey(env).op())) {
+      if (irGenTrySuperInlineFCall(env, callee, fca, objOrClass, dynamicCall)) {
+        return;
+      }
+    }
+
+    auto const numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
+    auto const coeffects = curCoeffects(env);
+    auto const prologueFlags = cns(env, PrologueFlags(
+      fca.hasGenerics(),
+      dynamicCall,
+      false,  // async eager return unused by prologue checks
+      0,  // call offset unused by prologue checks
+      0,  // generics bitmap not needed, generics SSA read from the stack
+      RuntimeCoeffects::none()  // coeffects not needed, passed via SSA arg
+    ).value());
+
+    // Callee checks and input initialization.
+    emitCalleeGenericsChecks(env, callee, prologueFlags, fca.hasGenerics());
+    emitCalleeArgumentArityChecks(env, callee, numArgsInclUnpack);
+    emitCalleeDynamicCallChecks(env, callee, prologueFlags);
+    emitCalleeCoeffectChecks(env, callee, prologueFlags, coeffects,
+                             fca.skipCoeffectsCheck(),
+                             numArgsInclUnpack,
+                             objOrClass ? objOrClass : cns(env, nullptr));
+    emitCalleeRecordFuncCoverage(env, callee);
+    emitInitFuncInputs(env, callee, numArgsInclUnpack);
 
     auto const hasRdsCache =
-      hasConstParamMemoCache(env, callee, fca, objOrClass);
+      hasConstParamMemoCache(env, callee, objOrClass);
 
-    if (isFCall(curSrcKey(env).op()) && skipRepack && !hasRdsCache) {
-      if (irGenTryInlineFCall(env, callee, fca, objOrClass, dynamicCall)) {
+    auto const entryOffset = callee->getEntryForNumArgs(numArgsInclUnpack);
+    auto const entry = SrcKey { callee, entryOffset, SrcKey::FuncEntryTag {} };
+
+    if (isFCall(curSrcKey(env).op()) && !hasRdsCache) {
+      if (irGenTryInlineFCall(env, entry, objOrClass, asyncEagerOffset)) {
         return;
       }
     }
 
     if (hasRdsCache) {
       auto const link =
-        constParamCacheLink(env, callee, fca, objOrClass, asyncEagerReturn);
+        constParamCacheLink(env, callee, objOrClass, asyncEagerReturn);
       assertx(link.isNormal());
       auto const data = TVInRDSHandleData { link.handle(), asyncEagerReturn };
       auto const retType = asyncEagerReturn ? TInitCell : callReturnType(callee);
@@ -475,7 +538,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
           gen(env, CheckRDSInitialized, taken, RDSHandleData { data });
         },
         [&] {
-          for (auto i = 0; i < fca.numInputs(); ++i) {
+          for (auto i = 0; i < callee->numFuncEntryInputs(); ++i) {
             popDecRef(env, static_cast<DecRefProfileId>(i));
           }
           for (auto i = 0; i < kNumActRecCells; ++i) popU(env);
@@ -485,22 +548,21 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
-                                       skipRepack, dynamicCall,
-                                       asyncEagerReturn);
+          auto const retVal = callFuncEntry(env, entry, objOrClass,
+                                            asyncEagerReturn);
           gen(env, StTVInRDS, data, retVal);
           gen(env, IncRef, retVal);
           gen(env, MarkRDSInitialized, RDSHandleData { data });
           return retVal;
         }
       );
-      handleCallReturn(env, callee, fca, res,
-                       asyncEagerReturn, false /* unlikely */);
+      handleCallReturn(env, callee, res, asyncEagerOffset,
+                       false /* unlikely */);
     } else {
-      auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
-                                   skipRepack, dynamicCall, asyncEagerReturn);
-      handleCallReturn(env, callee, fca, retVal, asyncEagerReturn,
-                     false /* unlikely */);
+      auto const retVal = callFuncEntry(env, entry, objOrClass,
+                                        asyncEagerReturn);
+      handleCallReturn(env, callee, retVal, asyncEagerOffset,
+                       false /* unlikely */);
     }
   };
 
@@ -576,10 +638,10 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   updateStackOffset(env);
 
   // Okay to request async eager return even if it is not supported.
-  auto const asyncEagerReturn = fca.asyncEagerOffset != kInvalidOffset;
   auto const retVal = callImpl(env, callee, fca, objOrClass, fca.skipRepack(),
-                               dynamicCall, asyncEagerReturn);
-  handleCallReturn(env, nullptr, fca, retVal, asyncEagerReturn, unlikely);
+                               dynamicCall,
+                               fca.asyncEagerOffset != kInvalidOffset);
+  handleCallReturn(env, nullptr, retVal, fca.asyncEagerOffset, unlikely);
 }
 
 void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,

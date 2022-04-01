@@ -28,6 +28,7 @@ class Foo {
 
   <<__MemoizeLSB>>
   public static function memoized_lsb(): Bar {
+    /* HH_FIXME[11002] Test HH_FIXME to ignore the error of passing global variables to function calls */
     return self::$bar; // A global variable is passed to (or returned from) a function call.
   }
 }
@@ -45,6 +46,8 @@ function memoized_vec_int(): vec<int> {
 function test_fun_call(): Bar {
   $a = Foo::$bar;
   $a->prop = 2; // A global variable is written.
+  /* HH_FIXME[11001] Test HH_FIXME to ignore the error of global variable write */
+  $a->prop = 2;
   return $a; // A global variable is passed to (or returned from) a function call.
 }
 

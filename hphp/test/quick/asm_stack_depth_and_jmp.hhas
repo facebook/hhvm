@@ -1,4 +1,5 @@
 .function test() {
+  .declvars $x;
   Int 42
   SetL $x
   PopC

@@ -35,6 +35,7 @@ fail:
 }
 
 .function case_three() {
+  .declvars $foo;
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "get_three"

@@ -6,9 +6,8 @@
 
 mod retry;
 
-use std::sync::atomic::{AtomicBool, Ordering};
-
 use detail::*;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 /// Lightweight stack size tracking facility
 ///
@@ -43,7 +42,7 @@ use detail::*;
 ///   silently missing stack overflows if you re-create an instance on the same thread!)
 #[derive(Debug)]
 pub struct StackLimit {
-    value: usize,
+    pub(crate) value: usize,
     overflow: AtomicBool,
 }
 
@@ -55,22 +54,14 @@ pub const MI: usize = KI * KI;
 pub const GI: usize = KI * MI;
 
 impl StackLimit {
-    pub fn relative(value: usize) -> Self {
+    fn relative(value: usize) -> Self {
         Self {
             value,
             overflow: AtomicBool::new(false),
         }
     }
 
-    pub fn get(&self) -> usize {
-        self.value
-    }
-
-    pub fn set(&mut self, value: usize) {
-        self.value = value
-    }
-
-    pub fn check_exceeded(&self) -> bool {
+    fn check_exceeded(&self) -> bool {
         let overflow = StackGuard::exceeds_size(self.value);
         if overflow {
             // Note: we never store false, so Release constraint (write reordering suffices)
@@ -85,7 +76,7 @@ impl StackLimit {
         }
     }
 
-    pub fn exceeded(&self) -> bool {
+    fn exceeded(&self) -> bool {
         // Note: need at least Acquire constraint in order for store to be visible across threads
         self.overflow.load(Ordering::Acquire)
     }
@@ -98,8 +89,6 @@ impl StackLimit {
         StackGuard::peak()
     }
 }
-
-pub const STACK_SLACK_1K: retry::StackSlackFunction = |_| KI;
 
 /// Initializes the global state, more precisely modifes panic hook such that:
 /// - panics raised from StackLimit::panic_if_exceeded() are silenced;

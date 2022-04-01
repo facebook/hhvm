@@ -191,7 +191,7 @@ mod tests {
         };
 
         let expo_grower = |limit: &StackLimit, _: super::NonMainStackSize| {
-            eprintln!("limit = {} B", limit.get());
+            eprintln!("limit = {} B", limit.value);
             let bounded = crate::tests::StackBounded {
                 // Note: safe because we're not leaking bounded from the closure
                 limit: unsafe { std::mem::transmute(limit) },

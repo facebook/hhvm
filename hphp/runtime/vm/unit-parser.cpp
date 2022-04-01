@@ -192,7 +192,17 @@ CompilerResult hackc_compile(
   };
 
   // Invoke hackc, producing a rust Vec<u8> containing HHAS.
-  rust::Vec<uint8_t> hhas_vec = hackc_compile_from_text_cpp_ffi(native_env, code);
+  rust::Vec<uint8_t> hhas_vec = [&] {
+    tracing::Block _{
+      "hackc",
+      [&] {
+        return tracing::Props{}
+          .add("filename", filename ? filename : "")
+          .add("code_size", strlen(code));
+      }
+    };
+    return hackc_compile_from_text_cpp_ffi(native_env, code);
+  }();
   auto const hhas = std::string(hhas_vec.begin(), hhas_vec.end());
 
   // Assemble HHAS into a UnitEmitter, or a std::string if there were errors.

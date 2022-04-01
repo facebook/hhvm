@@ -41,6 +41,9 @@ TransIDSet findPredTrans(const RegionDesc& rd, const ProfData* profData) {
 
   auto srLock = dstSR->readlock();
   for (auto& inBr : dstSR->incomingBranches()) {
+    // Function calls are not tracked by TransCFG.
+    if (inBr.type() == IncomingBranch::Tag::CALL) continue;
+
     auto const srcID = profData->jmpTransID(inBr.toSmash());
     if (srcID == kInvalidTransID) continue;
 

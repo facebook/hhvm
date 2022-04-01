@@ -131,6 +131,7 @@ struct Vunit;
   O(phplogue, Inone, U(fp), Dn)\
   O(phpret, Inone, U(fp) U(args), Dn)\
   O(callphp, I(target), U(args), Dn)\
+  O(callphpfe, I(target), U(args), Dn)\
   O(callphpr, Inone, U(target) U(args), Dn)\
   O(callphps, I(target), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
@@ -864,15 +865,17 @@ struct phpret { Vreg fp; RegSet args; bool noframe; };
  * Call a PHP function.
  *
  * Comes in three flavors:
- *    call:  direct call
- *    callr: indirect call via register
- *    calls: direct call with smashable target that begins its life as a request
- *           to translate the callee, and winds up as a direct call to the
- *           callee's prologue
+ *    call:   direct call
+ *    callr:  indirect call via register
+ *    calls:  direct call with smashable target that begins its life as
+ *            a request to translate the callee, and winds up as a direct call
+ *            to the callee's prologue
+ *    callfe: same as `calls', but calling func entry rather than prologue
  */
 struct callphp { TCA target; RegSet args; };
 struct callphpr { Vreg64 target; RegSet args; };
 struct callphps { TCA target; RegSet args; const Func* func; uint32_t nargs; };
+struct callphpfe { SrcKey target; RegSet args; };
 
 /*
  * Enter a continuation (with exception edges).

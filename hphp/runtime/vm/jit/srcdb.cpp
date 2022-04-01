@@ -37,6 +37,10 @@ TRACE_SET_MOD(trans)
 
 void IncomingBranch::patch(TCA dest) {
   switch (type()) {
+    case Tag::CALL:
+      smashCall(toSmash(), dest);
+      break;
+
     case Tag::JMP:
       smashJmp(toSmash(), dest);
       break;
@@ -61,6 +65,7 @@ void IncomingBranch::patch(TCA dest) {
 
 bool IncomingBranch::optimize() {
   switch (type()) {
+    case Tag::CALL: return optimizeSmashedCall(toSmash());
     case Tag::JMP: return optimizeSmashedJmp(toSmash());
     case Tag::JCC: return optimizeSmashedJcc(toSmash());
     case Tag::ADDR: return false;
@@ -71,6 +76,9 @@ bool IncomingBranch::optimize() {
 
 TCA IncomingBranch::target() const {
   switch (type()) {
+    case Tag::CALL:
+      return smashableCallTarget(toSmash());
+
     case Tag::JMP:
       return smashableJmpTarget(toSmash());
 
@@ -89,6 +97,7 @@ TCA IncomingBranch::target() const {
 std::string IncomingBranch::show() const {
   auto const typeStr = [&] {
     switch (type()) {
+      case Tag::CALL: return "call";
       case Tag::JMP: return "jmp";
       case Tag::JCC: return "jcc";
       case Tag::ADDR: return "addr";

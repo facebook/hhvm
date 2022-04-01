@@ -70,6 +70,7 @@ type kind =
   (* enum class name, label name *)
   | EnumClassLabel of string * string
   | Keyword of keyword_with_hover_docs
+  | PureFunctionContext
 [@@deriving ord, eq]
 
 type 'a t = {
@@ -98,6 +99,7 @@ let kind_to_string = function
   | Attribute _ -> "attribute"
   | EnumClassLabel _ -> "enum_class_label"
   | Keyword _ -> "keyword"
+  | PureFunctionContext -> "context_braces"
 
 let enclosing_class occurrence =
   match occurrence.type_ with

@@ -61,7 +61,6 @@ type env = {
   inference_env: Typing_inference_env.t;
   allow_wildcards: bool;
   big_envs: (Pos.t * env) list ref;
-  pessimize: bool;
   fun_tast_info: Tast.fun_tast_info option;
 }
 
@@ -139,7 +138,6 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     inference_env = Typing_inference_env.empty_inference_env;
     allow_wildcards = false;
     big_envs = ref [];
-    pessimize = false;
     fun_tast_info = None;
   }
 

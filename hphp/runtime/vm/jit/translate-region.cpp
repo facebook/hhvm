@@ -315,12 +315,11 @@ bool inEntryRetransChain(RegionDesc::BlockId bid, const RegionDesc& region) {
  * `retry'.  Update `inl' and return the region if it's inlinable.
  */
 RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
-                                       const Func* callee,
-                                       const FCallArgs& fca,
+                                       SrcKey entry,
                                        Type ctxType,
                                        const ProfSrcKey& psk,
                                        int& calleeCost) {
-  assertx(isFCall(psk.srcKey.op()));
+  assertx(entry.funcEntry());
   if (isProfiling(irgs.context.kind) || irgs.inlineState.conjure) {
     return nullptr;
   }
@@ -329,20 +328,19 @@ RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
   }
   auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
                         irgs.unit.annotationData.get() : nullptr;
-  if (!canInlineAt(psk.srcKey, callee, fca, annotationsPtr)) return nullptr;
+  if (!canInlineAt(psk.srcKey, entry, annotationsPtr)) return nullptr;
 
   auto const& inlineBlacklist = irgs.retryContext->inlineBlacklist;
   if (inlineBlacklist.find(psk) != inlineBlacklist.end()) {
     return nullptr;
   }
 
-  auto calleeRegion = selectCalleeRegion(
-    irgs, callee, fca, ctxType, psk.srcKey);
+  auto calleeRegion = selectCalleeRegion(irgs, entry, ctxType, psk.srcKey);
   if (!calleeRegion || calleeRegion->instrSize() > irgs.budgetBCInstrs) {
     return nullptr;
   }
 
-  calleeCost = costOfInlining(psk.srcKey, callee, *calleeRegion,
+  calleeCost = costOfInlining(psk.srcKey, entry.func(), *calleeRegion,
                               annotationsPtr);
   return calleeRegion;
 }
@@ -795,6 +793,7 @@ bool irGenTrySuperInlineFCall(irgen::IRGS& irgs, const Func* callee,
   if (callee->numInOutParams()) return refuse("callee has inout params");
 
   auto const firstArgPos = static_cast<int32_t>(fca.numInputs()) - 1;
+  ctx = ctx ? ctx : cns(irgs, nullptr);
   auto const& ctxType = ctx->type();
   std::vector<Type> argTypes;
   std::vector<TypedValue> args;
@@ -934,48 +933,41 @@ bool irGenTrySuperInlineFCall(irgen::IRGS& irgs, const Func* callee,
   return irgs.irb->inUnreachableState();
 }
 
-bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
-                         const FCallArgs& fca, SSATmp* ctx, bool dynamicCall) {
+bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
+                         Offset asyncEagerOffset) {
+  assertx(entry.funcEntry());
   ctx = ctx ? ctx : cns(irgs, nullptr);
-  if (irGenTrySuperInlineFCall(irgs, callee, fca, ctx, dynamicCall)) {
-    return true;
-  }
 
   auto const psk = ProfSrcKey { canonTransID(irgs.profTransIDs), curSrcKey(irgs) };
   int calleeCost{0};
 
   // See if we have a callee region we can inline.
   auto const calleeRegion = getInlinableCalleeRegion(
-    irgs, callee, fca, ctx->type(), psk, calleeCost);
+    irgs, entry, ctx->type(), psk, calleeCost);
   if (!calleeRegion) return false;
 
   // We shouldn't be inlining profiling translations.
   assertx(irgs.context.kind != TransKind::Profile);
   assertx(calleeRegion->instrSize() <= irgs.budgetBCInstrs);
+  assert_flog(calleeRegion->start() == entry,
+              "{} != {}", show(calleeRegion->start()), show(entry));
 
   FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
          "and stack:\n{}\n",
          curFunc(irgs)->fullName()->data(),
-         callee->fullName()->data(),
-         fca.numArgs,
+         entry.func()->fullName()->data(),
+         entry.func()->getEntryNumParams(entry.entryOffset()),
          show(irgs));
 
   auto const returnBlock = irgen::defBlock(irgs);
   auto const suspendRetBlock = irgen::defBlock(irgs);
   auto const endCatchBlock = irgen::defBlock(irgs, Block::Hint::Unused);
-  auto const asyncEagerOffset = callee->supportsAsyncEagerReturn()
-    ? fca.asyncEagerOffset : kInvalidOffset;
   auto const returnTarget = InlineReturnTarget {
     returnBlock, suspendRetBlock, endCatchBlock, asyncEagerOffset
   };
-  auto callFuncOff = bcOff(irgs);
+  auto const callFuncOff = bcOff(irgs);
 
-  irgen::beginInlining(irgs, callee, fca, ctx, dynamicCall,
-                       psk.srcKey.op(),
-                       calleeRegion->start(),
-                       callFuncOff,
-                       returnTarget,
-                       calleeCost);
+  irgen::beginInlining(irgs, entry, ctx, callFuncOff, returnTarget, calleeCost);
 
   SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
     { return show(*calleeRegion); };
@@ -1042,7 +1034,7 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
       irgs.profTransIDs.insert(mergedBlocks.begin(), mergedBlocks.end());
     }
 
-    auto const& argTypes = region.inlineInputTypes();
+    auto const& inputTypes = region.inlineInputTypes();
     auto const ctxType = region.inlineCtxType();
 
     auto const func = region.entry()->func();
@@ -1060,8 +1052,8 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
     SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
     irgs.irb->startBlock(unit->entry(), false /* hasUnprocPred */);
-    irgen::conjureBeginInlining(irgs, func, region.start(),
-                                ctxType, argTypes, returnTarget);
+    irgen::conjureBeginInlining(irgs, region.start(), ctxType, inputTypes,
+                                returnTarget);
 
     try {
       auto const result = irGenRegionImpl(irgs, region, 1 /* profFactor */,

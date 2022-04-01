@@ -1259,12 +1259,24 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         let ty_expect = MakeType.nothing Reason.none in
         (env, (ety1, Error (ety1, ty_expect), Ok tkey, Ok ty2))
       | Tvec_or_dict (tk, tv) ->
-        let (env, tv) = maybe_pessimise_type env tv in
         let (env, idx_err) =
           check_arraykey_index_write env expr_pos ety1 tkey
         in
-        let (env, tk') = Typing_union.union env tk tkey in
-        let (env, tv') = Typing_union.union env tv ty2 in
+        let (env, tk') =
+          match idx_err with
+          | Ok _ ->
+            if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+              pessimised_vec_dict_assign expr_pos env tk tkey
+            else
+              Typing_union.union env tk tkey
+          | _ -> Typing_union.union env tk tkey
+        in
+        let (env, tv') =
+          if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+            pessimised_vec_dict_assign expr_pos env tv ty2
+          else
+            Typing_union.union env tv ty2
+        in
         let ty = mk (r, Tvec_or_dict (tk', tv')) in
         (env, (ty, Ok ty, idx_err, Ok ty2))
       | Terr -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))

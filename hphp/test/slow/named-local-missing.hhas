@@ -1,5 +1,5 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
-  .declvars $okay;
+  .declvars $okay $_0;
   IsTypeL $_0;"oops" Int
   String "done"
   Print

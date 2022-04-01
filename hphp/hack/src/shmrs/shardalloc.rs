@@ -156,6 +156,11 @@ impl ShardAllocControlData {
     }
 }
 
+/// The minimum chunk size an allocator can be initialized with.
+///
+/// `ShardAlloc::new` will panic if given a smaller `chunk_size`.
+pub const SHARD_ALLOC_MIN_CHUNK_SIZE: usize = 64;
+
 /// An allocator used for shared memory hash maps.
 ///
 /// For now, each shard allocator is a bumping allocator that requests chunks from
@@ -186,15 +191,15 @@ impl<'shm> ShardAlloc<'shm> {
     /// Create a new shard allocator using the given lock-protected control
     /// data and a file allocator.
     ///
-    /// This function will fail if `chunk_size` < 64 bytes. As some of the
-    /// first bytes of a chunk are used as a header.
+    /// This function will fail if `chunk_size` < `SHARD_ALLOC_MIN_CHUNK_SIZE`
+    /// bytes. As some of the first bytes of a chunk are used as a header.
     pub unsafe fn new(
         control_data: RwLockRef<'shm, ShardAllocControlData>,
         file_alloc: &'shm FileAlloc,
         chunk_size: usize,
         is_fixed_size: bool,
     ) -> Self {
-        assert!(chunk_size >= 64);
+        assert!(chunk_size >= SHARD_ALLOC_MIN_CHUNK_SIZE);
         Self {
             control_data,
             file_alloc,

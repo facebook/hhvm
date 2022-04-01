@@ -1,0 +1,2 @@
+File "parse_int_with_underscore_bad5.php", line 5, characters 17-18:
+A binary literal needs at least one digit. (Parsing[1002])

@@ -1,6 +1,7 @@
 # just testing istype opcodes
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $x;
   Int 1
   IsTypeC Int
   JmpNZ was_int

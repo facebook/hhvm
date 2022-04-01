@@ -34,6 +34,7 @@
 .alias Quux = <N> """Y:1:{s:4:\"kind\";i:1;}""";
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $x;
   NullUninit
   NullUninit
   Int 0

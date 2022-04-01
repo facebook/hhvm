@@ -191,6 +191,66 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   }
 }
 
+void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const ctx = srcLoc(env, inst, 2).reg();
+  auto const extra = inst->extra<CallFuncEntry>();
+  auto const callee = extra->target.func();
+  assertx(extra->target.funcEntry());
+
+  auto& v = vmain(env);
+
+  // Make vmsp() point to the future vmfp().
+  auto const ssp = v.makeReg();
+  v << lea{
+    sp[cellsToBytes(extra->spOffset.offset + callee->numFuncEntryInputs())],
+    ssp
+  };
+  v << syncvmsp{ssp};
+
+  // Initialize non-native portion of the callee frame.
+  v << storeli{static_cast<int32_t>(callee->getFuncId().toInt()),
+               Vreg(rvmsp()) + AROFF(m_funcId)};
+  v << storeli{safe_cast<int32_t>(extra->arFlags),
+               Vreg(rvmsp()) + AROFF(m_callOffAndFlags)};
+
+  if (callee->cls() || callee->isClosureBody()) {
+    assertx(inst->src(2)->isA(TObj) || inst->src(2)->isA(TCls));
+    v << store{ctx, Vreg(rvmsp()) + AROFF(m_thisUnsafe)};
+  } else {
+    assertx(inst->src(2)->isA(TNullptr));
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      emitImmStoreq(v, ActRec::kTrashedThisSlot,
+                    Vreg(rvmsp()) + AROFF(m_thisUnsafe));
+    }
+  }
+
+  // Emit a smashable call that initially calls a recyclable service request
+  // stub.  The stub and the eventual targets take rvmfp() as an argument,
+  // pointing to the callee ActRec.
+  auto const done = v.makeBlock();
+  v << callphpfe{extra->target, func_entry_regs()};
+
+  // The callee is responsible for unwinding the whole frame, which includes
+  // all inputs, ActRec and empty space reserved for inouts.
+  auto const marker = inst->marker();
+  auto const fixupBcOff = marker.fixupBcOff();
+  auto const fixupSpOff = marker.fixupBcSPOff()
+    - callee->numFuncEntryInputs() - kNumActRecCells - callee->numInOutParams();
+  v << syncpoint{Fixup::direct(fixupBcOff, fixupSpOff)};
+  v << unwind{done, label(env, inst->taken())};
+  v = done;
+
+  auto const dst = dstLoc(env, inst, 0);
+  auto const type = inst->dst()->type();
+  if (!type.admitsSingleVal()) {
+    v << defvmretdata{dst.reg(0)};
+  }
+  if (type.needsReg()) {
+    v << defvmrettype{dst.reg(1)};
+  }
+}
+
 void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CallBuiltin>();
   auto const callee = extra->callee;

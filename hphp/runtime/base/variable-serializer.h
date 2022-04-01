@@ -121,6 +121,8 @@ struct VariableSerializer {
     m_serializeProvenanceAndLegacy = true;
   }
 
+  void setDisallowObjects() { m_disallowObjects = true; }
+
   // Should we be calling the pure callbacks
   void setPure() { m_pure = true; }
 
@@ -277,6 +279,7 @@ private:
   bool m_vdWarn{false};          // warn when attempting on vec-like darrays
   bool m_ddWarn{false};          // warn when attempting on non-vec-like darrays
   bool m_ignoreLateInit{false};  // ignore uninitalized late init props
+  bool m_disallowObjects{false};  // throw if serializing non-collection object
   bool m_hasHackWarned{false};   // have we already warned on Hack arrays?
   bool m_hasDictWarned{false};   // have we already warned on dicts?
   bool m_hasKeysetWarned{false};   // have we already warned on dicts?

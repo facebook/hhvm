@@ -46,6 +46,7 @@
 }
 
 .function obj_type2() {
+  .declvars $x;
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "make_bar"
@@ -60,6 +61,7 @@
 }
 
 .function foo() {
+  .declvars $obj $k;
   Jmp stuff
 out:
   Null
@@ -87,6 +89,7 @@ stuff:
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $x $y;
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "foo"

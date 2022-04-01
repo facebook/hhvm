@@ -288,4 +288,12 @@ let rec try_push_like env ty =
       | (env, Some ty) -> (env, Some (mk (r, Toption ty)))
       | (env, None) -> (env, None)
     end
+  | (r, Tvec_or_dict (tk, tv)) ->
+    let (changed, tyl) = List.map_env false [tk; tv] ~f:make_like in
+    if changed then
+      match tyl with
+      | [tk; tv] -> (env, Some (mk (r, Tvec_or_dict (tk, tv))))
+      | _ -> assert false
+    else
+      (env, None)
   | _ -> (env, None)

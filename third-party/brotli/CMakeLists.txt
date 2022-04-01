@@ -18,6 +18,8 @@ ExternalProject_Add(
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_LIBDIR=lib
+    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 )
 add_dependencies(brotli bundled_brotli)
 

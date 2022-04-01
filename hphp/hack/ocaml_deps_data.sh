@@ -33,7 +33,7 @@ export HACK_OPAM_DEPS=(
   visitors.20210608
   wtf8.1.0.2
   yojson.1.7.0
-#  ocaml-option-flambda
+  ocaml-option-flambda
 )
 
 # The rest of the file exports variables based on the above configuration.

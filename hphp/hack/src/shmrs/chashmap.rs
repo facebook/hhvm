@@ -13,7 +13,7 @@ use owning_ref::OwningRef;
 
 use crate::filealloc::FileAlloc;
 use crate::hashmap::Map;
-use crate::shardalloc::{ShardAlloc, ShardAllocControlData};
+use crate::shardalloc::{ShardAlloc, ShardAllocControlData, SHARD_ALLOC_MIN_CHUNK_SIZE};
 use crate::sync::{RwLock, RwLockReadGuard, RwLockRef, RwLockWriteGuard};
 
 /// The number of shards.
@@ -27,6 +27,14 @@ static_assertions::const_assert!(NUM_SHARDS.is_power_of_two());
 
 /// The non-evictable allocator itself allocates regions of memory in chunks.
 const NON_EVICTABLE_CHUNK_SIZE: usize = 1024 * 1024;
+
+/// Minimum evictable bytes for an evictable shard.
+///
+/// The program will panic if a `CMap` is initialized with less evictable
+/// bytes per shard.
+///
+/// See also `CMap::initialize_with_hasher`
+pub const MINIMUM_EVICTABLE_BYTES_PER_SHARD: usize = SHARD_ALLOC_MIN_CHUNK_SIZE;
 
 /// This struct gives access to a shard, including its hashmap and its
 /// allocators.
@@ -130,6 +138,8 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
     ///
     /// Panics:
     ///  - If `file_size` is not large enough.
+    ///  - If `max_evictable_bytes_per_shard` is less than
+    ///    `MINIMUM_EVICTABLE_BYTES_PER_SHARD`
     pub unsafe fn initialize_with_hasher(
         cmap: &'shm mut MaybeUninit<Self>,
         hash_builder: S,

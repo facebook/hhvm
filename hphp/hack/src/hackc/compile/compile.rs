@@ -654,7 +654,6 @@ fn parse_file(
             ParserResult {
                 errors,
                 aast,
-                scoured_comments,
                 parse_peak,
                 lower_peak,
                 error_peak,
@@ -666,21 +665,18 @@ fn parse_file(
                 profile.error_peak = error_peak;
                 profile.parsing_bytes = arena_bytes;
                 let mut errors = errors.iter().filter(|e| {
-                    scoured_comments.get_fixme(e.pos(), e.code()).is_none()
-                        /* Ignore these errors to match legacy AST behavior */
-                        && e.code() != 2086
+                    e.code() != 2086
                         /* Naming.MethodNeedsVisibility */
                         && e.code() != 2102
                         /* Naming.UnsupportedTraitUseAs */
                         && e.code() != 2103
                 });
-                if errors.next().is_some() {
-                    Err(ParseError(Pos::make_none(), String::new(), false))
-                } else {
-                    match aast {
+                match errors.next() {
+                    Some(e) => Err(ParseError(e.pos().clone(), String::from(e.msg()), false)),
+                    None => match aast {
                         Ok(aast) => Ok(aast),
                         Err(msg) => Err(ParseError(Pos::make_none(), msg, false)),
-                    }
+                    },
                 }
             }
         },

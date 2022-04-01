@@ -33,6 +33,11 @@ impl<'a> UserError<'a, Pos<'a>, PosOrDecl<'a>> {
         pos
     }
 
+    pub fn msg(&self) -> &str {
+        let Message(_, msg) = &self.claim;
+        msg
+    }
+
     pub fn code(&self) -> ErrorCode {
         self.code
     }

@@ -11,6 +11,7 @@
   index_builder
   logging
   naming_global
+  parser_options
   pos))
 
 (library

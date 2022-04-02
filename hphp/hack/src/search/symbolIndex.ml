@@ -31,7 +31,11 @@ let initialize
   let sienv =
     match sienv.sie_provider with
     | SqliteIndex ->
-      SqliteSearchService.initialize ~sienv ~workers ~savedstate_file_opt
+      SqliteSearchService.initialize
+        ~sienv
+        ~workers
+        ~savedstate_file_opt
+        ~namespace_map
     | CustomIndex ->
       CustomSearchService.initialize ~globalrev ~gleanopt;
       sienv

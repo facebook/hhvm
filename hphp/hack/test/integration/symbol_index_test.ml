@@ -96,6 +96,7 @@ let run_index_builder (harness : Test_harness.t) : si_env =
       custom_repo_name = None;
       set_paths_for_worker = false;
       hhi_root_folder = Some hhi_folder;
+      namespace_map = [];
       silent = true;
     }
   in

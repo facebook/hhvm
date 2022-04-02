@@ -14,6 +14,7 @@ use oxidized::relative_path::RelativePath;
 ocaml_ffi! {
     fn extract_as_json_ffi(
         flags: i32,
+        auto_namespace_map: Vec<(String, String)>,
         filename: RelativePath,
         text_ptr: UnsafeOcamlPtr,
         mangle_xhp: bool,
@@ -28,6 +29,7 @@ ocaml_ffi! {
             ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
             ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
             ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
+            auto_namespace_map,
             filename,
             text,
             mangle_xhp,
@@ -41,6 +43,7 @@ fn extract_facts_as_json_ffi(
     allow_new_attribute_syntax: bool,
     enable_xhp_class_modifier: bool,
     disable_xhp_element_mangling: bool,
+    auto_namespace_map: Vec<(String, String)>,
     filename: RelativePath,
     text: &[u8],
     mangle_xhp: bool,
@@ -48,23 +51,13 @@ fn extract_facts_as_json_ffi(
     let bump = bumpalo::Bump::new();
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
-    let aliased_namespaces = r#"{"hhvm.aliased_namespaces":{"global_value":{"Async": "HH\\Lib\\Async", "C": "FlibSL\\C", "Dict": "FlibSL\\Dict", "File": "HH\\Lib\\File", "IO": "HH\\Lib\\IO", "Keyset": "FlibSL\\Keyset", "Locale": "FlibSL\\Locale", "Math": "FlibSL\\Math", "OS": "HH\\Lib\\OS", "PHP": "FlibSL\\PHP", "PseudoRandom": "FlibSL\\PseudoRandom", "Regex": "FlibSL\\Regex", "Rx": "HH\\Rx", "SecureRandom": "FlibSL\\SecureRandom", "Str": "FlibSL\\Str", "Vec": "FlibSL\\Vec"}}}"#;
-    let config_opts = options::Options::from_configs(&[aliased_namespaces], &[]).unwrap();
-    let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
-        Some(m) => bumpalo::collections::Vec::from_iter_in(
-            m.iter().map(|(k, v)| {
-                (
-                    alloc.alloc_str(k.as_str()) as &str,
-                    alloc.alloc_str(v.as_str()) as &str,
-                )
-            }),
-            alloc,
-        ),
-        None => {
-            bumpalo::vec![in alloc;]
-        }
-    }
-    .into_bump_slice();
+    let auto_namespace_map =
+        alloc.alloc_slice_fill_iter(auto_namespace_map.iter().map(|(k, v)| {
+            (
+                alloc.alloc_str(k.as_str()) as &str,
+                alloc.alloc_str(v.as_str()) as &str,
+            )
+        }));
     let opts = DeclParserOptions {
         auto_namespace_map,
         hhvm_compat_mode,

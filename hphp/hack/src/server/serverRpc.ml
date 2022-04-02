@@ -196,6 +196,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~disable_legacy_attribute_syntax:false
         ~enable_xhp_class_modifier:false
         ~disable_xhp_element_mangling:false
+        ~auto_namespace_map:
+          env.ServerEnv.popt.GlobalOptions.po_auto_namespace_map
         ~filename:Relative_path.default
         ~text:contents
     in

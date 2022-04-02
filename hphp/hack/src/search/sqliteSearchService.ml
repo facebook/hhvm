@@ -55,6 +55,7 @@ let sqlite_escape_str (str : string) : string =
 let find_or_build_sqlite_file
     (workers : MultiWorker.worker list option)
     (savedstate_file_opt : string option)
+    (namespace_map : (string * string) list)
     ~(silent : bool) : string =
   match savedstate_file_opt with
   | Some path -> path
@@ -78,6 +79,7 @@ let find_or_build_sqlite_file
         custom_repo_name = None;
         set_paths_for_worker = false;
         hhi_root_folder = Some (Hhi.get_hhi_root ());
+        namespace_map;
         silent;
       }
     in
@@ -93,13 +95,15 @@ let find_or_build_sqlite_file
 let initialize
     ~(sienv : si_env)
     ~(workers : MultiWorker.worker list option)
-    ~(savedstate_file_opt : string option) : si_env =
+    ~(savedstate_file_opt : string option)
+    ~(namespace_map : (string * string) list) : si_env =
   (* Find the database and open it *)
   let db_path =
     find_or_build_sqlite_file
       ~silent:sienv.sie_quiet_mode
       workers
       savedstate_file_opt
+      namespace_map
   in
   let db = Sqlite3.db_open db_path in
   (* Report that the database has been loaded *)

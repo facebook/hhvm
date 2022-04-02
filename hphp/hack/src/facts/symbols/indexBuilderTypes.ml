@@ -20,6 +20,7 @@ type index_builder_context = {
   hhi_root_folder: Path.t option;
   set_paths_for_worker: bool;
   silent: bool;
+  namespace_map: (string * string) list;
 }
 
 (* Fully parsed data structure *)

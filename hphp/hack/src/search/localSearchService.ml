@@ -101,7 +101,9 @@ let update_file
     try
       let full_filename = Relative_path.to_absolute path in
       if Sys.file_exists full_filename then
-        let contents = IndexBuilder.parse_one_file ~path in
+        let popt = Provider_context.get_popt ctx in
+        let namespace_map = ParserOptions.auto_namespace_map popt in
+        let contents = IndexBuilder.parse_one_file ~namespace_map ~path in
         if List.length contents = 0 then
           convert_fileinfo_to_contents ~ctx ~sienv ~info ~filepath
         else

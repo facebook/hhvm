@@ -98,7 +98,9 @@ let convert_facts ~(path : Relative_path.t) ~(facts : Facts.facts) : si_capture
   |> List.append constants_mapped
 
 (* Parse one single file and capture information about it *)
-let parse_one_file ~(path : Relative_path.t) : si_capture =
+let parse_one_file
+    ~(namespace_map : (string * string) list) ~(path : Relative_path.t) :
+    si_capture =
   let filename = Relative_path.to_absolute path in
   let text = In_channel.read_all filename in
   (* Just the facts ma'am *)
@@ -112,6 +114,7 @@ let parse_one_file ~(path : Relative_path.t) : si_capture =
       ~disable_legacy_attribute_syntax:false
       ~enable_xhp_class_modifier:false
       ~disable_xhp_element_mangling:false
+      ~auto_namespace_map:namespace_map
       ~filename:path
       ~text
   in
@@ -127,8 +130,7 @@ let parse_one_file ~(path : Relative_path.t) : si_capture =
 (* Parse the file using the existing context*)
 let parse_file (ctxt : index_builder_context) (path : Relative_path.t) :
     si_capture =
-  let _ = ctxt in
-  parse_one_file ~path
+  parse_one_file ~path ~namespace_map:ctxt.namespace_map
 
 (* Parse a batch of files *)
 let parse_batch
@@ -275,6 +277,19 @@ let go (ctxt : index_builder_context) (workers : MultiWorker.worker list option)
       (* Sanity test.  If the folder does not have an .hhconfig file, this is probably
          * an integration test that's using a fake repository.  Don't do anything! *)
       if Disk.file_exists (Path.to_string hhconfig_path) then
+        let options = ServerArgs.default_options ~root:ctxt.repo_folder in
+        let (hhconfig, _) =
+          ServerConfig.load
+            ~silent:ctxt.silent
+            (Relative_path.create
+               Relative_path.Root
+               (Path.to_string hhconfig_path))
+            options
+        in
+        let popt = ServerConfig.parser_options hhconfig in
+        let ctxt =
+          { ctxt with namespace_map = ParserOptions.auto_namespace_map popt }
+        in
         measure_time
           ~silent:ctxt.silent
           ~f:(fun () -> gather_file_list ctxt.repo_folder)

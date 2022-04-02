@@ -8,9 +8,11 @@
   heap_shared_mem_hash
   hhi
   parser
+  parser_options
   process
   process_types
   procs_entry_point
   search_utils
+  server_env
   sqlite_utils
   utils_hash))

@@ -24,6 +24,7 @@ let parse_options () : index_builder_context option =
   let repository = ref None in
   let include_builtins = ref true in
   let silent = ref false in
+  let namespace_map = ref [] in
   let options =
     ref
       [
@@ -56,6 +57,11 @@ let parse_options () : index_builder_context option =
         ( "--silent",
           Arg.Unit (fun () -> silent := true),
           "Build without logging timing data" );
+        ( "--auto-namespace-map",
+          Arg.String
+            (fun m ->
+              namespace_map := ServerConfig.convert_auto_namespace_to_map m),
+          "Specify namespace aliases" );
       ]
   in
   Arg.parse_dynamic
@@ -89,6 +95,7 @@ let parse_options () : index_builder_context option =
         set_paths_for_worker = true;
         silent = !silent;
         hhi_root_folder;
+        namespace_map = !namespace_map;
       }
 
 (* Run the application *)

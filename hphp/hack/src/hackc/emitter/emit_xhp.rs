@@ -5,12 +5,13 @@
 
 use emit_property::PropAndInit;
 use env::emitter::Emitter;
+use hack_macro::{hack_expr, hack_stmts};
 use hhas_method::HhasMethod;
 use hhas_xhp_attribute::HhasXhpAttribute;
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{Error, Result};
-use oxidized::{ast::*, ast_defs, local_id, pos::Pos};
+use oxidized::{ast::*, ast_defs, pos::Pos};
 
 pub fn properties_for_cache<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
@@ -45,76 +46,16 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
     xal: &[HhasXhpAttribute<'_>],
     xual: &[Hint],
 ) -> Result<HhasMethod<'arena>> {
-    let id_from_str = |s: &str| Expr_::mk_id(ast_defs::Id(Pos::make_none(), s.into()));
-
-    let mk_var_r = || {
-        mk_expr(Expr_::mk_lvar(Lid(
-            Pos::make_none(),
-            local_id::make_unscoped("$r"),
-        )))
-    };
-    let mk_cache = || {
-        let self_ = mk_expr(id_from_str("self"));
-        mk_expr(Expr_::mk_class_get(
-            ClassId((), Pos::make_none(), ClassId_::CIexpr(self_)),
-            ClassGetExpr::CGstring((Pos::make_none(), "$__xhpAttributeDeclarationCache".into())),
-            PropOrMethod::IsProp,
-        ))
-    };
-    let token1 = mk_stmt(Stmt_::mk_expr(mk_expr(Expr_::mk_binop(
-        Bop::Eq(None),
-        mk_var_r(),
-        mk_cache(),
-    ))));
-    // if ($r === null) {
-    //   self::$__xhpAttributeDeclarationCache =
-    //       __SystemLib\\merge_xhp_attr_declarations(
-    //          parent::__xhpAttributeDeclaration(),
-    //          attributes
-    //        );
-    //   $r = self::$__xhpAttributeDeclarationCache;
-    // }
-    let cond = mk_expr(Expr_::mk_binop(
-        Bop::Eqeqeq,
-        mk_var_r(),
-        mk_expr(Expr_::mk_null()),
-    ));
     let mut args = vec![(
         ParamKind::Pnormal,
-        mk_expr(Expr_::mk_call(
-            mk_expr(Expr_::mk_class_const(
-                ClassId(
-                    (),
-                    Pos::make_none(),
-                    ClassId_::CIexpr(mk_expr(id_from_str("parent"))),
-                ),
-                (Pos::make_none(), "__xhpAttributeDeclaration".into()),
-            )),
-            vec![],
-            vec![],
-            None,
-        )),
+        hack_expr!("parent::__xhpAttributeDeclaration()"),
     )];
+
     for xua in xual.iter() {
         match xua.1.as_happly() {
             Some((ast_defs::Id(_, s), hints)) if hints.is_empty() => {
                 let s = string_utils::mangle(string_utils::strip_global_ns(s).into());
-                let arg = mk_expr(Expr_::mk_call(
-                    mk_expr(Expr_::mk_class_const(
-                        ClassId(
-                            (),
-                            Pos::make_none(),
-                            ClassId_::CIexpr(mk_expr(Expr_::mk_id(ast_defs::Id(
-                                Pos::make_none(),
-                                s,
-                            )))),
-                        ),
-                        (Pos::make_none(), "__xhpAttributeDeclaration".into()),
-                    )),
-                    vec![],
-                    vec![],
-                    None,
-                ));
+                let arg = hack_expr!("#{id(s)}::__xhpAttributeDeclaration()");
                 args.push((ParamKind::Pnormal, arg));
             }
             _ => {
@@ -128,25 +69,17 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
         ParamKind::Pnormal,
         emit_xhp_attribute_array(emitter.alloc, xal)?,
     ));
-    let array_merge_call = mk_expr(Expr_::mk_call(
-        mk_expr(id_from_str("__SystemLib\\merge_xhp_attr_declarations")),
-        vec![],
-        args,
-        None,
-    ));
-    let set_cache = mk_stmt(Stmt_::mk_expr(mk_expr(Expr_::mk_binop(
-        Bop::Eq(None),
-        mk_cache(),
-        array_merge_call,
-    ))));
-    let set_r = mk_stmt(Stmt_::mk_expr(mk_expr(Expr_::mk_binop(
-        Bop::Eq(None),
-        mk_var_r(),
-        mk_cache(),
-    ))));
-    let token2 = mk_stmt(Stmt_::mk_if(cond, vec![set_cache, set_r], vec![]));
-    let token3 = mk_stmt(Stmt_::mk_return(Some(mk_var_r()))); // return $r;
-    let body = vec![token1, token2, token3];
+
+    let body = hack_stmts!(
+        r#"
+            $r = self::$__xhpAttributeDeclarationCache;
+            if ($r === null) {
+                self::$__xhpAttributeDeclarationCache = __SystemLib\merge_xhp_attr_declarations(#{args*});
+                $r = self::$__xhpAttributeDeclarationCache;
+            }
+            return $r;
+    "#
+    );
     from_xhp_attribute_declaration_method(
         emitter,
         class,

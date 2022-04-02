@@ -7,13 +7,14 @@ use emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, SetRange
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
 use ffi::Slice;
+use hack_macro::hack_expr;
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use instruction_sequence::{instr, Error, InstrSeq, Result};
 use label::Label;
 use lazy_static::lazy_static;
 use local::Local;
-use naming_special_names_rust::{special_functions, special_idents, superglobals};
+use naming_special_names_rust::{special_idents, superglobals};
 use oxidized::{
     aast as a, ast,
     ast_defs::{self, ParamKind},
@@ -243,7 +244,7 @@ fn emit_call<'a, 'arena, 'decl>(
     c: &(
         ast::Expr,
         Vec<ast::Targ>,
-        Vec<(ast_defs::ParamKind, ast::Expr)>,
+        Vec<(ParamKind, ast::Expr)>,
         Option<ast::Expr>,
     ),
 ) -> Result<InstrSeq<'arena>> {
@@ -1516,33 +1517,6 @@ pub fn emit_markup<'a, 'arena, 'decl>(
     (_, s): &ast::Pstring,
     check_for_hashbang: bool,
 ) -> Result<InstrSeq<'arena>> {
-    let mut emit_ignored_call_expr = |fname: String, expr: ast::Expr| {
-        let call_expr = ast::Expr(
-            (),
-            Pos::make_none(),
-            ast::Expr_::mk_call(
-                ast::Expr(
-                    (),
-                    Pos::make_none(),
-                    ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), fname)),
-                ),
-                vec![],
-                vec![(ParamKind::Pnormal, expr)],
-                None,
-            ),
-        );
-        emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), &call_expr)
-    };
-    let mut emit_ignored_call_expr_for_nonempty_str = |fname: String, expr_str: String| {
-        if expr_str.is_empty() {
-            Ok(instr::empty())
-        } else {
-            emit_ignored_call_expr(
-                fname,
-                ast::Expr((), Pos::make_none(), ast::Expr_::mk_string(expr_str.into())),
-            )
-        }
-    };
     let markup = if s.is_empty() {
         instr::empty()
     } else {
@@ -1559,7 +1533,12 @@ pub fn emit_markup<'a, 'arena, 'decl>(
             }
             _ => s,
         });
-        emit_ignored_call_expr_for_nonempty_str(special_functions::ECHO.into(), tail)?
+        if tail.is_empty() {
+            instr::empty()
+        } else {
+            let call_expr = hack_expr!("echo #{str(tail)}");
+            emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), &call_expr)?
+        }
     };
     Ok(markup)
 }

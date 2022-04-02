@@ -15,6 +15,7 @@ bumpalo = { version = "3.8", features = ["collections"] }
 decl_vars = { path = "../../../hhbc/cargo/decl_vars" }
 env = { path = "../../../emitter/cargo/env" }
 global_state = { path = "../../../emitter/cargo/global_state" }
+hack_macro = { path = "../../../utils/cargo/hack_macro" }
 hash = { path = "../../../../utils/hash" }
 hhas_coeffects = { path = "../../../hhbc/cargo/hhas_coeffects" }
 hhbc_assertion_utils = { path = "../../../utils/cargo/hhbc_assertion_utils" }

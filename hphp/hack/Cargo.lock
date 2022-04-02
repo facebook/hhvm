@@ -423,6 +423,7 @@ dependencies = [
  "decl_vars",
  "env",
  "global_state",
+ "hack_macro",
  "hash",
  "hhas_coeffects",
  "hhbc_assertion_utils",
@@ -985,6 +986,7 @@ dependencies = [
  "env",
  "ffi",
  "generator",
+ "hack_macro",
  "hash",
  "hhas_body",
  "hhas_param",
@@ -1423,6 +1425,7 @@ dependencies = [
  "emit_method",
  "emit_property",
  "env",
+ "hack_macro",
  "hhas_method",
  "hhas_xhp_attribute",
  "hhbc_id",
@@ -1665,6 +1668,21 @@ dependencies = [
  "clap",
  "facts_rust",
  "oxidized",
+]
+
+[[package]]
+name = "hack_macro"
+version = "0.0.0"
+dependencies = [
+ "aast_parser",
+ "ocamlrep",
+ "once_cell",
+ "oxidized",
+ "parser_core_types",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "syn",
 ]
 
 [[package]]

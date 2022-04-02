@@ -7,6 +7,7 @@ use ast_body::AstBody;
 use ast_scope::{Lambda, LongLambda, Scope, ScopeItem};
 use env::emitter::Emitter;
 use global_state::{ClosureEnclosingClassInfo, GlobalState};
+use hack_macro::{hack_expr, hack_stmt};
 use hash::IndexSet;
 use hhas_coeffects::HhasCoeffects;
 use hhbc_assertion_utils::ensure_normal_paramkind;
@@ -23,10 +24,10 @@ use oxidized::{
     aast_defs,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
     ast::{
-        Abstraction, Bop, Catch, ClassGetExpr, ClassId, ClassId_, ClassVar, Class_, ClassishKind,
-        Contexts, Def, EmitId, Expr, Expr_, FunDef, FunKind, FunParam, Fun_, FuncBody, Hint, Hint_,
-        Id, Lid, LocalId, Method_, OgNullFlavor, Pos, Program, PropOrMethod, ReifyKind, Stmt,
-        Stmt_, Targ, Tparam, TypeHint, UserAttribute, Visibility,
+        Abstraction, ClassGetExpr, ClassId, ClassId_, ClassVar, Class_, ClassishKind, Contexts,
+        Def, EmitId, Expr, Expr_, FunDef, FunKind, FunParam, Fun_, FuncBody, Hint, Hint_, Id, Lid,
+        LocalId, Method_, Pos, Program, ReifyKind, Stmt, Stmt_, Targ, Tparam, TypeHint,
+        UserAttribute, Visibility,
     },
     ast_defs::ParamKind,
     file_info::Mode,
@@ -875,86 +876,32 @@ fn convert_meth_caller_to_func_ptr(
     // TODO: Move dummy variable to tasl.rs once it exists.
     let dummy_saved_env = ();
     let pos = || pos.clone();
-    let expr_id = |name: String| Expr((), pos(), Expr_::mk_id(Id(pos(), name)));
     let cname = match env.scope.get_class() {
         Some(cd) => &cd.get_name().1,
         None => "",
     };
     let mangle_name = string_utils::mangle_meth_caller(cls, fname);
-    let fun_handle: Expr_ = Expr_::mk_call(
-        expr_id("\\__systemlib\\meth_caller".into()),
-        vec![],
-        vec![(
-            ParamKind::Pnormal,
-            Expr((), pos(), Expr_::mk_string(mangle_name.clone().into())),
-        )],
-        None,
+    let fun_handle = hack_expr!(
+        pos = pos(),
+        r#"\__systemlib\meth_caller(#{str(clone(mangle_name))})"#
     );
     if st.state.named_hoisted_functions.contains_key(&mangle_name) {
-        return fun_handle;
+        return fun_handle.2;
     }
     // AST for: invariant(is_a($o, <cls>), 'object must be an instance of <cls>');
     let obj_var = Box::new(Lid(pos(), local_id::make_unscoped("$o")));
     let obj_lvar = Expr((), pos(), Expr_::Lvar(obj_var.clone()));
-    let assert_invariant = Expr(
-        (),
-        pos(),
-        Expr_::mk_call(
-            expr_id("\\HH\\invariant".into()),
-            vec![],
-            vec![
-                (
-                    ParamKind::Pnormal,
-                    Expr(
-                        (),
-                        pos(),
-                        Expr_::mk_call(
-                            expr_id("\\is_a".into()),
-                            vec![],
-                            vec![
-                                (ParamKind::Pnormal, obj_lvar.clone()),
-                                (
-                                    ParamKind::Pnormal,
-                                    Expr((), pc.clone(), Expr_::String(cls.into())),
-                                ),
-                            ],
-                            None,
-                        ),
-                    ),
-                ),
-                (
-                    ParamKind::Pnormal,
-                    Expr(
-                        (),
-                        pos(),
-                        Expr_::String(format!("object must be an instance of ({})", cls).into()),
-                    ),
-                ),
-            ],
-            None,
-        ),
+    let msg = format!("object must be an instance of ({})", cls);
+    let assert_invariant = hack_expr!(
+        pos = pos(),
+        r#"\HH\invariant(\is_a(#{clone(obj_lvar)}, #{str(clone(cls), pc)}), #{str(msg)})"#
     );
     // AST for: return $o-><func>(...$args);
-    let args_var = Box::new(Lid(pos(), local_id::make_unscoped("$args")));
-    let variadic_param = make_fn_param(pos(), &args_var.1, true, false);
-    let meth_caller_handle = Expr(
-        (),
-        pos(),
-        Expr_::mk_call(
-            Expr(
-                (),
-                pos(),
-                Expr_::ObjGet(Box::new((
-                    obj_lvar,
-                    Expr((), pos(), Expr_::mk_id(Id(pf.clone(), fname.to_owned()))),
-                    OgNullFlavor::OGNullthrows,
-                    PropOrMethod::IsMethod,
-                ))),
-            ),
-            vec![],
-            vec![],
-            Some(Expr((), pos(), Expr_::Lvar(args_var))),
-        ),
+    let args_var = local_id::make_unscoped("$args");
+    let variadic_param = make_fn_param(pos(), &args_var, true, false);
+    let meth_caller_handle = hack_expr!(
+        pos = pos(),
+        r#"#obj_lvar->#{id(clone(fname), pf)}(...#{lvar(args_var)})"#
     );
 
     let f = Fun_ {
@@ -993,7 +940,7 @@ fn convert_meth_caller_to_func_ptr(
         fun: f,
     };
     st.state.named_hoisted_functions.insert(mangle_name, fd);
-    fun_handle
+    fun_handle.2
 }
 
 fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: bool) -> Expr_ {
@@ -1005,26 +952,11 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
     let obj_lvar = Expr((), pos(), Expr_::Lvar(obj_var.clone()));
     let meth_lvar = Expr((), pos(), Expr_::Lvar(meth_var.clone()));
     // AST for: return $o-><func>(...$args);
-    let args_var = Box::new(Lid(pos(), local_id::make_unscoped("$args")));
-    let variadic_param = make_fn_param(pos(), &args_var.1, true, false);
-    let invoke_method = Expr(
-        (),
-        pos(),
-        Expr_::mk_call(
-            Expr(
-                (),
-                pos(),
-                Expr_::ObjGet(Box::new((
-                    obj_lvar,
-                    meth_lvar,
-                    OgNullFlavor::OGNullthrows,
-                    PropOrMethod::IsMethod,
-                ))),
-            ),
-            vec![],
-            vec![],
-            Some(Expr((), pos(), Expr_::Lvar(args_var))),
-        ),
+    let args_var = local_id::make_unscoped("$args");
+    let variadic_param = make_fn_param(pos(), &args_var, true, false);
+    let invoke_method = hack_expr!(
+        pos = pos(),
+        r#"#obj_lvar->#meth_lvar(...#{lvar(args_var)})"#
     );
     let attrs = if force {
         vec![UserAttribute {
@@ -1066,23 +998,14 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         external: false,
         doc_comment: None,
     };
-    let expr_id = |name: String| Expr((), pos(), Expr_::mk_id(Id(pos(), name)));
     let force_val = if force { Expr_::True } else { Expr_::False };
-    let fun_handle: Expr_ = Expr_::mk_call(
-        expr_id("\\__systemlib\\dynamic_meth_caller".into()),
-        vec![],
-        vec![
-            (ParamKind::Pnormal, cexpr.clone()),
-            (ParamKind::Pnormal, fexpr.clone()),
-            (
-                ParamKind::Pnormal,
-                Expr((), pos(), Expr_::mk_efun(fd, vec![])),
-            ),
-            (ParamKind::Pnormal, Expr((), pos(), force_val)),
-        ],
-        None,
+    let force_val_expr = Expr((), pos(), force_val);
+    let efun = Expr((), pos(), Expr_::mk_efun(fd, vec![]));
+    let fun_handle = hack_expr!(
+        pos = pos(),
+        r#"\__systemlib\dynamic_meth_caller(#{clone(cexpr)}, #{clone(fexpr)}, #efun, #force_val_expr)"#
     );
-    fun_handle
+    fun_handle.2
 }
 
 fn convert_function_like_body<'a, 'arena>(
@@ -1623,84 +1546,24 @@ fn extract_debugger_main(
             stmts
         };
     let p = Pos::make_none;
-    let id = |n: &str| Expr((), p(), Expr_::mk_id(Id(p(), n.into())));
-    let lv = |n: &String| {
-        Expr(
-            (),
-            p(),
-            Expr_::mk_lvar(Lid(p(), local_id::make_unscoped(n))),
-        )
-    };
     let mut unsets: Vec<_> = vars
         .iter()
         .map(|name| {
-            let unset = Stmt(
-                p(),
-                Stmt_::mk_expr(Expr(
-                    (),
-                    p(),
-                    Expr_::mk_call(
-                        id("unset"),
-                        vec![],
-                        vec![(ParamKind::Pnormal, lv(name))],
-                        None,
-                    ),
-                )),
-            );
-            Stmt(
-                p(),
-                Stmt_::mk_if(
-                    Expr(
-                        (),
-                        p(),
-                        Expr_::mk_is(
-                            lv(name),
-                            Hint::new(
-                                p(),
-                                Hint_::mk_happly(Id(p(), "__uninitSentinel".into()), vec![]),
-                            ),
-                        ),
-                    ),
-                    vec![unset],
-                    vec![],
-                ),
-            )
+            let name = local_id::make_unscoped(name);
+            hack_stmt!("if (#{lvar(clone(name))} is __uninitSentinel) { unset(#{lvar(name)}); }")
         })
         .collect();
     let sets: Vec<_> = vars
         .iter()
-        .map(|name| {
-            let checkfunc = id("\\__systemlib\\__debugger_is_uninit");
-            let isuninit = Expr(
-                (),
-                p(),
-                Expr_::mk_call(
-                    checkfunc,
-                    vec![],
-                    vec![(ParamKind::Pnormal, lv(name))],
-                    None,
-                ),
-            );
-            let obj = Expr(
-                (),
-                p(),
-                Expr_::mk_new(
-                    ClassId((), p(), ClassId_::CI(Id(p(), "__uninitSentinel".into()))),
-                    vec![],
-                    vec![],
-                    None,
-                    (),
-                ),
-            );
-            let set = Stmt(
-                p(),
-                Stmt_::mk_expr(Expr(
-                    (),
-                    p(),
-                    Expr_::mk_binop(Bop::mk_eq(None), lv(name), obj),
-                )),
-            );
-            Stmt(p(), Stmt_::mk_if(isuninit, vec![set], vec![]))
+        .map(|name: &String| {
+            let name = local_id::make_unscoped(name);
+            hack_stmt!(
+                pos = p(),
+                r#"if (\__systemlib\__debugger_is_uninit(#{lvar(clone(name))})) {
+                       #{lvar(name)} = new __uninitSentinel();
+                     }
+                "#
+            )
         })
         .collect();
     vars.push("$__debugger$this".into());
@@ -1709,14 +1572,18 @@ fn extract_debugger_main(
         .iter()
         .map(|var| make_fn_param(p(), &local_id::make_unscoped(var), false, true))
         .collect();
-    let exnvar = Lid(p(), local_id::make_unscoped("$__debugger_exn$output"));
-    let catch = Stmt(
-        p(),
-        Stmt_::mk_try(
-            stmts,
-            vec![Catch(Id(p(), "Throwable".into()), exnvar, vec![])],
-            sets,
-        ),
+    let exnvar = local_id::make_unscoped("$__debugger_exn$output");
+    let catch = hack_stmt!(
+        pos = p(),
+        r#"
+            try {
+              #{stmts*};
+            } catch (Throwable #{lvar(exnvar)}) {
+              /* no-op */
+            } finally {
+              #{sets*};
+            }
+        "#
     );
     unsets.push(catch);
     let body = unsets;

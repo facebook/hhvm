@@ -23,6 +23,7 @@ emit_type_hint = { path = "../emit_type_hint" }
 env = { path = "../env" }
 ffi = { path = "../../../../utils/ffi" }
 generator = { path = "../generator" }
+hack_macro = { path = "../../../utils/cargo/hack_macro" }
 hash = { path = "../../../../utils/hash" }
 hhas_body = { path = "../../../hhbc/cargo/hhas_body" }
 hhas_param = { path = "../../../hhbc/cargo/hhas_param" }

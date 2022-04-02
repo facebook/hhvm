@@ -52,19 +52,29 @@ fn process_one_file(writer: &SyncWrite, f: &Path, profile: &mut Profile) -> Resu
             disable_toplevel_elaboration: false,
             verbosity: 0,
         };
-        let mut profile1 = Profile::default();
-        match crate::compile::process_single_file(&compile_opts, f.into(), content, &mut profile1) {
-            Err(e) => {
+        let result = std::panic::catch_unwind(|| {
+            let mut profile1 = Profile::default();
+            let result = crate::compile::process_single_file(
+                &compile_opts,
+                f.into(),
+                content,
+                &mut profile1,
+            );
+            (result, profile1)
+        });
+        match result {
+            Ok((Err(e), profile1)) => {
                 *profile += profile1;
                 writeln!(writer.lock().unwrap(), "{}: error ({})", f.display(), e)?
             }
-            Ok(output) => {
+            Ok((Ok(output), profile1)) => {
                 *profile += profile1;
                 let mut hasher = std::collections::hash_map::DefaultHasher::new();
                 output.hash(&mut hasher);
                 let crc = hasher.finish();
                 writeln!(writer.lock().unwrap(), "{}: {:016x}", f.display(), crc)?;
             }
+            Err(_) => writeln!(writer.lock().unwrap(), "{}: panic", f.display())?,
         }
     }
     Ok(())

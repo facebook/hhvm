@@ -192,6 +192,18 @@ uint16_t getGenericsBitmap(const ArrayData* generics) {
   return bitmap;
 }
 
+uint16_t getGenericsBitmap(const Func* f) {
+  assertx(f);
+  if (!f->hasReifiedGenerics()) return 0;
+  auto const& info = f->getReifiedGenericsInfo();
+  if (info.m_typeParamInfo.size() > 15) return 0;
+  uint16_t bitmap = 1;
+  for (auto const& tinfo : info.m_typeParamInfo) {
+    bitmap = (bitmap << 1) | (tinfo.m_isReified && !tinfo.m_isSoft);
+  }
+  return bitmap;
+}
+
 bool areAllGenericsSoft(const ReifiedGenericsInfo& info) {
   for (auto const& tp : info.m_typeParamInfo) {
     if (!tp.m_isSoft) return false;

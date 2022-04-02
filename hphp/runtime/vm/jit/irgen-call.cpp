@@ -232,6 +232,16 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   auto const genericsBitmap = [&] {
     if (!fca.hasGenerics()) return uint16_t{0};
     auto const generics = topC(env);
+    auto const caller = curFunc(env);
+    // If caller forwards identical generics to the callee, we can construct
+    // the bitmap from caller's information
+    if (caller->hasReifiedGenerics() &&
+        caller->getReifiedGenericsInfo().allGenericsFullyReified() &&
+        generics->inst()->is(LdLoc) &&
+        generics->inst()->extra<LdLoc>()->locId ==
+          caller->reifiedGenericsLocalId()) {
+      return getGenericsBitmap(caller);
+    }
     // Do not bother calculating the bitmap using a C++ helper if generics are
     // not statically known, as the prologue already has the same logic.
     if (!generics->hasConstVal(TVec)) return uint16_t{0};

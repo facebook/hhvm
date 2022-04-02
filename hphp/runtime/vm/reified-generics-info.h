@@ -52,6 +52,13 @@ struct ReifiedGenericsInfo {
                           return !t.m_isSoft;
                         });
   }
+
+  bool allGenericsFullyReified() const {
+    return std::all_of(m_typeParamInfo.begin(), m_typeParamInfo.end(),
+                       [](TypeParamInfo t) {
+                         return t.m_isReified && !t.m_isSoft;
+                       });
+  }
 };
 
 }

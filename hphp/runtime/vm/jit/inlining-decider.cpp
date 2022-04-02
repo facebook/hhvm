@@ -374,7 +374,7 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
     adjustedCost *= std::pow((double)callerProfCount / calleeProfCount,
                              RuntimeOption::EvalHHIRInliningVasmCalleeExp);
   }
-  adjustedCost *= std::pow(1 - (double)depth / maxDepth,
+  adjustedCost *= std::pow(1.0 / (1 + depth),
                            RuntimeOption::EvalHHIRInliningDepthExp);
   if (adjustedCost < RuntimeOption::EvalHHIRInliningMinVasmCostLimit) {
     adjustedCost = RuntimeOption::EvalHHIRInliningMinVasmCostLimit;
@@ -386,23 +386,21 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
     FTRACE(3, "adjustedMaxVasmCost: adjustedCost ({}) = baseVasmCost ({}) * "
            "(callerProfCount ({}) / baseProfCount ({})) ^ {} * "
            "(callerProfCount ({}) / calleeProfCount ({})) ^ {} * "
-           "(1 - depth ({}) / maxDepth ({})) ^ {}\n",
+           "(1.0 / (1 + depth ({}))) ^ {}\n",
            adjustedCost, baseVasmCost,
            callerProfCount, baseProfCount,
            RuntimeOption::EvalHHIRInliningVasmCallerExp,
            callerProfCount, calleeProfCount,
            RuntimeOption::EvalHHIRInliningVasmCalleeExp,
-           depth, maxDepth,
-           RuntimeOption::EvalHHIRInliningDepthExp);
+           depth, RuntimeOption::EvalHHIRInliningDepthExp);
   } else {
     FTRACE(3, "adjustedMaxVasmCost: adjustedCost ({}) = baseVasmCost ({}) * "
            "(callerProfCount ({}) / baseProfCount ({})) ^ {} * "
-           "(1 - depth ({}) / maxDepth ({})) ^ {}\n",
+           "(1.0 / (1 + depth ({}))) ^ {}\n",
            adjustedCost, baseVasmCost,
            callerProfCount, baseProfCount,
            RuntimeOption::EvalHHIRInliningVasmCallerExp,
-           depth, maxDepth,
-           RuntimeOption::EvalHHIRInliningDepthExp);
+           depth, RuntimeOption::EvalHHIRInliningDepthExp);
   }
   return adjustedCost;
 }

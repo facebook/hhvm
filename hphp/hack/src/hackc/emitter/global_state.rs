@@ -34,7 +34,6 @@ pub struct GlobalState<'arena> {
     pub closure_namespaces: SMap<RcOc<NamespaceEnv>>,
     pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
     pub lambda_coeffects_of_scope: SMap<HhasCoeffects<'arena>>,
-    pub num_closures: SMap<u32>,
 }
 
 impl<'arena> GlobalState<'arena> {

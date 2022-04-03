@@ -292,19 +292,11 @@ impl<'arena> State<'arena> {
         self.closure_cnt_per_fun = 0;
     }
 
-    fn record_function_state(
-        &mut self,
-        key: String,
-        coeffects_of_scope: HhasCoeffects<'arena>,
-        num_closures: u32,
-    ) {
+    fn record_function_state(&mut self, key: String, coeffects_of_scope: HhasCoeffects<'arena>) {
         if !coeffects_of_scope.get_static_coeffects().is_empty() {
             self.global_state
                 .lambda_coeffects_of_scope
                 .insert(key.clone(), coeffects_of_scope);
-        }
-        if num_closures > 0 {
-            self.global_state.num_closures.insert(key, num_closures);
         }
     }
 
@@ -792,7 +784,6 @@ fn convert_lambda<'a, 'arena>(
     st.record_function_state(
         get_unique_id_for_method(&cd.name.1, &cd.methods.first().unwrap().name.1),
         coeffects_of_scope,
-        0,
     );
     // back to using env instead of lambda_env here
 
@@ -1051,7 +1042,6 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
         self.state.record_function_state(
             get_unique_id_for_method(cls.get_name_str(), &md.name.1),
             HhasCoeffects::default(),
-            self.state.closure_cnt_per_fun,
         );
         visit_mut(self, &mut env, &mut md.params)
     }
@@ -1080,7 +1070,6 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                 self.state.record_function_state(
                     get_unique_id_for_function(&x.fun.name.1),
                     HhasCoeffects::default(),
-                    self.state.closure_cnt_per_fun,
                 );
                 visit_mut(self, &mut env, &mut x.fun.params)?;
                 visit_mut(self, &mut env, &mut x.fun.user_attributes)
@@ -1656,7 +1645,7 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
 
     visitor
         .state
-        .record_function_state(get_unique_id_for_main(), HhasCoeffects::default(), 0);
+        .record_function_state(get_unique_id_for_main(), HhasCoeffects::default());
     hoist_toplevel_functions(&mut new_defs);
     let named_fun_defs = visitor
         .state

@@ -33,7 +33,6 @@ pub struct GlobalState<'arena> {
     pub explicit_use_set: SSet,
     pub closure_namespaces: SMap<RcOc<NamespaceEnv>>,
     pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
-    pub functions_with_finally: SSet,
     pub lambda_coeffects_of_scope: SMap<HhasCoeffects<'arena>>,
     pub num_closures: SMap<u32>,
 }

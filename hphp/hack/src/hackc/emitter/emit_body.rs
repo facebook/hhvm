@@ -6,13 +6,11 @@ mod emit_statement;
 mod reified_generics_helpers;
 mod try_finally_rewriter;
 
-use emit_statement::emit_final_stmts;
-use reified_generics_helpers as RGH;
-
 use ast_body::AstBody;
 use ast_class_expr::ClassExpr;
 use ast_scope::{Scope, ScopeItem};
 use emit_pos::emit_pos;
+use emit_statement::emit_final_stmts;
 use env::{emitter::Emitter, Env};
 use hash::HashSet;
 use hhas_body::{HhasBody, HhasBodyEnv};
@@ -25,9 +23,10 @@ use instruction_sequence::{instr, Error, InstrSeq, Result};
 use label::Label;
 use local::Local;
 use options::CompilerFlags;
+use reified_generics_helpers as RGH;
 use runtime::TypedValue;
+use stack_limit::StackLimit;
 use statement_state::StatementState;
-use unique_id_builder::*;
 
 use ocamlrep::rc::RcOc;
 use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
@@ -126,7 +125,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     env.jump_targets_gen.reset();
 
     // Params are numbered starting from 0, followed by decl_vars.
-    let should_reserve_locals = set_function_jmp_targets(emitter, &mut env);
+    let should_reserve_locals = body_contains_finally(&body, emitter.stack_limit);
     let local_gen = emitter.local_gen_mut();
     let num_locals = params.len() + decl_vars.len();
     local_gen.reset(Local::new(num_locals));
@@ -862,13 +861,59 @@ fn modify_prog_for_debugger_eval<'arena>(_body_instrs: &mut InstrSeq<'arena>) {
     unimplemented!() // SF(2021-03-17): I found it like this.
 }
 
-fn set_function_jmp_targets<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
-) -> bool {
-    let function_state_key = get_unique_id_for_scope(&env.scope);
-    emitter
-        .emit_global_state()
-        .functions_with_finally
-        .contains(&function_state_key)
+/// Scan through the AST looking to see if the body contains a non-empty
+/// `finally` clause (or a `using` which is morally equivalent).
+fn body_contains_finally(body: &AstBody<'_>, stack_limit: Option<&'_ StackLimit>) -> bool {
+    struct V<'a> {
+        has_finally: bool,
+        stack_limit: Option<&'a StackLimit>,
+    }
+    use oxidized::{
+        aast_visitor::{AstParams, Node, Visitor},
+        ast::{Expr_, Stmt_},
+    };
+    impl<'a> Visitor<'a> for V<'_> {
+        type Params = AstParams<(), ()>;
+        fn object(&mut self) -> &mut dyn Visitor<'a, Params = Self::Params> {
+            self
+        }
+        fn visit_stmt_(&mut self, c: &mut (), p: &Stmt_) -> Result<(), ()> {
+            match p {
+                Stmt_::Try(x) => {
+                    let (_, _, b2) = &**x;
+                    if !b2.is_empty() {
+                        self.has_finally = true;
+                        // Not a real error - just early out.
+                        return Err(());
+                    }
+                }
+                Stmt_::Using(_) => {
+                    self.has_finally = true;
+                    // Not a real error - just early out.
+                    return Err(());
+                }
+                _ => {}
+            }
+            p.recurse(c, self.object())
+        }
+        fn visit_expr_(&mut self, c: &mut (), p: &Expr_) -> Result<(), ()> {
+            // It's probably good enough to only check the stack on Expr_ since
+            // that's where we can get really deep.
+            self.stack_limit.map(StackLimit::panic_if_exceeded);
+
+            match p {
+                Expr_::Efun(_) | Expr_::Lfun(_) => {
+                    // Don't recurse into lambda bodies.
+                    Ok(())
+                }
+                _ => p.recurse(c, self.object()),
+            }
+        }
+    }
+    let mut v = V {
+        has_finally: false,
+        stack_limit,
+    };
+    let _ = body.recurse(&mut (), &mut v);
+    v.has_finally
 }

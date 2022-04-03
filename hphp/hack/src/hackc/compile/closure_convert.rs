@@ -80,11 +80,6 @@ struct Env<'a, 'arena> {
     stack_limit: &'a StackLimit,
 }
 
-#[derive(Default, Clone)]
-struct PerFunctionState {
-    has_finally: bool,
-}
-
 impl<'a, 'arena> Env<'a, 'arena> {
     fn toplevel(
         class_count: usize,
@@ -274,8 +269,6 @@ struct State<'arena> {
     namespace: RcOc<namespace_env::Env>,
     // Empty namespace as constructed by parser
     empty_namespace: RcOc<namespace_env::Env>,
-    // information about current function
-    current_function_state: PerFunctionState,
     // accumulated information about program
     global_state: GlobalState<'arena>,
 }
@@ -291,7 +284,6 @@ impl<'arena> State<'arena> {
             captured_generics: Default::default(),
             closures: vec![],
             named_hoisted_functions: SMap::new(),
-            current_function_state: PerFunctionState::default(),
             global_state: GlobalState::default(),
         }
     }
@@ -303,14 +295,9 @@ impl<'arena> State<'arena> {
     fn record_function_state(
         &mut self,
         key: String,
-        fun: PerFunctionState,
         coeffects_of_scope: HhasCoeffects<'arena>,
         num_closures: u32,
     ) {
-        if fun.has_finally {
-            self.global_state.functions_with_finally.insert(key.clone());
-        }
-
         if !coeffects_of_scope.get_static_coeffects().is_empty() {
             self.global_state
                 .lambda_coeffects_of_scope
@@ -664,7 +651,6 @@ fn convert_lambda<'a, 'arena>(
     let captured_this = st.captured_this;
     let captured_vars = st.captured_vars.clone();
     let captured_generics = st.captured_generics.clone();
-    let old_function_state = st.current_function_state.clone();
     let coeffects_of_scope = env.scope.coeffects_of_scope(alloc);
     st.enter_lambda();
     if let Some(user_vars) = &use_vars_opt {
@@ -684,7 +670,7 @@ fn convert_lambda<'a, 'arena>(
     } else {
         lambda_env.with_lambda(alloc, &fd)?
     };
-    let function_state = convert_function_like_body(self_, lambda_env, &mut fd.body)?;
+    fd.body.recurse(lambda_env, self_)?;
     for param in &mut fd.params {
         self_.visit_type_hint(lambda_env, &mut param.type_hint)?;
     }
@@ -800,13 +786,11 @@ fn convert_lambda<'a, 'arena>(
     st.captured_vars = captured_vars;
     st.captured_this = captured_this;
     st.captured_generics = captured_generics;
-    st.current_function_state = old_function_state;
     st.global_state
         .closure_namespaces
         .insert(closure_class_name.clone(), st.namespace.clone());
     st.record_function_state(
         get_unique_id_for_method(&cd.name.1, &cd.methods.first().unwrap().name.1),
-        function_state,
         coeffects_of_scope,
         0,
     );
@@ -1008,19 +992,6 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
     fun_handle.2
 }
 
-fn convert_function_like_body<'a, 'arena>(
-    self_: &mut ClosureConvertVisitor<'a, 'arena>,
-    env: &mut Env<'a, 'arena>,
-    body: &mut FuncBody,
-) -> Result<PerFunctionState> {
-    // reset has_finally values on the state
-    let old_state = std::mem::take(&mut self_.state.current_function_state);
-    body.recurse(env, self_.object())?;
-    // restore old has_finally values
-    let function_state = std::mem::replace(&mut self_.state.current_function_state, old_state);
-    Ok(function_state)
-}
-
 fn add_reified_property(tparams: &[Tparam], vars: &mut Vec<ClassVar>) {
     if !tparams.iter().all(|t| t.reified == ReifyKind::Erased) {
         let p = Pos::make_none();
@@ -1076,10 +1047,9 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
         let mut env = env.clone();
         env.with_method(md)?;
         self.state.reset_function_counts();
-        let function_state = convert_function_like_body(self, &mut env, &mut md.body)?;
+        md.body.recurse(&mut env, self)?;
         self.state.record_function_state(
             get_unique_id_for_method(cls.get_name_str(), &md.name.1),
-            function_state,
             HhasCoeffects::default(),
             self.state.closure_cnt_per_fun,
         );
@@ -1106,10 +1076,9 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                 let mut env = env.clone();
                 env.with_function(x)?;
                 self.state.reset_function_counts();
-                let function_state = convert_function_like_body(self, &mut env, &mut x.fun.body)?;
+                x.fun.body.recurse(&mut env, self)?;
                 self.state.record_function_state(
                     get_unique_id_for_function(&x.fun.name.1),
-                    function_state,
                     HhasCoeffects::default(),
                     self.state.closure_cnt_per_fun,
                 );
@@ -1173,13 +1142,6 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                     Some(dfl) => env.with_in_using(false, |env| visit_mut(self, env, dfl)),
                 }
             }
-            Stmt_::Try(x) => {
-                let (b1, cl, b2) = &mut **x;
-                visit_mut(self, env, b1)?;
-                visit_mut(self, env, cl)?;
-                visit_mut(self, env, b2)?;
-                Ok(self.state.current_function_state.has_finally |= !x.2.is_empty())
-            }
             Stmt_::Using(x) => {
                 if x.has_await {
                     env.check_if_in_async_context()?;
@@ -1188,7 +1150,7 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                     self.visit_expr(env, e)?;
                 }
                 env.with_in_using(true, |env| visit_mut(self, env, &mut x.block))?;
-                Ok(self.state.current_function_state.has_finally = true)
+                Ok(())
             }
             _ => stmt.recurse(env, self.object()),
         }
@@ -1692,12 +1654,9 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
         }
     }
 
-    visitor.state.record_function_state(
-        get_unique_id_for_main(),
-        visitor.state.current_function_state.clone(),
-        HhasCoeffects::default(),
-        0,
-    );
+    visitor
+        .state
+        .record_function_state(get_unique_id_for_main(), HhasCoeffects::default(), 0);
     hoist_toplevel_functions(&mut new_defs);
     let named_fun_defs = visitor
         .state

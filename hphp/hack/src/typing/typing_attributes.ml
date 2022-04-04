@@ -38,7 +38,7 @@ let check_implements
     (* Check against builtins *)
     let check_attr map =
       match SMap.find_opt attr_name map with
-      | Some intfs ->
+      | Some (intfs, _docs) ->
         let check_locations =
           TypecheckerOptions.check_attribute_locations
             (Typing_env.get_tcopt env)

@@ -642,8 +642,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
     }
 
     fn visit_expr(&mut self, context: &mut Context, p: &mut aast::Expr<(), ()>) -> Result<(), ()> {
-        // recurse on inner members first, then assign to value
-        p.recurse(context, self.object())?;
+        // Pipe expressions have their own recursion method due to their weird evaluation rules
+        if !self.is_typechecker || !p.2.is_pipe() {
+            // recurse on inner members first, then assign to value
+            p.recurse(context, self.object())?;
+        }
         match &mut p.2 {
             aast::Expr_::Binop(x) => {
                 let (bop, e_lhs, e_rhs) = x.as_mut();
@@ -678,11 +681,20 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 }
             }
             aast::Expr_::Pipe(p) => {
-                let (lid, left, _) = &**p;
+                let (lid, left, right) = &mut **p;
                 // The only time the id number matters is for Dollardollar
                 let (_, dollardollar) = &lid.1;
+                if self.is_typechecker {
+                    self.visit_expr(context, left)?;
+                }
                 let left_rty = rty_expr(context, left);
                 context.add_local(dollardollar, left_rty);
+                // Since pipe expressions are in reverse for evaluation,
+                // we need to recurse on the inner values again to check
+                // for readonlyness calls
+                if self.is_typechecker {
+                    self.visit_expr(context, right)?;
+                }
             }
             _ => {}
         }

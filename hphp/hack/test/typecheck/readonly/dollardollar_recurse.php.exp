@@ -1,0 +1,12 @@
+File "dollardollar_recurse.php", line 19, characters 25-26:
+Invalid argument (Typing[4411])
+  File "dollardollar_recurse.php", line 19, characters 25-26:
+  This expression is readonly
+  File "dollardollar_recurse.php", line 9, characters 33-34:
+  It is incompatible with this parameter, which is mutable
+File "dollardollar_recurse.php", line 20, characters 39-40:
+Invalid argument (Typing[4411])
+  File "dollardollar_recurse.php", line 20, characters 39-40:
+  This expression is readonly
+  File "dollardollar_recurse.php", line 9, characters 33-34:
+  It is incompatible with this parameter, which is mutable

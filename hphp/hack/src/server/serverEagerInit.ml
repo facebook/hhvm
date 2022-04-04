@@ -31,6 +31,7 @@ open Hh_prelude
 open SearchServiceRunner
 open ServerEnv
 open ServerInitTypes
+open ServerCheckUtils
 module SLC = ServerLocalConfig
 
 let type_decl
@@ -53,6 +54,14 @@ let init
     (lazy_level : lazy_level)
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+  let hulk_lite = genv.local_config.ServerLocalConfig.hulk_lite in
+  let hulk_heavy = genv.local_config.ServerLocalConfig.hulk_heavy in
+  let env =
+    if hulk_lite || hulk_heavy then
+      start_delegate_if_needed env genv 3_000_000 env.errorl
+    else
+      env
+  in
   let init_telemetry =
     ServerEnv.Init_telemetry.make
       ServerEnv.Init_telemetry.Init_eager

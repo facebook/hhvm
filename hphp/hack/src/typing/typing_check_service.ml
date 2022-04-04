@@ -730,7 +730,8 @@ let next
     (remote_payloads : remote_computation_payload list ref)
     (record : Measure.record)
     (remote_execution : ReEnv.t option)
-    (hulk_lite : bool) : unit -> job_progress Bucket.bucket =
+    (hulk_lite : bool)
+    (hulk_heavy : bool) : unit -> job_progress Bucket.bucket =
   let max_size =
     match remote_execution with
     | Some _ -> 25000
@@ -756,7 +757,7 @@ let next
     Measure.time ~record "time" @@ fun () ->
     let workitems_to_process_length = BigList.length !workitems_to_process in
     let delegate_job =
-      if hulk_lite then (
+      if hulk_lite || hulk_heavy then (
         (*
         This is the "reduce" part of the mapreduce paradigm. We activate this when workitems_to_check is empty,
         or in other words the local typechecker is done with its work. We'll try and download all the remote
@@ -769,6 +770,7 @@ let next
             !workitems_to_process
             workitems_to_process_length
             !remote_payloads
+            hulk_heavy
         in
         workitems_to_process := workitems;
         delegate_state := controller;
@@ -779,7 +781,7 @@ let next
     in
 
     let (state, delegate_job) =
-      if hulk_lite then
+      if hulk_lite || hulk_heavy then
         (!delegate_state, delegate_job)
       else
         Typing_service_delegate.next
@@ -790,7 +792,7 @@ let next
     delegate_state := state;
 
     let (stolen, state) =
-      if hulk_lite then
+      if hulk_lite || hulk_heavy then
         ([], !delegate_state)
       else
         Typing_service_delegate.steal state max_size
@@ -802,7 +804,7 @@ let next
        type checking) logic applies. *)
     match delegate_job with
     | Some { current_bucket; remaining_jobs; job } ->
-      if hulk_lite then
+      if hulk_lite || hulk_heavy then
         return_bucket_job
           (SimpleDelegateProgress job)
           ~current_bucket
@@ -887,6 +889,7 @@ let process_in_parallel
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(hulk_lite : bool)
+    ~(hulk_heavy : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
@@ -917,7 +920,7 @@ let process_in_parallel
     ~unit:"files"
     ~extra:delegate_progress;
 
-  if hulk_lite then (
+  if hulk_lite || hulk_heavy then (
     Hh_logger.log "Dispatch hulk lite initial payloads";
     let workitems_to_process_length = BigList.length !workitems_to_process in
     let (payloads, workitems, controller) =
@@ -941,6 +944,7 @@ let process_in_parallel
       record
       remote_execution
       hulk_lite
+      hulk_heavy
   in
   let should_prefetch_deferred_files =
     Vfs.is_vfs ()
@@ -1133,6 +1137,7 @@ let go_with_interrupt
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(hulk_lite : bool)
+    ~(hulk_heavy : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : (_ * result) job_result =
   let typecheck_info =
@@ -1152,7 +1157,7 @@ let go_with_interrupt
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
   let fnl =
-    if hulk_lite then
+    if hulk_lite || hulk_heavy then
       (* We want to randomize order for hulk simple to reduce variability of remote worker typecheck times *)
       List.sort fnl ~compare:(fun _a _b -> Random.bits () - Random.bits ())
     else
@@ -1234,6 +1239,7 @@ let go_with_interrupt
         ~memory_cap
         ~longlived_workers
         ~hulk_lite
+        ~hulk_heavy
         ~remote_execution
         ~check_info
         ~typecheck_info
@@ -1257,6 +1263,7 @@ let go
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(hulk_lite : bool)
+    ~(hulk_heavy : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
@@ -1272,6 +1279,7 @@ let go
       ~memory_cap
       ~longlived_workers
       ~hulk_lite
+      ~hulk_heavy
       ~remote_execution
       ~check_info
   in

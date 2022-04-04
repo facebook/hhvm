@@ -76,6 +76,7 @@ let test () =
       ~memory_cap
       ~longlived_workers:false
       ~hulk_lite:false
+      ~hulk_heavy:false
       ~remote_execution:None
       ~check_info
   in
@@ -90,6 +91,7 @@ let test () =
       ~memory_cap
       ~longlived_workers:false
       ~hulk_lite:false
+      ~hulk_heavy:false
       ~remote_execution:None
       ~check_info
   in
@@ -105,6 +107,7 @@ let test () =
       ~memory_cap
       ~longlived_workers:false
       ~hulk_lite:false
+      ~hulk_heavy:false
       ~remote_execution:None
       ~check_info
   in
@@ -119,6 +122,7 @@ let test () =
       ~memory_cap
       ~longlived_workers:false
       ~hulk_lite:false
+      ~hulk_heavy:false
       ~remote_execution:None
       ~check_info
   in

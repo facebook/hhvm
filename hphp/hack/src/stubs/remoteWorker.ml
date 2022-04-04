@@ -50,6 +50,7 @@ type 'naming_table work_env = {
   naming_table_base: 'naming_table;
   timeout: int;
   hulk_lite: bool;
+  hulk_heavy: bool;
   server: (module RemoteServerApi with type naming_table = 'naming_table);
 }
 
@@ -65,6 +66,7 @@ let make_env
     ~(transport_channel : string option)
     ~(root : Path.t)
     ~(hulk_lite : bool)
+    ~(hulk_heavy : bool)
     ?(timeout = (600 : int))
     (artifact_store_config : ArtifactStore.config)
     (server : (module RemoteServerApi with type naming_table = 'naming_table)) :
@@ -83,6 +85,7 @@ let make_env
     naming_table_base = None;
     root;
     hulk_lite;
+    hulk_heavy;
     timeout;
     server;
   }

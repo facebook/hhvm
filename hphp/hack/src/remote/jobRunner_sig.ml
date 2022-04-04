@@ -39,6 +39,7 @@ module type S = sig
     version_specifier:string option ->
     eden:bool ->
     hulk_lite:bool ->
+    hulk_heavy:bool ->
     command Future.t
 
   val is_alive : status -> bool

@@ -582,7 +582,10 @@ type t = {
   saved_state_manifold_api_key: string option;
       (** A string from hh.conf. The API key is used for saved state downloads
        when we call out to manifold *)
-  hulk_lite: bool;  (** Rewrite of Hulk to be faster and simpler *)
+  hulk_lite: bool;
+      (** Rewrite of Hulk to be faster and simpler - Doesn't update dep graph *)
+  hulk_heavy: bool;
+      (** Rewrite of Hulk to be faster and simpler - Does update dep graph *)
   specify_manifold_api_key: bool;
 }
 
@@ -687,6 +690,7 @@ let default =
     machine_class = None;
     saved_state_manifold_api_key = None;
     hulk_lite = false;
+    hulk_heavy = false;
     log_saved_state_age_and_distance = false;
     specify_manifold_api_key = false;
   }
@@ -1414,6 +1418,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let hulk_heavy =
+    bool_if_min_version
+      "hulk_heavy"
+      ~default:default.hulk_heavy
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1522,6 +1533,7 @@ let load_ fn ~silent ~current_version overrides =
     machine_class;
     saved_state_manifold_api_key;
     hulk_lite;
+    hulk_heavy;
     log_saved_state_age_and_distance;
     specify_manifold_api_key;
   }
@@ -1556,6 +1568,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       use_max_typechecker_worker_memory_for_decl_deferral =
         options.use_max_typechecker_worker_memory_for_decl_deferral;
       hulk_lite = options.hulk_lite;
+      hulk_heavy = options.hulk_heavy;
       specify_manifold_api_key = options.specify_manifold_api_key;
       populate_member_heaps = options.populate_member_heaps;
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;

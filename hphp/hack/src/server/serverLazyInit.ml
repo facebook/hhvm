@@ -1131,8 +1131,9 @@ let full_init
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   let hulk_lite = genv.local_config.ServerLocalConfig.hulk_lite in
+  let hulk_heavy = genv.local_config.ServerLocalConfig.hulk_heavy in
   let env =
-    if hulk_lite then
+    if hulk_lite || hulk_heavy then
       start_delegate_if_needed env genv 3_000_000 env.errorl
     else
       env
@@ -1184,7 +1185,7 @@ let full_init
   in
   let fnl = Relative_path.Map.keys fast in
   let env =
-    if is_check_mode && not hulk_lite then
+    if is_check_mode && (not hulk_lite) && not hulk_heavy then
       start_delegate_if_needed env genv (List.length fnl) env.errorl
     else
       env

@@ -20,7 +20,8 @@ let init
     ~(init_start_t : float)
     ~(bin_root : Path.t)
     ~(root : Path.t)
-    ~(hulk_lite : bool) : unit =
+    ~(hulk_lite : bool)
+    ~(hulk_heavy : bool) : unit =
   let (server
         : (module RemoteWorker.RemoteServerApi
              with type naming_table = Naming_table.t option)) =
@@ -56,6 +57,7 @@ let init
       ~transport_channel
       ~root
       ~hulk_lite
+      ~hulk_heavy
       artifact_store_config
       server
   in

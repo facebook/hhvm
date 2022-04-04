@@ -258,6 +258,7 @@ let make_remote_server_api
           ~memory_cap:(Some 200000)
           ~longlived_workers:false
           ~hulk_lite:false
+          ~hulk_heavy:false
           ~remote_execution:None
           ~check_info
       in

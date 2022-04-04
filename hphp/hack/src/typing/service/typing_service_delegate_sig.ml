@@ -23,7 +23,7 @@ module type Delegate_sig = sig
     raise_on_failure:bool ->
     state
 
-  val start : delegate_env -> state -> bool -> state
+  val start : delegate_env -> state -> bool -> bool -> state
 
   val stop : state -> state
 
@@ -52,6 +52,7 @@ module type Delegate_sig = sig
     workitem BigList.t ->
     int ->
     remote_computation_payload list ->
+    bool ->
     workitem BigList.t
     * state
     * remote_computation_payload list

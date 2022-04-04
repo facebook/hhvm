@@ -1053,6 +1053,7 @@ functor
         genv.local_config.ServerLocalConfig.longlived_workers
       in
       let hulk_lite = genv.local_config.ServerLocalConfig.hulk_lite in
+      let hulk_heavy = genv.local_config.ServerLocalConfig.hulk_heavy in
 
       let cgroup_typecheck_telemetry = ref None in
       let (errorl', telemetry, env, cancelled, time_first_typing_error) =
@@ -1082,6 +1083,7 @@ functor
             ~memory_cap
             ~longlived_workers
             ~hulk_lite
+            ~hulk_heavy
             ~remote_execution:env.ServerEnv.remote_execution
             ~check_info:(get_check_info ~check_reason genv env)
         in
@@ -1666,8 +1668,9 @@ functor
               .ServerLocalConfig.enable_type_check_filter_files
       in
       let hulk_lite = genv.local_config.ServerLocalConfig.hulk_lite in
+      let hulk_heavy = genv.local_config.ServerLocalConfig.hulk_heavy in
       let env =
-        if not hulk_lite then
+        if (not hulk_lite) && not hulk_heavy then
           ServerRemoteUtils.start_delegate_if_needed
             env
             genv

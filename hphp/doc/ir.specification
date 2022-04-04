@@ -931,10 +931,10 @@ To string conversions:
 
   Loads into D the value of m_cls from S0.
 
-| LdClsCtor, D(Func), S(Cls) S(Cls|Nullptr), NF
+| LdClsCtor, D(Func), S(Cls) S(Func), NF
 
   Loads into D the constructor of class S0. If the constructor cannot be called
-  from the context S1, raise an error.
+  from the context of the func S1, raise an error.
 
 | LdSmashable, D(Smashable), NA, NF
 
@@ -1129,11 +1129,10 @@ To string conversions:
   this vector is located before the class in memory, so the non-negative slots
   will map to negative offset loads.)
 
-| LookupClsMethod, D(Func|Nullptr), S(Cls) S(Str) S(Obj|Nullptr) S(Cls|Nullptr),
-|                  NF
+| LookupClsMethod, D(Func|Nullptr), S(Cls) S(Str) S(Obj|Nullptr) S(Func), NF
 
   Lookup a pointer to a class method for a given class S0 and method name S1,
-  assuming caller's $this is S2 and caller is defined in a class S3. Throws or
+  assuming caller's $this is S2 and the caller is S3. Throws or
   fatals if the method does not exist, is not accessible, or is not a static
   method. Returns nullptr if it is an instance method defined in S2's class
   hierarchy, indicating that this legacy call should be handled by interpreter.

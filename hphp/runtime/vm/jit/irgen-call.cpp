@@ -1485,8 +1485,7 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   }
 
   auto const cls = exactCls ? cns(env, exactCls) : gen(env, LdObjClass, obj);
-  auto const ctx = curClass(env) ? cns(env, curClass(env)) : cns(env, nullptr);
-  auto const callee = gen(env, LdClsCtor, cls, ctx);
+  auto const callee = gen(env, LdClsCtor, cls, cns(env, curFunc(env)));
   prepareAndCallProfiled(env, callee, fca, obj, false, false);
 }
 
@@ -1831,10 +1830,10 @@ void fcallClsMethodCommon(IRGS& env,
 
   auto const emitFCall = [&] (TargetProfile<MethProfile>* profile = nullptr,
                               bool noCallProfiling = false) {
-    auto const curCls = curClass(env);
-    auto const thiz = curCls && hasThis(env) ? ldThis(env) : cns(env, nullptr);
-    auto const lctx = curCls ? cns(env, curCls) : cns(env, nullptr);
-    auto const funcN = gen(env, LookupClsMethod, clsVal, methVal, thiz, lctx);
+    auto const thiz =
+      curClass(env) && hasThis(env) ? ldThis(env) : cns(env, nullptr);
+    auto const funcN =
+      gen(env, LookupClsMethod, clsVal, methVal, thiz, cns(env, curFunc(env)));
     auto const func = gen(env, CheckNonNull, makeExitSlow(env), funcN);
 
     if (profile && profile->profiling()) {

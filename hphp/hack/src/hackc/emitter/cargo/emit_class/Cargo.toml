@@ -23,6 +23,7 @@ emit_type_constant = { path = "../emit_type_constant" }
 emit_type_hint = { path = "../emit_type_hint" }
 emit_xhp = { path = "../emit_xhp" }
 env = { path = "../env" }
+error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
 hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
 hhas_class = { path = "../../../hhbc/cargo/hhas_class" }

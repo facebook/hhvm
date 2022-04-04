@@ -5,6 +5,7 @@
 
 use emit_property::PropAndInit;
 use env::{emitter::Emitter, Env};
+use error::{Error, Result};
 use ffi::{Maybe, Maybe::*, Slice, Str};
 use hhas_class::{HhasClass, TraitReqKind};
 use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
@@ -21,7 +22,7 @@ use hhbc_id::class::ClassType;
 use hhbc_id::{self as hhbc_id, class, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
-use instruction_sequence::{instr, Error, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq};
 use itertools::Itertools;
 use local::Local;
 use naming_special_names_rust as special_names;

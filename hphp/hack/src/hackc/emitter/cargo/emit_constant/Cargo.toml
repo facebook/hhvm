@@ -14,6 +14,7 @@ emit_body = { path = "../emit_body" }
 emit_expression = { path = "../emit_expression" }
 emit_type_hint = { path = "../emit_type_hint" }
 env = { path = "../env" }
+error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
 hhas_coeffects = { path = "../../../hhbc/cargo/hhas_coeffects" }
 hhas_constant = { path = "../../../hhbc/cargo/hhas_constant" }

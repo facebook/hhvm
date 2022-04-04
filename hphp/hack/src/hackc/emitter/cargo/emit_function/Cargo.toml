@@ -16,6 +16,7 @@ emit_memoize_helpers = { path = "../emit_memoize_helpers" }
 emit_param = { path = "../emit_param" }
 emit_pos = { path = "../emit_pos" }
 env = { path = "../env" }
+error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
 hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
 hhas_body = { path = "../../../hhbc/cargo/hhas_body" }

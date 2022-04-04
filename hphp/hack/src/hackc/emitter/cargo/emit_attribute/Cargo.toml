@@ -12,10 +12,10 @@ ast_constant_folder = { path = "../../../hhbc/cargo/ast_constant_folder" }
 bumpalo = { version = "3.8", features = ["collections"] }
 emit_expression = { path = "../emit_expression" }
 env = { path = "../env" }
+error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
 hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
-instruction_sequence = { path = "../instruction_sequence" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
 runtime = { path = "../runtime" }

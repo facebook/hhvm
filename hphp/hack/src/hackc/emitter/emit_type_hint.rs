@@ -2,12 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use error::{Error, Result};
 use ffi::{Maybe, Maybe::*, Str};
 use hhas_type::{constraint, HhasTypeInfo};
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
-use instruction_sequence::{Error, Result};
 use naming_special_names_rust::{classes, typehints};
 use oxidized::{
     aast_defs::{Hint, Hint_, Hint_::*, NastShapeInfo, ShapeFieldInfo, Tprim},

@@ -6,6 +6,7 @@
 use ast_scope::{self as ast_scope, Scope, ScopeItem};
 use emit_pos::emit_pos_then;
 use env::{emitter::Emitter, Env};
+use error::Result;
 use ffi::{Slice, Str};
 use hhas_attribute::*;
 use hhas_body::HhasBody;
@@ -18,7 +19,7 @@ use hhbc_ast::{FCallArgs, FCallArgsFlags, LocalRange};
 use hhbc_id::function;
 use hhbc_string_utils::reified;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq};
 use label::Label;
 use local::Local;
 use ocamlrep::rc::RcOc;

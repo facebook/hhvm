@@ -9,6 +9,7 @@ path = "../../scope.rs"
 
 [dependencies]
 env = { path = "../../../emitter/cargo/env" }
+error = { path = "../../../error/cargo/error" }
 instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 iterator = { path = "../../../emitter/cargo/iterator" }
 label = { path = "../../../emitter/cargo/label" }

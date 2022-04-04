@@ -6,14 +6,13 @@
 use ast_body::AstBody;
 use ast_scope::{Lambda, LongLambda, Scope, ScopeItem};
 use env::emitter::Emitter;
+use error::{Error, Result};
 use global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hack_macro::{hack_expr, hack_stmt};
 use hash::IndexSet;
 use hhas_coeffects::HhasCoeffects;
-use hhbc_assertion_utils::ensure_normal_paramkind;
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
-use instruction_sequence::{Error, Result};
 use itertools::{EitherOrBoth, Itertools};
 use naming_special_names_rust::{
     fb, pseudo_consts, pseudo_functions, special_idents, superglobals,
@@ -1324,8 +1323,8 @@ impl<'a, 'arena> ClosureConvertVisitor<'a, 'arena> {
             false
         };
         if let [(pk_c, cexpr), (pk_f, fexpr)] = &mut *x.2 {
-            ensure_normal_paramkind(pk_c)?;
-            ensure_normal_paramkind(pk_f)?;
+            error::ensure_normal_paramkind(pk_c)?;
+            error::ensure_normal_paramkind(pk_f)?;
             let mut res = make_dyn_meth_caller_lambda(pos, cexpr, fexpr, force);
             res.recurse(env, self.object())?;
             Ok(res)
@@ -1344,8 +1343,8 @@ impl<'a, 'arena> ClosureConvertVisitor<'a, 'arena> {
         pos: &Pos,
     ) -> Result<Expr_> {
         if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
-            ensure_normal_paramkind(pk_cls)?;
-            ensure_normal_paramkind(pk_f)?;
+            error::ensure_normal_paramkind(pk_cls)?;
+            error::ensure_normal_paramkind(pk_f)?;
             match (&cls, func.as_string()) {
                 (Expr_::ClassConst(cc), Some(fname)) if string_utils::is_class(&(cc.1).1) => {
                     let mut cls_const = cls.as_class_const_mut();
@@ -1413,8 +1412,8 @@ impl<'a, 'arena> ClosureConvertVisitor<'a, 'arena> {
     #[inline(never)]
     fn visit_meth_caller(&mut self, env: &mut Env<'a, 'arena>, mut x: CallExpr) -> Result<Expr_> {
         if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
-            ensure_normal_paramkind(pk_cls)?;
-            ensure_normal_paramkind(pk_f)?;
+            error::ensure_normal_paramkind(pk_cls)?;
+            error::ensure_normal_paramkind(pk_f)?;
             match (&cls, func.as_string()) {
                 (Expr_::ClassConst(cc), Some(_)) if string_utils::is_class(&(cc.1).1) => {
                     let mut cls_const = cls.as_class_const_mut();

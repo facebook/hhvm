@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use error::{Error, Result};
 use ffi::Pair;
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
-use instruction_sequence::{Error, Result};
 use naming_special_names_rust::classes;
 use options::Options;
 use oxidized::{

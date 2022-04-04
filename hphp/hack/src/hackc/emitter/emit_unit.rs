@@ -10,11 +10,11 @@ use emit_file_attributes::{emit_file_attributes_from_program, emit_module_from_p
 use emit_function::emit_functions_from_program;
 use emit_typedef::emit_typedefs_from_program;
 use env::{self, emitter::Emitter, Env};
+use error::{Error, ErrorKind, Result};
 use ffi::{Maybe::*, Slice, Str};
 use hackc_unit::HackCUnit;
 use hhas_symbol_refs::HhasSymbolRefs;
 use hhbc_ast::FatalOp;
-use instruction_sequence::{Error, ErrorKind, Result};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env, pos::Pos};
 

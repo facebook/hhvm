@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::{emitter::Emitter, Env};
+use error::{Error, Result};
 use hhas_attribute::HhasAttribute;
-use instruction_sequence::{Error, Result};
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::ast as a;

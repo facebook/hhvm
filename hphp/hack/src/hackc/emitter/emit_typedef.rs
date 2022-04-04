@@ -4,12 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
+use error::Result;
 use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
 use hhas_typedef::HhasTypedef;
 use hhbc_id::class::ClassType;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::Result;
 use oxidized::{aast_defs::Hint, ast};
 use runtime::TypedValue;
 

@@ -15,6 +15,7 @@ bumpalo = { version = "3.8", features = ["collections"] }
 compile = { path = "../hackc/compile/cargo/compile" }
 direct_decl_parser = { path = "../parser/api/cargo/direct_decl_parser" }
 env_logger = "0.7"
+hdrhistogram = "6.3"
 jwalk = "0.6"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 multifile_rust = { path = "../utils/multifile" }

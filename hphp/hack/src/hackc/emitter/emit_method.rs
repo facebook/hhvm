@@ -6,6 +6,7 @@
 use ast_body::AstBody;
 use ast_scope::{self as ast_scope, Lambda, Scope, ScopeItem};
 use env::emitter::Emitter;
+use error::{Error, Result};
 use ffi::Slice;
 use hhas_attribute::*;
 use hhas_coeffects::HhasCoeffects;
@@ -15,7 +16,7 @@ use hhbc_ast::Visibility;
 use hhbc_id::method;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::{instr, Error, Result};
+use instruction_sequence::instr;
 use naming_special_names_rust::{classes, user_attributes};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};

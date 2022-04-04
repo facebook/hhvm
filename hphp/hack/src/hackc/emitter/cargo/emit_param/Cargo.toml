@@ -15,6 +15,7 @@ emit_expression = { path = "../emit_expression" }
 emit_pos = { path = "../emit_pos" }
 emit_type_hint = { path = "../emit_type_hint" }
 env = { path = "../env" }
+error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
 hhas_param = { path = "../../../hhbc/cargo/hhas_param" }
 hhas_type = { path = "../../../hhbc/cargo/hhas_type" }

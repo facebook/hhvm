@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
-use instruction_sequence::{Error, Result};
+use error::{Error, Result};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env};
 use rewrite_xml::rewrite_xml;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use instruction_sequence::{Error, Result};
+use crate::{Error, Result};
 use oxidized::{ast, ast_defs::ParamKind};
 
 pub fn expect_normal_paramkind(arg: &(ParamKind, ast::Expr)) -> Result<&ast::Expr> {

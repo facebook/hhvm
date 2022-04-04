@@ -3,10 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use error::{Error, Result};
 use ffi::Slice;
 use hhbc_ast::{FCallArgs, FCallArgsFlags};
 use hhbc_id::function;
-use instruction_sequence::{instr, Error, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq};
 use local::Local;
 use oxidized::{aast::FunParam, pos::Pos};
 

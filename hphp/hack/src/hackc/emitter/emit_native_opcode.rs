@@ -4,9 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 use ast_scope::Scope;
 use env::emitter::Emitter;
+use error::{Error, Result};
 use ffi::{Maybe::Just, Slice};
 use hhas_body::HhasBody;
-use instruction_sequence::{instr, Error, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq};
 use local::Local;
 use oxidized::{aast, ast, pos::Pos};
 

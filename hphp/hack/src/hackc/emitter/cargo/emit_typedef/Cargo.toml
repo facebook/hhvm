@@ -14,11 +14,11 @@ emit_body = { path = "../emit_body" }
 emit_type_constant = { path = "../emit_type_constant" }
 emit_type_hint = { path = "../emit_type_hint" }
 env = { path = "../env" }
+error = { path = "../../../error/cargo/error" }
 hhas_pos = { path = "../../../hhbc/cargo/hhas_pos" }
 hhas_type = { path = "../../../hhbc/cargo/hhas_type" }
 hhas_typedef = { path = "../../../hhbc/cargo/hhas_typedef" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
-instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }
 runtime = { path = "../runtime" }

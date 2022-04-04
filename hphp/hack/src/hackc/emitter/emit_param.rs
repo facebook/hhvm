@@ -6,11 +6,12 @@
 use ast_scope::Scope;
 use emit_type_hint::{hint_to_type_info, Kind};
 use env::{emitter::Emitter, Env};
+use error::{Error, Result};
 use ffi::{Maybe, Nothing, Slice, Str};
 use hhas_param::HhasParam;
 use hhas_type::HhasTypeInfo;
 use hhbc_string_utils::locals::strip_dollar;
-use instruction_sequence::{instr, Error, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq};
 use label::Label;
 use local::Local;
 use oxidized::{

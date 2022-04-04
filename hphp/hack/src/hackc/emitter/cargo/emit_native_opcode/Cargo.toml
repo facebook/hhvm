@@ -12,6 +12,7 @@ ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
 emit_body = { path = "../emit_body" }
 emit_param = { path = "../emit_param" }
 env = { path = "../env" }
+error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
 hhas_body = { path = "../../../hhbc/cargo/hhas_body" }
 instruction_sequence = { path = "../instruction_sequence" }

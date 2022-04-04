@@ -1,6 +1,6 @@
 use env::emitter::Emitter;
+use error::{Error, Result};
 use hhbc_id::class;
-use instruction_sequence::Result;
 use naming_special_names_rust::pseudo_consts;
 use oxidized::{
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
@@ -19,7 +19,7 @@ struct Ctx<'emitter, 'arena, 'decl> {
 impl<'ast, 'arena, 'emitter, 'decl> VisitorMut<'ast>
     for RewriteXmlVisitor<'emitter, 'arena, 'decl>
 {
-    type Params = AstParams<Ctx<'emitter, 'arena, 'decl>, instruction_sequence::Error>;
+    type Params = AstParams<Ctx<'emitter, 'arena, 'decl>, Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self

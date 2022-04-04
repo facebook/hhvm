@@ -6,6 +6,7 @@
 use core_utils_rust as utils;
 use emit_type_hint::Kind;
 use env::{emitter::Emitter, Env};
+use error::Result;
 use ffi::{Maybe, Slice, Str};
 use hhas_coeffects::HhasCoeffects;
 use hhas_constant::HhasConstant;
@@ -14,7 +15,7 @@ use hhas_pos::HhasSpan;
 use hhbc_id::{constant, function};
 use hhbc_string_utils::strip_global_ns;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq};
 use oxidized::ast;
 use runtime::TypedValue;
 

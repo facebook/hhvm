@@ -16,6 +16,7 @@ emit_fatal = { path = "../emit_fatal" }
 emit_memoize_helpers = { path = "../emit_memoize_helpers" }
 emit_native_opcode = { path = "../emit_native_opcode" }
 env = { path = "../env" }
+error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
 hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
 hhas_coeffects = { path = "../../../hhbc/cargo/hhas_coeffects" }

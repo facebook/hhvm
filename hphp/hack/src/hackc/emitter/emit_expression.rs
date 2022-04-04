@@ -6,14 +6,14 @@
 use ast_class_expr::ClassExpr;
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env, Flags as EnvFlags};
+use error::{Error, Result};
 use ffi::{Slice, Str};
 use hash::HashSet;
-use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use hhbc_id::{class, constant, function, method, prop};
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
-use instruction_sequence::{instr, Error, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq};
 use label::Label;
 use lazy_static::lazy_static;
 use local::Local;
@@ -785,7 +785,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
                 && args.len() == 1
                 && string_utils::strip_global_ns(&(*id.1)) == "gena") =>
         {
-            inline_gena_call(emitter, env, expect_normal_paramkind(&args[0])?)
+            inline_gena_call(emitter, env, error::expect_normal_paramkind(&args[0])?)
         }
         _ => {
             let after_await = emitter.label_gen_mut().next_regular();
@@ -2508,7 +2508,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 .enumerate()
                 .map(|(i, arg)| {
                     Ok(InstrSeq::gather(vec![
-                        emit_expr(e, env, expect_normal_paramkind(arg)?)?,
+                        emit_expr(e, env, error::expect_normal_paramkind(arg)?)?,
                         emit_pos(pos),
                         instr::print(),
                         if i == nargs - 1 {
@@ -2537,7 +2537,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
             );
             let ignored_expr = emit_ignored_expr(e, env, &Pos::make_none(), &call)?;
             Ok(Some(InstrSeq::gather(vec![
-                emit_expr(e, env, expect_normal_paramkind(&args[0])?)?,
+                emit_expr(e, env, error::expect_normal_paramkind(&args[0])?)?,
                 instr::jmpnz(l),
                 ignored_expr,
                 emit_fatal::emit_fatal_runtime(alloc, pos, "invariant_violation"),
@@ -2557,13 +2557,13 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 _ => return Err(Error::unrecoverable("emit_special_function: class_kind")),
             };
             Ok(Some(InstrSeq::gather(vec![
-                emit_expr(e, env, expect_normal_paramkind(arg1)?)?,
+                emit_expr(e, env, error::expect_normal_paramkind(arg1)?)?,
                 instr::cast_string(),
                 if nargs == 1 {
                     instr::true_()
                 } else {
                     InstrSeq::gather(vec![
-                        emit_expr(e, env, expect_normal_paramkind(&args[1])?)?,
+                        emit_expr(e, env, error::expect_normal_paramkind(&args[1])?)?,
                         instr::cast_bool(),
                     ])
                 },
@@ -2573,7 +2573,9 @@ fn emit_special_function<'a, 'arena, 'decl>(
         ("exit", _) | ("die", _) if nargs == 0 || nargs == 1 => Ok(Some(emit_exit(
             e,
             env,
-            args.first().map(expect_normal_paramkind).transpose()?,
+            args.first()
+                .map(error::expect_normal_paramkind)
+                .transpose()?,
         )?)),
         ("HH\\fun", _) => {
             if fun_and_clsmeth_disabled {
@@ -2674,7 +2676,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
         ("__SystemLib\\get_enum_member_by_label", _) if e.systemlib() => {
             let local = match args {
                 [(pk, Expr(_, _, Expr_::Lvar(id)))] => {
-                    ensure_normal_paramkind(pk)?;
+                    error::ensure_normal_paramkind(pk)?;
                     get_local(e, env, pos, id.name())
                 }
                 _ => Err(Error::fatal_runtime(
@@ -2691,8 +2693,8 @@ fn emit_special_function<'a, 'arena, 'decl>(
             [obj_expr, method_name] => Ok(Some(emit_inst_meth(
                 e,
                 env,
-                expect_normal_paramkind(obj_expr)?,
-                expect_normal_paramkind(method_name)?,
+                error::expect_normal_paramkind(obj_expr)?,
+                error::expect_normal_paramkind(method_name)?,
             )?)),
             _ => Err(Error::fatal_runtime(
                 pos,
@@ -2715,8 +2717,8 @@ fn emit_special_function<'a, 'arena, 'decl>(
                         .as_id()
                         .map_or(false, |ast_defs::Id(_, id)| id == pseudo_consts::G__CLASS__)
                 {
-                    ensure_normal_paramkind(pk_cls)?;
-                    ensure_normal_paramkind(pk_meth)?;
+                    error::ensure_normal_paramkind(pk_cls)?;
+                    error::ensure_normal_paramkind(pk_meth)?;
                     return Ok(Some(emit_class_meth(e, env, cls, meth)?));
                 }
             }
@@ -2735,8 +2737,8 @@ fn emit_special_function<'a, 'arena, 'decl>(
         )),
         ("HH\\global_set", _) => match *args {
             [ref gkey, ref gvalue] => Ok(Some(InstrSeq::gather(vec![
-                emit_expr(e, env, expect_normal_paramkind(gkey)?)?,
-                emit_expr(e, env, expect_normal_paramkind(gvalue)?)?,
+                emit_expr(e, env, error::expect_normal_paramkind(gkey)?)?,
+                emit_expr(e, env, error::expect_normal_paramkind(gvalue)?)?,
                 emit_pos(pos),
                 instr::setg(),
                 instr::popc(),
@@ -2749,7 +2751,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
         },
         ("HH\\global_unset", _) => match *args {
             [ref gkey] => Ok(Some(InstrSeq::gather(vec![
-                emit_expr(e, env, expect_normal_paramkind(gkey)?)?,
+                emit_expr(e, env, error::expect_normal_paramkind(gkey)?)?,
                 emit_pos(pos),
                 instr::unsetg(),
                 instr::null(),
@@ -2765,7 +2767,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
         ("__hhvm_internal_whresult", &[(ref pk, Expr(_, _, Expr_::Lvar(ref param)))])
             if e.systemlib() =>
         {
-            ensure_normal_paramkind(pk)?;
+            error::ensure_normal_paramkind(pk)?;
             Ok(Some(InstrSeq::gather(vec![
                 instr::cgetl(e.named_local(local_id::get_name(&param.1).into())),
                 instr::whresult(),
@@ -2785,14 +2787,14 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 (&[ref arg_expr], _, Some(ref h)) => {
                     let is_expr = emit_is(e, env, pos, h)?;
                     Some(InstrSeq::gather(vec![
-                        emit_expr(e, env, expect_normal_paramkind(arg_expr)?)?,
+                        emit_expr(e, env, error::expect_normal_paramkind(arg_expr)?)?,
                         is_expr,
                     ]))
                 }
                 (&[(ref pk, Expr(_, _, Expr_::Lvar(ref arg_id)))], Some(i), _)
                     if superglobals::is_any_global(arg_id.name()) =>
                 {
-                    ensure_normal_paramkind(pk)?;
+                    error::ensure_normal_paramkind(pk)?;
                     Some(InstrSeq::gather(vec![
                         emit_local(e, env, BareThisOp::NoNotice, arg_id)?,
                         emit_pos(pos),
@@ -2802,14 +2804,14 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 (&[(ref pk, Expr(_, _, Expr_::Lvar(ref arg_id)))], Some(i), _)
                     if !is_local_this(env, &arg_id.1) =>
                 {
-                    ensure_normal_paramkind(pk)?;
+                    error::ensure_normal_paramkind(pk)?;
                     Some(instr::istypel(
                         get_local(e, env, &arg_id.0, &(arg_id.1).1)?,
                         i,
                     ))
                 }
                 (&[(ref pk, ref arg_expr)], Some(i), _) => {
-                    ensure_normal_paramkind(pk)?;
+                    error::ensure_normal_paramkind(pk)?;
                     Some(InstrSeq::gather(vec![
                         emit_expr(e, env, arg_expr)?,
                         emit_pos(pos),
@@ -3375,7 +3377,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         (Expr_::Id(id), [(pk, Expr(_, _, Expr_::String(data)))], None)
             if id.1 == special_functions::HHAS_ADATA =>
         {
-            ensure_normal_paramkind(pk)?;
+            error::ensure_normal_paramkind(pk)?;
             // FIXME: This is not safe--string literals are binary strings.
             // There's no guarantee that they're valid UTF-8.
             let tv = TypedValue::mk_hhas_adata(
@@ -3395,13 +3397,13 @@ fn emit_call_expr<'a, 'arena, 'decl>(
             emit_idx(e, env, pos, args)
         }
         (Expr_::Id(id), [(pk, arg1)], None) if id.1 == emitter_special_functions::EVAL => {
-            ensure_normal_paramkind(pk)?;
+            error::ensure_normal_paramkind(pk)?;
             emit_eval(e, env, pos, arg1)
         }
         (Expr_::Id(id), [(pk, arg1)], None)
             if id.1 == emitter_special_functions::SET_FRAME_METADATA =>
         {
-            ensure_normal_paramkind(pk)?;
+            error::ensure_normal_paramkind(pk)?;
             Ok(InstrSeq::gather(vec![
                 emit_expr(e, env, arg1)?,
                 emit_pos(pos),
@@ -3418,7 +3420,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         (Expr_::Id(id), [(pk, arg1)], None)
             if id.1 == pseudo_functions::EXIT || id.1 == pseudo_functions::DIE =>
         {
-            ensure_normal_paramkind(pk)?;
+            error::ensure_normal_paramkind(pk)?;
             let exit = emit_exit(e, env, Some(arg1))?;
             Ok(emit_pos_then(pos, exit))
         }
@@ -5059,11 +5061,11 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
         return raise_fatal("expects at least 3 arguments");
     };
 
-    ensure_normal_paramkind(pk_offset)?;
-    ensure_normal_paramkind(pk_src)?;
+    error::ensure_normal_paramkind(pk_offset)?;
+    error::ensure_normal_paramkind(pk_src)?;
 
     let count_instrs = match (args, kind.vec) {
-        ([c], true) => emit_expr(e, env, expect_normal_paramkind(c)?)?,
+        ([c], true) => emit_expr(e, env, error::expect_normal_paramkind(c)?)?,
         ([], _) => instr::int(-1),
         (_, false) => return raise_fatal("expects no more than 3 arguments"),
         (_, true) => return raise_fatal("expects no more than 4 arguments"),

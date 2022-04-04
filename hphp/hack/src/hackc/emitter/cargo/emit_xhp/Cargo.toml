@@ -12,11 +12,11 @@ bumpalo = { version = "3.8", features = ["collections"] }
 emit_method = { path = "../emit_method" }
 emit_property = { path = "../emit_property" }
 env = { path = "../env" }
+error = { path = "../../../error/cargo/error" }
 hack_macro = { path = "../../../utils/cargo/hack_macro" }
 hhas_method = { path = "../../../hhbc/cargo/hhas_method" }
 hhas_xhp_attribute = { path = "../../../hhbc/cargo/hhas_xhp_attribute" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
-instruction_sequence = { path = "../instruction_sequence" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

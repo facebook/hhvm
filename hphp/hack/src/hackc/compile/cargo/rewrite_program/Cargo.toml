@@ -10,7 +10,7 @@ path = "../../rewrite_program.rs"
 [dependencies]
 closure_convert = { path = "../closure_convert" }
 env = { path = "../../../emitter/cargo/env" }
-instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
+error = { path = "../../../error/cargo/error" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }
 rewrite_xml = { path = "../rewrite_xml" }

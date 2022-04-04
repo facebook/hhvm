@@ -5,9 +5,10 @@
 
 use adata_state::AdataState;
 use env::emitter::Emitter;
+use error::{Error, Result};
 use ffi::Str;
 use hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX};
-use instruction_sequence::{instr, Error, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq};
 use options::HhvmFlags;
 use runtime::TypedValue;
 

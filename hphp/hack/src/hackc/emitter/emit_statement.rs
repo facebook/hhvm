@@ -6,11 +6,11 @@ use crate::try_finally_rewriter as tfr;
 use emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, SetRange};
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
+use error::{Error, Result};
 use ffi::Slice;
 use hack_macro::hack_expr;
-use hhbc_assertion_utils::*;
 use hhbc_ast::*;
-use instruction_sequence::{instr, Error, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq};
 use label::Label;
 use lazy_static::lazy_static;
 use local::Local;
@@ -256,7 +256,9 @@ fn emit_call<'a, 'arena, 'decl>(
             Ok(InstrSeq::gather(
                 exprs
                     .iter()
-                    .map(|ex| emit_expr::emit_unset_expr(e, env, expect_normal_paramkind(ex)?))
+                    .map(|ex| {
+                        emit_expr::emit_unset_expr(e, env, error::expect_normal_paramkind(ex)?)
+                    })
                     .collect::<Result<Vec<_>, _>>()?,
             ))
         } else if let Some(kind) = set_bytes_kind(fname) {

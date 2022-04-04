@@ -17,9 +17,9 @@ decl_provider = { path = "../../../decl_provider" }
 elaborate_namespaces_visitor = { path = "../../../../naming/cargo/elaborate_namespaces" }
 emit_unit = { path = "../../../emitter/cargo/emit_unit" }
 env = { path = "../../../emitter/cargo/env" }
+error = { path = "../../../error/cargo/error" }
 hackc_unit = { path = "../../../hhbc/cargo/hackc_unit" }
 hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
-instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 ocamlrep = { path = "../../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
 options = { path = "../options" }

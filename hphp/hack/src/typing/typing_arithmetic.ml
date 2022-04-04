@@ -173,6 +173,12 @@ let expand_type_and_try_narrow_to_float env p ty =
   let widen_for_arithmetic env ty =
     match get_node ty with
     | Tprim Tast.Tfloat -> ((env, None), Some ty)
+    | Tgeneric _ ->
+      let float = MakeType.float (get_reason ty) in
+      if Typing_subtype.is_sub_type env ty float then
+        ((env, None), Some float)
+      else
+        ((env, None), None)
     | _ -> ((env, None), None)
   in
   Typing_solver.expand_type_and_narrow

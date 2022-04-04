@@ -145,6 +145,14 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     List.iter2 tparams targs ~f:(verify_targ_valid env Type_validator.Resolved)
     |> ignore
 
+let rec get_ft_tparams fun_ty =
+  match get_node fun_ty with
+  | Tnewtype (name, [ty1], _ty2) when String.equal name SN.Classes.cSupportDyn
+    ->
+    get_ft_tparams ty1
+  | Tfun { ft_tparams; _ } -> Some ft_tparams
+  | _ -> None
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -161,12 +169,12 @@ let handler =
       | (fun_ty, pos, Method_id _)
       | (fun_ty, pos, Smethod_id _) ->
         begin
-          match get_node fun_ty with
-          | Tfun { ft_tparams; _ } ->
+          match get_ft_tparams fun_ty with
+          | Some ft_tparams ->
             if tparams_has_reified ft_tparams then
               Errors.add_typing_error
                 Typing_error.(primary @@ Primary.Reified_function_reference pos)
-          | _ -> ()
+          | None -> ()
         end
       | ( _,
           pos,
@@ -185,16 +193,16 @@ let handler =
         end
       | (fun_ty, pos, FunctionPointer (_, targs)) ->
         begin
-          match get_node fun_ty with
-          | Tfun { ft_tparams; _ } ->
+          match get_ft_tparams fun_ty with
+          | Some ft_tparams ->
             verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
-          | _ -> ()
+          | None -> ()
         end
       | (_, pos, Call ((fun_ty, _, _), targs, _, _)) ->
         let (env, efun_ty) = Env.expand_type env fun_ty in
-        (match get_node efun_ty with
-        | Tfun ({ ft_tparams; _ } as ty)
-          when not @@ get_ft_is_function_pointer ty ->
+        (match (get_ft_tparams efun_ty, get_node efun_ty) with
+        | (Some ft_tparams, Tfun ty) when not @@ get_ft_is_function_pointer ty
+          ->
           verify_call_targs env pos (get_pos efun_ty) ft_tparams targs
         | _ -> ())
       | (_, pos, New ((ty, _, CI (_, class_id)), targs, _, _, _)) ->

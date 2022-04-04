@@ -7734,9 +7734,10 @@ and class_get_inner
               in
               Option.iter ~f:Errors.add_typing_error ty_err_opt2;
               let fty =
-                Typing_dynamic.relax_method_type
-                  env
-                  (get_ce_support_dynamic_type ce)
+                Typing_dynamic.maybe_wrap_with_supportdyn
+                  ~should_wrap:
+                    (get_ce_support_dynamic_type ce
+                    && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
                   r
                   ft
               in

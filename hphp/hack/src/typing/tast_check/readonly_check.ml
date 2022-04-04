@@ -14,6 +14,15 @@ module SN = Naming_special_names
 module MakeType = Typing_make_type
 module Reason = Typing_reason
 
+let rec get_fty ty =
+  let open Typing_defs in
+  match get_node ty with
+  | Tnewtype (name, [ty1], _ty2) when String.equal name SN.Classes.cSupportDyn
+    ->
+    get_fty ty1
+  | Tfun fty -> Some fty
+  | _ -> None
+
 type rty =
   | Readonly
   | Mut [@deriving show]
@@ -214,8 +223,8 @@ let check_readonly_return_call pos caller_ty is_readonly =
     ()
   else
     let open Typing_defs in
-    match get_node caller_ty with
-    | Tfun fty when get_ft_returns_readonly fty ->
+    match get_fty caller_ty with
+    | Some fty when get_ft_returns_readonly fty ->
       Errors.add_typing_error
         Typing_error.(
           readonly
@@ -368,8 +377,8 @@ let method_call caller =
   match caller with
   (* Readonly call checks *)
   | (ty, _, ReadonlyExpr (_, _, Obj_get (e1, _, _, Is_method))) ->
-    (match get_node ty with
-    | Tfun fty when not (get_ft_readonly_this fty) ->
+    (match get_fty ty with
+    | Some fty when not (get_ft_readonly_this fty) ->
       Errors.add_typing_error
         Typing_error.(
           readonly
@@ -405,8 +414,8 @@ let call
   let open Typing_defs in
   let (env, caller_ty) = Tast_env.expand_type env caller_ty in
   let check_readonly_closure caller_ty caller_rty =
-    match (get_node caller_ty, caller_rty) with
-    | (Tfun fty, Readonly)
+    match (get_fty caller_ty, caller_rty) with
+    | (Some fty, Readonly)
       when (not (get_ft_readonly_this fty)) && not method_call ->
       (* Get the position of why this function is its current type (usually a typehint) *)
       let reason = get_reason caller_ty in
@@ -454,8 +463,8 @@ let call
 
   (* Check that readonly arguments match their parameters *)
   let check_args caller_ty args unpacked_arg =
-    match get_node caller_ty with
-    | Tfun fty ->
+    match get_fty caller_ty with
+    | Some fty ->
       let rec check args params =
         match (args, params) with
         (* Remaining args should be checked against variadic *)
@@ -480,7 +489,7 @@ let call
       in
       let args = args @ unpacked_rty in
       check args fty.ft_params
-    | _ -> ()
+    | None -> ()
   in
   check_readonly_closure caller_ty caller_rty;
   check_readonly_return_call pos caller_ty is_readonly;

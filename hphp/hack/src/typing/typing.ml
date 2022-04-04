@@ -6177,6 +6177,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
     | (_, _, List el) ->
       (* Generate fresh types for each lhs list element, then subtype against
          rhs type *)
+      let env = Env.open_tyvars env p in
       let (env, tyl) =
         List.map_env env el ~f:(fun env (_, p, _e) -> Env.fresh_type env p)
       in
@@ -6184,6 +6185,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       let destructure_ty =
         MakeType.list_destructure (Reason.Rdestructure p1) tyl
       in
+      let env = Env.set_tyvar_variance_i env destructure_ty in
       let lty2 = LoclType ty2 in
       let assign_accumulate (env, tel, errs) (lvalue : Nast.expr) ty2 =
         let (env, te, _, err_opt) = assign p env lvalue pos2 ty2 in
@@ -6213,7 +6215,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
          in the ok case were the destrucutring succeeded, the fresh vars
          now have types so we can subtype each element, accumulate the errors
          and pack back into the rhs structure as our expected type *)
-      let (env, ty_err_opt) =
+      let (env, ty_err1) =
         Type.sub_type_i
           p
           ur
@@ -6222,10 +6224,11 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           destructure_ty
           Typing_error.Callback.unify_error
       in
+      let (env, ty_err2) = Typing_solver.close_tyvars_and_solve env in
+      let ty_err_opt = Option.merge ty_err1 ty_err2 ~f:Typing_error.both in
       Option.iter ~f:Errors.add_typing_error ty_err_opt;
       (match ty_err_opt with
       | None ->
-        let env = Env.set_tyvar_variance_i env destructure_ty in
         let (env, te, ty, subty_errs) = type_list_elem env in
         let err_opt =
           if List.for_all subty_errs ~f:Option.is_none then

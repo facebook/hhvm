@@ -30,8 +30,8 @@ impl TypingReturn {
 
     pub fn make_return_type<R: Reason>(
         env: &TEnv<R>,
-        localize: impl FnOnce(&TEnv<R>, decl::DeclTy<R>) -> Result<local::Ty<R>>,
-        ty: decl::DeclTy<R>,
+        localize: impl FnOnce(&TEnv<R>, decl::Ty<R>) -> Result<local::Ty<R>>,
+        ty: decl::Ty<R>,
     ) -> Result<local::Ty<R>> {
         rupro_todo_mark!(AwaitableAsync);
         localize(env, ty)

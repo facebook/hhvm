@@ -9,30 +9,28 @@ use ty::reason::Reason;
 /// Expose some utility functions to work with AST type hints.
 ///
 /// In particular these utility function convert those AST type hints
-/// into intermediate `DeclTy`s.
+/// into intermediate `Ty`s.
 pub struct HintUtils;
 
 impl HintUtils {
     pub fn fun_param<R: Reason>(
         fun_param: &oxidized::aast::FunParam<(), ()>,
-    ) -> Option<decl::DeclTy<R>> {
+    ) -> Option<decl::Ty<R>> {
         Self::type_hint(&fun_param.type_hint)
     }
 
-    pub fn type_hint<R: Reason>(
-        type_hint: &oxidized::aast::TypeHint<()>,
-    ) -> Option<decl::DeclTy<R>> {
+    pub fn type_hint<R: Reason>(type_hint: &oxidized::aast::TypeHint<()>) -> Option<decl::Ty<R>> {
         type_hint.1.as_ref().map(Self::hint)
     }
 
-    pub fn hint<R: Reason>(hint: &oxidized::aast_defs::Hint) -> decl::DeclTy<R> {
+    pub fn hint<R: Reason>(hint: &oxidized::aast_defs::Hint) -> decl::Ty<R> {
         use oxidized::aast_defs::Hint_::*;
         let r = R::hint(R::Pos::from(&hint.0));
         match &*hint.1 {
             Happly(id, argl) => {
-                decl::DeclTy::apply(r, id.into(), argl.iter().map(Self::hint).collect())
+                decl::Ty::apply(r, id.into(), argl.iter().map(Self::hint).collect())
             }
-            Hprim(p) => decl::DeclTy::prim(r, *p),
+            Hprim(p) => decl::Ty::prim(r, *p),
             h => rupro_todo!(AST, "{:?}", h),
         }
     }

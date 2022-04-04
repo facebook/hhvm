@@ -7,8 +7,8 @@ use pos::TypeName;
 use std::collections::BTreeMap;
 use ty::decl::subst::Subst;
 use ty::decl::{
-    AbstractTypeconst, ClassConst, ConcreteTypeconst, DeclTy, DeclTy_, FunParam, FunType,
-    PossiblyEnforcedTy, ShapeFieldType, TaccessType, Tparam, TypeConst, Typeconst, WhereConstraint,
+    AbstractTypeconst, ClassConst, ConcreteTypeconst, FunParam, FunType, PossiblyEnforcedTy,
+    ShapeFieldType, TaccessType, Tparam, Ty, Ty_, TypeConst, Typeconst, WhereConstraint,
 };
 use ty::reason::Reason;
 
@@ -24,24 +24,24 @@ impl<'a, R: Reason> Substitution<'a, R> {
         &self,
         orig_r: R,
         orig_var: TypeName,
-        ty: &DeclTy<R>,
-        args: impl Iterator<Item = DeclTy<R>>,
-    ) -> DeclTy<R> {
-        let ty_: &DeclTy_<R> = ty.node();
+        ty: &Ty<R>,
+        args: impl Iterator<Item = Ty<R>>,
+    ) -> Ty<R> {
+        let ty_: &Ty_<R> = ty.node();
         let res_ty_ = match ty_ {
-            DeclTy_::DTapply(params) => {
+            Ty_::Tapply(params) => {
                 // We could insist on `existing_args.is_empty()` here
                 // unless we want to support partial application.
                 let (name, existing_args) = &**params;
-                DeclTy_::DTapply(Box::new((
+                Ty_::Tapply(Box::new((
                     name.clone(),
                     existing_args.iter().cloned().chain(args).collect(),
                 )))
             }
-            DeclTy_::DTgeneric(params) => {
+            Ty_::Tgeneric(params) => {
                 // Same here.
                 let (name, ref existing_args) = **params;
-                DeclTy_::DTgeneric(Box::new((
+                Ty_::Tgeneric(Box::new((
                     name,
                     existing_args.iter().cloned().chain(args).collect(),
                 )))
@@ -51,10 +51,10 @@ impl<'a, R: Reason> Substitution<'a, R> {
             _ => ty_.clone(),
         };
         let r = ty.reason().clone();
-        DeclTy::new(R::instantiate(r, orig_var, orig_r), res_ty_)
+        Ty::new(R::instantiate(r, orig_var, orig_r), res_ty_)
     }
 
-    pub fn instantiate(&self, ty: &DeclTy<R>) -> DeclTy<R> {
+    pub fn instantiate(&self, ty: &Ty<R>) -> Ty<R> {
         // PERF: If subst is empty then instantiation is a no-op. We can save a
         // significant amount of CPU by avoiding recursively deconstructing the
         // `ty` data type.
@@ -62,67 +62,67 @@ impl<'a, R: Reason> Substitution<'a, R> {
             return ty.clone();
         }
         let r = ty.reason().clone();
-        let ty_: &DeclTy_<R> = ty.node();
+        let ty_: &Ty_<R> = ty.node();
         match ty_ {
-            DeclTy_::DTgeneric(params) => {
+            Ty_::Tgeneric(params) => {
                 let (x, ref existing_args) = **params;
                 let args = existing_args.iter().map(|arg| self.instantiate(arg));
                 match self.subst.0.get(&x) {
                     Some(x_ty) => self.merge_hk_type(r, x, x_ty, args),
-                    None => DeclTy::generic(r, x, args.collect()),
+                    None => Ty::generic(r, x, args.collect()),
                 }
             }
-            _ => DeclTy::new(r, self.instantiate_(ty_)),
+            _ => Ty::new(r, self.instantiate_(ty_)),
         }
     }
 
-    fn instantiate_(&self, x: &DeclTy_<R>) -> DeclTy_<R> {
+    fn instantiate_(&self, x: &Ty_<R>) -> Ty_<R> {
         match x {
-            DeclTy_::DTgeneric(_) => panic!("subst.rs: instantiate_: impossible!"),
-            // IMPORTANT: We cannot expand `DTaccess` during instantiation
+            Ty_::Tgeneric(_) => panic!("subst.rs: instantiate_: impossible!"),
+            // IMPORTANT: We cannot expand `Taccess` during instantiation
             // because this can be called before all type consts have been
             // declared and inherited.
-            DeclTy_::DTaccess(ta) => DeclTy_::DTaccess(Box::new(TaccessType {
+            Ty_::Taccess(ta) => Ty_::Taccess(Box::new(TaccessType {
                 ty: self.instantiate(&ta.ty),
                 type_const: ta.type_const.clone(),
             })),
-            DeclTy_::DTvecOrDict(tys) => DeclTy_::DTvecOrDict(Box::new((
+            Ty_::TvecOrDict(tys) => Ty_::TvecOrDict(Box::new((
                 self.instantiate(&tys.0),
                 self.instantiate(&tys.1),
             ))),
-            DeclTy_::DTthis
-            | DeclTy_::DTvar(_)
-            | DeclTy_::DTmixed
-            | DeclTy_::DTdynamic
-            | DeclTy_::DTnonnull
-            | DeclTy_::DTany
-            | DeclTy_::DTerr
-            | DeclTy_::DTprim(_) => x.clone(),
-            DeclTy_::DTtuple(tys) => DeclTy_::DTtuple(
+            Ty_::Tthis
+            | Ty_::Tvar(_)
+            | Ty_::Tmixed
+            | Ty_::Tdynamic
+            | Ty_::Tnonnull
+            | Ty_::Tany
+            | Ty_::Terr
+            | Ty_::Tprim(_) => x.clone(),
+            Ty_::Ttuple(tys) => Ty_::Ttuple(
                 tys.iter()
                     .map(|t| self.instantiate(t))
                     .collect::<Box<[_]>>(),
             ),
-            DeclTy_::DTunion(tys) => DeclTy_::DTunion(
+            Ty_::Tunion(tys) => Ty_::Tunion(
                 tys.iter()
                     .map(|t| self.instantiate(t))
                     .collect::<Box<[_]>>(),
             ),
-            DeclTy_::DTintersection(tys) => DeclTy_::DTintersection(
+            Ty_::Tintersection(tys) => Ty_::Tintersection(
                 tys.iter()
                     .map(|t| self.instantiate(t))
                     .collect::<Box<[_]>>(),
             ),
-            DeclTy_::DToption(ty) => {
+            Ty_::Toption(ty) => {
                 let ty = self.instantiate(ty);
                 // We want to avoid double option: `??T`.
-                match ty.node() as &DeclTy_<R> {
-                    ty_node @ DeclTy_::DToption(_) => ty_node.clone(),
-                    _ => DeclTy_::DToption(ty),
+                match ty.node() as &Ty_<R> {
+                    ty_node @ Ty_::Toption(_) => ty_node.clone(),
+                    _ => Ty_::Toption(ty),
                 }
             }
-            DeclTy_::DTlike(ty) => DeclTy_::DTlike(self.instantiate(ty)),
-            DeclTy_::DTfun(ft) => {
+            Ty_::Tlike(ty) => Ty_::Tlike(self.instantiate(ty)),
+            Ty_::Tfun(ft) => {
                 let tparams = &ft.tparams;
                 let outer_subst = self;
                 let mut subst = self.subst.clone();
@@ -163,7 +163,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
                         WhereConstraint(subst.instantiate(ty1), *ck, outer_subst.instantiate(ty2))
                     })
                     .collect::<Box<[_]>>();
-                DeclTy_::DTfun(Box::new(FunType {
+                Ty_::Tfun(Box::new(FunType {
                     params,
                     ret,
                     tparams,
@@ -173,16 +173,16 @@ impl<'a, R: Reason> Substitution<'a, R> {
                     ifc_decl: ft.ifc_decl.clone(),
                 }))
             }
-            DeclTy_::DTapply(params) => {
+            Ty_::Tapply(params) => {
                 let (name, tys) = &**params;
-                DeclTy_::DTapply(Box::new((
+                Ty_::Tapply(Box::new((
                     name.clone(),
                     tys.iter()
                         .map(|ty| self.instantiate(ty))
                         .collect::<Box<[_]>>(),
                 )))
             }
-            DeclTy_::DTshape(params) => {
+            Ty_::Tshape(params) => {
                 let (shape_kind, ref fdm) = **params;
                 let fdm = fdm
                     .iter()
@@ -197,15 +197,15 @@ impl<'a, R: Reason> Substitution<'a, R> {
                         )
                     })
                     .collect::<BTreeMap<_, _>>();
-                DeclTy_::DTshape(Box::new((shape_kind, fdm)))
+                Ty_::Tshape(Box::new((shape_kind, fdm)))
             }
         }
     }
 
     fn instantiate_possibly_enforced_ty(
         &self,
-        et: &PossiblyEnforcedTy<DeclTy<R>>,
-    ) -> PossiblyEnforcedTy<DeclTy<R>> {
+        et: &PossiblyEnforcedTy<Ty<R>>,
+    ) -> PossiblyEnforcedTy<Ty<R>> {
         PossiblyEnforcedTy {
             ty: self.instantiate(&et.ty),
             enforced: et.enforced,

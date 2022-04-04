@@ -47,7 +47,7 @@ impl<'a, P: Pos> ToOxidized<'a> for UserAttribute<P> {
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for Tparam<R, DeclTy<R>> {
+impl<'a, R: Reason> ToOxidized<'a> for Tparam<R, Ty<R>> {
     type Output = &'a obr::typing_defs::Tparam<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
@@ -66,7 +66,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Tparam<R, DeclTy<R>> {
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for WhereConstraint<DeclTy<R>> {
+impl<'a, R: Reason> ToOxidized<'a> for WhereConstraint<Ty<R>> {
     type Output = &'a obr::typing_defs::WhereConstraint<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
@@ -79,7 +79,7 @@ impl<'a, R: Reason> ToOxidized<'a> for WhereConstraint<DeclTy<R>> {
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for DeclTy<R> {
+impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
     type Output = &'a obr::typing_defs::Ty<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
@@ -133,45 +133,45 @@ fn oxidize_shape_field_name<'a, P: Pos>(
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for DeclTy_<R> {
+impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
     type Output = obr::typing_defs::Ty_<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         use obr::t_shape_map::{TShapeField, TShapeMap};
-        use obr::typing_defs::Ty_;
+        use obr::typing_defs;
         match self {
-            DeclTy_::DTthis => Ty_::Tthis,
-            DeclTy_::DTapply(x) => Ty_::Tapply(x.to_oxidized(arena)),
-            DeclTy_::DTmixed => Ty_::Tmixed,
-            DeclTy_::DTlike(x) => Ty_::Tlike(x.to_oxidized(arena)),
-            DeclTy_::DTany => Ty_::Tany(obr::tany_sentinel::TanySentinel),
-            DeclTy_::DTerr => Ty_::Terr,
-            DeclTy_::DTnonnull => Ty_::Tnonnull,
-            DeclTy_::DTdynamic => Ty_::Tdynamic,
-            DeclTy_::DToption(x) => Ty_::Toption(x.to_oxidized(arena)),
-            DeclTy_::DTprim(x) => Ty_::Tprim(arena.alloc(*x)),
-            DeclTy_::DTfun(x) => Ty_::Tfun(x.to_oxidized(arena)),
-            DeclTy_::DTtuple(x) => Ty_::Ttuple(x.to_oxidized(arena)),
-            DeclTy_::DTshape(shape) => {
+            Ty_::Tthis => typing_defs::Ty_::Tthis,
+            Ty_::Tapply(x) => typing_defs::Ty_::Tapply(x.to_oxidized(arena)),
+            Ty_::Tmixed => typing_defs::Ty_::Tmixed,
+            Ty_::Tlike(x) => typing_defs::Ty_::Tlike(x.to_oxidized(arena)),
+            Ty_::Tany => typing_defs::Ty_::Tany(obr::tany_sentinel::TanySentinel),
+            Ty_::Terr => typing_defs::Ty_::Terr,
+            Ty_::Tnonnull => typing_defs::Ty_::Tnonnull,
+            Ty_::Tdynamic => typing_defs::Ty_::Tdynamic,
+            Ty_::Toption(x) => typing_defs::Ty_::Toption(x.to_oxidized(arena)),
+            Ty_::Tprim(x) => typing_defs::Ty_::Tprim(arena.alloc(*x)),
+            Ty_::Tfun(x) => typing_defs::Ty_::Tfun(x.to_oxidized(arena)),
+            Ty_::Ttuple(x) => typing_defs::Ty_::Ttuple(x.to_oxidized(arena)),
+            Ty_::Tshape(shape) => {
                 let mut shape_fields = arena_collections::AssocListMut::new_in(arena);
                 let (shape_kind, shape_field_type_map): &(_, _) = shape;
                 for (k, v) in shape_field_type_map.iter() {
                     let k = oxidize_shape_field_name(arena, *k, &v.field_name_pos);
                     shape_fields.insert_or_replace(TShapeField(k), v.to_oxidized(arena));
                 }
-                Ty_::Tshape(arena.alloc((*shape_kind, TShapeMap::from(shape_fields))))
+                typing_defs::Ty_::Tshape(arena.alloc((*shape_kind, TShapeMap::from(shape_fields))))
             }
-            DeclTy_::DTvar(ident) => Ty_::Tvar((*ident).into()),
-            DeclTy_::DTgeneric(x) => Ty_::Tgeneric(x.to_oxidized(arena)),
-            DeclTy_::DTunion(x) => Ty_::Tunion(x.to_oxidized(arena)),
-            DeclTy_::DTintersection(x) => Ty_::Tintersection(x.to_oxidized(arena)),
-            DeclTy_::DTvecOrDict(x) => Ty_::TvecOrDict(x.to_oxidized(arena)),
-            DeclTy_::DTaccess(x) => Ty_::Taccess(x.to_oxidized(arena)),
+            Ty_::Tvar(ident) => typing_defs::Ty_::Tvar((*ident).into()),
+            Ty_::Tgeneric(x) => typing_defs::Ty_::Tgeneric(x.to_oxidized(arena)),
+            Ty_::Tunion(x) => typing_defs::Ty_::Tunion(x.to_oxidized(arena)),
+            Ty_::Tintersection(x) => typing_defs::Ty_::Tintersection(x.to_oxidized(arena)),
+            Ty_::TvecOrDict(x) => typing_defs::Ty_::TvecOrDict(x.to_oxidized(arena)),
+            Ty_::Taccess(x) => typing_defs::Ty_::Taccess(x.to_oxidized(arena)),
         }
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for TaccessType<R, DeclTy<R>> {
+impl<'a, R: Reason> ToOxidized<'a> for TaccessType<R, Ty<R>> {
     type Output = &'a obr::typing_defs::TaccessType<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
@@ -182,7 +182,7 @@ impl<'a, R: Reason> ToOxidized<'a> for TaccessType<R, DeclTy<R>> {
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for FunImplicitParams<R, DeclTy<R>> {
+impl<'a, R: Reason> ToOxidized<'a> for FunImplicitParams<R, Ty<R>> {
     type Output = &'a obr::typing_defs::FunImplicitParams<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
@@ -197,7 +197,7 @@ impl<'a, R: Reason> ToOxidized<'a> for FunImplicitParams<R, DeclTy<R>> {
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for FunType<R, DeclTy<R>> {
+impl<'a, R: Reason> ToOxidized<'a> for FunType<R, Ty<R>> {
     type Output = &'a obr::typing_defs::FunType<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
@@ -213,7 +213,7 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R, DeclTy<R>> {
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for PossiblyEnforcedTy<DeclTy<R>> {
+impl<'a, R: Reason> ToOxidized<'a> for PossiblyEnforcedTy<Ty<R>> {
     type Output = &'a obr::typing_defs::PossiblyEnforcedTy<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
@@ -224,7 +224,7 @@ impl<'a, R: Reason> ToOxidized<'a> for PossiblyEnforcedTy<DeclTy<R>> {
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for FunParam<R, DeclTy<R>> {
+impl<'a, R: Reason> ToOxidized<'a> for FunParam<R, Ty<R>> {
     type Output = &'a obr::typing_defs::FunParam<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {

@@ -70,7 +70,7 @@ fn make_default_return<R: Reason>(params: TCReturnTypeHintParams<R>) -> local::T
 fn make_return_type<R: Reason>(
     env: &TEnv<R>,
     params: TCReturnTypeHintParams<R>,
-    ty: decl::DeclTy<R>,
+    ty: decl::Ty<R>,
 ) -> Result<local::Ty<R>> {
     rupro_todo_mark!(AwaitableAsync);
     ty.infer(env, params.localize_env)

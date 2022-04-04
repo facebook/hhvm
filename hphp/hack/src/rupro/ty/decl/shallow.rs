@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl::ty::{
-    ClassConstKind, ClassConstRef, DeclTy, EnumType, FunElt, Tparam, Typeconst, TypedefType,
+    ClassConstKind, ClassConstRef, EnumType, FunElt, Tparam, Ty, Typeconst, TypedefType,
     UserAttribute, WhereConstraint, XhpAttribute, XhpEnumValue,
 };
 use crate::reason::Reason;
@@ -36,7 +36,7 @@ pub struct ShallowClassConst<R: Reason> {
     ///
     /// In a legacy enum, X.ty = string, Y.ty = int, and Z.ty = TAny, and ty is
     /// just a simple syntactic attempt to retrieve the type from the initializer.
-    pub ty: DeclTy<R>,
+    pub ty: Ty<R>,
 
     /// This is a list of all scope-resolution operators "A::B" that are mentioned
     /// in the const initializer, for members of regular-enums and enum-class-enums
@@ -73,7 +73,7 @@ impl<R: Reason> ShallowTypeconst<R> {
 pub struct ShallowProp<R: Reason> {
     pub name: Positioned<PropName, R::Pos>,
     pub xhp_attr: Option<XhpAttribute>,
-    pub ty: Option<DeclTy<R>>,
+    pub ty: Option<Ty<R>>,
     pub visibility: Visibility,
     pub flags: PropFlags,
 }
@@ -88,7 +88,7 @@ pub struct ShallowMethod<R: Reason> {
     //     - `Shallow_decl_defs.shallow_method`
     //     - `oxidized_by_ref::shallow_decl_defs::ShallowMethod<'_>`
     pub name: Positioned<MethodName, R::Pos>,
-    pub ty: DeclTy<R>,
+    pub ty: Ty<R>,
     pub visibility: Visibility,
     pub deprecated: Option<Bytes>, // e.g. "The method foo is deprecated: ..."
     pub flags: MethodFlags,
@@ -112,15 +112,15 @@ pub struct ShallowClass<R: Reason> {
     pub kind: oxidized::ast_defs::ClassishKind,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub name: Positioned<TypeName, R::Pos>,
-    pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
-    pub where_constraints: Box<[WhereConstraint<DeclTy<R>>]>,
-    pub extends: Box<[DeclTy<R>]>,
-    pub uses: Box<[DeclTy<R>]>,
-    pub xhp_attr_uses: Box<[DeclTy<R>]>,
+    pub tparams: Box<[Tparam<R, Ty<R>>]>,
+    pub where_constraints: Box<[WhereConstraint<Ty<R>>]>,
+    pub extends: Box<[Ty<R>]>,
+    pub uses: Box<[Ty<R>]>,
+    pub xhp_attr_uses: Box<[Ty<R>]>,
     pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
-    pub req_extends: Box<[DeclTy<R>]>,
-    pub req_implements: Box<[DeclTy<R>]>,
-    pub implements: Box<[DeclTy<R>]>,
+    pub req_extends: Box<[Ty<R>]>,
+    pub req_implements: Box<[Ty<R>]>,
+    pub implements: Box<[Ty<R>]>,
     pub support_dynamic_type: bool,
     pub consts: Box<[ShallowClassConst<R>]>,
     pub typeconsts: Box<[ShallowTypeconst<R>]>,

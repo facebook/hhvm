@@ -23,7 +23,7 @@ impl LocalizeEnv {
     }
 }
 
-/// Type localization is a "simple" conversion from `decl::DeclTy` to `Ty`.
+/// Type localization is a "simple" conversion from `decl::Ty` to `Ty`.
 ///
 /// Note that this sometimes requires non-trivial operations, specifically:
 ///
@@ -31,7 +31,7 @@ impl LocalizeEnv {
 ///  - resolving the `this` type
 ///  - instantiating generics (TODO(hverr): do we want to extract this?)
 ///  - ...
-impl<R: Reason> TC<R> for decl::DeclTy<R> {
+impl<R: Reason> TC<R> for decl::Ty<R> {
     type Params = LocalizeEnv;
     type Typed = local::Ty<R>;
 
@@ -43,14 +43,14 @@ impl<R: Reason> TC<R> for decl::DeclTy<R> {
 fn localize<R: Reason>(
     env: &TEnv<R>,
     localize_env: &LocalizeEnv,
-    ty: decl::DeclTy<R>,
+    ty: decl::Ty<R>,
 ) -> Result<local::Ty<R>> {
-    use decl::DeclTy_::*;
+    use decl::Ty_::*;
     let r = ty.reason().clone();
     let res = match &**ty.node() {
-        DTprim(p) => local::Ty::prim(r, *p),
-        DTapply(box (pos_id, tyl)) => localize_tapply(env, localize_env, r, pos_id.clone(), tyl)?,
-        DTfun(box ft) => localize_ft(env, localize_env, r, ft)?,
+        Tprim(p) => local::Ty::prim(r, *p),
+        Tapply(box (pos_id, tyl)) => localize_tapply(env, localize_env, r, pos_id.clone(), tyl)?,
+        Tfun(box ft) => localize_ft(env, localize_env, r, ft)?,
         t => rupro_todo!(AST, "{:?}", t),
     };
     Ok(res)
@@ -61,7 +61,7 @@ fn localize_tapply<R: Reason>(
     localize_env: &LocalizeEnv,
     r: R,
     sid: Positioned<TypeName, R::Pos>,
-    ty_args: &[decl::DeclTy<R>],
+    ty_args: &[decl::Ty<R>],
 ) -> Result<local::Ty<R>> {
     let class_info = env.decls().get_type(sid.id())?;
     let class_info = match &class_info {
@@ -76,7 +76,7 @@ fn localize_class_instantiation<R: Reason>(
     _localize_env: &LocalizeEnv,
     r: R,
     sid: Positioned<TypeName, R::Pos>,
-    ty_args: &[decl::DeclTy<R>],
+    ty_args: &[decl::Ty<R>],
     class_info: Option<&dyn Class<R>>,
 ) -> Result<local::Ty<R>> {
     use local::Ty_::*;
@@ -96,7 +96,7 @@ fn localize_ft<R: Reason>(
     env: &TEnv<R>,
     localize_env: &LocalizeEnv,
     r: R,
-    ft: &decl::FunType<R, decl::DeclTy<R>>,
+    ft: &decl::FunType<R, decl::Ty<R>>,
 ) -> Result<local::Ty<R>> {
     rupro_todo_assert!(ft.params.is_empty(), AST);
     let params: Vec<_> = ft
@@ -121,7 +121,7 @@ fn localize_ft<R: Reason>(
 fn localize_possibly_enforced_ty<R: Reason>(
     env: &TEnv<R>,
     localize_env: &LocalizeEnv,
-    ty: decl::PossiblyEnforcedTy<decl::DeclTy<R>>,
+    ty: decl::PossiblyEnforcedTy<decl::Ty<R>>,
 ) -> Result<local::Ty<R>> {
     localize(env, localize_env, ty.ty)
 }

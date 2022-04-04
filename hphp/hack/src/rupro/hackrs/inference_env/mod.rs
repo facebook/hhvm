@@ -154,7 +154,7 @@ impl<'a, R: Reason> Visitor<R> for CollectUnsolved<'a, R> {
         self
     }
 
-    fn visit_ty(&mut self, ty: &Ty<R>) {
+    fn visit_local_ty(&mut self, ty: &Ty<R>) {
         match ty.deref() {
             Ty_::Tvar(tv) => {
                 if self.env.is_unsolved(tv) || self.env.contains_unsolved(tv) {

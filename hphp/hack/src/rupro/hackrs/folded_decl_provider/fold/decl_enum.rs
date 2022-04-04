@@ -10,8 +10,7 @@ use crate::special_names as sn;
 use pos::{ClassConstName, ClassConstNameIndexMap, Positioned, TypeName, TypeNameIndexMap};
 use std::sync::Arc;
 use ty::decl::folded::{ClassConst, FoldedClass};
-use ty::decl::ty::DeclTy;
-use ty::decl::ty::DeclTy_;
+use ty::decl::{Prim, Ty, Ty_};
 use ty::reason::Reason;
 
 struct EnumKind<R: Reason> {
@@ -19,26 +18,26 @@ struct EnumKind<R: Reason> {
     /// `Enum`, this is the type parameter of the Enum. For enum classes, this
     /// is `HH\MemberOf<E, I>`.
     // NB(jakebailey, 2022-03-11): `base` is copied from OCaml but not used here.
-    // base: DeclTy<R>,
+    // base: Ty<R>,
 
     /// Type containing the enum name.
     /// For subclasses of Enum, this is also the type parameter of Enum.
-    ty: DeclTy<R>,
+    ty: Ty<R>,
 
     /// Reflects what's after the `as` keyword in the enum definition.
     // NB(jakebailey, 2022-03-11): `constraint` is copied from OCaml but not used here.
-    // constraint: Option<DeclTy<R>>,
+    // constraint: Option<Ty<R>>,
 
     /// For enum classes, this is the raw interface I, as provided by the user.
-    interface: Option<DeclTy<R>>,
+    interface: Option<Ty<R>>,
 }
 
 impl<'a, R: Reason> DeclFolder<'a, R> {
     /// Figures out if `self.child` needs to be treated like an enum.
     fn enum_kind(
         &self,
-        inner_ty: Option<&DeclTy<R>>,
-        ancestors: &TypeNameIndexMap<DeclTy<R>>,
+        inner_ty: Option<&Ty<R>>,
+        ancestors: &TypeNameIndexMap<Ty<R>>,
     ) -> Option<EnumKind<R>> {
         let is_enum_class = matches!(self.child.kind, ty::decl::ty::ClassishKind::CenumClass(..));
         match &self.child.enum_type {
@@ -60,10 +59,10 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                         let r = || enum_ty.reason().clone();
                         let ty_exp = match inner_ty {
                             Some(ty) => ty.clone(),
-                            None => DeclTy::access(
+                            None => Ty::access(
                                 r(),
                                 ty::decl::TaccessType {
-                                    ty: DeclTy::this(r()),
+                                    ty: Ty::this(r()),
                                     type_const: Positioned::new(
                                         enum_ty.pos().clone(),
                                         *sn::fb::tInner,
@@ -84,11 +83,11 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             Some(enum_type) => {
                 let reason = enum_type.base.reason();
                 let pos = reason.pos();
-                let enum_ty = DeclTy::apply(reason.clone(), self.child.name.clone(), [].into());
+                let enum_ty = Ty::apply(reason.clone(), self.child.name.clone(), [].into());
                 let (te_base, te_interface) = if is_enum_class {
                     let te_interface = enum_type.base.clone();
                     // TODO(T77095784) make a new reason !
-                    let te_base = DeclTy::apply(
+                    let te_base = Ty::apply(
                         reason.clone(),
                         Positioned::new(pos.clone(), *sn::classes::cMemberOf),
                         [enum_ty, enum_type.base.clone()].into(),
@@ -98,7 +97,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                     (enum_type.base.clone(), None)
                 };
                 Some(EnumKind {
-                    ty: DeclTy::apply(te_base.reason().clone(), self.child.name.clone(), [].into()),
+                    ty: Ty::apply(te_base.reason().clone(), self.child.name.clone(), [].into()),
                     // base: te_base,
                     // constraint: enum_type.constraint.clone(),
                     interface: te_interface,
@@ -112,8 +111,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     /// `Enum<arraykey>`, since that could *lose* type information.
     pub fn rewrite_class_consts_for_enum(
         &self,
-        inner_ty: Option<&DeclTy<R>>,
-        ancestors: &TypeNameIndexMap<DeclTy<R>>,
+        inner_ty: Option<&Ty<R>>,
+        ancestors: &TypeNameIndexMap<Ty<R>>,
         consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
     ) {
         let EnumKind {
@@ -132,10 +131,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
 
         // Don't rewrite `Enum<mixed>` or `Enum<arraykey>`.
-        if matches!(
-            ty.node_ref(),
-            DeclTy_::DTmixed | DeclTy_::DTprim(ty::decl::ty::Prim::Tarraykey)
-        ) {
+        if matches!(ty.node_ref(), Ty_::Tmixed | Ty_::Tprim(Prim::Tarraykey)) {
             return;
         }
 

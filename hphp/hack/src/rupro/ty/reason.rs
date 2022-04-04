@@ -67,7 +67,7 @@ pub trait Reason:
 
     fn pos(&self) -> &Self::Pos;
 
-    fn decl_ty_conser() -> &'static Conser<decl::DeclTy_<Self>>;
+    fn decl_ty_conser() -> &'static Conser<decl::Ty_<Self>>;
     fn local_ty_conser() -> &'static Conser<local::Ty_<Self, local::Ty<Self>>>;
     fn prop_conser() -> &'static Conser<PropF<Self, Prop<Self>>>;
 
@@ -370,8 +370,8 @@ impl Reason for BReason {
     }
 
     #[inline]
-    fn decl_ty_conser() -> &'static Conser<decl::DeclTy_<BReason>> {
-        static CONSER: Lazy<Conser<decl::DeclTy_<BReason>>> = Lazy::new(Conser::new);
+    fn decl_ty_conser() -> &'static Conser<decl::Ty_<BReason>> {
+        static CONSER: Lazy<Conser<decl::Ty_<BReason>>> = Lazy::new(Conser::new);
         &CONSER
     }
 
@@ -603,8 +603,8 @@ impl Reason for NReason {
     }
 
     #[inline]
-    fn decl_ty_conser() -> &'static Conser<decl::DeclTy_<NReason>> {
-        static CONSER: Lazy<Conser<decl::DeclTy_<NReason>>> = Lazy::new(Conser::new);
+    fn decl_ty_conser() -> &'static Conser<decl::Ty_<NReason>> {
+        static CONSER: Lazy<Conser<decl::Ty_<NReason>>> = Lazy::new(Conser::new);
         &CONSER
     }
 

@@ -79,7 +79,7 @@ pub enum ShapeFieldNamePos<P> {
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub enum DependentType {
-    DTexpr(Ident),
+    Texpr(Ident),
 }
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
@@ -108,18 +108,18 @@ walkable!(impl<R: Reason, TY> for WhereConstraint<TY> => [0, 1, 2]);
 
 #[derive(Clone, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
-pub struct DeclTy<R: Reason>(R, Hc<DeclTy_<R>>);
+pub struct Ty<R: Reason>(R, Hc<Ty_<R>>);
 
-walkable!(DeclTy<R> as visit_decl_ty => [0, 1]);
+walkable!(Ty<R> as visit_decl_ty => [0, 1]);
 
-impl<R: Reason> DeclTy<R> {
+impl<R: Reason> Ty<R> {
     #[inline]
-    pub fn new(reason: R, ty: DeclTy_<R>) -> Self {
+    pub fn new(reason: R, ty: Ty_<R>) -> Self {
         Self(reason, Hc::new(ty))
     }
 
     pub fn prim(r: R, prim: Prim) -> Self {
-        Self::new(r, DeclTy_::DTprim(prim))
+        Self::new(r, Ty_::Tprim(prim))
     }
 
     pub fn void(r: R) -> Self {
@@ -127,28 +127,28 @@ impl<R: Reason> DeclTy<R> {
     }
 
     pub fn any(r: R) -> Self {
-        Self::new(r, DeclTy_::DTany)
+        Self::new(r, Ty_::Tany)
     }
 
     pub fn this(r: R) -> Self {
-        Self::new(r, DeclTy_::DTthis)
+        Self::new(r, Ty_::Tthis)
     }
 
     pub fn apply(
         reason: R,
         type_name: Positioned<TypeName, R::Pos>,
-        tparams: Box<[DeclTy<R>]>,
+        tparams: Box<[Ty<R>]>,
     ) -> Self {
-        Self::new(reason, DeclTy_::DTapply(Box::new((type_name, tparams))))
+        Self::new(reason, Ty_::Tapply(Box::new((type_name, tparams))))
     }
 
-    pub fn generic(reason: R, name: TypeName, tparams: Box<[DeclTy<R>]>) -> Self {
-        Self::new(reason, DeclTy_::DTgeneric(Box::new((name, tparams))))
+    pub fn generic(reason: R, name: TypeName, tparams: Box<[Ty<R>]>) -> Self {
+        Self::new(reason, Ty_::Tgeneric(Box::new((name, tparams))))
     }
 
     #[inline]
-    pub fn access(reason: R, taccess: TaccessType<R, DeclTy<R>>) -> Self {
-        Self::new(reason, DeclTy_::DTaccess(Box::new(taccess)))
+    pub fn access(reason: R, taccess: TaccessType<R, Ty<R>>) -> Self {
+        Self::new(reason, Ty_::Taccess(Box::new(taccess)))
     }
 
     pub fn pos(&self) -> &R::Pos {
@@ -159,19 +159,19 @@ impl<R: Reason> DeclTy<R> {
         &self.0
     }
 
-    pub fn node(&self) -> &Hc<DeclTy_<R>> {
+    pub fn node(&self) -> &Hc<Ty_<R>> {
         &self.1
     }
 
-    pub fn node_ref(&self) -> &DeclTy_<R> {
+    pub fn node_ref(&self) -> &Ty_<R> {
         &self.1
     }
 
-    pub fn unwrap_class_type(&self) -> Option<(&R, &Positioned<TypeName, R::Pos>, &[DeclTy<R>])> {
-        use DeclTy_::*;
+    pub fn unwrap_class_type(&self) -> Option<(&R, &Positioned<TypeName, R::Pos>, &[Ty<R>])> {
+        use Ty_::*;
         let r = self.reason();
         match &**self.node() {
-            DTapply(id_and_args) => {
+            Tapply(id_and_args) => {
                 let (pos_id, args) = &**id_and_args;
                 Some((r, pos_id, args))
             }
@@ -194,18 +194,18 @@ impl<R: Reason> DeclTy<R> {
 pub struct ShapeFieldType<R: Reason> {
     pub field_name_pos: ShapeFieldNamePos<R::Pos>,
     pub optional: bool,
-    pub ty: DeclTy<R>,
+    pub ty: Ty<R>,
 }
 
 walkable!(ShapeFieldType<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
-pub enum DeclTy_<R: Reason> {
+pub enum Ty_<R: Reason> {
     /// The late static bound type of a class
-    DTthis,
+    Tthis,
     /// Either an object type or a type alias, ty list are the arguments
-    DTapply(Box<(Positioned<TypeName, R::Pos>, Box<[DeclTy<R>]>)>),
+    Tapply(Box<(Positioned<TypeName, R::Pos>, Box<[Ty<R>]>)>),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -232,11 +232,11 @@ pub enum DeclTy_<R: Reason> {
     ///
     /// mixed exists only in the decl_phase phase because it is desugared into ?nonnull
     /// during the localization phase.
-    DTmixed,
-    DTlike(DeclTy<R>),
-    DTany,
-    DTerr,
-    DTnonnull,
+    Tmixed,
+    Tlike(Ty<R>),
+    Tany,
+    Terr,
+    Tnonnull,
     /// A dynamic type is a special type which sometimes behaves as if it were a
     /// top type; roughly speaking, where a specific value of a particular type is
     /// expected and that type is dynamic, anything can be given. We call this
@@ -246,26 +246,26 @@ pub enum DeclTy_<R: Reason> {
     ///
     /// it captures dynamicism within function scope.
     /// See tests in typecheck/dynamic/ for more examples.
-    DTdynamic,
+    Tdynamic,
     /// Nullable, called "option" in the ML parlance.
-    DToption(DeclTy<R>),
+    Toption(Ty<R>),
     /// All the primitive types: int, string, void, etc.
-    DTprim(aast::Tprim),
+    Tprim(aast::Tprim),
     /// A wrapper around fun_type, which contains the full type information for a
     /// function, method, lambda, etc.
-    DTfun(Box<FunType<R, DeclTy<R>>>),
+    Tfun(Box<FunType<R, Ty<R>>>),
     /// Tuple, with ordered list of the types of the elements of the tuple.
-    DTtuple(Box<[DeclTy<R>]>),
+    Ttuple(Box<[Ty<R>]>),
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
-    DTshape(Box<(ShapeKind, BTreeMap<TshapeFieldName, ShapeFieldType<R>>)>),
-    DTvar(Ident),
+    Tshape(Box<(ShapeKind, BTreeMap<TshapeFieldName, ShapeFieldType<R>>)>),
+    Tvar(Ident),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
     /// is set up when checking the body of a function or method. See uses of
     /// Typing_phase.add_generic_parameters_and_constraints. The list denotes
     /// type arguments.
-    DTgeneric(Box<(TypeName, Box<[DeclTy<R>]>)>),
+    Tgeneric(Box<(TypeName, Box<[Ty<R>]>)>),
     /// Union type.
     /// The values that are members of this type are the union of the values
     /// that are members of the components of the union.
@@ -273,54 +273,54 @@ pub enum DeclTy_<R: Reason> {
     ///   Tunion []  is the "nothing" type, with no values
     ///   Tunion [int;float] is the same as num
     ///   Tunion [null;t] is the same as Toption t
-    DTunion(Box<[DeclTy<R>]>),
-    DTintersection(Box<[DeclTy<R>]>),
+    Tunion(Box<[Ty<R>]>),
+    Tintersection(Box<[Ty<R>]>),
     /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"
-    DTvecOrDict(Box<(DeclTy<R>, DeclTy<R>)>),
-    DTaccess(Box<TaccessType<R, DeclTy<R>>>),
+    TvecOrDict(Box<(Ty<R>, Ty<R>)>),
+    Taccess(Box<TaccessType<R, Ty<R>>>),
 }
 
-// We've boxed all variants of DeclTy_ which are larger than two usizes, so the
+// We've boxed all variants of Ty_ which are larger than two usizes, so the
 // total size should be equal to `[usize; 3]` (one more for the discriminant).
 // This is important because all variants use the same amount of memory and are
 // passed around by value, so adding a large unboxed variant can cause a large
 // regression.
-static_assertions::assert_eq_size!(DeclTy_<reason::NReason>, [usize; 3]);
-static_assertions::assert_eq_size!(DeclTy_<reason::BReason>, [usize; 3]);
+static_assertions::assert_eq_size!(Ty_<reason::NReason>, [usize; 3]);
+static_assertions::assert_eq_size!(Ty_<reason::BReason>, [usize; 3]);
 
-impl<R: Reason> hcons::Consable for DeclTy_<R> {
+impl<R: Reason> hcons::Consable for Ty_<R> {
     #[inline]
-    fn conser() -> &'static hcons::Conser<DeclTy_<R>> {
+    fn conser() -> &'static hcons::Conser<Ty_<R>> {
         R::decl_ty_conser()
     }
 }
 
-impl<R: Reason> crate::visitor::Walkable<R> for DeclTy_<R> {
+impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
     fn recurse(&self, v: &mut dyn crate::visitor::Visitor<R>) {
-        use DeclTy_::*;
+        use Ty_::*;
         match self {
-            DTthis | DTmixed | DTany | DTerr | DTnonnull | DTdynamic | DTprim(_) | DTvar(_) => {}
-            DTapply(id_and_args) => {
+            Tthis | Tmixed | Tany | Terr | Tnonnull | Tdynamic | Tprim(_) | Tvar(_) => {}
+            Tapply(id_and_args) => {
                 let (_, args) = &**id_and_args;
                 args.accept(v)
             }
-            DTlike(ty) | DToption(ty) => ty.accept(v),
-            DTfun(ft) => ft.accept(v),
-            DTtuple(tys) | DTunion(tys) | DTintersection(tys) => tys.accept(v),
-            DTshape(kind_and_fields) => {
+            Tlike(ty) | Toption(ty) => ty.accept(v),
+            Tfun(ft) => ft.accept(v),
+            Ttuple(tys) | Tunion(tys) | Tintersection(tys) => tys.accept(v),
+            Tshape(kind_and_fields) => {
                 let (_, fields) = &**kind_and_fields;
                 fields.accept(v)
             }
-            DTgeneric(id_and_args) => {
+            Tgeneric(id_and_args) => {
                 let (_, args) = &**id_and_args;
                 args.accept(v)
             }
-            DTvecOrDict(key_and_val_tys) => {
+            TvecOrDict(key_and_val_tys) => {
                 let (kty, vty) = &**key_and_val_tys;
                 kty.accept(v);
                 vty.accept(v)
             }
-            DTaccess(tt) => tt.accept(v),
+            Taccess(tt) => tt.accept(v),
         }
     }
 }
@@ -440,7 +440,7 @@ pub struct ClassConstRef(pub ClassConstFrom, pub Symbol);
 #[serde(bound = "R: Reason")]
 pub struct ConstDecl<R: Reason> {
     pub pos: R::Pos,
-    pub ty: DeclTy<R>,
+    pub ty: Ty<R>,
 }
 
 walkable!(ConstDecl<R> => [ty]);
@@ -452,7 +452,7 @@ pub struct FunElt<R: Reason> {
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     /// Top-level functions have limited visibilities
     pub internal: bool,
-    pub ty: DeclTy<R>,
+    pub ty: Ty<R>,
     pub pos: R::Pos,
     pub php_std_lib: bool,
     pub support_dynamic_type: bool,
@@ -463,9 +463,9 @@ walkable!(FunElt<R> => [ty]);
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
 pub struct AbstractTypeconst<R: Reason> {
-    pub as_constraint: Option<DeclTy<R>>,
-    pub super_constraint: Option<DeclTy<R>>,
-    pub default: Option<DeclTy<R>>,
+    pub as_constraint: Option<Ty<R>>,
+    pub super_constraint: Option<Ty<R>>,
+    pub default: Option<Ty<R>>,
 }
 
 walkable!(AbstractTypeconst<R> => [as_constraint, super_constraint, default]);
@@ -473,7 +473,7 @@ walkable!(AbstractTypeconst<R> => [as_constraint, super_constraint, default]);
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
 pub struct ConcreteTypeconst<R: Reason> {
-    pub ty: DeclTy<R>,
+    pub ty: Ty<R>,
 }
 
 walkable!(ConcreteTypeconst<R> => [ty]);
@@ -502,9 +502,9 @@ impl<R: Reason> fmt::Debug for Typeconst<R> {
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
 pub struct EnumType<R: Reason> {
-    pub base: DeclTy<R>,
-    pub constraint: Option<DeclTy<R>>,
-    pub includes: Box<[DeclTy<R>]>,
+    pub base: Ty<R>,
+    pub constraint: Option<Ty<R>>,
+    pub includes: Box<[Ty<R>]>,
 }
 
 walkable!(EnumType<R> => [base, constraint, includes]);
@@ -515,9 +515,9 @@ pub struct TypedefType<R: Reason> {
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub pos: R::Pos,
     pub vis: aast::TypedefVisibility,
-    pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
-    pub constraint: Option<DeclTy<R>>,
-    pub ty: DeclTy<R>,
+    pub tparams: Box<[Tparam<R, Ty<R>>]>,
+    pub constraint: Option<Ty<R>>,
+    pub ty: Ty<R>,
     pub is_ctx: bool,
     pub attributes: Box<[UserAttribute<R::Pos>]>,
 }

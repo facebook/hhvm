@@ -12,7 +12,7 @@ use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 use std::sync::Arc;
-use ty::decl::{ty::ConsistentKind, DeclTy, EnumType, FoldedClass, Tparam};
+use ty::decl::{ty::ConsistentKind, EnumType, FoldedClass, Tparam, Ty};
 use ty::decl_error::DeclError;
 use ty::local::ClassElt;
 use ty::reason::Reason;
@@ -103,7 +103,7 @@ impl<R: Reason> ClassType<R> {
 
     // If `self.class` has a substitution context for `origin`, apply the
     // associated substitution to `ty`.
-    fn instantiate(&self, ty: DeclTy<R>, origin: TypeName) -> DeclTy<R> {
+    fn instantiate(&self, ty: Ty<R>, origin: TypeName) -> Ty<R> {
         match self.class.substs.get(&origin) {
             Some(ctx) => Substitution { subst: &ctx.subst }.instantiate(&ty),
             None => ty,
@@ -245,7 +245,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
         self.class.enum_type.as_ref()
     }
 
-    fn get_tparams(&self) -> &[Tparam<R, DeclTy<R>>] {
+    fn get_tparams(&self) -> &[Tparam<R, Ty<R>>] {
         &self.class.tparams
     }
 

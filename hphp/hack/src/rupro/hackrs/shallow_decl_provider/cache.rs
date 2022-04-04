@@ -8,7 +8,7 @@ use crate::cache::Cache;
 use pos::{ConstName, FunName, MethodName, ModuleName, PropName, TypeName};
 use std::sync::Arc;
 use ty::decl::{
-    shallow::Decl, shallow::ModuleDecl, ConstDecl, DeclTy, FunDecl, ShallowClass, TypedefDecl,
+    shallow::Decl, shallow::ModuleDecl, ConstDecl, FunDecl, ShallowClass, Ty, TypedefDecl,
 };
 use ty::reason::Reason;
 
@@ -30,13 +30,13 @@ pub struct ShallowDeclCache<R: Reason> {
 
     // The below tables are intended to be index tables for information stored
     // in the `types` table (the underlying data is shared via the `Hc` in
-    // `DeclTy`). When inserting or removing from the `types` table, these
+    // `Ty`). When inserting or removing from the `types` table, these
     // indices must be updated.
-    properties: Box<dyn Cache<(TypeName, PropName), DeclTy<R>>>,
-    static_properties: Box<dyn Cache<(TypeName, PropName), DeclTy<R>>>,
-    methods: Box<dyn Cache<(TypeName, MethodName), DeclTy<R>>>,
-    static_methods: Box<dyn Cache<(TypeName, MethodName), DeclTy<R>>>,
-    constructors: Box<dyn Cache<TypeName, DeclTy<R>>>,
+    properties: Box<dyn Cache<(TypeName, PropName), Ty<R>>>,
+    static_properties: Box<dyn Cache<(TypeName, PropName), Ty<R>>>,
+    methods: Box<dyn Cache<(TypeName, MethodName), Ty<R>>>,
+    static_methods: Box<dyn Cache<(TypeName, MethodName), Ty<R>>>,
+    constructors: Box<dyn Cache<TypeName, Ty<R>>>,
 }
 
 impl<R: Reason> ShallowDeclCache<R> {
@@ -45,11 +45,11 @@ impl<R: Reason> ShallowDeclCache<R> {
         funs: Box<dyn Cache<FunName, Arc<FunDecl<R>>>>,
         consts: Box<dyn Cache<ConstName, Arc<ConstDecl<R>>>>,
         modules: Box<dyn Cache<ModuleName, Arc<ModuleDecl<R>>>>,
-        properties: Box<dyn Cache<(TypeName, PropName), DeclTy<R>>>,
-        static_properties: Box<dyn Cache<(TypeName, PropName), DeclTy<R>>>,
-        methods: Box<dyn Cache<(TypeName, MethodName), DeclTy<R>>>,
-        static_methods: Box<dyn Cache<(TypeName, MethodName), DeclTy<R>>>,
-        constructors: Box<dyn Cache<TypeName, DeclTy<R>>>,
+        properties: Box<dyn Cache<(TypeName, PropName), Ty<R>>>,
+        static_properties: Box<dyn Cache<(TypeName, PropName), Ty<R>>>,
+        methods: Box<dyn Cache<(TypeName, MethodName), Ty<R>>>,
+        static_methods: Box<dyn Cache<(TypeName, MethodName), Ty<R>>>,
+        constructors: Box<dyn Cache<TypeName, Ty<R>>>,
     ) -> Self {
         Self {
             types,
@@ -67,7 +67,7 @@ impl<R: Reason> ShallowDeclCache<R> {
     /// Construct a `ShallowDeclCache` which looks up class members from the
     /// given `types` table rather than maintaining separate member caches.
     /// Intended to be used with `Cache` implementations which hold on to
-    /// hash-consed `DeclTy`s in memory (rather than storing them in a
+    /// hash-consed `Ty`s in memory (rather than storing them in a
     /// serialized format), so that looking up individual members doesn't
     /// involve deserializing an entire `ShallowClass`.
     pub fn with_no_member_caches(
@@ -144,7 +144,7 @@ impl<R: Reason> ShallowDeclCache<R> {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<DeclTy<R>> {
+    ) -> Option<Ty<R>> {
         self.properties.get((class_name, property_name))
     }
 
@@ -152,15 +152,11 @@ impl<R: Reason> ShallowDeclCache<R> {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<DeclTy<R>> {
+    ) -> Option<Ty<R>> {
         self.static_properties.get((class_name, property_name))
     }
 
-    pub fn get_method_type(
-        &self,
-        class_name: TypeName,
-        method_name: MethodName,
-    ) -> Option<DeclTy<R>> {
+    pub fn get_method_type(&self, class_name: TypeName, method_name: MethodName) -> Option<Ty<R>> {
         self.methods.get((class_name, method_name))
     }
 
@@ -168,11 +164,11 @@ impl<R: Reason> ShallowDeclCache<R> {
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Option<DeclTy<R>> {
+    ) -> Option<Ty<R>> {
         self.static_methods.get((class_name, method_name))
     }
 
-    pub fn get_constructor_type(&self, class_name: TypeName) -> Option<DeclTy<R>> {
+    pub fn get_constructor_type(&self, class_name: TypeName) -> Option<Ty<R>> {
         self.constructors.get(class_name)
     }
 
@@ -209,8 +205,8 @@ struct PropFinder<R: Reason> {
     types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
 }
 
-impl<R: Reason> Cache<(TypeName, PropName), DeclTy<R>> for PropFinder<R> {
-    fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Option<DeclTy<R>> {
+impl<R: Reason> Cache<(TypeName, PropName), Ty<R>> for PropFinder<R> {
+    fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Option<Ty<R>> {
         self.types
             .get(class_name)
             .and_then(|decl| match decl {
@@ -227,7 +223,7 @@ impl<R: Reason> Cache<(TypeName, PropName), DeclTy<R>> for PropFinder<R> {
                 })
             })
     }
-    fn insert(&self, _: (TypeName, PropName), _: DeclTy<R>) {}
+    fn insert(&self, _: (TypeName, PropName), _: Ty<R>) {}
 }
 
 /// Looks up props from the `types` cache instead of storing them separately.
@@ -236,8 +232,8 @@ struct StaticPropFinder<R: Reason> {
     types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
 }
 
-impl<R: Reason> Cache<(TypeName, PropName), DeclTy<R>> for StaticPropFinder<R> {
-    fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Option<DeclTy<R>> {
+impl<R: Reason> Cache<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
+    fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Option<Ty<R>> {
         self.types
             .get(class_name)
             .and_then(|decl| match decl {
@@ -254,7 +250,7 @@ impl<R: Reason> Cache<(TypeName, PropName), DeclTy<R>> for StaticPropFinder<R> {
                 })
             })
     }
-    fn insert(&self, _: (TypeName, PropName), _: DeclTy<R>) {}
+    fn insert(&self, _: (TypeName, PropName), _: Ty<R>) {}
 }
 
 /// Looks up methods from the `types` cache instead of storing them separately.
@@ -263,8 +259,8 @@ struct MethodFinder<R: Reason> {
     types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
 }
 
-impl<R: Reason> Cache<(TypeName, MethodName), DeclTy<R>> for MethodFinder<R> {
-    fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Option<DeclTy<R>> {
+impl<R: Reason> Cache<(TypeName, MethodName), Ty<R>> for MethodFinder<R> {
+    fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Option<Ty<R>> {
         self.types
             .get(class_name)
             .and_then(|decl| match decl {
@@ -281,7 +277,7 @@ impl<R: Reason> Cache<(TypeName, MethodName), DeclTy<R>> for MethodFinder<R> {
                 })
             })
     }
-    fn insert(&self, _: (TypeName, MethodName), _: DeclTy<R>) {}
+    fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) {}
 }
 
 /// Looks up methods from the `types` cache instead of storing them separately.
@@ -290,8 +286,8 @@ struct StaticMethodFinder<R: Reason> {
     types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
 }
 
-impl<R: Reason> Cache<(TypeName, MethodName), DeclTy<R>> for StaticMethodFinder<R> {
-    fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Option<DeclTy<R>> {
+impl<R: Reason> Cache<(TypeName, MethodName), Ty<R>> for StaticMethodFinder<R> {
+    fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Option<Ty<R>> {
         self.types
             .get(class_name)
             .and_then(|decl| match decl {
@@ -308,7 +304,7 @@ impl<R: Reason> Cache<(TypeName, MethodName), DeclTy<R>> for StaticMethodFinder<
                 })
             })
     }
-    fn insert(&self, _: (TypeName, MethodName), _: DeclTy<R>) {}
+    fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) {}
 }
 
 /// Looks up constructors from the `types` cache instead of storing them separately.
@@ -317,8 +313,8 @@ struct ConstructorFinder<R: Reason> {
     types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
 }
 
-impl<R: Reason> Cache<TypeName, DeclTy<R>> for ConstructorFinder<R> {
-    fn get(&self, class_name: TypeName) -> Option<DeclTy<R>> {
+impl<R: Reason> Cache<TypeName, Ty<R>> for ConstructorFinder<R> {
+    fn get(&self, class_name: TypeName) -> Option<Ty<R>> {
         self.types
             .get(class_name)
             .and_then(|decl| match decl {
@@ -327,5 +323,5 @@ impl<R: Reason> Cache<TypeName, DeclTy<R>> for ConstructorFinder<R> {
             })
             .and_then(|cls| cls.constructor.as_ref().map(|meth| meth.ty.clone()))
     }
-    fn insert(&self, _: TypeName, _: DeclTy<R>) {}
+    fn insert(&self, _: TypeName, _: Ty<R>) {}
 }

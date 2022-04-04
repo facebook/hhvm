@@ -19,7 +19,7 @@ pub use shallow::{
 };
 pub use ty::{
     AbstractTypeconst, Abstraction, CeVisibility, ClassConstFrom, ClassConstKind, ClassConstRef,
-    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConcreteTypeconst, ConsistentKind, DeclTy,
-    DeclTy_, EnumType, FunParam, FunType, PossiblyEnforcedTy, Prim, ShapeFieldType, TaccessType,
-    Tparam, Typeconst, UserAttribute, Visibility, WhereConstraint, XhpAttribute,
+    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConcreteTypeconst, ConsistentKind, EnumType,
+    FunParam, FunType, PossiblyEnforcedTy, Prim, ShapeFieldType, TaccessType, Tparam, Ty, Ty_,
+    Typeconst, UserAttribute, Visibility, WhereConstraint, XhpAttribute,
 };

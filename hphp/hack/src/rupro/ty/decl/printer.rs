@@ -8,35 +8,35 @@ use crate::reason::Reason;
 use std::collections::BTreeMap;
 use std::fmt::{self, Display, Formatter};
 
-// This module provides a `Display` impl for `DeclTy` which uses Hack-like
-// syntax. The `Debug` impl for `DeclTy` uses this `Display` impl to make debug
+// This module provides a `Display` impl for `Ty` which uses Hack-like
+// syntax. The `Debug` impl for `Ty` uses this `Display` impl to make debug
 // output easier to read. If you need the full `Debug` information for a
-// `DeclTy`, use the `Debug` impl on `DeclTy_`, which is the standard derived
+// `Ty`, use the `Debug` impl on `Ty_`, which is the standard derived
 // impl.
 
-impl<R: Reason> Display for DeclTy<R> {
+impl<R: Reason> Display for Ty<R> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.node())
     }
 }
 
-impl<R: Reason> fmt::Debug for DeclTy<R> {
+impl<R: Reason> fmt::Debug for Ty<R> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.node())
     }
 }
 
-impl<R: Reason> Display for DeclTy_<R> {
+impl<R: Reason> Display for Ty_<R> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        use DeclTy_::*;
+        use Ty_::*;
         match self {
-            DTany => write!(f, "_"),
-            DTerr => write!(f, "err"),
-            DTthis => write!(f, "this"),
-            DTmixed => write!(f, "mixed"),
-            DTnonnull => write!(f, "nonnull"),
-            DTdynamic => write!(f, "dynamic"),
-            DTprim(prim) => match prim {
+            Tany => write!(f, "_"),
+            Terr => write!(f, "err"),
+            Tthis => write!(f, "this"),
+            Tmixed => write!(f, "mixed"),
+            Tnonnull => write!(f, "nonnull"),
+            Tdynamic => write!(f, "dynamic"),
+            Tprim(prim) => match prim {
                 Prim::Tnull => write!(f, "null"),
                 Prim::Tvoid => write!(f, "void"),
                 Prim::Tint => write!(f, "int"),
@@ -48,26 +48,26 @@ impl<R: Reason> Display for DeclTy_<R> {
                 Prim::Tarraykey => write!(f, "arraykey"),
                 Prim::Tnoreturn => write!(f, "noreturn"),
             },
-            DTvar(id) => write!(f, "{}", id),
-            DTlike(ty) => write!(f, "~{}", ty),
-            DToption(ty) => write!(f, "?{}", ty),
-            DTaccess(ta) => write!(f, "{}::{}", ta.ty, ta.type_const.id()),
-            DTfun(ft) => write!(f, "{}", ft),
-            DTshape(params) => tshape(f, params.0, &params.1),
-            DTtuple(tys) => list(f, "(", ", ", ")", tys.iter()),
-            DTunion(tys) => {
+            Tvar(id) => write!(f, "{}", id),
+            Tlike(ty) => write!(f, "~{}", ty),
+            Toption(ty) => write!(f, "?{}", ty),
+            Taccess(ta) => write!(f, "{}::{}", ta.ty, ta.type_const.id()),
+            Tfun(ft) => write!(f, "{}", ft),
+            Tshape(params) => tshape(f, params.0, &params.1),
+            Ttuple(tys) => list(f, "(", ", ", ")", tys.iter()),
+            Tunion(tys) => {
                 if tys.len() <= 1 {
                     write!(f, "|")?;
                 }
                 list(f, "(", " | ", ")", tys.iter())
             }
-            DTintersection(tys) => {
+            Tintersection(tys) => {
                 if tys.len() <= 1 {
                     write!(f, "&")?;
                 }
                 list(f, "(", " & ", ")", tys.iter())
             }
-            DTapply(params) => {
+            Tapply(params) => {
                 let (name, args) = &**params;
                 write!(f, "{}", strip_ns(name.id_ref()))?;
                 if !args.is_empty() {
@@ -75,7 +75,7 @@ impl<R: Reason> Display for DeclTy_<R> {
                 }
                 Ok(())
             }
-            DTgeneric(params) => {
+            Tgeneric(params) => {
                 let (name, ref args) = **params;
                 write!(f, "{}", name)?;
                 if !args.is_empty() {
@@ -83,7 +83,7 @@ impl<R: Reason> Display for DeclTy_<R> {
                 }
                 Ok(())
             }
-            DTvecOrDict(params) => {
+            TvecOrDict(params) => {
                 let (kty, vty) = &**params;
                 write!(f, "vec_or_dict<{}, {}>", kty, vty)
             }

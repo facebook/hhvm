@@ -8,7 +8,7 @@ use std::fmt::Debug;
 use std::sync::Arc;
 use ty::decl::{
     shallow::{ConstDecl, FunDecl, TypedefDecl},
-    DeclTy, ShallowClass,
+    ShallowClass, Ty,
 };
 use ty::reason::Reason;
 
@@ -99,7 +99,7 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Result<Option<DeclTy<R>>>;
+    ) -> Result<Option<Ty<R>>>;
 
     /// Fetch the type of the property with the given name from the given
     /// shallow class. When multiple properties are declared with the same name,
@@ -114,7 +114,7 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Result<Option<DeclTy<R>>>;
+    ) -> Result<Option<Ty<R>>>;
 
     /// Fetch the type of the method with the given name from the given shallow
     /// class. When multiple methods are declared with the same name, return the
@@ -129,7 +129,7 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Result<Option<DeclTy<R>>>;
+    ) -> Result<Option<Ty<R>>>;
 
     /// Fetch the type of the method with the given name from the given shallow
     /// class. When multiple methods are declared with the same name, return the
@@ -144,7 +144,7 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Result<Option<DeclTy<R>>>;
+    ) -> Result<Option<Ty<R>>>;
 
     /// Fetch the type of the constructor declared in the given shallow class.
     ///
@@ -153,5 +153,5 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
     /// stores data in a serialized format, implementations of this method
     /// should only deserialize the one constructor type, not the entire
     /// containing `ShallowClass`.
-    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<DeclTy<R>>>;
+    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>>;
 }

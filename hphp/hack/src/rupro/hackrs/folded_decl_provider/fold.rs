@@ -17,9 +17,9 @@ use std::sync::Arc;
 use ty::decl::subst::Subst;
 use ty::decl::{
     folded::Constructor, AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind,
-    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind, DeclTy, FoldedClass,
-    FoldedElement, Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,
-    ShallowTypeconst, TaccessType, TypeConst, Typeconst, Visibility,
+    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind, FoldedClass, FoldedElement,
+    Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst,
+    TaccessType, Ty, TypeConst, Typeconst, Visibility,
 };
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
@@ -91,10 +91,10 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let pos = self.child.name.pos();
         let name = self.child.name.id();
         let reason = R::class_class(pos.clone(), name);
-        let classname_ty = DeclTy::apply(
+        let classname_ty = Ty::apply(
             reason.clone(),
             Positioned::new(pos.clone(), *sn::classes::cClassname),
-            [DeclTy::this(reason)].into(),
+            [Ty::this(reason)].into(),
         );
         let class_const = ClassConst {
             is_synthesized: true,
@@ -114,9 +114,9 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let r = R::witness_from_decl(pos.clone());
         let tsid = Positioned::new(pos.clone(), *sn::fb::cTypeStructure);
         // The type `this`.
-        let tthis = DeclTy::this(r.clone());
+        let tthis = Ty::this(r.clone());
         // The type `this::T`.
-        let taccess = DeclTy::access(
+        let taccess = Ty::access(
             r.clone(),
             TaccessType {
                 ty: tthis,
@@ -124,7 +124,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             },
         );
         // The type `TypeStructure<this::T>`.
-        let ts_ty = DeclTy::apply(r, tsid, [taccess].into());
+        let ts_ty = Ty::apply(r, tsid, [taccess].into());
         let kind = match &stc.kind {
             Typeconst::TCAbstract(AbstractTypeconst { default, .. }) => {
                 ClassConstKind::CCAbstract(default.is_some())
@@ -350,7 +350,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
     }
 
-    fn get_implements(&self, ty: &DeclTy<R>, ancestors: &mut TypeNameIndexMap<DeclTy<R>>) {
+    fn get_implements(&self, ty: &Ty<R>, ancestors: &mut TypeNameIndexMap<Ty<R>>) {
         if let Some((_, pos_id, tyl)) = ty.unwrap_class_type() {
             match self.parents.get(&pos_id.id()) {
                 None => {
@@ -373,12 +373,12 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
     // HHVM implicitly adds StringishObject interface for every class/interface/trait
     // with a __toString method; "string" also implements this interface
-    fn add_stringish_object(&self, ancestors: &mut TypeNameIndexMap<DeclTy<R>>) {
+    fn add_stringish_object(&self, ancestors: &mut TypeNameIndexMap<Ty<R>>) {
         if self.child.name.id() != *sn::classes::cStringishObject {
             if let Some(meth) =
                 (self.child.methods.iter()).find(|meth| meth.name.id() == *sn::members::__toString)
             {
-                let declty = DeclTy::apply(
+                let declty = Ty::apply(
                     R::hint(meth.name.pos().clone()),
                     Positioned::new(
                         meth.name.pos().clone(),
@@ -426,7 +426,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         &mut self,
         pass: Pass,
         extends: &mut TypeNameIndexSet,
-        ty: &DeclTy<R>,
+        ty: &Ty<R>,
     ) {
         if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
             extends.insert(pos_id.id());
@@ -471,7 +471,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         &self,
         req_ancestors: &mut Vec<Requirement<R>>,
         req_ancestors_extends: &mut TypeNameIndexSet,
-        parent_ty: &DeclTy<R>,
+        parent_ty: &Ty<R>,
     ) {
         if let Some((_, pos_id, parent_params)) = parent_ty.unwrap_class_type() {
             if let Some(cls) = self.parents.get(&pos_id.id()) {
@@ -503,7 +503,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         &self,
         req_ancestors: &mut Vec<Requirement<R>>,
         req_ancestors_extends: &mut TypeNameIndexSet,
-        req_ty: &DeclTy<R>,
+        req_ty: &Ty<R>,
     ) {
         if let Some((_, pos_id, _)) = req_ty.unwrap_class_type() {
             // Since the req is declared on this class, we should
@@ -536,7 +536,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     /// that prunes the list via proper subtyping, but that's a little more work
     /// than I'm willing to do now.
     fn naive_dedup(&self, req_ancestors: &mut Vec<Requirement<R>>) {
-        let mut seen_reqs: TypeNameIndexMap<Vec<DeclTy<R>>> = TypeNameIndexMap::new();
+        let mut seen_reqs: TypeNameIndexMap<Vec<Ty<R>>> = TypeNameIndexMap::new();
         // Reverse to match the OCaml ordering for building the seen_reqs map
         // (since OCaml uses `rev_filter_map` for perf reasons)
         req_ancestors.reverse();

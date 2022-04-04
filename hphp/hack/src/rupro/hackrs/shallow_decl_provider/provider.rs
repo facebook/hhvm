@@ -8,7 +8,7 @@ use crate::decl_parser::DeclParser;
 use crate::naming_provider::NamingProvider;
 use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::sync::Arc;
-use ty::decl::{ConstDecl, DeclTy, FunDecl};
+use ty::decl::{ConstDecl, FunDecl, Ty};
 use ty::reason::Reason;
 
 /// A `ShallowDeclProvider` which, if the requested name is not present in its
@@ -81,7 +81,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         if let res @ Some(..) = self.cache.get_property_type(class_name, property_name) {
             return Ok(res);
         }
@@ -96,7 +96,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         if let res @ Some(..) = self
             .cache
             .get_static_property_type(class_name, property_name)
@@ -116,7 +116,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         if let res @ Some(..) = self.cache.get_method_type(class_name, method_name) {
             return Ok(res);
         }
@@ -131,7 +131,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         if let res @ Some(..) = self.cache.get_static_method_type(class_name, method_name) {
             return Ok(res);
         }
@@ -142,7 +142,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         Ok(None)
     }
 
-    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<DeclTy<R>>> {
+    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>> {
         if let res @ Some(..) = self.cache.get_constructor_type(class_name) {
             return Ok(res);
         }
@@ -185,7 +185,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         Ok(self.cache.get_property_type(class_name, property_name))
     }
 
@@ -193,7 +193,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         Ok(self
             .cache
             .get_static_property_type(class_name, property_name))
@@ -203,7 +203,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         Ok(self.cache.get_method_type(class_name, method_name))
     }
 
@@ -211,11 +211,11 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         Ok(self.cache.get_static_method_type(class_name, method_name))
     }
 
-    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<DeclTy<R>>> {
+    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>> {
         Ok(self.cache.get_constructor_type(class_name))
     }
 }

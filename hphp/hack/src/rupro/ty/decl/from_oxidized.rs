@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl::{self, folded, shallow, ty, DeclTy, DeclTy_};
+use crate::decl::{self, folded, shallow, ty, Ty, Ty_};
 use crate::reason::Reason;
 use pos::Pos;
 
@@ -90,7 +90,7 @@ impl<P: Pos> From<&obr::typing_defs::UserAttribute<'_>> for ty::UserAttribute<P>
     }
 }
 
-impl<R: Reason> From<&obr::typing_defs::Tparam<'_>> for ty::Tparam<R, DeclTy<R>> {
+impl<R: Reason> From<&obr::typing_defs::Tparam<'_>> for ty::Tparam<R, Ty<R>> {
     fn from(tparam: &obr::typing_defs::Tparam<'_>) -> Self {
         Self {
             variance: tparam.variance,
@@ -105,7 +105,7 @@ impl<R: Reason> From<&obr::typing_defs::Tparam<'_>> for ty::Tparam<R, DeclTy<R>>
     }
 }
 
-impl<R: Reason> From<&obr::typing_defs::WhereConstraint<'_>> for ty::WhereConstraint<DeclTy<R>> {
+impl<R: Reason> From<&obr::typing_defs::WhereConstraint<'_>> for ty::WhereConstraint<Ty<R>> {
     fn from(x: &obr::typing_defs::WhereConstraint<'_>) -> Self {
         Self(x.0.into(), x.1, x.2.into())
     }
@@ -122,25 +122,27 @@ fn decl_shape_field_type<R: Reason>(
     }
 }
 
-impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for DeclTy<R> {
+impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
     fn from(ty: &obr::typing_defs::Ty<'_>) -> Self {
-        use obr::typing_defs_core::Ty_::*;
-        use DeclTy_::*;
+        use obr::typing_defs_core;
+        use Ty_::*;
         let reason = R::from(*ty.0);
         let ty_ = match ty.1 {
-            Tthis => DTthis,
-            Tapply(&(pos_id, tys)) => DTapply(Box::new((pos_id.into(), slice(tys)))),
-            Tmixed => DTmixed,
-            Tlike(ty) => DTlike(ty.into()),
-            Tany(_) => DTany,
-            Terr => DTerr,
-            Tnonnull => DTnonnull,
-            Tdynamic => DTdynamic,
-            Toption(ty) => DToption(ty.into()),
-            Tprim(prim) => DTprim(*prim),
-            Tfun(ft) => DTfun(Box::new(ft.into())),
-            Ttuple(tys) => DTtuple(slice(tys)),
-            Tshape(&(kind, fields)) => DTshape(Box::new((
+            typing_defs_core::Ty_::Tthis => Tthis,
+            typing_defs_core::Ty_::Tapply(&(pos_id, tys)) => {
+                Tapply(Box::new((pos_id.into(), slice(tys))))
+            }
+            typing_defs_core::Ty_::Tmixed => Tmixed,
+            typing_defs_core::Ty_::Tlike(ty) => Tlike(ty.into()),
+            typing_defs_core::Ty_::Tany(_) => Tany,
+            typing_defs_core::Ty_::Terr => Terr,
+            typing_defs_core::Ty_::Tnonnull => Tnonnull,
+            typing_defs_core::Ty_::Tdynamic => Tdynamic,
+            typing_defs_core::Ty_::Toption(ty) => Toption(ty.into()),
+            typing_defs_core::Ty_::Tprim(prim) => Tprim(*prim),
+            typing_defs_core::Ty_::Tfun(ft) => Tfun(Box::new(ft.into())),
+            typing_defs_core::Ty_::Ttuple(tys) => Ttuple(slice(tys)),
+            typing_defs_core::Ty_::Tshape(&(kind, fields)) => Tshape(Box::new((
                 kind,
                 fields
                     .iter()
@@ -150,21 +152,29 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for DeclTy<R> {
                     })
                     .collect(),
             ))),
-            Tvar(ident) => DTvar(ident.into()),
-            Tgeneric(&(pos_id, tys)) => DTgeneric(Box::new((pos_id.into(), slice(tys)))),
-            Tunion(tys) => DTunion(slice(tys)),
-            Tintersection(tys) => DTintersection(slice(tys)),
-            TvecOrDict(&(ty1, ty2)) => DTvecOrDict(Box::new((ty1.into(), ty2.into()))),
-            Taccess(taccess_type) => DTaccess(Box::new(taccess_type.into())),
-            TunappliedAlias(_) | Tnewtype(_) | Tdependent(_) | Tclass(_) | Tneg(_) => {
+            typing_defs_core::Ty_::Tvar(ident) => Tvar(ident.into()),
+            typing_defs_core::Ty_::Tgeneric(&(pos_id, tys)) => {
+                Tgeneric(Box::new((pos_id.into(), slice(tys))))
+            }
+            typing_defs_core::Ty_::Tunion(tys) => Tunion(slice(tys)),
+            typing_defs_core::Ty_::Tintersection(tys) => Tintersection(slice(tys)),
+            typing_defs_core::Ty_::TvecOrDict(&(ty1, ty2)) => {
+                TvecOrDict(Box::new((ty1.into(), ty2.into())))
+            }
+            typing_defs_core::Ty_::Taccess(taccess_type) => Taccess(Box::new(taccess_type.into())),
+            typing_defs_core::Ty_::TunappliedAlias(_)
+            | typing_defs_core::Ty_::Tnewtype(_)
+            | typing_defs_core::Ty_::Tdependent(_)
+            | typing_defs_core::Ty_::Tclass(_)
+            | typing_defs_core::Ty_::Tneg(_) => {
                 unreachable!("Not used in decl tys")
             }
         };
-        DeclTy::new(reason, ty_)
+        Ty::new(reason, ty_)
     }
 }
 
-impl<R: Reason> From<&obr::typing_defs::TaccessType<'_>> for ty::TaccessType<R, DeclTy<R>> {
+impl<R: Reason> From<&obr::typing_defs::TaccessType<'_>> for ty::TaccessType<R, Ty<R>> {
     fn from(taccess_type: &obr::typing_defs::TaccessType<'_>) -> Self {
         Self {
             ty: taccess_type.0.into(),
@@ -173,7 +183,7 @@ impl<R: Reason> From<&obr::typing_defs::TaccessType<'_>> for ty::TaccessType<R, 
     }
 }
 
-impl<R: Reason> From<obr::typing_defs::Capability<'_>> for ty::Capability<R, DeclTy<R>> {
+impl<R: Reason> From<obr::typing_defs::Capability<'_>> for ty::Capability<R, Ty<R>> {
     fn from(cap: obr::typing_defs::Capability<'_>) -> Self {
         use obr::typing_defs_core::Capability as Obr;
         match cap {
@@ -183,9 +193,7 @@ impl<R: Reason> From<obr::typing_defs::Capability<'_>> for ty::Capability<R, Dec
     }
 }
 
-impl<R: Reason> From<&obr::typing_defs::FunImplicitParams<'_>>
-    for ty::FunImplicitParams<R, DeclTy<R>>
-{
+impl<R: Reason> From<&obr::typing_defs::FunImplicitParams<'_>> for ty::FunImplicitParams<R, Ty<R>> {
     fn from(x: &obr::typing_defs::FunImplicitParams<'_>) -> Self {
         Self {
             capability: x.capability.into(),
@@ -193,7 +201,7 @@ impl<R: Reason> From<&obr::typing_defs::FunImplicitParams<'_>>
     }
 }
 
-impl<R: Reason> From<&obr::typing_defs::FunType<'_>> for ty::FunType<R, DeclTy<R>> {
+impl<R: Reason> From<&obr::typing_defs::FunType<'_>> for ty::FunType<R, Ty<R>> {
     fn from(ft: &obr::typing_defs::FunType<'_>) -> Self {
         Self {
             tparams: slice(ft.tparams),
@@ -208,7 +216,7 @@ impl<R: Reason> From<&obr::typing_defs::FunType<'_>> for ty::FunType<R, DeclTy<R
 }
 
 impl<R: Reason> From<&obr::typing_defs_core::PossiblyEnforcedTy<'_>>
-    for decl::ty::PossiblyEnforcedTy<DeclTy<R>>
+    for decl::ty::PossiblyEnforcedTy<Ty<R>>
 {
     fn from(ty: &obr::typing_defs_core::PossiblyEnforcedTy<'_>) -> Self {
         Self {
@@ -218,7 +226,7 @@ impl<R: Reason> From<&obr::typing_defs_core::PossiblyEnforcedTy<'_>>
     }
 }
 
-impl<R: Reason> From<&obr::typing_defs_core::FunParam<'_>> for ty::FunParam<R, DeclTy<R>> {
+impl<R: Reason> From<&obr::typing_defs_core::FunParam<'_>> for ty::FunParam<R, Ty<R>> {
     fn from(fp: &obr::typing_defs_core::FunParam<'_>) -> Self {
         Self {
             pos: fp.pos.into(),

@@ -5,7 +5,7 @@
 
 use crate::decl::{
     ty::ConsistentKind, ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef,
-    ClassEltFlags, DeclTy, EnumType, Tparam, Typeconst, WhereConstraint, XhpAttribute,
+    ClassEltFlags, EnumType, Tparam, Ty, Typeconst, WhereConstraint, XhpAttribute,
 };
 use crate::decl_error::DeclError;
 use crate::reason::Reason;
@@ -106,7 +106,7 @@ pub struct ClassConst<R: Reason> {
     pub is_synthesized: bool,
     pub kind: ClassConstKind,
     pub pos: R::Pos,
-    pub ty: DeclTy<R>,
+    pub ty: Ty<R>,
     pub origin: TypeName, // Identifies the class from which this const originates
     pub refs: Box<[ClassConstRef]>,
 }
@@ -140,7 +140,7 @@ impl<R: Reason> TypeConst<R> {
 #[serde(bound = "R: Reason")]
 pub struct Requirement<R: Reason> {
     pub pos: R::Pos,
-    pub ty: DeclTy<R>,
+    pub ty: Ty<R>,
 }
 
 #[derive(Clone, Debug, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
@@ -164,10 +164,10 @@ pub struct FoldedClass<R: Reason> {
     pub support_dynamic_type: bool,
     pub enum_type: Option<EnumType<R>>,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
-    pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
-    pub where_constraints: Box<[WhereConstraint<DeclTy<R>>]>,
+    pub tparams: Box<[Tparam<R, Ty<R>>]>,
+    pub where_constraints: Box<[WhereConstraint<Ty<R>>]>,
     pub substs: TypeNameIndexMap<SubstContext<R>>,
-    pub ancestors: TypeNameIndexMap<DeclTy<R>>,
+    pub ancestors: TypeNameIndexMap<Ty<R>>,
     pub props: PropNameIndexMap<FoldedElement>,
     pub static_props: PropNameIndexMap<FoldedElement>,
     pub methods: MethodNameIndexMap<FoldedElement>,
@@ -304,7 +304,7 @@ impl FoldedElement {
 }
 
 impl<R: Reason> Requirement<R> {
-    pub fn new(pos: R::Pos, ty: DeclTy<R>) -> Self {
+    pub fn new(pos: R::Pos, ty: Ty<R>) -> Self {
         Self { pos, ty }
     }
 }

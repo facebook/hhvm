@@ -13,8 +13,8 @@ use pos::{
 use std::sync::Arc;
 use ty::decl::{
     folded::Constructor, subst::Subst, ty::ConsistentKind, AbstractTypeconst, Abstraction,
-    CeVisibility, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass, FoldedElement,
-    ShallowClass, SubstContext, TypeConst, Typeconst,
+    CeVisibility, ClassConst, ClassConstKind, ClassishKind, FoldedClass, FoldedElement,
+    ShallowClass, SubstContext, Ty, TypeConst, Typeconst,
 };
 use ty::reason::Reason;
 
@@ -309,7 +309,7 @@ struct MemberFolder<'a, R: Reason> {
 
 impl<'a, R: Reason> MemberFolder<'a, R> {
     // c.f. `Decl_inherit.from_class` and `Decl_inherit.inherit_hack_class`.
-    fn members_from_class(&self, parent_ty: &DeclTy<R>) -> Result<Inherited<R>> {
+    fn members_from_class(&self, parent_ty: &Ty<R>) -> Result<Inherited<R>> {
         fn is_not_private<N>((_, elt): &(&N, &FoldedElement)) -> bool {
             match elt.visibility {
                 CeVisibility::Private(_) if elt.is_lsb() => true,
@@ -424,7 +424,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
         Ok(Default::default())
     }
 
-    fn class_constants_from_class(&self, ty: &DeclTy<R>) -> Result<Inherited<R>> {
+    fn class_constants_from_class(&self, ty: &Ty<R>) -> Result<Inherited<R>> {
         if let Some((_, pos_id, tyl)) = ty.unwrap_class_type() {
             if let Some(class) = self.parents.get(&pos_id.id()) {
                 let sig = Subst::new(&class.tparams, tyl);
@@ -453,7 +453,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     // This logic deals with importing XHP attributes from an XHP class via the
     // "attribute :foo" syntax.
     // c.f. Decl_inherit.from_class_xhp_attrs_only
-    fn xhp_attrs_from_class(&self, ty: &DeclTy<R>) -> Result<Inherited<R>> {
+    fn xhp_attrs_from_class(&self, ty: &Ty<R>) -> Result<Inherited<R>> {
         if let Some((_, pos_id, _tyl)) = ty.unwrap_class_type() {
             if let Some(class) = self.parents.get(&pos_id.id()) {
                 // Filter out properties that are not XHP attributes.
@@ -499,7 +499,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     }
 
     fn add_from_parents(&mut self) -> Result<()> {
-        let mut tys: Vec<&DeclTy<R>> = Vec::new();
+        let mut tys: Vec<&Ty<R>> = Vec::new();
         match self.child.kind {
             ClassishKind::Cclass(Abstraction::Abstract) => {
                 tys.extend(self.child.implements.iter());

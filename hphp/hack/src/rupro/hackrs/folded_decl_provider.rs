@@ -10,7 +10,7 @@ use pos::{ConstName, FunName, MethodName, PropName, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;
 use ty::{
-    decl::{ConstDecl, DeclTy, FoldedClass, FunDecl, TypedefDecl},
+    decl::{ConstDecl, FoldedClass, FunDecl, Ty, TypedefDecl},
     reason::Reason,
 };
 
@@ -132,7 +132,7 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
         dependent: DeclName,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Result<Option<DeclTy<R>>>;
+    ) -> Result<Option<Ty<R>>>;
 
     /// Fetch the type of the given property, as it was syntactically declared
     /// in the given class (i.e., returns `None` for inherited properties).
@@ -147,7 +147,7 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
         dependent: DeclName,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Result<Option<DeclTy<R>>>;
+    ) -> Result<Option<Ty<R>>>;
 
     /// Fetch the type of the given method, as it was syntactically declared in
     /// the given class (i.e., returns `None` for inherited methods).
@@ -162,7 +162,7 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
         dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Result<Option<DeclTy<R>>>;
+    ) -> Result<Option<Ty<R>>>;
 
     /// Fetch the type of the given method, as it was syntactically declared in
     /// the given class (i.e., returns `None` for inherited methods).
@@ -177,7 +177,7 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
         dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Result<Option<DeclTy<R>>>;
+    ) -> Result<Option<Ty<R>>>;
 
     /// Fetch the type of the given constructor, as it was syntactically
     /// declared in the given class (i.e., returns `None` for inherited
@@ -192,5 +192,5 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
         &self,
         dependent: DeclName,
         class_name: TypeName,
-    ) -> Result<Option<DeclTy<R>>>;
+    ) -> Result<Option<Ty<R>>>;
 }

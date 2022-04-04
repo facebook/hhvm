@@ -108,7 +108,7 @@ impl<R: Reason> hcons::Consable for Ty_<R, Ty<R>> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Ty<R: Reason>(R, Hc<Ty_<R, Ty<R>>>);
 
-walkable!(Ty<R> as visit_ty => [0, 1]);
+walkable!(Ty<R> as visit_local_ty => [0, 1]);
 
 impl<R: Reason> Ty<R> {
     #[inline]

@@ -14,7 +14,7 @@ use pos::{
     TypeNameIndexSet,
 };
 use std::sync::Arc;
-use ty::decl::{ConstDecl, DeclTy, FoldedClass, FunDecl, ShallowClass};
+use ty::decl::{ConstDecl, FoldedClass, FunDecl, ShallowClass, Ty};
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
 
@@ -81,7 +81,7 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
         _dependent: DeclName,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         Ok(self
             .shallow_decl_provider
             .get_property_type(class_name, property_name)?)
@@ -92,7 +92,7 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
         _dependent: DeclName,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         Ok(self
             .shallow_decl_provider
             .get_static_property_type(class_name, property_name)?)
@@ -103,7 +103,7 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
         _dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         Ok(self
             .shallow_decl_provider
             .get_method_type(class_name, method_name)?)
@@ -114,7 +114,7 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
         _dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         Ok(self
             .shallow_decl_provider
             .get_static_method_type(class_name, method_name)?)
@@ -124,7 +124,7 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
         &self,
         _dependent: DeclName,
         class_name: TypeName,
-    ) -> Result<Option<DeclTy<R>>> {
+    ) -> Result<Option<Ty<R>>> {
         Ok(self
             .shallow_decl_provider
             .get_constructor_type(class_name)?)
@@ -153,7 +153,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         &self,
         stack: &mut TypeNameIndexSet,
         errors: &mut Vec<DeclError<R::Pos>>,
-        ty: &DeclTy<R>,
+        ty: &Ty<R>,
     ) -> Result<Option<(TypeName, Arc<FoldedClass<R>>)>> {
         if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
             if !self.detect_cycle(stack, errors, pos_id) {
@@ -165,7 +165,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         Ok(None)
     }
 
-    fn parent_error(sc: &ShallowClass<R>, parent: &DeclTy<R>, err: Error) -> Error {
+    fn parent_error(sc: &ShallowClass<R>, parent: &Ty<R>, err: Error) -> Error {
         // We tried to produce a decl of the parent of the given class but
         // failed. We capture this chain of events as a `Parent` error. The has
         // the effect of explaining that "we couldn't decl 'class' because we
@@ -195,7 +195,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         }
     }
 
-    fn register_extends_dependency(&self, ty: &DeclTy<R>, sc: &ShallowClass<R>) -> Result<()> {
+    fn register_extends_dependency(&self, ty: &Ty<R>, sc: &ShallowClass<R>) -> Result<()> {
         if let Some((_, p, _)) = ty.unwrap_class_type() {
             let child = sc.name.id();
             let parent = p.id();

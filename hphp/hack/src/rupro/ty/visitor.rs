@@ -20,10 +20,10 @@ pub trait Visitor<R: Reason> {
     /// Must return `self`.
     fn object(&mut self) -> &mut dyn Visitor<R>;
 
-    fn visit_decl_ty(&mut self, o: &decl::DeclTy<R>) {
+    fn visit_decl_ty(&mut self, o: &decl::Ty<R>) {
         o.recurse(self.object());
     }
-    fn visit_ty(&mut self, o: &local::Ty<R>) {
+    fn visit_local_ty(&mut self, o: &local::Ty<R>) {
         o.recurse(self.object());
     }
 }

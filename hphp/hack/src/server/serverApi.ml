@@ -106,7 +106,9 @@ let make_local_server_api
   end : LocalServerApi)
 
 let make_remote_server_api
-    (ctx : Provider_context.t) (workers : MultiWorker.worker list option) :
+    (ctx : Provider_context.t)
+    (workers : MultiWorker.worker list option)
+    (root : Path.t) :
     (module RemoteServerApi with type naming_table = Naming_table.t option) =
   (module struct
     type naming_table = Naming_table.t option
@@ -200,6 +202,37 @@ let make_remote_server_api
              with
             | e -> Error (Exn.to_string e))
         end
+
+    let build_naming_table _ =
+      Hh_logger.log "Building naming table";
+      let indexer =
+        Find.make_next_files ~name:"root" ~filter:FindUtils.is_hack root
+      in
+      let get_next =
+        ServerUtils.make_next
+          ~hhi_filter:(fun _ -> true)
+          ~indexer
+          ~extra_roots:(ServerConfig.extra_paths ServerConfig.default_config)
+      in
+      Hh_logger.log "Building naming table - Parsing";
+      let (fast, _errorl, _failed_parsing) =
+        ( Direct_decl_service.go
+            ctx
+            workers
+            ~ide_files:Relative_path.Set.empty
+            ~get_next
+            ~trace:false
+            ~cache_decls:true,
+          Errors.empty,
+          Relative_path.Set.empty )
+      in
+      Hh_logger.log "Building naming table - Naming";
+      let naming_table = Naming_table.create fast in
+      Naming_table.iter naming_table ~f:(fun k v ->
+          let _ = Naming_global.ndecl_file_error_if_already_bound ctx k v in
+          ());
+      Hh_logger.log "Building naming table - Done!";
+      ()
 
     let type_check ctx ~init_id ~check_id files_to_check ~state_filename =
       let t = Unix.gettimeofday () in

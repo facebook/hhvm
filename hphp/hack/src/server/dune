@@ -325,6 +325,7 @@
  (wrapped false)
  (modules serverApi)
  (libraries
+  direct_decl_service
   decl_redecl_service
   fileutils
   logging

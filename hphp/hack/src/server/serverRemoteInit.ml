@@ -24,7 +24,7 @@ let init
   let (server
         : (module RemoteWorker.RemoteServerApi
              with type naming_table = Naming_table.t option)) =
-    ServerApi.make_remote_server_api ctx workers
+    ServerApi.make_remote_server_api ctx workers root
   in
   let file_system_mode =
     remote_type_check_config.ServerLocalConfig.RemoteTypeCheck.file_system_mode

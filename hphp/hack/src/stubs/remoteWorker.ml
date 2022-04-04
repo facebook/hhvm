@@ -20,6 +20,8 @@ module type RemoteServerApi = sig
     naming_table_diff:Naming_table.changes_since_baseline ->
     (naming_table, string) result
 
+  val build_naming_table : unit -> unit
+
   (* Called by the worker to type check a list of files.
      The state filename is where the type checker should save its state that
      changed as a result of type checking the files

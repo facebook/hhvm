@@ -101,7 +101,7 @@ walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
 impl<R: Reason> hcons::Consable for Ty_<R, Ty<R>> {
     #[inline]
     fn conser() -> &'static hcons::Conser<Ty_<R, Ty<R>>> {
-        R::ty_conser()
+        R::local_ty_conser()
     }
 }
 

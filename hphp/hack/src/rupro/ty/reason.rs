@@ -10,8 +10,8 @@ use pos::{BPos, NPos, Pos, Positioned, Symbol, ToOxidized, TypeConstName, TypeNa
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::hash::Hash;
 
-use crate::decl::DeclTy_;
-use crate::local::{Ty, Ty_};
+use crate::decl;
+use crate::local;
 use crate::prop::{Prop, PropF};
 use crate::visitor::Walkable;
 
@@ -67,8 +67,8 @@ pub trait Reason:
 
     fn pos(&self) -> &Self::Pos;
 
-    fn decl_ty_conser() -> &'static Conser<DeclTy_<Self>>;
-    fn ty_conser() -> &'static Conser<Ty_<Self, Ty<Self>>>;
+    fn decl_ty_conser() -> &'static Conser<decl::DeclTy_<Self>>;
+    fn local_ty_conser() -> &'static Conser<local::Ty_<Self, local::Ty<Self>>>;
     fn prop_conser() -> &'static Conser<PropF<Self, Prop<Self>>>;
 
     fn from_oxidized(reason: oxidized_by_ref::typing_reason::T_<'_>) -> Self {
@@ -370,14 +370,15 @@ impl Reason for BReason {
     }
 
     #[inline]
-    fn decl_ty_conser() -> &'static Conser<DeclTy_<BReason>> {
-        static CONSER: Lazy<Conser<DeclTy_<BReason>>> = Lazy::new(Conser::new);
+    fn decl_ty_conser() -> &'static Conser<decl::DeclTy_<BReason>> {
+        static CONSER: Lazy<Conser<decl::DeclTy_<BReason>>> = Lazy::new(Conser::new);
         &CONSER
     }
 
     #[inline]
-    fn ty_conser() -> &'static Conser<Ty_<BReason, Ty<BReason>>> {
-        static CONSER: Lazy<Conser<Ty_<BReason, Ty<BReason>>>> = Lazy::new(Conser::new);
+    fn local_ty_conser() -> &'static Conser<local::Ty_<BReason, local::Ty<BReason>>> {
+        static CONSER: Lazy<Conser<local::Ty_<BReason, local::Ty<BReason>>>> =
+            Lazy::new(Conser::new);
         &CONSER
     }
 
@@ -602,14 +603,15 @@ impl Reason for NReason {
     }
 
     #[inline]
-    fn decl_ty_conser() -> &'static Conser<DeclTy_<NReason>> {
-        static CONSER: Lazy<Conser<DeclTy_<NReason>>> = Lazy::new(Conser::new);
+    fn decl_ty_conser() -> &'static Conser<decl::DeclTy_<NReason>> {
+        static CONSER: Lazy<Conser<decl::DeclTy_<NReason>>> = Lazy::new(Conser::new);
         &CONSER
     }
 
     #[inline]
-    fn ty_conser() -> &'static Conser<Ty_<NReason, Ty<NReason>>> {
-        static CONSER: Lazy<Conser<Ty_<NReason, Ty<NReason>>>> = Lazy::new(Conser::new);
+    fn local_ty_conser() -> &'static Conser<local::Ty_<NReason, local::Ty<NReason>>> {
+        static CONSER: Lazy<Conser<local::Ty_<NReason, local::Ty<NReason>>>> =
+            Lazy::new(Conser::new);
         &CONSER
     }
 

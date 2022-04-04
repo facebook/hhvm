@@ -7,8 +7,8 @@ use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use crate::typing_decl_provider::{Class, TypeDecl};
 use pos::{Positioned, TypeName};
-use ty::decl::{self, DeclTy, DeclTy_};
-use ty::local::{Exact, FunParam, FunType, Ty, Ty_};
+use ty::decl;
+use ty::local::{self, Exact, FunParam, FunType};
 use ty::reason::Reason;
 
 /// Localization environment, controlling localization.
@@ -23,7 +23,7 @@ impl LocalizeEnv {
     }
 }
 
-/// Type localization is a "simple" conversion from `DeclTy` to `Ty`.
+/// Type localization is a "simple" conversion from `decl::DeclTy` to `Ty`.
 ///
 /// Note that this sometimes requires non-trivial operations, specifically:
 ///
@@ -31,20 +31,24 @@ impl LocalizeEnv {
 ///  - resolving the `this` type
 ///  - instantiating generics (TODO(hverr): do we want to extract this?)
 ///  - ...
-impl<R: Reason> TC<R> for DeclTy<R> {
+impl<R: Reason> TC<R> for decl::DeclTy<R> {
     type Params = LocalizeEnv;
-    type Typed = Ty<R>;
+    type Typed = local::Ty<R>;
 
-    fn infer(&self, env: &TEnv<R>, localize_env: LocalizeEnv) -> Result<Ty<R>> {
+    fn infer(&self, env: &TEnv<R>, localize_env: LocalizeEnv) -> Result<local::Ty<R>> {
         localize(env, &localize_env, self.clone())
     }
 }
 
-fn localize<R: Reason>(env: &TEnv<R>, localize_env: &LocalizeEnv, ty: DeclTy<R>) -> Result<Ty<R>> {
-    use DeclTy_::*;
+fn localize<R: Reason>(
+    env: &TEnv<R>,
+    localize_env: &LocalizeEnv,
+    ty: decl::DeclTy<R>,
+) -> Result<local::Ty<R>> {
+    use decl::DeclTy_::*;
     let r = ty.reason().clone();
     let res = match &**ty.node() {
-        DTprim(p) => Ty::prim(r, *p),
+        DTprim(p) => local::Ty::prim(r, *p),
         DTapply(box (pos_id, tyl)) => localize_tapply(env, localize_env, r, pos_id.clone(), tyl)?,
         DTfun(box ft) => localize_ft(env, localize_env, r, ft)?,
         t => rupro_todo!(AST, "{:?}", t),
@@ -57,8 +61,8 @@ fn localize_tapply<R: Reason>(
     localize_env: &LocalizeEnv,
     r: R,
     sid: Positioned<TypeName, R::Pos>,
-    ty_args: &[DeclTy<R>],
-) -> Result<Ty<R>> {
+    ty_args: &[decl::DeclTy<R>],
+) -> Result<local::Ty<R>> {
     let class_info = env.decls().get_type(sid.id())?;
     let class_info = match &class_info {
         Some(TypeDecl::Class(cls)) => Some(cls.as_ref()),
@@ -72,17 +76,17 @@ fn localize_class_instantiation<R: Reason>(
     _localize_env: &LocalizeEnv,
     r: R,
     sid: Positioned<TypeName, R::Pos>,
-    ty_args: &[DeclTy<R>],
+    ty_args: &[decl::DeclTy<R>],
     class_info: Option<&dyn Class<R>>,
-) -> Result<Ty<R>> {
-    use Ty_::*;
+) -> Result<local::Ty<R>> {
+    use local::Ty_::*;
     let res = match class_info {
         None => rupro_todo!(Localization),
         Some(class_info) => {
             rupro_todo_assert!(class_info.get_enum_type().is_none(), AST);
             rupro_todo_assert!(class_info.get_tparams().is_empty(), AST);
             rupro_todo_assert!(ty_args.is_empty(), AST);
-            Ty::new(r, Tclass(sid, Exact::Nonexact, vec![]))
+            local::Ty::new(r, Tclass(sid, Exact::Nonexact, vec![]))
         }
     };
     Ok(res)
@@ -92,8 +96,8 @@ fn localize_ft<R: Reason>(
     env: &TEnv<R>,
     localize_env: &LocalizeEnv,
     r: R,
-    ft: &decl::FunType<R, DeclTy<R>>,
-) -> Result<Ty<R>> {
+    ft: &decl::FunType<R, decl::DeclTy<R>>,
+) -> Result<local::Ty<R>> {
     rupro_todo_assert!(ft.params.is_empty(), AST);
     let params: Vec<_> = ft
         .params
@@ -110,14 +114,14 @@ fn localize_ft<R: Reason>(
         .collect::<Result<_>>()?;
     let ret = localize_possibly_enforced_ty(env, localize_env, ft.ret.clone())?;
     let ft = FunType { params, ret };
-    let ty = Ty::fun(r, ft);
+    let ty = local::Ty::fun(r, ft);
     Ok(ty)
 }
 
 fn localize_possibly_enforced_ty<R: Reason>(
     env: &TEnv<R>,
     localize_env: &LocalizeEnv,
-    ty: decl::PossiblyEnforcedTy<DeclTy<R>>,
-) -> Result<Ty<R>> {
+    ty: decl::PossiblyEnforcedTy<decl::DeclTy<R>>,
+) -> Result<local::Ty<R>> {
     localize(env, localize_env, ty.ty)
 }

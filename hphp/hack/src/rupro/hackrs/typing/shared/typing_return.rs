@@ -9,32 +9,35 @@ use crate::typing::env::typing_env::TEnv;
 use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing::typing_error::Result;
 use pos::Symbol;
-use ty::decl::DeclTy;
-use ty::local::Ty;
 use ty::reason::Reason;
+use ty::{decl, local};
 
 pub struct TypingReturn;
 
 impl TypingReturn {
-    pub fn make_default_return<R: Reason>(is_method: bool, fpos: &R::Pos, fname: Symbol) -> Ty<R> {
+    pub fn make_default_return<R: Reason>(
+        is_method: bool,
+        fpos: &R::Pos,
+        fname: Symbol,
+    ) -> local::Ty<R> {
         let reason = R::witness(fpos.clone());
         if is_method && fname == special_names::members::__construct.as_symbol() {
-            Ty::void(reason)
+            local::Ty::void(reason)
         } else {
-            Ty::any(reason)
+            local::Ty::any(reason)
         }
     }
 
     pub fn make_return_type<R: Reason>(
         env: &TEnv<R>,
-        localize: impl FnOnce(&TEnv<R>, DeclTy<R>) -> Result<Ty<R>>,
-        ty: DeclTy<R>,
-    ) -> Result<Ty<R>> {
+        localize: impl FnOnce(&TEnv<R>, decl::DeclTy<R>) -> Result<local::Ty<R>>,
+        ty: decl::DeclTy<R>,
+    ) -> Result<local::Ty<R>> {
         rupro_todo_mark!(AwaitableAsync);
         localize(env, ty)
     }
 
-    pub fn make_info<R: Reason>(locl_ty: Ty<R>) -> TypingReturnInfo<R> {
+    pub fn make_info<R: Reason>(locl_ty: local::Ty<R>) -> TypingReturnInfo<R> {
         rupro_todo_mark!(Disposable);
         rupro_todo_mark!(Dynamic);
         TypingReturnInfo {

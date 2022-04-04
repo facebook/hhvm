@@ -9,9 +9,8 @@ use crate::typing::env::typing_env::TEnv;
 use crate::typing::hint_utils::HintUtils;
 use crate::typing::typing_error::Result;
 use pos::Symbol;
-use ty::decl::DeclTy;
-use ty::local::Ty;
 use ty::reason::Reason;
+use ty::{decl, local};
 
 /// This trait provides typing for return type hints.
 ///
@@ -42,7 +41,7 @@ pub struct TCReturnTypeHintParams<R: Reason> {
 
 impl<'a, R: Reason> TC<R> for TCReturnTypeHint<'a> {
     type Params = TCReturnTypeHintParams<R>;
-    type Typed = Ty<R>;
+    type Typed = local::Ty<R>;
 
     fn infer(&self, env: &TEnv<R>, params: TCReturnTypeHintParams<R>) -> Result<Self::Typed> {
         let decl_ty = HintUtils::type_hint(self.0);
@@ -59,20 +58,20 @@ impl<'a, R: Reason> TC<R> for TCReturnTypeHint<'a> {
     }
 }
 
-fn make_default_return<R: Reason>(params: TCReturnTypeHintParams<R>) -> Ty<R> {
+fn make_default_return<R: Reason>(params: TCReturnTypeHintParams<R>) -> local::Ty<R> {
     let reason = R::witness(params.fun_pos.clone());
     if params.is_method && params.fun_name == special_names::members::__construct.as_symbol() {
-        Ty::void(reason)
+        local::Ty::void(reason)
     } else {
-        Ty::any(reason)
+        local::Ty::any(reason)
     }
 }
 
 fn make_return_type<R: Reason>(
     env: &TEnv<R>,
     params: TCReturnTypeHintParams<R>,
-    ty: DeclTy<R>,
-) -> Result<Ty<R>> {
+    ty: decl::DeclTy<R>,
+) -> Result<local::Ty<R>> {
     rupro_todo_mark!(AwaitableAsync);
     ty.infer(env, params.localize_env)
 }

@@ -27,7 +27,7 @@ let get_fixme_patches codes (env : env) =
     Fixme_provider.get_unused_fixmes
       ~codes
       ~applied_fixmes:fixmelist
-      ~fold:Naming_table.fold
+      ~fold:(Naming_table.fold ~warn_on_naming_costly_iter:true)
       ~files_info:env.naming_table
   in
   List.map ~f:(fun pos -> Remove (Pos.to_absolute pos)) poslist

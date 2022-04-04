@@ -35,7 +35,12 @@ val empty : t
   * are removed. *)
 val filter : t -> f:(Relative_path.t -> FileInfo.t -> bool) -> t
 
-val fold : t -> init:'b -> f:(Relative_path.t -> FileInfo.t -> 'b -> 'b) -> 'b
+val fold :
+  ?warn_on_naming_costly_iter:bool ->
+  t ->
+  init:'b ->
+  f:(Relative_path.t -> FileInfo.t -> 'b -> 'b) ->
+  'b
 
 val get_files : t -> Relative_path.t list
 
@@ -118,7 +123,7 @@ val from_saved : saved_state_info -> t
 
 val to_saved : t -> saved_state_info
 
-val to_fast : t -> fast
+val to_fast : ?warn_on_naming_costly_iter:bool -> t -> fast
 
 val saved_to_fast : saved_state_info -> fast
 

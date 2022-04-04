@@ -15,7 +15,9 @@ module Test = Integration_test_base
 
 let foo_contents = "<?hh
 
-{
+function f(): int {
+  return 3
+}
 "
 
 let test () =
@@ -30,10 +32,8 @@ let test () =
     Test.fail "Expected the server to process disk updates";
   let expected_errors =
     [
-      "File \"/foo.php\", line 3, characters 1-1:\n"
-      ^ "Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])";
-      "File \"/foo.php\", line 3, characters 2-2:\n"
-      ^ "A right brace `}` is expected here. (Parsing[1002])\n";
+      "File \"/foo.php\", line 4, characters 11-11:\n"
+      ^ "A semicolon `;` is expected here. (Parsing[1002])";
     ]
   in
   match List.zip expected_errors (Errors.get_error_list env.errorl) with
@@ -41,4 +41,4 @@ let test () =
     List.iter
       ~f:(fun (expected, err) -> Test.assertSingleError expected [err])
       errs
-  | List.Or_unequal_lengths.Unequal_lengths -> Test.fail "Expected 2 errors."
+  | List.Or_unequal_lengths.Unequal_lengths -> Test.fail "Expected 1 error."

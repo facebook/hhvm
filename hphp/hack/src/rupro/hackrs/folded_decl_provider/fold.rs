@@ -16,10 +16,10 @@ use pos::{
 use std::sync::Arc;
 use ty::decl::subst::Subst;
 use ty::decl::{
-    folded::Constructor, AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind,
-    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind, FoldedClass, FoldedElement,
-    Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst,
-    TaccessType, Ty, TypeConst, Typeconst, Visibility,
+    folded::Constructor, AbstractTypeconst, Abstraction, CeVisibility, ClassConst, ClassConstKind,
+    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConcreteTypeconst, ConsistentKind, FoldedClass,
+    FoldedElement, Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,
+    ShallowTypeconst, TaccessType, Ty, TypeConst, Typeconst, Visibility,
 };
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
@@ -81,6 +81,35 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             Visibility::Internal => module.map_or(CeVisibility::Public, |module_name| {
                 CeVisibility::Internal(module_name)
             }),
+        }
+    }
+
+    fn synthesize_const_defaults(&self, consts: &mut ClassConstNameIndexMap<ClassConst<R>>) {
+        for c in consts.values_mut() {
+            if c.kind == ClassConstKind::CCAbstract(true) {
+                c.kind = ClassConstKind::CCConcrete;
+            }
+        }
+    }
+
+    /// When all type constants have been inherited and declared, this step
+    /// synthesizes the defaults of abstract type constants into concrete type
+    /// constants.
+    fn synthesize_type_const_defaults(
+        &self,
+        type_consts: &mut TypeConstNameIndexMap<TypeConst<R>>,
+        consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
+    ) {
+        for (name, tc) in type_consts.iter_mut() {
+            if let Typeconst::TCAbstract(atc) = &mut tc.kind {
+                if let Some(ty) = atc.default.take() {
+                    tc.kind = Typeconst::TCConcrete(ConcreteTypeconst { ty });
+                    tc.is_concretized = true;
+                    if let Some(c) = consts.get_mut(&ClassConstName(name.as_symbol())) {
+                        c.kind = ClassConstKind::CCConcrete;
+                    }
+                }
+            }
         }
     }
 
@@ -695,6 +724,11 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
         for tc in self.child.typeconsts.iter() {
             self.decl_type_const(&mut type_consts, &mut consts, tc);
+        }
+
+        if self.child.kind == ClassishKind::Cclass(Abstraction::Concrete) {
+            self.synthesize_const_defaults(&mut consts);
+            self.synthesize_type_const_defaults(&mut type_consts, &mut consts);
         }
 
         let direct_ancestors = (self.child.extends.iter())

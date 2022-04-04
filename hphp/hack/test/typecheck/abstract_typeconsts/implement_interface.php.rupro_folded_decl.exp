@@ -1,6 +1,6 @@
 --- ocaml
 +++ rupro
-@@ -1,151 +1,157 @@
+@@ -1,151 +1,151 @@
  FoldedClass {
      name: "\\I",
      pos: Pos(root|implement_interface.php, 3:11-12),
@@ -116,11 +116,8 @@
      consts: {
          "T": ClassConst {
              is_synthesized: true,
--            kind: CCConcrete,
+             kind: CCConcrete,
 -            pos: Pos(root|implement_interface.php, 7:23-24),
-+            kind: CCAbstract(
-+                false,
-+            ),
 +            pos: Pos(root|implement_interface.php, 4:23-24),
              ty: HH\TypeStructure<this::T>,
 -            origin: "\\A",
@@ -143,20 +140,13 @@
                  Pos(root|implement_interface.php, 7:23-24),
                  "T",
              ),
--            kind: ConcreteTypeconst {
--                ty: string,
-+            kind: AbstractTypeconst {
-+                as_constraint: None,
-+                super_constraint: None,
-+                default: Some(
-+                    string,
-+                ),
+             kind: ConcreteTypeconst {
+                 ty: string,
              },
              origin: "\\A",
              enforceable: None,
              reifiable: None,
--            is_concretized: true,
-+            is_concretized: false,
+             is_concretized: true,
              is_ctx: false,
          },
      },

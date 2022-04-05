@@ -40,6 +40,8 @@ let set_from_reason : t -> t = Pos.set_from_reason
 
 let unsafe_to_raw_pos : t -> Pos.t = (fun p -> p)
 
+let filename : t -> Relative_path.t = (fun p -> Pos.filename p)
+
 let line_start_end_columns : t -> int * int * int = Pos.info_pos
 
 let json : t -> Hh_json.json = (fun p -> p |> Pos.to_absolute |> Pos.json)

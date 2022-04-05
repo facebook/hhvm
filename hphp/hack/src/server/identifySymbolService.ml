@@ -83,6 +83,90 @@ let process_member ?(is_declaration = false) recv_class id ~is_method ~is_const
       pos = fst id;
     }
 
+(* If there's an exact class name can find for this type, return its name. *)
+let concrete_cls_name_from_ty enclosing_class_name ty : string option =
+  match Typing_defs_core.get_node ty with
+  | Tclass ((_, cls_name), _, _) -> Some cls_name
+  | Tgeneric ("this", _) -> enclosing_class_name
+  | _ -> None
+
+let get_callee enclosing_class_name (recv : Tast.expr) : receiver option =
+  let (_, _, recv_expr_) = recv in
+  match recv_expr_ with
+  | Aast.Id (_, id) -> Some (FunctionReceiver id)
+  | Aast.Class_const ((ty, _, _), (_, meth_name)) ->
+    (match concrete_cls_name_from_ty enclosing_class_name ty with
+    | Some cls_name ->
+      Some (MethodReceiver { cls_name; meth_name; is_static = true })
+    | None -> None)
+  | Aast.Obj_get ((ty, _, _), (_, _, Aast.Id (_, meth_name)), _, _) ->
+    (match concrete_cls_name_from_ty enclosing_class_name ty with
+    | Some cls_name ->
+      Some (MethodReceiver { cls_name; meth_name; is_static = false })
+    | None -> None)
+  | _ -> None
+
+let process_arg_names recv (args : Tast.expr list) : Result_set.t =
+  match recv with
+  | Some recv_name ->
+    List.mapi args ~f:(fun i (_, pos, _) ->
+        {
+          name = "(unused)";
+          type_ = BestEffortArgument (recv_name, i);
+          is_declaration = false;
+          pos;
+        })
+    |> Result_set.of_list
+  | None -> Result_set.empty
+
+(* Add parameter names for all arguments at a call site. This enables
+   us to show hover information on arguments.
+
+       greet_user("John Doe");
+                //^ Hover shows: Parameter: $name
+ *)
+let process_callee_arg_names
+    enclosing_class
+    (recv : Tast.expr)
+    (args : (Ast_defs.param_kind * Tast.expr) list) : Result_set.t =
+  let enclosing_class_name = Option.map ~f:snd enclosing_class in
+  let recv = get_callee enclosing_class_name recv in
+  process_arg_names recv (List.map ~f:snd args)
+
+(* Add parameter names for all arguments at an instantiation
+   site. This enables us to show hover information on arguments.
+
+       new User("John Doe");
+              //^ Hover shows: Parameter: $name
+ *)
+let process_constructor_arg_names
+    enclosing_class
+    (parent_class_hint : Aast.hint option)
+    ((_, _, cid) : Tast.class_id)
+    (args : Tast.expr list) : Result_set.t =
+  let enclosing_class_name = Option.map ~f:snd enclosing_class in
+  let cls_name =
+    match cid with
+    | Aast.CIparent ->
+      (match parent_class_hint with
+      | Some (_, Aast.Happly ((_, cls_name), _)) -> Some cls_name
+      | _ -> None)
+    | Aast.CIself -> enclosing_class_name
+    | Aast.CIstatic -> enclosing_class_name
+    | Aast.CIexpr (ty, _, _) ->
+      concrete_cls_name_from_ty enclosing_class_name ty
+    | Aast.CI (_, id) -> Some id
+  in
+  let recv =
+    match cls_name with
+    | Some cls_name ->
+      Some
+        (MethodReceiver
+           { cls_name; meth_name = SN.Members.__construct; is_static = false })
+    | None -> None
+  in
+  process_arg_names recv args
+
 let process_fun_id ?(is_declaration = false) id =
   Result_set.singleton
     { name = snd id; type_ = Function; is_declaration; pos = fst id }
@@ -209,6 +293,7 @@ let remove_apostrophes_from_function_eval (mid : Ast_defs.pstring) :
 
 let visitor =
   let class_name = ref None in
+  let parent_class_hint = ref None in
   let method_name = ref None in
   object (self)
     inherit [_] Tast_visitor.reduce as super
@@ -384,13 +469,20 @@ let visitor =
       in
       let tala = self#on_list self#on_targ env tal in
       let ela = self#on_list self#on_expr env (List.map ~f:snd el) in
+      let arg_names = process_callee_arg_names !class_name e el in
       let uea =
         Option.value_map
           ~default:Result_set.empty
           ~f:(self#on_expr env)
           unpacked_element
       in
-      ea + tala + ela + uea
+      ea + tala + ela + arg_names + uea
+
+    method! on_New env cid targs args var_arg constr_ty =
+      let named_params =
+        process_constructor_arg_names !class_name !parent_class_hint cid args
+      in
+      self#plus named_params (super#on_New env cid targs args var_arg constr_ty)
 
     method! on_Haccess env root ids =
       let acc =
@@ -506,6 +598,7 @@ let visitor =
 
     method! on_class_ env class_ =
       class_name := Some class_.Aast.c_name;
+      parent_class_hint := List.hd class_.Aast.c_extends;
       let acc = process_class class_ in
 
       (*
@@ -613,6 +706,7 @@ let visitor =
       in
       let acc = self#plus acc (super#on_class_ env class_) in
       class_name := None;
+      parent_class_hint := None;
       acc
 
     method! on_fun_ env fun_ =

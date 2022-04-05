@@ -43,6 +43,90 @@ let make_hover_doc_block ctx entry occurrence def_opt =
   | Some _ ->
     []
 
+(* Given a function/method call receiver, find the position of the
+   definition site. *)
+let callee_def_pos ctx recv : Pos_or_decl.t option =
+  SymbolOccurrence.(
+    match recv with
+    | FunctionReceiver fun_name ->
+      let f = Decl_provider.get_fun ctx fun_name in
+      Option.map f ~f:(fun fe -> fe.Typing_defs.fe_pos)
+    | MethodReceiver { cls_name; _ } ->
+      let c = Decl_provider.get_class ctx cls_name in
+      Option.map c ~f:Decl_provider.Class.pos)
+
+(* Return the name of the [n]th parameter in [params], handling
+   variadics correctly. *)
+let nth_param_name (params : ('a, 'b) Aast.fun_param list) (n : int) :
+    string option =
+  let param =
+    if n >= List.length params then
+      match List.last params with
+      | Some param when param.Aast.param_is_variadic -> Some param
+      | _ -> None
+    else
+      List.nth params n
+  in
+  Option.map param ~f:(fun param ->
+      if param.Aast.param_is_variadic then
+        "..." ^ param.Aast.param_name
+      else
+        param.Aast.param_name)
+
+(* Return the name of the [n]th parameter of function [fun_name]. *)
+let nth_fun_param tast fun_name n : string option =
+  List.find_map tast ~f:(fun def ->
+      match def with
+      | Aast.Fun { Aast.fd_fun; _ } ->
+        if String.equal fun_name (snd fd_fun.Aast.f_name) then
+          nth_param_name fd_fun.Aast.f_params n
+        else
+          None
+      | _ -> None)
+
+(* Return the name of the [n]th parameter of this method. *)
+let nth_meth_param tast ~cls_name ~meth_name ~is_static ~arg_n =
+  let class_methods =
+    List.find_map tast ~f:(fun def ->
+        match def with
+        | Aast.Class c ->
+          if String.equal cls_name (snd c.Aast.c_name) then
+            Some c.Aast.c_methods
+          else
+            None
+        | _ -> None)
+    |> Option.value ~default:[]
+  in
+  let class_method =
+    List.find_map class_methods ~f:(fun m ->
+        if
+          String.equal meth_name (snd m.Aast.m_name)
+          && Bool.equal is_static m.Aast.m_static
+        then
+          Some m
+        else
+          None)
+  in
+  match class_method with
+  | Some m -> nth_param_name m.Aast.m_params arg_n
+  | None -> None
+
+let nth_param ctx recv i : string option =
+  match callee_def_pos ctx recv with
+  | Some pos ->
+    let path = Pos_or_decl.filename pos in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+    let { Tast_provider.Compute_tast.tast; _ } =
+      Tast_provider.compute_tast_quarantined ~ctx ~entry
+    in
+
+    SymbolOccurrence.(
+      (match recv with
+      | FunctionReceiver fun_name -> nth_fun_param tast fun_name i
+      | MethodReceiver { cls_name; meth_name; is_static } ->
+        nth_meth_param tast ~cls_name ~meth_name ~is_static ~arg_n:i))
+  | None -> None
+
 let make_hover_const_definition entry def_opt =
   match def_opt with
   | Some def ->
@@ -223,6 +307,9 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
             | None ->
               Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
           end
+        | ({ type_ = BestEffortArgument (recv, i); _ }, _) ->
+          let param_name = nth_param ctx recv i in
+          Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name)
         | (occurrence, Some (env, ty)) ->
           Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
       in
@@ -300,17 +387,50 @@ let go_quarantined
   let env_and_ty =
     ServerInferType.human_friendly_type_at_pos ctx tast line column
   in
-  (* There are legitimate cases where we expect to have no identities returned,
-     so just format the type. *)
-  match identities with
-  | [] ->
-    begin
+  match (identities, env_and_ty) with
+  | ([], Some (env, ty)) ->
+    (* There are no identities (named entities) at the cursor, but we
+       know the type of the expression. Just show the type.
+
+       This can occur if the user hovers over a literal such as `123`. *)
+    [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
+  | ( [
+        ( {
+            SymbolOccurrence.type_ =
+              SymbolOccurrence.BestEffortArgument (recv, i);
+            _;
+          },
+          _ );
+      ],
+      _ ) ->
+    (* There are no identities (named entities) at the cursor, but we
+       know the type of the expression and the name of the parameter
+       from the definition site.
+
+       This can occur if the user hovers over a literal in a call,
+       e.g. `foo(123)`. *)
+    let ty_result =
       match env_and_ty with
       | Some (env, ty) ->
         [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
       | None -> []
-    end
-  | identities ->
+    in
+    let param_result =
+      match nth_param ctx recv i with
+      | Some param_name ->
+        [
+          {
+            snippet = Printf.sprintf "Parameter: %s" param_name;
+            addendum = [];
+            pos = None;
+          };
+        ]
+      | None -> []
+    in
+    ty_result @ param_result
+  | (identities, _) ->
+    (* We have a list of named things at the cursor. Show the
+       docblock and type of each thing. *)
     identities
     |> List.map ~f:(fun (occurrence, def_opt) ->
            let env_and_ty =

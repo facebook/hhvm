@@ -4375,7 +4375,12 @@ class TestLsp(TestCase[LspTestDriver]):
                     "textDocument": {"uri": "${php_file_uri}"},
                     "position": {"line": 26, "character": 20},  # 16 - 29
                 },
-                result={"contents": [{"language": "hack", "value": "string"}]},
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "string"},
+                        {"language": "hack", "value": "Parameter: $s"},
+                    ]
+                },
                 powered_by="serverless_ide",
             )
             .request(
@@ -4386,7 +4391,12 @@ class TestLsp(TestCase[LspTestDriver]):
                     "textDocument": {"uri": "${php_file_uri}"},
                     "position": {"line": 26, "character": 32},  # 31 - 33
                 },
-                result={"contents": [{"language": "hack", "value": "int"}]},
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "int"},
+                        {"language": "hack", "value": "Parameter: $i"},
+                    ]
+                },
                 powered_by="serverless_ide",
             )
             .request(
@@ -6189,7 +6199,12 @@ function unsaved_bar(): string { return "hello"; }
                     "textDocument": {"uri": "${php_file_uri}"},
                     "position": {"line": 26, "character": 20},
                 },
-                result={"contents": [{"language": "hack", "value": "string"}]},
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "string"},
+                        {"language": "hack", "value": "Parameter: $s"},
+                    ]
+                },
                 powered_by="serverless_ide",
             )
             .request(
@@ -6230,7 +6245,12 @@ function unsaved_bar(): string { return "hello"; }
                     "textDocument": {"uri": "${php_file_uri}"},
                     "position": {"line": 26, "character": 20},
                 },
-                result={"contents": [{"language": "hack", "value": "string"}]},
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "string"},
+                        {"language": "hack", "value": "Parameter: $s"},
+                    ]
+                },
                 powered_by="serverless_ide",
             )
             .notification(

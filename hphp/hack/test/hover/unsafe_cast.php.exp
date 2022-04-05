@@ -1,3 +1,5 @@
+Parameter: $_
+-------------
 string
 `UNSAFE_CAST` allows you to lie to the type checker. **This is almost
 always a bad idea**. You might get an exception, or you might get an

@@ -151,6 +151,7 @@ let go ctx ast result =
   | SO.Keyword _ -> None
   | SO.PureFunctionContext -> None
   | SO.BuiltInType _ -> None
+  | SO.BestEffortArgument _ -> None
   | SO.Property (SO.ClassName c_name, property_name)
   | SO.XhpLiteralAttr (c_name, property_name) ->
     Decl_provider.get_class ctx c_name >>= fun class_ ->

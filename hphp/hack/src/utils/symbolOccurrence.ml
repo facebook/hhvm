@@ -56,6 +56,15 @@ type built_in_type_hint =
   | BIoption
 [@@deriving ord, eq]
 
+type receiver =
+  | FunctionReceiver of string
+  | MethodReceiver of {
+      cls_name: string;
+      meth_name: string;
+      is_static: bool;
+    }
+[@@deriving ord, eq]
+
 type kind =
   | Class of class_id_type
   | BuiltInType of built_in_type_hint
@@ -74,6 +83,12 @@ type kind =
   | EnumClassLabel of string * string
   | Keyword of keyword_with_hover_docs
   | PureFunctionContext
+  (* The nth argument of receiver, used for looking up the parameter
+     name at the declaration site. Zero-indexed.
+
+     This is purely for IDE hover information, and is only used when
+     we can easily find a concrete receiver (e.g. no complex generics). *)
+  | BestEffortArgument of receiver * int
 [@@deriving ord, eq]
 
 type 'a t = {
@@ -103,6 +118,7 @@ let kind_to_string = function
   | EnumClassLabel _ -> "enum_class_label"
   | Keyword _ -> "keyword"
   | PureFunctionContext -> "context_braces"
+  | BestEffortArgument _ -> "argument"
 
 let enclosing_class occurrence =
   match occurrence.type_ with

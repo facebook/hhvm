@@ -61,6 +61,15 @@ type built_in_type_hint =
   | BIoption
 [@@deriving eq]
 
+type receiver =
+  | FunctionReceiver of string
+  | MethodReceiver of {
+      cls_name: string;
+      meth_name: string;
+      is_static: bool;
+    }
+[@@deriving eq]
+
 type kind =
   | Class of class_id_type
   | BuiltInType of built_in_type_hint
@@ -86,6 +95,7 @@ type kind =
   | EnumClassLabel of string * string
   | Keyword of keyword_with_hover_docs
   | PureFunctionContext
+  | BestEffortArgument of receiver * int
 [@@deriving eq]
 
 type 'a t = {

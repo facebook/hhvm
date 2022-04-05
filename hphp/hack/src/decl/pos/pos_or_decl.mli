@@ -47,6 +47,8 @@ val make_decl_pos_of_option : Pos.t -> Decl_reference.t option -> t
 
 val is_hhi : t -> bool
 
+val filename : t -> Relative_path.t
+
 (** This may become unsafe in the future as we change the implementation
     of positions in the decl heap. Avoid using in new code.
     Use a position from an AST instead of from a decl or type,

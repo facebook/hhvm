@@ -854,6 +854,11 @@ let class_id_positions_cases =
     ( ("class_id_positions.php", 3, 18),
       [
         { snippet = "class CIPos2"; addendum = []; pos = pos_at (3, 18) (3, 23) };
+        {
+          snippet = "Parameter: $x";
+          addendum = [];
+          pos = pos_at (3, 18) (3, 35);
+        };
       ] );
     ( ("class_id_positions.php", 3, 26),
       [
@@ -862,10 +867,20 @@ let class_id_positions_cases =
           addendum = [];
           pos = pos_at (3, 26) (3, 35);
         };
+        {
+          snippet = "Parameter: $x";
+          addendum = [];
+          pos = pos_at (3, 18) (3, 35);
+        };
       ] );
     ( ("class_id_positions.php", 5, 18),
       [
         { snippet = "class CIPos2"; addendum = []; pos = pos_at (5, 18) (5, 23) };
+        {
+          snippet = "Parameter: $x";
+          addendum = [];
+          pos = pos_at (5, 18) (5, 37);
+        };
       ] );
     ( ("class_id_positions.php", 5, 26),
       [
@@ -874,10 +889,20 @@ let class_id_positions_cases =
           addendum = [];
           pos = pos_at (5, 26) (5, 37);
         };
+        {
+          snippet = "Parameter: $x";
+          addendum = [];
+          pos = pos_at (5, 18) (5, 37);
+        };
       ] );
     ( ("class_id_positions.php", 7, 18),
       [
         { snippet = "class CIPos2"; addendum = []; pos = pos_at (7, 18) (7, 23) };
+        {
+          snippet = "Parameter: $x";
+          addendum = [];
+          pos = pos_at (7, 18) (7, 41);
+        };
       ] );
     ( ("class_id_positions.php", 7, 26),
       [

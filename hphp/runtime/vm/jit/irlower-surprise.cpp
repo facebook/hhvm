@@ -114,7 +114,7 @@ void cgCheckStackOverflow(IRLS& env, const IRInstruction* inst) {
     cellsToBytes(RuntimeOption::EvalVMStackElms) - 1
   };
   auto const depth = cellsToBytes(callee->maxStackCells()) +
-                     cellsToBytes(kStackCheckPadding) +
+                     cellsToBytes(stackCheckPadding()) +
                      Stack::sSurprisePageSize;
 
   auto const r = v.makeReg();

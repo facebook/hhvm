@@ -414,7 +414,7 @@ void Stack::requestInit() {
   rds::header()->stackLimitAndSurprise.store(
     reinterpret_cast<uintptr_t>(
       reinterpret_cast<char*>(m_elms) + sSurprisePageSize +
-        kStackCheckPadding * sizeof(TypedValue)
+        stackCheckPadding() * sizeof(TypedValue)
     ),
     std::memory_order_release
   );

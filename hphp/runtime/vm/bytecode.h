@@ -143,10 +143,12 @@ constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(TypedValue);
  *
  *   - delaying stack overflow checks on reentry
  */
-constexpr int kStackCheckLeafPadding = 100;
 constexpr int kStackCheckReenterPadding = 9;
-constexpr int kStackCheckPadding = kStackCheckLeafPadding +
-  kStackCheckReenterPadding;
+
+ALWAYS_INLINE
+int stackCheckPadding() {
+  return RO::EvalStackCheckLeafPadding + kStackCheckReenterPadding;
+}
 
 // Interpreter evaluation stack.
 struct Stack {

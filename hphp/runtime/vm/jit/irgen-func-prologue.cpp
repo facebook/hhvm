@@ -62,7 +62,7 @@ enum class StackCheck {
 
 StackCheck stack_check_kind(const Func* func, uint32_t argc) {
   if (func->isPhpLeafFn() &&
-      func->maxStackCells() < kStackCheckLeafPadding) {
+      func->maxStackCells() < RO::EvalStackCheckLeafPadding) {
     return StackCheck::None;
   }
 

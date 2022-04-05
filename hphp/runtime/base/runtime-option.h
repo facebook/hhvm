@@ -720,6 +720,7 @@ struct RuntimeOption {
    * Maximum number of elements on the VM execution stack.              \
    */                                                                   \
   F(uint64_t, VMStackElms, kEvalVMStackElmsDefault)                     \
+  F(int, StackCheckLeafPadding, 100)                                    \
   /*                                                                    \
    * Initial space reserved for the global variable environment (in     \
    * number of global variables).                                       \

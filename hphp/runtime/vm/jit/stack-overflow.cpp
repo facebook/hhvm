@@ -35,7 +35,7 @@ namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool checkCalleeStackOverflow(const TypedValue* calleeFP, const Func* callee) {
-  auto const limit = callee->maxStackCells() + kStackCheckPadding;
+  auto const limit = callee->maxStackCells() + stackCheckPadding();
   const void* const needed_top = calleeFP - limit;
   const void* const lower_limit =
     static_cast<char*>(vmRegsUnsafe().stack.getStackLowAddress()) +

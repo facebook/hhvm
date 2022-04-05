@@ -287,12 +287,12 @@ void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
    * Check whether func's maximum stack usage would overflow the stack.
    * Both native and VM stack overflows are independently possible.
    *
-   * All stack checks are inflated by kStackCheckPadding to ensure
+   * All stack checks are inflated by stackCheckPadding() to ensure
    * there is space both for calling leaf functions /and/ for
    * re-entry.  (See kStackCheckReenterPadding and
-   * kStackCheckLeafPadding.)
+   * RuntimeOption::EvalStackCheckLeafPadding.)
    */
-  auto limit = f->maxStackCells() + kStackCheckPadding + extraCells;
+  auto limit = f->maxStackCells() + stackCheckPadding() + extraCells;
   if (LIKELY(stack_in_bounds() && !stk.wouldOverflow(limit))) return;
   TRACE_MOD(Trace::gc, 1, "Maximum stack depth exceeded.\n");
   throw_stack_overflow();

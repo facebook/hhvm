@@ -140,7 +140,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   if (callee->isGenerator()) {
     return refuse("callee is generator");
   }
-  if (callee->maxStackCells() >= kStackCheckLeafPadding) {
+  if (callee->maxStackCells() >= RO::EvalStackCheckLeafPadding) {
     return refuse("function stack depth too deep");
   }
   if (callee->userAttributes().count(s_NeverInline.get())) {
@@ -493,7 +493,7 @@ bool shouldInline(const irgen::IRGS& irgs,
   };
 
   auto const stackDepth = irgs.inlineState.stackDepth;
-  if (stackDepth + callee->maxStackCells() >= kStackCheckLeafPadding) {
+  if (stackDepth + callee->maxStackCells() >= RO::EvalStackCheckLeafPadding) {
     return refuse("inlining stack depth limit exceeded");
   }
 

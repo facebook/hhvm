@@ -28,7 +28,8 @@ ocaml_ffi_with_arena! {
             hackrs_test_utils::decl_provider::make_folded_decl_provider(
                 None,
                 &decl_parser,
-                files.iter().copied(),
+                // Reverse to match the OCaml behavior
+                files.iter().copied().rev(),
             );
         files.into_iter().map(|filename| {
             let classes: Vec<TypeName> = decl_parser

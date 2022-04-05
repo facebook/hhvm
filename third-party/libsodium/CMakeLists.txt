@@ -27,6 +27,10 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   "SHA512=17e8638e46d8f6f7d024fe5559eccf2b8baf23e143fadd472a7d29d228b186d86686a5e6920385fe2020729119a5f12f989c3a782afbd05a8db4819bb18666ef"
 )
 
+if (CMAKE_OSX_SYSROOT)
+  set(ISYSROOT_FLAG -isysroot ${CMAKE_OSX_SYSROOT})
+endif ()
+
 ExternalProject_Add(
   bundled_libsodium
   ${LIBSODIUM_DOWNLOAD_ARGS}
@@ -34,6 +38,10 @@ ExternalProject_Add(
   /usr/bin/env
     CC=${CMAKE_C_COMPILER}
     CXX=${CMAKE_CXX_COMPILER}
+    SDK=${CMAKE_OSX_SYSROOT}
+    CFLAGS=${ISYSROOT_FLAG}
+    CXXFLAGS=${ISYSROOT_FLAG}
+    LDFLAGS=${ISYSROOT_FLAG}
     <SOURCE_DIR>/configure
     "--prefix=<INSTALL_DIR>"
     "--libdir=<INSTALL_DIR>/lib"

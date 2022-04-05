@@ -56,7 +56,8 @@ ExternalProject_Add(
 
   -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
   -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-)
+  -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
+  )
 add_dependencies(zstd bundled_zstd)
 ExternalProject_Get_Property(bundled_zstd INSTALL_DIR)
 target_include_directories(zstd INTERFACE "${INSTALL_DIR}/include")

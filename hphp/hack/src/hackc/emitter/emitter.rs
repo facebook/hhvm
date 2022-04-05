@@ -3,14 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{LabelGen, LocalGen, SymbolRefsState};
+use crate::{IterGen, LabelGen, LocalGen, SymbolRefsState};
 use adata_state::AdataState;
 use decl_provider::{DeclProvider, Result};
 use ffi::Str;
 use global_state::GlobalState;
 use hash::IndexSet;
 use hhbc_ast::Local;
-use iterator::Iter;
 use options::Options;
 use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
 use stack_limit::StackLimit;
@@ -27,7 +26,7 @@ pub struct Emitter<'arena, 'decl> {
     // the rest is being mutated during emittance
     label_gen: LabelGen,
     local_gen: LocalGen,
-    iterator: Iter,
+    iterator: IterGen,
     named_locals: IndexSet<Str<'arena>>,
 
     pub for_debugger_eval: bool,
@@ -94,11 +93,11 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         self.opts
     }
 
-    pub fn iterator(&self) -> &Iter {
+    pub fn iterator(&self) -> &IterGen {
         &self.iterator
     }
 
-    pub fn iterator_mut(&mut self) -> &mut Iter {
+    pub fn iterator_mut(&mut self) -> &mut IterGen {
         &mut self.iterator
     }
 

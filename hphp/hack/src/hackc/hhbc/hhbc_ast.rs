@@ -6,7 +6,6 @@
 mod opcodes;
 
 use ffi::{BumpSliceMut, Slice, Str};
-use iterator::IterId;
 use typed_value::TypedValue;
 
 pub use opcodes::Opcode;
@@ -158,6 +157,19 @@ impl Local {
 
     pub fn is_valid(self) -> bool {
         self != Self::INVALID
+    }
+}
+
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(C)]
+pub struct IterId {
+    /// 0-based index into HHBC stack frame iterators
+    pub idx: u32,
+}
+
+impl std::fmt::Display for IterId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.idx)
     }
 }
 

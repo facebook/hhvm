@@ -70,7 +70,6 @@ members = [
     "src/hackc/emitter/cargo/generator",
     "src/hackc/emitter/cargo/global_state",
     "src/hackc/emitter/cargo/instruction_sequence",
-    "src/hackc/emitter/cargo/iterator",
     "src/hackc/emitter/cargo/label_rewriter",
     "src/hackc/hhbc/cargo/typed_value",
     "src/hackc/emitter/cargo/statement_state",

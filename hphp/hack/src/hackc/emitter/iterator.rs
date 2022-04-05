@@ -2,29 +2,15 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-use std::fmt;
-
-#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(C)]
-pub struct IterId {
-    /// 0-based index into HHBC stack frame iterators
-    pub idx: u32,
-}
-
-impl fmt::Display for IterId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.idx)
-    }
-}
+use hhbc_ast::IterId;
 
 #[derive(Default, Debug, Clone)]
-pub struct Iter {
+pub struct IterGen {
     pub next: IterId,
     count: u32,
 }
 
-impl Iter {
+impl IterGen {
     pub fn count(&self) -> usize {
         self.count as usize
     }

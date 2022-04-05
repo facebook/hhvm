@@ -4,9 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 use env::{emitter::Emitter, LabelGen};
 use error::Result;
-use hhbc_ast::{Instruct, Label, Local, Opcode, Pseudo};
+use hhbc_ast::{Instruct, IterId, Label, Local, Opcode, Pseudo};
 use instruction_sequence::{instr, InstrSeq};
-use iterator::IterId;
 
 /// Run emit () in a new unnamed local scope, which produces three instruction
 /// blocks -- before, inner, after. If emit () registered any unnamed locals, the

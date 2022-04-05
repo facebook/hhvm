@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod emitter; // emitter is public API for mutating state
+mod iterator;
 pub mod jump_targets;
 mod label;
 mod local;
@@ -14,12 +15,12 @@ use bitflags::bitflags;
 use emitter::Emitter;
 use ffi::{Slice, Str};
 use hhas_symbol_refs::{HhasSymbolRefs, IncludePathSet};
-use hhbc_ast::{Label, Local};
-use iterator::IterId;
+use hhbc_ast::{IterId, Label, Local};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env::Env as NamespaceEnv};
 use std::collections::BTreeSet;
 
+pub use iterator::*;
 pub use label::*;
 pub use local::*;
 

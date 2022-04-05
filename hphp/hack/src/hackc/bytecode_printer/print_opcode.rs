@@ -8,13 +8,12 @@ use ffi::Str;
 use hash::HashSet;
 use hhbc_ast::{
     AdataId, BareThisOp, ClassId, ClassNum, CollectionType, ConstId, ContCheckOp, FCallArgs,
-    FatalOp, FunctionId, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, Label,
-    Local, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp, ObjMethodOp,
+    FatalOp, FunctionId, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId,
+    Label, Local, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp, ObjMethodOp,
     Opcode, ParamId, PropId, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef,
     StackIndex, SwitchKind, TypeStructResolveOp,
 };
 use hhbc_string_utils::float;
-use iterator::IterId;
 use print_opcode::{PrintOpcode, PrintOpcodeTypes};
 use std::io::{Error, ErrorKind, Result, Write};
 

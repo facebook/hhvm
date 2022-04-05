@@ -12,4 +12,3 @@ env = { path = "../env" }
 error = { path = "../../../error/cargo/error" }
 hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
 instruction_sequence = { path = "../instruction_sequence" }
-iterator = { path = "../iterator" }

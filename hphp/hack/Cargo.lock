@@ -314,7 +314,6 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
- "iterator",
  "itertools 0.10.3",
  "ocaml_helper",
  "oxidized",
@@ -1045,7 +1044,6 @@ dependencies = [
  "hhbc_string_utils",
  "indexmap",
  "instruction_sequence",
- "iterator",
  "label_rewriter",
  "lazy_static",
  "naming_special_names_rust",
@@ -1516,7 +1514,6 @@ dependencies = [
  "hhas_symbol_refs",
  "hhbc_ast",
  "indexmap",
- "iterator",
  "naming_special_names_rust",
  "ocamlrep",
  "options",
@@ -2179,7 +2176,6 @@ dependencies = [
  "ffi",
  "hhbc_id",
  "hhvm_hhbc_defs_ffi",
- "iterator",
  "oxidized",
  "typed_value",
 ]
@@ -2287,13 +2283,8 @@ dependencies = [
  "bumpalo",
  "ffi",
  "hhbc_ast",
- "iterator",
  "pretty_assertions",
 ]
-
-[[package]]
-name = "iterator"
-version = "0.0.0"
 
 [[package]]
 name = "itertools"
@@ -3418,7 +3409,6 @@ dependencies = [
  "error",
  "hhbc_ast",
  "instruction_sequence",
- "iterator",
 ]
 
 [[package]]

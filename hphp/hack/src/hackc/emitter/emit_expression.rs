@@ -955,7 +955,7 @@ fn emit_vec_collection<'a, 'arena, 'decl>(
     pos: &Pos,
     fields: &[ast::Afield],
 ) -> Result<InstrSeq<'arena>> {
-    match ast_constant_folder::vec_to_typed_value(e, fields) {
+    match constant_folder::vec_to_typed_value(e, fields) {
         Ok(tv) => {
             let instr = emit_adata::typed_value_to_instr(e, &tv)?;
             emit_static_collection(env, None, pos, instr)
@@ -1067,7 +1067,7 @@ fn emit_collection<'a, 'arena, 'decl>(
     transform_to_collection: Option<CollectionType>,
 ) -> Result<InstrSeq<'arena>> {
     let pos = &expr.1;
-    match ast_constant_folder::expr_to_typed_value_(
+    match constant_folder::expr_to_typed_value_(
         e, expr, true,  /*allow_map*/
         false, /*force_class_const*/
     ) {
@@ -1278,7 +1278,7 @@ fn is_struct_init<'arena, 'decl>(
         if let ast::Afield::AFkvalue(key, _) = f {
             // TODO(hrust): if key is String, don't clone and call fold_expr
             let mut key = key.clone();
-            ast_constant_folder::fold_expr(&mut key, e)
+            constant_folder::fold_expr(&mut key, e)
                 .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
             if let ast::Expr(_, _, ast::Expr_::String(s)) = key {
                 are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
@@ -1333,7 +1333,7 @@ fn emit_struct_array<
                 )),
                 _ => {
                     let mut k = k.clone();
-                    ast_constant_folder::fold_expr(&mut k, e)
+                    constant_folder::fold_expr(&mut k, e)
                         .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
                     match k {
                         Expr(_, _, Expr_::String(s)) => Ok((
@@ -3154,7 +3154,7 @@ fn emit_lit<'a, 'arena, 'decl>(
     pos: &Pos,
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let tv = ast_constant_folder::expr_to_typed_value(emitter, expression)
+    let tv = constant_folder::expr_to_typed_value(emitter, expression)
         .map_err(|_| Error::unrecoverable("expr_to_typed_value failed"))?;
     Ok(emit_pos_then(
         pos,
@@ -4234,7 +4234,7 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                 instr::empty(),
             )),
             // Special case for literal integer
-            Expr_::Int(s) => match ast_constant_folder::expr_to_typed_value(e, elem_expr) {
+            Expr_::Int(s) => match constant_folder::expr_to_typed_value(e, elem_expr) {
                 Ok(TypedValue::Int(i)) => Ok((MemberKey::EI(i, ReadonlyOp::Any), instr::empty())),
                 _ => Err(Error::unrecoverable(format!(
                     "{} is not a valid integer index",
@@ -6531,7 +6531,7 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
 ) -> Result<EmitJmpResult<'arena>> {
     let ast::Expr(_, pos, expr_) = expr;
     let opt = optimize_null_checks(e);
-    Ok(match ast_constant_folder::expr_to_typed_value(e, expr) {
+    Ok(match constant_folder::expr_to_typed_value(e, expr) {
         Ok(tv) => {
             if Into::<bool>::into(tv) {
                 EmitJmpResult {
@@ -6651,7 +6651,7 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
 ) -> Result<EmitJmpResult<'arena>> {
     let ast::Expr(_, pos, expr_) = expr;
     let opt = optimize_null_checks(e);
-    Ok(match ast_constant_folder::expr_to_typed_value(e, expr) {
+    Ok(match constant_folder::expr_to_typed_value(e, expr) {
         Ok(v) => {
             let b: bool = v.into();
             if b {

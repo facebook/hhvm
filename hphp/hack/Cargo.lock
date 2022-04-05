@@ -171,25 +171,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ast_constant_folder"
-version = "0.0.0"
-dependencies = [
- "ast_scope",
- "bumpalo",
- "class_expr",
- "env",
- "ffi",
- "hhbc_id",
- "hhbc_string_utils",
- "indexmap",
- "itertools 0.10.3",
- "naming_special_names_rust",
- "options",
- "oxidized",
- "runtime",
-]
-
-[[package]]
 name = "ast_scope"
 version = "0.0.0"
 dependencies = [
@@ -439,9 +420,9 @@ name = "closure_convert"
 version = "0.0.0"
 dependencies = [
  "ast_body",
- "ast_constant_folder",
  "ast_scope",
  "bumpalo",
+ "constant_folder",
  "decl_vars",
  "env",
  "error",
@@ -572,6 +553,25 @@ dependencies = [
  "terminal_size",
  "unicode-width",
  "winapi",
+]
+
+[[package]]
+name = "constant_folder"
+version = "0.0.0"
+dependencies = [
+ "ast_scope",
+ "bumpalo",
+ "class_expr",
+ "env",
+ "ffi",
+ "hhbc_id",
+ "hhbc_string_utils",
+ "indexmap",
+ "itertools 0.10.3",
+ "naming_special_names_rust",
+ "options",
+ "oxidized",
+ "runtime",
 ]
 
 [[package]]
@@ -1004,8 +1004,8 @@ dependencies = [
 name = "emit_attribute"
 version = "0.0.0"
 dependencies = [
- "ast_constant_folder",
  "bumpalo",
+ "constant_folder",
  "emit_expression",
  "env",
  "error",
@@ -1113,7 +1113,7 @@ dependencies = [
 name = "emit_constant"
 version = "0.0.0"
 dependencies = [
- "ast_constant_folder",
+ "constant_folder",
  "core_utils_rust",
  "emit_body",
  "emit_expression",
@@ -1137,10 +1137,10 @@ dependencies = [
 name = "emit_expression"
 version = "0.0.0"
 dependencies = [
- "ast_constant_folder",
  "bstr",
  "bumpalo",
  "class_expr",
+ "constant_folder",
  "emit_adata",
  "emit_fatal",
  "emit_pos",
@@ -1388,7 +1388,7 @@ dependencies = [
 name = "emit_property"
 version = "0.0.0"
 dependencies = [
- "ast_constant_folder",
+ "constant_folder",
  "emit_attribute",
  "emit_expression",
  "emit_pos",

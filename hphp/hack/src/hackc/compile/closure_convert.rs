@@ -1586,7 +1586,7 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
         .hack_compiler_flags
         .contains(CompilerFlags::CONSTANT_FOLDING)
     {
-        ast_constant_folder::fold_program(defs, e)
+        constant_folder::fold_program(defs, e)
             .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
     }
     let defs = &mut defs.0;

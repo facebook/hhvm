@@ -83,7 +83,7 @@ members = [
     "src/hackc/hhbc/cargo/adata_state",
     "src/hackc/hhbc/cargo/ast_body",
     "src/hackc/emitter/cargo/class_expr",
-    "src/hackc/hhbc/cargo/ast_constant_folder",
+    "src/hackc/emitter/cargo/constant_folder",
     "src/hackc/hhbc/cargo/ast_scope",
     "src/hackc/hhbc/cargo/hackc_unit",
     "src/hackc/hhbc/cargo/hhas_adata",

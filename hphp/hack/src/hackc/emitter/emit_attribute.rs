@@ -22,14 +22,14 @@ pub fn from_ast<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     attr: &a::UserAttribute,
 ) -> Result<HhasAttribute<'arena>> {
-    let arguments = ast_constant_folder::literals_from_exprs(
+    let arguments = constant_folder::literals_from_exprs(
         &mut attr.params.clone(),
         e,
     )
     .map_err(|err| {
         assert_eq!(
             err,
-            ast_constant_folder::Error::UserDefinedConstant,
+            constant_folder::Error::UserDefinedConstant,
             "literals_from_expr should have panicked for an error other than UserDefinedConstant"
         );
         Error::fatal_parse(&attr.name.0, "Attribute arguments must be literals")

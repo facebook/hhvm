@@ -8,7 +8,7 @@ edition = "2021"
 path = "../../emit_constant.rs"
 
 [dependencies]
-ast_constant_folder = { path = "../../../hhbc/cargo/ast_constant_folder" }
+constant_folder = { path = "../constant_folder" }
 core_utils_rust = { path = "../../../../utils/core" }
 emit_body = { path = "../emit_body" }
 emit_expression = { path = "../emit_expression" }

@@ -109,7 +109,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let (value, initializer_instrs) = match expr {
         None => (None, None),
-        Some(init) => match ast_constant_folder::expr_to_typed_value(emitter, init) {
+        Some(init) => match constant_folder::expr_to_typed_value(emitter, init) {
             Ok(v) => (Some(v), None),
             Err(_) => (
                 Some(TypedValue::Uninit),

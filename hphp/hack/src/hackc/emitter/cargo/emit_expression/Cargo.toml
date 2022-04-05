@@ -8,10 +8,10 @@ edition = "2021"
 path = "../../emit_expression.rs"
 
 [dependencies]
-ast_constant_folder = { path = "../../../hhbc/cargo/ast_constant_folder" }
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 class_expr = { path = "../class_expr" }
+constant_folder = { path = "../constant_folder" }
 emit_adata = { path = "../emit_adata" }
 emit_fatal = { path = "../emit_fatal" }
 emit_pos = { path = "../emit_pos" }

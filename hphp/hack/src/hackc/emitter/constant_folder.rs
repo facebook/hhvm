@@ -2,13 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use indexmap::IndexMap;
-use std::{collections::hash_map::RandomState, fmt};
-
 use class_expr::ClassExpr;
 use env::emitter::Emitter;
-use ffi::Pair;
+use ffi::{Pair, Str};
 use hhbc_string_utils as string_utils;
+use indexmap::IndexMap;
+use itertools::Itertools;
 use naming_special_names_rust::{math, members, special_functions, typehints};
 use options::HhvmFlags;
 use oxidized::{
@@ -17,8 +16,7 @@ use oxidized::{
     pos::Pos,
 };
 use runtime::TypedValue;
-
-use itertools::Itertools;
+use std::{collections::hash_map::RandomState, fmt};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
@@ -619,11 +617,11 @@ fn cast_value<'arena>(
         ast::Hint_::Happly(ast_defs::Id(_, id), args) if args.is_empty() => {
             let id = string_utils::strip_hh_ns(id);
             if id == typehints::BOOL {
-                v.cast_to_bool()
+                Some(TypedValue::Bool(v.into()))
             } else if id == typehints::STRING {
-                v.cast_to_string(alloc)
+                WithBump(alloc, v).try_into().ok().map(TypedValue::String)
             } else if id == typehints::FLOAT {
-                v.cast_to_double()
+                v.try_into().ok().map(TypedValue::double)
             } else {
                 None
             }
@@ -634,15 +632,14 @@ fn cast_value<'arena>(
 }
 
 fn unop_on_value<'arena>(
-    alloc: &'arena bumpalo::Bump,
     unop: &ast_defs::Uop,
     v: TypedValue<'arena>,
 ) -> Result<TypedValue<'arena>, Error> {
     match unop {
-        ast_defs::Uop::Unot => v.not(),
+        ast_defs::Uop::Unot => v.logical_not(),
         ast_defs::Uop::Uplus => v.add(&TypedValue::Int(0)),
         ast_defs::Uop::Uminus => v.neg(),
-        ast_defs::Uop::Utild => v.bitwise_not(alloc),
+        ast_defs::Uop::Utild => v.bitwise_not(),
         ast_defs::Uop::Usilence => Some(v.clone()),
         _ => None,
     }
@@ -714,7 +711,7 @@ impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitor<'_, '_, 'decl> {
                 .map(value_to_expr_)
                 .ok(),
             ast::Expr_::Unop(e) => expr_to_typed_value(self.emitter, &e.1)
-                .and_then(|v| unop_on_value(self.emitter.alloc, &e.0, v))
+                .and_then(|v| unop_on_value(&e.0, v))
                 .map(value_to_expr_)
                 .ok(),
             ast::Expr_::Binop(e) => expr_to_typed_value(self.emitter, &e.1)
@@ -762,5 +759,24 @@ pub fn literals_from_exprs<'arena, 'decl>(
         Err(Error::unrecoverable("literals_from_exprs: not literal"))
     } else {
         ret
+    }
+}
+
+struct WithBump<'arena, T>(&'arena bumpalo::Bump, T);
+
+impl<'arena> TryFrom<WithBump<'arena, TypedValue<'arena>>> for Str<'arena> {
+    type Error = runtime::CastError;
+    fn try_from(x: WithBump<'arena, TypedValue<'arena>>) -> Result<Str<'arena>, Self::Error> {
+        let alloc = x.0;
+        match x.1 {
+            TypedValue::Uninit => Err(()), // Should not happen
+            TypedValue::Bool(false) => Ok("".into()),
+            TypedValue::Bool(true) => Ok("1".into()),
+            TypedValue::Null => Ok("".into()),
+            TypedValue::Int(i) => Ok(alloc.alloc_str(i.to_string().as_str()).into()),
+            TypedValue::String(s) => Ok(s),
+            TypedValue::LazyClass(s) => Ok(s),
+            _ => Err(()),
+        }
     }
 }

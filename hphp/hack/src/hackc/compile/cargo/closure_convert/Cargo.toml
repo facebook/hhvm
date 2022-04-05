@@ -9,9 +9,9 @@ path = "../../closure_convert.rs"
 
 [dependencies]
 ast_body = { path = "../../../hhbc/cargo/ast_body" }
-ast_constant_folder = { path = "../../../hhbc/cargo/ast_constant_folder" }
 ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
 bumpalo = { version = "3.8", features = ["collections"] }
+constant_folder = { path = "../../../emitter/cargo/constant_folder" }
 decl_vars = { path = "../../../hhbc/cargo/decl_vars" }
 env = { path = "../../../emitter/cargo/env" }
 error = { path = "../../../error/cargo/error" }

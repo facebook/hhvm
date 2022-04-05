@@ -153,25 +153,6 @@ impl<'arena> TryFrom<TypedValue<'arena>> for String {
     }
 }
 
-struct WithBump<'arena, T>(&'arena bumpalo::Bump, T);
-
-impl<'arena> TryFrom<WithBump<'arena, TypedValue<'arena>>> for Str<'arena> {
-    type Error = CastError;
-    fn try_from(x: WithBump<'arena, TypedValue<'arena>>) -> Result<Str<'arena>, Self::Error> {
-        let alloc = x.0;
-        match x.1 {
-            TypedValue::Uninit => Err(()), // Should not happen
-            TypedValue::Bool(false) => Ok("".into()),
-            TypedValue::Bool(true) => Ok("1".into()),
-            TypedValue::Null => Ok("".into()),
-            TypedValue::Int(i) => Ok(alloc.alloc_str(i.to_string().as_str()).into()),
-            TypedValue::String(s) => Ok(s),
-            TypedValue::LazyClass(s) => Ok(s),
-            _ => Err(()),
-        }
-    }
-}
-
 impl<'arena> TypedValue<'arena> {
     pub fn mk_string(x: impl Into<Str<'arena>>) -> Self {
         Self::String(x.into())
@@ -321,33 +302,16 @@ impl<'arena> TypedValue<'arena> {
     }
 
     // Bitwise operations.
-    pub fn bitwise_not(&self, _alloc: &'arena bumpalo::Bump) -> Option<Self> {
+    pub fn bitwise_not(&self) -> Option<Self> {
         match self {
             Self::Int(i) => Some(Self::Int(!i)),
             _ => None,
         }
     }
 
-    #[allow(clippy::should_implement_trait)]
-    pub fn not(self) -> Option<Self> {
+    pub fn logical_not(self) -> Option<Self> {
         let b: bool = self.into();
         Some(Self::Bool(!b))
-    }
-
-    pub fn cast_to_string(self, alloc: &'arena bumpalo::Bump) -> Option<Self> {
-        WithBump(alloc, self).try_into().ok().map(Self::String)
-    }
-
-    pub fn cast_to_int(self) -> Option<Self> {
-        self.try_into().ok().map(Self::Int)
-    }
-
-    pub fn cast_to_bool(self) -> Option<Self> {
-        Some(Self::Bool(self.into()))
-    }
-
-    pub fn cast_to_double(self) -> Option<Self> {
-        self.try_into().ok().map(Self::double)
     }
 
     pub fn string(s: impl AsRef<str>, alloc: &'arena bumpalo::Bump) -> Self {

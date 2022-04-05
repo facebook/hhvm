@@ -426,22 +426,16 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
 
     fn class_constants_from_class(&self, ty: &Ty<R>) -> Result<Inherited<R>> {
         if let Some((_, pos_id, tyl)) = ty.unwrap_class_type() {
-            if let Some(class) = self.parents.get(&pos_id.id()) {
-                let sig = Subst::new(&class.tparams, tyl);
+            if let Some(parent) = self.parents.get(&pos_id.id()) {
+                let sig = Subst::new(&parent.tparams, tyl);
                 let subst = Substitution { subst: &sig };
-                let consts: ClassConstNameIndexMap<_> = class
-                    .consts
-                    .iter()
-                    .map(|(name, cc)| (*name, subst.instantiate_class_const(cc)))
-                    .collect();
-                let type_consts: TypeConstNameIndexMap<_> = class
-                    .type_consts
-                    .iter()
-                    .map(|(name, tc)| (*name, subst.instantiate_type_const(tc)))
-                    .collect();
                 return Ok(Inherited {
-                    consts,
-                    type_consts,
+                    consts: (parent.consts.iter())
+                        .map(|(name, cc)| (*name, subst.instantiate_class_const(cc)))
+                        .collect(),
+                    type_consts: (parent.type_consts.iter())
+                        .map(|(name, tc)| (*name, subst.instantiate_type_const(tc)))
+                        .collect(),
                     ..Default::default()
                 });
             }
@@ -455,12 +449,10 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     // c.f. Decl_inherit.from_class_xhp_attrs_only
     fn xhp_attrs_from_class(&self, ty: &Ty<R>) -> Result<Inherited<R>> {
         if let Some((_, pos_id, _tyl)) = ty.unwrap_class_type() {
-            if let Some(class) = self.parents.get(&pos_id.id()) {
+            if let Some(parent) = self.parents.get(&pos_id.id()) {
                 // Filter out properties that are not XHP attributes.
                 return Ok(Inherited {
-                    props: class
-                        .props
-                        .iter()
+                    props: (parent.props.iter())
                         .filter(|(_, prop)| prop.get_xhp_attr().is_some())
                         .map(|(name, prop)| (name.clone(), prop.clone()))
                         .collect(),

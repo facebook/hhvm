@@ -20,8 +20,18 @@ module Reason = Typing_reason
 (*****************************************************************************)
 
 let log_sub_type env p ty_sub ty_super =
+  let level =
+    if
+      not
+        (Typing_utils.is_capability_i ty_sub
+        || Typing_utils.is_capability_i ty_super)
+    then
+      1
+    else
+      3
+  in
   Typing_log.(
-    log_with_level env "sub" ~level:1 (fun () ->
+    log_with_level env "sub" ~level (fun () ->
         log_types
           (Pos_or_decl.of_raw_pos p)
           env

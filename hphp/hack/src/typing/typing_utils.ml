@@ -760,3 +760,18 @@ let rec make_supportdyn r env ty =
       (env, ty)
     else
       (env, Typing_make_type.supportdyn r ty)
+
+let rec is_capability ty =
+  match get_node ty with
+  | Tclass ((_, name), _, _)
+    when String.is_prefix ~prefix:SN.Capabilities.prefix name ->
+    true
+  | Tintersection [] -> false
+  | Tintersection tyl -> List.for_all ~f:is_capability tyl
+  | Tgeneric (s, []) when SN.Coeffects.is_generated_generic s -> true
+  | _ -> false
+
+let is_capability_i ty =
+  match ty with
+  | LoclType ty -> is_capability ty
+  | ConstraintType _ -> false

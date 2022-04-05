@@ -214,10 +214,18 @@ let log_subtype_i ~level ~this_ty ~function_name env ty_sub ty_super =
           Option.value_map this_ty ~default:types ~f:(fun ty ->
               Log_type ("this_ty", ty) :: types)
         in
-        log_types
-          (Reason.to_pos (reason ty_sub))
-          env
-          [Log_head (function_name, types)]))
+        if
+          level >= 3
+          || not
+               (Typing_utils.is_capability_i ty_sub
+               || Typing_utils.is_capability_i ty_super)
+        then
+          log_types
+            (Reason.to_pos (reason ty_sub))
+            env
+            [Log_head (function_name, types)]
+        else
+          ()))
 
 let log_subtype ~this_ty ~function_name env ty_sub ty_super =
   log_subtype_i

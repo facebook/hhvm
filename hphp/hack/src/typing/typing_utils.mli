@@ -476,3 +476,7 @@ val make_supportdyn :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
+
+val is_capability : Typing_defs.locl_ty -> bool
+
+val is_capability_i : Typing_defs.internal_type -> bool

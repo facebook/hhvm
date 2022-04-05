@@ -47,6 +47,6 @@ oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 print_expr = { path = "../../../print_expr" }
 regex = "1.5.4"
 runtime = { path = "../runtime" }
-scope = { path = "../../../hhbc/cargo/scope" }
+scope = { path = "../scope" }
 stack_limit = { path = "../../../../utils/stack_limit" }
 statement_state = { path = "../statement_state" }

@@ -34,5 +34,5 @@ options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
 regex = "1.5.4"
 runtime = { path = "../runtime" }
-scope = { path = "../../../hhbc/cargo/scope" }
+scope = { path = "../scope" }
 symbol_refs_state = { path = "../symbol_refs_state" }

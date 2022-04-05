@@ -17,14 +17,13 @@ use hhas_property::HhasProperty;
 use hhas_type::HhasTypeInfo;
 use hhas_type_const::HhasTypeConstant;
 use hhas_xhp_attribute::HhasXhpAttribute;
-use hhbc_ast::{FCallArgs, FCallArgsFlags, FatalOp, ReadonlyOp, SpecialClsRef, Visibility};
+use hhbc_ast::{FCallArgs, FCallArgsFlags, FatalOp, Local, ReadonlyOp, SpecialClsRef, Visibility};
 use hhbc_id::class::ClassType;
 use hhbc_id::{self as hhbc_id, class, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
 use instruction_sequence::{instr, InstrSeq};
 use itertools::Itertools;
-use local::Local;
 use naming_special_names_rust as special_names;
 use oxidized::{
     ast,

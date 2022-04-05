@@ -12,16 +12,15 @@ use hash::HashSet;
 use hhas_symbol_refs::IncludePath;
 use hhbc_ast::{
     BareThisOp, CollectionType, FCallArgs, FCallArgsFlags, HasGenericsOp, IncDecOp, Instruct,
-    IsLogAsDynamicCallOp, IsTypeOp, IterArgs, Label, MOpMode, MemberKey, MethodId, OODeclExistsOp,
-    ObjMethodOp, Opcode, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SpecialClsRef, StackIndex,
-    TypeStructResolveOp,
+    IsLogAsDynamicCallOp, IsTypeOp, IterArgs, Label, Local, MOpMode, MemberKey, MethodId,
+    OODeclExistsOp, ObjMethodOp, Opcode, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SpecialClsRef,
+    StackIndex, TypeStructResolveOp,
 };
 use hhbc_id::{class, constant, function, method, prop};
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq};
 use lazy_static::lazy_static;
-use local::Local;
 use naming_special_names_rust::{
     emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
     special_idents, superglobals, typehints, user_attributes,

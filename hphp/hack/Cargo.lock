@@ -316,7 +316,6 @@ dependencies = [
  "hhvm_types_ffi",
  "iterator",
  "itertools 0.10.3",
- "local",
  "ocaml_helper",
  "oxidized",
  "print_opcode",
@@ -1049,7 +1048,6 @@ dependencies = [
  "iterator",
  "label_rewriter",
  "lazy_static",
- "local",
  "naming_special_names_rust",
  "ocamlrep",
  "options",
@@ -1101,7 +1099,6 @@ dependencies = [
  "hhvm_types_ffi",
  "instruction_sequence",
  "itertools 0.10.3",
- "local",
  "naming_special_names_rust",
  "oxidized",
  "typed_value",
@@ -1155,7 +1152,6 @@ dependencies = [
  "indexmap",
  "instruction_sequence",
  "lazy_static",
- "local",
  "naming_special_names_rust",
  "options",
  "oxidized",
@@ -1213,7 +1209,6 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_types_ffi",
  "instruction_sequence",
- "local",
  "naming_special_names_rust",
  "ocamlrep",
  "options",
@@ -1231,7 +1226,6 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "instruction_sequence",
- "local",
  "oxidized",
 ]
 
@@ -1262,7 +1256,6 @@ dependencies = [
  "hhbc_id",
  "hhbc_string_utils",
  "instruction_sequence",
- "local",
  "naming_special_names_rust",
  "options",
  "oxidized",
@@ -1324,8 +1317,8 @@ dependencies = [
  "error",
  "ffi",
  "hhas_body",
+ "hhbc_ast",
  "instruction_sequence",
- "local",
  "oxidized",
 ]
 
@@ -1367,7 +1360,6 @@ dependencies = [
  "hhbc_ast",
  "hhbc_string_utils",
  "instruction_sequence",
- "local",
  "oxidized",
 ]
 
@@ -1523,8 +1515,9 @@ dependencies = [
  "hash",
  "hhas_symbol_refs",
  "hhbc_ast",
+ "indexmap",
  "iterator",
- "local",
+ "naming_special_names_rust",
  "ocamlrep",
  "options",
  "oxidized",
@@ -2187,7 +2180,6 @@ dependencies = [
  "hhbc_id",
  "hhvm_hhbc_defs_ffi",
  "iterator",
- "local",
  "oxidized",
  "typed_value",
 ]
@@ -2296,7 +2288,6 @@ dependencies = [
  "ffi",
  "hhbc_ast",
  "iterator",
- "local",
  "pretty_assertions",
 ]
 
@@ -2415,14 +2406,6 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_derive",
  "oxidized",
-]
-
-[[package]]
-name = "local"
-version = "0.0.0"
-dependencies = [
- "indexmap",
- "naming_special_names_rust",
 ]
 
 [[package]]
@@ -3436,7 +3419,6 @@ dependencies = [
  "hhbc_ast",
  "instruction_sequence",
  "iterator",
- "local",
 ]
 
 [[package]]

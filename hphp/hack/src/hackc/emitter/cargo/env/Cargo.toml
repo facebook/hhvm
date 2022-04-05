@@ -19,8 +19,9 @@ global_state = { path = "../global_state" }
 hash = { path = "../../../../utils/hash" }
 hhas_symbol_refs = { path = "../../../hhbc/cargo/hhas_symbol_refs" }
 hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
+indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
 iterator = { path = "../iterator" }
-local = { path = "../local" }
+naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }

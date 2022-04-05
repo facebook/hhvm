@@ -7,8 +7,8 @@ use env::emitter::Emitter;
 use error::{Error, Result};
 use ffi::{Maybe::Just, Slice};
 use hhas_body::HhasBody;
+use hhbc_ast::Local;
 use instruction_sequence::{instr, InstrSeq};
-use local::Local;
 use oxidized::{aast, ast, pos::Pos};
 
 pub fn emit_body<'a, 'arena, 'decl>(

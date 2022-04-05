@@ -37,7 +37,6 @@ instruction_sequence = { path = "../instruction_sequence" }
 iterator = { path = "../iterator" }
 label_rewriter = { path = "../label_rewriter" }
 lazy_static = "1.0"
-local = { path = "../local" }
 naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../../../compile/cargo/options" }

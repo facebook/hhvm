@@ -7,7 +7,7 @@ use crate::emit_statement::Level;
 use crate::reified_generics_helpers as reified;
 use bitflags::bitflags;
 use emit_pos::emit_pos;
-use env::{emitter::Emitter, jump_targets as jt, Env};
+use env::{emitter::Emitter, jump_targets as jt, Env, LocalGen};
 use error::Result;
 use hhbc_ast::{Instruct, IsTypeOp, Label, Opcode, Pseudo};
 use indexmap::IndexSet;
@@ -79,7 +79,7 @@ pub(super) fn emit_jump_to_label<'arena>(l: Label, iters: Vec<IterId>) -> InstrS
 }
 
 pub(super) fn emit_save_label_id<'arena>(
-    local_gen: &mut local::Gen,
+    local_gen: &mut LocalGen,
     id: jt::StateId,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(vec![

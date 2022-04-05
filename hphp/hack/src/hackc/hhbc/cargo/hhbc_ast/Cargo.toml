@@ -13,6 +13,5 @@ ffi = { path = "../../../../utils/ffi" }
 hhbc_id = { path = "../hhbc_id" }
 hhvm_hhbc_defs_ffi = { path = "../../../hhvm_cxx/hhvm_hhbc_defs" }
 iterator = { path = "../../../emitter/cargo/iterator" }
-local = { path = "../../../emitter/cargo/local" }
 oxidized = { path = "../../../../oxidized" }
 typed_value = { path = "../typed_value" }

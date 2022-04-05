@@ -7,12 +7,11 @@ use ffi::{BumpSliceMut, Slice, Str};
 use hhbc_ast::{
     AdataId, BareThisOp, ClassId, ClassNum, CollectionType, ConstId, ContCheckOp, FCallArgs,
     FatalOp, FunctionId, IncDecOp, InitPropOp, Instruct, IsLogAsDynamicCallOp, IsTypeOp, IterArgs,
-    Label, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp, ObjMethodOp,
+    Label, Local, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp, ObjMethodOp,
     Opcode, ParamId, PropId, Pseudo, QueryMOp, ReadonlyOp, SetOpOp, SilenceOp, SpecialClsRef,
     SrcLoc, StackIndex, SwitchKind, TypeStructResolveOp,
 };
 use iterator::IterId;
-use local::Local;
 
 /// The various from_X functions below take some kind of AST
 /// (expression, statement, etc.) and produce what is logically a

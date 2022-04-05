@@ -39,7 +39,6 @@ hhvm_hhbc_defs_ffi = { path = "../hhvm_cxx/hhvm_hhbc_defs" }
 hhvm_types_ffi = { path = "../hhvm_cxx/hhvm_types" }
 iterator = { path = "../emitter/cargo/iterator" }
 itertools = "0.10.3"
-local = { path = "../emitter/cargo/local" }
 ocaml_helper = { path = "../../utils/ocaml_helper" }
 oxidized = { path = "../../oxidized" }
 print_opcode = { path = "print_opcode/cargo/lib" }

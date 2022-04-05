@@ -28,7 +28,6 @@ hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
 instruction_sequence = { path = "../instruction_sequence" }
 lazy_static = "1.0"
-local = { path = "../local" }
 naming_special_names_rust = { path = "../../../../naming" }
 options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }

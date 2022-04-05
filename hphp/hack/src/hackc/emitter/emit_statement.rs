@@ -10,12 +10,11 @@ use error::{Error, Result};
 use ffi::Slice;
 use hack_macro::hack_expr;
 use hhbc_ast::{
-    FCallArgs, FCallArgsFlags, IsTypeOp, IterArgs, Label, MOpMode, MemberKey, ObjMethodOp,
+    FCallArgs, FCallArgsFlags, IsTypeOp, IterArgs, Label, Local, MOpMode, MemberKey, ObjMethodOp,
     QueryMOp, ReadonlyOp, SetRangeOp,
 };
 use instruction_sequence::{instr, InstrSeq};
 use lazy_static::lazy_static;
-use local::Local;
 use naming_special_names_rust::{special_idents, superglobals};
 use oxidized::{
     aast as a, ast,

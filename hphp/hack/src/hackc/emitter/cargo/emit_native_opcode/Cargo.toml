@@ -15,6 +15,6 @@ env = { path = "../env" }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
 hhas_body = { path = "../../../hhbc/cargo/hhas_body" }
+hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
 instruction_sequence = { path = "../instruction_sequence" }
-local = { path = "../local" }
 oxidized = { path = "../../../../oxidized" }

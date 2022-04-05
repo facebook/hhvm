@@ -5,10 +5,9 @@
 
 use error::{Error, Result};
 use ffi::Slice;
-use hhbc_ast::{FCallArgs, FCallArgsFlags};
+use hhbc_ast::{FCallArgs, FCallArgsFlags, Local};
 use hhbc_id::function;
 use instruction_sequence::{instr, InstrSeq};
-use local::Local;
 use oxidized::{aast::FunParam, pos::Pos};
 
 pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";

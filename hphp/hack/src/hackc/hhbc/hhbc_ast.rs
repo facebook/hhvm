@@ -7,7 +7,6 @@ mod opcodes;
 
 use ffi::{BumpSliceMut, Slice, Str};
 use iterator::IterId;
-use local::Local;
 use typed_value::TypedValue;
 
 pub use opcodes::Opcode;
@@ -131,6 +130,34 @@ impl<'arena> FCallArgs<'arena> {
         } else {
             &mut []
         }
+    }
+}
+
+/// Local variable numbers are ultimately encoded as IVA, limited to u32.
+/// Locals with idx < num_params + num_decl_vars are considered named,
+/// higher numbered locals are considered unnamed.
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+#[repr(C)]
+pub struct Local {
+    /// 0-based index into HHBC stack frame locals.
+    pub idx: u32,
+}
+
+impl std::fmt::Display for Local {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.idx.fmt(f)
+    }
+}
+
+impl Local {
+    pub const INVALID: Self = Self { idx: u32::MAX };
+
+    pub fn new(x: usize) -> Self {
+        Self { idx: x as u32 }
+    }
+
+    pub fn is_valid(self) -> bool {
+        self != Self::INVALID
     }
 }
 

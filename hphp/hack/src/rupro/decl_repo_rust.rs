@@ -97,7 +97,11 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
         Names::Filenames(filenames) => {
             let (classes, time_taken) =
                 time(|| parse(parser.clone(), &shallow_decl_cache, filenames));
-            println!("Parsed repo in {:?}", time_taken);
+            println!(
+                "Parsed {} classes in repo in {:?}",
+                classes.len(),
+                time_taken
+            );
             print_rss();
             classes
         }
@@ -105,8 +109,9 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
 
     let folded_decl_provider = make_folded_provider(opts, shallow_decl_cache, parser);
     if opts.fold {
+        let len = classes.len();
         let ((), time_taken) = time(|| fold(&folded_decl_provider, classes));
-        println!("Folded repo in {:?}", time_taken);
+        println!("Folded {} classes in repo in {:?}", len, time_taken);
         print_rss();
     }
 
@@ -139,7 +144,12 @@ fn collect_file_or_class_names(opts: &CliOptions, ctx: &RelativePathCtx) -> Name
             }
             classes
         });
-        println!("Queried all classes from naming table in {:?}", time_taken);
+        println!(
+            "Queried {} classes from naming table in {:?}",
+            classes.len(),
+            time_taken
+        );
+
         Names::Classnames(classes)
     } else {
         let mut filenames: Vec<RelativePath> = find_hack_files(&ctx.hhi)

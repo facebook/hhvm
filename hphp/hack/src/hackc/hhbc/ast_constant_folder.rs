@@ -5,6 +5,7 @@
 use indexmap::IndexMap;
 use std::{collections::hash_map::RandomState, fmt};
 
+use class_expr::ClassExpr;
 use env::emitter::Emitter;
 use ffi::Pair;
 use hhbc_string_utils as string_utils;
@@ -94,14 +95,14 @@ fn class_const_to_typed_value<'arena, 'decl>(
     id: &ast::Pstring,
 ) -> Result<TypedValue<'arena>, Error> {
     if id.1 == members::M_CLASS {
-        let cexpr = ast_class_expr::ClassExpr::class_id_to_class_expr(
+        let cexpr = ClassExpr::class_id_to_class_expr(
             emitter,
             false,
             true,
             &ast_scope::Scope::toplevel(),
             cid,
         );
-        if let ast_class_expr::ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
+        if let ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
             let classid = hhbc_id::class::ClassType::from_ast_name_and_mangle(emitter.alloc, cname)
                 .as_ffi_str();
             if emitter.options().emit_class_pointers() == 2 {

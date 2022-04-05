@@ -7,8 +7,8 @@ mod reified_generics_helpers;
 mod try_finally_rewriter;
 
 use ast_body::AstBody;
-use ast_class_expr::ClassExpr;
 use ast_scope::{Scope, ScopeItem};
+use class_expr::ClassExpr;
 use emit_pos::emit_pos;
 use emit_statement::emit_final_stmts;
 use env::{emitter::Emitter, Env};

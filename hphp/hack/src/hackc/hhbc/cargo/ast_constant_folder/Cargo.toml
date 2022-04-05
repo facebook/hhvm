@@ -8,9 +8,9 @@ edition = "2021"
 path = "../../ast_constant_folder.rs"
 
 [dependencies]
-ast_class_expr = { path = "../ast_class_expr" }
 ast_scope = { path = "../ast_scope" }
 bumpalo = { version = "3.8", features = ["collections"] }
+class_expr = { path = "../../../emitter/cargo/class_expr" }
 env = { path = "../../../emitter/cargo/env" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_id = { path = "../hhbc_id" }

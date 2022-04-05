@@ -9,10 +9,10 @@ path = "../../emit_body.rs"
 
 [dependencies]
 ast_body = { path = "../../../hhbc/cargo/ast_body" }
-ast_class_expr = { path = "../../../hhbc/cargo/ast_class_expr" }
 ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
 bitflags = "1.3"
 bumpalo = { version = "3.8", features = ["collections"] }
+class_expr = { path = "../class_expr" }
 decl_provider = { path = "../../../decl_provider" }
 decl_vars = { path = "../../../hhbc/cargo/decl_vars" }
 emit_expression = { path = "../emit_expression" }

@@ -171,25 +171,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "ast_class_expr"
-version = "0.0.0"
-dependencies = [
- "ast_scope",
- "env",
- "hhbc_ast",
- "hhbc_string_utils",
- "instruction_sequence",
- "naming_special_names_rust",
- "oxidized",
-]
-
-[[package]]
 name = "ast_constant_folder"
 version = "0.0.0"
 dependencies = [
- "ast_class_expr",
  "ast_scope",
  "bumpalo",
+ "class_expr",
  "env",
  "ffi",
  "hhbc_id",
@@ -432,6 +419,19 @@ dependencies = [
  "textwrap",
  "unicode-width",
  "vec_map",
+]
+
+[[package]]
+name = "class_expr"
+version = "0.0.0"
+dependencies = [
+ "ast_scope",
+ "env",
+ "hhbc_ast",
+ "hhbc_string_utils",
+ "instruction_sequence",
+ "naming_special_names_rust",
+ "oxidized",
 ]
 
 [[package]]
@@ -1022,10 +1022,10 @@ name = "emit_body"
 version = "0.0.0"
 dependencies = [
  "ast_body",
- "ast_class_expr",
  "ast_scope",
  "bitflags",
  "bumpalo",
+ "class_expr",
  "decl_provider",
  "decl_vars",
  "emit_expression",
@@ -1137,10 +1137,10 @@ dependencies = [
 name = "emit_expression"
 version = "0.0.0"
 dependencies = [
- "ast_class_expr",
  "ast_constant_folder",
  "bstr",
  "bumpalo",
+ "class_expr",
  "emit_adata",
  "emit_fatal",
  "emit_pos",
@@ -3047,9 +3047,9 @@ name = "print_expr"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "ast_class_expr",
  "bstr",
  "bumpalo",
+ "class_expr",
  "core_utils_rust",
  "emit_type_hint",
  "env",

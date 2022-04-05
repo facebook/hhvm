@@ -3,13 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::borrow::Cow;
-
-use ast_class_expr::ClassExpr;
+use class_expr::ClassExpr;
 use env::emitter::Emitter;
 use ffi::Pair;
 use hhas_body::HhasBodyEnv;
 use oxidized::{ast, ast_defs, pos::Pos};
+use std::borrow::Cow;
 
 pub trait SpecialClassResolver {
     fn resolve<'a>(&self, env: Option<&'a HhasBodyEnv<'_>>, id: &'a str) -> Cow<'a, str>;

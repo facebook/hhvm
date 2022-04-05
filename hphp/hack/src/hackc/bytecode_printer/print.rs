@@ -31,12 +31,11 @@ use hhas_symbol_refs::{HhasSymbolRefs, IncludePath};
 use hhas_type::HhasTypeInfo;
 use hhas_type_const::HhasTypeConstant;
 use hhas_typedef::HhasTypedef;
-use hhbc_ast::*;
+use hhbc_ast::{FCallArgs, FatalOp, Instruct, Label, Pseudo};
 use hhbc_id::class::ClassType;
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
-use label::Label;
 use ocaml_helper::escaped_bytes;
 use oxidized::ast_defs;
 use std::{

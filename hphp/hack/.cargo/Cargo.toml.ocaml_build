@@ -71,7 +71,6 @@ members = [
     "src/hackc/emitter/cargo/global_state",
     "src/hackc/emitter/cargo/instruction_sequence",
     "src/hackc/emitter/cargo/iterator",
-    "src/hackc/emitter/cargo/label",
     "src/hackc/emitter/cargo/label_rewriter",
     "src/hackc/emitter/cargo/local",
     "src/hackc/hhbc/cargo/typed_value",

@@ -9,9 +9,11 @@ use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use ffi::Slice;
 use hack_macro::hack_expr;
-use hhbc_ast::*;
+use hhbc_ast::{
+    FCallArgs, FCallArgsFlags, IsTypeOp, IterArgs, Label, MOpMode, MemberKey, ObjMethodOp,
+    QueryMOp, ReadonlyOp, SetRangeOp,
+};
 use instruction_sequence::{instr, InstrSeq};
-use label::Label;
 use lazy_static::lazy_static;
 use local::Local;
 use naming_special_names_rust::{special_idents, superglobals};
@@ -574,7 +576,7 @@ fn emit_using<'a, 'arena, 'decl>(
                     make_finally_catch(e, exn_local, finally_instrs),
                     emit_pos(&using.exprs.1[0].1),
                 ]);
-                InstrSeq::create_try_catch(e.label_gen_mut(), None, true, try_instrs, catch_instrs)
+                scope::create_try_catch(e.label_gen_mut(), None, true, try_instrs, catch_instrs)
             };
             Ok(InstrSeq::gather(vec![
                 preamble,
@@ -828,8 +830,7 @@ fn emit_try_finally_<
         emit_pos(&enclosing_span),
         make_finally_catch(e, exn_local, finally_body_for_catch),
     ]);
-    let middle =
-        InstrSeq::create_try_catch(e.label_gen_mut(), None, true, try_instrs, catch_instrs);
+    let middle = scope::create_try_catch(e.label_gen_mut(), None, true, try_instrs, catch_instrs);
 
     // Putting it all together
     Ok(InstrSeq::gather(vec![
@@ -853,7 +854,7 @@ fn make_finally_catch<'arena, 'decl>(
         instr::popl(exn_local),
         l1,
         l2,
-        InstrSeq::create_try_catch(
+        scope::create_try_catch(
             e.label_gen_mut(),
             None,
             false,
@@ -899,7 +900,7 @@ fn emit_try_catch_<'a, 'arena, 'decl>(
     env.flags.set(env::Flags::IN_TRY, in_try);
 
     let try_instrs = InstrSeq::gather(vec![try_body?, emit_pos(pos)]);
-    Ok(InstrSeq::create_try_catch(
+    Ok(scope::create_try_catch(
         e.label_gen_mut(),
         Some(end_label),
         false,

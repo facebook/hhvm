@@ -10,12 +10,16 @@ use error::{Error, Result};
 use ffi::{Slice, Str};
 use hash::HashSet;
 use hhas_symbol_refs::IncludePath;
-use hhbc_ast::*;
+use hhbc_ast::{
+    BareThisOp, CollectionType, FCallArgs, FCallArgsFlags, HasGenericsOp, IncDecOp, Instruct,
+    IsLogAsDynamicCallOp, IsTypeOp, IterArgs, Label, MOpMode, MemberKey, MethodId, OODeclExistsOp,
+    ObjMethodOp, Opcode, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SpecialClsRef, StackIndex,
+    TypeStructResolveOp,
+};
 use hhbc_id::{class, constant, function, method, prop};
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq};
-use label::Label;
 use lazy_static::lazy_static;
 use local::Local;
 use naming_special_names_rust::{
@@ -4542,7 +4546,7 @@ fn emit_unop<'a, 'arena, 'decl>(
                     let try_instrs = emit_expr(e, env, expr)?;
                     let catch_instrs =
                         InstrSeq::gather(vec![emit_pos(pos), instr::silence_end(temp_local)]);
-                    InstrSeq::create_try_catch(
+                    scope::create_try_catch(
                         e.label_gen_mut(),
                         None,
                         false, /* skip_throw */

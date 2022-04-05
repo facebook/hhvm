@@ -2,8 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use env::emitter::Emitter;
+use env::{emitter::Emitter, LabelGen};
 use error::Result;
+use hhbc_ast::{Instruct, Label, Opcode, Pseudo};
 use instruction_sequence::{instr, InstrSeq};
 use iterator::IterId;
 use local::Local;
@@ -126,13 +127,40 @@ fn free_iterators<'arena>(start: IterId, end: IterId) -> InstrSeq<'arena> {
 }
 
 fn wrap_inner_in_try_catch<'arena>(
-    label_gen: &mut label::Gen,
+    label_gen: &mut LabelGen,
     (before, inner, after): (InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>),
     catch_instrs: InstrSeq<'arena>,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(vec![
         before,
-        InstrSeq::create_try_catch(label_gen, None, false, inner, catch_instrs),
+        create_try_catch(label_gen, None, false, inner, catch_instrs),
         after,
+    ])
+}
+
+pub fn create_try_catch<'a>(
+    label_gen: &mut LabelGen,
+    opt_done_label: Option<Label>,
+    skip_throw: bool,
+    try_instrs: InstrSeq<'a>,
+    catch_instrs: InstrSeq<'a>,
+) -> InstrSeq<'a> {
+    let done_label = match opt_done_label {
+        Some(l) => l,
+        None => label_gen.next_regular(),
+    };
+    InstrSeq::gather(vec![
+        instr::instr(Instruct::Pseudo(Pseudo::TryCatchBegin)),
+        try_instrs,
+        instr::jmp(done_label),
+        instr::instr(Instruct::Pseudo(Pseudo::TryCatchMiddle)),
+        catch_instrs,
+        if skip_throw {
+            instr::empty()
+        } else {
+            instr::instr(Instruct::Opcode(Opcode::Throw))
+        },
+        instr::instr(Instruct::Pseudo(Pseudo::TryCatchEnd)),
+        instr::label(done_label),
     ])
 }

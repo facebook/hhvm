@@ -35,7 +35,6 @@ hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
 instruction_sequence = { path = "../instruction_sequence" }
 iterator = { path = "../iterator" }
-label = { path = "../label" }
 label_rewriter = { path = "../label_rewriter" }
 lazy_static = "1.0"
 local = { path = "../local" }

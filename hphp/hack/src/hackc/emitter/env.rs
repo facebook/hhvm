@@ -5,6 +5,7 @@
 
 pub mod emitter; // emitter is public API for mutating state
 pub mod jump_targets;
+mod label;
 
 use ast_body::AstBody;
 use ast_scope::{self as ast_scope, Scope, ScopeItem};
@@ -12,12 +13,14 @@ use bitflags::bitflags;
 use emitter::Emitter;
 use ffi::{Slice, Str};
 use hhas_symbol_refs::{HhasSymbolRefs, IncludePathSet};
+use hhbc_ast::Label;
 use iterator::IterId;
-use label::Label;
 use local::Local;
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env::Env as NamespaceEnv};
 use std::collections::BTreeSet;
+
+pub use label::*;
 
 bitflags! {
     #[derive(Default)]

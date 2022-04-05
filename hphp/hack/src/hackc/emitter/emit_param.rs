@@ -10,9 +10,9 @@ use error::{Error, Result};
 use ffi::{Maybe, Nothing, Slice, Str};
 use hhas_param::HhasParam;
 use hhas_type::HhasTypeInfo;
+use hhbc_ast::Label;
 use hhbc_string_utils::locals::strip_dollar;
 use instruction_sequence::{instr, InstrSeq};
-use label::Label;
 use local::Local;
 use oxidized::{
     aast_defs::{Hint, Hint_},

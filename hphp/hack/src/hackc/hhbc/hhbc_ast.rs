@@ -7,7 +7,6 @@ mod opcodes;
 
 use ffi::{BumpSliceMut, Slice, Str};
 use iterator::IterId;
-use label::Label;
 use local::Local;
 use typed_value::TypedValue;
 
@@ -39,6 +38,22 @@ pub type FunctionId<'arena> = hhbc_id::function::FunctionType<'arena>;
 pub type MethodId<'arena> = hhbc_id::method::MethodType<'arena>;
 pub type ConstId<'arena> = hhbc_id::constant::ConstType<'arena>;
 pub type PropId<'arena> = hhbc_id::prop::PropType<'arena>;
+
+/// HHBC encodes bytecode offsets as i32 (HPHP::Offset) so u32
+/// is plenty of range for label ids.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[repr(transparent)]
+pub struct Label(pub u32);
+
+impl std::fmt::Display for Label {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl Label {
+    pub const INVALID: Label = Label(u32::MAX);
+}
 
 pub type NumParams = u32;
 pub type ByRefs<'arena> = Slice<'arena, bool>;

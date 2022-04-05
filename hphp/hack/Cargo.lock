@@ -316,7 +316,6 @@ dependencies = [
  "hhvm_types_ffi",
  "iterator",
  "itertools 0.10.3",
- "label",
  "local",
  "ocaml_helper",
  "oxidized",
@@ -870,7 +869,7 @@ dependencies = [
  "ffi",
  "hash",
  "hhas_param",
- "label",
+ "hhbc_ast",
  "naming_special_names_rust",
  "oxidized",
  "unique_id_builder",
@@ -1048,7 +1047,6 @@ dependencies = [
  "indexmap",
  "instruction_sequence",
  "iterator",
- "label",
  "label_rewriter",
  "lazy_static",
  "local",
@@ -1156,7 +1154,6 @@ dependencies = [
  "hhbc_string_utils",
  "indexmap",
  "instruction_sequence",
- "label",
  "lazy_static",
  "local",
  "naming_special_names_rust",
@@ -1216,7 +1213,6 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_types_ffi",
  "instruction_sequence",
- "label",
  "local",
  "naming_special_names_rust",
  "ocamlrep",
@@ -1266,7 +1262,6 @@ dependencies = [
  "hhbc_id",
  "hhbc_string_utils",
  "instruction_sequence",
- "label",
  "local",
  "naming_special_names_rust",
  "options",
@@ -1369,9 +1364,9 @@ dependencies = [
  "ffi",
  "hhas_param",
  "hhas_type",
+ "hhbc_ast",
  "hhbc_string_utils",
  "instruction_sequence",
- "label",
  "local",
  "oxidized",
 ]
@@ -1527,8 +1522,8 @@ dependencies = [
  "global_state",
  "hash",
  "hhas_symbol_refs",
+ "hhbc_ast",
  "iterator",
- "label",
  "local",
  "ocamlrep",
  "options",
@@ -2105,7 +2100,7 @@ dependencies = [
  "ffi",
  "hhas_attribute",
  "hhas_type",
- "label",
+ "hhbc_ast",
 ]
 
 [[package]]
@@ -2192,7 +2187,6 @@ dependencies = [
  "hhbc_id",
  "hhvm_hhbc_defs_ffi",
  "iterator",
- "label",
  "local",
  "oxidized",
  "typed_value",
@@ -2302,7 +2296,6 @@ dependencies = [
  "ffi",
  "hhbc_ast",
  "iterator",
- "label",
  "local",
  "pretty_assertions",
 ]
@@ -2361,10 +2354,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "label"
-version = "0.0.0"
-
-[[package]]
 name = "label_rewriter"
 version = "0.0.0"
 dependencies = [
@@ -2373,7 +2362,6 @@ dependencies = [
  "hhas_param",
  "hhbc_ast",
  "instruction_sequence",
- "label",
  "oxidized",
 ]
 
@@ -3445,9 +3433,9 @@ version = "0.0.0"
 dependencies = [
  "env",
  "error",
+ "hhbc_ast",
  "instruction_sequence",
  "iterator",
- "label",
  "local",
 ]
 

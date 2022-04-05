@@ -12,7 +12,7 @@ ast_body = { path = "../ast_body" }
 ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }
 hhas_param = { path = "../hhas_param" }
-label = { path = "../../../emitter/cargo/label" }
+hhbc_ast = { path = "../hhbc_ast" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
 unique_id_builder = { path = "../../../utils/cargo/unique_id_builder" }

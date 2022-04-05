@@ -4,9 +4,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::{BumpSliceMut, Slice, Str};
-use hhbc_ast::*;
+use hhbc_ast::{
+    AdataId, BareThisOp, ClassId, ClassNum, CollectionType, ConstId, ContCheckOp, FCallArgs,
+    FatalOp, FunctionId, IncDecOp, InitPropOp, Instruct, IsLogAsDynamicCallOp, IsTypeOp, IterArgs,
+    Label, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp, ObjMethodOp,
+    Opcode, ParamId, PropId, Pseudo, QueryMOp, ReadonlyOp, SetOpOp, SilenceOp, SpecialClsRef,
+    SrcLoc, StackIndex, SwitchKind, TypeStructResolveOp,
+};
 use iterator::IterId;
-use label::Label;
 use local::Local;
 
 /// The various from_X functions below take some kind of AST
@@ -1215,33 +1220,6 @@ impl<'a> InstrSeq<'a> {
             v.truncate(i);
         }
         Slice::new(v.into_bump_slice())
-    }
-
-    pub fn create_try_catch(
-        label_gen: &mut label::Gen,
-        opt_done_label: Option<Label>,
-        skip_throw: bool,
-        try_instrs: Self,
-        catch_instrs: Self,
-    ) -> Self {
-        let done_label = match opt_done_label {
-            Some(l) => l,
-            None => label_gen.next_regular(),
-        };
-        InstrSeq::gather(vec![
-            instr::instr(Instruct::Pseudo(Pseudo::TryCatchBegin)),
-            try_instrs,
-            instr::jmp(done_label),
-            instr::instr(Instruct::Pseudo(Pseudo::TryCatchMiddle)),
-            catch_instrs,
-            if skip_throw {
-                instr::empty()
-            } else {
-                instr::instr(Instruct::Opcode(Opcode::Throw))
-            },
-            instr::instr(Instruct::Pseudo(Pseudo::TryCatchEnd)),
-            instr::label(done_label),
-        ])
     }
 
     /// Test whether `i` is of case `Pseudo::SrcLoc`.

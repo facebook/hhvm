@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::SymbolRefsState;
+use crate::{LabelGen, SymbolRefsState};
 use adata_state::AdataState;
 use decl_provider::{DeclProvider, Result};
 use ffi::Str;
@@ -25,7 +25,7 @@ pub struct Emitter<'arena, 'decl> {
     systemlib: bool,
 
     // the rest is being mutated during emittance
-    label_gen: label::Gen,
+    label_gen: LabelGen,
     local_gen: local::Gen,
     iterator: Iter,
     named_locals: IndexSet<Str<'arena>>,
@@ -102,7 +102,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         &mut self.iterator
     }
 
-    pub fn label_gen_mut(&mut self) -> &mut label::Gen {
+    pub fn label_gen_mut(&mut self) -> &mut LabelGen {
         &mut self.label_gen
     }
 

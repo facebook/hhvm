@@ -3,12 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use env::emitter::Emitter;
+use env::{emitter::Emitter, LabelGen};
 use hash::{HashMap, HashSet};
 use hhas_param::HhasParam;
-use hhbc_ast::{Instruct, Pseudo};
+use hhbc_ast::{Instruct, Label, Pseudo};
 use instruction_sequence::InstrSeq;
-use label::Label;
 use oxidized::ast;
 
 /// Create a mapping Label instructions to their position in the InstrSeq without
@@ -32,7 +31,7 @@ fn create_label_ref_map<'arena>(
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     body: &InstrSeq<'arena>,
 ) -> (HashSet<Label>, HashMap<u32, Label>) {
-    let mut label_gen = label::Gen::default();
+    let mut label_gen = LabelGen::default();
     let mut used = HashSet::default();
     let mut offset_to_label = HashMap::default();
 

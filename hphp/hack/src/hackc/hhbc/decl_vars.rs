@@ -7,7 +7,7 @@ use ast_body::AstBody;
 use ffi::{Just, Maybe};
 use hash::IndexSet;
 use hhas_param::HhasParam;
-use label::Label;
+use hhbc_ast::Label;
 use naming_special_names_rust::{emitter_special_functions, special_idents};
 use oxidized::{
     aast,

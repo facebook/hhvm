@@ -17,6 +17,7 @@ decl_provider = { path = "../../../decl_provider" }
 ffi = { path = "../../../../utils/ffi" }
 global_state = { path = "../global_state" }
 hash = { path = "../../../../utils/hash" }
+hhas_symbol_refs = { path = "../../../hhbc/cargo/hhas_symbol_refs" }
 iterator = { path = "../iterator" }
 label = { path = "../label" }
 local = { path = "../local" }
@@ -26,4 +27,3 @@ oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 stack_limit = { path = "../../../../utils/stack_limit" }
 statement_state = { path = "../statement_state" }
-symbol_refs_state = { path = "../symbol_refs_state" }

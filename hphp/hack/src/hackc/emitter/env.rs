@@ -10,11 +10,14 @@ use ast_body::AstBody;
 use ast_scope::{self as ast_scope, Scope, ScopeItem};
 use bitflags::bitflags;
 use emitter::Emitter;
+use ffi::{Slice, Str};
+use hhas_symbol_refs::{HhasSymbolRefs, IncludePathSet};
 use iterator::IterId;
 use label::Label;
 use local::Local;
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env::Env as NamespaceEnv};
+use std::collections::BTreeSet;
 
 bitflags! {
     #[derive(Default)]
@@ -197,6 +200,25 @@ impl<'a, 'arena> Env<'a, 'arena> {
         self.jump_targets_gen.release_ids();
         self.jump_targets_gen.revert();
         res
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct SymbolRefsState<'arena> {
+    pub includes: IncludePathSet<'arena>,
+    pub constants: BTreeSet<Str<'arena>>,
+    pub functions: BTreeSet<Str<'arena>>,
+    pub classes: BTreeSet<Str<'arena>>,
+}
+
+impl<'arena> SymbolRefsState<'arena> {
+    pub fn to_hhas(self, alloc: &'arena bumpalo::Bump) -> HhasSymbolRefs<'arena> {
+        HhasSymbolRefs {
+            includes: Slice::new(alloc.alloc_slice_fill_iter(self.includes.into_iter())),
+            constants: Slice::new(alloc.alloc_slice_fill_iter(self.constants.into_iter())),
+            functions: Slice::new(alloc.alloc_slice_fill_iter(self.functions.into_iter())),
+            classes: Slice::new(alloc.alloc_slice_fill_iter(self.classes.into_iter())),
+        }
     }
 }
 

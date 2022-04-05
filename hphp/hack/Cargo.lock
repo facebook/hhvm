@@ -1150,6 +1150,7 @@ dependencies = [
  "error",
  "ffi",
  "hash",
+ "hhas_symbol_refs",
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
@@ -1163,7 +1164,6 @@ dependencies = [
  "oxidized",
  "regex",
  "scope",
- "symbol_refs_state",
  "typed_value",
 ]
 
@@ -1413,8 +1413,8 @@ name = "emit_symbol_refs"
 version = "0.0.0"
 dependencies = [
  "env",
+ "hhas_symbol_refs",
  "hhbc_id",
- "symbol_refs_state",
 ]
 
 [[package]]
@@ -1479,13 +1479,11 @@ dependencies = [
  "emit_file_attributes",
  "emit_function",
  "emit_module",
- "emit_symbol_refs",
  "emit_typedef",
  "env",
  "error",
  "ffi",
  "hackc_unit",
- "hhas_symbol_refs",
  "hhbc_ast",
  "ocamlrep",
  "oxidized",
@@ -1528,6 +1526,7 @@ dependencies = [
  "ffi",
  "global_state",
  "hash",
+ "hhas_symbol_refs",
  "iterator",
  "label",
  "local",
@@ -1537,7 +1536,6 @@ dependencies = [
  "oxidized_by_ref",
  "stack_limit",
  "statement_state",
- "symbol_refs_state",
 ]
 
 [[package]]
@@ -2134,9 +2132,9 @@ dependencies = [
 name = "hhas_symbol_refs"
 version = "0.0.0"
 dependencies = [
+ "bstr",
  "bumpalo",
  "ffi",
- "symbol_refs_state",
 ]
 
 [[package]]
@@ -3640,15 +3638,6 @@ name = "sval"
 version = "1.0.0-alpha.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "45f6ee7c7b87caf59549e9fe45d6a69c75c8019e79e212a835c5da0e92f0ba08"
-
-[[package]]
-name = "symbol_refs_state"
-version = "0.0.0"
-dependencies = [
- "bstr",
- "bumpalo",
- "ffi",
-]
 
 [[package]]
 name = "syn"

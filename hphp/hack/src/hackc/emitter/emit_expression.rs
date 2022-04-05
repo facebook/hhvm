@@ -9,6 +9,7 @@ use env::{emitter::Emitter, Env, Flags as EnvFlags};
 use error::{Error, Result};
 use ffi::{Slice, Str};
 use hash::HashSet;
+use hhas_symbol_refs::IncludePath;
 use hhbc_ast::*;
 use hhbc_id::{class, constant, function, method, prop};
 use hhbc_string_utils as string_utils;
@@ -32,7 +33,6 @@ use oxidized::{
 };
 use regex::Regex;
 use std::{borrow::Cow, collections::BTreeMap, iter, str::FromStr};
-use symbol_refs_state::IncludePath;
 use typed_value::TypedValue;
 
 #[derive(Debug)]

@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::SymbolRefsState;
 use adata_state::AdataState;
 use decl_provider::{DeclProvider, Result};
 use ffi::Str;
@@ -14,7 +15,6 @@ use options::Options;
 use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
 use stack_limit::StackLimit;
 use statement_state::StatementState;
-use symbol_refs_state::SymbolRefsState;
 
 #[derive(Debug)]
 pub struct Emitter<'arena, 'decl> {
@@ -180,14 +180,22 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             .get_or_insert_with(StatementState::init)
     }
 
-    pub fn emit_symbol_refs_state(&self) -> &SymbolRefsState<'arena> {
+    pub fn symbol_refs_state(&self) -> &SymbolRefsState<'arena> {
         self.symbol_refs_state_
             .as_ref()
             .expect("uninit'd symbol_refs_state")
     }
-    pub fn emit_symbol_refs_state_mut(&mut self) -> &mut SymbolRefsState<'arena> {
+
+    pub fn symbol_refs_state_mut(&mut self) -> &mut SymbolRefsState<'arena> {
         self.symbol_refs_state_
-            .get_or_insert_with(|| SymbolRefsState::init(self.alloc))
+            .get_or_insert_with(SymbolRefsState::default)
+    }
+
+    pub fn take_symbol_refs(&mut self) -> SymbolRefsState<'arena> {
+        match &mut self.symbol_refs_state_ {
+            Some(state) => std::mem::take(state),
+            None => Default::default(),
+        }
     }
 
     pub fn emit_global_state(&self) -> &GlobalState<'arena> {

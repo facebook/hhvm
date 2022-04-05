@@ -16,13 +16,11 @@ emit_constant = { path = "../emit_constant" }
 emit_file_attributes = { path = "../emit_file_attributes" }
 emit_function = { path = "../emit_function" }
 emit_module = { path = "../emit_module" }
-emit_symbol_refs = { path = "../emit_symbol_refs" }
 emit_typedef = { path = "../emit_typedef" }
 env = { path = "../env" }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
 hackc_unit = { path = "../../../hhbc/cargo/hackc_unit" }
-hhas_symbol_refs = { path = "../../../hhbc/cargo/hhas_symbol_refs" }
 hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }

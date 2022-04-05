@@ -40,11 +40,18 @@ let check_fulfillment env class_pos get_impl (trait_pos, req_ty) =
       Option.iter ~f:Errors.add_typing_error ty_err_opt;
       env)
 
-let check_require_class env class_pos class_name (trait_pos, req_ty) =
+let check_require_class env class_pos tc (trait_pos, req_ty) =
   match TUtils.try_unwrap_class_type req_ty with
   | None -> env
   | Some (_r, (_p, req_name), _paraml) ->
-    if String.equal req_name class_name then
+    (* in a `require class t;` trait constraint, t must be a non-generic class
+     * name.  Since lowering enforces _paraml to be empty, so it is safe to
+     * ignore _param here.  Additionally we enforce that the class that uses
+     * the trait with a require class constraint does not have type parameters.
+     *
+     *)
+    if String.equal req_name (Cls.name tc) && List.is_empty (Cls.tparams tc)
+    then
       env
     else
       let req_pos = Typing_defs.get_pos req_ty in
@@ -69,7 +76,7 @@ let check_class env class_pos tc =
     in
     List.fold
       (Cls.all_ancestor_req_class_requirements tc)
-      ~f:(fun env req -> check_require_class env class_pos (Cls.name tc) req)
+      ~f:(fun env req -> check_require_class env class_pos tc req)
       ~init:env
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface

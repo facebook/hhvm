@@ -4783,11 +4783,29 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
         }
         RequireClause(c) => {
             use aast::RequireKind::*;
+            use ast::Hint_;
             let hint = p_hint(&c.name, env)?;
             let require_kind = match token_kind(&c.kind) {
                 Some(TK::Implements) => RequireImplements,
                 Some(TK::Extends) => RequireExtends,
-                Some(TK::Class) => RequireClass,
+                Some(TK::Class) => {
+                    let ast::Hint(_pos, hint_) = &hint;
+                    match hint_.as_ref() {
+                        Hint_::Happly(_, v) => {
+                            if !(v.is_empty()) {
+                                /* in a `require class t;` trait constraint,
+                                t must be a non-generic class name */
+                                raise_parsing_error(
+                                    &c.name,
+                                    env,
+                                    &syntax_error::require_class_applied_to_generic,
+                                )
+                            };
+                            RequireClass
+                        }
+                        _ => missing_syntax("class name", &c.name, env)?,
+                    }
+                }
                 _ => missing_syntax("trait require kind", &c.kind, env)?,
             };
             Ok(class.reqs.push((hint, require_kind)))

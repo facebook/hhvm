@@ -1100,3 +1100,6 @@ pub const default_switch_case_not_last: Error =
 
 pub const dollar_sign_in_meth_caller_argument: Error =
     Cow::Borrowed("`meth_caller` cannot be called on strings that contain `$`");
+
+pub const require_class_applied_to_generic: Error =
+    Cow::Borrowed("Require class cannot be used with a generic class");

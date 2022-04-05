@@ -75,6 +75,36 @@ struct ReflectionFileHandle {
   LowPtr<const Unit> m_unit{nullptr};
 };
 
+/* A ReflectionModuleHandle is a NativeData object wrapping a Module*
+ * for the purposes of ReflectionModule. */
+struct ReflectionModuleHandle {
+  ReflectionModuleHandle(): m_module(nullptr) {}
+  explicit ReflectionModuleHandle(const Module* module): m_module(module) {}
+  ReflectionModuleHandle(const ReflectionModuleHandle&) = delete;
+  ReflectionModuleHandle& operator=(const ReflectionModuleHandle& other) {
+    m_module = other.m_module;
+    return *this;
+  }
+
+  static ReflectionModuleHandle* Get(ObjectData* obj) {
+    return Native::data<ReflectionModuleHandle>(obj);
+  }
+
+  static const Module* GetModuleFor(ObjectData* obj) {
+    return Native::data<ReflectionModuleHandle>(obj)->getModule();
+  }
+
+  const Module* getModule() { return m_module; }
+  void setModule(const Module* module) {
+    assertx(module != nullptr);
+    assertx(m_module == nullptr);
+    m_module = module;
+  }
+
+ private:
+  const Module* m_module{nullptr};
+};
+
 /* A ReflectionFuncHandle is a NativeData object wrapping a Func*
  * for the purposes of ReflectionFunction and ReflectionMethod. */
 struct ReflectionFuncHandle {

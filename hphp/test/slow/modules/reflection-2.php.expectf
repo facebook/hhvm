@@ -1,0 +1,16 @@
+string(1) "A"
+dict(2) {
+  ["Ok"]=>
+  vec(0) {
+  }
+  ["Yes"]=>
+  vec(0) {
+  }
+}
+string(1) "B"
+dict(0) {
+}
+
+Fatal error: Uncaught exception 'ReflectionException' with message 'Module 'C' does not exist' in %s:19
+Stack trace:
+%A

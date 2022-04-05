@@ -1098,6 +1098,42 @@ static Array HHVM_METHOD(ReflectionFile, getAttributesNamespaced) {
   return ai.toArray();
 }
 
+// ------------------------- class ReflectionModule
+
+const StaticString s_ReflectionModuleHandle("ReflectionModuleHandle");
+
+// helper for __construct
+static String HHVM_METHOD(ReflectionModule, __init, const String& name) {
+  if (name.isNull()) {
+    Reflection::ThrowReflectionExceptionObject(
+      "Tried to construct ReflectionModule but the name was null"
+    );
+  }
+
+  const Module* module = Module::lookup(name.get());
+  if (!module) {
+    Reflection::ThrowReflectionExceptionObject(folly::sformat(
+      "Module '{}' does not exist",
+      name
+    ));
+  }
+
+  ReflectionModuleHandle::Get(this_)->setModule(module);
+  return String::attach(const_cast<StringData*>(module->name.get()));
+}
+
+static Array HHVM_METHOD(ReflectionModule, getAttributesNamespaced) {
+  auto const module = ReflectionModuleHandle::GetModuleFor(this_);
+  assertx(module);
+
+  auto userAttrs = module->userAttributes;
+  DictInit ai(userAttrs.size());
+  for (auto const& attr : userAttrs) {
+    ai.set(StrNR(attr.first), attr.second);
+  }
+  return ai.toArray();
+}
+
 // ------------------------- class ReflectionFunction
 
 // helper for __construct
@@ -2238,6 +2274,9 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionFunction, getClosureScopeClassname);
     HHVM_ME(ReflectionFunction, getClosureThisObject);
 
+    HHVM_ME(ReflectionModule, __init);
+    HHVM_ME(ReflectionModule, getAttributesNamespaced);
+
     HHVM_ME(ReflectionTypeConstant, __init);
     HHVM_ME(ReflectionTypeConstant, getName);
     HHVM_ME(ReflectionTypeConstant, isAbstract);
@@ -2314,6 +2353,8 @@ struct ReflectionExtension final : Extension {
       s_ReflectionPropHandle.get());
     Native::registerNativeDataInfo<ReflectionFileHandle>(
       s_ReflectionFileHandle.get());
+    Native::registerNativeDataInfo<ReflectionModuleHandle>(
+      s_ReflectionModuleHandle.get());
     Native::registerNativeDataInfo<ReflectionTypeAliasHandle>(
       s_ReflectionTypeAliasHandle.get(), Native::NO_SWEEP);
 

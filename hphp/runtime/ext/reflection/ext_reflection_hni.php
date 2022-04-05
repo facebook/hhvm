@@ -2495,3 +2495,66 @@ final class ReflectionFile implements Reflector {
   }
 
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// modules
+
+/** The ReflectionModule class reports information about a module.
+ */
+<<__NativeData('ReflectionModuleHandle')>>
+final class ReflectionModule implements Reflector {
+
+  private string $name = '';
+
+  /**
+   * Constructs a new ReflectionModule.
+   *
+   * @name      string  Name of the module.
+   */
+  final public function __construct(string $name)[] {
+    $n = $this->__init($name);
+    if (!$n) {
+      throw new ReflectionException(
+        "module {$name} does not exist");
+    }
+    $this->name = $n;
+  }
+
+  // helper for ctor
+  <<__Native>>
+  private function __init(string $name)[]: string;
+
+  /**
+   * Gets all attributes
+   *
+   * @return  darray<arraykey, varray<mixed>>
+   */
+  <<__Native>>
+  final public function getAttributesNamespaced(
+  )[]: darray<arraykey, varray<mixed>>;
+
+  use ReflectionLegacyAttribute;
+
+  use ReflectionTypedAttribute;
+
+  /**
+   * Get the name of the file.
+   *
+   * @return    string  The name of the file
+   */
+  public function getName()[] {
+    return $this->name;
+  }
+
+  // Prevent cloning
+  final public function __clone() {
+    throw new BadMethodCallException(
+      'Trying to clone an uncloneable object of class ReflectionModule'
+    );
+  }
+
+  public function __toString()[] {
+    return "Module [ {$this->name} ]\n";
+  }
+
+}

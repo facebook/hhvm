@@ -251,16 +251,18 @@ void reportJitMaturity() {
   auto const mainSize = code().main().used();
 
   auto const fullSize = RuntimeOption::EvalJitMatureSize;
-  auto const codeSize = mainSize + hotSize +
-    static_cast<size_t>(profSize * RuntimeOption::EvalJitMaturityProfWeight);
+  auto const codeSize =
+    std::max(mainSize,
+             static_cast<size_t>(profSize * RO::EvalJitMaturityProfWeight));
 
   int64_t maturity = before;
   if (beforeRetranslateAll) {
     maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
-  } else if (getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) {
+  } else if (mainSize >= CodeCache::AMaxUsage ||
+             getLiveMainUsage() >= RO::EvalJitMaxLiveMainUsage) {
     maturity = 100;
   } else if (codeSize >= fullSize) {
-    maturity = (mainSize >= CodeCache::AMaxUsage) ? 100 : 99;
+    maturity = 99;
   } else {
     maturity = std::pow(codeSize / static_cast<double>(fullSize),
                         RuntimeOption::EvalJitMaturityExponent) * 99;

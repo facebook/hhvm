@@ -67,7 +67,7 @@ let check_implements
           let bindings = SMap.bindings SN.UserAttributes.as_map in
           let filtered_bindings =
             List.filter
-              ~f:(fun (_, list) ->
+              ~f:(fun (_, (list, _)) ->
                 List.mem list attr_interface ~equal:String.equal)
               bindings
           in

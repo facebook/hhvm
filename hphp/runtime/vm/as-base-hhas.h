@@ -33,6 +33,7 @@ constexpr auto P = static_cast<ContextMask>(AttrContext::Prop);
 constexpr auto T = static_cast<ContextMask>(AttrContext::TraitImport);
 constexpr auto A = static_cast<ContextMask>(AttrContext::Alias);
 constexpr auto K = static_cast<ContextMask>(AttrContext::Constant);
+constexpr auto M = static_cast<ContextMask>(AttrContext::Module);
 
 constexpr bool supported(ContextMask mask, AttrContext a) {
   return mask & static_cast<ContextMask>(a);
@@ -60,7 +61,6 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrIsReadonly,               P,       "readonly");             \
   X(AttrReadonlyReturn,           F,       "readonly_return");      \
   X(AttrReadonlyThis,             F,       "readonly_this");        \
-  X(AttrModule,                   C,       "module");               \
   X(AttrForbidDynamicProps,       C,       "no_dynamic_props");     \
   X(AttrDynamicallyConstructible, C,       "dyn_constructible");    \
   X(AttrProvenanceSkipFrame,      F,       "prov_skip_frame");      \

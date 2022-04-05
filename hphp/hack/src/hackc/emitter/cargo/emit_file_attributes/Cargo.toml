@@ -11,7 +11,6 @@ path = "../../emit_file_attributes.rs"
 emit_attribute = { path = "../emit_attribute" }
 env = { path = "../env" }
 error = { path = "../../../error/cargo/error" }
-ffi = { path = "../../../../utils/ffi" }
 hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
 itertools = "0.10.3"
 oxidized = { path = "../../../../oxidized" }

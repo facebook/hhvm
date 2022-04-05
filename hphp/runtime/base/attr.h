@@ -124,9 +124,6 @@ enum Attr {
   // Indicates that the function returns readonly value
   AttrReadonlyReturn       = (1u << 15), //       |          |    X    //
                                          //       |          |         //
-  // Indicates that this class is a module declaration
-  AttrModule               = (1u << 16), //    X  |          |         //
-                                         //       |          |         //
   // Indicates that this symbol is internal to the module it is declared in
   AttrInternal             = (1u << 17), //    X  |    X     |    X    //
                                          //       |          |         //

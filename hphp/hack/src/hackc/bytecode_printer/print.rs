@@ -23,6 +23,7 @@ use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
 use hhas_constant::HhasConstant;
 use hhas_function::HhasFunction;
 use hhas_method::{HhasMethod, HhasMethodFlags};
+use hhas_module::HhasModule;
 use hhas_param::HhasParam;
 use hhas_pos::{HhasPos, HhasSpan};
 use hhas_property::HhasProperty;
@@ -128,10 +129,11 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Re
     }
 
     newline(w)?;
-    print_module(w, &prog.module)?;
+    print_module_use(w, &prog.module_use)?;
     concat(w, &prog.adata, |w, a| print_adata_region(ctx, w, a))?;
     concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
     concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
+    concat(w, &prog.modules, |w, cd| print_module_def(ctx, w, cd))?;
     concat(w, &prog.constants, |w, c| print_constant(ctx, w, c))?;
     concat(w, &prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
     print_file_attributes(ctx, w, prog.file_attributes.as_ref())?;
@@ -676,6 +678,29 @@ fn print_class_def<'arena>(
     newline(w)
 }
 
+fn print_module_def<'arena>(
+    ctx: &Context<'_>,
+    w: &mut dyn Write,
+    module_def: &HhasModule<'arena>,
+) -> Result<()> {
+    newline(w)?;
+    w.write_all(b".module ")?;
+    print_special_and_user_attrs(
+        ctx,
+        w,
+        module_def.attributes.as_ref(),
+        &AttrContext::Module,
+        &Attr::AttrNone,
+    )?;
+    w.write_all(module_def.name.as_bstr())?;
+    w.write_all(b" ")?;
+    print_span(w, &module_def.span)?;
+    w.write_all(b" {")?;
+    newline(w)?;
+    w.write_all(b"}")?;
+    newline(w)
+}
+
 fn print_pos_as_prov_tag(
     ctx: &Context<'_>,
     w: &mut dyn Write,
@@ -832,10 +857,10 @@ fn print_file_attributes(
     newline(w)
 }
 
-fn print_module(w: &mut dyn Write, m_opt: &Maybe<Str<'_>>) -> Result<()> {
+fn print_module_use(w: &mut dyn Write, m_opt: &Maybe<Str<'_>>) -> Result<()> {
     if let Just(m) = m_opt {
         newline(w)?;
-        write_bytes!(w, ".module \"{}\";", m)?;
+        write_bytes!(w, ".module_use \"{}\";", m)?;
         newline(w)?;
     }
     Ok(())

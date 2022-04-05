@@ -14,6 +14,7 @@ hhas_attribute = { path = "../hhas_attribute" }
 hhas_class = { path = "../hhas_class" }
 hhas_constant = { path = "../hhas_constant" }
 hhas_function = { path = "../hhas_function" }
+hhas_module = { path = "../hhas_module" }
 hhas_pos = { path = "../hhas_pos" }
 hhas_symbol_refs = { path = "../hhas_symbol_refs" }
 hhas_typedef = { path = "../hhas_typedef" }

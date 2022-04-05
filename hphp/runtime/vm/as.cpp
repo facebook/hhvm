@@ -3212,6 +3212,36 @@ void parse_class(AsmState& as) {
 }
 
 /*
+ * directive-module : attribute-list identifier '{}'
+ *                  ;
+ */
+void parse_module(AsmState& as) {
+  as.in.skipWhitespace();
+
+  UserAttributeMap userAttrs;
+  Attr attrs = parse_attribute_list(as, AttrContext::Module, &userAttrs);
+
+  std::string name;
+  if (!as.in.readname(name)) {
+    as.error(".module must have a name");
+  }
+
+  int line0;
+  int line1;
+  parse_line_range(as, line0, line1);
+  as.in.expectWs('{');
+  as.in.expectWs('}');
+
+  as.ue->addModule(std::move(Module{
+    makeStaticString(name),
+    line0,
+    line1,
+    attrs,
+    userAttrs
+  }));
+}
+
+/*
  * directive-filepath : quoted-string-literal ';'
  *                    ;
  */
@@ -3344,7 +3374,7 @@ void parse_fatal(AsmState& as) {
 /*
  * directive-module : string ';'
  */
-void parse_module(AsmState& as) {
+void parse_module_use(AsmState& as) {
   as.in.skipWhitespace();
   std::string name;
   if (!as.in.readQuotedStr(name)) {
@@ -3476,6 +3506,7 @@ void parse(AsmState& as) {
     if (directive == ".metadata")      { parse_metadata(as)      ; continue; }
     if (directive == ".file_attributes") { parse_file_attributes(as); continue;}
     if (directive == ".fatal")         { parse_fatal(as)         ; continue; }
+    if (directive == ".module_use")    { parse_module_use(as)    ; continue; }
     if (directive == ".module")        { parse_module(as)        ; continue; }
 
     as.error("unrecognized top-level directive `" + directive + "'");

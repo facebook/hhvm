@@ -41,7 +41,6 @@ pub mod ffi {
         AttrIsReadonly = 0x4000,
         AttrReadonlyThis = 0x4000,
         AttrReadonlyReturn = 0x8000,
-        AttrModule = 0x10000,
         AttrInternal = 0x20000,
         AttrPersistent = 0x40000,
         AttrDynamicallyCallable = 0x80000,
@@ -71,6 +70,7 @@ pub mod ffi {
         Alias = 0x10,
         Parameter = 0x20,
         Constant = 0x40,
+        Module = 0x80,
     }
 
     #[repr(u16)]

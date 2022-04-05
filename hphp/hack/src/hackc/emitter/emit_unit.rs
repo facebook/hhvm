@@ -6,8 +6,9 @@
 use bitflags::bitflags;
 use emit_class::emit_classes_from_program;
 use emit_constant::emit_constants_from_program;
-use emit_file_attributes::{emit_file_attributes_from_program, emit_module_from_program};
+use emit_file_attributes::emit_file_attributes_from_program;
 use emit_function::emit_functions_from_program;
+use emit_module::{emit_module_use_from_program, emit_modules_from_program};
 use emit_typedef::emit_typedefs_from_program;
 use env::{self, emitter::Emitter, Env};
 use error::{Error, ErrorKind, Result};
@@ -61,6 +62,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;
     let classes = emit_classes_from_program(emitter.alloc, emitter, prog)?;
+    let modules = emit_modules_from_program(emitter.alloc, emitter, prog)?;
     let typedefs = emit_typedefs_from_program(emitter, prog)?;
     let (constants, mut const_inits) = {
         let mut env = Env::default(emitter.alloc, namespace);
@@ -69,19 +71,20 @@ fn emit_unit_<'a, 'arena, 'decl>(
     functions.append(&mut const_inits);
     let file_attributes = emit_file_attributes_from_program(emitter, prog)?;
     let adata = emit_adata::take(emitter).adata;
-    let module = emit_module_from_program(emitter, prog);
+    let module_use = emit_module_use_from_program(emitter, prog);
     let symbol_refs =
         HhasSymbolRefs::from_symbol_refs_state(emitter.alloc, emit_symbol_refs::take(emitter));
     let fatal = Nothing;
 
     Ok(HackCUnit {
         classes: Slice::fill_iter(emitter.alloc, classes.into_iter()),
+        modules: Slice::fill_iter(emitter.alloc, modules.into_iter()),
         functions: Slice::fill_iter(emitter.alloc, functions.into_iter()),
         typedefs: Slice::fill_iter(emitter.alloc, typedefs.into_iter()),
         constants: Slice::fill_iter(emitter.alloc, constants.into_iter()),
         adata: Slice::fill_iter(emitter.alloc, adata.into_iter()),
         file_attributes: Slice::fill_iter(emitter.alloc, file_attributes.into_iter()),
-        module,
+        module_use,
         symbol_refs,
         fatal,
     })

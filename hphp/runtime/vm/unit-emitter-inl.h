@@ -74,6 +74,17 @@ inline const std::vector<Constant>& UnitEmitter::constants() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Modules.
+
+inline std::vector<Module>& UnitEmitter::modules() {
+  return m_modules;
+}
+
+inline const std::vector<Module>& UnitEmitter::modules() const {
+  return m_modules;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 
 inline bool UnitEmitter::isASystemLib() const {

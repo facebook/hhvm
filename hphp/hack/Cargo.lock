@@ -333,6 +333,7 @@ dependencies = [
  "hhas_constant",
  "hhas_function",
  "hhas_method",
+ "hhas_module",
  "hhas_param",
  "hhas_pos",
  "hhas_property",
@@ -1184,7 +1185,6 @@ dependencies = [
  "emit_attribute",
  "env",
  "error",
- "ffi",
  "hhas_attribute",
  "itertools 0.10.3",
  "oxidized",
@@ -1300,6 +1300,21 @@ dependencies = [
  "naming_special_names_rust",
  "ocamlrep",
  "options",
+ "oxidized",
+]
+
+[[package]]
+name = "emit_module"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "emit_attribute",
+ "env",
+ "error",
+ "ffi",
+ "hhas_module",
+ "hhas_pos",
+ "hhbc_id",
  "oxidized",
 ]
 
@@ -1463,6 +1478,7 @@ dependencies = [
  "emit_constant",
  "emit_file_attributes",
  "emit_function",
+ "emit_module",
  "emit_symbol_refs",
  "emit_typedef",
  "env",
@@ -1783,6 +1799,7 @@ dependencies = [
  "hhas_class",
  "hhas_constant",
  "hhas_function",
+ "hhas_module",
  "hhas_pos",
  "hhas_symbol_refs",
  "hhas_typedef",
@@ -2070,6 +2087,16 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhvm_types_ffi",
+]
+
+[[package]]
+name = "hhas_module"
+version = "0.0.0"
+dependencies = [
+ "ffi",
+ "hhas_attribute",
+ "hhas_pos",
+ "hhbc_id",
 ]
 
 [[package]]

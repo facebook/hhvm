@@ -601,6 +601,13 @@ struct Constant {
   Attr attrs;
 };
 
+struct Module {
+  LSString name;
+  SrcInfo srcInfo;
+  Attr attrs;
+  UserAttributeMap userAttributes;
+};
+
 struct TypeAlias {
   Unit* unit;
   SrcInfo srcInfo;
@@ -637,6 +644,7 @@ struct Unit {
   CompactVector<std::unique_ptr<Class>> classes;
   CompactVector<std::unique_ptr<TypeAlias>> typeAliases;
   CompactVector<std::unique_ptr<Constant>> constants;
+  CompactVector<std::unique_ptr<Module>> modules;
   CompactVector<SrcLoc> srcLocs;
   UserAttributeMap metaData;
   UserAttributeMap fileAttributes;

@@ -1266,6 +1266,17 @@ void emit_constant(UnitEmitter& ue, const php::Constant& constant) {
   ue.addConstant(c);
 }
 
+void emit_module(UnitEmitter& ue, const php::Module& module) {
+  Module m {
+    module.name,
+    (int)std::get<0>(module.srcInfo.loc),
+    (int)std::get<1>(module.srcInfo.loc),
+    module.attrs,
+    module.userAttributes
+  };
+  ue.addModule(m);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -1354,6 +1365,10 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
 
   for (size_t id = 0; id < unit.constants.size(); ++id) {
     emit_constant(*ue, *unit.constants[id]);
+  }
+
+  for (size_t id = 0; id < unit.modules.size(); ++id) {
+    emit_module(*ue, *unit.modules[id]);
   }
 
   ue->finish();

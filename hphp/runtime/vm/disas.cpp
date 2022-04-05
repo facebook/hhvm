@@ -918,6 +918,16 @@ void print_constant(Output& out, const Constant& cns) {
             member_tv_initializer(cns.val));
 }
 
+void print_module(Output& out, const Module& m) {
+  out.fmtln(".module{} {} ({},{}) {{",
+            opt_attrs(AttrContext::Module, m.attrs, &m.userAttributes),
+            m.name,
+            m.line0,
+            m.line1);
+  out.fmtln("}}");
+  out.nl();
+}
+
 void print_fatal(Output& out, const Unit* unit) {
   if (auto const info = unit->getFatalInfo()) {
     out.nl();
@@ -928,10 +938,10 @@ void print_fatal(Output& out, const Unit* unit) {
   }
 }
 
-void print_module(Output& out, const Unit* unit) {
+void print_module_use(Output& out, const Unit* unit) {
   if (auto const name = unit->moduleName()) {
     out.nl();
-    out.fmtln(".module \"{}\";", name);
+    out.fmtln(".module_use \"{}\";", name);
   }
 }
 
@@ -940,7 +950,7 @@ void print_unit_metadata(Output& out, const Unit* unit) {
 
   out.fmtln(".filepath {};", escaped(unit->origFilepath()));
   print_fatal(out, unit);
-  print_module(out, unit);
+  print_module_use(out, unit);
   if (!unit->fileAttributes().empty()) {
     out.nl();
     out.fmtln(".file_attributes [{}] ;", user_attrs(&unit->fileAttributes()));
@@ -977,6 +987,7 @@ void print_unit(Output& out, const Unit* unit) {
   for (auto& cls : unit->preclasses())    print_cls(out, cls.get());
   for (auto& alias : unit->typeAliases()) print_alias(out, alias);
   for (auto& c : unit->constants())       print_constant(out, c);
+  for (auto& m : unit->modules())         print_module(out, m);
   out.fmtln("# {} ends here", unit->origFilepath());
 }
 

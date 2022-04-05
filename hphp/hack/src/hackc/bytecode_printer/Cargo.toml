@@ -24,6 +24,7 @@ hhas_coeffects = { path = "../hhbc/cargo/hhas_coeffects" }
 hhas_constant = { path = "../hhbc/cargo/hhas_constant" }
 hhas_function = { path = "../hhbc/cargo/hhas_function" }
 hhas_method = { path = "../hhbc/cargo/hhas_method" }
+hhas_module = { path = "../hhbc/cargo/hhas_module" }
 hhas_param = { path = "../hhbc/cargo/hhas_param" }
 hhas_pos = { path = "../hhbc/cargo/hhas_pos" }
 hhas_property = { path = "../hhbc/cargo/hhas_property" }

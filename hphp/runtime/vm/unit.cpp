@@ -383,9 +383,9 @@ void Unit::mergeImpl(MergeTypes mergeTypes) {
   assertx(m_mergeState.load(std::memory_order_relaxed) >= MergeState::InitialMerged);
   autoTypecheck(this);
 
-  FTRACE(1, "Merging unit {} ({} funcs, {} constants, {} typealiases, {} classes)\n",
+  FTRACE(1, "Merging unit {} ({} funcs, {} constants, {} typealiases, {} classes, {} modules)\n",
          this->m_origFilepath->data(), m_funcs.size(), m_constants.size(), m_typeAliases.size(),
-         m_preClasses.size());
+         m_preClasses.size(), m_modules.size());
 
   if (mergeTypes & MergeTypes::Function) {
     for (auto func : funcs()) {
@@ -513,6 +513,9 @@ std::string Unit::toString() const {
   }
   for (auto& cns : constants()) {
     cns.prettyPrint(ss);
+  }
+  for (auto& m : modules()) {
+    m.prettyPrint(ss);
   }
   return ss.str();
 }

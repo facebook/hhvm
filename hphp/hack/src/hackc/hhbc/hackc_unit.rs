@@ -9,6 +9,7 @@ use hhas_attribute::HhasAttribute;
 use hhas_class::HhasClass;
 use hhas_constant::HhasConstant;
 use hhas_function::HhasFunction;
+use hhas_module::HhasModule;
 use hhas_pos::HhasPos;
 use hhas_symbol_refs::HhasSymbolRefs;
 use hhas_typedef::HhasTypedef;
@@ -20,9 +21,10 @@ pub struct HackCUnit<'arena> {
     pub adata: Slice<'arena, HhasAdata<'arena>>,
     pub functions: Slice<'arena, HhasFunction<'arena>>,
     pub classes: Slice<'arena, HhasClass<'arena>>,
+    pub modules: Slice<'arena, HhasModule<'arena>>,
     pub typedefs: Slice<'arena, HhasTypedef<'arena>>,
     pub file_attributes: Slice<'arena, HhasAttribute<'arena>>,
-    pub module: Maybe<Str<'arena>>,
+    pub module_use: Maybe<Str<'arena>>,
     pub symbol_refs: HhasSymbolRefs<'arena>,
     pub constants: Slice<'arena, HhasConstant<'arena>>,
     pub fatal: Maybe<Triple<FatalOp, HhasPos, Str<'arena>>>,

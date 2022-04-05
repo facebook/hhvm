@@ -1069,6 +1069,15 @@ std::unique_ptr<php::Constant> parse_constant(const Constant& c, php::Unit* unit
   });
 }
 
+std::unique_ptr<php::Module> parse_module(const Module& m) {
+  return std::unique_ptr<php::Module>(new php::Module{
+    m.name,
+    php::SrcInfo {{m.line0, m.line1}},
+    m.attrs,
+    m.userAttributes
+  });
+}
+
 std::unique_ptr<php::TypeAlias> parse_type_alias(php::Unit* unit,
                                                  const TypeAliasEmitter& te) {
   FTRACE(2, "  type alias: {}\n", te.name()->data());
@@ -1141,6 +1150,12 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
   for (auto& c : ue.constants()) {
     ret->constants.push_back(
       parse_constant(c, ret.get())
+    );
+  }
+
+  for (auto& m : ue.modules()) {
+    ret->modules.push_back(
+      parse_module(m)
     );
   }
 

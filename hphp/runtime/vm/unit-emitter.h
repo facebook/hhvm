@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/constant.h"
+#include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/unit.h"
@@ -217,6 +218,20 @@ struct UnitEmitter {
   Id addConstant(const Constant& c);
 
   /////////////////////////////////////////////////////////////////////////////
+  // Modules.
+
+  /*
+   * Reference to all of the Unit's modules.
+   */
+  std::vector<Module>& modules();
+  const std::vector<Module>& modules() const;
+
+  /*
+   * Add a new module to the Unit.
+   */
+  Id addModule(const Module&);
+
+  /////////////////////////////////////////////////////////////////////////////
   // Other methods.
 
   /*
@@ -287,6 +302,11 @@ private:
    * Constants table.
    */
   std::vector<Constant> m_constants;
+
+  /*
+   * Modules table.
+   */
+  std::vector<Module> m_modules;
 
   /*
    * FuncEmitter tables.

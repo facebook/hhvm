@@ -248,6 +248,11 @@ inline const Constant* Unit::lookupConstantId(Id id) const {
   return &m_constants[id];
 }
 
+inline const Module* Unit::lookupModuleId(Id id) const {
+  assertx(id < Id(m_modules.size()));
+  return &m_modules[id];
+}
+
 inline const PreTypeAlias* Unit::lookupTypeAliasId(Id id) const {
   assertx(id < Id(m_typeAliases.size()));
   return &m_typeAliases[id];
@@ -312,6 +317,17 @@ inline folly::Range<Constant*> Unit::constants() {
 
 inline folly::Range<const Constant*> Unit::constants() const {
   return { m_constants.begin(), m_constants.end() };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Modules
+
+inline folly::Range<Module*> Unit::modules() {
+  return { m_modules.begin(), m_modules.end() };
+}
+
+inline folly::Range<const Module*> Unit::modules() const {
+  return { m_modules.begin(), m_modules.end() };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

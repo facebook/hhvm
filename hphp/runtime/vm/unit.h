@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
 #include "hphp/runtime/vm/preclass.h"
@@ -164,6 +165,7 @@ public:
   using TypeAliasVec = VMCompactVector<PreTypeAlias>;
   using ConstantVec = VMFixedVector<Constant>;
   using FuncVec = VMCompactVector<Func*>;
+  using ModuleVec = VMCompactVector<Module>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Construction and destruction.
@@ -412,6 +414,13 @@ public:
   folly::Range<const Constant*> constants() const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // Modules.
+
+  const Module* lookupModuleId(Id id) const;
+  folly::Range<Module*> modules();
+  folly::Range<const Module*> modules() const;
+
+  /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
   const PreTypeAlias* lookupTypeAliasId(Id id) const;
@@ -536,6 +545,7 @@ private:
   PreClassPtrVec m_preClasses;
   TypeAliasVec m_typeAliases;
   ConstantVec m_constants;
+  ModuleVec m_modules;
 
   Id m_entryPointId{kInvalidId};
 

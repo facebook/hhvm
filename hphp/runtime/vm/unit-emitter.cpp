@@ -219,6 +219,16 @@ Id UnitEmitter::addConstant(const Constant& c) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Modules.
+
+Id UnitEmitter::addModule(const Module& m) {
+  Id id = m_modules.size();
+  TRACE(1, "Add Module %d %s %d\n", id, m.name->data(), m.attrs);
+  m_modules.push_back(m);
+  return id;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // EntryPoint calculation.
 
 const StaticString s___EntryPoint("__EntryPoint");
@@ -378,6 +388,8 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_fileAttributes = m_fileAttributes;
   u->m_moduleName = m_moduleName;
   u->m_ICE = m_ICE;
+
+  for (auto const& m : m_modules) u->m_modules.push_back(m);
 
   size_t ix = 0;
   for (auto& fe : m_fes) {
@@ -624,6 +636,22 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
     [&] (auto& sd, const Constant& cns) {
       sd(cns.name);
       sd(cns);
+    }
+  );
+
+  // Modules
+  seq(
+    m_modules,
+    [&] (auto& sd, size_t i) {
+      Module m;
+      sd(m.name);
+      sd(m);
+      auto const id UNUSED = addModule(m);
+      assertx(id == i);
+    },
+    [&] (auto& sd, const Module& m) {
+      sd(m.name);
+      sd(m);
     }
   );
 }

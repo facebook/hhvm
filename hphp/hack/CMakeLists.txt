@@ -145,6 +145,7 @@ set(HHBC_AST_SRCS
   "hhbc/hhas_constant.rs"
   "hhbc/hhas_function.rs"
   "hhbc/hhas_method.rs"
+  "hhbc/hhas_module.rs"
   "hhbc/hhas_param.rs"
   "hhbc/hhas_pos.rs"
   "hhbc/hhas_property.rs"

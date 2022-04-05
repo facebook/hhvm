@@ -46,6 +46,7 @@ enum class AttrContext {
   Alias         = 0x10,
   Parameter     = 0x20,
   Constant      = 0x40,
+  Module        = 0x80,
 };
 
 /*

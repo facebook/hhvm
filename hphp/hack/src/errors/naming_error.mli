@@ -81,6 +81,7 @@ type t =
   | Unbound_attribute_name of {
       pos: Pos.t;
       attr_name: string;
+      closest_attr_name: string option;
     }
   | This_no_argument of Pos.t
   | Object_cast of Pos.t

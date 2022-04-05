@@ -1,0 +1,12 @@
+Change to `__Override`
+
+<?hh
+
+class MyParent {
+  public function foo(): void {}
+}
+
+class MyChild extends MyParent {
+  <<__Override>>
+  public function foo(): void {}
+}

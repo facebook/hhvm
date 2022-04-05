@@ -63,8 +63,27 @@ let check_implements
       then
         ()
       else
+        let all_valid_user_attributes =
+          let bindings = SMap.bindings SN.UserAttributes.as_map in
+          let filtered_bindings =
+            List.filter
+              ~f:(fun (_, list) ->
+                List.mem list attr_interface ~equal:String.equal)
+              bindings
+          in
+          List.map ~f:fst filtered_bindings
+        in
+
+        let closest_attr_name =
+          Typing_env.most_similar
+            attr_name
+            all_valid_user_attributes
+            (fun name -> name)
+        in
+
         Errors.add_naming_error
-        @@ Naming_error.Unbound_attribute_name { pos = attr_pos; attr_name }
+        @@ Naming_error.Unbound_attribute_name
+             { pos = attr_pos; attr_name; closest_attr_name }
     in
 
     env
@@ -109,7 +128,8 @@ let check_implements
         check_new_object attr_pos env attr_cid params
     | _ ->
       Errors.add_naming_error
-      @@ Naming_error.Unbound_attribute_name { pos = attr_pos; attr_name };
+      @@ Naming_error.Unbound_attribute_name
+           { pos = attr_pos; attr_name; closest_attr_name = None };
       env
 
 let check_def env check_new_object (kind : attribute_interface_name) attributes

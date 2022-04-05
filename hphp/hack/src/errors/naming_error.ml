@@ -85,6 +85,7 @@ type t =
   | Unbound_attribute_name of {
       pos: Pos.t;
       attr_name: string;
+      closest_attr_name: string option;
     }
   | This_no_argument of Pos.t
   | Object_cast of Pos.t
@@ -635,7 +636,7 @@ let unbound_name pos name kind =
       ^ kind_str )
     []
 
-let unbound_attribute_name pos attr_name =
+let unbound_attribute_name pos attr_name closest_attr_name =
   let reason =
     if string_starts_with attr_name "__" then
       "starts with __ but is not a standard attribute"
@@ -643,8 +644,24 @@ let unbound_attribute_name pos attr_name =
       "does not have a class. Please declare a class for the attribute."
   in
 
+  let quickfixes =
+    if string_starts_with attr_name "__" then
+      match closest_attr_name with
+      | None -> []
+      | Some close_name ->
+        [
+          Quickfix.make
+            ~title:("Change to " ^ Markdown_lite.md_codify close_name)
+            ~new_text:close_name
+            pos;
+        ]
+    else
+      []
+  in
+
   User_error.make
     Error_code.(to_enum UnboundName)
+    ~quickfixes
     ( pos,
       Format.sprintf
         "Unrecognized user attribute: %s %s"
@@ -1092,8 +1109,8 @@ let to_user_error = function
   | Duplicate_user_attribute { attr_name; prev_pos; pos } ->
     duplicate_user_attribute attr_name prev_pos pos
   | Unbound_name { pos; name; kind } -> unbound_name pos name kind
-  | Unbound_attribute_name { pos; attr_name } ->
-    unbound_attribute_name pos attr_name
+  | Unbound_attribute_name { pos; attr_name; closest_attr_name } ->
+    unbound_attribute_name pos attr_name closest_attr_name
   | This_no_argument pos -> this_no_argument pos
   | Object_cast pos -> object_cast pos
   | This_hint_outside_class pos -> this_hint_outside_class pos

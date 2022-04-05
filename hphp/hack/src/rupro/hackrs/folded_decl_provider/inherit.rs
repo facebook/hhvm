@@ -166,23 +166,27 @@ impl<R: Reason> Inherited<R> {
                         new_const.kind,
                         old_const.kind,
                     ) {
-                        (true, false, _, _) => {
-                            // Don't replace a constant with a synthesized
-                            // constant. This covers the following case:
-                            // ```
-                            // class HasFoo { abstract const int FOO; }
-                            // trait T { require extends Foo; }
-                            // class Child extends HasFoo {
-                            //   use T;
-                            // }
-                            // ```
-                            // In this case, `Child` still doesn't have a value
-                            // for the `FOO` constant.
-                        }
-                        (_, _, ClassConstKind::CCAbstract(_), ClassConstKind::CCConcrete) => {
-                            // Don't replace a concrete constant with an
-                            // abstract constant found later in the MRO.
-                        }
+                        // Don't replace a constant with a synthesized constant.
+                        // This covers the following case:
+                        // ```
+                        // class HasFoo { abstract const int FOO; }
+                        // trait T { require extends Foo; }
+                        // class Child extends HasFoo {
+                        //   use T;
+                        // }
+                        // ```
+                        // In this case, `Child` still doesn't have a value for
+                        // the `FOO` constant.
+                        (true, false, _, _) => {}
+                        // Don't replace a concrete constant with an
+                        // abstract constant found later in the MRO.
+                        (
+                            _,
+                            _,
+                            ClassConstKind::CCAbstract(false),
+                            ClassConstKind::CCAbstract(true),
+                        )
+                        | (_, _, ClassConstKind::CCAbstract(_), ClassConstKind::CCConcrete) => {}
                         _ => {
                             e.insert(new_const);
                         }

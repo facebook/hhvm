@@ -4,43 +4,40 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ast_body::AstBody;
-use ast_scope::{Lambda, LongLambda, Scope, ScopeItem};
 use env::emitter::Emitter;
 use error::{Error, Result};
 use global_state::{ClosureEnclosingClassInfo, GlobalState};
-use hack_macro::{hack_expr, hack_stmt};
+use hack_macro::hack_expr;
 use hash::IndexSet;
 use hhas_coeffects::HhasCoeffects;
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
-use itertools::{EitherOrBoth, Itertools};
+use itertools::Itertools;
 use naming_special_names_rust::{
     fb, pseudo_consts, pseudo_functions, special_idents, superglobals,
 };
 use ocamlrep::rc::RcOc;
-use options::{CompilerFlags, HhvmFlags, Options};
+use options::{HhvmFlags, Options};
 use oxidized::{
-    aast_defs,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
     ast::{
-        Abstraction, ClassGetExpr, ClassId, ClassId_, ClassVar, Class_, ClassishKind, Contexts,
-        Def, EmitId, Expr, Expr_, FunDef, FunKind, FunParam, Fun_, FuncBody, Hint, Hint_, Id, Lid,
-        LocalId, Method_, Pos, Program, ReifyKind, Stmt, Stmt_, Targ, Tparam, TypeHint,
-        UserAttribute, Visibility,
+        Abstraction, ClassGetExpr, ClassHint, ClassId, ClassId_, ClassName, ClassVar, Class_,
+        ClassishKind, Contexts, Def, EmitId, Expr, Expr_, FunDef, FunKind, FunParam, Fun_,
+        FuncBody, Hint, Hint_, Id, Lid, LocalId, Method_, Pos, ReifyKind, Sid, Stmt, Stmt_, Targ,
+        Tparam, TypeHint, UserAttribute, Visibility,
     },
     ast_defs::ParamKind,
     file_info::Mode,
     local_id, namespace_env,
-    relative_path::{Prefix, RelativePath},
     s_map::SMap,
 };
 use stack_limit::StackLimit;
-use std::{borrow::Borrow, path::PathBuf};
+use std::borrow::Cow;
 use unique_id_builder::{
     get_unique_id_for_function, get_unique_id_for_main, get_unique_id_for_method,
 };
 
-#[derive(Debug, Clone, Default)]
+#[derive(Default)]
 struct Variables {
     /// all variables declared/used in the scope
     all_vars: IndexSet<String>,
@@ -51,173 +48,106 @@ struct Variables {
     explicit_capture: IndexSet<String>,
 }
 
-#[derive(Debug, Clone)] // TODO(hrust): do we need clone
-struct Env<'a, 'arena> {
-    /// What is the current context?
-    // TODO(hrust) VisitorMut doesn't provide an interface
-    // where a reference to visited NodeMut outlives the Context type (in this case Env<'a>),
-    // so we have no choice but to clone in ach ScopeItem (i.e., can't use Borrowed for 'a)
-
-    /// Span of function/method body
-    pos: Pos, // TODO(hrust) change to &'a Pos after dependent Visitor/Node lifetime is fixed.
-    /// What is the current context?
-    scope: Scope<'a, 'arena>,
-    variable_scopes: Vec<Variables>,
-    /// How many existing classes are there?
-    defined_class_count: usize,
-    /// How many existing functions are there?
-    #[allow(dead_code)]
-    defined_function_count: usize,
-    /// Are we immediately in a using statement?
-    in_using: bool,
-    /// Global compiler/hack options
-    options: &'a Options,
-    /// For debugger eval
-    for_debugger_eval: bool,
-
-    /// For checking elastic_stack and restarting if necessary.
-    stack_limit: &'a StackLimit,
+struct ClassSummary<'b> {
+    extends: &'b [ClassHint],
+    kind: ClassishKind,
+    mode: Mode,
+    name: &'b ClassName,
+    span: &'b Pos,
+    tparams: &'b [Tparam],
 }
 
-impl<'a, 'arena> Env<'a, 'arena> {
-    fn toplevel(
-        class_count: usize,
-        function_count: usize,
-        defs: &[Def],
-        options: &'a Options,
-        for_debugger_eval: bool,
-        stack_limit: &'a StackLimit,
-    ) -> Result<Self> {
-        let scope = Scope::toplevel();
-        let all_vars = get_vars(&[], AstBody::Defs(defs))?;
+struct FunctionSummary<'b, 'arena> {
+    // Unfortunately HhasCoeffects has to be owned for now.
+    coeffects: HhasCoeffects<'arena>,
+    fun_kind: FunKind,
+    mode: Mode,
+    name: &'b Sid,
+    span: &'b Pos,
+    tparams: &'b [Tparam],
+}
+
+struct LambdaSummary<'b, 'arena> {
+    // Unfortunately HhasCoeffects has to be owned for now.
+    coeffects: HhasCoeffects<'arena>,
+    explicit_capture: Option<&'b [Lid]>,
+    fun_kind: FunKind,
+    span: &'b Pos,
+}
+
+struct MethodSummary<'b, 'arena> {
+    // Unfortunately HhasCoeffects has to be owned for now.
+    coeffects: HhasCoeffects<'arena>,
+    fun_kind: FunKind,
+    name: &'b Sid,
+    span: &'b Pos,
+    static_: bool,
+    tparams: &'b [Tparam],
+}
+
+enum ScopeSummary<'b, 'arena> {
+    TopLevel,
+    Class(ClassSummary<'b>),
+    Function(FunctionSummary<'b, 'arena>),
+    Method(MethodSummary<'b, 'arena>),
+    Lambda(LambdaSummary<'b, 'arena>),
+}
+
+impl<'b, 'arena> ScopeSummary<'b, 'arena> {
+    fn span(&self) -> Option<&Pos> {
+        match self {
+            ScopeSummary::TopLevel => None,
+            ScopeSummary::Class(cd) => Some(cd.span),
+            ScopeSummary::Function(fd) => Some(fd.span),
+            ScopeSummary::Method(md) => Some(md.span),
+            ScopeSummary::Lambda(ld) => Some(ld.span),
+        }
+    }
+}
+
+/// The environment for a scope. This tracks the summary information and
+/// variables used within a scope.
+struct Scope<'b, 'arena> {
+    parent: Option<&'b Scope<'b, 'arena>>,
+
+    /// Number of closures created in the current function
+    closure_cnt_per_fun: u32,
+    /// Are we immediately in a using statement?
+    in_using: bool,
+    /// What is the current context?
+    summary: ScopeSummary<'b, 'arena>,
+    /// What variables are defined in this scope?
+    variables: Variables,
+}
+
+impl<'b, 'arena> Scope<'b, 'arena> {
+    fn toplevel(defs: &[Def]) -> Result<Self> {
+        let all_vars = compute_vars(&[], AstBody::Defs(defs))?;
 
         Ok(Self {
-            pos: Pos::make_none(),
-            scope,
-            variable_scopes: vec![Variables {
-                all_vars,
-                ..Default::default()
-            }],
-            defined_class_count: class_count,
-            defined_function_count: function_count,
             in_using: false,
-            options,
-            for_debugger_eval,
-            stack_limit,
+            closure_cnt_per_fun: 0,
+            parent: None,
+            summary: ScopeSummary::TopLevel,
+            variables: Variables {
+                all_vars,
+                ..Variables::default()
+            },
         })
     }
 
-    fn with_function_like(
-        &mut self,
-        e: ScopeItem<'a, 'arena>,
-        params: &[FunParam],
-        pos: Pos,
-        body: &[Stmt],
-        explicit_capture: IndexSet<String>,
-    ) -> Result<()> {
-        self.pos = pos;
-        self.scope.push_item(e);
-        let all_vars = get_vars(params, AstBody::Stmts(body))?;
-        let variables = Variables {
-            parameter_names: get_parameter_names(params),
-            all_vars,
-            explicit_capture,
-        };
-
-        self.variable_scopes.push(variables);
-        Ok(())
-    }
-
-    fn with_function(&mut self, fd: &FunDef) -> Result<()> {
-        self.with_function_like(
-            ScopeItem::Function(ast_scope::Fun::new_rc(fd)),
-            &fd.fun.params,
-            fd.fun.span.clone(),
-            fd.fun.body.fb_ast.as_slice(),
-            Default::default(),
-        )
-    }
-
-    fn with_method(&mut self, md: &Method_) -> Result<()> {
-        self.with_function_like(
-            ScopeItem::Method(ast_scope::Method::new_rc(md)),
-            &md.params,
-            md.span.clone(),
-            &md.body.fb_ast,
-            Default::default(),
-        )
-    }
-
-    fn with_lambda(&mut self, alloc: &'arena bumpalo::Bump, fd: &Fun_) -> Result<()> {
-        let is_async = fd.fun_kind.is_async();
-        let coeffects =
-            HhasCoeffects::from_ast(alloc, fd.ctxs.as_ref(), &fd.params, vec![], vec![]);
-
-        let lambda = Lambda {
-            is_async,
-            coeffects,
-        };
-        self.with_function_like(
-            ScopeItem::Lambda(lambda),
-            &fd.params,
-            fd.span.clone(),
-            fd.body.fb_ast.as_slice(),
-            Default::default(),
-        )
-    }
-
-    fn with_longlambda(
-        &mut self,
-        alloc: &'arena bumpalo::Bump,
-        fd: &Fun_,
-        use_vars_opt: Option<&[Lid]>,
-    ) -> Result<()> {
-        let is_async = fd.fun_kind.is_async();
-        let coeffects =
-            HhasCoeffects::from_ast(alloc, fd.ctxs.as_ref(), &fd.params, vec![], vec![]);
-
-        let explicit_capture: IndexSet<String> =
-            use_vars_opt.map_or_else(Default::default, |vars| {
-                vars.iter()
-                    .map(|Lid(_, (_, name))| name.to_string())
-                    .collect()
-            });
-
-        let long_lambda = LongLambda {
-            is_async,
-            coeffects,
-        };
-        self.with_function_like(
-            ScopeItem::LongLambda(long_lambda),
-            &fd.params,
-            fd.span.clone(),
-            fd.body.fb_ast.as_slice(),
-            explicit_capture,
-        )
-    }
-
-    fn with_class(&mut self, cd: &Class_) {
-        self.scope = Scope::toplevel();
-        self.scope
-            .push_item(ScopeItem::Class(ast_scope::Class::new_rc(cd)))
-    }
-
-    fn with_in_using<F, R>(&mut self, in_using: bool, mut f: F) -> R
-    where
-        F: FnMut(&mut Self) -> R,
-    {
-        let old_in_using = self.in_using;
-        self.in_using = in_using;
-        let r = f(self);
-        self.in_using = old_in_using;
-        r
+    fn as_class_summary(&self) -> Option<&ClassSummary<'_>> {
+        self.walk_scope().find_map(|scope| match &scope.summary {
+            ScopeSummary::Class(cd) => Some(cd),
+            _ => None,
+        })
     }
 
     fn check_if_in_async_context(&self) -> Result<()> {
         let check_valid_fun_kind = |name, kind: FunKind| {
             if !kind.is_async() {
                 Err(Error::fatal_parse(
-                    &self.pos,
+                    &self.span_or_none(),
                     format!(
                         "Function '{}' contains 'await' but is not declared as async.",
                         string_utils::strip_global_ns(name)
@@ -230,65 +160,279 @@ impl<'a, 'arena> Env<'a, 'arena> {
         let check_lambda = |is_async: bool| {
             if !is_async {
                 Err(Error::fatal_parse(
-                    &self.pos,
+                    &self.span_or_none(),
                     "Await may only appear in an async function",
                 ))
             } else {
                 Ok(())
             }
         };
-        let head = self.scope.iter().next();
-        use ScopeItem as S;
-        match head {
-            None => Err(Error::fatal_parse(
-                &self.pos,
+        match &self.summary {
+            ScopeSummary::TopLevel => Err(Error::fatal_parse(
+                &self.span_or_none(),
                 "'await' can only be used inside a function",
             )),
-            Some(S::Lambda(l)) => check_lambda(l.is_async),
-            Some(S::LongLambda(l)) => check_lambda(l.is_async),
-            Some(S::Class(_)) => Ok(()), /* Syntax error, wont get here */
-            Some(S::Function(fd)) => check_valid_fun_kind(&fd.get_name().1, fd.get_fun_kind()),
-            Some(S::Method(md)) => check_valid_fun_kind(&md.get_name().1, md.get_fun_kind()),
+            ScopeSummary::Lambda(ld) => check_lambda(ld.fun_kind.is_async()),
+            ScopeSummary::Class(_) => Ok(()), /* Syntax error, wont get here */
+            ScopeSummary::Function(fd) => check_valid_fun_kind(&fd.name.1, fd.fun_kind),
+            ScopeSummary::Method(md) => check_valid_fun_kind(&md.name.1, md.fun_kind),
+        }
+    }
+
+    fn class_tparams(&self) -> &[Tparam] {
+        self.as_class_summary().map_or(&[], |cd| cd.tparams)
+    }
+
+    fn coeffects_of_scope<'c>(&'c self) -> Option<&'c HhasCoeffects<'arena>> {
+        for scope in self.walk_scope() {
+            match &scope.summary {
+                ScopeSummary::Class(_) => break,
+                ScopeSummary::Method(md) => return Some(&md.coeffects),
+                ScopeSummary::Function(fd) => return Some(&fd.coeffects),
+                ScopeSummary::Lambda(ld) => {
+                    if !ld.coeffects.get_static_coeffects().is_empty() {
+                        return Some(&ld.coeffects);
+                    }
+                }
+                ScopeSummary::TopLevel => {}
+            }
+        }
+        None
+    }
+
+    fn fun_tparams(&self) -> &[Tparam] {
+        for scope in self.walk_scope() {
+            match &scope.summary {
+                ScopeSummary::Class(_) => break,
+                ScopeSummary::Function(fd) => return fd.tparams,
+                ScopeSummary::Method(md) => return md.tparams,
+                _ => {}
+            }
+        }
+        &[]
+    }
+
+    fn is_in_debugger_eval_fun(&self) -> bool {
+        let mut cur = Some(self);
+        while let Some(scope) = cur {
+            match &scope.summary {
+                ScopeSummary::Lambda(_) => {}
+                ScopeSummary::Function(fd) => return fd.name.1 == "include",
+                _ => break,
+            }
+            cur = scope.parent;
+        }
+        false
+    }
+
+    fn is_static(&self) -> bool {
+        for scope in self.walk_scope() {
+            match &scope.summary {
+                ScopeSummary::Function(_) => return true,
+                ScopeSummary::Method(md) => return md.static_,
+                ScopeSummary::Lambda(_) => {}
+                ScopeSummary::Class(_) | ScopeSummary::TopLevel => unreachable!(),
+            }
+        }
+        unreachable!();
+    }
+
+    fn make_scope_name(&self, ns: &RcOc<namespace_env::Env>) -> String {
+        let mut parts = Vec::new();
+        let mut iter = self.walk_scope();
+        while let Some(scope) = iter.next() {
+            match &scope.summary {
+                ScopeSummary::Class(cd) => {
+                    parts.push(make_class_name(cd.name));
+                    break;
+                }
+                ScopeSummary::Function(fd) => {
+                    let fname = strip_id(fd.name);
+                    parts.push(fname.into());
+                    for sub_scope in iter {
+                        match &sub_scope.summary {
+                            ScopeSummary::Class(cd) => {
+                                parts.push("::".into());
+                                parts.push(make_class_name(cd.name));
+                                break;
+                            }
+                            _ => {}
+                        }
+                    }
+                    break;
+                }
+                ScopeSummary::Method(x) => {
+                    parts.push(strip_id(x.name).to_string());
+                    if !parts.last().map_or(false, |x| x.ends_with("::")) {
+                        parts.push("::".into())
+                    };
+                }
+                ScopeSummary::Lambda(_) | ScopeSummary::TopLevel => {}
+            }
+        }
+
+        if parts.is_empty() {
+            if let Some(n) = &ns.name {
+                format!("{}\\", n)
+            } else {
+                String::new()
+            }
+        } else {
+            parts.reverse();
+            parts.join("")
+        }
+    }
+
+    /// Create a new Env which uses `self` as its parent.
+    fn new_child<'s>(
+        &'s self,
+        summary: ScopeSummary<'s, 'arena>,
+        variables: Variables,
+    ) -> Result<Scope<'s, 'arena>> {
+        Ok(Scope {
+            in_using: self.in_using,
+            closure_cnt_per_fun: self.closure_cnt_per_fun,
+            parent: Some(self),
+            summary,
+            variables,
+        })
+    }
+
+    fn scope_fmode(&self) -> Mode {
+        for scope in self.walk_scope() {
+            match &scope.summary {
+                ScopeSummary::Class(cd) => return cd.mode,
+                ScopeSummary::Function(fd) => return fd.mode,
+                _ => {}
+            }
+        }
+        Mode::Mstrict
+    }
+
+    fn should_capture_var(&self, var: &str) -> bool {
+        // variable used in lambda should be captured if is:
+        // - not contained in lambda parameter list
+        if self.variables.parameter_names.contains(var) {
+            return false;
+        };
+        // AND
+        // - it exists in one of enclosing scopes
+        for scope in self.walk_scope().skip(1) {
+            let vars = &scope.variables;
+            if vars.all_vars.contains(var)
+                || vars.parameter_names.contains(var)
+                || vars.explicit_capture.contains(var)
+            {
+                return true;
+            }
+
+            match &scope.summary {
+                ScopeSummary::Lambda(ld) => {
+                    // A lambda contained within an anonymous function (a 'long'
+                    // lambda) shouldn't capture variables from outside the
+                    // anonymous function unless they're explicitly mentioned in
+                    // the function's use clause.
+                    if ld.explicit_capture.is_some() {
+                        return false;
+                    }
+                }
+                ScopeSummary::TopLevel => {}
+                _ => return false,
+            }
+        }
+
+        false
+    }
+
+    fn span(&self) -> Option<&Pos> {
+        self.summary.span()
+    }
+
+    fn span_or_none<'s>(&'s self) -> Cow<'s, Pos> {
+        if let Some(pos) = self.span() {
+            Cow::Borrowed(pos)
+        } else {
+            Cow::Owned(Pos::make_none())
+        }
+    }
+
+    fn walk_scope<'s>(&'s self) -> ScopeIter<'b, 's, 'arena> {
+        ScopeIter(Some(self))
+    }
+
+    fn with_in_using<F, R>(&mut self, in_using: bool, mut f: F) -> R
+    where
+        F: FnMut(&mut Self) -> R,
+    {
+        let old_in_using = self.in_using;
+        self.in_using = in_using;
+        let r = f(self);
+        self.in_using = old_in_using;
+        r
+    }
+}
+
+struct ScopeIter<'b, 'c, 'arena>(Option<&'c Scope<'b, 'arena>>);
+
+impl<'b, 'c, 'arena> Iterator for ScopeIter<'b, 'c, 'arena> {
+    type Item = &'c Scope<'c, 'arena>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(cur) = self.0.take() {
+            self.0 = cur.parent;
+            Some(cur)
+        } else {
+            None
         }
     }
 }
 
-struct State<'arena> {
-    // Number of closures created in the current function
-    closure_cnt_per_fun: u32,
+#[derive(Clone, Default)]
+struct CaptureState {
+    this_: bool,
     // Free variables computed so far
-    captured_vars: IndexSet<String>,
-    captured_this: bool,
-    captured_generics: IndexSet<String>,
+    vars: IndexSet<String>,
+    generics: IndexSet<String>,
+}
+
+/// ReadOnlyState is split from State because it can be a simple ref in
+/// ClosureVisitor.
+struct ReadOnlyState<'a> {
+    /// How many existing classes are there?
+    class_count: usize,
+    // Empty namespace as constructed by parser
+    empty_namespace: RcOc<namespace_env::Env>,
+    /// For debugger eval
+    for_debugger_eval: bool,
+    /// Global compiler/hack options
+    options: &'a Options,
+    /// For checking elastic_stack and restarting if necessary.
+    stack_limit: &'a StackLimit,
+}
+
+/// Mutable state used during visiting in ClosureVisitor. It's mutable and owned
+/// so it needs to be moved as we push and pop scopes.
+struct State<'arena> {
+    capture_state: CaptureState,
     // Closure classes
     closures: Vec<Class_>,
+    // accumulated information about program
+    global_state: GlobalState<'arena>,
     /// Hoisted meth_caller functions
     named_hoisted_functions: SMap<FunDef>,
     // The current namespace environment
     namespace: RcOc<namespace_env::Env>,
-    // Empty namespace as constructed by parser
-    empty_namespace: RcOc<namespace_env::Env>,
-    // accumulated information about program
-    global_state: GlobalState<'arena>,
 }
 
 impl<'arena> State<'arena> {
     fn initial_state(empty_namespace: RcOc<namespace_env::Env>) -> Self {
         Self {
-            namespace: RcOc::clone(&empty_namespace),
-            empty_namespace,
-            closure_cnt_per_fun: 0,
-            captured_vars: Default::default(),
-            captured_this: false,
-            captured_generics: Default::default(),
+            capture_state: Default::default(),
             closures: vec![],
-            named_hoisted_functions: SMap::new(),
             global_state: GlobalState::default(),
+            named_hoisted_functions: SMap::new(),
+            namespace: empty_namespace,
         }
-    }
-
-    fn reset_function_counts(&mut self) {
-        self.closure_cnt_per_fun = 0;
     }
 
     fn record_function_state(&mut self, key: String, coeffects_of_scope: HhasCoeffects<'arena>) {
@@ -299,102 +443,56 @@ impl<'arena> State<'arena> {
         }
     }
 
-    // Clear the variables, upon entering a lambda
+    /// Clear the variables, upon entering a lambda
     fn enter_lambda(&mut self) {
-        self.captured_vars = Default::default();
-        self.captured_this = false;
-        self.captured_generics = Default::default();
+        self.capture_state.vars = Default::default();
+        self.capture_state.this_ = false;
+        self.capture_state.generics = Default::default();
     }
 
     fn set_namespace(&mut self, namespace: RcOc<namespace_env::Env>) {
         self.namespace = namespace;
     }
-}
 
-fn total_class_count(env: &Env<'_, '_>, st: &State<'_>) -> usize {
-    st.closures.len() + env.defined_class_count
-}
+    /// Add a variable to the captured variables
+    fn add_var<'s>(&mut self, scope: &Scope<'_, '_>, var: impl Into<Cow<'s, str>>) {
+        let var = var.into();
 
-fn should_capture_var(env: &Env<'_, '_>, var: &str) -> bool {
-    // variable used in lambda should be captured if is:
-    // - not contained in lambda parameter list
-    if let Some(true) = env
-        .variable_scopes
-        .last()
-        .map(|x| x.parameter_names.contains(var))
-    {
-        return false;
-    };
-    // AND
-    // - it exists in one of enclosing scopes
-    for x in env
-        .scope
-        .iter()
-        .zip_longest(env.variable_scopes.iter().rev())
-        .skip(1)
-    {
-        match x {
-            EitherOrBoth::Right(vars) => return vars.all_vars.contains(var),
-            EitherOrBoth::Both(scope, vars) => {
-                if vars.all_vars.contains(var)
-                    || vars.parameter_names.contains(var)
-                    || vars.explicit_capture.contains(var)
-                {
-                    return true;
-                }
-                if !scope.is_in_lambda() || scope.is_in_long_lambda() {
-                    // A lambda contained within an anonymous function (a 'long'
-                    // lambda) shouldn't capture variables from outside the
-                    // anonymous function unless they're explicitly mentioned in
-                    // the function's use clause.
-                    return false;
-                }
+        // Don't bother if it's $this, as this is captured implicitly
+        if var == special_idents::THIS {
+            self.capture_state.this_ = true;
+        } else if scope.should_capture_var(&var)
+            && (var != special_idents::DOLLAR_DOLLAR)
+            && !superglobals::is_superglobal(&var)
+        {
+            // If it's bound as a parameter or definite assignment, don't add it
+            // Also don't add the pipe variable and superglobals
+            self.capture_state.vars.insert(var.into_owned());
+        }
+    }
+
+    fn add_generic(&mut self, scope: &mut Scope<'_, '_>, var: &str) {
+        let reified_var_position = |is_fun| {
+            let is_reified_var =
+                |param: &Tparam| param.reified != ReifyKind::Erased && param.name.1 == var;
+            if is_fun {
+                scope.fun_tparams().iter().position(is_reified_var)
+            } else {
+                scope.class_tparams().iter().position(is_reified_var)
             }
-            EitherOrBoth::Left(_) => return false,
+        };
+
+        if let Some(i) = reified_var_position(true) {
+            let var = string_utils::reified::captured_name(true, i);
+            self.capture_state.generics.insert(var);
+        } else if let Some(i) = reified_var_position(false) {
+            let var = string_utils::reified::captured_name(false, i);
+            self.capture_state.generics.insert(var);
         }
     }
-    false
 }
 
-// Add a variable to the captured variables
-fn add_var(env: &Env<'_, '_>, st: &mut State<'_>, var: &str) {
-    // Don't bother if it's $this, as this is captured implicitly
-    if var == special_idents::THIS {
-        st.captured_this = true;
-    } else if
-    // If it's bound as a parameter or definite assignment, don't add it
-    // Also don't add the pipe variable and superglobals
-    (should_capture_var(env, var))
-        && !(var == special_idents::DOLLAR_DOLLAR || superglobals::is_superglobal(var))
-    {
-        st.captured_vars.insert(var.to_string());
-    }
-}
-
-fn add_generic(env: &mut Env<'_, '_>, st: &mut State<'_>, var: &str) {
-    let reified_var_position = |is_fun| {
-        let is_reified_var =
-            |param: &Tparam| param.reified != ReifyKind::Erased && param.name.1 == var;
-        if is_fun {
-            env.scope.get_fun_tparams().iter().position(is_reified_var)
-        } else {
-            env.scope
-                .get_class_tparams()
-                .iter()
-                .position(is_reified_var)
-        }
-    };
-
-    if let Some(i) = reified_var_position(true) {
-        let var = string_utils::reified::captured_name(true, i);
-        st.captured_generics.insert(var);
-    } else if let Some(i) = reified_var_position(false) {
-        let var = string_utils::reified::captured_name(false, i);
-        st.captured_generics.insert(var);
-    }
-}
-
-fn get_vars(params: &[FunParam], body: ast_body::AstBody<'_>) -> Result<IndexSet<String>> {
+fn compute_vars(params: &[FunParam], body: ast_body::AstBody<'_>) -> Result<IndexSet<String>> {
     decl_vars::vars_from_ast(params, &body).map_err(Error::unrecoverable)
 }
 
@@ -406,57 +504,22 @@ fn strip_id(id: &Id) -> &str {
     string_utils::strip_global_ns(&id.1)
 }
 
-fn make_class_name(cd: &ast_scope::Class<'_>) -> String {
-    string_utils::mangle_xhp_id(strip_id(cd.get_name()).to_string())
+fn make_class_name(name: &ClassName) -> String {
+    string_utils::mangle_xhp_id(strip_id(name).to_string())
 }
 
-fn make_scope_name(ns: &RcOc<namespace_env::Env>, scope: &ast_scope::Scope<'_, '_>) -> String {
-    let mut parts: Vec<String> = vec![];
-    for sub_scope in scope.iter_subscopes() {
-        match sub_scope.last() {
-            None => {
-                return match &ns.name {
-                    None => String::new(),
-                    Some(n) => format!("{}\\", n),
-                };
-            }
-            Some(ast_scope::ScopeItem::Class(x)) => {
-                parts.push(make_class_name(x));
-                break;
-            }
-            Some(ast_scope::ScopeItem::Function(x)) => {
-                let fname = strip_id(x.get_name());
-                parts.push(
-                    Scope::get_subscope_class(sub_scope)
-                        .map(|cd| make_class_name(cd) + "::")
-                        .unwrap_or_default()
-                        + fname,
-                );
-                break;
-            }
-            Some(ast_scope::ScopeItem::Method(x)) => {
-                parts.push(strip_id(x.get_name()).to_string());
-                if !parts.last().map_or(false, |x| x.ends_with("::")) {
-                    parts.push("::".into())
-                };
-            }
-            _ => {}
-        }
-    }
-    parts.reverse();
-    parts.join("")
-}
-
-fn make_closure_name(env: &Env<'_, '_>, st: &State<'_>) -> String {
-    let per_fun_idx = st.closure_cnt_per_fun;
-    string_utils::closures::mangle_closure(&make_scope_name(&st.namespace, &env.scope), per_fun_idx)
+fn make_closure_name(scope: &Scope<'_, '_>, state: &State<'_>) -> String {
+    let per_fun_idx = scope.closure_cnt_per_fun;
+    let name = scope.make_scope_name(&state.namespace);
+    string_utils::closures::mangle_closure(&name, per_fun_idx)
 }
 
 fn make_closure(
     class_num: usize,
     p: Pos,
-    env: &Env<'_, '_>,
-    st: &State<'_>,
+    scope: &Scope<'_, '_>,
+    state: &State<'_>,
+    ro_state: &ReadOnlyState<'_>,
     lambda_vars: Vec<String>,
     fun_tparams: Vec<Tparam>,
     class_tparams: Vec<Tparam>,
@@ -517,7 +580,7 @@ fn make_closure(
         is_xhp: false,
         has_xhp_keyword: false,
         kind: ClassishKind::Cclass(Abstraction::Concrete),
-        name: Id(p.clone(), make_closure_name(env, st)),
+        name: Id(p.clone(), make_closure_name(scope, state)),
         tparams: class_tparams,
         extends: vec![Hint(
             p.clone(),
@@ -538,7 +601,7 @@ fn make_closure(
         attributes: vec![],
         xhp_children: vec![],
         xhp_attrs: vec![],
-        namespace: RcOc::clone(&st.empty_namespace),
+        namespace: RcOc::clone(&ro_state.empty_namespace),
         enum_: None,
         doc_comment: None,
         emit_id: Some(EmitId::Anonymous),
@@ -549,52 +612,60 @@ fn make_closure(
     (fd, cd)
 }
 
-// Translate special identifiers __CLASS__, __METHOD__ and __FUNCTION__ into
-// literal strings. It's necessary to do this before closure conversion
-// because the enclosing class will be changed.
-fn convert_id(env: &Env<'_, '_>, Id(p, s): Id) -> Expr_ {
+/// Translate special identifiers `__CLASS__`, `__METHOD__` and `__FUNCTION__`
+/// into literal strings. It's necessary to do this before closure conversion
+/// because the enclosing class will be changed.
+fn convert_id(scope: &Scope<'_, '_>, Id(p, s): Id) -> Expr_ {
     let ret = Expr_::mk_string;
-    let name = |c: &ast_scope::Class<'_>| {
-        Expr_::mk_string(string_utils::mangle_xhp_id(strip_id(c.get_name()).to_string()).into())
+    let name = |c: &ClassName| {
+        Expr_::mk_string(string_utils::mangle_xhp_id(strip_id(c).to_string()).into())
     };
 
     match s {
-        _ if s.eq_ignore_ascii_case(pseudo_consts::G__TRAIT__) => match env.scope.get_class() {
-            Some(c) if c.get_kind() == ClassishKind::Ctrait => name(c),
+        _ if s.eq_ignore_ascii_case(pseudo_consts::G__TRAIT__) => match scope.as_class_summary() {
+            Some(cd) if cd.kind == ClassishKind::Ctrait => name(cd.name),
             _ => ret("".into()),
         },
-        _ if s.eq_ignore_ascii_case(pseudo_consts::G__CLASS__) => match env.scope.get_class() {
-            Some(c) if c.get_kind() != ClassishKind::Ctrait => name(c),
+        _ if s.eq_ignore_ascii_case(pseudo_consts::G__CLASS__) => match scope.as_class_summary() {
+            Some(cd) if cd.kind != ClassishKind::Ctrait => name(cd.name),
             Some(_) => Expr_::mk_id(Id(p, s)),
             None => ret("".into()),
         },
         _ if s.eq_ignore_ascii_case(pseudo_consts::G__METHOD__) => {
-            let (prefix, is_trait) = match env.scope.get_class() {
+            let (prefix, is_trait) = match scope.as_class_summary() {
                 None => ("".into(), false),
                 Some(cd) => (
-                    string_utils::mangle_xhp_id(strip_id(cd.get_name()).to_string()) + "::",
-                    cd.get_kind() == ClassishKind::Ctrait,
+                    string_utils::mangle_xhp_id(strip_id(cd.name).to_string()) + "::",
+                    cd.kind == ClassishKind::Ctrait,
                 ),
             };
             // for lambdas nested in trait methods HHVM replaces __METHOD__
             // with enclosing method name - do the same and bubble up from lambdas *
-            let scope = env.scope.iter().find(|x| !(is_trait && x.is_in_lambda()));
+            let id_scope = if is_trait {
+                scope.walk_scope().find(|x| {
+                    let scope_is_in_lambda = match &x.summary {
+                        ScopeSummary::Lambda(_) => true,
+                        _ => false,
+                    };
+                    !scope_is_in_lambda
+                })
+            } else {
+                scope.walk_scope().next()
+            };
 
-            match scope {
-                Some(ScopeItem::Function(fd)) => ret((prefix + strip_id(fd.get_name())).into()),
-                Some(ScopeItem::Method(md)) => ret((prefix + strip_id(md.get_name())).into()),
-                Some(ScopeItem::Lambda(_)) | Some(ScopeItem::LongLambda(_)) => {
-                    ret((prefix + "{closure}").into())
-                }
+            match id_scope.map(|x| &x.summary) {
+                Some(ScopeSummary::Function(fd)) => ret((prefix + strip_id(fd.name)).into()),
+                Some(ScopeSummary::Method(md)) => ret((prefix + strip_id(md.name)).into()),
+                Some(ScopeSummary::Lambda(_)) => ret((prefix + "{closure}").into()),
                 // PHP weirdness: __METHOD__ inside a class outside a method returns class name
-                Some(ScopeItem::Class(cd)) => ret(strip_id(cd.get_name()).into()),
+                Some(ScopeSummary::Class(cd)) => ret(strip_id(cd.name).into()),
                 _ => ret("".into()),
             }
         }
-        _ if s.eq_ignore_ascii_case(pseudo_consts::G__FUNCTION__) => match env.scope.items.last() {
-            Some(ScopeItem::Function(fd)) => ret(strip_id(fd.get_name()).into()),
-            Some(ScopeItem::Method(md)) => ret(strip_id(md.get_name()).into()),
-            Some(ScopeItem::Lambda(_)) | Some(ScopeItem::LongLambda(_)) => ret("{closure}".into()),
+        _ if s.eq_ignore_ascii_case(pseudo_consts::G__FUNCTION__) => match &scope.summary {
+            ScopeSummary::Function(fd) => ret(strip_id(fd.name).into()),
+            ScopeSummary::Method(md) => ret(strip_id(md.name).into()),
+            ScopeSummary::Lambda(_) => ret("{closure}".into()),
             _ => ret("".into()),
         },
         _ if s.eq_ignore_ascii_case(pseudo_consts::G__LINE__) => {
@@ -606,199 +677,18 @@ fn convert_id(env: &Env<'_, '_>, Id(p, s): Id) -> Expr_ {
     }
 }
 
-fn visit_class_id<'a, 'arena>(
-    env: &mut Env<'a, 'arena>,
-    self_: &mut ClosureConvertVisitor<'a, 'arena>,
-    cid: &mut ClassId,
-) -> Result<()> {
-    Ok(if let ClassId(_, _, ClassId_::CIexpr(e)) = cid {
-        self_.visit_expr(env, e)?;
-    })
-}
-
-fn make_info(c: &ast_scope::Class<'_>) -> ClosureEnclosingClassInfo {
+fn make_class_info(c: &ClassSummary<'_>) -> ClosureEnclosingClassInfo {
     ClosureEnclosingClassInfo {
-        kind: c.get_kind(),
-        name: c.get_name().1.clone(),
-        parent_class_name: match c.get_extends() {
+        kind: c.kind,
+        name: c.name.1.clone(),
+        parent_class_name: match c.extends {
             [x] => x.as_happly().map(|(id, _args)| id.1.clone()),
             _ => None,
         },
     }
 }
-// Closure-convert a lambda expression, with use_vars_opt = Some vars
-// if there is an explicit `use` clause.
-fn convert_lambda<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
-    env: &mut Env<'a, 'arena>,
-    self_: &mut ClosureConvertVisitor<'a, 'arena>,
-    mut fd: Fun_,
-    use_vars_opt: Option<Vec<aast_defs::Lid>>,
-) -> Result<Expr_> {
-    let is_long_lambda = use_vars_opt.is_some();
-    let st = &mut self_.state;
 
-    // Remember the current capture and defined set across the lambda
-    let captured_this = st.captured_this;
-    let captured_vars = st.captured_vars.clone();
-    let captured_generics = st.captured_generics.clone();
-    let coeffects_of_scope = env.scope.coeffects_of_scope(alloc);
-    st.enter_lambda();
-    if let Some(user_vars) = &use_vars_opt {
-        for aast_defs::Lid(p, id) in user_vars.iter() {
-            if local_id::get_name(id) == special_idents::THIS {
-                return Err(Error::fatal_parse(
-                    p,
-                    "Cannot use $this as lexical variable",
-                ));
-            }
-        }
-    }
-    let lambda_env = &mut env.clone();
-
-    if use_vars_opt.is_some() {
-        lambda_env.with_longlambda(alloc, &fd, use_vars_opt.as_ref().map(Borrow::borrow))?
-    } else {
-        lambda_env.with_lambda(alloc, &fd)?
-    };
-    fd.body.recurse(lambda_env, self_)?;
-    for param in &mut fd.params {
-        self_.visit_type_hint(lambda_env, &mut param.type_hint)?;
-    }
-    self_.visit_type_hint(lambda_env, &mut fd.ret)?;
-
-    let st = &mut self_.state;
-    st.closure_cnt_per_fun += 1;
-
-    let current_generics = st.captured_generics.clone();
-
-    // TODO(hrust): produce real unique local ids
-    let fresh_lid = |name: String| aast_defs::Lid(Pos::make_none(), (12345, name));
-
-    let lambda_vars: Vec<&String> = st
-        .captured_vars
-        .iter()
-        .chain(current_generics.iter())
-        // HHVM lists lambda vars in descending order - do the same
-        .sorted()
-        .rev()
-        .collect();
-
-    // Remove duplicates, (not efficient, but unlikely to be large),
-    // remove variables that are actually just parameters
-    let use_vars_opt: Option<Vec<Lid>> = use_vars_opt.map(|use_vars| {
-        use_vars
-            .into_iter()
-            .rev()
-            .unique_by(|lid| lid.name().to_string())
-            .filter(|x| !fd.params.iter().any(|y| x.name() == &y.name))
-            .collect::<Vec<_>>()
-            .into_iter()
-            .rev()
-            .collect()
-    });
-
-    // For lambdas with explicit `use` variables, we ignore the computed
-    // capture set and instead use the explicit set
-    let (lambda_vars, use_vars): (Vec<String>, Vec<Lid>) = match use_vars_opt {
-        None => (
-            lambda_vars.iter().map(|x| x.to_string()).collect(),
-            lambda_vars
-                .iter()
-                .map(|x| fresh_lid(x.to_string()))
-                .collect(),
-        ),
-        Some(use_vars) => {
-            // We still need to append the generics
-            (
-                use_vars
-                    .iter()
-                    .map(|x| x.name())
-                    .chain(current_generics.iter())
-                    .map(|x| x.to_string())
-                    .collect(),
-                use_vars
-                    .iter()
-                    .cloned()
-                    .chain(current_generics.iter().map(|x| fresh_lid(x.to_string())))
-                    .collect(),
-            )
-        }
-    };
-
-    let fun_tparams = lambda_env.scope.get_fun_tparams().to_vec();
-    let class_tparams = lambda_env.scope.get_class_tparams().to_vec();
-    let class_num = total_class_count(lambda_env, st);
-
-    let is_static = if is_long_lambda {
-        // long lambdas are never static
-        false
-    } else {
-        // short lambdas can be made static if they don't capture this in
-        // any form (including any nested lambdas)
-        !st.captured_this
-    };
-
-    // check if something can be promoted to static based on enclosing scope
-    let is_static = is_static || lambda_env.scope.is_static();
-
-    let pos = fd.span.clone();
-    let lambda_vars_clone = lambda_vars.clone();
-    let (inline_fundef, cd) = make_closure(
-        class_num,
-        pos,
-        lambda_env,
-        st,
-        lambda_vars,
-        fun_tparams,
-        class_tparams,
-        is_static,
-        get_scope_fmode(&env.scope),
-        fd,
-    );
-
-    if is_long_lambda {
-        st.global_state
-            .explicit_use_set
-            .insert(inline_fundef.name.1.clone());
-    }
-
-    let closure_class_name = &cd.name.1;
-    if let Some(cd) = env.scope.get_class() {
-        st.global_state
-            .closure_enclosing_classes
-            .insert(closure_class_name.clone(), make_info(cd));
-    }
-    // adjust captured $this information if lambda that was just processed was converted into
-    // non-static one
-    let captured_this = captured_this || !is_static;
-
-    // Restore capture and defined set
-    st.captured_vars = captured_vars;
-    st.captured_this = captured_this;
-    st.captured_generics = captured_generics;
-    st.global_state
-        .closure_namespaces
-        .insert(closure_class_name.clone(), st.namespace.clone());
-    st.record_function_state(
-        get_unique_id_for_method(&cd.name.1, &cd.methods.first().unwrap().name.1),
-        coeffects_of_scope,
-    );
-    // back to using env instead of lambda_env here
-
-    // Add lambda captured vars to current captured vars
-    for var in lambda_vars_clone.iter() {
-        add_var(env, st, var)
-    }
-    for x in current_generics.iter() {
-        st.captured_generics.insert(x.to_string());
-    }
-
-    st.closures.push(cd);
-    Ok(Expr_::mk_efun(inline_fundef, use_vars))
-}
-
-fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool) -> FunParam {
+pub fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool) -> FunParam {
     FunParam {
         annotation: (),
         type_hint: TypeHint((), None),
@@ -817,109 +707,7 @@ fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool) -> 
     }
 }
 
-fn get_scope_fmode(scope: &Scope<'_, '_>) -> Mode {
-    scope
-        .iter()
-        .find_map(|item| match item {
-            ScopeItem::Class(cd) => Some(cd.get_mode()),
-            ScopeItem::Function(fd) => Some(fd.get_mode()),
-            _ => None,
-        })
-        .unwrap_or(Mode::Mstrict)
-}
-
-fn convert_meth_caller_to_func_ptr(
-    env: &Env<'_, '_>,
-    st: &mut ClosureConvertVisitor<'_, '_>,
-    pos: &Pos,
-    pc: &Pos,
-    cls: &str,
-    pf: &Pos,
-    fname: &str,
-) -> Expr_ {
-    fn get_scope_fmode(scope: &Scope<'_, '_>) -> Mode {
-        scope
-            .iter()
-            .find_map(|item| match item {
-                ScopeItem::Class(cd) => Some(cd.get_mode()),
-                ScopeItem::Function(fd) => Some(fd.get_mode()),
-                _ => None,
-            })
-            .unwrap_or(Mode::Mstrict)
-    }
-    // TODO: Move dummy variable to tasl.rs once it exists.
-    let dummy_saved_env = ();
-    let pos = || pos.clone();
-    let cname = match env.scope.get_class() {
-        Some(cd) => &cd.get_name().1,
-        None => "",
-    };
-    let mangle_name = string_utils::mangle_meth_caller(cls, fname);
-    let fun_handle = hack_expr!(
-        pos = pos(),
-        r#"\__systemlib\meth_caller(#{str(clone(mangle_name))})"#
-    );
-    if st.state.named_hoisted_functions.contains_key(&mangle_name) {
-        return fun_handle.2;
-    }
-    // AST for: invariant(is_a($o, <cls>), 'object must be an instance of <cls>');
-    let obj_var = Box::new(Lid(pos(), local_id::make_unscoped("$o")));
-    let obj_lvar = Expr((), pos(), Expr_::Lvar(obj_var.clone()));
-    let msg = format!("object must be an instance of ({})", cls);
-    let assert_invariant = hack_expr!(
-        pos = pos(),
-        r#"\HH\invariant(\is_a(#{clone(obj_lvar)}, #{str(clone(cls), pc)}), #{str(msg)})"#
-    );
-    // AST for: return $o-><func>(...$args);
-    let args_var = local_id::make_unscoped("$args");
-    let variadic_param = make_fn_param(pos(), &args_var, true, false);
-    let meth_caller_handle = hack_expr!(
-        pos = pos(),
-        r#"#obj_lvar->#{id(clone(fname), pf)}(...#{lvar(args_var)})"#
-    );
-
-    let f = Fun_ {
-        span: pos(),
-        annotation: dummy_saved_env,
-        readonly_this: None, // TODO(readonly): readonly_this in closure_convert
-        readonly_ret: None,
-        ret: TypeHint((), None),
-        name: Id(pos(), mangle_name.clone()),
-        tparams: vec![],
-        where_constraints: vec![],
-        params: vec![
-            make_fn_param(pos(), &obj_var.1, false, false),
-            variadic_param,
-        ],
-        ctxs: None,
-        unsafe_ctxs: None,
-        body: FuncBody {
-            fb_ast: vec![
-                Stmt(pos(), Stmt_::Expr(Box::new(assert_invariant))),
-                Stmt(pos(), Stmt_::Return(Box::new(Some(meth_caller_handle)))),
-            ],
-        },
-        fun_kind: FunKind::FSync,
-        user_attributes: vec![UserAttribute {
-            name: Id(pos(), "__MethCaller".into()),
-            params: vec![Expr((), pos(), Expr_::String(cname.into()))],
-        }],
-        external: false,
-        doc_comment: None,
-    };
-    let fd = FunDef {
-        file_attributes: vec![],
-        namespace: RcOc::clone(&st.state.empty_namespace),
-        mode: get_scope_fmode(&env.scope),
-        fun: f,
-    };
-    st.state.named_hoisted_functions.insert(mangle_name, fd);
-    fun_handle.2
-}
-
 fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: bool) -> Expr_ {
-    // TODO: Move dummy variable to tasl.rs once it exists.
-    let dummy_saved_env = ();
     let pos = || pos.clone();
     let obj_var = Box::new(Lid(pos(), local_id::make_unscoped("$o")));
     let meth_var = Box::new(Lid(pos(), local_id::make_unscoped("$m")));
@@ -950,7 +738,7 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
 
     let fd = Fun_ {
         span: pos(),
-        annotation: dummy_saved_env,
+        annotation: (),
         readonly_this: None, // TODO: readonly_this in closure_convert
         readonly_ret: None,  // TODO: readonly_ret in closure convert
         ret: TypeHint((), None),
@@ -1012,179 +800,228 @@ fn add_reified_property(tparams: &[Tparam], vars: &mut Vec<ClassVar>) {
     }
 }
 
-fn count_classes(defs: &[Def]) -> usize {
-    defs.iter().filter(|x| x.is_class()).count()
-}
-
-struct ClosureConvertVisitor<'a, 'arena> {
+struct ClosureVisitor<'a, 'b, 'arena> {
     alloc: &'arena bumpalo::Bump,
-    state: State<'arena>,
-    phantom_lifetime_a: std::marker::PhantomData<&'a ()>,
+    state: Option<State<'arena>>,
+    ro_state: &'a ReadOnlyState<'a>,
+    // We need 'b to be a real lifetime so that our `type Params` can refer to
+    // it - but we don't actually have any fields that use it - so we need a
+    // Phantom.
+    phantom: std::marker::PhantomData<&'b ()>,
 }
 
-impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
-    type Params = AstParams<Env<'a, 'arena>, Error>;
+impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, 'arena> {
+    type Params = AstParams<Scope<'b, 'arena>, Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self
     }
 
-    fn visit_method_(&mut self, env: &mut Env<'a, 'arena>, md: &mut Method_) -> Result<()> {
-        let cls = env.scope.get_class().ok_or_else(|| {
+    fn visit_method_(&mut self, scope: &mut Scope<'b, 'arena>, md: &mut Method_) -> Result<()> {
+        let cd = scope.as_class_summary().ok_or_else(|| {
             Error::unrecoverable("unexpected scope shape - method is not inside the class")
         })?;
-        // TODO(hrust): not great to have to clone env constantly
-        let mut env = env.clone();
-        env.with_method(md)?;
-        self.state.reset_function_counts();
-        md.body.recurse(&mut env, self)?;
-        self.state.record_function_state(
-            get_unique_id_for_method(cls.get_name_str(), &md.name.1),
-            HhasCoeffects::default(),
+        let variables = Self::compute_variables_from_fun(&md.params, &md.body.fb_ast, None)?;
+        let coeffects = HhasCoeffects::from_ast(
+            self.alloc,
+            md.ctxs.as_ref(),
+            &md.params,
+            &md.tparams,
+            scope.class_tparams(),
         );
-        visit_mut(self, &mut env, &mut md.params)
+        let si = ScopeSummary::Method(MethodSummary {
+            coeffects,
+            fun_kind: md.fun_kind,
+            name: &md.name,
+            span: &md.span,
+            static_: md.static_,
+            tparams: &md.tparams,
+        });
+        self.with_subscope(scope, si, variables, |self_, scope| {
+            md.body.recurse(scope, self_)?;
+            let uid = get_unique_id_for_method(&cd.name.1, &md.name.1);
+            self_
+                .state_mut()
+                .record_function_state(uid, HhasCoeffects::default());
+            visit_mut(self_, scope, &mut md.params)?;
+            Ok(())
+        })?;
+        Ok(())
     }
 
-    fn visit_class_<'b>(&mut self, env: &mut Env<'a, 'arena>, cd: &'b mut Class_) -> Result<()> {
-        let mut env = env.clone();
-        env.with_class(cd);
-        self.state.reset_function_counts();
-        visit_mut(self, &mut env, &mut cd.methods)?;
-        visit_mut(self, &mut env, &mut cd.consts)?;
-        visit_mut(self, &mut env, &mut cd.vars)?;
-        visit_mut(self, &mut env, &mut cd.xhp_attrs)?;
-        visit_mut(self, &mut env, &mut cd.user_attributes)?;
-        Ok(add_reified_property(&cd.tparams, &mut cd.vars))
+    fn visit_class_(&mut self, scope: &mut Scope<'b, 'arena>, cd: &mut Class_) -> Result<()> {
+        let variables = Variables::default();
+        let si = ScopeSummary::Class(ClassSummary {
+            extends: &cd.extends,
+            kind: cd.kind,
+            mode: cd.mode,
+            name: &cd.name,
+            span: &cd.span,
+            tparams: &cd.tparams,
+        });
+        self.with_subscope(scope, si, variables, |self_, scope| -> Result<()> {
+            visit_mut(self_, scope, &mut cd.methods)?;
+            visit_mut(self_, scope, &mut cd.consts)?;
+            visit_mut(self_, scope, &mut cd.vars)?;
+            visit_mut(self_, scope, &mut cd.xhp_attrs)?;
+            visit_mut(self_, scope, &mut cd.user_attributes)?;
+            add_reified_property(&cd.tparams, &mut cd.vars);
+            Ok(())
+        })?;
+        Ok(())
     }
 
-    fn visit_def(&mut self, env: &mut Env<'a, 'arena>, def: &mut Def) -> Result<()> {
+    fn visit_def(&mut self, scope: &mut Scope<'b, 'arena>, def: &mut Def) -> Result<()> {
         match def {
             // need to handle it ourselvses, because visit_fun_ is
             // called both for toplevel functions and lambdas
-            Def::Fun(x) => {
-                let mut env = env.clone();
-                env.with_function(x)?;
-                self.state.reset_function_counts();
-                x.fun.body.recurse(&mut env, self)?;
-                self.state.record_function_state(
-                    get_unique_id_for_function(&x.fun.name.1),
-                    HhasCoeffects::default(),
+            Def::Fun(fd) => {
+                let variables =
+                    Self::compute_variables_from_fun(&fd.fun.params, &fd.fun.body.fb_ast, None)?;
+                let coeffects = HhasCoeffects::from_ast(
+                    self.alloc,
+                    fd.fun.ctxs.as_ref(),
+                    &fd.fun.params,
+                    &fd.fun.tparams,
+                    &[],
                 );
-                visit_mut(self, &mut env, &mut x.fun.params)?;
-                visit_mut(self, &mut env, &mut x.fun.user_attributes)
+                let si = ScopeSummary::Function(FunctionSummary {
+                    coeffects,
+                    fun_kind: fd.fun.fun_kind,
+                    mode: fd.mode,
+                    name: &fd.fun.name,
+                    span: &fd.fun.span,
+                    tparams: &fd.fun.tparams,
+                });
+                self.with_subscope(scope, si, variables, |self_, scope| {
+                    fd.fun.body.recurse(scope, self_)?;
+                    let uid = get_unique_id_for_function(&fd.fun.name.1);
+                    self_
+                        .state_mut()
+                        .record_function_state(uid, HhasCoeffects::default());
+                    visit_mut(self_, scope, &mut fd.fun.params)?;
+                    visit_mut(self_, scope, &mut fd.fun.user_attributes)?;
+                    Ok(())
+                })?;
+                Ok(())
             }
-            _ => def.recurse(env, self.object()),
+            _ => def.recurse(scope, self),
         }
     }
 
-    fn visit_hint_(&mut self, env: &mut Env<'a, 'arena>, hint: &mut Hint_) -> Result<()> {
+    fn visit_hint_(&mut self, scope: &mut Scope<'b, 'arena>, hint: &mut Hint_) -> Result<()> {
         if let Hint_::Happly(id, _) = hint {
-            add_generic(env, &mut self.state, id.name())
+            self.state_mut().add_generic(scope, id.name())
         };
-        hint.recurse(env, self.object())
+        hint.recurse(scope, self)
     }
 
-    fn visit_stmt_(&mut self, env: &mut Env<'a, 'arena>, stmt: &mut Stmt_) -> Result<()> {
+    fn visit_stmt_(&mut self, scope: &mut Scope<'b, 'arena>, stmt: &mut Stmt_) -> Result<()> {
         match stmt {
             Stmt_::Awaitall(x) => {
-                env.check_if_in_async_context()?;
-                x.recurse(env, self.object())
+                scope.check_if_in_async_context()?;
+                x.recurse(scope, self)
             }
             Stmt_::Do(x) => {
                 let (b, e) = &mut **x;
-                env.with_in_using(false, |env| visit_mut(self, env, b))?;
-                self.visit_expr(env, e)
+                scope.with_in_using(false, |scope| visit_mut(self, scope, b))?;
+                self.visit_expr(scope, e)
             }
             Stmt_::While(x) => {
                 let (e, b) = &mut **x;
-                self.visit_expr(env, e)?;
-                env.with_in_using(false, |env| visit_mut(self, env, b))
+                self.visit_expr(scope, e)?;
+                scope.with_in_using(false, |scope| visit_mut(self, scope, b))
             }
             Stmt_::Foreach(x) => {
                 if x.1.is_await_as_v() || x.1.is_await_as_kv() {
-                    env.check_if_in_async_context()?
+                    scope.check_if_in_async_context()?
                 }
-                x.recurse(env, self.object())
+                x.recurse(scope, self)
             }
             Stmt_::For(x) => {
                 let (e1, e2, e3, b) = &mut **x;
 
                 for e in e1 {
-                    self.visit_expr(env, e)?;
+                    self.visit_expr(scope, e)?;
                 }
                 if let Some(e) = e2 {
-                    self.visit_expr(env, e)?;
+                    self.visit_expr(scope, e)?;
                 }
-                env.with_in_using(false, |env| visit_mut(self, env, b))?;
+                scope.with_in_using(false, |scope| visit_mut(self, scope, b))?;
                 for e in e3 {
-                    self.visit_expr(env, e)?;
+                    self.visit_expr(scope, e)?;
                 }
                 Ok(())
             }
             Stmt_::Switch(x) => {
                 let (e, cl, dfl) = &mut **x;
-                self.visit_expr(env, e)?;
-                env.with_in_using(false, |env| visit_mut(self, env, cl))?;
+                self.visit_expr(scope, e)?;
+                scope.with_in_using(false, |scope| visit_mut(self, scope, cl))?;
                 match dfl {
                     None => Ok(()),
-                    Some(dfl) => env.with_in_using(false, |env| visit_mut(self, env, dfl)),
+                    Some(dfl) => scope.with_in_using(false, |scope| visit_mut(self, scope, dfl)),
                 }
             }
             Stmt_::Using(x) => {
                 if x.has_await {
-                    env.check_if_in_async_context()?;
+                    scope.check_if_in_async_context()?;
                 }
                 for e in &mut x.exprs.1 {
-                    self.visit_expr(env, e)?;
+                    self.visit_expr(scope, e)?;
                 }
-                env.with_in_using(true, |env| visit_mut(self, env, &mut x.block))?;
+                scope.with_in_using(true, |scope| visit_mut(self, scope, &mut x.block))?;
                 Ok(())
             }
-            _ => stmt.recurse(env, self.object()),
+            _ => stmt.recurse(scope, self),
         }
     }
 
-    //TODO(hrust): do we need special handling for Awaitall?
-    fn visit_expr(&mut self, env: &mut Env<'a, 'arena>, Expr(_, pos, e): &mut Expr) -> Result<()> {
-        env.stack_limit.panic_if_exceeded();
+    fn visit_expr(
+        &mut self,
+        scope: &mut Scope<'b, 'arena>,
+        Expr(_, pos, e): &mut Expr,
+    ) -> Result<()> {
+        self.ro_state.stack_limit.panic_if_exceeded();
         *e = match strip_unsafe_casts(e) {
-            Expr_::Efun(x) => convert_lambda(self.alloc, env, self, x.0, Some(x.1))?,
-            Expr_::Lfun(x) => convert_lambda(self.alloc, env, self, x.0, None)?,
+            Expr_::Efun(x) => self.convert_lambda(scope, x.0, Some(x.1))?,
+            Expr_::Lfun(x) => self.convert_lambda(scope, x.0, None)?,
             Expr_::Lvar(id_orig) => {
-                let id = if env.for_debugger_eval
+                let id = if self.ro_state.for_debugger_eval
                     && local_id::get_name(&id_orig.1) == special_idents::THIS
-                    && env.scope.is_in_debugger_eval_fun()
+                    && scope.is_in_debugger_eval_fun()
                 {
                     Box::new(Lid(id_orig.0, (0, "$__debugger$this".to_string())))
                 } else {
                     id_orig
                 };
-                add_var(env, &mut self.state, local_id::get_name(&id.1));
+                self.state_mut().add_var(scope, local_id::get_name(&id.1));
                 Expr_::Lvar(id)
             }
             Expr_::Id(id) if id.name().starts_with('$') => {
-                add_var(env, &mut self.state, id.name());
-                add_generic(env, &mut self.state, id.name());
+                let state = self.state_mut();
+                state.add_var(scope, id.name());
+                state.add_generic(scope, id.name());
                 Expr_::Id(id)
             }
             Expr_::Id(id) => {
-                add_generic(env, &mut self.state, id.name());
-                convert_id(env, *id)
+                self.state_mut().add_generic(scope, id.name());
+                convert_id(scope, *id)
             }
             Expr_::Call(x) if is_dyn_meth_caller(&x) => {
-                self.visit_dyn_meth_caller(env, x, &*pos)?
+                self.visit_dyn_meth_caller(scope, x, &*pos)?
             }
             Expr_::Call(x)
                 if is_meth_caller(&x)
-                    && env
+                    && self
+                        .ro_state
                         .options
                         .hhvm
                         .flags
                         .contains(HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS) =>
             {
-                self.visit_meth_caller_funcptr(env, x, &*pos)?
+                self.visit_meth_caller_funcptr(scope, x, &*pos)?
             }
-            Expr_::Call(x) if is_meth_caller(&x) => self.visit_meth_caller(env, x)?,
+            Expr_::Call(x) if is_meth_caller(&x) => self.visit_meth_caller(scope, x)?,
             Expr_::Call(x)
                 if (x.0)
                     .as_class_get()
@@ -1197,14 +1034,14 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                         .and_then(|x| x.as_id())
                         .map_or(false, string_utils::is_parent) =>
             {
-                add_var(env, &mut self.state, "$this");
+                self.state_mut().add_var(scope, "$this");
                 let mut res = Expr_::Call(x);
-                res.recurse(env, self.object())?;
+                res.recurse(scope, self)?;
                 res
             }
             Expr_::As(x) if (x.1).is_hlike() => {
                 let mut res = x.0;
-                res.recurse(env, self.object())?;
+                res.recurse(scope, self)?;
                 *pos = res.1;
                 res.2
             }
@@ -1218,7 +1055,7 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                     .unwrap_or_default() =>
             {
                 let mut res = x.0;
-                res.recurse(env, self.object())?;
+                res.recurse(scope, self)?;
                 *pos = res.1;
                 res.2
             }
@@ -1228,30 +1065,505 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                     // closure and can be removed. There are no relevant HHVM tests
                     // checking for it, but there are flib test failures when you try
                     // to remove it.
-                    add_var(env, &mut self.state, &id.1);
+                    self.state_mut().add_var(scope, &id.1);
                 };
-                x.recurse(env, self.object())?;
+                x.recurse(scope, self)?;
                 Expr_::ClassGet(x)
             }
             Expr_::Await(mut x) => {
-                env.check_if_in_async_context()?;
-                x.recurse(env, self.object())?;
+                scope.check_if_in_async_context()?;
+                x.recurse(scope, self)?;
                 Expr_::Await(x)
             }
             Expr_::ReadonlyExpr(mut x) => {
-                x.recurse(env, self.object())?;
+                x.recurse(scope, self)?;
                 Expr_::ReadonlyExpr(x)
             }
             Expr_::ExpressionTree(mut x) => {
-                x.runtime_expr.recurse(env, self.object())?;
+                x.runtime_expr.recurse(scope, self)?;
                 Expr_::ExpressionTree(x)
             }
             mut x => {
-                x.recurse(env, self.object())?;
+                x.recurse(scope, self)?;
                 x
             }
         };
         Ok(())
+    }
+}
+
+impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
+    /// Calls a function in the scope of a sub-Scope as a child of `scope`.
+    fn with_subscope<'s, F, R>(
+        &mut self,
+        scope: &'s Scope<'b, 'arena>,
+        si: ScopeSummary<'s, 'arena>,
+        variables: Variables,
+        f: F,
+    ) -> Result<(R, u32)>
+    where
+        'b: 's,
+        F: FnOnce(&mut ClosureVisitor<'a, 's, 'arena>, &mut Scope<'s, 'arena>) -> Result<R>,
+    {
+        let mut scope = scope.new_child(si, variables)?;
+
+        let mut self_ = ClosureVisitor {
+            alloc: self.alloc,
+            ro_state: self.ro_state,
+            state: self.state.take(),
+            phantom: Default::default(),
+        };
+        let res = f(&mut self_, &mut scope);
+        self.state = self_.state;
+        Ok((res?, scope.closure_cnt_per_fun))
+    }
+
+    fn state(&self) -> &State<'arena> {
+        self.state.as_ref().unwrap()
+    }
+
+    fn state_mut(&mut self) -> &mut State<'arena> {
+        self.state.as_mut().unwrap()
+    }
+
+    #[inline(never)]
+    fn visit_dyn_meth_caller(
+        &mut self,
+        scope: &mut Scope<'b, 'arena>,
+        mut x: CallExpr,
+        pos: &Pos,
+    ) -> Result<Expr_> {
+        let force = if let Expr_::Id(ref id) = (x.0).2 {
+            strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
+        } else {
+            false
+        };
+        if let [(pk_c, cexpr), (pk_f, fexpr)] = &mut *x.2 {
+            error::ensure_normal_paramkind(pk_c)?;
+            error::ensure_normal_paramkind(pk_f)?;
+            let mut res = make_dyn_meth_caller_lambda(pos, cexpr, fexpr, force);
+            res.recurse(scope, self)?;
+            Ok(res)
+        } else {
+            let mut res = Expr_::Call(x);
+            res.recurse(scope, self)?;
+            Ok(res)
+        }
+    }
+
+    #[inline(never)]
+    fn visit_meth_caller_funcptr(
+        &mut self,
+        scope: &mut Scope<'b, 'arena>,
+        mut x: CallExpr,
+        pos: &Pos,
+    ) -> Result<Expr_> {
+        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
+            error::ensure_normal_paramkind(pk_cls)?;
+            error::ensure_normal_paramkind(pk_f)?;
+            match (&cls, func.as_string()) {
+                (Expr_::ClassConst(cc), Some(fname)) if string_utils::is_class(&(cc.1).1) => {
+                    let mut cls_const = cls.as_class_const_mut();
+                    let (cid, _) = match cls_const {
+                        None => unreachable!(),
+                        Some((ref mut cid, (_, cs))) => (cid, cs),
+                    };
+                    self.visit_class_id(scope, cid)?;
+                    match &cid.2 {
+                        cid if cid
+                            .as_ciexpr()
+                            .and_then(Expr::as_id)
+                            .map_or(false, |id| !is_selflike_keyword(id)) =>
+                        {
+                            let alloc = bumpalo::Bump::new();
+                            let id = cid.as_ciexpr().unwrap().as_id().unwrap();
+                            let mangled_class_name =
+                                class::ClassType::from_ast_name_and_mangle(&alloc, id.as_ref());
+                            let mangled_class_name = mangled_class_name.unsafe_as_str();
+                            Ok(self.convert_meth_caller_to_func_ptr(
+                                scope,
+                                &*pos,
+                                pc,
+                                mangled_class_name,
+                                pf,
+                                // FIXME: This is not safe--string literals are binary
+                                // strings. There's no guarantee that they're valid UTF-8.
+                                unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
+                            ))
+                        }
+                        _ => Err(Error::fatal_parse(pc, "Invalid class")),
+                    }
+                }
+                (Expr_::String(cls_name), Some(fname)) => Ok(self.convert_meth_caller_to_func_ptr(
+                    scope,
+                    &*pos,
+                    pc,
+                    // FIXME: This is not safe--string literals are binary strings.
+                    // There's no guarantee that they're valid UTF-8.
+                    unsafe { std::str::from_utf8_unchecked(cls_name.as_slice()) },
+                    pf,
+                    // FIXME: This is not safe--string literals are binary strings.
+                    // There's no guarantee that they're valid UTF-8.
+                    unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
+                )),
+                (_, Some(_)) => Err(Error::fatal_parse(
+                    pc,
+                    "Class must be a Class or string type",
+                )),
+                (_, _) => Err(Error::fatal_parse(
+                    pf,
+                    "Method name must be a literal string",
+                )),
+            }
+        } else {
+            let mut res = Expr_::Call(x);
+            res.recurse(scope, self)?;
+            Ok(res)
+        }
+    }
+
+    #[inline(never)]
+    fn visit_meth_caller(
+        &mut self,
+        scope: &mut Scope<'b, 'arena>,
+        mut x: CallExpr,
+    ) -> Result<Expr_> {
+        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
+            error::ensure_normal_paramkind(pk_cls)?;
+            error::ensure_normal_paramkind(pk_f)?;
+            match (&cls, func.as_string()) {
+                (Expr_::ClassConst(cc), Some(_)) if string_utils::is_class(&(cc.1).1) => {
+                    let mut cls_const = cls.as_class_const_mut();
+                    let cid = match cls_const {
+                        None => unreachable!(),
+                        Some((ref mut cid, (_, _))) => cid,
+                    };
+                    if cid
+                        .as_ciexpr()
+                        .and_then(Expr::as_id)
+                        .map_or(false, |id| !is_selflike_keyword(id))
+                    {
+                        let mut res = Expr_::Call(x);
+                        res.recurse(scope, self)?;
+                        Ok(res)
+                    } else {
+                        Err(Error::fatal_parse(pc, "Invalid class"))
+                    }
+                }
+                (Expr_::String(_), Some(_)) => {
+                    let mut res = Expr_::Call(x);
+                    res.recurse(scope, self)?;
+                    Ok(res)
+                }
+                (_, Some(_)) => Err(Error::fatal_parse(
+                    pc,
+                    "Class must be a Class or string type",
+                )),
+                (_, _) => Err(Error::fatal_parse(
+                    pf,
+                    "Method name must be a literal string",
+                )),
+            }
+        } else {
+            let mut res = Expr_::Call(x);
+            res.recurse(scope, self)?;
+            Ok(res)
+        }
+    }
+
+    fn visit_class_id(&mut self, scope: &mut Scope<'b, 'arena>, cid: &mut ClassId) -> Result<()> {
+        if let ClassId(_, _, ClassId_::CIexpr(e)) = cid {
+            self.visit_expr(scope, e)?;
+        }
+        Ok(())
+    }
+
+    // Closure-convert a lambda expression, with use_vars_opt = Some vars
+    // if there is an explicit `use` clause.
+    fn convert_lambda(
+        &mut self,
+        scope: &mut Scope<'b, 'arena>,
+        mut fd: Fun_,
+        use_vars_opt: Option<Vec<Lid>>,
+    ) -> Result<Expr_> {
+        let is_long_lambda = use_vars_opt.is_some();
+        let state = self.state_mut();
+
+        // Remember the current capture and defined set across the lambda
+        let capture_state = state.capture_state.clone();
+        let coeffects_of_scope = scope
+            .coeffects_of_scope()
+            .map_or_else(Default::default, |co| co.clone());
+        state.enter_lambda();
+        if let Some(user_vars) = &use_vars_opt {
+            for Lid(p, id) in user_vars.iter() {
+                if local_id::get_name(id) == special_idents::THIS {
+                    return Err(Error::fatal_parse(
+                        p,
+                        "Cannot use $this as lexical variable",
+                    ));
+                }
+            }
+        }
+
+        let explicit_capture: Option<IndexSet<String>> = use_vars_opt.as_ref().map(|vars| {
+            vars.iter()
+                .map(|Lid(_, (_, name))| name.to_string())
+                .collect()
+        });
+        let variables =
+            Self::compute_variables_from_fun(&fd.params, &fd.body.fb_ast, explicit_capture)?;
+        let coeffects =
+            HhasCoeffects::from_ast(self.alloc, fd.ctxs.as_ref(), &fd.params, &fd.tparams, &[]);
+        let si = ScopeSummary::Lambda(LambdaSummary {
+            coeffects,
+            explicit_capture: use_vars_opt.as_deref(),
+            fun_kind: fd.fun_kind,
+            span: &fd.span,
+        });
+        let (_, closure_cnt_per_fun) =
+            self.with_subscope(scope, si, variables, |self_, scope| {
+                fd.body.recurse(scope, self_)?;
+                for param in &mut fd.params {
+                    visit_mut(self_, scope, &mut param.type_hint)?;
+                }
+                visit_mut(self_, scope, &mut fd.ret)?;
+                Ok(())
+            })?;
+
+        scope.closure_cnt_per_fun = closure_cnt_per_fun + 1;
+
+        let state = self.state.as_mut().unwrap();
+        let current_generics = state.capture_state.generics.clone();
+
+        // TODO(hrust): produce real unique local ids
+        let fresh_lid = |name: String| Lid(Pos::make_none(), (12345, name));
+
+        let lambda_vars: Vec<&String> = state
+            .capture_state
+            .vars
+            .iter()
+            .chain(current_generics.iter())
+            // HHVM lists lambda vars in descending order - do the same
+            .sorted()
+            .rev()
+            .collect();
+
+        // Remove duplicates, (not efficient, but unlikely to be large),
+        // remove variables that are actually just parameters
+        let use_vars_opt: Option<Vec<Lid>> = use_vars_opt.map(|use_vars| {
+            let params = &fd.params;
+            use_vars
+                .into_iter()
+                .rev()
+                .unique_by(|lid| lid.name().to_string())
+                .filter(|x| !params.iter().any(|y| x.name() == &y.name))
+                .collect::<Vec<_>>()
+                .into_iter()
+                .rev()
+                .collect()
+        });
+
+        // For lambdas with explicit `use` variables, we ignore the computed
+        // capture set and instead use the explicit set
+        let (lambda_vars, use_vars): (Vec<String>, Vec<Lid>) = match use_vars_opt {
+            None => (
+                lambda_vars.iter().map(|x| x.to_string()).collect(),
+                lambda_vars
+                    .iter()
+                    .map(|x| fresh_lid(x.to_string()))
+                    .collect(),
+            ),
+            Some(use_vars) => {
+                // We still need to append the generics
+                (
+                    use_vars
+                        .iter()
+                        .map(|x| x.name())
+                        .chain(current_generics.iter())
+                        .map(|x| x.to_string())
+                        .collect(),
+                    use_vars
+                        .iter()
+                        .cloned()
+                        .chain(current_generics.iter().map(|x| fresh_lid(x.to_string())))
+                        .collect(),
+                )
+            }
+        };
+
+        let fun_tparams = scope.fun_tparams().to_vec(); // hiddden .clone()
+        let class_tparams = scope.class_tparams().to_vec(); // hiddden .clone()
+        let class_num = state.closures.len() + self.ro_state.class_count;
+
+        let is_static = if is_long_lambda {
+            // long lambdas are never static
+            false
+        } else {
+            // short lambdas can be made static if they don't capture this in
+            // any form (including any nested lambdas)
+            !state.capture_state.this_
+        };
+
+        // check if something can be promoted to static based on enclosing scope
+        let is_static = is_static || scope.is_static();
+
+        let pos = fd.span.clone();
+        let lambda_vars_clone = lambda_vars.clone();
+        let (inline_fundef, cd) = make_closure(
+            class_num,
+            pos,
+            scope,
+            state,
+            self.ro_state,
+            lambda_vars,
+            fun_tparams,
+            class_tparams,
+            is_static,
+            scope.scope_fmode(),
+            fd,
+        );
+
+        if is_long_lambda {
+            state
+                .global_state
+                .explicit_use_set
+                .insert(inline_fundef.name.1.clone());
+        }
+
+        let closure_class_name = &cd.name.1;
+        if let Some(cd) = scope.as_class_summary() {
+            state
+                .global_state
+                .closure_enclosing_classes
+                .insert(closure_class_name.clone(), make_class_info(cd));
+        }
+
+        // Restore capture and defined set
+        // - adjust captured $this information if lambda that was just processed was
+        //   converted into non-static one
+        state.capture_state = CaptureState {
+            this_: capture_state.this_ || !is_static,
+            ..capture_state
+        };
+        state
+            .global_state
+            .closure_namespaces
+            .insert(closure_class_name.clone(), state.namespace.clone());
+        state.record_function_state(
+            get_unique_id_for_method(&cd.name.1, &cd.methods.first().unwrap().name.1),
+            coeffects_of_scope,
+        );
+
+        // Add lambda captured vars to current captured vars
+        for var in lambda_vars_clone.into_iter() {
+            state.add_var(scope, var)
+        }
+        for x in current_generics.iter() {
+            state.capture_state.generics.insert(x.to_string());
+        }
+
+        state.closures.push(cd);
+
+        Ok(Expr_::mk_efun(inline_fundef, use_vars))
+    }
+
+    fn convert_meth_caller_to_func_ptr(
+        &mut self,
+        scope: &Scope<'_, '_>,
+        pos: &Pos,
+        pc: &Pos,
+        cls: &str,
+        pf: &Pos,
+        fname: &str,
+    ) -> Expr_ {
+        let pos = || pos.clone();
+        let cname = match scope.as_class_summary() {
+            Some(cd) => &cd.name.1,
+            None => "",
+        };
+        let mangle_name = string_utils::mangle_meth_caller(cls, fname);
+        let fun_handle = hack_expr!(
+            pos = pos(),
+            r#"\__systemlib\meth_caller(#{str(clone(mangle_name))})"#
+        );
+        if self
+            .state()
+            .named_hoisted_functions
+            .contains_key(&mangle_name)
+        {
+            return fun_handle.2;
+        }
+        // AST for: invariant(is_a($o, <cls>), 'object must be an instance of <cls>');
+        let obj_var = Box::new(Lid(pos(), local_id::make_unscoped("$o")));
+        let obj_lvar = Expr((), pos(), Expr_::Lvar(obj_var.clone()));
+        let msg = format!("object must be an instance of ({})", cls);
+        let assert_invariant = hack_expr!(
+            pos = pos(),
+            r#"\HH\invariant(\is_a(#{clone(obj_lvar)}, #{str(clone(cls), pc)}), #{str(msg)})"#
+        );
+        // AST for: return $o-><func>(...$args);
+        let args_var = local_id::make_unscoped("$args");
+        let variadic_param = make_fn_param(pos(), &args_var, true, false);
+        let meth_caller_handle = hack_expr!(
+            pos = pos(),
+            r#"#obj_lvar->#{id(clone(fname), pf)}(...#{lvar(args_var)})"#
+        );
+
+        let f = Fun_ {
+            span: pos(),
+            annotation: (),
+            readonly_this: None, // TODO(readonly): readonly_this in closure_convert
+            readonly_ret: None,
+            ret: TypeHint((), None),
+            name: Id(pos(), mangle_name.clone()),
+            tparams: vec![],
+            where_constraints: vec![],
+            params: vec![
+                make_fn_param(pos(), &obj_var.1, false, false),
+                variadic_param,
+            ],
+            ctxs: None,
+            unsafe_ctxs: None,
+            body: FuncBody {
+                fb_ast: vec![
+                    Stmt(pos(), Stmt_::Expr(Box::new(assert_invariant))),
+                    Stmt(pos(), Stmt_::Return(Box::new(Some(meth_caller_handle)))),
+                ],
+            },
+            fun_kind: FunKind::FSync,
+            user_attributes: vec![UserAttribute {
+                name: Id(pos(), "__MethCaller".into()),
+                params: vec![Expr((), pos(), Expr_::String(cname.into()))],
+            }],
+            external: false,
+            doc_comment: None,
+        };
+        let fd = FunDef {
+            file_attributes: vec![],
+            namespace: RcOc::clone(&self.ro_state.empty_namespace),
+            mode: scope.scope_fmode(),
+            fun: f,
+        };
+        self.state_mut()
+            .named_hoisted_functions
+            .insert(mangle_name, fd);
+        fun_handle.2
+    }
+
+    fn compute_variables_from_fun(
+        params: &[FunParam],
+        body: &[Stmt],
+        explicit_capture: Option<IndexSet<String>>,
+    ) -> Result<Variables> {
+        let parameter_names = get_parameter_names(params);
+        let all_vars = compute_vars(params, AstBody::Stmts(body))?;
+        let explicit_capture = explicit_capture.unwrap_or_default();
+        Ok(Variables {
+            parameter_names,
+            all_vars,
+            explicit_capture,
+        })
     }
 }
 
@@ -1309,151 +1621,8 @@ fn is_meth_caller(x: &CallExpr) -> bool {
     }
 }
 
-impl<'a, 'arena> ClosureConvertVisitor<'a, 'arena> {
-    #[inline(never)]
-    fn visit_dyn_meth_caller(
-        &mut self,
-        env: &mut Env<'a, 'arena>,
-        mut x: CallExpr,
-        pos: &Pos,
-    ) -> Result<Expr_> {
-        let force = if let Expr_::Id(ref id) = (x.0).2 {
-            strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
-        } else {
-            false
-        };
-        if let [(pk_c, cexpr), (pk_f, fexpr)] = &mut *x.2 {
-            error::ensure_normal_paramkind(pk_c)?;
-            error::ensure_normal_paramkind(pk_f)?;
-            let mut res = make_dyn_meth_caller_lambda(pos, cexpr, fexpr, force);
-            res.recurse(env, self.object())?;
-            Ok(res)
-        } else {
-            let mut res = Expr_::Call(x);
-            res.recurse(env, self.object())?;
-            Ok(res)
-        }
-    }
-
-    #[inline(never)]
-    fn visit_meth_caller_funcptr(
-        &mut self,
-        env: &mut Env<'a, 'arena>,
-        mut x: CallExpr,
-        pos: &Pos,
-    ) -> Result<Expr_> {
-        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
-            error::ensure_normal_paramkind(pk_cls)?;
-            error::ensure_normal_paramkind(pk_f)?;
-            match (&cls, func.as_string()) {
-                (Expr_::ClassConst(cc), Some(fname)) if string_utils::is_class(&(cc.1).1) => {
-                    let mut cls_const = cls.as_class_const_mut();
-                    let (cid, _) = match cls_const {
-                        None => unreachable!(),
-                        Some((ref mut cid, (_, cs))) => (cid, cs),
-                    };
-                    visit_class_id(env, self, cid)?;
-                    match &cid.2 {
-                        cid if cid.as_ciexpr().and_then(|x| x.as_id()).map_or(false, |id| {
-                            !(string_utils::is_self(id)
-                                || string_utils::is_parent(id)
-                                || string_utils::is_static(id))
-                        }) =>
-                        {
-                            let alloc = bumpalo::Bump::new();
-                            let id = cid.as_ciexpr().unwrap().as_id().unwrap();
-                            let mangled_class_name =
-                                class::ClassType::from_ast_name_and_mangle(&alloc, id.as_ref());
-                            let mangled_class_name = mangled_class_name.unsafe_as_str();
-                            Ok(convert_meth_caller_to_func_ptr(
-                                env,
-                                self,
-                                &*pos,
-                                pc,
-                                mangled_class_name,
-                                pf,
-                                // FIXME: This is not safe--string literals are binary
-                                // strings. There's no guarantee that they're valid UTF-8.
-                                unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
-                            ))
-                        }
-                        _ => Err(Error::fatal_parse(pc, "Invalid class")),
-                    }
-                }
-                (Expr_::String(cls_name), Some(fname)) => Ok(convert_meth_caller_to_func_ptr(
-                    env,
-                    self,
-                    &*pos,
-                    pc,
-                    // FIXME: This is not safe--string literals are binary strings.
-                    // There's no guarantee that they're valid UTF-8.
-                    unsafe { std::str::from_utf8_unchecked(cls_name.as_slice()) },
-                    pf,
-                    // FIXME: This is not safe--string literals are binary strings.
-                    // There's no guarantee that they're valid UTF-8.
-                    unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
-                )),
-                (_, Some(_)) => Err(Error::fatal_parse(
-                    pc,
-                    "Class must be a Class or string type",
-                )),
-                (_, _) => Err(Error::fatal_parse(
-                    pf,
-                    "Method name must be a literal string",
-                )),
-            }
-        } else {
-            let mut res = Expr_::Call(x);
-            res.recurse(env, self.object())?;
-            Ok(res)
-        }
-    }
-
-    #[inline(never)]
-    fn visit_meth_caller(&mut self, env: &mut Env<'a, 'arena>, mut x: CallExpr) -> Result<Expr_> {
-        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
-            error::ensure_normal_paramkind(pk_cls)?;
-            error::ensure_normal_paramkind(pk_f)?;
-            match (&cls, func.as_string()) {
-                (Expr_::ClassConst(cc), Some(_)) if string_utils::is_class(&(cc.1).1) => {
-                    let mut cls_const = cls.as_class_const_mut();
-                    let cid = match cls_const {
-                        None => unreachable!(),
-                        Some((ref mut cid, (_, _))) => cid,
-                    };
-                    #[allow(clippy::blocks_in_if_conditions)]
-                    if cid.as_ciexpr().and_then(|x| x.as_id()).map_or(false, |id| {
-                        !(string_utils::is_self(id)
-                            || string_utils::is_parent(id)
-                            || string_utils::is_static(id))
-                    }) {
-                        let mut res = Expr_::Call(x);
-                        res.recurse(env, self.object())?;
-                        Ok(res)
-                    } else {
-                        Err(Error::fatal_parse(pc, "Invalid class"))
-                    }
-                }
-                (Expr_::String(_), Some(_)) => {
-                    let mut res = Expr_::Call(x);
-                    res.recurse(env, self.object())?;
-                    Ok(res)
-                }
-                (_, Some(_)) => Err(Error::fatal_parse(
-                    pc,
-                    "Class must be a Class or string type",
-                )),
-                (_, _) => Err(Error::fatal_parse(
-                    pf,
-                    "Method name must be a literal string",
-                )),
-            }
-        } else {
-            let mut res = Expr_::Call(x);
-            res.recurse(env, self.object())?;
-            Ok(res)
-        }
-    }
+fn is_selflike_keyword(id: &Id) -> bool {
+    string_utils::is_self(id) || string_utils::is_parent(id) || string_utils::is_static(id)
 }
 
 fn hoist_toplevel_functions(defs: &mut Vec<Def>) {
@@ -1463,199 +1632,95 @@ fn hoist_toplevel_functions(defs: &mut Vec<Def>) {
     defs.extend(nonfuns);
 }
 
-fn flatten_ns(defs: &mut Vec<Def>) -> Vec<Def> {
-    defs.drain(..)
-        .flat_map(|x| match x {
-            Def::Namespace(mut x) => flatten_ns(&mut x.1),
-            _ => vec![x],
-        })
-        .collect()
-}
-
-fn extract_debugger_main(
-    empty_namespace: &RcOc<namespace_env::Env>,
-    all_defs: &mut Vec<Def>,
-) -> Result<(), String> {
-    let (stmts, mut defs): (Vec<Def>, Vec<Def>) = all_defs.drain(..).partition(|x| x.is_stmt());
-    let mut vars = decl_vars::vars_from_ast(&[], &AstBody::Defs(&stmts))?
-        .into_iter()
-        .collect::<Vec<_>>();
-    // TODO(hrust) sort is only required when comparing Rust/Ocaml, remove sort after emitter shipped
-    vars.sort();
-    let mut stmts = stmts
-        .into_iter()
-        .filter_map(|x| x.as_stmt_into())
-        .collect::<Vec<_>>();
-    let stmts =
-        if defs.is_empty() && stmts.len() == 2 && stmts[0].1.is_markup() && stmts[1].1.is_expr() {
-            let Stmt(p, s) = stmts.pop().unwrap();
-            let e = s.as_expr_into().unwrap();
-            let m = stmts.pop().unwrap();
-            vec![m, Stmt::new(p, Stmt_::mk_return(Some(e)))]
-        } else {
-            stmts
-        };
-    let p = Pos::make_none;
-    let mut unsets: Vec<_> = vars
-        .iter()
-        .map(|name| {
-            let name = local_id::make_unscoped(name);
-            hack_stmt!("if (#{lvar(clone(name))} is __uninitSentinel) { unset(#{lvar(name)}); }")
-        })
-        .collect();
-    let sets: Vec<_> = vars
-        .iter()
-        .map(|name: &String| {
-            let name = local_id::make_unscoped(name);
-            hack_stmt!(
-                pos = p(),
-                r#"if (\__systemlib\__debugger_is_uninit(#{lvar(clone(name))})) {
-                       #{lvar(name)} = new __uninitSentinel();
-                     }
-                "#
-            )
-        })
-        .collect();
-    vars.push("$__debugger$this".into());
-    vars.push("$__debugger_exn$output".into());
-    let params: Vec<_> = vars
-        .iter()
-        .map(|var| make_fn_param(p(), &local_id::make_unscoped(var), false, true))
-        .collect();
-    let exnvar = local_id::make_unscoped("$__debugger_exn$output");
-    let catch = hack_stmt!(
-        pos = p(),
-        r#"
-            try {
-              #{stmts*};
-            } catch (Throwable #{lvar(exnvar)}) {
-              /* no-op */
-            } finally {
-              #{sets*};
-            }
-        "#
-    );
-    unsets.push(catch);
-    let body = unsets;
-    let pos = Pos::from_line_cols_offset(
-        RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
-        1,
-        0..0,
-        0,
-    );
-    let f = Fun_ {
-        span: pos,
-        annotation: (),
-        readonly_this: None, // TODO(readonly): readonly_this in closure_convert
-        readonly_ret: None,  // TODO(readonly): readonly_ret in closure_convert
-        ret: TypeHint((), None),
-        name: Id(Pos::make_none(), "include".into()),
-        tparams: vec![],
-        where_constraints: vec![],
-        params,
-        ctxs: None,        // TODO(T70095684)
-        unsafe_ctxs: None, // TODO(T70095684)
-        body: FuncBody { fb_ast: body },
-        fun_kind: FunKind::FSync,
-        user_attributes: vec![UserAttribute {
-            name: Id(Pos::make_none(), "__DebuggerMain".into()),
-            params: vec![],
-        }],
-        external: false,
-        doc_comment: None,
-    };
-    let fd = FunDef {
-        namespace: RcOc::clone(empty_namespace),
-        file_attributes: vec![],
-        mode: Mode::Mstrict,
-        fun: f,
-    };
-    let mut new_defs = vec![Def::mk_fun(fd)];
-    new_defs.append(&mut defs);
-    *all_defs = new_defs;
-    Ok(())
-}
-
-pub fn convert_toplevel_prog<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    defs: &mut Program,
-    namespace_env: RcOc<namespace_env::Env>,
-    stack_limit: &'decl StackLimit,
-) -> Result<()> {
-    if e.options()
-        .hack_compiler_flags
-        .contains(CompilerFlags::CONSTANT_FOLDING)
-    {
-        constant_folder::fold_program(defs, e)
-            .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
-    }
-    let defs = &mut defs.0;
-
-    let mut env = Env::toplevel(
-        count_classes(defs.as_slice()),
-        1,
-        defs.as_slice(),
-        e.options(),
-        e.for_debugger_eval,
-        stack_limit,
-    )?;
-    *defs = flatten_ns(defs);
-    if e.for_debugger_eval {
-        extract_debugger_main(&namespace_env, defs).map_err(Error::unrecoverable)?;
-    }
-
-    let mut visitor = ClosureConvertVisitor {
-        alloc: e.alloc,
-        state: State::initial_state(namespace_env),
-        phantom_lifetime_a: std::marker::PhantomData,
-    };
-
-    let mut new_defs = vec![];
+fn prepare_defs(defs: &mut [Def]) -> usize {
     let mut class_count = 0;
     let mut typedef_count = 0;
     let mut const_count = 0;
 
-    for mut def in defs.drain(..) {
-        visitor.visit_def(&mut env, &mut def)?;
+    for def in defs.iter_mut() {
         match def {
-            Def::Class(mut x) => {
+            Def::Class(x) => {
                 x.emit_id = Some(EmitId::EmitId(class_count));
                 class_count += 1;
-                new_defs.push(Def::Class(x));
             }
-            Def::Typedef(mut x) => {
+            Def::Typedef(x) => {
                 x.emit_id = Some(EmitId::EmitId(typedef_count));
                 typedef_count += 1;
-                new_defs.push(Def::Typedef(x));
             }
-            Def::Constant(mut x) => {
+            Def::Constant(x) => {
                 x.emit_id = Some(EmitId::EmitId(const_count));
                 const_count += 1;
-                new_defs.push(Def::Constant(x));
             }
-            Def::Namespace(x) => new_defs.extend_from_slice((*x).1.as_slice()),
-            Def::SetNamespaceEnv(x) => {
-                visitor.state.set_namespace(RcOc::clone(&*x));
-                new_defs.push(Def::SetNamespaceEnv(x))
+            Def::Namespace(_) => {
+                // This should have already been flattened by rewrite_program.
+                unreachable!()
             }
-            def => new_defs.push(def),
+            Def::FileAttributes(_)
+            | Def::Fun(_)
+            | Def::Module(_)
+            | Def::NamespaceUse(_)
+            | Def::SetNamespaceEnv(_)
+            | Def::Stmt(_) => {}
         }
     }
 
-    visitor
-        .state
-        .record_function_state(get_unique_id_for_main(), HhasCoeffects::default());
-    hoist_toplevel_functions(&mut new_defs);
-    let named_fun_defs = visitor
-        .state
+    class_count as usize
+}
+
+pub fn convert_toplevel_prog<'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    defs: &mut Vec<Def>,
+    namespace_env: RcOc<namespace_env::Env>,
+    stack_limit: &'decl StackLimit,
+) -> Result<()> {
+    let class_count = prepare_defs(defs);
+
+    let mut scope = Scope::toplevel(defs.as_slice())?;
+    let ro_state = ReadOnlyState {
+        class_count,
+        empty_namespace: RcOc::clone(&namespace_env),
+        for_debugger_eval: e.for_debugger_eval,
+        options: e.options(),
+        stack_limit,
+    };
+    let state = State::initial_state(namespace_env);
+
+    let mut visitor = ClosureVisitor {
+        alloc: e.alloc,
+        state: Some(state),
+        ro_state: &ro_state,
+        phantom: Default::default(),
+    };
+
+    for def in defs.iter_mut() {
+        visitor.visit_def(&mut scope, def)?;
+        match def {
+            Def::SetNamespaceEnv(x) => {
+                visitor.state_mut().set_namespace(RcOc::clone(&*x));
+            }
+            Def::Class(_)
+            | Def::Constant(_)
+            | Def::FileAttributes(_)
+            | Def::Fun(_)
+            | Def::Module(_)
+            | Def::Namespace(_)
+            | Def::NamespaceUse(_)
+            | Def::Stmt(_)
+            | Def::Typedef(_) => {}
+        }
+    }
+
+    let mut state = visitor.state.take().unwrap();
+    state.record_function_state(get_unique_id_for_main(), HhasCoeffects::default());
+    hoist_toplevel_functions(defs);
+    let named_fun_defs = state
         .named_hoisted_functions
         .into_iter()
         .map(|(_, fd)| Def::mk_fun(fd));
-    *defs = named_fun_defs.collect();
-    defs.append(&mut new_defs);
-    for class in visitor.state.closures.into_iter() {
+    defs.splice(0..0, named_fun_defs);
+    for class in state.closures.into_iter() {
         defs.push(Def::mk_class(class));
     }
-    *e.emit_global_state_mut() = visitor.state.global_state;
+    *e.emit_global_state_mut() = state.global_state;
     Ok(())
 }

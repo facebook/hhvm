@@ -171,8 +171,10 @@ pub fn from_ast<'a, 'arena, 'decl>(
     };
     if is_closure_body {
         scope.items.push(ScopeItem::Lambda(Lambda {
+            is_long: false,
             is_async,
             coeffects: HhasCoeffects::default(),
+            pos: method.span.clone(),
         }))
     };
     let namespace = RcOc::clone(

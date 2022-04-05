@@ -12,8 +12,9 @@ use oxidized::{
     ast_defs::{FunKind, Id},
     pos::Pos,
 };
+use std::borrow::Cow;
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default, Debug, Eq, PartialEq)]
 pub struct Scope<'a, 'arena> {
     pub items: Vec<ScopeItem<'a, 'arena>>,
 }
@@ -44,26 +45,24 @@ impl<'a, 'arena> Scope<'a, 'arena> {
         None
     }
 
+    pub fn top(&self) -> Option<&ScopeItem<'a, 'arena>> {
+        self.items.last()
+    }
+
     pub fn get_class(&self) -> Option<&Class<'_>> {
         Self::get_subscope_class(&self.items[..])
     }
 
-    pub fn get_span(&self) -> Pos {
-        for scope_item in self.iter() {
-            match scope_item {
-                ScopeItem::Class(cd) => {
-                    return cd.get_span().clone();
-                }
-                ScopeItem::Function(fd) => {
-                    return fd.get_span().clone();
-                }
-                ScopeItem::Method(md) => {
-                    return md.get_span().clone();
-                }
-                _ => {}
-            }
+    pub fn get_span(&self) -> Option<&Pos> {
+        self.top().map(ScopeItem::get_span)
+    }
+
+    pub fn get_span_or_none<'b>(&'b self) -> Cow<'b, Pos> {
+        if let Some(pos) = self.get_span() {
+            Cow::Borrowed(pos)
+        } else {
+            Cow::Owned(Pos::make_none())
         }
-        Pos::make_none()
     }
 
     pub fn get_tparams(&self) -> Vec<&ast::Tparam> {
@@ -166,7 +165,6 @@ impl<'a, 'arena> Scope<'a, 'arena> {
                 ScopeItem::Method(md) => {
                     return md.is_static();
                 }
-                ScopeItem::LongLambda(_) => {}
                 ScopeItem::Lambda(_) => {}
                 _ => return false,
             }
@@ -203,12 +201,11 @@ impl<'a, 'arena> Scope<'a, 'arena> {
                     );
                 }
                 ScopeItem::Lambda(Lambda { coeffects, .. })
-                | ScopeItem::LongLambda(LongLambda { coeffects, .. })
                     if !coeffects.get_static_coeffects().is_empty() =>
                 {
                     return coeffects.clone();
                 }
-                _ => {}
+                ScopeItem::Lambda(_) => {}
             }
         }
         HhasCoeffects::default()
@@ -235,7 +232,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
             match x {
                 ScopeItem::Function(_) => return true,
                 ScopeItem::Method(md) => return md.is_static(),
-                ScopeItem::Lambda(_) | ScopeItem::LongLambda(_) => continue,
+                ScopeItem::Lambda(_) => {}
                 _ => return true,
             }
         }
@@ -261,7 +258,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
     pub fn is_in_debugger_eval_fun(&self) -> bool {
         for x in self.iter() {
             match x {
-                ScopeItem::LongLambda(_) | ScopeItem::Lambda(_) => continue,
+                ScopeItem::Lambda(_) => {}
                 ScopeItem::Function(f) => return f.get_name().1 == "include",
                 _ => return false,
             }

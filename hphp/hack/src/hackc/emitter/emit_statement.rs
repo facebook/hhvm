@@ -819,7 +819,7 @@ fn emit_try_finally_<
     // emitter, get them fixed there. If not, get a clear explanation of
     // what they are for and why they are required.
 
-    let enclosing_span = env.scope.get_span();
+    let enclosing_span = env.scope.get_span_or_none();
     let try_instrs = if jump_instrs_is_empty {
         try_body
     } else {

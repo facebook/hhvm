@@ -21,7 +21,7 @@ pub struct HhasCtxConstant<'arena> {
     pub is_abstract: bool,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
 pub struct HhasCoeffects<'arena> {
     static_coeffects: Slice<'arena, Ctx>,

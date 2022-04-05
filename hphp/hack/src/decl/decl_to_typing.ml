@@ -73,7 +73,9 @@ let shallow_method_to_class_elt child_class mname mro subst meth : class_elt =
     ce_flags =
       make_ce_flags
         ~xhp_attr:None
-        ~synthesized:(is_set mro_via_req_extends mro.mro_flags)
+        ~synthesized:
+          (is_set mro_via_req_extends mro.mro_flags
+          || is_set mro_via_req_class mro.mro_flags)
         ~abstract:(sm_abstract meth)
         ~final:(sm_final meth)
         ~const:false

@@ -602,6 +602,7 @@ struct Constant {
 };
 
 struct Module {
+  Unit* unit;
   LSString name;
   SrcInfo srcInfo;
   Attr attrs;

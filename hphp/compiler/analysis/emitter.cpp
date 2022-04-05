@@ -229,6 +229,7 @@ struct SymbolSets {
   IMap funcs;
   IMap typeAliases;
   Map constants;
+  Map modules;
 
   static std::unique_ptr<Data> make(const UnitEmitter* ue,
                                     const StringData* name,
@@ -295,6 +296,10 @@ void writeUnit(UnitEmitter& ue,
   for (auto& c : ue.constants()) {
     c.attrs |= AttrUnique | AttrPersistent;
     HHBBC::add_symbol(sets.constants, make(c.name, c.attrs), "constant");
+  }
+  for (auto& m : ue.modules()) {
+    m.attrs |= AttrUnique | AttrPersistent;
+    HHBBC::add_symbol(sets.modules, make(m.name, m.attrs), "module");
   }
 
   autoloadMapBuilder.addUnit(ue);

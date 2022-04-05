@@ -402,6 +402,14 @@ void Unit::mergeImpl(MergeTypes mergeTypes) {
       Constant::def(&constant);
     }
 
+    for (auto& module : m_modules) {
+      Stats::inc(Stats::UnitMerge_mergeable);
+      Stats::inc(Stats::UnitMerge_mergeable_define);
+
+      assertx(IMPLIES(RO::RepoAuthoritative, module.attrs & AttrPersistent));
+      Module::def(&module);
+    }
+
     boost::dynamic_bitset<> preClasses(m_preClasses.size());
     preClasses.set();
     boost::dynamic_bitset<> typeAliases(m_typeAliases.size());

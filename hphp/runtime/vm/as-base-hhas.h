@@ -54,9 +54,9 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrFinal,                    C|F|T,   "final");                \
   X(AttrSealed,                   C,       "sealed");               \
   X(AttrTrait,                    C|F|P,   "trait");                \
-  X(AttrUnique,                   C|F,     "unique");               \
+  X(AttrUnique,                   C|F|M,   "unique");               \
   X(AttrBuiltin,                  C|F,     "builtin");              \
-  X(AttrPersistent,               C|F|A|K, "persistent");           \
+  X(AttrPersistent,               C|F|A|K|M, "persistent");         \
   X(AttrIsConst,                  C|P,     "is_const");             \
   X(AttrIsReadonly,               P,       "readonly");             \
   X(AttrReadonlyReturn,           F,       "readonly_return");      \

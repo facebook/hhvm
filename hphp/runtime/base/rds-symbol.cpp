@@ -46,6 +46,7 @@ struct SymbolKind : boost::static_visitor<std::string> {
   std::string operator()(LSBMemoValue) const { return "LSBMemoValue"; }
   std::string operator()(LSBMemoCache) const { return "LSBMemoCache"; }
   std::string operator()(TSCache) const { return "TSCache"; }
+  std::string operator()(ModuleCache) const { return "ModuleCache"; }
   std::string operator()(ConstMemoCache) const { return "ConstMemoCache"; }
 };
 
@@ -96,6 +97,10 @@ struct SymbolRep : boost::static_visitor<std::string> {
   std::string operator()(TSCache k) const {
     auto const func = Func::fromFuncId(k.funcId);
     return func->fullName()->toCppString();
+  }
+
+  std::string operator()(ModuleCache k) const {
+    return k.name->toCppString();
   }
 
   std::string operator()(ConstMemoCache k) const {
@@ -172,6 +177,10 @@ struct SymbolEq : boost::static_visitor<bool> {
     return k1.funcId == k2.funcId;
   }
 
+  bool operator()(ModuleCache k1, ModuleCache k2) const {
+    return k1.name->same(k2.name);
+  }
+
   bool operator()(ConstMemoCache k1, ConstMemoCache k2) const {
     return k1.funcId == k2.funcId &&
            k1.cls == k2.cls &&
@@ -237,6 +246,10 @@ struct SymbolHash : boost::static_visitor<size_t> {
 
   size_t operator()(TSCache k) const {
     return std::hash<FuncId>()(k.funcId);
+  }
+
+  size_t operator()(ModuleCache k) const {
+    return k.name->hash();
   }
 
   size_t operator()(ConstMemoCache k) const {

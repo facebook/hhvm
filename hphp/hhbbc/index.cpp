@@ -1096,6 +1096,7 @@ struct Index::IndexData {
   ISStringToOneT<const php::TypeAlias*>  typeAliases;
   ISStringToOneT<const php::Class*>      enums;
   SStringToOneT<const php::Constant*>    constants;
+  SStringToOneT<const php::Module*>      modules;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
@@ -2373,6 +2374,10 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
 
   for (auto& c : unit.constants) {
     add_symbol(index.constants, c.get(), "constant");
+  }
+
+  for (auto& m : unit.modules) {
+    add_symbol(index.modules, m.get(), "module");
   }
 }
 
@@ -7427,6 +7432,7 @@ void Index::cleanup_post_emit(php::ProgramPtr program) {
   CLEAR_PARALLEL(m_data->typeAliases);
   CLEAR_PARALLEL(m_data->enums);
   CLEAR_PARALLEL(m_data->constants);
+  CLEAR_PARALLEL(m_data->modules);
 
   CLEAR_PARALLEL(m_data->classClosureMap);
   CLEAR_PARALLEL(m_data->classExtraMethodMap);

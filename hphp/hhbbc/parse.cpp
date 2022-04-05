@@ -1069,11 +1069,12 @@ std::unique_ptr<php::Constant> parse_constant(const Constant& c, php::Unit* unit
   });
 }
 
-std::unique_ptr<php::Module> parse_module(const Module& m) {
+std::unique_ptr<php::Module> parse_module(const Module& m, php::Unit* unit) {
   return std::unique_ptr<php::Module>(new php::Module{
+    unit,
     m.name,
     php::SrcInfo {{m.line0, m.line1}},
-    m.attrs,
+    m.attrs | AttrUnique | AttrPersistent,
     m.userAttributes
   });
 }
@@ -1155,7 +1156,7 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
 
   for (auto& m : ue.modules()) {
     ret->modules.push_back(
-      parse_module(m)
+      parse_module(m, ret.get())
     );
   }
 

@@ -26,6 +26,7 @@ namespace HPHP {
   struct Func;
   struct StringData;
   struct MemoCacheBase;
+  struct Module;
 }
 
 namespace HPHP::rds {
@@ -77,6 +78,24 @@ bindConstMemoCache(const Func*, const Class*,
                    const ArrayData* paramVals, bool asyncEager);
 
 void clearConstMemoCache(const Func*, const Class*);
+
+template <Mode T>
+Link<Module*, T>
+bindModuleCache(const StringData* name) {
+  return bind<Module*, T>(
+    ModuleCache { name }
+  );
+}
+
+template <Mode T>
+Link<Module*, T>
+attachModuleCache(const StringData* name) {
+  return attach<Module*, T>(
+    ModuleCache { name }
+  );
+}
+
+
 //////////////////////////////////////////////////////////////////////
 
 }

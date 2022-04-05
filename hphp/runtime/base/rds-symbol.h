@@ -161,6 +161,10 @@ struct ConstMemoCache {
   bool asyncEager;
 };
 
+struct ModuleCache {
+  LowStringPtr name;
+};
+
 using Symbol = boost::variant<
   LinkName,
   LinkID,
@@ -174,7 +178,8 @@ using Symbol = boost::variant<
   LSBMemoValue,
   LSBMemoCache,
   TSCache,
-  ConstMemoCache
+  ConstMemoCache,
+  ModuleCache
 >;
 
 std::string symbol_kind(const Symbol&);

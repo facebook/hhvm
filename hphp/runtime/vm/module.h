@@ -44,6 +44,17 @@ struct Module {
   }
 
   void prettyPrint(std::ostream& out) const;
+
+  /*
+   * Look up the defined Module in this request with name `name'.
+   * Return nullptr if the module is not yet defined in this request.
+   */
+  static Module* lookup(const StringData* name);
+
+  /*
+   * Define module m for this request.
+   */
+  static void def(Module* m);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

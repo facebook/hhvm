@@ -16,6 +16,9 @@
 
 #include "hphp/runtime/vm/module.h"
 
+#include "hphp/runtime/base/rds-symbol.h"
+#include "hphp/runtime/base/rds-util.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-data.h"
 
 namespace HPHP {
@@ -33,4 +36,30 @@ void Module::prettyPrint(std::ostream& out) const {
   out << std::endl;
 }
 
+Module* Module::lookup(const StringData* name) {
+  assertx(name->isStatic());
+  if (RO::RepoAuthoritative) {
+    auto const link = rds::attachModuleCache<rds::Mode::Persistent>(name);
+    return link.bound() ? *link : nullptr;
+  }
+  auto const link = rds::attachModuleCache<rds::Mode::Normal>(name);
+  return link.bound() ? *link : nullptr;
 }
+
+void Module::def(Module* m) {
+  assertx(m->name->isStatic());
+  if (RO::RepoAuthoritative) {
+    auto const link = rds::bindModuleCache<rds::Mode::Persistent>(m->name);
+    assertx(m->attrs & AttrPersistent);
+    always_assert(*link == nullptr);
+    link.initWith(m);
+    return;
+  }
+  auto const link = rds::bindModuleCache<rds::Mode::Normal>(m->name);
+  if (link.isInit()) {
+    raise_error("Module already defined: %s", m->name->data());
+  }
+  link.initWith(m);
+}
+
+} // namespace HPHP

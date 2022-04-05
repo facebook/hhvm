@@ -31,7 +31,10 @@ ExternalProject_Add(
   bundled_libsodium
   ${LIBSODIUM_DOWNLOAD_ARGS}
   CONFIGURE_COMMAND
-  <SOURCE_DIR>/configure
+  /usr/bin/env
+    CC=${CMAKE_C_COMPILER}
+    CXX=${CMAKE_CXX_COMPILER}
+    <SOURCE_DIR>/configure
     "--prefix=<INSTALL_DIR>"
     "--libdir=<INSTALL_DIR>/lib"
     "--includedir=<INSTALL_DIR>/include"

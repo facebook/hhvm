@@ -31,9 +31,9 @@ use oxidized::{
     pos::Pos,
 };
 use regex::Regex;
-use runtime::TypedValue;
 use std::{borrow::Cow, collections::BTreeMap, iter, str::FromStr};
 use symbol_refs_state::IncludePath;
+use typed_value::TypedValue;
 
 #[derive(Debug)]
 pub struct EmitJmpResult<'arena> {
@@ -3380,7 +3380,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
             error::ensure_normal_paramkind(pk)?;
             // FIXME: This is not safe--string literals are binary strings.
             // There's no guarantee that they're valid UTF-8.
-            let tv = TypedValue::mk_hhas_adata(
+            let tv = TypedValue::hhas_adata(
                 alloc.alloc_str(unsafe { std::str::from_utf8_unchecked(data.as_ref()) }),
             );
             let instr = emit_adata::typed_value_to_instr(e, &tv)?;
@@ -6533,7 +6533,7 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
     let opt = optimize_null_checks(e);
     Ok(match constant_folder::expr_to_typed_value(e, expr) {
         Ok(tv) => {
-            if Into::<bool>::into(tv) {
+            if constant_folder::cast_to_bool(tv) {
                 EmitJmpResult {
                     instrs: emit_pos_then(pos, instr::jmp(label)),
                     is_fallthrough: false,
@@ -6653,8 +6653,7 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
     let opt = optimize_null_checks(e);
     Ok(match constant_folder::expr_to_typed_value(e, expr) {
         Ok(v) => {
-            let b: bool = v.into();
-            if b {
+            if constant_folder::cast_to_bool(v) {
                 EmitJmpResult {
                     instrs: emit_pos_then(pos, instr::empty()),
                     is_fallthrough: true,

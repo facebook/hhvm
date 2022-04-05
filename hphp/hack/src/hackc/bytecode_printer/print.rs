@@ -39,7 +39,6 @@ use itertools::Itertools;
 use label::Label;
 use ocaml_helper::escaped_bytes;
 use oxidized::ast_defs;
-use runtime::TypedValue;
 use std::{
     borrow::Cow,
     ffi::OsStr,
@@ -48,6 +47,7 @@ use std::{
     path::Path,
     write,
 };
+use typed_value::TypedValue;
 use write_bytes::write_bytes;
 
 macro_rules! write_if {

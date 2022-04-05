@@ -45,4 +45,4 @@ itertools = "0.10.3"
 local = { path = "../local" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
-runtime = { path = "../runtime" }
+typed_value = { path = "../../../hhbc/cargo/typed_value" }

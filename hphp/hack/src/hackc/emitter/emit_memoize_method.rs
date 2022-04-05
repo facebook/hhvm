@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ast_scope::{self as ast_scope, Scope, ScopeItem};
+use bitflags::bitflags;
 use emit_method::get_attrs_for_method;
 use emit_pos::emit_pos_then;
 use env::{emitter::Emitter, Env};
@@ -25,9 +26,7 @@ use local::Local;
 use naming_special_names_rust::{members, user_attributes as ua};
 use options::HhvmFlags;
 use oxidized::{ast as T, pos::Pos};
-use runtime::TypedValue;
-
-use bitflags::bitflags;
+use typed_value::TypedValue;
 
 /// Precomputed information required for generation of memoized methods
 pub struct MemoizeInfo<'arena> {

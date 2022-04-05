@@ -10,4 +10,4 @@ path = "../../hhas_constant.rs"
 [dependencies]
 ffi = { path = "../../../../utils/ffi" }
 hhbc_id = { path = "../hhbc_id" }
-runtime = { path = "../../../emitter/cargo/runtime" }
+typed_value = { path = "../typed_value" }

@@ -9,7 +9,7 @@ use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
 use hhbc_id::class::ClassType;
 use hhvm_types_ffi::ffi::Attr;
-use runtime::TypedValue;
+use typed_value::TypedValue;
 
 #[derive(Debug)]
 #[repr(C)]

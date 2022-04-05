@@ -6,7 +6,7 @@
 use ffi::{Slice, Str};
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
-use runtime::TypedValue;
+use typed_value::TypedValue;
 
 /// Attributes with a name from [naming_special_names::user_attributes] and
 /// a series of arguments.  Emitter code can match on an attribute as follows:

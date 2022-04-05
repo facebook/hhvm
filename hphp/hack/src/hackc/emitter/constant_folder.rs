@@ -15,8 +15,8 @@ use oxidized::{
     ast, ast_defs,
     pos::Pos,
 };
-use runtime::TypedValue;
 use std::{collections::hash_map::RandomState, fmt};
+use typed_value::TypedValue;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
@@ -124,7 +124,7 @@ fn varray_to_typed_value<'arena, 'decl>(
             .collect::<Result<Vec<_>, _>>()?
             .into_iter(),
     );
-    Ok(TypedValue::mk_vec(tv_fields))
+    Ok(TypedValue::vec(tv_fields))
 }
 
 fn darray_to_typed_value<'arena, 'decl>(
@@ -142,7 +142,7 @@ fn darray_to_typed_value<'arena, 'decl>(
             ))
         })
         .collect::<Result<_, Error>>()?;
-    Ok(TypedValue::mk_dict(emitter.alloc.alloc_slice_fill_iter(
+    Ok(TypedValue::dict(emitter.alloc.alloc_slice_fill_iter(
         update_duplicates_in_map(tv_fields),
     )))
 }
@@ -260,7 +260,7 @@ fn shape_to_typed_value<'arena, 'decl>(
                     ast_defs::ShapeFieldName::SFlitStr(id) => {
                         // FIXME: This is not safe--string literals are binary
                         // strings. There's no guarantee that they're valid UTF-8.
-                        TypedValue::mk_string(
+                        TypedValue::string(
                             emitter
                                 .alloc
                                 .alloc_str(unsafe { std::str::from_utf8_unchecked(&id.1) }),
@@ -283,7 +283,7 @@ fn shape_to_typed_value<'arena, 'decl>(
             .collect::<Result<Vec<Pair<_, _>>, _>>()?
             .into_iter(),
     );
-    Ok(TypedValue::mk_dict(a))
+    Ok(TypedValue::dict(a))
 }
 
 pub fn vec_to_typed_value<'arena, 'decl>(
@@ -297,7 +297,7 @@ pub fn vec_to_typed_value<'arena, 'decl>(
         .map(|f| value_afield_to_typed_value(e, f))
         .collect();
     let fields = e.alloc.alloc_slice_fill_iter(tv_fields?.into_iter());
-    Ok(TypedValue::mk_vec(fields))
+    Ok(TypedValue::vec(fields))
 }
 
 pub fn expr_to_typed_value<'arena, 'decl>(
@@ -406,7 +406,7 @@ fn call_expr_to_typed_value<'arena, 'decl>(
         [(ast_defs::ParamKind::Pnormal, Expr(_, _, Expr_::String(ref data)))] => {
             // FIXME: This is not safe--string literals are binary strings.
             // There's no guarantee that they're valid UTF-8.
-            Ok(TypedValue::mk_hhas_adata(
+            Ok(TypedValue::hhas_adata(
                 emitter
                     .alloc
                     .alloc_str(unsafe { std::str::from_utf8_unchecked(data) }),
@@ -443,7 +443,7 @@ fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
             .collect::<Vec<_>>()
             .into_iter(),
     );
-    Ok(TypedValue::mk_keyset(keys))
+    Ok(TypedValue::keyset(keys))
 }
 
 fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
@@ -461,7 +461,7 @@ fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
                 .map(|e| kv_to_typed_value_pair(emitter, &e.0, &e.1))
                 .collect::<Result<Vec<_>, _>>()?,
         ));
-    Ok(TypedValue::mk_dict(values))
+    Ok(TypedValue::dict(values))
 }
 
 fn valcollection_set_expr_to_typed_value<'arena, 'decl>(
@@ -475,7 +475,7 @@ fn valcollection_set_expr_to_typed_value<'arena, 'decl>(
                 .map(|e| set_afield_value_to_typed_value_pair(emitter, e))
                 .collect::<Result<Vec<_>, _>>()?,
         ));
-    Ok(TypedValue::mk_dict(values))
+    Ok(TypedValue::dict(values))
 }
 
 fn valcollection_vec_expr_to_typed_value<'arena, 'decl>(
@@ -486,7 +486,7 @@ fn valcollection_vec_expr_to_typed_value<'arena, 'decl>(
         x.2.iter()
             .map(|e| expr_to_typed_value(emitter, e))
             .collect::<Result<_, _>>()?;
-    Ok(TypedValue::mk_vec(
+    Ok(TypedValue::vec(
         emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
     ))
 }
@@ -499,7 +499,7 @@ fn tuple_expr_to_typed_value<'arena, 'decl>(
         .iter()
         .map(|e| expr_to_typed_value(emitter, e))
         .collect::<Result<_, _>>()?;
-    Ok(TypedValue::mk_vec(
+    Ok(TypedValue::vec(
         emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
     ))
 }
@@ -519,7 +519,7 @@ fn set_expr_to_typed_value<'arena, 'decl>(
                 .map(|x| set_afield_to_typed_value_pair(emitter, x))
                 .collect::<Result<_, _>>()?,
         ));
-    Ok(TypedValue::mk_dict(values))
+    Ok(TypedValue::dict(values))
 }
 
 fn dict_expr_to_typed_value<'arena, 'decl>(
@@ -537,7 +537,7 @@ fn dict_expr_to_typed_value<'arena, 'decl>(
                 .map(|x| afield_to_typed_value_pair(emitter, x))
                 .collect::<Result<_, _>>()?,
         ));
-    Ok(TypedValue::mk_dict(values))
+    Ok(TypedValue::dict(values))
 }
 
 fn keyset_expr_to_typed_value<'arena, 'decl>(
@@ -557,7 +557,7 @@ fn keyset_expr_to_typed_value<'arena, 'decl>(
             .collect::<Vec<_>>()
             .into_iter(),
     );
-    Ok(TypedValue::mk_keyset(keys))
+    Ok(TypedValue::keyset(keys))
 }
 
 fn float_expr_to_typed_value<'arena, 'decl>(
@@ -583,7 +583,7 @@ fn string_expr_to_typed_value<'arena, 'decl>(
 ) -> Result<TypedValue<'arena>, Error> {
     // FIXME: This is not safe--string literals are binary strings.
     // There's no guarantee that they're valid UTF-8.
-    Ok(TypedValue::mk_string(
+    Ok(TypedValue::string(
         emitter
             .alloc
             .alloc_str(unsafe { std::str::from_utf8_unchecked(s) }),
@@ -617,11 +617,11 @@ fn cast_value<'arena>(
         ast::Hint_::Happly(ast_defs::Id(_, id), args) if args.is_empty() => {
             let id = string_utils::strip_hh_ns(id);
             if id == typehints::BOOL {
-                Some(TypedValue::Bool(v.into()))
+                Some(TypedValue::Bool(cast_to_bool(v)))
             } else if id == typehints::STRING {
-                WithBump(alloc, v).try_into().ok().map(TypedValue::String)
+                cast_to_arena_str(v, alloc).map(TypedValue::string)
             } else if id == typehints::FLOAT {
-                v.try_into().ok().map(TypedValue::double)
+                cast_to_float(v).map(TypedValue::double)
             } else {
                 None
             }
@@ -636,10 +636,14 @@ fn unop_on_value<'arena>(
     v: TypedValue<'arena>,
 ) -> Result<TypedValue<'arena>, Error> {
     match unop {
-        ast_defs::Uop::Unot => v.logical_not(),
-        ast_defs::Uop::Uplus => v.add(&TypedValue::Int(0)),
-        ast_defs::Uop::Uminus => v.neg(),
-        ast_defs::Uop::Utild => v.bitwise_not(),
+        ast_defs::Uop::Unot => fold_logical_not(v),
+        ast_defs::Uop::Uplus => fold_add(v, TypedValue::Int(0)),
+        ast_defs::Uop::Uminus => match v {
+            TypedValue::Int(i) => Some(TypedValue::Int((-std::num::Wrapping(i)).0)),
+            TypedValue::Double(i) => Some(TypedValue::double(0.0 - i.to_f64())),
+            _ => None,
+        },
+        ast_defs::Uop::Utild => fold_bitwise_not(v),
         ast_defs::Uop::Usilence => Some(v.clone()),
         _ => None,
     }
@@ -654,13 +658,13 @@ fn binop_on_values<'arena>(
 ) -> Result<TypedValue<'arena>, Error> {
     use ast_defs::Bop;
     match binop {
-        Bop::Dot => v1.concat(alloc, v2),
-        Bop::Plus => v1.add(&v2),
-        Bop::Minus => v1.sub(&v2),
-        Bop::Star => v1.mul(&v2),
-        Bop::Ltlt => v1.shift_left(&v2),
-        Bop::Slash => v1.div(&v2),
-        Bop::Bar => v1.bitwise_or(&v2),
+        Bop::Dot => fold_concat(v1, v2, alloc),
+        Bop::Plus => fold_add(v1, v2),
+        Bop::Minus => fold_sub(v1, v2),
+        Bop::Star => fold_mul(v1, v2),
+        Bop::Ltlt => fold_shift_left(v1, v2),
+        Bop::Slash => fold_div(v1, v2),
+        Bop::Bar => fold_bitwise_or(v1, v2),
         _ => None,
     }
     .ok_or(Error::NotLiteral)
@@ -762,21 +766,231 @@ pub fn literals_from_exprs<'arena, 'decl>(
     }
 }
 
-struct WithBump<'arena, T>(&'arena bumpalo::Bump, T);
+fn cast_to_arena_str<'a>(x: TypedValue<'a>, alloc: &'a bumpalo::Bump) -> Option<Str<'a>> {
+    match x {
+        TypedValue::Uninit => None, // Should not happen
+        TypedValue::Bool(false) => Some("".into()),
+        TypedValue::Bool(true) => Some("1".into()),
+        TypedValue::Null => Some("".into()),
+        TypedValue::Int(i) => Some(alloc.alloc_str(i.to_string().as_str()).into()),
+        TypedValue::String(s) => Some(s),
+        TypedValue::LazyClass(s) => Some(s),
+        _ => None,
+    }
+}
 
-impl<'arena> TryFrom<WithBump<'arena, TypedValue<'arena>>> for Str<'arena> {
-    type Error = runtime::CastError;
-    fn try_from(x: WithBump<'arena, TypedValue<'arena>>) -> Result<Str<'arena>, Self::Error> {
-        let alloc = x.0;
-        match x.1 {
-            TypedValue::Uninit => Err(()), // Should not happen
-            TypedValue::Bool(false) => Ok("".into()),
-            TypedValue::Bool(true) => Ok("1".into()),
-            TypedValue::Null => Ok("".into()),
-            TypedValue::Int(i) => Ok(alloc.alloc_str(i.to_string().as_str()).into()),
-            TypedValue::String(s) => Ok(s),
-            TypedValue::LazyClass(s) => Ok(s),
-            _ => Err(()),
+// Arithmetic. Only on pure integer or float operands
+// and don't attempt to implement overflow-to-float semantics.
+fn fold_add<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> {
+    match (x, y) {
+        (TypedValue::Double(i1), TypedValue::Double(i2)) => {
+            Some(TypedValue::double(i1.to_f64() + i2.to_f64()))
         }
+        (TypedValue::Int(i1), TypedValue::Int(i2)) => Some(TypedValue::Int(
+            (std::num::Wrapping(i1) + std::num::Wrapping(i2)).0,
+        )),
+        (TypedValue::Int(i1), TypedValue::Double(i2)) => {
+            Some(TypedValue::double(i1 as f64 + i2.to_f64()))
+        }
+        (TypedValue::Double(i1), TypedValue::Int(i2)) => {
+            Some(TypedValue::double(i1.to_f64() + i2 as f64))
+        }
+        _ => None,
+    }
+}
+
+// Arithmetic. Only on pure integer or float operands,
+// and don't attempt to implement overflow-to-float semantics.
+fn fold_sub<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> {
+    match (x, y) {
+        (TypedValue::Int(i1), TypedValue::Int(i2)) => Some(TypedValue::Int(
+            (std::num::Wrapping(i1) - std::num::Wrapping(i2)).0,
+        )),
+        (TypedValue::Double(f1), TypedValue::Double(f2)) => {
+            Some(TypedValue::double(f1.to_f64() - f2.to_f64()))
+        }
+        _ => None,
+    }
+}
+
+// Arithmetic. Only on pure integer or float operands
+// and don't attempt to implement overflow-to-float semantics.
+fn fold_mul<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> {
+    match (x, y) {
+        (TypedValue::Int(i1), TypedValue::Int(i2)) => Some(TypedValue::Int(
+            (std::num::Wrapping(i1) * std::num::Wrapping(i2)).0,
+        )),
+        (TypedValue::Double(i1), TypedValue::Double(i2)) => {
+            Some(TypedValue::double(i1.to_f64() * i2.to_f64()))
+        }
+        (TypedValue::Int(i1), TypedValue::Double(i2)) => {
+            Some(TypedValue::double(i1 as f64 * i2.to_f64()))
+        }
+        (TypedValue::Double(i1), TypedValue::Int(i2)) => {
+            Some(TypedValue::double(i1.to_f64() * i2 as f64))
+        }
+        _ => None,
+    }
+}
+
+// Arithmetic. Only on pure integer or float operands
+// and don't attempt to implement overflow-to-float semantics.
+fn fold_div<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> {
+    match (x, y) {
+        (TypedValue::Int(i1), TypedValue::Int(i2)) if i2 != 0 && i1 % i2 == 0 => {
+            Some(TypedValue::Int(i1 / i2))
+        }
+        (TypedValue::Int(i1), TypedValue::Int(i2)) if i2 != 0 => {
+            Some(TypedValue::double(i1 as f64 / i2 as f64))
+        }
+        (TypedValue::Double(f1), TypedValue::Double(f2)) if f2.to_f64() != 0.0 => {
+            Some(TypedValue::double(f1.to_f64() / f2.to_f64()))
+        }
+        (TypedValue::Int(i1), TypedValue::Double(f2)) if f2.to_f64() != 0.0 => {
+            Some(TypedValue::double(i1 as f64 / f2.to_f64()))
+        }
+        (TypedValue::Double(f1), TypedValue::Int(i2)) if i2 != 0 => {
+            Some(TypedValue::double(f1.to_f64() / i2 as f64))
+        }
+        _ => None,
+    }
+}
+
+fn fold_shift_left<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> {
+    match (x, y) {
+        (TypedValue::Int(_), TypedValue::Int(i2)) if i2 < 0 => None,
+        (TypedValue::Int(i1), TypedValue::Int(i2)) => i32::try_from(i2)
+            .ok()
+            .map(|i2| TypedValue::Int(i1 << (i2 % 64) as u32)),
+        _ => None,
+    }
+}
+
+// Arithmetic, only on pure integer operands.
+fn fold_bitwise_or<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> {
+    match (x, y) {
+        (TypedValue::Int(i1), TypedValue::Int(i2)) => Some(TypedValue::Int(i1 | i2)),
+        _ => None,
+    }
+}
+
+// String concatenation
+fn fold_concat<'a>(
+    x: TypedValue<'a>,
+    y: TypedValue<'a>,
+    alloc: &'a bumpalo::Bump,
+) -> Option<TypedValue<'a>> {
+    fn safe_to_cast(t: &TypedValue<'_>) -> bool {
+        matches!(
+            t,
+            TypedValue::Int(_) | TypedValue::String(_) | TypedValue::LazyClass(_)
+        )
+    }
+    if !safe_to_cast(&x) || !safe_to_cast(&y) {
+        return None;
+    }
+
+    let l = cast_to_string(x)?;
+    let r = cast_to_string(y)?;
+    Some(TypedValue::alloc_string(l + &r, alloc))
+}
+
+// Bitwise operations.
+fn fold_bitwise_not<'a>(x: TypedValue<'a>) -> Option<TypedValue<'a>> {
+    match x {
+        TypedValue::Int(i) => Some(TypedValue::Int(!i)),
+        _ => None,
+    }
+}
+
+fn fold_logical_not<'a>(x: TypedValue<'a>) -> Option<TypedValue<'a>> {
+    Some(TypedValue::Bool(!cast_to_bool(x)))
+}
+
+/// Cast to a boolean: the (bool) operator in PHP
+pub fn cast_to_bool(x: TypedValue<'_>) -> bool {
+    match x {
+        TypedValue::Uninit => false, // Should not happen
+        TypedValue::Bool(b) => b,
+        TypedValue::Null => false,
+        TypedValue::String(s) => !s.is_empty() && s.unsafe_as_str() != "0",
+        TypedValue::LazyClass(_) => true,
+        TypedValue::Int(i) => i != 0,
+        TypedValue::Double(f) => f.to_f64() != 0.0,
+        // Empty collections cast to false if empty, otherwise true
+        TypedValue::Vec(v) => !v.is_empty(),
+        TypedValue::Keyset(v) => !v.is_empty(),
+        TypedValue::Dict(v) => !v.is_empty(),
+        // Non-empty collections cast to true
+        TypedValue::HhasAdata(_) => true,
+    }
+}
+
+/// Cast to an integer: the (int) operator in PHP. Return None if we can't
+/// or won't produce the correct value
+pub fn cast_to_int(x: TypedValue<'_>) -> Option<i64> {
+    match x {
+        TypedValue::Uninit => None, // Should not happen
+        // Unreachable - the only calliste of to_int is cast_to_arraykey, which never
+        // calls it with String
+        TypedValue::String(_) => None,    // not worth it
+        TypedValue::LazyClass(_) => None, // not worth it
+        TypedValue::Int(i) => Some(i),
+        TypedValue::Double(f) => match f.to_f64().classify() {
+            std::num::FpCategory::Nan | std::num::FpCategory::Infinite => {
+                Some(if f.to_f64() == f64::INFINITY {
+                    0
+                } else {
+                    std::i64::MIN
+                })
+            }
+            _ => todo!(),
+        },
+        v => Some(if cast_to_bool(v) { 1 } else { 0 }),
+    }
+}
+
+/// Cast to a float: the (float) operator in PHP. Return None if we can't
+/// or won't produce the correct value
+pub fn cast_to_float(v: TypedValue<'_>) -> Option<f64> {
+    match v {
+        TypedValue::Uninit => None,       // Should not happen
+        TypedValue::String(_) => None,    // not worth it
+        TypedValue::LazyClass(_) => None, // not worth it
+        TypedValue::Int(i) => Some(i as f64),
+        TypedValue::Double(f) => Some(f.to_f64()),
+        _ => Some(if cast_to_bool(v) { 1.0 } else { 0.0 }),
+    }
+}
+
+/// Cast to a string: the (string) operator in PHP. Return Err if we can't
+/// or won't produce the correct value *)
+pub fn cast_to_string(x: TypedValue<'_>) -> Option<String> {
+    match x {
+        TypedValue::Uninit => None, // Should not happen
+        TypedValue::Bool(false) => Some("".into()),
+        TypedValue::Bool(true) => Some("1".into()),
+        TypedValue::Null => Some("".into()),
+        TypedValue::Int(i) => Some(i.to_string()),
+        TypedValue::String(s) => Some(s.unsafe_as_str().into()),
+        TypedValue::LazyClass(s) => Some(s.unsafe_as_str().into()),
+        _ => None,
+    }
+}
+
+#[cfg(test)]
+mod cast_tests {
+    use super::*;
+
+    #[test]
+    fn non_numeric_string_to_int() {
+        let res = cast_to_int(TypedValue::string("foo"));
+        assert!(res.is_none());
+    }
+
+    #[test]
+    fn nan_to_int() {
+        let res = cast_to_int(TypedValue::double(std::f64::NAN)).unwrap();
+        assert_eq!(res, std::i64::MIN);
     }
 }

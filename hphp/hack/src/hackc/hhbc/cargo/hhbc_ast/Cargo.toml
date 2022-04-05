@@ -16,4 +16,4 @@ iterator = { path = "../../../emitter/cargo/iterator" }
 label = { path = "../../../emitter/cargo/label" }
 local = { path = "../../../emitter/cargo/local" }
 oxidized = { path = "../../../../oxidized" }
-runtime = { path = "../../../emitter/cargo/runtime" }
+typed_value = { path = "../typed_value" }

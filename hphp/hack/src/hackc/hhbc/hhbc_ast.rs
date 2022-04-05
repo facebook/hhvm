@@ -9,6 +9,7 @@ use ffi::{BumpSliceMut, Slice, Str};
 use iterator::IterId;
 use label::Label;
 use local::Local;
+use typed_value::TypedValue;
 
 pub use opcodes::Opcode;
 
@@ -240,7 +241,7 @@ pub enum Pseudo<'arena> {
     TryCatchMiddle,
     /// Pseudo instruction that will get translated into appropraite literal
     /// bytecode, with possible reference to .adata *)
-    TypedValue(runtime::TypedValue<'arena>),
+    TypedValue(TypedValue<'arena>),
 }
 
 pub trait Targets {

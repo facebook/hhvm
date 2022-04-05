@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use hash::HashMap;
 use hhas_adata::HhasAdata;
-use runtime::TypedValue;
+use typed_value::TypedValue;
 
 #[derive(Debug, Default)]
 pub struct AdataState<'arena> {

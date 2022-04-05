@@ -43,7 +43,7 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "hhas_adata",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -321,8 +321,8 @@ dependencies = [
  "ocaml_helper",
  "oxidized",
  "print_opcode",
- "runtime",
  "thiserror",
+ "typed_value",
  "write_bytes",
 ]
 
@@ -571,7 +571,7 @@ dependencies = [
  "naming_special_names_rust",
  "options",
  "oxidized",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -997,7 +997,7 @@ dependencies = [
  "hhbc_id",
  "instruction_sequence",
  "options",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -1014,7 +1014,7 @@ dependencies = [
  "hhbc_id",
  "naming_special_names_rust",
  "oxidized",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -1059,10 +1059,10 @@ dependencies = [
  "oxidized_by_ref",
  "print_expr",
  "regex",
- "runtime",
  "scope",
  "stack_limit",
  "statement_state",
+ "typed_value",
 ]
 
 [[package]]
@@ -1106,7 +1106,7 @@ dependencies = [
  "local",
  "naming_special_names_rust",
  "oxidized",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -1130,7 +1130,7 @@ dependencies = [
  "hhvm_types_ffi",
  "instruction_sequence",
  "oxidized",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -1162,9 +1162,9 @@ dependencies = [
  "options",
  "oxidized",
  "regex",
- "runtime",
  "scope",
  "symbol_refs_state",
+ "typed_value",
 ]
 
 [[package]]
@@ -1222,7 +1222,7 @@ dependencies = [
  "ocamlrep",
  "options",
  "oxidized",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -1271,7 +1271,7 @@ dependencies = [
  "naming_special_names_rust",
  "options",
  "oxidized",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -1405,7 +1405,7 @@ dependencies = [
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -1429,7 +1429,7 @@ dependencies = [
  "naming_special_names_rust",
  "options",
  "oxidized",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -1464,7 +1464,7 @@ dependencies = [
  "hhbc_id",
  "hhvm_types_ffi",
  "oxidized",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -2000,7 +2000,7 @@ name = "hhas_adata"
 version = "0.0.0"
 dependencies = [
  "ffi",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -2009,7 +2009,7 @@ version = "0.0.0"
 dependencies = [
  "ffi",
  "naming_special_names_rust",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -2056,7 +2056,7 @@ version = "0.0.0"
 dependencies = [
  "ffi",
  "hhbc_id",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -2127,7 +2127,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhvm_types_ffi",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -2153,7 +2153,7 @@ name = "hhas_type_const"
 version = "0.0.0"
 dependencies = [
  "ffi",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -2166,7 +2166,7 @@ dependencies = [
  "hhas_type",
  "hhbc_id",
  "hhvm_types_ffi",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -2197,7 +2197,7 @@ dependencies = [
  "label",
  "local",
  "oxidized",
- "runtime",
+ "typed_value",
 ]
 
 [[package]]
@@ -3311,14 +3311,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "runtime"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "ffi",
-]
-
-[[package]]
 name = "rusqlite"
 version = "0.26.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3784,6 +3776,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a31142970826733df8241ef35dc040ef98c679ab14d7c3e54d827099b3acecaa"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "typed_value"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "ffi",
 ]
 
 [[package]]

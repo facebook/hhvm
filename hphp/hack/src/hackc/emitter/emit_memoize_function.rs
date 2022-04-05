@@ -25,7 +25,7 @@ use local::Local;
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options, RepoFlags};
 use oxidized::{ast as T, pos::Pos};
-use runtime::TypedValue;
+use typed_value::TypedValue;
 
 pub fn is_interceptable(opts: &Options) -> bool {
     opts.hhvm

@@ -14,4 +14,4 @@ hhas_pos = { path = "../hhas_pos" }
 hhas_type = { path = "../hhas_type" }
 hhbc_id = { path = "../hhbc_id" }
 hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
-runtime = { path = "../../../emitter/cargo/runtime" }
+typed_value = { path = "../typed_value" }

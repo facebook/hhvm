@@ -36,4 +36,4 @@ naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
-runtime = { path = "../runtime" }
+typed_value = { path = "../../../hhbc/cargo/typed_value" }

@@ -31,9 +31,8 @@ use oxidized::{
     ast::{Hint, ReifyKind, RequireKind},
     namespace_env,
 };
-use runtime::TypedValue;
-
 use std::collections::BTreeMap;
+use typed_value::TypedValue;
 
 fn add_symbol_refs<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,

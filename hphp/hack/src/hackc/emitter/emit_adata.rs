@@ -10,7 +10,7 @@ use ffi::Str;
 use hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX};
 use instruction_sequence::{instr, InstrSeq};
 use options::HhvmFlags;
-use runtime::TypedValue;
+use typed_value::TypedValue;
 
 pub fn typed_value_to_instr<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,

@@ -20,4 +20,4 @@ itertools = "0.10.3"
 naming_special_names_rust = { path = "../../../../naming" }
 options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
-runtime = { path = "../runtime" }
+typed_value = { path = "../../../hhbc/cargo/typed_value" }

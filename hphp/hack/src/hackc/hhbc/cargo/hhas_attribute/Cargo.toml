@@ -10,4 +10,4 @@ path = "../../hhas_attribute.rs"
 [dependencies]
 ffi = { path = "../../../../utils/ffi" }
 naming_special_names_rust = { path = "../../../../naming" }
-runtime = { path = "../../../emitter/cargo/runtime" }
+typed_value = { path = "../typed_value" }

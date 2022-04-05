@@ -9,7 +9,7 @@ use hhas_attribute::HhasAttribute;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::ast as a;
-use runtime::TypedValue;
+use typed_value::TypedValue;
 
 pub fn from_asts<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,

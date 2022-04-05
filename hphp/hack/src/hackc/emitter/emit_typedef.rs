@@ -11,9 +11,8 @@ use hhas_typedef::HhasTypedef;
 use hhbc_id::class::ClassType;
 use hhvm_types_ffi::ffi::Attr;
 use oxidized::{aast_defs::Hint, ast};
-use runtime::TypedValue;
-
 use std::collections::BTreeMap;
+use typed_value::TypedValue;
 
 pub fn emit_typedefs_from_program<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,

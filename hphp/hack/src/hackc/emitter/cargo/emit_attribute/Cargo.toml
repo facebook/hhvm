@@ -18,4 +18,4 @@ hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
-runtime = { path = "../runtime" }
+typed_value = { path = "../../../hhbc/cargo/typed_value" }

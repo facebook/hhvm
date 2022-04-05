@@ -17,7 +17,7 @@ use hhbc_string_utils::strip_global_ns;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq};
 use oxidized::ast;
-use runtime::TypedValue;
+use typed_value::TypedValue;
 
 fn emit_constant_cinit<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,

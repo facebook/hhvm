@@ -9,4 +9,4 @@ path = "../../hhas_adata.rs"
 
 [dependencies]
 ffi = { path = "../../../../utils/ffi" }
-runtime = { path = "../../../emitter/cargo/runtime" }
+typed_value = { path = "../typed_value" }

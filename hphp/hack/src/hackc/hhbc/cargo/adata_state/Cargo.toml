@@ -10,4 +10,4 @@ path = "../../adata_state.rs"
 [dependencies]
 hash = { path = "../../../../utils/hash" }
 hhas_adata = { path = "../hhas_adata" }
-runtime = { path = "../../../emitter/cargo/runtime" }
+typed_value = { path = "../typed_value" }

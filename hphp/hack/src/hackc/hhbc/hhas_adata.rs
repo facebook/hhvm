@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use ffi::Str;
-use runtime::TypedValue;
+use typed_value::TypedValue;
 
 pub const VARRAY_PREFIX: &str = "y";
 pub const DARRAY_PREFIX: &str = "Y";

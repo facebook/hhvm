@@ -9,7 +9,7 @@
 
 use ffi::Maybe;
 use hhbc_id::constant::ConstType;
-use runtime::TypedValue;
+use typed_value::TypedValue;
 
 #[derive(Debug)]
 #[repr(C)]

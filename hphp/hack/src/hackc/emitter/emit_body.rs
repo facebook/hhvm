@@ -25,9 +25,9 @@ use label::Label;
 use local::Local;
 use options::CompilerFlags;
 use reified_generics_helpers as RGH;
-use runtime::TypedValue;
 use stack_limit::StackLimit;
 use statement_state::StatementState;
+use typed_value::TypedValue;
 
 use ocamlrep::rc::RcOc;
 use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};

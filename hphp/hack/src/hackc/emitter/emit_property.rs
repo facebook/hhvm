@@ -15,7 +15,7 @@ use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq};
 use naming_special_names_rust::{pseudo_consts, user_attributes as ua};
 use oxidized::{aast_defs, ast, ast_defs, doc_comment};
-use runtime::TypedValue;
+use typed_value::TypedValue;
 
 pub struct FromAstArgs<'ast> {
     pub user_attributes: &'ast [ast::UserAttribute],

@@ -164,13 +164,13 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
 
     # Warn about a GCC 4.9 bug leading to an incorrect refcounting issue
     # https://github.com/facebook/hhvm/issues/8011
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
-       message(WARNING "HHVM is known to trigger optimization bugs in GCC 4.9. Upgrading to GCC 5 is recommended. See https://github.com/facebook/hhvm/issues/8011 for more details.")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.4)
+      message(WARNING "HHVM is primarily tested on GCC 7.4-10.3. Using other versions may produce unexpected results, or may not even build at all.")
     endif()
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 10.3 OR
        CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 10.3)
-     message(WARNING "HHVM is primarily tested on GCC 5.0-10.3. Using other versions may produce unexpected results, or may not even build at all.")
+     message(WARNING "HHVM is primarily tested on GCC 7.4-10.3. Using other versions may produce unexpected results, or may not even build at all.")
     endif()
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1 OR

@@ -25,7 +25,8 @@ fn make_shallow_decl_provider<R: Reason>(
 ) -> Arc<dyn ShallowDeclProvider<R>> {
     let cache = Arc::new(make_non_eviction_shallow_decl_cache());
     for path in filenames {
-        let decls = decl_parser.parse(path).unwrap();
+        let mut decls = decl_parser.parse(path).unwrap();
+        decls.reverse(); // match OCaml behavior for duplicates
         cache.add_decls(decls);
     }
     if let Some(naming_table_path) = naming_table_path_opt {

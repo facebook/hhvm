@@ -223,6 +223,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
                     .map_or([].as_slice(), |et| &et.includes)
                     .iter(),
             )
+            .chain(DeclFolder::stringish_object_parent(sc).iter())
             .map(|ty| {
                 self.register_extends_dependency(ty, sc)?;
                 self.decl_class_type(stack, errors, ty)

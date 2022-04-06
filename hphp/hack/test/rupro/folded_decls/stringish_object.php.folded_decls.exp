@@ -4,6 +4,8 @@ FoldedClass {
         Concrete,
     ),
     ancestors: {
+        "\\XHPChild": XHPChild,
+        "\\Stringish": Stringish,
         "\\StringishObject": StringishObject,
     },
     methods: {
@@ -31,6 +33,8 @@ FoldedClass {
         Abstract,
     ),
     ancestors: {
+        "\\XHPChild": XHPChild,
+        "\\Stringish": Stringish,
         "\\StringishObject": StringishObject,
     },
     methods: {
@@ -53,31 +57,11 @@ FoldedClass {
     },
 }
 FoldedClass {
-    name: "\\StringishObject",
-    kind: Cinterface,
-    methods: {
-        "__toString": FoldedElement {
-            flags: ABSTRACT,
-            origin: "\\StringishObject",
-            visibility: Public,
-            deprecated: None,
-        },
-    },
-    consts: {
-        "class": ClassConst {
-            is_synthesized: true,
-            kind: CCConcrete,
-            pos: NPos,
-            ty: HH\classname<this>,
-            origin: "\\StringishObject",
-            refs: [],
-        },
-    },
-}
-FoldedClass {
     name: "\\SomeOtherC",
     kind: Cinterface,
     ancestors: {
+        "\\XHPChild": XHPChild,
+        "\\Stringish": Stringish,
         "\\StringishObject": StringishObject,
     },
     methods: {
@@ -103,6 +87,8 @@ FoldedClass {
     name: "\\TA",
     kind: Ctrait,
     ancestors: {
+        "\\XHPChild": XHPChild,
+        "\\Stringish": Stringish,
         "\\StringishObject": StringishObject,
     },
     methods: {

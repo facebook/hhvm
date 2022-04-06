@@ -10,7 +10,7 @@ open Hh_prelude
 module Env = Typing_env
 
 let measure_elapsed_time_and_report tcopt env_opt id f =
-  if TypecheckerOptions.profile_toplevel_definitions tcopt then (
+  if TypecheckerOptions.profile_top_level_definitions tcopt then (
     let start_time = Unix.gettimeofday () in
     let result = f () in
     let end_time = Unix.gettimeofday () in

@@ -134,7 +134,7 @@ type t = {
   tco_log_saved_state_age_and_distance: bool;
   tco_specify_manifold_api_key: bool;
   tco_saved_state_manifold_api_key: string option;
-  tco_profile_toplevel_definitions: bool;
+  tco_profile_top_level_definitions: bool;
 }
 [@@deriving eq, show]
 
@@ -318,7 +318,7 @@ let default =
     tco_log_saved_state_age_and_distance = false;
     tco_specify_manifold_api_key = false;
     tco_saved_state_manifold_api_key = None;
-    tco_profile_toplevel_definitions = false;
+    tco_profile_top_level_definitions = false;
   }
 
 let make
@@ -471,8 +471,8 @@ let make
     ?(tco_specify_manifold_api_key = default.tco_specify_manifold_api_key)
     ?(tco_saved_state_manifold_api_key =
       default.tco_saved_state_manifold_api_key)
-    ?(tco_profile_toplevel_definitions =
-      default.tco_profile_toplevel_definitions)
+    ?(tco_profile_top_level_definitions =
+      default.tco_profile_top_level_definitions)
     () =
   {
     tco_experimental_features;
@@ -599,7 +599,7 @@ let make
     tco_log_saved_state_age_and_distance;
     tco_specify_manifold_api_key;
     tco_saved_state_manifold_api_key;
-    tco_profile_toplevel_definitions;
+    tco_profile_top_level_definitions;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -886,4 +886,4 @@ let tco_specify_manifold_api_key t = t.tco_specify_manifold_api_key
 
 let tco_saved_state_manifold_api_key t = t.tco_saved_state_manifold_api_key
 
-let tco_profile_toplevel_definitions t = t.tco_profile_toplevel_definitions
+let tco_profile_top_level_definitions t = t.tco_profile_top_level_definitions

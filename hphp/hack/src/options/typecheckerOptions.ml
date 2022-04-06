@@ -227,5 +227,5 @@ let specify_manifold_api_key = GlobalOptions.tco_specify_manifold_api_key
 let saved_state_manifold_api_key =
   GlobalOptions.tco_saved_state_manifold_api_key
 
-let profile_toplevel_definitions =
-  GlobalOptions.tco_profile_toplevel_definitions
+let profile_top_level_definitions =
+  GlobalOptions.tco_profile_top_level_definitions

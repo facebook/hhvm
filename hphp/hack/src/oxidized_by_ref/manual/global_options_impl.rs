@@ -130,7 +130,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_log_saved_state_age_and_distance: false,
     tco_specify_manifold_api_key: false,
     tco_saved_state_manifold_api_key: None,
-    tco_profile_toplevel_definitions: false,
+    tco_profile_top_level_definitions: false,
 };
 
 impl GlobalOptions<'static> {

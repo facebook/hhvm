@@ -154,14 +154,10 @@ set(HHBC_AST_SRCS
   "hhbc/hhas_type_const.rs"
   "hhbc/hhas_typedef.rs"
   "hhbc/hhbc_ast.rs"
-  "hhbc/hhbc_ast_ffi_cbindgen.rs"
+  "hhbc/hhbc_ast_ffi_cbindgen.rs"  # Intentionally not in a crate.
   "hhbc/hhbc_id.rs"
-  "emitter/instruction_sequence.rs"
-  "emitter/iterator.rs"
-  "emitter/label.rs"
-  "emitter/local.rs"
-  "emitter/symbol_refs_state.rs"
-  "emitter/typed_value.rs"
+  "hhbc/opcodes.rs"
+  "hhbc/typed_value.rs"
 )
 foreach(src ${HHBC_AST_SRCS})
   string(APPEND HHBC_AST_SRC_ARG "${HHBC_PREFIX}/${src},")

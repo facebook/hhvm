@@ -417,9 +417,7 @@ name = "closure_convert"
 version = "0.0.0"
 dependencies = [
  "ast_body",
- "ast_scope",
  "bumpalo",
- "constant_folder",
  "decl_vars",
  "env",
  "error",
@@ -3240,10 +3238,15 @@ dependencies = [
 name = "rewrite_program"
 version = "0.0.0"
 dependencies = [
+ "ast_body",
  "closure_convert",
+ "constant_folder",
+ "decl_vars",
  "env",
  "error",
+ "hack_macro",
  "ocamlrep",
+ "options",
  "oxidized",
  "rewrite_xml",
  "stack_limit",

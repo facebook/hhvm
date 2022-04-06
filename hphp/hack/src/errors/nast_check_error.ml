@@ -446,6 +446,28 @@ let illegal_context pos name =
     []
 
 let case_fallthrough switch_pos case_pos =
+  let (start_line, start_column) = Pos.line_column case_pos in
+  let new_pos = Pos.set_col_end start_column @@ Pos.set_line_end (start_line+1) case_pos in
+  let quickfix = 
+    Quickfix.make
+      ~title: ("Add test")
+      ~new_text: "TEST"
+      new_pos
+  in
+  let () =
+    printf("Original case_pos: %s\n")
+    (Pos.print_verbose_relative case_pos)
+  in
+  let () =
+    printf("Changed case_pos: %s\n")
+    (Pos.print_verbose_relative new_pos)
+  in
+
+  let () =
+    printf("Quickfix: %s\n")
+    (Quickfix.show quickfix)
+  in
+
   let claim =
     ( switch_pos,
       "This `switch` has a `case` that implicitly falls through and is "
@@ -457,7 +479,11 @@ let case_fallthrough switch_pos case_pos =
       );
     ]
   in
-  User_error.make Error_code.(to_enum CaseFallthrough) claim reasons
+  User_error.make 
+  ~quickfixes:[quickfix]
+  Error_code.(to_enum CaseFallthrough) 
+  claim 
+  reasons
 
 let default_fallthrough pos =
   User_error.make

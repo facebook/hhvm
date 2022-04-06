@@ -664,7 +664,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             }
             .filter_map(|ty| ty.unwrap_class_type())
             .filter_map(|(_, pos_id, _)| self.parents.get(&pos_id.id()))
-            .find(|parent| parent.has_concrete_constructor())
+            .find(|parent| parent.has_concrete_constructor() && self.child.constructor.is_some())
             .map(|_| *sn::members::parentConstruct)
         };
 

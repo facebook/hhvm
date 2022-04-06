@@ -30,6 +30,7 @@ let check_param : env -> Nast.fun_param -> unit =
      fun env ty ->
       let (env, ty) = Env.expand_type env ty in
       let ety_env = empty_expand_env in
+      let ty = Typing_utils.strip_dynamic env ty in
       let ((env, ty_err_opt), ty, _) =
         Typing_tdef.force_expand_typedef ~ety_env env ty
       in
@@ -55,6 +56,9 @@ let check_param : env -> Nast.fun_param -> unit =
            the comment above about "stricter check_memoizables to come later" was added in revision
            in August 2015 *)
         ()
+      | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn
+        ->
+        check_memoizable env ty
       (* For parameter type 'this::TID' defined by 'type const TID as Bar' check_memoizables
        * Bar recursively. Also enums represented using AKnewtype.
        *)

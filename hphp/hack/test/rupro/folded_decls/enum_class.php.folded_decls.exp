@@ -79,7 +79,7 @@ FoldedClass {
             subst: Subst(
                 {},
             ),
-            class_context: "\\A",
+            class_context: "\\HH\\BuiltinEnumClass",
             from_req_extends: false,
         },
         "\\A": SubstContext {

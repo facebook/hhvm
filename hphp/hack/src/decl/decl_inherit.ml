@@ -204,28 +204,30 @@ let add_inherited inherited acc =
     ih_substs =
       SMap.merge
         begin
-          fun _ sub old_sub ->
-          match (sub, old_sub) with
+          fun _ old_subst_opt new_subst_opt ->
+          match (old_subst_opt, new_subst_opt) with
           | (None, None) -> None
           | (Some s, None)
           | (None, Some s) ->
             Some s
-          (* If the old subst_contexts came via required extends then we want to use
-           * the substitutios from the actual extends instead. I.e.
+          (* If the old subst_context came via require extends, then we want to use
+           * the substitutions from the actual extends instead. e.g.,
            *
            * class Base<+T> {}
-           *
            * trait MyTrait { require extends Base<mixed>; }
-           *
            * class Child extends Base<int> { use MyTrait; }
            *
-           * Here the subst_context (MyTrait/[T -> mixed]) should be overrode by
+           * Here the subst_context (MyTrait/[T -> mixed]) should be overridden by
            * (Child/[T -> int]), because it's the actual extension of class Base.
            *)
-          | (Some s, Some old_s)
-            when old_s.sc_from_req_extends && not s.sc_from_req_extends ->
-            Some s
-          | (Some _, Some old_s) -> Some old_s
+          | (Some old_subst, Some new_subst) ->
+            if
+              (not new_subst.sc_from_req_extends)
+              || old_subst.sc_from_req_extends
+            then
+              Some new_subst
+            else
+              Some old_subst
         end
         acc.ih_substs
         inherited.ih_substs;

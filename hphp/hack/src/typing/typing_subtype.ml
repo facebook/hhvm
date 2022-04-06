@@ -1039,6 +1039,19 @@ and simplify_subtype_i
                              { pos; decl_pos; expected; actual })))
         in
 
+        let destructure_dynamic t env =
+          if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+            List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+                res &&& simplify_subtype ~subtype_env ~this_ty t ty_dest)
+            &&& fun env ->
+            List.fold d_optional ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+                res &&& simplify_subtype ~subtype_env ~this_ty t ty_dest)
+            &&& fun env ->
+            Option.value_map ~default:(env, TL.valid) d_variadic ~f:(fun vty ->
+                simplify_subtype ~subtype_env ~this_ty t vty env)
+          else
+            env |> destructure_array t
+        in
         begin
           match ety_sub with
           | ConstraintType _ -> default_subtype env
@@ -1054,7 +1067,7 @@ and simplify_subtype_i
                    || String.equal x SN.Collections.cVec
                    || String.equal x SN.Collections.cConstVector ->
               env |> destructure_array elt_type
-            | (_, Tdynamic) -> env |> destructure_array ty_sub
+            | (_, Tdynamic) -> env |> destructure_dynamic ty_sub
             (* TODO: should remove these any cases *)
             | (r, Tany _) ->
               let any = mk (r, Typing_defs.make_tany ()) in

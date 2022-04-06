@@ -1032,7 +1032,6 @@ pub struct IssetExpressionChildren<'a, T, V> {
 pub struct FunctionCallExpressionChildren<'a, T, V> {
     pub receiver: Syntax<'a, T, V>,
     pub type_args: Syntax<'a, T, V>,
-    pub enum_class_label: Syntax<'a, T, V>,
     pub left_paren: Syntax<'a, T, V>,
     pub argument_list: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,

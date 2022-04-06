@@ -493,8 +493,8 @@ where
         Node(self.0.make_isset_expression(keyword.0, left_paren.0, argument_list.0, right_paren.0), self.1.make_isset_expression(keyword.1, left_paren.1, argument_list.1, right_paren.1))
     }
 
-    fn make_function_call_expression(&mut self, receiver: Self::R, type_args: Self::R, enum_class_label: Self::R, left_paren: Self::R, argument_list: Self::R, right_paren: Self::R) -> Self::R {
-        Node(self.0.make_function_call_expression(receiver.0, type_args.0, enum_class_label.0, left_paren.0, argument_list.0, right_paren.0), self.1.make_function_call_expression(receiver.1, type_args.1, enum_class_label.1, left_paren.1, argument_list.1, right_paren.1))
+    fn make_function_call_expression(&mut self, receiver: Self::R, type_args: Self::R, left_paren: Self::R, argument_list: Self::R, right_paren: Self::R) -> Self::R {
+        Node(self.0.make_function_call_expression(receiver.0, type_args.0, left_paren.0, argument_list.0, right_paren.0), self.1.make_function_call_expression(receiver.1, type_args.1, left_paren.1, argument_list.1, right_paren.1))
     }
 
     fn make_function_pointer_expression(&mut self, receiver: Self::R, type_args: Self::R) -> Self::R {

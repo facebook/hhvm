@@ -1501,7 +1501,7 @@ fn p_expr_impl<'a>(
         AnonymousFunction(c) => p_anonymous_function(node, c, env),
         AwaitableCreationExpression(c) => p_awaitable_creation_expr(node, c, env, pos),
         XHPExpression(c) if c.open.is_xhp_open() => p_xhp_expr(c, env),
-        EnumClassLabelExpression(c) => p_enum_class_label_expr(node, c, env),
+        EnumClassLabelExpression(c) => p_enum_class_label_expr(c, env),
         _ => missing_syntax_(Some(Expr_::Null), "expression", node, env),
     }
 }
@@ -1707,23 +1707,7 @@ fn p_function_call_expr<'a>(
             // Mark expression as CallReceiver so that we can correctly set
             // PropOrMethod field in ObjGet and ClassGet
             let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env, None)?;
-            let (mut args, varargs) = split_args_vararg(args, env)?;
-
-            // If the function has an enum class label expression, that's
-            // the first argument.
-            if let EnumClassLabelExpression(e) = &c.enum_class_label.children {
-                assert!(
-                    e.qualifier.is_missing(),
-                    "Parser error: function call with enum class labels"
-                );
-                let pos = p_pos(&c.enum_class_label, env);
-                let enum_class_label = ast::Expr::new(
-                    (),
-                    pos,
-                    Expr_::mk_enum_class_label(None, pos_name(&e.expression, env)?.1),
-                );
-                args.insert(0, (ast::ParamKind::Pnormal, enum_class_label));
-            }
+            let (args, varargs) = split_args_vararg(args, env)?;
 
             Ok(Expr_::mk_call(recv, targs, args, varargs))
         }
@@ -2280,44 +2264,33 @@ fn p_xhp_expr<'a>(
 }
 
 fn p_enum_class_label_expr<'a>(
-    node: S<'a>,
     c: &'a EnumClassLabelExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
+    use syntax_kind::SyntaxKind;
     /* Foo#Bar can be the following:
      * - short version: Foo is None/missing and we only have #Bar
      * - Foo is a name -> fully qualified Foo#Bar
-     * - Foo is a function call prefix (can happen during auto completion)
-     *   $c->foo#Bar or C::foo#Bar
      */
-    let ast::Id(label_pos, label_name) = pos_name(&c.expression, env)?;
-    if c.qualifier.is_missing() {
-        Ok(Expr_::mk_enum_class_label(None, label_name))
-    } else if c.qualifier.is_name() {
-        let name = pos_name(&c.qualifier, env)?;
-        Ok(Expr_::mk_enum_class_label(Some(name), label_name))
-    } else if label_name.ends_with("AUTO332") {
-        // This can happen during parsing in auto-complete mode
-        // In such case, the "label_name" must end with AUTO332
-        // We want to treat this as a method call even though we haven't
-        // yet seen the arguments
-        let recv = p_expr_with_loc(ExprLocation::CallReceiver, &c.qualifier, env, None);
-        match recv {
-            Ok(recv) => {
-                let enum_class_label = Expr_::mk_enum_class_label(None, label_name);
-                let enum_class_label = ast::Expr::new((), label_pos, enum_class_label);
-                Ok(Expr_::mk_call(
-                    recv,
-                    vec![],
-                    vec![(ast::ParamKind::Pnormal, enum_class_label)],
-                    None,
-                ))
-            }
-            Err(err) => Err(err),
-        }
+    let ast::Id(_label_pos, label_name) = pos_name(&c.expression, env)?;
+    let qual = if c.qualifier.is_missing() {
+        None
     } else {
-        missing_syntax_(Some(Expr_::Null), "method call", node, env)
-    }
+        let name = pos_name(&c.qualifier, env)?;
+        Some(name)
+    };
+
+    match c.qualifier.kind() {
+        SyntaxKind::Missing => {}
+        SyntaxKind::QualifiedName => {}
+        SyntaxKind::Token(TK::Name) => {}
+        _ => raise_parsing_error(
+            &c.qualifier,
+            env,
+            &syntax_error::invalid_enum_class_label_qualifier,
+        ),
+    };
+    Ok(Expr_::mk_enum_class_label(qual, label_name))
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

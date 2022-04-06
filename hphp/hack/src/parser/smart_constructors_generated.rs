@@ -142,7 +142,7 @@ pub trait SmartConstructors: Clone {
     fn make_conditional_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;
     fn make_eval_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
     fn make_isset_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
-    fn make_function_call_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R;
+    fn make_function_call_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;
     fn make_function_pointer_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_parenthesized_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_braced_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;

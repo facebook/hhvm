@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_class_label')>>
 
 interface I {
   public function kind() : string;
@@ -48,37 +47,37 @@ function testit() : void {
   expect_string(E::Age->kind());
   echo "Testing labels\n";
   echo "[E] Name = ";
-  echo E::nameOf#Name();
+  echo E::nameOf(#Name);
   echo "\n";
 
   echo "[E] AGE = ";
-  echo E::valueOf#Age()->kind();
+  echo E::valueOf(#Age)->kind();
   echo "\n";
 
   echo "[E] 42 = ";
-  echo E::valueOf#Age()->x;
+  echo E::valueOf(#Age)->x;
   echo "\n";
 
   echo "[E] 42 = ";
-  echo E_value_of_member#Age()->x;
+  echo E_value_of_member(#Age)->x;
   echo "\n";
 
   echo "[E] Age = ";
-  echo E_name_of_label#Age();
+  echo E_name_of_label(#Age);
   echo "\n";
 
   echo "Testing indirect calls\n";
-  E_test#Name();
+  E_test(#Name);
 
   echo "[F] NAME = ";
-  echo F::valueOf#Name()->kind();
+  echo F::valueOf(#Name)->kind();
   echo "\n";
 
   echo "[F] FOO = ";
-  echo F::valueOf#Foo()->kind();
+  echo F::valueOf(#Foo)->kind();
   echo "\n";
 
   echo "[F] Foo = ";
-  echo F::nameOf#Foo();
+  echo F::nameOf(#Foo);
   echo "\n";
 }

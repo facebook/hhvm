@@ -976,12 +976,11 @@ ss.serialize_field("isset_argument_list", &self.with(argument_list))?;
 ss.serialize_field("isset_right_paren", &self.with(right_paren))?;
       ss.end()
 } 
-SyntaxVariant::FunctionCallExpression (FunctionCallExpressionChildren{receiver,type_args,enum_class_label,left_paren,argument_list,right_paren} ) => {
-      let mut ss = s.serialize_struct("", 7)?;
+SyntaxVariant::FunctionCallExpression (FunctionCallExpressionChildren{receiver,type_args,left_paren,argument_list,right_paren} ) => {
+      let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "function_call_expression")?;
       ss.serialize_field("function_call_receiver", &self.with(receiver))?;
 ss.serialize_field("function_call_type_args", &self.with(type_args))?;
-ss.serialize_field("function_call_enum_class_label", &self.with(enum_class_label))?;
 ss.serialize_field("function_call_left_paren", &self.with(left_paren))?;
 ss.serialize_field("function_call_argument_list", &self.with(argument_list))?;
 ss.serialize_field("function_call_right_paren", &self.with(right_paren))?;

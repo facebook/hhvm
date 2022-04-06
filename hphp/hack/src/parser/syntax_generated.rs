@@ -1164,11 +1164,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_function_call_expression(_: &C, function_call_receiver: Self, function_call_type_args: Self, function_call_enum_class_label: Self, function_call_left_paren: Self, function_call_argument_list: Self, function_call_right_paren: Self) -> Self {
+    fn make_function_call_expression(_: &C, function_call_receiver: Self, function_call_type_args: Self, function_call_left_paren: Self, function_call_argument_list: Self, function_call_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::FunctionCallExpression(Box::new(FunctionCallExpressionChildren {
             function_call_receiver,
             function_call_type_args,
-            function_call_enum_class_label,
             function_call_left_paren,
             function_call_argument_list,
             function_call_right_paren,
@@ -2724,10 +2723,9 @@ where
                 acc
             },
             SyntaxVariant::FunctionCallExpression(x) => {
-                let FunctionCallExpressionChildren { function_call_receiver, function_call_type_args, function_call_enum_class_label, function_call_left_paren, function_call_argument_list, function_call_right_paren } = *x;
+                let FunctionCallExpressionChildren { function_call_receiver, function_call_type_args, function_call_left_paren, function_call_argument_list, function_call_right_paren } = *x;
                 let acc = f(function_call_receiver, acc);
                 let acc = f(function_call_type_args, acc);
-                let acc = f(function_call_enum_class_label, acc);
                 let acc = f(function_call_left_paren, acc);
                 let acc = f(function_call_argument_list, acc);
                 let acc = f(function_call_right_paren, acc);
@@ -4143,11 +4141,10 @@ where
                  isset_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::FunctionCallExpression, 6) => SyntaxVariant::FunctionCallExpression(Box::new(FunctionCallExpressionChildren {
+             (SyntaxKind::FunctionCallExpression, 5) => SyntaxVariant::FunctionCallExpression(Box::new(FunctionCallExpressionChildren {
                  function_call_right_paren: ts.pop().unwrap(),
                  function_call_argument_list: ts.pop().unwrap(),
                  function_call_left_paren: ts.pop().unwrap(),
-                 function_call_enum_class_label: ts.pop().unwrap(),
                  function_call_type_args: ts.pop().unwrap(),
                  function_call_receiver: ts.pop().unwrap(),
                  
@@ -5422,7 +5419,6 @@ pub struct IssetExpressionChildren<T, V> {
 pub struct FunctionCallExpressionChildren<T, V> {
     pub function_call_receiver: Syntax<T, V>,
     pub function_call_type_args: Syntax<T, V>,
-    pub function_call_enum_class_label: Syntax<T, V>,
     pub function_call_left_paren: Syntax<T, V>,
     pub function_call_argument_list: Syntax<T, V>,
     pub function_call_right_paren: Syntax<T, V>,
@@ -7160,13 +7156,12 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             FunctionCallExpression(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(5).and_then(|index| { match index {
                         0 => Some(&x.function_call_receiver),
                     1 => Some(&x.function_call_type_args),
-                    2 => Some(&x.function_call_enum_class_label),
-                    3 => Some(&x.function_call_left_paren),
-                    4 => Some(&x.function_call_argument_list),
-                    5 => Some(&x.function_call_right_paren),
+                    2 => Some(&x.function_call_left_paren),
+                    3 => Some(&x.function_call_argument_list),
+                    4 => Some(&x.function_call_right_paren),
                         _ => None,
                     }
                 })

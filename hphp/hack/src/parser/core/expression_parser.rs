@@ -397,7 +397,10 @@ where
             | TokenKind::Require_once => self.parse_inclusion_expression(),
             TokenKind::Isset => self.parse_isset_expression(),
             TokenKind::Eval => self.parse_eval_expression(),
-            TokenKind::Hash => self.parse_enum_class_label(),
+            TokenKind::Hash => {
+                let qualifier = S!(make_missing, self, self.pos());
+                self.parse_enum_class_label_expression(qualifier)
+            }
             TokenKind::Empty => self.parse_empty(),
             kind if self.expects(kind) => {
                 // ERROR RECOVERY: if we've prematurely found a token we're expecting
@@ -1156,18 +1159,13 @@ where
                 let type_specifier = S!(make_generic_type_specifier, self, term, type_arguments);
                 self.parse_scope_resolution_expression(type_specifier)
             }
-            TokenKind::Hash | TokenKind::LeftParen => {
-                let enum_class_label = match self.peek_token_kind() {
-                    TokenKind::Hash => self.parse_enum_class_label(),
-                    _ => S!(make_missing, self, self.pos()),
-                };
+            TokenKind::LeftParen => {
                 let (left, args, right) = self.parse_expression_list_opt();
                 S!(
                     make_function_call_expression,
                     self,
                     term,
                     type_arguments,
-                    enum_class_label,
                     left,
                     args,
                     right
@@ -1375,13 +1373,11 @@ where
                             ParseContinuation::Done(result)
                         }
                         TokenKind::Hash => {
-                            let result =
-                                self.parse_function_call_or_enum_class_label_expression(term);
+                            let result = self.parse_enum_class_label_expression(term);
                             ParseContinuation::Reparse(result)
                         }
                         TokenKind::LeftParen => {
-                            let missing = S!(make_missing, self, self.pos());
-                            let result = self.parse_function_call(missing, term);
+                            let result = self.parse_function_call(term);
                             ParseContinuation::Reparse(result)
                         }
                         TokenKind::LeftBracket | TokenKind::LeftBrace => {
@@ -1658,38 +1654,7 @@ where
         S!(make_constructor_call, self, designator, left, args, right)
     }
 
-    fn parse_function_call_or_enum_class_label_expression(&mut self, term: S::R) -> S::R {
-        // SPEC
-        // fully-qualified-label:
-        //   term '#' name
-        // function-call-with-label:
-        //   term '#' name '(' ... ')'
-        let hash = self.assert_token(TokenKind::Hash);
-        let label_name = self.require_name_allow_all_keywords();
-        let result = if self.peek_token_kind() == TokenKind::LeftParen {
-            let missing = S!(make_missing, self, self.pos());
-            let enum_class_label = S!(
-                make_enum_class_label_expression,
-                self,
-                missing,
-                hash,
-                label_name
-            );
-            let result = self.parse_function_call(enum_class_label, term);
-            self.parse_remaining_expression(result)
-        } else {
-            S!(
-                make_enum_class_label_expression,
-                self,
-                term,
-                hash,
-                label_name
-            )
-        };
-        result
-    }
-
-    fn parse_function_call(&mut self, enum_class_label: S::R, receiver: S::R) -> S::R {
+    fn parse_function_call(&mut self, receiver: S::R) -> S::R {
         // SPEC
         // function-call-expression:
         //   postfix-expression  (  argument-expression-list-opt  )
@@ -1702,7 +1667,6 @@ where
             self,
             receiver,
             type_arguments,
-            enum_class_label,
             left,
             args,
             right
@@ -3103,9 +3067,13 @@ where
         S!(make_scope_resolution_expression, self, qualifier, op, name)
     }
 
-    /* Only called for the "short" version of enum labels, so qualifier is always missing */
-    fn parse_enum_class_label(&mut self) -> S::R {
-        let qualifier = S!(make_missing, self, self.pos());
+    fn parse_enum_class_label_expression(&mut self, qualifier: S::R) -> S::R {
+        // SPEC
+        // enum-class-label-expression:
+        //   enum-class-label-qualifier # name
+        //
+        // enum-class-label-expression:
+        //   qualified-name
         let hash = self.assert_token(TokenKind::Hash);
         let label_name = self.require_name_allow_all_keywords();
         S!(

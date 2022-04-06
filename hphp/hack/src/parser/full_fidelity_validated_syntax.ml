@@ -4545,10 +4545,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
           function_call_argument_list =
             validate_list_with validate_expression x.function_call_argument_list;
           function_call_left_paren = validate_token x.function_call_left_paren;
-          function_call_enum_class_label =
-            validate_option_with
-              validate_expression
-              x.function_call_enum_class_label;
           function_call_type_args =
             validate_option_with
               validate_type_arguments
@@ -4570,10 +4566,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with
                 invalidate_type_arguments
                 x.function_call_type_args;
-            function_call_enum_class_label =
-              invalidate_option_with
-                invalidate_expression
-                x.function_call_enum_class_label;
             function_call_left_paren =
               invalidate_token x.function_call_left_paren;
             function_call_argument_list =

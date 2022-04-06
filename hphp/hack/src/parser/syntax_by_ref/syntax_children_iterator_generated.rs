@@ -1079,13 +1079,12 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             FunctionCallExpression(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(5).and_then(|index| { match index {
                         0 => Some(&x.receiver),
                     1 => Some(&x.type_args),
-                    2 => Some(&x.enum_class_label),
-                    3 => Some(&x.left_paren),
-                    4 => Some(&x.argument_list),
-                    5 => Some(&x.right_paren),
+                    2 => Some(&x.left_paren),
+                    3 => Some(&x.argument_list),
+                    4 => Some(&x.right_paren),
                         _ => None,
                     }
                 })

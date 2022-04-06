@@ -957,6 +957,7 @@ impl<'a> Node<'a> {
             Some(TokenKind::Private) => Some(aast::Visibility::Private),
             Some(TokenKind::Protected) => Some(aast::Visibility::Protected),
             Some(TokenKind::Public) => Some(aast::Visibility::Public),
+            Some(TokenKind::Internal) => Some(aast::Visibility::Internal),
             _ => None,
         }
     }
@@ -2704,7 +2705,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             | TokenKind::XHP
             | TokenKind::Required
             | TokenKind::Ctx
-            | TokenKind::Readonly => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
+            | TokenKind::Readonly
+            | TokenKind::Internal => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             _ if kind.fixed_width().is_some() => {
                 Node::IgnoredToken(FixedWidthToken::new(kind, token.start_offset()))
             }

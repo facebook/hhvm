@@ -44,7 +44,9 @@ impl ExpectedTokens {
             TokenKind::Class | TokenKind::Trait | TokenKind::Interface => Classish as ETMask,
             TokenKind::Semicolon => Semicolon as ETMask,
             TokenKind::RightParen => RightParen as ETMask,
-            TokenKind::Public | TokenKind::Protected | TokenKind::Private => Visibility as ETMask,
+            TokenKind::Public | TokenKind::Protected | TokenKind::Private | TokenKind::Internal => {
+                Visibility as ETMask
+            }
             _ => 0_u16,
         };
         (bit & mask) != 0

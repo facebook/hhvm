@@ -1,0 +1,4 @@
+File "internal_keyword.php--file2.php", line 4, characters 7-9:
+You cannot access internal members outside of a module (Typing[4112])
+  File "internal_keyword.php--file1.php", line 5, characters 21-23:
+  This member is internal

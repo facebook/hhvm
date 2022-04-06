@@ -97,6 +97,10 @@ impl<'a, T: LexableToken, V> Syntax<'a, T, V> {
         self.is_specific_token(TokenKind::Private)
     }
 
+    pub fn is_internal(&self) -> bool {
+        self.is_specific_token(TokenKind::Internal)
+    }
+
     pub fn is_protected(&self) -> bool {
         self.is_specific_token(TokenKind::Protected)
     }

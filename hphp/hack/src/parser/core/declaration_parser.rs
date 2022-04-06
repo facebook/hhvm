@@ -629,7 +629,7 @@ where
         let mut acc = vec![];
         loop {
             match self.peek_token_kind() {
-                TokenKind::Abstract | TokenKind::Final => {
+                TokenKind::Abstract | TokenKind::Final | TokenKind::Internal => {
                     // TODO(T25649779)
                     let token = self.next_token();
                     let token = S!(make_token, self, token);
@@ -2121,6 +2121,7 @@ where
                 | TokenKind::Protected
                 | TokenKind::Private
                 | TokenKind::Async
+                | TokenKind::Internal
                 | TokenKind::Final
                 | TokenKind::Readonly => {
                     let token = self.next_token();
@@ -2133,7 +2134,7 @@ where
         S!(make_list, self, items, self.pos())
     }
 
-    fn parse_toplevel_with_attributes(&mut self) -> S::R {
+    fn parse_toplevel_with_attributes_or_internal(&mut self) -> S::R {
         // An enum, type alias, function, interface, trait or class may all
         // begin with an attribute.
         let attribute_specification = match self.peek_token_kind() {
@@ -2141,17 +2142,33 @@ where
             _ => S!(make_missing, self, self.pos()),
         };
 
-        match self.peek_token_kind() {
+        // Check for internal keyword; if internal, we want to track that info and look at the token after to determine
+        // what we're parsing
+        // For most toplevel entities we will parse internal as another modifier with no issues,
+        // but we will need to lookahead at least 1 extra spot to see what we're actually parsing.
+        let next_token_kind = self.peek_token_kind();
+        let (token_maybe_after_internal, is_internal) = if next_token_kind == TokenKind::Internal {
+            (self.peek_token_kind_with_lookahead(1), true)
+        } else {
+            (next_token_kind, false)
+        };
+
+        match token_maybe_after_internal {
             TokenKind::Enum => {
-                let modifiers = S!(make_missing, self, self.pos());
+                let modifiers = if is_internal {
+                    self.parse_modifiers()
+                } else {
+                    S!(make_missing, self, self.pos())
+                };
                 self.parse_enum_or_enum_class_declaration(attribute_specification, modifiers)
             }
             TokenKind::Type | TokenKind::Newtype => {
+                // TODO: internal on type alias declaration
                 self.parse_type_alias_declaration(attribute_specification)
             }
             TokenKind::Newctx => self.parse_ctx_alias_declaration(attribute_specification),
             TokenKind::Async | TokenKind::Function => {
-                if attribute_specification.is_missing() {
+                if attribute_specification.is_missing() && !is_internal {
                     // if attribute section is missing - it might be either
                     // function declaration or expression statement containing
                     // anonymous function - use statement parser to determine in which case
@@ -2196,7 +2213,7 @@ where
         // abstract const type T;
         //
         // // property-declaration:
-        // public/private/protected/static T $x;
+        // public/private/protected/internal/static T $x;
         // TODO: We may wish to parse "T $x" and give an error indicating
         // TODO: that we were expecting either const or public.
         // Note that a visibility modifier is required; static is optional;
@@ -2236,6 +2253,7 @@ where
             | TokenKind::Protected
             | TokenKind::Private
             | TokenKind::Readonly
+            | TokenKind::Internal
             | TokenKind::Static
             | TokenKind::Async
             | TokenKind::Final
@@ -2501,8 +2519,9 @@ where
                     p.parse_possible_php_function(true)
                 })
             }
+            TokenKind::Internal => self.parse_toplevel_with_attributes_or_internal(),
             TokenKind::At if self.env.allow_new_attribute_syntax => {
-                self.parse_toplevel_with_attributes()
+                self.parse_toplevel_with_attributes_or_internal()
             }
             TokenKind::LessThanLessThan => match parser1.peek_token_kind() {
                 TokenKind::File
@@ -2510,7 +2529,7 @@ where
                 {
                     self.parse_file_attribute_specification_opt()
                 }
-                _ => self.parse_toplevel_with_attributes(),
+                _ => self.parse_toplevel_with_attributes_or_internal(),
             },
             // TODO figure out what global const differs from class const
             TokenKind::Const => {

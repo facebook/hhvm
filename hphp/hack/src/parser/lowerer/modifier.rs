@@ -10,16 +10,17 @@ use parser_core_types::token_kind::TokenKind as TK;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Kind(u32);
-pub const XHP: Kind = Kind(0b0000000001u32);
-pub const FINAL: Kind = Kind(0b0000000010u32);
-pub const STATIC: Kind = Kind(0b0000000100u32);
-pub const ABSTRACT: Kind = Kind(0b0000001000u32);
-pub const PRIVATE: Kind = Kind(0b0000010000u32);
-pub const PUBLIC: Kind = Kind(0b0000100000u32);
-pub const PROTECTED: Kind = Kind(0b0001000000u32);
-pub const VAR: Kind = Kind(0b0010000000u32);
-pub const ASYNC: Kind = Kind(0b0100000000u32);
-pub const READONLY: Kind = Kind(0b1000000000u32);
+pub const XHP: Kind = Kind(1u32);
+pub const FINAL: Kind = Kind(1u32 << 1);
+pub const STATIC: Kind = Kind(1u32 << 2);
+pub const ABSTRACT: Kind = Kind(1u32 << 3);
+pub const PRIVATE: Kind = Kind(1u32 << 4);
+pub const PUBLIC: Kind = Kind(1u32 << 5);
+pub const PROTECTED: Kind = Kind(1u32 << 6);
+pub const VAR: Kind = Kind(1u32 << 7);
+pub const ASYNC: Kind = Kind(1u32 << 8);
+pub const READONLY: Kind = Kind(1u32 << 9);
+pub const INTERNAL: Kind = Kind(1u32 << 10);
 
 pub fn from_token_kind(t: TK) -> Option<Kind> {
     match t {
@@ -29,6 +30,7 @@ pub fn from_token_kind(t: TK) -> Option<Kind> {
         TK::Private => Some(PRIVATE),
         TK::Public => Some(PUBLIC),
         TK::Protected => Some(PROTECTED),
+        TK::Internal => Some(INTERNAL),
         TK::Var => Some(VAR),
         TK::Async => Some(ASYNC),
         TK::XHP => Some(XHP),
@@ -42,6 +44,7 @@ pub fn to_visibility(kind: Kind) -> Option<Visibility> {
         PUBLIC => Some(Visibility::Public),
         PRIVATE => Some(Visibility::Private),
         PROTECTED => Some(Visibility::Protected),
+        INTERNAL => Some(Visibility::Internal),
         _ => None,
     }
 }

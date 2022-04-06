@@ -581,7 +581,7 @@ fn get_modifier_final<'a>(modifiers: S<'a>) -> Option<S<'a>> {
 }
 
 fn is_visibility(x: S<'_>) -> bool {
-    x.is_public() || x.is_private() || x.is_protected()
+    x.is_public() || x.is_private() || x.is_protected() || x.is_internal()
 }
 
 fn contains_async_not_last(mods: S<'_>) -> bool {
@@ -1551,6 +1551,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     if kind == TokenKind::Readonly {
                         self.mark_uses_readonly()
                     }
+                    if kind == TokenKind::Internal {
+                        self.check_can_use_feature(modifier, &UnstableFeatures::Modules)
+                    }
                     if !ok(kind) {
                         self.errors.push(make_error_from_node(
                             modifier,
@@ -2017,7 +2020,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let body = &fd.body;
                 self.check_attr_enabled(function_attrs);
                 self.invalid_modifier_errors("Top-level functions", node, |kind| {
-                    kind == TokenKind::Async
+                    kind == TokenKind::Async || kind == TokenKind::Internal
                 });
                 self.produce_error(
                     |self_, x| self_.function_declaration_external_not_native(x),
@@ -2072,6 +2075,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         || kind == TokenKind::Static
                         || kind == TokenKind::Private
                         || kind == TokenKind::Protected
+                        || kind == TokenKind::Internal
                         || kind == TokenKind::Public
                         || kind == TokenKind::Async
                         || kind == TokenKind::Readonly
@@ -3846,7 +3850,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             );
 
             self.invalid_modifier_errors("Classes, interfaces, and traits", node, |kind| {
-                kind == TokenKind::Abstract || kind == TokenKind::Final || kind == TokenKind::XHP
+                kind == TokenKind::Abstract
+                    || kind == TokenKind::Final
+                    || kind == TokenKind::XHP
+                    || kind == TokenKind::Internal
             });
 
             self.produce_error(
@@ -4580,6 +4587,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 kind == TokenKind::Static
                     || kind == TokenKind::Private
                     || kind == TokenKind::Protected
+                    || kind == TokenKind::Internal
                     || kind == TokenKind::Public
                     || kind == TokenKind::Readonly
             });

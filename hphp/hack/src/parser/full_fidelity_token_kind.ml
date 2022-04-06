@@ -203,6 +203,7 @@ type t =
   | XHP
   | Hash
   | Readonly
+  | Internal
   (* Variable text tokens *)
   | ErrorToken
   | Name
@@ -417,6 +418,7 @@ let from_string keyword ~only_reserved =
   | "xhp" when not only_reserved -> Some XHP
   | "#" -> Some Hash
   | "readonly" -> Some Readonly
+  | "internal" when not only_reserved -> Some Internal
   | _ -> None
 
 let to_string kind =
@@ -606,6 +608,7 @@ let to_string kind =
   | XHP -> "xhp"
   | Hash -> "#"
   | Readonly -> "readonly"
+  | Internal -> "internal"
   (* Variable text tokens *)
   | ErrorToken -> "error_token"
   | Name -> "name"

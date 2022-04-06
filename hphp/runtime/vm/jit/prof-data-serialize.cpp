@@ -523,7 +523,7 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
 
   auto const preClass = unit->lookupPreClassId(id);
   if (preClass->attrs() & AttrEnum &&
-      preClass->enumBaseTy().isObject()) {
+      preClass->enumBaseTy().isUnresolved()) {
     read_named_type(ser);
   }
 
@@ -614,7 +614,9 @@ void write_seen_types(ProfDataSerializer& ser, ProfData* pd) {
   pd->forEachProfilingFunc([&](auto const& func) {
     always_assert(func);
     for (auto const& p : func->params()) {
-      write_seen_type(ser, p.typeConstraint.namedEntity());
+      if (auto const ne = p.typeConstraint.anyNamedEntity()) {
+        write_seen_type(ser, ne);
+      }
     }
   });
 
@@ -1479,8 +1481,8 @@ void write_class(ProfDataSerializer& ser, const Class* cls) {
   write_container(ser, dependents, write_class);
 
   if (cls->attrs() & AttrEnum &&
-      cls->preClass()->enumBaseTy().isObject()) {
-    write_named_type(ser, cls->preClass()->enumBaseTy().namedEntity());
+      cls->preClass()->enumBaseTy().isUnresolved()) {
+    write_named_type(ser, cls->preClass()->enumBaseTy().typeNamedEntity());
   }
 
   if (cls->parent() == c_Closure::classof()) {

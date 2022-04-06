@@ -1224,9 +1224,6 @@ private:
 
   void init_return_type(const php::Func* func);
 
-  ResolvedInfo<boost::variant<boost::blank,SString,ClassInfo*>>
-  resolve_type_name_internal(SString name) const;
-
 private:
   std::unique_ptr<IndexData> const m_data;
 };

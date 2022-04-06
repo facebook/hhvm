@@ -333,10 +333,11 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
       }
       // Arg isn't null, so treat it like the underlying type for coersion
       // purposes.  The ABI-passed type will still be mixed/Variant.
-      targetType = tc.underlyingDataType();
+      targetType = std::nullopt;
     }
     if (!targetType) {
-      targetType = tc.underlyingDataType();
+      // FIXME(T116301380): native builtins don't resolve properly
+      targetType = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
     }
 
     auto const raise_type_error = [&]{
@@ -523,7 +524,8 @@ MaybeDataType builtinOutType(
   const TypeConstraint& tc,
   const UserAttributeMap& map
 ) {
-  auto const tcDT = tc.underlyingDataType();
+  // FIXME(T116301380): native builtins don't resolve properly
+  auto const tcDT = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
 
   auto const it = map.find(s_outOnly.get());
   if (it == map.end()) return tcDT;
@@ -586,6 +588,11 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
   }
 
   if (tc.isNothing() || tc.isNoReturn()) { return ty == T::Void; }
+
+  if (tc.isUnresolved()) {
+    // FIXME(T116301380): native builtins don't resolve properly
+    return ty == T::Object || ty == T::ObjectArg;
+  }
 
   if (!tc.underlyingDataType()) {
     return false;
@@ -661,6 +668,9 @@ static bool tcCheckNativeIO(
       tc.isArrayLike() || tc.isClassname()) {
     return ty == T::MixedIO;
   }
+
+  // FIXME(T116301380): native builtins don't resolve properly
+  if (tc.isUnresolved()) return ty == T::ObjectIO;
 
   if (!tc.underlyingDataType()) {
     return false;

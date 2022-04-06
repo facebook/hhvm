@@ -111,7 +111,7 @@ const AnnotType* nameToAnnotType(const StringData* typeName) {
 const AnnotType* nameToAnnotType(const std::string& typeName) {
   auto const& mapPair = getAnnotTypeMaps();
   auto const* at = folly::get_ptr(mapPair.second, typeName);
-  assertx(!at || *at != AnnotType::Object);
+  assertx(!at || (*at != AnnotType::Object && *at != AnnotType::Unresolved));
   return at;
 }
 
@@ -180,6 +180,7 @@ TypedValue annotDefaultValue(AnnotType at) {
     case AnnotType::Callable:
     case AnnotType::Resource:
     case AnnotType::Object:
+    case AnnotType::Unresolved:
     case AnnotType::Nothing:
     case AnnotType::NoReturn:
     case AnnotType::Classname:
@@ -207,6 +208,7 @@ TypedValue annotDefaultValue(AnnotType at) {
 AnnotAction
 annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   assertx(IMPLIES(at == AnnotType::Object, annotClsName != nullptr));
+  assertx(IMPLIES(at == AnnotType::Unresolved, annotClsName != nullptr));
 
   auto const metatype = getAnnotMetaType(at);
   switch (metatype) {
@@ -258,10 +260,12 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::NoReturn:
       return AnnotAction::Fail;
     case AnnotMetaType::Precise:
+    case AnnotMetaType::Unresolved:
       break;
   }
 
-  assertx(metatype == AnnotMetaType::Precise);
+  assertx(metatype == AnnotMetaType::Precise ||
+          metatype == AnnotMetaType::Unresolved);
   if (at == AnnotType::String && dt == KindOfClass) {
     return RuntimeOption::EvalClassStringHintNotices
       ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
@@ -271,7 +275,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
   }
 
-  if (at != AnnotType::Object) {
+  if (at != AnnotType::Object && at != AnnotType::Unresolved) {
     // If `at' is "bool", "int", "float", "string", "array", or "resource",
     // then equivDataTypes() can definitively tell us whether or not `dt'
     // is compatible.
@@ -279,9 +283,12 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       ? AnnotAction::Pass : AnnotAction::Fail;
   }
 
+  assertx(annotClsName != nullptr);
+  if (dt == KindOfObject) return AnnotAction::ObjectCheck;
+
   // If `dt' is not an object, check for "magic" interfaces that
   // support non-object datatypes
-  if (dt != KindOfObject && interface_supports_non_objects(annotClsName)) {
+  if (interface_supports_non_objects(annotClsName)) {
     switch (dt) {
       case KindOfInt64:
         return interface_supports_int(annotClsName)
@@ -329,7 +336,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     }
   }
 
-  return AnnotAction::ObjectCheck;
+  if (at == AnnotType::Object) return AnnotAction::Fail;
+
+  assertx(at == AnnotType::Unresolved);
+  return AnnotAction::Fallback;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -28,12 +28,14 @@ namespace {
 
 TypeAlias typeAliasFromClass(const PreTypeAlias* thisType,
                              Class *klass) {
+  assertx(klass);
   TypeAlias req(thisType);
   req.nullable = thisType->nullable;
   if (isEnum(klass)) {
     // If the class is an enum, pull out the actual base type.
     if (auto const enumType = klass->enumBaseTy()) {
       req.type = enumDataTypeToAnnotType(*enumType);
+      assertx(req.type != AnnotType::Object);
     } else {
       req.type = AnnotType::ArrayKey;
     }
@@ -56,7 +58,8 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
    * If the right hand side was a class, we need to autoload and
    * ensure it exists at this point.
    */
-  if (thisType->type != AnnotType::Object) {
+  if (thisType->type != AnnotType::Object &&
+      thisType->type != AnnotType::Unresolved) {
     return TypeAlias::From(thisType);
   }
 
@@ -82,6 +85,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
+    assertx(thisType->type != AnnotType::Object);
     return TypeAlias::From(*targetTd, thisType);
   }
 
@@ -93,6 +97,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
       return typeAliasFromClass(thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
+      assertx(thisType->type != AnnotType::Object);
       return TypeAlias::From(*targetTd, thisType);
     }
   }
@@ -104,8 +109,11 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
 }
 
 bool TypeAlias::compat(const PreTypeAlias& alias) const {
+  // FIXME(T116316964): can't compare type of unresolved PreTypeAlias
+  auto const preType = alias.type == AnnotType::Unresolved
+    ? AnnotType::Object : alias.type;
   return (alias.type == AnnotType::Mixed && type == AnnotType::Mixed) ||
-         (alias.type == type && alias.nullable == nullable &&
+         (preType == type && alias.nullable == nullable &&
           Class::lookup(alias.value) == klass);
 }
 

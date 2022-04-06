@@ -1255,7 +1255,8 @@ Type param_target_type(const Func* callee, uint32_t paramIdx) {
   auto const& pi = callee->params()[paramIdx];
   auto const& tc = pi.typeConstraint;
   if (tc.isNullable()) {
-    auto const dt = tc.underlyingDataType();
+    // FIXME(T116301380): native builtins don't resolve properly
+    auto const dt = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
     if (!dt) return TBottom;
     return TNull | Type(*dt);
   }
@@ -1743,7 +1744,7 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
   auto const& tc = pinfo.typeConstraint;
   if (auto const dt = Native::builtinOutType(tc, pinfo.userAttributes)) {
     const auto ty = Type{*dt};
-    return pinfo.typeConstraint.isNullable() ? TInitNull | ty : ty;
+    return tc.isNullable() ? ty | TInitNull : ty;
   }
 
   if (tc.isSoft() || tc.isMixed()) return TInitCell;
@@ -1751,7 +1752,10 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
   auto ty = [&] () -> Type {
     switch (tc.metaType()) {
     case AnnotMetaType::Precise:
-      return Type{*tc.underlyingDataType()};
+      if (auto const dt = tc.underlyingDataType()) {
+        return Type{*dt};
+      }
+      return TInitCell;
     case AnnotMetaType::Mixed:
       return TInitCell;
     case AnnotMetaType::Callable:
@@ -1773,6 +1777,9 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
     case AnnotMetaType::NoReturn:
     case AnnotMetaType::Nothing:
       return TInitCell;
+    case AnnotMetaType::Unresolved:
+      // FIXME(T116301380): native builtins don't resolve properly
+      return TObj;
     }
     not_reached();
   }();

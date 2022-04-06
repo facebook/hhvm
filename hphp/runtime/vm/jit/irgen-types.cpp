@@ -51,17 +51,10 @@ const StaticString
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Returns a {Cls|Nullptr} suitable for use in instance checks. If knownCls is
- * not null and is safe to use, that will be returned. Otherwise, className
- * will be used to look up a class.
+ * Returns a {Cls|Nullptr} suitable for use in instance checks.
  */
-SSATmp* ldClassSafe(IRGS& env, const StringData* className,
-                    const Class* knownCls = nullptr) {
-  if (!knownCls) {
-    knownCls = lookupUniqueClass(env, className);
-  }
-
-  if (knownCls) {
+SSATmp* ldClassSafe(IRGS& env, const StringData* className) {
+  if (auto const knownCls = lookupUniqueClass(env, className)) {
     return cns(env, knownCls);
   }
 
@@ -230,20 +223,18 @@ void verifyTypeImpl(IRGS& env,
   };
 
   auto const checkOneType = [&](SSATmp* val, AnnotAction result) {
-
-    auto const valType = val->type();
-    assertx(valType.isKnownDataType());
-    auto const valDataType = valType.toDataType();
+    assertx(val->type().isKnownDataType());
 
     switch (result) {
       case AnnotAction::Pass:          return;
       case AnnotAction::Fail:          return genFail(val);
+      case AnnotAction::Fallback:      return giveup();
       case AnnotAction::CallableCheck: return callable(val);
       case AnnotAction::ObjectCheck:   break;
 
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
-        assertx(valType <= TCls);
+        assertx(val->type() <= TCls);
         if (!classToStr(val)) return genFail(val);
         if (result == AnnotAction::WarnClass) {
           gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
@@ -252,7 +243,7 @@ void verifyTypeImpl(IRGS& env,
 
       case AnnotAction::WarnLazyClass:
       case AnnotAction::ConvertLazyClass:
-        assertx(valType <= TLazyCls);
+        assertx(val->type() <= TLazyCls);
         if (!lazyClassToStr(val)) return genFail(val);
         if (result == AnnotAction::WarnLazyClass) {
           gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
@@ -260,40 +251,13 @@ void verifyTypeImpl(IRGS& env,
         return;
 
       case AnnotAction::WarnClassname:
-        assertx(valType <= TCls || valType <= TLazyCls);
+        assertx(val->type() <= TCls || val->type() <= TLazyCls);
         gen(env, RaiseNotice, cns(env, s_CLASS_TO_CLASSNAME.get()));
         return;
     }
     assertx(result == AnnotAction::ObjectCheck);
+    assertx(val->type() <= TObj);
     if (onlyCheckNullability) return;
-
-    if (!(valType <= TObj)) {
-      if (tc.isResolved()) return genFail(val);
-
-      // In RepoAuth mode, we can optimize some type aliases and enum types.
-      if (tc.isObject() && RuntimeOption::RepoAuthoritative) {
-        auto const pass = [&]{
-          auto const ne = tc.namedEntity();
-          auto const td = ne->getCachedTypeAlias();
-          if (ne->isPersistentTypeAlias() && td) {
-            if (td->nullable && valType <= TNull) return true;
-            auto const cls = td->klass ? td->klass->name() : nullptr;
-            return annotCompat(valDataType, td->type, cls) == AnnotAction::Pass;
-          }
-          auto const cls = ne->getCachedClass();
-          if (cls && classHasPersistentRDS(cls) && cls->enumBaseTy()) {
-            auto const type = enumDataTypeToAnnotType(*cls->enumBaseTy());
-            return annotCompat(valDataType, type, nullptr) == AnnotAction::Pass;
-          }
-          return false;
-        }();
-        if (pass) {
-          env.irb->constrainValue(val, DataTypeSpecific);
-          return;
-        }
-      }
-      return giveup();
-    }
 
     // At this point, we know that val is a TObj.
     if (tc.isThis()) {
@@ -314,21 +278,9 @@ void verifyTypeImpl(IRGS& env,
     }
 
     // At this point, we know that val is a TObj and that tc is an Object.
-    assertx(tc.isObject());
-    const StringData* clsName = nullptr;
-    const Class* knownConstraint = nullptr;
-    auto const ne = tc.namedEntity();
-    auto const td = ne->getCachedTypeAlias();
-    if (RO::RepoAuthoritative && ne->isPersistentTypeAlias() &&
-        td && td->klass) {
-      assertx(classHasPersistentRDS(td->klass));
-      clsName = td->klass->name();
-      knownConstraint = td->klass;
-    } else {
-      clsName = tc.typeName();
-    }
-
-    auto const checkCls = ldClassSafe(env, clsName, knownConstraint);
+    assertx(tc.isObject() || tc.isUnresolved());
+    auto const clsName = tc.isObject() ? tc.clsName() : tc.typeName();
+    auto const checkCls = ldClassSafe(env, clsName);
     auto const fastIsInstance = implInstanceCheck(env, val, clsName, checkCls);
     if (fastIsInstance) {
       ifThen(
@@ -353,7 +305,8 @@ void verifyTypeImpl(IRGS& env,
 
   auto const computeAction = [&](DataType dt) {
     if (dt == KindOfNull && tc.isNullable()) return AnnotAction::Pass;
-    return annotCompat(dt, tc.type(), tc.typeName());
+    auto const name = tc.isObject() ? tc.clsName() : tc.typeName();
+    return annotCompat(dt, tc.type(), name);
   };
 
   if (genericValType.isKnownDataType()) {
@@ -1306,11 +1259,10 @@ void verifyPropType(IRGS& env,
       // Unlike the other type-hint checks, we don't punt here. We instead do
       // the check using a runtime helper. This gives us the freedom to call
       // verifyPropType without us worrying about it punting the whole set op.
-      // This check is fragile - which type constraints coerce?
 
       auto const data = TypeConstraintData{tc};
       auto const sprop = cns(env, isSProp);
-      if (coerce && (tc->isString() || (tc->isObject() && !tc->isResolved()))) {
+      if (coerce && tc->mayCoerce()) {
         *coerce = gen(env, VerifyPropCoerce, data, cls, cns(env, slot), val, sprop);
       } else {
         gen(env, VerifyProp, data, cls, cns(env, slot), val, sprop);
@@ -1396,7 +1348,7 @@ void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
   UNUSED auto const& valType = val->type();
 
   FTRACE_MOD(Trace::sib, 3, "Verifying constraint {} {}\n", valType.toString(),
-             c.tc.fullName());
+             c.tc.displayName());
 
   verifyTypeImpl(
     env,

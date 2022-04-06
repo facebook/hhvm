@@ -527,7 +527,7 @@ struct RenderOnce : ROMRenderer {
       // TODO: Handle coercions, which require dependent mystery boxes.
       throw RenderException(folly::sformat(
           "Failed to constrain mystery local {}, {} fails constraint {}",
-          show(provenance), show(tv), tc.fullName()));
+          show(provenance), show(tv), tc.displayName()));
     }
   }
   void allocAndCopyROM(const uint8_t* source, size_t numBytes) override {

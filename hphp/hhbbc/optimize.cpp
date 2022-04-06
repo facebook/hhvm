@@ -680,21 +680,18 @@ void optimize_iterators(VisitContext& visit) {
  * underlying type, if possible.
  */
 void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
-  if (!tc.isCheckable() || !tc.isObject() || tc.isResolved()) return;
+  if (!tc.isUnresolved()) return;
 
-  if (interface_supports_non_objects(tc.typeName())) return;
   auto const resolved = index.resolve_type_name(tc.typeName());
+  if (resolved.type == AnnotType::Unresolved) return;
 
   if (resolved.type == AnnotType::Object) {
-    if (!resolved.value || !resolved.value->resolved()) return;
-    // Can't resolve if it resolves to a magic interface. If we mark it as
-    // resolved, we'll think its an object and not do the special magic
-    // interface checks at runtime.
-    if (interface_supports_non_objects(resolved.value->name())) return;
+    tc.resolveType(resolved.type, resolved.nullable, resolved.value->name());
     if (!resolved.value->couldHaveMockedDerivedClass()) tc.setNoMockObjects();
+  } else {
+    tc.resolveType(resolved.type, resolved.nullable, nullptr);
   }
 
-  tc.resolveType(resolved.type, tc.isNullable() || resolved.nullable);
   FTRACE(1, "Retype tc {} -> {}\n", tc.typeName(), tc.displayName());
 }
 

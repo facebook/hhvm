@@ -370,7 +370,7 @@ function array_push(
  *
  */
 <<__Native>>
-function array_rand(mixed $input, int $num_req = 1): mixed;
+function array_rand(mixed $input, int $num_req = 1)[leak_safe]: mixed;
 
 /**
  * array_reduce() applies iteratively the function function to the elements of

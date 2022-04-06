@@ -3553,9 +3553,12 @@ and props_to_env
         | _ -> props_to_env pos env (prop :: remain) props on_error
       end)
 
-(* Move any top-level conjuncts of the form Tvar v <: t or t <: Tvar v to
- * the type variable environment. To do: use intersection and union to
- * simplify bounds.
+(* Given a subtype proposition, resolve conjunctions of subtype assertions
+ * of the form #v <: t or t <: #v by adding bounds to #v in env. Close env
+ * wrt transitivity i.e. if t <: #v and #v <: u then resolve t <: u which
+ * may in turn produce more bounds in env.
+ * For disjunctions, arbitrarily pick the first disjunct that is not
+ * unsatisfiable. If any unsatisfiable disjunct remains, return it.
  *)
 and prop_to_env pos env prop on_error =
   let (env, props') = props_to_env pos env [] [prop] on_error in

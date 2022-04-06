@@ -12,7 +12,6 @@ open Typing_defs
 open Typing_env_types
 module Env = Typing_env
 module SN = Naming_special_names
-module SubType = Typing_subtype
 module MakeType = Typing_make_type
 
 let check_param : env -> Nast.fun_param -> unit =
@@ -81,18 +80,11 @@ let check_param : env -> Nast.fun_param -> unit =
         let env = Env.open_tyvars env pos in
         let (env, type_param) = Env.fresh_type env pos in
         let container_type = MakeType.container Reason.none type_param in
-        let (env, props) =
-          SubType.simplify_subtype_i
-            env
-            (LoclType ty)
-            (LoclType container_type)
-            ~on_error:(Some (Typing_error.Reasons_callback.unify_error_at pos))
-        in
-        let (env, prop) =
-          SubType.prop_to_env (Pos_or_decl.of_raw_pos pos) env props
+        let (env, ty_err_opt) =
+          Typing_utils.sub_type env ty container_type
           @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
         in
-        let is_container = Typing_logic.is_valid prop in
+        let is_container = Option.is_none ty_err_opt in
 
         let mixed = MakeType.mixed Reason.none in
         let hackarray = MakeType.any_array Reason.none mixed mixed in

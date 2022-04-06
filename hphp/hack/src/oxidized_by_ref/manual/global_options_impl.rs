@@ -45,6 +45,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_fetch_remote_old_decls: false,
     tco_populate_member_heaps: true,
     tco_skip_hierarchy_checks: false,
+    tco_skip_tast_checks: false,
     tco_like_type_hints: false,
     tco_union_intersection_type_hints: false,
     tco_coeffects: true,

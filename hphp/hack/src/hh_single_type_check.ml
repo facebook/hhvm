@@ -220,6 +220,7 @@ let parse_options () =
   let set_float_ x f = x := f in
   let shallow_class_decl = ref false in
   let skip_hierarchy_checks = ref false in
+  let skip_tast_checks = ref false in
   let out_extension = ref ".out" in
   let like_type_hints = ref false in
   let union_intersection_type_hints = ref false in
@@ -515,6 +516,9 @@ let parse_options () =
       ( "--skip-hierarchy-checks",
         Arg.Set skip_hierarchy_checks,
         " Do not apply checks on class hierarchy (override, implements, etc)" );
+      ( "--skip-tast-checks",
+        Arg.Set skip_tast_checks,
+        " Do not apply checks using TAST visitors" );
       ( "--union-intersection-type-hints",
         Arg.Set union_intersection_type_hints,
         " Allows union and intersection types to be written in type hint positions"
@@ -841,6 +845,7 @@ let parse_options () =
       ~tco_check_redundant_generics:!check_redundant_generics
       ~tco_shallow_class_decl:!shallow_class_decl
       ~tco_skip_hierarchy_checks:!skip_hierarchy_checks
+      ~tco_skip_tast_checks:!skip_tast_checks
       ~tco_like_type_hints:!like_type_hints
       ~tco_union_intersection_type_hints:!union_intersection_type_hints
       ~tco_strict_contexts:!strict_contexts

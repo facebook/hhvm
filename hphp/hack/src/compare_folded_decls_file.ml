@@ -235,6 +235,7 @@ let () =
       ignored_flag "--pessimise-builtins";
       ignored_arg "--explicit-consistent-constructors";
       ignored_arg "--require-types-class-consts";
+      ignored_flag "--skip-tast-checks";
     ]
     set_file
     usage;

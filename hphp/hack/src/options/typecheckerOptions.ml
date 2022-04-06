@@ -96,6 +96,8 @@ let populate_member_heaps = GlobalOptions.tco_populate_member_heaps
 
 let skip_hierarchy_checks = GlobalOptions.tco_skip_hierarchy_checks
 
+let skip_tast_checks = GlobalOptions.tco_skip_tast_checks
+
 let call_coeffects = GlobalOptions.tco_call_coeffects
 
 let local_coeffects = GlobalOptions.tco_local_coeffects

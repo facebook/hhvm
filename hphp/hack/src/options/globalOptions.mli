@@ -115,6 +115,9 @@ type t = {
   (* Skip checks on hierarchy e.g. overrides, require extend, etc.
      Set to true only for debugging purposes! *)
   tco_skip_hierarchy_checks: bool;
+  (* Skip checks implemented with TAST visitors.
+     Set to true only for debugging purposes! *)
+  tco_skip_tast_checks: bool;
   (* Enables like type hints *)
   tco_like_type_hints: bool;
   (* Enables union and intersection type hints *)
@@ -350,6 +353,7 @@ val make :
   ?tco_force_load_hot_shallow_decls:bool ->
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->
+  ?tco_skip_tast_checks:bool ->
   ?tco_like_type_hints:bool ->
   ?tco_union_intersection_type_hints:bool ->
   ?tco_coeffects:bool ->
@@ -534,6 +538,8 @@ val tco_force_load_hot_shallow_decls : t -> bool
 val tco_populate_member_heaps : t -> bool
 
 val tco_skip_hierarchy_checks : t -> bool
+
+val tco_skip_tast_checks : t -> bool
 
 val tco_like_type_hints : t -> bool
 

@@ -367,6 +367,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         local_config.ServerLocalConfig.populate_member_heaps
       ~tco_skip_hierarchy_checks:
         local_config.ServerLocalConfig.skip_hierarchy_checks
+      ~tco_skip_tast_checks:local_config.ServerLocalConfig.skip_tast_checks
       ~po_allow_unstable_features:
         local_config.ServerLocalConfig.allow_unstable_features
       ?tco_like_type_hints:(bool_opt "like_type_hints" config)

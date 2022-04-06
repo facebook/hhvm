@@ -504,6 +504,9 @@ type t = {
   skip_hierarchy_checks: bool;
       (** Skip checks on hierarchy e.g. overrides, require extend, etc.
       Set to true only for debugging purposes! *)
+  skip_tast_checks: bool;
+      (** Skip checks implemented using TAST visitors.
+      Set to true only for debugging purposes! *)
   num_local_workers: int option;
       (** If None, only the type check delegate's logic will be used.
       If the delegate fails to type check, the typing check service as a whole
@@ -652,6 +655,7 @@ let default =
     fetch_remote_old_decls = false;
     use_hack_64_naming_table = false;
     skip_hierarchy_checks = false;
+    skip_tast_checks = false;
     num_local_workers = None;
     parallel_type_checking_threshold = 10;
     defer_class_declaration_threshold = None;
@@ -1150,6 +1154,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let skip_tast_checks =
+    bool_if_min_version
+      "skip_tast_checks"
+      ~default:default.skip_tast_checks
+      ~current_version
+      config
+  in
   let parallel_type_checking_threshold =
     int_
       "parallel_type_checking_threshold"
@@ -1487,6 +1498,7 @@ let load_ fn ~silent ~current_version overrides =
     fetch_remote_old_decls;
     use_hack_64_naming_table;
     skip_hierarchy_checks;
+    skip_tast_checks;
     num_local_workers;
     parallel_type_checking_threshold;
     defer_class_declaration_threshold;

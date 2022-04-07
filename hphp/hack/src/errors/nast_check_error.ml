@@ -447,17 +447,25 @@ let illegal_context pos name =
     []
 
 let case_fallthrough switch_pos case_pos next_pos =
+  let rec addspaces fallthrough_comment num_spaces =
+    if num_spaces > 0 then
+      addspaces (fallthrough_comment ^ " ") (num_spaces - 1)
+    else
+      fallthrough_comment
+  in
+
   let quickfixes =
     match next_pos with
     | None -> []
     | Some next_pos ->
       let (_, start_col) = Pos.line_column next_pos in
       let new_pos = Pos.set_col_end (start_col - 5) next_pos in
+      let new_text = addspaces "  // FALLTHROUGH\n" (start_col - 5) in
 
       [
         Quickfix.make
           ~title:"Annotate fallthrough case with // FALLTHROUGH comment"
-          ~new_text:"  // FALLTHROUGH\n  "
+          ~new_text
           new_pos;
       ]
   in

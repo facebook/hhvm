@@ -113,6 +113,7 @@ enum class AnnotAction {
   Pass,
   Fail,
   Fallback,
+  FallbackCoerce,
   ObjectCheck,
   CallableCheck,
   WarnClass,
@@ -144,7 +145,8 @@ enum class AnnotAction {
  * Fallback: A recommendation to perform a full C++ check. This can happen
  * if `at' is an unresolved reference to either (1) a real non-enum class or
  * interface, (2) an enum, or (3) a type alias and the DataType `dt' is
- * not KindOfObject.
+ * not KindOfObject. FallbackCoerce may require type coercion, Fallback is
+ * guaranteed to not require it.
  *
  * CallableCheck: `at' is "callable" and a value with DataType `dt' might
  * be compatible with the annotation, but the caller needs to consult

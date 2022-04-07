@@ -179,32 +179,32 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  * - Callable:  Emit code to verify that the given value is callable.
  * - VerifyCls: Emit code to verify that the given value is an instance of the
  *              given Class.
- * - Giveup:    Called when the type check cannot be resolved statically. Either
+ * - Fallback:  Called when the type check cannot be resolved statically. Either
  *              PUNT or call a runtime helper to do the check.
  *
  * `propCls' should only be non-null for property type-hints, and represents the
  * runtime class of the object the property belongs to.
  */
-template <typename GetVal,
-          typename GetCtx,
-          typename ClassToStr,
-          typename LazyClassToStr,
-          typename Fail,
-          typename Callable,
-          typename VerifyCls,
-          typename Giveup>
+template <typename TGetVal,
+          typename TGetCtx,
+          typename TClassToStr,
+          typename TLazyClassToStr,
+          typename TFail,
+          typename TCallable,
+          typename TVerifyCls,
+          typename TFallback>
 void verifyTypeImpl(IRGS& env,
                     const TypeConstraint& tc,
                     bool onlyCheckNullability,
                     SSATmp* propCls,
-                    GetVal getVal,
-                    GetCtx getCtx,
-                    ClassToStr classToStr,
-                    LazyClassToStr lazyClassToStr,
-                    Fail fail,
-                    Callable callable,
-                    VerifyCls verifyCls,
-                    Giveup giveup) {
+                    TGetVal getVal,
+                    TGetCtx getCtx,
+                    TClassToStr classToStr,
+                    TLazyClassToStr lazyClassToStr,
+                    TFail fail,
+                    TCallable callable,
+                    TVerifyCls verifyCls,
+                    TFallback fallback) {
 
   if (!tc.isCheckable()) return;
   assertx(!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB != 0);
@@ -226,11 +226,12 @@ void verifyTypeImpl(IRGS& env,
     assertx(val->type().isKnownDataType());
 
     switch (result) {
-      case AnnotAction::Pass:          return;
-      case AnnotAction::Fail:          return genFail(val);
-      case AnnotAction::Fallback:      return giveup();
-      case AnnotAction::CallableCheck: return callable(val);
-      case AnnotAction::ObjectCheck:   break;
+      case AnnotAction::Pass:           return;
+      case AnnotAction::Fail:           return genFail(val);
+      case AnnotAction::Fallback:       return fallback(val, false);
+      case AnnotAction::FallbackCoerce: return fallback(val, true);
+      case AnnotAction::CallableCheck:  return callable(val);
+      case AnnotAction::ObjectCheck:    break;
 
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
@@ -296,7 +297,7 @@ void verifyTypeImpl(IRGS& env,
       return;
     }
 
-    verifyCls(val, gen(env, LdObjClass, val), checkCls);
+    verifyCls(val, checkCls);
   };
 
   auto const genericVal = getVal();
@@ -314,14 +315,28 @@ void verifyTypeImpl(IRGS& env,
     return checkOneType(genericVal, computeAction(dt));
   }
 
+  enum { None, Fail, Fallback, FallbackCoerce } fallbackAction = None;
+
   auto const options = [&]{
     TinyVector<std::pair<DataType, AnnotAction>, kNumDataTypes> result;
     for (auto const dt : kDataTypes) {
       auto const type = Type(dt);
       if (!genericValType.maybe(type)) continue;
       auto const action = computeAction(dt);
-      if (action == AnnotAction::Fail) continue;
-      result.emplace_back(dt, action);
+      switch (action) {
+        case AnnotAction::Fail:
+          fallbackAction = std::max(fallbackAction, Fail);
+          break;
+        case AnnotAction::Fallback:
+          fallbackAction = std::max(fallbackAction, Fallback);
+          break;
+        case AnnotAction::FallbackCoerce:
+          fallbackAction = std::max(fallbackAction, FallbackCoerce);
+          break;
+        default:
+          result.emplace_back(dt, action);
+          break;
+      }
     }
     return result;
   }();
@@ -335,7 +350,23 @@ void verifyTypeImpl(IRGS& env,
       return cns(env, TBottom);
     });
   }
-  mc.elseDo([&]{ genFail(genericVal); return cns(env, TBottom); });
+  mc.elseDo([&]{
+    switch (fallbackAction) {
+      case None:
+        gen(env, Unreachable, ASSERT_REASON);
+        break;
+      case Fail:
+        genFail(genericVal);
+        break;
+      case Fallback:
+        fallback(genericVal, false);
+        break;
+      case FallbackCoerce:
+        fallback(genericVal, true);
+        break;
+    }
+    return cns(env, TBottom);
+  });
 }
 
 Type typeOpToType(IsTypeOp op) {
@@ -1120,18 +1151,18 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
           val
         );
       },
-      [&] (SSATmp* val, SSATmp* objClass, SSATmp* checkCls) {
+      [&] (SSATmp* val, SSATmp* checkCls) {
         // Class/type-alias check
         gen(
           env,
           VerifyRetCls,
           FuncParamWithTCData { func, id, &tc },
           val,
-          objClass,
+          gen(env, LdObjClass, val),
           checkCls
         );
       },
-      [] { // Giveup
+      [] (SSATmp*, bool) { // Fallback
         PUNT(VerifyReturnType);
       }
     );
@@ -1204,18 +1235,18 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
           val
         );
       },
-      [&] (SSATmp* val, SSATmp* objClass, SSATmp* checkCls) {
+      [&] (SSATmp* val, SSATmp* checkCls) {
         // Class/type-alias check
         gen(
           env,
           VerifyParamCls,
           FuncParamWithTCData { func, id, &tc },
           val,
-          objClass,
+          gen(env, LdObjClass, val),
           checkCls
         );
       },
-      [] { // Giveup
+      [] (SSATmp*, bool) { // Fallback
         PUNT(VerifyParamType);
       }
     );
@@ -1255,14 +1286,14 @@ void verifyPropType(IRGS& env,
     if (!tc || !tc->isCheckable()) return;
     assertx(tc->validForProp());
 
-    auto const giveup = [&] {
+    auto const fallback = [&](SSATmp* val, bool mayCoerce) {
       // Unlike the other type-hint checks, we don't punt here. We instead do
       // the check using a runtime helper. This gives us the freedom to call
       // verifyPropType without us worrying about it punting the whole set op.
 
       auto const data = TypeConstraintData{tc};
       auto const sprop = cns(env, isSProp);
-      if (coerce && tc->mayCoerce()) {
+      if (coerce && mayCoerce) {
         *coerce = gen(env, VerifyPropCoerce, data, cls, cns(env, slot), val, sprop);
       } else {
         gen(env, VerifyProp, data, cls, cns(env, slot), val, sprop);
@@ -1273,7 +1304,7 @@ void verifyPropType(IRGS& env,
     // cases separately. However, our callers want a single coerced value,
     // which we don't track, so we punt if we're going to split it up.
     if (!val->type().isKnownDataType()) {
-      return giveup();
+      return fallback(val, tc->mayCoerce());
     }
 
     verifyTypeImpl(
@@ -1288,19 +1319,19 @@ void verifyPropType(IRGS& env,
       [&] { // Get the context class
         return ldCtxCls(env);
       },
-      [&] (SSATmp*) {  // class to string automatic conversions
+      [&] (SSATmp* val) {  // class to string automatic conversions
         if (!coerce) return false;
         if (RO::EvalCheckPropTypeHints < 3) return false;
         *coerce = gen(env, LdClsName, val);
         return true;
       },
-      [&] (SSATmp*) {  // lazy class to string automatic conversions
+      [&] (SSATmp* val) {  // lazy class to string automatic conversions
         if (!coerce) return false;
         if (RO::EvalCheckPropTypeHints < 3) return false;
         *coerce = gen(env, LdLazyClsName, val);
         return true;
       },
-      [&] (SSATmp*, SSATmp*, bool hard) { // Check failure
+      [&] (SSATmp* val, SSATmp*, bool hard) { // Check failure
         auto const failHard =
           hard && RuntimeOption::EvalCheckPropTypeHints >= 3 &&
           (!tc->isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
@@ -1317,7 +1348,7 @@ void verifyPropType(IRGS& env,
       // We don't allow callable as a property type-hint, so we should never need
       // to check callability.
       [&] (SSATmp*) { always_assert(false); },
-      [&] (SSATmp* v, SSATmp*, SSATmp* checkCls) { // Class/type-alias check
+      [&] (SSATmp* val, SSATmp* checkCls) { // Class/type-alias check
         gen(
           env,
           VerifyPropCls,
@@ -1325,11 +1356,11 @@ void verifyPropType(IRGS& env,
           cls,
           cns(env, slot),
           checkCls,
-          v,
+          val,
           cns(env, isSProp)
         );
       },
-      giveup
+      fallback
     );
   };
   verifyFunc(tc);
@@ -1373,10 +1404,10 @@ void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
     [&] (SSATmp*) { // Callable check
       genFail();
     },
-    [&] (SSATmp*, SSATmp*, SSATmp*) {
+    [&] (SSATmp*, SSATmp*) {
       genFail();
     },
-    [&] { // Giveup
+    [&] (SSATmp*, bool) { // Fallback
       genFail();
     }
   );

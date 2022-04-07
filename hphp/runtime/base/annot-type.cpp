@@ -339,7 +339,8 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   if (at == AnnotType::Object) return AnnotAction::Fail;
 
   assertx(at == AnnotType::Unresolved);
-  return AnnotAction::Fallback;
+  return isClassType(dt) || isLazyClassType(dt)
+    ? AnnotAction::FallbackCoerce : AnnotAction::Fallback;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

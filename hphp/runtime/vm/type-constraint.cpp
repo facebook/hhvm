@@ -415,6 +415,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         return true;
       case AnnotAction::ObjectCheck:
       case AnnotAction::Fallback:
+      case AnnotAction::FallbackCoerce:
         not_reached();
     }
     not_reached();
@@ -542,7 +543,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
       case MetaType::Nothing:
       case MetaType::NoReturn:
         assertx(!isProp);
-        // fallthrogh
+        // fallthrough
       case MetaType::Precise:
       case MetaType::Number:
       case MetaType::ArrayKey:
@@ -574,6 +575,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
       if (isPasses) return false;
       return is_callable(tvAsCVarRef(*val));
     case AnnotAction::Fallback:
+    case AnnotAction::FallbackCoerce:
       assertx(isUnresolved());
       return !isPasses && checkNamedTypeNonObj<isAssert, isProp>(val);
     case AnnotAction::WarnClass:
@@ -670,6 +672,7 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
       return true;
     case AnnotAction::Fail:
     case AnnotAction::Fallback:
+    case AnnotAction::FallbackCoerce:
     case AnnotAction::CallableCheck:
     case AnnotAction::ObjectCheck:
     case AnnotAction::WarnClass:

@@ -180,6 +180,26 @@ bool EvaluateCommand::executeImpl(
     denv.set(StrNR{s_varName.get()}, executor.m_result.result, true);
   }
 
+  if (!m_debugger->getDebuggerOptions().disablePostDummyEvalHelper &&
+      m_debugger->isDummyRequest() &&
+      m_debugger->getRequestInfo()->m_evaluateCommandDepth == 0) {
+    auto helperExecutor = EvaluatePHPExecutor{
+      m_debugger,
+      session,
+      threadId,
+      "<?hh if (\\function_exists('vsdebug_post_dummy_eval')) { \\vsdebug_post_dummy_eval(); }",
+      frameDepth,
+      false
+    };
+    helperExecutor.execute();
+    if (helperExecutor.m_result.failed) {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelError,
+        "Failed to evaluate vsdebug_post_dummy_eval"
+      );
+    }
+  }
+
   folly::dynamic serializedResult =
     VariablesCommand::serializeVariable(
       session,

@@ -408,7 +408,6 @@ public:
 
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
-  void debuggerExecutePsps();
 
   Array& getDebuggerEnv() { return m_debuggerEnv; }
 

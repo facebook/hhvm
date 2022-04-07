@@ -59,7 +59,9 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   bool disableUniqueVarRef =
     tryGetBool(args, "disableUniqueVarRef", false);
 
-  bool disableDummyPsPs =
+  bool disablePostDummyEvalHelper =
+    tryGetBool(args, "disablePostDummyEvalHelper", false) ||
+    // TODO: make clients use the new flag name and remove this legacy version
     tryGetBool(args, "disableDummyPsPs", false);
 
   bool disableStdoutRedirection =
@@ -120,7 +122,7 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   options.warnOnInterceptedFunctions = warnOnInterceptedFunctions;
   options.notifyOnBpCalibration = notifyOnBpCalibration;
   options.disableUniqueVarRef = disableUniqueVarRef;
-  options.disableDummyPsPs = disableDummyPsPs;
+  options.disablePostDummyEvalHelper = disablePostDummyEvalHelper;
   options.maxReturnedStringLength = maxReturnedStringLength;
   options.disableStdoutRedirection = disableStdoutRedirection;
   m_debugger->setDebuggerOptions(options);

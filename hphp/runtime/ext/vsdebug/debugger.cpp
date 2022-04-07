@@ -59,8 +59,8 @@ bool Debugger::getDebuggerOption(const HPHP::String& option) {
     return options.notifyOnBpCalibration;
   } else if (optionStr == "disableuniquevarref") {
     return options.disableUniqueVarRef;
-  } else if (optionStr == "disabledummypsps") {
-    return options.disableDummyPsPs;
+  } else if (optionStr == "disablepostdummyevalhelper") {
+    return options.disablePostDummyEvalHelper;
   } else if (optionStr == "disableStdoutRedirection") {
     return options.disableStdoutRedirection;
   } else {
@@ -85,8 +85,8 @@ void Debugger::setDebuggerOption(const HPHP::String& option, bool value) {
     options.notifyOnBpCalibration = value;
   } else if (optionStr == "disableuniquevarref") {
     options.disableUniqueVarRef = value;
-  } else if (optionStr == "disabledummypsps") {
-    options.disableDummyPsPs = value;
+  } else if (optionStr == "disablepostdummyevalhelper") {
+    options.disablePostDummyEvalHelper = value;
   } else if (optionStr == "disableStdoutRedirection") {
     options.disableStdoutRedirection = value;
   } else {
@@ -107,14 +107,14 @@ void Debugger::setDebuggerOptions(DebuggerOptions options) {
       "warnOnInterceptedFunctions: %s\n"
       "notifyOnBpCalibration: %s\n"
       "disableUniqueVarRef: %s\n"
-      "disableDummyPsPs: %s\n"
+      "disablePostDummyEvalHelper: %s\n"
       "maxReturnedStringLength: %d\n"
       "disableStdoutRedirection: %s\n",
     options.showDummyOnAsyncPause ? "YES" : "NO",
     options.warnOnInterceptedFunctions ? "YES" : "NO",
     options.notifyOnBpCalibration ? "YES" : "NO",
     options.disableUniqueVarRef ? "YES" : "NO",
-    options.disableDummyPsPs ? "YES" : "NO",
+    options.disablePostDummyEvalHelper ? "YES" : "NO",
     options.maxReturnedStringLength,
     options.disableStdoutRedirection ? "YES" : "NO"
   );

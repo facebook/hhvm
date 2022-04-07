@@ -15,6 +15,10 @@ endif ()
 include(ExternalProject)
 include(HPHPFunctions)
 
+if (CMAKE_OSX_SYSROOT)
+  set(ISYSROOT_FLAG -isysroot${CMAKE_OSX_SYSROOT})
+endif ()
+
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   LZ4_DOWNLOAD_ARGS
   SOURCE_URL "https://github.com/lz4/lz4/archive/v1.9.2.tar.gz"
@@ -23,7 +27,7 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   # lz4-v1.9.2 instead
   FILENAME_PREFIX "lz4-"
 )
-set(MAKE_ARGS MOREFLAGS=-fPIC)
+set(MAKE_ARGS CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} "MOREFLAGS=-fPIC ${ISYSROOT_FLAG}")
 ExternalProject_Add(
   bundled_lz4
   ${LZ4_DOWNLOAD_ARGS}

@@ -4439,7 +4439,26 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 .map(|hint| soften_hint(&user_attributes, hint));
             let kinds = p_kinds(&c.modifiers, env)?;
             let name = pos_name(&c.name, env)?;
-            let as_constraint = map_optional(&c.type_constraint, env, p_tconstraint_ty)?;
+            let as_constraint = {
+                let mut constraints = could_map(&c.type_constraints, env, p_tconstraint_ty)?;
+                if constraints.len() == 1 {
+                    constraints.pop()
+                } else {
+                    #[allow(clippy::manual_map)]
+                    // map doesn't allow moving out of borrowed constraints
+                    match constraints.first() {
+                        None => None, // no bounds
+                        Some(fst) => {
+                            // desugar multiple as constraints into an intersection type
+                            // e.g., `as num as T1` -> `as (num & T1)`
+                            Some(ast::Hint::new(
+                                fst.0.clone(),
+                                ast::Hint_::Hintersection(constraints),
+                            ))
+                        }
+                    }
+                }
+            };
             let span = p_pos(node, env);
             let has_abstract = kinds.has(modifier::ABSTRACT);
             let kind = if has_abstract {

@@ -546,7 +546,7 @@ pub struct TypeConstDeclarationChildren<'a, T, V> {
     pub type_keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub type_parameters: Syntax<'a, T, V>,
-    pub type_constraint: Syntax<'a, T, V>,
+    pub type_constraints: Syntax<'a, T, V>,
     pub equal: Syntax<'a, T, V>,
     pub type_specifier: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,

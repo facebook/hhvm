@@ -285,7 +285,7 @@ module type Syntax_S = sig
         type_const_type_keyword: t;
         type_const_name: t;
         type_const_type_parameters: t;
-        type_const_type_constraint: t;
+        type_const_type_constraints: t;
         type_const_equal: t;
         type_const_type_specifier: t;
         type_const_semicolon: t;

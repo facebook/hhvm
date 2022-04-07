@@ -1092,7 +1092,7 @@ where
         )
     }
 
-    pub fn parse_type_constraint_opt(&mut self) -> S::R {
+    pub(crate) fn parse_type_constraint_opt(&mut self) -> Option<S::R> {
         // SPEC
         // type-constraint:
         //   as  type-specifier
@@ -1102,9 +1102,14 @@ where
             let constraint_as = self.next_token();
             let constraint_as = S!(make_token, self, constraint_as);
             let constraint_type = self.parse_type_specifier(false, true);
-            S!(make_type_constraint, self, constraint_as, constraint_type)
+            Some(S!(
+                make_type_constraint,
+                self,
+                constraint_as,
+                constraint_type
+            ))
         } else {
-            S!(make_missing, self, self.pos())
+            None
         }
     }
 

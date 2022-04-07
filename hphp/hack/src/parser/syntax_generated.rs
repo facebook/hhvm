@@ -491,7 +491,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_type_const_declaration(_: &C, type_const_attribute_spec: Self, type_const_modifiers: Self, type_const_keyword: Self, type_const_type_keyword: Self, type_const_name: Self, type_const_type_parameters: Self, type_const_type_constraint: Self, type_const_equal: Self, type_const_type_specifier: Self, type_const_semicolon: Self) -> Self {
+    fn make_type_const_declaration(_: &C, type_const_attribute_spec: Self, type_const_modifiers: Self, type_const_keyword: Self, type_const_type_keyword: Self, type_const_name: Self, type_const_type_parameters: Self, type_const_type_constraints: Self, type_const_equal: Self, type_const_type_specifier: Self, type_const_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::TypeConstDeclaration(Box::new(TypeConstDeclarationChildren {
             type_const_attribute_spec,
             type_const_modifiers,
@@ -499,7 +499,7 @@ where
             type_const_type_keyword,
             type_const_name,
             type_const_type_parameters,
-            type_const_type_constraint,
+            type_const_type_constraints,
             type_const_equal,
             type_const_type_specifier,
             type_const_semicolon,
@@ -2233,14 +2233,14 @@ where
                 acc
             },
             SyntaxVariant::TypeConstDeclaration(x) => {
-                let TypeConstDeclarationChildren { type_const_attribute_spec, type_const_modifiers, type_const_keyword, type_const_type_keyword, type_const_name, type_const_type_parameters, type_const_type_constraint, type_const_equal, type_const_type_specifier, type_const_semicolon } = *x;
+                let TypeConstDeclarationChildren { type_const_attribute_spec, type_const_modifiers, type_const_keyword, type_const_type_keyword, type_const_name, type_const_type_parameters, type_const_type_constraints, type_const_equal, type_const_type_specifier, type_const_semicolon } = *x;
                 let acc = f(type_const_attribute_spec, acc);
                 let acc = f(type_const_modifiers, acc);
                 let acc = f(type_const_keyword, acc);
                 let acc = f(type_const_type_keyword, acc);
                 let acc = f(type_const_name, acc);
                 let acc = f(type_const_type_parameters, acc);
-                let acc = f(type_const_type_constraint, acc);
+                let acc = f(type_const_type_constraints, acc);
                 let acc = f(type_const_equal, acc);
                 let acc = f(type_const_type_specifier, acc);
                 let acc = f(type_const_semicolon, acc);
@@ -3716,7 +3716,7 @@ where
                  type_const_semicolon: ts.pop().unwrap(),
                  type_const_type_specifier: ts.pop().unwrap(),
                  type_const_equal: ts.pop().unwrap(),
-                 type_const_type_constraint: ts.pop().unwrap(),
+                 type_const_type_constraints: ts.pop().unwrap(),
                  type_const_type_parameters: ts.pop().unwrap(),
                  type_const_name: ts.pop().unwrap(),
                  type_const_type_keyword: ts.pop().unwrap(),
@@ -4933,7 +4933,7 @@ pub struct TypeConstDeclarationChildren<T, V> {
     pub type_const_type_keyword: Syntax<T, V>,
     pub type_const_name: Syntax<T, V>,
     pub type_const_type_parameters: Syntax<T, V>,
-    pub type_const_type_constraint: Syntax<T, V>,
+    pub type_const_type_constraints: Syntax<T, V>,
     pub type_const_equal: Syntax<T, V>,
     pub type_const_type_specifier: Syntax<T, V>,
     pub type_const_semicolon: Syntax<T, V>,
@@ -6551,7 +6551,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     3 => Some(&x.type_const_type_keyword),
                     4 => Some(&x.type_const_name),
                     5 => Some(&x.type_const_type_parameters),
-                    6 => Some(&x.type_const_type_constraint),
+                    6 => Some(&x.type_const_type_constraints),
                     7 => Some(&x.type_const_equal),
                     8 => Some(&x.type_const_type_specifier),
                     9 => Some(&x.type_const_semicolon),

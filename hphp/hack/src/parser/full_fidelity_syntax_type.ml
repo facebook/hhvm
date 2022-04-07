@@ -415,7 +415,7 @@ struct
         type_const_type_keyword: t;
         type_const_name: t;
         type_const_type_parameters: t;
-        type_const_type_constraint: t;
+        type_const_type_constraints: t;
         type_const_equal: t;
         type_const_type_specifier: t;
         type_const_semicolon: t;
@@ -1718,7 +1718,7 @@ struct
     type_const_type_keyword: Token.t value;
     type_const_name: Token.t value;
     type_const_type_parameters: type_parameters option value;
-    type_const_type_constraint: type_constraint option value;
+    type_const_type_constraints: type_constraint listesque value;
     type_const_equal: Token.t option value;
     type_const_type_specifier: specifier option value;
     type_const_semicolon: Token.t value;

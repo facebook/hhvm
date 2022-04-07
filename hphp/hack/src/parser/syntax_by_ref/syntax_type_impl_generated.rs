@@ -497,7 +497,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_type_const_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, keyword: Self, type_keyword: Self, name: Self, type_parameters: Self, type_constraint: Self, equal: Self, type_specifier: Self, semicolon: Self) -> Self {
+    fn make_type_const_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, keyword: Self, type_keyword: Self, name: Self, type_parameters: Self, type_constraints: Self, equal: Self, type_specifier: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::TypeConstDeclaration(ctx.get_arena().alloc(TypeConstDeclarationChildren {
             attribute_spec,
             modifiers,
@@ -505,7 +505,7 @@ where
             type_keyword,
             name,
             type_parameters,
-            type_constraint,
+            type_constraints,
             equal,
             type_specifier,
             semicolon,

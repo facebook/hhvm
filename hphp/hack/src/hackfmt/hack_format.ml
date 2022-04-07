@@ -755,7 +755,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           type_const_type_keyword = type_kw;
           type_const_name = name;
           type_const_type_parameters = type_params;
-          type_const_type_constraint = type_constraint;
+          type_const_type_constraints = type_constraints;
           type_const_equal = eq;
           type_const_type_specifier = type_spec;
           type_const_semicolon = semi;
@@ -772,8 +772,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           t env name;
           t env type_params;
-          when_present type_constraint space;
-          t env type_constraint;
+          handle_possible_list
+            env
+            ~before_each:(fun _ -> Space)
+            type_constraints;
           when_present eq space;
           t env eq;
           when_present type_spec (fun _ ->

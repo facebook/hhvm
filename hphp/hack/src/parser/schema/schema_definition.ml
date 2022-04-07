@@ -655,7 +655,7 @@ let schema : schema_node list =
           ("type_keyword", Token);
           ("name", Token);
           ("type_parameters", ZeroOrOne (Just "TypeParameters"));
-          ("type_constraint", ZeroOrOne (Just "TypeConstraint"));
+          ("type_constraints", ZeroOrMore (Just "TypeConstraint"));
           ("equal", ZeroOrOne Token);
           ("type_specifier", ZeroOrOne (Aggregate Specifier));
           ("semicolon", Token);

@@ -86,8 +86,9 @@ enum UnstableFeatures {
     Ifc,
     Readonly,
     Modules,
-    ContextAliasDeclaration,
     ClassConstDefault,
+    TypeConstMultipleBounds,
+    ContextAliasDeclaration,
     ContextAliasDeclarationShort,
     MethodTraitDiamond,
     UpcastExpression,
@@ -107,8 +108,9 @@ impl UnstableFeatures {
             UnstableFeatures::Readonly => Preview,
             UnstableFeatures::Modules => Unstable,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
-            UnstableFeatures::ClassConstDefault => Migration,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
+            UnstableFeatures::TypeConstMultipleBounds => Unstable,
+            UnstableFeatures::ClassConstDefault => Migration,
             UnstableFeatures::MethodTraitDiamond => Preview,
             UnstableFeatures::UpcastExpression => Unstable,
             UnstableFeatures::RequireClass => Unstable,
@@ -4000,6 +4002,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.invalid_modifier_errors("Type constants", node, |kind| kind == TokenKind::Abstract);
     }
 
+    fn type_const_bounds_errors(&mut self, node: S<'a>) {
+        if self.env.is_typechecker() {
+            // HackC & HHVM don't see bounds, so it's pointless to ban (then unban later)
+            if let TypeConstDeclaration(tc) = node.children {
+                let count = tc.type_constraints.iter_children().count();
+                if count > 1 {
+                    self.check_can_use_feature(node, &UnstableFeatures::TypeConstMultipleBounds);
+                }
+            }
+        }
+    }
+
     fn alias_errors(&mut self, node: S<'a>) {
         if let AliasDeclaration(ad) = &node.children {
             let attrs = &ad.attribute_spec;
@@ -5185,7 +5199,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
             ConstDeclaration(_) => self.class_constant_modifier_errors(node),
 
-            TypeConstDeclaration(_) => self.type_const_modifier_errors(node),
+            TypeConstDeclaration(_) => {
+                self.type_const_modifier_errors(node);
+                self.type_const_bounds_errors(node);
+            }
 
             AliasDeclaration(_) | ContextAliasDeclaration(_) => self.alias_errors(node),
             ConstantDeclarator(_) => self.const_decl_errors(node),

@@ -5176,7 +5176,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         _type_keyword: Self::R,
         name: Self::R,
         _type_parameters: Self::R,
-        as_constraint: Self::R,
+        constraints: Self::R,
         _equal: Self::R,
         type_: Self::R,
         _semicolon: Self::R,
@@ -5185,14 +5185,42 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let has_abstract_keyword = modifiers
             .iter()
             .any(|node| node.is_token(TokenKind::Abstract));
-        let as_constraint = match as_constraint {
-            Node::TypeConstraint(innards) => self.node_to_ty(innards.1),
-            _ => None,
+        let reduce_bounds = |mut constraints: Vec<'a, &Ty<'a>>| {
+            if constraints.len() == 1 {
+                constraints.pop().map(|ty| self.alloc(ty.clone()))
+            } else {
+                #[allow(clippy::manual_map)]
+                // map doesn't allow moving out of borrowed constraints
+                match constraints.first() {
+                    None => None, // no bounds
+                    Some(fst) => Some(
+                        self.alloc(Ty(fst.0, Ty_::Tintersection(constraints.into_bump_slice()))),
+                    ),
+                }
+            }
         };
         let type_ = self.node_to_ty(type_);
         let kind = if has_abstract_keyword {
-            // Abstract type constant:
-            //     abstract const type T [as X] [super Y] [= Z];
+            // Abstract type constant in EBNF-like notation:
+            //     abstract const type T {as X} [= Z];
+            let as_constraint = reduce_bounds(constraints.iter().fold(
+                Vec::new_in(self.arena),
+                |mut tys, constraint| {
+                    if let Node::TypeConstraint(&(kind, hint)) = constraint {
+                        use ConstraintKind::*;
+                        match kind {
+                            ConstraintAs => {
+                                if let Some(ty) = self.node_to_ty(hint) {
+                                    tys.push(ty);
+                                }
+                            }
+                            ConstraintSuper => (/* TODO(leoo) implement later */),
+                            _ => (),
+                        };
+                    };
+                    tys
+                },
+            ));
             Typeconst::TCAbstract(self.alloc(AbstractTypeconst {
                 as_constraint,
                 super_constraint: None,

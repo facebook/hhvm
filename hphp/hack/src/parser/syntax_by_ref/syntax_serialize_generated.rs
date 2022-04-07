@@ -425,7 +425,7 @@ SyntaxVariant::ConstantDeclarator (ConstantDeclaratorChildren{name,initializer} 
 ss.serialize_field("constant_declarator_initializer", &self.with(initializer))?;
       ss.end()
 } 
-SyntaxVariant::TypeConstDeclaration (TypeConstDeclarationChildren{attribute_spec,modifiers,keyword,type_keyword,name,type_parameters,type_constraint,equal,type_specifier,semicolon} ) => {
+SyntaxVariant::TypeConstDeclaration (TypeConstDeclarationChildren{attribute_spec,modifiers,keyword,type_keyword,name,type_parameters,type_constraints,equal,type_specifier,semicolon} ) => {
       let mut ss = s.serialize_struct("", 11)?;
       ss.serialize_field("kind", "type_const_declaration")?;
       ss.serialize_field("type_const_attribute_spec", &self.with(attribute_spec))?;
@@ -434,7 +434,7 @@ ss.serialize_field("type_const_keyword", &self.with(keyword))?;
 ss.serialize_field("type_const_type_keyword", &self.with(type_keyword))?;
 ss.serialize_field("type_const_name", &self.with(name))?;
 ss.serialize_field("type_const_type_parameters", &self.with(type_parameters))?;
-ss.serialize_field("type_const_type_constraint", &self.with(type_constraint))?;
+ss.serialize_field("type_const_type_constraints", &self.with(type_constraints))?;
 ss.serialize_field("type_const_equal", &self.with(equal))?;
 ss.serialize_field("type_const_type_specifier", &self.with(type_specifier))?;
 ss.serialize_field("type_const_semicolon", &self.with(semicolon))?;

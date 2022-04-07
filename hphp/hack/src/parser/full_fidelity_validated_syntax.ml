@@ -2688,10 +2688,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             validate_option_with validate_specifier x.type_const_type_specifier;
           type_const_equal =
             validate_option_with validate_token x.type_const_equal;
-          type_const_type_constraint =
-            validate_option_with
+          type_const_type_constraints =
+            validate_list_with
               validate_type_constraint
-              x.type_const_type_constraint;
+              x.type_const_type_constraints;
           type_const_type_parameters =
             validate_option_with
               validate_type_parameters
@@ -2727,10 +2727,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with
                 invalidate_type_parameters
                 x.type_const_type_parameters;
-            type_const_type_constraint =
-              invalidate_option_with
+            type_const_type_constraints =
+              invalidate_list_with
                 invalidate_type_constraint
-                x.type_const_type_constraint;
+                x.type_const_type_constraints;
             type_const_equal =
               invalidate_option_with invalidate_token x.type_const_equal;
             type_const_type_specifier =

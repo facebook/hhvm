@@ -474,7 +474,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     3 => Some(&x.type_keyword),
                     4 => Some(&x.name),
                     5 => Some(&x.type_parameters),
-                    6 => Some(&x.type_constraint),
+                    6 => Some(&x.type_constraints),
                     7 => Some(&x.equal),
                     8 => Some(&x.type_specifier),
                     9 => Some(&x.semicolon),

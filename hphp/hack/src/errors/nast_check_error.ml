@@ -456,8 +456,8 @@ let case_fallthrough switch_pos case_pos next_pos =
 
       [
         Quickfix.make
-          ~title:"Change to test"
-          ~new_text:"\t// UNCHANGED\n  "
+          ~title:"Annotate fallthrough case with // FALLTHROUGH comment"
+          ~new_text:"  // FALLTHROUGH\n  "
           new_pos;
       ]
   in

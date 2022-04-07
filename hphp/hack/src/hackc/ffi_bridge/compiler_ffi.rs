@@ -18,6 +18,7 @@ use decl_provider::{
     DeclProvider,
 };
 use facts_rust::facts;
+use hhbc::hackc_unit;
 use no_pos_hash::position_insensitive_hash;
 use oxidized::file_info::NameType;
 use oxidized::relative_path::{Prefix, RelativePath};

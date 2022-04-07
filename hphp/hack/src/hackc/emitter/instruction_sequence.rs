@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::{BumpSliceMut, Slice, Str};
-use hhbc_ast::{
+use hhbc::{
     AdataId, BareThisOp, ClassId, ClassNum, CollectionType, ConstId, ContCheckOp, FCallArgs,
     FatalOp, FunctionId, IncDecOp, InitPropOp, Instruct, IsLogAsDynamicCallOp, IsTypeOp, IterArgs,
     IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp,

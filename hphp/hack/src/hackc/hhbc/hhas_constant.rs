@@ -7,9 +7,8 @@
 // unlike formal parameters and return types. We might consider fixing this.
 // Also interestingly, abstract constants are not emitted at all.
 
+use crate::{hhbc_id::constant::ConstType, typed_value::TypedValue};
 use ffi::Maybe;
-use hhbc_id::constant::ConstType;
-use typed_value::TypedValue;
 
 #[derive(Debug)]
 #[repr(C)]

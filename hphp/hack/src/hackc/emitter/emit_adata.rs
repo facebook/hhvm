@@ -3,14 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use adata_state::AdataState;
 use env::emitter::Emitter;
 use error::{Error, Result};
 use ffi::Str;
-use hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX};
+use hhbc::{
+    adata_state::AdataState,
+    hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX},
+    hhbc_id,
+    typed_value::TypedValue,
+    ClassId,
+};
 use instruction_sequence::{instr, InstrSeq};
 use options::HhvmFlags;
-use typed_value::TypedValue;
 
 pub fn typed_value_to_instr<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
@@ -24,7 +28,7 @@ pub fn typed_value_to_instr<'arena, 'decl>(
         TypedValue::Int(i) => Ok(instr::int(*i)),
         TypedValue::String(s) => Ok(instr::string(e.alloc, s.unsafe_as_str())),
         TypedValue::LazyClass(s) => {
-            let classid: hhbc_ast::ClassId<'arena> =
+            let classid: ClassId<'arena> =
                 hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
             Ok(instr::lazyclass(classid))
         }

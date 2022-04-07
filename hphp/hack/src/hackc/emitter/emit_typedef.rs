@@ -5,14 +5,13 @@
 
 use env::emitter::Emitter;
 use error::Result;
-use hhas_pos::HhasSpan;
-use hhas_type::HhasTypeInfo;
-use hhas_typedef::HhasTypedef;
-use hhbc_id::class::ClassType;
+use hhbc::{
+    hhas_pos::HhasSpan, hhas_type::HhasTypeInfo, hhas_typedef::HhasTypedef,
+    hhbc_id::class::ClassType, typed_value::TypedValue,
+};
 use hhvm_types_ffi::ffi::Attr;
 use oxidized::{aast_defs::Hint, ast};
 use std::collections::BTreeMap;
-use typed_value::TypedValue;
 
 pub fn emit_typedefs_from_program<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,

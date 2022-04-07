@@ -5,6 +5,7 @@
 use class_expr::ClassExpr;
 use env::emitter::Emitter;
 use ffi::{Pair, Str};
+use hhbc::{hhbc_id, typed_value::TypedValue};
 use hhbc_string_utils as string_utils;
 use indexmap::IndexMap;
 use itertools::Itertools;
@@ -16,7 +17,6 @@ use oxidized::{
     pos::Pos,
 };
 use std::{collections::hash_map::RandomState, fmt};
-use typed_value::TypedValue;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {

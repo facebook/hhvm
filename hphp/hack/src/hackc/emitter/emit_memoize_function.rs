@@ -3,27 +3,29 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_scope::{self as ast_scope, Scope, ScopeItem};
+use ast_scope::{self, Scope, ScopeItem};
 use emit_pos::emit_pos_then;
 use env::{emitter::Emitter, Env};
 use error::Result;
 use ffi::{Slice, Str};
-use hhas_attribute::*;
-use hhas_body::HhasBody;
-use hhas_coeffects::HhasCoeffects;
-use hhas_function::{HhasFunction, HhasFunctionFlags};
-use hhas_param::HhasParam;
-use hhas_pos::HhasSpan;
-use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FCallArgs, FCallArgsFlags, Label, Local, LocalRange};
-use hhbc_id::function;
+use hhbc::{
+    hhas_attribute::{self, HhasAttribute},
+    hhas_body::HhasBody,
+    hhas_coeffects::HhasCoeffects,
+    hhas_function::{HhasFunction, HhasFunctionFlags},
+    hhas_param::HhasParam,
+    hhas_pos::HhasSpan,
+    hhas_type::HhasTypeInfo,
+    hhbc_id::function,
+    typed_value::TypedValue,
+    FCallArgs, FCallArgsFlags, Label, Local, LocalRange,
+};
 use hhbc_string_utils::reified;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options, RepoFlags};
 use oxidized::{ast as T, pos::Pos};
-use typed_value::TypedValue;
 
 pub fn is_interceptable(opts: &Options) -> bool {
     opts.hhvm
@@ -40,17 +42,24 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
 ) -> Attr {
     let f = &fd.fun;
     let is_systemlib = emitter.systemlib();
-    let is_dyn_call = is_systemlib || (has_dynamically_callable(user_attrs) && !is_memoize_impl);
-    let is_prov_skip_frame = has_provenance_skip_frame(user_attrs);
-    let is_meth_caller = has_meth_caller(user_attrs);
+    let is_dyn_call =
+        is_systemlib || (hhas_attribute::has_dynamically_callable(user_attrs) && !is_memoize_impl);
+    let is_prov_skip_frame = hhas_attribute::has_provenance_skip_frame(user_attrs);
+    let is_meth_caller = hhas_attribute::has_meth_caller(user_attrs);
 
     let mut attrs = Attr::AttrNone;
     attrs.set(Attr::AttrBuiltin, is_meth_caller | is_systemlib);
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_call);
     attrs.set(Attr::AttrInterceptable, is_interceptable(emitter.options()));
-    attrs.set(Attr::AttrIsFoldable, has_foldable(user_attrs));
+    attrs.set(
+        Attr::AttrIsFoldable,
+        hhas_attribute::has_foldable(user_attrs),
+    );
     attrs.set(Attr::AttrIsMethCaller, is_meth_caller);
-    attrs.set(Attr::AttrNoInjection, is_no_injection(user_attrs));
+    attrs.set(
+        Attr::AttrNoInjection,
+        hhas_attribute::is_no_injection(user_attrs),
+    );
     attrs.set(Attr::AttrPersistent, is_systemlib);
     attrs.set(Attr::AttrProvenanceSkipFrame, is_prov_skip_frame);
     attrs.set(Attr::AttrReadonlyReturn, f.readonly_ret.is_some());

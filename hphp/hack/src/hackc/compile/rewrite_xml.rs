@@ -1,6 +1,6 @@
 use env::emitter::Emitter;
 use error::{Error, Result};
-use hhbc_id::class;
+use hhbc::hhbc_id::class;
 use naming_special_names_rust::pseudo_consts;
 use oxidized::{
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},

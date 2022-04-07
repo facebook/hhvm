@@ -8,16 +8,19 @@ use emit_type_hint::Kind;
 use env::{emitter::Emitter, Env};
 use error::Result;
 use ffi::{Maybe, Slice, Str};
-use hhas_coeffects::HhasCoeffects;
-use hhas_constant::HhasConstant;
-use hhas_function::{HhasFunction, HhasFunctionFlags};
-use hhas_pos::HhasSpan;
-use hhbc_id::{constant, function};
+use hhbc::{
+    hhas_coeffects::HhasCoeffects,
+    hhas_constant::HhasConstant,
+    hhas_function::{HhasFunction, HhasFunctionFlags},
+    hhas_pos::HhasSpan,
+    hhbc_id,
+    hhbc_id::{constant, function},
+    typed_value::TypedValue,
+};
 use hhbc_string_utils::strip_global_ns;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq};
 use oxidized::ast;
-use typed_value::TypedValue;
 
 fn emit_constant_cinit<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,

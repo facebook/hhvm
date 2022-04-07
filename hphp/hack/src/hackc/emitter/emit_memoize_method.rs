@@ -3,28 +3,30 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_scope::{self as ast_scope, Scope, ScopeItem};
+use ast_scope::{Scope, ScopeItem};
 use bitflags::bitflags;
 use emit_method::get_attrs_for_method;
 use emit_pos::emit_pos_then;
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use ffi::{Slice, Str};
-use hhas_attribute::deprecation_info;
-use hhas_body::HhasBody;
-use hhas_coeffects::HhasCoeffects;
-use hhas_method::{HhasMethod, HhasMethodFlags};
-use hhas_param::HhasParam;
-use hhas_pos::HhasSpan;
-use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FCallArgs, FCallArgsFlags, Label, Local, LocalRange, SpecialClsRef, Visibility};
-use hhbc_id::{class, method};
+use hhbc::{
+    hhas_attribute::deprecation_info,
+    hhas_body::HhasBody,
+    hhas_coeffects::HhasCoeffects,
+    hhas_method::{HhasMethod, HhasMethodFlags},
+    hhas_param::HhasParam,
+    hhas_pos::HhasSpan,
+    hhas_type::HhasTypeInfo,
+    hhbc_id::{class, method},
+    typed_value::TypedValue,
+    FCallArgs, FCallArgsFlags, Label, Local, LocalRange, SpecialClsRef, Visibility,
+};
 use hhbc_string_utils::reified;
 use instruction_sequence::{instr, InstrSeq};
 use naming_special_names_rust::{members, user_attributes as ua};
 use options::HhvmFlags;
 use oxidized::{ast as T, pos::Pos};
-use typed_value::TypedValue;
 
 /// Precomputed information required for generation of memoized methods
 pub struct MemoizeInfo<'arena> {

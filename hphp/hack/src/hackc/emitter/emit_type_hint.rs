@@ -4,8 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 use error::{Error, Result};
 use ffi::{Maybe, Maybe::*, Str};
-use hhas_type::{constraint, HhasTypeInfo};
-use hhbc_id::class;
+use hhbc::{
+    hhas_type::{constraint, HhasTypeInfo},
+    hhbc_id::class,
+};
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use naming_special_names_rust::{classes, typehints};

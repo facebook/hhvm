@@ -13,26 +13,29 @@ use crate::{
     },
 };
 use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
-use hackc_unit::HackCUnit;
 use hash::HashSet;
-use hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
-use hhas_attribute::{self, HhasAttribute};
-use hhas_body::{HhasBody, HhasBodyEnv};
-use hhas_class::{self, HhasClass};
-use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
-use hhas_constant::HhasConstant;
-use hhas_function::HhasFunction;
-use hhas_method::{HhasMethod, HhasMethodFlags};
-use hhas_module::HhasModule;
-use hhas_param::HhasParam;
-use hhas_pos::{HhasPos, HhasSpan};
-use hhas_property::HhasProperty;
-use hhas_symbol_refs::{HhasSymbolRefs, IncludePath};
-use hhas_type::HhasTypeInfo;
-use hhas_type_const::HhasTypeConstant;
-use hhas_typedef::HhasTypedef;
-use hhbc_ast::{FCallArgs, FatalOp, Instruct, Label, Pseudo};
-use hhbc_id::class::ClassType;
+use hhbc::{
+    hackc_unit::HackCUnit,
+    hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX},
+    hhas_attribute::HhasAttribute,
+    hhas_body::{HhasBody, HhasBodyEnv},
+    hhas_class::{self, HhasClass},
+    hhas_coeffects::{HhasCoeffects, HhasCtxConstant},
+    hhas_constant::HhasConstant,
+    hhas_function::HhasFunction,
+    hhas_method::{HhasMethod, HhasMethodFlags},
+    hhas_module::HhasModule,
+    hhas_param::HhasParam,
+    hhas_pos::{HhasPos, HhasSpan},
+    hhas_property::HhasProperty,
+    hhas_symbol_refs::{HhasSymbolRefs, IncludePath},
+    hhas_type::HhasTypeInfo,
+    hhas_type_const::HhasTypeConstant,
+    hhas_typedef::HhasTypedef,
+    hhbc_id::class::ClassType,
+    typed_value::TypedValue,
+    FCallArgs, FatalOp, Instruct, Label, Pseudo,
+};
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
@@ -46,7 +49,6 @@ use std::{
     path::Path,
     write,
 };
-use typed_value::TypedValue;
 use write_bytes::write_bytes;
 
 macro_rules! write_if {

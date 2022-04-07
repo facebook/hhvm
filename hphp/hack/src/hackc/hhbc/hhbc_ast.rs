@@ -3,12 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-mod opcodes;
+use crate::{hhbc_id, typed_value::TypedValue};
+use ffi::{Slice, Str};
 
-use ffi::{BumpSliceMut, Slice, Str};
-use typed_value::TypedValue;
-
-pub use opcodes::Opcode;
+pub use crate::opcodes::Opcode;
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
@@ -181,11 +179,8 @@ pub struct IterArgs {
     pub val_id: Local,
 }
 
-pub type ClassrefId = isize;
-
 /// Conventionally this is "A_" followed by an integer
 pub type AdataId<'arena> = Str<'arena>;
-pub type ParamLocations<'arena> = Slice<'arena, isize>;
 
 #[derive(Clone, Copy, Debug)]
 #[repr(C)]
@@ -239,6 +234,7 @@ pub enum Visibility {
     Protected,
     Internal,
 }
+
 impl std::convert::From<oxidized::ast_defs::Visibility> for Visibility {
     fn from(k: oxidized::ast_defs::Visibility) -> Self {
         use oxidized::ast_defs;
@@ -250,6 +246,7 @@ impl std::convert::From<oxidized::ast_defs::Visibility> for Visibility {
         }
     }
 }
+
 impl AsRef<str> for Visibility {
     fn as_ref(&self) -> &str {
         match self {
@@ -257,6 +254,17 @@ impl AsRef<str> for Visibility {
             Self::Public => "public",
             Self::Protected => "protected",
             Self::Internal => "internal",
+        }
+    }
+}
+
+impl From<Visibility> for hhvm_types_ffi::Attr {
+    fn from(k: Visibility) -> Self {
+        match k {
+            Visibility::Private => Self::AttrPrivate,
+            Visibility::Public => Self::AttrPublic,
+            Visibility::Protected => Self::AttrProtected,
+            Visibility::Internal => Self::AttrPublic,
         }
     }
 }

@@ -6,8 +6,7 @@ use ast_scope::Scope;
 use env::emitter::Emitter;
 use error::{Error, Result};
 use ffi::{Maybe::Just, Slice};
-use hhas_body::HhasBody;
-use hhbc_ast::Local;
+use hhbc::{hhas_body::HhasBody, Local};
 use instruction_sequence::{instr, InstrSeq};
 use oxidized::{aast, ast, pos::Pos};
 

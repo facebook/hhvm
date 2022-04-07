@@ -3,18 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_body::AstBody;
+use crate::{ast_body::AstBody, hhas_param::HhasParam, hhbc_ast::Label};
 use ffi::{Just, Maybe};
 use hash::IndexSet;
-use hhas_param::HhasParam;
-use hhbc_ast::Label;
 use naming_special_names_rust::{emitter_special_functions, special_idents};
 use oxidized::{
     aast,
     aast_visitor::{visit, AstParams, Node, Visitor},
     ast::*,
 };
-use unique_id_builder::SSet;
+
+type SSet = std::collections::BTreeSet<String>;
 
 struct DeclvarVisitorContext<'a> {
     explicit_use_set_opt: Option<&'a SSet>,

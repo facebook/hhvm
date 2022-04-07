@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_body::AstBody;
 use env::emitter::Emitter;
 use error::{Error, Result};
 use hack_macro::hack_stmt;
+use hhbc::{decl_vars, AstBody};
 use ocamlrep::rc::RcOc;
 use options::CompilerFlags;
 use oxidized::{

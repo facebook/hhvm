@@ -6,7 +6,7 @@
 use crate::print;
 use ffi::Str;
 use hash::HashSet;
-use hhbc_ast::{
+use hhbc::{
     AdataId, BareThisOp, ClassId, ClassNum, CollectionType, ConstId, ContCheckOp, FCallArgs,
     FatalOp, FunctionId, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId,
     Label, Local, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp, ObjMethodOp,

@@ -8,13 +8,9 @@ edition = "2021"
 path = "../../emit_adata.rs"
 
 [dependencies]
-adata_state = { path = "../../../hhbc/cargo/adata_state" }
 env = { path = "../env" }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
-hhas_adata = { path = "../../../hhbc/cargo/hhas_adata" }
-hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
-hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 instruction_sequence = { path = "../instruction_sequence" }
 options = { path = "../../../compile/cargo/options" }
-typed_value = { path = "../../../hhbc/cargo/typed_value" }

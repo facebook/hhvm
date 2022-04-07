@@ -9,5 +9,4 @@ path = "../../emit_symbol_refs.rs"
 
 [dependencies]
 env = { path = "../env" }
-hhas_symbol_refs = { path = "../../../hhbc/cargo/hhas_symbol_refs" }
-hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }

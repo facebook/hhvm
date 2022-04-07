@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::{
+    hhas_attribute::HhasAttribute, hhas_type::HhasTypeInfo, hhbc_ast::Visibility, hhbc_id,
+    typed_value::TypedValue,
+};
 use ffi::{Maybe, Slice, Str};
-use hhas_attribute::HhasAttribute;
-use hhas_type::HhasTypeInfo;
-use hhbc_ast::Visibility;
 use hhvm_types_ffi::ffi::Attr;
-use typed_value::TypedValue;
 
 #[derive(Debug)]
 #[repr(C)]

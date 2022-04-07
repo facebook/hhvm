@@ -6,16 +6,18 @@
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use ffi::Maybe::*;
-use hhas_property::HhasProperty;
-use hhas_type::{constraint, HhasTypeInfo};
-use hhbc_ast::InitPropOp;
-use hhbc_id::prop;
+use hhbc::{
+    hhas_property::HhasProperty,
+    hhas_type::{constraint, HhasTypeInfo},
+    hhbc_id::prop,
+    typed_value::TypedValue,
+    InitPropOp, Visibility,
+};
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq};
 use naming_special_names_rust::{pseudo_consts, user_attributes as ua};
 use oxidized::{aast_defs, ast, ast_defs, doc_comment};
-use typed_value::TypedValue;
 
 pub struct FromAstArgs<'ast> {
     pub user_attributes: &'ast [ast::UserAttribute],
@@ -185,7 +187,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
         type_info,
         initial_value: initial_value.into(),
         flags: hhas_property_flags,
-        visibility: hhbc_ast::Visibility::from(args.visibility),
+        visibility: Visibility::from(args.visibility),
         doc_comment: args
             .doc_comment
             .map(|pstr| ffi::Str::from(alloc.alloc_str(&pstr.0.1)))

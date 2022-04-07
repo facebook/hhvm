@@ -6,7 +6,6 @@ mod emit_statement;
 mod reified_generics_helpers;
 mod try_finally_rewriter;
 
-use ast_body::AstBody;
 use ast_scope::{Scope, ScopeItem};
 use class_expr::ClassExpr;
 use emit_pos::emit_pos;
@@ -14,18 +13,21 @@ use emit_statement::emit_final_stmts;
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use hash::HashSet;
-use hhas_body::{HhasBody, HhasBodyEnv};
-use hhas_param::HhasParam;
-use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, ParamId, Pseudo};
-use hhbc_id::function;
+use hhbc::{
+    decl_vars,
+    hhas_body::{HhasBody, HhasBodyEnv},
+    hhas_param::HhasParam,
+    hhas_type::{self, HhasTypeInfo},
+    hhbc_id::function,
+    typed_value::TypedValue,
+    AstBody, FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, ParamId, Pseudo,
+};
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{instr, InstrSeq};
 use options::CompilerFlags;
 use reified_generics_helpers as RGH;
 use stack_limit::StackLimit;
 use statement_state::StatementState;
-use typed_value::TypedValue;
 
 use ocamlrep::rc::RcOc;
 use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};

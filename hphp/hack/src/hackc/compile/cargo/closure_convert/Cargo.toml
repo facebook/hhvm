@@ -8,16 +8,13 @@ edition = "2021"
 path = "../../closure_convert.rs"
 
 [dependencies]
-ast_body = { path = "../../../hhbc/cargo/ast_body" }
 bumpalo = { version = "3.8", features = ["collections"] }
-decl_vars = { path = "../../../hhbc/cargo/decl_vars" }
 env = { path = "../../../emitter/cargo/env" }
 error = { path = "../../../error/cargo/error" }
 global_state = { path = "../../../emitter/cargo/global_state" }
 hack_macro = { path = "../../../utils/cargo/hack_macro" }
 hash = { path = "../../../../utils/hash" }
-hhas_coeffects = { path = "../../../hhbc/cargo/hhas_coeffects" }
-hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 itertools = "0.10.3"
 naming_special_names_rust = { path = "../../../../naming" }

@@ -3,17 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_body::AstBody;
-use ast_scope::{self as ast_scope, Lambda, Scope, ScopeItem};
+use ast_scope::{Lambda, Scope, ScopeItem};
 use env::emitter::Emitter;
 use error::{Error, Result};
 use ffi::Slice;
-use hhas_attribute::*;
-use hhas_coeffects::HhasCoeffects;
-use hhas_method::{HhasMethod, HhasMethodFlags};
-use hhas_pos::HhasSpan;
-use hhbc_ast::Visibility;
-use hhbc_id::method;
+use hhbc::{
+    hhas_attribute::{self, HhasAttribute},
+    hhas_coeffects::HhasCoeffects,
+    hhas_method::{HhasMethod, HhasMethodFlags},
+    hhas_pos::HhasSpan,
+    hhbc_id::method,
+    AstBody, Visibility,
+};
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::instr;
@@ -44,14 +45,15 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     is_memoize_impl: bool,
 ) -> Attr {
     let is_abstract = class.kind.is_cinterface() || method.abstract_;
-    let is_dyn_callable =
-        emitter.systemlib() || (has_dynamically_callable(user_attrs) && !is_memoize_impl);
+    let is_dyn_callable = emitter.systemlib()
+        || (hhas_attribute::has_dynamically_callable(user_attrs) && !is_memoize_impl);
     let is_interceptable = is_method_interceptable(emitter.options());
     let is_native_opcode_impl = hhas_attribute::is_native_opcode_impl(user_attrs);
     let is_no_injection = hhas_attribute::is_no_injection(user_attrs);
-    let is_prov_skip_frame = has_provenance_skip_frame(user_attrs);
+    let is_prov_skip_frame = hhas_attribute::has_provenance_skip_frame(user_attrs);
     let is_readonly_return = method.readonly_ret.is_some();
-    let is_unique = emitter.systemlib() && has_native(user_attrs) && !is_native_opcode_impl;
+    let is_unique =
+        emitter.systemlib() && hhas_attribute::has_native(user_attrs) && !is_native_opcode_impl;
 
     let mut attrs = Attr::AttrNone;
     attrs.add(Attr::from(visibility));
@@ -60,7 +62,10 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_callable);
     attrs.set(Attr::AttrFinal, method.final_);
     attrs.set(Attr::AttrInterceptable, is_interceptable);
-    attrs.set(Attr::AttrIsFoldable, has_foldable(user_attrs));
+    attrs.set(
+        Attr::AttrIsFoldable,
+        hhas_attribute::has_foldable(user_attrs),
+    );
     attrs.set(Attr::AttrNoInjection, is_no_injection);
     attrs.set(Attr::AttrPersistent, is_unique);
     attrs.set(Attr::AttrReadonlyReturn, is_readonly_return);

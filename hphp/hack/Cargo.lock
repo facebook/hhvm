@@ -38,15 +38,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "adata_state"
-version = "0.0.0"
-dependencies = [
- "hash",
- "hhas_adata",
- "typed_value",
-]
-
-[[package]]
 name = "adler"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -164,18 +155,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "ast_body"
-version = "0.0.0"
-dependencies = [
- "oxidized",
-]
-
-[[package]]
 name = "ast_scope"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "hhas_coeffects",
+ "hhbc",
  "oxidized",
 ]
 
@@ -291,26 +275,8 @@ dependencies = [
  "env",
  "escaper",
  "ffi",
- "hackc_unit",
  "hash",
- "hhas_adata",
- "hhas_attribute",
- "hhas_body",
- "hhas_class",
- "hhas_coeffects",
- "hhas_constant",
- "hhas_function",
- "hhas_method",
- "hhas_module",
- "hhas_param",
- "hhas_pos",
- "hhas_property",
- "hhas_symbol_refs",
- "hhas_type",
- "hhas_type_const",
- "hhas_typedef",
- "hhbc_ast",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
@@ -319,7 +285,6 @@ dependencies = [
  "oxidized",
  "print_opcode",
  "thiserror",
- "typed_value",
  "write_bytes",
 ]
 
@@ -405,7 +370,7 @@ version = "0.0.0"
 dependencies = [
  "ast_scope",
  "env",
- "hhbc_ast",
+ "hhbc",
  "hhbc_string_utils",
  "instruction_sequence",
  "naming_special_names_rust",
@@ -416,16 +381,13 @@ dependencies = [
 name = "closure_convert"
 version = "0.0.0"
 dependencies = [
- "ast_body",
  "bumpalo",
- "decl_vars",
  "env",
  "error",
  "global_state",
  "hack_macro",
  "hash",
- "hhas_coeffects",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "itertools 0.10.3",
  "naming_special_names_rust",
@@ -460,8 +422,7 @@ dependencies = [
  "emit_unit",
  "env",
  "error",
- "hackc_unit",
- "hhbc_ast",
+ "hhbc",
  "ocamlrep",
  "ocamlrep_derive",
  "options",
@@ -505,7 +466,7 @@ dependencies = [
  "direct_decl_parser",
  "facts_rust",
  "ffi",
- "hackc_unit",
+ "hhbc",
  "no_pos_hash",
  "ocamlrep",
  "options",
@@ -559,14 +520,13 @@ dependencies = [
  "class_expr",
  "env",
  "ffi",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "indexmap",
  "itertools 0.10.3",
  "naming_special_names_rust",
  "options",
  "oxidized",
- "typed_value",
 ]
 
 [[package]]
@@ -858,20 +818,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "decl_vars"
-version = "0.0.0"
-dependencies = [
- "ast_body",
- "ffi",
- "hash",
- "hhas_param",
- "hhbc_ast",
- "naming_special_names_rust",
- "oxidized",
- "unique_id_builder",
-]
-
-[[package]]
 name = "depgraph"
 version = "0.0.0"
 dependencies = [
@@ -983,16 +929,12 @@ dependencies = [
 name = "emit_adata"
 version = "0.0.0"
 dependencies = [
- "adata_state",
  "env",
  "error",
  "ffi",
- "hhas_adata",
- "hhbc_ast",
- "hhbc_id",
+ "hhbc",
  "instruction_sequence",
  "options",
- "typed_value",
 ]
 
 [[package]]
@@ -1005,24 +947,20 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hhas_attribute",
- "hhbc_id",
+ "hhbc",
  "naming_special_names_rust",
  "oxidized",
- "typed_value",
 ]
 
 [[package]]
 name = "emit_body"
 version = "0.0.0"
 dependencies = [
- "ast_body",
  "ast_scope",
  "bitflags",
  "bumpalo",
  "class_expr",
  "decl_provider",
- "decl_vars",
  "emit_expression",
  "emit_fatal",
  "emit_param",
@@ -1034,11 +972,7 @@ dependencies = [
  "generator",
  "hack_macro",
  "hash",
- "hhas_body",
- "hhas_param",
- "hhas_type",
- "hhbc_ast",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "indexmap",
  "instruction_sequence",
@@ -1054,7 +988,6 @@ dependencies = [
  "scope",
  "stack_limit",
  "statement_state",
- "typed_value",
 ]
 
 [[package]]
@@ -1078,26 +1011,13 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hhas_attribute",
- "hhas_class",
- "hhas_coeffects",
- "hhas_constant",
- "hhas_method",
- "hhas_param",
- "hhas_pos",
- "hhas_property",
- "hhas_type",
- "hhas_type_const",
- "hhas_xhp_attribute",
- "hhbc_ast",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "hhvm_types_ffi",
  "instruction_sequence",
  "itertools 0.10.3",
  "naming_special_names_rust",
  "oxidized",
- "typed_value",
 ]
 
 [[package]]
@@ -1112,16 +1032,11 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hhas_coeffects",
- "hhas_constant",
- "hhas_function",
- "hhas_pos",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "hhvm_types_ffi",
  "instruction_sequence",
  "oxidized",
- "typed_value",
 ]
 
 [[package]]
@@ -1141,9 +1056,7 @@ dependencies = [
  "error",
  "ffi",
  "hash",
- "hhas_symbol_refs",
- "hhbc_ast",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "indexmap",
  "instruction_sequence",
@@ -1153,7 +1066,6 @@ dependencies = [
  "oxidized",
  "regex",
  "scope",
- "typed_value",
 ]
 
 [[package]]
@@ -1162,7 +1074,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "emit_pos",
- "hhbc_ast",
+ "hhbc",
  "instruction_sequence",
  "oxidized",
 ]
@@ -1174,7 +1086,7 @@ dependencies = [
  "emit_attribute",
  "env",
  "error",
- "hhas_attribute",
+ "hhbc",
  "itertools 0.10.3",
  "oxidized",
 ]
@@ -1183,7 +1095,6 @@ dependencies = [
 name = "emit_function"
 version = "0.0.0"
 dependencies = [
- "ast_body",
  "ast_scope",
  "emit_attribute",
  "emit_body",
@@ -1193,15 +1104,7 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hhas_attribute",
- "hhas_body",
- "hhas_coeffects",
- "hhas_function",
- "hhas_param",
- "hhas_pos",
- "hhas_type",
- "hhbc_ast",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "hhvm_types_ffi",
  "instruction_sequence",
@@ -1209,7 +1112,6 @@ dependencies = [
  "ocamlrep",
  "options",
  "oxidized",
- "typed_value",
 ]
 
 [[package]]
@@ -1219,8 +1121,7 @@ dependencies = [
  "bumpalo",
  "error",
  "ffi",
- "hhbc_ast",
- "hhbc_id",
+ "hhbc",
  "instruction_sequence",
  "oxidized",
 ]
@@ -1241,28 +1142,18 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hhas_attribute",
- "hhas_body",
- "hhas_coeffects",
- "hhas_method",
- "hhas_param",
- "hhas_pos",
- "hhas_type",
- "hhbc_ast",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "instruction_sequence",
  "naming_special_names_rust",
  "options",
  "oxidized",
- "typed_value",
 ]
 
 [[package]]
 name = "emit_method"
 version = "0.0.0"
 dependencies = [
- "ast_body",
  "ast_scope",
  "emit_attribute",
  "emit_body",
@@ -1272,12 +1163,7 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hhas_attribute",
- "hhas_coeffects",
- "hhas_method",
- "hhas_pos",
- "hhbc_ast",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "hhvm_types_ffi",
  "instruction_sequence",
@@ -1296,9 +1182,7 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hhas_module",
- "hhas_pos",
- "hhbc_id",
+ "hhbc",
  "oxidized",
 ]
 
@@ -1312,8 +1196,7 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hhas_body",
- "hhbc_ast",
+ "hhbc",
  "instruction_sequence",
  "oxidized",
 ]
@@ -1322,7 +1205,7 @@ dependencies = [
 name = "emit_opcodes"
 version = "0.0.0"
 dependencies = [
- "hhbc",
+ "hhbc-gen",
  "macro_test_util",
  "opcode_test_data",
  "proc-macro2",
@@ -1335,7 +1218,7 @@ name = "emit_opcodes_macro"
 version = "0.0.0"
 dependencies = [
  "emit_opcodes",
- "hhbc",
+ "hhbc-gen",
 ]
 
 [[package]]
@@ -1351,9 +1234,7 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hhas_param",
- "hhas_type",
- "hhbc_ast",
+ "hhbc",
  "hhbc_string_utils",
  "instruction_sequence",
  "oxidized",
@@ -1379,16 +1260,12 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hhas_property",
- "hhas_type",
- "hhbc_ast",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "hhvm_types_ffi",
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
- "typed_value",
 ]
 
 [[package]]
@@ -1396,8 +1273,7 @@ name = "emit_symbol_refs"
 version = "0.0.0"
 dependencies = [
  "env",
- "hhas_symbol_refs",
- "hhbc_id",
+ "hhbc",
 ]
 
 [[package]]
@@ -1407,12 +1283,11 @@ dependencies = [
  "bumpalo",
  "error",
  "ffi",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "naming_special_names_rust",
  "options",
  "oxidized",
- "typed_value",
 ]
 
 [[package]]
@@ -1422,8 +1297,7 @@ dependencies = [
  "bumpalo",
  "error",
  "ffi",
- "hhas_type",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "hhvm_types_ffi",
  "naming_special_names_rust",
@@ -1441,13 +1315,9 @@ dependencies = [
  "emit_type_hint",
  "env",
  "error",
- "hhas_pos",
- "hhas_type",
- "hhas_typedef",
- "hhbc_id",
+ "hhbc",
  "hhvm_types_ffi",
  "oxidized",
- "typed_value",
 ]
 
 [[package]]
@@ -1466,8 +1336,7 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hackc_unit",
- "hhbc_ast",
+ "hhbc",
  "ocamlrep",
  "oxidized",
 ]
@@ -1482,9 +1351,7 @@ dependencies = [
  "env",
  "error",
  "hack_macro",
- "hhas_method",
- "hhas_xhp_attribute",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "naming_special_names_rust",
  "oxidized",
@@ -1500,8 +1367,6 @@ checksum = "a357d28ed41a50f9c765dbfe56cbc04a64e53e5fc58ba79fbc34c10ef3df831f"
 name = "env"
 version = "0.0.0"
 dependencies = [
- "adata_state",
- "ast_body",
  "ast_scope",
  "bitflags",
  "bumpalo",
@@ -1509,8 +1374,7 @@ dependencies = [
  "ffi",
  "global_state",
  "hash",
- "hhas_symbol_refs",
- "hhbc_ast",
+ "hhbc",
  "indexmap",
  "naming_special_names_rust",
  "ocamlrep",
@@ -1684,7 +1548,7 @@ version = "0.0.0"
 name = "generator"
 version = "0.0.0"
 dependencies = [
- "ast_body",
+ "hhbc",
  "oxidized",
 ]
 
@@ -1731,7 +1595,7 @@ dependencies = [
 name = "global_state"
 version = "0.0.0"
 dependencies = [
- "hhas_coeffects",
+ "hhbc",
  "ocamlrep",
  "oxidized",
  "unique_id_builder",
@@ -1768,23 +1632,6 @@ dependencies = [
  "aast_parser_ffi",
  "positioned_by_ref_parser_ffi",
  "verify_parser_ffi",
-]
-
-[[package]]
-name = "hackc_unit"
-version = "0.0.0"
-dependencies = [
- "ffi",
- "hhas_adata",
- "hhas_attribute",
- "hhas_class",
- "hhas_constant",
- "hhas_function",
- "hhas_module",
- "hhas_pos",
- "hhas_symbol_refs",
- "hhas_typedef",
- "hhbc_ast",
 ]
 
 [[package]]
@@ -1977,216 +1824,30 @@ dependencies = [
 ]
 
 [[package]]
-name = "hhas_adata"
-version = "0.0.0"
-dependencies = [
- "ffi",
- "typed_value",
-]
-
-[[package]]
-name = "hhas_attribute"
-version = "0.0.0"
-dependencies = [
- "ffi",
- "naming_special_names_rust",
- "typed_value",
-]
-
-[[package]]
-name = "hhas_body"
-version = "0.0.0"
-dependencies = [
- "ffi",
- "hhas_param",
- "hhas_type",
- "hhbc_ast",
-]
-
-[[package]]
-name = "hhas_class"
-version = "0.0.0"
-dependencies = [
- "ffi",
- "hhas_attribute",
- "hhas_coeffects",
- "hhas_constant",
- "hhas_method",
- "hhas_pos",
- "hhas_property",
- "hhas_type",
- "hhas_type_const",
- "hhbc_id",
- "hhvm_types_ffi",
-]
-
-[[package]]
-name = "hhas_coeffects"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "ffi",
- "hhbc_string_utils",
- "naming_special_names_rust",
- "oxidized",
-]
-
-[[package]]
-name = "hhas_constant"
-version = "0.0.0"
-dependencies = [
- "ffi",
- "hhbc_id",
- "typed_value",
-]
-
-[[package]]
-name = "hhas_function"
+name = "hhbc"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "ffi",
- "hhas_attribute",
- "hhas_body",
- "hhas_coeffects",
- "hhas_param",
- "hhas_pos",
- "hhbc_id",
- "hhvm_types_ffi",
-]
-
-[[package]]
-name = "hhas_method"
-version = "0.0.0"
-dependencies = [
- "bitflags",
- "ffi",
- "hhas_attribute",
- "hhas_body",
- "hhas_coeffects",
- "hhas_pos",
- "hhbc_ast",
- "hhbc_id",
- "hhvm_types_ffi",
-]
-
-[[package]]
-name = "hhas_module"
-version = "0.0.0"
-dependencies = [
- "ffi",
- "hhas_attribute",
- "hhas_pos",
- "hhbc_id",
-]
-
-[[package]]
-name = "hhas_param"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "ffi",
- "hhas_attribute",
- "hhas_type",
- "hhbc_ast",
-]
-
-[[package]]
-name = "hhas_pos"
-version = "0.0.0"
-dependencies = [
- "oxidized",
-]
-
-[[package]]
-name = "hhas_property"
-version = "0.0.0"
-dependencies = [
- "ffi",
- "hhas_attribute",
- "hhas_type",
- "hhbc_ast",
- "hhbc_id",
- "hhvm_types_ffi",
- "typed_value",
-]
-
-[[package]]
-name = "hhas_symbol_refs"
-version = "0.0.0"
-dependencies = [
  "bstr",
  "bumpalo",
+ "emit_opcodes_macro",
  "ffi",
-]
-
-[[package]]
-name = "hhas_type"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "ffi",
+ "hash",
+ "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
-]
-
-[[package]]
-name = "hhas_type_const"
-version = "0.0.0"
-dependencies = [
- "ffi",
- "typed_value",
-]
-
-[[package]]
-name = "hhas_typedef"
-version = "0.0.0"
-dependencies = [
- "ffi",
- "hhas_attribute",
- "hhas_pos",
- "hhas_type",
- "hhbc_id",
- "hhvm_types_ffi",
- "typed_value",
-]
-
-[[package]]
-name = "hhas_xhp_attribute"
-version = "0.0.0"
-dependencies = [
+ "naming_special_names_rust",
  "oxidized",
+ "write_bytes",
 ]
 
 [[package]]
-name = "hhbc"
+name = "hhbc-gen"
 version = "0.0.0"
 dependencies = [
  "bitflags",
  "maplit",
  "once_cell",
-]
-
-[[package]]
-name = "hhbc_ast"
-version = "0.0.0"
-dependencies = [
- "emit_opcodes_macro",
- "ffi",
- "hhbc_id",
- "hhvm_hhbc_defs_ffi",
- "oxidized",
- "typed_value",
-]
-
-[[package]]
-name = "hhbc_id"
-version = "0.0.0"
-dependencies = [
- "bstr",
- "bumpalo",
- "ffi",
- "hhbc_string_utils",
- "write_bytes",
 ]
 
 [[package]]
@@ -2217,7 +1878,6 @@ version = "0.0.0"
 dependencies = [
  "cxx",
  "cxx-build",
- "hhbc_ast",
  "oxidized",
 ]
 
@@ -2280,7 +1940,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "ffi",
- "hhbc_ast",
+ "hhbc",
  "pretty_assertions",
 ]
 
@@ -2339,8 +1999,7 @@ version = "0.0.0"
 dependencies = [
  "env",
  "hash",
- "hhas_param",
- "hhbc_ast",
+ "hhbc",
  "instruction_sequence",
  "oxidized",
 ]
@@ -2732,7 +2391,7 @@ checksum = "2839e79665f131bdb5782e51f2c6c9599c133c6098982a54c794358bf432529c"
 name = "opcode_test_data"
 version = "0.0.0"
 dependencies = [
- "hhbc",
+ "hhbc-gen",
 ]
 
 [[package]]
@@ -3014,8 +2673,7 @@ dependencies = [
  "error",
  "escaper",
  "ffi",
- "hhas_body",
- "hhbc_id",
+ "hhbc",
  "hhbc_string_utils",
  "lazy_static",
  "naming_special_names_rust",
@@ -3038,7 +2696,7 @@ name = "print_opcode_impl"
 version = "0.0.0"
 dependencies = [
  "convert_case",
- "hhbc",
+ "hhbc-gen",
  "macro_test_util",
  "opcode_test_data",
  "proc-macro2",
@@ -3050,7 +2708,7 @@ dependencies = [
 name = "print_opcode_macro"
 version = "0.0.0"
 dependencies = [
- "hhbc",
+ "hhbc-gen",
  "print_opcode_impl",
 ]
 
@@ -3238,13 +2896,12 @@ dependencies = [
 name = "rewrite_program"
 version = "0.0.0"
 dependencies = [
- "ast_body",
  "closure_convert",
  "constant_folder",
- "decl_vars",
  "env",
  "error",
  "hack_macro",
+ "hhbc",
  "ocamlrep",
  "options",
  "oxidized",
@@ -3259,7 +2916,7 @@ dependencies = [
  "emit_symbol_refs",
  "env",
  "error",
- "hhbc_id",
+ "hhbc",
  "naming_special_names_rust",
  "oxidized",
 ]
@@ -3410,7 +3067,7 @@ version = "0.0.0"
 dependencies = [
  "env",
  "error",
- "hhbc_ast",
+ "hhbc",
  "instruction_sequence",
 ]
 
@@ -3728,14 +3385,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a31142970826733df8241ef35dc040ef98c679ab14d7c3e54d827099b3acecaa"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "typed_value"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "ffi",
 ]
 
 [[package]]

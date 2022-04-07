@@ -6,9 +6,7 @@
 use env::emitter::Emitter;
 use error::Result;
 use ffi::{Maybe, Slice, Str};
-use hhas_module::HhasModule;
-use hhas_pos::HhasSpan;
-use hhbc_id::class::ClassType;
+use hhbc::{hhas_module::HhasModule, hhas_pos::HhasSpan, hhbc_id::class::ClassType};
 use oxidized::ast;
 
 pub fn emit_module<'a, 'arena, 'decl>(

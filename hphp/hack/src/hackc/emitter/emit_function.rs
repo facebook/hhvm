@@ -5,17 +5,18 @@
 
 mod emit_memoize_function;
 
-use ast_body::AstBody;
-use ast_scope::{self as ast_scope, Scope, ScopeItem};
-use emit_body::{self as emit_body};
+use ast_scope::{self, Scope, ScopeItem};
 use env::emitter::Emitter;
 use error::Result;
 use ffi::{Slice, Str};
-use hhas_attribute::{self as hhas_attribute, HhasAttribute};
-use hhas_coeffects::HhasCoeffects;
-use hhas_function::{self as hhas_function, HhasFunction};
-use hhas_pos::HhasSpan;
-use hhbc_id::{class::ClassType, function::FunctionType};
+use hhbc::{
+    hhas_attribute::{self, HhasAttribute},
+    hhas_coeffects::HhasCoeffects,
+    hhas_function::HhasFunction,
+    hhas_pos::HhasSpan,
+    hhbc_id::{class::ClassType, function::FunctionType},
+    AstBody,
+};
 use instruction_sequence::instr;
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
@@ -26,7 +27,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
     fd: &'a ast::FunDef,
 ) -> Result<Vec<HhasFunction<'arena>>> {
     use ast_defs::FunKind;
-    use hhas_function::HhasFunctionFlags;
+    use hhbc::hhas_function::HhasFunctionFlags;
 
     let alloc = e.alloc;
     let f = &fd.fun;

@@ -8,4 +8,4 @@ edition = "2021"
 path = "../../unique_id_builder.rs"
 
 [dependencies]
-ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
+ast_scope = { path = "../../../emitter/cargo/ast_scope" }

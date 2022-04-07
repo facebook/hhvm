@@ -19,7 +19,7 @@ decl_provider = { path = "../decl_provider" }
 direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 facts_rust = { path = "../../facts/cargo/facts_rust" }
 ffi = { path = "../../utils/ffi" }
-hackc_unit = { path = "../hhbc/cargo/hackc_unit" }
+hhbc = { path = "../hhbc/cargo/hhbc" }
 no_pos_hash = { path = "../../utils/no_pos_hash" }
 ocamlrep = { path = "../../ocamlrep" }
 options = { path = "../compile/cargo/options" }

@@ -10,8 +10,7 @@ use crate::{
 use bstr::{BString, ByteSlice};
 use core_utils_rust::add_ns;
 use error::ErrorKind;
-use hhas_body::HhasBodyEnv;
-use hhbc_id::class::ClassType;
+use hhbc::{hhas_body::HhasBodyEnv, hhbc_id::class::ClassType};
 use hhbc_string_utils::{
     integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
     strip_global_ns, strip_ns, types,

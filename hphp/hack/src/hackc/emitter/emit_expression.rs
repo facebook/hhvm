@@ -9,14 +9,15 @@ use env::{emitter::Emitter, Env, Flags as EnvFlags};
 use error::{Error, Result};
 use ffi::{Slice, Str};
 use hash::HashSet;
-use hhas_symbol_refs::IncludePath;
-use hhbc_ast::{
+use hhbc::{
+    hhas_symbol_refs::IncludePath,
+    hhbc_id::{class, constant, function, method, prop},
+    typed_value::TypedValue,
     BareThisOp, CollectionType, FCallArgs, FCallArgsFlags, HasGenericsOp, IncDecOp, Instruct,
     IsLogAsDynamicCallOp, IsTypeOp, IterArgs, Label, Local, MOpMode, MemberKey, MethodId,
     OODeclExistsOp, ObjMethodOp, Opcode, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SpecialClsRef,
     StackIndex, TypeStructResolveOp,
 };
-use hhbc_id::{class, constant, function, method, prop};
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq};
@@ -36,7 +37,6 @@ use oxidized::{
 };
 use regex::Regex;
 use std::{borrow::Cow, collections::BTreeMap, iter, str::FromStr};
-use typed_value::TypedValue;
 
 #[derive(Debug)]
 pub struct EmitJmpResult<'arena> {

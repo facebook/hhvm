@@ -9,13 +9,14 @@ pub mod jump_targets;
 mod label;
 mod local;
 
-use ast_body::AstBody;
-use ast_scope::{self as ast_scope, Scope, ScopeItem};
+use ast_scope::{Scope, ScopeItem};
 use bitflags::bitflags;
 use emitter::Emitter;
 use ffi::{Slice, Str};
-use hhas_symbol_refs::{HhasSymbolRefs, IncludePathSet};
-use hhbc_ast::{IterId, Label, Local};
+use hhbc::{
+    hhas_symbol_refs::{HhasSymbolRefs, IncludePathSet},
+    AstBody, IterId, Label, Local,
+};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env::Env as NamespaceEnv};
 use std::collections::BTreeSet;

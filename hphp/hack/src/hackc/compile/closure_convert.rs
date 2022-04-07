@@ -3,14 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_body::AstBody;
 use env::emitter::Emitter;
 use error::{Error, Result};
 use global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hack_macro::hack_expr;
 use hash::IndexSet;
-use hhas_coeffects::HhasCoeffects;
-use hhbc_id::class;
+use hhbc::{hhas_coeffects::HhasCoeffects, hhbc_id::class, AstBody};
 use hhbc_string_utils as string_utils;
 use itertools::Itertools;
 use naming_special_names_rust::{
@@ -492,8 +490,8 @@ impl<'arena> State<'arena> {
     }
 }
 
-fn compute_vars(params: &[FunParam], body: ast_body::AstBody<'_>) -> Result<IndexSet<String>> {
-    decl_vars::vars_from_ast(params, &body).map_err(Error::unrecoverable)
+fn compute_vars(params: &[FunParam], body: AstBody<'_>) -> Result<IndexSet<String>> {
+    hhbc::decl_vars::vars_from_ast(params, &body).map_err(Error::unrecoverable)
 }
 
 fn get_parameter_names(params: &[FunParam]) -> IndexSet<String> {

@@ -13,8 +13,7 @@ use emit_typedef::emit_typedefs_from_program;
 use env::{self, emitter::Emitter, Env};
 use error::{Error, ErrorKind, Result};
 use ffi::{Maybe::*, Slice, Str};
-use hackc_unit::HackCUnit;
-use hhbc_ast::FatalOp;
+use hhbc::{hackc_unit::HackCUnit, FatalOp};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env, pos::Pos};
 

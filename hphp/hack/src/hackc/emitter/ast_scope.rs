@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-mod ast_scope_item;
-pub use ast_scope_item::*;
+pub mod ast_scope_item;
+pub use crate::ast_scope_item::{Class, Fun, Lambda, Method, ScopeItem};
 
-use hhas_coeffects::HhasCoeffects;
+use hhbc::hhas_coeffects::HhasCoeffects;
 use oxidized::{
     ast,
     ast_defs::{FunKind, Id},

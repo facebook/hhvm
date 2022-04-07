@@ -11,7 +11,6 @@ path = "../../emit_memoize_helpers.rs"
 bumpalo = { version = "3.8", features = ["collections"] }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
-hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
-hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }

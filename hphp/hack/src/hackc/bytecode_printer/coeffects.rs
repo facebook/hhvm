@@ -7,7 +7,7 @@ use crate::{
     context::{Context, FmtIndent},
     write::{fmt_separated, fmt_separated_with},
 };
-use hhas_coeffects::HhasCoeffects;
+use hhbc::hhas_coeffects::HhasCoeffects;
 use std::io::{Result, Write};
 use write_bytes::{write_bytes, DisplayBytes};
 

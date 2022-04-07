@@ -4,8 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
-use hhas_symbol_refs::IncludePath;
-use hhbc_id::{class, constant, function};
+use hhbc::{
+    hhas_symbol_refs::IncludePath,
+    hhbc_id::{class, constant, function},
+};
 
 pub fn add_include<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>, inc: IncludePath<'arena>) {
     e.symbol_refs_state_mut().includes.insert(inc);

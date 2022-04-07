@@ -5,8 +5,7 @@
 
 use error::{Error, Result};
 use ffi::Slice;
-use hhbc_ast::{FCallArgs, FCallArgsFlags, Local};
-use hhbc_id::function;
+use hhbc::{hhbc_id::function, FCallArgs, FCallArgsFlags, Local};
 use instruction_sequence::{instr, InstrSeq};
 use oxidized::{aast::FunParam, pos::Pos};
 

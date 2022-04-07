@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Result;
-use hhbc::OpcodeData;
+use hhbc_gen::OpcodeData;
 use quote::quote;
 use std::{
     io::Write,
@@ -12,7 +12,7 @@ use std::{
 };
 
 fn main() -> Result<()> {
-    let mut opcode_data: Vec<OpcodeData> = hhbc::opcode_data().to_vec();
+    let mut opcode_data: Vec<OpcodeData> = hhbc_gen::opcode_data().to_vec();
     opcode_data.sort_by(|a: &OpcodeData, b: &OpcodeData| a.name.cmp(b.name));
 
     let opcodes = emit_opcodes::emit_opcodes(

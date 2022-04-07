@@ -5,7 +5,7 @@
 
 use error::{Error, Result};
 use ffi::Pair;
-use hhbc_id::class;
+use hhbc::{hhbc_id::class, typed_value::TypedValue};
 use hhbc_string_utils as string_utils;
 use naming_special_names_rust::classes;
 use options::Options;
@@ -16,7 +16,6 @@ use oxidized::{
     ast_defs::ShapeFieldName,
 };
 use std::collections::BTreeMap;
-use typed_value::TypedValue;
 
 fn get_kind_num(tparams: &[&str], mut p: &str) -> i64 {
     if tparams.contains(&p) {

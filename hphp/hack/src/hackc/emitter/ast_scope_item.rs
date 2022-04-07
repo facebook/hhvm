@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhas_coeffects::HhasCoeffects;
+use hhbc::hhas_coeffects::HhasCoeffects;
 use oxidized::{ast, file_info, pos::Pos};
 
 use std::rc::Rc;

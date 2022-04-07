@@ -11,6 +11,6 @@ path = "../../rewrite_xml.rs"
 emit_symbol_refs = { path = "../../../emitter/cargo/emit_symbol_refs" }
 env = { path = "../../../emitter/cargo/env" }
 error = { path = "../../../error/cargo/error" }
-hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

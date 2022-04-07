@@ -7,19 +7,26 @@ use emit_property::PropAndInit;
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use ffi::{Maybe, Maybe::*, Slice, Str};
-use hhas_class::{HhasClass, TraitReqKind};
-use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
-use hhas_constant::HhasConstant;
-use hhas_method::{HhasMethod, HhasMethodFlags};
-use hhas_param::HhasParam;
-use hhas_pos::HhasSpan;
-use hhas_property::HhasProperty;
-use hhas_type::HhasTypeInfo;
-use hhas_type_const::HhasTypeConstant;
-use hhas_xhp_attribute::HhasXhpAttribute;
-use hhbc_ast::{FCallArgs, FCallArgsFlags, FatalOp, Local, ReadonlyOp, SpecialClsRef, Visibility};
-use hhbc_id::class::ClassType;
-use hhbc_id::{self as hhbc_id, class, method, prop};
+use hhbc::{
+    hhas_attribute,
+    hhas_class::{HhasClass, TraitReqKind},
+    hhas_coeffects::{HhasCoeffects, HhasCtxConstant},
+    hhas_constant::HhasConstant,
+    hhas_method::{HhasMethod, HhasMethodFlags},
+    hhas_param::HhasParam,
+    hhas_pos::HhasSpan,
+    hhas_property::HhasProperty,
+    hhas_type::{self, HhasTypeInfo},
+    hhas_type_const::HhasTypeConstant,
+    hhas_xhp_attribute::HhasXhpAttribute,
+    hhbc_id::{
+        self,
+        class::{self, ClassType},
+        method, prop,
+    },
+    typed_value::TypedValue,
+    FCallArgs, FCallArgsFlags, FatalOp, Local, ReadonlyOp, SpecialClsRef, Visibility,
+};
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
 use instruction_sequence::{instr, InstrSeq};
@@ -31,7 +38,6 @@ use oxidized::{
     namespace_env,
 };
 use std::collections::BTreeMap;
-use typed_value::TypedValue;
 
 fn add_symbol_refs<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,

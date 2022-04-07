@@ -18,8 +18,7 @@ env = { path = "../emitter/cargo/env" }
 error = { path = "../error/cargo/error" }
 escaper = { path = "../../utils/escaper" }
 ffi = { path = "../../utils/ffi" }
-hhas_body = { path = "../hhbc/cargo/hhas_body" }
-hhbc_id = { path = "../hhbc/cargo/hhbc_id" }
+hhbc = { path = "../hhbc/cargo/hhbc" }
 hhbc_string_utils = { path = "../utils/cargo/hhbc_string_utils" }
 lazy_static = "1.0"
 naming_special_names_rust = { path = "../../naming" }

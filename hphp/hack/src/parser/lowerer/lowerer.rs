@@ -5155,6 +5155,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 file_attributes: vec![],
                 mode: env.file_mode(),
                 fun,
+                // TODO(T116039119): Populate value with presence of internal attribute
+                internal: false,
             })])
         }
         ClassishDeclaration(c) if contains_class_body(c) => {

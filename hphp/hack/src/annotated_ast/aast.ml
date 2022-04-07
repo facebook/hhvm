@@ -1010,6 +1010,7 @@ and ('ex, 'en) fun_def = {
   fd_file_attributes: ('ex, 'en) file_attribute list;
   fd_mode: FileInfo.mode; [@visitors.opaque]
   fd_fun: ('ex, 'en) fun_;
+  fd_internal: bool;
 }
 
 and ('ex, 'en) module_def = {

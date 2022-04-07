@@ -26,5 +26,5 @@
             ([7:3-9], (Expr ((_), [7:3-8], (Array_get (((_), [7:3-5], (Lvar ([7:3-5], $x))), (Some ((int), [7:6-7], (Int "1"))))))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
-      })
+        f_doc_comment = None };
+      fd_internal = false })

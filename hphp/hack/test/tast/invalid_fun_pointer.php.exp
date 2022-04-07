@@ -14,5 +14,5 @@ Errors:
         f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-23], (Expr ((_), [4:3-22], (Fun_id ([4:7-21], "\\unbound_func")))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
-      })
+        f_doc_comment = None };
+      fd_internal = false })

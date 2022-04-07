@@ -526,7 +526,16 @@ let _toplevel_def tenv = function
   (* This function is not used but ensures we don't forget to
    * extend this module for future top-level definitions we may add. *)
   | Fun f ->
-    let { fd_namespace = _; fd_mode = _; fd_file_attributes = _; fd_fun } = f in
+    let {
+      fd_namespace = _;
+      fd_mode = _;
+      fd_file_attributes = _;
+      fd_fun;
+      fd_internal = _;
+    } =
+      f
+    in
+
     fun_ tenv fd_fun
   | Constant gc -> global_constant tenv gc
   | Typedef td -> typedef tenv td

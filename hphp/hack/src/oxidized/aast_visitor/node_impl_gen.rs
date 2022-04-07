@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cb0ba0ffe823474e4202428d30a4c0e7>>
+// @generated SignedSource<<a699517403a03a77f44c28b1170d06f8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1150,7 +1150,8 @@ impl<P: Params> Node<P> for FunDef<P::Ex, P::En> {
         self.namespace.accept(c, v)?;
         self.file_attributes.accept(c, v)?;
         self.mode.accept(c, v)?;
-        self.fun.accept(c, v)
+        self.fun.accept(c, v)?;
+        self.internal.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for FunKind {

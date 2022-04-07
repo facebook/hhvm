@@ -37,5 +37,5 @@ Errors:
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None }
-       })
+         f_doc_comment = None };
+       fd_internal = false })

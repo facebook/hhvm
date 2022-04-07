@@ -1542,6 +1542,8 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
             namespace: RcOc::clone(&self.ro_state.empty_namespace),
             mode: scope.scope_fmode(),
             fun: f,
+            // TODO(T116039119): Populate value with presence of internal attribute
+            internal: false,
         };
         self.state_mut()
             .named_hoisted_functions

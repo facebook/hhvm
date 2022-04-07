@@ -1514,6 +1514,7 @@ and fun_def ctx fd =
       fd_mode = fd.Aast.fd_mode;
       fd_namespace = fd.Aast.fd_namespace;
       fd_file_attributes = file_attributes;
+      fd_internal = fd.Aast.fd_internal;
     }
   in
   named_fun_def

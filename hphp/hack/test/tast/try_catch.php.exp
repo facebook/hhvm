@@ -13,8 +13,8 @@
         f_doc_comment =
         (Some ([2:1-10:4],
                "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
-        }
-      });
+        };
+      fd_internal = false });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -42,8 +42,8 @@
              ([30:3-13], (Return (Some ((int), [30:10-12], (Lvar ([30:10-12], $a))))))]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None }
-       });
+         f_doc_comment = None };
+       fd_internal = false });
   (Class
      { c_span = [33:1-41]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

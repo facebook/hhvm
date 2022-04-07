@@ -26,5 +26,5 @@
             ([7:3-17], (Expr ((bool), [7:3-16], (Binop ((Eq None), ((bool), [7:3-9], (Array_get (((_), [7:3-7], (Lvar ([7:3-7], $obj))), None))), ((bool), [7:12-16], True))))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
-      })
+        f_doc_comment = None };
+      fd_internal = false })

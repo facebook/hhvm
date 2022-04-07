@@ -34,7 +34,7 @@
   parsing_service
   provider_utils
   server_monitor
-  telemetry
+  telemetry_test_utils
   typing_check
   typing_service_api
   unit_test))

@@ -18,7 +18,7 @@
   search_utils
   sys_utils
   tast_provider
-  telemetry
+  telemetry_test_utils
   test_injector_config
   typing_deps
   unit_test

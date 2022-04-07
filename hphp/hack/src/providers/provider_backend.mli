@@ -7,6 +7,29 @@
  *
  *)
 
+module Cache_kind : sig
+  type t =
+    | LRU
+    | LFU
+end
+
+module Cache (Entry : Cache_sig.Entry) : sig
+  module type Cache_intf =
+    Cache_sig.Cache_intf
+      with type 'a key := 'a Entry.key
+       and type 'a value := 'a Entry.value
+
+  module type Instance = sig
+    module Cache : Cache_intf
+
+    val this : Cache.t
+  end
+
+  include Cache_intf with type t = (module Instance)
+
+  val make : Cache_kind.t -> max_size:int -> t
+end
+
 module Decl_cache_entry : sig
   type _ t =
     | Fun_decl : string -> Typing_defs.fun_elt t
@@ -24,10 +47,7 @@ module Decl_cache_entry : sig
   val key_to_log_string : 'a key -> string
 end
 
-(** Maps decl names to types. *)
-module Decl_cache : sig
-  include module type of Lru_cache.Cache (Decl_cache_entry)
-end
+module Decl_cache : module type of Cache (Decl_cache_entry)
 
 module Shallow_decl_cache_entry : sig
   type _ t = Shallow_class_decl : string -> Shallow_decl_defs.shallow_class t
@@ -41,9 +61,7 @@ module Shallow_decl_cache_entry : sig
   val key_to_log_string : 'a key -> string
 end
 
-module Shallow_decl_cache : sig
-  include module type of Lru_cache.Cache (Shallow_decl_cache_entry)
-end
+module Shallow_decl_cache : module type of Cache (Shallow_decl_cache_entry)
 
 module Linearization_cache_entry : sig
   type _ t = Linearization : string -> Decl_defs.lin t
@@ -57,9 +75,7 @@ module Linearization_cache_entry : sig
   val key_to_log_string : 'a key -> string
 end
 
-module Linearization_cache : sig
-  include module type of Lru_cache.Cache (Linearization_cache_entry)
-end
+module Linearization_cache : module type of Cache (Linearization_cache_entry)
 
 (** A `fixme_map` associates:
     line number guarded by HH_FIXME =>
@@ -134,9 +150,9 @@ module Reverse_naming_table_delta : sig
 end
 
 type local_memory = {
-  decl_cache: Decl_cache.t;
-  shallow_decl_cache: Shallow_decl_cache.t;
-  linearization_cache: Linearization_cache.t;
+  decl_cache: (module Decl_cache.Instance);
+  shallow_decl_cache: (module Shallow_decl_cache.Instance);
+  linearization_cache: (module Linearization_cache.Instance);
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
       (** A map from symbol-name to pos. (1) It's used as a slowly updated
           authoritative place to look for symbols that have changed on disk since
@@ -177,13 +193,14 @@ val set_shared_memory_backend : unit -> unit
 
 val set_local_memory_backend_with_defaults_for_test : unit -> unit
 
-(** TOOD(ljw): for now, max_num_shallow_decls accepts a special value "-1"
+(** TODO(ljw): for now, max_num_shallow_decls accepts a special value "-1"
 which reflects the status quo ante, a max size of 140mb in bytes rather than
 a max number. This will be removed shortly. *)
 val set_local_memory_backend :
   max_num_decls:int ->
   max_num_shallow_decls:int ->
   max_num_linearizations:int ->
+  cache_kind:Cache_kind.t ->
   unit
 
 val set_decl_service_backend : Decl_service_client.t -> unit

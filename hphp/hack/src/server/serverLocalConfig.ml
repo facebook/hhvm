@@ -463,6 +463,7 @@ type t = {
   ide_max_num_linearizations: int;  (** tuning of clientIdeDaemon local cache *)
   ide_symbolindex_search_provider: string;
       (** like [symbolindex_search_provider] but for IDE *)
+  ide_use_lfu_cache_instead_of_lru: bool;
   predeclare_ide: bool;
   max_typechecker_worker_memory_mb: int option;
       (** if set, the worker will stop early at the end of a file if its heap exceeds this number *)
@@ -675,6 +676,7 @@ let default =
     (* the code actually doesn't use this default for ide_symbolindex_search_provider;
        it defaults to whatever was computed for symbolindex_search_provider. *)
     ide_symbolindex_search_provider = "SqliteIndex";
+    ide_use_lfu_cache_instead_of_lru = false;
     symbolindex_quiet = false;
     symbolindex_file = None;
     tico_invalidate_files = false;
@@ -1234,6 +1236,13 @@ let load_ fn ~silent ~current_version overrides =
       ~default:symbolindex_search_provider
       config
   in
+  let ide_use_lfu_cache_instead_of_lru =
+    bool_if_min_version
+      "ide_use_lfu_cache_instead_of_lru"
+      ~default:default.ide_use_lfu_cache_instead_of_lru
+      ~current_version
+      config
+  in
   let symbolindex_quiet =
     bool_if_min_version
       "symbolindex_quiet"
@@ -1478,6 +1487,7 @@ let load_ fn ~silent ~current_version overrides =
     ide_max_num_shallow_decls;
     ide_max_num_linearizations;
     ide_symbolindex_search_provider;
+    ide_use_lfu_cache_instead_of_lru;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
     use_max_typechecker_worker_memory_for_decl_deferral;

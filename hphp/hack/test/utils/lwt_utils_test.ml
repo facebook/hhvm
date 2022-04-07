@@ -1,3 +1,4 @@
+open Hh_prelude
 open Asserter
 
 let test_exec_checked_basic () : bool Lwt.t =
@@ -34,7 +35,7 @@ let test_exec_checked_failing () : bool Lwt.t =
         exn;
         _;
       } ->
-    assert (exn = None);
+    assert (Option.is_none exn);
     String_asserter.assert_equals
       command_line
       "false ignored-argument"
@@ -50,7 +51,7 @@ let test_exec_checked_failing () : bool Lwt.t =
 let test_exec_checked_big_payload () : bool Lwt.t =
   (* Try to exceed the pipe buffer size to suss out any deadlocks. *)
   let payload_size = 500000 in
-  let big_payload = String.init payload_size (fun _ -> 'x') in
+  let big_payload = String.init payload_size ~f:(fun _ -> 'x') in
   let%lwt process_status =
     Lwt_utils.exec_checked
       (Exec_command.For_use_in_testing_only "cat")
@@ -156,7 +157,7 @@ let wrap_lwt_test (test : string * (unit -> bool Lwt.t)) :
 let () =
   Unit_test.run_all
   @@ List.map
-       wrap_lwt_test
+       ~f:wrap_lwt_test
        [
          ("test Lwt_utils.exec_checked basic", test_exec_checked_basic);
          ("test Lwt_utils.exec_checked failing", test_exec_checked_failing);

@@ -13,3 +13,4 @@ anyhow = "1.0.56"
 emit_opcodes = { path = "../emit_opcodes" }
 hhbc-gen = { path = "../../../../../../tools/hhbc-gen" }
 quote = "1.0"
+structopt = "0.3.23"

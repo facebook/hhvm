@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8b616eba5ce06c701a439b211737a1ca>>
+// @generated SignedSource<<46965f5bced108d55a65b79595546933>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -469,7 +469,8 @@ impl<P: Params> NodeMut<P> for Class_<P::Ex, P::En> {
         self.file_attributes.accept(c, v)?;
         self.enum_.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
-        self.emit_id.accept(c, v)
+        self.emit_id.accept(c, v)?;
+        self.internal.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for ClassishKind {

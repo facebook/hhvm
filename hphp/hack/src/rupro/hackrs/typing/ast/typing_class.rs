@@ -69,6 +69,8 @@ impl<R: Reason> TC<R> for oxidized::aast::Class_<(), ()> {
             enum_: self.enum_.clone(),
             doc_comment: self.doc_comment.clone(),
             emit_id: self.emit_id.clone(),
+            // TODO(T116039119): Populate value with presence of internal attribute
+            internal: false,
         };
         Ok(res)
     }

@@ -320,6 +320,7 @@ let class_ tenv c =
     c_enum;
     c_doc_comment = _;
     c_emit_id = _;
+    c_internal = _;
   } =
     c
   in

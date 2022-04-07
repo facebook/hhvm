@@ -57,7 +57,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-       c_doc_comment = None; c_emit_id = None });
+       c_doc_comment = None; c_emit_id = None; c_internal = false });
   (Class
      { c_span = [34:1-39]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -71,4 +71,4 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-       c_doc_comment = None; c_emit_id = None })
+       c_doc_comment = None; c_emit_id = None; c_internal = false })

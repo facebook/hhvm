@@ -953,6 +953,7 @@ let rec class_ ctx c =
     N.c_attributes = [];
     N.c_xhp_attrs = [];
     N.c_emit_id = c.Aast.c_emit_id;
+    N.c_internal = c.Aast.c_internal;
   }
 
 and user_attributes env attrl =

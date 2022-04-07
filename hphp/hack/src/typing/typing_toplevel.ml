@@ -2047,6 +2047,7 @@ let class_def_ env c tc =
       Aast.c_xhp_children = c.c_xhp_children;
       Aast.c_xhp_attrs = [];
       Aast.c_emit_id = c.c_emit_id;
+      Aast.c_internal = c.c_internal;
     },
     global_inference_envs )
 

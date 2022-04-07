@@ -5226,6 +5226,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 enum_: None,
                 doc_comment: doc_comment_opt,
                 emit_id: None,
+                // TODO(T116039119): Populate value with presence of internal attribute
+                internal: false,
             };
             match &c.body.children {
                 ClassishBody(c1) => {
@@ -5416,6 +5418,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 emit_id: None,
+                // TODO(T116039119): Populate value with presence of internal attribute
+                internal: false,
             })])
         }
 
@@ -5490,6 +5494,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 emit_id: None,
+                // TODO(T116039119): Populate value with presence of internal attribute
+                internal: false,
             };
 
             for n in c.elements.syntax_node_to_list_skip_separator() {

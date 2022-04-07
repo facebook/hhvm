@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a699517403a03a77f44c28b1170d06f8>>
+// @generated SignedSource<<e07fc6823fbb9ea21d85b2864a354457>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -469,7 +469,8 @@ impl<P: Params> Node<P> for Class_<P::Ex, P::En> {
         self.file_attributes.accept(c, v)?;
         self.enum_.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
-        self.emit_id.accept(c, v)
+        self.emit_id.accept(c, v)?;
+        self.internal.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for ClassishKind {

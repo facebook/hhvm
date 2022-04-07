@@ -847,6 +847,7 @@ and ('ex, 'en) class_ = {
   c_enum: enum_ option;
   c_doc_comment: doc_comment option;
   c_emit_id: emit_id option;
+  c_internal: bool;
 }
 
 and class_hint = hint

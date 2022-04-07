@@ -603,6 +603,8 @@ fn make_closure(
         enum_: None,
         doc_comment: None,
         emit_id: Some(EmitId::Anonymous),
+        // TODO(T116039119): Populate value with presence of internal attribute
+        internal: false,
     };
 
     // TODO(hrust): can we reconstruct fd here from the scratch?

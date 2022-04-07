@@ -2748,7 +2748,6 @@ and case_list parent_locals ty env switch_pos cl dfl =
   in
   let check_fallthrough
       env switch_pos case_pos ~next_pos block ~last ~is_default =
-    let () = printf "got here in check_fallthrough" in
 
     if (not (List.is_empty block)) && not last then
       match LEnv.get_cont_option env C.Next with

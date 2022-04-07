@@ -106,6 +106,7 @@ type t =
   | Case_fallthrough of {
       switch_pos: Pos.t;
       case_pos: Pos.t;
+      next_pos: Pos.t option;
     }
   | Default_fallthrough of Pos.t
   | Php_lambda_disallowed of Pos.t
@@ -445,21 +446,25 @@ let illegal_context pos name =
         Naming_special_names.Coeffects.contexts )
     []
 
-let case_fallthrough switch_pos case_pos =
-  let (start_line, start_column) = Pos.line_column case_pos in
-  let new_pos =
-    Pos.set_col_end start_column @@ Pos.set_line_end (start_line + 1) case_pos
-  in
-  let quickfix = Quickfix.make ~title:"Add test" ~new_text:"TEST" new_pos in
-  let () =
-    printf "Original case_pos: %s\n" (Pos.print_verbose_relative case_pos)
-  in
-  let () =
-    printf "Changed case_pos: %s\n" (Pos.print_verbose_relative new_pos)
-  in
+let case_fallthrough switch_pos case_pos next_pos=
+  let quickfixes =
+    
+    match next_pos with
+    | None -> 
+      []
+    | Some next_pos ->
+      let (_, start_col) = Pos.line_column next_pos in
+      let new_pos = Pos.set_col_end (start_col-5) next_pos in
+      
+      [
+        Quickfix.make
+          ~title:("Change to test")
+          ~new_text:"\t// UNCHANGED\n  "
+          new_pos;
+      ]
 
-  let () = printf "Quickfix: %s\n" (Quickfix.show quickfix) in
-
+  in
+  
   let claim =
     ( switch_pos,
       "This `switch` has a `case` that implicitly falls through and is "
@@ -472,7 +477,7 @@ let case_fallthrough switch_pos case_pos =
     ]
   in
   User_error.make
-    ~quickfixes:[quickfix]
+    ~quickfixes
     Error_code.(to_enum CaseFallthrough)
     claim
     reasons
@@ -620,8 +625,8 @@ let to_user_error = function
   | Inout_argument_bad_expr pos -> inout_argument_bad_expr pos
   | Illegal_destructor pos -> illegal_destructor pos
   | Illegal_context { pos; name } -> illegal_context pos name
-  | Case_fallthrough { switch_pos; case_pos } ->
-    case_fallthrough switch_pos case_pos
+  | Case_fallthrough { switch_pos; case_pos; next_pos } ->
+    case_fallthrough switch_pos case_pos next_pos
   | Default_fallthrough pos -> default_fallthrough pos
   | Php_lambda_disallowed pos -> php_lambda_disallowed pos
   | Non_interface { pos; name; verb } -> non_interface pos name verb

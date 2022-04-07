@@ -411,6 +411,7 @@ let set_col_end pos_cnum pos =
   match pos with
   | Pos_large { pos_file; pos_start; pos_end } ->
     let pos_end = File_pos_large.set_column pos_cnum pos_end in
+    let pos_start = File_pos_large.set_column pos_cnum pos_start in
     Pos_large { pos_file; pos_start; pos_end }
   | _ -> pos
 

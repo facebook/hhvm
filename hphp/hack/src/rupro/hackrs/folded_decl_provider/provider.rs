@@ -156,7 +156,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         ty: &Ty<R>,
     ) -> Result<Option<(TypeName, Arc<FoldedClass<R>>)>> {
         if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
-            if !self.detect_cycle(stack, errors, pos_id) {
+            if !self.detect_cycle(stack, errors, &pos_id) {
                 if let Some(folded_decl) = self.get_folded_class_impl(stack, pos_id.id())? {
                     return Ok(Some((pos_id.id(), folded_decl)));
                 }

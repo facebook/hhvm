@@ -492,7 +492,13 @@ end
 
 let rec is_denotable ty =
   match get_node ty with
-  | Toption ty -> is_denotable ty
+  | Tunion [] (* Possible encodings of nothing *)
+  | Tintersection [] (* Possible encodings of mixed *)
+  | Tnonnull
+  | Tdynamic
+  | Tprim _
+  | Tnewtype _ ->
+    true
   | Tunion [ty; ty'] ->
     begin
       match (get_node ty, get_node ty') with
@@ -501,15 +507,28 @@ let rec is_denotable ty =
         true
       | _ -> false
     end
+  | Tclass (_, _, ts)
+  | Ttuple ts ->
+    List.for_all ~f:is_denotable ts
+  | Tvec_or_dict (tk, tv) -> is_denotable tk && is_denotable tv
+  | Taccess (ty, _) -> is_denotable ty
+  | Tshape (_, sm) ->
+    TShapeMap.for_all (fun _ { sft_ty; _ } -> is_denotable sft_ty) sm
+  | Tfun { ft_params; ft_ret; _ } ->
+    is_denotable ft_ret.et_type
+    && List.for_all ft_params ~f:(fun { fp_type; _ } ->
+           is_denotable fp_type.et_type)
+  | Toption ty -> is_denotable ty
+  | Tgeneric (nm, _) -> not (DependentKind.is_generic_dep_ty nm)
   | Tunion _
   | Tintersection _
   | Tneg _
   | Tany _
   | Terr
-  | Tvar _ ->
+  | Tvar _
+  | Tdependent _
+  | Tunapplied_alias _ ->
     false
-  | Tgeneric (nm, _) -> not (DependentKind.is_generic_dep_ty nm)
-  | _ -> true
 
 module ShapeFieldMap = struct
   include TShapeMap

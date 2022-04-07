@@ -893,13 +893,12 @@ template<class Target> Target read_opcode_arg(AsmState& as) {
   if (strVal.empty()) {
     as.error("expected opcode or directive argument");
   }
-  try {
-    return folly::to<Target>(strVal);
-  } catch (std::range_error&) {
+  auto const result = folly::tryTo<Target>(strVal);
+  if (result.hasError()) {
     as.error("couldn't convert input argument (" + strVal + ") to "
              "proper type");
-    not_reached();
   }
+  return result.value();
 }
 
 template<class SubOpType>

@@ -8,6 +8,7 @@
 
 external fold_classes_in_files :
   root:string ->
+  DeclParserOptions.t ->
   Relative_path.t list ->
   (Decl_defs.decl_class_type list Relative_path.Map.t, string) result
   = "fold_classes_in_files_ffi"

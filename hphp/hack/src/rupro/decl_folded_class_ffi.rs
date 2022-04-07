@@ -4,7 +4,7 @@
 
 use hackrs::{decl_parser::DeclParser, folded_decl_provider};
 use ocamlrep_ocamlpool::{ocaml_ffi_with_arena, Bump};
-use oxidized_by_ref::decl_defs::DeclClassType;
+use oxidized_by_ref::{decl_defs::DeclClassType, decl_parser_options::DeclParserOptions};
 use pos::{RelativePath, RelativePathCtx, ToOxidized, TypeName};
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -16,6 +16,7 @@ ocaml_ffi_with_arena! {
     fn fold_classes_in_files_ffi<'a>(
         arena: &'a Bump,
         root: &'a Path,
+        opts: &'a DeclParserOptions<'a>,
         files: &'a [oxidized_by_ref::relative_path::RelativePath<'a>],
     ) -> Result<BTreeMap<RelativePath, Vec<DeclClassType<'a>>>, String> {
         let files: Vec<RelativePath> = files.iter().map(Into::into).collect();
@@ -23,7 +24,7 @@ ocaml_ffi_with_arena! {
             root: root.into(),
             ..Default::default()
         });
-        let decl_parser = DeclParser::new(path_ctx);
+        let decl_parser = DeclParser::with_options(path_ctx, opts);
         let folded_decl_provider: Arc<dyn folded_decl_provider::FoldedDeclProvider<BReason>> =
             hackrs_test_utils::decl_provider::make_folded_decl_provider(
                 None,

@@ -21,6 +21,7 @@ names = { path = "../../../../facebook/hh_decl/cargo/names" }
 naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
 once_cell = "1.8"
+ouroboros = "0.8"
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }

@@ -2746,8 +2746,9 @@ and case_list parent_locals ty env switch_pos cl dfl =
     let env = LEnv.update_next_from_conts env [C.Next; C.Fallthrough] in
     LEnv.drop_cont env C.Fallthrough
   in
-  let check_fallthrough env switch_pos case_pos ~next_pos block ~last ~is_default =
-    let () = printf("got here in check_fallthrough") in
+  let check_fallthrough
+      env switch_pos case_pos ~next_pos block ~last ~is_default =
+    let () = printf "got here in check_fallthrough" in
 
     if (not (List.is_empty block)) && not last then
       match LEnv.get_cont_option env C.Next with
@@ -2801,17 +2802,31 @@ and case_list parent_locals ty env switch_pos cl dfl =
         let env = initialize_next_cont env in
         let (env, te, _) = expr env e ~allow_awaitable:(*?*) false in
         let (env, tb) = block env b in
-        let last = List.is_empty (another::rl) && Option.is_none dfl in
-        let (((_, next_pos, _)), _) = another in
-        check_fallthrough env switch_pos pos ~next_pos:(Some next_pos) b ~last ~is_default:false;
-        let (env, tcl) = case_list env (another::rl) in
+        let last = List.is_empty (another :: rl) && Option.is_none dfl in
+        let ((_, next_pos, _), _) = another in
+        check_fallthrough
+          env
+          switch_pos
+          pos
+          ~next_pos:(Some next_pos)
+          b
+          ~last
+          ~is_default:false;
+        let (env, tcl) = case_list env (another :: rl) in
         (env, (te, tb) :: tcl)
       | (((_, pos, _) as e), b) :: rl ->
         let env = initialize_next_cont env in
         let (env, te, _) = expr env e ~allow_awaitable:(*?*) false in
         let (env, tb) = block env b in
         let last = List.is_empty rl && Option.is_none dfl in
-        check_fallthrough env switch_pos pos ~next_pos:None b ~last ~is_default:false;
+        check_fallthrough
+          env
+          switch_pos
+          pos
+          ~next_pos:None
+          b
+          ~last
+          ~is_default:false;
         let (env, tcl) = case_list env rl in
         (env, (te, tb) :: tcl)
     in
@@ -2823,7 +2838,14 @@ and case_list parent_locals ty env switch_pos cl dfl =
     | Some (pos, b) ->
       let env = initialize_next_cont env in
       let (env, tb) = block env b in
-      check_fallthrough env switch_pos pos ~next_pos:None b ~last:true ~is_default:true;
+      check_fallthrough
+        env
+        switch_pos
+        pos
+        ~next_pos:None
+        b
+        ~last:true
+        ~is_default:true;
       (env, Some (pos, tb))
   in
   (env, tcl, tdfl)

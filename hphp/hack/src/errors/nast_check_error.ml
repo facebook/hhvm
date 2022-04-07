@@ -446,25 +446,22 @@ let illegal_context pos name =
         Naming_special_names.Coeffects.contexts )
     []
 
-let case_fallthrough switch_pos case_pos next_pos=
+let case_fallthrough switch_pos case_pos next_pos =
   let quickfixes =
-    
     match next_pos with
-    | None -> 
-      []
+    | None -> []
     | Some next_pos ->
       let (_, start_col) = Pos.line_column next_pos in
-      let new_pos = Pos.set_col_end (start_col-5) next_pos in
-      
+      let new_pos = Pos.set_col_end (start_col - 5) next_pos in
+
       [
         Quickfix.make
-          ~title:("Change to test")
+          ~title:"Change to test"
           ~new_text:"\t// UNCHANGED\n  "
           new_pos;
       ]
-
   in
-  
+
   let claim =
     ( switch_pos,
       "This `switch` has a `case` that implicitly falls through and is "
@@ -476,11 +473,7 @@ let case_fallthrough switch_pos case_pos next_pos=
       );
     ]
   in
-  User_error.make
-    ~quickfixes
-    Error_code.(to_enum CaseFallthrough)
-    claim
-    reasons
+  User_error.make ~quickfixes Error_code.(to_enum CaseFallthrough) claim reasons
 
 let default_fallthrough pos =
   User_error.make

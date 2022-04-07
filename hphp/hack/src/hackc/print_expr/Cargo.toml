@@ -8,7 +8,7 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-anyhow = "1.0.51"
+anyhow = "1.0.56"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 class_expr = { path = "../emitter/cargo/class_expr" }

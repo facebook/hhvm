@@ -26,12 +26,14 @@
 #include <folly/experimental/io/FsUtil.h>
 #include <folly/json.h>
 #include <folly/logging/xlog.h>
+#include <folly/memory/not_null.h>
 
 #include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/watcher.h"
 #include "hphp/runtime/ext/facts/watchman-watcher.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/optional.h"
 
@@ -169,7 +171,8 @@ folly::dynamic addWatchmanSince(folly::dynamic query, const Clock& clock) {
  */
 struct WatchmanWatcher final : public Watcher {
 
-  WatchmanWatcher(folly::dynamic queryExpr, Watchman& watchmanClient)
+  WatchmanWatcher(
+      folly::dynamic queryExpr, std::shared_ptr<Watchman> watchmanClient)
       : m_queryExpr{addFieldsToQuery(std::move(queryExpr))}
       , m_watchmanClient{watchmanClient} {
   }
@@ -184,7 +187,7 @@ struct WatchmanWatcher final : public Watcher {
   getChanges(folly::Executor& exec, Clock lastClock) override {
     auto queryExpr = addWatchmanSince(m_queryExpr, lastClock);
     XLOGF(INFO, "Querying watchman ({})\n", folly::toJson(queryExpr));
-    return m_watchmanClient.query(std::move(queryExpr))
+    return m_watchmanClient->query(std::move(queryExpr))
         .via(&exec)
         .thenValue([lastClock = std::move(lastClock)](
                        watchman::QueryResult&& wrappedResults) mutable {
@@ -195,7 +198,7 @@ struct WatchmanWatcher final : public Watcher {
   }
 
   void subscribe(std::function<void(Results&& callback)> callback) override {
-    m_watchmanClient.subscribe(
+    m_watchmanClient->subscribe(
         m_queryExpr,
         [cb = std::move(callback)](folly::Try<folly::dynamic>&& results) {
           if (results.hasValue()) {
@@ -209,14 +212,15 @@ struct WatchmanWatcher final : public Watcher {
 
 private:
   folly::dynamic m_queryExpr;
-  Watchman& m_watchmanClient;
+  folly::not_null_shared_ptr<Watchman> m_watchmanClient;
 };
 
 } // namespace
 
-std::unique_ptr<Watcher>
-make_watchman_watcher(folly::dynamic queryExpr, Watchman& watchman) {
-  return std::make_unique<WatchmanWatcher>(std::move(queryExpr), watchman);
+std::unique_ptr<Watcher> make_watchman_watcher(
+    folly::dynamic queryExpr, std::shared_ptr<Watchman> watchman) {
+  return std::make_unique<WatchmanWatcher>(
+      std::move(queryExpr), std::move(watchman));
 }
 
 } // namespace Facts

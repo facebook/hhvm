@@ -254,7 +254,7 @@ private:
   // Methods for reading records
   //
   // Convenience methods for parsing FastCGI records received from the
-  // webserver. All methods are called from readDataAvailable, and guarenteed
+  // webserver. All methods are called from readDataAvailable, and guaranteed
   // to have DestructorGuard on the stack.
   //
   // onRecordImpl methods process discrete records which have already been

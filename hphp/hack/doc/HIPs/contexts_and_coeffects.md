@@ -29,7 +29,7 @@ Capability: a permission or description of a permission. For example, one might 
 
 Context: a higher level representation of a set of capabilities. A function may be comprised of one or more contexts which represent the set union of the underlying capabilities.
 
-Example context: for the purpose for the rest of the defintions, a context created solely for the purpose of this document rather than for intended release.
+Example context: for the purpose for the rest of the definitions, a context created solely for the purpose of this document rather than for intended release.
 
 The Pure Context: A simple way of saying the context representing the empty list of capabilities `{}`.
 
@@ -193,7 +193,7 @@ interface IHasConst {
   abstract const type TC as IHasCtx;
 }
 
-// Disallowed: nested type acces
+// Disallowed: nested type access
 function type_const(IHasConst $t)[$t::TC::C]: void {}
 
 abstract class MyClass implements IHasConst {
@@ -245,7 +245,7 @@ function f(
   (()[$t::C] ==> 1)();    // Disallowed
   (()[rand] ==> 1)(); // Allowed, not a dependent context
   (()[] ==> 1)();     // Allowed
-  (() ==> 1)();       // Allowed. Note that this is logically equivalant to [rand, ctx $f, $t::C]
+  (() ==> 1)();       // Allowed. Note that this is logically equivalent to [rand, ctx $f, $t::C]
 }
 ```
 
@@ -465,7 +465,7 @@ function sum(Traversable<int> $nums)[]: int { // Has {}!!!
 }
 ```
 
-This code should not typecheck! The `sum` function has no capabilities, but what are the capabily requirements of the call to `next`?
+This code should not typecheck! The `sum` function has no capabilities, but what are the capability requirements of the call to `next`?
 
 ### Solution
 
@@ -831,11 +831,11 @@ If preferable, one may think of the runtime tracking of coeffects as an implicit
 
 ### Why enforce in HHVM at all?
 
-One may ask why it is necessary to enforce these guarentees at runtime. The language as a whole is generally unsound, and we're working to progress that forward. Why not just add this to the list of pieces that will get iteratively fixed with the rest of the language? Further, what terrible thing actually happens if the rules aren't enforced dynamically?
+One may ask why it is necessary to enforce these guarantees at runtime. The language as a whole is generally unsound, and we're working to progress that forward. Why not just add this to the list of pieces that will get iteratively fixed with the rest of the language? Further, what terrible thing actually happens if the rules aren't enforced dynamically?
 
 The answer to the first question is relatively simple. The planned system for a sound dynamic type requires that types implementing it make some guarantees about their properties, methods, etc, such that writing into one via a dynamic type won't result in unsoundness. If all functions have unenforced capabilities, then they would all necessarily preempt a type from implementing dynamic.
 
-There are multiple planned contexts for whom the goal is to make strong guarentees about chain of trust. Without dynamic enforcement, chain of trust is broken and those guarentees aren't successful. This would be tantamount to a constant recurring SEV.
+There are multiple planned contexts for whom the goal is to make strong guarantees about chain of trust. Without dynamic enforcement, chain of trust is broken and those guarantees aren't successful. This would be tantamount to a constant recurring SEV.
 
 ### Rules received by HHVM and how they get translated from the syntax
 
@@ -1118,12 +1118,12 @@ However, even if one were determined to implement the cross-function behavior of
 
 The current design involves checking an extra argument at every function invocation in the codebase. Because the types in question are big intersections, this has the potential to considerably slow down overall typechecking.
 
-Initially, the default context will have 2-3 capabilities (permission for external mutable references, global state, and to call reactive/pure code). Reactive code would have 1 capability and pure would have 0. Multiple capabilitys are currently represented via an intersection type in the typechecker, so we need only a single subtyping check for each function/method call, albeit with a large constant factor as subtyping type intersections (and unions) could be expensive.
+Initially, the default context will have 2-3 capabilities (permission for external mutable references, global state, and to call reactive/pure code). Reactive code would have 1 capability and pure would have 0. Multiple capabilities are currently represented via an intersection type in the typechecker, so we need only a single subtyping check for each function/method call, albeit with a large constant factor as subtyping type intersections (and unions) could be expensive.
 
 Options to mitigate this (within the typechecker, not shown to users):
 
 1. Special-case the most common cases to avoid full intersection type subtyping/simplification, e.g. if both caller and callee is unannotated, both are fully pure/CIPP, etc. This is probably simplest optimization to try and introduces a fast path and makes the slow path a tiny bit slower.
-2. Ad-hoc replace intersections of common combinations of capabilites with a single interface type, so that the check is cheap. This wouldn't be too conservative (incomplete but sound) if we can prove that 2 or more capabilities in the intersection of interest cannot be introduced independently (i.e., they always appear in tandem). See subsection "Encoding multiple capabilities" in the Vision doc
+2. Ad-hoc replace intersections of common combinations of capabilities with a single interface type, so that the check is cheap. This wouldn't be too conservative (incomplete but sound) if we can prove that 2 or more capabilities in the intersection of interest cannot be introduced independently (i.e., they always appear in tandem). See subsection "Encoding multiple capabilities" in the Vision doc
 
 # Prior art:
 
@@ -1144,13 +1144,13 @@ A major issue for this proposal, as well as hack generally, is the existence of 
 Somewhat ironically, the solution for this is an additional context: `can_dyn_call`. `can_dyn_call` gives the capability to invoke functions on receivers that are not known to hack to be static function types. Common examples include `HH\dynamic_fun` and invoking off of `mixed` via a `HH_FIXME`.
 
 ```
-function call_dynamicly_bad(string $funname, mixed $fun): void {
+function call_dynamically_bad(string $funname, mixed $fun): void {
   // HH_FIXME[4009]
   $fun('foobar'); // this would be unfixmeable
   HH\dynamic_fun($funname)('foobar');
 }
 
-function call_dynamicly_safe(string $funname, mixed $fun)[can_dyn_call]: void {
+function call_dynamically_safe(string $funname, mixed $fun)[can_dyn_call]: void {
   // HH_FIXME[4009] - still needs to be fixmed
   $fun('foobar'); // but no additional unfixmeable error
   HH\dynamic_fun($funname)('foobar');
@@ -1201,7 +1201,7 @@ However, due to the above, we would need to ban passing mismatching function-typ
 
 This work would necessarily be a prerequisite for adding sound capabilities whose calling conventions aren’t guaranteed by the runtime.
 
-Further questions: Does the ability to do `$x->foo = $my_fun` where `$x` is unknown break this because `$foo` could be not marked as `__MaybeDynFun?` Do we need to hardban this? What does this mean for generics, reified generics, and higher kinded types?
+Further questions: Does the ability to do `$x->foo = $my_fun` where `$x` is unknown break this because `$foo` could be not marked as `__MaybeDynFun?` Do we need to hard ban this? What does this mean for generics, reified generics, and higher kinded types?
 
 Even with all of the above, it might not generally be possible to guarantee safety in all cases, meaning that we can’t soundly roll out unenforced contexts.
 
@@ -1285,7 +1285,7 @@ An unfortunately common mistake is one is which a developer adds a `slog`
 statement within their code for the purpose of debugging but
 then forgets to remove it before committing. We could make the capability
 to log to stderr/stdout represented via the context system, such that most
-code utilizing it would have a hack error, rendering it uncommitable.
+code utilizing it would have a hack error, rendering it uncommittable.
 A debugging or development environment could conjure this capability
 to facilitate quick development cycle (see the previous subsection).
 

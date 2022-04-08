@@ -378,12 +378,12 @@ where
             }
             TokenKind::Name => {
                 let token = S!(make_token, parser, token);
-                let roken_ref = &token as *const _;
+                let token_ref = &token as *const _;
                 let (name, is_backslash) = parser.scan_remaining_qualified_name_extended(token);
                 // Here we rely on the implementation details of
                 // scan_remaining_qualified_name_extended. It's returning
                 // *exactly* token if there is nothing except it in the name.
-                is_backslash && (&name as *const _ == roken_ref)
+                is_backslash && (&name as *const _ == token_ref)
                     || parser.peek_token_kind() == TokenKind::LeftBrace
             }
             _ => false,

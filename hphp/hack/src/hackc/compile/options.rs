@@ -834,7 +834,7 @@ mod tests {
     }
 
     #[test]
-    fn test_hhvm_json_de_defaults_overrideable() {
+    fn test_hhvm_json_de_defaults_overridable() {
         let hhvm: Hhvm = serde_json::value::from_value(json!({})).unwrap();
         assert_eq!(hhvm.flags, HhvmFlags::default());
         assert!(

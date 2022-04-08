@@ -137,7 +137,7 @@ t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of type
   | ( t )  :: S :: paren {{ coq [[t]] }}    {{ com parentheses }} {{ ocaml [[t]] }}
   | ( t1 , .... , tn ) :: :: tuple          {{ com tuple }}
   | shape ( sft1 , .. , sftn ) :: :: shape  {{ com closed shape (all field names are assumed to be disjoint) }}
-  | shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfnm )   :: :: openshape  {{ com open shape (all field names are ssumed to be disjoint) }}
+  | shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfnm )   :: :: openshape  {{ com open shape (all field names are assumed to be disjoint) }}
   | function ( t1 , .. , tn ) : t           :: :: function {{ com function type }}
   | function ( t1 , .. , tn , t0 vardots ) : t :: :: variadicfunction {{ com variadic function type }}
   | vec < t > :: :: vec {{ com vector }}
@@ -1215,7 +1215,7 @@ G ; K |- e1 - e2 : num
 
 {{ com \subsection{Division and Exponentiation} }}
 
-{{ com Exponentiation is ommitted, but is similar to division. }}
+{{ com Exponentiation is omitted, but is similar to division. }}
 
 G ; K , skip:G', catch:G' |- < e1 : float , e2 : num|dynamic >
 --------------------------------------------------- :: div_float_left

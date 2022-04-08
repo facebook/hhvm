@@ -4,11 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{IterGen, LabelGen, LocalGen, SymbolRefsState};
+use adata_state::AdataState;
 use decl_provider::{DeclProvider, Result};
 use ffi::Str;
 use global_state::GlobalState;
 use hash::IndexSet;
-use hhbc::{adata_state::AdataState, Local};
+use hhbc::Local;
 use options::Options;
 use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
 use stack_limit::StackLimit;

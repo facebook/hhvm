@@ -3,11 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use adata_state::AdataState;
 use env::emitter::Emitter;
 use error::{Error, Result};
 use ffi::Str;
 use hhbc::{
-    adata_state::AdataState,
     hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX},
     hhbc_id,
     typed_value::TypedValue,

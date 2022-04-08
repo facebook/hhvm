@@ -5,7 +5,6 @@
 
 mod hhbc_ast;
 
-pub mod adata_state;
 pub mod decl_vars;
 pub mod hackc_unit;
 pub mod hhas_adata;

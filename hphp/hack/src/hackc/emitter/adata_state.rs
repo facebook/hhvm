@@ -2,8 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{hhas_adata::HhasAdata, typed_value::TypedValue};
 use hash::HashMap;
+use hhbc::{hhas_adata::HhasAdata, typed_value::TypedValue};
 
 #[derive(Debug, Default)]
 pub struct AdataState<'arena> {

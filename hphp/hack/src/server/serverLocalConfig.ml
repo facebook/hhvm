@@ -1595,4 +1595,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       populate_member_heaps = options.populate_member_heaps;
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;
       shm_cache_size = options.shm_cache_size;
+      ide_use_lfu_cache_instead_of_lru =
+        options.ide_use_lfu_cache_instead_of_lru;
     }

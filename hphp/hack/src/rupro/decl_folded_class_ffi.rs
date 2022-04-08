@@ -3,6 +3,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hackrs::{decl_parser::DeclParser, folded_decl_provider};
+use hh_config::HhConfig;
 use ocamlrep_ocamlpool::{ocaml_ffi_with_arena, Bump};
 use oxidized_by_ref::{decl_defs::DeclClassType, decl_parser_options::DeclParserOptions};
 use pos::{RelativePath, RelativePathCtx, ToOxidized, TypeName};
@@ -24,7 +25,8 @@ ocaml_ffi_with_arena! {
             root: root.into(),
             ..Default::default()
         });
-        let decl_parser = DeclParser::with_options(path_ctx, opts);
+        let hh_config = HhConfig::from_root(root).ok().unwrap_or_default();
+        let decl_parser = DeclParser::with_options(path_ctx, hh_config, opts);
         let folded_decl_provider: Arc<dyn folded_decl_provider::FoldedDeclProvider<BReason>> =
             hackrs_test_utils::decl_provider::make_folded_decl_provider(
                 None,

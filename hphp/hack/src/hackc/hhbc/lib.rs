@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-mod ast_body;
 mod hhbc_ast;
 
 pub mod adata_state;
@@ -30,7 +29,6 @@ pub mod hhbc_id;
 pub mod opcodes;
 pub mod typed_value;
 
-pub use ast_body::AstBody;
 pub use hhbc_ast::{
     AdataId, BareThisOp, ClassId, ClassNum, ClassishKind, CollectionType, ConstId, ContCheckOp,
     FCallArgs, FCallArgsFlags, FatalOp, FunctionId, HasGenericsOp, IncDecOp, InitPropOp, Instruct,

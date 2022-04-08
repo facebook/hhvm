@@ -1548,7 +1548,6 @@ version = "0.0.0"
 name = "generator"
 version = "0.0.0"
 dependencies = [
- "hhbc",
  "oxidized",
 ]
 

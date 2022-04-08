@@ -1483,7 +1483,7 @@ pub fn emit_final_stmt<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     match &stmt.1 {
         a::Stmt_::Throw(_) | a::Stmt_::Return(_) | a::Stmt_::YieldBreak => emit_stmt(e, env, stmt),
-        a::Stmt_::Block(stmts) => emit_final_stmts(e, env, stmts),
+        a::Stmt_::Block(stmts) => emit_final_stmts(env, e, stmts),
         _ => {
             let ret = emit_dropthrough_return(e, env)?;
             Ok(InstrSeq::gather(vec![emit_stmt(e, env, stmt)?, ret]))
@@ -1492,8 +1492,8 @@ pub fn emit_final_stmt<'a, 'arena, 'decl>(
 }
 
 pub fn emit_final_stmts<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
+    e: &mut Emitter<'arena, 'decl>,
     block: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
     match block {

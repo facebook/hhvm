@@ -6,7 +6,7 @@
 use env::emitter::Emitter;
 use error::{Error, Result};
 use hack_macro::hack_stmt;
-use hhbc::{decl_vars, AstBody};
+use hhbc::decl_vars;
 use ocamlrep::rc::RcOc;
 use options::CompilerFlags;
 use oxidized::{
@@ -96,7 +96,7 @@ fn extract_debugger_main(
     all_defs: &mut Vec<Def>,
 ) -> std::result::Result<(), String> {
     let (stmts, mut defs): (Vec<Def>, Vec<Def>) = all_defs.drain(..).partition(|x| x.is_stmt());
-    let mut vars = decl_vars::vars_from_ast(&[], &AstBody::Defs(&stmts))?
+    let mut vars = decl_vars::vars_from_ast(&[], &stmts)?
         .into_iter()
         .collect::<Vec<_>>();
     let mut stmts = stmts

@@ -8,7 +8,7 @@ use error::{Error, Result};
 use global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hack_macro::hack_expr;
 use hash::IndexSet;
-use hhbc::{hhas_coeffects::HhasCoeffects, hhbc_id::class, AstBody};
+use hhbc::{hhas_coeffects::HhasCoeffects, hhbc_id::class};
 use hhbc_string_utils as string_utils;
 use itertools::Itertools;
 use naming_special_names_rust::{
@@ -17,7 +17,7 @@ use naming_special_names_rust::{
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
 use oxidized::{
-    aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
+    aast_visitor::{self, visit_mut, AstParams, NodeMut, VisitorMut},
     ast::{
         Abstraction, ClassGetExpr, ClassHint, ClassId, ClassId_, ClassName, ClassVar, Class_,
         ClassishKind, Contexts, Def, EmitId, Expr, Expr_, FunDef, FunKind, FunParam, Fun_,
@@ -120,7 +120,7 @@ struct Scope<'b, 'arena> {
 
 impl<'b, 'arena> Scope<'b, 'arena> {
     fn toplevel(defs: &[Def]) -> Result<Self> {
-        let all_vars = compute_vars(&[], AstBody::Defs(defs))?;
+        let all_vars = compute_vars(&[], &defs)?;
 
         Ok(Self {
             in_using: false,
@@ -490,7 +490,10 @@ impl<'arena> State<'arena> {
     }
 }
 
-fn compute_vars(params: &[FunParam], body: AstBody<'_>) -> Result<IndexSet<String>> {
+fn compute_vars(
+    params: &[FunParam],
+    body: &impl aast_visitor::Node<AstParams<(), String>>,
+) -> Result<IndexSet<String>> {
     hhbc::decl_vars::vars_from_ast(params, &body).map_err(Error::unrecoverable)
 }
 
@@ -1559,7 +1562,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         explicit_capture: Option<IndexSet<String>>,
     ) -> Result<Variables> {
         let parameter_names = get_parameter_names(params);
-        let all_vars = compute_vars(params, AstBody::Stmts(body))?;
+        let all_vars = compute_vars(params, &body)?;
         let explicit_capture = explicit_capture.unwrap_or_default();
         Ok(Variables {
             parameter_names,

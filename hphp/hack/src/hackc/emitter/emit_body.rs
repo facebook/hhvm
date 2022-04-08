@@ -7,11 +7,13 @@ mod reified_generics_helpers;
 mod try_finally_rewriter;
 
 use ast_scope::{Scope, ScopeItem};
+use bitflags::bitflags;
 use class_expr::ClassExpr;
 use emit_pos::emit_pos;
 use emit_statement::emit_final_stmts;
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
+use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 use hash::HashSet;
 use hhbc::{
     decl_vars,
@@ -20,22 +22,17 @@ use hhbc::{
     hhas_type::{self, HhasTypeInfo},
     hhbc_id::function,
     typed_value::TypedValue,
-    AstBody, FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, ParamId, Pseudo,
+    FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, ParamId, Pseudo,
 };
 use hhbc_string_utils as string_utils;
+use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq};
+use ocamlrep::rc::RcOc;
 use options::CompilerFlags;
+use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
 use reified_generics_helpers as RGH;
 use stack_limit::StackLimit;
 use statement_state::StatementState;
-
-use ocamlrep::rc::RcOc;
-use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
-
-use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
-
-use bitflags::bitflags;
-use indexmap::IndexSet;
 
 static THIS: &str = "$this";
 
@@ -69,14 +66,14 @@ pub fn emit_body<'b, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: RcOc<namespace_env::Env>,
-    body: AstBody<'b>,
+    body: &'b [ast::Stmt],
     return_value: InstrSeq<'arena>,
     scope: Scope<'_, 'arena>,
     args: Args<'_, 'arena>,
 ) -> Result<(HhasBody<'arena>, bool, bool)> {
     let tparams: Vec<ast::Tparam> = scope.get_tparams().into_iter().cloned().collect();
     let mut tp_names = get_tp_names(&tparams);
-    let (is_generator, is_pair_generator) = generator::is_function_generator(&body);
+    let (is_generator, is_pair_generator) = generator::is_function_generator(body);
 
     emitter.label_gen_mut().reset();
     emitter.iterator_mut().reset();
@@ -103,7 +100,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
         &scope,
         args.immediate_tparams,
         &params,
-        &body,
+        body,
         args.flags,
     )?;
     let decl_vars: Vec<Str<'arena>> = decl_vars
@@ -126,7 +123,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     env.jump_targets_gen.reset();
 
     // Params are numbered starting from 0, followed by decl_vars.
-    let should_reserve_locals = body_contains_finally(&body, emitter.stack_limit);
+    let should_reserve_locals = body_contains_finally(body, emitter.stack_limit);
     let local_gen = emitter.local_gen_mut();
     let num_locals = params.len() + decl_vars.len();
     local_gen.reset(Local::new(num_locals));
@@ -176,7 +173,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
-    body: AstBody<'_>,
+    body: &[ast::Stmt],
     is_generator: bool,
     deprecation_info: Option<&[TypedValue<'arena>]>,
     pos: &Pos,
@@ -186,7 +183,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
     let stmt_instrs = if flags.contains(Flags::NATIVE) {
         instr::nativeimpl()
     } else {
-        env.do_function(emitter, &body, emit_ast_body)?
+        env.do_function(emitter, body, emit_final_stmts)?
     };
 
     let (begin_label, default_value_setters) =
@@ -259,7 +256,7 @@ fn make_decl_vars<'a, 'arena, 'decl>(
     scope: &Scope<'a, 'arena>,
     immediate_tparams: &[ast::Tparam],
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
-    body: &AstBody<'_>,
+    body: &[ast::Stmt],
     arg_flags: Flags,
 ) -> Result<Vec<String>> {
     let explicit_use_set = &emitter.emit_global_state().explicit_use_set;
@@ -448,80 +445,6 @@ pub fn make_body<'a, 'arena, 'decl>(
         doc_comment: doc_comment.map(|c| Str::new_str(alloc, &(c.0).1)).into(),
         env: body_env.into(),
     })
-}
-
-fn emit_ast_body<'a, 'arena, 'decl>(
-    env: &mut Env<'a, 'arena>,
-    e: &mut Emitter<'arena, 'decl>,
-    body: &AstBody<'_>,
-) -> Result<InstrSeq<'arena>> {
-    match body {
-        AstBody::Defs(p) => emit_defs(env, e, p),
-        AstBody::Stmts(b) => emit_final_stmts(e, env, b),
-    }
-}
-
-fn emit_defs<'a, 'arena, 'decl>(
-    env: &mut Env<'a, 'arena>,
-    emitter: &mut Emitter<'arena, 'decl>,
-    prog: &[ast::Def],
-) -> Result<InstrSeq<'arena>> {
-    use ast::Def;
-    fn emit_def<'a, 'arena, 'decl>(
-        env: &mut Env<'a, 'arena>,
-        emitter: &mut Emitter<'arena, 'decl>,
-        def: &ast::Def,
-    ) -> Result<InstrSeq<'arena>> {
-        match def {
-            Def::Stmt(s) => emit_statement::emit_stmt(emitter, env, s),
-            Def::Namespace(ns) => emit_defs(env, emitter, &ns.1),
-            _ => Ok(instr::empty()),
-        }
-    }
-    fn aux<'a, 'arena, 'decl>(
-        env: &mut Env<'a, 'arena>,
-        emitter: &mut Emitter<'arena, 'decl>,
-        defs: &[ast::Def],
-    ) -> Result<InstrSeq<'arena>> {
-        match defs {
-            [Def::SetNamespaceEnv(ns), ..] => {
-                env.namespace = RcOc::clone(ns);
-                aux(env, emitter, &defs[1..])
-            }
-            [] => emit_statement::emit_dropthrough_return(emitter, env),
-            [Def::Stmt(s)] => {
-                // emit last statement in the list as final statement
-                emit_statement::emit_final_stmt(emitter, env, s)
-            }
-            [Def::Stmt(s1), Def::Stmt(s2)] => match s2.1.as_markup() {
-                Some(id) if id.1.is_empty() => emit_statement::emit_final_stmt(emitter, env, s1),
-                _ => Ok(InstrSeq::gather(vec![
-                    emit_statement::emit_stmt(emitter, env, s1)?,
-                    emit_statement::emit_final_stmt(emitter, env, s2)?,
-                ])),
-            },
-            [def, ..] => Ok(InstrSeq::gather(vec![
-                emit_def(env, emitter, def)?,
-                aux(env, emitter, &defs[1..])?,
-            ])),
-        }
-    }
-
-    match prog {
-        [Def::Stmt(s), ..] if s.1.is_markup() => Ok(InstrSeq::gather(vec![
-            emit_statement::emit_markup(emitter, env, s.1.as_markup().unwrap(), true)?,
-            aux(env, emitter, &prog[1..])?,
-        ])),
-        [] | [_] => aux(env, emitter, prog),
-        [def, ..] => {
-            let i1 = emit_def(env, emitter, def)?;
-            if i1.is_empty() {
-                emit_defs(env, emitter, &prog[1..])
-            } else {
-                Ok(InstrSeq::gather(vec![i1, aux(env, emitter, &prog[1..])?]))
-            }
-        }
-    }
 }
 
 pub fn has_type_constraint<'a, 'arena>(
@@ -864,7 +787,7 @@ fn modify_prog_for_debugger_eval<'arena>(_body_instrs: &mut InstrSeq<'arena>) {
 
 /// Scan through the AST looking to see if the body contains a non-empty
 /// `finally` clause (or a `using` which is morally equivalent).
-fn body_contains_finally(body: &AstBody<'_>, stack_limit: Option<&'_ StackLimit>) -> bool {
+fn body_contains_finally(body: &[ast::Stmt], stack_limit: Option<&'_ StackLimit>) -> bool {
     struct V<'a> {
         has_finally: bool,
         stack_limit: Option<&'a StackLimit>,

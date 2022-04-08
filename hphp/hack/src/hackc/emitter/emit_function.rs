@@ -15,7 +15,6 @@ use hhbc::{
     hhas_function::HhasFunction,
     hhas_pos::HhasSpan,
     hhbc_id::{class::ClassType, function::FunctionType},
-    AstBody,
 };
 use instruction_sequence::instr;
 use naming_special_names_rust::user_attributes as ua;
@@ -135,7 +134,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
             alloc,
             e,
             RcOc::clone(&fd.namespace),
-            AstBody::Stmts(ast_body),
+            ast_body,
             instr::null(),
             scope,
             EmitBodyArgs {

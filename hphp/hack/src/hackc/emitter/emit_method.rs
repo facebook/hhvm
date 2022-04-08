@@ -13,7 +13,7 @@ use hhbc::{
     hhas_method::{HhasMethod, HhasMethodFlags},
     hhas_pos::HhasSpan,
     hhbc_id::method,
-    AstBody, Visibility,
+    Visibility,
 };
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
@@ -267,7 +267,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
             emitter.alloc,
             emitter,
             namespace,
-            AstBody::Stmts(ast_body_block),
+            ast_body_block,
             instr::null(),
             scope,
             emit_body::Args {

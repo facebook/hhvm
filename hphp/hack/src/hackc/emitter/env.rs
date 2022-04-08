@@ -15,7 +15,7 @@ use emitter::Emitter;
 use ffi::{Slice, Str};
 use hhbc::{
     hhas_symbol_refs::{HhasSymbolRefs, IncludePathSet},
-    AstBody, IterId, Label, Local,
+    IterId, Label, Local,
 };
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env::Env as NamespaceEnv};
@@ -188,11 +188,11 @@ impl<'a, 'arena> Env<'a, 'arena> {
     pub fn do_function<'decl, R, F>(
         &mut self,
         e: &mut Emitter<'arena, 'decl>,
-        defs: &AstBody<'_>,
+        defs: &[ast::Stmt],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl>, &AstBody<'_>) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl>, &[ast::Stmt]) -> R,
     {
         self.jump_targets_gen.with_function();
         self.run_and_release_ids(e, |env, e| f(env, e, defs))

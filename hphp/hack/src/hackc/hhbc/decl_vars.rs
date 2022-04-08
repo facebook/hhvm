@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{ast_body::AstBody, hhas_param::HhasParam, hhbc_ast::Label};
+use crate::{hhas_param::HhasParam, Label};
 use ffi::{Just, Maybe};
 use hash::IndexSet;
 use naming_special_names_rust::{emitter_special_functions, special_idents};
@@ -223,7 +223,7 @@ fn uls_from_ast<P, F1, F2>(
     get_param_name: F1,
     get_param_default_value: F2,
     explicit_use_set_opt: Option<&SSet>,
-    b: &AstBody<'_>,
+    body: &impl Node<AstParams<(), String>>,
 ) -> Result<impl Iterator<Item = String>, String>
 where
     F1: Fn(&P) -> &str,
@@ -236,7 +236,7 @@ where
             visitor.visit_expr(&mut (), e)?;
         }
     }
-    visit(&mut visitor, &mut (), b)?;
+    visit(&mut visitor, &mut (), body)?;
     for param in params {
         visitor.locals.shift_remove(get_param_name(param));
     }
@@ -245,7 +245,7 @@ where
 
 pub fn from_ast<'arena>(
     params: &[(HhasParam<'arena>, Option<(Label, Expr)>)],
-    body: &AstBody<'_>,
+    body: &[Stmt],
     explicit_use_set: &SSet,
 ) -> Result<Vec<String>, String> {
     let decl_vars = uls_from_ast(
@@ -253,18 +253,21 @@ pub fn from_ast<'arena>(
         |(param, _)| param.name.unsafe_as_str(),
         |(_, default_value)| Maybe::from(default_value.as_ref().map(|x| &x.1)),
         Some(explicit_use_set),
-        body,
+        &body,
     )?;
     Ok(decl_vars.collect())
 }
 
-pub fn vars_from_ast(params: &[FunParam], b: &AstBody<'_>) -> Result<IndexSet<String>, String> {
+pub fn vars_from_ast(
+    params: &[FunParam],
+    body: &impl Node<AstParams<(), String>>,
+) -> Result<IndexSet<String>, String> {
     let decl_vars = uls_from_ast(
         params,
         |p| &p.name,                      // get_param_name
         |p| Maybe::from(p.expr.as_ref()), // get_param_default_value
         None,                             // explicit_use_set_opt
-        b,
+        body,
     )?;
     Ok(decl_vars.collect())
 }

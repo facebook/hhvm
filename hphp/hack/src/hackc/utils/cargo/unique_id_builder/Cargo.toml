@@ -6,6 +6,3 @@ edition = "2021"
 
 [lib]
 path = "../../unique_id_builder.rs"
-
-[dependencies]
-ast_scope = { path = "../../../emitter/cargo/ast_scope" }

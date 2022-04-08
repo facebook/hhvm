@@ -5,7 +5,7 @@
 
 use error::{Error, Result};
 use ffi::Pair;
-use hhbc::{hhbc_id::class, typed_value::TypedValue};
+use hhbc::typed_value::TypedValue;
 use hhbc_string_utils as string_utils;
 use naming_special_names_rust::classes;
 use options::Options;
@@ -101,7 +101,7 @@ fn shape_field_name<'arena>(alloc: &'arena bumpalo::Bump, sf: &ShapeFieldName) -
             )
         }
         ShapeFieldName::SFclassConst(Id(_, cname), (_, s)) => {
-            let id = class::ClassType::from_ast_name_and_mangle(alloc, cname);
+            let id = hhbc::ClassName::from_ast_name_and_mangle(alloc, cname);
             (format!("{}::{}", id.unsafe_as_str(), s), true)
         }
     }
@@ -186,7 +186,7 @@ fn resolve_classname<'arena>(
 ) -> (Option<Pair<TypedValue<'arena>, TypedValue<'arena>>>, String) {
     let is_tparam = s == "_" || tparams.contains(&s.as_str());
     if !is_tparam {
-        s = class::ClassType::from_ast_name_and_mangle(alloc, s.as_str()).unsafe_into_string()
+        s = hhbc::ClassName::from_ast_name_and_mangle(alloc, s.as_str()).unsafe_into_string()
     };
     if is_prim(&s) || is_resolved_classname(&s) {
         (None, s)
@@ -234,7 +234,7 @@ fn root_to_string<'arena>(alloc: &'arena bumpalo::Bump, s: &str) -> String {
     if s == "this" {
         string_utils::prefix_namespace("HH", s)
     } else {
-        class::ClassType::from_ast_name_and_mangle(alloc, s).unsafe_into_string()
+        hhbc::ClassName::from_ast_name_and_mangle(alloc, s).unsafe_into_string()
     }
 }
 

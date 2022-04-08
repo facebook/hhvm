@@ -5,7 +5,7 @@
 
 use crate::{
     hhas_attribute::HhasAttribute, hhas_pos::HhasSpan, hhas_type::HhasTypeInfo,
-    hhbc_id::class::ClassType, typed_value::TypedValue,
+    typed_value::TypedValue, ClassName,
 };
 use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
@@ -13,7 +13,7 @@ use hhvm_types_ffi::ffi::Attr;
 #[derive(Debug)]
 #[repr(C)]
 pub struct HhasTypedef<'arena> {
-    pub name: ClassType<'arena>,
+    pub name: ClassName<'arena>,
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub type_info: HhasTypeInfo<'arena>,
     pub type_structure: TypedValue<'arena>,

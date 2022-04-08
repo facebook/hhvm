@@ -7,7 +7,7 @@ use emit_property::PropAndInit;
 use env::emitter::Emitter;
 use error::{Error, Result};
 use hack_macro::{hack_expr, hack_stmts};
-use hhbc::{hhas_method::HhasMethod, hhas_xhp_attribute::HhasXhpAttribute, hhbc_id::class};
+use hhbc::{hhas_method::HhasMethod, hhas_xhp_attribute::HhasXhpAttribute};
 use hhbc_string_utils as string_utils;
 use oxidized::{ast::*, ast_defs, pos::Pos};
 
@@ -295,7 +295,7 @@ fn emit_xhp_attribute_array<'arena>(
         id: &str,
         enum_opt: Option<&Vec<Expr>>,
     ) -> Result<(Expr, Expr)> {
-        let id = class::ClassType::from_ast_name_and_mangle(alloc, id).unsafe_as_str();
+        let id = hhbc::ClassName::from_ast_name_and_mangle(alloc, id).unsafe_as_str();
         let type_ = hint_to_num(id);
         let type_ident = mk_expr(Expr_::Int(type_.to_string()));
         let class_name = match type_ {

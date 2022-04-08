@@ -6,7 +6,7 @@
 use crate::{
     hhas_attribute::HhasAttribute, hhas_coeffects::HhasCtxConstant, hhas_constant::HhasConstant,
     hhas_method::HhasMethod, hhas_pos::HhasSpan, hhas_property::HhasProperty,
-    hhas_type::HhasTypeInfo, hhas_type_const::HhasTypeConstant, hhbc_id::class::ClassType,
+    hhas_type::HhasTypeInfo, hhas_type_const::HhasTypeConstant, ClassName,
 };
 use ffi::{Maybe, Pair, Quadruple, Slice, Str, Triple};
 use hhvm_types_ffi::ffi::Attr;
@@ -22,21 +22,21 @@ pub enum TraitReqKind {
 #[repr(C)]
 pub struct HhasClass<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
-    pub base: Maybe<ClassType<'arena>>,
-    pub implements: Slice<'arena, ClassType<'arena>>,
-    pub enum_includes: Slice<'arena, ClassType<'arena>>,
-    pub name: ClassType<'arena>,
+    pub base: Maybe<ClassName<'arena>>,
+    pub implements: Slice<'arena, ClassName<'arena>>,
+    pub enum_includes: Slice<'arena, ClassName<'arena>>,
+    pub name: ClassName<'arena>,
     pub span: HhasSpan,
     pub uses: Slice<'arena, Str<'arena>>,
     // Deprecated - kill please
     pub use_aliases: Slice<
         'arena,
-        Quadruple<Maybe<ClassType<'arena>>, ClassType<'arena>, Maybe<ClassType<'arena>>, Attr>,
+        Quadruple<Maybe<ClassName<'arena>>, ClassName<'arena>, Maybe<ClassName<'arena>>, Attr>,
     >,
     // Deprecated - kill please
     pub use_precedences: Slice<
         'arena,
-        Triple<ClassType<'arena>, ClassType<'arena>, Slice<'arena, ClassType<'arena>>>,
+        Triple<ClassName<'arena>, ClassName<'arena>, Slice<'arena, ClassName<'arena>>>,
     >,
     pub enum_type: Maybe<HhasTypeInfo<'arena>>,
     pub methods: Slice<'arena, HhasMethod<'arena>>,
@@ -44,7 +44,7 @@ pub struct HhasClass<'arena> {
     pub constants: Slice<'arena, HhasConstant<'arena>>,
     pub type_constants: Slice<'arena, HhasTypeConstant<'arena>>,
     pub ctx_constants: Slice<'arena, HhasCtxConstant<'arena>>, // TODO(SF, 2021-0811): HhasCtxConstant is part of Steve's HhasCoeffect work
-    pub requirements: Slice<'arena, Pair<ClassType<'arena>, TraitReqKind>>,
+    pub requirements: Slice<'arena, Pair<ClassName<'arena>, TraitReqKind>>,
     pub upper_bounds: Slice<'arena, Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub flags: Attr,

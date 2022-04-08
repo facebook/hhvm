@@ -237,91 +237,91 @@ mod fixups {
                 replace_imm("arg2", ImmType::IVA, ImmType::OA("StackIndex"))
             ],
             "CheckProp" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("PropId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("PropName")),
             ],
             "ClsCns" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstId"))
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstName"))
             ],
             "ClsCnsD" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstId")),
-                replace_imm("str2", ImmType::SA, ImmType::OAL("ClassId"))
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstName")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("ClassName"))
             ],
             "CnsE" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstName")),
             ],
             "CreateCl" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("NumParams")),
                 replace_imm("arg2", ImmType::IVA, ImmType::OA("ClassNum")),
             ],
             "FCallClsMethodD" => vec![
-                replace_imm("str3", ImmType::SA, ImmType::OAL("ClassId")),
-                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodId")),
+                replace_imm("str3", ImmType::SA, ImmType::OAL("ClassName")),
+                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "FCallClsMethodSD" => vec![
-                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodId")),
+                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "FCallFuncD" => vec![
-                replace_imm("str2", ImmType::SA, ImmType::OAL("FunctionId")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("FunctionName")),
             ],
             "FCallObjMethodD" => vec![
-                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodId")),
+                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "IncDecM" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
             ],
             "InitProp" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("PropId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("PropName")),
             ],
             "InstanceOfD" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
             ],
             "LazyClass" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
             ],
             "MemoGetEager" => vec![
                 replace_imm("target1", ImmType::BA, ImmType::BA2),
                 remove_imm("target2"),
             ],
             "NewObjD" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
             ],
             "NewObjRD" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
             ],
             "QueryM" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
             ],
             "ResolveClass" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
             ],
             "ResolveClsMethod" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("MethodId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "ResolveClsMethodD" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
-                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "ResolveClsMethodS" => vec![
-                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodId")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "ResolveFunc" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionName")),
             ],
             "ResolveMethCaller" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionName")),
             ],
             "ResolveRClsMethod" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("MethodId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "ResolveRClsMethodD" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
-                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "ResolveRClsMethodS" => vec![
-                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodId")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "ResolveRFunc" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionId")),
+                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionName")),
             ],
             "RetM" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
@@ -346,13 +346,13 @@ mod fixups {
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
             ],
             "VerifyOutType" => vec![
-                replace_imm("arg1", ImmType::IVA, ImmType::OAL("ParamId")),
+                replace_imm("arg1", ImmType::IVA, ImmType::OAL("ParamName")),
             ],
             "VerifyParamType" => vec![
-                replace_imm("loc1", ImmType::ILA, ImmType::OAL("ParamId")),
+                replace_imm("loc1", ImmType::ILA, ImmType::OAL("ParamName")),
             ],
             "VerifyParamTypeTS" => vec![
-                replace_imm("loc1", ImmType::ILA, ImmType::OAL("ParamId")),
+                replace_imm("loc1", ImmType::ILA, ImmType::OAL("ParamName")),
             ],
         }
     }

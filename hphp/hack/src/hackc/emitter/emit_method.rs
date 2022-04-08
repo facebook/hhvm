@@ -12,7 +12,6 @@ use hhbc::{
     hhas_coeffects::HhasCoeffects,
     hhas_method::{HhasMethod, HhasMethodFlags},
     hhas_pos::HhasSpan,
-    hhbc_id::method,
     Visibility,
 };
 use hhbc_string_utils as string_utils;
@@ -286,13 +285,13 @@ pub fn from_ast<'a, 'arena, 'decl>(
     };
     let name = {
         if is_memoize {
-            method::MethodType::from_ast_name_and_suffix(
+            hhbc::MethodName::from_ast_name_and_suffix(
                 emitter.alloc,
                 &method.name.1,
                 emit_memoize_helpers::MEMOIZE_SUFFIX,
             )
         } else {
-            method::MethodType::from_ast_name(emitter.alloc, &method.name.1)
+            hhbc::MethodName::from_ast_name(emitter.alloc, &method.name.1)
         }
     };
     let span = if is_native_opcode_impl {

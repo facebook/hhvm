@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{hhbc_id, typed_value::TypedValue};
+use crate::{typed_value::TypedValue, PropName};
 use ffi::{Slice, Str};
 
 pub use crate::opcodes::Opcode;
@@ -21,19 +21,13 @@ pub use hhvm_hhbc_defs_ffi::ffi::{
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum ParamId<'arena> {
+pub enum ParamName<'arena> {
     ParamUnnamed(isize),
     ParamNamed(Str<'arena>),
 }
 
 pub type StackIndex = u32;
 pub type ClassNum = u32;
-
-pub type ClassId<'arena> = hhbc_id::class::ClassType<'arena>;
-pub type FunctionId<'arena> = hhbc_id::function::FunctionType<'arena>;
-pub type MethodId<'arena> = hhbc_id::method::MethodType<'arena>;
-pub type ConstId<'arena> = hhbc_id::constant::ConstType<'arena>;
-pub type PropId<'arena> = hhbc_id::prop::PropType<'arena>;
 
 /// HHBC encodes bytecode offsets as i32 (HPHP::Offset) so u32
 /// is plenty of range for label ids.
@@ -191,8 +185,8 @@ pub enum MemberKey<'arena> {
     EI(i64, ReadonlyOp),
     PC(StackIndex, ReadonlyOp),
     PL(Local, ReadonlyOp),
-    PT(PropId<'arena>, ReadonlyOp),
-    QT(PropId<'arena>, ReadonlyOp),
+    PT(PropName<'arena>, ReadonlyOp),
+    QT(PropName<'arena>, ReadonlyOp),
     W,
 }
 

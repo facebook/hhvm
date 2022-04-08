@@ -6,7 +6,7 @@
 use env::emitter::Emitter;
 use error::Result;
 use ffi::{Maybe, Slice, Str};
-use hhbc::{hhas_module::HhasModule, hhas_pos::HhasSpan, hhbc_id::class::ClassType};
+use hhbc::{hhas_module::HhasModule, hhas_pos::HhasSpan, ClassName};
 use oxidized::ast;
 
 pub fn emit_module<'a, 'arena, 'decl>(
@@ -15,7 +15,7 @@ pub fn emit_module<'a, 'arena, 'decl>(
     ast_module: &'a ast::Module,
 ) -> Result<HhasModule<'arena>> {
     let attributes = emit_attribute::from_asts(emitter, &ast_module.user_attributes)?;
-    let name = ClassType::from_ast_name_and_mangle(alloc, &ast_module.name.1);
+    let name = ClassName::from_ast_name_and_mangle(alloc, &ast_module.name.1);
     let span = HhasSpan::from_pos(&ast_module.span);
     Ok(HhasModule {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),

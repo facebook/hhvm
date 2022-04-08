@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{
-    hhas_attribute::HhasAttribute, hhas_type::HhasTypeInfo, hhbc_ast::Visibility, hhbc_id,
-    typed_value::TypedValue,
+    hhas_attribute::HhasAttribute, hhas_type::HhasTypeInfo, hhbc_ast::Visibility,
+    typed_value::TypedValue, PropName,
 };
 use ffi::{Maybe, Slice, Str};
 use hhvm_types_ffi::ffi::Attr;
@@ -13,7 +13,7 @@ use hhvm_types_ffi::ffi::Attr;
 #[derive(Debug)]
 #[repr(C)]
 pub struct HhasProperty<'arena> {
-    pub name: hhbc_id::prop::PropType<'arena>,
+    pub name: PropName<'arena>,
     pub flags: Attr,
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub visibility: Visibility,

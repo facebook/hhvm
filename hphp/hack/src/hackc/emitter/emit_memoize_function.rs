@@ -16,7 +16,6 @@ use hhbc::{
     hhas_param::HhasParam,
     hhas_pos::HhasSpan,
     hhas_type::HhasTypeInfo,
-    hhbc_id::function,
     typed_value::TypedValue,
     FCallArgs, FCallArgsFlags, Label, Local, LocalRange,
 };
@@ -69,8 +68,8 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
 
 pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    original_id: function::FunctionType<'arena>,
-    renamed_id: &function::FunctionType<'arena>,
+    original_id: hhbc::FunctionName<'arena>,
+    renamed_id: &hhbc::FunctionName<'arena>,
     deprecation_info: Option<&[TypedValue<'arena>]>,
     fd: &'a T::FunDef,
 ) -> Result<HhasFunction<'arena>> {
@@ -153,7 +152,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
     deprecation_info: Option<&[TypedValue<'arena>]>,
     hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
     ast_params: &[T::FunParam],
-    renamed_id: function::FunctionType<'arena>,
+    renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
@@ -185,7 +184,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     deprecation_info: Option<&[TypedValue<'arena>]>,
     hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
     ast_params: &[T::FunParam],
-    renamed_id: function::FunctionType<'arena>,
+    renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
@@ -296,7 +295,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    renamed_id: function::FunctionType<'arena>,
+    renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
 ) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     let alloc = e.alloc;

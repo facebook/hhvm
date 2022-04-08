@@ -5,7 +5,7 @@
 
 use crate::{
     hhas_attribute::HhasAttribute, hhas_body::HhasBody, hhas_coeffects::HhasCoeffects,
-    hhas_pos::HhasSpan, hhbc_ast::Visibility, hhbc_id::method::MethodType,
+    hhas_pos::HhasSpan, hhbc_ast::Visibility, MethodName,
 };
 use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
@@ -17,7 +17,7 @@ use bitflags::bitflags;
 pub struct HhasMethod<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub visibility: Visibility,
-    pub name: MethodType<'arena>,
+    pub name: MethodName<'arena>,
     pub body: HhasBody<'arena>,
     pub span: HhasSpan,
     pub coeffects: HhasCoeffects<'arena>,

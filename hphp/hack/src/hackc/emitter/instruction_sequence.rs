@@ -5,11 +5,11 @@
 
 use ffi::{BumpSliceMut, Slice, Str};
 use hhbc::{
-    AdataId, BareThisOp, ClassId, ClassNum, CollectionType, ConstId, ContCheckOp, FCallArgs,
-    FatalOp, FunctionId, IncDecOp, InitPropOp, Instruct, IsLogAsDynamicCallOp, IsTypeOp, IterArgs,
-    IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp,
-    ObjMethodOp, Opcode, ParamId, PropId, Pseudo, QueryMOp, ReadonlyOp, SetOpOp, SilenceOp,
-    SpecialClsRef, SrcLoc, StackIndex, SwitchKind, TypeStructResolveOp,
+    AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, FCallArgs,
+    FatalOp, FunctionName, IncDecOp, InitPropOp, Instruct, IsLogAsDynamicCallOp, IsTypeOp,
+    IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodName, NumParams,
+    OODeclExistsOp, ObjMethodOp, Opcode, ParamName, PropName, Pseudo, QueryMOp, ReadonlyOp,
+    SetOpOp, SilenceOp, SpecialClsRef, SrcLoc, StackIndex, SwitchKind, TypeStructResolveOp,
 };
 
 /// The various from_X functions below take some kind of AST
@@ -238,11 +238,11 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::True))
     }
 
-    pub fn clscnsd<'a>(const_id: ConstId<'a>, cid: ClassId<'a>) -> InstrSeq<'a> {
+    pub fn clscnsd<'a>(const_id: ConstName<'a>, cid: ClassName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ClsCnsD(const_id, cid)))
     }
 
-    pub fn clscns<'a>(const_id: ConstId<'a>) -> InstrSeq<'a> {
+    pub fn clscns<'a>(const_id: ConstName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ClsCns(const_id)))
     }
 
@@ -338,7 +338,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::Nop))
     }
 
-    pub fn instanceofd<'a>(s: ClassId<'a>) -> InstrSeq<'a> {
+    pub fn instanceofd<'a>(s: ClassName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::InstanceOfD(s)))
     }
 
@@ -605,11 +605,11 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::PopL(l)))
     }
 
-    pub fn initprop<'a>(pid: PropId<'a>, op: InitPropOp) -> InstrSeq<'a> {
+    pub fn initprop<'a>(pid: PropName<'a>, op: InitPropOp) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::InitProp(pid, op)))
     }
 
-    pub fn checkprop<'a>(pid: PropId<'a>) -> InstrSeq<'a> {
+    pub fn checkprop<'a>(pid: PropName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::CheckProp(pid)))
     }
 
@@ -671,7 +671,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::NewObjR))
     }
 
-    pub fn newobjd<'a>(id: ClassId<'a>) -> InstrSeq<'a> {
+    pub fn newobjd<'a>(id: ClassName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::NewObjD(id)))
     }
 
@@ -687,7 +687,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::Keyset(id)))
     }
 
-    pub fn newobjrd<'a>(id: ClassId<'a>) -> InstrSeq<'a> {
+    pub fn newobjrd<'a>(id: ClassName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::NewObjRD(id)))
     }
 
@@ -796,15 +796,15 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::VerifyRetTypeTS))
     }
 
-    pub fn verify_out_type<'a>(i: ParamId<'a>) -> InstrSeq<'a> {
+    pub fn verify_out_type<'a>(i: ParamName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::VerifyOutType(i)))
     }
 
-    pub fn verify_param_type<'a>(i: ParamId<'a>) -> InstrSeq<'a> {
+    pub fn verify_param_type<'a>(i: ParamName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::VerifyParamType(i)))
     }
 
-    pub fn verify_param_type_ts<'a>(i: ParamId<'a>) -> InstrSeq<'a> {
+    pub fn verify_param_type_ts<'a>(i: ParamName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::VerifyParamTypeTS(i)))
     }
 
@@ -812,11 +812,11 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::Dim(op, key)))
     }
 
-    pub fn dim_warn_pt<'a>(key: PropId<'a>, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
+    pub fn dim_warn_pt<'a>(key: PropName<'a>, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
         dim(MOpMode::Warn, MemberKey::PT(key, readonly_op))
     }
 
-    pub fn dim_define_pt<'a>(key: PropId<'a>, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
+    pub fn dim_define_pt<'a>(key: PropName<'a>, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
         dim(MOpMode::Define, MemberKey::PT(key, readonly_op))
     }
 
@@ -833,8 +833,8 @@ pub mod instr {
 
     pub fn fcallclsmethodd<'a>(
         fcall_args: FCallArgs<'a>,
-        method: MethodId<'a>,
-        class: ClassId<'a>,
+        method: MethodName<'a>,
+        class: ClassName<'a>,
     ) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallClsMethodD(
             fcall_args,
@@ -855,7 +855,7 @@ pub mod instr {
     pub fn fcallclsmethodsd<'a>(
         fcall_args: FCallArgs<'a>,
         clsref: SpecialClsRef,
-        method: MethodId<'a>,
+        method: MethodName<'a>,
     ) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallClsMethodSD(
             fcall_args,
@@ -876,7 +876,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::FCallFunc(fcall_args)))
     }
 
-    pub fn fcallfuncd<'a>(fcall_args: FCallArgs<'a>, func: FunctionId<'a>) -> InstrSeq<'a> {
+    pub fn fcallfuncd<'a>(fcall_args: FCallArgs<'a>, func: FunctionName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallFuncD(fcall_args, func)))
     }
 
@@ -890,7 +890,7 @@ pub mod instr {
 
     pub fn fcallobjmethodd<'a>(
         fcall_args: FCallArgs<'a>,
-        method: MethodId<'a>,
+        method: MethodName<'a>,
         flavor: ObjMethodOp,
     ) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallObjMethodD(
@@ -903,7 +903,7 @@ pub mod instr {
 
     pub fn fcallobjmethodd_nullthrows<'a>(
         fcall_args: FCallArgs<'a>,
-        method: MethodId<'a>,
+        method: MethodName<'a>,
     ) -> InstrSeq<'a> {
         fcallobjmethodd(fcall_args, method, ObjMethodOp::NullThrows)
     }
@@ -914,7 +914,7 @@ pub mod instr {
 
     pub fn querym_cget_pt<'a>(
         num_params: NumParams,
-        key: PropId<'a>,
+        key: PropName<'a>,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         querym(num_params, QueryMOp::CGet, MemberKey::PT(key, readonly_op))
@@ -938,61 +938,67 @@ pub mod instr {
 
     pub fn setm_pt<'a>(
         num_params: NumParams,
-        key: PropId<'a>,
+        key: PropName<'a>,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         setm(num_params, MemberKey::PT(key, readonly_op))
     }
 
-    pub fn resolve_func<'a>(func_id: FunctionId<'a>) -> InstrSeq<'a> {
+    pub fn resolve_func<'a>(func_id: FunctionName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ResolveFunc(func_id)))
     }
 
-    pub fn resolve_rfunc<'a>(func_id: FunctionId<'a>) -> InstrSeq<'a> {
+    pub fn resolve_rfunc<'a>(func_id: FunctionName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ResolveRFunc(func_id)))
     }
 
-    pub fn resolveclsmethod<'a>(method_id: MethodId<'a>) -> InstrSeq<'a> {
+    pub fn resolveclsmethod<'a>(method_id: MethodName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ResolveClsMethod(method_id)))
     }
 
-    pub fn resolveclsmethodd<'a>(class_id: ClassId<'a>, method_id: MethodId<'a>) -> InstrSeq<'a> {
+    pub fn resolveclsmethodd<'a>(
+        class_id: ClassName<'a>,
+        method_id: MethodName<'a>,
+    ) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ResolveClsMethodD(
             class_id, method_id,
         )))
     }
 
-    pub fn resolveclsmethods<'a>(scref: SpecialClsRef, method_id: MethodId<'a>) -> InstrSeq<'a> {
+    pub fn resolveclsmethods<'a>(scref: SpecialClsRef, method_id: MethodName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ResolveClsMethodS(
             scref, method_id,
         )))
     }
 
-    pub fn resolverclsmethod<'a>(method_id: MethodId<'a>) -> InstrSeq<'a> {
+    pub fn resolverclsmethod<'a>(method_id: MethodName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ResolveRClsMethod(method_id)))
     }
 
-    pub fn resolverclsmethodd<'a>(class_id: ClassId<'a>, method_id: MethodId<'a>) -> InstrSeq<'a> {
+    pub fn resolverclsmethodd<'a>(
+        class_id: ClassName<'a>,
+        method_id: MethodName<'a>,
+    ) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ResolveRClsMethodD(
             class_id, method_id,
         )))
     }
 
-    pub fn resolverclsmethods<'a>(scref: SpecialClsRef, method_id: MethodId<'a>) -> InstrSeq<'a> {
+    pub fn resolverclsmethods<'a>(scref: SpecialClsRef, method_id: MethodName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ResolveRClsMethodS(
             scref, method_id,
         )))
     }
 
-    pub fn resolve_meth_caller<'a>(fun_id: FunctionId<'a>) -> InstrSeq<'a> {
+    pub fn resolve_meth_caller<'a>(fun_id: FunctionName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ResolveMethCaller(fun_id)))
     }
 
-    pub fn resolveclass<'a>(class_id: ClassId<'a>) -> InstrSeq<'a> {
+    pub fn resolveclass<'a>(class_id: ClassName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::ResolveClass(class_id)))
     }
 
-    pub fn lazyclass<'a>(class_id: ClassId<'a>) -> InstrSeq<'a> {
+    pub fn lazyclass<'a>(class_id: ClassName<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::LazyClass(class_id)))
     }
 

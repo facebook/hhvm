@@ -5,7 +5,7 @@
 
 use crate::{
     hhas_attribute::HhasAttribute, hhas_body::HhasBody, hhas_coeffects::HhasCoeffects,
-    hhas_param::HhasParam, hhas_pos::HhasSpan, hhbc_id::function::FunctionType,
+    hhas_param::HhasParam, hhas_pos::HhasSpan, FunctionName,
 };
 use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
@@ -16,7 +16,7 @@ use bitflags::bitflags;
 #[repr(C)]
 pub struct HhasFunction<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
-    pub name: FunctionType<'arena>,
+    pub name: FunctionName<'arena>,
     pub body: HhasBody<'arena>,
 
     pub span: HhasSpan,

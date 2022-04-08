@@ -7,11 +7,11 @@ use crate::print;
 use ffi::Str;
 use hash::HashSet;
 use hhbc::{
-    AdataId, BareThisOp, ClassId, ClassNum, CollectionType, ConstId, ContCheckOp, FCallArgs,
-    FatalOp, FunctionId, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId,
-    Label, Local, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp, ObjMethodOp,
-    Opcode, ParamId, PropId, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef,
-    StackIndex, SwitchKind, TypeStructResolveOp,
+    AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, FCallArgs,
+    FatalOp, FunctionName, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId,
+    Label, Local, LocalRange, MOpMode, MemberKey, MethodName, NumParams, OODeclExistsOp,
+    ObjMethodOp, Opcode, ParamName, PropName, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SilenceOp,
+    SpecialClsRef, StackIndex, SwitchKind, TypeStructResolveOp,
 };
 use hhbc_string_utils::float;
 use print_opcode::{PrintOpcode, PrintOpcodeTypes};
@@ -162,11 +162,11 @@ fn print_adata_id(w: &mut dyn Write, id: &AdataId<'_>) -> Result<()> {
     print_str(w, id)
 }
 
-fn print_class_id(w: &mut dyn Write, id: &ClassId<'_>) -> Result<()> {
+fn print_class_name(w: &mut dyn Write, id: &ClassName<'_>) -> Result<()> {
     print_quoted_str(w, &id.as_ffi_str())
 }
 
-fn print_const_id(w: &mut dyn Write, id: &ConstId<'_>) -> Result<()> {
+fn print_const_name(w: &mut dyn Write, id: &ConstName<'_>) -> Result<()> {
     print_quoted_str(w, &id.as_ffi_str())
 }
 
@@ -174,7 +174,7 @@ fn print_double(w: &mut dyn Write, d: f64) -> Result<()> {
     write!(w, "{}", float::to_string(d))
 }
 
-fn print_function_id(w: &mut dyn Write, id: &FunctionId<'_>) -> Result<()> {
+fn print_function_name(w: &mut dyn Write, id: &FunctionName<'_>) -> Result<()> {
     print_quoted_str(w, &id.as_ffi_str())
 }
 
@@ -244,13 +244,13 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[Str<'_
         }
         M::PT(id, op) => {
             w.write_all(b"PT:")?;
-            print_prop_id(w, id)?;
+            print_prop_name(w, id)?;
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
         M::QT(id, op) => {
             w.write_all(b"QT:")?;
-            print_prop_id(w, id)?;
+            print_prop_name(w, id)?;
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
@@ -258,18 +258,18 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[Str<'_
     }
 }
 
-fn print_method_id(w: &mut dyn Write, id: &MethodId<'_>) -> Result<()> {
+fn print_method_name(w: &mut dyn Write, id: &MethodName<'_>) -> Result<()> {
     print_quoted_str(w, &id.as_ffi_str())
 }
 
-fn print_param_id(w: &mut dyn Write, param_id: &ParamId<'_>) -> Result<()> {
-    match param_id {
-        ParamId::ParamUnnamed(i) => w.write_all(i.to_string().as_bytes()),
-        ParamId::ParamNamed(s) => w.write_all(s),
+fn print_param_name(w: &mut dyn Write, param_name: &ParamName<'_>) -> Result<()> {
+    match param_name {
+        ParamName::ParamUnnamed(i) => w.write_all(i.to_string().as_bytes()),
+        ParamName::ParamNamed(s) => w.write_all(s),
     }
 }
 
-pub(crate) fn print_prop_id(w: &mut dyn Write, id: &PropId<'_>) -> Result<()> {
+pub(crate) fn print_prop_name(w: &mut dyn Write, id: &PropName<'_>) -> Result<()> {
     print_quoted_str(w, &id.as_ffi_str())
 }
 

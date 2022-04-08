@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod hhbc_ast;
+mod hhbc_id;
 
 pub mod decl_vars;
 pub mod hackc_unit;
@@ -24,15 +25,15 @@ pub mod hhas_type;
 pub mod hhas_type_const;
 pub mod hhas_typedef;
 pub mod hhas_xhp_attribute;
-pub mod hhbc_id;
 pub mod opcodes;
 pub mod typed_value;
 
 pub use hhbc_ast::{
-    AdataId, BareThisOp, ClassId, ClassNum, ClassishKind, CollectionType, ConstId, ContCheckOp,
-    FCallArgs, FCallArgsFlags, FatalOp, FunctionId, HasGenericsOp, IncDecOp, InitPropOp, Instruct,
-    IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey,
-    MethodId, NumParams, OODeclExistsOp, ObjMethodOp, Opcode, ParamId, PropId, Pseudo, QueryMOp,
-    ReadonlyOp, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SrcLoc, StackIndex, SwitchKind,
-    TypeStructResolveOp, Visibility,
+    AdataId, BareThisOp, ClassNum, ClassishKind, CollectionType, ContCheckOp, FCallArgs,
+    FCallArgsFlags, FatalOp, HasGenericsOp, IncDecOp, InitPropOp, Instruct, IsLogAsDynamicCallOp,
+    IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey, NumParams,
+    OODeclExistsOp, ObjMethodOp, Opcode, ParamName, Pseudo, QueryMOp, ReadonlyOp, SetOpOp,
+    SetRangeOp, SilenceOp, SpecialClsRef, SrcLoc, StackIndex, SwitchKind, TypeStructResolveOp,
+    Visibility,
 };
+pub use hhbc_id::{ClassName, ConstName, FunctionName, MethodName, PropName};

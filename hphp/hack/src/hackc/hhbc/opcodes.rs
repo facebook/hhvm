@@ -3,12 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::hhbc_ast::{
-    AdataId, BareThisOp, ClassId, ClassNum, CollectionType, ConstId, ContCheckOp, FCallArgs,
-    FatalOp, FunctionId, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId,
-    Label, Local, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp, ObjMethodOp,
-    ParamId, PropId, QueryMOp, ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp, SilenceOp,
-    SpecialClsRef, StackIndex, SwitchKind, Targets, TypeStructResolveOp,
+use crate::{
+    hhbc_ast::{
+        AdataId, BareThisOp, ClassNum, CollectionType, ContCheckOp, FCallArgs, FatalOp, IncDecOp,
+        InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId, Label, Local, LocalRange,
+        MOpMode, MemberKey, NumParams, OODeclExistsOp, ObjMethodOp, ParamName, QueryMOp,
+        ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, StackIndex,
+        SwitchKind, Targets, TypeStructResolveOp,
+    },
+    ClassName, ConstName, FunctionName, MethodName, PropName,
 };
 use emit_opcodes_macro::Targets;
 use ffi::{BumpSliceMut, Slice, Str};

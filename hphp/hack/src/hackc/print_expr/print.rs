@@ -10,7 +10,7 @@ use crate::{
 use bstr::{BString, ByteSlice};
 use core_utils_rust::add_ns;
 use error::ErrorKind;
-use hhbc::{hhas_body::HhasBodyEnv, hhbc_id::class::ClassType};
+use hhbc::{hhas_body::HhasBodyEnv, ClassName};
 use hhbc_string_utils::{
     integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
     strip_global_ns, strip_ns, types,
@@ -258,7 +258,7 @@ fn print_expr(
 
         if env.is_some() {
             let alloc = bumpalo::Bump::new();
-            let class_id = ClassType::from_ast_name_and_mangle(&alloc, id);
+            let class_id = ClassName::from_ast_name_and_mangle(&alloc, id);
             let id = class_id.unsafe_as_str();
             get(should_format, is_class_constant, id)
                 .into_owned()
@@ -400,7 +400,7 @@ fn print_expr(
                             lstrip(
                                 &adjust_id(
                                     env,
-                                    ClassType::from_ast_name_and_mangle(
+                                    ClassName::from_ast_name_and_mangle(
                                         &bumpalo::Bump::new(),
                                         cname,
                                     )

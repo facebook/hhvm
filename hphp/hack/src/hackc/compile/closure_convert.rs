@@ -8,7 +8,7 @@ use error::{Error, Result};
 use global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hack_macro::hack_expr;
 use hash::IndexSet;
-use hhbc::{hhas_coeffects::HhasCoeffects, hhbc_id::class};
+use hhbc::hhas_coeffects::HhasCoeffects;
 use hhbc_string_utils as string_utils;
 use itertools::Itertools;
 use naming_special_names_rust::{
@@ -1181,7 +1181,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
                             let alloc = bumpalo::Bump::new();
                             let id = cid.as_ciexpr().unwrap().as_id().unwrap();
                             let mangled_class_name =
-                                class::ClassType::from_ast_name_and_mangle(&alloc, id.as_ref());
+                                hhbc::ClassName::from_ast_name_and_mangle(&alloc, id.as_ref());
                             let mangled_class_name = mangled_class_name.unsafe_as_str();
                             Ok(self.convert_meth_caller_to_func_ptr(
                                 scope,

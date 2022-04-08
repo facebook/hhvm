@@ -32,9 +32,8 @@ use hhbc::{
     hhas_type::HhasTypeInfo,
     hhas_type_const::HhasTypeConstant,
     hhas_typedef::HhasTypedef,
-    hhbc_id::class::ClassType,
     typed_value::TypedValue,
-    FCallArgs, FatalOp, Instruct, Label, Pseudo,
+    ClassName, FCallArgs, FatalOp, Instruct, Label, Pseudo,
 };
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
@@ -328,7 +327,7 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_
 fn print_requirement(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    r: &Pair<ClassType<'_>, hhas_class::TraitReqKind>,
+    r: &Pair<ClassName<'_>, hhas_class::TraitReqKind>,
 ) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".require ")?;
@@ -460,9 +459,9 @@ fn print_use_precedence<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     Triple(id1, id2, ids): &Triple<
-        ClassType<'arena>,
-        ClassType<'arena>,
-        Slice<'arena, ClassType<'arena>>,
+        ClassName<'arena>,
+        ClassName<'arena>,
+        Slice<'arena, ClassName<'arena>>,
     >,
 ) -> Result<()> {
     ctx.newline(w)?;
@@ -479,9 +478,9 @@ fn print_use_alias<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     Quadruple(ido1, id, ido2, attr): &Quadruple<
-        Maybe<ClassType<'arena>>,
-        ClassType<'arena>,
-        Maybe<ClassType<'arena>>,
+        Maybe<ClassName<'arena>>,
+        ClassName<'arena>,
+        Maybe<ClassName<'arena>>,
         Attr,
     >,
 ) -> Result<()> {
@@ -490,7 +489,7 @@ fn print_use_alias<'arena>(
     option_or(
         w,
         ido1.as_ref(),
-        |w, i: &ClassType<'arena>| write_bytes!(w, "{}::{}", i, id),
+        |w, i: &ClassName<'arena>| write_bytes!(w, "{}::{}", i, id),
         id,
     )?;
     w.write_all(b" as ")?;
@@ -504,7 +503,7 @@ fn print_use_alias<'arena>(
         })?;
     }
     write_if!(!attr.is_empty() && ido2.is_just(), w, " ")?;
-    option(w, ido2.as_ref(), |w, i: &ClassType<'arena>| {
+    option(w, ido2.as_ref(), |w, i: &ClassName<'arena>| {
         w.write_all(i.as_bstr())
     })?;
     w.write_all(b";")
@@ -523,17 +522,17 @@ fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena
             w.write_all(b" {")?;
             ctx.block(w, |ctx, w| {
                 let precs: &[Triple<
-                    ClassType<'arena>,
-                    ClassType<'arena>,
-                    Slice<'arena, ClassType<'arena>>,
+                    ClassName<'arena>,
+                    ClassName<'arena>,
+                    Slice<'arena, ClassName<'arena>>,
                 >] = c.use_precedences.as_ref();
                 for x in precs {
                     print_use_precedence(ctx, w, x)?;
                 }
                 let aliases: &[Quadruple<
-                    Maybe<ClassType<'arena>>,
-                    ClassType<'arena>,
-                    Maybe<ClassType<'arena>>,
+                    Maybe<ClassName<'arena>>,
+                    ClassName<'arena>,
+                    Maybe<ClassName<'arena>>,
                     Attr,
                 >] = c.use_aliases.as_ref();
                 for x in aliases {
@@ -547,14 +546,14 @@ fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena
     }
 }
 
-fn print_implements(w: &mut dyn Write, implements: &[ClassType<'_>]) -> Result<()> {
+fn print_implements(w: &mut dyn Write, implements: &[ClassName<'_>]) -> Result<()> {
     if implements.is_empty() {
         return Ok(());
     }
     write_bytes!(w, " implements ({})", fmt_separated(" ", implements))
 }
 
-fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassType<'_>]) -> Result<()> {
+fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassName<'_>]) -> Result<()> {
     if enum_includes.is_empty() {
         return Ok(());
     }
@@ -644,7 +643,7 @@ fn print_class_def<'arena>(
         class_def
             .base
             .as_ref()
-            .map(|x: &ClassType<'arena>| x.unsafe_as_str())
+            .map(|x: &ClassName<'arena>| x.unsafe_as_str())
             .into(),
     )?;
     print_implements(w, class_def.implements.as_ref())?;

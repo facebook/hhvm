@@ -20,9 +20,8 @@ use hhbc::{
     hhas_body::{HhasBody, HhasBodyEnv},
     hhas_param::HhasParam,
     hhas_type::{self, HhasTypeInfo},
-    hhbc_id::function,
     typed_value::TypedValue,
-    FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, ParamId, Pseudo,
+    FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, ParamName, Pseudo,
 };
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
@@ -475,7 +474,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
     let mut make_param_instr = |param: &HhasParam<'arena>,
                                 ast_param: &ast::FunParam|
      -> Result<InstrSeq<'arena>> {
-        let param_name = || ParamId::ParamNamed(Str::new_str(alloc, param.name.unsafe_as_str()));
+        let param_name = || ParamName::ParamNamed(Str::new_str(alloc, param.name.unsafe_as_str()));
         if param.is_variadic {
             Ok(instr::empty())
         } else {
@@ -616,7 +615,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                             None,
                             None,
                         ),
-                        function::from_raw_string(alloc, "trigger_sampled_error"),
+                        hhbc::FunctionName::from_raw_string(alloc, "trigger_sampled_error"),
                     ),
                     instr::popc(),
                 ])
@@ -684,7 +683,7 @@ fn emit_verify_out<'arena>(
                                     || t.unsafe_as_str().ends_with("HH\\dynamic"))
                             }) =>
                         {
-                            instr::verify_out_type(ParamId::ParamUnnamed(i as isize))
+                            instr::verify_out_type(ParamName::ParamUnnamed(i as isize))
                         }
                         _ => instr::empty(),
                     },

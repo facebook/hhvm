@@ -5,7 +5,7 @@
 use class_expr::ClassExpr;
 use env::emitter::Emitter;
 use ffi::{Pair, Str};
-use hhbc::{hhbc_id, typed_value::TypedValue};
+use hhbc::typed_value::TypedValue;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexMap;
 use itertools::Itertools;
@@ -101,8 +101,8 @@ fn class_const_to_typed_value<'arena, 'decl>(
             cid,
         );
         if let ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
-            let classid = hhbc_id::class::ClassType::from_ast_name_and_mangle(emitter.alloc, cname)
-                .as_ffi_str();
+            let classid =
+                hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname).as_ffi_str();
             if emitter.options().emit_class_pointers() == 2 {
                 return Ok(TypedValue::LazyClass(classid));
             } else {

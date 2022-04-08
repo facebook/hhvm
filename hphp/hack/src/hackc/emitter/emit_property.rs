@@ -9,7 +9,6 @@ use ffi::Maybe::*;
 use hhbc::{
     hhas_property::HhasProperty,
     hhas_type::{constraint, HhasTypeInfo},
-    hhbc_id::prop,
     typed_value::TypedValue,
     InitPropOp, Visibility,
 };
@@ -48,7 +47,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
 ) -> Result<PropAndInit<'arena>> {
     let alloc = emitter.alloc;
     let ast_defs::Id(pos, cv_name) = args.id;
-    let pid: prop::PropType<'arena> = prop::PropType::from_ast_name(alloc, cv_name);
+    let pid = hhbc::PropName::from_ast_name(alloc, cv_name);
     let attributes = emit_attribute::from_asts(emitter, args.user_attributes)?;
 
     let is_const = (!args.is_static && class_is_const)

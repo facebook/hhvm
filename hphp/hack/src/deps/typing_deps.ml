@@ -57,6 +57,30 @@ module Dep = struct
     | KModule [@value 13]
   [@@deriving enum]
 
+  let _ = (min_dep_kind, max_dep_kind, dep_kind_of_enum)
+
+  module Member = struct
+    type t =
+      | Method of string
+      | SMethod of string
+      | Prop of string
+      | SProp of string
+      | Constructor
+      | Const of string
+
+    let method_ name = Method name
+
+    let smethod name = SMethod name
+
+    let prop name = Prop name
+
+    let sprop name = SProp name
+
+    let constructor = Constructor
+
+    let const name = Const name
+  end
+
   external hash1 : int -> string -> int = "hash1_ocaml" [@@noalloc]
 
   external hash2 : int -> int -> string -> int = "hash2_ocaml" [@@noalloc]
@@ -87,57 +111,37 @@ module Dep = struct
        will show it as a positive integer. *)
     b
 
+  let make_member_dep_from_type_dep : t -> Member.t -> t =
+   fun type_hash -> function
+    | Member.Const name -> hash2 (dep_kind_to_enum KConst) type_hash name
+    | Member.Constructor -> type_hash
+    | Member.Prop name -> hash2 (dep_kind_to_enum KProp) type_hash name
+    | Member.SProp name -> hash2 (dep_kind_to_enum KSProp) type_hash name
+    | Member.Method name -> hash2 (dep_kind_to_enum KMethod) type_hash name
+    | Member.SMethod name -> hash2 (dep_kind_to_enum KSMethod) type_hash name
+
   (* Keep in sync with the tags for `DepType` in `typing_deps_hash.rs`. *)
-  let make : type a. a variant -> t = function
+  let rec make : type a. a variant -> t = function
+    (* Deps on defs *)
     | GConst name1 -> hash1 (dep_kind_to_enum KGConst) name1
     | Fun name1 -> hash1 (dep_kind_to_enum KFun) name1
     | Type name1 -> hash1 (dep_kind_to_enum KType) name1
     | Extends name1 -> hash1 (dep_kind_to_enum KExtends) name1
-    | Const (name1, name2) ->
-      hash2
-        (dep_kind_to_enum KConst)
-        (hash1 (dep_kind_to_enum KType) name1)
-        name2
-    | Constructor name1 -> hash1 (dep_kind_to_enum KConstructor) name1
-    | Prop (name1, name2) ->
-      hash2
-        (dep_kind_to_enum KProp)
-        (hash1 (dep_kind_to_enum KType) name1)
-        name2
-    | SProp (name1, name2) ->
-      hash2
-        (dep_kind_to_enum KSProp)
-        (hash1 (dep_kind_to_enum KType) name1)
-        name2
-    | Method (name1, name2) ->
-      hash2
-        (dep_kind_to_enum KMethod)
-        (hash1 (dep_kind_to_enum KType) name1)
-        name2
-    | SMethod (name1, name2) ->
-      hash2
-        (dep_kind_to_enum KSMethod)
-        (hash1 (dep_kind_to_enum KType) name1)
-        name2
     | AllMembers name1 -> hash1 (dep_kind_to_enum KAllMembers) name1
     | GConstName name1 -> hash1 (dep_kind_to_enum KGConstName) name1
     | Module mname -> hash1 (dep_kind_to_enum KModule) mname
-
-  let make_dep_with_type_hash : t -> string -> dep_kind -> t =
-   fun type_hash member_name -> function
-    | KGConst -> type_hash
-    | KFun -> type_hash
-    | KType -> type_hash
-    | KExtends -> type_hash
-    | KConst -> hash2 (dep_kind_to_enum KConst) type_hash member_name
-    | KConstructor -> type_hash
-    | KProp -> hash2 (dep_kind_to_enum KProp) type_hash member_name
-    | KSProp -> hash2 (dep_kind_to_enum KSProp) type_hash member_name
-    | KMethod -> hash2 (dep_kind_to_enum KMethod) type_hash member_name
-    | KSMethod -> hash2 (dep_kind_to_enum KSMethod) type_hash member_name
-    | KAllMembers -> type_hash
-    | KGConstName -> type_hash
-    | KModule -> type_hash
+    (* Deps on members *)
+    | Constructor name1 -> hash1 (dep_kind_to_enum KConstructor) name1
+    | Const (name1, name2) ->
+      make_member_dep_from_type_dep (make (Type name1)) (Member.Const name2)
+    | Prop (name1, name2) ->
+      make_member_dep_from_type_dep (make (Type name1)) (Member.Prop name2)
+    | SProp (name1, name2) ->
+      make_member_dep_from_type_dep (make (Type name1)) (Member.SProp name2)
+    | Method (name1, name2) ->
+      make_member_dep_from_type_dep (make (Type name1)) (Member.Method name2)
+    | SMethod (name1, name2) ->
+      make_member_dep_from_type_dep (make (Type name1)) (Member.SMethod name2)
 
   let is_class x = x land 1 = 1
 

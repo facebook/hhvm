@@ -139,39 +139,6 @@ let sound_dynamic_interface_check_from_fun_ty env fun_ty =
   in
   sound_dynamic_interface_check env params_decl_ty ret_locl_ty
 
-let build_dyn_fun_ty ft_ty =
-  let make_dynamic pos =
-    Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
-  in
-  let make_dyn_fun_param fp =
-    {
-      fp_pos = fp.fp_pos;
-      fp_name = fp.fp_name;
-      fp_type = Typing_make_type.unenforced (make_dynamic fp.fp_pos);
-      fp_flags = fp.fp_flags;
-    }
-  in
-  {
-    ft_tparams = [];
-    ft_where_constraints = [];
-    ft_params = List.map ft_ty.ft_params ~f:make_dyn_fun_param;
-    ft_implicit_params = ft_ty.ft_implicit_params;
-    ft_ret =
-      Typing_make_type.unenforced (make_dynamic (get_pos ft_ty.ft_ret.et_type));
-    (* Carries through the sync/async information from the aast *)
-    ft_flags = ft_ty.ft_flags;
-    ft_ifc_decl = ft_ty.ft_ifc_decl;
-  }
-
-let relax_method_type env relax r ft =
-  let lr = Typing_reason.localize r in
-  if Typing_env_types.(env.in_support_dynamic_type_method_check) && relax then
-    mk
-      ( Typing_reason.Rsupport_dynamic_type (Typing_reason.to_pos r),
-        Tintersection [mk (lr, Tfun ft); mk (lr, Tfun (build_dyn_fun_ty ft))] )
-  else
-    mk (lr, Tfun ft)
-
 (* Given t, construct ~t.
  * acc is a boolean that remains false if no change was made (e.g. t = dynamic)
  *)

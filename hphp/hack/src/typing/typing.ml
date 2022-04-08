@@ -786,18 +786,24 @@ let localize_targ env ta =
   let (env, targ) = Phase.localize_targ ~check_well_kinded:true env ta in
   (env, targ, ExpectedTy.make pos Reason.URhint (fst targ))
 
-let set_function_pointer ty =
+let rec set_function_pointer ty =
   match get_node ty with
   | Tfun ft ->
     let ft = set_ft_is_function_pointer ft true in
     mk (get_reason ty, Tfun ft)
+  | Tnewtype (name, [ty1], ty2) when String.equal name SN.Classes.cSupportDyn ->
+    let ty3 = set_function_pointer ty1 in
+    mk (get_reason ty, Tnewtype (name, [ty3], ty2))
   | _ -> ty
 
-let set_readonly_this ty =
+let rec set_readonly_this ty =
   match get_node ty with
   | Tfun ft ->
     let ft = set_ft_readonly_this ft true in
     mk (get_reason ty, Tfun ft)
+  | Tnewtype (name, [ty1], ty2) when String.equal name SN.Classes.cSupportDyn ->
+    let ty3 = set_readonly_this ty1 in
+    mk (get_reason ty, Tnewtype (name, [ty3], ty2))
   | _ -> ty
 
 let xhp_attribute_decl_ty env sid obj attr =
@@ -1397,7 +1403,12 @@ let call_param
           env
           [
             Log_head
-              ( "Typing.call_param ",
+              ( ("Typing.call_param "
+                ^
+                match dynamic_func with
+                | None -> "None"
+                | Some Supportdyn_function -> "sd"
+                | Some Like_function -> "~"),
                 [
                   Log_type ("param_ty", param.fp_type.et_type);
                   Log_type ("arg_ty", arg_ty);
@@ -3675,7 +3686,7 @@ and expr_
       in
       Option.iter ty_err_opt2 ~f:Errors.add_typing_error;
       let (env, fty) = Env.expand_type env fty in
-      (match deref fty with
+      (match deref (strip_supportdyn fty) with
       | (reason, Tfun ftype) ->
         (* We are creating a fake closure:
          * function(Class $x, arg_types_of(Class::meth_name))
@@ -8299,9 +8310,27 @@ and call
       * Tast.expr option
       * locl_ty
       * bool) =
-  let is_fun_type ty =
+  Typing_log.(
+    log_with_level env "typing" ~level:1 (fun () ->
+        log_types
+          (Pos_or_decl.of_raw_pos pos)
+          env
+          [
+            Log_head
+              ( ("Typing.call "
+                ^
+                match dynamic_func with
+                | None -> "None"
+                | Some Supportdyn_function -> "sd"
+                | Some Like_function -> "~"),
+                [Log_type ("fty", fty)] );
+          ]));
+
+  let rec is_fun_type ty =
     match get_node ty with
     | Tfun _ -> true
+    | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn ->
+      is_fun_type ty
     | _ -> false
   in
   (* When we enter a like function, it is safe to ignore the like type if we are
@@ -9089,6 +9118,7 @@ and call
               ~expected
               ~nullsafe
               ?in_await
+              ?dynamic_func
               pos
               env
               ty
@@ -9103,8 +9133,8 @@ and call
         Option.iter ~f:Errors.add_typing_error ty_err_opt;
         (env, ([], None, err_witness env pos, should_forget_fakes)))
 
-and call_supportdyn ~expected ~nullsafe ?in_await pos env ty el unpacked_element
-    =
+and call_supportdyn
+    ~expected ~nullsafe ?in_await ?dynamic_func pos env ty el unpacked_element =
   let (env, ty) = Env.expand_type env ty in
   match deref ty with
   | (_, Tfun _) ->
@@ -9123,6 +9153,7 @@ and call_supportdyn ~expected ~nullsafe ?in_await pos env ty el unpacked_element
       ~expected
       ~nullsafe
       ?in_await
+      ?dynamic_func
       pos
       env
       (MakeType.dynamic r)

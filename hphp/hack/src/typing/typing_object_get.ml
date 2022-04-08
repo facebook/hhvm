@@ -334,6 +334,12 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
             make_nullable_member_type ~is_method env id_pos pos ty)
       in
       Inter.intersect_list env r tyl
+    | (r, Tnewtype (name, [tyarg], _))
+      when String.equal name SN.Classes.cSupportDyn ->
+      let (env, ty) =
+        make_nullable_member_type ~is_method env id_pos pos tyarg
+      in
+      (env, MakeType.supportdyn r ty)
     | (_, (Terr | Tdynamic | Tany _)) -> (env, ty)
     | (_, Tunion []) -> (env, MakeType.null (Reason.Rnullsafe_op pos))
     | _ ->
@@ -712,9 +718,10 @@ and obj_get_concrete_class_with_member_info
             ft)
       in
       let ft_ty1 =
-        Typing_dynamic.relax_method_type
-          env
-          (get_ce_support_dynamic_type member_info)
+        Typing_dynamic.maybe_wrap_with_supportdyn
+          ~should_wrap:
+            (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+            && get_ce_support_dynamic_type member_info)
           r
           ft1
       in

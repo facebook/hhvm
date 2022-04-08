@@ -20,7 +20,7 @@ let check_parameters =
         | _ -> true)
       ftype.ft_params
   in
-  fun pos ft ->
+  let rec check pos ft =
     match get_node ft with
     | Tfun ftype ->
       begin
@@ -38,7 +38,12 @@ let check_parameters =
                    { pos; decl_pos = fparam.fp_pos; convention })
         | None -> ()
       end
+    | Tnewtype (name, [ty], _)
+      when String.equal Naming_special_names.Classes.cSupportDyn name ->
+      check pos ty
     | _ -> ()
+  in
+  check
 
 let check_readonly_return env pos ft =
   match get_node ft with

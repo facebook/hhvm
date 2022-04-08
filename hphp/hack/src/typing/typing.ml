@@ -8681,7 +8681,6 @@ and call
               in
               match arg with
               | EnumClassLabel (None, label_name) when is_label ->
-                let env = Typing_local_ops.enforce_enum_class_label pos env in
                 (match get_node (TUtils.strip_dynamic env ety) with
                 | Tnewtype (name, [ty_enum; _ty_interface], _)
                   when String.equal name SN.Classes.cMemberOf

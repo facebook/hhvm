@@ -449,8 +449,13 @@ void emitDir(IRGS& env) {
     push(env, gen(env, DirFromFilepath, filepath));
     return;
   }
-  auto const filepath = unit->origFilepath();
-  push(env, cns(env, makeStaticString(FileUtil::dirname(StrNR{filepath}))));
+  auto const p = [&] {
+    if (auto const of = curFunc(env)->originalFilename()) {
+      return of;
+    }
+    return unit->origFilepath();
+  }();
+  push(env, cns(env, makeStaticString(FileUtil::dirname(StrNR{p}))));
 }
 
 void emitFile(IRGS& env) {

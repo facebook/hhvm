@@ -1044,9 +1044,14 @@ OPTBLD_INLINE void iopFile() {
 }
 
 OPTBLD_INLINE void iopDir() {
-  auto const filepath = vmfp()->func()->unit()->filepath();
+  auto const p = [&] {
+    if (auto const of = vmfp()->func()->originalFilename()) {
+      return of;
+    }
+    return vmfp()->func()->unit()->filepath();
+  }();
   vmStack().pushStaticString(
-    makeStaticString(FileUtil::dirname(StrNR{filepath}))
+    makeStaticString(FileUtil::dirname(StrNR{p}))
   );
 }
 

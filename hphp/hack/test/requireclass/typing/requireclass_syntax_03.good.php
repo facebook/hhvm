@@ -1,18 +1,16 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-// bad: require is can only be used with classes
-
 <<file:__EnableUnstableFeatures('require_class')>>
 
-interface I {}
+abstract class C {}
 
-trait Tr {}
+final abstract class D {}
 
-trait T2 {
-  require class I;
+trait T1 {
+  require class C;
 }
 
-trait T3 {
-  require class Tr;
+trait T2 {
+  require class D;
 }

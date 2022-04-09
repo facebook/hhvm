@@ -4,14 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{
-    hhbc_ast::{
-        AdataId, BareThisOp, ClassNum, CollectionType, ContCheckOp, FCallArgs, FatalOp, IncDecOp,
-        InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId, Label, Local, LocalRange,
-        MOpMode, MemberKey, NumParams, OODeclExistsOp, ObjMethodOp, ParamName, QueryMOp,
-        ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, StackIndex,
-        SwitchKind, Targets, TypeStructResolveOp,
-    },
-    ClassName, ConstName, FunctionName, MethodName, PropName,
+    AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, FCallArgs,
+    FatalOp, FunctionName, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId,
+    Label, Local, LocalRange, MOpMode, MemberKey, MethodName, NumParams, OODeclExistsOp,
+    ObjMethodOp, ParamName, PropName, QueryMOp, ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp,
+    SilenceOp, SpecialClsRef, StackIndex, SwitchKind, Targets, TypeStructResolveOp,
 };
 use emit_opcodes_macro::Targets;
 use ffi::{BumpSliceMut, Slice, Str};

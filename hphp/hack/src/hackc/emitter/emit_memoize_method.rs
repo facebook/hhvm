@@ -18,8 +18,7 @@ use hhbc::{
     hhas_param::HhasParam,
     hhas_pos::HhasSpan,
     hhas_type::HhasTypeInfo,
-    typed_value::TypedValue,
-    FCallArgs, FCallArgsFlags, Label, Local, LocalRange, SpecialClsRef, Visibility,
+    FCallArgs, FCallArgsFlags, Label, Local, LocalRange, SpecialClsRef, TypedValue, Visibility,
 };
 use hhbc_string_utils::reified;
 use instruction_sequence::{instr, InstrSeq};

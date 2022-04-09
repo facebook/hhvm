@@ -32,8 +32,7 @@ use hhbc::{
     hhas_type::HhasTypeInfo,
     hhas_type_const::HhasTypeConstant,
     hhas_typedef::HhasTypedef,
-    typed_value::TypedValue,
-    ClassName, FCallArgs, FatalOp, Instruct, Label, Pseudo,
+    ClassName, FCallArgs, FatalOp, Instruct, Label, Pseudo, TypedValue,
 };
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;

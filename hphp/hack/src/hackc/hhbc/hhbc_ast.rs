@@ -3,21 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{typed_value::TypedValue, PropName};
+use crate::{opcodes::Opcode, typed_value::TypedValue, FCallArgsFlags, PropName, ReadonlyOp};
 use ffi::{Slice, Str};
-
-pub use crate::opcodes::Opcode;
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
 
 /// Export these publicly so consumers of hhbc_ast don't have to know the
 /// internal details about the ffi.
-pub use hhvm_hhbc_defs_ffi::ffi::{
-    BareThisOp, CollectionType, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp, InitPropOp,
-    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, OODeclExistsOp, ObjMethodOp, QueryMOp, ReadonlyOp,
-    SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
-};
 
 #[derive(Clone, Debug)]
 #[repr(C)]

@@ -16,8 +16,7 @@ use hhbc::{
     hhas_param::HhasParam,
     hhas_pos::HhasSpan,
     hhas_type::HhasTypeInfo,
-    typed_value::TypedValue,
-    FCallArgs, FCallArgsFlags, Label, Local, LocalRange,
+    FCallArgs, FCallArgsFlags, Label, Local, LocalRange, TypedValue,
 };
 use hhbc_string_utils::reified;
 use hhvm_types_ffi::ffi::Attr;

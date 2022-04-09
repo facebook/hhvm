@@ -3,8 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+mod hhas_xhp_attribute;
 mod hhbc_ast;
 mod hhbc_id;
+mod opcodes;
+mod typed_value;
 
 pub mod decl_vars;
 pub mod hackc_unit;
@@ -24,16 +27,18 @@ pub mod hhas_symbol_refs;
 pub mod hhas_type;
 pub mod hhas_type_const;
 pub mod hhas_typedef;
-pub mod hhas_xhp_attribute;
-pub mod opcodes;
-pub mod typed_value;
 
+pub use hhas_xhp_attribute::HhasXhpAttribute;
 pub use hhbc_ast::{
-    AdataId, BareThisOp, ClassNum, ClassishKind, CollectionType, ContCheckOp, FCallArgs,
-    FCallArgsFlags, FatalOp, HasGenericsOp, IncDecOp, InitPropOp, Instruct, IsLogAsDynamicCallOp,
-    IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey, NumParams,
-    OODeclExistsOp, ObjMethodOp, Opcode, ParamName, Pseudo, QueryMOp, ReadonlyOp, SetOpOp,
-    SetRangeOp, SilenceOp, SpecialClsRef, SrcLoc, StackIndex, SwitchKind, TypeStructResolveOp,
-    Visibility,
+    AdataId, ClassNum, ClassishKind, FCallArgs, HasGenericsOp, Instruct, IterArgs, IterId, Label,
+    Local, LocalRange, MemberKey, NumParams, ParamName, Pseudo, RepoAuthType, SrcLoc, StackIndex,
+    Targets, Visibility,
 };
 pub use hhbc_id::{ClassName, ConstName, FunctionName, MethodName, PropName};
+pub use hhvm_hhbc_defs_ffi::ffi::{
+    BareThisOp, CollectionType, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp, InitPropOp,
+    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, OODeclExistsOp, ObjMethodOp, QueryMOp, ReadonlyOp,
+    SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
+};
+pub use opcodes::Opcode;
+pub use typed_value::TypedValue;

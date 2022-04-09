@@ -9,8 +9,7 @@ use ffi::Maybe::*;
 use hhbc::{
     hhas_property::HhasProperty,
     hhas_type::{constraint, HhasTypeInfo},
-    typed_value::TypedValue,
-    InitPropOp, Visibility,
+    InitPropOp, TypedValue, Visibility,
 };
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;

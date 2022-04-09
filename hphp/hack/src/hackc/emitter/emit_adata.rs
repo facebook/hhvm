@@ -9,8 +9,7 @@ use error::{Error, Result};
 use ffi::Str;
 use hhbc::{
     hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX},
-    typed_value::TypedValue,
-    ClassName,
+    ClassName, TypedValue,
 };
 use instruction_sequence::{instr, InstrSeq};
 use options::HhvmFlags;

@@ -5,7 +5,7 @@
 
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
-use hhbc::{hhas_attribute::HhasAttribute, typed_value::TypedValue};
+use hhbc::{hhas_attribute::HhasAttribute, TypedValue};
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::ast as a;

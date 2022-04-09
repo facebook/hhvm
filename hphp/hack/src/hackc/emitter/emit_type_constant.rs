@@ -5,7 +5,7 @@
 
 use error::{Error, Result};
 use ffi::Pair;
-use hhbc::typed_value::TypedValue;
+use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use naming_special_names_rust::classes;
 use options::Options;

@@ -6,8 +6,7 @@
 use crate::{
     hhas_adata::HhasAdata, hhas_attribute::HhasAttribute, hhas_class::HhasClass,
     hhas_constant::HhasConstant, hhas_function::HhasFunction, hhas_module::HhasModule,
-    hhas_pos::HhasPos, hhas_symbol_refs::HhasSymbolRefs, hhas_typedef::HhasTypedef,
-    hhbc_ast::FatalOp,
+    hhas_pos::HhasPos, hhas_symbol_refs::HhasSymbolRefs, hhas_typedef::HhasTypedef, FatalOp,
 };
 use ffi::{Maybe, Slice, Str, Triple};
 

@@ -5,7 +5,7 @@
 use class_expr::ClassExpr;
 use env::emitter::Emitter;
 use ffi::{Pair, Str};
-use hhbc::typed_value::TypedValue;
+use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexMap;
 use itertools::Itertools;

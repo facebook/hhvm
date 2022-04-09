@@ -10,10 +10,10 @@ use error::{Error, Result};
 use ffi::{Slice, Str};
 use hash::HashSet;
 use hhbc::{
-    hhas_symbol_refs::IncludePath, typed_value::TypedValue, BareThisOp, CollectionType, FCallArgs,
-    FCallArgsFlags, HasGenericsOp, IncDecOp, Instruct, IsLogAsDynamicCallOp, IsTypeOp, IterArgs,
-    Label, Local, MOpMode, MemberKey, MethodName, OODeclExistsOp, ObjMethodOp, Opcode, QueryMOp,
-    ReadonlyOp, SetOpOp, SetRangeOp, SpecialClsRef, StackIndex, TypeStructResolveOp,
+    hhas_symbol_refs::IncludePath, BareThisOp, CollectionType, FCallArgs, FCallArgsFlags,
+    HasGenericsOp, IncDecOp, Instruct, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, Label, Local,
+    MOpMode, MemberKey, MethodName, OODeclExistsOp, ObjMethodOp, Opcode, QueryMOp, ReadonlyOp,
+    SetOpOp, SetRangeOp, SpecialClsRef, StackIndex, TypeStructResolveOp, TypedValue,
 };
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;

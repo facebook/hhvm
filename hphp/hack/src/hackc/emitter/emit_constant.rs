@@ -13,7 +13,7 @@ use hhbc::{
     hhas_constant::HhasConstant,
     hhas_function::{HhasFunction, HhasFunctionFlags},
     hhas_pos::HhasSpan,
-    typed_value::TypedValue,
+    TypedValue,
 };
 use hhbc_string_utils::strip_global_ns;
 use hhvm_types_ffi::ffi::Attr;

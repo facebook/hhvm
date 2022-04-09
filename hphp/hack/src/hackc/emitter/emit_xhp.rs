@@ -7,7 +7,7 @@ use emit_property::PropAndInit;
 use env::emitter::Emitter;
 use error::{Error, Result};
 use hack_macro::{hack_expr, hack_stmts};
-use hhbc::{hhas_method::HhasMethod, hhas_xhp_attribute::HhasXhpAttribute};
+use hhbc::{hhas_method::HhasMethod, HhasXhpAttribute};
 use hhbc_string_utils as string_utils;
 use oxidized::{ast::*, ast_defs, pos::Pos};
 

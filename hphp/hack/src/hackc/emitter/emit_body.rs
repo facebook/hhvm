@@ -20,8 +20,7 @@ use hhbc::{
     hhas_body::{HhasBody, HhasBodyEnv},
     hhas_param::HhasParam,
     hhas_type::{self, HhasTypeInfo},
-    typed_value::TypedValue,
-    FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, ParamName, Pseudo,
+    FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, ParamName, Pseudo, TypedValue,
 };
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;

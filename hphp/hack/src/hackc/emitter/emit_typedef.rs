@@ -6,8 +6,7 @@
 use env::emitter::Emitter;
 use error::Result;
 use hhbc::{
-    hhas_pos::HhasSpan, hhas_type::HhasTypeInfo, hhas_typedef::HhasTypedef,
-    typed_value::TypedValue, ClassName,
+    hhas_pos::HhasSpan, hhas_type::HhasTypeInfo, hhas_typedef::HhasTypedef, ClassName, TypedValue,
 };
 use hhvm_types_ffi::ffi::Attr;
 use oxidized::{aast_defs::Hint, ast};

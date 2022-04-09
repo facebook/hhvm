@@ -22,10 +22,10 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/location.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 
@@ -134,6 +134,27 @@ const ArrayData* UnitEmitter::lookupArray(Id id) const {
   return array;
 }
 
+const RepoAuthType::Array* UnitEmitter::lookupRATArray(Id id) const {
+  assertx(id >= 0 && id < m_rats.size());
+  auto& elem = m_rats[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    return wrapper.ptr();
+  }
+  elem.lock_for_update();
+  wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    elem.unlock();
+    return wrapper.ptr();
+  }
+  auto const array = loadRATArrayFromRepo(m_sn, wrapper.token());
+  assertx(array);
+  elem.update_and_unlock(RATArrayOrToken::FromPtr(array));
+  return array;
+}
+
 String UnitEmitter::lookupLitstrCopy(Id id) const {
   assertx(id >= 0 && id < m_litstrs.size());
   auto& elem = m_litstrs[id];
@@ -186,6 +207,20 @@ Id UnitEmitter::mergeArray(const ArrayData* a) {
     auto const id = m_arrays.size();
     m_arrays.emplace_back(ArrayOrToken::FromPtr(a));
     auto const DEBUG_ONLY insert = m_array2id.emplace(a, id);
+    assertx(insert.second);
+    return id;
+  } else {
+    return it->second;
+  }
+}
+
+Id UnitEmitter::mergeRATArray(const RepoAuthType::Array* a) {
+  assertx(a);
+  auto const it = m_rat2id.find(a);
+  if (it == m_rat2id.end()) {
+    auto const id = m_rats.size();
+    m_rats.emplace_back(RATArrayOrToken::FromPtr(a));
+    auto const DEBUG_ONLY insert = m_rat2id.emplace(a, id);
     assertx(insert.second);
     return id;
   } else {
@@ -278,6 +313,45 @@ const ArrayData* UnitEmitter::loadLitarrayFromRepo(int64_t unitSn,
   auto ad = v.detach().m_data.parr;
   if (makeStatic) ArrayData::GetScalarArray(&ad);
   return ad;
+}
+
+const RepoAuthType::Array*
+UnitEmitter::loadRATArrayFromRepo(int64_t unitSn,
+                                  RepoFile::Token token) {
+  assertx(RO::RepoAuthoritative);
+
+  auto const remaining = RepoFile::remainingSizeOfUnit(unitSn, token);
+
+  size_t actualSize;
+  {
+    auto const size = std::min<size_t>(remaining, 64);
+    auto const data = std::make_unique<unsigned char[]>(size);
+    RepoFile::readRawFromUnit(unitSn, token, data.get(), size);
+    BlobDecoder decoder{data.get(), size};
+    actualSize = decoder.peekSize();
+    if (actualSize <= decoder.remaining()) {
+      const RepoAuthType::Array* array = nullptr;
+      decoder.withSize(
+        [&] { array = RepoAuthType::Array::deserialize(decoder); }
+      );
+      assertx(array);
+      return array;
+    }
+  }
+
+  always_assert(actualSize <= remaining);
+  always_assert(actualSize <= std::numeric_limits<uint32_t>::max());
+
+  auto const data = std::make_unique<unsigned char[]>(actualSize);
+  RepoFile::readRawFromUnit(unitSn, token, data.get(), actualSize);
+  BlobDecoder decoder{data.get(), actualSize};
+  const RepoAuthType::Array* array = nullptr;
+  decoder.withSize(
+    [&] { array = RepoAuthType::Array::deserialize(decoder); }
+  );
+  decoder.assertDone();
+  assertx(array);
+  return array;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -539,6 +613,11 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     assertx(IMPLIES(a->isToken(), RO::RepoAuthoritative));
     u->m_arrays.emplace_back(a);
   }
+  u->m_rats.reserve(m_rats.size());
+  for (auto const& a : m_rats) {
+    assertx(IMPLIES(a->isToken(), RO::RepoAuthoritative));
+    u->m_rats.emplace_back(a);
+  }
 
   size_t ix = 0;
   for (auto& fe : m_fes) {
@@ -709,7 +788,29 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
     }
   );
 
-  auto serdeFuncEmitters = [&](auto& funcs, auto create) {
+  // RAT arrays
+  seq(
+    m_rats,
+    [&] (auto& sd, size_t i) {
+      if (lazy && RO::RepoLitstrLazyLoad) {
+        assertx(m_rats.size() == i);
+        m_rats.emplace_back(RATArrayOrToken::FromToken(sd.advanced()));
+        sd.skipWithSize();
+      } else {
+        const RepoAuthType::Array* array = nullptr;
+        sd.withSize(
+          [&] { array = RepoAuthType::Array::deserialize(sd); }
+        );
+        auto const id UNUSED = mergeRATArray(array);
+        assertx(id == i);
+      }
+    },
+    [&] (auto& sd, auto const& wrapper) {
+      sd.withSize([&] { wrapper->ptr()->serialize(sd); });
+    }
+  );
+
+  auto const serdeFuncEmitters = [&](auto& funcs, auto create) {
     seq(
       funcs,
       [&] (auto& sd, size_t i) {

@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/func.h"
 

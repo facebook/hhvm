@@ -888,7 +888,8 @@ void BlobEncoderHelper<const StringData*>::serde(BlobEncoder& encoder,
 }
 
 void BlobEncoderHelper<const StringData*>::serde(BlobDecoder& decoder,
-                                                 const StringData*& sd) {
+                                                 const StringData*& sd,
+                                                 bool makeStatic) {
   uint32_t size;
   decoder(size);
   if (size == 0) {
@@ -903,7 +904,9 @@ void BlobEncoderHelper<const StringData*>::serde(BlobDecoder& decoder,
 
   assertx(decoder.remaining() >= size);
   auto const data = decoder.data();
-  sd = makeStaticString(std::string{data, data+size});
+  sd = makeStatic
+    ? makeStaticString((const char*)data, size)
+    : StringData::Make((const char*)data, size, CopyString);
   decoder.advance(size);
 }
 
@@ -916,6 +919,30 @@ void BlobEncoderHelper<const StringData*>::skip(BlobDecoder& decoder) {
   --size;
   assertx(decoder.remaining() >= size);
   decoder.advance(size);
+}
+
+size_t BlobEncoderHelper<const StringData*>::peekSize(BlobDecoder& decoder) {
+  auto const before = decoder.advanced();
+  uint32_t size;
+  decoder(size);
+  auto const sizeBytes = decoder.advanced() - before;
+  decoder.retreat(sizeBytes);
+  if (size <= 1) return sizeBytes;
+  --size;
+  return sizeBytes + size;
+}
+
+void BlobEncoderHelper<LowStringPtr>::serde(BlobEncoder& encoder,
+                                            LowStringPtr s) {
+  auto const sd = s.get();
+  encoder(sd);
+}
+
+void BlobEncoderHelper<LowStringPtr>::serde(BlobDecoder& decoder,
+                                            LowStringPtr& s) {
+  const StringData* sd;
+  decoder(sd);
+  s = sd;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

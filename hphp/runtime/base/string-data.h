@@ -618,9 +618,11 @@ ALWAYS_INLINE StringData* staticEmptyString() {
 template<>
 struct BlobEncoderHelper<const StringData*> {
   static void serde(BlobEncoder&, const StringData*);
-  static void serde(BlobDecoder&, const StringData*&);
+  static void serde(BlobDecoder&, const StringData*&,
+                    bool makeStatic = true);
 
   static void skip(BlobDecoder&);
+  static size_t peekSize(BlobDecoder&);
 };
 
 //////////////////////////////////////////////////////////////////////

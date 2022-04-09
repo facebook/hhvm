@@ -523,7 +523,7 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
   const std::string& hhasString
 ) {
   auto const bcSha1 = SHA1{string_sha1(hhasString)};
-  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, false);
+  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 

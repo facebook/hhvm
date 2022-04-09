@@ -27,8 +27,8 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/named-entity.h"
-#include "hphp/runtime/vm/named-entity-pair-table.h"
 #include "hphp/runtime/vm/preclass.h"
+#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/type-alias.h"
 
@@ -346,26 +346,14 @@ public:
 
   /*
    * Size of the Unit's litstr table.
-   *
-   * This excludes litstrs that are instead found in the global table---thus,
-   * it is not a source of truth for the number of litstrs a Unit needs, only
-   * those it happens to own.
    */
   size_t numLitstrs() const;
 
   /*
-   * Is `id' a valid litstr in LitstrTable or the Unit's local
-   * NamedEntityPairTable?
-   */
-  bool isLitstrId(Id id) const;
-
-  /*
-   * Dispatch to either the global LitstrTable or the Unit's local
-   * NamedEntityPairTable, depending on whether `id' is global.
-   *
-   * @see: NamedEntityPairTable
+   * Lookup a literal string by ID.
    */
   StringData* lookupLitstrId(Id id) const;
+
   const NamedEntity* lookupNamedEntityId(Id id) const;
   NamedEntityPair lookupNamedEntityPairId(Id id) const;
 
@@ -547,6 +535,9 @@ private:
   ConstantVec m_constants;
   ModuleVec m_modules;
 
+  mutable VMCompactVector<UnsafeLockFreePtrWrapper<StringOrToken>> m_litstrs;
+  mutable VMCompactVector<UnsafeLockFreePtrWrapper<ArrayOrToken>> m_arrays;
+
   Id m_entryPointId{kInvalidId};
 
   /*
@@ -573,9 +564,6 @@ struct UnitExtended : Unit {
 
   UnitExtended() { m_extended = true; }
 
-  NamedEntityPairTable m_namedInfo;
-  VMFixedVector<const ArrayData*> m_arrays;
-
   // Used by Unit prefetcher:
   SymbolRefs m_symbolRefsForPrefetch;
   std::atomic_flag m_symbolRefsPrefetched;
@@ -589,21 +577,6 @@ struct UnitExtended : Unit {
   std::atomic<int64_t> m_lastTouchRequest{0};
   std::atomic<TouchClock::time_point> m_lastTouchTime{TouchClock::time_point{}};
 };
-
-///////////////////////////////////////////////////////////////////////////////
-// ID helpers.
-
-/*
- * Unit litstr Id's are all above this mark.
- */
-constexpr int kUnitIdOffset = 0x40000000;
-
-/*
- * Functions for differentiating unit-local Id's from global Id's.
- */
-bool isUnitId(Id id);
-Id encodeUnitId(Id id);
-Id decodeUnitId(Id id);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

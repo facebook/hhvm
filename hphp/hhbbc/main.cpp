@@ -360,9 +360,6 @@ void compile_repo() {
     }
   );
 
-  LitstrTable::get().setWriting();
-  LitarrayTable::get().setWriting();
-
   RepoAutoloadMapBuilder autoloadMapBuilder;
   UnitEmitterQueue ueq{&autoloadMapBuilder};
 

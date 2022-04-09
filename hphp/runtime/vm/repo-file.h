@@ -142,18 +142,14 @@ struct RepoFile {
 
   /*
    * Load the various global tables stored in the repo file. This
-   * includes the literal string table, the global array type table,
-   * the repo autoload map, and various unit emitter indexing
-   * information.
+   * includes the global array type table, the repo autoload map, and
+   * various unit emitter indexing information.
    *
    * This must be called after init(), but before any of the below
    * querying functions are called. It can only be called once, and
    * cannot be called concurrently.
-   *
-   * If "lazyLitstr" is true, the literal strings are not actually
-   * loaded, and will be loaded on demand.
    */
-  static void loadGlobalTables(bool lazyLiterals);
+  static void loadGlobalTables();
 
   /*
    * Query functions:
@@ -161,14 +157,6 @@ struct RepoFile {
    * Unlike otherwise stated, these all can be called concurrently,
    * and must be called only after loadGlobalTables() is called.
    */
-
-  // Load a literal string on-demand. The given index is the literal's
-  // position in the literal string table.
-  static StringData* loadLitstr(size_t);
-
-  // Load a literal array on-demand. The given index is the literal's
-  // position in the literal array table.
-  static ArrayData* loadLitarray(size_t);
 
   // Return the paths corresponding to all UnitEmitters in the repo
   // file.
@@ -269,6 +257,9 @@ private:
     return c << 2;
   }
 };
+
+using StringOrToken = TokenOrPtr<const StringData>;
+using ArrayOrToken = TokenOrPtr<const ArrayData>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

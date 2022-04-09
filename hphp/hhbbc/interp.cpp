@@ -4835,6 +4835,8 @@ void in(ISS& env, const bc::VerifyParamType& op) {
 }
 
 void in(ISS& env, const bc::VerifyParamTypeTS& op) {
+  IgnoreUsedParams _{env};
+
   auto const a = topC(env);
   if (!a.couldBe(BDict)) {
     unreachable(env);
@@ -4877,6 +4879,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
       }
     }
   }
+  mayReadLocal(env, op.loc1);
   popC(env);
 }
 

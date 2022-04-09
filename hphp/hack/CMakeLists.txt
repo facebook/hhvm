@@ -48,10 +48,19 @@ set(HACK_BUILD_ROOT "${DUNE_BUILD_DIR}/default")
 
 get_target_property(OPAM_EXECUTABLE opam IMPORTED_LOCATION)
 
+string(REGEX REPLACE "^/usr/bin/?(.+)$" "\\1" OPAM_CC ${CMAKE_C_COMPILER})
+if (CMAKE_OSX_SYSROOT)
+  set(ISYSROOT_FLAG -isysroot${CMAKE_OSX_SYSROOT})
+endif ()
+
 add_custom_command(
   OUTPUT "${OPAM_STAMP_FILE}"
   DEPENDS opam opam_setup.sh
   COMMAND
+    CC=${OPAM_CC}
+    CXX=${CMAKE_CXX_COMPILER}
+    CFLAGS=${ISYSROOT_FLAG}
+    CXXFLAGS=${ISYSROOT_FLAG}
     ${CMAKE_CURRENT_SOURCE_DIR}/opam_setup.sh
     "${OPAM_EXECUTABLE}"
     "${DUNE_BUILD_DIR}"

@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use crate::{ClassName, ConstName, FunctionName};
 use bstr::BString;
 use ffi::{Slice, Str};
 use std::{
@@ -19,9 +20,9 @@ use std::{
 #[repr(C)]
 pub struct HhasSymbolRefs<'arena> {
     pub includes: Slice<'arena, IncludePath<'arena>>,
-    pub constants: Slice<'arena, Str<'arena>>,
-    pub functions: Slice<'arena, Str<'arena>>,
-    pub classes: Slice<'arena, Str<'arena>>,
+    pub constants: Slice<'arena, ConstName<'arena>>,
+    pub functions: Slice<'arena, FunctionName<'arena>>,
+    pub classes: Slice<'arena, ClassName<'arena>>,
 }
 
 /// NOTE(hrust): order matters (hhbc_hhas write includes in sorted order)

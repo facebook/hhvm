@@ -228,6 +228,15 @@ impl<'a, T: 'a> Slice<'a, T> {
     }
 }
 
+impl<'a, T: 'a> IntoIterator for &'a Slice<'a, T> {
+    type Item = &'a T;
+    type IntoIter = std::slice::Iter<'a, T>;
+
+    fn into_iter(self) -> std::slice::Iter<'a, T> {
+        self.iter()
+    }
+}
+
 impl<'a, T> std::convert::From<&'a [T]> for Slice<'a, T> {
     fn from(x: &'a [T]) -> Self {
         Self::new(x)

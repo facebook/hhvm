@@ -19,7 +19,7 @@ use hhbc::{
     hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX},
     hhas_attribute::HhasAttribute,
     hhas_body::{HhasBody, HhasBodyEnv},
-    hhas_class::{self, HhasClass},
+    hhas_class::{HhasClass, TraitReqKind},
     hhas_coeffects::{HhasCoeffects, HhasCtxConstant},
     hhas_constant::HhasConstant,
     hhas_function::HhasFunction,
@@ -32,7 +32,7 @@ use hhbc::{
     hhas_type::HhasTypeInfo,
     hhas_type_const::HhasTypeConstant,
     hhas_typedef::HhasTypedef,
-    ClassName, FCallArgs, FatalOp, Instruct, Label, Pseudo, TypedValue,
+    ClassName, ConstName, FCallArgs, FatalOp, FunctionName, Instruct, Label, Pseudo, TypedValue,
 };
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
@@ -215,25 +215,55 @@ fn print_symbol_ref_regions<'arena>(
     w: &mut dyn Write,
     symbol_refs: &HhasSymbolRefs<'arena>,
 ) -> Result<()> {
-    let mut print_region = |name, refs: &Slice<'arena, Str<'arena>>| {
-        if !refs.is_empty() {
+    fn print_region<'a, T: 'a, F>(
+        ctx: &Context<'_>,
+        w: &mut dyn Write,
+        name: &str,
+        refs: impl IntoIterator<Item = &'a T>,
+        f: F,
+    ) -> Result<()>
+    where
+        F: Fn(&'a T) -> &'a [u8],
+    {
+        let mut iter = refs.into_iter();
+        if let Some(first) = iter.next() {
             ctx.newline(w)?;
             write!(w, ".{} {{", name)?;
             ctx.block(w, |c, w| {
-                for s in refs.as_ref().iter() {
+                c.newline(w)?;
+                w.write_all(f(first))?;
+                for s in iter {
                     c.newline(w)?;
-                    w.write_all(s)?;
+                    w.write_all(f(s))?;
                 }
                 Ok(())
             })?;
-            w.write_all(b"\n}\n")
-        } else {
-            Ok(())
+            w.write_all(b"\n}\n")?;
         }
-    };
-    print_region("constant_refs", &symbol_refs.constants)?;
-    print_region("function_refs", &symbol_refs.functions)?;
-    print_region("class_refs", &symbol_refs.classes)
+        Ok(())
+    }
+
+    print_region(
+        ctx,
+        w,
+        "constant_refs",
+        &symbol_refs.constants,
+        ConstName::as_bytes,
+    )?;
+    print_region(
+        ctx,
+        w,
+        "function_refs",
+        &symbol_refs.functions,
+        FunctionName::as_bytes,
+    )?;
+    print_region(
+        ctx,
+        w,
+        "class_refs",
+        &symbol_refs.classes,
+        ClassName::as_bytes,
+    )
 }
 
 fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &HhasAdata<'_>) -> Result<()> {
@@ -326,15 +356,15 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_
 fn print_requirement(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    r: &Pair<ClassName<'_>, hhas_class::TraitReqKind>,
+    r: &Pair<ClassName<'_>, TraitReqKind>,
 ) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".require ")?;
     match r {
-        Pair(name, hhas_class::TraitReqKind::MustExtend) => {
+        Pair(name, TraitReqKind::MustExtend) => {
             write_bytes!(w, "extends <{}>;", name)
         }
-        Pair(name, hhas_class::TraitReqKind::MustImplement) => {
+        Pair(name, TraitReqKind::MustImplement) => {
             write_bytes!(w, "implements <{}>;", name)
         }
     }

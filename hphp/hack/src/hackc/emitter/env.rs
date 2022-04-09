@@ -12,10 +12,10 @@ mod local;
 use ast_scope::{Scope, ScopeItem};
 use bitflags::bitflags;
 use emitter::Emitter;
-use ffi::{Slice, Str};
+use ffi::Slice;
 use hhbc::{
     hhas_symbol_refs::{HhasSymbolRefs, IncludePathSet},
-    IterId, Label, Local,
+    ClassName, ConstName, FunctionName, IterId, Label, Local,
 };
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env::Env as NamespaceEnv};
@@ -212,9 +212,9 @@ impl<'a, 'arena> Env<'a, 'arena> {
 #[derive(Clone, Debug, Default)]
 pub struct SymbolRefsState<'arena> {
     pub includes: IncludePathSet<'arena>,
-    pub constants: BTreeSet<Str<'arena>>,
-    pub functions: BTreeSet<Str<'arena>>,
-    pub classes: BTreeSet<Str<'arena>>,
+    pub constants: BTreeSet<ConstName<'arena>>,
+    pub functions: BTreeSet<FunctionName<'arena>>,
+    pub classes: BTreeSet<ClassName<'arena>>,
 }
 
 impl<'arena> SymbolRefsState<'arena> {

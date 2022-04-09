@@ -7,7 +7,7 @@
 // (`class::Type<'arena>`, `function::Type<'arena>`, ...). We intend that these
 // types borrow strings stored in `InstrSeq` arenas.
 
-use bstr::BStr;
+use bstr::{BStr, ByteSlice};
 use ffi::Str;
 
 macro_rules! impl_id {
@@ -15,6 +15,10 @@ macro_rules! impl_id {
         impl<'arena> $type<'arena> {
             pub fn new(s: ffi::Str<'arena>) -> Self {
                 Self(s)
+            }
+
+            pub fn is_empty(&self) -> bool {
+                self.0.is_empty()
             }
 
             pub fn unsafe_into_string(self) -> std::string::String {
@@ -35,6 +39,10 @@ macro_rules! impl_id {
 
             pub fn from_raw_string(alloc: &'arena bumpalo::Bump, s: &str) -> $type<'arena> {
                 $type(Str::new_str(alloc, s))
+            }
+
+            pub fn as_bytes(&self) -> &[u8] {
+                self.0.as_bytes()
             }
         }
 
@@ -76,7 +84,7 @@ macro_rules! impl_add_suffix {
     };
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[repr(C)]
 pub struct ClassName<'arena>(Str<'arena>);
 
@@ -111,7 +119,7 @@ impl<'arena> ClassName<'arena> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[repr(C)]
 pub struct PropName<'arena>(Str<'arena>);
 
@@ -124,7 +132,7 @@ impl<'arena> PropName<'arena> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[repr(C)]
 pub struct MethodName<'arena>(Str<'arena>);
 
@@ -145,7 +153,7 @@ impl<'arena> MethodName<'arena> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[repr(C)]
 pub struct FunctionName<'arena>(Str<'arena>);
 
@@ -158,7 +166,7 @@ impl<'arena> FunctionName<'arena> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[repr(C)]
 pub struct ConstName<'arena>(Str<'arena>);
 

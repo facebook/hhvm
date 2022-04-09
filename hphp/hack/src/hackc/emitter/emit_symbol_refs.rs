@@ -11,14 +11,14 @@ pub fn add_include<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>, inc: IncludePa
 }
 
 pub fn add_constant<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>, s: hhbc::ConstName<'arena>) {
-    if !s.unsafe_as_str().is_empty() {
-        e.symbol_refs_state_mut().constants.insert(s.as_ffi_str());
+    if !s.is_empty() {
+        e.symbol_refs_state_mut().constants.insert(s);
     }
 }
 
 pub fn add_class<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>, s: hhbc::ClassName<'arena>) {
-    if !s.unsafe_as_str().is_empty() {
-        e.symbol_refs_state_mut().classes.insert(s.as_ffi_str());
+    if !s.is_empty() {
+        e.symbol_refs_state_mut().classes.insert(s);
     }
 }
 
@@ -27,7 +27,7 @@ pub fn reset<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>) {
 }
 
 pub fn add_function<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>, s: hhbc::FunctionName<'arena>) {
-    if !s.unsafe_as_str().is_empty() {
-        e.symbol_refs_state_mut().functions.insert(s.as_ffi_str());
+    if !s.is_empty() {
+        e.symbol_refs_state_mut().functions.insert(s);
     }
 }

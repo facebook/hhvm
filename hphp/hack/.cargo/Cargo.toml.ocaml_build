@@ -60,7 +60,6 @@ members = [
     "src/hackc/emitter/cargo/emit_param",
     "src/hackc/emitter/cargo/emit_pos",
     "src/hackc/emitter/cargo/emit_property",
-    "src/hackc/emitter/cargo/emit_symbol_refs",
     "src/hackc/emitter/cargo/emit_type_constant",
     "src/hackc/emitter/cargo/emit_typedef",
     "src/hackc/emitter/cargo/emit_type_hint",

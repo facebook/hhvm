@@ -47,8 +47,8 @@ fn process_one_file(writer: &SyncWrite, f: &Path, profile: &mut Profile) -> Resu
     let files = multifile::to_files(f, content)?;
     for (f, content) in files {
         let f = f.as_ref();
-        let compile_opts = crate::compile::SingleFileOpts {
-            dump_symbol_refs: true,
+        let compile_opts = SingleFileOpts {
+            _dump_symbol_refs: Default::default(),
             disable_toplevel_elaboration: false,
             verbosity: 0,
         };

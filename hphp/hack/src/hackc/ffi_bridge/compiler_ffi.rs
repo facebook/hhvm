@@ -135,7 +135,6 @@ pub mod compile_ffi {
             is_systemlib: bool,
             is_evaled: bool,
             for_debugger_eval: bool,
-            dump_symbol_refs: bool,
             disable_toplevel_elaboration: bool,
         ) -> u8;
 
@@ -223,7 +222,6 @@ fn make_env_flags(
     is_systemlib: bool,
     is_evaled: bool,
     for_debugger_eval: bool,
-    dump_symbol_refs: bool,
     disable_toplevel_elaboration: bool,
 ) -> u8 {
     let mut flags = EnvFlags::empty();
@@ -235,9 +233,6 @@ fn make_env_flags(
     }
     if for_debugger_eval {
         flags |= EnvFlags::FOR_DEBUGGER_EVAL;
-    }
-    if dump_symbol_refs {
-        flags |= EnvFlags::DUMP_SYMBOL_REFS;
     }
     if disable_toplevel_elaboration {
         flags |= EnvFlags::DISABLE_TOPLEVEL_ELABORATION;

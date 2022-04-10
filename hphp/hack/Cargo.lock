@@ -1013,7 +1013,6 @@ dependencies = [
  "emit_method",
  "emit_pos",
  "emit_property",
- "emit_symbol_refs",
  "emit_type_constant",
  "emit_type_hint",
  "emit_xhp",
@@ -1059,7 +1058,6 @@ dependencies = [
  "emit_adata",
  "emit_fatal",
  "emit_pos",
- "emit_symbol_refs",
  "emit_type_constant",
  "env",
  "error",
@@ -1275,14 +1273,6 @@ dependencies = [
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
-]
-
-[[package]]
-name = "emit_symbol_refs"
-version = "0.0.0"
-dependencies = [
- "env",
- "hhbc",
 ]
 
 [[package]]
@@ -2922,7 +2912,6 @@ dependencies = [
 name = "rewrite_xml"
 version = "0.0.0"
 dependencies = [
- "emit_symbol_refs",
  "env",
  "error",
  "hhbc",

@@ -103,7 +103,7 @@ fn rewrite_xml_<'arena, 'decl>(
         ClassId_::CI(Id(id.0.clone(), renamed_id.unsafe_as_str().into())),
     );
 
-    emit_symbol_refs::add_class(e, renamed_id);
+    e.add_class_ref(renamed_id);
 
     Ok(Expr(
         (),

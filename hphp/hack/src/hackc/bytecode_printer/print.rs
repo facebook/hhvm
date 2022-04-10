@@ -136,11 +136,8 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Re
     concat(w, &prog.constants, |w, c| print_constant(ctx, w, c))?;
     concat(w, &prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
     print_file_attributes(ctx, w, prog.file_attributes.as_ref())?;
-
-    if ctx.dump_symbol_refs() {
-        print_include_region(ctx, w, &prog.symbol_refs.includes)?;
-        print_symbol_ref_regions(ctx, w, &prog.symbol_refs)?;
-    }
+    print_include_region(ctx, w, &prog.symbol_refs.includes)?;
+    print_symbol_ref_regions(ctx, w, &prog.symbol_refs)?;
     Ok(())
 }
 

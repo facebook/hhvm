@@ -3,17 +3,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{IterGen, LabelGen, LocalGen, SymbolRefsState};
+use crate::{IterGen, LabelGen, LocalGen};
 use adata_state::AdataState;
 use decl_provider::{DeclProvider, Result};
-use ffi::Str;
+use ffi::{Slice, Str};
 use global_state::GlobalState;
 use hash::IndexSet;
-use hhbc::Local;
+use hhbc::{
+    hhas_symbol_refs::{HhasSymbolRefs, IncludePath, IncludePathSet},
+    ClassName, ConstName, FunctionName, Local,
+};
 use options::Options;
 use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
 use stack_limit::StackLimit;
 use statement_state::StatementState;
+use std::collections::BTreeSet;
 
 #[derive(Debug)]
 pub struct Emitter<'arena, 'decl> {
@@ -35,7 +39,8 @@ pub struct Emitter<'arena, 'decl> {
 
     pub adata_state_: Option<AdataState<'arena>>,
     pub statement_state_: Option<StatementState<'arena>>,
-    pub symbol_refs_state_: Option<SymbolRefsState<'arena>>,
+    symbol_refs_state: SymbolRefsState<'arena>,
+
     /// State is also frozen and set after closure conversion
     pub global_state_: Option<GlobalState<'arena>>,
 
@@ -73,7 +78,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
 
             adata_state_: None,
             statement_state_: None,
-            symbol_refs_state_: None,
+            symbol_refs_state: Default::default(),
             global_state_: None,
 
             stack_limit,
@@ -179,24 +184,6 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             .get_or_insert_with(StatementState::init)
     }
 
-    pub fn symbol_refs_state(&self) -> &SymbolRefsState<'arena> {
-        self.symbol_refs_state_
-            .as_ref()
-            .expect("uninit'd symbol_refs_state")
-    }
-
-    pub fn symbol_refs_state_mut(&mut self) -> &mut SymbolRefsState<'arena> {
-        self.symbol_refs_state_
-            .get_or_insert_with(SymbolRefsState::default)
-    }
-
-    pub fn take_symbol_refs(&mut self) -> SymbolRefsState<'arena> {
-        match &mut self.symbol_refs_state_ {
-            Some(state) => std::mem::take(state),
-            None => Default::default(),
-        }
-    }
-
     pub fn emit_global_state(&self) -> &GlobalState<'arena> {
         self.global_state_.as_ref().expect("uninit'd global_state")
     }
@@ -208,6 +195,52 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         match self.decl_provider {
             Some(provider) => provider.get_decl(kind, sym),
             None => Err(decl_provider::Error::NotFound),
+        }
+    }
+
+    pub fn add_include_ref(&mut self, inc: IncludePath<'arena>) {
+        self.symbol_refs_state.includes.insert(inc);
+    }
+
+    pub fn add_constant_ref(&mut self, s: ConstName<'arena>) {
+        if !s.is_empty() {
+            self.symbol_refs_state.constants.insert(s);
+        }
+    }
+
+    pub fn add_class_ref(&mut self, s: ClassName<'arena>) {
+        if !s.is_empty() {
+            self.symbol_refs_state.classes.insert(s);
+        }
+    }
+
+    pub fn add_function_ref(&mut self, s: FunctionName<'arena>) {
+        if !s.is_empty() {
+            self.symbol_refs_state.functions.insert(s);
+        }
+    }
+
+    pub fn finish_symbol_refs(&mut self) -> HhasSymbolRefs<'arena> {
+        let state = std::mem::take(&mut self.symbol_refs_state);
+        state.to_hhas(self.alloc)
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+struct SymbolRefsState<'arena> {
+    includes: IncludePathSet<'arena>,
+    constants: BTreeSet<ConstName<'arena>>,
+    functions: BTreeSet<FunctionName<'arena>>,
+    classes: BTreeSet<ClassName<'arena>>,
+}
+
+impl<'arena> SymbolRefsState<'arena> {
+    fn to_hhas(self, alloc: &'arena bumpalo::Bump) -> HhasSymbolRefs<'arena> {
+        HhasSymbolRefs {
+            includes: Slice::new(alloc.alloc_slice_fill_iter(self.includes.into_iter())),
+            constants: Slice::new(alloc.alloc_slice_fill_iter(self.constants.into_iter())),
+            functions: Slice::new(alloc.alloc_slice_fill_iter(self.functions.into_iter())),
+            classes: Slice::new(alloc.alloc_slice_fill_iter(self.classes.into_iter())),
         }
     }
 }

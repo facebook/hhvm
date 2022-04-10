@@ -522,7 +522,7 @@ fn emit_id<'a, 'arena, 'decl>(
             // panic!("TODO: uncomment after D19350786 lands")
             // let cid: ConstId = hhbc::ConstName::from_ast_name(&s);
             let cid = hhbc::ConstName::new(Str::new_str(alloc, string_utils::strip_global_ns(s)));
-            emit_symbol_refs::add_constant(emitter, cid.clone());
+            emitter.add_constant_ref(cid.clone());
             Ok(emit_pos_then(
                 p,
                 instr::instr(Instruct::Opcode(Opcode::CnsE(cid))),
@@ -641,7 +641,7 @@ fn emit_import<'a, 'arena, 'decl>(
     use ast::ImportFlavor;
     let alloc = env.arena; // Should this be emitter.alloc?
     let inc = parse_include(alloc, expr);
-    emit_symbol_refs::add_include(e, inc.clone());
+    e.add_include_ref(inc.clone());
     let (expr_instrs, import_op_instr) = match flavor {
         ImportFlavor::Include => (emit_expr(e, env, expr)?, instr::incl()),
         ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req()),
@@ -1700,7 +1700,7 @@ fn emit_call<'a, 'arena, 'decl>(
     let alloc = env.arena;
     if let Some(ast_defs::Id(_, s)) = expr.as_id() {
         let fid = hhbc::FunctionName::<'arena>::from_ast_name(alloc, s);
-        emit_symbol_refs::add_function(e, fid);
+        e.add_function_ref(fid);
     }
     let readonly_this = match &expr.2 {
         ast::Expr_::ReadonlyExpr(_) => true,
@@ -2046,7 +2046,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 // Statically known
                 ClassExpr::Id(ast_defs::Id(_, cname)) => {
                     let cid = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &cname);
-                    emit_symbol_refs::add_class(e, cid.clone());
+                    e.add_class_ref(cid.clone());
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
                         InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
@@ -3558,7 +3558,7 @@ fn emit_known_class_id<'arena, 'decl>(
 ) -> InstrSeq<'arena> {
     let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &id.1);
     let cid_string = instr::string(alloc, cid.unsafe_as_str());
-    emit_symbol_refs::add_class(e, cid);
+    e.add_class_ref(cid);
     InstrSeq::gather(vec![cid_string, instr::classgetc()])
 }
 
@@ -3659,7 +3659,7 @@ fn emit_new<'a, 'arena, 'decl>(
         let newobj_instrs = match cexpr {
             ClassExpr::Id(ast_defs::Id(_, cname)) => {
                 let id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &cname);
-                emit_symbol_refs::add_class(e, id);
+                e.add_class_ref(id);
                 match has_generics {
                     H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), instr::newobjd(id)]),
                     H::HasGenerics => InstrSeq::gather(vec![
@@ -4469,7 +4469,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
                     emit_pos_then(&pos, instr::string(alloc, cname))
                 }
             } else {
-                emit_symbol_refs::add_class(e, cid.clone());
+                e.add_class_ref(cid.clone());
                 // TODO(hrust) enabel `let const_id = hhbc::ConstName::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
                 let const_id =

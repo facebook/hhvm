@@ -38,7 +38,6 @@ type options = {
   config_file: string option;
   mode: mode;
   input_file_list: string option;
-  dump_symbol_refs: bool;
   dump_config: bool;
   extract_facts: bool;
   log_stats: bool;
@@ -141,7 +140,7 @@ let parse_options () =
   let output_file = ref None in
   let config_file = ref None in
   let input_file_list = ref None in
-  let dump_symbol_refs = ref false in
+  let ignore_dump_symbol_refs = ref false in
   let extract_facts = ref false in
   let dump_config = ref false in
   let log_stats = ref false in
@@ -182,7 +181,7 @@ let parse_options () =
         " read a list of files (one per line) from the file `input-file-list'"
       );
       ( "--dump-symbol-refs",
-        Arg.Set dump_symbol_refs,
+        Arg.Set ignore_dump_symbol_refs,
         " Dump symbol ref sections of HHAS" );
       ("--dump-config", Arg.Set dump_config, " Dump configuration settings");
       ( "--enable-logging-stats",
@@ -239,7 +238,6 @@ let parse_options () =
     config_file = !config_file;
     mode = !mode;
     input_file_list = !input_file_list;
-    dump_symbol_refs = !dump_symbol_refs;
     dump_config = !dump_config;
     log_stats = !log_stats;
     extract_facts = !extract_facts;
@@ -429,10 +427,6 @@ let do_compile
                 4
               else
                 0)
-          lor (if compiler_options.dump_symbol_refs then
-                8
-              else
-                0)
           lor
           if compiler_options.disable_toplevel_elaboration then
             16
@@ -554,10 +548,6 @@ let desugar_and_print_expr_trees
              0)
           lor (if compiler_options.for_debugger_eval then
                 4
-              else
-                0)
-          lor (if compiler_options.dump_symbol_refs then
-                8
               else
                 0)
           lor

@@ -18,7 +18,6 @@ emit_memoize_method = { path = "../emit_memoize_method" }
 emit_method = { path = "../emit_method" }
 emit_pos = { path = "../emit_pos" }
 emit_property = { path = "../emit_property" }
-emit_symbol_refs = { path = "../emit_symbol_refs" }
 emit_type_constant = { path = "../emit_type_constant" }
 emit_type_hint = { path = "../emit_type_hint" }
 emit_xhp = { path = "../emit_xhp" }

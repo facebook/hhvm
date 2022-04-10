@@ -8,7 +8,6 @@ edition = "2021"
 path = "../../rewrite_xml.rs"
 
 [dependencies]
-emit_symbol_refs = { path = "../../../emitter/cargo/emit_symbol_refs" }
 env = { path = "../../../emitter/cargo/env" }
 error = { path = "../../../error/cargo/error" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }

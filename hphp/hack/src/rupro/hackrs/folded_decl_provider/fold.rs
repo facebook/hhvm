@@ -526,6 +526,23 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
     }
 
+    fn flatten_parent_class_class_reqs(
+        &self,
+        req_class_ancestors: &mut Vec<Requirement<R>>,
+        parent_ty: &Ty<R>,
+    ) {
+        let (_, pos_id, parent_params) = parent_ty.unwrap_class_type();
+        if let Some(parent_type) = self.parents.get(&pos_id.id()) {
+            let subst = Subst::new(&parent_type.tparams, parent_params);
+            let substitution = Substitution { subst: &subst };
+            req_class_ancestors.extend(
+                (parent_type.req_class_ancestors.iter())
+                    .map(|req| substitution.instantiate(&req.ty))
+                    .map(|ty| Requirement::new(pos_id.pos().clone(), ty)),
+            );
+        }
+    }
+
     fn declared_class_req(
         &self,
         req_ancestors: &mut Vec<Requirement<R>>,
@@ -587,7 +604,13 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         req_ancestors.reverse();
     }
 
-    fn get_class_requirements(&self) -> (Vec<Requirement<R>>, TypeNameIndexSet) {
+    fn get_class_requirements(
+        &self,
+    ) -> (
+        Box<[Requirement<R>]>,
+        TypeNameIndexSet,
+        Box<[Requirement<R>]>,
+    ) {
         let mut req_ancestors = vec![];
         let mut req_ancestors_extends = TypeNameIndexSet::new();
 
@@ -626,7 +649,25 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
 
         self.naive_dedup(&mut req_ancestors);
-        (req_ancestors, req_ancestors_extends)
+
+        let mut req_class_ancestors: Vec<_> = (self.child.req_class.iter())
+            .map(|req_ty| {
+                let (_, pos_id, _) = req_ty.unwrap_class_type();
+                Requirement::new(pos_id.pos().clone(), req_ty.clone())
+            })
+            .collect();
+
+        for ty in self.child.uses.iter() {
+            self.flatten_parent_class_class_reqs(&mut req_class_ancestors, ty);
+        }
+
+        self.naive_dedup(&mut req_class_ancestors);
+
+        (
+            req_ancestors.into_boxed_slice(),
+            req_ancestors_extends,
+            req_class_ancestors.into_boxed_slice(),
+        )
     }
 
     fn get_sealed_whitelist(&self) -> Option<TypeNameIndexSet> {
@@ -739,7 +780,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let extends = self.get_extends();
         let xhp_attr_deps = self.get_xhp_attr_deps();
 
-        let (req_ancestors, req_ancestors_extends) = self.get_class_requirements();
+        let (req_ancestors, req_ancestors_extends, req_class_ancestors) =
+            self.get_class_requirements();
 
         // TODO(T88552052) can make logic more explicit now, enum members appear to
         // only need abstract without default and concrete type consts
@@ -783,9 +825,9 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             xhp_enum_values: self.child.xhp_enum_values.clone(),
             extends,
             xhp_attr_deps,
-            req_ancestors: req_ancestors.into_boxed_slice(),
+            req_ancestors,
             req_ancestors_extends,
-            req_class_ancestors: [].into(), // TODO
+            req_class_ancestors,
             sealed_whitelist,
             deferred_init_members,
             decl_errors: self.errors.into_boxed_slice(),

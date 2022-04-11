@@ -117,6 +117,7 @@ pub struct FunHdr {
     unsafe_contexts: Option<ast::Contexts>,
     readonly_return: Option<ast::ReadonlyKind>,
     return_type: Option<ast::Hint>,
+    internal: bool,
 }
 
 impl FunHdr {
@@ -132,6 +133,7 @@ impl FunHdr {
             unsafe_contexts: None,
             readonly_return: None,
             return_type: None,
+            internal: false,
         }
     }
 }
@@ -3904,6 +3906,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
             }
             let kinds = p_kinds(modifiers, env)?;
             let has_async = kinds.has(modifier::ASYNC);
+            let internal = kinds.has(modifier::INTERNAL);
             let readonly_this = if kinds.has(modifier::READONLY) {
                 Some(ast::ReadonlyKind::Readonly)
             } else {
@@ -3929,6 +3932,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
                 suspension_kind,
                 readonly_this,
                 name,
+                internal,
                 constrs,
                 type_parameters,
                 parameters,
@@ -5099,8 +5103,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 file_attributes: vec![],
                 mode: env.file_mode(),
                 fun,
-                // TODO(T116039119): Populate value with presence of internal attribute
-                internal: false,
+                internal: hdr.internal,
             })])
         }
         ClassishDeclaration(c) if contains_class_body(c) => {
@@ -5170,8 +5173,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 enum_: None,
                 doc_comment: doc_comment_opt,
                 emit_id: None,
-                // TODO(T116039119): Populate value with presence of internal attribute
-                internal: false,
+                internal: kinds.has(modifier::INTERNAL),
             };
             match &c.body.children {
                 ClassishBody(c1) => {
@@ -5438,8 +5440,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 emit_id: None,
-                // TODO(T116039119): Populate value with presence of internal attribute
-                internal: false,
+                internal: kinds.has(modifier::INTERNAL),
             };
 
             for n in c.elements.syntax_node_to_list_skip_separator() {

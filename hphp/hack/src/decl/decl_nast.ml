@@ -39,15 +39,21 @@ and fun_decl (ctx : Provider_context.t) (f : Nast.fun_def) : Typing_defs.fun_elt
   let module_ =
     Naming_attributes_params.get_module_attribute f.fd_file_attributes
   in
-  fun_decl_in_env env ~is_lambda:false f.fd_fun module_
+  (* Support both attribute and fd_internal for now, will be removed in next diff once typechecker changes are made *)
+  let is_internal =
+    Naming_attributes_params.has_internal_attribute f.fd_fun.f_user_attributes
+    || f.fd_internal
+  in
+  fun_decl_in_env env ~is_lambda:false ~is_internal f.fd_fun module_
 
 and lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
     Typing_defs.fun_elt =
-  fun_decl_in_env env ~is_lambda:true f None
+  fun_decl_in_env env ~is_lambda:true ~is_internal:false f None
 
 and fun_decl_in_env
     (env : Decl_env.env)
     ~(is_lambda : bool)
+    ~(is_internal : bool)
     (f : Nast.fun_)
     (module_ : Ast_defs.id option) : Typing_defs.fun_elt =
   let ifc_decl = FunUtils.find_policied_attribute f.f_user_attributes in
@@ -86,9 +92,6 @@ and fun_decl_in_env
       SN.UserAttributes.uaSupportDynamicType
       f.f_user_attributes
   in
-  let fe_internal =
-    Naming_attributes_params.has_internal_attribute f.f_user_attributes
-  in
   let fe_pos = Decl_env.make_decl_pos env @@ fst f.f_name in
   let fe_type =
     mk
@@ -117,7 +120,7 @@ and fun_decl_in_env
   {
     fe_pos;
     fe_module = module_;
-    fe_internal;
+    fe_internal = is_internal;
     fe_type;
     fe_deprecated;
     fe_php_std_lib;

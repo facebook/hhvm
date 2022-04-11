@@ -1,9 +1,9 @@
 [("\\C",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-       sc_kind = (Cclass Concrete); sc_module = None;
-       sc_name = ([14:7-8], "\\C"); sc_tparams = [];
+       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+       sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+       sc_module = None; sc_name = ([14:7-8], "\\C"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
        sc_req_implements = []; sc_req_class = []; sc_implements = [];
@@ -14,8 +14,8 @@
   ("\\I",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-        sc_kind = Cinterface; sc_module = None;
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = Cinterface; sc_module = None;
         sc_name = ([16:11-12], "\\I"); sc_tparams = [];
         sc_where_constraints =
         [((Rhint ([16:19-23]), Tthis), Constraint_as,
@@ -30,8 +30,8 @@
   ("\\PartialC",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-        sc_kind = Ctrait; sc_module = None;
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = Ctrait; sc_module = None;
         sc_name = ([18:7-15], "\\PartialC"); sc_tparams = [];
         sc_where_constraints =
         [((Rhint ([18:35-39]), Tthis), Constraint_eq,
@@ -48,8 +48,8 @@
   ("\\J",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-        sc_kind = Cinterface; sc_module = None;
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = Cinterface; sc_module = None;
         sc_name = ([20:11-12], "\\J"); sc_tparams = [];
         sc_where_constraints =
         [((Rhint ([20:19-20]), (Tapply (([20:19-20], "\\C"), []))),

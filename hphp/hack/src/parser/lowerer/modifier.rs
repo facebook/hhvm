@@ -63,7 +63,7 @@ pub fn to_use_as_visibility(kind: Kind) -> Option<UseAsVisibility> {
 #[derive(Copy, Clone)]
 pub struct KindSet(u32);
 
-pub const VISIBILITIES: KindSet = KindSet(PRIVATE.0 | PUBLIC.0 | PROTECTED.0);
+pub const VISIBILITIES: KindSet = KindSet(PRIVATE.0 | PUBLIC.0 | PROTECTED.0 | INTERNAL.0);
 
 impl KindSet {
     pub fn new() -> Self {

@@ -113,6 +113,7 @@ type shallow_class = {
   sc_final: bool;
   sc_abstract: bool;
   sc_is_xhp: bool;
+  sc_internal: bool;
   sc_has_xhp_keyword: bool;
   sc_kind: Ast_defs.classish_kind;
   sc_module: Ast_defs.id option;

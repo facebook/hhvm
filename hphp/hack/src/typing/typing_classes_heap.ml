@@ -257,6 +257,7 @@ module ApiShallow = struct
     match t with
     | Lazy (sc, _lc) ->
       Attrs.mem SN.UserAttributes.uaInternal sc.sc_user_attributes
+      || sc.sc_internal
     | Eager (c, _) -> c.Decl_defs.dc_internal
 
   let decl_errors (decl, t, _ctx) =

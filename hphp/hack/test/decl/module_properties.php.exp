@@ -5,13 +5,14 @@ File root|module_properties.php--A.php
 [("\\A",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-       sc_kind = (Cclass Concrete); sc_module = (Some ([4:54-57], "A"));
-       sc_name = ([6:7-8], "\\A"); sc_tparams = [];
-       sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-       sc_req_implements = []; sc_req_class = []; sc_implements = [];
-       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+       sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+       sc_module = (Some ([4:54-57], "A")); sc_name = ([6:7-8], "\\A");
+       sc_tparams = []; sc_where_constraints = []; sc_extends = [];
+       sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+       sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([8:14-16], "x"); sp_xhp_attr = None;
           sp_type = (Some (Rhint ([8:10-13]), (Tprim Tint)));

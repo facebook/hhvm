@@ -373,6 +373,7 @@ let class_DEPRECATED ctx c =
       sc_is_xhp = c.c_is_xhp;
       sc_has_xhp_keyword = c.c_has_xhp_keyword;
       sc_kind = c.c_kind;
+      sc_internal = c.c_internal;
       sc_module;
       sc_name = Decl_env.make_decl_posed env c.c_name;
       sc_tparams = List.map c.c_tparams ~f:(FunUtils.type_param env);

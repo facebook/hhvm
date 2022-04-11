@@ -6,10 +6,10 @@ File root|module_enums.php--X.php
 [("\\X",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-       sc_kind = Cenum; sc_module = (Some ([2:54-57], "X"));
-       sc_name = ([5:6-7], "\\X"); sc_tparams = [];
-       sc_where_constraints = [];
+       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+       sc_has_xhp_keyword = false; sc_kind = Cenum;
+       sc_module = (Some ([2:54-57], "X")); sc_name = ([5:6-7], "\\X");
+       sc_tparams = []; sc_where_constraints = [];
        sc_extends =
        [(Rhint ([5:6-7]),
          (Tapply (([5:6-7], "\\HH\\BuiltinEnum"),

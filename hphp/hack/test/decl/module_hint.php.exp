@@ -6,15 +6,15 @@ File root|module_hint.php--here.php
 [("\\C",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-       sc_kind = (Cclass Concrete); sc_module = (Some ([3:54-60], "here"));
-       sc_name = ([6:7-8], "\\C"); sc_tparams = [];
-       sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-       sc_req_implements = []; sc_req_class = []; sc_implements = [];
-       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-       sc_props = []; sc_sprops = []; sc_constructor = None;
-       sc_static_methods = [];
+       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+       sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+       sc_module = (Some ([3:54-60], "here")); sc_name = ([6:7-8], "\\C");
+       sc_tparams = []; sc_where_constraints = []; sc_extends = [];
+       sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([7:19-22], "bar");
           sm_type =
@@ -57,15 +57,15 @@ File root|module_hint.php--there.php
 [("\\D",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-       sc_kind = (Cclass Concrete); sc_module = (Some ([2:54-61], "there"));
-       sc_name = ([5:7-8], "\\D"); sc_tparams = [];
-       sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-       sc_req_implements = []; sc_req_class = []; sc_implements = [];
-       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-       sc_props = []; sc_sprops = []; sc_constructor = None;
-       sc_static_methods = []; sc_methods = [];
+       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+       sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+       sc_module = (Some ([2:54-61], "there")); sc_name = ([5:7-8], "\\D");
+       sc_tparams = []; sc_where_constraints = []; sc_extends = [];
+       sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes =
        [{ Typing_defs_core.ua_name = ([4:22-32], "__Internal");
           ua_classname_params = [] };
@@ -76,9 +76,9 @@ File root|module_hint.php--there.php
   ("\\G",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-        sc_kind = (Cclass Concrete); sc_module = (Some ([2:54-61], "there"));
-        sc_name = ([8:7-8], "\\G");
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+        sc_module = (Some ([2:54-61], "there")); sc_name = ([8:7-8], "\\G");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
            tp_name = ([8:9-10], "T"); tp_tparams = []; tp_constraints = [];
@@ -100,10 +100,10 @@ File root|module_hint.php--there.php
   ("\\E",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-        sc_kind = Cenum; sc_module = (Some ([2:54-61], "there"));
-        sc_name = ([11:6-7], "\\E"); sc_tparams = [];
-        sc_where_constraints = [];
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = Cenum;
+        sc_module = (Some ([2:54-61], "there")); sc_name = ([11:6-7], "\\E");
+        sc_tparams = []; sc_where_constraints = [];
         sc_extends =
         [(Rhint ([11:6-7]),
           (Tapply (([11:6-7], "\\HH\\BuiltinEnum"),
@@ -178,9 +178,9 @@ File root|module_hint.php--everywhere.php
   ("\\MyList",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-        sc_kind = (Cclass Concrete); sc_module = None;
-        sc_name = ([5:7-13], "\\MyList");
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+        sc_module = None; sc_name = ([5:7-13], "\\MyList");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
            tp_name = ([5:14-15], "T"); tp_tparams = []; tp_constraints = [];

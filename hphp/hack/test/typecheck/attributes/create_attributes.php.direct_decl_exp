@@ -1,12 +1,12 @@
 --- legacy
 +++ direct decl
-@@ -1,407 +1,403 @@
+@@ -1,408 +1,404 @@
  [("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-        sc_kind = (Cclass Concrete); sc_module = None;
-        sc_name = ([5:7-8], "\\C"); sc_tparams = [];
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+        sc_module = None; sc_name = ([5:7-8], "\\C"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = [];
@@ -20,9 +20,9 @@
    ("\\Cc",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([6:7-9], "\\Cc"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([6:7-9], "\\Cc"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -36,9 +36,9 @@
    ("\\E",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([7:7-8], "\\E"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([7:7-8], "\\E"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -52,9 +52,9 @@
    ("\\F",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([8:7-8], "\\F"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([8:7-8], "\\F"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -68,9 +68,9 @@
    ("\\Met",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([9:7-10], "\\Met"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([9:7-10], "\\Met"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -84,9 +84,9 @@
    ("\\IProp",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([10:7-12], "\\IProp"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([10:7-12], "\\IProp"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -100,9 +100,9 @@
    ("\\SProp",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([11:7-12], "\\SProp"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([11:7-12], "\\SProp"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -116,9 +116,9 @@
    ("\\P",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([12:7-8], "\\P"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([12:7-8], "\\P"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -132,9 +132,9 @@
    ("\\T",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([13:7-8], "\\T"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([13:7-8], "\\T"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -148,9 +148,9 @@
    ("\\Fi",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([14:7-9], "\\Fi"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([14:7-9], "\\Fi"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -164,9 +164,9 @@
    ("\\Ec",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([15:7-9], "\\Ec"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([15:7-9], "\\Ec"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -180,9 +180,9 @@
    ("\\TParam",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([16:7-13], "\\TParam"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([16:7-13], "\\TParam"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -196,9 +196,9 @@
    ("\\Tc",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([17:7-9], "\\Tc"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([17:7-9], "\\Tc"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -212,9 +212,9 @@
    ("\\L",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([18:7-8], "\\L"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([18:7-8], "\\L"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = [];
@@ -258,9 +258,9 @@
    ("\\CCC",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([27:7-10], "\\CCC"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([27:7-10], "\\CCC"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_req_class = []; sc_implements = [];
@@ -318,9 +318,9 @@
    ("\\CT",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([40:7-9], "\\CT");
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+         sc_module = None; sc_name = ([40:7-9], "\\CT");
          sc_tparams =
          [{ Typing_defs_core.tp_variance = Invariant;
             tp_name = ([40:27-29], "T1"); tp_tparams = [];
@@ -341,9 +341,10 @@
    ("\\EE",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = Cenum; sc_module = None; sc_name = ([43:6-8], "\\EE");
-         sc_tparams = []; sc_where_constraints = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = Cenum; sc_module = None;
+         sc_name = ([43:6-8], "\\EE"); sc_tparams = [];
+         sc_where_constraints = [];
          sc_extends =
          [(Rhint ([43:6-8]),
            (Tapply (([43:6-8], "\\HH\\BuiltinEnum"),
@@ -376,9 +377,9 @@
    ("\\Ecc",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = (Cenum_class Concrete); sc_module = None;
-         sc_name = ([49:12-15], "\\Ecc"); sc_tparams = [];
+         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+         sc_has_xhp_keyword = false; sc_kind = (Cenum_class Concrete);
+         sc_module = None; sc_name = ([49:12-15], "\\Ecc"); sc_tparams = [];
          sc_where_constraints = [];
          sc_extends =
          [(Rhint ([49:12-15]),

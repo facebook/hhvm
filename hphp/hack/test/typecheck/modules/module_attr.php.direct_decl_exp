@@ -41,15 +41,15 @@ File root|module_attr.php--there.php
 [("\\C",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-       sc_kind = (Cclass Concrete); sc_module = (Some ([3:54-61], "there"));
-       sc_name = ([5:7-8], "\\C"); sc_tparams = [];
-       sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-       sc_req_implements = []; sc_req_class = []; sc_implements = [];
-       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-       sc_props = []; sc_sprops = []; sc_constructor = None;
-       sc_static_methods = [];
+       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+       sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+       sc_module = (Some ([3:54-61], "there")); sc_name = ([5:7-8], "\\C");
+       sc_tparams = []; sc_where_constraints = []; sc_extends = [];
+       sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([6:19-22], "bar");
           sm_type =
@@ -75,10 +75,10 @@ File root|module_attr.php--another.php
 [("\\E",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-       sc_kind = Cenum; sc_module = (Some ([3:54-63], "another"));
-       sc_name = ([5:6-7], "\\E"); sc_tparams = [];
-       sc_where_constraints = [];
+       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+       sc_has_xhp_keyword = false; sc_kind = Cenum;
+       sc_module = (Some ([3:54-63], "another")); sc_name = ([5:6-7], "\\E");
+       sc_tparams = []; sc_where_constraints = [];
        sc_extends =
        [(Rhint ([5:6-7]),
          (Tapply (([5:6-7], "\\HH\\BuiltinEnum"),

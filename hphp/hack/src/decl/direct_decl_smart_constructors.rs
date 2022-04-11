@@ -3384,9 +3384,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     s.push_str(msg);
                     s.into_bump_str()
                 });
+                let internal = header
+                    .modifiers
+                    .iter()
+                    .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
                 let fun_elt = self.alloc(FunElt {
                     module: parsed_attributes.module,
-                    internal: parsed_attributes.internal,
+                    internal: parsed_attributes.internal || internal,
                     deprecated,
                     type_,
                     pos,
@@ -3758,6 +3762,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
         let mut final_ = false;
         let mut abstract_ = false;
+        let mut internal = false;
 
         for modifier in modifiers.iter() {
             match modifier.token_kind() {
@@ -3765,6 +3770,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     abstract_ = true;
                 }
                 Some(TokenKind::Final) => final_ = true,
+                Some(TokenKind::Internal) => internal = true,
                 _ => {}
             }
         }
@@ -4010,6 +4016,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             has_xhp_keyword: xhp_keyword.is_token(TokenKind::XHP),
             kind: class_kind,
             module,
+            internal,
             name: (pos, name),
             tparams,
             where_constraints,
@@ -4439,6 +4446,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             has_xhp_keyword: false,
             kind: ClassishKind::Cenum,
             module: parsed_attributes.module,
+            internal: false, // TODO: enums should be denoteable as internal by keyword
             name: id.into(),
             tparams: &[],
             where_constraints: &[],
@@ -4582,6 +4590,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 _ => {}
             }
         }
+        let internal = modifiers
+            .iter()
+            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
         user_attributes.push(self.alloc(shallow_decl_defs::UserAttribute {
             name: (name.0, "__EnumClass"),
             classname_params: &[],
@@ -4599,6 +4610,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             abstract_: is_abstract,
             is_xhp: false,
             has_xhp_keyword: false,
+            internal,
             kind: class_kind,
             module: None, // TODO: grab module from attributes
             name: name.into(),

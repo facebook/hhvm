@@ -311,6 +311,7 @@ struct
       sc_final = sc.sc_final;
       sc_abstract = sc.sc_abstract;
       sc_is_xhp = sc.sc_is_xhp;
+      sc_internal = sc.sc_internal;
       sc_has_xhp_keyword = sc.sc_has_xhp_keyword;
       sc_kind = sc.sc_kind;
       sc_module = sc.sc_module;

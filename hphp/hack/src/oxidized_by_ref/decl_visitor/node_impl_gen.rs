@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ec9c18c18cd53bd06d6532e122e7839a>>
+// @generated SignedSource<<f1c06eea5c67d1a3df754c96923bffc7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -537,30 +537,31 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 final_: ref __binding_1,
                 abstract_: ref __binding_2,
                 is_xhp: ref __binding_3,
-                has_xhp_keyword: ref __binding_4,
-                kind: ref __binding_5,
-                module: ref __binding_6,
-                name: ref __binding_7,
-                tparams: ref __binding_8,
-                where_constraints: ref __binding_9,
-                extends: ref __binding_10,
-                uses: ref __binding_11,
-                xhp_attr_uses: ref __binding_12,
-                xhp_enum_values: ref __binding_13,
-                req_extends: ref __binding_14,
-                req_implements: ref __binding_15,
-                req_class: ref __binding_16,
-                implements: ref __binding_17,
-                support_dynamic_type: ref __binding_18,
-                consts: ref __binding_19,
-                typeconsts: ref __binding_20,
-                props: ref __binding_21,
-                sprops: ref __binding_22,
-                constructor: ref __binding_23,
-                static_methods: ref __binding_24,
-                methods: ref __binding_25,
-                user_attributes: ref __binding_26,
-                enum_type: ref __binding_27,
+                internal: ref __binding_4,
+                has_xhp_keyword: ref __binding_5,
+                kind: ref __binding_6,
+                module: ref __binding_7,
+                name: ref __binding_8,
+                tparams: ref __binding_9,
+                where_constraints: ref __binding_10,
+                extends: ref __binding_11,
+                uses: ref __binding_12,
+                xhp_attr_uses: ref __binding_13,
+                xhp_enum_values: ref __binding_14,
+                req_extends: ref __binding_15,
+                req_implements: ref __binding_16,
+                req_class: ref __binding_17,
+                implements: ref __binding_18,
+                support_dynamic_type: ref __binding_19,
+                consts: ref __binding_20,
+                typeconsts: ref __binding_21,
+                props: ref __binding_22,
+                sprops: ref __binding_23,
+                constructor: ref __binding_24,
+                static_methods: ref __binding_25,
+                methods: ref __binding_26,
+                user_attributes: ref __binding_27,
+                enum_type: ref __binding_28,
             } => {
                 {
                     __binding_0.accept(v)
@@ -643,7 +644,10 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 {
                     __binding_26.accept(v)
                 }
-                { __binding_27.accept(v) }
+                {
+                    __binding_27.accept(v)
+                }
+                { __binding_28.accept(v) }
             }
         }
     }

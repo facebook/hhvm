@@ -6,11 +6,20 @@ class Foo {
   internal function bar(): void {}
 }
 
+internal class FooInternal extends Foo {
+  public function bar(): void {} // ok
+}
+
+trait TFoo {
+  internal function bar(): void {}
+}
+internal function foo_internal(): void {}
 
 //// file2.php
 <?hh
-function test(): void {
-  $x = new Foo();
-  $x->bar();
-
+function test(FooInternal $y): void { // error on typehint
+  $x = new Foo(); // ok
+  foo_internal(); // error
+  $x->bar(); // error
+  $y->bar(); // ok
 }

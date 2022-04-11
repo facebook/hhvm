@@ -561,63 +561,35 @@ let autocomplete_typed_member ~is_static env class_ty cid mid =
 let autocomplete_static_member env (ty, _, cid) mid =
   autocomplete_typed_member ~is_static:true env ty (Some cid) mid
 
-let autocomplete_enum_class_label_call env fty pos_labelname =
+let autocomplete_enum_class_label env opt_cname pos_labelname =
   argument_global_type := Some Acclass_get;
-
   let suggest_members cls =
-    match cls with
-    | Some cls ->
-      List.iter (Cls.consts cls) ~f:(fun (name, cc) ->
-          (* Filter out the constant used for ::class if present *)
-          if String.(name <> Naming_special_names.Members.mClass) then
-            let res_ty = Tast_env.print_decl_ty env cc.cc_type in
-            let ty = Phase.decl cc.cc_type in
-            let kind = SearchUtils.SI_ClassConstant in
-            let complete =
-              {
-                res_pos = get_pos_for env ty;
-                res_replace_pos = replace_pos_of_id pos_labelname;
-                res_base_class = Some (Cls.name cls);
-                res_ty;
-                res_name = name;
-                res_fullname = name;
-                res_kind = kind;
-                func_details = get_func_details_for env ty;
-                ranking_details = None;
-                res_documentation = None;
-              }
-            in
-            add_res complete)
-    | _ -> ()
+    List.iter (Cls.consts cls) ~f:(fun (name, cc) ->
+        (* Filter out the constant used for ::class if present *)
+        if String.(name <> Naming_special_names.Members.mClass) then
+          let res_ty = Tast_env.print_decl_ty env cc.cc_type in
+          let ty = Phase.decl cc.cc_type in
+          let kind = SearchUtils.SI_ClassConstant in
+          let complete =
+            {
+              res_pos = get_pos_for env ty;
+              res_replace_pos = replace_pos_of_id pos_labelname;
+              res_base_class = Some (Cls.name cls);
+              res_ty;
+              res_name = name;
+              res_fullname = name;
+              res_kind = kind;
+              func_details = get_func_details_for env ty;
+              ranking_details = None;
+              res_documentation = None;
+            }
+          in
+          add_res complete)
   in
-  let suggest_members_from_ty env ty =
-    match get_node ty with
-    | Tclass ((_, enum_name), _, _) when Tast_env.is_enum_class env enum_name ->
-      suggest_members (Tast_env.get_class env enum_name)
-    | _ -> ()
-  in
-
-  let open Typing_defs in
-  match get_node fty with
-  | Tfun { ft_params = { fp_type = { et_type = t; _ }; _ } :: _; _ } ->
-    let is_enum_class_label_ty_name name =
-      String.equal Naming_special_names.Classes.cEnumClassLabel name
-    in
-    (match get_node t with
-    | Tnewtype (ty_name, [enum_ty; _member_ty], _)
-      when is_enum_class_label_ty_name ty_name ->
-      suggest_members_from_ty env enum_ty
-    | _ -> ())
-  | _ -> ()
-
-let autocomplete_enum_class_label_id env id pos_labelname =
-  let opt_ty = Tast_env.get_fun env id in
-  match opt_ty with
-  | None -> ()
-  | Some fun_elt ->
-    let dty = fun_elt.fe_type in
-    let (env, lty) = Tast_env.localize_no_subst env ~ignore_errors:true dty in
-    autocomplete_enum_class_label_call env lty pos_labelname
+  let open Option in
+  Option.iter
+    ~f:suggest_members
+    (opt_cname >>= fun (_, id) -> Tast_env.get_class env id)
 
 (* Zip two lists together. If the two lists have different lengths,
    take the shortest. *)
@@ -625,6 +597,35 @@ let rec zip_truncate (xs : 'a list) (ys : 'b list) : ('a * 'b) list =
   match (xs, ys) with
   | (x :: xs, y :: ys) -> (x, y) :: zip_truncate xs ys
   | _ -> []
+
+(* Auto complete for short labels `#Foo` inside a function call.
+ * Leverage function type information to infer the right enum class.
+ *)
+let autocomplete_enum_class_label_call env f args =
+  argument_global_type := Some Acclass_get;
+  let suggest_members_from_ty env ty pos_labelname =
+    match get_node ty with
+    | Tclass ((p, enum_name), _, _) when Tast_env.is_enum_class env enum_name ->
+      autocomplete_enum_class_label env (Some (p, enum_name)) pos_labelname
+    | _ -> ()
+  in
+  let is_enum_class_label_ty_name name =
+    String.equal Naming_special_names.Classes.cEnumClassLabel name
+  in
+  let (fty, _, _) = f in
+  match get_node fty with
+  | Tfun { ft_params; _ } ->
+    let ty_args = zip_truncate args ft_params in
+    List.iter
+      ~f:(fun (arg, arg_ty) ->
+        match (arg, get_node arg_ty.fp_type.et_type) with
+        | ( (_, (_, p, Aast.EnumClassLabel (None, n))),
+            Typing_defs.Tnewtype (ty_name, [enum_ty; _member_ty], _) )
+          when is_enum_class_label_ty_name ty_name ->
+          suggest_members_from_ty env enum_ty (p, n)
+        | (_, _) -> ())
+      ty_args
+  | _ -> ()
 
 (* Get the names of string literal keys in this shape type. *)
 let shape_string_keys (sm : 'a TShapeMap.t) : string list =
@@ -1019,12 +1020,7 @@ let visitor ctx autocomplete_context sienv =
       super#on_Id env id
 
     method! on_Call env f targs args unpack_arg =
-      (match args with
-      | (_, (_, p, Aast.EnumClassLabel (_, n))) :: _ when is_auto_complete n ->
-        let (fty, _, _) = f in
-        autocomplete_enum_class_label_call env fty (p, n)
-      | _ -> ());
-
+      autocomplete_enum_class_label_call env f args;
       super#on_Call env f targs args unpack_arg
 
     method! on_Fun_id env id =
@@ -1111,9 +1107,8 @@ let visitor ctx autocomplete_context sienv =
           autocomplete_shape_literal_in_call env ft args;
           autocomplete_enum_value_in_call env ft args
         | _ -> ())
-      (* Autocomplete is using ...#AUTO332 so is parsed as an EnumClassLabel *)
-      | (_, p, Aast.EnumClassLabel (Some (_, id), n)) when is_auto_complete n ->
-        autocomplete_enum_class_label_id env id (p, n)
+      | (_, p, Aast.EnumClassLabel (opt_cname, n)) when is_auto_complete n ->
+        autocomplete_enum_class_label env opt_cname (p, n)
       | _ -> ());
       super#on_expr env expr
 

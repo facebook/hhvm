@@ -26,6 +26,10 @@
 namespace HPHP {
 namespace Facts {
 
+struct WatchmanWatcherOpts {
+  int32_t m_retries = 0;
+};
+
 /**
  * Return a Watcher which listens to a Watchman server.
  *
@@ -33,7 +37,9 @@ namespace Facts {
  * `watchman`: An open connection to a Watchman server.
  */
 std::shared_ptr<Watcher> make_watchman_watcher(
-    folly::dynamic queryExpr, std::shared_ptr<Watchman> watchman);
+    folly::dynamic queryExpr,
+    std::shared_ptr<Watchman> watchman,
+    WatchmanWatcherOpts opts);
 
 } // namespace Facts
 } // namespace HPHP

@@ -168,11 +168,16 @@ folly::dynamic addWatchmanSince(folly::dynamic query, const Clock& clock) {
 /**
  * A Watcher which listens to a Watchman server.
  */
-struct WatchmanWatcher final : public Watcher {
+struct WatchmanWatcher final
+    : public Watcher,
+      public std::enable_shared_from_this<WatchmanWatcher> {
 
   WatchmanWatcher(
-      folly::dynamic queryExpr, std::shared_ptr<Watchman> watchmanClient)
-      : m_queryExpr{addFieldsToQuery(std::move(queryExpr))}
+      folly::dynamic queryExpr,
+      std::shared_ptr<Watchman> watchmanClient,
+      WatchmanWatcherOpts opts)
+      : m_opts{std::move(opts)}
+      , m_queryExpr{addFieldsToQuery(std::move(queryExpr))}
       , m_watchmanClient{watchmanClient} {
   }
 
@@ -185,12 +190,8 @@ struct WatchmanWatcher final : public Watcher {
   folly::SemiFuture<Results> getChanges(Clock lastClock) override {
     auto queryExpr = addWatchmanSince(m_queryExpr, lastClock);
     XLOGF(INFO, "Querying watchman ({})\n", folly::toJson(queryExpr));
-    return m_watchmanClient->query(std::move(queryExpr))
-        .deferValue([lastClock = std::move(lastClock)](
-                        watchman::QueryResult&& wrappedResults) mutable {
-          return parseWatchmanResults(
-              lastClock, std::move(wrappedResults.raw_));
-        });
+    return getChanges(
+        std::move(lastClock), std::move(queryExpr), m_opts.m_retries);
   }
 
   void subscribe(std::function<void(Results&& callback)> callback) override {
@@ -207,6 +208,31 @@ struct WatchmanWatcher final : public Watcher {
   }
 
 private:
+  folly::SemiFuture<Results>
+  getChanges(Clock lastClock, folly::dynamic queryExpr, int32_t retries) {
+    return queryWatchman(queryExpr, retries)
+        .deferValue([lastClock = std::move(lastClock)](
+                        watchman::QueryResult&& wrappedResults) mutable {
+          return parseWatchmanResults(
+              lastClock, std::move(wrappedResults.raw_));
+        });
+  }
+
+  folly::SemiFuture<folly::dynamic>
+  queryWatchman(folly::dynamic queryExpr, int32_t retries) {
+    auto fut = m_watchmanClient->query(queryExpr);
+    if (retries == 0) {
+      return fut;
+    }
+    return std::move(fut).deferError(
+        [sharedThis = shared_from_this(), queryExpr, retries](
+            const folly::exception_wrapper& err) {
+          Logger::FError("{}", err.what());
+          return sharedThis->queryWatchman(queryExpr, retries - 1);
+        });
+  }
+
+  WatchmanWatcherOpts m_opts;
   folly::dynamic m_queryExpr;
   folly::not_null_shared_ptr<Watchman> m_watchmanClient;
 };
@@ -214,9 +240,11 @@ private:
 } // namespace
 
 std::shared_ptr<Watcher> make_watchman_watcher(
-    folly::dynamic queryExpr, std::shared_ptr<Watchman> watchman) {
+    folly::dynamic queryExpr,
+    std::shared_ptr<Watchman> watchman,
+    WatchmanWatcherOpts opts) {
   return std::make_shared<WatchmanWatcher>(
-      std::move(queryExpr), std::move(watchman));
+      std::move(queryExpr), std::move(watchman), std::move(opts));
 }
 
 } // namespace Facts

@@ -82,6 +82,7 @@ constexpr size_t kSchemaVersion = 3413321234;
 constexpr std::string_view kEUIDPlaceholder = "%{euid}";
 constexpr std::string_view kSchemaPlaceholder = "%{schema}";
 constexpr std::chrono::seconds kDefaultExpirationTime{30 * 60};
+constexpr int32_t kDefaultWatchmanRetries = 0;
 
 struct RepoOptionsParseExc : public std::runtime_error {
   explicit RepoOptionsParseExc(std::string msg)
@@ -498,6 +499,10 @@ struct Facts final : Extension {
       FTRACE(3, "watchman.socket.root = {}\n", RO::WatchmanRootSocket);
     }
 
+    m_data->m_watchmanWatcherOpts = WatchmanWatcherOpts{
+        .m_retries = Config::GetInt32(
+            ini, config, "Autoload.WatchmanRetries", kDefaultWatchmanRetries)};
+
     for (auto const& repo : RuntimeOption::AutoloadExcludedRepos) {
       try {
         m_data->m_excludedRepos.insert(folly::fs::canonical(repo).native());
@@ -618,6 +623,10 @@ struct Facts final : Extension {
     return m_data->m_expirationTime;
   }
 
+  const WatchmanWatcherOpts& getWatchmanWatcherOpts() const {
+    return m_data->m_watchmanWatcherOpts;
+  }
+
 private:
   // Add new members to this struct instead of the top level so we can be sure
   // your new member is destroyed at the right time.
@@ -625,6 +634,7 @@ private:
     std::chrono::seconds m_expirationTime{30 * 60};
     hphp_hash_set<std::string> m_excludedRepos;
     std::unique_ptr<WatchmanAutoloadMapFactory> m_mapFactory;
+    WatchmanWatcherOpts m_watchmanWatcherOpts;
   };
   Optional<FactsData> m_data;
 } s_ext;
@@ -690,7 +700,9 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
                mapKey->m_root,
                std::move(dbHandle),
                make_watchman_watcher(
-                   mapKey->m_queryExpr, get_watchman_client(mapKey->m_root)),
+                   mapKey->m_queryExpr,
+                   get_watchman_client(mapKey->m_root),
+                   s_ext.getWatchmanWatcherOpts()),
                RuntimeOption::ServerExecutionMode(),
                mapKey->m_indexedMethodAttrs)})
       .first->second.get();

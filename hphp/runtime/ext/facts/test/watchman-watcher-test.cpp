@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <exception>
 #include <memory>
 
 #include <folly/futures/Future.h>
@@ -49,7 +50,8 @@ struct MockWatchman final : public Watchman {
 
 TEST(WatchmanWatcherTest, sinceAndClockArePassedThrough) {
   auto mockWatchman = std::make_shared<MockWatchman>();
-  auto watcher = make_watchman_watcher(folly::dynamic::object(), mockWatchman);
+  auto watcher =
+      make_watchman_watcher(folly::dynamic::object(), mockWatchman, {});
 
   EXPECT_CALL(*mockWatchman, query)
       .WillOnce(Return(
@@ -64,7 +66,8 @@ TEST(WatchmanWatcherTest, sinceAndClockArePassedThrough) {
 
 TEST(WatchmanWatcherTest, filesAndExistenceArePassedThrough) {
   auto mockWatchman = std::make_shared<MockWatchman>();
-  auto watcher = make_watchman_watcher(folly::dynamic::object(), mockWatchman);
+  auto watcher =
+      make_watchman_watcher(folly::dynamic::object(), mockWatchman, {});
 
   EXPECT_CALL(*mockWatchman, query)
       .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
@@ -87,7 +90,8 @@ TEST(WatchmanWatcherTest, filesAndExistenceArePassedThrough) {
 
 TEST(WatchmanWatcherTest, malformedWatchmanOutput) {
   auto mockWatchman = std::make_shared<MockWatchman>();
-  auto watcher = make_watchman_watcher(folly::dynamic::object(), mockWatchman);
+  auto watcher = make_watchman_watcher(
+      folly::dynamic::object(), mockWatchman, {.m_retries = 0});
 
   // No "clock" field
   EXPECT_CALL(*mockWatchman, query)
@@ -104,7 +108,8 @@ TEST(WatchmanWatcherTest, malformedWatchmanOutput) {
 
 TEST(WatchmanWatcherTest, querySinceMergebaseIsNotFresh) {
   auto mockWatchman = std::make_shared<MockWatchman>();
-  auto watcher = make_watchman_watcher(folly::dynamic::object(), mockWatchman);
+  auto watcher =
+      make_watchman_watcher(folly::dynamic::object(), mockWatchman, {});
 
   // If you didn't give Watchman a local clock, Watchman will return
   // `is_fresh_instance: true` even if you gave it a mergebase. Results from
@@ -127,6 +132,46 @@ TEST(WatchmanWatcherTest, querySinceMergebaseIsNotFresh) {
   auto resultsWithMergebase =
       watcher->getChanges(Clock{.m_mergebase = "faceb00c"}).get();
   EXPECT_FALSE(resultsWithMergebase.m_fresh);
+}
+
+struct WatchmanFailure : public std::runtime_error {
+  explicit WatchmanFailure(std::string msg)
+      : std::runtime_error{std::move(msg)} {
+  }
+};
+
+TEST(WatchmanWatcherTest, RetryOnFailure) {
+  auto mockWatchman = std::make_shared<MockWatchman>();
+  auto watcher = make_watchman_watcher(
+      folly::dynamic::object(), mockWatchman, {.m_retries = 1});
+
+  // Exercise retries by failing the first query.
+  EXPECT_CALL(*mockWatchman, query)
+      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
+          WatchmanFailure{"Watchman error"}))))
+      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
+          folly::dynamic::object("clock", "1")("is_fresh_instance", true)))));
+
+  Clock since;
+  auto results = watcher->getChanges(Clock{}).get();
+  EXPECT_TRUE(results.m_fresh);
+  EXPECT_EQ(results.m_newClock, Clock{.m_clock = "1"});
+}
+
+TEST(WatchmanWatcherTest, ThrowAfterRetrying) {
+  auto mockWatchman = std::make_shared<MockWatchman>();
+  auto watcher = make_watchman_watcher(
+      folly::dynamic::object(), mockWatchman, {.m_retries = 1});
+
+  // Fail twice.
+  EXPECT_CALL(*mockWatchman, query)
+      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
+          std::runtime_error{"Ignored error"}))))
+      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
+          WatchmanFailure{"Watchman error"}))));
+
+  Clock since;
+  EXPECT_THROW(watcher->getChanges(Clock{}).get(), WatchmanFailure);
 }
 
 } // namespace

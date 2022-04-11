@@ -541,50 +541,88 @@ where
 
 impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass<R> {
     fn from(cls: &obr::decl_defs::DeclClassType<'_>) -> Self {
+        // Destructure to help ensure we convert every field. A couple fields
+        // are ignored because they're redundant with other fields (and
+        // `folded::FoldedClass` just omits the redundant fields).
+        let obr::decl_defs::DeclClassType {
+            name,
+            pos,
+            kind,
+            abstract_: _, // `Self::is_abstract()` just reads the `kind` field
+            final_,
+            const_,
+            internal,
+            is_xhp,
+            has_xhp_keyword,
+            support_dynamic_type,
+            module,
+            tparams,
+            where_constraints,
+            substs,
+            ancestors,
+            props,
+            sprops,
+            methods,
+            smethods,
+            consts,
+            typeconsts,
+            xhp_enum_values,
+            construct,
+            need_init: _, // `Self::has_concrete_constructor()` reads the `constructor` field
+            deferred_init_members,
+            req_ancestors,
+            req_ancestors_extends,
+            req_class_ancestors,
+            extends,
+            sealed_whitelist,
+            xhp_attr_deps,
+            enum_type,
+            decl_errors,
+        } = cls;
         Self {
-            name: cls.name.into(),
-            pos: cls.pos.into(),
-            kind: cls.kind,
-            is_final: cls.final_,
-            is_const: cls.const_,
-            is_internal: cls.internal,
-            is_xhp: cls.is_xhp,
-            has_xhp_keyword: cls.has_xhp_keyword,
-            support_dynamic_type: cls.support_dynamic_type,
-            enum_type: cls.enum_type.map(Into::into),
-            module: cls.module.map(Into::into),
-            tparams: slice(cls.tparams),
-            where_constraints: slice(cls.where_constraints),
-            substs: map(cls.substs.iter()),
-            ancestors: map(cls.ancestors.iter()),
-            props: map(cls.props.iter()),
-            static_props: map(cls.sprops.iter()),
-            methods: map(cls.methods.iter()),
-            static_methods: map(cls.smethods.iter()),
-            constructor: cls.construct.into(),
-            consts: map(cls.consts.iter()),
-            type_consts: map(cls.typeconsts.iter()),
-            xhp_enum_values: (cls.xhp_enum_values.iter())
+            name: (*name).into(),
+            pos: (*pos).into(),
+            kind: *kind,
+            is_final: *final_,
+            is_const: *const_,
+            is_internal: *internal,
+            is_xhp: *is_xhp,
+            has_xhp_keyword: *has_xhp_keyword,
+            support_dynamic_type: *support_dynamic_type,
+            enum_type: enum_type.map(Into::into),
+            module: module.map(Into::into),
+            tparams: slice(tparams),
+            where_constraints: slice(where_constraints),
+            substs: map(substs.iter()),
+            ancestors: map(ancestors.iter()),
+            props: map(props.iter()),
+            static_props: map(sprops.iter()),
+            methods: map(methods.iter()),
+            static_methods: map(smethods.iter()),
+            constructor: (*construct).into(),
+            consts: map(consts.iter()),
+            type_consts: map(typeconsts.iter()),
+            xhp_enum_values: (xhp_enum_values.iter())
                 .map(|(&s, &evs)| (s.into(), slice(evs)))
                 .collect(),
-            extends: cls.extends.iter().copied().map(Into::into).collect(),
-            xhp_attr_deps: cls.xhp_attr_deps.iter().copied().map(Into::into).collect(),
-            req_ancestors: cls.req_ancestors.iter().copied().map(Into::into).collect(),
-            req_ancestors_extends: (cls.req_ancestors_extends.iter())
+            extends: extends.iter().copied().map(Into::into).collect(),
+            xhp_attr_deps: xhp_attr_deps.iter().copied().map(Into::into).collect(),
+            req_ancestors: req_ancestors.iter().copied().map(Into::into).collect(),
+            req_ancestors_extends: (req_ancestors_extends.iter())
                 .copied()
                 .map(Into::into)
                 .collect(),
-            req_class_ancestors: (cls.req_class_ancestors.iter())
+            req_class_ancestors: (req_class_ancestors.iter())
                 .copied()
                 .map(Into::into)
                 .collect(),
-            sealed_whitelist: (cls.sealed_whitelist)
+            sealed_whitelist: (sealed_whitelist)
                 .map(|l| l.iter().copied().map(Into::into).collect()),
-            deferred_init_members: (cls.deferred_init_members.iter())
+            deferred_init_members: (deferred_init_members.iter())
                 .copied()
                 .map(Into::into)
                 .collect(),
-            decl_errors: slice(cls.decl_errors),
+            decl_errors: slice(*decl_errors),
         }
     }
 }

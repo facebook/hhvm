@@ -41,6 +41,8 @@
 
 #include <watchman/cppclient/WatchmanClient.h>
 
+#include <hphp/runtime/base/datatype.h>
+#include <hphp/runtime/base/array-iterator.h>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -174,6 +176,96 @@ struct WatchmanThreadEventBase : folly::Executor {
 };
 
 WatchmanThreadEventBase* WatchmanThreadEventBase::s_wmTEB{nullptr};
+
+/**
+ * Convert a `folly::dynamic` into an `HPHP::TypedValue`.
+ */
+TypedValue makeTV(const folly::dynamic& data) {
+  switch (data.type()) {
+    case folly::dynamic::NULLT:
+      return make_tv<KindOfNull>();
+    case folly::dynamic::BOOL:
+      return make_tv<KindOfBoolean>(data.getBool());
+    case folly::dynamic::DOUBLE:
+      return make_tv<KindOfDouble>(data.getDouble());
+    case folly::dynamic::INT64:
+      return make_tv<KindOfInt64>(data.getInt());
+    case folly::dynamic::STRING:
+      return make_tv<KindOfString>(StringData::Make(data.getString()));
+    case folly::dynamic::ARRAY:
+    {
+      VecInit res{data.size()};
+      for (auto const& v : data) {
+        res.append(makeTV(v));
+      }
+      return make_tv<KindOfVec>(res.create());
+    }
+    case folly::dynamic::OBJECT:
+    {
+      DictInit res{data.size()};
+      for (auto const& [k, v] : data.items()) {
+        switch (k.type()) {
+          case folly::dynamic::INT64:
+            res.set(k.getInt(), makeTV(v));
+            break;
+          case folly::dynamic::STRING:
+            res.set(String{k.getString()}, makeTV(v));
+            break;
+          default:
+            SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+              "folly::dynamic to HPHP::Variant conversion failed! An object's "
+              "key was neither an int nor a string. It was {}", k.typeName()));
+        }
+      }
+      return make_tv<KindOfDict>(res.create());
+    }
+  }
+  not_reached();
+}
+
+/**
+ * Convert an `HPHP::TypedValue` into a `folly::dynamic`.
+ */
+folly::dynamic makeDynamic(const HPHP::TypedValue& data) {
+  switch (data.type()) {
+    case KindOfNull:
+      return folly::dynamic{nullptr};
+    case KindOfBoolean:
+      return folly::dynamic{static_cast<bool>(data.val().num)};
+    case KindOfDouble:
+      return folly::dynamic{data.val().dbl};
+    case KindOfInt64:
+      return folly::dynamic{data.val().num};
+    case KindOfString:
+    case KindOfPersistentString:
+      return folly::dynamic{data.val().pstr->slice()};
+    case KindOfVec:
+    case KindOfPersistentVec:
+    case KindOfKeyset:
+    case KindOfPersistentKeyset:
+    {
+      auto res = folly::dynamic::array();
+      IterateV(data.val().parr, [&](auto const& v) {
+        res.push_back(makeDynamic(v));
+      });
+      return res;
+    }
+    case KindOfDict:
+    case KindOfPersistentDict:
+    {
+      folly::dynamic res = folly::dynamic::object;
+      IterateKV(data.val().parr, [&](auto const& k, auto const& v) {
+        res[makeDynamic(k)] = makeDynamic(v);
+      });
+      return res;
+    }
+    default:
+      SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+        "HPHP::Variant to folly::dynamic conversion failed! Got an "
+        "unconvertible Variant of type {}...", data.type()));
+  }
+  not_reached();
+}
 
 struct ActiveSubscription {
   // There should only be exaclty one instance of a given ActiveSubscription
@@ -554,6 +646,14 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
     tvCopy(make_tv<KindOfBoolean>(m_result), result);
   }
 
+  // (PHP) no lock
+  template<typename U = T>
+  typename std::enable_if<std::is_same<U, folly::dynamic>::value>::type
+    unserializeImpl(TypedValue& result)
+  {
+    tvCopy(makeTV(m_result), result);
+  }
+
   T m_result;
   folly::exception_wrapper m_exception;
 };
@@ -621,6 +721,39 @@ Object HHVM_FUNCTION(HH_watchman_run,
     });
   return Object{
     (new FutureEvent<std::string>(std::move(res_future)))->getWaitHandle()
+  };
+}
+
+// (PHP entry-point)
+Object HHVM_FUNCTION(HH_watchman_query,
+  const Variant& _query,
+  const Variant& _socket_path
+) {
+  std::lock_guard<std::mutex> g(s_sharedDataMutex);
+
+  auto dynamic_query = makeDynamic(*_query.asTypedValue());
+  auto socket_path = _socket_path.isNull() ?
+    "" : _socket_path.toString().toCppString();
+
+  auto res_future = getWatchmanClientForSocket(socket_path)
+    .thenValue([dynamic_query](std::shared_ptr<watchman::WatchmanClient> client) {
+      // (ASYNC)
+      return client->run(dynamic_query)
+        .via(WatchmanThreadEventBase::Get())
+        // pass client shared_ptr through to keep client alive
+        // TODO: This shouldn't be necessary. The client should be keeping
+        // itself alive until its outstanding work is done.
+        .thenValue([client] (const folly::dynamic& result) {
+          auto const* errMsg = result.get_ptr("error");
+          if (errMsg != nullptr) {
+              throw std::runtime_error{
+                folly::sformat("Watchman error: {}", folly::toJson(*errMsg))};
+          }
+          return result;
+        });
+    });
+  return Object{
+    (new FutureEvent<folly::dynamic>(std::move(res_future)))->getWaitHandle()
   };
 }
 
@@ -828,6 +961,7 @@ struct WatchmanExtension final : Extension {
   void moduleInit() override {
     if (m_enabled) {
       HHVM_FALIAS(HH\\watchman_run, HH_watchman_run);
+      HHVM_FALIAS(HH\\watchman_query, HH_watchman_query);
       HHVM_FALIAS(HH\\watchman_subscribe, HH_watchman_subscribe);
       HHVM_FALIAS(HH\\watchman_check_sub, HH_watchman_check_sub);
       HHVM_FALIAS(HH\\watchman_sync_sub, HH_watchman_sync_sub);

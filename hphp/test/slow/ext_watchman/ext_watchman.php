@@ -25,9 +25,10 @@ function test_core(WatchmanInstance $wminst): void {
   $sock = $wminst->getFullSockName();
   // Test one-shot
   print("Testing one-shot\n");
-  $version_h =
-    HH\watchman_run('["version", {"optional":["relative_root"]}]', $sock);
-  $version = json_decode(HH\asio\join($version_h), true);
+  $version = HH\asio\join(HH\watchman_query(
+    vec['version', dict['optional' => vec['relative_root']]],
+    $sock,
+  ));
   if (
     !isset('capabilities', $version) ||
     $version['capabilities'] !== darray['relative_root' => true]
@@ -273,7 +274,13 @@ function test_core(WatchmanInstance $wminst): void {
   print("Checking connecting to a bad socket is graceful\n");
   $saw_exception = false;
   try {
-    HH\watchman_run('["version", {"optional":["relative_root"]}]', "garbage")
+    HH\watchman_query(
+      vec[
+        'version',
+        dict['optional' => vec['relative_root']],
+      ],
+      "garbage",
+    )
       |> HH\asio\join($$);
   } catch(Exception $e) {
     print('Got exception: '.$e->getMessage()."\n");

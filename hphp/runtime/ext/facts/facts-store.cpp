@@ -799,7 +799,7 @@ struct FactsStoreImpl final
         updateFuture->getFuture()
             .via(&m_updateExec)
             .thenTry([this](const folly::Try<folly::Unit>&) {
-              return m_watcher->getChanges(m_updateExec, getClock());
+              return m_watcher->getChanges(getClock());
             })
             .thenTry([this](folly::Try<Watcher::Results>&& results) {
               if (results.hasValue()) {

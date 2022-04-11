@@ -20,7 +20,6 @@
 #include <utility>
 #include <vector>
 
-#include <folly/Executor.h>
 #include <folly/Try.h>
 #include <folly/dynamic.h>
 #include <folly/experimental/io/FsUtil.h>
@@ -183,18 +182,15 @@ struct WatchmanWatcher final : public Watcher {
   WatchmanWatcher(WatchmanWatcher&&) = delete;
   WatchmanWatcher& operator=(WatchmanWatcher&&) = delete;
 
-  folly::SemiFuture<Results>
-  getChanges(folly::Executor& exec, Clock lastClock) override {
+  folly::SemiFuture<Results> getChanges(Clock lastClock) override {
     auto queryExpr = addWatchmanSince(m_queryExpr, lastClock);
     XLOGF(INFO, "Querying watchman ({})\n", folly::toJson(queryExpr));
     return m_watchmanClient->query(std::move(queryExpr))
-        .via(&exec)
-        .thenValue([lastClock = std::move(lastClock)](
-                       watchman::QueryResult&& wrappedResults) mutable {
+        .deferValue([lastClock = std::move(lastClock)](
+                        watchman::QueryResult&& wrappedResults) mutable {
           return parseWatchmanResults(
               lastClock, std::move(wrappedResults.raw_));
-        })
-        .semi();
+        });
   }
 
   void subscribe(std::function<void(Results&& callback)> callback) override {

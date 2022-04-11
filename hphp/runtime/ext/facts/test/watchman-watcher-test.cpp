@@ -20,7 +20,6 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
-#include "folly/executors/GlobalExecutor.h"
 #include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
@@ -58,7 +57,7 @@ TEST(WatchmanWatcherTest, sinceAndClockArePassedThrough) {
               "clock", "this is the new clock")("is_fresh_instance", false)))));
 
   auto since = Clock{.m_clock = "this is the old clock"};
-  auto result = watcher->getChanges(*folly::getGlobalIOExecutor(), since).get();
+  auto result = watcher->getChanges(since).get();
   EXPECT_EQ(result.m_lastClock, since);
   EXPECT_EQ(result.m_newClock, Clock{.m_clock = "this is the new clock"});
 }
@@ -77,8 +76,7 @@ TEST(WatchmanWatcherTest, filesAndExistenceArePassedThrough) {
                   folly::dynamic::object("name", "b.hck")(
                       "exists", false)))))));
 
-  auto results =
-      watcher->getChanges(*folly::getGlobalIOExecutor(), Clock{}).get();
+  auto results = watcher->getChanges(Clock{}).get();
   EXPECT_THAT(
       results.m_files,
       ElementsAre(
@@ -95,15 +93,13 @@ TEST(WatchmanWatcherTest, malformedWatchmanOutput) {
   EXPECT_CALL(*mockWatchman, query)
       .WillOnce(Return(ByMove(
           folly::makeSemiFuture<folly::dynamic>(folly::dynamic::object))));
-  EXPECT_THROW(
-      watcher->getChanges(*folly::getGlobalIOExecutor(), {}).get(), UpdateExc);
+  EXPECT_THROW(watcher->getChanges({}).get(), UpdateExc);
 
   // "clock" field is an empty object instead of a string
   EXPECT_CALL(*mockWatchman, query)
       .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
           folly::dynamic::object("clock", folly::dynamic::object)))));
-  EXPECT_THROW(
-      watcher->getChanges(*folly::getGlobalIOExecutor(), {}).get(), UpdateExc);
+  EXPECT_THROW(watcher->getChanges({}).get(), UpdateExc);
 }
 
 TEST(WatchmanWatcherTest, querySinceMergebaseIsNotFresh) {
@@ -122,18 +118,14 @@ TEST(WatchmanWatcherTest, querySinceMergebaseIsNotFresh) {
   // This query is asking for all files in the repo, not since a given point in
   // time or since a given commit. This is actually fresh from our perspective.
   Clock sinceWithoutMergebase;
-  auto resultsWithoutMergebase =
-      watcher->getChanges(*folly::getGlobalIOExecutor(), Clock{}).get();
+  auto resultsWithoutMergebase = watcher->getChanges(Clock{}).get();
   EXPECT_TRUE(resultsWithoutMergebase.m_fresh);
 
   // This query is based off of a mergebase commit hash, so we don't consider it
   // fresh - Watchman is not returning all the files in the repo, it's returning
   // all the files since a given point in time.
   auto resultsWithMergebase =
-      watcher
-          ->getChanges(
-              *folly::getGlobalIOExecutor(), Clock{.m_mergebase = "faceb00c"})
-          .get();
+      watcher->getChanges(Clock{.m_mergebase = "faceb00c"}).get();
   EXPECT_FALSE(resultsWithMergebase.m_fresh);
 }
 

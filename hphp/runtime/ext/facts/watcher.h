@@ -72,8 +72,7 @@ struct Watcher {
   /**
    * Return the changed files since `lastVersion`.
    */
-  virtual folly::SemiFuture<Results>
-  getChanges(folly::Executor& exec, Clock lastClock) = 0;
+  virtual folly::SemiFuture<Results> getChanges(Clock lastClock) = 0;
 
   /**
    * Subscribe to the filesystem. Whenever the filesystem changes, this Watcher

@@ -1864,11 +1864,7 @@ fn p_binary_expr<'a>(
         _ => TopLevel,
     };
     let right = p_expr_with_loc(rlocation, &c.right_operand, env, None)?;
-    let bop_ast_node = p_bop(pos, &c.operator, left, right, env)?;
-    if let Some((ast::Bop::Eq(_), lhs, _)) = bop_ast_node.as_binop() {
-        check_lvalue(lhs, env);
-    }
-    Ok(bop_ast_node)
+    p_bop(pos, &c.operator, left, right, env)
 }
 
 fn p_token<'a>(
@@ -2352,68 +2348,6 @@ fn p_obj_get<'a>(
     ))
 }
 
-fn check_lvalue<'a>(ast::Expr(_, p, expr_): &ast::Expr, env: &mut Env<'a>) {
-    let mut raise = |s| raise_parsing_error_pos(p, env, s);
-    match expr_ {
-        Expr_::ObjGet(og) => {
-            if og.as_ref().3 == ast::PropOrMethod::IsMethod {
-                raise("Invalid lvalue")
-            } else {
-                match og.as_ref() {
-                    (_, ast::Expr(_, _, Expr_::Id(_)), ast::OgNullFlavor::OGNullsafe, _) => {
-                        raise("?-> syntax is not supported for lvalues")
-                    }
-                    (_, ast::Expr(_, _, Expr_::Id(sid)), _, _) if sid.1.as_bytes()[0] == b':' => {
-                        raise("->: syntax is not supported for lvalues")
-                    }
-                    _ => {}
-                }
-            }
-        }
-        Expr_::ArrayGet(ag) => {
-            if let Expr_::ClassConst(_) = (ag.0).2 {
-                raise("Array-like class consts are not valid lvalues");
-            }
-        }
-        Expr_::List(l) => {
-            for i in l.iter() {
-                check_lvalue(i, env);
-            }
-        }
-        Expr_::Darray(_)
-        | Expr_::Varray(_)
-        | Expr_::Shape(_)
-        | Expr_::Collection(_)
-        | Expr_::Null
-        | Expr_::True
-        | Expr_::False
-        | Expr_::Id(_)
-        | Expr_::Clone(_)
-        | Expr_::ClassConst(_)
-        | Expr_::Int(_)
-        | Expr_::Float(_)
-        | Expr_::PrefixedString(_)
-        | Expr_::String(_)
-        | Expr_::String2(_)
-        | Expr_::Yield(_)
-        | Expr_::Await(_)
-        | Expr_::Cast(_)
-        | Expr_::Unop(_)
-        | Expr_::Binop(_)
-        | Expr_::Eif(_)
-        | Expr_::New(_)
-        | Expr_::Efun(_)
-        | Expr_::Lfun(_)
-        | Expr_::Xml(_)
-        | Expr_::Import(_)
-        | Expr_::Pipe(_)
-        | Expr_::Is(_)
-        | Expr_::As(_)
-        | Expr_::Call(_) => raise("Invalid lvalue"),
-        _ => {}
-    }
-}
-
 fn p_xhp_embedded<'a, F>(node: S<'a>, env: &mut Env<'a>, escaper: F) -> Result<ast::Expr>
 where
     F: FnOnce(&[u8]) -> Vec<u8>,
@@ -2830,13 +2764,6 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         ),
     }
 }
-fn check_mutate_class_const<'a>(e: &ast::Expr, node: S<'a>, env: &mut Env<'a>) {
-    match &e.2 {
-        Expr_::ArrayGet(c) if c.1.is_some() => check_mutate_class_const(&c.0, node, env),
-        Expr_::ClassConst(_) => raise_parsing_error(node, env, &syntax_error::const_mutation),
-        _ => {}
-    }
-}
 
 fn p_while_stmt<'a>(
     env: &mut Env<'a>,
@@ -2981,8 +2908,6 @@ fn p_unset_stmt<'a>(
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
         let args = could_map(&c.variables, e, p_expr_for_normal_argument)?;
-        args.iter()
-            .for_each(|(_, arg)| check_mutate_class_const(arg, node, e));
         let unset = match &c.keyword.children {
             QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                 let name = pos_name(&c.keyword, e)?;

@@ -1,1 +1,1 @@
-Fatal error: Array-like class consts are not valid lvalues in %s/test/slow/const_array_assign.php on line 7
+Fatal error: You cannot use this syntax on the left-hand side of an assignment. in %s/const_array_assign.php on line 7

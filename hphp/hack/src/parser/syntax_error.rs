@@ -570,24 +570,27 @@ pub fn error2074(call_modifier: &str) -> Error {
     ))
 }
 pub const error2077: Error = Cow::Borrowed("Cannot use empty list");
+
+pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
+
 pub fn not_allowed_in_write(what: &str) -> Error {
     Cow::Owned(format!("{} is not allowed in write context", what))
 }
-pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
 
-pub fn this_as_lval(root: LvalRoot) -> Error {
+pub fn invalid_lval(root: LvalRoot) -> Error {
     Cow::Owned(format!(
-        "Invalid use of `$this`: {}",
+        "You cannot use this syntax {}",
         match root {
-            LvalRoot::Unset => "it cannot be `unset`",
-            LvalRoot::Assignment => "it cannot be re-assigned",
-            LvalRoot::Inout => "it cannot be set via `inout`",
-            LvalRoot::IncrementOrDecrement => "it cannot be incremented or decremented",
-            LvalRoot::CatchClause => "it cannot be re-assigned via a `catch` clause",
-            LvalRoot::Foreach => "it cannot be re-assigned via a `foreach` loop",
+            LvalRoot::Unset => "in an `unset()` expression.",
+            LvalRoot::Assignment => "on the left-hand side of an assignment.",
+            LvalRoot::Inout => "with `inout`.",
+            LvalRoot::IncrementOrDecrement => "with an increment or decrement statement.",
+            LvalRoot::CatchClause => "where a `catch` variable is expected.",
+            LvalRoot::Foreach => "as the iterator variable in a `foreach` loop.",
         }
     ))
 }
+
 pub const enum_elem_name_is_class: Error = Cow::Borrowed("Enum element cannot be named `class`");
 pub const enum_class_elem_name_is_class: Error =
     Cow::Borrowed("Enum class members cannot be named `class`");

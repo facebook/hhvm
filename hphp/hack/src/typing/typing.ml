@@ -3891,11 +3891,6 @@ and expr_
     let r = Reason.Rplaceholder p in
     let ty = MakeType.void r in
     make_result env p (Aast.Lplaceholder p) ty
-  | Dollardollar _ when is_lvalue valkind ->
-    Errors.add_typing_error
-      Typing_error.(
-        wellformedness @@ Primary.Wellformedness.Dollardollar_lvalue p);
-    expr_error env (Reason.Rwitness p) outer
   | Dollardollar id ->
     let ty = Env.get_local_check_defined env id in
     let env = might_throw env in

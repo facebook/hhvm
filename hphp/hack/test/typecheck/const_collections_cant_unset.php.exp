@@ -1,2 +1,2 @@
-File "const_collections_cant_unset.php", line 8, characters 5-28:
-Cannot mutate a class constant (Parsing[1002])
+File "const_collections_cant_unset.php", line 8, characters 11-19:
+You cannot use this syntax in an `unset()` expression. (Parsing[1002])

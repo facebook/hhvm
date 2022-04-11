@@ -1,1 +1,1 @@
-Done.
+Fatal error: You cannot use this syntax on the left-hand side of an assignment. in %s/struct-dict-mutate-bug.php on line 14

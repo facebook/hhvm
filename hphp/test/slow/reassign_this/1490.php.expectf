@@ -1,1 +1,1 @@
-Fatal error: Invalid use of `$this`: it cannot be re-assigned in %s/test/slow/reassign_this/1490.php on line 6
+Fatal error: You cannot use this syntax on the left-hand side of an assignment. in %s/1490.php on line 6

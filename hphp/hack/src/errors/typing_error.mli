@@ -309,7 +309,6 @@ module Primary : sig
           hint_pos: Pos_or_decl.t option;
           is_async: bool;
         }
-      | Dollardollar_lvalue of Pos.t
       | Void_usage of {
           pos: Pos.t;
           reason: Pos_or_decl.t Message.t list Lazy.t;

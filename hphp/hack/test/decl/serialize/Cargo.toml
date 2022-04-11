@@ -17,8 +17,8 @@ direct_decl_parser = { path = "../../../src/parser/api/cargo/direct_decl_parser"
 flexbuffers = "0.2.1"
 oxidized = { path = "../../../src/oxidized" }
 oxidized_by_ref = { path = "../../../src/oxidized_by_ref" }
-serde = { version = "1.0.126", features = ["derive", "rc"] }
+serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_cbor = "0.11"
-serde_json = { version = "1.0.64", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 structopt = "0.3.23"
 walkdir = "2.3"

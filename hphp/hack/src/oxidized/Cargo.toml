@@ -20,7 +20,7 @@ no_pos_hash = { path = "../utils/no_pos_hash" }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
 rusqlite = { version = "0.26.3", features = ["backup", "blob", "column_decltype"] }
-serde = { version = "1.0.126", features = ["derive", "rc"] }
+serde = { version = "1.0.136", features = ["derive", "rc"] }
 static_assertions = "1.1.0"
 
 [dev-dependencies]

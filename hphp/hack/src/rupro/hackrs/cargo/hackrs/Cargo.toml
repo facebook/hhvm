@@ -30,7 +30,7 @@ parser_core_types = { path = "../../../../parser/cargo/core_types" }
 pos = { path = "../../../pos/cargo/pos" }
 rusqlite = { version = "0.26.3", features = ["backup", "blob", "column_decltype"] }
 rust_aast_parser_types = { path = "../../../../parser/cargo/rust_aast_parser_types" }
-serde = { version = "1.0.126", features = ["derive", "rc"] }
+serde = { version = "1.0.136", features = ["derive", "rc"] }
 stack_limit = { path = "../../../../utils/stack_limit" }
 thiserror = "1.0.30"
 ty = { path = "../../../ty/cargo/ty" }

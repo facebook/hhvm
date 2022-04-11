@@ -17,6 +17,6 @@ lz4 = "1.23.1"
 moka = { version = "0.8", features = ["future"] }
 oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
-serde = { version = "1.0.126", features = ["derive", "rc"] }
+serde = { version = "1.0.136", features = ["derive", "rc"] }
 ty = { path = "../../../ty/cargo/ty" }
 zstd = "0.9.0+zstd.1.5.0"

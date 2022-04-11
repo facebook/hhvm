@@ -3,11 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized_by_ref::decl_parser_options::DeclParserOptions;
+use oxidized_by_ref::parser_options::ParserOptions;
 use std::fmt;
 
-/// Owning wrapper for `oxidized_by_ref::decl_parser_options::DeclParserOptions`
-/// which is `Clone + Debug + Send + Sync`.
+/// Owning wrapper for `oxidized_by_ref::global_options::GlobalOptions` which is
+/// `Clone + Debug + Send + Sync`.
 pub struct Options(ArenaAndOpts);
 
 #[ouroboros::self_referencing]
@@ -15,7 +15,7 @@ struct ArenaAndOpts {
     arena: Box<bumpalo::Bump>,
     #[borrows(arena)]
     #[covariant]
-    opts: DeclParserOptions<'this>,
+    opts: ParserOptions<'this>,
 }
 
 // Safe because the arena cannot be accessed once the ArenaAndOpts is
@@ -24,13 +24,13 @@ struct ArenaAndOpts {
 unsafe impl Sync for ArenaAndOpts {}
 
 impl Options {
-    pub fn get(&self) -> &DeclParserOptions<'_> {
+    pub fn get(&self) -> &ParserOptions<'_> {
         self.0.borrow_opts()
     }
 }
 
-impl From<&DeclParserOptions<'_>> for Options {
-    fn from(opts: &DeclParserOptions<'_>) -> Self {
+impl From<&ParserOptions<'_>> for Options {
+    fn from(opts: &ParserOptions<'_>) -> Self {
         Self(
             ArenaAndOptsBuilder {
                 arena: Box::new(bumpalo::Bump::new()),
@@ -43,13 +43,7 @@ impl From<&DeclParserOptions<'_>> for Options {
 
 impl Default for Options {
     fn default() -> Self {
-        Self(
-            ArenaAndOptsBuilder {
-                arena: Box::new(bumpalo::Bump::new()),
-                opts_builder: |_arena| Default::default(),
-            }
-            .build(),
-        )
+        Self::from(ParserOptions::DEFAULT)
     }
 }
 

@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hh_config::HhConfig;
 use names::FileSummary;
 use oxidized_by_ref::decl_parser_options::DeclParserOptions;
+use oxidized_by_ref::parser_options::ParserOptions;
 use pos::{RelativePath, RelativePathCtx};
 use std::marker::PhantomData;
 use std::sync::Arc;
@@ -18,8 +18,6 @@ use options::Options;
 #[derive(Debug, Clone)]
 pub struct DeclParser<R: Reason> {
     relative_path_ctx: Arc<RelativePathCtx>,
-    #[allow(dead_code)] // 'til first use.
-    hh_config: HhConfig,
     opts: Options,
     // We could make our parse methods generic over `R` instead, but it's
     // usually more convenient for callers (especially tests) to pin the decl
@@ -28,21 +26,17 @@ pub struct DeclParser<R: Reason> {
 }
 
 impl<R: Reason> DeclParser<R> {
-    pub fn new(ctx: Arc<RelativePathCtx>) -> Self {
-        let hh_config = HhConfig::from_root(&ctx.root).ok().unwrap_or_default();
-        let opts_arena = bumpalo::Bump::new();
-        let decl_parser_opts = hh_config.get_decl_parser_options(&opts_arena);
-        DeclParser::with_options(ctx, hh_config, &decl_parser_opts)
-    }
-
-    pub fn with_options(
-        relative_path_ctx: Arc<RelativePathCtx>,
-        hh_config: HhConfig,
-        opts: &DeclParserOptions<'_>,
-    ) -> Self {
+    pub fn new(relative_path_ctx: Arc<RelativePathCtx>) -> Self {
         Self {
             relative_path_ctx,
-            hh_config,
+            opts: Default::default(),
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn with_options(relative_path_ctx: Arc<RelativePathCtx>, opts: &ParserOptions<'_>) -> Self {
+        Self {
+            relative_path_ctx,
             opts: Options::from(opts),
             _phantom: PhantomData,
         }
@@ -52,7 +46,8 @@ impl<R: Reason> DeclParser<R> {
         let arena = bumpalo::Bump::new();
         let absolute_path = path.to_absolute(&self.relative_path_ctx);
         let text = std::fs::read(&absolute_path)?;
-        let parsed_file = self.parse_impl(self.opts.get(), path, &text, &arena);
+        let decl_parser_opts = DeclParserOptions::from_parser_options(self.opts.get());
+        let parsed_file = self.parse_impl(&decl_parser_opts, path, &text, &arena);
         Ok(parsed_file.decls.iter().map(Into::into).collect())
     }
 
@@ -63,7 +58,8 @@ impl<R: Reason> DeclParser<R> {
         let arena = bumpalo::Bump::new();
         let absolute_path = path.to_absolute(&self.relative_path_ctx);
         let text = std::fs::read(&absolute_path)?;
-        let parsed_file = self.parse_impl(self.opts.get(), path, &text, &arena);
+        let opts = DeclParserOptions::from(self.opts.get());
+        let parsed_file = self.parse_impl(&opts, path, &text, &arena);
         let summary = FileSummary::from_decls(parsed_file);
         Ok((parsed_file.decls.iter().map(Into::into).collect(), summary))
     }

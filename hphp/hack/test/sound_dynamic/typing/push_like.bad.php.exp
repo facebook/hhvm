@@ -1,7 +1,7 @@
 File "push_like.bad.php", line 24, characters 10-35:
 Invalid return type (Typing[4110])
   File "push_like.bad.php", line 23, characters 31-43:
-  Expected `~(int, NoSDTC)`
+  Expected `dynamic`
   File "push_like.bad.php", line 24, characters 10-35:
   But got `(~int, NoSDTC)`
 File "push_like.bad.php", line 24, characters 10-35:
@@ -13,12 +13,12 @@ Invalid return type (Typing[4110])
 File "push_like.bad.php", line 29, characters 10-11:
 Invalid return type (Typing[4110])
   File "push_like.bad.php", line 27, characters 24-36:
-  Expected `~(int, NoSDTC)`
+  Expected `dynamic`
   File "push_like.bad.php", line 28, characters 8-33:
   But got `(~int, NoSDTC)`
 File "push_like.bad.php", line 37, characters 10-11:
 Invalid return type (Typing[4110])
   File "push_like.bad.php", line 32, characters 41-47:
-  Expected `~Box<C>`
+  Expected `dynamic`
   File "push_like.bad.php", line 32, characters 30-35:
   But got `Box<B>`

@@ -6,8 +6,10 @@ Can't use `new static()` for `BadClass`; `__construct` arguments are not guarant
   This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
 File "this_tparam_static.php", line 19, characters 7-33:
 Invalid assignment (Typing[4110])
-  File "this_tparam_static.php", line 13, characters 18-22:
-  Expected `?BadClass`
+  File "this_tparam_static.php", line 13, characters 19-22:
+  Expected `BadClass`
+  File "this_tparam_static.php", line 19, characters 7-10:
+    where the class `BadClass` was referenced here via the keyword `self`
   File "this_tparam_static.php", line 18, characters 23-28:
   But got `this as BadClass`
 File "this_tparam_static.php", line 21, characters 12-20:

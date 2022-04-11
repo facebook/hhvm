@@ -87,28 +87,34 @@ and is_unsat p =
 
 (* Smart constructor for binary conjunction *)
 let conj p1 p2 =
-  match (p1, p2) with
-  | (Conj [], p)
-  | (p, Conj []) ->
-    p
-  | (Conj ps1, Conj ps2) -> Conj (ps1 @ ps2)
-  (* Preserve the order to maintain legacy behaviour. If two errors share the
-   * same position then the first one to be emitted wins.
-   * TODO: consider relaxing this behaviour *)
-  | (Conj ps, _) -> Conj (ps @ [p2])
-  | (_, Conj ps) -> Conj (p1 :: ps)
-  | (_, _) -> Conj [p1; p2]
+  if equal_subtype_prop p1 p2 then
+    p1
+  else
+    match (p1, p2) with
+    | (Conj [], p)
+    | (p, Conj []) ->
+      p
+    | (Conj ps1, Conj ps2) -> Conj (ps1 @ ps2)
+    (* Preserve the order to maintain legacy behaviour. If two errors share the
+     * same position then the first one to be emitted wins.
+     * TODO: consider relaxing this behaviour *)
+    | (Conj ps, _) -> Conj (ps @ [p2])
+    | (_, Conj ps) -> Conj (p1 :: ps)
+    | (_, _) -> Conj [p1; p2]
 
 let conj_list ps = List.fold ~init:(Conj []) ps ~f:conj
 
 (* Smart constructor for binary disjunction *)
 let disj ~fail p1 p2 =
-  match (p1, p2) with
-  | (_, _) when is_valid p1 || is_valid p2 -> Conj []
-  | (_, _) when is_unsat p1 && is_unsat p2 -> Disj (fail, [])
-  | (_, _) when is_unsat p1 -> Disj (fail, [p2])
-  | (_, _) when is_unsat p2 -> Disj (fail, [p1])
-  | (Disj (_, ps1), Disj (_, ps2)) -> Disj (fail, ps1 @ ps2)
-  | (_, Disj (_, ps)) -> Disj (fail, p1 :: ps)
-  | (Disj (_, ps), _) -> Disj (fail, p2 :: ps)
-  | (_, _) -> Disj (fail, [p1; p2])
+  if equal_subtype_prop p1 p2 then
+    p1
+  else
+    match (p1, p2) with
+    | (_, _) when is_valid p1 || is_valid p2 -> Conj []
+    | (_, _) when is_unsat p1 && is_unsat p2 -> Disj (fail, [])
+    | (_, _) when is_unsat p1 -> Disj (fail, [p2])
+    | (_, _) when is_unsat p2 -> Disj (fail, [p1])
+    | (Disj (_, ps1), Disj (_, ps2)) -> Disj (fail, ps1 @ ps2)
+    | (_, Disj (_, ps)) -> Disj (fail, p1 :: ps)
+    | (Disj (_, ps), _) -> Disj (fail, p2 :: ps)
+    | (_, _) -> Disj (fail, [p1; p2])

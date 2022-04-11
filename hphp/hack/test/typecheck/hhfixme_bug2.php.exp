@@ -1,6 +1,1 @@
-File "hhfixme_bug2.php", line 9, characters 39-44:
-Invalid argument (Typing[4110])
-  File "hhfixme_bug2.php", line 4, characters 23-30:
-  Expected `arraykey`
-  File "hhfixme_bug2.php", line 7, characters 35-38:
-  But got `null`
+No errors

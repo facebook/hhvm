@@ -43,3 +43,11 @@ pub fn emit_targets(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         Err(err) => err.into_compile_error().into(),
     }
 }
+
+#[proc_macro]
+pub fn define_instr_seq_helpers(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    match emit_opcodes::define_instr_seq_helpers(input.into(), hhbc_gen::opcode_data()) {
+        Ok(res) => res.into(),
+        Err(err) => err.into_compile_error().into(),
+    }
+}

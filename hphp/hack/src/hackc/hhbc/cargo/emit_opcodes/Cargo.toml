@@ -8,6 +8,7 @@ edition = "2021"
 path = "../../emit_opcodes.rs"
 
 [dependencies]
+convert_case = "0.4.0"
 hhbc-gen = { path = "../../../../../../tools/hhbc-gen" }
 proc-macro2 = "1.0"
 quote = "1.0"

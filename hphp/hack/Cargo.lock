@@ -1212,6 +1212,7 @@ dependencies = [
 name = "emit_opcodes"
 version = "0.0.0"
 dependencies = [
+ "convert_case",
  "hhbc-gen",
  "macro_test_util",
  "opcode_test_data",
@@ -1938,6 +1939,7 @@ name = "instruction_sequence"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "emit_opcodes_macro",
  "ffi",
  "hhbc",
  "pretty_assertions",

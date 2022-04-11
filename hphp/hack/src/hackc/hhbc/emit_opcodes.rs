@@ -243,6 +243,215 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
     }
 }
 
+/// Build construction helpers for InstrSeq.  Each line in the input is either
+/// (a) a list of opcodes and an empty block (like `A | B => {}` which means to
+/// generate helpers for those opcodes with default snake-case names or (b) a
+/// single opcode and a single name (like `A => my_a`) which means to generate a
+/// helper for that opcode with the given name.
+///
+/// The parameters to the function are based on the expected immediates for the
+/// opcode.
+///
+///     define_instr_seq_helpers! {
+///       MyA | MyB => {}
+///       C => myc
+///     }
+///
+/// Expands into:
+///
+///     pub fn my_a<'a>() -> InstrSeq<'a> {
+///         instr(Instruct::Opcode(Opcode::MyA))
+///     }
+///
+///     pub fn my_b<'a>(arg1: i64) -> InstrSeq<'a> {
+///         instr(Instruct::Opcode(Opcode::MyB(arg1)))
+///     }
+///
+///     pub fn myc<'a>(arg1: i64, arg2: i64) -> InstrSeq<'a> {
+///         instr(Instruct::Opcode(Opcode::MyC(arg1, arg2)))
+///     }
+///
+pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
+    use convert_case as _;
+    use convert_case::{Case, Casing};
+    use proc_macro2::TokenTree;
+    use syn::{
+        parse::{ParseStream, Parser},
+        Error, Token,
+    };
+
+    #[derive(Debug)]
+    struct Helper<'a> {
+        opcode_name: Ident,
+        fn_name: Ident,
+        opcode_data: &'a OpcodeData,
+    }
+
+    // Foo => bar
+    // Foo | Bar | Baz => {}
+
+    let macro_input = |input: ParseStream<'_>| -> Result<Vec<Helper<'_>>> {
+        let mut helpers: Vec<Helper<'_>> = Vec::new();
+
+        let mut same_as_default: Vec<Ident> = Vec::new();
+
+        while !input.is_empty() {
+            let mut opcode_names: Vec<(Ident, &OpcodeData)> = {
+                let names =
+                    syn::punctuated::Punctuated::<Ident, Token![|]>::parse_separated_nonempty(
+                        input,
+                    )?;
+
+                names
+                    .into_iter()
+                    .map(|name| {
+                        let opcode_data = opcodes
+                            .iter()
+                            .find(|opcode_data| name == opcode_data.name)
+                            .ok_or_else(|| {
+                                Error::new(name.span(), format!("Unknown opcode '{}'", name))
+                            })?;
+                        Ok((name, opcode_data))
+                    })
+                    .collect::<Result<_>>()
+            }?;
+
+            let _arrow: Token![=>] = input.parse()?;
+
+            let tt: TokenTree = input.parse()?;
+            match tt {
+                TokenTree::Ident(fn_name) => {
+                    // Foo => bar
+
+                    let (opcode_name, opcode_data) = opcode_names.pop().unwrap();
+                    if let Some((unexpected, _)) = opcode_names.pop() {
+                        return Err(Error::new(
+                            unexpected.span(),
+                            format!(
+                                "Only a single Opcode is allowed when a function name ('{}') is provided",
+                                fn_name
+                            ),
+                        ));
+                    }
+
+                    // If the 'alias' name is what we would have picked as a default
+                    // then complain.
+                    let default_name = opcode_data.name.to_case(Case::Snake);
+                    if fn_name == default_name {
+                        same_as_default.push(opcode_name.clone());
+                    }
+
+                    helpers.push(Helper {
+                        opcode_name,
+                        fn_name,
+                        opcode_data,
+                    });
+
+                    if input.is_empty() {
+                        break;
+                    }
+                    input.parse::<Token![,]>()?;
+                }
+                TokenTree::Group(grp) => {
+                    // Foo | Bar | Baz => {}
+
+                    let stream = grp.stream();
+                    let mut iter = stream.into_iter();
+                    if let Some(tt) = iter.next() {
+                        return Err(Error::new(tt.span(), "Body of default must be empty"));
+                    }
+
+                    for (opcode_name, opcode_data) in opcode_names {
+                        let fn_name =
+                            Ident::new(&opcode_data.name.to_case(Case::Snake), opcode_name.span());
+                        helpers.push(Helper {
+                            opcode_name,
+                            fn_name,
+                            opcode_data,
+                        });
+                    }
+                }
+                TokenTree::Punct(_) | TokenTree::Literal(_) => {
+                    return Err(Error::new(tt.span(), "identifier or '{}' expected"));
+                }
+            }
+        }
+
+        if let Some(opcode_name) = same_as_default.pop() {
+            let span = opcode_name.span();
+            let msg = if same_as_default.is_empty() {
+                format!(
+                    "Opcode '{}' was given an alias which is the same name it would have gotten with default - use default ({{}}) instead.",
+                    opcode_name,
+                )
+            } else {
+                format!(
+                    "Opcodes {} were given aliases which are the same name they would have gotten with default - use default ({{}}) instead.",
+                    std::iter::once(opcode_name)
+                        .chain(same_as_default.into_iter())
+                        .map(|s| format!("'{}'", s))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
+            };
+
+            Err(Error::new(span, msg))
+        } else {
+            Ok(helpers)
+        }
+    };
+
+    let input: Vec<Helper<'_>> = macro_input.parse2(input)?;
+
+    let vis = quote!(pub);
+    let enum_name = quote!(Opcode);
+    let lifetime: Lifetime = syn::parse2::<Lifetime>(quote!('a))?;
+
+    let mut res: Vec<TokenStream> = Vec::new();
+    for Helper {
+        opcode_name,
+        fn_name,
+        opcode_data,
+    } in input
+    {
+        let params: Vec<TokenStream> = opcode_data
+            .immediates
+            .iter()
+            .map(|(imm_name, imm_ty)| {
+                let imm_name = Ident::new(imm_name, Span::call_site());
+                let ty = convert_imm_type(imm_ty, &lifetime);
+                quote!(#imm_name: #ty)
+            })
+            .collect();
+
+        let args = {
+            let args: Vec<TokenStream> = opcode_data
+                .immediates
+                .iter()
+                .map(|(imm_name, _)| {
+                    let imm_name = Ident::new(imm_name, Span::call_site());
+                    quote!(#imm_name)
+                })
+                .collect();
+            if args.is_empty() {
+                quote!()
+            } else {
+                quote!(( #(#args),* ))
+            }
+        };
+
+        let func = quote!(
+            #vis fn #fn_name<#lifetime>(#(#params),*) -> InstrSeq<#lifetime> {
+                instr(Instruct::#enum_name(#enum_name::#opcode_name #args))
+            }
+        );
+
+        res.push(func);
+    }
+
+    Ok(quote!(#(#res)*))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -290,6 +499,40 @@ mod tests {
                     TestSA(Str<'a>),
                     TestSLA(BumpSliceMut<'a, SwitchLabel>),
                     TestVSA(Slice<'a, Str<'a>>),
+                }
+            ),
+        );
+    }
+
+    #[test]
+    fn test_instr_seq() {
+        assert_pat_eq(
+            define_instr_seq_helpers(
+                quote!(
+                    TestOneImm => test_oneimm,
+                    TestTwoImm => test_twoimm,
+                    TestZeroImm | TestAsStruct | TestAA | TestLAR => {}
+                ),
+                &opcode_test_data::test_opcodes(),
+            ),
+            quote!(
+                pub fn test_oneimm<'a>(str1: Str<'a>) -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestOneImm(str1)))
+                }
+                pub fn test_twoimm<'a>(str1: Str<'a>, str2: Str<'a>) -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestTwoImm(str1, str2)))
+                }
+                pub fn test_zero_imm<'a>() -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestZeroImm))
+                }
+                pub fn test_as_struct<'a>(str1: Str<'a>, str2: Str<'a>) -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestAsStruct(str1, str2)))
+                }
+                pub fn test_aa<'a>(arr1: AdataId<'a>) -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestAA(arr1)))
+                }
+                pub fn test_lar<'a>(locrange: LocalRange) -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestLAR(locrange)))
                 }
             ),
         );

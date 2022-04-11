@@ -8,4 +8,4 @@ edition = "2021"
 path = "../../opcode_test_data.rs"
 
 [dependencies]
-hhbc = { path = "../../../../../../tools/hhbc-gen" }
+hhbc-gen = { path = "../../../../../../tools/hhbc-gen" }

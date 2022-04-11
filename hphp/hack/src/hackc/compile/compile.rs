@@ -16,8 +16,7 @@ use decl_provider::DeclProvider;
 use emit_unit::{emit_unit, FromAstFlags};
 use env::emitter::Emitter;
 use error::{Error, ErrorKind};
-use hackc_unit::HackCUnit;
-use hhbc_ast::FatalOp;
+use hhbc::{hackc_unit::HackCUnit, FatalOp};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use options::{Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, RepoFlags};
@@ -62,7 +61,7 @@ bitflags! {
         const IS_SYSTEMLIB = 1 << 0;
         const IS_EVALED = 1 << 1;
         const FOR_DEBUGGER_EVAL = 1 << 2;
-        const DUMP_SYMBOL_REFS = 1 << 3;
+        const UNUSED_PLACEHOLDER = 1 << 3;
         const DISABLE_TOPLEVEL_ELABORATION = 1 << 4;
     }
 }
@@ -325,15 +324,7 @@ pub fn emit_fatal_unit<S: AsRef<str>>(
 
     let prog = emit_unit::emit_fatal_unit(&alloc, FatalOp::Parse, Pos::make_none(), err_msg);
     let prog = prog.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
-    print_unit(
-        &Context::new(
-            &emitter,
-            Some(&env.filepath),
-            env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
-        ),
-        writer,
-        &prog,
-    )?;
+    print_unit(&Context::new(&emitter, Some(&env.filepath)), writer, &prog)?;
     Ok(())
 }
 
@@ -353,17 +344,8 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc, Some(stack_limit))?;
     let unit = emit_unit_from_text(&mut emitter, env, stack_limit, source_text, profile)?;
 
-    let (print_result, printing_t) = time(|| {
-        print_unit(
-            &Context::new(
-                &emitter,
-                Some(&env.filepath),
-                env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
-            ),
-            writer,
-            &unit,
-        )
-    });
+    let (print_result, printing_t) =
+        time(|| print_unit(&Context::new(&emitter, Some(&env.filepath)), writer, &unit));
     print_result?;
     profile.printing_t = printing_t;
     profile.codegen_bytes = alloc.allocated_bytes() as i64;
@@ -431,11 +413,7 @@ pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
     let emitter = create_emitter(env, native_env, None, &alloc, None)?;
     let (print_result, _) = time(|| {
         print_unit(
-            &Context::new(
-                &emitter,
-                Some(&env.filepath),
-                env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
-            ),
+            &Context::new(&emitter, Some(&env.filepath)),
             writer,
             program,
         )

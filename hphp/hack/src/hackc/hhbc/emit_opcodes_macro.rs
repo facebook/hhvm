@@ -30,7 +30,7 @@ pub fn emit_opcodes(
     _attrs: proc_macro::TokenStream,
     input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
-    match emit_opcodes::emit_opcodes(input.into(), hhbc::opcode_data()) {
+    match emit_opcodes::emit_opcodes(input.into(), hhbc_gen::opcode_data()) {
         Ok(res) => res.into(),
         Err(err) => err.into_compile_error().into(),
     }
@@ -38,7 +38,7 @@ pub fn emit_opcodes(
 
 #[proc_macro_derive(Targets)]
 pub fn emit_targets(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    match emit_opcodes::emit_impl_targets(input.into(), hhbc::opcode_data()) {
+    match emit_opcodes::emit_impl_targets(input.into(), hhbc_gen::opcode_data()) {
         Ok(res) => res.into(),
         Err(err) => err.into_compile_error().into(),
     }

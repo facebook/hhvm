@@ -198,22 +198,15 @@ ALWAYS_INLINE
 static bool VerifyTypeSlowImpl(const Class* cls,
                                const Class* constraint,
                                const TypeConstraint* expected) {
-  // This helper should only be called for the Object and This cases
-  assertx(expected->isObject() || expected->isThis());
-  // For the This case, we must always have a resolved class for the constraint
-  assertx(IMPLIES(expected->isThis(), constraint != nullptr));
+  // This helper should only be called for the Object and Unresolved cases
+  assertx(expected->isObject() || expected->isUnresolved());
   // If we have a resolved class for the constraint, all we have to do is
   // check if the value's class is compatible with it
   if (LIKELY(constraint != nullptr)) {
-    if (expected->isThis()) {
-      return cls == constraint;
-    }
     return cls->classof(constraint);
   }
-  // The This case should never reach here because it was handled above
-  assertx(expected->isObject());
-  // Handle the case where the constraint is a type alias
-  return expected->checkTypeAliasObj(cls);
+  // Handle the case where the constraint is a type alias if it could be
+  return expected->isUnresolved() && expected->checkTypeAliasObj(cls);
 }
 
 void VerifyParamTypeSlow(ObjectData* obj,
@@ -222,7 +215,7 @@ void VerifyParamTypeSlow(ObjectData* obj,
                          int32_t paramId,
                          const TypeConstraint* expected) {
   if (!VerifyTypeSlowImpl(obj->getVMClass(), constraint, expected)) {
-    assertx(expected->isObject());
+    assertx(expected->isObject() || expected->isUnresolved());
     VerifyParamTypeFail(
       make_tv<KindOfObject>(obj), nullptr, func, paramId, expected);
   }
@@ -252,7 +245,7 @@ void VerifyRetTypeSlow(ObjectData* obj,
                        int32_t retId,
                        const TypeConstraint* expected) {
   if (!VerifyTypeSlowImpl(obj->getVMClass(), constraint, expected)) {
-    assertx(expected->isObject());
+    assertx(expected->isObject() || expected->isUnresolved());
     VerifyRetTypeFail(
       make_tv<KindOfObject>(obj), nullptr, func, retId, expected);
   }

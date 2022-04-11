@@ -249,8 +249,8 @@ where
         Node(self.0.make_constant_declarator(name.0, initializer.0), self.1.make_constant_declarator(name.1, initializer.1))
     }
 
-    fn make_type_const_declaration(&mut self, attribute_spec: Self::R, modifiers: Self::R, keyword: Self::R, type_keyword: Self::R, name: Self::R, type_parameters: Self::R, type_constraint: Self::R, equal: Self::R, type_specifier: Self::R, semicolon: Self::R) -> Self::R {
-        Node(self.0.make_type_const_declaration(attribute_spec.0, modifiers.0, keyword.0, type_keyword.0, name.0, type_parameters.0, type_constraint.0, equal.0, type_specifier.0, semicolon.0), self.1.make_type_const_declaration(attribute_spec.1, modifiers.1, keyword.1, type_keyword.1, name.1, type_parameters.1, type_constraint.1, equal.1, type_specifier.1, semicolon.1))
+    fn make_type_const_declaration(&mut self, attribute_spec: Self::R, modifiers: Self::R, keyword: Self::R, type_keyword: Self::R, name: Self::R, type_parameters: Self::R, type_constraints: Self::R, equal: Self::R, type_specifier: Self::R, semicolon: Self::R) -> Self::R {
+        Node(self.0.make_type_const_declaration(attribute_spec.0, modifiers.0, keyword.0, type_keyword.0, name.0, type_parameters.0, type_constraints.0, equal.0, type_specifier.0, semicolon.0), self.1.make_type_const_declaration(attribute_spec.1, modifiers.1, keyword.1, type_keyword.1, name.1, type_parameters.1, type_constraints.1, equal.1, type_specifier.1, semicolon.1))
     }
 
     fn make_context_const_declaration(&mut self, modifiers: Self::R, const_keyword: Self::R, ctx_keyword: Self::R, name: Self::R, type_parameters: Self::R, constraint: Self::R, equal: Self::R, ctx_list: Self::R, semicolon: Self::R) -> Self::R {
@@ -493,8 +493,8 @@ where
         Node(self.0.make_isset_expression(keyword.0, left_paren.0, argument_list.0, right_paren.0), self.1.make_isset_expression(keyword.1, left_paren.1, argument_list.1, right_paren.1))
     }
 
-    fn make_function_call_expression(&mut self, receiver: Self::R, type_args: Self::R, enum_class_label: Self::R, left_paren: Self::R, argument_list: Self::R, right_paren: Self::R) -> Self::R {
-        Node(self.0.make_function_call_expression(receiver.0, type_args.0, enum_class_label.0, left_paren.0, argument_list.0, right_paren.0), self.1.make_function_call_expression(receiver.1, type_args.1, enum_class_label.1, left_paren.1, argument_list.1, right_paren.1))
+    fn make_function_call_expression(&mut self, receiver: Self::R, type_args: Self::R, left_paren: Self::R, argument_list: Self::R, right_paren: Self::R) -> Self::R {
+        Node(self.0.make_function_call_expression(receiver.0, type_args.0, left_paren.0, argument_list.0, right_paren.0), self.1.make_function_call_expression(receiver.1, type_args.1, left_paren.1, argument_list.1, right_paren.1))
     }
 
     fn make_function_pointer_expression(&mut self, receiver: Self::R, type_args: Self::R) -> Self::R {

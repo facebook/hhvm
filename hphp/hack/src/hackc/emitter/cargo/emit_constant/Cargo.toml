@@ -16,13 +16,8 @@ emit_type_hint = { path = "../emit_type_hint" }
 env = { path = "../env" }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
-hhas_coeffects = { path = "../../../hhbc/cargo/hhas_coeffects" }
-hhas_constant = { path = "../../../hhbc/cargo/hhas_constant" }
-hhas_function = { path = "../../../hhbc/cargo/hhas_function" }
-hhas_pos = { path = "../../../hhbc/cargo/hhas_pos" }
-hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
 instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }
-typed_value = { path = "../../../hhbc/cargo/typed_value" }

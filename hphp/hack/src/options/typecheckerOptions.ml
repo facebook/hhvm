@@ -96,6 +96,8 @@ let populate_member_heaps = GlobalOptions.tco_populate_member_heaps
 
 let skip_hierarchy_checks = GlobalOptions.tco_skip_hierarchy_checks
 
+let skip_tast_checks = GlobalOptions.tco_skip_tast_checks
+
 let call_coeffects = GlobalOptions.tco_call_coeffects
 
 let local_coeffects = GlobalOptions.tco_local_coeffects
@@ -225,5 +227,5 @@ let specify_manifold_api_key = GlobalOptions.tco_specify_manifold_api_key
 let saved_state_manifold_api_key =
   GlobalOptions.tco_saved_state_manifold_api_key
 
-let profile_toplevel_definitions =
-  GlobalOptions.tco_profile_toplevel_definitions
+let profile_top_level_definitions =
+  GlobalOptions.tco_profile_top_level_definitions

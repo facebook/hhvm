@@ -5,8 +5,7 @@
 
 use error::{Error, Result};
 use ffi::Slice;
-use hhbc_ast::{FCallArgs, FCallArgsFlags, Local};
-use hhbc_id::function;
+use hhbc::{FCallArgs, FCallArgsFlags, Local};
 use instruction_sequence::{instr, InstrSeq};
 use oxidized::{aast::FunParam, pos::Pos};
 
@@ -71,7 +70,7 @@ pub fn get_implicit_context_memo_key<'arena>(
                 None,
                 None,
             ),
-            function::from_raw_string(
+            hhbc::FunctionName::from_raw_string(
                 alloc,
                 "HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
             ),

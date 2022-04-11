@@ -686,19 +686,6 @@ void ExecutionContext::onShutdownPreSend() {
   executeFunctions(ShutDown);
 }
 
-void ExecutionContext::debuggerExecutePsps() {
-  try {
-    executeFunctions(PostSend);
-  } catch (const ExitException& e) {
-    // do nothing
-  } catch (const Exception& e) {
-    onFatalError(e);
-  } catch (const Object& e) {
-    onUnhandledException(e);
-  } catch (...) {
-  }
-}
-
 void ExecutionContext::onShutdownPostSend() {
   // When host is OOMing, abort abruptly.
   if (RID().shouldOOMAbort()) return;

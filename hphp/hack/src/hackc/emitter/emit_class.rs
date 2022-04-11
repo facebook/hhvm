@@ -7,19 +7,20 @@ use emit_property::PropAndInit;
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use ffi::{Maybe, Maybe::*, Slice, Str};
-use hhas_class::{HhasClass, TraitReqKind};
-use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
-use hhas_constant::HhasConstant;
-use hhas_method::{HhasMethod, HhasMethodFlags};
-use hhas_param::HhasParam;
-use hhas_pos::HhasSpan;
-use hhas_property::HhasProperty;
-use hhas_type::HhasTypeInfo;
-use hhas_type_const::HhasTypeConstant;
-use hhas_xhp_attribute::HhasXhpAttribute;
-use hhbc_ast::{FCallArgs, FCallArgsFlags, FatalOp, Local, ReadonlyOp, SpecialClsRef, Visibility};
-use hhbc_id::class::ClassType;
-use hhbc_id::{self as hhbc_id, class, method, prop};
+use hhbc::{
+    hhas_attribute,
+    hhas_class::{HhasClass, TraitReqKind},
+    hhas_coeffects::{HhasCoeffects, HhasCtxConstant},
+    hhas_constant::HhasConstant,
+    hhas_method::{HhasMethod, HhasMethodFlags},
+    hhas_param::HhasParam,
+    hhas_pos::HhasSpan,
+    hhas_property::HhasProperty,
+    hhas_type::{self, HhasTypeInfo},
+    hhas_type_const::HhasTypeConstant,
+    ClassName, FCallArgs, FCallArgsFlags, FatalOp, HhasXhpAttribute, Local, ReadonlyOp,
+    SpecialClsRef, TypedValue, Visibility,
+};
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
 use instruction_sequence::{instr, InstrSeq};
@@ -31,36 +32,29 @@ use oxidized::{
     namespace_env,
 };
 use std::collections::BTreeMap;
-use typed_value::TypedValue;
 
 fn add_symbol_refs<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
-    base: Option<&class::ClassType<'arena>>,
-    implements: &[class::ClassType<'arena>],
+    base: Option<&ClassName<'arena>>,
+    implements: &[ClassName<'arena>],
     uses: &[&str],
-    requirements: &[(class::ClassType<'arena>, TraitReqKind)],
+    requirements: &[(ClassName<'arena>, TraitReqKind)],
 ) {
-    base.iter()
-        .for_each(|&x| emit_symbol_refs::add_class(emitter, *x));
-    implements
-        .iter()
-        .for_each(|x| emit_symbol_refs::add_class(emitter, *x));
+    base.iter().for_each(|&x| emitter.add_class_ref(*x));
+    implements.iter().for_each(|x| emitter.add_class_ref(*x));
     uses.iter().for_each(|x| {
-        emit_symbol_refs::add_class(
-            emitter,
-            class::ClassType::from_ast_name_and_mangle(alloc, x.to_owned()),
-        )
+        emitter.add_class_ref(ClassName::from_ast_name_and_mangle(alloc, x.to_owned()))
     });
     requirements
         .iter()
-        .for_each(|(x, _)| emit_symbol_refs::add_class(emitter, *x));
+        .for_each(|(x, _)| emitter.add_class_ref(*x));
 }
 
 fn make_86method<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
-    name: method::MethodType<'arena>,
+    name: hhbc::MethodName<'arena>,
     params: Vec<HhasParam<'arena>>,
     is_static: bool,
     visibility: Visibility,
@@ -120,23 +114,20 @@ fn from_extends<'arena>(
     is_enum_class: bool,
     is_abstract: bool,
     extends: &[ast::Hint],
-) -> Option<hhbc_id::class::ClassType<'arena>> {
+) -> Option<ClassName<'arena>> {
     if is_enum {
         // Do not use special_names:: as there's a prefix \ which breaks HHVM
         if is_enum_class {
             if is_abstract {
-                Some(hhbc_id::class::from_raw_string(
+                Some(ClassName::from_raw_string(
                     alloc,
                     "HH\\BuiltinAbstractEnumClass",
                 ))
             } else {
-                Some(hhbc_id::class::from_raw_string(
-                    alloc,
-                    "HH\\BuiltinEnumClass",
-                ))
+                Some(ClassName::from_raw_string(alloc, "HH\\BuiltinEnumClass"))
             }
         } else {
-            Some(hhbc_id::class::from_raw_string(alloc, "HH\\BuiltinEnum"))
+            Some(ClassName::from_raw_string(alloc, "HH\\BuiltinEnum"))
         }
     } else {
         extends
@@ -148,7 +139,7 @@ fn from_extends<'arena>(
 fn from_implements<'arena>(
     alloc: &'arena bumpalo::Bump,
     implements: &[ast::Hint],
-) -> Vec<hhbc_id::class::ClassType<'arena>> {
+) -> Vec<ClassName<'arena>> {
     implements
         .iter()
         .map(|x| emit_type_hint::hint_to_class(alloc, x))
@@ -158,7 +149,7 @@ fn from_implements<'arena>(
 fn from_includes<'arena>(
     alloc: &'arena bumpalo::Bump,
     includes: &[ast::Hint],
-) -> Vec<hhbc_id::class::ClassType<'arena>> {
+) -> Vec<ClassName<'arena>> {
     includes
         .iter()
         .map(|x| emit_type_hint::hint_to_class(alloc, x))
@@ -313,7 +304,7 @@ fn from_class_elt_constants<'a, 'arena, 'decl>(
 fn from_class_elt_requirements<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     class_: &'a ast::Class_,
-) -> Vec<(hhbc_id::class::ClassType<'arena>, TraitReqKind)> {
+) -> Vec<(ClassName<'arena>, TraitReqKind)> {
     class_
         .reqs
         .iter()
@@ -433,7 +424,11 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
             instr::checkthis(),
             instr::cgetl(init_meth_param_local),
             instr::baseh(),
-            instr::setm_pt(0, prop::from_raw_string(alloc, PROP_NAME), ReadonlyOp::Any),
+            instr::setm_pt(
+                0,
+                hhbc::PropName::from_raw_string(alloc, PROP_NAME),
+                ReadonlyOp::Any,
+            ),
             instr::popc(),
         ])
     };
@@ -457,7 +452,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
                     None,
                 ),
                 SpecialClsRef::ParentCls,
-                method::from_raw_string(alloc, INIT_METH_NAME),
+                hhbc::MethodName::from_raw_string(alloc, INIT_METH_NAME),
             ),
             instr::popc(),
         ]);
@@ -503,7 +498,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
         Ok(Some(make_86method(
             alloc,
             emitter,
-            method::MethodType::new(Str::new_str(alloc, string_utils::reified::INIT_METH_NAME)),
+            hhbc::MethodName::new(Str::new_str(alloc, string_utils::reified::INIT_METH_NAME)),
             params,
             false, // is_static
             Visibility::Protected,
@@ -543,7 +538,7 @@ where
         Ok(Some(make_86method(
             alloc,
             emitter,
-            method::MethodType::new(Str::new_str(alloc, name)),
+            hhbc::MethodName::new(Str::new_str(alloc, name)),
             vec![],
             true, // is_static
             Visibility::Private,
@@ -582,7 +577,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     // class_is_const, but for now class_is_const is the only thing that turns
     // it on.
     let no_dynamic_props = is_const;
-    let name = class::ClassType::from_ast_name_and_mangle(alloc, &ast_class.name.1);
+    let name = ClassName::from_ast_name_and_mangle(alloc, &ast_class.name.1);
     let is_trait = ast_class.kind == ast::ClassishKind::Ctrait;
     let is_interface = ast_class.kind == ast::ClassishKind::Cinterface;
 
@@ -605,7 +600,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         .collect();
 
     let elaborate_namespace_id =
-        |x: &'a ast::Id| hhbc_id::class::ClassType::from_ast_name_and_mangle(alloc, x.name());
+        |x: &'a ast::Id| ClassName::from_ast_name_and_mangle(alloc, x.name());
     let use_aliases = Slice::fill_iter(
         alloc,
         ast_class
@@ -613,19 +608,13 @@ pub fn emit_class<'a, 'arena, 'decl>(
             .iter()
             .map(|ast::UseAsAlias(ido1, id, ido2, vis)| {
                 let id1 = Maybe::from(ido1.as_ref()).map(elaborate_namespace_id);
-                let id2 = Maybe::from(ido2.as_ref())
-                    .map(|x| hhbc_id::class::ClassType::new(Str::new_str(alloc, &x.1)));
+                let id2 =
+                    Maybe::from(ido2.as_ref()).map(|x| ClassName::new(Str::new_str(alloc, &x.1)));
                 let attr = vis
                     .iter()
                     .fold(Attr::AttrNone, |attr, &v| Attr::from(attr | Attr::from(v)));
 
-                (
-                    id1,
-                    hhbc_id::class::ClassType::new(Str::new_str(alloc, &id.1)),
-                    id2,
-                    attr,
-                )
-                    .into()
+                (id1, ClassName::new(Str::new_str(alloc, &id.1)), id2, attr).into()
             }),
     );
 
@@ -636,7 +625,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
             .iter()
             .map(|ast::InsteadofAlias(id1, id2, ids)| {
                 let id1 = elaborate_namespace_id(id1);
-                let id2 = ClassType::new(Str::new_str(alloc, &id2.1));
+                let id2 = ClassName::new(Str::new_str(alloc, &id2.1));
                 let ids = Slice::fill_iter(alloc, ids.iter().map(elaborate_namespace_id));
                 (id1, id2, ids).into()
             }),
@@ -837,7 +826,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         Some(make_86method(
             alloc,
             emitter,
-            method::MethodType::new(Str::new_str(alloc, "86cinit")),
+            hhbc::MethodName::new(Str::new_str(alloc, "86cinit")),
             params,
             true, /* is_static */
             Visibility::Private,

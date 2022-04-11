@@ -31,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Invokes a function asynchrously. For example,
+ * Invokes a function asynchronously. For example,
  *
  *   struct MyClass {
  *     void doJob();

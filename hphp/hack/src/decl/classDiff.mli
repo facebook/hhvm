@@ -42,4 +42,7 @@ val empty_member_diff : member_diff
 
 val is_empty_member_diff : member_diff -> bool
 
+(** Wether a change on a method or property affects the descendants.
+  This is the case for added and removed members, but also if e.g. abstractness or visibility
+  has changed. *)
 val method_or_property_change_affects_descendants : member_change -> bool

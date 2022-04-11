@@ -1,2 +1,1 @@
-
-Fatal error: Can't use return value in write context in %s/test/slow/parser/foreach-bad6.php on line 3
+Fatal error: You cannot use this syntax as the iterator variable in a `foreach` loop. in %s/foreach-bad6.php on line 3

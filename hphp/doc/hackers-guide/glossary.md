@@ -130,7 +130,7 @@ you may want to skim through the following terms:
 - [Bytecode interpreter](https://en.wikipedia.org/wiki/Interpreter_(computing)#Bytecode_interpreters)
 - [JIT/just-in-time compilation](https://en.wikipedia.org/wiki/Just-in-time_compilation)
 - **Leaf function**: a function that calls no other functions; a leaf node in the control flow graph.
-- [NUMA/non-uniform memory acces](https://en.wikipedia.org/wiki/Non-uniform_memory_access)
+- [NUMA/non-uniform memory access](https://en.wikipedia.org/wiki/Non-uniform_memory_access)
 - [PGO/profile-guided optimization](https://en.wikipedia.org/wiki/Profile-guided_optimization)
 - [RSS/resident set size](https://en.wikipedia.org/wiki/Resident_set_size)
 - [SP/stack pointer](https://en.wikipedia.org/wiki/Call_stack#Stack_and_frame_pointers)

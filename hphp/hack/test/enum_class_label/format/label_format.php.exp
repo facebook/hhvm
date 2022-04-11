@@ -1,5 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('enum_class_label')>>
 
 enum class E: int {
   int A = 42;
@@ -18,14 +17,10 @@ class Chains {
 }
 
 function main(): void {
-  f#A();
-  f#A();
   f(#A);
-  g#A(42);
-  g#A(42);
   g(#A, 42);
 
   $c = new Chains();
-  $c->f#A();
-  $c->f#A()->g#A(42);
+  $c->f(#A);
+  $c->f(#A)->g(#A, 42);
 }

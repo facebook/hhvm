@@ -1,11 +1,1 @@
-dict(0) {
-}
-dict(0) {
-}
-object(stdClass) (1) {
-  ["a"]=>
-  int(1)
-}
-int(2)
-int(2)
-int(3)
+Fatal error: You cannot use this syntax on the left-hand side of an assignment. in %s/bug52614.php on line 34

@@ -115,6 +115,9 @@ type t = {
   (* Skip checks on hierarchy e.g. overrides, require extend, etc.
      Set to true only for debugging purposes! *)
   tco_skip_hierarchy_checks: bool;
+  (* Skip checks implemented with TAST visitors.
+     Set to true only for debugging purposes! *)
+  tco_skip_tast_checks: bool;
   (* Enables like type hints *)
   tco_like_type_hints: bool;
   (* Enables union and intersection type hints *)
@@ -155,7 +158,7 @@ type t = {
   (* Perform global inference globally on the code base to infer missing type annotations. *)
   tco_global_inference: bool;
   tco_gi_reinfer_types: string list;
-      (** Types we want to remove and replace by infered types during global inference. *)
+      (** Types we want to remove and replace by inferred types during global inference. *)
   tco_ordered_solving: bool;
       (** Whether to solve typing inference constraints using ordered solving or transitive closure. *)
   (* Enable const static properties *)
@@ -308,7 +311,7 @@ type t = {
   tco_saved_state_manifold_api_key: string option;
   (* Measures and reports the time it takes to typecheck each top-level
      definition. *)
-  tco_profile_toplevel_definitions: bool;
+  tco_profile_top_level_definitions: bool;
 }
 [@@deriving eq, show]
 
@@ -350,6 +353,7 @@ val make :
   ?tco_force_load_hot_shallow_decls:bool ->
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->
+  ?tco_skip_tast_checks:bool ->
   ?tco_like_type_hints:bool ->
   ?tco_union_intersection_type_hints:bool ->
   ?tco_coeffects:bool ->
@@ -435,7 +439,7 @@ val make :
   ?tco_log_saved_state_age_and_distance:bool ->
   ?tco_specify_manifold_api_key:bool ->
   ?tco_saved_state_manifold_api_key:string option ->
-  ?tco_profile_toplevel_definitions:bool ->
+  ?tco_profile_top_level_definitions:bool ->
   unit ->
   t
 
@@ -534,6 +538,8 @@ val tco_force_load_hot_shallow_decls : t -> bool
 val tco_populate_member_heaps : t -> bool
 
 val tco_skip_hierarchy_checks : t -> bool
+
+val tco_skip_tast_checks : t -> bool
 
 val tco_like_type_hints : t -> bool
 
@@ -719,4 +725,4 @@ val tco_specify_manifold_api_key : t -> bool
 
 val tco_saved_state_manifold_api_key : t -> string option
 
-val tco_profile_toplevel_definitions : t -> bool
+val tco_profile_top_level_definitions : t -> bool

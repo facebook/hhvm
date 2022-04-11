@@ -12,7 +12,7 @@ pub mod ffi {
     // that they match the definition in attr.h.
     #[repr(u32)]
     #[derive(Debug, Copy, Clone)]
-    enum Attr {
+    pub enum Attr {
         AttrNone = 0x0,
         AttrForbidDynamicProps = 0x1,
         AttrDeepInit = 0x1,
@@ -98,7 +98,8 @@ pub mod ffi {
     }
 }
 
-use ffi::{type_flags_to_string_ffi, Attr, TypeConstraintFlags};
+use ffi::type_flags_to_string_ffi;
+pub use ffi::{Attr, TypeConstraintFlags};
 
 impl Default for TypeConstraintFlags {
     fn default() -> Self {
@@ -165,18 +166,6 @@ impl From<oxidized::ast_defs::Visibility> for Attr {
 impl From<&oxidized::ast_defs::Visibility> for Attr {
     fn from(k: &oxidized::ast_defs::Visibility) -> Self {
         use oxidized::ast_defs::Visibility;
-        match k {
-            Visibility::Private => Self::AttrPrivate,
-            Visibility::Public => Self::AttrPublic,
-            Visibility::Protected => Self::AttrProtected,
-            Visibility::Internal => Self::AttrPublic,
-        }
-    }
-}
-
-impl From<hhbc_ast::Visibility> for Attr {
-    fn from(k: hhbc_ast::Visibility) -> Self {
-        use hhbc_ast::Visibility;
         match k {
             Visibility::Private => Self::AttrPrivate,
             Visibility::Public => Self::AttrPublic,

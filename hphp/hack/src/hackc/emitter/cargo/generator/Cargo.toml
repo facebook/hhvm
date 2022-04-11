@@ -8,5 +8,4 @@ edition = "2021"
 path = "../../generator.rs"
 
 [dependencies]
-ast_body = { path = "../../../hhbc/cargo/ast_body" }
 oxidized = { path = "../../../../oxidized" }

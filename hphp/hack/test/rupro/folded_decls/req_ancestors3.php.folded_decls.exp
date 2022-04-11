@@ -100,7 +100,7 @@ FoldedClass {
             subst: Subst(
                 {},
             ),
-            class_context: "\\T",
+            class_context: "\\T1",
             from_req_extends: true,
         },
         "\\T1": SubstContext {

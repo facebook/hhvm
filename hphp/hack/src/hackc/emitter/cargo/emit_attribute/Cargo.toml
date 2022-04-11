@@ -14,8 +14,6 @@ emit_expression = { path = "../emit_expression" }
 env = { path = "../env" }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
-hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
-hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
-typed_value = { path = "../../../hhbc/cargo/typed_value" }

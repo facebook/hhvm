@@ -234,6 +234,89 @@ Func* Unit::getEntryPoint() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Literal strings.
+
+StringData* Unit::lookupLitstrId(Id id) const {
+  assertx(id >= 0 && id < m_litstrs.size());
+
+  auto& elem = m_litstrs[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    assertx(wrapper.ptr()->isStatic());
+    return const_cast<StringData*>(wrapper.ptr());
+  }
+  elem.lock_for_update();
+  wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    assertx(wrapper.ptr()->isStatic());
+    elem.unlock();
+    return const_cast<StringData*>(wrapper.ptr());
+  }
+  auto const str = UnitEmitter::loadLitstrFromRepo(m_sn, wrapper.token(), true);
+  assertx(str);
+  assertx(str->isStatic());
+  elem.update_and_unlock(StringOrToken::FromPtr(str));
+  return const_cast<StringData*>(str);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Literal arrays.
+
+const ArrayData* Unit::lookupArrayId(Id id) const {
+  assertx(id >= 0 && id < m_arrays.size());
+
+  auto& elem = m_arrays[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    assertx(wrapper.ptr()->isStatic());
+    return wrapper.ptr();
+  }
+  elem.lock_for_update();
+  wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    assertx(wrapper.ptr()->isStatic());
+    elem.unlock();
+    return wrapper.ptr();
+  }
+  auto const array = UnitEmitter::loadLitarrayFromRepo(
+    m_sn, wrapper.token(), m_origFilepath, true
+  );
+  assertx(array);
+  assertx(array->isStatic());
+  elem.update_and_unlock(ArrayOrToken::FromPtr(array));
+  return array;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// RAT arrays.
+
+const RepoAuthType::Array* Unit::lookupRATArray(Id id) const {
+  assertx(id >= 0 && id < m_rats.size());
+
+  auto& elem = m_rats[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    return wrapper.ptr();
+  }
+  elem.lock_for_update();
+  wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    elem.unlock();
+    return wrapper.ptr();
+  }
+  auto const array = UnitEmitter::loadRATArrayFromRepo(m_sn, wrapper.token());
+  assertx(array);
+  elem.update_and_unlock(RATArrayOrToken::FromPtr(array));
+  return array;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Merge.
 
 namespace {

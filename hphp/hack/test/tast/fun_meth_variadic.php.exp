@@ -18,8 +18,8 @@ Errors:
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
-      });
+        f_doc_comment = None };
+      fd_internal = false });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -51,8 +51,8 @@ Errors:
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None }
-       });
+         f_doc_comment = None };
+       fd_internal = false });
   (Class
      { c_span = [11:1-13:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -81,4 +81,4 @@ Errors:
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-       c_doc_comment = None; c_emit_id = None })
+       c_doc_comment = None; c_emit_id = None; c_internal = false })

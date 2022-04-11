@@ -64,6 +64,7 @@ type rollout_flags = {
   populate_member_heaps: bool;
   shm_use_sharded_hashtbl: bool;
   shm_cache_size: int;
+  ide_use_lfu_cache_instead_of_lru: bool;
 }
 
 let flush () = ()

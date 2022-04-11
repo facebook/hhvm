@@ -19,5 +19,5 @@ Errors:
             ([6:3-11], (Expr ((_), [6:3-10], (New (((_), [6:7-8], (CI ([6:7-8], "\\U"))), [], [], None, (_))))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
-      })
+        f_doc_comment = None };
+      fd_internal = false })

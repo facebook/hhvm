@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -485,7 +485,7 @@ size_t Type::stableHash() const {
       auto const spec = t.arrSpec();
       return folly::hash::hash_combine(
         spec.layout().toUint16(),
-        spec.type() ? spec.type()->id() : 0
+        spec.type() ? spec.type()->stableHash() : 0
       );
     }
     return 0;
@@ -979,17 +979,13 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
 
   using A = AnnotType;
   auto const atToType = [&](AnnotType at) {
+    assertx(at != A::Object && at != A::Unresolved);
     switch (at) {
       case A::Null:       return TNull;
       case A::Bool:       return TBool;
       case A::Int:        return TInt;
       case A::Float:      return TDbl;
       case A::String:     return TStr;
-      // We only call this once we've attempted resolving the
-      // type-constraint. If we successfully resolved it, we'll never get here,
-      // So if we're here and we have AnnotType::Object, we don't know what the
-      // type-hint is, so be conservative.
-      case A::Object:
       case A::Mixed:      return TCell;
       case A::Resource:   return TRes;
       case A::Dict:       return TDict;
@@ -1009,40 +1005,54 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::Nothing:
       case A::NoReturn:
       case A::Callable:
+      case A::Object:
+      case A::Unresolved:
         break;
     }
     always_assert(false);
   };
 
   auto base = [&]{
-    if (!tc.isObject()) return atToType(tc.type());
+    if (!tc.isObject() && !tc.isUnresolved()) return atToType(tc.type());
 
-    auto const handleCls = [&] (const Class* cls) {
-      // Don't try to be clever with magic interfaces
-      if (interface_supports_non_objects(cls->name())) return TInitCell;
+    if (tc.isObject()) {
+      // Don't try to be clever with magic interfaces.
+      if (interface_supports_non_objects(tc.clsName())) return TInitCell;
 
+      auto const cls = Class::lookupUniqueInContext(tc.clsName(), ctx, nullptr);
+      if (!cls) return TObj;
+      assertx(!isEnum(cls));
+      return Type::SubObj(cls);
+    }
+
+    assertx(tc.isUnresolved());
+    if (interface_supports_non_objects(tc.typeName())) return TInitCell;
+
+    auto const cls = Class::lookupUniqueInContext(tc.typeName(), ctx, nullptr);
+    if (cls) {
       if (isEnum(cls)) {
+        assertx(tc.isUnresolved());
         if (auto const dt = cls->enumBaseTy()) return Type{*dt};
         return TInt | TStr;
       }
       return Type::SubObj(cls);
-    };
+    }
 
     bool persistent = false;
     if (auto const alias = TypeAlias::lookup(tc.typeName(), &persistent)) {
       if (persistent && !alias->invalid) {
         auto ty = [&]{
-          if (alias->klass) return handleCls(alias->klass);
+          if (alias->klass) {
+            if (interface_supports_non_objects(alias->klass->name())) {
+              return TInitCell;
+            }
+            return Type::SubObj(alias->klass);
+          }
           return atToType(alias->type);
         }();
         if (alias->nullable) ty |= TInitNull;
         return ty;
       }
-    }
-
-    if (auto const cls =
-          Class::lookupUniqueInContext(tc.typeName(), ctx, nullptr)) {
-      return handleCls(cls);
     }
 
     // It could be an alias to mixed so we might have refs

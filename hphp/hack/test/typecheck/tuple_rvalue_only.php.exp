@@ -1,5 +1,5 @@
 File "tuple_rvalue_only.php", line 5, characters 3-15:
-tuple_expression is not allowed in write context (Parsing[1002])
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 File "tuple_rvalue_only.php", line 5, characters 3-27:
 Invalid assignment (Typing[4110])
   File "tuple_rvalue_only.php", line 5, characters 3-15:

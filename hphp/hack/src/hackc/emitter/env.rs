@@ -9,16 +9,12 @@ pub mod jump_targets;
 mod label;
 mod local;
 
-use ast_body::AstBody;
-use ast_scope::{self as ast_scope, Scope, ScopeItem};
+use ast_scope::{Scope, ScopeItem};
 use bitflags::bitflags;
 use emitter::Emitter;
-use ffi::{Slice, Str};
-use hhas_symbol_refs::{HhasSymbolRefs, IncludePathSet};
-use hhbc_ast::{IterId, Label, Local};
+use hhbc::{IterId, Label, Local};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env::Env as NamespaceEnv};
-use std::collections::BTreeSet;
 
 pub use iterator::*;
 pub use label::*;
@@ -187,11 +183,11 @@ impl<'a, 'arena> Env<'a, 'arena> {
     pub fn do_function<'decl, R, F>(
         &mut self,
         e: &mut Emitter<'arena, 'decl>,
-        defs: &AstBody<'_>,
+        defs: &[ast::Stmt],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl>, &AstBody<'_>) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl>, &[ast::Stmt]) -> R,
     {
         self.jump_targets_gen.with_function();
         self.run_and_release_ids(e, |env, e| f(env, e, defs))
@@ -205,25 +201,6 @@ impl<'a, 'arena> Env<'a, 'arena> {
         self.jump_targets_gen.release_ids();
         self.jump_targets_gen.revert();
         res
-    }
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct SymbolRefsState<'arena> {
-    pub includes: IncludePathSet<'arena>,
-    pub constants: BTreeSet<Str<'arena>>,
-    pub functions: BTreeSet<Str<'arena>>,
-    pub classes: BTreeSet<Str<'arena>>,
-}
-
-impl<'arena> SymbolRefsState<'arena> {
-    pub fn to_hhas(self, alloc: &'arena bumpalo::Bump) -> HhasSymbolRefs<'arena> {
-        HhasSymbolRefs {
-            includes: Slice::new(alloc.alloc_slice_fill_iter(self.includes.into_iter())),
-            constants: Slice::new(alloc.alloc_slice_fill_iter(self.constants.into_iter())),
-            functions: Slice::new(alloc.alloc_slice_fill_iter(self.functions.into_iter())),
-            classes: Slice::new(alloc.alloc_slice_fill_iter(self.classes.into_iter())),
-        }
     }
 }
 

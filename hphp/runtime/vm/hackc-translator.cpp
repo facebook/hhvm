@@ -369,26 +369,26 @@ void translateEnumType(TranslationState& ts, const Maybe<HhasTypeInfo>& t) {
   }
 }
 
-void translateRequirements(TranslationState& ts, Pair<ClassType, TraitReqKind> requirement) {
+void translateRequirements(TranslationState& ts, Pair<ClassName, TraitReqKind> requirement) {
   auto const name = toStaticString(requirement._0._0);
   auto const isExtends = requirement._1 == TraitReqKind::MustExtend;
   ts.pce->addClassRequirement(PreClass::ClassRequirement(name, isExtends));
 }
 
 using UseAlias = Quadruple<
-  Maybe<ClassType>,
-  ClassType,
-  Maybe<ClassType>,
+  Maybe<ClassName>,
+  ClassName,
+  Maybe<ClassName>,
   Attr
 >;
 void translateUseAlias(TranslationState& ts, UseAlias useAlias) {
   auto const identifier = toStaticString(useAlias._1._0);
   auto const traitName = maybeOrElse(useAlias._0,
-    [&](ClassType& c) {return toStaticString(c._0);},
+    [&](ClassName& c) {return toStaticString(c._0);},
     [&]() {return staticEmptyString();});
 
   auto const alias = maybeOrElse(useAlias._2,
-    [&](ClassType& c) { return toStaticString(c._0);},
+    [&](ClassName& c) { return toStaticString(c._0);},
     [&]() {return identifier;});
 
   ts.pce->addTraitAliasRule(
@@ -396,7 +396,7 @@ void translateUseAlias(TranslationState& ts, UseAlias useAlias) {
   );
 }
 
-using UsePrecedence = Triple<ClassType, ClassType, Slice<ClassType>>;
+using UsePrecedence = Triple<ClassName, ClassName, Slice<ClassName>>;
 void translateUsePrecedence(TranslationState& ts, UsePrecedence usePrecedence) {
   auto const traitName = toStaticString(usePrecedence._0._0);
   auto const identifier = toStaticString(usePrecedence._1._0);
@@ -427,7 +427,7 @@ void translateClass(TranslationState& ts, const HhasClass& c) {
   if (!SystemLib::s_inited) attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
 
   auto const parentName = maybeOrElse(c.base,
-    [&](ClassType& s) { return toStaticString(s._0); },
+    [&](ClassName& s) { return toStaticString(s._0); },
     [&]() { return staticEmptyString(); });
 
   ts.pce->init(c.span.line_begin,
@@ -523,7 +523,7 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
   const std::string& hhasString
 ) {
   auto const bcSha1 = SHA1{string_sha1(hhasString)};
-  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, false);
+  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 

@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_body::AstBody;
 use env::emitter::Emitter;
 use error::{Error, Result};
 use hack_macro::hack_stmt;
+use hhbc::decl_vars;
 use ocamlrep::rc::RcOc;
 use options::CompilerFlags;
 use oxidized::{
@@ -96,7 +96,7 @@ fn extract_debugger_main(
     all_defs: &mut Vec<Def>,
 ) -> std::result::Result<(), String> {
     let (stmts, mut defs): (Vec<Def>, Vec<Def>) = all_defs.drain(..).partition(|x| x.is_stmt());
-    let mut vars = decl_vars::vars_from_ast(&[], &AstBody::Defs(&stmts))?
+    let mut vars = decl_vars::vars_from_ast(&[], &stmts)?
         .into_iter()
         .collect::<Vec<_>>();
     let mut stmts = stmts
@@ -186,6 +186,8 @@ fn extract_debugger_main(
         file_attributes: vec![],
         mode: Mode::Mstrict,
         fun: f,
+        // TODO(T116039119): Populate value with presence of internal attribute
+        internal: false,
     };
     let mut new_defs = vec![Def::mk_fun(fd)];
     new_defs.append(&mut defs);

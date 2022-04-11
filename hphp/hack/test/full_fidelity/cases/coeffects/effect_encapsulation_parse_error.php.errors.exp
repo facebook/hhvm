@@ -1,6 +1,7 @@
 (6,14)-(6,15) A type specifier is expected here.
 (6,15)-(6,15) An equals sign `=` is expected here.
 (6,16)-(6,16) A semicolon `;` is expected here.
+(6,16)-(6,17) You cannot use this syntax on the left-hand side of an assignment.
 (6,18)-(6,18) An expression is expected here.
 (6,21)-(6,21) An expression is expected here.
 (6,22)-(6,23) Encountered unexpected token `]`.

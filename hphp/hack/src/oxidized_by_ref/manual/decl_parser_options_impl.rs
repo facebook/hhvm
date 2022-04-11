@@ -66,6 +66,31 @@ impl DeclParserOptions<'_> {
             hhvm_compat_mode: false,
         }
     }
+
+    pub fn clone_in<'a>(&self, arena: &'a bumpalo::Bump) -> DeclParserOptions<'a> {
+        let mut ns_map =
+            bumpalo::collections::Vec::with_capacity_in(self.auto_namespace_map.len(), arena);
+        ns_map.extend(
+            self.auto_namespace_map
+                .iter()
+                .map(|(a, b)| (&*arena.alloc_str(a), &*arena.alloc_str(b))),
+        );
+        let mut reinferred_types =
+            bumpalo::collections::Vec::with_capacity_in(self.gi_reinfer_types.len(), arena);
+        reinferred_types.extend(self.gi_reinfer_types.iter().map(|s| &*arena.alloc_str(s)));
+        DeclParserOptions {
+            auto_namespace_map: ns_map.into_bump_slice(),
+            disable_xhp_element_mangling: self.disable_xhp_element_mangling,
+            interpret_soft_types_as_like_types: self.interpret_soft_types_as_like_types,
+            allow_new_attribute_syntax: self.allow_new_attribute_syntax,
+            enable_xhp_class_modifier: self.enable_xhp_class_modifier,
+            everything_sdt: self.everything_sdt,
+            global_inference: self.global_inference,
+            gi_reinfer_types: reinferred_types.into_bump_slice(),
+            php5_compat_mode: false,
+            hhvm_compat_mode: false,
+        }
+    }
 }
 
 impl<'a> From<&ParserOptions<'a>> for DeclParserOptions<'a> {

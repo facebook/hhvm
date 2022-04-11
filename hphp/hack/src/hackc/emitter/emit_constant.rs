@@ -8,16 +8,17 @@ use emit_type_hint::Kind;
 use env::{emitter::Emitter, Env};
 use error::Result;
 use ffi::{Maybe, Slice, Str};
-use hhas_coeffects::HhasCoeffects;
-use hhas_constant::HhasConstant;
-use hhas_function::{HhasFunction, HhasFunctionFlags};
-use hhas_pos::HhasSpan;
-use hhbc_id::{constant, function};
+use hhbc::{
+    hhas_coeffects::HhasCoeffects,
+    hhas_constant::HhasConstant,
+    hhas_function::{HhasFunction, HhasFunctionFlags},
+    hhas_pos::HhasSpan,
+    TypedValue,
+};
 use hhbc_string_utils::strip_global_ns;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq};
 use oxidized::ast;
-use typed_value::TypedValue;
 
 fn emit_constant_cinit<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
@@ -26,10 +27,10 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
     init: Option<InstrSeq<'arena>>,
 ) -> Result<Option<HhasFunction<'arena>>> {
     let alloc = env.arena;
-    let const_id = constant::ConstType::from_ast_name(alloc, &constant.name.1);
-    let (ns, name) = utils::split_ns_from_name(const_id.unsafe_as_str());
+    let const_name = hhbc::ConstName::from_ast_name(alloc, &constant.name.1);
+    let (ns, name) = utils::split_ns_from_name(const_name.unsafe_as_str());
     let name = String::new() + strip_global_ns(ns) + "86cinit_" + name;
-    let original_id = function::FunctionType::new(Str::new_str(alloc, &name));
+    let original_name = hhbc::FunctionName::new(Str::new_str(alloc, &name));
     let ret = constant.type_.as_ref();
     let return_type_info = ret
         .map(|h| {
@@ -65,7 +66,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
         )?;
         Ok(HhasFunction {
             attributes: Slice::empty(),
-            name: original_id,
+            name: original_name,
             body,
             span: HhasSpan::from_pos(&constant.span),
             coeffects: HhasCoeffects::default(),
@@ -118,7 +119,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         },
     };
     let constant = HhasConstant {
-        name: hhbc_id::constant::ConstType::from_ast_name(alloc, id.name()),
+        name: hhbc::ConstName::from_ast_name(alloc, id.name()),
         value: Maybe::from(value),
         is_abstract,
     };

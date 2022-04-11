@@ -7,14 +7,13 @@
 // unlike formal parameters and return types. We might consider fixing this.
 // Also interestingly, abstract constants are not emitted at all.
 
+use crate::{typed_value::TypedValue, ConstName};
 use ffi::Maybe;
-use hhbc_id::constant::ConstType;
-use typed_value::TypedValue;
 
 #[derive(Debug)]
 #[repr(C)]
 pub struct HhasConstant<'arena> {
-    pub name: ConstType<'arena>,
+    pub name: ConstName<'arena>,
     pub value: Maybe<TypedValue<'arena>>,
     pub is_abstract: bool,
 }

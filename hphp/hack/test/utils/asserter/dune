@@ -1,4 +1,5 @@
 (library
  (name asserter)
  (modules asserter)
- (libraries hh_json relative_path str symbol_name))
+ (libraries hh_json relative_path str symbol_name)
+ (preprocess (pps ppx_deriving.std)))

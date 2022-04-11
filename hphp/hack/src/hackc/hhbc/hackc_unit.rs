@@ -3,17 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::{
+    hhas_adata::HhasAdata, hhas_attribute::HhasAttribute, hhas_class::HhasClass,
+    hhas_constant::HhasConstant, hhas_function::HhasFunction, hhas_module::HhasModule,
+    hhas_pos::HhasPos, hhas_symbol_refs::HhasSymbolRefs, hhas_typedef::HhasTypedef, FatalOp,
+};
 use ffi::{Maybe, Slice, Str, Triple};
-use hhas_adata::HhasAdata;
-use hhas_attribute::HhasAttribute;
-use hhas_class::HhasClass;
-use hhas_constant::HhasConstant;
-use hhas_function::HhasFunction;
-use hhas_module::HhasModule;
-use hhas_pos::HhasPos;
-use hhas_symbol_refs::HhasSymbolRefs;
-use hhas_typedef::HhasTypedef;
-use hhbc_ast::FatalOp;
 
 #[derive(Default, Debug)]
 #[repr(C)]

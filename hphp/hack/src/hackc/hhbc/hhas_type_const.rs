@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::typed_value::TypedValue;
 use ffi::{Maybe, Str};
-use typed_value::TypedValue;
 
 #[derive(Debug)]
 #[repr(C)]

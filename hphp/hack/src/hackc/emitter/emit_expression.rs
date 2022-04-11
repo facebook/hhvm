@@ -9,14 +9,12 @@ use env::{emitter::Emitter, Env, Flags as EnvFlags};
 use error::{Error, Result};
 use ffi::{Slice, Str};
 use hash::HashSet;
-use hhas_symbol_refs::IncludePath;
-use hhbc_ast::{
-    BareThisOp, CollectionType, FCallArgs, FCallArgsFlags, HasGenericsOp, IncDecOp, Instruct,
-    IsLogAsDynamicCallOp, IsTypeOp, IterArgs, Label, Local, MOpMode, MemberKey, MethodId,
-    OODeclExistsOp, ObjMethodOp, Opcode, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SpecialClsRef,
-    StackIndex, TypeStructResolveOp,
+use hhbc::{
+    hhas_symbol_refs::IncludePath, BareThisOp, CollectionType, FCallArgs, FCallArgsFlags,
+    HasGenericsOp, IncDecOp, Instruct, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, Label, Local,
+    MOpMode, MemberKey, MethodName, OODeclExistsOp, ObjMethodOp, Opcode, QueryMOp, ReadonlyOp,
+    SetOpOp, SetRangeOp, SpecialClsRef, StackIndex, TypeStructResolveOp, TypedValue,
 };
-use hhbc_id::{class, constant, function, method, prop};
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq};
@@ -36,7 +34,6 @@ use oxidized::{
 };
 use regex::Regex;
 use std::{borrow::Cow, collections::BTreeMap, iter, str::FromStr};
-use typed_value::TypedValue;
 
 #[derive(Debug)]
 pub struct EmitJmpResult<'arena> {
@@ -523,10 +520,9 @@ fn emit_id<'a, 'arena, 'decl>(
         pseudo_consts::EXIT | pseudo_consts::DIE => emit_exit(emitter, env, None),
         _ => {
             // panic!("TODO: uncomment after D19350786 lands")
-            // let cid: ConstId = constant::ConstType::from_ast_name(&s);
-            let cid =
-                constant::ConstType::new(Str::new_str(alloc, string_utils::strip_global_ns(s)));
-            emit_symbol_refs::add_constant(emitter, cid.clone());
+            // let cid: ConstId = hhbc::ConstName::from_ast_name(&s);
+            let cid = hhbc::ConstName::new(Str::new_str(alloc, string_utils::strip_global_ns(s)));
+            emitter.add_constant_ref(cid.clone());
             Ok(emit_pos_then(
                 p,
                 instr::instr(Instruct::Opcode(Opcode::CnsE(cid))),
@@ -645,7 +641,7 @@ fn emit_import<'a, 'arena, 'decl>(
     use ast::ImportFlavor;
     let alloc = env.arena; // Should this be emitter.alloc?
     let inc = parse_include(alloc, expr);
-    emit_symbol_refs::add_include(e, inc.clone());
+    e.add_include_ref(inc.clone());
     let (expr_instrs, import_op_instr) = match flavor {
         ImportFlavor::Include => (emit_expr(e, env, expr)?, instr::incl()),
         ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req()),
@@ -837,8 +833,8 @@ fn inline_gena_call<'a, 'arena, 'decl>(
                     Some(async_eager_label),
                     None,
                 ),
-                method::from_raw_string(alloc, "fromDict"),
-                class::from_raw_string(alloc, "HH\\AwaitAllWaitHandle"),
+                hhbc::MethodName::from_raw_string(alloc, "fromDict"),
+                hhbc::ClassName::from_raw_string(alloc, "HH\\AwaitAllWaitHandle"),
             ),
             instr::await_(),
             instr::label(async_eager_label),
@@ -1703,8 +1699,8 @@ fn emit_call<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     if let Some(ast_defs::Id(_, s)) = expr.as_id() {
-        let fid = function::FunctionType::<'arena>::from_ast_name(alloc, s);
-        emit_symbol_refs::add_function(e, fid);
+        let fid = hhbc::FunctionName::<'arena>::from_ast_name(alloc, s);
+        e.add_function_ref(fid);
     }
     let readonly_this = match &expr.2 {
         ast::Expr_::ReadonlyExpr(_) => true,
@@ -1723,7 +1719,7 @@ fn emit_call<'a, 'arena, 'decl>(
     match expr.2.as_id() {
         None => emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args),
         Some(ast_defs::Id(_, id)) => {
-            let fq = function::FunctionType::<'arena>::from_ast_name(alloc, id);
+            let fq = hhbc::FunctionName::<'arena>::from_ast_name(alloc, id);
             let lower_fq_name = fq.unsafe_as_str();
             emit_special_function(e, env, pos, args, uarg, lower_fq_name)
                 .transpose()
@@ -1806,7 +1802,7 @@ pub fn emit_reified_targs<'a, 'arena, 'decl>(
                 0,
                 QueryMOp::CGet,
                 MemberKey::PT(
-                    prop::from_raw_string(alloc, string_utils::reified::PROP_NAME),
+                    hhbc::PropName::from_raw_string(alloc, string_utils::reified::PROP_NAME),
                     ReadonlyOp::Any,
                 ),
             ),
@@ -1944,7 +1940,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                            null_flavor: &ast::OgNullFlavor,
                            mut fcall_args| {
                 let name =
-                    method::MethodType::new(Str::new_str(alloc, string_utils::strip_global_ns(id)));
+                    hhbc::MethodName::new(Str::new_str(alloc, string_utils::strip_global_ns(id)));
                 let obj = emit_object_expr(e, env, obj)?;
                 let generics = emit_generics(e, env, &mut fcall_args)?;
                 let null_flavor = from_ast_null_flavor(*null_flavor);
@@ -2005,9 +2001,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                                         ]),
                                         InstrSeq::gather(vec![instr::fcallfuncd(
                                             fcall_args,
-                                            function::FunctionType::<'arena>::from_ast_name(
-                                                alloc, fid,
-                                            ),
+                                            hhbc::FunctionName::<'arena>::from_ast_name(alloc, fid),
                                         )]),
                                     ))
                                 }
@@ -2046,19 +2040,19 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     cexpr = reified_var_cexpr;
                 }
             }
-            let method_id =
-                method::MethodType::new(Str::new_str(alloc, string_utils::strip_global_ns(id)));
+            let method_name =
+                hhbc::MethodName::new(Str::new_str(alloc, string_utils::strip_global_ns(id)));
             Ok(match cexpr {
                 // Statically known
                 ClassExpr::Id(ast_defs::Id(_, cname)) => {
-                    let cid = class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &cname);
-                    emit_symbol_refs::add_class(e, cid.clone());
+                    let cid = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &cname);
+                    e.add_class_ref(cid.clone());
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
                         InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
                         InstrSeq::gather(vec![
                             generics,
-                            instr::fcallclsmethodd(fcall_args, method_id, cid),
+                            instr::fcallclsmethodd(fcall_args, method_name, cid),
                         ]),
                     )
                 }
@@ -2068,7 +2062,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                         InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
                         InstrSeq::gather(vec![
                             generics,
-                            instr::fcallclsmethodsd(fcall_args, clsref, method_id),
+                            instr::fcallclsmethodsd(fcall_args, clsref, method_name),
                         ]),
                     )
                 }
@@ -2078,7 +2072,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                         InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
                         InstrSeq::gather(vec![
                             generics,
-                            instr::string(alloc, method_id.unsafe_as_str()),
+                            instr::string(alloc, method_name.unsafe_as_str()),
                             emit_expr(e, env, &expr)?,
                             instr::classgetc(),
                             instr::fcallclsmethod(
@@ -2098,7 +2092,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                             instr::popl(tmp),
                         ]),
                         InstrSeq::gather(vec![
-                            instr::string(alloc, method_id.unsafe_as_str()),
+                            instr::string(alloc, method_name.unsafe_as_str()),
                             instr::pushl(tmp),
                             instr::classgetc(),
                             instr::fcallclsmethod(
@@ -2214,12 +2208,12 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             } = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
                 "min" if num_args == 2 && !flags.contains(FCallArgsFlags::HasUnpack) => {
-                    function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\min2")
+                    hhbc::FunctionName::<'arena>::from_ast_name(alloc, "__SystemLib\\min2")
                 }
                 "max" if num_args == 2 && !flags.contains(FCallArgsFlags::HasUnpack) => {
-                    function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\max2")
+                    hhbc::FunctionName::<'arena>::from_ast_name(alloc, "__SystemLib\\max2")
                 }
-                _ => function::FunctionType::new(Str::new_str(
+                _ => hhbc::FunctionName::new(Str::new_str(
                     alloc,
                     string_utils::strip_global_ns(&id.1),
                 )),
@@ -2232,7 +2226,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         }
         Expr_::String(s) => {
             // TODO(hrust) should be able to accept `let fq_id = function::from_raw_string(s);`
-            let fq_id = function::FunctionType::new(Str::new_str(alloc, s.to_string().as_str()));
+            let fq_id = hhbc::FunctionName::new(Str::new_str(alloc, s.to_string().as_str()));
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
                 InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
@@ -2636,16 +2630,16 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 // `inout` is dropped here, but it should be impossible to have an expression
                 // like: `foo(inout "literal")`
                 [(_, Expr(_, _, Expr_::String(ref func_name)))] => {
-                    Ok(Some(instr::resolve_meth_caller(
-                        function::FunctionType::new(Str::new_str(
+                    Ok(Some(instr::resolve_meth_caller(hhbc::FunctionName::new(
+                        Str::new_str(
                             alloc,
                             string_utils::strip_global_ns(
                                 // FIXME: This is not safe--string literals are binary strings.
                                 // There's no guarantee that they're valid UTF-8.
                                 unsafe { std::str::from_utf8_unchecked(func_name.as_slice()) },
                             ),
-                        )),
-                    )))
+                        ),
+                    ))))
                 }
                 _ => Err(Error::fatal_runtime(
                     pos,
@@ -2861,25 +2855,28 @@ fn emit_class_meth<'a, 'arena, 'decl>(
         .flags
         .contains(HhvmFlags::EMIT_CLS_METH_POINTERS)
     {
-        let method_id = match &meth.2 {
+        let method_name = match &meth.2 {
             Expr_::String(method_name) => {
-                method::MethodType::new(Str::new_str(alloc, method_name.to_string().as_str()))
+                hhbc::MethodName::new(Str::new_str(alloc, method_name.to_string().as_str()))
             }
             _ => return Err(Error::unrecoverable("emit_class_meth: unhandled method")),
         };
         if let Some((cid, (_, id))) = cls.2.as_class_const() {
             if string_utils::is_class(id) {
-                return emit_class_meth_native(e, env, &cls.1, cid, method_id, &[]);
+                return emit_class_meth_native(e, env, &cls.1, cid, method_name, &[]);
             }
         }
         if let Some(ast_defs::Id(_, s)) = cls.2.as_id() {
             if s == pseudo_consts::G__CLASS__ {
-                return Ok(instr::resolveclsmethods(SpecialClsRef::SelfCls, method_id));
+                return Ok(instr::resolveclsmethods(
+                    SpecialClsRef::SelfCls,
+                    method_name,
+                ));
             }
         }
         if let Some(class_name) = cls.2.as_string() {
             return Ok(instr::resolveclsmethodd(
-                class::ClassType::new(Str::new_str(
+                hhbc::ClassName::new(Str::new_str(
                     alloc,
                     string_utils::strip_global_ns(
                         // FIXME: This is not safe--string literals are binary strings.
@@ -2887,7 +2884,7 @@ fn emit_class_meth<'a, 'arena, 'decl>(
                         unsafe { std::str::from_utf8_unchecked(class_name.as_slice()) },
                     ),
                 )),
-                method_id,
+                method_name,
             ));
         }
         Err(Error::unrecoverable("emit_class_meth: unhandled method"))
@@ -2906,7 +2903,7 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     cid: &ast::ClassId,
-    method_id: MethodId<'arena>,
+    method_name: MethodName<'arena>,
     targs: &[ast::Targ],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
@@ -2927,31 +2924,33 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     };
     Ok(match cexpr {
         ClassExpr::Id(ast_defs::Id(_, name)) if !has_generics => instr::resolveclsmethodd(
-            class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &name),
-            method_id,
+            hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &name),
+            method_name,
         ),
         ClassExpr::Id(ast_defs::Id(_, name)) => InstrSeq::gather(vec![
             emit_generics()?,
             instr::resolverclsmethodd(
-                class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &name),
-                method_id,
+                hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &name),
+                method_name,
             ),
         ]),
-        ClassExpr::Special(clsref) if !has_generics => instr::resolveclsmethods(clsref, method_id),
+        ClassExpr::Special(clsref) if !has_generics => {
+            instr::resolveclsmethods(clsref, method_name)
+        }
         ClassExpr::Special(clsref) => InstrSeq::gather(vec![
             emit_generics()?,
-            instr::resolverclsmethods(clsref, method_id),
+            instr::resolverclsmethods(clsref, method_name),
         ]),
         ClassExpr::Reified(instrs) if !has_generics => InstrSeq::gather(vec![
             instrs,
             instr::classgetc(),
-            instr::resolveclsmethod(method_id),
+            instr::resolveclsmethod(method_name),
         ]),
         ClassExpr::Reified(instrs) => InstrSeq::gather(vec![
             instrs,
             instr::classgetc(),
             emit_generics()?,
-            instr::resolverclsmethod(method_id),
+            instr::resolverclsmethod(method_name),
         ]),
         ClassExpr::Expr(_) => {
             return Err(Error::unrecoverable(
@@ -3000,14 +2999,14 @@ fn emit_function_pointer<'a, 'arena, 'decl>(
         // This is a function name. Equivalent to HH\fun('str')
         ast::FunctionPtrId::FPId(id) => emit_hh_fun(e, env, pos, targs, id.name())?,
         // class_meth
-        ast::FunctionPtrId::FPClassConst(cid, method_id) => {
+        ast::FunctionPtrId::FPClassConst(cid, method_name) => {
             // TODO(hrust) should accept
-            //   `let method_id = method::MethodType::from_ast_name(&(cc.1).1);`
-            let method_id = method::MethodType::new(Str::new_str(
+            //   `let method_name = hhbc::MethodName::from_ast_name(&(cc.1).1);`
+            let method_name = hhbc::MethodName::new(Str::new_str(
                 alloc,
-                string_utils::strip_global_ns(&method_id.1),
+                string_utils::strip_global_ns(&method_name.1),
             ));
-            emit_class_meth_native(e, env, pos, cid, method_id, targs)?
+            emit_class_meth_native(e, env, pos, cid, method_name, targs)?
         }
     };
     Ok(emit_pos_then(pos, instrs))
@@ -3035,12 +3034,12 @@ fn emit_hh_fun<'a, 'arena, 'decl>(
         )?;
         Ok(InstrSeq::gather(vec![
             generics,
-            instr::resolve_rfunc(function::FunctionType::new(Str::new_str(alloc, fname))),
+            instr::resolve_rfunc(hhbc::FunctionName::new(Str::new_str(alloc, fname))),
         ]))
     } else {
-        Ok(instr::resolve_func(function::FunctionType::new(
-            Str::new_str(alloc, fname),
-        )))
+        Ok(instr::resolve_func(hhbc::FunctionName::new(Str::new_str(
+            alloc, fname,
+        ))))
     }
 }
 
@@ -3478,7 +3477,7 @@ pub fn emit_reified_generic_instrs<'arena>(
             instr::checkthis(),
             instr::baseh(),
             instr::dim_warn_pt(
-                prop::from_raw_string(e.alloc, string_utils::reified::PROP_NAME),
+                hhbc::PropName::from_raw_string(e.alloc, string_utils::reified::PROP_NAME),
                 ReadonlyOp::Any,
             ),
         ])
@@ -3557,9 +3556,9 @@ fn emit_known_class_id<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     id: &ast_defs::Id,
 ) -> InstrSeq<'arena> {
-    let cid = class::ClassType::from_ast_name_and_mangle(alloc, &id.1);
+    let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &id.1);
     let cid_string = instr::string(alloc, cid.unsafe_as_str());
-    emit_symbol_refs::add_class(e, cid);
+    e.add_class_ref(cid);
     InstrSeq::gather(vec![cid_string, instr::classgetc()])
 }
 
@@ -3659,8 +3658,8 @@ fn emit_new<'a, 'arena, 'decl>(
     } else {
         let newobj_instrs = match cexpr {
             ClassExpr::Id(ast_defs::Id(_, cname)) => {
-                let id = class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &cname);
-                emit_symbol_refs::add_class(e, id);
+                let id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &cname);
+                e.add_class_ref(id);
                 match has_generics {
                     H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), instr::newobjd(id)]),
                     H::HasGenerics => InstrSeq::gather(vec![
@@ -3843,7 +3842,7 @@ fn emit_prop_expr<'a, 'arena, 'decl>(
                 MemberKey::PL(get_local(e, env, pos, name)?, readonly_op)
             } else {
                 // Special case for known property name
-                let pid: prop::PropType<'arena> = prop::PropType::<'arena>::from_ast_name(
+                let pid = hhbc::PropName::<'arena>::from_ast_name(
                     alloc,
                     string_utils::strip_global_ns(name),
                 );
@@ -3855,7 +3854,7 @@ fn emit_prop_expr<'a, 'arena, 'decl>(
         }
         // Special case for known property name
         ast::Expr_::String(name) => {
-            let pid: prop::PropType<'arena> = prop::PropType::<'arena>::from_ast_name(
+            let pid: hhbc::PropName<'arena> = hhbc::PropName::<'arena>::from_ast_name(
                 alloc,
                 string_utils::strip_global_ns(
                     // FIXME: This is not safe--string literals are binary strings.
@@ -4268,7 +4267,7 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                         ));
                     }
                 };
-                let fq_id = class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, cname)
+                let fq_id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, cname)
                     .unsafe_as_str();
                 if e.options().emit_class_pointers() > 0 {
                     Ok((
@@ -4459,7 +4458,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
     }
     match cexpr {
         ClassExpr::Id(ast_defs::Id(pos, name)) => {
-            let cid = class::ClassType::from_ast_name_and_mangle(alloc, &name);
+            let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &name);
             let cname = cid.unsafe_as_str();
             Ok(if string_utils::is_class(&id.1) {
                 if e.options().emit_class_pointers() == 1 {
@@ -4470,13 +4469,11 @@ fn emit_class_const<'a, 'arena, 'decl>(
                     emit_pos_then(&pos, instr::string(alloc, cname))
                 }
             } else {
-                emit_symbol_refs::add_class(e, cid.clone());
-                // TODO(hrust) enabel `let const_id = constant::ConstType::from_ast_name(&id.1);`,
+                e.add_class_ref(cid.clone());
+                // TODO(hrust) enabel `let const_id = hhbc::ConstName::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id = constant::ConstType::new(Str::new_str(
-                    alloc,
-                    string_utils::strip_global_ns(&id.1),
-                ));
+                let const_id =
+                    hhbc::ConstName::new(Str::new_str(alloc, string_utils::strip_global_ns(&id.1)));
                 emit_pos_then(&pos, instr::clscnsd(const_id, cid))
             })
         }
@@ -4488,12 +4485,10 @@ fn emit_class_const<'a, 'arena, 'decl>(
                     instr::classname()
                 }
             } else {
-                // TODO(hrust) enable `let const_id = constant::ConstType::from_ast_name(&id.1);`,
+                // TODO(hrust) enable `let const_id = hhbc::ConstName::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id = constant::ConstType::new(Str::new_str(
-                    alloc,
-                    string_utils::strip_global_ns(&id.1),
-                ));
+                let const_id =
+                    hhbc::ConstName::new(Str::new_str(alloc, string_utils::strip_global_ns(&id.1)));
                 instr::clscns(const_id)
             };
             if string_utils::is_class(&id.1) && e.options().emit_class_pointers() == 1 {

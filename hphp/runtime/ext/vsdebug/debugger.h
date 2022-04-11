@@ -190,8 +190,9 @@ struct DebuggerOptions {
   // Don't try to unique variable references by address.
   bool disableUniqueVarRef;
 
-  // Don't try to run PSPs after each eval command on the dummy.
-  bool disableDummyPsPs;
+  // Don't try to run the vsdebug_post_dummy_eval helper after each evaluate
+  // command in the dummy request.
+  bool disablePostDummyEvalHelper;
 
   // The maximum length of a string to return, for perf
   int maxReturnedStringLength;

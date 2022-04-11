@@ -33,5 +33,5 @@
             ([5:3-16], (Return (Some ((int), [5:10-15], (Call ((((function(int): int)), [5:10-12], (Lvar ([5:10-12], $f))), [], [(Pnormal, ((int), [5:13-14], (Int "1")))], None))))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
-      })
+        f_doc_comment = None };
+      fd_internal = false })

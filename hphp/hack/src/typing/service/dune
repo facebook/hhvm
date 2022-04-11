@@ -28,6 +28,8 @@
   typechecker_options
   typing_service_delegate_types
   typing_deps
+  process
+  process_types
   typing_service_types)
  (preprocess
   (pps ppx_deriving.std)))

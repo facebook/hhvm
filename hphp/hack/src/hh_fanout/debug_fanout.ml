@@ -49,8 +49,9 @@ let result_to_json (result : result) : Hh_json.json =
         Hh_json.JSON_Array
           (fanout_dependents
           |> Typing_deps.DepSet.elements
-          |> List.map ~f:(fun dep ->
-                 Hh_json.JSON_String (Typing_deps.Dep.to_debug_string dep))) );
+          |> List.map ~f:Typing_deps.Dep.to_debug_string
+          |> List.sort ~compare:String.compare
+          |> List.map ~f:(fun dep -> Hh_json.JSON_String dep)) );
       ( "relevant_dep_edges",
         Hh_json.JSON_Array (List.map relevant_dep_edges ~f:dep_edge_to_json) );
     ]

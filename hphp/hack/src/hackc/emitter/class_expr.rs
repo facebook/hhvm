@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_scope::{self as ast_scope, Scope};
+use ast_scope::Scope;
 use env::emitter::Emitter;
-use hhbc_ast::{ClassishKind, ClassishKind::*, SpecialClsRef};
+use hhbc::{ClassishKind, SpecialClsRef};
 use hhbc_string_utils as string_utils;
 use instruction_sequence::InstrSeq;
 use naming_special_names_rust::classes;
@@ -27,14 +27,14 @@ impl<'arena> ClassExpr<'arena> {
         opt_class_info: Option<(ClassishKind, &str)>,
     ) -> Option<String> {
         if let Some((kind, class_name)) = opt_class_info {
-            if (kind != Trait || check_traits) && resolve_self {
+            if (kind != ClassishKind::Trait || check_traits) && resolve_self {
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return Some(class_name.to_string());
                 } else if let Some(c) = emitter
                     .emit_global_state()
                     .get_closure_enclosing_class(class_name)
                 {
-                    if ClassishKind::from(c.kind.clone()) != Trait {
+                    if ClassishKind::from(c.kind.clone()) != ClassishKind::Trait {
                         return Some(c.name.clone());
                     }
                 }
@@ -56,14 +56,14 @@ impl<'arena> ClassExpr<'arena> {
         emitter: &Emitter<'arena, 'decl>,
         check_traits: bool,
         resolve_self: bool,
-        opt_class_info: Option<(hhbc_ast::ClassishKind, &str)>,
+        opt_class_info: Option<(ClassishKind, &str)>,
         opt_parent_name: Option<String>,
     ) -> Option<String> {
         if let Some((kind, class_name)) = opt_class_info {
-            if kind == hhbc_ast::ClassishKind::Interface {
+            if kind == ClassishKind::Interface {
                 return Some(classes::PARENT.to_string());
             };
-            if (kind != hhbc_ast::ClassishKind::Trait || check_traits) && resolve_self {
+            if (kind != ClassishKind::Trait || check_traits) && resolve_self {
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return opt_parent_name;
                 } else if let Some(c) = emitter
@@ -89,10 +89,7 @@ impl<'arena> ClassExpr<'arena> {
                 emitter,
                 check_traits,
                 resolve_self,
-                Some((
-                    hhbc_ast::ClassishKind::from(cd.get_kind()),
-                    cd.get_name_str(),
-                )),
+                Some((ClassishKind::from(cd.get_kind()), cd.get_name_str())),
                 Self::get_parent_class_name(cd),
                 expr,
             )
@@ -105,7 +102,7 @@ impl<'arena> ClassExpr<'arena> {
         emitter: &Emitter<'arena, 'decl>,
         check_traits: bool,
         resolve_self: bool,
-        opt_class_info: Option<(hhbc_ast::ClassishKind, &str)>,
+        opt_class_info: Option<(ClassishKind, &str)>,
         opt_parent_name: Option<String>,
         expr: ast::Expr,
     ) -> Self {

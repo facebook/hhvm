@@ -35,6 +35,7 @@ inline TypeAlias TypeAlias::Invalid(const PreTypeAlias* alias) {
 
 inline TypeAlias TypeAlias::From(const PreTypeAlias* alias) {
   assertx(alias->type != AnnotType::Object);
+  assertx(alias->type != AnnotType::Unresolved);
 
   TypeAlias req(alias);
   req.type = alias->type;
@@ -43,12 +44,15 @@ inline TypeAlias TypeAlias::From(const PreTypeAlias* alias) {
 }
 
 inline TypeAlias TypeAlias::From(TypeAlias req, const PreTypeAlias* alias) {
-  assertx(alias->type == AnnotType::Object);
+  assertx(alias->type == AnnotType::Unresolved);
 
   req.m_preTypeAlias = alias;
   if (req.invalid) {
     return req; // Do nothing.
   }
+
+  assertx(req.type != AnnotType::Unresolved);
+  assertx((req.type == AnnotType::Object) == (req.klass != nullptr));
   req.nullable |= alias->nullable;
   return req;
 }

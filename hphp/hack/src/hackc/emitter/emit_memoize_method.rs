@@ -3,35 +3,35 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_scope::{self as ast_scope, Scope, ScopeItem};
+use ast_scope::{Scope, ScopeItem};
 use bitflags::bitflags;
 use emit_method::get_attrs_for_method;
 use emit_pos::emit_pos_then;
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use ffi::{Slice, Str};
-use hhas_attribute::deprecation_info;
-use hhas_body::HhasBody;
-use hhas_coeffects::HhasCoeffects;
-use hhas_method::{HhasMethod, HhasMethodFlags};
-use hhas_param::HhasParam;
-use hhas_pos::HhasSpan;
-use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FCallArgs, FCallArgsFlags, Label, Local, LocalRange, SpecialClsRef, Visibility};
-use hhbc_id::{class, method};
+use hhbc::{
+    hhas_attribute::deprecation_info,
+    hhas_body::HhasBody,
+    hhas_coeffects::HhasCoeffects,
+    hhas_method::{HhasMethod, HhasMethodFlags},
+    hhas_param::HhasParam,
+    hhas_pos::HhasSpan,
+    hhas_type::HhasTypeInfo,
+    FCallArgs, FCallArgsFlags, Label, Local, LocalRange, SpecialClsRef, TypedValue, Visibility,
+};
 use hhbc_string_utils::reified;
 use instruction_sequence::{instr, InstrSeq};
 use naming_special_names_rust::{members, user_attributes as ua};
 use options::HhvmFlags;
 use oxidized::{ast as T, pos::Pos};
-use typed_value::TypedValue;
 
 /// Precomputed information required for generation of memoized methods
 pub struct MemoizeInfo<'arena> {
     /// True if the enclosing class is a trait
     is_trait: bool,
-    /// Enclosing class ID
-    class_id: class::ClassType<'arena>,
+    /// Enclosing class name
+    class_name: hhbc::ClassName<'arena>,
 }
 
 fn is_memoize(method: &T::Method_) -> bool {
@@ -50,7 +50,7 @@ fn is_memoize_lsb(method: &T::Method_) -> bool {
 
 pub fn make_info<'arena>(
     class: &T::Class_,
-    class_id: class::ClassType<'arena>,
+    class_name: hhbc::ClassName<'arena>,
     methods: &[T::Method_],
 ) -> Result<MemoizeInfo<'arena>> {
     for m in methods.iter() {
@@ -68,7 +68,7 @@ pub fn make_info<'arena>(
                     pos,
                     format!(
                         "Abstract method {}::{} cannot be memoized",
-                        class_id.unsafe_as_str(),
+                        class_name.unsafe_as_str(),
                         &m.name.1,
                     ),
                 ));
@@ -77,7 +77,10 @@ pub fn make_info<'arena>(
     }
 
     let is_trait = class.kind.is_ctrait();
-    Ok(MemoizeInfo { is_trait, class_id })
+    Ok(MemoizeInfo {
+        is_trait,
+        class_name,
+    })
 }
 
 pub fn emit_wrapper_methods<'a, 'arena, 'decl>(
@@ -115,7 +118,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     } else {
         method.ret.1.as_ref()
     };
-    let name = method::MethodType::from_ast_name(alloc, &method.name.1);
+    let name = hhbc::MethodName::from_ast_name(alloc, &method.name.1);
     let scope = &Scope {
         items: vec![
             ScopeItem::Class(ast_scope::Class::new_ref(class)),
@@ -373,7 +376,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         if args.method.static_ {
             call_cls_method(alloc, fcall_args, args)
         } else {
-            let renamed_method_id = method::MethodType::add_suffix(
+            let renamed_method_id = hhbc::MethodName::add_suffix(
                 alloc,
                 args.method_id,
                 emit_memoize_helpers::MEMOIZE_SUFFIX,
@@ -454,7 +457,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         if args.method.static_ {
             call_cls_method(alloc, fcall_args, args)
         } else {
-            let renamed_method_id = method::MethodType::add_suffix(
+            let renamed_method_id = hhbc::MethodName::add_suffix(
                 alloc,
                 args.method_id,
                 emit_memoize_helpers::MEMOIZE_SUFFIX,
@@ -508,11 +511,11 @@ fn call_cls_method<'a, 'arena>(
     args: &Args<'_, 'a, 'arena>,
 ) -> InstrSeq<'arena> {
     let method_id =
-        method::MethodType::add_suffix(alloc, args.method_id, emit_memoize_helpers::MEMOIZE_SUFFIX);
+        hhbc::MethodName::add_suffix(alloc, args.method_id, emit_memoize_helpers::MEMOIZE_SUFFIX);
     if args.info.is_trait || args.flags.contains(Flags::WITH_LSB) {
         instr::fcallclsmethodsd(fcall_args, SpecialClsRef::SelfCls, method_id)
     } else {
-        instr::fcallclsmethodd(fcall_args, method_id, args.info.class_id)
+        instr::fcallclsmethodd(fcall_args, method_id, args.info.class_name)
     }
 }
 
@@ -523,7 +526,7 @@ struct Args<'r, 'ast, 'arena> {
     pub deprecation_info: Option<&'r [TypedValue<'arena>]>,
     pub params: &'r [T::FunParam],
     pub ret: Option<&'r T::Hint>,
-    pub method_id: &'r method::MethodType<'arena>,
+    pub method_id: &'r hhbc::MethodName<'arena>,
     pub flags: Flags,
 }
 

@@ -1,0 +1,2 @@
+File "lvalue_foreach.php", line 6, characters 22-28:
+You cannot use this syntax as the iterator variable in a `foreach` loop. (Parsing[1002])

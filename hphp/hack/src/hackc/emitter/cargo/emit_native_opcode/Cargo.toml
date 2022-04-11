@@ -8,13 +8,12 @@ edition = "2021"
 path = "../../emit_native_opcode.rs"
 
 [dependencies]
-ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
+ast_scope = { path = "../ast_scope" }
 emit_body = { path = "../emit_body" }
 emit_param = { path = "../emit_param" }
 env = { path = "../env" }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
-hhas_body = { path = "../../../hhbc/cargo/hhas_body" }
-hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }

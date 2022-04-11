@@ -481,26 +481,6 @@ let rec null_not_subtype ty =
   | Tnewtype (_, _, bound) ->
     null_not_subtype bound
 
-(** Process the constraint proposition. There should only be errors left now,
-    i.e. empty disjunction with error functions we call here. *)
-let process_simplify_subtype_result prop =
-  let rec aux ~k = function
-    | TL.IsSubtype (_, _ty1, _ty2) ->
-      (* All subtypes should have been resolved *)
-      failwith "unexpected subtype assertion"
-    | TL.Conj props ->
-      (* Evaluates list from left-to-right so preserves order of conjuncts *)
-      auxs props ~k:(fun xs ->
-          k @@ Typing_error.union_opt @@ List.filter_map ~f:Fn.id xs)
-    | TL.Disj (ty_err_opt, []) -> k ty_err_opt
-    | TL.Disj _ -> failwith "non-empty disjunction"
-  and auxs ~k = function
-    | [] -> k []
-    | prop :: props ->
-      aux prop ~k:(fun x -> auxs props ~k:(fun xs -> k (x :: xs)))
-  in
-  aux ~k:Fn.id prop
-
 let get_tyvar_opt t =
   match t with
   | LoclType lt ->
@@ -1039,6 +1019,19 @@ and simplify_subtype_i
                              { pos; decl_pos; expected; actual })))
         in
 
+        let destructure_dynamic t env =
+          if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+            List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+                res &&& simplify_subtype ~subtype_env ~this_ty t ty_dest)
+            &&& fun env ->
+            List.fold d_optional ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+                res &&& simplify_subtype ~subtype_env ~this_ty t ty_dest)
+            &&& fun env ->
+            Option.value_map ~default:(env, TL.valid) d_variadic ~f:(fun vty ->
+                simplify_subtype ~subtype_env ~this_ty t vty env)
+          else
+            env |> destructure_array t
+        in
         begin
           match ety_sub with
           | ConstraintType _ -> default_subtype env
@@ -1054,7 +1047,7 @@ and simplify_subtype_i
                    || String.equal x SN.Collections.cVec
                    || String.equal x SN.Collections.cConstVector ->
               env |> destructure_array elt_type
-            | (_, Tdynamic) -> env |> destructure_array ty_sub
+            | (_, Tdynamic) -> env |> destructure_dynamic ty_sub
             (* TODO: should remove these any cases *)
             | (r, Tany _) ->
               let any = mk (r, Typing_defs.make_tany ()) in
@@ -3458,27 +3451,37 @@ and simplify_disj env disj =
   rebuild_disj remaining bounds
 
 and props_to_env
-    pos env remain props (on_error : Typing_error.Reasons_callback.t option) =
+    pos
+    env
+    ty_errs
+    remain
+    props
+    (on_error : Typing_error.Reasons_callback.t option) =
   match props with
-  | [] -> (env, List.rev remain)
+  | [] -> (env, List.rev ty_errs, List.rev remain)
   | prop :: props ->
     (match prop with
-    | TL.Conj props' -> props_to_env pos env remain (props' @ props) on_error
-    | TL.Disj (f, disj_props) ->
+    | TL.Conj props' ->
+      props_to_env pos env ty_errs remain (props' @ props) on_error
+    | TL.Disj (ty_err_opt, disj_props) ->
       (* For now, just find the first prop in the disjunction that works *)
       let rec try_disj disj_props =
         match disj_props with
         | [] ->
           (* For now let it fail later when calling
              process_simplify_subtype_result on the remaining constraints. *)
-          props_to_env pos env (TL.invalid ~fail:f :: remain) props on_error
+          props_to_env pos env (ty_err_opt :: ty_errs) remain props on_error
         | prop :: disj_props' ->
-          let (env', other) = props_to_env pos env remain [prop] on_error in
-          if TL.is_unsat (TL.conj_list other) then
-            try_disj disj_props'
+          let (env', ty_errs', other) =
+            props_to_env pos env [] remain [prop] on_error
+          in
+          if List.is_empty ty_errs' || List.for_all ty_errs' ~f:Option.is_none
+          then
+            props_to_env pos env' ty_errs (remain @ other) props on_error
           else
-            props_to_env pos env' (remain @ other) props on_error
+            try_disj disj_props'
       in
+
       let rec log_non_singleton_disj msg props =
         match props with
         | [] -> ()
@@ -3516,7 +3519,7 @@ and props_to_env
               ty_sub
               on_error
           in
-          props_to_env pos env remain (prop1 :: prop2 :: props) on_error
+          props_to_env pos env ty_errs remain (prop1 :: prop2 :: props) on_error
         | (Some var, _) ->
           let (env, prop) =
             add_tyvar_upper_bound_and_close
@@ -3526,7 +3529,7 @@ and props_to_env
               ty_super
               on_error
           in
-          props_to_env pos env remain (prop :: props) on_error
+          props_to_env pos env ty_errs remain (prop :: props) on_error
         | (_, Some var) ->
           let (env, prop) =
             add_tyvar_lower_bound_and_close
@@ -3536,17 +3539,22 @@ and props_to_env
               ty_sub
               on_error
           in
-          props_to_env pos env remain (prop :: props) on_error
-        | _ -> props_to_env pos env (prop :: remain) props on_error
+          props_to_env pos env ty_errs remain (prop :: props) on_error
+        | _ -> props_to_env pos env ty_errs (prop :: remain) props on_error
       end)
 
-(* Move any top-level conjuncts of the form Tvar v <: t or t <: Tvar v to
- * the type variable environment. To do: use intersection and union to
- * simplify bounds.
+(* Given a subtype proposition, resolve conjunctions of subtype assertions
+ * of the form #v <: t or t <: #v by adding bounds to #v in env. Close env
+ * wrt transitivity i.e. if t <: #v and #v <: u then resolve t <: u which
+ * may in turn produce more bounds in env.
+ * For disjunctions, arbitrarily pick the first disjunct that is not
+ * unsatisfiable. If any unsatisfiable disjunct remains, return it.
  *)
 and prop_to_env pos env prop on_error =
-  let (env, props') = props_to_env pos env [] [prop] on_error in
-  (env, TL.conj_list props')
+  let (env, ty_errs, props') = props_to_env pos env [] [] [prop] on_error in
+  let ty_err_opt = Typing_error.union_opt @@ List.filter_map ~f:Fn.id ty_errs in
+  let env = Env.add_subtype_prop env (TL.conj_list props') in
+  (env, ty_err_opt)
 
 and sub_type_inner
     (env : env)
@@ -3577,12 +3585,7 @@ and sub_type_inner
       "sub_type_inner"
       env
       prop;
-  let (env, prop) =
-    prop_to_env (Reason.to_pos (reason ty_sub)) env prop subtype_env.on_error
-  in
-  let env = Env.add_subtype_prop env prop in
-  let ty_err_opt = process_simplify_subtype_result prop in
-  (env, ty_err_opt)
+  prop_to_env (Reason.to_pos (reason ty_sub)) env prop subtype_env.on_error
 
 and is_sub_type_alt_i ~ignore_generic_params ~no_top_bottom ~coerce env ty1 ty2
     =
@@ -4162,7 +4165,6 @@ let add_constraints p env constraints =
   List.fold_left constraints ~f:add_constraint ~init:env
 
 let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
-  let env_change_log = Env.log_env_change "coercion" env in
   log_subtype
     ~level:1
     ~this_ty:None
@@ -4180,13 +4182,14 @@ let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
       ty_super
       env
   in
-  let (env, prop) =
+  let (env, ty_err) =
     prop_to_env (Reason.to_pos (get_reason ty_sub)) env prop on_error
   in
-  let env = Env.add_subtype_prop env prop in
-  match process_simplify_subtype_result prop with
-  | None -> (env_change_log env, None)
-  | ty_err_opt -> (env_change_log old_env, ty_err_opt)
+  ( (if Option.is_some ty_err then
+      old_env
+    else
+      env),
+    ty_err )
 
 let simplify_subtype_i ?(is_coeffect = false) env ty_sub ty_super ~on_error =
   simplify_subtype_i
@@ -4214,11 +4217,11 @@ let subtype_funs
     (r_super : Reason.t)
     (ft_super : locl_fun_type)
     env =
-  let old_env = env in
   (* This is used for checking subtyping of function types for method override
    * (see Typing_subtype_method) so types are fully-explicit and therefore we
    * permit subtyping to dynamic when --enable-sound-dynamic-type is true
    *)
+  let old_env = env in
   let (env, prop) =
     simplify_subtype_funs
       ~subtype_env:(make_subtype_env ~coerce:(Some TL.CoerceToDynamic) on_error)
@@ -4229,11 +4232,12 @@ let subtype_funs
       ft_super
       env
   in
-  let (env, prop) = prop_to_env (Reason.to_pos r_sub) env prop on_error in
-  let env = Env.add_subtype_prop env prop in
-  match process_simplify_subtype_result prop with
-  | None -> (env, None)
-  | ty_err_opt -> (old_env, ty_err_opt)
+  let (env, ty_err) = prop_to_env (Reason.to_pos r_sub) env prop on_error in
+  ( (if Option.is_some ty_err then
+      old_env
+    else
+      env),
+    ty_err )
 
 let sub_type_or_fail env ty1 ty2 err_opt =
   sub_type env ty1 ty2

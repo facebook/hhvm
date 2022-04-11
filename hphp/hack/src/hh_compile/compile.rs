@@ -65,9 +65,9 @@ pub struct Opts {
 
 #[derive(StructOpt, Clone, Debug)]
 pub(crate) struct SingleFileOpts {
-    /// Dump symbol ref sections of HHAS
-    #[structopt(long)]
-    pub(crate) dump_symbol_refs: bool,
+    /// Dump symbol ref sections of HHAS (ignored, always true)
+    #[structopt(long = "dump-symbol-refs")]
+    pub(crate) _dump_symbol_refs: bool,
 
     /// Disable toplevel definition elaboration
     #[structopt(long)]
@@ -187,7 +187,6 @@ fn process_single_file_impl(
         EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
         opts.disable_toplevel_elaboration,
     );
-    flags.set(EnvFlags::DUMP_SYMBOL_REFS, opts.dump_symbol_refs);
     let hhbc_flags = HHBCFlags::EMIT_CLS_METH_POINTERS
         | HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS
         | HHBCFlags::FOLD_LAZY_CLASS_KEYS

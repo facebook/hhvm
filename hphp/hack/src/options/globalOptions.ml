@@ -49,6 +49,7 @@ type t = {
   tco_force_load_hot_shallow_decls: bool;
   tco_populate_member_heaps: bool;
   tco_skip_hierarchy_checks: bool;
+  tco_skip_tast_checks: bool;
   tco_like_type_hints: bool;
   tco_union_intersection_type_hints: bool;
   tco_coeffects: bool;
@@ -133,7 +134,7 @@ type t = {
   tco_log_saved_state_age_and_distance: bool;
   tco_specify_manifold_api_key: bool;
   tco_saved_state_manifold_api_key: string option;
-  tco_profile_toplevel_definitions: bool;
+  tco_profile_top_level_definitions: bool;
 }
 [@@deriving eq, show]
 
@@ -232,6 +233,7 @@ let default =
     tco_force_load_hot_shallow_decls = false;
     tco_populate_member_heaps = true;
     tco_skip_hierarchy_checks = false;
+    tco_skip_tast_checks = false;
     tco_like_type_hints = false;
     tco_union_intersection_type_hints = false;
     tco_coeffects = true;
@@ -316,7 +318,7 @@ let default =
     tco_log_saved_state_age_and_distance = false;
     tco_specify_manifold_api_key = false;
     tco_saved_state_manifold_api_key = None;
-    tco_profile_toplevel_definitions = false;
+    tco_profile_top_level_definitions = false;
   }
 
 let make
@@ -362,6 +364,7 @@ let make
       default.tco_force_load_hot_shallow_decls)
     ?(tco_populate_member_heaps = default.tco_populate_member_heaps)
     ?(tco_skip_hierarchy_checks = default.tco_skip_hierarchy_checks)
+    ?(tco_skip_tast_checks = default.tco_skip_tast_checks)
     ?(tco_like_type_hints = default.tco_like_type_hints)
     ?(tco_union_intersection_type_hints =
       default.tco_union_intersection_type_hints)
@@ -468,8 +471,8 @@ let make
     ?(tco_specify_manifold_api_key = default.tco_specify_manifold_api_key)
     ?(tco_saved_state_manifold_api_key =
       default.tco_saved_state_manifold_api_key)
-    ?(tco_profile_toplevel_definitions =
-      default.tco_profile_toplevel_definitions)
+    ?(tco_profile_top_level_definitions =
+      default.tco_profile_top_level_definitions)
     () =
   {
     tco_experimental_features;
@@ -511,6 +514,7 @@ let make
     tco_force_load_hot_shallow_decls;
     tco_populate_member_heaps;
     tco_skip_hierarchy_checks;
+    tco_skip_tast_checks;
     tco_like_type_hints;
     tco_union_intersection_type_hints;
     tco_coeffects;
@@ -595,7 +599,7 @@ let make
     tco_log_saved_state_age_and_distance;
     tco_specify_manifold_api_key;
     tco_saved_state_manifold_api_key;
-    tco_profile_toplevel_definitions;
+    tco_profile_top_level_definitions;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -678,6 +682,8 @@ let tco_force_load_hot_shallow_decls t = t.tco_force_load_hot_shallow_decls
 let tco_populate_member_heaps t = t.tco_populate_member_heaps
 
 let tco_skip_hierarchy_checks t = t.tco_skip_hierarchy_checks
+
+let tco_skip_tast_checks t = t.tco_skip_tast_checks
 
 let tco_like_type_hints t = t.tco_like_type_hints
 
@@ -880,4 +886,4 @@ let tco_specify_manifold_api_key t = t.tco_specify_manifold_api_key
 
 let tco_saved_state_manifold_api_key t = t.tco_saved_state_manifold_api_key
 
-let tco_profile_toplevel_definitions t = t.tco_profile_toplevel_definitions
+let tco_profile_top_level_definitions t = t.tco_profile_top_level_definitions

@@ -5,14 +5,12 @@
 
 use env::emitter::Emitter;
 use error::Result;
-use hhas_pos::HhasSpan;
-use hhas_type::HhasTypeInfo;
-use hhas_typedef::HhasTypedef;
-use hhbc_id::class::ClassType;
+use hhbc::{
+    hhas_pos::HhasSpan, hhas_type::HhasTypeInfo, hhas_typedef::HhasTypedef, ClassName, TypedValue,
+};
 use hhvm_types_ffi::ffi::Attr;
 use oxidized::{aast_defs::Hint, ast};
 use std::collections::BTreeMap;
-use typed_value::TypedValue;
 
 pub fn emit_typedefs_from_program<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
@@ -35,7 +33,7 @@ fn emit_typedef<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     typedef: &'a ast::Typedef,
 ) -> Result<HhasTypedef<'arena>> {
-    let name = ClassType::<'arena>::from_ast_name_and_mangle(emitter.alloc, &typedef.name.1);
+    let name = ClassName::<'arena>::from_ast_name_and_mangle(emitter.alloc, &typedef.name.1);
     let attributes_res = emit_attribute::from_asts(emitter, &typedef.user_attributes);
     let tparams = emit_body::get_tp_names(typedef.tparams.as_slice());
     let type_info_res = kind_to_type_info(emitter.alloc, &tparams, &typedef.kind);

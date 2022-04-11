@@ -378,12 +378,12 @@ where
             }
             TokenKind::Name => {
                 let token = S!(make_token, parser, token);
-                let roken_ref = &token as *const _;
+                let token_ref = &token as *const _;
                 let (name, is_backslash) = parser.scan_remaining_qualified_name_extended(token);
                 // Here we rely on the implementation details of
                 // scan_remaining_qualified_name_extended. It's returning
                 // *exactly* token if there is nothing except it in the name.
-                is_backslash && (&name as *const _ == roken_ref)
+                is_backslash && (&name as *const _ == token_ref)
                     || parser.peek_token_kind() == TokenKind::LeftBrace
             }
             _ => false,
@@ -1434,7 +1434,7 @@ where
         let generic_type_parameter_list = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
             p.parse_generic_type_parameter_list_opt()
         });
-        let type_constraint = self.parse_type_constraint_opt();
+        let type_constraints = self.parse_type_constraints();
         let (equal_token, type_specifier) = if self.peek_token_kind() == TokenKind::Equal {
             let equal_token = self.assert_token(TokenKind::Equal);
             let type_spec = self
@@ -1455,7 +1455,7 @@ where
             type_token,
             name,
             generic_type_parameter_list,
-            type_constraint,
+            type_constraints,
             equal_token,
             type_specifier,
             semicolon,
@@ -2306,7 +2306,16 @@ where
     }
 
     fn parse_type_constraint_opt(&mut self) -> S::R {
-        self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_type_constraint_opt())
+        self.with_type_parser(|p: &mut TypeParser<'a, S>| {
+            p.parse_type_constraint_opt()
+                .unwrap_or_else(|| S!(make_missing, p, p.pos()))
+        })
+    }
+
+    fn parse_type_constraints(&mut self) -> S::R {
+        self.with_type_parser(|p: &mut TypeParser<'a, S>| {
+            p.parse_list_until_none(|p| p.parse_type_constraint_opt())
+        })
     }
 
     fn parse_type_alias_declaration(&mut self, attr: S::R) -> S::R {

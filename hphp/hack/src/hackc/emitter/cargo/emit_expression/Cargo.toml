@@ -15,15 +15,12 @@ constant_folder = { path = "../constant_folder" }
 emit_adata = { path = "../emit_adata" }
 emit_fatal = { path = "../emit_fatal" }
 emit_pos = { path = "../emit_pos" }
-emit_symbol_refs = { path = "../emit_symbol_refs" }
 emit_type_constant = { path = "../emit_type_constant" }
 env = { path = "../env" }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }
-hhas_symbol_refs = { path = "../../../hhbc/cargo/hhas_symbol_refs" }
-hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
-hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
 instruction_sequence = { path = "../instruction_sequence" }
@@ -33,4 +30,3 @@ options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
 regex = "1.5.4"
 scope = { path = "../scope" }
-typed_value = { path = "../../../hhbc/cargo/typed_value" }

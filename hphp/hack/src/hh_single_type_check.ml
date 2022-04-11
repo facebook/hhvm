@@ -220,6 +220,7 @@ let parse_options () =
   let set_float_ x f = x := f in
   let shallow_class_decl = ref false in
   let skip_hierarchy_checks = ref false in
+  let skip_tast_checks = ref false in
   let out_extension = ref ".out" in
   let like_type_hints = ref false in
   let union_intersection_type_hints = ref false in
@@ -297,8 +298,8 @@ let parse_options () =
     ref (TypecheckerOptions.type_printer_fuel GlobalOptions.default)
   in
   let profile_type_check_twice = ref false in
-  let profile_toplevel_definitions =
-    ref (TypecheckerOptions.profile_toplevel_definitions GlobalOptions.default)
+  let profile_top_level_definitions =
+    ref (TypecheckerOptions.profile_top_level_definitions GlobalOptions.default)
   in
   let memtrace = ref None in
   let enable_global_write_check = ref [] in
@@ -435,7 +436,7 @@ let parse_options () =
         " Optimized solver for type variables. Experimental." );
       ( "--reinfer-types",
         Arg.String (fun s -> reinfer_types := Str.split (Str.regexp ", *") s),
-        " List of type hint to be ignored and infered again using global inference."
+        " List of type hint to be ignored and inferred again using global inference."
       );
       ( "--find-refs",
         Arg.Tuple
@@ -515,6 +516,9 @@ let parse_options () =
       ( "--skip-hierarchy-checks",
         Arg.Set skip_hierarchy_checks,
         " Do not apply checks on class hierarchy (override, implements, etc)" );
+      ( "--skip-tast-checks",
+        Arg.Set skip_tast_checks,
+        " Do not apply checks using TAST visitors" );
       ( "--union-intersection-type-hints",
         Arg.Set union_intersection_type_hints,
         " Allows union and intersection types to be written in type hint positions"
@@ -739,8 +743,8 @@ let parse_options () =
       ( "--profile-type-check-twice",
         Arg.Set profile_type_check_twice,
         " Typecheck the file twice" );
-      ( "--profile-toplevel-definitions",
-        Arg.Set profile_toplevel_definitions,
+      ( "--profile-top-level-definitions",
+        Arg.Set profile_top_level_definitions,
         " Profile typechecking of top-level definitions" );
       ( "--memtrace",
         Arg.String (fun s -> memtrace := Some s),
@@ -841,6 +845,7 @@ let parse_options () =
       ~tco_check_redundant_generics:!check_redundant_generics
       ~tco_shallow_class_decl:!shallow_class_decl
       ~tco_skip_hierarchy_checks:!skip_hierarchy_checks
+      ~tco_skip_tast_checks:!skip_tast_checks
       ~tco_like_type_hints:!like_type_hints
       ~tco_union_intersection_type_hints:!union_intersection_type_hints
       ~tco_strict_contexts:!strict_contexts
@@ -917,7 +922,7 @@ let parse_options () =
       ~tco_explicit_consistent_constructors:!explicit_consistent_constructors
       ~tco_require_types_class_consts:!require_types_class_consts
       ~tco_type_printer_fuel:!type_printer_fuel
-      ~tco_profile_toplevel_definitions:!profile_toplevel_definitions
+      ~tco_profile_top_level_definitions:!profile_top_level_definitions
       ()
   in
   Errors.allowed_fixme_codes_strict :=

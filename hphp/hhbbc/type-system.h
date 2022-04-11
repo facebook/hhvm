@@ -23,7 +23,6 @@
 #include "hphp/util/low-ptr.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
 
 #include "hphp/hhbbc/type-system-bits.h"
 
@@ -549,8 +548,7 @@ private:
   friend bool arr_map_set(Type&, const Type&, const Type&, bool);
   friend bool arr_map_newelem(Type&, const Type&, bool);
   friend IterTypes iter_types(const Type&);
-  friend Optional<RepoAuthType> make_repo_type_arr(ArrayTypeTable::Builder&,
-                                                          const Type&);
+  friend Optional<RepoAuthType> make_repo_type_arr(const Type&);
 
   friend Type vec_val(SArray);
   friend Type vec_empty();
@@ -1394,13 +1392,8 @@ IterTypes iter_types(const Type&);
 
 /*
  * Create a RepoAuthType for a Type.
- *
- * RepoAuthTypes may contain things like RepoAuthType::Array*'s or
- * SStrings for class names.  The emit code needs to handle making
- * sure these things are merged into the appropriate unit or repo.
- *
  */
-RepoAuthType make_repo_type(ArrayTypeTable::Builder&, const Type& t);
+RepoAuthType make_repo_type(const Type& t);
 
 /*
  * Returns true iff an IsType testing for testTy/testOp on valTy might raise.

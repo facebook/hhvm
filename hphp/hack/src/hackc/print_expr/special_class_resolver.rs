@@ -6,7 +6,7 @@
 use class_expr::ClassExpr;
 use env::emitter::Emitter;
 use ffi::Pair;
-use hhas_body::HhasBodyEnv;
+use hhbc::hhas_body::HhasBodyEnv;
 use oxidized::{ast, ast_defs, pos::Pos};
 use std::borrow::Cow;
 

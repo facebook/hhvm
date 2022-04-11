@@ -1277,7 +1277,6 @@ module Primary = struct
           hint_pos: Pos_or_decl.t option;
           is_async: bool;
         }
-      | Dollardollar_lvalue of Pos.t
       | Void_usage of {
           pos: Pos.t;
           reason: Pos_or_decl.t Message.t list Lazy.t;
@@ -1321,12 +1320,6 @@ module Primary = struct
       let claim = lazy (pos, "Invalid return type") in
 
       (Error_code.MissingReturnInNonVoidFunction, claim, lazy [], quickfixes)
-
-    let dollardollar_lvalue pos =
-      let claim =
-        lazy (pos, "Cannot assign a value to the special pipe variable `$$`")
-      in
-      (Error_code.DollardollarLvalue, claim, lazy [], [])
 
     let void_usage pos reason : error =
       let claim =
@@ -1404,7 +1397,6 @@ module Primary = struct
     let to_error : t -> error = function
       | Missing_return { pos; hint_pos; is_async } ->
         missing_return pos hint_pos is_async
-      | Dollardollar_lvalue pos -> dollardollar_lvalue pos
       | Void_usage { pos; reason } -> void_usage pos reason
       | Noreturn_usage { pos; reason } -> noreturn_usage pos reason
       | Returns_with_and_without_value

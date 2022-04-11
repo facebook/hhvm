@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use emit_pos::emit_pos;
-use hhbc_ast::FatalOp;
+use hhbc::FatalOp;
 use instruction_sequence::{instr, InstrSeq};
 use oxidized::pos::Pos;
 

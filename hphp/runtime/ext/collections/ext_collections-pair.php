@@ -583,7 +583,7 @@ final class Pair implements \ConstVector {
    * This will only return `true` for provided keys of 0 and 1 since those are
    * the only two keys that can exist in a `Pair`.
    *
-   * @param $k - the key to check existance for in the `Pair`.
+   * @param $k - the key to check existence for in the `Pair`.
    *
    * @return - `true` if the provided key exists in the `Pair`; `false`
    *           otherwise. This will only return `true` if the provided key is

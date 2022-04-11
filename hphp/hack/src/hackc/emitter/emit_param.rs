@@ -8,9 +8,7 @@ use emit_type_hint::{hint_to_type_info, Kind};
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use ffi::{Maybe, Nothing, Slice, Str};
-use hhas_param::HhasParam;
-use hhas_type::HhasTypeInfo;
-use hhbc_ast::{Label, Local};
+use hhbc::{hhas_param::HhasParam, hhas_type::HhasTypeInfo, Label, Local};
 use hhbc_string_utils::locals::strip_dollar;
 use instruction_sequence::{instr, InstrSeq};
 use oxidized::{
@@ -20,7 +18,6 @@ use oxidized::{
     ast_defs::{Id, ReadonlyKind},
     pos::Pos,
 };
-
 use std::collections::{BTreeMap, BTreeSet};
 use std::marker::PhantomData;
 

@@ -497,7 +497,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_type_const_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, keyword: Self, type_keyword: Self, name: Self, type_parameters: Self, type_constraint: Self, equal: Self, type_specifier: Self, semicolon: Self) -> Self {
+    fn make_type_const_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, keyword: Self, type_keyword: Self, name: Self, type_parameters: Self, type_constraints: Self, equal: Self, type_specifier: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::TypeConstDeclaration(ctx.get_arena().alloc(TypeConstDeclarationChildren {
             attribute_spec,
             modifiers,
@@ -505,7 +505,7 @@ where
             type_keyword,
             name,
             type_parameters,
-            type_constraint,
+            type_constraints,
             equal,
             type_specifier,
             semicolon,
@@ -1170,11 +1170,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_function_call_expression(ctx: &C, receiver: Self, type_args: Self, enum_class_label: Self, left_paren: Self, argument_list: Self, right_paren: Self) -> Self {
+    fn make_function_call_expression(ctx: &C, receiver: Self, type_args: Self, left_paren: Self, argument_list: Self, right_paren: Self) -> Self {
         let syntax = SyntaxVariant::FunctionCallExpression(ctx.get_arena().alloc(FunctionCallExpressionChildren {
             receiver,
             type_args,
-            enum_class_label,
             left_paren,
             argument_list,
             right_paren,

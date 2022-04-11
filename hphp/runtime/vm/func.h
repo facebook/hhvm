@@ -1374,7 +1374,7 @@ private:
     mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
     mutable LockFreePtrWrapper<LineTablePtr> m_lineTable;
   };
-  static_assert(CheckSize<SharedData, use_lowptr ? 152 : 176>(), "");
+  static_assert(CheckSize<SharedData, use_lowptr ? 160 : 184>(), "");
 
   /*
    * If this Func represents a native function or is exceptionally large
@@ -1407,7 +1407,7 @@ private:
     int64_t m_dynCallSampleRate;
     LowStringPtr m_docComment;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 280 : 304>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 288 : 312>(), "");
 
   /*
    * SharedData accessors for internal use.

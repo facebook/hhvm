@@ -122,11 +122,11 @@ static void verifyPropClsImpl(const Class* objCls,
                               const TypeConstraint* tc) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < objCls->numDeclProperties());
-  assertx(tc && tc->isObject());
+  assertx(tc && (tc->isObject() || tc->isUnresolved()));
   auto const success = [&]{
     auto const valCls = val->getVMClass();
     if (LIKELY(constraint != nullptr)) return valCls->classof(constraint);
-    return tc->checkTypeAliasObj(valCls);
+    return tc->isUnresolved() && tc->checkTypeAliasObj(valCls);
   }();
   if (!success) verifyPropFailImpl(objCls, make_tv<KindOfObject>(val), slot, tc);
 }
@@ -138,11 +138,11 @@ static void verifyStaticPropClsImpl(const Class* objCls,
                                     const TypeConstraint* tc) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < objCls->numStaticProperties());
-  assertx(tc && tc->isObject());
+  assertx(tc && (tc->isObject() || tc->isUnresolved()));
   auto const success = [&]{
     auto const valCls = val->getVMClass();
     if (LIKELY(constraint != nullptr)) return valCls->classof(constraint);
-    return tc->checkTypeAliasObj(valCls);
+    return tc->isUnresolved() && tc->checkTypeAliasObj(valCls);
   }();
   if (!success) {
     verifyStaticPropFailImpl(objCls, make_tv<KindOfObject>(val), slot, tc);

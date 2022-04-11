@@ -21,10 +21,11 @@
 #include "hphp/runtime/vm/verifier/pretty.h"
 
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/vanilla-dict.h"
+
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -462,19 +463,11 @@ bool FuncChecker::checkLocal(PC pc, int k) {
 }
 
 bool FuncChecker::checkString(PC /*pc*/, Id id) {
-  if (!isUnitId(id)) {
-    return LitstrTable::get().contains(id);
-  }
-  auto unitID = decodeUnitId(id);
-  return unitID < unit()->numLitstrs();
+  return id < unit()->numLitstrs();
 }
 
 bool FuncChecker::checkArray(PC /*pc*/, Id id) {
-  if (!isUnitId(id)) {
-    return LitarrayTable::get().contains(id);
-  }
-  auto unitID = decodeUnitId(id);
-  return unitID < unit()->numArrays();
+  return id < unit()->numArrays();
 }
 
 bool FuncChecker::checkImmVec(PC& pc, size_t elemSize) {
@@ -1164,15 +1157,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
           ferror("{} cannot appear in {} function\n", opcodeToName(op), fname);
           return false;
         }
-        if (!LitstrTable::canRead()) {
-          // Unfortunately in order to check if the property name itself is
-          // valid we need to be able to read from the Litstr table, which we
-          // cannot do while verifying an optimized repo in hhbbc.
-          if (!checkString(pc, getImm(pc, 0).u_SA)) return false;
-          break;
-        }
-        auto const prop = m_func->ue().lookupLitstr(getImm(pc, 0).u_SA);
-        if (!m_func->pce() || !m_func->pce()->hasProp(prop)){
+        auto const prop = m_func->ue().lookupLitstrCopy(getImm(pc, 0).u_SA);
+        if (!m_func->pce() || !m_func->pce()->hasProp(prop.get())){
              ferror("{} references non-existent property {}\n",
                     opcodeToName(op), prop);
              return false;
@@ -1239,10 +1225,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
                 #name, #name); \
         return false; \
       } \
-      if (!LitarrayTable::canRead()) { \
-        break; \
-      } \
-      auto const dt = unit()->lookupArray(id)->toDataType(); \
+      auto const dt = unit()->lookupArrayCopy(id)->toDataType(); \
       if (dt != KindOf##name) { \
         ferror("{} references array data that is a {}\n", #name, dt); \
         return false; \
@@ -1426,11 +1409,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
             ferror("Generics passed to {} don't exist\n", opcodeToName(op));
             return false;
           }
-          if (!LitarrayTable::canRead()) {
-            break;
-          }
-          auto const arr = unit()->lookupArray(id);
-          if (doesTypeStructureContainTUnresolved(arr)) {
+          auto const arr = unit()->lookupArrayCopy(id);
+          if (doesTypeStructureContainTUnresolved(arr.get())) {
             ferror("Generics passed to {} contain unresolved generics. "
                    "Call CombineAndResolveTypeStruct to resolve them\n",
                    opcodeToName(op));

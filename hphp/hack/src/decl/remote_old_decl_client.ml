@@ -7,12 +7,7 @@
  *)
 
 (*****************************************************************************)
-(* Module for getting old decls.
-  - Currently we rely on hh --gen-prefetch-dir <remote decl store> to generate
-    old decls stored on disk.
-  - We fetch the old decls "remotely" from this directory.
-  - Eventually we will fetch the decls from memcache/manifold.
- *)
+(* Module for getting old decls remotely. *)
 (*****************************************************************************)
 open Hh_prelude
 
@@ -49,27 +44,7 @@ let name_to_decl_hash_opt ~(name : string) ~(db_path : Naming_sqlite.db_path) =
 
 let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
     Shallow_decl_defs.shallow_class option SMap.t =
-  let db_path_opt =
-    db_path_of_ctx ctx
-    (*
-    Note:
-      Currently only the naming table builder generates naming tables with decl
-      hashes. The saved-state naming table contains only zero-valued decl hashes.
-
-      For testing this function,
-      1. use hh_naming_table_builder to build a naming table at /tmp/naming.sql:
-        ```
-        buck run //hphp/hack/src/facebook/naming_table_builder:hh_naming_table_builder \
-        -- --use-direct-decl-parser --overwrite --www ~/www --output /tmp/naming.sql
-        ```
-      2. uncomment the following lines to extract the decl hash from /tmp/naming.sql
-        ```
-        let _ = db_path_opt in
-        let path = Filename.concat Sys_utils.temp_dir_name "naming.sql" in
-        let db_path_opt = Some (Naming_sqlite.Db_path path) in
-        ```
-  *)
-  in
+  let db_path_opt = db_path_of_ctx ctx in
   match db_path_opt with
   | None -> SMap.empty
   | Some db_path ->

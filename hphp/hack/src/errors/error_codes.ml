@@ -422,7 +422,7 @@ module Typing = struct
     (* | CoroutinnessMismatch [@value 4173] *)
     (* | ExpectingAwaitableReturnTypeHint [@value 4174] *)
     (* | ReffinessInvariantDEPRECATED [@value 4175] *)
-    | DollardollarLvalue [@value 4176]
+    (* | DollardollarLvalue [@value 4176] *)
     (* | StaticMethodOnInterfaceDEPRECATED [@value 4177] *)
     | DuplicateUsingVar [@value 4178]
     | IllegalDisposable [@value 4179]

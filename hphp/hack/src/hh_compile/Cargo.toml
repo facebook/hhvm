@@ -10,7 +10,7 @@ path = "hh_compile.rs"
 
 [dependencies]
 aast_parser = { path = "../parser/cargo/aast_parser" }
-anyhow = "1.0.51"
+anyhow = "1.0.56"
 bumpalo = { version = "3.8", features = ["collections"] }
 compile = { path = "../hackc/compile/cargo/compile" }
 direct_decl_parser = { path = "../parser/api/cargo/direct_decl_parser" }
@@ -27,7 +27,7 @@ positioned_by_ref_parser = { path = "../parser/api/cargo/positioned_by_ref_parse
 positioned_full_trivia_parser = { path = "../parser/api/cargo/positioned_full_trivia_parser" }
 positioned_parser = { path = "../parser/api/cargo/positioned_parser" }
 rayon = "1.2"
-serde_json = { version = "1.0.64", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 stack_limit = { path = "../utils/stack_limit" }
 structopt = "0.3.23"
 strum = "0.21"

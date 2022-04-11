@@ -34,6 +34,8 @@ fn infer_func_body<R: Reason>(
         file_attributes: vec![],
         mode: fd.mode,
         fun,
+        // TODO(T116039119): Populate value with presence of internal attribute
+        internal: false,
     };
     Ok(res)
 }

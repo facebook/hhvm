@@ -2418,7 +2418,7 @@ struct FuncParamWithTCData : IRExtraData {
     return folly::hash::hash_combine(
       func->stableHash(),
       std::hash<int32_t>()(paramId),
-      std::hash<std::string>()(tc->fullName())  // Not great but hey its easy.
+      tc->stableHash()
     );
   }
 
@@ -2441,8 +2441,7 @@ struct TypeConstraintData : IRExtraData {
   std::string show() const { return tc->displayName(); }
 
   size_t stableHash() const {
-    // Not great but easy.
-    return std::hash<std::string>()(tc->fullName());
+    return tc->stableHash();
   }
 
   bool equals(const TypeConstraintData& o) const {

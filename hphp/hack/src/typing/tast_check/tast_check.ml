@@ -49,8 +49,8 @@ let visitor ctx =
             (TypecheckerOptions.global_write_check_functions_enabled
                (Provider_context.get_tcopt ctx))
   in
-  Tast_visitor.iter_with
-    (handlers
+  let handlers =
+    handlers
     @ irregular_handlers
     @ List.filter_map
         ~f:Fn.id
@@ -99,8 +99,15 @@ let visitor ctx =
             Some Global_write_check.handler
           else
             None);
-          Some Call_in_subscript_check.handler;
-        ])
+        ]
+  in
+  let handlers =
+    if TypecheckerOptions.skip_tast_checks (Provider_context.get_tcopt ctx) then
+      []
+    else
+      handlers
+  in
+  Tast_visitor.iter_with handlers
 
 let program ctx = (visitor ctx)#go ctx
 

@@ -317,7 +317,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
   auto const outputPath = ar->getOutputPath();
 
   std::thread wp_thread;
-  std::future<void> fut;
 
   auto unexpectedException = [&] (const char* what) {
     if (wp_thread.joinable()) {
@@ -384,23 +383,19 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       };
 
       RuntimeOption::EvalJit = false; // For HHBBC to invoke builtins.
-      std::unique_ptr<ArrayTypeTable::Builder> arrTable;
-      std::promise<void> arrTableReady;
-      fut = arrTableReady.get_future();
 
+      std::exception_ptr wpExn;
       wp_thread = std::thread(
-        [program = std::move(program), &ueq, &arrTable, &arrTableReady]
-        () mutable {
+        [program = std::move(program), &ueq, &wpExn] () mutable {
           Timer timer(Timer::WallTime, "running HHBBC");
           HphpSessionAndThread _(Treadmill::SessionKind::CompilerEmit);
           try {
             // We rely on this function to provide a value to arrTable
             HHBBC::whole_program(
-              std::move(program), ueq, arrTable,
-              Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0,
-              &arrTableReady);
+              std::move(program), ueq,
+              Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0);
           } catch (...) {
-            arrTableReady.set_exception(std::current_exception());
+            wpExn = std::current_exception();
             ueq.finish();
           }
         }
@@ -418,17 +413,18 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
           }
         }
       }
+      if (wpExn) {
+        wp_thread.join();
+        std::rethrow_exception(wpExn);
+      }
 
-      fut.wait();
       Timer finalizeTime(Timer::WallTime, "finalizing repo");
-      if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
       if (repoBuilder) {
         repoBuilder->finish(getGlobalData(), *autoloadMapBuilder);
       }
     }
 
     wp_thread.join();
-    fut.get(); // Exception thrown here if it holds one, otherwise no-op.
   } catch (std::exception& ex) {
     unexpectedException(ex.what());
   } catch (const Object& o) {

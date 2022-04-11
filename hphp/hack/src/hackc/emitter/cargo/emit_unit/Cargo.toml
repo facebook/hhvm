@@ -20,7 +20,6 @@ emit_typedef = { path = "../emit_typedef" }
 env = { path = "../env" }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
-hackc_unit = { path = "../../../hhbc/cargo/hackc_unit" }
-hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }

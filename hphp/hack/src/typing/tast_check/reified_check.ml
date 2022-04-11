@@ -150,7 +150,7 @@ let rec get_ft_tparams fun_ty =
   | Tnewtype (name, [ty1], _ty2) when String.equal name SN.Classes.cSupportDyn
     ->
     get_ft_tparams ty1
-  | Tfun { ft_tparams; _ } -> Some ft_tparams
+  | Tfun ({ ft_tparams; _ } as fun_ty) -> Some (ft_tparams, fun_ty)
   | _ -> None
 
 let handler =
@@ -168,14 +168,12 @@ let handler =
       | (fun_ty, pos, Fun_id _)
       | (fun_ty, pos, Method_id _)
       | (fun_ty, pos, Smethod_id _) ->
-        begin
-          match get_ft_tparams fun_ty with
-          | Some ft_tparams ->
-            if tparams_has_reified ft_tparams then
-              Errors.add_typing_error
-                Typing_error.(primary @@ Primary.Reified_function_reference pos)
-          | None -> ()
-        end
+        (match get_ft_tparams fun_ty with
+        | Some (ft_tparams, _) ->
+          if tparams_has_reified ft_tparams then
+            Errors.add_typing_error
+              Typing_error.(primary @@ Primary.Reified_function_reference pos)
+        | None -> ())
       | ( _,
           pos,
           FunctionPointer (FP_class_const ((ty, _, CI (_, class_id)), _), _) )
@@ -194,15 +192,14 @@ let handler =
       | (fun_ty, pos, FunctionPointer (_, targs)) ->
         begin
           match get_ft_tparams fun_ty with
-          | Some ft_tparams ->
+          | Some (ft_tparams, _) ->
             verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
           | None -> ()
         end
       | (_, pos, Call ((fun_ty, _, _), targs, _, _)) ->
         let (env, efun_ty) = Env.expand_type env fun_ty in
-        (match (get_ft_tparams efun_ty, get_node efun_ty) with
-        | (Some ft_tparams, Tfun ty) when not @@ get_ft_is_function_pointer ty
-          ->
+        (match get_ft_tparams efun_ty with
+        | Some (ft_tparams, ty) when not @@ get_ft_is_function_pointer ty ->
           verify_call_targs env pos (get_pos efun_ty) ft_tparams targs
         | _ -> ())
       | (_, pos, New ((ty, _, CI (_, class_id)), targs, _, _, _)) ->

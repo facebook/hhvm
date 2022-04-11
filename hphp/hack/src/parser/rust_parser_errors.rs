@@ -10,9 +10,8 @@ use std::{matches, str::FromStr};
 use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter, EnumString, IntoStaticStr};
 
-use naming_special_names_rust as sn;
-
 use hash::{HashMap, HashSet};
+use naming_special_names_rust as sn;
 use oxidized::parser_options::ParserOptions;
 use parser_core_types::{
     indexed_source_text::IndexedSourceText,
@@ -86,8 +85,9 @@ enum UnstableFeatures {
     Ifc,
     Readonly,
     Modules,
-    ContextAliasDeclaration,
     ClassConstDefault,
+    TypeConstMultipleBounds,
+    ContextAliasDeclaration,
     ContextAliasDeclarationShort,
     MethodTraitDiamond,
     UpcastExpression,
@@ -107,8 +107,9 @@ impl UnstableFeatures {
             UnstableFeatures::Readonly => Preview,
             UnstableFeatures::Modules => Unstable,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
-            UnstableFeatures::ClassConstDefault => Migration,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
+            UnstableFeatures::TypeConstMultipleBounds => Unstable,
+            UnstableFeatures::ClassConstDefault => Migration,
             UnstableFeatures::MethodTraitDiamond => Preview,
             UnstableFeatures::UpcastExpression => Unstable,
             UnstableFeatures::RequireClass => Unstable,
@@ -4000,6 +4001,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.invalid_modifier_errors("Type constants", node, |kind| kind == TokenKind::Abstract);
     }
 
+    fn type_const_bounds_errors(&mut self, node: S<'a>) {
+        if self.env.is_typechecker() {
+            // HackC & HHVM don't see bounds, so it's pointless to ban (then unban later)
+            if let TypeConstDeclaration(tc) = node.children {
+                let count = tc.type_constraints.iter_children().count();
+                if count > 1 {
+                    self.check_can_use_feature(node, &UnstableFeatures::TypeConstMultipleBounds);
+                }
+            }
+        }
+    }
+
     fn alias_errors(&mut self, node: S<'a>) {
         if let AliasDeclaration(ad) = &node.children {
             let attrs = &ad.attribute_spec;
@@ -4822,7 +4835,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
         let check_variable = |self_: &mut Self, text| {
             if text == sn::special_idents::THIS {
-                err(self_, errors::this_as_lval(lval_root))
+                err(self_, errors::invalid_lval(lval_root))
             }
         };
 
@@ -4853,36 +4866,33 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             },
             ParenthesizedExpression(x) => self.check_lvalue(&x.expression, lval_root),
             SubscriptExpression(x) => self.check_lvalue(&x.receiver, lval_root),
-            LambdaExpression(_)
-            | AnonymousFunction(_)
-            | AwaitableCreationExpression(_)
-            | DarrayIntrinsicExpression(_)
-            | VarrayIntrinsicExpression(_)
-            | ShapeExpression(_)
-            | CollectionLiteralExpression(_)
-            | GenericTypeSpecifier(_)
-            | YieldExpression(_)
-            | CastExpression(_)
-            | BinaryExpression(_)
-            | ConditionalExpression(_)
-            | IsExpression(_)
-            | AsExpression(_)
-            | NullableAsExpression(_)
-            | ConstructorCall(_)
-            | AnonymousClass(_)
-            | XHPExpression(_)
-            | InclusionExpression(_)
-            | TupleExpression(_)
-            | LiteralExpression(_) => err(
-                self,
-                errors::not_allowed_in_write(loperand.kind().to_string()),
-            ),
             PrefixUnaryExpression(x) => check_unary_expression(self, &x.operator),
             PostfixUnaryExpression(x) => check_unary_expression(self, &x.operator),
-            // FIXME: Array_get ((_, Class_const _), _) is not a valid lvalue. *)
-            _ => {} // Ideally we should put all the rest of the syntax here so everytime
-                    // a new syntax is added people need to consider whether the syntax
-                    // can be a valid lvalue or not. However, there are too many of them.
+            // Potentially un-intuitive; `missing` is perfectly valid in LHS positions, for example:
+            //
+            // list( , $_) = ...;
+            //      ^ this is "missing"
+            //
+            // $x[ ] = 42;
+            //    ^ this is "missing", though we don't end up scanning for it in this function
+            Missing => {}
+            // A scope resolution expression is a valid lvalue if we're referencing a static
+            // variable, otherwise it's nonsense.
+            ScopeResolutionExpression(e) => {
+                // Foo::$bar = ...;
+                // OK, as this is a static member assignment
+                if Some(TokenKind::Variable) == token_kind(&e.name) {
+                    return;
+                }
+                // Foo::{$bar} = ...;
+                // OK, as this is static member assignment to whatever prop name is in `$bar`
+                if let BracedExpression(_) = e.name.children {
+                    return;
+                }
+                // Foo::BAR = ...;  // Not OK, this is an assignment to a constant
+                err(self, errors::invalid_lval(lval_root))
+            }
+            _ => err(self, errors::invalid_lval(lval_root)),
         }
     }
 
@@ -5185,7 +5195,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
             ConstDeclaration(_) => self.class_constant_modifier_errors(node),
 
-            TypeConstDeclaration(_) => self.type_const_modifier_errors(node),
+            TypeConstDeclaration(_) => {
+                self.type_const_modifier_errors(node);
+                self.type_const_bounds_errors(node);
+            }
 
             AliasDeclaration(_) | ContextAliasDeclaration(_) => self.alias_errors(node),
             ConstantDeclarator(_) => self.const_decl_errors(node),
@@ -5258,12 +5271,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
                 _ => {}
             },
-            FunctionCallExpression(x) => {
-                // We only allow f(#X) for now. This gates f#X()
-                if !x.enum_class_label.is_missing() {
-                    self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
-                }
-            }
             UpcastExpression(_) => {
                 if !self.env.parser_options.tco_enable_sound_dynamic {
                     self.check_can_use_feature(node, &UnstableFeatures::UpcastExpression)

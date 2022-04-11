@@ -10,17 +10,7 @@ open Hh_prelude
 
 type size = int
 
-module type Entry = sig
-  type _ t
-
-  type 'a key = 'a t
-
-  type 'a value = 'a
-
-  val get_size : key:'a key -> value:'a value -> size
-
-  val key_to_log_string : 'a key -> string
-end
+module type Entry = Cache_sig.Entry
 
 module Cache (Entry : Entry) = struct
   type telemetry = {
@@ -180,7 +170,7 @@ module Cache (Entry : Entry) = struct
 
   let reset_telemetry (t : t) : unit = t.telemetry <- empty_telemetry
 
-  let get_telemetry ~(key : string) (t : t) (telemetry : Telemetry.t) :
+  let get_telemetry (t : t) ~(key : string) (telemetry : Telemetry.t) :
       Telemetry.t =
     if length t = 0 then
       telemetry

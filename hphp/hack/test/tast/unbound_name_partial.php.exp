@@ -14,5 +14,5 @@ Errors:
         f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-37], (Expr ((_), [4:3-36], (Method_caller (([4:15-28], "\\NoSuchClass"), ([4:30-35], "foo"))))))] };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
-      })
+        f_doc_comment = None };
+      fd_internal = false })

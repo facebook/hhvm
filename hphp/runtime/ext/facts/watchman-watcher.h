@@ -32,8 +32,8 @@ namespace Facts {
  * `queryExpr`: A query object that follows Watchman's JSON API.
  * `watchman`: An open connection to a Watchman server.
  */
-std::unique_ptr<Watcher>
-make_watchman_watcher(folly::dynamic queryExpr, Watchman& watchman);
+std::unique_ptr<Watcher> make_watchman_watcher(
+    folly::dynamic queryExpr, std::shared_ptr<Watchman> watchman);
 
 } // namespace Facts
 } // namespace HPHP

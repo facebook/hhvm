@@ -546,7 +546,7 @@ pub struct TypeConstDeclarationChildren<'a, T, V> {
     pub type_keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub type_parameters: Syntax<'a, T, V>,
-    pub type_constraint: Syntax<'a, T, V>,
+    pub type_constraints: Syntax<'a, T, V>,
     pub equal: Syntax<'a, T, V>,
     pub type_specifier: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
@@ -1032,7 +1032,6 @@ pub struct IssetExpressionChildren<'a, T, V> {
 pub struct FunctionCallExpressionChildren<'a, T, V> {
     pub receiver: Syntax<'a, T, V>,
     pub type_args: Syntax<'a, T, V>,
-    pub enum_class_label: Syntax<'a, T, V>,
     pub left_paren: Syntax<'a, T, V>,
     pub argument_list: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,

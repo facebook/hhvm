@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::{ImmType, InstrFlags, OpcodeData};
+use hhbc_gen::{ImmType, InstrFlags, OpcodeData};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use std::collections::HashSet;
@@ -268,7 +268,7 @@ pub trait PrintOpcodeTypes {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hhbc as _;
+    use hhbc_gen as _;
     use macro_test_util::assert_pat_eq;
     use quote::quote;
 

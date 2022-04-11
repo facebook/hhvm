@@ -428,7 +428,7 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   if (!g_context.isNull()) {
     if (auto const opts = g_context->getRepoOptionsForRequest()) {
       // If path() is empty we have the default() options, which means we have
-      // negatively cached the existance of a .hhvmconfig.hdf for this request.
+      // negatively cached the existence of a .hhvmconfig.hdf for this request.
       if (opts->path().empty()) return *opts;
 
       if (isParentOf(opts->path(), fpath)) {

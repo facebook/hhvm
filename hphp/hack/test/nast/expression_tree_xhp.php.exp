@@ -1,13 +1,13 @@
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       fd_file_attributes = []; fd_mode = Mstrict;
       fd_fun =
-      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([3:17-21], (Hprim Tvoid)))); 
-        f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = ();
+        f_readonly_ret = None; f_ret = ((), (Some ([3:17-21], (Hprim Tvoid))));
+        f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = [];
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -17,17 +17,17 @@
                 (Binop ((Eq None), ((), [4:3-5], (Lvar ([4:3-5], $x))),
                    ((), [4:8-59],
                     (ExpressionTree
-                       { et_hint = ([4:8-18], (Happly (([4:8-18], "\\ExampleDsl"), []))); 
+                       { et_hint = ([4:8-18], (Happly (([4:8-18], "\\ExampleDsl"), [])));
                          et_splices = []; et_function_pointers = [];
                          et_virtualized_expr =
                          ((), [4:19-58],
                           (Call (
                              ((), [4:19-58],
                               (Efun (
-                                 { f_span = [4:19-58]; f_readonly_this = None; 
-                                   f_annotation = (); f_readonly_ret = None; 
-                                   f_ret = ((), None); f_name = ([4:19-58], ";anonymous"); 
-                                   f_tparams = []; f_where_constraints = []; 
+                                 { f_span = [4:19-58]; f_readonly_this = None;
+                                   f_annotation = (); f_readonly_ret = None;
+                                   f_ret = ((), None); f_name = ([4:19-58], ";anonymous");
+                                   f_tparams = []; f_where_constraints = [];
                                    f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                    f_body =
                                    { fb_ast =
@@ -36,7 +36,7 @@
                                           (Some ((), [4:19-58],
                                                  (Xml (([4:20-27], "\\:foo:bar"),
                                                     [(Xhp_simple
-                                                        { xs_name = ([4:28-29], "x"); 
+                                                        { xs_name = ([4:28-29], "x");
                                                           xs_type = ();
                                                           xs_expr =
                                                           ((), [4:30-33],
@@ -50,13 +50,13 @@
                                                     ))))))
                                        ]
                                      };
-                                   f_fun_kind = FSync; f_user_attributes = []; 
+                                   f_fun_kind = FSync; f_user_attributes = [];
                                    f_external = false; f_doc_comment = None },
                                  []))),
                              [], [], None)));
                          et_runtime_expr =
                          ((), [4:8-18],
-                          (Call (((), [4:8-18], (Class_const (((), [4:8-18], (CI ([4:8-18], "\\ExampleDsl"))), ([4:8-18], "makeTree")))), 
+                          (Call (((), [4:8-18], (Class_const (((), [4:8-18], (CI ([4:8-18], "\\ExampleDsl"))), ([4:8-18], "makeTree")))),
                              [],
                              [(Pnormal,
                                ((), [4:19-58],
@@ -75,16 +75,16 @@
                                (Pnormal,
                                 ((), [4:19-58],
                                  (Lfun (
-                                    { f_span = [4:19-58]; f_readonly_this = None; 
-                                      f_annotation = (); f_readonly_ret = None; 
-                                      f_ret = ((), None); f_name = ([4:19-58], ";anonymous"); 
+                                    { f_span = [4:19-58]; f_readonly_this = None;
+                                      f_annotation = (); f_readonly_ret = None;
+                                      f_ret = ((), None); f_name = ([4:19-58], ";anonymous");
                                       f_tparams = []; f_where_constraints = [];
                                       f_params =
-                                      [{ param_annotation = (); param_type_hint = ((), (Some ([4:8-18], (Happly (([4:8-18], "\\ExampleDsl"), []))))); 
-                                         param_is_variadic = false; param_pos = [4:8-18]; 
-                                         param_name = "$0v"; param_expr = None; 
-                                         param_readonly = None; param_callconv = Pnormal; 
-                                         param_user_attributes = []; 
+                                      [{ param_annotation = (); param_type_hint = ((), (Some ([4:8-18], (Happly (([4:8-18], "\\ExampleDsl"), [])))));
+                                         param_is_variadic = false; param_pos = [4:8-18];
+                                         param_name = "$0v"; param_expr = None;
+                                         param_readonly = None; param_callconv = Pnormal;
+                                         param_user_attributes = [];
                                          param_visibility = None }
                                         ];
                                       f_ctxs = None; f_unsafe_ctxs = None;
@@ -170,7 +170,7 @@
                                                        None))))))
                                           ]
                                         };
-                                      f_fun_kind = FSync; f_user_attributes = []; 
+                                      f_fun_kind = FSync; f_user_attributes = [];
                                       f_external = false; f_doc_comment = None },
                                     []))))
                                ],
@@ -179,7 +179,7 @@
                    )))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
-      })
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+        f_doc_comment = None };
+      fd_internal = false })
   ]

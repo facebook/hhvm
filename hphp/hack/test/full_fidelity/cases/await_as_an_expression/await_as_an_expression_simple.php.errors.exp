@@ -1,1 +1,1 @@
-(80,9)-(80,17) varray_intrinsic_expression is not allowed in write context
+(80,9)-(80,17) You cannot use this syntax in an `unset()` expression.

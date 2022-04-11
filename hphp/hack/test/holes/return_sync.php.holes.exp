@@ -19,5 +19,5 @@
             ([6:3-13], (Return (Some ((Pair<int, string>), [6:10-12], (Hole (((Pair<int, string>), [6:10-12], (Lvar ([6:10-12], $x))), (Pair<int, string>), (Pair<int, bool>), Typing))))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
-      })
+        f_doc_comment = None };
+      fd_internal = false })

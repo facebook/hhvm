@@ -569,7 +569,8 @@ let check =
           constructor_fty
           Mut
           (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) args)
-          unpacked_arg
+          unpacked_arg;
+        super#on_expr env e
       | (_, _, Obj_get _)
       | (_, _, Class_get _)
       | (_, _, This)

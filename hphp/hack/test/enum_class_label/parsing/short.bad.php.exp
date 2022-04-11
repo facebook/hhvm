@@ -1,4 +1,3 @@
-(8,3)-(8,17) Cannot use unstable feature: `enum_class_label`
 {
   "kind":"script",
   "script_declarations":{
@@ -358,54 +357,52 @@
                 "expression_statement_expression":{
                   "kind":"function_call_expression",
                   "function_call_receiver":{
-                    "kind":"scope_resolution_expression",
-                    "scope_resolution_qualifier":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"name",
-                        "text":"E",
-                        "offset":68,
-                        "leading_width":2,
-                        "width":1,
-                        "trailing_width":0,
-                        "leading":[{"kind":"whitespace","text":"  ","offset":68,"width":2}],
-                        "trailing":[],
-                        "line_number":8
-                      }
-                    },
-                    "scope_resolution_operator":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"::",
-                        "text":"::",
-                        "offset":71,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":8
-                      }
-                    },
-                    "scope_resolution_name":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"name",
-                        "text":"valueOf",
-                        "offset":73,
-                        "leading_width":0,
-                        "width":7,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":8
-                      }
-                    }
-                  },
-                  "function_call_type_args":{"kind":"missing"},
-                  "function_call_enum_class_label":{
                     "kind":"enum_class_label",
-                    "enum_class_label_qualifier":{"kind":"missing"},
+                    "enum_class_label_qualifier":{
+                      "kind":"scope_resolution_expression",
+                      "scope_resolution_qualifier":{
+                        "kind":"token",
+                        "token":{
+                          "kind":"name",
+                          "text":"E",
+                          "offset":68,
+                          "leading_width":2,
+                          "width":1,
+                          "trailing_width":0,
+                          "leading":[{"kind":"whitespace","text":"  ","offset":68,"width":2}],
+                          "trailing":[],
+                          "line_number":8
+                        }
+                      },
+                      "scope_resolution_operator":{
+                        "kind":"token",
+                        "token":{
+                          "kind":"::",
+                          "text":"::",
+                          "offset":71,
+                          "leading_width":0,
+                          "width":2,
+                          "trailing_width":0,
+                          "leading":[],
+                          "trailing":[],
+                          "line_number":8
+                        }
+                      },
+                      "scope_resolution_name":{
+                        "kind":"token",
+                        "token":{
+                          "kind":"name",
+                          "text":"valueOf",
+                          "offset":73,
+                          "leading_width":0,
+                          "width":7,
+                          "trailing_width":0,
+                          "leading":[],
+                          "trailing":[],
+                          "line_number":8
+                        }
+                      }
+                    },
                     "enum_class_label_hash":{
                       "kind":"token",
                       "token":{
@@ -435,6 +432,7 @@
                       }
                     }
                   },
+                  "function_call_type_args":{"kind":"missing"},
                   "function_call_left_paren":{
                     "kind":"token",
                     "token":{

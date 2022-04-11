@@ -28,5 +28,5 @@
             ([6:3-12], (Return (Some ((int), [6:10-11], (Int "0")))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
-      })
+        f_doc_comment = None };
+      fd_internal = false })

@@ -9,7 +9,7 @@ Invalid assignment (Typing[4110])
 File "dict_index.bad.php", line 12, characters 5-22:
 Invalid assignment (Typing[4110])
   File "dict_index.bad.php", line 7, characters 18-20:
-  Expected `(int | not arraykey)`
+  Expected `int`
   File "dict_index.bad.php", line 10, characters 21-27:
   But got `dynamic`
 File "dict_index.bad.php", line 14, characters 5-24:
@@ -29,7 +29,7 @@ Invalid assignment (Typing[4110])
 File "dict_index.bad.php", line 16, characters 5-24:
 Invalid assignment (Typing[4110])
   File "dict_index.bad.php", line 7, characters 18-20:
-  Expected `(int | not arraykey)`
+  Expected `int`
   File "dict_index.bad.php", line 10, characters 21-27:
   But got `dynamic`
 File "dict_index.bad.php", line 17, characters 5-23:
@@ -49,6 +49,6 @@ Invalid assignment (Typing[4110])
 File "dict_index.bad.php", line 19, characters 5-23:
 Invalid assignment (Typing[4110])
   File "dict_index.bad.php", line 7, characters 18-20:
-  Expected `(int | not arraykey)`
+  Expected `int`
   File "dict_index.bad.php", line 10, characters 21-27:
   But got `dynamic`

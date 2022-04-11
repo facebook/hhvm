@@ -97,8 +97,8 @@ template <typename T, size_t Expected, size_t Actual = sizeof(T)>
 constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
 static_assert(CheckSize<php::Block, 24>(), "");
 static_assert(CheckSize<php::Local, use_lowptr ? 12 : 16>(), "");
-static_assert(CheckSize<php::Param, use_lowptr ? 64 : 88>(), "");
-static_assert(CheckSize<php::Func, use_lowptr ? 176 : 216>(), "");
+static_assert(CheckSize<php::Param, use_lowptr ? 64 : 96>(), "");
+static_assert(CheckSize<php::Func, use_lowptr ? 184 : 224>(), "");
 
 // Likewise, we also keep the bytecode and immediate types small.
 static_assert(CheckSize<Bytecode, use_lowptr ? 32 : 40>(), "");
@@ -1083,8 +1083,6 @@ struct Index::IndexData {
 
   bool frozen{false};
   bool ever_frozen{false};
-
-  std::unique_ptr<ArrayTypeTable::Builder> arrTableBuilder;
 
   ISStringToOneT<const php::Class*>      classes;
   SStringToMany<const php::Func>         methods;
@@ -4556,8 +4554,6 @@ Index::Index(php::Program* program)
 {
   trace_time tracer("create index");
 
-  m_data->arrTableBuilder.reset(new ArrayTypeTable::Builder());
-
   add_system_constants_to_index(*m_data);
 
   {
@@ -5210,19 +5206,6 @@ const php::TypeAlias* Index::lookup_type_alias(SString name) const {
 
 Index::ResolvedInfo<Optional<res::Class>>
 Index::resolve_type_name(SString inName) const {
-  auto const res = resolve_type_name_internal(inName);
-  using Ret = Optional<res::Class>;
-  auto const val = match<Ret>(
-    res.value,
-    [&] (boost::blank) { return Ret{}; },
-    [&] (SString s)    { return res::Class{s}; },
-    [&] (ClassInfo* c) { return res::Class{c}; }
-  );
-  return { res.type, res.nullable, val };
-}
-
-Index::ResolvedInfo<boost::variant<boost::blank,SString,ClassInfo*>>
-Index::resolve_type_name_internal(SString inName) const {
   Optional<hphp_fast_set<const void*>> seen;
 
   auto nullable = false;
@@ -5235,14 +5218,14 @@ Index::resolve_type_name_internal(SString inName) const {
       auto const cinfo = cls_it->second;
       assertx(cinfo->cls->attrs & AttrUnique);
       if (!(cinfo->cls->attrs & AttrEnum)) {
-        return { AnnotType::Object, nullable, cinfo };
+        return { AnnotType::Object, nullable, res::Class { cinfo } };
       }
       auto const& tc = cinfo->cls->enumBaseTy;
       assertx(!tc.isNullable());
-      if (tc.type() != AnnotType::Object) {
-        auto const type = tc.type() == AnnotType::Mixed ?
-          AnnotType::ArrayKey : tc.type();
-        return { type, nullable, tc.typeName() };
+      if (!tc.isUnresolved()) {
+        auto const type = tc.isMixed() ? AnnotType::ArrayKey : tc.type();
+        assertx(type != AnnotType::Object);
+        return { type, nullable, {} };
       }
       name = tc.typeName();
     } else {
@@ -5251,8 +5234,9 @@ Index::resolve_type_name_internal(SString inName) const {
       auto const ta = ta_it->second;
       assertx(ta->attrs & AttrUnique);
       nullable = nullable || ta->nullable;
-      if (ta->type != AnnotType::Object) {
-        return { ta->type, nullable, ta->value.get() };
+      if (ta->type != AnnotType::Unresolved) {
+        assertx(ta->type != AnnotType::Object);
+        return { ta->type, nullable, {} };
       }
       name = ta->value;
     }
@@ -5265,12 +5249,12 @@ Index::resolve_type_name_internal(SString inName) const {
       seen->insert(name);
     } else if (i > 10) {
       if (!seen->insert(name).second) {
-        return { AnnotType::Object, false, {} };
+        return { AnnotType::Unresolved, false, {} };
       }
     }
   }
 
-  return { AnnotType::Object, nullable, name };
+  return { AnnotType::Object, nullable, res::Class { name } };
 }
 
 struct Index::ConstraintResolution {
@@ -5288,9 +5272,11 @@ struct Index::ConstraintResolution {
 Index::ConstraintResolution Index::resolve_named_type(
   const Context& ctx, SString name, const Type& candidate) const {
 
-  auto const res = resolve_type_name_internal(name);
+  auto const res = resolve_type_name(name);
 
   if (res.nullable && candidate.subtypeOf(BInitNull)) return TInitNull;
+
+  if (res.type == AnnotType::Unresolved) return TInitCell;
 
   if (res.type == AnnotType::Object) {
     auto resolve = [&] (const res::Class& rcls) -> Optional<Type> {
@@ -5315,20 +5301,13 @@ Index::ConstraintResolution Index::resolve_named_type(
       return std::nullopt;
     };
 
-    auto const val = match<Either<SString, ClassInfo*>>(
-      res.value,
-      [&] (boost::blank) { return nullptr; },
-      [&] (SString s) { return s; },
-      [&] (ClassInfo* c) { return c; }
-    );
-    if (val.isNull()) return ConstraintResolution{ std::nullopt, true };
-    auto ty = resolve(res::Class { val });
+    auto ty = resolve(*res.value);
     if (ty && res.nullable) *ty = opt(std::move(*ty));
     return ConstraintResolution{ std::move(ty), false };
   }
 
-  return get_type_for_annotated_type(ctx, res.type, res.nullable,
-                                     boost::get<SString>(res.value), candidate);
+  return get_type_for_annotated_type(ctx, res.type, res.nullable, nullptr,
+                                     candidate);
 }
 
 std::pair<res::Class,php::Class*>
@@ -5562,7 +5541,7 @@ Type Index::get_type_for_constraint(Context ctx,
     ctx,
     tc.type(),
     tc.isNullable(),
-    tc.typeName(),
+    tc.isObject() ? tc.clsName() : tc.typeName(),
     candidate
   );
   if (res.type) return *res.type;
@@ -5584,7 +5563,7 @@ bool Index::prop_tc_maybe_unenforced(const php::Class& propCls,
     Context { nullptr, nullptr, &propCls },
     tc.type(),
     tc.isNullable(),
-    tc.typeName(),
+    tc.isObject() ? tc.clsName() : tc.typeName(),
     TCell
   );
   return res.maybeMixed;
@@ -5670,6 +5649,9 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
         if (candidate.subtypeOf(BCls)) return TCls;
         if (candidate.subtypeOf(BLazyCls)) return TLazyCls;
       }
+      break;
+    case AnnotMetaType::Unresolved:
+      return resolve_named_type(ctx, name, candidate);
     }
     return ConstraintResolution{ std::nullopt, false };
   }();
@@ -5710,18 +5692,12 @@ bool Index::could_have_reified_type(Context ctx,
     }
     return false;
   }
-  if (!tc.isObject()) return false;
-  auto const name = tc.typeName();
-  auto const resolved = resolve_type_name_internal(name);
+  if (!tc.isObject() && !tc.isUnresolved()) return false;
+  auto const name = tc.isObject() ? tc.clsName() : tc.typeName();
+  auto const resolved = resolve_type_name(name);
+  if (resolved.type == AnnotType::Unresolved) return true;
   if (resolved.type != AnnotType::Object) return false;
-  auto const val = match<Either<SString, ClassInfo*>>(
-    resolved.value,
-    [&] (boost::blank) { return nullptr; },
-    [&] (SString s) { return s; },
-    [&] (ClassInfo* c) { return c; }
-  );
-  res::Class rcls{val};
-  return rcls.couldHaveReifiedGenerics();
+  return resolved.value->couldHaveReifiedGenerics();
 }
 
 Optional<bool>
@@ -7459,10 +7435,6 @@ void Index::cleanup_post_emit(php::ProgramPtr program) {
 
 void Index::thaw() {
   m_data->frozen = false;
-}
-
-std::unique_ptr<ArrayTypeTable::Builder>& Index::array_table_builder() const {
-  return m_data->arrTableBuilder;
 }
 
 //////////////////////////////////////////////////////////////////////

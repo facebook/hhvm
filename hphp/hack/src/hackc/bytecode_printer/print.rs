@@ -13,26 +13,27 @@ use crate::{
     },
 };
 use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
-use hackc_unit::HackCUnit;
 use hash::HashSet;
-use hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
-use hhas_attribute::{self, HhasAttribute};
-use hhas_body::{HhasBody, HhasBodyEnv};
-use hhas_class::{self, HhasClass};
-use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
-use hhas_constant::HhasConstant;
-use hhas_function::HhasFunction;
-use hhas_method::{HhasMethod, HhasMethodFlags};
-use hhas_module::HhasModule;
-use hhas_param::HhasParam;
-use hhas_pos::{HhasPos, HhasSpan};
-use hhas_property::HhasProperty;
-use hhas_symbol_refs::{HhasSymbolRefs, IncludePath};
-use hhas_type::HhasTypeInfo;
-use hhas_type_const::HhasTypeConstant;
-use hhas_typedef::HhasTypedef;
-use hhbc_ast::{FCallArgs, FatalOp, Instruct, Label, Pseudo};
-use hhbc_id::class::ClassType;
+use hhbc::{
+    hackc_unit::HackCUnit,
+    hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX},
+    hhas_attribute::HhasAttribute,
+    hhas_body::{HhasBody, HhasBodyEnv},
+    hhas_class::{HhasClass, TraitReqKind},
+    hhas_coeffects::{HhasCoeffects, HhasCtxConstant},
+    hhas_constant::HhasConstant,
+    hhas_function::HhasFunction,
+    hhas_method::{HhasMethod, HhasMethodFlags},
+    hhas_module::HhasModule,
+    hhas_param::HhasParam,
+    hhas_pos::{HhasPos, HhasSpan},
+    hhas_property::HhasProperty,
+    hhas_symbol_refs::{HhasSymbolRefs, IncludePath},
+    hhas_type::HhasTypeInfo,
+    hhas_type_const::HhasTypeConstant,
+    hhas_typedef::HhasTypedef,
+    ClassName, ConstName, FCallArgs, FatalOp, FunctionName, Instruct, Label, Pseudo, TypedValue,
+};
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
@@ -46,7 +47,6 @@ use std::{
     path::Path,
     write,
 };
-use typed_value::TypedValue;
 use write_bytes::write_bytes;
 
 macro_rules! write_if {
@@ -136,11 +136,8 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Re
     concat(w, &prog.constants, |w, c| print_constant(ctx, w, c))?;
     concat(w, &prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
     print_file_attributes(ctx, w, prog.file_attributes.as_ref())?;
-
-    if ctx.dump_symbol_refs() {
-        print_include_region(ctx, w, &prog.symbol_refs.includes)?;
-        print_symbol_ref_regions(ctx, w, &prog.symbol_refs)?;
-    }
+    print_include_region(ctx, w, &prog.symbol_refs.includes)?;
+    print_symbol_ref_regions(ctx, w, &prog.symbol_refs)?;
     Ok(())
 }
 
@@ -215,25 +212,55 @@ fn print_symbol_ref_regions<'arena>(
     w: &mut dyn Write,
     symbol_refs: &HhasSymbolRefs<'arena>,
 ) -> Result<()> {
-    let mut print_region = |name, refs: &Slice<'arena, Str<'arena>>| {
-        if !refs.is_empty() {
+    fn print_region<'a, T: 'a, F>(
+        ctx: &Context<'_>,
+        w: &mut dyn Write,
+        name: &str,
+        refs: impl IntoIterator<Item = &'a T>,
+        f: F,
+    ) -> Result<()>
+    where
+        F: Fn(&'a T) -> &'a [u8],
+    {
+        let mut iter = refs.into_iter();
+        if let Some(first) = iter.next() {
             ctx.newline(w)?;
             write!(w, ".{} {{", name)?;
             ctx.block(w, |c, w| {
-                for s in refs.as_ref().iter() {
+                c.newline(w)?;
+                w.write_all(f(first))?;
+                for s in iter {
                     c.newline(w)?;
-                    w.write_all(s)?;
+                    w.write_all(f(s))?;
                 }
                 Ok(())
             })?;
-            w.write_all(b"\n}\n")
-        } else {
-            Ok(())
+            w.write_all(b"\n}\n")?;
         }
-    };
-    print_region("constant_refs", &symbol_refs.constants)?;
-    print_region("function_refs", &symbol_refs.functions)?;
-    print_region("class_refs", &symbol_refs.classes)
+        Ok(())
+    }
+
+    print_region(
+        ctx,
+        w,
+        "constant_refs",
+        &symbol_refs.constants,
+        ConstName::as_bytes,
+    )?;
+    print_region(
+        ctx,
+        w,
+        "function_refs",
+        &symbol_refs.functions,
+        FunctionName::as_bytes,
+    )?;
+    print_region(
+        ctx,
+        w,
+        "class_refs",
+        &symbol_refs.classes,
+        ClassName::as_bytes,
+    )
 }
 
 fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &HhasAdata<'_>) -> Result<()> {
@@ -326,15 +353,15 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_
 fn print_requirement(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    r: &Pair<ClassType<'_>, hhas_class::TraitReqKind>,
+    r: &Pair<ClassName<'_>, TraitReqKind>,
 ) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".require ")?;
     match r {
-        Pair(name, hhas_class::TraitReqKind::MustExtend) => {
+        Pair(name, TraitReqKind::MustExtend) => {
             write_bytes!(w, "extends <{}>;", name)
         }
-        Pair(name, hhas_class::TraitReqKind::MustImplement) => {
+        Pair(name, TraitReqKind::MustImplement) => {
             write_bytes!(w, "implements <{}>;", name)
         }
     }
@@ -458,9 +485,9 @@ fn print_use_precedence<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     Triple(id1, id2, ids): &Triple<
-        ClassType<'arena>,
-        ClassType<'arena>,
-        Slice<'arena, ClassType<'arena>>,
+        ClassName<'arena>,
+        ClassName<'arena>,
+        Slice<'arena, ClassName<'arena>>,
     >,
 ) -> Result<()> {
     ctx.newline(w)?;
@@ -477,9 +504,9 @@ fn print_use_alias<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     Quadruple(ido1, id, ido2, attr): &Quadruple<
-        Maybe<ClassType<'arena>>,
-        ClassType<'arena>,
-        Maybe<ClassType<'arena>>,
+        Maybe<ClassName<'arena>>,
+        ClassName<'arena>,
+        Maybe<ClassName<'arena>>,
         Attr,
     >,
 ) -> Result<()> {
@@ -488,7 +515,7 @@ fn print_use_alias<'arena>(
     option_or(
         w,
         ido1.as_ref(),
-        |w, i: &ClassType<'arena>| write_bytes!(w, "{}::{}", i, id),
+        |w, i: &ClassName<'arena>| write_bytes!(w, "{}::{}", i, id),
         id,
     )?;
     w.write_all(b" as ")?;
@@ -502,7 +529,7 @@ fn print_use_alias<'arena>(
         })?;
     }
     write_if!(!attr.is_empty() && ido2.is_just(), w, " ")?;
-    option(w, ido2.as_ref(), |w, i: &ClassType<'arena>| {
+    option(w, ido2.as_ref(), |w, i: &ClassName<'arena>| {
         w.write_all(i.as_bstr())
     })?;
     w.write_all(b";")
@@ -521,17 +548,17 @@ fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena
             w.write_all(b" {")?;
             ctx.block(w, |ctx, w| {
                 let precs: &[Triple<
-                    ClassType<'arena>,
-                    ClassType<'arena>,
-                    Slice<'arena, ClassType<'arena>>,
+                    ClassName<'arena>,
+                    ClassName<'arena>,
+                    Slice<'arena, ClassName<'arena>>,
                 >] = c.use_precedences.as_ref();
                 for x in precs {
                     print_use_precedence(ctx, w, x)?;
                 }
                 let aliases: &[Quadruple<
-                    Maybe<ClassType<'arena>>,
-                    ClassType<'arena>,
-                    Maybe<ClassType<'arena>>,
+                    Maybe<ClassName<'arena>>,
+                    ClassName<'arena>,
+                    Maybe<ClassName<'arena>>,
                     Attr,
                 >] = c.use_aliases.as_ref();
                 for x in aliases {
@@ -545,14 +572,14 @@ fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena
     }
 }
 
-fn print_implements(w: &mut dyn Write, implements: &[ClassType<'_>]) -> Result<()> {
+fn print_implements(w: &mut dyn Write, implements: &[ClassName<'_>]) -> Result<()> {
     if implements.is_empty() {
         return Ok(());
     }
     write_bytes!(w, " implements ({})", fmt_separated(" ", implements))
 }
 
-fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassType<'_>]) -> Result<()> {
+fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassName<'_>]) -> Result<()> {
     if enum_includes.is_empty() {
         return Ok(());
     }
@@ -642,7 +669,7 @@ fn print_class_def<'arena>(
         class_def
             .base
             .as_ref()
-            .map(|x: &ClassType<'arena>| x.unsafe_as_str())
+            .map(|x: &ClassName<'arena>| x.unsafe_as_str())
             .into(),
     )?;
     print_implements(w, class_def.implements.as_ref())?;

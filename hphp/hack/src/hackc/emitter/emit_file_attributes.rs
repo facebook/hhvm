@@ -5,7 +5,7 @@
 use emit_attribute::from_asts;
 use env::emitter::Emitter;
 use error::Result;
-use hhas_attribute::HhasAttribute;
+use hhbc::hhas_attribute::HhasAttribute;
 use itertools::Itertools;
 use oxidized::ast;
 

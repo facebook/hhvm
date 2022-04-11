@@ -11,8 +11,7 @@ path = "../../emit_type_hint.rs"
 bumpalo = { version = "3.8", features = ["collections"] }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
-hhas_type = { path = "../../../hhbc/cargo/hhas_type" }
-hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
 naming_special_names_rust = { path = "../../../../naming" }

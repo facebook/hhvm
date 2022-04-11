@@ -85,7 +85,6 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/tv-type.h"
@@ -893,13 +892,12 @@ template<class Target> Target read_opcode_arg(AsmState& as) {
   if (strVal.empty()) {
     as.error("expected opcode or directive argument");
   }
-  try {
-    return folly::to<Target>(strVal);
-  } catch (std::range_error&) {
+  auto const result = folly::tryTo<Target>(strVal);
+  if (result.hasError()) {
     as.error("couldn't convert input argument (" + strVal + ") to "
              "proper type");
-    not_reached();
   }
+  return result.value();
 }
 
 template<class SubOpType>
@@ -1345,7 +1343,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
   auto const vecImmStackValues = vecImm.size();                         \
   as.fe->emitIVA(vecImmStackValues);                                    \
   for (size_t i = 0; i < vecImmStackValues; ++i) {                      \
-    as.fe->emitInt32(as.ue->mergeLitstr(String(vecImm[i]).get()));      \
+    as.fe->emitInt32(as.ue->mergeLitstr(makeStaticString(vecImm[i])));  \
   }
 
 #define IMM_SA     as.fe->emitInt32(create_litstr_id(as))
@@ -3548,7 +3546,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   };
 
   auto const bcSha1 = SHA1{string_sha1(folly::StringPiece(code, codeLen))};
-  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, false);
+  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 

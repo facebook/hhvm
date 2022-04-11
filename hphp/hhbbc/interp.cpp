@@ -2370,13 +2370,16 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   auto const mkc = [&] {
     if (op.nloc1.id >= env.ctx.func->params.size()) return MK::None;
     auto tc = env.ctx.func->params[op.nloc1.id].typeConstraint;
-    if (tc.type() == AnnotType::Object) {
+    if (tc.isUnresolved()) {
       auto res = env.index.resolve_type_name(tc.typeName());
-      if (res.type != AnnotType::Object) {
-        tc.resolveType(res.type, res.nullable || tc.isNullable());
-      } else {
-        resolvedCls = env.index.resolve_class(env.ctx, tc.typeName());
+      if (res.type != AnnotType::Unresolved) {
+        auto const typeName = res.type == AnnotType::Object
+          ? res.value->name() : nullptr;
+        tc.resolveType(res.type, res.nullable, typeName);
       }
+    }
+    if (tc.isObject()) {
+      resolvedCls = env.index.resolve_class(env.ctx, tc.clsName());
     }
     return memoKeyConstraintFromTC(tc);
   }();
@@ -4823,7 +4826,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
       if (constraint->isThis() && couldBeMocked(t)) {
         t = unctx(std::move(t));
       }
-      FTRACE(2, "     {} ({})\n", constraint->fullName(), show(t));
+      FTRACE(2, "     {} ({})\n", constraint->displayName(), show(t));
       tcT = intersection_of(std::move(tcT), std::move(t));
       if (tcT.subtypeOf(BBottom)) unreachable(env);
     }
@@ -4832,6 +4835,8 @@ void in(ISS& env, const bc::VerifyParamType& op) {
 }
 
 void in(ISS& env, const bc::VerifyParamTypeTS& op) {
+  IgnoreUsedParams _{env};
+
   auto const a = topC(env);
   if (!a.couldBe(BDict)) {
     unreachable(env);
@@ -4874,6 +4879,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
       }
     }
   }
+  mayReadLocal(env, op.loc1);
   popC(env);
 }
 

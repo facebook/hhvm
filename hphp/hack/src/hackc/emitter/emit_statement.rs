@@ -9,7 +9,7 @@ use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use ffi::Slice;
 use hack_macro::hack_expr;
-use hhbc_ast::{
+use hhbc::{
     FCallArgs, FCallArgsFlags, IsTypeOp, IterArgs, Label, Local, MOpMode, MemberKey, ObjMethodOp,
     QueryMOp, ReadonlyOp, SetRangeOp,
 };
@@ -251,7 +251,7 @@ fn emit_call<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     if let (a::Expr(_, _, a::Expr_::Id(sid)), _, exprs, None) = c {
-        let ft = hhbc_id::function::FunctionType::from_ast_name(alloc, &sid.1);
+        let ft = hhbc::FunctionName::from_ast_name(alloc, &sid.1);
         let fname = ft.unsafe_as_str();
         if fname.eq_ignore_ascii_case("unset") {
             Ok(InstrSeq::gather(
@@ -531,7 +531,7 @@ fn emit_using<'a, 'arena, 'decl>(
                 } else {
                     (instr::popc(), None)
                 };
-                let fn_name = hhbc_id::method::from_raw_string(
+                let fn_name = hhbc::MethodName::from_raw_string(
                     alloc,
                     if has_await {
                         "__disposeAsync"
@@ -919,7 +919,7 @@ fn emit_catch<'a, 'arena, 'decl>(
     // Note that this is a "regular" label; we're not going to branch to
     // it directly in the event of an exception.
     let next_catch = e.label_gen_mut().next_regular();
-    let class_id = hhbc_id::class::ClassType::from_ast_name_and_mangle(alloc, &catch_ty.1);
+    let class_id = hhbc::ClassName::from_ast_name_and_mangle(alloc, &catch_ty.1);
     let ast::Lid(_pos, catch_local_id) = catch_lid;
     Ok(InstrSeq::gather(vec![
         instr::dup(),
@@ -1013,11 +1013,11 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
         let exit_label = e.label_gen_mut().next_regular();
         let pop_and_exit_label = e.label_gen_mut().next_regular();
         let async_eager_label = e.label_gen_mut().next_regular();
-        let next_meth = hhbc_id::method::from_raw_string(alloc, "next");
+        let next_meth = hhbc::MethodName::from_raw_string(alloc, "next");
         let iter_init = InstrSeq::gather(vec![
             instr_collection,
             instr::dup(),
-            instr::instanceofd(hhbc_id::class::from_raw_string(alloc, "HH\\AsyncIterator")),
+            instr::instanceofd(hhbc::ClassName::from_raw_string(alloc, "HH\\AsyncIterator")),
             instr::jmpnz(input_is_async_iterator_label),
             emit_fatal::emit_fatal_runtime(
                 alloc,
@@ -1483,7 +1483,7 @@ pub fn emit_final_stmt<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     match &stmt.1 {
         a::Stmt_::Throw(_) | a::Stmt_::Return(_) | a::Stmt_::YieldBreak => emit_stmt(e, env, stmt),
-        a::Stmt_::Block(stmts) => emit_final_stmts(e, env, stmts),
+        a::Stmt_::Block(stmts) => emit_final_stmts(env, e, stmts),
         _ => {
             let ret = emit_dropthrough_return(e, env)?;
             Ok(InstrSeq::gather(vec![emit_stmt(e, env, stmt)?, ret]))
@@ -1492,8 +1492,8 @@ pub fn emit_final_stmt<'a, 'arena, 'decl>(
 }
 
 pub fn emit_final_stmts<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
+    e: &mut Emitter<'arena, 'decl>,
     block: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
     match block {

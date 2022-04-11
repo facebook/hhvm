@@ -97,18 +97,6 @@ void PHPExecutor::execute()
         Debugger::ThreadEventType::ThreadExited
       );
 
-      // Execute any PSPs scheduled by the code that was just evaluated.
-      // Do this only for the dummy thread. Real request threads run their
-      // PSPs at the ordinary time.
-      //
-      // This is queued as a new command so that the PSPs run *AFTER* this
-      // evaluation command returns a value to the debugger client.
-      // NOTE: This also clears the list of PSPs queued by the request.
-      if (!m_debugger->getDebuggerOptions().disableDummyPsPs) {
-        VSCommand* runPspCommand = RunPspCommand::createInstance(m_debugger);
-        m_ri->m_commandQueue.dispatchCommand(runPspCommand);
-      }
-
       if (exitDummyContext) {
         g_context->exitDebuggerDummyEnv();
       }

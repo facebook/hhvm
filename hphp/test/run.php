@@ -527,7 +527,6 @@ function get_options(
     '*hh_single_type_check:' => '',
     'write-to-checkout' => '',
     'bespoke' => '',
-    'lazyclass' => '',
   ];
   $options = new Options() as dynamic;
   $files = vec[];
@@ -918,10 +917,6 @@ function extra_args(Options $options): string {
     $args .= escapeshellarg($options->vendor.'/hh_autoload.php');
   }
 
-  if ($options->lazyclass) {
-    $args .= ' -vEval.EmitClassPointers=2';
-    $args .= ' -vEval.ClassPassesClassname=true';
-  }
   return $args;
 }
 

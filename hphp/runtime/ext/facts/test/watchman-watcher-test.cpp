@@ -50,7 +50,7 @@ struct MockWatchman final : public Watchman {
 
 TEST(WatchmanWatcherTest, sinceAndClockArePassedThrough) {
   auto mockWatchman = std::make_shared<MockWatchman>();
-  auto watcher = make_watchman_watcher(folly::dynamic::object(), *mockWatchman);
+  auto watcher = make_watchman_watcher(folly::dynamic::object(), mockWatchman);
 
   EXPECT_CALL(*mockWatchman, query)
       .WillOnce(Return(
@@ -65,7 +65,7 @@ TEST(WatchmanWatcherTest, sinceAndClockArePassedThrough) {
 
 TEST(WatchmanWatcherTest, filesAndExistenceArePassedThrough) {
   auto mockWatchman = std::make_shared<MockWatchman>();
-  auto watcher = make_watchman_watcher(folly::dynamic::object(), *mockWatchman);
+  auto watcher = make_watchman_watcher(folly::dynamic::object(), mockWatchman);
 
   EXPECT_CALL(*mockWatchman, query)
       .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
@@ -89,7 +89,7 @@ TEST(WatchmanWatcherTest, filesAndExistenceArePassedThrough) {
 
 TEST(WatchmanWatcherTest, malformedWatchmanOutput) {
   auto mockWatchman = std::make_shared<MockWatchman>();
-  auto watcher = make_watchman_watcher(folly::dynamic::object(), *mockWatchman);
+  auto watcher = make_watchman_watcher(folly::dynamic::object(), mockWatchman);
 
   // No "clock" field
   EXPECT_CALL(*mockWatchman, query)
@@ -108,7 +108,7 @@ TEST(WatchmanWatcherTest, malformedWatchmanOutput) {
 
 TEST(WatchmanWatcherTest, querySinceMergebaseIsNotFresh) {
   auto mockWatchman = std::make_shared<MockWatchman>();
-  auto watcher = make_watchman_watcher(folly::dynamic::object(), *mockWatchman);
+  auto watcher = make_watchman_watcher(folly::dynamic::object(), mockWatchman);
 
   // If you didn't give Watchman a local clock, Watchman will return
   // `is_fresh_instance: true` even if you gave it a mergebase. Results from

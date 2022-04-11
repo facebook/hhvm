@@ -1,3 +1,5 @@
+open Hh_prelude
+
 module type Comparator = sig
   type t
 
@@ -15,7 +17,7 @@ module String_comparator = struct
 end
 
 module Int_comparator = struct
-  type t = int
+  type t = int [@@deriving ord]
 
   let to_string x = string_of_int x
 
@@ -71,7 +73,13 @@ module Process_status_comparator = struct
     | Unix.WSIGNALED i -> Printf.sprintf "Unix.WSIGNALED %d" i
     | Unix.WSTOPPED i -> Printf.sprintf "Unix.WSTOPPED %d" i
 
-  let is_equal exp actual = exp = actual
+  let is_equal exp actual =
+    match (exp, actual) with
+    | (Unix.WEXITED i, Unix.WEXITED j)
+    | (Unix.WSIGNALED i, Unix.WSIGNALED j)
+    | (Unix.WSTOPPED i, Unix.WSTOPPED j) ->
+      Int.equal i j
+    | ((Unix.WEXITED _ | Unix.WSIGNALED _ | Unix.WSTOPPED _), _) -> false
 end
 
 module Relative_path_comparator = struct
@@ -79,7 +87,7 @@ module Relative_path_comparator = struct
 
   let to_string = Relative_path.S.to_string
 
-  let is_equal = ( = )
+  let is_equal = Relative_path.equal
 end
 
 module type Pattern_substitutions = sig
@@ -109,11 +117,11 @@ module Pattern_comparator (Substitutions : Pattern_substitutions) = struct
   type t = string
 
   let apply_substitutions s =
-    List.fold_left
-      (fun acc (k, v) ->
+    List.fold
+      ~f:(fun acc (k, v) ->
         let re = Str.regexp ("{" ^ k ^ "}") in
         Str.global_replace re v acc)
-      s
+      ~init:s
       Substitutions.substitutions
 
   (** Argh, due to the signature of Comparator, the "expected" and
@@ -128,7 +136,7 @@ module Pattern_comparator (Substitutions : Pattern_substitutions) = struct
 
   let is_equal expected actual =
     let expected = apply_substitutions expected in
-    expected = actual
+    String.equal expected actual
 end
 
 (** Useful for abstracting on option types. *)
@@ -141,18 +149,16 @@ module Make_option_comparator (Comp : Comparator) :
     | None -> "None"
     | Some v -> Comp.to_string v
 
-  let is_equal exp actual =
-    match (exp, actual) with
-    | (None, None) -> true
-    | (None, Some _)
-    | (Some _, None) ->
-      false
-    | (Some exp, Some actual) -> Comp.is_equal exp actual
+  let is_equal = Option.equal Comp.is_equal
 end
 
-module Make_asserter (Comp : Comparator) = struct
-  module Comp_option = Make_option_comparator (Comp)
+module Make_asserter (Comp : Comparator) : sig
+  val assert_equals : Comp.t -> Comp.t -> string -> unit
 
+  val assert_list_equals : Comp.t list -> Comp.t list -> string -> unit
+
+  val assert_option_equals : Comp.t option -> Comp.t option -> string -> unit
+end = struct
   let assert_equals exp actual failure_msg =
     if Comp.is_equal exp actual then
       ()
@@ -167,9 +173,9 @@ module Make_asserter (Comp : Comparator) = struct
       assert false
 
   let assert_list_equals exp actual failure_msg =
-    if List.length exp = List.length actual then
-      List.iter2
-        (fun exp actual -> assert_equals exp actual failure_msg)
+    if Int.equal (List.length exp) (List.length actual) then
+      List.iter2_exn
+        ~f:(fun exp actual -> assert_equals exp actual failure_msg)
         exp
         actual
     else
@@ -179,13 +185,13 @@ module Make_asserter (Comp : Comparator) = struct
           (List.length exp)
           (List.length actual)
       in
-      let exp_strs = List.map Comp.to_string exp in
-      let actual_strs = List.map Comp.to_string actual in
+      let exp_strs = List.map ~f:Comp.to_string exp in
+      let actual_strs = List.map ~f:Comp.to_string actual in
       let () =
         Printf.eprintf
           "Error: Assertion failure. Expected:\n'%s'\n\n But Found:\n'%s'\n"
-          (String.concat "\n" exp_strs)
-          (String.concat "\n" actual_strs)
+          (String.concat ~sep:"\n" exp_strs)
+          (String.concat ~sep:"\n" actual_strs)
       in
       let () = Printf.eprintf "Assertion msg: %s" failure_msg in
       assert false
@@ -208,13 +214,35 @@ module Make_asserter (Comp : Comparator) = struct
     | (Some exp, Some actual) -> assert_equals exp actual failure_msg
 end
 
+module Make_asserter_ord (Ord : sig
+  include Comparator
+
+  val compare : t -> t -> int
+end) =
+struct
+  include Make_asserter (Ord)
+
+  let assert_leq ~expected ~actual failure_msg =
+    if Ord.compare actual expected <= 0 then
+      ()
+    else
+      let () =
+        Printf.eprintf
+          "Error: assertion failure. Expected result '%s' to be lesser than or equal to '%s'\n"
+          (Ord.to_string actual)
+          (Ord.to_string expected)
+      in
+      let () = Printf.eprintf "Assertion msg: %s\n" failure_msg in
+      assert false
+end
+
 module Hh_json_json_option_comparator =
   Make_option_comparator (Hh_json_json_comparator)
 module Int_option_comparator = Make_option_comparator (Int_comparator)
 module String_asserter = Make_asserter (String_comparator)
 module Bool_asserter = Make_asserter (Bool_comparator)
 module Hh_json_json_asserter = Make_asserter (Hh_json_json_comparator)
-module Int_asserter = Make_asserter (Int_comparator)
+module Int_asserter = Make_asserter_ord (Int_comparator)
 module Process_status_asserter = Make_asserter (Process_status_comparator)
 module Relative_path_asserter = Make_asserter (Relative_path_comparator)
 module Type_name_asserter =

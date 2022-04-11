@@ -56,7 +56,7 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
@@ -1044,9 +1044,14 @@ OPTBLD_INLINE void iopFile() {
 }
 
 OPTBLD_INLINE void iopDir() {
-  auto const filepath = vmfp()->func()->unit()->filepath();
+  auto const p = [&] {
+    if (auto const of = vmfp()->func()->originalFilename()) {
+      return of;
+    }
+    return vmfp()->func()->unit()->filepath();
+  }();
   vmStack().pushStaticString(
-    makeStaticString(FileUtil::dirname(StrNR{filepath}))
+    makeStaticString(FileUtil::dirname(StrNR{p}))
   );
 }
 

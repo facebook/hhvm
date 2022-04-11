@@ -58,6 +58,7 @@ void TypeConstraint::init() {
   auto const mptr = nameToAnnotType(m_typeName);
   if (mptr) {
     m_type = *mptr;
+    assertx(m_type != Type::Object);
     assertx(getAnnotDataType(m_type) != KindOfPersistentString);
     return;
   }
@@ -65,11 +66,15 @@ void TypeConstraint::init() {
     TRACE(5, "TypeConstraint: this %p pre-resolved type %s, treating as %s\n",
           this, m_typeName->data(), tname(getAnnotDataType(m_type)).c_str());
   } else {
-    TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
+    TRACE(5, "TypeConstraint: this %p no such type %s, marking as unresolved\n",
           this, m_typeName->data());
-    m_type = Type::Object;
+    m_type = Type::Unresolved;
   }
-  m_namedEntity = NamedEntity::get(m_typeName);
+  if (isObject()) {
+    m_namedEntity = NamedEntity::get(m_clsName);
+  } else if (isUnresolved()) {
+    m_namedEntity = NamedEntity::get(m_typeName);
+  }
   TRACE(5, "TypeConstraint: this %p NamedEntity: %p\n",
         this, m_namedEntity.get());
 }
@@ -77,8 +82,17 @@ void TypeConstraint::init() {
 bool TypeConstraint::operator==(const TypeConstraint& o) const {
   // The named entity is defined based on the m_typeName and is redundant to
   // include in the equality operation.
-  return m_flags == o.m_flags && m_type == o.m_type &&
-         m_typeName == o.m_typeName;
+  return m_type == o.m_type && m_flags == o.m_flags &&
+         m_clsName == o.m_clsName && m_typeName == o.m_typeName;
+}
+
+size_t TypeConstraint::stableHash() const {
+  return folly::hash::hash_combine(
+    std::hash<AnnotType>()(m_type),
+    std::hash<TypeConstraintFlags>()(m_flags),
+    m_clsName ? m_clsName->hashStatic() : 0,
+    m_typeName->hashStatic()
+  );
 }
 
 std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
@@ -128,7 +142,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
   }
   name += str;
 
-  if (extra && m_flags & Flags::Resolved && m_type != AnnotType::Object) {
+  if (extra && m_flags & Flags::Resolved) {
     const char* str = nullptr;
     switch (m_type) {
       case AnnotType::Nothing:  str = "nothing"; break;
@@ -148,11 +162,13 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
       case AnnotType::ArrayLike: str = "AnyArray"; break;
       case AnnotType::Nonnull:  str = "nonnull"; break;
       case AnnotType::Classname: str = "classname"; break;
+      case AnnotType::Object:   str = clsName()->data(); break;
       case AnnotType::This:
-      case AnnotType::Object:
       case AnnotType::Mixed:
       case AnnotType::Callable:
         break;
+      case AnnotType::Unresolved:
+        not_reached();
     }
     if (str) folly::format(&name, " ({})", str);
   }
@@ -218,70 +234,67 @@ getNamedTypeWithAutoload(const NamedEntity* ne,
 
 }
 
+TypeConstraint TypeConstraint::resolvedWithAutoload() const {
+  auto copy = *this;
+
+  // Nothing to do if we are not unresolved.
+  if (!isUnresolved()) return copy;
+
+  auto const p = getNamedTypeWithAutoload(typeNamedEntity(), typeName());
+
+  // Type alias.
+  if (auto const ptd = boost::get<const TypeAlias*>(&p)) {
+    auto const td = *ptd;
+    auto const typeName = td->klass ? td->klass->name() : nullptr;
+    copy.resolveType(td->type, td->nullable, typeName);
+    return copy;
+  }
+
+  // Enum.
+  if (auto const pcls = boost::get<Class*>(&p)) {
+    auto const cls = *pcls;
+    if (cls && isEnum(cls)) {
+      auto const type = cls->enumBaseTy()
+        ? enumDataTypeToAnnotType(*cls->enumBaseTy())
+        : AnnotType::ArrayKey;
+      copy.resolveType(type, false, nullptr);
+      return copy;
+    }
+  }
+
+  // Existing or non-existing class.
+  copy.resolveType(AnnotType::Object, false, typeName());
+  return copy;
+}
+
 MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
   assertx(!isCallable());
   assertx(IMPLIES(
     !hasConstraint() || isTypeVar() || isTypeConstant(),
     isMixed()));
 
-  if (!isPrecise()) return std::nullopt;
-
-  auto t = underlyingDataType();
-  assertx(t);
-
-  // If we aren't a class or type alias, nothing special to do.
-  if (!isObject()) return t;
-
-  assertx(t == KindOfObject);
-  auto p = getNamedTypeWithAutoload(m_namedEntity, m_typeName);
-
-  auto ptd = boost::get<const TypeAlias*>(&p);
-  auto td = ptd ? *ptd : nullptr;
-  auto pc = boost::get<Class*>(&p);
-  auto c = pc ? *pc : nullptr;
-
-  // See if this is a type alias.
-  if (td) {
-    if (td->type != Type::Object) {
-      auto const metatype = getAnnotMetaType(td->type);
-      if (metatype == MetaType::Precise) {
-        t = getAnnotDataType(td->type);
-      } else {
-        t = std::nullopt;
-      }
-    } else {
-      c = td->klass;
-    }
-  }
-
-  // If the underlying type is a class, see if it is an enum and get that.
-  if (c && isEnum(c)) {
-    t = c->enumBaseTy();
-  }
-
-  return t;
+  auto const resolved = resolvedWithAutoload();
+  return resolved.isPrecise() ? resolved.underlyingDataType() : std::nullopt;
 }
 
 bool TypeConstraint::isMixedResolved() const {
   if (!isCheckable()) return true;
   // isCheckable() implies !isMixed(), so if its not an unresolved object here,
   // we know it cannot be mixed.
-  if (!isObject() || isResolved()) return false;
-  auto v = getNamedTypeWithAutoload(m_namedEntity, m_typeName);
-  auto const pTyAlias = boost::get<const TypeAlias*>(&v);
-  return pTyAlias && (*pTyAlias)->type == AnnotType::Mixed;
+  if (!isUnresolved()) return false;
+  return !resolvedWithAutoload().isCheckable();
 }
 
 bool TypeConstraint::maybeMixed() const {
   if (!isCheckable()) return true;
   // isCheckable() implies !isMixed(), so if its not an unresolved object here,
   // we know it cannot be mixed.
-  if (!isObject() || isResolved()) return false;
-  if (auto const def = m_namedEntity->getCachedTypeAlias()) {
+  if (!isUnresolved()) return false;
+  if (auto const def = typeNamedEntity()->getCachedTypeAlias()) {
     return def->type == AnnotType::Mixed;
   }
   // If its a known class, its definitely not mixed. Otherwise it might be.
-  return !Class::lookup(m_namedEntity);
+  return !Class::lookup(typeNamedEntity());
 }
 
 bool
@@ -296,11 +309,16 @@ TypeConstraint::maybeInequivalentForProp(const TypeConstraint& other) const {
 
   if (isNullable() != other.isNullable()) return true;
 
-  if (isObject()) {
+  if (isObject() && other.isObject()) return !clsName()->isame(other.clsName());
+
+  if (isObject() || isUnresolved()) {
     // Type-hints with the same name should always be the same thing
-    return !other.isObject() || !m_typeName->isame(other.m_typeName);
+    // TODO: take advantage of clsName() if one of them is object
+    return
+      (!other.isObject() && !other.isUnresolved()) ||
+      !typeName()->isame(other.typeName());
   }
-  if (other.isObject()) return true;
+  if (other.isObject() || other.isUnresolved()) return true;
   return type() != other.type();
 }
 
@@ -310,15 +328,21 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
 
   if (isSoft() != other.isSoft()) return false;
 
-  if (isObject() && other.isObject() &&
+  if (isObject() && other.isObject()) return clsName()->isame(other.clsName());
+
+  if ((isObject() || isUnresolved()) &&
+      (other.isObject() || other.isUnresolved()) &&
       isNullable() == other.isNullable() &&
-      m_typeName->isame(other.m_typeName)) {
+      typeName()->isame(other.typeName())) {
     // We can avoid having to resolve the type-hint if they have the same name.
+    // TODO: take advantage of clsName() if one of them is object
     return true;
   }
 
-  auto const resolve = [&] (const TypeConstraint& tc)
-    -> std::tuple<AnnotType, Class*, bool> {
+  auto const resolve = [&] (const TypeConstraint& origTC)
+    -> std::tuple<AnnotType, const StringData*, bool> {
+    auto const tc = origTC.resolvedWithAutoload();
+
     if (!tc.isCheckable()) {
       return std::make_tuple(AnnotType::Mixed, nullptr, false);
     }
@@ -332,74 +356,34 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
       case MetaType::ArrayLike:
       case MetaType::Classname:
       case MetaType::Precise:
-        if (!tc.isObject()) {
-          return std::make_tuple(tc.type(), nullptr, tc.isNullable());
-        }
-        break;
+        return std::make_tuple(tc.type(), tc.clsName(), tc.isNullable());
       case MetaType::Nothing:
       case MetaType::NoReturn:
       case MetaType::Callable:
       case MetaType::Mixed:
+      case MetaType::Unresolved:
         always_assert(false);
     }
-
-    assertx(tc.isObject());
-
-    const TypeAlias* tyAlias = nullptr;
-    Class* klass = nullptr;
-    auto v =
-      getNamedTypeWithAutoload(tc.m_namedEntity, tc.m_typeName);
-    if (auto pT = boost::get<const TypeAlias*>(&v)) {
-      tyAlias = *pT;
-    }
-    if (auto pK = boost::get<Class*>(&v)) {
-      klass = *pK;
-    }
-    auto nullable = tc.isNullable();
-    auto at = AnnotType::Object;
-    if (tyAlias) {
-      nullable |= tyAlias->nullable;
-      at = tyAlias->type;
-      klass = (at == Type::Object) ? tyAlias->klass : nullptr;
-    }
-
-    if (klass && isEnum(klass)) {
-      auto const maybeDt = klass->enumBaseTy();
-      at = maybeDt ? enumDataTypeToAnnotType(*maybeDt) : AnnotType::ArrayKey;
-      klass = nullptr;
-    }
-
-    if (at == AnnotType::Mixed) nullable = false;
-    return std::make_tuple(at, klass, nullable);
+    not_reached();
   };
 
-  auto const resolved1 = resolve(*this);
-  auto const resolved2 = resolve(other);
-  if (resolved1 != resolved2) return false;
-
-  // The resolutions are the same. However, both could have failed to resolve to
-  // anything. In that case, rely on their name.
-  auto const resType = std::get<0>(resolved1);
-  if (resType == AnnotType::Object && !std::get<1>(resolved1)) {
-    return m_typeName->isame(other.m_typeName);
-  }
-  return true;
+  return resolve(*this) == resolve(other);
 }
 
 template <bool Assert, bool ForProp>
 bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
   assertx(val.type() != KindOfObject);
-  assertx(isObject());
+  assertx(isUnresolved());
 
   auto const p = [&]() ->
     boost::variant<const TypeAlias*, Class*> {
     if (!Assert) {
-      return getNamedTypeWithAutoload(m_namedEntity, m_typeName);
+      return getNamedTypeWithAutoload(typeNamedEntity(), typeName());
     }
-    if (auto const def = m_namedEntity->getCachedTypeAlias()) {
+    if (auto const def = typeNamedEntity()->getCachedTypeAlias()) {
       return def;
     }
-    return Class::lookup(m_namedEntity);
+    return Class::lookup(typeNamedEntity());
   }();
   auto ptd = boost::get<const TypeAlias*>(&p);
   auto td = ptd ? *ptd : nullptr;
@@ -418,10 +402,6 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
       case AnnotAction::Fail: return false;
       case AnnotAction::CallableCheck:
         return !ForProp && (Assert || is_callable(tvAsCVarRef(*val)));
-      case AnnotAction::ObjectCheck:
-        assertx(td->type == AnnotType::Object);
-        c = td->klass;
-        break;
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
       case AnnotAction::WarnLazyClass:
@@ -433,10 +413,12 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         assertx(RuntimeOption::EvalClassnameNotices);
         if (!Assert) raise_notice(Strings::CLASS_TO_CLASSNAME);
         return true;
+      case AnnotAction::ObjectCheck:
+      case AnnotAction::Fallback:
+      case AnnotAction::FallbackCoerce:
+        not_reached();
     }
-    assertx(result == AnnotAction::ObjectCheck);
-    // Fall through to the check below, since this could be a type alias to
-    // an enum type
+    not_reached();
   }
 
   // Otherwise, this isn't a proper type alias, but it *might* be a
@@ -458,15 +440,15 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
 
 template <bool Assert>
 bool TypeConstraint::checkTypeAliasImpl(const Class* type) const {
-  assertx(isObject() && m_namedEntity && m_typeName);
+  assertx(isUnresolved());
 
   // Look up the type alias (autoloading if necessary)
   // and fail if we can't find it
   auto const td = [&]{
     if (!Assert) {
-      return getTypeAliasWithAutoload(m_namedEntity, m_typeName);
+      return getTypeAliasWithAutoload(typeNamedEntity(), typeName());
     }
-    return m_namedEntity->getCachedTypeAlias();
+    return typeNamedEntity()->getCachedTypeAlias();
   }();
   if (!td) return Assert;
 
@@ -492,6 +474,9 @@ bool TypeConstraint::checkTypeAliasImpl(const Class* type) const {
     case AnnotMetaType::ArrayLike:
     case AnnotMetaType::Classname:  // TODO: T83332251
       return false;
+    case AnnotMetaType::Unresolved:
+      not_reached();
+      break;
   }
   not_reached();
 }
@@ -519,58 +504,68 @@ bool TypeConstraint::checkImpl(tv_rval val,
   if (isNullable() && val.type() == KindOfNull) return true;
 
   if (val.type() == KindOfObject) {
-    // Perfect match seems common enough to be worth skipping the hash
-    // table lookup.
-    const Class *c = nullptr;
-    if (isObject()) {
-      if (m_typeName->isame(val.val().pobj->getVMClass()->name())) {
-        return true;
-      }
-      // We can't save the Class* since it might move around from request to
-      // request.
-      assertx(m_namedEntity);
-      c = Class::lookup(m_namedEntity);
+    auto const tryCls = [&](const StringData* clsName, const NamedEntity* ne) {
+      // Perfect match seems common enough to be worth skipping the hash
+      // table lookup.
+      if (clsName->isame(val.val().pobj->getVMClass()->name())) return true;
+
+      assertx(ne);
+      auto const cls = Class::lookup(ne);
+
       // If we're being conservative we can only use the class if its persistent
       // (otherwise what we infer may not be valid in all requests).
-      if (isPasses && c && !classHasPersistentRDS(c)) c = nullptr;
-    } else {
-      switch (metaType()) {
-        case MetaType::This:
-          if (isAssert) return true;
-          if (isPasses) return false;
-          return val.val().pobj->getVMClass() == context;
-        case MetaType::Callable:
-          assertx(!isProp);
-          if (isAssert) return true;
-          if (isPasses) return false;
-          return is_callable(tvAsCVarRef(*val));
-        case MetaType::Nothing:
-        case MetaType::NoReturn:
-          assertx(!isProp);
-          // fallthrogh
-        case MetaType::Precise:
-        case MetaType::Number:
-        case MetaType::ArrayKey:
-        case MetaType::VecOrDict:
-        case MetaType::ArrayLike:
-        case MetaType::Classname:
-          return false;
-        case MetaType::Nonnull:
-          return true;
-        case MetaType::Mixed:
-          // We assert'd at the top of this function that the
-          // metatype cannot be Mixed
-          not_reached();
-      }
+      return
+        cls &&
+        (!isPasses || classHasPersistentRDS(cls)) &&
+        val.val().pobj->instanceof(cls);
+    };
+
+    if (isObject()) {
+      return tryCls(clsName(), clsNamedEntity());
     }
-    if (c && val.val().pobj->instanceof(c)) {
-      return true;
+
+    if (isUnresolved()) {
+      if (tryCls(typeName(), typeNamedEntity())) return true;
+      if (isPasses) return false;
+      return checkTypeAliasImpl<isAssert>(val.val().pobj->getVMClass());
     }
-    return isObject() && !isPasses &&
-      checkTypeAliasImpl<isAssert>(val.val().pobj->getVMClass());
+
+    switch (metaType()) {
+      case MetaType::This:
+        if (isAssert) return true;
+        if (isPasses) return false;
+        return val.val().pobj->getVMClass() == context;
+      case MetaType::Callable:
+        assertx(!isProp);
+        if (isAssert) return true;
+        if (isPasses) return false;
+        return is_callable(tvAsCVarRef(*val));
+      case MetaType::Nothing:
+      case MetaType::NoReturn:
+        assertx(!isProp);
+        // fallthrough
+      case MetaType::Precise:
+      case MetaType::Number:
+      case MetaType::ArrayKey:
+      case MetaType::VecOrDict:
+      case MetaType::ArrayLike:
+      case MetaType::Classname:
+        return false;
+      case MetaType::Nonnull:
+        return true;
+      case MetaType::Mixed:
+        // We assert'd at the top of this function that the
+        // metatype cannot be Mixed.
+        not_reached();
+      case MetaType::Unresolved:
+        // Unresolved was handled above.
+        not_reached();
+    }
+    not_reached();
   }
 
-  auto const result = annotCompat(val.type(), m_type, m_typeName);
+  auto const name = isObject() ? clsName() : typeName();
+  auto const result = annotCompat(val.type(), m_type, name);
   switch (result) {
     case AnnotAction::Pass: return true;
     case AnnotAction::Fail: return false;
@@ -579,8 +574,9 @@ bool TypeConstraint::checkImpl(tv_rval val,
       if (isAssert) return true;
       if (isPasses) return false;
       return is_callable(tvAsCVarRef(*val));
-    case AnnotAction::ObjectCheck:
-      assertx(isObject());
+    case AnnotAction::Fallback:
+    case AnnotAction::FallbackCoerce:
+      assertx(isUnresolved());
       return !isPasses && checkNamedTypeNonObj<isAssert, isProp>(val);
     case AnnotAction::WarnClass:
     case AnnotAction::ConvertClass:
@@ -594,6 +590,8 @@ bool TypeConstraint::checkImpl(tv_rval val,
       assertx(RuntimeOption::EvalClassnameNotices);
       if (!isAssert) raise_notice(Strings::CLASS_TO_CLASSNAME);
       return true;
+    case AnnotAction::ObjectCheck:
+      not_reached();
   }
   not_reached();
 }
@@ -615,46 +613,28 @@ template bool TypeConstraint::checkImpl<TypeConstraint::CheckMode::Assert>(
   const Class*
 ) const;
 
-bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
+bool TypeConstraint::alwaysPasses(const StringData* checkedClsName) const {
   if (!isCheckable()) return true;
 
-  if (isObject()) {
+  auto const tryCls = [&](const StringData* clsName, const NamedEntity* ne) {
     // Same name is always a match.
-    if (m_typeName->isame(clsName)) return true;
+    if (clsName->isame(checkedClsName)) return true;
 
-    assertx(m_namedEntity);
-    auto const c1 = Class::lookup(clsName);
-    auto const c2 = Class::lookup(m_namedEntity);
+    assertx(ne);
+    auto const c1 = Class::lookup(checkedClsName);
+    auto const c2 = Class::lookup(ne);
     // If both names map to persistent classes we can just check for a subtype
     // relationship.
-    if (c1 && c2 &&
-        classHasPersistentRDS(c1) &&
-        classHasPersistentRDS(c2) &&
-        c1->classof(c2)) return true;
-
-    auto const result = annotCompat(KindOfObject, m_type, m_typeName);
-    switch (result) {
-      case AnnotAction::Pass:
-        return true;
-      case AnnotAction::Fail:
-      case AnnotAction::CallableCheck:
-      case AnnotAction::ObjectCheck:
-        return false;
-      case AnnotAction::WarnClass:
-      case AnnotAction::ConvertClass:
-      case AnnotAction::WarnLazyClass:
-      case AnnotAction::ConvertLazyClass:
-      case AnnotAction::WarnClassname:
-        // Can't get these with objects
-        break;
-    }
-    not_reached();
-  }
+    return
+      c1 && c2 &&
+      classHasPersistentRDS(c1) &&
+      classHasPersistentRDS(c2) &&
+      c1->classof(c2);
+  };
 
   switch (metaType()) {
     case MetaType::This:
     case MetaType::Callable:
-    case MetaType::Precise:
     case MetaType::Nothing:
     case MetaType::NoReturn:
     case MetaType::Number:
@@ -665,6 +645,11 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
       return false;
     case MetaType::Nonnull:
       return true;
+    case MetaType::Precise:
+      if (isObject()) return tryCls(clsName(), clsNamedEntity());
+      return false;
+    case MetaType::Unresolved:
+      return tryCls(typeName(), typeNamedEntity());
     case MetaType::Mixed:
       // We check at the top of this function that the metatype cannot be
       // Mixed
@@ -680,11 +665,14 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
 
   if (isNullable() && dt == KindOfNull) return true;
 
-  auto const result = annotCompat(dt, m_type, m_typeName);
+  auto const name = isObject() ? clsName() : typeName();
+  auto const result = annotCompat(dt, m_type, name);
   switch (result) {
     case AnnotAction::Pass:
       return true;
     case AnnotAction::Fail:
+    case AnnotAction::Fallback:
+    case AnnotAction::FallbackCoerce:
     case AnnotAction::CallableCheck:
     case AnnotAction::ObjectCheck:
     case AnnotAction::WarnClass:
@@ -810,11 +798,12 @@ std::string describe_actual_type(tv_rval val) {
 
 bool TypeConstraint::checkStringCompatible() const {
   if (isString() || isArrayKey() ||
-      (isObject() && interface_supports_string(m_typeName))) {
+      (isObject() && interface_supports_string(clsName())) ||
+      (isUnresolved() && interface_supports_string(typeName()))) {
     return true;
   }
-  if (!isObject()) return false;
-  auto p = getNamedTypeWithAutoload(m_namedEntity, m_typeName);
+  if (!isUnresolved()) return false;
+  auto p = getNamedTypeWithAutoload(typeNamedEntity(), typeName());
   if (auto ptd = boost::get<const TypeAlias*>(&p)) {
     auto td = *ptd;
     return td->type == AnnotType::String ||
@@ -857,7 +846,9 @@ bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
 }
 
 bool TypeConstraint::maybeStringCompatible() const {
-  return isString() || isArrayKey() || isObject();
+  return
+    isString() || isArrayKey() || isUnresolved() ||
+    (isObject() && interface_supports_string(clsName()));
 }
 
 void TypeConstraint::verifyParamFail(tv_lval val,
@@ -1031,7 +1022,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
   switch (tc.metaType()) {
     case AnnotMetaType::Precise: {
       auto const dt = tc.underlyingDataType();
-      assertx(dt.has_value());
+      if (!dt) return MK::None;
       switch (*dt) {
         case KindOfBoolean:
           return tc.isNullable() ? MK::BoolOrNull : MK::Bool;
@@ -1076,6 +1067,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::Number:
     case AnnotMetaType::VecOrDict:
     case AnnotMetaType::ArrayLike:
+    case AnnotMetaType::Unresolved:
       return MK::None;
   }
   not_reached();

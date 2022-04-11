@@ -5,11 +5,10 @@
 
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
-use hhas_attribute::HhasAttribute;
+use hhbc::{hhas_attribute::HhasAttribute, TypedValue};
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::ast as a;
-use typed_value::TypedValue;
 
 pub fn from_asts<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
@@ -38,7 +37,7 @@ pub fn from_ast<'arena, 'decl>(
         // don't do anything to builtin attributes
         &attr.name.1
     } else {
-        hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, &attr.name.1).unsafe_as_str()
+        hhbc::ClassName::from_ast_name_and_mangle(e.alloc, &attr.name.1).unsafe_as_str()
     };
     Ok(HhasAttribute {
         name: e.alloc.alloc_str(fully_qualified_id).into(),

@@ -1,2 +1,2 @@
 File "foreach_bad_lvalue.php", line 13, characters 25-26:
-literal is not allowed in write context (Parsing[1002])
+You cannot use this syntax as the iterator variable in a `foreach` loop. (Parsing[1002])

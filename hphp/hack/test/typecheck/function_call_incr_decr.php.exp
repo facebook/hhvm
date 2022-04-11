@@ -1,1 +1,4 @@
-No errors
+File "function_call_incr_decr.php", line 8, characters 3-12:
+You cannot use this syntax with an increment or decrement statement. (Parsing[1002])
+File "function_call_incr_decr.php", line 9, characters 3-12:
+You cannot use this syntax with an increment or decrement statement. (Parsing[1002])

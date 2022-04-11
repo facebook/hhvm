@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 
 #include "hphp/runtime/vm/func-emitter.h"
-#include "hphp/runtime/vm/litarray-table.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -195,10 +194,10 @@ struct Blob {
   BlobDecoder decoder;
 };
 
-Blob loadBlob(const FD& fd, size_t offset, size_t size, bool useGlobalIds) {
+Blob loadBlob(const FD& fd, size_t offset, size_t size) {
   auto buffer = std::make_unique<char[]>(size);
   if (size > 0) fd.pread(buffer.get(), size, offset);
-  BlobDecoder decoder{buffer.get(), size, useGlobalIds};
+  BlobDecoder decoder{buffer.get(), size};
   return { std::move(buffer), std::move(decoder) };
 }
 
@@ -233,9 +232,6 @@ constexpr uint16_t kCurrentVersion = 1;
 constexpr size_t kGlobalDataSizeLimit        = 1ull << 28;
 constexpr size_t kUnitEmittersIndexSizeLimit = 1ull << 32;
 constexpr size_t kAutoloadMapSizeLimit       = 1ull << 32;
-constexpr size_t kArrayTableSizeLimit        = 1ull << 33;
-constexpr size_t kArrayTypesSizeLimit        = 1ull << 28;
-constexpr size_t kLiteralTableSizeLimit      = 1ull << 33;
 constexpr size_t kUnitEmitterSizeLimit       = 1ull << 33;
 
 // Blob of data containing the sizes of the various sections. This is
@@ -247,27 +243,18 @@ struct SizeHeader {
   uint64_t unitEmittersIndexSize = 0;
   uint64_t globalDataSize        = 0;
   uint64_t autoloadMapSize       = 0;
-  uint64_t arrayTableSize        = 0;
-  uint64_t arrayTypesSize        = 0;
-  uint64_t literalTableSize      = 0;
 
   constexpr static size_t kFileSize =
     sizeof(unitEmittersSize) +
     sizeof(unitEmittersIndexSize) +
     sizeof(globalDataSize) +
-    sizeof(autoloadMapSize) +
-    sizeof(arrayTableSize) +
-    sizeof(arrayTypesSize) +
-    sizeof(literalTableSize);
+    sizeof(autoloadMapSize);
 
   void write(const FD& fd) const {
     writeInt(fd, unitEmittersSize);
     writeInt(fd, unitEmittersIndexSize);
     writeInt(fd, globalDataSize);
     writeInt(fd, autoloadMapSize);
-    writeInt(fd, arrayTableSize);
-    writeInt(fd, arrayTypesSize);
-    writeInt(fd, literalTableSize);
   }
 
   void read(const FD& fd) {
@@ -275,9 +262,6 @@ struct SizeHeader {
     unitEmittersIndexSize = readInt<decltype(unitEmittersIndexSize)>(fd);
     globalDataSize        = readInt<decltype(globalDataSize)>(fd);
     autoloadMapSize       = readInt<decltype(autoloadMapSize)>(fd);
-    arrayTableSize        = readInt<decltype(arrayTableSize)>(fd);
-    arrayTypesSize        = readInt<decltype(arrayTypesSize)>(fd);
-    literalTableSize      = readInt<decltype(literalTableSize)>(fd);
   }
 };
 
@@ -361,7 +345,7 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
   {
     // Verify in debug builds that all SNs are unique.
     DEBUG_ONLY hphp_fast_set<int64_t> seenSN;
-    BlobEncoder encoder{true};
+    BlobEncoder encoder;
 
     always_assert(
       m_data->unitEmittersIndex.size() <= std::numeric_limits<uint32_t>::max()
@@ -381,7 +365,7 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
 
   // Global data
   {
-    BlobEncoder encoder{false};
+    BlobEncoder encoder;
     encoder(global);
     m_data->fd.write(encoder.data(), encoder.size());
     m_data->sizes.globalDataSize = encoder.size();
@@ -390,80 +374,11 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
 
   // Repo autoload map
   {
-    BlobEncoder encoder{true};
+    BlobEncoder encoder;
     autoloadMap.serde(encoder);
     m_data->fd.write(encoder.data(), encoder.size());
     m_data->sizes.autoloadMapSize = encoder.size();
     always_assert(m_data->sizes.autoloadMapSize <= kAutoloadMapSizeLimit);
-  }
-
-  // Literal array table
-  {
-    MemoryManager::SuppressOOM so(*tl_heap);
-
-    auto& litarrayTable = LitarrayTable::get();
-    litarrayTable.setReading();
-
-    BlobEncoder encoder{true};
-
-    auto const numLitarrays = litarrayTable.numLitarrays();
-    always_assert(
-      numLitarrays <= std::numeric_limits<uint32_t>::max()
-    );
-    encoder((uint32_t)numLitarrays);
-    DEBUG_ONLY int next = 0;
-    LitarrayTable::get().forEachLitarray(
-      [&] (int i, const ArrayData* arr) {
-        assertx(i == next);
-        auto const str = [&]{
-          VariableSerializer vs{VariableSerializer::Type::Internal};
-          return
-            vs.serializeValue(VarNR(const_cast<ArrayData*>(arr)), false)
-            .toCppString();
-        }();
-        encoder(str);
-        ++next;
-      }
-    );
-    assertx(next == numLitarrays);
-    m_data->fd.write(encoder.data(), encoder.size());
-    m_data->sizes.arrayTableSize = encoder.size();
-    always_assert(m_data->sizes.arrayTableSize <= kArrayTableSizeLimit);
-  }
-
-  // Global array type table
-  {
-    BlobEncoder encoder{true};
-    globalArrayTypeTable().serde(encoder);
-    m_data->fd.write(encoder.data(), encoder.size());
-    m_data->sizes.arrayTypesSize = encoder.size();
-    always_assert(m_data->sizes.arrayTypesSize <= kArrayTypesSizeLimit);
-  }
-
-  // Literal string table
-  {
-    auto& litstrTable = LitstrTable::get();
-    litstrTable.setReading();
-
-    BlobEncoder encoder{false};
-
-    auto const numLitstrs = litstrTable.numLitstrs();
-    always_assert(
-      numLitstrs <= std::numeric_limits<uint32_t>::max()
-    );
-    encoder((uint32_t)numLitstrs);
-    DEBUG_ONLY int next = 1;
-    LitstrTable::get().forEachLitstr(
-      [&] (int i, const StringData* name) {
-        assertx(i == next);
-        encoder(name);
-        ++next;
-      }
-    );
-    assertx(next == numLitstrs);
-    m_data->fd.write(encoder.data(), encoder.size());
-    m_data->sizes.literalTableSize = encoder.size();
-    always_assert(m_data->sizes.literalTableSize <= kLiteralTableSizeLimit);
   }
 
   // All the sizes are updated, so now go patch the size table.
@@ -490,8 +405,7 @@ RepoFileBuilder::EncodedUE::EncodedUE(const UnitEmitter& ue)
   : path{ue.m_filepath}
   , sn{ue.m_sn}
 {
-  BlobEncoder encoder{ue.useGlobalIds()};
-  encoder(ue.useGlobalIds());
+  BlobEncoder encoder;
   const_cast<UnitEmitter&>(ue).serde(encoder, false);
   blob = encoder.take();
 }
@@ -506,8 +420,6 @@ struct Bounds {
   size_t offset = 0;
   size_t size = 0;
 };
-
-using StringOrToken = TokenOrPtr<const StringData>;
 
 struct UnitInfo {
   UnsafeLockFreePtrWrapper<StringOrToken> path;
@@ -534,20 +446,12 @@ struct RepoFileData {
   uint64_t unitEmittersIndexOffset = 0;
   uint64_t globalDataOffset = 0;
   uint64_t autoloadMapOffset = 0;
-  uint64_t arrayTableOffset = 0;
-  uint64_t arrayTypesOffset = 0;
-  uint64_t literalTableOffset = 0;
 
   RepoGlobalData globalData;
 
   hphp_fast_map<SHA1, int64_t, SHA1Hasher> pathToSN;
   std::vector<UnitInfo> unitInfo;
 
-  std::vector<Bounds> literals;
-  std::vector<Bounds> arrays;
-
-  std::atomic<bool> loadedLitstrTable{false};
-  std::atomic<bool> loadedLitarrayTable{false};
   std::atomic<bool> loadedUnitEmitterIndices{false};
 };
 
@@ -585,8 +489,7 @@ const StringData* UnitInfo::getPath(const RepoFileData& data) {
         auto blob = loadBlob(
           data.fd,
           data.unitEmittersIndexOffset + token,
-          firstSize,
-          true
+          firstSize
         );
 
         actualSize = blob.decoder.peekStdStringSize();
@@ -603,8 +506,7 @@ const StringData* UnitInfo::getPath(const RepoFileData& data) {
       auto blob = loadBlob(
         data.fd,
         data.unitEmittersIndexOffset + token,
-        actualSize,
-        true
+        actualSize
       );
       std::string pathStr;
       blob.decoder(pathStr);
@@ -708,18 +610,6 @@ void RepoFile::init(const std::string& path) {
     data.autoloadMapOffset = offset;
     offset += data.sizes.autoloadMapSize;
 
-    check("arrays", data.sizes.arrayTableSize, kArrayTableSizeLimit);
-    data.arrayTableOffset = offset;
-    offset += data.sizes.arrayTableSize;
-
-    check("array-types", data.sizes.arrayTypesSize, kArrayTypesSizeLimit);
-    data.arrayTypesOffset = offset;
-    offset += data.sizes.arrayTypesSize;
-
-    check("literals", data.sizes.literalTableSize, kLiteralTableSizeLimit);
-    data.literalTableOffset = offset;
-    offset += data.sizes.literalTableSize;
-
     always_assert_flog(
       offset == data.fileSize,
       "Corrupted size table for {}: "
@@ -733,8 +623,7 @@ void RepoFile::init(const std::string& path) {
     auto blob = loadBlob(
       data.fd,
       data.globalDataOffset,
-      data.sizes.globalDataSize,
-      false
+      data.sizes.globalDataSize
     );
     blob.decoder(data.globalData);
     blob.decoder.assertDone();
@@ -759,112 +648,18 @@ const RepoGlobalData& RepoFile::globalData() {
   return s_repoFileData->globalData;
 }
 
-void RepoFile::loadGlobalTables(bool lazyLiterals) {
+void RepoFile::loadGlobalTables() {
   assertx(s_repoFileData);
-  assertx(!s_repoFileData->loadedLitstrTable.load());
-  assertx(!s_repoFileData->loadedLitarrayTable.load());
   assertx(!s_repoFileData->loadedUnitEmitterIndices.load());
 
   auto& data = *s_repoFileData;
-
-  // Literal strings. We need to do this first because other sections
-  // might want to use literals.
-  {
-    auto blob = loadBlob(
-      data.fd,
-      data.literalTableOffset,
-      data.sizes.literalTableSize,
-      false
-    );
-
-    auto& table = LitstrTable::get();
-    assertx(table.numLitstrs() == 0);
-
-    uint32_t numLitstrs;
-    blob.decoder(numLitstrs);
-
-    assertx(data.literals.empty());
-    data.literals.reserve(numLitstrs);
-
-    NamedEntityPairTable namedInfo;
-    namedInfo.resize(numLitstrs, LowStringPtr{nullptr});
-    table.setNamedEntityPairTable(std::move(namedInfo));
-
-    for (size_t id = 1; id < numLitstrs; ++id) {
-      auto const offset = blob.decoder.advanced();
-      if (!lazyLiterals) {
-        const StringData* litstr;
-        blob.decoder(litstr);
-        table.setLitstr(id, litstr);
-      } else {
-        BlobEncoderHelper<const StringData*>::skip(blob.decoder);
-      }
-      auto const post = blob.decoder.advanced();
-      assertx(post >= offset);
-      data.literals.emplace_back(Bounds{offset, post - offset});
-    }
-    blob.decoder.assertDone();
-    data.loadedLitstrTable.store(true);
-  }
-
-  // Arrays
-  {
-    auto blob = loadBlob(
-      data.fd,
-      data.arrayTableOffset,
-      data.sizes.arrayTableSize,
-      true
-    );
-
-    auto& table = LitarrayTable::get();
-    assertx(table.numLitarrays() == 0);
-
-    uint32_t numLitarrays;
-    blob.decoder(numLitarrays);
-
-    assertx(data.arrays.empty());
-    data.arrays.reserve(numLitarrays);
-
-    LitarrayTableData tableData;
-    tableData.resize(numLitarrays, nullptr);
-    table.setTable(std::move(tableData));
-
-    for (size_t id = 0; id < numLitarrays; ++id) {
-      auto const offset = blob.decoder.advanced();
-      if (!lazyLiterals) {
-        std::string str;
-        blob.decoder(str);
-
-        auto v = [&]{
-          VariableUnserializer vu{
-            str.data(),
-            str.size(),
-            VariableUnserializer::Type::Internal
-          };
-          return vu.unserialize();
-        }();
-        assertx(v.isArray());
-        auto arr = v.detach().m_data.parr;
-        ArrayData::GetScalarArray(&arr);
-        table.setLitarray(id, arr);
-      } else {
-        blob.decoder.skipStdString();
-      }
-      auto const post = blob.decoder.advanced();
-      assertx(post >= offset);
-      data.arrays.emplace_back(Bounds{offset, post - offset});
-    }
-    blob.decoder.assertDone();
-    data.loadedLitarrayTable.store(true);
-  }
 
   // Unit emitter indices
   {
     auto blob = loadBlob(
       data.fd,
       data.unitEmittersIndexOffset,
-      data.sizes.unitEmittersIndexSize,
-      true
+      data.sizes.unitEmittersIndexSize
     );
 
     uint32_t count;
@@ -931,90 +726,18 @@ void RepoFile::loadGlobalTables(bool lazyLiterals) {
     data.loadedUnitEmitterIndices.store(true);
   }
 
-  // Global array type table
-  {
-    assertx(globalArrayTypeTable().empty());
-    auto blob = loadBlob(
-      data.fd,
-      data.arrayTypesOffset,
-      data.sizes.arrayTypesSize,
-      true
-    );
-    globalArrayTypeTable().serde(blob.decoder);
-    blob.decoder.assertDone();
-  }
-
   // Repo autoload map
   {
     auto blob = loadBlob(
       data.fd,
       data.autoloadMapOffset,
-      data.sizes.autoloadMapSize,
-      true
+      data.sizes.autoloadMapSize
     );
     AutoloadHandler::setRepoAutoloadMap(
       RepoAutoloadMapBuilder::serde(blob.decoder)
     );
     blob.decoder.assertDone();
   }
-}
-
-StringData* RepoFile::loadLitstr(size_t id) {
-  assertx(s_repoFileData);
-  assertx(s_repoFileData->loadedLitstrTable.load());
-
-  auto const& data = *s_repoFileData;
-
-  if (id == 0 || id > data.literals.size()) return nullptr;
-
-  auto const& index = data.literals[id - 1];
-  auto blob = loadBlob(
-    data.fd,
-    data.literalTableOffset + index.offset,
-    index.size,
-    false
-  );
-  const StringData* litstr;
-  blob.decoder(litstr);
-  blob.decoder.assertDone();
-  LitstrTable::get().setLitstr(id, litstr);
-  return const_cast<StringData*>(litstr);
-}
-
-ArrayData* RepoFile::loadLitarray(size_t id) {
-  assertx(s_repoFileData);
-  assertx(s_repoFileData->loadedLitarrayTable.load());
-
-  auto const& data = *s_repoFileData;
-
-  if (id < 0 || id >= data.arrays.size()) return nullptr;
-
-  MemoryManager::SuppressOOM so(*tl_heap);
-
-  auto const& index = data.arrays[id];
-  auto blob = loadBlob(
-    data.fd,
-    data.arrayTableOffset + index.offset,
-    index.size,
-    true
-  );
-  std::string str;
-  blob.decoder(str);
-  blob.decoder.assertDone();
-
-  auto v = [&]{
-    VariableUnserializer vu{
-      str.data(),
-      str.size(),
-      VariableUnserializer::Type::Internal
-    };
-    return vu.unserialize();
-  }();
-  assertx(v.isArray());
-  auto arr = v.detach().m_data.parr;
-  ArrayData::GetScalarArray(&arr);
-  LitarrayTable::get().setLitarray(id, arr);
-  return arr;
 }
 
 std::unique_ptr<UnitEmitter>
@@ -1042,16 +765,11 @@ RepoFile::loadUnitEmitter(const StringData* searchPath,
   auto blob = loadBlob(
     data.fd,
     data.unitEmittersOffset + info.location.offset,
-    info.location.size,
-    false
+    info.location.size
   );
 
-  bool useGlobalIds;
-  blob.decoder(useGlobalIds);
-  blob.decoder.setUseGlobalIds(useGlobalIds);
-  auto ue = std::make_unique<UnitEmitter>(
-    SHA1{ (uint64_t)sn }, SHA1{}, nativeFuncs, useGlobalIds
-  );
+  auto ue =
+    std::make_unique<UnitEmitter>(SHA1{ (uint64_t)sn }, SHA1{}, nativeFuncs);
   ue->m_filepath = path;
   ue->m_sn = sn;
   ue->serde(blob.decoder, lazy);

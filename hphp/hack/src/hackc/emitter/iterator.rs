@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use hhbc_ast::IterId;
+use hhbc::IterId;
 
 #[derive(Default, Debug, Clone)]
 pub struct IterGen {

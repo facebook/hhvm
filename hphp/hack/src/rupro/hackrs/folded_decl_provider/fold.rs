@@ -402,21 +402,22 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
     // HHVM implicitly adds StringishObject interface for every class/interface/trait
     // with a __toString method; "string" also implements this interface
-    fn add_stringish_object(&self, ancestors: &mut TypeNameIndexMap<Ty<R>>) {
-        if self.child.name.id() != *sn::classes::cStringishObject {
-            if let Some(meth) =
-                (self.child.methods.iter()).find(|meth| meth.name.id() == *sn::members::__toString)
-            {
-                let declty = Ty::apply(
-                    R::hint(meth.name.pos().clone()),
-                    Positioned::new(
-                        meth.name.pos().clone(),
-                        sn::classes::cStringishObject.clone(),
-                    ),
-                    Box::new([]),
-                );
-                ancestors.insert(sn::classes::cStringishObject.clone(), declty);
-            }
+    pub fn stringish_object_parent(cls: &ShallowClass<R>) -> Option<Ty<R>> {
+        if cls.name.id() != *sn::classes::cStringishObject {
+            (cls.methods.iter())
+                .find(|meth| meth.name.id() == *sn::members::__toString)
+                .map(|meth| {
+                    Ty::apply(
+                        R::hint(meth.name.pos().clone()),
+                        Positioned::new(
+                            meth.name.pos().clone(),
+                            sn::classes::cStringishObject.clone(),
+                        ),
+                        Box::new([]),
+                    )
+                })
+        } else {
+            None
         }
     }
 
@@ -663,7 +664,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             }
             .filter_map(|ty| ty.unwrap_class_type())
             .filter_map(|(_, pos_id, _)| self.parents.get(&pos_id.id()))
-            .find(|parent| parent.has_concrete_constructor())
+            .find(|parent| parent.has_concrete_constructor() && self.child.constructor.is_some())
             .map(|_| *sn::members::parentConstruct)
         };
 
@@ -731,15 +732,16 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             self.synthesize_type_const_defaults(&mut type_consts, &mut consts);
         }
 
+        let stringish_object_opt = DeclFolder::stringish_object_parent(self.child);
         let direct_ancestors = (self.child.extends.iter())
             .chain(self.child.implements.iter())
-            .chain(self.child.uses.iter());
+            .chain(self.child.uses.iter())
+            .chain(stringish_object_opt.iter());
 
         let mut ancestors = Default::default();
         for ty in direct_ancestors.rev() {
             self.get_implements(ty, &mut ancestors);
         }
-        self.add_stringish_object(&mut ancestors);
 
         let extends = self.get_extends();
         let xhp_attr_deps = self.get_xhp_attr_deps();

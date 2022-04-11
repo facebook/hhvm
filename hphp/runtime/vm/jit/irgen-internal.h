@@ -445,17 +445,14 @@ struct MultiCond {
   template <typename Branch, typename Then>
   void ifThen(Branch&& branch, Then&& then) {
     assertx(!finished);
-    try {
-      auto const taken = defBlock(env);
-      auto const refined = branch(taken);
-      auto const result = then(refined);
-      resultTy |= result->type();
-      gen(env, Jmp, done, result);
-      env.irb->appendBlock(taken);
-    } catch (const FailedIRGen&) {
-      finished = true;
-      throw;
-    }
+    SCOPE_FAIL { finished = true; };
+
+    auto const taken = defBlock(env);
+    auto const refined = branch(taken);
+    auto const result = then(refined);
+    resultTy |= result->type();
+    gen(env, Jmp, done, result);
+    env.irb->appendBlock(taken);
   }
 
   template <typename Then>
@@ -467,11 +464,12 @@ struct MultiCond {
   template <typename Else>
   SSATmp* elseDo(Else&& els) {
     assertx(!finished);
+    SCOPE_EXIT { finished = true; };
+
     auto const result = els();
     assertx(result);
     resultTy |= result->type();
     gen(env, Jmp, done, result);
-    finished = true;
 
     env.irb->appendBlock(done);
     auto const label = env.unit.defLabel(1, done, env.irb->nextBCContext());

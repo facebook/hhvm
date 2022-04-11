@@ -31,7 +31,7 @@
 #include "hphp/util/either.h"
 #include "hphp/util/tribool.h"
 
-#include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/hhbbc/hhbbc.h"
@@ -600,15 +600,6 @@ struct Index {
    * stage.
    */
   void cleanup_post_emit(php::ProgramPtr program);
-
-  /*
-   * The Index contains a Builder for an ArrayTypeTable.
-   *
-   * If we're creating assert types with options.InsertAssertions, we
-   * need to keep track of which array types exist in the whole
-   * program in order to include it in the repo.
-   */
-  std::unique_ptr<ArrayTypeTable::Builder>& array_table_builder() const;
 
   /*
    * Find all the closures created inside the context of a given
@@ -1223,9 +1214,6 @@ private:
     SString name, const Type& candidate) const;
 
   void init_return_type(const php::Func* func);
-
-  ResolvedInfo<boost::variant<boost::blank,SString,ClassInfo*>>
-  resolve_type_name_internal(SString name) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

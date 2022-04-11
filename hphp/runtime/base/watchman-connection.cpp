@@ -87,14 +87,14 @@ folly::Singleton<WatchmanCache> s_watchmanClients;
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-Watchman& get_watchman_client(const folly::fs::path& root) {
+std::shared_ptr<Watchman> get_watchman_client(const folly::fs::path& root) {
   auto const cache = s_watchmanClients.try_get();
   always_assert(cache);
 
   auto it = cache->find(root.native());
-  if (it != cache->end()) return *it->second;
+  if (it != cache->end()) return it->second;
 
-  return *cache->insert(
+  return cache->insert(
     root.native(), Watchman::get(root, find_user_socket(root))
   ).first->second;
 }

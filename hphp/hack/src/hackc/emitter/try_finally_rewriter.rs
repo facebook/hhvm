@@ -9,7 +9,7 @@ use bitflags::bitflags;
 use emit_pos::emit_pos;
 use env::{emitter::Emitter, jump_targets as jt, Env, LocalGen};
 use error::Result;
-use hhbc_ast::{Instruct, IsTypeOp, IterId, Label, Opcode, Pseudo};
+use hhbc::{Instruct, IsTypeOp, IterId, Label, Opcode, Pseudo};
 use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq};
 use oxidized::pos::Pos;

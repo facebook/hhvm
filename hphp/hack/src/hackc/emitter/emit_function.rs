@@ -5,17 +5,17 @@
 
 mod emit_memoize_function;
 
-use ast_body::AstBody;
-use ast_scope::{self as ast_scope, Scope, ScopeItem};
-use emit_body::{self as emit_body};
+use ast_scope::{self, Scope, ScopeItem};
 use env::emitter::Emitter;
 use error::Result;
 use ffi::{Slice, Str};
-use hhas_attribute::{self as hhas_attribute, HhasAttribute};
-use hhas_coeffects::HhasCoeffects;
-use hhas_function::{self as hhas_function, HhasFunction};
-use hhas_pos::HhasSpan;
-use hhbc_id::{class::ClassType, function::FunctionType};
+use hhbc::{
+    hhas_attribute::{self, HhasAttribute},
+    hhas_coeffects::HhasCoeffects,
+    hhas_function::HhasFunction,
+    hhas_pos::HhasSpan,
+    ClassName, FunctionName,
+};
 use instruction_sequence::instr;
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
@@ -26,11 +26,11 @@ pub fn emit_function<'a, 'arena, 'decl>(
     fd: &'a ast::FunDef,
 ) -> Result<Vec<HhasFunction<'arena>>> {
     use ast_defs::FunKind;
-    use hhas_function::HhasFunctionFlags;
+    use hhbc::hhas_function::HhasFunctionFlags;
 
     let alloc = e.alloc;
     let f = &fd.fun;
-    let original_id = FunctionType::from_ast_name(alloc, &f.name.1);
+    let original_id = FunctionName::from_ast_name(alloc, &f.name.1);
     let mut flags = HhasFunctionFlags::empty();
     flags.set(
         HhasFunctionFlags::ASYNC,
@@ -46,7 +46,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
 
     let renamed_id = {
         if memoized {
-            FunctionType::add_suffix(alloc, &original_id, emit_memoize_helpers::MEMOIZE_SUFFIX)
+            FunctionName::add_suffix(alloc, &original_id, emit_memoize_helpers::MEMOIZE_SUFFIX)
         } else {
             original_id
         }
@@ -61,7 +61,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
                 },
             ] if s == "__MethCaller" => match &params[..] {
                 [ast::Expr(_, _, ast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
-                    ClassType::from_ast_name_and_mangle(
+                    ClassName::from_ast_name_and_mangle(
                         alloc,
                         // FIXME: This is not safe--string literals are binary strings.
                         // There's no guarantee that they're valid UTF-8.
@@ -134,7 +134,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
             alloc,
             e,
             RcOc::clone(&fd.namespace),
-            AstBody::Stmts(ast_body),
+            ast_body,
             instr::null(),
             scope,
             EmitBodyArgs {
@@ -167,7 +167,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
     let attrs = emit_memoize_function::get_attrs_for_fun(e, fd, &user_attrs, memoized);
     let normal_function = HhasFunction {
         attributes: Slice::fill_iter(alloc, user_attrs.into_iter()),
-        name: FunctionType::new(Str::new_str(alloc, renamed_id.unsafe_as_str())),
+        name: FunctionName::new(Str::new_str(alloc, renamed_id.unsafe_as_str())),
         span: HhasSpan::from_pos(&f.span),
         coeffects,
         body,

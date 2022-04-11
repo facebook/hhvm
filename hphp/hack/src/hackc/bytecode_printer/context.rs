@@ -44,7 +44,6 @@ impl fmt::Display for Indent {
 pub struct Context<'a> {
     pub(crate) path: Option<&'a RelativePath>,
 
-    dump_symbol_refs: bool,
     indent: Indent,
 
     pub(crate) include_roots: &'a BTreeMap<BString, BString>,
@@ -57,7 +56,6 @@ impl<'a> Context<'a> {
     pub fn new<'arena, 'decl>(
         emitter: &'a Emitter<'arena, 'decl>,
         path: Option<&'a RelativePath>,
-        dump_symbol_refs: bool,
     ) -> Self {
         let include_roots = emitter.options().hhvm.include_roots.get();
         let include_search_paths = emitter.options().server.include_search_paths.get();
@@ -66,7 +64,6 @@ impl<'a> Context<'a> {
 
         Self {
             path,
-            dump_symbol_refs,
             indent: Indent::new(),
 
             include_roots,
@@ -74,10 +71,6 @@ impl<'a> Context<'a> {
             doc_root: doc_root.as_bstr(),
             array_provenance,
         }
-    }
-
-    pub(crate) fn dump_symbol_refs(&self) -> bool {
-        self.dump_symbol_refs
     }
 
     /// Insert a newline with indentation

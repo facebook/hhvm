@@ -224,39 +224,44 @@
                     "line_number":5
                   }
                 },
-                "type_const_type_constraint":{
-                  "kind":"type_constraint",
-                  "constraint_keyword":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"as",
-                      "text":"as",
-                      "offset":69,
-                      "leading_width":0,
-                      "width":2,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":71,"width":1}],
-                      "line_number":5
-                    }
-                  },
-                  "constraint_type":{
-                    "kind":"simple_type_specifier",
-                    "simple_type_specifier":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"num",
-                        "text":"num",
-                        "offset":72,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":5
+                "type_const_type_constraints":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"type_constraint",
+                      "constraint_keyword":{
+                        "kind":"token",
+                        "token":{
+                          "kind":"as",
+                          "text":"as",
+                          "offset":69,
+                          "leading_width":0,
+                          "width":2,
+                          "trailing_width":1,
+                          "leading":[],
+                          "trailing":[{"kind":"whitespace","text":" ","offset":71,"width":1}],
+                          "line_number":5
+                        }
+                      },
+                      "constraint_type":{
+                        "kind":"simple_type_specifier",
+                        "simple_type_specifier":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"num",
+                            "text":"num",
+                            "offset":72,
+                            "leading_width":0,
+                            "width":3,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":5
+                          }
+                        }
                       }
                     }
-                  }
+                  ]
                 },
                 "type_const_semicolon":{
                   "kind":"token",
@@ -339,39 +344,44 @@
                     "line_number":7
                   }
                 },
-                "type_const_type_constraint":{
-                  "kind":"type_constraint",
-                  "constraint_keyword":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"as",
-                      "text":"as",
-                      "offset":103,
-                      "leading_width":0,
-                      "width":2,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":105,"width":1}],
-                      "line_number":7
-                    }
-                  },
-                  "constraint_type":{
-                    "kind":"simple_type_specifier",
-                    "simple_type_specifier":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"num",
-                        "text":"num",
-                        "offset":106,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":7
+                "type_const_type_constraints":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"type_constraint",
+                      "constraint_keyword":{
+                        "kind":"token",
+                        "token":{
+                          "kind":"as",
+                          "text":"as",
+                          "offset":103,
+                          "leading_width":0,
+                          "width":2,
+                          "trailing_width":1,
+                          "leading":[],
+                          "trailing":[{"kind":"whitespace","text":" ","offset":105,"width":1}],
+                          "line_number":7
+                        }
+                      },
+                      "constraint_type":{
+                        "kind":"simple_type_specifier",
+                        "simple_type_specifier":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"num",
+                            "text":"num",
+                            "offset":106,
+                            "leading_width":0,
+                            "width":3,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":7
+                          }
+                        }
                       }
                     }
-                  }
+                  ]
                 },
                 "type_const_semicolon":{
                   "kind":"token",

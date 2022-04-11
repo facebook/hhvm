@@ -47,6 +47,7 @@ enum class AnnotMetaType : uint8_t {
   NoReturn = 9,
   Nothing = 10,
   Classname = 11,
+  Unresolved = 12,
 };
 
 enum class AnnotType : uint16_t {
@@ -71,7 +72,8 @@ enum class AnnotType : uint16_t {
   ArrayLike  = (uint16_t)AnnotMetaType::ArrayLike << 8  | (uint8_t)KindOfUninit,
   NoReturn   = (uint16_t)AnnotMetaType::NoReturn << 8   | (uint8_t)KindOfUninit,
   Nothing    = (uint16_t)AnnotMetaType::Nothing << 8    | (uint8_t)KindOfUninit,
-  Classname  = (uint16_t)AnnotMetaType::Classname << 8  | (uint8_t)KindOfUninit
+  Classname  = (uint16_t)AnnotMetaType::Classname << 8  | (uint8_t)KindOfUninit,
+  Unresolved = (uint16_t)AnnotMetaType::Unresolved << 8 | (uint8_t)KindOfUninit,
 };
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
@@ -110,6 +112,8 @@ TypedValue annotDefaultValue(AnnotType at);
 enum class AnnotAction {
   Pass,
   Fail,
+  Fallback,
+  FallbackCoerce,
   ObjectCheck,
   CallableCheck,
   WarnClass,
@@ -138,6 +142,12 @@ enum class AnnotAction {
  * addition in Weak mode verifyFail may coerce certain types allowing
  * execution to continue.
  *
+ * Fallback: A recommendation to perform a full C++ check. This can happen
+ * if `at' is an unresolved reference to either (1) a real non-enum class or
+ * interface, (2) an enum, or (3) a type alias and the DataType `dt' is
+ * not KindOfObject. FallbackCoerce may require type coercion, Fallback is
+ * guaranteed to not require it.
+ *
  * CallableCheck: `at' is "callable" and a value with DataType `dt' might
  * be compatible with the annotation, but the caller needs to consult
  * is_callable() to verify the value is actually a valid callable.
@@ -145,12 +155,7 @@ enum class AnnotAction {
  * ObjectCheck: `at' is either (1) a reference to a real non-enum class or
  * interface, (2) an enum, (3) a type alias, or (4) "self" or "parent".
  * The caller needs to perform more checks to determine whether or not a
- * value with DataType `dt' is compatible with the annotation.  NOTE that
- * if dt is not KindOfObject, then we've already checked if the annotation
- * was a direct reference to a "magic" interface that supports non-object
- * types and we've already checked if the annotation was "self" / "parent",
- * but the caller still needs to check if the annotation is a type alias or
- * an enum.
+ * value with the KindOfObject DataType is compatible with the annotation.
  *
  * WarnClassname: 'at' is classname and 'dt' is either a Class or LazyClass
  * and RuntimeOption::ClassnameNotices is on. The 'dt' is compatible with 'at'

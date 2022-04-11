@@ -1,0 +1,4 @@
+File "constructor_inner_expr.php", line 17, characters 7-18:
+This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
+  File "constructor_inner_expr.php", line 3, characters 28-35:
+  The function call is defined here.

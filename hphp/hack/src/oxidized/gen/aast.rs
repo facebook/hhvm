@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d016518b21d492e7a17cc28d71cd4d2e>>
+// @generated SignedSource<<66d1e54a2c42ca06aefc1e437c5f4adc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1386,6 +1386,7 @@ pub struct Class_<Ex, En> {
     pub enum_: Option<Enum_>,
     pub doc_comment: Option<DocComment>,
     pub emit_id: Option<EmitId>,
+    pub internal: bool,
 }
 
 pub type ClassHint = Hint;
@@ -1807,6 +1808,7 @@ pub struct FunDef<Ex, En> {
     pub file_attributes: Vec<FileAttribute<Ex, En>>,
     pub mode: file_info::Mode,
     pub fun: Fun_<Ex, En>,
+    pub internal: bool,
 }
 
 #[derive(

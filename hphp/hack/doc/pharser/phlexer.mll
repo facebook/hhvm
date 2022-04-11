@@ -967,7 +967,7 @@ and initial st = parse
     { (* less: if short_tags normally, otherwise INLINE_HTML *)
       set_mode st ST_IN_SCRIPTING2;
       (* todo? ugly, may be better ot generate a real ECHO token with maybe a
-       * FakeTok or ExpandeTok. *)
+       * FakeToken or ExpandedToken. *)
       OPEN_TAG_WITH_ECHO
     }
 

@@ -8,7 +8,7 @@ edition = "2021"
 path = "../../hackrs_test.rs"
 
 [dependencies]
-anyhow = "1.0.51"
+anyhow = "1.0.56"
 fbinit = { path = "../../../../../../../common/rust/shed/fbinit" }
 hackrs = { path = "../../../hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../../hackrs_test_utils/cargo/hackrs_test_utils" }

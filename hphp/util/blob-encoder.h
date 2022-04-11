@@ -95,7 +95,7 @@ public:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Like IsNontrivialSerializable, but checks for the presense of a
+ * Like IsNontrivialSerializable, but checks for the presence of a
  * static makeForSerde function (with a matching signature) in the
  * type T.
  */
@@ -119,7 +119,7 @@ template <typename T> struct BlobEncoderHelper {};
 
 struct BlobEncoder {
   static const bool deserializing = false;
-  explicit BlobEncoder(bool l) : m_useGlobalIds{l} {}
+  BlobEncoder() = default;
 
   void writeRaw(const char* ptr, size_t size) {
     auto const start = m_blob.size();
@@ -290,8 +290,6 @@ struct BlobEncoder {
     return *this;
   }
 
-  bool usesGlobalIds() const { return m_useGlobalIds; }
-
   size_t size() const { return m_blob.size(); }
   const void* data() const { return m_blob.data(); }
 
@@ -329,7 +327,6 @@ private:
   }
 
   std::vector<char> m_blob;
-  bool m_useGlobalIds;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -337,11 +334,10 @@ private:
 struct BlobDecoder {
   static const bool deserializing = true;
 
-  BlobDecoder(const void* vp, size_t sz, bool l)
+  BlobDecoder(const void* vp, size_t sz)
     : m_start{static_cast<const unsigned char*>(vp)}
     , m_p{m_start}
     , m_last{m_p + sz}
-    , m_useGlobalIds{l}
   {}
 
   void assertDone() {
@@ -352,6 +348,11 @@ struct BlobDecoder {
   void advance(size_t s) {
     assertx(remaining() >= s);
     m_p += s;
+  }
+
+  void retreat(size_t s) {
+    assertx(advanced() >= s);
+    m_p -= s;
   }
 
   size_t remaining() const {
@@ -599,9 +600,6 @@ struct BlobDecoder {
     return *this;
   }
 
-  bool usesGlobalIds() const { return m_useGlobalIds; }
-  void setUseGlobalIds(bool b) { m_useGlobalIds = b; }
-
 private:
   template<typename Cont>
   void decodeMapContainer(Cont& cont) {
@@ -644,7 +642,6 @@ private:
   const unsigned char* m_start;
   const unsigned char* m_p;
   const unsigned char* const m_last;
-  bool m_useGlobalIds;
 };
 
 //////////////////////////////////////////////////////////////////////

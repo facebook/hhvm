@@ -63,28 +63,28 @@ module Dep : sig
         (** Represents a toplevel symbol being defined as a member of
         this module *)
 
-  type dep_kind =
-    | KGConst [@value 0]
-    | KFun [@value 1]
-    | KType [@value 2]
-    | KExtends [@value 3]
-    | KConst [@value 5]
-    | KConstructor [@value 6]
-    | KProp [@value 7]
-    | KSProp [@value 8]
-    | KMethod [@value 9]
-    | KSMethod [@value 10]
-    | KAllMembers [@value 11]
-    | KGConstName [@value 12]
-    | KModule [@value 13]
-  [@@deriving enum]
+  module Member : sig
+    type t
+
+    val method_ : string -> t
+
+    val smethod : string -> t
+
+    val prop : string -> t
+
+    val sprop : string -> t
+
+    val constructor : t
+
+    val const : string -> t
+  end
 
   (** A 63bit hash *)
   type t
 
   val make : 'a variant -> t
 
-  val make_dep_with_type_hash : t -> string -> dep_kind -> t
+  val make_member_dep_from_type_dep : t -> Member.t -> t
 
   (** A 64bit representation of the 63bit hash. *)
   val to_int64 : t -> int64

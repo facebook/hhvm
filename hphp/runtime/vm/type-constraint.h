@@ -56,6 +56,7 @@ struct TypeConstraint {
 
   TypeConstraint()
     : m_flags(NoFlags)
+    , m_clsName(nullptr)
     , m_typeName(nullptr)
     , m_namedEntity(nullptr)
   {
@@ -64,6 +65,7 @@ struct TypeConstraint {
 
   TypeConstraint(const StringData* typeName, Flags flags)
     : m_flags(flags)
+    , m_clsName(nullptr)
     , m_typeName(typeName)
     , m_namedEntity(nullptr)
   {
@@ -76,7 +78,9 @@ struct TypeConstraint {
       (m_flags)
       ;
     if (m_flags & Flags::Resolved) {
-      sd(m_type);
+      sd(m_type)
+        (m_clsName)
+        ;
     }
     if (SerDe::deserializing) {
       init();
@@ -88,12 +92,17 @@ struct TypeConstraint {
 
   bool operator==(const TypeConstraint& o) const;
 
-  void resolveType(AnnotType t, bool nullable) {
-    assertx(m_type == AnnotType::Object);
+  size_t stableHash() const;
+
+  void resolveType(AnnotType t, bool nullable, LowStringPtr clsName) {
+    assertx(m_type == AnnotType::Unresolved);
+    assertx(t != AnnotType::Unresolved);
+    assertx((t == AnnotType::Object) == (clsName != nullptr));
     auto flags = m_flags | Flags::Resolved;
     if (nullable) flags |= Flags::Nullable;
     m_flags = static_cast<Flags>(flags);
     m_type = t;
+    m_clsName = clsName;
   }
 
   void setNoMockObjects() {
@@ -115,8 +124,17 @@ struct TypeConstraint {
   /*
    * Read access to various members.
    */
+  const StringData* clsName() const { return m_clsName; }
   const StringData* typeName() const { return m_typeName; }
-  const NamedEntity* namedEntity() const { return m_namedEntity; }
+  const NamedEntity* clsNamedEntity() const {
+    assertx(isObject());
+    return m_namedEntity;
+  }
+  const NamedEntity* typeNamedEntity() const {
+    assertx(isUnresolved());
+    return m_namedEntity;
+  }
+  const NamedEntity* anyNamedEntity() const { return m_namedEntity; }
   Flags flags() const { return m_flags; }
 
   /*
@@ -125,10 +143,19 @@ struct TypeConstraint {
   MetaType metaType() const { return getAnnotMetaType(m_type); }
 
   /*
+   * If this->isUnresolved(), resolve it using the autoloader.
+   */
+  TypeConstraint resolvedWithAutoload() const;
+
+  /*
    * Returns the underlying DataType for this TypeConstraint.
    */
   MaybeDataType underlyingDataType() const {
-    return isPrecise() ? MaybeDataType(getAnnotDataType(m_type)) : std::nullopt;
+    if (!isPrecise()) return std::nullopt;
+    if (isObject() && interface_supports_non_objects(m_clsName)) {
+      return std::nullopt;
+    }
+    return MaybeDataType(getAnnotDataType(m_type));
   }
 
   /*
@@ -173,7 +200,6 @@ struct TypeConstraint {
   bool isExtended() const { return m_flags & ExtendedHint; }
   bool isTypeVar()  const { return m_flags & TypeVar; }
   bool isTypeConstant() const { return m_flags & TypeConstant; }
-  bool isResolved() const { return m_flags & Resolved; }
   bool isUpperBound() const { return m_flags & UpperBound; }
   bool couldSeeMockObject() const { return !(m_flags & NoMockObjects); }
 
@@ -194,6 +220,7 @@ struct TypeConstraint {
   bool isArrayLike() const { return m_type == Type::ArrayLike; }
   bool isVecOrDict() const { return m_type == Type::VecOrDict; }
   bool isClassname() const { return m_type == Type::Classname; }
+  bool isUnresolved() const { return m_type == Type::Unresolved; }
 
   // Returns true if we should convert a ClsMeth to a varray for this typehint.
   bool convertClsMethToArrLike() const;
@@ -202,24 +229,6 @@ struct TypeConstraint {
 
   bool validForProp() const {
     return !isCallable() && !isNothing() && !isNoReturn();
-  }
-
-  /*
-   * A string representation of this type constraint.
-   */
-  std::string fullName() const {
-    std::string name;
-    if (isSoft()) {
-      name += '@';
-    }
-    if ((m_flags & Flags::DisplayNullable) && isExtended()) {
-      name += '?';
-    }
-    name += m_typeName->data();
-    if ((m_flags & Flags::DisplayNullable) && !isExtended()) {
-      name += " (defaulted to null)";
-    }
-    return name;
   }
 
   /*
@@ -347,6 +356,12 @@ struct TypeConstraint {
 
   bool maybeStringCompatible() const;
 
+  // Whether input may need to be coerced.
+  bool mayCoerce() const {
+    return maybeStringCompatible();
+  }
+
+
 private:
   void init();
 
@@ -383,11 +398,12 @@ private:
 private:
   // m_type represents the type to check on.  We don't know whether a
   // bare name is a class/interface name or a type alias or an enum,
-  // so when this is set to Type::Object we may have to resolve a type
+  // so when this is set to Type::Unresolved we may have to resolve a type
   // alias or enum and test for a different DataType (see annotCompat()
   // for details).
   Type m_type;
   Flags m_flags;
+  LowStringPtr m_clsName;   // valid iff isObject()
   LowStringPtr m_typeName;
   LowPtr<const NamedEntity> m_namedEntity;
 };

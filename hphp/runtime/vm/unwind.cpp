@@ -256,8 +256,8 @@ DEBUG_ONLY bool throwable_has_expected_props() {
   // to verify anything when setting. If someone changes the type-hint we want
   // to know.
   auto const isException = [&](const TypeConstraint& tc) {
-    if (!tc.isObject()) return false;
-    auto const cls = Class::lookup(tc.namedEntity());
+    if (!tc.isUnresolved() && !tc.isObject()) return false;
+    auto const cls = Class::lookup(tc.anyNamedEntity());
     return cls && cls == SystemLib::s_ExceptionClass;
   };
 

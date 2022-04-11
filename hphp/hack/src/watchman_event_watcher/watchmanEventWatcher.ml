@@ -365,7 +365,7 @@ let daemon_main root (_ic, oc) =
     HackEventLogger.watchman_uncaught_exception e
 
 (** Typechecker canont infer this type since the input channel
- * is never used so its phantom type is never ineferred. We annotate
+ * is never used so its phantom type is never inferred. We annotate
  * the type manually to "unit" here to help it out. *)
 let daemon_entry : (Path.t, unit, daemon_init_result) Daemon.entry =
   Daemon.register_entry_point "Watchman_event_watcher_daemon_main" daemon_main

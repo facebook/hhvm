@@ -96,13 +96,22 @@ get_target_property(CARGO_EXE cargo LOCATION)
 get_filename_component(RUSTC_BIN_DIR "${RUSTC_EXE}" DIRECTORY)
 get_filename_component(CARGO_BIN_DIR "${CARGO_EXE}" DIRECTORY)
 
+if (CMAKE_OSX_SYSROOT)
+  set(ISYSROOT_FLAG -isysroot${CMAKE_OSX_SYSROOT})
+endif ()
+
 function(invoke_dune name target)
   add_custom_target(
       ${name}
       COMMAND
         . "${CMAKE_CURRENT_BINARY_DIR}/dev_env.sh" &&
         opam exec --
-        $(MAKE) --makefile=Makefile.dune ${target}
+        $(MAKE)
+        CC=${CMAKE_C_COMPILER}
+        CXX=${CMAKE_CXX_COMPILER}
+        CFLAGS=${ISYSROOT_FLAG}
+        CXXFLAGS=${ISYSROOT_FLAG}
+        --makefile=Makefile.dune ${target}
         BYTECODE="${EMIT_OCAML_BYTECODE}"
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )

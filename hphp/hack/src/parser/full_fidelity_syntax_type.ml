@@ -415,7 +415,7 @@ struct
         type_const_type_keyword: t;
         type_const_name: t;
         type_const_type_parameters: t;
-        type_const_type_constraint: t;
+        type_const_type_constraints: t;
         type_const_equal: t;
         type_const_type_specifier: t;
         type_const_semicolon: t;
@@ -777,7 +777,6 @@ struct
     | FunctionCallExpression of {
         function_call_receiver: t;
         function_call_type_args: t;
-        function_call_enum_class_label: t;
         function_call_left_paren: t;
         function_call_argument_list: t;
         function_call_right_paren: t;
@@ -1719,7 +1718,7 @@ struct
     type_const_type_keyword: Token.t value;
     type_const_name: Token.t value;
     type_const_type_parameters: type_parameters option value;
-    type_const_type_constraint: type_constraint option value;
+    type_const_type_constraints: type_constraint listesque value;
     type_const_equal: Token.t option value;
     type_const_type_specifier: specifier option value;
     type_const_semicolon: Token.t value;
@@ -2144,7 +2143,6 @@ struct
   and function_call_expression = {
     function_call_receiver: expression value;
     function_call_type_args: type_arguments option value;
-    function_call_enum_class_label: expression option value;
     function_call_left_paren: Token.t value;
     function_call_argument_list: expression listesque value;
     function_call_right_paren: Token.t value;

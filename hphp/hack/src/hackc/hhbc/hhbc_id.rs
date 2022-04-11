@@ -3,16 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-//Note: `$type<'arena>` is a newtype over a `&'arena str`
-// (`class::Type<'arena>`, `function::Type<'arena>`, ...). We
-//intend that these types borrow strings stored in `InstrSeq`
-//arenas.
+// Note: `$type<'arena>` is a newtype over a `&'arena str`
+// (`class::Type<'arena>`, `function::Type<'arena>`, ...). We intend that these
+// types borrow strings stored in `InstrSeq` arenas.
 
-//Note: We manually write these definitions "outside" `impl_id` macro
-//so as to allow `cbindgen` to see the definitions in order
-//that it may generate compatible C structs.
-
-use bstr::BStr;
+use bstr::{BStr, ByteSlice};
 use ffi::Str;
 
 macro_rules! impl_id {
@@ -20,6 +15,10 @@ macro_rules! impl_id {
         impl<'arena> $type<'arena> {
             pub fn new(s: ffi::Str<'arena>) -> Self {
                 Self(s)
+            }
+
+            pub fn is_empty(&self) -> bool {
+                self.0.is_empty()
             }
 
             pub fn unsafe_into_string(self) -> std::string::String {
@@ -37,10 +36,14 @@ macro_rules! impl_id {
             pub fn as_bstr(&self) -> &'arena BStr {
                 self.0.as_bstr()
             }
-        }
 
-        pub fn from_raw_string<'arena>(alloc: &'arena bumpalo::Bump, s: &str) -> $type<'arena> {
-            $type(Str::new_str(alloc, s))
+            pub fn from_raw_string(alloc: &'arena bumpalo::Bump, s: &str) -> $type<'arena> {
+                $type(Str::new_str(alloc, s))
+            }
+
+            pub fn as_bytes(&self) -> &[u8] {
+                self.0.as_bytes()
+            }
         }
 
         impl write_bytes::DisplayBytes for $type<'_> {
@@ -59,143 +62,119 @@ macro_rules! impl_id {
 
 macro_rules! impl_add_suffix {
     ($type: ident) => {
-        fn from_raw_string_with_suffix<'arena>(
-            alloc: &'arena bumpalo::Bump,
-            s: &str,
-            suffix: &str,
-        ) -> $type<'arena> {
-            let mut r = bumpalo::collections::String::<'arena>::with_capacity_in(
-                s.len() + suffix.len(),
-                alloc,
-            );
-            r.push_str(s);
-            r.push_str(suffix);
-            $type(ffi::Slice::new(r.into_bump_str().as_bytes()))
-        }
-
-        // ok (multiple impl Struct blocks are allowed if needed)
         impl<'arena> $type<'arena> {
+            fn from_raw_string_with_suffix(
+                alloc: &'arena bumpalo::Bump,
+                s: &str,
+                suffix: &str,
+            ) -> $type<'arena> {
+                let mut r = bumpalo::collections::String::<'arena>::with_capacity_in(
+                    s.len() + suffix.len(),
+                    alloc,
+                );
+                r.push_str(s);
+                r.push_str(suffix);
+                $type(ffi::Slice::new(r.into_bump_str().as_bytes()))
+            }
+
             pub fn add_suffix(alloc: &'arena bumpalo::Bump, id: &Self, suffix: &str) -> Self {
-                from_raw_string_with_suffix(alloc, id.0.unsafe_as_str(), suffix)
+                $type::from_raw_string_with_suffix(alloc, id.0.unsafe_as_str(), suffix)
             }
         }
     };
 }
 
-pub mod class {
-    use super::*;
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[repr(C)]
+pub struct ClassName<'arena>(Str<'arena>);
 
-    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-    #[repr(C)]
-    pub struct ClassType<'arena>(Str<'arena>);
+impl_id!(ClassName);
 
-    impl_id!(ClassType);
+impl<'arena> ClassName<'arena> {
+    pub fn from_ast_name_and_mangle(
+        alloc: &'arena bumpalo::Bump,
+        s: impl std::convert::Into<std::string::String>,
+    ) -> Self {
+        ClassName(Str::new_str(
+            alloc,
+            hhbc_string_utils::strip_global_ns(&hhbc_string_utils::mangle(s.into())),
+        ))
+    }
 
-    impl<'arena> ClassType<'arena> {
-        pub fn from_ast_name_and_mangle(
-            alloc: &'arena bumpalo::Bump,
-            s: impl std::convert::Into<std::string::String>,
-        ) -> Self {
-            ClassType(Str::new_str(
-                alloc,
-                hhbc_string_utils::strip_global_ns(&hhbc_string_utils::mangle(s.into())),
-            ))
-        }
+    pub fn from_ast_name_and_mangle_for_module(
+        alloc: &'arena bumpalo::Bump,
+        s: impl std::convert::Into<std::string::String>,
+    ) -> Self {
+        ClassName(Str::new_str(
+            alloc,
+            &*format!(
+                "__module_{}",
+                hhbc_string_utils::strip_global_ns(&hhbc_string_utils::mangle(s.into()))
+            ),
+        ))
+    }
 
-        pub fn unsafe_to_unmangled_str(&self) -> std::borrow::Cow<'arena, str> {
-            std::borrow::Cow::from(hhbc_string_utils::unmangle(self.unsafe_as_str().into()))
-        }
+    pub fn unsafe_to_unmangled_str(&self) -> std::borrow::Cow<'arena, str> {
+        std::borrow::Cow::from(hhbc_string_utils::unmangle(self.unsafe_as_str().into()))
     }
 }
 
-pub mod prop {
-    use super::*;
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[repr(C)]
+pub struct PropName<'arena>(Str<'arena>);
 
-    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-    #[repr(C)]
-    pub struct PropType<'arena>(Str<'arena>);
+impl_id!(PropName);
+impl_add_suffix!(PropName);
 
-    impl_id!(PropType);
-    impl_add_suffix!(PropType);
-
-    impl<'arena> PropType<'arena> {
-        pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> PropType<'arena> {
-            PropType(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
-        }
+impl<'arena> PropName<'arena> {
+    pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> PropName<'arena> {
+        PropName(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
     }
 }
 
-pub mod method {
-    use super::*;
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[repr(C)]
+pub struct MethodName<'arena>(Str<'arena>);
 
-    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-    #[repr(C)]
-    pub struct MethodType<'arena>(Str<'arena>);
+impl_id!(MethodName);
+impl_add_suffix!(MethodName);
 
-    impl_id!(MethodType);
-    impl_add_suffix!(MethodType);
+impl<'arena> MethodName<'arena> {
+    pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> MethodName<'arena> {
+        MethodName(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
+    }
 
-    impl<'arena> MethodType<'arena> {
-        pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> MethodType<'arena> {
-            MethodType(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
-        }
-
-        pub fn from_ast_name_and_suffix(
-            alloc: &'arena bumpalo::Bump,
-            s: &str,
-            suffix: &str,
-        ) -> Self {
-            from_raw_string_with_suffix(alloc, hhbc_string_utils::strip_global_ns(s), suffix)
-        }
+    pub fn from_ast_name_and_suffix(alloc: &'arena bumpalo::Bump, s: &str, suffix: &str) -> Self {
+        MethodName::from_raw_string_with_suffix(
+            alloc,
+            hhbc_string_utils::strip_global_ns(s),
+            suffix,
+        )
     }
 }
 
-pub mod function {
-    use super::*;
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[repr(C)]
+pub struct FunctionName<'arena>(Str<'arena>);
 
-    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-    #[repr(C)]
-    pub struct FunctionType<'arena>(Str<'arena>);
+impl_id!(FunctionName);
+impl_add_suffix!(FunctionName);
 
-    impl_id!(FunctionType);
-    impl_add_suffix!(FunctionType);
-
-    impl<'arena> FunctionType<'arena> {
-        pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> FunctionType<'arena> {
-            FunctionType(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
-        }
+impl<'arena> FunctionName<'arena> {
+    pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> FunctionName<'arena> {
+        FunctionName(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
     }
 }
 
-pub mod constant {
-    use super::*;
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[repr(C)]
+pub struct ConstName<'arena>(Str<'arena>);
 
-    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-    #[repr(C)]
-    pub struct ConstType<'arena>(Str<'arena>);
+impl_id!(ConstName);
 
-    impl_id!(ConstType);
-
-    impl<'arena> ConstType<'arena> {
-        pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> ConstType<'arena> {
-            ConstType(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
-        }
-    }
-}
-
-pub mod record {
-    use super::*;
-
-    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-    #[repr(C)]
-    pub struct RecordType<'arena>(Str<'arena>);
-
-    impl_id!(RecordType);
-
-    impl<'arena> RecordType<'arena> {
-        pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> RecordType<'arena> {
-            RecordType(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
-        }
+impl<'arena> ConstName<'arena> {
+    pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> ConstName<'arena> {
+        ConstName(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
     }
 }
 
@@ -206,21 +185,24 @@ mod tests {
     #[test]
     fn test_from_unsafe_as_str() {
         let alloc = bumpalo::Bump::new();
-        assert_eq!("Foo", class::from_raw_string(&alloc, "Foo").unsafe_as_str());
+        assert_eq!(
+            "Foo",
+            ClassName::from_raw_string(&alloc, "Foo").unsafe_as_str()
+        );
     }
 
     #[test]
     fn test_add_suffix() {
         let alloc = bumpalo::Bump::new();
-        let id = prop::PropType::new(ffi::Str::new_str(&alloc, "Some"));
-        let id = prop::PropType::add_suffix(&alloc, &id, "Property");
+        let id = PropName::new(ffi::Str::new_str(&alloc, "Some"));
+        let id = PropName::add_suffix(&alloc, &id, "Property");
         assert_eq!("SomeProperty", id.unsafe_as_str());
     }
 
     #[test]
     fn test_from_ast_name() {
         let alloc = bumpalo::Bump::new();
-        let id = method::MethodType::from_ast_name(&alloc, "meth");
+        let id = MethodName::from_ast_name(&alloc, "meth");
         assert_eq!("meth", id.unsafe_as_str());
     }
 }

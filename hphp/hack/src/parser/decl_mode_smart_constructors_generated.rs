@@ -471,8 +471,8 @@ where
         <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<'_, '_, Self::R>>>::make_isset_expression(self, arg0, arg1, arg2, arg3)
     }
 
-    fn make_function_call_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<'_, '_, Self::R>>>::make_function_call_expression(self, arg0, arg1, arg2, arg3, arg4, arg5)
+    fn make_function_call_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<'_, '_, Self::R>>>::make_function_call_expression(self, arg0, arg1, arg2, arg3, arg4)
     }
 
     fn make_function_pointer_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {

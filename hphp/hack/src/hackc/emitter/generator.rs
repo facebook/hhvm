@@ -2,13 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use ast_body::AstBody;
 use oxidized::{
     aast_visitor::{visit, AstParams, Node, Visitor},
     ast,
 };
 
-pub fn is_function_generator<'a>(body: &AstBody<'a>) -> (bool, bool) {
+pub fn is_function_generator<'a>(body: &'a [ast::Stmt]) -> (bool, bool) {
     struct S((bool, bool));
 
     impl<'ast> Visitor<'ast> for S {
@@ -43,6 +42,6 @@ pub fn is_function_generator<'a>(body: &AstBody<'a>) -> (bool, bool) {
         }
     }
     let mut state = S((false, false));
-    visit(&mut state, &mut (), body).unwrap();
+    visit(&mut state, &mut (), &body).unwrap();
     state.0
 }

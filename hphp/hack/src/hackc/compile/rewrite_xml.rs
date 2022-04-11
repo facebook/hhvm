@@ -1,6 +1,5 @@
 use env::emitter::Emitter;
 use error::{Error, Result};
-use hhbc_id::class;
 use naming_special_names_rust::pseudo_consts;
 use oxidized::{
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
@@ -97,14 +96,14 @@ fn rewrite_xml_<'arena, 'decl>(
         pos.clone(),
         Expr_::mk_id(Id(pos.clone(), pseudo_consts::G__LINE__.into())),
     );
-    let renamed_id = class::ClassType::from_ast_name_and_mangle(e.alloc, &id.1);
+    let renamed_id = hhbc::ClassName::from_ast_name_and_mangle(e.alloc, &id.1);
     let cid = ClassId(
         (),
         pos.clone(),
         ClassId_::CI(Id(id.0.clone(), renamed_id.unsafe_as_str().into())),
     );
 
-    emit_symbol_refs::add_class(e, renamed_id);
+    e.add_class_ref(renamed_id);
 
     Ok(Expr(
         (),

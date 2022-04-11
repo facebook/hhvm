@@ -82,7 +82,7 @@ HeapObject* findHeapObjStart(HeapObject* ptr) {
 // to areas in the heap that are relevant for SIB manipulaitons.
 // For now we have ProcessTV and ProcessHeapPtr lambdas:
 //   - ProcessHeapPtr receives a reference to all HeapObjects*
-//   - ProcessTV receives a tv_lval referencins all TVs
+//   - ProcessTV receives a tv_lval referencing all TVs
 // For tracking heap object starts we also have the StartHeapObject lambda.
 // StartHeapObject and ProcessTV can return an object that will be held as
 // an RAII guard until done with the heap object or tv processing.
@@ -527,7 +527,7 @@ struct RenderOnce : ROMRenderer {
       // TODO: Handle coercions, which require dependent mystery boxes.
       throw RenderException(folly::sformat(
           "Failed to constrain mystery local {}, {} fails constraint {}",
-          show(provenance), show(tv), tc.fullName()));
+          show(provenance), show(tv), tc.displayName()));
     }
   }
   void allocAndCopyROM(const uint8_t* source, size_t numBytes) override {

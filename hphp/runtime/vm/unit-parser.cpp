@@ -174,7 +174,6 @@ CompilerResult hackc_compile(
     isSystemLib,                    // is_systemlib
     false,                          // is_evaled
     forDebuggerEval,                // for_debugger_eval
-    true,                           // dump_symbol_refs
     false                           // disable_toplevel_elaboration
   );
 

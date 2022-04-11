@@ -11,5 +11,5 @@ doctest = false
 proc-macro = true
 
 [dependencies]
-hhbc = { path = "../../../../../../../tools/hhbc-gen" }
+hhbc-gen = { path = "../../../../../../../tools/hhbc-gen" }
 print_opcode_impl = { path = "../print_opcode_impl" }

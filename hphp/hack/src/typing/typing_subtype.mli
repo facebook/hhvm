@@ -109,17 +109,3 @@ val subtype_funs :
   locl_fun_type ->
   env ->
   env * Typing_error.t option
-
-(* Given a subtype proposition, resolve conjunctions of subtype assertions
- * of the form #v <: t or t <: #v by adding bounds to #v in env. Close env
- * wrt transitivity i.e. if t <: #v and #v <: u then resolve t <: u which
- * may in turn produce more bounds in env.
- * For disjunctions, arbitrarily pick the first disjunct that is not
- * unsatisfiable. If any unsatisfiable disjunct remains, return it.
- *)
-val prop_to_env :
-  Pos_or_decl.t ->
-  env ->
-  Typing_logic.subtype_prop ->
-  Typing_error.Reasons_callback.t option ->
-  env * Typing_logic.subtype_prop

@@ -1176,7 +1176,7 @@ module WithToken (Token : TokenType) = struct
             type_const_type_keyword;
             type_const_name;
             type_const_type_parameters;
-            type_const_type_constraint;
+            type_const_type_constraints;
             type_const_equal;
             type_const_type_specifier;
             type_const_semicolon;
@@ -1187,7 +1187,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc type_const_type_keyword in
         let acc = f acc type_const_name in
         let acc = f acc type_const_type_parameters in
-        let acc = f acc type_const_type_constraint in
+        let acc = f acc type_const_type_constraints in
         let acc = f acc type_const_equal in
         let acc = f acc type_const_type_specifier in
         let acc = f acc type_const_semicolon in
@@ -1774,14 +1774,12 @@ module WithToken (Token : TokenType) = struct
           {
             function_call_receiver;
             function_call_type_args;
-            function_call_enum_class_label;
             function_call_left_paren;
             function_call_argument_list;
             function_call_right_paren;
           } ->
         let acc = f acc function_call_receiver in
         let acc = f acc function_call_type_args in
-        let acc = f acc function_call_enum_class_label in
         let acc = f acc function_call_left_paren in
         let acc = f acc function_call_argument_list in
         let acc = f acc function_call_right_paren in
@@ -2867,7 +2865,7 @@ module WithToken (Token : TokenType) = struct
             type_const_type_keyword;
             type_const_name;
             type_const_type_parameters;
-            type_const_type_constraint;
+            type_const_type_constraints;
             type_const_equal;
             type_const_type_specifier;
             type_const_semicolon;
@@ -2879,7 +2877,7 @@ module WithToken (Token : TokenType) = struct
           type_const_type_keyword;
           type_const_name;
           type_const_type_parameters;
-          type_const_type_constraint;
+          type_const_type_constraints;
           type_const_equal;
           type_const_type_specifier;
           type_const_semicolon;
@@ -3405,7 +3403,6 @@ module WithToken (Token : TokenType) = struct
           {
             function_call_receiver;
             function_call_type_args;
-            function_call_enum_class_label;
             function_call_left_paren;
             function_call_argument_list;
             function_call_right_paren;
@@ -3413,7 +3410,6 @@ module WithToken (Token : TokenType) = struct
         [
           function_call_receiver;
           function_call_type_args;
-          function_call_enum_class_label;
           function_call_left_paren;
           function_call_argument_list;
           function_call_right_paren;
@@ -4480,7 +4476,7 @@ module WithToken (Token : TokenType) = struct
             type_const_type_keyword;
             type_const_name;
             type_const_type_parameters;
-            type_const_type_constraint;
+            type_const_type_constraints;
             type_const_equal;
             type_const_type_specifier;
             type_const_semicolon;
@@ -4492,7 +4488,7 @@ module WithToken (Token : TokenType) = struct
           "type_const_type_keyword";
           "type_const_name";
           "type_const_type_parameters";
-          "type_const_type_constraint";
+          "type_const_type_constraints";
           "type_const_equal";
           "type_const_type_specifier";
           "type_const_semicolon";
@@ -5025,7 +5021,6 @@ module WithToken (Token : TokenType) = struct
           {
             function_call_receiver;
             function_call_type_args;
-            function_call_enum_class_label;
             function_call_left_paren;
             function_call_argument_list;
             function_call_right_paren;
@@ -5033,7 +5028,6 @@ module WithToken (Token : TokenType) = struct
         [
           "function_call_receiver";
           "function_call_type_args";
-          "function_call_enum_class_label";
           "function_call_left_paren";
           "function_call_argument_list";
           "function_call_right_paren";
@@ -6233,7 +6227,7 @@ module WithToken (Token : TokenType) = struct
             type_const_type_keyword;
             type_const_name;
             type_const_type_parameters;
-            type_const_type_constraint;
+            type_const_type_constraints;
             type_const_equal;
             type_const_type_specifier;
             type_const_semicolon;
@@ -6246,7 +6240,7 @@ module WithToken (Token : TokenType) = struct
             type_const_type_keyword;
             type_const_name;
             type_const_type_parameters;
-            type_const_type_constraint;
+            type_const_type_constraints;
             type_const_equal;
             type_const_type_specifier;
             type_const_semicolon;
@@ -6828,7 +6822,6 @@ module WithToken (Token : TokenType) = struct
           [
             function_call_receiver;
             function_call_type_args;
-            function_call_enum_class_label;
             function_call_left_paren;
             function_call_argument_list;
             function_call_right_paren;
@@ -6837,7 +6830,6 @@ module WithToken (Token : TokenType) = struct
           {
             function_call_receiver;
             function_call_type_args;
-            function_call_enum_class_label;
             function_call_left_paren;
             function_call_argument_list;
             function_call_right_paren;
@@ -8186,7 +8178,7 @@ module WithToken (Token : TokenType) = struct
           type_const_type_keyword
           type_const_name
           type_const_type_parameters
-          type_const_type_constraint
+          type_const_type_constraints
           type_const_equal
           type_const_type_specifier
           type_const_semicolon =
@@ -8199,7 +8191,7 @@ module WithToken (Token : TokenType) = struct
               type_const_type_keyword;
               type_const_name;
               type_const_type_parameters;
-              type_const_type_constraint;
+              type_const_type_constraints;
               type_const_equal;
               type_const_type_specifier;
               type_const_semicolon;
@@ -9002,7 +8994,6 @@ module WithToken (Token : TokenType) = struct
       let make_function_call_expression
           function_call_receiver
           function_call_type_args
-          function_call_enum_class_label
           function_call_left_paren
           function_call_argument_list
           function_call_right_paren =
@@ -9011,7 +9002,6 @@ module WithToken (Token : TokenType) = struct
             {
               function_call_receiver;
               function_call_type_args;
-              function_call_enum_class_label;
               function_call_left_paren;
               function_call_argument_list;
               function_call_right_paren;

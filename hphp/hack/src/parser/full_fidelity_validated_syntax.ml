@@ -2688,10 +2688,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             validate_option_with validate_specifier x.type_const_type_specifier;
           type_const_equal =
             validate_option_with validate_token x.type_const_equal;
-          type_const_type_constraint =
-            validate_option_with
+          type_const_type_constraints =
+            validate_list_with
               validate_type_constraint
-              x.type_const_type_constraint;
+              x.type_const_type_constraints;
           type_const_type_parameters =
             validate_option_with
               validate_type_parameters
@@ -2727,10 +2727,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with
                 invalidate_type_parameters
                 x.type_const_type_parameters;
-            type_const_type_constraint =
-              invalidate_option_with
+            type_const_type_constraints =
+              invalidate_list_with
                 invalidate_type_constraint
-                x.type_const_type_constraint;
+                x.type_const_type_constraints;
             type_const_equal =
               invalidate_option_with invalidate_token x.type_const_equal;
             type_const_type_specifier =
@@ -4545,10 +4545,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
           function_call_argument_list =
             validate_list_with validate_expression x.function_call_argument_list;
           function_call_left_paren = validate_token x.function_call_left_paren;
-          function_call_enum_class_label =
-            validate_option_with
-              validate_expression
-              x.function_call_enum_class_label;
           function_call_type_args =
             validate_option_with
               validate_type_arguments
@@ -4570,10 +4566,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with
                 invalidate_type_arguments
                 x.function_call_type_args;
-            function_call_enum_class_label =
-              invalidate_option_with
-                invalidate_expression
-                x.function_call_enum_class_label;
             function_call_left_paren =
               invalidate_token x.function_call_left_paren;
             function_call_argument_list =

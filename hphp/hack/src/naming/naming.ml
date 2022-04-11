@@ -953,6 +953,7 @@ let rec class_ ctx c =
     N.c_attributes = [];
     N.c_xhp_attrs = [];
     N.c_emit_id = c.Aast.c_emit_id;
+    N.c_internal = c.Aast.c_internal;
   }
 
 and user_attributes env attrl =
@@ -1514,6 +1515,7 @@ and fun_def ctx fd =
       fd_mode = fd.Aast.fd_mode;
       fd_namespace = fd.Aast.fd_namespace;
       fd_file_attributes = file_attributes;
+      fd_internal = fd.Aast.fd_internal;
     }
   in
   named_fun_def

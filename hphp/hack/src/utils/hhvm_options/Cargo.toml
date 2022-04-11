@@ -8,7 +8,7 @@ edition = "2021"
 path = "hhvm_options.rs"
 
 [dependencies]
-anyhow = "1.0.51"
+anyhow = "1.0.56"
 hdf = { path = "hdf" }
 hhvm_runtime_options = { path = "hhvm_runtime_options/hhvm_runtime_options" }
 structopt = "0.3.23"

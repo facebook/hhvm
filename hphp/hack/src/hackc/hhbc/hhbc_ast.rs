@@ -3,39 +3,24 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-mod opcodes;
-
-use ffi::{BumpSliceMut, Slice, Str};
-use typed_value::TypedValue;
-
-pub use opcodes::Opcode;
+use crate::{opcodes::Opcode, typed_value::TypedValue, FCallArgsFlags, PropName, ReadonlyOp};
+use ffi::{Slice, Str};
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
 
 /// Export these publicly so consumers of hhbc_ast don't have to know the
 /// internal details about the ffi.
-pub use hhvm_hhbc_defs_ffi::ffi::{
-    BareThisOp, CollectionType, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp, InitPropOp,
-    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, OODeclExistsOp, ObjMethodOp, QueryMOp, ReadonlyOp,
-    SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
-};
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum ParamId<'arena> {
+pub enum ParamName<'arena> {
     ParamUnnamed(isize),
     ParamNamed(Str<'arena>),
 }
 
 pub type StackIndex = u32;
 pub type ClassNum = u32;
-
-pub type ClassId<'arena> = hhbc_id::class::ClassType<'arena>;
-pub type FunctionId<'arena> = hhbc_id::function::FunctionType<'arena>;
-pub type MethodId<'arena> = hhbc_id::method::MethodType<'arena>;
-pub type ConstId<'arena> = hhbc_id::constant::ConstType<'arena>;
-pub type PropId<'arena> = hhbc_id::prop::PropType<'arena>;
 
 /// HHBC encodes bytecode offsets as i32 (HPHP::Offset) so u32
 /// is plenty of range for label ids.
@@ -181,11 +166,8 @@ pub struct IterArgs {
     pub val_id: Local,
 }
 
-pub type ClassrefId = isize;
-
 /// Conventionally this is "A_" followed by an integer
 pub type AdataId<'arena> = Str<'arena>;
-pub type ParamLocations<'arena> = Slice<'arena, isize>;
 
 #[derive(Clone, Copy, Debug)]
 #[repr(C)]
@@ -196,8 +178,8 @@ pub enum MemberKey<'arena> {
     EI(i64, ReadonlyOp),
     PC(StackIndex, ReadonlyOp),
     PL(Local, ReadonlyOp),
-    PT(PropId<'arena>, ReadonlyOp),
-    QT(PropId<'arena>, ReadonlyOp),
+    PT(PropName<'arena>, ReadonlyOp),
+    QT(PropName<'arena>, ReadonlyOp),
     W,
 }
 
@@ -239,6 +221,7 @@ pub enum Visibility {
     Protected,
     Internal,
 }
+
 impl std::convert::From<oxidized::ast_defs::Visibility> for Visibility {
     fn from(k: oxidized::ast_defs::Visibility) -> Self {
         use oxidized::ast_defs;
@@ -250,6 +233,7 @@ impl std::convert::From<oxidized::ast_defs::Visibility> for Visibility {
         }
     }
 }
+
 impl AsRef<str> for Visibility {
     fn as_ref(&self) -> &str {
         match self {
@@ -257,6 +241,17 @@ impl AsRef<str> for Visibility {
             Self::Public => "public",
             Self::Protected => "protected",
             Self::Internal => "internal",
+        }
+    }
+}
+
+impl From<Visibility> for hhvm_types_ffi::Attr {
+    fn from(k: Visibility) -> Self {
+        match k {
+            Visibility::Private => Self::AttrPrivate,
+            Visibility::Public => Self::AttrPublic,
+            Visibility::Protected => Self::AttrProtected,
+            Visibility::Internal => Self::AttrPublic,
         }
     }
 }

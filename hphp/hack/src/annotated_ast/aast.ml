@@ -847,6 +847,7 @@ and ('ex, 'en) class_ = {
   c_enum: enum_ option;
   c_doc_comment: doc_comment option;
   c_emit_id: emit_id option;
+  c_internal: bool;
 }
 
 and class_hint = hint
@@ -1010,6 +1011,7 @@ and ('ex, 'en) fun_def = {
   fd_file_attributes: ('ex, 'en) file_attribute list;
   fd_mode: FileInfo.mode; [@visitors.opaque]
   fd_fun: ('ex, 'en) fun_;
+  fd_internal: bool;
 }
 
 and ('ex, 'en) module_def = {

@@ -49,8 +49,8 @@ Errors:
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
-      });
+        f_doc_comment = None };
+      fd_internal = false });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -83,8 +83,8 @@ Errors:
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None }
-       });
+         f_doc_comment = None };
+       fd_internal = false });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -190,8 +190,8 @@ Errors:
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None }
-       });
+         f_doc_comment = None };
+       fd_internal = false });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -239,8 +239,8 @@ Errors:
              ([58:3-23], (Expr ((_), [58:3-22], (Binop ((Eq None), ((_), [58:3-9], (Lvar ([58:3-9], $bad11))), ((_), [58:14-22], (String "HelloH")))))))]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None }
-       });
+         f_doc_comment = None };
+       fd_internal = false });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -264,5 +264,5 @@ Errors:
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None }
-       })
+         f_doc_comment = None };
+       fd_internal = false })

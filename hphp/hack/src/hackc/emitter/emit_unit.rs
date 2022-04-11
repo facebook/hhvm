@@ -13,8 +13,7 @@ use emit_typedef::emit_typedefs_from_program;
 use env::{self, emitter::Emitter, Env};
 use error::{Error, ErrorKind, Result};
 use ffi::{Maybe::*, Slice, Str};
-use hackc_unit::HackCUnit;
-use hhbc_ast::FatalOp;
+use hhbc::{hackc_unit::HackCUnit, FatalOp};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env, pos::Pos};
 
@@ -71,7 +70,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     let file_attributes = emit_file_attributes_from_program(emitter, prog)?;
     let adata = emit_adata::take(emitter).adata;
     let module_use = emit_module_use_from_program(emitter, prog);
-    let symbol_refs = emitter.take_symbol_refs().to_hhas(emitter.alloc);
+    let symbol_refs = emitter.finish_symbol_refs();
     let fatal = Nothing;
 
     Ok(HackCUnit {

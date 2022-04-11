@@ -185,14 +185,6 @@ public:
   static ContinueCommand* createInstance(Debugger* debugger);
 };
 
-//////  Runs a request thread's PSPs.                                //////
-struct RunPspCommand : public VSCommand {
-  VS_COMMAND_COMMON_IMPL(RunPspCommand, CommandTarget::WorkItem, false);
-
-public:
-  static RunPspCommand* createInstance(Debugger* debugger);
-};
-
 //////  Handles SetBreakpoints commands from the debugger client.     //////
 struct SetBreakpointsCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(SetBreakpointsCommand, CommandTarget::None, false);

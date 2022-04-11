@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Result;
-use hhbc::{ImmType, Inputs, InstrFlags, OpcodeData, Outputs};
+use hhbc_gen::{ImmType, Inputs, InstrFlags, OpcodeData, Outputs};
 use std::fmt::{self, Display};
 use structopt::StructOpt;
 
@@ -22,7 +22,7 @@ pub struct Opts {}
 /// in the round trip. It also serves as an example that could be used
 /// as the basis for one or more Rust proc-macros.
 fn main() -> Result<()> {
-    let ops = hhbc::opcode_data();
+    let ops = hhbc_gen::opcode_data();
     println!("#define OPCODES \\");
     for op in ops {
         print_op(op);

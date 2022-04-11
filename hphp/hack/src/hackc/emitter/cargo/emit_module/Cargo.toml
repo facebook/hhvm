@@ -13,7 +13,5 @@ emit_attribute = { path = "../emit_attribute" }
 env = { path = "../env" }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
-hhas_module = { path = "../../../hhbc/cargo/hhas_module" }
-hhas_pos = { path = "../../../hhbc/cargo/hhas_pos" }
-hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 oxidized = { path = "../../../../oxidized" }

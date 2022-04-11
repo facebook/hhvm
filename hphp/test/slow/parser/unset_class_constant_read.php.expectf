@@ -1,1 +1,1 @@
- Fatal error: Can't use [] for reading in %s/unset_class_constant_read.php on line 10
+Fatal error: You cannot use this syntax in an `unset()` expression. in %s/unset_class_constant_read.php on line 10

@@ -961,6 +961,7 @@ let class_def : Typing_env_types.env -> Nast.class_ -> unit =
     c_enum = _;
     c_doc_comment = _;
     c_emit_id = _;
+    c_internal = _;
   } =
     class_
   in

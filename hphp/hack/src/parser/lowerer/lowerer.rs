@@ -1501,7 +1501,7 @@ fn p_expr_impl<'a>(
         AnonymousFunction(c) => p_anonymous_function(node, c, env),
         AwaitableCreationExpression(c) => p_awaitable_creation_expr(node, c, env, pos),
         XHPExpression(c) if c.open.is_xhp_open() => p_xhp_expr(c, env),
-        EnumClassLabelExpression(c) => p_enum_class_label_expr(node, c, env),
+        EnumClassLabelExpression(c) => p_enum_class_label_expr(c, env),
         _ => missing_syntax_(Some(Expr_::Null), "expression", node, env),
     }
 }
@@ -1707,23 +1707,7 @@ fn p_function_call_expr<'a>(
             // Mark expression as CallReceiver so that we can correctly set
             // PropOrMethod field in ObjGet and ClassGet
             let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env, None)?;
-            let (mut args, varargs) = split_args_vararg(args, env)?;
-
-            // If the function has an enum class label expression, that's
-            // the first argument.
-            if let EnumClassLabelExpression(e) = &c.enum_class_label.children {
-                assert!(
-                    e.qualifier.is_missing(),
-                    "Parser error: function call with enum class labels"
-                );
-                let pos = p_pos(&c.enum_class_label, env);
-                let enum_class_label = ast::Expr::new(
-                    (),
-                    pos,
-                    Expr_::mk_enum_class_label(None, pos_name(&e.expression, env)?.1),
-                );
-                args.insert(0, (ast::ParamKind::Pnormal, enum_class_label));
-            }
+            let (args, varargs) = split_args_vararg(args, env)?;
 
             Ok(Expr_::mk_call(recv, targs, args, varargs))
         }
@@ -1880,11 +1864,7 @@ fn p_binary_expr<'a>(
         _ => TopLevel,
     };
     let right = p_expr_with_loc(rlocation, &c.right_operand, env, None)?;
-    let bop_ast_node = p_bop(pos, &c.operator, left, right, env)?;
-    if let Some((ast::Bop::Eq(_), lhs, _)) = bop_ast_node.as_binop() {
-        check_lvalue(lhs, env);
-    }
-    Ok(bop_ast_node)
+    p_bop(pos, &c.operator, left, right, env)
 }
 
 fn p_token<'a>(
@@ -2280,44 +2260,33 @@ fn p_xhp_expr<'a>(
 }
 
 fn p_enum_class_label_expr<'a>(
-    node: S<'a>,
     c: &'a EnumClassLabelExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
+    use syntax_kind::SyntaxKind;
     /* Foo#Bar can be the following:
      * - short version: Foo is None/missing and we only have #Bar
      * - Foo is a name -> fully qualified Foo#Bar
-     * - Foo is a function call prefix (can happen during auto completion)
-     *   $c->foo#Bar or C::foo#Bar
      */
-    let ast::Id(label_pos, label_name) = pos_name(&c.expression, env)?;
-    if c.qualifier.is_missing() {
-        Ok(Expr_::mk_enum_class_label(None, label_name))
-    } else if c.qualifier.is_name() {
-        let name = pos_name(&c.qualifier, env)?;
-        Ok(Expr_::mk_enum_class_label(Some(name), label_name))
-    } else if label_name.ends_with("AUTO332") {
-        // This can happen during parsing in auto-complete mode
-        // In such case, the "label_name" must end with AUTO332
-        // We want to treat this as a method call even though we haven't
-        // yet seen the arguments
-        let recv = p_expr_with_loc(ExprLocation::CallReceiver, &c.qualifier, env, None);
-        match recv {
-            Ok(recv) => {
-                let enum_class_label = Expr_::mk_enum_class_label(None, label_name);
-                let enum_class_label = ast::Expr::new((), label_pos, enum_class_label);
-                Ok(Expr_::mk_call(
-                    recv,
-                    vec![],
-                    vec![(ast::ParamKind::Pnormal, enum_class_label)],
-                    None,
-                ))
-            }
-            Err(err) => Err(err),
-        }
+    let ast::Id(_label_pos, label_name) = pos_name(&c.expression, env)?;
+    let qual = if c.qualifier.is_missing() {
+        None
     } else {
-        missing_syntax_(Some(Expr_::Null), "method call", node, env)
-    }
+        let name = pos_name(&c.qualifier, env)?;
+        Some(name)
+    };
+
+    match c.qualifier.kind() {
+        SyntaxKind::Missing => {}
+        SyntaxKind::QualifiedName => {}
+        SyntaxKind::Token(TK::Name) => {}
+        _ => raise_parsing_error(
+            &c.qualifier,
+            env,
+            &syntax_error::invalid_enum_class_label_qualifier,
+        ),
+    };
+    Ok(Expr_::mk_enum_class_label(qual, label_name))
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {
@@ -2377,68 +2346,6 @@ fn p_obj_get<'a>(
             _ => ast::PropOrMethod::IsProp,
         },
     ))
-}
-
-fn check_lvalue<'a>(ast::Expr(_, p, expr_): &ast::Expr, env: &mut Env<'a>) {
-    let mut raise = |s| raise_parsing_error_pos(p, env, s);
-    match expr_ {
-        Expr_::ObjGet(og) => {
-            if og.as_ref().3 == ast::PropOrMethod::IsMethod {
-                raise("Invalid lvalue")
-            } else {
-                match og.as_ref() {
-                    (_, ast::Expr(_, _, Expr_::Id(_)), ast::OgNullFlavor::OGNullsafe, _) => {
-                        raise("?-> syntax is not supported for lvalues")
-                    }
-                    (_, ast::Expr(_, _, Expr_::Id(sid)), _, _) if sid.1.as_bytes()[0] == b':' => {
-                        raise("->: syntax is not supported for lvalues")
-                    }
-                    _ => {}
-                }
-            }
-        }
-        Expr_::ArrayGet(ag) => {
-            if let Expr_::ClassConst(_) = (ag.0).2 {
-                raise("Array-like class consts are not valid lvalues");
-            }
-        }
-        Expr_::List(l) => {
-            for i in l.iter() {
-                check_lvalue(i, env);
-            }
-        }
-        Expr_::Darray(_)
-        | Expr_::Varray(_)
-        | Expr_::Shape(_)
-        | Expr_::Collection(_)
-        | Expr_::Null
-        | Expr_::True
-        | Expr_::False
-        | Expr_::Id(_)
-        | Expr_::Clone(_)
-        | Expr_::ClassConst(_)
-        | Expr_::Int(_)
-        | Expr_::Float(_)
-        | Expr_::PrefixedString(_)
-        | Expr_::String(_)
-        | Expr_::String2(_)
-        | Expr_::Yield(_)
-        | Expr_::Await(_)
-        | Expr_::Cast(_)
-        | Expr_::Unop(_)
-        | Expr_::Binop(_)
-        | Expr_::Eif(_)
-        | Expr_::New(_)
-        | Expr_::Efun(_)
-        | Expr_::Lfun(_)
-        | Expr_::Xml(_)
-        | Expr_::Import(_)
-        | Expr_::Pipe(_)
-        | Expr_::Is(_)
-        | Expr_::As(_)
-        | Expr_::Call(_) => raise("Invalid lvalue"),
-        _ => {}
-    }
 }
 
 fn p_xhp_embedded<'a, F>(node: S<'a>, env: &mut Env<'a>, escaper: F) -> Result<ast::Expr>
@@ -2857,13 +2764,6 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         ),
     }
 }
-fn check_mutate_class_const<'a>(e: &ast::Expr, node: S<'a>, env: &mut Env<'a>) {
-    match &e.2 {
-        Expr_::ArrayGet(c) if c.1.is_some() => check_mutate_class_const(&c.0, node, env),
-        Expr_::ClassConst(_) => raise_parsing_error(node, env, &syntax_error::const_mutation),
-        _ => {}
-    }
-}
 
 fn p_while_stmt<'a>(
     env: &mut Env<'a>,
@@ -3008,8 +2908,6 @@ fn p_unset_stmt<'a>(
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
         let args = could_map(&c.variables, e, p_expr_for_normal_argument)?;
-        args.iter()
-            .for_each(|(_, arg)| check_mutate_class_const(arg, node, e));
         let unset = match &c.keyword.children {
             QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                 let name = pos_name(&c.keyword, e)?;
@@ -4466,7 +4364,26 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 .map(|hint| soften_hint(&user_attributes, hint));
             let kinds = p_kinds(&c.modifiers, env)?;
             let name = pos_name(&c.name, env)?;
-            let as_constraint = map_optional(&c.type_constraint, env, p_tconstraint_ty)?;
+            let as_constraint = {
+                let mut constraints = could_map(&c.type_constraints, env, p_tconstraint_ty)?;
+                if constraints.len() == 1 {
+                    constraints.pop()
+                } else {
+                    #[allow(clippy::manual_map)]
+                    // map doesn't allow moving out of borrowed constraints
+                    match constraints.first() {
+                        None => None, // no bounds
+                        Some(fst) => {
+                            // desugar multiple as constraints into an intersection type
+                            // e.g., `as num as T1` -> `as (num & T1)`
+                            Some(ast::Hint::new(
+                                fst.0.clone(),
+                                ast::Hint_::Hintersection(constraints),
+                            ))
+                        }
+                    }
+                }
+            };
             let span = p_pos(node, env);
             let has_abstract = kinds.has(modifier::ABSTRACT);
             let kind = if has_abstract {
@@ -5182,6 +5099,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 file_attributes: vec![],
                 mode: env.file_mode(),
                 fun,
+                // TODO(T116039119): Populate value with presence of internal attribute
+                internal: false,
             })])
         }
         ClassishDeclaration(c) if contains_class_body(c) => {
@@ -5251,6 +5170,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 enum_: None,
                 doc_comment: doc_comment_opt,
                 emit_id: None,
+                // TODO(T116039119): Populate value with presence of internal attribute
+                internal: false,
             };
             match &c.body.children {
                 ClassishBody(c1) => {
@@ -5441,6 +5362,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 emit_id: None,
+                // TODO(T116039119): Populate value with presence of internal attribute
+                internal: false,
             })])
         }
 
@@ -5515,6 +5438,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 emit_id: None,
+                // TODO(T116039119): Populate value with presence of internal attribute
+                internal: false,
             };
 
             for n in c.elements.syntax_node_to_list_skip_separator() {

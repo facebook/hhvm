@@ -10,10 +10,6 @@ abstract class B {
   public abstract function __toString(): string;
 }
 
-interface StringishObject {
-  public abstract function __toString(): string;
-}
-
 interface SomeOtherC {
   public function __toString(): string;
 }

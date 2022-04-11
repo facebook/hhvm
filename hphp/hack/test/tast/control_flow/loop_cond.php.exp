@@ -11,7 +11,7 @@
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None });
+      c_doc_comment = None; c_emit_id = None; c_internal = false });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -25,8 +25,8 @@
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body = { fb_ast = [([6:3-18], (Return (Some ((A), [6:10-17], (New (((A), [6:14-15], (CI ([6:14-15], "\\A"))), [], [], None, (_)))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None }
-       });
+         f_doc_comment = None };
+       fd_internal = false });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -54,8 +54,8 @@
              ([11:3-13:4], (AssertEnv (Refinement, {$x})))]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None }
-       });
+         f_doc_comment = None };
+       fd_internal = false });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -78,5 +78,5 @@
              ([17:3-18:4], (AssertEnv (Refinement, {$x})))]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None }
-       })
+         f_doc_comment = None };
+       fd_internal = false })

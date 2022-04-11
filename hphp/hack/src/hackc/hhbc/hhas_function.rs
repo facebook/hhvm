@@ -3,13 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::{
+    hhas_attribute::HhasAttribute, hhas_body::HhasBody, hhas_coeffects::HhasCoeffects,
+    hhas_param::HhasParam, hhas_pos::HhasSpan, FunctionName,
+};
 use ffi::Slice;
-use hhas_attribute::HhasAttribute;
-use hhas_body::HhasBody;
-use hhas_coeffects::HhasCoeffects;
-use hhas_param::HhasParam;
-use hhas_pos::HhasSpan;
-use hhbc_id::function::FunctionType;
 use hhvm_types_ffi::ffi::Attr;
 
 use bitflags::bitflags;
@@ -18,7 +16,7 @@ use bitflags::bitflags;
 #[repr(C)]
 pub struct HhasFunction<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
-    pub name: FunctionType<'arena>,
+    pub name: FunctionName<'arena>,
     pub body: HhasBody<'arena>,
 
     pub span: HhasSpan,

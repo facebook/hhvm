@@ -285,6 +285,7 @@ let fun_def ctx fd :
       Aast.fd_fun = fun_;
       Aast.fd_file_attributes = file_attrs;
       Aast.fd_namespace = fd.fd_namespace;
+      Aast.fd_internal = fd.fd_internal;
     }
   in
   let (_env, global_inference_env) = Env.extract_global_inference_env env in
@@ -2046,6 +2047,7 @@ let class_def_ env c tc =
       Aast.c_xhp_children = c.c_xhp_children;
       Aast.c_xhp_attrs = [];
       Aast.c_emit_id = c.c_emit_id;
+      Aast.c_internal = c.c_internal;
     },
     global_inference_envs )
 

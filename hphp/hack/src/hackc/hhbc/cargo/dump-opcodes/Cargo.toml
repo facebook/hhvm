@@ -9,7 +9,8 @@ name = "dump_opcodes"
 path = "../../dump_opcodes.rs"
 
 [dependencies]
-anyhow = "1.0.51"
+anyhow = "1.0.56"
 emit_opcodes = { path = "../emit_opcodes" }
-hhbc = { path = "../../../../../../tools/hhbc-gen" }
+hhbc-gen = { path = "../../../../../../tools/hhbc-gen" }
 quote = "1.0"
+structopt = "0.3.23"

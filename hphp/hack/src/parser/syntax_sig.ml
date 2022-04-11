@@ -285,7 +285,7 @@ module type Syntax_S = sig
         type_const_type_keyword: t;
         type_const_name: t;
         type_const_type_parameters: t;
-        type_const_type_constraint: t;
+        type_const_type_constraints: t;
         type_const_equal: t;
         type_const_type_specifier: t;
         type_const_semicolon: t;
@@ -647,7 +647,6 @@ module type Syntax_S = sig
     | FunctionCallExpression of {
         function_call_receiver: t;
         function_call_type_args: t;
-        function_call_enum_class_label: t;
         function_call_left_paren: t;
         function_call_argument_list: t;
         function_call_right_paren: t;
@@ -1287,7 +1286,7 @@ module type Syntax_S = sig
 
   val make_isset_expression : t -> t -> t -> t -> t
 
-  val make_function_call_expression : t -> t -> t -> t -> t -> t -> t
+  val make_function_call_expression : t -> t -> t -> t -> t -> t
 
   val make_function_pointer_expression : t -> t -> t
 

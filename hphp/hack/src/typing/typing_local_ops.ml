@@ -15,7 +15,13 @@ module SN = Naming_special_names
 
 let check_local_capability (mk_required : env -> env * locl_ty) mk_err_opt env =
   (* gate the check behavior on coeffects TC option *)
-  if TypecheckerOptions.local_coeffects (Env.get_tcopt env) then (
+  let tcopt = Env.get_tcopt env in
+  if
+    TypecheckerOptions.local_coeffects tcopt
+    && not
+         (TypecheckerOptions.enable_sound_dynamic tcopt
+         && env.in_support_dynamic_type_method_check)
+  then (
     let available = Env.get_local env Typing_coeffects.local_capability_id in
     let (env, required) = mk_required env in
     let err_opt = mk_err_opt available required in
@@ -100,11 +106,6 @@ let enforce_enum_class_variant =
   enforce_local_capability
     Capabilities.(mk writeProperty)
     "Accessing an enum class constant"
-
-let enforce_enum_class_label =
-  enforce_local_capability
-    Capabilities.(mk defaults)
-    "Using an enum class label"
 
 (* basic local mutability checks *)
 let rec is_byval_collection_or_string_or_any_type env ty =

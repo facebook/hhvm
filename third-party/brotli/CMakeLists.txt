@@ -20,6 +20,7 @@ ExternalProject_Add(
     -DCMAKE_INSTALL_LIBDIR=lib
     -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
     -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
 )
 add_dependencies(brotli bundled_brotli)
 

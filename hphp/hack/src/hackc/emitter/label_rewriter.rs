@@ -5,8 +5,7 @@
 
 use env::{emitter::Emitter, LabelGen};
 use hash::{HashMap, HashSet};
-use hhas_param::HhasParam;
-use hhbc_ast::{Instruct, Label, Pseudo};
+use hhbc::{hhas_param::HhasParam, Instruct, Label, Pseudo};
 use instruction_sequence::InstrSeq;
 use oxidized::ast;
 

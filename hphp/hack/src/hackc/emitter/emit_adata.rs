@@ -7,10 +7,12 @@ use adata_state::AdataState;
 use env::emitter::Emitter;
 use error::{Error, Result};
 use ffi::Str;
-use hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX};
+use hhbc::{
+    hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX},
+    ClassName, TypedValue,
+};
 use instruction_sequence::{instr, InstrSeq};
 use options::HhvmFlags;
-use typed_value::TypedValue;
 
 pub fn typed_value_to_instr<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
@@ -24,8 +26,8 @@ pub fn typed_value_to_instr<'arena, 'decl>(
         TypedValue::Int(i) => Ok(instr::int(*i)),
         TypedValue::String(s) => Ok(instr::string(e.alloc, s.unsafe_as_str())),
         TypedValue::LazyClass(s) => {
-            let classid: hhbc_ast::ClassId<'arena> =
-                hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
+            let classid: ClassName<'arena> =
+                ClassName::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
             Ok(instr::lazyclass(classid))
         }
         TypedValue::Double(f) => Ok(instr::double(f.to_f64())),

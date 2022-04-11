@@ -9,6 +9,7 @@ final class Ref<T> {
   public function __construct(public T $value) {}
 }
 
+/*
 function set_default<Tk as arraykey, Tv>(
   \Ref<dict<Tk, Tv>> $dict,
   Tk $key,
@@ -28,3 +29,4 @@ function test(): void {
 function contains_key(mixed $_, mixed $_): bool {
   return true;
 }
+*/

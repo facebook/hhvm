@@ -445,12 +445,6 @@ void final_pass(Index& index,
                 const StatsHolder& stats,
                 F emitUnit) {
   trace_time final_pass("final pass");
-  LitstrTable::fini();
-  LitstrTable::init();
-  LitstrTable::get().setWriting();
-  LitarrayTable::fini();
-  LitarrayTable::init();
-  LitarrayTable::get().setWriting();
   index.freeze();
   auto const dump_dir = debug_dump_to();
   parallel::for_each(
@@ -552,9 +546,7 @@ void add_unit_to_program(const UnitEmitter* ue, php::Program& program) {
 
 void whole_program(php::ProgramPtr program,
                    UnitEmitterQueue& ueq,
-                   std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
-                   int num_threads,
-                   std::promise<void>* arrTableReady) {
+                   int num_threads) {
   StructuredLogEntry sample;
   trace_time tracer("whole program");
 
@@ -632,10 +624,6 @@ void whole_program(php::ProgramPtr program,
 
   print_stats(stats);
 
-  arrTable = std::move(index.array_table_builder());
-  if (arrTableReady != nullptr) {
-    arrTableReady->set_value();
-  }
   ueq.finish();
   cleanup_pre.join();
   cleanup_post.join();

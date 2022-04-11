@@ -1,0 +1,173 @@
+--- ocaml
++++ rupro
+@@ -1,170 +1,158 @@
+ FoldedClass {
+     name: "\\PEntBase",
+     pos: Pos(root|ent_02.good.php, 6:16-24),
+     kind: Cclass(
+         Abstract,
+     ),
+     methods: {
+         "getData": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\PEntBase",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "TData": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|ent_02.good.php, 7:23-28),
+             ty: HH\TypeStructure<this::TData>,
+             origin: "\\PEntBase",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|ent_02.good.php, 6:16-24),
+             ty: HH\classname<this>,
+             origin: "\\PEntBase",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TData": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|ent_02.good.php, 7:23-28),
+                 "TData",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: None,
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\PEntBase",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\PFooEnt",
+     pos: Pos(root|ent_02.good.php, 12:13-20),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_final: true,
+     substs: {
+         "\\PEntBase": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\PFooEnt",
+             from_req_extends: false,
+         },
+         "\\PFooAutogenTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\PFooEnt",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\PEntBase": PEntBase,
+         "\\PFooAutogenTrait": PFooAutogenTrait,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\PFooAutogenTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+         "getData": FoldedElement {
+             flags: (empty),
+             origin: "\\PFooEnt",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "TData": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|ent_02.good.php, 15:14-19),
+             ty: HH\TypeStructure<this::TData>,
+             origin: "\\PFooEnt",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|ent_02.good.php, 12:13-20),
+             ty: HH\classname<this>,
+             origin: "\\PFooEnt",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TData": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|ent_02.good.php, 15:14-19),
+                 "TData",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: shape('a' => int),
+             },
+             origin: "\\PFooEnt",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\PEntBase",
+         "\\PFooAutogenTrait",
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|ent_02.good.php, 13:7-23),
+-            PFooEnt,
+-        ),
+-    ],
+ }
+ FoldedClass {
+     name: "\\PFooAutogenTrait",
+     pos: Pos(root|ent_02.good.php, 23:7-23),
+     kind: Ctrait,
+     methods: {
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\PFooAutogenTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|ent_02.good.php, 23:7-23),
+             ty: HH\classname<this>,
+             origin: "\\PFooAutogenTrait",
+             refs: [],
+         },
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|ent_02.good.php, 24:17-24),
+-            PFooEnt,
+-        ),
+-    ],
+ }

@@ -1,0 +1,80 @@
+--- ocaml
++++ rupro
+@@ -1,77 +1,65 @@
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|requireclass_syntax_03.good.php, 6:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|requireclass_syntax_03.good.php, 6:16-17),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\D",
+     pos: Pos(root|requireclass_syntax_03.good.php, 8:22-23),
+     kind: Cclass(
+         Abstract,
+     ),
+     is_final: true,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|requireclass_syntax_03.good.php, 8:22-23),
+             ty: HH\classname<this>,
+             origin: "\\D",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\T1",
+     pos: Pos(root|requireclass_syntax_03.good.php, 10:7-9),
+     kind: Ctrait,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|requireclass_syntax_03.good.php, 10:7-9),
+             ty: HH\classname<this>,
+             origin: "\\T1",
+             refs: [],
+         },
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|requireclass_syntax_03.good.php, 11:17-18),
+-            C,
+-        ),
+-    ],
+ }
+ FoldedClass {
+     name: "\\T2",
+     pos: Pos(root|requireclass_syntax_03.good.php, 14:7-9),
+     kind: Ctrait,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|requireclass_syntax_03.good.php, 14:7-9),
+             ty: HH\classname<this>,
+             origin: "\\T2",
+             refs: [],
+         },
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|requireclass_syntax_03.good.php, 15:17-18),
+-            D,
+-        ),
+-    ],
+ }

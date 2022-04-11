@@ -1,0 +1,86 @@
+--- ocaml
++++ rupro
+@@ -1,83 +1,71 @@
+ FoldedClass {
+     name: "\\T",
+     pos: Pos(root|self_01.good.php, 6:7-8),
+     kind: Ctrait,
+     methods: {
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|self_01.good.php, 6:7-8),
+             ty: HH\classname<this>,
+             origin: "\\T",
+             refs: [],
+         },
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|self_01.good.php, 7:17-18),
+-            C,
+-        ),
+-    ],
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|self_01.good.php, 14:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\T": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\C",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\T": T,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     static_methods: {
+         "bar": FoldedElement {
+             flags: (empty),
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|self_01.good.php, 14:7-8),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\T",
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|self_01.good.php, 15:7-8),
+-            C,
+-        ),
+-    ],
+ }

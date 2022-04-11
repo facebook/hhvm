@@ -1,0 +1,120 @@
+--- ocaml
++++ rupro
+@@ -1,117 +1,105 @@
+ FoldedClass {
+     name: "\\T",
+     pos: Pos(root|parent_01.bad.php, 8:7-8),
+     kind: Ctrait,
+     methods: {
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|parent_01.bad.php, 8:7-8),
+             ty: HH\classname<this>,
+             origin: "\\T",
+             refs: [],
+         },
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|parent_01.bad.php, 9:17-18),
+-            D,
+-        ),
+-    ],
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|parent_01.bad.php, 16:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     static_methods: {
+         "bar": FoldedElement {
+             flags: (empty),
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|parent_01.bad.php, 16:7-8),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\D",
+     pos: Pos(root|parent_01.bad.php, 20:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\C": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\D",
+             from_req_extends: false,
+         },
+         "\\T": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\D",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\C": C,
+         "\\T": T,
+     },
+     methods: {
+         "foo": FoldedElement {
+             flags: (empty),
+             origin: "\\T",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     static_methods: {
+         "bar": FoldedElement {
+             flags: (empty),
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|parent_01.bad.php, 20:7-8),
+             ty: HH\classname<this>,
+             origin: "\\D",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\C",
+         "\\T",
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|parent_01.bad.php, 21:7-8),
+-            D,
+-        ),
+-    ],
+ }

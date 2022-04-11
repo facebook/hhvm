@@ -1,0 +1,79 @@
+--- ocaml
++++ rupro
+@@ -1,76 +1,64 @@
+ FoldedClass {
+     name: "\\T",
+     pos: Pos(root|requireclass_hierarchy_02.bad.php, 6:7-8),
+     kind: Ctrait,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|requireclass_hierarchy_02.bad.php, 6:7-8),
+             ty: HH\classname<this>,
+             origin: "\\T",
+             refs: [],
+         },
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|requireclass_hierarchy_02.bad.php, 7:17-18),
+-            C,
+-        ),
+-    ],
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|requireclass_hierarchy_02.bad.php, 10:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|requireclass_hierarchy_02.bad.php, 10:7-8),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\D",
+     pos: Pos(root|requireclass_hierarchy_02.bad.php, 12:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\T": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\D",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\T": T,
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|requireclass_hierarchy_02.bad.php, 12:7-8),
+             ty: HH\classname<this>,
+             origin: "\\D",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\T",
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|requireclass_hierarchy_02.bad.php, 13:7-8),
+-            C,
+-        ),
+-    ],
+ }

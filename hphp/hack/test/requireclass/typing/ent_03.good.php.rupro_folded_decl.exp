@@ -1,0 +1,152 @@
+--- ocaml
++++ rupro
+@@ -1,149 +1,137 @@
+ FoldedClass {
+     name: "\\PFooEnt",
+     pos: Pos(root|ent_03.good.php, 6:13-20),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_final: true,
+     substs: {
+         "\\PFooAutogenTrait": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\PFooEnt",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\PFooAutogenTrait": PFooAutogenTrait,
+     },
+     methods: {
+         "gen": FoldedElement {
+             flags: (empty),
+             origin: "\\PFooAutogenTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "MyData": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|ent_03.good.php, 15:14-20),
+             ty: HH\TypeStructure<this::MyData>,
+             origin: "\\PFooAutogenTrait",
+             refs: [],
+         },
+         "TData": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|ent_03.good.php, 9:14-19),
+             ty: HH\TypeStructure<this::TData>,
+             origin: "\\PFooEnt",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|ent_03.good.php, 6:13-20),
+             ty: HH\classname<this>,
+             origin: "\\PFooEnt",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "MyData": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|ent_03.good.php, 15:14-20),
+                 "MyData",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: this::TData,
+             },
+             origin: "\\PFooAutogenTrait",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+         "TData": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|ent_03.good.php, 9:14-19),
+                 "TData",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: shape('a' => int),
+             },
+             origin: "\\PFooEnt",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\PFooAutogenTrait",
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|ent_03.good.php, 7:7-23),
+-            PFooEnt,
+-        ),
+-    ],
+ }
+ FoldedClass {
+     name: "\\PFooAutogenTrait",
+     pos: Pos(root|ent_03.good.php, 12:7-23),
+     kind: Ctrait,
+     methods: {
+         "gen": FoldedElement {
+             flags: (empty),
+             origin: "\\PFooAutogenTrait",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "MyData": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|ent_03.good.php, 15:14-20),
+             ty: HH\TypeStructure<this::MyData>,
+             origin: "\\PFooAutogenTrait",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|ent_03.good.php, 12:7-23),
+             ty: HH\classname<this>,
+             origin: "\\PFooAutogenTrait",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "MyData": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|ent_03.good.php, 15:14-20),
+                 "MyData",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: this::TData,
+             },
+             origin: "\\PFooAutogenTrait",
+             enforceable: None,
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|ent_03.good.php, 13:17-24),
+-            PFooEnt,
+-        ),
+-    ],
+ }

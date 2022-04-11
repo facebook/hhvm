@@ -1,0 +1,54 @@
+--- ocaml
++++ rupro
+@@ -1,51 +1,45 @@
+ FoldedClass {
+     name: "\\MyTrait",
+     pos: Pos(root|requireclass_generic_01.bad.php, 6:7-14),
+     kind: Ctrait,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|requireclass_generic_01.bad.php, 6:7-14),
+             ty: HH\classname<this>,
+             origin: "\\MyTrait",
+             refs: [],
+         },
+     },
+-    req_class_ancestors: [
+-        Requirement(
+-            Pos(root|requireclass_generic_01.bad.php, 7:17-18),
+-            C<int>,
+-        ),
+-    ],
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|requireclass_generic_01.bad.php, 10:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|requireclass_generic_01.bad.php, 10:9-10),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|requireclass_generic_01.bad.php, 10:7-8),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+ }

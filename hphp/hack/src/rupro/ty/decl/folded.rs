@@ -180,6 +180,10 @@ pub struct FoldedClass<R: Reason> {
     pub xhp_attr_deps: TypeNameIndexSet,
     pub req_ancestors: Box<[Requirement<R>]>,
     pub req_ancestors_extends: TypeNameIndexSet,
+    /// `req_class_ancestors` gathers all the `require class` requirements
+    /// declared in self and ancestors. Note that `require class` requirements
+    /// are _not_ stored in `req_ancestors` or `req_ancestors_extends` fields.
+    pub req_class_ancestors: Box<[Requirement<R>]>,
     pub sealed_whitelist: Option<TypeNameIndexSet>,
     pub deferred_init_members: PropNameIndexSet,
     pub decl_errors: Box<[DeclError<R::Pos>]>,

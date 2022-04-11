@@ -785,6 +785,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             xhp_attr_deps,
             req_ancestors: req_ancestors.into_boxed_slice(),
             req_ancestors_extends,
+            req_class_ancestors: [].into(), // TODO
             sealed_whitelist,
             deferred_init_members,
             decl_errors: self.errors.into_boxed_slice(),

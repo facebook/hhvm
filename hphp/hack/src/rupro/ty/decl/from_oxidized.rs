@@ -574,6 +574,10 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
                 .copied()
                 .map(Into::into)
                 .collect(),
+            req_class_ancestors: (cls.req_class_ancestors.iter())
+                .copied()
+                .map(Into::into)
+                .collect(),
             sealed_whitelist: (cls.sealed_whitelist)
                 .map(|l| l.iter().copied().map(Into::into).collect()),
             deferred_init_members: (cls.deferred_init_members.iter())

@@ -335,114 +335,112 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
             }
         }
 
-        if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
-            if let Some(parent_folded_decl) = self.parents.get(&parent_pos_id.id()) {
-                let sig = Subst::new(&parent_folded_decl.tparams, parent_tyl);
-                let subst = Substitution { subst: &sig };
+        let (_, parent_pos_id, parent_tyl) = parent_ty.unwrap_class_type();
+        if let Some(parent_folded_decl) = self.parents.get(&parent_pos_id.id()) {
+            let sig = Subst::new(&parent_folded_decl.tparams, parent_tyl);
+            let subst = Substitution { subst: &sig };
 
-                let consts = (parent_folded_decl.consts.iter())
-                    .map(|(name, cc)| (*name, subst.instantiate_class_const(cc)))
-                    .collect();
-                let type_consts = (parent_folded_decl.type_consts.iter())
-                    .map(|(name, tc)| (*name, subst.instantiate_type_const(tc)))
-                    .collect();
+            let consts = (parent_folded_decl.consts.iter())
+                .map(|(name, cc)| (*name, subst.instantiate_class_const(cc)))
+                .collect();
+            let type_consts = (parent_folded_decl.type_consts.iter())
+                .map(|(name, tc)| (*name, subst.instantiate_type_const(tc)))
+                .collect();
 
-                let parent_inh = match parent_folded_decl.kind {
-                    ClassishKind::Ctrait => Inherited {
-                        consts,
-                        type_consts,
-                        props: (parent_folded_decl.props.iter())
-                            .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
-                            .collect(),
-                        static_props: (parent_folded_decl.static_props.iter())
-                            .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
-                            .collect(),
-                        methods: (parent_folded_decl.methods)
-                            .iter()
-                            .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
-                            .collect(),
-                        static_methods: (parent_folded_decl.static_methods.iter())
-                            .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
-                            .collect(),
-                        ..Default::default()
-                    },
-                    ClassishKind::Cclass(_) | ClassishKind::Cinterface => Inherited {
-                        consts,
-                        type_consts,
-                        props: (parent_folded_decl.props.iter())
-                            .filter(is_not_private)
-                            .map(|(k, v)| (*k, v.clone()))
-                            .collect(),
-                        static_props: (parent_folded_decl.static_props.iter())
-                            .filter(is_not_private)
-                            .map(|(k, v)| (*k, v.clone()))
-                            .collect(),
-                        methods: (parent_folded_decl.methods.iter())
-                            .filter(is_not_private)
-                            .map(|(k, v)| (*k, v.clone()))
-                            .collect(),
-                        static_methods: (parent_folded_decl.static_methods.iter())
-                            .filter(is_not_private)
-                            .map(|(k, v)| (*k, v.clone()))
-                            .collect(),
-                        ..Default::default()
-                    },
-                    ClassishKind::Cenum | ClassishKind::CenumClass(_) => Inherited {
-                        consts,
-                        type_consts,
-                        props: parent_folded_decl.props.clone(),
-                        static_props: parent_folded_decl.static_props.clone(),
-                        methods: parent_folded_decl.methods.clone(),
-                        static_methods: parent_folded_decl.static_methods.clone(),
-                        ..Default::default()
-                    },
-                };
+            let parent_inh = match parent_folded_decl.kind {
+                ClassishKind::Ctrait => Inherited {
+                    consts,
+                    type_consts,
+                    props: (parent_folded_decl.props.iter())
+                        .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
+                        .collect(),
+                    static_props: (parent_folded_decl.static_props.iter())
+                        .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
+                        .collect(),
+                    methods: (parent_folded_decl.methods)
+                        .iter()
+                        .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
+                        .collect(),
+                    static_methods: (parent_folded_decl.static_methods.iter())
+                        .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
+                        .collect(),
+                    ..Default::default()
+                },
+                ClassishKind::Cclass(_) | ClassishKind::Cinterface => Inherited {
+                    consts,
+                    type_consts,
+                    props: (parent_folded_decl.props.iter())
+                        .filter(is_not_private)
+                        .map(|(k, v)| (*k, v.clone()))
+                        .collect(),
+                    static_props: (parent_folded_decl.static_props.iter())
+                        .filter(is_not_private)
+                        .map(|(k, v)| (*k, v.clone()))
+                        .collect(),
+                    methods: (parent_folded_decl.methods.iter())
+                        .filter(is_not_private)
+                        .map(|(k, v)| (*k, v.clone()))
+                        .collect(),
+                    static_methods: (parent_folded_decl.static_methods.iter())
+                        .filter(is_not_private)
+                        .map(|(k, v)| (*k, v.clone()))
+                        .collect(),
+                    ..Default::default()
+                },
+                ClassishKind::Cenum | ClassishKind::CenumClass(_) => Inherited {
+                    consts,
+                    type_consts,
+                    props: parent_folded_decl.props.clone(),
+                    static_props: parent_folded_decl.static_props.clone(),
+                    methods: parent_folded_decl.methods.clone(),
+                    static_methods: parent_folded_decl.static_methods.clone(),
+                    ..Default::default()
+                },
+            };
 
-                // TODO(hrust): Do we need sharing?
-                let mut substs = parent_folded_decl.substs.clone();
-                substs.insert(
-                    parent_folded_decl.name,
-                    SubstContext {
-                        subst: sig,
-                        class_context: self.child.name.id(),
-                        from_req_extends: false,
-                    },
-                );
+            // TODO(hrust): Do we need sharing?
+            let mut substs = parent_folded_decl.substs.clone();
+            substs.insert(
+                parent_folded_decl.name,
+                SubstContext {
+                    subst: sig,
+                    class_context: self.child.name.id(),
+                    from_req_extends: false,
+                },
+            );
 
-                let constructor = parent_folded_decl.constructor.clone();
-                if !parent_folded_decl.pos.is_hhi() {
-                    self.dependency_registrar.add_dependency(
-                        DeclName::Type(self.child.name.id()),
-                        DependencyName::Constructor(parent_folded_decl.name),
-                    )?;
-                }
-
-                return Ok(Inherited {
-                    substs,
-                    constructor,
-                    ..parent_inh
-                });
+            let constructor = parent_folded_decl.constructor.clone();
+            if !parent_folded_decl.pos.is_hhi() {
+                self.dependency_registrar.add_dependency(
+                    DeclName::Type(self.child.name.id()),
+                    DependencyName::Constructor(parent_folded_decl.name),
+                )?;
             }
+
+            return Ok(Inherited {
+                substs,
+                constructor,
+                ..parent_inh
+            });
         }
 
         Ok(Default::default())
     }
 
     fn class_constants_from_class(&self, ty: &Ty<R>) -> Result<Inherited<R>> {
-        if let Some((_, pos_id, tyl)) = ty.unwrap_class_type() {
-            if let Some(parent) = self.parents.get(&pos_id.id()) {
-                let sig = Subst::new(&parent.tparams, tyl);
-                let subst = Substitution { subst: &sig };
-                return Ok(Inherited {
-                    consts: (parent.consts.iter())
-                        .map(|(name, cc)| (*name, subst.instantiate_class_const(cc)))
-                        .collect(),
-                    type_consts: (parent.type_consts.iter())
-                        .map(|(name, tc)| (*name, subst.instantiate_type_const(tc)))
-                        .collect(),
-                    ..Default::default()
-                });
-            }
+        let (_, pos_id, tyl) = ty.unwrap_class_type();
+        if let Some(parent) = self.parents.get(&pos_id.id()) {
+            let sig = Subst::new(&parent.tparams, tyl);
+            let subst = Substitution { subst: &sig };
+            return Ok(Inherited {
+                consts: (parent.consts.iter())
+                    .map(|(name, cc)| (*name, subst.instantiate_class_const(cc)))
+                    .collect(),
+                type_consts: (parent.type_consts.iter())
+                    .map(|(name, tc)| (*name, subst.instantiate_type_const(tc)))
+                    .collect(),
+                ..Default::default()
+            });
         }
 
         Ok(Default::default())
@@ -452,17 +450,16 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     // "attribute :foo" syntax.
     // c.f. Decl_inherit.from_class_xhp_attrs_only
     fn xhp_attrs_from_class(&self, ty: &Ty<R>) -> Result<Inherited<R>> {
-        if let Some((_, pos_id, _tyl)) = ty.unwrap_class_type() {
-            if let Some(parent) = self.parents.get(&pos_id.id()) {
-                // Filter out properties that are not XHP attributes.
-                return Ok(Inherited {
-                    props: (parent.props.iter())
-                        .filter(|(_, prop)| prop.get_xhp_attr().is_some())
-                        .map(|(name, prop)| (name.clone(), prop.clone()))
-                        .collect(),
-                    ..Default::default()
-                });
-            }
+        let (_, pos_id, _tyl) = ty.unwrap_class_type();
+        if let Some(parent) = self.parents.get(&pos_id.id()) {
+            // Filter out properties that are not XHP attributes.
+            return Ok(Inherited {
+                props: (parent.props.iter())
+                    .filter(|(_, prop)| prop.get_xhp_attr().is_some())
+                    .map(|(name, prop)| (name.clone(), prop.clone()))
+                    .collect(),
+                ..Default::default()
+            });
         }
 
         Ok(Default::default())

@@ -380,22 +380,21 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     }
 
     fn get_implements(&self, ty: &Ty<R>, ancestors: &mut TypeNameIndexMap<Ty<R>>) {
-        if let Some((_, pos_id, tyl)) = ty.unwrap_class_type() {
-            match self.parents.get(&pos_id.id()) {
-                None => {
-                    // The class lives in PHP land.
-                    ancestors.insert(pos_id.id(), ty.clone());
+        let (_, pos_id, tyl) = ty.unwrap_class_type();
+        match self.parents.get(&pos_id.id()) {
+            None => {
+                // The class lives in PHP land.
+                ancestors.insert(pos_id.id(), ty.clone());
+            }
+            Some(cls) => {
+                let subst = Subst::new(&cls.tparams, tyl);
+                let substitution = Substitution { subst: &subst };
+                // Update `ancestors`.
+                for (&anc_name, anc_ty) in &cls.ancestors {
+                    ancestors.insert(anc_name, substitution.instantiate(anc_ty));
                 }
-                Some(cls) => {
-                    let subst = Subst::new(&cls.tparams, tyl);
-                    let substitution = Substitution { subst: &subst };
-                    // Update `ancestors`.
-                    for (&anc_name, anc_ty) in &cls.ancestors {
-                        ancestors.insert(anc_name, substitution.instantiate(anc_ty));
-                    }
-                    // Now add `ty`.
-                    ancestors.insert(pos_id.id(), ty.clone());
-                }
+                // Now add `ty`.
+                ancestors.insert(pos_id.id(), ty.clone());
             }
         }
     }
@@ -458,21 +457,20 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         extends: &mut TypeNameIndexSet,
         ty: &Ty<R>,
     ) {
-        if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
-            extends.insert(pos_id.id());
-            if let Some(cls) = self.parents.get(&pos_id.id()) {
-                if pass == Pass::Extends {
-                    self.check_extend_kind(pos_id.pos(), cls.kind, cls.name);
-                }
-
-                if pass == Pass::Xhp {
-                    // If we are crawling the xhp attribute deps, need to merge their xhp deps as well
-                    // XHP attribute dependencies don't actually pull the trait into the class,
-                    // so we need to track them totally separately.
-                    extends.extend(cls.xhp_attr_deps.iter().cloned());
-                }
-                extends.extend(cls.extends.iter().cloned());
+        let (_, pos_id, _) = ty.unwrap_class_type();
+        extends.insert(pos_id.id());
+        if let Some(cls) = self.parents.get(&pos_id.id()) {
+            if pass == Pass::Extends {
+                self.check_extend_kind(pos_id.pos(), cls.kind, cls.name);
             }
+
+            if pass == Pass::Xhp {
+                // If we are crawling the xhp attribute deps, need to merge their xhp deps as well
+                // XHP attribute dependencies don't actually pull the trait into the class,
+                // so we need to track them totally separately.
+                extends.extend(cls.xhp_attr_deps.iter().cloned());
+            }
+            extends.extend(cls.extends.iter().cloned());
         }
     }
 
@@ -503,27 +501,26 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         req_ancestors_extends: &mut TypeNameIndexSet,
         parent_ty: &Ty<R>,
     ) {
-        if let Some((_, pos_id, parent_params)) = parent_ty.unwrap_class_type() {
-            if let Some(cls) = self.parents.get(&pos_id.id()) {
-                let subst = Subst::new(&cls.tparams, parent_params);
-                let substitution = Substitution { subst: &subst };
-                req_ancestors.extend(
-                    cls.req_ancestors
-                        .iter()
-                        .map(|req| substitution.instantiate(&req.ty))
-                        .map(|ty| Requirement::new(pos_id.pos().clone(), ty)),
-                );
-                match self.child.kind {
-                    ClassishKind::Cclass(_) => {
-                        // Not necessary to accumulate req_ancestors_extends for classes --
-                        // it's not used
-                    }
-                    ClassishKind::Ctrait | ClassishKind::Cinterface => {
-                        req_ancestors_extends.extend(cls.req_ancestors_extends.iter().cloned());
-                    }
-                    ClassishKind::Cenum | ClassishKind::CenumClass(_) => {
-                        panic!();
-                    }
+        let (_, pos_id, parent_params) = parent_ty.unwrap_class_type();
+        if let Some(cls) = self.parents.get(&pos_id.id()) {
+            let subst = Subst::new(&cls.tparams, parent_params);
+            let substitution = Substitution { subst: &subst };
+            req_ancestors.extend(
+                cls.req_ancestors
+                    .iter()
+                    .map(|req| substitution.instantiate(&req.ty))
+                    .map(|ty| Requirement::new(pos_id.pos().clone(), ty)),
+            );
+            match self.child.kind {
+                ClassishKind::Cclass(_) => {
+                    // Not necessary to accumulate req_ancestors_extends for classes --
+                    // it's not used
+                }
+                ClassishKind::Ctrait | ClassishKind::Cinterface => {
+                    req_ancestors_extends.extend(cls.req_ancestors_extends.iter().cloned());
+                }
+                ClassishKind::Cenum | ClassishKind::CenumClass(_) => {
+                    panic!();
                 }
             }
         }
@@ -535,22 +532,21 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         req_ancestors_extends: &mut TypeNameIndexSet,
         req_ty: &Ty<R>,
     ) {
-        if let Some((_, pos_id, _)) = req_ty.unwrap_class_type() {
-            // Since the req is declared on this class, we should
-            // emphatically *not* substitute: a require extends Foo<T> is
-            // going to be this class's <T>
-            req_ancestors.push(Requirement::new(pos_id.pos().clone(), req_ty.clone()));
-            req_ancestors_extends.insert(pos_id.id());
+        let (_, pos_id, _) = req_ty.unwrap_class_type();
+        // Since the req is declared on this class, we should
+        // emphatically *not* substitute: a require extends Foo<T> is
+        // going to be this class's <T>
+        req_ancestors.push(Requirement::new(pos_id.pos().clone(), req_ty.clone()));
+        req_ancestors_extends.insert(pos_id.id());
 
-            if let Some(cls) = self.parents.get(&pos_id.id()) {
-                req_ancestors_extends.extend(cls.extends.iter().cloned());
-                req_ancestors_extends.extend(cls.xhp_attr_deps.iter().cloned());
-                // The req may be on an interface that has reqs of its own; the
-                // flattened ancestry required by *those* reqs need to be added
-                // in to, e.g., interpret accesses to protected functions inside
-                // traits
-                req_ancestors_extends.extend(cls.req_ancestors_extends.iter().cloned());
-            }
+        if let Some(cls) = self.parents.get(&pos_id.id()) {
+            req_ancestors_extends.extend(cls.extends.iter().cloned());
+            req_ancestors_extends.extend(cls.xhp_attr_deps.iter().cloned());
+            // The req may be on an interface that has reqs of its own; the
+            // flattened ancestry required by *those* reqs need to be added
+            // in to, e.g., interpret accesses to protected functions inside
+            // traits
+            req_ancestors_extends.extend(cls.req_ancestors_extends.iter().cloned());
         }
     }
 
@@ -571,22 +567,19 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         // (since OCaml uses `rev_filter_map` for perf reasons)
         req_ancestors.reverse();
         req_ancestors.retain(|req_extend| {
-            if let Some((_, pos_id, targs)) = req_extend.ty.unwrap_class_type() {
-                if let Some(seen_targs) = seen_reqs.get(&pos_id.id()) {
-                    if targs.eq_modulo_pos(seen_targs) {
-                        false
-                    } else {
-                        // Seems odd to replace the existing targs list when we
-                        // see a different one, but the OCaml does it, so we
-                        // need to as well
-                        seen_reqs.insert(pos_id.id(), targs.to_vec());
-                        true
-                    }
+            let (_, pos_id, targs) = req_extend.ty.unwrap_class_type();
+            if let Some(seen_targs) = seen_reqs.get(&pos_id.id()) {
+                if targs.eq_modulo_pos(seen_targs) {
+                    false
                 } else {
+                    // Seems odd to replace the existing targs list when we
+                    // see a different one, but the OCaml does it, so we
+                    // need to as well
                     seen_reqs.insert(pos_id.id(), targs.to_vec());
                     true
                 }
             } else {
+                seen_reqs.insert(pos_id.id(), targs.to_vec());
                 true
             }
         });
@@ -650,7 +643,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             .map(|prop| prop.name.id());
 
         let extends_props = (self.child.extends.iter())
-            .filter_map(|extend| extend.unwrap_class_type())
+            .map(|extend| extend.unwrap_class_type())
             .filter_map(|(_, pos_id, _)| self.parents.get(&pos_id.id()))
             .flat_map(|ty| ty.deferred_init_members.iter().copied());
 
@@ -662,7 +655,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             } else {
                 self.child.extends.iter()
             }
-            .filter_map(|ty| ty.unwrap_class_type())
+            .map(|ty| ty.unwrap_class_type())
             .filter_map(|(_, pos_id, _)| self.parents.get(&pos_id.id()))
             .find(|parent| parent.has_concrete_constructor() && self.child.constructor.is_some())
             .map(|_| *sn::members::parentConstruct)

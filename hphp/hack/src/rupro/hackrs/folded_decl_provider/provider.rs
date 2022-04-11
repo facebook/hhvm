@@ -155,11 +155,10 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         errors: &mut Vec<DeclError<R::Pos>>,
         ty: &Ty<R>,
     ) -> Result<Option<(TypeName, Arc<FoldedClass<R>>)>> {
-        if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
-            if !self.detect_cycle(stack, errors, &pos_id) {
-                if let Some(folded_decl) = self.get_folded_class_impl(stack, pos_id.id())? {
-                    return Ok(Some((pos_id.id(), folded_decl)));
-                }
+        let (_, pos_id, _) = ty.unwrap_class_type();
+        if !self.detect_cycle(stack, errors, &pos_id) {
+            if let Some(folded_decl) = self.get_folded_class_impl(stack, pos_id.id())? {
+                return Ok(Some((pos_id.id(), folded_decl)));
             }
         }
         Ok(None)
@@ -171,37 +170,34 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         // the effect of explaining that "we couldn't decl 'class' because we
         // couldn't decl 'parent' because ... x" ( where 'x' is the underlying
         // error like, the parent's php file is missing).
-        match parent.unwrap_class_type() {
-            Some((_, parent_name, _)) => match err {
+        let (_, parent_name, _) = parent.unwrap_class_type();
+        match err {
+            Error::Parent {
+                class: _,
+                mut parents,
+                error,
+            } => {
+                parents.push(parent_name.id());
                 Error::Parent {
-                    class: _,
-                    mut parents,
-                    error,
-                } => {
-                    parents.push(parent_name.id());
-                    Error::Parent {
-                        class: sc.name.id(),
-                        parents,
-                        error,
-                    }
-                }
-                _ => Error::Parent {
                     class: sc.name.id(),
-                    parents: vec![parent_name.id()],
-                    error: Box::new(err),
-                },
+                    parents,
+                    error,
+                }
+            }
+            _ => Error::Parent {
+                class: sc.name.id(),
+                parents: vec![parent_name.id()],
+                error: Box::new(err),
             },
-            None => err,
         }
     }
 
     fn register_extends_dependency(&self, ty: &Ty<R>, sc: &ShallowClass<R>) -> Result<()> {
-        if let Some((_, p, _)) = ty.unwrap_class_type() {
-            let child = sc.name.id();
-            let parent = p.id();
-            self.dependency_registrar
-                .add_dependency(DeclName::Type(child), DependencyName::Extends(parent))?;
-        }
+        let (_, p, _) = ty.unwrap_class_type();
+        let child = sc.name.id();
+        let parent = p.id();
+        self.dependency_registrar
+            .add_dependency(DeclName::Type(child), DependencyName::Extends(parent))?;
         Ok(())
     }
 

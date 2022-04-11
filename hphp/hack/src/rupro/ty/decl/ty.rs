@@ -167,15 +167,15 @@ impl<R: Reason> Ty<R> {
         &self.1
     }
 
-    pub fn unwrap_class_type(&self) -> Option<(&R, Positioned<TypeName, R::Pos>, &[Ty<R>])> {
+    pub fn unwrap_class_type(&self) -> (&R, Positioned<TypeName, R::Pos>, &[Ty<R>]) {
         use Ty_::*;
         let r = self.reason();
         match &**self.node() {
             Tapply(id_and_args) => {
                 let (pos_id, args) = &**id_and_args;
-                Some((r, pos_id.clone(), args))
+                (r, pos_id.clone(), args)
             }
-            _ => Some((r, Positioned::new(r.pos().clone(), TypeName::from("")), &[])),
+            _ => (r, Positioned::new(r.pos().clone(), TypeName::from("")), &[]),
         }
     }
 }

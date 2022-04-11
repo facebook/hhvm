@@ -47,13 +47,13 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                     Some(ty) => ty,
                 };
                 match enum_ty.unwrap_class_type() {
-                    Some((_, name, [ty_exp])) if name.id() == *sn::fb::cEnum => Some(EnumKind {
+                    (_, name, [ty_exp]) if name.id() == *sn::fb::cEnum => Some(EnumKind {
                         // base: ty_exp.clone(),
                         ty: ty_exp.clone(),
                         // constraint: None,
                         interface: None,
                     }),
-                    Some((_, name, _)) if name.id() == *sn::fb::cEnum => {
+                    (_, name, _) if name.id() == *sn::fb::cEnum => {
                         // The fallback if the class does not declare `TInner` (i.e.
                         // it is abstract) is to use `this::TInner`
                         let r = || enum_ty.reason().clone();

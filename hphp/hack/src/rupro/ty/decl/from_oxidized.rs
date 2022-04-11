@@ -368,6 +368,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ClassDecl<'_>> for shallow::Shallo
                 .collect(),
             req_extends: slice(sc.req_extends),
             req_implements: slice(sc.req_implements),
+            req_class: slice(sc.req_class),
             implements: slice(sc.implements),
             support_dynamic_type: sc.support_dynamic_type,
             consts: slice(sc.consts),

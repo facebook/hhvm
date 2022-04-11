@@ -31,6 +31,7 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
             xhp_enum_values,
             req_extends,
             req_implements,
+            req_class,
             implements,
             support_dynamic_type,
             consts,
@@ -93,6 +94,9 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
         }
         if !req_implements.is_empty() {
             s.field("req_implements", req_implements);
+        }
+        if !req_class.is_empty() {
+            s.field("req_class", req_class);
         }
         if !implements.is_empty() {
             s.field("implements", implements);

@@ -35,7 +35,7 @@ namespace Facts {
 std::shared_ptr<FactsStore> make_watcher_facts(
     folly::fs::path root,
     AutoloadDB::Handle dbHandle,
-    std::unique_ptr<Watcher> watcher,
+    std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
     std::vector<std::string> indexedMethodAttributes);
 

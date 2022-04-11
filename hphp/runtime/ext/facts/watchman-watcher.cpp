@@ -213,9 +213,9 @@ private:
 
 } // namespace
 
-std::unique_ptr<Watcher> make_watchman_watcher(
+std::shared_ptr<Watcher> make_watchman_watcher(
     folly::dynamic queryExpr, std::shared_ptr<Watchman> watchman) {
-  return std::make_unique<WatchmanWatcher>(
+  return std::make_shared<WatchmanWatcher>(
       std::move(queryExpr), std::move(watchman));
 }
 

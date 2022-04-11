@@ -482,7 +482,7 @@ struct FactsStoreImpl final
   FactsStoreImpl(
       folly::fs::path root,
       AutoloadDB::Handle dbHandle,
-      std::unique_ptr<Watcher> watcher,
+      std::shared_ptr<Watcher> watcher,
       hphp_hash_set<std::string> indexedMethodAttributes)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
@@ -1082,7 +1082,7 @@ struct FactsStoreImpl final
   std::atomic<bool> m_closing{false};
   folly::fs::path m_root;
   SymbolMap m_map;
-  std::unique_ptr<Watcher> m_watcher;
+  std::shared_ptr<Watcher> m_watcher;
 
   template <SymKind k, typename TLambda>
   Array getFileSymbols(const String& path, TLambda lambda) {
@@ -1239,7 +1239,7 @@ struct FactsStoreImpl final
 std::shared_ptr<FactsStore> make_watcher_facts(
     folly::fs::path root,
     AutoloadDB::Handle dbHandle,
-    std::unique_ptr<Watcher> watcher,
+    std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
     std::vector<std::string> indexedMethodAttrsVec) {
   hphp_hash_set<std::string> indexedMethodAttrs;

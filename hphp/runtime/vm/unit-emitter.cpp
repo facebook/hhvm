@@ -95,7 +95,6 @@ const StringData* UnitEmitter::lookupLitstr(Id id) const {
     return wrapper.ptr();
   }
   elem.lock_for_update();
-  SCOPE_FAIL { elem.unlock(); };
   wrapper = elem.copy();
   if (wrapper.isPtr()) {
     assertx(wrapper.ptr());
@@ -120,7 +119,6 @@ const ArrayData* UnitEmitter::lookupArray(Id id) const {
     return wrapper.ptr();
   }
   elem.lock_for_update();
-  SCOPE_FAIL { elem.unlock(); };
   wrapper = elem.copy();
   if (wrapper.isPtr()) {
     assertx(wrapper.ptr());
@@ -145,7 +143,6 @@ const RepoAuthType::Array* UnitEmitter::lookupRATArray(Id id) const {
     return wrapper.ptr();
   }
   elem.lock_for_update();
-  SCOPE_FAIL { elem.unlock(); };
   wrapper = elem.copy();
   if (wrapper.isPtr()) {
     assertx(wrapper.ptr());

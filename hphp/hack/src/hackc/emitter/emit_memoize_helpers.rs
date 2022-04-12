@@ -13,9 +13,9 @@ pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";
 
 pub fn get_memo_key_list<'arena>(temp_local: Local, param_local: Local) -> Vec<InstrSeq<'arena>> {
     vec![
-        instr::getmemokeyl(param_local),
-        instr::setl(temp_local),
-        instr::popc(),
+        instr::get_memo_key_l(param_local),
+        instr::set_l(temp_local),
+        instr::pop_c(),
     ]
 }
 
@@ -34,7 +34,7 @@ pub fn param_code_sets<'arena>(num_params: usize, first_unnamed: Local) -> Instr
 pub fn param_code_gets<'arena>(num_params: usize) -> InstrSeq<'arena> {
     InstrSeq::gather(
         (0..num_params)
-            .map(|i| instr::cgetl(Local::new(i)))
+            .map(|i| instr::c_get_l(Local::new(i)))
             .collect(),
     )
 }
@@ -58,9 +58,9 @@ pub fn get_implicit_context_memo_key<'arena>(
     local: Local,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(vec![
-        instr::nulluninit(),
-        instr::nulluninit(),
-        instr::fcallfuncd(
+        instr::null_uninit(),
+        instr::null_uninit(),
+        instr::f_call_func_d(
             FCallArgs::new(
                 FCallArgsFlags::default(),
                 1,
@@ -75,7 +75,7 @@ pub fn get_implicit_context_memo_key<'arena>(
                 "HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
             ),
         ),
-        instr::setl(local),
-        instr::popc(),
+        instr::set_l(local),
+        instr::pop_c(),
     ])
 }

@@ -10,8 +10,8 @@ use error::{Error, Result};
 use ffi::Slice;
 use hack_macro::hack_expr;
 use hhbc::{
-    FCallArgs, FCallArgsFlags, IsTypeOp, IterArgs, Label, Local, MOpMode, MemberKey, ObjMethodOp,
-    QueryMOp, ReadonlyOp, SetRangeOp,
+    FCallArgs, FCallArgsFlags, IsTypeOp, IterArgs, Label, Local, MOpMode, MemberKey, QueryMOp,
+    ReadonlyOp, SetRangeOp,
 };
 use instruction_sequence::{instr, InstrSeq};
 use lazy_static::lazy_static;
@@ -127,7 +127,7 @@ fn emit_await_<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     Ok(InstrSeq::gather(vec![
         emit_await(e, env, &e_.1, a)?,
-        instr::popc(),
+        instr::pop_c(),
     ]))
 }
 
@@ -157,13 +157,13 @@ fn emit_binop<'a, 'arena, 'decl>(
                             is_readonly_expr(e_rhs),
                         )?;
                         Ok((
-                            InstrSeq::gather(vec![awaited_instrs, instr::popl(temp)]),
+                            InstrSeq::gather(vec![awaited_instrs, instr::pop_l(temp)]),
                             InstrSeq::gather(vec![init, assign]),
-                            instr::unsetl(temp),
+                            instr::unset_l(temp),
                         ))
                     })
                 } else {
-                    Ok(InstrSeq::gather(vec![awaited_instrs, instr::popc()]))
+                    Ok(InstrSeq::gather(vec![awaited_instrs, instr::pop_c()]))
                 }
             } else {
                 emit_await_assignment(e, env, await_pos, e_lhs, e_await)
@@ -312,7 +312,7 @@ fn emit_check_case<'a, 'arena, 'decl>(
         InstrSeq::gather(vec![
             emit_expr::emit_two_exprs(e, env, &case_expr.1, scrutinee_expr, case_expr)?,
             instr::eq(),
-            instr::jmpnz(case_handler_label),
+            instr::jmp_nz(case_handler_label),
         ])
     } else {
         let next_case_label = e.label_gen_mut().next_regular();
@@ -321,8 +321,8 @@ fn emit_check_case<'a, 'arena, 'decl>(
             emit_expr::emit_expr(e, env, case_expr)?,
             emit_pos(&case_expr.1),
             instr::eq(),
-            instr::jmpz(next_case_label),
-            instr::popc(),
+            instr::jmp_z(next_case_label),
+            instr::pop_c(),
             instr::jmp(case_handler_label),
             instr::label(next_case_label),
         ])
@@ -354,12 +354,12 @@ fn emit_awaitall_single<'a, 'arena, 'decl>(
     scope::with_unnamed_locals(e, |e| {
         let load_arg = emit_expr::emit_await(e, env, pos, expr)?;
         let (load, unset) = match lval {
-            None => (instr::popc(), instr::empty()),
+            None => (instr::pop_c(), instr::empty()),
             Some(ast::Lid(_, id)) => {
                 let l = e
                     .local_gen_mut()
                     .init_unnamed_for_tempname(local_id::get_name(id));
-                (instr::popl(*l), instr::unsetl(*l))
+                (instr::pop_l(*l), instr::unset_l(*l))
             }
         };
         Ok((
@@ -395,26 +395,26 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
             });
         }
 
-        let init_locals = InstrSeq::gather(locals.iter().rev().map(|l| instr::popl(*l)).collect());
-        let unset_locals = InstrSeq::gather(locals.iter().map(|l| instr::unsetl(*l)).collect());
+        let init_locals = InstrSeq::gather(locals.iter().rev().map(|l| instr::pop_l(*l)).collect());
+        let unset_locals = InstrSeq::gather(locals.iter().map(|l| instr::unset_l(*l)).collect());
         let mut instrs = vec![];
         for l in locals.iter() {
             instrs.push({
                 let label_done = e.label_gen_mut().next_regular();
                 InstrSeq::gather(vec![
-                    instr::pushl(*l),
+                    instr::push_l(*l),
                     instr::dup(),
-                    instr::istypec(IsTypeOp::Null),
-                    instr::jmpnz(label_done),
-                    instr::whresult(),
+                    instr::is_type_c(IsTypeOp::Null),
+                    instr::jmp_nz(label_done),
+                    instr::wh_result(),
                     instr::label(label_done),
-                    instr::popl(*l),
+                    instr::pop_l(*l),
                 ])
             });
         }
 
         let unpack = InstrSeq::gather(instrs);
-        let await_all = InstrSeq::gather(vec![instr::awaitall_list(locals), instr::popc()]);
+        let await_all = InstrSeq::gather(vec![instr::await_all_list(locals), instr::pop_c()]);
         let block_instrs = emit_stmts(e, env, block)?;
         Ok((
             // before
@@ -465,7 +465,7 @@ fn emit_using<'a, 'arena, 'decl>(
                         InstrSeq::gather(vec![
                             emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                             emit_pos(&block_pos),
-                            instr::popc(),
+                            instr::pop_c(),
                         ]),
                     ),
                     _ => {
@@ -474,8 +474,8 @@ fn emit_using<'a, 'arena, 'decl>(
                             l,
                             InstrSeq::gather(vec![
                                 emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
-                                instr::setl(l),
-                                instr::popc(),
+                                instr::set_l(l),
+                                instr::pop_c(),
                             ]),
                         )
                     }
@@ -485,7 +485,7 @@ fn emit_using<'a, 'arena, 'decl>(
                     InstrSeq::gather(vec![
                         emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                         emit_pos(&block_pos),
-                        instr::popc(),
+                        instr::pop_c(),
                     ]),
                 ),
                 _ => {
@@ -494,8 +494,8 @@ fn emit_using<'a, 'arena, 'decl>(
                         l,
                         InstrSeq::gather(vec![
                             emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
-                            instr::setl(l),
-                            instr::popc(),
+                            instr::set_l(l),
+                            instr::pop_c(),
                         ]),
                     )
                 }
@@ -524,12 +524,12 @@ fn emit_using<'a, 'arena, 'decl>(
                         InstrSeq::gather(vec![
                             instr::await_(),
                             instr::label(after_await),
-                            instr::popc(),
+                            instr::pop_c(),
                         ]),
                         Some(after_await),
                     )
                 } else {
-                    (instr::popc(), None)
+                    (instr::pop_c(), None)
                 };
                 let fn_name = hhbc::MethodName::from_raw_string(
                     alloc,
@@ -540,9 +540,9 @@ fn emit_using<'a, 'arena, 'decl>(
                     },
                 );
                 InstrSeq::gather(vec![
-                    instr::cgetl(local),
-                    instr::nulluninit(),
-                    instr::fcallobjmethodd(
+                    instr::c_get_l(local),
+                    instr::null_uninit(),
+                    instr::f_call_obj_method_d(
                         FCallArgs::new(
                             FCallArgsFlags::default(),
                             1,
@@ -555,11 +555,10 @@ fn emit_using<'a, 'arena, 'decl>(
                                 .map(|s| -> &str { alloc.alloc_str(s.as_ref()) }),
                         ),
                         fn_name,
-                        ObjMethodOp::NullThrows,
                     ),
                     epilogue,
                     if is_block_scoped {
-                        instr::unsetl(local)
+                        instr::unset_l(local)
                     } else {
                         instr::empty()
                     },
@@ -671,7 +670,10 @@ fn emit_switch<'a, 'arena, 'decl>(
     let (instr_init, instr_free) = if scrutinee_expr.2.is_lvar() {
         (instr::empty(), instr::empty())
     } else {
-        (emit_expr::emit_expr(e, env, scrutinee_expr)?, instr::popc())
+        (
+            emit_expr::emit_expr(e, env, scrutinee_expr)?,
+            instr::pop_c(),
+        )
     };
     let break_label = e.label_gen_mut().next_regular();
 
@@ -847,10 +849,10 @@ fn make_finally_catch<'arena, 'decl>(
     exn_local: Local,
     finally_body: InstrSeq<'arena>,
 ) -> InstrSeq<'arena> {
-    let l2 = instr::unsetl(*e.local_gen_mut().get_retval());
-    let l1 = instr::unsetl(*e.local_gen_mut().get_label());
+    let l2 = instr::unset_l(*e.local_gen_mut().get_retval());
+    let l1 = instr::unset_l(*e.local_gen_mut().get_label());
     InstrSeq::gather(vec![
-        instr::popl(exn_local),
+        instr::pop_l(exn_local),
         l1,
         l2,
         scope::create_try_catch(
@@ -858,9 +860,9 @@ fn make_finally_catch<'arena, 'decl>(
             None,
             false,
             finally_body,
-            InstrSeq::gather(vec![instr::pushl(exn_local), instr::chain_faults()]),
+            InstrSeq::gather(vec![instr::push_l(exn_local), instr::chain_faults()]),
         ),
-        instr::pushl(exn_local),
+        instr::push_l(exn_local),
         instr::throw(),
     ])
 }
@@ -923,10 +925,10 @@ fn emit_catch<'a, 'arena, 'decl>(
     let ast::Lid(_pos, catch_local_id) = catch_lid;
     Ok(InstrSeq::gather(vec![
         instr::dup(),
-        instr::instanceofd(class_id),
-        instr::jmpz(next_catch),
-        instr::setl(e.named_local(local_id::get_name(catch_local_id).into())),
-        instr::popc(),
+        instr::instance_of_d(class_id),
+        instr::jmp_z(next_catch),
+        instr::set_l(e.named_local(local_id::get_name(catch_local_id).into())),
+        instr::pop_c(),
         emit_stmts(e, env, catch_block)?,
         emit_pos(pos),
         instr::jmp(end_label),
@@ -982,7 +984,7 @@ fn emit_foreach_<'a, 'arena, 'decl>(
         let iter_init = InstrSeq::gather(vec![
             collection_instrs,
             emit_pos(&collection.1),
-            instr::iterinit(iter_args.clone(), loop_break_label),
+            instr::iter_init(iter_args.clone(), loop_break_label),
         ]);
         let iterate = InstrSeq::gather(vec![
             instr::label(loop_head_label),
@@ -990,7 +992,7 @@ fn emit_foreach_<'a, 'arena, 'decl>(
             body,
             instr::label(loop_continue_label),
             emit_pos(pos),
-            instr::iternext(iter_args, loop_head_label),
+            instr::iter_next(iter_args, loop_head_label),
         ]);
         let iter_done = instr::label(loop_break_label);
         Ok((iter_init, iterate, iter_done))
@@ -1017,23 +1019,23 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
         let iter_init = InstrSeq::gather(vec![
             instr_collection,
             instr::dup(),
-            instr::instanceofd(hhbc::ClassName::from_raw_string(alloc, "HH\\AsyncIterator")),
-            instr::jmpnz(input_is_async_iterator_label),
+            instr::instance_of_d(hhbc::ClassName::from_raw_string(alloc, "HH\\AsyncIterator")),
+            instr::jmp_nz(input_is_async_iterator_label),
             emit_fatal::emit_fatal_runtime(
                 alloc,
                 pos,
                 "Unable to iterate non-AsyncIterator asynchronously",
             ),
             instr::label(input_is_async_iterator_label),
-            instr::popl(iter_temp_local),
+            instr::pop_l(iter_temp_local),
         ]);
         let loop_body_instr =
             env.do_in_loop_body(e, exit_label, next_label, None, block, emit_block)?;
         let iterate = InstrSeq::gather(vec![
             instr::label(next_label),
-            instr::cgetl(iter_temp_local),
-            instr::nulluninit(),
-            instr::fcallobjmethodd(
+            instr::c_get_l(iter_temp_local),
+            instr::null_uninit(),
+            instr::f_call_obj_method_d(
                 FCallArgs::new(
                     FCallArgsFlags::default(),
                     1,
@@ -1044,22 +1046,21 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
                     None,
                 ),
                 next_meth,
-                ObjMethodOp::NullThrows,
             ),
             instr::await_(),
             instr::label(async_eager_label),
             instr::dup(),
-            instr::istypec(IsTypeOp::Null),
-            instr::jmpnz(pop_and_exit_label),
+            instr::is_type_c(IsTypeOp::Null),
+            instr::jmp_nz(pop_and_exit_label),
             emit_foreach_await_key_value_storage(e, env, iterator)?,
             loop_body_instr,
             emit_pos(pos),
             instr::jmp(next_label),
             instr::label(pop_and_exit_label),
-            instr::popc(),
+            instr::pop_c(),
             instr::label(exit_label),
         ]);
-        let iter_done = instr::unsetl(iter_temp_local);
+        let iter_done = instr::unset_l(iter_temp_local);
         Ok((iter_init, iterate, iter_done))
     })
 }
@@ -1165,12 +1166,12 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl>(
             let (preamble, load_values) = emit_load_list_elements(
                 e,
                 env,
-                vec![instr::basel(local, MOpMode::Warn, ReadonlyOp::Any)],
+                vec![instr::base_l(local, MOpMode::Warn, ReadonlyOp::Any)],
                 es,
             )?;
             let load_values = vec![
                 InstrSeq::gather(load_values.into_iter().rev().collect()),
-                instr::unsetl(local),
+                instr::unset_l(local),
             ];
             Ok((preamble, load_values))
         }
@@ -1181,14 +1182,14 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl>(
                 &lvalue.1,
                 LValOp::Set,
                 lvalue,
-                instr::cgetl(local),
+                instr::c_get_l(local),
                 1,
                 false,
                 false, // TODO: Readonly iterator assignment
             )?;
             Ok((
                 vec![lhs],
-                vec![rhs, set_op, instr::popc(), instr::unsetl(local)],
+                vec![rhs, set_op, instr::pop_c(), instr::unset_l(local)],
             ))
         }
     }
@@ -1231,15 +1232,15 @@ fn emit_load_list_element<'a, 'arena, 'decl>(
     let query_value = |path| {
         InstrSeq::gather(vec![
             InstrSeq::gather(path),
-            instr::querym(0, QueryMOp::CGet, MemberKey::EI(i as i64, ReadonlyOp::Any)),
+            instr::query_m(0, QueryMOp::CGet, MemberKey::EI(i as i64, ReadonlyOp::Any)),
         ])
     };
     Ok(match &elem.2 {
         ast::Expr_::Lvar(lid) => {
             let load_value = InstrSeq::gather(vec![
                 query_value(path),
-                instr::setl(e.named_local(local_id::get_name(&lid.1).into())),
-                instr::popc(),
+                instr::set_l(e.named_local(local_id::get_name(&lid.1).into())),
+                instr::pop_c(),
             ]);
             (vec![], vec![load_value])
         }
@@ -1260,7 +1261,7 @@ fn emit_load_list_element<'a, 'arena, 'decl>(
                 false,
                 false, // TODO readonly load list elements
             )?;
-            let load_value = InstrSeq::gather(vec![set_instrs, instr::popc()]);
+            let load_value = InstrSeq::gather(vec![set_instrs, instr::pop_c()]);
             (vec![], vec![load_value])
         }
     })
@@ -1313,12 +1314,12 @@ fn emit_foreach_await_lvalue_storage<'a, 'arena, 'decl>(
             false,
         )?;
         Ok((
-            instr::popl(local),
+            instr::pop_l(local),
             InstrSeq::gather(vec![init, assign]),
             if keep_on_stack {
-                instr::pushl(local)
+                instr::push_l(local)
             } else {
-                instr::unsetl(local)
+                instr::unset_l(local)
             },
         ))
     })
@@ -1574,12 +1575,12 @@ fn emit_await_assignment<'a, 'arena, 'decl>(
         Some(ast::Lid(_, id)) if !emit_expr::is_local_this(env, id) => Ok(InstrSeq::gather(vec![
             emit_expr::emit_await(e, env, pos, r)?,
             emit_pos(pos),
-            instr::popl(emit_expr::get_local(e, env, pos, local_id::get_name(id))?),
+            instr::pop_l(emit_expr::get_local(e, env, pos, local_id::get_name(id))?),
         ])),
         _ => {
             let awaited_instrs = emit_await(e, env, pos, r)?;
             scope::with_unnamed_local(e, |e, temp| {
-                let rhs_instrs = instr::pushl(temp);
+                let rhs_instrs = instr::push_l(temp);
                 let (lhs, rhs, setop) = emit_expr::emit_lval_op_nonlist_steps(
                     e,
                     env,
@@ -1592,9 +1593,9 @@ fn emit_await_assignment<'a, 'arena, 'decl>(
                     false, // unnamed local assignment does not need readonly check
                 )?;
                 Ok((
-                    InstrSeq::gather(vec![awaited_instrs, instr::popl(temp)]),
+                    InstrSeq::gather(vec![awaited_instrs, instr::pop_l(temp)]),
                     lhs,
-                    InstrSeq::gather(vec![rhs, setop, instr::popc()]),
+                    InstrSeq::gather(vec![rhs, setop, instr::pop_c()]),
                 ))
             })
         }

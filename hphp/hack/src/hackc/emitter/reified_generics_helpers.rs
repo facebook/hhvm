@@ -160,7 +160,7 @@ pub(crate) fn simplify_verify_type<'a, 'arena, 'decl>(
         let done_label = label_gen.next_regular();
         Ok(InstrSeq::gather(vec![
             check,
-            instr::jmpnz(done_label),
+            instr::jmp_nz(done_label),
             get_ts(e, hint)?,
             verify_instr,
             instr::label(done_label),

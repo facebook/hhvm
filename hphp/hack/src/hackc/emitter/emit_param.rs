@@ -188,8 +188,8 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
                 let instrs = InstrSeq::gather(vec![
                     emit_expression::emit_expr(emitter, env, expr)?,
                     emit_pos::emit_pos(pos),
-                    instr::setl(Local::new(i)),
-                    instr::popc(),
+                    instr::set_l(Local::new(i)),
+                    instr::pop_c(),
                 ]);
                 Ok(InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]))
             })
@@ -201,7 +201,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
         let l = emitter.label_gen_mut().next_regular();
         Ok((
             instr::label(l),
-            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::jmpns(l)]),
+            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::jmp_ns(l)]),
         ))
     }
 }

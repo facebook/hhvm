@@ -102,7 +102,7 @@ where
 {
     with_unnamed_locals(e, |e| {
         let tmp = e.local_gen_mut().get_unnamed();
-        Ok((instr::popl(tmp.clone()), emit(e)?, instr::pushl(tmp)))
+        Ok((instr::pop_l(tmp.clone()), emit(e)?, instr::push_l(tmp)))
     })
 }
 
@@ -110,7 +110,7 @@ fn unset_unnamed_locals<'arena>(start: Local, end: Local) -> InstrSeq<'arena> {
     InstrSeq::gather(
         (start.idx..end.idx)
             .into_iter()
-            .map(|idx| instr::unsetl(Local::new(idx as usize)))
+            .map(|idx| instr::unset_l(Local::new(idx as usize)))
             .collect(),
     )
 }
@@ -119,7 +119,7 @@ fn free_iterators<'arena>(start: IterId, end: IterId) -> InstrSeq<'arena> {
     InstrSeq::gather(
         (start.idx..end.idx)
             .into_iter()
-            .map(|idx| instr::iterfree(IterId { idx }))
+            .map(|idx| instr::iter_free(IterId { idx }))
             .collect(),
     )
 }

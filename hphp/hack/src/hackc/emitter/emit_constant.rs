@@ -49,7 +49,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
             None => instr::empty(),
             Some(_) => instr::verify_ret_type_c(),
         };
-        let instrs = InstrSeq::gather(vec![instrs, verify_instr, instr::retc()]);
+        let instrs = InstrSeq::gather(vec![instrs, verify_instr, instr::ret_c()]);
         let body = emit_body::make_body(
             alloc,
             e,

@@ -28,7 +28,7 @@ pub fn typed_value_to_instr<'arena, 'decl>(
         TypedValue::LazyClass(s) => {
             let classid: ClassName<'arena> =
                 ClassName::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
-            Ok(instr::lazyclass(classid))
+            Ok(instr::lazy_class(classid))
         }
         TypedValue::Double(f) => Ok(instr::double(f.to_f64())),
         TypedValue::Keyset(_) => {

@@ -68,28 +68,28 @@ fn emit_generator_method<'arena>(name: &str, params: &[ast::FunParam]) -> Result
         "send" => {
             let local = get_first_param_local(params)?;
             InstrSeq::gather(vec![
-                instr::contcheck_check(),
-                instr::pushl(local),
-                instr::contenter(),
+                instr::cont_check_check(),
+                instr::push_l(local),
+                instr::cont_enter(),
             ])
         }
         "raise" | "throw" => {
             let local = get_first_param_local(params)?;
             InstrSeq::gather(vec![
-                instr::contcheck_check(),
-                instr::pushl(local),
-                instr::contraise(),
+                instr::cont_check_check(),
+                instr::push_l(local),
+                instr::cont_raise(),
             ])
         }
         "next" | "rewind" => InstrSeq::gather(vec![
-            instr::contcheck_ignore(),
+            instr::cont_check_ignore(),
             instr::null(),
-            instr::contenter(),
+            instr::cont_enter(),
         ]),
-        "valid" => instr::contvalid(),
-        "current" => instr::contcurrent(),
-        "key" => instr::contkey(),
-        "getReturn" => instr::contgetreturn(),
+        "valid" => instr::cont_valid(),
+        "current" => instr::cont_current(),
+        "key" => instr::cont_key(),
+        "getReturn" => instr::cont_get_return(),
         _ => {
             return Err(Error::fatal_runtime(
                 &Pos::make_none(),
@@ -97,7 +97,7 @@ fn emit_generator_method<'arena>(name: &str, params: &[ast::FunParam]) -> Result
             ));
         }
     };
-    Ok(InstrSeq::gather(vec![instrs, instr::retc()]))
+    Ok(InstrSeq::gather(vec![instrs, instr::ret_c()]))
 }
 
 fn get_first_param_local(params: &[ast::FunParam]) -> Result<Local> {

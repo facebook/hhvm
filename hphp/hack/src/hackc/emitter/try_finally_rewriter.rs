@@ -83,8 +83,8 @@ pub(super) fn emit_save_label_id<'arena>(
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(vec![
         instr::int(id.0.into()),
-        instr::setl(*local_gen.get_label()),
-        instr::popc(),
+        instr::set_l(*local_gen.get_label()),
+        instr::pop_c(),
     ])
 }
 
@@ -107,12 +107,12 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                 jt_gen
                     .jump_targets()
                     .iterators()
-                    .map(instr::iterfree)
+                    .map(instr::iter_free)
                     .collect(),
             );
             let mut instrs = Vec::with_capacity(5);
             if in_finally_epilogue {
-                let load_retval_instr = instr::cgetl(e.local_gen_mut().get_retval().clone());
+                let load_retval_instr = instr::c_get_l(e.local_gen_mut().get_retval().clone());
                 instrs.push(load_retval_instr);
             }
             let verify_return_instr = verify_return.map_or_else(
@@ -136,7 +136,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                         ReificationLevel::Definitely => {
                             let check = InstrSeq::gather(vec![
                                 instr::dup(),
-                                instr::istypec(IsTypeOp::Null),
+                                instr::is_type_c(IsTypeOp::Null),
                             ]);
                             reified::simplify_verify_type(
                                 e,
@@ -155,9 +155,9 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                 verify_out,
                 release_iterators_instr,
                 if num_out != 0 {
-                    instr::retm(num_out as u32 + 1)
+                    instr::ret_m(num_out as u32 + 1)
                 } else {
-                    instr::retc()
+                    instr::ret_c()
                 },
             ]);
             Ok(InstrSeq::gather(instrs))
@@ -171,8 +171,8 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                 let jt_gen = &mut env.jump_targets_gen;
                 let save_state = emit_save_label_id(e.local_gen_mut(), jt_gen.get_id_for_return());
                 let save_retval = InstrSeq::gather(vec![
-                    instr::setl(e.local_gen_mut().get_retval().clone()),
-                    instr::popc(),
+                    instr::set_l(e.local_gen_mut().get_retval().clone()),
+                    instr::pop_c(),
                 ]);
                 InstrSeq::gather(vec![save_state, save_retval])
             };
@@ -181,7 +181,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                 emit_jump_to_label(target_label, iterators_to_release),
                 // emit ret instr as an indicator for try/finally rewriter to generate
                 // finally epilogue, try/finally rewriter will remove it.
-                instr::retc(),
+                instr::ret_c(),
             ]))
         }
     }
@@ -211,7 +211,7 @@ pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
         }
         jt::ResolvedJumpTarget::ResolvedRegular(target_label, iterators_to_release) => {
             let preamble = if in_finally_epilogue && level == 1 {
-                instr::unsetl(e.local_gen_mut().get_label().clone())
+                instr::unset_l(e.local_gen_mut().get_label().clone())
             } else {
                 instr::empty()
             };
@@ -294,8 +294,8 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
         let (_, instr) = jump_instrs.0.iter().next().unwrap();
         InstrSeq::gather(vec![
             emit_pos(pos),
-            instr::issetl(e.local_gen_mut().get_label().clone()),
-            instr::jmpz(finally_end),
+            instr::isset_l(e.local_gen_mut().get_label().clone()),
+            instr::jmp_z(finally_end),
             emit_instr(e, env, pos, instr)?,
         ])
     } else {
@@ -345,9 +345,9 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
         }
         InstrSeq::gather(vec![
             emit_pos(pos),
-            instr::issetl(e.local_gen_mut().get_label().clone()),
-            instr::jmpz(finally_end),
-            instr::cgetl(e.local_gen_mut().get_label().clone()),
+            instr::isset_l(e.local_gen_mut().get_label().clone()),
+            instr::jmp_z(finally_end),
+            instr::c_get_l(e.local_gen_mut().get_label().clone()),
             instr::switch(
                 alloc,
                 bumpalo::collections::Vec::from_iter_in(labels.into_iter().rev(), alloc),

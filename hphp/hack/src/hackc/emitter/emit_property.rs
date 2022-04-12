@@ -130,7 +130,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
                             instr::empty(),
                             emit_pos::emit_pos_then(
                                 &class.span,
-                                instr::initprop(pid, InitPropOp::Static),
+                                instr::init_prop(pid, InitPropOp::Static),
                             ),
                         )
                     } else if args.visibility.is_private() {
@@ -138,19 +138,19 @@ pub fn from_ast<'ast, 'arena, 'decl>(
                             instr::empty(),
                             emit_pos::emit_pos_then(
                                 &class.span,
-                                instr::initprop(pid, InitPropOp::NonStatic),
+                                instr::init_prop(pid, InitPropOp::NonStatic),
                             ),
                         )
                     } else {
                         (
                             InstrSeq::gather(vec![
                                 emit_pos::emit_pos(&class.span),
-                                instr::checkprop(pid),
-                                instr::jmpnz(label),
+                                instr::check_prop(pid),
+                                instr::jmp_nz(label),
                             ]),
                             InstrSeq::gather(vec![
                                 emit_pos::emit_pos(&class.span),
-                                instr::initprop(pid, InitPropOp::NonStatic),
+                                instr::init_prop(pid, InitPropOp::NonStatic),
                                 instr::label(label),
                             ]),
                         )

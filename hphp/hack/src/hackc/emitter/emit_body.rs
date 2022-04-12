@@ -178,7 +178,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
     flags: Flags,
 ) -> Result<InstrSeq<'arena>> {
     let stmt_instrs = if flags.contains(Flags::NATIVE) {
-        instr::nativeimpl()
+        instr::native_impl()
     } else {
         env.do_function(emitter, body, emit_final_stmts)?
     };
@@ -202,7 +202,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
         _ => false,
     };
     let header = if first_instr_is_label && InstrSeq::is_empty(&header_content) {
-        InstrSeq::gather(vec![begin_label, instr::entrynop()])
+        InstrSeq::gather(vec![begin_label, instr::entry_nop()])
     } else {
         InstrSeq::gather(vec![begin_label, header_content])
     };
@@ -236,7 +236,7 @@ fn make_header_content<'a, 'arena, 'decl>(
         emit_deprecation_info(alloc, &env.scope, deprecation_info, emitter.systemlib())?;
 
     let generator_info = if is_generator {
-        InstrSeq::gather(vec![instr::createcont(), instr::popc()])
+        InstrSeq::gather(vec![instr::create_cont(), instr::pop_c()])
     } else {
         instr::empty()
     };
@@ -503,7 +503,8 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                     if !RGH::happly_decl_has_reified_generics(emitter, &h) {
                         Ok(instr::verify_param_type(param_name()))
                     } else {
-                        let check = instr::istypel(emitter.named_local(param.name), IsTypeOp::Null);
+                        let check =
+                            instr::is_type_l(emitter.named_local(param.name), IsTypeOp::Null);
                         let verify_instr = instr::verify_param_type_ts(param_name());
                         RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
                     }
@@ -546,7 +547,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                     None => ("".into(), instr::empty(), instr::empty()),
                     Some(c) if c.get_kind() == ast::ClassishKind::Ctrait => (
                         "::".into(),
-                        InstrSeq::gather(vec![instr::selfcls(), instr::classname()]),
+                        InstrSeq::gather(vec![instr::self_cls(), instr::class_name()]),
                         instr::concat(),
                     ),
                     Some(c) => (
@@ -596,14 +597,14 @@ pub fn emit_deprecation_info<'a, 'arena>(
                 instr::empty()
             } else {
                 InstrSeq::gather(vec![
-                    instr::nulluninit(),
-                    instr::nulluninit(),
+                    instr::null_uninit(),
+                    instr::null_uninit(),
                     trait_instrs,
                     instr::string(alloc, deprecation_string),
                     concat_instruction,
                     instr::int(sampling_rate),
                     instr::int(error_code),
-                    instr::fcallfuncd(
+                    instr::f_call_func_d(
                         FCallArgs::new(
                             FCallArgsFlags::default(),
                             1,
@@ -615,7 +616,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                         ),
                         hhbc::FunctionName::from_raw_string(alloc, "trigger_sampled_error"),
                     ),
-                    instr::popc(),
+                    instr::pop_c(),
                 ])
             }
         }
@@ -644,7 +645,7 @@ fn set_emit_statement_state<'arena, 'decl>(
         Some(InstrSeq::gather(vec![
             instr::null(),
             instr::verify_ret_type_c(),
-            instr::retc(),
+            instr::ret_c(),
         ]))
     } else {
         None
@@ -673,7 +674,7 @@ fn emit_verify_out<'arena>(
         .filter_map(|(i, (p, _))| {
             if p.is_inout {
                 Some(InstrSeq::gather(vec![
-                    instr::cgetl(Local::new(i)),
+                    instr::c_get_l(Local::new(i)),
                     match p.type_info.as_ref() {
                         Just(HhasTypeInfo { user_type, .. })
                             if user_type.as_ref().map_or(true, |t| {

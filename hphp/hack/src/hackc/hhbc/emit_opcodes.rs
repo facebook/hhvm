@@ -244,17 +244,23 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
 }
 
 /// Build construction helpers for InstrSeq.  Each line in the input is either
-/// (a) a list of opcodes and an empty block (like `A | B => {}` which means to
-/// generate helpers for those opcodes with default snake-case names or (b) a
-/// single opcode and a single name (like `A => my_a`) which means to generate a
-/// helper for that opcode with the given name.
+///   (a) a list of opcodes and the keyword 'default':
+///           `A | B => default`
+///       which means to generate helpers for those opcodes with default snake-case names
+///   (b) a single opcode and a single name:
+///           `A => my_a`
+///       which means to generate a helper for that opcode with the given name.
+///   (c) a list of opcodes and an empty block:
+///           `A | B => {}`
+///       which means to skip generating helpers for those opcodes.
 ///
 /// The parameters to the function are based on the expected immediates for the
 /// opcode.
 ///
 ///     define_instr_seq_helpers! {
-///       MyA | MyB => {}
-///       C => myc
+///       MyA | MyB => default
+///       MyC => myc
+///       MyD => {}
 ///     }
 ///
 /// Expands into:
@@ -272,9 +278,13 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
 ///     }
 ///
 pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
-    use convert_case as _;
+    // Foo => bar
+    // Foo | Bar | Baz => default
+    // Foo | Bar | Baz => {}
+
     use convert_case::{Case, Casing};
     use proc_macro2::TokenTree;
+    use std::collections::HashMap;
     use syn::{
         parse::{ParseStream, Parser},
         Error, Token,
@@ -287,7 +297,11 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
         opcode_data: &'a OpcodeData,
     }
 
+    let mut opcodes: HashMap<&str, &OpcodeData> =
+        opcodes.iter().map(|data| (data.name, data)).collect();
+
     // Foo => bar
+    // Foo | Bar | Baz => default
     // Foo | Bar | Baz => {}
 
     let macro_input = |input: ParseStream<'_>| -> Result<Vec<Helper<'_>>> {
@@ -302,19 +316,20 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
                         input,
                     )?;
 
-                names
-                    .into_iter()
-                    .map(|name| {
-                        let opcode_data = opcodes
-                            .iter()
-                            .find(|opcode_data| name == opcode_data.name)
-                            .ok_or_else(|| {
-                                Error::new(name.span(), format!("Unknown opcode '{}'", name))
-                            })?;
-                        Ok((name, opcode_data))
-                    })
-                    .collect::<Result<_>>()
-            }?;
+                let mut opcode_names: Vec<(Ident, &OpcodeData)> = Vec::new();
+                for name in names {
+                    if let Some(opcode_data) = opcodes.remove(name.to_string().as_str()) {
+                        opcode_names.push((name, opcode_data));
+                    } else {
+                        return Err(Error::new(
+                            name.span(),
+                            format!("Unknown opcode '{}'", name),
+                        ));
+                    }
+                }
+
+                opcode_names
+            };
 
             let _arrow: Token![=>] = input.parse()?;
 
@@ -358,17 +373,14 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
                     let stream = grp.stream();
                     let mut iter = stream.into_iter();
                     if let Some(tt) = iter.next() {
-                        return Err(Error::new(tt.span(), "Body of default must be empty"));
+                        return Err(Error::new(tt.span(), "Block must be empty"));
                     }
 
-                    for (opcode_name, opcode_data) in opcode_names {
-                        let fn_name =
-                            Ident::new(&opcode_data.name.to_case(Case::Snake), opcode_name.span());
-                        helpers.push(Helper {
-                            opcode_name,
-                            fn_name,
-                            opcode_data,
-                        });
+                    // do nothing
+
+                    // allow an unnecessary comma
+                    if input.peek(Token![,]) {
+                        input.parse::<Token![,]>()?;
                     }
                 }
                 TokenTree::Punct(_) | TokenTree::Literal(_) => {
@@ -381,12 +393,12 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
             let span = opcode_name.span();
             let msg = if same_as_default.is_empty() {
                 format!(
-                    "Opcode '{}' was given an alias which is the same name it would have gotten with default - use default ({{}}) instead.",
+                    "Opcode '{}' was given an alias which is the same name it would have gotten with default - please omit it instead.",
                     opcode_name,
                 )
             } else {
                 format!(
-                    "Opcodes {} were given aliases which are the same name they would have gotten with default - use default ({{}}) instead.",
+                    "Opcodes {} were given aliases which are the same name they would have gotten with default - please omit it instead.",
                     std::iter::once(opcode_name)
                         .chain(same_as_default.into_iter())
                         .map(|s| format!("'{}'", s))
@@ -395,10 +407,21 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
                 )
             };
 
-            Err(Error::new(span, msg))
-        } else {
-            Ok(helpers)
+            return Err(Error::new(span, msg));
         }
+
+        for opcode_data in opcodes.values() {
+            let opcode_name = Ident::new(opcode_data.name, Span::call_site());
+            let fn_name = Ident::new(&opcode_data.name.to_case(Case::Snake), opcode_name.span());
+            helpers.push(Helper {
+                opcode_name,
+                fn_name,
+                opcode_data,
+            });
+        }
+
+        helpers.sort_by(|a, b| a.fn_name.cmp(&b.fn_name));
+        Ok(helpers)
     };
 
     let input: Vec<Helper<'_>> = macro_input.parse2(input)?;
@@ -511,11 +534,23 @@ mod tests {
                 quote!(
                     TestOneImm => test_oneimm,
                     TestTwoImm => test_twoimm,
-                    TestZeroImm | TestAsStruct | TestAA | TestLAR => {}
+                    TestBLA | TestFCA | TestARR | TestDA | TestBA2 | TestBA |
+                    TestIA | TestITA | TestNLA | TestOAL | TestLA | TestRATA |
+                    TestSLA | TestILA | TestIVA | TestKA | TestI64A | TestSA |
+                    TestOA | TestVSA | TestThreeImm => {}
                 ),
                 &opcode_test_data::test_opcodes(),
             ),
             quote!(
+                pub fn test_aa<'a>(arr1: AdataId<'a>) -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestAA(arr1)))
+                }
+                pub fn test_as_struct<'a>(str1: Str<'a>, str2: Str<'a>) -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestAsStruct(str1, str2)))
+                }
+                pub fn test_lar<'a>(locrange: LocalRange) -> InstrSeq<'a> {
+                    instr(Instruct::Opcode(Opcode::TestLAR(locrange)))
+                }
                 pub fn test_oneimm<'a>(str1: Str<'a>) -> InstrSeq<'a> {
                     instr(Instruct::Opcode(Opcode::TestOneImm(str1)))
                 }
@@ -524,15 +559,6 @@ mod tests {
                 }
                 pub fn test_zero_imm<'a>() -> InstrSeq<'a> {
                     instr(Instruct::Opcode(Opcode::TestZeroImm))
-                }
-                pub fn test_as_struct<'a>(str1: Str<'a>, str2: Str<'a>) -> InstrSeq<'a> {
-                    instr(Instruct::Opcode(Opcode::TestAsStruct(str1, str2)))
-                }
-                pub fn test_aa<'a>(arr1: AdataId<'a>) -> InstrSeq<'a> {
-                    instr(Instruct::Opcode(Opcode::TestAA(arr1)))
-                }
-                pub fn test_lar<'a>(locrange: LocalRange) -> InstrSeq<'a> {
-                    instr(Instruct::Opcode(Opcode::TestLAR(locrange)))
                 }
             ),
         );

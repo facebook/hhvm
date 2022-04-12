@@ -231,7 +231,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         (instr::empty(), instr::empty())
     } else {
         (
-            instr::cgetl(generics_local),
+            instr::c_get_l(generics_local),
             InstrSeq::gather(emit_memoize_helpers::get_memo_key_list(
                 Local::new(param_count + first_unnamed_idx),
                 generics_local,
@@ -260,30 +260,30 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         ic_memokey,
         if is_async {
             InstrSeq::gather(vec![
-                instr::memoget_eager(notfound, suspended_get, local_range),
-                instr::retc(),
+                instr::memo_get_eager(notfound, suspended_get, local_range),
+                instr::ret_c(),
                 instr::label(suspended_get),
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
             ])
         } else {
-            InstrSeq::gather(vec![instr::memoget(notfound, local_range), instr::retc()])
+            InstrSeq::gather(vec![instr::memo_get(notfound, local_range), instr::ret_c()])
         },
         instr::label(notfound),
-        instr::nulluninit(),
-        instr::nulluninit(),
+        instr::null_uninit(),
+        instr::null_uninit(),
         emit_memoize_helpers::param_code_gets(hhas_params.len()),
         reified_get,
-        instr::fcallfuncd(fcall_args, renamed_id),
-        instr::memoset(local_range),
+        instr::f_call_func_d(fcall_args, renamed_id),
+        instr::memo_set(local_range),
         if is_async {
             InstrSeq::gather(vec![
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
                 instr::label(eager_set),
-                instr::memoset_eager(local_range),
-                instr::retc(),
+                instr::memo_set_eager(local_range),
+                instr::ret_c(),
             ])
         } else {
-            instr::retc()
+            instr::ret_c()
         },
         default_value_setters,
     ]);
@@ -316,31 +316,31 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
         deprecation_body,
         if is_async {
             InstrSeq::gather(vec![
-                instr::memoget_eager(notfound, suspended_get, LocalRange::default()),
-                instr::retc(),
+                instr::memo_get_eager(notfound, suspended_get, LocalRange::default()),
+                instr::ret_c(),
                 instr::label(suspended_get),
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
             ])
         } else {
             InstrSeq::gather(vec![
-                instr::memoget(notfound, LocalRange::default()),
-                instr::retc(),
+                instr::memo_get(notfound, LocalRange::default()),
+                instr::ret_c(),
             ])
         },
         instr::label(notfound),
-        instr::nulluninit(),
-        instr::nulluninit(),
-        instr::fcallfuncd(fcall_args, renamed_id),
-        instr::memoset(LocalRange::default()),
+        instr::null_uninit(),
+        instr::null_uninit(),
+        instr::f_call_func_d(fcall_args, renamed_id),
+        instr::memo_set(LocalRange::default()),
         if is_async {
             InstrSeq::gather(vec![
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
                 instr::label(eager_set),
-                instr::memoset_eager(LocalRange::default()),
-                instr::retc(),
+                instr::memo_set_eager(LocalRange::default()),
+                instr::ret_c(),
             ])
         } else {
-            instr::retc()
+            instr::ret_c()
         },
     ]);
     Ok((instrs, Vec::new()))

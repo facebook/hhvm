@@ -3,14 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{BumpSliceMut, Slice, Str};
-use hhbc::{
-    AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, FCallArgs,
-    FatalOp, FunctionName, IncDecOp, InitPropOp, Instruct, IsLogAsDynamicCallOp, IsTypeOp,
-    IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodName, NumParams,
-    OODeclExistsOp, ObjMethodOp, Opcode, ParamName, PropName, Pseudo, QueryMOp, ReadonlyOp,
-    SetOpOp, SilenceOp, SpecialClsRef, SrcLoc, StackIndex, SwitchKind, TypeStructResolveOp,
-};
+use ffi::Slice;
+use hhbc::{Instruct, Pseudo};
 
 /// The various from_X functions below take some kind of AST
 /// (expression, statement, etc.) and produce what is logically a
@@ -167,150 +161,32 @@ impl<'i, 'a> Iterator for ListIterMut<'i, 'a> {
 }
 
 pub mod instr {
-    use crate::*;
+    use crate::InstrSeq;
+    use ffi::{BumpSliceMut, Slice, Str};
+    use hhbc::{
+        AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp,
+        FCallArgs, FatalOp, FunctionName, IncDecOp, InitPropOp, Instruct, IsLogAsDynamicCallOp,
+        IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodName,
+        NumParams, OODeclExistsOp, ObjMethodOp, Opcode, ParamName, PropName, Pseudo, QueryMOp,
+        ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SrcLoc,
+        StackIndex, SwitchKind, TypeStructResolveOp,
+    };
 
     // This macro builds helper functions for each of the given opcodes.  See
     // the definition of define_instr_seq_helpers for details.
     emit_opcodes_macro::define_instr_seq_helpers! {
-        Add | ArrayIdx | CastBool | CastDict | CastDouble | CastInt |
-        CastString | ChainFaults | CheckReifiedGenericMismatch | Clone | Cmp |
-        CombineAndResolveTypeStruct | Concat | ContCheck | Dict | Dim | Div |
-        Double | Dup | Eq | Eval | Exit | Fatal | Gt | Gte | Idx | Incl | Int |
-        Jmp | Keyset | Lt | Lte | Mul | Neq | NewPair | Nop | Not | Null | Pow |
-        Print | RaiseClassStringConversionWarning | RecordReifiedGeneric | Req |
-        ResolveFunc | ResolveMethCaller | Same | Shl | Shr | Silence | Sub |
-        This | Throw | ThrowNonExhaustiveSwitch | Vec | VerifyOutType |
-        VerifyParamType | VerifyParamTypeTS | VerifyRetTypeC |
-        VerifyRetTypeTS => {}
+        // These get custom implementations below.
+        FCallClsMethod | FCallClsMethodD | FCallClsMethodS | FCallClsMethodSD |
+        FCallCtor | FCallObjMethod | FCallObjMethodD | MemoGetEager |
+        NewStructDict | SSwitch | String | Switch => {}
 
         // These are "custom" names that don't match the simple snake-case of
         // their Opcodes.
-        AddElemC => add_elemc,
-        AddNewElemC => add_new_elemc,
-        AddO => addo,
         Await => await_,
-        AwaitAll => awaitall,
-        BareThis => barethis,
-        BaseC => basec,
-        BaseGC => basegc,
-        BaseGL => basegl,
-        BaseH => baseh,
-        BaseL => basel,
-        BaseSC => basesc,
-        BitAnd => bitand,
-        BitNot => bitnot,
-        BitOr => bitor,
-        BitXor => bitxor,
-        CGetCUNop => cgetcunop,
-        CGetG => cgetg,
-        CGetL => cgetl,
-        CGetL2 => cgetl2,
-        CGetQuietL => cgetquietl,
-        CGetS => cgets,
-        CUGetL => cugetl,
-        CheckProp => checkprop,
-        CheckThis => checkthis,
-        ClassGetC => classgetc,
-        ClassGetTS => classgetts,
-        ClassName => classname,
-        ClsCns => clscns,
-        ClsCnsD => clscnsd,
-        ClsCnsL => clscnsl,
-        ColFromArray => colfromarray,
-        ConcatN => concatn,
-        ContCurrent => contcurrent,
-        ContEnter => contenter,
-        ContGetReturn => contgetreturn,
-        ContKey => contkey,
-        ContRaise => contraise,
-        ContValid => contvalid,
-        CreateCl => createcl,
-        CreateCont => createcont,
-        EntryNop => entrynop,
-        FCallFunc => fcallfunc,
-        FCallFuncD => fcallfuncd,
         False => false_,
-        GetMemoKeyL => getmemokeyl,
-        IncDecG => incdecg,
-        IncDecL => incdecl,
-        IncDecM => incdecm,
-        IncDecS => incdecs,
-        InclOnce => inclonce,
-        InitProp => initprop,
-        InstanceOf => instanceof,
-        InstanceOfD => instanceofd,
-        IsLateBoundCls => islateboundcls,
-        IsTypeC => istypec,
-        IsTypeL => istypel,
-        IsTypeStructC => istypestructc,
-        IsUnsetL => isunsetl,
-        IssetG => issetg,
-        IssetL => issetl,
-        IssetS => issets,
-        IterFree => iterfree,
-        IterInit => iterinit,
-        IterNext => iternext,
-        JmpNS => jmpns,
-        JmpNZ => jmpnz,
-        JmpZ => jmpz,
-        LateBoundCls => lateboundcls,
-        LazyClass => lazyclass,
-        LazyClassFromClass => lazyclassfromclass,
-        LockObj => lockobj,
-        MemoGet => memoget,
-        MemoSet => memoset,
-        MemoSetEager => memoset_eager,
         Mod => mod_,
-        MulO => mulo,
-        NSame => nsame,
-        NativeImpl => nativeimpl,
-        NewCol => newcol,
-        NewObj => newobj,
-        NewObjD => newobjd,
-        NewObjR => newobjr,
-        NewObjRD => newobjrd,
-        NewObjS => newobjs,
-        NewVec => new_vec_array,
-        NullUninit => nulluninit,
-        OODeclExists => oodeclexists,
-        ParentCls => parentcls,
-        PopC => popc,
-        PopL => popl,
-        PopU => popu,
-        PushL => pushl,
-        QueryM => querym,
-        ReqDoc => reqdoc,
-        ReqOnce => reqonce,
-        ResolveClass => resolveclass,
-        ResolveClsMethod => resolveclsmethod,
-        ResolveClsMethodD => resolveclsmethodd,
-        ResolveClsMethodS => resolveclsmethods,
-        ResolveRClsMethod => resolverclsmethod,
-        ResolveRClsMethodD => resolverclsmethodd,
-        ResolveRClsMethodS => resolverclsmethods,
-        ResolveRFunc => resolve_rfunc,
-        RetC => retc,
-        RetCSuspended => retc_suspended,
-        RetM => retm,
-        SelfCls => selfcls,
-        SetG => setg,
-        SetL => setl,
-        SetM => setm,
-        SetOpG => setopg,
-        SetOpL => setopl,
-        SetOpM => setopm,
-        SetOpS => setops,
-        SetS => sets,
-        SubO => subo,
-        ThrowAsTypeStructException => throwastypestructexception,
         True => true_,
-        UGetCUNop => ugetcunop,
-        UnsetG => unsetg,
-        UnsetL => unsetl,
-        UnsetM => unsetm,
-        WHResult => whresult,
         Yield => yield_,
-        YieldK => yieldk,
     }
 
     pub fn empty<'a>() -> InstrSeq<'a> {
@@ -325,27 +201,21 @@ pub mod instr {
         InstrSeq::List(is)
     }
 
-    pub fn break_<'a>(level: isize) -> InstrSeq<'a> {
-        instr(Instruct::Pseudo(Pseudo::Break(level)))
-    }
+    // Special constructors for Opcode
 
-    pub fn contcheck_check<'a>() -> InstrSeq<'a> {
+    pub fn cont_check_check<'a>() -> InstrSeq<'a> {
         cont_check(ContCheckOp::CheckStarted)
     }
 
-    pub fn contcheck_ignore<'a>() -> InstrSeq<'a> {
+    pub fn cont_check_ignore<'a>() -> InstrSeq<'a> {
         cont_check(ContCheckOp::IgnoreStarted)
-    }
-
-    pub fn continue_<'a>(level: isize) -> InstrSeq<'a> {
-        instr(Instruct::Pseudo(Pseudo::Continue(level)))
     }
 
     pub fn dim_warn_pt<'a>(key: PropName<'a>, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
         dim(MOpMode::Warn, MemberKey::PT(key, readonly_op))
     }
 
-    pub fn fcallclsmethod<'a>(
+    pub fn f_call_cls_method<'a>(
         log: IsLogAsDynamicCallOp,
         fcall_args: FCallArgs<'a>,
     ) -> InstrSeq<'a> {
@@ -356,7 +226,7 @@ pub mod instr {
         )))
     }
 
-    pub fn fcallclsmethodd<'a>(
+    pub fn f_call_cls_method_d<'a>(
         fcall_args: FCallArgs<'a>,
         method: MethodName<'a>,
         class: ClassName<'a>,
@@ -369,7 +239,10 @@ pub mod instr {
         )))
     }
 
-    pub fn fcallclsmethods<'a>(fcall_args: FCallArgs<'a>, clsref: SpecialClsRef) -> InstrSeq<'a> {
+    pub fn f_call_cls_method_s<'a>(
+        fcall_args: FCallArgs<'a>,
+        clsref: SpecialClsRef,
+    ) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallClsMethodS(
             fcall_args,
             Default::default(),
@@ -377,7 +250,7 @@ pub mod instr {
         )))
     }
 
-    pub fn fcallclsmethodsd<'a>(
+    pub fn f_call_cls_method_sd<'a>(
         fcall_args: FCallArgs<'a>,
         clsref: SpecialClsRef,
         method: MethodName<'a>,
@@ -390,14 +263,14 @@ pub mod instr {
         )))
     }
 
-    pub fn fcallctor<'a>(fcall_args: FCallArgs<'a>) -> InstrSeq<'a> {
+    pub fn f_call_ctor<'a>(fcall_args: FCallArgs<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallCtor(
             fcall_args,
             Default::default(),
         )))
     }
 
-    pub fn fcallobjmethod<'a>(fcall_args: FCallArgs<'a>, flavor: ObjMethodOp) -> InstrSeq<'a> {
+    pub fn f_call_obj_method<'a>(fcall_args: FCallArgs<'a>, flavor: ObjMethodOp) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallObjMethod(
             fcall_args,
             Default::default(),
@@ -405,7 +278,7 @@ pub mod instr {
         )))
     }
 
-    pub fn fcallobjmethodd<'a>(
+    pub fn f_call_obj_method_d_<'a>(
         fcall_args: FCallArgs<'a>,
         method: MethodName<'a>,
         flavor: ObjMethodOp,
@@ -418,23 +291,19 @@ pub mod instr {
         )))
     }
 
-    pub fn fcallobjmethodd_nullthrows<'a>(
+    pub fn f_call_obj_method_d<'a>(
         fcall_args: FCallArgs<'a>,
         method: MethodName<'a>,
     ) -> InstrSeq<'a> {
-        fcallobjmethodd(fcall_args, method, ObjMethodOp::NullThrows)
+        f_call_obj_method_d_(fcall_args, method, ObjMethodOp::NullThrows)
     }
 
-    pub fn is_type_structc_dontresolve<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcode::IsTypeStructC(
-            TypeStructResolveOp::DontResolve,
-        )))
+    pub fn is_type_struct_c_dontresolve<'a>() -> InstrSeq<'a> {
+        is_type_struct_c(TypeStructResolveOp::DontResolve)
     }
 
-    pub fn is_type_structc_resolve<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcode::IsTypeStructC(
-            TypeStructResolveOp::Resolve,
-        )))
+    pub fn is_type_struct_c_resolve<'a>() -> InstrSeq<'a> {
+        is_type_struct_c(TypeStructResolveOp::Resolve)
     }
 
     pub fn iter_break<'a>(label: Label, iters: Vec<IterId>) -> InstrSeq<'a> {
@@ -446,28 +315,24 @@ pub mod instr {
         instrs(vec)
     }
 
-    pub fn label<'a>(label: Label) -> InstrSeq<'a> {
-        instr(Instruct::Pseudo(Pseudo::Label(label)))
-    }
-
-    pub fn memoget_eager<'a>(label1: Label, label2: Label, range: LocalRange) -> InstrSeq<'a> {
+    pub fn memo_get_eager<'a>(label1: Label, label2: Label, range: LocalRange) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::MemoGetEager(
             [label1, label2],
             range,
         )))
     }
 
-    pub fn newstructdict<'a>(alloc: &'a bumpalo::Bump, keys: &'a [&'a str]) -> InstrSeq<'a> {
+    pub fn new_struct_dict<'a>(alloc: &'a bumpalo::Bump, keys: &'a [&'a str]) -> InstrSeq<'a> {
         let keys = Slice::new(alloc.alloc_slice_fill_iter(keys.iter().map(|s| Str::from(*s))));
         instr(Instruct::Opcode(Opcode::NewStructDict(keys)))
     }
 
-    pub fn setm_pt<'a>(
+    pub fn set_m_pt<'a>(
         num_params: NumParams,
         key: PropName<'a>,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
-        setm(num_params, MemberKey::PT(key, readonly_op))
+        set_m(num_params, MemberKey::PT(key, readonly_op))
     }
 
     pub fn silence_end<'a>(local: Local) -> InstrSeq<'a> {
@@ -478,21 +343,7 @@ pub mod instr {
         silence(local, SilenceOp::Start)
     }
 
-    pub fn srcloc<'a>(
-        line_begin: isize,
-        line_end: isize,
-        col_begin: isize,
-        col_end: isize,
-    ) -> InstrSeq<'a> {
-        instr(Instruct::Pseudo(Pseudo::SrcLoc(SrcLoc {
-            line_begin,
-            line_end,
-            col_begin,
-            col_end,
-        })))
-    }
-
-    pub fn sswitch<'a>(
+    pub fn s_switch<'a>(
         alloc: &'a bumpalo::Bump,
         cases: bumpalo::collections::Vec<'a, (&'a str, Label)>,
     ) -> InstrSeq<'a> {
@@ -525,7 +376,7 @@ pub mod instr {
         )))
     }
 
-    pub fn awaitall_list<'a>(unnamed_locals: Vec<Local>) -> InstrSeq<'a> {
+    pub fn await_all_list<'a>(unnamed_locals: Vec<Local>) -> InstrSeq<'a> {
         match unnamed_locals.split_first() {
             None => panic!("Expected at least one await"),
             Some((head, tail)) => {
@@ -535,12 +386,39 @@ pub mod instr {
                     assert_eq!(prev_id.idx + 1, id.idx);
                     prev_id = id;
                 }
-                awaitall(LocalRange {
+                await_all(LocalRange {
                     start: *head,
                     len: unnamed_locals.len().try_into().unwrap(),
                 })
             }
         }
+    }
+
+    // Special constructors for Pseudo
+    pub fn break_<'a>(level: isize) -> InstrSeq<'a> {
+        instr(Instruct::Pseudo(Pseudo::Break(level)))
+    }
+
+    pub fn continue_<'a>(level: isize) -> InstrSeq<'a> {
+        instr(Instruct::Pseudo(Pseudo::Continue(level)))
+    }
+
+    pub fn label<'a>(label: Label) -> InstrSeq<'a> {
+        instr(Instruct::Pseudo(Pseudo::Label(label)))
+    }
+
+    pub fn srcloc<'a>(
+        line_begin: isize,
+        line_end: isize,
+        col_begin: isize,
+        col_end: isize,
+    ) -> InstrSeq<'a> {
+        instr(Instruct::Pseudo(Pseudo::SrcLoc(SrcLoc {
+            line_begin,
+            line_end,
+            col_begin,
+            col_end,
+        })))
     }
 }
 
@@ -643,6 +521,7 @@ impl<'a> InstrSeq<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ffi::Str;
     use instr::{instr, instrs};
     use pretty_assertions::assert_eq;
 

@@ -322,7 +322,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         (instr::empty(), instr::empty())
     } else {
         (
-            instr::cgetl(generics_local),
+            instr::c_get_l(generics_local),
             InstrSeq::gather(emit_memoize_helpers::get_memo_key_list(
                 Local::new(param_count + first_unnamed_idx),
                 generics_local,
@@ -349,28 +349,28 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         if args.method.static_ {
             instr::empty()
         } else {
-            instr::checkthis()
+            instr::check_this()
         },
         emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
-                instr::memoget_eager(notfound, suspended_get, local_range),
-                instr::retc(),
+                instr::memo_get_eager(notfound, suspended_get, local_range),
+                instr::ret_c(),
                 instr::label(suspended_get),
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
             ])
         } else {
-            InstrSeq::gather(vec![instr::memoget(notfound, local_range), instr::retc()])
+            InstrSeq::gather(vec![instr::memo_get(notfound, local_range), instr::ret_c()])
         },
         instr::label(notfound),
         if args.method.static_ {
-            instr::nulluninit()
+            instr::null_uninit()
         } else {
             instr::this()
         },
-        instr::nulluninit(),
+        instr::null_uninit(),
         emit_memoize_helpers::param_code_gets(hhas_params.len()),
         reified_get,
         if args.method.static_ {
@@ -381,18 +381,18 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
                 args.method_id,
                 emit_memoize_helpers::MEMOIZE_SUFFIX,
             );
-            instr::fcallobjmethodd_nullthrows(fcall_args, renamed_method_id)
+            instr::f_call_obj_method_d(fcall_args, renamed_method_id)
         },
-        instr::memoset(local_range),
+        instr::memo_set(local_range),
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
                 instr::label(eager_set),
-                instr::memoset_eager(local_range),
-                instr::retc(),
+                instr::memo_set_eager(local_range),
+                instr::ret_c(),
             ])
         } else {
-            instr::retc()
+            instr::ret_c()
         },
         default_value_setters,
     ]);
@@ -432,28 +432,28 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         if args.method.static_ {
             instr::empty()
         } else {
-            instr::checkthis()
+            instr::check_this()
         },
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
-                instr::memoget_eager(notfound, suspended_get, LocalRange::default()),
-                instr::retc(),
+                instr::memo_get_eager(notfound, suspended_get, LocalRange::default()),
+                instr::ret_c(),
                 instr::label(suspended_get),
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
             ])
         } else {
             InstrSeq::gather(vec![
-                instr::memoget(notfound, LocalRange::default()),
-                instr::retc(),
+                instr::memo_get(notfound, LocalRange::default()),
+                instr::ret_c(),
             ])
         },
         instr::label(notfound),
         if args.method.static_ {
-            instr::nulluninit()
+            instr::null_uninit()
         } else {
             instr::this()
         },
-        instr::nulluninit(),
+        instr::null_uninit(),
         if args.method.static_ {
             call_cls_method(alloc, fcall_args, args)
         } else {
@@ -462,18 +462,18 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
                 args.method_id,
                 emit_memoize_helpers::MEMOIZE_SUFFIX,
             );
-            instr::fcallobjmethodd_nullthrows(fcall_args, renamed_method_id)
+            instr::f_call_obj_method_d(fcall_args, renamed_method_id)
         },
-        instr::memoset(LocalRange::default()),
+        instr::memo_set(LocalRange::default()),
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
                 instr::label(eager_set),
-                instr::memoset_eager(LocalRange::default()),
-                instr::retc(),
+                instr::memo_set_eager(LocalRange::default()),
+                instr::ret_c(),
             ])
         } else {
-            instr::retc()
+            instr::ret_c()
         },
     ]);
     Ok((instrs, Vec::new()))
@@ -513,9 +513,9 @@ fn call_cls_method<'a, 'arena>(
     let method_id =
         hhbc::MethodName::add_suffix(alloc, args.method_id, emit_memoize_helpers::MEMOIZE_SUFFIX);
     if args.info.is_trait || args.flags.contains(Flags::WITH_LSB) {
-        instr::fcallclsmethodsd(fcall_args, SpecialClsRef::SelfCls, method_id)
+        instr::f_call_cls_method_sd(fcall_args, SpecialClsRef::SelfCls, method_id)
     } else {
-        instr::fcallclsmethodd(fcall_args, method_id, args.info.class_name)
+        instr::f_call_cls_method_d(fcall_args, method_id, args.info.class_name)
     }
 }
 

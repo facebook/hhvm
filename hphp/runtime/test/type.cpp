@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/test/bespoke-layout-mock.h"
 #include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -514,9 +514,10 @@ TEST(Type, ArrayFitsSpec) {
   auto const str_rat = RepoAuthType(RepoAuthType::Tag::Str);
   auto const int_rat = RepoAuthType(RepoAuthType::Tag::Int);
 
-  auto const rat1 = RepoAuthType::Array::tuple(nonempty, {int_rat, int_rat});
-  auto const rat2 = RepoAuthType::Array::tuple(maybe_empty, {int_rat, str_rat});
-  auto const rat3 = RepoAuthType::Array::packed(nonempty, int_rat);
+  ArrayTypeTable::Builder builder;
+  auto const rat1 = builder.tuple(nonempty, {int_rat, int_rat});
+  auto const rat2 = builder.tuple(maybe_empty, {int_rat, str_rat});
+  auto const rat3 = builder.packed(nonempty, int_rat);
 
   auto const ratType1 = Type::Vec(rat1);
   auto const ratType2 = Type::Vec(rat2);
@@ -733,11 +734,12 @@ TEST(Type, Const) {
   EXPECT_FALSE(TDict <= constArray);
   EXPECT_FALSE(TDict <= TVec);
 
-  auto const rat1 = RepoAuthType::Array::packed(RepoAuthType::Array::Empty::No,
-                                                RepoAuthType(RepoAuthType::Tag::Str));
+  ArrayTypeTable::Builder ratBuilder;
+  auto const rat1 = ratBuilder.packed(RepoAuthType::Array::Empty::No,
+                                       RepoAuthType(RepoAuthType::Tag::Str));
   auto const ratArray1 = Type::Dict(rat1);
-  auto const rat2 = RepoAuthType::Array::packed(RepoAuthType::Array::Empty::No,
-                                                RepoAuthType(RepoAuthType::Tag::Int));
+  auto const rat2 = ratBuilder.packed(RepoAuthType::Array::Empty::No,
+                                       RepoAuthType(RepoAuthType::Tag::Int));
   auto const ratArray2 = Type::Dict(rat2);
   EXPECT_EQ(ratArray1, ratArray1 & ratArray2);
   EXPECT_EQ(ratArray1, ratArray2 & ratArray1);
@@ -871,8 +873,9 @@ TEST(Type, BespokeVecRAT) {
   };
   bespoke::selectBespokeLayouts();
 
-  auto const rat = RepoAuthType::Array::packed(RepoAuthType::Array::Empty::No,
-                                               RepoAuthType(RepoAuthType::Tag::Str));
+  ArrayTypeTable::Builder ratBuilder;
+  auto const rat = ratBuilder.packed(RepoAuthType::Array::Empty::No,
+                                      RepoAuthType(RepoAuthType::Tag::Str));
   auto const vecRat = Type::Vec(rat);
   EXPECT_EQ("Vec=N([Str])", vecRat.toString());
   auto const vecRatBespoke = vecRat.narrowToLayout(foo_layout);
@@ -886,8 +889,9 @@ TEST(Type, BespokeVecRAT) {
 }
 
 TEST(Type, VanillaVecRAT) {
-  auto const rat = RepoAuthType::Array::packed(RepoAuthType::Array::Empty::No,
-                                               RepoAuthType(RepoAuthType::Tag::Str));
+  ArrayTypeTable::Builder ratBuilder;
+  auto const rat = ratBuilder.packed(RepoAuthType::Array::Empty::No,
+                                      RepoAuthType(RepoAuthType::Tag::Str));
   auto const vecRat = Type::Vec(rat);
   EXPECT_EQ("Vec=N([Str])", vecRat.toString());
   EXPECT_TRUE(vecRat.arrSpec().type());

@@ -292,31 +292,6 @@ const ArrayData* Unit::lookupArrayId(Id id) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// RAT arrays.
-
-const RepoAuthType::Array* Unit::lookupRATArray(Id id) const {
-  assertx(id >= 0 && id < m_rats.size());
-
-  auto& elem = m_rats[id];
-  auto wrapper = elem.copy();
-  if (wrapper.isPtr()) {
-    assertx(wrapper.ptr());
-    return wrapper.ptr();
-  }
-  elem.lock_for_update();
-  wrapper = elem.copy();
-  if (wrapper.isPtr()) {
-    assertx(wrapper.ptr());
-    elem.unlock();
-    return wrapper.ptr();
-  }
-  auto const array = UnitEmitter::loadRATArrayFromRepo(m_sn, wrapper.token());
-  assertx(array);
-  elem.update_and_unlock(RATArrayOrToken::FromPtr(array));
-  return array;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Merge.
 
 namespace {

@@ -1084,6 +1084,8 @@ struct Index::IndexData {
   bool frozen{false};
   bool ever_frozen{false};
 
+  std::unique_ptr<ArrayTypeTable::Builder> arrTableBuilder;
+
   ISStringToOneT<const php::Class*>      classes;
   SStringToMany<const php::Func>         methods;
   SStringToOneFastT<uint64_t>            method_inout_params_by_name;
@@ -4554,6 +4556,8 @@ Index::Index(php::Program* program)
 {
   trace_time tracer("create index");
 
+  m_data->arrTableBuilder.reset(new ArrayTypeTable::Builder());
+
   add_system_constants_to_index(*m_data);
 
   {
@@ -7435,6 +7439,10 @@ void Index::cleanup_post_emit(php::ProgramPtr program) {
 
 void Index::thaw() {
   m_data->frozen = false;
+}
+
+std::unique_ptr<ArrayTypeTable::Builder>& Index::array_table_builder() const {
+  return m_data->arrTableBuilder;
 }
 
 //////////////////////////////////////////////////////////////////////

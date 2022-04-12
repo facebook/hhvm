@@ -307,6 +307,20 @@ RegionDesc::GuardedLocation read_guarded_location(ProfDataDeserializer& ser) {
   return { location, type, cat };
 }
 
+void write_global_array_map(ProfDataSerializer& ser) {
+  write_container(ser, globalArrayTypeTable(), write_array_rat);
+}
+
+void read_global_array_map(ProfDataDeserializer& ser) {
+  BootStats::Block timer("DES_read_global_array_map",
+                         RuntimeOption::ServerExecutionMode());
+  auto const sz = read_raw<uint32_t>(ser);
+  always_assert(sz == globalArrayTypeTable().size());
+  for (auto const arr : globalArrayTypeTable()) {
+    ser.record(read_id(ser), arr);
+  }
+}
+
 void write_region_block(ProfDataSerializer& ser,
                         const RegionDesc::BlockPtr& block) {
   write_raw(ser, block->id());
@@ -1388,30 +1402,12 @@ ArrayData* read_array(ProfDataDeserializer& ser) {
 }
 
 void write_array_rat(ProfDataSerializer& ser, const RepoAuthType::Array* arr) {
-  auto const [id, old] = ser.serialize(arr);
-  if (old) return write_id(ser, id);
-  write_serialized_id(ser, id);
-  BlobEncoder encoder;
-  arr->serialize(encoder);
-  write_raw(ser, (uint32_t)encoder.size());
-  write_raw(ser, encoder.data(), encoder.size());
+  write_id(ser, ser.serialize(arr).first);
 }
 
 const RepoAuthType::Array* read_array_rat(ProfDataDeserializer& ser) {
-  return deserialize(
-    ser,
-    [&] () -> const RepoAuthType::Array* {
-      auto const size = read_raw<uint32_t>(ser);
-      constexpr uint32_t kBufLen = 8192;
-      char buffer[kBufLen];
-      char* ptr = buffer;
-      if (size > kBufLen) ptr = (char*)malloc(size);
-      SCOPE_EXIT { if (ptr != buffer) free(ptr); };
-      read_raw(ser, ptr, size);
-      BlobDecoder decoder{ptr, size};
-      return RepoAuthType::Array::deserialize(decoder);
-    }
-  );
+  auto const id = read_id(ser);
+  return ser.getArrayRAT(id);
 }
 
 void write_unit(ProfDataSerializer& ser, const Unit* unit) {
@@ -1794,6 +1790,7 @@ std::string serializeProfData(const std::string& filename) {
     PropertyProfile::serialize(ser);
     InstanceBits::init();
     InstanceBits::serialize(ser);
+    write_global_array_map(ser);
 
     auto const pd = profData();
     write_prof_data(ser, pd);
@@ -1924,6 +1921,7 @@ std::string deserializeProfData(const std::string& filename,
     ExtensionRegistry::deserialize(ser);
     PropertyProfile::deserialize(ser);
     InstanceBits::deserialize(ser);
+    read_global_array_map(ser);
 
     ProfData::Session pds;
     auto const pd = profData();

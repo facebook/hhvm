@@ -110,10 +110,12 @@ bool ignoresReadLocal(const Bytecode& bcode, LocalId l) {
   }
 }
 
-template<typename TyBC, typename ArgType>
-Optional<Bytecode> makeAssert(ArgType arg, Type t) {
+template<class TyBC, class ArgType>
+Optional<Bytecode> makeAssert(ArrayTypeTable::Builder& arrTable,
+                              ArgType arg,
+                              Type t) {
   if (t.subtypeOf(BBottom)) return std::nullopt;
-  auto const rat = make_repo_type(t);
+  auto const rat = make_repo_type(arrTable, t);
   using T = RepoAuthType::Tag;
   if (options.FilterAssertions) {
     // Cell and InitCell don't add any useful information, so leave them
@@ -125,7 +127,8 @@ Optional<Bytecode> makeAssert(ArgType arg, Type t) {
 }
 
 template<class Gen>
-void insert_assertions_step(const php::Func& func,
+void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
+                            const php::Func& func,
                             const Bytecode& bcode,
                             const State& state,
                             std::bitset<kMaxTrackedLocals> mayReadLocalSet,
@@ -142,7 +145,7 @@ void insert_assertions_step(const php::Func& func,
     }
     if (ignoresReadLocal(bcode, i)) continue;
     auto const realT = state.locals[i];
-    auto const op = makeAssert<bc::AssertRATL>(i, realT);
+    auto const op = makeAssert<bc::AssertRATL>(arrTable, i, realT);
     if (op) gen(*op);
   }
 
@@ -163,6 +166,7 @@ void insert_assertions_step(const php::Func& func,
 
     auto const op =
       makeAssert<bc::AssertRATStk>(
+        arrTable,
         static_cast<uint32_t>(idx),
         realT
       );
@@ -314,6 +318,7 @@ void insert_assertions(VisitContext& visit, BlockId bid, State state) {
 
   auto const& index = visit.index;
   auto const& ainfo = visit.ainfo;
+  auto& arrTable = *index.array_table_builder();
   auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
 
   std::vector<uint8_t> obviousStackOutputs(state.stack.size(), false);
@@ -344,6 +349,7 @@ void insert_assertions(VisitContext& visit, BlockId bid, State state) {
     auto const flags    = step(interp, op);
 
     insert_assertions_step(
+      arrTable,
       *func,
       op,
       preState,

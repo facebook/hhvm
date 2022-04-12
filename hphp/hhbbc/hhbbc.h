@@ -23,7 +23,7 @@
 #include <string>
 #include <utility>
 
-#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
@@ -126,7 +126,9 @@ void add_unit_to_program(const UnitEmitter* ue, php::Program& program);
  */
 void whole_program(php::ProgramPtr program,
                    UnitEmitterQueue& ueq,
-                   int num_threads = 0);
+                   std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
+                   int num_threads = 0,
+                   std::promise<void>* arrTableReady = nullptr);
 
 //////////////////////////////////////////////////////////////////////
 

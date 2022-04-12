@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -485,7 +485,7 @@ size_t Type::stableHash() const {
       auto const spec = t.arrSpec();
       return folly::hash::hash_combine(
         spec.layout().toUint16(),
-        spec.type() ? spec.type()->stableHash() : 0
+        spec.type() ? spec.type()->id() : 0
       );
     }
     return 0;

@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/double-to-int64.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/type-structure.h"
@@ -6482,7 +6483,7 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
    * (hopefully m_nextKI would be gone by then).
    */
 
-  // Loosen staticness and remove emptiness from the bits
+  // Loosen staticness and remove emptiness from the bitsOB
   auto const bits = [&] {
     auto b = BBottom;
     if (arr.couldBe(BVec))  b |= BVecN;
@@ -6635,7 +6636,9 @@ std::pair<Type, Promotion> promote_classlike_to_key(Type ty) {
 
 //////////////////////////////////////////////////////////////////////
 
-Optional<RepoAuthType> make_repo_type_arr(const Type& t) {
+Optional<RepoAuthType>
+make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
+                   const Type& t) {
   assertx(t.subtypeOf(BOptArrLike));
   assertx(is_specialized_array_like(t));
 
@@ -6683,9 +6686,9 @@ Optional<RepoAuthType> make_repo_type_arr(const Type& t) {
     case DataTag::ArrLikeMapN:
       return nullptr;
     case DataTag::ArrLikePackedN:
-      return RepoAuthType::Array::packed(
+      return arrTable.packed(
         emptiness,
-        make_repo_type(t.m_data.packedn->type)
+        make_repo_type(arrTable, t.m_data.packedn->type)
       );
     case DataTag::ArrLikePacked:
       {
@@ -6693,9 +6696,9 @@ Optional<RepoAuthType> make_repo_type_arr(const Type& t) {
         std::transform(
           begin(t.m_data.packed->elems), end(t.m_data.packed->elems),
           std::back_inserter(repoTypes),
-          [&] (const Type& t2) { return make_repo_type(t2); }
+          [&] (const Type& t2) { return make_repo_type(arrTable, t2); }
         );
-        return RepoAuthType::Array::tuple(emptiness, repoTypes);
+        return arrTable.tuple(emptiness, repoTypes);
       }
       return nullptr;
     }
@@ -6706,7 +6709,7 @@ Optional<RepoAuthType> make_repo_type_arr(const Type& t) {
   return RepoAuthType { *tag, arr };
 }
 
-RepoAuthType make_repo_type(const Type& t) {
+RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   assertx(t.subtypeOf(BCell));
   assertx(!t.subtypeOf(BBottom));
   using T = RepoAuthType::Tag;
@@ -6739,7 +6742,7 @@ RepoAuthType make_repo_type(const Type& t) {
   }
 
   if (is_specialized_array_like(t) && t.subtypeOf(BOptArrLike)) {
-    if (auto const rat = make_repo_type_arr(t)) return *rat;
+    if (auto const rat = make_repo_type_arr(arrTable, t)) return *rat;
   }
 
 #define X(tag) if (t.subtypeOf(B##tag)) return RepoAuthType{T::tag};

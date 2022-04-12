@@ -36,6 +36,8 @@
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/unit-util.h"
 
+#include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 
@@ -1010,13 +1012,18 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
 
   auto const retTy = state.index.lookup_return_type_raw(&func).first;
   if (!retTy.subtypeOf(BBottom)) {
-    fe.repoReturnType = make_repo_type(retTy);
+    auto const rat = make_repo_type(*state.index.array_table_builder(), retTy);
+    fe.repoReturnType = rat;
   }
 
   if (is_specialized_wait_handle(retTy)) {
     auto const awaitedTy = wait_handle_inner(retTy);
     if (!awaitedTy.subtypeOf(BBottom)) {
-      fe.repoAwaitedReturnType = make_repo_type(awaitedTy);
+      auto const rat = make_repo_type(
+        *state.index.array_table_builder(),
+        awaitedTy
+      );
+      fe.repoAwaitedReturnType = rat;
     }
   }
 
@@ -1179,7 +1186,8 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
         // since such a prop will be inaccessible.
         return RepoAuthType{};
       }
-      return make_repo_type(ty);
+
+      return make_repo_type(*state.index.array_table_builder(), ty);
     };
 
     auto const privPropTy = [&] (const PropState& ps) -> std::pair<Type, bool> {

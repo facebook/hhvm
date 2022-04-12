@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/either.h"
 

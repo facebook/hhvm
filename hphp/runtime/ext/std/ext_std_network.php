@@ -13,7 +13,7 @@
  */
 <<__Native>>
 function checkdnsrr(string $host,
-                    string $type = "MX"): bool;
+                    string $type = "MX")[defaults]: bool;
 
 /**
  * Close connection to system logger
@@ -56,14 +56,14 @@ function define_syslog_variables(): void {
 /**
  * Alias of checkdnsrr()
  */
-function dns_check_record(mixed $host, mixed $type = 'MX'): bool {
+function dns_check_record(mixed $host, mixed $type = 'MX')[defaults]: bool {
   return checkdnsrr($host, $type);
 }
 
 /**
  * Alias of getmxrr
  */
-function dns_get_mx(mixed $host, inout mixed $mxhosts, inout mixed $weight) {
+function dns_get_mx(mixed $host, inout mixed $mxhosts, inout mixed $weight)[defaults] {
   $ret = getmxrr($host, inout $mxhosts, inout $weight);
   return $ret;
 }
@@ -143,7 +143,7 @@ function dns_get_record(string $hostname,
                         <<__OutOnly>>
                         inout mixed $authns,
                         <<__OutOnly>>
-                        inout mixed $addtl): mixed;
+                        inout mixed $addtl)[defaults]: mixed;
 
 /**
  * Open Internet or Unix domain socket connection
@@ -184,7 +184,7 @@ function fsockopen(string $hostname,
  * @return int - Returns the size of the http request.
  */
 <<__Native>>
-function get_http_request_size(): int;
+function get_http_request_size()[read_globals]: int;
 
 /**
  * Get the Internet host name corresponding to a given IP address
@@ -249,7 +249,7 @@ function getmxrr(string $hostname,
                  <<__OutOnly>>
                  inout mixed $mxhosts,
                  <<__OutOnly>>
-                 inout mixed $weight): bool;
+                 inout mixed $weight)[defaults]: bool;
 
 /**
  * Get protocol number associated with protocol name
@@ -306,7 +306,7 @@ function getservbyport(int $port,
  * @return bool -
  */
 <<__Native>>
-function header_register_callback(mixed $callback): mixed;
+function header_register_callback(mixed $callback)[globals]: mixed;
 
 /**
  * Remove previously set headers
@@ -317,7 +317,7 @@ function header_register_callback(mixed $callback): mixed;
  * @return void -
  */
 <<__Native>>
-function header_remove(?string $name = null): void;
+function header_remove(?string $name = null)[globals]: void;
 
 /**
  * Send a raw HTTP header
@@ -346,7 +346,7 @@ function header_remove(?string $name = null): void;
 <<__Native>>
 function header(string $string,
                 bool $replace = true,
-                int $http_response_code = 0): void;
+                int $http_response_code = 0)[globals]: void;
 
 /**
  * Returns a list of response headers sent (or ready to send)
@@ -368,14 +368,14 @@ function headers_list()[read_globals]: varray<string>;
  *   have already been sent or TRUE otherwise.
  */
 <<__Native>>
-function headers_sent(): bool;
+function headers_sent()[read_globals]: bool;
 
 <<__Native>>
 function headers_sent_with_file_line(
   <<__OutOnly>>
   inout mixed $file,
   <<__OutOnly>>
-  inout mixed $line): bool;
+  inout mixed $line)[read_globals]: bool;
 
 /**
  * Get or Set the HTTP response code
@@ -387,7 +387,7 @@ function headers_sent_with_file_line(
  *   is int(200).
  */
 <<__Native>>
-function http_response_code(int $response_code = 0): mixed;
+function http_response_code(int $response_code = 0)[globals]: mixed;
 
 /**
  * Converts a packed internet address to a human readable representation

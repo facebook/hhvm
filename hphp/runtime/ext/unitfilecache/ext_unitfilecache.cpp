@@ -111,8 +111,8 @@ std::unique_ptr<UnitEmitter> cache_hook(
       size_t blobSize;
       query.getBlob(0, blob, blobSize);
 
-      auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, nativeFuncs);
-      BlobDecoder decoder{blob, blobSize};
+      auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, nativeFuncs, false);
+      BlobDecoder decoder{blob, blobSize, false};
       ue->m_filepath = makeStaticString(filename);
       ue->serde(decoder, false);
       decoder.assertDone();
@@ -133,7 +133,7 @@ std::unique_ptr<UnitEmitter> cache_hook(
 
   ue = compile(true);
   {
-    BlobEncoder encoder;
+    BlobEncoder encoder{false};
     ue->serde(encoder, false);
 
     std::lock_guard<std::mutex> _{s_state->m_lock};

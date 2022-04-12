@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/preclass.h"
-#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -68,7 +67,8 @@ struct UnitEmitter {
 
   explicit UnitEmitter(const SHA1& sha1,
                        const SHA1& bcSha1,
-                       const Native::FuncTable&);
+                       const Native::FuncTable&,
+                       bool useGlobalIds);
   UnitEmitter(UnitEmitter&&) = delete;
   ~UnitEmitter();
 
@@ -105,28 +105,25 @@ struct UnitEmitter {
   // Litstrs and Arrays.
 
   /*
-   * Look up a static string or array/arraytype by ID. This might load
-   * the data from the repo if lazy loading is enabled.
+   * Look up a static string or array/arraytype by ID.
    */
   const StringData* lookupLitstr(Id id) const;
   const ArrayData* lookupArray(Id id) const;
 
-  /*
-   * Like the above lookup functions, but create ref-counted copies,
-   * and don't cache the result. This is meant for things like the
-   * verifier, where we want to lookup the values, but not keep them
-   * around.
-   */
-  String lookupLitstrCopy(Id id) const;
-  Array lookupArrayCopy(Id id) const;
-
   Id numArrays() const { return m_arrays.size(); }
   Id numLitstrs() const { return m_litstrs.size(); }
 
+  bool useGlobalIds() const { return m_useGlobalIds; }
   /*
-   * Merge a literal string into the Unit.
+   * Merge a literal string into either the global LitstrTable or the table for
+   * the Unit.
    */
   Id mergeLitstr(const StringData* litstr);
+
+  /*
+   * Merge a literal string into the table for the Unit.
+   */
+  Id mergeUnitLitstr(const StringData* litstr);
 
   /*
    * Merge a scalar array into the Unit.
@@ -134,18 +131,9 @@ struct UnitEmitter {
   Id mergeArray(const ArrayData* a);
 
   /*
-   * Load literal array or strings from the repo. The data is loaded
-   * from the unit given by the SN, at the location given by the
-   * token. The token should be what was calculated when the
-   * unit-emitter was created.
+   * Merge a scalar array into the table for the Unit.
    */
-  static const ArrayData* loadLitarrayFromRepo(int64_t unitSn,
-                                               RepoFile::Token token,
-                                               const StringData* filepath,
-                                               bool makeStatic);
-  static const StringData* loadLitstrFromRepo(int64_t unitSn,
-                                              RepoFile::Token token,
-                                              bool makeStatic);
+  Id mergeUnitArray(const ArrayData* a);
 
   /////////////////////////////////////////////////////////////////////////////
   // FuncEmitters.
@@ -271,6 +259,7 @@ public:
   const StringData* m_filepath{nullptr};
 
   bool m_ICE{false}; // internal compiler error
+  bool m_useGlobalIds{0};
   bool m_fatalUnit{false}; // parse/runtime error
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
@@ -294,14 +283,15 @@ private:
   /*
    * Litstr tables.
    */
-  hphp_fast_map<const StringData*, Id> m_litstr2id;
-  mutable std::vector<UnsafeLockFreePtrWrapper<StringOrToken>> m_litstrs;
+  hphp_hash_map<const StringData*, Id,
+                string_data_hash, string_data_same> m_litstr2id;
+  std::vector<const StringData*> m_litstrs;
 
   /*
    * Scalar array tables.
    */
-  hphp_fast_map<const ArrayData*, Id> m_array2id;
-  mutable std::vector<UnsafeLockFreePtrWrapper<ArrayOrToken>> m_arrays;
+  hphp_hash_map<const ArrayData*, Id> m_array2id;
+  std::vector<const ArrayData*> m_arrays;
 
   /*
    * Type alias table.

@@ -792,16 +792,17 @@ LineTable FuncEmitter::loadLineTableFromRepo(int64_t unitSn,
 
   auto const remaining = RepoFile::remainingSizeOfUnit(unitSn, token);
   always_assert(remaining >= sizeof(uint64_t));
+  auto const size = std::min<size_t>(remaining, 128);
+
+  auto data = std::make_unique<unsigned char[]>(size);
+  RepoFile::readRawFromUnit(unitSn, token, data.get(), size);
 
   size_t actualSize;
   {
     // We encoded the size of the line table along with the table. So,
     // peek its size and bail if the decoder doesn't have enough data
     // remaining.
-    auto const size = std::min<size_t>(remaining, 128);
-    auto const data = std::make_unique<unsigned char[]>(size);
-    RepoFile::readRawFromUnit(unitSn, token, data.get(), size);
-    BlobDecoder decoder{data.get(), size};
+    BlobDecoder decoder{data.get(), size, false};
     actualSize = decoder.peekSize();
     if (actualSize <= decoder.remaining()) {
       LineTable lineTable;
@@ -815,9 +816,9 @@ LineTable FuncEmitter::loadLineTableFromRepo(int64_t unitSn,
   always_assert(actualSize <= remaining);
 
   LineTable lineTable;
-  auto const data = std::make_unique<unsigned char[]>(actualSize);
+  data = std::make_unique<unsigned char[]>(actualSize);
   RepoFile::readRawFromUnit(unitSn, token, data.get(), actualSize);
-  BlobDecoder decoder{data.get(), actualSize};
+  BlobDecoder decoder{data.get(), actualSize, false};
   deserializeLineTable(decoder, lineTable);
   decoder.assertDone();
   return lineTable;

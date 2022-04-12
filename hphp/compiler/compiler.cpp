@@ -506,6 +506,11 @@ int process(const CompilerOptions &po) {
   // This should be set before parsing anything
   RuntimeOption::EvalLowStaticArrays = false;
 
+  LitstrTable::init();
+  LitstrTable::get().setWriting();
+  LitarrayTable::init();
+  LitarrayTable::get().setWriting();
+
   {
     Timer timer2(Timer::WallTime, "parsing");
     if (po.modules.empty() && po.fmodules.empty() &&

@@ -445,6 +445,12 @@ void final_pass(Index& index,
                 const StatsHolder& stats,
                 F emitUnit) {
   trace_time final_pass("final pass");
+  LitstrTable::fini();
+  LitstrTable::init();
+  LitstrTable::get().setWriting();
+  LitarrayTable::fini();
+  LitarrayTable::init();
+  LitarrayTable::get().setWriting();
   index.freeze();
   auto const dump_dir = debug_dump_to();
   parallel::for_each(

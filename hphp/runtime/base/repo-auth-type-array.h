@@ -82,7 +82,7 @@ private:
 /*
  * Global singleton instance wrapped around ArrayTypeTable. This should be
  * only used in repo mode. Non-repo mode array type tables are stored locally in
- * the units/unit emitters.
+ * the units/unit emitters. The logic is very similar to that of LitstrTable.
  */
 ArrayTypeTable& globalArrayTypeTable();
 

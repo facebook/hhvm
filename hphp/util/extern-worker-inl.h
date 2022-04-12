@@ -152,7 +152,7 @@ T JobBase::deserialize(const folly::fs::path& path) {
     // that.
     static_assert(!IsMulti<T>::value, "Multi can only be used as return type");
     auto const data = readFile(path);
-    BlobDecoder decoder{data.data(), data.size()};
+    BlobDecoder decoder{data.data(), data.size(), false};
     return decoder.makeWhole<T>();
   }
 }
@@ -205,7 +205,7 @@ void JobBase::serialize(const T& v,
   } else {
     // Most types are just encoded with BlobEncoder and written as
     // root/idx
-    BlobEncoder encoder;
+    BlobEncoder encoder{false};
     encoder(v);
     writeFile(
       root / folly::to<std::string>(idx),
@@ -1118,7 +1118,7 @@ template <typename T> T Client::unblobify(std::string&& blob) {
   if constexpr (std::is_same<T, std::string>::value) {
     return std::move(blob);
   } else {
-    BlobDecoder decoder{blob.data(), blob.size()};
+    BlobDecoder decoder{blob.data(), blob.size(), false};
     return decoder.makeWhole<T>();
   }
 }
@@ -1132,7 +1132,7 @@ template <typename T> std::string Client::blobify(T&& t) {
   if constexpr (std::is_same<BaseT, std::string>::value) {
     return std::forward<T>(t);
   } else {
-    BlobEncoder encoder;
+    BlobEncoder encoder{false};
     encoder(t);
     // It's a shame we have to copy this, but there's no way to
     // "attach" the BlobEncoder's buffer into the std::string without

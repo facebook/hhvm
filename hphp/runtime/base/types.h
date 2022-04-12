@@ -50,7 +50,7 @@ using LowStringPtr = LowPtr<const StringData>;
 
 template<>
 struct BlobEncoderHelper<LowStringPtr> {
-  // Implemented in string-data.cpp
+  // Implemented in litstr-table.cpp
   static void serde(BlobEncoder&, LowStringPtr);
   static void serde(BlobDecoder&, LowStringPtr&);
 };

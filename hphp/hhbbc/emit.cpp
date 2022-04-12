@@ -1290,7 +1290,8 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
 
   auto ue = std::make_unique<UnitEmitter>(unit.sha1,
                                           SHA1{},
-                                          Native::s_noNativeFuncs);
+                                          Native::s_noNativeFuncs,
+                                          true);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_sn = unit.sn;
   ue->m_filepath = unit.filename;

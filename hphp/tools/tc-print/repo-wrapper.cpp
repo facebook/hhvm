@@ -61,8 +61,10 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   RuntimeOption::RepoAuthoritative = true;
   RuntimeOption::EvalLowStaticArrays = false; // save some low mem
 
+  LitstrTable::init();
+  LitarrayTable::init();
   if (hasRepo) {
-    RepoFile::loadGlobalTables();
+    RepoFile::loadGlobalTables(false);
     RepoFile::globalData().load();
   }
 

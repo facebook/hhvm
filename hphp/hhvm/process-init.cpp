@@ -93,7 +93,9 @@ void ProcessInit() {
   RuntimeOption::EvalAllowHhas = true;
 
   if (RuntimeOption::RepoAuthoritative) {
-    RepoFile::loadGlobalTables();
+    LitstrTable::init();
+    LitarrayTable::init();
+    RepoFile::loadGlobalTables(RO::RepoLitstrLazyLoad);
     RepoFile::globalData().load();
   }
   StringData::markSymbolsLoaded();

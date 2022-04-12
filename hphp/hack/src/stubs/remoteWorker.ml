@@ -22,6 +22,10 @@ module type RemoteServerApi = sig
 
   val build_naming_table : unit -> unit
 
+  (* downloads the naming table via saved state and adds updates from changed_files *)
+  val download_and_update_naming_table :
+    Provider_context.t -> string option -> Path.t -> unit
+
   (* Called by the worker to type check a list of files.
      The state filename is where the type checker should save its state that
      changed as a result of type checking the files

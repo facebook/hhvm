@@ -17,3 +17,6 @@ let load
 let wait_for_finish _ = failwith "Not implemented"
 
 let wait_for_finish_with_debug_details _ = failwith "Not implemented"
+
+let wait_for_finish_with_debug_details_timeout _ ~timeout:_ =
+  failwith "Not implemented"

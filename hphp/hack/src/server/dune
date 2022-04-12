@@ -335,6 +335,7 @@
   typing
   typing_check
   typing_service_api
+  state_loader
   utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

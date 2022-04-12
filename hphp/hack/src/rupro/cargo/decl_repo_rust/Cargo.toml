@@ -20,6 +20,8 @@ pos = { path = "../../pos/cargo/pos" }
 procfs = "0.9"
 rayon = "1.2"
 rusqlite = { version = "0.26.3", features = ["backup", "blob", "column_decltype"] }
+serde = { version = "1.0.136", features = ["derive", "rc"] }
+serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 structopt = "0.3.23"
 tempdir = "0.3"
 ty = { path = "../../ty/cargo/ty" }

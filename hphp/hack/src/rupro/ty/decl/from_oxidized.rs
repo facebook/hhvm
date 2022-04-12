@@ -380,7 +380,6 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ClassDecl<'_>> for shallow::Shallo
             methods,
             user_attributes,
             enum_type,
-            internal: _, // FIXME
         } = sc;
         Self {
             mode: *mode,

@@ -39,6 +39,7 @@ type init_approach =
   | Saved_state_init of load_state_approach
   | Remote_init of remote_init
   | Write_symbol_info
+  | Write_symbol_info_with_state of load_state_approach
 [@@deriving show]
 
 (** Docs are in .mli *)

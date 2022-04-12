@@ -1081,7 +1081,18 @@ let resolve_init_approach genv : ServerInit.init_approach * string =
     else if Option.is_some (ServerArgs.save_filename genv.options) then
       (ServerInit.Full_init, "Server_args_saving_state")
     else if Option.is_some (ServerArgs.write_symbol_info genv.options) then
-      (ServerInit.Write_symbol_info, "Server_args_writing_symbol_info")
+      match
+        ( genv.local_config.ServerLocalConfig.use_saved_state_when_indexing,
+          ServerArgs.with_saved_state genv.options )
+      with
+      | (false, None) ->
+        (ServerInit.Write_symbol_info, "Server_args_writing_symbol_info")
+      | (true, None) ->
+        ( ServerInit.Write_symbol_info_with_state ServerInit.Load_state_natively,
+          "Server_args_writing_symbol_info_load_native" )
+      | (_, Some (ServerArgs.Saved_state_target_info target)) ->
+        ( ServerInit.Write_symbol_info_with_state (ServerInit.Precomputed target),
+          "Server_args_writing_symbol_info_precomputed" )
     else (
       match
         ( genv.local_config.ServerLocalConfig.load_state_natively,
@@ -1118,6 +1129,7 @@ let program_init genv env =
     | ServerInit.Full_init ->
       (env, "fresh", None, None, None)
     | ServerInit.Parse_only_init -> (env, "parse-only", None, None, None)
+    | ServerInit.Write_symbol_info_with_state _
     | ServerInit.Saved_state_init _ ->
       begin
         match init_result with

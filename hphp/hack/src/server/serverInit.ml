@@ -135,9 +135,16 @@ let lazy_parse_only_init genv env profiling =
   ( ServerLazyInit.parse_only_init genv env profiling |> fst,
     Load_state_declined "No saved-state requested (for lazy parse-only init)" )
 
-let lazy_saved_state_init genv env root load_state_approach profiling =
+let lazy_saved_state_init
+    ~do_indexing genv env root load_state_approach profiling =
   let result =
-    ServerLazyInit.saved_state_init ~load_state_approach genv env root profiling
+    ServerLazyInit.saved_state_init
+      ~do_indexing
+      ~load_state_approach
+      genv
+      env
+      root
+      profiling
   in
   (* Saved-state init is the only kind of init that might error... *)
   match result with
@@ -149,13 +156,20 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
       load_state_error_to_verbose_string err
     in
     let (next_step_descr, next_step, user_instructions) =
-      match (genv.local_config.SLC.require_saved_state, auto_retry) with
-      | (true, true) -> ("retry", Exit_status.Failed_to_load_should_retry, None)
-      | (true, false) ->
+      if do_indexing then
+        (* ServerInit.Write_symbol_info_with_state will never fallback upon saved-state problems *)
+        ("fatal", Exit_status.Failed_to_load_should_abort, None)
+      else if not genv.local_config.SLC.require_saved_state then
+        (* without "--config require_saved_state=true", we're happy to fallback to full init *)
+        ("fallback", Exit_status.No_error, None)
+      else if auto_retry then
+        (* The auto-retry means we'll exit in such a way that find_hh.sh will rerun us *)
+        ("retry", Exit_status.Failed_to_load_should_retry, None)
+      else
+        (* No fallbacks, no retries, no recourse! Let's explain this clearly to the user. *)
         ( "fatal",
           Exit_status.Failed_to_load_should_abort,
           Some ServerInitMessages.messageSavedStateFailedFullInitDisabled )
-      | (false, _) -> ("fallback", Exit_status.No_error, None)
     in
     let user_message = Printf.sprintf "%s [%s]" message next_step_descr in
     let user_message =
@@ -194,9 +208,21 @@ let eager_full_init genv env _lazy_lev profiling =
   let init_result = Load_state_declined "No saved-state requested" in
   (env, init_result)
 
-let lazy_write_symbol_info_init genv env profiling =
-  ( ServerLazyInit.write_symbol_info_init genv env profiling |> post_init genv,
-    Load_state_declined "Write Symbol info state" )
+let lazy_write_symbol_info_init genv env root (load_state : 'a option) profiling
+    =
+  match load_state with
+  | None ->
+    ( ServerLazyInit.write_symbol_info_full_init genv env profiling
+      |> post_init genv,
+      Load_state_declined "Write Symobl info state" )
+  | Some load_state_approach ->
+    lazy_saved_state_init
+      ~do_indexing:true
+      genv
+      env
+      root
+      load_state_approach
+      profiling
 
 (* entry point *)
 let init
@@ -225,7 +251,12 @@ let init
     | (Init, Parse_only_init) ->
       (lazy_parse_only_init genv env, "lazy_parse_only_init")
     | (Init, Saved_state_init load_state_approach) ->
-      ( lazy_saved_state_init genv env root load_state_approach,
+      ( lazy_saved_state_init
+          ~do_indexing:false
+          genv
+          env
+          root
+          load_state_approach,
         "lazy_saved_state_init" )
     | (Off, Full_init)
     | (Decl, Full_init)
@@ -236,6 +267,10 @@ let init
     | (Parse, _) ->
       (eager_init genv env lazy_lev, "eager_init")
     | (_, Write_symbol_info) ->
-      (lazy_write_symbol_info_init genv env, "lazy_write_symbol_info_init")
+      ( lazy_write_symbol_info_init genv env root None,
+        "lazy_write_symbol_info_init" )
+    | (_, Write_symbol_info_with_state load_state_approach) ->
+      ( lazy_write_symbol_info_init genv env root (Some load_state_approach),
+        "lazy_write_symbol_info_init with state" )
   in
   CgroupProfiler.step_group init_method_name ~log:true init_method

@@ -1023,18 +1023,11 @@ let initialize_naming_table
   else
     (env, t)
 
-let write_symbol_info_init
+let write_symbol_info
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  let (env, t) =
-    initialize_naming_table
-      ~cache_decls:true
-      "write symbol info initialization"
-      genv
-      env
-      cgroup_steps
-  in
+    (cgroup_steps : CgroupProfiler.step_group)
+    (t : float) : ServerEnv.env * float =
   let (env, t) =
     ServerInitCommon.naming
       env
@@ -1125,6 +1118,20 @@ let write_symbol_info_init
 
     (env, t)
 
+let write_symbol_info_full_init
+    (genv : ServerEnv.genv)
+    (env : ServerEnv.env)
+    (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+  let (env, t) =
+    initialize_naming_table
+      ~cache_decls:true
+      "write symbol info initialization"
+      genv
+      env
+      cgroup_steps
+  in
+  write_symbol_info genv env cgroup_steps t
+
 (* If we fail to load a saved state, fall back to typechecking everything *)
 let full_init
     (genv : ServerEnv.genv)
@@ -1211,6 +1218,7 @@ let parse_only_init
     cgroup_steps
 
 let post_saved_state_initialization
+    ~(do_indexing : bool)
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
     ~(state_result : loaded_info * Relative_path.Set.t)
@@ -1347,80 +1355,84 @@ let post_saved_state_initialization
       t
       ~cgroup_steps
   in
-  (* Do global naming on all dirty files *)
-  let (env, t) =
-    ServerInitCommon.naming
-      env
-      t
-      ~telemetry_label:"post_ss1.naming"
-      ~cgroup_steps
-  in
+  if do_indexing then
+    write_symbol_info genv env cgroup_steps t
+  else
+    (* Do global naming on all dirty files *)
+    let (env, t) =
+      ServerInitCommon.naming
+        env
+        t
+        ~telemetry_label:"post_ss1.naming"
+        ~cgroup_steps
+    in
 
-  (* Add all files from fast to the files_info object *)
-  let fast = Naming_table.to_fast env.naming_table in
-  let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-  let fast =
-    Relative_path.Set.fold
-      failed_parsing
-      ~f:(fun x m -> Relative_path.Map.remove m x)
-      ~init:fast
-  in
-  let env =
-    {
-      env with
-      disk_needs_parsing =
-        Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
-    }
-  in
-  (* Separate the dirty files from the files whose decl only changed *)
-  (* Here, for each dirty file, we compare its hash to the one saved
-     in the saved state. If the hashes are the same, then the declarations
-     on the file have not changed and we only need to retypecheck that file,
-     not all of its dependencies.
-     We call these files "similar" to their previous versions. *)
-  let partition_similar dirty_files =
-    Relative_path.Set.partition
-      (fun f ->
-        let info1 = Naming_table.get_file_info old_naming_table f in
-        let info2 = Naming_table.get_file_info env.naming_table f in
-        match (info1, info2) with
-        | (Some x, Some y) ->
-          (match (x.FileInfo.hash, y.FileInfo.hash) with
-          | (Some x, Some y) -> Int64.equal x y
+    (* Add all files from fast to the files_info object *)
+    let fast = Naming_table.to_fast env.naming_table in
+    let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
+    let fast =
+      Relative_path.Set.fold
+        failed_parsing
+        ~f:(fun x m -> Relative_path.Map.remove m x)
+        ~init:fast
+    in
+    let env =
+      {
+        env with
+        disk_needs_parsing =
+          Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
+      }
+    in
+    (* Separate the dirty files from the files whose decl only changed *)
+    (* Here, for each dirty file, we compare its hash to the one saved
+       in the saved state. If the hashes are the same, then the declarations
+       on the file have not changed and we only need to retypecheck that file,
+       not all of its dependencies.
+       We call these files "similar" to their previous versions. *)
+    let partition_similar dirty_files =
+      Relative_path.Set.partition
+        (fun f ->
+          let info1 = Naming_table.get_file_info old_naming_table f in
+          let info2 = Naming_table.get_file_info env.naming_table f in
+          match (info1, info2) with
+          | (Some x, Some y) ->
+            (match (x.FileInfo.hash, y.FileInfo.hash) with
+            | (Some x, Some y) -> Int64.equal x y
+            | _ -> false)
           | _ -> false)
-        | _ -> false)
-      dirty_files
-  in
-  let (dirty_master_files_unchanged_hash, dirty_master_files_changed_hash) =
-    partition_similar dirty_master_files
-  in
-  let (dirty_local_files_unchanged_hash, dirty_local_files_changed_hash) =
-    partition_similar dirty_local_files
-  in
-  let env =
-    {
-      env with
-      naming_table = Naming_table.combine old_naming_table env.naming_table;
-      (* The only reason old_parsing_error_files are added to disk_needs_parsing
-                 here is because of an issue that seems to be already tracked in T30786759 *)
-      disk_needs_parsing = old_parsing_error_files;
-      needs_recheck =
-        Relative_path.Set.union env.needs_recheck decl_and_typing_error_files;
-    }
-  in
-  type_check_dirty
-    genv
-    env
-    old_naming_table
-    fast
-    ~dirty_master_files_unchanged_hash
-    ~dirty_master_files_changed_hash
-    ~dirty_local_files_unchanged_hash
-    ~dirty_local_files_changed_hash
-    t
-    cgroup_steps
+        dirty_files
+    in
+    let (dirty_master_files_unchanged_hash, dirty_master_files_changed_hash) =
+      partition_similar dirty_master_files
+    in
+    let (dirty_local_files_unchanged_hash, dirty_local_files_changed_hash) =
+      partition_similar dirty_local_files
+    in
+    let env =
+      {
+        env with
+        naming_table = Naming_table.combine old_naming_table env.naming_table;
+        (* The only reason old_parsing_error_files are added to disk_needs_parsing
+                   here is because of an issue that seems to be already tracked in T30786759 *)
+        disk_needs_parsing = old_parsing_error_files;
+        needs_recheck =
+          Relative_path.Set.union env.needs_recheck decl_and_typing_error_files;
+      }
+    in
+    type_check_dirty
+      genv
+      env
+      old_naming_table
+      fast
+      ~dirty_master_files_unchanged_hash
+      ~dirty_master_files_changed_hash
+      ~dirty_local_files_unchanged_hash
+      ~dirty_local_files_changed_hash
+      t
+      cgroup_steps
 
 let saved_state_init
+    ~(do_indexing : bool)
     ~(load_state_approach : load_state_approach)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
@@ -1486,6 +1498,11 @@ let saved_state_init
   | Ok state_result ->
     ServerProgress.send_progress "loading saved state succeeded";
     let (env, t) =
-      post_saved_state_initialization ~state_result ~env ~genv cgroup_steps
+      post_saved_state_initialization
+        ~do_indexing
+        ~state_result
+        ~env
+        ~genv
+        cgroup_steps
     in
     Ok ((env, t), state_result)

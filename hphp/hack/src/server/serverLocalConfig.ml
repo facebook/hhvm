@@ -413,6 +413,8 @@ type t = {
   experiments_config_meta: string;  (** a free-form diagnostic string *)
   use_saved_state: bool;
       (** should we attempt to load saved-state? (subject to further options) *)
+  use_saved_state_when_indexing: bool;
+      (** should we attempt to load saved-state when running glean indexing? *)
   require_saved_state: bool;
       (** if attempting saved-state, should we fail upon failure? *)
   load_state_natively: bool;
@@ -602,6 +604,7 @@ let default =
     experiments_config_meta = "";
     force_remote_type_check = false;
     use_saved_state = false;
+    use_saved_state_when_indexing = false;
     require_saved_state = false;
     load_state_natively = false;
     load_state_natively_download_timeout = 60;
@@ -830,6 +833,13 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_min_version
       "use_mini_state"
       ~default:default.use_saved_state
+      ~current_version
+      config
+  in
+  let use_saved_state_when_indexing =
+    bool_if_min_version
+      "use_mini_state_when_indexing"
+      ~default:default.use_saved_state_when_indexing
       ~current_version
       config
   in
@@ -1452,6 +1462,7 @@ let load_ fn ~silent ~current_version overrides =
     experiments;
     experiments_config_meta;
     use_saved_state;
+    use_saved_state_when_indexing;
     require_saved_state;
     load_state_natively;
     load_state_natively_download_timeout;

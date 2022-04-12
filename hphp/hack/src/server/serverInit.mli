@@ -24,6 +24,7 @@ type init_approach =
   | Saved_state_init of load_state_approach
   | Remote_init of remote_init
   | Write_symbol_info
+  | Write_symbol_info_with_state of load_state_approach
 
 (* Saves the state that is used by init below and returns the number of
   edges added to the saved state dependency table. *)

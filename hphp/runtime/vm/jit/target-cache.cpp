@@ -211,9 +211,8 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE
-const Func* lookup(const Class* cls, const StringData* name, const Class* ctx) {
-  // TODO(T115356820): Pass module name to the context
-  auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
+const Func* lookup(const Class* cls, const StringData* name,
+                   const MethodLookupCallContext& callCtx) {
   auto const func = lookupMethodCtx(cls, name, callCtx, CallType::ObjMethod,
                                     MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(func);
@@ -270,8 +269,10 @@ void smashImmediate(TCA movAddr, const Class* cls, const Func* func) {
 
 EXTERNALLY_VISIBLE const Func*
 handleDynamicCall(const Class* cls, const StringData* name, const Class* ctx) {
+  // TODO(T115356820): Pass module name to the context
+  auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
   // Perform lookup without any caching.
-  return lookup(cls, name, ctx);
+  return lookup(cls, name, callCtx);
 }
 
 EXTERNALLY_VISIBLE const Func*
@@ -280,12 +281,14 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
   assertx(name->isStatic());
   assertx(cls);
   auto& mce = rds::handleToRef<Entry, rds::Mode::Normal>(mceHandle);
+  // TODO(T115356820): Pass module name to the context
+  auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
   if (!rds::isHandleInit(mceHandle, rds::NormalTag{})) {
     // If the low bit is set in mcePrime, we have not yet smashed the immediate
     // into the TC, or the value was not cacheable.
     if (UNLIKELY(mcePrime & 0x1)) {
       // First fill the request local cache for this call.
-      auto const func = lookup(cls, name, ctx);
+      auto const func = lookup(cls, name, callCtx);
       mce = Entry { cls, func };
       rds::initHandle(mceHandle);
       if (mcePrime != 0x1) {
@@ -311,7 +314,7 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
   // Note: if you manually CSE oldFunc->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
   if (UNLIKELY(cls->numMethods() <= oldFunc->methodSlot())) {
-    auto const func = lookup(cls, name, ctx);
+    auto const func = lookup(cls, name, callCtx);
     mce = Entry { cls, func };
     return func;
   }
@@ -392,7 +395,7 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
     }
   }
 
-  auto const func = lookup(cls, name, ctx);
+  auto const func = lookup(cls, name, callCtx);
   mce = Entry { cls, func };
   return func;
 }

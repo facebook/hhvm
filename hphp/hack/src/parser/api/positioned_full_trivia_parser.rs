@@ -19,7 +19,6 @@ use parser::{
 };
 use positioned_smart_constructors::*;
 use serde::{Serialize, Serializer};
-use stack_limit::StackLimit;
 
 pub type Syntax<'a> =
     syntax::Syntax<'a, PositionedTokenFullTrivia<'a>, PositionedValueFullTrivia<'a>>;
@@ -31,12 +30,11 @@ pub fn parse_script<'src, 'arena>(
     arena: &'arena Bump,
     source: &SourceText<'src>,
     env: ParserEnv,
-    stack_limit: Option<&'src StackLimit>,
 ) -> (Syntax<'arena>, Vec<SyntaxError>) {
     let tf = TokenFactoryFullTrivia::new(arena);
     let sc = SmartConstructors::new(State { arena }, tf);
     let mut parser = Parser::new(source, env, sc);
-    let root = parser.parse_script(stack_limit);
+    let root = parser.parse_script();
     let errors = parser.errors();
     (root, errors)
 }
@@ -46,7 +44,6 @@ pub fn parse_script_to_json<'src, 'arena, S: Serializer>(
     s: S,
     source: &IndexedSourceText<'src>,
     env: ParserEnv,
-    stack_limit: Option<&'src StackLimit>,
 ) -> Result<S::Ok, S::Error> {
     #[derive(Serialize)]
     struct Output<'a> {
@@ -58,7 +55,7 @@ pub fn parse_script_to_json<'src, 'arena, S: Serializer>(
     let tf = TokenFactoryFullTrivia::new(arena);
     let sc = SmartConstructors::new(State { arena }, tf);
     let mut parser = Parser::new(source.source_text(), env, sc);
-    let root = parser.parse_script(stack_limit);
+    let root = parser.parse_script();
 
     let parse_tree = serialize::WithContext(source, &root);
     let output = Output {

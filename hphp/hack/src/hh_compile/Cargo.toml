@@ -28,7 +28,6 @@ positioned_full_trivia_parser = { path = "../parser/api/cargo/positioned_full_tr
 positioned_parser = { path = "../parser/api/cargo/positioned_parser" }
 rayon = "1.2"
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
-stack_limit = { path = "../utils/stack_limit" }
 structopt = "0.3.23"
 strum = "0.21"
 strum_macros = "0.21"

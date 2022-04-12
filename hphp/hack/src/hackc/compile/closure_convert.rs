@@ -29,7 +29,6 @@ use oxidized::{
     local_id, namespace_env,
     s_map::SMap,
 };
-use stack_limit::StackLimit;
 use std::borrow::Cow;
 use unique_id_builder::{
     get_unique_id_for_function, get_unique_id_for_main, get_unique_id_for_method,
@@ -404,8 +403,6 @@ struct ReadOnlyState<'a> {
     for_debugger_eval: bool,
     /// Global compiler/hack options
     options: &'a Options,
-    /// For checking elastic_stack and restarting if necessary.
-    stack_limit: &'a StackLimit,
 }
 
 /// Mutable state used during visiting in ClosureVisitor. It's mutable and owned
@@ -984,114 +981,116 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
         scope: &mut Scope<'b, 'arena>,
         Expr(_, pos, e): &mut Expr,
     ) -> Result<()> {
-        self.ro_state.stack_limit.panic_if_exceeded();
-        *e = match strip_unsafe_casts(e) {
-            Expr_::Efun(x) => self.convert_lambda(scope, x.0, Some(x.1))?,
-            Expr_::Lfun(x) => self.convert_lambda(scope, x.0, None)?,
-            Expr_::Lvar(id_orig) => {
-                let id = if self.ro_state.for_debugger_eval
-                    && local_id::get_name(&id_orig.1) == special_idents::THIS
-                    && scope.is_in_debugger_eval_fun()
+        stack_limit::maybe_grow(|| {
+            *e = match strip_unsafe_casts(e) {
+                Expr_::Efun(x) => self.convert_lambda(scope, x.0, Some(x.1))?,
+                Expr_::Lfun(x) => self.convert_lambda(scope, x.0, None)?,
+                Expr_::Lvar(id_orig) => {
+                    let id = if self.ro_state.for_debugger_eval
+                        && local_id::get_name(&id_orig.1) == special_idents::THIS
+                        && scope.is_in_debugger_eval_fun()
+                    {
+                        Box::new(Lid(id_orig.0, (0, "$__debugger$this".to_string())))
+                    } else {
+                        id_orig
+                    };
+                    self.state_mut().add_var(scope, local_id::get_name(&id.1));
+                    Expr_::Lvar(id)
+                }
+                Expr_::Id(id) if id.name().starts_with('$') => {
+                    let state = self.state_mut();
+                    state.add_var(scope, id.name());
+                    state.add_generic(scope, id.name());
+                    Expr_::Id(id)
+                }
+                Expr_::Id(id) => {
+                    self.state_mut().add_generic(scope, id.name());
+                    convert_id(scope, *id)
+                }
+                Expr_::Call(x) if is_dyn_meth_caller(&x) => {
+                    self.visit_dyn_meth_caller(scope, x, &*pos)?
+                }
+                Expr_::Call(x)
+                    if is_meth_caller(&x)
+                        && self
+                            .ro_state
+                            .options
+                            .hhvm
+                            .flags
+                            .contains(HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS) =>
                 {
-                    Box::new(Lid(id_orig.0, (0, "$__debugger$this".to_string())))
-                } else {
-                    id_orig
-                };
-                self.state_mut().add_var(scope, local_id::get_name(&id.1));
-                Expr_::Lvar(id)
-            }
-            Expr_::Id(id) if id.name().starts_with('$') => {
-                let state = self.state_mut();
-                state.add_var(scope, id.name());
-                state.add_generic(scope, id.name());
-                Expr_::Id(id)
-            }
-            Expr_::Id(id) => {
-                self.state_mut().add_generic(scope, id.name());
-                convert_id(scope, *id)
-            }
-            Expr_::Call(x) if is_dyn_meth_caller(&x) => {
-                self.visit_dyn_meth_caller(scope, x, &*pos)?
-            }
-            Expr_::Call(x)
-                if is_meth_caller(&x)
-                    && self
-                        .ro_state
-                        .options
-                        .hhvm
-                        .flags
-                        .contains(HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS) =>
-            {
-                self.visit_meth_caller_funcptr(scope, x, &*pos)?
-            }
-            Expr_::Call(x) if is_meth_caller(&x) => self.visit_meth_caller(scope, x)?,
-            Expr_::Call(x)
-                if (x.0)
-                    .as_class_get()
-                    .and_then(|(id, _, _)| id.as_ciexpr())
-                    .and_then(|x| x.as_id())
-                    .map_or(false, string_utils::is_parent)
-                    || (x.0)
-                        .as_class_const()
-                        .and_then(|(id, _)| id.as_ciexpr())
+                    self.visit_meth_caller_funcptr(scope, x, &*pos)?
+                }
+                Expr_::Call(x) if is_meth_caller(&x) => self.visit_meth_caller(scope, x)?,
+                Expr_::Call(x)
+                    if (x.0)
+                        .as_class_get()
+                        .and_then(|(id, _, _)| id.as_ciexpr())
                         .and_then(|x| x.as_id())
-                        .map_or(false, string_utils::is_parent) =>
-            {
-                self.state_mut().add_var(scope, "$this");
-                let mut res = Expr_::Call(x);
-                res.recurse(scope, self)?;
-                res
-            }
-            Expr_::As(x) if (x.1).is_hlike() => {
-                let mut res = x.0;
-                res.recurse(scope, self)?;
-                *pos = res.1;
-                res.2
-            }
-            Expr_::As(x)
-                if (x.1)
-                    .as_happly()
-                    .map(|(id, args)| {
-                        (id.name() == fb::INCORRECT_TYPE || id.name() == fb::INCORRECT_TYPE_NO_NS)
-                            && args.len() == 1
-                    })
-                    .unwrap_or_default() =>
-            {
-                let mut res = x.0;
-                res.recurse(scope, self)?;
-                *pos = res.1;
-                res.2
-            }
-            Expr_::ClassGet(mut x) => {
-                if let ClassGetExpr::CGstring(id) = &x.1 {
-                    // T43412864 claims that this does not need to be added into the
-                    // closure and can be removed. There are no relevant HHVM tests
-                    // checking for it, but there are flib test failures when you try
-                    // to remove it.
-                    self.state_mut().add_var(scope, &id.1);
-                };
-                x.recurse(scope, self)?;
-                Expr_::ClassGet(x)
-            }
-            Expr_::Await(mut x) => {
-                scope.check_if_in_async_context()?;
-                x.recurse(scope, self)?;
-                Expr_::Await(x)
-            }
-            Expr_::ReadonlyExpr(mut x) => {
-                x.recurse(scope, self)?;
-                Expr_::ReadonlyExpr(x)
-            }
-            Expr_::ExpressionTree(mut x) => {
-                x.runtime_expr.recurse(scope, self)?;
-                Expr_::ExpressionTree(x)
-            }
-            mut x => {
-                x.recurse(scope, self)?;
-                x
-            }
-        };
-        Ok(())
+                        .map_or(false, string_utils::is_parent)
+                        || (x.0)
+                            .as_class_const()
+                            .and_then(|(id, _)| id.as_ciexpr())
+                            .and_then(|x| x.as_id())
+                            .map_or(false, string_utils::is_parent) =>
+                {
+                    self.state_mut().add_var(scope, "$this");
+                    let mut res = Expr_::Call(x);
+                    res.recurse(scope, self)?;
+                    res
+                }
+                Expr_::As(x) if (x.1).is_hlike() => {
+                    let mut res = x.0;
+                    res.recurse(scope, self)?;
+                    *pos = res.1;
+                    res.2
+                }
+                Expr_::As(x)
+                    if (x.1)
+                        .as_happly()
+                        .map(|(id, args)| {
+                            (id.name() == fb::INCORRECT_TYPE
+                                || id.name() == fb::INCORRECT_TYPE_NO_NS)
+                                && args.len() == 1
+                        })
+                        .unwrap_or_default() =>
+                {
+                    let mut res = x.0;
+                    res.recurse(scope, self)?;
+                    *pos = res.1;
+                    res.2
+                }
+                Expr_::ClassGet(mut x) => {
+                    if let ClassGetExpr::CGstring(id) = &x.1 {
+                        // T43412864 claims that this does not need to be added into the
+                        // closure and can be removed. There are no relevant HHVM tests
+                        // checking for it, but there are flib test failures when you try
+                        // to remove it.
+                        self.state_mut().add_var(scope, &id.1);
+                    };
+                    x.recurse(scope, self)?;
+                    Expr_::ClassGet(x)
+                }
+                Expr_::Await(mut x) => {
+                    scope.check_if_in_async_context()?;
+                    x.recurse(scope, self)?;
+                    Expr_::Await(x)
+                }
+                Expr_::ReadonlyExpr(mut x) => {
+                    x.recurse(scope, self)?;
+                    Expr_::ReadonlyExpr(x)
+                }
+                Expr_::ExpressionTree(mut x) => {
+                    x.runtime_expr.recurse(scope, self)?;
+                    Expr_::ExpressionTree(x)
+                }
+                mut x => {
+                    x.recurse(scope, self)?;
+                    x
+                }
+            };
+            Ok(())
+        })
     }
 }
 
@@ -1676,7 +1675,6 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     defs: &mut Vec<Def>,
     namespace_env: RcOc<namespace_env::Env>,
-    stack_limit: &'decl StackLimit,
 ) -> Result<()> {
     let class_count = prepare_defs(defs);
 
@@ -1686,7 +1684,6 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
         empty_namespace: RcOc::clone(&namespace_env),
         for_debugger_eval: e.for_debugger_eval,
         options: e.options(),
-        stack_limit,
     };
     let state = State::initial_state(namespace_env);
 

@@ -81,7 +81,6 @@ fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8
                     (**filename).clone(),
                     text,
                     &arena,
-                    None,
                 );
                 arena.reset();
             }
@@ -101,7 +100,6 @@ fn bench_cst_and_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u
                     &text,
                     None,
                     &arena,
-                    None,
                 );
                 arena.reset();
             }
@@ -120,7 +118,6 @@ fn bench_ast_and_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u
                     &Default::default(),
                     &indexed_source_text,
                     &arena,
-                    None,
                 );
                 arena.reset();
             }
@@ -134,12 +131,8 @@ fn bench_aast_full_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])
             for (filename, text) in files {
                 let text = SourceText::make(RcOc::clone(filename), text);
                 let indexed_source_text = IndexedSourceText::new(text.clone());
-                aast_parser::AastParser::from_text(
-                    &AastParserEnv::default(),
-                    &indexed_source_text,
-                    None,
-                )
-                .unwrap();
+                aast_parser::AastParser::from_text(&AastParserEnv::default(), &indexed_source_text)
+                    .unwrap();
             }
         })
     });
@@ -157,7 +150,6 @@ fn bench_aast_quick_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8]
                         ..AastParserEnv::default()
                     },
                     &indexed_source_text,
-                    None,
                 )
                 .unwrap();
             }

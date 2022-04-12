@@ -97,34 +97,30 @@ fn desugar_and_replace_et_literals<S: AsRef<str>>(
 pub fn desugar_and_print<S: AsRef<str>>(env: &Env<S>) {
     let is_systemlib = env.flags.contains(EnvFlags::IS_SYSTEMLIB);
     let opts = Options::from_configs(&env.config_jsons, &env.config_list).expect("Invalid options");
-    stack_limit::with_elastic_stack(|limit| {
-        let filepath = env.filepath.clone();
-        let content = fs::read(filepath.to_absolute()).unwrap();
-        let source_text = SourceText::make(RcOc::new(filepath), &content);
-        let ns = RcOc::new(NamespaceEnv::empty(
-            opts.hhvm.aliased_namespaces_cloned().collect(),
-            true,
-            opts.hhvm
-                .hack_lang
-                .flags
-                .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
-        ));
-        match crate::parse_file(
-            &opts,
-            limit,
-            source_text,
-            false,
-            ns,
-            is_systemlib,
-            &mut Profile::default(),
-        ) {
-            Err(ParseError(_, msg, _)) => panic!("Parsing failed: {}", msg),
-            Ok(ast) => {
-                let old_src = String::from_utf8_lossy(&content);
-                let new_src = desugar_and_replace_et_literals(env, ast, &old_src);
-                print!("{}", new_src);
-            }
+    let filepath = env.filepath.clone();
+    let content = fs::read(filepath.to_absolute()).unwrap();
+    let source_text = SourceText::make(RcOc::new(filepath), &content);
+    let ns = RcOc::new(NamespaceEnv::empty(
+        opts.hhvm.aliased_namespaces_cloned().collect(),
+        true,
+        opts.hhvm
+            .hack_lang
+            .flags
+            .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
+    ));
+    match crate::parse_file(
+        &opts,
+        source_text,
+        false,
+        ns,
+        is_systemlib,
+        &mut Profile::default(),
+    ) {
+        Err(ParseError(_, msg, _)) => panic!("Parsing failed: {}", msg),
+        Ok(ast) => {
+            let old_src = String::from_utf8_lossy(&content);
+            let new_src = desugar_and_replace_et_literals(env, ast, &old_src);
+            print!("{}", new_src);
         }
-    })
-    .unwrap()
+    }
 }

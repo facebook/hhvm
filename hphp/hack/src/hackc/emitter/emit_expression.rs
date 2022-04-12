@@ -369,83 +369,84 @@ pub fn emit_expr<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    use ast::Expr_;
-    let ast::Expr(_, pos, expr) = expression;
-    if let Some(sl) = emitter.stack_limit.as_ref() {
-        sl.panic_if_exceeded()
-    }
-    match expr {
-        Expr_::Float(_)
-        | Expr_::String(_)
-        | Expr_::Int(_)
-        | Expr_::Null
-        | Expr_::False
-        | Expr_::True => emit_lit(emitter, env, pos, expression),
-        Expr_::EnumClassLabel(label) => emit_label(emitter, env, pos, label),
-        Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
-        Expr_::Lvar(e) => emit_lvar(emitter, env, pos, e),
-        Expr_::ClassConst(e) => emit_class_const(emitter, env, pos, &e.0, &e.1),
-        Expr_::Unop(e) => emit_unop(emitter, env, pos, e),
-        Expr_::Binop(_) => emit_binop(emitter, env, pos, expression),
-        Expr_::Pipe(e) => emit_pipe(emitter, env, e),
-        Expr_::Is(is_expr) => emit_is_expr(emitter, env, pos, is_expr),
-        Expr_::As(e) => emit_as(emitter, env, pos, e),
-        Expr_::Upcast(e) => emit_expr(emitter, env, &e.0),
-        Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
-        Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, e.1.as_ref(), &e.2),
-        Expr_::ArrayGet(e) => emit_array_get_expr(emitter, env, pos, e),
-        Expr_::ObjGet(e) => emit_obj_get_expr(emitter, env, pos, e),
-        Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, false, c),
-        Expr_::New(e) => emit_new(emitter, env, pos, e, false),
-        Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
-        Expr_::Darray(e) => emit_darray(emitter, env, pos, e, expression),
-        Expr_::Varray(e) => emit_varray(emitter, env, pos, e, expression),
-        Expr_::Collection(e) => emit_named_collection_str(emitter, env, expression, e),
-        Expr_::ValCollection(e) => emit_val_collection(emitter, env, pos, e, expression),
-        Expr_::Pair(e) => emit_pair(emitter, env, pos, e, expression),
-        Expr_::KeyValCollection(e) => emit_keyval_collection_expr(emitter, env, pos, e, expression),
-        Expr_::Clone(e) => Ok(emit_pos_then(pos, emit_clone(emitter, env, e)?)),
-        Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(emitter, env, expression, e)?)),
-        Expr_::Await(e) => emit_await(emitter, env, pos, e),
-        Expr_::ReadonlyExpr(e) => emit_readonly_expr(emitter, env, pos, e),
-        Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
-        Expr_::Efun(e) => Ok(emit_pos_then(pos, emit_lambda(emitter, env, &e.0, &e.1)?)),
-        Expr_::ClassGet(e) => emit_class_get_expr(emitter, env, pos, e),
+    stack_limit::maybe_grow(|| {
+        use ast::Expr_;
+        let ast::Expr(_, pos, expr) = expression;
+        match expr {
+            Expr_::Float(_)
+            | Expr_::String(_)
+            | Expr_::Int(_)
+            | Expr_::Null
+            | Expr_::False
+            | Expr_::True => emit_lit(emitter, env, pos, expression),
+            Expr_::EnumClassLabel(label) => emit_label(emitter, env, pos, label),
+            Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
+            Expr_::Lvar(e) => emit_lvar(emitter, env, pos, e),
+            Expr_::ClassConst(e) => emit_class_const(emitter, env, pos, &e.0, &e.1),
+            Expr_::Unop(e) => emit_unop(emitter, env, pos, e),
+            Expr_::Binop(_) => emit_binop(emitter, env, pos, expression),
+            Expr_::Pipe(e) => emit_pipe(emitter, env, e),
+            Expr_::Is(is_expr) => emit_is_expr(emitter, env, pos, is_expr),
+            Expr_::As(e) => emit_as(emitter, env, pos, e),
+            Expr_::Upcast(e) => emit_expr(emitter, env, &e.0),
+            Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
+            Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, e.1.as_ref(), &e.2),
+            Expr_::ArrayGet(e) => emit_array_get_expr(emitter, env, pos, e),
+            Expr_::ObjGet(e) => emit_obj_get_expr(emitter, env, pos, e),
+            Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, false, c),
+            Expr_::New(e) => emit_new(emitter, env, pos, e, false),
+            Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
+            Expr_::Darray(e) => emit_darray(emitter, env, pos, e, expression),
+            Expr_::Varray(e) => emit_varray(emitter, env, pos, e, expression),
+            Expr_::Collection(e) => emit_named_collection_str(emitter, env, expression, e),
+            Expr_::ValCollection(e) => emit_val_collection(emitter, env, pos, e, expression),
+            Expr_::Pair(e) => emit_pair(emitter, env, pos, e, expression),
+            Expr_::KeyValCollection(e) => {
+                emit_keyval_collection_expr(emitter, env, pos, e, expression)
+            }
+            Expr_::Clone(e) => Ok(emit_pos_then(pos, emit_clone(emitter, env, e)?)),
+            Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(emitter, env, expression, e)?)),
+            Expr_::Await(e) => emit_await(emitter, env, pos, e),
+            Expr_::ReadonlyExpr(e) => emit_readonly_expr(emitter, env, pos, e),
+            Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
+            Expr_::Efun(e) => Ok(emit_pos_then(pos, emit_lambda(emitter, env, &e.0, &e.1)?)),
+            Expr_::ClassGet(e) => emit_class_get_expr(emitter, env, pos, e),
 
-        Expr_::String2(es) => emit_string2(emitter, env, pos, es),
-        Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
-        Expr_::Xml(_) => Err(Error::unrecoverable(
-            "emit_xhp: syntax should have been converted during rewriting",
-        )),
-        Expr_::Import(e) => emit_import(emitter, env, pos, &e.0, &e.1),
-        Expr_::Omitted => Ok(instr::empty()),
-        Expr_::Lfun(_) => Err(Error::unrecoverable(
-            "expected Lfun to be converted to Efun during closure conversion emit_expr",
-        )),
-        Expr_::List(_) => Err(Error::fatal_parse(
-            pos,
-            "list() can only be used as an lvar. Did you mean to use tuple()?",
-        )),
-        Expr_::Tuple(e) => Ok(emit_pos_then(
-            pos,
-            emit_collection(emitter, env, expression, &mk_afvalues(e), None)?,
-        )),
+            Expr_::String2(es) => emit_string2(emitter, env, pos, es),
+            Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
+            Expr_::Xml(_) => Err(Error::unrecoverable(
+                "emit_xhp: syntax should have been converted during rewriting",
+            )),
+            Expr_::Import(e) => emit_import(emitter, env, pos, &e.0, &e.1),
+            Expr_::Omitted => Ok(instr::empty()),
+            Expr_::Lfun(_) => Err(Error::unrecoverable(
+                "expected Lfun to be converted to Efun during closure conversion emit_expr",
+            )),
+            Expr_::List(_) => Err(Error::fatal_parse(
+                pos,
+                "list() can only be used as an lvar. Did you mean to use tuple()?",
+            )),
+            Expr_::Tuple(e) => Ok(emit_pos_then(
+                pos,
+                emit_collection(emitter, env, expression, &mk_afvalues(e), None)?,
+            )),
 
-        Expr_::This | Expr_::Lplaceholder(_) | Expr_::Dollardollar(_) => {
-            unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
+            Expr_::This | Expr_::Lplaceholder(_) | Expr_::Dollardollar(_) => {
+                unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
+            }
+            Expr_::ExpressionTree(et) => emit_expr(emitter, env, &et.runtime_expr),
+            Expr_::ETSplice(_) => Err(Error::unrecoverable(
+                "expression trees: splice should be erased during rewriting",
+            )),
+            Expr_::FunId(_)
+            | Expr_::MethodId(_)
+            | Expr_::MethodCaller(_)
+            | Expr_::SmethodId(_)
+            | Expr_::Hole(_) => {
+                unimplemented!("TODO(hrust)")
+            }
         }
-        Expr_::ExpressionTree(et) => emit_expr(emitter, env, &et.runtime_expr),
-        Expr_::ETSplice(_) => Err(Error::unrecoverable(
-            "expression trees: splice should be erased during rewriting",
-        )),
-        Expr_::FunId(_)
-        | Expr_::MethodId(_)
-        | Expr_::MethodCaller(_)
-        | Expr_::SmethodId(_)
-        | Expr_::Hole(_) => {
-            unimplemented!("TODO(hrust)")
-        }
-    }
+    })
 }
 
 fn emit_exprs_and_error_on_inout<'a, 'arena, 'decl>(

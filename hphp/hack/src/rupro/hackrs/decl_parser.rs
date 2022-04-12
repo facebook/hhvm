@@ -71,15 +71,7 @@ impl<R: Reason> DeclParser<R> {
         text: &'a [u8],
         arena: &'a bumpalo::Bump,
     ) -> oxidized_by_ref::direct_decl_parser::ParsedFile<'a> {
-        let mut parsed_file = stack_limit::with_elastic_stack(|stack_limit| {
-            direct_decl_parser::parse_decls(opts, path.into(), text, arena, Some(stack_limit))
-        })
-        .unwrap_or_else(|failure| {
-            panic!(
-                "Rust decl parser FFI exceeded maximum allowed stack of {} KiB",
-                failure.max_stack_size_tried / stack_limit::KI
-            );
-        });
+        let mut parsed_file = direct_decl_parser::parse_decls(opts, path.into(), text, arena);
         // TODO: The direct decl parser should return decls in the same order as
         // they are declared in the file. At the moment it reverses them.
         // Reverse them again to match the syntactic order.

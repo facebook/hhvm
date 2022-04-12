@@ -17,7 +17,6 @@ use oxidized::{
     relative_path::{Prefix, RelativePath},
 };
 use rewrite_xml::rewrite_xml;
-use stack_limit::StackLimit;
 use std::path::PathBuf;
 
 fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
@@ -50,7 +49,6 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
     emitter: &'emitter mut Emitter<'arena, 'decl>,
     prog: &'p mut ast::Program,
     namespace_env: RcOc<namespace_env::Env>,
-    stack_limit: &'decl StackLimit,
 ) -> Result<()> {
     let for_debugger_eval =
         emitter.for_debugger_eval && debugger_eval_should_modify(prog.as_slice())?;
@@ -82,7 +80,7 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
 
     prog.0 = flatten_ns(prog.0.drain(..));
 
-    closure_convert::convert_toplevel_prog(emitter, &mut prog.0, namespace_env, stack_limit)?;
+    closure_convert::convert_toplevel_prog(emitter, &mut prog.0, namespace_env)?;
 
     emitter.for_debugger_eval = for_debugger_eval;
 

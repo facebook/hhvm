@@ -28,7 +28,6 @@ use parser_core_types::{
     indexed_source_text::IndexedSourceText, source_text::SourceText, syntax_error::ErrorType,
 };
 use rewrite_program::rewrite_program;
-use stack_limit::StackLimit;
 use thiserror::Error;
 
 /// Common input needed for compilation.  Extra care is taken
@@ -319,7 +318,6 @@ pub fn emit_fatal_unit<S: AsRef<str>>(
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         &alloc,
         None,
-        None,
     );
 
     let prog = emit_unit::emit_fatal_unit(&alloc, FatalOp::Parse, Pos::make_none(), err_msg);
@@ -334,15 +332,14 @@ pub fn emit_fatal_unit<S: AsRef<str>>(
 pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
-    stack_limit: &'decl StackLimit,
     writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     mut profile: &mut Profile,
 ) -> anyhow::Result<()> {
-    let mut emitter = create_emitter(env, native_env, decl_provider, alloc, Some(stack_limit))?;
-    let unit = emit_unit_from_text(&mut emitter, env, stack_limit, source_text, profile)?;
+    let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
+    let unit = emit_unit_from_text(&mut emitter, env, source_text, profile)?;
 
     let (print_result, printing_t) =
         time(|| print_unit(&Context::new(&emitter, Some(&env.filepath)), writer, &unit));
@@ -357,14 +354,13 @@ fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
     env: &Env<S>,
     namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
-    stack_limit: &'decl StackLimit,
     profile: &'p mut Profile,
 ) -> Result<HackCUnit<'arena>, Error> {
-    stack_limit.reset();
     // First rewrite and modify `ast` in place.
-    let result = rewrite(emitter, ast, RcOc::clone(&namespace_env), stack_limit);
-    profile.rewrite_peak = stack_limit.peak() as i64;
-    stack_limit.reset();
+    stack_limit::reset();
+    let result = rewrite(emitter, ast, RcOc::clone(&namespace_env));
+    profile.rewrite_peak = stack_limit::peak() as i64;
+    stack_limit::reset();
     let unit = match result {
         Ok(()) => {
             // Rewrite ok, now emit.
@@ -377,7 +373,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
             ErrorKind::Unrecoverable(x) => Err(Error::unrecoverable(x)),
         },
     };
-    profile.emitter_peak = stack_limit.peak() as i64;
+    profile.emitter_peak = stack_limit::peak() as i64;
     unit
 }
 
@@ -385,22 +381,20 @@ fn rewrite<'p, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     ast: &'p mut ast::Program,
     namespace_env: RcOc<NamespaceEnv>,
-    stack_limit: &'decl StackLimit,
 ) -> Result<(), Error> {
-    rewrite_program(emitter, ast, namespace_env, stack_limit)
+    rewrite_program(emitter, ast, namespace_env)
 }
 
 pub fn unit_from_text<'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
-    stack_limit: &'decl StackLimit,
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     profile: &mut Profile,
 ) -> anyhow::Result<HackCUnit<'arena>> {
-    let mut emitter = create_emitter(env, native_env, decl_provider, alloc, Some(stack_limit))?;
-    emit_unit_from_text(&mut emitter, env, stack_limit, source_text, profile)
+    let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
+    emit_unit_from_text(&mut emitter, env, source_text, profile)
 }
 
 pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
@@ -410,7 +404,7 @@ pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
     program: &HackCUnit<'_>,
 ) -> anyhow::Result<()> {
     let alloc = bumpalo::Bump::new();
-    let emitter = create_emitter(env, native_env, None, &alloc, None)?;
+    let emitter = create_emitter(env, native_env, None, &alloc)?;
     let (print_result, _) = time(|| {
         print_unit(
             &Context::new(&emitter, Some(&env.filepath)),
@@ -444,7 +438,6 @@ fn emit_unit_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
 fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
-    stack_limit: &'decl StackLimit,
     source_text: SourceText<'_>,
     profile: &mut Profile,
 ) -> anyhow::Result<HackCUnit<'arena>> {
@@ -464,7 +457,6 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
     let (parse_result, parsing_t) = time(|| {
         parse_file(
             emitter.options(),
-            stack_limit,
             source_text,
             !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
             RcOc::clone(&namespace_env),
@@ -478,8 +470,7 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
         Ok(mut ast) => {
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
             time(move || {
-                let u =
-                    rewrite_and_emit(emitter, env, namespace_env, &mut ast, stack_limit, profile);
+                let u = rewrite_and_emit(emitter, env, namespace_env, &mut ast, profile);
                 (u, profile)
             })
         }
@@ -516,7 +507,6 @@ fn create_emitter<'arena, 'decl, S: AsRef<str>>(
     native_env: Option<&NativeEnv<S>>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     alloc: &'arena bumpalo::Bump,
-    stack_limit: Option<&'decl StackLimit>,
 ) -> anyhow::Result<Emitter<'arena, 'decl>> {
     let opts = match native_env {
         None => Options::from_configs(&env.config_jsons, &env.config_list)
@@ -529,7 +519,6 @@ fn create_emitter<'arena, 'decl, S: AsRef<str>>(
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         alloc,
         decl_provider,
-        stack_limit,
     ))
 }
 
@@ -573,7 +562,6 @@ pub(crate) struct ParseError(Pos, String, bool);
 
 fn parse_file(
     opts: &Options,
-    stack_limit: &StackLimit,
     source_text: SourceText<'_>,
     elaborate_namespaces: bool,
     namespace_env: RcOc<NamespaceEnv>,
@@ -596,12 +584,8 @@ fn parse_file(
     };
 
     let indexed_source_text = IndexedSourceText::new(source_text);
-    let ast_result = AastParser::from_text_with_namespace_env(
-        &aast_env,
-        namespace_env,
-        &indexed_source_text,
-        Some(stack_limit),
-    );
+    let ast_result =
+        AastParser::from_text_with_namespace_env(&aast_env, namespace_env, &indexed_source_text);
     match ast_result {
         Err(AastError::Other(msg)) => Err(ParseError(Pos::make_none(), msg, false)),
         Err(AastError::NotAHackFile()) => Err(ParseError(
@@ -678,7 +662,6 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         &alloc,
-        None,
         None,
     );
     let ctx = Context::new(&emitter);

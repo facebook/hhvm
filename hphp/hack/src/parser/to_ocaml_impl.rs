@@ -70,13 +70,15 @@ impl ToOcaml for Syntax<'_, PositionedToken<'_>, PositionedValue<'_>> {
                 block.build()
             }
             _ => {
+                // TODO: rewrite this iteratively.
                 let tag = self.kind().ocaml_tag();
                 let n = self.iter_children().count();
                 let mut block = alloc.block_with_size_and_tag(n, tag);
-                self.iter_children().fold(0, |i, field| {
-                    let field = field.to_ocaml(alloc, source_text);
-                    alloc.set_field(&mut block, i, field);
-                    i + 1
+                stack_limit::maybe_grow(|| {
+                    for (i, field) in self.iter_children().enumerate() {
+                        let field = field.to_ocaml(alloc, source_text);
+                        alloc.set_field(&mut block, i, field);
+                    }
                 });
                 block.build()
             }

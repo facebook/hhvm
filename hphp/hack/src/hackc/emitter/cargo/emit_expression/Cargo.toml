@@ -30,3 +30,4 @@ options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
 regex = "1.5.4"
 scope = { path = "../scope" }
+stack_limit = { path = "../../../../utils/stack_limit" }

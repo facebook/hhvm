@@ -18,4 +18,3 @@ pair_smart_constructors = { path = "../../../cargo/pair_smart_constructors" }
 parser = { path = "../../../core" }
 parser_core_types = { path = "../../../cargo/core_types" }
 positioned_smart_constructors = { path = "../../../cargo/positioned_smart_constructors" }
-stack_limit = { path = "../../../../utils/stack_limit" }

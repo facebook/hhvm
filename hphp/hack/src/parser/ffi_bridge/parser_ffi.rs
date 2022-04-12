@@ -50,13 +50,11 @@ pub fn hackc_parse_positioned_full_trivia_cpp_ffi(
     );
     let alloc = bumpalo::Bump::new();
     let mut serializer = serde_json::Serializer::new(std::vec![]);
-    let stack_limit: std::option::Option<&stack_limit::StackLimit> = None;
     match positioned_full_trivia_parser::parse_script_to_json(
         &alloc,
         &mut serializer,
         &indexed_source,
         env,
-        stack_limit,
     ) {
         Ok(()) => str::from_utf8(&serializer.into_inner())
             .unwrap()

@@ -12,5 +12,4 @@ doctest = false
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
 parser = { path = "../../../core" }
-stack_limit = { path = "../../../../utils/stack_limit" }
 verify_smart_constructors = { path = "../../../cargo/verify_parser" }

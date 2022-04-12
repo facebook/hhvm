@@ -8,5 +8,5 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-crossbeam = "0.8"
-thiserror = "1.0.30"
+psm = "0.1.17"
+stacker = "0.1.14"

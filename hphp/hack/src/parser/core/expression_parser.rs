@@ -57,7 +57,7 @@ where
 {
     lexer: Lexer<'a, S::TF>,
     env: ParserEnv,
-    context: Context<'a, Token<S>>,
+    context: Context<Token<S>>,
     errors: Vec<SyntaxError>,
     sc: S,
     precedence: usize,
@@ -74,7 +74,7 @@ where
     fn make(
         lexer: Lexer<'a, S::TF>,
         env: ParserEnv,
-        context: Context<'a, Token<S>>,
+        context: Context<Token<S>>,
         errors: Vec<SyntaxError>,
         sc: S,
     ) -> Self {
@@ -91,7 +91,7 @@ where
         }
     }
 
-    fn into_parts(self) -> (Lexer<'a, S::TF>, Context<'a, Token<S>>, Vec<SyntaxError>, S) {
+    fn into_parts(self) -> (Lexer<'a, S::TF>, Context<Token<S>>, Vec<SyntaxError>, S) {
         (self.lexer, self.context, self.errors, self.sc)
     }
 
@@ -131,11 +131,11 @@ where
         &self.context.skipped_tokens
     }
 
-    fn context_mut(&mut self) -> &mut Context<'a, Token<S>> {
+    fn context_mut(&mut self) -> &mut Context<Token<S>> {
         &mut self.context
     }
 
-    fn context(&self) -> &Context<'a, Token<S>> {
+    fn context(&self) -> &Context<Token<S>> {
         &self.context
     }
 }
@@ -238,8 +238,10 @@ where
     }
 
     pub fn parse_expression(&mut self) -> S::R {
-        let term = self.parse_term();
-        self.parse_remaining_expression(term)
+        stack_limit::maybe_grow(|| {
+            let term = self.parse_term();
+            self.parse_remaining_expression(term)
+        })
     }
 
     fn with_reset_precedence<U, F: FnOnce(&mut Self) -> U>(&mut self, parse_function: F) -> U {

@@ -547,7 +547,7 @@ fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Re
     let source_text = SourceText::make(RcOc::new(rel_path), input.as_bytes());
     let indexed_source_text = IndexedSourceText::new(source_text);
 
-    let aast = aast_parser::AastParser::from_text(&env, &indexed_source_text, None)
+    let aast = aast_parser::AastParser::from_text(&env, &indexed_source_text)
         .map_err(|err| convert_aast_error(err, input, internal_offset, span))?;
 
     aast.errors

@@ -141,17 +141,7 @@ impl AstProvider {
         let source_text = SourceText::make(rel_path, text.as_bytes());
         let indexed_source_text = IndexedSourceText::new(source_text);
 
-        let parsed_file = stack_limit::with_elastic_stack(|stack_limit| {
-            AastParser::from_text(&env, &indexed_source_text, Some(stack_limit))
-        })
-        .map_err(|failure| ParsingError::StackExceeded {
-            file: fln.clone(),
-            msg: format!(
-                "Rust decl parser FFI exceeded maximum allowed stack of {} KiB",
-                failure.max_stack_size_tried / stack_limit::KI
-            ),
-        })?;
-
+        let parsed_file = AastParser::from_text(&env, &indexed_source_text);
         let parsed_file = parsed_file.map_err(|failure| match failure {
             ParserError::NotAHackFile() => ParsingError::NotAHackFile { file: fln.clone() },
             ParserError::ParserFatal(e, p) => ParsingError::ParserFatal { pos: p, err: e },

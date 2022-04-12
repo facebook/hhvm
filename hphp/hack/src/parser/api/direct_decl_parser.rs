@@ -17,7 +17,6 @@ use parser::parser::Parser;
 use parser_core_types::{
     parser_env::ParserEnv, source_text::SourceText, syntax_error::SyntaxError,
 };
-use stack_limit::StackLimit;
 
 pub use oxidized_by_ref::{
     decl_parser_options::DeclParserOptions,
@@ -34,14 +33,12 @@ pub fn parse_decls<'a>(
     filename: RelativePath,
     text: &'a [u8],
     arena: &'a Bump,
-    stack_limit: Option<&StackLimit>,
 ) -> ParsedFile<'a> {
     let text = SourceText::make(RcOc::new(filename), text);
     let (_, errors, state, mode) = parse_script_with_text_allocator(
         opts,
         &text,
         arena,
-        stack_limit,
         NoSourceTextAllocator,
         false, // retain_or_omit_user_attributes_for_facts
         false, // elaborate_xhp_namespaces_for_facts
@@ -67,14 +64,12 @@ pub fn parse_decls_without_reference_text<'a, 'text>(
     filename: RelativePath,
     text: &'text [u8],
     arena: &'a Bump,
-    stack_limit: Option<&StackLimit>,
 ) -> ParsedFile<'a> {
     let text = SourceText::make(RcOc::new(filename), text);
     let (_, errors, state, mode) = parse_script_with_text_allocator(
         opts,
         &text,
         arena,
-        stack_limit,
         ArenaSourceTextAllocator(arena),
         true, // retain_or_omit_user_attributes_for_facts
         true, // elaborate_xhp_namespaces_for_facts
@@ -108,7 +103,6 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
     opts: &'a DeclParserOptions<'a>,
     source: &SourceText<'text>,
     arena: &'a Bump,
-    stack_limit: Option<&StackLimit>,
     source_text_allocator: S,
     retain_or_omit_user_attributes_for_facts: bool,
     elaborate_xhp_namespaces_for_facts: bool,
@@ -131,7 +125,7 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
         elaborate_xhp_namespaces_for_facts,
     );
     let mut parser = Parser::new(source, env, sc);
-    let root = parser.parse_script(stack_limit);
+    let root = parser.parse_script();
     let errors = parser.errors();
     let sc_state = parser.into_sc_state();
     (root, errors, sc_state, mode_opt)

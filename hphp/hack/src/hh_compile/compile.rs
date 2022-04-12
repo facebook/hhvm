@@ -12,7 +12,6 @@ use options::Options;
 use oxidized::relative_path::{self, RelativePath};
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
-use stack_limit::StackLimit;
 use structopt::StructOpt;
 
 use std::{
@@ -171,7 +170,6 @@ fn process_single_file_impl(
     opts: &SingleFileOpts,
     filepath: &Path,
     content: &[u8],
-    stack_limit: &StackLimit,
     profile: &mut Profile,
 ) -> Result<Vec<u8>> {
     use compile::{Env, EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
@@ -212,7 +210,6 @@ fn process_single_file_impl(
     compile::from_text(
         &alloc,
         &env,
-        stack_limit,
         &mut output,
         source_text,
         Some(&native_env),
@@ -232,11 +229,9 @@ pub(crate) fn process_single_file(
     profile: &mut Profile,
 ) -> Result<Vec<u8>> {
     let ctx = &Arc::new((opts.clone(), filepath, content));
-    stack_limit::with_elastic_stack(|stack_limit| {
-        let new_ctx = Arc::clone(ctx);
-        let (opts, filepath, content) = new_ctx.as_ref();
-        process_single_file_impl(opts, filepath, content.as_slice(), stack_limit, profile)
-    })?
+    let new_ctx = Arc::clone(ctx);
+    let (opts, filepath, content) = new_ctx.as_ref();
+    process_single_file_impl(opts, filepath, content.as_slice(), profile)
 }
 
 fn assert_regular_file(filepath: impl AsRef<Path>) {

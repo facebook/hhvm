@@ -46,7 +46,6 @@ use parser_core_types::{
     token_kind::TokenKind as TK,
 };
 use regex::bytes::Regex;
-use stack_limit::StackLimit;
 use std::{
     cell::{Ref, RefCell, RefMut},
     matches, mem,
@@ -190,7 +189,6 @@ pub struct Env<'a> {
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
     pub parser_options: &'a GlobalOptions,
-    pub stack_limit: Option<&'a StackLimit>,
 
     pub token_factory: PositionedTokenFactory<'a>,
     pub arena: &'a Bump,
@@ -209,7 +207,6 @@ impl<'a> Env<'a> {
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
         namespace_env: RcOc<NamespaceEnv>,
-        stack_limit: Option<&'a StackLimit>,
         token_factory: PositionedTokenFactory<'a>,
         arena: &'a Bump,
     ) -> Self {
@@ -228,7 +225,6 @@ impl<'a> Env<'a> {
             parser_options,
             pos_none: Pos::make_none(),
             empty_ns_env: namespace_env,
-            stack_limit,
             token_factory,
             arena,
 
@@ -358,12 +354,6 @@ impl<'a> Env<'a> {
             Either::Left(cloned)
         } else {
             Either::Right(e)
-        }
-    }
-
-    fn check_stack_limit(&self) {
-        if let Some(limit) = &self.stack_limit {
-            limit.panic_if_exceeded()
         }
     }
 }
@@ -1401,7 +1391,7 @@ fn p_expr_recurse<'a>(
         Err(Error::Failwith("Expression recursion limit reached".into()))
     } else {
         *env.exp_recursion_depth() += 1;
-        let r = p_expr_impl(location, node, env, parent_pos);
+        let r = stack_limit::maybe_grow(|| p_expr_impl(location, node, env, parent_pos));
         *env.exp_recursion_depth() -= 1;
         r
     }
@@ -1438,7 +1428,6 @@ fn p_expr_impl<'a>(
     env: &mut Env<'a>,
     parent_pos: Option<Pos>,
 ) -> Result<Expr_> {
-    env.check_stack_limit();
     let pos = match parent_pos {
         Some(pos) => pos,
         None => p_pos(node, env),

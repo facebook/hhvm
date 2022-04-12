@@ -15,7 +15,6 @@ use parser_core_types::{
     token_kind::TokenKind,
     trivia_factory::TriviaFactory,
 };
-use stack_limit::StackLimit;
 
 #[derive(PartialEq)]
 pub enum SeparatedListKind {
@@ -84,18 +83,16 @@ impl ExpectedTokenVec {
 }
 
 #[derive(Debug, Clone)]
-pub struct Context<'a, T> {
+pub struct Context<T> {
     pub expected: ExpectedTokenVec,
     pub skipped_tokens: Vec<T>,
-    stack_limit: Option<&'a StackLimit>,
 }
 
-impl<'a, T> Context<'a, T> {
-    pub fn empty(stack_limit: Option<&'a StackLimit>) -> Self {
+impl<T> Context<T> {
+    pub fn empty() -> Self {
         Self {
             expected: ExpectedTokenVec(vec![]),
             skipped_tokens: vec![],
-            stack_limit,
         }
     }
 
@@ -125,12 +122,12 @@ where
     fn make(
         _: Lexer<'a, S::TF>,
         _: ParserEnv,
-        _: Context<'a, Token<S>>,
+        _: Context<Token<S>>,
         _: Vec<SyntaxError>,
         _: S,
     ) -> Self;
     fn add_error(&mut self, _: SyntaxError);
-    fn into_parts(self) -> (Lexer<'a, S::TF>, Context<'a, Token<S>>, Vec<SyntaxError>, S);
+    fn into_parts(self) -> (Lexer<'a, S::TF>, Context<Token<S>>, Vec<SyntaxError>, S);
     fn lexer(&self) -> &Lexer<'a, S::TF>;
     fn lexer_mut(&mut self) -> &mut Lexer<'a, S::TF>;
     fn continue_from<P: ParserTrait<'a, S>>(&mut self, _: P);
@@ -142,8 +139,8 @@ where
     fn skipped_tokens(&self) -> &[Token<S>];
     fn drain_skipped_tokens(&mut self) -> std::vec::Drain<'_, Token<S>>;
 
-    fn context_mut(&mut self) -> &mut Context<'a, Token<S>>;
-    fn context(&self) -> &Context<'a, Token<S>>;
+    fn context_mut(&mut self) -> &mut Context<Token<S>>;
+    fn context(&self) -> &Context<Token<S>>;
 
     fn pos(&self) -> usize {
         self.lexer().offset()
@@ -1479,11 +1476,5 @@ where
 
     fn require_semicolon(&mut self) -> S::R {
         self.require_token(TokenKind::Semicolon, Errors::error1010)
-    }
-
-    fn check_stack_limit(&self) {
-        if let Some(limit) = self.context().stack_limit.as_ref() {
-            limit.panic_if_exceeded()
-        }
     }
 }

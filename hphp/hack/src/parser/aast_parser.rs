@@ -33,7 +33,6 @@ use parser_core_types::{
 pub use rust_aast_parser_types::{Env, ParserResult};
 use rust_parser_errors::parse_errors_with_text;
 use smart_constructors::NoState;
-use stack_limit::StackLimit;
 use std::borrow::Borrow;
 
 type PositionedSyntaxTree<'src, 'arena> = SyntaxTree<'src, PositionedSyntax<'arena>, NoState>;
@@ -58,35 +57,28 @@ impl<'src> AastParser {
     pub fn from_text(
         env: &Env,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        stack_limit: Option<&StackLimit>,
     ) -> Result<ParserResult> {
         let ns = NamespaceEnv::empty(
             env.parser_options.po_auto_namespace_map.clone(),
             env.codegen,
             env.parser_options.po_disable_xhp_element_mangling,
         );
-        Self::from_text_with_namespace_env(env, RcOc::new(ns), indexed_source_text, stack_limit)
+        Self::from_text_with_namespace_env(env, RcOc::new(ns), indexed_source_text)
     }
 
     pub fn from_text_with_namespace_env(
         env: &Env,
         ns: RcOc<NamespaceEnv>,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        stack_limit: Option<&StackLimit>,
     ) -> Result<ParserResult> {
         let arena = Bump::new();
-        let (language, mode, tree) =
-            Self::parse_text(&arena, env, indexed_source_text, stack_limit)?;
-        let parse_peak = stack_limit.map_or(0, |sl| {
-            let x = sl.peak();
-            sl.reset();
-            x
-        });
+        stack_limit::reset();
+        let (language, mode, tree) = Self::parse_text(&arena, env, indexed_source_text)?;
+        let parse_peak = stack_limit::peak();
         Self::from_tree_with_namespace_env(
             env,
             ns,
             indexed_source_text,
-            stack_limit,
             &arena,
             language,
             mode,
@@ -101,7 +93,6 @@ impl<'src> AastParser {
     pub fn from_tree<'arena>(
         env: &Env,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        stack_limit: Option<&StackLimit>,
         arena: &'arena Bump,
         language: Language,
         mode: Option<Mode>,
@@ -116,7 +107,6 @@ impl<'src> AastParser {
             env,
             RcOc::new(ns),
             indexed_source_text,
-            stack_limit,
             arena,
             language,
             mode,
@@ -128,7 +118,6 @@ impl<'src> AastParser {
         env: &Env,
         ns: RcOc<NamespaceEnv>,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        stack_limit: Option<&StackLimit>,
         arena: &'arena Bump,
         language: Language,
         mode: Option<Mode>,
@@ -151,32 +140,23 @@ impl<'src> AastParser {
             indexed_source_text,
             &env.parser_options,
             RcOc::clone(&ns),
-            stack_limit,
             TokenFactory::new(arena),
             arena,
         );
+        stack_limit::reset();
         let ret = lower(&mut lowerer_env, tree.root());
-        let lower_peak = stack_limit.map_or(0, |sl| {
-            let x = sl.peak();
-            sl.reset();
-            x
-        });
+        let lower_peak = stack_limit::peak();
         let mut ret = if env.elaborate_namespaces {
             ret.map(|ast| namespaces::toplevel_elaborator::elaborate_toplevel_defs(ns, ast))
         } else {
             ret
         };
+        stack_limit::reset();
         let syntax_errors = match &mut ret {
-            Ok(aast) => {
-                Self::check_syntax_error(env, indexed_source_text, &tree, Some(aast), stack_limit)
-            }
-            Err(_) => Self::check_syntax_error(env, indexed_source_text, &tree, None, stack_limit),
+            Ok(aast) => Self::check_syntax_error(env, indexed_source_text, &tree, Some(aast)),
+            Err(_) => Self::check_syntax_error(env, indexed_source_text, &tree, None),
         };
-        let error_peak = stack_limit.map_or(0, |sl| {
-            let x = sl.peak();
-            sl.reset();
-            x
-        });
+        let error_peak = stack_limit::peak();
         let lowpri_errors = lowerer_env.lowpri_errors().borrow().to_vec();
         let errors = lowerer_env.hh_errors().borrow().to_vec();
         let lint_errors = lowerer_env.lint_errors().borrow().to_vec();
@@ -201,7 +181,6 @@ impl<'src> AastParser {
         indexed_source_text: &'src IndexedSourceText<'src>,
         tree: &PositionedSyntaxTree<'src, 'arena>,
         aast: Option<&mut Program<(), ()>>,
-        stack_limit: Option<&StackLimit>,
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
             let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();
@@ -214,7 +193,6 @@ impl<'src> AastParser {
                 hhi_mode,
                 env.codegen,
                 env.is_systemlib,
-                stack_limit,
             );
             errors.extend(parse_errors);
             errors.sort_by(SyntaxError::compare_offset);
@@ -254,11 +232,10 @@ impl<'src> AastParser {
         arena: &'arena Bump,
         env: &Env,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        stack_limit: Option<&StackLimit>,
     ) -> Result<(Language, Option<Mode>, PositionedSyntaxTree<'src, 'arena>)> {
         let source_text = indexed_source_text.source_text();
         let (language, mode, parser_env) = Self::make_parser_env(env, source_text);
-        let tree = Self::parse(arena, env, parser_env, source_text, mode, stack_limit)?;
+        let tree = Self::parse(arena, env, parser_env, source_text, mode)?;
         Ok((language, mode, tree))
     }
 
@@ -293,7 +270,6 @@ impl<'src> AastParser {
         parser_env: ParserEnv,
         source_text: &'src SourceText<'src>,
         mode: Option<Mode>,
-        stack_limit: Option<&StackLimit>,
     ) -> Result<PositionedSyntaxTree<'src, 'arena>> {
         let quick_mode = match mode {
             None | Some(Mode::Mhhi) => !env.codegen,
@@ -301,11 +277,11 @@ impl<'src> AastParser {
         };
         let tree = if quick_mode {
             let (tree, errors, _state) =
-                decl_mode_parser::parse_script(arena, source_text, parser_env, stack_limit);
+                decl_mode_parser::parse_script(arena, source_text, parser_env);
             PositionedSyntaxTree::create(source_text, tree, errors, mode, NoState)
         } else {
             let (tree, errors, _state) =
-                positioned_by_ref_parser::parse_script(arena, source_text, parser_env, stack_limit);
+                positioned_by_ref_parser::parse_script(arena, source_text, parser_env);
             PositionedSyntaxTree::create(source_text, tree, errors, mode, NoState)
         };
         Ok(tree)

@@ -12,7 +12,6 @@ use crate::{
     smart_constructors::{NodeType, SmartConstructors},
 };
 use parser_core_types::{source_text::SourceText, syntax_error::SyntaxError};
-use stack_limit::StackLimit;
 
 pub struct Parser<'a, S>
 where
@@ -51,17 +50,17 @@ where
     ) -> Option<<S::R as NodeType>::R> {
         let (lexer, errors, env, sc) = Self::new(text, env, sc).into_parts();
         let mut decl_parser: DeclarationParser<'_, S> =
-            DeclarationParser::make(lexer, env, Context::empty(None), errors, sc);
+            DeclarationParser::make(lexer, env, Context::empty(), errors, sc);
         decl_parser
             .parse_leading_markup_section()
             .map(|r| r.extract())
     }
 
-    pub fn parse_script(&mut self, stack_limit: Option<&'a StackLimit>) -> <S::R as NodeType>::R {
+    pub fn parse_script(&mut self) -> <S::R as NodeType>::R {
         let mut decl_parser: DeclarationParser<'_, S> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
-            Context::empty(stack_limit),
+            Context::empty(),
             vec![],
             self.sc.clone(),
         );

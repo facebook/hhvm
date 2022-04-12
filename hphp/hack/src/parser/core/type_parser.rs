@@ -24,7 +24,7 @@ where
 {
     lexer: Lexer<'a, S::TF>,
     env: ParserEnv,
-    context: Context<'a, Token<S>>,
+    context: Context<Token<S>>,
     errors: Vec<SyntaxError>,
     sc: S,
 }
@@ -37,7 +37,7 @@ where
     fn make(
         mut lexer: Lexer<'a, S::TF>,
         env: ParserEnv,
-        context: Context<'a, Token<S>>,
+        context: Context<Token<S>>,
         errors: Vec<SyntaxError>,
         sc: S,
     ) -> Self {
@@ -51,7 +51,7 @@ where
         }
     }
 
-    fn into_parts(mut self) -> (Lexer<'a, S::TF>, Context<'a, Token<S>>, Vec<SyntaxError>, S) {
+    fn into_parts(mut self) -> (Lexer<'a, S::TF>, Context<Token<S>>, Vec<SyntaxError>, S) {
         self.lexer.set_in_type(false);
         (self.lexer, self.context, self.errors, self.sc)
     }
@@ -93,11 +93,11 @@ where
         &self.context.skipped_tokens
     }
 
-    fn context_mut(&mut self) -> &mut Context<'a, Token<S>> {
+    fn context_mut(&mut self) -> &mut Context<Token<S>> {
         &mut self.context
     }
 
-    fn context(&self) -> &Context<'a, Token<S>> {
+    fn context(&self) -> &Context<Token<S>> {
         &self.context
     }
 }

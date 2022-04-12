@@ -18,4 +18,3 @@ ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../options" }
 oxidized = { path = "../../../../oxidized" }
 rewrite_xml = { path = "../rewrite_xml" }
-stack_limit = { path = "../../../../utils/stack_limit" }

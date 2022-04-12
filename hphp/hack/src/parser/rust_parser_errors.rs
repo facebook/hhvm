@@ -28,7 +28,6 @@ use parser_core_types::{
     syntax_tree::SyntaxTree,
     token_kind::TokenKind,
 };
-use stack_limit::StackLimit;
 
 use hh_autoimport_rust as hh_autoimport;
 
@@ -226,7 +225,6 @@ struct Env<'a, State> {
     hhi_mode: bool,
     codegen: bool,
     systemlib: bool,
-    stack_limit: Option<&'a StackLimit>,
 }
 
 impl<'a, State> Env<'a, State> {
@@ -2980,9 +2978,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn expression_errors(&mut self, node: S<'a>) {
-        if let Some(sl) = self.env.stack_limit.as_ref() {
-            sl.panic_if_exceeded();
-        }
         let check_is_as_expression = |self_: &mut Self, hint: S<'a>| {
             let n = match &node.children {
                 IsExpression(_) => "is",
@@ -5094,9 +5089,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn folder(&mut self, node: S<'a>) {
-        if let Some(sl) = self.env.stack_limit.as_ref() {
-            sl.panic_if_exceeded();
-        }
         let mut prev_context = None;
         let mut pushed_nested_namespace = false;
 
@@ -5452,14 +5444,16 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn fold_child_nodes(&mut self, node: S<'a>) {
-        self.parents.push(node);
-        for c in node.iter_children() {
-            self.folder(c)
-        }
-        assert_eq!(
-            self.parents.pop().map(|x| x as *const _),
-            Some(node as *const _)
-        );
+        stack_limit::maybe_grow(|| {
+            self.parents.push(node);
+            for c in node.iter_children() {
+                self.folder(c);
+            }
+            assert_eq!(
+                self.parents.pop().map(|x| x as *const _),
+                Some(node as *const _)
+            );
+        })
     }
 
     fn parse_errors_impl(mut self) -> (Vec<SyntaxError>, bool) {
@@ -5476,7 +5470,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         hhi_mode: bool,
         codegen: bool,
         systemlib: bool,
-        stack_limit: Option<&'a StackLimit>,
     ) -> (Vec<SyntaxError>, bool) {
         let env = Env {
             parser_options,
@@ -5495,7 +5488,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             hhi_mode,
             codegen,
             systemlib,
-            stack_limit,
         };
         Self::new(env).parse_errors_impl()
     }
@@ -5508,7 +5500,6 @@ pub fn parse_errors<'a, State: Clone>(
     hhi_mode: bool,
     codegen: bool,
     systemlib: bool,
-    stack_limit: Option<&'a StackLimit>,
 ) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, State>>::parse_errors(
         tree,
@@ -5518,7 +5509,6 @@ pub fn parse_errors<'a, State: Clone>(
         hhi_mode,
         codegen,
         systemlib,
-        stack_limit,
     )
 }
 
@@ -5530,7 +5520,6 @@ pub fn parse_errors_with_text<'a, State: Clone>(
     hhi_mode: bool,
     codegen: bool,
     systemlib: bool,
-    stack_limit: Option<&'a StackLimit>,
 ) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, State>>::parse_errors(
         tree,
@@ -5540,6 +5529,5 @@ pub fn parse_errors_with_text<'a, State: Clone>(
         hhi_mode,
         codegen,
         systemlib,
-        stack_limit,
     )
 }

@@ -29,7 +29,6 @@ use ocamlrep::rc::RcOc;
 use options::CompilerFlags;
 use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
 use reified_generics_helpers as RGH;
-use stack_limit::StackLimit;
 use statement_state::StatementState;
 
 static THIS: &str = "$this";
@@ -121,7 +120,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     env.jump_targets_gen.reset();
 
     // Params are numbered starting from 0, followed by decl_vars.
-    let should_reserve_locals = body_contains_finally(body, emitter.stack_limit);
+    let should_reserve_locals = body_contains_finally(body);
     let local_gen = emitter.local_gen_mut();
     let num_locals = params.len() + decl_vars.len();
     local_gen.reset(Local::new(num_locals));
@@ -785,16 +784,15 @@ fn modify_prog_for_debugger_eval<'arena>(_body_instrs: &mut InstrSeq<'arena>) {
 
 /// Scan through the AST looking to see if the body contains a non-empty
 /// `finally` clause (or a `using` which is morally equivalent).
-fn body_contains_finally(body: &[ast::Stmt], stack_limit: Option<&'_ StackLimit>) -> bool {
-    struct V<'a> {
+fn body_contains_finally(body: &[ast::Stmt]) -> bool {
+    struct V {
         has_finally: bool,
-        stack_limit: Option<&'a StackLimit>,
     }
     use oxidized::{
         aast_visitor::{AstParams, Node, Visitor},
         ast::{Expr_, Stmt_},
     };
-    impl<'a> Visitor<'a> for V<'_> {
+    impl<'a> Visitor<'a> for V {
         type Params = AstParams<(), ()>;
         fn object(&mut self) -> &mut dyn Visitor<'a, Params = Self::Params> {
             self
@@ -821,21 +819,18 @@ fn body_contains_finally(body: &[ast::Stmt], stack_limit: Option<&'_ StackLimit>
         fn visit_expr_(&mut self, c: &mut (), p: &Expr_) -> Result<(), ()> {
             // It's probably good enough to only check the stack on Expr_ since
             // that's where we can get really deep.
-            self.stack_limit.map(StackLimit::panic_if_exceeded);
-
-            match p {
-                Expr_::Efun(_) | Expr_::Lfun(_) => {
-                    // Don't recurse into lambda bodies.
-                    Ok(())
+            stack_limit::maybe_grow(|| {
+                match p {
+                    Expr_::Efun(_) | Expr_::Lfun(_) => {
+                        // Don't recurse into lambda bodies.
+                        Ok(())
+                    }
+                    _ => p.recurse(c, self.object()),
                 }
-                _ => p.recurse(c, self.object()),
-            }
+            })
         }
     }
-    let mut v = V {
-        has_finally: false,
-        stack_limit,
-    };
+    let mut v = V { has_finally: false };
     let _ = body.recurse(&mut (), &mut v);
     v.has_finally
 }

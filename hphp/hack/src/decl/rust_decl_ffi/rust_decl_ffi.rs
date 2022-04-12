@@ -6,11 +6,10 @@
 
 use bumpalo::Bump;
 
-use ast_and_decl_parser::{Env, ParserResult, Result};
+use ast_and_decl_parser::Env;
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
-use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::{
     decl_parser_options::DeclParserOptions,
     direct_decl_parser::{Decl, Decls, ParsedFile},
@@ -38,7 +37,7 @@ ocaml_ffi_with_arena! {
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
-        parse_decls(arena, opts, filename.to_oxidized(), text)
+        direct_decl_parser::parse_decls(opts, filename.to_oxidized(), text, arena)
     }
 
     fn hh_parse_and_hash_decls_ffi<'a>(
@@ -52,7 +51,8 @@ ocaml_ffi_with_arena! {
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
-        let parsed_file = parse_decls(arena, opts, filename.to_oxidized(), text);
+        let parsed_file =
+            direct_decl_parser::parse_decls(opts, filename.to_oxidized(), text, arena);
         hash_decls(parsed_file)
     }
 
@@ -75,40 +75,12 @@ unsafe extern "C" fn hh_parse_ast_and_decls_ffi(env: usize, source_text: usize) 
         let indexed_source_text = IndexedSourceText::new(source_text);
 
         let arena = &Bump::new();
-        let (ast_result, decls) = parse_ast_and_decls(arena, &env, &indexed_source_text);
+        let (ast_result, decls) = ast_and_decl_parser::from_text(&env, &indexed_source_text, arena);
         let decls = hash_decls(decls);
         // SAFETY: Requires no concurrent interaction with the OCaml runtime
         unsafe { to_ocaml(&(ast_result, decls)) }
     }
     ocamlrep_ocamlpool::catch_unwind(|| inner(env, source_text))
-}
-
-fn parse_decls<'a>(
-    arena: &'a Bump,
-    opts: &'a DeclParserOptions<'a>,
-    filename: RelativePath,
-    text: &'a [u8],
-) -> ParsedFile<'a> {
-    stack_limit::with_elastic_stack(|stack_limit| {
-        direct_decl_parser::parse_decls(opts, filename.clone(), text, arena, Some(stack_limit))
-    })
-    .unwrap_or_else(|failure| {
-        panic!(
-            "Rust decl parser FFI exceeded maximum allowed stack of {} KiB",
-            failure.max_stack_size_tried / stack_limit::KI
-        );
-    })
-}
-
-fn parse_ast_and_decls<'a>(
-    arena: &'a Bump,
-    env: &'a Env,
-    indexed_source_text: &'a IndexedSourceText<'a>,
-) -> (Result<ParserResult>, ParsedFile<'a>) {
-    stack_limit::with_elastic_stack(|stack_limit| {
-        ast_and_decl_parser::from_text(env, indexed_source_text, arena, Some(stack_limit))
-    })
-    .expect("Expression recursion limit reached")
 }
 
 fn hash_decls<'a>(parsed_file: ParsedFile<'a>) -> ParsedFileWithHashes<'a> {

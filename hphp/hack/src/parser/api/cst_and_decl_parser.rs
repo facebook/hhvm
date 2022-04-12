@@ -16,7 +16,6 @@ use parser::{
     NoState,
 };
 use parser_core_types::{parser_env::ParserEnv, source_text::SourceText, syntax_tree::SyntaxTree};
-use stack_limit::StackLimit;
 
 pub type ConcreteSyntaxTree<'src, 'arena> = SyntaxTree<'src, PositionedSyntax<'arena>, NoState>;
 
@@ -32,7 +31,6 @@ pub fn parse_script<'a>(
     source: &'a SourceText<'a>,
     mode: Option<file_info::Mode>,
     arena: &'a Bump,
-    stack_limit: Option<&StackLimit>,
 ) -> (
     ConcreteSyntaxTree<'a, 'a>,
     direct_decl_parser::ParsedFile<'a>,
@@ -56,7 +54,7 @@ pub fn parse_script<'a>(
     };
     let sc = PairSmartConstructors::new(sc0, sc1);
     let mut parser = Parser::new(source, env, sc);
-    let root = parser.parse_script(stack_limit);
+    let root = parser.parse_script();
     let errors = parser.errors();
     let has_first_pass_parse_errors = !errors.is_empty();
     let sc_state = parser.into_sc_state();

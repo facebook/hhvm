@@ -20,3 +20,4 @@ itertools = "0.10.3"
 naming_special_names_rust = { path = "../../../../naming" }
 options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
+stack_limit = { path = "../../../../utils/stack_limit" }

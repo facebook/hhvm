@@ -8,7 +8,7 @@
 // Rust/C++ shared Facts (in the compile_ffi module)
 mod compiler_ffi_impl;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use compile::EnvFlags;
@@ -263,57 +263,51 @@ fn hackc_compile_from_text_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
 ) -> Result<Vec<u8>, String> {
-    stack_limit::with_elastic_stack(|stack_limit| {
-        let native_env: compile::NativeEnv<&str> =
-            compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-        let compile_env = compile::Env::<&str> {
-            filepath: native_env.filepath.clone(),
-            config_jsons: vec![],
-            config_list: vec![],
-            flags: native_env.flags,
-        };
+    let native_env: compile::NativeEnv<&str> = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
+    let compile_env = compile::Env::<&str> {
+        filepath: native_env.filepath.clone(),
+        config_jsons: vec![],
+        config_list: vec![],
+        flags: native_env.flags,
+    };
 
-        let text = SourceText::make(
-            ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
-            source_text.as_bytes(),
-        );
-        let mut output = Vec::new();
-        let alloc = bumpalo::Bump::new();
-        let decl_allocator = bumpalo::Bump::new();
+    let text = SourceText::make(
+        ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
+        source_text.as_bytes(),
+    );
+    let mut output = Vec::new();
+    let alloc = bumpalo::Bump::new();
+    let decl_allocator = bumpalo::Bump::new();
 
-        let decl_provider = if env.decl_getter != 0 {
-            let decl_getter_ptr = env.decl_getter as *const ();
-            let hhvm_provider_ptr = env.decl_provider as *const ();
-            let c_decl_getter_fn =
-                unsafe { std::mem::transmute::<*const (), ProviderFunc<'_>>(decl_getter_ptr) };
-            let c_hhvm_provider_ptr = unsafe {
-                std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr)
-            };
-            Some(ExternalDeclProvider {
-                provider: c_decl_getter_fn,
-                data: c_hhvm_provider_ptr,
-                arena: &decl_allocator,
-            })
-        } else {
-            None
-        };
+    let decl_provider = if env.decl_getter != 0 {
+        let decl_getter_ptr = env.decl_getter as *const ();
+        let hhvm_provider_ptr = env.decl_provider as *const ();
+        let c_decl_getter_fn =
+            unsafe { std::mem::transmute::<*const (), ProviderFunc<'_>>(decl_getter_ptr) };
+        let c_hhvm_provider_ptr =
+            unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
+        Some(ExternalDeclProvider {
+            provider: c_decl_getter_fn,
+            data: c_hhvm_provider_ptr,
+            arena: &decl_allocator,
+        })
+    } else {
+        None
+    };
 
-        compile::from_text(
-            &alloc,
-            &compile_env,
-            stack_limit,
-            &mut output,
-            text,
-            Some(&native_env),
-            decl_provider
-                .as_ref()
-                .map(|provider| provider as &dyn DeclProvider<'_>),
-            &mut Default::default(),
-        )?;
-        Ok(output)
-    })
-    .map_err(|e| e.to_string())?
-    .map_err(|e: anyhow::Error| format!("{}", e))
+    compile::from_text(
+        &alloc,
+        &compile_env,
+        &mut output,
+        text,
+        Some(&native_env),
+        decl_provider
+            .as_ref()
+            .map(|provider| provider as &dyn DeclProvider<'_>),
+        &mut Default::default(),
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(output)
 }
 
 fn hackc_dump_expr_trees(env: &compile_ffi::NativeEnv) {
@@ -432,7 +426,7 @@ pub fn hackc_direct_decl_parse(
     let path = std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes()));
     let filename = RelativePath::make(Prefix::Root, path);
     let result: direct_decl_parser::ParsedFile<'static> =
-        direct_decl_parser::parse_decls_without_reference_text(opts, filename, text, alloc, None);
+        direct_decl_parser::parse_decls_without_reference_text(opts, filename, text, alloc);
 
     let op = bincode::config::Options::with_native_endian(bincode::options());
     let data = op
@@ -469,60 +463,49 @@ fn hackc_compile_unit_from_text_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
 ) -> Result<Box<HackCUnitWrapper>, String> {
-    stack_limit::with_elastic_stack(|stack_limit| {
-        let bump = bumpalo::Bump::new();
-        let alloc: &'static bumpalo::Bump =
-            unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
-        let native_env: compile::NativeEnv<&str> =
-            compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-        let compile_env = compile::Env::<&str> {
-            filepath: native_env.filepath.clone(),
-            config_jsons: vec![],
-            config_list: vec![],
-            flags: native_env.flags,
-        };
-        let text = SourceText::make(
-            ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
-            source_text.as_bytes(),
-        );
+    let bump = bumpalo::Bump::new();
+    let alloc: &'static bumpalo::Bump =
+        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
+    let native_env: compile::NativeEnv<&str> = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
+    let compile_env = compile::Env::<&str> {
+        filepath: native_env.filepath.clone(),
+        config_jsons: vec![],
+        config_list: vec![],
+        flags: native_env.flags,
+    };
+    let text = SourceText::make(
+        ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
+        source_text.as_bytes(),
+    );
 
-        let decl_allocator = bumpalo::Bump::new();
-        let decl_provider = if env.decl_getter != 0 {
-            let decl_getter_ptr = env.decl_getter as *const ();
-            let hhvm_provider_ptr = env.decl_provider as *const ();
-            let c_decl_getter_fn =
-                unsafe { std::mem::transmute::<*const (), ProviderFunc<'_>>(decl_getter_ptr) };
-            let c_hhvm_provider_ptr = unsafe {
-                std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr)
-            };
-            Some(ExternalDeclProvider {
-                provider: c_decl_getter_fn,
-                data: c_hhvm_provider_ptr,
-                arena: &decl_allocator,
-            })
-        } else {
-            None
-        };
+    let decl_allocator = bumpalo::Bump::new();
+    let decl_provider = if env.decl_getter != 0 {
+        let decl_getter_ptr = env.decl_getter as *const ();
+        let hhvm_provider_ptr = env.decl_provider as *const ();
+        let c_decl_getter_fn =
+            unsafe { std::mem::transmute::<*const (), ProviderFunc<'_>>(decl_getter_ptr) };
+        let c_hhvm_provider_ptr =
+            unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
+        Some(ExternalDeclProvider {
+            provider: c_decl_getter_fn,
+            data: c_hhvm_provider_ptr,
+            arena: &decl_allocator,
+        })
+    } else {
+        None
+    };
 
-        let compile_result = compile::unit_from_text(
-            alloc,
-            &compile_env,
-            stack_limit,
-            text,
-            Some(&native_env),
-            decl_provider
-                .as_ref()
-                .map(|provider| provider as &dyn DeclProvider<'_>),
-            &mut Default::default(),
-        );
-
-        match compile_result {
-            Ok(unit) => Ok(Box::new(HackCUnitWrapper(unit, bump))),
-            Err(e) => Err(anyhow!("{}", e)),
-        }
-    })
-    .map_err(|e| format!("{}", e))
-    .expect("hackc_compile_unit_from_text_cpp_ffi: retry failed")
+    compile::unit_from_text(
+        alloc,
+        &compile_env,
+        text,
+        Some(&native_env),
+        decl_provider
+            .as_ref()
+            .map(|provider| provider as &dyn DeclProvider<'_>),
+        &mut Default::default(),
+    )
+    .map(|unit| Box::new(HackCUnitWrapper(unit, bump)))
     .map_err(|e| e.to_string())
 }
 

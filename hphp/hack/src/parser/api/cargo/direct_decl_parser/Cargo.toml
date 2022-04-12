@@ -18,4 +18,3 @@ oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 parser = { path = "../../../core" }
 parser_core_types = { path = "../../../cargo/core_types" }
-stack_limit = { path = "../../../../utils/stack_limit" }

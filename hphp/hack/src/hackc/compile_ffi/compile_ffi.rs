@@ -44,7 +44,7 @@ extern "C" fn compile_from_text_ffi(
 ) -> usize {
     ocamlrep_ocamlpool::catch_unwind_with_handler(
         || {
-            let r: Result<(), String> = stack_limit::with_elastic_stack(|stack_limit| {
+            let r: Result<(), String> = {
                 let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
                 let output_config =
                     unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
@@ -55,7 +55,6 @@ extern "C" fn compile_from_text_ffi(
                 match compile::from_text(
                     &alloc,
                     &env,
-                    stack_limit,
                     &mut w,
                     source_text,
                     None,
@@ -74,9 +73,7 @@ extern "C" fn compile_from_text_ffi(
                     ),
                     Err(e) => Err(anyhow!("{}", e)),
                 }
-            })
-            .map_err(|e| format!("{}", e))
-            .expect("Retry Failed")
+            }
             .map_err(|e| e.to_string());
             unsafe { to_ocaml(&r) }
         },

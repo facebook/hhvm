@@ -14,4 +14,3 @@ cst_and_decl_parser = { path = "../../api/cargo/cst_and_decl_parser" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 parser_core_types = { path = "../core_types" }
 rust_aast_parser_types = { path = "../rust_aast_parser_types" }
-stack_limit = { path = "../../../utils/stack_limit" }

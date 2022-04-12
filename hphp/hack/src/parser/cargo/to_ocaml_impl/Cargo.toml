@@ -12,3 +12,4 @@ doctest = false
 [dependencies]
 ocamlrep = { path = "../../../ocamlrep" }
 parser_core_types = { path = "../core_types" }
+stack_limit = { path = "../../../utils/stack_limit" }

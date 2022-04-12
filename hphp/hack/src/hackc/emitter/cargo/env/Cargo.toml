@@ -23,5 +23,4 @@ ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
-stack_limit = { path = "../../../../utils/stack_limit" }
 statement_state = { path = "../statement_state" }

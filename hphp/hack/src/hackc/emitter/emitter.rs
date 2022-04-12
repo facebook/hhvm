@@ -15,7 +15,6 @@ use hhbc::{
 };
 use options::Options;
 use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
-use stack_limit::StackLimit;
 use statement_state::StatementState;
 use std::collections::BTreeSet;
 
@@ -50,9 +49,6 @@ pub struct Emitter<'arena, 'decl> {
     /// DeclProvider that always returns NotFound, but this behavior may later
     /// diverge from None provider behavior.
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
-
-    /// For checking elastic_stack and restarting if necessary.
-    pub stack_limit: Option<&'decl StackLimit>,
 }
 
 impl<'arena, 'decl> Emitter<'arena, 'decl> {
@@ -62,7 +58,6 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         for_debugger_eval: bool,
         alloc: &'arena bumpalo::Bump,
         decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
-        stack_limit: Option<&'decl StackLimit>,
     ) -> Emitter<'arena, 'decl> {
         Emitter {
             opts,
@@ -80,8 +75,6 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             statement_state_: None,
             symbol_refs_state: Default::default(),
             global_state_: None,
-
-            stack_limit,
         }
     }
 

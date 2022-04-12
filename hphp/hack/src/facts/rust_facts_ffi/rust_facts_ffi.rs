@@ -68,7 +68,7 @@ fn extract_facts_as_json_ffi(
         ..Default::default()
     };
     let decls =
-        direct_decl_parser::parse_decls_without_reference_text(&opts, filename, text, alloc, None);
+        direct_decl_parser::parse_decls_without_reference_text(&opts, filename, text, alloc);
 
     if decls.has_first_pass_parse_errors {
         None

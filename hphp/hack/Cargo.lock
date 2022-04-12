@@ -34,7 +34,6 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "parser_core_types",
- "stack_limit",
 ]
 
 [[package]]
@@ -159,7 +158,6 @@ dependencies = [
  "oxidized_by_ref",
  "parser_core_types",
  "rust_aast_parser_types",
- "stack_limit",
 ]
 
 [[package]]
@@ -456,7 +454,6 @@ dependencies = [
  "oxidized",
  "parser_core_types",
  "serde_json",
- "stack_limit",
 ]
 
 [[package]]
@@ -481,7 +478,6 @@ dependencies = [
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
- "stack_limit",
 ]
 
 [[package]]
@@ -535,6 +531,7 @@ dependencies = [
  "naming_special_names_rust",
  "options",
  "oxidized",
+ "stack_limit",
 ]
 
 [[package]]
@@ -693,7 +690,6 @@ dependencies = [
  "parser",
  "parser_core_types",
  "positioned_smart_constructors",
- "stack_limit",
 ]
 
 [[package]]
@@ -791,7 +787,6 @@ dependencies = [
  "bumpalo",
  "decl_mode_smart_constructors",
  "parser",
- "stack_limit",
 ]
 
 [[package]]
@@ -886,7 +881,6 @@ dependencies = [
  "oxidized_by_ref",
  "parser",
  "parser_core_types",
- "stack_limit",
 ]
 
 [[package]]
@@ -1073,6 +1067,7 @@ dependencies = [
  "oxidized",
  "regex",
  "scope",
+ "stack_limit",
 ]
 
 [[package]]
@@ -1382,7 +1377,6 @@ dependencies = [
  "options",
  "oxidized",
  "oxidized_by_ref",
- "stack_limit",
  "statement_state",
 ]
 
@@ -1783,7 +1777,6 @@ dependencies = [
  "positioned_parser",
  "rayon",
  "serde_json",
- "stack_limit",
  "structopt",
  "strum",
  "strum_macros",
@@ -2613,7 +2606,6 @@ dependencies = [
  "bumpalo",
  "parser",
  "positioned_smart_constructors",
- "stack_limit",
 ]
 
 [[package]]
@@ -2636,7 +2628,6 @@ dependencies = [
  "parser",
  "positioned_smart_constructors",
  "serde",
- "stack_limit",
 ]
 
 [[package]]
@@ -2645,7 +2636,6 @@ version = "0.0.0"
 dependencies = [
  "parser",
  "positioned_smart_constructors",
- "stack_limit",
 ]
 
 [[package]]
@@ -2766,6 +2756,15 @@ name = "profile_rust"
 version = "0.0.0"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "psm"
+version = "0.1.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "871372391786ccec00d3c5d3d6608905b3d4db263639cfe075d3b60a736d115a"
+dependencies = [
+ "cc",
 ]
 
 [[package]]
@@ -2922,7 +2921,6 @@ dependencies = [
  "options",
  "oxidized",
  "rewrite_xml",
- "stack_limit",
 ]
 
 [[package]]
@@ -2983,10 +2981,8 @@ dependencies = [
  "ocamlrep_caml_builtins",
  "ocamlrep_derive",
  "ocamlrep_ocamlpool",
- "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
- "stack_limit",
 ]
 
 [[package]]
@@ -3042,7 +3038,6 @@ dependencies = [
  "oxidized",
  "parser_core_types",
  "positioned_by_ref_parser",
- "stack_limit",
  "to_ocaml_impl",
 ]
 
@@ -3198,8 +3193,21 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 name = "stack_limit"
 version = "0.0.0"
 dependencies = [
- "crossbeam",
- "thiserror",
+ "psm",
+ "stacker",
+]
+
+[[package]]
+name = "stacker"
+version = "0.1.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "90939d5171a4420b3ff5fbc8954d641e7377335454c259dcb80786f3f21dc9b4"
+dependencies = [
+ "cc",
+ "cfg-if 1.0.0",
+ "libc",
+ "psm",
+ "winapi",
 ]
 
 [[package]]
@@ -3391,6 +3399,7 @@ version = "0.0.0"
 dependencies = [
  "ocamlrep",
  "parser_core_types",
+ "stack_limit",
 ]
 
 [[package]]
@@ -3500,7 +3509,6 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "parser",
- "stack_limit",
  "verify_smart_constructors",
 ]
 

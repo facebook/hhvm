@@ -4,249 +4,204 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-mod retry;
+/// Use a large enough redzone value to avoid stack overflow between
+/// calls to stack_limit::maybe_grow(). This can be adjusted but
+/// should be big enough to accommodate debug builds. HHVM's equivalent
+/// value is RequestInfo::StackSlack, currently set to 1MiB.
+const RED_ZONE: usize = 128 * 1024; // 128KiB
 
-use detail::*;
-use std::sync::atomic::{AtomicBool, Ordering};
+/// When the stack grows, allocate a new stack segment of this size.
+const STACK_SIZE: usize = 16 * RED_ZONE; // 2MiB
 
 /// Lightweight stack size tracking facility
 ///
 /// # Usage:
 /// ```
-/// use crate::stack_limit::{init, StackLimit, MI};
-/// init();  // important: initialize if needed (cheap to call multiple times)
+/// {
+///   // casual recursion: no checks needed within RED_ZONE.
+///   // Can also reset & check peak stack depth.
+///   stack_limit::reset();
+///   let x = stack_limit::maybe_grow(move || {
+///     // fearless recursion: stack will be at least STACK_SIZE
+///     // if remaining space is below RED_ZONE bytes.
+///   });
+///   println!("max depth {}", stack_limit::peak());
+///   x
+/// }
 ///
-/// let limit = std::sync::Arc::new(StackLimit::relative(3_000_000));
-/// limit.reset(); // set the baseline (when the stack is low)
-/// let limit_ref = limit.clone();
-/// let deeply_recursive_task = move || {
-///      if limit_ref.check_exceeded() {
-///          // abort early
-///      }
-///  };
-///  deeply_recursive_task();  // detect if it would consume >3MB of stack
-///  if limit.exceeded() {
-///      // handle stack overflow preemptively (e.g., retry with custom stack space)
-///      std::thread::Builder::new().stack_size(16 * MI) // 16 MiB
-///          .spawn(deeply_recursive_task)
-///          .expect("ERROR: thread::spawn")
-///          .join();
-///  }
-///  ```
-/// *Notes*:
-/// - each thread keeps its own stack usage info (thread-safely but lock-free for efficiency)
-/// - you need to call `check_exceeded` from each thread that may exceed its stack space
-///   (a separate StackLimit instance for each group with different limit is sufficient)
-/// - if you decrease the limit for the same thread, you need to call `reset` beforehand
-///   (this is a design choice; doing it automatically upon initialization would risk
-///   silently missing stack overflows if you re-create an instance on the same thread!)
-#[derive(Debug)]
-pub struct StackLimit {
-    pub(crate) value: usize,
-    overflow: AtomicBool,
+/// Call stack_limit::maybe_grow() along recursive paths that may otherwise
+/// overflow. The called lambda continues to run on the same thread even
+/// when the stack is grown.
+/// ```
+///
+
+pub fn maybe_grow<T>(f: impl FnOnce() -> T) -> T {
+    let sp = psm::stack_pointer();
+    match stacker::remaining_stack() {
+        Some(r) if r < RED_ZONE => {
+            // Save old base & depth values before growing stack, and update peak.
+            let old = TRACKER.with(|t| {
+                let old = t.get();
+                let depth = old.depth(sp);
+                t.replace(Tracker {
+                    depth,
+                    peak: std::cmp::max(old.peak, depth),
+                    ..old
+                })
+            });
+            let x = stacker::grow(STACK_SIZE, || {
+                // Get the new base stack pointer.
+                TRACKER.with(|t| {
+                    t.set(Tracker {
+                        base: psm::stack_pointer(),
+                        ..t.get()
+                    })
+                });
+                f()
+            });
+            TRACKER.with(|t| {
+                // Restore old tracker but preserve peak.
+                t.set(Tracker {
+                    peak: t.get().peak,
+                    ..old
+                })
+            });
+            return x;
+        }
+        Some(_) => {
+            // No need to grow, just update peak.
+            TRACKER.with(|t| {
+                let old = t.get();
+                t.set(Tracker {
+                    peak: std::cmp::max(old.peak, old.depth(sp)),
+                    ..old
+                })
+            });
+        }
+        None => {}
+    }
+    f()
 }
 
-/// Kibi unit (2^10) - a stack size is usually a multiple of it
-pub const KI: usize = 1024;
-// Mebi unit (2^20)
-pub const MI: usize = KI * KI;
-// Gibi unit (2^30)
-pub const GI: usize = KI * MI;
+#[derive(Debug, Clone, Copy)]
+struct Tracker {
+    /// Highest address in current stack segment.
+    base: *const u8,
 
-impl StackLimit {
-    fn relative(value: usize) -> Self {
+    /// Maximum stack depth since last reset().
+    peak: usize,
+
+    /// Stack depth just before most recent grow().
+    depth: usize,
+}
+
+impl Default for Tracker {
+    fn default() -> Self {
         Self {
-            value,
-            overflow: AtomicBool::new(false),
+            base: std::ptr::null(),
+            peak: 0,
+            depth: 0,
         }
-    }
-
-    fn check_exceeded(&self) -> bool {
-        let overflow = StackGuard::exceeds_size(self.value);
-        if overflow {
-            // Note: we never store false, so Release constraint (write reordering suffices)
-            self.overflow.store(true, Ordering::Release);
-        }
-        overflow
-    }
-
-    pub fn panic_if_exceeded(&self) {
-        if self.check_exceeded() {
-            panic!("stack overflow prevented by StackLimit");
-        }
-    }
-
-    fn exceeded(&self) -> bool {
-        // Note: need at least Acquire constraint in order for store to be visible across threads
-        self.overflow.load(Ordering::Acquire)
-    }
-
-    pub fn reset(&self) {
-        StackGuard::reset();
-    }
-
-    pub fn peak(&self) -> usize {
-        StackGuard::peak()
     }
 }
 
-/// Initializes the global state, more precisely modifes panic hook such that:
-/// - panics raised from StackLimit::panic_if_exceeded() are silenced;
-/// - other panics are passed through the original panic hook.
-pub fn init() {
-    use std::sync::Once;
-    static INIT: Once = Once::new();
-    INIT.call_once(|| {
-        let original_hook = std::panic::take_hook();
-        std::panic::set_hook(Box::new(move |panic_info| {
-            let mut swallow = false;
-            if let Some(location) = panic_info.location() {
-                if location.file() == file!() {
-                    // if panic comes from this file, it must be due to StackOverflow
-                    swallow = true;
-                }
-            }
-            if !swallow {
-                original_hook(panic_info);
-            }
-        }));
+impl Tracker {
+    fn depth(&self, sp: *const u8) -> usize {
+        self.depth + (self.base as isize - sp as isize).abs() as usize
+    }
+}
+
+pub fn reset() {
+    let base = psm::stack_pointer();
+    TRACKER.with(|t| {
+        t.set(Tracker {
+            base,
+            ..Default::default()
+        });
     });
 }
 
-pub fn with_elastic_stack<F, T>(mut retryable: F) -> Result<T, retry::JobFailed>
-where
-    F: FnMut(&StackLimit) -> T,
-{
-    let job = retry::Job {
-        nonmain_stack_min: 13 * MI,
-        // TODO(hrust) compile_ffi needs as much as 7 * GI, but aast_parser_ffi
-        // only requies 1 * GI. Why? it's like rust compiler produce inconsistent binary.
-        nonmain_stack_max: Some(7 * GI),
-        ..Default::default()
-    };
-    let on_retry = &mut |_| ();
-    // Assume peak is 2.5x of stack.
-    let stack_slack = |stack_size| stack_size * 6 / 10;
-    job.with_elastic_stack(
-        |stack_limit, _nonmain_stack_size| retryable(stack_limit),
-        on_retry,
-        stack_slack,
-    )
+pub fn peak() -> usize {
+    TRACKER.with(|t| t.get().peak)
 }
 
-// Implementation details (hidden to facilitate swapping in something less hacky)
-mod detail {
-    use std::cell::RefCell;
-
-    thread_local!(static STK_GUARD: RefCell<StackGuard> = RefCell::new(StackGuard::new()));
-
-    pub struct StackGuard {
-        min: usize,
-        max: usize,
-    }
-
-    impl StackGuard {
-        pub fn new() -> Self {
-            let mut ret = StackGuard {
-                min: std::usize::MAX,
-                max: std::usize::MIN,
-            };
-            ret.update();
-            ret
-        }
-
-        pub fn reset() {
-            STK_GUARD.with(|stk| stk.replace(Self::new()));
-        }
-
-        pub fn exceeds_size(bytes: usize) -> bool {
-            STK_GUARD.with(|stk| stk.borrow_mut().update() > bytes)
-        }
-
-        pub(crate) fn peak() -> usize {
-            STK_GUARD.with(|stk| stk.borrow().size())
-        }
-
-        #[inline(never)] // ensure that local variable gets address on stack
-        fn update(&mut self) -> usize {
-            let local = 1;
-            let cur = &local as *const _ as usize;
-            self.min = std::cmp::min(self.min, cur);
-            self.max = std::cmp::max(self.max, cur);
-            self.size()
-        }
-
-        fn size(&self) -> usize {
-            if self.max >= self.min {
-                self.max - self.min
-            } else {
-                self.min - self.max
-            }
-        }
-    }
+thread_local! {
+    static TRACKER: std::cell::Cell<Tracker> = Default::default();
 }
 
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
 
-    pub(crate) struct StackBounded<'a> {
-        pub(crate) limit: &'a StackLimit,
+    fn detect_growth() -> bool {
+        TRACKER.with(|t| t.get().depth != 0)
     }
 
-    impl StackBounded<'_> {
-        fn ackermann(&self, m: i64, n: i64) -> Result<i64, ()> {
-            if self.limit.check_exceeded() {
-                return Err(());
-            }
-
-            if m == 0 {
-                Ok(n + 1)
-            } else if n == 0 {
-                self.ackermann(m - 1, 1)
+    // Ackerman function that returns a K-sized array of result values
+    // to consume stack space faster.
+    #[inline(never)]
+    fn ackermann<const K: usize>(m: i64, n: i64) -> ([i64; K], bool) {
+        let over = detect_growth();
+        if m == 0 {
+            return ([n + 1; K], over);
+        }
+        maybe_grow(|| {
+            if n == 0 {
+                let (a, inner_over) = ackermann(m - 1, 1);
+                (a, over | inner_over)
             } else {
-                let inner: i64 = self.ackermann(m, n - 1)?;
-                self.ackermann(m - 1, inner)
+                let (a1, over1) = ackermann::<K>(m, n - 1);
+                let (a2, over2) = ackermann::<K>(m - 1, a1[0]);
+                (a2, over | over1 | over2)
             }
-        }
-
-        pub(crate) fn min_n_that_fails_ackermann(&self, m: i64) -> i64 {
-            for n in 2..20 {
-                if self.ackermann(m, n).is_err() {
-                    return n;
-                }
-            }
-            0
-        }
-    }
-
-    #[test]
-    fn ackermann_m_eq_3_growing_stack_avoids_overflow() {
-        std::thread::spawn(|| {
-            // new thread to avoid relying on StackGuard thread-localness
-            const M: i64 = 3;
-            const LIMIT: usize = 25_000; // 25 KB
-            let limit = StackLimit::relative(LIMIT);
-            let bounded = StackBounded { limit: &limit };
-
-            let n_err = bounded.min_n_that_fails_ackermann(M);
-
-            assert!(bounded.ackermann(M, n_err).is_err());
-
-            // Ackermann recursion depth grows ~2x when n is increased by 1 and m is fixed,
-            // so triple stack size (to avoid rounding errors) should always be sufficient
-            let limit = StackLimit::relative(3 * LIMIT);
-            let bounded = StackBounded { limit: &limit };
-            assert!(bounded.ackermann(M, n_err).is_ok());
         })
-        .join()
-        .unwrap();
+    }
+
+    // Find the lowest value of n that will encroach on RED_ZONE
+    fn min_n_that_overflows<const K: usize>(m: i64) -> i64 {
+        for n in 2..8 {
+            eprintln!("trying ({},{})", m, n);
+            if let (_, true) = ackermann::<K>(m, n) {
+                eprintln!("overflow at n={}", n);
+                return n;
+            }
+        }
+        0
+    }
+
+    fn ackermann_test<const K: usize>() -> bool {
+        const M: i64 = 3;
+        let n = min_n_that_overflows::<K>(M);
+        if n < 4 {
+            eprintln!("K={} n={} rejected", K, n);
+            return false;
+        }
+        // Ackermann recursion depth grows ~2x when n is increased by 1 and m is fixed,
+        // so this should trigger stacker::grow() but not panic or crash.
+        assert!(matches!(ackermann::<K>(M, n + 1), (_, true)));
+        true
     }
 
     #[test]
-    fn units() {
-        assert_eq!(1_024, KI);
-        assert_eq!(1_048_576, MI);
-        assert_eq!(1_073_741_824, GI);
+    fn test() {
+        assert!(!detect_growth());
+        // Try to find a good value of K (stack bloat for each stack frame)
+        // so the test recurses deep enough but also terminates reasonably fast.
+        if ackermann_test::<1000>() {
+            return;
+        }
+        if ackermann_test::<500>() {
+            return;
+        }
+        if ackermann_test::<200>() {
+            return;
+        }
+        if ackermann_test::<100>() {
+            return;
+        }
+        if ackermann_test::<50>() {
+            return;
+        }
+        panic!();
     }
 }

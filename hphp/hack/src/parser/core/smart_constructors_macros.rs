@@ -28,7 +28,6 @@ macro_rules! S {
 }
 macro_rules! S_ {
     ($f: ident, $parser: expr, $($rs:expr),* $(,)*) => {{
-        $parser.check_stack_limit();
         $parser.sc_mut().$f($($rs),+)
     }}
 }

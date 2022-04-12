@@ -802,13 +802,14 @@ struct FactsStoreImpl final
               return m_watcher->getChanges(getClock());
             })
             .thenTry([this](folly::Try<Watcher::Results>&& results) {
-              if (results.hasValue()) {
-                return update(std::move(results.value()));
-              } else if (results.hasException()) {
-                XLOG(ERR) << "Exception while processing watcher results: "
-                          << results.exception().what();
+              if (results.hasException()) {
+                auto msg = folly::sformat(
+                    "Exception while querying watcher: {}",
+                    results.exception().what());
+                XLOG(ERR) << msg;
+                throw UpdateExc{msg};
               }
-              return folly::makeSemiFuture();
+              return update(std::move(results.value()));
             }));
     return updateFuture->getFuture().semi();
   }

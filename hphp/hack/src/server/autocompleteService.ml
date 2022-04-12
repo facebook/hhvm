@@ -728,35 +728,80 @@ let enum_consts env name : string list option =
     | _ -> None)
   | None -> None
 
+let add_enum_const_result env pos replace_pos prefix const_name =
+  argument_global_type := Some Acid;
+
+  let ty = Tprim Aast_defs.Tstring in
+  let reason = Typing_reason.Rwitness pos in
+  let ty = mk (reason, ty) in
+
+  let kind = SI_ClassConstant in
+  let lty = Phase.locl ty in
+  let key = prefix ^ const_name in
+  let complete =
+    {
+      res_pos = get_pos_for env lty;
+      res_replace_pos = replace_pos;
+      res_base_class = None;
+      res_ty = kind_to_string kind;
+      res_name = key;
+      res_fullname = key;
+      res_kind = kind;
+      func_details = get_func_details_for env lty;
+      ranking_details = None;
+      res_documentation = None;
+    }
+  in
+  add_res complete
+
+let case_names (expected_enum : string) (cases : Tast.case list) : SSet.t =
+  let case_name case =
+    match fst case with
+    | ( _,
+        _,
+        Aast.Class_const ((_, _, Aast.CI (_, enum_name)), (_, variant_name)) )
+      when String.equal expected_enum enum_name ->
+      Some variant_name
+    | _ -> None
+  in
+  SSet.of_list (List.filter_map cases ~f:case_name)
+
+(* Autocomplete enum values in case statements.
+
+   switch ($enum_value) {
+     case AUTO332
+   } *)
+let autocomplete_enum_case env (expr : Tast.expr) (cases : Tast.case list) =
+  List.iter cases ~f:(fun (e, _) ->
+      match e with
+      | (_, _, Aast.Id (pos, id)) when is_auto_complete id ->
+        let (recv_ty, _, _) = expr in
+        let (_, ty) = Tast_env.expand_type env recv_ty in
+        let (_, ty_) = Typing_defs_core.deref ty in
+        let replace_pos = replace_pos_of_id (pos, id) in
+        (match ty_ with
+        | Tnewtype (name, _, _) ->
+          (match enum_consts env name with
+          | Some consts ->
+            let used_consts = case_names name cases in
+            let unused_consts =
+              List.filter consts ~f:(fun const ->
+                  not (SSet.mem const used_consts))
+            in
+
+            let prefix = Utils.strip_ns name ^ "::" in
+            List.iter
+              unused_consts
+              ~f:(add_enum_const_result env pos replace_pos prefix)
+          | None -> ())
+        | _ -> ())
+      | _ -> ())
+
+(* Autocomplete enum values in function arguments that are known to be enums.
+
+   takes_enum(AUTO332); *)
 let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
     unit =
-  let add_enum_const_result pos replace_pos prefix const_name =
-    argument_global_type := Some Acid;
-
-    let ty = Tprim Aast_defs.Tstring in
-    let reason = Typing_reason.Rwitness pos in
-    let ty = mk (reason, ty) in
-
-    let kind = SI_ClassConstant in
-    let lty = Phase.locl ty in
-    let key = prefix ^ const_name in
-    let complete =
-      {
-        res_pos = get_pos_for env lty;
-        res_replace_pos = replace_pos;
-        res_base_class = None;
-        res_ty = kind_to_string kind;
-        res_name = key;
-        res_fullname = key;
-        res_kind = kind;
-        func_details = get_func_details_for env lty;
-        ranking_details = None;
-        res_documentation = None;
-      }
-    in
-    add_res complete
-  in
-
   let args = List.map args ~f:(fun (_, e) -> unwrap_holes e) in
 
   List.iter
@@ -772,7 +817,9 @@ let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
           (match enum_consts env name with
           | Some consts ->
             let prefix = Utils.strip_ns name ^ "::" in
-            List.iter consts ~f:(add_enum_const_result pos replace_pos prefix)
+            List.iter
+              consts
+              ~f:(add_enum_const_result env pos replace_pos prefix)
           | None -> ())
         | _ -> ())
       | (_, _, Aast.Class_const ((_, _, Aast.CI _name), (pos, id)))
@@ -785,7 +832,7 @@ let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
         | Tnewtype (name, _, _) ->
           (match enum_consts env name with
           | Some consts ->
-            List.iter consts ~f:(add_enum_const_result pos replace_pos "")
+            List.iter consts ~f:(add_enum_const_result env pos replace_pos "")
           | None -> ())
         | _ -> ())
       | _ -> ())
@@ -1166,6 +1213,10 @@ let visitor ctx autocomplete_context sienv =
       (* If we don't clear out c_uses we'll end up overwriting the trait
          completion as soon as we get to on_Happly. *)
       super#on_class_ env { cls with Aast.c_uses = [] }
+
+    method! on_Switch env expr cases default_case =
+      autocomplete_enum_case env expr cases;
+      super#on_Switch env expr cases default_case
   end
 
 let auto_complete_suffix_finder =

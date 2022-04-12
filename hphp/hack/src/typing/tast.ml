@@ -69,6 +69,8 @@ type stmt = (ty, saved_env) Aast.stmt
 
 type stmt_ = (ty, saved_env) Aast.stmt_
 
+type case = (ty, saved_env) Aast.case
+
 type block = (ty, saved_env) Aast.block
 
 type class_ = (ty, saved_env) Aast.class_

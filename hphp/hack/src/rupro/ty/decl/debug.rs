@@ -18,6 +18,7 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
             mode,
             is_final,
             is_abstract,
+            is_internal,
             is_xhp,
             has_xhp_keyword,
             kind,
@@ -55,6 +56,9 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
         }
         if *is_abstract {
             s.field("is_abstract", is_abstract);
+        }
+        if *is_internal {
+            s.field("is_internal", is_internal);
         }
         if *is_xhp {
             s.field("is_xhp", is_xhp);

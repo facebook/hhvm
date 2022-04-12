@@ -107,6 +107,7 @@ pub struct ShallowClass<R: Reason> {
     pub mode: oxidized::file_info::Mode,
     pub is_final: bool,
     pub is_abstract: bool,
+    pub is_internal: bool,
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub kind: oxidized::ast_defs::ClassishKind,

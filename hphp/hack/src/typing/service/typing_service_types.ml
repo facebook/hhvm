@@ -168,6 +168,7 @@ type delegate_env = {
   num_workers: int;
   recheck_id: string;
   nonce: Int64.t;
+  tenant: string;
   root: string;
   tcopt: TypecheckerOptions.t;
   (* This module exposes to the controller the limited set of operations that

@@ -17,6 +17,7 @@ module type Delegate_sig = sig
   val make :
     artifact_store_config:ArtifactStore.config ->
     job_runner:(module JobRunner_sig.S) ->
+    tenant:string ->
     max_batch_size:int ->
     min_batch_size:int ->
     initial_payload_size:int ->

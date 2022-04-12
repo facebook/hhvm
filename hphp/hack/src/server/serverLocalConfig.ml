@@ -105,6 +105,8 @@ module RemoteTypeCheck = struct
     min_batch_size: int;
     (* Dictates the number of remote type checking workers *)
     num_workers: int;
+    (* The sandcastle tenant used to spawn remote workers *)
+    remote_worker_sandcastle_tenant: string;
     (* Indicates whether files-to-declare should be fetched by VFS
         (see `declaration_threshold`) *)
     prefetch_deferred_files: bool;
@@ -139,6 +141,7 @@ module RemoteTypeCheck = struct
       max_batch_size = 25_000;
       min_batch_size = 5_000;
       num_workers = 4;
+      remote_worker_sandcastle_tenant = "hack_experimental";
       prefetch_deferred_files = false;
       recheck_threshold = None;
       worker_min_log_level = Hh_logger.Level.Info;
@@ -210,6 +213,12 @@ module RemoteTypeCheck = struct
     in
     let num_workers =
       int_ "remote_type_check_num_workers" ~default:default.num_workers config
+    in
+    let remote_worker_sandcastle_tenant =
+      string_
+        "remote_worker_sandcastle_tenant"
+        ~default:default.remote_worker_sandcastle_tenant
+        config
     in
     let max_batch_size =
       int_
@@ -297,6 +306,7 @@ module RemoteTypeCheck = struct
       max_cas_bytes;
       max_artifact_inline_bytes;
       remote_initial_payload_ratio;
+      remote_worker_sandcastle_tenant;
     }
 end
 

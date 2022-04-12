@@ -75,8 +75,6 @@ let set_use_watchman _ = ()
 
 let set_use_full_fidelity_parser _ = ()
 
-let set_lazy_incremental _ = ()
-
 let set_search_chunk_size _ = ()
 
 let set_changed_mergebase _ = ()

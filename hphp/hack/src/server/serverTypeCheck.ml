@@ -1955,9 +1955,6 @@ let type_check_unsafe genv env kind start_time profiling =
     |> Telemetry.string_ ~key:"kind" ~value:check_kind
     |> Telemetry.duration ~key:"start" ~start_time
   in
-  (match kind with
-  | CheckKind.Lazy -> HackEventLogger.set_lazy_incremental ()
-  | CheckKind.Full -> ());
 
   (* CAUTION! Lots of alerts/dashboards depend on the exact string of check_kind and check_reason *)
   HackEventLogger.with_check_kind ~check_kind ~check_reason @@ fun () ->

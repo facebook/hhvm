@@ -43,6 +43,14 @@ let remove_vars_to_ctx ctx vars =
     List.filter !(ctx.global_vars) ~f:(fun v ->
         not (List.mem vars v ~equal:String.equal))
 
+(* Check if an expression is directly from a static variable or not,
+  e.g. it returns true for Foo::$bar or (Foo::$bar)->prop. *)
+let rec is_expr_static (_, _, te) =
+  match te with
+  | Class_get (_, _, Is_prop) -> true
+  | Obj_get (e, _, _, Is_prop) -> is_expr_static e
+  | _ -> false
+
 (* Given a context of global variables and an expression,
   check if the expression is global or not. *)
 let rec is_expr_global ctx (_, _, te) =
@@ -237,23 +245,33 @@ let visitor =
       (match e with
       | Binop (Ast_defs.Eq _, le, re) ->
         let () = self#on_expr (env, (ctx, fun_name)) re in
-        let is_le_global = is_expr_global ctx le in
-        let is_re_global_and_mutable = is_expr_global_and_mutable env ctx re in
-        let vars_in_le = ref [] in
-        let () = get_vars_in_expr vars_in_le le in
-        (match has_global_write_access le with
-        | true -> if is_le_global then Errors.global_var_write_error p fun_name
-        | false ->
-          if is_le_global && not is_re_global_and_mutable then
-            remove_vars_to_ctx ctx !vars_in_le);
-        if is_re_global_and_mutable then add_vars_to_ctx ctx !vars_in_le
+        (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
+        if is_expr_static le then
+          Errors.static_var_direct_write_error p fun_name
+        else
+          let is_le_global = is_expr_global ctx le in
+          let is_re_global_and_mutable =
+            is_expr_global_and_mutable env ctx re
+          in
+          let vars_in_le = ref [] in
+          let () = get_vars_in_expr vars_in_le le in
+          (match has_global_write_access le with
+          | true ->
+            if is_le_global then Errors.global_var_write_error p fun_name
+          | false ->
+            if is_le_global && not is_re_global_and_mutable then
+              remove_vars_to_ctx ctx !vars_in_le);
+          if is_re_global_and_mutable then add_vars_to_ctx ctx !vars_in_le
       | Unop (op, e) ->
         (match op with
         | Ast_defs.Uincr
         | Ast_defs.Udecr
         | Ast_defs.Upincr
         | Ast_defs.Updecr ->
-          if has_global_write_access e && is_expr_global ctx e then
+          (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
+          if is_expr_static e then
+            Errors.static_var_direct_write_error p fun_name
+          else if has_global_write_access e && is_expr_global ctx e then
             Errors.global_var_write_error p fun_name
         | _ -> ())
       | Call (_, _, tpl, _) ->

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fba4ff8e20c18583d1028ecdcfe87868>>
+// @generated SignedSource<<cb51aca4932098fb33408009646f528f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -615,8 +615,9 @@ arena_deserializer::impl_deserialize_in_arena!(Init);
 )]
 #[repr(C)]
 pub enum GlobalWriteCheck {
-    GlobalVariableWrite = 11001,
-    GlobalVariableInFunctionCall = 11002,
+    StaticVariableDirectWrite = 11001,
+    GlobalVariableWrite = 11002,
+    GlobalVariableInFunctionCall = 11003,
 }
 impl TrivialDrop for GlobalWriteCheck {}
 arena_deserializer::impl_deserialize_in_arena!(GlobalWriteCheck);

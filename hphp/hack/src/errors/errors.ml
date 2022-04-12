@@ -1121,6 +1121,12 @@ let method_is_not_dynamically_callable
       ^ " is not dynamically callable." )
     (parent_class_reason @ attribute_reason @ nested_error_reason)
 
+let static_var_direct_write_error pos fun_name =
+  add
+    (GlobalWriteCheck.err_code GlobalWriteCheck.StaticVariableDirectWrite)
+    pos
+    ("[" ^ fun_name ^ "] A static variable is directly written.")
+
 let global_var_write_error pos fun_name =
   add
     (GlobalWriteCheck.err_code GlobalWriteCheck.GlobalVariableWrite)

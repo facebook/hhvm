@@ -451,6 +451,10 @@ let server_progress_read_exn ~server_progress_file:_ _ = ()
 
 let worker_exception _ = ()
 
+(* Typing service events. *)
+
+let hulk_type_check_end _ ~start_t:_ = ()
+
 module ProfileTypeCheck = struct
   type stats = unit
 

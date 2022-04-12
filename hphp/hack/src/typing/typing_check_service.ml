@@ -731,7 +731,8 @@ let next
     (record : Measure.record)
     (remote_execution : ReEnv.t option)
     (hulk_lite : bool)
-    (hulk_heavy : bool) : unit -> job_progress Bucket.bucket =
+    (hulk_heavy : bool)
+    (telemetry : Telemetry.t) : unit -> job_progress Bucket.bucket =
   let max_size =
     match remote_execution with
     | Some _ -> 25000
@@ -764,8 +765,9 @@ let next
         worker outputs in once go. For any payloads that aren't available we'll simply stop waiting on the
         remote worker and have the local worker "steal" the work.
        *)
-        let (workitems, controller, payloads, job) =
+        let (workitems, controller, payloads, job, _telemetry) =
           Typing_service_delegate.collect
+            ~telemetry
             !delegate_state
             !workitems_to_process
             workitems_to_process_length
@@ -920,19 +922,26 @@ let process_in_parallel
     ~unit:"files"
     ~extra:delegate_progress;
 
-  if hulk_lite || hulk_heavy then (
-    Hh_logger.log "Dispatch hulk lite initial payloads";
-    let workitems_to_process_length = BigList.length !workitems_to_process in
-    let (payloads, workitems, controller) =
-      Typing_service_delegate.dispatch
-        !delegate_state
-        !workitems_to_process
-        workitems_to_process_length
-    in
-    remote_payloads := payloads;
-    workitems_to_process := workitems;
-    delegate_state := controller
-  );
+  let (telemetry, telemetry_start_t) : Telemetry.t * float option =
+    if hulk_lite || hulk_heavy then (
+      Hh_logger.log "Dispatch hulk lite initial payloads";
+      let workitems_to_process_length = BigList.length !workitems_to_process in
+      let ( payloads,
+            workitems,
+            controller,
+            (dispatch_telemetry, hulk_dispatch_start_t) ) =
+        Typing_service_delegate.dispatch
+          !delegate_state
+          !workitems_to_process
+          workitems_to_process_length
+      in
+      remote_payloads := payloads;
+      workitems_to_process := workitems;
+      delegate_state := controller;
+      (dispatch_telemetry, Some hulk_dispatch_start_t)
+    ) else
+      (telemetry, None)
+  in
 
   let next =
     next
@@ -945,6 +954,7 @@ let process_in_parallel
       remote_execution
       hulk_lite
       hulk_heavy
+      telemetry
   in
   let should_prefetch_deferred_files =
     Vfs.is_vfs ()
@@ -1015,6 +1025,17 @@ let process_in_parallel
       List.fold cancelled_computations ~init:[] ~f:paths_of
     in
     List.concat (List.map cancelled_results ~f:paths_of)
+  in
+  let _ =
+    if hulk_lite || hulk_heavy then
+      HackEventLogger.hulk_type_check_end
+        telemetry
+        ~start_t:
+          (Option.value_exn
+             telemetry_start_t
+             ~message:"Unexpected missing telemetry start time for Hulk Lite")
+    else
+      ()
   in
   ( typing_result,
     !delegate_state,

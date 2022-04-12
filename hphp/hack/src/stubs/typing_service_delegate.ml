@@ -42,12 +42,17 @@ let steal state n =
 
 let dispatch state files_to_process files_to_process_length =
   ignore (state, files_to_process, files_to_process_length);
-  ([], files_to_process, state)
+  ([], files_to_process, state, (Telemetry.create (), 0.0))
 
 let collect
-    state files_to_process files_to_process_length remote_payloads hulk_heavy =
+    ~telemetry
+    state
+    files_to_process
+    files_to_process_length
+    remote_payloads
+    hulk_heavy =
   ignore (files_to_process_length, hulk_heavy);
-  (files_to_process, state, remote_payloads, None)
+  (files_to_process, state, remote_payloads, None, telemetry)
 
 let add_telemetry state telemetry =
   ignore state;

@@ -58,6 +58,16 @@ struct CliOptions {
     /// If `--serialize` was given, use the given compression algorithm.
     #[structopt(default_value, long)]
     compression: Compression,
+
+    /// Output profiling results for folding (in JSON format) to a separate file.
+    #[structopt(long, parse(from_os_str))]
+    profile_output: Option<PathBuf>,
+}
+
+#[derive(serde::Serialize, Debug, Default)]
+struct ProfileFoldResult {
+    real_time: f64,
+    rss: f64,
 }
 
 fn main() {
@@ -112,7 +122,16 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
         let len = classes.len();
         let ((), time_taken) = time(|| fold(&folded_decl_provider, classes));
         println!("Folded {} classes in repo in {:?}", len, time_taken);
-        print_rss();
+        let rss = print_rss();
+        if let Some(output_path) = &opts.profile_output {
+            write_profile_fold_result(
+                output_path,
+                ProfileFoldResult {
+                    real_time: time_taken.as_secs_f64(),
+                    rss,
+                },
+            )
+        }
     }
 
     // Avoid running the decl provider's destructor or destructors for hcons
@@ -122,6 +141,10 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
     std::process::exit(0);
 }
 
+fn write_profile_fold_result(output_path: &Path, profile: ProfileFoldResult) {
+    let mut output_file = std::fs::File::create(output_path).unwrap();
+    serde_json::to_writer(&mut output_file, &profile).unwrap();
+}
 enum Names {
     Filenames(Vec<RelativePath>),
     Classnames(Vec<TypeName>),
@@ -270,13 +293,12 @@ fn find_hack_files(path: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {
         .filter(|path| find_utils::is_hack(path))
 }
 
-fn print_rss() {
+fn print_rss() -> f64 {
     let me = procfs::process::Process::myself().unwrap();
     let page_size = procfs::page_size().unwrap();
-    println!(
-        "RSS: {:.3}GiB",
-        (me.stat.rss * page_size) as f64 / 1024.0 / 1024.0 / 1024.0
-    );
+    let rss = (me.stat.rss * page_size) as f64 / 1024.0 / 1024.0 / 1024.0;
+    println!("RSS: {:.3}GiB", rss);
+    rss
 }
 
 fn time<T>(f: impl FnOnce() -> T) -> (T, std::time::Duration) {

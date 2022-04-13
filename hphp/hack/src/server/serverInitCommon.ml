@@ -133,7 +133,13 @@ let naming
   (env, Hh_logger.log_duration ("Naming " ^ telemetry_label) t)
 
 let log_type_check_end
-    env genv ~start_t ~count ~desc ~init_telemetry ~typecheck_telemetry : unit =
+    env
+    genv
+    ~start_t
+    ~total_rechecked_count
+    ~desc
+    ~init_telemetry
+    ~typecheck_telemetry : unit =
   let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
 
   let telemetry =
@@ -151,8 +157,8 @@ let log_type_check_end
   HackEventLogger.type_check_end
     (Some telemetry)
     ~heap_size:(SharedMem.SMTelemetry.heap_size ())
-    ~started_count:count
-    ~count
+    ~started_count:total_rechecked_count
+    ~total_rechecked_count
     ~desc
     ~experiments:genv.local_config.ServerLocalConfig.experiments
     ~start_t
@@ -202,8 +208,10 @@ let type_check
         Relative_path.Set.elements filtered_check
     in
     let (_new_t : float) = Hh_logger.log_duration logstring t in
-    let count = List.length files_to_check in
-    let logstring = Printf.sprintf "type-check %d files" count in
+    let total_rechecked_count = List.length files_to_check in
+    let logstring =
+      Printf.sprintf "type-check %d files" total_rechecked_count
+    in
     Hh_logger.log "Begin %s" logstring;
     let {
       Typing_check_service.errors = errorl;
@@ -250,7 +258,7 @@ let type_check
       env
       genv
       ~start_t:t
-      ~count
+      ~total_rechecked_count
       ~desc:telemetry_label
       ~init_telemetry
       ~typecheck_telemetry;

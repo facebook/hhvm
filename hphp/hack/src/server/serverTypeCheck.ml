@@ -1925,7 +1925,7 @@ functor
         (Option.some_if should_log telemetry)
         ~heap_size
         ~started_count:to_recheck_count
-        ~count:total_rechecked_count
+        ~total_rechecked_count
         ~experiments:genv.local_config.ServerLocalConfig.experiments
         ~desc:"serverTypeCheck"
         ~start_t:type_check_start_t;

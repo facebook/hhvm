@@ -7,21 +7,22 @@ mod constraint;
 use crate::local::Ty;
 use crate::local_error::TypingError;
 use crate::reason::Reason;
-pub use constraint::Constraint;
+pub use constraint::Cstr;
 use hcons::{Conser, Hc};
 use std::ops::Deref;
 
+/// TODO[mjt] Consider making constraints types
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum CTy<R: Reason> {
+pub enum CstrTy<R: Reason> {
     Locl(Ty<R>),
-    Cstr(Constraint<R>),
+    Cstr(Cstr<R>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropF<R: Reason, A> {
     Conj(Vec<A>),
     Disj(Option<TypingError<R>>, Vec<A>),
-    Subtype(CTy<R>, CTy<R>),
+    Subtype(CstrTy<R>, CstrTy<R>),
 }
 
 impl<R: Reason> PropF<R, Prop<R>> {
@@ -49,6 +50,30 @@ impl<R: Reason> Deref for Prop<R> {
 }
 
 impl<R: Reason> Prop<R> {
+    pub fn conjs(ps: Vec<Prop<R>>) -> Self {
+        PropF::Conj(ps).inj()
+    }
+
+    pub fn conj(self, other: Self) -> Self {
+        Self::conjs(vec![self, other])
+    }
+
+    pub fn disjs(ps: Vec<Prop<R>>, fail: Option<TypingError<R>>) -> Self {
+        PropF::Disj(fail, ps).inj()
+    }
+
+    pub fn disj(self, other: Self, fail: Option<TypingError<R>>) -> Self {
+        Self::disjs(vec![self, other], fail)
+    }
+
+    pub fn subtype(cty_sub: CstrTy<R>, cty_sup: CstrTy<R>) -> Self {
+        PropF::Subtype(cty_sub, cty_sup).inj()
+    }
+
+    pub fn subtype_ty(ty_sub: Ty<R>, ty_sup: Ty<R>) -> Self {
+        Self::subtype(CstrTy::Locl(ty_sub), CstrTy::Locl(ty_sup))
+    }
+
     pub fn valid() -> Self {
         PropF::Conj(vec![]).inj()
     }

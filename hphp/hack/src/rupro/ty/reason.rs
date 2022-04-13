@@ -65,6 +65,10 @@ pub trait Reason:
         Self::mk(|| ReasonImpl::RnoReturn(pos))
     }
 
+    fn implicit_upper_bound(pos: Self::Pos, sym: Symbol) -> Self {
+        Self::mk(|| ReasonImpl::RimplicitUpperBound(pos, sym))
+    }
+
     fn pos(&self) -> &Self::Pos;
 
     fn decl_ty_conser() -> &'static Conser<decl::Ty_<Self>>;

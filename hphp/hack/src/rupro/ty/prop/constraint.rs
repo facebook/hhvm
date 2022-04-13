@@ -14,7 +14,7 @@ use crate::reason::Reason;
 use pos::Symbol;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum Constraint<R: Reason> {
+pub enum Cstr<R: Reason> {
     HasMethod {
         name: Symbol,
         ty: Ty<R>,
@@ -34,14 +34,14 @@ pub enum Constraint<R: Reason> {
     },
 }
 
-impl<R: Reason> Constraint<R> {
+impl<R: Reason> Cstr<R> {
     pub fn has_method(
         name: Symbol,
         ty: Ty<R>,
         class_id: Symbol,
         ty_args: Vec<Ty<R>>, // TODO
     ) -> Self {
-        Constraint::HasMethod {
+        Self::HasMethod {
             name,
             ty,
             class_id,
@@ -50,6 +50,6 @@ impl<R: Reason> Constraint<R> {
     }
 
     pub fn has_prop(name: Symbol, ty: Ty<R>, class_id: Symbol) -> Self {
-        Constraint::HasProp { name, ty, class_id }
+        Self::HasProp { name, ty, class_id }
     }
 }

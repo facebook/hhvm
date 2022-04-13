@@ -57,13 +57,13 @@ impl<R: Reason> TyparamEnv<R> {
         }
     }
 
-    fn upper_bounds(&self, tp_name: &TypeName) -> Option<&HashSet<Ty<R>>> {
+    pub fn upper_bounds(&self, tp_name: &TypeName) -> Option<&HashSet<Ty<R>>> {
         self.typarams
             .get(tp_name)
             .map(|(_, kind)| kind.upper_bounds())
     }
 
-    fn lower_bounds(&self, tp_name: &TypeName) -> Option<&HashSet<Ty<R>>> {
+    pub fn lower_bounds(&self, tp_name: &TypeName) -> Option<&HashSet<Ty<R>>> {
         self.typarams
             .get(tp_name)
             .map(|(_, kind)| kind.lower_bounds())

@@ -47,12 +47,6 @@ impl From<&oxidized::ast_defs::ParamKind> for ParamMode {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Ty_<R: Reason, TY> {
-    /// Top
-    Tmixed,
-
-    /// Bottom
-    Tnothing,
-
     /// A primitive type
     Tprim(Prim),
 
@@ -83,11 +77,10 @@ pub enum Ty_<R: Reason, TY> {
 
     Tunion(Vec<TY>),
     Toption(TY),
+    Tnonnull,
 }
 
 walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
-    Ty_::Tmixed => [],
-    Ty_::Tnothing => [],
     Ty_::Tprim(_) => [],
     Ty_::Tfun(fun_type) => [fun_type],
     Ty_::Tany => [],
@@ -96,6 +89,7 @@ walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
     Ty_::Tunion(args) => [args],
     Ty_::Toption(arg) => [arg],
     Ty_::Tvar(_) => [],
+    Ty_::Tnonnull => [],
 });
 
 impl<R: Reason> hcons::Consable for Ty_<R, Ty<R>> {
@@ -114,14 +108,6 @@ impl<R: Reason> Ty<R> {
     #[inline]
     pub fn new(reason: R, ty: Ty_<R, Ty<R>>) -> Self {
         Self(reason, Hc::new(ty))
-    }
-
-    pub fn mixed(r: R) -> Ty<R> {
-        Self::new(r, Ty_::Tmixed)
-    }
-
-    pub fn nothing(r: R) -> Ty<R> {
-        Self::new(r, Ty_::Tmixed)
     }
 
     pub fn prim(r: R, prim: Prim) -> Ty<R> {
@@ -156,16 +142,15 @@ impl<R: Reason> Ty<R> {
     }
 
     pub fn option(r: R, ty: Ty<R>) -> Self {
-        Self::new(r, Ty_::Toption(ty))
+        match ty.deref() {
+            Ty_::Toption(_) => ty,
+            Ty_::Tunion(tys) if tys.is_empty() => Self::null(r),
+            _ => Self::new(r, Ty_::Toption(ty)),
+        }
     }
 
     pub fn union(r: R, tys: Vec<Ty<R>>) -> Self {
-        let ln = tys.len();
-        if ln == 0 {
-            Self::nothing(r)
-        } else {
-            Self::new(r, Ty_::Tunion(tys))
-        }
+        Self::new(r, Ty_::Tunion(tys))
     }
 
     pub fn var(r: R, tv: Tyvar) -> Self {
@@ -178,6 +163,23 @@ impl<R: Reason> Ty<R> {
 
     pub fn generic(r: R, ty_name: TypeName, args: Vec<Ty<R>>) -> Self {
         Self::new(r, Ty_::Tgeneric(ty_name, args))
+    }
+
+    pub fn nonnull(r: R) -> Ty<R> {
+        Self::new(r, Ty_::Tnonnull)
+    }
+
+    pub fn is_nonnull(&self) -> bool {
+        matches!(self.deref(), Ty_::Tnonnull)
+    }
+
+    pub fn mixed(r: R) -> Ty<R> {
+        let inner = Self::nonnull(r.clone());
+        Self::option(r, inner)
+    }
+
+    pub fn nothing(r: R) -> Ty<R> {
+        Self::union(r, vec![])
     }
 
     pub fn reason(&self) -> &R {
@@ -212,12 +214,11 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
         let ty = match &**self.node() {
             Ty_::Tvar(tv) => OTy_::Tvar((*tv).into()),
             Ty_::Tprim(x) => OTy_::Tprim(arena.alloc(*x)),
-            Ty_::Tmixed => OTy_::Tmixed,
-            Ty_::Tnothing => todo!(),
             Ty_::Toption(_) => todo!(),
             Ty_::Tunion(_) => todo!(),
             Ty_::Tfun(_) => todo!(),
             Ty_::Tany => todo!(),
+            Ty_::Tnonnull => todo!(),
             Ty_::Tgeneric(_, _) => todo!(),
             Ty_::Tclass(pos_id, exact, tys) => OTy_::Tclass(&*arena.alloc((
                 pos_id.to_oxidized(arena),

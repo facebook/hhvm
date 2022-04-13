@@ -13,6 +13,7 @@ pub mod decl_parser;
 pub mod dependency_registrar;
 pub mod errors;
 pub mod folded_decl_provider;
+pub mod inference;
 pub mod inference_env;
 pub mod naming;
 pub mod naming_provider;

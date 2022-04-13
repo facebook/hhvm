@@ -116,11 +116,11 @@ impl<R: Reason> InferenceEnv<R> {
         }
     }
 
-    pub fn resolve(&mut self, reason: R, tv: Tyvar) -> Result<Ty<R>, Tyvar> {
+    pub fn resolve(&mut self, reason: &R, tv: Tyvar) -> Result<Ty<R>, Tyvar> {
         let (aliases, step) = self.resolve_help(tv);
         use ResolveStep::*;
         let ty_res = match step {
-            Unbound(tv) => Ok(Ty::var(reason, tv)),
+            Unbound(tv) => Ok(Ty::var(reason.clone(), tv)),
             Bound(ty) => Ok(ty.clone()),
             CircularRef(tv) => Err(tv),
         };
@@ -130,6 +130,23 @@ impl<R: Reason> InferenceEnv<R> {
             }
         }
         ty_res
+    }
+
+    pub fn resolve_ty(&mut self, ty: &Ty<R>) -> Ty<R> {
+        if let Ty_::Tvar(tv) = ty.deref() {
+            self.resolve(ty.reason(), *tv).unwrap()
+        } else {
+            ty.clone()
+        }
+    }
+
+    pub fn is_mixed(&mut self, ty: &Ty<R>) -> bool {
+        if let Ty_::Toption(ty_inner) = ty.deref() {
+            let ety = self.resolve_ty(ty_inner);
+            matches!(ety.deref(), Ty_::Tnonnull)
+        } else {
+            false
+        }
     }
 }
 

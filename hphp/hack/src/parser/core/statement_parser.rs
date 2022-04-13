@@ -549,26 +549,6 @@ where
         )
     }
 
-    fn parse_elseif_opt(&mut self) -> Option<S::R> {
-        if self.peek_token_kind() == TokenKind::Elseif {
-            let elseif_token = self.assert_token(TokenKind::Elseif);
-            let (elseif_left_paren, elseif_condition_expr, elseif_right_paren, elseif_statement) =
-                self.parse_if_body_helper();
-            let elseif_syntax = S!(
-                make_elseif_clause,
-                self,
-                elseif_token,
-                elseif_left_paren,
-                elseif_condition_expr,
-                elseif_right_paren,
-                elseif_statement,
-            );
-            Some(elseif_syntax)
-        } else {
-            None
-        }
-    }
-
     // do not eat token and return Missing if first token is not Else
     fn parse_else_opt(&mut self) -> S::R {
         let else_token = self.optional_token(TokenKind::Else);
@@ -583,20 +563,12 @@ where
     fn parse_if_statement(&mut self) -> S::R {
         // SPEC:
         // if-statement:
-        //   if   (   expression   )   statement   elseif-clauses-opt    else-clause-opt
-        //
-        // elseif-clauses:
-        //   elseif-clause
-        //   elseif-clauses   elseif-clause
-        //
-        // elseif-clause:
-        //   elseif   (   expression   )   statement
+        //   if   (   expression   )   statement   else-clause-opt
         //
         // else-clause:
         //   else   statement
         let if_keyword_token = self.assert_token(TokenKind::If);
         let (if_left_paren, if_expr, if_right_paren, if_consequence) = self.parse_if_body_helper();
-        let elseif_syntax = self.parse_list_until_none(|x| x.parse_elseif_opt());
         let else_syntax = self.parse_else_opt();
         S!(
             make_if_statement,
@@ -606,7 +578,6 @@ where
             if_expr,
             if_right_paren,
             if_consequence,
-            elseif_syntax,
             else_syntax,
         )
     }

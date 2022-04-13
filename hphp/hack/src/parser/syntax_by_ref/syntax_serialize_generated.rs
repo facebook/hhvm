@@ -585,26 +585,15 @@ ss.serialize_field("while_right_paren", &self.with(right_paren))?;
 ss.serialize_field("while_body", &self.with(body))?;
       ss.end()
 } 
-SyntaxVariant::IfStatement (IfStatementChildren{keyword,left_paren,condition,right_paren,statement,elseif_clauses,else_clause} ) => {
-      let mut ss = s.serialize_struct("", 8)?;
+SyntaxVariant::IfStatement (IfStatementChildren{keyword,left_paren,condition,right_paren,statement,else_clause} ) => {
+      let mut ss = s.serialize_struct("", 7)?;
       ss.serialize_field("kind", "if_statement")?;
       ss.serialize_field("if_keyword", &self.with(keyword))?;
 ss.serialize_field("if_left_paren", &self.with(left_paren))?;
 ss.serialize_field("if_condition", &self.with(condition))?;
 ss.serialize_field("if_right_paren", &self.with(right_paren))?;
 ss.serialize_field("if_statement", &self.with(statement))?;
-ss.serialize_field("if_elseif_clauses", &self.with(elseif_clauses))?;
 ss.serialize_field("if_else_clause", &self.with(else_clause))?;
-      ss.end()
-} 
-SyntaxVariant::ElseifClause (ElseifClauseChildren{keyword,left_paren,condition,right_paren,statement} ) => {
-      let mut ss = s.serialize_struct("", 6)?;
-      ss.serialize_field("kind", "elseif_clause")?;
-      ss.serialize_field("elseif_keyword", &self.with(keyword))?;
-ss.serialize_field("elseif_left_paren", &self.with(left_paren))?;
-ss.serialize_field("elseif_condition", &self.with(condition))?;
-ss.serialize_field("elseif_right_paren", &self.with(right_paren))?;
-ss.serialize_field("elseif_statement", &self.with(statement))?;
       ss.end()
 } 
 SyntaxVariant::ElseClause (ElseClauseChildren{keyword,statement} ) => {

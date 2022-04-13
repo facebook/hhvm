@@ -3119,12 +3119,6 @@ fn p_if_stmt<'a>(
     use ast::{Stmt, Stmt_ as S_};
     let new = Stmt::new;
 
-    let p_else_if = |n: S<'a>, e: &mut Env<'a>| -> Result<(ast::Expr, ast::Block)> {
-        match &n.children {
-            ElseifClause(c) => Ok((p_expr(&c.condition, e)?, p_block(true, &c.statement, e)?)),
-            _ => missing_syntax("elseif clause", n, e),
-        }
-    };
     let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
         let condition = p_expr(&c.condition, env)?;
         let statement = p_block(true /* remove noop */, &c.statement, env)?;
@@ -3133,14 +3127,7 @@ fn p_if_stmt<'a>(
             Missing => vec![mk_noop(env)],
             _ => missing_syntax("else clause", &c.else_clause, env)?,
         };
-        let else_ifs = could_map(&c.elseif_clauses, env, p_else_if)?;
-        let else_if = else_ifs
-            .into_iter()
-            .rev()
-            .fold(else_, |child, (cond, stmts)| {
-                vec![new(pos.clone(), S_::mk_if(cond, stmts, child))]
-            });
-        Ok(new(pos, S_::mk_if(condition, statement, else_if)))
+        Ok(new(pos, S_::mk_if(condition, statement, else_)))
     };
     lift_awaits_in_statement(node, env, f)
 }

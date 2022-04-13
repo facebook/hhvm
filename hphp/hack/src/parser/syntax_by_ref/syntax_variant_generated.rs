@@ -87,7 +87,6 @@ pub enum SyntaxVariant<'a, T, V> {
     UsingStatementFunctionScoped(&'a UsingStatementFunctionScopedChildren<'a, T, V>),
     WhileStatement(&'a WhileStatementChildren<'a, T, V>),
     IfStatement(&'a IfStatementChildren<'a, T, V>),
-    ElseifClause(&'a ElseifClauseChildren<'a, T, V>),
     ElseClause(&'a ElseClauseChildren<'a, T, V>),
     TryStatement(&'a TryStatementChildren<'a, T, V>),
     CatchClause(&'a CatchClauseChildren<'a, T, V>),
@@ -687,17 +686,7 @@ pub struct IfStatementChildren<'a, T, V> {
     pub condition: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
     pub statement: Syntax<'a, T, V>,
-    pub elseif_clauses: Syntax<'a, T, V>,
     pub else_clause: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct ElseifClauseChildren<'a, T, V> {
-    pub keyword: Syntax<'a, T, V>,
-    pub left_paren: Syntax<'a, T, V>,
-    pub condition: Syntax<'a, T, V>,
-    pub right_paren: Syntax<'a, T, V>,
-    pub statement: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

@@ -518,15 +518,7 @@ struct
         if_condition: t;
         if_right_paren: t;
         if_statement: t;
-        if_elseif_clauses: t;
         if_else_clause: t;
-      }
-    | ElseifClause of {
-        elseif_keyword: t;
-        elseif_left_paren: t;
-        elseif_condition: t;
-        elseif_right_paren: t;
-        elseif_statement: t;
       }
     | ElseClause of {
         else_keyword: t;
@@ -1841,16 +1833,7 @@ struct
     if_condition: expression value;
     if_right_paren: Token.t value;
     if_statement: statement value;
-    if_elseif_clauses: elseif_clause listesque value;
     if_else_clause: else_clause option value;
-  }
-
-  and elseif_clause = {
-    elseif_keyword: Token.t value;
-    elseif_left_paren: Token.t value;
-    elseif_condition: expression value;
-    elseif_right_paren: Token.t value;
-    elseif_statement: statement value;
   }
 
   and else_clause = {

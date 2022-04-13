@@ -1,1 +1,10 @@
-No errors
+File "elseif.php", line 16, characters 11-11:
+An expression is expected here. (Parsing[1002])
+File "elseif.php", line 15, characters 5-10:
+Unbound name: `elseif` (a global function) (Naming[2049])
+File "elseif.php", line 16, characters 5-10:
+Unbound name: `return` (a global constant) (Naming[2049])
+File "elseif.php", line 15, characters 5-10:
+Unbound name (typing): `elseif` (Typing[4107])
+File "elseif.php", line 16, characters 5-10:
+Unbound global constant (Typing) (Typing[4106])

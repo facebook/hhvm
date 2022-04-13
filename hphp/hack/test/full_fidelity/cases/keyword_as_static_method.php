@@ -40,7 +40,6 @@ class A {
   public static function double() {}
   public static function echo() {}
   public static function else() {}
-  public static function elseif() {}
   public static function empty() {}
   public static function enddeclare() {}
   public static function endfor() {}
@@ -150,7 +149,6 @@ class A {
     static::double();
     static::echo();
     static::else();
-    static::elseif();
     static::empty();
     static::enddeclare();
     static::endfor();
@@ -259,7 +257,6 @@ A::do();
 A::double();
 A::echo();
 A::else();
-A::elseif();
 A::empty();
 A::enddeclare();
 A::endfor();

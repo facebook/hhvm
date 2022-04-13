@@ -46,7 +46,7 @@ if (true) {
 
 if ($a)
   f();
-elseif ($b)
+else if ($b)
   g();
 else
   h();
@@ -57,7 +57,7 @@ else h();
 
 if ($a)
   f();
-elseif ($b) {
+else if ($b) {
   g();
 } else
   h();
@@ -72,7 +72,7 @@ else if ($b) {
 
 if ($a)
   f();
-elseif ($b) {
+else if ($b) {
   g();
   g2();
 } else

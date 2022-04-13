@@ -15,7 +15,6 @@ class default {}
 class do {}
 class echo {}
 class else {}
-class elseif {}
 class empty {}
 class endfor {}
 class endforeach {}
@@ -77,7 +76,6 @@ new default();
 new do();
 new echo();
 new else();
-new elseif();
 new empty();
 new endfor();
 new endforeach();

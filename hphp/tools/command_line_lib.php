@@ -235,7 +235,7 @@ function display_help(string $message, OptionInfoMap $optmap): void {
       $has_opt = true;
       $vis = substr($long, 0, -2);
     }
-    elseif (substr($long, -1) == ':') {
+    else if (substr($long, -1) == ':') {
       $has_arg = true;
       $vis = substr($long, 0, -1);
     }
@@ -249,7 +249,7 @@ function display_help(string $message, OptionInfoMap $optmap): void {
     if ($has_arg) {
       $first_cols[$long] .= '=arg';
     }
-    elseif ($has_opt) {
+    else if ($has_opt) {
       $first_cols[$long] .= '[=optarg]';
     }
   }

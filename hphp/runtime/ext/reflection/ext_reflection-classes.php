@@ -667,7 +667,7 @@ class ReflectionProperty implements Reflector {
   public function __toString()[] {
     if ($this->isStatic()) {
       $def = '';
-    } elseif ($this->isDefault()) {
+    } else if ($this->isDefault()) {
       $def = '<default> ';
     } else {
       $def = '<dynamic> ';
@@ -675,7 +675,7 @@ class ReflectionProperty implements Reflector {
     // FIXME: Implicit public
     if ($this->isPrivate()) {
       $modifiers = 'private';
-    } elseif ($this->isProtected()) {
+    } else if ($this->isProtected()) {
       $modifiers = 'protected';
     } else {
       $modifiers = 'public';

@@ -4314,9 +4314,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     | Protected | Public | Global | Instanceof | Insteadof | Interface
                     | Namespace | New | Try | Use | Var | List | Clone | Include | Include_once
                     | Throw | Tuple | Print | Echo | Require | Require_once | Return | Else
-                    | Elseif | Default | Break | Continue | Switch | Yield | Function | If
-                    | Finally | For | Foreach | Case | Do | While | As | Catch | Empty | Using
-                    | Class | NullLiteral | Super | Where => true,
+                    | Default | Break | Continue | Switch | Yield | Function | If | Finally
+                    | For | Foreach | Case | Do | While | As | Catch | Empty | Using | Class
+                    | NullLiteral | Super | Where => true,
                     _ => false,
                 }
             }

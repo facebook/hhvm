@@ -321,12 +321,8 @@ where
         Node(self.0.make_while_statement(keyword.0, left_paren.0, condition.0, right_paren.0, body.0), self.1.make_while_statement(keyword.1, left_paren.1, condition.1, right_paren.1, body.1))
     }
 
-    fn make_if_statement(&mut self, keyword: Self::R, left_paren: Self::R, condition: Self::R, right_paren: Self::R, statement: Self::R, elseif_clauses: Self::R, else_clause: Self::R) -> Self::R {
-        Node(self.0.make_if_statement(keyword.0, left_paren.0, condition.0, right_paren.0, statement.0, elseif_clauses.0, else_clause.0), self.1.make_if_statement(keyword.1, left_paren.1, condition.1, right_paren.1, statement.1, elseif_clauses.1, else_clause.1))
-    }
-
-    fn make_elseif_clause(&mut self, keyword: Self::R, left_paren: Self::R, condition: Self::R, right_paren: Self::R, statement: Self::R) -> Self::R {
-        Node(self.0.make_elseif_clause(keyword.0, left_paren.0, condition.0, right_paren.0, statement.0), self.1.make_elseif_clause(keyword.1, left_paren.1, condition.1, right_paren.1, statement.1))
+    fn make_if_statement(&mut self, keyword: Self::R, left_paren: Self::R, condition: Self::R, right_paren: Self::R, statement: Self::R, else_clause: Self::R) -> Self::R {
+        Node(self.0.make_if_statement(keyword.0, left_paren.0, condition.0, right_paren.0, statement.0, else_clause.0), self.1.make_if_statement(keyword.1, left_paren.1, condition.1, right_paren.1, statement.1, else_clause.1))
     }
 
     fn make_else_clause(&mut self, keyword: Self::R, statement: Self::R) -> Self::R {

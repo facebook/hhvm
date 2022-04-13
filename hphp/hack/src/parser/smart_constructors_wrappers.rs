@@ -254,11 +254,8 @@ where S: SmartConstructors<State = State>,
     fn make_while_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
         compose(SyntaxKind::WhileStatement, self.s.make_while_statement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
-    fn make_if_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R) -> Self::R {
-        compose(SyntaxKind::IfStatement, self.s.make_if_statement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1))
-    }
-    fn make_elseif_clause(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
-        compose(SyntaxKind::ElseifClause, self.s.make_elseif_clause(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
+    fn make_if_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R {
+        compose(SyntaxKind::IfStatement, self.s.make_if_statement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
     }
     fn make_else_clause(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::ElseClause, self.s.make_else_clause(arg0.1, arg1.1))

@@ -4,12 +4,12 @@ $b=2;
 
 if($a==0) {
     echo "bad";
-} elseif($a==3) {
+} else if($a==3) {
     echo "bad";
 } else {
     if($b==1) {
         echo "bad";
-    } elseif($b==2) {
+    } else if($b==2) {
         echo "good";
     } else {
         echo "bad";

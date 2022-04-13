@@ -306,12 +306,8 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors<'src, Self>>::make_while_statement(self, keyword, left_paren, condition, right_paren, body)
     }
 
-    fn make_if_statement(&mut self, keyword: Self::R, left_paren: Self::R, condition: Self::R, right_paren: Self::R, statement: Self::R, elseif_clauses: Self::R, else_clause: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_if_statement(self, keyword, left_paren, condition, right_paren, statement, elseif_clauses, else_clause)
-    }
-
-    fn make_elseif_clause(&mut self, keyword: Self::R, left_paren: Self::R, condition: Self::R, right_paren: Self::R, statement: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_elseif_clause(self, keyword, left_paren, condition, right_paren, statement)
+    fn make_if_statement(&mut self, keyword: Self::R, left_paren: Self::R, condition: Self::R, right_paren: Self::R, statement: Self::R, else_clause: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_if_statement(self, keyword, left_paren, condition, right_paren, statement, else_clause)
     }
 
     fn make_else_clause(&mut self, keyword: Self::R, statement: Self::R) -> Self::R {

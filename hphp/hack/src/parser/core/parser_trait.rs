@@ -519,7 +519,7 @@ where
     {
         let mut parser1 = self.clone();
         let block = parser1.parse_list_while(parse_item, |x: &Self| match x.peek_token_kind() {
-            TokenKind::Elseif | TokenKind::Else | TokenKind::Endif => false,
+            TokenKind::Else | TokenKind::Endif => false,
             _ => true,
         });
         if block.is_missing() {

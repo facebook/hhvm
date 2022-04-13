@@ -1000,7 +1000,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           if_condition = condition;
           if_right_paren = right_p;
           if_statement = if_body;
-          if_elseif_clauses = elseif_clauses;
           if_else_clause = else_clause;
         } ->
       Concat
@@ -1009,24 +1008,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           transform_condition env left_p condition right_p;
           transform_consequence t env if_body right_p;
-          handle_possible_list env elseif_clauses;
           t env else_clause;
           Newline;
-        ]
-    | Syntax.ElseifClause
-        {
-          elseif_keyword = kw;
-          elseif_left_paren = left_p;
-          elseif_condition = condition;
-          elseif_right_paren = right_p;
-          elseif_statement = body;
-        } ->
-      Concat
-        [
-          t env kw;
-          Space;
-          transform_condition env left_p condition right_p;
-          transform_consequence t env body right_p;
         ]
     | Syntax.ElseClause x ->
       Concat

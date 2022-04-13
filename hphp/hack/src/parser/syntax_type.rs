@@ -80,8 +80,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_using_statement_block_scoped(ctx: &C, using_block_await_keyword: Self, using_block_using_keyword: Self, using_block_left_paren: Self, using_block_expressions: Self, using_block_right_paren: Self, using_block_body: Self) -> Self;
     fn make_using_statement_function_scoped(ctx: &C, using_function_await_keyword: Self, using_function_using_keyword: Self, using_function_expression: Self, using_function_semicolon: Self) -> Self;
     fn make_while_statement(ctx: &C, while_keyword: Self, while_left_paren: Self, while_condition: Self, while_right_paren: Self, while_body: Self) -> Self;
-    fn make_if_statement(ctx: &C, if_keyword: Self, if_left_paren: Self, if_condition: Self, if_right_paren: Self, if_statement: Self, if_elseif_clauses: Self, if_else_clause: Self) -> Self;
-    fn make_elseif_clause(ctx: &C, elseif_keyword: Self, elseif_left_paren: Self, elseif_condition: Self, elseif_right_paren: Self, elseif_statement: Self) -> Self;
+    fn make_if_statement(ctx: &C, if_keyword: Self, if_left_paren: Self, if_condition: Self, if_right_paren: Self, if_statement: Self, if_else_clause: Self) -> Self;
     fn make_else_clause(ctx: &C, else_keyword: Self, else_statement: Self) -> Self;
     fn make_try_statement(ctx: &C, try_keyword: Self, try_compound_statement: Self, try_catch_clauses: Self, try_finally_clause: Self) -> Self;
     fn make_catch_clause(ctx: &C, catch_keyword: Self, catch_left_paren: Self, catch_type: Self, catch_variable: Self, catch_right_paren: Self, catch_body: Self) -> Self;

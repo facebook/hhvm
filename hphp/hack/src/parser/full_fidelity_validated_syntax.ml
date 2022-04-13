@@ -3286,8 +3286,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
         {
           if_else_clause =
             validate_option_with validate_else_clause x.if_else_clause;
-          if_elseif_clauses =
-            validate_list_with validate_elseif_clause x.if_elseif_clauses;
           if_statement = validate_statement x.if_statement;
           if_right_paren = validate_token x.if_right_paren;
           if_condition = validate_expression x.if_condition;
@@ -3307,37 +3305,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             if_condition = invalidate_expression x.if_condition;
             if_right_paren = invalidate_token x.if_right_paren;
             if_statement = invalidate_statement x.if_statement;
-            if_elseif_clauses =
-              invalidate_list_with invalidate_elseif_clause x.if_elseif_clauses;
             if_else_clause =
               invalidate_option_with invalidate_else_clause x.if_else_clause;
-          };
-      Syntax.value = v;
-    }
-
-  and validate_elseif_clause : elseif_clause validator = function
-    | { Syntax.syntax = Syntax.ElseifClause x; value = v } ->
-      ( v,
-        {
-          elseif_statement = validate_statement x.elseif_statement;
-          elseif_right_paren = validate_token x.elseif_right_paren;
-          elseif_condition = validate_expression x.elseif_condition;
-          elseif_left_paren = validate_token x.elseif_left_paren;
-          elseif_keyword = validate_token x.elseif_keyword;
-        } )
-    | s -> validation_fail (Some SyntaxKind.ElseifClause) s
-
-  and invalidate_elseif_clause : elseif_clause invalidator =
-   fun (v, x) ->
-    {
-      Syntax.syntax =
-        Syntax.ElseifClause
-          {
-            elseif_keyword = invalidate_token x.elseif_keyword;
-            elseif_left_paren = invalidate_token x.elseif_left_paren;
-            elseif_condition = invalidate_expression x.elseif_condition;
-            elseif_right_paren = invalidate_token x.elseif_right_paren;
-            elseif_statement = invalidate_statement x.elseif_statement;
           };
       Syntax.value = v;
     }

@@ -388,15 +388,7 @@ module type Syntax_S = sig
         if_condition: t;
         if_right_paren: t;
         if_statement: t;
-        if_elseif_clauses: t;
         if_else_clause: t;
-      }
-    | ElseifClause of {
-        elseif_keyword: t;
-        elseif_left_paren: t;
-        elseif_condition: t;
-        elseif_right_paren: t;
-        elseif_statement: t;
       }
     | ElseClause of {
         else_keyword: t;
@@ -1198,9 +1190,7 @@ module type Syntax_S = sig
 
   val make_while_statement : t -> t -> t -> t -> t -> t
 
-  val make_if_statement : t -> t -> t -> t -> t -> t -> t -> t
-
-  val make_elseif_clause : t -> t -> t -> t -> t -> t
+  val make_if_statement : t -> t -> t -> t -> t -> t -> t
 
   val make_else_clause : t -> t -> t
 
@@ -1550,8 +1540,6 @@ module type Syntax_S = sig
   val is_while_statement : t -> bool
 
   val is_if_statement : t -> bool
-
-  val is_elseif_clause : t -> bool
 
   val is_else_clause : t -> bool
 

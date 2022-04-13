@@ -894,24 +894,7 @@ let schema : schema_node list =
           ("condition", Aggregate Expression);
           ("right_paren", Token);
           ("statement", Aggregate Statement);
-          ("elseif_clauses", ZeroOrMore (Just "ElseifClause"));
           ("else_clause", ZeroOrOne (Just "ElseClause"));
-        ];
-    };
-    {
-      kind_name = "ElseifClause";
-      type_name = "elseif_clause";
-      func_name = "elseif_clause";
-      description = "elseif_clause";
-      prefix = "elseif";
-      aggregates = [];
-      fields =
-        [
-          ("keyword", Token);
-          ("left_paren", Token);
-          ("condition", Aggregate Expression);
-          ("right_paren", Token);
-          ("statement", Aggregate Statement);
         ];
     };
     {

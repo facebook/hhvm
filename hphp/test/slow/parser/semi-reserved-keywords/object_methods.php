@@ -136,9 +136,6 @@ class Foo {
   public function else(): int {
     return 42;
   }
-  public function elseif(): int {
-    return 43;
-  }
   public function default(): int {
     return 44;
   }
@@ -252,7 +249,6 @@ echo $foo->require();
 echo $foo->require_once();
 echo $foo->return();
 echo $foo->else();
-echo $foo->elseif();
 echo $foo->default();
 echo $foo->break();
 echo $foo->continue();

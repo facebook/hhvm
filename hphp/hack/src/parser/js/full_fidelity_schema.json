@@ -79,8 +79,6 @@
       "token_text" : "echo" },
     { "token_kind" : "Else",
       "token_text" : "else" },
-    { "token_kind" : "Elseif",
-      "token_text" : "elseif" },
     { "token_kind" : "Empty",
       "token_text" : "empty" },
     { "token_kind" : "Endfor",
@@ -1052,19 +1050,7 @@
         { "field_name" : "condition" },
         { "field_name" : "right_paren" },
         { "field_name" : "statement" },
-        { "field_name" : "elseif_clauses" },
         { "field_name" : "else_clause" }
-      ] },
-    { "kind_name" : "ElseifClause",
-      "type_name" : "elseif_clause",
-      "description" : "elseif_clause",
-      "prefix" : "elseif",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "left_paren" },
-        { "field_name" : "condition" },
-        { "field_name" : "right_paren" },
-        { "field_name" : "statement" }
       ] },
     { "kind_name" : "ElseClause",
       "type_name" : "else_clause",

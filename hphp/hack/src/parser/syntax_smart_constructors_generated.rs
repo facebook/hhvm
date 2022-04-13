@@ -350,14 +350,9 @@ where
         Self::R::make_while_statement(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
     }
 
-    fn make_if_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6]);
-        Self::R::make_if_statement(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    }
-
-    fn make_elseif_clause(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4]);
-        Self::R::make_elseif_clause(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
+    fn make_if_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5]);
+        Self::R::make_if_statement(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5)
     }
 
     fn make_else_clause(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {

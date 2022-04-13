@@ -321,12 +321,8 @@ where
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_while_statement(self, arg0, arg1, arg2, arg3, arg4)
     }
 
-    fn make_if_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<S, TF, State>>::make_if_statement(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    }
-
-    fn make_elseif_clause(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<S, TF, State>>::make_elseif_clause(self, arg0, arg1, arg2, arg3, arg4)
+    fn make_if_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<S, TF, State>>::make_if_statement(self, arg0, arg1, arg2, arg3, arg4, arg5)
     }
 
     fn make_else_clause(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {

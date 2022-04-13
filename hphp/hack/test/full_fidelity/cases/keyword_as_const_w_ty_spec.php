@@ -29,7 +29,6 @@ const int do = 1;
 const int double = 1;
 const int echo = 1;
 const int else = 1;
-const int elseif = 1;
 const int empty = 1;
 const int enddeclare = 1;
 const int endfor = 1;

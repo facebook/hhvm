@@ -82,7 +82,6 @@ type t =
   | UsingStatementFunctionScoped
   | WhileStatement
   | IfStatement
-  | ElseifClause
   | ElseClause
   | TryStatement
   | CatchClause
@@ -259,7 +258,6 @@ let to_string kind =
   | UsingStatementFunctionScoped -> "using_statement_function_scoped"
   | WhileStatement -> "while_statement"
   | IfStatement -> "if_statement"
-  | ElseifClause -> "elseif_clause"
   | ElseClause -> "else_clause"
   | TryStatement -> "try_statement"
   | CatchClause -> "catch_clause"

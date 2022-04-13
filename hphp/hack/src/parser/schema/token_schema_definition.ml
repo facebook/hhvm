@@ -106,7 +106,6 @@ let given_text_tokens =
     make_token_node "Double" "double" ~allowed_as_identifier:true ();
     make_token_node "Echo" "echo" ();
     make_token_node "Else" "else" ();
-    make_token_node "Elseif" "elseif" ();
     make_token_node "Empty" "empty" ();
     make_token_node "Endfor" "endfor" ();
     make_token_node "Endforeach" "endforeach" ();

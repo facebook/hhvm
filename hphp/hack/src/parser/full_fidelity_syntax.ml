@@ -119,7 +119,6 @@ module WithToken (Token : TokenType) = struct
         SyntaxKind.UsingStatementFunctionScoped
       | WhileStatement _ -> SyntaxKind.WhileStatement
       | IfStatement _ -> SyntaxKind.IfStatement
-      | ElseifClause _ -> SyntaxKind.ElseifClause
       | ElseClause _ -> SyntaxKind.ElseClause
       | TryStatement _ -> SyntaxKind.TryStatement
       | CatchClause _ -> SyntaxKind.CatchClause
@@ -384,8 +383,6 @@ module WithToken (Token : TokenType) = struct
     let is_while_statement = has_kind SyntaxKind.WhileStatement
 
     let is_if_statement = has_kind SyntaxKind.IfStatement
-
-    let is_elseif_clause = has_kind SyntaxKind.ElseifClause
 
     let is_else_clause = has_kind SyntaxKind.ElseClause
 
@@ -1354,7 +1351,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           } ->
         let acc = f acc if_keyword in
@@ -1362,22 +1358,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc if_condition in
         let acc = f acc if_right_paren in
         let acc = f acc if_statement in
-        let acc = f acc if_elseif_clauses in
         let acc = f acc if_else_clause in
-        acc
-      | ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          } ->
-        let acc = f acc elseif_keyword in
-        let acc = f acc elseif_left_paren in
-        let acc = f acc elseif_condition in
-        let acc = f acc elseif_right_paren in
-        let acc = f acc elseif_statement in
         acc
       | ElseClause { else_keyword; else_statement } ->
         let acc = f acc else_keyword in
@@ -3034,7 +3015,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           } ->
         [
@@ -3043,23 +3023,7 @@ module WithToken (Token : TokenType) = struct
           if_condition;
           if_right_paren;
           if_statement;
-          if_elseif_clauses;
           if_else_clause;
-        ]
-      | ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          } ->
-        [
-          elseif_keyword;
-          elseif_left_paren;
-          elseif_condition;
-          elseif_right_paren;
-          elseif_statement;
         ]
       | ElseClause { else_keyword; else_statement } ->
         [else_keyword; else_statement]
@@ -4645,7 +4609,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           } ->
         [
@@ -4654,23 +4617,7 @@ module WithToken (Token : TokenType) = struct
           "if_condition";
           "if_right_paren";
           "if_statement";
-          "if_elseif_clauses";
           "if_else_clause";
-        ]
-      | ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          } ->
-        [
-          "elseif_keyword";
-          "elseif_left_paren";
-          "elseif_condition";
-          "elseif_right_paren";
-          "elseif_statement";
         ]
       | ElseClause { else_keyword; else_statement } ->
         ["else_keyword"; "else_statement"]
@@ -6412,7 +6359,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           ] ) ->
         IfStatement
@@ -6422,24 +6368,7 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
-          }
-      | ( SyntaxKind.ElseifClause,
-          [
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          ] ) ->
-        ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
           }
       | (SyntaxKind.ElseClause, [else_keyword; else_statement]) ->
         ElseClause { else_keyword; else_statement }
@@ -8428,7 +8357,6 @@ module WithToken (Token : TokenType) = struct
           if_condition
           if_right_paren
           if_statement
-          if_elseif_clauses
           if_else_clause =
         let syntax =
           IfStatement
@@ -8438,27 +8366,7 @@ module WithToken (Token : TokenType) = struct
               if_condition;
               if_right_paren;
               if_statement;
-              if_elseif_clauses;
               if_else_clause;
-            }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_elseif_clause
-          elseif_keyword
-          elseif_left_paren
-          elseif_condition
-          elseif_right_paren
-          elseif_statement =
-        let syntax =
-          ElseifClause
-            {
-              elseif_keyword;
-              elseif_left_paren;
-              elseif_condition;
-              elseif_right_paren;
-              elseif_statement;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in

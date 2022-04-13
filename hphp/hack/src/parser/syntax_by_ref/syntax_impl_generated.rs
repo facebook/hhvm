@@ -86,7 +86,6 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::UsingStatementFunctionScoped {..} => SyntaxKind::UsingStatementFunctionScoped,
             SyntaxVariant::WhileStatement {..} => SyntaxKind::WhileStatement,
             SyntaxVariant::IfStatement {..} => SyntaxKind::IfStatement,
-            SyntaxVariant::ElseifClause {..} => SyntaxKind::ElseifClause,
             SyntaxVariant::ElseClause {..} => SyntaxKind::ElseClause,
             SyntaxVariant::TryStatement {..} => SyntaxKind::TryStatement,
             SyntaxVariant::CatchClause {..} => SyntaxKind::CatchClause,

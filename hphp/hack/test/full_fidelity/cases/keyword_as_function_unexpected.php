@@ -17,7 +17,6 @@ function default() {}
 function do() {}
 function echo() {}
 function else() {}
-function elseif() {}
 function endfor() {}
 function endforeach() {}
 function endif() {}
@@ -78,7 +77,6 @@ default();
 do();
 echo();
 else();
-elseif();
 endfor();
 endforeach();
 enddeclare();

@@ -51,7 +51,6 @@ type t =
   | Double
   | Echo
   | Else
-  | Elseif
   | Empty
   | Endfor
   | Endforeach
@@ -266,7 +265,6 @@ let from_string keyword ~only_reserved =
   | "double" when not only_reserved -> Some Double
   | "echo" -> Some Echo
   | "else" -> Some Else
-  | "elseif" -> Some Elseif
   | "empty" -> Some Empty
   | "endfor" -> Some Endfor
   | "endforeach" -> Some Endforeach
@@ -456,7 +454,6 @@ let to_string kind =
   | Double -> "double"
   | Echo -> "echo"
   | Else -> "else"
-  | Elseif -> "elseif"
   | Empty -> "empty"
   | Endfor -> "endfor"
   | Endforeach -> "endforeach"

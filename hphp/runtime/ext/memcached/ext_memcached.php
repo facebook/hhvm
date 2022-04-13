@@ -727,7 +727,7 @@ class Memcached {
       if (is_int($key)) {
         // numeric strings (e.g. '5') become integers as array keys
         $key = (string)$key;
-      } elseif (!is_string($key)) {
+      } else if (!is_string($key)) {
         continue;
       }
       if (!$this->setByKey($server_key, $key, $value, $expiration)) {

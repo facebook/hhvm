@@ -19,7 +19,7 @@ if (!openssl_sign($data, inout $signature, $priv_key_id, OPENSSL_ALGO_MD5)) {
 $ok = openssl_verify($data, $signature, $pub_key_id, OPENSSL_ALGO_MD5);
 if ($ok == 1) {
    echo "Ok";
-} elseif ($ok == 0) {
+} else if ($ok == 0) {
    echo "openssl_verify failed.";
 }
 }

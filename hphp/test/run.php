@@ -3965,7 +3965,7 @@ function main(vec<string> $argv): int {
         unset($servers->pids[$pid]);
         $pid = $server->pid;
         $servers->pids[$pid] = $server;
-      } elseif (isset($children[$pid])) {
+      } else if (isset($children[$pid])) {
         unset($children[$pid]);
         $return_value |= pcntl_wexitstatus($status);
       } // Else, ignorable signal

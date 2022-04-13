@@ -645,25 +645,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             IfStatement(x) => {
-                get_index(7).and_then(|index| { match index {
+                get_index(6).and_then(|index| { match index {
                         0 => Some(&x.keyword),
                     1 => Some(&x.left_paren),
                     2 => Some(&x.condition),
                     3 => Some(&x.right_paren),
                     4 => Some(&x.statement),
-                    5 => Some(&x.elseif_clauses),
-                    6 => Some(&x.else_clause),
-                        _ => None,
-                    }
-                })
-            },
-            ElseifClause(x) => {
-                get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.keyword),
-                    1 => Some(&x.left_paren),
-                    2 => Some(&x.condition),
-                    3 => Some(&x.right_paren),
-                    4 => Some(&x.statement),
+                    5 => Some(&x.else_clause),
                         _ => None,
                     }
                 })

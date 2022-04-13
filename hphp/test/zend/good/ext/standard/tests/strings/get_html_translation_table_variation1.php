@@ -64,7 +64,7 @@ for($index = 0; $index < count($values); $index ++) {
   try { $v = get_html_translation_table($table, ENT_COMPAT, "UTF-8"); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   if (is_array($v) && count($v) > 100)
     var_dump(count($v));
-   elseif (is_array($v)) {
+   else if (is_array($v)) {
     asort(inout $v);
     var_dump($v);
    } else {
@@ -75,7 +75,7 @@ for($index = 0; $index < count($values); $index ++) {
   try { $v = get_html_translation_table($table, $quote_style, "UTF-8"); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   if (is_array($v) && count($v) > 100)
     var_dump(count($v));
-   elseif (is_array($v)) {
+   else if (is_array($v)) {
     asort(inout $v);
     var_dump($v);
    } else {

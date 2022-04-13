@@ -727,7 +727,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
 
     if ($this->isPrivate()) {
       $funcAttrs[] = 'private';
-    } elseif ($this->isProtected()) {
+    } else if ($this->isProtected()) {
       $funcAttrs[] = 'protected';
     } else {
       $funcAttrs[] = 'public';
@@ -1084,11 +1084,11 @@ class ReflectionClass implements Reflector {
     }
     if ($this is ReflectionObject) {
       $ret .= 'Object of class [ ';
-    } elseif ($this->isInterface()) {
+    } else if ($this->isInterface()) {
       $ret .= 'Interface [ ';
-    } elseif ($this->isTrait()) {
+    } else if ($this->isTrait()) {
       $ret .= 'Trait [ ';
-    } elseif ($this->isEnum()) {
+    } else if ($this->isEnum()) {
       $ret .= 'Enum [ ';
     } else {
       $ret .= 'Class [ ';
@@ -1107,9 +1107,9 @@ class ReflectionClass implements Reflector {
     }
     if ($this->isInterface()) {
       $ret .= 'interface ';
-    } elseif ($this->isTrait()) {
+    } else if ($this->isTrait()) {
       $ret .= 'trait ';
-    } elseif ($this->isEnum()) {
+    } else if ($this->isEnum()) {
       $ret .= 'enum ';
     } else {
       if ($this->isAbstract()) {
@@ -1158,7 +1158,7 @@ class ReflectionClass implements Reflector {
     foreach ($props as $prop) {
       if ($prop->isStatic()) {
         ++$numStaticProps;
-      } elseif (!$prop->isDefault()) {
+      } else if (!$prop->isDefault()) {
         ++$numDynamicProps;
       }
     }

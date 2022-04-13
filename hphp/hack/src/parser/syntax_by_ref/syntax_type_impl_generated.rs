@@ -693,27 +693,14 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_if_statement(ctx: &C, keyword: Self, left_paren: Self, condition: Self, right_paren: Self, statement: Self, elseif_clauses: Self, else_clause: Self) -> Self {
+    fn make_if_statement(ctx: &C, keyword: Self, left_paren: Self, condition: Self, right_paren: Self, statement: Self, else_clause: Self) -> Self {
         let syntax = SyntaxVariant::IfStatement(ctx.get_arena().alloc(IfStatementChildren {
             keyword,
             left_paren,
             condition,
             right_paren,
             statement,
-            elseif_clauses,
             else_clause,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_elseif_clause(ctx: &C, keyword: Self, left_paren: Self, condition: Self, right_paren: Self, statement: Self) -> Self {
-        let syntax = SyntaxVariant::ElseifClause(ctx.get_arena().alloc(ElseifClauseChildren {
-            keyword,
-            left_paren,
-            condition,
-            right_paren,
-            statement,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)

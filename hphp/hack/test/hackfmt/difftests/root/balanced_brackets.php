@@ -8,7 +8,7 @@ function isbalanced(string $s): bool {
     $ch = substr($s, $i, 1);
     if ($ch == '[') {
       $bal++;
-    } elseif ($ch == ']') {
+    } else if ($ch == ']') {
       $bal--;
     }
     if ($bal < 0)

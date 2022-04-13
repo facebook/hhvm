@@ -687,27 +687,14 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_if_statement(_: &C, if_keyword: Self, if_left_paren: Self, if_condition: Self, if_right_paren: Self, if_statement: Self, if_elseif_clauses: Self, if_else_clause: Self) -> Self {
+    fn make_if_statement(_: &C, if_keyword: Self, if_left_paren: Self, if_condition: Self, if_right_paren: Self, if_statement: Self, if_else_clause: Self) -> Self {
         let syntax = SyntaxVariant::IfStatement(Box::new(IfStatementChildren {
             if_keyword,
             if_left_paren,
             if_condition,
             if_right_paren,
             if_statement,
-            if_elseif_clauses,
             if_else_clause,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_elseif_clause(_: &C, elseif_keyword: Self, elseif_left_paren: Self, elseif_condition: Self, elseif_right_paren: Self, elseif_statement: Self) -> Self {
-        let syntax = SyntaxVariant::ElseifClause(Box::new(ElseifClauseChildren {
-            elseif_keyword,
-            elseif_left_paren,
-            elseif_condition,
-            elseif_right_paren,
-            elseif_statement,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -2375,23 +2362,13 @@ where
                 acc
             },
             SyntaxVariant::IfStatement(x) => {
-                let IfStatementChildren { if_keyword, if_left_paren, if_condition, if_right_paren, if_statement, if_elseif_clauses, if_else_clause } = *x;
+                let IfStatementChildren { if_keyword, if_left_paren, if_condition, if_right_paren, if_statement, if_else_clause } = *x;
                 let acc = f(if_keyword, acc);
                 let acc = f(if_left_paren, acc);
                 let acc = f(if_condition, acc);
                 let acc = f(if_right_paren, acc);
                 let acc = f(if_statement, acc);
-                let acc = f(if_elseif_clauses, acc);
                 let acc = f(if_else_clause, acc);
-                acc
-            },
-            SyntaxVariant::ElseifClause(x) => {
-                let ElseifClauseChildren { elseif_keyword, elseif_left_paren, elseif_condition, elseif_right_paren, elseif_statement } = *x;
-                let acc = f(elseif_keyword, acc);
-                let acc = f(elseif_left_paren, acc);
-                let acc = f(elseif_condition, acc);
-                let acc = f(elseif_right_paren, acc);
-                let acc = f(elseif_statement, acc);
                 acc
             },
             SyntaxVariant::ElseClause(x) => {
@@ -3298,7 +3275,6 @@ where
             SyntaxVariant::UsingStatementFunctionScoped {..} => SyntaxKind::UsingStatementFunctionScoped,
             SyntaxVariant::WhileStatement {..} => SyntaxKind::WhileStatement,
             SyntaxVariant::IfStatement {..} => SyntaxKind::IfStatement,
-            SyntaxVariant::ElseifClause {..} => SyntaxKind::ElseifClause,
             SyntaxVariant::ElseClause {..} => SyntaxKind::ElseClause,
             SyntaxVariant::TryStatement {..} => SyntaxKind::TryStatement,
             SyntaxVariant::CatchClause {..} => SyntaxKind::CatchClause,
@@ -3836,22 +3812,13 @@ where
                  while_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::IfStatement, 7) => SyntaxVariant::IfStatement(Box::new(IfStatementChildren {
+             (SyntaxKind::IfStatement, 6) => SyntaxVariant::IfStatement(Box::new(IfStatementChildren {
                  if_else_clause: ts.pop().unwrap(),
-                 if_elseif_clauses: ts.pop().unwrap(),
                  if_statement: ts.pop().unwrap(),
                  if_right_paren: ts.pop().unwrap(),
                  if_condition: ts.pop().unwrap(),
                  if_left_paren: ts.pop().unwrap(),
                  if_keyword: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::ElseifClause, 5) => SyntaxVariant::ElseifClause(Box::new(ElseifClauseChildren {
-                 elseif_statement: ts.pop().unwrap(),
-                 elseif_right_paren: ts.pop().unwrap(),
-                 elseif_condition: ts.pop().unwrap(),
-                 elseif_left_paren: ts.pop().unwrap(),
-                 elseif_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ElseClause, 2) => SyntaxVariant::ElseClause(Box::new(ElseClauseChildren {
@@ -5074,17 +5041,7 @@ pub struct IfStatementChildren<T, V> {
     pub if_condition: Syntax<T, V>,
     pub if_right_paren: Syntax<T, V>,
     pub if_statement: Syntax<T, V>,
-    pub if_elseif_clauses: Syntax<T, V>,
     pub if_else_clause: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct ElseifClauseChildren<T, V> {
-    pub elseif_keyword: Syntax<T, V>,
-    pub elseif_left_paren: Syntax<T, V>,
-    pub elseif_condition: Syntax<T, V>,
-    pub elseif_right_paren: Syntax<T, V>,
-    pub elseif_statement: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -5988,7 +5945,6 @@ pub enum SyntaxVariant<T, V> {
     UsingStatementFunctionScoped(Box<UsingStatementFunctionScopedChildren<T, V>>),
     WhileStatement(Box<WhileStatementChildren<T, V>>),
     IfStatement(Box<IfStatementChildren<T, V>>),
-    ElseifClause(Box<ElseifClauseChildren<T, V>>),
     ElseClause(Box<ElseClauseChildren<T, V>>),
     TryStatement(Box<TryStatementChildren<T, V>>),
     CatchClause(Box<CatchClauseChildren<T, V>>),
@@ -6722,25 +6678,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             IfStatement(x) => {
-                get_index(7).and_then(|index| { match index {
+                get_index(6).and_then(|index| { match index {
                         0 => Some(&x.if_keyword),
                     1 => Some(&x.if_left_paren),
                     2 => Some(&x.if_condition),
                     3 => Some(&x.if_right_paren),
                     4 => Some(&x.if_statement),
-                    5 => Some(&x.if_elseif_clauses),
-                    6 => Some(&x.if_else_clause),
-                        _ => None,
-                    }
-                })
-            },
-            ElseifClause(x) => {
-                get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.elseif_keyword),
-                    1 => Some(&x.elseif_left_paren),
-                    2 => Some(&x.elseif_condition),
-                    3 => Some(&x.elseif_right_paren),
-                    4 => Some(&x.elseif_statement),
+                    5 => Some(&x.if_else_clause),
                         _ => None,
                     }
                 })

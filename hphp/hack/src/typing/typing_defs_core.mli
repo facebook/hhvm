@@ -550,6 +550,18 @@ type can_index = {
 }
 [@@deriving show]
 
+(* A can_traverse represents the ability to do a foreach over a certain type.
+   We should have t <: {ct_key; ct_val; ct_is_await} when type t supports foreach
+   and doing the foreack will bind values of type ct_val, and optionally bind keys of
+   type ct_key. *)
+type can_traverse = {
+  ct_key: locl_ty option;
+  ct_val: locl_ty;
+  ct_is_await: bool;
+  ct_expr_pos: Pos.t;
+}
+[@@deriving show]
+
 (* = Reason.t * constraint_type_ *)
 type constraint_type [@@deriving show]
 
@@ -558,6 +570,7 @@ type constraint_type_ =
   (* The type of a list destructuring assignment.
    * Implements valid destructuring operations via subtyping *)
   | Tcan_index of can_index
+  | Tcan_traverse of can_traverse
   | Tdestructure of destructure
   | TCunion of locl_ty * constraint_type
   | TCintersection of locl_ty * constraint_type

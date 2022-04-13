@@ -362,6 +362,18 @@ let rec refresh_ctype renv v cty_orig =
     ( renv,
       mk_constraint_type (r, Tcan_index { ci with ci_val; ci_key }),
       ch1 || ch2 )
+  | (r, Tcan_traverse ct) ->
+    let (renv, ct_val, ch1) = refresh_type renv inv ct.ct_val in
+    let (renv, ct_key, ch2) =
+      match ct.ct_key with
+      | None -> (renv, None, Unchanged)
+      | Some ct_key ->
+        let (renv, ct_key, ch2) = refresh_type renv inv ct_key in
+        (renv, Some ct_key, ch2)
+    in
+    ( renv,
+      mk_constraint_type (r, Tcan_traverse { ct with ct_val; ct_key }),
+      ch1 || ch2 )
   | (r, Tdestructure { d_required; d_optional; d_variadic; d_kind }) ->
     let (renv, d_required, ch1) = refresh_types renv inv d_required in
     let (renv, d_optional, ch2) = refresh_types renv inv d_optional in

@@ -182,7 +182,13 @@ class type ['a] internal_type_visitor_type =
 
     method on_tcan_index : 'a -> Typing_reason.t -> Typing_defs.can_index -> 'a
 
+    method on_tcan_traverse :
+      'a -> Typing_reason.t -> Typing_defs.can_traverse -> 'a
+
     method on_can_index : 'a -> Typing_reason.t -> Typing_defs.can_index -> 'a
+
+    method on_can_traverse :
+      'a -> Typing_reason.t -> Typing_defs.can_traverse -> 'a
 
     method on_tdestructure :
       'a -> Typing_reason.t -> Typing_defs.destructure -> 'a

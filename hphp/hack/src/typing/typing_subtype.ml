@@ -412,6 +412,7 @@ let rec describe_ty_super ~is_coeffect env ty =
       (match targs with
       | None -> Printf.sprintf "an object with property `%s`" name
       | Some _ -> Printf.sprintf "an object with method `%s`" name)
+    | (_, Tcan_traverse _) -> "an array that can be traversed with foreach"
     | (_, Tcan_index _) -> "an array that can be indexed"
     | (_, Tdestructure _) ->
       Markdown_lite.md_codify
@@ -1098,6 +1099,15 @@ and simplify_subtype_i
           ety_sub
           ety_super
           (r, ci)
+          env
+      | (r, Tcan_traverse ct) ->
+        simplify_subtype_can_traverse
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ety_sub
+          ety_super
+          (r, ct)
           env
       | (r, Thas_member has_member_ty) ->
         simplify_subtype_has_member
@@ -2369,6 +2379,11 @@ and simplify_subtype_shape
       (env, TL.valid)
 
 and simplify_subtype_can_index
+    ~subtype_env ~this_ty ~fail ty_sub ty_super (_r, _ci) env =
+  (* TODO: implement *)
+  default_subtype ~subtype_env ~this_ty ~fail env ty_sub ty_super
+
+and simplify_subtype_can_traverse
     ~subtype_env ~this_ty ~fail ty_sub ty_super (_r, _ci) env =
   (* TODO: implement *)
   default_subtype ~subtype_env ~this_ty ~fail env ty_sub ty_super

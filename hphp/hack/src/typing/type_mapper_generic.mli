@@ -227,6 +227,12 @@ class type ['env] constraint_type_mapper_type =
       Typing_defs.can_index ->
       'env * Typing_defs.constraint_type
 
+    method on_Tcan_traverse :
+      'env ->
+      Typing_reason.t ->
+      Typing_defs.can_traverse ->
+      'env * Typing_defs.constraint_type
+
     method on_Tdestructure :
       'env ->
       Typing_reason.t ->

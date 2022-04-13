@@ -1452,6 +1452,14 @@ and get_tyvars_i env (ty : internal_type) =
       let (env, pos1, neg1) = get_tyvars env ci.ci_val in
       let (env, pos2, neg2) = get_tyvars env ci.ci_key in
       (env, ISet.union pos1 pos2, ISet.union neg1 neg2)
+    | (_, Tcan_traverse ct) ->
+      let (env, pos1, neg1) = get_tyvars env ct.ct_val in
+      let (env, pos2, neg2) =
+        match ct.ct_key with
+        | None -> (env, ISet.empty, ISet.empty)
+        | Some ct_key -> get_tyvars env ct_key
+      in
+      (env, ISet.union pos1 pos2, ISet.union neg1 neg2)
     | (_, TCunion (lty, cty))
     | (_, TCintersection (lty, cty)) ->
       let (env, positive1, negative1) = get_tyvars env lty in

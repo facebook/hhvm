@@ -396,6 +396,39 @@ module Full = struct
             text ")";
           ] )
 
+  let tcan_traverse ~fuel k ct =
+    match ct.ct_key with
+    | None ->
+      let (fuel, val_doc) = k ~fuel ct.ct_val in
+      ( fuel,
+        Concat
+          [
+            text "can_traverse";
+            text "(";
+            val_doc;
+            comma_sep;
+            text "is_await:";
+            text (string_of_bool ct.ct_is_await);
+            text ")";
+          ] )
+    | Some ct_key ->
+      let (fuel, key_doc) = k ~fuel ct_key in
+      let (fuel, val_doc) = k ~fuel ct.ct_val in
+
+      ( fuel,
+        Concat
+          [
+            text "can_traverse";
+            text "(";
+            key_doc;
+            comma_sep;
+            val_doc;
+            comma_sep;
+            text "is_await:";
+            text (string_of_bool ct.ct_is_await);
+            text ")";
+          ] )
+
   let tdestructure ~fuel (k : fuel:Fuel.t -> locl_ty -> Fuel.t * Doc.t) d =
     let { d_required; d_optional; d_variadic; d_kind } = d in
     let (fuel, e_required) =
@@ -813,6 +846,7 @@ module Full = struct
     | Thas_member hm -> thas_member ~fuel k hm
     | Tdestructure d -> tdestructure ~fuel k d
     | Tcan_index ci -> tcan_index ~fuel k ci
+    | Tcan_traverse ct -> tcan_traverse ~fuel k ct
     | TCunion (lty, cty) ->
       let (fuel, lty_doc) = k ~fuel lty in
       let (fuel, cty_doc) = k' ~fuel cty in

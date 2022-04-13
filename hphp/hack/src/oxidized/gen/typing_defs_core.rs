@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<84f3aa7e5df3e774c404149c82541d13>>
+// @generated SignedSource<<81e7d87d513216ef9d6798a0c7e3b0f9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -862,6 +862,29 @@ pub struct CanIndex {
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct CanTraverse {
+    pub key: Option<Ty>,
+    pub val: Ty,
+    pub is_await: bool,
+    pub expr_pos: pos::Pos,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -875,6 +898,7 @@ pub struct CanIndex {
 pub enum ConstraintType_ {
     ThasMember(HasMember),
     TcanIndex(CanIndex),
+    TcanTraverse(CanTraverse),
     /// The type of container destructuring via list() or splat `...`
     Tdestructure(Destructure),
     TCunion(Ty, ConstraintType),

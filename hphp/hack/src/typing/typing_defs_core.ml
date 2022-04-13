@@ -1049,9 +1049,18 @@ type can_index = {
 }
 [@@deriving show]
 
+type can_traverse = {
+  ct_key: locl_ty option;
+  ct_val: locl_ty;
+  ct_is_await: bool;
+  ct_expr_pos: Pos.t;
+}
+[@@deriving show]
+
 type constraint_type_ =
   | Thas_member of has_member
   | Tcan_index of can_index
+  | Tcan_traverse of can_traverse
   | Tdestructure of destructure
       (** The type of container destructuring via list() or splat `...` *)
   | TCunion of locl_ty * constraint_type

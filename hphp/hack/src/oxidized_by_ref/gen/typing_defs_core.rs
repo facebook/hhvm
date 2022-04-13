@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fc11b93a107f3c9def3aa36356544918>>
+// @generated SignedSource<<6ef662e85d66d5b6dc5b98769839ff54>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -793,6 +793,34 @@ arena_deserializer::impl_deserialize_in_arena!(CanIndex<'arena>);
 
 #[derive(
     Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct CanTraverse<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub key: Option<&'a Ty<'a>>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub val: &'a Ty<'a>,
+    pub is_await: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub expr_pos: &'a pos::Pos<'a>,
+}
+impl<'a> TrivialDrop for CanTraverse<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(CanTraverse<'arena>);
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -812,6 +840,8 @@ pub enum ConstraintType_<'a> {
     ThasMember(&'a HasMember<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TcanIndex(&'a CanIndex<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    TcanTraverse(&'a CanTraverse<'a>),
     /// The type of container destructuring via list() or splat `...`
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tdestructure(&'a Destructure<'a>),

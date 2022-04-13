@@ -279,7 +279,7 @@ val typing_env_as_tast_env : Typing_env_types.env -> env
 val tast_env_as_typing_env : env -> Typing_env_types.env
 
 (** Verify that an XHP body expression is legal. *)
-val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
+val is_xhp_child : env -> Pos.t -> Tast.ty -> bool * Typing_error.t option
 
 val get_enum : env -> Decl_provider.type_key -> Decl_provider.class_decl option
 

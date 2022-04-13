@@ -5261,12 +5261,13 @@ and lambda ~is_anon ?expected p env f idl =
 and xhp_spread_attribute env c_onto valexpr sid obj =
   let (_, p, _) = valexpr in
   let (env, te, valty) = expr env valexpr ~allow_awaitable:(*?*) false in
-  let (env, attr_ptys) =
+  let ((env, xhp_req_err_opt), attr_ptys) =
     match c_onto with
-    | None -> (env, [])
+    | None -> ((env, None), [])
     | Some class_info -> Typing_xhp.get_spread_attributes env p class_info valty
   in
-  let (env, has_err) =
+  Option.iter xhp_req_err_opt ~f:Errors.add_typing_error;
+  let (env, has_ty_mismatch) =
     List.fold_left
       attr_ptys
       ~f:(fun (env, has_err) attr ->
@@ -5275,15 +5276,15 @@ and xhp_spread_attribute env c_onto valexpr sid obj =
       ~init:(env, false)
   in
   (* If we have a subtyping error for any attribute, the best we can do here
-     is give an expected type of dynamic *)
-  let err_opt =
-    if has_err then
+     is give an expected type of nothing *)
+  let ty_mismatch =
+    if has_ty_mismatch then
       Some (valty, MakeType.nothing Reason.Rnone)
     else
       None
   in
   (* Build the typed attribute node *)
-  let typed_attr = Aast.Xhp_spread (hole_on_err ~err_opt te) in
+  let typed_attr = Aast.Xhp_spread (hole_on_err ~err_opt:ty_mismatch te) in
   (env, typed_attr)
 
 (**

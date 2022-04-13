@@ -13,7 +13,9 @@ open Typing_defs
 module Env = Tast_env
 
 let check_xhp_children env pos ty =
-  if not @@ Env.is_xhp_child env pos ty then
+  let (is_xhp_child, subty_err_opt) = Env.is_xhp_child env pos ty in
+  Option.iter subty_err_opt ~f:Errors.add_typing_error;
+  if not is_xhp_child then
     let ty_str = lazy (Env.print_error_ty ~ignore_dynamic:true env ty) in
     let ty_reason_msg =
       Lazy.map ty_str ~f:(fun ty_str ->

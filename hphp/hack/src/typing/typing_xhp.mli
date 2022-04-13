@@ -22,12 +22,14 @@ val get_spread_attributes :
   Pos.t ->
   Decl_provider.class_decl ->
   Typing_defs.locl_ty ->
-  env * (Aast.pstring * (Pos.t * Typing_defs.locl_ty)) list
+  (env * Typing_error.t option)
+  * (Aast.pstring * (Pos.t * Typing_defs.locl_ty)) list
 
 (**
  * Verify that an XHP body expression is legal.
  *)
-val is_xhp_child : env -> Pos.t -> Typing_defs.locl_ty -> bool
+val is_xhp_child :
+  env -> Pos.t -> Typing_defs.locl_ty -> bool * Typing_error.t option
 
 (* Rewrites an Xml node into a New node. The resulting New expression has
  * four arguments. This mimics the rewrite undergone before the emitter is

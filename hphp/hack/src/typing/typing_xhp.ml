@@ -25,15 +25,14 @@ let raise_xhp_required env pos ureason ty =
     Lazy.map ty_str ~f:(fun ty_str ->
         Reason.to_string ("This is " ^ ty_str) (get_reason ty))
   in
-  Errors.add_typing_error
-    Typing_error.(
-      xhp
-      @@ Primary.Xhp.Xhp_required
-           {
-             pos;
-             why_xhp = Reason.string_of_ureason ureason;
-             ty_reason_msg = msgl;
-           })
+  Typing_error.(
+    xhp
+    @@ Primary.Xhp.Xhp_required
+         {
+           pos;
+           why_xhp = Reason.string_of_ureason ureason;
+           ty_reason_msg = msgl;
+         })
 
 (**
  * Given class info, produces the subset of props that are XHP attributes
@@ -126,7 +125,10 @@ and get_spread_attributes env pos onto_xhp cty =
     |> List.fold ~init:SSet.empty ~f:(fun acc (k, _) -> SSet.add k acc)
   in
   let (env, possible_xhp, non_xhp) = walk_and_gather_xhp_ ~env ~pos cty in
-  List.iter non_xhp ~f:(raise_xhp_required env pos Reason.URxhp_spread);
+  let xhp_required_err_opt =
+    Typing_error.multiple_opt
+    @@ List.map non_xhp ~f:(raise_xhp_required env pos Reason.URxhp_spread)
+  in
   let xhp_to_attrs env (xhp_ty, tparams, xhp_info) =
     let attrs = xhp_attributes_for_class xhp_info in
     (* Compute the intersection and then localize the types *)
@@ -152,15 +154,17 @@ and get_spread_attributes env pos onto_xhp cty =
       env
       attrs
   in
-  let ((env, ty_err_opt), attrs) =
+  let ((env, locl_ty_err_opt), attrs) =
     List.map_env_ty_err_opt
       ~f:xhp_to_attrs
       env
       possible_xhp
       ~combine_ty_errs:Typing_error.multiple_opt
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  (env, List.concat attrs)
+  let ty_err_opt =
+    Option.merge ~f:Typing_error.both xhp_required_err_opt locl_ty_err_opt
+  in
+  ((env, ty_err_opt), List.concat attrs)
 
 (**
  * Typing rules for the body expressions of an XHP literal.
@@ -171,16 +175,12 @@ let is_xhp_child env pos ty =
   let ty_child = MakeType.class_type r SN.Classes.cXHPChild [] in
   (* Any Traversable *)
   let ty_traversable = MakeType.traversable r (MakeType.mixed r) in
-  let (res, ty_err_opt) =
-    Typing_solver.is_sub_type
-      env
-      ty
-      (MakeType.nullable_locl
-         r
-         (MakeType.union r [MakeType.dynamic r; ty_child; ty_traversable]))
-  in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  res
+  Typing_solver.is_sub_type
+    env
+    ty
+    (MakeType.nullable_locl
+       r
+       (MakeType.union r [MakeType.dynamic r; ty_child; ty_traversable]))
 
 let rewrite_xml_into_new pos sid attributes children =
   let cid = CI sid in

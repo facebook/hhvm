@@ -105,12 +105,11 @@ Class::PropInitVec::allocWithReqAllocator(const PropInitVec& src) {
   p->m_capacity = ~size;
   p->m_data = reinterpret_cast<ObjectProps*>(p + 1);
 
-  // these are two distinct memcpys because the props and deep init bits
+  // These are two distinct memcpys because the props and deep init bits
   // aren't necessarily contiguous in src (because capacity >= size)
-  // but will be in the destination (which is exactly sized)
-  memcpy16_inline(p->m_data, src.m_data, props_size);
-  memcpy(reinterpret_cast<char*>(p->m_data) +
-         ObjectProps::sizeFor(size),
+  // but will be in the destination (which is exactly sized).
+  memcpy(p->m_data, src.m_data, props_size);
+  memcpy(reinterpret_cast<char*>(p->m_data) + props_size,
          src.deepInitBits().buffer(),
          bits_size);
 
@@ -133,10 +132,10 @@ Class::PropInitVec::operator=(const PropInitVec& piv) {
     m_data = reinterpret_cast<ObjectProps*>(
       lower_malloc(props_size + bits_size)
     );
-    // these are two distinct memcpys because the props and deep init bits
+    // These are two distinct memcpys because the props and deep init bits
     // aren't necessarily contiguous in src (because capacity >= size)
-    // but will be in the destination (which is exactly sized)
-    memcpy16_inline(m_data, piv.m_data, props_size);
+    // but will be in the destination (which is exactly sized).
+    memcpy(m_data, piv.m_data, props_size);
     memcpy(deepInitBits().buffer(),
            piv.deepInitBits().buffer(),
            bits_size);
@@ -163,10 +162,10 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
     ObjectProps::setInvariantsAfterGrow(newData, oldSize, props_size);
 
     if (m_data) {
-      // these two memcpys are separate because we're going from
+      // These two memcpys are separate because we're going from
       // contiguous memory (since the size == capacity) to noncontiguous memory
-      // (because the structure has grown)
-      memcpy16_inline(newData, m_data, oldSize);
+      // (because the structure has grown).
+      memcpy(newData, m_data, oldSize);
       memcpy(newData + props_size,
              deepInitBits().buffer(),
              (m_size + 7) / 8);

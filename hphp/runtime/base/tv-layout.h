@@ -487,17 +487,16 @@ struct Tv7Up : public LayoutBase<Tv7Up,
  *
  * This implements a flavor of an array layout storing unaligned typed values, which
  * occupy 9 bytes and are stored one after another (no padding for alignment between
- * elements; extra padding at end to align entire thing to 16 byte boundary).
+ * elements.
  *
- *  ______________9 * N bytes________________   extra
- * /                                         \   / \
- *  9 bytes  9 bytes   ............   9 bytes   /   \
- * /       \/       \                /       \ /     \
- * +--------+--------+---------------+--------+------+
- * | v1  |t1| v1  |t2| ............  | vN  |tN|      |
- * +--------+--------+---------------+--------+------+
+ *  ______________9 * N bytes________________
+ * /                                         \
+ *  9 bytes  9 bytes   ............   9 bytes
+ * /       \/       \                /       \
+ * +--------+--------+---------------+--------+
+ * | v1  |t1| v1  |t2| ............  | vN  |tN|
+ * +--------+--------+---------------+--------+
  *
- * where extra = ((9 * N + 15) & 15) - 9 * N, i.e. enough to make entire block 16-byte aligned.
  */
 
 namespace detail_utv {
@@ -560,10 +559,8 @@ struct UnalignedTVLayout :
   static size_t constexpr max_index = UINT16_MAX - 1;
 
   static size_t constexpr sizeFor(index_t len) {
-    // For optimization reasons (see LayoutBase comments), align to 16 bytes
     auto const bytes = len * sizeof(UnalignedTypedValue);
-    auto constexpr mask = 16 - 1;
-    return (bytes + mask) & ~mask;
+    return bytes;
   }
 
   // Since index_t == quick_index, don't define functions on the second type
@@ -585,7 +582,7 @@ struct UnalignedTVLayout :
   }
 
   void init(index_t) {
-    static_assert(VanillaVec::stores_unaligned_typed_values);
+    assertx(stores_unaligned_typed_values);
   }
 
   static void setInvariantsAfterGrow(char *, size_t, size_t) {

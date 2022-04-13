@@ -224,21 +224,17 @@ inline void ObjectData::instanceInit(Class* cls) {
   size_t nProps = cls->numDeclProperties();
   if (nProps > 0) {
     if (cls->pinitVec().size() > 0) {
-      const Class::PropInitVec* propInitVec = m_cls->getPropData();
+      const Class::PropInitVec* propInitVec = cls->getPropData();
       assertx(propInitVec != nullptr);
       assertx(nProps == propInitVec->size());
       if (!cls->hasDeepInitProps()) {
-        memcpy16_inline(props(),
-                        propInitVec->data(),
-                        ObjectProps::sizeFor(nProps));
+        memcpy(props(), propInitVec->data(), ObjectProps::sizeFor(nProps));
       } else {
         deepInitHelper(props(), propInitVec, nProps);
       }
     } else {
       assertx(nProps == cls->declPropInit().size());
-      memcpy16_inline(props(),
-                      cls->declPropInit().data(),
-                      ObjectProps::sizeFor(nProps));
+      memcpy(props(), cls->declPropInit().data(), ObjectProps::sizeFor(nProps));
     }
   }
 }

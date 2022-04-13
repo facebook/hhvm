@@ -151,7 +151,8 @@ $myClass = myAsyncFunc();
 __hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
-echo get_bytes_eq(StaticWaitHandle::class, $objs) == 16 + $ObjSize // handle size
+$padding = $ObjSize == 12 ? 4 : 0;
+echo get_bytes_eq(StaticWaitHandle::class, $objs) == 16 + $ObjSize + $padding // handle size + object size + padding
   ? "(GOOD) Bytes (Async) works\n"
   : "(BAD) Bytes (Async) failed: ".var_export($objs, true)."\n";
 $objs = null;

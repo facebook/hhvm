@@ -128,7 +128,7 @@ private:
 };
 static_assert(sizeof(MemoSlot) == sizeof(TypedValue), "");
 
-#ifdef _MSC_VER
+#if defined(__x86_64__)
 #pragma pack(push, 1)
 #endif
 
@@ -581,15 +581,17 @@ private:
 private:
   const LowPtr<Class> m_cls;
 };
-#ifdef _MSC_VER
+#if defined(__x86_64__)
 #pragma pack(pop)
 #endif
 
-#ifdef _MSC_VER
+#if defined(__x86_64__)
 static_assert(sizeof(ObjectData) == (use_lowptr ? 12 : 16),
               "Change this only on purpose");
+static_assert(alignof(ObjectData) == 1);
 #else
 static_assert(sizeof(ObjectData) == 16, "Change this only on purpose");
+static_assert(alignof(ObjectData) == 8);
 #endif
 ///////////////////////////////////////////////////////////////////////////////
 

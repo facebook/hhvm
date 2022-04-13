@@ -183,13 +183,17 @@ let run_loop_once :
         SearchServiceRunner.run_completely ctx env.ServerEnv.local_symbol_table;
     }
   in
-  let { ServerEnv.RecheckLoopStats.rechecked_count; total_rechecked_count; _ } =
+  let {
+    ServerEnv.RecheckLoopStats.total_changed_files_count;
+    total_rechecked_count;
+    _;
+  } =
     env.ServerEnv.last_recheck_loop_stats
   in
   ( env,
     {
       did_read_disk_changes = !did_read_disk_changes_ref;
-      rechecked_count;
+      total_changed_files_count;
       total_rechecked_count;
       last_actual_total_rechecked_count =
         (match env.ServerEnv.last_recheck_loop_stats_for_actual_work with

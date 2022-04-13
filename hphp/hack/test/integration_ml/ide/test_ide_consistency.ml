@@ -42,7 +42,7 @@ let run_and_check_autocomplete env expected_rechecked expected =
   (* Simulate time passing to trigger recheck *)
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  if loop_output.rechecked_count != expected_rechecked then
+  if loop_output.total_changed_files_count != expected_rechecked then
     Test.fail
       (Printf.sprintf "Expected %d files to be rechecked" expected_rechecked);
 

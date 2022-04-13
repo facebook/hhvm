@@ -201,8 +201,9 @@ module RecheckLoopStats : sig
         (** Watchman subscription has gone down, so state of the world after the
             recheck loop may not reflect what is actually on disk. *)
     per_batch_telemetry: Telemetry.t list;
-    rechecked_count: int;
-    total_rechecked_count: int;  (** includes dependencies *)
+    total_changed_files_count: int;
+        (** Count of files changed on disk and potentially also in the IDE. *)
+    total_rechecked_count: int;
     last_iteration_start_time: seconds_since_epoch;
         (** Start time of the last loop iteration, after the last user change. *)
     duration: seconds;

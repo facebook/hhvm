@@ -223,12 +223,12 @@ let query_notifier genv env query_kind start_time =
 let update_stats_after_recheck :
     RecheckLoopStats.t ->
     ServerTypeCheck.CheckStats.t ->
-    check_kind:_ ->
+    check_kind:ServerTypeCheck.CheckKind.t ->
     telemetry:Telemetry.t ->
     start_time:seconds_since_epoch ->
     RecheckLoopStats.t =
  fun {
-       RecheckLoopStats.rechecked_count;
+       RecheckLoopStats.total_changed_files_count;
        per_batch_telemetry;
        total_rechecked_count;
        updates_stale;
@@ -248,7 +248,8 @@ let update_stats_after_recheck :
      ~telemetry
      ~start_time ->
   {
-    RecheckLoopStats.rechecked_count = rechecked_count + reparse_count;
+    RecheckLoopStats.total_changed_files_count =
+      total_changed_files_count + reparse_count;
     per_batch_telemetry = telemetry :: per_batch_telemetry;
     total_rechecked_count =
       total_rechecked_count + total_rechecked_count_in_iteration;
@@ -531,7 +532,7 @@ let idle_if_no_client env waiting_client =
   | ClientProvider.Select_nothing ->
     let {
       RecheckLoopStats.per_batch_telemetry;
-      rechecked_count;
+      total_changed_files_count;
       total_rechecked_count;
       _;
     } =
@@ -543,9 +544,9 @@ let idle_if_no_client env waiting_client =
      * the SharedMem module, which doesn't know anything about Server stuff.
      * So we wrap the call here. *)
     HackEventLogger.with_rechecked_stats
-      (List.length per_batch_telemetry)
-      rechecked_count
-      total_rechecked_count
+      ~update_batch_count:(List.length per_batch_telemetry)
+      ~total_changed_files:total_changed_files_count
+      ~total_rechecked:total_rechecked_count
       (fun () -> SharedMem.GC.collect `aggressive);
     let t = Unix.gettimeofday () in
     if Float.(t -. env.last_idle_job_time > 0.5) then
@@ -564,7 +565,8 @@ let push_diagnostics env : env * string * seconds_since_epoch option =
   let env = { env with diagnostic_pusher } in
   (env, "pushed any leftover", time_errors_pushed)
 
-let log_recheck_end stats ~errors ~diag_reason =
+let log_recheck_end (stats : ServerEnv.RecheckLoopStats.t) ~errors ~diag_reason
+    =
   let telemetry =
     ServerEnv.RecheckLoopStats.to_user_telemetry stats
     |> Telemetry.string_ ~key:"diag_reason" ~value:diag_reason
@@ -572,7 +574,7 @@ let log_recheck_end stats ~errors ~diag_reason =
   in
   let {
     RecheckLoopStats.duration;
-    rechecked_count;
+    total_changed_files_count;
     total_rechecked_count;
     per_batch_telemetry;
     any_full_checks;
@@ -584,10 +586,10 @@ let log_recheck_end stats ~errors ~diag_reason =
     stats
   in
   HackEventLogger.recheck_end
-    duration
-    (List.length per_batch_telemetry - 1)
-    rechecked_count
-    total_rechecked_count
+    ~last_recheck_duration:duration
+    ~update_batch_count:(List.length per_batch_telemetry - 1)
+    ~total_changed_files:total_changed_files_count
+    ~total_rechecked:total_rechecked_count
     (Option.some_if any_full_checks telemetry);
   Hh_logger.log
     "RECHECK_END (recheck_id %s):\n%s"

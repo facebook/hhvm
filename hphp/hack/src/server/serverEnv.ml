@@ -23,8 +23,9 @@ module RecheckLoopStats = struct
         (** Watchman subscription has gone down, so state of the world after the
           recheck loop may not reflect what is actually on disk. *)
     per_batch_telemetry: Telemetry.t list;
-    rechecked_count: int;
-    total_rechecked_count: int;  (** includes dependencies *)
+    total_changed_files_count: int;
+        (** Count of files changed on disk and potentially also in the IDE. *)
+    total_rechecked_count: int;
     last_iteration_start_time: seconds_since_epoch;
     duration: seconds;
     time_first_result: seconds_since_epoch option;
@@ -36,7 +37,7 @@ module RecheckLoopStats = struct
     {
       updates_stale = false;
       per_batch_telemetry = [];
-      rechecked_count = 0;
+      total_changed_files_count = 0;
       total_rechecked_count = 0;
       last_iteration_start_time = 0.;
       duration = 0.;
@@ -50,7 +51,7 @@ module RecheckLoopStats = struct
     let {
       updates_stale;
       per_batch_telemetry;
-      rechecked_count;
+      total_changed_files_count;
       total_rechecked_count;
       last_iteration_start_time;
       duration;
@@ -64,7 +65,9 @@ module RecheckLoopStats = struct
     |> Telemetry.string_ ~key:"id" ~value:recheck_id
     |> Telemetry.float_ ~key:"time" ~value:duration
     |> Telemetry.int_ ~key:"count" ~value:total_rechecked_count
-    |> Telemetry.int_ ~key:"reparse_count" ~value:rechecked_count
+    |> Telemetry.int_
+         ~key:"total_changed_files_count"
+         ~value:total_changed_files_count
     |> Telemetry.object_list
          ~key:"per_batch"
          ~value:(List.rev per_batch_telemetry)

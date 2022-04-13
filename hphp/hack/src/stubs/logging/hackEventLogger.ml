@@ -308,7 +308,13 @@ let remote_worker_type_check_end _ = ()
 
 let remote_worker_load_naming_end _ = ()
 
-let recheck_end _ _ _ _ _ = ()
+let recheck_end
+    ~last_recheck_duration:_
+    ~update_batch_count:_
+    ~total_changed_files:_
+    ~total_rechecked:_
+    _ =
+  ()
 
 let indexing_end ~desc:_ _ = ()
 
@@ -373,7 +379,9 @@ let type_at_pos_batch ~start_time:_ ~num_files:_ ~num_positions:_ ~results:_ =
 
 let with_id ~stage:_ _ f = f ()
 
-let with_rechecked_stats _ _ _ f = f ()
+let with_rechecked_stats
+    ~update_batch_count:_ ~total_changed_files:_ ~total_rechecked:_ f =
+  f ()
 
 let with_init_type _ f = f ()
 

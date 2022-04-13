@@ -1337,21 +1337,17 @@ and simplify_subtype_i
               lty_sub
               (mk (r_super, Tnewtype (name, [tyarg], tyarg)))
               env
-          (* For the case that u is an intersection or type variable, implement
-           *   supportdyn<t> <: ?u   iff
+          (*   supportdyn<t> <: ?u   iff
            *   nonnull & supportdyn<t> <: u   iff
            *   supportdyn<nonnull & t> <: u
            *)
-          | ((r_sub, Tnewtype (name, [tyarg1], _)), (Tintersection _ | Tvar _))
+          | ((r_sub, Tnewtype (name, [tyarg1], _)), _)
             when String.equal name SN.Classes.cSupportDyn ->
             let (env, ty_sub') =
               Inter.intersect env ~r:r_super tyarg1 (MakeType.nonnull r_super)
             in
             let ty_sub' = mk (r_sub, Tnewtype (name, [ty_sub'], ty_sub')) in
             simplify_subtype ~subtype_env ty_sub' ety env
-          | ((_, Tnewtype (name_sub, _, _)), Tnewtype (name_sup, _, _))
-            when String.equal name_sup name_sub ->
-            simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env
           (* A <: ?B iff A & nonnull <: B
              Only apply if B is a type variable or an intersection, to avoid oscillating
              forever between this case and the previous one. *)

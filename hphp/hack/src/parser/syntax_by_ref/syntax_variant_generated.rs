@@ -1517,7 +1517,8 @@ pub struct EnumClassLabelExpressionChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct ModuleDeclarationChildren<'a, T, V> {
     pub attribute_spec: Syntax<'a, T, V>,
-    pub keyword: Syntax<'a, T, V>,
+    pub new_keyword: Syntax<'a, T, V>,
+    pub module_keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub left_brace: Syntax<'a, T, V>,
     pub right_brace: Syntax<'a, T, V>,

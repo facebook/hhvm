@@ -2,7 +2,7 @@
 <?hh
 <<file:__EnableUnstableFeatures('modules')>>
 
-module here {}
+new module here {}
 
 //// main.php
 <?hh

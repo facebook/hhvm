@@ -6501,8 +6501,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
           module_declaration_left_brace =
             validate_token x.module_declaration_left_brace;
           module_declaration_name = validate_token x.module_declaration_name;
-          module_declaration_keyword =
-            validate_token x.module_declaration_keyword;
+          module_declaration_module_keyword =
+            validate_token x.module_declaration_module_keyword;
+          module_declaration_new_keyword =
+            validate_token x.module_declaration_new_keyword;
           module_declaration_attribute_spec =
             validate_option_with
               validate_attribute_specification
@@ -6520,8 +6522,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with
                 invalidate_attribute_specification
                 x.module_declaration_attribute_spec;
-            module_declaration_keyword =
-              invalidate_token x.module_declaration_keyword;
+            module_declaration_new_keyword =
+              invalidate_token x.module_declaration_new_keyword;
+            module_declaration_module_keyword =
+              invalidate_token x.module_declaration_module_keyword;
             module_declaration_name = invalidate_token x.module_declaration_name;
             module_declaration_left_brace =
               invalidate_token x.module_declaration_left_brace;

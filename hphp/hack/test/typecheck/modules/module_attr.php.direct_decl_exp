@@ -1,7 +1,8 @@
 File root|module_attr.php--modules.php
-[("here", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [4:8-12] }));
-  ("there", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [5:8-13] }));
-  ("another", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [6:8-15] }))]
+[("here", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [4:12-16] }));
+  ("there", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [5:12-17] }));
+  ("another", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [6:12-19] }))
+  ]
 
 File root|module_attr.php--here.php
 [("\\foo",

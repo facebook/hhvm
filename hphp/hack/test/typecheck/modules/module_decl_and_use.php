@@ -2,4 +2,4 @@
 
 <<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-module A {}
+new module A {}

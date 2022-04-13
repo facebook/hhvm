@@ -2,9 +2,9 @@
 <?hh
 <<file:__EnableUnstableFeatures('modules')>>
 
-module here {}
-module there {}
-module elsewhere {}
+new module here {}
+new module there {}
+new module elsewhere {}
 
 //// here.php
 <?hh

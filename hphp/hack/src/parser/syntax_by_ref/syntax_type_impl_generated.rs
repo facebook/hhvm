@@ -1852,10 +1852,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_module_declaration(ctx: &C, attribute_spec: Self, keyword: Self, name: Self, left_brace: Self, right_brace: Self) -> Self {
+    fn make_module_declaration(ctx: &C, attribute_spec: Self, new_keyword: Self, module_keyword: Self, name: Self, left_brace: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::ModuleDeclaration(ctx.get_arena().alloc(ModuleDeclarationChildren {
             attribute_spec,
-            keyword,
+            new_keyword,
+            module_keyword,
             name,
             left_brace,
             right_brace,

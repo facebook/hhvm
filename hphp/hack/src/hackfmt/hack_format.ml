@@ -2440,7 +2440,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.ModuleDeclaration
         {
           module_declaration_attribute_spec = attr;
-          module_declaration_keyword = keyword;
+          module_declaration_new_keyword = new_kw;
+          module_declaration_module_keyword = mod_kw;
           module_declaration_name = name;
           module_declaration_left_brace = lb;
           module_declaration_right_brace = rb;
@@ -2449,7 +2450,9 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         [
           t env attr;
           when_present attr newline;
-          t env keyword;
+          t env new_kw;
+          Space;
+          t env mod_kw;
           Space;
           t env name;
           Space;

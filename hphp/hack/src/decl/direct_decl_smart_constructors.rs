@@ -5571,6 +5571,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     fn make_module_declaration(
         &mut self,
         _attributes: Self::R,
+        _new_keyword: Self::R,
         _module_keyword: Self::R,
         name: Self::R,
         _left_brace: Self::R,

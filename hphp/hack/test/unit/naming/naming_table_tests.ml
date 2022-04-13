@@ -57,7 +57,7 @@ let files =
     ( "corge.php",
       {|<?hh
     <<file: __EnableUnstableFeatures('modules')>>
-    module Corge {}
+    new module Corge {}
   |}
     );
   ]

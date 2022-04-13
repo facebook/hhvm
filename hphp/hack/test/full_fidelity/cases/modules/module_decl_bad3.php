@@ -1,3 +1,3 @@
 <?hh
 
-module Bing {>
+new module Bing {>

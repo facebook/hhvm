@@ -1129,7 +1129,8 @@ struct
       }
     | ModuleDeclaration of {
         module_declaration_attribute_spec: t;
-        module_declaration_keyword: t;
+        module_declaration_new_keyword: t;
+        module_declaration_module_keyword: t;
         module_declaration_name: t;
         module_declaration_left_brace: t;
         module_declaration_right_brace: t;
@@ -2547,7 +2548,8 @@ struct
 
   and module_declaration = {
     module_declaration_attribute_spec: attribute_specification option value;
-    module_declaration_keyword: Token.t value;
+    module_declaration_new_keyword: Token.t value;
+    module_declaration_module_keyword: Token.t value;
     module_declaration_name: Token.t value;
     module_declaration_left_brace: Token.t value;
     module_declaration_right_brace: Token.t value;

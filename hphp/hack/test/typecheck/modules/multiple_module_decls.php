@@ -1,5 +1,5 @@
 <?hh
 <<file:__EnableUnstableFeatures('modules')>>
 
-module A {}
-module A {}
+new module A {}
+new module A {}

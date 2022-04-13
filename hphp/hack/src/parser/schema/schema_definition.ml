@@ -2368,7 +2368,8 @@ let schema : schema_node list =
       fields =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
-          ("keyword", Token);
+          ("new_keyword", Token);
+          ("module_keyword", Token);
           ("name", Token)
           (* TODO(T108206307) This might need its own node in the future, to
            * represent module names *);

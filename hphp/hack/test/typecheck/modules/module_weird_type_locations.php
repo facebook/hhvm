@@ -3,8 +3,8 @@
 
 <<file:__EnableUnstableFeatures('modules')>>
 
-module A {}
-module B {}
+new module A {}
+new module B {}
 
 //// A.php
 <?hh

@@ -2396,13 +2396,15 @@ module WithToken (Token : TokenType) = struct
       | ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
             module_declaration_right_brace;
           } ->
         let acc = f acc module_declaration_attribute_spec in
-        let acc = f acc module_declaration_keyword in
+        let acc = f acc module_declaration_new_keyword in
+        let acc = f acc module_declaration_module_keyword in
         let acc = f acc module_declaration_name in
         let acc = f acc module_declaration_left_brace in
         let acc = f acc module_declaration_right_brace in
@@ -3980,14 +3982,16 @@ module WithToken (Token : TokenType) = struct
       | ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
             module_declaration_right_brace;
           } ->
         [
           module_declaration_attribute_spec;
-          module_declaration_keyword;
+          module_declaration_new_keyword;
+          module_declaration_module_keyword;
           module_declaration_name;
           module_declaration_left_brace;
           module_declaration_right_brace;
@@ -5597,14 +5601,16 @@ module WithToken (Token : TokenType) = struct
       | ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
             module_declaration_right_brace;
           } ->
         [
           "module_declaration_attribute_spec";
-          "module_declaration_keyword";
+          "module_declaration_new_keyword";
+          "module_declaration_module_keyword";
           "module_declaration_name";
           "module_declaration_left_brace";
           "module_declaration_right_brace";
@@ -7429,7 +7435,8 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.ModuleDeclaration,
           [
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
             module_declaration_right_brace;
@@ -7437,7 +7444,8 @@ module WithToken (Token : TokenType) = struct
         ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
             module_declaration_right_brace;
@@ -9807,7 +9815,8 @@ module WithToken (Token : TokenType) = struct
 
       let make_module_declaration
           module_declaration_attribute_spec
-          module_declaration_keyword
+          module_declaration_new_keyword
+          module_declaration_module_keyword
           module_declaration_name
           module_declaration_left_brace
           module_declaration_right_brace =
@@ -9815,7 +9824,8 @@ module WithToken (Token : TokenType) = struct
           ModuleDeclaration
             {
               module_declaration_attribute_spec;
-              module_declaration_keyword;
+              module_declaration_new_keyword;
+              module_declaration_module_keyword;
               module_declaration_name;
               module_declaration_left_brace;
               module_declaration_right_brace;

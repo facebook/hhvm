@@ -2,13 +2,13 @@
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>
 
-module A {}
+new module A {}
 
 //// changed-a-decl.php
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>
 
-module A {}
+new module A {}
 //// base-a-use.php
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>

@@ -2,8 +2,8 @@
 <?hh
 <<file:__EnableUnstableFeatures('modules')>>
 
-module here {}
-module there {}
+new module here {}
+new module there {}
 
 //// here.php
 <?hh

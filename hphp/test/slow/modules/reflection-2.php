@@ -3,8 +3,8 @@
 <<file:__EnableUnstableFeatures("modules")>>
 
 <<Ok, Yes>>
-module A {}
-module B {}
+new module A {}
+new module B {}
 
 <<__EntryPoint>>
 function main() {

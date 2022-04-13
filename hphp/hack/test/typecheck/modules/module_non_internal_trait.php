@@ -2,7 +2,7 @@
 <?hh
 <<file:__EnableUnstableFeatures('modules')>>
 
-module A {}
+new module A {}
 
 //// A.php
 <?hh
@@ -18,7 +18,7 @@ function foobar(): void {}
 
 trait NonInternalCaller {
   public function test(Quxx $q): void {
-    // All of these lines are Hack errors: they're `internal` to the module we
+    // All of these lines are Hack errors: they're `internal` to the new module we
     // are currently in, but this trait might be included in another module
     // that doesn't have access to these symbols.
     foobar();

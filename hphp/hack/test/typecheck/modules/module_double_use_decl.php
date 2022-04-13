@@ -2,8 +2,8 @@
 
 <<file:__EnableUnstableFeatures('modules')>>
 
-module A {}
-module B {}
+new module A {}
+new module B {}
 
 <<file:__Module('A')>>
 // This should probably error, and if it doesn't, it should be consistent

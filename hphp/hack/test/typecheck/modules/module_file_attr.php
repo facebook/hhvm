@@ -2,7 +2,7 @@
 <?hh
 <<file:__EnableUnstableFeatures('modules')>>
 
-module Foo {}
+new module Foo {}
 //// foo.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.

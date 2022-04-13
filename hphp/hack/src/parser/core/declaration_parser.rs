@@ -2186,7 +2186,12 @@ where
             | TokenKind::Trait
             | TokenKind::XHP
             | TokenKind::Class => self.parse_classish_declaration(attribute_specification),
-            TokenKind::Module => self.parse_module_declaration(attribute_specification),
+            // The only thing that can put an attribute on a new is a module declaration
+            TokenKind::New
+                if !is_internal && self.peek_token_kind_with_lookahead(1) == TokenKind::Module =>
+            {
+                self.parse_module_declaration(attribute_specification)
+            }
             _ => {
                 // ERROR RECOVERY: we encountered an unexpected token, raise an error and continue
                 // TODO: This is wrong; we have lost the attribute specification
@@ -2460,6 +2465,7 @@ where
     }
 
     fn parse_module_declaration(&mut self, attrs: S::R) -> S::R {
+        let new_kw = self.assert_token(TokenKind::New);
         let module_kw = self.assert_token(TokenKind::Module);
         // TODO(T108206307) This will probably change if we have a different syntax
         // for module names.
@@ -2471,6 +2477,7 @@ where
             make_module_declaration,
             self,
             attrs,
+            new_kw,
             module_kw,
             name,
             lb,
@@ -2548,7 +2555,8 @@ where
                 let token = S!(make_token, self, token);
                 self.parse_const_declaration(missing1, missing2, token)
             }
-            TokenKind::Module => {
+            // If we see new as a token, it's a module definition
+            TokenKind::New if parser1.peek_token_kind() == TokenKind::Module => {
                 let missing = S!(make_missing, self, self.pos());
                 self.parse_module_declaration(missing)
             }

@@ -1,5 +1,5 @@
 File root|file_attribute_order.php--modules.php
-[("A", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [4:8-9] }))]
+[("A", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [4:12-13] }))]
 
 File root|file_attribute_order.php--A1.php
 [("\\f",

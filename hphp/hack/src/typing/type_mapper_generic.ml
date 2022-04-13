@@ -284,6 +284,9 @@ class type ['env] constraint_type_mapper_type =
     method on_Thas_member :
       'env -> Reason.t -> has_member -> 'env * constraint_type
 
+    method on_Tcan_index :
+      'env -> Reason.t -> can_index -> 'env * constraint_type
+
     method on_Tdestructure :
       'env -> Reason.t -> destructure -> 'env * constraint_type
 
@@ -312,6 +315,7 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
     method on_constraint_type_ env r ty_ =
       match ty_ with
       | Thas_member hm -> this#on_Thas_member env r hm
+      | Tcan_index ci -> this#on_Tcan_index env r ci
       | Tdestructure tyl -> this#on_Tdestructure env r tyl
       | TCunion (lty, cty) -> this#on_TCunion env r lty cty
       | TCintersection (lty, cty) -> this#on_TCintersection env r lty cty
@@ -321,6 +325,13 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       let (env, hm_type) = this#on_type env hm_type in
       let hm = { hm_name; hm_type; hm_class_id; hm_explicit_targs } in
       (env, mk_constraint_type (r, Thas_member hm))
+
+    method on_Tcan_index env r ci =
+      let { ci_key; ci_shape; ci_val; ci_expr_pos; ci_index_pos } = ci in
+      let (env, ci_key) = this#on_type env ci_key in
+      let (env, ci_val) = this#on_type env ci_val in
+      let ci = { ci_key; ci_shape; ci_val; ci_expr_pos; ci_index_pos } in
+      (env, mk_constraint_type (r, Tcan_index ci))
 
     method on_Tdestructure env r { d_required; d_optional; d_variadic; d_kind }
         =

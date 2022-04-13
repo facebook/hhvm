@@ -913,6 +913,7 @@ module Size = struct
         hm
       in
       ty_size env ty
+    | (_, Tcan_index ci) -> 1 + ty_size env ci.ci_val + ty_size env ci.ci_key
     | (_, TCunion (lty, cty))
     | (_, TCintersection (lty, cty)) ->
       1 + ty_size env lty + constraint_type_size env cty

@@ -838,6 +838,7 @@ let rec union_i env ?(approx_cancel_neg = false) r ty1 lty2 =
               ConstraintType
                 (mk_constraint_type (r', TCintersection (lty, cty))) ))
         | (_, Thas_member _)
+        | (_, Tcan_index _)
         | (_, Tdestructure _) ->
           (env, ConstraintType (mk_constraint_type (r, TCunion (lty2, cty1)))))
     in

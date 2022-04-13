@@ -999,6 +999,14 @@ let has_member_compare ~normalize_lists hm1 hm2 =
     | comp -> comp)
   | comp -> comp
 
+let can_index_compare ~normalize_lists ci1 ci2 =
+  match ty_compare ~normalize_lists ci1.ci_key ci2.ci_key with
+  | 0 ->
+    (match ty_compare ~normalize_lists ci1.ci_val ci2.ci_val with
+    | 0 -> Option.compare compare_tshape_field_name ci1.ci_shape ci2.ci_shape
+    | comp -> comp)
+  | comp -> comp
+
 let destructure_compare ~normalize_lists d1 d2 =
   let {
     d_required = tyl1;
@@ -1032,6 +1040,7 @@ let constraint_ty_con_ordinal cty =
   | Tdestructure _ -> 1
   | TCunion _ -> 2
   | TCintersection _ -> 3
+  | Tcan_index _ -> 4
 
 let rec constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
   let (_, ty1) = deref_constraint_type ty1 in
@@ -1039,6 +1048,8 @@ let rec constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
   match (ty1, ty2) with
   | (Thas_member hm1, Thas_member hm2) ->
     has_member_compare ~normalize_lists hm1 hm2
+  | (Tcan_index ci1, Tcan_index ci2) ->
+    can_index_compare ~normalize_lists ci1 ci2
   | (Tdestructure d1, Tdestructure d2) ->
     destructure_compare ~normalize_lists d1 d2
   | (TCunion (lty1, cty1), TCunion (lty2, cty2))
@@ -1048,7 +1059,9 @@ let rec constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
       comp1
     else
       constraint_ty_compare ~normalize_lists cty1 cty2
-  | (_, (Thas_member _ | Tdestructure _ | TCunion _ | TCintersection _)) ->
+  | ( _,
+      ( Thas_member _ | Tcan_index _ | Tdestructure _ | TCunion _
+      | TCintersection _ ) ) ->
     constraint_ty_con_ordinal ty2 - constraint_ty_con_ordinal ty1
 
 let constraint_ty_equal ?(normalize_lists = false) ty1 ty2 =

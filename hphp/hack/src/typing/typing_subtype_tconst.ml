@@ -39,6 +39,7 @@ let make_type_const_equal
     | ConstraintType ty ->
       (match deref_constraint_type ty with
       | (_, Thas_member _)
+      | (_, Tcan_index _)
       | (_, Tdestructure _) ->
         (env, None)
         (* This not quite correct but works for now since no constraint type has any

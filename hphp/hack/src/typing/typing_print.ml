@@ -376,6 +376,26 @@ module Full = struct
     in
     (fuel, has_member_doc)
 
+  let tcan_index ~fuel k ci =
+    let (fuel, key_doc) = k ~fuel ci.ci_key in
+    let (fuel, val_doc) = k ~fuel ci.ci_val in
+    ( fuel,
+      match ci.ci_shape with
+      | None ->
+        Concat
+          [text "can_index"; text "("; key_doc; comma_sep; val_doc; text ")"]
+      | Some _ft ->
+        Concat
+          [
+            text "can_index";
+            text "(";
+            key_doc;
+            text "(shape_field)";
+            comma_sep;
+            val_doc;
+            text ")";
+          ] )
+
   let tdestructure ~fuel (k : fuel:Fuel.t -> locl_ty -> Fuel.t * Doc.t) d =
     let { d_required; d_optional; d_variadic; d_kind } = d in
     let (fuel, e_required) =
@@ -792,6 +812,7 @@ module Full = struct
     match x with
     | Thas_member hm -> thas_member ~fuel k hm
     | Tdestructure d -> tdestructure ~fuel k d
+    | Tcan_index ci -> tcan_index ~fuel k ci
     | TCunion (lty, cty) ->
       let (fuel, lty_doc) = k ~fuel lty in
       let (fuel, cty_doc) = k' ~fuel cty in

@@ -335,6 +335,9 @@ val class_id_equal : ('a, 'b) Aast.class_id_ -> ('c, 'd) Aast.class_id_ -> bool
 val has_member_compare :
   normalize_lists:bool -> has_member -> has_member -> Ppx_deriving_runtime.int
 
+val can_index_compare :
+  normalize_lists:bool -> can_index -> can_index -> Ppx_deriving_runtime.int
+
 val destructure_compare :
   normalize_lists:bool -> destructure -> destructure -> Ppx_deriving_runtime.int
 

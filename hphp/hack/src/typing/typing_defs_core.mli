@@ -534,6 +534,22 @@ type destructure = {
 }
 [@@deriving show]
 
+(* A can_index constraint represents the ability to do an array index operation.
+ * We should have t <: { ci_key; ci_shape; ci_val } when t is a type that supports
+ * being index with a value of type ci_key, and will return a value of ci_val. The
+ * ci_shape field is necessary because shapes (and tuples) are required to be
+ * indexed with certain literals, and so in those cases it is not sufficient to
+ * record simply the type of the index.
+ *)
+type can_index = {
+  ci_key: locl_ty;
+  ci_shape: tshape_field_name option;
+  ci_val: locl_ty;
+  ci_expr_pos: Pos.t;
+  ci_index_pos: Pos.t;
+}
+[@@deriving show]
+
 (* = Reason.t * constraint_type_ *)
 type constraint_type [@@deriving show]
 
@@ -541,6 +557,7 @@ type constraint_type_ =
   | Thas_member of has_member
   (* The type of a list destructuring assignment.
    * Implements valid destructuring operations via subtyping *)
+  | Tcan_index of can_index
   | Tdestructure of destructure
   | TCunion of locl_ty * constraint_type
   | TCintersection of locl_ty * constraint_type

@@ -180,6 +180,10 @@ class type ['a] internal_type_visitor_type =
 
     method on_has_member : 'a -> Typing_reason.t -> Typing_defs.has_member -> 'a
 
+    method on_tcan_index : 'a -> Typing_reason.t -> Typing_defs.can_index -> 'a
+
+    method on_can_index : 'a -> Typing_reason.t -> Typing_defs.can_index -> 'a
+
     method on_tdestructure :
       'a -> Typing_reason.t -> Typing_defs.destructure -> 'a
 

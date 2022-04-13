@@ -1040,8 +1040,18 @@ type has_member = {
 }
 [@@deriving show]
 
+type can_index = {
+  ci_key: locl_ty;
+  ci_shape: tshape_field_name option;
+  ci_val: locl_ty;
+  ci_expr_pos: Pos.t;
+  ci_index_pos: Pos.t;
+}
+[@@deriving show]
+
 type constraint_type_ =
   | Thas_member of has_member
+  | Tcan_index of can_index
   | Tdestructure of destructure
       (** The type of container destructuring via list() or splat `...` *)
   | TCunion of locl_ty * constraint_type

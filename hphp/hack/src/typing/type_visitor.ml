@@ -324,6 +324,10 @@ class type ['a] internal_type_visitor_type =
 
     method on_has_member : 'a -> Reason.t -> has_member -> 'a
 
+    method on_tcan_index : 'a -> Reason.t -> can_index -> 'a
+
+    method on_can_index : 'a -> Reason.t -> can_index -> 'a
+
     method on_tdestructure : 'a -> Reason.t -> destructure -> 'a
 
     method on_destructure : 'a -> Reason.t -> destructure -> 'a
@@ -345,6 +349,7 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
       let (r, ty) = deref_constraint_type ty in
       match ty with
       | Thas_member hm -> this#on_thas_member acc r hm
+      | Tcan_index ci -> this#on_tcan_index acc r ci
       | Tdestructure des -> this#on_tdestructure acc r des
       | TCunion (lty, cty) -> this#on_tcunion acc r lty cty
       | TCintersection (lty, cty) -> this#on_tcintersection acc r lty cty
@@ -364,6 +369,12 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
         hm
       in
       this#on_locl_type acc hm_type
+
+    method on_tcan_index acc r hm = this#on_can_index acc r hm
+
+    method on_can_index acc _r ci =
+      let acc = this#on_locl_type acc ci.ci_key in
+      this#on_locl_type acc ci.ci_val
 
     method on_tdestructure acc r des = this#on_destructure acc r des
 

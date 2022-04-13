@@ -38,7 +38,7 @@ let handler =
       List.iter c.c_consts ~f:(fun cc -> error_if_is_named_class cc.cc_id)
 
     method! at_expr env (_, _, e) =
-      let func_name = 
+      let func_name =
         match env.function_name with
         | None -> None
         | Some sid -> Some (snd sid)
@@ -66,9 +66,7 @@ let handler =
         ()
       | Class_const (_, ((pos, meth_name) as mid))
         when is_magic mid
-             && not
-                  (Option.equal String.equal func_name (Some meth_name))
-        ->
+             && not (Option.equal String.equal func_name (Some meth_name)) ->
         Errors.add_nast_check_error @@ Nast_check_error.Magic { pos; meth_name }
       | Obj_get (_, (_, _, Id s), _, _) when is_magic s ->
         let (pos, meth_name) = s in

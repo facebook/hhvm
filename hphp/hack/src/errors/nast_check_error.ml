@@ -46,7 +46,7 @@ type t =
   | Toplevel_break of Pos.t
   | Toplevel_continue of Pos.t
   | Continue_in_switch of Pos.t
-  | Await_in_sync_function of  {
+  | Await_in_sync_function of {
       pos: Pos.t;
       func_pos: Pos.t option;
     }
@@ -294,24 +294,24 @@ let continue_in_switch pos =
     []
 
 let await_in_sync_function pos func_pos =
-  let quickfixes = 
+  let quickfixes =
     match func_pos with
     | None -> Some []
-    | Some fix_pos -> 
-      (
+    | Some fix_pos ->
       let (_, start_col) = Pos.line_column fix_pos in
-      let fix_pos = Pos.set_col_end (start_col-9) fix_pos in
-      let fix_pos = Pos.set_col_start(start_col-9) fix_pos in
-      Some [
-      Quickfix.make
-          ~title:("Make function " ^ Markdown_lite.md_codify "async")
-          ~new_text:"async "
-          fix_pos;
-      ])
+      let fix_pos = Pos.set_col_end (start_col - 9) fix_pos in
+      let fix_pos = Pos.set_col_start (start_col - 9) fix_pos in
+      Some
+        [
+          Quickfix.make
+            ~title:("Make function " ^ Markdown_lite.md_codify "async")
+            ~new_text:"async "
+            fix_pos;
+        ]
   in
   User_error.make
     Error_code.(to_enum AwaitInSyncFunction)
-    ?quickfixes:quickfixes
+    ?quickfixes
     (pos, "`await` can only be used inside `async` functions")
     []
 
@@ -594,7 +594,8 @@ let to_user_error = function
   | Toplevel_break pos -> toplevel_break pos
   | Toplevel_continue pos -> toplevel_continue pos
   | Continue_in_switch pos -> continue_in_switch pos
-  | Await_in_sync_function { pos; func_pos } -> await_in_sync_function pos func_pos
+  | Await_in_sync_function { pos; func_pos } ->
+    await_in_sync_function pos func_pos
   | Interface_uses_trait pos -> interface_uses_trait pos
   | Static_memoized_function pos -> static_memoized_function pos
   | Magic { pos; meth_name } -> magic pos meth_name

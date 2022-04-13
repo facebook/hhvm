@@ -397,13 +397,13 @@ let set_col_end pos_cnum pos =
     Pos_large { pos_file; pos_start; pos_end }
   | _ -> pos
 
-let set_col_start pos_cnum pos = 
+let set_col_start pos_cnum pos =
   let pos = as_large_pos pos in
   match pos with
   | Pos_large { pos_file; pos_start; pos_end } ->
     let pos_start = File_pos_large.set_column pos_cnum pos_start in
     Pos_large { pos_file; pos_start; pos_end }
-  | _ -> pos 
+  | _ -> pos
 
 let set_from_reason pos =
   match pos with

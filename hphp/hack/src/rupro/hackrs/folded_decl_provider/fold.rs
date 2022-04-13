@@ -804,8 +804,10 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             is_final: self.child.is_final,
             is_const: (self.child.user_attributes.iter())
                 .any(|ua| ua.name.id() == *sn::user_attributes::uaConst),
-            is_internal: (self.child.user_attributes.iter())
-                .any(|ua| ua.name.id() == *sn::user_attributes::uaInternal),
+            // Support both attribute and keyword for now, until typechecker changes are made
+            is_internal: self.child.is_internal
+                || (self.child.user_attributes.iter())
+                    .any(|ua| ua.name.id() == *sn::user_attributes::uaInternal),
             is_xhp: self.child.is_xhp,
             support_dynamic_type: self.child.support_dynamic_type,
             enum_type: self.child.enum_type.clone(),

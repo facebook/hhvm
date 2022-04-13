@@ -68,10 +68,11 @@ let ft_redundant_tparams env tparams ty =
           begin
             match super_bounds with
             | [] ->
-              Lints_errors.redundant_covariant pos bounds_message "nothing"
+              Lints_errors.redundant_covariant pos name bounds_message "nothing"
             | [(_, t)] ->
               Lints_errors.redundant_covariant
                 pos
+                name
                 bounds_message
                 (Tast_env.print_decl_ty env t)
             | _ -> ()
@@ -89,15 +90,20 @@ let ft_redundant_tparams env tparams ty =
           begin
             match as_bounds with
             | [] ->
-              Lints_errors.redundant_contravariant pos bounds_message "mixed"
+              Lints_errors.redundant_contravariant
+                pos
+                name
+                bounds_message
+                "mixed"
             | [(_, t)] ->
               Lints_errors.redundant_contravariant
                 pos
+                name
                 bounds_message
                 (Tast_env.print_decl_ty env t)
             | _ -> ()
           end
-        | (None, None) -> Lints_errors.redundant_generic pos)
+        | (None, None) -> Lints_errors.redundant_generic pos name)
 
 let check_redundant_generics_class_method env (_method_name, method_) =
   match method_.ce_type with

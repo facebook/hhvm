@@ -101,12 +101,13 @@ let infer_variance_class env class_name class_type =
           | (Ast_defs.Invariant, None, None) ->
             Lints_errors.inferred_variance
               pos
+              name
               "covariant or contravariant"
               "`+` or `-`"
           | (Ast_defs.Invariant, Some _, None) ->
-            Lints_errors.inferred_variance pos "covariant" "`+`"
+            Lints_errors.inferred_variance pos name "covariant" "`+`"
           | (Ast_defs.Invariant, None, Some _) ->
-            Lints_errors.inferred_variance pos "contravariant" "`-`"
+            Lints_errors.inferred_variance pos name "contravariant" "`-`"
           | _ -> ()))
 
 let handler =

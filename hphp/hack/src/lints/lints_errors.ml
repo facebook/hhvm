@@ -272,31 +272,39 @@ let sketchy_truthiness_test pos ty truthiness =
       "Sketchy condition: a value of type %s may be truthy even when empty.\nHack collections and arrays are falsy when empty, but user-defined Traversables will always be truthy, even when empty.\nIf you would like to only allow containers which are falsy when empty, use the `Container` or `KeyedContainer` interfaces."
       ty
 
-let redundant_covariant pos msg suggest =
+let redundant_covariant pos name msg suggest =
   Lints.add Codes.redundant_generic Lint_warning pos
-  @@ "This generic parameter is redundant because it only appears in a covariant (output) position"
+  @@ "The generic parameter "
+  ^ Markdown_lite.md_codify name
+  ^ " is redundant because it only appears in a covariant (output) position"
   ^ msg
   ^ ". Consider replacing uses of generic parameter with "
   ^ Markdown_lite.md_codify suggest
   ^ " or specifying `<<__Explicit>>` on the generic parameter"
 
-let redundant_contravariant pos msg suggest =
+let redundant_contravariant pos name msg suggest =
   Lints.add Codes.redundant_generic Lint_warning pos
-  @@ "This generic parameter is redundant because it only appears in a contravariant (input) position"
+  @@ "The generic parameter "
+  ^ Markdown_lite.md_codify name
+  ^ " is redundant because it only appears in a contravariant (input) position"
   ^ msg
   ^ ". Consider replacing uses of generic parameter with "
   ^ Markdown_lite.md_codify suggest
   ^ " or specifying `<<__Explicit>>` on the generic parameter"
 
-let redundant_generic pos =
+let redundant_generic pos name =
   Lints.add Codes.redundant_generic Lint_warning pos
-  @@ "This generic parameter is unused."
+  @@ Printf.sprintf
+       "The generic parameter %s is unused."
+       (Markdown_lite.md_codify name)
 
-let inferred_variance pos description syntax =
+let inferred_variance pos name description syntax =
   Lints.add Codes.inferred_variance Lint_advice pos
-  @@ "This generic parameter could be marked "
+  @@ "The generic parameter "
+  ^ Markdown_lite.md_codify name
+  ^ " could be marked "
   ^ description
-  ^ ". Consider prefixing the generic parameter with "
+  ^ ". Consider prefixing it with "
   ^ syntax
 
 let nullsafe_not_needed pos =

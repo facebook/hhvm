@@ -9,7 +9,10 @@ use pos::{ConstName, FunName, MethodName, PropName, TypeName};
 use std::fmt::Debug;
 use std::rc::Rc;
 use std::sync::Arc;
-use ty::decl::{ty::ConsistentKind, ConstDecl, EnumType, FunDecl, Tparam, Ty, TypedefDecl};
+use ty::decl::{
+    ty::ConsistentKind, ConstDecl, EnumType, FunDecl, Requirement, Tparam, Ty, TypedefDecl,
+    WhereConstraint,
+};
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
 
@@ -95,7 +98,15 @@ pub trait Class<R: Reason>: Debug {
         dependent: DeclName,
     ) -> Result<(Option<Rc<ClassElt<R>>>, ConsistentKind)>;
 
+    fn is_final(&self) -> bool;
+
     fn get_enum_type(&self) -> Option<&EnumType<R>>;
     fn get_tparams(&self) -> &[Tparam<R, Ty<R>>];
     fn decl_errors(&self) -> &[DeclError<R::Pos>];
+
+    fn where_constraints(&self) -> &[WhereConstraint<Ty<R>>];
+    fn upper_bounds_on_this_from_constraints(&self) -> Vec<Ty<R>>;
+    fn all_ancestor_reqs(&self) -> &[Requirement<R>];
+    fn upper_bounds_on_this(&self) -> Vec<Ty<R>>;
+    fn get_ancestor(&self, super_name: &TypeName) -> Option<&Ty<R>>;
 }

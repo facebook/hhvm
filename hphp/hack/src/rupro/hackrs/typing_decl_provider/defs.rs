@@ -7,12 +7,15 @@ use super::{Class, Error, Result};
 use crate::dependency_registrar::DeclName;
 use crate::folded_decl_provider::{FoldedDeclProvider, Substitution};
 use once_cell::unsync::OnceCell;
+use oxidized::ast_defs::ConstraintKind;
 use pos::{MethodName, MethodNameMap, PropName, PropNameMap, TypeName};
 use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 use std::sync::Arc;
-use ty::decl::{ty::ConsistentKind, EnumType, FoldedClass, Tparam, Ty};
+use ty::decl::{
+    ty::ConsistentKind, EnumType, FoldedClass, Requirement, Tparam, Ty, Ty_, WhereConstraint,
+};
 use ty::decl_error::DeclError;
 use ty::local::ClassElt;
 use ty::reason::Reason;
@@ -251,5 +254,43 @@ impl<R: Reason> Class<R> for ClassType<R> {
 
     fn decl_errors(&self) -> &[DeclError<R::Pos>] {
         &self.class.decl_errors
+    }
+
+    fn is_final(&self) -> bool {
+        self.class.is_final
+    }
+
+    fn where_constraints(&self) -> &[WhereConstraint<Ty<R>>] {
+        &self.class.where_constraints
+    }
+
+    fn upper_bounds_on_this_from_constraints(&self) -> Vec<Ty<R>> {
+        use ConstraintKind::{ConstraintAs, ConstraintEq, ConstraintSuper};
+        self.where_constraints()
+            .iter()
+            .filter_map(|WhereConstraint(lhs, cstr_kind, rhs)| {
+                match (lhs.node_ref(), cstr_kind, rhs.node_ref()) {
+                    (Ty_::Tthis, ConstraintEq | ConstraintAs, _) => Some(rhs.clone()),
+                    (_, ConstraintEq | ConstraintSuper, Ty_::Tthis) => Some(lhs.clone()),
+                    (_, _, _) => None,
+                }
+            })
+            .collect()
+    }
+
+    fn all_ancestor_reqs(&self) -> &[Requirement<R>] {
+        &self.class.req_ancestors
+    }
+
+    fn upper_bounds_on_this(&self) -> Vec<Ty<R>> {
+        self.all_ancestor_reqs()
+            .iter()
+            .map(|req| req.ty.clone())
+            .chain(self.upper_bounds_on_this_from_constraints().into_iter())
+            .collect()
+    }
+
+    fn get_ancestor(&self, super_name: &TypeName) -> Option<&Ty<R>> {
+        self.class.ancestors.get(super_name)
     }
 }

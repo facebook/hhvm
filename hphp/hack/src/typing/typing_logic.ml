@@ -104,6 +104,12 @@ let conj p1 p2 =
 
 let conj_list ps = List.fold ~init:(Conj []) ps ~f:conj
 
+let add_prop p ps =
+  if List.exists ps ~f:(equal_subtype_prop p) then
+    ps
+  else
+    p :: ps
+
 (* Smart constructor for binary disjunction *)
 let disj ~fail p1 p2 =
   if equal_subtype_prop p1 p2 then
@@ -114,7 +120,8 @@ let disj ~fail p1 p2 =
     | (_, _) when is_unsat p1 && is_unsat p2 -> Disj (fail, [])
     | (_, _) when is_unsat p1 -> Disj (fail, [p2])
     | (_, _) when is_unsat p2 -> Disj (fail, [p1])
-    | (Disj (_, ps1), Disj (_, ps2)) -> Disj (fail, ps1 @ ps2)
-    | (_, Disj (_, ps)) -> Disj (fail, p1 :: ps)
-    | (Disj (_, ps), _) -> Disj (fail, p2 :: ps)
+    | (Disj (_, ps1), Disj (_, ps2)) ->
+      Disj (fail, List.fold ps2 ~init:ps1 ~f:(fun ps p -> add_prop p ps))
+    | (_, Disj (_, ps)) -> Disj (fail, add_prop p1 ps)
+    | (Disj (_, ps), _) -> Disj (fail, add_prop p2 ps)
     | (_, _) -> Disj (fail, [p1; p2])

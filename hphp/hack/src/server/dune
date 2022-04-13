@@ -425,13 +425,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (rule
- (target serverHotClassesDescription.fb.ml)
- (action
-  (copy#
-   facebook/serverHotClassesDescription.ml
-   serverHotClassesDescription.fb.ml)))
-
-(rule
  (target serverInvalidateUnits.fb.ml)
  (action
   (copy# facebook/serverInvalidateUnits.ml serverInvalidateUnits.fb.ml)))
@@ -454,9 +447,7 @@
   serverFileDependents
   serverFileSync
   serverFormat
-  serverHotClasses
   serverGenPrefetchDir
-  serverHotClassesDescription
   serverIdle
   serverInferTypeBatch
   serverInvalidateUnits
@@ -526,11 +517,6 @@
   utils_core
   version
   watchman_utils
-  (select
-   serverHotClassesDescription.ml
-   from
-   (facebook signed_source -> serverHotClassesDescription.fb.ml)
-   (-> serverHotClassesDescription.stubs.ml))
   (select
    serverInvalidateUnits.ml
    from

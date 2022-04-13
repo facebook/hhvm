@@ -49,8 +49,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | DELETE_CHECKPOINT _ -> true
   | IN_MEMORY_DEP_TABLE_SIZE -> true
   | NO_PRECHECKED_FILES -> true
-  (* Dump codebase-wide dependency graph information *)
-  | GEN_HOT_CLASSES _ -> true
   | GEN_PREFETCH_DIR _ -> false
   | STATS -> false
   | DISCONNECT -> false

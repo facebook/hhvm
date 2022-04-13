@@ -110,7 +110,6 @@ let parse_check_args cmd =
   let format_from = ref 0 in
   let from = ref "" in
   let show_spinner = ref None in
-  let hot_classes_threshold = ref 0 in
   let gen_saved_ignore_type_errors = ref false in
   let ignore_hh_version = ref false in
   let save_64bit = ref None in
@@ -329,17 +328,6 @@ let parse_check_args cmd =
               | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) for each entry in input list get list of function dependencies [file:line:character list]"
-      );
-      ( "--gen-hot-classes-file",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> hot_classes_threshold := x);
-            Arg.String
-              (fun x ->
-                set_mode (MODE_GEN_HOT_CLASSES (!hot_classes_threshold, x)));
-          ],
-        " generate a JSON file listing all classes with more dependents than the"
-        ^ " given threshold. Usage: --gen-hot-classes-file 500 ~/hh_hot_classes.json"
       );
       ( "--gen-prefetch-dir",
         Arg.String (fun x -> set_mode (MODE_GEN_PREFETCH_DIR x)),

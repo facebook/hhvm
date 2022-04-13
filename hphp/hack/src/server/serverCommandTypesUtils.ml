@@ -59,7 +59,6 @@ let debug_describe_t : type a. a t -> string = function
   | RAGE -> "RAGE"
   | CST_SEARCH _ -> "CST_SEARCH"
   | NO_PRECHECKED_FILES -> "NO_PRECHECKED_FILES"
-  | GEN_HOT_CLASSES _ -> "GEN_HOT_CLASSES"
   | GEN_PREFETCH_DIR _ -> "GEN_PREFETCH_DIR"
   | FUN_DEPS_BATCH _ -> "FUN_DEPS_BATCH"
   | LIST_FILES_WITH_ERRORS -> "LIST_FILES_WITH_ERRORS"

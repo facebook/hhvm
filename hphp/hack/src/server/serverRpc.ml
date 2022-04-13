@@ -486,8 +486,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         (env, Error (Exception.to_string e))
     end
   | NO_PRECHECKED_FILES -> (ServerPrecheckedFiles.expand_all env, ())
-  | GEN_HOT_CLASSES threshold ->
-    (env, ServerHotClasses.go genv.workers env threshold)
   | GEN_PREFETCH_DIR dir ->
     (* TODO(bobren) remove dir entirely from saved state job invocation *)
     let _ = dir in

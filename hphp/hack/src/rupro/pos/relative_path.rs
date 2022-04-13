@@ -50,6 +50,11 @@ impl RelativePath {
         self.suffix
     }
 
+    #[inline]
+    pub fn is_hhi(&self) -> bool {
+        self.prefix() == Prefix::Hhi
+    }
+
     pub fn to_absolute(&self, ctx: &RelativePathCtx) -> PathBuf {
         let mut buf = match self.prefix {
             Prefix::Root => &ctx.root,

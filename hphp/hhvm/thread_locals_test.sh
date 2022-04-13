@@ -20,7 +20,7 @@ ALL=$( \
 WHITELIST=$(sed -e 's/ *#.*//' "$2")
 
 # comm -23 returns lines in the first input that are not in the second.
-# We need -u becaues a symbol may appear multiple times with different ABI tags.
+# We need -u because a symbol may appear multiple times with different ABI tags.
 EXTRA=$(comm -23 <(echo "$ALL" | sort -u) <(echo "$WHITELIST" | sort -u))
 
 if [ "$EXTRA" ]; then

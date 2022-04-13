@@ -51,7 +51,7 @@ double php_math_round(double value, int places, int mode = PHP_ROUND_HALF_UP);
  * We have a problem here in that only n==M will get mapped to b which
  # means the chances of getting b is much much less than getting any of
  # the other values in the range.  We can fix this by increasing our range
- # artifically and using:
+ # artificially and using:
  #
  #               n' = a + n(b-a+1)/M
  *

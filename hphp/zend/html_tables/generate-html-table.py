@@ -91,7 +91,7 @@ def filter_clashing_codes(data, good_values):
 # (e.g. "midast" and "ast" share 0x42)
 # In zend's php which one to use is chosen by usort,
 # which has undefined behaviour. To mimic this behaviour we use
-# full list of html5 entities, prdocued by following script:
+# full list of html5 entities, produced by following script:
 # <?php
 # $a = get_html_translation_table(HTML_ENTITIES, ENT_HTML5 | ENT_QUOTES);
 # foreach($a as $k => $v) {
@@ -190,7 +190,7 @@ output_mapping('mappings/CP1252.TXT', 'entity_table_cs_cp1252')
 output_mapping('mappings/KOI8-R.TXT', 'entity_table_cs_koi8r')
 #output_mapping('mappings/ROMAN.TXT', 'entity_table_cs_macroman')
 
-# table for encoding csjis is esentially empty
+# table for encoding cs-sjis is essentially empty
 write_mapping_table('entity_table_cs_sjis', [])
 
 make('ents_html401.txt', 'entity_table_html401')

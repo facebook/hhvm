@@ -1597,6 +1597,12 @@ module Primary = struct
         req_pos: Pos_or_decl.t;
         req_name: string;
       }
+    | Incompatible_reqs of {
+        pos: Pos.t;
+        req_name: string;
+        req_class_pos: Pos_or_decl.t;
+        req_extends_pos: Pos_or_decl.t;
+      }
     | Invalid_echo_argument of Pos.t
     | Index_type_mismatch of {
         pos: Pos.t;
@@ -2634,6 +2640,22 @@ module Primary = struct
           "This class does not satisfy all the requirements of its traits or interfaces."
         )
     in
+    (Error_code.UnsatisfiedReq, claim, reasons, [])
+
+  let incompatible_reqs pos req_name req_class_pos req_extends_pos =
+    let reasons =
+      lazy
+        (let r1 =
+           ( req_class_pos,
+             "This requires exactly class " ^ Render.strip_ns req_name )
+         in
+         let r2 =
+           ( req_extends_pos,
+             "This requires a subtype of class " ^ Render.strip_ns req_name )
+         in
+         [r1; r2])
+    in
+    let claim = lazy (pos, "This trait defines incompatible requirements.") in
     (Error_code.UnsatisfiedReq, claim, reasons, [])
 
   let invalid_echo_argument pos =
@@ -5332,6 +5354,8 @@ module Primary = struct
       unsatisfied_req pos trait_pos req_name req_pos
     | Unsatisfied_req_class { pos; trait_pos; req_name; req_pos } ->
       unsatisfied_req_class pos trait_pos req_name req_pos
+    | Incompatible_reqs { pos; req_name; req_class_pos; req_extends_pos } ->
+      incompatible_reqs pos req_name req_class_pos req_extends_pos
     | Invalid_echo_argument pos -> invalid_echo_argument pos
     | Index_type_mismatch { pos; is_covariant_container; msg_opt; reasons_opt }
       ->

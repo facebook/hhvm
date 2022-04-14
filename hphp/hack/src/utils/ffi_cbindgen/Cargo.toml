@@ -9,5 +9,6 @@ name = "ffi_cbindgen"
 path = "ffi_cbindgen.rs"
 
 [dependencies]
+anyhow = "1.0.56"
 cbindgen = "0.20.0"
-structopt = "0.3.23"
+clap = { version = "3.1.2", features = ["derive", "regex", "unicode", "wrap_help"] }

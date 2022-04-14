@@ -27,9 +27,6 @@ while :; do
         --header) header=$2
           shift 2
         ;;
-        --srcs) srcs=$2
-          shift 2
-        ;;
         --namespaces) namespaces=$2
           shift 2
         ;;
@@ -71,8 +68,9 @@ fi
     "$@";
 if [ -n "$exe" ]
 then
-  cargo run --bin ffi_cbindgen -- --header "$header" --srcs "$srcs" \
-  --includes "$includes" --namespaces "$namespaces"
+  cargo run --bin ffi_cbindgen -- --header "$header" \
+  --includes "$includes" --namespaces "$namespaces" \
+    "$@"
 fi) &&
 if [ -z "$exe" ]
 then

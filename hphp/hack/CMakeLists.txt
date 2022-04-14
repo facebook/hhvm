@@ -136,50 +136,41 @@ endif()
 
 set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc")
 set(HHBC_AST_SRCS
-  "hhbc/hackc_unit.rs"
-  "hhbc/hhas_adata.rs"
-  "hhbc/hhas_attribute.rs"
-  "hhbc/hhas_body.rs"
-  "hhbc/hhas_class.rs"
-  "hhbc/hhas_coeffects.rs"
-  "hhbc/hhas_constant.rs"
-  "hhbc/hhas_function.rs"
-  "hhbc/hhas_method.rs"
-  "hhbc/hhas_module.rs"
-  "hhbc/hhas_param.rs"
-  "hhbc/hhas_pos.rs"
-  "hhbc/hhas_property.rs"
-  "hhbc/hhas_symbol_refs.rs"
-  "hhbc/hhas_type.rs"
-  "hhbc/hhas_type_const.rs"
-  "hhbc/hhas_typedef.rs"
-  "hhbc/hhbc_ast.rs"
-  "hhbc/hhbc_ast_ffi_cbindgen.rs"  # Intentionally not in a crate.
-  "hhbc/hhbc_id.rs"
-  "hhbc/opcodes.rs"
-  "hhbc/typed_value.rs"
+  "${HHBC_PREFIX}/hhbc/hackc_unit.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_adata.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_attribute.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_body.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_class.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_coeffects.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_constant.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_function.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_method.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_module.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_param.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_pos.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_property.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_symbol_refs.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_type.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_type_const.rs"
+  "${HHBC_PREFIX}/hhbc/hhas_typedef.rs"
+  "${HHBC_PREFIX}/hhbc/hhbc_ast.rs"
+  "${HHBC_PREFIX}/hhbc/hhbc_ast_ffi_cbindgen.rs"  # Not in a crate.
+  "${HHBC_PREFIX}/hhbc/hhbc_id.rs"
+  "${HHBC_PREFIX}/hhbc/opcodes.rs"
+  "${HHBC_PREFIX}/hhbc/typed_value.rs"
 )
-foreach(src ${HHBC_AST_SRCS})
-  string(APPEND HHBC_AST_SRC_ARG "${HHBC_PREFIX}/${src},")
-endforeach()
 
 set(NAMING_SPECIAL_NAMES_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/naming")
 set(NAMING_SPECIAL_NAMES_SRCS
-   "naming_special_names.rs"
-   "naming_special_names_ffi_cbindgen.rs"
+   "${NAMING_SPECIAL_NAMES_PREFIX}/naming_special_names.rs"
+   "${NAMING_SPECIAL_NAMES_PREFIX}/naming_special_names_ffi_cbindgen.rs"
 )
-foreach(src ${NAMING_SPECIAL_NAMES_SRCS})
-  string(APPEND NAMING_SPECIAL_NAMES_SRC_ARG "${NAMING_SPECIAL_NAMES_PREFIX}/${src},")
-endforeach()
 
 set(FFI_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/ffi")
 set(FFI_SRCS
-   "ffi.rs"
-   "ffi_ffi_cbindgen.rs"
+   "${FFI_PREFIX}/ffi.rs"
+   "${FFI_PREFIX}/ffi_ffi_cbindgen.rs"
 )
-foreach(src ${FFI_SRCS})
-  string(APPEND FFI_SRC_ARG "${FFI_PREFIX}/${src},")
-endforeach()
 
 set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-ast.h")
 set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
@@ -194,14 +185,15 @@ add_custom_command(
   COMMAND
    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
     ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
-      --header "${FFI_HEADER}" --srcs "${FFI_SRC_ARG}"
-      --namespaces "HPHP,hackc" &&
+      --header "${FFI_HEADER}" --namespaces "HPHP,hackc"
+      ${FFI_SRCS} &&
     ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
-      --header "${NAMING_SPECIAL_NAMES_HEADER}" --srcs "${NAMING_SPECIAL_NAMES_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
-      --namespaces "HPHP,hackc" &&
+      --header "${NAMING_SPECIAL_NAMES_HEADER}" --namespaces "HPHP,hackc,hhbc"
+      ${NAMING_SPECIAL_NAMES_SRCS} &&
     ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
-      --header "${HHBC_AST_HEADER}" --srcs "${HHBC_AST_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
+      --header "${HHBC_AST_HEADER}" --namespaces "HPHP,hackc,hhbc"
       --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${HHBC_HEADER}"
+      ${HHBC_AST_SRCS}
   DEPENDS rustc cargo "${OPCODES}"
   COMMENT "Generating hhbc-ast.h"
 )

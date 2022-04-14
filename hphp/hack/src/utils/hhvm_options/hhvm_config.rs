@@ -1,21 +1,4 @@
-#![allow(dead_code)]
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-//#![feature(const_fn_trait_bound)]
-
-/// Are we JIT, AOT, or compiling code that needs to work with both?
-#[derive(Debug, Clone, Copy)]
-pub enum CompilerMode {
-    Aot,
-    Both,
-    Jit,
-}
-
-impl Default for CompilerMode {
-    fn default() -> Self {
-        // Default to being noncommital.
-        CompilerMode::Both
-    }
-}
 
 #[derive(Debug)]
 pub struct HhvmConfig {
@@ -119,7 +102,7 @@ impl HhvmConfig {
     }
 }
 
-impl std::default::Default for HhvmConfig {
+impl Default for HhvmConfig {
     fn default() -> Self {
         Self {
             hdf_config: hdf::Value::new(),

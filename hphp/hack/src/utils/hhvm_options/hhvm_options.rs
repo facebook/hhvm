@@ -2,39 +2,39 @@
 mod hhvm_config;
 
 use anyhow::anyhow;
+use clap::Parser;
 use hdf::IniLine;
 use hhvm_config::HhvmConfig;
 use std::{ffi::OsStr, path::PathBuf};
-use structopt::StructOpt;
 
 // Define HHVM-compatible options, as best as we can with structopt.
-#[derive(Debug, Default, StructOpt)]
+#[derive(Debug, Default, Parser)]
 pub struct HhvmOptions {
     /// Load specified HDF or INI config file(s)
-    #[structopt(
-        short("c"),
+    #[clap(
+        short('c'),
         long("config"),
-        multiple(true),
+        multiple_occurrences(true),
         number_of_values(1),
         value_name("CONFIG")
     )]
     pub config_files: Vec<PathBuf>,
 
     /// Individual HDF configuration string
-    #[structopt(
-        short("v"),
+    #[clap(
+        short('v'),
         long("config-value"),
-        multiple(true),
+        multiple_occurrences(true),
         number_of_values(1),
         value_name("NAME=VALUE")
     )]
     pub hdf_values: Vec<String>,
 
     /// Define an INI setting
-    #[structopt(
-        short("d"),
+    #[clap(
+        short('d'),
         long("define"),
-        multiple(true),
+        multiple_occurrences(true),
         number_of_values(1),
         value_name("NAME=VALUE")
     )]
@@ -101,13 +101,13 @@ impl HhvmOptions {
 // Compiler options that are compatible with hphp (hhvm --hphp),
 // intended to be a CLI-compatible subset of HPHP::CompilerOptions
 // in hphp/compiler/compiler.cpp.
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 pub struct HphpOptions {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     pub config: HhvmOptions,
 
     /// Compile target (ignored).
-    #[structopt(
+    #[clap(
         long,
         short,
         default_value("hnbc"),
@@ -116,7 +116,7 @@ pub struct HphpOptions {
     pub target: String,
 
     /// Output format (ignored).
-    #[structopt(
+    #[clap(
         long,
         short,
         default_value("binary"),
@@ -125,45 +125,45 @@ pub struct HphpOptions {
     pub format: String,
 
     /// Ignore code generation errors and continue compilation (ignored)
-    #[structopt(long, parse(try_from_str = parse_boolish), default_value("true"))]
+    #[clap(long, parse(try_from_str = parse_boolish), default_value("true"))]
     pub force: bool,
 
     /// Log level (ignored - use HH_LOG). -1, 0: no logging; 1: errors, 2: warnings;
     /// 3: info, 4: verbose.
-    #[structopt(long, short, default_value("-1"))]
+    #[clap(long, short, default_value("-1"))]
     pub log: i32,
 
     /// Whether to save compilation stats and errors to output-dir/Stats.js (ignored)
-    #[structopt(long, parse(try_from_str = parse_boolish), default_value("false"))]
+    #[clap(long, parse(try_from_str = parse_boolish), default_value("false"))]
     pub gen_stats: bool,
 
     /// Whether to keep the output directory (ignored)
-    #[structopt(long, short, parse(try_from_str = parse_boolish), default_value("true"))]
+    #[clap(long, short, parse(try_from_str = parse_boolish), default_value("true"))]
     pub keep_tempdir: bool,
 
     /// Use the autoload map to parse additional files transitively referenced
     /// from input files.
-    #[structopt(long, parse(try_from_str = parse_boolish), default_value("true"))]
+    #[clap(long, parse(try_from_str = parse_boolish), default_value("true"))]
     pub parse_on_demand: bool,
 
     /// Input directory. If specified, input pathnames are interpreted
     /// relative to this directory. Absolute input pathnames must have this
     /// directory as a prefix, which will be stripped.
-    #[structopt(long, default_value(""))]
+    #[clap(long, default_value(""))]
     pub input_dir: PathBuf,
 
     /// Output directory
-    #[structopt(long, short)]
+    #[clap(long, short)]
     pub output_dir: Option<PathBuf>,
 
     /// If specified, generate a static file cache with this filename (ignored)
-    #[structopt(long)]
+    #[clap(long)]
     pub file_cache: Option<PathBuf>,
 
     /// Directory containing input files.
-    #[structopt(
+    #[clap(
         long("module"),
-        multiple(true),
+        multiple_occurrences(true),
         number_of_values(1),
         value_name("PATH")
     )]
@@ -171,53 +171,63 @@ pub struct HphpOptions {
 
     /// Same as --module, except no exclusion checking is performed so these
     /// directories are forced to be included.
-    #[structopt(
+    #[clap(
         long("fmodule"),
-        multiple(true),
+        multiple_occurrences(true),
         number_of_values(1),
         value_name("PATH")
     )]
     pub fmodules: Vec<PathBuf>,
 
     /// Extra directories for static files without exclusion checking
-    #[structopt(
+    #[clap(
         long("cmodule"),
-        multiple(true),
+        multiple_occurrences(true),
         number_of_values(1),
         value_name("PATH")
     )]
     pub cmodules: Vec<PathBuf>,
 
     /// Extra static files force-included without exclusion checking (ignored)
-    #[structopt(long("cfile"), multiple(true), number_of_values(1), value_name("PATH"))]
+    #[clap(
+        long("cfile"),
+        multiple_occurrences(true),
+        number_of_values(1),
+        value_name("PATH")
+    )]
     pub cfiles: Vec<PathBuf>,
 
     /// Extra Hack source files force-included without exclusion checking (ignored)
-    #[structopt(long("ffile"), multiple(true), number_of_values(1), value_name("PATH"))]
+    #[clap(
+        long("ffile"),
+        multiple_occurrences(true),
+        number_of_values(1),
+        value_name("PATH")
+    )]
     pub ffiles: Vec<PathBuf>,
 
     /// Exclude these files or directories from the static content cache (ignored)
-    #[structopt(
+    #[clap(
         long("exclude-static-pattern"),
-        multiple(true),
+        multiple_occurrences(true),
         number_of_values(1),
         value_name("REGEX")
     )]
     pub exclude_static_patterns: Vec<String>,
 
     /// Directories to exclude from the input
-    #[structopt(
+    #[clap(
         long("exclude-dir"),
-        multiple(true),
+        multiple_occurrences(true),
         number_of_values(1),
         value_name("PATH")
     )]
     pub exclude_dirs: Vec<PathBuf>,
 
     /// Directories to exclude from the static content cache (ignored)
-    #[structopt(
+    #[clap(
         long("exclude-static-dir"),
-        multiple(true),
+        multiple_occurrences(true),
         number_of_values(1),
         value_name("PATH")
     )]
@@ -225,18 +235,18 @@ pub struct HphpOptions {
 
     /// Regex pattern for files or directories to exclude from the input,
     /// even if --parse-on-demand finds it
-    #[structopt(
+    #[clap(
         long("exclude-pattern"),
-        multiple(true),
+        multiple_occurrences(true),
         number_of_values(1),
         value_name("REGEX")
     )]
     pub exclude_patterns: Vec<String>,
 
     /// Files to exclude from the input, even if parse-on-demand finds it
-    #[structopt(
+    #[clap(
         long("exclude-file"),
-        multiple(true),
+        multiple_occurrences(true),
         number_of_values(1),
         value_name("PATH")
     )]
@@ -246,16 +256,16 @@ pub struct HphpOptions {
     pub inputs: Vec<PathBuf>,
 
     /// File containing list of relative file names, one per line.
-    #[structopt(long, value_name("PATH"))]
+    #[clap(long, value_name("PATH"))]
     pub input_list: Option<PathBuf>,
 
     /// (ignored) By default, hhvm --hphp forks and does all the work in
     /// the child. This option can disable forking.
-    #[structopt(long, parse(try_from_str = parse_boolish), default_value("false"))]
+    #[clap(long, parse(try_from_str = parse_boolish), default_value("false"))]
     pub nofork: bool,
 
     /// Filename of final program to emit; will be placed in output-dir.
-    #[structopt(long)]
+    #[clap(long)]
     pub program: Option<String>,
 }
 

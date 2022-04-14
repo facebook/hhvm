@@ -2828,6 +2828,7 @@ static bool hphp_warmup(ExecutionContext *context,
 void hphp_session_init(Treadmill::SessionKind session_kind,
                        Transport* transport) {
   assertx(!*s_sessionInitialized);
+  MemoryManager::requestInit();
   g_context.getCheck();
   AsioSession::Init();
   Socket::clearLastError();
@@ -2973,6 +2974,7 @@ void hphp_context_exit() {
 }
 
 void hphp_memory_cleanup() {
+  MemoryManager::requestShutdown();
   auto& mm = *tl_heap;
   // sweep functions are allowed to access g_context,
   // so we can't destroy it yet

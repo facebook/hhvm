@@ -11,3 +11,15 @@ cpp_library(
         "//folly:conv",
     ],
 )
+
+cpp_library(
+    name = "headers",
+    headers = [
+        "FBSerialize.h",
+        "FBSerialize-inl.h",
+    ],
+    exported_deps = [
+        "//folly:bits",
+        "//folly:conv",
+    ],
+)

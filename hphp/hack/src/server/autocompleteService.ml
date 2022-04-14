@@ -561,30 +561,57 @@ let autocomplete_typed_member ~is_static env class_ty cid mid =
 let autocomplete_static_member env (ty, _, cid) mid =
   autocomplete_typed_member ~is_static:true env ty (Some cid) mid
 
-let autocomplete_enum_class_label env opt_cname pos_labelname =
+let compatible_enum_class_consts env cls (expected_ty : locl_ty option) =
+  (* Ignore ::class, as it's not a normal enum constant. *)
+  let consts =
+    List.filter (Cls.consts cls) ~f:(fun (name, _) ->
+        String.(name <> Naming_special_names.Members.mClass))
+  in
+
+  (* All the constants that are compatible with [expected_ty]. *)
+  let compatible_consts =
+    List.filter consts ~f:(fun (_, cc) ->
+        let (env, cc_ty) =
+          Tast_env.localize_no_subst env ~ignore_errors:true cc.cc_type
+        in
+        match expected_ty with
+        | Some expected_ty -> Tast_env.is_sub_type env cc_ty expected_ty
+        | None -> true)
+  in
+
+  match compatible_consts with
+  | [] ->
+    (* If we couldn't find any constants that match the expected
+       type, show all constants. We sometimes infer [nothing] for
+       generics when a user hasn't passed all the arguments to a
+       function yet. *)
+    consts
+  | _ -> compatible_consts
+
+let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
   argument_global_type := Some Acclass_get;
   let suggest_members cls =
-    List.iter (Cls.consts cls) ~f:(fun (name, cc) ->
-        (* Filter out the constant used for ::class if present *)
-        if String.(name <> Naming_special_names.Members.mClass) then
-          let res_ty = Tast_env.print_decl_ty env cc.cc_type in
-          let ty = Phase.decl cc.cc_type in
-          let kind = SearchUtils.SI_ClassConstant in
-          let complete =
-            {
-              res_pos = get_pos_for env ty;
-              res_replace_pos = replace_pos_of_id pos_labelname;
-              res_base_class = Some (Cls.name cls);
-              res_ty;
-              res_name = name;
-              res_fullname = name;
-              res_kind = kind;
-              func_details = get_func_details_for env ty;
-              ranking_details = None;
-              res_documentation = None;
-            }
-          in
-          add_res complete)
+    List.iter
+      (compatible_enum_class_consts env cls expected_ty)
+      ~f:(fun (name, cc) ->
+        let res_ty = Tast_env.print_decl_ty env cc.cc_type in
+        let ty = Phase.decl cc.cc_type in
+        let kind = SearchUtils.SI_ClassConstant in
+        let complete =
+          {
+            res_pos = get_pos_for env ty;
+            res_replace_pos = replace_pos_of_id pos_labelname;
+            res_base_class = Some (Cls.name cls);
+            res_ty;
+            res_name = name;
+            res_fullname = name;
+            res_kind = kind;
+            func_details = get_func_details_for env ty;
+            ranking_details = None;
+            res_documentation = None;
+          }
+        in
+        add_res complete)
   in
   let open Option in
   Option.iter
@@ -603,10 +630,14 @@ let rec zip_truncate (xs : 'a list) (ys : 'b list) : ('a * 'b) list =
  *)
 let autocomplete_enum_class_label_call env f args =
   argument_global_type := Some Acclass_get;
-  let suggest_members_from_ty env ty pos_labelname =
+  let suggest_members_from_ty env ty pos_labelname expected_ty =
     match get_node ty with
     | Tclass ((p, enum_name), _, _) when Tast_env.is_enum_class env enum_name ->
-      autocomplete_enum_class_label env (Some (p, enum_name)) pos_labelname
+      autocomplete_enum_class_label
+        env
+        (Some (p, enum_name))
+        pos_labelname
+        expected_ty
     | _ -> ()
   in
   let is_enum_class_label_ty_name name =
@@ -620,9 +651,9 @@ let autocomplete_enum_class_label_call env f args =
       ~f:(fun (arg, arg_ty) ->
         match (arg, get_node arg_ty.fp_type.et_type) with
         | ( (_, (_, p, Aast.EnumClassLabel (None, n))),
-            Typing_defs.Tnewtype (ty_name, [enum_ty; _member_ty], _) )
+            Typing_defs.Tnewtype (ty_name, [enum_ty; member_ty], _) )
           when is_enum_class_label_ty_name ty_name ->
-          suggest_members_from_ty env enum_ty (p, n)
+          suggest_members_from_ty env enum_ty (p, n) (Some member_ty)
         | (_, _) -> ())
       ty_args
   | _ -> ()
@@ -1155,7 +1186,7 @@ let visitor ctx autocomplete_context sienv =
           autocomplete_enum_value_in_call env ft args
         | _ -> ())
       | (_, p, Aast.EnumClassLabel (opt_cname, n)) when is_auto_complete n ->
-        autocomplete_enum_class_label env opt_cname (p, n)
+        autocomplete_enum_class_label env opt_cname (p, n) None
       | _ -> ());
       super#on_expr env expr
 

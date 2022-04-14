@@ -389,13 +389,19 @@ let set_line_end line pos =
     Pos_large { pos_file; pos_start; pos_end }
   | _ -> pos
 
+let set_col_start pos_cnum pos =
+  let pos = as_large_pos pos in
+  match pos with
+  | Pos_large { pos_file; pos_start; pos_end } ->
+    let pos_start = File_pos_large.set_column pos_cnum pos_start in
+    Pos_large { pos_file; pos_start; pos_end }
+  | _ -> pos
+
 let set_col_end pos_cnum pos =
-  (* temporarily change this function to change both the start and end's columns *)
   let pos = as_large_pos pos in
   match pos with
   | Pos_large { pos_file; pos_start; pos_end } ->
     let pos_end = File_pos_large.set_column pos_cnum pos_end in
-    let pos_start = File_pos_large.set_column pos_cnum pos_start in
     Pos_large { pos_file; pos_start; pos_end }
   | _ -> pos
 

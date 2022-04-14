@@ -2320,6 +2320,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17b02fc0ff9a9e4b35b3342880f48e896ebf69f2967921fe8646bf5b7125956a"
 
 [[package]]
+name = "ocaml_blob"
+version = "0.0.0"
+dependencies = [
+ "libc",
+ "lz4",
+ "ocamlrep",
+ "rand",
+ "shmrs",
+]
+
+[[package]]
 name = "ocaml_helper"
 version = "0.0.0"
 dependencies = [
@@ -3147,7 +3158,7 @@ name = "shmffi"
 version = "0.0.0"
 dependencies = [
  "libc",
- "lz4",
+ "ocaml_blob",
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "once_cell",

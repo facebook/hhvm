@@ -83,6 +83,9 @@ let recheck_job
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi_path);
   write_json ctx ownership out_dir files_info start_time
 
+let index_files ctx ~out_dir ~files =
+  recheck_job ctx out_dir "www" "hhi" false 0.0 files |> ignore
+
 let go
     (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)

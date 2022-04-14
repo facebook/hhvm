@@ -26,6 +26,7 @@ type mode =
   | Coverage
   | Cst_search
   | Dump_symbol_info
+  | Glean_index of string
   | Dump_inheritance
   | Errors
   | Lint
@@ -369,6 +370,9 @@ let parse_options () =
       ( "--dump-symbol-info",
         Arg.Unit (set_mode Dump_symbol_info),
         " Dump all symbol information" );
+      ( "--glean-index",
+        Arg.String (fun output_dir -> set_mode (Glean_index output_dir) ()),
+        " Run indexer and output json in provided dir" );
       ( "--error-format",
         Arg.String
           (fun s ->
@@ -1815,6 +1819,15 @@ let handle_mode
           in
           print_endline (Hh_json.json_to_multiline result_json)
         | None -> ())
+  | Glean_index out_dir ->
+    if
+      (not (Disk.is_directory out_dir))
+      || Array.length (Sys.readdir out_dir) > 0
+    then (
+      Printf.printf "%s should be an empty dir\n" out_dir;
+      exit 1
+    ) else
+      Symbol_entrypoint.index_files ctx ~out_dir ~files:filenames
   | Lint ->
     let lint_errors =
       Relative_path.Map.fold

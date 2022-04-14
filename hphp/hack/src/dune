@@ -46,7 +46,8 @@
   typing
   typing_serialization
   utils_core
-  utils_multifile))
+  utils_multifile
+  write_symbol_info))
 
 (executable
  (name hh_single_ai)

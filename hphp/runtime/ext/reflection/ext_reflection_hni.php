@@ -117,6 +117,12 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function isAsync()[]: bool;
 
   /**
+   * @return     bool   TRUE if the function is internal, otherwise FALSE.
+   */
+  <<__Native>>
+  public function isInternalToModule()[]: bool;
+
+  /**
    * Indicates whether the function has ...$varargs as its last parameter
    * to capture variadic arguments.
    *
@@ -1647,6 +1653,14 @@ class ReflectionClass implements Reflector {
    */
   <<__Native>>
   public function isFinal()[]: bool;
+
+  /**
+   * Checks if a class is internal.
+   *
+   * @return     bool   Returns TRUE on success or FALSE on failure.
+   */
+  <<__Native>>
+  public function isInternalToModule()[]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.istrait.php )

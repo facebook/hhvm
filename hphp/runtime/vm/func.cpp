@@ -563,6 +563,7 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrPublic)    { out << " public"; }
   if (attrs & AttrProtected) { out << " protected"; }
   if (attrs & AttrPrivate)   { out << " private"; }
+  if (attrs & AttrInternal)  { out << " internal"; }
   if (attrs & AttrAbstract)  { out << " abstract"; }
   if (attrs & AttrFinal)     { out << " final"; }
   if (attrs & AttrNoOverride){ out << " (nooverride)"; }

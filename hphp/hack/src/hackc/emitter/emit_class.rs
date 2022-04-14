@@ -910,6 +910,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         Attr::AttrEnum,
         enum_type.is_some() && !hhas_attribute::has_enum_class(&attributes),
     );
+    flags.set(Attr::AttrInternal, ast_class.internal);
 
     add_symbol_refs(
         alloc,

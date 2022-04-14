@@ -194,6 +194,7 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_attrs & AttrPublic) { out << "public "; }
   if (m_attrs & AttrProtected) { out << "protected "; }
   if (m_attrs & AttrPrivate) { out << "private "; }
+  if (m_attrs & AttrInternal) { out << "internal "; }
   if (m_attrs & AttrPersistent) { out << "(persistent) "; }
   if (m_attrs & AttrIsConst) { out << "(const) "; }
   if (m_attrs & AttrTrait) { out << "(trait) "; }

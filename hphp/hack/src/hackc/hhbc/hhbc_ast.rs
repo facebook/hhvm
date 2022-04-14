@@ -251,7 +251,11 @@ impl From<Visibility> for hhvm_types_ffi::Attr {
             Visibility::Private => Self::AttrPrivate,
             Visibility::Public => Self::AttrPublic,
             Visibility::Protected => Self::AttrProtected,
-            Visibility::Internal => Self::AttrPublic,
+            // TODO(T115356820): Decide whether internal should be mutually
+            // exclusive with other visibility modifiers or it should be a
+            // modifier on top the others.
+            // In order to unblock typechecker, let it be a modifier on top for now.
+            Visibility::Internal => (Self::AttrInternal | Self::AttrPublic).into(),
         }
     }
 }

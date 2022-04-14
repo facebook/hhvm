@@ -732,6 +732,11 @@ static bool HHVM_METHOD(ReflectionFunctionAbstract, isAsync) {
   return func->isAsync();
 }
 
+static bool HHVM_METHOD(ReflectionFunctionAbstract, isInternalToModule) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  return func->attrs() & AttrInternal;
+}
+
 static bool HHVM_METHOD(ReflectionFunctionAbstract, isVariadic) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return func->hasVariadicCaptureParam();
@@ -1227,6 +1232,11 @@ static bool HHVM_METHOD(ReflectionClass, isInstantiable) {
 static bool HHVM_METHOD(ReflectionClass, isFinal) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return cls->attrs() & AttrFinal;
+}
+
+static bool HHVM_METHOD(ReflectionClass, isInternalToModule) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  return cls->attrs() & AttrInternal;
 }
 
 static bool HHVM_METHOD(ReflectionClass, isAbstract) {
@@ -2010,6 +2020,20 @@ static bool HHVM_METHOD(ReflectionProperty, isStatic) {
   }
 }
 
+static bool HHVM_METHOD(ReflectionProperty, isInternalToModule) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance:
+      return data->getProp()->attrs & AttrInternal;
+    case ReflectionPropHandle::Type::Static:
+      return data->getSProp()->attrs & AttrInternal;
+    case ReflectionPropHandle::Type::Dynamic:
+      return false;
+    default:
+      reflection_property_internal_error();
+  }
+}
+
 static bool HHVM_METHOD(ReflectionProperty, isDefault) {
   auto const data = Native::data<ReflectionPropHandle>(this_);
   switch (data->getType()) {
@@ -2237,6 +2261,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionFunctionAbstract, isInternal);
     HHVM_ME(ReflectionFunctionAbstract, isGenerator);
     HHVM_ME(ReflectionFunctionAbstract, isAsync);
+    HHVM_ME(ReflectionFunctionAbstract, isInternalToModule);
     HHVM_ME(ReflectionFunctionAbstract, isVariadic);
     HHVM_ME(ReflectionFunctionAbstract, getFileName);
     HHVM_ME(ReflectionFunctionAbstract, getStartLine);
@@ -2289,6 +2314,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionProperty, isProtected);
     HHVM_ME(ReflectionProperty, isPrivate);
     HHVM_ME(ReflectionProperty, isStatic);
+    HHVM_ME(ReflectionProperty, isInternalToModule);
     HHVM_ME(ReflectionProperty, isDefault);
     HHVM_ME(ReflectionProperty, isReadonly);
     HHVM_ME(ReflectionProperty, getModifiers);
@@ -2315,6 +2341,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionClass, getEnumUnderlyingType);
     HHVM_ME(ReflectionClass, isAbstract);
     HHVM_ME(ReflectionClass, isFinal);
+    HHVM_ME(ReflectionClass, isInternalToModule);
     HHVM_ME(ReflectionClass, getModifiers);
     HHVM_ME(ReflectionClass, getFileName);
     HHVM_ME(ReflectionClass, getStartLine);

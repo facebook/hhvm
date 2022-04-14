@@ -62,6 +62,7 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
     attrs.set(Attr::AttrProvenanceSkipFrame, is_prov_skip_frame);
     attrs.set(Attr::AttrReadonlyReturn, f.readonly_ret.is_some());
     attrs.set(Attr::AttrUnique, is_systemlib);
+    attrs.set(Attr::AttrInternal, fd.internal);
     attrs
 }
 

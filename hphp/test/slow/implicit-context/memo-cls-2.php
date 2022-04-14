@@ -3,7 +3,7 @@
 class Foo {
   static Foo $x;
   <<__PolicyShardedMemoize>>
-  function memo<reify T>($a, $b)[zoned] {
+  readonly function memo<reify T>($a, $b)[zoned] {
     $hash = quoted_printable_encode(
       HH\ImplicitContext\_Private\get_implicit_context_memo_key()
     );
@@ -13,22 +13,22 @@ class Foo {
 }
 
 function g()[zoned] {
-  Foo::$x->memo<int>(1, 2);
-  Foo::$x->memo<int>(1, 3);
-  Foo::$x->memo<string>(1, 2);
-  Foo::$x->memo<string>(1, 3);
+  (readonly Foo::$x)->memo<int>(1, 2);
+  (readonly Foo::$x)->memo<int>(1, 3);
+  (readonly Foo::$x)->memo<string>(1, 2);
+  (readonly Foo::$x)->memo<string>(1, 3);
 }
 
 function f()[zoned] {
-  Foo::$x->memo<int>(1, 2);
-  Foo::$x->memo<int>(1, 3);
-  Foo::$x->memo<string>(1, 2);
-  Foo::$x->memo<string>(1, 3);
+  (readonly Foo::$x)->memo<int>(1, 2);
+  (readonly Foo::$x)->memo<int>(1, 3);
+  (readonly Foo::$x)->memo<string>(1, 2);
+  (readonly Foo::$x)->memo<string>(1, 3);
   ClassContext2::start(new B, g<>);
-  Foo::$x->memo<int>(1, 2);
-  Foo::$x->memo<int>(1, 3);
-  Foo::$x->memo<string>(1, 2);
-  Foo::$x->memo<string>(1, 3);
+  (readonly Foo::$x)->memo<int>(1, 2);
+  (readonly Foo::$x)->memo<int>(1, 3);
+  (readonly Foo::$x)->memo<string>(1, 2);
+  (readonly Foo::$x)->memo<string>(1, 3);
 }
 
 <<__EntryPoint>>

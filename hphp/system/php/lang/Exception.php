@@ -25,8 +25,8 @@ class Exception implements Throwable {
 
   private static $traceOpts = 0;
 
-  final public static function getTraceOptions()[read_globals] {
-    return self::$traceOpts;
+  final public static function getTraceOptions()[read_globals] : int {
+    return (readonly self::$traceOpts) as int;
   }
 
   final public static function setTraceOptions($opts)[globals] {

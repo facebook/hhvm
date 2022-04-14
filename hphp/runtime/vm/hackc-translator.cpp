@@ -77,6 +77,33 @@ auto maybeOrElse(hackc::Maybe<T> m, Fn fn, ElseFn efn) {
   return opt ? fn(opt.value()) : efn();
 }
 
+template<typename T, typename Fn>
+auto maybeThen(hackc::Maybe<T> m, Fn fn) {
+  auto opt = maybe(m);
+  if (opt) fn(opt.value());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+struct FatalUnitError : std::runtime_error {
+  FatalUnitError(
+    const std::string& msg,
+    const StringData* filePath,
+    Location::Range pos,
+    FatalOp op)
+    : std::runtime_error(msg)
+    , filePath(filePath)
+    , pos(pos)
+    , op(op)
+  {}
+
+  const StringData* filePath;
+  Location::Range pos;
+  FatalOp op;
+};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // hhbc::Str Helpers
 
@@ -536,6 +563,17 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
     translateAdata(ts, d);
   }
 
+  translateUserAttributes(unit.file_attributes, ts.ue->m_fileAttributes);
+  maybeThen(unit.fatal, [&](Triple<FatalOp, HhasPos, Str> fatal) {
+    auto const pos = fatal._1;
+    auto const msg = toString(fatal._2);
+    throw FatalUnitError(
+      msg, ts.ue->m_filepath,
+      Location::Range(pos.line_begin, pos.col_begin, pos.line_end, pos.col_end),
+      fatal._0
+    );
+  });
+
   translateModuleUse(ts, maybe(unit.module_use));
 }
 }
@@ -552,10 +590,14 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 
-  TranslationState ts{};
-  ts.ue = ue.get();
-  translate(ts, unit);
-  ue->finish();
+  try {
+    TranslationState ts{};
+    ts.ue = ue.get();
+    translate(ts, unit);
+    ue->finish();
+  } catch (const FatalUnitError& e) {
+    ue = createFatalUnit(e.filePath, sha1, e.op, e.what(), e.pos);
+  }
   return ue;
 }
 }

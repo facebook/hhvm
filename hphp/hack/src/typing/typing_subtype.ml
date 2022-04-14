@@ -493,6 +493,16 @@ let get_tyvar_opt t =
     end
   | _ -> None
 
+(* build the interface corresponding to the can_traverse constraint *)
+let can_traverse_to_iface ct =
+  match (ct.ct_key, ct.ct_is_await) with
+  | (None, false) -> MakeType.traversable ct.ct_reason ct.ct_val
+  | (None, true) -> MakeType.async_iterator ct.ct_reason ct.ct_val
+  | (Some ct_key, false) ->
+    MakeType.keyed_traversable ct.ct_reason ct_key ct.ct_val
+  | (Some ct_key, true) ->
+    MakeType.async_keyed_iterator ct.ct_reason ct_key ct.ct_val
+
 let rec simplify_subtype
     ~(subtype_env : subtype_env)
     ?(this_ty : locl_ty option = None)
@@ -2384,9 +2394,32 @@ and simplify_subtype_can_index
   default_subtype ~subtype_env ~this_ty ~fail env ty_sub ty_super
 
 and simplify_subtype_can_traverse
-    ~subtype_env ~this_ty ~fail ty_sub ty_super (_r, _ci) env =
-  (* TODO: implement *)
-  default_subtype ~subtype_env ~this_ty ~fail env ty_sub ty_super
+    ~subtype_env ~this_ty ~fail ty_sub ty_super ((_r : Reason.t), ct) env =
+  log_subtype_i
+    ~level:2
+    ~this_ty
+    ~function_name:"simplify_subtype_can_traverse"
+    env
+    ty_sub
+    ty_super;
+  match ty_sub with
+  | ConstraintType _ ->
+    default_subtype ~subtype_env ~this_ty ~fail env ty_sub ty_super
+  | LoclType lty_sub ->
+    (match get_node lty_sub with
+    | Tdynamic ->
+      simplify_subtype ~subtype_env ~this_ty lty_sub ct.ct_val env
+      &&&
+      (match ct.ct_key with
+      | None -> valid
+      | Some ct_key -> simplify_subtype ~subtype_env ~this_ty lty_sub ct_key)
+    | Tclass _
+    | Tvec_or_dict _
+    | Tany _
+    | Terr ->
+      let trav_ty = can_traverse_to_iface ct in
+      simplify_subtype ~subtype_env ~this_ty lty_sub trav_ty env
+    | _ -> default_subtype ~subtype_env ~this_ty ~fail env ty_sub ty_super)
 
 and simplify_subtype_has_member
     ~subtype_env

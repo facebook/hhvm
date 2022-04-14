@@ -535,102 +535,70 @@ let branch :
 let as_expr env ty1 pe e =
   let env = Env.open_tyvars env pe in
   let (env, tv) = Env.fresh_type env pe in
-  let (env, expected_ty, tk, tv) =
+  let (env, ct) =
     match e with
     | As_v _ ->
-      let tk = MakeType.mixed Reason.Rnone in
-      (env, MakeType.traversable (Reason.Rforeach pe) tv, tk, tv)
+      ( env,
+        {
+          ct_key = None;
+          ct_val = tv;
+          ct_is_await = false;
+          ct_reason = Reason.Rforeach pe;
+        } )
     | As_kv _ ->
       let (env, tk) = Env.fresh_type env pe in
-      (env, MakeType.keyed_traversable (Reason.Rforeach pe) tk tv, tk, tv)
+      ( env,
+        {
+          ct_key = Some tk;
+          ct_val = tv;
+          ct_is_await = false;
+          ct_reason = Reason.Rforeach pe;
+        } )
     | Await_as_v _ ->
-      let tk = MakeType.mixed Reason.Rnone in
-      (env, MakeType.async_iterator (Reason.Rasyncforeach pe) tv, tk, tv)
+      ( env,
+        {
+          ct_key = None;
+          ct_val = tv;
+          ct_is_await = true;
+          ct_reason = Reason.Rasyncforeach pe;
+        } )
     | Await_as_kv _ ->
       let (env, tk) = Env.fresh_type env pe in
       ( env,
-        MakeType.async_keyed_iterator (Reason.Rasyncforeach pe) tk tv,
-        tk,
-        tv )
+        {
+          ct_key = Some tk;
+          ct_val = tv;
+          ct_is_await = true;
+          ct_reason = Reason.Rasyncforeach pe;
+        } )
   in
-  let is_nonnull ty =
-    let (_env, ty) = Env.expand_type env ty in
-    match get_node ty with
-    | Tnonnull -> true
-    | _ -> false
+  let expected_ty =
+    ConstraintType (mk_constraint_type (Reason.Rforeach pe, Tcan_traverse ct))
   in
-  let rec distribute_union ~expected_ty env ty =
-    let (env, ty) = Env.expand_type env ty in
-    match get_node ty with
-    (* Special case for nonnull & tyl <: expected_ty which
-     * is equivalent to tyl <: ?expected_ty. We need this in the
-     * case that tyl is a type variable
-     *)
-    | Tintersection tyl when List.exists tyl ~f:is_nonnull ->
-      let tyl = List.filter tyl ~f:(fun t -> not (is_nonnull t)) in
-      let expected_ty =
-        MakeType.nullable_locl (get_reason expected_ty) expected_ty
-      in
-      distribute_union
-        ~expected_ty
-        env
-        (MakeType.intersection (get_reason ty) tyl)
-    | Tunion tyl ->
-      let (env, errs) =
-        List.fold tyl ~init:(env, []) ~f:(fun (env, errs) ty ->
-            let (env, err) = distribute_union ~expected_ty env ty in
-            (env, err :: errs))
-      in
-      (env, union_coercion_errs errs)
-    | _ ->
-      let is_dynamic =
-        if
-          TCO.enable_sound_dynamic (Env.get_tcopt env)
-          && env.in_support_dynamic_type_method_check
-        then
-          SubType.is_sub_type_for_union env (MakeType.dynamic Reason.Rnone) ty
-          && SubType.is_sub_type_for_union
-               env
-               ty
-               (MakeType.dynamic Reason.Rnone)
-        else
-          SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
-      in
-      if is_dynamic then (
-        let (env, e1) =
-          SubType.sub_type env ty tk
-          @@ Some (Typing_error.Reasons_callback.unify_error_at pe)
-        in
-        let (env, e2) =
-          SubType.sub_type env ty tv
-          @@ Some (Typing_error.Reasons_callback.unify_error_at pe)
-        in
-        Option.(
-          iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
-        (env, Ok ty)
-      ) else
-        let ur = Reason.URforeach in
-        let (env, ty_err_opt) =
-          Type.sub_type
-            pe
-            ur
-            env
-            ty
-            expected_ty
-            Typing_error.Callback.unify_error
-        in
-        Option.iter ~f:Errors.add_typing_error ty_err_opt;
-        let ty_mismatch = mk_ty_mismatch_res ty expected_ty ty_err_opt in
-        (env, ty_mismatch)
+  let (env, ty_err_opt) =
+    Type.sub_type_i
+      pe
+      Reason.URforeach
+      env
+      (LoclType ty1)
+      expected_ty
+      Typing_error.Callback.unify_error
   in
-
-  let (env, err_res) = distribute_union ~expected_ty env ty1 in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  let ty_mismatch = mk_ty_mismatch_res ty1 expected_ty ty_err_opt in
   let err_opt =
-    match err_res with
+    match ty_mismatch with
     | Ok _ -> None
-    | Error (act, exp) -> Some (act, exp)
+    | Error (act, LoclType exp) -> Some (act, exp)
+    | Error (act, ConstraintType _) ->
+      Some (act, SubType.can_traverse_to_iface ct)
   in
-  let env = Env.set_tyvar_variance env expected_ty in
+  let env = Env.set_tyvar_variance_i env expected_ty in
+  let tk =
+    match ct.ct_key with
+    | None -> MakeType.mixed Reason.Rnone
+    | Some tk -> tk
+  in
   (Typing_solver.close_tyvars_and_solve env, tk, tv, err_opt)
 
 (* These functions invoke special printing functions for Typing_env. They do not

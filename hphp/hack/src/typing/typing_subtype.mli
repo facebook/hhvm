@@ -109,3 +109,5 @@ val subtype_funs :
   locl_fun_type ->
   env ->
   env * Typing_error.t option
+
+val can_traverse_to_iface : can_traverse -> locl_ty

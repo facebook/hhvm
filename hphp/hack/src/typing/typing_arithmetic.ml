@@ -101,46 +101,7 @@ let check_like_num p_exp p env ty =
       Typing_error.Callback.unify_error
   in
   let et_type = MakeType.num (Reason.Rarith p_exp) in
-  let (env1, ty_err_opt) =
-    Typing_coercion.coerce_type
-      p
-      Reason.URnone
-      env
-      ty
-      { et_type; et_enforced = Unenforced }
-      err
-  in
-  match ty_err_opt with
-  | None -> (env1, None, false, ty)
-  | Some _ ->
-    let (env2, fresh_ty) = Env.fresh_type env p in
-    let (env2, like_ty) =
-      Typing_union.union env2 fresh_ty (MakeType.dynamic (get_reason fresh_ty))
-    in
-    let (env2, _impossible_error) =
-      Typing_subtype.sub_type env2 fresh_ty et_type
-      @@ Some
-           Typing_error.(
-             Reasons_callback.always
-             @@ primary
-             @@ Primary.Internal_error
-                  { pos = p; msg = "Subtype of fresh type variable" })
-    in
-    let (env2, ty_err_opt_like) =
-      Typing_coercion.coerce_type
-        p
-        Reason.URnone
-        env2
-        ty
-        { et_type = like_ty; et_enforced = Unenforced }
-        Typing_error.Callback.unify_error
-    in
-    (match ty_err_opt_like with
-    | None -> (env2, None, true, fresh_ty)
-    | Some _ ->
-      Option.iter ty_err_opt ~f:Errors.add_typing_error;
-      let ty_mismatch = Option.map ty_err_opt ~f:Fn.(const (ty, et_type)) in
-      (env1, ty_mismatch, false, ty))
+  Typing_coercion.coerce_type_like_strip p Reason.URnone env ty et_type err
 
 (** [expand_type_and_narrow_to_numeric ~allow_nothing env p ty] forces the
   solving of [ty] to a numeric type, based on its lower bounds. If allow_nothing

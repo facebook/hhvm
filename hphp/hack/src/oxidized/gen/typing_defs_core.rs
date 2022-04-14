@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<81e7d87d513216ef9d6798a0c7e3b0f9>>
+// @generated SignedSource<<18ffe5d97ed49b67f370e85fb16472fe>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -877,7 +877,7 @@ pub struct CanTraverse {
     pub key: Option<Ty>,
     pub val: Ty,
     pub is_await: bool,
-    pub expr_pos: pos::Pos,
+    pub reason: reason::Reason,
 }
 
 #[derive(

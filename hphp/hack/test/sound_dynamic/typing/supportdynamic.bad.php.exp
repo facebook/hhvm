@@ -39,7 +39,7 @@ Typing error (Typing[4110])
 File "supportdynamic.bad.php", line 16, characters 12-14:
 Invalid `foreach` (Typing[4110])
   File "supportdynamic.bad.php", line 16, characters 12-14:
-  Expected `Traversable<[unresolved]>` because this is used in a `foreach` statement
+  Expected an array that can be traversed with foreach because this is used in a `foreach` statement
   File "supportdynamic.hhi", line 7, characters 36-42:
   But got `nonnull`
   File "supportdynamic.hhi", line 6, characters 29-29:
@@ -47,7 +47,7 @@ Invalid `foreach` (Typing[4110])
 File "supportdynamic.bad.php", line 17, characters 12-14:
 Invalid `foreach` (Typing[4110])
   File "supportdynamic.bad.php", line 17, characters 12-14:
-  Expected `KeyedTraversable<[unresolved], [unresolved]>` because this is used in a `foreach` statement
+  Expected an array that can be traversed with foreach because this is used in a `foreach` statement
   File "supportdynamic.hhi", line 7, characters 36-42:
   But got `nonnull`
   File "supportdynamic.hhi", line 6, characters 29-29:

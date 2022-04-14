@@ -558,7 +558,7 @@ type can_traverse = {
   ct_key: locl_ty option;
   ct_val: locl_ty;
   ct_is_await: bool;
-  ct_expr_pos: Pos.t;
+  ct_reason: Reason.t;
 }
 [@@deriving show]
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6ef662e85d66d5b6dc5b98769839ff54>>
+// @generated SignedSource<<73b94b2474fdc47c042ad1cd4b8b85b6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -814,7 +814,7 @@ pub struct CanTraverse<'a> {
     pub val: &'a Ty<'a>,
     pub is_await: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub expr_pos: &'a pos::Pos<'a>,
+    pub reason: &'a reason::Reason<'a>,
 }
 impl<'a> TrivialDrop for CanTraverse<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(CanTraverse<'arena>);

@@ -338,7 +338,7 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       (env, mk_constraint_type (r, Tcan_index ci))
 
     method on_Tcan_traverse env r ct =
-      let { ct_key; ct_val; ct_is_await; ct_expr_pos } = ct in
+      let { ct_key; ct_val; ct_is_await; ct_reason } = ct in
       let (env, ct_key) =
         match ct_key with
         | None -> (env, None)
@@ -347,7 +347,7 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
           (env, Some ct_key)
       in
       let (env, ct_val) = this#on_type env ct_val in
-      let ct = { ct_key; ct_val; ct_is_await; ct_expr_pos } in
+      let ct = { ct_key; ct_val; ct_is_await; ct_reason } in
       (env, mk_constraint_type (r, Tcan_traverse ct))
 
     method on_Tdestructure env r { d_required; d_optional; d_variadic; d_kind }

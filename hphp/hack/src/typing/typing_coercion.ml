@@ -100,6 +100,57 @@ let coerce_type
           on_error
           ~claim:(lazy (p, Reason.string_of_ureason ur)))
 
+let coerce_type_like_strip
+    p ur env ty_have ty_expect (on_error : Typing_error.Callback.t) =
+  let (env1, ty_err_opt) =
+    coerce_type_impl
+      ~coerce_for_op:false
+      ~coerce:None
+      env
+      ty_have
+      { et_type = ty_expect; et_enforced = Unenforced }
+    @@ Some
+         (Typing_error.Reasons_callback.with_claim
+            on_error
+            ~claim:(lazy (p, Reason.string_of_ureason ur)))
+  in
+  match ty_err_opt with
+  | None -> (env1, None, false, ty_have)
+  | Some _ ->
+    let (env2, fresh_ty) = Typing_env.fresh_type env p in
+    let (env2, like_ty) =
+      Typing_utils.union
+        env2
+        fresh_ty
+        (Typing_make_type.dynamic (get_reason fresh_ty))
+    in
+    let (env2, _impossible_error) =
+      Typing_utils.sub_type env2 fresh_ty ty_expect
+      @@ Some
+           Typing_error.(
+             Reasons_callback.always
+             @@ primary
+             @@ Primary.Internal_error
+                  { pos = p; msg = "Subtype of fresh type variable" })
+    in
+    let (env2, ty_err_opt_like) =
+      coerce_type
+        p
+        Reason.URnone
+        env2
+        ty_have
+        { et_type = like_ty; et_enforced = Unenforced }
+        Typing_error.Callback.unify_error
+    in
+    (match ty_err_opt_like with
+    | None -> (env2, None, true, fresh_ty)
+    | Some _ ->
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
+      let ty_mismatch =
+        Option.map ty_err_opt ~f:Fn.(const (ty_have, ty_expect))
+      in
+      (env1, ty_mismatch, false, ty_have))
+
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)
 let try_coerce ?(coerce = None) env ty_have ty_expect =

@@ -642,6 +642,16 @@ fn print_expr(
             print_expr(ctx, w, env, splice)?;
             w.write_all(b"}")
         }
+        E_::EnumClassLabel(ecl) => match &ecl.0 {
+            Some(ast_defs::Id(_, s1)) => {
+                let s1 = get_class_name_from_id(ctx, env.codegen_env, true, true, s1);
+                write::concat_str_by(w, "#", [&s1.into(), &ecl.1])
+            }
+            None => {
+                w.write_all(b"#")?;
+                w.write_all(ecl.1.as_bytes())
+            }
+        },
         _ => Err(Error::fail(format!("TODO Unimplemented: Cannot print: {:?}", expr)).into()),
     }
 }

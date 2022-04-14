@@ -42,6 +42,15 @@ val build_occ_target_json : Hh_json.json -> Hh_json.json
 
 val build_file_lines_json : string -> int list -> bool -> bool -> Hh_json.json
 
+val build_gen_code_json :
+  filepath:string ->
+  fully_generated:bool ->
+  signature:string option ->
+  source:string option ->
+  command:string option ->
+  class_:string option ->
+  Hh_json.json
+
 val build_is_async_json : Ast_defs.fun_kind -> Hh_json.json
 
 val build_signature_json :

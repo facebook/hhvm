@@ -42,9 +42,12 @@ type hack =
 
 type src = FileLines
 
+type gencode = GenCode
+
 type t =
   | Hack of hack
   | Src of src
+  | Gencode of gencode
 
 type predicate = t
 

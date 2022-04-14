@@ -516,6 +516,19 @@ let file_lines filepath sourceText progress =
   in
   Fact_acc.add_fact Predicate.(Src FileLines) json progress
 
+let gen_code
+    ~filepath ~fully_generated ~signature ~source ~command ~class_ progress =
+  let json =
+    Build_json.build_gen_code_json
+      ~filepath
+      ~fully_generated
+      ~signature
+      ~source
+      ~command
+      ~class_
+  in
+  Fact_acc.add_fact Predicate.(Gencode GenCode) json progress
+
 let file_xrefs filepath xref_map progress =
   let json =
     JSON_Object

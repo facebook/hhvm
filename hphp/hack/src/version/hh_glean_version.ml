@@ -14,6 +14,8 @@ let schema_version = 8
     code indexation *)
 let hack_version = "6"
 
+let gencode_version = "1"
+
 let version : string = string_of_int schema_version
 
 let version_json =

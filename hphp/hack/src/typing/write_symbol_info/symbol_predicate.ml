@@ -47,14 +47,20 @@ type hack =
 
 type src = FileLines [@@deriving ord]
 
+type gencode = GenCode [@@deriving ord]
+
 type t =
   | Hack of hack
   | Src of src
+  | Gencode of gencode
 [@@deriving ord]
 
 type predicate = t
 
 let compare_predicate = compare
+
+let gencode_to_string = function
+  | GenCode -> "GenCode"
 
 let hack_to_string = function
   | ClassConstDeclaration -> "ClassConstDeclaration"
@@ -93,6 +99,7 @@ let hack_to_string = function
    This guarantee that facts are introduced before they are referenced. *)
 let ordered_all =
   [
+    Gencode GenCode;
     Hack MethodOccurrence;
     Hack NamespaceDeclaration;
     Hack GlobalConstDeclaration;
@@ -133,6 +140,8 @@ let src_to_string = function
 let to_string = function
   | Hack x -> "hack." ^ hack_to_string x ^ "." ^ Hh_glean_version.hack_version
   | Src x -> "src." ^ src_to_string x ^ ".1"
+  | Gencode x ->
+    "gencode." ^ gencode_to_string x ^ "." ^ Hh_glean_version.gencode_version
 
 (* Containers in inheritance relationships which share the four member
 types (excludes enum) *)

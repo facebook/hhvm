@@ -7,6 +7,7 @@ from typing import ClassVar, Dict, List, Optional, Type
 
 import test_case
 from common_tests import CommonTestDriver
+from glean.schema.gencode.types import GenCode
 from glean.schema.hack.types import (
     ClassConstDeclaration,
     ClassConstDefinition,
@@ -161,6 +162,7 @@ max_workers = 2
             "hack.TypedefDeclaration": TypedefDeclaration,
             "hack.TypedefDefinition": TypedefDefinition,
             "src.FileLines": FileLines,
+            "gencode.GenCode": GenCode,
         }
         predicate_base = predicate_name[: predicate_name.rfind(".")]
         return predicate_dict.get(predicate_base)

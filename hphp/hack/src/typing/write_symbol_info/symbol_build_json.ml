@@ -149,6 +149,36 @@ let build_file_lines_json filepath lineLengths endsInNewline hasUnicodeOrTabs =
       ("hasUnicodeOrTabs", JSON_Bool hasUnicodeOrTabs);
     ]
 
+let build_string_json_nested str = JSON_Object [("key", JSON_String str)]
+
+let build_gen_code_json
+    ~filepath ~fully_generated ~signature ~source ~command ~class_ =
+  let fields =
+    [
+      ("file", build_file_json_nested filepath);
+      ( "variant",
+        JSON_Number
+          (if fully_generated then
+            "0"
+          else
+            "1") );
+    ]
+  in
+  let l =
+    [
+      ("signature", signature);
+      ("source", source);
+      ("command", command);
+      ("class_", class_);
+    ]
+  in
+  let f (key, value_opt) =
+    match value_opt with
+    | None -> None
+    | Some value -> Some (key, build_string_json_nested value)
+  in
+  JSON_Object (fields @ List.filter_map ~f l)
+
 let build_is_async_json fun_kind =
   let is_async =
     match fun_kind with

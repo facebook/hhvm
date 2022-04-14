@@ -154,6 +154,16 @@ val decl_span :
 val file_lines :
   string -> Full_fidelity_source_text.t -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
+val gen_code :
+  filepath:string ->
+  fully_generated:bool ->
+  signature:string option ->
+  source:string option ->
+  command:string option ->
+  class_:string option ->
+  Fact_acc.t ->
+  Fact_id.t * Fact_acc.t
+
 val file_xrefs :
   string ->
   (Hh_json.json * Pos.t list) Fact_id.Map.t ->

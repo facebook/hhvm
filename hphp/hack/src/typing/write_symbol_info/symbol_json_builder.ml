@@ -16,6 +16,106 @@ module Build = Symbol_build_json
 module Predicate = Symbol_predicate
 module File_info = Symbol_file_info
 
+module Gencode : sig
+  type t = private {
+    mutable is_generated: bool;
+    mutable fully_generated: bool;
+    mutable source: string option;
+    mutable command: string option;
+    mutable class_: string option;
+    mutable signature: string option;
+  }
+
+  (* one linear pass of the string to extract the gencode info *)
+  val get_gencode_status : string -> t
+end = struct
+  type t = {
+    mutable is_generated: bool;
+    mutable fully_generated: bool;
+    mutable source: string option;
+    mutable command: string option;
+    mutable class_: string option;
+    mutable signature: string option;
+  }
+
+  let regex_sig =
+    {|\(^.*@\(partially-\)?generated\( SignedSource<<\([0-9a-f]+\)>>\)?.*$\)|}
+
+  let regex_codegen = {|\(^.*@codegen-\(command\|class\|source\).*: *\(.*\)$\)|}
+
+  let regex = Str.regexp (regex_sig ^ {|\||} ^ regex_codegen)
+
+  let has_group text i =
+    Option.(try_with (fun () -> Str.matched_group i text) |> is_some)
+
+  let extract_group text i =
+    Option.try_with (fun () -> Str.matched_group i text)
+
+  let update_fields t text =
+    t.is_generated <- true;
+    if has_group text 1 then (
+      t.fully_generated <- not (has_group text 2);
+      t.signature <- extract_group text 4
+    ) else
+      match extract_group text 6 with
+      | Some "command" -> t.command <- extract_group text 7
+      | Some "source" -> t.source <- extract_group text 7
+      | Some "class" -> t.class_ <- extract_group text 7
+      | _ -> Hh_logger.log "WARNING: this shouldn't happen."
+
+  let search_and_update t text pos =
+    try
+      let found_pos = Str.search_forward regex text pos in
+      update_fields t text;
+      (true, found_pos)
+    with
+    | Caml.Not_found -> (false, 0)
+
+  let get_gencode_status text =
+    let t =
+      {
+        is_generated = true;
+        fully_generated = true;
+        source = None;
+        command = None;
+        class_ = None;
+        signature = None;
+      }
+    in
+    let cur_pos = ref 0 in
+    let matched = ref true in
+    while !matched do
+      let (m, cp) = search_and_update t text !cur_pos in
+      cur_pos := cp + 1;
+      matched := m
+    done;
+    t
+end
+
+let process_source_text _ctx prog File_info.{ path; source_text; _ } =
+  let filepath = Relative_path.to_absolute path in
+  let text = Full_fidelity_source_text.text source_text in
+  match Gencode.get_gencode_status text with
+  | Gencode.
+      {
+        is_generated = true;
+        fully_generated;
+        source;
+        command;
+        class_;
+        signature;
+      } ->
+    Add_fact.gen_code
+      ~filepath
+      ~fully_generated
+      ~signature
+      ~source
+      ~command
+      ~class_
+      prog
+    |> snd
+  | _ -> prog
+
 let is_enum_or_enum_class = function
   | Ast_defs.Cenum
   | Ast_defs.Cenum_class _ ->
@@ -549,6 +649,9 @@ let process_xrefs_all_files ctx files_info progress =
 let process_decls_all_files ctx files_info progress =
   List.fold files_info ~init:progress ~f:(process_decls ctx)
 
+let process_source_text_all_files ctx files_info progress =
+  List.fold files_info ~init:progress ~f:(process_source_text ctx)
+
 (* This function processes declarations, starting with an
 empty fact cache. *)
 let build_decls_json ctx files_info ~ownership =
@@ -567,6 +670,7 @@ let build_xrefs_json ctx files_info ~ownership =
 sharing the declaration fact cache between them. *)
 let build_json ctx files_info ~ownership =
   Fact_acc.init ~ownership
+  |> process_source_text_all_files ctx files_info
   |> process_decls_all_files ctx files_info
   |> process_xrefs_all_files ctx files_info
   |> Fact_acc.to_json

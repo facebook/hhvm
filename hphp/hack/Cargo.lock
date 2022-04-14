@@ -3148,7 +3148,6 @@ version = "0.0.0"
 dependencies = [
  "libc",
  "lz4",
- "nohash-hasher",
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "once_cell",
@@ -3163,6 +3162,7 @@ dependencies = [
  "hashbrown",
  "libc",
  "nix",
+ "nohash-hasher",
  "owning_ref",
  "rand",
  "static_assertions",

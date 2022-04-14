@@ -33,7 +33,7 @@ pub extern "C" fn realloc_in_ocaml_heap(value: usize) -> usize {
         None => value,
         Some(slab) => {
             let pool = unsafe { ocamlrep_ocamlpool::Pool::new() };
-            slab.value().clone_with_allocator(&pool).to_bits()
+            slab.rebase().value().clone_with_allocator(&pool).to_bits()
         }
     }
 }

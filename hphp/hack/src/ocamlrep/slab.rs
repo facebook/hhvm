@@ -464,9 +464,10 @@ fn with_slab_allocator(f: impl Fn(&SlabAllocator) -> OpaqueValue<'_>) -> Option<
     // aligned to WORD_SIZE.
     data.push(unsafe { OpaqueValue::from_bits(0) });
     let mut slab = data.into_boxed_slice();
-    unsafe { slab.rebase_to(slab.current_address()) };
     slab.set_root_value_offset(root_value_byte_offset / WORD_SIZE);
     slab.mark_initialized();
+    // SlabAllocator starts its offsets at zero, so there is no need to rebase
+    // to 0 to satisfy OwnedSlab's invariant.
     Some(OwnedSlab(slab))
 }
 
@@ -562,6 +563,7 @@ pub fn copy_and_rebase_value<'a>(src: SlabReader<'_>, dest: &'a mut [usize]) -> 
 }
 
 /// A contiguous memory region containing a tree of OCaml values.
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct OwnedSlab(
     // This 'static lifetime is a lie. Slab's lifetime parameter represents the
     // lifetime of the OpaqueValues inside it. Since these values are expected
@@ -569,6 +571,11 @@ pub struct OwnedSlab(
     // values is the same as the lifetime of the backing memory for the slab.
     // When handing out references to values inside this slab, we must take care
     // that they borrow `self`, so that they don't outlive this backing memory.
+    //
+    // Rebased to address 0, so each "pointer" value in the slab represents an
+    // offset from the slab's start address.
+    #[serde(serialize_with = "serialize_slab")]
+    #[serde(deserialize_with = "deserialize_slab")]
     Box<Slab<'static>>,
 );
 
@@ -581,72 +588,92 @@ impl OwnedSlab {
         Self::from_value(Value::from_bits(value))
     }
 
-    pub fn value<'a>(&'a self) -> Value<'a> {
-        // The contents of our boxed slice cannot be moved, so we should never
-        // need to rebase.
-        self.0.value().unwrap()
-    }
-
     pub fn size_in_bytes(&self) -> usize {
         self.0.len() * WORD_SIZE
     }
 
     pub fn as_bytes(&self) -> &[u8] {
         let ptr = self.0.as_ptr() as *const u8;
+        // SAFETY: should be safe to view the underlying memory as bytes
+        // (although the exact behavior will be dependent on platform
+        // endianness)
         unsafe { std::slice::from_raw_parts(ptr, self.size_in_bytes()) }
     }
 
-    pub fn as_slice(&self) -> &[usize] {
-        unsafe { std::slice::from_raw_parts(self.0.as_ptr().cast(), self.0.len()) }
-    }
-
     pub fn as_reader(&self) -> SlabReader<'_> {
-        // SAFETY: `self.0` is a valid Slab, so it's safe to interpret its words
-        // as a slab using a SlabReader.
-        unsafe { SlabReader::from_words(self.as_slice()).unwrap() }
+        // SAFETY: `self.0` is a valid Slab
+        unsafe { SlabReader::from_slab(&self.0).unwrap() }
     }
 
-    /// Convert the given vector into an OwnedSlab.
-    ///
-    /// # Safety
-    ///
-    /// The caller must only invoke this function on a vector of usizes which
-    /// was initialized by slab APIs (e.g., one cloned from a slice returned by
-    /// `OwnedSlab::as_slice` or `SlabReader::as_slice`).
-    pub unsafe fn from_vec(words: Vec<usize>) -> Result<Self, SlabIntegrityError> {
-        let slab =
-            std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(words.into_boxed_slice());
-        Self::from_slab(slab)
+    #[cfg(test)]
+    fn from_slice(slice: &[usize]) -> Result<Self, SlabIntegrityError> {
+        Ok(Self(slab_from_words(slice.into())?))
     }
 
-    /// Copy the given slice into a newly allocated OwnedSlab.
-    ///
-    /// # Safety
-    ///
-    /// The caller must only invoke this function on slices which were
-    /// initialized by slab APIs (e.g., `OwnedSlab::as_slice`,
-    /// `SlabReader::as_slice`).
-    pub unsafe fn from_slice(slice: &[usize]) -> Result<Self, SlabIntegrityError> {
-        let slab = std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(slice.into());
-        Self::from_slab(slab)
-    }
-
-    unsafe fn from_slab(mut slab: Box<Slab<'static>>) -> Result<Self, SlabIntegrityError> {
-        slab.check_initialized()?;
-        slab.rebase_to(slab.current_address());
-        Ok(Self(slab))
+    pub fn rebase(mut self) -> RebasedSlab {
+        // SAFETY: `self.0` is a valid Slab
+        unsafe { self.0.rebase_to(self.0.current_address()) };
+        RebasedSlab(self.0)
     }
 
     pub fn leak(self) -> Value<'static> {
-        // The contents of our boxed slice cannot be moved, so we should never
-        // need to rebase.
-        Box::leak(self.0).value().unwrap()
+        let slab = self.rebase();
+        Box::leak(slab.0).value().unwrap()
     }
 }
 
 impl Debug for OwnedSlab {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         debug_slab("OwnedSlab", &self.0, f)
+    }
+}
+
+fn serialize_slab<S: serde::Serializer>(
+    slab: &Slab<'static>,
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    // SAFETY: `usize` and `OpaqueValue` have the same size and alignment
+    let slice: &[usize] = unsafe { std::slice::from_raw_parts(slab.as_ptr().cast(), slab.len()) };
+    serde::Serialize::serialize(slice, serializer)
+}
+
+fn deserialize_slab<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Box<Slab<'static>>, D::Error> {
+    let words: Box<[usize]> = serde::Deserialize::deserialize(deserializer)?;
+    let slab = slab_from_words(words)
+        .map_err(|e| serde::de::Error::custom(format!("invalid slab: {}", e)))?;
+    Ok(slab)
+}
+
+fn slab_from_words(words: Box<[usize]>) -> Result<Box<Slab<'static>>, SlabIntegrityError> {
+    let mut slab = unsafe { std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(words) };
+    // Do a (relatively expensive) integrity check, since we have no
+    // guarantee that the `Box<[usize]>` is a valid slab (since this
+    // function is used in deserialization).
+    slab.check_integrity()?;
+    if slab.base() != 0 {
+        unsafe {
+            slab.rebase_to(0);
+        }
+    }
+    Ok(slab)
+}
+
+/// A contiguous memory region containing a tree of OCaml values.
+/// Rebased to its current address, allowing reads of the contained value.
+#[derive(Clone)]
+pub struct RebasedSlab(Box<Slab<'static>>);
+
+impl RebasedSlab {
+    pub fn value(&self) -> Value<'_> {
+        // Invariant: self.0 is always rebased to its current address.
+        self.as_reader().value().unwrap()
+    }
+
+    fn as_reader(&self) -> SlabReader<'_> {
+        // SAFETY: `self.0` is a valid Slab
+        unsafe { SlabReader::from_slab(&self.0).unwrap() }
     }
 }
 
@@ -683,6 +710,12 @@ impl<'a> SlabReader<'a> {
         )))
     }
 
+    /// Safety: `slab` must be a valid slab
+    unsafe fn from_slab(slab: &'a Slab<'static>) -> Result<Self, SlabIntegrityError> {
+        let words: &[usize] = std::slice::from_raw_parts(slab.as_ptr().cast(), slab.len());
+        Self::from_words(words)
+    }
+
     pub fn size_in_words(&self) -> usize {
         Slab::from_bytes(self.0).len()
     }
@@ -708,7 +741,7 @@ impl<'a> SlabReader<'a> {
         unsafe { std::slice::from_raw_parts(slab.as_ptr() as *const usize, slab.len()) }
     }
 
-    pub fn value(&self) -> Option<Value<'_>> {
+    pub fn value(&self) -> Option<Value<'a>> {
         Slab::from_bytes(self.0).value()
     }
 
@@ -796,7 +829,7 @@ mod test {
                 let reader = SlabReader::from_bytes(bytes).unwrap();
                 let owned_slab = OwnedSlab::from_slice(reader.as_slice()).unwrap();
                 assert_eq!(
-                    <(isize, String)>::from_ocamlrep(owned_slab.value()),
+                    <(isize, String)>::from_ocamlrep(owned_slab.rebase().value()),
                     Ok((42, "a".to_string()))
                 );
             }

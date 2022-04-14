@@ -50,6 +50,8 @@ struct TranslationException : Exception {
 struct TranslationState {
   UnitEmitter* ue;
   PreClassEmitter* pce{nullptr};
+  // Map of adata identifiers to their associated static arrays.
+  std::map<std::string, ArrayData*> adataMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -109,53 +111,61 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
       case kind::Double: {
         return make_tv<KindOfDouble>(tv.double_._0);
       }
-    case kind::String: {
-      auto const s = toStaticString(tv.string._0);
-      return make_tv<KindOfPersistentString>(s);
-    }
-    case kind::Null:
-      return make_tv<KindOfNull>();
-    case kind::Vec: {
-      VecInit v(tv.vec._0.len);
-      auto set = range(tv.vec._0);
-      for (auto const& elt : set) {
-        v.append(toTypedValue(elt));
+      case kind::String: {
+        auto const s = toStaticString(tv.string._0);
+        return make_tv<KindOfPersistentString>(s);
       }
-      return make_tv<KindOfVec>(v.create());
-    }
-    case kind::Dict: {
-      DictInit d(tv.dict._0.len);
-      auto set = range(tv.dict._0);
-      for (auto const& elt : set) {
-        switch (elt._0.tag) {
-          case kind::Int:
-            d.set(elt._0.int_._0, toTypedValue(elt._1));
-            break;
-          case kind::String: {
-            auto const s = toStaticString(elt._0.string._0);
-            d.set(s, toTypedValue(elt._1));
-            break;
-          }
-          default:
-            always_assert(false);
+      case kind::Null:
+        return make_tv<KindOfNull>();
+      case kind::Vec: {
+        VecInit v(tv.vec._0.len);
+        auto set = range(tv.vec._0);
+        for (auto const& elt : set) {
+          v.append(toTypedValue(elt));
         }
+        return make_tv<KindOfVec>(v.create());
       }
-      return make_tv<KindOfDict>(d.create());
-    }
-    case kind::Keyset: {
-      KeysetInit k(tv.keyset._0.len);
-      auto set = range(tv.keyset._0);
-      for (auto const& elt : set) {
-        k.add(toTypedValue(elt));
+      case kind::Dict: {
+        DictInit d(tv.dict._0.len);
+        auto set = range(tv.dict._0);
+        for (auto const& elt : set) {
+          switch (elt._0.tag) {
+            case kind::Int:
+              d.set(elt._0.int_._0, toTypedValue(elt._1));
+              break;
+            case kind::String: {
+              auto const s = toStaticString(elt._0.string._0);
+              d.set(s, toTypedValue(elt._1));
+              break;
+            }
+            case kind::LazyClass:{
+              if (RuntimeOption::EvalRaiseClassConversionWarning) {
+                raise_class_to_string_conversion_warning();
+              }
+              auto const s = toStaticString(elt._0.lazy_class._0);
+              d.set(s, toTypedValue(elt._1));
+              break;
+            }
+            default:
+              always_assert(false);
+          }
+        }
+        return make_tv<KindOfDict>(d.create());
       }
-      return make_tv<KindOfKeyset>(k.create());
-    }
-    case kind::LazyClass: {
-      auto const lc = LazyClassData::create(toStaticString(tv.lazy_class._0));
-      return make_tv<KindOfLazyClass>(lc);
-    }
-    case kind::HhasAdata:
-      error("toTypedValue unimplemented for HhasAdata");
+      case kind::Keyset: {
+        KeysetInit k(tv.keyset._0.len);
+        auto set = range(tv.keyset._0);
+        for (auto const& elt : set) {
+          k.add(toTypedValue(elt));
+        }
+        return make_tv<KindOfKeyset>(k.create());
+      }
+      case kind::LazyClass: {
+        auto const lc = LazyClassData::create(toStaticString(tv.lazy_class._0));
+        return make_tv<KindOfLazyClass>(lc);
+      }
+      case kind::HhasAdata:
+        error("toTypedValue unimplemented for HhasAdata");
     }
     not_reached();
   }();
@@ -473,6 +483,15 @@ void translateClass(TranslationState& ts, const HhasClass& c) {
   translateClassBody(ts, c, ubs);
 }
 
+void translateAdata(TranslationState& ts, const HhasAdata& ad) {
+  auto const name = toString(ad.id);
+  auto tv = toTypedValue(ad.value);
+  auto arr = tv.m_data.parr;
+  ArrayData::GetScalarArray(&arr);
+  ts.adataMap[name] = arr;
+  ts.ue->mergeArray(arr);
+}
+
 void translateConstant(TranslationState& ts, const HhasConstant& c) {
   Constant constant;
   constant.name = toStaticString(c.name._0);
@@ -511,6 +530,12 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
   for (auto const& t : typedefs) {
     translateTypedef(ts, t);
   }
+
+  auto adata = range(unit.adata);
+  for (auto const& d : adata) {
+    translateAdata(ts, d);
+  }
+
   translateModuleUse(ts, maybe(unit.module_use));
 }
 }

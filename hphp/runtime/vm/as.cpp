@@ -773,18 +773,6 @@ struct AsmState {
   UnitEmitter* ue;
   Input in;
 
-  /*
-   * Map of adata identifiers to their serialized contents
-   * Needed because, when instrumenting array provenance, we're unable
-   * to initialize their static arrays until the adata is first referenced
-   *
-   * There's also some painful maneuvering around keeping either the serialized
-   * or unserialized array in request heap until it can be made static since
-   * this could potentially confusingly OOM a request that autoloads a large
-   * unit
-   */
-  std::unordered_map<std::string, std::vector<char>> adataDecls;
-
   // Map of adata identifiers to their associated static arrays.
   std::map<std::string, ArrayData*> adataMap;
 
@@ -959,29 +947,11 @@ std::pair<ArrayData*, std::string> read_litarray(AsmState& as) {
     as.error("expected name of .adata literal");
   }
 
-  auto adata = [&]() -> ArrayData* {
-    auto const it = as.adataMap.find(name);
-    if (it != as.adataMap.end()) return it->second;
-    auto const decl = as.adataDecls.find(name);
-    if (decl == as.adataDecls.end()) return nullptr;
-    auto& buf = decl->second;
-    return suppressOOM([&] {
-      auto var = parse_php_serialized(buf);
-      if (!var.isArray()) {
-        as.error(".adata only supports serialized arrays");
-      }
-
-      auto data = var.detach().m_data.parr;
-      ArrayData::GetScalarArray(&data);
-      as.adataMap[name] = data;
-      as.adataDecls.erase(decl);
-      return data;
-    });
-  }();
-
-  if (!adata) as.error("unknown array data literal name " + name);
-
-  return {adata, std::move(name)};
+  auto const it = as.adataMap.find(name);
+  if (it == as.adataMap.end()) {
+    as.error("unknown array data literal name " + name);
+  }
+  return {it->second, std::move(name)};
 }
 
 RepoAuthType read_repo_auth_type(folly::StringPiece parse, AsmState* as) {
@@ -3265,7 +3235,16 @@ void parse_adata(AsmState& as) {
   }
 
   as.in.expectWs('=');
-  as.adataDecls[dataLabel] = parse_long_string_raw(as);
+  suppressOOM([&] {
+    auto var = parse_php_serialized(as);
+    if (!var.isArray()) {
+      as.error(".adata only supports serialized arrays");
+    }
+    auto data = var.detach().m_data.parr;
+    ArrayData::GetScalarArray(&data);
+    as.ue->mergeArray(data);
+    as.adataMap[dataLabel] = data;
+  });
   as.in.expectWs(';');
 }
 

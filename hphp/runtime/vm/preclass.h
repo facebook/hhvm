@@ -255,15 +255,20 @@ struct PreClass : AtomicCountable {
   /*
    * Trait and interface requirements.
    *
-   * Represents a `require implements' or `require extends' declaration.
+   * Represents a `require implements', `require extends', or `require class' declaration.
    */
+  enum RequirementKind {
+    RequirementImplements = 0,
+    RequirementExtends    = 0x1,
+    RequirementClass      = 0x2,
+  };
+
   struct ClassRequirement {
     ClassRequirement();
-    ClassRequirement(const StringData* req, bool isExtends);
+    ClassRequirement(const StringData* req, const RequirementKind reqKind);
 
     const StringData* name() const;
-    bool is_extends() const;
-    bool is_implements() const;
+    RequirementKind kind() const;
     bool is_same(const ClassRequirement* other) const;
     size_t hash() const;
 

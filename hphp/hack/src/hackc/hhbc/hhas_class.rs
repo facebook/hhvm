@@ -16,6 +16,7 @@ use hhvm_types_ffi::ffi::Attr;
 pub enum TraitReqKind {
     MustExtend,
     MustImplement,
+    MustBeClass,
 }
 
 #[derive(Debug)]

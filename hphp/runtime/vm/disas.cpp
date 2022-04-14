@@ -829,8 +829,15 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
 }
 
 void print_requirement(Output& out, const PreClass::ClassRequirement& req) {
-  out.fmtln(".require {} <{}>;", req.is_extends() ? "extends" : "implements",
-            req.name()->data());
+  auto const kind = [&] {
+    switch (req.kind()) {
+      case PreClass::RequirementExtends: return "extends";
+      case PreClass::RequirementImplements: return "implements";
+      case PreClass::RequirementClass: return "class";
+    }
+    not_reached();
+  }();
+  out.fmtln(".require {} <{}>;", kind, req.name()->data());
 }
 
 void print_cls_directives(Output& out, const PreClass* cls) {

@@ -3012,18 +3012,27 @@ void parse_enum_ty(AsmState& as) {
 }
 
 /*
- * directive-require : 'extends' '<' indentifier '>' ';'
- *                   | 'implements' '<' indentifier '>' ';'
+ * directive-require : 'extends' '<' identifier '>' ';'
+ *                   | 'implements' '<' identifier '>' ';'
+ *                   | 'class' '<' identifier '>;  ';'
  *                   ;
  *
  */
 void parse_require(AsmState& as) {
   as.in.skipWhitespace();
 
-  bool extends = as.in.tryConsume("extends");
-  if (!extends && !as.in.tryConsume("implements")) {
-    as.error(".require should be extends or implements");
-  }
+  auto const reqKind = [&] {
+    if (as.in.tryConsume("implements"))  {
+      return PreClass::RequirementKind::RequirementImplements;
+    } else if (as.in.tryConsume("extends")) {
+      return PreClass::RequirementKind::RequirementExtends;
+    } else if (as.in.tryConsume("class")) {
+      return PreClass::RequirementKind::RequirementClass;
+    } else {
+      as.error(".require should be extends, implements, or class");
+      not_reached();
+    }
+  }();
 
   as.in.expectWs('<');
   std::string name;
@@ -3033,7 +3042,7 @@ void parse_require(AsmState& as) {
   as.in.expectWs('>');
 
   as.pce->addClassRequirement(PreClass::ClassRequirement(
-    makeStaticString(name), extends
+    makeStaticString(name), reqKind
   ));
 
   as.in.expectWs(';');

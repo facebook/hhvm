@@ -1,0 +1,1 @@
+Fatal error: Trait 'T2' requires implementations of 'C', but C is not an interface in %s/requireclass_conflict_02.bad.php on line 9

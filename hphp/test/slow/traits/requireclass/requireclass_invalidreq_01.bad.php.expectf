@@ -1,0 +1,1 @@
+Fatal error: Trait 'T' may only be used from 'T2', but 'T2' is not a class in %s/requireclass_invalidreq_01.bad.php on line 8

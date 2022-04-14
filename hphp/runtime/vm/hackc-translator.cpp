@@ -408,8 +408,16 @@ void translateEnumType(TranslationState& ts, const Maybe<HhasTypeInfo>& t) {
 
 void translateRequirements(TranslationState& ts, Pair<ClassName, TraitReqKind> requirement) {
   auto const name = toStaticString(requirement._0._0);
-  auto const isExtends = requirement._1 == TraitReqKind::MustExtend;
-  ts.pce->addClassRequirement(PreClass::ClassRequirement(name, isExtends));
+  auto const requirementKind = [&] {
+    switch (requirement._1) {
+    case TraitReqKind::MustExtend: return PreClass::RequirementExtends;
+    case TraitReqKind::MustImplement: return PreClass::RequirementImplements;
+    case TraitReqKind::MustBeClass: return PreClass::RequirementClass;
+    }
+    not_reached();
+  }();
+
+  ts.pce->addClassRequirement(PreClass::ClassRequirement(name, requirementKind));
 }
 
 using UseAlias = Quadruple<

@@ -364,6 +364,9 @@ fn print_requirement(
         Pair(name, TraitReqKind::MustImplement) => {
             write_bytes!(w, "implements <{}>;", name)
         }
+        Pair(name, TraitReqKind::MustBeClass) => {
+            write_bytes!(w, "class <{}>;", name)
+        }
     }
 }
 

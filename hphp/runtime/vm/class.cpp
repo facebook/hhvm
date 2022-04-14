@@ -3933,7 +3933,7 @@ void Class::setRequirements() {
     // pointless circular dependencies, but if it does, we check
     // that it's the right kind.
     for (auto const& req : m_preClass->requirements()) {
-      assertx(req.is_extends());
+      assertx(req.kind() == PreClass::RequirementExtends);
       auto const reqName = req.name();
       auto const reqCls = Class::lookup(reqName);
       if (reqCls) {
@@ -3954,20 +3954,33 @@ void Class::setRequirements() {
     for (auto const& req : m_preClass->requirements()) {
       auto const reqName = req.name();
       if (auto const reqCls = Class::lookup(reqName)) {
-        if (req.is_extends()) {
-          if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
-            raise_error(Strings::TRAIT_BAD_REQ_EXTENDS,
-                        m_preClass->name()->data(),
-                        reqName->data(),
-                        reqName->data());
+        switch (req.kind()) {
+          case PreClass::RequirementExtends: {
+            if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
+              raise_error(Strings::TRAIT_BAD_REQ_EXTENDS,
+                          m_preClass->name()->data(),
+                          reqName->data(),
+                          reqName->data());
+            }
+            break;
           }
-        } else {
-          assertx(req.is_implements());
-          if (!(reqCls->attrs() & AttrInterface)) {
-            raise_error(Strings::TRAIT_BAD_REQ_IMPLEMENTS,
-                        m_preClass->name()->data(),
-                        reqName->data(),
-                        reqName->data());
+          case PreClass::RequirementImplements: {
+            if (!(reqCls->attrs() & AttrInterface)) {
+              raise_error(Strings::TRAIT_BAD_REQ_IMPLEMENTS,
+                          m_preClass->name()->data(),
+                          reqName->data(),
+                          reqName->data());
+            }
+            break;
+          }
+          case PreClass::RequirementClass: {
+            if (reqCls->attrs() & (AttrInterface | AttrTrait)) {
+              raise_error("Trait '%s' may only be used from '%s', but '%s' is not a class",
+                          m_preClass->name()->data(),
+                          reqName->data(),
+                          reqName->data());
+            }
+            break;
           }
         }
       }
@@ -4295,70 +4308,77 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
   assertx(!(attrs() & (AttrInterface | AttrTrait)));
 
   auto const reqName = req->name();
-  if (req->is_implements()) {
-    // "require implements" is only allowed on traits.
+  switch (req->kind()) {
+    case PreClass::RequirementImplements: {
+      // "require implements" is only allowed on traits.
+      assertx(attrs() & AttrNoExpandTrait ||
+             (m_extra && m_extra->m_usedTraits.size() > 0));
+      for (auto const& traitCls : m_extra->m_usedTraits) {
+        if (traitCls->allRequirements().contains(reqName)) {
+          raise_error(Strings::TRAIT_REQ_IMPLEMENTS,
+                      m_preClass->name()->data(),
+                      reqName->data(),
+                      traitCls->preClass()->name()->data());
+        }
+      }
 
-    assertx(attrs() & AttrNoExpandTrait ||
-           (m_extra && m_extra->m_usedTraits.size() > 0));
-    for (auto const& traitCls : m_extra->m_usedTraits) {
-      if (traitCls->allRequirements().contains(reqName)) {
+      if (attrs() & AttrNoExpandTrait) {
+        // As a result of trait flattening, the PreClass of this normal class
+        // contains a requirement. To save space, we don't include the source
+        // trait in the requirement. For details, see
+        // ClassScope::importUsedTraits in the compiler.
+        assertx(!m_extra || m_extra->m_usedTraits.size() == 0);
+        assertx(m_preClass->requirements().size() > 0);
         raise_error(Strings::TRAIT_REQ_IMPLEMENTS,
                     m_preClass->name()->data(),
                     reqName->data(),
-                    traitCls->preClass()->name()->data());
+                    "<<flattened>>");
+      }
+
+      always_assert(false); // requirements cannot spontaneously generate
+      break;
+    }
+    case PreClass::RequirementClass: {
+      assertx(m_preClass->name() != reqName);
+      raise_error("Trait '%s' may only be used from the class '%s'",
+                  reqName->data(),
+                  m_preClass->name()->data());
+      break;
+    }
+    case PreClass::RequirementExtends: {
+      for (auto const& iface : m_interfaces.range()) {
+        if (iface->allRequirements().contains(reqName)) {
+          raise_error("Class '%s' required to extend class '%s'"
+                      " by interface '%s'",
+                      m_preClass->name()->data(),
+                      reqName->data(),
+                      iface->preClass()->name()->data());
+        }
+      }
+
+      for (auto const& traitCls : m_extra->m_usedTraits) {
+         if (traitCls->allRequirements().contains(reqName)) {
+           raise_error(Strings::TRAIT_REQ_EXTENDS,
+                       m_preClass->name()->data(),
+                       reqName->data(),
+                       traitCls->preClass()->name()->data());
+         }
+      }
+
+      if (attrs() & AttrNoExpandTrait) {
+        // A result of trait flattening, as with the is_implements case above
+        assertx(!m_extra || m_extra->m_usedTraits.size() == 0);
+        assertx(m_preClass->requirements().size() > 0);
+        raise_error(Strings::TRAIT_REQ_EXTENDS,
+                    m_preClass->name()->data(),
+                    reqName->data(),
+                    "<<flattened>>");
       }
     }
-
-    if (attrs() & AttrNoExpandTrait) {
-      // As a result of trait flattening, the PreClass of this normal class
-      // contains a requirement. To save space, we don't include the source
-      // trait in the requirement. For details, see
-      // ClassScope::importUsedTraits in the compiler.
-      assertx(!m_extra || m_extra->m_usedTraits.size() == 0);
-      assertx(m_preClass->requirements().size() > 0);
-      raise_error(Strings::TRAIT_REQ_IMPLEMENTS,
-                  m_preClass->name()->data(),
-                  reqName->data(),
-                  "<<flattened>>");
-    }
-
-    always_assert(false); // requirements cannot spontaneously generate
-    return;
   }
-
-  assertx(req->is_extends());
-  for (auto const& iface : m_interfaces.range()) {
-    if (iface->allRequirements().contains(reqName)) {
-      raise_error("Class '%s' required to extend class '%s'"
-                  " by interface '%s'",
-                  m_preClass->name()->data(),
-                  reqName->data(),
-                  iface->preClass()->name()->data());
-    }
-  }
-
-  for (auto const& traitCls : m_extra->m_usedTraits) {
-    if (traitCls->allRequirements().contains(reqName)) {
-      raise_error(Strings::TRAIT_REQ_EXTENDS,
-                  m_preClass->name()->data(),
-                  reqName->data(),
-                  traitCls->preClass()->name()->data());
-    }
-  }
-
-  if (attrs() & AttrNoExpandTrait) {
-    // A result of trait flattening, as with the is_implements case above
-    assertx(!m_extra || m_extra->m_usedTraits.size() == 0);
-    assertx(m_preClass->requirements().size() > 0);
-    raise_error(Strings::TRAIT_REQ_EXTENDS,
-                m_preClass->name()->data(),
-                reqName->data(),
-                "<<flattened>>");
-  }
-
   // calls to this method are expected to come as a result of an error due
   // to a requirement coming from traits or interfaces
-  always_assert(false);
+  not_reached();
 }
 
 void Class::checkRequirementConstraints() const {
@@ -4366,20 +4386,30 @@ void Class::checkRequirementConstraints() const {
 
   for (auto const& req : m_requirements.range()) {
     auto const reqName = req->name();
-    if (req->is_implements()) {
-      if (UNLIKELY(!ifaceofDirect(reqName))) {
-        raiseUnsatisfiedRequirement(req);
+    switch (req->kind()) {
+      case PreClass::RequirementExtends: {
+        auto reqExtCls = Class::lookup(reqName);
+        if (UNLIKELY(
+              (reqExtCls == nullptr) ||
+              (reqExtCls->attrs() & (AttrTrait | AttrInterface)))) {
+          raiseUnsatisfiedRequirement(req);
+        }
+        if (UNLIKELY(!classofNonIFace(reqExtCls))) {
+          raiseUnsatisfiedRequirement(req);
+        }
+        break;
       }
-    } else {
-      auto reqExtCls = Class::lookup(reqName);
-      if (UNLIKELY(
-            (reqExtCls == nullptr) ||
-            (reqExtCls->attrs() & (AttrTrait | AttrInterface)))) {
-        raiseUnsatisfiedRequirement(req);
+      case PreClass::RequirementImplements: {
+        if (UNLIKELY(!ifaceofDirect(reqName))) {
+          raiseUnsatisfiedRequirement(req);
+        }
+        break;
       }
-
-      if (UNLIKELY(!classofNonIFace(reqExtCls))) {
-        raiseUnsatisfiedRequirement(req);
+      case PreClass::RequirementClass: {
+        if (m_preClass->name() != reqName) {
+          raiseUnsatisfiedRequirement(req);
+        }
+        break;
       }
     }
   }

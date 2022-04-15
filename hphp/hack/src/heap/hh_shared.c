@@ -1049,7 +1049,7 @@ value hh_get_handle(void) {
   Store_field(connector, 3, Val_long(hash_table_pow));
   Store_field(connector, 4, Val_long(num_workers));
   Store_field(connector, 5, Val_bool(shm_use_sharded_hashtbl));
-  Store_field(connector, 6, Val_bool(shm_cache_size_b));
+  Store_field(connector, 6, Val_long(shm_cache_size_b));
   Store_field(connector, 7, Val_handle(memfd_shmffi));
 
   CAMLreturn(connector);

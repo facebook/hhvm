@@ -767,10 +767,11 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
 
         let stringish_object_opt = DeclFolder::stringish_object_parent(self.child);
-        let direct_ancestors = (self.child.extends.iter())
+        // Order matters - the earlier, the higher precedence its ancestors will have
+        let direct_ancestors = (stringish_object_opt.iter())
+            .chain(self.child.extends.iter())
             .chain(self.child.implements.iter())
-            .chain(self.child.uses.iter())
-            .chain(stringish_object_opt.iter());
+            .chain(self.child.uses.iter());
 
         let mut ancestors = Default::default();
         for ty in direct_ancestors.rev() {

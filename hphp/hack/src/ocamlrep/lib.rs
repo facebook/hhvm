@@ -247,10 +247,11 @@ chooses these OCaml types to represent them with:
 [BTreeSet]: https://doc.rust-lang.org/std/collections/struct.BTreeSet.html
 [Set]: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Set.html
 
-See the [`impls`](../src/ocamlrep/impls.rs.html)
-submodule for examples of conversions for std types, and
-[Real World OCaml](https://v1.realworldocaml.org/v1/en/html/memory-representation-of-values.html)
-for a description of the OCaml representation of values.
+See the [`impls`](../src/ocamlrep/impls.rs.html) submodule for examples of
+conversions for std types, and [Real World
+OCaml](https://dev.realworldocaml.org/runtime-memory-layout.html) and the
+[Interfacing C with OCaml](https://ocaml.org/manual/intfc.html) section of the
+OCaml manual for description of the OCaml representation of values.
 
 Since manually implementing OcamlRep is cumbersome and error-prone, the
 `ocamlrep_derive` crate provides a procedural macro for deriving the OcamlRep

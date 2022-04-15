@@ -924,7 +924,6 @@ CAMLprim value hh_shared_init(
   value num_workers_val
 ) {
   CAMLparam3(config_val, shm_dir_val, num_workers_val);
-  CAMLlocal1(connector);
   CAMLlocal4(
     config_global_size_val,
     config_heap_size_val,
@@ -1002,17 +1001,7 @@ CAMLprim value hh_shared_init(
   sigaction(SIGSEGV, &sigact, NULL);
 #endif
 
-  connector = caml_alloc_tuple(8);
-  Store_field(connector, 0, Val_handle(memfd_shared_mem));
-  Store_field(connector, 1, config_global_size_val);
-  Store_field(connector, 2, config_heap_size_val);
-  Store_field(connector, 3, config_hash_table_pow_val);
-  Store_field(connector, 4, num_workers_val);
-  Store_field(connector, 5, config_shm_use_sharded_hashtbl);
-  Store_field(connector, 6, config_shm_cache_size);
-  Store_field(connector, 7, Val_handle(memfd_shmffi));
-
-  CAMLreturn(connector);
+  CAMLreturn(hh_get_handle());
 }
 
 /* Must be called by every worker before any operation is performed */
@@ -1061,7 +1050,7 @@ value hh_get_handle(void) {
   Store_field(connector, 4, Val_long(num_workers));
   Store_field(connector, 5, Val_bool(shm_use_sharded_hashtbl));
   Store_field(connector, 6, Val_bool(shm_cache_size_b));
-  Store_field(connector, 7, Val_bool(memfd_shmffi));
+  Store_field(connector, 7, Val_handle(memfd_shmffi));
 
   CAMLreturn(connector);
 }

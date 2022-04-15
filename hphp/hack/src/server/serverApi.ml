@@ -284,6 +284,31 @@ let make_remote_server_api
         Hh_logger.error "Downloading naming table failed: %s" err;
         Error err
 
+    let remove_decls naming_table fast_parsed =
+      Relative_path.Map.iter fast_parsed ~f:(fun fn _ ->
+          match Naming_table.get_file_info naming_table fn with
+          | None -> ()
+          | Some
+              {
+                FileInfo.funs;
+                classes;
+                typedefs;
+                consts;
+                modules;
+                file_mode = _;
+                comments = _;
+                hash = _;
+              } ->
+            (* we use [snd] to strip away positions *)
+            let snd (_, x, _) = x in
+            Naming_global.remove_decls
+              ~backend:(Provider_backend.get ())
+              ~funs:(List.map funs ~f:snd)
+              ~classes:(List.map classes ~f:snd)
+              ~typedefs:(List.map typedefs ~f:snd)
+              ~consts:(List.map consts ~f:snd)
+              ~modules:(List.map modules ~f:snd))
+
     let download_and_update_naming_table
         (ctx : Provider_context.t)
         (manifold_api_key : string option)
@@ -293,21 +318,22 @@ let make_remote_server_api
             Hh_logger.log "Loading naming table...";
             load_naming_table_base ~naming_table_base:(Some naming_table_base)
             (* needed to capture changed_files in scope for later binds *)
-            |> Result.map ~f:(fun naming_table_path ->
-                   (naming_table_path, changed_files)))
+            >>|
+            fun naming_table_path -> (naming_table_path, changed_files))
       >>= (fun (naming_table, changed_files) ->
-            (* clear naming table of old definitions before passing changed files into Direct_decl_service *)
             match naming_table with
             | None -> Error "Failed to load naming table"
-            | Some n ->
-              Hh_logger.log "Cleaning naming table of changed files";
-              ignore
-                (clean_changed_files_state
-                   ctx
-                   n
-                   changed_files
-                   ~t:(Unix.gettimeofday ()));
-              Ok (n, changed_files))
+            | Some n -> Ok (n, changed_files))
+      >>= (fun (naming_table, changed_files) ->
+            (* clear naming table of old definitions before passing changed files into Direct_decl_service *)
+            Hh_logger.log "Cleaning naming table of changed files";
+            ignore
+              (clean_changed_files_state
+                 ctx
+                 naming_table
+                 changed_files
+                 ~t:(Unix.gettimeofday ()));
+            Ok (naming_table, changed_files))
       >>= (fun (naming_table, changed_files) ->
             Hh_logger.log "Updating naming table...";
             (* changed_files is a Relative_path.t list *)
@@ -335,17 +361,30 @@ let make_remote_server_api
                 ~extra_roots:
                   (ServerConfig.extra_paths ServerConfig.default_config)
             in
-            let fast =
-              Direct_decl_service.go
-                ctx
-                workers
-                ~ide_files:Relative_path.Set.empty
-                ~get_next
-                ~trace:false
-                ~cache_decls:true
-            in
-            let _ = Hh_logger.log "Built updated decls for naming table" in
-            Ok (Naming_table.update_many naming_table fast))
+            Ok
+              ( naming_table,
+                Direct_decl_service.go
+                  ctx
+                  workers
+                  ~ide_files:Relative_path.Set.empty
+                  ~get_next
+                  ~trace:false
+                  ~cache_decls:true ))
+      >>= (fun (naming_table, fast_parsed) ->
+            Hh_logger.log "Built updated decls for naming table";
+            Hh_logger.log "Clearing old decls from naming table";
+            remove_decls naming_table fast_parsed;
+            Hh_logger.log "Updating naming table";
+            ignore (Naming_table.update_many naming_table fast_parsed);
+            Ok fast_parsed)
+      >>= (fun fast_parsed ->
+            Naming_table.create fast_parsed
+            |> Naming_table.iter ~f:(fun k v ->
+                   let _ =
+                     Naming_global.ndecl_file_error_if_already_bound ctx k v
+                   in
+                   ());
+            Ok ())
       |> Result.iter_error ~f:(fun err ->
              Hh_logger.log
                "Could not build naming table from saved state: %s"

@@ -190,7 +190,7 @@ function parse_options_impl(OptionInfoMap $optmap, Vector<string> $argv): Option
           }
           $long = $short_to_long[$s];
           if ($long_requires_arg[$long]) {
-            error("option -$s requres an argument");
+            error("option -$s requires an argument");
           }
           $ret[$short_to_long[$s]] = $long_to_default[$long];
         }

@@ -358,7 +358,7 @@ void DwarfState::forEachContext(F&& f, bool isInfo) const {
 
 /*
  * Iterate over all the contexts in the file, calling the given
- * callable for each in parellel. The function f must be thread safe.
+ * callable for each in parallel. The function f must be thread safe.
  */
 template <typename F>
 void DwarfState::forEachContextParallel(F&& f, bool isInfo,

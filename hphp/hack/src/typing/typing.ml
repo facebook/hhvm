@@ -2533,7 +2533,7 @@ and stmt_ env pos st =
     in
     let (env, (te1, te2, te3, tb, refinement_map)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
-          (* For loops leak their initalizer, but nothing that's defined in the
+          (* For loops leak their initializer, but nothing that's defined in the
              body
           *)
           let (env, te1, _) = exprs env e1 in

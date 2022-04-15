@@ -187,7 +187,8 @@ void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
       extra->namedEntity,
       extra->clsName,
       extra->methodName,
-      extra->context
+      extra->context,
+      extra->callerFunc
     );
   }
 
@@ -196,7 +197,8 @@ void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
     .immPtr(extra->namedEntity)
     .immPtr(extra->clsName)
     .immPtr(extra->methodName)
-    .immPtr(extra->context);
+    .immPtr(extra->context)
+    .immPtr(extra->callerFunc);
 
   // May raise an error if the class is undefined.
   cgCallHelper(v, env, CallSpec::direct(StaticMethodCache::lookup),
@@ -255,14 +257,15 @@ void cgLookupClsMethodFCache(IRLS& env, const IRInstruction* inst) {
   assertx(rds::isNormalHandle(ch));
 
   const Func* (*lookup)(rds::Handle, const Class*,
-                        const StringData*, const Class*) =
+                        const StringData*, const Class*, const Func*) =
     StaticMethodFCache::lookup;
 
   auto const args = argGroup(env, inst)
    .imm(ch)
    .immPtr(cls)
    .immPtr(extra->methodName)
-   .immPtr(extra->context);
+   .immPtr(extra->context)
+   .immPtr(extra->callerFunc);
 
   cgCallHelper(v, env, CallSpec::direct(lookup),
                callDest(dst), SyncOptions::Sync, args);

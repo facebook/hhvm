@@ -291,19 +291,22 @@ struct InstanceOfIfaceVtableData : IRExtraData {
  */
 struct ClsMethodData : IRExtraData {
   ClsMethodData(const StringData* cls, const StringData* method,
-                const NamedEntity* ne, const Class* context)
+                const NamedEntity* ne, const Class* context,
+                const Func* callerFunc)
     : clsName(cls)
     , methodName(method)
     , namedEntity(ne)
     , context(context)
+    , callerFunc(callerFunc)
   {}
 
   std::string show() const {
     return folly::sformat(
-      "{}::{} ({})",
+      "{}::{} ({},{})",
       clsName,
       methodName,
-      context ? context->name()->data() : "{no context}");
+      context ? context->name()->data() : "{no context}",
+      callerFunc->fullName()->data());
   }
 
   bool equals(const ClsMethodData& o) const {
@@ -311,13 +314,15 @@ struct ClsMethodData : IRExtraData {
     return
       clsName == o.clsName &&
       methodName == o.methodName &&
-      context == o.context;
+      context == o.context &&
+      callerFunc == o.callerFunc;
   }
   size_t hash() const {
     return folly::hash::hash_combine(
       std::hash<const StringData*>()(clsName),
       std::hash<const StringData*>()(methodName),
-      std::hash<const Class*>()(context)
+      std::hash<const Class*>()(context),
+      std::hash<const Func*>()(callerFunc)
     );
   }
 
@@ -325,7 +330,8 @@ struct ClsMethodData : IRExtraData {
     return folly::hash::hash_combine(
       clsName->hashStatic(),
       methodName->hashStatic(),
-      context ? context->stableHash() : 0
+      context ? context->stableHash() : 0,
+      callerFunc->stableHash()
     );
   }
 
@@ -333,6 +339,7 @@ struct ClsMethodData : IRExtraData {
   const StringData* methodName;
   const NamedEntity* namedEntity;
   const Class* context;
+  const Func* callerFunc;
 };
 
 struct IfaceMethodData : IRExtraData {

@@ -439,7 +439,8 @@ rds::Handle StaticMethodFCache::alloc(const StringData* clsName,
 const Func*
 StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
                           const StringData* clsName,
-                          const StringData* methName, const Class* ctx) {
+                          const StringData* methName, const Class* ctx,
+                          const Func* callerFunc) {
   assertx(rds::isNormalHandle(handle));
   auto thiz = rds::handleToPtr<StaticMethodCache, rds::Mode::Normal>(handle);
   Stats::inc(Stats::TgtCache_StaticMethodMiss);
@@ -457,8 +458,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
   // Class::load().
   assertx(cls == ne->getCachedClass());
 
-  // TODO(T115356820): Pass module name to the context
-  auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
+  auto const callCtx = MethodLookupCallContext(ctx, callerFunc);
   LookupResult res = lookupClsMethod(f, cls, methName,
                                      nullptr, // there may be an active
                                               // this, but we can just fall
@@ -485,7 +485,8 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
 
 const Func*
 StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
-                           const StringData* methName, const Class* ctx) {
+                           const StringData* methName, const Class* ctx,
+                           const Func* callerFunc) {
   assertx(cls);
   assertx(rds::isNormalHandle(handle));
   auto thiz = rds::handleToPtr<StaticMethodFCache, rds::Mode::Normal>(handle);
@@ -493,8 +494,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
   Stats::inc(Stats::TgtCache_StaticMethodFHit, -1);
 
   const Func* f;
-  // TODO(T115356820): Pass module name to the context
-  auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
+  auto const callCtx = MethodLookupCallContext(ctx, callerFunc);
   LookupResult res = lookupClsMethod(f, cls, methName,
                                      nullptr,
                                      callCtx,

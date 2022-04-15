@@ -1614,7 +1614,8 @@ void emitFCallClsMethodD(IRGS& env,
 
   auto const slowExit = makeExitSlow(env);
   auto const ne = NamedEntity::get(className);
-  auto const data = ClsMethodData { className, methodName, ne, callerCtx };
+  auto const data =
+    ClsMethodData { className, methodName, ne, callerCtx, curFunc(env) };
   auto const func = loadClsMethodUnknown(env, data, slowExit);
   auto const ctx = gen(env, LdClsMethodCacheCls, data);
   prepareAndCallProfiled(env, func, fca, ctx, false, false);
@@ -1723,7 +1724,8 @@ resolveClsMethodDSlow(IRGS& env, const StringData* className,
                       const StringData* methodName) {
   auto const slowExit = makeExitSlow(env);
   auto const ne = NamedEntity::get(className);
-  auto const data = ClsMethodData { className, methodName, ne, curClass(env) };
+  auto const data =
+    ClsMethodData { className, methodName, ne, curClass(env), curFunc(env) };
   auto const func = loadClsMethodUnknown(env, data, slowExit);
   gen(env, CheckClsMethFunc, func);
   auto const cls = gen(env, LdClsCached, cns(env, className));

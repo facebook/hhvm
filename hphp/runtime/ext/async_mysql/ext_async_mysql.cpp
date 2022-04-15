@@ -1425,6 +1425,16 @@ connectionContextFromOperation(const am::Operation* operation) {
   return context;
 }
 
+static bool HHVM_METHOD(AsyncMysqlResult, sslSessionReused) {
+  auto* data = Native::data<AsyncMysqlResult>(this_);
+
+  if (auto* op = data->m_op.get()) {
+    const auto* context = connectionContextFromOperation(op);
+    return context && context->sslSessionReused;
+  }
+  return false;
+}
+
 static String HHVM_METHOD(AsyncMysqlResult, getSslCertCn) {
   auto* data = Native::data<AsyncMysqlResult>(this_);
   if (auto* op = data->m_op.get()) {
@@ -2331,6 +2341,7 @@ static struct AsyncMysqlExtension final : Extension {
     Native::registerNativeDataInfo<AsyncMysqlConnection>(
         AsyncMysqlConnection::s_className.get(), Native::NDIFlags::NO_COPY);
 
+    HHVM_ME(AsyncMysqlResult, sslSessionReused);
     HHVM_ME(AsyncMysqlResult, getSslCertCn);
     HHVM_ME(AsyncMysqlResult, getSslCertSan);
     HHVM_ME(AsyncMysqlResult, getSslCertExtensions);

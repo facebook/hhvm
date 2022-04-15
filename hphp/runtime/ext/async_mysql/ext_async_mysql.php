@@ -934,6 +934,19 @@ abstract class AsyncMysqlResult {
   public abstract function clientStats(): AsyncMysqlClientStats;
 
   /**
+   * Returns whether or not the current connection reused the SSL session
+   * from another SSL connection. The session is set by MySSLContextProvider.
+   * Some cases, the server can deny the session that was set and the handshake
+   * will create a new one, in those cases this function will return `false`.
+   * If this connections isn't SSL, `false` will be returned as well.
+   *
+   * @return - `true` if this is a SSL connection and the SSL session was
+   *           reused; `false` otherwise.
+   */
+  <<__Native>>
+  public function sslSessionReused(): bool;
+
+  /**
    * Returns Common Name attribute of the TLS certificate presented
    * by MySQL server.
    *

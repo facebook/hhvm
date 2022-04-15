@@ -199,6 +199,7 @@ abstract class AsyncMysqlResult {
   public function endTime(): float { }
 
   public function clientStats() : AsyncMysqlClientStats { }
+  public function sslSessionReused(): bool { }
   public function getSslCertCn(): string { }
   public function getSslCertSan(): Vector<string> { }
   public function getSslCertExtensions(): Vector<string> { }

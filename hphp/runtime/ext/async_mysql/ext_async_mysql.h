@@ -149,6 +149,7 @@ struct AsyncMysqlResult {
 
   void sweep() { m_op.reset(); }
 
+  bool sslSessionReused();
   String getSslCertCn();
   String getSslCertSan();
   String getSslCertExtensions();

@@ -176,7 +176,7 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
 
   auto const fnFromName = [&](SSATmp* clsName, SSATmp* methodName) {
     auto const cls = gen(env, LdCls, clsName, cns(env, nullptr));
-    auto const data = OptClassData { nullptr };
+    auto const data = OptClassAndFuncData { nullptr, f };
     return gen(env, LdObjMethodD, data, cls, methodName);
   };
 

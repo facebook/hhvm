@@ -268,21 +268,21 @@ void smashImmediate(TCA movAddr, const Class* cls, const Func* func) {
 }
 
 EXTERNALLY_VISIBLE const Func*
-handleDynamicCall(const Class* cls, const StringData* name, const Class* ctx) {
-  // TODO(T115356820): Pass module name to the context
-  auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
+handleDynamicCall(const Class* cls, const StringData* name,
+                  const Class* ctx, const Func* callerFunc) {
+  auto const callCtx = MethodLookupCallContext(ctx, callerFunc);
   // Perform lookup without any caching.
   return lookup(cls, name, callCtx);
 }
 
 EXTERNALLY_VISIBLE const Func*
-handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
+handleStaticCall(const Class* cls, const StringData* name,
+                 const Class* ctx, const Func* callerFunc,
                  rds::Handle mceHandle, uintptr_t mcePrime) {
   assertx(name->isStatic());
   assertx(cls);
   auto& mce = rds::handleToRef<Entry, rds::Mode::Normal>(mceHandle);
-  // TODO(T115356820): Pass module name to the context
-  auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
+  auto const callCtx = MethodLookupCallContext(ctx, callerFunc);
   if (!rds::isHandleInit(mceHandle, rds::NormalTag{})) {
     // If the low bit is set in mcePrime, we have not yet smashed the immediate
     // into the TC, or the value was not cacheable.

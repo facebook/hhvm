@@ -109,7 +109,8 @@ void cgLdObjMethodD(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(0 /* cls */)
     .ssa(1 /* methodName */)
-    .immPtr(inst->extra<OptClassData>()->cls);
+    .immPtr(inst->extra<OptClassAndFuncData>()->cls)
+    .immPtr(inst->extra<OptClassAndFuncData>()->func); // callerFunc
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -130,8 +131,9 @@ void cgLdObjMethodS(IRLS& env, const IRInstruction* inst) {
   auto const target = CallSpec::direct(MethodCache::handleStaticCall);
   auto const args = argGroup(env, inst)
     .ssa(0 /* cls */)
-    .immPtr(inst->extra<FuncNameData>()->name)
-    .immPtr(inst->extra<FuncNameData>()->context)
+    .immPtr(inst->extra<FuncNameCtxData>()->name)
+    .immPtr(inst->extra<FuncNameCtxData>()->context)
+    .immPtr(inst->extra<FuncNameCtxData>()->func) // callerFunc
     .imm(safe_cast<int32_t>(handle))
     .ssa(1 /* smashable */);
 

@@ -137,28 +137,33 @@ struct ClassData : IRExtraData {
   const Class* cls;
 };
 
-struct OptClassData : IRExtraData {
-  explicit OptClassData(const Class* cls)
+struct OptClassAndFuncData : IRExtraData {
+  OptClassAndFuncData(const Class* cls, const Func* func)
     : cls(cls)
+    , func(func)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(cls ? cls->name()->data() : "{null}");
+    return folly::to<std::string>(
+      cls ? cls->name()->data() : "{no context}",
+      ",",
+      func->fullName()->data()
+    );
   }
 
-  bool equals(const OptClassData& o) const {
-    return cls == o.cls;
-  }
-
-  size_t hash() const {
-    return pointer_hash<Class>()(cls);
+  bool equals(const OptClassAndFuncData& o) const {
+    return cls == o.cls && func == o.func;
   }
 
   size_t stableHash() const {
-    return (cls ? cls->stableHash() : 0);
+    return folly::hash::hash_combine(
+      cls ? cls->stableHash() : 0,
+      func->stableHash()
+    );
   }
 
   const Class* cls;
+  const Func* func;
 };
 
 /*
@@ -1353,6 +1358,41 @@ struct FuncNameData : IRExtraData {
 
   const StringData* name;
   const Class* context;
+};
+
+struct FuncNameCtxData : IRExtraData {
+  FuncNameCtxData(const StringData* name, const Class* context,
+                  const Func* callerFunc)
+    : name(name)
+    , context(context)
+    , func(callerFunc)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(
+      name->data(),
+      ",",
+      context ? context->name()->data() : "{no context}",
+      ",",
+      func->fullName()->data()
+    );
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      name->hash(),
+      context ? context->stableHash() : 0,
+      func->stableHash()
+    );
+  }
+
+  bool equals(const FuncNameCtxData& o) const {
+    return name == o.name && context == o.context && func == o.func;
+  }
+
+  const StringData* name;
+  const Class* context;
+  const Func* func;
 };
 
 /*
@@ -2820,8 +2860,8 @@ X(LdResolvedTypeCnsNoCheck,     ClsCnsSlotData);
 X(ProfileSubClsCns,             ProfileSubClsCnsData);
 X(LdFuncCached,                 FuncNameData);
 X(LookupFuncCached,             FuncNameData);
-X(LdObjMethodS,                 FuncNameData);
-X(LdObjMethodD,                 OptClassData);
+X(LdObjMethodS,                 FuncNameCtxData);
+X(LdObjMethodD,                 OptClassAndFuncData);
 X(ThrowMissingArg,              FuncArgData);
 X(RaiseTooManyArg,              FuncData);
 X(RaiseCoeffectsCallViolation,  FuncData);

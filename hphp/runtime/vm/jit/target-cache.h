@@ -139,11 +139,13 @@ struct Entry {
 
 const Func* handleDynamicCall(const Class* cls,
                               const StringData* name,
-                              const Class* ctx);
+                              const Class* ctx,
+                              const Func* callerFunc);
 
 const Func* handleStaticCall(const Class* cls,
                              const StringData* name,
                              const Class* ctx,
+                             const Func* callerFunc,
                              rds::Handle mce_handle,
                              uintptr_t mcePrime);
 

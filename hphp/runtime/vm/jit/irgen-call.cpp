@@ -700,8 +700,8 @@ void fcallObjMethodUnknown(
   auto const func = [&] {
     auto const cls = gen(env, LdObjClass, obj);
     if (!methodName->hasConstVal()) {
-      auto const ocData = OptClassData { callerCtx };
-      return gen(env, LdObjMethodD, ocData, cls, methodName);
+      auto const focData = OptClassAndFuncData { callerCtx, curFunc(env) };
+      return gen(env, LdObjMethodD, focData, cls, methodName);
     }
 
     auto const tcCache = gen(env, LdSmashable);
@@ -718,7 +718,8 @@ void fcallObjMethodUnknown(
       [&] {
         // slow path: run C++ helper to determine Func*, exit if we can't handle
         // the call in the JIT
-        auto const fnData = FuncNameData { methodName->strVal(), callerCtx };
+        auto const fnData =
+          FuncNameCtxData { methodName->strVal(), callerCtx, curFunc(env) };
         return gen(env, LdObjMethodS, fnData, cls, tcCache);
       }
     );

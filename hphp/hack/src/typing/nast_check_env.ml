@@ -19,7 +19,7 @@ type env = {
   ctx: Provider_context.t;
   classish_kind: Ast_defs.classish_kind option;
   class_name: string option;
-  function_name: string option;
+  function_name: Ast_defs.id option;
   file_mode: FileInfo.mode;
   function_kind: Ast_defs.fun_kind option;
   is_finally: bool;
@@ -31,11 +31,7 @@ type env = {
 let get_tcopt env = Provider_context.get_tcopt env.ctx
 
 let fun_env env f =
-  {
-    env with
-    function_name = Some (snd f.f_name);
-    function_kind = Some f.f_fun_kind;
-  }
+  { env with function_name = Some f.f_name; function_kind = Some f.f_fun_kind }
 
 let fun_def_env env fd =
   {
@@ -46,11 +42,7 @@ let fun_def_env env fd =
   }
 
 let method_env env m =
-  {
-    env with
-    function_name = Some (snd m.m_name);
-    function_kind = Some m.m_fun_kind;
-  }
+  { env with function_name = Some m.m_name; function_kind = Some m.m_fun_kind }
 
 let class_env env c =
   {

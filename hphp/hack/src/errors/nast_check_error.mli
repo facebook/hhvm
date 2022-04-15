@@ -43,7 +43,10 @@ type t =
   | Toplevel_break of Pos.t
   | Toplevel_continue of Pos.t
   | Continue_in_switch of Pos.t
-  | Await_in_sync_function of Pos.t
+  | Await_in_sync_function of {
+      pos: Pos.t;
+      func_pos: Pos.t option;
+    }
   | Interface_uses_trait of Pos.t
   | Static_memoized_function of Pos.t
   | Magic of {

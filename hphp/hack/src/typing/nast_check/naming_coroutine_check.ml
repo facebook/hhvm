@@ -31,7 +31,13 @@ let handler =
     method! at_expr env (_, p, e) =
       match e with
       | Await _ when is_sync env ->
-        Errors.add_nast_check_error @@ Nast_check_error.Await_in_sync_function p
+        let func_pos =
+          match env.function_name with
+          | None -> None
+          | Some sid -> Some (fst sid)
+        in
+        Errors.add_nast_check_error
+        @@ Nast_check_error.Await_in_sync_function { pos = p; func_pos }
       | _ -> ()
 
     method! at_stmt env =
@@ -39,11 +45,13 @@ let handler =
       | (_, Using { us_has_await; us_exprs; _ })
         when us_has_await && is_sync env ->
         Errors.add_nast_check_error
-        @@ Nast_check_error.Await_in_sync_function (fst us_exprs)
+        @@ Nast_check_error.Await_in_sync_function
+             { pos = fst us_exprs; func_pos = None }
       | (_, Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _))
       | (p, Awaitall _)
         when is_sync env ->
-        Errors.add_nast_check_error @@ Nast_check_error.Await_in_sync_function p
+        Errors.add_nast_check_error
+        @@ Nast_check_error.Await_in_sync_function { pos = p; func_pos = None }
       | (p, Return (Some _)) when is_generator env ->
         Errors.add_nast_check_error @@ Nast_check_error.Return_in_gen p
       | _ -> ()

@@ -266,6 +266,8 @@ static const struct {
    */
   { OpFCallClsMethod,
                    {StackTop2,        StackN,       OutUnknown      }},
+  { OpFCallClsMethodM,
+                   {Stack1,           StackN,       OutUnknown      }},
   { OpFCallClsMethodD,
                    {None,             StackN,       OutUnknown      }},
   { OpFCallClsMethodS,
@@ -464,6 +466,7 @@ int64_t getStackPopped(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
     case Op::FCallClsMethod:
+    case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
@@ -513,6 +516,7 @@ int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
     case Op::FCallClsMethod:
+    case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
@@ -953,6 +957,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Double:
   case Op::Dup:
   case Op::FCallClsMethod:
+  case Op::FCallClsMethodM:
   case Op::FCallClsMethodD:
   case Op::FCallClsMethodS:
   case Op::FCallClsMethodSD:

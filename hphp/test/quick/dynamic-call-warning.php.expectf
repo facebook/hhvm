@@ -1,0 +1,12 @@
+int(10)
+int(10)
+
+Notice: 'Foo::bar' called dynamically but is not __DynamicallyCallable in %s/dynamic-call-warning.php on line 26
+int(10)
+
+Notice: 'Foo::rbar' called dynamically but is not __DynamicallyCallable in %s/dynamic-call-warning.php on line 27
+int(10)
+
+Notice: 'Foo::bar' called dynamically but is not __DynamicallyCallable in %s/dynamic-call-warning.php on line 29
+int(10)
+int(20)

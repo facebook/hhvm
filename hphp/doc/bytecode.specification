@@ -1760,6 +1760,8 @@ FCallObjMethodD <fca> <class hint> <nullsafe> <litstr id>
 
 FCallClsMethod <fca> <class hint> <op>
   [U U C|V..C|V C C:Class]  ->  [C..C]
+FCallClsMethodM <fca> <class hint> <op> <litstr id>
+  [U U C|V..C|V C]    ->  [C..C]
 FCallClsMethodD <fca> <class hint> <litstr id> <litstr id>
   [U U C|V..C|V]    ->  [C..C]
 FCallClsMethodS <fca> <class hint> <mode>
@@ -1773,13 +1775,14 @@ FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
     instruction            x    y
     --------------------+----+-----
       FCallClsMethod    | $1 | $2
+      FCallClsMethodM   | $1 | %4
       FCallClsMethodD   | %3 | %4
       FCallClsMethodS   | %3 | $1
       FCallClsMethodSD  | %3 | %4
 
   When loading litstr id %3 into x, FCallClsMethodD will perform the work
   performed by the ClassGetC instruction to convert the name given by %3 into
-  a class.
+  a class. Similarly, FCallClsMethodM will convert $1 into a class.
 
   When loading mode %3 into x, FCallClsMethodS and FCallClsMethodSD will
   perform the work performed by LateBoundCls/SelfCls/ParentCls depending

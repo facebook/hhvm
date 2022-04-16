@@ -4080,6 +4080,30 @@ iopFCallClsMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
 }
 
 OPTBLD_INLINE JitResumeAddr
+iopFCallClsMethodM(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+                  const StringData*, IsLogAsDynamicCallOp op,
+                  const StringData* methName) {
+  auto const cell = vmStack().topC();
+  auto isString = isStringType(cell->m_type);
+  if (isString) {
+    raise_str_to_class_notice(cell->m_data.pstr);
+  }
+  auto const cls = lookupClsRef(cell);
+  vmStack().popC();
+  auto const methNameC = const_cast<StringData*>(methName);
+  assertx(cls && methNameC);
+  auto const logAsDynamicCall = op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
+    RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
+  if (isString || RuntimeOption::EvalEmitClassPointers == 0) {
+    return fcallClsMethodImpl<true>(
+      retToJit, origpc, pc, fca, cls, methNameC, false, logAsDynamicCall);
+  } else {
+    return fcallClsMethodImpl<false>(
+      retToJit, origpc, pc, fca, cls, methNameC, false, logAsDynamicCall);
+  }
+}
+
+OPTBLD_INLINE JitResumeAddr
 iopFCallClsMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                    const StringData*, Id classId, const StringData* methName) {
   const NamedEntityPair &nep =

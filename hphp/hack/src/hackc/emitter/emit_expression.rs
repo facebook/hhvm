@@ -2074,12 +2074,11 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                         InstrSeq::gather(vec![instr::null_uninit(), instr::null_uninit()]),
                         InstrSeq::gather(vec![
                             generics,
-                            instr::string(alloc, method_name.unsafe_as_str()),
                             emit_expr(e, env, &expr)?,
-                            instr::class_get_c(),
-                            instr::f_call_cls_method(
+                            instr::f_call_cls_method_m(
                                 IsLogAsDynamicCallOp::DontLogAsDynamicCall,
                                 fcall_args,
+                                method_name,
                             ),
                         ]),
                     )
@@ -2094,12 +2093,11 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                             instr::pop_l(tmp),
                         ]),
                         InstrSeq::gather(vec![
-                            instr::string(alloc, method_name.unsafe_as_str()),
                             instr::push_l(tmp),
-                            instr::class_get_c(),
-                            instr::f_call_cls_method(
+                            instr::f_call_cls_method_m(
                                 IsLogAsDynamicCallOp::DontLogAsDynamicCall,
                                 fcall_args,
+                                method_name,
                             ),
                         ]),
                     )

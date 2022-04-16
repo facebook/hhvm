@@ -4265,6 +4265,54 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
   fcallClsMethodImpl(env, op, clsTy, methName, true, 2, updateBC);
 }
 
+void in(ISS& env, const bc::FCallClsMethodM& op) {
+  auto const t = topC(env);
+  if (!t.couldBe(BObj | BCls | BStr | BLazyCls)) {
+    popC(env);
+    fcallUnknownImpl(env, op.fca);
+    unreachable(env);
+    return;
+  }
+  auto const clsTy = [&] {
+    if (t.subtypeOf(BCls)) return t;
+    if (t.subtypeOf(BObj)) {
+      return objcls(t);
+    }
+    if (auto const clsname = getNameFromType(t)) {
+      if (auto const rcls = env.index.resolve_class(env.ctx, clsname)) {
+        return clsExact(*rcls);
+      }
+    }
+    return TCls;
+  }();
+  auto const methName = op.str4;
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
+  auto const maybeDynamicCall =
+    RuntimeOption::EvalEmitClassPointers == 0 || t.couldBe(TStr);
+  auto const skipLogAsDynamicCall =
+    !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
+      op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
+      (!rfunc.mightCareAboutDynCalls() ||
+        !maybeDynamicCall ||
+        skipLogAsDynamicCall
+      )
+  ) {
+    auto const clsName = dcls_of(clsTy).cls.name();
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FCallClsMethodD { op.fca, op.str2, clsName, methName }
+    );
+  }
+
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    if (!clsHint) clsHint = op.str2;
+    return bc::FCallClsMethodM { std::move(fca), clsHint, op.subop3 , methName};
+  };
+  fcallClsMethodImpl(env, op, clsTy, methName, maybeDynamicCall, 1, updateBC);
+}
+
 namespace {
 
 template <typename Op, class UpdateBC>

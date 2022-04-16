@@ -176,7 +176,7 @@ pub mod instr {
     // the definition of define_instr_seq_helpers for details.
     emit_opcodes_macro::define_instr_seq_helpers! {
         // These get custom implementations below.
-        FCallClsMethod | FCallClsMethodD | FCallClsMethodS | FCallClsMethodSD |
+        FCallClsMethod | FCallClsMethodM | FCallClsMethodD | FCallClsMethodS | FCallClsMethodSD |
         FCallCtor | FCallObjMethod | FCallObjMethodD | MemoGetEager |
         NewStructDict | SSwitch | String | Switch => {}
 
@@ -223,6 +223,19 @@ pub mod instr {
             fcall_args,
             Default::default(),
             log,
+        )))
+    }
+
+    pub fn f_call_cls_method_m<'a>(
+        log: IsLogAsDynamicCallOp,
+        fcall_args: FCallArgs<'a>,
+        method: MethodName<'a>,
+    ) -> InstrSeq<'a> {
+        instr(Instruct::Opcode(Opcode::FCallClsMethodM(
+            fcall_args,
+            Default::default(),
+            log,
+            method,
         )))
     }
 

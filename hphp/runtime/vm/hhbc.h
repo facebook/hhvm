@@ -594,6 +594,7 @@ constexpr bool isComparisonOp(Op opcode) {
 constexpr bool isFCallClsMethod(Op opcode) {
   return
     opcode == OpFCallClsMethod ||
+    opcode == OpFCallClsMethodM ||
     opcode == OpFCallClsMethodD ||
     opcode == OpFCallClsMethodS ||
     opcode == OpFCallClsMethodSD;

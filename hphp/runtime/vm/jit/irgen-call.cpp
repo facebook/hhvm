@@ -1921,6 +1921,37 @@ void emitFCallClsMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
                        2);
 }
 
+void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
+                        IsLogAsDynamicCallOp op,
+                        const StringData* methName) {
+  auto const name = topC(env);
+  if (!name->type().subtypeOfAny(TObj, TCls, TStr, TLazyCls)) {
+    interpOne(env);
+    return;
+  }
+  auto const cls = [&] {
+    if (name->isA(TCls)) return name;
+    if (name->isA(TStr) &&
+      !name->hasConstVal() &&
+      RO::EvalRaiseStrToClsConversionWarning) {
+      gen(env, RaiseStrToClassNotice, name);
+    }
+    auto const ret = name->isA(TObj) ?
+      gen(env, LdObjClass, name) : ldCls(env, name);
+    decRef(env, name, DecRefProfileId::Default);
+    return ret;
+  }();
+
+  auto const suppressDynCallCheck =
+    op == IsLogAsDynamicCallOp::DontLogAsDynamicCall &&
+    !RO::EvalLogKnownMethodsAsDynamicCalls;
+
+  fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), false,
+                       name->isA(TStr) || RO::EvalEmitClassPointers == 0,
+                       suppressDynCallCheck,
+                       1);
+}
+
 void emitFCallClsMethodS(IRGS& env, FCallArgs fca, const StringData* clsHint,
                          SpecialClsRef ref) {
   auto const cls = specialClsRefToCls(env, ref);

@@ -1319,6 +1319,7 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::NewObjS:
     case Op::LockObj:
     case Op::FCallClsMethod:
+    case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:

@@ -527,6 +527,14 @@ inline bool Func::isPublic() const {
   return m_attrs & AttrPublic;
 }
 
+inline bool Func::isInternal() const {
+  return m_attrs & AttrInternal;
+}
+
+inline const StringData* Func::moduleName() const {
+  return unit()->moduleName();
+}
+
 inline bool Func::isStatic() const {
   return m_attrs & AttrStatic;
 }

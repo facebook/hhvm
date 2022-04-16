@@ -286,6 +286,10 @@ inline bool Class::isPersistent() const {
   return attrs() & AttrPersistent;
 }
 
+inline bool Class::isInternal() const {
+  return attrs() & AttrInternal;
+}
+
 inline bool Class::isDynamicallyConstructible() const {
   return attrs() & AttrDynamicallyConstructible;
 }

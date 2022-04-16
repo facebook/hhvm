@@ -636,6 +636,11 @@ public:
   bool isPersistent() const;
 
   /*
+   * Is this class internal to its module?
+   */
+  bool isInternal() const;
+
+  /*
    * Is this class allowed to be constructed dynamically?
    */
   bool isDynamicallyConstructible() const;

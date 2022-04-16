@@ -679,6 +679,16 @@ public:
   bool isAbstract() const;
 
   /*
+   * Is this function declared as internal to its module?
+   */
+  bool isInternal() const;
+
+  /*
+   * What module does this function belong to?
+   */
+  const StringData* moduleName() const;
+
+  /*
    * Whether a function is called non-statically. Generally this means
    * isStatic(), but eg static closures are still called with a valid
    * this pointer.

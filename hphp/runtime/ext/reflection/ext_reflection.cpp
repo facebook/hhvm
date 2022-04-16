@@ -734,7 +734,7 @@ static bool HHVM_METHOD(ReflectionFunctionAbstract, isAsync) {
 
 static bool HHVM_METHOD(ReflectionFunctionAbstract, isInternalToModule) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  return func->attrs() & AttrInternal;
+  return func->isInternal();
 }
 
 static bool HHVM_METHOD(ReflectionFunctionAbstract, isVariadic) {
@@ -935,7 +935,7 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getCoeffects) {
 
 static Variant HHVM_METHOD(ReflectionFunctionAbstract, getModule) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  auto const name = func->unit()->moduleName();
+  auto const name = func->moduleName();
   if (!name) return init_null_variant;
   return String::attach(const_cast<StringData*>(name));
 }
@@ -1236,7 +1236,7 @@ static bool HHVM_METHOD(ReflectionClass, isFinal) {
 
 static bool HHVM_METHOD(ReflectionClass, isInternalToModule) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return cls->attrs() & AttrInternal;
+  return cls->isInternal();
 }
 
 static bool HHVM_METHOD(ReflectionClass, isAbstract) {

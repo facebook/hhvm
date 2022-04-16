@@ -1932,7 +1932,6 @@ void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
   auto const cls = [&] {
     if (name->isA(TCls)) return name;
     if (name->isA(TStr) &&
-      !name->hasConstVal() &&
       RO::EvalRaiseStrToClsConversionWarning) {
       gen(env, RaiseStrToClassNotice, name);
     }

@@ -49,9 +49,7 @@ void emitClassGetC(IRGS& env) {
     return;
   }
 
-  if (name->isA(TStr) &&
-      !name->hasConstVal() &&
-      RO::EvalRaiseStrToClsConversionWarning) {
+  if (name->isA(TStr) && RO::EvalRaiseStrToClsConversionWarning) {
     gen(env, RaiseStrToClassNotice, name);
   }
 

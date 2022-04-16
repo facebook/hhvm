@@ -527,7 +527,7 @@ void raise_message(ErrorMode mode,
 }
 
 void raise_str_to_class_notice(const StringData* name) {
-  if (RuntimeOption::EvalRaiseStrToClsConversionWarning && !name->isStatic()) {
+  if (RuntimeOption::EvalRaiseStrToClsConversionWarning) {
     raise_notice("Implicit string to Class conversion for classname %s",
                  name->data());
   }

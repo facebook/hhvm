@@ -2759,7 +2759,6 @@ and case_list parent_locals ty env switch_pos cl dfl =
   in
   let check_fallthrough
       env switch_pos case_pos ~next_pos block ~last ~is_default =
-
     if (not (List.is_empty block)) && not last then
       match LEnv.get_cont_option env C.Next with
       | Some _ ->
@@ -2808,35 +2807,17 @@ and case_list parent_locals ty env switch_pos cl dfl =
   let (env, tcl) =
     let rec case_list env = function
       | [] -> (env, [])
-      | (((_, pos, _) as e), b) :: another :: rl ->
-        let env = initialize_next_cont env in
-        let (env, te, _) = expr env e ~allow_awaitable:(*?*) false in
-        let (env, tb) = block env b in
-        let last = List.is_empty (another :: rl) && Option.is_none dfl in
-        let ((_, next_pos, _), _) = another in
-        check_fallthrough
-          env
-          switch_pos
-          pos
-          ~next_pos:(Some next_pos)
-          b
-          ~last
-          ~is_default:false;
-        let (env, tcl) = case_list env (another :: rl) in
-        (env, (te, tb) :: tcl)
       | (((_, pos, _) as e), b) :: rl ->
         let env = initialize_next_cont env in
         let (env, te, _) = expr env e ~allow_awaitable:(*?*) false in
         let (env, tb) = block env b in
         let last = List.is_empty rl && Option.is_none dfl in
-        check_fallthrough
-          env
-          switch_pos
-          pos
-          ~next_pos:None
-          b
-          ~last
-          ~is_default:false;
+        let next_pos =
+          match rl with
+          | ((_, next_pos, _), _) :: _ -> Some next_pos
+          | [] -> None
+        in
+        check_fallthrough env switch_pos pos ~next_pos b ~last ~is_default:false;
         let (env, tcl) = case_list env rl in
         (env, (te, tb) :: tcl)
     in

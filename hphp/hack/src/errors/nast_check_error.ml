@@ -463,7 +463,7 @@ let case_fallthrough switch_pos case_pos next_pos =
 
       [
         Quickfix.make
-          ~title:"Annotate fallthrough case with // FALLTHROUGH comment"
+          ~title:"Mark this `case` as explicitly falling through"
           ~new_text
           new_pos;
       ]

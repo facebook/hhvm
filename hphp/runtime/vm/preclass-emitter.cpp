@@ -217,16 +217,6 @@ void PreClassEmitter::addUsedTrait(const StringData* traitName) {
   m_usedTraits.push_back(traitName);
 }
 
-void PreClassEmitter::addTraitPrecRule(
-    const PreClass::TraitPrecRule &rule) {
-  m_traitPrecRules.push_back(rule);
-}
-
-void PreClassEmitter::addTraitAliasRule(
-    const PreClass::TraitAliasRule &rule) {
-  m_traitAliasRules.push_back(rule);
-}
-
 const StaticString
   s_nativedata("__nativedata"),
   s_DynamicallyConstructible("__DynamicallyConstructible"),
@@ -276,8 +266,6 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_includedEnums = m_enumIncludes;
   pc->m_usedTraits = m_usedTraits;
   pc->m_requirements = m_requirements;
-  pc->m_traitPrecRules = m_traitPrecRules;
-  pc->m_traitAliasRules = m_traitAliasRules;
   pc->m_enumBaseTy = m_enumBaseTy;
   pc->m_numDeclMethods = -1;
   pc->m_ifaceVtableSlot = m_ifaceVtableSlot;
@@ -441,8 +429,6 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     (m_enumIncludes)
     (m_usedTraits)
     (m_requirements)
-    (m_traitPrecRules)
-    (m_traitAliasRules)
     (m_userAttributes)
     (m_propMap, [](Prop p) { return p.name(); })
     (m_constMap, [](Const c) { return c.name(); })

@@ -356,8 +356,6 @@ public:
   const IncludedEnumsVec& includedEnums()    const { return m_includedEnums; }
   const UsedTraitVec& usedTraits()           const { return m_usedTraits; }
   const ClassRequirementsVec& requirements() const { return m_requirements; }
-  const TraitPrecRuleVec& traitPrecRules()   const { return m_traitPrecRules; }
-  const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
   const UserAttributeMap& userAttributes()   const { return m_userAttributes; }
 
   /*
@@ -475,8 +473,6 @@ private:
   IncludedEnumsVec m_includedEnums;
   UsedTraitVec m_usedTraits;
   ClassRequirementsVec m_requirements;
-  TraitPrecRuleVec m_traitPrecRules;
-  TraitAliasRuleVec m_traitAliasRules;
   UserAttributeMap m_userAttributes;
   const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
   MethodMap m_methods;

@@ -48,7 +48,6 @@ function main() {
   var_dump($a_cls->getStaticProperties());
   $b_cls = new ReflectionClass('B');
   var_dump($b_cls->newInstanceArgs(varray[null]));
-  var_dump($b_cls->getTraitAliases());
   var_dump($b_cls->getTraitNames());
   var_dump($b_cls->getTraits());
   $bing_cls = new ReflectionClass('TBing');

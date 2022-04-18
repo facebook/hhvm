@@ -2085,12 +2085,6 @@ bool build_class_methods(const IndexData& index,
         }
       }
     }
-    for (auto const& precRule : cinfo->cls->traitPrecRules) {
-      tmid.applyPrecRule(precRule, cinfo);
-    }
-    for (auto const& aliasRule : cinfo->cls->traitAliasRules) {
-      tmid.applyAliasRule(aliasRule, cinfo);
-    }
 
     auto traitMethods = tmid.finish(cinfo, enable_method_trait_diamond(cinfo));
     // Import the methods.

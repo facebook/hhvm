@@ -787,45 +787,8 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
     out.fmt(" {}", traits[i].get());
   }
 
-  auto& precRules  = cls->traitPrecRules();
-  auto& aliasRules = cls->traitAliasRules();
-  if (precRules.empty() && aliasRules.empty()) {
-    out.fmt(";");
-    out.nl();
-    return;
-  }
-
-  out.fmt(" {{");
+  out.fmt(";");
   out.nl();
-  indented(out, [&] {
-    for (auto& prec : precRules) {
-      out.fmtln("{}::{} insteadof{};",
-        prec.selectedTraitName()->data(),
-        prec.methodName()->data(),
-        [&]() -> std::string {
-          auto ret = std::string{};
-          for (auto& name : prec.otherTraitNames()) {
-            ret += folly::format(" {}", name.get()).str();
-          }
-          return ret;
-        }()
-      );
-    }
-
-    for (auto& alias : aliasRules) {
-      out.fmtln("{}{} as{}{};",
-        alias.traitName()->empty()
-          ? std::string{}
-          : folly::format("{}::", alias.traitName()).str(),
-        alias.origMethodName()->data(),
-        opt_attrs(AttrContext::TraitImport, alias.modifiers()),
-        alias.newMethodName() != alias.origMethodName()
-          ? std::string(" ") + alias.newMethodName()->data()
-          : std::string{}
-      );
-    }
-  });
-  out.fmtln("}}");
 }
 
 void print_requirement(Output& out, const PreClass::ClassRequirement& req) {

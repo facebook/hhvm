@@ -1583,20 +1583,6 @@ class ReflectionClass implements Reflector {
   public function getTraitNames()[]: varray<string>;
 
   /**
-   * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.gettraitaliases.php )
-   *
-   * Warning: This function is currently not documented; only its argument
-   * list is available.
-   *
-   * @return     mixed   Returns an array with new method names in keys and
-   *                     original names (in the format "TraitName::original")
-   *                     in values. Returns NULL in case of an error.
-   */
-  <<__Native>>
-  public function getTraitAliases()[]: darray<string, string>;
-
-  /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.gettraits.php )
    *
    * Warning: This function is currently not documented; only its argument

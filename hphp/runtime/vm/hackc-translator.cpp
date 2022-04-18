@@ -420,40 +420,6 @@ void translateRequirements(TranslationState& ts, Pair<ClassName, TraitReqKind> r
   ts.pce->addClassRequirement(PreClass::ClassRequirement(name, requirementKind));
 }
 
-using UseAlias = Quadruple<
-  Maybe<ClassName>,
-  ClassName,
-  Maybe<ClassName>,
-  Attr
->;
-void translateUseAlias(TranslationState& ts, UseAlias useAlias) {
-  auto const identifier = toStaticString(useAlias._1._0);
-  auto const traitName = maybeOrElse(useAlias._0,
-    [&](ClassName& c) {return toStaticString(c._0);},
-    [&]() {return staticEmptyString();});
-
-  auto const alias = maybeOrElse(useAlias._2,
-    [&](ClassName& c) { return toStaticString(c._0);},
-    [&]() {return identifier;});
-
-  ts.pce->addTraitAliasRule(
-    PreClass::TraitAliasRule(traitName, identifier, alias, useAlias._3)
-  );
-}
-
-using UsePrecedence = Triple<ClassName, ClassName, Slice<ClassName>>;
-void translateUsePrecedence(TranslationState& ts, UsePrecedence usePrecedence) {
-  auto const traitName = toStaticString(usePrecedence._0._0);
-  auto const identifier = toStaticString(usePrecedence._1._0);
-
-  PreClass::TraitPrecRule precRule(traitName, identifier);
-  auto otherTraits = range(usePrecedence._2);
-  for (auto const& t : otherTraits) {
-    precRule.addOtherTraitName(toStaticString(t._0));
-  }
-  ts.pce->addTraitPrecRule(precRule);
-}
-
 void translateClass(TranslationState& ts, const HhasClass& c) {
   UpperBoundMap ubs;
   auto upper_bounds = range(c.upper_bounds);
@@ -502,16 +468,6 @@ void translateClass(TranslationState& ts, const HhasClass& c) {
   auto uses = range(c.uses);
   for (auto const& u : uses) {
     ts.pce->addUsedTrait(toStaticString(u));
-  }
-
-  auto useAliases = range(c.use_aliases);
-  for (auto const& ua : useAliases) {
-    translateUseAlias(ts, ua);
-  }
-
-  auto usePrecedences = range(c.use_precedences);
-  for (auto const& up : usePrecedences) {
-    translateUsePrecedence(ts, up);
   }
 
   translateEnumType(ts, c.enum_type);

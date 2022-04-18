@@ -1110,8 +1110,6 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
   for (auto& x : cls.includedEnumNames)  pce->addEnumInclude(x);
   for (auto& x : cls.usedTraitNames)     pce->addUsedTrait(x);
   for (auto& x : cls.requirements)       pce->addClassRequirement(x);
-  for (auto& x : cls.traitPrecRules)     pce->addTraitPrecRule(x);
-  for (auto& x : cls.traitAliasRules)    pce->addTraitAliasRule(x);
 
   pce->setIfaceVtableSlot(state.index.lookup_iface_vtable_slot(&cls));
 

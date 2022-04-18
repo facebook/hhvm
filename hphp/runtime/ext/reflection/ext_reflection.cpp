@@ -106,7 +106,6 @@ const StaticString
   s_private_properties_index("private_properties_index"),
   s_attributes("attributes"),
   s_function("function"),
-  s_trait_aliases("trait_aliases"),
   s_varg("varg"),
   s___invoke("__invoke"),
   s_return_type("return_type"),
@@ -1369,36 +1368,6 @@ static Array HHVM_METHOD(ReflectionClass, getTraitNames) {
   return ai.toArray();
 }
 
-static Array get_trait_alias_info(const Class* cls) {
-  auto const& aliases = cls->traitAliases();
-
-  if (aliases.size()) {
-    DictInit ai(aliases.size());
-
-    for (auto const& namePair : aliases) {
-      ai.set(StrNR(namePair.first), VarNR(namePair.second).tv());
-    }
-    return ai.toArray();
-  } else {
-    // Even if we have alias rules, if we're in repo mode, they will be applied
-    // during the trait flattening step, and we won't populate traitAliases()
-    // on the Class.
-    auto const& rules = cls->preClass()->traitAliasRules();
-
-    DictInit ai(rules.size());
-
-    for (auto const& rule : rules) {
-      auto namePair = rule.asNamePair();
-      ai.set(StrNR(namePair.first), VarNR(namePair.second).tv());
-    }
-    return ai.toArray();
-  }
-}
-
-static Array HHVM_METHOD(ReflectionClass, getTraitAliases) {
-  return get_trait_alias_info(ReflectionClassHandle::GetClassFor(this_));
-}
-
 static bool HHVM_METHOD(ReflectionClass, hasMethod, const String& name) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return (get_method_func(cls, name) != nullptr);
@@ -2350,7 +2319,6 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionClass, getInterfaceNames);
     HHVM_ME(ReflectionClass, getRequirementNames);
     HHVM_ME(ReflectionClass, getTraitNames);
-    HHVM_ME(ReflectionClass, getTraitAliases);
 
     HHVM_ME(ReflectionClass, hasMethod);
     HHVM_STATIC_ME(ReflectionClass, getMethodOrder);
@@ -2553,11 +2521,6 @@ Array get_class_info(const String& name) {
       arr.set(StrNR(traitName), make_tv<KindOfInt64>(1));
     }
     ret.set(s_traits, make_array_like_tv(arr.create()));
-  }
-
-  // trait aliases
-  {
-    ret.set(s_trait_aliases, VarNR(get_trait_alias_info(cls)).tv());
   }
 
   // attributes

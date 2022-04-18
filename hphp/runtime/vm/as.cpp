@@ -2898,13 +2898,7 @@ void parse_default_ctor(AsmState& as) {
 
 /*
  * directive-use :  identifier+ ';'
- *               |  identifier+ '{' use-line* '}'
  *               ;
- *
- * use-line : use-name-ref "insteadof" identifier+ ';'
- *          | use-name-ref "as" attribute-list identifier ';'
- *          | use-name-ref "as" attribute-list ';'
- *          ;
  */
 void parse_use(AsmState& as) {
   std::vector<std::string> usedTraits;
@@ -2921,78 +2915,7 @@ void parse_use(AsmState& as) {
     as.pce->addUsedTrait(makeStaticString(usedTraits[i]));
   }
   as.in.skipWhitespace();
-  if (as.in.peek() != '{') {
-    as.in.expect(';');
-    return;
-  }
-  as.in.getc();
-
-  for (;;) {
-    as.in.skipWhitespace();
-    if (as.in.peek() == '}') break;
-
-    std::string traitName;
-    std::string identifier;
-    if (!as.in.readword(traitName)) {
-      as.error("expected identifier for line in .use block");
-    }
-    as.in.skipWhitespace();
-    if (as.in.peek() == ':') {
-      as.in.getc();
-      as.in.expect(':');
-      if (!as.in.readword(identifier)) {
-        as.error("expected identifier after ::");
-      }
-    } else {
-      identifier = traitName;
-      traitName.clear();
-    }
-
-    if (as.in.tryConsume("as")) {
-      Attr attrs = parse_attribute_list(as, AttrContext::TraitImport);
-      std::string alias;
-      if (!as.in.readword(alias)) {
-        if (attrs != AttrNone) {
-          alias = identifier;
-        } else {
-          as.error("expected identifier or attribute list after "
-                   "`as' in .use block");
-        }
-      }
-
-      as.pce->addTraitAliasRule(PreClass::TraitAliasRule(
-        makeStaticString(traitName),
-        makeStaticString(identifier),
-        makeStaticString(alias),
-        attrs));
-    } else if (as.in.tryConsume("insteadof")) {
-      if (traitName.empty()) {
-        as.error("Must specify TraitName::name when using a trait insteadof");
-      }
-
-      PreClass::TraitPrecRule precRule(
-        makeStaticString(traitName),
-        makeStaticString(identifier));
-
-      bool addedOtherTraits = false;
-      std::string whom;
-      while (as.in.readword(whom)) {
-        precRule.addOtherTraitName(makeStaticString(whom));
-        addedOtherTraits = true;
-      }
-      if (!addedOtherTraits) {
-        as.error("one or more trait names expected after `insteadof'");
-      }
-
-      as.pce->addTraitPrecRule(precRule);
-    } else {
-      as.error("expected `as' or `insteadof' in .use block");
-    }
-
-    as.in.expectWs(';');
-  }
-
-  as.in.expect('}');
+  as.in.expect(';');
 }
 
 /*

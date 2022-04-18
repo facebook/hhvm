@@ -272,19 +272,11 @@ struct PreClassEmitter {
   void addClassRequirement(const PreClass::ClassRequirement req) {
     m_requirements.push_back(req);
   }
-  void addTraitPrecRule(const PreClass::TraitPrecRule &rule);
-  void addTraitAliasRule(const PreClass::TraitAliasRule &rule);
   const std::vector<LowStringPtr>& usedTraits() const {
     return m_usedTraits;
   }
   const std::vector<PreClass::ClassRequirement>& requirements() const {
     return m_requirements;
-  }
-  const std::vector<PreClass::TraitAliasRule>& traitAliasRules() const {
-    return m_traitAliasRules;
-  }
-  const std::vector<PreClass::TraitPrecRule>& traitPrecRules() const {
-    return m_traitPrecRules;
   }
 
   void setUserAttributes(UserAttributeMap map) {
@@ -329,8 +321,6 @@ struct PreClassEmitter {
   std::vector<LowStringPtr> m_enumIncludes;
   std::vector<LowStringPtr> m_usedTraits;
   std::vector<PreClass::ClassRequirement> m_requirements;
-  std::vector<PreClass::TraitPrecRule> m_traitPrecRules;
-  std::vector<PreClass::TraitAliasRule> m_traitAliasRules;
   UserAttributeMap m_userAttributes;
   MethodVec m_methods;
   MethodMap m_methodMap;

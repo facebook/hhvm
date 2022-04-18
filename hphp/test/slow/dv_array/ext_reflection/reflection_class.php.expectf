@@ -79,8 +79,6 @@ object(B) (1) {
   ["prop":protected]=>
   NULL
 }
-dict(0) {
-}
 vec(1) {
   string(5) "TBing"
 }

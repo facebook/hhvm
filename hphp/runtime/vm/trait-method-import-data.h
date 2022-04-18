@@ -158,18 +158,6 @@ struct TraitMethodImportData {
                     Attr mods);
 
   /*
-   * Apply a precedence ("insteadof") rule to the import data set.
-   */
-  void applyPrecRule(const PreClass::TraitPrecRule& rule,
-                     typename TraitMethod::class_type ctx);
-
-  /*
-   * Apply an alias ("as") rule to the import data set.
-   */
-  void applyAliasRule(const PreClass::TraitAliasRule& rule,
-                      typename TraitMethod::class_type ctx);
-
-  /*
    * Declare that all imports have been added---and that all rules have been
    * applied---and return an ordered vector of all imported (name, TraitMethod)
    * pairs.

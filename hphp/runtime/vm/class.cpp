@@ -238,19 +238,6 @@ unsigned loadUsedTraits(PreClass* preClass,
 
   }
 
-  if (!traitsFlattened) {
-    // Trait aliases can increase method count. Get an estimate of the
-    // number of aliased functions. This doesn't need to be done in
-    // classes with flattened traits because those methods are already
-    // present in the preclass.
-    for (auto const& rule : preClass->traitAliasRules()) {
-      auto origName = rule.origMethodName();
-      auto newName = rule.newMethodName();
-      if (origName != newName) {
-        methodCount++;
-      }
-    }
-  }
   return methodCount;
 }
 
@@ -4649,15 +4636,6 @@ struct TMIOps {
 
 using TMIData = TraitMethodImportData<TraitMethod, TMIOps>;
 
-void applyTraitRules(Class* cls, TMIData& tmid) {
-  for (auto const& precRule : cls->preClass()->traitPrecRules()) {
-    tmid.applyPrecRule(precRule, cls);
-  }
-  for (auto const& aliasRule : cls->preClass()->traitAliasRules()) {
-    tmid.applyAliasRule(aliasRule, cls);
-  }
-}
-
 void importTraitMethod(Class* cls,
                        const TMIData::MethodData& mdata,
                        Class::MethodMapBuilder& builder) {
@@ -4737,9 +4715,6 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
       tmid.add(traitMethod, method->name());
     }
   }
-
-  // Apply trait rules and import the methods.
-  applyTraitRules(this, tmid);
 
   bool enableMethodTraitDiamond = m_preClass->enableMethodTraitDiamond();
   auto traitMethods = tmid.finish(this, enableMethodTraitDiamond);

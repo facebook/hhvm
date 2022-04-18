@@ -556,8 +556,6 @@ struct Class : ClassBase {
    */
   CompactVector<LowStringPtr> usedTraitNames;
   CompactVector<PreClass::ClassRequirement> requirements;
-  CompactVector<PreClass::TraitPrecRule> traitPrecRules;
-  CompactVector<PreClass::TraitAliasRule> traitAliasRules;
 
   /*
    * Properties defined on this class.

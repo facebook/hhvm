@@ -3368,7 +3368,6 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         Option<ast::Expr>,
     ),
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let jit_enable_rename_function = e
         .options()
         .hhvm
@@ -3376,18 +3375,6 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
     use {ast::Expr, ast::Expr_};
     match (&expr.2, &args[..], uarg) {
-        (Expr_::Id(id), [(pk, Expr(_, _, Expr_::String(data)))], None)
-            if id.1 == special_functions::HHAS_ADATA =>
-        {
-            error::ensure_normal_paramkind(pk)?;
-            // FIXME: This is not safe--string literals are binary strings.
-            // There's no guarantee that they're valid UTF-8.
-            let tv = TypedValue::hhas_adata(
-                alloc.alloc_str(unsafe { std::str::from_utf8_unchecked(data.as_ref()) }),
-            );
-            let instr = emit_adata::typed_value_to_instr(e, &tv)?;
-            Ok(emit_pos_then(pos, instr))
-        }
         (Expr_::Id(id), _, None) if id.1 == pseudo_functions::ISSET => {
             emit_call_isset_exprs(e, env, pos, args)
         }

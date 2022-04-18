@@ -474,12 +474,9 @@ pub mod special_functions {
 
     pub const ECHO: &str = "echo"; /* pseudo-function */
 
-    pub const HHAS_ADATA: &str = "__hhas_adata";
-
     pub fn is_special_function(x: &str) -> bool {
         lazy_static! {
-            static ref ALL_SPECIAL_FUNCTIONS: Vec<&'static str> =
-                vec![ECHO, HHAS_ADATA,].into_iter().collect();
+            static ref ALL_SPECIAL_FUNCTIONS: Vec<&'static str> = vec![ECHO].into_iter().collect();
         }
         ALL_SPECIAL_FUNCTIONS.contains(&x)
     }

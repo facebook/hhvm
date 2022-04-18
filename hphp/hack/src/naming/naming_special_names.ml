@@ -623,7 +623,7 @@ module SpecialFunctions = struct
   let hhas_adata = "__hhas_adata"
 
   let is_special_function =
-    let all_special_functions = HashSet.of_list [echo; hhas_adata] in
+    let all_special_functions = HashSet.of_list [echo] in
     (fun x -> HashSet.mem all_special_functions x)
 end
 

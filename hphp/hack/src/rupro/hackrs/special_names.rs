@@ -205,7 +205,6 @@ pub mod special_functions {
     use super::*;
 
     pub static echo: Lazy<FunName> = lazy!(sn::special_functions::ECHO);
-    pub static hhas_adata: Lazy<FunName> = lazy!(sn::special_functions::HHAS_ADATA);
 }
 
 pub mod autoimported_functions {

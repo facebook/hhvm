@@ -9,7 +9,7 @@ use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexMap;
 use itertools::Itertools;
-use naming_special_names_rust::{math, members, special_functions, typehints};
+use naming_special_names_rust::{math, members, typehints};
 use options::HhvmFlags;
 use oxidized::{
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
@@ -326,11 +326,6 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             Expr_::Null => Ok(TypedValue::Null),
             Expr_::String(s) => string_expr_to_typed_value(emitter, s),
             Expr_::Float(s) => float_expr_to_typed_value(emitter, s),
-            Expr_::Call(id)
-                if (id.0.as_id()).map_or(false, |x| x.1 == special_functions::HHAS_ADATA) =>
-            {
-                call_expr_to_typed_value(emitter, id)
-            }
 
             Expr_::Varray(fields) => varray_to_typed_value(emitter, &fields.1),
             Expr_::Darray(fields) => darray_to_typed_value(emitter, &fields.1),
@@ -390,30 +385,6 @@ fn class_const_expr_to_typed_value<'arena, 'decl>(
         Err(Error::NotLiteral)
     } else {
         class_const_to_typed_value(emitter, &x.0, &x.1)
-    }
-}
-
-fn call_expr_to_typed_value<'arena, 'decl>(
-    emitter: &Emitter<'arena, 'decl>,
-    id: &(
-        ast::Expr,
-        Vec<ast::Targ>,
-        Vec<(ast_defs::ParamKind, ast::Expr)>,
-        Option<ast::Expr>,
-    ),
-) -> Result<TypedValue<'arena>, Error> {
-    use ast::{Expr, Expr_};
-    match id.2[..] {
-        [(ast_defs::ParamKind::Pnormal, Expr(_, _, Expr_::String(ref data)))] => {
-            // FIXME: This is not safe--string literals are binary strings.
-            // There's no guarantee that they're valid UTF-8.
-            Ok(TypedValue::hhas_adata(
-                emitter
-                    .alloc
-                    .alloc_str(unsafe { std::str::from_utf8_unchecked(data) }),
-            ))
-        }
-        _ => Err(Error::NotLiteral),
     }
 }
 

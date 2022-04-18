@@ -290,7 +290,7 @@ module CustomGraph = struct
   external hh_custom_dep_graph_register_custom_types : unit -> unit
     = "hh_custom_dep_graph_register_custom_types"
 
-  external assert_master : unit -> unit = "assert_master"
+  external assert_master : unit -> unit = "hh_assert_master"
 
   let allow_reads_ref = ref false
 

@@ -118,7 +118,7 @@
 // Some OCaml utility functions (introduced only in 4.12.0)
 //
 // TODO(hverr): Remove these when we move to 4.12.0
-value hh_shared_caml_alloc_some(value v) {
+static value hh_shared_caml_alloc_some(value v) {
   CAMLparam1(v);
   value some = caml_alloc_small(1, 0);
   Store_field(some, 0, v);
@@ -483,13 +483,13 @@ CAMLprim value hh_hash_slots(void) {
 
 #ifdef _WIN32
 
-struct timeval log_duration(const char *prefix, struct timeval start_t) {
+static struct timeval log_duration(const char *prefix, struct timeval start_t) {
    return start_t; // TODO
 }
 
 #else
 
-struct timeval log_duration(const char *prefix, struct timeval start_t) {
+static struct timeval log_duration(const char *prefix, struct timeval start_t) {
   struct timeval end_t = {0};
   gettimeofday(&end_t, NULL);
   time_t secs = end_t.tv_sec - start_t.tv_sec;
@@ -521,7 +521,7 @@ static HANDLE memfd;
  * Committing the whole shared heap at once would require the same
  * amount of free space in memory (or in swap file).
  **************************************************************************/
-void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
+static void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
   memfd = CreateFileMapping(
     INVALID_HANDLE_VALUE,
     NULL,
@@ -558,7 +558,7 @@ static void raise_less_than_minimum_available(uint64_t avail) {
 }
 
 #include <sys/statvfs.h>
-void assert_avail_exceeds_minimum(const char *shm_dir, uint64_t minimum_avail) {
+static void assert_avail_exceeds_minimum(const char *shm_dir, uint64_t minimum_avail) {
   struct statvfs stats;
   uint64_t avail;
   if (statvfs(shm_dir, &stats)) {
@@ -570,7 +570,7 @@ void assert_avail_exceeds_minimum(const char *shm_dir, uint64_t minimum_avail) {
   }
 }
 
-int memfd_create_helper(const char *name, const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
+static int memfd_create_helper(const char *name, const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
   int memfd = -1;
 
   if (shm_dir == NULL) {
@@ -647,7 +647,7 @@ int memfd_create_helper(const char *name, const char *shm_dir, size_t shared_mem
  * The resulting file descriptor should be mmaped with the memfd_map
  * function (see below).
  ****************************************************************************/
-void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
+static void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
   memfd_shared_mem = memfd_create_helper("fb_heap", shm_dir, shared_mem_size, minimum_avail);
   if (shm_use_sharded_hashtbl) {
     memfd_shmffi = memfd_create_helper("fb_sharded_hashtbl", shm_dir, SHARDED_HASHTBL_MEM_SIZE, 0);
@@ -1093,20 +1093,26 @@ CAMLprim value hh_counter_next(void) {
  * process
  */
 /*****************************************************************************/
-void assert_master(void) {
+static void assert_master(void) {
   assert(my_pid == *master_pid);
 }
 
-void assert_not_master(void) {
+static void assert_not_master(void) {
   assert(my_pid != *master_pid);
 }
 
-void assert_allow_removes(void) {
+static void assert_allow_removes(void) {
   assert(*allow_removes);
 }
 
-void assert_allow_hashtable_writes_by_current_process(void) {
+static void assert_allow_hashtable_writes_by_current_process(void) {
   assert(allow_hashtable_writes_by_current_process);
+}
+
+CAMLprim value hh_assert_master(void) {
+  CAMLparam0();
+  assert_master();
+  CAMLreturn(Val_unit);
 }
 
 /*****************************************************************************/
@@ -1143,7 +1149,7 @@ CAMLprim value hh_set_allow_hashtable_writes_by_current_process(value val) {
   CAMLreturn(Val_unit);
 }
 
-void check_should_exit(void) {
+static void check_should_exit(void) {
   if (workers_should_exit == NULL) {
     caml_failwith(
       "`check_should_exit` failed: `workers_should_exit` was uninitialized. "
@@ -1546,7 +1552,7 @@ static uint64_t get_hash(value key) {
   return *((uint64_t*)String_val(key));
 }
 
-CAMLprim value get_hash_ocaml(value key) {
+CAMLprim value hh_get_hash_ocaml(value key) {
   return caml_copy_int64(*((uint64_t*)String_val(key)));
 }
 
@@ -1796,7 +1802,7 @@ static unsigned int find_slot(value key) {
   }
 }
 
-_Bool hh_is_slot_taken_for_key(unsigned int slot, value key) {
+static _Bool hh_is_slot_taken_for_key(unsigned int slot, value key) {
   _Bool good_hash = hashtbl[slot].hash == get_hash(key);
   _Bool non_null_addr = hashtbl[slot].addr != NULL;
   if (good_hash && non_null_addr) {
@@ -1847,7 +1853,7 @@ value hh_mem(value key) {
 /*****************************************************************************/
 /* Deserializes the value pointed to by elt. */
 /*****************************************************************************/
-CAMLprim value hh_deserialize(heap_entry_t *elt) {
+static CAMLprim value hh_deserialize(heap_entry_t *elt) {
   CAMLparam0();
   CAMLlocal1(result);
   size_t size = Entry_size(elt->header);

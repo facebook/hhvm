@@ -12,7 +12,7 @@ use crate::{
         wrap_by, Error,
     },
 };
-use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
+use ffi::{Maybe, Maybe::*, Pair, Slice, Str, Triple};
 use hash::HashSet;
 use hhbc::{
     hackc_unit::HackCUnit,
@@ -484,94 +484,13 @@ fn print_doc_comment<'arena>(
     Ok(())
 }
 
-fn print_use_precedence<'arena>(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    Triple(id1, id2, ids): &Triple<
-        ClassName<'arena>,
-        ClassName<'arena>,
-        Slice<'arena, ClassName<'arena>>,
-    >,
-) -> Result<()> {
-    ctx.newline(w)?;
-    write_bytes!(
-        w,
-        "{}::{} insteadof {};",
-        id1,
-        id2,
-        fmt_separated(" ", ids.as_ref().iter().unique())
-    )
-}
-
-fn print_use_alias<'arena>(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    Quadruple(ido1, id, ido2, attr): &Quadruple<
-        Maybe<ClassName<'arena>>,
-        ClassName<'arena>,
-        Maybe<ClassName<'arena>>,
-        Attr,
-    >,
-) -> Result<()> {
-    ctx.newline(w)?;
-    let id = id.unsafe_as_str();
-    option_or(
-        w,
-        ido1.as_ref(),
-        |w, i: &ClassName<'arena>| write_bytes!(w, "{}::{}", i, id),
-        id,
-    )?;
-    w.write_all(b" as ")?;
-    if !attr.is_empty() {
-        square(w, |w| {
-            write!(
-                w,
-                "{}",
-                attrs_to_string_ffi(AttrContext::TraitImport, *attr)
-            )
-        })?;
-    }
-    write_if!(!attr.is_empty() && ido2.is_just(), w, " ")?;
-    option(w, ido2.as_ref(), |w, i: &ClassName<'arena>| {
-        w.write_all(i.as_bstr())
-    })?;
-    w.write_all(b";")
-}
-
-fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena>) -> Result<()> {
+fn print_uses<'arena>(w: &mut dyn Write, c: &HhasClass<'arena>) -> Result<()> {
     if c.uses.is_empty() {
         Ok(())
     } else {
         newline(w)?;
         write_bytes!(w, "  .use {}", fmt_separated(" ", c.uses.iter()))?;
-
-        if c.use_aliases.is_empty() && c.use_precedences.is_empty() {
-            w.write_all(b";")
-        } else {
-            w.write_all(b" {")?;
-            ctx.block(w, |ctx, w| {
-                let precs: &[Triple<
-                    ClassName<'arena>,
-                    ClassName<'arena>,
-                    Slice<'arena, ClassName<'arena>>,
-                >] = c.use_precedences.as_ref();
-                for x in precs {
-                    print_use_precedence(ctx, w, x)?;
-                }
-                let aliases: &[Quadruple<
-                    Maybe<ClassName<'arena>>,
-                    ClassName<'arena>,
-                    Maybe<ClassName<'arena>>,
-                    Attr,
-                >] = c.use_aliases.as_ref();
-                for x in aliases {
-                    print_use_alias(ctx, w, x)?;
-                }
-                Ok(())
-            })?;
-            newline(w)?;
-            w.write_all(b"  }")
-        }
+        w.write_all(b";")
     }
 }
 
@@ -680,7 +599,7 @@ fn print_class_def<'arena>(
     w.write_all(b" {")?;
     ctx.block(w, |c, w| {
         print_doc_comment(c, w, class_def.doc_comment.as_ref())?;
-        print_uses(c, w, class_def)?;
+        print_uses(w, class_def)?;
         print_enum_ty(c, w, class_def)?;
         for x in class_def.requirements.as_ref() {
             print_requirement(c, w, x)?;

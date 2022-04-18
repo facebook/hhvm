@@ -599,38 +599,6 @@ pub fn emit_class<'a, 'arena, 'decl>(
         .unique()
         .collect();
 
-    let elaborate_namespace_id =
-        |x: &'a ast::Id| ClassName::from_ast_name_and_mangle(alloc, x.name());
-    let use_aliases = Slice::fill_iter(
-        alloc,
-        ast_class
-            .use_as_alias
-            .iter()
-            .map(|ast::UseAsAlias(ido1, id, ido2, vis)| {
-                let id1 = Maybe::from(ido1.as_ref()).map(elaborate_namespace_id);
-                let id2 =
-                    Maybe::from(ido2.as_ref()).map(|x| ClassName::new(Str::new_str(alloc, &x.1)));
-                let attr = vis
-                    .iter()
-                    .fold(Attr::AttrNone, |attr, &v| Attr::from(attr | Attr::from(v)));
-
-                (id1, ClassName::new(Str::new_str(alloc, &id.1)), id2, attr).into()
-            }),
-    );
-
-    let use_precedences = Slice::fill_iter(
-        alloc,
-        ast_class
-            .insteadof_alias
-            .iter()
-            .map(|ast::InsteadofAlias(id1, id2, ids)| {
-                let id1 = elaborate_namespace_id(id1);
-                let id2 = ClassName::new(Str::new_str(alloc, &id2.1));
-                let ids = Slice::fill_iter(alloc, ids.iter().map(elaborate_namespace_id));
-                (id1, id2, ids).into()
-            }),
-    );
-
     let enum_type = if ast_class.kind.is_cenum() || ast_class.kind.is_cenum_class() {
         from_enum_type(alloc, ast_class.enum_.as_ref())?
     } else {
@@ -930,8 +898,6 @@ pub fn emit_class<'a, 'arena, 'decl>(
         flags,
         doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &(c.0).1))),
         uses: Slice::fill_iter(alloc, uses.into_iter().map(|s| Str::new_str(alloc, s))),
-        use_aliases,
-        use_precedences,
         methods: Slice::fill_iter(alloc, methods.into_iter()),
         enum_type: Maybe::from(enum_type),
         upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),

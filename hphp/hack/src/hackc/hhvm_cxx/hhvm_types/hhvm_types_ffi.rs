@@ -183,18 +183,6 @@ impl From<&oxidized::ast_defs::Visibility> for Attr {
     }
 }
 
-impl std::convert::From<oxidized::ast::UseAsVisibility> for Attr {
-    fn from(k: oxidized::ast::UseAsVisibility) -> Self {
-        use oxidized::ast::UseAsVisibility;
-        match k {
-            UseAsVisibility::UseAsPrivate => Self::AttrPrivate,
-            UseAsVisibility::UseAsPublic => Self::AttrPublic,
-            UseAsVisibility::UseAsProtected => Self::AttrProtected,
-            UseAsVisibility::UseAsFinal => Self::AttrFinal,
-        }
-    }
-}
-
 impl From<Attr> for u32 {
     fn from(attr: Attr) -> Self {
         attr.repr

@@ -8,7 +8,7 @@ use crate::{
     hhas_method::HhasMethod, hhas_pos::HhasSpan, hhas_property::HhasProperty,
     hhas_type::HhasTypeInfo, hhas_type_const::HhasTypeConstant, ClassName,
 };
-use ffi::{Maybe, Pair, Quadruple, Slice, Str, Triple};
+use ffi::{Maybe, Pair, Slice, Str};
 use hhvm_types_ffi::ffi::Attr;
 
 #[derive(Debug)]
@@ -29,16 +29,6 @@ pub struct HhasClass<'arena> {
     pub name: ClassName<'arena>,
     pub span: HhasSpan,
     pub uses: Slice<'arena, Str<'arena>>,
-    // Deprecated - kill please
-    pub use_aliases: Slice<
-        'arena,
-        Quadruple<Maybe<ClassName<'arena>>, ClassName<'arena>, Maybe<ClassName<'arena>>, Attr>,
-    >,
-    // Deprecated - kill please
-    pub use_precedences: Slice<
-        'arena,
-        Triple<ClassName<'arena>, ClassName<'arena>, Slice<'arena, ClassName<'arena>>>,
-    >,
     pub enum_type: Maybe<HhasTypeInfo<'arena>>,
     pub methods: Slice<'arena, HhasMethod<'arena>>,
     pub properties: Slice<'arena, HhasProperty<'arena>>,

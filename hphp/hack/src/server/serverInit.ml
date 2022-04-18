@@ -122,6 +122,8 @@ let remote_init genv env root worker_key nonce check_id _profiling =
     ~init_start_t
     ~bin_root
     ~root
+    ~saved_state_manifold_path:
+      genv.local_config.remote_worker_saved_state_manifold_path
     ~hulk_lite:genv.local_config.ServerLocalConfig.hulk_lite
     ~hulk_heavy:genv.local_config.ServerLocalConfig.hulk_heavy;
   let _ = Hh_logger.log_duration "Remote type check" t in

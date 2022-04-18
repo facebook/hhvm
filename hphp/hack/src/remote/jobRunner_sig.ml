@@ -41,6 +41,7 @@ module type S = sig
     eden:bool ->
     hulk_lite:bool ->
     hulk_heavy:bool ->
+    saved_state_manifold_path:string option ->
     command Future.t
 
   val is_alive : status -> bool

@@ -23,6 +23,7 @@ type workitem =
 type remote_computation_payload = {
   nonce: string;
   payload: workitem BigList.t;
+  changed_files: Relative_path.t list option;
 }
 [@@deriving show]
 
@@ -186,4 +187,9 @@ type delegate_env = {
   (* Optional transport channel used by remote type checking. None means default. *)
   transport_channel: string option;
   naming_table_manifold_path: string option;
+  (* Function that returns a future of result of the manifold path and changed_files list.
+     This largely exists to allow unit tests to run without making saved state calls to watchman.
+  *)
+  saved_state_data_loader:
+    (unit -> (string * Relative_path.t list, string) result Future.t) option;
 }

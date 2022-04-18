@@ -23,4 +23,5 @@ val init :
   root:Path.t ->
   hulk_lite:bool ->
   hulk_heavy:bool ->
+  saved_state_manifold_path:string option ->
   unit

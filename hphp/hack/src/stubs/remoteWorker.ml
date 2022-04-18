@@ -24,7 +24,7 @@ module type RemoteServerApi = sig
 
   (* downloads the naming table via saved state and adds updates from changed_files *)
   val download_and_update_naming_table :
-    Provider_context.t -> string option -> Path.t -> unit
+    string option -> string option -> Relative_path.t list option -> unit
 
   (* Called by the worker to type check a list of files.
      The state filename is where the type checker should save its state that
@@ -55,6 +55,7 @@ type 'naming_table work_env = {
   timeout: int;
   hulk_lite: bool;
   hulk_heavy: bool;
+  saved_state_manifold_path: string option;
   server: (module RemoteServerApi with type naming_table = 'naming_table);
 }
 
@@ -71,6 +72,7 @@ let make_env
     ~(root : Path.t)
     ~(hulk_lite : bool)
     ~(hulk_heavy : bool)
+    ~(saved_state_manifold_path : string option)
     ?(timeout = (600 : int))
     (artifact_store_config : ArtifactStore.config)
     (server : (module RemoteServerApi with type naming_table = 'naming_table)) :
@@ -90,6 +92,7 @@ let make_env
     root;
     hulk_lite;
     hulk_heavy;
+    saved_state_manifold_path;
     timeout;
     server;
   }

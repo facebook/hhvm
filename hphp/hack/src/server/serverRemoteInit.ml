@@ -21,7 +21,8 @@ let init
     ~(bin_root : Path.t)
     ~(root : Path.t)
     ~(hulk_lite : bool)
-    ~(hulk_heavy : bool) : unit =
+    ~(hulk_heavy : bool)
+    ~(saved_state_manifold_path : string option) : unit =
   let (server
         : (module RemoteWorker.RemoteServerApi
              with type naming_table = Naming_table.t option)) =
@@ -58,6 +59,7 @@ let init
       ~root
       ~hulk_lite
       ~hulk_heavy
+      ~saved_state_manifold_path
       artifact_store_config
       server
   in

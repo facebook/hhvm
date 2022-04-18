@@ -18,5 +18,10 @@ let wait_for_finish _ = failwith "Not implemented"
 
 let wait_for_finish_with_debug_details _ = failwith "Not implemented"
 
-let wait_for_finish_with_debug_details_timeout _ ~timeout:_ =
+let download_and_unpack_saved_state_from_manifold
+    ~env:_
+    ~progress_callback:_
+    ~manifold_path:_
+    ~target_path:_
+    ~saved_state_type:_ =
   failwith "Not implemented"

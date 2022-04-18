@@ -551,6 +551,8 @@ type t = {
       (** The version of the package the remote worker is to install *)
   remote_transport_channel: string option;
       (** Name of the transport channel used by remote type checking. TODO: move into remote_type_check. *)
+  remote_worker_saved_state_manifold_path: string option;
+      (** A manifold path to a naming table to be used for Hulk Lite when typechecking. *)
   naming_sqlite_path: string option;
       (** Enables the reverse naming table to fall back to SQLite for queries. *)
   enable_naming_table_fallback: bool;
@@ -683,6 +685,7 @@ let default =
     remote_version_specifier_required = true;
     remote_version_specifier = None;
     remote_transport_channel = None;
+    remote_worker_saved_state_manifold_path = None;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
     symbolindex_search_provider = "SqliteIndex";
@@ -1465,6 +1468,9 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let remote_worker_saved_state_manifold_path =
+    string_opt "remote_worker_saved_state_manifold_path" config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1543,6 +1549,7 @@ let load_ fn ~silent ~current_version overrides =
     remote_version_specifier_required;
     remote_version_specifier;
     remote_transport_channel;
+    remote_worker_saved_state_manifold_path;
     naming_sqlite_path;
     enable_naming_table_fallback;
     symbolindex_search_provider;

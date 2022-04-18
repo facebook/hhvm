@@ -427,39 +427,29 @@ impl<'ast> Visitor<'ast> for Checker {
                 if let Some((ast_defs::Bop::Eq(_), lhs, rhs)) = p.2.as_binop() {
                     if let Some((_, _, ast_defs::PropOrMethod::IsProp)) = lhs.2.as_class_get() {
                         self.add_error(&lhs.1, syntax_error::access_globals_without_capability);
-                        // TODO(T109525099): Turn on runtime enforcement for enclosing
-                        // statics in readonly expressions
                         // Skipping one level of recursion when read_globals are present
                         // ensures the left hand side global is not subject to read_global
                         // enforcement, thus duplicating the error message.
-                        if c.has_read_globals() && c.is_typechecker() {
+                        if c.has_read_globals() {
                             return rhs.recurse(c, self);
                         }
                     }
                 }
-                // TODO(T109525099): Turn on runtime enforcement for enclosing statics in readonly
-                // expressions
-                if c.is_typechecker() {
-                    // Skipping one level of recursion for a readonly expression when
-                    // read_globals are present ensures globals enclosed in read_globals
-                    // are not subject to enforcement.
-                    if let Some(e) = p.2.as_readonly_expr() {
-                        if c.has_read_globals() {
-                            // Do not subject the readonly static itself to read_globals check,
-                            // only its potential children
-                            return e.recurse(c, self);
-                        }
+                // Skipping one level of recursion for a readonly expression when
+                // read_globals are present ensures globals enclosed in read_globals
+                // are not subject to enforcement.
+                if let Some(e) = p.2.as_readonly_expr() {
+                    if c.has_read_globals() {
+                        // Do not subject the readonly static itself to read_globals check,
+                        // only its potential children
+                        return e.recurse(c, self);
                     }
                 }
                 if let Some((_, _, ast_defs::PropOrMethod::IsProp)) = p.2.as_class_get() {
                     if !c.has_read_globals() {
                         self.add_error(&p.1, syntax_error::read_globals_without_capability)
                     } else {
-                        // TODO(T109525099): Turn on runtime enforcement for enclosing
-                        // statics in readonly expressions
-                        if c.is_typechecker() {
-                            self.add_error(&p.1, syntax_error::read_globals_without_readonly)
-                        }
+                        self.add_error(&p.1, syntax_error::read_globals_without_readonly)
                     }
                 }
             }

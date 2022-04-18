@@ -134,7 +134,6 @@ module Naming = struct
     (* | PocketUniversesDuplicationDEPRECATED [@value 2101] *)
     | UnsupportedTraitUseAs [@value 2102]
     | UnsupportedInsteadOf [@value 2103]
-    | InvalidTraitUseAsVisibility [@value 2104]
     | InvalidFunPointer [@value 2105]
     | IllegalUseOfDynamicallyCallable [@value 2106]
     (* | PocketUniversesNotInClassDEPRECATED [@value 2107] *)

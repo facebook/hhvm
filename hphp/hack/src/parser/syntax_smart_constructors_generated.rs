@@ -225,21 +225,6 @@ where
         Self::R::make_classish_body(self.state_mut(), arg0, arg1, arg2)
     }
 
-    fn make_trait_use_precedence_item(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2]);
-        Self::R::make_trait_use_precedence_item(self.state_mut(), arg0, arg1, arg2)
-    }
-
-    fn make_trait_use_alias_item(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3]);
-        Self::R::make_trait_use_alias_item(self.state_mut(), arg0, arg1, arg2, arg3)
-    }
-
-    fn make_trait_use_conflict_resolution(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4]);
-        Self::R::make_trait_use_conflict_resolution(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
-    }
-
     fn make_trait_use(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         self.state_mut().next(&[&arg0, &arg1, &arg2]);
         Self::R::make_trait_use(self.state_mut(), arg0, arg1, arg2)

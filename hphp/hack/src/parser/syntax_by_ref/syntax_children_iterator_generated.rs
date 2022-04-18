@@ -397,36 +397,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            TraitUsePrecedenceItem(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.name),
-                    1 => Some(&x.keyword),
-                    2 => Some(&x.removed_names),
-                        _ => None,
-                    }
-                })
-            },
-            TraitUseAliasItem(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.aliasing_name),
-                    1 => Some(&x.keyword),
-                    2 => Some(&x.modifiers),
-                    3 => Some(&x.aliased_name),
-                        _ => None,
-                    }
-                })
-            },
-            TraitUseConflictResolution(x) => {
-                get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.keyword),
-                    1 => Some(&x.names),
-                    2 => Some(&x.left_brace),
-                    3 => Some(&x.clauses),
-                    4 => Some(&x.right_brace),
-                        _ => None,
-                    }
-                })
-            },
             TraitUse(x) => {
                 get_index(3).and_then(|index| { match index {
                         0 => Some(&x.keyword),

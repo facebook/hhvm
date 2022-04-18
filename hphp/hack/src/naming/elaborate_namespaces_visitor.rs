@@ -343,29 +343,6 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
         ua.recurse(env, self.object())
     }
 
-    fn visit_insteadof_alias(
-        &mut self,
-        env: &mut Env,
-        alias: &mut InsteadofAlias,
-    ) -> Result<(), ()> {
-        let (replacement_sid, orig_sids) = (&mut alias.0, &mut alias.2);
-        env.elaborate_type_name(replacement_sid);
-        for sid in orig_sids.iter_mut() {
-            env.elaborate_type_name(sid);
-        }
-        alias.recurse(env, self.object())
-    }
-
-    fn visit_use_as_alias(&mut self, env: &mut Env, alias: &mut UseAsAlias) -> Result<(), ()> {
-        let sid_option = &mut alias.0;
-        Ok(match sid_option {
-            Some(sid) => {
-                env.elaborate_type_name(sid);
-            }
-            _ => {}
-        })
-    }
-
     fn visit_xhp_child(&mut self, env: &mut Env, child: &mut XhpChild) -> Result<(), ()> {
         match child {
             XhpChild::ChildName(sid)

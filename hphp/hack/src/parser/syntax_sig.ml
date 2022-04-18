@@ -237,24 +237,6 @@ module type Syntax_S = sig
         classish_body_elements: t;
         classish_body_right_brace: t;
       }
-    | TraitUsePrecedenceItem of {
-        trait_use_precedence_item_name: t;
-        trait_use_precedence_item_keyword: t;
-        trait_use_precedence_item_removed_names: t;
-      }
-    | TraitUseAliasItem of {
-        trait_use_alias_item_aliasing_name: t;
-        trait_use_alias_item_keyword: t;
-        trait_use_alias_item_modifiers: t;
-        trait_use_alias_item_aliased_name: t;
-      }
-    | TraitUseConflictResolution of {
-        trait_use_conflict_resolution_keyword: t;
-        trait_use_conflict_resolution_names: t;
-        trait_use_conflict_resolution_left_brace: t;
-        trait_use_conflict_resolution_clauses: t;
-        trait_use_conflict_resolution_right_brace: t;
-      }
     | TraitUse of {
         trait_use_keyword: t;
         trait_use_names: t;
@@ -1139,12 +1121,6 @@ module type Syntax_S = sig
 
   val make_classish_body : t -> t -> t -> t
 
-  val make_trait_use_precedence_item : t -> t -> t -> t
-
-  val make_trait_use_alias_item : t -> t -> t -> t -> t
-
-  val make_trait_use_conflict_resolution : t -> t -> t -> t -> t -> t
-
   val make_trait_use : t -> t -> t -> t
 
   val make_require_clause : t -> t -> t -> t -> t
@@ -1489,12 +1465,6 @@ module type Syntax_S = sig
   val is_classish_declaration : t -> bool
 
   val is_classish_body : t -> bool
-
-  val is_trait_use_precedence_item : t -> bool
-
-  val is_trait_use_alias_item : t -> bool
-
-  val is_trait_use_conflict_resolution : t -> bool
 
   val is_trait_use : t -> bool
 

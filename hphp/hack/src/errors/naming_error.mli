@@ -8,7 +8,6 @@
 type t =
   | Unsupported_trait_use_as of Pos.t
   | Unsupported_instead_of of Pos.t
-  | Invalid_trait_use_as_visibility of Pos.t
   | Unexpected_arrow of {
       pos: Pos.t;
       cname: string;

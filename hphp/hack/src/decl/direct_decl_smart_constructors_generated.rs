@@ -206,18 +206,6 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors<'src, Self>>::make_classish_body(self, left_brace, elements, right_brace)
     }
 
-    fn make_trait_use_precedence_item(&mut self, name: Self::R, keyword: Self::R, removed_names: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_trait_use_precedence_item(self, name, keyword, removed_names)
-    }
-
-    fn make_trait_use_alias_item(&mut self, aliasing_name: Self::R, keyword: Self::R, modifiers: Self::R, aliased_name: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_trait_use_alias_item(self, aliasing_name, keyword, modifiers, aliased_name)
-    }
-
-    fn make_trait_use_conflict_resolution(&mut self, keyword: Self::R, names: Self::R, left_brace: Self::R, clauses: Self::R, right_brace: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_trait_use_conflict_resolution(self, keyword, names, left_brace, clauses, right_brace)
-    }
-
     fn make_trait_use(&mut self, keyword: Self::R, names: Self::R, semicolon: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, Self>>::make_trait_use(self, keyword, names, semicolon)
     }

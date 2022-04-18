@@ -585,8 +585,6 @@ fn make_closure(
             Box::new(Hint_::Happly(Id(p.clone(), "Closure".into()), vec![])),
         )],
         uses: vec![],
-        use_as_alias: vec![],
-        insteadof_alias: vec![],
         xhp_attr_uses: vec![],
         xhp_category: None,
         reqs: vec![],

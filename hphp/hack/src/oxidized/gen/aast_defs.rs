@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<67731a9c7646eba4e1d1b3c6851d6210>>
+// @generated SignedSource<<4db28c5db4d10955b62c65af517a94cd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -408,33 +408,6 @@ pub enum VcKind {
 }
 impl TrivialDrop for VcKind {}
 arena_deserializer::impl_deserialize_in_arena!(VcKind);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(u8)]
-pub enum UseAsVisibility {
-    UseAsPublic,
-    UseAsPrivate,
-    UseAsProtected,
-    UseAsFinal,
-}
-impl TrivialDrop for UseAsVisibility {}
-arena_deserializer::impl_deserialize_in_arena!(UseAsVisibility);
 
 #[derive(
     Clone,

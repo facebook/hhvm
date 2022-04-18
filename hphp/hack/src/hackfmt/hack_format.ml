@@ -626,64 +626,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           braced_block_nest env left_b right_b [handle_possible_list env body];
           Newline;
         ]
-    | Syntax.TraitUsePrecedenceItem
-        {
-          trait_use_precedence_item_name = name;
-          trait_use_precedence_item_keyword = kw;
-          trait_use_precedence_item_removed_names = removed_names;
-        } ->
-      Concat
-        [
-          t env name;
-          Space;
-          t env kw;
-          Space;
-          WithRule
-            ( Rule.Parental,
-              Nest
-                [
-                  handle_possible_list env ~before_each:space_split removed_names;
-                ] );
-        ]
-    | Syntax.TraitUseAliasItem
-        {
-          trait_use_alias_item_aliasing_name = aliasing_name;
-          trait_use_alias_item_keyword = kw;
-          trait_use_alias_item_modifiers = visibility;
-          trait_use_alias_item_aliased_name = aliased_name;
-        } ->
-      Concat
-        [
-          t env aliasing_name;
-          Space;
-          t env kw;
-          Space;
-          t env visibility;
-          Space;
-          t env aliased_name;
-        ]
-    | Syntax.TraitUseConflictResolution
-        {
-          trait_use_conflict_resolution_keyword = kw;
-          trait_use_conflict_resolution_names = elements;
-          trait_use_conflict_resolution_left_brace = lb;
-          trait_use_conflict_resolution_clauses = clauses;
-          trait_use_conflict_resolution_right_brace = rb;
-        } ->
-      Concat
-        [
-          t env kw;
-          WithRule
-            ( Rule.Parental,
-              Nest [handle_possible_list env ~before_each:space_split elements]
-            );
-          Space;
-          t env lb;
-          Newline;
-          Nest [handle_possible_list env ~before_each:newline clauses];
-          Newline;
-          t env rb;
-        ]
     | Syntax.TraitUse
         {
           trait_use_keyword = kw;

@@ -329,7 +329,6 @@ fn get_modifiers_of_declaration<'a>(node: S<'a>) -> Option<S<'a>> {
         ConstDeclaration(x) => Some(&x.modifiers),
         TypeConstDeclaration(x) => Some(&x.modifiers),
         ClassishDeclaration(x) => Some(&x.modifiers),
-        TraitUseAliasItem(x) => Some(&x.modifiers),
         EnumClassDeclaration(x) => Some(&x.modifiers),
         EnumClassEnumerator(x) => Some(&x.modifiers),
         _ => None,
@@ -4674,15 +4673,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn trait_use_alias_item_modifier_errors(&mut self, node: S<'a>) {
-        self.invalid_modifier_errors("Trait use aliases", node, |kind| {
-            kind == TokenKind::Final
-                || kind == TokenKind::Private
-                || kind == TokenKind::Protected
-                || kind == TokenKind::Public
-        });
-    }
-
     fn mixed_namespace_errors(&mut self, node: S<'a>) {
         match &node.children {
             NamespaceBody(x) => {
@@ -5207,7 +5197,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.class_property_const_errors(node);
                 self.class_property_declarator_errors(node);
             }
-            TraitUseAliasItem(_) => self.trait_use_alias_item_modifier_errors(node),
             EnumDeclaration(_) => self.enum_decl_errors(node),
             Enumerator(_) => self.enumerator_errors(node),
             PostfixUnaryExpression(_)

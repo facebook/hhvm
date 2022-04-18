@@ -540,51 +540,6 @@ let schema : schema_node list =
         ];
     };
     {
-      kind_name = "TraitUsePrecedenceItem";
-      type_name = "trait_use_precedence_item";
-      func_name = "trait_use_precedence_item";
-      description = "trait_use_precedence_item";
-      prefix = "trait_use_precedence_item";
-      aggregates = [];
-      fields =
-        [
-          ("name", Aggregate Specifier);
-          ("keyword", Token);
-          ("removed_names", ZeroOrMore (Aggregate Specifier));
-        ];
-    };
-    {
-      kind_name = "TraitUseAliasItem";
-      type_name = "trait_use_alias_item";
-      func_name = "trait_use_alias_item";
-      description = "trait_use_alias_item";
-      prefix = "trait_use_alias_item";
-      aggregates = [];
-      fields =
-        [
-          ("aliasing_name", Aggregate Specifier);
-          ("keyword", Token);
-          ("modifiers", ZeroOrMore Token);
-          ("aliased_name", ZeroOrOne (Aggregate Specifier));
-        ];
-    };
-    {
-      kind_name = "TraitUseConflictResolution";
-      type_name = "trait_use_conflict_resolution";
-      func_name = "trait_use_conflict_resolution";
-      description = "trait_use_conflict_resolution";
-      prefix = "trait_use_conflict_resolution";
-      aggregates = [];
-      fields =
-        [
-          ("keyword", Token);
-          ("names", ZeroOrMore (Aggregate Specifier));
-          ("left_brace", Token);
-          ("clauses", ZeroOrMore (Aggregate Specifier));
-          ("right_brace", Token);
-        ];
-    };
-    {
       kind_name = "TraitUse";
       type_name = "trait_use";
       func_name = "trait_use";

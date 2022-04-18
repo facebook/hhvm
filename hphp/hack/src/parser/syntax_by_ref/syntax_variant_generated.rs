@@ -61,9 +61,6 @@ pub enum SyntaxVariant<'a, T, V> {
     MethodishTraitResolution(&'a MethodishTraitResolutionChildren<'a, T, V>),
     ClassishDeclaration(&'a ClassishDeclarationChildren<'a, T, V>),
     ClassishBody(&'a ClassishBodyChildren<'a, T, V>),
-    TraitUsePrecedenceItem(&'a TraitUsePrecedenceItemChildren<'a, T, V>),
-    TraitUseAliasItem(&'a TraitUseAliasItemChildren<'a, T, V>),
-    TraitUseConflictResolution(&'a TraitUseConflictResolutionChildren<'a, T, V>),
     TraitUse(&'a TraitUseChildren<'a, T, V>),
     RequireClause(&'a RequireClauseChildren<'a, T, V>),
     ConstDeclaration(&'a ConstDeclarationChildren<'a, T, V>),
@@ -479,30 +476,6 @@ pub struct ClassishDeclarationChildren<'a, T, V> {
 pub struct ClassishBodyChildren<'a, T, V> {
     pub left_brace: Syntax<'a, T, V>,
     pub elements: Syntax<'a, T, V>,
-    pub right_brace: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct TraitUsePrecedenceItemChildren<'a, T, V> {
-    pub name: Syntax<'a, T, V>,
-    pub keyword: Syntax<'a, T, V>,
-    pub removed_names: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct TraitUseAliasItemChildren<'a, T, V> {
-    pub aliasing_name: Syntax<'a, T, V>,
-    pub keyword: Syntax<'a, T, V>,
-    pub modifiers: Syntax<'a, T, V>,
-    pub aliased_name: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct TraitUseConflictResolutionChildren<'a, T, V> {
-    pub keyword: Syntax<'a, T, V>,
-    pub names: Syntax<'a, T, V>,
-    pub left_brace: Syntax<'a, T, V>,
-    pub clauses: Syntax<'a, T, V>,
     pub right_brace: Syntax<'a, T, V>,
 }
 

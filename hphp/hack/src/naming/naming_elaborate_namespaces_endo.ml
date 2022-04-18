@@ -407,17 +407,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       in
       { ua_name; ua_params = List.map ~f:(self#on_expr env) ua.ua_params }
 
-    method! on_insteadof_alias env alias =
-      let (sid1, pstr, sid2) = alias in
-      ( elaborate_type_name env sid1,
-        pstr,
-        List.map ~f:(elaborate_type_name env) sid2 )
-
-    method! on_use_as_alias env alias =
-      let (sido1, pstr, sido2, visl) = alias in
-      let sido1 = Option.map ~f:(elaborate_type_name env) sido1 in
-      (sido1, pstr, sido2, visl)
-
     method! on_xhp_child env child =
       if in_codegen env then
         super#on_xhp_child env child

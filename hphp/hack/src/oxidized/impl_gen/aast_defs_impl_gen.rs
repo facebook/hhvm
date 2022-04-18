@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<66949fc7205fdfd72d8ab0207b637ef9>>
+// @generated SignedSource<<e9b0522cdc650e2a3a091558c0b5e682>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -829,44 +829,6 @@ impl VcKind {
     pub fn is_keyset(&self) -> bool {
         match self {
             VcKind::Keyset => true,
-            _ => false,
-        }
-    }
-}
-impl UseAsVisibility {
-    pub fn mk_use_as_public() -> Self {
-        UseAsVisibility::UseAsPublic
-    }
-    pub fn mk_use_as_private() -> Self {
-        UseAsVisibility::UseAsPrivate
-    }
-    pub fn mk_use_as_protected() -> Self {
-        UseAsVisibility::UseAsProtected
-    }
-    pub fn mk_use_as_final() -> Self {
-        UseAsVisibility::UseAsFinal
-    }
-    pub fn is_use_as_public(&self) -> bool {
-        match self {
-            UseAsVisibility::UseAsPublic => true,
-            _ => false,
-        }
-    }
-    pub fn is_use_as_private(&self) -> bool {
-        match self {
-            UseAsVisibility::UseAsPrivate => true,
-            _ => false,
-        }
-    }
-    pub fn is_use_as_protected(&self) -> bool {
-        match self {
-            UseAsVisibility::UseAsProtected => true,
-            _ => false,
-        }
-    }
-    pub fn is_use_as_final(&self) -> bool {
-        match self {
-            UseAsVisibility::UseAsFinal => true,
             _ => false,
         }
     }

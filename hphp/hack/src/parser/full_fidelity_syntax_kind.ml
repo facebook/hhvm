@@ -56,9 +56,6 @@ type t =
   | MethodishTraitResolution
   | ClassishDeclaration
   | ClassishBody
-  | TraitUsePrecedenceItem
-  | TraitUseAliasItem
-  | TraitUseConflictResolution
   | TraitUse
   | RequireClause
   | ConstDeclaration
@@ -232,9 +229,6 @@ let to_string kind =
   | MethodishTraitResolution -> "methodish_trait_resolution"
   | ClassishDeclaration -> "classish_declaration"
   | ClassishBody -> "classish_body"
-  | TraitUsePrecedenceItem -> "trait_use_precedence_item"
-  | TraitUseAliasItem -> "trait_use_alias_item"
-  | TraitUseConflictResolution -> "trait_use_conflict_resolution"
   | TraitUse -> "trait_use"
   | RequireClause -> "require_clause"
   | ConstDeclaration -> "const_declaration"

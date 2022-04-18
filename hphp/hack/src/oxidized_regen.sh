@@ -1,20 +1,22 @@
 #!/bin/bash
 set -u # terminate upon read of uninitalized variable
-set -e # terminate upon non-zero-exit-codes (in case of pipe, only checks at end of pipe)
 set -o pipefail # in a pipe, the whole pipe runs, but its exit code is that of the first failure
-trap 'echo "exit code $? at line $LINENO" >&2' ERR
 
 CYAN=""
 WHITE=""
 BOLD=""
 RESET=""
 
+# If these fail that's just fine.
 if [ -t 1 ]; then
     CYAN=$(tput setaf 6)
     WHITE=$(tput setaf 7)
     BOLD=$(tput bold)
     RESET=$(tput sgr0)
 fi
+
+set -e # terminate upon non-zero-exit-codes (in case of pipe, only checks at end of pipe)
+trap 'echo "exit code $? at line $LINENO" >&2' ERR
 
 function summary {
     echo -e "$BOLD$CYAN==>$WHITE ${1}$RESET"

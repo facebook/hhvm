@@ -179,15 +179,6 @@ where S: SmartConstructors<State = State>,
     fn make_classish_body(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::ClassishBody, self.s.make_classish_body(arg0.1, arg1.1, arg2.1))
     }
-    fn make_trait_use_precedence_item(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        compose(SyntaxKind::TraitUsePrecedenceItem, self.s.make_trait_use_precedence_item(arg0.1, arg1.1, arg2.1))
-    }
-    fn make_trait_use_alias_item(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
-        compose(SyntaxKind::TraitUseAliasItem, self.s.make_trait_use_alias_item(arg0.1, arg1.1, arg2.1, arg3.1))
-    }
-    fn make_trait_use_conflict_resolution(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
-        compose(SyntaxKind::TraitUseConflictResolution, self.s.make_trait_use_conflict_resolution(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
-    }
     fn make_trait_use(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::TraitUse, self.s.make_trait_use(arg0.1, arg1.1, arg2.1))
     }

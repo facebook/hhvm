@@ -221,18 +221,6 @@ where
         Node(self.0.make_classish_body(left_brace.0, elements.0, right_brace.0), self.1.make_classish_body(left_brace.1, elements.1, right_brace.1))
     }
 
-    fn make_trait_use_precedence_item(&mut self, name: Self::R, keyword: Self::R, removed_names: Self::R) -> Self::R {
-        Node(self.0.make_trait_use_precedence_item(name.0, keyword.0, removed_names.0), self.1.make_trait_use_precedence_item(name.1, keyword.1, removed_names.1))
-    }
-
-    fn make_trait_use_alias_item(&mut self, aliasing_name: Self::R, keyword: Self::R, modifiers: Self::R, aliased_name: Self::R) -> Self::R {
-        Node(self.0.make_trait_use_alias_item(aliasing_name.0, keyword.0, modifiers.0, aliased_name.0), self.1.make_trait_use_alias_item(aliasing_name.1, keyword.1, modifiers.1, aliased_name.1))
-    }
-
-    fn make_trait_use_conflict_resolution(&mut self, keyword: Self::R, names: Self::R, left_brace: Self::R, clauses: Self::R, right_brace: Self::R) -> Self::R {
-        Node(self.0.make_trait_use_conflict_resolution(keyword.0, names.0, left_brace.0, clauses.0, right_brace.0), self.1.make_trait_use_conflict_resolution(keyword.1, names.1, left_brace.1, clauses.1, right_brace.1))
-    }
-
     fn make_trait_use(&mut self, keyword: Self::R, names: Self::R, semicolon: Self::R) -> Self::R {
         Node(self.0.make_trait_use(keyword.0, names.0, semicolon.0), self.1.make_trait_use(keyword.1, names.1, semicolon.1))
     }

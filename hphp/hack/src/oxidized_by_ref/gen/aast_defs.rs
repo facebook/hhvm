@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<88f4ad69842d70cde8afe9c52abe92a0>>
+// @generated SignedSource<<da5b40d5b556a7cd49a87c438a9e6770>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -333,8 +333,6 @@ arena_deserializer::impl_deserialize_in_arena!(NastShapeInfo<'arena>);
 pub use oxidized::aast_defs::KvcKind;
 
 pub use oxidized::aast_defs::VcKind;
-
-pub use oxidized::aast_defs::UseAsVisibility;
 
 pub use oxidized::aast_defs::TypedefVisibility;
 

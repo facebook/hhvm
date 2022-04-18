@@ -331,30 +331,6 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
-    fn make_trait_use_precedence_item(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
-          Self::zero(SyntaxKind::TraitUsePrecedenceItem)
-        } else {
-          self.flatten(SyntaxKind::TraitUsePrecedenceItem, vec!(arg0, arg1, arg2))
-        }
-    }
-
-    fn make_trait_use_alias_item(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
-          Self::zero(SyntaxKind::TraitUseAliasItem)
-        } else {
-          self.flatten(SyntaxKind::TraitUseAliasItem, vec!(arg0, arg1, arg2, arg3))
-        }
-    }
-
-    fn make_trait_use_conflict_resolution(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
-          Self::zero(SyntaxKind::TraitUseConflictResolution)
-        } else {
-          self.flatten(SyntaxKind::TraitUseConflictResolution, vec!(arg0, arg1, arg2, arg3, arg4))
-        }
-    }
-
     fn make_trait_use(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero(SyntaxKind::TraitUse)

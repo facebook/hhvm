@@ -929,11 +929,6 @@ let rec class_ ctx c =
     N.c_tparams;
     N.c_extends = parents;
     N.c_uses = uses;
-    (* c_use_as_alias and c_insteadof_alias are PHP features not supported
-     * in Hack but are required since we have runtime support for it
-     *)
-    N.c_use_as_alias = [];
-    N.c_insteadof_alias = [];
     N.c_xhp_attr_uses = xhp_attr_uses;
     N.c_xhp_category = c.Aast.c_xhp_category;
     N.c_reqs = req_extends @ req_implements @ req_class;

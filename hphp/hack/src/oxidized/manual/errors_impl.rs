@@ -188,18 +188,6 @@ impl Naming {
             vec![],
         )
     }
-
-    pub fn invalid_trait_use_as_visibility(p: Pos) -> Error {
-        UserError::new(
-            Self::InvalidTraitUseAsVisibility as isize,
-            Message(
-                p,
-                "Cannot redeclare trait method's visibility in this manner".into(),
-            ),
-            vec![],
-            vec![],
-        )
-    }
 }
 
 impl NastCheck {

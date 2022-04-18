@@ -2024,11 +2024,6 @@ let class_def_ env c tc =
       Aast.c_tparams = tparams;
       Aast.c_extends = c.c_extends;
       Aast.c_uses = c.c_uses;
-      (* c_use_as_alias and c_insteadof_alias are PHP features not supported
-       * in Hack but are required since we have runtime support for it
-       *)
-      Aast.c_use_as_alias = [];
-      Aast.c_insteadof_alias = [];
       Aast.c_xhp_attr_uses = c.c_xhp_attr_uses;
       Aast.c_xhp_category = c.c_xhp_category;
       Aast.c_reqs = c.c_reqs;

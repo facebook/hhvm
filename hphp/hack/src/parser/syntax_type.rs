@@ -55,9 +55,6 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_methodish_trait_resolution(ctx: &C, methodish_trait_attribute: Self, methodish_trait_function_decl_header: Self, methodish_trait_equal: Self, methodish_trait_name: Self, methodish_trait_semicolon: Self) -> Self;
     fn make_classish_declaration(ctx: &C, classish_attribute: Self, classish_modifiers: Self, classish_xhp: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_where_clause: Self, classish_body: Self) -> Self;
     fn make_classish_body(ctx: &C, classish_body_left_brace: Self, classish_body_elements: Self, classish_body_right_brace: Self) -> Self;
-    fn make_trait_use_precedence_item(ctx: &C, trait_use_precedence_item_name: Self, trait_use_precedence_item_keyword: Self, trait_use_precedence_item_removed_names: Self) -> Self;
-    fn make_trait_use_alias_item(ctx: &C, trait_use_alias_item_aliasing_name: Self, trait_use_alias_item_keyword: Self, trait_use_alias_item_modifiers: Self, trait_use_alias_item_aliased_name: Self) -> Self;
-    fn make_trait_use_conflict_resolution(ctx: &C, trait_use_conflict_resolution_keyword: Self, trait_use_conflict_resolution_names: Self, trait_use_conflict_resolution_left_brace: Self, trait_use_conflict_resolution_clauses: Self, trait_use_conflict_resolution_right_brace: Self) -> Self;
     fn make_trait_use(ctx: &C, trait_use_keyword: Self, trait_use_names: Self, trait_use_semicolon: Self) -> Self;
     fn make_require_clause(ctx: &C, require_keyword: Self, require_kind: Self, require_name: Self, require_semicolon: Self) -> Self;
     fn make_const_declaration(ctx: &C, const_attribute_spec: Self, const_modifiers: Self, const_keyword: Self, const_type_specifier: Self, const_declarators: Self, const_semicolon: Self) -> Self;

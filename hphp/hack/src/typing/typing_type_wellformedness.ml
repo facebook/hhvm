@@ -297,8 +297,6 @@ let class_ tenv c =
     c_tparams;
     c_extends;
     c_uses;
-    c_use_as_alias = _;
-    c_insteadof_alias = _;
     c_xhp_category = _;
     (* TODO: c_reqs should be checked too. Problem: that causes errors in un-fixmeable places. *)
     c_reqs = _;

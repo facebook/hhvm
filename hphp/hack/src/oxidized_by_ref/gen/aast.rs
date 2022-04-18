@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<617661273a32d75197a39a4627de3aa0>>
+// @generated SignedSource<<ae3c8f9d713508a5a727d2ff869ac0ce>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1624,54 +1624,6 @@ pub struct Tparam<'a, Ex, En> {
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Tparam<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Tparam<'arena, Ex, En>);
 
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct UseAsAlias<'a>(
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Option<Sid<'a>>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pstring<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Option<Sid<'a>>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub  &'a [oxidized::aast::UseAsVisibility],
-);
-impl<'a> TrivialDrop for UseAsAlias<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(UseAsAlias<'arena>);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct InsteadofAlias<'a>(
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Sid<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pstring<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a [Sid<'a>],
-);
-impl<'a> TrivialDrop for InsteadofAlias<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(InsteadofAlias<'arena>);
-
 pub use oxidized::aast::RequireKind;
 
 pub use oxidized::aast::EmitId;
@@ -1713,14 +1665,6 @@ pub struct Class_<'a, Ex, En> {
     pub extends: &'a [&'a ClassHint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub uses: &'a [&'a TraitHint<'a>],
-    /// PHP feature not supported in hack but required
-    /// because we have runtime support.
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub use_as_alias: &'a [&'a UseAsAlias<'a>],
-    /// PHP feature not supported in hack but required
-    /// because we have runtime support.
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub insteadof_alias: &'a [&'a InsteadofAlias<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub xhp_attr_uses: &'a [&'a XhpAttrHint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

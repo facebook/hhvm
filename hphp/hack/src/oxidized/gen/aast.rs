@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<66d1e54a2c42ca06aefc1e437c5f4adc>>
+// @generated SignedSource<<043a427f149fe7cf059a29dd1fa1058f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1249,45 +1249,6 @@ pub struct Tparam<Ex, En> {
 
 #[derive(
     Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct UseAsAlias(
-    pub Option<Sid>,
-    pub Pstring,
-    pub Option<Sid>,
-    pub Vec<UseAsVisibility>,
-);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct InsteadofAlias(pub Sid, pub Pstring, pub Vec<Sid>);
-
-#[derive(
-    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -1362,12 +1323,6 @@ pub struct Class_<Ex, En> {
     pub tparams: Vec<Tparam<Ex, En>>,
     pub extends: Vec<ClassHint>,
     pub uses: Vec<TraitHint>,
-    /// PHP feature not supported in hack but required
-    /// because we have runtime support.
-    pub use_as_alias: Vec<UseAsAlias>,
-    /// PHP feature not supported in hack but required
-    /// because we have runtime support.
-    pub insteadof_alias: Vec<InsteadofAlias>,
     pub xhp_attr_uses: Vec<XhpAttrHint>,
     pub xhp_category: Option<(Pos, Vec<Pstring>)>,
     pub reqs: Vec<(ClassHint, RequireKind)>,

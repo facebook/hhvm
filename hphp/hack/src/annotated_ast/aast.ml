@@ -795,10 +795,6 @@ and ('ex, 'en) tparam = {
   tp_user_attributes: ('ex, 'en) user_attribute list;
 }
 
-and use_as_alias = sid option * pstring * sid option * use_as_visibility list
-
-and insteadof_alias = sid * pstring * sid list
-
 and require_kind =
   | RequireExtends
   | RequireImplements
@@ -823,12 +819,6 @@ and ('ex, 'en) class_ = {
       (** The type parameters of a class A<T> (T is the parameter) *)
   c_extends: class_hint list;
   c_uses: trait_hint list;
-  c_use_as_alias: use_as_alias list;
-      (** PHP feature not supported in hack but required
-          because we have runtime support. *)
-  c_insteadof_alias: insteadof_alias list;
-      (** PHP feature not supported in hack but required
-          because we have runtime support. *)
   c_xhp_attr_uses: xhp_attr_hint list;
   c_xhp_category: (pos * pstring list) option;
   c_reqs: (class_hint * require_kind) list;

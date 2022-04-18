@@ -173,12 +173,6 @@ and vc_kind =
   | Keyset
 [@@visitors.opaque]
 
-and use_as_visibility =
-  | UseAsPublic
-  | UseAsPrivate
-  | UseAsProtected
-  | UseAsFinal
-
 and typedef_visibility =
   | Transparent
   | Opaque
@@ -252,13 +246,6 @@ let string_of_visibility vis =
   | Public -> "public"
   | Protected -> "protected"
   | Internal -> "internal"
-
-let string_of_use_as_visibility vis =
-  match vis with
-  | UseAsPublic -> "public"
-  | UseAsPrivate -> "private"
-  | UseAsProtected -> "protected"
-  | UseAsFinal -> "final"
 
 type pstring = Ast_defs.pstring [@@deriving eq, show]
 

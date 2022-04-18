@@ -5034,17 +5034,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         Node::TraitUse(self.alloc(names))
     }
 
-    fn make_trait_use_conflict_resolution(
-        &mut self,
-        _keyword: Self::R,
-        names: Self::R,
-        _left_brace: Self::R,
-        _clauses: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
-        Node::TraitUse(self.alloc(names))
-    }
-
     fn make_require_clause(
         &mut self,
         _keyword: Self::R,

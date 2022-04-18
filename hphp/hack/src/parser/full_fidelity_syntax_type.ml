@@ -367,24 +367,6 @@ struct
         classish_body_elements: t;
         classish_body_right_brace: t;
       }
-    | TraitUsePrecedenceItem of {
-        trait_use_precedence_item_name: t;
-        trait_use_precedence_item_keyword: t;
-        trait_use_precedence_item_removed_names: t;
-      }
-    | TraitUseAliasItem of {
-        trait_use_alias_item_aliasing_name: t;
-        trait_use_alias_item_keyword: t;
-        trait_use_alias_item_modifiers: t;
-        trait_use_alias_item_aliased_name: t;
-      }
-    | TraitUseConflictResolution of {
-        trait_use_conflict_resolution_keyword: t;
-        trait_use_conflict_resolution_names: t;
-        trait_use_conflict_resolution_left_brace: t;
-        trait_use_conflict_resolution_clauses: t;
-        trait_use_conflict_resolution_right_brace: t;
-      }
     | TraitUse of {
         trait_use_keyword: t;
         trait_use_names: t;
@@ -1654,27 +1636,6 @@ struct
     classish_body_left_brace: Token.t value;
     classish_body_elements: class_body_declaration listesque value;
     classish_body_right_brace: Token.t value;
-  }
-
-  and trait_use_precedence_item = {
-    trait_use_precedence_item_name: specifier value;
-    trait_use_precedence_item_keyword: Token.t value;
-    trait_use_precedence_item_removed_names: specifier listesque value;
-  }
-
-  and trait_use_alias_item = {
-    trait_use_alias_item_aliasing_name: specifier value;
-    trait_use_alias_item_keyword: Token.t value;
-    trait_use_alias_item_modifiers: Token.t listesque value;
-    trait_use_alias_item_aliased_name: specifier option value;
-  }
-
-  and trait_use_conflict_resolution = {
-    trait_use_conflict_resolution_keyword: Token.t value;
-    trait_use_conflict_resolution_names: specifier listesque value;
-    trait_use_conflict_resolution_left_brace: Token.t value;
-    trait_use_conflict_resolution_clauses: specifier listesque value;
-    trait_use_conflict_resolution_right_brace: Token.t value;
   }
 
   and trait_use = {

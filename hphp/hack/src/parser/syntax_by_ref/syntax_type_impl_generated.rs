@@ -421,39 +421,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_trait_use_precedence_item(ctx: &C, name: Self, keyword: Self, removed_names: Self) -> Self {
-        let syntax = SyntaxVariant::TraitUsePrecedenceItem(ctx.get_arena().alloc(TraitUsePrecedenceItemChildren {
-            name,
-            keyword,
-            removed_names,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_trait_use_alias_item(ctx: &C, aliasing_name: Self, keyword: Self, modifiers: Self, aliased_name: Self) -> Self {
-        let syntax = SyntaxVariant::TraitUseAliasItem(ctx.get_arena().alloc(TraitUseAliasItemChildren {
-            aliasing_name,
-            keyword,
-            modifiers,
-            aliased_name,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_trait_use_conflict_resolution(ctx: &C, keyword: Self, names: Self, left_brace: Self, clauses: Self, right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::TraitUseConflictResolution(ctx.get_arena().alloc(TraitUseConflictResolutionChildren {
-            keyword,
-            names,
-            left_brace,
-            clauses,
-            right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_trait_use(ctx: &C, keyword: Self, names: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::TraitUse(ctx.get_arena().alloc(TraitUseChildren {
             keyword,

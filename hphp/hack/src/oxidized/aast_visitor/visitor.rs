@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b1a5c02284ebef11a79e41bd0f16b5b9>>
+// @generated SignedSource<<18bb0a0dc16551559caabaffb9b6aaa9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -386,13 +386,6 @@ pub trait Visitor<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
-    fn visit_insteadof_alias(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node InsteadofAlias,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
     fn visit_kvc_kind(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
@@ -558,20 +551,6 @@ pub trait Visitor<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node Uop,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_use_as_alias(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node UseAsAlias,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_use_as_visibility(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node UseAsVisibility,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

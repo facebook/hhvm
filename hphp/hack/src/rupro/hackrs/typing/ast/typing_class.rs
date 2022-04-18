@@ -47,10 +47,6 @@ impl<R: Reason> TC<R> for oxidized::aast::Class_<(), ()> {
             tparams,
             extends: self.extends.clone(),
             uses: self.uses.clone(),
-            // use_as_alias and insteadof_alias are PHP features not supported
-            // in Hack but are required since we have runtime support for it
-            use_as_alias: vec![],
-            insteadof_alias: vec![],
             xhp_attr_uses: self.xhp_attr_uses.clone(),
             xhp_category: self.xhp_category.clone(),
             reqs: self.reqs.clone(),

@@ -4603,77 +4603,6 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             class.vars.append(&mut member_def);
             Ok(class.methods.push(method))
         }
-        TraitUseConflictResolution(c) => {
-            type Ret = Result<Either<ast::InsteadofAlias, ast::UseAsAlias>>;
-            let p_item = |n: S<'a>, e: &mut Env<'a>| -> Ret {
-                match &n.children {
-                    TraitUsePrecedenceItem(c) => {
-                        let (qualifier, name) = match &c.name.children {
-                            ScopeResolutionExpression(c) => {
-                                (pos_name(&c.qualifier, e)?, p_pstring(&c.name, e)?)
-                            }
-                            _ => missing_syntax("trait use precedence item", n, e)?,
-                        };
-                        let removed_names = could_map(&c.removed_names, e, pos_name)?;
-                        raise_hh_error(e, Naming::unsupported_instead_of(name.0.clone()));
-                        Ok(Either::Left(ast::InsteadofAlias(
-                            qualifier,
-                            name,
-                            removed_names,
-                        )))
-                    }
-                    TraitUseAliasItem(c) => {
-                        let (qualifier, name) = match &c.aliasing_name.children {
-                            ScopeResolutionExpression(c) => {
-                                (Some(pos_name(&c.qualifier, e)?), p_pstring(&c.name, e)?)
-                            }
-                            _ => (None, p_pstring(&c.aliasing_name, e)?),
-                        };
-                        let (kinds, mut vis_raw) = p_modifiers(
-                            |mut acc, kind| -> Vec<ast::UseAsVisibility> {
-                                if let Some(v) = modifier::to_use_as_visibility(kind) {
-                                    acc.push(v);
-                                }
-                                acc
-                            },
-                            vec![],
-                            &c.modifiers,
-                            e,
-                        )?;
-                        let vis = if kinds.is_empty() || kinds.has_any(modifier::VISIBILITIES) {
-                            vis_raw
-                        } else {
-                            let mut v = vec![ast::UseAsVisibility::UseAsPublic];
-                            v.append(&mut vis_raw);
-                            v
-                        };
-                        let aliased_name = if !c.aliased_name.is_missing() {
-                            Some(pos_name(&c.aliased_name, e)?)
-                        } else {
-                            None
-                        };
-                        raise_hh_error(e, Naming::unsupported_trait_use_as(name.0.clone()));
-                        Ok(Either::Right(ast::UseAsAlias(
-                            qualifier,
-                            name,
-                            aliased_name,
-                            vis,
-                        )))
-                    }
-                    _ => missing_syntax("trait use conflict resolution item", n, e),
-                }
-            };
-            let mut uses = could_map(&c.names, env, p_hint)?;
-            let elts = could_map(&c.clauses, env, p_item)?;
-            class.uses.append(&mut uses);
-            for elt in elts.into_iter() {
-                match elt {
-                    Either::Left(l) => class.insteadof_alias.push(l),
-                    Either::Right(r) => class.use_as_alias.push(r),
-                }
-            }
-            Ok(())
-        }
         TraitUse(c) => {
             let mut uses = could_map(&c.names, env, p_hint)?;
             Ok(class.uses.append(&mut uses))
@@ -5128,8 +5057,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 tparams,
                 extends,
                 uses: vec![],
-                use_as_alias: vec![],
-                insteadof_alias: vec![],
                 xhp_attr_uses: vec![],
                 xhp_category: None,
                 reqs: vec![],
@@ -5328,8 +5255,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 }),
                 doc_comment: doc_comment_opt,
                 uses: vec![],
-                use_as_alias: vec![],
-                insteadof_alias: vec![],
                 xhp_attr_uses: vec![],
                 xhp_category: None,
                 reqs: vec![],
@@ -5404,8 +5329,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 }),
                 doc_comment: doc_comment_opt,
                 uses: vec![],
-                use_as_alias: vec![],
-                insteadof_alias: vec![],
                 xhp_attr_uses: vec![],
                 xhp_category: None,
                 reqs: vec![],

@@ -415,39 +415,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_trait_use_precedence_item(_: &C, trait_use_precedence_item_name: Self, trait_use_precedence_item_keyword: Self, trait_use_precedence_item_removed_names: Self) -> Self {
-        let syntax = SyntaxVariant::TraitUsePrecedenceItem(Box::new(TraitUsePrecedenceItemChildren {
-            trait_use_precedence_item_name,
-            trait_use_precedence_item_keyword,
-            trait_use_precedence_item_removed_names,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_trait_use_alias_item(_: &C, trait_use_alias_item_aliasing_name: Self, trait_use_alias_item_keyword: Self, trait_use_alias_item_modifiers: Self, trait_use_alias_item_aliased_name: Self) -> Self {
-        let syntax = SyntaxVariant::TraitUseAliasItem(Box::new(TraitUseAliasItemChildren {
-            trait_use_alias_item_aliasing_name,
-            trait_use_alias_item_keyword,
-            trait_use_alias_item_modifiers,
-            trait_use_alias_item_aliased_name,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_trait_use_conflict_resolution(_: &C, trait_use_conflict_resolution_keyword: Self, trait_use_conflict_resolution_names: Self, trait_use_conflict_resolution_left_brace: Self, trait_use_conflict_resolution_clauses: Self, trait_use_conflict_resolution_right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::TraitUseConflictResolution(Box::new(TraitUseConflictResolutionChildren {
-            trait_use_conflict_resolution_keyword,
-            trait_use_conflict_resolution_names,
-            trait_use_conflict_resolution_left_brace,
-            trait_use_conflict_resolution_clauses,
-            trait_use_conflict_resolution_right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_trait_use(_: &C, trait_use_keyword: Self, trait_use_names: Self, trait_use_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::TraitUse(Box::new(TraitUseChildren {
             trait_use_keyword,
@@ -2165,30 +2132,6 @@ where
                 let acc = f(classish_body_right_brace, acc);
                 acc
             },
-            SyntaxVariant::TraitUsePrecedenceItem(x) => {
-                let TraitUsePrecedenceItemChildren { trait_use_precedence_item_name, trait_use_precedence_item_keyword, trait_use_precedence_item_removed_names } = *x;
-                let acc = f(trait_use_precedence_item_name, acc);
-                let acc = f(trait_use_precedence_item_keyword, acc);
-                let acc = f(trait_use_precedence_item_removed_names, acc);
-                acc
-            },
-            SyntaxVariant::TraitUseAliasItem(x) => {
-                let TraitUseAliasItemChildren { trait_use_alias_item_aliasing_name, trait_use_alias_item_keyword, trait_use_alias_item_modifiers, trait_use_alias_item_aliased_name } = *x;
-                let acc = f(trait_use_alias_item_aliasing_name, acc);
-                let acc = f(trait_use_alias_item_keyword, acc);
-                let acc = f(trait_use_alias_item_modifiers, acc);
-                let acc = f(trait_use_alias_item_aliased_name, acc);
-                acc
-            },
-            SyntaxVariant::TraitUseConflictResolution(x) => {
-                let TraitUseConflictResolutionChildren { trait_use_conflict_resolution_keyword, trait_use_conflict_resolution_names, trait_use_conflict_resolution_left_brace, trait_use_conflict_resolution_clauses, trait_use_conflict_resolution_right_brace } = *x;
-                let acc = f(trait_use_conflict_resolution_keyword, acc);
-                let acc = f(trait_use_conflict_resolution_names, acc);
-                let acc = f(trait_use_conflict_resolution_left_brace, acc);
-                let acc = f(trait_use_conflict_resolution_clauses, acc);
-                let acc = f(trait_use_conflict_resolution_right_brace, acc);
-                acc
-            },
             SyntaxVariant::TraitUse(x) => {
                 let TraitUseChildren { trait_use_keyword, trait_use_names, trait_use_semicolon } = *x;
                 let acc = f(trait_use_keyword, acc);
@@ -3251,9 +3194,6 @@ where
             SyntaxVariant::MethodishTraitResolution {..} => SyntaxKind::MethodishTraitResolution,
             SyntaxVariant::ClassishDeclaration {..} => SyntaxKind::ClassishDeclaration,
             SyntaxVariant::ClassishBody {..} => SyntaxKind::ClassishBody,
-            SyntaxVariant::TraitUsePrecedenceItem {..} => SyntaxKind::TraitUsePrecedenceItem,
-            SyntaxVariant::TraitUseAliasItem {..} => SyntaxKind::TraitUseAliasItem,
-            SyntaxVariant::TraitUseConflictResolution {..} => SyntaxKind::TraitUseConflictResolution,
             SyntaxVariant::TraitUse {..} => SyntaxKind::TraitUse,
             SyntaxVariant::RequireClause {..} => SyntaxKind::RequireClause,
             SyntaxVariant::ConstDeclaration {..} => SyntaxKind::ConstDeclaration,
@@ -3640,27 +3580,6 @@ where
                  classish_body_right_brace: ts.pop().unwrap(),
                  classish_body_elements: ts.pop().unwrap(),
                  classish_body_left_brace: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::TraitUsePrecedenceItem, 3) => SyntaxVariant::TraitUsePrecedenceItem(Box::new(TraitUsePrecedenceItemChildren {
-                 trait_use_precedence_item_removed_names: ts.pop().unwrap(),
-                 trait_use_precedence_item_keyword: ts.pop().unwrap(),
-                 trait_use_precedence_item_name: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::TraitUseAliasItem, 4) => SyntaxVariant::TraitUseAliasItem(Box::new(TraitUseAliasItemChildren {
-                 trait_use_alias_item_aliased_name: ts.pop().unwrap(),
-                 trait_use_alias_item_modifiers: ts.pop().unwrap(),
-                 trait_use_alias_item_keyword: ts.pop().unwrap(),
-                 trait_use_alias_item_aliasing_name: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::TraitUseConflictResolution, 5) => SyntaxVariant::TraitUseConflictResolution(Box::new(TraitUseConflictResolutionChildren {
-                 trait_use_conflict_resolution_right_brace: ts.pop().unwrap(),
-                 trait_use_conflict_resolution_clauses: ts.pop().unwrap(),
-                 trait_use_conflict_resolution_left_brace: ts.pop().unwrap(),
-                 trait_use_conflict_resolution_names: ts.pop().unwrap(),
-                 trait_use_conflict_resolution_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::TraitUse, 3) => SyntaxVariant::TraitUse(Box::new(TraitUseChildren {
@@ -4841,30 +4760,6 @@ pub struct ClassishBodyChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct TraitUsePrecedenceItemChildren<T, V> {
-    pub trait_use_precedence_item_name: Syntax<T, V>,
-    pub trait_use_precedence_item_keyword: Syntax<T, V>,
-    pub trait_use_precedence_item_removed_names: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct TraitUseAliasItemChildren<T, V> {
-    pub trait_use_alias_item_aliasing_name: Syntax<T, V>,
-    pub trait_use_alias_item_keyword: Syntax<T, V>,
-    pub trait_use_alias_item_modifiers: Syntax<T, V>,
-    pub trait_use_alias_item_aliased_name: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct TraitUseConflictResolutionChildren<T, V> {
-    pub trait_use_conflict_resolution_keyword: Syntax<T, V>,
-    pub trait_use_conflict_resolution_names: Syntax<T, V>,
-    pub trait_use_conflict_resolution_left_brace: Syntax<T, V>,
-    pub trait_use_conflict_resolution_clauses: Syntax<T, V>,
-    pub trait_use_conflict_resolution_right_brace: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct TraitUseChildren<T, V> {
     pub trait_use_keyword: Syntax<T, V>,
     pub trait_use_names: Syntax<T, V>,
@@ -5923,9 +5818,6 @@ pub enum SyntaxVariant<T, V> {
     MethodishTraitResolution(Box<MethodishTraitResolutionChildren<T, V>>),
     ClassishDeclaration(Box<ClassishDeclarationChildren<T, V>>),
     ClassishBody(Box<ClassishBodyChildren<T, V>>),
-    TraitUsePrecedenceItem(Box<TraitUsePrecedenceItemChildren<T, V>>),
-    TraitUseAliasItem(Box<TraitUseAliasItemChildren<T, V>>),
-    TraitUseConflictResolution(Box<TraitUseConflictResolutionChildren<T, V>>),
     TraitUse(Box<TraitUseChildren<T, V>>),
     RequireClause(Box<RequireClauseChildren<T, V>>),
     ConstDeclaration(Box<ConstDeclarationChildren<T, V>>),
@@ -6430,36 +6322,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.classish_body_left_brace),
                     1 => Some(&x.classish_body_elements),
                     2 => Some(&x.classish_body_right_brace),
-                        _ => None,
-                    }
-                })
-            },
-            TraitUsePrecedenceItem(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.trait_use_precedence_item_name),
-                    1 => Some(&x.trait_use_precedence_item_keyword),
-                    2 => Some(&x.trait_use_precedence_item_removed_names),
-                        _ => None,
-                    }
-                })
-            },
-            TraitUseAliasItem(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.trait_use_alias_item_aliasing_name),
-                    1 => Some(&x.trait_use_alias_item_keyword),
-                    2 => Some(&x.trait_use_alias_item_modifiers),
-                    3 => Some(&x.trait_use_alias_item_aliased_name),
-                        _ => None,
-                    }
-                })
-            },
-            TraitUseConflictResolution(x) => {
-                get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.trait_use_conflict_resolution_keyword),
-                    1 => Some(&x.trait_use_conflict_resolution_names),
-                    2 => Some(&x.trait_use_conflict_resolution_left_brace),
-                    3 => Some(&x.trait_use_conflict_resolution_clauses),
-                    4 => Some(&x.trait_use_conflict_resolution_right_brace),
                         _ => None,
                     }
                 })

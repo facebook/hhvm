@@ -1083,17 +1083,6 @@ where
         }
     }
 
-    fn parse_qualified_name_type_opt(&mut self) -> S::R {
-        // Here we're parsing a name followed by an optional generic type
-        // argument list; if we don't have a name, give an error.
-        match self.peek_token_kind() {
-            TokenKind::Backslash | TokenKind::Construct | TokenKind::Name => {
-                self.parse_simple_type_or_generic()
-            }
-            _ => S!(make_missing, self, self.pos()),
-        }
-    }
-
     fn parse_require_clause(&mut self) -> S::R {
         // SPEC
         // require-extends-clause:
@@ -1168,104 +1157,6 @@ where
         }
     }
 
-    fn parse_trait_use_precedence_item(&mut self, name: S::R) -> S::R {
-        let keyword = self.assert_token(TokenKind::Insteadof);
-        let removed_names = self.parse_trait_name_list(|x: TokenKind| x == TokenKind::Semicolon);
-        S!(
-            make_trait_use_precedence_item,
-            self,
-            name,
-            keyword,
-            removed_names
-        )
-    }
-
-    fn parse_trait_use_alias_item(&mut self, aliasing_name: S::R) -> S::R {
-        let keyword = self.require_token(TokenKind::As, Errors::expected_as_or_insteadof);
-        let modifiers = self.parse_modifiers();
-        let aliased_name = self.parse_qualified_name_type_opt();
-        S!(
-            make_trait_use_alias_item,
-            self,
-            aliasing_name,
-            keyword,
-            modifiers,
-            aliased_name
-        )
-    }
-
-    fn parse_trait_use_conflict_resolution_item(&mut self) -> S::R {
-        let qualifier = self.parse_qualified_name_type();
-        let name = if self.peek_token_kind() == TokenKind::ColonColon {
-            // scope resolution expression case
-            let cc_token = self.require_coloncolon();
-            let name = self
-                .require_token_one_of(&[TokenKind::Name, TokenKind::Construct], Errors::error1004);
-            S!(
-                make_scope_resolution_expression,
-                self,
-                qualifier,
-                cc_token,
-                name
-            )
-        } else {
-            // plain qualified name case
-            qualifier
-        };
-        match self.peek_token_kind() {
-            TokenKind::Insteadof => self.parse_trait_use_precedence_item(name),
-            _ => self.parse_trait_use_alias_item(name),
-        }
-    }
-
-    // SPEC:
-    // trait-use-conflict-resolution:
-    //   use trait-name-list  {  trait-use-conflict-resolution-list  }
-    //
-    // trait-use-conflict-resolution-list:
-    //   trait-use-conflict-resolution-item
-    //   trait-use-conflict-resolution-item  trait-use-conflict-resolution-list
-    //
-    // trait-use-conflict-resolution-item:
-    //   trait-use-alias-item
-    //   trait-use-precedence-item
-    //
-    // trait-use-alias-item:
-    //   trait-use-conflict-resolution-item-name  as  name;
-    //   trait-use-conflict-resolution-item-name  as  visibility-modifier  name;
-    //   trait-use-conflict-resolution-item-name  as  visibility-modifier;
-    //
-    // trait-use-precedence-item:
-    //   scope-resolution-expression  insteadof  trait-name-list
-    //
-    // trait-use-conflict-resolution-item-name:
-    //   qualified-name
-    //   scope-resolution-expression
-    fn parse_trait_use_conflict_resolution(
-        &mut self,
-        use_token: S::R,
-        trait_name_list: S::R,
-    ) -> S::R {
-        let left_brace = self.assert_token(TokenKind::LeftBrace);
-        let clauses = self.parse_separated_list_opt(
-            TokenKind::Semicolon,
-            SeparatedListKind::TrailingAllowed,
-            TokenKind::RightBrace,
-            Errors::error1004,
-            |x: &mut Self| x.parse_trait_use_conflict_resolution_item(),
-        );
-        let right_brace = self.require_token(TokenKind::RightBrace, Errors::error1006);
-        S!(
-            make_trait_use_conflict_resolution,
-            self,
-            use_token,
-            trait_name_list,
-            left_brace,
-            clauses,
-            right_brace,
-        )
-    }
-
     // SPEC:
     // trait-use-clause:
     //   use  trait-name-list  ;
@@ -1291,12 +1182,8 @@ where
         let use_token = self.assert_token(TokenKind::Use);
         let trait_name_list =
             self.parse_trait_name_list(|x| x == TokenKind::Semicolon || x == TokenKind::LeftBrace);
-        if self.peek_token_kind() == TokenKind::LeftBrace {
-            self.parse_trait_use_conflict_resolution(use_token, trait_name_list)
-        } else {
-            let semi = self.require_semicolon();
-            S!(make_trait_use, self, use_token, trait_name_list, semi)
-        }
+        let semi = self.require_semicolon();
+        S!(make_trait_use, self, use_token, trait_name_list, semi)
     }
 
     fn parse_property_declaration(&mut self, attribute_spec: S::R, modifiers: S::R) -> S::R {

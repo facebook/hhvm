@@ -9,10 +9,10 @@ Errors:
       [{ tp_variance = Invariant; tp_name = ([3:9-11], "Ta"); tp_parameters = []; tp_constraints = [(Constraint_as, ([3:15-18], (Hprim Tint)))]; tp_reified = Erased; tp_user_attributes = [] };
         { tp_variance = Invariant; tp_name = ([3:20-22], "Tb"); tp_parameters = []; tp_constraints = [(Constraint_super, ([3:29-35], (Hprim Tstring)))]; tp_reified = Erased; tp_user_attributes = [] }
         ];
-      c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
-      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-      c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
+      c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
+      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

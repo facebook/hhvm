@@ -5,7 +5,6 @@ aast_defs::KvcKind
 aast_defs::ParamMutability
 aast_defs::ReifyKind
 aast_defs::TypedefVisibility
-aast_defs::UseAsVisibility
 aast_defs::VcKind
 aast_defs::Visibility
 aast_defs::XhpChildOp
@@ -27,7 +26,6 @@ aast::ReifyKind
 aast::RequireKind
 aast::TypedefVisibility
 aast::Uop
-aast::UseAsVisibility
 aast::Variance
 aast::VcKind
 aast::Visibility

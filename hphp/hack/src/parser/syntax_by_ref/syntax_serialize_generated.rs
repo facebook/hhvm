@@ -363,33 +363,6 @@ ss.serialize_field("classish_body_elements", &self.with(elements))?;
 ss.serialize_field("classish_body_right_brace", &self.with(right_brace))?;
       ss.end()
 } 
-SyntaxVariant::TraitUsePrecedenceItem (TraitUsePrecedenceItemChildren{name,keyword,removed_names} ) => {
-      let mut ss = s.serialize_struct("", 4)?;
-      ss.serialize_field("kind", "trait_use_precedence_item")?;
-      ss.serialize_field("trait_use_precedence_item_name", &self.with(name))?;
-ss.serialize_field("trait_use_precedence_item_keyword", &self.with(keyword))?;
-ss.serialize_field("trait_use_precedence_item_removed_names", &self.with(removed_names))?;
-      ss.end()
-} 
-SyntaxVariant::TraitUseAliasItem (TraitUseAliasItemChildren{aliasing_name,keyword,modifiers,aliased_name} ) => {
-      let mut ss = s.serialize_struct("", 5)?;
-      ss.serialize_field("kind", "trait_use_alias_item")?;
-      ss.serialize_field("trait_use_alias_item_aliasing_name", &self.with(aliasing_name))?;
-ss.serialize_field("trait_use_alias_item_keyword", &self.with(keyword))?;
-ss.serialize_field("trait_use_alias_item_modifiers", &self.with(modifiers))?;
-ss.serialize_field("trait_use_alias_item_aliased_name", &self.with(aliased_name))?;
-      ss.end()
-} 
-SyntaxVariant::TraitUseConflictResolution (TraitUseConflictResolutionChildren{keyword,names,left_brace,clauses,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 6)?;
-      ss.serialize_field("kind", "trait_use_conflict_resolution")?;
-      ss.serialize_field("trait_use_conflict_resolution_keyword", &self.with(keyword))?;
-ss.serialize_field("trait_use_conflict_resolution_names", &self.with(names))?;
-ss.serialize_field("trait_use_conflict_resolution_left_brace", &self.with(left_brace))?;
-ss.serialize_field("trait_use_conflict_resolution_clauses", &self.with(clauses))?;
-ss.serialize_field("trait_use_conflict_resolution_right_brace", &self.with(right_brace))?;
-      ss.end()
-} 
 SyntaxVariant::TraitUse (TraitUseChildren{keyword,names,semicolon} ) => {
       let mut ss = s.serialize_struct("", 4)?;
       ss.serialize_field("kind", "trait_use")?;

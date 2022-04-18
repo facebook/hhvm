@@ -12,7 +12,6 @@ module Error_code = Error_codes.Naming
 type t =
   | Unsupported_trait_use_as of Pos.t
   | Unsupported_instead_of of Pos.t
-  | Invalid_trait_use_as_visibility of Pos.t
   | Unexpected_arrow of {
       pos: Pos.t;
       cname: string;
@@ -392,12 +391,6 @@ let unsupported_instead_of pos =
   User_error.make
     Error_code.(to_enum UnsupportedInsteadOf)
     (pos, "`insteadof` is a PHP feature that is unsupported in Hack")
-    []
-
-let invalid_trait_use_as_visibility pos =
-  User_error.make
-    Error_code.(to_enum InvalidTraitUseAsVisibility)
-    (pos, "Cannot redeclare trait method's visibility in this manner")
     []
 
 let unexpected_arrow pos cname =
@@ -1082,7 +1075,6 @@ let explicit_consistent_constructor ck pos =
 let to_user_error = function
   | Unsupported_trait_use_as pos -> unsupported_trait_use_as pos
   | Unsupported_instead_of pos -> unsupported_instead_of pos
-  | Invalid_trait_use_as_visibility pos -> invalid_trait_use_as_visibility pos
   | Unexpected_arrow { pos; cname } -> unexpected_arrow pos cname
   | Missing_arrow { pos; cname } -> missing_arrow pos cname
   | Disallowed_xhp_type { pos; ty_name } -> disallowed_xhp_type pos ty_name

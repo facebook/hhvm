@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e07fc6823fbb9ea21d85b2864a354457>>
+// @generated SignedSource<<1409f55b7548088792a73b988f7621da>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -450,8 +450,6 @@ impl<P: Params> Node<P> for Class_<P::Ex, P::En> {
         self.tparams.accept(c, v)?;
         self.extends.accept(c, v)?;
         self.uses.accept(c, v)?;
-        self.use_as_alias.accept(c, v)?;
-        self.insteadof_alias.accept(c, v)?;
         self.xhp_attr_uses.accept(c, v)?;
         self.xhp_category.accept(c, v)?;
         self.reqs.accept(c, v)?;
@@ -1458,24 +1456,6 @@ impl<P: Params> Node<P> for ImportFlavor {
         }
     }
 }
-impl<P: Params> Node<P> for InsteadofAlias {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_insteadof_alias(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        self.0.accept(c, v)?;
-        self.1.accept(c, v)?;
-        self.2.accept(c, v)
-    }
-}
 impl<P: Params> Node<P> for KvcKind {
     fn accept<'node>(
         &'node self,
@@ -2078,46 +2058,6 @@ impl<P: Params> Node<P> for Uop {
             Uop::Upincr => Ok(()),
             Uop::Updecr => Ok(()),
             Uop::Usilence => Ok(()),
-        }
-    }
-}
-impl<P: Params> Node<P> for UseAsAlias {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_use_as_alias(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        self.0.accept(c, v)?;
-        self.1.accept(c, v)?;
-        self.2.accept(c, v)?;
-        self.3.accept(c, v)
-    }
-}
-impl<P: Params> Node<P> for UseAsVisibility {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_use_as_visibility(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            UseAsVisibility::UseAsPublic => Ok(()),
-            UseAsVisibility::UseAsPrivate => Ok(()),
-            UseAsVisibility::UseAsProtected => Ok(()),
-            UseAsVisibility::UseAsFinal => Ok(()),
         }
     }
 }

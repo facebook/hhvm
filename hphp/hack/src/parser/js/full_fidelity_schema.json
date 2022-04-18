@@ -793,36 +793,6 @@
         { "field_name" : "elements" },
         { "field_name" : "right_brace" }
       ] },
-    { "kind_name" : "TraitUsePrecedenceItem",
-      "type_name" : "trait_use_precedence_item",
-      "description" : "trait_use_precedence_item",
-      "prefix" : "trait_use_precedence_item",
-      "fields" : [
-        { "field_name" : "name" },
-        { "field_name" : "keyword" },
-        { "field_name" : "removed_names" }
-      ] },
-    { "kind_name" : "TraitUseAliasItem",
-      "type_name" : "trait_use_alias_item",
-      "description" : "trait_use_alias_item",
-      "prefix" : "trait_use_alias_item",
-      "fields" : [
-        { "field_name" : "aliasing_name" },
-        { "field_name" : "keyword" },
-        { "field_name" : "modifiers" },
-        { "field_name" : "aliased_name" }
-      ] },
-    { "kind_name" : "TraitUseConflictResolution",
-      "type_name" : "trait_use_conflict_resolution",
-      "description" : "trait_use_conflict_resolution",
-      "prefix" : "trait_use_conflict_resolution",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "names" },
-        { "field_name" : "left_brace" },
-        { "field_name" : "clauses" },
-        { "field_name" : "right_brace" }
-      ] },
     { "kind_name" : "TraitUse",
       "type_name" : "trait_use",
       "description" : "trait_use",

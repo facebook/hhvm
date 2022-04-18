@@ -2564,57 +2564,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn function_call_argument_errors(&mut self, in_constructor_call: bool, node: S<'a>) {
-        if let Some(e) = match &node.children {
-            DecoratedExpression(x) => {
-                if let Token(token) = &x.decorator.children {
-                    if token.kind() == TokenKind::Inout {
-                        let expression = &x.expression;
-                        match &expression.children {
-                            _ if in_constructor_call => Some(errors::inout_param_in_construct),
-                            VariableExpression(x)
-                                if sn::superglobals::is_any_global(self.text(&x.expression))
-                                    || self.text(&x.expression) == sn::special_idents::THIS =>
-                            {
-                                Some(errors::fun_arg_invalid_arg)
-                            }
-                            PipeVariableExpression(_) => Some(errors::fun_arg_invalid_arg),
-                            BinaryExpression(_) => Some(errors::fun_arg_inout_set),
-                            QualifiedName(_) => Some(errors::fun_arg_inout_const),
-                            Token(_) if expression.is_name() => Some(errors::fun_arg_inout_const),
-                            // TODO: Maybe be more descriptive in error messages
-                            ScopeResolutionExpression(_)
-                            | FunctionCallExpression(_)
-                            | MemberSelectionExpression(_)
-                            | SafeMemberSelectionExpression(_) => Some(errors::fun_arg_invalid_arg),
-                            SubscriptExpression(x) => match &x.receiver.children {
-                                MemberSelectionExpression(_) | ScopeResolutionExpression(_) => {
-                                    Some(errors::fun_arg_invalid_arg)
-                                }
-                                _ => {
-                                    let text = self.text(&x.receiver);
-                                    if sn::superglobals::is_any_global(text) {
-                                        Some(errors::fun_arg_inout_containers)
-                                    } else {
-                                        None
-                                    }
-                                }
-                            },
-                            _ => None,
-                        }
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
-            }
-            _ => None,
-        } {
-            self.errors.push(make_error_from_node(node, e))
-        }
-    }
-
     fn function_call_on_xhp_name_errors(&mut self, node: S<'a>) {
         let check = |self_: &mut Self, member_object: S<'a>, name: S<'a>| {
             if let XHPExpression(_) = &member_object.children {
@@ -3013,7 +2962,16 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             // Refer: https://github.com/php/php-langspec/blob/master/spec/10-expressions.md#instanceof-operator*)
             ConstructorCall(ctr_call) => {
                 for p in syntax_to_list_no_separators(&ctr_call.argument_list) {
-                    self.function_call_argument_errors(true, p);
+                    if let DecoratedExpression(e) = &p.children {
+                        if let Token(t) = &e.decorator.children {
+                            if t.kind() == TokenKind::Inout {
+                                self.errors.push(make_error_from_node(
+                                    p,
+                                    errors::inout_param_in_construct,
+                                ));
+                            }
+                        }
+                    }
                 }
                 self.class_type_designator_errors(&ctr_call.type_);
                 if self.env.is_typechecker() {
@@ -3066,10 +3024,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let arg_list = &x.argument_list;
                 if let Some(h) = misplaced_variadic_arg(arg_list) {
                     self.errors.push(make_error_from_node(h, errors::error2033))
-                }
-
-                for p in syntax_to_list_no_separators(arg_list) {
-                    self.function_call_argument_errors(false, p)
                 }
 
                 let recv = &x.receiver;
@@ -4807,7 +4761,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn check_lvalue(&mut self, loperand: S<'a>, lval_root: LvalRoot) {
+    /// Checks whether `loperand` is valid syntax to appear in the context represented by
+    /// `lval_root`. This is meant to span any context in which we're mutating some value. See
+    /// `LvalRoot` for an accounting of the different lvalue contexts in Hack.
+    /// Notably, this includes `inout` expressions, which are lvalues by way of being assignment.
+    fn check_lvalue_and_inout(&mut self, loperand: S<'a>, lval_root: LvalRoot) {
         let append_errors =
             |self_: &mut Self, node, error| self_.errors.push(make_error_from_node(node, error));
 
@@ -4825,18 +4783,36 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         };
 
         match &loperand.children {
+            // There's some syntax that is never allowed as part of an `inout` expression, so we
+            // match against it specially.
+            // - `list( ... )` is nonsensical as the argument to an `inout` function; `inout`
+            //   expressions must be both valid lvalues *and* rvalues: `list( ... )` is only valid
+            //   as an lvalue.
+            // - class member access (static or instance) is disallowed to avoid unexpected behavior
+            //   around ref-counting and dangling references to class members.
+            MemberSelectionExpression(_) | ListExpression(_) | ScopeResolutionExpression(_)
+                if lval_root == LvalRoot::Inout =>
+            {
+                err(self, errors::fun_arg_invalid_arg)
+            }
             ListExpression(x) => syntax_to_list_no_separators(&x.members)
-                .for_each(|n| self.check_lvalue(n, lval_root)),
+                .for_each(|n| self.check_lvalue_and_inout(n, lval_root)),
             SafeMemberSelectionExpression(_) => {
                 err(self, errors::not_allowed_in_write("`?->` operator"))
             }
             MemberSelectionExpression(x) => {
                 if token_kind(&x.name) == Some(TokenKind::XHPClassName) {
-                    err(self, errors::not_allowed_in_write("`->:` operator"))
+                    err(self, errors::not_allowed_in_write("`->:` operator"));
                 }
             }
             CatchClause(x) => check_variable(self, self.text(&x.variable)),
-            VariableExpression(x) => check_variable(self, self.text(&x.expression)),
+            VariableExpression(x) => {
+                let txt = self.text(&x.expression);
+                check_variable(self, txt);
+                if lval_root == LvalRoot::Inout && sn::superglobals::is_any_global(txt) {
+                    err(self, errors::fun_arg_invalid_arg);
+                }
+            }
             DecoratedExpression(x) => match token_kind(&x.decorator) {
                 Some(TokenKind::Clone) => err(self, errors::not_allowed_in_write("`clone`")),
                 Some(TokenKind::Await) => err(self, errors::not_allowed_in_write("`await`")),
@@ -4849,8 +4825,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 Some(TokenKind::Inout) => err(self, errors::not_allowed_in_write("`inout`")),
                 _ => {}
             },
-            ParenthesizedExpression(x) => self.check_lvalue(&x.expression, lval_root),
-            SubscriptExpression(x) => self.check_lvalue(&x.receiver, lval_root),
+            ParenthesizedExpression(x) => self.check_lvalue_and_inout(&x.expression, lval_root),
+            SubscriptExpression(x) => {
+                self.check_lvalue_and_inout(&x.receiver, lval_root);
+                if lval_root == LvalRoot::Inout && x.index.is_missing() {
+                    err(self, errors::fun_arg_invalid_arg);
+                }
+            }
             PrefixUnaryExpression(x) => check_unary_expression(self, &x.operator),
             PostfixUnaryExpression(x) => check_unary_expression(self, &x.operator),
             // Potentially un-intuitive; `missing` is perfectly valid in LHS positions, for example:
@@ -4884,7 +4865,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn assignment_errors(&mut self, node: S<'a>) {
         let check_unary_expression = |self_: &mut Self, op, loperand: S<'a>| {
             if does_unop_create_write(token_kind(op)) {
-                self_.check_lvalue(loperand, LvalRoot::IncrementOrDecrement);
+                self_.check_lvalue_and_inout(loperand, LvalRoot::IncrementOrDecrement);
             }
         };
         match &node.children {
@@ -4893,21 +4874,21 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             DecoratedExpression(x) => {
                 let loperand = &x.expression;
                 if does_decorator_create_write(token_kind(&x.decorator)) {
-                    self.check_lvalue(loperand, LvalRoot::Inout)
+                    self.check_lvalue_and_inout(loperand, LvalRoot::Inout)
                 }
             }
             BinaryExpression(x) => {
                 let loperand = &x.left_operand;
                 if does_binop_create_write_on_left(token_kind(&x.operator)) {
-                    self.check_lvalue(loperand, LvalRoot::Assignment);
+                    self.check_lvalue_and_inout(loperand, LvalRoot::Assignment);
                 }
             }
             ForeachStatement(x) => {
-                self.check_lvalue(&x.value, LvalRoot::Foreach);
-                self.check_lvalue(&x.key, LvalRoot::Foreach);
+                self.check_lvalue_and_inout(&x.value, LvalRoot::Foreach);
+                self.check_lvalue_and_inout(&x.key, LvalRoot::Foreach);
             }
             CatchClause(_) => {
-                self.check_lvalue(node, LvalRoot::CatchClause);
+                self.check_lvalue_and_inout(node, LvalRoot::CatchClause);
             }
             _ => {}
         }
@@ -5221,7 +5202,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             QualifiedName(_) => self.check_qualified_name(node),
             UnsetStatement(x) => {
                 for expr in syntax_to_list_no_separators(&x.variables) {
-                    self.check_lvalue(expr, LvalRoot::Unset);
+                    self.check_lvalue_and_inout(expr, LvalRoot::Unset);
                 }
             }
             _ => {}

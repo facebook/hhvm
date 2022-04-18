@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<34a63e9d0113d2d7f175c336bfa522f1>>
+// @generated SignedSource<<16d8d3360a883a83e99db38fd213fb77>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -195,7 +195,6 @@ pub enum NastCheck {
     InoutParamsSpecial = 3043,
     InoutParamsMemoize = 3045,
     ReadingFromAppend = 3047,
-    InoutArgumentBadExpr = 3050,
     IllegalDestructor = 3056,
     RequiresFinalClass = 3072,
     InterfaceUsesTrait = 3073,

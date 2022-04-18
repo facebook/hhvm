@@ -205,7 +205,7 @@ module NastCheck = struct
     | ReadingFromAppend [@value 3047]
     (* | ConstAttributeProhibitedDEPRECATED [@value 3048] *)
     (* | RetiredError3049DEPRECATED [@value 3049] *)
-    | InoutArgumentBadExpr [@value 3050]
+    (* | InoutArgumentBadExpr [@value 3050] *)
     | IllegalDestructor [@value 3056]
     (* | CoroutineInConstructor [@value 3065] *)
     (* | IllegalReturnByRefDEPRECATED [@value 3066] *)

@@ -1,1 +1,1 @@
-Fatal error: You cannot decorate this argument as `inout` in %s/test/slow/inout/bad-call-4.php on line 6
+Fatal error: You cannot use this syntax with `inout`. in %s/bad-call-4.php on line 6

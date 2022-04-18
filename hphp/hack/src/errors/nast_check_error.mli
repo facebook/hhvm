@@ -97,7 +97,6 @@ type t =
     }
   | Reading_from_append of Pos.t
   | List_rvalue of Pos.t
-  | Inout_argument_bad_expr of Pos.t
   | Illegal_destructor of Pos.t
   | Illegal_context of {
       pos: Pos.t;

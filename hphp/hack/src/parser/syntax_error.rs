@@ -19,7 +19,7 @@ pub enum ErrorType {
     RuntimeError,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum LvalRoot {
     Unset,
     Assignment,

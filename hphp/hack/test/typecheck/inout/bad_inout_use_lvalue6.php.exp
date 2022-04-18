@@ -1,10 +1,4 @@
-File "bad_inout_use_lvalue6.php", line 15, characters 5-13:
-You cannot decorate this argument as `inout` (Parsing[1002])
 File "bad_inout_use_lvalue6.php", line 15, characters 11-13:
 You cannot use this syntax with `inout`. (Parsing[1002])
 File "bad_inout_use_lvalue6.php", line 16, characters 11-13:
 You cannot use this syntax with `inout`. (Parsing[1002])
-File "bad_inout_use_lvalue6.php", line 15, characters 11-13:
-`inout` arguments may only be local variables or array indexing expressions  (NastCheck[3050])
-File "bad_inout_use_lvalue6.php", line 16, characters 11-20:
-`inout` arguments may only be local variables or array indexing expressions  (NastCheck[3050])

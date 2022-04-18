@@ -1,4 +1,1 @@
-
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Parameters marked inout must be contained in locals, vecs, dicts, keysets, and arrays' in %s/bad-call-11.php:10
-Stack trace:
-%a
+Fatal error: You cannot decorate this argument as `inout` in %s/bad-call-11.php on line 10

@@ -100,7 +100,6 @@ type t =
     }
   | Reading_from_append of Pos.t
   | List_rvalue of Pos.t
-  | Inout_argument_bad_expr of Pos.t
   | Illegal_destructor of Pos.t
   | Illegal_context of {
       pos: Pos.t;
@@ -438,14 +437,6 @@ let list_rvalue pos =
     )
     []
 
-let inout_argument_bad_expr pos =
-  User_error.make
-    Error_code.(to_enum InoutArgumentBadExpr)
-    ( pos,
-      "`inout` arguments may only be local variables or array indexing expressions "
-    )
-    []
-
 let illegal_destructor pos =
   User_error.make
     Error_code.(to_enum IllegalDestructor)
@@ -619,7 +610,6 @@ let to_user_error = function
     inout_in_transformed_pseudofunction pos fn_name
   | Reading_from_append pos -> reading_from_append pos
   | List_rvalue pos -> list_rvalue pos
-  | Inout_argument_bad_expr pos -> inout_argument_bad_expr pos
   | Illegal_destructor pos -> illegal_destructor pos
   | Illegal_context { pos; name } -> illegal_context pos name
   | Case_fallthrough { switch_pos; case_pos } ->

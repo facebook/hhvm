@@ -134,11 +134,10 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
     let edited_file_content =
       match File_content.edit_file file_content edits with
       | Ok new_content -> new_content
-      | Error (reason, _stack) ->
-        Hh_logger.log "%s" reason;
-
-        (* TODO: do not crash, but surface this to the client somehow *)
-        assert false
+      | Error (reason, e) ->
+        Hh_logger.log "SERVER_FILE_EDITED_ERROR - %s" reason;
+        HackEventLogger.server_file_edited_error e ~reason;
+        Exception.reraise e
     in
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     File_provider.remove_batch (Relative_path.Set.singleton path);

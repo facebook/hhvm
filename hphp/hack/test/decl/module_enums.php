@@ -16,14 +16,14 @@ enum X: int {
   C = 2;
 }
 
-<<__Module("X"), __Internal>>
-function f1(X $x): void {} // ok
+<<__Module("X")>>
+internal function f1(X $x): void {} // ok
 
 <<__Module("X")>>
 function f2(X $x): void {} // error
 
-<<__Module("X"), __Internal>>
-function f5(): void {
+<<__Module("X")>>
+internal function f5(): void {
   $x = X::A; // ok
 }
 

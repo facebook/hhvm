@@ -21,13 +21,11 @@ newtype TyNew = int;
 class A {
   public function a(Ty $x): void {} // error
 
-  <<__Internal>>
-  public function b(Ty $x): void {} // ok
+  internal function b(Ty $x): void {} // ok
 
   public function c(TyNew $x): void {} // error
 
-  <<__Internal>>
-  public function d(TyNew $x): void {} // ok
+  internal function d(TyNew $x): void {} // ok
 }
 
 // Visibility

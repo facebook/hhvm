@@ -16,7 +16,6 @@ module Env = Typing_env
 module FunUtils = Decl_fun_utils
 module Inst = Decl_instantiate
 module Phase = Typing_phase
-module SN = Naming_special_names
 module Subst = Decl_subst
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
@@ -235,9 +234,7 @@ let class_vars env cvs =
     let tenv =
       Env.set_internal
         env.tenv
-        (Naming_attributes.mem
-           SN.UserAttributes.uaInternal
-           cv.cv_user_attributes)
+        (Aast.equal_visibility Aast.Internal cv.cv_visibility)
     in
     let env = { env with tenv } in
     type_hint env cv.cv_type
@@ -256,9 +253,7 @@ let method_ env m =
   in
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   let tenv =
-    Env.set_internal
-      tenv
-      (Naming_attributes.mem SN.UserAttributes.uaInternal m.m_user_attributes)
+    Env.set_internal tenv (Aast.equal_visibility Aast.Internal m.m_visibility)
   in
   let env = { env with tenv } in
   fun_params env m.m_params

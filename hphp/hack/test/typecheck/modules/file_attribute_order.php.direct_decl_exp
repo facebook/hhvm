@@ -7,19 +7,19 @@ File root|file_attribute_order.php--A1.php
      { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:54-57], "A"));
        fe_internal = true;
        fe_type =
-       (Rwitness_from_decl ([6:10-11]),
+       (Rwitness_from_decl ([5:19-20]),
         (Tfun
            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
-             ft_implicit_params = { capability = (CapDefaults [6:10-11]) };
+             ft_implicit_params = { capability = (CapDefaults [5:19-20]) };
              ft_ret =
              { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rhint ([6:15-19]), (Tprim Tvoid)) };
+               et_type = (Rhint ([5:24-28]), (Tprim Tvoid)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
                ~readonly_this:false ~is_memoized:false ~variadic:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
-       fe_pos = [6:10-11]; fe_php_std_lib = false;
+       fe_pos = [5:19-20]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }))
   ]
 

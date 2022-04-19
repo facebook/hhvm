@@ -10,8 +10,7 @@ new module there {}
 
 <<file:__EnableUnstableFeatures('modules'), __Module('here')>>
 
-<<__Internal>>
-class C {
+internal class C {
   public function bar():void { }
 }
 
@@ -25,19 +24,18 @@ implements I {
   // Bad
   public ?C $bad1;
   // Good
-  <<__Internal>> public ?C $good1;
+  internal ?C $good1;
   // Bad
   public function bad2(C $x):void { }
   // Good
-  <<__Internal>> public function good2(C $c):void { }
+  internal function good2(C $c):void { }
   // Bad
   public function bad3():C { return new C(); }
   // Goood
-  <<__Internal>> public function good3():C { return new C(); }
+  internal function good3():C { return new C(); }
 }
 
-<<__Internal>>
-class E extends C {} // Ok!
+internal class E extends C {} // Ok!
 
 
 //// there.php

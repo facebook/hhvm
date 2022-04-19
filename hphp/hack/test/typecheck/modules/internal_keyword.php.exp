@@ -1,3 +1,7 @@
+File "internal_keyword.php--file1.php", line 13, characters 3-34:
+You cannot make this trait member `internal` (NastCheck[3099])
+  File "internal_keyword.php--file1.php", line 12, characters 7-10:
+  Only `internal` traits can have `internal` members
 File "internal_keyword.php--file2.php", line 2, characters 15-25:
 Cannot access an internal element from module `foo` outside of a module (Typing[4444])
   File "internal_keyword.php--file1.php", line 8, characters 16-26:

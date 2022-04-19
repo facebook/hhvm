@@ -16,13 +16,11 @@ enum X: int {
   C = 2;
 }
 
-<<__Internal>>
-function f1(X $x): void {} // ok
+internal function f1(X $x): void {} // ok
 
 function f2(X $x): void {} // error
 
-<<__Internal>>
-function f5(): void {
+internal function f5(): void {
   $x = X::A; // ok
 }
 

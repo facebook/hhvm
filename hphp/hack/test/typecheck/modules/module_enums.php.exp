@@ -1,4 +1,4 @@
-File "module_enums.php--X.php", line 15, characters 13-13:
+File "module_enums.php--X.php", line 14, characters 13-13:
 You cannot use this type in a public declaration. (Typing[4446])
   File "module_enums.php--X.php", line 6, characters 6-6:
   It is declared as `internal` here

@@ -135,11 +135,7 @@ let fun_def ctx fd :
     Env.set_module env
     @@ Naming_attributes_params.get_module_attribute fd.fd_file_attributes
   in
-  let env =
-    Env.set_internal
-      env
-      (Naming_attributes.mem SN.UserAttributes.uaInternal f.f_user_attributes)
-  in
+  let env = Env.set_internal env fd.fd_internal in
   let env =
     if
       Naming_attributes.mem
@@ -2055,7 +2051,8 @@ let setup_env_for_class_def_check ctx c =
   let env =
     Env.set_internal
       env
-      (Naming_attributes.mem SN.UserAttributes.uaInternal c.c_user_attributes)
+      (Naming_attributes.mem SN.UserAttributes.uaInternal c.c_user_attributes
+      || c.c_internal)
   in
   let env =
     Env.set_support_dynamic_type

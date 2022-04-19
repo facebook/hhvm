@@ -16,5 +16,5 @@ Cannot access an internal element from module `A` in module `B` (Typing[4444])
   This is from module `A`
 File "module_weird_type_locations.php--not-A.php", line 12, characters 39-44:
 Cannot access an internal element from module `A` in module `B` (Typing[4444])
-  File "module_weird_type_locations.php--A.php", line 9, characters 7-12:
+  File "module_weird_type_locations.php--A.php", line 8, characters 16-21:
   This is from module `A`

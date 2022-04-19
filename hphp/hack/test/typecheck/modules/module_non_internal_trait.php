@@ -9,12 +9,11 @@ new module A {}
 
 <<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>> class Bing {}
+internal class Bing {}
 
-class Quxx { <<__Internal>> public function doFlip(): void {} }
+class Quxx { internal function doFlip(): void {} }
 
-<<__Internal>>
-function foobar(): void {}
+internal function foobar(): void {}
 
 trait NonInternalCaller {
   public function test(Quxx $q): void {
@@ -26,7 +25,6 @@ trait NonInternalCaller {
     $_ = new Bing();
   }
 }
-
 
 <<__Internal>>
 trait InternalCaller {
@@ -45,10 +43,10 @@ trait InternalCaller {
 
 <<__Internal>>
 trait Quuz {
-  <<__Internal>> public function lol(): void {}
+  internal function lol(): void {}
 }
 
 trait Corge {
   use Quuz;
-  <<__Internal>> public function lol(): void {}
+  internal function lol(): void {}
 }

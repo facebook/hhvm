@@ -2,7 +2,7 @@ File "module_typedef.php--A.php", line 15, characters 21-22:
 You cannot use this type in a public declaration. (Typing[4446])
   File "module_typedef.php--A.php", line 7, characters 6-7:
   It is declared as `internal` here
-File "module_typedef.php--A.php", line 20, characters 21-25:
+File "module_typedef.php--A.php", line 19, characters 21-25:
 You cannot use this type in a public declaration. (Typing[4446])
   File "module_typedef.php--A.php", line 10, characters 9-13:
   It is declared as `internal` here

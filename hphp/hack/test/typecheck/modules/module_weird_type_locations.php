@@ -14,8 +14,7 @@ new module B {}
 <<__Internal>>
 type Foo = int;
 
-<<__Internal>>
-class Crosby {}
+internal class Crosby {}
 
 //// also-A.php
 <?hh
@@ -27,8 +26,7 @@ function foobar<T>(T $t): void where T = Foo {
   foobar($t);
 }
 
-<<__Internal>>
-function quxx<T as Foo>(T $_): void {}
+internal function quxx<T as Foo>(T $_): void {}
 
 //// not-A.php
 <?hh

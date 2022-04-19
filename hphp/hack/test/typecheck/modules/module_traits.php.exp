@@ -1,30 +1,30 @@
-File "module_traits.php--A.php", line 11, characters 14-19:
+File "module_traits.php--A.php", line 9, characters 16-21:
 You cannot make this trait member `internal` (NastCheck[3099])
-  File "module_traits.php--A.php", line 8, characters 7-8:
+  File "module_traits.php--A.php", line 7, characters 7-8:
   Only `internal` traits can have `internal` members
-File "module_traits.php--A.php", line 13, characters 3-49:
+File "module_traits.php--A.php", line 11, characters 3-34:
 You cannot make this trait member `internal` (NastCheck[3099])
-  File "module_traits.php--A.php", line 8, characters 7-8:
+  File "module_traits.php--A.php", line 7, characters 7-8:
   Only `internal` traits can have `internal` members
-File "module_traits.php--A.php", line 28, characters 21-21:
+File "module_traits.php--A.php", line 24, characters 21-21:
 Cannot access `internal` members inside a non-internal trait (Typing[4444])
-  File "module_traits.php--A.php", line 27, characters 7-8:
+  File "module_traits.php--A.php", line 23, characters 7-8:
   This trait must be made `internal` to access other internal members
 File "module_traits.php--B.php", line 6, characters 7-8:
 Cannot access an internal element from module `A` in module `B` (Typing[4444])
-  File "module_traits.php--A.php", line 6, characters 7-8:
+  File "module_traits.php--A.php", line 5, characters 16-17:
   This is from module `A`
 File "module_traits.php--C.php", line 5, characters 7-8:
 Cannot access an internal element from module `A` outside of a module (Typing[4444])
-  File "module_traits.php--A.php", line 6, characters 7-8:
+  File "module_traits.php--A.php", line 5, characters 16-17:
   This is from module `A`
 File "module_traits.php--E.php", line 6, characters 5-9:
 Typing error (Typing[4112])
   File "module_traits.php--E.php", line 6, characters 12-12:
   You cannot access internal members outside of a module
-  File "module_traits.php--A.php", line 11, characters 10-12:
+  File "module_traits.php--A.php", line 9, characters 12-14:
   This member is internal
 File "module_traits.php--E.php", line 7, characters 12-14:
 You cannot access internal members outside of a module (Typing[4112])
-  File "module_traits.php--A.php", line 14, characters 19-21:
+  File "module_traits.php--A.php", line 11, characters 21-23:
   This member is internal

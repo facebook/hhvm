@@ -9,16 +9,13 @@ new module B {}
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 <<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-trait T1 {}
+internal trait T1 {}
 
 trait T2 {
-  // Error: cannot have __Internal members in public traits
-  <<__Internal>>
-  public int $x = 0;
-  // Error: cannot have __Internal members in public traits
-  <<__Internal>>
-  public function lol(): void {}
+  // Error: cannot have internal members in public traits
+  internal int $x = 0;
+  // Error: cannot have internal members in public traits
+  internal function lol(): void {}
 }
 
 // Using an internal trait
@@ -28,8 +25,7 @@ class A {
 }
 // Leaking internal types in public trait
 
-<<__Internal>>
-class D {}
+internal class D {}
 
 trait T3 {
   public function f(D $d): void {} // can't use D here

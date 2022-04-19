@@ -39,12 +39,12 @@ and fun_decl (ctx : Provider_context.t) (f : Nast.fun_def) : Typing_defs.fun_elt
   let module_ =
     Naming_attributes_params.get_module_attribute f.fd_file_attributes
   in
-  (* Support both attribute and fd_internal for now, will be removed in next diff once typechecker changes are made *)
-  let is_internal =
-    Naming_attributes_params.has_internal_attribute f.fd_fun.f_user_attributes
-    || f.fd_internal
-  in
-  fun_decl_in_env env ~is_lambda:false ~is_internal f.fd_fun module_
+  fun_decl_in_env
+    env
+    ~is_lambda:false
+    ~is_internal:f.fd_internal
+    f.fd_fun
+    module_
 
 and lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
     Typing_defs.fun_elt =

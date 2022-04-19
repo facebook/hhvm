@@ -16,8 +16,8 @@ let has_internal_attribute =
   in
   List.exists ~f
 
-let check ~attributes ~module_ ~pos =
-  if has_internal_attribute attributes && Option.is_none module_ then
+let check ~is_internal ~module_ ~pos =
+  if is_internal && Option.is_none module_ then
     Errors.add_nast_check_error @@ Nast_check_error.Internal_outside_module pos
 
 let handler =
@@ -26,25 +26,25 @@ let handler =
 
     method! at_class_ env c =
       check
-        ~attributes:c.c_user_attributes
+        ~is_internal:(c.c_internal || has_internal_attribute c.c_user_attributes)
         ~module_:env.Nast_check_env.module_
         ~pos:c.c_span
 
     method! at_method_ env m =
       check
-        ~attributes:m.m_user_attributes
+        ~is_internal:(Aast.equal_visibility m.m_visibility Aast.Internal)
         ~module_:env.Nast_check_env.module_
         ~pos:m.m_span
 
-    method! at_fun_ env f =
+    method! at_fun_def env fd =
       check
-        ~attributes:f.f_user_attributes
+        ~is_internal:fd.fd_internal
         ~module_:env.Nast_check_env.module_
-        ~pos:f.f_span
+        ~pos:fd.fd_fun.f_span
 
     method! at_typedef env t =
       check
-        ~attributes:t.t_user_attributes
+        ~is_internal:(t.t_internal || has_internal_attribute t.t_user_attributes)
         ~module_:env.Nast_check_env.module_
         ~pos:t.t_span
   end

@@ -128,6 +128,7 @@ void usage() {
     "translations by density (count / size) of the selected perf event\n"
     "    -d <DIRECTORY>  : looks for dump file in <DIRECTORY> "
     "(default: /tmp)\n"
+    "    -F <FUNC_NAME>  : prints the translations for the given function\n"
     "    -f <FUNC_ID>    : prints the translations for the given "
     "<FUNC_ID>, sorted by start offset\n"
     "    -g <FUNC_ID>    : prints the CFG among the translations for the "

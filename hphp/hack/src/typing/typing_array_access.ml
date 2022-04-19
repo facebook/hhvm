@@ -30,7 +30,8 @@ let err_witness env p = TUtils.terr env (Reason.Rwitness p)
 let error_array env p ty =
   Errors.add_typing_error
     Typing_error.(
-      primary
+      with_code ~code:Error_code.IndexTypeMismatch
+      @@ primary
       @@ Primary.Array_access
            {
              ctxt = `read;

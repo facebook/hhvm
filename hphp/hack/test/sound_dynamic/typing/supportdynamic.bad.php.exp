@@ -1,5 +1,5 @@
 File "supportdynamic.bad.php", line 4, characters 3-8:
-This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4005])
+This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4324])
   File "supportdynamic.hhi", line 7, characters 36-42:
   Definition is here
 File "supportdynamic.bad.php", line 5, characters 3-11:

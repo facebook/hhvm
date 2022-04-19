@@ -1,4 +1,4 @@
 File "accessing_nonnull_as_array.php", line 4, characters 8-16:
-This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4005])
-File "accessing_nonnull_as_array.php", line 3, characters 12-18:
-Definition is here
+This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4324])
+  File "accessing_nonnull_as_array.php", line 3, characters 12-18:
+  Definition is here

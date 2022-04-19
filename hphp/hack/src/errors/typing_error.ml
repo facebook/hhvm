@@ -2790,7 +2790,7 @@ module Primary = struct
     and code =
       Error_code.(
         match ctxt with
-        | `read -> InvalidArrayKeyRead
+        | `read -> IndexTypeMismatch
         | `write -> InvalidArrayKeyWrite)
     in
     (code, claim, reasons, [])
@@ -2804,7 +2804,7 @@ module Primary = struct
           (value_pos, String.capitalize value_ty_name ^ " is not an arraykey");
         ]
     and claim = lazy (pos, "Keyset values must be arraykeys") in
-    (Error_code.InvalidKeysetValue, claim, reasons, [])
+    (Error_code.IndexTypeMismatch, claim, reasons, [])
 
   let invalid_set_value
       pos container_pos container_ty_name value_pos value_ty_name =
@@ -2815,7 +2815,7 @@ module Primary = struct
           (value_pos, String.capitalize value_ty_name ^ " is not an arraykey");
         ]
     and claim = lazy (pos, "Set values must be arraykeys") in
-    (Error_code.InvalidKeysetValue, claim, reasons, [])
+    (Error_code.IndexTypeMismatch, claim, reasons, [])
 
   let hkt_alias_with_implicit_constraints
       pos

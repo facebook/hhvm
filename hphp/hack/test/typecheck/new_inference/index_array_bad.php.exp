@@ -21,7 +21,7 @@ Invalid index type for this dict (Typing[4449])
   File "index_array_bad.php", line 16, characters 12-14:
   It is incompatible with a string
 File "index_array_bad.php", line 18, characters 9-18:
-This value is not a valid key type for this container (Typing[4298])
+This value is not a valid key type for this container (Typing[4324])
   File "index_array_bad.php", line 8, characters 3-18:
   This container is an object of type dict<mixed, bool>
   File "index_array_bad.php", line 18, characters 13-17:
@@ -39,19 +39,19 @@ Invalid index type for this ConstMap (Typing[4324])
   File "index_array_bad.php", line 20, characters 13-15:
   It is incompatible with a string
 File "index_array_bad.php", line 22, characters 8-14:
-This value is not a valid key type for this container (Typing[4298])
+This value is not a valid key type for this container (Typing[4324])
   File "index_array_bad.php", line 9, characters 3-28:
   This container is an object of type KeyedContainer<int, string>
   File "index_array_bad.php", line 12, characters 3-7:
   A mixed value cannot be used as a key for an object of type KeyedContainer<int, string>
 File "index_array_bad.php", line 23, characters 8-14:
-This value is not a valid key type for this container (Typing[4298])
+This value is not a valid key type for this container (Typing[4324])
   File "index_array_bad.php", line 10, characters 3-20:
   This container is an object of type ConstMap<int, bool>
   File "index_array_bad.php", line 12, characters 3-7:
   A mixed value cannot be used as a key for an object of type ConstMap<int, bool>
 File "index_array_bad.php", line 24, characters 8-14:
-This value is not a valid key type for this container (Typing[4298])
+This value is not a valid key type for this container (Typing[4324])
   File "index_array_bad.php", line 11, characters 3-20:
   This container is an object of type ImmMap<int, mixed>
   File "index_array_bad.php", line 12, characters 3-7:

@@ -64,10 +64,6 @@ pub struct Opts {
 
 #[derive(StructOpt, Clone, Debug)]
 pub(crate) struct SingleFileOpts {
-    /// Dump symbol ref sections of HHAS (ignored, always true)
-    #[structopt(long = "dump-symbol-refs")]
-    pub(crate) _dump_symbol_refs: bool,
-
     /// Disable toplevel definition elaboration
     #[structopt(long)]
     pub(crate) disable_toplevel_elaboration: bool,

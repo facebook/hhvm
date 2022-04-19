@@ -140,7 +140,6 @@ let parse_options () =
   let output_file = ref None in
   let config_file = ref None in
   let input_file_list = ref None in
-  let ignore_dump_symbol_refs = ref false in
   let extract_facts = ref false in
   let dump_config = ref false in
   let log_stats = ref false in
@@ -180,9 +179,6 @@ let parse_options () =
         Arg.String (fun str -> input_file_list := Some str),
         " read a list of files (one per line) from the file `input-file-list'"
       );
-      ( "--dump-symbol-refs",
-        Arg.Set ignore_dump_symbol_refs,
-        " Dump symbol ref sections of HHAS" );
       ("--dump-config", Arg.Set dump_config, " Dump configuration settings");
       ( "--enable-logging-stats",
         Arg.Unit (fun () -> log_stats := true),

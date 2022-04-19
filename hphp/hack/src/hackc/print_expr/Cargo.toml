@@ -15,7 +15,6 @@ core_utils_rust = { path = "../../utils/core" }
 emit_type_hint = { path = "../emitter/cargo/emit_type_hint" }
 error = { path = "../error/cargo/error" }
 escaper = { path = "../../utils/escaper" }
-ffi = { path = "../../utils/ffi" }
 hhbc = { path = "../hhbc/cargo/hhbc" }
 hhbc_string_utils = { path = "../utils/cargo/hhbc_string_utils" }
 lazy_static = "1.0"

@@ -643,7 +643,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
 
     fn visit_expr(&mut self, context: &mut Context, p: &mut aast::Expr<(), ()>) -> Result<(), ()> {
         // Pipe expressions have their own recursion method due to their weird evaluation rules
-        if !self.is_typechecker || !p.2.is_pipe() {
+        if !p.2.is_pipe() {
             // recurse on inner members first, then assign to value
             p.recurse(context, self.object())?;
         }
@@ -684,17 +684,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 let (lid, left, right) = &mut **p;
                 // The only time the id number matters is for Dollardollar
                 let (_, dollardollar) = &lid.1;
-                if self.is_typechecker {
-                    self.visit_expr(context, left)?;
-                }
+                // Go left first, get the readonlyness, then go right
+                self.visit_expr(context, left)?;
                 let left_rty = rty_expr(context, left);
                 context.add_local(dollardollar, left_rty);
-                // Since pipe expressions are in reverse for evaluation,
-                // we need to recurse on the inner values again to check
-                // for readonlyness calls
-                if self.is_typechecker {
-                    self.visit_expr(context, right)?;
-                }
+                self.visit_expr(context, right)?;
             }
             _ => {}
         }

@@ -25,6 +25,7 @@ open Hh_prelude
 open Aast
 module MakeType = Typing_make_type
 module Reason = Typing_reason
+module Cls = Decl_provider.Class
 
 (* The context is a list of global variables. *)
 type ctx = { global_vars: string list ref }
@@ -43,43 +44,117 @@ let remove_vars_to_ctx ctx vars =
     List.filter !(ctx.global_vars) ~f:(fun v ->
         not (List.mem vars v ~equal:String.equal))
 
+let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
+  let open Typing_defs in
+  (* Given a list of types, find recurse on the first type that
+     has the property and return the result *)
+  let find_first_in_list ~seen tyl =
+    List.find_map
+      ~f:(fun ty ->
+        match grab_class_elts_from_ty ~static ~seen env ty prop_id with
+        | [] -> None
+        | tyl -> Some tyl)
+      tyl
+  in
+  match get_node ty with
+  | Tclass (id, _exact, _args) ->
+    let provider_ctx = Tast_env.get_ctx env in
+    let class_decl = Decl_provider.get_class provider_ctx (snd id) in
+    (match class_decl with
+    | Some class_decl ->
+      let prop =
+        if static then
+          Cls.get_sprop class_decl (snd prop_id)
+        else
+          Cls.get_prop class_decl (snd prop_id)
+      in
+      Option.to_list prop
+    | None -> [])
+  (* Accessing a property off of an intersection type
+     should involve exactly one kind of readonlyness, since for
+     the intersection type to exist, the property must be related
+     by some subtyping relationship anyways, and property readonlyness
+     is invariant. Thus we just grab the first one from the list where the prop exists. *)
+  | Tintersection [] -> []
+  | Tintersection tyl ->
+    find_first_in_list ~seen tyl |> Option.value ~default:[]
+  (* A union type is more interesting, where we must return all possible cases
+     and be conservative in our use case. *)
+  | Tunion tyl ->
+    List.concat_map
+      ~f:(fun ty -> grab_class_elts_from_ty ~static ~seen env ty prop_id)
+      tyl
+  (* Generic types can be treated similarly to an intersection type
+     where we find the first prop that works from the upper bounds *)
+  | Tgeneric (name, tyargs) ->
+    (* Avoid circular generics with a set *)
+    if SSet.mem name seen then
+      []
+    else
+      let new_seen = SSet.add name seen in
+      let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
+      find_first_in_list ~seen:new_seen (Typing_set.elements upper_bounds)
+      |> Option.value ~default:[]
+  | Tdependent (_, ty) ->
+    (* Dependent types have an upper bound that's a class or generic *)
+    grab_class_elts_from_ty ~static ~seen env ty prop_id
+  | Toption ty ->
+    (* If it's nullable, take the *)
+    grab_class_elts_from_ty ~static ~seen env ty prop_id
+  | _ -> []
+
+(* Return a list of possible static prop elts given a class_get expression *)
+let get_static_prop_elts env class_id get =
+  let (ty, _, _) = class_id in
+  match get with
+  | CGstring prop_id -> grab_class_elts_from_ty ~static:true env ty prop_id
+  (* An expression is dynamic, so there's no way to tell the type generally *)
+  | CGexpr _ -> []
+
 (* Check if an expression is directly from a static variable or not,
   e.g. it returns true for Foo::$bar or (Foo::$bar)->prop. *)
-let rec is_expr_static (_, _, te) =
+let rec is_expr_static env (_, _, te) =
   match te with
-  | Class_get (_, _, Is_prop) -> true
-  | Obj_get (e, _, _, Is_prop) -> is_expr_static e
+  | Class_get (class_id, expr, Is_prop) ->
+    (* Ignore static variables annotated with <<__SafeGlobalVariable>> *)
+    let class_elts = get_static_prop_elts env class_id expr in
+    not (List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable)
+  | Obj_get (e, _, _, Is_prop) -> is_expr_static env e
   | _ -> false
 
 (* Given a context of global variables and an expression,
   check if the expression is global or not. *)
-let rec is_expr_global ctx (_, _, te) =
+let rec is_expr_global env ctx (_, _, te) =
   match te with
-  | Class_get (_, _, Is_prop) -> true
+  | Class_get (class_id, expr, Is_prop) ->
+    (* Ignore static variables annotated with <<__SafeGlobalVariable>> *)
+    let class_elts = get_static_prop_elts env class_id expr in
+    not (List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable)
   | Lvar (_, id) ->
     List.mem !(ctx.global_vars) (Local_id.to_string id) ~equal:String.equal
-  | Obj_get (e, _, _, Is_prop) -> is_expr_global ctx e
-  | Darray (_, tpl) -> List.exists tpl ~f:(fun (_, e) -> is_expr_global ctx e)
-  | Varray (_, el) -> List.exists el ~f:(fun e -> is_expr_global ctx e)
-  | Shape tpl -> List.exists tpl ~f:(fun (_, e) -> is_expr_global ctx e)
+  | Obj_get (e, _, _, Is_prop) -> is_expr_global env ctx e
+  | Darray (_, tpl) ->
+    List.exists tpl ~f:(fun (_, e) -> is_expr_global env ctx e)
+  | Varray (_, el) -> List.exists el ~f:(fun e -> is_expr_global env ctx e)
+  | Shape tpl -> List.exists tpl ~f:(fun (_, e) -> is_expr_global env ctx e)
   | ValCollection (_, _, el) ->
-    List.exists el ~f:(fun e -> is_expr_global ctx e)
+    List.exists el ~f:(fun e -> is_expr_global env ctx e)
   | KeyValCollection (_, _, fl) ->
-    List.exists fl ~f:(fun (_, e) -> is_expr_global ctx e)
-  | Array_get (e, _) -> is_expr_global ctx e
-  | Await e -> is_expr_global ctx e
-  | ReadonlyExpr e -> is_expr_global ctx e
-  | Tuple el -> List.exists el ~f:(fun e -> is_expr_global ctx e)
-  | List el -> List.exists el ~f:(fun e -> is_expr_global ctx e)
-  | Cast (_, e) -> is_expr_global ctx e
+    List.exists fl ~f:(fun (_, e) -> is_expr_global env ctx e)
+  | Array_get (e, _) -> is_expr_global env ctx e
+  | Await e -> is_expr_global env ctx e
+  | ReadonlyExpr e -> is_expr_global env ctx e
+  | Tuple el -> List.exists el ~f:(fun e -> is_expr_global env ctx e)
+  | List el -> List.exists el ~f:(fun e -> is_expr_global env ctx e)
+  | Cast (_, e) -> is_expr_global env ctx e
   | Eif (_, e1, e2) ->
     (match e1 with
-    | Some e -> is_expr_global ctx e
+    | Some e -> is_expr_global env ctx e
     | None -> false)
-    || is_expr_global ctx e2
-  | As (e, _, _) -> is_expr_global ctx e
-  | Upcast (e, _) -> is_expr_global ctx e
-  | Pair (_, e1, e2) -> is_expr_global ctx e1 || is_expr_global ctx e2
+    || is_expr_global env ctx e2
+  | As (e, _, _) -> is_expr_global env ctx e
+  | Upcast (e, _) -> is_expr_global env ctx e
+  | Pair (_, e1, e2) -> is_expr_global env ctx e1 || is_expr_global env ctx e2
   | Call (caller, _, _, _) ->
     let caller_ty = Tast.get_type caller in
     let open Typing_defs in
@@ -163,7 +238,8 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
     not (Typing_subtype.is_type_disjoint env ty union)
 
 let is_expr_global_and_mutable env ctx (tp, p, te) =
-  is_expr_global ctx (tp, p, te) && not (has_no_object_ref_ty env SSet.empty tp)
+  is_expr_global env ctx (tp, p, te)
+  && not (has_no_object_ref_ty env SSet.empty tp)
 
 (* Given an expression that appears on LHS of an assignment,
   this method gets the list of variables whose value may be assigned. *)
@@ -246,10 +322,10 @@ let visitor =
       | Binop (Ast_defs.Eq _, le, re) ->
         let () = self#on_expr (env, (ctx, fun_name)) re in
         (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
-        if is_expr_static le then
+        if is_expr_static env le then
           Errors.static_var_direct_write_error p fun_name
         else
-          let is_le_global = is_expr_global ctx le in
+          let is_le_global = is_expr_global env ctx le in
           let is_re_global_and_mutable =
             is_expr_global_and_mutable env ctx re
           in
@@ -269,9 +345,9 @@ let visitor =
         | Ast_defs.Upincr
         | Ast_defs.Updecr ->
           (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
-          if is_expr_static e then
+          if is_expr_static env e then
             Errors.static_var_direct_write_error p fun_name
-          else if has_global_write_access e && is_expr_global ctx e then
+          else if has_global_write_access e && is_expr_global env ctx e then
             Errors.global_var_write_error p fun_name
         | _ -> ())
       | Call (_, _, tpl, _) ->
@@ -279,7 +355,7 @@ let visitor =
         List.iter tpl ~f:(fun (pk, ((_, pos, _) as expr)) ->
             match pk with
             | Ast_defs.Pinout _ ->
-              if is_expr_global ctx expr then
+              if is_expr_global env ctx expr then
                 Errors.global_var_in_fun_call_error pos fun_name
             | Ast_defs.Pnormal ->
               if is_expr_global_and_mutable env ctx expr then

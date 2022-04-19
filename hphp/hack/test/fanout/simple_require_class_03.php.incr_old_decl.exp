@@ -6,4 +6,4 @@ a.php:9:12,23: Invalid return type (Typing[4110])
   b.php:4:26,31: But got `string`
 === fanout ===
 Type A
-Type D
+Type C

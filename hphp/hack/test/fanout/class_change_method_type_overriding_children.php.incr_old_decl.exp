@@ -6,5 +6,5 @@ b.php:3:19,21: The method `foo` is not compatible with the overridden method (Ty
   b.php:3:26,28: But got `int`
 === fanout ===
 Fun use_a_foo
+Type A
 Type B
-Type C

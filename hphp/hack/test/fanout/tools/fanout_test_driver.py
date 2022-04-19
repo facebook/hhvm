@@ -32,6 +32,8 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "--config",
     "use_direct_decl_parser=true",
     "--config",
+    "force_shallow_decl_fanout=true",
+    "--config",
     "num_local_workers=1",
     "--config",
     "max_workers=1",

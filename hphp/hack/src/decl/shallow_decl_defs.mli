@@ -21,6 +21,7 @@ module PropFlags : sig
   val get_needs_init  : t -> bool
   val get_php_std_lib : t -> bool
   val get_readonly    : t -> bool
+  val get_safe_global_variable: t -> bool
 
   val set_abstract    : bool -> t -> t
   val set_const       : bool -> t -> t
@@ -29,6 +30,7 @@ module PropFlags : sig
   val set_needs_init  : bool -> t -> t
   val set_php_std_lib : bool -> t -> t
   val set_readonly    : bool -> t -> t
+  val set_safe_global_variable: bool -> t -> t
 
   val make :
     abstract:bool ->
@@ -38,6 +40,7 @@ module PropFlags : sig
     needs_init:bool ->
     php_std_lib:bool ->
     readonly: bool ->
+    safe_global_variable: bool ->
     t
 end
 [@@ocamlformat "disable"]
@@ -154,6 +157,8 @@ val sp_needs_init : shallow_prop -> bool
 val sp_php_std_lib : shallow_prop -> bool
 
 val sp_readonly : shallow_prop -> bool
+
+val sp_safe_global_variable : shallow_prop -> bool
 
 val sm_abstract : shallow_method -> bool
 

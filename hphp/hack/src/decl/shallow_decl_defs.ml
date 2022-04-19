@@ -32,6 +32,7 @@ module PropFlags = struct
   let needs_init_bit  = 1 lsl 4
   let php_std_lib_bit = 1 lsl 5
   let readonly_bit    = 1 lsl 6
+  let safe_global_variable_bit = 1 lsl 7
 
   let get_abstract    = is_set abstract_bit
   let get_const       = is_set const_bit
@@ -40,6 +41,7 @@ module PropFlags = struct
   let get_needs_init  = is_set needs_init_bit
   let get_php_std_lib = is_set php_std_lib_bit
   let get_readonly = is_set readonly_bit
+  let get_safe_global_variable = is_set safe_global_variable_bit
 
   let set_abstract    = set_bit abstract_bit
   let set_const       = set_bit const_bit
@@ -48,6 +50,7 @@ module PropFlags = struct
   let set_needs_init  = set_bit needs_init_bit
   let set_php_std_lib = set_bit php_std_lib_bit
   let set_readonly    = set_bit readonly_bit
+  let set_safe_global_variable = set_bit safe_global_variable_bit
 
   let make
       ~abstract
@@ -57,6 +60,7 @@ module PropFlags = struct
       ~needs_init
       ~php_std_lib
       ~readonly
+      ~safe_global_variable
       =
     empty
     |> set_abstract abstract
@@ -66,6 +70,7 @@ module PropFlags = struct
     |> set_needs_init needs_init
     |> set_php_std_lib php_std_lib
     |> set_readonly readonly
+    |> set_safe_global_variable safe_global_variable
 
   let pp fmt t =
     if t = empty then
@@ -85,6 +90,7 @@ module PropFlags = struct
       if get_needs_init t then print "needs_init";
       if get_php_std_lib t then print "php_std_lib";
       if get_readonly t then print "readonly";
+      if get_safe_global_variable t then print "safe_global_variable";
       Format.fprintf fmt "@,@]"
     )
 
@@ -247,6 +253,8 @@ let sp_needs_init sp = PropFlags.get_needs_init sp.sp_flags
 let sp_php_std_lib sp = PropFlags.get_php_std_lib sp.sp_flags
 
 let sp_readonly sp = PropFlags.get_readonly sp.sp_flags
+
+let sp_safe_global_variable sp = PropFlags.get_safe_global_variable sp.sp_flags
 
 let sm_abstract sm = MethodFlags.get_abstract sm.sm_flags
 

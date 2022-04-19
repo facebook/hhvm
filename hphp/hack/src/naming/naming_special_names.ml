@@ -352,6 +352,12 @@ module UserAttributes = struct
 
   let uaNoFlatten = "__NoFlatten"
 
+  (* <<__SafeGlobalVariable>> marks global variables as safe from mutations.
+     This attribute merely ensures that the global_write_check does NOT raise
+     errors/warnings from writing to the annotated global variable, and it
+     has NO runtime/semantic implication. *)
+  let uaSafeGlobalVariable = "__SafeGlobalVariable"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -578,6 +584,11 @@ module UserAttributes = struct
               "Allows a trait to be `use`d more than once. "
               ^ "This is useful in large class hierarchies, where you can end up using the same trait on via multiple paths, producing 'diamond inheritance'."
               ^ "\n\nThis requires methods to unambiguous: each method definition must occur in exactly one trait."
+            ) );
+          ( uaSafeGlobalVariable,
+            ( [staticProperty],
+              "Marks this global variable as safe from mutation."
+              ^ " This ensures the global_write_check does NOT raise errors/warnings from writing to this global variable."
             ) );
         ])
 

@@ -86,6 +86,7 @@ let shallow_method_to_class_elt child_class mname mro subst meth : class_elt =
         ~readonly_prop:false
         ~support_dynamic_type:(sm_support_dynamic_type meth)
         ~needs_init:false
+        ~safe_global_variable:false
       (* The readonliness of the method is on the type *);
   }
 
@@ -141,7 +142,8 @@ let shallow_prop_to_telt child_class mname mro subst prop : tagged_elt =
             ~dynamicallycallable:false
             ~readonly_prop:(sp_readonly prop)
             ~support_dynamic_type:false
-            ~needs_init:false;
+            ~needs_init:false
+            ~safe_global_variable:(sp_safe_global_variable prop);
       };
   }
 

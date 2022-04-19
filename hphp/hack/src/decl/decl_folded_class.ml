@@ -330,7 +330,8 @@ let build_constructor
           ~dynamicallycallable:false
           ~readonly_prop:false
           ~support_dynamic_type:false
-          ~needs_init:false;
+          ~needs_init:false
+          ~safe_global_variable:false;
       elt_visibility = vis;
       elt_origin = class_name;
       elt_deprecated = method_.sm_deprecated;
@@ -458,7 +459,8 @@ let prop_decl_eager
           ~dynamicallycallable:false
           ~readonly_prop:(sp_readonly sp)
           ~support_dynamic_type:false
-          ~needs_init:(sp_needs_init sp);
+          ~needs_init:(sp_needs_init sp)
+          ~safe_global_variable:false;
       elt_visibility = vis;
       elt_origin;
       elt_deprecated = None;
@@ -508,7 +510,8 @@ let static_prop_decl_eager
           ~dynamicallycallable:false
           ~readonly_prop:(sp_readonly sp)
           ~support_dynamic_type:false
-          ~needs_init:false;
+          ~needs_init:false
+          ~safe_global_variable:(sp_safe_global_variable sp);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
@@ -670,7 +673,8 @@ let method_decl_eager
           ~dynamicallycallable:(sm_dynamicallycallable m)
           ~readonly_prop:false
           ~support_dynamic_type
-          ~needs_init:false;
+          ~needs_init:false
+          ~safe_global_variable:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;

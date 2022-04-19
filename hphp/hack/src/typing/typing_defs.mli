@@ -432,6 +432,8 @@ val get_ce_support_dynamic_type : class_elt -> bool
 
 val get_ce_xhp_attr : class_elt -> xhp_attr option
 
+val get_ce_safe_global_variable : class_elt -> bool
+
 val make_ce_flags :
   xhp_attr:xhp_attr option ->
   abstract:bool ->
@@ -445,6 +447,7 @@ val make_ce_flags :
   readonly_prop:bool ->
   support_dynamic_type:bool ->
   needs_init:bool ->
+  safe_global_variable:bool ->
   Typing_defs_flags.ClassElt.t
 
 val class_elt_is_private_not_lsb : class_elt -> bool

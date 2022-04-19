@@ -1223,6 +1223,9 @@ let get_ce_support_dynamic_type ce = ClassElt.supports_dynamic_type ce.ce_flags
 
 let get_ce_xhp_attr ce = Typing_defs_flags.ClassElt.get_xhp_attr ce.ce_flags
 
+let get_ce_safe_global_variable ce =
+  ClassElt.is_safe_global_variable ce.ce_flags
+
 let make_ce_flags = Typing_defs_flags.ClassElt.make
 
 (** Return true if the element is private and not marked with the __LSB

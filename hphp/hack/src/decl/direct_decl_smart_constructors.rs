@@ -1011,6 +1011,7 @@ struct Attributes<'a> {
     support_dynamic_type: bool,
     module: Option<Id<'a>>,
     internal: bool,
+    safe_global_variable: bool,
 }
 
 impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
@@ -1400,6 +1401,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             support_dynamic_type: false,
             module: self.module,
             internal: false,
+            safe_global_variable: false,
         };
 
         let nodes = match node {
@@ -1487,6 +1489,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     }
                     "__Internal" => {
                         attributes.internal = true;
+                    }
+                    "__SafeGlobalVariable" => {
+                        attributes.safe_global_variable = true;
                     }
                     _ => {}
                 }
@@ -4097,6 +4102,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     flags.set(PropFlags::ABSTRACT, modifiers.is_abstract);
                     flags.set(PropFlags::READONLY, modifiers.is_readonly);
                     flags.set(PropFlags::PHP_STD_LIB, attributes.php_std_lib);
+                    flags.set(
+                        PropFlags::SAFE_GLOBAL_VARIABLE,
+                        attributes.safe_global_variable,
+                    );
                     Some(ShallowProp {
                         xhp_attr: None,
                         name: (pos, name),

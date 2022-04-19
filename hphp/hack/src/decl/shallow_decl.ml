@@ -203,7 +203,8 @@ let prop env cv =
         ~needs_init:(Option.is_none cv.cv_expr)
         ~abstract:cv.cv_abstract
         ~php_std_lib
-        ~readonly:cv.cv_readonly;
+        ~readonly:cv.cv_readonly
+        ~safe_global_variable:false;
   }
 
 and static_prop env cv =
@@ -222,6 +223,9 @@ and static_prop env cv =
   let php_std_lib =
     Attrs.mem SN.UserAttributes.uaPHPStdLib cv.cv_user_attributes
   in
+  let safe_global_variable =
+    Attrs.mem SN.UserAttributes.uaSafeGlobalVariable cv.cv_user_attributes
+  in
   let vis = make_visibility cv.cv_user_attributes cv.cv_visibility in
   {
     sp_name = (cv_pos, id);
@@ -236,7 +240,8 @@ and static_prop env cv =
         ~needs_init:(Option.is_none cv.cv_expr)
         ~abstract:cv.cv_abstract
         ~php_std_lib
-        ~readonly:cv.cv_readonly;
+        ~readonly:cv.cv_readonly
+        ~safe_global_variable;
   }
 
 let method_type ~support_dynamic_type env m =

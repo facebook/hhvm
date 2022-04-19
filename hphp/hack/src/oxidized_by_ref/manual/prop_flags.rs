@@ -18,6 +18,7 @@ bitflags! {
         const NEEDS_INIT  = 1 << 4;
         const PHP_STD_LIB = 1 << 5;
         const READONLY    = 1 << 6;
+        const SAFE_GLOBAL_VARIABLE = 1 << 7;
     }
 }
 
@@ -39,6 +40,9 @@ impl PropFlags {
     }
     pub fn is_lsb(&self) -> bool {
         self.contains(Self::LSB)
+    }
+    pub fn is_safe_global_variable(&self) -> bool {
+        self.contains(Self::SAFE_GLOBAL_VARIABLE)
     }
 }
 

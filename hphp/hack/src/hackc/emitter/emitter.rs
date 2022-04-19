@@ -3,20 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{IterGen, LabelGen, LocalGen};
+use crate::{ClassExpr, IterGen, LabelGen, LocalGen};
 use adata_state::AdataState;
 use decl_provider::{DeclProvider, Result};
-use ffi::{Slice, Str};
+use ffi::{Pair, Slice, Str};
 use global_state::GlobalState;
 use hash::IndexSet;
+use hhbc::hhas_body::HhasBodyEnv;
 use hhbc::{
     hhas_symbol_refs::{HhasSymbolRefs, IncludePath, IncludePathSet},
     ClassName, ConstName, FunctionName, Local,
 };
 use options::Options;
+use oxidized::{ast, ast_defs, pos::Pos};
 use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
 use statement_state::StatementState;
-use std::collections::BTreeSet;
+use std::{borrow::Cow, collections::BTreeSet};
 
 #[derive(Debug)]
 pub struct Emitter<'arena, 'decl> {
@@ -216,6 +218,49 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     pub fn finish_symbol_refs(&mut self) -> HhasSymbolRefs<'arena> {
         let state = std::mem::take(&mut self.symbol_refs_state);
         state.to_hhas(self.alloc)
+    }
+}
+
+impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> {
+    fn resolve<'a>(&self, env: Option<&'a HhasBodyEnv<'_>>, id: &'a str) -> Cow<'a, str> {
+        let class_expr = match env {
+            None => ClassExpr::expr_to_class_expr_(
+                self,
+                true,
+                true,
+                None,
+                None,
+                ast::Expr(
+                    (),
+                    Pos::make_none(),
+                    ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),
+                ),
+            ),
+            Some(body_env) => ClassExpr::expr_to_class_expr_(
+                self,
+                true,
+                true,
+                body_env
+                    .class_info
+                    .as_ref()
+                    .map(|Pair(k, s)| (k.clone(), s.unsafe_as_str()))
+                    .into(),
+                body_env
+                    .parent_name
+                    .clone()
+                    .map(|s| s.unsafe_as_str().to_owned())
+                    .into(),
+                ast::Expr(
+                    (),
+                    Pos::make_none(),
+                    ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),
+                ),
+            ),
+        };
+        match class_expr {
+            ClassExpr::Id(ast_defs::Id(_, name)) => Cow::Owned(name),
+            _ => Cow::Borrowed(id),
+        }
     }
 }
 

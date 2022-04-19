@@ -10,4 +10,5 @@ mod write;
 
 pub use context::Context;
 pub use print::{expr_to_string_lossy, external_print_expr as print_expr, ExprEnv};
+pub use special_class_resolver::SpecialClassResolver;
 pub use write::Error;

@@ -8,10 +8,9 @@ mod try_finally_rewriter;
 
 use ast_scope::{Scope, ScopeItem};
 use bitflags::bitflags;
-use class_expr::ClassExpr;
 use emit_pos::emit_pos;
 use emit_statement::emit_final_stmts;
-use env::{emitter::Emitter, Env};
+use env::{emitter::Emitter, ClassExpr, Env};
 use error::{Error, Result};
 use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 use hash::HashSet;

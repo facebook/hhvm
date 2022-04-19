@@ -74,7 +74,6 @@ members = [
     "src/hackc/hhbc/cargo/hhbc",
     "src/hackc/ffi_bridge",
     "src/hackc/emitter/cargo/adata_state",
-    "src/hackc/emitter/cargo/class_expr",
     "src/hackc/emitter/cargo/constant_folder",
     "src/hackc/emitter/cargo/scope",
     "src/hackc/hhvm_cxx/hhvm_hhbc_defs",

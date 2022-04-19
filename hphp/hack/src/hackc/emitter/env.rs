@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+mod class_expr;
 pub mod emitter; // emitter is public API for mutating state
 mod iterator;
 pub mod jump_targets;
@@ -16,6 +17,7 @@ use hhbc::{IterId, Label, Local};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env::Env as NamespaceEnv};
 
+pub use class_expr::ClassExpr;
 pub use iterator::*;
 pub use label::*;
 pub use local::*;

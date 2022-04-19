@@ -2,8 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use class_expr::ClassExpr;
-use env::emitter::Emitter;
+use env::{emitter::Emitter, ClassExpr};
 use ffi::{Pair, Str};
 use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;

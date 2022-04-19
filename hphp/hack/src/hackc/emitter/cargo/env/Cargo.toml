@@ -17,10 +17,13 @@ ffi = { path = "../../../../utils/ffi" }
 global_state = { path = "../global_state" }
 hash = { path = "../../../../utils/hash" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
+hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
+instruction_sequence = { path = "../instruction_sequence" }
 naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
+print_expr = { path = "../../../print_expr" }
 statement_state = { path = "../statement_state" }

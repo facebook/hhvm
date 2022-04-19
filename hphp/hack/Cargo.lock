@@ -402,19 +402,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "class_expr"
-version = "0.0.0"
-dependencies = [
- "ast_scope",
- "env",
- "hhbc",
- "hhbc_string_utils",
- "instruction_sequence",
- "naming_special_names_rust",
- "oxidized",
-]
-
-[[package]]
 name = "closure_convert"
 version = "0.0.0"
 dependencies = [
@@ -552,7 +539,6 @@ version = "0.0.0"
 dependencies = [
  "ast_scope",
  "bumpalo",
- "class_expr",
  "env",
  "ffi",
  "hhbc",
@@ -993,7 +979,6 @@ dependencies = [
  "ast_scope",
  "bitflags",
  "bumpalo",
- "class_expr",
  "decl_provider",
  "emit_expression",
  "emit_fatal",
@@ -1078,7 +1063,6 @@ version = "0.0.0"
 dependencies = [
  "bstr",
  "bumpalo",
- "class_expr",
  "constant_folder",
  "emit_adata",
  "emit_fatal",
@@ -1402,12 +1386,15 @@ dependencies = [
  "global_state",
  "hash",
  "hhbc",
+ "hhbc_string_utils",
  "indexmap",
+ "instruction_sequence",
  "naming_special_names_rust",
  "ocamlrep",
  "options",
  "oxidized",
  "oxidized_by_ref",
+ "print_expr",
  "statement_state",
 ]
 
@@ -2734,10 +2721,8 @@ dependencies = [
  "anyhow",
  "bstr",
  "bumpalo",
- "class_expr",
  "core_utils_rust",
  "emit_type_hint",
- "env",
  "error",
  "escaper",
  "ffi",

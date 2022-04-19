@@ -3,9 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use class_expr::ClassExpr;
 use emit_pos::{emit_pos, emit_pos_then};
-use env::{emitter::Emitter, Env, Flags as EnvFlags};
+use env::{emitter::Emitter, ClassExpr, Env, Flags as EnvFlags};
 use error::{Error, Result};
 use ffi::{Slice, Str};
 use hash::HashSet;

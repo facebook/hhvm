@@ -11,10 +11,8 @@ path = "lib.rs"
 anyhow = "1.0.56"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
-class_expr = { path = "../emitter/cargo/class_expr" }
 core_utils_rust = { path = "../../utils/core" }
 emit_type_hint = { path = "../emitter/cargo/emit_type_hint" }
-env = { path = "../emitter/cargo/env" }
 error = { path = "../error/cargo/error" }
 escaper = { path = "../../utils/escaper" }
 ffi = { path = "../../utils/ffi" }

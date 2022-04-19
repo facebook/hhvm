@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<da5b40d5b556a7cd49a87c438a9e6770>>
+// @generated SignedSource<<fd3f2ef3c163da76142a81325166981a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -57,8 +57,6 @@ arena_deserializer::impl_deserialize_in_arena!(Lid<'arena>);
 pub type Sid<'a> = ast_defs::Id<'a>;
 
 pub type ClassName<'a> = Sid<'a>;
-
-pub use oxidized::aast_defs::IsReified;
 
 pub use oxidized::aast_defs::ImportFlavor;
 

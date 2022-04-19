@@ -45,8 +45,6 @@ and sid = Ast_defs.id
 
 and class_name = sid
 
-and is_reified = bool
-
 and import_flavor =
   | Include
   | Require

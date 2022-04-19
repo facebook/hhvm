@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4db28c5db4d10955b62c65af517a94cd>>
+// @generated SignedSource<<c71598795c69fe040196f26f6dc8749a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -52,8 +52,6 @@ pub struct Lid(pub Pos, pub LocalId);
 pub type Sid = ast_defs::Id;
 
 pub type ClassName = Sid;
-
-pub type IsReified = bool;
 
 #[derive(
     Clone,

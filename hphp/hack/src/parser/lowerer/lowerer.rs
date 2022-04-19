@@ -5145,6 +5145,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 span: p_pos(node, env),
                 emit_id: None,
                 is_ctx: false,
+                // TODO(T116039119): Populate value with presence of internal attribute
+                internal: false,
             })])
         }
         ContextAliasDeclaration(c) => {
@@ -5199,6 +5201,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 span: p_pos(node, env),
                 emit_id: None,
                 is_ctx: true,
+                // TODO(T116039119): Populate value with presence of internal attribute
+                internal: false,
             })])
         }
         EnumDeclaration(c) => {

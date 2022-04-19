@@ -983,6 +983,7 @@ and ('ex, 'en) typedef = {
   t_span: pos;
   t_emit_id: emit_id option;
   t_is_ctx: bool;
+  t_internal: bool;
 }
 
 and ('ex, 'en) gconst = {

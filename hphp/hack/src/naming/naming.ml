@@ -2410,6 +2410,7 @@ let typedef ctx tdef =
     t_is_ctx = tdef.Aast.t_is_ctx;
     t_file_attributes =
       file_attributes ctx tdef.Aast.t_mode tdef.Aast.t_file_attributes;
+    t_internal = tdef.Aast.t_internal;
   }
 
 (**************************************************************************)

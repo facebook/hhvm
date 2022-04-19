@@ -381,6 +381,7 @@ let typedef tenv t =
     t_emit_id = _;
     t_is_ctx = _;
     t_file_attributes = _;
+    t_internal = _;
   } =
     t
   in

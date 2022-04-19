@@ -564,10 +564,6 @@ let check_override
     parent_class_elt
     class_elt
     on_error =
-  add_member_dep
-    env
-    class_
-    (member_kind, member_name, parent_class_elt.ce_origin, Cls.pos parent_class);
   (* If the class element is defined in the class that we're checking, then
    * don't wrap with the extra
    * "Class ... does not correctly implement all required members" message *)
@@ -1003,6 +999,10 @@ let check_class_against_parent_class_elt
       errors_if_not_overriden;
     }
     env =
+  add_member_dep
+    env
+    class_
+    (member_kind, member_name, parent_class_elt.ce_origin, Cls.pos parent_class);
   match get_member member_kind class_ member_name with
   | Some class_elt ->
     if String.equal parent_class_elt.ce_origin class_elt.ce_origin then (

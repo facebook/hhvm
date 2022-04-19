@@ -978,7 +978,7 @@ functor
         old_decl_missing_count;
       }
 
-    (** Merge the results of the two redecl phases. *)
+    (** Merge the results of the two redecl phases by unioning all that's to recheck and redecl together. *)
     let merge_redecl_results
         ~(fast : FileInfo.names Relative_path.Map.t)
         ~(fast_redecl_phase2_now : FileInfo.names Relative_path.Map.t)

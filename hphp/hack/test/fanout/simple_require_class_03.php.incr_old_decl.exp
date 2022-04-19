@@ -7,3 +7,4 @@ a.php:9:12,23: Invalid return type (Typing[4110])
 === fanout ===
 Type A
 Type C
+Type D

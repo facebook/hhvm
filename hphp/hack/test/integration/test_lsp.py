@@ -2204,7 +2204,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "builtin",
                             "documentation": {
                                 "kind": "markdown",
-                                "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                                "value": "A sequence of characters.",
                             },
                             "sortText": "string",
                             "insertTextFormat": 1,
@@ -2278,7 +2278,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "builtin",
                     "documentation": {
                         "kind": "markdown",
-                        "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                        "value": "A sequence of characters.",
                     },
                     "inlineDetail": "builtin",
                     "insertText": "string",
@@ -2292,7 +2292,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "builtin",
                     "documentation": {
                         "kind": "markdown",
-                        "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                        "value": "A sequence of characters.",
                     },
                     "inlineDetail": "builtin",
                     "insertText": "string",

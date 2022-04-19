@@ -120,3 +120,5 @@ val is_constructor : 'a t -> bool
 val is_class : 'a t -> bool
 
 val is_xhp_literal_attr : 'a t -> bool
+
+val built_in_type_hover : built_in_type_hint -> string

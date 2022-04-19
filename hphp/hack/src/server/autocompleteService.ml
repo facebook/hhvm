@@ -869,47 +869,24 @@ let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
       | _ -> ())
     (zip_truncate args ft.ft_params)
 
-let builtins =
+let builtin_type_hints =
   [
-    ( "string",
-      "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace ",
-      SI_Typedef,
-      [Actype] );
-    ("int", "A signed integer of at least 64bits.", SI_Typedef, [Actype]);
-    ( "float",
-      "Allows the use of real numbers, and includes the special values minus infinity, plus infinity, and Not-a-Number (NaN).",
-      SI_Typedef,
-      [Actype] );
-    ( "num",
-      "Can represent any `int` or `float` value, or an enum backed by `int`. To find out which, use the `is` operator.",
-      SI_Typedef,
-      [Actype] );
-    ("bool", "Is either the value `true` or `false`.", SI_Typedef, [Actype]);
-    ( "arraykey",
-      "Can represent any integer or string value.",
-      SI_Typedef,
-      [Actype] );
-    ( "void",
-      "Used to declare that a function does not return any value.",
-      SI_Typedef,
-      [Actype] );
-    ( "null",
-      "Has only one possible value, the value `null`. You can use the `null` type when refining with `is`.",
-      SI_Typedef,
-      [Actype] );
-    ( "mixed",
-      "Represents any value at all in Hack. We recommend you avoid using `mixed` whenever you can use a more specific type.",
-      SI_Typedef,
-      [Actype] );
-    ("nonnull", "Supports any value except `null`.", SI_Typedef, [Actype]);
-    ( "noreturn",
-      "Used to declare that a function either loops forever, throws an an error, or calls another `noreturn` function.",
-      SI_Typedef,
-      [Actype] );
-    ( "dynamic",
-      "Primarily used as a parameter type, where it's used to help capture dynamism in a more manageable manner than `mixed`.",
-      SI_Typedef,
-      [Actype] );
+    (SymbolOccurrence.BImixed, "mixed");
+    (SymbolOccurrence.BIdynamic, "dynamic");
+    (SymbolOccurrence.BInothing, "nothing");
+    (SymbolOccurrence.BInonnull, "nonnull");
+    (SymbolOccurrence.BIshape, "shape");
+    (SymbolOccurrence.BIprimitive Aast_defs.Tnull, "null");
+    (* TODO: only offer void in return positions. *)
+    (SymbolOccurrence.BIprimitive Aast_defs.Tvoid, "void");
+    (SymbolOccurrence.BIprimitive Aast_defs.Tint, "int");
+    (SymbolOccurrence.BIprimitive Aast_defs.Tbool, "bool");
+    (SymbolOccurrence.BIprimitive Aast_defs.Tfloat, "float");
+    (SymbolOccurrence.BIprimitive Aast_defs.Tstring, "string");
+    (SymbolOccurrence.BIprimitive Aast_defs.Tresource, "resource");
+    (SymbolOccurrence.BIprimitive Aast_defs.Tnum, "num");
+    (SymbolOccurrence.BIprimitive Aast_defs.Tarraykey, "arraykey");
+    (SymbolOccurrence.BIprimitive Aast_defs.Tnoreturn, "noreturn");
   ]
 
 (* Find global autocomplete results *)
@@ -1050,31 +1027,29 @@ let find_global_results
     autocomplete_is_complete := List.length !autocomplete_results < max_results;
 
     (* Add any builtins that match *)
-    builtins
-    |> List.filter ~f:(fun (_, _, _, allowed_actypes) ->
-           match completion_type with
-           | Some actype
-             when List.mem allowed_actypes actype ~equal:equal_autocomplete_type
-             ->
-             true
-           | None -> true
-           | _ -> false)
-    |> List.filter ~f:(fun (name, _, _, _) ->
-           String_utils.string_starts_with name query_text)
-    |> List.iter ~f:(fun (name, documentation, kind, _) ->
-           add_res
-             {
-               res_pos = absolute_none;
-               res_replace_pos = replace_pos_of_id id;
-               res_base_class = None;
-               res_ty = "builtin";
-               res_name = name;
-               res_fullname = name;
-               res_kind = kind;
-               func_details = None;
-               ranking_details = None;
-               res_documentation = Some documentation;
-             })
+    match completion_type with
+    | Some Actype
+    | None ->
+      builtin_type_hints
+      |> List.filter ~f:(fun (_, name) ->
+             String_utils.string_starts_with name query_text)
+      |> List.iter ~f:(fun (hint, name) ->
+             let kind = SI_Typedef in
+             let documentation = SymbolOccurrence.built_in_type_hover hint in
+             add_res
+               {
+                 res_pos = absolute_none;
+                 res_replace_pos = replace_pos_of_id id;
+                 res_base_class = None;
+                 res_ty = "builtin";
+                 res_name = name;
+                 res_fullname = name;
+                 res_kind = kind;
+                 func_details = None;
+                 ranking_details = None;
+                 res_documentation = Some documentation;
+               })
+    | _ -> ()
 
 let visitor ctx autocomplete_context sienv =
   object (self)

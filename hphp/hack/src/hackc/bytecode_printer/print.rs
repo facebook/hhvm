@@ -41,10 +41,7 @@ use ocaml_helper::escaped_bytes;
 use oxidized::ast_defs;
 use std::{
     borrow::Cow,
-    ffi::OsStr,
     io::{self, Result, Write},
-    os::unix::ffi::OsStrExt,
-    path::Path,
     write,
 };
 use write_bytes::write_bytes;
@@ -146,54 +143,11 @@ fn print_include_region(
     w: &mut dyn Write,
     includes: &Slice<'_, IncludePath<'_>>,
 ) -> Result<()> {
-    fn print_path(w: &mut dyn Write, p: &Path) -> Result<()> {
-        option(w, p.to_str(), |w, p: &str| write!(w, "\n  {}", p))
-    }
-    fn print_if_exists(w: &mut dyn Write, p: &Path) -> Result<()> {
-        if p.exists() { print_path(w, p) } else { Ok(()) }
-    }
     fn print_include(ctx: &Context<'_>, w: &mut dyn Write, inc: IncludePath<'_>) -> Result<()> {
-        let include_roots = ctx.include_roots;
-        let alloc = bumpalo::Bump::new();
-        match inc.into_doc_root_relative(&alloc, include_roots) {
-            IncludePath::Absolute(p) => print_if_exists(w, Path::new(OsStr::from_bytes(&p))),
-            IncludePath::SearchPathRelative(p) => {
-                let path_from_cur_dirname = ctx
-                    .path
-                    .and_then(|p| p.path().parent())
-                    .unwrap_or_else(|| Path::new(""))
-                    .join(OsStr::from_bytes(&p));
-                if path_from_cur_dirname.exists() {
-                    print_path(w, &path_from_cur_dirname)
-                } else {
-                    let search_paths = ctx.include_search_paths;
-                    for prefix in search_paths.iter() {
-                        let path = Path::new(OsStr::from_bytes(prefix)).join(OsStr::from_bytes(&p));
-                        if path.exists() {
-                            return print_path(w, &path);
-                        }
-                    }
-                    Ok(())
-                }
-            }
-            IncludePath::IncludeRootRelative(v, p) => {
-                if !p.is_empty() {
-                    include_roots.get(v.as_bstr()).iter().try_for_each(|ir| {
-                        let doc_root = ctx.doc_root;
-                        let resolved = Path::new(OsStr::from_bytes(doc_root))
-                            .join(OsStr::from_bytes(ir))
-                            .join(OsStr::from_bytes(&p));
-                        print_if_exists(w, &resolved)
-                    })?
-                }
-                Ok(())
-            }
-            IncludePath::DocRootRelative(p) => {
-                let doc_root = ctx.doc_root;
-                let resolved = Path::new(OsStr::from_bytes(doc_root)).join(OsStr::from_bytes(&p));
-                print_if_exists(w, &resolved)
-            }
+        if let Some(path) = ctx.include_processor.convert_include(inc, ctx.path) {
+            write!(w, "\n  {}", path.display())?;
         }
+        Ok(())
     }
     if !includes.is_empty() {
         w.write_all(b"\n.includes {")?;

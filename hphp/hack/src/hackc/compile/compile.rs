@@ -9,7 +9,7 @@ use aast_parser::{
     rust_aast_parser_types::{Env as AastEnv, ParserResult},
     AastParser, Error as AastError,
 };
-use anyhow::anyhow;
+use anyhow::{anyhow, Result};
 use bitflags::bitflags;
 use bytecode_printer::{print_unit, Context};
 use decl_provider::DeclProvider;
@@ -307,22 +307,18 @@ pub fn emit_fatal_unit<S: AsRef<str>>(
     env: &Env<S>,
     writer: &mut dyn std::io::Write,
     err_msg: &str,
-) -> anyhow::Result<()> {
-    let is_systemlib = env.flags.contains(EnvFlags::IS_SYSTEMLIB);
+) -> Result<()> {
     let opts =
         Options::from_configs(&env.config_jsons, &env.config_list).map_err(anyhow::Error::msg)?;
     let alloc = bumpalo::Bump::new();
-    let emitter = Emitter::new(
-        opts,
-        is_systemlib,
-        env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
-        &alloc,
-        None,
-    );
 
     let prog = emit_unit::emit_fatal_unit(&alloc, FatalOp::Parse, Pos::make_none(), err_msg);
     let prog = prog.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
-    print_unit(&Context::new(&emitter, Some(&env.filepath)), writer, &prog)?;
+    print_unit(
+        &Context::new(&opts, Some(&env.filepath), opts.array_provenance()),
+        writer,
+        &prog,
+    )?;
     Ok(())
 }
 
@@ -337,12 +333,18 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     native_env: Option<&NativeEnv<S>>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     mut profile: &mut Profile,
-) -> anyhow::Result<()> {
+) -> Result<()> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
     let unit = emit_unit_from_text(&mut emitter, env, source_text, profile)?;
+    let opts = emitter.into_options();
 
-    let (print_result, printing_t) =
-        time(|| print_unit(&Context::new(&emitter, Some(&env.filepath)), writer, &unit));
+    let (print_result, printing_t) = time(|| {
+        print_unit(
+            &Context::new(&opts, Some(&env.filepath), opts.array_provenance()),
+            writer,
+            &unit,
+        )
+    });
     print_result?;
     profile.printing_t = printing_t;
     profile.codegen_bytes = alloc.allocated_bytes() as i64;
@@ -392,7 +394,7 @@ pub fn unit_from_text<'arena, 'decl, S: AsRef<str>>(
     native_env: Option<&NativeEnv<S>>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     profile: &mut Profile,
-) -> anyhow::Result<HackCUnit<'arena>> {
+) -> Result<HackCUnit<'arena>> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
     emit_unit_from_text(&mut emitter, env, source_text, profile)
 }
@@ -402,12 +404,11 @@ pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
     native_env: Option<&NativeEnv<S>>,
     writer: &mut W,
     program: &HackCUnit<'_>,
-) -> anyhow::Result<()> {
-    let alloc = bumpalo::Bump::new();
-    let emitter = create_emitter(env, native_env, None, &alloc)?;
+) -> Result<()> {
+    let opts = construct_options(env, native_env)?;
     let (print_result, _) = time(|| {
         print_unit(
-            &Context::new(&emitter, Some(&env.filepath)),
+            &Context::new(&opts, Some(&env.filepath), opts.array_provenance()),
             writer,
             program,
         )
@@ -440,7 +441,7 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
     env: &Env<S>,
     source_text: SourceText<'_>,
     profile: &mut Profile,
-) -> anyhow::Result<HackCUnit<'arena>> {
+) -> Result<HackCUnit<'arena>> {
     profile.log_enabled = emitter.options().log_extern_compiler_perf();
 
     let namespace_env = RcOc::new(NamespaceEnv::empty(
@@ -502,17 +503,25 @@ fn emit_fatal<'arena>(
     emit_unit::emit_fatal_unit(alloc, op, pos, msg)
 }
 
-fn create_emitter<'arena, 'decl, S: AsRef<str>>(
+fn construct_options<S: AsRef<str>>(
     env: &Env<S>,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
-    alloc: &'arena bumpalo::Bump,
-) -> anyhow::Result<Emitter<'arena, 'decl>> {
+) -> Result<Options> {
     let opts = match native_env {
         None => Options::from_configs(&env.config_jsons, &env.config_list)
             .map_err(anyhow::Error::msg)?,
         Some(native_env) => NativeEnv::to_options(native_env),
     };
+    Ok(opts)
+}
+
+fn create_emitter<'arena, 'decl, S: AsRef<str>>(
+    env: &Env<S>,
+    native_env: Option<&NativeEnv<S>>,
+    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
+    alloc: &'arena bumpalo::Bump,
+) -> Result<Emitter<'arena, 'decl>> {
+    let opts = construct_options(env, native_env)?;
     Ok(Emitter::new(
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),

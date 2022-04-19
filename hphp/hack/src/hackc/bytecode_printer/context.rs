@@ -3,13 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use bstr::{BStr, BString, ByteSlice};
-use env::emitter::Emitter;
+use hhbc::hhas_symbol_refs::IncludePath;
 use oxidized::relative_path::RelativePath;
-use std::collections::BTreeMap;
 use std::{
     fmt,
     io::{Result, Write},
+    path::PathBuf,
 };
 
 /// Indent is an abstraction of indentation. Configurable indentation
@@ -40,35 +39,38 @@ impl fmt::Display for Indent {
     }
 }
 
+/// This trait is used by the bytecode printer to turn the IncludePaths in the
+/// SymbolRefs::includes into a PathBuf for printing.
+pub trait IncludeProcessor {
+    /// Turn an IncludePath into a PathBuf. If the resulting file doesn't exist
+    /// returns None.
+    fn convert_include<'a>(
+        &'a self,
+        include_path: IncludePath<'a>,
+        cur_path: Option<&'a RelativePath>,
+    ) -> Option<PathBuf>;
+}
+
 #[derive(Clone)]
 pub struct Context<'a> {
     pub(crate) path: Option<&'a RelativePath>,
 
     indent: Indent,
 
-    pub(crate) include_roots: &'a BTreeMap<BString, BString>,
-    pub(crate) include_search_paths: &'a [BString],
-    pub(crate) doc_root: &'a BStr,
+    pub(crate) include_processor: &'a dyn IncludeProcessor,
     pub(crate) array_provenance: bool,
 }
 
 impl<'a> Context<'a> {
     pub fn new<'arena, 'decl>(
-        emitter: &'a Emitter<'arena, 'decl>,
+        include_processor: &'a dyn IncludeProcessor,
         path: Option<&'a RelativePath>,
+        array_provenance: bool,
     ) -> Self {
-        let include_roots = emitter.options().hhvm.include_roots.get();
-        let include_search_paths = emitter.options().server.include_search_paths.get();
-        let doc_root = emitter.options().doc_root.get();
-        let array_provenance = emitter.options().array_provenance();
-
         Self {
             path,
             indent: Indent::new(),
-
-            include_roots,
-            include_search_paths,
-            doc_root: doc_root.as_bstr(),
+            include_processor,
             array_provenance,
         }
     }

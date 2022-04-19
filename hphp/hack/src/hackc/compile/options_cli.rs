@@ -9,8 +9,8 @@
 //! For options that don't parse as strings (excluding flags), this module
 //! defines to-JSON parse functions returned by [to_json(json_key)].
 
+use lazy_static::lazy_static;
 use serde_json::{json, value::Value as Json};
-
 use std::collections::HashMap;
 
 macro_rules! impl_CANON_BY_ALIAS {

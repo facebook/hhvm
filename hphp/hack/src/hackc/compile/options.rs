@@ -38,20 +38,21 @@
 
 mod options_cli;
 
-use options_serde::prefix_all;
-
-use lru::LruCache;
-
 use bitflags::bitflags;
-
-#[macro_use]
-extern crate lazy_static;
-
+use bstr::{BString, ByteSlice};
+use hhbc::hhas_symbol_refs::IncludePath;
+use lru::LruCache;
+use options_serde::prefix_all;
+use oxidized::relative_path::RelativePath;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::{json, value::Value as Json};
-
-use bstr::BString;
-use std::{cell::RefCell, collections::BTreeMap};
+use std::{
+    cell::RefCell,
+    collections::BTreeMap,
+    ffi::OsStr,
+    os::unix::ffi::OsStrExt,
+    path::{Path, PathBuf},
+};
 
 /// Provides uniform access to bitflags-generated structs in JSON SerDe
 trait PrefixedFlags:
@@ -427,6 +428,67 @@ impl Default for Options {
             server: Server::default(),
             // the rest is zeroed out (cannot do ..Default::default() as it'd be recursive)
             doc_root: Arg::new("".into()),
+        }
+    }
+}
+
+impl bytecode_printer::IncludeProcessor for Options {
+    fn convert_include<'a>(
+        &'a self,
+        include_path: IncludePath<'a>,
+        cur_path: Option<&'a RelativePath>,
+    ) -> Option<PathBuf> {
+        let alloc = bumpalo::Bump::new();
+        let include_roots = self.hhvm.include_roots.get();
+        let search_paths = self.server.include_search_paths.get();
+        let doc_root = self.doc_root.get().as_bstr();
+        match include_path.into_doc_root_relative(&alloc, include_roots) {
+            IncludePath::Absolute(p) => {
+                let path = Path::new(OsStr::from_bytes(&p));
+                if path.exists() {
+                    Some(path.to_owned())
+                } else {
+                    None
+                }
+            }
+            IncludePath::SearchPathRelative(p) => {
+                let path_from_cur_dirname = cur_path
+                    .and_then(|p| p.path().parent())
+                    .unwrap_or_else(|| Path::new(""))
+                    .join(OsStr::from_bytes(&p));
+                if path_from_cur_dirname.exists() {
+                    Some(path_from_cur_dirname)
+                } else {
+                    for prefix in search_paths.iter() {
+                        let path = Path::new(OsStr::from_bytes(prefix)).join(OsStr::from_bytes(&p));
+                        if path.exists() {
+                            return Some(path);
+                        }
+                    }
+                    None
+                }
+            }
+            IncludePath::IncludeRootRelative(v, p) => {
+                if !p.is_empty() {
+                    if let Some(ir) = include_roots.get(v.as_bstr()) {
+                        let resolved = Path::new(OsStr::from_bytes(doc_root))
+                            .join(OsStr::from_bytes(ir))
+                            .join(OsStr::from_bytes(&p));
+                        if resolved.exists() {
+                            return Some(resolved);
+                        }
+                    }
+                }
+                None
+            }
+            IncludePath::DocRootRelative(p) => {
+                let resolved = Path::new(OsStr::from_bytes(doc_root)).join(OsStr::from_bytes(&p));
+                if resolved.exists() {
+                    Some(resolved)
+                } else {
+                    None
+                }
+            }
         }
     }
 }

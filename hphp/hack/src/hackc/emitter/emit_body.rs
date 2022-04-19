@@ -402,22 +402,19 @@ pub fn make_body<'a, 'arena, 'decl>(
     // Pretty-print the DV initializer expression as a Hack source code string,
     // to make it available for reflection.
     params.iter_mut().for_each(|(p, default_value)| {
-        p.default_value = Maybe::from(
-            default_value
-                .as_ref()
-                .map(|(l, expr)| {
-                    use print_expr::{Context, ExprEnv};
-                    let ctx = Context::new(emitter);
-                    let expr_env = ExprEnv {
-                        codegen_env: body_env.as_ref(),
-                    };
-                    let mut buf = Vec::new();
-                    print_expr::print_expr(&ctx, &mut buf, &expr_env, expr)
-                        .map(|_| Pair(l.clone(), Str::from_vec(alloc, buf)))
-                        .ok()
-                })
-                .flatten(),
-        );
+        p.default_value = Maybe::from(default_value.as_ref().map(|(l, expr)| {
+            use print_expr::{Context, ExprEnv};
+            let ctx = Context::new(emitter);
+            let expr_env = ExprEnv {
+                codegen_env: body_env.as_ref(),
+            };
+            let mut buf = Vec::new();
+            let msg = print_expr::print_expr(&ctx, &mut buf, &expr_env, expr).map_or_else(
+                |e| Str::new_str(alloc, &e.to_string()),
+                |_| Str::from_vec(alloc, buf),
+            );
+            Pair(l.clone(), msg)
+        }));
     });
 
     // Now that we're done with this function, clear the named_local table.

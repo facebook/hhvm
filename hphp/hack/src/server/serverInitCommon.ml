@@ -47,7 +47,7 @@ let parsing
   end;
   let quick = lazy_parse in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let (fast, errorl, _failed_parsing) =
+  let (defs_per_file, errorl, _failed_parsing) =
     if genv.local_config.ServerLocalConfig.use_direct_decl_parser then
       if always_cache_asts then
         Ast_and_decl_service.go
@@ -81,7 +81,7 @@ let parsing
         ~trace
         env.popt
   in
-  let naming_table = Naming_table.update_many env.naming_table fast in
+  let naming_table = Naming_table.update_many env.naming_table defs_per_file in
   let hs = SharedMem.SMTelemetry.heap_size () in
   Stats.(stats.init_parsing_heap_size <- hs);
 

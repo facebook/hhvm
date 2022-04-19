@@ -30,14 +30,16 @@ module SearchServiceRunner = struct
         let x = Queue.dequeue_exn queue in
         iter (x :: acc) (n - 1)
     in
-    let fast = iter [] num_files in
-    let len = List.length fast in
+    let defs_per_file = iter [] num_files in
+    let len = List.length defs_per_file in
     if len = 0 then
       sienv
     else begin
       Hh_logger.log "UPDATE_SEARCH start";
       if len > 10 then ServerProgress.send_progress "indexing %d files" len;
-      let sienv = SymbolIndexCore.update_files ~ctx ~sienv ~paths:fast in
+      let sienv =
+        SymbolIndexCore.update_files ~ctx ~sienv ~paths:defs_per_file
+      in
       let telemetry =
         Telemetry.create ()
         |> Telemetry.int_ ~key:"files" ~value:len
@@ -82,9 +84,10 @@ module SearchServiceRunner = struct
     chunk_size genv = 0 && Option.is_none (ServerArgs.ai_mode genv.options)
 
   let update_fileinfo_map
-      (fast : Naming_table.t) ~(source : SearchUtils.file_source) : unit =
+      (defs_per_file : Naming_table.t) ~(source : SearchUtils.file_source) :
+      unit =
     let i = ref 0 in
-    Naming_table.iter fast ~f:(fun fn info ->
+    Naming_table.iter defs_per_file ~f:(fun fn info ->
         internal_ssr_update fn info ~source;
         i := !i + 1)
 end

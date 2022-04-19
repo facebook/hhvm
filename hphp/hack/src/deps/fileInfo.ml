@@ -255,12 +255,20 @@ let merge_names t_names1 t_names2 =
     n_modules = SSet.union n_modules t_names2.n_modules;
   }
 
-let to_string fast =
-  let funs = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.funs in
-  let classes = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.classes in
-  let typedefs = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.typedefs in
-  let consts = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.consts in
-  let modules = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.modules in
+let to_string defs_per_file =
+  let funs = List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.funs in
+  let classes =
+    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.classes
+  in
+  let typedefs =
+    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.typedefs
+  in
+  let consts =
+    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.consts
+  in
+  let modules =
+    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.modules
+  in
   [
     ("funs", funs);
     ("classes", classes);

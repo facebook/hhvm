@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open ServerCheckUtils
 open SearchServiceRunner
 open ServerEnv
 open Reordered_argument_collections
@@ -58,8 +57,8 @@ let use_direct_decl_parser (ctx : Provider_context.t) =
 let print_defs prefix defs =
   List.iter defs ~f:(fun (_, fname) -> Printf.printf "  %s %s\n" prefix fname)
 
-let print_fast_pos fast_pos =
-  SMap.iter fast_pos ~f:(fun x (funs, classes) ->
+let print_defs_per_file_pos defs_per_file_pos =
+  SMap.iter defs_per_file_pos ~f:(fun x (funs, classes) ->
       Printf.printf "File: %s\n" x;
       print_defs "Fun" funs;
       print_defs "Class" classes);
@@ -67,8 +66,8 @@ let print_fast_pos fast_pos =
   Out_channel.flush stdout;
   ()
 
-let print_fast fast =
-  SMap.iter fast ~f:(fun x (funs, classes) ->
+let print_fast defs_per_file =
+  SMap.iter defs_per_file ~f:(fun x (funs, classes) ->
       Printf.printf "File: %s\n" x;
       SSet.iter funs ~f:(Printf.printf "  Fun %s\n");
       SSet.iter classes ~f:(Printf.printf "  Class %s\n"));
@@ -94,9 +93,9 @@ let print_fast fast =
  *)
 (*****************************************************************************)
 
-let add_old_decls old_naming_table fast =
+let add_old_decls old_naming_table defs_per_file =
   Relative_path.Map.fold
-    fast
+    defs_per_file
     ~f:
       begin
         fun filename info_names acc ->
@@ -107,14 +106,14 @@ let add_old_decls old_naming_table fast =
           let info_names = FileInfo.merge_names old_info_names info_names in
           Relative_path.Map.add acc ~key:filename ~data:info_names
       end
-    ~init:fast
+    ~init:defs_per_file
 
 (*****************************************************************************)
 (* Removes the names that were defined in the files *)
 (*****************************************************************************)
 
-let remove_decls env fast_parsed =
-  Relative_path.Map.iter fast_parsed ~f:(fun fn _ ->
+let remove_decls env defs_per_file_parsed =
+  Relative_path.Map.iter defs_per_file_parsed ~f:(fun fn _ ->
       match Naming_table.get_file_info env.naming_table fn with
       | None -> ()
       | Some
@@ -216,10 +215,10 @@ let push_and_accumulate_errors :
   in
   (env, errors, time_errors_pushed)
 
-(** Remove files which failed parsing from [fast] files and
+(** Remove files which failed parsing from [defs_per_file] files and
     discard any previous errors they had in [omitted_phases] *)
 let wont_do_failed_parsing
-    fast ~stop_at_errors ~omitted_phases env failed_parsing =
+    defs_per_file ~stop_at_errors ~omitted_phases env failed_parsing =
   if stop_at_errors then
     let (env, time_first_erased) =
       List.fold
@@ -234,15 +233,15 @@ let wont_do_failed_parsing
           in
           (env, time_first_erased))
     in
-    let fast =
-      Relative_path.Set.filter fast ~f:(fun k ->
+    let defs_per_file =
+      Relative_path.Set.filter defs_per_file ~f:(fun k ->
           not
           @@ Relative_path.(
                Set.mem failed_parsing k && Set.mem env.editor_open_files k))
     in
-    (env, fast, time_first_erased)
+    (env, defs_per_file, time_first_erased)
   else
-    (env, fast, None)
+    (env, defs_per_file, None)
 
 let parsing genv env to_check cgroup_steps =
   let (ide_files, disk_files) =
@@ -272,7 +271,7 @@ let parsing genv env to_check cgroup_steps =
     MultiWorker.next genv.workers (Relative_path.Set.elements disk_files)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let (fast, errors, failed_parsing) =
+  let (defs_per_file, errors, failed_parsing) =
     CgroupProfiler.step_start_end cgroup_steps "parsing" @@ fun _cgroup_step ->
     if use_direct_decl_parser ctx then
       ( Direct_decl_service.go
@@ -295,7 +294,7 @@ let parsing genv env to_check cgroup_steps =
   in
 
   SearchServiceRunner.update_fileinfo_map
-    (Naming_table.create fast)
+    (Naming_table.create defs_per_file)
     ~source:SearchUtils.TypeChecker;
 
   (* During integration tests, we want to pretend that search is run
@@ -317,7 +316,7 @@ let parsing genv env to_check cgroup_steps =
     }
   in
 
-  (env, fast, errors, failed_parsing)
+  (env, defs_per_file, errors, failed_parsing)
 
 let diff_set_and_map_keys set map =
   Relative_path.Map.fold map ~init:set ~f:(fun k _ acc ->
@@ -357,11 +356,11 @@ module type CheckKindType = sig
   (* Returns a tuple: files to redecl now, files to redecl later *)
   val get_defs_to_redecl_phase2 :
     ServerEnv.genv ->
-    decl_defs:Naming_table.fast ->
+    decl_defs:Naming_table.defs_per_file ->
     naming_table:Naming_table.t ->
     to_redecl_phase2:Relative_path.Set.t ->
     env:ServerEnv.env ->
-    Naming_table.fast * Naming_table.fast
+    Naming_table.defs_per_file * Naming_table.defs_per_file
 
   val get_to_recheck2_approximation :
     to_redecl_phase2_deps:Typing_deps.DepSet.t ->
@@ -372,7 +371,7 @@ module type CheckKindType = sig
   (* Which files to typecheck, based on results of declaration phase *)
   val get_defs_to_recheck :
     reparsed:Relative_path.Set.t ->
-    phase_2_decl_defs:Naming_table.fast ->
+    phase_2_decl_defs:Naming_table.defs_per_file ->
     to_recheck:Relative_path.Set.t ->
     env:ServerEnv.env ->
     ctx:Provider_context.t ->
@@ -417,10 +416,22 @@ module FullCheckKind : CheckKindType = struct
 
   let get_defs_to_redecl_phase2
       genv ~decl_defs ~naming_table ~to_redecl_phase2 ~env =
-    let fast = extend_fast genv decl_defs naming_table to_redecl_phase2 in
+    let defs_per_file =
+      ServerCheckUtils.extend_defs_per_file
+        genv
+        decl_defs
+        naming_table
+        to_redecl_phase2
+    in
     (* Add decl fanout that was delayed by previous lazy checks to phase 2 *)
-    let fast = extend_fast genv fast naming_table env.needs_phase2_redecl in
-    (fast, Relative_path.Map.empty)
+    let defs_per_file =
+      ServerCheckUtils.extend_defs_per_file
+        genv
+        defs_per_file
+        naming_table
+        env.needs_phase2_redecl
+    in
+    (defs_per_file, Relative_path.Map.empty)
 
   let get_to_recheck2_approximation ~to_redecl_phase2_deps:_ ~env:_ ~ctx:_ =
     (* Full check is computing to_recheck2 set accurately, so there is no need
@@ -537,8 +548,16 @@ module LazyCheckKind : CheckKindType = struct
     let (to_redecl_phase2_now, to_redecl_phase2_later) =
       Relative_path.Set.partition (is_ide_file env) to_redecl_phase2
     in
-    ( extend_fast genv decl_defs naming_table to_redecl_phase2_now,
-      extend_fast genv decl_defs naming_table to_redecl_phase2_later )
+    ( ServerCheckUtils.extend_defs_per_file
+        genv
+        decl_defs
+        naming_table
+        to_redecl_phase2_now,
+      ServerCheckUtils.extend_defs_per_file
+        genv
+        decl_defs
+        naming_table
+        to_redecl_phase2_later )
 
   let get_related_files ctx dep =
     let deps_mode = Provider_context.get_deps_mode ctx in
@@ -651,9 +670,9 @@ functor
   (CheckKind : CheckKindType)
   ->
   struct
-    let get_defs fast =
+    let get_defs defs_per_file =
       Relative_path.Map.fold
-        fast
+        defs_per_file
         ~f:
           begin
             fun _ names1 names2 ->
@@ -731,7 +750,7 @@ functor
     type parsing_result = {
       parse_errors: Errors.t;
       failed_parsing: Relative_path.Set.t;
-      fast_parsed: FileInfo.t Relative_path.Map.t;
+      defs_per_file_parsed: FileInfo.t Relative_path.Map.t;
       time_errors_pushed: seconds_since_epoch option;
     }
 
@@ -742,7 +761,7 @@ functor
         ~(files_to_parse : Relative_path.Set.t)
         ~(cgroup_steps : CgroupProfiler.step_group) :
         ServerEnv.env * parsing_result =
-      let (env, fast_parsed, errorl, failed_parsing) =
+      let (env, defs_per_file_parsed, errorl, failed_parsing) =
         parsing genv env files_to_parse cgroup_steps
       in
       let (env, errors, time_errors_pushed) =
@@ -757,7 +776,7 @@ functor
         {
           parse_errors = errors;
           failed_parsing;
-          fast_parsed;
+          defs_per_file_parsed;
           time_errors_pushed;
         } )
 
@@ -783,18 +802,18 @@ functor
     let do_naming
         (env : env)
         (ctx : Provider_context.t)
-        ~(fast_parsed : FileInfo.t Relative_path.Map.t)
+        ~(defs_per_file_parsed : FileInfo.t Relative_path.Map.t)
         ~(cgroup_steps : CgroupProfiler.step_group) : naming_result =
       let telemetry = Telemetry.create () in
       let start_t = Unix.gettimeofday () in
-      let count = Relative_path.Map.cardinal fast_parsed in
+      let count = Relative_path.Map.cardinal defs_per_file_parsed in
       CgroupProfiler.step_start_end cgroup_steps "naming" @@ fun _cgroup_step ->
       (* Update name->filename reverse naming table (global, mutable),
          and gather "duplicate name" errors *)
-      remove_decls env fast_parsed;
+      remove_decls env defs_per_file_parsed;
       let (duplicate_name_errors, failed_naming) =
         Relative_path.Map.fold
-          fast_parsed
+          defs_per_file_parsed
           ~init:(Errors.empty, Relative_path.Set.empty)
           ~f:(fun file fileinfo (errorl, failed) ->
             let (errorl', failed') =
@@ -807,7 +826,7 @@ functor
       in
       (* Update filename->FileInfo.t forward naming table (into this local variable) *)
       let naming_table =
-        Naming_table.update_many env.naming_table fast_parsed
+        Naming_table.update_many env.naming_table defs_per_file_parsed
       in
       (* final telemetry *)
       let t3 = Hh_logger.log_duration "Update_many (filename->names)" t2 in
@@ -838,7 +857,7 @@ functor
     let do_redecl_phase1
         (genv : genv)
         (env : env)
-        ~(fast : FileInfo.names Relative_path.Map.t)
+        ~(defs_per_file : FileInfo.names Relative_path.Map.t)
         ~(naming_table : Naming_table.t)
         ~(oldified_defs : FileInfo.names)
         ~(cgroup_steps : CgroupProfiler.step_group) : redecl_phase1_result =
@@ -851,7 +870,7 @@ functor
           get_classes ~old_naming_table:naming_table
       in
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
-      let defs_to_redecl = get_defs fast in
+      let defs_to_redecl = get_defs defs_per_file in
       let ctx = Provider_utils.ctx_from_server_env env in
       let {
         Decl_redecl_service.errors = _;
@@ -868,7 +887,7 @@ functor
           genv.workers
           get_classes
           ~previously_oldified_defs:oldified_defs
-          ~defs:fast
+          ~defs:defs_per_file
       in
       (* Things that were redeclared are no longer in old heap, so we substract
        * defs_to_redecl from oldified_defs *)
@@ -901,7 +920,7 @@ functor
         (genv : genv)
         (env : env)
         ~(errors : Errors.t)
-        ~(fast_redecl_phase2_now : FileInfo.names Relative_path.Map.t)
+        ~(defs_per_file_redecl_phase2_now : FileInfo.names Relative_path.Map.t)
         ~(naming_table : Naming_table.t)
         ~(lazy_decl_later : FileInfo.names Relative_path.Map.t)
         ~(oldified_defs : FileInfo.names)
@@ -941,14 +960,14 @@ functor
           genv.workers
           get_classes
           ~previously_oldified_defs:oldified_defs
-          ~defs:fast_redecl_phase2_now
+          ~defs:defs_per_file_redecl_phase2_now
       in
       let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors
           (env, errors)
           errorl'
           ~rechecked:
-            (fast_redecl_phase2_now
+            (defs_per_file_redecl_phase2_now
             |> Relative_path.Map.keys
             |> Relative_path.Set.of_list)
           ~phase:Errors.Decl
@@ -958,7 +977,7 @@ functor
           (* Redeclaration delayed before and now. *)
           (union_set_and_map_keys env.needs_phase2_redecl lazy_decl_later)
           (* Redeclarations completed now. *)
-          fast_redecl_phase2_now
+          defs_per_file_redecl_phase2_now
       in
       let to_recheck2 = Naming_provider.get_files ctx to_recheck2_deps in
       let to_recheck2 =
@@ -980,16 +999,20 @@ functor
 
     (** Merge the results of the two redecl phases by unioning all that's to recheck and redecl together. *)
     let merge_redecl_results
-        ~(fast : FileInfo.names Relative_path.Map.t)
-        ~(fast_redecl_phase2_now : FileInfo.names Relative_path.Map.t)
+        ~(defs_per_file : FileInfo.names Relative_path.Map.t)
+        ~(defs_per_file_redecl_phase2_now : FileInfo.names Relative_path.Map.t)
         ~(to_recheck1 : Relative_path.Set.t)
         ~(to_recheck1_deps : Typing_deps.DepSet.t)
         ~(to_recheck2 : Relative_path.Set.t)
         ~(to_recheck2_deps : Typing_deps.DepSet.t)
         ~(to_redecl_phase2 : Relative_path.Set.t)
         ~(to_redecl_phase2_deps : Typing_deps.DepSet.t) :
-        Naming_table.fast * Relative_path.Set.t * Typing_deps.DepSet.t lazy_t =
-      let fast = Relative_path.Map.union fast fast_redecl_phase2_now in
+        Naming_table.defs_per_file
+        * Relative_path.Set.t
+        * Typing_deps.DepSet.t lazy_t =
+      let defs_per_file =
+        Relative_path.Map.union defs_per_file defs_per_file_redecl_phase2_now
+      in
       (* I want to make sure the way we compute to_recheck in terms of files
        * vs. in terms of toplevel symbol hashes does not diverge. Therefore,
        * instead of duplicating the unioning logic, I put the logic in a
@@ -1019,7 +1042,7 @@ functor
              ~to_recheck2:to_recheck2_deps
              ~to_redecl_phase2:to_redecl_phase2_deps)
       in
-      (fast, to_recheck, to_recheck_deps)
+      (defs_per_file, to_recheck, to_recheck_deps)
 
     type type_checking_result = {
       env: ServerEnv.env;
@@ -1085,7 +1108,7 @@ functor
             ~hulk_lite
             ~hulk_heavy
             ~remote_execution:env.ServerEnv.remote_execution
-            ~check_info:(get_check_info ~check_reason genv env)
+            ~check_info:(ServerCheckUtils.get_check_info ~check_reason genv env)
         in
         let env =
           {
@@ -1296,7 +1319,7 @@ functor
             {
               parse_errors = errors;
               failed_parsing;
-              fast_parsed;
+              defs_per_file_parsed;
               time_errors_pushed;
             } ) =
         do_parsing genv env ~errors ~files_to_parse ~cgroup_steps
@@ -1331,7 +1354,7 @@ functor
         naming_table;
         telemetry = naming_telemetry;
       } =
-        do_naming env ctx ~fast_parsed ~cgroup_steps
+        do_naming env ctx ~defs_per_file_parsed ~cgroup_steps
         (* Note: although do_naming updates global reverse-naming-table maps,
            the updated forward-naming-table "naming_table" only gets assigned
            into env.naming_table later on, in get_env_after_decl. *)
@@ -1348,7 +1371,9 @@ functor
           (env, errors)
           duplicate_name_errors
           ~rechecked:
-            (fast_parsed |> Relative_path.Map.keys |> Relative_path.Set.of_list)
+            (defs_per_file_parsed
+            |> Relative_path.Map.keys
+            |> Relative_path.Set.of_list)
           ~phase:Errors.Naming
       in
       let time_first_error =
@@ -1362,19 +1387,33 @@ functor
       in
 
       Hh_logger.log "(Recomputing type declarations in relation to naming)";
-      (* failed_naming can be a superset of keys in fast - see comment in Naming_global.ndecl_file *)
+      (* failed_naming can be a superset of keys in defs_per_file - see comment in Naming_global.ndecl_file *)
       let failed_decl =
         CheckKind.get_defs_to_redecl ~reparsed:files_to_parse ~env ~ctx
       in
-      (* The term [fast] doesn't mean anything. It's just exactly the same as fast_parsed,
+      (* The term [defs_per_file] doesn't mean anything. It's just exactly the same as defs_per_file_parsed,
          that is a filename->FileInfo.t map of the files we just parsed,
          except it's just filename->FileInfo.names -- i.e. purely the names, without positions. *)
-      let fast = Naming_table.to_fast (Naming_table.create fast_parsed) in
-      let fast = extend_fast genv fast naming_table failed_naming in
-      let fast = extend_fast genv fast naming_table failed_decl in
-      let fast = add_old_decls env.naming_table fast in
+      let defs_per_file =
+        Naming_table.to_defs_per_file (Naming_table.create defs_per_file_parsed)
+      in
+      let defs_per_file =
+        ServerCheckUtils.extend_defs_per_file
+          genv
+          defs_per_file
+          naming_table
+          failed_naming
+      in
+      let defs_per_file =
+        ServerCheckUtils.extend_defs_per_file
+          genv
+          defs_per_file
+          naming_table
+          failed_decl
+      in
+      let defs_per_file = add_old_decls env.naming_table defs_per_file in
 
-      let count = Relative_path.Map.cardinal fast in
+      let count = Relative_path.Map.cardinal defs_per_file in
       let logstring =
         Printf.sprintf "Type declaration (phase 1) for %d files" count
       in
@@ -1408,7 +1447,7 @@ functor
         do_redecl_phase1
           genv
           env
-          ~fast
+          ~defs_per_file
           ~naming_table
           ~oldified_defs
           ~cgroup_steps
@@ -1455,18 +1494,18 @@ functor
       let telemetry =
         Telemetry.duration telemetry ~key:"redecl2_now_start" ~start_time
       in
-      let (fast_redecl_phase2_now, lazy_decl_later) =
+      let (defs_per_file_redecl_phase2_now, lazy_decl_later) =
         if shallow_decl_enabled ctx then
           (Relative_path.Map.empty, Relative_path.Map.empty)
         else
           CheckKind.get_defs_to_redecl_phase2
             genv
-            ~decl_defs:fast
+            ~decl_defs:defs_per_file
             ~naming_table
             ~to_redecl_phase2
             ~env
       in
-      let count = Relative_path.Map.cardinal fast_redecl_phase2_now in
+      let count = Relative_path.Map.cardinal defs_per_file_redecl_phase2_now in
       let telemetry =
         Telemetry.duration telemetry ~key:"redecl2_now_end" ~start_time
       in
@@ -1533,7 +1572,7 @@ functor
             genv
             env
             ~errors
-            ~fast_redecl_phase2_now
+            ~defs_per_file_redecl_phase2_now
             ~naming_table
             ~lazy_decl_later
             ~oldified_defs
@@ -1553,10 +1592,10 @@ functor
         Option.first_some time_first_error time_errors_pushed
       in
 
-      let (fast, to_recheck, to_recheck_deps) =
+      let (defs_per_file, to_recheck, to_recheck_deps) =
         merge_redecl_results
-          ~fast
-          ~fast_redecl_phase2_now
+          ~defs_per_file
+          ~defs_per_file_redecl_phase2_now
           ~to_recheck1
           ~to_recheck1_deps
           ~to_recheck2
@@ -1659,7 +1698,7 @@ functor
       let (files_to_check, lazy_check_later) =
         CheckKind.get_defs_to_recheck
           ~reparsed:files_to_parse
-          ~phase_2_decl_defs:fast
+          ~phase_2_decl_defs:defs_per_file
           ~to_recheck
           ~env
           ~ctx
@@ -1819,7 +1858,12 @@ functor
       in
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)
-      ServerInvalidateUnits.go genv ctx files_checked fast_parsed naming_table;
+      ServerInvalidateUnits.go
+        genv
+        ctx
+        files_checked
+        defs_per_file_parsed
+        naming_table;
 
       let telemetry =
         Telemetry.duration telemetry ~key:"invalidate_end" ~start_time
@@ -1991,7 +2035,7 @@ let type_check_unsafe genv env kind start_time profiling =
     let (_ : seconds option) =
       ServerBusyStatus.send
         (ServerCommandTypes.Doing_global_typecheck
-           (global_typecheck_kind genv env))
+           (ServerCheckUtils.global_typecheck_kind genv env))
     in
     let telemetry =
       Telemetry.duration telemetry ~key:"core_start" ~start_time

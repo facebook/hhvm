@@ -216,7 +216,7 @@ let make_remote_server_api
           ~extra_roots:(ServerConfig.extra_paths ServerConfig.default_config)
       in
       Hh_logger.log "Building naming table - Parsing";
-      let (fast, _errorl, _failed_parsing) =
+      let (defs_per_file, _errorl, _failed_parsing) =
         ( Direct_decl_service.go
             ctx
             workers
@@ -228,7 +228,7 @@ let make_remote_server_api
           Relative_path.Set.empty )
       in
       Hh_logger.log "Building naming table - Naming";
-      let naming_table = Naming_table.create fast in
+      let naming_table = Naming_table.create defs_per_file in
       Naming_table.iter naming_table ~f:(fun k v ->
           let _ = Naming_global.ndecl_file_error_if_already_bound ctx k v in
           ());

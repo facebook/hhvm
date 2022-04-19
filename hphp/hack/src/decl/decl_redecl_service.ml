@@ -55,7 +55,7 @@ let compute_deps_neutral () =
 (*****************************************************************************)
 
 module OnTheFlyStore = GlobalStorage.Make (struct
-  type t = Naming_table.fast
+  type t = Naming_table.defs_per_file
 end)
 
 (*****************************************************************************)
@@ -163,8 +163,10 @@ let on_the_fly_decl_files filel =
   (* Redeclaring the files *)
   redeclare_files filel
 
-let compute_deps ctx fast (filel : Relative_path.t list) =
-  let infol = List.map filel ~f:(fun fn -> Relative_path.Map.find fast fn) in
+let compute_deps ctx defs_per_file (filel : Relative_path.t list) =
+  let infol =
+    List.map filel ~f:(fun fn -> Relative_path.Map.find defs_per_file fn)
+  in
   let names =
     List.fold_left infol ~f:FileInfo.merge_names ~init:FileInfo.empty_names
   in
@@ -221,9 +223,9 @@ let load_and_on_the_fly_decl_files ctx _ filel =
 let load_and_compute_deps ctx _acc (filel : Relative_path.t list) :
     (DepSet.t * DepSet.t * DepSet.t * int) * int =
   try
-    let fast = OnTheFlyStore.load () in
+    let defs_per_file = OnTheFlyStore.load () in
     let ((changed, to_redecl, to_recheck), old_decl_missing_count) =
-      compute_deps ctx fast filel
+      compute_deps ctx defs_per_file filel
     in
     ((changed, to_redecl, to_recheck, List.length filel), old_decl_missing_count)
   with
@@ -280,11 +282,11 @@ let parallel_on_the_fly_decl
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     (bucket_size : int)
-    (fast : FileInfo.names Relative_path.Map.t)
+    (defs_per_file : FileInfo.names Relative_path.Map.t)
     (fnl : Relative_path.t list) :
     (Errors.t * DepSet.t * DepSet.t * DepSet.t) * int =
   try
-    OnTheFlyStore.store fast;
+    OnTheFlyStore.store defs_per_file;
     let files_initial_count = List.length fnl in
     let files_declared_count = ref 0 in
     let t = Unix.gettimeofday () in

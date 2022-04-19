@@ -14,7 +14,7 @@ val go :
   Provider_context.t ->
   MultiWorker.worker list option ->
   bucket_size:int ->
-  Naming_table.fast ->
+  Naming_table.defs_per_file ->
   Errors.t
 
 val decl_file : Provider_context.t -> Errors.t -> Relative_path.t -> Errors.t

@@ -432,7 +432,7 @@ type t = {
   load_state_natively_download_timeout: int;  (** in seconds *)
   load_state_natively_dirty_files_timeout: int;  (** in seconds *)
   type_decl_bucket_size: int;
-  extend_fast_bucket_size: int;
+  extend_defs_per_file_bucket_size: int;
   enable_on_nfs: bool;
   enable_fuzzy_search: bool;
   lazy_parse: bool;
@@ -622,7 +622,7 @@ let default =
     load_state_natively_download_timeout = 60;
     load_state_natively_dirty_files_timeout = 200;
     type_decl_bucket_size = 1000;
-    extend_fast_bucket_size = 2000;
+    extend_defs_per_file_bucket_size = 2000;
     enable_on_nfs = false;
     enable_fuzzy_search = true;
     lazy_parse = false;
@@ -946,10 +946,10 @@ let load_ fn ~silent ~current_version overrides =
   let type_decl_bucket_size =
     int_ "type_decl_bucket_size" ~default:default.type_decl_bucket_size config
   in
-  let extend_fast_bucket_size =
+  let extend_defs_per_file_bucket_size =
     int_
-      "extend_fast_bucket_size"
-      ~default:default.extend_fast_bucket_size
+      "extend_defs_per_file_bucket_size"
+      ~default:default.extend_defs_per_file_bucket_size
       config
   in
   let io_priority = int_ "io_priority" ~default:default.io_priority config in
@@ -1485,7 +1485,7 @@ let load_ fn ~silent ~current_version overrides =
     load_state_natively_dirty_files_timeout;
     max_purgatory_clients;
     type_decl_bucket_size;
-    extend_fast_bucket_size;
+    extend_defs_per_file_bucket_size;
     enable_on_nfs;
     enable_fuzzy_search;
     lazy_parse;

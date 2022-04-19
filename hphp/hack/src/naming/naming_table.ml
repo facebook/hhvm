@@ -159,7 +159,7 @@ type t =
   | Backed of Naming_sqlite.local_changes * Naming_sqlite.db_path
 [@@deriving show]
 
-type fast = FileInfo.names Relative_path.Map.t
+type defs_per_file = FileInfo.names Relative_path.Map.t
 
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 
@@ -472,7 +472,7 @@ let to_saved a =
     fold a ~init:Relative_path.Map.empty ~f:(fun path fi acc ->
         Relative_path.Map.add acc ~key:path ~data:(FileInfo.to_saved fi))
 
-let to_fast ?(warn_on_naming_costly_iter = true) a =
+let to_defs_per_file ?(warn_on_naming_costly_iter = true) a =
   match a with
   | Unbacked a -> Relative_path.Map.map a ~f:FileInfo.simplify
   | Backed _ ->
@@ -483,7 +483,8 @@ let to_fast ?(warn_on_naming_costly_iter = true) a =
       ~f:(fun path fi acc ->
         Relative_path.Map.add acc ~key:path ~data:(FileInfo.simplify fi))
 
-let saved_to_fast saved = Relative_path.Map.map saved ~f:FileInfo.saved_to_names
+let saved_to_defs_per_file saved =
+  Relative_path.Map.map saved ~f:FileInfo.saved_to_names
 
 (*****************************************************************************)
 (* Forward naming table creation functions *)

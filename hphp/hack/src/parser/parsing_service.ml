@@ -227,7 +227,7 @@ let go_DEPRECATED
       get_next
       popt
   in
-  let (fast, errorl, failed_parsing) =
+  let (defs_per_file, errorl, failed_parsing) =
     Relative_path.Set.fold files_set ~init:acc ~f:(fun fn acc ->
         let content = File_provider.get_ide_contents_unsafe fn in
         parse_sequential_DEPRECATED
@@ -240,4 +240,4 @@ let go_DEPRECATED
           acc
           popt)
   in
-  (fast, errorl, failed_parsing)
+  (defs_per_file, errorl, failed_parsing)

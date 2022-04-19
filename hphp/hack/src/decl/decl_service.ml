@@ -42,8 +42,10 @@ let go
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     ~bucket_size
-    fast =
-  let fast_l = Relative_path.Map.fold fast ~init:[] ~f:(fun x _ y -> x :: y) in
+    defs_per_file =
+  let defs_per_file_l =
+    Relative_path.Map.fold defs_per_file ~init:[] ~f:(fun x _ y -> x :: y)
+  in
   let neutral = Errors.empty in
   Hh_logger.debug ~category "Declaring the types";
   let result =
@@ -52,6 +54,6 @@ let go
       ~job:(decl_files ctx)
       ~neutral
       ~merge:Errors.merge
-      ~next:(MultiWorker.next ~max_size:bucket_size workers fast_l)
+      ~next:(MultiWorker.next ~max_size:bucket_size workers defs_per_file_l)
   in
   result

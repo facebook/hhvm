@@ -31,18 +31,17 @@ open Hh_prelude
 open SearchServiceRunner
 open ServerEnv
 open ServerInitTypes
-open ServerCheckUtils
 module SLC = ServerLocalConfig
 
 let type_decl
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (fast : Naming_table.fast)
+    (defs_per_file : Naming_table.defs_per_file)
     (t : float) : ServerEnv.env * float =
   ServerProgress.send_progress "evaluating type declarations";
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let errorl = Decl_service.go ~bucket_size ctx genv.workers fast in
+  let errorl = Decl_service.go ~bucket_size ctx genv.workers defs_per_file in
   Stats.(stats.init_heap_size <- SharedMem.SMTelemetry.heap_size ());
   HackEventLogger.type_decl_end t;
   let t = Hh_logger.log_duration "Type-decl" t in
@@ -58,7 +57,7 @@ let init
   let hulk_heavy = genv.local_config.ServerLocalConfig.hulk_heavy in
   let env =
     if hulk_lite || hulk_heavy then
-      start_delegate_if_needed env genv 3_000_000 env.errorl
+      ServerCheckUtils.start_delegate_if_needed env genv 3_000_000 env.errorl
     else
       env
   in
@@ -104,24 +103,24 @@ let init
       ~telemetry_label:"eager.init.naming"
       ~cgroup_steps
   in
-  let fast = Naming_table.to_fast env.naming_table in
+  let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-  let fast =
+  let defs_per_file =
     Relative_path.Set.fold
       failed_parsing
       ~f:(fun x m -> Relative_path.Map.remove m x)
-      ~init:fast
+      ~init:defs_per_file
   in
   let (env, t) =
     match lazy_level with
-    | Off -> type_decl genv env fast t
+    | Off -> type_decl genv env defs_per_file t
     | _ -> (env, t)
   in
   (* Type-checking everything *)
   ServerInitCommon.type_check
     genv
     env
-    (Relative_path.Map.keys fast)
+    (Relative_path.Map.keys defs_per_file)
     init_telemetry
     t
     ~telemetry_label:"eager.init.type_check"

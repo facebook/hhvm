@@ -27,7 +27,6 @@ open GlobalOptions
 open Result.Export
 open Reordered_argument_collections
 open SearchServiceRunner
-open ServerCheckUtils
 open ServerEnv
 open ServerInitTypes
 open String_utils
@@ -183,7 +182,9 @@ let merge_saved_state_futures
           Hh_logger.log "Using sqlite naming table from hack/64 saved state";
           Some (Path.to_string naming_sqlite_table_path)
         ) else
-          get_naming_table_fallback_path genv downloaded_naming_table_path
+          ServerCheckUtils.get_naming_table_fallback_path
+            genv
+            downloaded_naming_table_path
       in
       let (old_naming_table, old_errors) =
         SaveStateService.load_saved_state
@@ -460,7 +461,7 @@ let use_precomputed_state_exn
       Hh_logger.log "Using sqlite naming table from hack/64 saved state";
       Some naming_sqlite_table_path
     ) else
-      get_naming_table_fallback_path genv None
+      ServerCheckUtils.get_naming_table_fallback_path genv None
   in
   let legacy_hot_decls_path =
     ServerArgs.legacy_hot_decls_path_for_target_info info
@@ -582,25 +583,27 @@ let use_prechecked_files (genv : ServerEnv.genv) : bool =
   && (not (ServerArgs.check_mode genv.options))
   && Option.is_none (ServerArgs.save_filename genv.options)
 
-let get_dirty_fast
+let get_old_and_new_defs_in_files
     (old_naming_table : Naming_table.t)
-    (fast : FileInfo.names Relative_path.Map.t)
-    (dirty : Relative_path.Set.t) : FileInfo.names Relative_path.Map.t =
+    (new_defs_per_file : FileInfo.names Relative_path.Map.t)
+    (files : Relative_path.Set.t) : FileInfo.names Relative_path.Map.t =
   Relative_path.Set.fold
-    dirty
+    files
     ~f:
       begin
-        fun fn acc ->
-        let dirty_fast = Relative_path.Map.find_opt fast fn in
-        let dirty_old_fast =
-          Naming_table.get_file_info old_naming_table fn
+        fun path acc ->
+        let new_defs_in_file =
+          Relative_path.Map.find_opt new_defs_per_file path
+        in
+        let old_defs_in_file =
+          Naming_table.get_file_info old_naming_table path
           |> Option.map ~f:FileInfo.simplify
         in
-        let fast =
-          Option.merge dirty_old_fast dirty_fast ~f:FileInfo.merge_names
+        let all_defs =
+          Option.merge old_defs_in_file new_defs_in_file ~f:FileInfo.merge_names
         in
-        match fast with
-        | Some fast -> Relative_path.Map.add acc ~key:fn ~data:fast
+        match all_defs with
+        | Some all_defs -> Relative_path.Map.add acc ~key:path ~data:all_defs
         | None -> acc
       end
     ~init:Relative_path.Map.empty
@@ -644,33 +647,33 @@ let log_fanout_information to_recheck_deps files_to_recheck =
               ])
 
 (** Compare declarations loaded from the saved state to declarations based on
-    the current versions of dirty files. This lets us check a smaller set of
-    files than the set we'd check if old declarations were not available.
-    To be used only when load_decls_from_saved_state is enabled. *)
+  the current versions of dirty files. This lets us check a smaller set of
+  files than the set we'd check if old declarations were not available.
+  To be used only when load_decls_from_saved_state is enabled. *)
 let get_files_to_undecl_and_recheck
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (old_naming_table : Naming_table.t)
-    (new_fast : FileInfo.names Relative_path.Map.t)
-    (dirty_fast : FileInfo.names Relative_path.Map.t)
+    (new_defs_per_file : FileInfo.names Relative_path.Map.t)
+    (defs_per_dirty_file : FileInfo.names Relative_path.Map.t)
     (files_to_redeclare : Relative_path.Set.t) :
     Relative_path.Set.t * Relative_path.Set.t =
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
-  let fast =
+  let defs_per_file_to_redeclare =
     Relative_path.Set.fold
       files_to_redeclare
       ~init:Relative_path.Map.empty
       ~f:(fun path acc ->
-        match Relative_path.Map.find_opt dirty_fast path with
+        match Relative_path.Map.find_opt defs_per_dirty_file path with
         | Some info -> Relative_path.Map.add acc ~key:path ~data:info
         | None -> acc)
   in
-  let get_classes path =
+  let get_old_and_new_classes path : SSet.t =
     let old_names =
       Naming_table.get_file_info old_naming_table path
       |> Option.map ~f:FileInfo.simplify
     in
-    let new_names = Relative_path.Map.find_opt new_fast path in
+    let new_names = Relative_path.Map.find_opt new_defs_per_file path in
     let classes_from_names x = x.FileInfo.n_classes in
     let old_classes = Option.map old_names ~f:classes_from_names in
     let new_classes = Option.map new_names ~f:classes_from_names in
@@ -678,15 +681,17 @@ let get_files_to_undecl_and_recheck
     |> Option.value ~default:SSet.empty
   in
   let dirty_names =
-    Relative_path.Map.fold dirty_fast ~init:FileInfo.empty_names ~f:(fun _ ->
-        FileInfo.merge_names)
+    Relative_path.Map.fold
+      defs_per_dirty_file
+      ~init:FileInfo.empty_names
+      ~f:(fun _ -> FileInfo.merge_names)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   Decl_redecl_service.oldify_type_decl
     ctx
     ~bucket_size
     genv.workers
-    get_classes
+    get_old_and_new_classes
     ~previously_oldified_defs:FileInfo.empty_names
     ~defs:dirty_names;
   let { Decl_redecl_service.to_redecl; to_recheck; _ } =
@@ -694,9 +699,9 @@ let get_files_to_undecl_and_recheck
       ~bucket_size
       ctx
       genv.workers
-      get_classes
+      get_old_and_new_classes
       ~previously_oldified_defs:dirty_names
-      ~defs:fast
+      ~defs:defs_per_file_to_redeclare
   in
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
   let to_recheck_deps = Typing_deps.add_all_deps env.deps_mode to_redecl in
@@ -708,18 +713,18 @@ let get_files_to_undecl_and_recheck
   (files_to_undecl, files_to_recheck)
 
 (* We start off with a list of files that have changed since the state was
- * saved (dirty_files), and two maps of the class / function declarations
- * -- one made when the state was saved (old_fast) and one made for the
- * current files in the repository (new_fast). We grab the declarations from
- * both, to account for both the declaratons that were deleted and those that
- * are newly created. Then we use the deptable to figure out the files that
+ * saved (dirty_files), the naming table from the saved state (old_naming_table)
+ * and a map of the current class / function declarations per file (new_defs_per_file).
+ * We grab the declarations from both, to account for both the declarations
+ * that were deleted and those that are newly created.
+ * Then we use the deptable to figure out the files that
  * referred to them. Finally we recheck the lot.
  *
  * Args:
  *
  * genv, env : environments
- * old_fast: old file-ast from saved state
- * new_fast: newly parsed file ast
+ * old_naming_table: naming table at the time of the saved state
+ * new_defs_per_file: newly parsed file ast
  * dirty_master_files and dirty_local_files: we need to typecheck these and,
  *    since their decl have changed, also all of their dependencies
  * similar_files: we only need to typecheck these,
@@ -729,7 +734,7 @@ let type_check_dirty
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (old_naming_table : Naming_table.t)
-    (new_fast : FileInfo.names Relative_path.Map.t)
+    (new_defs_per_file : FileInfo.names Relative_path.Map.t)
     ~(dirty_master_files_unchanged_hash : Relative_path.Set.t)
     ~(dirty_master_files_changed_hash : Relative_path.Set.t)
     ~(dirty_local_files_unchanged_hash : Relative_path.Set.t)
@@ -747,16 +752,19 @@ let type_check_dirty
       dirty_master_files_changed_hash
       dirty_local_files_changed_hash
   in
-  let dirty_changed_fast =
-    get_dirty_fast old_naming_table new_fast dirty_files_changed_hash
+  let old_and_new_defs_per_dirty_files_changed_hash =
+    get_old_and_new_defs_in_files
+      old_naming_table
+      new_defs_per_file
+      dirty_files_changed_hash
   in
-  let names s =
+  let old_and_new_defs_in_files files : FileInfo.names =
     Relative_path.Map.fold
-      dirty_changed_fast
+      old_and_new_defs_per_dirty_files_changed_hash
       ~f:
         begin
           fun k v acc ->
-          if Relative_path.Set.mem s k then
+          if Relative_path.Set.mem files k then
             FileInfo.merge_names v acc
           else
             acc
@@ -764,18 +772,24 @@ let type_check_dirty
       ~init:FileInfo.empty_names
   in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let master_deps = names dirty_master_files_changed_hash |> names_to_deps in
-  let local_deps = names dirty_local_files_changed_hash |> names_to_deps in
-  (* Include similar_files in the dirty_fast used to determine which loaded
-     declarations to oldify. This is necessary because the positions of
-     declarations may have changed, which affects error messages and FIXMEs. *)
-  let get_files_to_undecl_and_recheck =
-    get_files_to_undecl_and_recheck genv env old_naming_table new_fast
-    @@ extend_fast
+  let master_deps =
+    old_and_new_defs_in_files dirty_master_files_changed_hash |> names_to_deps
+  in
+  let local_deps =
+    old_and_new_defs_in_files dirty_local_files_changed_hash |> names_to_deps
+  in
+  let get_files_to_undecl_and_recheck files_to_redeclare =
+    get_files_to_undecl_and_recheck
+      genv
+      env
+      old_naming_table
+      new_defs_per_file
+      (ServerCheckUtils.extend_defs_per_file
          genv
-         dirty_changed_fast
+         old_and_new_defs_per_dirty_files_changed_hash
          env.naming_table
-         dirty_files_unchanged_hash
+         dirty_files_unchanged_hash)
+      files_to_redeclare
   in
   let (env, to_undecl, to_recheck) =
     if use_prechecked_files genv then
@@ -826,8 +840,14 @@ let type_check_dirty
   let to_recheck =
     Relative_path.Set.union to_recheck dirty_files_unchanged_hash
   in
-  let fast = extend_fast genv dirty_changed_fast env.naming_table to_recheck in
-  let files_to_check = Relative_path.Map.keys fast in
+  let defs_per_files_to_recheck =
+    ServerCheckUtils.extend_defs_per_file
+      genv
+      old_and_new_defs_per_dirty_files_changed_hash
+      env.naming_table
+      to_recheck
+  in
+  let files_to_check = Relative_path.Map.keys defs_per_files_to_recheck in
 
   (* HACK: dump the fanout that we calculated and exit. This is for
      `hh_fanout`'s regression testing vs. `hh_server`. This can be deleted once
@@ -1051,17 +1071,17 @@ let write_symbol_info
           |> List.filter ~f:relative_path_exists;
         ]
     else
-      let fast = Naming_table.to_fast env.naming_table in
+      let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
       let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-      let fast =
+      let defs_per_file =
         Relative_path.Set.fold
           failed_parsing
           ~f:(fun x m -> Relative_path.Map.remove m x)
-          ~init:fast
+          ~init:defs_per_file
       in
       let exclude_hhi = not env.swriteopt.symbol_write_include_hhi in
       let ignore_paths = env.swriteopt.symbol_write_ignore_paths in
-      Relative_path.Map.fold fast ~init:[] ~f:(fun path _ acc ->
+      Relative_path.Map.fold defs_per_file ~init:[] ~f:(fun path _ acc ->
           match Naming_table.get_file_info env.naming_table path with
           | None -> acc
           | Some _ ->
@@ -1141,7 +1161,7 @@ let full_init
   let hulk_heavy = genv.local_config.ServerLocalConfig.hulk_heavy in
   let env =
     if hulk_lite || hulk_heavy then
-      start_delegate_if_needed env genv 3_000_000 env.errorl
+      ServerCheckUtils.start_delegate_if_needed env genv 3_000_000 env.errorl
     else
       env
   in
@@ -1182,18 +1202,22 @@ let full_init
     SearchServiceRunner.update_fileinfo_map
       env.naming_table
       ~source:SearchUtils.Init;
-  let fast = Naming_table.to_fast env.naming_table in
+  let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-  let fast =
+  let defs_per_file =
     Relative_path.Set.fold
       failed_parsing
       ~f:(fun x m -> Relative_path.Map.remove m x)
-      ~init:fast
+      ~init:defs_per_file
   in
-  let fnl = Relative_path.Map.keys fast in
+  let fnl = Relative_path.Map.keys defs_per_file in
   let env =
     if is_check_mode && (not hulk_lite) && not hulk_heavy then
-      start_delegate_if_needed env genv (List.length fnl) env.errorl
+      ServerCheckUtils.start_delegate_if_needed
+        env
+        genv
+        (List.length fnl)
+        env.errorl
     else
       env
   in
@@ -1367,14 +1391,14 @@ let post_saved_state_initialization
         ~cgroup_steps
     in
 
-    (* Add all files from fast to the files_info object *)
-    let fast = Naming_table.to_fast env.naming_table in
+    (* Add all files from defs_per_file to the files_info object *)
+    let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
     let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-    let fast =
+    let defs_per_file =
       Relative_path.Set.fold
         failed_parsing
         ~f:(fun x m -> Relative_path.Map.remove m x)
-        ~init:fast
+        ~init:defs_per_file
     in
     let env =
       {
@@ -1423,7 +1447,7 @@ let post_saved_state_initialization
       genv
       env
       old_naming_table
-      fast
+      defs_per_file
       ~dirty_master_files_unchanged_hash
       ~dirty_master_files_changed_hash
       ~dirty_local_files_unchanged_hash

@@ -63,7 +63,9 @@ let test () =
   (* Prepare rechecking of all files *)
   let ctx = Provider_utils.ctx_from_server_env env in
   let workers = None in
-  let fast = Naming_table.to_fast env.ServerEnv.naming_table in
+  let defs_per_file =
+    Naming_table.to_defs_per_file env.ServerEnv.naming_table
+  in
   (* Pretend that this rechecking will be cancelled before we get to bar1 *)
   let bar1_path =
     Relative_path.(create Root (Test.prepend_root (bar_name 1)))
@@ -72,7 +74,7 @@ let test () =
 
   (* Run the recheck *)
   let interrupt = MultiThreadedCall.no_interrupt () in
-  let fnl = Relative_path.Map.keys fast in
+  let fnl = Relative_path.Map.keys defs_per_file in
   let check_info =
     {
       Typing_service_types.init_id = "";

@@ -18,7 +18,7 @@ type t [@@deriving show]
 
 type changes_since_baseline
 
-type fast = FileInfo.names Relative_path.Map.t
+type defs_per_file = FileInfo.names Relative_path.Map.t
 
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 
@@ -123,9 +123,9 @@ val from_saved : saved_state_info -> t
 
 val to_saved : t -> saved_state_info
 
-val to_fast : ?warn_on_naming_costly_iter:bool -> t -> fast
+val to_defs_per_file : ?warn_on_naming_costly_iter:bool -> t -> defs_per_file
 
-val saved_to_fast : saved_state_info -> fast
+val saved_to_defs_per_file : saved_state_info -> defs_per_file
 
 val save_changes_since_baseline : t -> destination_path:string -> unit
 

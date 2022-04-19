@@ -22,21 +22,34 @@ let get_naming_table_fallback_path genv (naming_table_fn : string option) :
     Hh_logger.log "No path set in config, using the loaded naming table";
     naming_table_fn
 
-let extend_fast_sequential fast naming_table additional_files =
-  Hh_logger.log "Extending FAST sequentially (in memory)...";
-  Relative_path.Set.fold additional_files ~init:fast ~f:(fun x acc ->
-      match Relative_path.Map.find_opt fast x with
+(** [extend_defs_per_file_sequential defs_per_file naming_table additional_files]
+  extends [defs_per_file] file-to-defs table with definitions in [additional_files]
+  by querying [naming_table] for their definitions.
+  Does so sequentially file by file. *)
+let extend_defs_per_file_sequential defs_per_file naming_table additional_files
+    =
+  Hh_logger.log "Extending file-to-defs table sequentially (in memory)...";
+  Relative_path.Set.fold
+    additional_files
+    ~init:defs_per_file
+    ~f:(fun path acc ->
+      match Relative_path.Map.find_opt defs_per_file path with
       | None ->
         (try
-           let info = Naming_table.get_file_info_unsafe naming_table x in
+           let info = Naming_table.get_file_info_unsafe naming_table path in
            let info_names = FileInfo.simplify info in
-           Relative_path.Map.add acc ~key:x ~data:info_names
+           Relative_path.Map.add acc ~key:path ~data:info_names
          with
         | Naming_table.File_info_not_found -> acc)
       | Some _ -> acc)
 
-let extend_fast_batch genv fast naming_table additional_files bucket_size =
-  Hh_logger.log "Extending FAST in batch mode...";
+(** [extend_defs_per_file_batch genv defs_per_file naming_table additional_files bucket_size]
+  extends [defs_per_file] file-to-defs table with definitions in [additional_files]
+  by querying [naming_table] for their definitions.
+  Does so in batches of size [bucket_size]. *)
+let extend_defs_per_file_batch
+    genv defs_per_file naming_table additional_files bucket_size =
+  Hh_logger.log "Extending file-to-defs table in batch mode...";
   let additional_files = Relative_path.Set.elements additional_files in
   let get_one acc x =
     try
@@ -56,34 +69,49 @@ let extend_fast_batch genv fast naming_table additional_files bucket_size =
   in
   let neutral = Relative_path.Map.empty in
   let merge = Relative_path.Map.union in
-  let extended_fast =
+  let extended_defs_per_file =
     MultiWorker.call genv.workers ~job ~neutral ~merge ~next
   in
-  Relative_path.Map.union fast extended_fast
+  Relative_path.Map.union defs_per_file extended_defs_per_file
 
-let extend_fast
+(** [extend_defs_per_file genv defs_per_file naming_table additional_files]
+  extends [defs_per_file] file-to-defs table with definitions in [additional_files]
+  by querying [naming_table] for their definitions.
+  Does so either sequentially or in batches depending on how many files to add. *)
+let extend_defs_per_file
     genv
-    (fast : FileInfo.names Relative_path.Map.t)
+    (defs_per_file : FileInfo.names Relative_path.Map.t)
     (naming_table : Naming_table.t)
     (additional_files : Relative_path.Set.t) :
     FileInfo.names Relative_path.Map.t =
   let additional_count = Relative_path.Set.cardinal additional_files in
   if additional_count = 0 then
-    fast
+    defs_per_file
   else (
-    Hh_logger.log "Extending the FAST by %d additional files" additional_count;
+    Hh_logger.log
+      "Extending the file-to-defs table by %d additional files"
+      additional_count;
     let t = Unix.gettimeofday () in
     let bucket_size =
-      genv.local_config.ServerLocalConfig.extend_fast_bucket_size
+      genv.local_config.ServerLocalConfig.extend_defs_per_file_bucket_size
     in
-    let extended_fast =
+    let extended_defs_per_file =
       match Naming_table.get_forward_naming_fallback_path naming_table with
       | Some _sqlite_path when additional_count >= bucket_size ->
-        extend_fast_batch genv fast naming_table additional_files bucket_size
-      | _ -> extend_fast_sequential fast naming_table additional_files
+        extend_defs_per_file_batch
+          genv
+          defs_per_file
+          naming_table
+          additional_files
+          bucket_size
+      | _ ->
+        extend_defs_per_file_sequential
+          defs_per_file
+          naming_table
+          additional_files
     in
-    let _t = Hh_logger.log_duration "Extended FAST" t in
-    extended_fast
+    let _t = Hh_logger.log_duration "Extended file-to-defs table" t in
+    extended_defs_per_file
   )
 
 let global_typecheck_kind genv env =
@@ -94,7 +122,8 @@ let global_typecheck_kind genv env =
   else
     ServerCommandTypes.Blocking
 
-let get_check_info ~check_reason genv env : Typing_service_types.check_info =
+let get_check_info ~check_reason (genv : genv) env :
+    Typing_service_types.check_info =
   {
     Typing_service_types.init_id = env.init_env.init_id;
     check_reason;

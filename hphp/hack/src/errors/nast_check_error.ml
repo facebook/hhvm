@@ -108,6 +108,7 @@ type t =
   | Case_fallthrough of {
       switch_pos: Pos.t;
       case_pos: Pos.t;
+      next_pos: Pos.t option;
     }
   | Default_fallthrough of Pos.t
   | Php_lambda_disallowed of Pos.t
@@ -455,7 +456,29 @@ let illegal_context pos name =
         Naming_special_names.Coeffects.contexts )
     []
 
-let case_fallthrough switch_pos case_pos =
+let case_fallthrough switch_pos case_pos next_pos =
+  let quickfixes =
+    match next_pos with
+    | None -> []
+    | Some next_pos ->
+      let (_, start_col) = Pos.line_column next_pos in
+      let offset = String.length "case " in
+      let new_pos =
+        Pos.set_col_end (start_col - offset)
+        @@ Pos.set_col_start (start_col - offset) next_pos
+      in
+      let new_text =
+        "  // FALLTHROUGH\n" ^ String.make (start_col - offset) ' '
+      in
+
+      [
+        Quickfix.make
+          ~title:"Mark this `case` as explicitly falling through"
+          ~new_text
+          new_pos;
+      ]
+  in
+
   let claim =
     ( switch_pos,
       "This `switch` has a `case` that implicitly falls through and is "
@@ -467,7 +490,7 @@ let case_fallthrough switch_pos case_pos =
       );
     ]
   in
-  User_error.make Error_code.(to_enum CaseFallthrough) claim reasons
+  User_error.make ~quickfixes Error_code.(to_enum CaseFallthrough) claim reasons
 
 let default_fallthrough pos =
   User_error.make
@@ -612,8 +635,8 @@ let to_user_error = function
   | List_rvalue pos -> list_rvalue pos
   | Illegal_destructor pos -> illegal_destructor pos
   | Illegal_context { pos; name } -> illegal_context pos name
-  | Case_fallthrough { switch_pos; case_pos } ->
-    case_fallthrough switch_pos case_pos
+  | Case_fallthrough { switch_pos; case_pos; next_pos } ->
+    case_fallthrough switch_pos case_pos next_pos
   | Default_fallthrough pos -> default_fallthrough pos
   | Php_lambda_disallowed pos -> php_lambda_disallowed pos
   | Non_interface { pos; name; verb } -> non_interface pos name verb

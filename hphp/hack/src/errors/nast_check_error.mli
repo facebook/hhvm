@@ -105,6 +105,7 @@ type t =
   | Case_fallthrough of {
       switch_pos: Pos.t;
       case_pos: Pos.t;
+      next_pos: Pos.t option;
     }
   | Default_fallthrough of Pos.t
   | Php_lambda_disallowed of Pos.t

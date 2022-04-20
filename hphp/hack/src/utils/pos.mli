@@ -143,9 +143,9 @@ val set_file : 'a -> 'b pos -> 'a pos
 
 val set_line_end : int -> 'a pos -> 'a pos
 
-val set_col_end : int -> 'a pos -> 'a pos
-
 val set_col_start : int -> 'a pos -> 'a pos
+
+val set_col_end : int -> 'a pos -> 'a pos
 
 val make_from_lnum_bol_offset :
   pos_file:Relative_path.t ->

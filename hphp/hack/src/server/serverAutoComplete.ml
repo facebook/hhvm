@@ -43,7 +43,6 @@ let get_autocomplete_context
     {
       AutocompleteTypes.is_manually_invoked;
       is_xhp_classname = false;
-      is_instance_member = false;
       is_after_single_colon = false;
       is_after_double_right_angle_bracket = false;
       is_after_open_square_bracket = false;
@@ -63,9 +62,6 @@ let get_autocomplete_context
     (* text is the text from the start of the line up to the caret position *)
     let is_xhp_classname =
       Str.string_match context_xhp_classname_regex leading_text 0
-    in
-    let is_instance_member =
-      Str.string_match context_xhp_member_regex leading_text 0
     in
     let is_after_single_colon =
       Str.string_match context_after_single_colon_regex leading_text 0
@@ -98,7 +94,6 @@ let get_autocomplete_context
     {
       AutocompleteTypes.is_manually_invoked;
       is_xhp_classname;
-      is_instance_member;
       is_after_single_colon;
       is_after_double_right_angle_bracket;
       is_after_open_square_bracket;

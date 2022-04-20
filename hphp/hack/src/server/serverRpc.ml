@@ -158,7 +158,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       {
         AutocompleteTypes.is_manually_invoked = false;
         is_xhp_classname = false;
-        is_instance_member = false;
         is_after_single_colon = false;
         is_after_double_right_angle_bracket = false;
         is_after_open_square_bracket = false;

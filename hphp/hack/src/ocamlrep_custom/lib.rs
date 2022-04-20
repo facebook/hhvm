@@ -72,38 +72,31 @@ impl CustomOperations {
 ///
 /// Expose Rust type:
 ///
-/// ```
+/// ```rust
+/// use ocamlrep_custom::caml_serialize_default_impls;
+/// use ocamlrep_custom::{CamlSerialize, Custom};
 /// use ocamlrep_ocamlpool::ocaml_ffi;
-/// use std::cell::RefCell;
+/// use std::cell::Cell;
 ///
-/// pub struct Counter(isize);
+/// pub struct Counter(Cell<isize>);
 ///
-/// impl Counter {
-///   pub fn new() -> Self {
-///     Self(0)
-///   }
-///
-///   pub fn inc(&mut self) {
-///     self.0 += 1
-///   }
-///
-///   pub fn read(&self) -> isize {
-///     self.0
-///   }
+/// impl CamlSerialize for Counter {
+///     caml_serialize_default_impls!();
 /// }
 ///
 /// ocaml_ffi! {
-///   fn counter_new() -> Custom<RefCell<Counter>> {
-///     Custom::from(RefCell::new(Counter(0)))
-///   }
+///     fn counter_new() -> Custom<Counter> {
+///         Custom::from(Counter(Cell::new(0)))
+///     }
 ///
-///   fn counter_inc(counter: Custom<RefCell<Counter>>) {
-///     counter.borrow_mut().inc();
-///   }
+///     fn counter_inc(counter: Custom<Counter>) -> Custom<Counter> {
+///         counter.0.set(counter.0.get() - 1);
+///         counter
+///     }
 ///
-///   fn counter_read(counter: Custom<RefCell<Counter>>) -> isize {
-///     counter.borrow().read();
-///   }
+///     fn counter_read(counter: Custom<Counter>) -> isize {
+///         counter.0.get()
+///     }
 /// }
 /// ```
 ///

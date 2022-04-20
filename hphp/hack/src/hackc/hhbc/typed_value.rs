@@ -61,8 +61,6 @@ pub enum TypedValue<'arena> {
     String(Str<'arena>),
     LazyClass(Str<'arena>),
     Null,
-    /// An array literal represented as __hhas_adata("serialized-data").
-    HhasAdata(Str<'arena>),
     // Hack arrays: vectors, keysets, and dictionaries
     Vec(Slice<'arena, TypedValue<'arena>>),
     Keyset(Slice<'arena, TypedValue<'arena>>),
@@ -72,10 +70,6 @@ pub enum TypedValue<'arena> {
 impl<'arena> TypedValue<'arena> {
     pub fn string(x: impl Into<Str<'arena>>) -> Self {
         Self::String(x.into())
-    }
-
-    pub fn hhas_adata(x: impl Into<Str<'arena>>) -> Self {
-        Self::HhasAdata(x.into())
     }
 
     pub fn vec(x: impl Into<Slice<'arena, TypedValue<'arena>>>) -> Self {

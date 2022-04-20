@@ -191,8 +191,6 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
         auto const lc = LazyClassData::create(toStaticString(tv.lazy_class._0));
         return make_tv<KindOfLazyClass>(lc);
       }
-      case kind::HhasAdata:
-        error("toTypedValue unimplemented for HhasAdata");
     }
     not_reached();
   }();

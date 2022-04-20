@@ -37,7 +37,6 @@ use hhbc::{
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
-use ocaml_helper::escaped_bytes;
 use oxidized::ast_defs;
 use std::{
     borrow::Cow,
@@ -706,7 +705,6 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
         TypedValue::Keyset(values) => {
             print_adata_collection_argument(ctx, w, KEYSET_PREFIX, None, values.as_ref())
         }
-        TypedValue::HhasAdata(s) => w.write_all(&escaped_bytes(s.as_ref())),
     }
 }
 

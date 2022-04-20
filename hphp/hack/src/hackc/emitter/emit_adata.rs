@@ -7,10 +7,7 @@ use adata_state::AdataState;
 use env::emitter::Emitter;
 use error::{Error, Result};
 use ffi::Str;
-use hhbc::{
-    hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX},
-    ClassName, TypedValue,
-};
+use hhbc::{hhas_adata::HhasAdata, ClassName, TypedValue};
 use instruction_sequence::{instr, InstrSeq};
 use options::HhvmFlags;
 
@@ -42,22 +39,6 @@ pub fn typed_value_to_instr<'arena, 'decl>(
         TypedValue::Dict(_) => {
             let arrayid = Str::from(get_array_identifier(e, tv));
             Ok(instr::dict(arrayid))
-        }
-        TypedValue::HhasAdata(d) if d.is_empty() => {
-            Err(Error::unrecoverable("HhasAdata may not be empty"))
-        }
-        TypedValue::HhasAdata(d) => {
-            let arrayid = Str::from(get_array_identifier(e, tv));
-            let d = d.unsafe_as_str();
-            match &d[..1] {
-                VARRAY_PREFIX | VEC_PREFIX => Ok(instr::vec(arrayid)),
-                DARRAY_PREFIX | DICT_PREFIX => Ok(instr::dict(arrayid)),
-                KEYSET_PREFIX => Ok(instr::keyset(arrayid)),
-                _ => Err(Error::unrecoverable(format!(
-                    "Unknown HhasAdata data: {}",
-                    d,
-                ))),
-            }
         }
     }
 }

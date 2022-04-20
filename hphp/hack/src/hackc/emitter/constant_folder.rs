@@ -656,7 +656,6 @@ fn value_to_expr_<'arena>(v: TypedValue<'arena>) -> Result<ast::Expr_, Error> {
         TypedValue::Uninit => Err(Error::unrecoverable("value_to_expr: uninit value")),
         TypedValue::Vec(_) => Err(Error::unrecoverable("value_to_expr: vec NYI")),
         TypedValue::Keyset(_) => Err(Error::unrecoverable("value_to_expr: keyset NYI")),
-        TypedValue::HhasAdata(_) => Err(Error::unrecoverable("value_to_expr: HhasAdata NYI")),
         TypedValue::Dict(_) => Err(Error::unrecoverable("value_to_expr: dict NYI")),
     }
 }
@@ -892,8 +891,6 @@ pub fn cast_to_bool(x: TypedValue<'_>) -> bool {
         TypedValue::Vec(v) => !v.is_empty(),
         TypedValue::Keyset(v) => !v.is_empty(),
         TypedValue::Dict(v) => !v.is_empty(),
-        // Non-empty collections cast to true
-        TypedValue::HhasAdata(_) => true,
     }
 }
 

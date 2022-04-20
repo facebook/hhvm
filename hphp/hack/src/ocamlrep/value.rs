@@ -108,7 +108,7 @@ impl<'a> Value<'a> {
     ///
     /// This method is unsafe because it requires that the pointed-to Value is
     /// the first field of a block, which must be preceded by a valid Header
-    /// correctly describing the block's size and tag (i.e., value.offset(1)
+    /// correctly describing the block's size and tag (i.e., value.offset(-1)
     /// should point to that Header). To be used only with pointers returned by
     /// Arena allocation methods (e.g.,
     /// [`Allocator::block_with_size_and_tag`](trait.Allocator.html#tymethod.block_with_size_and_tag).

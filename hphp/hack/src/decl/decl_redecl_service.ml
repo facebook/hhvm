@@ -589,7 +589,8 @@ let redo_type_decl
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
     ~(previously_oldified_defs : FileInfo.names)
-    ~(defs : FileInfo.names Relative_path.Map.t) : redo_type_decl_result =
+    ~(defs : FileInfo.names Relative_path.Map.t)
+    ~(telemetry_label : string) : redo_type_decl_result =
   let all_defs =
     Relative_path.Map.fold defs ~init:FileInfo.empty_names ~f:(fun _ ->
         FileInfo.merge_names)
@@ -626,7 +627,8 @@ let redo_type_decl
         Shallow_decl_compare.compute_class_fanout
           ctx
           ~defs
-          ~fetch_old_decls:(Remote_old_decl_client.fetch_old_decls ~ctx)
+          ~fetch_old_decls:
+            (Remote_old_decl_client.fetch_old_decls ~ctx ~telemetry_label)
           fnl
       in
       let changed = DepSet.union changed changed' in
@@ -645,7 +647,8 @@ let redo_type_decl
         Shallow_decl_compare.compute_class_fanout
           ctx
           ~defs
-          ~fetch_old_decls:(Remote_old_decl_client.fetch_old_decls ~ctx)
+          ~fetch_old_decls:
+            (Remote_old_decl_client.fetch_old_decls ~ctx ~telemetry_label)
           fnl
       in
 

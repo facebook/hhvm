@@ -342,6 +342,8 @@ let naming_sqlite_local_changes_nonempty _ = ()
 
 let type_decl_end _ = ()
 
+let remote_old_decl_end _ _ = ()
+
 let first_redecl_end _ _ = ()
 
 let second_redecl_end _ _ = ()

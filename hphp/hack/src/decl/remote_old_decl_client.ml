@@ -42,8 +42,10 @@ let name_to_decl_hash_opt ~(name : string) ~(db_path : Naming_sqlite.db_path) =
       (Option.value_exn decl_hash);
   decl_hash
 
-let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
-    Shallow_decl_defs.shallow_class option SMap.t =
+let fetch_old_decls
+    ~(telemetry_label : string)
+    ~(ctx : Provider_context.t)
+    (names : string list) : Shallow_decl_defs.shallow_class option SMap.t =
   let db_path_opt = db_path_of_ctx ctx in
   match db_path_opt with
   | None -> SMap.empty
@@ -54,6 +56,7 @@ let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
         names
     in
     let hh_config_version = get_hh_version () in
+    let start_t = Unix.gettimeofday () in
     let decl_blobs =
       Remote_old_decls_ffi.get_decls hh_config_version decl_hashes
     in
@@ -70,4 +73,14 @@ let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
             acc)
         decl_blobs
     in
+    let telemetry = Telemetry.create () in
+    let fetch_results =
+      Telemetry.create ()
+      |> Telemetry.int_ ~key:"to_fetch" ~value:(List.length names)
+      |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal decls)
+    in
+    let telemetry =
+      Telemetry.object_ telemetry ~key:telemetry_label ~value:fetch_results
+    in
+    HackEventLogger.remote_old_decl_end telemetry start_t;
     decls

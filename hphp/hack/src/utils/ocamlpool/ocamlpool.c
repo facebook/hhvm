@@ -130,6 +130,7 @@ static void init_cursor(void)
 
 static void ocamlpool_chunk_alloc(void);
 
+__attribute__((no_sanitize("undefined")))
 static void ocamlpool_chunk_truncate(void)
 {
   if (ocamlpool_root == Val_unit)

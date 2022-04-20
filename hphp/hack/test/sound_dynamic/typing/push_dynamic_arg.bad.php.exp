@@ -1,0 +1,6 @@
+File "push_dynamic_arg.bad.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+  File "push_dynamic_arg.bad.php", line 7, characters 33-41:
+  Expected `dynamic`
+  File "push_dynamic_arg.bad.php", line 7, characters 16-27:
+  But got `Inv<dynamic>`

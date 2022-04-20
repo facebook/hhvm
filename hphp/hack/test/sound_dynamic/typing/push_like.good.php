@@ -55,18 +55,7 @@ function return_vec_direct():~vec<int> {
 }
 
 function return_vec_direct2():~vec<int> {
-  $x = makeVec(get());
-  // Unfortunately we can't yet do return makeVec(get());
-  // Why not?
-  // Because we will generate two constraints
-  //   ~int <: #1
-  //   vec<#1> <: ~vec<int>
-  // And from the second we will conclude that #1 <: int
-  // Then by transitivity we have ~int <: int which is not true
-  // If instead we proceeded from the second constraint by pushing
-  // the like-type, to get vec<#1> <: vec<~int> and then top #1 <: ~int
-  // we would succeed.
-  return $x;
+  return makeVec(get());
 }
 
 function return_vec():~vec<int> {

@@ -503,19 +503,50 @@ let can_traverse_to_iface ct =
   | (Some ct_key, true) ->
     MakeType.async_keyed_iterator ct.ct_reason ct_key ct.ct_val
 
+let liken ~super_like env ty =
+  if super_like then
+    Typing_dynamic.make_like env ty
+  else
+    ty
+
+(** Given types ty_sub and ty_super, attempt to
+ *  reduce the subtyping proposition ty_sub <: ty_super to
+ *  a logical proposition whose primitive assertions are of the form v <: t or t <: v
+ *  where v is a type variable.
+ *
+ *  If super_like=true, then we have already reduced ty_sub <: ~ty_super to ty_sub <: ty_super
+ *  with ty_super known to support dynamic (i.e. ty_super <: supportdyn<mixed>). In this case,
+ *  when "going under" a constructor (for example, we had C<t> <: ~C<u>),
+ *  we can apply "like pushing" on the components (in this example, t <: ~u).
+ *  The parameter defaults to false to guard against incorrectly propagating the option. When
+ *  simplifying ty_sub only (e.g. reducing t|u <: v to t<:v && u<:v) it is correct to
+ *  propagate it.
+ **)
 let rec simplify_subtype
     ~(subtype_env : subtype_env)
     ?(this_ty : locl_ty option = None)
+    ?(super_like = false)
     ty_sub
     ty_super =
-  simplify_subtype_i ~subtype_env ~this_ty (LoclType ty_sub) (LoclType ty_super)
+  simplify_subtype_i
+    ~subtype_env
+    ~this_ty
+    ~super_like
+    (LoclType ty_sub)
+    (LoclType ty_super)
 
 and simplify_dynamic_aware_subtype ~subtype_env =
   simplify_subtype
     ~subtype_env:{ subtype_env with coerce = Some TL.CoerceToDynamic }
 
 and default_subtype
-    ~subtype_env ~(this_ty : locl_ty option) ~fail env ty_sub ty_super =
+    ~subtype_env
+    ~(this_ty : locl_ty option)
+    ?(super_like = false)
+    ~fail
+    env
+    ty_sub
+    ty_super =
   let default env =
     (env, TL.IsSubtype (subtype_env.coerce, ty_sub, ty_super))
   in
@@ -553,7 +584,12 @@ and default_subtype
         match deref lty_sub with
         | (_, Tunion tyl) ->
           List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
-              res &&& simplify_subtype_i ~subtype_env (LoclType ty_sub) ty_super)
+              res
+              &&& simplify_subtype_i
+                    ~subtype_env
+                    ~super_like
+                    (LoclType ty_sub)
+                    ty_super)
         | (_, Terr) ->
           if subtype_env.no_top_bottom then
             default env
@@ -661,6 +697,7 @@ and default_subtype
                   simplify_subtype_i
                     ~subtype_env
                     ~this_ty
+                    ~super_like
                     (LoclType ty)
                     ty_super
                     env
@@ -670,6 +707,7 @@ and default_subtype
                   ||| simplify_subtype_i
                         ~subtype_env
                         ~this_ty
+                        ~super_like
                         (LoclType ty)
                         ty_super
               in
@@ -682,10 +720,22 @@ and default_subtype
         | (_, Tdynamic) when coercing_from_dynamic subtype_env -> valid env
         | (_, Taccess _) -> invalid ~fail env
         | (_, Tnewtype (_, _, ty)) ->
-          simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ty_super env
+          simplify_subtype_i
+            ~subtype_env
+            ~this_ty
+            ~super_like
+            (LoclType ty)
+            ty_super
+            env
         | (_, Tdependent (_, ty)) ->
           let this_ty = Option.first_some this_ty (Some lty_sub) in
-          simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ty_super env
+          simplify_subtype_i
+            ~subtype_env
+            ~this_ty
+            ~super_like
+            (LoclType ty)
+            ty_super
+            env
         | _ -> invalid ~fail env
       end
   in
@@ -743,6 +793,7 @@ and default_subtype
 and simplify_subtype_i
     ~(subtype_env : subtype_env)
     ?(this_ty : locl_ty option = None)
+    ?(super_like : bool = false)
     (ty_sub : internal_type)
     (ty_super : internal_type)
     env : env * TL.subtype_prop =
@@ -751,11 +802,15 @@ and simplify_subtype_i
     ~this_ty
     ~function_name:
       ("simplify_subtype"
+      ^ (match subtype_env.coerce with
+        | None -> ""
+        | Some TL.CoerceToDynamic -> " <:D"
+        | Some TL.CoerceFromDynamic -> " D<:")
       ^
-      match subtype_env.coerce with
-      | None -> ""
-      | Some TL.CoerceToDynamic -> " <:D"
-      | Some TL.CoerceFromDynamic -> " D<:")
+      if super_like then
+        " super-like"
+      else
+        "")
     env
     ty_sub
     ty_super;
@@ -834,7 +889,14 @@ and simplify_subtype_i
     (env, TL.IsSubtype (subtype_env.coerce, ety_sub, ety_super))
   in
   let default_subtype env =
-    default_subtype ~subtype_env ~this_ty ~fail env ety_sub ety_super
+    default_subtype
+      ~subtype_env
+      ~this_ty
+      ~super_like
+      ~fail
+      env
+      ety_sub
+      ety_super
   in
   match ety_super with
   (* First deal with internal constraint types *)
@@ -1174,7 +1236,7 @@ and simplify_subtype_i
           | _ ->
             let ty_null = MakeType.null r in
             env
-            |> simplify_subtype ~subtype_env ~this_ty t ty_super
+            |> simplify_subtype ~subtype_env ~this_ty ~super_like t ty_super
             &&& simplify_subtype ~subtype_env ~this_ty ty_null ty_super)
         | (_, Tvar var_sub) when Ident.equal var_sub var_super -> valid env
         | _ ->
@@ -1202,8 +1264,14 @@ and simplify_subtype_i
     | (_, Tunion []) -> default_subtype env
     (* ty_sub <: union{ty_super'} iff ty_sub <: ty_super' *)
     | (_, Tunion [ty_super']) ->
-      simplify_subtype_i ~subtype_env ~this_ty ty_sub (LoclType ty_super') env
-    | (_, Tunion (_ :: _ as tyl_super)) ->
+      simplify_subtype_i
+        ~subtype_env
+        ~this_ty
+        ~super_like
+        ty_sub
+        (LoclType ty_super')
+        env
+    | (r, Tunion (_ :: _ as tyl_super)) ->
       let simplify_sub_union env ty_sub tyl_super =
         let finish env =
           match ty_sub with
@@ -1218,15 +1286,40 @@ and simplify_subtype_i
             end
           | _ -> invalid_env env
         in
-        (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
-         * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
-         *   t <: ~C<t1,...,tn> iff
-         *   t <: C<~t1,...,~tn> /\ C<~t1,...,~tn> <:D dynamic.
-         * An SDT class C generalizes to other SDT constructors such as tuples and shapes.
-         *)
-        let try_push env =
+        let stripped_dynamic =
           if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-            match TUtils.try_strip_dynamic env ty_super with
+            TUtils.try_strip_dynamic_from_union env r tyl_super
+          else
+            None
+        in
+        match stripped_dynamic with
+        | Some ty
+          when is_sub_type_for_union_i
+                 env
+                 (LoclType ty)
+                 (LoclType (MakeType.supportdyn r (MakeType.mixed r))) ->
+          env
+          |> simplify_subtype_i
+               ~subtype_env
+               ~this_ty
+               ty_sub
+               (LoclType (MakeType.dynamic r))
+          ||| simplify_subtype_i
+                ~subtype_env
+                ~this_ty
+                ~super_like:true
+                ty_sub
+                (LoclType ty)
+          ||| finish
+        | _ ->
+          (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
+           * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
+           *   t <: ~C<t1,...,tn> iff
+           *   t <: C<~t1,...,~tn> /\ C<~t1,...,~tn> <:D dynamic.
+           * An SDT class C generalizes to other SDT constructors such as tuples and shapes.
+           *)
+          let try_push env =
+            match stripped_dynamic with
             | None -> finish env
             | Some ty ->
               let (env, opt_ty) = Typing_dynamic.try_push_like env ty in
@@ -1247,27 +1340,26 @@ and simplify_subtype_i
                         (LoclType ty)
                 in
                 env |> simplify_pushed_like ||| finish)
-          else
-            finish env
-        in
+          in
 
-        (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
-         * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
-         * But we deal with unions on the left first (see case above), so this
-         * particular situation won't arise.
-         * TODO: identify under what circumstances this reduction is complete.
-         *)
-        let rec try_disjuncts tys env =
-          match tys with
-          | [] -> try_push env
-          | ty :: tys ->
-            let ty = LoclType ty in
-            env
-            |> simplify_subtype_i ~subtype_env ~this_ty ty_sub ty
-            ||| try_disjuncts tys
-        in
-        env |> try_disjuncts tyl_super
+          (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
+           * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
+           * But we deal with unions on the left first (see case above), so this
+           * particular situation won't arise.
+           * TODO: identify under what circumstances this reduction is complete.
+           *)
+          let rec try_disjuncts tys env =
+            match tys with
+            | [] -> try_push env
+            | ty :: tys ->
+              let ty = LoclType ty in
+              env
+              |> simplify_subtype_i ~subtype_env ~this_ty ~super_like ty_sub ty
+              ||| try_disjuncts tys
+          in
+          env |> try_disjuncts tyl_super
       in
+
       (match ety_sub with
       | ConstraintType cty when is_constraint_type_union cty ->
         default_subtype env
@@ -1364,6 +1456,7 @@ and simplify_subtype_i
             let tyarg = MakeType.nullable_locl r_super tyarg in
             simplify_subtype
               ~subtype_env
+              ~super_like
               lty_sub
               (mk (r_super, Tnewtype (name, [tyarg], tyarg)))
               env
@@ -1377,7 +1470,7 @@ and simplify_subtype_i
               Inter.intersect env ~r:r_super tyarg1 (MakeType.nonnull r_super)
             in
             let ty_sub' = mk (r_sub, Tnewtype (name, [ty_sub'], ty_sub')) in
-            simplify_subtype ~subtype_env ty_sub' ety env
+            simplify_subtype ~subtype_env ~super_like ty_sub' ety env
           (* A <: ?B iff A & nonnull <: B
              Only apply if B is a type variable or an intersection, to avoid oscillating
              forever between this case and the previous one. *)
@@ -1389,7 +1482,12 @@ and simplify_subtype_i
             let (env, ty_sub') =
               Inter.intersect_i env r_super ty_sub (MakeType.nonnull r_super)
             in
-            simplify_subtype_i ~subtype_env ty_sub' (LoclType arg_ty_super) env
+            simplify_subtype_i
+              ~subtype_env
+              ~super_like
+              ty_sub'
+              (LoclType arg_ty_super)
+              env
           (* null is the type of null and is a subtype of any option type. *)
           | ((_, Tprim Nast.Tnull), _) -> valid env
           (* ?ty_sub' <: ?ty_super' iff ty_sub' <: ?ty_super'. Reasoning:
@@ -1399,7 +1497,13 @@ and simplify_subtype_i
            * Therefore, this step preserves the set of solutions.
            *)
           | ((_, Toption ty_sub'), _) ->
-            simplify_subtype ~subtype_env ~this_ty ty_sub' ty_super env
+            simplify_subtype
+              ~subtype_env
+              ~this_ty
+              ~super_like
+              ty_sub'
+              ty_super
+              env
           (* We do not want to decompose Toption for these cases *)
           | ((_, (Tvar _ | Tunion _ | Tintersection _)), _) ->
             default_subtype env
@@ -1418,10 +1522,21 @@ and simplify_subtype_i
             ->
             (* TODO(T69551141) handle type arguments? *)
             if null_not_subtype lty_sub then
-              env |> simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super
+              env
+              |> simplify_subtype
+                   ~subtype_env
+                   ~this_ty
+                   ~super_like
+                   lty_sub
+                   arg_ty_super
             else
               env
-              |> simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super
+              |> simplify_subtype
+                   ~subtype_env
+                   ~this_ty
+                   ~super_like
+                   lty_sub
+                   arg_ty_super
               ||| default_subtype
           (* If ty_sub <: ?ty_super' and ty_sub does not contain null then we
            * must also have ty_sub <: ty_super'.  The converse follows by
@@ -1434,12 +1549,24 @@ and simplify_subtype_i
                 ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
                 | Tclass _ | Tvec_or_dict _ | Tany _ | Terr | Taccess _ ) ),
               _ ) ->
-            simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env
+            simplify_subtype
+              ~subtype_env
+              ~this_ty
+              ~super_like
+              lty_sub
+              arg_ty_super
+              env
           (* This is treating the option as a union, and using the sound, but incomplete,
              t <: t1 | t2 to (t <: t1) || (t <: t2) reduction
           *)
           | ((_, Tneg _), _) ->
-            simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env)
+            simplify_subtype
+              ~subtype_env
+              ~this_ty
+              ~super_like
+              lty_sub
+              arg_ty_super
+              env)
       )
     | (_r_super, Tdependent (d_sup, bound_sup)) ->
       let (env, bound_sup) = Env.expand_type env bound_sup in
@@ -1867,6 +1994,7 @@ and simplify_subtype_i
           simplify_subtype_funs
             ~subtype_env
             ~check_return:true
+            ~super_like
             r_sub
             ft_sub
             r_super
@@ -1883,6 +2011,7 @@ and simplify_subtype_i
           when Int.equal (List.length tyl_super) (List.length tyl_sub) ->
           wfold_left2
             (fun res ty_sub ty_super ->
+              let ty_super = liken ~super_like env ty_super in
               res &&& simplify_subtype ~subtype_env ty_sub ty_super)
             (env, TL.valid)
             tyl_sub
@@ -1898,6 +2027,7 @@ and simplify_subtype_i
             ~subtype_env
             ~env
             ~this_ty
+            ~super_like
             (r_sub, shape_kind_sub, fdm_sub)
             (r_super, shape_kind_super, fdm_super)
         | _ -> default_subtype env))
@@ -1907,12 +2037,16 @@ and simplify_subtype_i
       | LoclType lty ->
         (match (get_node lty, get_node ty_super) with
         | (Tvec_or_dict (tk_sub, tv_sub), Tvec_or_dict (tk_super, tv_super)) ->
+          let tv_super = liken ~super_like env tv_super in
+          let tk_super = liken ~super_like env tk_super in
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
         | ( Tclass ((_, n), _, [tk_sub; tv_sub]),
             Tvec_or_dict (tk_super, tv_super) )
           when String.equal n SN.Collections.cDict ->
+          let tv_super = liken ~super_like env tv_super in
+          let tk_super = liken ~super_like env tk_super in
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
@@ -1920,6 +2054,8 @@ and simplify_subtype_i
           when String.equal n SN.Collections.cVec ->
           let pos = get_pos lty in
           let tk_sub = MakeType.int (Reason.Ridx_vector_from_decl pos) in
+          let tv_super = liken ~super_like env tv_super in
+          let tk_super = liken ~super_like env tk_super in
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
@@ -1935,12 +2071,23 @@ and simplify_subtype_i
         (match deref lty_sub with
         | (_, Tnewtype (name_sub, [tyarg_sub], _))
           when String.equal name_sub SN.Classes.cSupportDyn ->
-          env |> simplify_subtype ~subtype_env ~this_ty tyarg_sub tyarg_super
+          env
+          |> simplify_subtype
+               ~subtype_env
+               ~this_ty
+               ~super_like
+               tyarg_sub
+               tyarg_super
         | (_, Tvar _) -> default_subtype env
         | _ ->
           let ty_dyn = MakeType.dynamic r_supportdyn in
           env
-          |> simplify_subtype ~subtype_env ~this_ty lty_sub tyarg_super
+          |> simplify_subtype
+               ~subtype_env
+               ~this_ty
+               ~super_like
+               lty_sub
+               tyarg_super
           &&& simplify_dynamic_aware_subtype
                 ~subtype_env
                 ~this_ty
@@ -1973,6 +2120,7 @@ and simplify_subtype_i
                 in
                 simplify_subtype_variance
                   ~subtype_env
+                  ~super_like
                   name_sub
                   variance_reifiedl
                   tyl_sub
@@ -2134,6 +2282,7 @@ and simplify_subtype_i
                  *)
                 simplify_subtype_variance
                   ~subtype_env
+                  ~super_like
                   cid_sub
                   variance_reifiedl
                   tyl_sub
@@ -2166,7 +2315,13 @@ and simplify_subtype_i
                 let ((env, _ty_err_opt), up_obj) =
                   Phase.localize ~ety_env env up_obj
                 in
-                simplify_subtype ~subtype_env ~this_ty up_obj ty_super env
+                simplify_subtype
+                  ~subtype_env
+                  ~this_ty
+                  ~super_like
+                  up_obj
+                  ty_super
+                  env
               | None ->
                 if
                   Ast_defs.is_c_trait (Cls.kind class_sub)
@@ -2235,6 +2390,7 @@ and simplify_subtype_shape
     ~(subtype_env : subtype_env)
     ~(env : env)
     ~(this_ty : locl_ty option)
+    ?(super_like = false)
     (r_sub, shape_kind_sub, fdm_sub)
     (r_super, shape_kind_super, fdm_super) =
   (*
@@ -2289,6 +2445,7 @@ and simplify_subtype_shape
     | (`Required sub_ty, `Required super_ty)
     | (`Required sub_ty, `Optional super_ty)
     | (`Optional sub_ty, `Optional super_ty) ->
+      let super_ty = liken ~super_like env super_ty in
       res &&& simplify_subtype ~subtype_env ~this_ty sub_ty super_ty
     | (`Absent, `Optional _)
     | (`Absent, `Absent) ->
@@ -2708,6 +2865,7 @@ and simplify_subtype_has_member
 
 and simplify_subtype_variance
     ~(subtype_env : subtype_env)
+    ?(super_like = false)
     (cid : string)
     (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
     (children_tyl : locl_ty list)
@@ -2743,7 +2901,9 @@ and simplify_subtype_variance
     in
     simplify_subtype ~subtype_env ~this_ty:None
   in
-  let simplify_subtype_variance = simplify_subtype_variance ~subtype_env in
+  let simplify_subtype_variance =
+    simplify_subtype_variance ~subtype_env ~super_like
+  in
   match (variance_reifiedl, children_tyl, super_tyl) with
   | ([], _, _)
   | (_, [], _)
@@ -2755,7 +2915,9 @@ and simplify_subtype_variance
     let simplify_subtype = simplify_subtype reify_kind in
     begin
       match variance with
-      | Ast_defs.Covariant -> simplify_subtype child super env
+      | Ast_defs.Covariant ->
+        let super = liken ~super_like env super in
+        simplify_subtype child super env
       | Ast_defs.Contravariant ->
         let super =
           mk
@@ -2767,7 +2929,9 @@ and simplify_subtype_variance
         let super' =
           mk (Reason.Rinvariant_generic (get_reason super, cid), get_node super)
         in
-        env |> simplify_subtype child super' &&& simplify_subtype super' child
+        env
+        |> simplify_subtype child (liken ~super_like env super')
+        &&& simplify_subtype super' child
     end
     &&& simplify_subtype_variance cid variance_reifiedl childrenl superl
 
@@ -3223,14 +3387,12 @@ and simplify_subtype_possibly_enforced
 and simplify_subtype_funs
     ~(subtype_env : subtype_env)
     ~(check_return : bool)
+    ?(super_like = false)
     (r_sub : Reason.t)
     (ft_sub : locl_fun_type)
     (r_super : Reason.t)
     (ft_super : locl_fun_type)
     env : env * TL.subtype_prop =
-  let simplify_subtype_possibly_enforced =
-    simplify_subtype_possibly_enforced ~subtype_env
-  in
   (* First apply checks on attributes and variadic arity *)
   let simplify_subtype_implicit_params =
     simplify_subtype_implicit_params ~subtype_env
@@ -3259,9 +3421,10 @@ and simplify_subtype_funs
         ft_super.ft_implicit_params
         ft_sub.ft_implicit_params
   &&&
-  (* Finally do covariant subtryping on return type *)
+  (* Finally do covariant subtyping on return type *)
   if check_return then
-    simplify_subtype_possibly_enforced ft_sub.ft_ret ft_super.ft_ret
+    let super_ty = liken ~super_like env ft_super.ft_ret.et_type in
+    simplify_subtype ~subtype_env ft_sub.ft_ret.et_type super_ty
   else
     valid
 

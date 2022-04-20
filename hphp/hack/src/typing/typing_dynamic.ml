@@ -142,8 +142,11 @@ let sound_dynamic_interface_check_from_fun_ty env fun_ty =
 (* Given t, construct ~t.
  * acc is a boolean that remains false if no change was made (e.g. t = dynamic)
  *)
-let make_like changed ty =
-  if Typing_defs.is_dynamic ty then
+let make_like env changed ty =
+  if
+    Typing_defs.is_dynamic ty
+    || Option.is_some (Typing_utils.try_strip_dynamic env ty)
+  then
     (changed, ty)
   else
     let r = get_reason ty in
@@ -169,7 +172,7 @@ let push_like_tyargs env tyl tparams =
       match tp.tp_variance with
       | Ast_defs.Contravariant -> (changed, ty)
       | _ ->
-        let (changed', ty') = make_like changed ty in
+        let (changed', ty') = make_like env changed ty in
         (* Only push like onto type argument if it produces a well-formed type
          * i.e. satisfies any as constraints
          *)
@@ -197,14 +200,14 @@ let push_like_tyargs env tyl tparams =
 let rec try_push_like env ty =
   match deref ty with
   | (r, Ttuple tyl) ->
-    let (changed, tyl) = List.map_env false tyl ~f:make_like in
+    let (changed, tyl) = List.map_env false tyl ~f:(make_like env) in
     ( env,
       if changed then
         Some (mk (r, Ttuple tyl))
       else
         None )
   | (r, Tfun ft) ->
-    let (changed, ret_ty) = make_like false ft.ft_ret.et_type in
+    let (changed, ret_ty) = make_like env false ft.ft_ret.et_type in
     ( env,
       if changed then
         Some
@@ -214,7 +217,7 @@ let rec try_push_like env ty =
         None )
   | (r, Tshape (kind, fields)) ->
     let add_like_to_shape_field changed _name { sft_optional; sft_ty } =
-      let (changed, sft_ty) = make_like changed sft_ty in
+      let (changed, sft_ty) = make_like env changed sft_ty in
       (changed, { sft_optional; sft_ty })
     in
     let (changed, fields) =
@@ -256,7 +259,7 @@ let rec try_push_like env ty =
       | (env, None) -> (env, None)
     end
   | (r, Tvec_or_dict (tk, tv)) ->
-    let (changed, tyl) = List.map_env false [tk; tv] ~f:make_like in
+    let (changed, tyl) = List.map_env false [tk; tv] ~f:(make_like env) in
     if changed then
       match tyl with
       | [tk; tv] -> (env, Some (mk (r, Tvec_or_dict (tk, tv))))
@@ -264,3 +267,5 @@ let rec try_push_like env ty =
     else
       (env, None)
   | _ -> (env, None)
+
+let make_like env ty = snd (make_like env false ty)

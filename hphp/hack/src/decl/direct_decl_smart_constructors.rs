@@ -3025,6 +3025,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     fn make_alias_declaration(
         &mut self,
         attributes: Self::R,
+        _modifiers: Self::R,
         keyword: Self::R,
         name: Self::R,
         generic_params: Self::R,
@@ -4379,6 +4380,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     fn make_enum_declaration(
         &mut self,
         attributes: Self::R,
+        _modifiers: Self::R, // TODO
         _keyword: Self::R,
         name: Self::R,
         _colon: Self::R,

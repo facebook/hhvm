@@ -194,6 +194,7 @@ struct
       }
     | EnumDeclaration of {
         enum_attribute_spec: t;
+        enum_modifiers: t;
         enum_keyword: t;
         enum_name: t;
         enum_colon: t;
@@ -238,6 +239,7 @@ struct
       }
     | AliasDeclaration of {
         alias_attribute_spec: t;
+        alias_modifiers: t;
         alias_keyword: t;
         alias_name: t;
         alias_generic_parameter: t;
@@ -1440,6 +1442,7 @@ struct
 
   and enum_declaration = {
     enum_attribute_spec: attribute_specification option value;
+    enum_modifiers: Token.t option value;
     enum_keyword: Token.t value;
     enum_name: Token.t value;
     enum_colon: Token.t value;
@@ -1489,6 +1492,7 @@ struct
 
   and alias_declaration = {
     alias_attribute_spec: attribute_specification option value;
+    alias_modifiers: Token.t option value;
     alias_keyword: Token.t value;
     alias_name: Token.t option value;
     alias_generic_parameter: type_parameters option value;

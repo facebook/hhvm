@@ -111,10 +111,11 @@ ss.serialize_field("file_attribute_specification_attributes", &self.with(attribu
 ss.serialize_field("file_attribute_specification_right_double_angle", &self.with(right_double_angle))?;
       ss.end()
 } 
-SyntaxVariant::EnumDeclaration (EnumDeclarationChildren{attribute_spec,keyword,name,colon,base,type_,left_brace,use_clauses,enumerators,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 11)?;
+SyntaxVariant::EnumDeclaration (EnumDeclarationChildren{attribute_spec,modifiers,keyword,name,colon,base,type_,left_brace,use_clauses,enumerators,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 12)?;
       ss.serialize_field("kind", "enum_declaration")?;
       ss.serialize_field("enum_attribute_spec", &self.with(attribute_spec))?;
+ss.serialize_field("enum_modifiers", &self.with(modifiers))?;
 ss.serialize_field("enum_keyword", &self.with(keyword))?;
 ss.serialize_field("enum_name", &self.with(name))?;
 ss.serialize_field("enum_colon", &self.with(colon))?;
@@ -170,10 +171,11 @@ ss.serialize_field("enum_class_enumerator_initializer", &self.with(initializer))
 ss.serialize_field("enum_class_enumerator_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
-SyntaxVariant::AliasDeclaration (AliasDeclarationChildren{attribute_spec,keyword,name,generic_parameter,constraint,equal,type_,semicolon} ) => {
-      let mut ss = s.serialize_struct("", 9)?;
+SyntaxVariant::AliasDeclaration (AliasDeclarationChildren{attribute_spec,modifiers,keyword,name,generic_parameter,constraint,equal,type_,semicolon} ) => {
+      let mut ss = s.serialize_struct("", 10)?;
       ss.serialize_field("kind", "alias_declaration")?;
       ss.serialize_field("alias_attribute_spec", &self.with(attribute_spec))?;
+ss.serialize_field("alias_modifiers", &self.with(modifiers))?;
 ss.serialize_field("alias_keyword", &self.with(keyword))?;
 ss.serialize_field("alias_name", &self.with(name))?;
 ss.serialize_field("alias_generic_parameter", &self.with(generic_parameter))?;

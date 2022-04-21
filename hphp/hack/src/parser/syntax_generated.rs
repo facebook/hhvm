@@ -113,9 +113,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_enum_declaration(_: &C, enum_attribute_spec: Self, enum_keyword: Self, enum_name: Self, enum_colon: Self, enum_base: Self, enum_type: Self, enum_left_brace: Self, enum_use_clauses: Self, enum_enumerators: Self, enum_right_brace: Self) -> Self {
+    fn make_enum_declaration(_: &C, enum_attribute_spec: Self, enum_modifiers: Self, enum_keyword: Self, enum_name: Self, enum_colon: Self, enum_base: Self, enum_type: Self, enum_left_brace: Self, enum_use_clauses: Self, enum_enumerators: Self, enum_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::EnumDeclaration(Box::new(EnumDeclarationChildren {
             enum_attribute_spec,
+            enum_modifiers,
             enum_keyword,
             enum_name,
             enum_colon,
@@ -182,9 +183,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_alias_declaration(_: &C, alias_attribute_spec: Self, alias_keyword: Self, alias_name: Self, alias_generic_parameter: Self, alias_constraint: Self, alias_equal: Self, alias_type: Self, alias_semicolon: Self) -> Self {
+    fn make_alias_declaration(_: &C, alias_attribute_spec: Self, alias_modifiers: Self, alias_keyword: Self, alias_name: Self, alias_generic_parameter: Self, alias_constraint: Self, alias_equal: Self, alias_type: Self, alias_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
             alias_attribute_spec,
+            alias_modifiers,
             alias_keyword,
             alias_name,
             alias_generic_parameter,
@@ -1906,8 +1908,9 @@ where
                 acc
             },
             SyntaxVariant::EnumDeclaration(x) => {
-                let EnumDeclarationChildren { enum_attribute_spec, enum_keyword, enum_name, enum_colon, enum_base, enum_type, enum_left_brace, enum_use_clauses, enum_enumerators, enum_right_brace } = *x;
+                let EnumDeclarationChildren { enum_attribute_spec, enum_modifiers, enum_keyword, enum_name, enum_colon, enum_base, enum_type, enum_left_brace, enum_use_clauses, enum_enumerators, enum_right_brace } = *x;
                 let acc = f(enum_attribute_spec, acc);
+                let acc = f(enum_modifiers, acc);
                 let acc = f(enum_keyword, acc);
                 let acc = f(enum_name, acc);
                 let acc = f(enum_colon, acc);
@@ -1960,8 +1963,9 @@ where
                 acc
             },
             SyntaxVariant::AliasDeclaration(x) => {
-                let AliasDeclarationChildren { alias_attribute_spec, alias_keyword, alias_name, alias_generic_parameter, alias_constraint, alias_equal, alias_type, alias_semicolon } = *x;
+                let AliasDeclarationChildren { alias_attribute_spec, alias_modifiers, alias_keyword, alias_name, alias_generic_parameter, alias_constraint, alias_equal, alias_type, alias_semicolon } = *x;
                 let acc = f(alias_attribute_spec, acc);
+                let acc = f(alias_modifiers, acc);
                 let acc = f(alias_keyword, acc);
                 let acc = f(alias_name, acc);
                 let acc = f(alias_generic_parameter, acc);
@@ -3380,7 +3384,7 @@ where
                  file_attribute_specification_left_double_angle: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::EnumDeclaration, 10) => SyntaxVariant::EnumDeclaration(Box::new(EnumDeclarationChildren {
+             (SyntaxKind::EnumDeclaration, 11) => SyntaxVariant::EnumDeclaration(Box::new(EnumDeclarationChildren {
                  enum_right_brace: ts.pop().unwrap(),
                  enum_enumerators: ts.pop().unwrap(),
                  enum_use_clauses: ts.pop().unwrap(),
@@ -3390,6 +3394,7 @@ where
                  enum_colon: ts.pop().unwrap(),
                  enum_name: ts.pop().unwrap(),
                  enum_keyword: ts.pop().unwrap(),
+                 enum_modifiers: ts.pop().unwrap(),
                  enum_attribute_spec: ts.pop().unwrap(),
                  
              })),
@@ -3429,7 +3434,7 @@ where
                  enum_class_enumerator_modifiers: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::AliasDeclaration, 8) => SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
+             (SyntaxKind::AliasDeclaration, 9) => SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
                  alias_semicolon: ts.pop().unwrap(),
                  alias_type: ts.pop().unwrap(),
                  alias_equal: ts.pop().unwrap(),
@@ -3437,6 +3442,7 @@ where
                  alias_generic_parameter: ts.pop().unwrap(),
                  alias_name: ts.pop().unwrap(),
                  alias_keyword: ts.pop().unwrap(),
+                 alias_modifiers: ts.pop().unwrap(),
                  alias_attribute_spec: ts.pop().unwrap(),
                  
              })),
@@ -4535,6 +4541,7 @@ pub struct FileAttributeSpecificationChildren<T, V> {
 #[derive(Debug, Clone)]
 pub struct EnumDeclarationChildren<T, V> {
     pub enum_attribute_spec: Syntax<T, V>,
+    pub enum_modifiers: Syntax<T, V>,
     pub enum_keyword: Syntax<T, V>,
     pub enum_name: Syntax<T, V>,
     pub enum_colon: Syntax<T, V>,
@@ -4589,6 +4596,7 @@ pub struct EnumClassEnumeratorChildren<T, V> {
 #[derive(Debug, Clone)]
 pub struct AliasDeclarationChildren<T, V> {
     pub alias_attribute_spec: Syntax<T, V>,
+    pub alias_modifiers: Syntax<T, V>,
     pub alias_keyword: Syntax<T, V>,
     pub alias_name: Syntax<T, V>,
     pub alias_generic_parameter: Syntax<T, V>,
@@ -6050,17 +6058,18 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             EnumDeclaration(x) => {
-                get_index(10).and_then(|index| { match index {
+                get_index(11).and_then(|index| { match index {
                         0 => Some(&x.enum_attribute_spec),
-                    1 => Some(&x.enum_keyword),
-                    2 => Some(&x.enum_name),
-                    3 => Some(&x.enum_colon),
-                    4 => Some(&x.enum_base),
-                    5 => Some(&x.enum_type),
-                    6 => Some(&x.enum_left_brace),
-                    7 => Some(&x.enum_use_clauses),
-                    8 => Some(&x.enum_enumerators),
-                    9 => Some(&x.enum_right_brace),
+                    1 => Some(&x.enum_modifiers),
+                    2 => Some(&x.enum_keyword),
+                    3 => Some(&x.enum_name),
+                    4 => Some(&x.enum_colon),
+                    5 => Some(&x.enum_base),
+                    6 => Some(&x.enum_type),
+                    7 => Some(&x.enum_left_brace),
+                    8 => Some(&x.enum_use_clauses),
+                    9 => Some(&x.enum_enumerators),
+                    10 => Some(&x.enum_right_brace),
                         _ => None,
                     }
                 })
@@ -6114,15 +6123,16 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AliasDeclaration(x) => {
-                get_index(8).and_then(|index| { match index {
+                get_index(9).and_then(|index| { match index {
                         0 => Some(&x.alias_attribute_spec),
-                    1 => Some(&x.alias_keyword),
-                    2 => Some(&x.alias_name),
-                    3 => Some(&x.alias_generic_parameter),
-                    4 => Some(&x.alias_constraint),
-                    5 => Some(&x.alias_equal),
-                    6 => Some(&x.alias_type),
-                    7 => Some(&x.alias_semicolon),
+                    1 => Some(&x.alias_modifiers),
+                    2 => Some(&x.alias_keyword),
+                    3 => Some(&x.alias_name),
+                    4 => Some(&x.alias_generic_parameter),
+                    5 => Some(&x.alias_constraint),
+                    6 => Some(&x.alias_equal),
+                    7 => Some(&x.alias_type),
+                    8 => Some(&x.alias_semicolon),
                         _ => None,
                     }
                 })

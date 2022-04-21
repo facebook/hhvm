@@ -762,6 +762,7 @@ module WithToken (Token : TokenType) = struct
       | EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -773,6 +774,7 @@ module WithToken (Token : TokenType) = struct
             enum_right_brace;
           } ->
         let acc = f acc enum_attribute_spec in
+        let acc = f acc enum_modifiers in
         let acc = f acc enum_keyword in
         let acc = f acc enum_name in
         let acc = f acc enum_colon in
@@ -845,6 +847,7 @@ module WithToken (Token : TokenType) = struct
       | AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -854,6 +857,7 @@ module WithToken (Token : TokenType) = struct
             alias_semicolon;
           } ->
         let acc = f acc alias_attribute_spec in
+        let acc = f acc alias_modifiers in
         let acc = f acc alias_keyword in
         let acc = f acc alias_name in
         let acc = f acc alias_generic_parameter in
@@ -2412,6 +2416,7 @@ module WithToken (Token : TokenType) = struct
       | EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -2424,6 +2429,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           enum_attribute_spec;
+          enum_modifiers;
           enum_keyword;
           enum_name;
           enum_colon;
@@ -2496,6 +2502,7 @@ module WithToken (Token : TokenType) = struct
       | AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -2506,6 +2513,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           alias_attribute_spec;
+          alias_modifiers;
           alias_keyword;
           alias_name;
           alias_generic_parameter;
@@ -3961,6 +3969,7 @@ module WithToken (Token : TokenType) = struct
       | EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -3973,6 +3982,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           "enum_attribute_spec";
+          "enum_modifiers";
           "enum_keyword";
           "enum_name";
           "enum_colon";
@@ -4045,6 +4055,7 @@ module WithToken (Token : TokenType) = struct
       | AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -4055,6 +4066,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           "alias_attribute_spec";
+          "alias_modifiers";
           "alias_keyword";
           "alias_name";
           "alias_generic_parameter";
@@ -5633,6 +5645,7 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.EnumDeclaration,
           [
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -5646,6 +5659,7 @@ module WithToken (Token : TokenType) = struct
         EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -5722,6 +5736,7 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.AliasDeclaration,
           [
             alias_attribute_spec;
+            alias_modifiers;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -5733,6 +5748,7 @@ module WithToken (Token : TokenType) = struct
         AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -7417,6 +7433,7 @@ module WithToken (Token : TokenType) = struct
 
       let make_enum_declaration
           enum_attribute_spec
+          enum_modifiers
           enum_keyword
           enum_name
           enum_colon
@@ -7430,6 +7447,7 @@ module WithToken (Token : TokenType) = struct
           EnumDeclaration
             {
               enum_attribute_spec;
+              enum_modifiers;
               enum_keyword;
               enum_name;
               enum_colon;
@@ -7520,6 +7538,7 @@ module WithToken (Token : TokenType) = struct
 
       let make_alias_declaration
           alias_attribute_spec
+          alias_modifiers
           alias_keyword
           alias_name
           alias_generic_parameter
@@ -7531,6 +7550,7 @@ module WithToken (Token : TokenType) = struct
           AliasDeclaration
             {
               alias_attribute_spec;
+              alias_modifiers;
               alias_keyword;
               alias_name;
               alias_generic_parameter;

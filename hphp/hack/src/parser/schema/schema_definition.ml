@@ -157,6 +157,7 @@ let schema : schema_node list =
       fields =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
+          ("modifiers", ZeroOrOne Token);
           ("keyword", Token);
           ("name", Token);
           ("colon", Token);
@@ -246,6 +247,7 @@ let schema : schema_node list =
       fields =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
+          ("modifiers", ZeroOrOne Token);
           ("keyword", Token);
           ("name", ZeroOrOne Token);
           ("generic_parameter", ZeroOrOne (Just "TypeParameters"));

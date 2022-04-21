@@ -331,6 +331,8 @@ fn get_modifiers_of_declaration<'a>(node: S<'a>) -> Option<S<'a>> {
         ClassishDeclaration(x) => Some(&x.modifiers),
         EnumClassDeclaration(x) => Some(&x.modifiers),
         EnumClassEnumerator(x) => Some(&x.modifiers),
+        EnumDeclaration(x) => Some(&x.modifiers),
+        AliasDeclaration(x) => Some(&x.modifiers),
         _ => None,
     }
 }
@@ -3965,6 +3967,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         if let AliasDeclaration(ad) = &node.children {
             let attrs = &ad.attribute_spec;
             self.check_attr_enabled(attrs);
+            self.invalid_modifier_errors("Type aliases", node, |kind| kind == TokenKind::Internal);
             if token_kind(&ad.keyword) == Some(TokenKind::Type) && !ad.constraint.is_missing() {
                 self.errors
                     .push(make_error_from_node(&ad.keyword, errors::error2034))
@@ -4752,7 +4755,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     errors::no_const_interfaces_traits_enums,
                 ))
             }
-
+            self.invalid_modifier_errors("Enums", node, |kind| kind == TokenKind::Internal);
             if !x.name.is_missing() {
                 let name = self.text(&x.name);
                 let location = make_location_of_node(&x.name);

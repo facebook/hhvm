@@ -255,6 +255,7 @@ pub struct FileAttributeSpecificationChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct EnumDeclarationChildren<'a, T, V> {
     pub attribute_spec: Syntax<'a, T, V>,
+    pub modifiers: Syntax<'a, T, V>,
     pub keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub colon: Syntax<'a, T, V>,
@@ -309,6 +310,7 @@ pub struct EnumClassEnumeratorChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct AliasDeclarationChildren<'a, T, V> {
     pub attribute_spec: Syntax<'a, T, V>,
+    pub modifiers: Syntax<'a, T, V>,
     pub keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub generic_parameter: Syntax<'a, T, V>,

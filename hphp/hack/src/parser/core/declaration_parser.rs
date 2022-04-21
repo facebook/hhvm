@@ -216,9 +216,9 @@ where
         )
     }
 
-    fn parse_enum_declaration(&mut self, attrs: S::R) -> S::R {
+    fn parse_enum_declaration(&mut self, attrs: S::R, modifiers: S::R) -> S::R {
         // enum-declaration:
-        //   attribute-specification-opt enum  name  enum-base  type-constraint-opt /
+        //   attribute-specification-opt modifiers enum  name  enum-base  type-constraint-opt /
         //     {  enum-use-clause-list-opt; enumerator-list-opt  }
         // enum-base:
         //   :  int
@@ -243,6 +243,7 @@ where
             make_enum_declaration,
             self,
             attrs,
+            modifiers,
             enum_,
             name,
             colon,
@@ -289,12 +290,7 @@ where
     fn parse_enum_or_enum_class_declaration(&mut self, attrs: S::R, modifiers: S::R) -> S::R {
         match self.peek_token_kind_with_lookahead(1) {
             TokenKind::Class => self.parse_enum_class_declaration(attrs, modifiers),
-            _ => {
-                if !modifiers.is_missing() {
-                    self.with_error(Errors::enum_with_modifiers)
-                }
-                self.parse_enum_declaration(attrs)
-            }
+            _ => self.parse_enum_declaration(attrs, modifiers),
         }
     }
 
@@ -2050,7 +2046,6 @@ where
                 self.parse_enum_or_enum_class_declaration(attribute_specification, modifiers)
             }
             TokenKind::Type | TokenKind::Newtype => {
-                // TODO: internal on type alias declaration
                 self.parse_type_alias_declaration(attribute_specification)
             }
             TokenKind::Newctx => self.parse_ctx_alias_declaration(attribute_specification),
@@ -2213,11 +2208,12 @@ where
     fn parse_type_alias_declaration(&mut self, attr: S::R) -> S::R {
         // SPEC
         // alias-declaration:
-        //   attribute-spec-opt type  name
+        //   attribute-spec-opt modifiers type  name
         //     generic-type-parameter-list-opt  =  type-specifier  ;
-        //   attribute-spec-opt newtype  name
+        //   attribute-spec-opt modifiers newtype  name
         //     generic-type-parameter-list-opt type-constraint-opt
         //       =  type-specifier  ;
+        let modifiers = self.parse_modifiers();
         let token = self.fetch_token();
         // Not `require_name` but `require_name_allow_non_reserved`, because the parser
         // must allow keywords in the place of identifiers; at least to parse .hhi
@@ -2234,6 +2230,7 @@ where
             make_alias_declaration,
             self,
             attr,
+            modifiers,
             token,
             name,
             generic,

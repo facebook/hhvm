@@ -121,17 +121,18 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             EnumDeclaration(x) => {
-                get_index(10).and_then(|index| { match index {
+                get_index(11).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
-                    1 => Some(&x.keyword),
-                    2 => Some(&x.name),
-                    3 => Some(&x.colon),
-                    4 => Some(&x.base),
-                    5 => Some(&x.type_),
-                    6 => Some(&x.left_brace),
-                    7 => Some(&x.use_clauses),
-                    8 => Some(&x.enumerators),
-                    9 => Some(&x.right_brace),
+                    1 => Some(&x.modifiers),
+                    2 => Some(&x.keyword),
+                    3 => Some(&x.name),
+                    4 => Some(&x.colon),
+                    5 => Some(&x.base),
+                    6 => Some(&x.type_),
+                    7 => Some(&x.left_brace),
+                    8 => Some(&x.use_clauses),
+                    9 => Some(&x.enumerators),
+                    10 => Some(&x.right_brace),
                         _ => None,
                     }
                 })
@@ -185,15 +186,16 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AliasDeclaration(x) => {
-                get_index(8).and_then(|index| { match index {
+                get_index(9).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
-                    1 => Some(&x.keyword),
-                    2 => Some(&x.name),
-                    3 => Some(&x.generic_parameter),
-                    4 => Some(&x.constraint),
-                    5 => Some(&x.equal),
-                    6 => Some(&x.type_),
-                    7 => Some(&x.semicolon),
+                    1 => Some(&x.modifiers),
+                    2 => Some(&x.keyword),
+                    3 => Some(&x.name),
+                    4 => Some(&x.generic_parameter),
+                    5 => Some(&x.constraint),
+                    6 => Some(&x.equal),
+                    7 => Some(&x.type_),
+                    8 => Some(&x.semicolon),
                         _ => None,
                     }
                 })

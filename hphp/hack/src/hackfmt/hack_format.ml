@@ -176,6 +176,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.EnumDeclaration
         {
           enum_attribute_spec = attr;
+          enum_modifiers = modifiers;
           enum_keyword = kw;
           enum_name = name;
           enum_colon = colon_kw;
@@ -190,6 +191,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         [
           t env attr;
           when_present attr newline;
+          handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
           t env kw;
           Space;
           t env name;
@@ -253,6 +255,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.AliasDeclaration
         {
           alias_attribute_spec = attr;
+          alias_modifiers = modifiers;
           alias_keyword = kw;
           alias_name = name;
           alias_generic_parameter = generic;
@@ -260,7 +263,27 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           alias_equal = eq_kw;
           alias_type = ty;
           alias_semicolon = semi;
-        }
+        } ->
+      (* TODO: revisit this for long names *)
+      Concat
+        [
+          t env attr;
+          when_present attr newline;
+          handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+          t env kw;
+          Space;
+          t env name;
+          t env generic;
+          Space;
+          handle_possible_list env type_constraint;
+          when_present eq_kw (function () ->
+              Concat
+                [
+                  Space; t env eq_kw; Space; SplitWith Cost.Base; Nest [t env ty];
+                ]);
+          t env semi;
+          Newline;
+        ]
     | Syntax.ContextAliasDeclaration
         {
           ctx_alias_attribute_spec = attr;

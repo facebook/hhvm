@@ -121,8 +121,8 @@ where
         Node(self.0.make_file_attribute_specification(left_double_angle.0, keyword.0, colon.0, attributes.0, right_double_angle.0), self.1.make_file_attribute_specification(left_double_angle.1, keyword.1, colon.1, attributes.1, right_double_angle.1))
     }
 
-    fn make_enum_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, colon: Self::R, base: Self::R, type_: Self::R, left_brace: Self::R, use_clauses: Self::R, enumerators: Self::R, right_brace: Self::R) -> Self::R {
-        Node(self.0.make_enum_declaration(attribute_spec.0, keyword.0, name.0, colon.0, base.0, type_.0, left_brace.0, use_clauses.0, enumerators.0, right_brace.0), self.1.make_enum_declaration(attribute_spec.1, keyword.1, name.1, colon.1, base.1, type_.1, left_brace.1, use_clauses.1, enumerators.1, right_brace.1))
+    fn make_enum_declaration(&mut self, attribute_spec: Self::R, modifiers: Self::R, keyword: Self::R, name: Self::R, colon: Self::R, base: Self::R, type_: Self::R, left_brace: Self::R, use_clauses: Self::R, enumerators: Self::R, right_brace: Self::R) -> Self::R {
+        Node(self.0.make_enum_declaration(attribute_spec.0, modifiers.0, keyword.0, name.0, colon.0, base.0, type_.0, left_brace.0, use_clauses.0, enumerators.0, right_brace.0), self.1.make_enum_declaration(attribute_spec.1, modifiers.1, keyword.1, name.1, colon.1, base.1, type_.1, left_brace.1, use_clauses.1, enumerators.1, right_brace.1))
     }
 
     fn make_enum_use(&mut self, keyword: Self::R, names: Self::R, semicolon: Self::R) -> Self::R {
@@ -141,8 +141,8 @@ where
         Node(self.0.make_enum_class_enumerator(modifiers.0, type_.0, name.0, initializer.0, semicolon.0), self.1.make_enum_class_enumerator(modifiers.1, type_.1, name.1, initializer.1, semicolon.1))
     }
 
-    fn make_alias_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, generic_parameter: Self::R, constraint: Self::R, equal: Self::R, type_: Self::R, semicolon: Self::R) -> Self::R {
-        Node(self.0.make_alias_declaration(attribute_spec.0, keyword.0, name.0, generic_parameter.0, constraint.0, equal.0, type_.0, semicolon.0), self.1.make_alias_declaration(attribute_spec.1, keyword.1, name.1, generic_parameter.1, constraint.1, equal.1, type_.1, semicolon.1))
+    fn make_alias_declaration(&mut self, attribute_spec: Self::R, modifiers: Self::R, keyword: Self::R, name: Self::R, generic_parameter: Self::R, constraint: Self::R, equal: Self::R, type_: Self::R, semicolon: Self::R) -> Self::R {
+        Node(self.0.make_alias_declaration(attribute_spec.0, modifiers.0, keyword.0, name.0, generic_parameter.0, constraint.0, equal.0, type_.0, semicolon.0), self.1.make_alias_declaration(attribute_spec.1, modifiers.1, keyword.1, name.1, generic_parameter.1, constraint.1, equal.1, type_.1, semicolon.1))
     }
 
     fn make_context_alias_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, generic_parameter: Self::R, as_constraint: Self::R, equal: Self::R, context: Self::R, semicolon: Self::R) -> Self::R {

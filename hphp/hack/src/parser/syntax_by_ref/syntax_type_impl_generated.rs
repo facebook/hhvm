@@ -119,9 +119,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_enum_declaration(ctx: &C, attribute_spec: Self, keyword: Self, name: Self, colon: Self, base: Self, type_: Self, left_brace: Self, use_clauses: Self, enumerators: Self, right_brace: Self) -> Self {
+    fn make_enum_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, keyword: Self, name: Self, colon: Self, base: Self, type_: Self, left_brace: Self, use_clauses: Self, enumerators: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::EnumDeclaration(ctx.get_arena().alloc(EnumDeclarationChildren {
             attribute_spec,
+            modifiers,
             keyword,
             name,
             colon,
@@ -188,9 +189,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_alias_declaration(ctx: &C, attribute_spec: Self, keyword: Self, name: Self, generic_parameter: Self, constraint: Self, equal: Self, type_: Self, semicolon: Self) -> Self {
+    fn make_alias_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, keyword: Self, name: Self, generic_parameter: Self, constraint: Self, equal: Self, type_: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AliasDeclaration(ctx.get_arena().alloc(AliasDeclarationChildren {
             attribute_spec,
+            modifiers,
             keyword,
             name,
             generic_parameter,

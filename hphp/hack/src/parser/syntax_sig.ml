@@ -64,6 +64,7 @@ module type Syntax_S = sig
       }
     | EnumDeclaration of {
         enum_attribute_spec: t;
+        enum_modifiers: t;
         enum_keyword: t;
         enum_name: t;
         enum_colon: t;
@@ -108,6 +109,7 @@ module type Syntax_S = sig
       }
     | AliasDeclaration of {
         alias_attribute_spec: t;
+        alias_modifiers: t;
         alias_keyword: t;
         alias_name: t;
         alias_generic_parameter: t;
@@ -1067,7 +1069,7 @@ module type Syntax_S = sig
   val make_file_attribute_specification : t -> t -> t -> t -> t -> t
 
   val make_enum_declaration :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_enum_use : t -> t -> t -> t
 
@@ -1078,7 +1080,7 @@ module type Syntax_S = sig
 
   val make_enum_class_enumerator : t -> t -> t -> t -> t -> t
 
-  val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_context_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
 

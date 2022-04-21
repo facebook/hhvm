@@ -320,6 +320,7 @@
       {
         "kind":"enum_declaration",
         "enum_attribute_spec":{"kind":"missing"},
+        "enum_modifiers":{"kind":"missing"},
         "enum_keyword":{
           "kind":"token",
           "token":{

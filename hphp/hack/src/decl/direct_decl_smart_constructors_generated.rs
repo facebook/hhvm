@@ -106,8 +106,8 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors<'src, Self>>::make_file_attribute_specification(self, left_double_angle, keyword, colon, attributes, right_double_angle)
     }
 
-    fn make_enum_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, colon: Self::R, base: Self::R, type_: Self::R, left_brace: Self::R, use_clauses: Self::R, enumerators: Self::R, right_brace: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_enum_declaration(self, attribute_spec, keyword, name, colon, base, type_, left_brace, use_clauses, enumerators, right_brace)
+    fn make_enum_declaration(&mut self, attribute_spec: Self::R, modifiers: Self::R, keyword: Self::R, name: Self::R, colon: Self::R, base: Self::R, type_: Self::R, left_brace: Self::R, use_clauses: Self::R, enumerators: Self::R, right_brace: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_enum_declaration(self, attribute_spec, modifiers, keyword, name, colon, base, type_, left_brace, use_clauses, enumerators, right_brace)
     }
 
     fn make_enum_use(&mut self, keyword: Self::R, names: Self::R, semicolon: Self::R) -> Self::R {
@@ -126,8 +126,8 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors<'src, Self>>::make_enum_class_enumerator(self, modifiers, type_, name, initializer, semicolon)
     }
 
-    fn make_alias_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, generic_parameter: Self::R, constraint: Self::R, equal: Self::R, type_: Self::R, semicolon: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_alias_declaration(self, attribute_spec, keyword, name, generic_parameter, constraint, equal, type_, semicolon)
+    fn make_alias_declaration(&mut self, attribute_spec: Self::R, modifiers: Self::R, keyword: Self::R, name: Self::R, generic_parameter: Self::R, constraint: Self::R, equal: Self::R, type_: Self::R, semicolon: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_alias_declaration(self, attribute_spec, modifiers, keyword, name, generic_parameter, constraint, equal, type_, semicolon)
     }
 
     fn make_context_alias_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, generic_parameter: Self::R, as_constraint: Self::R, equal: Self::R, context: Self::R, semicolon: Self::R) -> Self::R {

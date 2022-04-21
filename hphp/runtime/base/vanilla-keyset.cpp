@@ -221,7 +221,7 @@ ArrayData* VanillaKeyset::MakeSetFromAPC(const APCArray* apc) {
   auto const apcSize = apc->size();
   KeysetInit init{apcSize};
   for (uint32_t i = 0; i < apcSize; ++i) {
-    init.add(apc->getPackedVal(i)->toLocal());
+    init.add(apc->getPackedVal(i)->toLocal(true /* pure irrelevant for arraykeys */));
   }
   return init.create();
 }

@@ -31,10 +31,12 @@ namespace HPHP {
 struct APCArray {
   static APCHandle::Pair MakeSharedVec(ArrayData* data,
                                        APCHandleLevel level,
-                                       bool unserializeObj);
+                                       bool unserializeObj,
+                                       bool pure);
   static APCHandle::Pair MakeSharedDict(ArrayData* data,
                                         APCHandleLevel level,
-                                        bool unserializeObj);
+                                        bool unserializeObj,
+                                        bool pure);
   static APCHandle::Pair MakeSharedKeyset(ArrayData* data,
                                           APCHandleLevel level,
                                           bool unserializeObj);
@@ -67,17 +69,17 @@ struct APCArray {
     return reinterpret_cast<const APCArray*>(handle);
   }
 
-  ArrayData* toLocalVec() const {
-    return VanillaVec::MakeVecFromAPC(this);
+  ArrayData* toLocalVec(bool pure) const {
+    return VanillaVec::MakeVecFromAPC(this, pure);
   }
-  ArrayData* toLocalLegacyVec() const {
-    return VanillaVec::MakeVecFromAPC(this, /*isLegacy=*/true);
+  ArrayData* toLocalLegacyVec(bool pure) const {
+    return VanillaVec::MakeVecFromAPC(this, pure, /*isLegacy=*/true);
   }
-  ArrayData* toLocalDict() const {
-    return VanillaDict::MakeDictFromAPC(this);
+  ArrayData* toLocalDict(bool pure) const {
+    return VanillaDict::MakeDictFromAPC(this, pure);
   }
-  ArrayData* toLocalLegacyDict() const {
-    return VanillaDict::MakeDictFromAPC(this, /*isLegacy=*/true);
+  ArrayData* toLocalLegacyDict(bool pure) const {
+    return VanillaDict::MakeDictFromAPC(this, pure, /*isLegacy=*/true);
   }
   ArrayData* toLocalKeyset() const {
     return VanillaKeyset::MakeSetFromAPC(this);
@@ -154,12 +156,12 @@ private:
 
 private:
   template <typename A, typename B>
-  static APCHandle::Pair MakeSharedImpl(ArrayData*, APCHandleLevel, A, B);
+  static APCHandle::Pair MakeSharedImpl(ArrayData*, APCHandleLevel, A, B, bool);
 
   static APCHandle::Pair MakeHash(ArrayData* data, APCKind kind,
-                                  bool unserializeObj);
+                                  bool unserializeObj, bool pure);
   static APCHandle::Pair MakePacked(ArrayData* data, APCKind kind,
-                                    bool unserializeObj);
+                                    bool unserializeObj, bool pure);
 
 private:
   friend size_t getMemSize(const APCArray*);
@@ -183,4 +185,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

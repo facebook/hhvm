@@ -29,6 +29,12 @@ function apc_add(mixed $key_or_array,
                  int $ttl = 0,
                  int $bump_ttl = 0): mixed;
 
+<<__Native>>
+function apc_add_with_pure_sleep(mixed $key_or_array,
+                 mixed $var = null,
+                 int $ttl = 0,
+                 int $bump_ttl = 0)[globals]: mixed;
+
 /**
  * Cache a variable in the data store. Unlike many other mechanisms in PHP,
  *   variables stored using apc_store() will persist between requests (until the
@@ -57,6 +63,16 @@ function apc_store(mixed $key_or_array,
                    int $bump_ttl = 0): mixed;
 
 /**
+ * Similar to apc_store but requires that any serialized objects' __sleep
+ * methods can be called from a pure context.
+ */
+<<__Native>>
+function apc_store_with_pure_sleep(mixed $key_or_array,
+                                   mixed $var = null,
+                                   int $ttl = 0,
+                                   int $bump_ttl = 0)[globals]: mixed;
+
+/**
  * Fetches a stored variable from the cache.
  *
  * @param mixed $key - The key used to store the value (with apc_store()). If
@@ -70,6 +86,16 @@ function apc_store(mixed $key_or_array,
 <<__Native, __NonRx('APC')>>
 function apc_fetch(mixed $key,
                    <<__OutOnly("KindOfBoolean")>> inout mixed $success): mixed;
+
+/**
+ * Similar to apc_fetch but requires that any deserialized objects' __wakeup
+ * methods can be called from a pure context.
+ */
+<<__Native>>
+function apc_fetch_with_pure_wakeup(
+  mixed $key,
+  <<__OutOnly("KindOfBoolean")>> inout mixed $success,
+)[read_globals]: mixed;
 
 /**
  * Removes a stored variable from the cache.

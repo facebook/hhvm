@@ -27,7 +27,8 @@ struct Object;
 struct APCCollection {
   static APCHandle::Pair Make(const ObjectData*,
                               APCHandleLevel level,
-                              bool unserializeObj);
+                              bool unserializeObj,
+                              bool pure);
   static void Delete(APCHandle*);
 
   static const APCCollection* fromHandle(const APCHandle* handle) {
@@ -37,7 +38,7 @@ struct APCCollection {
     return reinterpret_cast<const APCCollection*>(handle);
   }
 
-  Object createObject() const;
+  Object createObject(bool pure) const;
 
 private:
   APCCollection();
@@ -53,4 +54,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

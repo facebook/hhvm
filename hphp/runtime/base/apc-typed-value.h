@@ -187,13 +187,13 @@ private:
 //////////////////////////////////////////////////////////////////////
 // Here because of circular dependencies
 
-inline Variant APCHandle::toLocal() const {
+inline Variant APCHandle::toLocal(bool pure) const {
   if (isTypedValue()) {
     Variant ret;
     *ret.asTypedValue() = APCTypedValue::fromHandle(this)->toTypedValue();
     return ret;
   }
-  return toLocalHelper();
+  return toLocalHelper(pure);
 }
 
 //////////////////////////////////////////////////////////////////////

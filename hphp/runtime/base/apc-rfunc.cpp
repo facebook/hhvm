@@ -32,6 +32,8 @@ APCHandle::Pair APCRFunc::Construct(RFuncData* rfuncData) {
   auto const generics = VarNR{rfuncData->m_arr};
   auto const handle = APCHandle::Create(const_variant_ref{generics},
                                         APCHandleLevel::Inner,
+                                        true,
+                                        // pure irrelevant for generics
                                         true);
 
   auto const apcRFunc = new APCRFunc(rfuncData, handle.handle);
@@ -41,7 +43,8 @@ APCHandle::Pair APCRFunc::Construct(RFuncData* rfuncData) {
 Variant APCRFunc::Make(const APCHandle* handle) {
     auto apcrfunc = APCRFunc::fromHandle(handle);
     auto const f = Func::load(apcrfunc->m_entity, apcrfunc->m_name);
-    auto const generics_arr = apcrfunc->m_generics->toLocal();
+    // pure irrelevant for generics
+    auto const generics_arr = apcrfunc->m_generics->toLocal(true);
     auto const generics = generics_arr.getArrayData();
     generics->incRefCount();
     return Variant{RFuncData::newInstance(f, generics)};

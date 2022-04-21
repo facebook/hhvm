@@ -170,7 +170,7 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
   static ArrayData* MakeUncounted(
       ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv);
 
-  static ArrayData* MakeVecFromAPC(const APCArray* apc, bool isLegacy = false);
+  static ArrayData* MakeVecFromAPC(const APCArray* apc, bool pure, bool isLegacy = false);
 
   static bool VecEqual(const ArrayData* ad1, const ArrayData* ad2);
   static bool VecNotEqual(const ArrayData* ad1, const ArrayData* ad2);

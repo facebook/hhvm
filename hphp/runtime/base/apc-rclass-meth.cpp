@@ -30,6 +30,8 @@ APCHandle::Pair APCRClsMeth::Construct(RClsMethData* data) {
   auto const generics = VarNR{data->m_arr};
   auto const handle = APCHandle::Create(const_variant_ref{generics},
                                         APCHandleLevel::Inner,
+                                        true,
+                                        // pure irrelevant for generics
                                         true);
   auto const apcRClsMeth = new APCRClsMeth(data, handle.handle);
   return {apcRClsMeth->getHandle(), sizeof(APCRClsMeth) + handle.size};
@@ -39,7 +41,8 @@ Variant APCRClsMeth::Make(const APCHandle* handle) {
   auto apc_rclsmeth = APCRClsMeth::fromHandle(handle);
   auto const cls = Class::load(apc_rclsmeth->m_cls_name);
   auto const func = cls->lookupMethod(apc_rclsmeth->m_func_name);
-  auto const generics = apc_rclsmeth->m_generics->toLocal();
+  // pure irrelevant for generics
+  auto const generics = apc_rclsmeth->m_generics->toLocal(true);
   auto const generics_arr = generics.getArrayData();
   generics_arr->incRefCount();
   return Variant{RClsMethData::create(cls, func, generics_arr)};

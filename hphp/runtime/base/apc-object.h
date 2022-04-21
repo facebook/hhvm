@@ -44,14 +44,14 @@ struct APCObject {
   /*
    * Create an APCObject from an ObjectData*; returns its APCHandle.
    */
-  static APCHandle::Pair Construct(ObjectData* data);
+  static APCHandle::Pair Construct(ObjectData* data, bool pure);
 
   // Return an APCObject instance from a serialized version of the
   // object.  May return null.
-  static APCHandle::Pair MakeAPCObject(APCHandle* obj, const Variant& value);
+  static APCHandle::Pair MakeAPCObject(APCHandle* obj, const Variant& value, bool pure);
 
   // Return an instance of a PHP object from the given object handle
-  static Variant MakeLocalObject(const APCHandle* handle);
+  static Variant MakeLocalObject(const APCHandle* handle, bool pure);
 
   static void Delete(APCHandle* handle);
 
@@ -88,11 +88,11 @@ private:
   APCObject& operator=(const APCObject&) = delete;
 
 private:
-  static APCHandle::Pair ConstructSlow(ObjectData* data, ClassOrName name);
+  static APCHandle::Pair ConstructSlow(ObjectData* data, ClassOrName name, bool pure);
 
   friend size_t getMemSize(const APCObject*);
-  Object createObject() const;
-  Object createObjectSlow() const;
+  Object createObject(bool) const;
+  Object createObjectSlow(bool) const;
 
   Prop* props() { return reinterpret_cast<Prop*>(this + 1); }
   const Prop* props() const {
@@ -118,4 +118,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

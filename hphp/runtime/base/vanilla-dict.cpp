@@ -469,13 +469,13 @@ ArrayData* VanillaDict::MakeUncounted(
   return ad;
 }
 
-ArrayData* VanillaDict::MakeDictFromAPC(const APCArray* apc, bool isLegacy) {
+ArrayData* VanillaDict::MakeDictFromAPC(const APCArray* apc, bool pure, bool isLegacy) {
   assertx(apc->isHashed());
   auto const apcSize = apc->size();
   DictInit init{apcSize};
   for (uint32_t i = 0; i < apcSize; ++i) {
-    init.setValidKey(apc->getHashedKey(i)->toLocal(),
-                     apc->getHashedVal(i)->toLocal());
+    init.setValidKey(apc->getHashedKey(i)->toLocal(true /* pure irrelevant for arraykey */),
+                     apc->getHashedVal(i)->toLocal(pure));
   }
   auto const ad = init.create();
   ad->setLegacyArrayInPlace(isLegacy);

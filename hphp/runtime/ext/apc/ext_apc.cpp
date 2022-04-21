@@ -186,8 +186,11 @@ void apcExtension::moduleInit() {
   HHVM_RC_INT(APC_LIST_DELETED, 2);
 
   HHVM_FE(apc_add);
+  HHVM_FE(apc_add_with_pure_sleep);
   HHVM_FE(apc_store);
+  HHVM_FE(apc_store_with_pure_sleep);
   HHVM_FE(apc_fetch);
+  HHVM_FE(apc_fetch_with_pure_wakeup);
   HHVM_FE(apc_delete);
   HHVM_FE(apc_clear_cache);
   HHVM_FE(apc_inc);
@@ -216,7 +219,7 @@ std::string apcExtension::serialize() {
 void apcExtension::deserialize(std::string data) {
   auto sd = StringData::MakeUncounted(data);
   data.clear();
-  apc_store().set(s_internal_preload, Variant{sd}, 0, 0);
+  apc_store().set(s_internal_preload, Variant{sd}, 0, 0, false);
   DecRefUncountedString(sd); // APC did an uncounted inc-ref
 }
 
@@ -247,11 +250,11 @@ uint32_t apcExtension::SizedSampleBytes = 0;
 
 static apcExtension s_apc_extension;
 
-Variant HHVM_FUNCTION(apc_store,
-                      const Variant& key_or_array,
-                      const Variant& var /* = null */,
-                      int64_t ttl /* = 0 */,
-                      int64_t bump_ttl /* = 0 */) {
+Variant apc_store_impl(const Variant& key_or_array,
+                       const Variant& var,
+                       int64_t ttl,
+                       int64_t bump_ttl,
+                       bool pure) {
   if (!apcExtension::Enable) return Variant(false);
 
   if (key_or_array.isArray()) {
@@ -274,7 +277,7 @@ Variant HHVM_FUNCTION(apc_store,
         raise_invalid_argument_warning("apc key: (contains invalid characters)");
         return Variant(false);
       }
-      apc_store().set(strKey, v, ttl, bump_ttl);
+      apc_store().set(strKey, v, ttl, bump_ttl, pure);
       if (RuntimeOption::EnableAPCStats) {
         ServerStats::Log("apc.write", 1);
       }
@@ -296,18 +299,34 @@ Variant HHVM_FUNCTION(apc_store,
     raise_invalid_argument_warning("apc key: (contains invalid characters)");
     return Variant(false);
   }
-  apc_store().set(strKey, var, ttl, bump_ttl);
+  apc_store().set(strKey, var, ttl, bump_ttl, pure);
   if (RuntimeOption::EnableAPCStats) {
     ServerStats::Log("apc.write", 1);
   }
   return Variant(true);
 }
 
-Variant HHVM_FUNCTION(apc_add,
+Variant HHVM_FUNCTION(apc_store,
                       const Variant& key_or_array,
                       const Variant& var /* = null */,
                       int64_t ttl /* = 0 */,
                       int64_t bump_ttl /* = 0 */) {
+  return apc_store_impl(key_or_array, var, ttl, bump_ttl, false);
+}
+
+Variant HHVM_FUNCTION(apc_store_with_pure_sleep,
+                      const Variant& key_or_array,
+                      const Variant& var /* = null */,
+                      int64_t ttl /* = 0 */,
+                      int64_t bump_ttl /* = 0 */) {
+  return apc_store_impl(key_or_array, var, ttl, bump_ttl, true);
+}
+
+Variant apc_add_impl(const Variant& key_or_array,
+                     const Variant& var,
+                     int64_t ttl,
+                     int64_t bump_ttl,
+                     bool pure) {
   if (!apcExtension::Enable) return false;
 
   if (key_or_array.isArray()) {
@@ -334,7 +353,7 @@ Variant HHVM_FUNCTION(apc_add,
         return false;
       }
 
-      if (!apc_store().add(strKey, v, ttl, bump_ttl)) {
+      if (!apc_store().add(strKey, v, ttl, bump_ttl, pure)) {
         errors.set(strKey, -1);
       }
     }
@@ -357,7 +376,23 @@ Variant HHVM_FUNCTION(apc_add,
   if (RuntimeOption::EnableAPCStats) {
     ServerStats::Log("apc.write", 1);
   }
-  return apc_store().add(strKey, var, ttl, bump_ttl);
+  return apc_store().add(strKey, var, ttl, bump_ttl, pure);
+}
+
+Variant HHVM_FUNCTION(apc_add,
+                      const Variant& key_or_array,
+                      const Variant& var /* = null */,
+                      int64_t ttl /* = 0 */,
+                      int64_t bump_ttl /* = 0 */) {
+  return apc_add_impl(key_or_array, var, ttl, bump_ttl, false);
+}
+
+Variant HHVM_FUNCTION(apc_add_with_pure_sleep,
+                      const Variant& key_or_array,
+                      const Variant& var /* = null */,
+                      int64_t ttl /* = 0 */,
+                      int64_t bump_ttl /* = 0 */) {
+  return apc_add_impl(key_or_array, var, ttl, bump_ttl, true);
 }
 
 bool HHVM_FUNCTION(apc_extend_ttl, const String& key, int64_t new_ttl) {
@@ -367,7 +402,7 @@ bool HHVM_FUNCTION(apc_extend_ttl, const String& key, int64_t new_ttl) {
   return apc_store().extendTTL(key, new_ttl);
 }
 
-TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
+TypedValue apc_fetch_impl(const Variant& key, bool& success, bool pure) {
   if (!apcExtension::Enable) return make_tv<KindOfBoolean>(false);
 
   Variant v;
@@ -383,7 +418,7 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
         return make_tv<KindOfBoolean>(false);
       }
       auto strKey = k.asCStrRef();
-      if (apc_store().get(strKey, v)) {
+      if (apc_store().get(strKey, v, pure)) {
         if (RuntimeOption::EnableAPCStats) {
           ServerStats::Log("apc.hit", 1);
         }
@@ -395,7 +430,7 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
     return tvReturn(init.toVariant());
   }
 
-  if (apc_store().get(key.toString(), v)) {
+  if (apc_store().get(key.toString(), v, pure)) {
     success = true;
     if (RuntimeOption::EnableAPCStats) {
       ServerStats::Log("apc.hit", 1);
@@ -408,6 +443,14 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
     }
   }
   return tvReturn(std::move(v));
+}
+
+TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
+  return apc_fetch_impl(key, success, false);
+}
+
+TypedValue HHVM_FUNCTION(apc_fetch_with_pure_wakeup, const Variant& key, bool& success) {
+  return apc_fetch_impl(key, success, true);
 }
 
 Variant HHVM_FUNCTION(apc_delete,
@@ -682,7 +725,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
           rfc1867ApcData->prev_bytes_processed >
           rfc1867ApcData->update_freq) {
         Variant v;
-        if (apc_store().get(rfc1867ApcData->tracking_key, v)) {
+        if (apc_store().get(rfc1867ApcData->tracking_key, v, false)) {
           if (v.isArray()) {
             DictInit track(6);
             track.set(s_total, rfc1867ApcData->content_length);
@@ -751,22 +794,23 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const_variant_ref value) {
+String apc_serialize(const_variant_ref value, bool pure) {
   auto const enableApcSerialize = apcExtension::EnableApcSerialize;
   VariableSerializer::Type sType =
     enableApcSerialize ?
       VariableSerializer::Type::APCSerialize :
       VariableSerializer::Type::Internal;
   VariableSerializer vs(sType);
+  if (pure) vs.setPure();
   return vs.serialize(value, true);
 }
 
-Variant apc_unserialize(const char* data, int len) {
+Variant apc_unserialize(const char* data, int len, bool pure) {
   VariableUnserializer::Type sType =
     apcExtension::EnableApcSerialize ?
       VariableUnserializer::Type::APCSerialize :
       VariableUnserializer::Type::Internal;
-  return unserialize_ex(data, len, sType);
+  return unserialize_ex(data, len, sType, null_array, pure);
 }
 
 String apc_reserialize(const String& str) {

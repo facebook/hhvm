@@ -68,12 +68,23 @@ Variant HHVM_FUNCTION(apc_add,
                       const Variant& var = uninit_variant,
                       int64_t ttl = 0,
                       int64_t bump_ttl = 0);
+Variant HHVM_FUNCTION(apc_add_with_pure_sleep,
+                      const Variant& key_or_array,
+                      const Variant& var = uninit_variant,
+                      int64_t ttl = 0,
+                      int64_t bump_ttl = 0);
 Variant HHVM_FUNCTION(apc_store,
                       const Variant& key_or_array,
                       const Variant& var = uninit_variant,
                       int64_t ttl = 0,
                       int64_t bump_ttl = 0);
+Variant HHVM_FUNCTION(apc_store_with_pure_sleep,
+                      const Variant& key_or_array,
+                      const Variant& var = uninit_variant,
+                      int64_t ttl = 0,
+                      int64_t bump_ttl = 0);
 TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success);
+TypedValue HHVM_FUNCTION(apc_fetch_with_pure_wakeup, const Variant& key, bool& success);
 Variant HHVM_FUNCTION(apc_delete,
                       const Variant& key);
 bool HHVM_FUNCTION(apc_clear_cache,
@@ -146,11 +157,11 @@ static_assert(sizeof(int64_t) == sizeof(long long),
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const_variant_ref value);
-inline String apc_serialize(const Variant& var) {
-  return apc_serialize(const_variant_ref{var});
+String apc_serialize(const_variant_ref value, bool pure);
+inline String apc_serialize(const Variant& var, bool pure) {
+  return apc_serialize(const_variant_ref{var}, pure);
 }
-Variant apc_unserialize(const char* data, int len);
+Variant apc_unserialize(const char* data, int len, bool pure);
 String apc_reserialize(const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////

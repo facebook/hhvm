@@ -254,7 +254,7 @@ public:
   static ArrayData* MakeUncounted(
       ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv);
 
-  static ArrayData* MakeDictFromAPC(const APCArray* apc, bool isLegacy = false);
+  static ArrayData* MakeDictFromAPC(const APCArray* apc, bool pure, bool isLegacy = false);
 
   static bool DictEqual(const ArrayData*, const ArrayData*);
   static bool DictNotEqual(const ArrayData*, const ArrayData*);

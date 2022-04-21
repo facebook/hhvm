@@ -58,14 +58,14 @@ APCObject::APCObject(ClassOrName cls, uint32_t propCount)
   , m_no_verify_prop_types{0}
 {}
 
-APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
+APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
   // This function assumes the object and object/array down the tree have no
   // internal references and do not implement the serializable interface.
   assertx(!objectData->instanceof(SystemLib::s_SerializableClass));
 
   auto cls = objectData->getVMClass();
   auto clsOrName = make_class(cls);
-  if (clsOrName.right()) return ConstructSlow(objectData, clsOrName);
+  if (clsOrName.right()) return ConstructSlow(objectData, clsOrName, pure);
 
   // We have a persistent Class. Build an array of APCHandle* to mirror the
   // declared properties in the object.
@@ -126,7 +126,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
     }
 
     auto val = APCHandle::Create(const_variant_ref{objProp},
-                                 APCHandleLevel::Inner, true);
+                                 APCHandleLevel::Inner, true, pure);
     size += val.size;
     apcPropVec[index] = val.handle;
   }
@@ -137,7 +137,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
 
   if (UNLIKELY(hasDynProps)) {
     auto val = APCHandle::Create(VarNR{objectData->dynPropArray()},
-                                 APCHandleLevel::Inner, true);
+                                 APCHandleLevel::Inner, true, pure);
     size += val.size;
     apcPropVec[numRealProps] = val.handle;
   }
@@ -147,7 +147,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
 
 NEVER_INLINE
 APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
-                                         ClassOrName name) {
+                                         ClassOrName name, bool pure) {
   Array odProps;
   objectData->o_getArray(odProps);
   auto const propCount = odProps.size();
@@ -163,7 +163,7 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
     auto const tv = it.secondVal();
     if (!isNullType(type(tv))) {
       auto val = APCHandle::Create(tvAsCVarRef(&tv), APCHandleLevel::Inner,
-                                   true);
+                                   true, pure);
       prop->val = val.handle;
       size += val.size;
     } else {
@@ -227,7 +227,7 @@ void APCObject::Delete(APCHandle* handle) {
 
 //////////////////////////////////////////////////////////////////////
 
-APCHandle::Pair APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
+APCHandle::Pair APCObject::MakeAPCObject(APCHandle* obj, const Variant& value, bool pure) {
   if (!value.is(KindOfObject) || obj->objAttempted()) {
     return {nullptr, 0};
   }
@@ -239,18 +239,18 @@ APCHandle::Pair APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
   if (features.isCircular || features.hasSerializable) {
     return {nullptr, 0};
   }
-  auto tmp = APCHandle::Create(value, APCHandleLevel::Inner, true);
+  auto tmp = APCHandle::Create(value, APCHandleLevel::Inner, true, pure);
   tmp.handle->setObjAttempted();
   return tmp;
 }
 
-Variant APCObject::MakeLocalObject(const APCHandle* handle) {
+Variant APCObject::MakeLocalObject(const APCHandle* handle, bool pure) {
   auto apcObj = APCObject::fromHandle(handle);
-  return apcObj->m_persistent ? apcObj->createObject()
-                              : apcObj->createObjectSlow();
+  return apcObj->m_persistent ? apcObj->createObject(pure)
+                              : apcObj->createObjectSlow(pure);
 }
 
-Object APCObject::createObject() const {
+Object APCObject::createObject(bool pure) const {
   auto cls = m_cls.left();
   assertx(cls != nullptr);
 
@@ -274,13 +274,13 @@ Object APCObject::createObject() const {
   try {
     obj->setHasUninitProps();
     for (; it != range.end(); ++it, ++i) {
-      auto const val = apcProp[i]->toLocal();
+      auto const val = apcProp[i]->toLocal(pure);
       tvDup(*val.asTypedValue(), tv_lval{it});
     }
     obj->clearHasUninitProps();
   } catch (...) {
     for (; it != range.end(); ++it, ++i) {
-      auto const val = apcProp[i]->toLocal();
+      auto const val = apcProp[i]->toLocal(pure);
       type(tv_lval{it}) = KindOfUninit;
     }
     obj->clearHasUninitProps();
@@ -296,14 +296,16 @@ Object APCObject::createObject() const {
     auto dynProps = apcProp[numProps];
     assertx(dynProps->type() == KindOfPersistentDict ||
             dynProps->kind() == APCKind::SharedDict);
-    obj->setDynProps(dynProps->toLocal().asCArrRef());
+    obj->setDynProps(dynProps->toLocal(pure).asCArrRef());
   }
 
-  if (!m_no_wakeup) obj->invokeWakeup(RuntimeCoeffects::fixme());
+  auto const providedCoeffects =
+    pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults();
+  if (!m_no_wakeup) obj->invokeWakeup(providedCoeffects);
   return obj;
 }
 
-Object APCObject::createObjectSlow() const {
+Object APCObject::createObjectSlow(bool pure) const {
   const Class* klass;
   if (auto const c = m_cls.left()) {
     klass = c;
@@ -338,12 +340,14 @@ Object APCObject::createObjectSlow() const {
         }
       }
 
-      auto val = prop->val ? prop->val->toLocal() : init_null();
+      auto val = prop->val ? prop->val->toLocal(pure) : init_null();
       obj->setProp(const_cast<Class*>(ctx), key, *val.asTypedValue());
     }
   }
 
-  obj->invokeWakeup(RuntimeCoeffects::fixme());
+  auto const providedCoeffects =
+    pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults();
+  obj->invokeWakeup(providedCoeffects);
   return obj;
 }
 

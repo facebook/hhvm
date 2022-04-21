@@ -133,6 +133,23 @@ TypeOrReduced builtin_strlen(ISS& env, const php::Func* func,
   return ty.subtypeOf(BPrim | BStr) ? TInt : TOptInt;
 }
 
+TypeOrReduced builtin_is_numeric(ISS& env, const php::Func* func,
+                                 const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto const ty = getArg(env, func, fca, 0);
+  if (!ty.couldBe(BInt | BDbl | BStr)) return TFalse;
+  if (ty.subtypeOf(BInt | BDbl)) return TTrue;
+  if (ty.subtypeOf(BStr)) {
+     if (auto const val = tv(ty)) {
+       int64_t ival;
+       double dval;
+       auto const dt = val->m_data.pstr->toNumeric(ival, dval);
+       return dt == KindOfInt64 || dt == KindOfDouble ? TTrue : TFalse;
+     }
+  }
+  return TBool;
+}
+
 TypeOrReduced builtin_function_exists(ISS& env, const php::Func* func,
                                       const FCallArgs& fca) {
   assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
@@ -510,6 +527,7 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   X(max2, max2)                                                         \
   X(min2, min2)                                                         \
   X(strlen, strlen)                                                     \
+  X(is_numeric, is_numeric)                                             \
   X(function_exists, function_exists)                                   \
   X(class_exists, class_exists)                                         \
   X(interface_exists, interface_exists)                                 \

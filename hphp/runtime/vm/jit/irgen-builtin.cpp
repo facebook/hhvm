@@ -200,6 +200,21 @@ SSATmp* opt_chr(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
+SSATmp* opt_is_numeric(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+
+  auto const arg = params[0].value;
+  if (!arg->type().maybe(TInt | TDbl | TStr)) return cns(env, false);
+  if (arg->isA(TInt | TDbl)) return cns(env, true);
+  if (arg->hasConstVal(TStr)) {
+    int64_t ival;
+    double dval;
+    auto const dt = arg->strVal()->toNumeric(ival, dval);
+    return cns(env, dt == KindOfInt64 || dt == KindOfDouble);
+  }
+  return nullptr;
+}
+
 SSATmp* opt_hphp_debug_caller_info(IRGS& env, const ParamPrep& params) {
   if (params.size() != 0) return nullptr;
 
@@ -1104,6 +1119,7 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"abs", opt_abs},
   {"ord", opt_ord},
   {"chr", opt_chr},
+  {"is_numeric", opt_is_numeric},
   {"hphp_debug_caller_info", opt_hphp_debug_caller_info},
   {"hh\\array_key_cast", opt_array_key_cast},
   {"hh\\type_structure", opt_type_structure},

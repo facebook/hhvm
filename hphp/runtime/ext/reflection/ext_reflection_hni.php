@@ -520,8 +520,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
       function(...$args) { return $this->invokeArgs($args); };
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function isClosure(): bool {
+  public function isClosure()[]: bool {
     return (bool) $this->closure;
   }
 

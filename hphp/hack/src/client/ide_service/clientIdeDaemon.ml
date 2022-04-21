@@ -421,12 +421,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
     ~max_num_shallow_decls:
       local_config.ServerLocalConfig.ide_max_num_shallow_decls
     ~max_num_linearizations:
-      local_config.ServerLocalConfig.ide_max_num_linearizations
-    ~cache_kind:
-      (if local_config.ServerLocalConfig.ide_use_lfu_cache_instead_of_lru then
-        Provider_backend.Cache_kind.LFU
-      else
-        Provider_backend.Cache_kind.LRU);
+      local_config.ServerLocalConfig.ide_max_num_linearizations;
   let local_memory =
     match Provider_backend.get () with
     | Provider_backend.Local_memory local_memory -> local_memory

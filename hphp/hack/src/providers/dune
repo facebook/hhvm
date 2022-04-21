@@ -6,7 +6,6 @@
   decl_service_client
   heap_shared_mem
   lfu_cache
-  lru_cache
   naming_sqlite
   naming_types
   pos
@@ -33,23 +32,9 @@
   (pps ppx_deriving.std)))
 
 (library
- (name cache_sig)
- (modules cache_sig)
- (libraries core_kernel utils_core)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name lru_cache)
- (modules lru_cache)
- (libraries cache_sig core_kernel utils_core)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name lfu_cache)
  (modules lfu_cache)
- (libraries cache_sig core_kernel utils_core)
+ (libraries core_kernel utils_core)
  (preprocess
   (pps ppx_deriving.std)))
 

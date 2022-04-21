@@ -7,28 +7,7 @@
  *
  *)
 
-module Cache_kind : sig
-  type t =
-    | LRU
-    | LFU
-end
-
-module Cache (Entry : Cache_sig.Entry) : sig
-  module type Cache_intf =
-    Cache_sig.Cache_intf
-      with type 'a key := 'a Entry.key
-       and type 'a value := 'a Entry.value
-
-  module type Instance = sig
-    module Cache : Cache_intf
-
-    val this : Cache.t
-  end
-
-  include Cache_intf with type t = (module Instance)
-
-  val make : Cache_kind.t -> max_size:int -> t
-end
+module Cache (Entry : Lfu_cache.Entry) : module type of Lfu_cache.Cache (Entry)
 
 module Decl_cache_entry : sig
   type _ t =
@@ -150,9 +129,9 @@ module Reverse_naming_table_delta : sig
 end
 
 type local_memory = {
-  decl_cache: (module Decl_cache.Instance);
-  shallow_decl_cache: (module Shallow_decl_cache.Instance);
-  linearization_cache: (module Linearization_cache.Instance);
+  decl_cache: Decl_cache.t;
+  shallow_decl_cache: Shallow_decl_cache.t;
+  linearization_cache: Linearization_cache.t;
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
       (** A map from symbol-name to pos. (1) It's used as a slowly updated
           authoritative place to look for symbols that have changed on disk since
@@ -200,7 +179,6 @@ val set_local_memory_backend :
   max_num_decls:int ->
   max_num_shallow_decls:int ->
   max_num_linearizations:int ->
-  cache_kind:Cache_kind.t ->
   unit
 
 val set_decl_service_backend : Decl_service_client.t -> unit

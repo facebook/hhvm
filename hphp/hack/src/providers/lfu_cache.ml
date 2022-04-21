@@ -11,7 +11,17 @@ open Option.Monad_infix
 
 type size = int
 
-module type Entry = Cache_sig.Entry
+module type Entry = sig
+  type _ t
+
+  type 'a key = 'a t
+
+  type 'a value = 'a
+
+  val get_size : key:'a key -> value:'a value -> size
+
+  val key_to_log_string : 'a key -> string
+end
 
 module RevIMap = Caml.Map.Make (struct
   type t = int

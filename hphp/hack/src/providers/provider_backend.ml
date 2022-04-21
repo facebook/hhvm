@@ -44,68 +44,7 @@ module Decl_cache_entry = struct
     | Module_decl s -> "ModuleDecl" ^ s
 end
 
-module Cache_kind = struct
-  type t =
-    | LRU
-    | LFU
-end
-
-module Cache (Entry : Cache_sig.Entry) : sig
-  module type Cache_intf =
-    Cache_sig.Cache_intf
-      with type 'a key := 'a Entry.key
-       and type 'a value := 'a Entry.value
-
-  module type Instance = sig
-    module Cache : Cache_intf
-
-    val this : Cache.t
-  end
-
-  include Cache_intf with type t = (module Instance)
-
-  val make : Cache_kind.t -> max_size:int -> t
-end = struct
-  module type Cache_intf =
-    Cache_sig.Cache_intf
-      with type 'a key := 'a Entry.key
-       and type 'a value := 'a Entry.value
-
-  module type Instance = sig
-    module Cache : Cache_intf
-
-    val this : Cache.t
-  end
-
-  type t = (module Instance)
-
-  let make cache_kind ~max_size : t =
-    (module struct
-      module Cache = (val match cache_kind with
-                          | Cache_kind.LRU ->
-                            (module Lru_cache.Cache (Entry) : Cache_intf)
-                          | Cache_kind.LFU ->
-                            (module Lfu_cache.Cache (Entry) : Cache_intf)
-                        : Cache_intf)
-
-      let this = Cache.make ~max_size
-    end : Instance)
-
-  let find_or_add (module C : Instance) = C.Cache.find_or_add C.this
-
-  let clear (module C : Instance) = C.Cache.clear C.this
-
-  let add (module C : Instance) = C.Cache.add C.this
-
-  let remove (module C : Instance) = C.Cache.remove C.this
-
-  let length (module C : Instance) = C.Cache.length C.this
-
-  let get_telemetry (module C : Instance) = C.Cache.get_telemetry C.this
-
-  let reset_telemetry (module C : Instance) = C.Cache.reset_telemetry C.this
-end
-
+module Cache (Entry : Lfu_cache.Entry) = Lfu_cache.Cache (Entry)
 module Decl_cache = Cache (Decl_cache_entry)
 
 module Shallow_decl_cache_entry = struct
@@ -242,9 +181,9 @@ module Reverse_naming_table_delta = struct
 end
 
 type local_memory = {
-  decl_cache: (module Decl_cache.Instance);
-  shallow_decl_cache: (module Shallow_decl_cache.Instance);
-  linearization_cache: (module Linearization_cache.Instance);
+  decl_cache: Decl_cache.t;
+  shallow_decl_cache: Shallow_decl_cache.t;
+  linearization_cache: Linearization_cache.t;
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
   fixmes: Fixmes.t;
   naming_db_path_ref: Naming_sqlite.db_path option ref;
@@ -275,16 +214,15 @@ let set_shared_memory_backend () : unit = backend_ref := Shared_memory
 let set_local_memory_backend_internal
     ~(max_num_decls : int)
     ~(max_num_shallow_decls : int)
-    ~(max_num_linearizations : int)
-    ~(cache_kind : Cache_kind.t) : unit =
+    ~(max_num_linearizations : int) : unit =
   backend_ref :=
     Local_memory
       {
-        decl_cache = Decl_cache.make cache_kind ~max_size:max_num_decls;
+        decl_cache = Decl_cache.make ~max_size:max_num_decls;
         shallow_decl_cache =
-          Shallow_decl_cache.make cache_kind ~max_size:max_num_shallow_decls;
+          Shallow_decl_cache.make ~max_size:max_num_shallow_decls;
         linearization_cache =
-          Linearization_cache.make cache_kind ~max_size:max_num_linearizations;
+          Linearization_cache.make ~max_size:max_num_linearizations;
         reverse_naming_table_delta = Reverse_naming_table_delta.make ();
         fixmes = empty_fixmes;
         naming_db_path_ref = ref None;
@@ -311,7 +249,6 @@ let set_local_memory_backend_with_defaults_for_test () : unit =
     ~max_num_decls:5000
     ~max_num_shallow_decls:(140 * 1024 * 1024)
     ~max_num_linearizations:10000
-    ~cache_kind:Cache_kind.LFU
 
 let set_decl_service_backend (decl : Decl_service_client.t) : unit =
   backend_ref := Decl_service { decl; fixmes = empty_fixmes }

@@ -259,7 +259,9 @@ void reportJitMaturity() {
   if (beforeRetranslateAll) {
     maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
   } else if (mainSize >= CodeCache::AMaxUsage ||
-             getLiveMainUsage() >= RO::EvalJitMaxLiveMainUsage) {
+             getLiveMainUsage() >= RO::EvalJitMaxLiveMainUsage ||
+             code().cold().used() >= CodeCache::AColdMaxUsage ||
+             code().frozen().used() >= CodeCache::AFrozenMaxUsage) {
     maturity = 100;
   } else if (codeSize >= fullSize) {
     maturity = 99;

@@ -694,7 +694,11 @@ let get_files_to_undecl_and_recheck
     get_old_and_new_classes
     ~previously_oldified_defs:FileInfo.empty_names
     ~defs:dirty_names;
-  let { Decl_redecl_service.to_redecl; to_recheck; _ } =
+  let {
+    Decl_redecl_service.fanout =
+      { Decl_redecl_service.to_redecl; to_recheck; _ };
+    _;
+  } =
     Decl_redecl_service.redo_type_decl
       ~bucket_size
       ctx

@@ -12,15 +12,19 @@ open Typing_deps
 
 type get_classes_in_file = Relative_path.t -> SSet.t
 
-type redo_type_decl_result = {
-  errors: Errors.t;
-      (** Decl errors that were emitted when checking the provided symbols. *)
+type fanout = {
   changed: DepSet.t;
       (** The symbols that were changed compared to their old version. *)
   to_redecl: DepSet.t;
       (** The symbols which need to be re-declared, for the second phase of two-phase redecl. *)
   to_recheck: DepSet.t;
       (** The symbols which need to be re-typechecked as a result of the change. *)
+}
+
+type redo_type_decl_result = {
+  errors: Errors.t;
+      (** Decl errors that were emitted when checking the provided symbols. *)
+  fanout: fanout;
   old_decl_missing_count: int;
       (** The number of old decls we didn't have when calculating the redecl. *)
 }
@@ -63,13 +67,11 @@ val remove_old_defs :
   FileInfo.names ->
   unit
 
-(**
- * Exposed for tests only!
- * For a set of classes, return all the declared classes that share their class
- * elements (see Decl_class_elements).
- * Not for general use case since it doesn't use lazy decl and makes sense only
- * in a very particular use case of invalidate_type_decl.
- *)
+(** Exposed for tests only!
+  For a set of classes, return all the declared classes that share their class
+  elements (see Decl_class_elements).
+  Not for general use case since it doesn't use lazy decl and makes sense only
+  in a very particular use case of invalidate_type_decl. *)
 val get_dependent_classes :
   Provider_context.t ->
   MultiWorker.worker list option ->

@@ -874,9 +874,12 @@ functor
       let ctx = Provider_utils.ctx_from_server_env env in
       let {
         Decl_redecl_service.errors = _;
-        changed;
-        to_redecl = to_redecl_phase2_deps;
-        to_recheck = to_recheck1_deps;
+        fanout =
+          {
+            Decl_redecl_service.changed;
+            to_redecl = to_redecl_phase2_deps;
+            to_recheck = to_recheck1_deps;
+          };
         old_decl_missing_count;
       } =
         CgroupProfiler.step_start_end cgroup_steps "redecl phase 1"
@@ -948,9 +951,12 @@ functor
       let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
       let {
         Decl_redecl_service.errors = errorl';
-        changed = _;
-        to_redecl = _;
-        to_recheck = to_recheck2_deps;
+        fanout =
+          {
+            Decl_redecl_service.changed = _;
+            to_redecl = _;
+            to_recheck = to_recheck2_deps;
+          };
         old_decl_missing_count;
       } =
         CgroupProfiler.step_start_end cgroup_steps "redecl phase 2"

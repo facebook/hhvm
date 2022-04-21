@@ -7,23 +7,25 @@
  *
  *)
 
-(*****************************************************************************)
-(* On the fly type-declaration are called when the user modified a file
- * we are not at initilalization time anymore. Therefore, we have a bit more
- * work to do. We need calculate what must be re-checked.
- *)
-(*****************************************************************************)
+(** On the fly defs-declaration are called when the user modified a file
+  and we are not at initilalization time anymore. Therefore, we have a bit more
+  work to do. We need to calculate what must be re-checked. *)
+
 open Hh_prelude
 open Reordered_argument_collections
 open Typing_deps
 
 type get_classes_in_file = Relative_path.t -> SSet.t
 
-type redo_type_decl_result = {
-  errors: Errors.t;
+type fanout = {
   changed: DepSet.t;
   to_redecl: DepSet.t;
   to_recheck: DepSet.t;
+}
+
+type redo_type_decl_result = {
+  errors: Errors.t;
+  fanout: fanout;
   old_decl_missing_count: int;
 }
 
@@ -35,114 +37,88 @@ let shallow_decl_enabled (ctx : Provider_context.t) =
 let force_shallow_decl_fanout_enabled (ctx : Provider_context.t) =
   TypecheckerOptions.force_shallow_decl_fanout (Provider_context.get_tcopt ctx)
 
-(*****************************************************************************)
-(* The neutral element of declaration (cf procs/multiWorker.mli) *)
-(*****************************************************************************)
-let on_the_fly_neutral = Errors.empty
-
-let compute_deps_neutral () =
+let empty_fanout =
   let empty = DepSet.make () in
-  ((empty, empty, empty), 0)
+  { changed = empty; to_redecl = empty; to_recheck = empty }
 
-(*****************************************************************************)
-(* This is the place where we are going to put everything necessary for
- * the redeclaration. We could "pass" the values directly to the workers,
- * but it gives too much work to the master and slows things down,
- * so what we do instead is pass the data through shared memory via
- * OnTheFlyStore.
- * I tried replicating the data to speed things up but it had no effect.
- *)
-(*****************************************************************************)
+let compute_deps_neutral = (empty_fanout, 0)
 
+(** This is the place where we are going to put everything necessary for
+  the redeclaration. We could "pass" the values directly to the workers,
+  but it gives too much work to the master and slows things down,
+  so what we do instead is pass the data through shared memory via
+  OnTheFlyStore.
+  I tried replicating the data to speed things up but it had no effect. *)
 module OnTheFlyStore = GlobalStorage.Make (struct
   type t = Naming_table.defs_per_file
 end)
 
-(*****************************************************************************)
-(* Re-declaring the types in a file *)
-(*****************************************************************************)
-
-let on_the_fly_decl_file ctx errors fn =
+(** Compute the decls in a file *)
+let decl_file ctx errors fn =
   let (decl_errors, ()) =
     Errors.do_with_context fn Errors.Decl (fun () ->
         Decl.make_env ~sh:SharedMem.Uses ctx fn)
   in
   Errors.merge decl_errors errors
 
-(*****************************************************************************)
-(* Given a set of classes, compare the old and the new type and deduce
- * what must be rechecked accordingly.
- *)
-(*****************************************************************************)
-
-let compute_classes_deps ctx old_classes new_classes acc classes =
-  let (changed, to_redecl, to_recheck) = acc in
+(** Given a set of classes, compare the old and the new decl and deduce
+  what must be rechecked accordingly. *)
+let compare_classes_and_get_fanout ctx old_classes new_classes acc classes =
+  let { changed; to_redecl; to_recheck } = acc in
   let ((rc, rdd, rdc), old_classes_missing) =
     Decl_compare.get_classes_deps ~ctx old_classes new_classes classes
   in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  ((changed, to_redecl, to_recheck), old_classes_missing)
+  ({ changed; to_redecl; to_recheck }, old_classes_missing)
 
-(*****************************************************************************)
-(* Given a set of functions, compare the old and the new type and deduce
- * what must be rechecked accordingly.
- *)
-(*****************************************************************************)
-
-let compute_funs_deps ctx old_funs (changed, to_redecl, to_recheck) funs =
+(** Given a set of functions, compare the old and the new decl and deduce
+  what must be rechecked accordingly. *)
+let compare_funs_and_get_fanout
+    ctx old_funs { changed; to_redecl; to_recheck } funs =
   let ((rc, rdd, rdc), old_funs_missing) =
     Decl_compare.get_funs_deps ~ctx old_funs funs
   in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  ((changed, to_redecl, to_recheck), old_funs_missing)
+  ({ changed; to_redecl; to_recheck }, old_funs_missing)
 
-(*****************************************************************************)
-(* Given a set of typedefs, compare the old and the new type and deduce
- * what must be rechecked accordingly.
- *)
-(*****************************************************************************)
-
-let compute_types_deps ctx old_types (changed, to_redecl, to_recheck) types =
+(** Given a set of typedefs, compare the old and the new decl and deduce
+  what must be rechecked accordingly. *)
+let compare_types_and_get_fanout
+    ctx old_types { changed; to_redecl; to_recheck } types =
   let ((rc, rdc), old_types_missing) =
     Decl_compare.get_types_deps ~ctx old_types types
   in
   let changed = DepSet.union rc changed in
   let to_recheck = DepSet.union rdc to_recheck in
-  ((changed, to_redecl, to_recheck), old_types_missing)
+  ({ changed; to_redecl; to_recheck }, old_types_missing)
 
-(*****************************************************************************)
-(* Given a set of global constants, compare the old and the new type and
- * deduce what must be rechecked accordingly.
- *)
-(*****************************************************************************)
-
-let compute_gconsts_deps
-    ctx old_gconsts (changed, to_redecl, to_recheck) gconsts =
+(* Given a set of global constants, compare the old and the new decl and
+  deduce what must be rechecked accordingly. *)
+let compare_gconsts_and_get_fanout
+    ctx old_gconsts { changed; to_redecl; to_recheck } gconsts =
   let ((rc, rdd, rdc), old_gconsts_missing) =
     Decl_compare.get_gconsts_deps ~ctx old_gconsts gconsts
   in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  ((changed, to_redecl, to_recheck), old_gconsts_missing)
+  ({ changed; to_redecl; to_recheck }, old_gconsts_missing)
 
-(*****************************************************************************)
-(* Whatever we need to do for modules, here *)
-(*****************************************************************************)
-
-let compute_module_deps
-    ctx old_modules new_modules (changed, to_redecl, to_recheck) modules =
+(* Given a set of modules, compare the old and the new decl and
+  deduce what must be rechecked accordingly. *)
+let compare_module_and_get_fanout
+    ctx old_modules new_modules { changed; to_redecl; to_recheck } modules =
   let ((rc, rdd, rdc), old_modules_missing) =
     Decl_compare.get_module_deps ~ctx ~old_modules ~new_modules ~modules
   in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  ((changed, to_redecl, to_recheck), old_modules_missing)
+  ({ changed; to_redecl; to_recheck }, old_modules_missing)
 
 (*****************************************************************************)
 (* Redeclares a list of files
@@ -151,36 +127,40 @@ let compute_module_deps
  *)
 (*****************************************************************************)
 
+(** Compute decls in files. Return errors raised during decling. *)
 let redeclare_files ctx filel =
-  let errors =
-    List.fold_left filel ~f:(on_the_fly_decl_file ctx) ~init:Errors.empty
-  in
-  (List.length filel, errors)
+  List.fold_left filel ~f:(decl_file ctx) ~init:Errors.empty
 
-let on_the_fly_decl_files filel =
+(** Invalidate local caches and compute decls in files. Return errors raised during decling. *)
+let decl_files ctx filel =
   SharedMem.invalidate_local_caches ();
+  redeclare_files ctx filel
 
-  (* Redeclaring the files *)
-  redeclare_files filel
-
-let compute_deps ctx defs_per_file (filel : Relative_path.t list) =
-  let infol =
+let compare_decls_and_get_fanout
+    ctx defs_per_file (filel : Relative_path.t list) : fanout * int =
+  let defs_in_files =
     List.map filel ~f:(fun fn -> Relative_path.Map.find defs_per_file fn)
   in
-  let names =
-    List.fold_left infol ~f:FileInfo.merge_names ~init:FileInfo.empty_names
+  let all_defs =
+    List.fold_left
+      defs_in_files
+      ~f:FileInfo.merge_names
+      ~init:FileInfo.empty_names
   in
-  let { FileInfo.n_classes; n_funs; n_types; n_consts; n_modules } = names in
-  let empty = DepSet.make () in
-  let acc = (empty, empty, empty) in
+  let { FileInfo.n_classes; n_funs; n_types; n_consts; n_modules } = all_defs in
+  let acc = empty_fanout in
   (* Fetching everything at once is faster *)
   let old_funs = Decl_heap.Funs.get_old_batch n_funs in
-  let (acc, old_funs_missing) = compute_funs_deps ctx old_funs acc n_funs in
+  let (acc, old_funs_missing) =
+    compare_funs_and_get_fanout ctx old_funs acc n_funs
+  in
   let old_types = Decl_heap.Typedefs.get_old_batch n_types in
-  let (acc, old_types_missing) = compute_types_deps ctx old_types acc n_types in
+  let (acc, old_types_missing) =
+    compare_types_and_get_fanout ctx old_types acc n_types
+  in
   let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
   let (acc, old_gconsts_missing) =
-    compute_gconsts_deps ctx old_consts acc n_consts
+    compare_gconsts_and_get_fanout ctx old_consts acc n_consts
   in
 
   let (acc, old_classes_missing) =
@@ -189,13 +169,13 @@ let compute_deps ctx defs_per_file (filel : Relative_path.t list) =
     else
       let old_classes = Decl_heap.Classes.get_old_batch n_classes in
       let new_classes = Decl_heap.Classes.get_batch n_classes in
-      compute_classes_deps ctx old_classes new_classes acc n_classes
+      compare_classes_and_get_fanout ctx old_classes new_classes acc n_classes
   in
 
   let (acc, old_modules_missing) =
     let old_modules = Decl_heap.Modules.get_old_batch n_modules in
     let new_modules = Decl_heap.Modules.get_batch n_modules in
-    compute_module_deps ctx old_modules new_modules acc n_modules
+    compare_module_and_get_fanout ctx old_modules new_modules acc n_modules
   in
 
   let old_decl_missing_count =
@@ -205,29 +185,30 @@ let compute_deps ctx defs_per_file (filel : Relative_path.t list) =
     + old_classes_missing
     + old_modules_missing
   in
-  let (changed, to_redecl, to_recheck) = acc in
-  ((changed, to_redecl, to_recheck), old_decl_missing_count)
+  let { changed; to_redecl; to_recheck } = acc in
+  ({ changed; to_redecl; to_recheck }, old_decl_missing_count)
 
 (*****************************************************************************)
 (* Load the environment and then redeclare *)
 (*****************************************************************************)
 
-let load_and_on_the_fly_decl_files ctx _ filel =
-  try on_the_fly_decl_files ctx filel with
+(** Invalidate local caches and compute decls in files. Return the file count and errors raised during decling. *)
+let decl_files_job ctx _ filel =
+  try (List.length filel, decl_files ctx filel) with
   | exn ->
     let e = Exception.wrap exn in
     Printf.printf "Error: %s\n" (Exception.get_ctor_string e);
     Out_channel.flush stdout;
     Exception.reraise e
 
-let load_and_compute_deps ctx _acc (filel : Relative_path.t list) :
-    (DepSet.t * DepSet.t * DepSet.t * int) * int =
+let load_defs_compare_and_get_fanout ctx _acc (filel : Relative_path.t list) :
+    (fanout * int) * int =
   try
     let defs_per_file = OnTheFlyStore.load () in
-    let ((changed, to_redecl, to_recheck), old_decl_missing_count) =
-      compute_deps ctx defs_per_file filel
+    let (fanout, old_decl_missing_count) =
+      compare_decls_and_get_fanout ctx defs_per_file filel
     in
-    ((changed, to_redecl, to_recheck, List.length filel), old_decl_missing_count)
+    ((fanout, List.length filel), old_decl_missing_count)
   with
   | exn ->
     let e = Exception.wrap exn in
@@ -254,15 +235,22 @@ let merge_on_the_fly
 let merge_compute_deps
     files_initial_count
     files_computed_count
-    ( (changed1, to_redecl1, to_recheck1, computed_count),
-      old_decl_missing_count1 )
-    ((changed2, to_redecl2, to_recheck2), old_decl_missing_count2) =
+    ((fanout1, computed_count), old_decl_missing_count1)
+    (fanout2, old_decl_missing_count2) =
   files_computed_count := !files_computed_count + computed_count;
 
-  let (changed, to_redecl, to_recheck) =
-    ( DepSet.union changed1 changed2,
-      DepSet.union to_redecl1 to_redecl2,
-      DepSet.union to_recheck1 to_recheck2 )
+  let { changed = changed1; to_redecl = to_redecl1; to_recheck = to_recheck1 } =
+    fanout1
+  in
+  let { changed = changed2; to_redecl = to_redecl2; to_recheck = to_recheck2 } =
+    fanout2
+  in
+  let fanout =
+    {
+      changed = DepSet.union changed1 changed2;
+      to_redecl = DepSet.union to_redecl1 to_redecl2;
+      to_recheck = DepSet.union to_recheck1 to_recheck2;
+    }
   in
 
   ServerProgress.send_percentage_progress
@@ -272,19 +260,21 @@ let merge_compute_deps
     ~unit:"files"
     ~extra:None;
 
-  ( (changed, to_redecl, to_recheck),
-    old_decl_missing_count1 + old_decl_missing_count2 )
+  (fanout, old_decl_missing_count1 + old_decl_missing_count2)
 
 (*****************************************************************************)
 (* The parallel worker *)
 (*****************************************************************************)
-let parallel_on_the_fly_decl
+
+(** Invalidate local decl caches and recompute decls in files in parallel.
+  Compare new and old decls and deduce the fanout.
+  Return errors raised during decling, fanout and missing old decl count. *)
+let parallel_redecl_compare_and_get_fanout
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     (bucket_size : int)
     (defs_per_file : FileInfo.names Relative_path.Map.t)
-    (fnl : Relative_path.t list) :
-    (Errors.t * DepSet.t * DepSet.t * DepSet.t) * int =
+    (fnl : Relative_path.t list) : (Errors.t * fanout) * int =
   try
     OnTheFlyStore.store defs_per_file;
     let files_initial_count = List.length fnl in
@@ -300,8 +290,8 @@ let parallel_on_the_fly_decl
     let errors =
       MultiWorker.call
         workers
-        ~job:(load_and_on_the_fly_decl_files ctx)
-        ~neutral:on_the_fly_neutral
+        ~job:(decl_files_job ctx)
+        ~neutral:Errors.empty
         ~merge:(merge_on_the_fly files_initial_count files_declared_count)
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
@@ -314,11 +304,11 @@ let parallel_on_the_fly_decl
       ~total_count:files_initial_count
       ~unit:"files"
       ~extra:None;
-    let ((changed, to_redecl, to_recheck), old_decl_missing_count) =
+    let (fanout, old_decl_missing_count) =
       MultiWorker.call
         workers
-        ~job:(load_and_compute_deps ctx)
-        ~neutral:(compute_deps_neutral ())
+        ~job:(load_defs_compare_and_get_fanout ctx)
+        ~neutral:compute_deps_neutral
         ~merge:(merge_compute_deps files_initial_count files_computed_count)
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
@@ -326,7 +316,7 @@ let parallel_on_the_fly_decl
       Hh_logger.log_duration ~lvl "Finished computing dependencies" t
     in
     OnTheFlyStore.clear ();
-    ((errors, changed, to_redecl, to_recheck), old_decl_missing_count)
+    ((errors, fanout), old_decl_missing_count)
   with
   | exn ->
     let e = Exception.wrap exn in
@@ -583,6 +573,10 @@ let invalidate_folded_classes_for_shallow_fanout
 (* The main entry point *)
 (*****************************************************************************)
 
+(** Oldify any defs in [defs] which aren't already in
+[previously_oldified_defs], then determines which symbols need to be
+re-typechecked as a result of comparing the current versions of the symbols
+to their old versions. *)
 let redo_type_decl
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
@@ -610,16 +604,16 @@ let redo_type_decl
   let all_elems = SMap.union current_elems oldified_elems in
   let fnl = Relative_path.Map.keys defs in
 
-  (* If there aren't enough files, let's do this ourselves ... it's faster! *)
-  let ((errors, changed, to_redecl, to_recheck), old_decl_missing_count) =
+  let ((errors, { changed; to_redecl; to_recheck }), old_decl_missing_count) =
+    (* If there aren't enough files, let's do this ourselves ... it's faster! *)
     if List.length fnl < 10 then
-      let ((_declared : int), errors) = on_the_fly_decl_files ctx fnl in
-      let ((changed, to_redecl, to_recheck), old_decl_missing_count) =
-        compute_deps ctx defs fnl
+      let errors = decl_files ctx fnl in
+      let (fanout, old_decl_missing_count) =
+        compare_decls_and_get_fanout ctx defs fnl
       in
-      ((errors, changed, to_redecl, to_recheck), old_decl_missing_count)
+      ((errors, fanout), old_decl_missing_count)
     else
-      parallel_on_the_fly_decl ctx workers bucket_size defs fnl
+      parallel_redecl_compare_and_get_fanout ctx workers bucket_size defs fnl
   in
   let (changed, to_recheck) =
     if shallow_decl_enabled ctx then (
@@ -673,8 +667,18 @@ let redo_type_decl
   Hh_logger.log "  to_redecl: %d" (DepSet.cardinal to_redecl);
   Hh_logger.log "  to_recheck: %d" (DepSet.cardinal to_recheck);
 
-  { errors; changed; to_redecl; to_recheck; old_decl_missing_count }
+  {
+    errors;
+    fanout = { changed; to_redecl; to_recheck };
+    old_decl_missing_count;
+  }
 
+(** Mark all provided [defs] as old, as long as they were not previously
+oldified. All definitions in [previously_oldified_defs] are then removed from
+the decl heaps.
+
+Typically, there are only any [previously_oldified_defs] during two-phase
+redeclaration. *)
 let oldify_type_decl
     (ctx : Provider_context.t)
     ?(collect_garbage = true)

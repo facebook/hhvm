@@ -18,7 +18,7 @@ function gc_disable(): void;
 /* Forces collection of any existing garbage cycles.
  */
 <<__Native>>
-function gc_collect_cycles(): int;
+function gc_collect_cycles()[leak_safe]: int;
 
 /* Reclaims memory used by the memory manager using flush_thread_caches().
  */

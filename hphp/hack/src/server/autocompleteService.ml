@@ -652,7 +652,7 @@ let autocomplete_enum_class_label_call env f args =
         match (arg, get_node arg_ty.fp_type.et_type) with
         | ( (_, (_, p, Aast.EnumClassLabel (None, n))),
             Typing_defs.Tnewtype (ty_name, [enum_ty; member_ty], _) )
-          when is_enum_class_label_ty_name ty_name ->
+          when is_enum_class_label_ty_name ty_name && is_auto_complete n ->
           suggest_members_from_ty env enum_ty (p, n) (Some member_ty)
         | (_, _) -> ())
       ty_args

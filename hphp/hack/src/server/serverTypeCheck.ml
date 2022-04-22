@@ -1714,17 +1714,12 @@ functor
             genv.ServerEnv.local_config
               .ServerLocalConfig.enable_type_check_filter_files
       in
-      let hulk_lite = genv.local_config.ServerLocalConfig.hulk_lite in
-      let hulk_heavy = genv.local_config.ServerLocalConfig.hulk_heavy in
       let env =
-        if (not hulk_lite) && not hulk_heavy then
-          ServerRemoteUtils.start_delegate_if_needed
-            env
-            genv
-            (Relative_path.Set.cardinal files_to_check)
-            errors
-        else
+        ServerRemoteUtils.start_delegate_if_needed
           env
+          genv
+          (Relative_path.Set.cardinal files_to_check)
+          errors
       in
       let (env, files_to_check, time_erased_errors) =
         wont_do_failed_parsing

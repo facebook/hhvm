@@ -757,8 +757,10 @@ let next
   fun () ->
     Measure.time ~record "time" @@ fun () ->
     let workitems_to_process_length = BigList.length !workitems_to_process in
+    let controller_started = Delegate.controller_started !delegate_state in
+    let should_run_hulk_v2 = controller_started && (hulk_lite || hulk_heavy) in
     let delegate_job =
-      if hulk_lite || hulk_heavy then (
+      if should_run_hulk_v2 then (
         (*
         This is the "reduce" part of the mapreduce paradigm. We activate this when workitems_to_check is empty,
         or in other words the local typechecker is done with its work. We'll try and download all the remote
@@ -783,7 +785,7 @@ let next
     in
 
     let (state, delegate_job) =
-      if hulk_lite || hulk_heavy then
+      if should_run_hulk_v2 then
         (!delegate_state, delegate_job)
       else
         Typing_service_delegate.next
@@ -794,7 +796,7 @@ let next
     delegate_state := state;
 
     let (stolen, state) =
-      if hulk_lite || hulk_heavy then
+      if should_run_hulk_v2 then
         ([], !delegate_state)
       else
         Typing_service_delegate.steal state max_size
@@ -806,7 +808,7 @@ let next
        type checking) logic applies. *)
     match delegate_job with
     | Some { current_bucket; remaining_jobs; job } ->
-      if hulk_lite || hulk_heavy then
+      if should_run_hulk_v2 then
         return_bucket_job
           (SimpleDelegateProgress job)
           ~current_bucket
@@ -914,6 +916,7 @@ let process_in_parallel
   let delegate_progress =
     Typing_service_delegate.get_progress !delegate_state
   in
+  let controller_started = Delegate.controller_started !delegate_state in
   let batch_counts_by_worker_id = ref SMap.empty in
   ServerProgress.send_percentage_progress
     ~operation:"typechecking"
@@ -923,7 +926,7 @@ let process_in_parallel
     ~extra:delegate_progress;
 
   let (telemetry, telemetry_start_t) : Telemetry.t * float option =
-    if hulk_lite || hulk_heavy then (
+    if controller_started && (hulk_lite || hulk_heavy) then (
       Hh_logger.log "Dispatch hulk lite initial payloads";
       let workitems_to_process_length = BigList.length !workitems_to_process in
       let ( payloads,
@@ -1027,13 +1030,20 @@ let process_in_parallel
     List.concat (List.map cancelled_results ~f:paths_of)
   in
   let _ =
-    if hulk_lite || hulk_heavy then
+    if controller_started && (hulk_lite || hulk_heavy) then
       HackEventLogger.hulk_type_check_end
         telemetry
         ~start_t:
           (Option.value_exn
              telemetry_start_t
              ~message:"Unexpected missing telemetry start time for Hulk Lite")
+    else
+      ()
+  in
+  let _ =
+    if hulk_lite || hulk_heavy then
+      (* during an incremental typecheck, we want to ensure controller state is reset for the recheck*)
+      delegate_state := Typing_service_delegate.stop !delegate_state
     else
       ()
   in

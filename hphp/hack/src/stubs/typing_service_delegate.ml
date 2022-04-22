@@ -61,3 +61,7 @@ let add_telemetry state telemetry =
 let get_progress state =
   ignore state;
   None
+
+let controller_started state =
+  ignore state;
+  false

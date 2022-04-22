@@ -32,7 +32,7 @@ Errors:
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false })[(Class
+      c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None })[(Class
     { c_span = [3:1-7:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-8], "\\B"); c_tparams = []; c_extends = [([3:17-18], (Happly (([3:17-18], "\\A"), [])))]; 
@@ -68,7 +68,7 @@ Errors:
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false })[(Class
+      c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None })[(Class
     { c_span = [3:1-7:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-8], "\\C"); c_tparams = []; c_extends = [([3:17-18], (Happly (([3:17-18], "\\B"), [])))]; 
@@ -110,7 +110,7 @@ Errors:
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false })[(Fun
+      c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None })[(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -144,4 +144,4 @@ Errors:
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false })
+      fd_internal = false; fd_module = None })

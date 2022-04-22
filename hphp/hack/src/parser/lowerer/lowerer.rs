@@ -5009,6 +5009,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 mode: env.file_mode(),
                 fun,
                 internal: hdr.internal,
+                module: None,
             })])
         }
         ClassishDeclaration(c) if contains_class_body(c) => {
@@ -5077,6 +5078,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 doc_comment: doc_comment_opt,
                 emit_id: None,
                 internal: kinds.has(modifier::INTERNAL),
+                module: None,
             };
             match &c.body.children {
                 ClassishBody(c1) => {
@@ -5147,6 +5149,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 is_ctx: false,
                 // TODO(T116039119): Populate value with presence of internal attribute
                 internal: false,
+                module: None,
             })])
         }
         ContextAliasDeclaration(c) => {
@@ -5203,6 +5206,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 is_ctx: true,
                 // TODO(T116039119): Populate value with presence of internal attribute
                 internal: false,
+                module: None,
             })])
         }
         EnumDeclaration(c) => {
@@ -5271,6 +5275,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 emit_id: None,
                 // TODO(T116039119): Populate value with presence of internal attribute
                 internal: false,
+                module: None,
             })])
         }
 
@@ -5344,6 +5349,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 xhp_attrs: vec![],
                 emit_id: None,
                 internal: kinds.has(modifier::INTERNAL),
+                module: None,
             };
 
             for n in c.elements.syntax_node_to_list_skip_separator() {

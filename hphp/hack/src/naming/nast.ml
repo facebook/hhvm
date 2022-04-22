@@ -224,7 +224,8 @@ let get_defs (ast : program) =
               FileInfo.pos_full (to_id md.md_name) :: modules )
           | Namespace (_, defs) -> get_defs defs acc
           | NamespaceUse _
-          | SetNamespaceEnv _ ->
+          | SetNamespaceEnv _
+          | SetModule _ ->
             acc
           (* toplevel statements are ignored *)
           | FileAttributes _
@@ -1186,6 +1187,7 @@ module Visitor_DEPRECATED = struct
         | NamespaceUse _
         | SetNamespaceEnv _
         | FileAttributes _
+        | SetModule _
         | Module _ ->
           acc
 

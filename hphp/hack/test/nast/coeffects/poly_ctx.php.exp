@@ -1,12 +1,12 @@
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       fd_file_attributes = []; fd_mode = Mstrict;
       fd_fun =
-      { f_span = [3:1-6:28]; f_readonly_this = None; f_annotation = ();
-        f_readonly_ret = None; f_ret = ((), (Some ([6:21-25], (Hprim Tvoid))));
+      { f_span = [3:1-6:28]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([6:21-25], (Hprim Tvoid)))); 
         f_name = ([3:10-14], "\\poly");
         f_tparams =
         [{ tp_variance = Invariant; tp_name = ([4:19-20], "T/[ctx $f]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
@@ -18,12 +18,12 @@
            ((),
             (Some ([4:3-28],
                    (Hfun
-                      { hf_is_readonly = None; hf_param_tys = [([4:14-17], (Hprim Tint))];
-                        hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })];
-                        hf_variadic_ty = None; hf_ctxs = (Some ([4:18-21], [([4:19-20], (Hfun_context "$f"))]));
+                      { hf_is_readonly = None; hf_param_tys = [([4:14-17], (Hprim Tint))]; 
+                        hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                        hf_variadic_ty = None; hf_ctxs = (Some ([4:18-21], [([4:19-20], (Hfun_context "$f"))])); 
                         hf_return_ty = ([4:23-27], (Hprim Tvoid)); hf_is_readonly_return = None }))));
-           param_is_variadic = false; param_pos = [4:29-31]; param_name = "$f";
-           param_expr = None; param_readonly = None; param_callconv = Pnormal;
+           param_is_variadic = false; param_pos = [4:29-31]; param_name = "$f"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
           { param_annotation = ();
             param_type_hint =
@@ -32,18 +32,18 @@
                     (Hoption
                        ([5:4-32],
                         (Hfun
-                           { hf_is_readonly = None; hf_param_tys = [([5:15-21], (Hprim Tstring))];
-                             hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })];
-                             hf_variadic_ty = None; hf_ctxs = (Some ([5:22-25], [([5:23-24], (Hfun_context "$nf"))]));
-                             hf_return_ty = ([5:27-31], (Hprim Tbool));
+                           { hf_is_readonly = None; hf_param_tys = [([5:15-21], (Hprim Tstring))]; 
+                             hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                             hf_variadic_ty = None; hf_ctxs = (Some ([5:22-25], [([5:23-24], (Hfun_context "$nf"))])); 
+                             hf_return_ty = ([5:27-31], (Hprim Tbool)); 
                              hf_is_readonly_return = None }))))));
-            param_is_variadic = false; param_pos = [5:33-36]; param_name = "$nf";
-            param_expr = None; param_readonly = None; param_callconv = Pnormal;
+            param_is_variadic = false; param_pos = [5:33-36]; param_name = "$nf"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = (Some ([6:2-19], [([6:3-9], (Hfun_context "$f")); ([6:11-18], (Hfun_context "$nf"))]));
-        f_unsafe_ctxs = (Some ([6:2-19], [([6:3-9], (Hfun_context "$f")); ([6:11-18], (Hfun_context "$nf"))]));
-        f_body = { fb_ast = [([Pos.none], Noop)] }; f_fun_kind = FSync;
+        f_unsafe_ctxs = (Some ([6:2-19], [([6:3-9], (Hfun_context "$f")); ([6:11-18], (Hfun_context "$nf"))])); 
+        f_body = { fb_ast = [([Pos.none], Noop)] }; f_fun_kind = FSync; 
         f_user_attributes = []; f_external = false; f_doc_comment = None };
-      fd_internal = false })
+      fd_internal = false; fd_module = None })
   ]

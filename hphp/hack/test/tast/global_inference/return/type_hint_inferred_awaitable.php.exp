@@ -13,4 +13,4 @@ Errors:
         f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "1")))))] }; 
         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false })
+      fd_internal = false; fd_module = None })

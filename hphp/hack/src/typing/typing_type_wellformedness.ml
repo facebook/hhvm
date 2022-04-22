@@ -311,6 +311,7 @@ let class_ tenv c =
     c_doc_comment = _;
     c_emit_id = _;
     c_internal = _;
+    c_module = _;
   } =
     c
   in
@@ -374,6 +375,7 @@ let typedef tenv t =
     t_is_ctx = _;
     t_file_attributes = _;
     t_internal = _;
+    t_module = _;
   } =
     t
   in
@@ -524,6 +526,7 @@ let _toplevel_def tenv = function
       fd_file_attributes = _;
       fd_fun;
       fd_internal = _;
+      fd_module = _;
     } =
       f
     in
@@ -537,6 +540,7 @@ let _toplevel_def tenv = function
   | NamespaceUse _
   | SetNamespaceEnv _
   | FileAttributes _
+  | SetModule _
   (* TODO(T108206307) *)
   | Module _ ->
     []

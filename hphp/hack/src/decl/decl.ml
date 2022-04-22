@@ -41,6 +41,7 @@ let rec name_and_declare_types_program_DEPRECATED
         name_and_declare_types_program_DEPRECATED acc ~sh ctx prog
       | NamespaceUse _ -> acc
       | SetNamespaceEnv _ -> acc
+      | SetModule _ -> acc
       | FileAttributes _ -> acc
       | Fun f ->
         let (name, decl) = Decl_nast.fun_naming_and_decl_DEPRECATED ctx f in

@@ -6,7 +6,8 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      t_span = [10:1-17]; t_emit_id = None; t_is_ctx = false; t_internal = false });
+      t_span = [10:1-17]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+      t_module = None });
   (Typedef
      { t_annotation = (); t_name = ([11:6-8], "\\T4"); t_tparams = []; 
        t_constraint = None; t_kind = ([11:11-16], Hmixed); t_user_attributes = []; 
@@ -15,7 +16,8 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       t_span = [11:1-17]; t_emit_id = None; t_is_ctx = false; t_internal = false });
+       t_span = [11:1-17]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+       t_module = None });
   (Typedef
      { t_annotation = (); t_name = ([12:6-8], "\\T6"); t_tparams = []; 
        t_constraint = None; t_kind = ([12:11-16], Hmixed); t_user_attributes = []; 
@@ -24,7 +26,8 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       t_span = [12:1-17]; t_emit_id = None; t_is_ctx = false; t_internal = false });
+       t_span = [12:1-17]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+       t_module = None });
   (Typedef
      { t_annotation = (); t_name = ([13:6-8], "\\T7"); t_tparams = []; 
        t_constraint = None; t_kind = ([13:11-16], Hmixed); t_user_attributes = []; 
@@ -33,7 +36,8 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       t_span = [13:1-17]; t_emit_id = None; t_is_ctx = false; t_internal = false });
+       t_span = [13:1-17]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+       t_module = None });
   (Class
      { c_span = [15:1-22:5]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -73,5 +77,5 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-       c_doc_comment = None; c_emit_id = None; c_internal = false })
+       c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None })
   ]

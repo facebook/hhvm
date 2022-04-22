@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<37563f32b317103d84f046d9d5cef8f8>>
+// @generated SignedSource<<f44ab1231ce79c5aa5bb7ea40e4c3d4b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3005,6 +3005,9 @@ impl<Ex, En> Def<Ex, En> {
     pub fn mk_module(p0: ModuleDef<Ex, En>) -> Self {
         Def::Module(Box::new(p0))
     }
+    pub fn mk_set_module(p0: Sid) -> Self {
+        Def::SetModule(Box::new(p0))
+    }
     pub fn is_fun(&self) -> bool {
         match self {
             Def::Fun(..) => true,
@@ -3062,6 +3065,12 @@ impl<Ex, En> Def<Ex, En> {
     pub fn is_module(&self) -> bool {
         match self {
             Def::Module(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_set_module(&self) -> bool {
+        match self {
+            Def::SetModule(..) => true,
             _ => false,
         }
     }
@@ -3125,6 +3134,12 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_set_module(&self) -> Option<&Sid> {
+        match self {
+            Def::SetModule(p0) => Some(&p0),
+            _ => None,
+        }
+    }
     pub fn as_fun_mut(&mut self) -> Option<&mut FunDef<Ex, En>> {
         match self {
             Def::Fun(p0) => Some(p0.as_mut()),
@@ -3185,6 +3200,12 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_set_module_mut(&mut self) -> Option<&mut Sid> {
+        match self {
+            Def::SetModule(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
     pub fn as_fun_into(self) -> Option<FunDef<Ex, En>> {
         match self {
             Def::Fun(p0) => Some(*p0),
@@ -3242,6 +3263,12 @@ impl<Ex, En> Def<Ex, En> {
     pub fn as_module_into(self) -> Option<ModuleDef<Ex, En>> {
         match self {
             Def::Module(p0) => Some(*p0),
+            _ => None,
+        }
+    }
+    pub fn as_set_module_into(self) -> Option<Sid> {
+        match self {
+            Def::SetModule(p0) => Some(*p0),
             _ => None,
         }
     }

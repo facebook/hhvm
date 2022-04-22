@@ -87,6 +87,7 @@ impl<'a, Ex, En> Iterator for DefsIterator<'a, Ex, En> {
                 Def::Namespace(defs) => self.stack.push(defs.1.iter()),
                 Def::Stmt(_)
                 | Def::Module(_)
+                | Def::SetModule(_)
                 | Def::NamespaceUse(_)
                 | Def::SetNamespaceEnv(_)
                 | Def::FileAttributes(_) => {}

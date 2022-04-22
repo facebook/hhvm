@@ -12,4 +12,4 @@
         f_body = { fb_ast = [([5:3-14], (Return (Some ((string), [5:10-13], (Hole (((string), [5:10-13], (String "3")), (string), (int), Typing))))))] }; 
         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false })
+      fd_internal = false; fd_module = None })

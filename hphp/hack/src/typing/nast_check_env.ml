@@ -80,6 +80,7 @@ let def_env ctx x =
   | Fun f -> fun_def_env empty_env f
   | Class c -> class_env empty_env c
   | Typedef t -> typedef_env empty_env t
+  | SetModule _
   | Constant _
   | Stmt _
   | Namespace _

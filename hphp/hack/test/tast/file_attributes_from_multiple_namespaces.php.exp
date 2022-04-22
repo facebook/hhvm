@@ -25,7 +25,8 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
         ];
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false });
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None });
   (Class
      { c_span = [13:1-45]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -53,4 +54,5 @@
              ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
            }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false })
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None })

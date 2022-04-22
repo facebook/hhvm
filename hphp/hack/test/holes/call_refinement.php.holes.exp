@@ -23,7 +23,7 @@
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:3-16], (Return (Some ((bool), [3:10-15], False))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false });
+      fd_internal = false; fd_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -37,7 +37,7 @@
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:3-19], (Return (Some ((vec<nothing>), [6:10-18], (ValCollection (Vec, None, []))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -70,7 +70,7 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false });
+       fd_internal = false; fd_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -108,4 +108,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false })
+       fd_internal = false; fd_module = None })

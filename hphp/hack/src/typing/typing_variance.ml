@@ -956,6 +956,7 @@ let class_def : Typing_env_types.env -> Nast.class_ -> unit =
     c_namespace = _;
     c_user_attributes = _;
     c_file_attributes = _;
+    c_module = _;
     c_enum = _;
     c_doc_comment = _;
     c_emit_id = _;
@@ -999,6 +1000,7 @@ let typedef : Typing_env_types.env -> Nast.typedef -> unit =
     t_is_ctx = _;
     t_file_attributes = _;
     t_internal = _;
+    t_module = _;
   } =
     typedef
   in

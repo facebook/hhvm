@@ -186,6 +186,7 @@ fn extract_debugger_main(
         fun: f,
         // TODO(T116039119): Populate value with presence of internal attribute
         internal: false,
+        module: None,
     };
     let mut new_defs = vec![Def::mk_fun(fd)];
     new_defs.append(&mut defs);

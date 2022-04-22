@@ -291,6 +291,7 @@ let fun_def ctx fd :
       Aast.fd_file_attributes = file_attrs;
       Aast.fd_namespace = fd.fd_namespace;
       Aast.fd_internal = fd.fd_internal;
+      Aast.fd_module = fd.fd_module;
     }
   in
   let (_env, global_inference_env) = Env.extract_global_inference_env env in
@@ -2048,6 +2049,7 @@ let class_def_ env c tc =
       Aast.c_xhp_attrs = [];
       Aast.c_emit_id = c.c_emit_id;
       Aast.c_internal = c.c_internal;
+      Aast.c_module = c.c_module;
     },
     global_inference_envs )
 
@@ -2197,6 +2199,7 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _
+    | SetModule _
     | FileAttributes _ ->
       failwith
         "Invalid nodes in NAST. These nodes should be removed during naming."

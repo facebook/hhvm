@@ -8,7 +8,8 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      t_span = [2:1-35]; t_emit_id = None; t_is_ctx = false; t_internal = false })[(Typedef
+      t_span = [2:1-35]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+      t_module = None })[(Typedef
     { t_annotation = (); t_name = ([4:6-26], "\\UNSAFE_TYPE_HH_FIXME"); 
       t_tparams = []; t_constraint = None; t_kind = ([4:29-50], (Happly (([4:29-50], "\\UNSAFE_TYPE_HH_FIXME_"), []))); 
       t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict; 
@@ -17,7 +18,8 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      t_span = [4:1-51]; t_emit_id = None; t_is_ctx = false; t_internal = false })[(Fun
+      t_span = [4:1-51]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+      t_module = None })[(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -30,7 +32,7 @@
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-16], (Return (Some ((string), [4:10-15], (String "foo")))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false })[(Class
+      fd_internal = false; fd_module = None })[(Class
     { c_span = [2:1-4:2]; c_annotation = (); c_mode = Mstrict; c_final = true; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Abstract); 
       c_name = ([2:22-30], "\\HH_FIXME"); c_tparams = []; c_extends = []; 
@@ -48,7 +50,7 @@
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false })[(Fun
+      c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None })[(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -61,4 +63,4 @@
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "0")))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false })
+      fd_internal = false; fd_module = None })

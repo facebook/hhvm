@@ -53,6 +53,7 @@ let typedef_def ctx typedef =
     t_is_ctx = _;
     t_file_attributes = _;
     t_internal = _;
+    t_module = _;
   } =
     typedef
   in
@@ -119,4 +120,5 @@ let typedef_def ctx typedef =
     Aast.t_is_ctx = typedef.t_is_ctx;
     Aast.t_file_attributes = file_attributes;
     Aast.t_internal = typedef.t_internal;
+    Aast.t_module = typedef.t_module;
   }

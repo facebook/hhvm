@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3f367ad45094fa0eb0cca0b832762345>>
+// @generated SignedSource<<28cd663dd0473eae872922b7e1a1e8e1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -468,7 +468,8 @@ impl<P: Params> NodeMut<P> for Class_<P::Ex, P::En> {
         self.enum_.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
         self.emit_id.accept(c, v)?;
-        self.internal.accept(c, v)
+        self.internal.accept(c, v)?;
+        self.module.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for ClassishKind {
@@ -585,6 +586,7 @@ impl<P: Params> NodeMut<P> for Def<P::Ex, P::En> {
             Def::SetNamespaceEnv(a0) => a0.accept(c, v),
             Def::FileAttributes(a0) => a0.accept(c, v),
             Def::Module(a0) => a0.accept(c, v),
+            Def::SetModule(a0) => a0.accept(c, v),
         }
     }
 }
@@ -1150,7 +1152,8 @@ impl<P: Params> NodeMut<P> for FunDef<P::Ex, P::En> {
         self.file_attributes.accept(c, v)?;
         self.mode.accept(c, v)?;
         self.fun.accept(c, v)?;
-        self.internal.accept(c, v)
+        self.internal.accept(c, v)?;
+        self.module.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for FunKind {
@@ -2013,7 +2016,8 @@ impl<P: Params> NodeMut<P> for Typedef<P::Ex, P::En> {
         self.span.accept(c, v)?;
         self.emit_id.accept(c, v)?;
         self.is_ctx.accept(c, v)?;
-        self.internal.accept(c, v)
+        self.internal.accept(c, v)?;
+        self.module.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for TypedefVisibility {

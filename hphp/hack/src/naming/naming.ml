@@ -949,6 +949,7 @@ let rec class_ ctx c =
     N.c_xhp_attrs = [];
     N.c_emit_id = c.Aast.c_emit_id;
     N.c_internal = c.Aast.c_internal;
+    N.c_module = c.Aast.c_module;
   }
 
 and user_attributes env attrl =
@@ -1511,6 +1512,7 @@ and fun_def ctx fd =
       fd_namespace = fd.Aast.fd_namespace;
       fd_file_attributes = file_attributes;
       fd_internal = fd.Aast.fd_internal;
+      fd_module = fd.Aast.fd_module;
     }
   in
   named_fun_def
@@ -2411,6 +2413,7 @@ let typedef ctx tdef =
     t_file_attributes =
       file_attributes ctx tdef.Aast.t_mode tdef.Aast.t_file_attributes;
     t_internal = tdef.Aast.t_internal;
+    t_module = tdef.Aast.t_module;
   }
 
 (**************************************************************************)
@@ -2485,7 +2488,10 @@ let program ctx ast =
       top_level_env := genv;
       acc
     | Aast.Module md -> N.Module (module_ ctx md) :: acc
-    | Aast.FileAttributes _ -> acc
+    (* These are elaborated away in Namespaces.elaborate_toplevel_defs *)
+    | Aast.SetModule _
+    | Aast.FileAttributes _ ->
+      acc
   in
   let on_program aast =
     let nast = List.fold_left ~f:aux ~init:[] aast in

@@ -44,6 +44,7 @@ impl TypingCheckUtils {
                 | Def::Module(_)
                 | Def::NamespaceUse(_)
                 | Def::SetNamespaceEnv(_)
+                | Def::SetModule(_)
                 | Def::FileAttributes(_) => unreachable!("Program::defs won't emit these"),
             }
         }

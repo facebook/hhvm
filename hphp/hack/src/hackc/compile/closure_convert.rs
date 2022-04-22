@@ -603,6 +603,8 @@ fn make_closure(
         emit_id: Some(EmitId::Anonymous),
         // TODO(T116039119): Populate value with presence of internal attribute
         internal: false,
+        // TODO: closures should have the visibility of the module they are defined in
+        module: None,
     };
 
     // TODO(hrust): can we reconstruct fd here from the scratch?
@@ -1546,6 +1548,8 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
             fun: f,
             // TODO(T116039119): Populate value with presence of internal attribute
             internal: false,
+            // TODO: meth_caller should have the visibility of the module it is defined in
+            module: None,
         };
         self.state_mut()
             .named_hoisted_functions
@@ -1660,6 +1664,7 @@ fn prepare_defs(defs: &mut [Def]) -> usize {
             Def::FileAttributes(_)
             | Def::Fun(_)
             | Def::Module(_)
+            | Def::SetModule(_)
             | Def::NamespaceUse(_)
             | Def::SetNamespaceEnv(_)
             | Def::Stmt(_) => {}
@@ -1703,6 +1708,7 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
             | Def::FileAttributes(_)
             | Def::Fun(_)
             | Def::Module(_)
+            | Def::SetModule(_)
             | Def::Namespace(_)
             | Def::NamespaceUse(_)
             | Def::Stmt(_)

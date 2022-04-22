@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ae899eba3e561f95304b6d8ead7a6371>>
+// @generated SignedSource<<c1d7b464ac7e92d60cd9ba9469892daf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1342,6 +1342,7 @@ pub struct Class_<Ex, En> {
     pub doc_comment: Option<DocComment>,
     pub emit_id: Option<EmitId>,
     pub internal: bool,
+    pub module: Option<Sid>,
 }
 
 pub type ClassHint = Hint;
@@ -1716,6 +1717,7 @@ pub struct Typedef<Ex, En> {
     pub emit_id: Option<EmitId>,
     pub is_ctx: bool,
     pub internal: bool,
+    pub module: Option<Sid>,
 }
 
 #[derive(
@@ -1765,6 +1767,7 @@ pub struct FunDef<Ex, En> {
     pub mode: file_info::Mode,
     pub fun: Fun_<Ex, En>,
     pub internal: bool,
+    pub module: Option<Sid>,
 }
 
 #[derive(
@@ -1816,6 +1819,7 @@ pub enum Def<Ex, En> {
     SetNamespaceEnv(Box<Nsenv>),
     FileAttributes(Box<FileAttribute<Ex, En>>),
     Module(Box<ModuleDef<Ex, En>>),
+    SetModule(Box<Sid>),
 }
 
 #[derive(

@@ -147,6 +147,8 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     t_emit_id = _;
     t_is_ctx = td_is_ctx;
     t_internal = _;
+    (* We'll consume this in the next diff *)
+    t_module = _;
   } =
     tdef
   in

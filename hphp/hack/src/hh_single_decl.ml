@@ -74,6 +74,7 @@ let rec shallow_declare_ast ctx decls prog =
       match def with
       | Namespace (_, prog) -> shallow_declare_ast ctx decls prog
       | NamespaceUse _ -> decls
+      | SetModule _ -> decls
       | SetNamespaceEnv _ -> decls
       | FileAttributes _ -> decls
       | Fun f ->

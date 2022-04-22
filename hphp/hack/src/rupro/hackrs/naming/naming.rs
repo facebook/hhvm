@@ -113,6 +113,7 @@ pub fn program(p: &mut aast::Program<(), ()>) {
             SetNamespaceEnv(_) => {}
             FileAttributes(_) => {}
             Module(_) => {}
+            SetModule(_) => {}
         }
     }
 }

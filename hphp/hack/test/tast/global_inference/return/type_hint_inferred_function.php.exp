@@ -20,4 +20,4 @@ Errors:
         f_body = { fb_ast = [([4:3-17], (Return (Some ((int), [4:10-16], (Binop (Star, ((int), [4:10-12], (Lvar ([4:10-12], $x))), ((int), [4:15-16], (Int "2"))))))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false })
+      fd_internal = false; fd_module = None })

@@ -838,6 +838,7 @@ and ('ex, 'en) class_ = {
   c_doc_comment: doc_comment option;
   c_emit_id: emit_id option;
   c_internal: bool;
+  c_module: sid option;
 }
 
 and class_hint = hint
@@ -984,6 +985,7 @@ and ('ex, 'en) typedef = {
   t_emit_id: emit_id option;
   t_is_ctx: bool;
   t_internal: bool;
+  t_module: sid option;
 }
 
 and ('ex, 'en) gconst = {
@@ -1003,6 +1005,7 @@ and ('ex, 'en) fun_def = {
   fd_mode: FileInfo.mode; [@visitors.opaque]
   fd_fun: ('ex, 'en) fun_;
   fd_internal: bool;
+  fd_module: sid option;
 }
 
 and ('ex, 'en) module_def = {
@@ -1024,6 +1027,7 @@ and ('ex, 'en) def =
   | SetNamespaceEnv of nsenv
   | FileAttributes of ('ex, 'en) file_attribute
   | Module of ('ex, 'en) module_def
+  | SetModule of sid
 
 and ns_kind =
   | NSNamespace

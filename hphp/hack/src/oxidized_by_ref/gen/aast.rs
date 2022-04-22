@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a784dbe30a95e3718e471a8f2fe3e27c>>
+// @generated SignedSource<<e9f0724a676d7559b22fff22666818d4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1701,6 +1701,8 @@ pub struct Class_<'a, Ex, En> {
     pub doc_comment: Option<&'a DocComment<'a>>,
     pub emit_id: Option<oxidized::aast::EmitId>,
     pub internal: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub module: Option<Sid<'a>>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Class_<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Class_<'arena, Ex, En>);
@@ -2168,6 +2170,8 @@ pub struct Typedef<'a, Ex, En> {
     pub emit_id: Option<oxidized::aast::EmitId>,
     pub is_ctx: bool,
     pub internal: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub module: Option<Sid<'a>>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Typedef<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Typedef<'arena, Ex, En>);
@@ -2236,6 +2240,8 @@ pub struct FunDef<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub fun: &'a Fun_<'a, Ex, En>,
     pub internal: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub module: Option<Sid<'a>>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for FunDef<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(FunDef<'arena, Ex, En>);
@@ -2312,6 +2318,8 @@ pub enum Def<'a, Ex, En> {
     FileAttributes(&'a FileAttribute<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Module(&'a ModuleDef<'a, Ex, En>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    SetModule(&'a Sid<'a>),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Def<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Def<'arena, Ex, En>);

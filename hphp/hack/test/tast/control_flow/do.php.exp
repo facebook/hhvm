@@ -1,21 +1,21 @@
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       fd_file_attributes = []; fd_mode = Mstrict;
       fd_fun =
-      { f_span = [3:1-9:2]; f_readonly_this = None; f_annotation = ();
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:30-34], (Hprim Tvoid))));
+      { f_span = [3:1-9:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:30-34], (Hprim Tvoid)))); 
         f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
         f_params =
-        [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:12-16], (Hprim Tbool))));
-           param_is_variadic = false; param_pos = [3:17-19]; param_name = "$b";
-           param_expr = None; param_readonly = None; param_callconv = Pnormal;
+        [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:12-16], (Hprim Tbool)))); 
+           param_is_variadic = false; param_pos = [3:17-19]; param_name = "$b"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = (int); param_type_hint = ((int), (Some ([3:21-24], (Hprim Tint))));
-            param_is_variadic = false; param_pos = [3:25-27]; param_name = "$a";
-            param_expr = None; param_readonly = None; param_callconv = Pnormal;
+          { param_annotation = (int); param_type_hint = ((int), (Some ([3:21-24], (Hprim Tint)))); 
+            param_is_variadic = false; param_pos = [3:25-27]; param_name = "$a"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
@@ -28,6 +28,6 @@
                ((bool), [7:12-14], (Lvar ([7:12-14], $b))))));
             ([8:3-6], (Expr ((string), [8:3-5], (Lvar ([8:3-5], $a)))))]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false })
+      fd_internal = false; fd_module = None })

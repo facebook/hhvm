@@ -78,7 +78,8 @@ struct Watcher {
    * Subscribe to the filesystem. Whenever the filesystem changes, this Watcher
    * will send a Results object describing the change to the given callback.
    */
-  virtual void subscribe(std::function<void(Results&&)> callback) = 0;
+  virtual void subscribe(
+      const Clock& lastClock, std::function<void(Results&&)> callback) = 0;
 };
 
 } // namespace Facts

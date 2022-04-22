@@ -194,9 +194,11 @@ struct WatchmanWatcher final
         std::move(lastClock), std::move(queryExpr), m_opts.m_retries);
   }
 
-  void subscribe(std::function<void(Results&& callback)> callback) override {
+  void subscribe(
+      const Clock& lastClock,
+      std::function<void(Results&& callback)> callback) override {
     m_watchmanClient->subscribe(
-        m_queryExpr,
+        addWatchmanSince(m_queryExpr, lastClock),
         [cb = std::move(callback)](folly::Try<folly::dynamic>&& results) {
           if (results.hasValue()) {
             cb(parseWatchmanResults({}, std::move(results.value())));

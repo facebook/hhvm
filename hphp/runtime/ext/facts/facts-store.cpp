@@ -771,8 +771,12 @@ struct FactsStoreImpl final
     if (!m_watcher) {
       return;
     }
+    auto clock = m_map.getClock();
+    if (clock.isInitial()) {
+      clock = m_map.dbClock();
+    }
     m_watcher->subscribe(
-        [weakThis = weak_from_this()](Watcher::Results&& results) {
+        clock, [weakThis = weak_from_this()](Watcher::Results&& results) {
           XLOGF(
               INFO,
               "Subscription result: {} paths received.",

@@ -39,7 +39,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * System-wide memory infomation from /proc/meminfo
+ * System-wide memory information from /proc/meminfo
  */
 struct MemInfo {
   int64_t totalMb{-1};
@@ -53,7 +53,7 @@ struct MemInfo {
 };
 
 /*
- * Infomation from /proc/self/status, along with other HHVM-specific memory
+ * Information from /proc/self/status, along with other HHVM-specific memory
  * usage data.
  *
  * Kernel documentation: http://man7.org/linux/man-pages/man5/proc.5.html

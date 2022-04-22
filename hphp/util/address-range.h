@@ -41,7 +41,7 @@ constexpr size_t kHighColdCap = 4ull << 30;
 constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr - kHighColdCap;
 constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
 
-// Areans for request heap starts at kLocalArenaMinAddr.
+// Arenas for request heap starts at kLocalArenaMinAddr.
 constexpr uintptr_t kLocalArenaMinAddr = 1ull << 40;
 constexpr size_t kLocalArenaSizeLimit = 64ull << 30;
 // Extra pages for Arena 0

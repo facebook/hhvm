@@ -258,7 +258,7 @@ void LockFreePtrWrapper<T>::lock_for_update() {
         // We failed, so someone else got in before us. start over.
         continue;
       }
-      // compare_exchange_weak only upates c when it fails, so set it
+      // compare_exchange_weak only updates c when it fails, so set it
       // to the value we actually wrote to memory.
       c = desired;
     }

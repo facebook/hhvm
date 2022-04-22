@@ -1,42 +1,58 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-use anyhow::Result;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct HhvmConfig {
     pub hdf_config: hdf::Value,
     pub ini_config: hdf::Value,
 }
 
 impl HhvmConfig {
-    pub fn get_str<'a>(&'a self, key: &str) -> Result<Option<String>> {
+    pub fn get_str<'a>(&'a self, key: &str) -> Option<&'a str> {
         self.get_helper(
             key,
             /*prepend_hhvm=*/ true,
-            |config, key| Ok(config.get_str(key)?),
+            |config, key| config.get_str(key),
         )
     }
 
-    pub fn get_bool(&self, key: &str) -> Result<Option<bool>> {
+    pub fn get_bool(&self, key: &str) -> Option<bool> {
         self.get_helper(
             key,
             /*prepend_hhvm=*/ true,
-            |config, key| Ok(config.get_bool(key)?),
+            |config, key| config.get_bool(key).ok().flatten(),
         )
     }
 
-    fn get_helper<'a, T: 'a>(
+    pub fn enumerate<'a>(&'a self, key: &str) -> Vec<&'a str> {
+        let mut result: Vec<&str> = Vec::new();
+        if let Some(value) = self.hdf_config.get(key) {
+            for k in value.keys() {
+                result.push(k);
+            }
+        }
+
+        let ini_name = Self::ini_name(key, /*prepend_hhvm=*/ true);
+        if let Some(value) = self.ini_config.get(&ini_name) {
+            for k in value.keys() {
+                result.push(k);
+            }
+        }
+
+        result
+    }
+
+    fn get_helper<'a, T: 'a, F: Fn(&'a hdf::Value, &str) -> Option<T>>(
         &'a self,
         key: &str,
         prepend_hhvm: bool,
-        mut f: impl FnMut(&'a hdf::Value, &str) -> Result<Option<T>>,
-    ) -> Result<Option<T>> {
-        match f(&self.hdf_config, key)? {
-            Some(value) => Ok(Some(value)),
-            None => {
-                let ini_name = Self::ini_name(key, prepend_hhvm);
-                f(&self.ini_config, &ini_name)
-            }
+        f: F,
+    ) -> Option<T> {
+        if let Some(value) = f(&self.hdf_config, key) {
+            return Some(value);
         }
+
+        let ini_name = Self::ini_name(key, prepend_hhvm);
+        f(&self.ini_config, &ini_name)
     }
 
     fn ini_name(name: &str, prepend_hhvm: bool) -> String {
@@ -86,6 +102,15 @@ impl HhvmConfig {
     }
 }
 
+impl Default for HhvmConfig {
+    fn default() -> Self {
+        Self {
+            hdf_config: hdf::Value::new(),
+            ini_config: hdf::Value::new(),
+        }
+    }
+}
+
 #[test]
 fn test_ini_name() {
     assert_eq!(
@@ -97,4 +122,10 @@ fn test_ini_name() {
         "server.ssl_port"
     );
     assert_eq!(HhvmConfig::ini_name("PathDebug", false), "path_debug");
+}
+
+#[derive(Clone, Debug)]
+pub struct ParseConfig {
+    /// -vHack.Lang.AllowUnstableFeatures=1
+    pub allow_unstable_features: bool,
 }

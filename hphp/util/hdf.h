@@ -110,7 +110,6 @@ struct Hdf {
    * Read or dump this entire tree in HDF format.
    */
   void fromString(const char *input);
-  void fromString(const std::string &input) { fromString(input.c_str()); }
   const char *toString() const;
   void write(const char *filename) const;
   void write(const std::string &filename) const { write(filename.c_str());}

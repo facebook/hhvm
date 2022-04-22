@@ -93,7 +93,7 @@ void Config::ParseIniString(const std::string &iniStr, IniSettingMap &ini,
 }
 
 void Config::ParseHdfString(const std::string &hdfStr, Hdf &hdf) {
-  hdf.fromString(hdfStr);
+  hdf.fromString(hdfStr.c_str());
 }
 
 void Config::ParseConfigFile(const std::string &filename, IniSettingMap &ini,

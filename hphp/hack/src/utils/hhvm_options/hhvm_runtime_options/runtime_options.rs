@@ -12,24 +12,24 @@ use std::{borrow::Cow, fs};
 /// Based on getTierOverwrites() in runtime-option.cpp
 pub fn apply_tier_overrides(mut config: hdf::Value) -> Result<hdf::Value> {
     // Machine metrics
-    let hostname = config
-        .get_str("Machine.name")?
-        .unwrap_or_else(cxx_ffi::Process_GetHostName);
+    let hostname: String = config
+        .get_str("Machine.name")
+        .map_or_else(cxx_ffi::Process_GetHostName, |s| s.to_string());
 
-    let tier: String = config.get_str("Machine.tier")?.unwrap_or_default();
-    let task: String = config.get_str("Machine.task")?.unwrap_or_default();
+    let tier: String = config.get_str("Machine.tier").unwrap_or("").to_string();
+    let task: String = config.get_str("Machine.task").unwrap_or("").to_string();
 
     let cpu: String = config
-        .get_str("Machine.cpu")?
+        .get_str("Machine.cpu")
         .map_or_else(cxx_ffi::Process_GetCPUModel, |s| s.to_string());
 
     let tiers: String = config
-        .get_str("Machine.tiers")?
+        .get_str("Machine.tiers")
         .and_then(|tiers| fs::read_to_string(tiers).ok())
         .unwrap_or_else(|| "".to_owned());
 
     let tags: String = config
-        .get_str("Machine.tags")?
+        .get_str("Machine.tags")
         .and_then(|tiers| fs::read_to_string(tiers).ok())
         .unwrap_or_else(|| "".to_owned());
 
@@ -43,37 +43,39 @@ pub fn apply_tier_overrides(mut config: hdf::Value) -> Result<hdf::Value> {
         tags
     );
 
-    let check_patterns = |hdf: &hdf::Value| -> Result<bool> {
-        Ok(match_hdf_pattern(&hostname, hdf, "machine", "")?
-            && match_hdf_pattern(&tier, hdf, "tier", "")?
-            && match_hdf_pattern(&task, hdf, "task", "")?
-            && match_hdf_pattern(&tiers, hdf, "tiers", "m")?
-            && match_hdf_pattern(&tags, hdf, "tags", "m")?
-            && match_hdf_pattern(&cpu, hdf, "cpu", "")?)
+    let check_patterns = |hdf: &hdf::Value| {
+        match_hdf_pattern(&hostname, hdf, "machine", "")
+            && match_hdf_pattern(&tier, hdf, "tier", "")
+            && match_hdf_pattern(&task, hdf, "task", "")
+            && match_hdf_pattern(&tiers, hdf, "tiers", "m")
+            && match_hdf_pattern(&tags, hdf, "tags", "m")
+            && match_hdf_pattern(&cpu, hdf, "cpu", "")
     };
 
     let mut enable_shards = true;
 
-    if let Some(tiers) = config.get("Tiers")? {
-        for tier in tiers.into_children()? {
-            let tier = tier?;
-            if check_patterns(&tier)?
-                && (!tier.contains_key("exclude")?
-                    || !tier
-                        .get("exclude")?
-                        .map_or(Ok(false), |v| check_patterns(&v))?
-                        && match_shard(enable_shards, &hostname, &tier))
+    let tiers: Vec<String> = config.get_or_empty("Tiers").keys().cloned().collect();
+    for tier_key in &tiers {
+        if let Some(tier) = config.get(tier_key) {
+            if check_patterns(tier)
+                && (!tier.contains_key("exclude")
+                    || !tier.get("exclude").map_or(false, check_patterns)
+                        && match_shard(enable_shards, &hostname, tier))
             {
-                log::info!("Matched tier: {}", tier.name()?);
+                log::info!("Matched tier: {}", tier_key);
 
-                if enable_shards && tier.get_bool_or("DisableShards", false)? {
+                if enable_shards && tier.get_bool("DisableShards")?.unwrap_or(false) {
                     log::info!("Sharding is disabled.");
                     enable_shards = false;
                 }
 
-                if let Some(remove) = tier.get("clear")? {
-                    for s in remove.values()? {
-                        config.remove(&s)?;
+                if let Some(clear) = tier.get("clear") {
+                    let remove: Vec<String> = clear
+                        .values()
+                        .map(|v| v.as_str().map_or_else(String::new, str::to_owned))
+                        .collect();
+                    for s in remove {
+                        config.remove(&s);
                     }
                 }
 
@@ -96,8 +98,8 @@ fn match_shard(_en: bool, _hostname: &str, _config: &hdf::Value) -> bool {
 }
 
 // Config::matchHdfPattern()
-fn match_hdf_pattern(_value: &str, config: &hdf::Value, name: &str, suffix: &str) -> Result<bool> {
-    let pattern = config.get_str(name)?.unwrap_or_default();
+fn match_hdf_pattern(_value: &str, config: &hdf::Value, name: &str, suffix: &str) -> bool {
+    let pattern = config.get_str(name).unwrap_or("");
     if !pattern.is_empty() {
         let _pattern: Cow<'_, str> = if suffix.is_empty() {
             pattern.into()
@@ -113,5 +115,5 @@ fn match_hdf_pattern(_value: &str, config: &hdf::Value, name: &str, suffix: &str
         //--   return false;
         //-- }
     }
-    Ok(true)
+    true
 }

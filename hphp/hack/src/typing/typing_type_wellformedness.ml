@@ -17,7 +17,6 @@ module FunUtils = Decl_fun_utils
 module Inst = Decl_instantiate
 module Phase = Typing_phase
 module Subst = Decl_subst
-module TUtils = Typing_utils
 module Cls = Decl_provider.Class
 
 (** This module checks well-formedness of type hints. See .mli file for more. *)
@@ -58,14 +57,12 @@ let check_happly unchecked_tparams env h =
       | None -> (env, None)
       | Some typedef ->
         check_tparams_constraints env hint_pos typedef.td_tparams targs)
-    | _ ->
-      (match get_node (TUtils.get_base_type env locl_ty) with
-      | Tclass (cls, _, targs) ->
-        (match Env.get_class env (snd cls) with
-        | Some cls ->
-          check_tparams_constraints env hint_pos (Cls.tparams cls) targs
-        | None -> (env, None))
-      | _ -> (env, None))
+    | Tclass (cls, _, targs) ->
+      (match Env.get_class env (snd cls) with
+      | Some cls ->
+        check_tparams_constraints env hint_pos (Cls.tparams cls) targs
+      | None -> (env, None))
+    | _ -> (env, None)
   in
   Option.iter ~f:Errors.add_typing_error ty_err_opt2;
   env

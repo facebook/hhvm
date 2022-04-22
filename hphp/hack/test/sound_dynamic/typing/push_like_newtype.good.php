@@ -8,9 +8,9 @@ newtype N<T> as C = C;
 
 function makeN<T>(T $_):N<T> { return new C(); }
 
-newtype NC<+T as dynamic> as C = C;
+newtype NC<+T as supportdyn<mixed>> as C = C;
 
-function makeNC<T as dynamic>(T $_):NC<T> { return new C(); }
+function makeNC<T as supportdyn<mixed>>(T $_):NC<T> { return new C(); }
 
 ////file2.php
 <?hh

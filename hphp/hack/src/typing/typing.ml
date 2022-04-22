@@ -906,14 +906,7 @@ let expand_expected_and_get_node
         match opt_ty with
         | None -> unbox env stripped_ty
         | Some ty ->
-          let dyn = MakeType.dynamic Reason.Rnone in
-          if
-            SubType.is_sub_type_for_union
-              ~coerce:(Some Typing_logic.CoerceToDynamic)
-              env
-              ty
-              dyn
-          then
+          if Typing_utils.is_supportdyn env ty then
             unbox env ty
           else
             unbox env stripped_ty
@@ -1402,18 +1395,13 @@ let call_param
   let ((env, e1), dep_ty) =
     match dynamic_func with
     | Some dyn_func_kind ->
-      let dyn_ty = MakeType.dynamic (get_reason dep_ty) in
       let (env, e1) =
         (* If dynamic_func is set, then the function type is supportdyn<t1 ... tn -> t>
            or ~(t1 ... tn -> t)
            and we are trying to call it as though it were dynamic. Hence all of the
            arguments must be subtypes of dynamic, regardless of whether they have
            a like to be stripped. *)
-        Typing_subtype.sub_type
-          env
-          ~coerce:(Some Typing_logic.CoerceToDynamic)
-          dep_ty
-          dyn_ty
+        Typing_utils.supports_dynamic env dep_ty
         @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
       in
       (* It is only sound to like strip the arguments to supportdyn functions, since there we
@@ -4629,11 +4617,7 @@ and expr_
       if Typing_defs.is_dynamic hint_ty then
         let (env, ty_err_opt) =
           if enable_sound_dynamic then
-            SubType.sub_type
-              ~coerce:(Some Typing_logic.CoerceToDynamic)
-              env
-              expr_ty
-              hint_ty
+            Typing_utils.supports_dynamic env expr_ty
             @@ Some (Typing_error.Reasons_callback.unify_error_at p)
           else
             (env, None)

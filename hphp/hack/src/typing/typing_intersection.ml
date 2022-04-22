@@ -154,9 +154,9 @@ let rec intersect env ~r ty1 ty2 =
   else
     let (env, ty1) = Env.expand_type env ty1 in
     let (env, ty2) = Env.expand_type env ty2 in
-    if Utils.is_sub_type_for_union ~coerce:None env ty1 ty2 then
+    if Utils.is_sub_type_for_union env ty1 ty2 then
       (env, ty1)
-    else if Utils.is_sub_type_for_union ~coerce:None env ty2 ty1 then
+    else if Utils.is_sub_type_for_union env ty2 ty1 then
       (env, ty2)
     else if Utils.is_type_disjoint env ty1 ty2 then (
       let inter_ty = MkType.nothing r in
@@ -409,9 +409,9 @@ let intersect env ~r ty1 ty2 =
 
 let rec intersect_i env r ty1 lty2 =
   let ty2 = LoclType lty2 in
-  if Utils.is_sub_type_for_union_i ~coerce:None env ty1 ty2 then
+  if Utils.is_sub_type_for_union_i env ty1 ty2 then
     (env, ty1)
-  else if Utils.is_sub_type_for_union_i ~coerce:None env ty2 ty1 then
+  else if Utils.is_sub_type_for_union_i env ty2 ty1 then
     (env, ty2)
   else
     let (env, ty) =

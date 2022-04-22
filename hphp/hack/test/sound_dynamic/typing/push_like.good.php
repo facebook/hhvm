@@ -110,7 +110,7 @@ function return_dict_vec():~dict<string,vec<int>> {
 
 // Some regression tests that failed with a previous change
 <<__SupportDynamicType>>
-function f<Tk as dynamic >(~Vector<?Tk> $x): ~Vector<Tk> {
+function f<Tk as supportdyn<mixed>>(~Vector<?Tk> $x): ~Vector<Tk> {
   return Vector {};
 }
 

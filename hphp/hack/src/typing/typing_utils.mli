@@ -71,31 +71,21 @@ val is_sub_type :
 val is_sub_type_for_coercion_ref : is_sub_type_type ref
 
 val is_sub_type_for_union_ref :
-  (Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  bool)
+  (Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool)
   ref
 
 val is_sub_type_for_union_i_ref :
   (Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
   Typing_defs.internal_type ->
   Typing_defs.internal_type ->
   bool)
   ref
 
 val is_sub_type_for_union :
-  Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  bool
+  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool
 
 val is_sub_type_for_union_i :
   Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
   Typing_defs.internal_type ->
   Typing_defs.internal_type ->
   bool
@@ -486,3 +476,12 @@ val make_supportdyn :
 val is_capability : Typing_defs.locl_ty -> bool
 
 val is_capability_i : Typing_defs.internal_type -> bool
+
+val supports_dynamic :
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_error.Reasons_callback.t option ->
+  Typing_env_types.env * Typing_error.t option
+
+(* Return true if type definitely is a subtype of supportdyn<mixed> *)
+val is_supportdyn : Typing_env_types.env -> Typing_defs.locl_ty -> bool

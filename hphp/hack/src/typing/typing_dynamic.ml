@@ -15,7 +15,7 @@ module SN = Naming_special_names
 module Reason = Typing_reason
 module Cls = Decl_provider.Class
 
-(* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>>
+(* Add `supportdyn<mixed>` lower and upper bound to any type parameters that are marked <<__RequireDynamic>>
  * Just add the upper bound to others. *)
 let add_require_dynamic_bounds env cls =
   List.fold_left (Decl_provider.Class.tparams cls) ~init:env ~f:(fun env tp ->
@@ -23,7 +23,9 @@ let add_require_dynamic_bounds env cls =
         Attributes.mem SN.UserAttributes.uaRequireDynamic tp.tp_user_attributes
       in
       let dtype =
-        Typing_make_type.dynamic (Reason.Rwitness_from_decl (fst tp.tp_name))
+        Typing_make_type.supportdyn
+          (Reason.Rwitness_from_decl (fst tp.tp_name))
+          (Typing_make_type.mixed Reason.Rnone)
       in
       let env = Env.add_upper_bound env (snd tp.tp_name) dtype in
       if require_dynamic then
@@ -39,14 +41,7 @@ let is_dynamic_decl env ty =
 
 (* Check that a property type is a subtype of dynamic *)
 let check_property_sound_for_dynamic_read ~on_error env classname id ty =
-  if
-    not
-      (Typing_utils.is_sub_type_for_union
-         ~coerce:(Some Typing_logic.CoerceToDynamic)
-         env
-         ty
-         (mk (Reason.Rnone, Tdynamic)))
-  then (
+  if not (Typing_utils.is_supportdyn env ty) then (
     let pos = get_pos ty in
     Typing_log.log_pessimise_prop env pos (snd id);
     Some
@@ -77,7 +72,6 @@ let check_property_sound_for_dynamic_write ~on_error env classname id decl_ty ty
     if
       not
         (Typing_utils.is_sub_type_for_union
-           ~coerce:(Some Typing_logic.CoerceToDynamic)
            env
            (Typing_make_type.dynamic Reason.Rnone)
            ty)
@@ -110,11 +104,7 @@ let sound_dynamic_interface_check env params_decl_ty ret_locl_ty =
   in
   let coercible_return_type =
     (* 2. check if the return type is coercible *)
-    Typing_utils.is_sub_type_for_union
-      ~coerce:(Some Typing_logic.CoerceToDynamic)
-      env
-      ret_locl_ty
-      (mk (Reason.Rnone, Tdynamic))
+    Typing_utils.is_supportdyn env ret_locl_ty
   in
   enforceable_params && coercible_return_type
 
@@ -183,11 +173,7 @@ let push_like_tyargs env tyl tparams =
                 let (_env, cty) =
                   Typing_phase.localize_no_subst env ~ignore_errors:true cty
                 in
-                Typing_utils.is_sub_type_for_union
-                  ~coerce:(Some Typing_logic.CoerceToDynamic)
-                  env
-                  ty'
-                  cty
+                Typing_utils.is_sub_type_for_union env ty' cty
               | _ -> true)
         then
           (changed', ty')

@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-function expectLike<T as dynamic>(~T $_):void { }
+function expectLike<T as supportdyn<mixed>>(~T $_):void { }
 
 <<__SupportDynamicType>>
 function bar(int $x):int {

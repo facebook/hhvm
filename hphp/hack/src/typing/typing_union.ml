@@ -219,9 +219,9 @@ let rec union env ?(approx_cancel_neg = false) ty1 ty2 =
   @@
   if ty_equal ty1 ty2 then
     (env, ty1)
-  else if Typing_utils.is_sub_type_for_union ~coerce:None env ty1 ty2 then
+  else if Typing_utils.is_sub_type_for_union env ty1 ty2 then
     (env, ty2)
-  else if Typing_utils.is_sub_type_for_union ~coerce:None env ty2 ty1 then
+  else if Typing_utils.is_sub_type_for_union env ty2 ty1 then
     (env, ty1)
   else
     let r = union_reason r1 r2 in
@@ -256,9 +256,9 @@ and simplify_union ~approx_cancel_neg env ty1 ty2 r =
   @@
   if ty_equal ty1 ty2 then
     (env, Some ty1)
-  else if Typing_utils.is_sub_type_for_union ~coerce:None env ty1 ty2 then
+  else if Typing_utils.is_sub_type_for_union env ty1 ty2 then
     (env, Some ty2)
-  else if Typing_utils.is_sub_type_for_union ~coerce:None env ty2 ty1 then
+  else if Typing_utils.is_sub_type_for_union env ty2 ty1 then
     (env, Some ty1)
   else
     simplify_union_ ~approx_cancel_neg env ty1 ty2 r
@@ -771,7 +771,7 @@ let union_list_2_by_2 ~approx_cancel_neg env r tyl =
         not
           (List.exists
              reduced_nonfinal
-             ~f:(Typing_utils.is_sub_type_for_union ~coerce:None env fty)))
+             ~f:(Typing_utils.is_sub_type_for_union env fty)))
   in
   (env, reduced_final @ reduced_nonfinal)
 
@@ -805,9 +805,9 @@ let simplify_unions env ?(approx_cancel_neg = false) ?on_tyvar ty =
 
 let rec union_i env ?(approx_cancel_neg = false) r ty1 lty2 =
   let ty2 = LoclType lty2 in
-  if Typing_utils.is_sub_type_for_union_i ~coerce:None env ty1 ty2 then
+  if Typing_utils.is_sub_type_for_union_i env ty1 ty2 then
     (env, ty2)
-  else if Typing_utils.is_sub_type_for_union_i ~coerce:None env ty2 ty1 then
+  else if Typing_utils.is_sub_type_for_union_i env ty2 ty1 then
     (env, ty1)
   else
     let (env, ty) =

@@ -11,17 +11,7 @@ val is_sub_type_for_coercion : env -> locl_ty -> locl_ty -> bool
 
 val is_sub_type_ignore_generic_params : env -> locl_ty -> locl_ty -> bool
 
-(** If the optional [coerce] argument indicates whether subtyping should allow
- * coercion to or from dynamic. For coercion to dynamic, types that implement
- * dynamic are considered sub-types of dynamic. For coercion from dynamic,
- * dynamic is treated as a sub-type of all types.
-*)
-val is_sub_type_for_union :
-  env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  locl_ty ->
-  locl_ty ->
-  bool
+val is_sub_type_for_union : env -> locl_ty -> locl_ty -> bool
 
 (** Determines whether the types are definitely disjoint, or whether they might
     overlap. *)

@@ -509,6 +509,36 @@ let liken ~super_like env ty =
   else
     ty
 
+(* At present, we don't distinguish between coercions (<:D) and subtyping (<:) in the
+ * type variable and type parameter environments. When closing the environment we use subtyping (<:).
+ * To mitigate against this, when adding a dynamic upper bound wrt coercion,
+ * transform it first into supportdyn<mixed>,
+ * as t <:D dynamic iff t <: supportdyn<mixed>.
+ *)
+let transform_dynamic_upper_bound ~coerce env ty =
+  if env.in_support_dynamic_type_method_check then
+    ty
+  else
+    match (coerce, get_node ty) with
+    | (Some TL.CoerceToDynamic, Tdynamic) ->
+      let r = get_reason ty in
+      MakeType.supportdyn r (MakeType.mixed r)
+    | (Some TL.CoerceToDynamic, _) -> ty
+    | _ -> ty
+
+let mk_issubtype_prop ~coerce _env ty1 ty2 =
+  match ty2 with
+  | LoclType ty2 ->
+    let (coerce, ty2) =
+      match (coerce, get_node ty2) with
+      | (Some TL.CoerceToDynamic, Tdynamic) ->
+        let r = get_reason ty2 in
+        (None, MakeType.supportdyn r (MakeType.mixed r))
+      | _ -> (coerce, ty2)
+    in
+    TL.IsSubtype (coerce, ty1, LoclType ty2)
+  | _ -> TL.IsSubtype (coerce, ty1, ty2)
+
 (** Given types ty_sub and ty_super, attempt to
  *  reduce the subtyping proposition ty_sub <: ty_super to
  *  a logical proposition whose primitive assertions are of the form v <: t or t <: v
@@ -548,7 +578,7 @@ and default_subtype
     ty_sub
     ty_super =
   let default env =
-    (env, TL.IsSubtype (subtype_env.coerce, ty_sub, ty_super))
+    (env, mk_issubtype_prop ~coerce:subtype_env.coerce env ty_sub ty_super)
   in
   let ( ||| ) = ( ||| ) ~fail in
   let (env, ty_super) = Env.expand_internal_type env ty_super in
@@ -753,7 +783,12 @@ and default_subtype
           begin
             match subtype_env.coerce with
             | Some cd ->
-              (env, TL.IsSubtype (Some cd, LoclType lty_sub, LoclType lty_super))
+              ( env,
+                mk_issubtype_prop
+                  ~coerce:(Some cd)
+                  env
+                  (LoclType lty_sub)
+                  (LoclType lty_super) )
             | None -> default_subtype_inner env ty_sub ty_super
           end
         | (r_sub, Tprim Nast.Tvoid) ->
@@ -886,7 +921,7 @@ and simplify_subtype_i
   let invalid_env_with env f = invalid ~fail:f env in
   (* We don't know whether the assertion is valid or not *)
   let default env =
-    (env, TL.IsSubtype (subtype_env.coerce, ety_sub, ety_super))
+    (env, mk_issubtype_prop ~coerce:subtype_env.coerce env ety_sub ety_super)
   in
   let default_subtype env =
     default_subtype
@@ -1243,7 +1278,12 @@ and simplify_subtype_i
           begin
             match subtype_env.coerce with
             | Some cd ->
-              (env, TL.IsSubtype (Some cd, LoclType ty_sub, LoclType ty_super))
+              ( env,
+                mk_issubtype_prop
+                  ~coerce:(Some cd)
+                  env
+                  (LoclType ty_sub)
+                  (LoclType ty_super) )
             | None -> default env
           end))
     | (_, Tintersection tyl) ->
@@ -1760,7 +1800,7 @@ and simplify_subtype_i
         | (_, Tneg _) ->
           default_subtype env
         | (_, Tvec_or_dict (_, ty)) ->
-          simplify_dynamic_aware_subtype ~subtype_env ty ty_super env
+          simplify_subtype ~subtype_env ty ty_super env
         | (_, Tfun ft_sub) ->
           if get_ft_support_dynamic_type ft_sub then
             valid env
@@ -1774,31 +1814,22 @@ and simplify_subtype_i
             env
             (* Contravariant subtyping on parameters *)
             |> simplify_supertype_params_with_variadic
-                 ~subtype_env:
-                   { subtype_env with coerce = Some TL.CoerceToDynamic }
+                 ~subtype_env
                  ft_sub.ft_params
                  ty_dyn_enf
             &&& (* Finally do covariant subtryping on return type *)
-            simplify_dynamic_aware_subtype
-              ~subtype_env
-              ft_sub.ft_ret.et_type
-              ty_super
+            simplify_subtype ~subtype_env ft_sub.ft_ret.et_type ty_super
         | (_, Ttuple tyl) ->
           List.fold_left
             ~init:(env, TL.valid)
             ~f:(fun res ty_sub ->
-              res
-              &&& simplify_dynamic_aware_subtype ~subtype_env ty_sub ty_super)
+              res &&& simplify_subtype ~subtype_env ty_sub ty_super)
             tyl
         | (_, Tshape (Closed_shape, sftl)) ->
           List.fold_left
             ~init:(env, TL.valid)
             ~f:(fun res sft ->
-              res
-              &&& simplify_dynamic_aware_subtype
-                    ~subtype_env
-                    sft.sft_ty
-                    ty_super)
+              res &&& simplify_subtype ~subtype_env sft.sft_ty ty_super)
             (TShapeMap.values sftl)
         | (_, Tclass ((_, class_id), _exact, tyargs)) ->
           let class_def_sub = Typing_env.get_class env class_id in
@@ -1853,27 +1884,12 @@ and simplify_subtype_i
                     in
                     match tp.tp_variance with
                     | Ast_defs.Covariant ->
-                      simplify_dynamic_aware_subtype
-                        ~subtype_env
-                        tyarg
-                        super
-                        env
+                      simplify_subtype ~subtype_env tyarg super env
                     | Ast_defs.Contravariant ->
-                      simplify_dynamic_aware_subtype
-                        ~subtype_env
-                        super
-                        tyarg
-                        env
+                      simplify_subtype ~subtype_env super tyarg env
                     | Ast_defs.Invariant ->
-                      simplify_dynamic_aware_subtype
-                        ~subtype_env
-                        tyarg
-                        super
-                        env
-                      &&& simplify_dynamic_aware_subtype
-                            ~subtype_env
-                            super
-                            tyarg
+                      simplify_subtype ~subtype_env tyarg super env
+                      &&& simplify_subtype ~subtype_env super tyarg
                   else
                     (* If the class is marked <<__SupportDynamicType>> then for any
                        * type parameters not marked <<__RequireDynamic>> then the class is a
@@ -1882,11 +1898,7 @@ and simplify_subtype_i
                     match tp.tp_variance with
                     | Ast_defs.Covariant
                     | Ast_defs.Invariant ->
-                      simplify_dynamic_aware_subtype
-                        ~subtype_env
-                        tyarg
-                        ty_super
-                        env
+                      simplify_subtype ~subtype_env tyarg ty_super env
                     | Ast_defs.Contravariant ->
                       (* If the parameter is contra-variant, then we only need to
                          check that the lower bounds (if present) are subtypes of
@@ -1915,11 +1927,7 @@ and simplify_subtype_i
                       | [] -> valid env
                       | _ ->
                         let sub = MakeType.union r_dynamic lower_bounds in
-                        simplify_dynamic_aware_subtype
-                          ~subtype_env
-                          sub
-                          ty_super
-                          env))
+                        simplify_subtype ~subtype_env sub ty_super env))
                   &&& subtype_args tparams tyargs
               in
               subtype_args (Cls.tparams class_sub) tyargs env
@@ -1934,11 +1942,7 @@ and simplify_subtype_i
                       env
                       enum_type.te_base
                   in
-                  simplify_dynamic_aware_subtype
-                    ~subtype_env
-                    subtype
-                    ty_super
-                    env
+                  simplify_subtype ~subtype_env subtype ty_super env
                 | None -> default_subtype env)
               | _ -> default_subtype env
             ))))
@@ -2078,7 +2082,7 @@ and simplify_subtype_i
                ~super_like
                tyarg_sub
                tyarg_super
-        | (_, Tvar _) -> default_subtype env
+        | (_, (Tgeneric _ | Tvar _)) -> default_subtype env
         | _ ->
           let ty_dyn = MakeType.dynamic r_supportdyn in
           env
@@ -3438,22 +3442,10 @@ and add_tyvar_upper_bound_and_close
     var
     ty
     (on_error : Typing_error.Reasons_callback.t option) =
-  (* At present, we don't distinguish between coercions (<:D) and subtyping (<:) in the
-   * environment. When closing the environment we use subtyping (<:). To mitigate against
-   * this, when adding a dynamic upper bound wrt coercion, transform it first into ?supportdynamic,
-   * as t <:D dynamic iff t <: ?supportdynamic.
-   *)
   let ty =
-    match (coerce, ty) with
-    | (Some TL.CoerceToDynamic, LoclType lty_super) ->
-      begin
-        match get_node lty_super with
-        | Tdynamic ->
-          let r = get_reason lty_super in
-          LoclType (MakeType.nullablesupportdynamic r)
-        | _ -> ty
-      end
-    | _ -> ty
+    match ty with
+    | LoclType ty -> LoclType (transform_dynamic_upper_bound ~coerce env ty)
+    | cty -> cty
   in
   let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
   let env =
@@ -3634,6 +3626,12 @@ and simplify_disj env disj =
   *)
   let bound_map = ref IMap.empty in
   let process_bound ~is_lower ~coerce ~constr ty var =
+    let ty =
+      match ty with
+      | LoclType ty when not is_lower ->
+        LoclType (transform_dynamic_upper_bound ~coerce env ty)
+      | _ -> ty
+    in
     match IMap.find_opt var !bound_map with
     | None -> bound_map := IMap.add var [(is_lower, ty, constr)] !bound_map
     | Some bounds ->
@@ -3673,18 +3671,20 @@ and simplify_disj env disj =
   rebuild_disj remaining bounds
 
 and props_to_env
-    pos
+    ty_sub
+    ty_super
     env
     ty_errs
     remain
     props
     (on_error : Typing_error.Reasons_callback.t option) =
+  let props_to_env = props_to_env ty_sub ty_super in
   match props with
   | [] -> (env, List.rev ty_errs, List.rev remain)
   | prop :: props ->
     (match prop with
     | TL.Conj props' ->
-      props_to_env pos env ty_errs remain (props' @ props) on_error
+      props_to_env env ty_errs remain (props' @ props) on_error
     | TL.Disj (ty_err_opt, disj_props) ->
       (* For now, just find the first prop in the disjunction that works *)
       let rec try_disj disj_props =
@@ -3692,14 +3692,14 @@ and props_to_env
         | [] ->
           (* For now let it fail later when calling
              process_simplify_subtype_result on the remaining constraints. *)
-          props_to_env pos env (ty_err_opt :: ty_errs) remain props on_error
+          props_to_env env (ty_err_opt :: ty_errs) remain props on_error
         | prop :: disj_props' ->
           let (env', ty_errs', other) =
-            props_to_env pos env [] remain [prop] on_error
+            props_to_env env [] remain [prop] on_error
           in
           if List.is_empty ty_errs' || List.for_all ty_errs' ~f:Option.is_none
           then
-            props_to_env pos env' ty_errs (remain @ other) props on_error
+            props_to_env env' ty_errs (remain @ other) props on_error
           else
             try_disj disj_props'
       in
@@ -3712,8 +3712,13 @@ and props_to_env
         | _ ->
           Typing_log.log_prop
             1
-            pos
-            ("non-singleton disjunction " ^ msg)
+            (Reason.to_pos (get_reason_i ty_sub))
+            ("non-singleton disjunction "
+            ^ msg
+            ^ " of "
+            ^ Typing_print.full_i env ty_sub
+            ^ " <: "
+            ^ Typing_print.full_i env ty_super)
             env
             prop
       in
@@ -3741,7 +3746,7 @@ and props_to_env
               ty_sub
               on_error
           in
-          props_to_env pos env ty_errs remain (prop1 :: prop2 :: props) on_error
+          props_to_env env ty_errs remain (prop1 :: prop2 :: props) on_error
         | (Some var, _) ->
           let (env, prop) =
             add_tyvar_upper_bound_and_close
@@ -3751,7 +3756,7 @@ and props_to_env
               ty_super
               on_error
           in
-          props_to_env pos env ty_errs remain (prop :: props) on_error
+          props_to_env env ty_errs remain (prop :: props) on_error
         | (_, Some var) ->
           let (env, prop) =
             add_tyvar_lower_bound_and_close
@@ -3761,8 +3766,8 @@ and props_to_env
               ty_sub
               on_error
           in
-          props_to_env pos env ty_errs remain (prop :: props) on_error
-        | _ -> props_to_env pos env ty_errs (prop :: remain) props on_error
+          props_to_env env ty_errs remain (prop :: props) on_error
+        | _ -> props_to_env env ty_errs (prop :: remain) props on_error
       end)
 
 (* Given a subtype proposition, resolve conjunctions of subtype assertions
@@ -3772,8 +3777,10 @@ and props_to_env
  * For disjunctions, arbitrarily pick the first disjunct that is not
  * unsatisfiable. If any unsatisfiable disjunct remains, return it.
  *)
-and prop_to_env pos env prop on_error =
-  let (env, ty_errs, props') = props_to_env pos env [] [] [prop] on_error in
+and prop_to_env ty_sub ty_super env prop on_error =
+  let (env, ty_errs, props') =
+    props_to_env ty_sub ty_super env [] [] [prop] on_error
+  in
   let ty_err_opt = Typing_error.union_opt @@ List.filter_map ~f:Fn.id ty_errs in
   let env = Env.add_subtype_prop env (TL.conj_list props') in
   (env, ty_err_opt)
@@ -3807,7 +3814,7 @@ and sub_type_inner
       "sub_type_inner"
       env
       prop;
-  prop_to_env (Reason.to_pos (reason ty_sub)) env prop subtype_env.on_error
+  prop_to_env ty_sub ty_super env prop subtype_env.on_error
 
 and is_sub_type_alt_i ~ignore_generic_params ~no_top_bottom ~coerce env ty1 ty2
     =
@@ -4188,13 +4195,14 @@ let is_type_disjoint env ty1 ty2 =
   is_type_disjoint ISet.empty env ty1 ty2
 
 let decompose_subtype_add_bound
-    (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : env =
+    ~coerce (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : env =
   let (env, ty_super) = Env.expand_type env ty_super in
   let (env, ty_sub) = Env.expand_type env ty_sub in
   match (get_node ty_sub, get_node ty_super) with
   | (_, Tany _) -> env
   (* name_sub <: ty_super so add an upper bound on name_sub *)
   | (Tgeneric (name_sub, targs), _) when not (phys_equal ty_sub ty_super) ->
+    let ty_super = transform_dynamic_upper_bound ~coerce env ty_super in
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_upper_bound call must be adapted *)
     log_subtype
@@ -4261,11 +4269,7 @@ let rec decompose_subtype
     ty_super;
   let (env, prop) =
     simplify_subtype
-      ~subtype_env:
-        (make_subtype_env
-           ~coerce:(Some TL.CoerceToDynamic)
-           ~ignore_generic_params:true
-           on_error)
+      ~subtype_env:(make_subtype_env ~ignore_generic_params:true on_error)
       ~this_ty:None
       ty_sub
       ty_super
@@ -4288,8 +4292,8 @@ and decompose_subtype_add_prop env prop =
       env
       prop;
     env
-  | TL.IsSubtype (_, LoclType ty1, LoclType ty2) ->
-    decompose_subtype_add_bound env ty1 ty2
+  | TL.IsSubtype (coerce, LoclType ty1, LoclType ty2) ->
+    decompose_subtype_add_bound ~coerce env ty1 ty2
   | TL.IsSubtype _ ->
     failwith
       "Subtyping locl types should yield propositions involving locl types only."
@@ -4405,7 +4409,7 @@ let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
       env
   in
   let (env, ty_err) =
-    prop_to_env (Reason.to_pos (get_reason ty_sub)) env prop on_error
+    prop_to_env (LoclType ty_sub) (LoclType ty_super) env prop on_error
   in
   ( (if Option.is_some ty_err then
       old_env
@@ -4454,7 +4458,14 @@ let subtype_funs
       ft_super
       env
   in
-  let (env, ty_err) = prop_to_env (Reason.to_pos r_sub) env prop on_error in
+  let (env, ty_err) =
+    prop_to_env
+      (LoclType (mk (r_sub, Tfun ft_sub)))
+      (LoclType (mk (r_super, Tfun ft_super)))
+      env
+      prop
+      on_error
+  in
   ( (if Option.is_some ty_err then
       old_env
     else
@@ -4464,6 +4475,10 @@ let subtype_funs
 let sub_type_or_fail env ty1 ty2 err_opt =
   sub_type env ty1 ty2
   @@ Option.map ~f:Typing_error.Reasons_callback.always err_opt
+
+let is_sub_type_for_union = is_sub_type_for_union ~coerce:None
+
+let is_sub_type_for_union_i = is_sub_type_for_union_i ~coerce:None
 
 let set_fun_refs () =
   Typing_utils.sub_type_ref := sub_type;

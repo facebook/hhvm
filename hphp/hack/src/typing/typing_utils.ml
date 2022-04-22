@@ -85,24 +85,13 @@ let is_sub_type x = !is_sub_type_ref x
 let (is_sub_type_for_coercion_ref : is_sub_type_type ref) =
   ref (not_implemented "is_sub_type_for_coercion")
 
-let (is_sub_type_for_union_ref :
-      (env ->
-      ?coerce:Typing_logic.coercion_direction option ->
-      locl_ty ->
-      locl_ty ->
-      bool)
-      ref) =
+let (is_sub_type_for_union_ref : (env -> locl_ty -> locl_ty -> bool) ref) =
   ref (not_implemented "is_sub_type_for_union")
 
 let is_sub_type_for_union x = !is_sub_type_for_union_ref x
 
 let (is_sub_type_for_union_i_ref :
-      (env ->
-      ?coerce:Typing_logic.coercion_direction option ->
-      internal_type ->
-      internal_type ->
-      bool)
-      ref) =
+      (env -> internal_type -> internal_type -> bool) ref) =
   ref (not_implemented "is_sub_type_for_union_i")
 
 let is_sub_type_for_union_i x = !is_sub_type_for_union_i_ref x
@@ -263,9 +252,8 @@ let is_nothing env ty = is_nothing_i env (LoclType ty)
 
 let is_dynamic env ty =
   let dynamic = MakeType.dynamic Reason.Rnone in
-  (is_sub_type_for_union ~coerce:None env dynamic ty && not (is_mixed env ty))
-  || is_sub_type_for_union ~coerce:None env ty dynamic
-     && not (is_nothing env ty)
+  (is_sub_type_for_union env dynamic ty && not (is_mixed env ty))
+  || (is_sub_type_for_union env ty dynamic && not (is_nothing env ty))
 
 let rec is_any env ty =
   let (env, ty) = Env.expand_type env ty in
@@ -509,6 +497,8 @@ let rec get_base_type env ty =
   | Tnewtype (classname, _, _) when String.equal classname SN.Classes.cClassname
     ->
     ty
+  | Tnewtype (n, _, ty) when String.equal n SN.Classes.cSupportDyn ->
+    get_base_type env ty
   (* If we have an expression dependent type and it only has one super
      type, we can treat it similarly to AKdependent _, Some ty *)
   | Tgeneric (n, targs) when DependentKind.is_generic_dep_ty n ->
@@ -529,13 +519,12 @@ let rec get_base_type env ty =
   | Tgeneric _
   | Tnewtype _
   | Tdependent _ ->
-    begin
-      match get_concrete_supertypes ~abstract_enum:true env ty with
-      (* If the type is exactly equal, we don't want to recurse *)
-      | (_, ty2 :: _) when ty_equal ty ty2 -> ty
-      | (_, ty :: _) -> get_base_type env ty
-      | (_, []) -> ty
-    end
+    let (_env, tys) =
+      get_concrete_supertypes ~expand_supportdyn:true ~abstract_enum:true env ty
+    in
+    (match tys with
+    | [ty] -> get_base_type env ty
+    | _ -> ty)
   | _ -> ty
 
 let get_printable_shape_field_name = Typing_defs.TShapeField.name
@@ -742,6 +731,12 @@ and strip_dynamic env ty =
   | None -> ty
   | Some ty -> ty
 
+let is_supportdyn env ty =
+  is_sub_type_for_union
+    env
+    ty
+    (MakeType.supportdyn Reason.Rnone (MakeType.mixed Reason.Rnone))
+
 let rec make_supportdyn r env ty =
   let (env, ty) = Env.expand_type env ty in
   match deref ty with
@@ -752,13 +747,7 @@ let rec make_supportdyn r env ty =
     let (env, tyl) = List.map_env env tyl ~f:(make_supportdyn r) in
     (env, mk (r', Tunion tyl))
   | _ ->
-    if
-      is_sub_type_for_union
-        ~coerce:(Some Typing_logic.CoerceToDynamic)
-        env
-        ty
-        (MakeType.dynamic r)
-    then
+    if is_supportdyn env ty then
       (env, ty)
     else
       (env, Typing_make_type.supportdyn r ty)
@@ -777,3 +766,7 @@ let is_capability_i ty =
   match ty with
   | LoclType ty -> is_capability ty
   | ConstraintType _ -> false
+
+let supports_dynamic env ty =
+  let r = get_reason ty in
+  sub_type env ty (MakeType.supportdyn r (MakeType.mixed Reason.Rnone))

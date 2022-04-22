@@ -542,11 +542,7 @@ let rec array_get
                TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
         let tv = Typing_make_type.dynamic r in
         let (env, idx_ty_err_opt) =
-          Typing_utils.sub_type
-            env
-            ~coerce:(Some Typing_logic.CoerceToDynamic)
-            ty2
-            tv
+          Typing_utils.supports_dynamic env ty2
           @@ Some (Typing_error.Reasons_callback.unify_error_at expr_pos)
         in
         Option.iter ~f:Errors.add_typing_error idx_ty_err_opt;
@@ -962,11 +958,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
                TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
         let tv = Typing_make_type.dynamic r in
         let (env, val_ty_err_opt) =
-          Typing_utils.sub_type
-            env
-            ~coerce:(Some Typing_logic.CoerceToDynamic)
-            ty2
-            tv
+          Typing_utils.supports_dynamic env ty2
           @@ Some (Typing_error.Reasons_callback.unify_error_at expr_pos)
         in
         Option.iter ~f:Errors.add_typing_error val_ty_err_opt;
@@ -1290,20 +1282,12 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
                TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
         let tv = Typing_make_type.dynamic r in
         let (env, ty_err1) =
-          Typing_utils.sub_type
-            ~coerce:(Some Typing_logic.CoerceToDynamic)
-            env
-            tkey
-            tv
+          Typing_utils.supports_dynamic env tkey
           @@ Some (Typing_error.Reasons_callback.unify_error_at expr_pos)
         in
         let idx_err_res = mk_ty_mismatch_res tkey tv ty_err1 in
         let (env, ty_err2) =
-          Typing_utils.sub_type
-            ~coerce:(Some Typing_logic.CoerceToDynamic)
-            env
-            ty2
-            tv
+          Typing_utils.supports_dynamic env ty2
           @@ Some (Typing_error.Reasons_callback.unify_error_at expr_pos)
         in
         let val_err_res = mk_ty_mismatch_res tkey tv ty_err2 in

@@ -32,6 +32,7 @@ val bind_param :
 
 val fun_ :
   ?abstract:bool ->
+  ?native:bool ->
   ?disable:bool ->
   Typing_env_types.env ->
   Typing_env_return_info.t ->

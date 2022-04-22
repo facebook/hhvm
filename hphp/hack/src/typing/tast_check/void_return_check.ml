@@ -218,7 +218,13 @@ let visitor =
     method! on_fun_ env fun_ =
       let decl_env = Tast_env.get_decl_env env in
       let has_impl_ret = Tast_env.fun_has_implicit_return env in
-      if not FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi) then
+      if
+        not
+          (FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi)
+          || Typing_native.is_native_fun
+               ~env:(Tast_env.tast_env_as_typing_env env)
+               fun_)
+      then
         this#traverse_fun_body
           (hint_of_type_hint fun_.f_ret)
           (fst fun_.f_name)
@@ -233,7 +239,10 @@ let visitor =
       if
         not
           (method_.m_abstract
-          || FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi))
+          || FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi)
+          || Typing_native.is_native_meth
+               ~env:(Tast_env.tast_env_as_typing_env env)
+               method_)
       then
         this#traverse_fun_body
           (hint_of_type_hint method_.m_ret)

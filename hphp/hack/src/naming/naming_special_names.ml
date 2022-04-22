@@ -513,7 +513,7 @@ module UserAttributes = struct
               "Instructs hhbbc to never inline this trait into classes that use it."
               ^ " Used for testing hhbbc optimizations." ) );
           ( uaNativeData,
-            ( [],
+            ( [cls],
               "Associates this class with a native data type (usually a C++ class)."
               ^ " When instantiating this class, the corresponding native object will also be allocated."
             ) );

@@ -231,7 +231,16 @@ let fun_def ctx fd :
       f.f_user_attributes
   in
   Typing_memoize.check_function env f;
-  let (env, tb) = Typing.fun_ ~disable env return pos f.f_body f.f_fun_kind in
+  let (env, tb) =
+    Typing.fun_
+      ~native:(Typing_native.is_native_fun ~env f)
+      ~disable
+      env
+      return
+      pos
+      f.f_body
+      f.f_fun_kind
+  in
   begin
     match hint_of_type_hint f.f_ret with
     | None ->
@@ -385,6 +394,7 @@ let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
         let (_ : env * Tast.stmt list) =
           Typing.fun_
             ~abstract:m.m_abstract
+            ~native:(Typing_native.is_native_meth ~env m)
             ~disable
             env
             dynamic_return_info
@@ -550,6 +560,7 @@ let method_def ~is_disposable env cls m =
   let (env, tb) =
     Typing.fun_
       ~abstract:m.m_abstract
+      ~native:(Typing_native.is_native_meth ~env m)
       ~disable
       env
       return

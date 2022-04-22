@@ -2116,8 +2116,15 @@ let rec bind_param
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
 (*****************************************************************************)
-and fun_ ?(abstract = false) ?(disable = false) env return pos named_body f_kind
-    =
+and fun_
+    ?(abstract = false)
+    ?(native = false)
+    ?(disable = false)
+    env
+    return
+    pos
+    named_body
+    f_kind =
   Env.with_env env (fun env ->
       debug_last_pos := pos;
       let env = Env.set_return env return in
@@ -2141,7 +2148,8 @@ and fun_ ?(abstract = false) ?(disable = false) env return pos named_body f_kind
       let has_implicit_return = LEnv.has_next env in
       let has_readonly = Env.get_readonly env in
       let env =
-        if (not has_implicit_return) || abstract || Env.is_hhi env then
+        if (not has_implicit_return) || abstract || native || Env.is_hhi env
+        then
           env
         else
           Typing_return.fun_implicit_return env pos ret.et_type f_kind

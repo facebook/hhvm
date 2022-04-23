@@ -24,6 +24,7 @@ type remote_computation_payload = {
   nonce: string;
   payload: workitem BigList.t;
   changed_files: Relative_path.t list option;
+  dirty_files: (Relative_path.t * string option) list;
 }
 [@@deriving show]
 
@@ -157,6 +158,9 @@ module type LocalServerApi = sig
   (* Packages the files changed since the mergebase into a single file.
     *)
   val write_changed_files : string list -> destination_path:string -> unit
+
+  (* Gather the filepaths changed since the mergebase and load their content *)
+  val load_changed_files : string list -> (Relative_path.t * string option) list
 end
 
 type delegate_env = {

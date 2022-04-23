@@ -88,9 +88,9 @@ let make_local_server_api
         changed_files
       | None -> Future.of_value []
 
-    let write_changed_files
-        (changed_files : string list) ~(destination_path : string) : unit =
-      let changed_files =
+    let load_changed_files (changed_files : string list) :
+        (Relative_path.t * string option) list =
+      let changed_files_and_content =
         List.map changed_files ~f:(fun changed_file ->
             let changed_file = FilePath.make_absolute root changed_file in
             let changed_file_path =
@@ -101,8 +101,13 @@ let make_local_server_api
                 ~writeback_disk_contents_in_shmem_provider:enable_disk_heap
                 changed_file_path ))
       in
+      changed_files_and_content
+
+    let write_changed_files
+        (changed_files : string list) ~(destination_path : string) : unit =
+      let changed_filepaths_and_content = load_changed_files changed_files in
       let chan = Stdlib.open_out_bin destination_path in
-      Marshal.to_channel chan changed_files [];
+      Marshal.to_channel chan changed_filepaths_and_content [];
       Stdlib.close_out chan
   end : LocalServerApi)
 

@@ -277,7 +277,7 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
   } else if (isMemberDimOp(extra->opcode) || isMemberFinalOp(extra->opcode)) {
     stores = stores | AMIStateAny;
     loads = loads | AMIStateAny;
-  } else {
+  } else if (!isTypeAssert(extra->opcode)) {
     kills = kills | AMIStateAny;
   }
 

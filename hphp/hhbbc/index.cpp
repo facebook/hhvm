@@ -5402,6 +5402,12 @@ res::Func Index::resolve_method(Context ctx,
   if (methIt == end(cinfo->methods)) return find_extra_method();
   auto const ftarget = methIt->second.func;
 
+  // Be conservative around unflattened trait methods, since their cls
+  // may change at runtime.
+  if (ftarget->cls && is_used_trait(*ftarget->cls)) {
+    return name_only();
+  }
+
   // We need to revisit the hasPrivateAncestor code if we start being
   // able to look up methods on interfaces (currently they have empty
   // method tables).

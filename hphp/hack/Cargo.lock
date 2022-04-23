@@ -285,7 +285,6 @@ dependencies = [
  "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
  "itertools 0.10.3",
- "ocaml_helper",
  "oxidized",
  "print_opcode",
  "thiserror",

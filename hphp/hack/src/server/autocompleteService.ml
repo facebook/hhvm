@@ -1395,6 +1395,25 @@ let def_start_keywords filename s : unit =
   in
   complete_keywords_at_token possible_keywords filename s
 
+(* Drop the items from [possible_keywords] if they're already in
+   [existing_modifiers]. *)
+let available_keywords existing_modifiers possible_keywords : string list =
+  let current_modifiers =
+    Syntax.syntax_node_to_list existing_modifiers
+    |> List.filter_map ~f:(fun s ->
+           match s.Syntax.syntax with
+           | Syntax.Token _ -> Some (Syntax.text s)
+           | _ -> None)
+  in
+  List.filter possible_keywords ~f:(fun kw ->
+      not (List.mem current_modifiers kw ~equal:String.equal))
+
+let class_keywords filename existing_modifiers s : unit =
+  let possible_keywords =
+    available_keywords existing_modifiers ["final"; "abstract"; "class"]
+  in
+  complete_keywords_at_token possible_keywords filename s
+
 let keywords filename tree =
   let open Syntax in
   let rec aux s =
@@ -1421,6 +1440,13 @@ let keywords filename tree =
       | Missing ->
         (* The user has written `async AUTO332`, so we're expecting `function`. *)
         complete_keywords_at_token ["function"] filename fdh.function_name
+      | _ -> ())
+    | ClassishDeclaration cd ->
+      (match cd.classish_keyword.syntax with
+      | Missing ->
+        (* The user has written `final AUTO332` or `abstract AUTO332`,
+           so we're expecting a class, not an interface or trait. *)
+        class_keywords filename cd.classish_modifiers cd.classish_name
       | _ -> ())
     | _ -> ());
     List.iter (children s) ~f:aux

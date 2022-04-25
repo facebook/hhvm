@@ -17,6 +17,7 @@ include AutocompleteTypes
 open Tast
 module Phase = Typing_phase
 module Cls = Decl_provider.Class
+module Syntax = Full_fidelity_positioned_syntax
 
 let autocomplete_results : complete_autocomplete_result list ref = ref []
 
@@ -73,9 +74,16 @@ let matches_auto_complete_suffix x =
   in
   String.equal suffix AutocompleteTypes.autocomplete_token
 
-let is_auto_complete x =
-  if List.is_empty !autocomplete_results then
-    matches_auto_complete_suffix x
+(* Does [str] look like something we should offer code completion on? *)
+let is_auto_complete str : bool =
+  let results_without_keywords =
+    List.filter !autocomplete_results ~f:(fun res ->
+        match res.res_kind with
+        | SI_Keyword -> false
+        | _ -> true)
+  in
+  if List.is_empty results_without_keywords then
+    matches_auto_complete_suffix str
   else
     false
 
@@ -1328,16 +1336,101 @@ let reset () =
   autocomplete_results := [];
   autocomplete_is_complete := true
 
+let complete_keywords_at possible_keywords text pos : unit =
+  if is_auto_complete text then
+    let prefix = strip_suffix text in
+    possible_keywords
+    |> List.filter ~f:(fun possible_keyword ->
+           String.is_prefix possible_keyword ~prefix)
+    |> List.iter ~f:(fun keyword ->
+           let kind = SI_Keyword in
+           let complete =
+             {
+               res_pos = Pos.none |> Pos.to_absolute;
+               res_replace_pos = replace_pos_of_id (pos, text);
+               res_base_class = None;
+               res_ty = kind_to_string kind;
+               res_name = keyword;
+               res_fullname = keyword;
+               res_kind = kind;
+               func_details = None;
+               ranking_details = None;
+               res_documentation = None;
+             }
+           in
+           add_res complete)
+
+let complete_keywords_at_token possible_keywords filename (s : Syntax.t) : unit
+    =
+  let token_str = Syntax.text s in
+  match s.Syntax.syntax with
+  | Syntax.Token t ->
+    let start_offset = t.Syntax.Token.offset + t.Syntax.Token.leading_width in
+    let end_offset = start_offset + t.Syntax.Token.width in
+    let source_text = t.Syntax.Token.source_text in
+
+    let pos =
+      Full_fidelity_source_text.relative_pos
+        filename
+        source_text
+        start_offset
+        end_offset
+    in
+    complete_keywords_at possible_keywords token_str pos
+  | _ -> ()
+
+let def_start_keywords filename s : unit =
+  let possible_keywords = ["function"; "async"] in
+  complete_keywords_at_token possible_keywords filename s
+
+let keywords filename tree =
+  let open Syntax in
+  let rec aux s =
+    (match s.syntax with
+    | Script sd ->
+      List.iter (syntax_node_to_list sd.script_declarations) ~f:(fun d ->
+          (* If we see AUTO332 at the top-level it's parsed as an
+             expression, but the user is about to write a top-level
+             definition (function, class etc). *)
+          match d.syntax with
+          | ExpressionStatement es ->
+            def_start_keywords filename es.expression_statement_expression
+          | _ -> ())
+    | NamespaceBody nb ->
+      List.iter (syntax_node_to_list nb.namespace_declarations) ~f:(fun d ->
+          match d.syntax with
+          (* Treat expressions in namespaces consistently with
+             top-level expressions. *)
+          | ExpressionStatement es ->
+            def_start_keywords filename es.expression_statement_expression
+          | _ -> ())
+    | FunctionDeclarationHeader fdh ->
+      (match fdh.function_keyword.syntax with
+      | Missing ->
+        (* The user has written `async AUTO332`, so we're expecting `function`. *)
+        complete_keywords_at_token ["function"] filename fdh.function_name
+      | _ -> ())
+    | _ -> ());
+    List.iter (children s) ~f:aux
+  in
+
+  aux tree
+
 (* Main entry point for autocomplete *)
 let go_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv : SearchUtils.si_env) =
+  reset ();
+
+  let cst = Ast_provider.compute_cst ~ctx ~entry in
+  let tree = Provider_context.PositionedSyntaxTree.root cst in
+  keywords entry.Provider_context.path tree;
+
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  reset ();
   (visitor ctx autocomplete_context sienv)#go ctx tast;
 
   Errors.ignore_ (fun () ->

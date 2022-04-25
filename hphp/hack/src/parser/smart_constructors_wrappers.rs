@@ -572,6 +572,9 @@ where S: SmartConstructors<State = State>,
     fn make_module_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R {
         compose(SyntaxKind::ModuleDeclaration, self.s.make_module_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
     }
+    fn make_module_membership_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
+        compose(SyntaxKind::ModuleMembershipDeclaration, self.s.make_module_membership_declaration(arg0.1, arg1.1, arg2.1))
+    }
 
 }
 

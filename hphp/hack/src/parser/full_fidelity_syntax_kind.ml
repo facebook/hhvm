@@ -187,6 +187,7 @@ type t =
   | ListItem
   | EnumClassLabelExpression
   | ModuleDeclaration
+  | ModuleMembershipDeclaration
 [@@deriving show, eq]
 
 let to_string kind =
@@ -360,3 +361,4 @@ let to_string kind =
   | ListItem -> "list_item"
   | EnumClassLabelExpression -> "enum_class_label"
   | ModuleDeclaration -> "module_declaration"
+  | ModuleMembershipDeclaration -> "module_membership_declaration"

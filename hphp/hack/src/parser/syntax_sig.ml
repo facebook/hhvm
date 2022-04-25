@@ -989,6 +989,11 @@ module type Syntax_S = sig
         module_declaration_left_brace: t;
         module_declaration_right_brace: t;
       }
+    | ModuleMembershipDeclaration of {
+        module_membership_declaration_module_keyword: t;
+        module_membership_declaration_name: t;
+        module_membership_declaration_semicolon: t;
+      }
 
   val rust_parse :
     Full_fidelity_source_text.t ->
@@ -1390,6 +1395,8 @@ module type Syntax_S = sig
 
   val make_module_declaration : t -> t -> t -> t -> t -> t -> t
 
+  val make_module_membership_declaration : t -> t -> t -> t
+
   val position : Relative_path.t -> t -> Pos.t option
 
   val offset : t -> int option
@@ -1729,6 +1736,8 @@ module type Syntax_S = sig
   val is_enum_class_label_expression : t -> bool
 
   val is_module_declaration : t -> bool
+
+  val is_module_membership_declaration : t -> bool
 
   val is_specific_token : TokenKind.t -> t -> bool
 

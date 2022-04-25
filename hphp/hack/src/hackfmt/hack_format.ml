@@ -2424,7 +2424,14 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env lb;
           t env rb;
           Newline;
-        ])
+        ]
+    | Syntax.ModuleMembershipDeclaration
+        {
+          module_membership_declaration_module_keyword = mod_kw;
+          module_membership_declaration_name = name;
+          module_membership_declaration_semicolon = semicolon;
+        } ->
+      Concat [t env mod_kw; Space; t env name; t env semicolon; Newline])
 
 and when_present node f =
   match Syntax.syntax node with

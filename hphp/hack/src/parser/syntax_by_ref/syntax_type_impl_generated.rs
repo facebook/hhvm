@@ -1834,4 +1834,14 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_module_membership_declaration(ctx: &C, module_keyword: Self, name: Self, semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleMembershipDeclaration(ctx.get_arena().alloc(ModuleMembershipDeclarationChildren {
+            module_keyword,
+            name,
+            semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
  }

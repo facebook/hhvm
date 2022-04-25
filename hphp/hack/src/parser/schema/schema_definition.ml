@@ -2334,6 +2334,16 @@ let schema : schema_node list =
           ("right_brace", Token);
         ];
     };
+    {
+      kind_name = "ModuleMembershipDeclaration";
+      type_name = "module_membership_declaration";
+      func_name = "module_membership_declaration";
+      description = "module_membership_declaration";
+      prefix = "module_membership_declaration";
+      aggregates = [TopLevelDeclaration];
+      fields =
+        [("module_keyword", Token); ("name", Token); ("semicolon", Token)];
+    };
   ]
 
 (******************************************************************************(

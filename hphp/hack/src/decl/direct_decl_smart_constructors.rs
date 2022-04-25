@@ -5561,4 +5561,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
         Node::Ignored(SK::ModuleDeclaration)
     }
+
+    fn make_module_membership_declaration(
+        &mut self,
+        _module_keyword: Self::R,
+        _name: Self::R,
+        _semicolon: Self::R,
+    ) -> Self::R {
+        Node::Ignored(SK::ModuleMembershipDeclaration)
+    }
 }

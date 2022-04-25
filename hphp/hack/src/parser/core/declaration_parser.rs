@@ -2369,6 +2369,19 @@ where
         )
     }
 
+    fn parse_module_membership_declaration(&mut self) -> S::R {
+        let module_kw = self.assert_token(TokenKind::Module);
+        let name = self.require_name();
+        let semicolon = self.require_semicolon();
+        S!(
+            make_module_membership_declaration,
+            self,
+            module_kw,
+            name,
+            semicolon
+        )
+    }
+
     fn parse_declaration(&mut self) -> S::R {
         self.expect_in_new_scope(ExpectedTokens::Classish);
         let mut parser1 = self.clone();
@@ -2439,6 +2452,7 @@ where
                 let token = S!(make_token, self, token);
                 self.parse_const_declaration(missing1, missing2, token)
             }
+            TokenKind::Module => self.parse_module_membership_declaration(),
             // If we see new as a token, it's a module definition
             TokenKind::New if parser1.peek_token_kind() == TokenKind::Module => {
                 let missing = S!(make_missing, self, self.pos());

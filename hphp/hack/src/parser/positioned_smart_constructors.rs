@@ -745,4 +745,8 @@ where
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_module_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5)
     }
 
+    fn make_module_membership_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<S, TF, State>>::make_module_membership_declaration(self, arg0, arg1, arg2)
+    }
+
 }

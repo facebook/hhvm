@@ -5097,6 +5097,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             FileAttributeSpecification(_) => self.file_attribute_spec(node),
             ModuleDeclaration(_) => self.check_can_use_feature(node, &UnstableFeatures::Modules),
+            ModuleMembershipDeclaration(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::Modules)
+            }
             _ => {}
         };
 

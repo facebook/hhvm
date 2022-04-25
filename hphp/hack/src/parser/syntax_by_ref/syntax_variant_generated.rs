@@ -192,6 +192,7 @@ pub enum SyntaxVariant<'a, T, V> {
     ListItem(&'a ListItemChildren<'a, T, V>),
     EnumClassLabelExpression(&'a EnumClassLabelExpressionChildren<'a, T, V>),
     ModuleDeclaration(&'a ModuleDeclarationChildren<'a, T, V>),
+    ModuleMembershipDeclaration(&'a ModuleMembershipDeclarationChildren<'a, T, V>),
 }
 
 #[derive(Debug, Clone)]
@@ -1497,6 +1498,13 @@ pub struct ModuleDeclarationChildren<'a, T, V> {
     pub name: Syntax<'a, T, V>,
     pub left_brace: Syntax<'a, T, V>,
     pub right_brace: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ModuleMembershipDeclarationChildren<'a, T, V> {
+    pub module_keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
 }
 
 

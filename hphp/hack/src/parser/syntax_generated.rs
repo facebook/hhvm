@@ -1828,6 +1828,16 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_module_membership_declaration(_: &C, module_membership_declaration_module_keyword: Self, module_membership_declaration_name: Self, module_membership_declaration_semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleMembershipDeclaration(Box::new(ModuleMembershipDeclarationChildren {
+            module_membership_declaration_module_keyword,
+            module_membership_declaration_name,
+            module_membership_declaration_semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
  }
 
 impl<T, V> Syntax<T, V>
@@ -3154,6 +3164,13 @@ where
                 let acc = f(module_declaration_right_brace, acc);
                 acc
             },
+            SyntaxVariant::ModuleMembershipDeclaration(x) => {
+                let ModuleMembershipDeclarationChildren { module_membership_declaration_module_keyword, module_membership_declaration_name, module_membership_declaration_semicolon } = *x;
+                let acc = f(module_membership_declaration_module_keyword, acc);
+                let acc = f(module_membership_declaration_name, acc);
+                let acc = f(module_membership_declaration_semicolon, acc);
+                acc
+            },
 
         }
     }
@@ -3329,6 +3346,7 @@ where
             SyntaxVariant::ListItem {..} => SyntaxKind::ListItem,
             SyntaxVariant::EnumClassLabelExpression {..} => SyntaxKind::EnumClassLabelExpression,
             SyntaxVariant::ModuleDeclaration {..} => SyntaxKind::ModuleDeclaration,
+            SyntaxVariant::ModuleMembershipDeclaration {..} => SyntaxKind::ModuleMembershipDeclaration,
         }
     }
 
@@ -4473,6 +4491,12 @@ where
                  module_declaration_module_keyword: ts.pop().unwrap(),
                  module_declaration_new_keyword: ts.pop().unwrap(),
                  module_declaration_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ModuleMembershipDeclaration, 3) => SyntaxVariant::ModuleMembershipDeclaration(Box::new(ModuleMembershipDeclarationChildren {
+                 module_membership_declaration_semicolon: ts.pop().unwrap(),
+                 module_membership_declaration_name: ts.pop().unwrap(),
+                 module_membership_declaration_module_keyword: ts.pop().unwrap(),
                  
              })),
              _ => panic!("from_children called with wrong number of children"),
@@ -5785,6 +5809,13 @@ pub struct ModuleDeclarationChildren<T, V> {
     pub module_declaration_right_brace: Syntax<T, V>,
 }
 
+#[derive(Debug, Clone)]
+pub struct ModuleMembershipDeclarationChildren<T, V> {
+    pub module_membership_declaration_module_keyword: Syntax<T, V>,
+    pub module_membership_declaration_name: Syntax<T, V>,
+    pub module_membership_declaration_semicolon: Syntax<T, V>,
+}
+
 
 #[derive(Debug, Clone)]
 pub enum SyntaxVariant<T, V> {
@@ -5957,6 +5988,7 @@ pub enum SyntaxVariant<T, V> {
     ListItem(Box<ListItemChildren<T, V>>),
     EnumClassLabelExpression(Box<EnumClassLabelExpressionChildren<T, V>>),
     ModuleDeclaration(Box<ModuleDeclarationChildren<T, V>>),
+    ModuleMembershipDeclaration(Box<ModuleMembershipDeclarationChildren<T, V>>),
 }
 
 impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
@@ -7612,6 +7644,15 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     3 => Some(&x.module_declaration_name),
                     4 => Some(&x.module_declaration_left_brace),
                     5 => Some(&x.module_declaration_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ModuleMembershipDeclaration(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.module_membership_declaration_module_keyword),
+                    1 => Some(&x.module_membership_declaration_name),
+                    2 => Some(&x.module_membership_declaration_semicolon),
                         _ => None,
                     }
                 })

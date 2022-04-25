@@ -1379,4 +1379,12 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
+    fn make_module_membership_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
+          Self::zero(SyntaxKind::ModuleMembershipDeclaration)
+        } else {
+          self.flatten(SyntaxKind::ModuleMembershipDeclaration, vec!(arg0, arg1, arg2))
+        }
+    }
+
 }

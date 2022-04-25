@@ -730,4 +730,8 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors<'src, Self>>::make_module_declaration(self, attribute_spec, new_keyword, module_keyword, name, left_brace, right_brace)
     }
 
+    fn make_module_membership_declaration(&mut self, module_keyword: Self::R, name: Self::R, semicolon: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_module_membership_declaration(self, module_keyword, name, semicolon)
+    }
+
 }

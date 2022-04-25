@@ -1,3 +1,1 @@
-(5,8)-(5,8) An expression is expected here.
-(5,8)-(5,15) Cannot use collection initialization for non-collection class.
-(5,15)-(6,1) A semicolon `;` is expected here.
+(5,12)-(5,13) Encountered unexpected token `:`.

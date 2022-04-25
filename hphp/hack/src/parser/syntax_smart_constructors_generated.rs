@@ -880,4 +880,9 @@ where
         Self::R::make_module_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5)
     }
 
+    fn make_module_membership_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1, &arg2]);
+        Self::R::make_module_membership_declaration(self.state_mut(), arg0, arg1, arg2)
+    }
+
 }

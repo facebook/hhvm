@@ -230,6 +230,7 @@ module WithToken (Token : TokenType) = struct
       | ListItem _ -> SyntaxKind.ListItem
       | EnumClassLabelExpression _ -> SyntaxKind.EnumClassLabelExpression
       | ModuleDeclaration _ -> SyntaxKind.ModuleDeclaration
+      | ModuleMembershipDeclaration _ -> SyntaxKind.ModuleMembershipDeclaration
 
     let kind node = to_kind (syntax node)
 
@@ -614,6 +615,9 @@ module WithToken (Token : TokenType) = struct
       has_kind SyntaxKind.EnumClassLabelExpression
 
     let is_module_declaration = has_kind SyntaxKind.ModuleDeclaration
+
+    let is_module_membership_declaration =
+      has_kind SyntaxKind.ModuleMembershipDeclaration
 
     let is_loop_statement node =
       is_for_statement node
@@ -2366,6 +2370,16 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc module_declaration_left_brace in
         let acc = f acc module_declaration_right_brace in
         acc
+      | ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          } ->
+        let acc = f acc module_membership_declaration_module_keyword in
+        let acc = f acc module_membership_declaration_name in
+        let acc = f acc module_membership_declaration_semicolon in
+        acc
 
     (* The order that the children are returned in should match the order
        that they appear in the source text *)
@@ -3917,6 +3931,17 @@ module WithToken (Token : TokenType) = struct
           module_declaration_name;
           module_declaration_left_brace;
           module_declaration_right_brace;
+        ]
+      | ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          } ->
+        [
+          module_membership_declaration_module_keyword;
+          module_membership_declaration_name;
+          module_membership_declaration_semicolon;
         ]
 
     let children node = children_from_syntax node.syntax
@@ -5501,6 +5526,17 @@ module WithToken (Token : TokenType) = struct
           "module_declaration_name";
           "module_declaration_left_brace";
           "module_declaration_right_brace";
+        ]
+      | ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          } ->
+        [
+          "module_membership_declaration_module_keyword";
+          "module_membership_declaration_name";
+          "module_membership_declaration_semicolon";
         ]
 
     let rec to_json_ ?(with_value = false) ?(ignore_missing = false) node =
@@ -7298,6 +7334,18 @@ module WithToken (Token : TokenType) = struct
             module_declaration_name;
             module_declaration_left_brace;
             module_declaration_right_brace;
+          }
+      | ( SyntaxKind.ModuleMembershipDeclaration,
+          [
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          ] ) ->
+        ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
           }
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, items) -> SyntaxList items
@@ -9631,6 +9679,21 @@ module WithToken (Token : TokenType) = struct
               module_declaration_name;
               module_declaration_left_brace;
               module_declaration_right_brace;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_module_membership_declaration
+          module_membership_declaration_module_keyword
+          module_membership_declaration_name
+          module_membership_declaration_semicolon =
+        let syntax =
+          ModuleMembershipDeclaration
+            {
+              module_membership_declaration_module_keyword;
+              module_membership_declaration_name;
+              module_membership_declaration_semicolon;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in

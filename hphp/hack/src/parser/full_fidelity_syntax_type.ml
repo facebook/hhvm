@@ -1119,6 +1119,11 @@ struct
         module_declaration_left_brace: t;
         module_declaration_right_brace: t;
       }
+    | ModuleMembershipDeclaration of {
+        module_membership_declaration_module_keyword: t;
+        module_membership_declaration_name: t;
+        module_membership_declaration_semicolon: t;
+      }
 end
 
 module MakeValidated (Token : TokenType) (SyntaxValue : SyntaxValueType) =
@@ -1170,6 +1175,7 @@ struct
     | TLDContinue of continue_statement
     | TLDEcho of echo_statement
     | TLDModule of module_declaration
+    | TLDModuleMembership of module_membership_declaration
 
   and expression =
     | ExprLiteral of literal_expression
@@ -2518,6 +2524,12 @@ struct
     module_declaration_name: Token.t value;
     module_declaration_left_brace: Token.t value;
     module_declaration_right_brace: Token.t value;
+  }
+
+  and module_membership_declaration = {
+    module_membership_declaration_module_keyword: Token.t value;
+    module_membership_declaration_name: Token.t value;
+    module_membership_declaration_semicolon: Token.t value;
   }
   [@@deriving show]
 end

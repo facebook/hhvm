@@ -1679,6 +1679,15 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            ModuleMembershipDeclaration(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.module_keyword),
+                    1 => Some(&x.name),
+                    2 => Some(&x.semicolon),
+                        _ => None,
+                    }
+                })
+            },
 
         };
         if res.is_some() {

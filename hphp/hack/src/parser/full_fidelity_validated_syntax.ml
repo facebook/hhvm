@@ -204,6 +204,11 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       tag validate_echo_statement (fun x -> TLDEcho x) x
     | Syntax.ModuleDeclaration _ ->
       tag validate_module_declaration (fun x -> TLDModule x) x
+    | Syntax.ModuleMembershipDeclaration _ ->
+      tag
+        validate_module_membership_declaration
+        (fun x -> TLDModuleMembership x)
+        x
     | s -> aggregation_fail Def.TopLevelDeclaration s
 
   and invalidate_top_level_declaration : top_level_declaration invalidator =
@@ -252,6 +257,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | TLDContinue thing -> invalidate_continue_statement (value, thing)
     | TLDEcho thing -> invalidate_echo_statement (value, thing)
     | TLDModule thing -> invalidate_module_declaration (value, thing)
+    | TLDModuleMembership thing ->
+      invalidate_module_membership_declaration (value, thing)
 
   and validate_expression : expression validator =
    fun x ->
@@ -6417,6 +6424,37 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_token x.module_declaration_left_brace;
             module_declaration_right_brace =
               invalidate_token x.module_declaration_right_brace;
+          };
+      Syntax.value = v;
+    }
+
+  and validate_module_membership_declaration :
+      module_membership_declaration validator = function
+    | { Syntax.syntax = Syntax.ModuleMembershipDeclaration x; value = v } ->
+      ( v,
+        {
+          module_membership_declaration_semicolon =
+            validate_token x.module_membership_declaration_semicolon;
+          module_membership_declaration_name =
+            validate_token x.module_membership_declaration_name;
+          module_membership_declaration_module_keyword =
+            validate_token x.module_membership_declaration_module_keyword;
+        } )
+    | s -> validation_fail (Some SyntaxKind.ModuleMembershipDeclaration) s
+
+  and invalidate_module_membership_declaration :
+      module_membership_declaration invalidator =
+   fun (v, x) ->
+    {
+      Syntax.syntax =
+        Syntax.ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword =
+              invalidate_token x.module_membership_declaration_module_keyword;
+            module_membership_declaration_name =
+              invalidate_token x.module_membership_declaration_name;
+            module_membership_declaration_semicolon =
+              invalidate_token x.module_membership_declaration_semicolon;
           };
       Syntax.value = v;
     }

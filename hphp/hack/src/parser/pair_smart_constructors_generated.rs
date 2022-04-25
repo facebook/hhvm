@@ -745,4 +745,8 @@ where
         Node(self.0.make_module_declaration(attribute_spec.0, new_keyword.0, module_keyword.0, name.0, left_brace.0, right_brace.0), self.1.make_module_declaration(attribute_spec.1, new_keyword.1, module_keyword.1, name.1, left_brace.1, right_brace.1))
     }
 
+    fn make_module_membership_declaration(&mut self, module_keyword: Self::R, name: Self::R, semicolon: Self::R) -> Self::R {
+        Node(self.0.make_module_membership_declaration(module_keyword.0, name.0, semicolon.0), self.1.make_module_membership_declaration(module_keyword.1, name.1, semicolon.1))
+    }
+
 }

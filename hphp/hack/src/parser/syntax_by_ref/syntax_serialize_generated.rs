@@ -1514,6 +1514,14 @@ ss.serialize_field("module_declaration_left_brace", &self.with(left_brace))?;
 ss.serialize_field("module_declaration_right_brace", &self.with(right_brace))?;
       ss.end()
 } 
+SyntaxVariant::ModuleMembershipDeclaration (ModuleMembershipDeclarationChildren{module_keyword,name,semicolon} ) => {
+      let mut ss = s.serialize_struct("", 4)?;
+      ss.serialize_field("kind", "module_membership_declaration")?;
+      ss.serialize_field("module_membership_declaration_module_keyword", &self.with(module_keyword))?;
+ss.serialize_field("module_membership_declaration_name", &self.with(name))?;
+ss.serialize_field("module_membership_declaration_semicolon", &self.with(semicolon))?;
+      ss.end()
+} 
 
         }
     }

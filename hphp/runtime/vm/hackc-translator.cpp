@@ -68,7 +68,7 @@ folly::Range<const T*> range(Slice<T> const& s) {
 template<typename T>
 Optional<T> maybe(hackc::Maybe<T> m) {
   if (m.tag == hackc::Maybe<T>::Tag::Nothing) return std::nullopt;
-  return m.just._0;
+  return m.Just._0;
 }
 
 template<typename T, typename Fn, typename ElseFn>
@@ -132,36 +132,36 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
       case kind::Uninit:
         return make_tv<KindOfUninit>();
       case kind::Int:
-        return make_tv<KindOfInt64>(tv.int_._0);
+        return make_tv<KindOfInt64>(tv.Int._0);
       case kind::Bool:
-        return make_tv<KindOfBoolean>(tv.bool_._0);
+        return make_tv<KindOfBoolean>(tv.Bool._0);
       case kind::Double: {
-        return make_tv<KindOfDouble>(tv.double_._0);
+        return make_tv<KindOfDouble>(tv.Double._0);
       }
       case kind::String: {
-        auto const s = toStaticString(tv.string._0);
+        auto const s = toStaticString(tv.String._0);
         return make_tv<KindOfPersistentString>(s);
       }
       case kind::Null:
         return make_tv<KindOfNull>();
       case kind::Vec: {
-        VecInit v(tv.vec._0.len);
-        auto set = range(tv.vec._0);
+        VecInit v(tv.Vec._0.len);
+        auto set = range(tv.Vec._0);
         for (auto const& elt : set) {
           v.append(toTypedValue(elt));
         }
         return make_tv<KindOfVec>(v.create());
       }
       case kind::Dict: {
-        DictInit d(tv.dict._0.len);
-        auto set = range(tv.dict._0);
+        DictInit d(tv.Dict._0.len);
+        auto set = range(tv.Dict._0);
         for (auto const& elt : set) {
           switch (elt._0.tag) {
             case kind::Int:
-              d.set(elt._0.int_._0, toTypedValue(elt._1));
+              d.set(elt._0.Int._0, toTypedValue(elt._1));
               break;
             case kind::String: {
-              auto const s = toStaticString(elt._0.string._0);
+              auto const s = toStaticString(elt._0.String._0);
               d.set(s, toTypedValue(elt._1));
               break;
             }
@@ -169,7 +169,7 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
               if (RuntimeOption::EvalRaiseClassConversionWarning) {
                 raise_class_to_string_conversion_warning();
               }
-              auto const s = toStaticString(elt._0.lazy_class._0);
+              auto const s = toStaticString(elt._0.LazyClass._0);
               d.set(s, toTypedValue(elt._1));
               break;
             }
@@ -180,15 +180,15 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
         return make_tv<KindOfDict>(d.create());
       }
       case kind::Keyset: {
-        KeysetInit k(tv.keyset._0.len);
-        auto set = range(tv.keyset._0);
+        KeysetInit k(tv.Keyset._0.len);
+        auto set = range(tv.Keyset._0);
         for (auto const& elt : set) {
           k.add(toTypedValue(elt));
         }
         return make_tv<KindOfKeyset>(k.create());
       }
       case kind::LazyClass: {
-        auto const lc = LazyClassData::create(toStaticString(tv.lazy_class._0));
+        auto const lc = LazyClassData::create(toStaticString(tv.LazyClass._0));
         return make_tv<KindOfLazyClass>(lc);
       }
     }

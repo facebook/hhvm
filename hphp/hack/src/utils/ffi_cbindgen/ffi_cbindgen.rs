@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Result;
-use cbindgen::{Builder, Config, Language, MacroExpansionConfig};
+use cbindgen::{Builder, Config, EnumConfig, Language, MacroExpansionConfig, RenameRule};
 use clap::Parser;
 use std::path::PathBuf;
 
@@ -45,6 +45,10 @@ fn builder(opts: &Opt) -> Builder {
         .with_config(Config {
             language: Language::Cxx,
             macro_expansion: MacroExpansionConfig { bitflags: true },
+            enumeration: EnumConfig {
+                rename_variant_name_fields: RenameRule::None,
+                ..Default::default()
+            },
             ..Default::default()
         })
         .with_header(

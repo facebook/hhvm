@@ -395,9 +395,12 @@ let go_quarantined
        docblock and type of each thing. *)
     identities
     |> List.map ~f:(fun (occurrence, def_opt) ->
+           (* If we're hovering over a type hint, we're not interested
+              in the type of the enclosing expression. *)
            let env_and_ty =
              match occurrence.SymbolOccurrence.type_ with
              | SymbolOccurrence.TypeVar -> None
+             | SymbolOccurrence.BuiltInType _ -> None
              | _ -> env_and_ty
            in
            let path =

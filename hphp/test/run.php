@@ -3,6 +3,8 @@
 * Run the test suites in various configurations.
 */
 
+use namespace HH\Lib\C;
+
 const int TIMEOUT_SECONDS = 300;
 
 function get_argv(): vec<string> {
@@ -3324,7 +3326,11 @@ function print_commands(
   vec<string> $tests,
   Options $options,
 ): void {
-  if ($options->verbose) {
+  if (C\count($tests) === 0) {
+    print make_header(
+      "Test run failed with no failed tests; did a worker process die?"
+    );
+  } else if ($options->verbose) {
     print make_header("Run these by hand:");
   } else {
     $test = $tests[0];
@@ -3945,15 +3951,26 @@ function main(vec<string> $argv): int {
     while (count($children) && $printer_pid !== 0) {
       $status = null;
       $pid = pcntl_wait(inout $status);
-      if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
+      if (pcntl_wifexited($status)) {
+        $bad_end = pcntl_wexitstatus($status) !== 0;
+      } else if (pcntl_wifsignaled($status)) {
+        $bad_end = true;
+      } else {
         error("Unexpected exit status from child");
       }
 
       if ($pid === $printer_pid) {
         // We should be finishing up soon.
         $printer_pid = 0;
+        if ($bad_end) {
+          // Don't consider the run successful if the printer worker died
+          $return_value = 1;
+        }
       } else if ($servers && isset($servers->pids[$pid])) {
         // A server crashed. Restart it.
+        // We intentionally ignore $bad_end here because we expect this to
+        // show up as a test failure in whatever test was running on the server
+        // when it crashed. TODO(alexeyt): assert $bad_end === true?
         if (getenv('HHVM_TEST_SERVER_LOG')) {
           echo "\nServer $pid crashed. Restarting.\n";
         }
@@ -3967,19 +3984,32 @@ function main(vec<string> $argv): int {
         $servers->pids[$pid] = $server;
       } else if (isset($children[$pid])) {
         unset($children[$pid]);
-        $return_value |= pcntl_wexitstatus($status);
-      } // Else, ignorable signal
+        if ($bad_end) {
+          // If any worker process dies we should fail the test run
+          $return_value = 1;
+        }
+      } else {
+        error("Got status for child that we didn't know we had with pid $pid");
+      }
     }
   }
 
   Status::finished($return_value);
 
-  // Wait for the printer child to die, if needed.
+  // Wait for the printer child to exit, if needed.
   if (!Status::$nofork && $printer_pid !== 0) {
     $status = 0;
     $pid = pcntl_waitpid($printer_pid, inout $status);
     $status = $status as int;
-    if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
+    if (pcntl_wifexited($status)) {
+      if (pcntl_wexitstatus($status) !== 0) {
+        // Don't consider the run successful if the printer worker died
+        $return_value = 1;
+      }
+    } else if (pcntl_wifsignaled($status)) {
+      // Don't consider the run successful if the printer worker died
+      $return_value = 1;
+    } else {
       error("Unexpected exit status from child");
     }
   }

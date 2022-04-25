@@ -5119,6 +5119,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
         }
         AliasDeclaration(c) => {
             let tparams = p_tparam_l(false, &c.generic_parameter, env)?;
+            let kinds = p_kinds(&c.modifiers, env)?;
             for tparam in tparams.iter() {
                 if tparam.reified != ast::ReifyKind::Erased {
                     raise_parsing_error(node, env, &syntax_error::invalid_reified)
@@ -5147,8 +5148,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 span: p_pos(node, env),
                 emit_id: None,
                 is_ctx: false,
-                // TODO(T116039119): Populate value with presence of internal attribute
-                internal: false,
+                internal: kinds.has(modifier::INTERNAL),
                 module: None,
             })])
         }
@@ -5222,6 +5222,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                     _ => missing_syntax("enumerator", n, e),
                 }
             };
+            let kinds = p_kinds(&c.modifiers, env)?;
 
             let mut includes = vec![];
 
@@ -5273,8 +5274,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 emit_id: None,
-                // TODO(T116039119): Populate value with presence of internal attribute
-                internal: false,
+                internal: kinds.has(modifier::INTERNAL),
                 module: None,
             })])
         }

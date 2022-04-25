@@ -338,8 +338,6 @@ module UserAttributes = struct
 
   let uaModule = "__Module"
 
-  let uaInternal = "__Internal"
-
   let uaEnableMethodTraitDiamond = "__EnableMethodTraitDiamond"
 
   let uaIgnoreReadonlyLocalErrors = "__IgnoreReadonlyLocalErrors"
@@ -565,19 +563,6 @@ module UserAttributes = struct
           ( uaModule,
             ( [fn; cls; file; typealias; enum; enumcls],
               "Associates a definition with a module. Requires `<<file:__EnableUnstableFeatures('modules')>>`."
-            ) );
-          ( uaInternal,
-            ( [
-                fn;
-                mthd;
-                cls;
-                instProperty;
-                staticProperty;
-                typealias;
-                enum;
-                enumcls;
-              ],
-              "Marks a definition as a private to a module. Requires `<<file:__EnableUnstableFeatures('modules')>>`."
             ) );
           ( uaEnableMethodTraitDiamond,
             ( [cls],

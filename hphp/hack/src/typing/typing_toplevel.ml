@@ -2059,12 +2059,7 @@ let setup_env_for_class_def_check ctx c =
     Env.set_module env
     @@ Naming_attributes_params.get_module_attribute c.c_file_attributes
   in
-  let env =
-    Env.set_internal
-      env
-      (Naming_attributes.mem SN.UserAttributes.uaInternal c.c_user_attributes
-      || c.c_internal)
-  in
+  let env = Env.set_internal env c.c_internal in
   let env =
     Env.set_support_dynamic_type
       env

@@ -8,8 +8,7 @@ new module A {}
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 <<file:__EnableUnstableFeatures('modules'), __Module("A")>>
 
-<<__Internal>>
-function f(): void {}
+internal function f(): void {}
 
 //// main.php
 <?hh

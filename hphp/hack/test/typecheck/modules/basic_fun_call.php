@@ -9,8 +9,7 @@ new module B {}
 <?hh
 <<file:__EnableUnstableFeatures('modules'), __Module("A")>>
 
-<<__Internal>>
-function a(): void {}
+internal function a(): void {}
 
 function a2(): void { a(); /* ok */ }
 

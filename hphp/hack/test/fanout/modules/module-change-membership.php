@@ -16,15 +16,13 @@ new module B {}
 <?hh
 <<file: __EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-function f(): void {}
+internal function f(): void {}
 
 //// changed-f.php
 <?hh
 <<file: __EnableUnstableFeatures('modules'), __Module('B')>>
 
-<<__Internal>>
-function f(): void {}
+internal function f(): void {}
 
 //// base-g.php
 <?hh

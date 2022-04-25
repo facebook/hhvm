@@ -10,12 +10,9 @@ new module D {}
 <<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
 abstract class A {
-    <<__Internal>>
-    public function foobar(): void {}
-    <<__Internal>>
-    abstract public function abstractFoobar(): void;
-    <<__Internal>>
-    public int $foobar = 42;
+ internal function foobar(): void {}
+ abstract internal function abstractFoobar(): void;
+ internal int $foobar = 42;
 }
 
 //// B.php
@@ -41,9 +38,9 @@ class C extends A {
 
 class D extends A {
     // Not OK
-    <<__Internal>> public function foobar(): void {}
+    internal function foobar(): void {}
     // Not OK
-    <<__Internal>> public function abstractFoobar(): void {}
+    internal function abstractFoobar(): void {}
     // Not OK
-    <<__Internal>> public int $foobar = 13;
+    internal int $foobar = 13;
 }

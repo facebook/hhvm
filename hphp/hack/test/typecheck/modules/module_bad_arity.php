@@ -13,16 +13,3 @@ new module C {}
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 <<file:__EnableUnstableFeatures('modules'), __Module('A', 'B')>>
-
-//// bad-internal.php
-<?hh
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('C')>>
-
-<<__Internal(42)>>
-function c(): void {}
-
-class D {
-  <<__Internal('lol')>>
-  public function foobar(): void {}
-}

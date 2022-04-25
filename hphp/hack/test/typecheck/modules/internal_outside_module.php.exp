@@ -4,11 +4,13 @@ File "internal_outside_module.php", line 5, characters 1-8:
 Cannot use unstable feature: `modules` (Parsing[1002])
 File "internal_outside_module.php", line 6, characters 3-10:
 Cannot use unstable feature: `modules` (Parsing[1002])
+File "internal_outside_module.php", line 9, characters 1-8:
+Cannot use unstable feature: `modules` (Parsing[1002])
 File "internal_outside_module.php", line 3, characters 1-30:
 You cannot make this symbol `internal` outside a module (NastCheck[3098])
 File "internal_outside_module.php", line 5, characters 1-53:
 You cannot make this symbol `internal` outside a module (NastCheck[3098])
 File "internal_outside_module.php", line 6, characters 3-32:
 You cannot make this symbol `internal` outside a module (NastCheck[3098])
-File "internal_outside_module.php", line 9, characters 1-33:
+File "internal_outside_module.php", line 9, characters 1-27:
 You cannot make this symbol `internal` outside a module (NastCheck[3098])

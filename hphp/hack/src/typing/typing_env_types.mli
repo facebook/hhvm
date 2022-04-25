@@ -71,7 +71,7 @@ and genv = {
   this_module: Ast_defs.id option;
       (** The module of the top-level definition that we are checking *)
   this_internal: bool;
-      (** Is the definition that we are checking marked <<__Internal>>? *)
+      (** Is the definition that we are checking marked internal? *)
   this_support_dynamic_type: bool;
       (** Is the definition that we are checking marked <<__SupportDynamicType>>? *)
 }

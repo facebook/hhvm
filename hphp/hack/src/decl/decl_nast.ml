@@ -146,7 +146,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     t_span = _;
     t_emit_id = _;
     t_is_ctx = td_is_ctx;
-    t_internal = _;
+    t_internal = td_internal;
     (* We'll consume this in the next diff *)
     t_module = _;
   } =
@@ -159,7 +159,9 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   let td_constraint = Option.map tcstr ~f:(Decl_hint.hint env) in
   let td_pos = Decl_env.make_decl_pos env name_pos in
   let td_vis =
-    if Naming_attributes_params.has_internal_attribute t_user_attributes then
+    (* TODO: this is incorrect, should be orthogonal in decl instead of a visibility
+       matching existing behavior for keyword change and fixing bug after *)
+    if td_internal then
       Tinternal
     else
       td_vis

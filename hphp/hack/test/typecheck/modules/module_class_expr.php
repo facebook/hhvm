@@ -9,8 +9,7 @@ new module there {}
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 <<file:__EnableUnstableFeatures('modules'), __Module('here')>>
 
-<<__Internal>>
-class C {
+internal class C {
   public function bar(mixed $m):void {
     // All not ok
     $x1 = new D();
@@ -32,7 +31,6 @@ class C {
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 <<file:__EnableUnstableFeatures('modules'), __Module('there')>>
 
-<<__Internal>>
-class D {
+internal class D {
   public static function foo():void { }
 }

@@ -10,12 +10,6 @@ open Hh_prelude
 open Aast
 module SN = Naming_special_names
 
-let has_internal_attribute =
-  let f { ua_name; _ } =
-    String.equal SN.UserAttributes.uaInternal (snd ua_name)
-  in
-  List.exists ~f
-
 let check ~is_internal ~module_ ~pos =
   if is_internal && Option.is_none module_ then
     Errors.add_nast_check_error @@ Nast_check_error.Internal_outside_module pos
@@ -26,7 +20,7 @@ let handler =
 
     method! at_class_ env c =
       check
-        ~is_internal:(c.c_internal || has_internal_attribute c.c_user_attributes)
+        ~is_internal:c.c_internal
         ~module_:env.Nast_check_env.module_
         ~pos:c.c_span
 
@@ -44,7 +38,7 @@ let handler =
 
     method! at_typedef env t =
       check
-        ~is_internal:(t.t_internal || has_internal_attribute t.t_user_attributes)
+        ~is_internal:t.t_internal
         ~module_:env.Nast_check_env.module_
         ~pos:t.t_span
   end

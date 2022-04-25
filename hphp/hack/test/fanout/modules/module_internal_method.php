@@ -24,8 +24,7 @@ class Foo {
 <<file: __EnableUnstableFeatures('modules'), __Module('A')>>
 
 class Foo {
-  <<__Internal>>
-  public function foo(): void {}
+  internal function foo(): void {}
 }
 
 //// base-foo-use.php

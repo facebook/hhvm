@@ -315,8 +315,6 @@ pub mod user_attributes {
 
     pub const MODULE: &str = "__Module";
 
-    pub const INTERNAL: &str = "__Internal";
-
     pub const ENABLE_METHOD_TRAIT_DIAMOND: &str = "__EnableMethodTraitDiamond";
 
     pub const IGNORE_READONLY_LOCAL_ERRORS: &str = "__IgnoreReadonlyLocalErrors";
@@ -362,7 +360,6 @@ pub mod user_attributes {
             SUPPORT_DYNAMIC_TYPE,
             REQUIRE_DYNAMIC,
             MODULE,
-            INTERNAL,
             ENABLE_METHOD_TRAIT_DIAMOND,
         ]
         .into_iter()

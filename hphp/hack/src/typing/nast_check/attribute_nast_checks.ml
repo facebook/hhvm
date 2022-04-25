@@ -83,18 +83,6 @@ let check_ifc_enabled tcopt attrs =
     Errors.experimental_feature pos "IFC InferFlows"
   | _ -> ()
 
-let check_internal_method_visibility m =
-  let attr =
-    Naming_attributes.find SN.UserAttributes.uaInternal m.m_user_attributes
-  in
-  match (attr, m.m_visibility) with
-  | (Some { ua_name = (pos, _); _ }, Aast.Private)
-  | (Some { ua_name = (pos, _); _ }, Aast.Protected) ->
-    Errors.add_nast_check_error
-    @@ Nast_check_error.Internal_method_with_invalid_visibility
-         { pos; vis = m.m_visibility }
-  | (_, _) -> ()
-
 (* TODO: error if both Governed and InferFlows are attributes on a function or method *)
 
 let handler =
@@ -155,11 +143,7 @@ let handler =
             fp.param_user_attributes
             SN.UserAttributes.uaCanCall
             (`Exact 0))
-        params;
-      check_attribute_arity
-        f.f_user_attributes
-        SN.UserAttributes.uaInternal
-        (`Exact 0)
+        params
 
     method! at_method_ env m =
       let variadic_param =
@@ -180,18 +164,13 @@ let handler =
         (`Range (1, 2));
       check_deprecated_static m.m_user_attributes;
       (* Ban variadic arguments on memoized methods. *)
-      (if
-       has_attribute "__Memoize" m.m_user_attributes
-       || has_attribute "__MemoizeLSB" m.m_user_attributes
+      if
+        has_attribute "__Memoize" m.m_user_attributes
+        || has_attribute "__MemoizeLSB" m.m_user_attributes
       then
         match variadic_param with
         | Some p ->
           Errors.add_nast_check_error
           @@ Nast_check_error.Variadic_memoize p.param_pos
-        | None -> ());
-      check_attribute_arity
-        m.m_user_attributes
-        SN.UserAttributes.uaInternal
-        (`Exact 0);
-      check_internal_method_visibility m
+        | None -> ()
   end

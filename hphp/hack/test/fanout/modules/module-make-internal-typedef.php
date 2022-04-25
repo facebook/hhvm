@@ -20,8 +20,7 @@ type Foo = int;
 <?hh
 <<file: __EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-type Foo = int;
+internal type Foo = int;
 //// base-foo-use.php
 <?hh
 

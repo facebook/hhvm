@@ -20,8 +20,7 @@ function foo(): void {}
 <?hh
 <<file: __EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-function foo(): void {}
+internal function foo(): void {}
 //// base-foo-use.php
 <?hh
 

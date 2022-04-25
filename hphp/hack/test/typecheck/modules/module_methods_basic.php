@@ -10,8 +10,7 @@ new module B {}
 <<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
 class A {
-  <<__Internal>>
-  public function f(): void {}
+  internal function f(): void {}
 
   public function g(): void { $this->f(); /* ok */ }
 

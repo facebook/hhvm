@@ -9,8 +9,8 @@ new module Y {}
 <?hh
 <<file:__EnableUnstableFeatures('modules'), __Module("X")>>
 
-<<__Module("X"), __Internal>>
-enum X: int {
+<<__Module("X")>>
+internal enum X: int {
   A = 0;
   B = 1;
   C = 2;

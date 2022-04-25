@@ -1886,7 +1886,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn is_module_attribute(&self, name: &str) -> bool {
-        name == sn::user_attributes::MODULE || name == sn::user_attributes::INTERNAL
+        name == sn::user_attributes::MODULE
     }
 
     fn check_attr_enabled(&mut self, attrs: S<'a>) {

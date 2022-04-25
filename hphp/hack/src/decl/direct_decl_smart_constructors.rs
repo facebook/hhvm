@@ -1010,7 +1010,6 @@ struct Attributes<'a> {
     soft: bool,
     support_dynamic_type: bool,
     module: Option<Id<'a>>,
-    internal: bool,
     safe_global_variable: bool,
 }
 
@@ -1400,7 +1399,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             soft: false,
             support_dynamic_type: false,
             module: self.module,
-            internal: false,
             safe_global_variable: false,
         };
 
@@ -1486,9 +1484,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     }
                     "__SupportDynamicType" => {
                         attributes.support_dynamic_type = true;
-                    }
-                    "__Internal" => {
-                        attributes.internal = true;
                     }
                     "__SafeGlobalVariable" => {
                         attributes.safe_global_variable = true;
@@ -1746,13 +1741,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                                         self.node_to_ty(hint),
                                         Reason::RglobalFunParam(pos),
                                     ),
-                                    visibility: if attributes.internal
-                                        && visibility == aast::Visibility::Public
-                                    {
-                                        aast::Visibility::Internal
-                                    } else {
-                                        visibility
-                                    },
+                                    visibility,
                                     flags,
                                 });
                             }
@@ -3025,7 +3014,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     fn make_alias_declaration(
         &mut self,
         attributes: Self::R,
-        _modifiers: Self::R,
+        modifiers: Self::R,
         keyword: Self::R,
         name: Self::R,
         generic_params: Self::R,
@@ -3064,10 +3053,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         } else {
             &[][..]
         };
+        let internal = modifiers
+            .iter()
+            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
         let typedef = self.alloc(TypedefType {
             module: parsed_attributes.module,
             pos,
-            vis: if parsed_attributes.internal {
+            vis: if internal {
                 aast::TypedefVisibility::Tinternal
             } else {
                 match keyword.token_kind() {
@@ -3142,11 +3134,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let typedef = self.alloc(TypedefType {
             module: parsed_attributes.module,
             pos,
-            vis: if parsed_attributes.internal {
-                aast::TypedefVisibility::Tinternal
-            } else {
-                aast::TypedefVisibility::Opaque
-            },
+            vis: aast::TypedefVisibility::Opaque,
             tparams,
             constraint: as_constraint,
             type_: ty,
@@ -3396,7 +3384,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
                 let fun_elt = self.alloc(FunElt {
                     module: parsed_attributes.module,
-                    internal: parsed_attributes.internal || internal,
+                    internal,
                     deprecated,
                     type_,
                     pos,
@@ -4111,13 +4099,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                         xhp_attr: None,
                         name: (pos, name),
                         type_: ty,
-                        visibility: if attributes.internal
-                            && modifiers.visibility == aast::Visibility::Public
-                        {
-                            aast::Visibility::Internal
-                        } else {
-                            modifiers.visibility
-                        },
+                        visibility: modifiers.visibility,
                         flags,
                     })
                 }
@@ -4323,16 +4305,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             MethodFlags::SUPPORT_DYNAMIC_TYPE,
             !is_constructor && attributes.support_dynamic_type,
         );
-        let visibility = match modifiers.visibility {
-            aast::Visibility::Public => {
-                if attributes.internal {
-                    aast::Visibility::Internal
-                } else {
-                    aast::Visibility::Public
-                }
-            }
-            _ => modifiers.visibility,
-        };
 
         let mut user_attributes = Vec::new_in(self.arena);
         if self.retain_or_omit_user_attributes_for_facts {
@@ -4353,7 +4325,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let method = self.alloc(ShallowMethod {
             name: id,
             type_: ty,
-            visibility,
+            visibility: modifiers.visibility,
             deprecated,
             flags,
             attributes: user_attributes,
@@ -4380,7 +4352,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     fn make_enum_declaration(
         &mut self,
         attributes: Self::R,
-        _modifiers: Self::R, // TODO
+        modifiers: Self::R,
         _keyword: Self::R,
         name: Self::R,
         _colon: Self::R,
@@ -4407,6 +4379,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             Some(ty) => ty,
             None => return Node::Ignored(SK::EnumDeclaration),
         };
+        let internal = modifiers
+            .iter()
+            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
         let key = id.1;
         let consts = self.slice(enumerators.iter().filter_map(|node| match *node {
             Node::Const(const_) => Some(const_),
@@ -4457,7 +4432,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             has_xhp_keyword: false,
             kind: ClassishKind::Cenum,
             module: parsed_attributes.module,
-            internal: false, // TODO: enums should be denoteable as internal by keyword
+            internal,
             name: id.into(),
             tparams: &[],
             where_constraints: &[],

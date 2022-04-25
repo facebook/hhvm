@@ -5,10 +5,8 @@
 new module A {}
 
 class A {
-  <<__Internal>>
-  private function bad1(): void {}
-  <<__Internal>>
-  protected function bad2(): void {}
-  <<__Internal>>
-  public function good(): void {}
+  private internal function bad1(): void {}
+  protected internal function bad2(): void {}
+  public internal function bad3(): void {}
+  internal function good(): void {}
 }

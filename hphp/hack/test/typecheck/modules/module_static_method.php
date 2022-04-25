@@ -11,8 +11,7 @@ new module B {}
 <<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
 class A {
-  <<__Internal>>
-  public static function f(): void {}
+  internal static function f(): void {}
 }
 
 function a(): void {

@@ -11,8 +11,7 @@ new module A {}
 <<file:__EnableUnstableFeatures('modules'), __Module("A")>>
 
 class A {
-  <<__Internal>>
-  public int $x = 0;
+  internal int $x = 0;
 }
 
 //// f.php

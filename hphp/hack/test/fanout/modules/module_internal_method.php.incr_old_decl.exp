@@ -2,7 +2,7 @@
 No errors!
 === changed errors ===
 foo-use.php:4:7,9: You cannot access internal members outside of a module (Typing[4112])
-  foo-defn.php:6:19,21: This member is internal
+  foo-defn.php:5:21,23: This member is internal
 === fanout ===
 Fun call_foo
 Type Foo

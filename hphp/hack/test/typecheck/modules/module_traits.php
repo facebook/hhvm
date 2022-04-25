@@ -12,9 +12,9 @@ new module B {}
 internal trait T1 {}
 
 trait T2 {
-  // Error: cannot have internal members in public traits
+  // Error: cannot have internal traits
   internal int $x = 0;
-  // Error: cannot have internal members in public traits
+  // Error: cannot have internal traits
   internal function lol(): void {}
 }
 
@@ -23,7 +23,7 @@ trait T2 {
 class A {
   use T1; // ok
 }
-// Leaking internal types in public trait
+// Leaking internal trait
 
 internal class D {}
 

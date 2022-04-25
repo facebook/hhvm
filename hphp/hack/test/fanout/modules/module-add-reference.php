@@ -19,5 +19,4 @@ class FooA {}
 <?hh
 <<file: __EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-class FooA {}
+internal class FooA {}

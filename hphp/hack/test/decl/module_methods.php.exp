@@ -15,15 +15,15 @@ File root|module_methods.php--A.php
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
-       [{ Shallow_decl_defs.sm_name = ([8:19-20], "f");
+       [{ Shallow_decl_defs.sm_name = ([7:21-22], "f");
           sm_type =
-          (Rwitness_from_decl ([8:19-20]),
+          (Rwitness_from_decl ([7:21-22]),
            (Tfun
               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
-                ft_implicit_params = { capability = (CapDefaults [8:19-20]) };
+                ft_implicit_params = { capability = (CapDefaults [7:21-22]) };
                 ft_ret =
                 { et_enforced = Typing_defs_core.Unenforced;
-                  et_type = (Rhint ([8:24-28]), (Tprim Tvoid)) };
+                  et_type = (Rhint ([7:26-30]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~support_dynamic_type:false

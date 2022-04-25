@@ -9,8 +9,7 @@ new module A {}
 <<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
 class A {
-  <<__Internal>>
-  public function foobar(): void {}
+  internal function foobar(): void {}
 }
 
 //// f.php

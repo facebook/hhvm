@@ -192,7 +192,6 @@ pub mod user_attributes {
         lazy!(sn::user_attributes::SUPPORT_DYNAMIC_TYPE);
     pub static uaRequireDynamic: Lazy<TypeName> = lazy!(sn::user_attributes::REQUIRE_DYNAMIC);
     pub static uaModule: Lazy<TypeName> = lazy!(sn::user_attributes::MODULE);
-    pub static uaInternal: Lazy<TypeName> = lazy!(sn::user_attributes::INTERNAL);
     pub static uaEnableMethodTraitDiamond: Lazy<TypeName> =
         lazy!(sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND);
     pub static uaIgnoreReadonlyLocalErrors: Lazy<TypeName> =

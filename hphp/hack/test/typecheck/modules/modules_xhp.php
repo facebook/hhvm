@@ -14,8 +14,7 @@ class :my-xhp-base {
   ) {}
 }
 
-<<__Internal>>
-class :my-xhp extends :my-xhp-base {}
+internal class :my-xhp extends :my-xhp-base {}
 
 class :other-xhp extends :my-xhp-base {}
 

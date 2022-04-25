@@ -205,14 +205,14 @@ let check_visibility env parent_vis c_vis parent_pos pos on_error =
        * a test case where this also doesn't violate _other_ rules about
        * referencing internal symbols in modules, e.g.:
        *
-       * <<__Internal>>
-       * trait Quuz {
-       *   <<__Internal>> public function lol(): void {}
+       *
+       * internal trait Quuz {
+       *   internal function lol(): void {}
        * }
        *
        * trait Corge {
        *   use Quuz;
-       *   <<__Internal>> public function lol(): void {}
+       *   internal function lol(): void {}
        * }
        *
        * This code snippet alone raises two errors. One for `use Quuz`,

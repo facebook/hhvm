@@ -26,8 +26,7 @@ trait NonInternalCaller {
   }
 }
 
-<<__Internal>>
-trait InternalCaller {
+internal trait InternalCaller {
   public function test(Quxx $q): void {
     // This trait is internal, so all of these symbols are OK to access.
     foobar();
@@ -41,8 +40,7 @@ trait InternalCaller {
 
 <<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-trait Quuz {
+internal trait Quuz {
   internal function lol(): void {}
 }
 

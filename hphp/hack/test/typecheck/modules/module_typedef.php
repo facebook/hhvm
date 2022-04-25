@@ -10,11 +10,9 @@ new module B {}
 
 <<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-type Ty = int;
+internal type Ty = int;
 
-<<__Internal>>
-newtype TyNew = int;
+internal newtype TyNew = int;
 
 // In Signatures
 

@@ -57,10 +57,6 @@ let gather_constants =
       CCRSet.add ref acc
   end
 
-let make_visibility attrs = function
-  | Public when Attrs.mem SN.UserAttributes.uaInternal attrs -> Internal
-  | vis -> vis
-
 let class_const env (cc : Nast.class_const) =
   let gather_constants = gather_constants#on_expr CCRSet.empty in
   let {
@@ -189,7 +185,7 @@ let prop env cv =
   let php_std_lib =
     Attrs.mem SN.UserAttributes.uaPHPStdLib cv.cv_user_attributes
   in
-  let vis = make_visibility cv.cv_user_attributes cv.cv_visibility in
+  let vis = cv.cv_visibility in
   {
     sp_name = Decl_env.make_decl_posed env cv.cv_id;
     sp_xhp_attr = make_xhp_attr cv;
@@ -226,7 +222,7 @@ and static_prop env cv =
   let safe_global_variable =
     Attrs.mem SN.UserAttributes.uaSafeGlobalVariable cv.cv_user_attributes
   in
-  let vis = make_visibility cv.cv_user_attributes cv.cv_visibility in
+  let vis = cv.cv_visibility in
   {
     sp_name = (cv_pos, id);
     sp_xhp_attr = make_xhp_attr cv;
@@ -307,7 +303,7 @@ let method_ ~support_dynamic_type env m =
       m.m_name
       m.m_user_attributes
   in
-  let vis = make_visibility m.m_user_attributes m.m_visibility in
+  let vis = m.m_visibility in
   {
     sm_name = Decl_env.make_decl_posed env m.m_name;
     sm_type = mk (Reason.Rwitness_from_decl pos, Tfun ft);

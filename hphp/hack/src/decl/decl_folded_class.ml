@@ -778,9 +778,7 @@ and class_decl
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
   (* Support both attribute and keyword for now, until typechecker changes are made *)
-  let internal =
-    Attrs.mem SN.UserAttributes.uaInternal c.sc_user_attributes || c.sc_internal
-  in
+  let internal = c.sc_internal in
   let (_p, cls_name) = c.sc_name in
   let class_dep = Dep.Type cls_name in
   let env = { Decl_env.mode = c.sc_mode; droot = Some class_dep; ctx } in

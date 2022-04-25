@@ -6,5 +6,4 @@ internal class A {
   internal function g(): void {}
 }
 
-<<__Internal>>
-type Foobar = int;
+internal type Foobar = int;

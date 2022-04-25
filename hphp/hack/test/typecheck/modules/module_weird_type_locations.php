@@ -11,8 +11,7 @@ new module B {}
 
 <<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-type Foo = int;
+internal type Foo = int;
 
 internal class Crosby {}
 

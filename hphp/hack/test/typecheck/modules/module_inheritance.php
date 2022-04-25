@@ -12,21 +12,20 @@ new module B {}
 class A {
   public function pub(): void {}
 
-  <<__Internal>>
-  public function internal(): void {}
+  internal function internal(): void {}
 }
 
 class A2 extends A {
   // This is allowed because it's the same module
-  <<__Override, __Internal>>
-  public function internal(): void {}
+  <<__Override>>
+  internal function internal(): void {}
 }
 
 // This is illegal, overriding a public method to be internal
 
 class A3 extends A {
-  <<__Override, __Internal>>
-  public function pub(): void {}
+  <<__Override>>
+  internal function pub(): void {}
 }
 
 //// B.php
@@ -35,14 +34,14 @@ class A3 extends A {
 <<file:__EnableUnstableFeatures('modules'), __Module('B')>>
 
 class B extends A {
-  <<__Override, __Internal>>
-  public function pub(): void {}
+  <<__Override>>
+  internal function pub(): void {}
 }
 
 
 // This is illegal because it is overriding an internal method from a different
 // module
 class B2 extends A {
-  <<__Override, __Internal>>
-  public function internal(): void {}
+  <<__Override>>
+  internal function internal(): void {}
 }

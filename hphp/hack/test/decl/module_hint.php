@@ -10,8 +10,8 @@ new module there {}
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 <<file:__EnableUnstableFeatures('modules'), __Module('here')>>
 
-<<__Module('here'), __Internal>>
-class C {
+<<__Module('here')>>
+internal class C {
   public function bar(mixed $m):void {
     // All not ok
     $m as D;
@@ -35,14 +35,14 @@ class C {
 <?hh
 <<file:__EnableUnstableFeatures('modules'), __Module('there')>>
 
-<<__Module('there'), __Internal>>
-class D {
+<<__Module('there')>>
+internal class D {
 }
-<<__Module('there'), __Internal>>
-class G<T> {
+<<__Module('there')>>
+internal class G<T> {
 }
-<<__Module('there'), __Internal>>
-enum E : int {
+<<__Module('there')>>
+internal enum E : int {
   A = 1;
 }
 

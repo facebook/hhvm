@@ -1,2 +1,8 @@
+enum keyword
+newtype keyword
+type keyword
+interface keyword
+trait keyword
+class keyword
 async keyword
 function keyword

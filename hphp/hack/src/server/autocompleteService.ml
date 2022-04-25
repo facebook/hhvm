@@ -1380,7 +1380,19 @@ let complete_keywords_at_token possible_keywords filename (s : Syntax.t) : unit
   | _ -> ()
 
 let def_start_keywords filename s : unit =
-  let possible_keywords = ["function"; "async"] in
+  let possible_keywords =
+    [
+      "function";
+      (* `async` at the top level can occur for functions. *)
+      "async";
+      "class";
+      "trait";
+      "interface";
+      "type";
+      "newtype";
+      "enum";
+    ]
+  in
   complete_keywords_at_token possible_keywords filename s
 
 let keywords filename tree =

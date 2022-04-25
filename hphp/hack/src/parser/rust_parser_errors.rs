@@ -104,7 +104,7 @@ impl UnstableFeatures {
             UnstableFeatures::EnumClassLabel => Preview,
             UnstableFeatures::Ifc => Unstable,
             UnstableFeatures::Readonly => Preview,
-            UnstableFeatures::Modules => Unstable,
+            UnstableFeatures::Modules => Preview,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
             UnstableFeatures::TypeConstMultipleBounds => Unstable,

@@ -18,7 +18,6 @@
 #include <cstring>
 #include "hphp/runtime/vm/opcodes.h"
 
-using namespace HPHP;
 
 const char* fix_self(const char* name) {
   // We could avoid this by renaming Self to SelfCls

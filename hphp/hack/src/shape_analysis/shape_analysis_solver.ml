@@ -174,9 +174,9 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
            Shape_like_dict (pos, result_id, ShapeKeyMap.bindings keys_and_types))
   in
 
-  (* TODO: only consider existing candidates to report a summary *)
   let dynamic_shape_results =
-    Pos.Set.elements dynamic_accesses
+    Pos.Set.inter (Pos.Set.of_list exists) dynamic_accesses
+    |> Pos.Set.elements
     |> List.map ~f:(fun entity_ -> Dynamically_accessed_dict (Literal entity_))
   in
 

@@ -18,6 +18,7 @@ open Tast
 module Phase = Typing_phase
 module Cls = Decl_provider.Class
 module Syntax = Full_fidelity_positioned_syntax
+module Trivia = Full_fidelity_positioned_trivia
 
 let autocomplete_results : complete_autocomplete_result list ref = ref []
 
@@ -1379,6 +1380,25 @@ let complete_keywords_at_token possible_keywords filename (s : Syntax.t) : unit
     complete_keywords_at possible_keywords token_str pos
   | _ -> ()
 
+let complete_keywords_at_trivia possible_keywords filename (t : Trivia.t) : unit
+    =
+  let trivia_str = Trivia.text t in
+  match Trivia.kind t with
+  | Trivia.TriviaKind.ExtraTokenError when is_auto_complete trivia_str ->
+    let start_offset = t.Trivia.offset in
+    let end_offset = start_offset + t.Trivia.width in
+    let source_text = t.Trivia.source_text in
+
+    let pos =
+      Full_fidelity_source_text.relative_pos
+        filename
+        source_text
+        start_offset
+        end_offset
+    in
+    complete_keywords_at possible_keywords trivia_str pos
+  | _ -> ()
+
 let def_start_keywords filename s : unit =
   let possible_keywords =
     [
@@ -1396,7 +1416,8 @@ let def_start_keywords filename s : unit =
   complete_keywords_at_token possible_keywords filename s
 
 (* Drop the items from [possible_keywords] if they're already in
-   [existing_modifiers]. *)
+   [existing_modifiers], and drop visibility keywords if we already
+   have any visibility keyword. *)
 let available_keywords existing_modifiers possible_keywords : string list =
   let current_modifiers =
     Syntax.syntax_node_to_list existing_modifiers
@@ -1405,12 +1426,41 @@ let available_keywords existing_modifiers possible_keywords : string list =
            | Syntax.Token _ -> Some (Syntax.text s)
            | _ -> None)
   in
+  let visibility_modifiers = SSet.of_list ["public"; "protected"; "private"] in
+  let has_visibility =
+    List.exists current_modifiers ~f:(fun kw ->
+        SSet.mem kw visibility_modifiers)
+  in
   List.filter possible_keywords ~f:(fun kw ->
-      not (List.mem current_modifiers kw ~equal:String.equal))
+      (not (List.mem current_modifiers kw ~equal:String.equal))
+      && not (SSet.mem kw visibility_modifiers && has_visibility))
 
 let class_keywords filename existing_modifiers s : unit =
   let possible_keywords =
     available_keywords existing_modifiers ["final"; "abstract"; "class"]
+  in
+  complete_keywords_at_token possible_keywords filename s
+
+let method_keywords filename trivia =
+  complete_keywords_at_trivia
+    ["public"; "protected"; "private"; "static"; "abstract"; "final"; "async"]
+    filename
+    trivia
+
+let property_or_method_keywords filename existing_modifiers s : unit =
+  let possible_keywords =
+    available_keywords
+      existing_modifiers
+      [
+        "public";
+        "protected";
+        "private";
+        "static";
+        "abstract";
+        "final";
+        "async";
+        "function";
+      ]
   in
   complete_keywords_at_token possible_keywords filename s
 
@@ -1447,6 +1497,28 @@ let keywords filename tree =
         (* The user has written `final AUTO332` or `abstract AUTO332`,
            so we're expecting a class, not an interface or trait. *)
         class_keywords filename cd.classish_modifiers cd.classish_name
+      | _ -> ())
+    | MethodishDeclaration md ->
+      let header = md.methodish_function_decl_header in
+      (match header.syntax with
+      | FunctionDeclarationHeader fdh ->
+        (match fdh.function_keyword.syntax with
+        | Token t ->
+          (* The user has written `public AUTO332 function`, so we're expecting
+             method modifiers like `static`. *)
+          List.iter (Syntax.Token.leading t) ~f:(method_keywords filename)
+        | _ -> ())
+      | _ -> ())
+    | PropertyDeclaration pd ->
+      (match pd.property_type.syntax with
+      | SimpleTypeSpecifier sts ->
+        (* The user has written `public AUTO332`. This could be a method
+           `public function foo(): void {}` or a property
+           `public int $x = 1;`. *)
+        property_or_method_keywords
+          filename
+          pd.property_modifiers
+          sts.simple_type_specifier
       | _ -> ())
     | _ -> ());
     List.iter (children s) ~f:aux

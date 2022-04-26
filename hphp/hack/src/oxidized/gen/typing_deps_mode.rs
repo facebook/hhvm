@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6dd34311cb4c33b9e92047d16793f5a6>>
+// @generated SignedSource<<ce57eb2565992fc7b7ce61a4ab45a97d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
@@ -25,6 +26,7 @@ use crate::*;
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,

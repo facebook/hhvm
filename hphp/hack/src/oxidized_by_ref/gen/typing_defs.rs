@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5351f4d0ff49fbae17b2acc5a3bbc181>>
+// @generated SignedSource<<30bb8dee46c07782ebbf50ec8866e2df>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
@@ -44,6 +45,7 @@ pub use typing_defs_core::*;
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -81,6 +83,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstFrom<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -104,6 +107,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstRef<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -129,6 +133,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConstDecl<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -163,6 +168,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassElt<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -198,6 +204,7 @@ pub use oxidized::typing_defs::ClassConstKind;
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -231,6 +238,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConst<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -267,6 +275,7 @@ arena_deserializer::impl_deserialize_in_arena!(ModuleDefType<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -291,6 +300,7 @@ arena_deserializer::impl_deserialize_in_arena!(Requirement<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -318,6 +328,7 @@ arena_deserializer::impl_deserialize_in_arena!(AbstractTypeconst<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -341,6 +352,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConcreteTypeconst<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -367,6 +379,7 @@ arena_deserializer::impl_deserialize_in_arena!(PartiallyAbstractTypeconst<'arena
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -392,6 +405,7 @@ arena_deserializer::impl_deserialize_in_arena!(Typeconst<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -444,6 +458,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypeconstType<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -471,6 +486,7 @@ arena_deserializer::impl_deserialize_in_arena!(EnumType<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -508,6 +524,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefType<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,

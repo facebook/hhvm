@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<711c0d350303e5270c59d81eef86bea1>>
+// @generated SignedSource<<79400c68ee6386cf8837a4bc99213a66>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
@@ -37,6 +38,7 @@ pub use shape_map::ShapeMap;
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -60,6 +62,7 @@ pub type ClassName = Sid;
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -86,6 +89,7 @@ arena_deserializer::impl_deserialize_in_arena!(ImportFlavor);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -110,6 +114,7 @@ pub enum XhpChild {
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -135,6 +140,7 @@ arena_deserializer::impl_deserialize_in_arena!(XhpChildOp);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -155,6 +161,7 @@ pub type VariadicHint = Option<Hint>;
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -173,6 +180,7 @@ pub struct Contexts(pub Pos, pub Vec<Hint>);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -194,6 +202,7 @@ pub struct HfParamInfo {
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -220,6 +229,7 @@ pub struct HintFun {
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -283,6 +293,7 @@ pub enum Hint_ {
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -315,6 +326,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tprim);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -337,6 +349,7 @@ pub struct ShapeFieldInfo {
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -359,6 +372,7 @@ pub struct NastShapeInfo {
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -385,6 +399,7 @@ arena_deserializer::impl_deserialize_in_arena!(KvcKind);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -414,6 +429,7 @@ arena_deserializer::impl_deserialize_in_arena!(VcKind);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -438,6 +454,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -460,6 +477,7 @@ pub struct Enum_ {
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -479,6 +497,7 @@ pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint)
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,

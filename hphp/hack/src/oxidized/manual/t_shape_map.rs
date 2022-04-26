@@ -8,7 +8,7 @@ use std::hash::{Hash, Hasher};
 
 use serde::{Deserialize, Serialize};
 
-use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
@@ -20,6 +20,7 @@ use crate::typing_defs_core::TshapeFieldName;
     Deserialize,
     FromOcamlRep,
     EqModuloPos,
+    EqModuloPosAndReason,
     NoPosHash,
     Serialize,
     ToOcamlRep

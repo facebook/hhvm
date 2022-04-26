@@ -17,7 +17,7 @@ fn derive_eq_modulo_pos(mut s: Structure<'_>) -> TokenStream {
     // parameters implement our trait.
     s.add_bounds(synstructure::AddBounds::Generics);
 
-    let body = derive_body(&s);
+    let body = derive_eq_modulo_pos_body(&s);
     s.gen_impl(quote! {
         gen impl EqModuloPos for @Self {
             fn eq_modulo_pos(&self, rhs: &Self) -> bool {
@@ -27,7 +27,7 @@ fn derive_eq_modulo_pos(mut s: Structure<'_>) -> TokenStream {
     })
 }
 
-fn derive_body(s: &Structure<'_>) -> TokenStream {
+fn derive_eq_modulo_pos_body(s: &Structure<'_>) -> TokenStream {
     s.each_variant(|v| {
         let mut s_rhs = s.clone();
         let v_rhs = s_rhs
@@ -43,6 +43,52 @@ fn derive_body(s: &Structure<'_>) -> TokenStream {
         let mut inner = quote! {true};
         for (bi, bi_rhs) in v.bindings().iter().zip(v_rhs.bindings().iter()) {
             inner = quote! { #inner && #bi.eq_modulo_pos(#bi_rhs) }
+        }
+        quote!(
+            match rhs {
+                #arm => { #inner }
+                _ => false,
+            }
+        )
+    })
+}
+
+decl_derive!([EqModuloPosAndReason] => derive_eq_modulo_pos_and_reason);
+
+fn derive_eq_modulo_pos_and_reason(mut s: Structure<'_>) -> TokenStream {
+    // By default, if you are deriving an impl of trait Foo for generic type
+    // X<T>, synstructure will add Foo as a bound not only for the type
+    // parameter T, but also for every type which appears as a field in X. This
+    // is not necessary for our use case--we can just require that the type
+    // parameters implement our trait.
+    s.add_bounds(synstructure::AddBounds::Generics);
+
+    let body = derive_eq_modulo_pos_and_reason_body(&s);
+    s.gen_impl(quote! {
+        gen impl EqModuloPosAndReason for @Self {
+            fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
+                match self { #body }
+            }
+        }
+    })
+}
+
+fn derive_eq_modulo_pos_and_reason_body(s: &Structure<'_>) -> TokenStream {
+    s.each_variant(|v| {
+        let mut s_rhs = s.clone();
+        let v_rhs = s_rhs
+            .variants_mut()
+            .iter_mut()
+            .find(|v2| v2.ast().ident == v.ast().ident)
+            .unwrap();
+        for (i, binding) in v_rhs.bindings_mut().iter_mut().enumerate() {
+            let name = format!("rhs{}", i);
+            binding.binding = proc_macro2::Ident::new(&name, binding.binding.span());
+        }
+        let arm = v_rhs.pat();
+        let mut inner = quote! {true};
+        for (bi, bi_rhs) in v.bindings().iter().zip(v_rhs.bindings().iter()) {
+            inner = quote! { #inner && #bi.eq_modulo_pos_and_reason(#bi_rhs) }
         }
         quote!(
             match rhs {

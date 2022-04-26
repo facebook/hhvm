@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
 use intern::string::BytesId;
 use oxidized::file_pos_small::FilePosSmall;
 use oxidized::pos_span_raw::PosSpanRaw;
@@ -31,6 +31,7 @@ pub trait Pos:
     + for<'a> From<&'a oxidized_by_ref::pos::Pos<'a>>
     + for<'a> ToOxidized<'a, Output = &'a oxidized_by_ref::pos::Pos<'a>>
     + EqModuloPos
+    + EqModuloPosAndReason
     + 'static
 {
     /// Make a new instance. If the implementing Pos is stateful,
@@ -213,6 +214,12 @@ impl EqModuloPos for BPos {
     }
 }
 
+impl EqModuloPosAndReason for BPos {
+    fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
+        true
+    }
+}
+
 impl<'a> From<&'a oxidized::pos::Pos> for BPos {
     fn from(pos: &'a oxidized::pos::Pos) -> Self {
         Self::from_ast(pos)
@@ -285,6 +292,12 @@ impl EqModuloPos for NPos {
     }
 }
 
+impl EqModuloPosAndReason for NPos {
+    fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
+        true
+    }
+}
+
 impl<'a> From<&'a oxidized::pos::Pos> for NPos {
     fn from(pos: &'a oxidized::pos::Pos) -> Self {
         Self::from_ast(pos)
@@ -305,7 +318,16 @@ impl<'a> ToOxidized<'a> for NPos {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    Hash,
+    Serialize,
+    Deserialize
+)]
 pub struct Positioned<S, P> {
     // Caution: field order will matter if we ever derive
     // `ToOcamlRep`/`FromOcamlRep` for this type.

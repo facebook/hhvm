@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8a4e87f55860aac00d466a14d8888c84>>
+// @generated SignedSource<<61bbcf81f8de592e34472244a2b627c6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
@@ -58,6 +59,7 @@ pub use typing_defs::*;
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -81,6 +83,7 @@ pub struct SubstContext {
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -113,6 +116,7 @@ arena_deserializer::impl_deserialize_in_arena!(SourceType);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -137,6 +141,7 @@ arena_deserializer::impl_deserialize_in_arena!(LinearizationKind);
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -168,6 +173,7 @@ pub enum DeclError {
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -225,6 +231,7 @@ pub struct DeclClassType {
     Deserialize,
     Eq,
     EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,

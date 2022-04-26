@@ -6,16 +6,30 @@
 use std::rc::Rc;
 use std::sync::Arc;
 
-pub use eq_modulo_pos_derive::EqModuloPos;
+pub use eq_modulo_pos_derive::{EqModuloPos, EqModuloPosAndReason};
 
 pub trait EqModuloPos {
     fn eq_modulo_pos(&self, rhs: &Self) -> bool;
+}
+
+pub trait EqModuloPosAndReason {
+    fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool;
 }
 
 impl<T: EqModuloPos> EqModuloPos for Option<T> {
     fn eq_modulo_pos(&self, rhs: &Self) -> bool {
         match (self, rhs) {
             (Some(lhs), Some(rhs)) => lhs.eq_modulo_pos(rhs),
+            (None, None) => true,
+            _ => false,
+        }
+    }
+}
+
+impl<T: EqModuloPosAndReason> EqModuloPosAndReason for Option<T> {
+    fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
+        match (self, rhs) {
+            (Some(lhs), Some(rhs)) => lhs.eq_modulo_pos_and_reason(rhs),
             (None, None) => true,
             _ => false,
         }
@@ -37,9 +51,30 @@ impl<T: EqModuloPos> EqModuloPos for [T] {
     }
 }
 
+impl<T: EqModuloPosAndReason> EqModuloPosAndReason for [T] {
+    fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
+        if self.len() != rhs.len() {
+            false
+        } else {
+            for (lhs, rhs) in self.iter().zip(rhs.iter()) {
+                if !lhs.eq_modulo_pos_and_reason(rhs) {
+                    return false;
+                }
+            }
+            true
+        }
+    }
+}
+
 impl<T: EqModuloPos> EqModuloPos for hcons::Hc<T> {
     fn eq_modulo_pos(&self, rhs: &Self) -> bool {
         (**self).eq_modulo_pos(&**rhs)
+    }
+}
+
+impl<T: EqModuloPosAndReason> EqModuloPosAndReason for hcons::Hc<T> {
+    fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
+        (**self).eq_modulo_pos_and_reason(&**rhs)
     }
 }
 
@@ -47,6 +82,12 @@ macro_rules! impl_with_equal {
     ($($ty:ty,)*) => {$(
         impl EqModuloPos for $ty {
             fn eq_modulo_pos(&self, rhs: &Self) -> bool {
+                self == rhs
+            }
+        }
+
+        impl EqModuloPosAndReason for $ty {
+            fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
                 self == rhs
             }
         }
@@ -83,6 +124,12 @@ macro_rules! impl_deref {
                 (**self).eq_modulo_pos(&**rhs)
             }
         }
+
+        impl<T: EqModuloPosAndReason + ?Sized> EqModuloPosAndReason for $ty {
+            fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
+                (**self).eq_modulo_pos_and_reason(&**rhs)
+            }
+        }
     };
 }
 
@@ -97,6 +144,10 @@ macro_rules! impl_tuple {
         impl EqModuloPos for () {
             fn eq_modulo_pos(&self, _rhs: &Self) -> bool { true }
         }
+
+        impl EqModuloPosAndReason for () {
+            fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool { true }
+        }
     );
 
     ( $(($name:ident, $lhs:ident, $rhs:ident))+) => (
@@ -106,6 +157,16 @@ macro_rules! impl_tuple {
                 let ($(ref $rhs,)+) = rhs;
                 true
                 $(&& $lhs.eq_modulo_pos($rhs))+
+
+            }
+        }
+
+        impl< $($name: EqModuloPosAndReason),+ > EqModuloPosAndReason for ($($name,)+) {
+            fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
+                let ($(ref $lhs,)+) = self;
+                let ($(ref $rhs,)+) = rhs;
+                true
+                $(&& $lhs.eq_modulo_pos_and_reason($rhs))+
 
             }
         }
@@ -127,6 +188,20 @@ macro_rules! impl_with_iter {
                     let mut res = true;
                     for (lhs, rhs) in self.iter().zip(rhs.iter()) {
                         res = res && lhs.eq_modulo_pos(&rhs);
+                    }
+                    res
+                }
+            }
+        }
+
+        impl<$($gen: EqModuloPosAndReason,)*> EqModuloPosAndReason for $ty {
+            fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
+                if self.$size() != rhs.$size() {
+                    false
+                } else {
+                    let mut res = true;
+                    for (lhs, rhs) in self.iter().zip(rhs.iter()) {
+                        res = res && lhs.eq_modulo_pos_and_reason(&rhs);
                     }
                     res
                 }

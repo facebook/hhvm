@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 
 use serde::{Deserialize, Serialize};
 
-use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
@@ -21,6 +21,7 @@ use crate::typing_defs_core::{PosByteString, PosString, TshapeFieldName};
     FromOcamlRepIn,
     Hash,
     EqModuloPos,
+    EqModuloPosAndReason,
     NoPosHash,
     Serialize,
     ToOcamlRep

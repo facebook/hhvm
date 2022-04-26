@@ -5,7 +5,7 @@
 
 use std::{borrow::Cow, cmp::Ordering, ops::Range, path::PathBuf};
 
-use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
 use ocamlrep::rc::RcOc;
 use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
@@ -396,6 +396,12 @@ impl std::hash::Hash for Pos {
 
 impl EqModuloPos for Pos {
     fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
+        true
+    }
+}
+
+impl EqModuloPosAndReason for Pos {
+    fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
         true
     }
 }

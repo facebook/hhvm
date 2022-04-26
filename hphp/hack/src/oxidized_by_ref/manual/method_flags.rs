@@ -4,12 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bitflags::bitflags;
-use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
 
 // NB: Keep the values of these flags in sync with shallow_decl_defs.ml.
 
 bitflags! {
-    #[derive(EqModuloPos)]
+    #[derive(EqModuloPos, EqModuloPosAndReason)]
     pub struct MethodFlags: u8 {
         const ABSTRACT            = 1 << 0;
         const FINAL               = 1 << 1;

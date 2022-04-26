@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
 use hcons::Conser;
 use once_cell::sync::Lazy;
 use pos::{BPos, NPos, Pos, Positioned, Symbol, ToOxidized, TypeConstName, TypeName};
@@ -20,6 +20,7 @@ pub use oxidized::typing_reason::{ArgPosition, BlameSource};
 pub trait Reason:
     Eq
     + EqModuloPos
+    + EqModuloPosAndReason
     + Hash
     + Clone
     + Walkable<Self>
@@ -587,6 +588,12 @@ impl<'a> ToOxidized<'a> for BReason {
     }
 }
 
+impl EqModuloPosAndReason for BReason {
+    fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
+        true
+    }
+}
+
 /// A stateless sentinal Reason.
 #[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
 pub struct NReason;
@@ -639,5 +646,11 @@ impl<'a> ToOxidized<'a> for NReason {
 
     fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
         oxidized_by_ref::typing_reason::Reason::Rnone
+    }
+}
+
+impl EqModuloPosAndReason for NReason {
+    fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
+        true
     }
 }

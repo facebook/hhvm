@@ -8,7 +8,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::ToOxidized;
-use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
 use indexmap::{IndexMap, IndexSet};
 use intern::{
     string::{BytesId, IntoUtf8Bytes, StringId},
@@ -75,6 +75,12 @@ impl<T: IntoUtf8Bytes> From<T> for Symbol {
 
 impl EqModuloPos for Symbol {
     fn eq_modulo_pos(&self, rhs: &Self) -> bool {
+        self == rhs
+    }
+}
+
+impl EqModuloPosAndReason for Symbol {
+    fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
         self == rhs
     }
 }
@@ -241,7 +247,17 @@ pub type TypeNameIndexSet = IndexSet<TypeName>;
 
 /// A TypeName is the name of a class, interface, trait, type parameter,
 /// type alias, newtype, or primitive type names like int, arraykey, etc.
-#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(
+    Eq,
+    PartialEq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    Clone,
+    Copy,
+    Hash,
+    Ord,
+    PartialOrd
+)]
 #[derive(Serialize, Deserialize)]
 pub struct TypeName(pub Symbol);
 common_impls!(TypeName);
@@ -278,7 +294,17 @@ pub type ClassConstNameIndexMap<V> = IndexMap<ClassConstName, V>;
 pub type ClassConstNameIndexSet = IndexSet<ClassConstName>;
 common_impls!(ClassConstName);
 
-#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(
+    Eq,
+    PartialEq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    Clone,
+    Copy,
+    Hash,
+    Ord,
+    PartialOrd
+)]
 #[derive(Serialize, Deserialize)]
 pub struct TypeConstName(pub Symbol);
 pub type BuildTypeConstNameHasher = BuildSymbolHasher;

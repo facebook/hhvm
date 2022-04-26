@@ -6,7 +6,7 @@
 use super::{inherit::Inherited, Result, Substitution};
 use crate::dependency_registrar::DependencyRegistrar;
 use crate::special_names as sn;
-use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 use oxidized::global_options::GlobalOptions;
 use pos::{
     ClassConstName, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned,
@@ -586,7 +586,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         req_ancestors.retain(|req_extend| {
             let (_, pos_id, targs) = req_extend.ty.unwrap_class_type();
             if let Some(seen_targs) = seen_reqs.get(&pos_id.id()) {
-                if targs.eq_modulo_pos(seen_targs) {
+                if targs.eq_modulo_pos_and_reason(seen_targs) {
                     false
                 } else {
                     // Seems odd to replace the existing targs list when we

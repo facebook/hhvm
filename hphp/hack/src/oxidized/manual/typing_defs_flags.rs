@@ -4,14 +4,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bitflags::bitflags;
-use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
 
 use crate::xhp_attribute::{self, XhpAttribute};
 
 // NB: Keep the values of these flags in sync with typing_defs_flags.ml.
 
 bitflags! {
-    #[derive(EqModuloPos)]
+    #[derive(EqModuloPos, EqModuloPosAndReason)]
     pub struct FunTypeFlags: u16 {
         const RETURN_DISPOSABLE      = 1 << 0;
         const RETURNS_MUTABLE        = 1 << 1;
@@ -37,7 +37,7 @@ bitflags! {
 }
 
 bitflags! {
-    #[derive(EqModuloPos)]
+    #[derive(EqModuloPos, EqModuloPosAndReason)]
     pub struct FunParamFlags: u16 {
         const ACCEPT_DISPOSABLE      = 1 << 0;
         const INOUT                  = 1 << 1;
@@ -57,7 +57,7 @@ bitflags! {
 }
 
 bitflags! {
-    #[derive(EqModuloPos)]
+    #[derive(EqModuloPos, EqModuloPosAndReason)]
     pub struct ClassEltFlags: u16 {
         const ABSTRACT                 = 1 << 0;
         const FINAL                    = 1 << 1;

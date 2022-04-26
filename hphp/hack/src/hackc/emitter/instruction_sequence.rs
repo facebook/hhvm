@@ -331,6 +331,9 @@ pub mod instr {
     pub fn memo_get_eager<'a>(label1: Label, label2: Label, range: LocalRange) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::MemoGetEager(
             [label1, label2],
+            // Need dummy immediate here to satisfy opcodes translator expectation of immediate
+            // with name _0.
+            u8::MAX,
             range,
         )))
     }
@@ -368,7 +371,11 @@ pub mod instr {
             alloc,
             alloc.alloc_slice_fill_iter(cases.into_iter().map(|(s, _)| Str::from(s))),
         );
-        instr(Instruct::Opcode(Opcode::SSwitch { cases, targets }))
+        instr(Instruct::Opcode(Opcode::SSwitch {
+            cases,
+            targets,
+            _0: u8::MAX,
+        }))
     }
 
     pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl Into<String>) -> InstrSeq<'a> {

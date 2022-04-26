@@ -69,6 +69,7 @@ type options = {
   profile_type_check_twice: bool;
   memtrace: string option;
   pessimise_builtins: bool;
+  rust_provider_backend: bool;
 }
 
 (** If the user passed --root, then all pathnames have to be canonicalized.
@@ -220,6 +221,7 @@ let parse_options () =
   let set_bool_ x () = x := true in
   let set_float_ x f = x := f in
   let shallow_class_decl = ref false in
+  let rust_provider_backend = ref false in
   let skip_hierarchy_checks = ref false in
   let skip_tast_checks = ref false in
   let out_extension = ref ".out" in
@@ -517,6 +519,10 @@ let parse_options () =
       ( "--shallow-class-decl",
         Arg.Set shallow_class_decl,
         " Look up class members lazily from shallow declarations" );
+      ( "--rust-provider-backend",
+        Arg.Set rust_provider_backend,
+        " Use the Rust implementation of Provider_backend (including decl-folding)"
+      );
       ( "--skip-hierarchy-checks",
         Arg.Set skip_hierarchy_checks,
         " Do not apply checks on class hierarchy (override, implements, etc)" );
@@ -991,6 +997,7 @@ let parse_options () =
       profile_type_check_twice = !profile_type_check_twice;
       memtrace = !memtrace;
       pessimise_builtins = !pessimise_builtins;
+      rust_provider_backend = !rust_provider_backend;
     },
     root,
     !naming_table,
@@ -2477,6 +2484,7 @@ let decl_and_run_mode
       profile_type_check_twice;
       memtrace;
       pessimise_builtins;
+      rust_provider_backend;
     }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
@@ -2608,10 +2616,19 @@ let decl_and_run_mode
     Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace
   | _ -> ());
   let ctx =
-    Provider_context.empty_for_test
-      ~popt
-      ~tcopt
-      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+    if rust_provider_backend then
+      Provider_context.empty_for_tool
+        ~popt
+        ~tcopt
+        ~backend:
+          (Provider_backend.Rust_provider_backend
+             (Rust_provider_backend.make ()))
+        ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+    else
+      Provider_context.empty_for_test
+        ~popt
+        ~tcopt
+        ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
      so it will look in the sqlite database for names it doesn't know.

@@ -40,7 +40,9 @@ let read_file_contents_from_disk (fn : Relative_path.t) : string option =
 let get fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Shared_memory -> FileHeap.get fn
+  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Shared_memory ->
+    FileHeap.get fn
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith "File_provider.get not supported with local/decl memory provider"
@@ -48,6 +50,7 @@ let get fn =
 let get_unsafe fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     begin
       match get fn with
@@ -62,6 +65,7 @@ let get_unsafe fn =
 let get_contents ~writeback_disk_contents_in_shmem_provider fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     begin
       match FileHeap.get fn with
@@ -82,6 +86,7 @@ let get_contents ~writeback_disk_contents_in_shmem_provider fn =
 let get_ide_contents_unsafe fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     begin
       match FileHeap.get fn with
@@ -97,7 +102,9 @@ let get_ide_contents_unsafe fn =
 let provide_file_for_tests fn contents =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Shared_memory -> FileHeap.add fn (Disk contents)
+  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Shared_memory ->
+    FileHeap.add fn (Disk contents)
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
@@ -106,7 +113,9 @@ let provide_file_for_tests fn contents =
 let provide_file_for_ide fn contents =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Shared_memory -> FileHeap.add fn (Ide contents)
+  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Shared_memory ->
+    FileHeap.add fn (Ide contents)
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
@@ -115,6 +124,7 @@ let provide_file_for_ide fn contents =
 let provide_file_hint ~write_disk_contents_in_shmem_provider fn contents =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     (match contents with
     | Ide _ -> FileHeap.add fn contents
@@ -128,7 +138,9 @@ let provide_file_hint ~write_disk_contents_in_shmem_provider fn contents =
 let remove_batch paths =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Shared_memory -> FileHeap.remove_batch paths
+  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Shared_memory ->
+    FileHeap.remove_batch paths
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith

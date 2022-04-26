@@ -94,6 +94,7 @@ let cache_decls ctx file decls =
   in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Sequence.iter decls ~f:(function
         | (name, Class decl) ->

@@ -196,6 +196,7 @@ type t =
       decl: Decl_service_client.t;
       fixmes: Fixmes.t;
     }
+  | Rust_provider_backend of Rust_provider_backend.t
   | Analysis
 
 let t_to_string (t : t) : string =
@@ -203,6 +204,7 @@ let t_to_string (t : t) : string =
   | Shared_memory -> "Shared_memory"
   | Local_memory _ -> "Local_memory"
   | Decl_service _ -> "Decl_service"
+  | Rust_provider_backend _ -> "Rust_provider_backend"
   | Analysis -> "Analysis"
 
 let backend_ref = ref Shared_memory
@@ -210,6 +212,9 @@ let backend_ref = ref Shared_memory
 let set_analysis_backend () : unit = backend_ref := Analysis
 
 let set_shared_memory_backend () : unit = backend_ref := Shared_memory
+
+let set_rust_backend () : unit =
+  backend_ref := Rust_provider_backend (Rust_provider_backend.make ())
 
 let set_local_memory_backend_internal
     ~(max_num_decls : int)
@@ -260,5 +265,6 @@ let supports_eviction (t : t) : bool =
   | Analysis -> false
   | Local_memory _
   | Decl_service _
+  | Rust_provider_backend _
   | Shared_memory ->
     true

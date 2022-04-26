@@ -113,6 +113,7 @@ let get_class
       | None -> None
       | Some v -> Some (counter, v, Some ctx)
     end
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory
   | Provider_backend.Decl_service _ ->
     begin
@@ -157,6 +158,7 @@ let get_fun
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_fun fun_name)
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_fun fun_name) with
     | Some c -> Some c
@@ -219,6 +221,7 @@ let get_typedef
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c
@@ -281,6 +284,7 @@ let get_gconst
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_gconst gconst_name)
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_gconst gconst_name) with
     | Some c -> Some c
@@ -331,6 +335,7 @@ let prepare_for_typecheck
     unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory
   | Provider_backend.Local_memory _ ->
     ()
@@ -378,6 +383,7 @@ let get_module
   in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_module module_name)
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Option.first_some
       Decl_store.((get ()).get_module module_name)

@@ -212,7 +212,9 @@ let get_ast_with_error ?(full = false) ctx path =
        the file is open in the IDE, and so will benefit from a full AST at
        some time, so we might as well get it now. *)
     compute_ast_with_error ~popt:(Provider_context.get_popt ctx) ~entry
-  | (_, (Provider_backend.Analysis | Provider_backend.Shared_memory)) ->
+  | ( _,
+      ( Provider_backend.Analysis | Provider_backend.Rust_provider_backend _
+      | Provider_backend.Shared_memory ) ) ->
     (* Note that we might be looking up the shared ParserHeap directly, *)
     (* or maybe into a local-change-stack due to quarantine. *)
     begin
@@ -333,6 +335,7 @@ let provide_ast_hint
     : unit =
   match Provider_backend.get () with
   | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     ParserHeap.write_around path (program, parse_type)
   | Provider_backend.Local_memory _

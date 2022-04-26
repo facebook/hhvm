@@ -162,6 +162,8 @@ type t =
       decl: Decl_service_client.t;
       fixmes: Fixmes.t;
     }  (** Used by the hh_server rearchitecture (hh_decl/hh_worker) *)
+  | Rust_provider_backend of Rust_provider_backend.t
+      (** For the Rust port of Provider_backend and decl-folding logic (rupro/hackrs) *)
   | Analysis
 
 val t_to_string : t -> string
@@ -169,6 +171,8 @@ val t_to_string : t -> string
 val set_analysis_backend : unit -> unit
 
 val set_shared_memory_backend : unit -> unit
+
+val set_rust_backend : unit -> unit
 
 val set_local_memory_backend_with_defaults_for_test : unit -> unit
 

@@ -49,6 +49,7 @@ let add (ctx : Provider_context.t) (key : string) (value : Decl_defs.lin) : unit
     =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Cache.add key value
   | Provider_backend.Local_memory { Provider_backend.linearization_cache; _ } ->
@@ -62,6 +63,7 @@ let add (ctx : Provider_context.t) (key : string) (value : Decl_defs.lin) : unit
 let get (ctx : Provider_context.t) (key : string) : Decl_defs.lin option =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Cache.get key
   | Provider_backend.Local_memory { Provider_backend.linearization_cache; _ } ->

@@ -29,10 +29,12 @@ let naming_db_path_cache :
 let get_naming_db_path (backend : Provider_backend.t) :
     Naming_sqlite.db_path option =
   match (backend, !naming_db_path_cache) with
-  | ( (Provider_backend.Analysis | Provider_backend.Shared_memory),
+  | ( ( Provider_backend.Analysis | Provider_backend.Rust_provider_backend _
+      | Provider_backend.Shared_memory ),
       `Shmem_cached_path path_opt ) ->
     path_opt
-  | ( (Provider_backend.Analysis | Provider_backend.Shared_memory),
+  | ( ( Provider_backend.Analysis | Provider_backend.Rust_provider_backend _
+      | Provider_backend.Shared_memory ),
       `Shmem_not_yet_cached_path ) ->
     let path_opt = Shared_db_settings.get "database_path" in
     naming_db_path_cache := `Shmem_cached_path path_opt;
@@ -48,6 +50,7 @@ let set_naming_db_path
     (naming_db_path : Naming_sqlite.db_path option) : unit =
   match backend with
   | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Shared_db_settings.remove_batch (SSet.singleton "database_path");
     Option.iter naming_db_path ~f:(Shared_db_settings.add "database_path");

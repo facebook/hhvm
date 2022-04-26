@@ -1019,26 +1019,36 @@ and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
         Some (pos, Aast.Happly ((pos, "mixed"), []))
     | _ -> Aast.hint_of_type_hint h
   in
+  let strip_like h =
+    match h with
+    | Aast.Hlike h -> snd h
+    | _ -> h
+  in
   let hint_ =
     match hint_ with
-    | Some (p, Aast.Hoption _) ->
-      if is_required then
-        Errors.add_naming_error
-        @@ Naming_error.Xhp_optional_required_attr { pos = p; attr_name = id };
-      hint_
-    | Some (_, Aast.Happly ((_, "mixed"), [])) -> hint_
     | Some (p, h) ->
-      let has_default =
-        match default with
-        | None
-        | Some (_, _, Aast.Null) ->
-          false
-        | _ -> true
-      in
-      if is_required || has_default then
-        hint_
-      else
-        Some (p, Aast.Hoption (p, h))
+      begin
+        match strip_like h with
+        | Aast.Hoption _ ->
+          if is_required then
+            Errors.add_naming_error
+            @@ Naming_error.Xhp_optional_required_attr
+                 { pos = p; attr_name = id };
+          hint_
+        | Aast.Happly ((_, "mixed"), []) -> hint_
+        | _ ->
+          let has_default =
+            match default with
+            | None
+            | Some (_, _, Aast.Null) ->
+              false
+            | _ -> true
+          in
+          if is_required || has_default then
+            hint_
+          else
+            Some (p, Aast.Hoption (p, h))
+      end
     | None -> None
   in
   let (like, enum_values) =

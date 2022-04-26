@@ -350,11 +350,11 @@ module UserAttributes = struct
 
   let uaNoFlatten = "__NoFlatten"
 
-  (* <<__SafeGlobalVariable>> marks global variables as safe from mutations.
+  (* <<__SafeForGlobalWriteCheck>> marks global variables as safe from mutations.
      This attribute merely ensures that the global_write_check does NOT raise
      errors/warnings from writing to the annotated global variable, and it
      has NO runtime/semantic implication. *)
-  let uaSafeGlobalVariable = "__SafeGlobalVariable"
+  let uaSafeGlobalVariable = "__SafeForGlobalWriteCheck"
 
   let as_map =
     AttributeKinds.(

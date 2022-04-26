@@ -116,7 +116,7 @@ let get_static_prop_elts env class_id get =
 let rec is_expr_static env (_, _, te) =
   match te with
   | Class_get (class_id, expr, Is_prop) ->
-    (* Ignore static variables annotated with <<__SafeGlobalVariable>> *)
+    (* Ignore static variables annotated with <<__SafeForGlobalWriteCheck>> *)
     let class_elts = get_static_prop_elts env class_id expr in
     not (List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable)
   | Obj_get (e, _, _, Is_prop) -> is_expr_static env e
@@ -127,7 +127,7 @@ let rec is_expr_static env (_, _, te) =
 let rec is_expr_global env ctx (_, _, te) =
   match te with
   | Class_get (class_id, expr, Is_prop) ->
-    (* Ignore static variables annotated with <<__SafeGlobalVariable>> *)
+    (* Ignore static variables annotated with <<__SafeForGlobalWriteCheck>> *)
     let class_elts = get_static_prop_elts env class_id expr in
     not (List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable)
   | Lvar (_, id) ->

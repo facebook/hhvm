@@ -1485,7 +1485,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     "__SupportDynamicType" => {
                         attributes.support_dynamic_type = true;
                     }
-                    "__SafeGlobalVariable" => {
+                    "__SafeForGlobalWriteCheck" => {
                         attributes.safe_global_variable = true;
                     }
                     _ => {}

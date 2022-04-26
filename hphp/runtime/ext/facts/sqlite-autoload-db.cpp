@@ -388,21 +388,21 @@ struct TypeStmts {
             " AND path = @path"
             " AND attribute_name = @attribute_name")}
       , m_getTypesWithAttribute{db.prepare(
-            "SELECT name, path from type_details"
-            " JOIN all_paths USING (pathid)"
-            " WHERE EXISTS ("
-            "  SELECT * FROM type_attributes"
-            "   WHERE attribute_name = @attribute_name"
-            "   AND type_attributes.typeid=type_details.typeid"
-            " ) AND kind_of <> 'typeAlias'")}
+            "SELECT name, path FROM ("
+            " SELECT DISTINCT typeid FROM type_attributes"
+            " WHERE attribute_name = @attribute_name"
+            ")"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE kind_of <> 'typeAlias'")}
       , m_getTypeAliasesWithAttribute{db.prepare(
-            "SELECT name, path from type_details"
-            " JOIN all_paths USING (pathid)"
-            " WHERE EXISTS ("
-            "  SELECT * FROM type_attributes"
-            "   WHERE attribute_name = @attribute_name"
-            "   AND type_attributes.typeid=type_details.typeid"
-            " ) AND kind_of = 'typeAlias'")}
+            "SELECT name, path FROM ("
+            " SELECT DISTINCT typeid FROM type_attributes"
+            " WHERE attribute_name = @attribute_name"
+            ")"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE kind_of = 'typeAlias'")}
       , m_getMethodsInPath{db.prepare(
             "SELECT name, method, path FROM type_details"
             " JOIN method_attributes USING (typeid)"

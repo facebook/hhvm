@@ -17,6 +17,7 @@ use emit_unit::{emit_unit, FromAstFlags};
 use env::emitter::Emitter;
 use error::{Error, ErrorKind};
 use hhbc::{hackc_unit::HackCUnit, FatalOp};
+use hhvm_options::HhvmConfig;
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use options::{Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, RepoFlags};
@@ -118,12 +119,78 @@ impl FromOcamlRep for EnvFlags {
 }
 
 impl HHBCFlags {
+    pub fn from_hhvm_config(config: &HhvmConfig) -> Result<Self> {
+        let mut hhbc_options = Self::empty();
+
+        // Only ini version in use
+        if let Some(true) = config.get_bool("php7.ltr_assign")? {
+            hhbc_options |= Self::LTR_ASSIGN;
+        }
+        // Only ini version in use
+        if let Some(true) = config.get_bool("php7.uvs")? {
+            hhbc_options |= Self::UVS;
+        }
+        // Both variants in use
+        if let Some(true) = config.get_bool("Repo.Authoritative")? {
+            hhbc_options |= Self::AUTHORITATIVE;
+        }
+        // HDF uses both Eval.JitEnableRenameFunction and JitEnableRenameFunction
+        // ini only uses the hhvm.jit_enable_rename_function
+        if let Some(true) = config.get_bool("Eval.JitEnableRenameFunction")? {
+            hhbc_options |= Self::JIT_ENABLE_RENAME_FUNCTION;
+        }
+        if let Some(true) = config.get_bool("JitEnableRenameFunction")? {
+            hhbc_options |= Self::JIT_ENABLE_RENAME_FUNCTION;
+        }
+        // Only hdf version in use
+        if let Some(true) = config.get_bool("Eval.LogExternCompilerPerf")? {
+            hhbc_options |= Self::LOG_EXTERN_COMPILER_PERF;
+        }
+        // I think only the hdf is used correctly
+        if let Some(true) = config.get_bool("Eval.EnableIntrinsicsExtension")? {
+            hhbc_options |= Self::ENABLE_INTRINSICS_EXTENSION;
+        }
+        // Only the hdf versions used
+        if let Some(true) = config.get_bool("Eval.EmitClsMethPointers")? {
+            hhbc_options |= Self::EMIT_CLS_METH_POINTERS;
+        }
+        // Only the hdf versions used. Can kill variant in options_cli.rs
+        if config
+            .get_bool("Eval.EmitMethCallerFuncPointers")?
+            .unwrap_or(true)
+        {
+            hhbc_options |= Self::EMIT_METH_CALLER_FUNC_POINTERS;
+        }
+        // ini just uses hhvm.enable_implicit_context
+        // hdf uses Eval.EnableImplicitContext
+        if let Some(true) = config.get_bool("Eval.EnableImplicitContext")? {
+            hhbc_options |= Self::ENABLE_IMPLICIT_CONTEXT;
+        }
+        if let Some(true) = config.get_bool("enable_implicit_context")? {
+            hhbc_options |= Self::ENABLE_IMPLICIT_CONTEXT;
+        }
+        // ini might use hhvm.array_provenance
+        // hdf might use Eval.ArrayProvenance
+        // But super unclear here
+        if let Some(true) = config.get_bool("Eval.ArrayProvenance")? {
+            hhbc_options |= Self::ARRAY_PROVENANCE;
+        }
+        if let Some(true) = config.get_bool("array_provenance")? {
+            hhbc_options |= Self::ARRAY_PROVENANCE;
+        }
+        // Only hdf version
+        if config.get_bool("Eval.FoldLazyClassKeys")?.unwrap_or(true) {
+            hhbc_options |= Self::FOLD_LAZY_CLASS_KEYS;
+        }
+        Ok(hhbc_options)
+    }
+
     fn to_php7_flags(self) -> Php7Flags {
         let mut f = Php7Flags::empty();
-        if self.contains(HHBCFlags::UVS) {
+        if self.contains(Self::UVS) {
             f |= Php7Flags::UVS;
         }
-        if self.contains(HHBCFlags::LTR_ASSIGN) {
+        if self.contains(Self::LTR_ASSIGN) {
             f |= Php7Flags::LTR_ASSIGN;
         }
         f
@@ -131,28 +198,28 @@ impl HHBCFlags {
 
     fn to_hhvm_flags(self) -> HhvmFlags {
         let mut f = HhvmFlags::empty();
-        if self.contains(HHBCFlags::ARRAY_PROVENANCE) {
+        if self.contains(Self::ARRAY_PROVENANCE) {
             f |= HhvmFlags::ARRAY_PROVENANCE;
         }
-        if self.contains(HHBCFlags::EMIT_CLS_METH_POINTERS) {
+        if self.contains(Self::EMIT_CLS_METH_POINTERS) {
             f |= HhvmFlags::EMIT_CLS_METH_POINTERS;
         }
-        if self.contains(HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS) {
+        if self.contains(Self::EMIT_METH_CALLER_FUNC_POINTERS) {
             f |= HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS;
         }
-        if self.contains(HHBCFlags::ENABLE_INTRINSICS_EXTENSION) {
+        if self.contains(Self::ENABLE_INTRINSICS_EXTENSION) {
             f |= HhvmFlags::ENABLE_INTRINSICS_EXTENSION;
         }
-        if self.contains(HHBCFlags::FOLD_LAZY_CLASS_KEYS) {
+        if self.contains(Self::FOLD_LAZY_CLASS_KEYS) {
             f |= HhvmFlags::FOLD_LAZY_CLASS_KEYS;
         }
-        if self.contains(HHBCFlags::JIT_ENABLE_RENAME_FUNCTION) {
+        if self.contains(Self::JIT_ENABLE_RENAME_FUNCTION) {
             f |= HhvmFlags::JIT_ENABLE_RENAME_FUNCTION;
         }
-        if self.contains(HHBCFlags::LOG_EXTERN_COMPILER_PERF) {
+        if self.contains(Self::LOG_EXTERN_COMPILER_PERF) {
             f |= HhvmFlags::LOG_EXTERN_COMPILER_PERF;
         }
-        if self.contains(HHBCFlags::ENABLE_IMPLICIT_CONTEXT) {
+        if self.contains(Self::ENABLE_IMPLICIT_CONTEXT) {
             f |= HhvmFlags::ENABLE_IMPLICIT_CONTEXT;
         }
         f
@@ -160,7 +227,7 @@ impl HHBCFlags {
 
     fn to_repo_flags(self) -> RepoFlags {
         let mut f = RepoFlags::empty();
-        if self.contains(HHBCFlags::AUTHORITATIVE) {
+        if self.contains(Self::AUTHORITATIVE) {
             f |= RepoFlags::AUTHORITATIVE;
         }
         f
@@ -168,45 +235,99 @@ impl HHBCFlags {
 }
 
 impl ParserFlags {
+    pub fn from_hhvm_config(config: &HhvmConfig) -> Result<Self> {
+        let mut parser_options = ParserFlags::empty();
+        // Note: Could only find examples of Hack.Lang.AbstractStaticProps
+        if let Some(true) = config.get_bool("Hack.Lang.AbstractStaticProps")? {
+            parser_options |= ParserFlags::ABSTRACT_STATIC_PROPS;
+        }
+        // TODO: I'm pretty sure allow_new_attribute_syntax is dead and we can kill this option
+        if let Some(true) = config.get_bool("hack.lang.allow_new_attribute_syntax")? {
+            parser_options |= ParserFlags::ALLOW_NEW_ATTRIBUTE_SYNTAX;
+        }
+        // Both hdf and ini versions are being used
+        if let Some(true) = config.get_bool("Hack.Lang.AllowUnstableFeatures")? {
+            parser_options |= ParserFlags::ALLOW_UNSTABLE_FEATURES;
+        }
+        // TODO: could not find examples of const_default_func_args, kill it in options_cli.rs
+        if let Some(true) = config.get_bool("Hack.Lang.ConstDefaultFuncArgs")? {
+            parser_options |= ParserFlags::CONST_DEFAULT_FUNC_ARGS;
+        }
+        // Only hdf version found in use
+        if let Some(true) = config.get_bool("Hack.Lang.ConstStaticProps")? {
+            parser_options |= ParserFlags::CONST_STATIC_PROPS;
+        }
+        // TODO: Kill disable_lval_as_an_expression
+        // Only hdf option in use
+        if let Some(true) = config.get_bool("Hack.Lang.DisallowInstMeth")? {
+            parser_options |= ParserFlags::DISALLOW_INST_METH;
+        }
+        // Both ini and hdf variants in use
+        if let Some(true) = config.get_bool("Hack.Lang.DisableXHPElementMangling")? {
+            parser_options |= ParserFlags::DISABLE_XHP_ELEMENT_MANGLING;
+        }
+        // Both ini and hdf variants in use
+        if let Some(true) = config.get_bool("Hack.Lang.DisallowFunAndClsMethPseudoFuncs")? {
+            parser_options |= ParserFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS;
+        }
+        // Only hdf option in use
+        if let Some(true) = config.get_bool("Hack.Lang.DisallowFuncPtrsInConstants")? {
+            parser_options |= ParserFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS;
+        }
+        // Only hdf option in use
+        if let Some(true) = config.get_bool("Hack.Lang.EnableEnumClasses")? {
+            parser_options |= ParserFlags::ENABLE_ENUM_CLASSES;
+        }
+        // Both options in use
+        if let Some(true) = config.get_bool("Hack.Lang.EnableXHPClassModifier")? {
+            parser_options |= ParserFlags::ENABLE_XHP_CLASS_MODIFIER;
+        }
+        // Only hdf option in use. Kill variant in options_cli.rs
+        if let Some(true) = config.get_bool("Hack.Lang.EnableClassLevelWhereClauses")? {
+            parser_options |= ParserFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES;
+        }
+        Ok(parser_options)
+    }
+
     fn to_lang_flags(self) -> LangFlags {
         let mut f = LangFlags::empty();
-        if self.contains(ParserFlags::ABSTRACT_STATIC_PROPS) {
+        if self.contains(Self::ABSTRACT_STATIC_PROPS) {
             f |= LangFlags::ABSTRACT_STATIC_PROPS;
         }
-        if self.contains(ParserFlags::ALLOW_NEW_ATTRIBUTE_SYNTAX) {
+        if self.contains(Self::ALLOW_NEW_ATTRIBUTE_SYNTAX) {
             f |= LangFlags::ALLOW_NEW_ATTRIBUTE_SYNTAX;
         }
-        if self.contains(ParserFlags::ALLOW_UNSTABLE_FEATURES) {
+        if self.contains(Self::ALLOW_UNSTABLE_FEATURES) {
             f |= LangFlags::ALLOW_UNSTABLE_FEATURES;
         }
-        if self.contains(ParserFlags::CONST_DEFAULT_FUNC_ARGS) {
+        if self.contains(Self::CONST_DEFAULT_FUNC_ARGS) {
             f |= LangFlags::CONST_DEFAULT_FUNC_ARGS;
         }
-        if self.contains(ParserFlags::CONST_STATIC_PROPS) {
+        if self.contains(Self::CONST_STATIC_PROPS) {
             f |= LangFlags::CONST_STATIC_PROPS;
         }
-        if self.contains(ParserFlags::DISABLE_LVAL_AS_AN_EXPRESSION) {
+        if self.contains(Self::DISABLE_LVAL_AS_AN_EXPRESSION) {
             f |= LangFlags::DISABLE_LVAL_AS_AN_EXPRESSION;
         }
-        if self.contains(ParserFlags::DISALLOW_INST_METH) {
+        if self.contains(Self::DISALLOW_INST_METH) {
             f |= LangFlags::DISALLOW_INST_METH;
         }
-        if self.contains(ParserFlags::DISABLE_XHP_ELEMENT_MANGLING) {
+        if self.contains(Self::DISABLE_XHP_ELEMENT_MANGLING) {
             f |= LangFlags::DISABLE_XHP_ELEMENT_MANGLING;
         }
-        if self.contains(ParserFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS) {
+        if self.contains(Self::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS) {
             f |= LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS;
         }
-        if self.contains(ParserFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS) {
+        if self.contains(Self::DISALLOW_FUNC_PTRS_IN_CONSTANTS) {
             f |= LangFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS;
         }
-        if self.contains(ParserFlags::ENABLE_ENUM_CLASSES) {
+        if self.contains(Self::ENABLE_ENUM_CLASSES) {
             f |= LangFlags::ENABLE_ENUM_CLASSES;
         }
-        if self.contains(ParserFlags::ENABLE_XHP_CLASS_MODIFIER) {
+        if self.contains(Self::ENABLE_XHP_CLASS_MODIFIER) {
             f |= LangFlags::ENABLE_XHP_CLASS_MODIFIER;
         }
-        if self.contains(ParserFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES) {
+        if self.contains(Self::ENABLE_CLASS_LEVEL_WHERE_CLAUSES) {
             f |= LangFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES;
         }
         f

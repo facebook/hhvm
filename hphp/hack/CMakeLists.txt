@@ -213,10 +213,10 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
   set(FFI_BRIDGE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/${FFI_BRIDGE_DIR}")
   set(FFI_BRIDGE_BIN "${RUST_FFI_BUILD_ROOT}/hphp/hack/${FFI_BRIDGE_DIR}")
 
-  set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/${CMAKE_STATIC_LIBRARY_PREFIX}${NAME}_ffi${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/${NAME}_ffi.cpp")
-  set(RUST_PART_HEADER "${FFI_BRIDGE_BIN}/${NAME}_ffi.rs")
-  set(GENERATED "${FFI_BRIDGE_BIN}/cxxbridge/${NAME}_ffi/${NAME}_ffi")
+  set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/${CMAKE_STATIC_LIBRARY_PREFIX}${NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/${NAME}.cpp")
+  set(RUST_PART_HEADER "${FFI_BRIDGE_BIN}/${NAME}.rs")
+  set(GENERATED "${FFI_BRIDGE_BIN}/cxxbridge/${NAME}/${NAME}")
   set(GENERATED_CXXBRIDGE "${FFI_BRIDGE_BIN}/cxxbridge")
 
   add_custom_command(
@@ -224,7 +224,7 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
       COMMAND
         ${CMAKE_COMMAND} -E make_directory "${FFI_BRIDGE_BIN}" &&
         . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-        ${CARGO_BUILD} "${NAME}_ffi" "${NAME}_ffi" --cxx "${FFI_BRIDGE_BIN}" &&
+        ${CARGO_BUILD} "${NAME}" "${NAME}" --cxx "${FFI_BRIDGE_BIN}" &&
         ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.cc" "${RUST_PART_CXX}" &&
         ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.h" "${RUST_PART_HEADER}"
       WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
@@ -235,21 +235,34 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
     DEPENDS ${RUST_PART_CXX}
   )
 
-  add_library("${NAME}_ffi" STATIC ${RUST_PART_CXX} ${ARGN})
-  add_dependencies("${NAME}_ffi" rustc cargo "${NAME}_cxx")
-  add_dependencies(hack_rust_ffi_bridge_targets "${NAME}_ffi")
-  target_link_libraries("${NAME}_ffi" PUBLIC ${RUST_PART_LIB})
+  add_library("${NAME}" STATIC ${RUST_PART_CXX} ${ARGN})
+  add_dependencies("${NAME}" rustc cargo "${NAME}_cxx")
+  add_dependencies(hack_rust_ffi_bridge_targets "${NAME}")
+  target_link_libraries("${NAME}" PUBLIC ${RUST_PART_LIB})
   # `-iquote` is like `-I` (or target_include_directories()`), except:
   # - it takes precedence over `-I`
   # - it only applies to `#include "foo"`, not `#include <foo>`
-  target_compile_options("${NAME}_ffi" INTERFACE "-iquote" "${RUST_FFI_BUILD_ROOT}")
-  target_compile_options("${NAME}_ffi" PUBLIC "-iquote" "${GENERATED_CXXBRIDGE}")
+  target_compile_options("${NAME}" INTERFACE "-iquote" "${RUST_FFI_BUILD_ROOT}")
+  target_compile_options("${NAME}" PUBLIC "-iquote" "${GENERATED_CXXBRIDGE}")
 endfunction()
 
-build_cxx_bridge(parser "src/parser/ffi_bridge")
-build_cxx_bridge(compiler "src/hackc/ffi_bridge")
-build_cxx_bridge(hhvm_types "src/hackc/hhvm_cxx/hhvm_types" "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_types/as-base-ffi.cpp")
-build_cxx_bridge(hhvm_hhbc_defs "src/hackc/hhvm_cxx/hhvm_hhbc_defs" "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.cpp")
+build_cxx_bridge(parser_ffi "src/parser/ffi_bridge")
+build_cxx_bridge(compiler_ffi "src/hackc/ffi_bridge")
+build_cxx_bridge(
+  hdf
+  "src/utils/hdf"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/hdf/hdf-wrap.cpp"
+)
+build_cxx_bridge(
+  hhvm_types_ffi
+  "src/hackc/hhvm_cxx/hhvm_types"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_types/as-base-ffi.cpp"
+)
+build_cxx_bridge(
+ hhvm_hhbc_defs_ffi
+ "src/hackc/hhvm_cxx/hhvm_hhbc_defs"
+ "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.cpp"
+)
 
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)

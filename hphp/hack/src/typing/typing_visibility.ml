@@ -151,17 +151,12 @@ let check_classname_access ~use_pos ~in_signature env cls =
     (Cls.get_module cls)
 
 let check_typedef_access ~use_pos ~in_signature env td =
-  let internal =
-    match td.td_vis with
-    | Tinternal -> true
-    | _ -> false
-  in
   check_internal_access
     ~use_pos
     ~in_signature
     ~def_pos:td.td_pos
     env
-    internal
+    td.td_internal
     (Option.map td.td_module ~f:snd)
 
 let is_visible_for_obj ~is_method env vis =

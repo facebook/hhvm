@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f1c06eea5c67d1a3df754c96923bffc7>>
+// @generated SignedSource<<c88336921c230c12cdc82440e0ad00e2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1071,6 +1071,7 @@ impl<'a> Node<'a> for TypedefType<'a> {
                 type_: ref __binding_5,
                 is_ctx: ref __binding_6,
                 attributes: ref __binding_7,
+                internal: ref __binding_8,
             } => {
                 {
                     __binding_0.accept(v)
@@ -1093,7 +1094,10 @@ impl<'a> Node<'a> for TypedefType<'a> {
                 {
                     __binding_6.accept(v)
                 }
-                { __binding_7.accept(v) }
+                {
+                    __binding_7.accept(v)
+                }
+                { __binding_8.accept(v) }
             }
         }
     }
@@ -1106,7 +1110,6 @@ impl<'a> Node<'a> for TypedefVisibility {
         match self {
             TypedefVisibility::Transparent => {}
             TypedefVisibility::Opaque => {}
-            TypedefVisibility::Tinternal => {}
         }
     }
 }

@@ -104,6 +104,7 @@ class virtual type_validator =
             td_constraint;
             td_is_ctx = _;
             td_attributes = _;
+            td_internal = _;
           } =
             td
           in

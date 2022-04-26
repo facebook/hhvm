@@ -603,10 +603,7 @@ let is_typedef_visible env ?(expand_visible_newtype = true) td =
     && Relative_path.equal
          (Pos.filename (Pos_or_decl.unsafe_to_raw_pos td_pos))
          (get_file env)
-  | Aast.Transparent
-  (* Internal types are not opaque, but they may be inaccessible altogether *)
-  | Aast.Tinternal ->
-    true
+  | Aast.Transparent -> true
 
 let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =
   let res =

@@ -36,6 +36,11 @@ function g(): void {
   $x = 1 as TyNew; // ok
 }
 
+internal function k(Ty $x, TyNew $y): void {
+  $z = $x + 5; // ok
+  $z = $y + 6; // ok
+}
+
 
 //// B.php
 <?hh
@@ -53,3 +58,11 @@ function h_new(TyNew $x): void {} // error
 function j(Ty $x): void {} // error
 
 function j_new(TyNew $x): void {} // error
+
+//// still-A.php
+<?hh
+<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+internal function k2(Ty $x, TyNew $y): void {
+  $z = $x + 5; // ok
+  $z = $y + 6; // error, opaque outside of file level type alias
+}

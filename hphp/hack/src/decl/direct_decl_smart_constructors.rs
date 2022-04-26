@@ -3059,20 +3059,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let typedef = self.alloc(TypedefType {
             module: parsed_attributes.module,
             pos,
-            vis: if internal {
-                aast::TypedefVisibility::Tinternal
-            } else {
-                match keyword.token_kind() {
-                    Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
-                    Some(TokenKind::Newtype) => aast::TypedefVisibility::Opaque,
-                    _ => aast::TypedefVisibility::Transparent,
-                }
+            vis: match keyword.token_kind() {
+                Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
+                Some(TokenKind::Newtype) => aast::TypedefVisibility::Opaque,
+                _ => aast::TypedefVisibility::Transparent,
             },
             tparams,
             constraint,
             type_: ty,
             is_ctx: false,
             attributes: user_attributes,
+            internal,
         });
 
         self.add_typedef(name, typedef);
@@ -3140,6 +3137,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             type_: ty,
             is_ctx: true,
             attributes: user_attributes,
+            internal: false,
         });
 
         self.add_typedef(name, typedef);

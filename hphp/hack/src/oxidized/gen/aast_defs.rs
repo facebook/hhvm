@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c71598795c69fe040196f26f6dc8749a>>
+// @generated SignedSource<<711c0d350303e5270c59d81eef86bea1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -428,7 +428,6 @@ arena_deserializer::impl_deserialize_in_arena!(VcKind);
 pub enum TypedefVisibility {
     Transparent,
     Opaque,
-    Tinternal,
 }
 impl TrivialDrop for TypedefVisibility {}
 arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);

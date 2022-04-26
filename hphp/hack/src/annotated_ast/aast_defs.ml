@@ -174,7 +174,6 @@ and vc_kind =
 and typedef_visibility =
   | Transparent
   | Opaque
-  | Tinternal
 
 and enum_ = {
   e_base: hint;

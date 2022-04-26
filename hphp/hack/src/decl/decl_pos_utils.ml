@@ -303,6 +303,7 @@ struct
       td_type = ty tdef.td_type;
       td_is_ctx = tdef.td_is_ctx;
       td_attributes = List.map tdef.td_attributes ~f:user_attribute;
+      td_internal = tdef.td_internal;
     }
 
   and shallow_class sc =

@@ -158,14 +158,6 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   let td_type = Decl_hint.hint env concrete_type in
   let td_constraint = Option.map tcstr ~f:(Decl_hint.hint env) in
   let td_pos = Decl_env.make_decl_pos env name_pos in
-  let td_vis =
-    (* TODO: this is incorrect, should be orthogonal in decl instead of a visibility
-       matching existing behavior for keyword change and fixing bug after *)
-    if td_internal then
-      Tinternal
-    else
-      td_vis
-  in
   let td_module =
     Naming_attributes_params.get_module_attribute t_file_attributes
   in
@@ -183,6 +175,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     td_pos;
     td_is_ctx;
     td_attributes;
+    td_internal;
   }
 
 let typedef_naming_and_decl_DEPRECATED

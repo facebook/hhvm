@@ -205,6 +205,7 @@ type typedef_type = {
   td_type: decl_ty;
   td_is_ctx: bool;
   td_attributes: user_attribute list;
+  td_internal: bool;
 }
 [@@deriving show]
 

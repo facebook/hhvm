@@ -241,24 +241,6 @@ let is_final_and_not_contravariant env id =
   | Some class_ty -> TUtils.class_is_final_and_not_contravariant class_ty
   | None -> false
 
-(** Make all types appearing in the given type a Tany, e.g.
-    - for A<B> return A<_>
-    - for function(A): B return function (_): _
-    *)
-let anyfy env r ty =
-  let anyfyer =
-    object
-      inherit Type_mapper.deep_type_mapper as super
-
-      method! on_type env _ty = (env, mk (r, Typing_defs.make_tany ()))
-
-      method go ty =
-        let (_, ty) = super#on_type env ty in
-        ty
-    end
-  in
-  anyfyer#go ty
-
 let is_tprim_disjoint tp1 tp2 =
   let one_side tp1 tp2 =
     Aast_defs.(
@@ -802,12 +784,11 @@ and default_subtype
             lty_super
             env
           |> if_unsat (invalid ~fail)
-        | (r_sub, Tany _) ->
+        | (_, Tany _) ->
           if subtype_env.no_top_bottom then
             default env
           else
-            let ty_sub = anyfy env r_sub lty_super in
-            simplify_subtype ~subtype_env ~this_ty ty_sub lty_super env
+            valid env
         | _ -> default_subtype_inner env ty_sub ty_super
       end)
   | ConstraintType _ -> default_subtype_inner env ty_sub ty_super
@@ -1964,7 +1945,7 @@ and simplify_subtype_i
         | ((_, Toption arg_ty_sub), Nast.Tnull) ->
           simplify_subtype ~subtype_env ~this_ty arg_ty_sub ty_super env
         | (_, _) -> default_subtype env))
-    | (r_super, Tany _) ->
+    | (_, Tany _) ->
       (match ety_sub with
       | ConstraintType cty ->
         begin
@@ -1977,18 +1958,7 @@ and simplify_subtype_i
         | (_, Tany _) -> valid env
         | (_, (Tunion _ | Tintersection _ | Tvar _)) -> default_subtype env
         | _ when subtype_env.no_top_bottom -> default env
-        (* If ty_sub contains other types, e.g. C<T>, make this a subtype assertion on
-            those inner types and `any`. For example transform the assertion
-              C<D> <: Tany
-            into
-              C<D> <: C<Tany>
-            which might become
-              D <: Tany
-            if say C is covariant.
-        *)
-        | _ ->
-          let ty_super = anyfy env r_super ty_sub in
-          simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env))
+        | _ -> valid env))
     | (r_super, Tfun ft_super) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env

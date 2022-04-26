@@ -49,3 +49,13 @@ impl Bop {
         }
     }
 }
+
+impl Variance {
+    pub fn negate(&self) -> Self {
+        match self {
+            Variance::Covariant => Variance::Contravariant,
+            Variance::Contravariant => Variance::Covariant,
+            Variance::Invariant => Variance::Invariant,
+        }
+    }
+}

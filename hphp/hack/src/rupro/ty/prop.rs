@@ -4,18 +4,34 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod constraint;
 
-use crate::local::Ty;
+use crate::local::{Ty, Tyvar};
 use crate::local_error::TypingError;
 use crate::reason::Reason;
 pub use constraint::Cstr;
 use hcons::{Conser, Hc};
+use im::HashSet;
+use oxidized::ast_defs::Variance;
+use pos::TypeName;
 use std::ops::Deref;
 
-/// TODO[mjt] Consider making constraints types
+/// TODO[mjt] Consider making 'constraints' 'types' to avoid this
+/// or maybe rethink the inference env entirely
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum CstrTy<R: Reason> {
     Locl(Ty<R>),
     Cstr(Cstr<R>),
+}
+
+impl<R: Reason> CstrTy<R> {
+    pub fn tyvars<F>(&self, get_tparam_variance: &F) -> (HashSet<Tyvar>, HashSet<Tyvar>)
+    where
+        F: Fn(&TypeName) -> Option<Vec<Variance>>,
+    {
+        match self {
+            CstrTy::Locl(ty) => ty.tyvars(get_tparam_variance),
+            CstrTy::Cstr(cstr) => cstr.tyvars(get_tparam_variance),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

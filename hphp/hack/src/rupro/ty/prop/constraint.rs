@@ -9,9 +9,11 @@
 
 #![allow(dead_code)]
 
-use crate::local::Ty;
+use crate::local::{Ty, Tyvar};
 use crate::reason::Reason;
-use pos::Symbol;
+use im::HashSet;
+use oxidized::ast_defs::Variance;
+use pos::{Symbol, TypeName};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Cstr<R: Reason> {
@@ -51,5 +53,14 @@ impl<R: Reason> Cstr<R> {
 
     pub fn has_prop(name: Symbol, ty: Ty<R>, class_id: Symbol) -> Self {
         Self::HasProp { name, ty, class_id }
+    }
+
+    pub fn tyvars<F>(&self, get_tparam_variance: &F) -> (HashSet<Tyvar>, HashSet<Tyvar>)
+    where
+        F: Fn(&TypeName) -> Option<Vec<Variance>>,
+    {
+        match self {
+            Cstr::HasMethod { ty, .. } | Cstr::HasProp { ty, .. } => ty.tyvars(get_tparam_variance),
+        }
     }
 }

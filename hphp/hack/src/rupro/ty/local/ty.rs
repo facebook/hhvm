@@ -7,7 +7,9 @@ pub use crate::decl::ty::{Exact, Prim};
 use crate::local::tyvar::Tyvar;
 use crate::reason::Reason;
 use hcons::Hc;
+use im::HashSet;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
+use oxidized::ast_defs::Variance;
 use pos::{Positioned, Symbol, ToOxidized, TypeName};
 use std::ops::Deref;
 
@@ -196,6 +198,72 @@ impl<R: Reason> Ty<R> {
     pub fn node(&self) -> &Hc<Ty_<R, Ty<R>>> {
         &self.1
     }
+
+    pub fn tyvars<F>(&self, get_tparam_variance: F) -> (HashSet<Tyvar>, HashSet<Tyvar>)
+    where
+        F: Fn(&TypeName) -> Option<Vec<Variance>>,
+    {
+        let mut covs = HashSet::default();
+        let mut contravs = HashSet::default();
+        self.tyvars_help(
+            Variance::Covariant,
+            &mut covs,
+            &mut contravs,
+            &get_tparam_variance,
+        );
+        (covs, contravs)
+    }
+
+    fn tyvars_help<F>(
+        &self,
+        variance: Variance,
+        covs: &mut HashSet<Tyvar>,
+        contravs: &mut HashSet<Tyvar>,
+        get_tparam_variance: &F,
+    ) where
+        F: Fn(&TypeName) -> Option<Vec<Variance>>,
+    {
+        match self.deref() {
+            Ty_::Tvar(tv) => match variance {
+                Variance::Covariant => {
+                    covs.insert(*tv);
+                }
+                Variance::Contravariant => {
+                    contravs.insert(*tv);
+                }
+                Variance::Invariant => {
+                    covs.insert(*tv);
+                    contravs.insert(*tv);
+                }
+            },
+            Ty_::Toption(ty) => ty.tyvars_help(variance, covs, contravs, get_tparam_variance),
+            Ty_::Tunion(tys) => tys
+                .iter()
+                .for_each(|ty| ty.tyvars_help(variance, covs, contravs, get_tparam_variance)),
+            Ty_::Tfun(ft) => {
+                for fp in &ft.params {
+                    // TODO[mjt] handle inout params when we have them
+                    // for now treat all contravariantly
+                    fp.ty
+                        .tyvars_help(variance.negate(), covs, contravs, get_tparam_variance);
+                }
+                ft.ret
+                    .tyvars_help(variance, covs, contravs, get_tparam_variance)
+            }
+            Ty_::Tclass(cn, _, typarams) if !typarams.is_empty() => {
+                if let Some(vars) = get_tparam_variance(&cn.id()) {
+                    typarams.iter().zip(vars.iter()).for_each(|(tp, variance)| {
+                        tp.tyvars_help(*variance, covs, contravs, get_tparam_variance)
+                    })
+                }
+            }
+            Ty_::Tclass(_, _, _)
+            | Ty_::Tgeneric(_, _)
+            | Ty_::Tany
+            | Ty_::Tnonnull
+            | Ty_::Tprim(_) => {}
+        }
+    }
 }
 
 impl<R: Reason> Deref for Ty<R> {
@@ -273,5 +341,69 @@ impl<R: Reason> ToOcamlRep for Ty<R> {
             >(&ty)
         };
         ty.to_ocamlrep(alloc)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::reason::NReason;
+    use pos::{NPos, Pos};
+    use utils::core::IdentGen;
+
+    #[test]
+    fn test_non_var() {
+        let ty_int = Ty::int(NReason::none());
+        let (covs, contravs) = ty_int.tyvars(|_| None);
+        assert!(covs.is_empty());
+        assert!(contravs.is_empty());
+    }
+
+    #[test]
+    fn test_var() {
+        let gen = IdentGen::new();
+        let tv0: Tyvar = gen.make().into();
+        let ty_v0 = Ty::var(NReason::none(), tv0.clone());
+        let (covs, contravs) = ty_v0.tyvars(|_| None);
+        assert!(covs.contains(&tv0));
+        assert!(contravs.is_empty());
+    }
+
+    #[test]
+    fn test_fn_ty() {
+        let gen = IdentGen::new();
+        let tv0: Tyvar = gen.make().into();
+        let tv1: Tyvar = gen.make().into();
+        let tv2: Tyvar = gen.make().into();
+
+        let params = vec![FunParam {
+            pos: NPos::none(),
+            name: None,
+            ty: Ty::var(NReason::none(), tv0.clone()),
+        }];
+        let ret = Ty::var(NReason::none(), tv1.clone());
+
+        // #0 -> #1
+        let ty_fn1 = Ty::fun(NReason::none(), FunType { params, ret });
+        let (covs, contravs) = ty_fn1.tyvars(|_| None);
+        assert!(covs.contains(&tv1));
+        assert!(contravs.contains(&tv0));
+
+        // (#0 -> #1) -> #2
+        let ty_fn2 = Ty::fun(
+            NReason::none(),
+            FunType {
+                params: vec![FunParam {
+                    pos: NPos::none(),
+                    name: None,
+                    ty: ty_fn1,
+                }],
+                ret: Ty::var(NReason::none(), tv2.clone()),
+            },
+        );
+        let (covs, contravs) = ty_fn2.tyvars(|_| None);
+        assert!(covs.contains(&tv0));
+        assert!(covs.contains(&tv2));
+        assert!(contravs.contains(&tv1));
     }
 }

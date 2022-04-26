@@ -990,12 +990,7 @@ module Primary = struct
       (Error_code.ReadonlyException, claim, lazy [], [])
 
     let explicit_readonly_cast pos decl_pos kind =
-      let (start_line, start_column) = Pos.line_column pos in
-      (* Create a zero-width position at the start of the offending
-         expression, so we can insert text without overwriting anything. *)
-      let qf_pos =
-        pos |> Pos.set_line_end start_line |> Pos.set_col_end start_column
-      in
+      let qf_pos = Pos.shrink_to_start pos in
       let quickfixes =
         [Quickfix.make ~title:"Insert `readonly`" ~new_text:"readonly " qf_pos]
       in
@@ -3158,8 +3153,7 @@ module Primary = struct
   let inout_annotation_missing pos1 pos2 =
     let claim = lazy (pos1, "This argument should be annotated with `inout`") in
     let reason = lazy [(pos2, "Because this is an `inout` parameter")] in
-    let (_, start_column) = Pos.line_column pos1 in
-    let pos = Pos.set_col_end start_column pos1 in
+    let pos = Pos.shrink_to_start pos1 in
 
     ( Error_code.InoutAnnotationMissing,
       claim,
@@ -4396,12 +4390,10 @@ module Primary = struct
       [] )
 
   let unbound_name_typing pos name class_exists =
-    let (_, start_column) = Pos.line_column pos in
-
     let quickfixes =
       match class_exists with
       | true ->
-        let newpos = Pos.set_col_end start_column pos in
+        let newpos = Pos.shrink_to_start pos in
         [
           Quickfix.make
             ~title:("Add " ^ Markdown_lite.md_codify "new")

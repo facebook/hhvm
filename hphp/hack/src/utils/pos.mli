@@ -141,7 +141,8 @@ val compare : t -> t -> int
 
 val set_file : 'a -> 'b pos -> 'a pos
 
-val set_line_end : int -> 'a pos -> 'a pos
+(* Return a zero-width position that occurs at the start of input position. *)
+val shrink_to_start : 'a pos -> 'a pos
 
 val set_col_start : int -> 'a pos -> 'a pos
 

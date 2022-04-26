@@ -1,11 +1,11 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 mod hhvm_config;
 
-use anyhow::anyhow;
+use anyhow::{anyhow, Result};
 use clap::Parser;
-use hdf::IniLine;
-use hhvm_config::HhvmConfig;
 use std::{ffi::OsStr, path::PathBuf};
+
+pub use hhvm_config::*;
 
 // Define HHVM-compatible options, as best as we can with structopt.
 #[derive(Debug, Default, Parser)]
@@ -46,49 +46,27 @@ impl HhvmOptions {
         self.config_files.is_empty() && self.hdf_values.is_empty() && self.ini_values.is_empty()
     }
 
-    pub fn to_config(&self) -> anyhow::Result<HhvmConfig> {
-        let mut hdf_config = hdf::Value::new();
-        let mut ini_config = hdf::Value::new();
+    pub fn to_config(&self) -> Result<HhvmConfig> {
+        let mut hdf_config = hdf::Value::default();
+        let mut ini_config = hdf::Value::default();
 
         for path in &self.config_files {
             let ext = path.extension();
             if ext == Some(OsStr::new("hdf")) {
-                // ISSUE: The runtime will ignore these.
                 hdf_config = hdf::Value::from_file(path)?;
                 hdf_config =
                     hhvm_runtime_options::runtime_options::apply_tier_overrides(hdf_config)?;
             } else if ext == Some(OsStr::new("ini")) {
-                // ISSUE: The runtime will process these but we should too.
-                // ISSUE: Once we process these, perhaps we should just pass
-                // down the resulting "-dKEY=VAL" options to the runtime, and
-                // then we could delete some complex "core" runtime code.
-                // Obviously this would also require "hnx" support too.
                 ini_config = hdf::Value::from_ini_file(path)?;
             } else {
                 return Err(anyhow!("{}: Unknown config file format", path.display(),));
             }
         }
         for opt in &self.hdf_values {
-            match IniLine::parse(opt) {
-                Err(_) | Ok(IniLine::Empty | IniLine::Section(_)) => {}
-                Ok(IniLine::Key(_)) => {
-                    // Silently ignored.
-                }
-                Ok(IniLine::KeyValue(k, v)) => {
-                    hdf_config.set(k, v.into());
-                }
-            }
+            hdf_config.set_hdf(opt)?;
         }
         for opt in &self.ini_values {
-            match IniLine::parse(opt) {
-                Err(_) | Ok(IniLine::Empty | IniLine::Section(_)) => {}
-                Ok(IniLine::Key(k)) => {
-                    ini_config.set(k, "".into());
-                }
-                Ok(IniLine::KeyValue(k, v)) => {
-                    ini_config.set(k, v.into());
-                }
-            }
+            ini_config.set_ini(opt)?;
         }
 
         Ok(HhvmConfig {
@@ -272,6 +250,6 @@ pub struct HphpOptions {
 /// Parse strings that are convertible to bool. Currently:
 /// true, false => bool
 /// int => nonzero means true
-fn parse_boolish(s: &str) -> std::result::Result<bool, std::num::ParseIntError> {
+fn parse_boolish(s: &str) -> Result<bool, std::num::ParseIntError> {
     s.parse::<bool>().or_else(|_| Ok(s.parse::<i64>()? != 0))
 }

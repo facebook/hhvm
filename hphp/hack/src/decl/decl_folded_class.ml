@@ -552,7 +552,7 @@ let typeconst_structure
     match stc.stc_kind with
     | TCAbstract { atc_default = default; _ } ->
       CCAbstract (Option.is_some default)
-    | _ -> CCConcrete
+    | TCConcrete _ -> CCConcrete
   in
   {
     cc_abstract = abstract;

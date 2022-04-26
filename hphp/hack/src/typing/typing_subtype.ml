@@ -2181,8 +2181,11 @@ and simplify_subtype_i
             env |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super'
           | _ -> default_subtype env)
         | (_, Tnewtype (enum_name, _, _))
-          when (String.equal enum_name class_name && Env.is_enum env enum_name)
-               || String.equal class_name SN.Classes.cXHPChild ->
+          when String.equal enum_name class_name && Env.is_enum env enum_name ->
+          valid env
+        | (_, Tnewtype (enum_name, _, _))
+          when Env.is_enum env enum_name
+               && String.equal class_name SN.Classes.cXHPChild ->
           valid env
         | (_, Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum))
           when String.equal class_name SN.Classes.cXHPChild

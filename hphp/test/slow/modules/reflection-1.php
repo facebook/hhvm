@@ -1,6 +1,7 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module("B")>>
+<<file:__EnableUnstableFeatures('modules')>>
+module B;
 
 class C {
   function f() {}

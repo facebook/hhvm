@@ -1,5 +1,6 @@
 <?hh
-<<file:__EnableUnstableFeatures("modules"), __Module("foo")>>
+<<file:__EnableUnstableFeatures("modules")>>
+module foo;
 internal abstract class Foo {
   internal function foo(): void {}
   internal abstract function bar(): void {}

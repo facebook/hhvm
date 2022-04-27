@@ -7,7 +7,8 @@ new module B {}
 //// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 
 class A {
   public function pub(): void {}
@@ -31,7 +32,8 @@ class A3 extends A {
 //// B.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module B;
 
 class B extends A {
   <<__Override>>

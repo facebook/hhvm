@@ -7,7 +7,8 @@ new module A {}
 //// A.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 
 internal class Bing {}
 
@@ -38,7 +39,8 @@ internal trait InternalCaller {
 //// also-A.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 
 internal trait Quuz {
   internal function lol(): void {}

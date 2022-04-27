@@ -7,7 +7,8 @@ new module Y {}
 //// X.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('X')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module X;
 
 internal enum X: int {
   A = 0;
@@ -31,7 +32,8 @@ function f6(): void {
 //// Y.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('Y')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module Y;
 
 function f3(X $x): void {} // error
 

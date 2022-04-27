@@ -8,7 +8,8 @@ new module B {}
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 
 internal type Ty = int;
 
@@ -46,7 +47,8 @@ internal function k(Ty $x, TyNew $y): void {
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module B;
 
 function h(Ty $x): void {} // error
 
@@ -61,7 +63,8 @@ function j_new(TyNew $x): void {} // error
 
 //// still-A.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 internal function k2(Ty $x, TyNew $y): void {
   $z = $x + 5; // ok
   $z = $y + 6; // error, opaque outside of file level type alias

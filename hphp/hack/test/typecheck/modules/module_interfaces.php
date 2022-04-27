@@ -7,7 +7,8 @@ new module B {}
 //// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 
 internal interface A {}
 
@@ -21,7 +22,8 @@ interface A3 {
 //// B.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module B;
 
 class B implements A {} // Bad
 

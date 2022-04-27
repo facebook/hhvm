@@ -7,7 +7,8 @@ new module B {}
 
 //// A.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module("A")>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 
 internal function a(): void {}
 
@@ -16,7 +17,8 @@ function a2(): void { a(); /* ok */ }
 //// B.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module("B")>>
+<<file:__EnableUnstableFeatures('modules')>>
+module B;
 
 function b(): void { a(); /* error */ }
 

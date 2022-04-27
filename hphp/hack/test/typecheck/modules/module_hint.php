@@ -7,7 +7,8 @@ new module there {}
 //// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('here')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module here;
 
 internal class C {
   public function bar(mixed $m):void {
@@ -32,7 +33,8 @@ internal class C {
 //// there.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('there')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module there;
 
 internal class D {
 }

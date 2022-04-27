@@ -1,6 +1,7 @@
 //// file1.php
 <?hh
-<<file:__EnableUnstableFeatures("modules"), __Module("foo")>>
+<<file:__EnableUnstableFeatures("modules")>>
+module foo;
 new module foo {}
 class Foo {
   internal function bar(): void {}

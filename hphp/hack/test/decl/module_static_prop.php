@@ -9,7 +9,8 @@ new module B {}
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 
 class A {
   internal static int $x = 0;
@@ -25,9 +26,10 @@ function a(): void {
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module B;
 
-<<__Module("B")>>
+
 function b(): void {
   A::$x = 1;
 }

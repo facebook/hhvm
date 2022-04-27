@@ -45,23 +45,8 @@ pub fn emit_module_use_from_program<'arena, 'decl>(
     prog: &[ast::Def],
 ) -> Maybe<Str<'arena>> {
     for node in prog.iter() {
-        // TODO T115356820: This is temporary until parser support is added
-        if let ast::Def::FileAttributes(fa) = node {
-            for attr in fa.user_attributes.iter() {
-                if attr.name.1 == "__Module" {
-                    match attr.params[..] {
-                        [ast::Expr(_, _, ast::Expr_::String(ref ctx))] => {
-                            return Maybe::Just(Str::new_str(
-                                e.alloc,
-                                // FIXME: This is not safe--string literals are binary strings.
-                                // There's no guarantee that they're valid UTF-8.
-                                unsafe { std::str::from_utf8_unchecked(ctx.as_slice()) },
-                            ));
-                        }
-                        _ => continue,
-                    }
-                }
-            }
+        if let ast::Def::SetModule(s) = node {
+            return Maybe::Just(Str::new_str(e.alloc, &*s.1));
         }
     }
     Maybe::Nothing

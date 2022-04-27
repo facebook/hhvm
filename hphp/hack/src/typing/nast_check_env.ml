@@ -37,8 +37,7 @@ let fun_def_env env fd =
   {
     (fun_env env fd.fd_fun) with
     file_mode = fd.fd_mode;
-    module_ =
-      Naming_attributes_params.get_module_attribute fd.fd_file_attributes;
+    module_ = fd.fd_module;
   }
 
 let method_env env m =
@@ -50,15 +49,10 @@ let class_env env c =
     classish_kind = Some c.c_kind;
     class_name = Some (snd c.c_name);
     file_mode = c.c_mode;
-    module_ = Naming_attributes_params.get_module_attribute c.c_file_attributes;
+    module_ = c.c_module;
   }
 
-let typedef_env env t =
-  {
-    env with
-    file_mode = t.t_mode;
-    module_ = Naming_attributes_params.get_module_attribute t.t_file_attributes;
-  }
+let typedef_env env t = { env with file_mode = t.t_mode; module_ = t.t_module }
 
 let get_empty_env ctx =
   {

@@ -8,7 +8,8 @@ new module there {}
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module('here')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module here;
 
 internal class C {
   public function bar():void { }
@@ -41,7 +42,8 @@ internal class E extends C {} // Ok!
 //// there.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('there')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module there;
 
 class F extends C {} // Bad!
 

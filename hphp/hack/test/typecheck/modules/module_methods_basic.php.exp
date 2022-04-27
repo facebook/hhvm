@@ -1,12 +1,12 @@
-File "module_methods_basic.php--B.php", line 7, characters 9-9:
+File "module_methods_basic.php--B.php", line 8, characters 9-9:
 You cannot access internal members from module `A` in module `B` (Typing[4112])
-  File "module_methods_basic.php--A.php", line 6, characters 21-21:
+  File "module_methods_basic.php--A.php", line 7, characters 21-21:
   This member is internal
-File "module_methods_basic.php--B.php", line 11, characters 30-30:
+File "module_methods_basic.php--B.php", line 12, characters 30-30:
 You cannot access internal members from module `A` in module `B` (Typing[4112])
-  File "module_methods_basic.php--A.php", line 6, characters 21-21:
+  File "module_methods_basic.php--A.php", line 7, characters 21-21:
   This member is internal
 File "module_methods_basic.php--main.php", line 2, characters 33-33:
 You cannot access internal members outside of a module (Typing[4112])
-  File "module_methods_basic.php--A.php", line 6, characters 21-21:
+  File "module_methods_basic.php--A.php", line 7, characters 21-21:
   This member is internal

@@ -7,7 +7,8 @@ new module D {}
 
 //// A.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 
 abstract class A {
  internal function foobar(): void {}
@@ -34,7 +35,8 @@ class C extends A {
 
 //// D.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module('D')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module D;
 
 class D extends A {
     // Not OK

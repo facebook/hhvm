@@ -12,13 +12,15 @@ new module A {}
 
 //// base-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 function foo(): void {}
 
 //// changed-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 internal function foo(): void {}
 //// base-foo-use.php
@@ -36,7 +38,8 @@ function call_foo(): void {
 }
 //// base-foo-use-in-module.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 function call_foo_in_module(): void {
   foo();
@@ -44,7 +47,8 @@ function call_foo_in_module(): void {
 
 //// changed-foo-use-in-module.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 function call_foo_in_module(): void {
   foo();

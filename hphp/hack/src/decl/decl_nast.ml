@@ -36,9 +36,7 @@ and fun_decl (ctx : Provider_context.t) (f : Nast.fun_def) : Typing_defs.fun_elt
     =
   let dep = Dep.Fun (snd f.fd_fun.f_name) in
   let env = { Decl_env.mode = f.fd_mode; droot = Some dep; ctx } in
-  let module_ =
-    Naming_attributes_params.get_module_attribute f.fd_file_attributes
-  in
+  let module_ = f.fd_module in
   fun_decl_in_env
     env
     ~is_lambda:false
@@ -139,7 +137,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     t_constraint = tcstr;
     t_kind = concrete_type;
     t_user_attributes;
-    t_file_attributes;
+    t_file_attributes = _;
     t_namespace = _;
     t_mode = mode;
     t_vis = td_vis;
@@ -148,7 +146,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     t_is_ctx = td_is_ctx;
     t_internal = td_internal;
     (* We'll consume this in the next diff *)
-    t_module = _;
+    t_module = td_module;
   } =
     tdef
   in
@@ -158,9 +156,6 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   let td_type = Decl_hint.hint env concrete_type in
   let td_constraint = Option.map tcstr ~f:(Decl_hint.hint env) in
   let td_pos = Decl_env.make_decl_pos env name_pos in
-  let td_module =
-    Naming_attributes_params.get_module_attribute t_file_attributes
-  in
   let td_attributes =
     List.map
       t_user_attributes

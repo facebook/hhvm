@@ -14,7 +14,8 @@ namespace {
 //// foo.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('foo')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module foo;
 
 namespace Bing {
   // TODO(T108206307) You _need_ a top level symbol to attach a new module to in order
@@ -25,7 +26,8 @@ namespace Bing {
 //// bar.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('bar')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module bar;
 
 function g(): void {
   Bing\f(); // Not an error, demonstrates that modules have no effect on naming
@@ -34,6 +36,6 @@ function g(): void {
 //// a-foo.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A\\foo')>>
-
+<<file:__EnableUnstableFeatures('modules')>>
+module A\foo;
 function h(): void {}

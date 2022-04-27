@@ -7,40 +7,41 @@ new module Y {}
 
 //// X.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module("X")>>
+<<file:__EnableUnstableFeatures('modules')>>
+module X;
 
-<<__Module("X")>>
 internal enum X: int {
   A = 0;
   B = 1;
   C = 2;
 }
 
-<<__Module("X")>>
+
 internal function f1(X $x): void {} // ok
 
-<<__Module("X")>>
+
 function f2(X $x): void {} // error
 
-<<__Module("X")>>
+
 internal function f5(): void {
   $x = X::A; // ok
 }
 
-<<__Module("X")>>
+
 function f6(): void {
   $x = X::A; // ok
 }
 
 //// Y.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module("Y")>>
+<<file:__EnableUnstableFeatures('modules')>>
+module Y;
 
-<<__Module("Y")>>
+
 function f3(X $x): void {} // error
 
 
-<<__Module("Y")>>
+
 function f7(): void {
   $x = X::A; // error
 }

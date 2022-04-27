@@ -8,7 +8,7 @@ new module here {}
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__Module('here')>>
+module here;
 
 function foo():void { }
 

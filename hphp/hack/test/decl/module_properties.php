@@ -8,7 +8,8 @@ new module A {}
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module("A")>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 
 class A {
   internal int $x = 0;

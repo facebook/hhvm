@@ -12,13 +12,15 @@ new module A {}
 
 //// base-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 type Foo = int;
 
 //// changed-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 internal type Foo = int;
 //// base-foo-use.php

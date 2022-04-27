@@ -1,5 +1,6 @@
 <?hh
-<<file:__EnableUnstableFeatures("modules"), __Module("foo")>>
+<<file:__EnableUnstableFeatures("modules")>>
+module foo;
 new module foo {}
 
 internal newtype X = int;

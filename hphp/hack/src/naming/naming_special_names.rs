@@ -313,8 +313,6 @@ pub mod user_attributes {
 
     pub const REQUIRE_DYNAMIC: &str = "__RequireDynamic";
 
-    pub const MODULE: &str = "__Module";
-
     pub const ENABLE_METHOD_TRAIT_DIAMOND: &str = "__EnableMethodTraitDiamond";
 
     pub const IGNORE_READONLY_LOCAL_ERRORS: &str = "__IgnoreReadonlyLocalErrors";
@@ -359,7 +357,6 @@ pub mod user_attributes {
             CAN_CALL,
             SUPPORT_DYNAMIC_TYPE,
             REQUIRE_DYNAMIC,
-            MODULE,
             ENABLE_METHOD_TRAIT_DIAMOND,
         ]
         .into_iter()

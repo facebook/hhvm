@@ -377,17 +377,28 @@ pub mod toplevel_elaborator {
         }
     }
 
-    fn attach_file_attributes(p: &mut Vec<Def>) {
+    fn attach_file_level_info(p: &mut [Def]) {
         let file_attrs: Vec<FileAttribute> = p
             .iter()
             .filter_map(|x| x.as_file_attributes())
             .cloned()
             .collect();
 
+        let module_name: Option<Id> = p.iter().find_map(|x| x.as_set_module()).cloned();
+
         p.iter_mut().for_each(|x| match x {
-            Def::Class(c) => c.file_attributes = file_attrs.clone(),
-            Def::Fun(f) => f.file_attributes = file_attrs.clone(),
-            Def::Typedef(t) => t.file_attributes = file_attrs.clone(),
+            Def::Class(c) => {
+                c.file_attributes = file_attrs.clone();
+                c.module = module_name.clone()
+            }
+            Def::Fun(f) => {
+                f.file_attributes = file_attrs.clone();
+                f.module = module_name.clone()
+            }
+            Def::Typedef(t) => {
+                t.file_attributes = file_attrs.clone();
+                t.module = module_name.clone()
+            }
             _ => {}
         });
     }
@@ -398,7 +409,7 @@ pub mod toplevel_elaborator {
             on_def(&mut nsenv, &mut new_acc, def)
         }
 
-        attach_file_attributes(&mut new_acc);
+        attach_file_level_info(&mut new_acc);
         acc.append(&mut new_acc);
     }
 

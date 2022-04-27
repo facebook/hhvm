@@ -5,10 +5,10 @@
 new module A {}
 new module B {}
 
-<<file:__Module('A')>>
+module A;
 // This should probably error, and if it doesn't, it should be consistent
 // between legacy decl and direct decl
-<<file:__Module('B')>>
+module B;
 
 
 function h(): void {}

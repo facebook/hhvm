@@ -12,33 +12,39 @@ new module A {}
 
 //// base-a-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 internal class FooA {}
 
 //// changed-a-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 internal class FooA {}
 //// base-b-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 internal function foobar(): void {}
 //// changed-b-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 internal function foobar(): void {}
 
 //// base-c-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 internal newtype Foo = int;
 //// changed-c-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 internal newtype Foo = int;

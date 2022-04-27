@@ -7,9 +7,10 @@ new module Foo {}
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module('Foo')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module Foo;
 
-<<__Module("lol")>>
+
 final class Bar {}
 
 function baz(): void {}

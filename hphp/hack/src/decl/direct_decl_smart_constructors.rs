@@ -2057,24 +2057,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         })
     }
 
-    fn set_module_if_unset(&mut self, attributes: &Node<'a>) {
-        // TODO(T113116708) We shouldn't need this check here, really; it should be
-        // illegal to have more than one attribute named `__Module`, but file attrs are
-        // weird.
-        if self.module.is_none() {
-            for attr in attributes.iter() {
-                if let Node::Attribute(attr) = attr {
-                    if attr.name.1 == "__Module" {
-                        self.module = attr.string_literal_params.first().map(|&(p, m)| {
-                            oxidized_by_ref::ast::Id(p, self.str_from_utf8_for_bytes_in_arena(m))
-                        });
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
     fn namespace_use_kind(use_kind: &Node<'_>) -> Option<NamespaceUseKind> {
         match use_kind.token_kind() {
             Some(TokenKind::Const) => None,
@@ -4975,7 +4957,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }));
 
         let string_literal_params = if match name.1 {
-            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" | "__Module" => true,
+            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" => true,
             _ => false,
         } {
             fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut Vec<'a, u8>) {
@@ -5480,7 +5462,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 }
             }
         }
-        self.set_module_if_unset(&attributes);
         Node::Ignored(SK::FileAttributeSpecification)
     }
 
@@ -5563,9 +5544,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     fn make_module_membership_declaration(
         &mut self,
         _module_keyword: Self::R,
-        _name: Self::R,
+        name: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
+        match name {
+            Node::Name(&(name, pos)) => {
+                if self.module.is_none() {
+                    self.module = Some(oxidized_by_ref::ast::Id(pos, name));
+                }
+            }
+            _ => {}
+        }
         Node::Ignored(SK::ModuleMembershipDeclaration)
     }
 }

@@ -131,10 +131,7 @@ let fun_def ctx fd :
   let (env, cap_ty, unsafe_cap_ty) =
     Typing_coeffects.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
   in
-  let env =
-    Env.set_module env
-    @@ Naming_attributes_params.get_module_attribute fd.fd_file_attributes
-  in
+  let env = Env.set_module env fd.fd_module in
   let env = Env.set_internal env fd.fd_internal in
   let env =
     if
@@ -2055,10 +2052,7 @@ let class_def_ env c tc =
 
 let setup_env_for_class_def_check ctx c =
   let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in
-  let env =
-    Env.set_module env
-    @@ Naming_attributes_params.get_module_attribute c.c_file_attributes
-  in
+  let env = Env.set_module env c.c_module in
   let env = Env.set_internal env c.c_internal in
   let env =
     Env.set_support_dynamic_type

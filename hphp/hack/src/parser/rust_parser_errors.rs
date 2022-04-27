@@ -1885,10 +1885,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             || name == sn::user_attributes::EXTERNAL
     }
 
-    fn is_module_attribute(&self, name: &str) -> bool {
-        name == sn::user_attributes::MODULE
-    }
-
     fn check_attr_enabled(&mut self, attrs: S<'a>) {
         for node in attr_spec_to_node_list(attrs) {
             match self.attr_name(node) {
@@ -4697,7 +4693,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         for decl in syntax_to_list_no_separators(syntax_list) {
                             match &decl.children {
                                 MarkupSection(_) => {}
-                                NamespaceUseDeclaration(_) | FileAttributeSpecification(_) => {}
+                                NamespaceUseDeclaration(_)
+                                | FileAttributeSpecification(_)
+                                | ModuleMembershipDeclaration(_) => {}
                                 NamespaceDeclaration(_) => {
                                     is_first_decl = true;
                                     break;
@@ -5282,16 +5280,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         ))
                         } else {
                             args.for_each(|arg| self.enable_unstable_feature(node, arg))
-                        }
-                    }
-                }
-                Some(name) if self.is_module_attribute(name) => {
-                    self.check_can_use_feature(node, &UnstableFeatures::Modules);
-                    if let Some(args) = self.attr_args(node) {
-                        let arity = args.count();
-                        if arity != 1 {
-                            self.errors
-                                .push(make_error_from_node(node, errors::module_attr_arity(arity)));
                         }
                     }
                 }

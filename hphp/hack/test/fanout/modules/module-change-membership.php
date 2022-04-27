@@ -14,19 +14,22 @@ new module B {}
 
 //// base-f.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 internal function f(): void {}
 
 //// changed-f.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('B')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module B;
 
 internal function f(): void {}
 
 //// base-g.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 function g(): void {
   f();
@@ -34,7 +37,8 @@ function g(): void {
 
 //// changed-g.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 function g(): void {
     f();

@@ -12,7 +12,8 @@ new module A {}
 
 //// base-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 class Foo {
   public function foo(): void {}
@@ -21,7 +22,8 @@ class Foo {
 
 //// changed-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules'), __Module('A')>>
+<<file: __EnableUnstableFeatures('modules')>>
+module A;
 
 class Foo {
   internal function foo(): void {}

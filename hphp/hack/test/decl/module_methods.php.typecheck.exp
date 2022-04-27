@@ -1,4 +1,4 @@
 File "module_methods.php--main.php", line 6, characters 7-7:
 You cannot access internal members outside of a module (Typing[4112])
-  File "module_methods.php--A.php", line 7, characters 21-21:
+  File "module_methods.php--A.php", line 8, characters 21-21:
   This member is internal

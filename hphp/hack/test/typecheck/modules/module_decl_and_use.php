@@ -1,5 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module A;
 
 new module A {}

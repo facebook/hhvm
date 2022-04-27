@@ -350,9 +350,7 @@ let class_DEPRECATED ctx c =
         c.c_user_attributes
         ~f:(Decl_hint.aast_user_attribute_to_decl_user_attribute env)
     in
-    let sc_module =
-      Naming_attributes_params.get_module_attribute c.c_file_attributes
-    in
+    let sc_module = c.c_module in
     let where_constraints =
       List.map c.c_where_constraints ~f:(FunUtils.where_constraint env)
     in

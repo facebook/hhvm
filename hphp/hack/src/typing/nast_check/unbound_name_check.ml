@@ -91,6 +91,9 @@ let check_module_name env ((_, name) as id) =
   else
     handle_unbound_name env id Name_context.ModuleNamespace
 
+let check_module_if_present env id_opt =
+  Option.iter id_opt ~f:(check_module_name env)
+
 let check_type_name
     ?(kind = Name_context.TypeNamespace)
     env
@@ -185,6 +188,7 @@ let handler ctx =
           type_params = extend_type_params SMap.empty c.Aast.c_tparams;
         }
       in
+      check_module_if_present new_env c.Aast.c_module;
       new_env
 
     method! at_typedef env td =
@@ -195,6 +199,7 @@ let handler ctx =
           type_params = extend_type_params SMap.empty td.Aast.t_tparams;
         }
       in
+      check_module_if_present new_env td.Aast.t_module;
       new_env
 
     method! at_fun_def env fd =
@@ -206,32 +211,12 @@ let handler ctx =
           type_params = extend_type_params env.type_params f.Aast.f_tparams;
         }
       in
+      check_module_if_present new_env fd.Aast.fd_module;
       new_env
 
     method! at_gconst env gconst =
       let new_env =
         { env with droot = Typing_deps.Dep.GConst (snd gconst.Aast.cst_name) }
-      in
-      new_env
-
-    method! at_file_attribute env attrs =
-      let () =
-        attrs.Aast.fa_user_attributes
-        |> Naming_attributes.find Naming_special_names.UserAttributes.uaModule
-        |> function
-        | None
-        | Some { Aast.ua_name = _; Aast.ua_params = [] } ->
-          ()
-        | Some { Aast.ua_name = _; Aast.ua_params = ((_, p, _) as name) :: _ }
-          ->
-          begin
-            match Nast_eval.static_string name with
-            | Ok name -> check_module_name env (p, name)
-            | Error _ -> () (* TODO(T110227532) *)
-          end
-      in
-      let new_env =
-        { env with droot = Typing_deps.Dep.Fun ""; type_params = SMap.empty }
       in
       new_env
 

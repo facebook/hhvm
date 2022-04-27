@@ -336,8 +336,6 @@ module UserAttributes = struct
 
   let uaRequireDynamic = "__RequireDynamic"
 
-  let uaModule = "__Module"
-
   let uaEnableMethodTraitDiamond = "__EnableMethodTraitDiamond"
 
   let uaIgnoreReadonlyLocalErrors = "__IgnoreReadonlyLocalErrors"
@@ -559,10 +557,6 @@ module UserAttributes = struct
           ( uaRequireDynamic,
             ( [typeparam],
               "Marks this type parameter as required to be `dynamic`. Requires the enable_sound_dynamic_type typechecking flag."
-            ) );
-          ( uaModule,
-            ( [fn; cls; file; typealias; enum; enumcls],
-              "Associates a definition with a module. Requires `<<file:__EnableUnstableFeatures('modules')>>`."
             ) );
           ( uaEnableMethodTraitDiamond,
             ( [cls],

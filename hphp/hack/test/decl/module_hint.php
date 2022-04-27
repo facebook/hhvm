@@ -8,9 +8,9 @@ new module there {}
 //// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('here')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module here;
 
-<<__Module('here')>>
 internal class C {
   public function bar(mixed $m):void {
     // All not ok
@@ -33,15 +33,13 @@ internal class C {
 
 //// there.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module('there')>>
+<<file:__EnableUnstableFeatures('modules')>>
+module there;
 
-<<__Module('there')>>
 internal class D {
 }
-<<__Module('there')>>
 internal class G<T> {
 }
-<<__Module('there')>>
 internal enum E : int {
   A = 1;
 }

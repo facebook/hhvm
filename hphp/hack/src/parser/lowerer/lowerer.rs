@@ -5459,6 +5459,9 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             span: p_pos(node, env),
             mode: env.file_mode(),
         })]),
+        ModuleMembershipDeclaration(mm) => {
+            Ok(vec![ast::Def::mk_set_module(pos_name(&mm.name, env)?)])
+        }
         _ if env.file_mode() == file_info::Mode::Mhhi => Ok(vec![]),
         _ => Ok(vec![ast::Def::mk_stmt(p_stmt(node, env)?)]),
     }

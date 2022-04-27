@@ -24,7 +24,7 @@ use oxidized::{
         FuncBody, Hint, Hint_, Id, Lid, LocalId, Method_, Pos, ReifyKind, Sid, Stmt, Stmt_, Targ,
         Tparam, TypeHint, UserAttribute, Visibility,
     },
-    ast_defs::ParamKind,
+    ast_defs::{ParamKind, PropOrMethod},
     file_info::Mode,
     local_id, namespace_env,
     s_map::SMap,
@@ -1061,11 +1061,7 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
                     res.2
                 }
                 Expr_::ClassGet(mut x) => {
-                    if let ClassGetExpr::CGstring(id) = &x.1 {
-                        // T43412864 claims that this does not need to be added into the
-                        // closure and can be removed. There are no relevant HHVM tests
-                        // checking for it, but there are flib test failures when you try
-                        // to remove it.
+                    if let (ClassGetExpr::CGstring(id), PropOrMethod::IsMethod) = (&x.1, x.2) {
                         self.state_mut().add_var(scope, &id.1);
                     };
                     x.recurse(scope, self)?;

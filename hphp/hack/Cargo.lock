@@ -917,6 +917,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "dump-opcodes"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "emit_opcodes",
+ "hhbc-gen",
+ "quote",
+ "structopt",
+]
+
+[[package]]
 name = "dump_saved_state_depgraph"
 version = "0.0.0"
 dependencies = [

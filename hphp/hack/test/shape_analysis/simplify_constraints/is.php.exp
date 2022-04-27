@@ -1,0 +1,7 @@
+=== Shape analysis results for is.php
+Summary for \f:
+#{0} [6:8-14] : shape()
+#{0} [10:11-13] :
+  shape(
+    k => int
+  )

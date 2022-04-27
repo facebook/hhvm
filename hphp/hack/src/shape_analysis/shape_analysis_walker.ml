@@ -252,6 +252,11 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     in
     (env, entity)
   | A.Await e -> expr_ env e
+  | A.As (e, _ty, _) -> expr_ env e
+  | A.Is (e, _ty) ->
+    (* `is` expressions always evaluate to bools, so we discard the entity. *)
+    let (env, _) = expr_ env e in
+    (env, None)
   | _ -> failwithpos pos "An expression is not yet handled"
 
 let expr (env : env) (e : T.expr) : env = expr_ env e |> fst

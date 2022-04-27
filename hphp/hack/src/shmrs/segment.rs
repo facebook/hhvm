@@ -22,7 +22,7 @@ type HashBuilder = BuildHasherDefault<NoHashHasher<u64>>;
 /// The shared memory pointer that we obtain from `mmap` is directly cast
 /// to this struct. Its fields are all `MaybeUninit` because we can't
 /// initialize them all at once.
-pub struct ShmemSegment<'shm, T> {
+pub struct ShmemTableSegment<'shm, T> {
     file_alloc: MaybeUninit<FileAlloc>,
     table: MaybeUninit<CMap<'shm, u64, T, HashBuilder>>,
 }
@@ -32,12 +32,12 @@ pub struct ShmemSegment<'shm, T> {
 /// This struct is merely a reference to the shared memory segment and
 /// the data it contains. As such, it is process-local.
 ///
-/// Obtained by calling `initialize` or `attach` on `ShmemSegment`.
-pub struct ShmemSegmentRef<'shm, T> {
+/// Obtained by calling `initialize` or `attach` on `ShmemTableSegment`.
+pub struct ShmemTableSegmentRef<'shm, T> {
     pub table: CMapRef<'shm, u64, T, HashBuilder>,
 }
 
-impl<'shm, T> ShmemSegment<'shm, T> {
+impl<'shm, T> ShmemTableSegment<'shm, T> {
     /// Initialize a shared memory segment, by setting up the file allocator
     /// and the hash tables.
     ///
@@ -55,7 +55,7 @@ impl<'shm, T> ShmemSegment<'shm, T> {
         file_start: *mut libc::c_void,
         file_size: usize,
         max_evictable_bytes_per_shard: usize,
-    ) -> ShmemSegmentRef<'shm, T> {
+    ) -> ShmemTableSegmentRef<'shm, T> {
         let (self_ptr, next_free_byte) =
             Self::maybe_unint_ptr_and_next_free_byte(file_start, file_size);
 
@@ -63,7 +63,7 @@ impl<'shm, T> ShmemSegment<'shm, T> {
         //  - The lifetime matches.
         //  - We are the sole users of the underlying memory.
         let segment: &'shm mut MaybeUninit<Self> = &mut *self_ptr;
-        segment.write(ShmemSegment {
+        segment.write(ShmemTableSegment {
             file_alloc: MaybeUninit::uninit(),
             table: MaybeUninit::uninit(),
         });
@@ -80,7 +80,7 @@ impl<'shm, T> ShmemSegment<'shm, T> {
             max_evictable_bytes_per_shard,
         );
 
-        ShmemSegmentRef { table }
+        ShmemTableSegmentRef { table }
     }
 
     /// Attach to an already initialized shared memory segment.
@@ -91,14 +91,14 @@ impl<'shm, T> ShmemSegment<'shm, T> {
     pub unsafe fn attach(
         file_start: *mut libc::c_void,
         file_size: usize,
-    ) -> ShmemSegmentRef<'shm, T> {
+    ) -> ShmemTableSegmentRef<'shm, T> {
         let (self_ptr, _) = Self::maybe_unint_ptr_and_next_free_byte(file_start, file_size);
 
         let segment: &'shm MaybeUninit<Self> = &*self_ptr;
         let segment = segment.assume_init_ref();
 
         let table = CMap::attach(&segment.table);
-        ShmemSegmentRef { table }
+        ShmemTableSegmentRef { table }
     }
 
     unsafe fn maybe_unint_ptr_and_next_free_byte(

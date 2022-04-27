@@ -9,14 +9,14 @@ use ocamlrep::{ptr::UnsafeOcamlPtr, Value};
 use ocamlrep_ocamlpool::catch_unwind;
 use once_cell::unsync::OnceCell;
 use shmrs::chashmap::{MINIMUM_EVICTABLE_BYTES_PER_SHARD, NUM_SHARDS};
-use shmrs::segment::{ShmemSegment, ShmemSegmentRef};
+use shmrs::segment::{ShmemTableSegment, ShmemTableSegmentRef};
 use std::convert::TryInto;
 
 thread_local! {
-    static SEGMENT: OnceCell<ShmemSegmentRef<'static, HeapValue>> = OnceCell::new();
+    static SEGMENT: OnceCell<ShmemTableSegmentRef<'static, HeapValue>> = OnceCell::new();
 }
 
-fn with<R>(f: impl FnOnce(&ShmemSegmentRef<'static, HeapValue>) -> R) -> R {
+fn with<R>(f: impl FnOnce(&ShmemTableSegmentRef<'static, HeapValue>) -> R) -> R {
     SEGMENT.with(|cell| f(cell.get().unwrap()))
 }
 
@@ -43,7 +43,7 @@ pub extern "C" fn shmffi_init(
             // Safety:
             //  - We are the only one initializing!
             unsafe {
-                ShmemSegment::initialize(
+                ShmemTableSegment::initialize(
                     mmap_address,
                     file_size,
                     max_evictable_bytes / NUM_SHARDS,
@@ -64,7 +64,7 @@ pub extern "C" fn shmffi_attach(mmap_address: *mut libc::c_void, file_size: libc
             // Safety:
             //  - Should be already initialized by the master process.
             unsafe {
-                ShmemSegment::attach(mmap_address, file_size)
+                ShmemTableSegment::attach(mmap_address, file_size)
             });
         });
 

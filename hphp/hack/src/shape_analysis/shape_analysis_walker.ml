@@ -148,7 +148,7 @@ let rec assign
     end
   | _ -> failwithpos pos "An lvalue is not yet supported"
 
-and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
+and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   match e with
   | A.Int _
   | A.Float _
@@ -164,8 +164,8 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let result_id = Logic.fresh_result_id () in
     let collect_key_constraint (env, keys_and_tys) (key, ((ty, _, _) as value))
         : env * (T.expr * Typing_defs.locl_ty) list =
-      let (env, _key_entity) = expr env key in
-      let (env, _val_entity) = expr env value in
+      let (env, _key_entity) = expr_ env key in
+      let (env, _val_entity) = expr_ env value in
       (env, (key, ty) :: keys_and_tys)
     in
     let (env, keys_and_tys) =
@@ -177,15 +177,15 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, var) = redirect env entity_ in
     (env, Some var)
   | A.Array_get (base, Some ix) ->
-    let (env, entity_exp) = expr env base in
-    let (env, _entity_ix) = expr env ix in
+    let (env, entity_exp) = expr_ env base in
+    let (env, _entity_ix) = expr_ env ix in
     let env = add_key_constraints ResultID.empty env entity_exp [(ix, ty)] in
     (env, None)
   | A.Lvar (_, lid) ->
     let entity = Env.get_local env lid in
     (env, entity)
   | A.Binop (Ast_defs.Eq None, e1, ((ty_rhs, _, _) as e2)) ->
-    let (env, entity_rhs) = expr env e2 in
+    let (env, entity_rhs) = expr_ env e2 in
     let env = assign pos env e1 entity_rhs ty_rhs in
     (env, None)
   | A.Call (_base, _targs, args, _unpacked) ->
@@ -193,7 +193,7 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
        dict argument so that we know what shape type that reaches to the
        given position is. *)
     let expr_arg env (_param_kind, ((ty, pos, _exp) as arg)) =
-      let (env, arg_entity) = expr env arg in
+      let (env, arg_entity) = expr_ env arg in
       if is_suitable_target_ty env.tast_env ty then
         let env = Env.add_constraint env (Exists (Argument, pos)) in
         match arg_entity with
@@ -215,7 +215,7 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
     (env, None)
   | _ -> failwithpos pos "An expression is not yet handled"
 
-let expr (env : env) (e : T.expr) : env = expr env e |> fst
+let expr (env : env) (e : T.expr) : env = expr_ env e |> fst
 
 let rec switch
     (parent_locals : lenv)
@@ -244,9 +244,14 @@ let rec switch
 
 and stmt (env : env) ((pos, stmt) : T.stmt) : env =
   match stmt with
-  | A.Expr e
+  | A.Expr e -> expr env e
   | A.Return (Some e) ->
-    expr env e
+    let (env, entity) = expr_ env e in
+    let add_dynamic_if_tast_check entity_ =
+      when_tast_check env.tast_env ~default:env @@ fun () ->
+      Env.add_constraint env @@ Has_dynamic_key entity_
+    in
+    Option.value_map entity ~default:env ~f:add_dynamic_if_tast_check
   | A.If (cond, then_bl, else_bl) ->
     let parent_env = expr env cond in
     let base_env = Env.reset_constraints parent_env in

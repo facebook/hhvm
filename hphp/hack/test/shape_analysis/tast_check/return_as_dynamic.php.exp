@@ -1,0 +1,5 @@
+\f: #{1} [5:8-25] :
+  shape(
+    b => bool
+  )
+No errors

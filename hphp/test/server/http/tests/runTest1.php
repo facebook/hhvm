@@ -40,5 +40,6 @@ requestAll(varray[
   "test_curl_multi_except.php",
   "test_pagelet.php",
   "test_cookie2.php",
+  "test_curl_empty_post.php",
 ]);
 }

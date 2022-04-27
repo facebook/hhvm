@@ -171,17 +171,18 @@ void CurlResource::prepare() {
     curl_easy_setopt(m_cp, CURLOPT_CAINFO, NULL);
     curl_easy_setopt(m_cp, CURLOPT_PROXY_CAINFO, NULL);
   }
+
+  if (m_emptyPost) {
+    // As per curl docs, an empty post must set POSTFIELDSIZE to be 0 or
+    // the reader function will be called
+    curl_easy_setopt(m_cp, CURLOPT_POSTFIELDSIZE, 0);
+  }
 }
 
 Variant CurlResource::execute() {
   assertx(!m_exception);
   if (m_cp == nullptr) {
     return false;
-  }
-  if (m_emptyPost) {
-    // As per curl docs, an empty post must set POSTFIELDSIZE to be 0 or
-    // the reader function will be called
-    curl_easy_setopt(m_cp, CURLOPT_POSTFIELDSIZE, 0);
   }
   m_write.buf.clear();
   m_write.content.clear();

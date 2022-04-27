@@ -213,6 +213,41 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     in
     let env = List.fold ~f:expr_arg ~init:env args in
     (env, None)
+  | A.Eif (cond, Some then_expr, else_expr) ->
+    let (parent_env, _cond_entity) = expr_ env cond in
+    let base_env = Env.reset_constraints parent_env in
+    let (then_env, then_entity) = expr_ base_env then_expr in
+    let (else_env, else_entity) = expr_ base_env else_expr in
+    let env = Env.union parent_env then_env else_env in
+    (* Create a join point entity. It is pretty much Option.marge except that
+       that function doesn't allow threading state (`env`) through *)
+    let (env, entity) =
+      match (then_entity, else_entity) with
+      | (Some then_entity_, Some else_entity_) ->
+        let var = Env.fresh_var () in
+        let env = Env.add_constraint env @@ Subset (then_entity_, var) in
+        let env = Env.add_constraint env @@ Subset (else_entity_, var) in
+        (env, Some var)
+      | (None, Some _) -> (env, else_entity)
+      | (_, _) -> (env, then_entity)
+    in
+    (env, entity)
+  | A.Eif (cond, None, else_expr) ->
+    let (env, cond_entity) = expr_ env cond in
+    let (env, else_entity) = expr_ env else_expr in
+    (* Create a join point entity. It is pretty much Option.marge except that
+       that function doesn't allow threading state (`env`) through *)
+    let (env, entity) =
+      match (cond_entity, else_entity) with
+      | (Some then_entity_, Some else_entity_) ->
+        let var = Env.fresh_var () in
+        let env = Env.add_constraint env @@ Subset (then_entity_, var) in
+        let env = Env.add_constraint env @@ Subset (else_entity_, var) in
+        (env, Some var)
+      | (None, Some _) -> (env, else_entity)
+      | (_, _) -> (env, cond_entity)
+    in
+    (env, entity)
   | _ -> failwithpos pos "An expression is not yet handled"
 
 let expr (env : env) (e : T.expr) : env = expr_ env e |> fst

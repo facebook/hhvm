@@ -13,6 +13,8 @@ open Shape_analysis_types
 
 exception Shape_analysis_exn of string
 
+val is_shape_like_dict : shape_result -> bool
+
 val simplify : Typing_env_types.env -> constraint_ list -> shape_result list
 
 val callable :

@@ -56,3 +56,7 @@ let callable = Walker.callable
 let simplify = Solver.simplify
 
 let show_shape_result = show_shape_result
+
+let is_shape_like_dict = function
+  | Shape_like_dict _ -> true
+  | _ -> false

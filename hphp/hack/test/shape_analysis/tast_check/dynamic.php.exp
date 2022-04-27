@@ -1,0 +1,5 @@
+\f: #{1} [6:3-20] :
+  shape(
+    key => int
+  )
+No errors

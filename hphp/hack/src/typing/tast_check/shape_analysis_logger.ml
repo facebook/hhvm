@@ -34,7 +34,11 @@ let log_result typing_env id results : unit =
 
 let compute_result tast_env params body =
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in
-  try SA.callable tast_env params body |> SA.simplify typing_env with
+  try
+    SA.callable tast_env params body
+    |> SA.simplify typing_env
+    |> List.filter ~f:SA.is_shape_like_dict
+  with
   | SA.Shape_analysis_exn _ -> []
 
 let should_not_skip tast_env =

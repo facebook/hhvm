@@ -1,4 +1,4 @@
-\:div::__construct: #{} [5:25-36] : shape()
+\:div::__construct: [5:25-36] : dynamic
 \C::g: #{0} [19:5-33] :
   shape(
     a => int

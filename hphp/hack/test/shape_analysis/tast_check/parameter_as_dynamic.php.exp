@@ -1,0 +1,6 @@
+\f: #{0} [5:3-20] :
+  shape(
+    b => bool
+  )
+\f: [3:32-34] : dynamic
+No errors

@@ -15,6 +15,12 @@ module SN = Naming_special_names
 module Env = Shape_analysis_env
 module Logic = Shape_analysis_logic
 
+let when_tast_check tast_env ~default f =
+  let tcopt = Tast_env.get_tcopt tast_env |> TypecheckerOptions.log_levels in
+  match SMap.find_opt "shape_analysis" tcopt with
+  | Some level when level > 0 -> f ()
+  | _ -> default
+
 let failwithpos pos msg =
   raise @@ Shape_analysis_exn (Format.asprintf "%a: %s" Pos.pp pos msg)
 
@@ -193,7 +199,14 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
         match arg_entity with
         | Some arg_entity_ ->
           let new_entity_ = Literal pos in
-          Env.add_constraint env (Subset (arg_entity_, new_entity_))
+          let env =
+            when_tast_check env.tast_env ~default:env @@ fun () ->
+            Env.add_constraint env @@ Has_dynamic_key new_entity_
+          in
+          let env =
+            Env.add_constraint env (Subset (arg_entity_, new_entity_))
+          in
+          env
         | None -> env
       else
         env
@@ -292,6 +305,10 @@ let init_params tast_env (params : T.fun_param list) :
         let entity_ = Literal param_pos in
         let lmap = LMap.add param_lid (Some entity_) lmap in
         let constraints = Exists (Parameter, param_pos) :: constraints in
+        let constraints =
+          when_tast_check tast_env ~default:constraints @@ fun () ->
+          Has_dynamic_key entity_ :: constraints
+        in
         (constraints, lmap)
       else
         (constraints, lmap)

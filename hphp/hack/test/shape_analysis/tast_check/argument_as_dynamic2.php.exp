@@ -1,0 +1,5 @@
+\f: #{0} [6:8-23] :
+  shape(
+    a => int
+  )
+No errors

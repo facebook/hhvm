@@ -1,0 +1,8 @@
+\g: [3:32-34] : dynamic
+\f: #{1} [7:8-25] :
+  shape(
+    b => bool
+  )
+\f: [6:8-23] : dynamic
+\f: [8:5-7] : dynamic
+No errors

@@ -1,0 +1,6 @@
+=== Shape analysis results for await.php
+Summary for \f:
+#{0} [5:3-18] :
+  shape(
+    a => int
+  )

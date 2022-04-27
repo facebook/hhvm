@@ -62,9 +62,12 @@ let collect_analysis_targets :
 
 (* Is the type a suitable dict that can be coverted into shape. For the moment,
    that's only the case if the key is a string. *)
-let is_suitable_target_ty tast_env ty =
+let rec is_suitable_target_ty tast_env ty =
   let ty = Tast_env.fully_expand tast_env ty in
   match Typing_defs.get_node ty with
+  | Typing_defs.Tclass ((_, id), _, [ty])
+    when String.equal id SN.Classes.cAwaitable ->
+    is_suitable_target_ty tast_env ty
   | Typing_defs.Tclass ((_, id), _, [key_ty; _])
     when String.equal id SN.Collections.cDict ->
     Tast_env.can_subtype
@@ -248,6 +251,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       | (_, _) -> (env, cond_entity)
     in
     (env, entity)
+  | A.Await e -> expr_ env e
   | _ -> failwithpos pos "An expression is not yet handled"
 
 let expr (env : env) (e : T.expr) : env = expr_ env e |> fst

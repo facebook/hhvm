@@ -286,6 +286,7 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
     let env = expr env cond in
     let env = Env.update_next_from_conts env [Cont.Break; Cont.Next] in
     env
+  | A.Block statements -> block env statements
   | A.Noop
   | A.AssertEnv _
   | A.Markup _ ->

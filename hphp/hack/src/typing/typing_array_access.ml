@@ -684,11 +684,12 @@ let rec array_get
                         primary
                         @@ Primary.Array_get_with_optional_field
                              {
-                               pos = p;
-                               decl_pos =
-                                 Typing_defs.TShapeField.pos declared_field;
+                               recv_pos = array_pos;
+                               field_pos = p;
                                field_name =
                                  TUtils.get_printable_shape_field_name field;
+                               decl_pos =
+                                 Typing_defs.TShapeField.pos declared_field;
                              });
                     (env, (err_witness env p, dflt_arr_res, Ok ty2))
                   ) else

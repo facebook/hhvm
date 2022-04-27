@@ -2426,7 +2426,8 @@ module Primary = struct
         tyconst_names: string list;
       }
     | Array_get_with_optional_field of {
-        pos: Pos.t;
+        recv_pos: Pos.t;
+        field_pos: Pos.t;
         field_name: string;
         decl_pos: Pos_or_decl.t;
       }
@@ -5244,15 +5245,41 @@ module Primary = struct
     in
     (Error_code.CyclicTypeconst, claim, lazy [], [])
 
-  let array_get_with_optional_field pos1 name pos2 =
+  let array_get_with_optional_field
+      ~(field_pos : Pos.t) ~(recv_pos : Pos.t) ~decl_pos name =
+    let (_, recv_end_col) = Pos.end_line_column recv_pos in
+    let open_bracket_pos =
+      recv_pos
+      |> Pos.set_col_start recv_end_col
+      |> Pos.set_col_end (recv_end_col + 1)
+    in
+    let (_, field_end_col) = Pos.end_line_column field_pos in
+    let close_bracket_pos =
+      field_pos
+      |> Pos.set_col_start field_end_col
+      |> Pos.set_col_end (field_end_col + 1)
+    in
+
+    let quickfixes =
+      [
+        Quickfix.make_with_edits
+          ~title:"Change to `Shapes::idx()`"
+          ~edits:
+            [
+              (")", close_bracket_pos);
+              (", ", open_bracket_pos);
+              ("Shapes::idx(", Pos.shrink_to_start recv_pos);
+            ];
+      ]
+    in
     ( Error_code.ArrayGetWithOptionalField,
       lazy
-        ( pos1,
+        ( field_pos,
           Printf.sprintf
             "The field %s may not be present in this shape. Use `Shapes::idx()` instead."
             (Markdown_lite.md_codify name) ),
-      lazy [(pos2, "This is where the field was declared as optional.")],
-      [] )
+      lazy [(decl_pos, "This is where the field was declared as optional.")],
+      quickfixes )
 
   let mutating_const_property pos =
     ( Error_code.AssigningToConst,
@@ -5853,8 +5880,9 @@ module Primary = struct
       contravariant_this pos class_name typaram_name
     | Cyclic_typeconst { pos; tyconst_names } ->
       cyclic_typeconst pos tyconst_names
-    | Array_get_with_optional_field { pos; field_name; decl_pos } ->
-      array_get_with_optional_field pos field_name decl_pos
+    | Array_get_with_optional_field
+        { recv_pos; field_pos; field_name; decl_pos } ->
+      array_get_with_optional_field field_name ~decl_pos ~recv_pos ~field_pos
     | Mutating_const_property pos -> mutating_const_property pos
     | Self_const_parent_not pos -> self_const_parent_not pos
     | Unexpected_ty_in_tast { pos; expected_ty; actual_ty } ->

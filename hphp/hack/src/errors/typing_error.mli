@@ -1288,7 +1288,8 @@ module Primary : sig
         tyconst_names: string list;
       }
     | Array_get_with_optional_field of {
-        pos: Pos.t;
+        recv_pos: Pos.t;
+        field_pos: Pos.t;
         field_name: string;
         decl_pos: Pos_or_decl.t;
       }

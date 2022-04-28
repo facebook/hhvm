@@ -1,6 +1,12 @@
-dict(4) {
+dict(7) {
   ["Reflector"]=>
   string(9) "Reflector"
+  ["IPureStringishObject"]=>
+  string(20) "IPureStringishObject"
+  ["ILeakSafeStringishObject"]=>
+  string(24) "ILeakSafeStringishObject"
+  ["IZonedStringishObject"]=>
+  string(21) "IZonedStringishObject"
   ["StringishObject"]=>
   string(15) "StringishObject"
   ["Stringish"]=>

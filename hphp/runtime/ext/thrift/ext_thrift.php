@@ -47,7 +47,7 @@ class InteractionId {
 }
 
 <<__NativeData("RpcOptions")>>
-final class RpcOptions {
+final class RpcOptions implements IPureStringishObject {
   public function __construct()[]: void {}
 
   <<__Native>>

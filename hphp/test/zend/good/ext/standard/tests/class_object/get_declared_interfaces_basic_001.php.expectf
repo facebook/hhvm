@@ -1,7 +1,7 @@
 *** Testing get_declared_interfaces() : basic functionality ***
 
 -- Testing get_declared_interfaces() function with Zero arguments --
-vec(127) {
+vec(130) {
   string(23) "HH\Rx\IteratorAggregate"
   string(19) "HH\Rx\KeyedIterator"
   string(26) "HH\Lib\IO\SeekableFDHandle"
@@ -25,6 +25,7 @@ vec(127) {
   string(16) "HH\KeyedIterator"
   string(11) "HH\Iterable"
   string(28) "IExceptionWithPureGetMessage"
+  string(21) "IZonedStringishObject"
   string(10) "SplSubject"
   string(37) "HH\Lib\OS\PosixSpawnFileActionsSetter"
   string(36) "HH\Lib\IO\CloseableReadWriteFDHandle"
@@ -77,6 +78,7 @@ vec(127) {
   string(21) "HH\ClassLikeAttribute"
   string(25) "HH\ClassConstantAttribute"
   string(24) "HH\Lib\Str\SprintfFormat"
+  string(24) "ILeakSafeStringishObject"
   string(32) "HH\Asio\ResultOrExceptionWrapper"
   string(16) "OutputCollection"
   string(25) "HH\Lib\IO\ReadWriteHandle"
@@ -107,6 +109,7 @@ vec(127) {
   string(21) "HH\ParameterAttribute"
   string(29) "HH\Lib\Str\SprintfFormatQuote"
   string(32) "HH\Lib\File\CloseableWriteHandle"
+  string(20) "IPureStringishObject"
   string(30) "HH\UNSAFESingletonMemoizeParam"
   string(17) "HH\Rx\Traversable"
   string(39) "HH\Lib\IO\CloseableSeekableReadFDHandle"

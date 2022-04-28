@@ -4,7 +4,7 @@
 namespace {
 
 <<__Sealed(\HH\Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
-interface ConstCollection extends HH\Rx\Countable {
+interface ConstCollection extends HH\Rx\Countable, IPureStringishObject {
   public readonly function isEmpty()[];
   public readonly function count()[];
   public function items()[];

@@ -11,6 +11,18 @@ interface StringishObject extends Stringish {
   public function __toString(): string;
 }
 
+interface IZonedStringishObject extends StringishObject {
+  public function __toString()[zoned]: string;
+}
+
+interface ILeakSafeStringishObject extends IZonedStringishObject {
+  public function __toString()[leak_safe]: string;
+}
+
+interface IPureStringishObject extends ILeakSafeStringishObject {
+  public function __toString()[]: string;
+}
+
 } // namespace
 
 namespace HH {

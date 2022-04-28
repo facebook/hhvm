@@ -1225,6 +1225,14 @@ let visitor ctx autocomplete_context sienv =
             List.iter params ~f:(self#on_hint env)
           | _ -> ());
 
+      (* Ignore properties on interfaces. They're not legal syntax, but
+         they can occur when we parse partial method definitions. *)
+      let cls =
+        match cls.Aast.c_kind with
+        | Ast_defs.Cinterface -> { cls with Aast.c_vars = [] }
+        | _ -> cls
+      in
+
       (* If we don't clear out c_uses we'll end up overwriting the trait
          completion as soon as we get to on_Happly. *)
       super#on_class_ env { cls with Aast.c_uses = [] }
@@ -1447,6 +1455,14 @@ let method_keywords filename trivia =
     filename
     trivia
 
+let interface_method_keywords filename existing_modifiers s : unit =
+  let possible_keywords =
+    available_keywords
+      existing_modifiers
+      ["public"; "protected"; "private"; "static"; "function"]
+  in
+  complete_keywords_at_token possible_keywords filename s
+
 let property_or_method_keywords filename existing_modifiers s : unit =
   let possible_keywords =
     available_keywords
@@ -1464,9 +1480,10 @@ let property_or_method_keywords filename existing_modifiers s : unit =
   in
   complete_keywords_at_token possible_keywords filename s
 
-let keywords filename tree =
+let keywords filename tree : unit =
   let open Syntax in
-  let rec aux s =
+  let rec aux (ctx : Ast_defs.classish_kind option) s =
+    let inner_ctx = ref ctx in
     (match s.syntax with
     | Script sd ->
       List.iter (syntax_node_to_list sd.script_declarations) ~f:(fun d ->
@@ -1497,6 +1514,16 @@ let keywords filename tree =
         (* The user has written `final AUTO332` or `abstract AUTO332`,
            so we're expecting a class, not an interface or trait. *)
         class_keywords filename cd.classish_modifiers cd.classish_name
+      | Token _ ->
+        (match Syntax.text cd.classish_keyword with
+        | "interface" -> inner_ctx := Some Ast_defs.Cinterface
+        | "class" ->
+          (* We're only interested if the context is a class or not,
+             so arbitrarily consider this a concrete class. *)
+          inner_ctx := Some (Ast_defs.Cclass Ast_defs.Concrete)
+        | "trait" -> inner_ctx := Some Ast_defs.Ctrait
+        | "enum" -> inner_ctx := Some Ast_defs.Cenum
+        | _ -> ())
       | _ -> ())
     | MethodishDeclaration md ->
       let header = md.methodish_function_decl_header in
@@ -1510,8 +1537,15 @@ let keywords filename tree =
         | _ -> ())
       | _ -> ())
     | PropertyDeclaration pd ->
-      (match pd.property_type.syntax with
-      | SimpleTypeSpecifier sts ->
+      (match (pd.property_type.syntax, ctx) with
+      | (SimpleTypeSpecifier sts, Some Ast_defs.Cinterface) ->
+        (* Interfaces cannot contain properties, and have fewer
+           modifiers available on methods. *)
+        interface_method_keywords
+          filename
+          pd.property_modifiers
+          sts.simple_type_specifier
+      | (SimpleTypeSpecifier sts, _) ->
         (* The user has written `public AUTO332`. This could be a method
            `public function foo(): void {}` or a property
            `public int $x = 1;`. *)
@@ -1521,10 +1555,10 @@ let keywords filename tree =
           sts.simple_type_specifier
       | _ -> ())
     | _ -> ());
-    List.iter (children s) ~f:aux
+    List.iter (children s) ~f:(aux !inner_ctx)
   in
 
-  aux tree
+  aux None tree
 
 (* Main entry point for autocomplete *)
 let go_ctx

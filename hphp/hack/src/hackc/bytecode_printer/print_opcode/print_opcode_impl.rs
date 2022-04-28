@@ -204,6 +204,7 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
         ImmType::BA2 => quote!(self.print_label2(w, #name)?;),
         ImmType::BLA => quote!(self.print_branch_labels(w, #name.as_ref())?;),
         ImmType::DA => quote!(print_double(w, *#name)?;),
+        ImmType::DUMMY => TokenStream::new(),
         ImmType::FCA => quote!(self.print_fcall_args(w, #name)?;),
         ImmType::I64A => quote!(write!(w, "{}", #name)?;),
         ImmType::IA => quote!(print_iterator_id(w, #name)?;),
@@ -237,6 +238,7 @@ fn convert_call_arg(name: &str, imm: &ImmType) -> TokenStream {
         | ImmType::BA
         | ImmType::BA2
         | ImmType::DA
+        | ImmType::DUMMY
         | ImmType::FCA
         | ImmType::I64A
         | ImmType::IA

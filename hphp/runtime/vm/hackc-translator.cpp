@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/disas.h"
+#include "hphp/runtime/vm/opcodes.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
@@ -48,10 +49,17 @@ struct TranslationException : Exception {
 }
 
 struct TranslationState {
+
+  template<typename T>
+  void emitByte(T subop) {
+    fe->emitByte(static_cast<uint8_t>(subop));
+  }
+
   UnitEmitter* ue;
   PreClassEmitter* pce{nullptr};
   // Map of adata identifiers to their associated static arrays.
   std::map<std::string, ArrayData*> adataMap;
+  FuncEmitter* fe{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -418,6 +426,138 @@ void translateRequirements(TranslationState& ts, Pair<ClassName, TraitReqKind> r
   ts.pce->addClassRequirement(PreClass::ClassRequirement(name, requirementKind));
 }
 
+////////////////////////////////////////////////////////////////////
+
+#define IMM_NA
+#define IMM_ONE(t) IMM_##t(body._0)
+#define IMM_TWO(t1, t2) IMM_ONE(t1); ++immIdx; IMM_##t2(body._1)
+#define IMM_THREE(t1, t2, t3) IMM_TWO(t1, t2); ++immIdx; IMM_##t3(body._2)
+#define IMM_FOUR(t1, t2, t3, t4) IMM_THREE(t1, t2, t3); ++immIdx; IMM_##t4(body._3)
+#define IMM_FIVE(t1, t2, t3, t4, t5) IMM_FOUR(t1, t2, t3, t4); ++immIdx; IMM_##t5(body._4)
+#define IMM_SIX(t1, t2, t3, t4, t5, t6) IMM_FIVE(t1, t2, t3, t4, t5); ++immIdx; IMM_##t6(body._5)
+
+#define MAYBE_IMM_ONE(...)
+#define MAYBE_IMM_TWO(...)
+#define MAYBE_IMM_THREE(...)
+#define MAYBE_IMM_FOUR(...)
+#define MAYBE_IMM_FIVE(...)
+#define MAYBE_IMM_SIX(...)
+#define MAYBE_IMM_NA NO_
+
+#define BODY(name) UNUSED auto const body = o.name;
+#define NO_BODY(...)
+
+#define GEN_BODY2(id, name) id##BODY(name)
+#define GEN_BODY(...) GEN_BODY2(__VA_ARGS__)
+
+#define IMM_I64A
+#define IMM_SA
+#define IMM_RATA
+#define IMM_DA
+#define IMM_IVA
+#define IMM_LA
+#define IMM_NLA
+#define IMM_ILA
+#define IMM_BA
+#define IMM_BLA
+#define IMM_SLA
+#define IMM_OA
+#define IMM_MA
+#define IMM_AA
+#define IMM_VSA
+#define IMM_KA
+#define IMM_LAR
+#define IMM_FCA
+#define IMM_ITA
+#define IMM_IA
+
+#define O(name, imm, pop, push, flags)                                \
+  void translateOpcode##name(TranslationState& ts, const Opcode& o) { \
+    std::vector<std::pair<hhbc::Label, Offset> > labelJumps;          \
+    ts.fe->emitOp(Op##name);                                          \
+                                                                      \
+    UNUSED size_t immIdx = 0;                                         \
+    GEN_BODY(MAYBE_IMM_##imm, name)                                   \
+    IMM_##imm;                                                        \
+  }
+OPCODES
+
+#undef O
+
+#undef IMM_I64A
+#undef IMM_SA
+#undef IMM_RATA
+#undef IMM_DA
+#undef IMM_IVA
+#undef IMM_LA
+#undef IMM_NLA
+#undef IMM_ILA
+#undef IMM_BA
+#undef IMM_BLA
+#undef IMM_SLA
+#undef IMM_OA
+#undef IMM_MA
+#undef IMM_AA
+#undef IMM_VSA
+#undef IMM_KA
+#undef IMM_LAR
+#undef IMM_FCA
+#undef IMM_ITA
+#undef IMM_IA
+
+typedef void (*translatorFunc)(TranslationState& ts, const Opcode& o);
+hphp_hash_map<Opcode::Tag, translatorFunc> opcodeTranslators;
+
+void initializeMap() {
+  #define O(name, imm, pop, push, flags) \
+    opcodeTranslators[Opcode::Tag::name] = translateOpcode##name;
+  OPCODES
+  #undef O
+}
+
+struct Initializer {
+  Initializer() { initializeMap(); }
+} initializer;
+
+
+//////////////////////////////////////////////////////////////////////
+
+void translateOpcodeInstruction(TranslationState& ts, const Opcode& o) {
+  opcodeTranslators[o.tag];
+}
+
+void translatePseudoInstruction(TranslationState& ts, const Pseudo& p) {}
+
+void translateInstruction(TranslationState& ts, const Instruct& i) {
+  switch (i.tag) {
+    case Instruct::Tag::Opcode:
+      return translateOpcodeInstruction(ts, i.Opcode._0);
+    case Instruct::Tag::Pseudo:
+      return translatePseudoInstruction(ts, i.Pseudo._0);
+  }
+}
+
+void translateFunctionBody(TranslationState& ts, const HhasBody& b) {
+  ts.fe->isMemoizeWrapper = b.is_memoize_wrapper | b.is_memoize_wrapper_lsb;
+  ts.fe->isMemoizeWrapperLSB = b.is_memoize_wrapper_lsb;
+
+  ts.fe->setNumIterators(b.num_iters);
+
+  auto decl_vars = range(b.decl_vars);
+  for (auto const& dv : decl_vars) {
+    ts.fe->allocVarId(toStaticString(dv));
+  }
+
+  auto instrs = range(b.body_instrs);
+  for (auto const& instr : instrs) {
+    translateInstruction(ts, instr);
+  }
+}
+
+void translateFunction(TranslationState& ts, const HhasFunction& f) {
+  translateFunctionBody(ts, f.body);
+}
+
 void translateClass(TranslationState& ts, const HhasClass& c) {
   UpperBoundMap ubs;
   auto upper_bounds = range(c.upper_bounds);
@@ -523,6 +663,11 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
   auto adata = range(unit.adata);
   for (auto const& d : adata) {
     translateAdata(ts, d);
+  }
+
+  auto funcs = range(unit.functions);
+  for (auto const& f : funcs) {
+    translateFunction(ts, f);
   }
 
   translateUserAttributes(unit.file_attributes, ts.ue->m_fileAttributes);

@@ -12,7 +12,7 @@ pub type RepoAuthType<'arena> = Str<'arena>;
 /// Export these publicly so consumers of hhbc_ast don't have to know the
 /// internal details about the ffi.
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 #[repr(C)]
 pub enum ParamName<'arena> {
     ParamUnnamed(isize),
@@ -41,7 +41,7 @@ impl Label {
 pub type NumParams = u32;
 pub type ByRefs<'arena> = Slice<'arena, bool>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 #[repr(C)]
 pub struct FCallArgs<'arena> {
     pub flags: FCallArgsFlags,
@@ -120,7 +120,7 @@ impl<'arena> FCallArgs<'arena> {
 /// Local variable numbers are ultimately encoded as IVA, limited to u32.
 /// Locals with idx < num_params + num_decl_vars are considered named,
 /// higher numbered locals are considered unnamed.
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[repr(C)]
 pub struct Local {
     /// 0-based index into HHBC stack frame locals.
@@ -145,7 +145,7 @@ impl Local {
     }
 }
 
-#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(C)]
 pub struct IterId {
     /// 0-based index into HHBC stack frame iterators
@@ -158,7 +158,7 @@ impl std::fmt::Display for IterId {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 #[repr(C)]
 pub struct IterArgs {
     pub iter_id: IterId,
@@ -169,7 +169,7 @@ pub struct IterArgs {
 /// Conventionally this is "A_" followed by an integer
 pub type AdataId<'arena> = Str<'arena>;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
 #[repr(C)]
 pub enum MemberKey<'arena> {
     EC(StackIndex, ReadonlyOp),
@@ -263,14 +263,14 @@ impl From<Visibility> for hhvm_types_ffi::Attr {
 /// A Contiguous range of locals. The canonical (default) empty
 /// range is {0, 0}. This is normally only used for unnamed locals
 /// but nothing prevents arbitrary ranges.
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, Hash, Eq, PartialEq)]
 #[repr(C)]
 pub struct LocalRange {
     pub start: Local,
     pub len: u32,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq, Default)]
 #[repr(C)]
 pub struct SrcLoc {
     pub line_begin: isize,
@@ -281,7 +281,7 @@ pub struct SrcLoc {
 
 /// These are HHAS pseudo-instructions that are handled in the HHAS parser and
 /// do not have HHBC opcodes equivalents.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 #[repr(C)]
 pub enum Pseudo<'arena> {
     Break(isize),
@@ -309,7 +309,7 @@ pub trait Targets {
     fn targets_mut(&mut self) -> &mut [Label];
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 #[repr(C)]
 pub enum Instruct<'arena> {
     // HHVM opcodes.

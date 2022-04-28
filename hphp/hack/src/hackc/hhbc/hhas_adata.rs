@@ -12,7 +12,7 @@ pub const VEC_PREFIX: &str = "v";
 pub const DICT_PREFIX: &str = "D";
 pub const KEYSET_PREFIX: &str = "k";
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 #[repr(C)]
 pub struct HhasAdata<'arena> {
     pub id: Str<'arena>,

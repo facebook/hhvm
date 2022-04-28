@@ -6,7 +6,7 @@
 use ffi::{Maybe, Maybe::*, Str};
 
 /// Type info has additional optional user type
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[repr(C)]
 pub struct HhasTypeInfo<'arena> {
     pub user_type: Maybe<Str<'arena>>,
@@ -18,7 +18,7 @@ pub mod constraint {
     use ffi::{Maybe, Maybe::Just, Str};
     use hhvm_types_ffi::ffi::TypeConstraintFlags;
 
-    #[derive(Clone, Default, Debug)]
+    #[derive(Clone, Default, Debug, Eq, PartialEq)]
     #[repr(C)]
     pub struct Constraint<'arena> {
         pub name: Maybe<Str<'arena>>,

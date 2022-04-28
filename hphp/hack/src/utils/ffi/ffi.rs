@@ -413,6 +413,20 @@ impl<'a, T> std::ops::IndexMut<usize> for BumpSliceMut<'a, T> {
         &mut self.as_mut()[i]
     }
 }
+impl<'a, T: PartialEq> PartialEq for BumpSliceMut<'a, T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.iter().zip(other.iter()).all(|(a, b)| a == b)
+    }
+}
+impl<'a, T: Eq> Eq for BumpSliceMut<'a, T> {}
+impl<'a, T: Hash> Hash for BumpSliceMut<'a, T> {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        for i in self.iter() {
+            i.hash(hasher);
+        }
+    }
+}
+
 impl<'a, T> AsRef<[T]> for BumpSliceMut<'a, T> {
     fn as_ref<'r>(&'r self) -> &'r [T] {
         // Safety:

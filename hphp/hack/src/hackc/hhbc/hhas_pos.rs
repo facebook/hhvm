@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
 pub struct HhasPos {
     pub line_begin: usize,
@@ -39,7 +39,7 @@ impl std::convert::From<oxidized::pos::Pos> for HhasPos {
 }
 
 /// Span, emitted as prefix to classes and functions
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
 pub struct HhasSpan {
     pub line_begin: usize,

@@ -10,7 +10,7 @@ use crate::{
 };
 use ffi::{Maybe, Pair, Slice, Str};
 
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, Eq, PartialEq)]
 #[repr(C)]
 pub struct HhasBodyEnv<'arena> {
     pub is_namespaced: bool,

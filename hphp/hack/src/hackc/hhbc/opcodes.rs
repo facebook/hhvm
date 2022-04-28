@@ -14,7 +14,7 @@ use emit_opcodes_macro::Targets;
 use ffi::{BumpSliceMut, Slice, Str};
 
 #[emit_opcodes_macro::emit_opcodes]
-#[derive(Clone, Debug, Targets)]
+#[derive(Clone, Debug, Targets, Hash, Eq, PartialEq)]
 #[repr(C)]
 pub enum Opcode<'arena> {
     // This is filled in by the emit_opcodes macro.  It can be printed using the

@@ -11,7 +11,7 @@ use crate::{
 use ffi::{Maybe, Pair, Slice, Str};
 use hhvm_types_ffi::ffi::Attr;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 #[repr(C)]
 pub enum TraitReqKind {
     MustExtend,

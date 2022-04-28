@@ -10,7 +10,7 @@ use crate::{
 };
 use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[repr(C)]
 pub struct HhasParam<'arena> {
     pub name: Str<'arena>,

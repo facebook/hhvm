@@ -12,7 +12,7 @@ use oxidized::{
     ast_defs::Id,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 #[repr(C)]
 pub struct HhasCtxConstant<'arena> {
     pub name: Str<'arena>,

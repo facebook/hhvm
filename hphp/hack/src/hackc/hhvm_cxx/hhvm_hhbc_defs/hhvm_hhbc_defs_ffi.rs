@@ -12,7 +12,7 @@ pub mod ffi {
     // these enum variants that they match the definition in
     // fcall-args-flags.h.
     #[repr(u16)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum FCallArgsFlags {
         // This maps to a non-class enum in C++ so the variant names are chosen
         // to avoid naming collisions.
@@ -33,7 +33,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum IsTypeOp {
         Null,
         Bool,
@@ -56,7 +56,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum FatalOp {
         Runtime,
         Parse,
@@ -64,14 +64,14 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum InitPropOp {
         Static,
         NonStatic,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum SpecialClsRef {
         SelfCls,
         LateBoundCls,
@@ -79,7 +79,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum MOpMode {
         None,
         Warn,
@@ -89,7 +89,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum QueryMOp {
         CGet,
         CGetQuiet,
@@ -98,21 +98,21 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum TypeStructResolveOp {
         Resolve,
         DontResolve,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum IsLogAsDynamicCallOp {
         LogAsDynamicCall,
         DontLogAsDynamicCall,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum ReadonlyOp {
         Any,
         Readonly,
@@ -122,42 +122,42 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum SetRangeOp {
         Forward,
         Reverse,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum ContCheckOp {
         IgnoreStarted,
         CheckStarted,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum SwitchKind {
         Unbounded,
         Bounded,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum ObjMethodOp {
         NullThrows,
         NullSafe,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum SilenceOp {
         Start,
         End,
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum BareThisOp {
         Notice,
         NoNotice,
@@ -165,7 +165,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum IncDecOp {
         PreInc,
         PostInc,
@@ -178,7 +178,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum CollectionType {
         Vector = 0x11,
         Map = 0x12,
@@ -190,7 +190,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum SetOpOp {
         PlusEqual,
         MinusEqual,
@@ -210,7 +210,7 @@ pub mod ffi {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
     enum OODeclExistsOp {
         Class,
         Interface,

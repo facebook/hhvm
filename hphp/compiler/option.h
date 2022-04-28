@@ -57,6 +57,12 @@ struct Option {
   static bool CachePHPFile;
 
   /*
+   * If true, HHBBC will const fold File and Dir bytecodes to static
+   * strings (using SourceRoot).
+   */
+  static bool ConstFoldFileBC;
+
+  /*
    * Autoload information for resolving parse on-demand
    */
   static hphp_fast_string_imap<std::string> AutoloadClassMap;

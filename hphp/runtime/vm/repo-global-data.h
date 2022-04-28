@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/base/config.h"
 
+#include "hphp/util/optional.h"
+
 #include <cstdint>
 #include <vector>
 
@@ -167,6 +169,12 @@ struct RepoGlobalData {
 
   bool EnableImplicitContext = false;
 
+  /*
+   * If set, const fold the File and Dir bytecodes, using this as the
+   * SourceRoot.
+   */
+  Optional<std::string> SourceRootForFileBC;
+
   // Load the appropriate options into their matching
   // RuntimeOptions. If `loadConstantFuncs' is true, also deserialize
   // ConstantFunctions and store it in RuntimeOptions (this can only
@@ -212,6 +220,7 @@ struct RepoGlobalData {
       (DiamondTraitMethods)
       (EvalCoeffectEnforcementLevels)
       (EnableImplicitContext)
+      (SourceRootForFileBC)
       ;
   }
 };

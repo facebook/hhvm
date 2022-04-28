@@ -18,7 +18,9 @@
 
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/option.h"
+
 #include "hphp/hhbbc/hhbbc.h"
+#include "hphp/hhbbc/options.h"
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -182,6 +184,10 @@ RepoGlobalData getGlobalData() {
   gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
   gd.EnableImplicitContext = RO::EvalEnableImplicitContext;
+
+  if (Option::ConstFoldFileBC) {
+    gd.SourceRootForFileBC.emplace(RO::SourceRoot);
+  }
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));
@@ -394,6 +400,9 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
           Timer timer(Timer::WallTime, "running HHBBC");
           HphpSessionAndThread _(Treadmill::SessionKind::CompilerEmit);
           try {
+            if (Option::ConstFoldFileBC) {
+              HHBBC::options.SourceRootForFileBC = RO::SourceRoot;
+            }
             // We rely on this function to provide a value to arrTable
             HHBBC::whole_program(
               std::move(program), ueq, arrTable,

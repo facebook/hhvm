@@ -335,7 +335,7 @@ RepoGlobalData get_global_data() {
   gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
   gd.EnableImplicitContext = RO::EvalEnableImplicitContext;
-
+  gd.SourceRootForFileBC = options.SourceRootForFileBC;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));
@@ -467,6 +467,7 @@ int main(int argc, char** argv) try {
 
   auto const& gd = RepoFile::globalData();
   gd.load(false);
+  options.SourceRootForFileBC = gd.SourceRootForFileBC;
   if (gd.InitialNamedEntityTableSize) {
     RO::EvalInitialNamedEntityTableSize  = gd.InitialNamedEntityTableSize;
   }

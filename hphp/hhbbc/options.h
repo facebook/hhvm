@@ -205,6 +205,12 @@ struct Options {
   bool FlattenTraits = true;
 
   /*
+   * If set, replace the File and Dir bytecodes with constant strings,
+   * using this as the SourceRoot.
+   */
+  Optional<std::string> SourceRootForFileBC;
+
+  /*
    * The filepath where to save the stats file.  If the path is empty, then we
    * save the stats file to a temporary file.
    */

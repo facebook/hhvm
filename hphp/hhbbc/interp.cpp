@@ -976,9 +976,52 @@ void in(ISS& env, const bc::ClsCnsD& op) {
   clsCnsImpl(env, clsExact(*rcls), sval(op.str1));
 }
 
-void in(ISS& env, const bc::File&)   { effect_free(env); push(env, TSStr); }
-void in(ISS& env, const bc::Dir&)    { effect_free(env); push(env, TSStr); }
-void in(ISS& env, const bc::Method&) { effect_free(env); push(env, TSStr); }
+void in(ISS& env, const bc::File&) {
+  if (!options.SourceRootForFileBC) {
+    effect_free(env);
+    return push(env, TSStr);
+  }
+
+  auto filename = env.ctx.func->originalFilename
+    ? env.ctx.func->originalFilename
+    : env.ctx.func->unit->filename;
+  if (!FileUtil::isAbsolutePath(filename->slice())) {
+    filename = makeStaticString(
+      *options.SourceRootForFileBC + filename->toCppString()
+    );
+  }
+  constprop(env);
+  push(env, sval(filename));
+}
+
+void in(ISS& env, const bc::Dir&) {
+  if (!options.SourceRootForFileBC) {
+    effect_free(env);
+    return push(env, TSStr);
+  }
+
+  auto filename = env.ctx.func->originalFilename
+    ? env.ctx.func->originalFilename
+    : env.ctx.func->unit->filename;
+  if (!FileUtil::isAbsolutePath(filename->slice())) {
+    filename = makeStaticString(
+      *options.SourceRootForFileBC + filename->toCppString()
+    );
+  }
+  constprop(env);
+  push(env, sval(makeStaticString(FileUtil::dirname(StrNR{filename}))));
+}
+
+void in(ISS& env, const bc::Method&) {
+  auto const fullName = [&] () -> const StringData* {
+    if (!env.ctx.func->cls) return env.ctx.func->name;
+    return makeStaticString(
+      folly::sformat("{}::{}", env.ctx.func->cls->name, env.ctx.func->name)
+    );
+  }();
+  constprop(env);
+  push(env, sval(fullName));
+}
 
 void in(ISS& env, const bc::FuncCred&) { effect_free(env); push(env, TObj); }
 

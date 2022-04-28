@@ -107,6 +107,10 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(DiamondTraitMethods);
   SHOW(EnableImplicitContext);
 #undef SHOW
+  folly::format(
+    &out, "  SourceRootForFileBC: {}\n",
+    gd.SourceRootForFileBC.value_or("*")
+  );
   return out;
 }
 

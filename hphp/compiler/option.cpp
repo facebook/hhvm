@@ -43,6 +43,8 @@ hphp_fast_string_set Option::PackageExcludeStaticPatterns;
 
 bool Option::CachePHPFile = false;
 
+bool Option::ConstFoldFileBC = false;
+
 hphp_fast_string_imap<std::string> Option::AutoloadClassMap;
 hphp_fast_string_imap<std::string> Option::AutoloadFuncMap;
 hphp_fast_string_map<std::string> Option::AutoloadConstMap;
@@ -138,7 +140,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     AutoloadRoot = Config::GetString(ini, config, "AutoloadMap.root");
   }
 
- Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
+  Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
                "CheckPropTypeHints", RuntimeOption::EvalCheckPropTypeHints);
 
   Config::Bind(RuntimeOption::EnableHipHopSyntax,
@@ -206,6 +208,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   if (ParserDirGroupSizeLimit <= 0) {
     ParserDirGroupSizeLimit = kDefaultParserDirGroupSizeLimit;
   }
+
+  Config::Bind(ConstFoldFileBC, ini, config,
+               "ConstFoldFileBC", ConstFoldFileBC);
 
   Config::Bind(ParserAsyncCleanup, ini, config,
                "ParserAsyncCleanup", ParserAsyncCleanup);

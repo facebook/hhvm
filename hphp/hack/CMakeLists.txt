@@ -119,7 +119,7 @@ invoke_dune(hack_dune_debug debug)
 invoke_dune(hack_dune_test test)
 invoke_dune(hack_dune all)
 
-set(CARGO_BUILD "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh")
+set(INVOKE_CARGO "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh")
 
 set(OPCODE_DATA "${CMAKE_BINARY_DIR}/hphp/tools/opcodes.rs")
 
@@ -180,7 +180,8 @@ add_custom_command(
   OUTPUT ${RUST_OPCODES}
   COMMAND
     . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-     ${CARGO_BUILD} dump-opcodes dump-opcodes --exe
+     ${INVOKE_CARGO} dump-opcodes dump-opcodes &&
+     ${INVOKE_CARGO} dump-opcodes dump_opcodes --run
       --output "${RUST_OPCODES}"
 )
 
@@ -196,13 +197,14 @@ add_custom_command(
   OUTPUT ${HHBC_AST_HEADER}
   COMMAND
    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
+    ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen &&
+    ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --run
       --header "${FFI_HEADER}" --namespaces "HPHP,hackc"
       ${FFI_SRCS} &&
-    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
+    ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --run
       --header "${NAMING_SPECIAL_NAMES_HEADER}" --namespaces "HPHP,hackc,hhbc"
       ${NAMING_SPECIAL_NAMES_SRCS} &&
-    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
+    ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --run
       --header "${HHBC_AST_HEADER}" --namespaces "HPHP,hackc,hhbc"
       --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${HHBC_HEADER}"
       ${HHBC_AST_SRCS}
@@ -260,7 +262,7 @@ function(build_cxx_bridge NAME)
       COMMAND
         ${CMAKE_COMMAND} -E make_directory "${FFI_BRIDGE_BIN}" &&
         . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-        ${CARGO_BUILD} "${NAME}" "${NAME}" --cxx "${FFI_BRIDGE_BIN}" &&
+        ${INVOKE_CARGO} "${NAME}" "${NAME}" --target-dir "${FFI_BRIDGE_BIN}" &&
         ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.cc" "${RUST_PART_CXX}" &&
         ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.h" "${RUST_PART_HEADER}"
       WORKING_DIRECTORY ${FFI_BRIDGE_SRC}

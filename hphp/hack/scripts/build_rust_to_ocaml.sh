@@ -18,28 +18,16 @@ shift 2
 
 while :; do
     case $1 in
-        --cxx) cxx=$2
+        --target-dir) TARGET_DIR=$2
           shift 2
         ;;
-        --exe) exe=$1
+        --run) run=$1
           shift 1
         ;;
-        --output) output=$2
-          shift 2
-        ;;
-        --header) header=$2
-          shift 2
-        ;;
-        --namespaces) namespaces=$2
-          shift 2
-        ;;
-        --includes) includes=$2
-          shift 2
-        ;;
+
         *) break
     esac
 done
-
 
 if [ -z "${HACK_NO_CARGO_VENDOR}" ]; then
   LOCK_FLAG="--frozen"
@@ -47,40 +35,32 @@ else
   LOCK_FLAG="--locked"
 fi
 
-TARGET_DIR="${HACK_BUILD_ROOT}/target"
-if [ -n "$cxx" ]
-then
-  TARGET_DIR=$cxx
+if [ -z "${TARGET_DIR}" ]; then
+  TARGET_DIR="${HACK_BUILD_ROOT}/target"
 fi
 
-profile=debug; profile_flags=
 if [ -z ${HACKDEBUG+1} ]; then
   profile=release; profile_flags="--release"
+else
+  profile=debug; profile_flags=
 fi
+
+BUILD_PARAMS=()
+BUILD_PARAMS+=("$LOCK_FLAG")
+BUILD_PARAMS+=(--quiet)
+BUILD_PARAMS+=(--target-dir "${TARGET_DIR}")
+BUILD_PARAMS+=(--package "$pkg")
+BUILD_PARAMS+=("$profile_flags")
+
 ( # add CARGO_BIN to PATH so that rustc and other tools can be invoked
   [[ -n "$CARGO_BIN" ]] && PATH="$CARGO_BIN:$PATH";
   # note: --manifest-path doesn't work with custom toolchain, so do cd
   cd "$HACK_SOURCE_ROOT" && \
-  sed '/\/facebook\//d' ./.cargo/Cargo.toml.ocaml_build > ./Cargo.toml && \
-  cargo build \
-    $LOCK_FLAG \
-    --quiet \
-    --target-dir "${TARGET_DIR}" \
-    --package "$pkg" \
-    $profile_flags
-if [ -n "$exe" ]
-then
-  if [[ "$pkg" == "ffi_cbindgen" ]]
-  then
-    cargo run --bin ffi_cbindgen -- --header "$header" \
-    --includes "$includes" --namespaces "$namespaces" \
-      "$@"
-  elif [[ "$pkg" == "dump-opcodes" ]]
-  then
-    cargo run --bin dump_opcodes -- -o "$output"
+  sed '/\/facebook\//d' ./.cargo/Cargo.toml.ocaml_build > ./Cargo.toml;
+  if [ -z "$run" ]; then
+    cargo build "${BUILD_PARAMS[@]}" && \
+    cp "${TARGET_DIR}/$profile/lib$lib.a" "lib${lib}.a"
+  else
+    cargo run --bin "$lib" "$@"
   fi
-fi) &&
-if [ -z "$exe" ]
-then
-  cp "${TARGET_DIR}/$profile/lib$lib.a" "lib${lib}.a"
-fi
+)

@@ -17,7 +17,7 @@
  (locks /cargo)
  (action
   (run
-   %{workspace_root}/scripts/build_rust_to_ocaml.sh
+   %{workspace_root}/scripts/invoke_cargo.sh
    rust_facts_ffi
    rust_facts_ffi)))
 

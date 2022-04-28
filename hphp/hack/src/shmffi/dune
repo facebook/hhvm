@@ -13,4 +13,4 @@
   (source_tree %{workspace_root}/src))
  (locks /cargo)
  (action
-  (run %{workspace_root}/scripts/build_rust_to_ocaml.sh shmffi shmffi)))
+  (run %{workspace_root}/scripts/invoke_cargo.sh shmffi shmffi)))

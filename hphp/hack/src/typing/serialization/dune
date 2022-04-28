@@ -24,6 +24,6 @@
  (locks /cargo)
  (action
   (run
-   %{workspace_root}/scripts/build_rust_to_ocaml.sh
+   %{workspace_root}/scripts/invoke_cargo.sh
    typing_ser_ffi
    typing_ser_ffi)))

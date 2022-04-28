@@ -12,4 +12,4 @@
   (source_tree %{workspace_root}/src))
  (locks /cargo)
  (action
-  (run %{workspace_root}/scripts/build_rust_to_ocaml.sh depgraph depgraph)))
+  (run %{workspace_root}/scripts/invoke_cargo.sh depgraph depgraph)))

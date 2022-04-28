@@ -119,7 +119,7 @@ invoke_dune(hack_dune_debug debug)
 invoke_dune(hack_dune_test test)
 invoke_dune(hack_dune all)
 
-set(INVOKE_CARGO "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh")
+set(INVOKE_CARGO "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/invoke_cargo.sh")
 
 set(OPCODE_DATA "${CMAKE_BINARY_DIR}/hphp/tools/opcodes.rs")
 

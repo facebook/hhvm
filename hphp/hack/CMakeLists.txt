@@ -121,13 +121,13 @@ invoke_dune(hack_dune all)
 
 set(CARGO_BUILD "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh")
 
-set(OPCODES "${CMAKE_BINARY_DIR}/hphp/tools/opcodes.rs")
+set(OPCODE_DATA "${CMAKE_BINARY_DIR}/hphp/tools/opcodes.rs")
 
 add_executable(gen-rust1 "${CMAKE_SOURCE_DIR}/hphp/tools/hhbc-gen/gen-rust.cpp")
 add_custom_command(
-  OUTPUT "${OPCODES}"
-  COMMAND gen-rust1 > "${OPCODES}"
-  COMMENT "Generating opcodes.rs"
+  OUTPUT "${OPCODE_DATA}"
+  COMMAND gen-rust1 > "${OPCODE_DATA}"
+  COMMENT "Generating opcode data"
 )
 
 if(DEFINED ENV{HACKDEBUG})
@@ -135,6 +135,8 @@ if(DEFINED ENV{HACKDEBUG})
 else()
   set(PROFILE "release")
 endif()
+
+set(RUST_OPCODES "${CMAKE_BINARY_DIR}/hphp/hack/src/hackc/opcodes.rs")
 
 set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc")
 set(HHBC_AST_SRCS
@@ -158,8 +160,8 @@ set(HHBC_AST_SRCS
   "${HHBC_PREFIX}/hhbc/hhbc_ast.rs"
   "${HHBC_PREFIX}/hhbc/hhbc_ast_ffi_cbindgen.rs"  # Not in a crate.
   "${HHBC_PREFIX}/hhbc/hhbc_id.rs"
-  "${HHBC_PREFIX}/hhbc/opcodes.rs"
   "${HHBC_PREFIX}/hhbc/typed_value.rs"
+  "${RUST_OPCODES}"
 )
 
 set(NAMING_SPECIAL_NAMES_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/naming")
@@ -172,6 +174,14 @@ set(FFI_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/ffi")
 set(FFI_SRCS
    "${FFI_PREFIX}/ffi.rs"
    "${FFI_PREFIX}/ffi_ffi_cbindgen.rs"
+)
+
+add_custom_command(
+  OUTPUT ${RUST_OPCODES}
+  COMMAND
+    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
+     ${CARGO_BUILD} dump-opcodes dump-opcodes --exe
+      --output "${RUST_OPCODES}"
 )
 
 set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-ast.h")
@@ -196,7 +206,7 @@ add_custom_command(
       --header "${HHBC_AST_HEADER}" --namespaces "HPHP,hackc,hhbc"
       --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${HHBC_HEADER}"
       ${HHBC_AST_SRCS}
-  DEPENDS rustc cargo "${OPCODES}"
+  DEPENDS rustc cargo "${OPCODE_DATA}" "${RUST_OPCODES}"
   COMMENT "Generating hhbc-ast.h"
 )
 
@@ -254,7 +264,7 @@ function(build_cxx_bridge NAME)
         ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.cc" "${RUST_PART_CXX}" &&
         ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.h" "${RUST_PART_HEADER}"
       WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
-      DEPENDS rustc cargo "${OPCODES}"
+      DEPENDS rustc cargo "${OPCODED_DATA}"
   )
   add_custom_target(
     "${NAME}_cxx"
@@ -302,8 +312,8 @@ endif()
 # you're working with Hack, but means that e.g. hhvm can't find
 # `hh_single_compile` in the source tree. Keep it around, but require it to be
 # explicitly used
-add_custom_target(hack ALL DEPENDS hack_dune "${OPCODES}")
-add_custom_target(hack_test DEPENDS hack_dune_test "${OPCODES}")
+add_custom_target(hack ALL DEPENDS hack_dune "${OPCODE_DATA}")
+add_custom_target(hack_test DEPENDS hack_dune_test "${OPCODE_DATA}")
 
 configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)
 configure_file(dev_env_common.sh.in dev_env_common.sh ESCAPE_QUOTES @ONLY)

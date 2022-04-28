@@ -24,6 +24,9 @@ while :; do
         --exe) exe=$1
           shift 1
         ;;
+        --output) output=$2
+          shift 2
+        ;;
         --header) header=$2
           shift 2
         ;;
@@ -67,9 +70,15 @@ fi
     $profile_flags
 if [ -n "$exe" ]
 then
-  cargo run --bin ffi_cbindgen -- --header "$header" \
-  --includes "$includes" --namespaces "$namespaces" \
-    "$@"
+  if [[ "$pkg" == "ffi_cbindgen" ]]
+  then
+    cargo run --bin ffi_cbindgen -- --header "$header" \
+    --includes "$includes" --namespaces "$namespaces" \
+      "$@"
+  elif [[ "$pkg" == "dump-opcodes" ]]
+  then
+    cargo run --bin dump_opcodes -- -o "$output"
+  fi
 fi) &&
 if [ -z "$exe" ]
 then

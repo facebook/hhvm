@@ -6,6 +6,8 @@
  *
  *)
 
+[@@@warning "-3"]
+
 open Hh_prelude
 
 type env = {

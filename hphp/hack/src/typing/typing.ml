@@ -101,8 +101,8 @@ let mk_hole ?(source = Aast.Typing) ((_, pos, _) as expr) ~ty_have ~ty_expect =
     in
     make_typed_expr pos ty_hole @@ Aast.Hole (expr, ty_have, ty_expect, source)
 
-let hole_on_err (te : Tast.expr) ~err_opt =
-  Option.value_map err_opt ~default:te ~f:(fun (ty_have, ty_expect) ->
+let hole_on_ty_mismatch (te : Tast.expr) ~ty_mismatch_opt =
+  Option.value_map ty_mismatch_opt ~default:te ~f:(fun (ty_have, ty_expect) ->
       mk_hole te ~ty_have ~ty_expect)
 
 (* When typing compound assignments we generate a 'fake' expression which
@@ -2427,7 +2427,7 @@ and stmt_ env pos st =
       mk_ty_mismatch_opt rty return_type.et_type ty_err_opt
     in
     let env = LEnv.move_and_merge_next_in_cont env C.Exit in
-    (env, Aast.Return (Some (hole_on_err ~err_opt:ty_mismatch_opt te)))
+    (env, Aast.Return (Some (hole_on_ty_mismatch ~ty_mismatch_opt te)))
   | Do (b, e) ->
     (* NOTE: leaks scope as currently implemented; this matches
        the behavior in naming (cf. `do_stmt` in naming/naming.ml).
@@ -2590,7 +2590,9 @@ and stmt_ env pos st =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           let env = LEnv.save_and_merge_next_in_cont env C.Continue in
           let (_, p1, _) = e1 in
-          let ((env, ty_err_opt), tk, tv, err_opt) = as_expr env ty1 p1 e2 in
+          let ((env, ty_err_opt), tk, tv, ty_mismatch_opt) =
+            as_expr env ty1 p1 e2
+          in
           Option.iter ~f:Errors.add_typing_error ty_err_opt;
           let (env, (te2, tb)) =
             infer_loop env (fun env ->
@@ -2607,7 +2609,7 @@ and stmt_ env pos st =
           let env =
             LEnv.update_next_from_conts env [C.Continue; C.Break; C.Next]
           in
-          (env, (hole_on_err ~err_opt te1, te2, tb)))
+          (env, (hole_on_ty_mismatch ~ty_mismatch_opt te1, te2, tb)))
     in
     (env, Aast.Foreach (te1, te2, tb))
   | Try (tb, cl, fb) ->
@@ -2625,10 +2627,10 @@ and stmt_ env pos st =
           match e1 with
           | Some e1 ->
             let pos = fst e1 in
-            let (env, _, _, err_opt) =
+            let (env, _, _, ty_mismatch_opt) =
               assign pos env ((), pos, Lvar e1) pos2 ty2
             in
-            (env, (Some e1, hole_on_err ~err_opt te2) :: tel)
+            (env, (Some e1, hole_on_ty_mismatch ~ty_mismatch_opt te2) :: tel)
           | None -> (env, (None, te2) :: tel))
     in
     let (env, b) = block env b in
@@ -3205,7 +3207,7 @@ and expr_
     let exprs =
       if add_holes then
         List.map2_exn
-          ~f:(fun te err_opt -> hole_on_err te ~err_opt)
+          ~f:(fun te ty_mismatch_opt -> hole_on_ty_mismatch te ~ty_mismatch_opt)
           exprs
           err_opts
       else
@@ -3981,8 +3983,12 @@ and expr_
       p
       (Aast.Pair
          ( th,
-           hole_on_err te1 ~err_opt:(Option.join @@ List.hd err_opt1),
-           hole_on_err te2 ~err_opt:(Option.join @@ List.hd err_opt2) ))
+           hole_on_ty_mismatch
+             te1
+             ~ty_mismatch_opt:(Option.join @@ List.hd err_opt1),
+           hole_on_ty_mismatch
+             te2
+             ~ty_mismatch_opt:(Option.join @@ List.hd err_opt2) ))
       ty
   | Array_get (e, None) ->
     let (env, te, _) = update_array_type p env e valkind in
@@ -3999,7 +4005,7 @@ and expr_
     let env = might_throw env in
     let is_lvalue = is_lvalue valkind in
     let (_, p1, _) = e1 in
-    let (env, (ty, arr_err_opt, key_err_opt)) =
+    let (env, (ty, arr_ty_mismatch_opt, key_ty_mismatch_opt)) =
       Typing_array_access.array_get
         ~array_pos:p1
         ~expr_pos:p
@@ -4014,8 +4020,9 @@ and expr_
       env
       p
       (Aast.Array_get
-         ( hole_on_err ~err_opt:arr_err_opt te1,
-           Some (hole_on_err ~err_opt:key_err_opt te2) ))
+         ( hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1,
+           Some (hole_on_ty_mismatch ~ty_mismatch_opt:key_ty_mismatch_opt te2)
+         ))
       ty
   | Call (((_, pos_id, Id (_, s)) as e), explicit_targs, el, None)
     when Hash_set.mem typing_env_pseudofunctions s ->
@@ -4175,8 +4182,11 @@ and expr_
     | None ->
       let (env, te2, ty2) = raw_expr env e2 in
       let (_, pos2, _) = te2 in
-      let (env, te1, ty, err_opt) = assign p env e1 pos2 ty2 in
-      let te = Aast.Binop (Ast_defs.Eq None, te1, hole_on_err ~err_opt te2) in
+      let (env, te1, ty, ty_mismatch_opt) = assign p env e1 pos2 ty2 in
+      let te =
+        Aast.Binop
+          (Ast_defs.Eq None, te1, hole_on_ty_mismatch ~ty_mismatch_opt te2)
+      in
       make_result env p te ty)
   | Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2) ->
     let c = Ast_defs.(equal_bop bop Ampamp) in
@@ -4381,7 +4391,7 @@ and expr_
         ~explicit_targs:None
     in
     let lty1 = LoclType ty1 in
-    let ((env, ty_err_opt), result_ty, err_opt) =
+    let ((env, ty_err_opt), result_ty, ty_mismatch_opt) =
       match nullsafe with
       | None ->
         let (env, ty_err_opt) =
@@ -4430,7 +4440,7 @@ and expr_
       env
       p
       (Aast.Obj_get
-         ( hole_on_err ~err_opt te1,
+         ( hole_on_ty_mismatch ~ty_mismatch_opt te1,
            Tast.make_typed_expr pm result_ty (Aast.Id m),
            nullflavor,
            prop_or_method ))
@@ -5250,14 +5260,14 @@ and xhp_spread_attribute env c_onto valexpr sid obj =
   in
   (* If we have a subtyping error for any attribute, the best we can do here
      is give an expected type of nothing *)
-  let ty_mismatch =
+  let ty_mismatch_opt =
     if has_ty_mismatch then
       Some (valty, MakeType.nothing Reason.Rnone)
     else
       None
   in
   (* Build the typed attribute node *)
-  let typed_attr = Aast.Xhp_spread (hole_on_err ~err_opt:ty_mismatch te) in
+  let typed_attr = Aast.Xhp_spread (hole_on_ty_mismatch ~ty_mismatch_opt te) in
   (env, typed_attr)
 
 (**
@@ -5270,10 +5280,16 @@ and xhp_simple_attribute env id valexpr sid obj =
   (* This converts the attribute name to a member name. *)
   let name = ":" ^ snd id in
   let attr_pty = ((fst id, name), (p, valty)) in
-  let (env, decl_ty, err_opt) = xhp_attribute_decl_ty env sid obj attr_pty in
+  let (env, decl_ty, ty_mismatch_opt) =
+    xhp_attribute_decl_ty env sid obj attr_pty
+  in
   let typed_attr =
     Aast.Xhp_simple
-      { xs_name = id; xs_type = decl_ty; xs_expr = hole_on_err ~err_opt te }
+      {
+        xs_name = id;
+        xs_type = decl_ty;
+        xs_expr = hole_on_ty_mismatch ~ty_mismatch_opt te;
+      }
   in
   (env, typed_attr)
 
@@ -6239,7 +6255,10 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       in
       let env = might_throw env in
       let (_, p1, _) = obj in
-      let ((env, ty_err_opt), (declared_ty, _tal), lval_err_opt, rval_err_opt) =
+      let ( (env, ty_err_opt),
+            (declared_ty, _tal),
+            lval_ty_mismatch_opt,
+            rval_ty_mismatch_opt ) =
         TOG.obj_get_with_mismatches
           ~obj_pos:p1
           ~is_method:false
@@ -6260,7 +6279,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           pobj
           declared_ty
           (Aast.Obj_get
-             ( hole_on_err ~err_opt:lval_err_opt tobj,
+             ( hole_on_ty_mismatch ~ty_mismatch_opt:lval_ty_mismatch_opt tobj,
                Tast.make_typed_expr pm declared_ty (Aast.Id m),
                nullflavor,
                prop_or_method ))
@@ -6275,8 +6294,8 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
             Inter.intersect env ~r:(Reason.Rwitness p) declared_ty ty2
           in
           let env = set_valid_rvalue p env local refined_ty in
-          (env, te1, ty2, rval_err_opt)
-        | _ -> (env, te1, ty2, rval_err_opt)
+          (env, te1, ty2, rval_ty_mismatch_opt)
+        | _ -> (env, te1, ty2, rval_ty_mismatch_opt)
       end
     | (_, _, Obj_get _) ->
       let lenv = env.lenv in
@@ -6326,7 +6345,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
     | (_, pos, Array_get (e1, None)) ->
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let (_, p1, _) = e1 in
-      let (env, (ty1', arr_err_opt, val_err_opt)) =
+      let (env, (ty1', arr_ty_mismatch_opt, val_ty_mismatch_opt)) =
         Typing_array_access.assign_array_append
           ~array_pos:p1
           ~expr_pos:p
@@ -6338,28 +6357,31 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       let (ty1_is_hack_collection, ty_err_opt) = is_hack_collection env ty1 in
       let (env, te1) =
         if ty1_is_hack_collection then
-          (env, hole_on_err ~err_opt:arr_err_opt te1)
+          (env, hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1)
         else
           let (env, te1, ty, _) =
             assign_with_subtype_err_ p ur env e1 p1 ty1'
           in
           (* Update the actual type to that after assignment *)
-          let arr_err_opt =
-            Option.map arr_err_opt ~f:(fun (_, ty_expect) -> (ty, ty_expect))
+          let arr_ty_mismatch_opt =
+            Option.map arr_ty_mismatch_opt ~f:(fun (_, ty_expect) ->
+                (ty, ty_expect))
           in
-          (env, hole_on_err ~err_opt:arr_err_opt te1)
+          (env, hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1)
       in
       let (env, te, ty) =
         make_result env pos (Aast.Array_get (te1, None)) ty2
       in
       Option.iter ~f:Errors.add_typing_error ty_err_opt;
-      (env, te, ty, val_err_opt)
+      (env, te, ty, val_ty_mismatch_opt)
     | (_, pos, Array_get (e1, Some e)) ->
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let (env, te, ty) = expr env e ~allow_awaitable in
       let env = might_throw env in
       let (_, p1, _) = e1 in
-      let (env, (ty1', arr_err_opt, key_err_opt, val_err_opt)) =
+      let ( env,
+            (ty1', arr_ty_mismatch_opt, key_ty_mismatch_opt, val_ty_mismatch_opt)
+          ) =
         Typing_array_access.assign_array_get
           ~array_pos:p1
           ~expr_pos:p
@@ -6373,24 +6395,28 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       let (ty1_is_hack_collection, ty_err_opt) = is_hack_collection env ty1 in
       let (env, te1) =
         if ty1_is_hack_collection then
-          (env, hole_on_err ~err_opt:arr_err_opt te1)
+          (env, hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1)
         else
           let (env, te1, ty, _) =
             assign_with_subtype_err_ p ur env e1 p1 ty1'
           in
           (* Update the actual type to that after assignment *)
-          let arr_err_opt =
-            Option.map arr_err_opt ~f:(fun (_, ty_expect) -> (ty, ty_expect))
+          let arr_ty_mismatch_opt =
+            Option.map arr_ty_mismatch_opt ~f:(fun (_, ty_expect) ->
+                (ty, ty_expect))
           in
-          (env, hole_on_err ~err_opt:arr_err_opt te1)
+          (env, hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1)
       in
       Option.iter ~f:Errors.add_typing_error ty_err_opt;
       ( env,
         ( ty2,
           pos,
-          Aast.Array_get (te1, Some (hole_on_err ~err_opt:key_err_opt te)) ),
+          Aast.Array_get
+            ( te1,
+              Some (hole_on_ty_mismatch ~ty_mismatch_opt:key_ty_mismatch_opt te)
+            ) ),
         ty2,
-        val_err_opt )
+        val_ty_mismatch_opt )
     | _ -> assign_simple p ur env e1 ty2)
 
 and assign_simple pos ur env e1 ty2 =
@@ -6466,7 +6492,7 @@ and arraykey_value
           ty_expected
           Typing_error.Callback.unify_error
       in
-      let (ty_mismatch, e2) =
+      let (ty_mismatch_opt, e2) =
         match e1 with
         | None when is_option ->
           let ty_str = lazy (Typing_print.full_strip_ns env ty_actual) in
@@ -6493,7 +6519,7 @@ and arraykey_value
         | Some _ -> (Some (ty_actual, ty_arraykey), None)
       in
       let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-      ((env, ty_err_opt), hole_on_err ~err_opt:ty_mismatch te)
+      ((env, ty_err_opt), hole_on_ty_mismatch ~ty_mismatch_opt te)
     else
       let env =
         Typing_coercion.coerce_type
@@ -6763,14 +6789,17 @@ and dispatch_call
                      (Typing_error.Reasons_callback.invalid_echo_argument_at
                         pos)
               in
-              let ty_mismatch = mk_ty_mismatch_opt ty arraykey_ty ty_err_opt in
+              let ty_mismatch_opt =
+                mk_ty_mismatch_opt ty arraykey_ty ty_err_opt
+              in
               let ty_errs =
                 Option.value_map
                   ~default:ty_errs
                   ~f:(fun e -> e :: ty_errs)
                   ty_err_opt
               in
-              ((env, ty_errs), (pk, hole_on_err ~err_opt:ty_mismatch te) :: tel))
+              ( (env, ty_errs),
+                (pk, hole_on_ty_mismatch ~ty_mismatch_opt te) :: tel ))
         in
         let tel = List.rev rev_tel in
         let should_forget_fakes = false in
@@ -7129,7 +7158,10 @@ and dispatch_call
       | OG_nullsafe -> Some p
     in
     let (_, p1, _) = e1 in
-    let ((env, ty_err_opt), (tfty, tal), lval_err_opt, _rval_err_opt) =
+    let ( (env, ty_err_opt),
+          (tfty, tal),
+          lval_ty_mismatch_opt,
+          _rval_ty_mismatch_opt ) =
       TOG.obj_get_with_mismatches
         ~obj_pos:p1
         ~is_method:true
@@ -7156,7 +7188,7 @@ and dispatch_call
            fpos
            tfty
            (Aast.Obj_get
-              ( hole_on_err ~err_opt:lval_err_opt te1,
+              ( hole_on_ty_mismatch ~ty_mismatch_opt:lval_ty_mismatch_opt te1,
                 Tast.make_typed_expr pos_id tfty (Aast.Id m),
                 nullflavor,
                 Is_method )))
@@ -7221,7 +7253,9 @@ and dispatch_call
     in
     Option.iter ~f:Errors.add_typing_error ty_err_opt;
     let ty_nothing = MakeType.nothing Reason.none in
-    let err_opt = mk_ty_mismatch_opt receiver_ty ty_nothing ty_err_opt in
+    let ty_mismatch_opt =
+      mk_ty_mismatch_opt receiver_ty ty_nothing ty_err_opt
+    in
 
     (* Perhaps solve for `method_ty`. Opening and closing a scope is too coarse
        here - type parameters are localised to fresh type variables over the
@@ -7270,7 +7304,7 @@ and dispatch_call
            fpos
            method_ty
            (Aast.Obj_get
-              ( hole_on_err ~err_opt typed_receiver,
+              ( hole_on_ty_mismatch ~ty_mismatch_opt typed_receiver,
                 Tast.make_typed_expr pos_id method_ty (Aast.Id meth),
                 nullflavor,
                 Is_method )))
@@ -8137,13 +8171,13 @@ and class_expr
           (err_witness env p, Error (base_ty, ty_expect)) )
     in
     let ((env, ty_err_opt), (result_ty, err_res)) = resolve_ety env ty in
-    let err_opt =
+    let ty_mismatch_opt =
       Result.fold
         err_res
         ~ok:(fun _ -> None)
         ~error:(fun (ty_act, ty_expect) -> Some (ty_act, ty_expect))
     in
-    let te = hole_on_err ~err_opt te in
+    let te = hole_on_ty_mismatch ~ty_mismatch_opt te in
     let x = make_result env [] (Aast.CIexpr te) result_ty in
     Option.iter ~f:Errors.add_typing_error ty_err_opt;
     x
@@ -8413,8 +8447,8 @@ and call
                   ty
                 @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
               in
-              let ty_mismatch = mk_ty_mismatch_opt e_ty ty ty_err_opt in
-              ((env, ty_err_opt), (pk, hole_on_err ~err_opt:ty_mismatch te)))
+              let ty_mismatch_opt = mk_ty_mismatch_opt e_ty ty ty_err_opt in
+              ((env, ty_err_opt), (pk, hole_on_ty_mismatch ~ty_mismatch_opt te)))
         in
         let (env, e2) =
           call_untyped_unpack env (Reason.to_pos r) unpacked_element
@@ -8440,7 +8474,7 @@ and call
         let (env, tel) =
           List.map_env env el ~f:(fun env (pk, elt) ->
               let (env, te, ty) = expr ~expected:expected_arg_ty env elt in
-              let (env, err_opt) =
+              let (env, ty_mismatch_opt) =
                 if TCO.global_inference (Env.get_tcopt env) then
                   match get_node efty with
                   | Terr
@@ -8472,7 +8506,7 @@ and call
                   env
                 | Ast_defs.Pnormal -> env
               in
-              (env, (pk, hole_on_err ~err_opt te)))
+              (env, (pk, hole_on_ty_mismatch ~ty_mismatch_opt te)))
         in
         let (env, ty_err_opt) =
           call_untyped_unpack env (Reason.to_pos r) unpacked_element
@@ -8701,10 +8735,10 @@ and call
                   env
                   e
             in
-            let (env, err_opt) =
+            let (env, ty_mismatch_opt) =
               call_param ~dynamic_func env param param_kind (e, ty) ~is_variadic
             in
-            (env, Some (hole_on_err ~err_opt te, ty))
+            (env, Some (hole_on_ty_mismatch ~ty_mismatch_opt te, ty))
           | None ->
             let expected =
               ExpectedTy.make pos Reason.URparam (Typing_utils.mk_tany env pos)
@@ -8937,9 +8971,10 @@ and call
                   | ([], None) -> te
                   | _ ->
                     let (_, pos, _) = te in
-                    hole_on_err
+                    hole_on_ty_mismatch
                       te
-                      ~err_opt:(Some (ty, pack_errs pos ty subtyping_errs))
+                      ~ty_mismatch_opt:
+                        (Some (ty, pack_errs pos ty subtyping_errs))
                 in
                 (env, te)
             in
@@ -9289,9 +9324,9 @@ and string2 env idl =
               stringlike
               Typing_error.Callback.strict_str_interp_type_mismatch
           in
-          let ty_mismatch = mk_ty_mismatch_opt ty stringlike ty_err_opt in
+          let ty_mismatch_opt = mk_ty_mismatch_opt ty stringlike ty_err_opt in
           Option.iter ~f:Errors.add_typing_error ty_err_opt;
-          (env, hole_on_err ~err_opt:ty_mismatch te :: tel)
+          (env, hole_on_ty_mismatch ~ty_mismatch_opt te :: tel)
         ) else
           let env = Typing_substring.sub_string p env ty in
           (env, te :: tel))

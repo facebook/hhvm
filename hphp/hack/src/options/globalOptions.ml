@@ -135,6 +135,8 @@ type t = {
   tco_specify_manifold_api_key: bool;
   tco_saved_state_manifold_api_key: string option;
   tco_profile_top_level_definitions: bool;
+  tco_allow_all_files_for_module_declarations: bool;
+  tco_allowed_files_for_module_declarations: string list;
 }
 [@@deriving eq, show]
 
@@ -319,6 +321,8 @@ let default =
     tco_specify_manifold_api_key = false;
     tco_saved_state_manifold_api_key = None;
     tco_profile_top_level_definitions = false;
+    tco_allow_all_files_for_module_declarations = false;
+    tco_allowed_files_for_module_declarations = [];
   }
 
 let make
@@ -473,6 +477,10 @@ let make
       default.tco_saved_state_manifold_api_key)
     ?(tco_profile_top_level_definitions =
       default.tco_profile_top_level_definitions)
+    ?(tco_allow_all_files_for_module_declarations =
+      default.tco_allow_all_files_for_module_declarations)
+    ?(tco_allowed_files_for_module_declarations =
+      default.tco_allowed_files_for_module_declarations)
     () =
   {
     tco_experimental_features;
@@ -600,6 +608,8 @@ let make
     tco_specify_manifold_api_key;
     tco_saved_state_manifold_api_key;
     tco_profile_top_level_definitions;
+    tco_allow_all_files_for_module_declarations;
+    tco_allowed_files_for_module_declarations;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -887,3 +897,9 @@ let tco_specify_manifold_api_key t = t.tco_specify_manifold_api_key
 let tco_saved_state_manifold_api_key t = t.tco_saved_state_manifold_api_key
 
 let tco_profile_top_level_definitions t = t.tco_profile_top_level_definitions
+
+let tco_allow_all_files_for_module_declarations t =
+  t.tco_allow_all_files_for_module_declarations
+
+let tco_allowed_files_for_module_declarations t =
+  t.tco_allowed_files_for_module_declarations

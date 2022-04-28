@@ -236,6 +236,7 @@ type t =
       pos: Pos.t;
       classish_kind: Ast_defs.classish_kind;
     }
+  | Module_declaration_outside_allowed_files of Pos.t
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -1072,6 +1073,14 @@ let explicit_consistent_constructor ck pos =
     )
     []
 
+let module_declaration_outside_allowed_files pos =
+  User_error.make
+    Error_code.(to_enum ModuleDeclarationOutsideAllowedFiles)
+    ( pos,
+      "This module declaration exists in an unapproved file. "
+      ^ "The set of approved files is in .hhconfig" )
+    []
+
 let to_user_error = function
   | Unsupported_trait_use_as pos -> unsupported_trait_use_as pos
   | Unsupported_instead_of pos -> unsupported_instead_of pos
@@ -1197,3 +1206,5 @@ let to_user_error = function
       pos
   | Explicit_consistent_constructor { pos; classish_kind } ->
     explicit_consistent_constructor classish_kind pos
+  | Module_declaration_outside_allowed_files pos ->
+    module_declaration_outside_allowed_files pos

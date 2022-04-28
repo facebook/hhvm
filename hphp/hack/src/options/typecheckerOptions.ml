@@ -229,3 +229,9 @@ let saved_state_manifold_api_key =
 
 let profile_top_level_definitions =
   GlobalOptions.tco_profile_top_level_definitions
+
+let allow_all_files_for_module_declarations =
+  GlobalOptions.tco_allow_all_files_for_module_declarations
+
+let allowed_files_for_module_declarations =
+  GlobalOptions.tco_allowed_files_for_module_declarations

@@ -315,6 +315,8 @@ type t = {
   (* Measures and reports the time it takes to typecheck each top-level
      definition. *)
   tco_profile_top_level_definitions: bool;
+  tco_allow_all_files_for_module_declarations: bool;
+  tco_allowed_files_for_module_declarations: string list;
 }
 [@@deriving eq, show]
 
@@ -443,6 +445,8 @@ val make :
   ?tco_specify_manifold_api_key:bool ->
   ?tco_saved_state_manifold_api_key:string option ->
   ?tco_profile_top_level_definitions:bool ->
+  ?tco_allow_all_files_for_module_declarations:bool ->
+  ?tco_allowed_files_for_module_declarations:string list ->
   unit ->
   t
 
@@ -729,3 +733,7 @@ val tco_specify_manifold_api_key : t -> bool
 val tco_saved_state_manifold_api_key : t -> string option
 
 val tco_profile_top_level_definitions : t -> bool
+
+val tco_allow_all_files_for_module_declarations : t -> bool
+
+val tco_allowed_files_for_module_declarations : t -> string list

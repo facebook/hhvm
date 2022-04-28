@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a95e21a65b5ede08509de292d5db5552>>
+// @generated SignedSource<<d9a6f6ae428636f9a289ede6d96aa08f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -153,4 +153,6 @@ pub struct GlobalOptions {
     pub tco_specify_manifold_api_key: bool,
     pub tco_saved_state_manifold_api_key: Option<String>,
     pub tco_profile_top_level_definitions: bool,
+    pub tco_allow_all_files_for_module_declarations: bool,
+    pub tco_allowed_files_for_module_declarations: Vec<String>,
 }

@@ -39,6 +39,8 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "max_workers=1",
     "--config",
     "allow_unstable_features=true",
+    "--config",
+    "allow_all_files_for_module_declarations=true",
 ]
 
 

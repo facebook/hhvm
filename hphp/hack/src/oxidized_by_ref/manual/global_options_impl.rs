@@ -131,6 +131,8 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_specify_manifold_api_key: false,
     tco_saved_state_manifold_api_key: None,
     tco_profile_top_level_definitions: false,
+    tco_allow_all_files_for_module_declarations: false,
+    tco_allowed_files_for_module_declarations: &[],
 };
 
 impl GlobalOptions<'static> {
@@ -388,6 +390,20 @@ impl GlobalOptions<'_> {
             .tco_saved_state_manifold_api_key
             .map(|s| &*arena.alloc_str(s));
         let tco_profile_top_level_definitions = self.tco_profile_top_level_definitions;
+        let tco_allow_all_files_for_module_declarations =
+            self.tco_allow_all_files_for_module_declarations;
+        let mut tco_allowed_files_for_module_declarations =
+            bumpalo::collections::Vec::with_capacity_in(
+                self.tco_allowed_files_for_module_declarations.len(),
+                arena,
+            );
+        tco_allowed_files_for_module_declarations.extend(
+            self.tco_allowed_files_for_module_declarations
+                .iter()
+                .map(|s| &*arena.alloc_str(s)),
+        );
+        let tco_allowed_files_for_module_declarations: &'a [&'a str] =
+            tco_allowed_files_for_module_declarations.into_bump_slice();
 
         GlobalOptions::<'a> {
             tco_experimental_features,
@@ -515,6 +531,8 @@ impl GlobalOptions<'_> {
             tco_specify_manifold_api_key,
             tco_saved_state_manifold_api_key,
             tco_profile_top_level_definitions,
+            tco_allow_all_files_for_module_declarations,
+            tco_allowed_files_for_module_declarations,
         }
     }
 }

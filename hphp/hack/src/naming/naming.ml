@@ -2455,6 +2455,13 @@ let global_const ctx cst =
 (**************************************************************************)
 
 let module_ ctx module_ =
+  let tcopts = Provider_context.get_tcopt ctx in
+  let allowed_files =
+    TypecheckerOptions.allowed_files_for_module_declarations tcopts
+  in
+  let allow_all_files =
+    TypecheckerOptions.allow_all_files_for_module_declarations tcopts
+  in
   let open Aast in
   let env = Env.make_module_env ctx module_ in
   let module_ =
@@ -2462,6 +2469,15 @@ let module_ ctx module_ =
       (Naming_elaborate_namespaces_endo.make_env env.namespace)
       module_
   in
+  let module_file = Relative_path.suffix @@ Pos.filename module_.md_span in
+  if
+    (not allow_all_files)
+    && not
+         (List.exists allowed_files ~f:(fun allowed_file ->
+              String.equal allowed_file module_file))
+  then
+    Errors.add_naming_error
+    @@ Naming_error.Module_declaration_outside_allowed_files module_.md_span;
   {
     module_ with
     md_annotation = ();

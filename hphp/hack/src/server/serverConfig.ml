@@ -494,6 +494,10 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ~tco_log_saved_state_age_and_distance:
         local_config.ServerLocalConfig.log_saved_state_age_and_distance
       ~log_levels:(prepare_log_levels config)
+      ?tco_allowed_files_for_module_declarations:
+        (string_list_opt "allowed_files_for_module_declarations" config)
+      ?tco_allow_all_files_for_module_declarations:
+        (bool_opt "allow_all_files_for_module_declarations" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

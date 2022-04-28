@@ -320,6 +320,7 @@ let parse_options () =
     | Hh_json.JSON_Array lst -> List.iter lst ~f:add_function
     | _ -> enable_global_write_check_functions := SSet.empty
   in
+  let allow_all_files_for_module_declarations = ref true in
   let options =
     [
       ( "--no-print-position",
@@ -933,6 +934,8 @@ let parse_options () =
       ~tco_require_types_class_consts:!require_types_class_consts
       ~tco_type_printer_fuel:!type_printer_fuel
       ~tco_profile_top_level_definitions:!profile_top_level_definitions
+      ~tco_allow_all_files_for_module_declarations:
+        !allow_all_files_for_module_declarations
       ()
   in
   Errors.allowed_fixme_codes_strict :=

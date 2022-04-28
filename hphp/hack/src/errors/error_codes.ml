@@ -149,6 +149,7 @@ module Naming = struct
     | InvalidWildcardContext [@value 2117]
     | ExplicitConsistentConstructor [@value 2118]
     | InvalidReqClass [@value 2119]
+    | ModuleDeclarationOutsideAllowedFiles [@value 2120]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

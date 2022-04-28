@@ -133,6 +133,8 @@ impl Default for GlobalOptions {
             tco_specify_manifold_api_key: false,
             tco_saved_state_manifold_api_key: None,
             tco_profile_top_level_definitions: false,
+            tco_allow_all_files_for_module_declarations: false,
+            tco_allowed_files_for_module_declarations: vec![],
         }
     }
 }

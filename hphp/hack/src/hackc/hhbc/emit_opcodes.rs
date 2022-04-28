@@ -85,6 +85,7 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                 ImmType::ARR(subty) => is_label_type(subty),
                 ImmType::AA
                 | ImmType::DA
+                | ImmType::DUMMY
                 | ImmType::I64A
                 | ImmType::IA
                 | ImmType::ILA
@@ -217,6 +218,7 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
         ImmType::BA2 => quote!([Label; 2]),
         ImmType::BLA => quote!(BumpSliceMut<#lifetime, Label>),
         ImmType::DA => quote!(f64),
+        ImmType::DUMMY => quote!(u8),
         ImmType::FCA => quote!(FCallArgs<#lifetime>),
         ImmType::I64A => quote!(i64),
         ImmType::IA => quote!(IterId),

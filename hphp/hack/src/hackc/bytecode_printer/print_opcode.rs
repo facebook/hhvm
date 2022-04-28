@@ -84,6 +84,7 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
         w: &mut dyn Write,
         cases: &[Str<'_>],
         targets: &[Label],
+        _dummy_imm: &u8,
     ) -> Result<()> {
         if cases.len() != targets.len() {
             return Err(Error::new(

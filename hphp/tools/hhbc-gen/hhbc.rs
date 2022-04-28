@@ -30,6 +30,7 @@ pub enum ImmType {
     BA,
     BLA,
     DA,
+    DUMMY,
     FCA,
     I64A,
     IA,
@@ -283,7 +284,7 @@ mod fixups {
             ],
             "MemoGetEager" => vec![
                 replace_imm("target1", ImmType::BA, ImmType::BA2),
-                remove_imm("target2"),
+                replace_imm("target2", ImmType::BA, ImmType::DUMMY),
             ],
             "NewObjD" => vec![
                 replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
@@ -341,8 +342,11 @@ mod fixups {
             "SSwitch" => vec![
                 // Instead of using a single [(String, Label)] field in HHAS we
                 // split the cases and targets.
+                // One of the immediates needs to be "_0" to satisfy opcodes
+                // translator macro in the HackC Translator.
                 add_flag(InstrFlags::AS_STRUCT),
                 insert_imm(0, "cases", ImmType::ARR(Box::new(ImmType::SA))),
+                insert_imm(2, "_0", ImmType::DUMMY),
                 replace_imm("targets", ImmType::SLA, ImmType::BLA),
             ],
             "UnsetM" => vec![

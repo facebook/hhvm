@@ -1076,12 +1076,12 @@ let resolve_init_approach genv : ServerInit.init_approach * string =
       && Option.is_none (ServerArgs.save_filename genv.options)
     then
       (ServerInit.Parse_only_init, "Server_args_saving_naming")
-    else if not genv.local_config.ServerLocalConfig.use_saved_state then
-      (ServerInit.Full_init, "Local_config_saved_state_disabled")
     else if ServerArgs.no_load genv.options then
       (ServerInit.Full_init, "Server_args_no_load")
     else if Option.is_some (ServerArgs.save_filename genv.options) then
       (ServerInit.Full_init, "Server_args_saving_state")
+    else if not genv.local_config.ServerLocalConfig.use_saved_state then
+      (ServerInit.Full_init, "Local_config_saved_state_disabled")
     else if Option.is_some (ServerArgs.write_symbol_info genv.options) then
       match
         ( genv.local_config.ServerLocalConfig.use_saved_state_when_indexing,

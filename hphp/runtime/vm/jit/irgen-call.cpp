@@ -406,7 +406,6 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
       callKnown(profiledFunc);
     },
     [&] {
-      updateStackOffset(env);
       auto const unlikely = probability * 100 >=
         RuntimeOption::EvalJitPGOCalledFuncExitThreshold;
       if (unlikely) {
@@ -469,6 +468,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
                          SSATmp* objOrClass, bool dynamicCall,
                          bool suppressDynCallCheck) {
   assertx(callee);
+
+  updateStackOffset(env);
 
   // Caller checks
   if (!emitCallerInOutChecksKnown(env, callee, fca)) return;
@@ -638,14 +639,14 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     return;
   }
 
+  updateStackOffset(env);
+
   // Caller checks
   emitCallerInOutChecksUnknown(env, callee, fca);
   emitCallerReadonlyChecksUnknown(env, callee, fca);
   if (dynamicCall && !suppressDynCallCheck) {
     emitCallerDynamicCallChecksUnknown(env, callee);
   }
-
-  updateStackOffset(env);
 
   // Okay to request async eager return even if it is not supported.
   auto const retVal = callImpl(env, callee, fca, objOrClass, fca.skipRepack(),

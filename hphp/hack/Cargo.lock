@@ -446,6 +446,7 @@ dependencies = [
  "env",
  "error",
  "hhbc",
+ "hhvm_options",
  "ocamlrep",
  "ocamlrep_derive",
  "options",
@@ -1702,6 +1703,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hdf"
+version = "0.0.0"
+dependencies = [
+ "cxx",
+ "cxx-build",
+ "thiserror",
+]
+
+[[package]]
 name = "hdrhistogram"
 version = "6.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1896,6 +1906,26 @@ dependencies = [
  "cxx",
  "cxx-build",
  "oxidized",
+]
+
+[[package]]
+name = "hhvm_options"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "clap 3.1.8",
+ "hdf",
+ "hhvm_runtime_options",
+]
+
+[[package]]
+name = "hhvm_runtime_options"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "cxx",
+ "hdf",
+ "log",
 ]
 
 [[package]]

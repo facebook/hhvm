@@ -1,7 +1,7 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::bridge::ffi;
+use crate::hdf::ffi;
 use cxx::{let_cxx_string, UniquePtr};
 use std::{borrow::Cow, ffi::CStr, os::unix::ffi::OsStrExt, path::Path};
 use thiserror::Error;

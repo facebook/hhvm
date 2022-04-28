@@ -64,8 +64,7 @@ fi
     --quiet \
     --target-dir "${TARGET_DIR}" \
     --package "$pkg" \
-    $profile_flags \
-    "$@";
+    $profile_flags
 if [ -n "$exe" ]
 then
   cargo run --bin ffi_cbindgen -- --header "$header" \

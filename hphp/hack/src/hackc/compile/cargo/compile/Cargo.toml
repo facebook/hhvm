@@ -19,6 +19,7 @@ emit_unit = { path = "../../../emitter/cargo/emit_unit" }
 env = { path = "../../../emitter/cargo/env" }
 error = { path = "../../../error/cargo/error" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
+hhvm_options = { path = "../../../../utils/hhvm_options" }
 ocamlrep = { path = "../../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
 options = { path = "../options" }

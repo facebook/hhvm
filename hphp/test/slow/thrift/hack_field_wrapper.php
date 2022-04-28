@@ -98,19 +98,35 @@ class OuterStructWithWrapperAndAdapter implements IThriftStruct {
       'is_wrapped' => true,
       'adapter' => \StringToIntPrimitiveAdapter::class,
     ],
+    2 => darray[
+      'var' => 'struct_value',
+      'type' => \TType::STRUCT,
+      'is_wrapped' => true,
+      'class' => InnerStruct::class,
+    ],
   ];
   private ?\MyFieldWrapper<?\MyAdapter::THackType> $value;
+  private ?\MyFieldWrapper<?InnerStruct> $struct_value;
 
   public function get_value(
   )[]: \MyFieldWrapper<?\StringToIntPrimitiveAdapter::THackType> {
     return $this->value as nonnull;
   }
 
+  public function get_struct_value()[]: \MyFieldWrapper<?\InnerStruct> {
+    return $this->struct_value as nonnull;
+  }
+
   public function __construct()[] {
     $this->value = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<
       ?\StringToIntPrimitiveAdapter::THackType,
-      OuterStruct,
+      OuterStructWithWrapperAndAdapter,
     >(null, 1, $this);
+    $this->struct_value =
+      \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<
+        ?InnerStruct,
+        OuterStructWithWrapperAndAdapter,
+      >(null, 2, $this);
   }
 
   public static function withDefaultValues()[]: this {
@@ -118,32 +134,52 @@ class OuterStructWithWrapperAndAdapter implements IThriftStruct {
   }
 
   public async function print(): Awaitable<void> {
+    $inner_struct = await $this->get_struct_value()->genUnwrap();
     echo "----OuterStructWithWrapperAndAdapter----\n";
     echo "\t\t value = ";
     echo await $this->get_value()->genUnwrap();
     echo "\n";
+    echo "\t\t struct_value = ";
+    echo $inner_struct ? $inner_struct->print() : "null";
+    echo "\n";
   }
 }
 
-class OuterStruct implements IThriftStruct {
+class OuterStructWithWrapper implements IThriftStruct {
   const SPEC = darray[
     1 => darray[
       'var' => 'value',
       'type' => \TType::I32,
       'is_wrapped' => true,
     ],
+    2 => darray[
+      'var' => 'struct_value',
+      'type' => \TType::STRUCT,
+      'class' => InnerStruct::class,
+      'is_wrapped' => true,
+    ],
   ];
   private ?\MyFieldWrapper<?int> $value;
+  private ?\MyFieldWrapper<?InnerStruct> $struct_value;
 
   public function get_value()[]: \MyFieldWrapper<?int> {
     return $this->value as nonnull;
   }
 
+  public function get_struct_value()[]: \MyFieldWrapper<?\InnerStruct> {
+    return $this->struct_value as nonnull;
+  }
+
   public function __construct()[] {
     $this->value = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<
       ?int,
-      OuterStruct,
+      OuterStructWithWrapper,
     >(null, 1, $this);
+    $this->struct_value =
+      \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<
+        ?InnerStruct,
+        OuterStructWithWrapper,
+      >(null, 2, $this);
   }
 
   public static function withDefaultValues()[]: this {
@@ -151,24 +187,32 @@ class OuterStruct implements IThriftStruct {
   }
 
   public async function print(): Awaitable<void> {
-    echo "----OuterStruct----\n";
+    $inner_struct = await $this->get_struct_value()->genUnwrap();
+    echo "----OuterStructWithWrapper----\n";
     echo "\t\t value = ";
     echo await $this->get_value()->genUnwrap();
+    echo "\n";
+    echo "\t\t struct_value = ";
+    echo $inner_struct ? $inner_struct->print() : "null";
     echo "\n";
   }
 }
 
-// This class is identical to OuterStruct but with all the adapters removed.
-// It's used to "peek" at the actual serialized data without adapters getting
-// in the way.
 class OuterStructNoWrappedFields {
   const SPEC = darray[
     1 => darray[
       'var' => 'value',
       'type' => \TType::I32,
     ],
+    2 => darray[
+      'var' => 'struct_value',
+      'type' => \TType::STRUCT,
+      'class' => InnerStruct::class,
+    ],
   ];
   public ?int $value = null;
+  public ?InnerStruct $struct_value;
+
   public function __construct()[] {}
   public static function withDefaultValues()[]: this {
     return new static();
@@ -179,22 +223,48 @@ class OuterStructNoWrappedFields {
     echo "\t\t value = ";
     echo $this->value;
     echo "\n";
+    echo "\t\t struct_value = ";
+    echo $this->struct_value ? $this->struct_value->print() : "null";
+    echo "\n";
   }
 }
 
-async function getStruct() {
-  $v = new OuterStruct();
+class InnerStruct implements IThriftStruct {
+  const SPEC = darray[
+    1 => darray[
+      'var' => 'value',
+      'type' => \TType::I32,
+    ],
+  ];
+  private ?int $value;
+
+  public function __construct()[] {}
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public function print(): void {
+    echo "\t\t ----InnerStruct----\n";
+    echo "\t\t\t\t value = ";
+    echo $this->value;
+    echo "\n";
+  }
+}
+
+async function getStructWithWrapper() {
+  $v = new OuterStructWithWrapper();
   await $v->get_value()->genWrap(42);
   return $v;
 }
 
 async function testBinary() {
   $p = new DummyProtocol();
-  $v = await getStruct();
-  $v->print();
+  $v = await getStructWithWrapper();
+  await $v->print();
   thrift_protocol_write_binary($p, 'foomethod', 1, $v, 20, true);
   var_dump(md5($p->getTransport()->buff));
-  $new_value = thrift_protocol_read_binary($p, 'OuterStruct', true);
+  $new_value = thrift_protocol_read_binary($p, 'OuterStructWithWrapper', true);
   await $new_value->print();
   // Peek at what the serialized data actually looks like.
   $p->getTransport()->pos = 0;
@@ -211,11 +281,11 @@ async function testBinary() {
 
 async function testCompact() {
   $p = new DummyProtocol();
-  $v = await getStruct();
+  $v = await getStructWithWrapper();
   $v->print();
   thrift_protocol_write_compact($p, 'foomethod', 2, $v, 20);
   var_dump(md5($p->getTransport()->buff));
-  $new_value = thrift_protocol_read_compact($p, 'OuterStruct');
+  $new_value = thrift_protocol_read_compact($p, 'OuterStructWithWrapper');
   await $new_value->print();
 
   // Peek at what the serialized data actually looks like.

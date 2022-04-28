@@ -283,7 +283,12 @@ struct CompactWriter {
           auto index = cls->propSlotToIndex(slot);
 
           VarNR fieldWrapper(objProps->at(index).tv());
-          const Variant& fieldVal = fieldWrapper;
+          Variant fieldVal;
+          if (fields[slot].isWrapped) {
+            fieldVal = getThriftType(obj, StrNR(fields[slot].name));
+          } else {
+            fieldVal = fieldWrapper;
+          }
           if (!fieldVal.isNull()) {
             TType fieldType = fields[slot].type;
             writeFieldBegin(fields[slot].fieldNum, fieldType);
@@ -291,13 +296,7 @@ struct CompactWriter {
             fieldInfo.cls = cls;
             fieldInfo.prop = &prop[slot];
             fieldInfo.fieldNum = fields[slot].fieldNum;
-
-            if (fields[slot].isWrapped) {
-              auto value = getThriftType(obj, StrNR(fields[slot].name));
-              writeField(value, fields[slot], fieldType, fieldInfo);
-            } else {
-              writeField(fieldVal, fields[slot], fieldType, fieldInfo);
-            }
+            writeField(fieldVal, fields[slot], fieldType, fieldInfo);
             writeFieldEnd();
           } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
                      (prop[slot].attrs & AttrLateInit)) {

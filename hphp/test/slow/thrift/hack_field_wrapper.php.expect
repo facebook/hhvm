@@ -1,20 +1,28 @@
 --- binary ---
-----OuterStruct----
+----OuterStructWithWrapper----
 		 value = 42
+		 struct_value = null
 string(32) "26cc06895b4bb7b431b2580f9443bb12"
-----OuterStruct----
+----OuterStructWithWrapper----
 		 value = 42
+		 struct_value = null
 ----OuterStructNoWrappedFields----
 		 value = 42
+		 struct_value = null
 ----OuterStructWithWrapperAndAdapter----
 		 value = Int value is 42
+		 struct_value = null
 --- compact ---
-----OuterStruct----
+----OuterStructWithWrapper----
 		 value = 42
+		 struct_value = null
 string(32) "633119f2b60fec192ff10759cf557234"
-----OuterStruct----
+----OuterStructWithWrapper----
 		 value = 42
+		 struct_value = null
 ----OuterStructNoWrappedFields----
 		 value = 42
+		 struct_value = null
 ----OuterStructWithWrapperAndAdapter----
 		 value = Int value is 42
+		 struct_value = null

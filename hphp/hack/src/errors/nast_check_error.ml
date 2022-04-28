@@ -117,7 +117,6 @@ type t =
       vis: Ast_defs.visibility;
     }
   | Private_and_final of Pos.t
-  | Internal_outside_module of Pos.t
   | Internal_member_inside_public_trait of {
       member_pos: Pos.t;
       trait_pos: Pos.t;
@@ -567,12 +566,6 @@ let private_and_final pos =
     (pos, "Class methods cannot be both `private` and `final`.")
     []
 
-let internal_outside_module pos =
-  User_error.make
-    Error_code.(to_enum InternalOutsideModule)
-    (pos, "You cannot make this symbol `internal` outside a module")
-    []
-
 let internal_member_inside_public_trait member_pos trait_pos =
   User_error.make
     Error_code.(to_enum InternalMemberInsidePublicTrait)
@@ -646,6 +639,5 @@ let to_user_error = function
   | Internal_method_with_invalid_visibility { pos; vis } ->
     internal_method_with_invalid_visibility pos vis
   | Private_and_final pos -> private_and_final pos
-  | Internal_outside_module pos -> internal_outside_module pos
   | Internal_member_inside_public_trait { member_pos; trait_pos } ->
     internal_member_inside_public_trait member_pos trait_pos

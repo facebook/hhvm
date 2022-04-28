@@ -1110,3 +1110,7 @@ pub const require_class_applied_to_generic: Error =
 pub const invalid_enum_class_label_qualifier: Error = Cow::Borrowed(
     "Invalid label qualifier. Only names or qualified names are allowed at this position.",
 );
+
+pub const internal_outside_of_module: Error = Cow::Borrowed(
+    "`internal` cannot be used outside of a module. Please define a module for this file.",
+);

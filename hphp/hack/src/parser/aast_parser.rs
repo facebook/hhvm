@@ -7,6 +7,7 @@
 use crate::aast_check;
 use crate::coeffects_check;
 use crate::expression_tree_check;
+use crate::modules_check;
 use crate::readonly_check;
 use bumpalo::Bump;
 use lowerer::{lower, ScourComment};
@@ -203,9 +204,9 @@ impl<'src> AastParser {
                 errors.extend(readonly_check::check_program(aast, !env.codegen));
             }
             errors.extend(aast_check::check_program(aast, !env.codegen));
+            errors.extend(modules_check::check_program(aast));
             errors.extend(expression_tree_check::check_splices(aast));
             errors.extend(coeffects_check::check_program(aast, !env.codegen));
-
             errors
         };
         if env.codegen {

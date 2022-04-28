@@ -39,7 +39,8 @@ abstract class IThriftFieldWrapper<TThriftType, TStruct as IThriftStruct> {
   abstract public function genWrap(TThriftType $value): Awaitable<void>;
 }
 
-final class MyFieldWrapper<TThriftType, TStruct as IThriftStruct>  extends IThriftFieldWrapper<TThriftType, TStruct>{
+final class MyFieldWrapper<TThriftType, TStruct as IThriftStruct>
+  extends IThriftFieldWrapper<TThriftType, TStruct> {
   <<__Override>>
   public static async function genToThrift(
     this $value,
@@ -52,8 +53,8 @@ final class MyFieldWrapper<TThriftType, TStruct as IThriftStruct>  extends IThri
     TThriftType $value,
     int $field_id,
     TStruct $parent,
-  ): Awaitable<this>{
-    return new static($value,$field_id,$parent);
+  ): Awaitable<this> {
+    return new static($value, $field_id, $parent);
   }
 
   <<__Override>>
@@ -85,7 +86,7 @@ class StringToIntPrimitiveAdapter {
     return (int)$hack_value;
   }
   public static function fromThrift(int $thrift_value): string {
-    return "Int value is ". $thrift_value;
+    return "Int value is ".$thrift_value;
   }
 }
 
@@ -95,17 +96,21 @@ class OuterStructWithWrapperAndAdapter implements IThriftStruct {
       'var' => 'value',
       'type' => \TType::I32,
       'is_wrapped' => true,
-      'adapter' => \StringToIntPrimitiveAdapter::class
-    ]
+      'adapter' => \StringToIntPrimitiveAdapter::class,
+    ],
   ];
   private ?\MyFieldWrapper<?\MyAdapter::THackType> $value;
 
-  public function get_value()[]: \MyFieldWrapper<?\StringToIntPrimitiveAdapter::THackType> {
+  public function get_value(
+  )[]: \MyFieldWrapper<?\StringToIntPrimitiveAdapter::THackType> {
     return $this->value as nonnull;
   }
 
   public function __construct()[] {
-    $this->value = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?\StringToIntPrimitiveAdapter::THackType, OuterStruct>(null, 1, $this);
+    $this->value = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<
+      ?\StringToIntPrimitiveAdapter::THackType,
+      OuterStruct,
+    >(null, 1, $this);
   }
 
   public static function withDefaultValues()[]: this {
@@ -120,13 +125,13 @@ class OuterStructWithWrapperAndAdapter implements IThriftStruct {
   }
 }
 
-class OuterStruct implements IThriftStruct{
+class OuterStruct implements IThriftStruct {
   const SPEC = darray[
     1 => darray[
       'var' => 'value',
       'type' => \TType::I32,
       'is_wrapped' => true,
-    ]
+    ],
   ];
   private ?\MyFieldWrapper<?int> $value;
 
@@ -135,7 +140,10 @@ class OuterStruct implements IThriftStruct{
   }
 
   public function __construct()[] {
-    $this->value = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?int, OuterStruct>(null, 1, $this);
+    $this->value = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<
+      ?int,
+      OuterStruct,
+    >(null, 1, $this);
   }
 
   public static function withDefaultValues()[]: this {
@@ -174,7 +182,7 @@ class OuterStructNoWrappedFields {
   }
 }
 
-async function getStruct(){
+async function getStruct() {
   $v = new OuterStruct();
   await $v->get_value()->genWrap(42);
   return $v;
@@ -190,12 +198,14 @@ async function testBinary() {
   await $new_value->print();
   // Peek at what the serialized data actually looks like.
   $p->getTransport()->pos = 0;
-  $new_value = thrift_protocol_read_binary($p, 'OuterStructNoWrappedFields', true);
+  $new_value =
+    thrift_protocol_read_binary($p, 'OuterStructNoWrappedFields', true);
   $new_value->print();
 
   // Peek at what the serialized data actually looks like.
   $p->getTransport()->pos = 0;
-  $new_value = thrift_protocol_read_binary($p, 'OuterStructWithWrapperAndAdapter', true);
+  $new_value =
+    thrift_protocol_read_binary($p, 'OuterStructWithWrapperAndAdapter', true);
   $new_value->print();
 }
 
@@ -215,7 +225,8 @@ async function testCompact() {
 
   // Peek at what the serialized data actually looks like.
   $p->getTransport()->pos = 0;
-  $new_value = thrift_protocol_read_compact($p, 'OuterStructWithWrapperAndAdapter');
+  $new_value =
+    thrift_protocol_read_compact($p, 'OuterStructWithWrapperAndAdapter');
   $new_value->print();
 }
 

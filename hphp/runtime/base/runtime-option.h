@@ -1012,7 +1012,7 @@ struct RuntimeOption {
   F(double,   JitPGOMinArcProbability, 0.0)                             \
   F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
   F(uint32_t, JitPGORelaxPercent,      100)                             \
-  F(double,   JitPGOCalledFuncCheckThreshold, 50)                       \
+  F(double,   JitPGOCalledFuncCheckThreshold, 25)                       \
   F(double,   JitPGOCalledFuncExitThreshold,  99.9)                     \
   F(bool,     JitPGODumpCallGraph,     false)                           \
   F(bool,     JitPGOOptCodeCallGraph,  true)                            \

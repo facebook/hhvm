@@ -376,9 +376,14 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
 
   if (!profile.optimizing()) return callUnknown(false);
 
-  double probability = 0;
   auto const data = profile.data();
-  auto const profiledFunc = data.choose(probability);
+  auto const choices = data.choose();
+  const Func* profiledFunc = nullptr;
+  double probability = 0;
+  if (choices.size() > 0) {
+    profiledFunc = choices[0].func;
+    probability = choices[0].probability;
+  }
 
   // Dump annotations if requested.
   if (RuntimeOption::EvalDumpCallTargets) {
@@ -392,7 +397,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
   // Don't emit the check if the probability of it succeeding is below the
   // threshold.
   if (profiledFunc == nullptr ||
-      probability * 100 < RuntimeOption::EvalJitPGOCalledFuncCheckThreshold) {
+      probability * 100 < RO::EvalJitPGOCalledFuncCheckThreshold) {
     return callUnknown(false);
   }
 
@@ -406,15 +411,43 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
       callKnown(profiledFunc);
     },
     [&] {
-      auto const unlikely = probability * 100 >=
-        RuntimeOption::EvalJitPGOCalledFuncExitThreshold;
-      if (unlikely) {
-        hint(env, Block::Hint::Unlikely);
-        IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
-        callUnknown(true);
-      } else {
-        callUnknown(false);
+      auto indirectCall = [&] {
+        auto const unlikely = probability * 100 >=
+          RuntimeOption::EvalJitPGOCalledFuncExitThreshold;
+        if (unlikely) {
+          hint(env, Block::Hint::Unlikely);
+          IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
+          callUnknown(true);
+        } else {
+          callUnknown(false);
+        }
+      };
+      // If we have a 2nd hottest call target, consider adding a check + direct
+      // call to it too.
+      if (choices.size() > 1) {
+        profiledFunc = choices[1].func;
+        auto const remainingProb = 1 - choices[0].probability;
+        always_assert(remainingProb > 0);
+        probability = choices[1].probability / remainingProb;
+        if (probability * 100 >= RO::EvalJitPGOCalledFuncCheckThreshold) {
+          ifThenElse(
+            env,
+            [&] (Block* taken2) {
+              auto const equal = gen(env, EqFunc, callee,
+                                     cns(env, profiledFunc));
+              gen(env, JmpZero, taken2, equal);
+            },
+            [&] {
+              callKnown(profiledFunc);
+            },
+            [&] {
+              indirectCall();
+            }
+          );
+          return;
+        }
       }
+      indirectCall();
     }
   );
 }

@@ -70,8 +70,7 @@
              (Expr
                 ((void), [13:3-8],
                  (Call ((((function(Iterable<int> $m): void)), [13:3-4], (Id ([13:3-4], "\\m"))), 
-                    [], [(Pnormal, ((<expr#1> as Iterable<float>), [13:5-7], (Hole (((Iterable<float>), [13:5-7], (Lvar ([13:5-7], $m))), (<expr#1> as Iterable<float>), (Iterable<int>), Typing))))],
-                    None)))));
+                    [], [(Pnormal, ((Iterable<float>), [13:5-7], (Hole (((Iterable<float>), [13:5-7], (Lvar ([13:5-7], $m))), (Iterable<float>), (Iterable<int>), Typing))))], None)))));
              ([15:3-29],
               (Expr
                  ((TestIterable), [15:3-28],
@@ -83,10 +82,7 @@
                   (Call (
                      (((function(Iterable<int> $m): void)), [18:3-10],
                       (Obj_get (((TestIterable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Iterable<int> $m): void)), [18:9-10], (Id ([18:9-10], "m"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal, ((<expr#1> as Iterable<float>), [18:11-13], (Hole (((Iterable<float>), [18:11-13], (Lvar ([18:11-13], $m))), (<expr#1> as Iterable<float>), (Iterable<int>), Typing))))
-                       ],
-                     None)))))
+                     [], [(Pnormal, ((Iterable<float>), [18:11-13], (Hole (((Iterable<float>), [18:11-13], (Lvar ([18:11-13], $m))), (Iterable<float>), (Iterable<int>), Typing))))], None)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

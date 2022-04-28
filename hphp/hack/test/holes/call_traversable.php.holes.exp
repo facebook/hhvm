@@ -71,10 +71,7 @@
              (Expr
                 ((void), [13:3-8],
                  (Call ((((function(Traversable<int> $i): void)), [13:3-4], (Id ([13:3-4], "\\i"))), 
-                    [],
-                    [(Pnormal,
-                      ((<expr#1> as Traversable<float>), [13:5-7], (Hole (((Traversable<float>), [13:5-7], (Lvar ([13:5-7], $i))), (<expr#1> as Traversable<float>), (Traversable<int>), Typing))))],
-                    None)))));
+                    [], [(Pnormal, ((Traversable<float>), [13:5-7], (Hole (((Traversable<float>), [13:5-7], (Lvar ([13:5-7], $i))), (Traversable<float>), (Traversable<int>), Typing))))], None)))));
              ([15:3-32],
               (Expr
                  ((TestTraversable), [15:3-31],
@@ -86,12 +83,8 @@
                   (Call (
                      (((function(Traversable<int> $i): void)), [18:3-10],
                       (Obj_get (((TestTraversable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Traversable<int> $i): void)), [18:9-10], (Id ([18:9-10], "i"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((<expr#1> as Traversable<float>), [18:11-13],
-                        (Hole (((Traversable<float>), [18:11-13], (Lvar ([18:11-13], $i))), (<expr#1> as Traversable<float>), (Traversable<int>), Typing))))
-                       ],
-                     None)))))
+                     [], [(Pnormal, ((Traversable<float>), [18:11-13], (Hole (((Traversable<float>), [18:11-13], (Lvar ([18:11-13], $i))), (Traversable<float>), (Traversable<int>), Typing))))], None
+                     )))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

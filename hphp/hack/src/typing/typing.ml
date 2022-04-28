@@ -1432,7 +1432,7 @@ let call_param
       Typing_error.Callback.(
         (with_side_effect ~eff unify_error [@alert "-deprecated"]))
   in
-  let ty_mismatch_opt = mk_ty_mismatch_opt dep_ty param.fp_type.et_type e2 in
+  let ty_mismatch_opt = mk_ty_mismatch_opt arg_ty param.fp_type.et_type e2 in
   Option.(iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
   (env, ty_mismatch_opt)
 

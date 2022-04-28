@@ -5,7 +5,7 @@
 #[cxx::bridge(namespace = "HPHP")]
 pub(crate) mod ffi {
     unsafe extern "C++" {
-        include!("hphp/hack/src/utils/hdf/bridge.h");
+        include!("hphp/hack/src/utils/hdf/hdf-wrap.h");
         type Hdf;
         fn hdf_new() -> UniquePtr<Hdf>;
         fn hdf_new_child(parent: &Hdf, name: &CxxString) -> UniquePtr<Hdf>;

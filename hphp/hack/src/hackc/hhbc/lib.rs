@@ -41,4 +41,4 @@ pub use hhvm_hhbc_defs_ffi::ffi::{
     SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
 };
 pub use opcodes::Opcode;
-pub use typed_value::TypedValue;
+pub use typed_value::{FloatBits, TypedValue};

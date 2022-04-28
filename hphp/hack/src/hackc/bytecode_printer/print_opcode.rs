@@ -8,10 +8,10 @@ use ffi::Str;
 use hash::HashSet;
 use hhbc::{
     AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, FCallArgs,
-    FatalOp, FunctionName, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId,
-    Label, Local, LocalRange, MOpMode, MemberKey, MethodName, NumParams, OODeclExistsOp,
-    ObjMethodOp, Opcode, ParamName, PropName, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SilenceOp,
-    SpecialClsRef, StackIndex, SwitchKind, TypeStructResolveOp,
+    FatalOp, FloatBits, FunctionName, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp,
+    IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodName, NumParams,
+    OODeclExistsOp, ObjMethodOp, Opcode, ParamName, PropName, QueryMOp, ReadonlyOp, SetOpOp,
+    SetRangeOp, SilenceOp, SpecialClsRef, StackIndex, SwitchKind, TypeStructResolveOp,
 };
 use hhbc_string_utils::float;
 use print_opcode::{PrintOpcode, PrintOpcodeTypes};
@@ -171,8 +171,8 @@ fn print_const_name(w: &mut dyn Write, id: &ConstName<'_>) -> Result<()> {
     print_quoted_str(w, &id.as_ffi_str())
 }
 
-fn print_double(w: &mut dyn Write, d: f64) -> Result<()> {
-    write!(w, "{}", float::to_string(d))
+fn print_double(w: &mut dyn Write, d: FloatBits) -> Result<()> {
+    write!(w, "{}", float::to_string(d.to_f64()))
 }
 
 fn print_function_name(w: &mut dyn Write, id: &FunctionName<'_>) -> Result<()> {

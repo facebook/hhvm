@@ -27,7 +27,7 @@ pub fn typed_value_to_instr<'arena, 'decl>(
                 ClassName::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
             Ok(instr::lazy_class(classid))
         }
-        TypedValue::Double(f) => Ok(instr::double(f.to_f64())),
+        TypedValue::Double(f) => Ok(instr::double(*f)),
         TypedValue::Keyset(_) => {
             let arrayid = Str::from(get_array_identifier(e, tv));
             Ok(instr::keyset(arrayid))

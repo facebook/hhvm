@@ -35,6 +35,8 @@ module type Getters_S = sig
 
   val int_ : string -> default:int -> t -> int
 
+  val int_opt_result : string -> t -> (int, string) result option
+
   val int_opt : string -> t -> int option
 
   val float_ : string -> default:float -> t -> float

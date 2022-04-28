@@ -1,0 +1,32 @@
+File "conflict_with_override.bad.php", line 15, characters 7-7:
+Constant T is defined concretely in multiple ancestors (Typing[4374])
+  File "conflict_with_override.bad.php", line 5, characters 14-14:
+  One conflicting definition is here, inherited through A
+  File "conflict_with_override.bad.php", line 9, characters 14-14:
+  Another conflicting definition is here
+File "conflict_with_override.bad.php", line 15, characters 7-7:
+Constant X is defined concretely in multiple ancestors (Typing[4374])
+  File "conflict_with_override.bad.php", line 4, characters 13-13:
+  One conflicting definition is here, inherited through A
+  File "conflict_with_override.bad.php", line 8, characters 13-13:
+  Another conflicting definition is here
+File "conflict_with_override.bad.php", line 21, characters 7-7:
+Constant T is defined concretely in multiple ancestors (Typing[4374])
+  File "conflict_with_override.bad.php", line 5, characters 14-14:
+  One conflicting definition is here
+  File "conflict_with_override.bad.php", line 9, characters 14-14:
+  Another conflicting definition is here
+File "conflict_with_override.bad.php", line 21, characters 7-7:
+Constant X is defined concretely in multiple ancestors (Typing[4374])
+  File "conflict_with_override.bad.php", line 4, characters 13-13:
+  One conflicting definition is here
+  File "conflict_with_override.bad.php", line 8, characters 13-13:
+  Another conflicting definition is here
+File "conflict_with_override.bad.php", line 22, characters 7-8:
+Some members in class `C` are incompatible with those declared in type `T1` (Typing[4374])
+  File "conflict_with_override.bad.php", line 8, characters 13-13:
+  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
+  File "conflict_with_override.bad.php", line 4, characters 13-13:
+  `X` inherited from `T1`
+  File "conflict_with_override.bad.php", line 8, characters 13-13:
+  conflicts with constant `X` inherited from `T2`.

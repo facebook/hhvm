@@ -280,8 +280,11 @@ type t = {
   (* Raise an error when a concrete type constant is overridden by a concrete type constant
      in a child class. *)
   tco_typeconst_concrete_concrete_error: bool;
-  (* Raise an error whenever a concrete const is defined multiple times *)
-  tco_enable_strict_const_semantics: bool;
+  (* When the value is 1, raises a 4734 error when an inherited constant comes from a conflicting
+   * hierarchy, but not if the constant is locally defined. When the value is 2, raises a conflict
+   * any time two parents declare concrete constants with the same name, matching HHVM
+   * -vEval.TraitConstantInterfaceBehavior=1 *)
+  tco_enable_strict_const_semantics: int;
   (* meth_caller can only reference public methods *)
   tco_meth_caller_only_public_visibility: bool;
   (* Consider `require extends` and `require implements` as ancestors when checking a class *)
@@ -425,7 +428,7 @@ val make :
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_math_new_code:bool ->
   ?tco_typeconst_concrete_concrete_error:bool ->
-  ?tco_enable_strict_const_semantics:bool ->
+  ?tco_enable_strict_const_semantics:int ->
   ?tco_meth_caller_only_public_visibility:bool ->
   ?tco_require_extends_implements_ancestors:bool ->
   ?tco_strict_value_equality:bool ->
@@ -697,7 +700,7 @@ val tco_math_new_code : t -> bool
 
 val tco_typeconst_concrete_concrete_error : t -> bool
 
-val tco_enable_strict_const_semantics : t -> bool
+val tco_enable_strict_const_semantics : t -> int
 
 val tco_meth_caller_only_public_visibility : t -> bool
 

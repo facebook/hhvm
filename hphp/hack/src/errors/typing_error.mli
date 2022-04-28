@@ -491,6 +491,11 @@ module Primary : sig
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
       }
+    | Constant_multiple_concrete_conflict of {
+        pos: Pos.t;
+        name: string;
+        definitions: (Pos_or_decl.t * string option) list;
+      }
     | Invalid_memoized_param of {
         pos: Pos.t;
         ty_name: string Lazy.t;

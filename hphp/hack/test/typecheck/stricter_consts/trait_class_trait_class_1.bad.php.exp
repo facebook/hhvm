@@ -1,3 +1,9 @@
+File "trait_class_trait_class_1.bad.php", line 16, characters 13-13:
+Constant ONCALL is defined concretely in multiple ancestors (Typing[4374])
+  File "trait_class_trait_class_1.bad.php", line 5, characters 15-20:
+  One conflicting definition is here, inherited through A
+  File "trait_class_trait_class_1.bad.php", line 9, characters 16-21:
+  Another conflicting definition is here
 File "trait_class_trait_class_1.bad.php", line 16, characters 23-23:
 Some members in class `B` are incompatible with those declared in type `A` (Typing[4374])
   File "trait_class_trait_class_1.bad.php", line 9, characters 16-21:

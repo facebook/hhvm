@@ -283,7 +283,7 @@ let parse_options () =
   let ignore_unsafe_cast = ref false in
   let math_new_code = ref false in
   let typeconst_concrete_concrete_error = ref false in
-  let enable_strict_const_semantics = ref false in
+  let enable_strict_const_semantics = ref 0 in
   let meth_caller_only_public_visibility = ref true in
   let require_extends_implements_ancestors = ref false in
   let strict_value_equality = ref false in
@@ -700,7 +700,7 @@ let parse_options () =
         " Raise an error when a concrete type constant is overridden by a concrete type constant in a child class."
       );
       ( "--enable-strict-const-semantics",
-        Arg.Set enable_strict_const_semantics,
+        Arg.Int (fun x -> enable_strict_const_semantics := x),
         " Raise an error when a concrete constants is overridden or multiply defined"
       );
       ( "--meth-caller-only-public-visibility",

@@ -72,6 +72,8 @@ module type Getters_S = sig
 
   val int_ : string -> default:int -> t -> int
 
+  val int_opt_result : string -> t -> (int, string) result option
+
   val int_opt : string -> t -> int option
 
   val float_ : string -> default:float -> t -> float
@@ -102,6 +104,9 @@ module Getters : Getters_S = struct
     | Error e -> invalid_arg e
 
   let string_opt key config = Config_file_ffi_externs.get_string_opt config key
+
+  (* Does not immediately raise if key is not an int *)
+  let int_opt_result key config = Config_file_ffi_externs.get_int_opt config key
 
   let int_opt key config =
     Config_file_ffi_externs.get_int_opt config key

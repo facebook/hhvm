@@ -1,3 +1,9 @@
+File "interface_interface_1.bad.php", line 14, characters 7-7:
+Constant ONCALL is defined concretely in multiple ancestors (Typing[4374])
+  File "interface_interface_1.bad.php", line 7, characters 15-20:
+  One conflicting definition is here
+  File "interface_interface_1.bad.php", line 11, characters 16-21:
+  Another conflicting definition is here
 File "interface_interface_1.bad.php", line 14, characters 20-21:
 Some members in class `A` are incompatible with those declared in type `IA` (Typing[4374])
   File "interface_interface_1.bad.php", line 11, characters 16-21:

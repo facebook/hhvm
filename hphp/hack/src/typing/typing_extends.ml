@@ -144,11 +144,9 @@ end
 module ParentClassEltSet = Caml.Set.Make (ParentClassElt)
 
 module ParentClassConst = struct
-  type parent = Pos.t * Cls.t
-
   type t = {
     class_const: class_const;
-    parent: parent;  (** The parent this class element is from. *)
+    parent: ParentClassElt.parent;
   }
 
   let make class_const parent = { class_const; parent }
@@ -710,7 +708,7 @@ let conflict_with_declared_interface_or_trait
     origin
     const_name =
   let strict_const_semantics =
-    TCO.enable_strict_const_semantics (Env.get_tcopt env)
+    TCO.enable_strict_const_semantics (Env.get_tcopt env) > 0
   in
   let is_inherited_and_conflicts_with_parent =
     String.( <> ) origin (Cls.name class_) && String.( <> ) origin parent_origin
@@ -1729,6 +1727,39 @@ let minimum_classes env classes =
   List.fold classes ~init:[] ~f:(fun minimum_classes class_ ->
       add_min is_sub_type class_ minimum_classes)
 
+let check_no_conflicting_inherited_concrete_constants name constants class_pos =
+  let open ParentClassConst in
+  let definitions =
+    ParentClassConstSet.filter
+      (fun { class_const = { cc_abstract; _ }; _ } ->
+        match cc_abstract with
+        | CCConcrete -> true
+        | CCAbstract _ -> false)
+      constants
+    |> ParentClassConstSet.elements
+  in
+  if List.length definitions > 1 then
+    let err =
+      Typing_error.Primary.Constant_multiple_concrete_conflict
+        {
+          pos = class_pos;
+          name;
+          definitions =
+            List.map
+              ~f:(fun { class_const; parent } ->
+                let parent_name = Cls.name (snd parent) in
+                let via =
+                  if String.(parent_name <> class_const.cc_origin) then
+                    Some (Utils.strip_ns parent_name)
+                  else
+                    None
+                in
+                (class_const.cc_pos, via))
+              definitions;
+        }
+    in
+    Errors.add_typing_error (Typing_error.primary err)
+
 let union_parent_constants parents : ParentClassConstSet.t MemberNameMap.t =
   (* Note, this covers all kinds of constants, including constants of type TypeStructure created for each type constant. *)
   let get_declared_consts ((parent_name_pos, _), parent_tparaml, parent_class) =
@@ -1766,8 +1797,16 @@ let check_class_extends_parents_constants
     union_parent_constants parents
   in
 
+  let class_pos = fst class_ast.Aast.c_name in
+
   MemberNameMap.fold
     (fun const_name inherited env ->
+      if TCO.enable_strict_const_semantics (Env.get_tcopt env) > 1 then
+        check_no_conflicting_inherited_concrete_constants
+          const_name
+          inherited
+          class_pos;
+
       (* TODO(vmladenov): factor individual checks out of check_const_override and remove [implements] parameter *)
       ParentClassConstSet.fold
         (fun ParentClassConst.
@@ -1786,7 +1825,7 @@ let check_class_extends_parents_constants
                 implements
                 const_name
                 parent_class
-                (fst class_ast.Aast.c_name, class_)
+                (class_pos, class_)
                 parent_const
                 const
                 (on_error (parent_pos, Cls.name parent_class))

@@ -465,7 +465,13 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_typeconst_concrete_concrete_error:
         (bool_opt "typeconst_concrete_concrete_error" config)
       ?tco_enable_strict_const_semantics:
-        (bool_opt "enable_strict_const_semantics" config)
+        (let key = "enable_strict_const_semantics" in
+         match int_opt_result key config with
+         | None -> None
+         | Some (Ok i) -> Some i
+         | Some (Error _) ->
+           (* not an int *)
+           bool_opt key config |> Option.map ~f:Bool.to_int)
       ?tco_meth_caller_only_public_visibility:
         (bool_opt "meth_caller_only_public_visibility" config)
       ?tco_require_extends_implements_ancestors:

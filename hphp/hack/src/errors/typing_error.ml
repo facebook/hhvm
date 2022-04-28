@@ -1629,6 +1629,11 @@ module Primary = struct
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
       }
+    | Constant_multiple_concrete_conflict of {
+        pos: Pos.t;
+        name: string;
+        definitions: (Pos_or_decl.t * string option) list;
+      }
     | Invalid_memoized_param of {
         pos: Pos.t;
         ty_name: string Lazy.t;
@@ -2760,6 +2765,39 @@ module Primary = struct
     let reasons = lazy [(decl_pos, "Previously defined here")]
     and claim = lazy (pos, "Cannot re-declare this type constant") in
     (Error_code.TypeconstConcreteConcreteOverride, claim, reasons, [])
+
+  let constant_multiple_concrete_conflict pos name definitions =
+    let reasons =
+      lazy
+        (List.mapi
+           ~f:(fun i (p, via) ->
+             let first =
+               if i = 0 then
+                 "One"
+               else
+                 "Another"
+             in
+             let message =
+               Format.sprintf "%s conflicting definition is here" first
+             in
+             let full_message =
+               match via with
+               | Some parent_name ->
+                 Format.sprintf "%s, inherited through %s" message parent_name
+               | None -> message
+             in
+             (p, full_message))
+           definitions)
+    in
+
+    let claim =
+      lazy
+        ( pos,
+          Format.sprintf
+            "Constant %s is defined concretely in multiple ancestors"
+            name )
+    in
+    (Error_code.ConcreteConstInterfaceOverride, claim, reasons, [])
 
   let invalid_memoized_param pos reason : error =
     let claim =
@@ -5395,6 +5433,8 @@ module Primary = struct
     | Expected_tparam { pos; n; decl_pos } -> expected_tparam pos n decl_pos
     | Typeconst_concrete_concrete_override { pos; decl_pos } ->
       typeconst_concrete_concrete_override pos decl_pos
+    | Constant_multiple_concrete_conflict { pos; name; definitions } ->
+      constant_multiple_concrete_conflict pos name definitions
     | Invalid_memoized_param { pos; reason; _ } ->
       invalid_memoized_param pos reason
     | Invalid_arraykey

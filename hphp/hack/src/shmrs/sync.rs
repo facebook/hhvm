@@ -5,10 +5,45 @@
 
 use std::cell::UnsafeCell;
 use std::ops::{Deref, DerefMut};
+use std::time::Duration;
 
 use owning_ref::StableAddress;
 
 use crate::error::Errno;
+
+// Some pthread-functions are not exported in the `libc` crate.
+//
+// Note that these are not supported on all platforms, in particular
+// on macOS.
+#[cfg(target_os = "linux")]
+extern "C" {
+    fn pthread_rwlock_timedwrlock(
+        lock: *mut libc::pthread_rwlock_t,
+        timespec: *const libc::timespec,
+    ) -> libc::c_int;
+
+    fn pthread_rwlock_timedrdlock(
+        lock: *mut libc::pthread_rwlock_t,
+        timespec: *const libc::timespec,
+    ) -> libc::c_int;
+}
+
+/// Errors that can occur while handling locks.
+#[derive(Debug)]
+pub enum LockError {
+    Errno(Errno),
+    Timeout,
+}
+
+impl From<Errno> for LockError {
+    fn from(errno: Errno) -> Self {
+        if errno.errno == libc::ETIMEDOUT.try_into().unwrap() {
+            Self::Timeout
+        } else {
+            Self::Errno(errno)
+        }
+    }
+}
 
 /// A reader-writer lock that can be used in a shared-memory
 /// (inter-process) context.
@@ -72,7 +107,7 @@ impl<T> RwLock<T> {
     ///  - As long as the lock is in use, you can't initialize it again!
     ///  - You shouldn't be mutating the `RwLock` after `initialize`
     ///    or attached are called.
-    pub unsafe fn initialize(&self) -> Result<RwLockRef<'_, T>, Errno> {
+    pub unsafe fn initialize(&self) -> Result<RwLockRef<'_, T>, LockError> {
         let mut attr: libc::pthread_rwlockattr_t = std::mem::zeroed();
 
         Errno::from(libc::pthread_rwlockattr_init(&mut attr as *mut _))?;
@@ -107,17 +142,18 @@ impl<T> RwLock<T> {
     }
 
     #[cfg(target_os = "linux")]
-    unsafe fn set_prefer_writer(attr: *mut libc::pthread_rwlockattr_t) -> Result<(), Errno> {
+    unsafe fn set_prefer_writer(attr: *mut libc::pthread_rwlockattr_t) -> Result<(), LockError> {
         // Not defined in the libc crate. Linux specific. See pthread.h.
         const LIBC_PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP: libc::c_int = 2;
         Errno::from(libc::pthread_rwlockattr_setkind_np(
             attr,
             LIBC_PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP,
         ))
+        .map_err(Into::into)
     }
 
     #[cfg(not(target_os = "linux"))]
-    unsafe fn set_prefer_writer(_attr: *mut libc::pthread_rwlockattr_t) -> Result<(), Errno> {
+    unsafe fn set_prefer_writer(_attr: *mut libc::pthread_rwlockattr_t) -> Result<(), LockError> {
         // Non-Linux Oses don't have this flag.
         Ok(())
     }
@@ -129,8 +165,8 @@ impl<T> RwLock<T> {
     ///     reinitialized by calling `initialize`.
     ///   - No thread must hold the lock.
     ///   - Attempting to destroy an uninitialized lock is undefined behavior.
-    pub unsafe fn destroy(&mut self) -> Result<(), Errno> {
-        Errno::from(libc::pthread_rwlock_destroy(self.lock_ptr()))
+    pub unsafe fn destroy(&mut self) -> Result<(), LockError> {
+        Errno::from(libc::pthread_rwlock_destroy(self.lock_ptr())).map_err(Into::into)
     }
 }
 
@@ -140,7 +176,11 @@ impl<'a, T> RwLockRef<'a, T> {
     ///
     /// Note that, according to the pthread_rwlock_rdlock manual page, this
     /// does support recursive locking.
-    pub fn read(self) -> Result<RwLockReadGuard<'a, T>, Errno> {
+    ///
+    /// The optional [timeout] parameter can be specified to abort blocking
+    /// after the given duration. In that case a `LockError::Timeout` is returned.
+    /// Note that on non-Linux platforms the timeout option will be ignored.
+    pub fn read(self, timeout: Option<Duration>) -> Result<RwLockReadGuard<'a, T>, LockError> {
         // Safety: A RwLockRef can only be obtained by calling
         // RwLock::initialize or -acquire. Therefore, we should
         // have a pointer to a valid rwlock.
@@ -149,7 +189,14 @@ impl<'a, T> RwLockRef<'a, T> {
         });
         if !success {
             unsafe {
-                Errno::from(libc::pthread_rwlock_rdlock(self.0.lock_ptr()))?;
+                let errno = match timeout {
+                    None => libc::pthread_rwlock_rdlock(self.0.lock_ptr()),
+                    Some(timeout) => {
+                        let timespec = Self::timespec_for_duration(timeout)?;
+                        Self::pthread_rwlock_timedrdlock(self.0.lock_ptr(), &timespec)
+                    }
+                };
+                Errno::from(errno)?;
             }
         }
         Ok(RwLockReadGuard { lock: self })
@@ -160,7 +207,11 @@ impl<'a, T> RwLockRef<'a, T> {
     ///
     /// Note that, according to the pthread_rwlock_wrlock manual page, this
     /// returns EDEADLK of the current thread already holds the lock.
-    pub fn write(self) -> Result<RwLockWriteGuard<'a, T>, Errno> {
+    ///
+    /// The optional [timeout] parameter can be specified to abort blocking
+    /// after the given duration. In that case a `LockError::Timeout` is returned.
+    /// Note that on non-Linux platforms the timeout option will be ignored.
+    pub fn write(self, timeout: Option<Duration>) -> Result<RwLockWriteGuard<'a, T>, LockError> {
         // Safety: A RwLockRef can only be obtained by calling
         // RwLock::initialize or -acquire. Therefore, we should
         // have a pointer to a valid rwlock.
@@ -169,7 +220,14 @@ impl<'a, T> RwLockRef<'a, T> {
         });
         if !success {
             unsafe {
-                Errno::from(libc::pthread_rwlock_wrlock(self.0.lock_ptr()))?;
+                let errno = match timeout {
+                    None => libc::pthread_rwlock_wrlock(self.0.lock_ptr()),
+                    Some(timeout) => {
+                        let timespec = Self::timespec_for_duration(timeout)?;
+                        Self::pthread_rwlock_timedwrlock(self.0.lock_ptr(), &timespec)
+                    }
+                };
+                Errno::from(errno)?;
             }
         }
         Ok(RwLockWriteGuard { lock: self })
@@ -199,6 +257,63 @@ impl<'a, T> RwLockRef<'a, T> {
         }
 
         false
+    }
+
+    fn timespec_for_duration(duration: Duration) -> Result<libc::timespec, Errno> {
+        let mut timespec = libc::timespec {
+            tv_sec: 0,
+            tv_nsec: 0,
+        };
+        // Safety: timespec is a valid pointer
+        unsafe {
+            // pthread timeouts are based on `CLOCK_REALTIME` (see man page),
+            // so we have to use that one.
+            Errno::if_(libc::clock_gettime(libc::CLOCK_REALTIME, &mut timespec) != 0)?;
+        }
+        let now = Duration::new(
+            timespec.tv_sec.try_into().unwrap(),
+            timespec.tv_nsec.try_into().unwrap(),
+        );
+        let deadline = now + duration;
+        timespec.tv_sec = TryInto::<libc::time_t>::try_into(deadline.as_secs()).unwrap();
+        timespec.tv_nsec = TryInto::<libc::c_long>::try_into(deadline.subsec_nanos()).unwrap();
+        Ok(timespec)
+    }
+
+    #[cfg(target_os = "linux")]
+    unsafe fn pthread_rwlock_timedwrlock(
+        lock: *mut libc::pthread_rwlock_t,
+        timespec: *const libc::timespec,
+    ) -> libc::c_int {
+        pthread_rwlock_timedwrlock(lock, timespec)
+    }
+
+    #[cfg(target_os = "linux")]
+    unsafe fn pthread_rwlock_timedrdlock(
+        lock: *mut libc::pthread_rwlock_t,
+        timespec: *const libc::timespec,
+    ) -> libc::c_int {
+        pthread_rwlock_timedrdlock(lock, timespec)
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    unsafe fn pthread_rwlock_timedwrlock(
+        lock: *mut libc::pthread_rwlock_t,
+        _timespec: *const libc::timespec,
+    ) -> libc::c_int {
+        // On non-Linux platforms we ignore the timeouts because
+        // the timed pthread functions might not be available.
+        libc::pthread_rwlock_wrlock(lock)
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    unsafe fn pthread_rwlock_timedrdlock(
+        lock: *mut libc::pthread_rwlock_t,
+        _timespec: *const libc::timespec,
+    ) -> libc::c_int {
+        // On non-Linux platforms we ignore the timeouts because
+        // the timed pthread functions might not be available.
+        libc::pthread_rwlock_rdlock(lock)
     }
 }
 
@@ -281,6 +396,7 @@ mod integration_tests {
     use super::*;
 
     use std::mem::MaybeUninit;
+    use std::sync::atomic::{AtomicBool, Ordering};
     use std::time::Duration;
 
     use nix::sys::wait::WaitStatus;
@@ -347,13 +463,13 @@ mod integration_tests {
                     let mut num_incrs = 0;
                     while num_incrs < NUM_INCRS_PER_PROC {
                         if rng.gen_bool(0.5) {
-                            let mut guard = lock.write().unwrap();
+                            let mut guard = lock.write(None).unwrap();
                             *guard += 1;
                             std::thread::sleep(OP_SLEEP);
                             drop(guard);
                             num_incrs += 1;
                         } else {
-                            let guard = lock.read().unwrap();
+                            let guard = lock.read(None).unwrap();
                             let init_val = *guard;
                             for _ in 0..NUM_CONSEQ_READS {
                                 std::thread::sleep(OP_SLEEP);
@@ -375,8 +491,88 @@ mod integration_tests {
             }
         }
 
-        assert_eq!(*lock.read().unwrap(), NUM_PROCS * NUM_INCRS_PER_PROC);
+        assert_eq!(*lock.read(None).unwrap(), NUM_PROCS * NUM_INCRS_PER_PROC);
 
         assert_eq!(unsafe { libc::munmap(mmap_ptr, mmap_size) }, 0);
+    }
+
+    struct TimeoutSetup {
+        lock: RwLock<()>,
+        has_locked: AtomicBool,
+    }
+
+    #[test]
+    fn test_timeout() {
+        // Scenario:
+        // 1. the child process takes the lock
+        // 2. the child process notifies master it has taken the
+        //    lock by setting the atomic bool
+        // 3. the child now waits forever
+        // 4. the master tries to take the lock with a timeout
+        // 5. the timeout triggers
+        // 6. the master kills the child and cleans up
+        let mmap_size = std::mem::size_of::<TimeoutSetup>();
+        let mmap_ptr = unsafe {
+            libc::mmap(
+                std::ptr::null_mut(),
+                mmap_size,
+                libc::PROT_READ | libc::PROT_WRITE,
+                libc::MAP_SHARED | libc::MAP_ANONYMOUS,
+                -1,
+                0,
+            )
+        };
+        assert_ne!(mmap_ptr, libc::MAP_FAILED);
+        let setup_ptr: *mut MaybeUninit<TimeoutSetup> = mmap_ptr as *mut _;
+        let setup: &'static mut MaybeUninit<TimeoutSetup> =
+            // Safety:
+            //  - Pointer is not null
+            //  - Pointer is aligned on a page
+            //  - This is the only reference to the data, and the lifetime is
+            //    static as we don't unmap the memory.
+            unsafe { &mut *setup_ptr };
+        // Safety: Initialize the memory properly
+        let setup = unsafe {
+            setup.as_mut_ptr().write(TimeoutSetup {
+                lock: RwLock::new(()),
+                has_locked: AtomicBool::new(false),
+            });
+            setup.assume_init_mut()
+        };
+        // Safety: We are the only ones to attach to this lock!
+        let lock = unsafe { setup.lock.initialize().unwrap() };
+
+        match unsafe { nix::unistd::fork() }.unwrap() {
+            ForkResult::Parent { child } => {
+                // Wait until the child has acquired the lock
+                while !setup.has_locked.load(Ordering::SeqCst) {
+                    std::thread::yield_now();
+                }
+
+                // Acquiring the lock should now trigger the timeout
+                match lock.write(Some(Duration::from_millis(200))) {
+                    Err(LockError::Timeout) => {}
+                    Err(e) => panic!("expected a timeout, but got Err({:?})", e),
+                    Ok(..) => panic!("expected a timeout, but acquired the lock"),
+                };
+
+                // Kill the child and wait for it
+                nix::sys::signal::kill(child, nix::sys::signal::Signal::SIGTERM).unwrap();
+                nix::sys::wait::waitpid(child, None).unwrap();
+            }
+            ForkResult::Child => {
+                // Take the lock indefinitely
+                let _guard = lock.write(None).unwrap();
+
+                // Inform the master process that the lock has been taken
+                setup.has_locked.store(true, Ordering::SeqCst);
+
+                loop {
+                    std::thread::sleep(Duration::from_secs(1));
+                }
+
+                // This is unreachable, so the guard is never dropped!
+            }
+        }
     }
 }

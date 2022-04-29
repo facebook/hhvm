@@ -232,7 +232,7 @@ impl<'shm> ShardAlloc<'shm> {
     ///  - Of course, all values that were previously allocated using this
     ///    allocator are now garbage. You shouldn't try to read them anymore!
     pub unsafe fn reset(&self) {
-        let mut control_data = self.control_data.write().unwrap();
+        let mut control_data = self.control_data.write(None).unwrap();
         control_data.mark_current_chunk_as_filled();
         control_data.mark_filled_chunks_as_free();
     }
@@ -253,7 +253,7 @@ unsafe impl<'shm> Allocator for ShardAlloc<'shm> {
             return self.alloc_large(l);
         }
 
-        let mut control_data = self.control_data.write().unwrap();
+        let mut control_data = self.control_data.write(None).unwrap();
 
         let align_offset = control_data.current_next.align_offset(l.align());
         let mut pointer = unsafe { control_data.current_next.add(align_offset) };

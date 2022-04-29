@@ -16,6 +16,12 @@ use crate::hashmap::Map;
 use crate::shardalloc::{ShardAlloc, ShardAllocControlData, SHARD_ALLOC_MIN_CHUNK_SIZE};
 use crate::sync::{RwLock, RwLockReadGuard, RwLockRef, RwLockWriteGuard};
 
+/// Timeout for acquiring shard locks.
+///
+/// We'd like to not hang forever if another worker craches (or is killed)
+/// while holding the lock (e.g. because of an OOM kill)
+pub const LOCK_TIMEOUT: Option<std::time::Duration> = Some(std::time::Duration::new(60, 0));
+
 /// The number of shards.
 ///
 /// DashMap uses (nproc * 4) rounded up to the next power of two. Let's do the
@@ -207,7 +213,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
 
         // Initialize maps themselves.
         for map in maps.iter() {
-            map.write()
+            map.write(LOCK_TIMEOUT)
                 .unwrap()
                 .reset_with_hasher(cmap.file_alloc, cmap.hash_builder.clone());
         }
@@ -282,7 +288,7 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
 
     fn shard_for_writing<'a>(&'a self, key: &K) -> Shard<'shm, 'a, K, V, S> {
         let shard_index = self.shard_index_for(key);
-        let map = self.maps[shard_index].write().unwrap();
+        let map = self.maps[shard_index].write(LOCK_TIMEOUT).unwrap();
         let alloc_non_evictable = &self.shard_allocs_non_evictable[shard_index];
         let alloc_evictable = &self.shard_allocs_evictable[shard_index];
         Shard {
@@ -294,7 +300,7 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
 
     fn shard_for_reading<'a>(&'a self, key: &K) -> RwLockReadGuard<'a, Map<'shm, K, V, S>> {
         let shard_index = self.shard_index_for(key);
-        self.maps[shard_index].read().unwrap()
+        self.maps[shard_index].read(LOCK_TIMEOUT).unwrap()
     }
 
     /// Empty a shard.
@@ -418,13 +424,18 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
     ///
     /// Will loop over each shard.
     pub fn len(&self) -> usize {
-        self.maps.iter().map(|map| map.read().unwrap().len()).sum()
+        self.maps
+            .iter()
+            .map(|map| map.read(LOCK_TIMEOUT).unwrap().len())
+            .sum()
     }
 
     /// Return true if the hashmap is empty.
     /// Will loop over each shard.
     pub fn is_empty(&self) -> bool {
-        self.maps.iter().all(|map| map.read().unwrap().is_empty())
+        self.maps
+            .iter()
+            .all(|map| map.read(LOCK_TIMEOUT).unwrap().is_empty())
     }
 }
 

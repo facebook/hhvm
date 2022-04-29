@@ -126,7 +126,7 @@ mod integration_tests {
         // Safety: We are the only ones to attach to this lock.
         let map = unsafe { inserter.map.initialize() }.unwrap();
 
-        map.write().unwrap().reset(&inserter.file_alloc);
+        map.write(None).unwrap().reset(&inserter.file_alloc);
 
         let mut child_procs = vec![];
         for scenario in &scenarios {
@@ -136,7 +136,7 @@ mod integration_tests {
                 }
                 ForkResult::Child => {
                     for &(key, value) in scenario.iter() {
-                        let mut guard = map.write().unwrap();
+                        let mut guard = map.write(None).unwrap();
                         guard.insert(key, value);
                         std::thread::sleep(OP_SLEEP);
                         // Make sure we sleep while holding the lock.
@@ -155,7 +155,7 @@ mod integration_tests {
             }
         }
 
-        let guard = map.read().unwrap();
+        let guard = map.read(None).unwrap();
 
         let mut expected: HashMap<u64, HashSet<u64>> = HashMap::new();
         for scenario in scenarios {

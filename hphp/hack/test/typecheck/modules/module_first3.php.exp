@@ -1,0 +1,4 @@
+File "module_first3.php", line 5, characters 8-10:
+`module foo;` must be unique, and precede any other declarations in a file. (Parsing[1002])
+File "module_first3.php", line 5, characters 8-10:
+Unbound name: `foo` (a module) (Naming[2049])

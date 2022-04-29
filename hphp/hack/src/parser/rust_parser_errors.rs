@@ -4710,6 +4710,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                                     MarkupSection(_) => false,
                                     NamespaceDeclaration(_)
                                     | FileAttributeSpecification(_)
+                                    | ModuleMembershipDeclaration(_)
                                     | EndOfFile(_)
                                     | NamespaceUseDeclaration(_) => false,
                                     _ => true,

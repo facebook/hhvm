@@ -1114,3 +1114,10 @@ pub const invalid_enum_class_label_qualifier: Error = Cow::Borrowed(
 pub const internal_outside_of_module: Error = Cow::Borrowed(
     "`internal` cannot be used outside of a module. Please define a module for this file.",
 );
+
+pub fn module_first_in_file(name: &str) -> Error {
+    Cow::Owned(format!(
+        "`module {};` must be unique, and precede any other declarations in a file.",
+        name
+    ))
+}

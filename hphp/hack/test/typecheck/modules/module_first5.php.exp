@@ -1,0 +1,2 @@
+File "module_first5.php", line 4, characters 8-10:
+`module bar;` must be unique, and precede any other declarations in a file. (Parsing[1002])

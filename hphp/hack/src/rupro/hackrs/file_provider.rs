@@ -8,13 +8,20 @@ use pos::RelativePath;
 use std::fmt::Debug;
 use std::marker::{Send, Sync};
 
-#[derive(ToOcamlRep, FromOcamlRep)]
+mod provider;
+pub use provider::PlainFileProvider;
+
+#[derive(Clone, Debug, ToOcamlRep, FromOcamlRep)]
 pub enum FileType {
     Disk(bstr::BString),
     Ide(bstr::BString),
 }
 
-///
+/// Acts as a sort of caching facade which is filled on-demand as contents are
+/// needed. The "cache" is filled by loading from the file system if the file
+/// isn't opened in the IDE (otherwise uses the IDE contents). That is, the IDE
+/// version takes precedence over the file system's.
+// note(sf, 2022-04-28): c.f. hphp/hack/src/providers/file_provider.ml
 pub trait FileProvider: Debug + Send + Sync {
     ///
     fn get(&self, file: RelativePath) -> Option<FileType>;

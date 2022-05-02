@@ -2,23 +2,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-use std::collections::BTreeMap;
-use std::rc::Rc;
-
-use bstr::BStr;
-use bumpalo::{
-    collections::{String, Vec},
-    Bump,
-};
-
-use hh_autoimport_rust as hh_autoimport;
-use naming_special_names_rust as naming_special_names;
+mod direct_decl_smart_constructors_generated;
 
 use arena_collections::{AssocListMut, List, MultiSetMut};
+use bstr::BStr;
+use bumpalo::{collections as bump, Bump};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
+use hh_autoimport_rust as hh_autoimport;
 use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
+use naming_special_names_rust as naming_special_names;
 use oxidized_by_ref::{
     aast,
     ast_defs::{
@@ -54,8 +47,8 @@ use parser_core_types::{
     compact_token::CompactToken, indexed_source_text::IndexedSourceText, source_text::SourceText,
     syntax_kind::SyntaxKind, token_factory::SimpleTokenFactoryImpl, token_kind::TokenKind,
 };
-
-mod direct_decl_smart_constructors_generated;
+use std::collections::BTreeMap;
+use std::rc::Rc;
 
 type SK = SyntaxKind;
 
@@ -69,14 +62,17 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
     pub file_attributes: List<'a, &'a typing_defs::UserAttribute<'a>>,
-    // const_refs will accumulate all scope-resolution-expressions it enconuters while it's "Some"
+
+    // const_refs will accumulate all scope-resolution-expressions it
+    // encounters while it's "Some"
     const_refs: Option<arena_collections::set::Set<'a, typing_defs::ClassConstRef<'a>>>,
+
     opts: &'a DeclParserOptions<'a>,
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
     classish_name_builder: ClassishNameBuilder<'a>,
-    type_parameters: Rc<Vec<'a, SSet<'a>>>,
+    type_parameters: Rc<Vec<SSet<'a>>>,
     retain_or_omit_user_attributes_for_facts: bool,
     previous_token_kind: TokenKind,
     source_text_allocator: S,
@@ -96,7 +92,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         let source_text = IndexedSourceText::new(src.clone());
         let path = source_text.source_text().file_path();
         let prefix = path.prefix();
-        let path = String::from_str_in(path.path_str(), arena).into_bump_str();
+        let path = bump::String::from_str_in(path.path_str(), arena).into_bump_str();
         let filename = RelativePath::make(prefix, path);
         Self {
             token_factory: SimpleTokenFactoryImpl::new(),
@@ -116,7 +112,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 arena,
             )),
             classish_name_builder: ClassishNameBuilder::new(),
-            type_parameters: Rc::new(Vec::new_in(arena)),
+            type_parameters: Rc::new(Vec::new()),
             // EndOfFile is used here as a None value (signifying "beginning of
             // file") to save space. There is no legitimate circumstance where
             // we would parse a token and the previous token kind would be
@@ -158,7 +154,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             return Id(pos, qualified_name);
         }
         // Allocate `len` bytes and fill them with the fully qualified name.
-        let mut qualified_name = String::with_capacity_in(len, self.arena);
+        let mut qualified_name = bump::String::with_capacity_in(len, self.arena);
         for part in parts {
             match part {
                 Node::Name(&(name, _pos)) => qualified_name.push_str(name),
@@ -252,8 +248,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
 
     fn slice<T>(&self, iter: impl Iterator<Item = T>) -> &'a [T] {
         let mut result = match iter.size_hint().1 {
-            Some(upper_bound) => Vec::with_capacity_in(upper_bound, self.arena),
-            None => Vec::new_in(self.arena),
+            Some(upper_bound) => bump::Vec::with_capacity_in(upper_bound, self.arena),
+            None => bump::Vec::new_in(self.arena),
         };
         for item in iter {
             result.push(item);
@@ -269,9 +265,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // The decl for a class constant stores a list of all the scope-resolution expressions
         // it contains. For example "const C=A::X" stores A::X, and "const D=self::Y" stores self::Y.
         // (This is so we can detect cross-type circularity in constant initializers).
-        // TODO: Hack is the wrong place to detect circularity (because we can never do it completely soundly,
-        // and because it's a cross-body problem). The right place to do it is in a linter. All this should be
-        // removed from here and put into a linter.
+        // TODO: Hack is the wrong place to detect circularity (because we can never do
+        // it completely soundly, and because it's a cross-body problem). The right place
+        // to do it is in a linter. All this should be removed from here and put into a linter.
         if let Some(const_refs) = self.const_refs {
             match class_id.2 {
                 nast::ClassId_::CI(sid) => {
@@ -301,7 +297,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         self.const_refs = None;
         match const_refs {
             Some(const_refs) => {
-                let mut elements: Vec<'_, typing_defs::ClassConstRef<'_>> =
+                let mut elements: bump::Vec<'_, typing_defs::ClassConstRef<'_>> =
                     bumpalo::collections::Vec::with_capacity_in(const_refs.count(), self.arena);
                 elements.extend(const_refs.into_iter());
                 elements.into_bump_slice()
@@ -336,21 +332,21 @@ impl<'text, 'arena> SourceTextAllocator<'text, 'arena> for ArenaSourceTextAlloca
 }
 
 fn prefix_slash<'a>(arena: &'a Bump, name: &str) -> &'a str {
-    let mut s = String::with_capacity_in(1 + name.len(), arena);
+    let mut s = bump::String::with_capacity_in(1 + name.len(), arena);
     s.push('\\');
     s.push_str(name);
     s.into_bump_str()
 }
 
 fn prefix_colon<'a>(arena: &'a Bump, name: &str) -> &'a str {
-    let mut s = String::with_capacity_in(1 + name.len(), arena);
+    let mut s = bump::String::with_capacity_in(1 + name.len(), arena);
     s.push(':');
     s.push_str(name);
     s.into_bump_str()
 }
 
 fn concat<'a>(arena: &'a Bump, str1: &str, str2: &str) -> &'a str {
-    let mut result = String::with_capacity_in(str1.len() + str2.len(), arena);
+    let mut result = bump::String::with_capacity_in(str1.len() + str2.len(), arena);
     result.push_str(str1);
     result.push_str(str2);
     result.into_bump_str()
@@ -404,9 +400,7 @@ fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a
 #[derive(Clone, Debug)]
 struct NamespaceBuilder<'a> {
     arena: &'a Bump,
-    stack: Vec<'a, NamespaceEnv<'a>>,
-    #[allow(dead_code)]
-    auto_ns_map: &'a [(&'a str, &'a str)],
+    stack: Vec<NamespaceEnv<'a>>,
     elaborate_xhp_namespaces_for_facts: bool,
 }
 
@@ -432,7 +426,7 @@ impl<'a> NamespaceBuilder<'a> {
 
         NamespaceBuilder {
             arena,
-            stack: bumpalo::vec![in arena; NamespaceEnv {
+            stack: vec![NamespaceEnv {
                 ns_uses,
                 class_uses,
                 fun_uses: SMap::empty(),
@@ -442,7 +436,6 @@ impl<'a> NamespaceBuilder<'a> {
                 is_codegen: false,
                 disable_xhp_element_mangling,
             }],
-            auto_ns_map,
             elaborate_xhp_namespaces_for_facts,
         }
     }
@@ -452,10 +445,10 @@ impl<'a> NamespaceBuilder<'a> {
         let nsenv = self.stack.last().unwrap().clone(); // shallow clone
         if let Some(name) = name {
             let mut fully_qualified = match current {
-                None => String::with_capacity_in(name.len(), self.arena),
+                None => bump::String::with_capacity_in(name.len(), self.arena),
                 Some(current) => {
                     let mut fully_qualified =
-                        String::with_capacity_in(current.len() + name.len() + 1, self.arena);
+                        bump::String::with_capacity_in(current.len() + name.len() + 1, self.arena);
                     fully_qualified.push_str(current);
                     fully_qualified.push('\\');
                     fully_qualified
@@ -822,8 +815,15 @@ pub enum Node<'a> {
     Ty(&'a Ty<'a>),
     XhpEnumTy(&'a (Option<&'a Pos<'a>>, &'a Ty<'a>, &'a [XhpEnumValue<'a>])),
     ListItem(&'a (Node<'a>, Node<'a>)),
-    Const(&'a ShallowClassConst<'a>), // For the "X=1" in enums "enum E {X=1}" and enum-classes "enum class C {int X=1}", and also for consts via make_const_declaration
-    ConstInitializer(&'a (Node<'a>, Node<'a>, &'a [typing_defs::ClassConstRef<'a>])), // Stores (X,1,refs) for "X=1" in top-level "const int X=1" and class-const "public const int X=1".
+
+    // For the "X=1" in enums "enum E {X=1}" and enum-classes "enum class C {int X=1}",
+    // and also for consts via make_const_declaration
+    Const(&'a ShallowClassConst<'a>),
+
+    // Stores (X,1,refs) for "X=1" in top-level "const int X=1" and
+    // class-const "public const int X=1".
+    ConstInitializer(&'a (Node<'a>, Node<'a>, &'a [typing_defs::ClassConstRef<'a>])),
+
     FunParam(&'a FunParamDecl<'a>),
     Attribute(&'a UserAttributeNode<'a>),
     FunctionHeader(&'a FunctionHeader<'a>),
@@ -846,6 +846,7 @@ pub enum Node<'a> {
     Expr(&'a nast::Expr<'a>),
     TypeParameters(&'a &'a [&'a Tparam<'a>]),
     WhereConstraint(&'a WhereConstraint<'a>),
+
     // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
     Token(FixedWidthToken),
 }
@@ -1048,7 +1049,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         if let Ok(s) = std::str::from_utf8(slice) {
             self.source_text_allocator.alloc(s)
         } else {
-            String::from_utf8_lossy_in(slice, self.arena).into_bump_str()
+            bump::String::from_utf8_lossy_in(slice, self.arena).into_bump_str()
         }
     }
 
@@ -1059,7 +1060,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         if let Ok(s) = std::str::from_utf8(slice) {
             s
         } else {
-            String::from_utf8_lossy_in(slice, self.arena).into_bump_str()
+            bump::String::from_utf8_lossy_in(slice, self.arena).into_bump_str()
         }
     }
 
@@ -1708,8 +1709,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     ) -> Option<(&'a FunParams<'a>, &'a [ShallowProp<'a>], bool)> {
         match list {
             Node::List(nodes) => {
-                let mut params = Vec::with_capacity_in(nodes.len(), self.arena);
-                let mut properties = Vec::new_in(self.arena);
+                let mut params = bump::Vec::with_capacity_in(nodes.len(), self.arena);
+                let mut properties = bump::Vec::new_in(self.arena);
                 let mut ft_variadic = false;
                 for node in nodes.iter() {
                     match node {
@@ -2115,7 +2116,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     // parameter `(function (ts)[_]: t) $f` as `(function (ts)[Tctx$f]: t) $f`
     fn rewrite_fun_ctx(
         &self,
-        tparams: &mut Vec<'_, &'a Tparam<'a>>,
+        tparams: &mut bump::Vec<'_, &'a Tparam<'a>>,
         ty: &Ty<'a>,
         param_name: &str,
     ) -> Ty<'a> {
@@ -2214,8 +2215,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // Then, for each polymorphic context with form `$g::C`,
         //   - add a type parameter `T/[$g::C]`
         //   - add a where constraint `T/[$g::C] = T$g :: C`
-        let rewrite_arg_ctx = |tparams: &mut Vec<'_, &'a Tparam<'a>>,
-                               where_constraints: &mut Vec<'_, &'a WhereConstraint<'a>>,
+        let rewrite_arg_ctx = |tparams: &mut bump::Vec<'_, &'a Tparam<'a>>,
+                               where_constraints: &mut bump::Vec<'_, &'a WhereConstraint<'a>>,
                                ty: &Ty<'a>,
                                param_pos: &'a Pos<'a>,
                                name: &str,
@@ -2269,9 +2270,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             rewritten_ty
         };
 
-        let mut tparams = Vec::from_iter_in(tparams.iter().copied(), self.arena);
+        let mut tparams = bump::Vec::from_iter_in(tparams.iter().copied(), self.arena);
         let mut where_constraints =
-            Vec::from_iter_in(where_constraints.iter().copied(), self.arena);
+            bump::Vec::from_iter_in(where_constraints.iter().copied(), self.arena);
 
         // The divergence here from the lowerer comes from using oxidized_by_ref instead of oxidized
         let mut ty_by_param: BTreeMap<&str, (Ty<'a>, &'a Pos<'a>)> = params
@@ -2435,7 +2436,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenOp
 {
     type S = Node<'a>;
 
-    fn flatten(&self, kind: SyntaxKind, lst: std::vec::Vec<Self::S>) -> Self::S {
+    fn flatten(&self, kind: SyntaxKind, lst: Vec<Self::S>) -> Self::S {
         let size = lst
             .iter()
             .map(|s| match s {
@@ -2449,7 +2450,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenOp
                 }
             })
             .sum();
-        let mut r = Vec::with_capacity_in(size, self.arena);
+        let mut r = bump::Vec::with_capacity_in(size, self.arena);
         for s in lst.into_iter() {
             match s {
                 Node::List(children) => r.extend(children.iter().copied()),
@@ -2704,7 +2705,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         Node::Ignored(SK::Missing)
     }
 
-    fn make_list(&mut self, items: std::vec::Vec<Self::R>, _: usize) -> Self::R {
+    fn make_list(&mut self, mut items: Vec<Self::R>, _: usize) -> Self::R {
         if let Some(&yield_) = items
             .iter()
             .flat_map(|node| node.iter())
@@ -2712,18 +2713,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         {
             yield_
         } else {
-            let size = items.iter().filter(|node| node.is_present()).count();
-            let items_iter = items.into_iter();
-            let mut items = Vec::with_capacity_in(size, self.arena);
-            for node in items_iter {
-                if node.is_present() {
-                    items.push(node);
-                }
-            }
-            let items = items.into_bump_slice();
+            items.retain(|node| node.is_present());
             if items.is_empty() {
                 Node::Ignored(SK::SyntaxList)
             } else {
+                let items = self.arena.alloc_slice_fill_iter(items);
                 Node::List(self.alloc(items))
             }
         }
@@ -3207,7 +3201,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_type_parameters(&mut self, _lt: Self::R, tparams: Self::R, _gt: Self::R) -> Self::R {
         let size = tparams.len();
-        let mut tparams_with_name = Vec::with_capacity_in(size, self.arena);
+        let mut tparams_with_name = bump::Vec::with_capacity_in(size, self.arena);
         let mut tparam_names = MultiSetMut::with_capacity_in(size, self.arena);
         for node in tparams.iter() {
             match *node {
@@ -3223,7 +3217,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             }
         }
         Rc::make_mut(&mut self.type_parameters).push(tparam_names.into());
-        let mut tparams = Vec::with_capacity_in(tparams_with_name.len(), self.arena);
+        let mut tparams = bump::Vec::with_capacity_in(tparams_with_name.len(), self.arena);
         for (decl, name) in tparams_with_name.into_iter() {
             let &TypeParameterDecl {
                 name: _,
@@ -3351,7 +3345,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                         None => return Node::Ignored(SK::FunctionDeclaration),
                     };
                 let deprecated = parsed_attributes.deprecated.map(|msg| {
-                    let mut s = String::new_in(self.arena);
+                    let mut s = bump::String::new_in(self.arena);
                     s.push_str("The function ");
                     s.push_str(name.trim_start_matches('\\'));
                     s.push_str(" is deprecated: ");
@@ -3649,7 +3643,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
         for clause in clauses.iter() {
             if let Node::NamespaceUseClause(nuc) = clause {
-                let mut id = String::new_in(self.arena);
+                let mut id = bump::String::new_in(self.arena);
                 id.push_str(prefix);
                 id.push_str(nuc.id.1);
                 Rc::make_mut(&mut self.namespace_builder).add_import(
@@ -3835,19 +3829,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
         let mut constructor = None;
 
-        let mut uses = Vec::with_capacity_in(uses_len, self.arena);
-        let mut xhp_attr_uses = Vec::with_capacity_in(xhp_attr_uses_len, self.arena);
-        let mut req_extends = Vec::with_capacity_in(req_extends_len, self.arena);
-        let mut req_implements = Vec::with_capacity_in(req_implements_len, self.arena);
-        let mut req_class = Vec::with_capacity_in(req_class_len, self.arena);
-        let mut consts = Vec::with_capacity_in(consts_len, self.arena);
-        let mut typeconsts = Vec::with_capacity_in(typeconsts_len, self.arena);
-        let mut props = Vec::with_capacity_in(props_len, self.arena);
-        let mut sprops = Vec::with_capacity_in(sprops_len, self.arena);
-        let mut static_methods = Vec::with_capacity_in(static_methods_len, self.arena);
-        let mut methods = Vec::with_capacity_in(methods_len, self.arena);
+        let mut uses = bump::Vec::with_capacity_in(uses_len, self.arena);
+        let mut xhp_attr_uses = bump::Vec::with_capacity_in(xhp_attr_uses_len, self.arena);
+        let mut req_extends = bump::Vec::with_capacity_in(req_extends_len, self.arena);
+        let mut req_implements = bump::Vec::with_capacity_in(req_implements_len, self.arena);
+        let mut req_class = bump::Vec::with_capacity_in(req_class_len, self.arena);
+        let mut consts = bump::Vec::with_capacity_in(consts_len, self.arena);
+        let mut typeconsts = bump::Vec::with_capacity_in(typeconsts_len, self.arena);
+        let mut props = bump::Vec::with_capacity_in(props_len, self.arena);
+        let mut sprops = bump::Vec::with_capacity_in(sprops_len, self.arena);
+        let mut static_methods = bump::Vec::with_capacity_in(static_methods_len, self.arena);
+        let mut methods = bump::Vec::with_capacity_in(methods_len, self.arena);
 
-        let mut user_attributes = Vec::with_capacity_in(user_attributes_len, self.arena);
+        let mut user_attributes = bump::Vec::with_capacity_in(user_attributes_len, self.arena);
         for attribute in attributes.iter() {
             match attribute {
                 Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
@@ -4098,7 +4092,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         attributes: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
-        let mut xhp_attr_enum_values = Vec::new_in(self.arena);
+        let mut xhp_attr_enum_values = bump::Vec::new_in(self.arena);
 
         let xhp_attr_decls = self.slice(attributes.iter().filter_map(|node| {
             let node = match node {
@@ -4182,7 +4176,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 let ty_ = node_ty.1;
                 self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_))
             });
-        let mut values = Vec::new_in(self.arena);
+        let mut values = bump::Vec::new_in(self.arena);
         for node in xhp_enum_values.iter() {
             // XHP enum values may only be string or int literals.
             match node {
@@ -4191,7 +4185,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     values.push(XhpEnumValue::XEVInt(i));
                 }
                 Node::StringLiteral(&(s, _)) => {
-                    let owned_str = std::string::String::from_utf8_lossy(s);
+                    let owned_str = String::from_utf8_lossy(s);
                     values.push(XhpEnumValue::XEVString(self.arena.alloc_str(&owned_str)));
                 }
                 _ => {}
@@ -4262,7 +4256,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
         let attributes = self.to_attributes(attrs);
         let deprecated = attributes.deprecated.map(|msg| {
-            let mut s = String::new_in(self.arena);
+            let mut s = bump::String::new_in(self.arena);
             s.push_str("The method ");
             s.push_str(id.1);
             s.push_str(" is deprecated: ");
@@ -4286,7 +4280,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             !is_constructor && attributes.support_dynamic_type,
         );
 
-        let mut user_attributes = Vec::new_in(self.arena);
+        let mut user_attributes = bump::Vec::new_in(self.arena);
         if self.retain_or_omit_user_attributes_for_facts {
             for attribute in attrs.iter() {
                 match attribute {
@@ -4367,7 +4361,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             Node::Const(const_) => Some(const_),
             _ => None,
         }));
-        let mut user_attributes = Vec::with_capacity_in(attributes.len(), self.arena);
+        let mut user_attributes = bump::Vec::with_capacity_in(attributes.len(), self.arena);
         for attribute in attributes.iter() {
             match attribute {
                 Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
@@ -4391,7 +4385,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 _ => {}
             }
         }
-        let mut includes = Vec::with_capacity_in(includes_len, self.arena);
+        let mut includes = bump::Vec::with_capacity_in(includes_len, self.arena);
         for element in use_clauses.iter() {
             match element {
                 Node::EnumUse(names) => {
@@ -4543,13 +4537,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             _ => None,
         }));
 
-        let mut extends = Vec::with_capacity_in(extends_list.len() + 1, self.arena);
+        let mut extends = bump::Vec::with_capacity_in(extends_list.len() + 1, self.arena);
         extends.push(builtin_enum_class_ty);
         extends.extend(extends_list.iter().filter_map(|&n| self.node_to_ty(n)));
         let extends = extends.into_bump_slice();
         let includes = &extends[1..];
 
-        let mut user_attributes = Vec::with_capacity_in(attributes.len() + 1, self.arena);
+        let mut user_attributes = bump::Vec::with_capacity_in(attributes.len() + 1, self.arena);
         for attribute in attributes.iter() {
             match attribute {
                 Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
@@ -4777,7 +4771,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 {
                     // for facts, allow xhp class consts to be mangled later
                     // on even when xhp_element_mangling is disabled
-                    let mut qualified = String::with_capacity_in(id.1.len() + 1, self.arena);
+                    let mut qualified = bump::String::with_capacity_in(id.1.len() + 1, self.arena);
                     qualified.push_str("\\");
                     qualified.push_str(id.1);
                     Id(id.0, self.arena.alloc_str(&qualified))
@@ -4930,7 +4924,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 {
                     // for facts, allow xhp class consts to be mangled later on
                     // even when xhp_element_mangling is disabled
-                    let mut qualified = String::with_capacity_in(class_name.len() + 1, self.arena);
+                    let mut qualified =
+                        bump::String::with_capacity_in(class_name.len() + 1, self.arena);
                     qualified.push_str("\\");
                     qualified.push_str(class_name);
                     Id(pos, self.arena.alloc_str(&qualified))
@@ -4960,7 +4955,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" => true,
             _ => false,
         } {
-            fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut Vec<'a, u8>) {
+            fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut bump::Vec<'a, u8>) {
                 match *expr {
                     aast::Expr(_, _, aast::Expr_::String(val)) => acc.extend_from_slice(val),
                     aast::Expr(_, _, aast::Expr_::Binop(&(Bop::Dot, e1, e2))) => {
@@ -4974,7 +4969,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             self.slice(args.iter().filter_map(|expr| match expr {
                 Node::StringLiteral((x, p)) => Some((*p, *x)),
                 Node::Expr(e @ aast::Expr(_, p, aast::Expr_::Binop(_))) => {
-                    let mut acc = Vec::new_in(self.arena);
+                    let mut acc = bump::Vec::new_in(self.arena);
                     fold_string_concat(e, &mut acc);
                     Some((p, acc.into_bump_slice().into()))
                 }
@@ -5152,7 +5147,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let has_abstract_keyword = modifiers
             .iter()
             .any(|node| node.is_token(TokenKind::Abstract));
-        let reduce_bounds = |mut constraints: Vec<'a, &Ty<'a>>| {
+        let reduce_bounds = |mut constraints: bump::Vec<'a, &Ty<'a>>| {
             if constraints.len() == 1 {
                 constraints.pop().map(|ty| self.alloc(ty.clone()))
             } else {
@@ -5171,7 +5166,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             // Abstract type constant in EBNF-like notation:
             //     abstract const type T {as X} [= Z];
             let as_constraint = reduce_bounds(constraints.iter().fold(
-                Vec::new_in(self.arena),
+                bump::Vec::new_in(self.arena),
                 |mut tys, constraint| {
                     if let Node::TypeConstraint(&(kind, hint)) = constraint {
                         use ConstraintKind::*;

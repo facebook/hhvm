@@ -573,12 +573,15 @@ let visitor =
               pos;
             }
         | (pos, Aast.Hoption _) ->
+          (* Narrow the position to just the '?', not the whole ?Foo<Complicated<Bar>>. *)
+          let (_start_line, start_column) = Pos.line_column pos in
+          let qmark_pos = Pos.set_col_end (start_column + 1) pos in
           Result_set.singleton
             {
               name = "?";
               type_ = BuiltInType BIoption;
               is_declaration = false;
-              pos;
+              pos = qmark_pos;
             }
         | _ -> Result_set.empty
       in

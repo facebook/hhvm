@@ -1,0 +1,2 @@
+?
+The type `?Foo` allows either `Foo` or `null`.

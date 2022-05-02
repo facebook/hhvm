@@ -136,7 +136,8 @@ else()
   set(PROFILE "release")
 endif()
 
-set(RUST_OPCODES "${CMAKE_BINARY_DIR}/hphp/hack/src/hackc/opcodes.rs")
+set(RUST_OPCODES_DIR "${CMAKE_BINARY_DIR}/hphp/hack/src/hackc")
+set(RUST_OPCODES "${RUST_OPCODES_DIR}/opcodes.rs")
 
 set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc")
 set(HHBC_AST_SRCS
@@ -179,10 +180,13 @@ set(FFI_SRCS
 add_custom_command(
   OUTPUT ${RUST_OPCODES}
   COMMAND
+    ${CMAKE_COMMAND} -E make_directory "${RUST_OPCODES_DIR}" &&
     . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-     ${INVOKE_CARGO} dump-opcodes dump-opcodes --exe &&
-     ${INVOKE_CARGO} dump-opcodes dump-opcodes --bin dump_opcodes
+    ${INVOKE_CARGO} dump-opcodes dump-opcodes --exe &&
+    ${INVOKE_CARGO} dump-opcodes dump-opcodes --bin dump_opcodes
       -o "${RUST_OPCODES}"
+  COMMENT "Generating Rust opcode struct for cbindgen to use to generate hhbc-ast.h"
+  DEPENDS "${OPCODE_DATA}"
 )
 
 set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-ast.h")
@@ -208,7 +212,7 @@ add_custom_command(
       --header "${HHBC_AST_HEADER}" --namespaces "HPHP,hackc,hhbc"
       --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${HHBC_HEADER}"
       ${HHBC_AST_SRCS}
-  DEPENDS rustc cargo "${OPCODE_DATA}" "${RUST_OPCODES}"
+  DEPENDS rustc cargo "${RUST_OPCODES}"
   COMMENT "Generating hhbc-ast.h"
 )
 

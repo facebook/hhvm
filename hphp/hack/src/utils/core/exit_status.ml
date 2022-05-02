@@ -86,8 +86,11 @@ let (_ignored : t -> int) = to_enum
 
 exception Exit_with of t
 
+(* Please note that AI(zoncolan) calls hack and might exit with these codes,
+and also uses own defined codes from ai_exit_status.ml.
+When adding a new code here, ensure not to overlap with ai_exit_status  *)
 let exit_code = function
-  | Interrupted -> -6
+  | Interrupted -> 250
   | No_error -> 0
   | Kill_error -> 1 (* used in clientStop/Start/Restart *)
   | Server_shutting_down_due_to_sigusr2 -> 1 (* used in server *)

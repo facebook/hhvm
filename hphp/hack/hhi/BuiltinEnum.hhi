@@ -76,18 +76,6 @@ const enumname<arraykey> BUILTIN_ENUM = BuiltinEnum::class;
 newtype MemberOf<-TEnumClass, +TType> as TType = TType;
 
 /**
- * Base helper class for the enum class feature, if sane switch semantic is
- * needed.
- */
-final class SwitchableClass<+T> {
-  public function __construct(private T $data)[] {}
-
-  public function data()[]: T {
-    return $this->data;
-  }
-}
-
-/**
  * BuiltinAbstractEnumClass contains the utility methods provided by
  * abstract enum classes.
  *

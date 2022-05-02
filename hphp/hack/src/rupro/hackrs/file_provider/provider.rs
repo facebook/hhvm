@@ -6,33 +6,37 @@
 use super::{FileProvider, FileType};
 use dashmap::DashMap;
 use parking_lot::RwLock;
-use pos::RelativePath;
+use pos::{RelativePath, RelativePathCtx};
+use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct PlainFileProvider {
-    #[allow(dead_code)]
     curr: DashMap<RelativePath, Option<FileType>>,
-    #[allow(dead_code)]
     prev: RwLock<Vec<DashMap<RelativePath, Option<FileType>>>>,
+    relative_path_ctx: Arc<RelativePathCtx>,
 }
 
 impl PlainFileProvider {
-    pub fn new() -> Self {
+    pub fn new(relative_path_ctx: Arc<RelativePathCtx>) -> Self {
         PlainFileProvider {
             curr: DashMap::new(),
             prev: RwLock::new(Vec::new()),
+            relative_path_ctx,
         }
+    }
+
+    fn read_file_contents_from_disk(&self, file: RelativePath) -> Option<bstr::BString> {
+        let absolute_path = file.to_absolute(&self.relative_path_ctx);
+        std::fs::read(&absolute_path).ok().map(Into::into)
     }
 }
 
 impl FileProvider for PlainFileProvider {
-    fn get(&self, _file: RelativePath) -> Option<FileType> {
-        todo!()
-        /*
+    fn get(&self, file: RelativePath) -> Option<FileType> {
         // Check current.
         if let Some(kv) = self.curr.get(&file) {
             if let Some(ft) = kv.value() {
-                return Some(ft.clone())
+                return Some(ft.clone());
             }
         }
         // Check ancestors.
@@ -40,40 +44,52 @@ impl FileProvider for PlainFileProvider {
         for scope in scopes.iter().rev() {
             if let Some(kv) = scope.get(&file) {
                 if let Some(ft) = kv.value() {
-                    return Some(ft.clone())
+                    return Some(ft.clone());
                 }
             }
         }
         // Not found.
         None
-         */
     }
 
-    fn get_contents(&self, _file: RelativePath) -> bstr::BString {
-        todo!()
+    fn get_contents(&self, file: RelativePath) -> bstr::BString {
+        match self.get(file) {
+            Some(FileType::Ide(bytes)) => bytes,
+            Some(FileType::Disk(bytes)) => bytes,
+            None => (self.read_file_contents_from_disk(file))
+                .or_else(|| Some(bstr::BString::from("")))
+                .unwrap(),
+        }
     }
 
-    fn provide_file_for_tests(&self, _file: RelativePath, _contents: bstr::BString) {
-        todo!()
+    fn provide_file_for_tests(&self, file: RelativePath, contents: bstr::BString) {
+        self.curr.insert(file, Some(FileType::Disk(contents)));
     }
 
-    fn provide_file_for_ide(&self, _file: RelativePath, _contents: bstr::BString) {
-        todo!()
+    fn provide_file_for_ide(&self, file: RelativePath, contents: bstr::BString) {
+        self.curr.insert(file, Some(FileType::Ide(contents)));
     }
 
-    fn provide_file_hint(&self, _file: RelativePath, _file_type: FileType) {
-        todo!()
+    fn provide_file_hint(&self, file: RelativePath, file_type: FileType) {
+        if let FileType::Ide(_) = file_type {
+            self.curr.insert(file, Some(file_type));
+        }
     }
 
-    fn remove_batch<I: Iterator<Item = RelativePath>>(&self, _files: I) {
-        todo!()
+    fn remove_batch<I: Iterator<Item = RelativePath>>(&self, files: I) {
+        for file in files {
+            self.curr.insert(file, None);
+        }
     }
 
     fn push_local_changes(&self) {
-        todo!()
+        let mut lck = self.prev.write();
+        let prev = &mut *lck;
+        prev.push(self.curr.clone());
+        self.curr.clear()
     }
 
     fn pop_local_changes(&self) {
-        todo!()
+        self.curr.clear()
     }
 }

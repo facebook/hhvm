@@ -4928,6 +4928,25 @@ Class* Class::defClosure(const PreClass* preClass, bool cache) {
   auto const nameList = preClass->namedEntity();
 
   auto const find = [&] () -> Class* {
+    if (RO::RepoAuthoritative) {
+      // In repo mode the cached class slot in the NamedEntity should
+      // be authoritative. Closure names are unique in repo mode so
+      // there should only ever be one pre-class with the same
+      // name. This is more than an optimization. We don't want to
+      // consult the name list below in repo mode because a class can
+      // be put onto it before it's done being setup. This can cause
+      // later assertions if we try to look up the closure by name
+      // (for example, in an AssertRAT).
+      if (auto const cls = nameList->getCachedClass()) {
+        assertx(classHasPersistentRDS(cls));
+        assertx(cls->preClass() == preClass);
+        assertx(nameList->clsList() == cls);
+        assertx(!nameList->clsList()->m_next);
+        return cls;
+      }
+      return nullptr;
+    }
+
     if (auto const cls = nameList->getCachedClass()) {
       if (cls->preClass() == preClass) return cls;
     }

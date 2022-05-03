@@ -276,18 +276,29 @@ using ContextRetTyMap = tbb::concurrent_hash_map<
 //////////////////////////////////////////////////////////////////////
 
 template<class Filter>
-PropState make_unknown_propstate(const php::Class* cls,
+PropState make_unknown_propstate(const Index& index,
+                                 const php::Class* cls,
                                  Filter filter) {
   auto ret = PropState{};
   for (auto& prop : cls->properties) {
     if (filter(prop)) {
       auto& elem = ret[prop.name];
-      elem.ty = TCell;
+      elem.ty = adjust_type_for_prop(
+        index,
+        *cls,
+        &prop.typeConstraint,
+        TCell
+      );
+      if (prop.attrs & AttrSystemInitialValue) {
+        auto initial = loosen_all(from_cell(prop.val));
+        if (!initial.subtypeOf(BUninit)) elem.ty |= initial;
+      }
       elem.tc = &prop.typeConstraint;
       elem.attrs = prop.attrs;
       elem.everModified = true;
     }
   }
+
   return ret;
 }
 
@@ -3711,15 +3722,32 @@ void check_invariants(IndexData& data) {
 
 //////////////////////////////////////////////////////////////////////
 
+Type adjust_closure_context(const Index& index, const CallContext& ctx) {
+  if (ctx.callee->cls && ctx.callee->cls->closureContextCls) {
+    auto withClosureContext = Context {
+      ctx.callee->unit,
+      ctx.callee,
+      ctx.callee->cls->closureContextCls
+    };
+    if (auto const rcls = index.selfCls(withClosureContext)) {
+      return setctx(subObj(*rcls));
+    }
+    return TObj;
+  }
+  return ctx.context;
+}
+
 Type context_sensitive_return_type(IndexData& data,
                                    CallContext callCtx,
                                    Type returnType) {
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
   auto const finfo = func_info(data, callCtx.callee);
-  returnType = return_with_context(std::move(returnType), callCtx.context);
 
-  auto checkParam = [&] (int i) {
+  auto const adjustedCtx = adjust_closure_context(*data.m_index, callCtx);
+  returnType = return_with_context(std::move(returnType), adjustedCtx);
+
+  auto const checkParam = [&] (int i) {
     auto const constraint = finfo->func->params[i].typeConstraint;
     if (constraint.hasConstraint() &&
         !constraint.isTypeVar() &&
@@ -3732,7 +3760,7 @@ Type context_sensitive_return_type(IndexData& data,
   };
 
   // TODO(#3788877): more heuristics here would be useful.
-  bool const tryContextSensitive = [&] {
+  auto const tryContextSensitive = [&] {
     if (finfo->func->noContextSensitiveAnalysis ||
         finfo->func->params.empty() ||
         interp_nesting_level + 1 >= max_interp_nexting_level ||
@@ -3755,9 +3783,7 @@ Type context_sensitive_return_type(IndexData& data,
     return false;
   }();
 
-  if (!tryContextSensitive) {
-    return returnType;
-  }
+  if (!tryContextSensitive) return returnType;
 
   {
     ContextRetTyMap::const_accessor acc;
@@ -3768,9 +3794,7 @@ Type context_sensitive_return_type(IndexData& data,
     }
   }
 
-  if (data.frozen) {
-    return returnType;
-  }
+  if (data.frozen) return returnType;
 
   auto contextType = [&] {
     ++interp_nesting_level;
@@ -3779,10 +3803,13 @@ Type context_sensitive_return_type(IndexData& data,
     auto const func = finfo->func;
     auto const wf = php::WideFunc::cns(func);
     auto const calleeCtx = AnalysisContext { func->unit, wf, func->cls };
-    auto const ty =
-      analyze_func_inline(*data.m_index, calleeCtx,
-                          callCtx.context, callCtx.args).inferredReturn;
-    return return_with_context(ty, callCtx.context);
+    auto const ty = analyze_func_inline(
+      *data.m_index,
+      calleeCtx,
+      adjustedCtx,
+      callCtx.args
+    ).inferredReturn;
+    return return_with_context(ty, adjustedCtx);
   }();
 
   if (!interp_nesting_level) {
@@ -6026,19 +6053,20 @@ bool Index::func_depends_on_arg(const php::Func* func, int arg) const {
 Type Index::lookup_foldable_return_type(Context ctx,
                                         const CallContext& calleeCtx) const {
   auto const func = calleeCtx.callee;
-  auto const& ctxType = calleeCtx.context;
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
   static __thread Context base_ctx;
 
+  auto const ctxType = adjust_closure_context(*this, calleeCtx);
+
   // Don't fold functions when staticness mismatches
-  if ((func->attrs & AttrStatic) && ctxType.couldBe(TObj)) return TInitCell;
-  if (!(func->attrs & AttrStatic) && ctxType.couldBe(TCls)) return TInitCell;
+  if (!func->isClosureBody) {
+    if ((func->attrs & AttrStatic) && ctxType.couldBe(TObj)) return TInitCell;
+    if (!(func->attrs & AttrStatic) && ctxType.couldBe(TCls)) return TInitCell;
+  }
 
   auto const& finfo = *func_info(*m_data, func);
-  if (finfo.effectFree && is_scalar(finfo.returnTy)) {
-    return finfo.returnTy;
-  }
+  if (finfo.effectFree && is_scalar(finfo.returnTy)) return finfo.returnTy;
 
   auto showArgs DEBUG_ONLY = [] (const CompactVector<Type>& a) {
     std::string ret, sep;
@@ -6093,16 +6121,14 @@ Type Index::lookup_foldable_return_type(Context ctx,
     auto const fa = analyze_func_inline(
       *this,
       AnalysisContext { func->unit, wf, func->cls },
-      calleeCtx.context,
+      ctxType,
       calleeCtx.args,
       CollectionOpts::EffectFreeOnly
     );
     return fa.effectFree ? fa.inferredReturn : TInitCell;
   }();
 
-  if (!is_scalar(contextType)) {
-    return TInitCell;
-  }
+  if (!is_scalar(contextType)) return TInitCell;
 
   ContextRetTyMap::accessor acc;
   if (m_data->foldableReturnTypeMap.insert(acc, calleeCtx)) {
@@ -6407,6 +6433,7 @@ Index::lookup_private_props(const php::Class* cls,
     return it->second;
   }
   return make_unknown_propstate(
+    *this,
     cls,
     [&] (const php::Prop& prop) {
       return (prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic);
@@ -6423,6 +6450,7 @@ Index::lookup_private_statics(const php::Class* cls,
     return it->second;
   }
   return make_unknown_propstate(
+    *this,
     cls,
     [&] (const php::Prop& prop) {
       return (prop.attrs & AttrPrivate) && (prop.attrs & AttrStatic);

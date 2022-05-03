@@ -678,9 +678,7 @@ inline EnumValues* Class::getEnumValues() const {
 // ExtraData.
 
 inline void Class::allocExtraData() const {
-  if (!m_extra) {
-    m_extra = new ExtraData();
-  }
+  m_extra.ensureAllocated();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

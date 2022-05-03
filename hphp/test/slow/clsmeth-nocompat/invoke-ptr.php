@@ -2,7 +2,8 @@
 
 <<__EntryPoint>>
 function main() {
-  $cl = () ==> 0;
+  $cl = () ==> __hhvm_intrinsics\launder_value(false);
+  $cl();
 
   try {
     $f = HH\dynamic_class_meth(get_class($cl), "__invoke");

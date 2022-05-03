@@ -4704,6 +4704,16 @@ OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, uint32_t clsIx) {
 
   auto const cls = c->rescope(const_cast<Class*>(func->cls()));
   assertx(!cls->needInitialization());
+  // In repo mode, rescoping should always use the template class
+  // (except if we're in a trait).
+  assertx(
+    IMPLIES(
+      RO::RepoAuthoritative &&
+        !(func->preClass() && func->preClass()->attrs() & AttrTrait),
+      cls == c
+    )
+  );
+
   auto obj = RuntimeOption::RepoAuthoritative
     ? createClosureRepoAuth(cls) : createClosure(cls);
   c_Closure::fromObject(obj)->init(numArgs, vmfp(), vmStack().top());

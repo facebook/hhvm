@@ -535,15 +535,17 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
     ne->m_cachedClass.markUninit();
   }
 
-  auto const cls = Class::def(preClass, true);
-  if (cls->pinitVec().size()) cls->initPropHandle();
-  if (cls->numStaticProperties()) cls->initSPropHandles();
-
-  if (cls->parent() == c_Closure::classof()) {
+  if (preClass->parent() == c_Closure::classof()->name()) {
     auto const ctx = read_class(ser);
-    if (ctx != cls) return cls->rescope(ctx);
+    auto const cls = Class::defClosure(preClass, true);
+    assertx(!cls->needInitialization());
+    return cls->rescope(ctx);
+  } else {
+    auto const cls = Class::def(preClass, true);
+    if (cls->pinitVec().size()) cls->initPropHandle();
+    if (cls->numStaticProperties()) cls->initSPropHandles();
+    return cls;
   }
-  return cls;
 }
 
 const TypeAlias* read_typealias_internal(ProfDataDeserializer& ser) {

@@ -603,8 +603,11 @@ FuncAnalysis analyze_func_inline(const Index& index,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
                                  CollectionOpts opts) {
-  assertx(!ctx.func->isClosureBody);
-  auto const knownArgs = KnownArgs { thisType, args };
+  auto const knownArgs = KnownArgs {
+    ctx.func->isClosureBody ? TBottom : thisType,
+    args
+  };
+
   return do_analyze(index, ctx, nullptr, &knownArgs,
                     opts | CollectionOpts::Inlining);
 }

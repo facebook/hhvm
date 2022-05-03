@@ -3611,9 +3611,12 @@ bool fcallTryFold(
   };
   if (env.collect.unfoldableFuncs.count(calleeCtx)) return false;
 
-  if (finish(env.index.lookup_foldable_return_type(env.ctx, calleeCtx))) {
-    return true;
-  }
+  auto foldableReturnType = env.index.lookup_foldable_return_type(
+    env.ctx,
+    calleeCtx
+  );
+  if (finish(std::move(foldableReturnType))) return true;
+
   env.collect.unfoldableFuncs.emplace(std::move(calleeCtx));
   return false;
 }
@@ -3824,6 +3827,164 @@ void in(ISS& env, const bc::FCallFuncD& op) {
 
 namespace {
 
+const StaticString s_invoke("__invoke");
+const StaticString
+  s_DynamicContextOverrideUnsafe("__SystemLib\\DynamicContextOverrideUnsafe");
+
+bool isBadContext(const FCallArgs& fca) {
+  return fca.context() &&
+    fca.context()->isame(s_DynamicContextOverrideUnsafe.get());
+}
+
+Context getCallContext(const ISS& env, const FCallArgs& fca) {
+  if (auto const name = fca.context()) {
+    auto const rcls = env.index.resolve_class(env.ctx, name);
+    if (rcls && rcls->cls()) {
+      return Context { env.ctx.unit, env.ctx.func, rcls->cls() };
+    }
+    return Context { env.ctx.unit, env.ctx.func, nullptr };
+  }
+  return env.ctx;
+}
+
+void fcallObjMethodNullsafeNoFold(ISS& env,
+                                  const FCallArgs& fca,
+                                  bool extraInput) {
+  assertx(fca.asyncEagerTarget() == NoBlockId);
+  if (extraInput) popC(env);
+  if (fca.hasGenerics()) popC(env);
+  if (fca.hasUnpack()) popC(env);
+  auto const numArgs = fca.numArgs();
+  auto const numRets = fca.numRets();
+  std::vector<Type> inOuts;
+  for (auto i = uint32_t{0}; i < numArgs; ++i) {
+    if (fca.enforceInOut() && fca.isInOut(numArgs - i - 1)) {
+      inOuts.emplace_back(popCV(env));
+    } else {
+      popCV(env);
+    }
+  }
+  popU(env);
+  popCU(env);
+  for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
+  assertx(inOuts.size() == numRets - 1);
+  for (auto& t : inOuts) push(env, std::move(t));
+  push(env, TInitNull);
+}
+
+void fcallObjMethodNullsafe(ISS& env, const FCallArgs& fca, bool extraInput) {
+  // Don't fold if there's inout arguments. We could, in principal,
+  // fold away the inout case like we do below, but we don't have the
+  // bytecodes necessary to shuffle the stack.
+  if (fca.enforceInOut()) {
+    for (uint32_t i = 0; i < fca.numArgs(); ++i) {
+      if (fca.isInOut(i)) {
+        return fcallObjMethodNullsafeNoFold(env, fca, extraInput);
+      }
+    }
+  }
+
+  BytecodeVec repl;
+  if (extraInput) repl.push_back(bc::PopC {});
+  if (fca.hasGenerics()) repl.push_back(bc::PopC {});
+  if (fca.hasUnpack()) repl.push_back(bc::PopC {});
+
+  auto const numArgs = fca.numArgs();
+  for (uint32_t i = 0; i < numArgs; ++i) {
+    assertx(topC(env, repl.size()).subtypeOf(BInitCell));
+    repl.push_back(bc::PopC {});
+  }
+  repl.push_back(bc::PopU {});
+  repl.push_back(bc::PopC {});
+  assertx(fca.numRets() == 1);
+  repl.push_back(bc::Null {});
+
+  reduce(env, std::move(repl));
+}
+
+template <typename UpdateBC>
+void fcallObjMethodImpl(ISS& env, const FCallArgs& fca, SString methName,
+                        bool nullThrows, bool dynamic, bool extraInput,
+                        uint32_t inputPos, SString clsHint,
+                        UpdateBC updateBC) {
+  auto const input = topC(env, inputPos);
+  auto const location = topStkEquiv(env, inputPos);
+  auto const mayCallMethod = input.couldBe(BObj);
+  auto const mayUseNullsafe = !nullThrows && input.couldBe(BNull);
+  auto const mayThrowNonObj = !input.subtypeOf(nullThrows ? BObj : BOptObj);
+
+  auto const refineLoc = [&] {
+    if (location == NoLocalId) return;
+    if (!refineLocation(env, location, [&] (Type t) {
+      if (nullThrows) return intersection_of(t, TObj);
+      if (!t.couldBe(BUninit)) return intersection_of(t, TOptObj);
+      if (!t.couldBe(BObj)) return intersection_of(t, TNull);
+      return t;
+    })) {
+      unreachable(env);
+    }
+  };
+
+  auto const throws = [&] {
+    if (fca.asyncEagerTarget() != NoBlockId) {
+      // Kill the async eager target if the function never returns.
+      return reduce(env, updateBC(fca.withoutAsyncEagerTarget()));
+    }
+    if (extraInput) popC(env);
+    fcallUnknownImpl(env, fca, TBottom);
+    unreachable(env);
+  };
+
+  if (!mayCallMethod && !mayUseNullsafe) {
+    // This FCallObjMethodD may only throw
+    return throws();
+  }
+
+  if (!mayCallMethod && !mayThrowNonObj) {
+    // Null input, this may only return null, so do that.
+    return fcallObjMethodNullsafe(env, fca, extraInput);
+  }
+
+  if (!mayCallMethod) {
+    // May only return null, but can't fold as we may still throw.
+    assertx(mayUseNullsafe && mayThrowNonObj);
+    if (fca.asyncEagerTarget() != NoBlockId) {
+      return reduce(env, updateBC(fca.withoutAsyncEagerTarget()));
+    }
+    return fcallObjMethodNullsafeNoFold(env, fca, extraInput);
+  }
+
+  if (isBadContext(fca)) return throws();
+
+  auto const ctx = getCallContext(env, fca);
+  auto const ctxTy = input.couldBe(BObj)
+    ? intersection_of(input, TObj)
+    : TObj;
+  auto const clsTy = objcls(ctxTy);
+  auto const rfunc = env.index.resolve_method(ctx, clsTy, methName);
+
+  auto const numInOut = fca.enforceInOut()
+    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    : std::nullopt;
+
+  auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
+  auto const numExtraInputs = extraInput ? 1 : 0;
+  if (fcallOptimizeChecks(env, fca, rfunc, updateBC,
+                          numInOut, mayUseNullsafe, numExtraInputs) ||
+      (canFold && fcallTryFold(env, fca, rfunc, ctxTy, dynamic,
+                               numExtraInputs))) {
+    return;
+  }
+
+  if (clsHint && clsHint->empty() && rfunc.exactFunc()) {
+    return reduce(env, updateBC(fca, rfunc.exactFunc()->cls->name));
+  }
+
+  fcallKnownImpl(env, fca, rfunc, ctxTy, mayUseNullsafe, extraInput ? 1 : 0,
+                 updateBC, numInOut);
+  refineLoc();
+}
+
 void fcallFuncUnknown(ISS& env, const bc::FCallFunc& op) {
   popC(env);
   fcallUnknownImpl(env, op.fca);
@@ -3844,10 +4005,17 @@ void fcallFuncFunc(ISS& env, const bc::FCallFunc& op) {
 }
 
 void fcallFuncObj(ISS& env, const bc::FCallFunc& op) {
-  assertx(topC(env).subtypeOf(BObj));
+  assertx(topC(env).subtypeOf(BOptObj));
 
-  // TODO: optimize me
-  fcallFuncUnknown(env, op);
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    assertx(!clsHint);
+    return bc::FCallFunc { std::move(fca) };
+  };
+  fcallObjMethodImpl(
+    env, op.fca, s_invoke.get(),
+    true, false, true, 0, nullptr,
+    updateBC
+  );
 }
 
 void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
@@ -3873,7 +4041,7 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false, 0)) {
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false, 1)) {
     return;
   }
   fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 1, updateBC, numInOut);
@@ -3883,9 +4051,18 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
 
 void in(ISS& env, const bc::FCallFunc& op) {
   auto const callable = topC(env);
+  if (!callable.couldBe(BObj | BArrLike | BStr | BFunc |
+                        BRFunc | BClsMeth | BRClsMeth)) {
+    if (op.fca.asyncEagerTarget() != NoBlockId) {
+      return reduce(env, bc::FCallFunc { op.fca.withoutAsyncEagerTarget() });
+    }
+    popC(env);
+    fcallUnknownImpl(env, op.fca, TBottom);
+    return unreachable(env);
+  }
+  if (callable.subtypeOf(BOptObj)) return fcallFuncObj(env, op);
   if (callable.subtypeOf(BFunc)) return fcallFuncFunc(env, op);
   if (callable.subtypeOf(BClsMeth)) return fcallFuncClsMeth(env, op);
-  if (callable.subtypeOf(BObj)) return fcallFuncObj(env, op);
   if (callable.subtypeOf(BStr)) return fcallFuncStr(env, op);
   fcallFuncUnknown(env, op);
 }
@@ -3988,167 +4165,6 @@ void in(ISS& env, const bc::LazyClass& op) {
   push(env, lazyclsval(op.str1));
 }
 
-namespace {
-
-const StaticString
-  s_DynamicContextOverrideUnsafe("__SystemLib\\DynamicContextOverrideUnsafe");
-
-bool isBadContext(const FCallArgs& fca) {
-  return fca.context() &&
-    fca.context()->isame(s_DynamicContextOverrideUnsafe.get());
-}
-
-Context getCallContext(const ISS& env, const FCallArgs& fca) {
-  if (auto const name = fca.context()) {
-    auto const rcls = env.index.resolve_class(env.ctx, name);
-    if (rcls && rcls->cls()) {
-      return Context { env.ctx.unit, env.ctx.func, rcls->cls() };
-    }
-    return Context { env.ctx.unit, env.ctx.func, nullptr };
-  }
-  return env.ctx;
-}
-
-void fcallObjMethodNullsafeNoFold(ISS& env,
-                                  const FCallArgs& fca,
-                                  bool extraInput) {
-  assertx(fca.asyncEagerTarget() == NoBlockId);
-  if (extraInput) popC(env);
-  if (fca.hasGenerics()) popC(env);
-  if (fca.hasUnpack()) popC(env);
-  auto const numArgs = fca.numArgs();
-  auto const numRets = fca.numRets();
-  std::vector<Type> inOuts;
-  for (auto i = uint32_t{0}; i < numArgs; ++i) {
-    if (fca.enforceInOut() && fca.isInOut(numArgs - i - 1)) {
-      inOuts.emplace_back(popCV(env));
-    } else {
-      popCV(env);
-    }
-  }
-  popU(env);
-  popCU(env);
-  for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
-  assertx(inOuts.size() == numRets - 1);
-  for (auto& t : inOuts) push(env, std::move(t));
-  push(env, TInitNull);
-}
-
-void fcallObjMethodNullsafe(ISS& env, const FCallArgs& fca, bool extraInput) {
-  // Don't fold if there's inout arguments. We could, in principal,
-  // fold away the inout case like we do below, but we don't have the
-  // bytecodes necessary to shuffle the stack.
-  if (fca.enforceInOut()) {
-    for (uint32_t i = 0; i < fca.numArgs(); ++i) {
-      if (fca.isInOut(i)) {
-        return fcallObjMethodNullsafeNoFold(env, fca, extraInput);
-      }
-    }
-  }
-
-  BytecodeVec repl;
-  if (extraInput) repl.push_back(bc::PopC {});
-  if (fca.hasGenerics()) repl.push_back(bc::PopC {});
-  if (fca.hasUnpack()) repl.push_back(bc::PopC {});
-
-  auto const numArgs = fca.numArgs();
-  for (uint32_t i = 0; i < numArgs; ++i) {
-    assertx(topC(env, repl.size()).subtypeOf(BInitCell));
-    repl.push_back(bc::PopC {});
-  }
-  repl.push_back(bc::PopU {});
-  repl.push_back(bc::PopC {});
-  assertx(fca.numRets() == 1);
-  repl.push_back(bc::Null {});
-
-  reduce(env, std::move(repl));
-}
-
-template <typename Op, class UpdateBC>
-void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
-                        bool extraInput, UpdateBC updateBC) {
-  auto const nullThrows = op.subop3 == ObjMethodOp::NullThrows;
-  auto const inputPos = op.fca.numInputs() + (extraInput ? 2 : 1);
-  auto const input = topC(env, inputPos);
-  auto const location = topStkEquiv(env, inputPos);
-  auto const mayCallMethod = input.couldBe(BObj);
-  auto const mayUseNullsafe = !nullThrows && input.couldBe(BNull);
-  auto const mayThrowNonObj = !input.subtypeOf(nullThrows ? BObj : BOptObj);
-
-  auto const refineLoc = [&] {
-    if (location == NoLocalId) return;
-    if (!refineLocation(env, location, [&] (Type t) {
-      if (nullThrows) return intersection_of(t, TObj);
-      if (!t.couldBe(BUninit)) return intersection_of(t, TOptObj);
-      if (!t.couldBe(BObj)) return intersection_of(t, TNull);
-      return t;
-    })) {
-      unreachable(env);
-    }
-  };
-
-  auto const throws = [&] {
-    if (op.fca.asyncEagerTarget() != NoBlockId) {
-      // Kill the async eager target if the function never returns.
-      return reduce(env, updateBC(op.fca.withoutAsyncEagerTarget()));
-    }
-    if (extraInput) popC(env);
-    fcallUnknownImpl(env, op.fca, TBottom);
-    unreachable(env);
-  };
-
-  if (!mayCallMethod && !mayUseNullsafe) {
-    // This FCallObjMethodD may only throw
-    return throws();
-  }
-
-  if (!mayCallMethod && !mayThrowNonObj) {
-    // Null input, this may only return null, so do that.
-    return fcallObjMethodNullsafe(env, op.fca, extraInput);
-  }
-
-  if (!mayCallMethod) {
-    // May only return null, but can't fold as we may still throw.
-    assertx(mayUseNullsafe && mayThrowNonObj);
-    if (op.fca.asyncEagerTarget() != NoBlockId) {
-      return reduce(env, updateBC(op.fca.withoutAsyncEagerTarget()));
-    }
-    return fcallObjMethodNullsafeNoFold(env, op.fca, extraInput);
-  }
-
-  if (isBadContext(op.fca)) return throws();
-
-  auto const ctx = getCallContext(env, op.fca);
-  auto const ctxTy = input.couldBe(BObj)
-    ? intersection_of(input, TObj)
-    : TObj;
-  auto const clsTy = objcls(ctxTy);
-  auto const rfunc = env.index.resolve_method(ctx, clsTy, methName);
-
-  auto const numInOut = op.fca.enforceInOut()
-    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
-    : std::nullopt;
-
-  auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
-  auto const numExtraInputs = extraInput ? 1 : 0;
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC,
-                          numInOut, mayUseNullsafe, numExtraInputs) ||
-      (canFold && fcallTryFold(env, op.fca, rfunc, ctxTy, dynamic,
-                               numExtraInputs))) {
-    return;
-  }
-
-  if (rfunc.exactFunc() && op.str2->empty()) {
-    return reduce(env, updateBC(op.fca, rfunc.exactFunc()->cls->name));
-  }
-
-  fcallKnownImpl(env, op.fca, rfunc, ctxTy, mayUseNullsafe, extraInput ? 1 : 0,
-                 updateBC, numInOut);
-  refineLoc();
-}
-
-} // namespace
-
 void in(ISS& env, const bc::FCallObjMethodD& op) {
   if (op.fca.hasGenerics()) {
     auto const tsList = topC(env);
@@ -4175,7 +4191,12 @@ void in(ISS& env, const bc::FCallObjMethodD& op) {
     if (!clsHint) clsHint = op.str2;
     return bc::FCallObjMethodD { std::move(fca), clsHint, op.subop3, op.str4 };
   };
-  fcallObjMethodImpl(env, op, op.str4, false, false, updateBC);
+  fcallObjMethodImpl(
+    env, op.fca, op.str4,
+    op.subop3 == ObjMethodOp::NullThrows,
+    false, false, op.fca.numInputs() + 1,
+    op.str2, updateBC
+  );
 }
 
 void in(ISS& env, const bc::FCallObjMethod& op) {
@@ -4203,7 +4224,12 @@ void in(ISS& env, const bc::FCallObjMethod& op) {
     if (!clsHint) clsHint = op.str2;
     return bc::FCallObjMethod { std::move(fca), clsHint, op.subop3 };
   };
-  fcallObjMethodImpl(env, op, methName, true, true, updateBC);
+  fcallObjMethodImpl(
+    env, op.fca, methName,
+    op.subop3 == ObjMethodOp::NullThrows,
+    true, true, op.fca.numInputs() + 2,
+    op.str2, updateBC
+  );
 }
 
 namespace {
@@ -5198,12 +5224,18 @@ void in(ISS& env, const bc::CreateCl& op) {
     );
   }
 
-  // Closure classes can be cloned and rescoped at runtime, so it's not safe to
-  // assert the exact type of closure objects. The best we can do is assert
-  // that it's a subclass of Closure.
-  auto const closure = env.index.builtin_class(s_Closure.get());
+  effect_free(env);
 
-  return push(env, subObj(closure));
+  if (env.ctx.cls && is_used_trait(*env.ctx.cls)) {
+    // Be pessimistic if we're within a trait. The closure will get
+    // rescoped potentially multiple times at runtime.
+    push(
+      env,
+      subObj(env.index.builtin_class(s_Closure.get()))
+    );
+  } else {
+    push(env, objExact(clsPair.first));
+  }
 }
 
 void in(ISS& env, const bc::CreateCont& /*op*/) {

@@ -322,11 +322,22 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
  */
 void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
   auto const preCls = curFunc(env)->unit()->lookupPreClassId(clsIx);
-  auto cls = Class::defClosure(preCls, false);
-  assertx(cls);
+  auto const templateCls = Class::defClosure(preCls, false);
+  assertx(templateCls);
 
-  cls = cls->rescope(const_cast<Class*>(curClass(env)));
+  auto const cls = templateCls->rescope(const_cast<Class*>(curClass(env)));
+
   assertx(!cls->needInitialization());
+  // In repo mode, rescoping should always use the template class
+  // (except if we're in a trait).
+  assertx(
+    IMPLIES(
+      RO::RepoAuthoritative &&
+        !(curFunc(env)->preClass() &&
+          curFunc(env)->preClass()->attrs() & AttrTrait),
+      cls == templateCls
+    )
+  );
 
   auto const func = cls->getCachedInvoke();
 

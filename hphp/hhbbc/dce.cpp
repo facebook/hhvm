@@ -1512,6 +1512,7 @@ void dce(Env& env, const bc::CombineAndResolveTypeStruct&) {
 }
 void dce(Env& env, const bc::Concat&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ConcatN&)          { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CreateCl&)         { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::DblAsBits&)        { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Div&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Eq&)               { pushRemovableIfNoThrow(env); }
@@ -1589,7 +1590,6 @@ void dce(Env& env, const bc::ContGetReturn& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContKey& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContRaise& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContValid& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CreateCl& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CreateCont& op) { no_dce(env, op); }
 void dce(Env& env, const bc::EntryNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Eval& op) { no_dce(env, op); }

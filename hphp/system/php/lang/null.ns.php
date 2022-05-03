@@ -8,6 +8,6 @@ function __86null()[]: void {}
 
 /* Special function used by nullsafe 86reifiedinit.
  */
-function __86single_arg_null($_)[]: void {}
+function __86single_arg_null(mixed $_)[]: void {}
 
 }

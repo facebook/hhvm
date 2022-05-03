@@ -5,120 +5,22 @@
 
 #![allow(dead_code)]
 
+mod tyvar_constraints;
+mod tyvar_state;
+
 use im::HashSet;
-use ty::local::{Ty, Variance};
-use ty::reason::Reason;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TyvarConstraints<R: Reason> {
-    variance: Variance,
-    lower_bounds: HashSet<Ty<R>>,
-    upper_bounds: HashSet<Ty<R>>,
-}
-
-impl<R: Reason> Default for TyvarConstraints<R> {
-    fn default() -> Self {
-        TyvarConstraints {
-            variance: Variance::default(),
-            lower_bounds: HashSet::default(),
-            upper_bounds: HashSet::default(),
-        }
-    }
-}
-
-impl<R: Reason> TyvarConstraints<R> {
-    pub fn new(
-        variance: Variance,
-        lower_bounds: HashSet<Ty<R>>,
-        upper_bounds: HashSet<Ty<R>>,
-    ) -> Self {
-        TyvarConstraints {
-            variance,
-            lower_bounds,
-            upper_bounds,
-        }
-    }
-
-    pub fn append(&mut self, other: Self) {
-        self.variance = self.variance.meet(&other.variance);
-        self.lower_bounds.extend(other.lower_bounds);
-        self.upper_bounds.extend(other.upper_bounds);
-    }
-
-    pub fn is_informative(&self) -> bool {
-        !self.variance.is_bivariant()
-            || !self.lower_bounds.is_empty()
-            || !self.upper_bounds.is_empty()
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum TyvarState<R: Reason> {
-    Bound(Ty<R>),
-    Constrained(TyvarConstraints<R>),
-}
-
-impl<R: Reason> Default for TyvarState<R> {
-    fn default() -> TyvarState<R> {
-        TyvarState::Constrained(TyvarConstraints::default())
-    }
-}
-
-impl<R: Reason> TyvarState<R> {
-    pub fn is_bound(&self) -> bool {
-        matches!(self, TyvarState::Bound(_))
-    }
-
-    pub fn binding(&self) -> Option<&Ty<R>> {
-        if let Self::Bound(ty) = self {
-            Some(ty)
-        } else {
-            None
-        }
-    }
-
-    pub fn is_informative(&self) -> bool {
-        match self {
-            TyvarState::Bound(_) => true,
-            TyvarState::Constrained(cstrs) => cstrs.is_informative(),
-        }
-    }
-
-    fn constraints_opt(&self) -> Option<&TyvarConstraints<R>> {
-        match self {
-            TyvarState::Constrained(cstrs) => Some(cstrs),
-            TyvarState::Bound(_) => None,
-        }
-    }
-
-    fn constraints(&self) -> TyvarConstraints<R> {
-        match &self {
-            TyvarState::Constrained(cstrs) => cstrs.clone(),
-            TyvarState::Bound(ty) => {
-                let mut lower_bounds: HashSet<Ty<R>> = Default::default();
-                let mut upper_bounds: HashSet<Ty<R>> = Default::default();
-                lower_bounds.insert(ty.clone());
-                upper_bounds.insert(ty.clone());
-                TyvarConstraints::new(Default::default(), upper_bounds, lower_bounds)
-            }
-        }
-    }
-}
+use ty::{
+    local::{Ty, Variance},
+    prop::CstrTy,
+    reason::Reason,
+};
+use tyvar_state::TyvarState;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TyvarInfo<R: Reason> {
     pos: Option<R::Pos>,
     state: TyvarState<R>,
     early_solve_failed: bool,
-}
-impl<R: Reason> Default for TyvarInfo<R> {
-    fn default() -> Self {
-        TyvarInfo {
-            pos: None,
-            state: TyvarState::default(),
-            early_solve_failed: false,
-        }
-    }
 }
 
 impl<R: Reason> TyvarInfo<R> {
@@ -133,5 +35,48 @@ impl<R: Reason> TyvarInfo<R> {
 
     pub fn binding(&self) -> Option<&Ty<R>> {
         self.state.binding()
+    }
+
+    pub fn upper_bounds(&self) -> Option<HashSet<CstrTy<R>>> {
+        self.state.upper_bounds()
+    }
+
+    pub fn lower_bounds(&self) -> Option<HashSet<CstrTy<R>>> {
+        self.state.lower_bounds()
+    }
+
+    pub fn add_upper_bound(&mut self, bound: CstrTy<R>) {
+        self.state.add_upper_bound(bound)
+    }
+    pub fn add_lower_bound(&mut self, bound: CstrTy<R>) {
+        self.state.add_lower_bound(bound)
+    }
+    pub fn add_lower_bound_as_union<F>(&mut self, bound: CstrTy<R>, union: F)
+    where
+        F: FnOnce(CstrTy<R>, &HashSet<CstrTy<R>>) -> HashSet<CstrTy<R>>,
+    {
+        self.state.add_lower_bound_as_union(bound, union)
+    }
+
+    pub fn appears_covariantly(&self) -> bool {
+        self.state.appears_covariantly()
+    }
+
+    pub fn appears_contravariantly(&self) -> bool {
+        self.state.appears_contravariantly()
+    }
+
+    pub fn with_appearance(&mut self, appearing: &Variance) {
+        self.state.with_appearance(appearing)
+    }
+}
+
+impl<R: Reason> Default for TyvarInfo<R> {
+    fn default() -> Self {
+        TyvarInfo {
+            pos: None,
+            state: TyvarState::default(),
+            early_solve_failed: false,
+        }
     }
 }

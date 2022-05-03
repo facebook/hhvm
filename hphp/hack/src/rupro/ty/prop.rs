@@ -4,9 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod constraint;
 
-use crate::local::{Ty, Tyvar};
-use crate::local_error::TypingError;
-use crate::reason::Reason;
+use crate::{
+    local::{Ty, Tyvar},
+    local_error::TypingError,
+    reason::Reason,
+};
 pub use constraint::Cstr;
 use hcons::{Conser, Hc};
 use im::HashSet;
@@ -25,19 +27,31 @@ pub enum CstrTy<R: Reason> {
 impl<R: Reason> CstrTy<R> {
     pub fn tyvars<F>(&self, get_tparam_variance: &F) -> (HashSet<Tyvar>, HashSet<Tyvar>)
     where
-        F: Fn(&TypeName) -> Option<Vec<Variance>>,
+        F: Fn(TypeName) -> Option<Vec<Variance>>,
     {
         match self {
             CstrTy::Locl(ty) => ty.tyvars(get_tparam_variance),
             CstrTy::Cstr(cstr) => cstr.tyvars(get_tparam_variance),
         }
     }
+
+    #[inline]
+    pub fn tyvar_opt(&self) -> Option<&Tyvar> {
+        match self {
+            Self::Locl(ty) => ty.tyvar_opt(),
+            Self::Cstr(_) => None,
+        }
+    }
+
+    pub fn is_var(&self) -> bool {
+        self.tyvar_opt().is_some()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropF<R: Reason, A> {
     Conj(Vec<A>),
-    Disj(Option<TypingError<R>>, Vec<A>),
+    Disj(TypingError<R>, Vec<A>),
     Subtype(CstrTy<R>, CstrTy<R>),
 }
 
@@ -74,11 +88,11 @@ impl<R: Reason> Prop<R> {
         Self::conjs(vec![self, other])
     }
 
-    pub fn disjs(ps: Vec<Prop<R>>, fail: Option<TypingError<R>>) -> Self {
+    pub fn disjs(ps: Vec<Prop<R>>, fail: TypingError<R>) -> Self {
         PropF::Disj(fail, ps).inj()
     }
 
-    pub fn disj(self, other: Self, fail: Option<TypingError<R>>) -> Self {
+    pub fn disj(self, other: Self, fail: TypingError<R>) -> Self {
         Self::disjs(vec![self, other], fail)
     }
 
@@ -94,7 +108,7 @@ impl<R: Reason> Prop<R> {
         PropF::Conj(vec![]).inj()
     }
 
-    pub fn invalid(fail: Option<TypingError<R>>) -> Self {
+    pub fn invalid(fail: TypingError<R>) -> Self {
         PropF::Disj(fail, vec![]).inj()
     }
 

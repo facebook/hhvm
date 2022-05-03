@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
 pub enum Primary<R: Reason> {
+    Subtype,
     InvalidTypeHint(R::Pos),
     ExpectingTypeHint(R::Pos),
     ExpectingReturnTypeHint(R::Pos),

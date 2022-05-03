@@ -175,6 +175,10 @@ impl<R: Reason> Ty<R> {
         matches!(self.deref(), Ty_::Tnonnull)
     }
 
+    pub fn is_var(&self) -> bool {
+        matches!(self.deref(), Ty_::Tvar(_))
+    }
+
     pub fn mixed(r: R) -> Ty<R> {
         let inner = Self::nonnull(r.clone());
         Self::option(r, inner)
@@ -195,13 +199,19 @@ impl<R: Reason> Ty<R> {
         }
     }
 
+    pub fn tyvar_opt(&self) -> Option<&Tyvar> {
+        match self.deref() {
+            Ty_::Tvar(tv) => Some(tv),
+            _ => None,
+        }
+    }
     pub fn node(&self) -> &Hc<Ty_<R, Ty<R>>> {
         &self.1
     }
 
     pub fn tyvars<F>(&self, get_tparam_variance: F) -> (HashSet<Tyvar>, HashSet<Tyvar>)
     where
-        F: Fn(&TypeName) -> Option<Vec<Variance>>,
+        F: Fn(TypeName) -> Option<Vec<Variance>>,
     {
         let mut covs = HashSet::default();
         let mut contravs = HashSet::default();
@@ -221,7 +231,7 @@ impl<R: Reason> Ty<R> {
         contravs: &mut HashSet<Tyvar>,
         get_tparam_variance: &F,
     ) where
-        F: Fn(&TypeName) -> Option<Vec<Variance>>,
+        F: Fn(TypeName) -> Option<Vec<Variance>>,
     {
         match self.deref() {
             Ty_::Tvar(tv) => match variance {
@@ -251,7 +261,7 @@ impl<R: Reason> Ty<R> {
                     .tyvars_help(variance, covs, contravs, get_tparam_variance)
             }
             Ty_::Tclass(cn, _, typarams) if !typarams.is_empty() => {
-                if let Some(vars) = get_tparam_variance(&cn.id()) {
+                if let Some(vars) = get_tparam_variance(cn.id()) {
                     typarams.iter().zip(vars.iter()).for_each(|(tp, variance)| {
                         tp.tyvars_help(*variance, covs, contravs, get_tparam_variance)
                     })

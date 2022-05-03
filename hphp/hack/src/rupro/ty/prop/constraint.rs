@@ -57,7 +57,7 @@ impl<R: Reason> Cstr<R> {
 
     pub fn tyvars<F>(&self, get_tparam_variance: &F) -> (HashSet<Tyvar>, HashSet<Tyvar>)
     where
-        F: Fn(&TypeName) -> Option<Vec<Variance>>,
+        F: Fn(TypeName) -> Option<Vec<Variance>>,
     {
         match self {
             Cstr::HasMethod { ty, .. } | Cstr::HasProp { ty, .. } => ty.tyvars(get_tparam_variance),

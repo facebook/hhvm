@@ -1,7 +1,9 @@
 File "abstract_inheritance.bad.php", line 8, characters 12-12:
 This class must be declared `abstract`, or provide an implementation for the abstract constant `X` (Typing[4047])
+  File "abstract_inheritance.bad.php", line 8, characters 30-30:
+  `F` uses `E`
   File "abstract_inheritance.bad.php", line 5, characters 16-16:
-  Declaration is here
+  The constant is defined here
 File "abstract_inheritance.bad.php", line 25, characters 16-16:
 Cannot re-declare this constant as abstract (Typing[4142])
   File "abstract_inheritance.bad.php", line 21, characters 7-7:

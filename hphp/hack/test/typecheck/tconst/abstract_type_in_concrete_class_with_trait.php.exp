@@ -1,4 +1,6 @@
 File "abstract_type_in_concrete_class_with_trait.php", line 11, characters 13-15:
 This class was declared as `final`. It must provide an implementation for the abstract constant `NUM` (Typing[4047])
+  File "abstract_type_in_concrete_class_with_trait.php", line 11, characters 25-27:
+  `Bar` uses `Foo`
   File "abstract_type_in_concrete_class_with_trait.php", line 4, characters 22-24:
-  Declaration is here
+  The constant is defined here

@@ -2304,6 +2304,7 @@ module Primary = struct
         pos: Pos.t;
         is_final: bool;
         decl_pos: Pos_or_decl.t;
+        trace: Pos_or_decl.t Message.t list Lazy.t;
         name: string;
         kind: [ `meth | `prop | `const | `ty_const ];
         quickfixes: Quickfix.t list;
@@ -4882,17 +4883,17 @@ module Primary = struct
       lazy [],
       [] )
 
-  let implement_abstract pos1 is_final pos2 x kind qfxs =
+  let implement_abstract pos1 is_final pos2 x kind qfxs trace =
+    let kind =
+      match kind with
+      | `meth -> "method"
+      | `prop -> "property"
+      | `const -> "constant"
+      | `ty_const -> "type constant"
+    in
     let claim =
       lazy
-        (let kind =
-           match kind with
-           | `meth -> "method"
-           | `prop -> "property"
-           | `const -> "constant"
-           | `ty_const -> "type constant"
-         in
-         let name = "abstract " ^ kind ^ " " ^ Markdown_lite.md_codify x in
+        (let name = "abstract " ^ kind ^ " " ^ Markdown_lite.md_codify x in
          let msg1 =
            if is_final then
              "This class was declared as `final`. It must provide an implementation for the "
@@ -4905,7 +4906,9 @@ module Primary = struct
     in
     ( Error_code.ImplementAbstract,
       claim,
-      lazy [(pos2, "Declaration is here")],
+      lazy
+        (Lazy.force trace
+        @ [(pos2, Printf.sprintf "The %s is defined here" kind)]),
       qfxs )
 
   let abstract_member_in_concrete_class
@@ -5866,8 +5869,9 @@ module Primary = struct
     | Trait_prop_const_class { pos; name } -> trait_prop_const_class pos name
     | Read_before_write { pos; member_name } ->
       read_before_write (pos, member_name)
-    | Implement_abstract { pos; is_final; decl_pos; name; kind; quickfixes } ->
-      implement_abstract pos is_final decl_pos name kind quickfixes
+    | Implement_abstract
+        { pos; is_final; decl_pos; trace; name; kind; quickfixes } ->
+      implement_abstract pos is_final decl_pos name kind quickfixes trace
     | Abstract_member_in_concrete_class
         { pos; class_name_pos; is_final; member_kind; member_name } ->
       abstract_member_in_concrete_class

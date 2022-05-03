@@ -764,11 +764,18 @@ let conflict_with_declared_interface_or_trait
     false
 
 let check_abstract_const_in_concrete_class
-    (class_pos, class_) (const_name, class_const) =
+    env (class_pos, class_) (const_name, class_const) =
   let is_final = Cls.final class_ in
   if Ast_defs.is_c_concrete (Cls.kind class_) || is_final then
     match class_const.cc_abstract with
     | CCAbstract _ ->
+      let trace =
+        lazy
+          (Ancestor_route.describe_route
+             env
+             ~classish:(Cls.name class_)
+             ~ancestor:class_const.cc_origin)
+      in
       Errors.add_typing_error
         Typing_error.(
           primary
@@ -777,6 +784,7 @@ let check_abstract_const_in_concrete_class
                  is_final;
                  pos = class_pos;
                  decl_pos = class_const.cc_pos;
+                 trace;
                  kind = `const;
                  name = const_name;
                  quickfixes = [];
@@ -794,6 +802,7 @@ let check_const_override
     on_error =
   if String.equal parent_class_const.cc_origin class_const.cc_origin then (
     check_abstract_const_in_concrete_class
+      env
       (class_pos, class_)
       (const_name, class_const);
     env
@@ -965,12 +974,19 @@ let check_inherited_member_is_dynamically_callable
       ()
 
 let check_abstract_member_in_concrete_class
-    (class_pos, class_) (member_kind, class_elt_name, class_elt) =
+    env (class_pos, class_) (member_kind, class_elt_name, class_elt) =
   let is_final = Cls.final class_ in
   if
     (Ast_defs.is_c_concrete (Cls.kind class_) || is_final)
     && Typing_defs_flags.ClassElt.is_abstract class_elt.ce_flags
   then
+    let trace =
+      lazy
+        (Ancestor_route.describe_route
+           env
+           ~classish:(Cls.name class_)
+           ~ancestor:class_elt.ce_origin)
+    in
     Errors.add_typing_error
       Typing_error.(
         primary
@@ -979,6 +995,7 @@ let check_abstract_member_in_concrete_class
                is_final;
                pos = class_pos;
                decl_pos = Lazy.force class_elt.ce_pos;
+               trace;
                kind =
                  (if MemberKind.is_functional member_kind then
                    `meth
@@ -1026,6 +1043,7 @@ let check_class_against_parent_class_elt
         parent_class
         (member_kind, member_name, parent_class_elt);
       check_abstract_member_in_concrete_class
+        env
         (class_pos, class_)
         (member_kind, member_name, class_elt);
       errors_if_not_overriden
@@ -1388,12 +1406,19 @@ let tconst_subsumption
     Option.iter ty_err_opt ~f:Errors.add_typing_error;
     env
 
-let check_abstract_typeconst_in_concrete_class (class_pos, class_) tconst =
+let check_abstract_typeconst_in_concrete_class env (class_pos, class_) tconst =
   let is_final = Cls.final class_ in
   if Ast_defs.is_c_concrete (Cls.kind class_) || is_final then
     match tconst.ttc_kind with
     | TCAbstract _ ->
       let (typeconst_pos, typeconst_name) = tconst.ttc_name in
+      let trace =
+        lazy
+          (Ancestor_route.describe_route
+             env
+             ~classish:(Cls.name class_)
+             ~ancestor:tconst.ttc_origin)
+      in
       Errors.add_typing_error
         Typing_error.(
           primary
@@ -1402,6 +1427,7 @@ let check_abstract_typeconst_in_concrete_class (class_pos, class_) tconst =
                  is_final;
                  pos = class_pos;
                  decl_pos = typeconst_pos;
+                 trace;
                  kind = `ty_const;
                  name = typeconst_name;
                  quickfixes = [];
@@ -1417,7 +1443,7 @@ let check_typeconst_override
     parent_class
     on_error =
   if String.equal parent_tconst.ttc_origin tconst.ttc_origin then (
-    check_abstract_typeconst_in_concrete_class (class_pos, class_) tconst;
+    check_abstract_typeconst_in_concrete_class env (class_pos, class_) tconst;
     env
   ) else
     let tconst_check parent_tconst tconst () =

@@ -1166,6 +1166,7 @@ module Primary : sig
         pos: Pos.t;
         is_final: bool;
         decl_pos: Pos_or_decl.t;
+        trace: Pos_or_decl.t Message.t list Lazy.t;
         name: string;
         kind: [ `meth | `prop | `const | `ty_const ];
         quickfixes: Quickfix.t list;

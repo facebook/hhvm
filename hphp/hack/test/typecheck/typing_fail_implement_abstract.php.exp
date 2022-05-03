@@ -2,5 +2,7 @@ File "typing_fail_implement_abstract.php", line 13, characters 28-28:
 This method is declared as abstract, but has a body (NastCheck[3002])
 File "typing_fail_implement_abstract.php", line 16, characters 7-7:
 This class must be declared `abstract`, or provide an implementation for the abstract method `f` (Typing[4047])
-File "typing_fail_implement_abstract.php", line 13, characters 28-28:
-Declaration is here
+  File "typing_fail_implement_abstract.php", line 16, characters 17-17:
+  `B` uses `A`
+  File "typing_fail_implement_abstract.php", line 13, characters 28-28:
+  The method is defined here

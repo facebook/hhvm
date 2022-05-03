@@ -18,5 +18,7 @@ Cannot reference abstract constant `G::Y` directly (Typing[4129])
   Declaration is here
 File "abstract.bad.php", line 35, characters 12-12:
 This class must be declared `abstract`, or provide an implementation for the abstract constant `X` (Typing[4047])
+  File "abstract.bad.php", line 35, characters 26-26:
+  `H` uses `E`
   File "abstract.bad.php", line 11, characters 14-14:
-  Declaration is here
+  The constant is defined here

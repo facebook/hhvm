@@ -10,9 +10,6 @@
 module OcamlPrintf = Printf
 open Hh_prelude
 module Printf = OcamlPrintf
-
-[@@@warning "-3"]
-
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module PositionedSyntax = Full_fidelity_positioned_syntax

@@ -6,8 +6,6 @@
  *
  *)
 
-[@@@warning "-3"]
-
 open Hh_prelude
 
 type env = {
@@ -609,22 +607,20 @@ If not provided, will use the default path for the repository.
 let clean_subcommand =
   let open Cmdliner in
   let doc = "Delete any state files which hh_fanout uses from disk." in
-  let exits = Term.default_exits in
 
   let run env =
     let state_path = get_state_path ~env in
     Hh_logger.log "Deleting %s" (Path.to_string state_path);
     Sys_utils.rm_dir_tree (Path.to_string state_path)
   in
-
-  Term.
-    (const run $ env_t, info "clean" ~doc ~sdocs:Manpage.s_common_options ~exits)
+  let info = Cmd.info "clean" ~doc ~sdocs:Manpage.s_common_options in
+  let term = Term.(const run $ env_t) in
+  Cmd.v info term
 
 let calculate_subcommand =
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc = "Determines which files must be rechecked after a change." in
-  let exits = Term.default_exits in
 
   let input_files = value & pos_all string [] & info [] ~docv:"FILENAME" in
   let cursor_id =
@@ -645,16 +641,14 @@ let calculate_subcommand =
 
     Lwt_utils.run_main (fun () -> mode_calculate ~env ~input_files ~cursor_id)
   in
-
-  Term.
-    ( const run $ env_t $ input_files $ cursor_id,
-      info "calculate" ~doc ~sdocs:Manpage.s_common_options ~exits )
+  let info = Cmd.info "calculate" ~doc ~sdocs:Manpage.s_common_options in
+  let term = Term.(const run $ env_t $ input_files $ cursor_id) in
+  Cmd.v info term
 
 let calculate_errors_subcommand =
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc = "Produce typechecking errors for the codebase." in
-  let exits = Term.default_exits in
 
   let cursor_id =
     let doc =
@@ -677,10 +671,9 @@ If not provided, uses the cursor corresponding to the saved-state.
     Lwt_utils.run_main (fun () ->
         mode_calculate_errors ~env ~cursor_id ~pretty_print)
   in
-
-  Term.
-    ( const run $ env_t $ cursor_id $ pretty_print,
-      info "calculate-errors" ~doc ~sdocs:Manpage.s_common_options ~exits )
+  let info = Cmd.info "calculate-errors" ~doc ~sdocs:Manpage.s_common_options in
+  let term = Term.(const run $ env_t $ cursor_id $ pretty_print) in
+  Cmd.v info term
 
 let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
     unit Lwt.t =
@@ -744,7 +737,6 @@ let debug_subcommand =
   let doc =
     "Produces debugging information about the fanout of a certain file."
   in
-  let exits = Term.default_exits in
 
   let path = required & pos 0 (some string) None & info [] ~docv:"PATH" in
   let cursor_id =
@@ -756,10 +748,9 @@ let debug_subcommand =
     let path = Path.make path in
     Lwt_utils.run_main (fun () -> mode_debug ~env ~path ~cursor_id)
   in
-
-  Term.
-    ( const run $ env_t $ path $ cursor_id,
-      info "debug" ~doc ~sdocs:Manpage.s_common_options ~exits )
+  let info = Cmd.info "debug" ~doc ~sdocs:Manpage.s_common_options in
+  let term = Term.(const run $ env_t $ path $ cursor_id) in
+  Cmd.v info term
 
 let mode_status ~(env : env) ~(cursor_id : string) : unit Lwt.t =
   let incremental_state = make_incremental_state ~env in
@@ -779,7 +770,6 @@ let status_subcommand =
   let doc =
     "EXPERIMENTAL: Shows details about the files that need to be re-typechecked on the next `calculate-errors` call."
   in
-  let exits = Term.default_exits in
 
   let cursor_id =
     let doc = "The cursor that the previous request returned." in
@@ -789,10 +779,9 @@ let status_subcommand =
   let run env cursor_id =
     Lwt_utils.run_main (fun () -> mode_status ~env ~cursor_id)
   in
-
-  Term.
-    ( const run $ env_t $ cursor_id,
-      info "status" ~doc ~sdocs:Manpage.s_common_options ~exits )
+  let info = Cmd.info "status" ~doc ~sdocs:Manpage.s_common_options in
+  let term = Term.(const run $ env_t $ cursor_id) in
+  Cmd.v info term
 
 let mode_query
     ~(env : env) ~(dep_hash : Typing_deps.Dep.t) ~(include_extends : bool) :
@@ -813,7 +802,6 @@ let query_subcommand =
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc = "Get the edges for which the given input node is a dependency." in
-  let exits = Term.default_exits in
 
   let include_extends =
     let doc =
@@ -827,10 +815,9 @@ let query_subcommand =
     let dep_hash = Typing_deps.Dep.of_debug_string dep_hash in
     Lwt_utils.run_main (fun () -> mode_query ~env ~dep_hash ~include_extends)
   in
-
-  Term.
-    ( const run $ env_t $ include_extends $ dep_hash,
-      info "query" ~doc ~sdocs:Manpage.s_common_options ~exits )
+  let info = Cmd.info "query" ~doc ~sdocs:Manpage.s_common_options in
+  let term = Term.(const run $ env_t $ include_extends $ dep_hash) in
+  Cmd.v info term
 
 let mode_query_path
     ~(env : env) ~(source : Typing_deps.Dep.t) ~(dest : Typing_deps.Dep.t) :
@@ -863,7 +850,6 @@ a typing-dependency edge.
 |});
     ]
   in
-  let exits = Term.default_exits in
 
   let source =
     required & pos 0 (some string) None & info [] ~docv:"SOURCE-HASH"
@@ -875,10 +861,9 @@ a typing-dependency edge.
     let dest = Typing_deps.Dep.of_debug_string dest in
     Lwt_utils.run_main (fun () -> mode_query_path ~env ~source ~dest)
   in
-
-  Term.
-    ( const run $ env_t $ source $ dest,
-      info "query-path" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
+  let info = Cmd.info "query-path" ~doc ~sdocs:Manpage.s_common_options ~man in
+  let term = Term.(const run $ env_t $ source $ dest) in
+  Cmd.v info term
 
 let mode_build = Build.go
 
@@ -898,7 +883,6 @@ to be produced by hh_server
 |});
     ]
   in
-  let exits = Term.default_exits in
 
   let allow_empty =
     let doc =
@@ -943,9 +927,12 @@ to be produced by hh_server
     Lwt_utils.run_main (fun () ->
         mode_build ~allow_empty ~incremental ~edges_dir ~delta_file ~output)
   in
-  Term.
-    ( const run $ allow_empty $ incremental $ edges_dir $ delta_file $ output,
-      info "build" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
+  let info = Cmd.info "build" ~doc ~sdocs:Manpage.s_common_options ~man in
+  let term =
+    Term.(
+      const run $ allow_empty $ incremental $ edges_dir $ delta_file $ output)
+  in
+  Cmd.v info term
 
 let mode_dep_graph_stats = Dep_graph_stats.go
 
@@ -963,7 +950,6 @@ Calculate a bunch of statistics for a given 64-bit dependency graph.
 |});
     ]
   in
-  let exits = Term.default_exits in
 
   let dep_graph =
     let doc = "Path to a 64-bit dependency graph." in
@@ -974,9 +960,11 @@ Calculate a bunch of statistics for a given 64-bit dependency graph.
   let run dep_graph =
     Lwt_utils.run_main (fun () -> mode_dep_graph_stats ~dep_graph)
   in
-  Term.
-    ( const run $ dep_graph,
-      info "dep-graph-stats" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
+  let info =
+    Cmd.info "dep-graph-stats" ~doc ~sdocs:Manpage.s_common_options ~man
+  in
+  let term = Term.(const run $ dep_graph) in
+  Cmd.v info term
 
 let mode_dep_graph_is_subgraph = Dep_graph_is_subgraph.go
 
@@ -994,7 +982,6 @@ Check whether a 64-bit dependency graph is a subgraph of an other graph.
 |});
     ]
   in
-  let exits = Term.default_exits in
 
   let dep_graph_sub =
     let doc = "Path to smallest 64-bit dependency graph." in
@@ -1007,20 +994,16 @@ Check whether a 64-bit dependency graph is a subgraph of an other graph.
   let run sub super =
     Lwt_utils.run_main (fun () -> mode_dep_graph_is_subgraph ~sub ~super)
   in
-  Term.
-    ( const run $ dep_graph_sub $ dep_graph_super,
-      info
-        "dep-graph-is-subgraph"
-        ~doc
-        ~sdocs:Manpage.s_common_options
-        ~man
-        ~exits )
+  let info =
+    Cmd.info "dep-graph-is-subgraph" ~doc ~sdocs:Manpage.s_common_options ~man
+  in
+  let term = Term.(const run $ dep_graph_sub $ dep_graph_super) in
+  Cmd.v info term
 
 let default_subcommand =
   let open Cmdliner in
   let sdocs = Manpage.s_common_options in
-  let exits = Term.default_exits in
-  Term.(ret (const (`Help (`Pager, None))), info "hh_fanout" ~sdocs ~exits)
+  Term.(ret (const (`Help (`Pager, None))), Cmd.info "hh_fanout" ~sdocs)
 
 let () =
   EventLogger.init EventLogger.Event_logger_fake 0.0;
@@ -1040,4 +1023,6 @@ let () =
       status_subcommand;
     ]
   in
-  Cmdliner.Term.(exit @@ eval_choice default_subcommand cmds)
+  let (default, default_info) = default_subcommand in
+  let group = Cmdliner.Cmd.group ~default default_info cmds in
+  Stdlib.exit (Cmdliner.Cmd.eval group)

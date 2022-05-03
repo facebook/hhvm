@@ -30,7 +30,7 @@ namespace HPHP {
 
 /* Act on exactly 1 category, e.g. LC_CTYPE
  *
- * This is useful for interoperatbility with `setlocale()`.
+ * This is useful for interoperability with `setlocale()`.
  */
 enum LocaleCategoryMode { LocaleCategory };
 /* Act on multiple categories, e.g. LC_CTYPE_MASK | LC_TIME_MASK

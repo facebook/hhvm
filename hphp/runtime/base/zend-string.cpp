@@ -1887,7 +1887,7 @@ char _codes[26] = { 1,16,4,16,9,2,4,16,9,2,0,2,2,2,1,4,0,2,4,4,1,0,0,0,8,0};
 /*----------------------------- */
 
 /* I suppose I could have been using a character pointer instead of
- * accesssing the array directly... */
+ * accessing the array directly... */
 
 /* Look at the next letter in the word */
 #define Next_Letter ((char)toupper(word[w_idx+1]))
@@ -2033,7 +2033,7 @@ String string_metaphone(const char *input, int word_len, long max_phonemes,
 
     /* THOUGHT:  It would be nice if, rather than having things like...
      * well, SCI.  For SCI you encode the S, then have to remember
-     * to skip the C.  So the phonome SCI invades both S and C.  It would
+     * to skip the C.  So the phoneme SCI invades both S and C.  It would
      * be better, IMHO, to skip the C from the S part of the encoding.
      * Hell, I'm trying it.
      */

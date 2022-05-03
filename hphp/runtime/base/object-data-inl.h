@@ -261,7 +261,7 @@ inline void ObjectData::verifyPropTypeHintImpl(tv_lval val,
   tc.verifyProperty(val, m_cls, prop.cls, prop.name);
 
   if (debug && RuntimeOption::RepoAuthoritative) {
-    // The fact that uninitialized LateInit props are uninint isn't
+    // The fact that uninitialized LateInit props are uninit isn't
     // reflected in the repo-auth-type.
     if (type(val) != KindOfUninit || !(prop.attrs & AttrLateInit)) {
       always_assert(tvMatchesRepoAuthType(val.tv(), prop.repoAuthType));

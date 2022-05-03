@@ -1832,7 +1832,7 @@ namespace {
  * Unit Reaper
  *
  * This thread is responsible for removing "expired" Units from caches
- * (after which they will get deleted by the treadmil). This helps
+ * (after which they will get deleted by the treadmill). This helps
  * long running server processes avoid wasting memory on old Units
  * which will never be used any longer. This is especially useful when
  * using symlinks and every change is considered a "new" Unit.
@@ -1945,7 +1945,7 @@ private:
     // Nothing is expired. We're done.
     if (expired.empty()) return;
 
-    // As mentioed above, we might have visited an entry more than
+    // As mentioned above, we might have visited an entry more than
     // once. Remove any duplicates.
     std::sort(
       expired.begin(), expired.end(),

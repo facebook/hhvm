@@ -29,8 +29,8 @@
  * Request tracing facility
  *
  * This provides a facility for logging detailed traces to a pluggable
- * backend, as well as aggregrate statistics via StructuredLog. It is
- * enabled by a configerable coin-flip and is designed to add almost
+ * backend, as well as aggregate statistics via StructuredLog. It is
+ * enabled by a configurable coin-flip and is designed to add almost
  * no overhead when tracing is disabled.
  *
  * Data-model:

@@ -73,7 +73,7 @@ void ExtendedLogger::LogImpl(LogLevelType level, const std::string &msg) {
   for (auto& l : s_loggers) {
     auto& logger = l.second;
     if (logger) {
-      // we can only get here if ther's no extended loggers (see assertion)
+      // we can only get here if there's no extended loggers (see assertion)
       // if this isn't enough of assurance we could check type at runtime,
       // but probably good enough for now
       Array bt;

@@ -684,7 +684,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value, bool 
   if (needsToLocal) {
     SCOPE_EXIT { svar->unreferenceNonRoot(); };
 
-    l.unlock(); // toLocal() may reenter the autolaoder
+    l.unlock(); // toLocal() may reenter the autoloader
     value = svar->toLocal(pure);
     if (promoteObj) handlePromoteObj(keyStr, svar, value, pure);
   }

@@ -842,7 +842,7 @@ struct MemoryManager {
   int64_t currentUsage() const;
 
   /*
-   * Reset all stats that are synchronzied externally from the memory manager.
+   * Reset all stats that are synchronized externally from the memory manager.
    *
    * Used between sessions and to signal that external sync is now safe to
    * begin (after shared structure initialization that should not be counted is

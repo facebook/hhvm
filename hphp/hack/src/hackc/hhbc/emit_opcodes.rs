@@ -3,14 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_gen::{ImmType, InstrFlags, OpcodeData};
+use hhbc_gen::{ImmType, Inputs, InstrFlags, OpcodeData};
 use proc_macro2::{Ident, Punct, Spacing, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::{punctuated::Punctuated, token, ItemEnum, Lifetime, Result, Variant};
 
 pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
-    let mut item_enum = syn::parse2::<ItemEnum>(input)?;
-    let generics = &item_enum.generics;
+    let mut enum_def = syn::parse2::<ItemEnum>(input)?;
+    let generics = &enum_def.generics;
 
     let lifetime = &generics.lifetimes().next().unwrap().lifetime;
 
@@ -45,15 +45,73 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
         }
 
         let variant = syn::parse2::<Variant>(quote!(#(#body)*))?;
-        item_enum.variants.push(variant);
+        enum_def.variants.push(variant);
     }
 
     // Silliness to match rustfmt...
-    if !item_enum.variants.trailing_punct() {
-        item_enum.variants.push_punct(Default::default());
+    if !enum_def.variants.trailing_punct() {
+        enum_def.variants.push_punct(Default::default());
     }
 
-    Ok(quote!(#item_enum))
+    let (impl_generics, impl_types, impl_where) = enum_def.generics.split_for_impl();
+
+    let variant_name_impl = {
+        let enum_name = &enum_def.ident;
+        let mut variant_names_matches = Vec::new();
+        let mut num_inputs_matches = Vec::new();
+        for opcode in opcodes {
+            let name = Ident::new(opcode.name, Span::call_site());
+            let name_str = &opcode.name;
+            let is_struct = opcode.flags.contains(InstrFlags::AS_STRUCT);
+            let ignore_args = if opcode.immediates.is_empty() {
+                Default::default()
+            } else if is_struct {
+                quote!({ .. })
+            } else {
+                quote!((..))
+            };
+            variant_names_matches.push(quote!(#enum_name :: #name #ignore_args => #name_str,));
+
+            let num_inputs = match opcode.inputs {
+                Inputs::NOV => quote!(#enum_name :: #name #ignore_args => Some(0),),
+                Inputs::Fixed(ref inputs) => {
+                    let n = inputs.len();
+                    quote!(#enum_name :: #name #ignore_args => Some(#n),)
+                }
+                Inputs::FCall { inp, .. } => {
+                    quote!(#enum_name :: #name (fca, ..) => Some(NUM_ACT_REC_CELLS + fca.num_inputs() + #inp as usize),)
+                }
+                Inputs::CMany | Inputs::CUMany => {
+                    quote!(#enum_name :: #name (n, ..) => Some(*n as usize),)
+                }
+                Inputs::SMany => {
+                    quote!(#enum_name :: #name (n, ..) => Some(n.len()),)
+                }
+                Inputs::MFinal | Inputs::CMFinal(_) => {
+                    // This is complicated.
+                    quote!(#enum_name :: #name #ignore_args => None,)
+                }
+            };
+            num_inputs_matches.push(num_inputs);
+        }
+        quote!(
+            impl #impl_generics #enum_name #impl_types #impl_where {
+                pub fn variant_name(&self) -> &'static str {
+                    match self {
+                        #(#variant_names_matches)*
+                    }
+                }
+
+                pub fn num_inputs(&self) -> Option<usize> {
+                    match self {
+                        #(#num_inputs_matches)*
+                    }
+                }
+            }
+        )
+    };
+
+    Ok(quote!(#enum_def #variant_name_impl))
 }
 
 pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
@@ -524,6 +582,70 @@ mod tests {
                     TestSA(Str<'a>),
                     TestSLA(BumpSliceMut<'a, SwitchLabel>),
                     TestVSA(Slice<'a, Str<'a>>),
+                }
+                impl<'a> MyOps<'a> {
+                    pub fn variant_name(&self) -> &'static str {
+                        match self {
+                            MyOps::TestZeroImm => "TestZeroImm",
+                            MyOps::TestOneImm(..) => "TestOneImm",
+                            MyOps::TestTwoImm(..) => "TestTwoImm",
+                            MyOps::TestThreeImm(..) => "TestThreeImm",
+                            MyOps::TestAsStruct { .. } => "TestAsStruct",
+                            MyOps::TestAA(..) => "TestAA",
+                            MyOps::TestARR(..) => "TestARR",
+                            MyOps::TestBA(..) => "TestBA",
+                            MyOps::TestBA2(..) => "TestBA2",
+                            MyOps::TestBLA(..) => "TestBLA",
+                            MyOps::TestDA(..) => "TestDA",
+                            MyOps::TestFCA(..) => "TestFCA",
+                            MyOps::TestI64A(..) => "TestI64A",
+                            MyOps::TestIA(..) => "TestIA",
+                            MyOps::TestILA(..) => "TestILA",
+                            MyOps::TestITA(..) => "TestITA",
+                            MyOps::TestIVA(..) => "TestIVA",
+                            MyOps::TestKA(..) => "TestKA",
+                            MyOps::TestLA(..) => "TestLA",
+                            MyOps::TestLAR(..) => "TestLAR",
+                            MyOps::TestNLA(..) => "TestNLA",
+                            MyOps::TestOA(..) => "TestOA",
+                            MyOps::TestOAL(..) => "TestOAL",
+                            MyOps::TestRATA(..) => "TestRATA",
+                            MyOps::TestSA(..) => "TestSA",
+                            MyOps::TestSLA(..) => "TestSLA",
+                            MyOps::TestVSA(..) => "TestVSA",
+                        }
+                    }
+                    pub fn num_inputs(&self) -> Option<usize> {
+                        match self {
+                            MyOps::TestZeroImm => Some(0),
+                            MyOps::TestOneImm(..) => Some(0),
+                            MyOps::TestTwoImm(..) => Some(0),
+                            MyOps::TestThreeImm(..) => Some(0),
+                            MyOps::TestAsStruct { .. } => Some(0),
+                            MyOps::TestAA(..) => Some(0),
+                            MyOps::TestARR(..) => Some(0),
+                            MyOps::TestBA(..) => Some(0),
+                            MyOps::TestBA2(..) => Some(0),
+                            MyOps::TestBLA(..) => Some(0),
+                            MyOps::TestDA(..) => Some(0),
+                            MyOps::TestFCA(..) => Some(0),
+                            MyOps::TestI64A(..) => Some(0),
+                            MyOps::TestIA(..) => Some(0),
+                            MyOps::TestILA(..) => Some(0),
+                            MyOps::TestITA(..) => Some(0),
+                            MyOps::TestIVA(..) => Some(0),
+                            MyOps::TestKA(..) => Some(0),
+                            MyOps::TestLA(..) => Some(0),
+                            MyOps::TestLAR(..) => Some(0),
+                            MyOps::TestNLA(..) => Some(0),
+                            MyOps::TestOA(..) => Some(0),
+                            MyOps::TestOAL(..) => Some(0),
+                            MyOps::TestRATA(..) => Some(0),
+                            MyOps::TestSA(..) => Some(0),
+                            MyOps::TestSLA(..) => Some(0),
+                            MyOps::TestVSA(..) => Some(0),
+                        }
+                    }
                 }
             ),
         );

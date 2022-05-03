@@ -41,6 +41,9 @@ impl Label {
 pub type NumParams = u32;
 pub type ByRefs<'arena> = Slice<'arena, bool>;
 
+// This corresponds to kActRecCells in bytecode.h and must be kept in sync.
+pub const NUM_ACT_REC_CELLS: usize = 2;
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 #[repr(C)]
 pub struct FCallArgs<'arena> {
@@ -114,6 +117,12 @@ impl<'arena> FCallArgs<'arena> {
         } else {
             &mut []
         }
+    }
+
+    pub fn num_inputs(&self) -> usize {
+        self.num_args as usize
+            + self.flags.contains(FCallArgsFlags::HasUnpack) as usize
+            + self.flags.contains(FCallArgsFlags::HasGenerics) as usize
     }
 }
 
@@ -327,15 +336,17 @@ impl Instruct<'_> {
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
-            Self::Pseudo(Pseudo::TypedValue(_))
-            | Self::Pseudo(Pseudo::Continue(_))
-            | Self::Pseudo(Pseudo::Break(_))
-            | Self::Pseudo(Pseudo::Label(_))
-            | Self::Pseudo(Pseudo::TryCatchBegin)
-            | Self::Pseudo(Pseudo::TryCatchMiddle)
-            | Self::Pseudo(Pseudo::TryCatchEnd)
-            | Self::Pseudo(Pseudo::Comment(_))
-            | Self::Pseudo(Pseudo::SrcLoc(_)) => &[],
+            Self::Pseudo(
+                Pseudo::TypedValue(_)
+                | Pseudo::Continue(_)
+                | Pseudo::Break(_)
+                | Pseudo::Label(_)
+                | Pseudo::TryCatchBegin
+                | Pseudo::TryCatchMiddle
+                | Pseudo::TryCatchEnd
+                | Pseudo::Comment(_)
+                | Pseudo::SrcLoc(_),
+            ) => &[],
         }
     }
 
@@ -345,17 +356,52 @@ impl Instruct<'_> {
         match self {
             Self::Opcode(opcode) => opcode.targets_mut(),
 
-            // Make sure new variants with branch target Labels are handled above
-            // before adding items to this catch-all.
-            Self::Pseudo(Pseudo::TypedValue(_))
-            | Self::Pseudo(Pseudo::Continue(_))
-            | Self::Pseudo(Pseudo::Break(_))
-            | Self::Pseudo(Pseudo::Label(_))
-            | Self::Pseudo(Pseudo::TryCatchBegin)
-            | Self::Pseudo(Pseudo::TryCatchMiddle)
-            | Self::Pseudo(Pseudo::TryCatchEnd)
-            | Self::Pseudo(Pseudo::Comment(_))
-            | Self::Pseudo(Pseudo::SrcLoc(_)) => &mut [],
+            // Make sure new variants with branch target Labels are handled
+            // above before adding items to this catch-all.
+            Self::Pseudo(
+                Pseudo::TypedValue(_)
+                | Pseudo::Continue(_)
+                | Pseudo::Break(_)
+                | Pseudo::Label(_)
+                | Pseudo::TryCatchBegin
+                | Pseudo::TryCatchMiddle
+                | Pseudo::TryCatchEnd
+                | Pseudo::Comment(_)
+                | Pseudo::SrcLoc(_),
+            ) => &mut [],
+        }
+    }
+
+    pub fn num_inputs(&self) -> Option<usize> {
+        match self {
+            Self::Opcode(opcode) => opcode.num_inputs(),
+
+            Self::Pseudo(
+                Pseudo::TypedValue(_)
+                | Pseudo::Continue(_)
+                | Pseudo::Break(_)
+                | Pseudo::Label(_)
+                | Pseudo::TryCatchBegin
+                | Pseudo::TryCatchMiddle
+                | Pseudo::TryCatchEnd
+                | Pseudo::Comment(_)
+                | Pseudo::SrcLoc(_),
+            ) => Some(0),
+        }
+    }
+
+    pub fn variant_name(&self) -> &'static str {
+        match self {
+            Self::Opcode(opcode) => opcode.variant_name(),
+            Self::Pseudo(Pseudo::TypedValue(_)) => "TypedValue",
+            Self::Pseudo(Pseudo::Continue(_)) => "Continue",
+            Self::Pseudo(Pseudo::Break(_)) => "Break",
+            Self::Pseudo(Pseudo::Label(_)) => "Label",
+            Self::Pseudo(Pseudo::TryCatchBegin) => "TryCatchBegin",
+            Self::Pseudo(Pseudo::TryCatchMiddle) => "TryCatchMiddle",
+            Self::Pseudo(Pseudo::TryCatchEnd) => "TryCatchEnd",
+            Self::Pseudo(Pseudo::Comment(_)) => "Comment",
+            Self::Pseudo(Pseudo::SrcLoc(_)) => "SrcLoc",
         }
     }
 }

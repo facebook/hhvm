@@ -7,7 +7,7 @@ mod direct_decl_smart_constructors_generated;
 use arena_collections::{AssocListMut, List, MultiSetMut};
 use bstr::BStr;
 use bumpalo::{collections as bump, Bump};
-use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
+use flatten_smart_constructors::FlattenSmartConstructors;
 use hh_autoimport_rust as hh_autoimport;
 use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
@@ -2431,12 +2431,12 @@ impl<'a, 'b> DoubleEndedIterator for NodeIterHelper<'a, 'b> {
     }
 }
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenOp
+impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
     for DirectDeclSmartConstructors<'a, 'text, S>
 {
-    type S = Node<'a>;
+    // type Output = Node<'a> in direct_decl_smart_constructors_generated.rs
 
-    fn flatten(&self, kind: SyntaxKind, lst: Vec<Self::S>) -> Self::S {
+    fn flatten(&self, kind: SyntaxKind, lst: Vec<Self::Output>) -> Self::Output {
         let size = lst
             .iter()
             .map(|s| match s {
@@ -2468,11 +2468,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenOp
         }
     }
 
-    fn zero(kind: SyntaxKind) -> Self::S {
+    fn zero(kind: SyntaxKind) -> Node<'a> {
         Node::Ignored(kind)
     }
 
-    fn is_zero(s: &Self::S) -> bool {
+    fn is_zero(s: &Self::Output) -> bool {
         match s {
             Node::Token(token) => match token.kind() {
                 TokenKind::Yield | TokenKind::Required | TokenKind::Lateinit => false,
@@ -2482,12 +2482,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenOp
             _ => true,
         }
     }
-}
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
-    FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a, 'text, S>>
-    for DirectDeclSmartConstructors<'a, 'text, S>
-{
     fn make_token(&mut self, token: CompactToken) -> Self::Output {
         let token_text = |this: &Self| this.str_from_utf8(this.token_bytes(&token));
         let token_pos = |this: &Self| {

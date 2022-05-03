@@ -1809,16 +1809,12 @@ use parser_core_types::{
   token_factory::TokenFactory,
 };
 
-pub trait FlattenOp {
-    type S;
-    fn is_zero(s: &Self::S) -> bool;
-    fn zero(kind: SyntaxKind) -> Self::S;
-    fn flatten(&self, kind: SyntaxKind, lst: Vec<Self::S>) -> Self::S;
-}
-
-pub trait FlattenSmartConstructors<'src, State>
-: SmartConstructors<State = State> + FlattenOp<S=<Self as SmartConstructors>::Output>
+pub trait FlattenSmartConstructors: SmartConstructors
 {
+    fn is_zero(s: &Self::Output) -> bool;
+    fn zero(kind: SyntaxKind) -> Self::Output;
+    fn flatten(&self, kind: SyntaxKind, lst: Vec<Self::Output>) -> Self::Output;
+
     fn make_missing(&mut self, _: usize) -> Self::Output {
        Self::zero(SyntaxKind::Missing)
     }
@@ -1864,7 +1860,7 @@ module GenerateRustDirectDeclSmartConstructors = struct
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::Output {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_%s(self, %s)
+        <Self as FlattenSmartConstructors>::make_%s(self, %s)
     }\n\n"
       x.type_name
       args
@@ -1899,27 +1895,27 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::Output {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_missing(self, offset)
+        <Self as FlattenSmartConstructors>::make_missing(self, offset)
     }
 
     fn make_token(&mut self, token: CompactToken) -> Self::Output {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_token(self, token)
+        <Self as FlattenSmartConstructors>::make_token(self, token)
     }
 
     fn make_list(&mut self, items: Vec<Self::Output>, offset: usize) -> Self::Output {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_list(self, items, offset)
+        <Self as FlattenSmartConstructors>::make_list(self, items, offset)
     }
 
     fn begin_enumerator(&mut self) {
-        <Self as FlattenSmartConstructors<'src, Self>>::begin_enumerator(self)
+        <Self as FlattenSmartConstructors>::begin_enumerator(self)
     }
 
     fn begin_enum_class_enumerator(&mut self) {
-        <Self as FlattenSmartConstructors<'src, Self>>::begin_enum_class_enumerator(self)
+        <Self as FlattenSmartConstructors>::begin_enum_class_enumerator(self)
     }
 
     fn begin_constant_declarator(&mut self) {
-        <Self as FlattenSmartConstructors<'src, Self>>::begin_constant_declarator(self)
+        <Self as FlattenSmartConstructors>::begin_constant_declarator(self)
     }
 
 

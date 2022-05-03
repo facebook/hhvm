@@ -23,16 +23,12 @@ use parser_core_types::{
   token_factory::TokenFactory,
 };
 
-pub trait FlattenOp {
-    type S;
-    fn is_zero(s: &Self::S) -> bool;
-    fn zero(kind: SyntaxKind) -> Self::S;
-    fn flatten(&self, kind: SyntaxKind, lst: Vec<Self::S>) -> Self::S;
-}
-
-pub trait FlattenSmartConstructors<'src, State>
-: SmartConstructors<State = State> + FlattenOp<S=<Self as SmartConstructors>::Output>
+pub trait FlattenSmartConstructors: SmartConstructors
 {
+    fn is_zero(s: &Self::Output) -> bool;
+    fn zero(kind: SyntaxKind) -> Self::Output;
+    fn flatten(&self, kind: SyntaxKind, lst: Vec<Self::Output>) -> Self::Output;
+
     fn make_missing(&mut self, _: usize) -> Self::Output {
        Self::zero(SyntaxKind::Missing)
     }

@@ -51,7 +51,7 @@ let search_and_update t text pos =
 let get_gencode_status text =
   let t =
     {
-      is_generated = true;
+      is_generated = false;
       fully_generated = true;
       source = None;
       command = None;

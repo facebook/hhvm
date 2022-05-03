@@ -140,6 +140,7 @@
   typechecker_options
   typing_service_api
   typing_service_delegate
+  typing_service_delegate_types
   utils_config_file
   utils_core
   utils_www_root

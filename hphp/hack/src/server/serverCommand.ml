@@ -282,7 +282,10 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
 
     ClientProvider.send_response_to_client client response;
 
-    if genv.local_config.ServerLocalConfig.hulk_lite then (
+    let hulk_lite_ran =
+      Typing_service_delegate.did_run env.typing_service.delegate_state
+    in
+    if genv.local_config.ServerLocalConfig.hulk_lite && hulk_lite_ran then (
       Hh_logger.log
         "Killing hh_server since hulk lite hh_servers can't be reused";
       exit 0

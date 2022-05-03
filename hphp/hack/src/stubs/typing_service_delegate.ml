@@ -65,3 +65,7 @@ let get_progress state =
 let controller_started state =
   ignore state;
   false
+
+let did_run state =
+  ignore state;
+  false

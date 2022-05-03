@@ -1041,8 +1041,8 @@ let process_in_parallel
       ()
   in
   let _ =
-    if hulk_lite || hulk_heavy then
-      (* during an incremental typecheck, we want to ensure controller state is reset for the recheck*)
+    if hulk_heavy then
+      (* We want to ensure controller state is reset for the recheck *)
       delegate_state := Typing_service_delegate.stop !delegate_state
     else
       ()

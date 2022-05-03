@@ -70,4 +70,6 @@ module type Delegate_sig = sig
   val get_progress : state -> string option
 
   val controller_started : state -> bool
+
+  val did_run : state -> bool
 end

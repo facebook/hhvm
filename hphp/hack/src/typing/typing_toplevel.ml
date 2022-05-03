@@ -157,24 +157,25 @@ let fun_def ctx fd :
   let (return_decl_ty, params_decl_ty) =
     merge_decl_header_with_hints ~params:f.f_params ~ret:f.f_ret decl_header env
   in
-  let (env, return_ty) =
-    match return_decl_ty with
-    | None ->
-      (env, Typing_return.make_default_return ~is_method:false env f.f_name)
-    | Some ty ->
-      let localize env ty =
-        let ((env, ty_err_opt), lty) =
-          Phase.localize_no_subst env ~ignore_errors:false ty
-        in
-        Option.iter ~f:Errors.add_typing_error ty_err_opt;
-        (env, lty)
-      in
-      Typing_return.make_return_type localize env ty
+  let hint_pos =
+    match f.f_ret with
+    | (_, None) -> fst f.f_name
+    | (_, Some (pos, _)) -> pos
+  in
+  let ety_env =
+    empty_expand_env_with_on_error
+      (Typing_error.Reasons_callback.invalid_type_hint hint_pos)
   in
   let ret_pos =
     match snd f.f_ret with
     | Some (ret_pos, _) -> ret_pos
     | None -> fst f.f_name
+  in
+  let (env, return_ty) =
+    match return_decl_ty with
+    | None ->
+      (env, Typing_return.make_default_return ~is_method:false env f.f_name)
+    | Some ty -> Typing_return.make_return_type ~ety_env env ty
   in
   let (env, return_ty) =
     Typing_return.force_return_kind env ret_pos return_ty
@@ -413,6 +414,11 @@ let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
   if not interface_check then method_body_check ()
 
 let method_return env m ret_decl_ty =
+  let ret_pos =
+    match snd m.m_ret with
+    | Some (ret_pos, _) -> ret_pos
+    | None -> fst m.m_name
+  in
   let (env, ret_ty) =
     match ret_decl_ty with
     | None ->
@@ -425,19 +431,7 @@ let method_return env m ret_decl_ty =
         empty_expand_env_with_on_error
           (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
       in
-      Typing_return.make_return_type
-        (fun env dty ->
-          let ((env, ty_err_opt), lty) = Phase.localize ~ety_env env dty in
-
-          Option.iter ~f:Errors.add_typing_error ty_err_opt;
-          (env, lty))
-        env
-        ret
-  in
-  let ret_pos =
-    match snd m.m_ret with
-    | Some (ret_pos, _) -> ret_pos
-    | None -> fst m.m_name
+      Typing_return.make_return_type ~ety_env env ret
   in
   let (env, ret_ty) = Typing_return.force_return_kind env ret_pos ret_ty in
   let return =

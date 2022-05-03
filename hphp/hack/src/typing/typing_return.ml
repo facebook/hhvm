@@ -77,9 +77,14 @@ let make_info ret_pos fun_kind attributes env ~is_explicit locl_ty decl_ty =
     return_dynamically_callable = false;
   }
 
-let make_return_type localize env (ty : decl_ty) =
+let make_return_type ~ety_env env (ty : decl_ty) =
   let wrap_awaitable p =
     MakeType.awaitable (Reason.Rret_fun_kind_from_decl (p, Ast_defs.FAsync))
+  in
+  let localize env dty =
+    let ((env, ty_err_opt), lty) = Typing_phase.localize ~ety_env env dty in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    (env, lty)
   in
   match (Env.get_fn_kind env, deref ty) with
   | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))

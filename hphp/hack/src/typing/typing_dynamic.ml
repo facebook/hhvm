@@ -113,17 +113,10 @@ let sound_dynamic_interface_check_from_fun_ty env fun_ty =
     List.map fun_ty.ft_params ~f:(fun fun_param ->
         Some fun_param.fp_type.et_type)
   in
-  let ety_env = empty_expand_env in
   let ret_locl_ty =
     snd
       (Typing_return.make_return_type
-         (fun env dty ->
-           let ((env, ty_err_opt), lty) =
-             Typing_phase.localize ~ety_env env dty
-           in
-
-           Option.iter ~f:Errors.add_typing_error ty_err_opt;
-           (env, lty))
+         ~ety_env:empty_expand_env
          env
          fun_ty.ft_ret.et_type)
   in

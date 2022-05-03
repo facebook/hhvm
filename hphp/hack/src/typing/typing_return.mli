@@ -33,7 +33,7 @@ val implicit_return :
   env
 
 val make_return_type :
-  (env -> Typing_defs.decl_ty -> env * Typing_defs.locl_ty) ->
+  ety_env:Typing_defs.expand_env ->
   env ->
   Typing_defs.decl_ty ->
   env * Typing_defs.locl_ty

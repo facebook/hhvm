@@ -5593,14 +5593,7 @@ and closure_make
         empty_expand_env_with_on_error
           (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
       in
-      Typing_return.make_return_type
-        (fun env dty ->
-          let ((env, ty_err_opt), lty) = Phase.localize ~ety_env env dty in
-
-          Option.iter ~f:Errors.add_typing_error ty_err_opt;
-          (env, lty))
-        env
-        ret
+      Typing_return.make_return_type ~ety_env env ret
   in
   let (env, hret) =
     Typing_return.force_return_kind ~is_toplevel:false env ret_pos hret

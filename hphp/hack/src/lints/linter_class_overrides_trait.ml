@@ -10,7 +10,7 @@
 (* This linter warns if a class overrides all instance/static methods
    and properties of a trait the class uses *)
 
-open Base
+open Hh_prelude
 open Aast
 module Cls = Decl_provider.Class
 
@@ -61,6 +61,34 @@ let names_defined_by_class_ class_ =
     ~f:(fun set cv -> SSet.add (snd cv.cv_id) set)
     class_.c_vars
 
+(* Does this [trait] implement any interfaces?
+
+   This looks for traits of the form:
+
+   trait X implements I {} // true
+
+   It does not include traits with requirements.
+
+   trait X { require implements I; } // false
+ *)
+let trait_implements_interfaces ctx (trait : Cls.t) : bool =
+  let is_interface name : bool =
+    match Decl_provider.get_class ctx name with
+    | Some decl ->
+      (match Cls.kind decl with
+      | Ast_defs.Cinterface -> true
+      | _ -> false)
+    | None ->
+      (* If we can't find this type (e.g. the user hasn't finished
+         writing it), conservatively assume it's an interface. *)
+      true
+  in
+
+  let interface_ancestors =
+    List.filter ~f:is_interface (Cls.all_ancestor_names trait)
+  in
+  not (List.is_empty interface_ancestors)
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -84,6 +112,7 @@ let handler =
             if
               (not (SSet.is_empty trait_names))
               && SSet.subset trait_names class_names
+              && not (trait_implements_interfaces ctx t_cls)
             then
               Lints_errors.class_overrides_all_trait_methods
                 pos

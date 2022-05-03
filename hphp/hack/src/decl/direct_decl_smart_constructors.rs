@@ -852,9 +852,9 @@ pub enum Node<'a> {
 }
 
 impl<'a> smart_constructors::NodeType for Node<'a> {
-    type R = Node<'a>;
+    type Output = Node<'a>;
 
-    fn extract(self) -> Self::R {
+    fn extract(self) -> Self::Output {
         self
     }
 

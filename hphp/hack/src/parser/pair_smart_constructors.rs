@@ -29,9 +29,9 @@ where
     N0: NodeType,
     N1: NodeType,
 {
-    type R = Node<N0, N1>;
+    type Output = Node<N0, N1>;
 
-    fn extract(self) -> Self::R {
+    fn extract(self) -> Self::Output {
         self
     }
 

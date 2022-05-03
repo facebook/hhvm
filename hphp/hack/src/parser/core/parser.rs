@@ -47,7 +47,7 @@ where
         env: ParserEnv,
         text: &'a SourceText<'a>,
         sc: S,
-    ) -> Option<<S::R as NodeType>::R> {
+    ) -> Option<<S::R as NodeType>::Output> {
         let (lexer, errors, env, sc) = Self::new(text, env, sc).into_parts();
         let mut decl_parser: DeclarationParser<'_, S> =
             DeclarationParser::make(lexer, env, Context::empty(), errors, sc);
@@ -56,7 +56,7 @@ where
             .map(|r| r.extract())
     }
 
-    pub fn parse_script(&mut self) -> <S::R as NodeType>::R {
+    pub fn parse_script(&mut self) -> <S::R as NodeType>::Output {
         let mut decl_parser: DeclarationParser<'_, S> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),

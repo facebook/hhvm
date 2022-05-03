@@ -1066,12 +1066,6 @@ bool instrIsVMCall(Op opcode) {
   switch (opcode) {
     case OpContEnter:
     case OpContRaise:
-    case OpEval:
-    case OpIncl:
-    case OpInclOnce:
-    case OpReq:
-    case OpReqDoc:
-    case OpReqOnce:
       return true;
 
     default:

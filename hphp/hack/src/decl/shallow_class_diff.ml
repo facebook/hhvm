@@ -33,81 +33,110 @@ let merge_member_lists
       | None -> SMap.add map ~key:name ~data:(None, Some y)
       | Some (_, Some _) -> map)
 
+module type Member_S = sig
+  type t
+
+  val diff : t -> t -> member_change option
+
+  val is_private : t -> bool
+end
+
 let diff_members
-    (members : ('member option * 'member option) SMap.t)
-    (diff_member : 'member -> 'member -> member_change option)
-    (is_private : 'member -> bool)
+    (type member)
+    (members_left_right : (member option * member option) SMap.t)
+    (module Member : Member_S with type t = member)
     (classish_kind : Ast_defs.classish_kind) : member_change SMap.t =
-  SMap.fold members ~init:SMap.empty ~f:(fun name old_and_new diff ->
+  SMap.fold members_left_right ~init:SMap.empty ~f:(fun name old_and_new diff ->
       match old_and_new with
       | (None, None) -> failwith "merge_member_lists added (None, None)"
       | (Some member, None)
       | (None, Some member)
-        when (not Ast_defs.(is_c_trait classish_kind)) && is_private member ->
+        when (not Ast_defs.(is_c_trait classish_kind))
+             && Member.is_private member ->
         SMap.add diff ~key:name ~data:Private_change
       | (Some _, None) -> SMap.add diff ~key:name ~data:Removed
       | (None, Some _) -> SMap.add diff ~key:name ~data:Added
       | (Some old_member, Some new_member) ->
-        diff_member old_member new_member
+        Member.diff old_member new_member
         |> Option.value_map ~default:diff ~f:(fun ch ->
                SMap.add diff ~key:name ~data:ch))
 
-let diff_const (c1 : shallow_class_const) c2 : member_change option =
-  let c1 = Decl_pos_utils.NormalizeSig.shallow_class_const c1 in
-  let c2 = Decl_pos_utils.NormalizeSig.shallow_class_const c2 in
-  if equal_shallow_class_const c1 c2 then
-    None
-  else if
-    not (Typing_defs.equal_class_const_kind c1.scc_abstract c2.scc_abstract)
-  then
-    Some Changed_inheritance
-  else
-    Some Modified
+module ClassConst : Member_S with type t = shallow_class_const = struct
+  type t = shallow_class_const
 
-let diff_typeconst tc1 tc2 : member_change option =
-  let tc1 = Decl_pos_utils.NormalizeSig.shallow_typeconst tc1 in
-  let tc2 = Decl_pos_utils.NormalizeSig.shallow_typeconst tc2 in
-  if equal_shallow_typeconst tc1 tc2 then
-    None
-  else
-    let open Typing_defs in
-    match (tc1.stc_kind, tc2.stc_kind) with
-    | (TCAbstract _, TCAbstract _)
-    | (TCConcrete _, TCConcrete _) ->
+  let diff (c1 : shallow_class_const) c2 : member_change option =
+    let c1 = Decl_pos_utils.NormalizeSig.shallow_class_const c1 in
+    let c2 = Decl_pos_utils.NormalizeSig.shallow_class_const c2 in
+    if equal_shallow_class_const c1 c2 then
+      None
+    else if
+      not (Typing_defs.equal_class_const_kind c1.scc_abstract c2.scc_abstract)
+    then
+      Some Changed_inheritance
+    else
       Some Modified
-    | (_, (TCAbstract _ | TCConcrete _)) -> Some Changed_inheritance
 
-let diff_prop p1 p2 : member_change option =
-  let p1 = Decl_pos_utils.NormalizeSig.shallow_prop p1 in
-  let p2 = Decl_pos_utils.NormalizeSig.shallow_prop p2 in
-  if equal_shallow_prop p1 p2 then
-    None
-  else if
-    (not (Aast.equal_visibility p1.sp_visibility p2.sp_visibility))
-    || Bool.( <> ) (sp_abstract p1) (sp_abstract p2)
-  then
-    Some Changed_inheritance
-  else
-    Some Modified
+  let is_private _ = false
+end
 
-let diff_method m1 m2 : member_change option =
-  let m1 = Decl_pos_utils.NormalizeSig.shallow_method m1 in
-  let m2 = Decl_pos_utils.NormalizeSig.shallow_method m2 in
-  if equal_shallow_method m1 m2 then
-    None
-  else if
-    (not (Aast.equal_visibility m1.sm_visibility m2.sm_visibility))
-    || Bool.( <> ) (sm_abstract m1) (sm_abstract m2)
-  then
-    Some Changed_inheritance
-  else
-    Some Modified
+module TypeConst : Member_S with type t = shallow_typeconst = struct
+  type t = shallow_typeconst
 
-let is_prop_private p : bool =
-  Aast_defs.equal_visibility p.sp_visibility Aast_defs.Private
+  let diff tc1 tc2 : member_change option =
+    let tc1 = Decl_pos_utils.NormalizeSig.shallow_typeconst tc1 in
+    let tc2 = Decl_pos_utils.NormalizeSig.shallow_typeconst tc2 in
+    if equal_shallow_typeconst tc1 tc2 then
+      None
+    else
+      let open Typing_defs in
+      match (tc1.stc_kind, tc2.stc_kind) with
+      | (TCAbstract _, TCAbstract _)
+      | (TCConcrete _, TCConcrete _) ->
+        Some Modified
+      | (_, (TCAbstract _ | TCConcrete _)) -> Some Changed_inheritance
 
-let is_method_private m : bool =
-  Aast_defs.equal_visibility m.sm_visibility Aast_defs.Private
+  let is_private _ = false
+end
+
+module Prop : Member_S with type t = shallow_prop = struct
+  type t = shallow_prop
+
+  let diff p1 p2 : member_change option =
+    let p1 = Decl_pos_utils.NormalizeSig.shallow_prop p1 in
+    let p2 = Decl_pos_utils.NormalizeSig.shallow_prop p2 in
+    if equal_shallow_prop p1 p2 then
+      None
+    else if
+      (not (Aast.equal_visibility p1.sp_visibility p2.sp_visibility))
+      || Bool.( <> ) (sp_abstract p1) (sp_abstract p2)
+    then
+      Some Changed_inheritance
+    else
+      Some Modified
+
+  let is_private p : bool =
+    Aast_defs.equal_visibility p.sp_visibility Aast_defs.Private
+end
+
+module Method : Member_S with type t = shallow_method = struct
+  type t = shallow_method
+
+  let diff m1 m2 : member_change option =
+    let m1 = Decl_pos_utils.NormalizeSig.shallow_method m1 in
+    let m2 = Decl_pos_utils.NormalizeSig.shallow_method m2 in
+    if equal_shallow_method m1 m2 then
+      None
+    else if
+      (not (Aast.equal_visibility m1.sm_visibility m2.sm_visibility))
+      || Bool.( <> ) (sm_abstract m1) (sm_abstract m2)
+    then
+      Some Changed_inheritance
+    else
+      Some Modified
+
+  let is_private m : bool =
+    Aast_defs.equal_visibility m.sm_visibility Aast_defs.Private
+end
 
 let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =
   match (old_cstr, new_cstr) with
@@ -120,7 +149,7 @@ let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =
     if not (Typing_defs.equal_consistent_kind consistent1 consistent2) then
       Some Changed_inheritance
     else
-      diff_method old_method new_method
+      Method.diff old_method new_method
 
 let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     ClassDiff.member_diff =
@@ -129,8 +158,12 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
   let diff =
     let get_name x = snd x.scc_name in
     let consts = merge_member_lists get_name c1.sc_consts c2.sc_consts in
-    let is_private _ = false in
-    let consts = diff_members consts diff_const is_private kind in
+    let consts =
+      diff_members
+        consts
+        (module ClassConst : Member_S with type t = shallow_class_const)
+        kind
+    in
     { diff with consts }
   in
   let diff =
@@ -138,26 +171,45 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     let typeconsts =
       merge_member_lists get_name c1.sc_typeconsts c2.sc_typeconsts
     in
-    let is_private _ = false in
-    let typeconsts = diff_members typeconsts diff_typeconst is_private kind in
+    let typeconsts =
+      diff_members
+        typeconsts
+        (module TypeConst : Member_S with type t = shallow_typeconst)
+        kind
+    in
     { diff with typeconsts }
   in
   let diff =
     let get_name x = snd x.sp_name in
     let props = merge_member_lists get_name c1.sc_props c2.sc_props in
-    let props = diff_members props diff_prop is_prop_private kind in
+    let props =
+      diff_members
+        props
+        (module Prop : Member_S with type t = shallow_prop)
+        kind
+    in
     { diff with props }
   in
   let diff =
     let get_name x = snd x.sp_name in
     let sprops = merge_member_lists get_name c1.sc_sprops c2.sc_sprops in
-    let sprops = diff_members sprops diff_prop is_prop_private kind in
+    let sprops =
+      diff_members
+        sprops
+        (module Prop : Member_S with type t = shallow_prop)
+        kind
+    in
     { diff with sprops }
   in
   let diff =
     let get_name x = snd x.sm_name in
     let methods = merge_member_lists get_name c1.sc_methods c2.sc_methods in
-    let methods = diff_members methods diff_method is_method_private kind in
+    let methods =
+      diff_members
+        methods
+        (module Method : Member_S with type t = shallow_method)
+        kind
+    in
     { diff with methods }
   in
   let diff =
@@ -165,7 +217,12 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     let smethods =
       merge_member_lists get_name c1.sc_static_methods c2.sc_static_methods
     in
-    let smethods = diff_members smethods diff_method is_method_private kind in
+    let smethods =
+      diff_members
+        smethods
+        (module Method : Member_S with type t = shallow_method)
+        kind
+    in
     { diff with smethods }
   in
   let diff =

@@ -16,7 +16,7 @@ use parser_core_types::{source_text::SourceText, syntax_error::SyntaxError};
 pub struct Parser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     lexer: Lexer<'a, S::TF>,
     errors: Vec<SyntaxError>,
@@ -27,7 +27,7 @@ where
 impl<'a, S> Parser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     pub fn new(source: &SourceText<'a>, env: ParserEnv, mut sc: S) -> Self {
         let source = source.clone();
@@ -47,7 +47,7 @@ where
         env: ParserEnv,
         text: &'a SourceText<'a>,
         sc: S,
-    ) -> Option<<S::R as NodeType>::Output> {
+    ) -> Option<<S::Output as NodeType>::Output> {
         let (lexer, errors, env, sc) = Self::new(text, env, sc).into_parts();
         let mut decl_parser: DeclarationParser<'_, S> =
             DeclarationParser::make(lexer, env, Context::empty(), errors, sc);
@@ -56,7 +56,7 @@ where
             .map(|r| r.extract())
     }
 
-    pub fn parse_script(&mut self) -> <S::R as NodeType>::Output {
+    pub fn parse_script(&mut self) -> <S::Output as NodeType>::Output {
         let mut decl_parser: DeclarationParser<'_, S> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),

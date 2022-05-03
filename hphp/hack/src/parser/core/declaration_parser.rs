@@ -20,7 +20,7 @@ use parser_core_types::trivia_kind::TriviaKind;
 pub struct DeclarationParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     lexer: Lexer<'a, S::TF>,
     env: ParserEnv,
@@ -32,7 +32,7 @@ where
 impl<'a, S> ParserTrait<'a, S> for DeclarationParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     fn make(
         lexer: Lexer<'a, S::TF>,
@@ -102,7 +102,7 @@ where
 impl<'a, S> DeclarationParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     fn with_type_parser<F, U>(&mut self, f: F) -> U
     where
@@ -120,7 +120,7 @@ where
         res
     }
 
-    fn parse_type_specifier(&mut self, allow_var: bool, allow_attr: bool) -> S::R {
+    fn parse_type_specifier(&mut self, allow_var: bool, allow_attr: bool) -> S::Output {
         self.with_type_parser(|p: &mut TypeParser<'a, S>| {
             p.parse_type_specifier(allow_var, allow_attr)
         })
@@ -142,11 +142,11 @@ where
         res
     }
 
-    fn parse_simple_type_or_type_constant(&mut self) -> S::R {
+    fn parse_simple_type_or_type_constant(&mut self) -> S::Output {
         self.with_type_parser(|x: &mut TypeParser<'a, S>| x.parse_simple_type_or_type_constant())
     }
 
-    fn parse_simple_type_or_generic(&mut self) -> S::R {
+    fn parse_simple_type_or_generic(&mut self) -> S::Output {
         self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_simple_type_or_generic())
     }
 
@@ -166,11 +166,11 @@ where
         res
     }
 
-    fn parse_expression(&mut self) -> S::R {
+    fn parse_expression(&mut self) -> S::Output {
         self.with_expression_parser(|p: &mut ExpressionParser<'a, S>| p.parse_expression())
     }
 
-    fn parse_compound_statement(&mut self) -> S::R {
+    fn parse_compound_statement(&mut self) -> S::Output {
         self.with_statement_parser(|p: &mut StatementParser<'a, S>| p.parse_compound_statement())
     }
 
@@ -181,7 +181,7 @@ where
     // enum-name-list:
     //   name
     //   enum-name-list  ,  name
-    fn parse_enum_use(&mut self) -> Option<S::R> {
+    fn parse_enum_use(&mut self) -> Option<S::Output> {
         match self.peek_token_kind_with_lookahead(1) {
             TokenKind::Equal => None,
             _ => match self.peek_token_kind() {
@@ -196,11 +196,11 @@ where
         }
     }
 
-    fn parse_enum_use_list_opt(&mut self) -> S::R {
+    fn parse_enum_use_list_opt(&mut self) -> S::Output {
         self.parse_list_until_none(|x: &mut Self| x.parse_enum_use())
     }
 
-    fn parse_enumerator_list_opt(&mut self) -> S::R {
+    fn parse_enumerator_list_opt(&mut self) -> S::Output {
         // SPEC
         // enumerator-list:
         //   enumerator
@@ -209,14 +209,14 @@ where
         self.parse_terminated_list(|x: &mut Self| x.parse_enumerator(), TokenKind::RightBrace)
     }
 
-    fn parse_enum_class_enumerator_list_opt(&mut self) -> S::R {
+    fn parse_enum_class_enumerator_list_opt(&mut self) -> S::Output {
         self.parse_terminated_list(
             |x: &mut Self| x.parse_enum_class_enumerator(),
             TokenKind::RightBrace,
         )
     }
 
-    fn parse_enum_declaration(&mut self, attrs: S::R, modifiers: S::R) -> S::R {
+    fn parse_enum_declaration(&mut self, attrs: S::Output, modifiers: S::Output) -> S::Output {
         // enum-declaration:
         //   attribute-specification-opt modifiers enum  name  enum-base  type-constraint-opt /
         //     {  enum-use-clause-list-opt; enumerator-list-opt  }
@@ -256,7 +256,11 @@ where
         )
     }
 
-    fn parse_enum_class_declaration(&mut self, attrs: S::R, modifiers: S::R) -> S::R {
+    fn parse_enum_class_declaration(
+        &mut self,
+        attrs: S::Output,
+        modifiers: S::Output,
+    ) -> S::Output {
         // enum-class-declaration:
         //   attribute-specification-opt modifiers-opt enum class name : base { enum-class-enumerator-list-opt }
         let enum_kw = self.assert_token(TokenKind::Enum);
@@ -287,14 +291,18 @@ where
         )
     }
 
-    fn parse_enum_or_enum_class_declaration(&mut self, attrs: S::R, modifiers: S::R) -> S::R {
+    fn parse_enum_or_enum_class_declaration(
+        &mut self,
+        attrs: S::Output,
+        modifiers: S::Output,
+    ) -> S::Output {
         match self.peek_token_kind_with_lookahead(1) {
             TokenKind::Class => self.parse_enum_class_declaration(attrs, modifiers),
             _ => self.parse_enum_declaration(attrs, modifiers),
         }
     }
 
-    pub fn parse_leading_markup_section(&mut self) -> Option<S::R> {
+    pub fn parse_leading_markup_section(&mut self) -> Option<S::Output> {
         let mut parser1 = self.clone();
         let (markup_section, has_suffix) =
             parser1.with_statement_parser(|p: &mut StatementParser<'a, S>| p.parse_header());
@@ -327,7 +335,7 @@ where
         }
     }
 
-    fn parse_namespace_body(&mut self) -> S::R {
+    fn parse_namespace_body(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::Semicolon => {
                 let token = self.fetch_token();
@@ -386,7 +394,7 @@ where
         }
     }
 
-    fn parse_namespace_use_kind_opt(&mut self) -> S::R {
+    fn parse_namespace_use_kind_opt(&mut self) -> S::Output {
         // SPEC
         // namespace-use-kind:
         //   namespace
@@ -403,7 +411,7 @@ where
         }
     }
 
-    fn parse_group_use(&mut self) -> S::R {
+    fn parse_group_use(&mut self) -> S::Output {
         // See below for grammar.
         let use_token = self.assert_token(TokenKind::Use);
         let use_kind = self.parse_namespace_use_kind_opt();
@@ -428,7 +436,7 @@ where
         )
     }
 
-    fn parse_namespace_use_clause(&mut self) -> S::R {
+    fn parse_namespace_use_clause(&mut self) -> S::Output {
         // SPEC
         // namespace-use-clause:
         //   qualified-name  namespace-aliasing-clauseopt
@@ -459,7 +467,7 @@ where
         )
     }
 
-    fn parse_namespace_use_declaration(&mut self) -> S::R {
+    fn parse_namespace_use_declaration(&mut self) -> S::Output {
         // SPEC
         // namespace-use-declaration:
         //   use namespace-use-kind-opt namespace-use-clauses  ;
@@ -511,7 +519,7 @@ where
         }
     }
 
-    fn parse_namespace_declaration(&mut self) -> S::R {
+    fn parse_namespace_declaration(&mut self) -> S::Output {
         // SPEC
         // namespace-definition:
         //   namespace  namespace-name  ;
@@ -549,7 +557,7 @@ where
         S!(make_namespace_declaration, self, header, body)
     }
 
-    pub fn parse_classish_declaration(&mut self, attribute_spec: S::R) -> S::R {
+    pub fn parse_classish_declaration(&mut self, attribute_spec: S::Output) -> S::Output {
         let modifiers = self.parse_classish_modifiers();
 
         if self.peek_token_kind() == TokenKind::Enum {
@@ -594,7 +602,7 @@ where
         )
     }
 
-    fn parse_classish_where_clause_opt(&mut self) -> S::R {
+    fn parse_classish_where_clause_opt(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::Where {
             self.parse_where_clause()
         } else {
@@ -602,7 +610,7 @@ where
         }
     }
 
-    fn parse_classish_implements_opt(&mut self) -> (S::R, S::R) {
+    fn parse_classish_implements_opt(&mut self) -> (S::Output, S::Output) {
         if self.peek_token_kind() != TokenKind::Implements {
             let missing1 = S!(make_missing, self, self.pos());
             let missing2 = S!(make_missing, self, self.pos());
@@ -615,13 +623,13 @@ where
         }
     }
 
-    fn parse_xhp_keyword(&mut self) -> (S::R, bool) {
+    fn parse_xhp_keyword(&mut self) -> (S::Output, bool) {
         let xhp = self.optional_token(TokenKind::XHP);
         let is_missing = xhp.is_missing();
         (xhp, !is_missing)
     }
 
-    fn parse_classish_modifiers(&mut self) -> S::R {
+    fn parse_classish_modifiers(&mut self) -> S::Output {
         let mut acc = vec![];
         loop {
             match self.peek_token_kind() {
@@ -636,7 +644,7 @@ where
         }
     }
 
-    fn parse_classish_token(&mut self) -> S::R {
+    fn parse_classish_token(&mut self) -> S::Output {
         let spellcheck_tokens = vec![TokenKind::Class, TokenKind::Trait, TokenKind::Interface];
         let token_str = &self.current_token_text();
         let token_kind = self.peek_token_kind();
@@ -660,7 +668,7 @@ where
         }
     }
 
-    fn parse_special_type(&mut self) -> (S::R, bool) {
+    fn parse_special_type(&mut self) -> (S::Output, bool) {
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_class_name_or_other_token();
         match token.kind() {
@@ -706,7 +714,7 @@ where
         }
     }
 
-    fn parse_special_type_list(&mut self) -> S::R {
+    fn parse_special_type_list(&mut self) -> S::Output {
         // An extends / implements / enum_use list is a comma-separated list of types,
         // but very special types; we want the types to consist of a name and an
         // optional generic type argument list.
@@ -736,7 +744,7 @@ where
         S!(make_list, self, items, self.pos())
     }
 
-    fn parse_extends_opt(&mut self) -> (S::R, S::R) {
+    fn parse_extends_opt(&mut self) -> (S::Output, S::Output) {
         let token_kind = self.peek_token_kind();
         if token_kind != TokenKind::Extends {
             let missing1 = S!(make_missing, self, self.pos());
@@ -750,7 +758,7 @@ where
         }
     }
 
-    fn parse_classish_body(&mut self) -> S::R {
+    fn parse_classish_body(&mut self) -> S::Output {
         let left_brace_token = self.require_left_brace();
         let classish_element_list = self.parse_classish_element_list_opt();
         let right_brace_token = self.require_right_brace();
@@ -763,7 +771,7 @@ where
         )
     }
 
-    fn parse_classish_element_list_opt(&mut self) -> S::R {
+    fn parse_classish_element_list_opt(&mut self) -> S::Output {
         // TODO: ERROR RECOVERY: consider bailing if the token cannot possibly
         // start a classish element.
         // ERROR RECOVERY: we're in the body of a classish, so we add visibility
@@ -777,7 +785,7 @@ where
         element_list
     }
 
-    fn parse_xhp_children_paren(&mut self) -> S::R {
+    fn parse_xhp_children_paren(&mut self) -> S::Output {
         // SPEC (Draft)
         // ( xhp-children-expressions )
         //
@@ -800,7 +808,7 @@ where
         )
     }
 
-    fn parse_xhp_children_term(&mut self) -> S::R {
+    fn parse_xhp_children_term(&mut self) -> S::Output {
         // SPEC (Draft)
         // xhp-children-term:
         // ( xhp-children-expressions ) trailing-opt
@@ -840,7 +848,7 @@ where
         }
     }
 
-    fn parse_xhp_children_trailing(&mut self, term: S::R) -> S::R {
+    fn parse_xhp_children_trailing(&mut self, term: S::Output) -> S::Output {
         let token_kind = self.peek_token_kind();
         match token_kind {
             TokenKind::Star | TokenKind::Plus | TokenKind::Question => {
@@ -852,7 +860,7 @@ where
         }
     }
 
-    fn parse_xhp_children_bar(&mut self, left: S::R) -> S::R {
+    fn parse_xhp_children_bar(&mut self, left: S::Output) -> S::Output {
         let token_kind = self.peek_token_kind();
         match token_kind {
             TokenKind::Bar => {
@@ -866,7 +874,7 @@ where
         }
     }
 
-    fn parse_xhp_children_expression(&mut self) -> S::R {
+    fn parse_xhp_children_expression(&mut self) -> S::Output {
         // SPEC (Draft)
         // xhp-children-expression:
         //   xhp-children-term
@@ -878,7 +886,7 @@ where
         self.parse_xhp_children_bar(term)
     }
 
-    fn parse_xhp_children_declaration(&mut self) -> S::R {
+    fn parse_xhp_children_declaration(&mut self) -> S::Output {
         // SPEC (Draft)
         // xhp-children-declaration:
         //   children empty ;
@@ -899,7 +907,7 @@ where
         S!(make_xhp_children_declaration, self, children, expr, semi)
     }
 
-    fn parse_xhp_category(&mut self) -> S::R {
+    fn parse_xhp_category(&mut self) -> S::Output {
         let token = self.next_xhp_category_name();
         let token_kind = token.kind();
         let category = S!(make_token, self, token);
@@ -912,7 +920,7 @@ where
         }
     }
 
-    fn parse_xhp_attribute_enum(&mut self) -> S::R {
+    fn parse_xhp_attribute_enum(&mut self) -> S::Output {
         let like_token = if self.peek_token_kind() == TokenKind::Tilde {
             self.assert_token(TokenKind::Tilde)
         } else {
@@ -932,7 +940,7 @@ where
         )
     }
 
-    fn parse_xhp_type_specifier(&mut self) -> S::R {
+    fn parse_xhp_type_specifier(&mut self) -> S::Output {
         // SPEC (Draft)
         // xhp-type-specifier:
         //   (enum | ~enum) { xhp-attribute-enum-list  ,-opt  }
@@ -964,7 +972,7 @@ where
         }
     }
 
-    fn parse_xhp_required_opt(&mut self) -> S::R {
+    fn parse_xhp_required_opt(&mut self) -> S::Output {
         // SPEC (Draft)
         // xhp-required :
         //   @  (required | lateinit)
@@ -988,7 +996,7 @@ where
         }
     }
 
-    fn parse_xhp_class_attribute_typed(&mut self) -> S::R {
+    fn parse_xhp_class_attribute_typed(&mut self) -> S::Output {
         // xhp-type-specifier xhp-name initializer-opt xhp-required-opt
         let ty = self.parse_xhp_type_specifier();
         let name = self.require_xhp_name();
@@ -997,7 +1005,7 @@ where
         S!(make_xhp_class_attribute, self, ty, name, init, req)
     }
 
-    fn parse_xhp_category_declaration(&mut self) -> S::R {
+    fn parse_xhp_category_declaration(&mut self) -> S::Output {
         // SPEC (Draft)
         // xhp-category-declaration:
         //   category xhp-category-list ,-opt  ;
@@ -1015,7 +1023,7 @@ where
         S!(make_xhp_category_declaration, self, category, items, semi)
     }
 
-    fn parse_xhp_class_attribute(&mut self) -> S::R {
+    fn parse_xhp_class_attribute(&mut self) -> S::Output {
         // SPEC (Draft)
         // xhp-attribute-declaration:
         //   xhp-class-name
@@ -1041,7 +1049,7 @@ where
         }
     }
 
-    fn parse_xhp_class_attribute_declaration(&mut self) -> S::R {
+    fn parse_xhp_class_attribute_declaration(&mut self) -> S::Output {
         // SPEC: (Draft)
         // xhp-class-attribute-declaration :
         //   attribute xhp-attribute-declaration-list ;
@@ -1070,7 +1078,7 @@ where
         )
     }
 
-    fn parse_qualified_name_type(&mut self) -> S::R {
+    fn parse_qualified_name_type(&mut self) -> S::Output {
         // Here we're parsing a name followed by an optional generic type
         // argument list; if we don't have a name, give an error.
         match self.peek_token_kind() {
@@ -1079,7 +1087,7 @@ where
         }
     }
 
-    fn parse_require_clause(&mut self) -> S::R {
+    fn parse_require_clause(&mut self) -> S::Output {
         // SPEC
         // require-extends-clause:
         //   require  extends  qualified-name  ;
@@ -1122,7 +1130,7 @@ where
         S!(make_require_clause, self, req, req_kind, name, semi)
     }
 
-    fn parse_methodish_or_property(&mut self, attribute_spec: S::R) -> S::R {
+    fn parse_methodish_or_property(&mut self, attribute_spec: S::Output) -> S::Output {
         let modifiers = self.parse_modifiers();
         // ERROR RECOVERY: match against two tokens, because if one token is
         // in error but the next isn't, then it's likely that the user is
@@ -1160,7 +1168,7 @@ where
     // trait-name-list:
     //   qualified-name  generic-type-parameter-listopt
     //   trait-name-list  ,  qualified-name  generic-type-parameter-listopt
-    fn parse_trait_name_list<P>(&mut self, predicate: P) -> S::R
+    fn parse_trait_name_list<P>(&mut self, predicate: P) -> S::Output
     where
         P: Fn(TokenKind) -> bool,
     {
@@ -1174,7 +1182,7 @@ where
         items
     }
 
-    fn parse_trait_use(&mut self) -> S::R {
+    fn parse_trait_use(&mut self) -> S::Output {
         let use_token = self.assert_token(TokenKind::Use);
         let trait_name_list =
             self.parse_trait_name_list(|x| x == TokenKind::Semicolon || x == TokenKind::LeftBrace);
@@ -1182,7 +1190,11 @@ where
         S!(make_trait_use, self, use_token, trait_name_list, semi)
     }
 
-    fn parse_property_declaration(&mut self, attribute_spec: S::R, modifiers: S::R) -> S::R {
+    fn parse_property_declaration(
+        &mut self,
+        attribute_spec: S::Output,
+        modifiers: S::Output,
+    ) -> S::Output {
         // SPEC:
         // property-declaration:
         //   attribute-spec-opt  property-modifier  type-specifier
@@ -1214,7 +1226,7 @@ where
         )
     }
 
-    fn parse_property_declarator(&mut self) -> S::R {
+    fn parse_property_declarator(&mut self) -> S::Output {
         // SPEC:
         // property-declarator:
         //   variable-name  property-initializer-opt
@@ -1243,7 +1255,12 @@ where
     //   name  constant-initializer_opt
     // constant-initializer:
     //   =  const-expression
-    fn parse_const_declaration(&mut self, attributes: S::R, modifiers: S::R, const_: S::R) -> S::R {
+    fn parse_const_declaration(
+        &mut self,
+        attributes: S::Output,
+        modifiers: S::Output,
+        const_: S::Output,
+    ) -> S::Output {
         let type_spec = if self.is_type_in_const() {
             self.parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ true)
         } else {
@@ -1267,7 +1284,7 @@ where
         )
     }
 
-    fn parse_constant_declarator(&mut self) -> S::R {
+    fn parse_constant_declarator(&mut self) -> S::Output {
         // TODO: We allow const names to be keywords here; in particular we
         // require that const string TRUE = "true"; be legal.  Likely this
         // should be more strict. What are the rules for which keywords are
@@ -1308,10 +1325,10 @@ where
     // syntactic.  Consider moving the error detection out of the type checker.
     fn parse_type_const_declaration(
         &mut self,
-        attributes: S::R,
-        modifiers: S::R,
-        const_: S::R,
-    ) -> S::R {
+        attributes: S::Output,
+        modifiers: S::Output,
+        const_: S::Output,
+    ) -> S::Output {
         let type_token = self.assert_token(TokenKind::Type);
         let name = self.require_name_allow_non_reserved();
         let generic_type_parameter_list = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
@@ -1345,7 +1362,11 @@ where
         )
     }
 
-    fn parse_context_const_declaration(&mut self, modifiers: S::R, const_: S::R) -> S::R {
+    fn parse_context_const_declaration(
+        &mut self,
+        modifiers: S::Output,
+        const_: S::Output,
+    ) -> S::Output {
         // SPEC
         // context-constant-declaration:
         //   abstract-context-constant-declaration
@@ -1410,7 +1431,7 @@ where
     // TODO: The list of attrs can have a trailing comma. Update the spec.
     // TODO: The list of values can have a trailing comma. Update the spec.
     // (Both these work items are tracked by spec issue 106.)
-    pub fn parse_old_attribute_specification_opt(&mut self) -> S::R {
+    pub fn parse_old_attribute_specification_opt(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::LessThanLessThan {
             let (left, items, right) =
                 self.parse_double_angled_comma_list_allow_trailing(|x: &mut Self| {
@@ -1422,7 +1443,7 @@ where
         }
     }
 
-    fn parse_file_attribute_specification_opt(&mut self) -> S::R {
+    fn parse_file_attribute_specification_opt(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::LessThanLessThan {
             let left = self.assert_token(TokenKind::LessThanLessThan);
             let keyword = self.assert_token(TokenKind::File);
@@ -1447,7 +1468,7 @@ where
         }
     }
 
-    fn parse_return_readonly_opt(&mut self) -> S::R {
+    fn parse_return_readonly_opt(&mut self) -> S::Output {
         let token_kind = self.peek_token_kind();
         if token_kind == TokenKind::Readonly {
             let token = self.next_token();
@@ -1457,7 +1478,7 @@ where
         }
     }
 
-    fn parse_return_type_hint_opt(&mut self) -> (S::R, S::R, S::R) {
+    fn parse_return_type_hint_opt(&mut self) -> (S::Output, S::Output, S::Output) {
         let token_kind = self.peek_token_kind();
         if token_kind == TokenKind::Colon {
             let token = self.next_token();
@@ -1479,7 +1500,7 @@ where
         }
     }
 
-    pub fn parse_parameter_list_opt(&mut self) -> (S::R, S::R, S::R) {
+    pub fn parse_parameter_list_opt(&mut self) -> (S::Output, S::Output, S::Output) {
         // SPEC
         // TODO: The specification is wrong in several respects concerning
         // variadic parameters. Variadic parameters are permitted to have a
@@ -1510,7 +1531,7 @@ where
         self.parse_parenthesized_comma_list_opt_allow_trailing(|x: &mut Self| x.parse_parameter())
     }
 
-    fn parse_parameter(&mut self) -> S::R {
+    fn parse_parameter(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let token = parser1.next_token();
         match token.kind() {
@@ -1530,7 +1551,7 @@ where
         }
     }
 
-    fn parse_parameter_declaration(&mut self) -> S::R {
+    fn parse_parameter_declaration(&mut self) -> S::Output {
         // SPEC
         //
         // TODO: Add call-convention-opt to the specification.
@@ -1581,7 +1602,7 @@ where
         )
     }
 
-    fn parse_decorated_variable_opt(&mut self) -> S::R {
+    fn parse_decorated_variable_opt(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::DotDotDot => self.parse_decorated_variable(),
             _ => self.require_variable(),
@@ -1592,7 +1613,7 @@ where
     // an optional decoration on it.  It's a declaration. We shouldn't be using the
     // same data structure for a decorated expression as a declaration; one
     // is ause* and the other is a *definition*.
-    fn parse_decorated_variable(&mut self) -> S::R {
+    fn parse_decorated_variable(&mut self) -> S::Output {
         // ERROR RECOVERY
         // Detection of (variadic, byRef) inout params happens in post-parsing.
         // Although a parameter can have at most one variadic/reference decorator,
@@ -1606,7 +1627,7 @@ where
         S!(make_decorated_expression, self, decorator, variable)
     }
 
-    fn parse_visibility_modifier_opt(&mut self) -> S::R {
+    fn parse_visibility_modifier_opt(&mut self) -> S::Output {
         let token_kind = self.peek_token_kind();
         match token_kind {
             TokenKind::Public | TokenKind::Protected | TokenKind::Private => {
@@ -1624,7 +1645,7 @@ where
     //
     // call-convention:
     //   inout
-    fn parse_call_convention_opt(&mut self) -> S::R {
+    fn parse_call_convention_opt(&mut self) -> S::Output {
         let token_kind = self.peek_token_kind();
         match token_kind {
             TokenKind::Inout => {
@@ -1642,7 +1663,7 @@ where
     //
     // readonly:
     //   readonly
-    fn parse_readonly_opt(&mut self) -> S::R {
+    fn parse_readonly_opt(&mut self) -> S::Output {
         let token_kind = self.peek_token_kind();
         match token_kind {
             TokenKind::Readonly => {
@@ -1659,7 +1680,7 @@ where
     //
     // constant-initializer:
     //   =  const-expression
-    fn parse_simple_initializer_opt(&mut self) -> S::R {
+    fn parse_simple_initializer_opt(&mut self) -> S::Output {
         let token_kind = self.peek_token_kind();
         match token_kind {
             TokenKind::Equal => {
@@ -1673,7 +1694,7 @@ where
         }
     }
 
-    pub fn parse_function_declaration(&mut self, attribute_specification: S::R) -> S::R {
+    pub fn parse_function_declaration(&mut self, attribute_specification: S::Output) -> S::Output {
         let modifiers = self.parse_modifiers();
         let header =
             self.parse_function_declaration_header(modifiers, /* is_methodish =*/ false);
@@ -1687,7 +1708,7 @@ where
         )
     }
 
-    fn parse_constraint_operator(&mut self) -> S::R {
+    fn parse_constraint_operator(&mut self) -> S::Output {
         // TODO: Put this in the specification
         // (This work is tracked by spec issue 100.)
         // constraint-operator:
@@ -1709,7 +1730,7 @@ where
         }
     }
 
-    fn parse_where_constraint(&mut self) -> S::R {
+    fn parse_where_constraint(&mut self) -> S::Output {
         // TODO: Put this in the specification
         // (This work is tracked by spec issue 100.)
         // constraint:
@@ -1722,7 +1743,7 @@ where
         S!(make_where_constraint, self, left, op, right)
     }
 
-    fn parse_where_constraint_list_item(&mut self) -> Option<S::R> {
+    fn parse_where_constraint_list_item(&mut self) -> Option<S::Output> {
         match self.peek_token_kind() {
             TokenKind::Semicolon | TokenKind::LeftBrace => None,
             _ => {
@@ -1734,7 +1755,7 @@ where
         }
     }
 
-    fn parse_where_clause(&mut self) -> S::R {
+    fn parse_where_clause(&mut self) -> S::Output {
         // TODO: Add this to the specification
         // (This work is tracked by spec issue 100.)
         // where-clause:
@@ -1749,7 +1770,7 @@ where
         S!(make_where_clause, self, keyword, constraints)
     }
 
-    fn parse_where_clause_opt(&mut self) -> S::R {
+    fn parse_where_clause_opt(&mut self) -> S::Output {
         if self.peek_token_kind() != TokenKind::Where {
             S!(make_missing, self, self.pos())
         } else {
@@ -1757,7 +1778,11 @@ where
         }
     }
 
-    fn parse_function_declaration_header(&mut self, modifiers: S::R, is_methodish: bool) -> S::R {
+    fn parse_function_declaration_header(
+        &mut self,
+        modifiers: S::Output,
+        is_methodish: bool,
+    ) -> S::Output {
         // SPEC
         // function-definition-header:
         //   attribute-specification-opt  async-opt  function  name  /
@@ -1796,7 +1821,7 @@ where
     }
 
     // A function label is either a function name or a __construct label.
-    fn parse_function_label_opt(&mut self, is_methodish: bool) -> S::R {
+    fn parse_function_label_opt(&mut self, is_methodish: bool) -> S::Output {
         let report_error = |x: &mut Self, token: Token<S>| {
             x.with_error(Errors::error1044);
             let token = S!(make_token, x, token);
@@ -1833,11 +1858,11 @@ where
         }
     }
 
-    fn parse_old_attribute(&mut self) -> S::R {
+    fn parse_old_attribute(&mut self) -> S::Output {
         self.with_expression_parser(|p: &mut ExpressionParser<'a, S>| p.parse_constructor_call())
     }
 
-    pub fn parse_attribute_specification_opt(&mut self) -> S::R {
+    pub fn parse_attribute_specification_opt(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::At if self.env.allow_new_attribute_syntax => {
                 self.parse_new_attribute_specification_opt()
@@ -1847,7 +1872,7 @@ where
         }
     }
 
-    fn parse_new_attribute_specification_opt(&mut self) -> S::R {
+    fn parse_new_attribute_specification_opt(&mut self) -> S::Output {
         let attributes = self.parse_list_while(
             |p: &mut Self| p.parse_new_attribute(),
             |p: &Self| p.peek_token_kind() == TokenKind::At,
@@ -1855,7 +1880,7 @@ where
         S!(make_attribute_specification, self, attributes)
     }
 
-    fn parse_new_attribute(&mut self) -> S::R {
+    fn parse_new_attribute(&mut self) -> S::Output {
         let at = self.assert_token(TokenKind::At);
         let token = self.peek_token();
         let constructor_call = match token.kind() {
@@ -1872,7 +1897,10 @@ where
 
     // Parses modifiers and passes them into the parse methods for the
     // respective class body element.
-    fn parse_methodish_or_property_or_const_or_type_const(&mut self, attribute_spec: S::R) -> S::R {
+    fn parse_methodish_or_property_or_const_or_type_const(
+        &mut self,
+        attribute_spec: S::Output,
+    ) -> S::Output {
         let mut parser1 = self.clone();
         let modifiers = parser1.parse_modifiers();
         let kind0 = parser1.peek_token_kind_with_lookahead(0);
@@ -1915,7 +1943,7 @@ where
     //   static
     //   abstract
     //   final
-    fn parse_methodish(&mut self, attribute_spec: S::R, modifiers: S::R) -> S::R {
+    fn parse_methodish(&mut self, attribute_spec: S::Output, modifiers: S::Output) -> S::Output {
         let header =
             self.parse_function_declaration_header(modifiers, /* is_methodish:*/ true);
         let token_kind = self.peek_token_kind();
@@ -1993,7 +2021,7 @@ where
             }
         }
     }
-    fn parse_modifiers(&mut self) -> S::R {
+    fn parse_modifiers(&mut self) -> S::Output {
         let mut items = vec![];
         loop {
             let token_kind = self.peek_token_kind();
@@ -2017,7 +2045,7 @@ where
         S!(make_list, self, items, self.pos())
     }
 
-    fn parse_toplevel_with_attributes_or_internal(&mut self) -> S::R {
+    fn parse_toplevel_with_attributes_or_internal(&mut self) -> S::Output {
         // An enum, type alias, function, interface, trait or class may all
         // begin with an attribute.
         let attribute_specification = match self.peek_token_kind() {
@@ -2086,7 +2114,7 @@ where
         }
     }
 
-    fn parse_classish_element(&mut self) -> S::R {
+    fn parse_classish_element(&mut self) -> S::Output {
         // We need to identify an element of a class, trait, etc. Possibilities
         // are:
         //
@@ -2192,20 +2220,20 @@ where
         }
     }
 
-    fn parse_type_constraint_opt(&mut self) -> S::R {
+    fn parse_type_constraint_opt(&mut self) -> S::Output {
         self.with_type_parser(|p: &mut TypeParser<'a, S>| {
             p.parse_type_constraint_opt()
                 .unwrap_or_else(|| S!(make_missing, p, p.pos()))
         })
     }
 
-    fn parse_type_constraints(&mut self) -> S::R {
+    fn parse_type_constraints(&mut self) -> S::Output {
         self.with_type_parser(|p: &mut TypeParser<'a, S>| {
             p.parse_list_until_none(|p| p.parse_type_constraint_opt())
         })
     }
 
-    fn parse_type_alias_declaration(&mut self, attr: S::R) -> S::R {
+    fn parse_type_alias_declaration(&mut self, attr: S::Output) -> S::Output {
         // SPEC
         // alias-declaration:
         //   attribute-spec-opt modifiers type  name
@@ -2241,7 +2269,7 @@ where
         )
     }
 
-    fn parse_ctx_alias_declaration(&mut self, attr: S::R) -> S::R {
+    fn parse_ctx_alias_declaration(&mut self, attr: S::Output) -> S::Output {
         // SPEC
         // ctx-alias-declaration:
         //   newctx name type-constraint-opt = type-specifier  ;
@@ -2274,7 +2302,7 @@ where
         )
     }
 
-    fn parse_enumerator(&mut self) -> S::R {
+    fn parse_enumerator(&mut self) -> S::Output {
         // SPEC
         // enumerator:
         //   enumerator-constant  =  constant-expression ;
@@ -2294,7 +2322,7 @@ where
         S!(make_enumerator, self, name, equal, value, semicolon)
     }
 
-    fn parse_enum_class_enumerator(&mut self) -> S::R {
+    fn parse_enum_class_enumerator(&mut self) -> S::Output {
         // SPEC
         // enum-class-enumerator:
         //   type-specifier name = expression ;
@@ -2319,7 +2347,7 @@ where
         )
     }
 
-    fn parse_inclusion_directive(&mut self) -> S::R {
+    fn parse_inclusion_directive(&mut self) -> S::Output {
         // SPEC:
         // inclusion-directive:
         //   require-multiple-directive
@@ -2348,7 +2376,7 @@ where
         S!(make_inclusion_directive, self, expr, semi)
     }
 
-    fn parse_module_declaration(&mut self, attrs: S::R) -> S::R {
+    fn parse_module_declaration(&mut self, attrs: S::Output) -> S::Output {
         let new_kw = self.assert_token(TokenKind::New);
         let module_kw = self.assert_token(TokenKind::Module);
         // TODO(T108206307) This will probably change if we have a different syntax
@@ -2369,7 +2397,7 @@ where
         )
     }
 
-    fn parse_module_membership_declaration(&mut self) -> S::R {
+    fn parse_module_membership_declaration(&mut self) -> S::Output {
         let module_kw = self.assert_token(TokenKind::Module);
         let name = self.require_name();
         let semicolon = self.require_semicolon();
@@ -2382,7 +2410,7 @@ where
         )
     }
 
-    fn parse_declaration(&mut self) -> S::R {
+    fn parse_declaration(&mut self) -> S::Output {
         self.expect_in_new_scope(ExpectedTokens::Classish);
         let mut parser1 = self.clone();
         let token = parser1.next_token();
@@ -2466,7 +2494,7 @@ where
         result
     }
 
-    pub fn parse_script(&mut self) -> S::R {
+    pub fn parse_script(&mut self) -> S::Output {
         let header = self.parse_leading_markup_section();
         let mut declarations = vec![];
         if let Some(x) = header {

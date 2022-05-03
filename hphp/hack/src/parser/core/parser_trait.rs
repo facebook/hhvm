@@ -117,7 +117,7 @@ impl<T> Context<T> {
 pub trait ParserTrait<'a, S>: Clone
 where
     S: SmartConstructors,
-    <S as SmartConstructors>::R: NodeType,
+    <S as SmartConstructors>::Output: NodeType,
 {
     fn make(
         _: Lexer<'a, S::TF>,
@@ -229,7 +229,7 @@ where
         self.lexer_mut().next_token_in_string(literal_kind)
     }
 
-    fn next_xhp_class_name_or_other(&mut self) -> S::R {
+    fn next_xhp_class_name_or_other(&mut self) -> S::Output {
         let token = self.next_xhp_class_name_or_other_token();
         match token.kind() {
             TokenKind::Namespace | TokenKind::Name => {
@@ -283,7 +283,7 @@ where
     // The triple left angle is currently lexed as a HeredocStringLiteral,
     // but we can get around this by manually advancing the lexer one token
     // and returning a LeftAngle. Then, the next token will be a LeftAngleLeftAngle
-    fn assert_left_angle_in_type_list_with_possible_attribute(&mut self) -> S::R {
+    fn assert_left_angle_in_type_list_with_possible_attribute(&mut self) -> S::Output {
         let parser1 = self.clone();
         let lexer = self.lexer_mut();
         lexer.scan_leading_php_trivia();
@@ -304,7 +304,7 @@ where
         }
     }
 
-    fn assert_xhp_body_token(&mut self, kind: TokenKind) -> S::R {
+    fn assert_xhp_body_token(&mut self, kind: TokenKind) -> S::Output {
         self.assert_token_with_tokenizer(kind, |x: &mut Lexer<'a, S::TF>| x.next_xhp_body_token())
     }
 
@@ -334,12 +334,12 @@ where
         self.peek_token_with_lookahead(lookahead).kind()
     }
 
-    fn fetch_token(&mut self) -> S::R {
+    fn fetch_token(&mut self) -> S::Output {
         let token = self.lexer_mut().next_token();
         S!(make_token, self, token)
     }
 
-    fn assert_token_with_tokenizer<F>(&mut self, kind: TokenKind, tokenizer: F) -> S::R
+    fn assert_token_with_tokenizer<F>(&mut self, kind: TokenKind, tokenizer: F) -> S::Output
     where
         F: Fn(&mut Lexer<'a, S::TF>) -> Token<S>,
     {
@@ -354,7 +354,7 @@ where
         S!(make_token, self, token)
     }
 
-    fn assert_token(&mut self, kind: TokenKind) -> S::R {
+    fn assert_token(&mut self, kind: TokenKind) -> S::Output {
         self.assert_token_with_tokenizer(kind, |x: &mut Lexer<'_, S::TF>| x.next_token())
     }
 
@@ -380,7 +380,7 @@ where
         self.lexer_mut().next_token_as_name()
     }
 
-    fn optional_token(&mut self, kind: TokenKind) -> S::R {
+    fn optional_token(&mut self, kind: TokenKind) -> S::Output {
         if self.peek_token_kind() == kind {
             let token = self.next_token();
             S!(make_token, self, token)
@@ -391,10 +391,10 @@ where
 
     fn scan_qualified_name_worker(
         &mut self,
-        mut name_opt: Option<S::R>,
-        mut parts: Vec<S::R>,
+        mut name_opt: Option<S::Output>,
+        mut parts: Vec<S::Output>,
         mut has_backslash: bool,
-    ) -> (Vec<S::R>, Option<S::R>, bool) {
+    ) -> (Vec<S::Output>, Option<S::Output>, bool) {
         loop {
             let mut parser1 = self.clone();
             let token = if parser1.is_next_xhp_class_name() {
@@ -441,7 +441,10 @@ where
         }
     }
 
-    fn scan_remaining_qualified_name_extended(&mut self, name_token: S::R) -> (S::R, bool) {
+    fn scan_remaining_qualified_name_extended(
+        &mut self,
+        name_token: S::Output,
+    ) -> (S::Output, bool) {
         let (parts, name_token_opt, is_backslash) =
             self.scan_qualified_name_worker(Some(name_token), vec![], false);
         if parts.is_empty() {
@@ -453,7 +456,11 @@ where
         }
     }
 
-    fn scan_qualified_name_extended(&mut self, missing: S::R, backslash: S::R) -> (S::R, bool) {
+    fn scan_qualified_name_extended(
+        &mut self,
+        missing: S::Output,
+        backslash: S::Output,
+    ) -> (S::Output, bool) {
         let head = S!(make_list_item, self, missing, backslash);
         let parts = vec![head];
         let (parts, _, is_backslash) = self.scan_qualified_name_worker(None, parts, false);
@@ -462,7 +469,7 @@ where
         (name, is_backslash)
     }
 
-    fn scan_qualified_name(&mut self, missing: S::R, backslash: S::R) -> S::R {
+    fn scan_qualified_name(&mut self, missing: S::Output, backslash: S::Output) -> S::Output {
         let (name, _) = self.scan_qualified_name_extended(missing, backslash);
         name
     }
@@ -493,7 +500,7 @@ where
         }
     }
 
-    fn scan_name_or_qualified_name(&mut self) -> S::R {
+    fn scan_name_or_qualified_name(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let token = parser1.next_token_non_reserved_as_name();
         match token.kind() {
@@ -513,9 +520,9 @@ where
         }
     }
 
-    fn parse_alternate_if_block<F>(&mut self, parse_item: F) -> S::R
+    fn parse_alternate_if_block<F>(&mut self, parse_item: F) -> S::Output
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let mut parser1 = self.clone();
         let block = parser1.parse_list_while(parse_item, |x: &Self| match x.peek_token_kind() {
@@ -540,9 +547,9 @@ where
         close_kind: TokenKind,
         error: Error,
         parse_item: F,
-    ) -> (S::R, bool)
+    ) -> (S::Output, bool)
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let (x, y, _) = self.parse_separated_list_predicate(
             |x| x == separator_kind,
@@ -554,7 +561,7 @@ where
         (x, y)
     }
 
-    fn require_qualified_name(&mut self) -> S::R {
+    fn require_qualified_name(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let name = if parser1.is_next_xhp_class_name() {
             parser1.next_xhp_class_name()
@@ -581,16 +588,16 @@ where
         }
     }
 
-    fn require_name(&mut self) -> S::R {
+    fn require_name(&mut self) -> S::Output {
         self.require_token(TokenKind::Name, Errors::error1004)
     }
 
-    fn require_xhp_class_name(&mut self) -> S::R {
+    fn require_xhp_class_name(&mut self) -> S::Output {
         let token = self.next_xhp_modifier_class_name();
         S!(make_token, self, token)
     }
 
-    fn require_xhp_class_name_or_name(&mut self) -> S::R {
+    fn require_xhp_class_name_or_name(&mut self) -> S::Output {
         if self.is_next_xhp_class_name() {
             let token = self.next_xhp_class_name();
             S!(make_token, self, token)
@@ -602,7 +609,7 @@ where
     /// Require that the next node is either:
     /// - A normal class name (`\w+`)
     /// - An XHP class name (`(:(\w-)+)+`)
-    fn require_maybe_xhp_class_name(&mut self) -> S::R {
+    fn require_maybe_xhp_class_name(&mut self) -> S::Output {
         if self.is_next_xhp_class_name() {
             let token = self.next_xhp_class_name();
             S!(make_token, self, token)
@@ -611,75 +618,75 @@ where
         }
     }
 
-    fn require_function(&mut self) -> S::R {
+    fn require_function(&mut self) -> S::Output {
         self.require_token(TokenKind::Function, Errors::error1003)
     }
 
-    fn require_variable(&mut self) -> S::R {
+    fn require_variable(&mut self) -> S::Output {
         self.require_token(TokenKind::Variable, Errors::error1008)
     }
 
-    fn require_colon(&mut self) -> S::R {
+    fn require_colon(&mut self) -> S::Output {
         self.require_token(TokenKind::Colon, Errors::error1020)
     }
 
-    fn require_left_brace(&mut self) -> S::R {
+    fn require_left_brace(&mut self) -> S::Output {
         self.require_token(TokenKind::LeftBrace, Errors::error1034)
     }
 
-    fn require_slashgt(&mut self) -> S::R {
+    fn require_slashgt(&mut self) -> S::Output {
         self.require_token(TokenKind::SlashGreaterThan, Errors::error1029)
     }
 
-    fn require_right_brace(&mut self) -> S::R {
+    fn require_right_brace(&mut self) -> S::Output {
         self.require_token(TokenKind::RightBrace, Errors::error1006)
     }
 
-    fn require_left_paren(&mut self) -> S::R {
+    fn require_left_paren(&mut self) -> S::Output {
         self.require_token(TokenKind::LeftParen, Errors::error1019)
     }
 
-    fn require_left_angle(&mut self) -> S::R {
+    fn require_left_angle(&mut self) -> S::Output {
         self.require_token(TokenKind::LessThan, Errors::error1021)
     }
 
-    fn require_right_angle(&mut self) -> S::R {
+    fn require_right_angle(&mut self) -> S::Output {
         self.require_token(TokenKind::GreaterThan, Errors::error1013)
     }
 
-    fn require_comma(&mut self) -> S::R {
+    fn require_comma(&mut self) -> S::Output {
         self.require_token(TokenKind::Comma, Errors::error1054)
     }
 
-    fn require_right_bracket(&mut self) -> S::R {
+    fn require_right_bracket(&mut self) -> S::Output {
         self.require_token(TokenKind::RightBracket, Errors::error1032)
     }
 
-    fn require_equal(&mut self) -> S::R {
+    fn require_equal(&mut self) -> S::Output {
         self.require_token(TokenKind::Equal, Errors::error1036)
     }
 
-    fn require_arrow(&mut self) -> S::R {
+    fn require_arrow(&mut self) -> S::Output {
         self.require_token(TokenKind::EqualGreaterThan, Errors::error1028)
     }
 
-    fn require_lambda_arrow(&mut self) -> S::R {
+    fn require_lambda_arrow(&mut self) -> S::Output {
         self.require_token(TokenKind::EqualEqualGreaterThan, Errors::error1046)
     }
 
-    fn require_as(&mut self) -> S::R {
+    fn require_as(&mut self) -> S::Output {
         self.require_token(TokenKind::As, Errors::error1023)
     }
 
-    fn require_while(&mut self) -> S::R {
+    fn require_while(&mut self) -> S::Output {
         self.require_token(TokenKind::While, Errors::error1018)
     }
 
-    fn require_coloncolon(&mut self) -> S::R {
+    fn require_coloncolon(&mut self) -> S::Output {
         self.require_token(TokenKind::ColonColon, Errors::error1047)
     }
 
-    fn require_name_or_variable_or_error(&mut self, error: Error) -> S::R {
+    fn require_name_or_variable_or_error(&mut self, error: Error) -> S::Output {
         let mut parser1 = self.clone();
         let token = parser1.next_token_as_name();
         match token.kind() {
@@ -701,11 +708,11 @@ where
         }
     }
 
-    fn require_name_or_variable(&mut self) -> S::R {
+    fn require_name_or_variable(&mut self) -> S::Output {
         self.require_name_or_variable_or_error(Errors::error1050)
     }
 
-    fn require_xhp_class_name_or_name_or_variable(&mut self) -> S::R {
+    fn require_xhp_class_name_or_name_or_variable(&mut self) -> S::Output {
         if self.is_next_xhp_class_name() {
             let token = self.next_xhp_class_name();
             S!(make_token, self, token)
@@ -714,7 +721,7 @@ where
         }
     }
 
-    fn require_name_allow_non_reserved(&mut self) -> S::R {
+    fn require_name_allow_non_reserved(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let token = parser1.next_token_non_reserved_as_name();
         if token.kind() == TokenKind::Name {
@@ -753,7 +760,7 @@ where
         self.lexer_mut().next_xhp_modifier_class_name()
     }
 
-    fn require_xhp_name(&mut self) -> S::R {
+    fn require_xhp_name(&mut self) -> S::Output {
         if self.is_next_name() {
             let token = self.next_xhp_name();
             S!(make_token, self, token)
@@ -775,9 +782,9 @@ where
         close_predicate: TokenKind,
         error: Error,
         parse_item: F,
-    ) -> (S::R, bool)
+    ) -> (S::Output, bool)
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         self.parse_separated_list(
             TokenKind::Comma,
@@ -795,11 +802,11 @@ where
         close_predicate: P,
         error: Error,
         parse_item: F,
-    ) -> (S::R, bool, TokenKind)
+    ) -> (S::Output, bool, TokenKind)
     where
         P: Fn(TokenKind) -> bool,
         SP: Fn(TokenKind) -> bool,
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let mut items = vec![];
         // Set this when we first see a separator
@@ -902,9 +909,9 @@ where
         (item_list, no_arg_is_missing, separator_kind)
     }
 
-    fn parse_list_until_none<F>(&mut self, parse_item: F) -> S::R
+    fn parse_list_until_none<F>(&mut self, parse_item: F) -> S::Output
     where
-        F: Fn(&mut Self) -> Option<S::R>,
+        F: Fn(&mut Self) -> Option<S::Output>,
     {
         let mut acc = vec![];
         loop {
@@ -933,10 +940,10 @@ where
         close_predicate: P,
         error: Error,
         parse_item: F,
-    ) -> S::R
+    ) -> S::Output
     where
         P: Fn(TokenKind) -> bool,
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let kind = self.peek_token_kind();
         if close_predicate(kind) {
@@ -980,9 +987,9 @@ where
         close_kind: TokenKind,
         error: Error,
         parse_item: F,
-    ) -> S::R
+    ) -> S::Output
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         self.parse_separated_list_opt_predicate(
             separator_kind,
@@ -998,9 +1005,9 @@ where
         close_kind: TokenKind,
         error: Error,
         parse_item: F,
-    ) -> S::R
+    ) -> S::Output
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         self.parse_separated_list_opt(
             TokenKind::Comma,
@@ -1016,9 +1023,9 @@ where
         close_kind: TokenKind,
         error: Error,
         parse_item: F,
-    ) -> S::R
+    ) -> S::Output
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         self.parse_separated_list_opt(
             TokenKind::Comma,
@@ -1034,9 +1041,9 @@ where
         close_kind: TokenKind,
         error: Error,
         parse_item: F,
-    ) -> S::R
+    ) -> S::Output
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         self.parse_separated_list_opt(
             TokenKind::Comma,
@@ -1052,10 +1059,10 @@ where
         close_kind: P,
         error: Error,
         parse_item: F,
-    ) -> S::R
+    ) -> S::Output
     where
         P: Fn(TokenKind) -> bool,
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         self.parse_separated_list_opt_predicate(
             TokenKind::Comma,
@@ -1066,9 +1073,14 @@ where
         )
     }
 
-    fn parse_comma_list<F>(&mut self, close_kind: TokenKind, error: Error, parse_item: F) -> S::R
+    fn parse_comma_list<F>(
+        &mut self,
+        close_kind: TokenKind,
+        error: Error,
+        parse_item: F,
+    ) -> S::Output
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let (items, _) = self.parse_separated_list(
             TokenKind::Comma,
@@ -1087,9 +1099,9 @@ where
         right_kind: TokenKind,
         right_error: Error,
         parse_items: P,
-    ) -> (S::R, S::R, S::R)
+    ) -> (S::Output, S::Output, S::Output)
     where
-        P: FnOnce(&mut Self) -> S::R,
+        P: FnOnce(&mut Self) -> S::Output,
     {
         let left = self.require_token(left_kind, left_error);
         let items = parse_items(self);
@@ -1097,9 +1109,9 @@ where
         (left, items, right)
     }
 
-    fn parse_braced_list<P>(&mut self, parse_items: P) -> (S::R, S::R, S::R)
+    fn parse_braced_list<P>(&mut self, parse_items: P) -> (S::Output, S::Output, S::Output)
     where
-        P: FnOnce(&mut Self) -> S::R,
+        P: FnOnce(&mut Self) -> S::Output,
     {
         self.parse_delimited_list(
             TokenKind::LeftBrace,
@@ -1110,9 +1122,9 @@ where
         )
     }
 
-    fn parse_parenthesized_list<F>(&mut self, parse_items: F) -> (S::R, S::R, S::R)
+    fn parse_parenthesized_list<F>(&mut self, parse_items: F) -> (S::Output, S::Output, S::Output)
     where
-        F: FnOnce(&mut Self) -> S::R,
+        F: FnOnce(&mut Self) -> S::Output,
     {
         self.parse_delimited_list(
             TokenKind::LeftParen,
@@ -1123,9 +1135,12 @@ where
         )
     }
 
-    fn parse_parenthesized_comma_list<F>(&mut self, parse_item: F) -> (S::R, S::R, S::R)
+    fn parse_parenthesized_comma_list<F>(
+        &mut self,
+        parse_item: F,
+    ) -> (S::Output, S::Output, S::Output)
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let parse_items =
             |x: &mut Self| x.parse_comma_list(TokenKind::RightParen, Errors::error1011, parse_item);
@@ -1136,9 +1151,9 @@ where
     fn parse_parenthesized_comma_list_opt_allow_trailing<F>(
         &mut self,
         parse_item: F,
-    ) -> (S::R, S::R, S::R)
+    ) -> (S::Output, S::Output, S::Output)
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let parse_items = |x: &mut Self| {
             x.parse_comma_list_opt_allow_trailing(
@@ -1154,9 +1169,9 @@ where
     fn parse_parenthesized_comma_list_opt_items_opt<F>(
         &mut self,
         parse_item: F,
-    ) -> (S::R, S::R, S::R)
+    ) -> (S::Output, S::Output, S::Output)
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let parse_items = |x: &mut Self| {
             x.parse_comma_list_opt_items_opt(TokenKind::RightParen, Errors::error1011, parse_item)
@@ -1165,9 +1180,12 @@ where
         self.parse_parenthesized_list(parse_items)
     }
 
-    fn parse_braced_comma_list_opt_allow_trailing<F>(&mut self, parse_item: F) -> (S::R, S::R, S::R)
+    fn parse_braced_comma_list_opt_allow_trailing<F>(
+        &mut self,
+        parse_item: F,
+    ) -> (S::Output, S::Output, S::Output)
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let parse_items = |parser: &mut Self| {
             parser.parse_comma_list_opt_allow_trailing(
@@ -1179,9 +1197,9 @@ where
         self.parse_braced_list(parse_items)
     }
 
-    fn parse_bracketted_list<F>(&mut self, parse_items: F) -> (S::R, S::R, S::R)
+    fn parse_bracketted_list<F>(&mut self, parse_items: F) -> (S::Output, S::Output, S::Output)
     where
-        F: FnOnce(&mut Self) -> S::R,
+        F: FnOnce(&mut Self) -> S::Output,
     {
         self.parse_delimited_list(
             TokenKind::LeftBracket,
@@ -1195,9 +1213,9 @@ where
     fn parse_bracketted_comma_list_opt_allow_trailing<F>(
         &mut self,
         parse_item: F,
-    ) -> (S::R, S::R, S::R)
+    ) -> (S::Output, S::Output, S::Output)
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let parse_items = |x: &mut Self| {
             x.parse_comma_list_opt_allow_trailing(
@@ -1209,9 +1227,9 @@ where
         self.parse_bracketted_list(parse_items)
     }
 
-    fn parse_double_angled_list<F>(&mut self, parse_items: F) -> (S::R, S::R, S::R)
+    fn parse_double_angled_list<F>(&mut self, parse_items: F) -> (S::Output, S::Output, S::Output)
     where
-        F: FnOnce(&mut Self) -> S::R,
+        F: FnOnce(&mut Self) -> S::Output,
     {
         self.parse_delimited_list(
             TokenKind::LessThanLessThan,
@@ -1225,9 +1243,9 @@ where
     fn parse_double_angled_comma_list_allow_trailing<F>(
         &mut self,
         parse_item: F,
-    ) -> (S::R, S::R, S::R)
+    ) -> (S::Output, S::Output, S::Output)
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let parse_items = |x: &mut Self| {
             let (items, _) = x.parse_comma_list_allow_trailing(
@@ -1240,15 +1258,15 @@ where
         self.parse_double_angled_list(parse_items)
     }
 
-    fn scan_remaining_qualified_name(&mut self, name_token: S::R) -> S::R {
+    fn scan_remaining_qualified_name(&mut self, name_token: S::Output) -> S::Output {
         let (name, _) = self.scan_remaining_qualified_name_extended(name_token);
         name
     }
 
     // Parse with parse_item while a condition is met.
-    fn parse_list_while<F, P>(&mut self, parse_item: F, predicate: P) -> S::R
+    fn parse_list_while<F, P>(&mut self, parse_item: F, predicate: P) -> S::Output
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
         P: Fn(&Self) -> bool,
     {
         let mut items = vec![];
@@ -1280,9 +1298,9 @@ where
         S!(make_list, self, items, self.pos())
     }
 
-    fn parse_terminated_list<F>(&mut self, parse_item: F, terminator: TokenKind) -> S::R
+    fn parse_terminated_list<F>(&mut self, parse_item: F, terminator: TokenKind) -> S::Output
     where
-        F: Fn(&mut Self) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
     {
         let predicate = |x: &Self| x.peek_token_kind() != terminator;
         self.parse_list_while(parse_item, predicate)
@@ -1354,7 +1372,7 @@ where
         self.skip_and_log_unexpected_token(/* generate_error:*/ false)
     }
 
-    fn require_token_one_of(&mut self, kinds: &[TokenKind], error: Error) -> S::R {
+    fn require_token_one_of(&mut self, kinds: &[TokenKind], error: Error) -> S::Output {
         let token_kind = self.peek_token_kind();
         if kinds.iter().any(|x| *x == token_kind) {
             let token = self.next_token();
@@ -1390,7 +1408,7 @@ where
         }
     }
 
-    fn require_token(&mut self, kind: TokenKind, error: Error) -> S::R {
+    fn require_token(&mut self, kind: TokenKind, error: Error) -> S::Output {
         // Must behave as `require_token_one_of parser [kind] error`
         if self.peek_token_kind() == kind {
             let token = self.next_token();
@@ -1447,7 +1465,7 @@ where
         }
     }
 
-    fn require_name_allow_all_keywords(&mut self) -> S::R {
+    fn require_name_allow_all_keywords(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let token = parser1.next_token_as_name();
 
@@ -1462,7 +1480,7 @@ where
         }
     }
 
-    fn require_right_paren(&mut self) -> S::R {
+    fn require_right_paren(&mut self) -> S::Output {
         self.require_token(TokenKind::RightParen, Errors::error1011)
     }
 
@@ -1474,7 +1492,7 @@ where
         }
     }
 
-    fn require_semicolon(&mut self) -> S::R {
+    fn require_semicolon(&mut self) -> S::Output {
         self.require_token(TokenKind::Semicolon, Errors::error1010)
     }
 }

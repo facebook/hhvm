@@ -1293,10 +1293,11 @@ end
 module GenerateFFRustSmartConstructors = struct
   let to_make_methods x =
     let fields =
-      List.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i ^ " : Self::R")
+      List.mapi x.fields ~f:(fun i _ ->
+          "arg" ^ string_of_int i ^ ": Self::Output")
     in
     let stack = String.concat ~sep:", " fields in
-    sprintf "    fn make_%s(&mut self, %s) -> Self::R;\n" x.type_name stack
+    sprintf "    fn make_%s(&mut self, %s) -> Self::Output;\n" x.type_name stack
 
   let full_fidelity_smart_constructors_template : string =
     make_header CStyle ""
@@ -1310,15 +1311,15 @@ pub type Trivia<S> = <Token<S> as LexableToken>::Trivia;
 pub trait SmartConstructors: Clone {
     type TF: TokenFactory;
     type State;
-    type R;
+    type Output;
 
     fn state_mut(&mut self) -> &mut Self::State;
     fn into_state(self) -> Self::State;
     fn token_factory_mut(&mut self) -> &mut Self::TF;
 
-    fn make_missing(&mut self, offset : usize) -> Self::R;
-    fn make_token(&mut self, arg0: Token<Self>) -> Self::R;
-    fn make_list(&mut self, arg0: Vec<Self::R>, offset: usize) -> Self::R;
+    fn make_missing(&mut self, offset : usize) -> Self::Output;
+    fn make_token(&mut self, arg0: Token<Self>) -> Self::Output;
+    fn make_list(&mut self, arg0: Vec<Self::Output>, offset: usize) -> Self::Output;
 
     fn begin_enumerator(&mut self) {}
     fn begin_enum_class_enumerator(&mut self) {}
@@ -1340,12 +1341,14 @@ end
 
 module GenerateFFRustPositionedSmartConstructors = struct
   let to_constructor_methods x =
-    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i) in
+    let args =
+      List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::Output" i)
+    in
     let args = String.concat ~sep:", " args in
     let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
-      "    fn make_%s(&mut self, %s) -> Self::R {
+      "    fn make_%s(&mut self, %s) -> Self::Output {
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_%s(self, %s)
     }\n\n"
       x.type_name
@@ -1396,7 +1399,7 @@ where
 {
     type TF = TF;
     type State = State;
-    type R = S;
+    type Output = S;
 
     fn state_mut(&mut self) -> &mut State {
        &mut self.state
@@ -1410,15 +1413,15 @@ where
         &mut self.token_factory
     }
 
-    fn make_missing(&mut self, offset: usize) -> Self::R {
+    fn make_missing(&mut self, offset: usize) -> Self::Output {
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_missing(self, offset)
     }
 
-    fn make_token(&mut self, offset: <Self::TF as TokenFactory>::Token) -> Self::R {
+    fn make_token(&mut self, offset: <Self::TF as TokenFactory>::Token) -> Self::Output {
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_token(self, offset)
     }
 
-    fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
+    fn make_list(&mut self, lst: Vec<Self::Output>, offset: usize) -> Self::Output {
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_list(self, lst, offset)
     }
 CONSTRUCTOR_METHODS}
@@ -1437,12 +1440,14 @@ end
 
 module GenerateFFRustVerifySmartConstructors = struct
   let to_constructor_methods x =
-    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i) in
+    let args =
+      List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::Output" i)
+    in
     let args = String.concat ~sep:", " args in
     let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
-      "    fn make_%s(&mut self, %s) -> Self::R {
+      "    fn make_%s(&mut self, %s) -> Self::Output {
         let args = arg_kinds!(%s);
         let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_%s(self, %s);
         self.state_mut().verify(&args);
@@ -1479,7 +1484,7 @@ impl<'a> SmartConstructors for VerifySmartConstructors<'a>
 {
     type State = State<'a>;
     type TF = TokenFactory<'a>;
-    type R = PositionedSyntax<'a>;
+    type Output = PositionedSyntax<'a>;
 
     fn state_mut(&mut self) -> &mut State<'a> {
        &mut self.state
@@ -1493,19 +1498,19 @@ impl<'a> SmartConstructors for VerifySmartConstructors<'a>
         &mut self.token_factory
     }
 
-    fn make_missing(&mut self, offset: usize) -> Self::R {
+    fn make_missing(&mut self, offset: usize) -> Self::Output {
         let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_missing(self, offset);
         self.state_mut().push(r.kind());
         r
     }
 
-    fn make_token(&mut self, offset: PositionedToken<'a>) -> Self::R {
+    fn make_token(&mut self, offset: PositionedToken<'a>) -> Self::Output {
         let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_token(self, offset);
         self.state_mut().push(r.kind());
         r
     }
 
-    fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
+    fn make_list(&mut self, lst: Vec<Self::Output>, offset: usize) -> Self::Output {
         if !lst.is_empty() {
             let args: Vec<_> = (&lst).iter().map(|s| s.kind()).collect();
             let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_list(self, lst, offset);
@@ -1619,7 +1624,7 @@ end
 module GenerateFFRustSyntaxSmartConstructors = struct
   let to_constructor_methods x =
     let params =
-      List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d : Self::R" i)
+      List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d : Self::Output" i)
     in
     let params = String.concat ~sep:", " params in
     let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
@@ -1627,9 +1632,9 @@ module GenerateFFRustSyntaxSmartConstructors = struct
     let next_args = List.mapi x.fields ~f:(fun i _ -> sprintf "&arg%d" i) in
     let next_args = String.concat ~sep:", " next_args in
     sprintf
-      "    fn make_%s(&mut self, %s) -> Self::R {
+      "    fn make_%s(&mut self, %s) -> Self::Output {
         self.state_mut().next(&[%s]);
-        Self::R::make_%s(self.state_mut(), %s)
+        Self::Output::make_%s(self.state_mut(), %s)
     }\n\n"
       x.type_name
       params
@@ -1648,29 +1653,29 @@ use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
 pub trait SyntaxSmartConstructors<S: SyntaxType<State>, TF: TokenFactory<Token = S::Token>, State = NoState>:
-    SmartConstructors<State = State, R=S, TF = TF>
+    SmartConstructors<State = State, Output=S, TF = TF>
 where
     State: StateType<S>,
 {
-    fn make_missing(&mut self, offset: usize) -> Self::R {
-        let r = Self::R::make_missing(self.state_mut(), offset);
+    fn make_missing(&mut self, offset: usize) -> Self::Output {
+        let r = Self::Output::make_missing(self.state_mut(), offset);
         self.state_mut().next(&[]);
         r
     }
 
-    fn make_token(&mut self, arg: <Self::TF as TokenFactory>::Token) -> Self::R {
-        let r = Self::R::make_token(self.state_mut(), arg);
+    fn make_token(&mut self, arg: <Self::TF as TokenFactory>::Token) -> Self::Output {
+        let r = Self::Output::make_token(self.state_mut(), arg);
         self.state_mut().next(&[]);
         r
     }
 
-    fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
+    fn make_list(&mut self, items: Vec<Self::Output>, offset: usize) -> Self::Output {
         if items.is_empty() {
             <Self as SyntaxSmartConstructors<S, TF, State>>::make_missing(self, offset)
         } else {
             let item_refs: Vec<_> = items.iter().collect();
             self.state_mut().next(&item_refs);
-            Self::R::make_list(self.state_mut(), items, offset)
+            Self::Output::make_list(self.state_mut(), items, offset)
         }
     }
 
@@ -1691,13 +1696,15 @@ end
 
 module GenerateFFRustDeclModeSmartConstructors = struct
   let to_constructor_methods x =
-    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i) in
+    let args =
+      List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::Output" i)
+    in
     let args = String.concat ~sep:", " args in
     let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
-      "    fn make_%s(&mut self, %s) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<'_, '_, Self::R>>>::make_%s(self, %s)
+      "    fn make_%s(&mut self, %s) -> Self::Output {
+        <Self as SyntaxSmartConstructors<Self::Output, Self::TF, State<'_, '_, Self::Output>>>::make_%s(self, %s)
     }\n\n"
       x.type_name
       args
@@ -1724,7 +1731,7 @@ where
 {
     type State = State<'src, 'arena, Syntax<'arena, Token, Value>>;
     type TF = TF;
-    type R = Syntax<'arena, Token, Value>;
+    type Output = Syntax<'arena, Token, Value>;
 
     fn state_mut(&mut self) -> &mut State<'src, 'arena, Syntax<'arena, Token, Value>> {
         &mut self.state
@@ -1738,16 +1745,16 @@ where
         &mut self.token_factory
     }
 
-    fn make_missing(&mut self, o: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<'_, '_, Self::R>>>::make_missing(self, o)
+    fn make_missing(&mut self, o: usize) -> Self::Output {
+        <Self as SyntaxSmartConstructors<Self::Output, Self::TF, State<'_, '_, Self::Output>>>::make_missing(self, o)
     }
 
-    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<'_, '_, Self::R>>>::make_token(self, token)
+    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::Output {
+        <Self as SyntaxSmartConstructors<Self::Output, Self::TF, State<'_, '_, Self::Output>>>::make_token(self, token)
     }
 
-    fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<'_, '_, Self::R>>>::make_list(self, items, offset)
+    fn make_list(&mut self, items: Vec<Self::Output>, offset: usize) -> Self::Output {
+        <Self as SyntaxSmartConstructors<Self::Output, Self::TF, State<'_, '_, Self::Output>>>::make_list(self, items, offset)
     }
 
 CONSTRUCTOR_METHODS}
@@ -1767,7 +1774,9 @@ end
 
 module GenerateRustFlattenSmartConstructors = struct
   let to_constructor_methods x =
-    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i) in
+    let args =
+      List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::Output" i)
+    in
     let args = String.concat ~sep:", " args in
     let if_cond =
       List.mapi x.fields ~f:(fun i _ -> sprintf "Self::is_zero(&arg%d)" i)
@@ -1776,7 +1785,7 @@ module GenerateRustFlattenSmartConstructors = struct
     let flatten_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let flatten_args = String.concat ~sep:", " flatten_args in
     sprintf
-      "    fn make_%s(&mut self, %s) -> Self::R {
+      "    fn make_%s(&mut self, %s) -> Self::Output {
         if %s {
           Self::zero(SyntaxKind::%s)
         } else {
@@ -1808,17 +1817,17 @@ pub trait FlattenOp {
 }
 
 pub trait FlattenSmartConstructors<'src, State>
-: SmartConstructors<State = State> + FlattenOp<S=<Self as SmartConstructors>::R>
+: SmartConstructors<State = State> + FlattenOp<S=<Self as SmartConstructors>::Output>
 {
-    fn make_missing(&mut self, _: usize) -> Self::R {
+    fn make_missing(&mut self, _: usize) -> Self::Output {
        Self::zero(SyntaxKind::Missing)
     }
 
-    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::R {
+    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::Output {
         Self::zero(SyntaxKind::Token(token.kind()))
     }
 
-    fn make_list(&mut self, _: Vec<Self::R>, _: usize) -> Self::R {
+    fn make_list(&mut self, _: Vec<Self::Output>, _: usize) -> Self::Output {
         Self::zero(SyntaxKind::SyntaxList)
     }
 
@@ -1846,7 +1855,7 @@ module GenerateRustDirectDeclSmartConstructors = struct
   let to_constructor_methods x =
     let args =
       List.map x.fields ~f:(fun (name, _) ->
-          sprintf "%s: Self::R" (escape_rust_keyword name))
+          sprintf "%s: Self::Output" (escape_rust_keyword name))
     in
     let args = String.concat ~sep:", " args in
     let fwd_args =
@@ -1854,7 +1863,7 @@ module GenerateRustDirectDeclSmartConstructors = struct
     in
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
-      "    fn make_%s(&mut self, %s) -> Self::R {
+      "    fn make_%s(&mut self, %s) -> Self::Output {
         <Self as FlattenSmartConstructors<'src, Self>>::make_%s(self, %s)
     }\n\n"
       x.type_name
@@ -1875,7 +1884,7 @@ use crate::{DirectDeclSmartConstructors, Node, SourceTextAllocator};
 impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for DirectDeclSmartConstructors<'src, 'text, S> {
     type State = Self;
     type TF = SimpleTokenFactoryImpl<CompactToken>;
-    type R = Node<'src>;
+    type Output = Node<'src>;
 
     fn state_mut(&mut self) -> &mut Self {
         self
@@ -1889,15 +1898,15 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         &mut self.token_factory
     }
 
-    fn make_missing(&mut self, offset: usize) -> Self::R {
+    fn make_missing(&mut self, offset: usize) -> Self::Output {
         <Self as FlattenSmartConstructors<'src, Self>>::make_missing(self, offset)
     }
 
-    fn make_token(&mut self, token: CompactToken) -> Self::R {
+    fn make_token(&mut self, token: CompactToken) -> Self::Output {
         <Self as FlattenSmartConstructors<'src, Self>>::make_token(self, token)
     }
 
-    fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
+    fn make_list(&mut self, items: Vec<Self::Output>, offset: usize) -> Self::Output {
         <Self as FlattenSmartConstructors<'src, Self>>::make_list(self, items, offset)
     }
 
@@ -1935,7 +1944,7 @@ module GenerateRustPairSmartConstructors = struct
   let to_constructor_methods x =
     let args =
       List.map x.fields ~f:(fun (name, _) ->
-          sprintf "%s: Self::R" (escape_rust_keyword name))
+          sprintf "%s: Self::Output" (escape_rust_keyword name))
     in
     let args = String.concat ~sep:", " args in
     let fwd_args =
@@ -1946,7 +1955,7 @@ module GenerateRustPairSmartConstructors = struct
       |> String.concat ~sep:", "
     in
     sprintf
-      "    fn make_%s(&mut self, %s) -> Self::R {
+      "    fn make_%s(&mut self, %s) -> Self::Output {
         Node(self.0.make_%s(%s), self.1.make_%s(%s))
     }\n\n"
       x.type_name
@@ -1969,16 +1978,16 @@ use crate::{PairTokenFactory, Node};
 pub struct PairSmartConstructors<SC0, SC1>(pub SC0, pub SC1, PairTokenFactory<SC0::TF, SC1::TF>)
 where
     SC0: SmartConstructors,
-    SC0::R: NodeType,
+    SC0::Output: NodeType,
     SC1: SmartConstructors,
-    SC1::R: NodeType;
+    SC1::Output: NodeType;
 
 impl<SC0, SC1> PairSmartConstructors<SC0, SC1>
 where
     SC0: SmartConstructors,
-    SC0::R: NodeType,
+    SC0::Output: NodeType,
     SC1: SmartConstructors,
-    SC1::R: NodeType,
+    SC1::Output: NodeType,
 {
     pub fn new(mut sc0: SC0, mut sc1: SC1) -> Self {
         let tf0 = sc0.token_factory_mut().clone();
@@ -1991,13 +2000,13 @@ where
 impl<SC0, SC1> SmartConstructors for PairSmartConstructors<SC0, SC1>
 where
     SC0: SmartConstructors,
-    SC0::R: NodeType,
+    SC0::Output: NodeType,
     SC1: SmartConstructors,
-    SC1::R: NodeType,
+    SC1::Output: NodeType,
 {
     type State = Self;
     type TF = PairTokenFactory<SC0::TF, SC1::TF>;
-    type R = Node<SC0::R, SC1::R>;
+    type Output = Node<SC0::Output, SC1::Output>;
 
     fn state_mut(&mut self) -> &mut Self {
         self
@@ -2011,15 +2020,15 @@ where
         &mut self.2
     }
 
-    fn make_missing(&mut self, offset: usize) -> Self::R {
+    fn make_missing(&mut self, offset: usize) -> Self::Output {
         Node(self.0.make_missing(offset), self.1.make_missing(offset))
     }
 
-    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::R {
+    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::Output {
         Node(self.0.make_token(token.0), self.1.make_token(token.1))
     }
 
-    fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
+    fn make_list(&mut self, items: Vec<Self::Output>, offset: usize) -> Self::Output {
         let (items0, items1) = items.into_iter().map(|n| (n.0, n.1)).unzip();
         Node(self.0.make_list(items0, offset), self.1.make_list(items1, offset))
     }
@@ -2099,13 +2108,14 @@ end
 module GenerateFFRustSmartConstructorsWrappers = struct
   let to_constructor_methods x =
     let params =
-      List.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i ^ " : Self::R")
+      List.mapi x.fields ~f:(fun i _ ->
+          "arg" ^ string_of_int i ^ " : Self::Output")
     in
     let params = String.concat ~sep:", " params in
     let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let raw_args = map_and_concat_separated ", " (fun x -> x ^ ".1") args in
     sprintf
-      "    fn make_%s(&mut self, %s) -> Self::R {
+      "    fn make_%s(&mut self, %s) -> Self::Output {
         compose(SyntaxKind::%s, self.s.make_%s(%s))
     }\n"
       x.type_name
@@ -2144,7 +2154,7 @@ where S: SmartConstructors<State = State>,
 {
     type TF = S::TF;
     type State = State;
-    type R = (SyntaxKind, S::R);
+    type Output = (SyntaxKind, S::Output);
 
     fn state_mut(&mut self) -> &mut State {
         self.s.state_mut()
@@ -2159,15 +2169,15 @@ where S: SmartConstructors<State = State>,
     }
 
 
-    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::R {
+    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::Output {
         compose(SyntaxKind::Token(token.kind()), self.s.make_token(token))
     }
 
-    fn make_missing(&mut self, p: usize) -> Self::R {
+    fn make_missing(&mut self, p: usize) -> Self::Output {
         compose(SyntaxKind::Missing, self.s.make_missing(p))
     }
 
-    fn make_list(&mut self, items: Vec<Self::R>, p: usize) -> Self::R {
+    fn make_list(&mut self, items: Vec<Self::Output>, p: usize) -> Self::Output {
         let kind = if items.is_empty() {
             SyntaxKind::Missing
         } else {

@@ -2488,7 +2488,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a, 'text, S>>
     for DirectDeclSmartConstructors<'a, 'text, S>
 {
-    fn make_token(&mut self, token: CompactToken) -> Self::R {
+    fn make_token(&mut self, token: CompactToken) -> Self::Output {
         let token_text = |this: &Self| this.str_from_utf8(this.token_bytes(&token));
         let token_pos = |this: &Self| {
             let start = this
@@ -2693,7 +2693,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         result
     }
 
-    fn make_error(&mut self, error: Self::R) -> Self::R {
+    fn make_error(&mut self, error: Self::Output) -> Self::Output {
         // If it's a Token or IgnoredToken, we can use it for error recovery.
         // For instance, in `function using() {}`, the `using` keyword will be a
         // token wrapped in an error CST node, since the keyword isn't legal in
@@ -2701,11 +2701,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         error
     }
 
-    fn make_missing(&mut self, _: usize) -> Self::R {
+    fn make_missing(&mut self, _: usize) -> Self::Output {
         Node::Ignored(SK::Missing)
     }
 
-    fn make_list(&mut self, mut items: Vec<Self::R>, _: usize) -> Self::R {
+    fn make_list(&mut self, mut items: Vec<Self::Output>, _: usize) -> Self::Output {
         if let Some(&yield_) = items
             .iter()
             .flat_map(|node| node.iter())
@@ -2723,7 +2723,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
     }
 
-    fn make_qualified_name(&mut self, parts: Self::R) -> Self::R {
+    fn make_qualified_name(&mut self, parts: Self::Output) -> Self::Output {
         let pos = self.get_pos(parts);
         match parts {
             Node::List(nodes) => Node::QualifiedName(self.alloc((nodes, pos))),
@@ -2734,17 +2734,21 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
     }
 
-    fn make_simple_type_specifier(&mut self, specifier: Self::R) -> Self::R {
+    fn make_simple_type_specifier(&mut self, specifier: Self::Output) -> Self::Output {
         // Return this explicitly because flatten filters out zero nodes, and
         // we treat most non-error nodes as zeroes.
         specifier
     }
 
-    fn make_literal_expression(&mut self, expression: Self::R) -> Self::R {
+    fn make_literal_expression(&mut self, expression: Self::Output) -> Self::Output {
         expression
     }
 
-    fn make_simple_initializer(&mut self, equals: Self::R, expr: Self::R) -> Self::R {
+    fn make_simple_initializer(
+        &mut self,
+        equals: Self::Output,
+        expr: Self::Output,
+    ) -> Self::Output {
         // If the expr is Ignored, bubble up the assignment operator so that we
         // can tell that *some* initializer was here. Useful for class
         // properties, where we need to enforce that properties without default
@@ -2754,55 +2758,59 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_anonymous_function(
         &mut self,
-        _attribute_spec: Self::R,
-        _async_keyword: Self::R,
-        _function_keyword: Self::R,
-        _left_paren: Self::R,
-        _parameters: Self::R,
-        _right_paren: Self::R,
-        _ctx_list: Self::R,
-        _colon: Self::R,
-        _readonly_return: Self::R,
-        _type_: Self::R,
-        _use_: Self::R,
-        _body: Self::R,
-    ) -> Self::R {
+        _attribute_spec: Self::Output,
+        _async_keyword: Self::Output,
+        _function_keyword: Self::Output,
+        _left_paren: Self::Output,
+        _parameters: Self::Output,
+        _right_paren: Self::Output,
+        _ctx_list: Self::Output,
+        _colon: Self::Output,
+        _readonly_return: Self::Output,
+        _type_: Self::Output,
+        _use_: Self::Output,
+        _body: Self::Output,
+    ) -> Self::Output {
         // do not allow Yield to bubble up
         Node::Ignored(SK::AnonymousFunction)
     }
 
     fn make_lambda_expression(
         &mut self,
-        _attribute_spec: Self::R,
-        _async_: Self::R,
-        _signature: Self::R,
-        _arrow: Self::R,
-        _body: Self::R,
-    ) -> Self::R {
+        _attribute_spec: Self::Output,
+        _async_: Self::Output,
+        _signature: Self::Output,
+        _arrow: Self::Output,
+        _body: Self::Output,
+    ) -> Self::Output {
         // do not allow Yield to bubble up
         Node::Ignored(SK::LambdaExpression)
     }
 
     fn make_awaitable_creation_expression(
         &mut self,
-        _attribute_spec: Self::R,
-        _async_: Self::R,
-        _compound_statement: Self::R,
-    ) -> Self::R {
+        _attribute_spec: Self::Output,
+        _async_: Self::Output,
+        _compound_statement: Self::Output,
+    ) -> Self::Output {
         // do not allow Yield to bubble up
         Node::Ignored(SK::AwaitableCreationExpression)
     }
 
     fn make_element_initializer(
         &mut self,
-        key: Self::R,
-        _arrow: Self::R,
-        value: Self::R,
-    ) -> Self::R {
+        key: Self::Output,
+        _arrow: Self::Output,
+        value: Self::Output,
+    ) -> Self::Output {
         Node::ListItem(self.alloc((key, value)))
     }
 
-    fn make_prefix_unary_expression(&mut self, op: Self::R, value: Self::R) -> Self::R {
+    fn make_prefix_unary_expression(
+        &mut self,
+        op: Self::Output,
+        value: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(op, value);
         let op = match op.token_kind() {
             Some(TokenKind::Tilde) => Uop::Utild,
@@ -2825,7 +2833,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         )))
     }
 
-    fn make_postfix_unary_expression(&mut self, value: Self::R, op: Self::R) -> Self::R {
+    fn make_postfix_unary_expression(
+        &mut self,
+        value: Self::Output,
+        op: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(value, op);
         let op = match op.token_kind() {
             Some(TokenKind::PlusPlus) => Uop::Upincr,
@@ -2843,7 +2855,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         )))
     }
 
-    fn make_binary_expression(&mut self, lhs: Self::R, op_node: Self::R, rhs: Self::R) -> Self::R {
+    fn make_binary_expression(
+        &mut self,
+        lhs: Self::Output,
+        op_node: Self::Output,
+        rhs: Self::Output,
+    ) -> Self::Output {
         let op = match op_node.token_kind() {
             Some(TokenKind::Plus) => Bop::Plus,
             Some(TokenKind::Minus) => Bop::Minus,
@@ -2894,10 +2911,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_parenthesized_expression(
         &mut self,
-        _lparen: Self::R,
-        expr: Self::R,
-        _rparen: Self::R,
-    ) -> Self::R {
+        _lparen: Self::Output,
+        expr: Self::Output,
+        _rparen: Self::Output,
+    ) -> Self::Output {
         if self.retain_or_omit_user_attributes_for_facts {
             Node::Ignored(SK::ParenthesizedExpression)
         } else {
@@ -2905,7 +2922,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
     }
 
-    fn make_list_item(&mut self, item: Self::R, sep: Self::R) -> Self::R {
+    fn make_list_item(&mut self, item: Self::Output, sep: Self::Output) -> Self::Output {
         match (item.is_ignored(), sep.is_ignored()) {
             (true, true) => Node::Ignored(SK::ListItem),
             (false, true) => item,
@@ -2916,10 +2933,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_type_arguments(
         &mut self,
-        less_than: Self::R,
-        arguments: Self::R,
-        greater_than: Self::R,
-    ) -> Self::R {
+        less_than: Self::Output,
+        arguments: Self::Output,
+        greater_than: Self::Output,
+    ) -> Self::Output {
         Node::BracketedList(self.alloc((
             self.get_pos(less_than),
             arguments.as_slice(self.arena),
@@ -2929,9 +2946,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_generic_type_specifier(
         &mut self,
-        class_type: Self::R,
-        type_arguments: Self::R,
-    ) -> Self::R {
+        class_type: Self::Output,
+        type_arguments: Self::Output,
+    ) -> Self::Output {
         let class_id = match self.expect_name(class_type) {
             Some(id) => id,
             None => return Node::Ignored(SK::GenericTypeSpecifier),
@@ -2989,16 +3006,16 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_alias_declaration(
         &mut self,
-        attributes: Self::R,
-        modifiers: Self::R,
-        keyword: Self::R,
-        name: Self::R,
-        generic_params: Self::R,
-        constraint: Self::R,
-        _equal: Self::R,
-        aliased_type: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        modifiers: Self::Output,
+        keyword: Self::Output,
+        name: Self::Output,
+        generic_params: Self::Output,
+        constraint: Self::Output,
+        _equal: Self::Output,
+        aliased_type: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         if name.is_ignored() {
             return Node::Ignored(SK::AliasDeclaration);
         }
@@ -3055,15 +3072,15 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_context_alias_declaration(
         &mut self,
-        attributes: Self::R,
-        _keyword: Self::R,
-        name: Self::R,
-        generic_params: Self::R,
-        constraint: Self::R,
-        _equal: Self::R,
-        ctx_list: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        _keyword: Self::Output,
+        name: Self::Output,
+        generic_params: Self::Output,
+        constraint: Self::Output,
+        _equal: Self::Output,
+        ctx_list: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         if name.is_ignored() {
             return Node::Ignored(SK::ContextAliasDeclaration);
         }
@@ -3121,7 +3138,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         Node::Ignored(SK::ContextAliasDeclaration)
     }
 
-    fn make_type_constraint(&mut self, kind: Self::R, value: Self::R) -> Self::R {
+    fn make_type_constraint(&mut self, kind: Self::Output, value: Self::Output) -> Self::Output {
         let kind = match kind.token_kind() {
             Some(TokenKind::As) => ConstraintKind::ConstraintAs,
             Some(TokenKind::Super) => ConstraintKind::ConstraintSuper,
@@ -3130,7 +3147,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         Node::TypeConstraint(self.alloc((kind, value)))
     }
 
-    fn make_context_constraint(&mut self, kind: Self::R, value: Self::R) -> Self::R {
+    fn make_context_constraint(&mut self, kind: Self::Output, value: Self::Output) -> Self::Output {
         let kind = match kind.token_kind() {
             Some(TokenKind::As) => ConstraintKind::ConstraintAs,
             Some(TokenKind::Super) => ConstraintKind::ConstraintSuper,
@@ -3141,13 +3158,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_type_parameter(
         &mut self,
-        user_attributes: Self::R,
-        reify: Self::R,
-        variance: Self::R,
-        name: Self::R,
-        tparam_params: Self::R,
-        constraints: Self::R,
-    ) -> Self::R {
+        user_attributes: Self::Output,
+        reify: Self::Output,
+        variance: Self::Output,
+        name: Self::Output,
+        tparam_params: Self::Output,
+        constraints: Self::Output,
+    ) -> Self::Output {
         let user_attributes = match user_attributes {
             Node::BracketedList((_, attributes, _)) => {
                 self.slice(attributes.iter().filter_map(|x| match x {
@@ -3199,7 +3216,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_type_parameters(&mut self, _lt: Self::R, tparams: Self::R, _gt: Self::R) -> Self::R {
+    fn make_type_parameters(
+        &mut self,
+        _lt: Self::Output,
+        tparams: Self::Output,
+        _gt: Self::Output,
+    ) -> Self::Output {
         let size = tparams.len();
         let mut tparams_with_name = bump::Vec::with_capacity_in(size, self.arena);
         let mut tparam_names = MultiSetMut::with_capacity_in(size, self.arena);
@@ -3254,14 +3276,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_parameter_declaration(
         &mut self,
-        attributes: Self::R,
-        visibility: Self::R,
-        inout: Self::R,
-        readonly: Self::R,
-        hint: Self::R,
-        name: Self::R,
-        initializer: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        visibility: Self::Output,
+        inout: Self::Output,
+        readonly: Self::Output,
+        hint: Self::Output,
+        name: Self::Output,
+        initializer: Self::Output,
+    ) -> Self::Output {
         let (variadic, pos, name) = match name {
             Node::ListItem(&(ellipsis, id)) => {
                 let Id(pos, name) = match id.as_variable() {
@@ -3311,7 +3333,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_variadic_parameter(&mut self, _: Self::R, hint: Self::R, ellipsis: Self::R) -> Self::R {
+    fn make_variadic_parameter(
+        &mut self,
+        _: Self::Output,
+        hint: Self::Output,
+        ellipsis: Self::Output,
+    ) -> Self::Output {
         Node::FunParam(
             self.alloc(FunParamDecl {
                 attributes: Node::Ignored(SK::Missing),
@@ -3331,10 +3358,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_function_declaration(
         &mut self,
-        attributes: Self::R,
-        header: Self::R,
-        body: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        header: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let parsed_attributes = self.to_attributes(attributes);
         match header {
             Node::FunctionHeader(header) => {
@@ -3375,10 +3402,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_contexts(
         &mut self,
-        left_bracket: Self::R,
-        tys: Self::R,
-        right_bracket: Self::R,
-    ) -> Self::R {
+        left_bracket: Self::Output,
+        tys: Self::Output,
+        right_bracket: Self::Output,
+    ) -> Self::Output {
         let tys = self.slice(tys.iter().filter_map(|ty| match ty {
             Node::ListItem(&(ty, _)) | &ty => {
                 // A wildcard is used for the context of a closure type on a
@@ -3434,9 +3461,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_function_ctx_type_specifier(
         &mut self,
-        ctx_keyword: Self::R,
-        variable: Self::R,
-    ) -> Self::R {
+        ctx_keyword: Self::Output,
+        variable: Self::Output,
+    ) -> Self::Output {
         match variable.as_variable() {
             Some(Id(pos, name)) => {
                 Node::Variable(self.alloc((name, self.merge(pos, self.get_pos(ctx_keyword)))))
@@ -3447,19 +3474,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_function_declaration_header(
         &mut self,
-        modifiers: Self::R,
-        _keyword: Self::R,
-        name: Self::R,
-        type_params: Self::R,
-        left_paren: Self::R,
-        param_list: Self::R,
-        _right_paren: Self::R,
-        capability: Self::R,
-        _colon: Self::R,
-        readonly_return: Self::R,
-        ret_hint: Self::R,
-        where_constraints: Self::R,
-    ) -> Self::R {
+        modifiers: Self::Output,
+        _keyword: Self::Output,
+        name: Self::Output,
+        type_params: Self::Output,
+        left_paren: Self::Output,
+        param_list: Self::Output,
+        _right_paren: Self::Output,
+        capability: Self::Output,
+        _colon: Self::Output,
+        readonly_return: Self::Output,
+        ret_hint: Self::Output,
+        where_constraints: Self::Output,
+    ) -> Self::Output {
         // Use the position of the left paren if the name is missing.
         // Keep the name if it's an IgnoredToken rather than an Ignored. An
         // IgnoredToken here should always be an error, but it's better to treat
@@ -3481,20 +3508,24 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_yield_expression(&mut self, keyword: Self::R, _operand: Self::R) -> Self::R {
+    fn make_yield_expression(
+        &mut self,
+        keyword: Self::Output,
+        _operand: Self::Output,
+    ) -> Self::Output {
         assert!(keyword.token_kind() == Some(TokenKind::Yield));
         keyword
     }
 
     fn make_const_declaration(
         &mut self,
-        _attributes: Self::R,
-        modifiers: Self::R,
-        const_keyword: Self::R,
-        hint: Self::R,
-        decls: Self::R,
-        semicolon: Self::R,
-    ) -> Self::R {
+        _attributes: Self::Output,
+        modifiers: Self::Output,
+        const_keyword: Self::Output,
+        hint: Self::Output,
+        decls: Self::Output,
+        semicolon: Self::Output,
+    ) -> Self::Output {
         match decls {
             // Class consts.
             Node::List(consts)
@@ -3564,7 +3595,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         self.start_accumulating_const_refs();
     }
 
-    fn make_constant_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {
+    fn make_constant_declarator(
+        &mut self,
+        name: Self::Output,
+        initializer: Self::Output,
+    ) -> Self::Output {
         // The "X=1" part of either a member const "class C {const int X=1;}" or a top-level const "const int X=1;"
         // Note: the the declarator itself doesn't yet know whether a type was provided by the user;
         // that's only known in the parent, make_const_declaration
@@ -3576,14 +3611,22 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
     }
 
-    fn make_namespace_declaration(&mut self, _name: Self::R, body: Self::R) -> Self::R {
+    fn make_namespace_declaration(
+        &mut self,
+        _name: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         if let Node::Ignored(SK::NamespaceBody) = body {
             Rc::make_mut(&mut self.namespace_builder).pop_namespace();
         }
         Node::Ignored(SK::NamespaceDeclaration)
     }
 
-    fn make_namespace_declaration_header(&mut self, _keyword: Self::R, name: Self::R) -> Self::R {
+    fn make_namespace_declaration_header(
+        &mut self,
+        _keyword: Self::Output,
+        name: Self::Output,
+    ) -> Self::Output {
         let name = self.expect_name(name).map(|Id(_, name)| name);
         // if this is header of semicolon-style (one with NamespaceEmptyBody) namespace, we should pop
         // the previous namespace first, but we don't have the body yet. We'll fix it retroactively in
@@ -3594,25 +3637,25 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_namespace_body(
         &mut self,
-        _left_brace: Self::R,
-        _declarations: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
+        _left_brace: Self::Output,
+        _declarations: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::NamespaceBody)
     }
 
-    fn make_namespace_empty_body(&mut self, _semicolon: Self::R) -> Self::R {
+    fn make_namespace_empty_body(&mut self, _semicolon: Self::Output) -> Self::Output {
         Rc::make_mut(&mut self.namespace_builder).pop_previous_namespace();
         Node::Ignored(SK::NamespaceEmptyBody)
     }
 
     fn make_namespace_use_declaration(
         &mut self,
-        _keyword: Self::R,
-        namespace_use_kind: Self::R,
-        clauses: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        _keyword: Self::Output,
+        namespace_use_kind: Self::Output,
+        clauses: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         if let Some(import_kind) = Self::namespace_use_kind(&namespace_use_kind) {
             for clause in clauses.iter() {
                 if let Node::NamespaceUseClause(nuc) = clause {
@@ -3629,14 +3672,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_namespace_group_use_declaration(
         &mut self,
-        _keyword: Self::R,
-        _kind: Self::R,
-        prefix: Self::R,
-        _left_brace: Self::R,
-        clauses: Self::R,
-        _right_brace: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        _keyword: Self::Output,
+        _kind: Self::Output,
+        prefix: Self::Output,
+        _left_brace: Self::Output,
+        clauses: Self::Output,
+        _right_brace: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let Id(_, prefix) = match self.expect_name(prefix) {
             Some(id) => id,
             None => return Node::Ignored(SK::NamespaceGroupUseDeclaration),
@@ -3658,11 +3701,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_namespace_use_clause(
         &mut self,
-        clause_kind: Self::R,
-        name: Self::R,
-        as_: Self::R,
-        aliased_name: Self::R,
-    ) -> Self::R {
+        clause_kind: Self::Output,
+        name: Self::Output,
+        as_: Self::Output,
+        aliased_name: Self::Output,
+    ) -> Self::Output {
         let id = match self.expect_name(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::NamespaceUseClause),
@@ -3682,16 +3725,20 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
     }
 
-    fn make_where_clause(&mut self, _: Self::R, where_constraints: Self::R) -> Self::R {
+    fn make_where_clause(
+        &mut self,
+        _: Self::Output,
+        where_constraints: Self::Output,
+    ) -> Self::Output {
         where_constraints
     }
 
     fn make_where_constraint(
         &mut self,
-        left_type: Self::R,
-        operator: Self::R,
-        right_type: Self::R,
-    ) -> Self::R {
+        left_type: Self::Output,
+        operator: Self::Output,
+        right_type: Self::Output,
+    ) -> Self::Output {
         Node::WhereConstraint(self.alloc(WhereConstraint(
             self.node_to_ty(left_type).unwrap_or(TANY),
             match operator.token_kind() {
@@ -3705,19 +3752,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_classish_declaration(
         &mut self,
-        attributes: Self::R,
-        modifiers: Self::R,
-        xhp_keyword: Self::R,
-        class_keyword: Self::R,
-        name: Self::R,
-        tparams: Self::R,
-        _extends_keyword: Self::R,
-        extends: Self::R,
-        _implements_keyword: Self::R,
-        implements: Self::R,
-        where_clause: Self::R,
-        body: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        modifiers: Self::Output,
+        xhp_keyword: Self::Output,
+        class_keyword: Self::Output,
+        name: Self::Output,
+        tparams: Self::Output,
+        _extends_keyword: Self::Output,
+        extends: Self::Output,
+        _implements_keyword: Self::Output,
+        implements: Self::Output,
+        where_clause: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let raw_name = match self.expect_name(name) {
             Some(Id(_, name)) => name,
             None => return Node::Ignored(SK::ClassishDeclaration),
@@ -4016,12 +4063,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_property_declaration(
         &mut self,
-        attrs: Self::R,
-        modifiers: Self::R,
-        hint: Self::R,
-        declarators: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        attrs: Self::Output,
+        modifiers: Self::Output,
+        hint: Self::Output,
+        declarators: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let (attrs, modifiers, hint) = (attrs, modifiers, hint);
         let modifiers = read_member_modifiers(modifiers.iter());
         let declarators = self.slice(declarators.iter().filter_map(
@@ -4088,10 +4135,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_xhp_class_attribute_declaration(
         &mut self,
-        _keyword: Self::R,
-        attributes: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        _keyword: Self::Output,
+        attributes: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let mut xhp_attr_enum_values = bump::Vec::new_in(self.arena);
 
         let xhp_attr_decls = self.slice(attributes.iter().filter_map(|node| {
@@ -4159,12 +4206,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     ///   }
     fn make_xhp_enum_type(
         &mut self,
-        like: Self::R,
-        enum_keyword: Self::R,
-        _left_brace: Self::R,
-        xhp_enum_values: Self::R,
-        right_brace: Self::R,
-    ) -> Self::R {
+        like: Self::Output,
+        enum_keyword: Self::Output,
+        _left_brace: Self::Output,
+        xhp_enum_values: Self::Output,
+        right_brace: Self::Output,
+    ) -> Self::Output {
         // Infer the type hint from the first value.
         // TODO: T88207956 consider all the values.
         let ty = xhp_enum_values
@@ -4202,11 +4249,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_xhp_class_attribute(
         &mut self,
-        type_: Self::R,
-        name: Self::R,
-        initializer: Self::R,
-        tag: Self::R,
-    ) -> Self::R {
+        type_: Self::Output,
+        name: Self::Output,
+        initializer: Self::Output,
+        tag: Self::Output,
+    ) -> Self::Output {
         let name = match name.as_id() {
             Some(name) => name,
             None => return Node::Ignored(SK::XHPClassAttribute),
@@ -4224,21 +4271,25 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_xhp_simple_class_attribute(&mut self, name: Self::R) -> Self::R {
+    fn make_xhp_simple_class_attribute(&mut self, name: Self::Output) -> Self::Output {
         Node::XhpAttributeUse(self.alloc(name))
     }
 
-    fn make_property_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {
+    fn make_property_declarator(
+        &mut self,
+        name: Self::Output,
+        initializer: Self::Output,
+    ) -> Self::Output {
         Node::ListItem(self.alloc((name, initializer)))
     }
 
     fn make_methodish_declaration(
         &mut self,
-        attrs: Self::R,
-        header: Self::R,
-        body: Self::R,
-        closer: Self::R,
-    ) -> Self::R {
+        attrs: Self::Output,
+        header: Self::Output,
+        body: Self::Output,
+        closer: Self::Output,
+    ) -> Self::Output {
         let header = match header {
             Node::FunctionHeader(header) => header,
             _ => return Node::Ignored(SK::MethodishDeclaration),
@@ -4316,27 +4367,27 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_classish_body(
         &mut self,
-        _left_brace: Self::R,
-        elements: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
+        _left_brace: Self::Output,
+        elements: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
         Node::ClassishBody(self.alloc(elements.as_slice(self.arena)))
     }
 
     fn make_enum_declaration(
         &mut self,
-        attributes: Self::R,
-        modifiers: Self::R,
-        _keyword: Self::R,
-        name: Self::R,
-        _colon: Self::R,
-        extends: Self::R,
-        constraint: Self::R,
-        _left_brace: Self::R,
-        use_clauses: Self::R,
-        enumerators: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        modifiers: Self::Output,
+        _keyword: Self::Output,
+        name: Self::Output,
+        _colon: Self::Output,
+        extends: Self::Output,
+        constraint: Self::Output,
+        _left_brace: Self::Output,
+        use_clauses: Self::Output,
+        enumerators: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
         let id = match self.elaborate_defined_id(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::EnumDeclaration),
@@ -4440,7 +4491,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         Node::Ignored(SK::EnumDeclaration)
     }
 
-    fn make_enum_use(&mut self, _keyword: Self::R, names: Self::R, _semicolon: Self::R) -> Self::R {
+    fn make_enum_use(
+        &mut self,
+        _keyword: Self::Output,
+        names: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         Node::EnumUse(self.alloc(names))
     }
 
@@ -4450,11 +4506,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_enumerator(
         &mut self,
-        name: Self::R,
-        _equal: Self::R,
-        value: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        name: Self::Output,
+        _equal: Self::Output,
+        value: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let refs = self.stop_accumulating_const_refs();
         let id = match self.expect_name(name) {
             Some(id) => id,
@@ -4475,19 +4531,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_enum_class_declaration(
         &mut self,
-        attributes: Self::R,
-        modifiers: Self::R,
-        _enum_keyword: Self::R,
-        _class_keyword: Self::R,
-        name: Self::R,
-        _colon: Self::R,
-        base: Self::R,
-        _extends_keyword: Self::R,
-        extends_list: Self::R,
-        _left_brace: Self::R,
-        elements: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        modifiers: Self::Output,
+        _enum_keyword: Self::Output,
+        _class_keyword: Self::Output,
+        name: Self::Output,
+        _colon: Self::Output,
+        base: Self::Output,
+        _extends_keyword: Self::Output,
+        extends_list: Self::Output,
+        _left_brace: Self::Output,
+        elements: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
         let name = match self.elaborate_defined_id(name) {
             Some(name) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassDeclaration),
@@ -4612,12 +4668,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_enum_class_enumerator(
         &mut self,
-        modifiers: Self::R,
-        type_: Self::R,
-        name: Self::R,
-        _initializer: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        modifiers: Self::Output,
+        type_: Self::Output,
+        name: Self::Output,
+        _initializer: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let refs = self.stop_accumulating_const_refs();
         let name = match self.expect_name(name) {
             Some(name) => name,
@@ -4657,10 +4713,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_tuple_type_specifier(
         &mut self,
-        left_paren: Self::R,
-        tys: Self::R,
-        right_paren: Self::R,
-    ) -> Self::R {
+        left_paren: Self::Output,
+        tys: Self::Output,
+        right_paren: Self::Output,
+    ) -> Self::Output {
         // We don't need to include the tys list in this position merging
         // because by definition it's already contained by the two brackets.
         let pos = self.merge_positions(left_paren, right_paren);
@@ -4670,11 +4726,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_tuple_type_explicit_specifier(
         &mut self,
-        keyword: Self::R,
-        _left_angle: Self::R,
-        types: Self::R,
-        right_angle: Self::R,
-    ) -> Self::R {
+        keyword: Self::Output,
+        _left_angle: Self::Output,
+        types: Self::Output,
+        right_angle: Self::Output,
+    ) -> Self::Output {
         let id = (self.get_pos(keyword), "\\tuple");
         // This is an error--tuple syntax is (A, B), not tuple<A, B>.
         // OCaml decl makes a Tapply rather than a Ttuple here.
@@ -4683,10 +4739,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_intersection_type_specifier(
         &mut self,
-        left_paren: Self::R,
-        tys: Self::R,
-        right_paren: Self::R,
-    ) -> Self::R {
+        left_paren: Self::Output,
+        tys: Self::Output,
+        right_paren: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(left_paren, right_paren);
         let tys = self.slice(tys.iter().filter_map(|x| match x {
             Node::ListItem(&(ty, _ampersand)) => self.node_to_ty(ty),
@@ -4697,10 +4753,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_union_type_specifier(
         &mut self,
-        left_paren: Self::R,
-        tys: Self::R,
-        right_paren: Self::R,
-    ) -> Self::R {
+        left_paren: Self::Output,
+        tys: Self::Output,
+        right_paren: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(left_paren, right_paren);
         let tys = self.slice(tys.iter().filter_map(|x| match x {
             Node::ListItem(&(ty, _bar)) => self.node_to_ty(ty),
@@ -4711,12 +4767,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_shape_type_specifier(
         &mut self,
-        shape: Self::R,
-        _lparen: Self::R,
-        fields: Self::R,
-        open: Self::R,
-        rparen: Self::R,
-    ) -> Self::R {
+        shape: Self::Output,
+        _lparen: Self::Output,
+        fields: Self::Output,
+        open: Self::Output,
+        rparen: Self::Output,
+    ) -> Self::Output {
         let fields = fields;
         let fields_iter = fields.iter();
         let mut fields = AssocListMut::new_in(self.arena);
@@ -4735,12 +4791,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_classname_type_specifier(
         &mut self,
-        classname: Self::R,
-        _lt: Self::R,
-        targ: Self::R,
-        _trailing_comma: Self::R,
-        gt: Self::R,
-    ) -> Self::R {
+        classname: Self::Output,
+        _lt: Self::Output,
+        targ: Self::Output,
+        _trailing_comma: Self::Output,
+        gt: Self::Output,
+    ) -> Self::Output {
         let id = match classname.as_id() {
             Some(id) => id,
             None => return Node::Ignored(SK::ClassnameTypeSpecifier),
@@ -4758,10 +4814,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_scope_resolution_expression(
         &mut self,
-        class_name: Self::R,
-        _operator: Self::R,
-        value: Self::R,
-    ) -> Self::R {
+        class_name: Self::Output,
+        _operator: Self::Output,
+        value: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(class_name, value);
         let Id(class_name_pos, class_name_str) = match self.expect_name(class_name) {
             Some(id) => {
@@ -4803,11 +4859,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_field_specifier(
         &mut self,
-        question_token: Self::R,
-        name: Self::R,
-        _arrow: Self::R,
-        type_: Self::R,
-    ) -> Self::R {
+        question_token: Self::Output,
+        name: Self::Output,
+        _arrow: Self::Output,
+        type_: Self::Output,
+    ) -> Self::Output {
         let optional = question_token.is_present();
         let ty = match self.node_to_ty(type_) {
             Some(ty) => ty,
@@ -4823,18 +4879,23 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_field_initializer(&mut self, key: Self::R, _arrow: Self::R, value: Self::R) -> Self::R {
+    fn make_field_initializer(
+        &mut self,
+        key: Self::Output,
+        _arrow: Self::Output,
+        value: Self::Output,
+    ) -> Self::Output {
         Node::ListItem(self.alloc((key, value)))
     }
 
     fn make_varray_type_specifier(
         &mut self,
-        varray_keyword: Self::R,
-        _less_than: Self::R,
-        tparam: Self::R,
-        _trailing_comma: Self::R,
-        greater_than: Self::R,
-    ) -> Self::R {
+        varray_keyword: Self::Output,
+        _less_than: Self::Output,
+        tparam: Self::Output,
+        _trailing_comma: Self::Output,
+        greater_than: Self::Output,
+    ) -> Self::Output {
         let tparam = match self.node_to_ty(tparam) {
             Some(ty) => ty,
             None => self.tany_with_pos(self.get_pos(varray_keyword)),
@@ -4853,14 +4914,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_darray_type_specifier(
         &mut self,
-        darray: Self::R,
-        _less_than: Self::R,
-        key_type: Self::R,
-        _comma: Self::R,
-        value_type: Self::R,
-        _trailing_comma: Self::R,
-        greater_than: Self::R,
-    ) -> Self::R {
+        darray: Self::Output,
+        _less_than: Self::Output,
+        key_type: Self::Output,
+        _comma: Self::Output,
+        value_type: Self::Output,
+        _trailing_comma: Self::Output,
+        greater_than: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(darray, greater_than);
         let key_type = self.node_to_ty(key_type).unwrap_or(TANY);
         let value_type = self.node_to_ty(value_type).unwrap_or(TANY);
@@ -4878,10 +4939,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_old_attribute_specification(
         &mut self,
-        ltlt: Self::R,
-        attrs: Self::R,
-        gtgt: Self::R,
-    ) -> Self::R {
+        ltlt: Self::Output,
+        attrs: Self::Output,
+        gtgt: Self::Output,
+    ) -> Self::Output {
         match attrs {
             Node::List(nodes) => {
                 Node::BracketedList(self.alloc((self.get_pos(ltlt), nodes, self.get_pos(gtgt))))
@@ -4892,11 +4953,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_constructor_call(
         &mut self,
-        name: Self::R,
-        _left_paren: Self::R,
-        args: Self::R,
-        _right_paren: Self::R,
-    ) -> Self::R {
+        name: Self::Output,
+        _left_paren: Self::Output,
+        args: Self::Output,
+        _right_paren: Self::Output,
+    ) -> Self::Output {
         let unqualified_name = match self.expect_name(name) {
             Some(name) => name,
             None => return Node::Ignored(SK::ConstructorCall),
@@ -4988,24 +5049,28 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_trait_use(
         &mut self,
-        _keyword: Self::R,
-        names: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        _keyword: Self::Output,
+        names: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         Node::TraitUse(self.alloc(names))
     }
 
     fn make_require_clause(
         &mut self,
-        _keyword: Self::R,
-        require_type: Self::R,
-        name: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        _keyword: Self::Output,
+        require_type: Self::Output,
+        name: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         Node::RequireClause(self.alloc(RequireClause { require_type, name }))
     }
 
-    fn make_nullable_type_specifier(&mut self, question_mark: Self::R, hint: Self::R) -> Self::R {
+    fn make_nullable_type_specifier(
+        &mut self,
+        question_mark: Self::Output,
+        hint: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(question_mark, hint);
         let ty = match self.node_to_ty(hint) {
             Some(ty) => ty,
@@ -5014,7 +5079,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         self.hint_ty(pos, Ty_::Toption(ty))
     }
 
-    fn make_like_type_specifier(&mut self, tilde: Self::R, hint: Self::R) -> Self::R {
+    fn make_like_type_specifier(
+        &mut self,
+        tilde: Self::Output,
+        hint: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(tilde, hint);
         let ty = match self.node_to_ty(hint) {
             Some(ty) => ty,
@@ -5025,18 +5094,18 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_closure_type_specifier(
         &mut self,
-        outer_left_paren: Self::R,
-        readonly_keyword: Self::R,
-        _function_keyword: Self::R,
-        _inner_left_paren: Self::R,
-        parameter_list: Self::R,
-        _inner_right_paren: Self::R,
-        capability: Self::R,
-        _colon: Self::R,
-        readonly_ret: Self::R,
-        return_type: Self::R,
-        outer_right_paren: Self::R,
-    ) -> Self::R {
+        outer_left_paren: Self::Output,
+        readonly_keyword: Self::Output,
+        _function_keyword: Self::Output,
+        _inner_left_paren: Self::Output,
+        parameter_list: Self::Output,
+        _inner_right_paren: Self::Output,
+        capability: Self::Output,
+        _colon: Self::Output,
+        readonly_ret: Self::Output,
+        return_type: Self::Output,
+        outer_right_paren: Self::Output,
+    ) -> Self::Output {
         let mut ft_variadic = false;
         let mut make_param = |fp: &'a FunParamDecl<'a>| -> &'a FunParam<'a> {
             let mut flags = FunParamFlags::empty();
@@ -5108,10 +5177,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_closure_parameter_type_specifier(
         &mut self,
-        inout: Self::R,
-        readonly: Self::R,
-        hint: Self::R,
-    ) -> Self::R {
+        inout: Self::Output,
+        readonly: Self::Output,
+        hint: Self::Output,
+    ) -> Self::Output {
         let kind = if inout.is_token(TokenKind::Inout) {
             ParamMode::FPinout
         } else {
@@ -5132,17 +5201,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_type_const_declaration(
         &mut self,
-        attributes: Self::R,
-        modifiers: Self::R,
-        _const_keyword: Self::R,
-        _type_keyword: Self::R,
-        name: Self::R,
-        _type_parameters: Self::R,
-        constraints: Self::R,
-        _equal: Self::R,
-        type_: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        attributes: Self::Output,
+        modifiers: Self::Output,
+        _const_keyword: Self::Output,
+        _type_keyword: Self::Output,
+        name: Self::Output,
+        _type_parameters: Self::Output,
+        constraints: Self::Output,
+        _equal: Self::Output,
+        type_: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let attributes = self.to_attributes(attributes);
         let has_abstract_keyword = modifiers
             .iter()
@@ -5214,16 +5283,16 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_context_const_declaration(
         &mut self,
-        modifiers: Self::R,
-        _const_keyword: Self::R,
-        _ctx_keyword: Self::R,
-        name: Self::R,
-        _type_parameters: Self::R,
-        constraints: Self::R,
-        _equal: Self::R,
-        ctx_list: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        modifiers: Self::Output,
+        _const_keyword: Self::Output,
+        _ctx_keyword: Self::Output,
+        name: Self::Output,
+        _type_parameters: Self::Output,
+        constraints: Self::Output,
+        _equal: Self::Output,
+        ctx_list: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         let name = match name.as_id() {
             Some(name) => name,
             None => return Node::Ignored(SK::TypeConstDeclaration),
@@ -5267,16 +5336,20 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }))
     }
 
-    fn make_decorated_expression(&mut self, decorator: Self::R, expr: Self::R) -> Self::R {
+    fn make_decorated_expression(
+        &mut self,
+        decorator: Self::Output,
+        expr: Self::Output,
+    ) -> Self::Output {
         Node::ListItem(self.alloc((decorator, expr)))
     }
 
     fn make_type_constant(
         &mut self,
-        ty: Self::R,
-        _coloncolon: Self::R,
-        constant_name: Self::R,
-    ) -> Self::R {
+        ty: Self::Output,
+        _coloncolon: Self::Output,
+        constant_name: Self::Output,
+    ) -> Self::Output {
         let id = match self.expect_name(constant_name) {
             Some(id) => id,
             None => return Node::Ignored(SK::TypeConstant),
@@ -5314,7 +5387,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         )))
     }
 
-    fn make_soft_type_specifier(&mut self, at_token: Self::R, hint: Self::R) -> Self::R {
+    fn make_soft_type_specifier(
+        &mut self,
+        at_token: Self::Output,
+        hint: Self::Output,
+    ) -> Self::Output {
         let pos = self.merge_positions(at_token, hint);
         let hint = match self.node_to_ty(hint) {
             Some(ty) => ty,
@@ -5333,7 +5410,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         )
     }
 
-    fn make_attribute_specification(&mut self, attributes: Self::R) -> Self::R {
+    fn make_attribute_specification(&mut self, attributes: Self::Output) -> Self::Output {
         if self.retain_or_omit_user_attributes_for_facts {
             attributes
         } else {
@@ -5341,7 +5418,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
     }
 
-    fn make_attribute(&mut self, _at: Self::R, attribute: Self::R) -> Self::R {
+    fn make_attribute(&mut self, _at: Self::Output, attribute: Self::Output) -> Self::Output {
         if self.retain_or_omit_user_attributes_for_facts {
             attribute
         } else {
@@ -5351,7 +5428,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     // A type specifier preceded by an attribute list. At the time of writing,
     // only the <<__Soft>> attribute is permitted here.
-    fn make_attributized_specifier(&mut self, attributes: Self::R, hint: Self::R) -> Self::R {
+    fn make_attributized_specifier(
+        &mut self,
+        attributes: Self::Output,
+        hint: Self::Output,
+    ) -> Self::Output {
         match attributes {
             Node::BracketedList((
                 ltlt_pos,
@@ -5389,12 +5470,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_vector_type_specifier(
         &mut self,
-        vec: Self::R,
-        _left_angle: Self::R,
-        hint: Self::R,
-        _trailing_comma: Self::R,
-        right_angle: Self::R,
-    ) -> Self::R {
+        vec: Self::Output,
+        _left_angle: Self::Output,
+        hint: Self::Output,
+        _trailing_comma: Self::Output,
+        right_angle: Self::Output,
+    ) -> Self::Output {
         let id = match self.expect_name(vec) {
             Some(id) => id,
             None => return Node::Ignored(SK::VectorTypeSpecifier),
@@ -5405,11 +5486,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_dictionary_type_specifier(
         &mut self,
-        dict: Self::R,
-        _left_angle: Self::R,
-        type_arguments: Self::R,
-        right_angle: Self::R,
-    ) -> Self::R {
+        dict: Self::Output,
+        _left_angle: Self::Output,
+        type_arguments: Self::Output,
+        right_angle: Self::Output,
+    ) -> Self::Output {
         let id = match self.expect_name(dict) {
             Some(id) => id,
             None => return Node::Ignored(SK::DictionaryTypeSpecifier),
@@ -5420,12 +5501,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_keyset_type_specifier(
         &mut self,
-        keyset: Self::R,
-        _left_angle: Self::R,
-        hint: Self::R,
-        _trailing_comma: Self::R,
-        right_angle: Self::R,
-    ) -> Self::R {
+        keyset: Self::Output,
+        _left_angle: Self::Output,
+        hint: Self::Output,
+        _trailing_comma: Self::Output,
+        right_angle: Self::Output,
+    ) -> Self::Output {
         let id = match self.expect_name(keyset) {
             Some(id) => id,
             None => return Node::Ignored(SK::KeysetTypeSpecifier),
@@ -5434,18 +5515,18 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         self.make_apply(id, hint, self.get_pos(right_angle))
     }
 
-    fn make_variable_expression(&mut self, _expression: Self::R) -> Self::R {
+    fn make_variable_expression(&mut self, _expression: Self::Output) -> Self::Output {
         Node::Ignored(SK::VariableExpression)
     }
 
     fn make_file_attribute_specification(
         &mut self,
-        _left_double_angle: Self::R,
-        _keyword: Self::R,
-        _colon: Self::R,
-        attributes: Self::R,
-        _right_double_angle: Self::R,
-    ) -> Self::R {
+        _left_double_angle: Self::Output,
+        _keyword: Self::Output,
+        _colon: Self::Output,
+        attributes: Self::Output,
+        _right_double_angle: Self::Output,
+    ) -> Self::Output {
         if self.retain_or_omit_user_attributes_for_facts {
             self.file_attributes = List::empty();
             for attr in attributes.iter() {
@@ -5462,70 +5543,70 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_subscript_expression(
         &mut self,
-        _receiver: Self::R,
-        _left_bracket: Self::R,
-        _index: Self::R,
-        _right_bracket: Self::R,
-    ) -> Self::R {
+        _receiver: Self::Output,
+        _left_bracket: Self::Output,
+        _index: Self::Output,
+        _right_bracket: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::SubscriptExpression)
     }
 
     fn make_member_selection_expression(
         &mut self,
-        _object: Self::R,
-        _operator: Self::R,
-        _name: Self::R,
-    ) -> Self::R {
+        _object: Self::Output,
+        _operator: Self::Output,
+        _name: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::MemberSelectionExpression)
     }
 
     fn make_object_creation_expression(
         &mut self,
-        _new_keyword: Self::R,
-        _object: Self::R,
-    ) -> Self::R {
+        _new_keyword: Self::Output,
+        _object: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::ObjectCreationExpression)
     }
 
     fn make_safe_member_selection_expression(
         &mut self,
-        _object: Self::R,
-        _operator: Self::R,
-        _name: Self::R,
-    ) -> Self::R {
+        _object: Self::Output,
+        _operator: Self::Output,
+        _name: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::SafeMemberSelectionExpression)
     }
 
     fn make_function_call_expression(
         &mut self,
-        _receiver: Self::R,
-        _type_args: Self::R,
-        _left_paren: Self::R,
-        _argument_list: Self::R,
-        _right_paren: Self::R,
-    ) -> Self::R {
+        _receiver: Self::Output,
+        _type_args: Self::Output,
+        _left_paren: Self::Output,
+        _argument_list: Self::Output,
+        _right_paren: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::FunctionCallExpression)
     }
 
     fn make_list_expression(
         &mut self,
-        _keyword: Self::R,
-        _left_paren: Self::R,
-        _members: Self::R,
-        _right_paren: Self::R,
-    ) -> Self::R {
+        _keyword: Self::Output,
+        _left_paren: Self::Output,
+        _members: Self::Output,
+        _right_paren: Self::Output,
+    ) -> Self::Output {
         Node::Ignored(SK::ListExpression)
     }
 
     fn make_module_declaration(
         &mut self,
-        _attributes: Self::R,
-        _new_keyword: Self::R,
-        _module_keyword: Self::R,
-        name: Self::R,
-        _left_brace: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
+        _attributes: Self::Output,
+        _new_keyword: Self::Output,
+        _module_keyword: Self::Output,
+        name: Self::Output,
+        _left_brace: Self::Output,
+        _right_brace: Self::Output,
+    ) -> Self::Output {
         match name {
             Node::Name(&(name, mdt_pos)) => {
                 let module = self.alloc(shallow_decl_defs::ModuleDefType { mdt_pos });
@@ -5538,10 +5619,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_module_membership_declaration(
         &mut self,
-        _module_keyword: Self::R,
-        name: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
+        _module_keyword: Self::Output,
+        name: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
         match name {
             Node::Name(&(name, pos)) => {
                 if self.module.is_none() {

@@ -130,45 +130,45 @@ where
     V: SyntaxValueType<T> + Clone,
     Syntax<'arena, T, V>: SyntaxType<State<'src, 'arena, Syntax<'arena, T, V>>>,
 {
-    fn make_yield_expression(&mut self, _r1: Self::R, _r2: Self::R) -> Self::R {
+    fn make_yield_expression(&mut self, _r1: Self::Output, _r2: Self::Output) -> Self::Output {
         self.state.pop_n(2);
         self.state.push(true);
-        Self::R::make_missing(0)
+        Self::Output::make_missing(0)
     }
 
     fn make_lambda_expression(
         &mut self,
-        r1: Self::R,
-        r2: Self::R,
-        r3: Self::R,
-        r4: Self::R,
-        body: Self::R,
-    ) -> Self::R {
+        r1: Self::Output,
+        r2: Self::Output,
+        r3: Self::Output,
+        r4: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let saw_yield = self.state.pop_n(5);
         let body = replace_body(&mut self.token_factory, &mut self.state, body, saw_yield);
         self.state.push(false);
-        Self::R::make_lambda_expression(&self.state, r1, r2, r3, r4, body)
+        Self::Output::make_lambda_expression(&self.state, r1, r2, r3, r4, body)
     }
 
     fn make_anonymous_function(
         &mut self,
-        r1: Self::R,
-        r2: Self::R,
-        r3: Self::R,
-        r4: Self::R,
-        r5: Self::R,
-        r6: Self::R,
-        r7: Self::R,
-        r8: Self::R,
-        r9: Self::R,
-        r10: Self::R,
-        r11: Self::R,
-        body: Self::R,
-    ) -> Self::R {
+        r1: Self::Output,
+        r2: Self::Output,
+        r3: Self::Output,
+        r4: Self::Output,
+        r5: Self::Output,
+        r6: Self::Output,
+        r7: Self::Output,
+        r8: Self::Output,
+        r9: Self::Output,
+        r10: Self::Output,
+        r11: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let saw_yield = self.state.pop_n(11);
         let body = replace_body(&mut self.token_factory, &mut self.state, body, saw_yield);
         self.state.push(false);
-        Self::R::make_anonymous_function(
+        Self::Output::make_anonymous_function(
             &self.state,
             r1,
             r2,
@@ -187,35 +187,40 @@ where
 
     fn make_awaitable_creation_expression(
         &mut self,
-        r1: Self::R,
-        r2: Self::R,
-        body: Self::R,
-    ) -> Self::R {
+        r1: Self::Output,
+        r2: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let saw_yield = self.state.pop_n(3);
         let body = replace_body(&mut self.token_factory, &mut self.state, body, saw_yield);
         self.state.push(false);
-        Self::R::make_awaitable_creation_expression(&self.state, r1, r2, body)
+        Self::Output::make_awaitable_creation_expression(&self.state, r1, r2, body)
     }
 
     fn make_methodish_declaration(
         &mut self,
-        r1: Self::R,
-        r2: Self::R,
-        body: Self::R,
-        r3: Self::R,
-    ) -> Self::R {
+        r1: Self::Output,
+        r2: Self::Output,
+        body: Self::Output,
+        r3: Self::Output,
+    ) -> Self::Output {
         self.state.pop_n(1);
         let saw_yield = self.state.pop_n(3);
         let body = replace_body(&mut self.token_factory, &mut self.state, body, saw_yield);
         self.state.push(false);
-        Self::R::make_methodish_declaration(&self.state, r1, r2, body, r3)
+        Self::Output::make_methodish_declaration(&self.state, r1, r2, body, r3)
     }
 
-    fn make_function_declaration(&mut self, r1: Self::R, r2: Self::R, body: Self::R) -> Self::R {
+    fn make_function_declaration(
+        &mut self,
+        r1: Self::Output,
+        r2: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let saw_yield = self.state.pop_n(3);
         let body = replace_body(&mut self.token_factory, &mut self.state, body, saw_yield);
         self.state.push(false);
-        Self::R::make_function_declaration(&self.state, r1, r2, body)
+        Self::Output::make_function_declaration(&self.state, r1, r2, body)
     }
 }
 

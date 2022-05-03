@@ -20,7 +20,7 @@ use parser_core_types::trivia_kind::TriviaKind;
 pub struct StatementParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     lexer: Lexer<'a, S::TF>,
     env: ParserEnv,
@@ -32,7 +32,7 @@ where
 impl<'a, S> ParserTrait<'a, S> for StatementParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     fn make(
         lexer: Lexer<'a, S::TF>,
@@ -102,7 +102,7 @@ where
 impl<'a, S> StatementParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     fn with_type_parser<F, U>(&mut self, f: F) -> U
     where
@@ -120,7 +120,7 @@ where
         res
     }
 
-    fn parse_type_specifier(&mut self) -> S::R {
+    fn parse_type_specifier(&mut self) -> S::Output {
         self.with_type_parser(|x: &mut TypeParser<'a, S>| x.parse_type_specifier(false, true))
     }
 
@@ -156,7 +156,7 @@ where
         res
     }
 
-    pub fn parse_statement(&mut self) -> S::R {
+    pub fn parse_statement(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::Async | TokenKind::Function => {
                 self.parse_possible_php_function(/* toplevel:*/ false)
@@ -231,7 +231,7 @@ where
         }
     }
 
-    pub fn parse_header(&mut self) -> (S::R, bool) {
+    pub fn parse_header(&mut self) -> (S::Output, bool) {
         let (markup, suffix_opt) = self.lexer.scan_header();
         let (suffix, has_suffix) = match suffix_opt {
             Some((less_than_question, language_opt)) => {
@@ -270,7 +270,7 @@ where
         (s, has_suffix)
     }
 
-    pub fn parse_possible_php_function(&mut self, toplevel: bool) -> S::R {
+    pub fn parse_possible_php_function(&mut self, toplevel: bool) -> S::Output {
         // ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
         // (Hack only supports anonymous nested functions as expressions.)
         //
@@ -306,14 +306,14 @@ where
     }
 
     // Helper: parses ( expr )
-    fn parse_paren_expr(&mut self) -> (S::R, S::R, S::R) {
+    fn parse_paren_expr(&mut self) -> (S::Output, S::Output, S::Output) {
         let left_paren = self.require_left_paren();
         let expr_syntax = self.parse_expression();
         let right_paren = self.require_right_paren();
         (left_paren, expr_syntax, right_paren)
     }
 
-    fn parse_for_statement(&mut self) -> S::R {
+    fn parse_for_statement(&mut self) -> S::Output {
         // SPEC
         // for-statement:
         //   for   (   for-initializer-opt   ;   for-control-opt   ;    \
@@ -363,7 +363,7 @@ where
         )
     }
 
-    fn parse_foreach_statement(&mut self) -> S::R {
+    fn parse_foreach_statement(&mut self) -> S::Output {
         let foreach_keyword_token = self.assert_token(TokenKind::Foreach);
         let foreach_left_paren = self.require_left_paren();
         self.expect_in_new_scope(ExpectedTokens::RightParen);
@@ -418,7 +418,7 @@ where
         )
     }
 
-    fn parse_do_statement(&mut self) -> S::R {
+    fn parse_do_statement(&mut self) -> S::Output {
         let do_keyword_token = self.assert_token(TokenKind::Do);
         let statement_node = self.parse_statement();
         let do_while_keyword_token = self.require_while();
@@ -437,7 +437,7 @@ where
         )
     }
 
-    fn parse_while_statement(&mut self) -> S::R {
+    fn parse_while_statement(&mut self) -> S::Output {
         let while_keyword_token = self.assert_token(TokenKind::While);
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
         let statement_node = self.parse_statement();
@@ -458,7 +458,7 @@ where
     //   await-opt   using   (   expression-list   )   compound-statement
     //
     // TODO: Update the specification of the grammar
-    fn parse_using_statement(&mut self, await_kw: S::R) -> S::R {
+    fn parse_using_statement(&mut self, await_kw: S::Output) -> S::Output {
         let using_kw = self.assert_token(TokenKind::Using);
         // Decision point - Are we at a function scope or a body scope
         let token_kind = self.peek_token_kind();
@@ -513,7 +513,7 @@ where
         }
     }
 
-    fn parse_unset_statement(&mut self) -> S::R {
+    fn parse_unset_statement(&mut self) -> S::Output {
         // TODO: This is listed as unsupported in Hack in the spec; is that true?
         // TODO: If it is formally supported in Hack then update the spec; if not
         // TODO: then should we make it illegal in strict mode?
@@ -538,7 +538,7 @@ where
     }
 
     // parses the "( expr ) statement" segment of If, Elseif or Else clauses.
-    fn parse_if_body_helper(&mut self) -> (S::R, S::R, S::R, S::R) {
+    fn parse_if_body_helper(&mut self) -> (S::Output, S::Output, S::Output, S::Output) {
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
         let statement_node = self.parse_statement();
         (
@@ -550,7 +550,7 @@ where
     }
 
     // do not eat token and return Missing if first token is not Else
-    fn parse_else_opt(&mut self) -> S::R {
+    fn parse_else_opt(&mut self) -> S::Output {
         let else_token = self.optional_token(TokenKind::Else);
         if else_token.is_missing() {
             else_token
@@ -560,7 +560,7 @@ where
         }
     }
 
-    fn parse_if_statement(&mut self) -> S::R {
+    fn parse_if_statement(&mut self) -> S::Output {
         // SPEC:
         // if-statement:
         //   if   (   expression   )   statement   else-clause-opt
@@ -582,7 +582,7 @@ where
         )
     }
 
-    fn parse_switch_statement(&mut self) -> S::R {
+    fn parse_switch_statement(&mut self) -> S::Output {
         // SPEC:
         //
         // The spec for switches is very simple:
@@ -687,7 +687,7 @@ where
             && self.peek_token_kind_with_lookahead(1) == TokenKind::Semicolon
     }
 
-    fn parse_possible_erroneous_fallthrough(&mut self) -> S::R {
+    fn parse_possible_erroneous_fallthrough(&mut self) -> S::Output {
         if self.is_switch_fallthrough() {
             self.with_error_on_whole_token(Errors::error1055);
             self.parse_switch_fallthrough()
@@ -696,14 +696,14 @@ where
         }
     }
 
-    fn parse_switch_fallthrough(&mut self) -> S::R {
+    fn parse_switch_fallthrough(&mut self) -> S::Output {
         // We don't get here unless we have fallthrough ;
         let keyword = self.assert_token(TokenKind::Fallthrough);
         let semi = self.assert_token(TokenKind::Semicolon);
         S!(make_switch_fallthrough, self, keyword, semi)
     }
 
-    fn parse_switch_fallthrough_opt(&mut self) -> S::R {
+    fn parse_switch_fallthrough_opt(&mut self) -> S::Output {
         if self.is_switch_fallthrough() {
             self.parse_switch_fallthrough()
         } else {
@@ -742,7 +742,7 @@ where
         }
     }
 
-    fn parse_switch_section(&mut self) -> S::R {
+    fn parse_switch_section(&mut self) -> S::Output {
         // See parse_switch_statement for grammar
         let labels = self.parse_list_until_none(|x| x.parse_switch_section_label());
         if labels.is_missing() {
@@ -753,7 +753,7 @@ where
         S!(make_switch_section, self, labels, statements, fallthrough)
     }
 
-    fn parse_switch_section_statement(&mut self) -> Option<S::R> {
+    fn parse_switch_section_statement(&mut self) -> Option<S::Output> {
         if self.is_switch_fallthrough() {
             None
         } else {
@@ -771,7 +771,7 @@ where
         }
     }
 
-    fn parse_switch_section_label(&mut self) -> Option<S::R> {
+    fn parse_switch_section_label(&mut self) -> Option<S::Output> {
         // See the grammar under parse_switch_statement
         match self.peek_token_kind() {
             TokenKind::Case => {
@@ -786,7 +786,7 @@ where
         }
     }
 
-    fn parse_catch_clause_opt(&mut self) -> Option<S::R> {
+    fn parse_catch_clause_opt(&mut self) -> Option<S::Output> {
         // SPEC
         // catch  (  type-specification-opt variable-name  )  compound-statement
         if self.peek_token_kind() == TokenKind::Catch {
@@ -819,7 +819,7 @@ where
         }
     }
 
-    fn parse_finally_clause_opt(&mut self) -> S::R {
+    fn parse_finally_clause_opt(&mut self) -> S::Output {
         // SPEC
         // finally-clause:
         //   finally   compound-statement
@@ -832,7 +832,7 @@ where
         }
     }
 
-    fn parse_try_statement(&mut self) -> S::R {
+    fn parse_try_statement(&mut self) -> S::Output {
         // SPEC:
         // try-statement:
         //   try  compound-statement   catch-clauses
@@ -854,7 +854,7 @@ where
         )
     }
 
-    fn parse_break_statement(&mut self) -> S::R {
+    fn parse_break_statement(&mut self) -> S::Output {
         // SPEC
         // break-statement:
         //   break  ;
@@ -865,7 +865,7 @@ where
         S!(make_break_statement, self, break_token, semi_token)
     }
 
-    fn parse_continue_statement(&mut self) -> S::R {
+    fn parse_continue_statement(&mut self) -> S::Output {
         // SPEC
         // continue-statement:
         //   continue  ;
@@ -876,7 +876,7 @@ where
         S!(make_continue_statement, self, continue_token, semi_token)
     }
 
-    fn parse_return_statement(&mut self) -> S::R {
+    fn parse_return_statement(&mut self) -> S::Output {
         let return_token = self.assert_token(TokenKind::Return);
         if self.peek_token_kind() == TokenKind::Semicolon {
             let missing = S!(make_missing, self, self.pos());
@@ -896,14 +896,14 @@ where
         }
     }
 
-    fn parse_throw_statement(&mut self) -> S::R {
+    fn parse_throw_statement(&mut self) -> S::Output {
         let throw_token = self.assert_token(TokenKind::Throw);
         let expr = self.parse_expression();
         let semi_token = self.require_semicolon();
         S!(make_throw_statement, self, throw_token, expr, semi_token)
     }
 
-    fn parse_yield_break_statement(&mut self) -> S::R {
+    fn parse_yield_break_statement(&mut self) -> S::Output {
         let yield_token = self.assert_token(TokenKind::Yield);
         let break_token = self.assert_token(TokenKind::Break);
         let semi_token = self.require_semicolon();
@@ -916,7 +916,7 @@ where
         )
     }
 
-    fn parse_default_label(&mut self) -> S::R {
+    fn parse_default_label(&mut self) -> S::Output {
         //
         // See comments under parse_switch_statement for the grammar.
         // TODO: Update the spec.
@@ -937,7 +937,7 @@ where
         };
         S!(make_default_label, self, default_token, colon_token)
     }
-    fn parse_case_label(&mut self) -> S::R {
+    fn parse_case_label(&mut self) -> S::Output {
         // SPEC:
         // See comments under parse_switch_statement for the grammar.
         // TODO: The spec is wrong; it implies that a statement must always follow
@@ -960,7 +960,7 @@ where
         S!(make_case_label, self, case_token, expr, colon_token)
     }
 
-    fn parse_concurrent_statement(&mut self) -> S::R {
+    fn parse_concurrent_statement(&mut self) -> S::Output {
         let keyword = self.assert_token(TokenKind::Concurrent);
         let statement = self.parse_statement();
         S!(make_concurrent_statement, self, keyword, statement)
@@ -977,7 +977,7 @@ where
     //   expression  ,  expression
     //   expression-list-two-or-more  ,  expression
 
-    fn parse_echo_statement(&mut self) -> S::R {
+    fn parse_echo_statement(&mut self) -> S::Output {
         let token = self.assert_token(TokenKind::Echo);
         let expression_list = self.parse_comma_list(TokenKind::Semicolon, Errors::error1015, |x| {
             x.parse_expression()
@@ -986,7 +986,7 @@ where
         S!(make_echo_statement, self, token, expression_list, semicolon)
     }
 
-    fn parse_expression_statement(&mut self) -> S::R {
+    fn parse_expression_statement(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::Semicolon => {
                 let missing = S!(make_missing, self, self.pos());
@@ -1026,7 +1026,7 @@ where
         }
     }
 
-    pub fn parse_compound_statement(&mut self) -> S::R {
+    pub fn parse_compound_statement(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let token = parser1.next_token();
         match token.kind() {
@@ -1050,7 +1050,7 @@ where
         }
     }
 
-    fn parse_expression(&mut self) -> S::R {
+    fn parse_expression(&mut self) -> S::Output {
         self.with_expression_parser(|p: &mut ExpressionParser<'a, S>| p.parse_expression())
     }
 }

@@ -77,43 +77,26 @@ impl HhvmOptions {
 }
 
 // Compiler options that are compatible with hphp (hhvm --hphp),
-// intended to be a CLI-compatible subset of HPHP::CompilerOptions
-// in hphp/compiler/compiler.cpp.
+// intended to be CLI-compatible subset with HPHP::CompilerOptions
+// and prepareOptions() in hphp/compiler/compiler.cpp.
 #[derive(Debug, Parser)]
 pub struct HphpOptions {
     #[clap(flatten)]
     pub config: HhvmOptions,
 
-    /// Compile target (ignored).
-    #[clap(
-        long,
-        short,
-        default_value("hnbc"),
-        possible_values(&["hnbc", "hnas", "hhbc"]),
-    )]
-    pub target: String,
-
-    /// Output format (ignored).
+    /// HHBC Output format (ignored).
     #[clap(
         long,
         short,
         default_value("binary"),
-        possible_values(&["binary", "hnas", "hnbc"]),
+        possible_values(&["binary", "hhas", "text"]),
     )]
     pub format: String,
-
-    /// Ignore code generation errors and continue compilation (ignored)
-    #[clap(long, parse(try_from_str = parse_boolish), default_value("true"))]
-    pub force: bool,
 
     /// Log level (ignored - use HH_LOG). -1, 0: no logging; 1: errors, 2: warnings;
     /// 3: info, 4: verbose.
     #[clap(long, short, default_value("-1"))]
     pub log: i32,
-
-    /// Whether to save compilation stats and errors to output-dir/Stats.js (ignored)
-    #[clap(long, parse(try_from_str = parse_boolish), default_value("false"))]
-    pub gen_stats: bool,
 
     /// Whether to keep the output directory (ignored)
     #[clap(long, short, parse(try_from_str = parse_boolish), default_value("true"))]
@@ -236,11 +219,6 @@ pub struct HphpOptions {
     /// File containing list of relative file names, one per line.
     #[clap(long, value_name("PATH"))]
     pub input_list: Option<PathBuf>,
-
-    /// (ignored) By default, hhvm --hphp forks and does all the work in
-    /// the child. This option can disable forking.
-    #[clap(long, parse(try_from_str = parse_boolish), default_value("false"))]
-    pub nofork: bool,
 
     /// Filename of final program to emit; will be placed in output-dir.
     #[clap(long)]

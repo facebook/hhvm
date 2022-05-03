@@ -218,7 +218,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("target,t", value<std::string>(&dummy4)->default_value("hhbc"),
      "hhbc") // TODO: T115189426 remove this
     ("format,f", value<std::string>(&po.format),
-     "hhbc: binary (default) | hhas | text")
+     "HHBC Output format: binary (default) | hhas | text")
     ("input-dir", value<std::string>(&po.inputDir), "input directory")
     ("inputs,i", value<std::vector<std::string>>(&po.inputs),
      "input file names")

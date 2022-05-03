@@ -1,15 +1,41 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+mod expr_trees;
 
 use anyhow::Result;
 use clap::Parser;
+use compile::EnvFlags;
+use hhvm_options::HhvmOptions;
+use std::{
+    fs,
+    io::{BufRead, BufReader},
+    path::{Path, PathBuf},
+};
 
 /// Hack Compiler
 #[derive(Parser, Debug)]
 struct Opts {
     #[clap(flatten)]
     command: Command,
+
+    #[clap(flatten)]
+    hhvm_options: HhvmOptions,
+
+    /// Disable toplevel definition elaboration
+    #[clap(long)]
+    disable_toplevel_elaboration: bool,
+
+    /// Input file(s)
+    filenames: Vec<PathBuf>,
+
+    /// Mutate the program as if we're in the debugger repl
+    #[clap(long)]
+    for_debugger_eval: bool,
+
+    /// Read a list of files (one-per-line) from this file
+    #[clap(long)]
+    input_file_list: Option<PathBuf>,
 }
 
 // Which command are we running? Every bool option here conflicts with
@@ -18,38 +44,62 @@ struct Opts {
 #[derive(Parser, Debug)]
 struct Command {
     /// Compile source text to HackCUnit
-    #[clap(long, exclusive(true))]
+    #[clap(long)]
     compile_and_print_unit: bool,
 
     /// Runs in daemon mode for testing purposes. Do not rely on for production
-    #[clap(long, exclusive(true))]
+    #[clap(long)]
     daemon: bool,
 
     /// Print the source code with expression tree literals desugared.
     /// Best effort debugging tool.
-    #[clap(long, exclusive(true))]
+    #[clap(long)]
     dump_desugared_expression_trees: bool,
 
     /// Parse decls from source text, transform them into facts, and print the facts
     /// in JSON format.
-    #[clap(long, exclusive(true))]
+    #[clap(long)]
     extract_facts_from_decls: bool,
 
     /// Render the source text parse tree
-    #[clap(long, exclusive(true))]
+    #[clap(long)]
     parse: bool,
 
     /// Test FFIs
-    #[clap(long, exclusive(true))]
+    #[clap(long)]
     test: bool,
 
     /// Compile file with decls from the same file available during compilation.
-    #[clap(long, exclusive(true))]
+    #[clap(long)]
     test_compile_with_decls: bool,
 
     /// Verify decls ffi
-    #[clap(long, exclusive(true))]
+    #[clap(long)]
     verify_decls_ffi: bool,
+}
+
+impl Opts {
+    pub fn gather_input_files(&mut self) -> Result<Vec<PathBuf>> {
+        let mut files: Vec<PathBuf> = Default::default();
+        if let Some(list_path) = self.input_file_list.take() {
+            for line in BufReader::new(fs::File::open(list_path)?).lines() {
+                files.push(Path::new(&line?).to_path_buf());
+            }
+        }
+        files.append(&mut self.filenames);
+        Ok(files)
+    }
+
+    pub fn env_flags(&self) -> EnvFlags {
+        let mut flags = EnvFlags::empty();
+        if self.for_debugger_eval {
+            flags |= EnvFlags::FOR_DEBUGGER_EVAL;
+        }
+        if self.disable_toplevel_elaboration {
+            flags |= EnvFlags::DISABLE_TOPLEVEL_ELABORATION;
+        }
+        flags
+    }
 }
 
 fn test(_: Opts) -> Result<()> {
@@ -80,10 +130,6 @@ fn compile_from_text_with_same_file_decl(_: Opts) -> Result<()> {
     unimplemented!()
 }
 
-fn dump_expr_trees(_: Opts) -> Result<()> {
-    unimplemented!()
-}
-
 fn compile_from_text(_: Opts) -> Result<()> {
     unimplemented!()
 }
@@ -105,7 +151,7 @@ fn main() -> Result<()> {
     } else if opts.command.test_compile_with_decls {
         compile_from_text_with_same_file_decl(opts)
     } else if opts.command.dump_desugared_expression_trees {
-        dump_expr_trees(opts)
+        expr_trees::dump_expr_trees(opts)
     } else {
         compile_from_text(opts)
     }

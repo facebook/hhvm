@@ -18,7 +18,7 @@ where
     S: SmartConstructors,
     S::Output: NodeType,
 {
-    lexer: Lexer<'a, S::TF>,
+    lexer: Lexer<'a, S::Factory>,
     errors: Vec<SyntaxError>,
     env: ParserEnv,
     sc: S,
@@ -39,7 +39,7 @@ where
         }
     }
 
-    pub fn into_parts(self) -> (Lexer<'a, S::TF>, Vec<SyntaxError>, ParserEnv, S) {
+    pub fn into_parts(self) -> (Lexer<'a, S::Factory>, Vec<SyntaxError>, ParserEnv, S) {
         (self.lexer, self.errors, self.env, self.sc)
     }
 

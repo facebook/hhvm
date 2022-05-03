@@ -22,7 +22,7 @@ where
     S: SmartConstructors,
     S::Output: NodeType,
 {
-    lexer: Lexer<'a, S::TF>,
+    lexer: Lexer<'a, S::Factory>,
     env: ParserEnv,
     context: Context<Token<S>>,
     errors: Vec<SyntaxError>,
@@ -35,7 +35,7 @@ where
     S::Output: NodeType,
 {
     fn make(
-        lexer: Lexer<'a, S::TF>,
+        lexer: Lexer<'a, S::Factory>,
         env: ParserEnv,
         context: Context<Token<S>>,
         errors: Vec<SyntaxError>,
@@ -50,15 +50,22 @@ where
         }
     }
 
-    fn into_parts(self) -> (Lexer<'a, S::TF>, Context<Token<S>>, Vec<SyntaxError>, S) {
+    fn into_parts(
+        self,
+    ) -> (
+        Lexer<'a, S::Factory>,
+        Context<Token<S>>,
+        Vec<SyntaxError>,
+        S,
+    ) {
         (self.lexer, self.context, self.errors, self.sc)
     }
 
-    fn lexer(&self) -> &Lexer<'a, S::TF> {
+    fn lexer(&self) -> &Lexer<'a, S::Factory> {
         &self.lexer
     }
 
-    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::TF> {
+    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::Factory> {
         &mut self.lexer
     }
 

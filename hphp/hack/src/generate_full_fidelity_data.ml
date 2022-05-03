@@ -1305,17 +1305,17 @@ module GenerateFFRustSmartConstructors = struct
 use parser_core_types::token_factory::TokenFactory;
 use parser_core_types::lexable_token::LexableToken;
 
-pub type Token<S> = <<S as SmartConstructors>::TF as TokenFactory>::Token;
+pub type Token<S> = <<S as SmartConstructors>::Factory as TokenFactory>::Token;
 pub type Trivia<S> = <Token<S> as LexableToken>::Trivia;
 
 pub trait SmartConstructors: Clone {
-    type TF: TokenFactory;
+    type Factory: TokenFactory;
     type State;
     type Output;
 
     fn state_mut(&mut self) -> &mut Self::State;
     fn into_state(self) -> Self::State;
-    fn token_factory_mut(&mut self) -> &mut Self::TF;
+    fn token_factory_mut(&mut self) -> &mut Self::Factory;
 
     fn make_missing(&mut self, offset : usize) -> Self::Output;
     fn make_token(&mut self, arg0: Token<Self>) -> Self::Output;
@@ -1397,7 +1397,7 @@ where
     S: SyntaxType<State> + Clone,
     State: StateType<S>,
 {
-    type TF = TF;
+    type Factory = TF;
     type State = State;
     type Output = S;
 
@@ -1409,7 +1409,7 @@ where
       self.state
     }
 
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
         &mut self.token_factory
     }
 
@@ -1417,7 +1417,7 @@ where
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_missing(self, offset)
     }
 
-    fn make_token(&mut self, offset: <Self::TF as TokenFactory>::Token) -> Self::Output {
+    fn make_token(&mut self, offset: <Self::Factory as TokenFactory>::Token) -> Self::Output {
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_token(self, offset)
     }
 
@@ -1483,7 +1483,7 @@ macro_rules! arg_kinds {
 impl<'a> SmartConstructors for VerifySmartConstructors<'a>
 {
     type State = State<'a>;
-    type TF = TokenFactory<'a>;
+    type Factory = TokenFactory<'a>;
     type Output = PositionedSyntax<'a>;
 
     fn state_mut(&mut self) -> &mut State<'a> {
@@ -1494,7 +1494,7 @@ impl<'a> SmartConstructors for VerifySmartConstructors<'a>
       self.state
     }
 
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
         &mut self.token_factory
     }
 
@@ -1653,7 +1653,7 @@ use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
 pub trait SyntaxSmartConstructors<S: SyntaxType<State>, TF: TokenFactory<Token = S::Token>, State = NoState>:
-    SmartConstructors<State = State, Output=S, TF = TF>
+    SmartConstructors<State = State, Output=S, Factory = TF>
 where
     State: StateType<S>,
 {
@@ -1663,7 +1663,7 @@ where
         r
     }
 
-    fn make_token(&mut self, arg: <Self::TF as TokenFactory>::Token) -> Self::Output {
+    fn make_token(&mut self, arg: <Self::Factory as TokenFactory>::Token) -> Self::Output {
         let r = Self::Output::make_token(self.state_mut(), arg);
         self.state_mut().next(&[]);
         r
@@ -1704,7 +1704,7 @@ module GenerateFFRustDeclModeSmartConstructors = struct
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::Output {
-        <Self as SyntaxSmartConstructors<Self::Output, Self::TF, State<'_, '_, Self::Output>>>::make_%s(self, %s)
+        <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_%s(self, %s)
     }\n\n"
       x.type_name
       args
@@ -1730,7 +1730,7 @@ where
     Value: SyntaxValueType<Token> + Clone,
 {
     type State = State<'src, 'arena, Syntax<'arena, Token, Value>>;
-    type TF = TF;
+    type Factory = TF;
     type Output = Syntax<'arena, Token, Value>;
 
     fn state_mut(&mut self) -> &mut State<'src, 'arena, Syntax<'arena, Token, Value>> {
@@ -1741,20 +1741,20 @@ where
         self.state
     }
 
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
         &mut self.token_factory
     }
 
     fn make_missing(&mut self, o: usize) -> Self::Output {
-        <Self as SyntaxSmartConstructors<Self::Output, Self::TF, State<'_, '_, Self::Output>>>::make_missing(self, o)
+        <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_missing(self, o)
     }
 
-    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::Output {
-        <Self as SyntaxSmartConstructors<Self::Output, Self::TF, State<'_, '_, Self::Output>>>::make_token(self, token)
+    fn make_token(&mut self, token: <Self::Factory as TokenFactory>::Token) -> Self::Output {
+        <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_token(self, token)
     }
 
     fn make_list(&mut self, items: Vec<Self::Output>, offset: usize) -> Self::Output {
-        <Self as SyntaxSmartConstructors<Self::Output, Self::TF, State<'_, '_, Self::Output>>>::make_list(self, items, offset)
+        <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_list(self, items, offset)
     }
 
 CONSTRUCTOR_METHODS}
@@ -1819,7 +1819,7 @@ pub trait FlattenSmartConstructors: SmartConstructors
        Self::zero(SyntaxKind::Missing)
     }
 
-    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::Output {
+    fn make_token(&mut self, token: <Self::Factory as TokenFactory>::Token) -> Self::Output {
         Self::zero(SyntaxKind::Token(token.kind()))
     }
 
@@ -1879,7 +1879,7 @@ use crate::{DirectDeclSmartConstructors, Node, SourceTextAllocator};
 
 impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for DirectDeclSmartConstructors<'src, 'text, S> {
     type State = Self;
-    type TF = SimpleTokenFactoryImpl<CompactToken>;
+    type Factory = SimpleTokenFactoryImpl<CompactToken>;
     type Output = Node<'src>;
 
     fn state_mut(&mut self) -> &mut Self {
@@ -1890,7 +1890,7 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         self
     }
 
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
         &mut self.token_factory
     }
 
@@ -1971,7 +1971,7 @@ use smart_constructors::{NodeType, SmartConstructors};
 use crate::{PairTokenFactory, Node};
 
 #[derive(Clone)]
-pub struct PairSmartConstructors<SC0, SC1>(pub SC0, pub SC1, PairTokenFactory<SC0::TF, SC1::TF>)
+pub struct PairSmartConstructors<SC0, SC1>(pub SC0, pub SC1, PairTokenFactory<SC0::Factory, SC1::Factory>)
 where
     SC0: SmartConstructors,
     SC0::Output: NodeType,
@@ -2001,7 +2001,7 @@ where
     SC1::Output: NodeType,
 {
     type State = Self;
-    type TF = PairTokenFactory<SC0::TF, SC1::TF>;
+    type Factory = PairTokenFactory<SC0::Factory, SC1::Factory>;
     type Output = Node<SC0::Output, SC1::Output>;
 
     fn state_mut(&mut self) -> &mut Self {
@@ -2012,7 +2012,7 @@ where
         self
     }
 
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
         &mut self.2
     }
 
@@ -2020,7 +2020,7 @@ where
         Node(self.0.make_missing(offset), self.1.make_missing(offset))
     }
 
-    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::Output {
+    fn make_token(&mut self, token: <Self::Factory as TokenFactory>::Token) -> Self::Output {
         Node(self.0.make_token(token.0), self.1.make_token(token.1))
     }
 
@@ -2148,7 +2148,7 @@ impl<S> WithKind<S> {
 impl<S, State> SmartConstructors for WithKind<S>
 where S: SmartConstructors<State = State>,
 {
-    type TF = S::TF;
+    type Factory = S::Factory;
     type State = State;
     type Output = (SyntaxKind, S::Output);
 
@@ -2160,12 +2160,12 @@ where S: SmartConstructors<State = State>,
       self.s.into_state()
     }
 
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
         self.s.token_factory_mut()
     }
 
 
-    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::Output {
+    fn make_token(&mut self, token: <Self::Factory as TokenFactory>::Token) -> Self::Output {
         compose(SyntaxKind::Token(token.kind()), self.s.make_token(token))
     }
 

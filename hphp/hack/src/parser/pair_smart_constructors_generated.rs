@@ -23,7 +23,7 @@ use smart_constructors::{NodeType, SmartConstructors};
 use crate::{PairTokenFactory, Node};
 
 #[derive(Clone)]
-pub struct PairSmartConstructors<SC0, SC1>(pub SC0, pub SC1, PairTokenFactory<SC0::TF, SC1::TF>)
+pub struct PairSmartConstructors<SC0, SC1>(pub SC0, pub SC1, PairTokenFactory<SC0::Factory, SC1::Factory>)
 where
     SC0: SmartConstructors,
     SC0::Output: NodeType,
@@ -53,7 +53,7 @@ where
     SC1::Output: NodeType,
 {
     type State = Self;
-    type TF = PairTokenFactory<SC0::TF, SC1::TF>;
+    type Factory = PairTokenFactory<SC0::Factory, SC1::Factory>;
     type Output = Node<SC0::Output, SC1::Output>;
 
     fn state_mut(&mut self) -> &mut Self {
@@ -64,7 +64,7 @@ where
         self
     }
 
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
         &mut self.2
     }
 
@@ -72,7 +72,7 @@ where
         Node(self.0.make_missing(offset), self.1.make_missing(offset))
     }
 
-    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::Output {
+    fn make_token(&mut self, token: <Self::Factory as TokenFactory>::Token) -> Self::Output {
         Node(self.0.make_token(token.0), self.1.make_token(token.1))
     }
 

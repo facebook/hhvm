@@ -36,7 +36,7 @@ macro_rules! arg_kinds {
 impl<'a> SmartConstructors for VerifySmartConstructors<'a>
 {
     type State = State<'a>;
-    type TF = TokenFactory<'a>;
+    type Factory = TokenFactory<'a>;
     type Output = PositionedSyntax<'a>;
 
     fn state_mut(&mut self) -> &mut State<'a> {
@@ -47,7 +47,7 @@ impl<'a> SmartConstructors for VerifySmartConstructors<'a>
       self.state
     }
 
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
         &mut self.token_factory
     }
 

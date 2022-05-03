@@ -25,7 +25,7 @@ use crate::{DirectDeclSmartConstructors, Node, SourceTextAllocator};
 
 impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for DirectDeclSmartConstructors<'src, 'text, S> {
     type State = Self;
-    type TF = SimpleTokenFactoryImpl<CompactToken>;
+    type Factory = SimpleTokenFactoryImpl<CompactToken>;
     type Output = Node<'src>;
 
     fn state_mut(&mut self) -> &mut Self {
@@ -36,7 +36,7 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         self
     }
 
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
         &mut self.token_factory
     }
 

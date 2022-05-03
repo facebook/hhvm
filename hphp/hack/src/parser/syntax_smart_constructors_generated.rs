@@ -24,7 +24,7 @@ use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
 pub trait SyntaxSmartConstructors<S: SyntaxType<State>, TF: TokenFactory<Token = S::Token>, State = NoState>:
-    SmartConstructors<State = State, Output=S, TF = TF>
+    SmartConstructors<State = State, Output=S, Factory = TF>
 where
     State: StateType<S>,
 {
@@ -34,7 +34,7 @@ where
         r
     }
 
-    fn make_token(&mut self, arg: <Self::TF as TokenFactory>::Token) -> Self::Output {
+    fn make_token(&mut self, arg: <Self::Factory as TokenFactory>::Token) -> Self::Output {
         let r = Self::Output::make_token(self.state_mut(), arg);
         self.state_mut().next(&[]);
         r

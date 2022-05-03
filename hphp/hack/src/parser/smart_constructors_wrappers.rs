@@ -40,7 +40,7 @@ impl<S> WithKind<S> {
 impl<S, State> SmartConstructors for WithKind<S>
 where S: SmartConstructors<State = State>,
 {
-    type TF = S::TF;
+    type Factory = S::Factory;
     type State = State;
     type Output = (SyntaxKind, S::Output);
 
@@ -52,12 +52,12 @@ where S: SmartConstructors<State = State>,
       self.s.into_state()
     }
 
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
         self.s.token_factory_mut()
     }
 
 
-    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::Output {
+    fn make_token(&mut self, token: <Self::Factory as TokenFactory>::Token) -> Self::Output {
         compose(SyntaxKind::Token(token.kind()), self.s.make_token(token))
     }
 

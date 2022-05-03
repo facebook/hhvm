@@ -120,16 +120,23 @@ where
     <S as SmartConstructors>::Output: NodeType,
 {
     fn make(
-        _: Lexer<'a, S::TF>,
+        _: Lexer<'a, S::Factory>,
         _: ParserEnv,
         _: Context<Token<S>>,
         _: Vec<SyntaxError>,
         _: S,
     ) -> Self;
     fn add_error(&mut self, _: SyntaxError);
-    fn into_parts(self) -> (Lexer<'a, S::TF>, Context<Token<S>>, Vec<SyntaxError>, S);
-    fn lexer(&self) -> &Lexer<'a, S::TF>;
-    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::TF>;
+    fn into_parts(
+        self,
+    ) -> (
+        Lexer<'a, S::Factory>,
+        Context<Token<S>>,
+        Vec<SyntaxError>,
+        S,
+    );
+    fn lexer(&self) -> &Lexer<'a, S::Factory>;
+    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::Factory>;
     fn continue_from<P: ParserTrait<'a, S>>(&mut self, _: P);
 
     fn env(&self) -> &ParserEnv;
@@ -188,7 +195,7 @@ where
 
     fn next_token_with_tokenizer<F>(&mut self, tokenizer: F) -> Token<S>
     where
-        F: Fn(&mut Lexer<'a, S::TF>) -> Token<S>,
+        F: Fn(&mut Lexer<'a, S::Factory>) -> Token<S>,
     {
         let token = tokenizer(self.lexer_mut());
         if !self.skipped_tokens().is_empty() {
@@ -305,7 +312,9 @@ where
     }
 
     fn assert_xhp_body_token(&mut self, kind: TokenKind) -> S::Output {
-        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<'a, S::TF>| x.next_xhp_body_token())
+        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<'a, S::Factory>| {
+            x.next_xhp_body_token()
+        })
     }
 
     fn peek_token_with_lookahead(&self, lookahead: usize) -> Token<S> {
@@ -341,7 +350,7 @@ where
 
     fn assert_token_with_tokenizer<F>(&mut self, kind: TokenKind, tokenizer: F) -> S::Output
     where
-        F: Fn(&mut Lexer<'a, S::TF>) -> Token<S>,
+        F: Fn(&mut Lexer<'a, S::Factory>) -> Token<S>,
     {
         let token = self.next_token_with_tokenizer(tokenizer);
         if token.kind() != kind {
@@ -355,7 +364,7 @@ where
     }
 
     fn assert_token(&mut self, kind: TokenKind) -> S::Output {
-        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<'_, S::TF>| x.next_token())
+        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<'_, S::Factory>| x.next_token())
     }
 
     fn token_text(&self, token: &Token<S>) -> &'a str {

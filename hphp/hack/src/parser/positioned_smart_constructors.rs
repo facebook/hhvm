@@ -54,7 +54,7 @@ where
     S: SyntaxType<State> + Clone,
     State: StateType<S>,
 {
-    type TF = TF;
+    type Factory = TF;
     type State = State;
     type Output = S;
 
@@ -66,7 +66,7 @@ where
       self.state
     }
 
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
         &mut self.token_factory
     }
 
@@ -74,7 +74,7 @@ where
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_missing(self, offset)
     }
 
-    fn make_token(&mut self, offset: <Self::TF as TokenFactory>::Token) -> Self::Output {
+    fn make_token(&mut self, offset: <Self::Factory as TokenFactory>::Token) -> Self::Output {
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_token(self, offset)
     }
 

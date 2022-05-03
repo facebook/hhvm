@@ -33,7 +33,7 @@ pub trait FlattenSmartConstructors: SmartConstructors
        Self::zero(SyntaxKind::Missing)
     }
 
-    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::Output {
+    fn make_token(&mut self, token: <Self::Factory as TokenFactory>::Token) -> Self::Output {
         Self::zero(SyntaxKind::Token(token.kind()))
     }
 

@@ -37,18 +37,18 @@ impl<S> WithKind<S> {
     }
 }
 
-impl<S, State> SmartConstructors for WithKind<S>
-where S: SmartConstructors<State = State>,
+impl<S, St> SmartConstructors for WithKind<S>
+where S: SmartConstructors<State = St>,
 {
     type Factory = S::Factory;
-    type State = State;
+    type State = St;
     type Output = (SyntaxKind, S::Output);
 
-    fn state_mut(&mut self) -> &mut State {
+    fn state_mut(&mut self) -> &mut St {
         self.s.state_mut()
     }
 
-    fn into_state(self) -> State {
+    fn into_state(self) -> St {
       self.s.into_state()
     }
 

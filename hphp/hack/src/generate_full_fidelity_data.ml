@@ -1349,7 +1349,7 @@ module GenerateFFRustPositionedSmartConstructors = struct
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::Output {
-        <Self as SyntaxSmartConstructors<S, TF, State>>::make_%s(self, %s)
+        <Self as SyntaxSmartConstructors<S, TF, St>>::make_%s(self, %s)
     }\n\n"
       x.type_name
       args
@@ -1370,42 +1370,42 @@ use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
 
 #[derive(Clone)]
-pub struct PositionedSmartConstructors<S, TF, State: StateType<S>> {
-    pub state: State,
+pub struct PositionedSmartConstructors<S, TF, St: StateType<S>> {
+    pub state: St,
     token_factory: TF,
     phantom_s: std::marker::PhantomData<S>,
 }
 
-impl<S, TF, State: StateType<S>> PositionedSmartConstructors<S, TF, State> {
-    pub fn new(state: State, token_factory: TF) -> Self {
+impl<S, TF, St: StateType<S>> PositionedSmartConstructors<S, TF, St> {
+    pub fn new(state: St, token_factory: TF) -> Self {
         Self { state, token_factory, phantom_s: std::marker::PhantomData }
     }
 }
 
-impl<S, TF, State> SyntaxSmartConstructors<S, TF, State> for PositionedSmartConstructors<S, TF, State>
+impl<S, TF, St> SyntaxSmartConstructors<S, TF, St> for PositionedSmartConstructors<S, TF, St>
 where
     TF: TokenFactory<Token = S::Token>,
-    State: StateType<S>,
-    S: SyntaxType<State> + Clone,
+    St: StateType<S>,
+    S: SyntaxType<St> + Clone,
     S::Token: LexableToken,
 {}
 
-impl<S, TF, State> SmartConstructors for PositionedSmartConstructors<S, TF, State>
+impl<S, TF, St> SmartConstructors for PositionedSmartConstructors<S, TF, St>
 where
     TF: TokenFactory<Token = S::Token>,
     S::Token: LexableToken,
-    S: SyntaxType<State> + Clone,
-    State: StateType<S>,
+    S: SyntaxType<St> + Clone,
+    St: StateType<S>,
 {
     type Factory = TF;
-    type State = State;
+    type State = St;
     type Output = S;
 
-    fn state_mut(&mut self) -> &mut State {
+    fn state_mut(&mut self) -> &mut St {
        &mut self.state
     }
 
-    fn into_state(self) -> State {
+    fn into_state(self) -> St {
       self.state
     }
 
@@ -1414,15 +1414,15 @@ where
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::Output {
-        <Self as SyntaxSmartConstructors<S, TF, State>>::make_missing(self, offset)
+        <Self as SyntaxSmartConstructors<S, TF, St>>::make_missing(self, offset)
     }
 
     fn make_token(&mut self, offset: <Self::Factory as TokenFactory>::Token) -> Self::Output {
-        <Self as SyntaxSmartConstructors<S, TF, State>>::make_token(self, offset)
+        <Self as SyntaxSmartConstructors<S, TF, St>>::make_token(self, offset)
     }
 
     fn make_list(&mut self, lst: Vec<Self::Output>, offset: usize) -> Self::Output {
-        <Self as SyntaxSmartConstructors<S, TF, State>>::make_list(self, lst, offset)
+        <Self as SyntaxSmartConstructors<S, TF, St>>::make_list(self, lst, offset)
     }
 CONSTRUCTOR_METHODS}
 "
@@ -1652,10 +1652,10 @@ use parser_core_types::{
 use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
-pub trait SyntaxSmartConstructors<S: SyntaxType<State>, TF: TokenFactory<Token = S::Token>, State = NoState>:
-    SmartConstructors<State = State, Output=S, Factory = TF>
+pub trait SyntaxSmartConstructors<S: SyntaxType<St>, TF: TokenFactory<Token = S::Token>, St = NoState>:
+    SmartConstructors<State = St, Output=S, Factory = TF>
 where
-    State: StateType<S>,
+    St: StateType<S>,
 {
     fn make_missing(&mut self, offset: usize) -> Self::Output {
         let r = Self::Output::make_missing(self.state_mut(), offset);
@@ -1671,7 +1671,7 @@ where
 
     fn make_list(&mut self, items: Vec<Self::Output>, offset: usize) -> Self::Output {
         if items.is_empty() {
-            <Self as SyntaxSmartConstructors<S, TF, State>>::make_missing(self, offset)
+            <Self as SyntaxSmartConstructors<S, TF, St>>::make_missing(self, offset)
         } else {
             let item_refs: Vec<_> = items.iter().collect();
             self.state_mut().next(&item_refs);
@@ -2145,18 +2145,18 @@ impl<S> WithKind<S> {
     }
 }
 
-impl<S, State> SmartConstructors for WithKind<S>
-where S: SmartConstructors<State = State>,
+impl<S, St> SmartConstructors for WithKind<S>
+where S: SmartConstructors<State = St>,
 {
     type Factory = S::Factory;
-    type State = State;
+    type State = St;
     type Output = (SyntaxKind, S::Output);
 
-    fn state_mut(&mut self) -> &mut State {
+    fn state_mut(&mut self) -> &mut St {
         self.s.state_mut()
     }
 
-    fn into_state(self) -> State {
+    fn into_state(self) -> St {
       self.s.into_state()
     }
 

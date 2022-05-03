@@ -23,10 +23,10 @@ use parser_core_types::{
 use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
-pub trait SyntaxSmartConstructors<S: SyntaxType<State>, TF: TokenFactory<Token = S::Token>, State = NoState>:
-    SmartConstructors<State = State, Output=S, Factory = TF>
+pub trait SyntaxSmartConstructors<S: SyntaxType<St>, TF: TokenFactory<Token = S::Token>, St = NoState>:
+    SmartConstructors<State = St, Output=S, Factory = TF>
 where
-    State: StateType<S>,
+    St: StateType<S>,
 {
     fn make_missing(&mut self, offset: usize) -> Self::Output {
         let r = Self::Output::make_missing(self.state_mut(), offset);
@@ -42,7 +42,7 @@ where
 
     fn make_list(&mut self, items: Vec<Self::Output>, offset: usize) -> Self::Output {
         if items.is_empty() {
-            <Self as SyntaxSmartConstructors<S, TF, State>>::make_missing(self, offset)
+            <Self as SyntaxSmartConstructors<S, TF, St>>::make_missing(self, offset)
         } else {
             let item_refs: Vec<_> = items.iter().collect();
             self.state_mut().next(&item_refs);

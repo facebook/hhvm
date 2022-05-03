@@ -334,6 +334,13 @@ OffsetList instrJumpOffsets(const PC origPC) {
   auto const op = decode_op(pc);
 
   OffsetList targets;
+  if (!instrIsControlFlow(op)) {
+    DEBUG_ONLY constexpr std::array<uint8_t, kMaxHhbcImms>
+      empty = { 0, 0, 0, 0, 0 };
+    assertx(argTypes[size_t(op)] == empty);
+    return targets;
+  }
+
   if (isFCall(op)) {
     auto const offset = decodeFCallArgs(op, pc, nullptr).asyncEagerOffset;
     if (offset != kInvalidOffset) targets.emplace_back(offset);

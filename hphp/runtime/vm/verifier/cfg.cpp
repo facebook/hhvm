@@ -72,29 +72,34 @@ void GraphBuilder::linkBlocks() {
   block->id = m_graph->block_count++;
   for (InstrRange i = funcInstrs(m_func); !i.empty(); ) {
     PC pc = i.popFront();
-    block->last = pc;
-    if (isCF(pc)) {
-      int i = 0;
-      auto const targets = instrJumpTargets(bc, pc - bc);
-      for (auto it = targets.rbegin(); it != targets.rend(); ++it) {
-        succs(block)[numSuccBlocks(block) - 1 - i] = at(*it);
-        ++i;
-      }
-    }
     PC next_pc = !i.empty() ? i.front() : m_func.at(m_func.past());
     Block* next = at(next_pc);
-    if (next) {
-      block->next_linear = next;
-      block->end = next_pc;
-      if (!isTF(pc)) {
-        assertx(numSuccBlocks(block) > 0);
-        succs(block)[0] = next;
-      }
-      block = next;
-      block->id = m_graph->block_count++;
+    if (!i.empty() && next == nullptr) continue;
+
+    block->last = pc;
+    block->end = next_pc;
+    block->next_linear = next;
+
+    auto const targets = instrJumpTargets(bc, pc - bc);
+    block->succ_count = (!isTF(pc) ? 1 : 0) + targets.size();
+    block->succs = new (m_arena) Block*[block->succ_count];
+    auto succs = block->succs;
+
+    if (!isTF(pc)) {
+      assertx(next);
+      *(succs++) = next;
     }
+
+    for (auto target : targets) {
+      assertx(at(target));
+      *(succs++) = at(target);
+    }
+
+    assertx(block->succs + block->succ_count == succs);
+
+    block = next;
+    if (block) block->id = m_graph->block_count++;
   }
-  block->end = m_func.at(m_func.past());
 }
 
 /**
@@ -138,15 +143,6 @@ void GraphBuilder::linkExBlocks() {
   }
 }
 
-Block** GraphBuilder::succs(Block* b) {
-  if (!b->succs) {
-    int num_succs = numSuccBlocks(b);
-    Block** s = b->succs = new (m_arena) Block*[num_succs];
-    memset(s, 0, sizeof(*s) * num_succs);
-  }
-  return b->succs;
-}
-
 Block* GraphBuilder::createBlock(PC pc) {
   BlockMap::iterator i = m_blocks.find(pc);
   if (i != m_blocks.end()) return i->second;
@@ -167,7 +163,7 @@ bool Block::reachable(Block* from, Block* to,
    if (visited[from->id]) return false;
    visited[from->id] = true;
    if (from->id == to->id) return true;
-   for (int i = 0; i < numSuccBlocks(from); i++) {
+   for (int i = 0; i < from->succ_count; i++) {
      if (reachable(from->succs[i], to, visited)) return true;
    }
    if (from->exn) return reachable(from->exn, to, visited);

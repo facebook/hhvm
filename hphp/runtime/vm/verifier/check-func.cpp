@@ -1772,9 +1772,8 @@ bool FuncChecker::checkFlow() {
 
 bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   bool ok = true;
-  int succs = numSuccBlocks(b);
 
-  if (isIter(b->last) && succs == 2) {
+  if (isIter(b->last) && b->succ_count == 2) {
     // IterInit* and IterNext*, Both implicitly free their iterator variable
     // on the loop-exit path.  Compute the iterator state on the "taken" path;
     // the fall-through path has the opposite state.
@@ -1795,11 +1794,11 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     }
     ok &= checkEdge(b, *cur, b->succs[0]);
     cur->iters[id] = save;
-  } else if (peek_op(b->last) == OpMemoGet && numSuccBlocks(b) == 2) {
+  } else if (peek_op(b->last) == OpMemoGet && b->succ_count == 2) {
     ok &= checkEdge(b, *cur, b->succs[0]);
     --cur->stklen;
     ok &= checkEdge(b, *cur, b->succs[1]);
-  } else if (peek_op(b->last) == OpMemoGetEager && numSuccBlocks(b) == 3) {
+  } else if (peek_op(b->last) == OpMemoGetEager && b->succ_count == 3) {
     ok &= checkEdge(b, *cur, b->succs[0]);
     --cur->stklen;
     ok &= checkEdge(b, *cur, b->succs[1]);
@@ -1815,7 +1814,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     }
   }
 
-  for (int i = 0; i < succs; i++) {
+  for (int i = 0; i < b->succ_count; i++) {
     auto const t = b->succs[i];
     if (t && offset(t->start) == 0) {
       boost::dynamic_bitset<> visited(m_graph->block_count);
@@ -1833,7 +1832,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     ok = false;
   }
 
-  if (succs == 0 && cur->silences.find_first() != cur->silences.npos &&
+  if (b->succ_count == 0 && cur->silences.find_first() != cur->silences.npos &&
       !b->exn) {
     error("Error reporting was silenced at end of terminal block B%d\n", b->id);
     return false;

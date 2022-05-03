@@ -219,6 +219,7 @@
  (name typing_wellformedness)
  (wrapped false)
  (modules
+  ancestor_route
   trait_reuse_check
   typing_extends
   typing_inheritance

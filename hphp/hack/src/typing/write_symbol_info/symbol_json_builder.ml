@@ -41,6 +41,59 @@ let process_source_text _ctx prog File_info.{ path; source_text; _ } =
     |> snd
   | _ -> prog
 
+module PosMap = WrappedMap.Make (struct
+  let compare = Pos.compare
+
+  type t = Pos.t
+end)
+
+let xrefs_map_to_pos_map
+    (file_xrefs : (Hh_json.json * Pos.t list) Fact_id.Map.t SMap.t) :
+    Hh_json.json PosMap.t =
+  let res = ref PosMap.empty in
+  let f _fact_id (decl_json, pos_list) =
+    List.iter pos_list ~f:(fun pos -> res := PosMap.add pos decl_json !res)
+  in
+  SMap.iter (fun _filepath fact_map -> Fact_id.Map.iter f fact_map) file_xrefs;
+  !res
+
+let call_handler progress_ref (map_pos_decl : Hh_json.json PosMap.t) =
+  object (_self)
+    inherit Tast_visitor.handler_base
+
+    method! at_Call _env (_, callee_pos, _) _targs args _unpack_arg =
+      let f (_, (_, arg_pos, exp)) =
+        let exp_json =
+          match exp with
+          | Aast.String s
+            when String.for_all ~f:(fun c -> Caml.Char.code c < 127) s ->
+            (* TODO make this more general *)
+            Some (Symbol_build_json.build_argument_lit_json s)
+          | Aast.Id (id_pos, _id) ->
+            Option.map
+              ~f:Symbol_build_json.build_argument_xref_json
+              (PosMap.find_opt id_pos map_pos_decl)
+          | _ -> None
+        in
+        (exp_json, arg_pos)
+      in
+      let call_args =
+        Symbol_build_json.build_call_arguments_json (List.map args ~f)
+      in
+      let (_fact_id, prog) =
+        Add_fact.file_call callee_pos ~call_args !progress_ref
+      in
+      progress_ref := prog
+  end
+
+let process_calls ctx tast map_pos_decl progress =
+  let progress_ref = ref progress in
+  let visitor =
+    Tast_visitor.iter_with [call_handler progress_ref map_pos_decl]
+  in
+  visitor#go ctx tast;
+  !progress_ref
+
 let is_enum_or_enum_class = function
   | Ast_defs.Cenum
   | Ast_defs.Cenum_class _ ->
@@ -494,14 +547,13 @@ let process_decls ctx prog File_info.{ path; tast; source_text; cst } =
   in
   Add_fact.file_decls abspath decls prog |> snd
 
-let process_xrefs ctx prog File_info.{ path; tast; _ } =
+let process_xrefs_and_calls ctx prog File_info.{ path; tast; _ } =
   let open SymbolDefinition in
   let open SymbolOccurrence in
   let symbols = IdentifySymbolService.all_symbols ctx tast in
   let filepath = Relative_path.to_absolute path in
   Fact_acc.set_ownership_unit prog (Some filepath);
-  (* file_xrefs : (Hh_json.json * Relative_path.t Pos.pos list) Fact_id.Map.t SMap.t *)
-  let (file_xrefs, prog) =
+  let ((file_xrefs : (Hh_json.json * Pos.t list) Fact_id.Map.t SMap.t), prog) =
     List.fold symbols ~init:(SMap.empty, prog) ~f:(fun (xrefs, prog) occ ->
         if occ.is_declaration then
           (xrefs, prog)
@@ -563,13 +615,23 @@ let process_xrefs ctx prog File_info.{ path; tast; _ } =
                 process_container_xref con_kind name pos (xrefs, prog)
               | _ -> (xrefs, prog))))
   in
-  SMap.fold
-    (fun path target_map acc -> Add_fact.file_xrefs path target_map acc |> snd)
-    file_xrefs
-    prog
+  let prog =
+    SMap.fold
+      (fun path target_map acc ->
+        Add_fact.file_xrefs path target_map acc |> snd)
+      file_xrefs
+      prog
+  in
+  (* maps symbol positions to the json representation of the corresponding XRefTarget
+
+     TODO refactoring: compute pos_map together with file_xrefs.
+     I suspect that the string key (file path) in SMap.t is redundant and
+     could be simplified in the process. *)
+  let pos_map = xrefs_map_to_pos_map file_xrefs in
+  process_calls ctx tast pos_map prog
 
 let process_xrefs_all_files ctx files_info progress =
-  List.fold files_info ~init:progress ~f:(process_xrefs ctx)
+  List.fold files_info ~init:progress ~f:(process_xrefs_and_calls ctx)
 
 let process_decls_all_files ctx files_info progress =
   List.fold files_info ~init:progress ~f:(process_decls ctx)

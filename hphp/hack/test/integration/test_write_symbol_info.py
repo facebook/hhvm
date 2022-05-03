@@ -19,6 +19,7 @@ from glean.schema.hack.types import (
     EnumDeclaration,
     EnumDefinition,
     Enumerator,
+    FileCall,
     FileDeclarations,
     FileXRefs,
     FunctionDeclaration,
@@ -128,6 +129,7 @@ max_workers = 2
 
     def predicate_name_to_type(self, predicate_name: str) -> Optional[Type[Struct]]:
         predicate_dict = {
+            "hack.FileCall": FileCall,
             "hack.ClassConstDeclaration": ClassConstDeclaration,
             "hack.ClassConstDefinition": ClassConstDefinition,
             "hack.ClassDeclaration": ClassDeclaration,

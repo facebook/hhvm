@@ -564,3 +564,15 @@ let method_occ receiver_class name progress =
     Predicate.(Hack MethodOccurrence)
     (JSON_Object json)
     progress
+
+let file_call pos ~call_args progress =
+  let filepath = Relative_path.to_absolute (Pos.filename pos) in
+  let json =
+    JSON_Object
+      [
+        ("file", Build_json.build_file_json_nested filepath);
+        ("callee_span", Build_json.build_bytespan_json pos);
+        ("call_args", JSON_Array call_args);
+      ]
+  in
+  Fact_acc.add_fact Predicate.(Hack FileCall) json progress

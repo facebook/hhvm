@@ -51,6 +51,14 @@ val build_gen_code_json :
   class_:string option ->
   Hh_json.json
 
+val build_call_arguments_json :
+  (Hh_json.json option * Pos.t) list -> Hh_json.json list
+
+(* expects a utf-8 string *)
+val build_argument_lit_json : string -> Hh_json.json
+
+val build_argument_xref_json : Hh_json.json -> Hh_json.json
+
 val build_is_async_json : Ast_defs.fun_kind -> Hh_json.json
 
 val build_signature_json :

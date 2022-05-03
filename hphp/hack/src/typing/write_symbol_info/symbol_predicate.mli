@@ -39,6 +39,7 @@ type hack =
   | TypeConstDefinition
   | TypedefDeclaration
   | TypedefDefinition
+  | FileCall
 
 type src = FileLines
 

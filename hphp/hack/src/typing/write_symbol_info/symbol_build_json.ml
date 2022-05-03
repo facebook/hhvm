@@ -15,6 +15,11 @@ module Fact_id = Symbol_fact_id
 
 let build_id_json fact_id = JSON_Object [("id", Fact_id.to_json_number fact_id)]
 
+let build_argument_lit_json lit =
+  Hh_json.JSON_Object [("lit", Hh_json.JSON_Object [("key", JSON_String lit)])]
+
+let build_argument_xref_json xref = Hh_json.JSON_Object [("xref", xref)]
+
 let build_file_json_nested filepath =
   JSON_Object [("key", JSON_String filepath)]
 
@@ -115,6 +120,23 @@ let build_rel_bytespan_json offset len =
       ("offset", JSON_Number (string_of_int offset));
       ("length", JSON_Number (string_of_int len));
     ]
+
+let build_call_arguments_json arguments =
+  let argument_json span arg_opt =
+    JSON_Object
+      (("span", span)
+       ::
+       (match arg_opt with
+       | Some json_obj -> [("argument", json_obj)]
+       | None -> []))
+  in
+  let f (json_fields, last_start) (arg_opt, pos) =
+    let (start, _) = Pos.info_raw pos in
+    let length = Pos.length pos in
+    let rel_span = build_rel_bytespan_json (start - last_start) length in
+    (argument_json rel_span arg_opt :: json_fields, start)
+  in
+  List.fold arguments ~init:([], 0) ~f |> fst |> List.rev
 
 let build_constraint_kind_json kind =
   let num =

@@ -105,7 +105,7 @@ let go
       workers
       ~job:(recheck_job ctx out_dir root_path hhi_path ownership)
       ~merge:(fun f1 f2 -> f1 +. f2)
-      ~next:(Bucket.make ~num_workers ~max_size:150 files)
+      ~next:(Bucket.make ~num_workers ~max_size:115 files)
       ~neutral:0.
   in
   log_elapsed "Processed all batches (cumulated time) in " cumulated_elapsed;

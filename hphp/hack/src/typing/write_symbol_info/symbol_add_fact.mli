@@ -173,6 +173,12 @@ val file_xrefs :
 val file_decls :
   string -> Hh_json.json list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
+val file_call :
+  Relative_path.t Pos.pos ->
+  call_args:Hh_json.json list ->
+  Fact_acc.t ->
+  Fact_id.t * Fact_acc.t
+
 val method_occ :
   SymbolOccurrence.receiver_class ->
   string ->

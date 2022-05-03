@@ -43,6 +43,7 @@ type hack =
   | TypeConstDefinition
   | TypedefDeclaration
   | TypedefDefinition
+  | FileCall
 [@@deriving ord]
 
 type src = FileLines [@@deriving ord]
@@ -94,6 +95,7 @@ let hack_to_string = function
   | TypeConstDefinition -> "TypeConstDefinition"
   | TypedefDeclaration -> "TypedefDeclaration"
   | TypedefDefinition -> "TypedefDefinition"
+  | FileCall -> "FileCall"
 
 (* List of all predicates, in the order in which they should appear in the JSON.
    This guarantee that facts are introduced before they are referenced. *)
@@ -131,6 +133,7 @@ let ordered_all =
     Hack MethodOverrides;
     Hack FileXRefs;
     Hack FileDeclarations;
+    Hack FileCall;
     Src FileLines;
   ]
 

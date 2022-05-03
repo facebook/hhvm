@@ -20,3 +20,10 @@ type t = {
 let init : t = { xa_tag = None; xa_has_default = false }
 
 let map_tag attr ~f = { attr with xa_tag = f attr.xa_tag }
+
+let is_required attr =
+  match attr.xa_tag with
+  | None
+  | Some LateInit ->
+    false
+  | Some Required -> true

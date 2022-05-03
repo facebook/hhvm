@@ -15,6 +15,17 @@ type member_change =
   | Private_change (* Added/removed a private member *)
 [@@deriving eq, show { with_path = false }]
 
+(** Order member_change values by corresponding fanout size. *)
+let ord_member_change = function
+  | Private_change -> 0
+  | Modified -> 1
+  | Changed_inheritance -> 2
+  | Added -> 3
+  | Removed -> 4
+
+(** Compare member_change values by corresponding fanout size. *)
+let compare_member_change x y = ord_member_change x - ord_member_change y
+
 (* Returns true if the member changed in a way that affects what a descendant
    might inherit. This is trivially true for Added/Removed. The
    Changed_inheritance case captures situations where member metadata is used to
@@ -60,6 +71,8 @@ let method_or_property_change_affects_descendants member_change =
   | Private_change ->
     false
 
+type constructor_change = member_change option [@@deriving eq, ord]
+
 type member_diff = {
   consts: member_change SMap.t;
   typeconsts: member_change SMap.t;
@@ -67,7 +80,7 @@ type member_diff = {
   sprops: member_change SMap.t;
   methods: member_change SMap.t;
   smethods: member_change SMap.t;
-  constructor: member_change option;
+  constructor: constructor_change;
 }
 [@@deriving eq]
 
@@ -132,6 +145,13 @@ let pp_member_diff fmt member_diff =
 
 let show_member_diff member_diff =
   Format.asprintf "%a" pp_member_diff member_diff
+
+(** The maximum of two constructor changes is the change which has the largest fanout. *)
+let max_constructor_change left right =
+  if compare_constructor_change left right >= 0 then
+    left
+  else
+    right
 
 type minor_change = {
   mro_positions_changed: bool;

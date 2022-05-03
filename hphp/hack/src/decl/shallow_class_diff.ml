@@ -39,27 +39,46 @@ module type Member_S = sig
   val diff : t -> t -> member_change option
 
   val is_private : t -> bool
+
+  (** Whether adding this member implies that the constructor should be considered modified.
+    This is the case for example for required XHP attributes. *)
+  val constructor_is_modified_when_added : t -> bool
 end
 
+(** Returns the diff of two member lists, plus a diff on the constructor if the member changes
+  impact the constructor. *)
 let diff_members
     (type member)
     (members_left_right : (member option * member option) SMap.t)
     (module Member : Member_S with type t = member)
-    (classish_kind : Ast_defs.classish_kind) : member_change SMap.t =
-  SMap.fold members_left_right ~init:SMap.empty ~f:(fun name old_and_new diff ->
+    (classish_kind : Ast_defs.classish_kind) :
+    member_change SMap.t * constructor_change =
+  SMap.fold
+    members_left_right
+    ~init:(SMap.empty, None)
+    ~f:(fun name old_and_new (diff, constructor_change) ->
       match old_and_new with
       | (None, None) -> failwith "merge_member_lists added (None, None)"
       | (Some member, None)
       | (None, Some member)
         when (not Ast_defs.(is_c_trait classish_kind))
              && Member.is_private member ->
-        SMap.add diff ~key:name ~data:Private_change
-      | (Some _, None) -> SMap.add diff ~key:name ~data:Removed
-      | (None, Some _) -> SMap.add diff ~key:name ~data:Added
+        (SMap.add diff ~key:name ~data:Private_change, constructor_change)
+      | (Some _, None) ->
+        (SMap.add diff ~key:name ~data:Removed, constructor_change)
+      | (None, Some m) ->
+        ( SMap.add diff ~key:name ~data:Added,
+          max_constructor_change
+            constructor_change
+            (if Member.constructor_is_modified_when_added m then
+              Some Modified
+            else
+              None) )
       | (Some old_member, Some new_member) ->
-        Member.diff old_member new_member
-        |> Option.value_map ~default:diff ~f:(fun ch ->
-               SMap.add diff ~key:name ~data:ch))
+        ( Member.diff old_member new_member
+          |> Option.value_map ~default:diff ~f:(fun ch ->
+                 SMap.add diff ~key:name ~data:ch),
+          constructor_change ))
 
 module ClassConst : Member_S with type t = shallow_class_const = struct
   type t = shallow_class_const
@@ -77,6 +96,8 @@ module ClassConst : Member_S with type t = shallow_class_const = struct
       Some Modified
 
   let is_private _ = false
+
+  let constructor_is_modified_when_added _ = false
 end
 
 module TypeConst : Member_S with type t = shallow_typeconst = struct
@@ -96,6 +117,8 @@ module TypeConst : Member_S with type t = shallow_typeconst = struct
       | (_, (TCAbstract _ | TCConcrete _)) -> Some Changed_inheritance
 
   let is_private _ = false
+
+  let constructor_is_modified_when_added _ = false
 end
 
 module Prop : Member_S with type t = shallow_prop = struct
@@ -116,6 +139,11 @@ module Prop : Member_S with type t = shallow_prop = struct
 
   let is_private p : bool =
     Aast_defs.equal_visibility p.sp_visibility Aast_defs.Private
+
+  let constructor_is_modified_when_added p =
+    match p.sp_xhp_attr with
+    | None -> false
+    | Some attr -> Xhp_attribute.is_required attr
 end
 
 module Method : Member_S with type t = shallow_method = struct
@@ -136,6 +164,8 @@ module Method : Member_S with type t = shallow_method = struct
 
   let is_private m : bool =
     Aast_defs.equal_visibility m.sm_visibility Aast_defs.Private
+
+  let constructor_is_modified_when_added _ = false
 end
 
 let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =
@@ -158,78 +188,105 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
   let diff =
     let get_name x = snd x.scc_name in
     let consts = merge_member_lists get_name c1.sc_consts c2.sc_consts in
-    let consts =
+    let (consts, constructor_change) =
       diff_members
         consts
         (module ClassConst : Member_S with type t = shallow_class_const)
         kind
     in
-    { diff with consts }
+    {
+      diff with
+      consts;
+      constructor = max_constructor_change diff.constructor constructor_change;
+    }
   in
   let diff =
     let get_name x = snd x.stc_name in
     let typeconsts =
       merge_member_lists get_name c1.sc_typeconsts c2.sc_typeconsts
     in
-    let typeconsts =
+    let (typeconsts, constructor_change) =
       diff_members
         typeconsts
         (module TypeConst : Member_S with type t = shallow_typeconst)
         kind
     in
-    { diff with typeconsts }
+    {
+      diff with
+      typeconsts;
+      constructor = max_constructor_change diff.constructor constructor_change;
+    }
   in
   let diff =
     let get_name x = snd x.sp_name in
     let props = merge_member_lists get_name c1.sc_props c2.sc_props in
-    let props =
+    let (props, constructor_change) =
       diff_members
         props
         (module Prop : Member_S with type t = shallow_prop)
         kind
     in
-    { diff with props }
+    {
+      diff with
+      props;
+      constructor = max_constructor_change diff.constructor constructor_change;
+    }
   in
   let diff =
     let get_name x = snd x.sp_name in
     let sprops = merge_member_lists get_name c1.sc_sprops c2.sc_sprops in
-    let sprops =
+    let (sprops, constructor_change) =
       diff_members
         sprops
         (module Prop : Member_S with type t = shallow_prop)
         kind
     in
-    { diff with sprops }
+    {
+      diff with
+      sprops;
+      constructor = max_constructor_change diff.constructor constructor_change;
+    }
   in
   let diff =
     let get_name x = snd x.sm_name in
     let methods = merge_member_lists get_name c1.sc_methods c2.sc_methods in
-    let methods =
+    let (methods, constructor_change) =
       diff_members
         methods
         (module Method : Member_S with type t = shallow_method)
         kind
     in
-    { diff with methods }
+    {
+      diff with
+      methods;
+      constructor = max_constructor_change diff.constructor constructor_change;
+    }
   in
   let diff =
     let get_name x = snd x.sm_name in
     let smethods =
       merge_member_lists get_name c1.sc_static_methods c2.sc_static_methods
     in
-    let smethods =
+    let (smethods, constructor_change) =
       diff_members
         smethods
         (module Method : Member_S with type t = shallow_method)
         kind
     in
-    { diff with smethods }
+    {
+      diff with
+      smethods;
+      constructor = max_constructor_change diff.constructor constructor_change;
+    }
   in
   let diff =
     let constructor =
       diff_constructor c1 c2 c1.sc_constructor c2.sc_constructor
     in
-    { diff with constructor }
+    {
+      diff with
+      constructor = max_constructor_change diff.constructor constructor;
+    }
   in
   diff
 

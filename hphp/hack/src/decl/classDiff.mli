@@ -15,6 +15,8 @@ type member_change =
   | Private_change (* Added/removed a private member *)
 [@@deriving eq, show]
 
+type constructor_change = member_change option [@@deriving eq]
+
 type member_diff = {
   consts: member_change SMap.t;
   typeconsts: member_change SMap.t;
@@ -22,7 +24,7 @@ type member_diff = {
   sprops: member_change SMap.t;
   methods: member_change SMap.t;
   smethods: member_change SMap.t;
-  constructor: member_change option;
+  constructor: constructor_change;
 }
 [@@deriving eq, show]
 
@@ -46,3 +48,7 @@ val is_empty_member_diff : member_diff -> bool
   This is the case for added and removed members, but also if e.g. abstractness or visibility
   has changed. *)
 val method_or_property_change_affects_descendants : member_change -> bool
+
+(** The maximum of two constructor changes is the change which has the largest fanout. *)
+val max_constructor_change :
+  constructor_change -> constructor_change -> constructor_change

@@ -20,3 +20,5 @@ type t = {
 val init : t
 
 val map_tag : t -> f:(tag option -> tag option) -> t
+
+val is_required : t -> bool

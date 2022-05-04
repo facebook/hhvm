@@ -2312,6 +2312,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "names"
+version = "0.0.0"
+dependencies = [
+ "derive_more",
+ "hh24_types",
+ "nohash-hasher",
+ "oxidized",
+ "oxidized_by_ref",
+ "rusqlite",
+ "typing_deps_hash",
+]
+
+[[package]]
 name = "namespaces_rust"
 version = "0.0.0"
 dependencies = [

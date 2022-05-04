@@ -88,6 +88,7 @@ members = [
     "src/naming",
     "src/naming/cargo/elaborate_namespaces",
     "src/naming/cargo/naming_attributes",
+    "src/naming/names_rust",
     "src/ocamlrep",
     "src/ocamlrep_custom",
     "src/ocamlrep_derive",

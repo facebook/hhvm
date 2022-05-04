@@ -1,0 +1,8 @@
+=== base errors ===
+No errors!
+=== changed errors ===
+foo.php:3:11,12: `switch` statement nonexhaustive; the following cases are missing: `C` (Typing[4019])
+  b.php:2:6,6: Enum declared here
+=== fanout ===
+Type E
+Type F

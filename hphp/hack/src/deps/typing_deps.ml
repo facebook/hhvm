@@ -67,6 +67,7 @@ module Dep = struct
       | SProp of string
       | Constructor
       | Const of string
+      | All
 
     let method_ name = Method name
 
@@ -79,6 +80,8 @@ module Dep = struct
     let constructor = Constructor
 
     let const name = Const name
+
+    let all = All
   end
 
   external hash1 : int -> string -> int = "hash1_ocaml" [@@noalloc]
@@ -119,6 +122,7 @@ module Dep = struct
     | Member.SProp name -> hash2 (dep_kind_to_enum KSProp) type_hash name
     | Member.Method name -> hash2 (dep_kind_to_enum KMethod) type_hash name
     | Member.SMethod name -> hash2 (dep_kind_to_enum KSMethod) type_hash name
+    | Member.All -> hash2 (dep_kind_to_enum KAllMembers) type_hash ""
 
   (* Keep in sync with the tags for `DepType` in `typing_deps_hash.rs`. *)
   let rec make : type a. a variant -> t = function
@@ -127,7 +131,6 @@ module Dep = struct
     | Fun name1 -> hash1 (dep_kind_to_enum KFun) name1
     | Type name1 -> hash1 (dep_kind_to_enum KType) name1
     | Extends name1 -> hash1 (dep_kind_to_enum KExtends) name1
-    | AllMembers name1 -> hash1 (dep_kind_to_enum KAllMembers) name1
     | GConstName name1 -> hash1 (dep_kind_to_enum KGConstName) name1
     | Module mname -> hash1 (dep_kind_to_enum KModule) mname
     (* Deps on members *)
@@ -142,6 +145,8 @@ module Dep = struct
       make_member_dep_from_type_dep (make (Type name1)) (Member.Method name2)
     | SMethod (name1, name2) ->
       make_member_dep_from_type_dep (make (Type name1)) (Member.SMethod name2)
+    | AllMembers name1 ->
+      make_member_dep_from_type_dep (make (Type name1)) Member.All
 
   let is_class x = x land 1 = 1
 

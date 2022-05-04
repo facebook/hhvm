@@ -108,10 +108,7 @@ let add_minor_change_fanout
           match change with
           | Added
           | Removed ->
-            AffectedDeps.mark_all_dependents_as_needing_recheck
-              mode
-              acc
-              (Dep.AllMembers class_name)
+            recheck_descendants_and_their_member_dependents acc Dep.Member.all
           | _ -> acc
         in
         add_member_fanout ~is_const:true (Dep.Member.const name) change acc)

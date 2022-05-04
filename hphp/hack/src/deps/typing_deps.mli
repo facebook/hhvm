@@ -77,6 +77,8 @@ module Dep : sig
     val constructor : t
 
     val const : string -> t
+
+    val all : t
   end
 
   (** A 63bit hash *)

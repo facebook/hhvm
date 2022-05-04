@@ -2429,13 +2429,13 @@ void remove_unused_local_names(
     php::WideFunc& func,
     const std::bitset<kMaxTrackedLocals>& usedLocalNames) {
   if (!options.RemoveUnusedLocalNames) return;
-  /*
-   * Closures currently rely on name information being available.
-   */
-  if (func->isClosureBody) return;
 
-  // For reified functions, skip the first non-param local
-  auto loc = func->locals.begin() + func->params.size() + (int)func->isReified;
+  // For reified functions, skip the first non-param local For closures skip
+  // capture params since they can contain captured reified generics that get
+  // looked up by local name.
+  auto const captures = func->isClosureBody ? closure_num_use_vars(func) : 0;
+  auto loc = func->locals.begin() + func->params.size()
+             + (int)func->isReified + captures;
   for (; loc != func->locals.end(); ++loc) {
     // We can't remove the names of volatile locals, as they can be accessed by
     // name.
@@ -2582,16 +2582,6 @@ void apply_remapping(const FuncAnalysis& ainfo, php::WideFunc& func,
 void remap_locals(const FuncAnalysis& ainfo, php::WideFunc& func,
                   LocalRemappingIndex&& remappingIndex) {
   if (!options.CompactLocalSlots) return;
-  /*
-   * Remapping locals in closures requires checking which ones
-   * are captured variables so we can remove the relevant properties,
-   * and then we'd have to mutate the CreateCl callsite, so we don't
-   * bother for now.
-   *
-   * Note: many closure bodies have unused $this local, because of
-   * some emitter quirk, so this might be worthwhile.
-   */
-  if (func->isClosureBody) return;
 
   auto& localInterference = remappingIndex.localInterference;
   auto const& pinned = remappingIndex.pinnedLocals;
@@ -2629,7 +2619,8 @@ void remap_locals(const FuncAnalysis& ainfo, php::WideFunc& func,
   };
 
   auto const isParam = [&](uint32_t i) {
-    return i < (func->params.size() + (int)func->isReified);
+    auto const captures = func->isClosureBody ? closure_num_use_vars(func) : 0;
+    return i < (func->params.size() + (int)func->isReified + captures);
   };
 
   std::vector<LocalId> remapping(maxRemappedLocals);
@@ -2894,9 +2885,11 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
    * at an entrypoint.  Such a local might be depending on the local slot being
    * Unset from the function entry.
    */
+  auto const captures = func->isClosureBody ? closure_num_use_vars(func) : 0;
+  auto const numParams = func->params.size() + (int)func->isReified + captures;
   std::bitset<kMaxTrackedLocals> paramSet;
   paramSet.set();
-  paramSet >>= kMaxTrackedLocals - (func->params.size() + (int)func->isReified);
+  paramSet >>= kMaxTrackedLocals - numParams;
   boost::dynamic_bitset<> entrypoint(func.blocks().size());
   entrypoint[func->mainEntry] = true;
   for (auto const blkId: func->dvEntries) {

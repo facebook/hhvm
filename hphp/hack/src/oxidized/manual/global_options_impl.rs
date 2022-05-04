@@ -108,7 +108,7 @@ impl Default for GlobalOptions {
             tco_ifc_enabled: vec![],
             tco_global_write_check_enabled: vec![],
             tco_global_write_check_functions_enabled: s_set::SSet::new(),
-            po_enable_enum_supertyping: false,
+            po_enable_enum_supertyping: true,
             po_interpret_soft_types_as_like_types: false,
             tco_enable_strict_string_concat_interp: false,
             tco_ignore_unsafe_cast: false,

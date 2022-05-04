@@ -14,7 +14,6 @@ let popt
     ~enable_xhp_class_modifier
     ~disable_xhp_element_mangling
     ~disable_enum_classes
-    ~enable_enum_supertyping
     ~interpret_soft_types_as_like_types
     ~everything_sdt =
   let enable_enum_classes = not disable_enum_classes in
@@ -29,9 +28,6 @@ let popt
     ParserOptions.with_enable_xhp_class_modifier po enable_xhp_class_modifier
   in
   let po = ParserOptions.with_enable_enum_classes po enable_enum_classes in
-  let po =
-    ParserOptions.with_enable_enum_supertyping po enable_enum_supertyping
-  in
   let po =
     ParserOptions.with_interpret_soft_types_as_like_types
       po
@@ -159,7 +155,6 @@ let () =
   let disable_xhp_element_mangling = ref false in
   let disable_enum_classes = ref false in
   let disallow_static_memoized = ref false in
-  let enable_enum_supertyping = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let everything_sdt = ref false in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
@@ -195,9 +190,6 @@ let () =
       ( "--disallow-static-memoized",
         Arg.Set disallow_static_memoized,
         " Disallow static memoized methods on non-final methods" );
-      ( "--enable-enum-supertyping",
-        Arg.Set enable_enum_supertyping,
-        "Enable the enum supertyping extension." );
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         "Interpret <<__Soft>> type hints as like types" );
@@ -288,7 +280,6 @@ let () =
         let enable_xhp_class_modifier = !enable_xhp_class_modifier in
         let disable_xhp_element_mangling = !disable_xhp_element_mangling in
         let disable_enum_classes = !disable_enum_classes in
-        let enable_enum_supertyping = !enable_enum_supertyping in
         let interpret_soft_types_as_like_types =
           !interpret_soft_types_as_like_types
         in
@@ -299,7 +290,6 @@ let () =
             ~enable_xhp_class_modifier
             ~disable_xhp_element_mangling
             ~disable_enum_classes
-            ~enable_enum_supertyping
             ~interpret_soft_types_as_like_types
             ~everything_sdt
         in

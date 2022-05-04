@@ -277,7 +277,6 @@ let parse_options () =
   let disallow_inst_meth = ref false in
   let use_direct_decl_parser = ref true in
   let disable_enum_classes = ref false in
-  let enable_enum_supertyping = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let enable_strict_string_concat_interp = ref false in
   let ignore_unsafe_cast = ref false in
@@ -678,9 +677,6 @@ let parse_options () =
       ( "--disable-enum-classes",
         Arg.Set disable_enum_classes,
         " Disable the enum classes extension." );
-      ( "--enable-enum-supertyping",
-        Arg.Set enable_enum_supertyping,
-        " Enable the enum supertyping extension." );
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         " Types declared with <<__Soft>> (runtime logs but doesn't throw) become like types."
@@ -914,7 +910,6 @@ let parse_options () =
         !enable_global_write_check_functions
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
       ~po_enable_enum_classes:(not !disable_enum_classes)
-      ~po_enable_enum_supertyping:!enable_enum_supertyping
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
       ~tco_enable_strict_string_concat_interp:
         !enable_strict_string_concat_interp

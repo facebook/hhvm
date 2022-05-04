@@ -101,7 +101,6 @@ let parse_options () =
   let enable_xhp_class_modifier = ref false in
   let allowed_fixme_codes_strict = ref None in
   let allowed_decl_fixme_codes = ref None in
-  let enable_enum_supertyping = ref false in
   let options =
     [
       ( "--extra-builtin",
@@ -141,9 +140,6 @@ let parse_options () =
         Arg.String
           (fun s -> allowed_decl_fixme_codes := Some (comma_string_to_iset s)),
         "List of fixmes that are allowed in declarations." );
-      ( "--enable-enum-supertyping",
-        Arg.Set enable_enum_supertyping,
-        "Enable the enum supertyping extension." );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -167,7 +163,6 @@ let parse_options () =
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~po_allowed_decl_fixme_codes:
         (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)
-      ~po_enable_enum_supertyping:!enable_enum_supertyping
       ()
   in
   Errors.allowed_fixme_codes_strict :=

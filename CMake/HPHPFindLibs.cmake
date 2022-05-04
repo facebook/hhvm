@@ -272,6 +272,7 @@ if (NOT WINDOWS)
   endif()
 endif()
 
+FIND_LIBRARY(PAM_LIB pam)
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
 if (LINUX OR FREEBSD)
   FIND_LIBRARY (RT_LIB rt)
@@ -402,6 +403,10 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} ${LIBXML2_LIBRARIES})
 
   target_link_libraries(${target} ${VISIBILITY} ${LBER_LIBRARIES})
+
+  if (PAM_LIB)
+    target_link_libraries(${target} ${VISIBILITY} ${PAM_LIB})
+  endif()
 
   if (CRYPT_LIB)
     target_link_libraries(${target} ${VISIBILITY} ${CRYPT_LIB})

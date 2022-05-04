@@ -23,7 +23,7 @@ function(HHVM_EXTENSION EXTNAME)
   get_target_property(TY ${EXTNAME} TYPE)
   # Don't install via target, because it triggers a re-link that doesn't
   # run the POST_BUILD custom command that embeds the systemlib on Linux.
-  install(CODE "FILE(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/hhvm/extensions/${HHVM_VERSION_BRANCH}\" TYPE ${TY} FILES \"${LOC}\")")
+  install(CODE "FILE(INSTALL DESTINATION \"${CMAKE_INSTALL_LIBDIR}/hhvm/extensions/${HHVM_VERSION_BRANCH}\" TYPE ${TY} FILES \"${LOC}\")")
 endfunction()
 
 function(embed_systemlibs TARGET DEST)

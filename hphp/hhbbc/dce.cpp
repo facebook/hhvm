@@ -1699,9 +1699,12 @@ void dce(Env& env, const bc::YieldK& op) { no_dce(env, op); }
 // Iterator ops don't really read their key and value output locals; they just
 // dec-ref the old value there before storing the new one (i.e. SetL semantics).
 //
-// We have to mark these values as live inside (else they could be
-// completely killed - that is, remap locals could reused their local
-// slot), but we don't have to may-read them.
+// We have to mark these values as live inside (else they could be completely
+// killed - that is, remap locals could reused their local slot), but we don't
+// have to may-read them.
+//
+// This is distinct from a kill, because the iter ops don't necessarily replace
+// the key or value local.  Eg. on the last iteration, they are left alone.
 void iter_dce(Env& env, const IterArgs& ita, LocalId baseId, int numPop) {
   addLocUse(env, ita.valId);
   if (ita.hasKey()) addLocUse(env, ita.keyId);
@@ -2101,17 +2104,28 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
       addInterference(visit_env, dceState.liveLocals | visit_env.liveInside);
     }
 
+    if (visit_env.states.unreachable()) {
+      FTRACE(4, "    Continuation of program has been marked unreachable.\n");
+      dceState.willBeUnsetLocals.set();
+    }
     // Any local that is live before this op, dead after this op may be worth
     // unsetting.  We check that we won't be inserting these UnsetLs as the
     // last op in a block to prevent a control flow ops from becoming non
     // terminal.
-    auto const unsetable = (~liveAfter) & dceState.liveLocals &
-                           (~dceState.willBeUnsetLocals);
+    auto const unsettable = (~liveAfter)
+                           & (dceState.liveLocals | visit_env.liveInside)
+                           & (~dceState.willBeUnsetLocals);
 
-    // If we have a PEI instruction, we should try to unset the unsetable
+    FTRACE(4, "    Unsettable: {} (before: {}, after: {}, will be unset {})\n",
+             loc_bits_string(func, unsettable),
+             loc_bits_string(func, dceState.liveLocals),
+             loc_bits_string(func, liveAfter),
+             loc_bits_string(func, dceState.willBeUnsetLocals));
+
+    // If we have a PEI instruction, we should try to unset the unsettable
     // locals at the start of the exception block.
     if (states.wasPEI() && blk->throwExit != NoBlockId) {
-      dceState.mayNeedUnsettingExn |= unsetable | liveAfter;
+      dceState.mayNeedUnsettingExn |= unsettable | liveAfter;
     }
     auto const opIsCntrlFlow = [&] {
       if (idx != blk->hhbcs.size() - 1) return false;
@@ -2121,12 +2135,16 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
       return b;
     };
     if (opIsCntrlFlow()) {
+      FTRACE(4, "    Propagating unsettable: {}\n",
+             loc_bits_string(func, unsettable));
       // We can't put Unsets in the last position in a block (control flow ops
       // must be last).  So when the last op in a block needs something unset
       // we flag it as maybe needing to be unset in all successors.
-      dceState.mayNeedUnsetting |= unsetable;
-    } else if (unsetable.any() && !visit_env.states.unreachable()) {
-      auto bcs = eager_unsets(unsetable, func, [&](uint32_t i) {
+      dceState.mayNeedUnsetting |= unsettable;
+    } else if (unsettable.any() && !visit_env.states.unreachable()) {
+      FTRACE(4, "    Trying to unset: {}\n",
+             loc_bits_string(func, unsettable));
+      auto bcs = eager_unsets(unsettable, func, [&](uint32_t i) {
         return states.localAfter(i);
       });
       if (!bcs.empty()) {
@@ -2146,8 +2164,6 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
       if (op.UnsetL.loc1 < kMaxTrackedLocals) {
         dceState.willBeUnsetLocals[op.UnsetL.loc1] = true;
       }
-    } else if (visit_env.states.unreachable()) {
-      dceState.willBeUnsetLocals.set();
     } else if (!(isMemberFinalOp(op.op) || isMemberDimOp(op.op))) {
       dceState.willBeUnsetLocals.reset();
     }
@@ -3053,6 +3069,9 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
 
   auto const predMayNeedUnsetting = [&] (BlockId bid){
     std::bitset<kMaxTrackedLocals> needUnsetting;
+    if (entrypoint[bid]) {
+      needUnsetting |= paramSet;
+    }
     for (auto const pid : nonThrowPreds[bid]) {
       needUnsetting |= locMayNeedUnsetting[pid];
     }
@@ -3074,11 +3093,11 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
     FTRACE(2, "block #{}\n", bid);
     auto const& stateIn = ai.bdata[bid].stateIn;
     auto ret = optimize_dce(visit, bid, stateIn, blockStates[bid]);
-    auto const unsetable = (~ret.locLiveIn) & predMayNeedUnsetting(bid) &
+    auto const unsettable = (~ret.locLiveIn) & predMayNeedUnsetting(bid) &
                            (~ret.willBeUnsetLocals);
-    if (unsetable.any() && ai.bdata[bid].stateIn.initialized &&
+    if (unsettable.any() && ai.bdata[bid].stateIn.initialized &&
         !ai.bdata[bid].stateIn.unreachable) {
-      auto bcs = eager_unsets(unsetable, func, [&](uint32_t i) {
+      auto bcs = eager_unsets(unsettable, func, [&](uint32_t i) {
         return ai.bdata[bid].stateIn.locals[i];
       });
       if (!bcs.empty()) {

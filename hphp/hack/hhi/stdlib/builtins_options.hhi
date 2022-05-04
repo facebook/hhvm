@@ -119,7 +119,7 @@ function gc_enable();
 <<__PHPStdLib>>
 function gc_disable();
 <<__PHPStdLib>>
-function gc_collect_cycles();
+function gc_collect_cycles()[leak_safe];
 <<__PHPStdLib>>
 function gc_mem_caches();
 <<__PHPStdLib>>

@@ -332,16 +332,6 @@ std::string RepoOptionsFlags::getAliasedNamespacesConfig() const {
   return folly::toJson(m_config);
 }
 
-std::uint32_t RepoOptionsFlags::getFactsFlags() const {
-  int32_t flags =
-    1 << 0 |  //php5_compat_mode
-    1 << 1 |  //hhvm_compat_mode
-    AllowNewAttributeSyntax   << 2 |
-    EnableXHPClassModifier    << 3 |
-    DisableXHPElementMangling << 4;
-  return flags;
-}
-
 std::uint32_t RepoOptionsFlags::getDeclFlags() const {
   int32_t flags =
     DisableXHPElementMangling << 0 |

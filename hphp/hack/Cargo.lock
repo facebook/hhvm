@@ -872,6 +872,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive_more"
+version = "0.99.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4fb810d30a7c1953f91334de7244731fc3f3c10d7fe163338a35b9f640960321"
+dependencies = [
+ "convert_case",
+ "proc-macro2",
+ "quote",
+ "rustc_version",
+ "syn",
+]
+
+[[package]]
 name = "difference"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1777,6 +1790,23 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
+name = "hh24_types"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "depgraph",
+ "derive_more",
+ "hh_hash",
+ "nohash-hasher",
+ "oxidized_by_ref",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "typing_deps_hash",
+]
 
 [[package]]
 name = "hh_autoimport_rust"

@@ -15,7 +15,7 @@ bumpalo = { version = "3.8", features = ["collections"] }
 dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 direct_decl_parser = { path = "../../../../parser/api/cargo/direct_decl_parser" }
 eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
-hh24_types = { path = "../../../../facebook/utils/hh24_types" }
+hh24_types = { path = "../../../../utils/hh24_types" }
 im = { version = "14.2", features = ["rayon", "serde"] }
 indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
 itertools = "0.10.3"

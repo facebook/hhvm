@@ -9,6 +9,6 @@ path = "hhvm_options.rs"
 
 [dependencies]
 anyhow = "1.0.56"
-clap = { version = "3.1.2", features = ["derive", "regex", "unicode", "wrap_help"] }
+clap = { version = "=3.1.8", features = ["derive", "regex", "unicode", "wrap_help"] }
 hdf = { path = "../hdf" }
 hhvm_runtime_options = { path = "hhvm_runtime_options/hhvm_runtime_options" }

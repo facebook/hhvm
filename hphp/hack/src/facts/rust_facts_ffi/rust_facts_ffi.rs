@@ -73,7 +73,7 @@ fn extract_facts_as_json_ffi(
     if decls.has_first_pass_parse_errors {
         None
     } else if mangle_xhp {
-        let facts = Facts::facts_of_decls(
+        let facts = Facts::from_decls(
             &decls.decls,
             decls.file_attributes,
             disable_xhp_element_mangling,
@@ -81,7 +81,7 @@ fn extract_facts_as_json_ffi(
         Some(facts.to_json(text))
     } else {
         without_xhp_mangling(|| {
-            let facts = Facts::facts_of_decls(
+            let facts = Facts::from_decls(
                 &decls.decls,
                 decls.file_attributes,
                 disable_xhp_element_mangling,

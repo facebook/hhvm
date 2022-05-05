@@ -383,26 +383,6 @@ pub fn hackc_create_direct_decl_parse_options(
     Box::new(DeclParserOptions(opts, bump))
 }
 
-impl compile_ffi::DeclResult {
-    fn new(
-        hash: u64,
-        serialized: Bytes,
-        decls: Decls,
-        attributes: FileAttributes,
-        bump: Bump,
-        has_errors: bool,
-    ) -> Self {
-        Self {
-            hash,
-            serialized: Box::new(serialized),
-            decls: Box::new(decls),
-            attributes: Box::new(attributes),
-            bump: Box::new(bump),
-            has_errors,
-        }
-    }
-}
-
 pub fn hackc_direct_decl_parse(
     opts: &DeclParserOptions,
     filename: &CxxString,
@@ -434,14 +414,14 @@ pub fn hackc_direct_decl_parse(
         .map_err(|e| format!("failed to serialize, error: {}", e))
         .unwrap();
 
-    compile_ffi::DeclResult::new(
-        position_insensitive_hash(&result.decls),
-        Bytes(ffi::Bytes::from(data)),
-        Decls(result.decls),
-        FileAttributes(result.file_attributes),
-        Bump(bump),
-        result.has_first_pass_parse_errors,
-    )
+    compile_ffi::DeclResult {
+        hash: position_insensitive_hash(&result.decls),
+        serialized: Box::new(Bytes(ffi::Bytes::from(data))),
+        decls: Box::new(Decls(result.decls)),
+        attributes: Box::new(FileAttributes(result.file_attributes)),
+        bump: Box::new(Bump(bump)),
+        has_errors: result.has_first_pass_parse_errors,
+    }
 }
 
 unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool {
@@ -545,16 +525,16 @@ pub fn hackc_decls_to_facts_cpp_ffi(
     decl_result: &compile_ffi::DeclResult,
     source_text: &CxxString,
 ) -> compile_ffi::FactsResult {
-    let text = source_text.as_bytes();
-    let (md5sum, sha1sum) = facts::md5_and_sha1(text);
     if decl_result.has_errors {
         compile_ffi::FactsResult {
             has_errors: true,
             ..Default::default()
         }
     } else {
+        let text = source_text.as_bytes();
+        let (md5sum, sha1sum) = facts::md5_and_sha1(text);
         let disable_xhp_element_mangling = ((1 << 0) & decl_flags) != 0;
-        let facts = compile_ffi::Facts::from(facts::Facts::facts_of_decls(
+        let facts = compile_ffi::Facts::from(facts::Facts::from_decls(
             &(*decl_result.decls).0,
             (*decl_result.attributes).0,
             disable_xhp_element_mangling,

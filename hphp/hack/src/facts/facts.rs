@@ -96,7 +96,7 @@ impl Facts {
         self.file_attributes.is_empty()
     }
 
-    pub fn facts_of_decls(
+    pub fn from_decls(
         decls: &Decls<'_>,
         file_attributes: &[&UserAttribute<'_>],
         disable_xhp_element_mangling: bool,

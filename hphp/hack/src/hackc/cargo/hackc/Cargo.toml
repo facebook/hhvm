@@ -10,7 +10,12 @@ path = "../../hackc/hackc.rs"
 
 [dependencies]
 anyhow = "1.0.56"
+bumpalo = { version = "3.8", features = ["collections"] }
 clap = { version = "=3.1.8", features = ["derive", "regex", "unicode", "wrap_help"] }
 compile = { path = "../../compile/cargo/compile" }
+direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
+facts_rust = { path = "../../../facts/cargo/facts_rust" }
 hhvm_options = { path = "../../../utils/hhvm_options" }
+options = { path = "../../compile/cargo/options" }
 oxidized = { path = "../../../oxidized" }
+oxidized_by_ref = { path = "../../../oxidized_by_ref" }

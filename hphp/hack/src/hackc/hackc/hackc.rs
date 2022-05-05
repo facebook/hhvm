@@ -2,11 +2,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 mod expr_trees;
+mod facts;
 
 use anyhow::Result;
 use clap::Parser;
 use compile::EnvFlags;
 use hhvm_options::HhvmOptions;
+use oxidized_by_ref::decl_parser_options::DeclParserOptions;
 use std::{
     fs,
     io::{BufRead, BufReader},
@@ -14,7 +16,7 @@ use std::{
 };
 
 /// Hack Compiler
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Default)]
 struct Opts {
     #[clap(flatten)]
     command: Command,
@@ -41,7 +43,7 @@ struct Opts {
 // Which command are we running? Every bool option here conflicts with
 // every other one. Using bool opts for backward compatibility with
 // hh_single_compile_cpp.
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Default)]
 struct Command {
     /// Compile source text to HackCUnit
     #[clap(long)]
@@ -100,6 +102,59 @@ impl Opts {
         }
         flags
     }
+
+    pub fn decl_opts<'a>(&self, arena: &'a bumpalo::Bump) -> DeclParserOptions<'a> {
+        // TODO (T118266805): get these from nearest .hhconfig enclosing each file.
+        // For now these are all hardcoded in hh_single_compile_cpp, so hardcode
+        // them here too.
+        const AUTO_NAMESPACE_MAP: &str = r#"{
+            "hhvm.aliased_namespaces": {
+                "global_value": {
+                    "Async": "HH\\Lib\\Async",
+                    "C": "FlibSL\\C",
+                    "Dict": "FlibSL\\Dict",
+                    "File": "HH\\Lib\\File",
+                    "IO": "HH\\Lib\\IO",
+                    "Keyset": "FlibSL\\Keyset",
+                    "Locale": "FlibSL\\Locale",
+                    "Math": "FlibSL\\Math",
+                    "OS": "HH\\Lib\\OS",
+                    "PHP": "FlibSL\\PHP",
+                    "PseudoRandom": "FlibSL\\PseudoRandom",
+                    "Regex": "FlibSL\\Regex",
+                    "SecureRandom": "FlibSL\\SecureRandom",
+                    "Str": "FlibSL\\Str",
+                    "Vec": "FlibSL\\Vec"
+                }
+            }
+        }"#;
+
+        // TODO: share this logic with hackc_create_decl_parse_options()
+        let config_opts = options::Options::from_configs(&[AUTO_NAMESPACE_MAP], &[]).unwrap();
+        let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
+            Some(m) => bumpalo::collections::Vec::from_iter_in(
+                m.iter().map(|(k, v)| {
+                    (
+                        arena.alloc_str(k.as_str()) as &str,
+                        arena.alloc_str(v.as_str()) as &str,
+                    )
+                }),
+                arena,
+            )
+            .into_bump_slice(),
+            None => &[],
+        };
+        DeclParserOptions {
+            auto_namespace_map,
+            disable_xhp_element_mangling: false,
+            interpret_soft_types_as_like_types: true,
+            allow_new_attribute_syntax: true,
+            enable_xhp_class_modifier: false,
+            php5_compat_mode: true,
+            hhvm_compat_mode: true,
+            ..Default::default()
+        }
+    }
 }
 
 fn test(_: Opts) -> Result<()> {
@@ -119,10 +174,6 @@ fn daemon_mode(_: Opts) -> Result<()> {
 }
 
 fn parse(_: Opts) -> Result<()> {
-    unimplemented!()
-}
-
-fn extract_facts_from_decls(_: Opts) -> Result<()> {
     unimplemented!()
 }
 
@@ -147,12 +198,26 @@ fn main() -> Result<()> {
     } else if opts.command.parse {
         parse(opts)
     } else if opts.command.extract_facts_from_decls {
-        extract_facts_from_decls(opts)
+        facts::extract_facts(opts)
     } else if opts.command.test_compile_with_decls {
         compile_from_text_with_same_file_decl(opts)
     } else if opts.command.dump_desugared_expression_trees {
         expr_trees::dump_expr_trees(opts)
     } else {
         compile_from_text(opts)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Just make sure json parsing produces a proper list.
+    /// If the alias map length changes, keep this test in sync.
+    #[test]
+    fn test_auto_namespace_map() {
+        let arena = bumpalo::Bump::new();
+        let dp_opts = Opts::default().decl_opts(&arena);
+        assert_eq!(dp_opts.auto_namespace_map.len(), 15);
     }
 }

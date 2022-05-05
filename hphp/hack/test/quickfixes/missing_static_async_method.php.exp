@@ -1,0 +1,14 @@
+Add stub method `MyClass::foo`
+
+<?hh
+
+abstract class MyClass {
+  abstract public static function foo(): Awaitable<void>;
+}
+
+class MyChild extends MyClass {
+  <<__Override>>
+  public static async function foo(): Awaitable<void> {}
+
+
+}

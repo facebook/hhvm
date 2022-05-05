@@ -140,11 +140,11 @@ let of_method (name : string) (meth : class_elt) ~is_static ~is_override :
     else
       "")
     (Typing_defs.string_of_visibility meth.ce_visibility)
-    async_modifier
     (if is_static then
       "static "
     else
       "")
+    async_modifier
     name
     params
     return_ty

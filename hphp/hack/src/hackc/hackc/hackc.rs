@@ -1,12 +1,16 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+mod compile;
+mod crc;
 mod expr_trees;
 mod facts;
+mod parse;
+mod utils;
 
+use ::compile::EnvFlags;
 use anyhow::Result;
 use clap::Parser;
-use compile::EnvFlags;
 use hhvm_options::HhvmOptions;
 use oxidized_by_ref::decl_parser_options::DeclParserOptions;
 use std::{
@@ -18,8 +22,11 @@ use std::{
 /// Hack Compiler
 #[derive(Parser, Debug, Default)]
 struct Opts {
+    #[clap(subcommand)]
+    command: Option<Command>,
+
     #[clap(flatten)]
-    command: Command,
+    flag_commands: FlagCommands,
 
     #[clap(flatten)]
     hhvm_options: HhvmOptions,
@@ -40,11 +47,24 @@ struct Opts {
     input_file_list: Option<PathBuf>,
 }
 
+#[derive(Parser, Debug)]
+enum Command {
+    /// Compile one Hack source file or a list of files to HHAS
+    Compile(compile::Opts),
+
+    /// Compile Hack source files or directories and produce a single CRC per
+    /// input file.
+    Crc(crc::Opts),
+
+    /// Parse many files whose filenames are read from stdin
+    Parse(parse::Opts),
+}
+
 // Which command are we running? Every bool option here conflicts with
 // every other one. Using bool opts for backward compatibility with
 // hh_single_compile_cpp.
 #[derive(Parser, Debug, Default)]
-struct Command {
+struct FlagCommands {
     /// Compile source text to HackCUnit
     #[clap(long)]
     compile_and_print_unit: bool,
@@ -186,25 +206,33 @@ fn compile_from_text(_: Opts) -> Result<()> {
 }
 
 fn main() -> Result<()> {
+    env_logger::init();
     let opts = Opts::parse();
-    if opts.command.test {
-        test(opts)
-    } else if opts.command.verify_decls_ffi {
-        verify_decls_ffi(opts)
-    } else if opts.command.compile_and_print_unit {
-        compile_unit_from_text(opts)
-    } else if opts.command.daemon {
-        daemon_mode(opts)
-    } else if opts.command.parse {
-        parse(opts)
-    } else if opts.command.extract_facts_from_decls {
-        facts::extract_facts(opts)
-    } else if opts.command.test_compile_with_decls {
-        compile_from_text_with_same_file_decl(opts)
-    } else if opts.command.dump_desugared_expression_trees {
-        expr_trees::dump_expr_trees(opts)
-    } else {
-        compile_from_text(opts)
+    match opts.command {
+        Some(Command::Compile(opts)) => compile::run(opts),
+        Some(Command::Crc(opts)) => crc::run(opts),
+        Some(Command::Parse(opts)) => parse::run(opts),
+        None => {
+            if opts.flag_commands.test {
+                test(opts)
+            } else if opts.flag_commands.verify_decls_ffi {
+                verify_decls_ffi(opts)
+            } else if opts.flag_commands.compile_and_print_unit {
+                compile_unit_from_text(opts)
+            } else if opts.flag_commands.daemon {
+                daemon_mode(opts)
+            } else if opts.flag_commands.parse {
+                parse(opts)
+            } else if opts.flag_commands.extract_facts_from_decls {
+                facts::extract_facts(opts)
+            } else if opts.flag_commands.test_compile_with_decls {
+                compile_from_text_with_same_file_decl(opts)
+            } else if opts.flag_commands.dump_desugared_expression_trees {
+                expr_trees::dump_expr_trees(opts)
+            } else {
+                compile_from_text(opts)
+            }
+        }
     }
 }
 

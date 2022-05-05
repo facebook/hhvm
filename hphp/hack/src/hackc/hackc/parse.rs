@@ -6,6 +6,7 @@
 use crate::utils;
 use aast_parser::{rust_aast_parser_types::Env as AastParserEnv, AastParser};
 use anyhow::{Context, Result};
+use clap::Parser;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::{self, RelativePath};
 use parser_core_types::{
@@ -17,21 +18,19 @@ use std::{
     path::PathBuf,
     sync::Arc,
 };
-use structopt::StructOpt;
 use strum_macros::{Display, EnumString};
 
-#[derive(StructOpt, Clone, Debug)]
-#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)
+#[derive(Parser, Clone, Debug)]
 pub struct Opts {
-    #[structopt(long)]
+    #[clap(long)]
     thread_num: Option<usize>,
 
-    #[structopt(default_value, long)]
-    parser: Parser,
+    #[clap(default_value_t, long)]
+    parser: ParserKind,
 }
 
 #[derive(Clone, Copy, Debug, Display, EnumString)]
-enum Parser {
+enum ParserKind {
     Aast,
     Positioned,
     PositionedByRef,
@@ -39,7 +38,7 @@ enum Parser {
     DirectDecl,
 }
 
-impl std::default::Default for Parser {
+impl Default for ParserKind {
     fn default() -> Self {
         Self::Positioned
     }
@@ -66,7 +65,7 @@ pub fn run(opts: Opts) -> Result<()> {
         .try_for_each(|f| parse_file(opts.parser, f.clone()))
 }
 
-fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
+fn parse_file(parser: ParserKind, filepath: PathBuf) -> anyhow::Result<()> {
     let content = utils::read_file(&filepath)?;
     let ctx = &Arc::new((filepath, content));
     let new_ctx = Arc::clone(ctx);
@@ -75,7 +74,7 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
     let path = RelativePath::make(relative_path::Prefix::Dummy, filepath.clone());
     let source_text = SourceText::make(RcOc::new(path.clone()), content.as_slice());
     match parser {
-        Parser::PositionedWithFullTrivia => {
+        ParserKind::PositionedWithFullTrivia => {
             let stdout = std::io::stdout();
             let w = stdout.lock();
             let mut s = serde_json::Serializer::new(w);
@@ -83,18 +82,18 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
             let src = IndexedSourceText::new(source_text);
             positioned_full_trivia_parser::parse_script_to_json(&arena, &mut s, &src, env)?
         }
-        Parser::PositionedByRef => {
+        ParserKind::PositionedByRef => {
             let arena = bumpalo::Bump::new();
             let (_, _, _) = positioned_by_ref_parser::parse_script(&arena, &source_text, env);
         }
-        Parser::Positioned => {
+        ParserKind::Positioned => {
             let (_, _, _) = positioned_parser::parse_script(&source_text, env);
         }
-        Parser::DirectDecl => {
+        ParserKind::DirectDecl => {
             let arena = bumpalo::Bump::new();
             let _ = direct_decl_parser::parse_decls(Default::default(), path, content, &arena);
         }
-        Parser::Aast => {
+        ParserKind::Aast => {
             let indexed_source_text = IndexedSourceText::new(source_text);
             let env = AastParserEnv::default();
             let _ = AastParser::from_text(&env, &indexed_source_text);

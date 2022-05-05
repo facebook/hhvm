@@ -5,6 +5,7 @@
 
 use crate::{compile::SingleFileOpts, utils};
 use anyhow::Result;
+use clap::Parser;
 use compile::Profile;
 use log::info;
 use multifile_rust as multifile;
@@ -22,23 +23,21 @@ use std::{
     },
     time::{Duration, Instant},
 };
-use structopt::StructOpt;
 
 type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
-#[derive(StructOpt, Clone, Debug)]
-#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)
+#[derive(Parser, Clone, Debug)]
 pub struct Opts {
     #[allow(dead_code)]
-    #[structopt(flatten)]
+    #[clap(flatten)]
     single_file_opts: SingleFileOpts,
 
     /// Number of parallel worker threads. By default, or if set to 0, use num-cpu threads.
-    #[structopt(long, default_value = "0")]
+    #[clap(long, default_value = "0")]
     num_threads: usize,
 
     /// The input Hack files or directories to process.
-    #[structopt(name = "PATH")]
+    #[clap(name = "PATH")]
     paths: Vec<PathBuf>,
 }
 

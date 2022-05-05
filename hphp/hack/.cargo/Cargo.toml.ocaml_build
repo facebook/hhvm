@@ -81,7 +81,6 @@ members = [
     "src/hackc/utils/cargo/unique_id_builder",
     "src/heap",
     "src/hh_codegen",
-    "src/hh_compile",
     "src/hh_fanout/cargo/hh_fanout_build_rust",
     "src/hh_fanout/cargo/hh_fanout_dep_graph_is_subgraph_rust",
     "src/hh_fanout/cargo/hh_fanout_dep_graph_stats_rust",

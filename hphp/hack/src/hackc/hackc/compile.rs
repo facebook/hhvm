@@ -5,6 +5,7 @@
 
 use crate::utils;
 use anyhow::{anyhow, Result};
+use clap::Parser;
 use compile::Profile;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
@@ -12,7 +13,6 @@ use options::Options;
 use oxidized::relative_path::{self, RelativePath};
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
-use structopt::StructOpt;
 
 use std::{
     fs::File,
@@ -21,55 +21,54 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-#[derive(StructOpt, Clone, Debug)]
-#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)
+#[derive(Parser, Clone, Debug)]
 pub struct Opts {
     /// " Configuration: Server.Port=<value> "
     ///     Allows overriding config options passed on a file
-    #[structopt(short = "v")]
+    #[clap(short = 'v')]
     config_args: Vec<String>,
 
     /// Config file in JSON format
-    #[structopt(short = "c")]
+    #[clap(short = 'c')]
     config_file: Option<PathBuf>,
 
     /// Output file. Creates it if necessary
-    #[structopt(short = "o", conflicts_with("input_file_list"))]
+    #[clap(short = 'o')]
     output_file: Option<PathBuf>,
 
     /// Run a daemon which processes Hack source from standard input
-    #[structopt(long)]
+    #[clap(long)]
     daemon: bool,
 
     /// Read a list of files or stdin (one per line) from FILE
-    #[structopt(long, name = "FILE")]
+    #[clap(long, value_name = "FILE", conflicts_with("output-file"))]
     input_file_list: Option<Option<PathBuf>>,
 
     /// Dump configuration settings
-    #[structopt(long)]
+    #[clap(long)]
     dump_config: bool,
 
     /// The path to an input Hack file (omit if --daemon or --input-file-list)
-    #[structopt(name = "FILENAME", required_unless_one = &["daemon", "input-file-list"])]
+    #[clap(value_name = "FILE", required_unless_present_any = &["daemon", "input-file-list"])]
     filename: Option<PathBuf>,
 
-    #[structopt(flatten)]
+    #[clap(flatten)]
     single_file_opts: SingleFileOpts,
 
     /// Number of parallel worker threads. By default, use num-cpu worker threads.
     /// If 0 or 1, uses the main (single) thread.
-    #[structopt(long)]
+    #[clap(long)]
     thread_num: Option<usize>,
 }
 
-#[derive(StructOpt, Clone, Debug)]
+#[derive(Parser, Clone, Debug)]
 pub(crate) struct SingleFileOpts {
     /// Disable toplevel definition elaboration
-    #[structopt(long)]
+    #[clap(long)]
     pub(crate) disable_toplevel_elaboration: bool,
 
     /// The level of verbosity (can be set multiple times)
-    #[structopt(long = "verbose", parse(from_occurrences))]
+    #[clap(long = "verbose", parse(from_occurrences))]
     pub(crate) verbosity: isize,
 }
 
@@ -77,7 +76,7 @@ pub fn run(opts: Opts) -> Result<()> {
     type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
     if opts.single_file_opts.verbosity > 1 {
-        eprintln!("hh_compile options/flags: {:#?}", opts);
+        eprintln!("hackc compile options/flags: {:#?}", opts);
     }
     let config = Config::new(&opts);
 

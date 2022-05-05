@@ -11,16 +11,13 @@ open Typing_env_types
 
 (** Typing code concerned with return types. *)
 
-(** Returns the possibly enforced return type along with some other information.
-    The position parameter is used for error generation. *)
 val make_info :
   Pos.t ->
   Ast_defs.fun_kind ->
   Nast.user_attribute list ->
   env ->
   is_explicit:bool ->
-  Typing_defs.locl_ty ->
-  Typing_defs.decl_ty option ->
+  Typing_defs.locl_possibly_enforced_ty ->
   Typing_env_return_info.t
 
 val implicit_return :
@@ -34,9 +31,18 @@ val implicit_return :
 
 val make_return_type :
   ety_env:Typing_defs.expand_env ->
+  is_explicit:bool ->
+  ?is_toplevel:bool ->
   env ->
-  Typing_defs.decl_ty ->
-  env * Typing_defs.locl_ty
+  (* Position of return type hint, or function name, if absent *)
+  hint_pos:Ast_defs.pos ->
+  (* Explicit type from source code *)
+  explicit:Typing_defs.decl_ty option ->
+  (* A type to use if the explicit type isn't present.
+   * e.g. implicit void (for constructors), or contextual type (for lambdas)
+   *)
+  default:Typing_defs.locl_ty option ->
+  env * Typing_defs.locl_possibly_enforced_ty
 
 (** For async functions, strip Awaitable<_> from the return type *)
 val strip_awaitable :
@@ -44,22 +50,6 @@ val strip_awaitable :
   env ->
   Typing_defs.locl_possibly_enforced_ty ->
   Typing_defs.locl_possibly_enforced_ty
-
-val make_fresh_return_type : env -> Ast_defs.pos -> env * Typing_defs.locl_ty
-
-(** Force the return type of a function to adhere to the fun_kind specified in
-    the env *)
-val force_return_kind :
-  ?is_toplevel:bool ->
-  env ->
-  Ast_defs.pos ->
-  Typing_defs.locl_ty ->
-  env * Typing_defs.locl_ty
-
-(** If there is no return type annotation on method, assume `void` for the
-special functions `__construct`, otherwise we can assume type Tany *)
-val make_default_return :
-  is_method:bool -> env -> Ast_defs.pos * string -> Typing_defs.locl_ty
 
 val fun_implicit_return :
   env -> Ast_defs.pos -> Typing_defs.locl_ty -> Ast_defs.fun_kind -> env

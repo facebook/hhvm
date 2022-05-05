@@ -46,7 +46,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
        { f_span = [17:1-30]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((_), None); f_name = ([17:10-25], "\\my_php_function"); 
+         f_readonly_ret = None; f_ret = ((void), None); f_name = ([17:10-25], "\\my_php_function"); 
          f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
          f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

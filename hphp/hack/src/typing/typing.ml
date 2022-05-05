@@ -5009,7 +5009,7 @@ and lambda ~is_anon ?expected p env f idl =
     | _ -> ());
 
   (* Is the return type declared? *)
-  let is_explicit_ret = Option.is_some (hint_of_type_hint f.f_ret) in
+  let is_explicit = Option.is_some (hint_of_type_hint f.f_ret) in
   let check_body_under_known_params ~supportdyn env ?ret_ty ft :
       env * _ * locl_ty =
     let (env, (tefun, ty, ft)) =
@@ -5022,7 +5022,7 @@ and lambda ~is_anon ?expected p env f idl =
             {
               ft with
               ft_ret =
-                (if is_explicit_ret then
+                (if is_explicit then
                   declared_ft.ft_ret
                 else
                   MakeType.unenforced ty);
@@ -5107,7 +5107,7 @@ and lambda ~is_anon ?expected p env f idl =
     (* Don't bother passing in `void` if there is no explicit return *)
     let ret_ty =
       match get_node expected_ft.ft_ret.et_type with
-      | Tprim Tvoid when not is_explicit_ret -> None
+      | Tprim Tvoid when not is_explicit -> None
       | _ -> Some expected_ft.ft_ret.et_type
     in
     Typing_log.increment_feature_count env FL.Lambda.contextual_params;
@@ -5571,37 +5571,30 @@ and closure_make
   let decl_ty =
     Option.map ~f:(Decl_hint.hint env.decl_env) (hint_of_type_hint f.f_ret)
   in
-  let ret_pos =
+  let hint_pos =
     match snd f.f_ret with
     | Some (ret_pos, _) -> ret_pos
     | None -> lambda_pos
   in
-  let (env, hret) =
-    match decl_ty with
-    | None ->
-      (* Do we have a contextual return type? *)
-      begin
-        match ret_ty with
-        | None -> Typing_return.make_fresh_return_type env ret_pos
-        | Some ret_ty -> (env, ret_ty)
-      end
-    | Some ret ->
-      (* If a 'this' type appears it needs to be compatible with the
-       * late static type
-       *)
-      let ety_env =
-        empty_expand_env_with_on_error
-          (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
-      in
-      Typing_return.make_return_type ~ety_env env ret
+  let ety_env =
+    empty_expand_env_with_on_error
+      (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
   in
+  let is_explicit = Option.is_some (hint_of_type_hint f.f_ret) in
   let (env, hret) =
-    Typing_return.force_return_kind ~is_toplevel:false env ret_pos hret
+    Typing_return.make_return_type
+      ~ety_env
+      ~is_explicit
+      ~is_toplevel:false
+      env
+      ~hint_pos
+      ~explicit:decl_ty
+      ~default:ret_ty
   in
   let ft =
     {
       ft with
-      ft_ret = { ft.ft_ret with et_type = hret };
+      ft_ret = hret;
       ft_flags =
         Typing_defs_flags.set_bit
           Typing_defs_flags.ft_flags_support_dynamic_type
@@ -5613,13 +5606,12 @@ and closure_make
     Env.set_return
       env
       (Typing_return.make_info
-         ret_pos
+         hint_pos
          f.f_fun_kind
          []
          env
          ~is_explicit:(Option.is_some ret_ty)
-         hret
-         decl_ty)
+         hret)
   in
   let local_tpenv = Env.get_tpenv env in
   (* Outer pipe variables aren't available in closures. Note that
@@ -5635,7 +5627,7 @@ and closure_make
     if not has_implicit_return then
       env
     else
-      Typing_return.fun_implicit_return env lambda_pos hret f.f_fun_kind
+      Typing_return.fun_implicit_return env lambda_pos hret.et_type f.f_fun_kind
   in
   let has_readonly = Env.get_readonly env in
   let env =
@@ -5657,13 +5649,13 @@ and closure_make
       sound_dynamic_check_saved_env
       f
       params_decl_ty
-      hret;
+      hret.et_type;
   let tfun_ =
     {
       Aast.f_annotation = Env.save local_tpenv env;
       Aast.f_readonly_this = f.f_readonly_this;
       Aast.f_span = f.f_span;
-      Aast.f_ret = (hret, hint_of_type_hint f.f_ret);
+      Aast.f_ret = (hret.et_type, hint_of_type_hint f.f_ret);
       Aast.f_readonly_ret = f.f_readonly_ret;
       Aast.f_name = f.f_name;
       Aast.f_tparams = tparams;
@@ -5695,7 +5687,7 @@ and closure_make
         Aast.Lfun (tfun_, idl))
   in
   let env = Env.set_tyvar_variance env ty in
-  (env, (te, hret, ft))
+  (env, (te, hret.et_type, ft))
 
 (*****************************************************************************)
 (* End of anonymous functions & lambdas. *)

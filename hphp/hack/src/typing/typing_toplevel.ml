@@ -166,29 +166,24 @@ let fun_def ctx fd :
     empty_expand_env_with_on_error
       (Typing_error.Reasons_callback.invalid_type_hint hint_pos)
   in
-  let ret_pos =
-    match snd f.f_ret with
-    | Some (ret_pos, _) -> ret_pos
-    | None -> fst f.f_name
-  in
+  let is_explicit = Option.is_some (hint_of_type_hint f.f_ret) in
   let (env, return_ty) =
-    match return_decl_ty with
-    | None ->
-      (env, Typing_return.make_default_return ~is_method:false env f.f_name)
-    | Some ty -> Typing_return.make_return_type ~ety_env env ty
-  in
-  let (env, return_ty) =
-    Typing_return.force_return_kind env ret_pos return_ty
+    Typing_return.make_return_type
+      ~is_explicit
+      ~ety_env
+      env
+      ~hint_pos
+      ~explicit:return_decl_ty
+      ~default:None
   in
   let return =
     Typing_return.make_info
-      ret_pos
+      hint_pos
       f.f_fun_kind
       f.f_user_attributes
       env
-      ~is_explicit:(Option.is_some (hint_of_type_hint f.f_ret))
+      ~is_explicit
       return_ty
-      return_decl_ty
   in
   let (env, _) =
     Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
@@ -221,7 +216,7 @@ let fun_def ctx fd :
     in
     List.map_env env (List.zip_exn param_tys f.f_params) ~f:bind_param_and_check
   in
-  let env = set_tyvars_variance_in_callable env return_ty param_tys in
+  let env = set_tyvars_variance_in_callable env return_ty.et_type param_tys in
   let local_tpenv = Env.get_tpenv env in
   let disable =
     Naming_attributes.mem
@@ -260,7 +255,7 @@ let fun_def ctx fd :
       sound_dynamic_check_saved_env
       f
       params_decl_ty
-      return_ty;
+      return_ty.et_type;
 
   let fun_ =
     {
@@ -268,7 +263,7 @@ let fun_def ctx fd :
       Aast.f_readonly_this = f.f_readonly_this;
       Aast.f_span = f.f_span;
       Aast.f_readonly_ret = f.f_readonly_ret;
-      Aast.f_ret = (return_ty, hint_of_type_hint f.f_ret);
+      Aast.f_ret = (return_ty.et_type, hint_of_type_hint f.f_ret);
       Aast.f_name = f.f_name;
       Aast.f_tparams = tparams;
       Aast.f_where_constraints = f.f_where_constraints;
@@ -414,35 +409,39 @@ let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
   if not interface_check then method_body_check ()
 
 let method_return env m ret_decl_ty =
-  let ret_pos =
+  let hint_pos =
     match snd m.m_ret with
-    | Some (ret_pos, _) -> ret_pos
+    | Some (hint_pos, _) -> hint_pos
     | None -> fst m.m_name
   in
-  let (env, ret_ty) =
+  let is_explicit = Option.is_some (hint_of_type_hint m.m_ret) in
+  let default_ty =
     match ret_decl_ty with
-    | None ->
-      (env, Typing_return.make_default_return ~is_method:true env m.m_name)
-    | Some ret ->
-      (* If a 'this' type appears it needs to be compatible with the
-       * late static type
-       *)
-      let ety_env =
-        empty_expand_env_with_on_error
-          (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
-      in
-      Typing_return.make_return_type ~ety_env env ret
+    | None when String.equal (snd m.m_name) SN.Members.__construct ->
+      Some (MakeType.void (Reason.Rwitness (fst m.m_name)))
+    | _ -> None
   in
-  let (env, ret_ty) = Typing_return.force_return_kind env ret_pos ret_ty in
+  let ety_env =
+    empty_expand_env_with_on_error
+      (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
+  in
+  let (env, ret_ty) =
+    Typing_return.make_return_type
+      ~ety_env
+      env
+      ~is_explicit
+      ~hint_pos
+      ~explicit:ret_decl_ty
+      ~default:default_ty
+  in
   let return =
     Typing_return.make_info
-      ret_pos
+      hint_pos
       m.m_fun_kind
       m.m_user_attributes
       env
-      ~is_explicit:(Option.is_some (hint_of_type_hint m.m_ret))
+      ~is_explicit
       ret_ty
-      ret_decl_ty
   in
   (env, return, ret_ty)
 
@@ -542,7 +541,7 @@ let method_def ~is_disposable env cls m =
     in
     List.map_env env (List.zip_exn param_tys m.m_params) ~f:bind_param_and_check
   in
-  let env = set_tyvars_variance_in_callable env return_ty param_tys in
+  let env = set_tyvars_variance_in_callable env return_ty.et_type param_tys in
   let local_tpenv = Env.get_tpenv env in
   let disable =
     Naming_attributes.mem
@@ -593,7 +592,7 @@ let method_def ~is_disposable env cls m =
       cls
       m
       params_decl_ty
-      return_ty;
+      return_ty.et_type;
   let method_def =
     {
       Aast.m_annotation = Env.save local_tpenv env;
@@ -612,7 +611,7 @@ let method_def ~is_disposable env cls m =
       Aast.m_fun_kind = m.m_fun_kind;
       Aast.m_user_attributes = user_attributes;
       Aast.m_readonly_ret = m.m_readonly_ret;
-      Aast.m_ret = (return_ty, hint_of_type_hint m.m_ret);
+      Aast.m_ret = (return_ty.et_type, hint_of_type_hint m.m_ret);
       Aast.m_body = { Aast.fb_ast = tb };
       Aast.m_external = m.m_external;
       Aast.m_doc_comment = m.m_doc_comment;

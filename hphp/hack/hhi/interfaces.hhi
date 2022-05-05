@@ -129,6 +129,10 @@ interface Iterator<+Tv> extends Traversable<Tv> {
    */
   public function current(): Tv;
   /**
+   * Returns the current key that the iterator points to.
+   */
+  public function key(): mixed;
+  /**
    * Move the iterator position to the next element.
    *
    */

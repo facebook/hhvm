@@ -186,6 +186,7 @@ class DirectoryIterator extends SplFileInfo
   public function rewind(): void;
   public function seek(int $position): void;
   public function valid(): bool;
+  public function key(): mixed;
 }
 
 class NoRewindIterator<T> extends IteratorIterator<T> {

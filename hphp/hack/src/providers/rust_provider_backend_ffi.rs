@@ -6,9 +6,11 @@
 use hackrs::{decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider};
 use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
 use ocamlrep_custom::Custom;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use ocamlrep_ocamlpool::{ocaml_ffi, ocaml_ffi_with_arena, Bump};
 use oxidized_by_ref::{decl_defs, parser_options::ParserOptions, shallow_decl_defs};
-use pos::{RelativePathCtx, ToOxidized};
+use pos::{RelativePath, RelativePathCtx, ToOxidized};
+use std::collections::BTreeSet;
 use std::path::Path;
 use std::sync::Arc;
 use ty::reason::BReason;
@@ -139,6 +141,72 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_decl_provider_pop_local_changes(
+        _backend: Custom<ProviderBackend>,
+    ) {
+        todo!()
+    }
+}
+
+// File_provider ////////////////////////////////////////////////////////////
+
+#[derive(ToOcamlRep, FromOcamlRep)]
+enum FileType {
+    Disk(bstr::BString),
+    Ide(bstr::BString),
+}
+
+ocaml_ffi! {
+    fn hh_rust_provider_backend_file_provider_get(
+        _backend: Custom<ProviderBackend>,
+        _path: RelativePath,
+    ) -> Option<FileType> {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_file_provider_get_contents(
+        _backend: Custom<ProviderBackend>,
+        _path: RelativePath,
+    ) -> Option<bstr::BString> {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_file_provider_provide_file_for_tests(
+        _backend: Custom<ProviderBackend>,
+        _path: RelativePath,
+        _contents: bstr::BString,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_file_provider_provide_file_for_ide(
+        _backend: Custom<ProviderBackend>,
+        _path: RelativePath,
+        _contents: bstr::BString,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_file_provider_provide_file_hint(
+        _backend: Custom<ProviderBackend>,
+        _contents: FileType,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_file_provider_remove_batch(
+        _backend: Custom<ProviderBackend>,
+        _paths: BTreeSet<RelativePath>,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_file_provider_push_local_changes(
+        _backend: Custom<ProviderBackend>,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_file_provider_pop_local_changes(
         _backend: Custom<ProviderBackend>,
     ) {
         todo!()

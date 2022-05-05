@@ -5,7 +5,7 @@
 
 use crate::ToOxidized;
 use intern::string::BytesId;
-use ocamlrep::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use std::ffi::OsStr;
 use std::fmt;
 use std::os::unix::ffi::OsStrExt;
@@ -68,6 +68,8 @@ impl RelativePath {
     }
 }
 
+impl arena_trait::TrivialDrop for RelativePath {}
+
 impl<'a> ToOxidized<'a> for RelativePath {
     type Output = &'a oxidized_by_ref::relative_path::RelativePath<'a>;
 
@@ -94,6 +96,16 @@ impl ToOcamlRep for RelativePath {
 
 impl FromOcamlRep for RelativePath {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        let path = oxidized::relative_path::RelativePath::from_ocamlrep(value)?;
+        Ok(Self::from(&path))
+    }
+}
+
+impl<'a> FromOcamlRepIn<'a> for RelativePath {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _arena: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
         let path = oxidized::relative_path::RelativePath::from_ocamlrep(value)?;
         Ok(Self::from(&path))
     }

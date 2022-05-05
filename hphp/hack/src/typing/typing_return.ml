@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_env_types
 open Typing_env_return_info
 module Env = Typing_env
 module TUtils = Typing_utils
@@ -131,8 +132,10 @@ let make_return_type
     in
     (env, MakeType.unenforced ty)
   | Some ty ->
-    let wrap_awaitable p =
-      MakeType.awaitable (Reason.Rret_fun_kind_from_decl (p, Ast_defs.FAsync))
+    let wrap_awaitable p ty =
+      MakeType.awaitable
+        (Reason.Rret_fun_kind_from_decl (p, Ast_defs.FAsync))
+        ty
     in
     let localize ~wrap env dty =
       let et_enforced =
@@ -145,13 +148,22 @@ let make_return_type
         Typing_phase.localize ~ety_env env dty
       in
       Option.iter ~f:Errors.add_typing_error ty_err_opt;
+      (* If return type t is enforced we permit values of type ~t to be returned *)
+      let et_type =
+        match et_enforced with
+        | Enforced
+          when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+               && Env.get_support_dynamic_type env ->
+          Typing_utils.make_like env et_type
+        | _ -> et_type
+      in
       let et_type =
         if wrap then
           wrap_awaitable (get_pos et_type) et_type
         else
           et_type
       in
-      (env, { et_type; et_enforced })
+      (env, { et_enforced; et_type })
     in
     (match (Env.get_fn_kind env, deref ty) with
     | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))
@@ -183,7 +195,6 @@ let implicit_return env pos ~expected ~actual ~hint_pos ~is_async =
     Typing_error.Primary.(
       Wellformedness (Wellformedness.Missing_return { pos; hint_pos; is_async }))
   in
-  let open Typing_env_types in
   let (env, ty_err_opt) =
     if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
       Typing_utils.sub_type
@@ -258,7 +269,6 @@ let rec remove_like_for_return env ty =
 
 let fun_implicit_return env pos ret =
   let ret =
-    let open Typing_env_types in
     if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
       (* Under sound dynamic, void <D: dynamic, which means that it void <D: ~T for any T.
        * However, for ergonomic reasons, it should not be the case that a function

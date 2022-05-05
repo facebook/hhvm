@@ -752,6 +752,13 @@ let rec make_supportdyn r env ty =
     else
       (env, Typing_make_type.supportdyn r ty)
 
+let make_like env ty =
+  if Typing_defs.is_dynamic ty || Option.is_some (try_strip_dynamic env ty) then
+    ty
+  else
+    let r = get_reason ty in
+    Typing_make_type.locl_like r ty
+
 let rec is_capability ty =
   match get_node ty with
   | Tclass ((_, name), _, _)

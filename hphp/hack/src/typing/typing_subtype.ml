@@ -487,7 +487,7 @@ let can_traverse_to_iface ct =
 
 let liken ~super_like env ty =
   if super_like then
-    Typing_dynamic.make_like env ty
+    Typing_utils.make_like env ty
   else
     ty
 

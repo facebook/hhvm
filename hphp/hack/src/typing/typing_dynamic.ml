@@ -249,5 +249,3 @@ let rec try_push_like env ty =
     else
       (env, None)
   | _ -> (env, None)
-
-let make_like env ty = snd (make_like env false ty)

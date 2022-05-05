@@ -18,3 +18,30 @@ let make popt =
     ~hhi_root:Relative_path.(path_of_prefix Hhi)
     ~tmp:Relative_path.(path_of_prefix Tmp)
     popt
+
+module Decl = struct
+  external get_fun : t -> string -> Shallow_decl_defs.fun_decl option
+    = "hh_rust_provider_backend_get_fun"
+
+  external get_shallow_class :
+    t -> string -> Shallow_decl_defs.class_decl option
+    = "hh_rust_provider_backend_get_shallow_class"
+
+  external get_typedef : t -> string -> Shallow_decl_defs.typedef_decl option
+    = "hh_rust_provider_backend_get_typedef"
+
+  external get_gconst : t -> string -> Shallow_decl_defs.const_decl option
+    = "hh_rust_provider_backend_get_gconst"
+
+  external get_module : t -> string -> Shallow_decl_defs.module_decl option
+    = "hh_rust_provider_backend_get_module"
+
+  external get_folded_class : t -> string -> Decl_defs.decl_class_type option
+    = "hh_rust_provider_backend_get_folded_class"
+
+  external push_local_changes : t -> unit
+    = "hh_rust_provider_backend_decl_provider_push_local_changes"
+
+  external pop_local_changes : t -> unit
+    = "hh_rust_provider_backend_decl_provider_pop_local_changes"
+end

@@ -4,10 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hackrs::{decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider};
+use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
 use ocamlrep_custom::Custom;
-use ocamlrep_ocamlpool::{ocaml_ffi_with_arena, Bump};
-use oxidized_by_ref::parser_options::ParserOptions;
-use pos::RelativePathCtx;
+use ocamlrep_ocamlpool::{ocaml_ffi, ocaml_ffi_with_arena, Bump};
+use oxidized_by_ref::{decl_defs, parser_options::ParserOptions, shallow_decl_defs};
+use pos::{RelativePathCtx, ToOxidized};
 use std::path::Path;
 use std::sync::Arc;
 use ty::reason::BReason;
@@ -47,5 +48,99 @@ ocaml_ffi_with_arena! {
             path_ctx,
             folded_decl_provider,
         })
+    }
+}
+
+// Decl_provider ////////////////////////////////////////////////////////////
+
+ocaml_ffi_with_arena! {
+    fn hh_rust_provider_backend_get_fun<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: &'a str,
+    ) -> Option<shallow_decl_defs::FunDecl<'a>> {
+        let backend = unsafe { get_backend(backend) };
+        let name = pos::FunName::from(name);
+        backend.folded_decl_provider.get_fun(name.into(), name)
+            .unwrap()
+            .map(|_f| todo!("f.to_oxidized(arena)"))
+    }
+
+    fn hh_rust_provider_backend_get_shallow_class<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: &'a str,
+    ) -> Option<shallow_decl_defs::ClassDecl<'a>> {
+        let _backend = unsafe { get_backend(backend) };
+        let _name = pos::TypeName::from(name);
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_get_typedef<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: &'a str,
+    ) -> Option<shallow_decl_defs::TypedefDecl<'a>> {
+        let backend = unsafe { get_backend(backend) };
+        let name = pos::TypeName::from(name);
+        backend.folded_decl_provider.get_typedef(name.into(), name)
+            .unwrap()
+            .map(|_td| todo!("td.to_oxidized(arena)"))
+    }
+
+    fn hh_rust_provider_backend_get_gconst<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: &'a str,
+    ) -> Option<shallow_decl_defs::ConstDecl<'a>> {
+        let backend = unsafe { get_backend(backend) };
+        let name = pos::ConstName::from(name);
+        backend.folded_decl_provider.get_const(name.into(), name)
+            .unwrap()
+            .map(|_c| todo!("c.to_oxidized(arena)"))
+    }
+
+    fn hh_rust_provider_backend_get_module<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: &'a str,
+    ) -> Option<shallow_decl_defs::ModuleDecl<'a>> {
+        let _backend = unsafe { get_backend(backend) };
+        let _name = pos::ModuleName::from(name);
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_get_folded_class<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: &'a str,
+    ) -> Option<decl_defs::DeclClassType<'a>> {
+        let backend = unsafe { get_backend(backend) };
+        let name = pos::TypeName::from(name);
+        backend.folded_decl_provider.get_class(name.into(), name)
+            .unwrap()
+            .map(|c| c.to_oxidized(arena))
+    }
+}
+
+// UnsafeOcamlPtr is used because ocamlrep_custom::Custom cannot be used with
+// ocaml_ffi_with_arena (it does not implement FromOcamlRepIn, and shouldn't,
+// since arena-allocating a Custom would result in failing to decrement the
+// inner Rc and leaking memory).
+unsafe fn get_backend(ptr: UnsafeOcamlPtr) -> Custom<ProviderBackend> {
+    <Custom<ProviderBackend>>::from_ocamlrep(ptr.as_value()).unwrap()
+}
+
+ocaml_ffi! {
+    fn hh_rust_provider_backend_decl_provider_push_local_changes(
+        _backend: Custom<ProviderBackend>,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_decl_provider_pop_local_changes(
+        _backend: Custom<ProviderBackend>,
+    ) {
+        todo!()
     }
 }

@@ -13,6 +13,7 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 hackrs = { path = "../../../rupro/hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../../rupro/hackrs_test_utils/cargo/hackrs_test_utils" }
+ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_custom = { path = "../../../ocamlrep_custom" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }

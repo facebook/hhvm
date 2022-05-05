@@ -138,7 +138,7 @@ final class Vector<<<__RequireDynamic>> Tv> implements \MutableVector<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function lazy()[]: \HH\Rx\KeyedIterable<int, Tv>;
+  public function lazy()[]: KeyedIterable<int, Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Vector`.
@@ -627,7 +627,7 @@ final class Vector<<<__RequireDynamic>> Tv> implements \MutableVector<Tv> {
    * @return - A `KeyedIterator` that allows you to traverse the current
    *           `Vector`.
    */
-  public function getIterator()[]: \HH\Rx\KeyedIterator<int, Tv>;
+  public function getIterator()[]: KeyedIterator<int, Tv>;
 
   /**
    * Reverse the elements of the current `Vector` in place.
@@ -734,7 +734,7 @@ final class Vector<<<__RequireDynamic>> Tv> implements \MutableVector<Tv> {
    *
    * @return - The `Iterable` view of the current `Vector`.
    */
-  public function items()[]: \HH\Rx\Iterable<Tv>;
+  public function items()[]: Iterable<Tv>;
   public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<int, Tv>;
 }
@@ -748,7 +748,7 @@ namespace {
  *
  * Methods and functions should take and return the KeyedIterator interface.
  */
-class VectorIterator<+Tv> implements HH\Rx\KeyedIterator<int, Tv> {
+class VectorIterator<+Tv> implements HH\KeyedIterator<int, Tv> {
   public function __construct()[];
   public function current()[]: Tv;
   public function key()[]: int;

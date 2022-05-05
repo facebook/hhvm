@@ -140,7 +140,7 @@ final class Pair<<<__RequireDynamic>> +Tv1, <<__RequireDynamic>> +Tv2> implement
    *
    * @guide /hack/collections/examples
    */
-  public function lazy()[]: \HH\Rx\KeyedIterable<int, mixed>;
+  public function lazy()[]: KeyedIterable<int, mixed>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `Pair`.
@@ -409,7 +409,7 @@ final class Pair<<<__RequireDynamic>> +Tv1, <<__RequireDynamic>> +Tv2> implement
    *
    * @return - The `Iterable` view of the current `Pair`.
    */
-  public function items()[]: \HH\Rx\Iterable<mixed>;
+  public function items()[]: Iterable<mixed>;
 
   /**
    * Returns the value at the specified key in the current `Pair`.
@@ -459,7 +459,7 @@ final class Pair<<<__RequireDynamic>> +Tv1, <<__RequireDynamic>> +Tv2> implement
    *
    * @return - A `KeyedIterator` that allows you to traverse the current `Pair`.
    */
-  public function getIterator()[]: \HH\Rx\KeyedIterator<int, mixed>;
+  public function getIterator()[]: KeyedIterator<int, mixed>;
 
   /**
    * Returns the `string` version of the current `Pair`, which is `"Pair"`.
@@ -480,7 +480,7 @@ namespace {
  *
  * Methods and functions should take and return the KeyedIterator interface.
  */
-class PairIterator implements HH\Rx\KeyedIterator<int, mixed> {
+class PairIterator implements HH\KeyedIterator<int, mixed> {
   public function __construct()[];
   public function current()[]: mixed;
   public function key()[]: int;

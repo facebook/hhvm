@@ -33,13 +33,13 @@ namespace HH {
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(
+  Container::class,
   \Imagick::class,
   Iterator::class,
   \IteratorAggregate::class,
   KeyedTraversable::class,
   \ResourceBundle::class,
   \SplHeap::class,
-  \HH\Rx\Traversable::class
 )>>
 interface Traversable<+Tv> {
 
@@ -69,10 +69,10 @@ interface Traversable<+Tv> {
   \DOMNamedNodeMap::class,
   \ImagickPixelIterator::class,
   \IntlBreakIterator::class,
+  KeyedContainer::class,
   KeyedIterable::class,
   KeyedIterator::class,
   \MysqlRow::class,
-  \HH\Rx\KeyedTraversable::class
 )>>
 interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
 
@@ -89,7 +89,7 @@ interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(KeyedContainer::class)>>
-interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {
+interface Container<+Tv> extends Traversable<Tv> {
 
 
 }
@@ -107,7 +107,7 @@ interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {
  * @guide /hack/collections/read-write
  */
 <<__Sealed(\ConstVector::class, \ConstMap::class, \ConstSet::class, AnyArray::class)>>
-interface KeyedContainer<+Tk as arraykey, +Tv> extends Container<Tv>, \HH\Rx\KeyedTraversable<Tk, Tv> {}
+interface KeyedContainer<+Tk as arraykey, +Tv> extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
 
 /**
  * For those entities that are `Traversable`, the `Iterator` interfaces provides

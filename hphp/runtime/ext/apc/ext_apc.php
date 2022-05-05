@@ -23,7 +23,7 @@
  *   with error keys if passed an array.
  *
  */
-<<__Native, __NonRx('APC')>>
+<<__Native>>
 function apc_add(mixed $key_or_array,
                  mixed $var = null,
                  int $ttl = 0,
@@ -56,7 +56,7 @@ function apc_add_with_pure_sleep(mixed $key_or_array,
  *   error keys if passed an array.
  *
  */
-<<__Native, __NonRx('APC')>>
+<<__Native>>
 function apc_store(mixed $key_or_array,
                    mixed $var = null,
                    int $ttl = 0,
@@ -83,7 +83,7 @@ function apc_store_with_pure_sleep(mixed $key_or_array,
  *   on failure
  *
  */
-<<__Native, __NonRx('APC')>>
+<<__Native>>
 function apc_fetch(mixed $key,
                    <<__OutOnly("KindOfBoolean")>> inout mixed $success): mixed;
 
@@ -105,7 +105,7 @@ function apc_fetch_with_pure_wakeup(
  * @return mixed - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __NonRx('APC')>>
+<<__Native>>
 function apc_delete(mixed $key): mixed;
 
 /**
@@ -126,7 +126,7 @@ function apc_delete(mixed $key): mixed;
  *   data. This typically occurs when APC is not enabled.
  *
  */
-<<__Native, __NonRx('APC')>>
+<<__Native>>
 function apc_cache_info(string $cache_type = "", bool $limited = false): darray;
 
 /**
@@ -135,7 +135,7 @@ function apc_cache_info(string $cache_type = "", bool $limited = false): darray;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __NonRx('APC')>>
+<<__Native>>
 function apc_clear_cache(string $cache_type = ""): bool;
 
 /**
@@ -162,7 +162,7 @@ function apc_sma_info(bool $limited = false): darray { return darray[]; }
  *   FALSE on failure
  *
  */
-<<__Native, __NonRx('APC')>>
+<<__Native>>
 function apc_inc(string $key,
                  int $step,
                  <<__OutOnly("KindOfBoolean")>>
@@ -180,7 +180,7 @@ function apc_inc(string $key,
  *   FALSE on failure
  *
  */
-<<__Native, __NonRx('APC')>>
+<<__Native>>
 function apc_dec(string $key,
                  int $step,
                  <<__OutOnly("KindOfBoolean")>>
@@ -196,7 +196,7 @@ function apc_dec(string $key,
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __NonRx('APC')>>
+<<__Native>>
 function apc_cas(string $key,
                  int $old_cas,
                  int $new_cas): bool;
@@ -212,7 +212,7 @@ function apc_cas(string $key,
  *   array if none exist.
  *
  */
-<<__Native, __NonRx('APC')>>
+<<__Native>>
 function apc_exists(mixed $key): mixed;
 
 /**
@@ -227,7 +227,7 @@ function apc_exists(mixed $key): mixed;
  *
  * @return bool - TRUE if the TTL was actually extended, FALSE otherwise.
  */
- <<__Native, __NonRx('APC')>>
+ <<__Native>>
  function apc_extend_ttl(string $key, int $new_ttl): bool;
 
 /**
@@ -238,5 +238,5 @@ function apc_exists(mixed $key): mixed;
  * @return mixed - Returns the current size of a key or null on failure.
  *
  */
-<<__Native, __NonRx('APC')>>
+<<__Native>>
 function apc_size(string $key): ?int;

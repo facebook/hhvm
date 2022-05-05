@@ -108,7 +108,7 @@ final class ImmSet<<<__RequireDynamic>> +Tv as arraykey> implements \ConstSet<Tv
    * @return - A `KeyedIterator` that allows you to traverse the current
    *           `ImmSet`.
    */
-  public function getIterator()[]: \HH\Rx\KeyedIterator<arraykey, Tv>;
+  public function getIterator()[]: KeyedIterator<arraykey, Tv>;
 
   /**
    * Creates an `ImmSet` from the given `Traversable`, or an empty `ImmSet` if
@@ -204,7 +204,7 @@ final class ImmSet<<<__RequireDynamic>> +Tv as arraykey> implements \ConstSet<Tv
    *
    * @return - The `Iterable` view of the current `ImmSet`.
    */
-  public function items()[]: \HH\Rx\Iterable<Tv>;
+  public function items()[]: Iterable<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `ImmSet`.
@@ -239,7 +239,7 @@ final class ImmSet<<<__RequireDynamic>> +Tv as arraykey> implements \ConstSet<Tv
    *
    * @guide /hack/collections/examples
    */
-  public function lazy()[]: \HH\Rx\KeyedIterable<arraykey, Tv>;
+  public function lazy()[]: KeyedIterable<arraykey, Tv>;
 
   /**
    * Returns an `ImmSet` containing the values after an operation has been

@@ -144,7 +144,7 @@ namespace HH {
    *
    * @guide /hack/collections/examples
    */
-  public function lazy()[]: \HH\Rx\KeyedIterable<Tk, Tv>;
+  public function lazy()[]: KeyedIterable<Tk, Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Map`.
@@ -599,7 +599,7 @@ namespace HH {
    *
    * @return - A `KeyedIterator` that allows you to traverse the current `Map`.
    */
-  public function getIterator()[]: \HH\Rx\KeyedIterator<Tk, Tv>;
+  public function getIterator()[]: KeyedIterator<Tk, Tv>;
 
   /**
    * Returns a `Map` containing the key/value pairs from the specified `array`.
@@ -643,7 +643,7 @@ namespace HH {
    *
    * @return - The `Iterable` view of the current `Map`.
    */
-  public function items()[]: \HH\Rx\Iterable<Pair<Tk, Tv>>;
+  public function items()[]: Iterable<Pair<Tk, Tv>>;
   public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<Tk, Tv>;
 }
@@ -657,7 +657,7 @@ namespace {
  *
  * Methods and functions should take and return the KeyedIterator interface.
  */
-class MapIterator<Tk, +Tv> implements HH\Rx\KeyedIterator<Tk, Tv> {
+class MapIterator<Tk, +Tv> implements HH\KeyedIterator<Tk, Tv> {
   public function __construct()[];
   public function current()[]: Tv;
   public function key()[]: Tk;

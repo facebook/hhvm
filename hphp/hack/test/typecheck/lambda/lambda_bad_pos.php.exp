@@ -12,7 +12,5 @@ Invalid return type (Typing[4323])
     via this generic `T`
   File "hackarray.hhi", line 19, characters 119-120:
     via this generic `Tv`
-  File "interfaces.hhi", line 110, characters 99-100:
-    via this generic `Tv`
-  File "rx/interfaces.hhi", line 35, characters 63-64:
+  File "interfaces.hhi", line 110, characters 92-93:
     via this generic `Tv`

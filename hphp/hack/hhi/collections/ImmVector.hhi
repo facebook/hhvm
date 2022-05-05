@@ -133,7 +133,7 @@ final class ImmVector<<<__RequireDynamic>> +Tv> implements \ConstVector<Tv> {
    * @return - A `KeyedIterator` that allows you to traverse the current
    *           `ImmVector`.
    */
-  public function getIterator()[]: \HH\Rx\KeyedIterator<int, Tv>;
+  public function getIterator()[]: KeyedIterator<int, Tv>;
 
   /**
    * Returns the index of the first element that matches the search value.
@@ -196,7 +196,7 @@ final class ImmVector<<<__RequireDynamic>> +Tv> implements \ConstVector<Tv> {
    *
    * @return - The `Iterable` view of the current `ImmVector`.
    */
-  public function items()[]: \HH\Rx\Iterable<Tv>;
+  public function items()[]: Iterable<Tv>;
 
   /**
    * Returns the current `ImmVector`.
@@ -268,7 +268,7 @@ final class ImmVector<<<__RequireDynamic>> +Tv> implements \ConstVector<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function lazy()[]: \HH\Rx\KeyedIterable<int, Tv>;
+  public function lazy()[]: KeyedIterable<int, Tv>;
 
   /**
    * Returns a new `ImmVector` containing the values of the current `ImmVector`;

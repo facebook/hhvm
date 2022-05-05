@@ -153,7 +153,7 @@ final class Set<<<__RequireDynamic>> Tv as arraykey> implements \MutableSet<Tv> 
    *
    * @guide /hack/collections/examples
    */
-  public function lazy()[]: \HH\Rx\KeyedIterable<arraykey, Tv>;
+  public function lazy()[]: KeyedIterable<arraykey, Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Set`.
@@ -560,7 +560,7 @@ final class Set<<<__RequireDynamic>> Tv as arraykey> implements \MutableSet<Tv> 
    *
    * @return - A `KeyedIterator` that allows you to traverse the current `Set`.
    */
-  public function getIterator()[]: \HH\Rx\KeyedIterator<arraykey, Tv>;
+  public function getIterator()[]: KeyedIterator<arraykey, Tv>;
 
   /**
    * Returns a `Set` containing the values from the specified `array`.
@@ -625,7 +625,7 @@ final class Set<<<__RequireDynamic>> Tv as arraykey> implements \MutableSet<Tv> 
    *
    * @return - The `Iterable` view of the current `Set`.
    */
-  public function items()[]: \HH\Rx\Iterable<Tv>;
+  public function items()[]: Iterable<Tv>;
  /* HH_FIXME[0002] */
   public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
   public function toDArray()[]: darray<Tv, Tv>;
@@ -640,7 +640,7 @@ namespace {
  *
  * Methods and functions should take and return the KeyedIterator interface.
  */
-class SetIterator<+Tv> implements HH\Rx\KeyedIterator<arraykey, Tv> {
+class SetIterator<+Tv> implements HH\KeyedIterator<arraykey, Tv> {
   public function __construct()[];
   public function current()[]: Tv;
   public function key()[]: arraykey;

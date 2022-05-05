@@ -13,7 +13,7 @@ namespace {
  *
  */
 <<__Sealed(Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
-interface ConstCollection<+Te> extends HH\Rx\Countable {
+interface ConstCollection<+Te> extends Countable {
 
   /**
    * Is the collection empty?
@@ -35,7 +35,7 @@ interface ConstCollection<+Te> extends HH\Rx\Countable {
    * @return - Returns an `Iterable` with access to all of the items in
    *   the collection.
    */
-  public function items()[]: HH\Rx\Iterable<Te>;
+  public function items()[]: HH\Iterable<Te>;
  /* HH_FIXME[0002] */
   public function toVArray()[]: varray; /* HH_FIXME[0001] */
   public function toDArray()[]: darray;
@@ -295,7 +295,7 @@ interface MapAccess<Tk as arraykey, Tv> extends ConstMapAccess<Tk, Tv>,
 interface ConstVector<+Tv> extends KeyedContainer<int, Tv>,
                                    ConstCollection<Tv>,
                                    ConstIndexAccess<int, Tv>,
-                                   HH\Rx\KeyedIterable<int, Tv> {
+                                   HH\KeyedIterable<int, Tv> {
   /**
    * Returns a `ConstVector` containing the values of the current
    * `ConstVector`. Essentially a copy of the current `ConstVector`.
@@ -810,7 +810,7 @@ interface MutableVector<<<__RequireDynamic>> Tv> extends ConstVector<Tv>,
 interface ConstMap<Tk as arraykey, +Tv> extends KeyedContainer<Tk, Tv>,
                                     ConstCollection<Pair<Tk, Tv>>,
                                     ConstMapAccess<Tk, Tv>,
-                                    HH\Rx\KeyedIterable<Tk, Tv> {
+                                    HH\KeyedIterable<Tk, Tv> {
   /**
    * Returns a `ConstVector` containing the values of the current `ConstMap`.
    *
@@ -1322,7 +1322,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
 interface ConstSet<+Tv as arraykey> extends KeyedContainer<Tv, Tv>,
                                 ConstCollection<Tv>,
                                 ConstSetAccess<Tv>,
-                                HH\Rx\KeyedIterable<arraykey, Tv> {
+                                HH\KeyedIterable<arraykey, Tv> {
   /**
    * Returns a `ConstVector` containing the values of the current `ConstSet`.
    *

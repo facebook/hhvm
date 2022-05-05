@@ -114,7 +114,7 @@ namespace HH {
    *
    * @guide /hack/collections/examples
    */
-  public function lazy()[]: \HH\Rx\KeyedIterable<Tk, Tv>;
+  public function lazy()[]: KeyedIterable<Tk, Tv>;
 
   /**
    * Returns an ImmVector containing the values of the current `ImmMap`.
@@ -459,7 +459,7 @@ namespace HH {
    * @return - A `KeyedIterator` that allows you to traverse the current
    *           `ImmMap`.
    */
-  public function getIterator()[]: \HH\Rx\KeyedIterator<Tk, Tv>;
+  public function getIterator()[]: KeyedIterator<Tk, Tv>;
 
   /**
    * Creates an `ImmMap` from the given `Traversable`, or an empty `ImmMap`
@@ -493,7 +493,7 @@ namespace HH {
    *
    * @return - The `Iterable` view of the current `ImmMap`.
    */
-  public function items()[]: \HH\Rx\Iterable<Pair<Tk, Tv>>;
+  public function items()[]: Iterable<Pair<Tk, Tv>>;
   public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<Tk, Tv>;
 }

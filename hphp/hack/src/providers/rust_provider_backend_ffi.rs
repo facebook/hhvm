@@ -59,10 +59,9 @@ ocaml_ffi_with_arena! {
     fn hh_rust_provider_backend_get_fun<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
-        name: &'a str,
+        name: pos::FunName,
     ) -> Option<shallow_decl_defs::FunDecl<'a>> {
         let backend = unsafe { get_backend(backend) };
-        let name = pos::FunName::from(name);
         backend.folded_decl_provider.get_fun(name.into(), name)
             .unwrap()
             .map(|_f| todo!("f.to_oxidized(arena)"))
@@ -71,20 +70,18 @@ ocaml_ffi_with_arena! {
     fn hh_rust_provider_backend_get_shallow_class<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
-        name: &'a str,
+        _name: pos::TypeName,
     ) -> Option<shallow_decl_defs::ClassDecl<'a>> {
         let _backend = unsafe { get_backend(backend) };
-        let _name = pos::TypeName::from(name);
         todo!()
     }
 
     fn hh_rust_provider_backend_get_typedef<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
-        name: &'a str,
+        name: pos::TypeName,
     ) -> Option<shallow_decl_defs::TypedefDecl<'a>> {
         let backend = unsafe { get_backend(backend) };
-        let name = pos::TypeName::from(name);
         backend.folded_decl_provider.get_typedef(name.into(), name)
             .unwrap()
             .map(|_td| todo!("td.to_oxidized(arena)"))
@@ -93,10 +90,9 @@ ocaml_ffi_with_arena! {
     fn hh_rust_provider_backend_get_gconst<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
-        name: &'a str,
+        name: pos::ConstName,
     ) -> Option<shallow_decl_defs::ConstDecl<'a>> {
         let backend = unsafe { get_backend(backend) };
-        let name = pos::ConstName::from(name);
         backend.folded_decl_provider.get_const(name.into(), name)
             .unwrap()
             .map(|_c| todo!("c.to_oxidized(arena)"))
@@ -105,20 +101,18 @@ ocaml_ffi_with_arena! {
     fn hh_rust_provider_backend_get_module<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
-        name: &'a str,
+        _name: pos::ModuleName,
     ) -> Option<shallow_decl_defs::ModuleDecl<'a>> {
         let _backend = unsafe { get_backend(backend) };
-        let _name = pos::ModuleName::from(name);
         todo!()
     }
 
     fn hh_rust_provider_backend_get_folded_class<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
-        name: &'a str,
+        name: pos::TypeName,
     ) -> Option<decl_defs::DeclClassType<'a>> {
         let backend = unsafe { get_backend(backend) };
-        let name = pos::TypeName::from(name);
         backend.folded_decl_provider.get_class(name.into(), name)
             .unwrap()
             .map(|c| c.to_oxidized(arena))

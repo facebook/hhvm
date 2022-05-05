@@ -14,6 +14,7 @@ use intern::{
     string::{BytesId, IntoUtf8Bytes, StringId},
     BuildIdHasher,
 };
+use ocamlrep::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
@@ -92,6 +93,32 @@ impl<'a> ToOxidized<'a> for Symbol {
         self.0.as_str()
     }
 }
+
+impl ToOcamlRep for Symbol {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
+        ocamlrep::str_to_ocamlrep(self.as_str(), alloc)
+    }
+}
+
+impl FromOcamlRep for Symbol {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        Ok(Self::new(ocamlrep::str_from_ocamlrep(value)?))
+    }
+}
+
+impl<'a> FromOcamlRepIn<'a> for Symbol {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _arena: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        Ok(Self::new(ocamlrep::str_from_ocamlrep(value)?))
+    }
+}
+
+impl arena_trait::TrivialDrop for Symbol {}
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
@@ -173,6 +200,32 @@ impl<'a> ToOxidized<'a> for Bytes {
     }
 }
 
+impl ToOcamlRep for Bytes {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
+        ocamlrep::bytes_to_ocamlrep(self.as_bytes(), alloc)
+    }
+}
+
+impl FromOcamlRep for Bytes {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        Ok(Self::new(ocamlrep::bytes_from_ocamlrep(value)?))
+    }
+}
+
+impl<'a> FromOcamlRepIn<'a> for Bytes {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _arena: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        Ok(Self::new(ocamlrep::bytes_from_ocamlrep(value)?))
+    }
+}
+
+impl arena_trait::TrivialDrop for Bytes {}
+
 macro_rules! common_impls {
     ($name:ident) => {
         impl $name {
@@ -228,6 +281,32 @@ macro_rules! common_impls {
                 self.as_symbol().0.as_str()
             }
         }
+
+        impl ToOcamlRep for $name {
+            fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+                &'a self,
+                alloc: &'a A,
+            ) -> ocamlrep::OpaqueValue<'a> {
+                ocamlrep::str_to_ocamlrep(self.as_str(), alloc)
+            }
+        }
+
+        impl FromOcamlRep for $name {
+            fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+                Ok(Self::new(ocamlrep::str_from_ocamlrep(value)?))
+            }
+        }
+
+        impl<'a> FromOcamlRepIn<'a> for $name {
+            fn from_ocamlrep_in(
+                value: ocamlrep::Value<'_>,
+                _arena: &'a bumpalo::Bump,
+            ) -> Result<Self, ocamlrep::FromError> {
+                Ok(Self::new(ocamlrep::str_from_ocamlrep(value)?))
+            }
+        }
+
+        impl arena_trait::TrivialDrop for $name {}
     };
 }
 

@@ -4539,7 +4539,14 @@ let handle_client_message
         | None -> 0
         | Some { Hover.contents; _ } -> List.length contents
       in
-      Lwt.return_some { result_count; result_extra_telemetry = None }
+      let pos = params.Lsp.TextDocumentPositionParams.position in
+      let result_extra_telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_ ~key:"line" ~value:pos.line
+        |> Telemetry.int_ ~key:"character" ~value:pos.character
+      in
+      Lwt.return_some
+        { result_count; result_extra_telemetry = Some result_extra_telemetry }
     (* textDocument/typeDefinition request *)
     | (Main_loop menv, _, RequestMessage (id, TypeDefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in

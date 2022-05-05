@@ -1490,7 +1490,6 @@ dependencies = [
  "digest",
  "hex",
  "hhbc_string_utils",
- "md-5",
  "naming_special_names_rust",
  "oxidized_by_ref",
  "pretty_assertions",

@@ -11,7 +11,6 @@ path = "../../lib.rs"
 digest = "0.8"
 hex = "0.4.3"
 hhbc_string_utils = { path = "../../../hackc/utils/cargo/hhbc_string_utils" }
-md-5 = "0.8"
 naming_special_names_rust = { path = "../../../naming" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

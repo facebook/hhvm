@@ -73,17 +73,9 @@ pub struct Facts {
 }
 impl Facts {
     pub fn to_json(&self, text: &[u8]) -> String {
-        let (md5sum, sha1sum) = md5_and_sha1(text);
+        let sha1sum = sha1(text);
         let mut json = json!(&self);
         if let Some(m) = json.as_object_mut() {
-            m.insert(
-                String::from("md5sum0"),
-                json!(hex_number_to_i64(&md5sum[0..16])),
-            );
-            m.insert(
-                String::from("md5sum1"),
-                json!(hex_number_to_i64(&md5sum[16..32])),
-            );
             m.insert(String::from("sha1sum"), json!(sha1sum));
             if self.skip_file_attributes() {
                 m.remove("fileAttributes");
@@ -184,11 +176,8 @@ impl Flag {
     }
 }
 
-pub fn md5_and_sha1(text: &[u8]) -> (String, String) {
-    (
-        hash_and_hexify(md5::Md5::new(), text),
-        hash_and_hexify(sha1::Sha1::new(), text),
-    )
+pub fn sha1(text: &[u8]) -> String {
+    hash_and_hexify(sha1::Sha1::new(), text)
 }
 
 // implementation details
@@ -387,10 +376,6 @@ fn hash_and_hexify<D: Digest>(mut digest: D, text: &[u8]) -> String {
     hex::encode(digest.result())
 }
 
-fn hex_number_to_i64(s: &str) -> i64 {
-    u64::from_str_radix(s, 16).unwrap() as i64
-}
-
 // TODO: move to typing_defs_core_impl.rs once completed
 fn extract_type_name<'a>(ty: &Ty<'a>) -> String {
     match ty.get_node() {
@@ -459,20 +444,11 @@ mod tests {
     }
 
     #[test]
-    fn hex_number_to_json() {
-        assert_eq!(hex_number_to_i64("23"), 35);
-        assert_eq!(hex_number_to_i64("fffffffffffffffe"), -2);
-    }
-
-    #[test]
-    fn md5_and_sha1_some_text() {
+    fn sha1_some_text() {
         let text = b"some text";
         assert_eq!(
-            md5_and_sha1(text),
-            (
-                String::from("552e21cd4cd9918678e3c1a0df491bc3"),
-                String::from("37aa63c77398d954473262e1a0057c1e632eda77"),
-            ),
+            sha1(text),
+            String::from("37aa63c77398d954473262e1a0057c1e632eda77"),
         );
     }
 
@@ -611,8 +587,6 @@ mod tests {
     "c2"
   ],
   "functions": [],
-  "md5sum0": 6137880507793904006,
-  "md5sum1": 8711019000949709763,
   "sha1sum": "37aa63c77398d954473262e1a0057c1e632eda77",
   "typeAliases": [
     "my_type_alias"

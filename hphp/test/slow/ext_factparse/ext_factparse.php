@@ -106,10 +106,10 @@ function entrypoint_ext_factparse(): void {
       false, // useThreads
     );
     var_dump($res);
-    if ($res[__FILE__]['md5sum0'] === $res[$namespace_file1]['md5sum0']) {
-      print "FAILED md5sum\n";
+    if ($res[__FILE__]['sha1sum'] === $res[$namespace_file1]['sha1sum']) {
+      print "FAILED sha1sum\n";
     } else {
-      print "PASSED md5sum\n";
+      print "PASSED sha1sum\n";
     }
   } finally {
     unlink($namespace_file1);

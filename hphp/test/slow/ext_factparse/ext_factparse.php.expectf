@@ -1,6 +1,6 @@
 dict(3) {
   ["%s/ext_factparse.php"]=>
-  dict(7) {
+  dict(5) {
     ["constants"]=>
     vec(6) {
       string(3) "CO0"
@@ -17,12 +17,8 @@ dict(3) {
       string(2) "f6"
       string(24) "entrypoint_ext_factparse"
     }
-    ["md5sum0"]=>
-    int(-4529500088478076815)
-    ["md5sum1"]=>
-    int(-3615269830592059690)
     ["sha1sum"]=>
-    string(40) "9df949edb878ee48d239d70cbc6c7072448fdf61"
+    string(40) "a0b0a37c3e4370d06ce60084fe3aec29267d39dd"
     ["typeAliases"]=>
     vec(3) {
       string(3) "TA0"
@@ -219,7 +215,7 @@ dict(3) {
     }
   }
   ["%s"]=>
-  dict(7) {
+  dict(5) {
     ["constants"]=>
     vec(6) {
       string(6) "NS\CO0"
@@ -236,12 +232,8 @@ dict(3) {
       string(5) "NS\f6"
       string(27) "NS\entrypoint_ext_factparse"
     }
-    ["md5sum0"]=>
-    int(2703938819773158444)
-    ["md5sum1"]=>
-    int(8548665741115492170)
     ["sha1sum"]=>
-    string(40) "fc8d24b90b7e433bedd235fe3c688b6d7af20904"
+    string(40) "76761a6bcdcfee86a1446b8bc989e9139c8793a7"
     ["typeAliases"]=>
     vec(3) {
       string(6) "NS\TA0"
@@ -438,7 +430,7 @@ dict(3) {
     }
   }
   ["%s"]=>
-  dict(7) {
+  dict(5) {
     ["constants"]=>
     vec(6) {
       string(9) "NS\NS\CO0"
@@ -455,12 +447,8 @@ dict(3) {
       string(8) "NS\NS\f6"
       string(30) "NS\NS\entrypoint_ext_factparse"
     }
-    ["md5sum0"]=>
-    int(8680792043312564937)
-    ["md5sum1"]=>
-    int(4037804473865108766)
     ["sha1sum"]=>
-    string(40) "4aab700e160b609a1ef540d7579ad1650b5023a5"
+    string(40) "cc9af13672ef16a46bf5fdefc202a57db511d79c"
     ["typeAliases"]=>
     vec(3) {
       string(9) "NS\NS\TA0"
@@ -657,7 +645,7 @@ dict(3) {
     }
   }
 }
-PASSED md5sum
+PASSED sha1sum
 dict(3) {
   ["%s"]=>
   NULL

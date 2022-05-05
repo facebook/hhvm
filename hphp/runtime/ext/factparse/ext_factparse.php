@@ -36,8 +36,7 @@ enum FactTypeFlags : int {
  * be null, otherwise a result will be of the form:
  *
  *   array(
- *     'md5sum0' => int 64bits of md5sum of path contents + HHVM runtime flags,
- *     'md5sum1' => int next 64bits of path md5sum,
+ *     'sha1sum' => SHA1 Hash of source text,
  *     'types' => details of 'types' in the file (traits/classes/interfaces)
  *       array(
  *         array(

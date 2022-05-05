@@ -118,7 +118,6 @@ pub mod compile_ffi {
     #[derive(Debug, Default)]
     pub struct FactsResult {
         facts: Facts,
-        md5sum: String,
         sha1sum: String,
         has_errors: bool,
     }
@@ -532,7 +531,7 @@ pub fn hackc_decls_to_facts_cpp_ffi(
         }
     } else {
         let text = source_text.as_bytes();
-        let (md5sum, sha1sum) = facts::md5_and_sha1(text);
+        let sha1sum = facts::sha1(text);
         let disable_xhp_element_mangling = ((1 << 0) & decl_flags) != 0;
         let facts = compile_ffi::Facts::from(facts::Facts::from_decls(
             &(*decl_result.decls).0,
@@ -541,7 +540,6 @@ pub fn hackc_decls_to_facts_cpp_ffi(
         ));
         compile_ffi::FactsResult {
             facts,
-            md5sum,
             sha1sum,
             has_errors: false,
         }

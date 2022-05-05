@@ -134,10 +134,6 @@ let empty =
 
 (* Facts to JSON *)
 
-let hex_number_to_json s =
-  let number = "0x" ^ s |> Int64.of_string |> Int64.to_string in
-  J.JSON_Number number
-
 let add_set_member ~include_empty name values members =
   if InvSSet.is_empty values && not include_empty then
     members
@@ -188,13 +184,7 @@ let type_facts_to_json name tf =
   in
   J.JSON_Object members
 
-let facts_to_json ~md5 ~sha1 facts =
-  let md5sum0 =
-    ("md5sum0", hex_number_to_json (String.sub md5 ~pos:0 ~len:16))
-  in
-  let md5sum1 =
-    ("md5sum1", hex_number_to_json (String.sub md5 ~pos:16 ~len:16))
-  in
+let facts_to_json ~sha1 facts =
   let sha1sum = ("sha1sum", J.JSON_String sha1) in
   let type_facts_json =
     let elements =
@@ -212,13 +202,7 @@ let facts_to_json ~md5 ~sha1 facts =
   in
   J.JSON_Object
     [
-      md5sum0;
-      md5sum1;
-      sha1sum;
-      type_facts_json;
-      functions_json;
-      constants_json;
-      type_aliases_json;
+      sha1sum; type_facts_json; functions_json; constants_json; type_aliases_json;
     ]
 
 (* Facts from JSON *)

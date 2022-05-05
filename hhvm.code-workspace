@@ -6,6 +6,7 @@
   ],
   "settings": {
     "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
+    "nix.enableLanguageServer": true,
     "terminal.integrated.profiles.linux": {
       "Nix Shell": {
         "path": "nix-shell"

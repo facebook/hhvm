@@ -2620,7 +2620,7 @@ let decl_and_run_mode
         ~tcopt
         ~backend:
           (Provider_backend.Rust_provider_backend
-             (Rust_provider_backend.make ()))
+             (Rust_provider_backend.make popt))
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
     else
       Provider_context.empty_for_test

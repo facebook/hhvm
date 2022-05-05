@@ -8,4 +8,4 @@
 
 type t
 
-val make : unit -> t
+val make : ParserOptions.t -> t

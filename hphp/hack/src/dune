@@ -29,7 +29,7 @@
   naming_ast_print
   memtrace
   parent
-  rust_provider_backend
+  rust_provider_backend_stubs
   server_coverage_metric_utils
   server_color_file
   server_env

@@ -213,8 +213,8 @@ let set_analysis_backend () : unit = backend_ref := Analysis
 
 let set_shared_memory_backend () : unit = backend_ref := Shared_memory
 
-let set_rust_backend () : unit =
-  backend_ref := Rust_provider_backend (Rust_provider_backend.make ())
+let set_rust_backend popt : unit =
+  backend_ref := Rust_provider_backend (Rust_provider_backend.make popt)
 
 let set_local_memory_backend_internal
     ~(max_num_decls : int)

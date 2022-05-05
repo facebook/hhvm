@@ -6,6 +6,15 @@
  *
  *)
 
-type t = unit
+type t
 
-let make () = ()
+external make_ffi :
+  root:string -> hhi_root:string -> tmp:string -> ParserOptions.t -> t
+  = "hh_rust_provider_backend_make"
+
+let make popt =
+  make_ffi
+    ~root:Relative_path.(path_of_prefix Root)
+    ~hhi_root:Relative_path.(path_of_prefix Hhi)
+    ~tmp:Relative_path.(path_of_prefix Tmp)
+    popt

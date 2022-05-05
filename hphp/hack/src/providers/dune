@@ -4,7 +4,7 @@
  (libraries
   collections
   decl_service_client
-  rust_provider_backend
+  rust_provider_backend_stubs
   heap_shared_mem
   lfu_cache
   naming_sqlite
@@ -59,12 +59,6 @@
   sys_utils)
  (preprocess
   (pps ppx_deriving.std)))
-
-(library
- (name rust_provider_backend)
- (modules rust_provider_backend)
- (libraries
-  core_kernel))
 
 (library
  (name file_provider)

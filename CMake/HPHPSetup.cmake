@@ -170,7 +170,7 @@ add_definitions(-DHAVE_INTTYPES_H)
 # blacklist the platform rather than whitelisting others.
 option(USE_BUNDLED_TZDATA "Use bundled system tzdata instead of /usr/share/zoneinfo" OFF)
 if (NOT ${USE_BUNDLED_TZDATA})
-  if (NOT EXISTS /usr/share/zoneinfo)
+  if (NOT DEFINED HAVE_SYSTEM_TZDATA AND NOT EXISTS /usr/share/zoneinfo)
     message(FATAL_ERROR "/usr/share/zoneinfo does not exist, and USE_BUNDLED_TZDATA not set")
   endif()
   add_definitions(-DHAVE_SYSTEM_TZDATA)

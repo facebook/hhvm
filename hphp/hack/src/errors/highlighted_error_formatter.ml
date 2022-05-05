@@ -263,6 +263,11 @@ let load_context_lines_for_highlighted ~before ~after ~(pos : Pos.absolute) :
   let path = Pos.filename pos in
   let (start_line, _start_col) = Pos.line_column pos in
   let (end_line, end_col) = Pos.end_line_column pos in
+
+  (* Type checker internal errors report the whole file. Limit our
+     output to at most 1,000 lines. *)
+  let end_line = min (start_line + 1000) end_line in
+
   let lines = Errors.read_lines path in
   match lines with
   | [] ->

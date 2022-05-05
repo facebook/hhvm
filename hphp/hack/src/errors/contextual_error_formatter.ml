@@ -23,6 +23,7 @@ let load_context_lines (pos : Pos.absolute) : string list =
   let path = Pos.filename pos in
   let line = Pos.line pos in
   let end_line = Pos.end_line pos in
+
   let lines = Errors.read_lines path in
   (* Line numbers are 1-indexed. *)
   List.filteri lines ~f:(fun i _ -> i + 1 >= line && i + 1 <= end_line)

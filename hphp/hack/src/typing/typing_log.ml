@@ -298,19 +298,13 @@ let possibly_enforced_type_as_value env et =
 
 let return_info_as_value env return_info =
   let Typing_env_return_info.
-        {
-          return_type;
-          return_disposable;
-          return_explicit;
-          return_dynamically_callable;
-        } =
+        { return_type; return_disposable; return_dynamically_callable } =
     return_info
   in
   make_map
     [
       ("return_type", possibly_enforced_type_as_value env return_type);
       ("return_disposable", Bool return_disposable);
-      ("return_explicit", Bool return_explicit);
       ("return_dynamically_callable", Bool return_dynamically_callable);
     ]
 

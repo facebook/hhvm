@@ -16,7 +16,6 @@ val make_info :
   Ast_defs.fun_kind ->
   Nast.user_attribute list ->
   env ->
-  is_explicit:bool ->
   Typing_defs.locl_possibly_enforced_ty ->
   Typing_env_return_info.t
 

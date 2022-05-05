@@ -117,7 +117,6 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
                 et_enforced = Unenforced;
               };
             return_disposable = false;
-            return_explicit = false;
             return_dynamically_callable = false;
           };
         params = Local_id.Map.empty;

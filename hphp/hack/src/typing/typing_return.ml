@@ -48,16 +48,11 @@ let has_attribute attr l =
 let has_return_disposable_attribute attrs =
   has_attribute SN.UserAttributes.uaReturnDisposable attrs
 
-let make_info ret_pos fun_kind attributes env ~is_explicit return_type =
+let make_info ret_pos fun_kind attributes env return_type =
   let return_disposable = has_return_disposable_attribute attributes in
   if not return_disposable then
     enforce_return_not_disposable ret_pos fun_kind env return_type;
-  {
-    return_type;
-    return_disposable;
-    return_explicit = is_explicit;
-    return_dynamically_callable = false;
-  }
+  { return_type; return_disposable; return_dynamically_callable = false }
 
 (* Create a return type with fresh type variables  *)
 let make_fresh_return_type env p =

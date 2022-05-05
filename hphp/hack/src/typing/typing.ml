@@ -2386,26 +2386,18 @@ and stmt_ env pos st =
     let env = Typing_return.check_inout_return pos env in
     let (_, expr_pos, _) = e in
     let Typing_env_return_info.
-          {
-            return_type;
-            return_disposable;
-            return_explicit;
-            return_dynamically_callable = _;
-          } =
+          { return_type; return_disposable; return_dynamically_callable = _ } =
       Env.get_return env
     in
     let return_type =
       Typing_return.strip_awaitable (Env.get_fn_kind env) env return_type
     in
     let expected =
-      if return_explicit then
-        Some
-          (ExpectedTy.make_and_allow_coercion
-             expr_pos
-             Reason.URreturn
-             return_type)
-      else
-        None
+      Some
+        (ExpectedTy.make_and_allow_coercion
+           expr_pos
+           Reason.URreturn
+           return_type)
     in
     if return_disposable then enforce_return_disposable env e;
     let (env, te, rty) =
@@ -4899,7 +4891,6 @@ and function_dynamically_callable env f params_decl_ty ret_locl_ty =
         {
           return_type = MakeType.unenforced dynamic_return_ty;
           return_disposable = false;
-          return_explicit = true;
           return_dynamically_callable = true;
         }
     in
@@ -5605,13 +5596,7 @@ and closure_make
   let env =
     Env.set_return
       env
-      (Typing_return.make_info
-         hint_pos
-         f.f_fun_kind
-         []
-         env
-         ~is_explicit:(Option.is_some ret_ty)
-         hret)
+      (Typing_return.make_info hint_pos f.f_fun_kind [] env hret)
   in
   let local_tpenv = Env.get_tpenv env in
   (* Outer pipe variables aren't available in closures. Note that

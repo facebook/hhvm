@@ -182,7 +182,6 @@ let fun_def ctx fd :
       f.f_fun_kind
       f.f_user_attributes
       env
-      ~is_explicit
       return_ty
   in
   let (env, _) =
@@ -318,7 +317,6 @@ let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
         {
           return_type = MakeType.unenforced dynamic_return_ty;
           return_disposable = false;
-          return_explicit = true;
           return_dynamically_callable = true;
         }
     in
@@ -435,13 +433,7 @@ let method_return env m ret_decl_ty =
       ~default:default_ty
   in
   let return =
-    Typing_return.make_info
-      hint_pos
-      m.m_fun_kind
-      m.m_user_attributes
-      env
-      ~is_explicit
-      ret_ty
+    Typing_return.make_info hint_pos m.m_fun_kind m.m_user_attributes env ret_ty
   in
   (env, return, ret_ty)
 

@@ -266,6 +266,9 @@ interface MethodAttribute {}
 
 interface LambdaAttribute {}
 
+// Modules
+interface ModuleAttribute {}
+
 // properties
 interface PropertyAttribute {}
 interface InstancePropertyAttribute extends PropertyAttribute {}

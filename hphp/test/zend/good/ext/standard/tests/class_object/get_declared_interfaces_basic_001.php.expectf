@@ -1,7 +1,7 @@
 *** Testing get_declared_interfaces() : basic functionality ***
 
 -- Testing get_declared_interfaces() function with Zero arguments --
-vec(130) {
+vec(131) {
   string(23) "HH\Rx\IteratorAggregate"
   string(19) "HH\Rx\KeyedIterator"
   string(26) "HH\Lib\IO\SeekableFDHandle"
@@ -48,6 +48,7 @@ vec(130) {
   string(21) "HH\Lib\Network\Server"
   string(28) "HH\InstancePropertyAttribute"
   string(26) "HH\StaticPropertyAttribute"
+  string(18) "HH\ModuleAttribute"
   string(9) "SetAccess"
   string(9) "MapAccess"
   string(22) "HH\Lib\File\ReadHandle"

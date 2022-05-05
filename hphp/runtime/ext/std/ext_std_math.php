@@ -1,5 +1,10 @@
 <?hh // partial
 
+// Keep in sync with hphp/runtime/ext/std/ext_std_math.cpp: k_M_PI
+const float M_PI = 3.1415926535898;
+// Keep in sync with hphp/zend/zend-math.h: PHP_ROUND_HALF_UP
+const int PHP_ROUND_HALF_UP = 1;
+
 /**
  * @return float - The value of pi as float.
  *
@@ -26,7 +31,7 @@ function pi()[]: float {
  *
  */
 <<__IsFoldable, __Native>>
-function min(mixed $value1, ...$argv)[]: mixed;
+function min(mixed $value1, mixed ...$argv)[]: mixed;
 
 /**
  * If the first and only parameter is an array, max() returns the highest
@@ -49,7 +54,7 @@ function min(mixed $value1, ...$argv)[]: mixed;
  *
  */
 <<__IsFoldable, __Native>>
-function max(mixed $value1, ...$argv)[]: mixed;
+function max(mixed $value1, mixed...$argv)[]: mixed;
 
 /**
  * Returns the absolute value of number.
@@ -553,7 +558,7 @@ function getrandmax()[]: int;
  * @param mixed $seed - Optional seed value
  *
  */
-<<__Native, __NonRx('Randomness')>>
+<<__Native>>
 function srand(mixed $seed = null): void;
 
 /**
@@ -564,7 +569,7 @@ function srand(mixed $seed = null): void;
  *   getrandmax(), inclusive).
  *
  */
-<<__Native, __NonRx('Randomness')>>
+<<__Native>>
 function rand(int $min = 0, ?int $max = null): int;
 
 /**
@@ -582,7 +587,7 @@ function mt_getrandmax()[]: int;
  * @param mixed $seed - An optional seed value
  *
  */
-<<__Native, __NonRx('Randomness')>>
+<<__Native>>
 function mt_srand(mixed $seed = null): void;
 
 /**
@@ -594,7 +599,7 @@ function mt_srand(mixed $seed = null): void;
  *   mt_getrandmax(), inclusive)
  *
  */
-<<__Native, __NonRx('Randomness')>>
+<<__Native>>
 function mt_rand(int $min = 0, ?int $max = null)[leak_safe]: int;
 
 /**
@@ -605,7 +610,7 @@ function mt_rand(int $min = 0, ?int $max = null)[leak_safe]: int;
  * @return float - A pseudo random float value in the range of (0, 1)
  *
  */
-<<__Native, __NonRx('Randomness')>>
+<<__Native>>
 function lcg_value(): float;
 
 /**

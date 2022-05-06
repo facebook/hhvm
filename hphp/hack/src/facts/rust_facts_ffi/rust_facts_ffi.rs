@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use direct_decl_parser::DeclParserOptions;
-use facts_rust::facts::Facts;
+use facts_rust::Facts;
 use hhbc_string_utils::without_xhp_mangling;
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_ocamlpool::ocaml_ffi;

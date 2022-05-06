@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../lib.rs"
+path = "../../facts.rs"
 
 [dependencies]
 digest = "0.8"

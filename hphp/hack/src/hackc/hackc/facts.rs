@@ -3,7 +3,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use anyhow::Result;
 use clap::Parser;
-use facts_rust::facts::Facts;
+use facts_rust::Facts;
 use oxidized::relative_path::{Prefix, RelativePath};
 use serde_json::json;
 use std::io::Write;

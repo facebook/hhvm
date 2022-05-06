@@ -4,8 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::{BTreeMap, BTreeSet};
-
 use digest::Digest;
 use hhbc_string_utils::{mangle_xhp_id, strip_global_ns};
 use naming_special_names_rust::user_attributes;
@@ -16,11 +14,15 @@ use oxidized_by_ref::{
     typing_defs::{Ty, Ty_, UserAttribute},
 };
 use serde::ser::SerializeSeq;
-use serde::Serializer;
-use serde_derive::Serialize;
+use serde::{
+    de::{SeqAccess, Visitor},
+    Deserializer, Serializer,
+};
+use serde_derive::{Deserialize, Serialize};
 use serde_json::json;
+use std::collections::{BTreeMap, BTreeSet};
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TypeKind {
     Class,
@@ -36,56 +38,62 @@ pub enum TypeKind {
 pub type StringSet = BTreeSet<String>;
 pub type Attributes = BTreeMap<String, Vec<String>>;
 
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MethodFacts {
-    #[serde(skip_serializing_if = "Attributes::is_empty")]
+    #[serde(default, skip_serializing_if = "Attributes::is_empty")]
     pub attributes: Attributes,
 }
 
 pub type Methods = BTreeMap<String, MethodFacts>;
 
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TypeFacts {
     pub base_types: StringSet,
+
     #[serde(rename = "kindOf")]
     pub kind: TypeKind,
+
+    #[serde(default)]
     pub attributes: Attributes,
+
     pub flags: isize,
+
+    #[serde(default)]
     pub require_extends: StringSet,
+
+    #[serde(default)]
     pub require_implements: StringSet,
-    #[serde(skip_serializing_if = "Methods::is_empty")]
+
+    #[serde(default, skip_serializing_if = "Methods::is_empty")]
     pub methods: Methods,
 }
 
 pub type TypeFactsByName = BTreeMap<String, TypeFacts>;
 
-#[derive(Default, Debug, PartialEq, Serialize)]
+#[derive(Default, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Facts {
-    #[serde(serialize_with = "types_to_json")]
+    #[serde(serialize_with = "types_to_json", deserialize_with = "json_to_types")]
     pub types: TypeFactsByName,
+
     pub functions: Vec<String>,
     pub constants: Vec<String>,
     pub type_aliases: Vec<String>,
+
+    #[serde(default, skip_serializing_if = "Attributes::is_empty")]
     pub file_attributes: Attributes,
 }
+
 impl Facts {
     pub fn to_json(&self, text: &[u8]) -> String {
         let sha1sum = sha1(text);
         let mut json = json!(&self);
         if let Some(m) = json.as_object_mut() {
             m.insert(String::from("sha1sum"), json!(sha1sum));
-            if self.skip_file_attributes() {
-                m.remove("fileAttributes");
-            }
         };
         serde_json::to_string_pretty(&json).expect("Could not serialize facts to JSON")
-    }
-
-    fn skip_file_attributes(&self) -> bool {
-        self.file_attributes.is_empty()
     }
 
     pub fn from_decls(
@@ -93,8 +101,6 @@ impl Facts {
         file_attributes: &[&UserAttribute<'_>],
         disable_xhp_element_mangling: bool,
     ) -> Facts {
-        // 10/15/2021 TODO(T103413083): Fill out the implementation
-
         let mut types = TypeFactsByName::new();
         decls.classes().for_each(|(class_name, decl)| {
             let mut name = format(class_name);
@@ -157,6 +163,7 @@ pub enum Flag {
     Final = 2,
     MultipleDeclarations = 4,
 }
+
 impl Flag {
     pub fn as_flags(&self) -> Flags {
         *self as isize
@@ -164,7 +171,6 @@ impl Flag {
     pub fn default() -> Flags {
         0
     }
-    #[allow(dead_code)]
     pub fn is_set(&self, flags: Flags) -> bool {
         (flags & (*self as Flags)) != 0
     }
@@ -177,11 +183,15 @@ impl Flag {
 }
 
 pub fn sha1(text: &[u8]) -> String {
-    hash_and_hexify(sha1::Sha1::new(), text)
+    let mut digest = sha1::Sha1::new();
+    digest.input(text);
+    hex::encode(digest.result())
 }
 
 // implementation details
 
+/// Serialize the Map<Name, TypeFacts> as a sequence of JSON objects with `name`
+/// as one of the fields.
 fn types_to_json<S: Serializer>(types_by_name: &TypeFactsByName, s: S) -> Result<S::Ok, S::Error> {
     let mut seq = s.serialize_seq(None)?;
     for (name, types) in types_by_name.iter() {
@@ -208,6 +218,38 @@ fn types_to_json<S: Serializer>(types_by_name: &TypeFactsByName, s: S) -> Result
         seq.serialize_element(&types_json)?;
     }
     seq.end()
+}
+
+/// Deserialize a sequence of TypeFacts with `name` fields as a Map by hoisting
+/// the name as the map key.
+fn json_to_types<'de, D: Deserializer<'de>>(d: D) -> Result<TypeFactsByName, D::Error> {
+    struct TypeFactsSeqVisitor;
+    impl<'de> Visitor<'de> for TypeFactsSeqVisitor {
+        type Value = TypeFactsByName;
+        fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "a sequence of TypeFacts")
+        }
+        fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
+            let mut types = TypeFactsByName::new();
+            while let Some(mut v) = seq.next_element::<serde_json::Value>()? {
+                let obj = v
+                    .as_object_mut()
+                    .ok_or_else(|| serde::de::Error::custom("Expected TypeFacts JSON Object"))?;
+                let name = obj
+                    .remove("name")
+                    .ok_or_else(|| serde::de::Error::missing_field("name"))?;
+                let name = name
+                    .as_str()
+                    .ok_or_else(|| serde::de::Error::custom("Expected name JSON String"))?;
+                types.insert(
+                    name.into(),
+                    serde_json::from_value(v).map_err(serde::de::Error::custom)?,
+                );
+            }
+            Ok(types)
+        }
+    }
+    d.deserialize_seq(TypeFactsSeqVisitor)
 }
 
 impl TypeFacts {
@@ -371,11 +413,6 @@ fn add_or_update_classish_decl(name: String, mut delta: TypeFacts, types: &mut T
         .or_insert(delta);
 }
 
-fn hash_and_hexify<D: Digest>(mut digest: D, text: &[u8]) -> String {
-    digest.input(text);
-    hex::encode(digest.result())
-}
-
 // TODO: move to typing_defs_core_impl.rs once completed
 fn extract_type_name<'a>(ty: &Ty<'a>) -> String {
     match ty.get_node() {
@@ -466,121 +503,131 @@ mod tests {
         );
     }
 
+    fn fake_facts() -> Facts {
+        let mut types = TypeFactsByName::new();
+        let mut base_types = StringSet::new();
+        base_types.insert("bt3".into());
+        base_types.insert("bt1".into());
+        base_types.insert("bt2".into());
+        types.insert(
+            String::from("include_empty_both_when_trait_kind"),
+            TypeFacts {
+                kind: TypeKind::Trait,
+                attributes: Attributes::new(),
+                require_extends: StringSet::new(),
+                require_implements: StringSet::new(),
+                base_types,
+                flags: 6,
+                methods: Methods::new(),
+            },
+        );
+        // verify requireImplements and requireExtends are skipped if empty and Class kind
+        types.insert(
+            String::from("include_empty_neither_when_class_kind"),
+            TypeFacts {
+                kind: TypeKind::Class,
+                attributes: Attributes::new(),
+                require_extends: StringSet::new(),
+                require_implements: StringSet::new(),
+                base_types: StringSet::new(),
+                flags: 0,
+                methods: Methods::new(),
+            },
+        );
+        // verify only requireImplements is skipped if empty and Interface kind
+        types.insert(
+            String::from("include_empty_req_extends_when_interface_kind"),
+            TypeFacts {
+                kind: TypeKind::Interface,
+                attributes: Attributes::new(),
+                require_extends: StringSet::new(),
+                require_implements: StringSet::new(),
+                base_types: StringSet::new(),
+                flags: 1,
+                methods: Methods::new(),
+            },
+        );
+        // verify non-empty require* is included
+        types.insert(
+            String::from("include_nonempty_always"),
+            TypeFacts {
+                kind: TypeKind::Unknown,
+                attributes: {
+                    let mut map = Attributes::new();
+                    map.insert("A".into(), vec!["'B'".into()]);
+                    map.insert("C".into(), Vec::new());
+                    map
+                },
+                require_extends: {
+                    let mut set = StringSet::new();
+                    set.insert("extends1".into());
+                    set
+                },
+                require_implements: {
+                    let mut set = StringSet::new();
+                    set.insert("impl1".into());
+                    set
+                },
+                base_types: StringSet::new(),
+                flags: 9,
+                methods: Methods::new(),
+            },
+        );
+        types.insert(
+            String::from("include_method_attrs"),
+            TypeFacts {
+                kind: TypeKind::Class,
+                attributes: Attributes::new(),
+                require_extends: StringSet::new(),
+                require_implements: StringSet::new(),
+                base_types: StringSet::new(),
+                flags: 6,
+                methods: vec![
+                    (
+                        String::from("no_attrs"),
+                        MethodFacts {
+                            attributes: Attributes::new(),
+                        },
+                    ),
+                    (
+                        String::from("one_attr_with_arg"),
+                        MethodFacts {
+                            attributes: vec![(
+                                String::from("attr_with_arg"),
+                                vec![String::from("arg")],
+                            )]
+                            .into_iter()
+                            .collect(),
+                        },
+                    ),
+                ]
+                .into_iter()
+                .collect(),
+            },
+        );
+        Facts {
+            constants: vec!["c1".into(), "c2".into()],
+            file_attributes: BTreeMap::new(),
+            functions: vec![],
+            type_aliases: vec!["my_type_alias".into()],
+            types,
+        }
+    }
+
+    #[test]
+    fn round_trip_json() -> serde_json::Result<()> {
+        let f1 = fake_facts();
+        let json = f1.to_json(b"fake source text");
+        let f2 = serde_json::from_str(&json)?;
+        assert_eq!(f1, f2);
+        Ok(())
+    }
+
     #[test]
     fn to_json() {
-        let mut types = TypeFactsByName::new();
-        {
-            let mut base_types = StringSet::new();
-            base_types.insert("bt3".into());
-            base_types.insert("bt1".into());
-            base_types.insert("bt2".into());
-            types.insert(
-                String::from("include_empty_both_when_trait_kind"),
-                TypeFacts {
-                    kind: TypeKind::Trait,
-                    attributes: Attributes::new(),
-                    require_extends: StringSet::new(),
-                    require_implements: StringSet::new(),
-                    base_types,
-                    flags: 6,
-                    methods: Methods::new(),
-                },
-            );
-            // verify requireImplements and requireExtends are skipped if empty and Class kind
-            types.insert(
-                String::from("include_empty_neither_when_class_kind"),
-                TypeFacts {
-                    kind: TypeKind::Class,
-                    attributes: Attributes::new(),
-                    require_extends: StringSet::new(),
-                    require_implements: StringSet::new(),
-                    base_types: StringSet::new(),
-                    flags: 0,
-                    methods: Methods::new(),
-                },
-            );
-            // verify only requireImplements is skipped if empty and Interface kind
-            types.insert(
-                String::from("include_empty_req_extends_when_interface_kind"),
-                TypeFacts {
-                    kind: TypeKind::Interface,
-                    attributes: Attributes::new(),
-                    require_extends: StringSet::new(),
-                    require_implements: StringSet::new(),
-                    base_types: StringSet::new(),
-                    flags: 1,
-                    methods: Methods::new(),
-                },
-            );
-            // verify non-empty require* is included
-            types.insert(
-                String::from("include_nonempty_always"),
-                TypeFacts {
-                    kind: TypeKind::Unknown,
-                    attributes: {
-                        let mut map = Attributes::new();
-                        map.insert("A".into(), vec!["'B'".into()]);
-                        map.insert("C".into(), Vec::new());
-                        map
-                    },
-                    require_extends: {
-                        let mut set = StringSet::new();
-                        set.insert("extends1".into());
-                        set
-                    },
-                    require_implements: {
-                        let mut set = StringSet::new();
-                        set.insert("impl1".into());
-                        set
-                    },
-                    base_types: StringSet::new(),
-                    flags: 9,
-                    methods: Methods::new(),
-                },
-            );
-            types.insert(
-                String::from("include_method_attrs"),
-                TypeFacts {
-                    kind: TypeKind::Class,
-                    attributes: Attributes::new(),
-                    require_extends: StringSet::new(),
-                    require_implements: StringSet::new(),
-                    base_types: StringSet::new(),
-                    flags: 6,
-                    methods: vec![
-                        (
-                            String::from("no_attrs"),
-                            MethodFacts {
-                                attributes: Attributes::new(),
-                            },
-                        ),
-                        (
-                            String::from("one_attr_with_arg"),
-                            MethodFacts {
-                                attributes: vec![(
-                                    String::from("attr_with_arg"),
-                                    vec![String::from("arg")],
-                                )]
-                                .into_iter()
-                                .collect(),
-                            },
-                        ),
-                    ]
-                    .into_iter()
-                    .collect(),
-                },
-            );
-        }
-        // to_string_pretty
+        // test to_string_pretty()
         assert_eq!(
-            (Facts {
-                constants: vec!["c1".into(), "c2".into()],
-                file_attributes: BTreeMap::new(),
-                functions: vec![],
-                type_aliases: vec!["my_type_alias".into()],
-                types,
-            })
-            .to_json(b"some text"),
+            fake_facts().to_json(b"some text"),
             r#"{
   "constants": [
     "c1",

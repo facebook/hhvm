@@ -11,6 +11,7 @@ use tempdir::TempDir;
 use fbinit::FacebookInit;
 use hackrs::{
     decl_parser::DeclParser,
+    file_provider,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
     naming_provider::{NamingProvider, SqliteNamingTable},
     shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider},
@@ -61,7 +62,9 @@ impl TestContext {
             dummy: PathBuf::new(),
             tmp: PathBuf::new(),
         });
-        let decl_parser = DeclParser::new(path_ctx);
+        let file_provider: Arc<dyn file_provider::FileProvider> =
+            Arc::new(file_provider::PlainFileProvider::new(Arc::clone(&path_ctx)));
+        let decl_parser = DeclParser::new(Arc::clone(&file_provider));
         let naming_provider: Arc<dyn NamingProvider> =
             Arc::new(SqliteNamingTable::new(&naming_table).unwrap());
         let shallow_decl_provider: Arc<dyn ShallowDeclProvider<_>> =

@@ -5,6 +5,7 @@
 
 use hackrs::{
     decl_parser::DeclParser,
+    file_provider,
     folded_decl_provider::FoldedDeclProvider,
     typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };
@@ -92,7 +93,9 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
         .filter(|e| !e.file_type().is_dir())
         .map(|e| RelativePath::new(Prefix::Hhi, e.path().strip_prefix(&ctx.hhi).unwrap()))
         .collect::<Vec<_>>();
-    let decl_parser = DeclParser::new(ctx);
+    let file_provider: Arc<dyn file_provider::FileProvider> =
+        Arc::new(file_provider::PlainFileProvider::new(ctx));
+    let decl_parser = DeclParser::new(Arc::clone(&file_provider));
     let folded_decl_provider = hackrs_test_utils::decl_provider::make_folded_decl_provider(
         opts.naming_table.as_ref(),
         &decl_parser,

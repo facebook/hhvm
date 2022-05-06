@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::special_names;
+use crate::{file_provider, file_provider::FileProvider};
 use arena_collections::list::List;
 use names::FileSummary;
 use obr::{
@@ -13,7 +14,7 @@ use obr::{
     shallow_decl_defs::{Decl, ShallowClass},
 };
 use oxidized_by_ref as obr;
-use pos::{RelativePath, RelativePathCtx, TypeName};
+use pos::{RelativePath, TypeName};
 use std::marker::PhantomData;
 use std::sync::Arc;
 use ty::decl::shallow;
@@ -24,7 +25,7 @@ use options::Options;
 
 #[derive(Debug, Clone)]
 pub struct DeclParser<R: Reason> {
-    relative_path_ctx: Arc<RelativePathCtx>,
+    file_provider: Arc<dyn FileProvider>,
     opts: Options,
     // We could make our parse methods generic over `R` instead, but it's
     // usually more convenient for callers (especially tests) to pin the decl
@@ -33,26 +34,25 @@ pub struct DeclParser<R: Reason> {
 }
 
 impl<R: Reason> DeclParser<R> {
-    pub fn new(relative_path_ctx: Arc<RelativePathCtx>) -> Self {
+    pub fn new(file_provider: Arc<dyn FileProvider>) -> Self {
         Self {
-            relative_path_ctx,
+            file_provider,
             opts: Default::default(),
             _phantom: PhantomData,
         }
     }
 
-    pub fn with_options(relative_path_ctx: Arc<RelativePathCtx>, opts: &ParserOptions<'_>) -> Self {
+    pub fn with_options(file_provider: Arc<dyn FileProvider>, opts: &ParserOptions<'_>) -> Self {
         Self {
-            relative_path_ctx,
+            file_provider,
             opts: Options::from(opts),
             _phantom: PhantomData,
         }
     }
 
-    pub fn parse(&self, path: RelativePath) -> std::io::Result<Vec<shallow::Decl<R>>> {
+    pub fn parse(&self, path: RelativePath) -> Result<Vec<shallow::Decl<R>>, file_provider::Error> {
         let arena = bumpalo::Bump::new();
-        let absolute_path = path.to_absolute(&self.relative_path_ctx);
-        let text = std::fs::read(&absolute_path)?;
+        let text = self.file_provider.get_contents(path)?;
         let decl_parser_opts = DeclParserOptions::from_parser_options(self.opts.get());
         let parsed_file = self.parse_impl(&decl_parser_opts, path, &text, &arena);
         Ok(parsed_file.decls.iter().map(Into::into).collect())
@@ -61,10 +61,9 @@ impl<R: Reason> DeclParser<R> {
     pub fn parse_and_summarize(
         &self,
         path: RelativePath,
-    ) -> std::io::Result<(Vec<shallow::Decl<R>>, FileSummary)> {
+    ) -> Result<(Vec<shallow::Decl<R>>, FileSummary), file_provider::Error> {
         let arena = bumpalo::Bump::new();
-        let absolute_path = path.to_absolute(&self.relative_path_ctx);
-        let text = std::fs::read(&absolute_path)?;
+        let text = self.file_provider.get_contents(path)?;
         let opts = DeclParserOptions::from(self.opts.get());
         let parsed_file = self.parse_impl(&opts, path, &text, &arena);
         let summary = FileSummary::from_decls(parsed_file);

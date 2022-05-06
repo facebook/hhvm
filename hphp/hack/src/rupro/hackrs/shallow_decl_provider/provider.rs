@@ -37,7 +37,10 @@ impl<R: Reason> LazyShallowDeclProvider<R> {
 
     fn parse_and_cache_decls_in(&self, path: RelativePath) -> Result<()> {
         let decls_result = self.parser.parse(path);
-        let decls = decls_result.map_err(|io_error| Error::DeclParse { path, io_error })?;
+        let decls = decls_result.map_err(|file_provider_error| Error::DeclParse {
+            path,
+            file_provider_error,
+        })?;
         self.cache.add_decls(decls);
         Ok(())
     }

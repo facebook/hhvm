@@ -9,6 +9,7 @@
 
 use hackrs::ast_provider::AstProvider;
 use hackrs::decl_parser::DeclParser;
+use hackrs::file_provider;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::shallow_decl_provider::EagerShallowDeclProvider;
 use hackrs::tast;
@@ -83,7 +84,10 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
     let options = Arc::new(oxidized::global_options::GlobalOptions::default());
 
     let ast_provider = AstProvider::new(Arc::clone(&relative_path_ctx), Arc::clone(&options));
-    let decl_parser = DeclParser::new(relative_path_ctx);
+    let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(
+        file_provider::PlainFileProvider::new(Arc::clone(&relative_path_ctx)),
+    );
+    let decl_parser = DeclParser::new(Arc::clone(&file_provider));
     let shallow_decl_cache = Arc::new(make_non_eviction_shallow_decl_cache());
     let shallow_decl_provider = Arc::new(EagerShallowDeclProvider::new(Arc::clone(
         &shallow_decl_cache,

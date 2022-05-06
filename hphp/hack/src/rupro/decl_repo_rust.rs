@@ -19,7 +19,7 @@ use tempdir::TempDir;
 use ty::reason::{BReason, NReason, Reason};
 
 use hackrs::{
-    decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider,
+    decl_parser::DeclParser, file_provider, folded_decl_provider::FoldedDeclProvider,
     shallow_decl_provider::ShallowDeclCache,
 };
 use hackrs_test_utils::cache::NonEvictingCache;
@@ -100,7 +100,9 @@ fn main() {
 fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: TempDir) {
     let names = collect_file_or_class_names(opts, &ctx);
 
-    let parser = DeclParser::new(ctx);
+    let file_provider: Arc<dyn file_provider::FileProvider> =
+        Arc::new(file_provider::PlainFileProvider::new(Arc::clone(&ctx)));
+    let parser = DeclParser::new(file_provider);
     let shallow_decl_cache = make_shallow_cache::<R>(opts);
     let classes = match names {
         Names::Classnames(classes) => classes,

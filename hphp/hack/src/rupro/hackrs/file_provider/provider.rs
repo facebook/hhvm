@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{FileProvider, FileType};
+use super::{Error, FileProvider, FileType, Result};
 use dashmap::DashMap;
 use parking_lot::RwLock;
 use pos::{RelativePath, RelativePathCtx};
@@ -25,9 +25,9 @@ impl PlainFileProvider {
         }
     }
 
-    fn read_file_contents_from_disk(&self, file: RelativePath) -> Option<bstr::BString> {
+    fn read_file_contents_from_disk(&self, file: RelativePath) -> Result<bstr::BString> {
         let absolute_path = file.to_absolute(&self.relative_path_ctx);
-        std::fs::read(&absolute_path).ok().map(Into::into)
+        Ok((std::fs::read(&absolute_path).map_err(Error::IoError))?.into())
     }
 }
 
@@ -52,13 +52,11 @@ impl FileProvider for PlainFileProvider {
         None
     }
 
-    fn get_contents(&self, file: RelativePath) -> bstr::BString {
+    fn get_contents(&self, file: RelativePath) -> Result<bstr::BString> {
         match self.get(file) {
-            Some(FileType::Ide(bytes)) => bytes,
-            Some(FileType::Disk(bytes)) => bytes,
-            None => (self.read_file_contents_from_disk(file))
-                .or_else(|| Some(bstr::BString::from("")))
-                .unwrap(),
+            Some(FileType::Ide(bytes)) => Ok(bytes),
+            Some(FileType::Disk(bytes)) => Ok(bytes),
+            None => self.read_file_contents_from_disk(file),
         }
     }
 
@@ -76,9 +74,9 @@ impl FileProvider for PlainFileProvider {
         }
     }
 
-    fn remove_batch<I: Iterator<Item = RelativePath>>(&self, files: I) {
+    fn remove_batch(&self, files: &[RelativePath]) {
         for file in files {
-            self.curr.insert(file, None);
+            self.curr.insert(*file, None);
         }
     }
 

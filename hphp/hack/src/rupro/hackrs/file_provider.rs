@@ -17,6 +17,14 @@ pub enum FileType {
     Ide(bstr::BString),
 }
 
+pub type Result<T, E = Error> = std::result::Result<T, E>;
+
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("{0}")]
+    IoError(#[from] std::io::Error),
+}
+
 /// Acts as a sort of caching facade which is filled on-demand as contents are
 /// needed. The "cache" is (or rather, might be) filled by loading from the file
 /// system if the file isn't open in the IDE (otherwise use the IDE contents).
@@ -26,10 +34,10 @@ pub trait FileProvider: Debug + Send + Sync {
     /// Lookup a path.
     fn get(&self, file: RelativePath) -> Option<FileType>;
 
-    /// If there is an existing cache entry for file then return its contents.
-    /// If there isn't, try to read `file`'s contents from disk and return that.
-    /// If all else fails, return the empty string.
-    fn get_contents(&self, file: RelativePath) -> bstr::BString;
+    /// If a cached entry for the provided path exists then return its contents.
+    /// If not, try to read the contents from disk. Reading from disk might
+    /// produce an `Error::IoError(_)` result.
+    fn get_contents(&self, file: RelativePath) -> Result<bstr::BString>;
 
     /// Register `file` as a disk file containing `contents`.
     fn provide_file_for_tests(&self, file: RelativePath, contents: bstr::BString);
@@ -42,7 +50,7 @@ pub trait FileProvider: Debug + Send + Sync {
     fn provide_file_hint(&self, file: RelativePath, file_type: FileType);
 
     /// Associate each path in `files` with `None`.
-    fn remove_batch<I: Iterator<Item = RelativePath>>(&self, files: I);
+    fn remove_batch(&self, files: &[RelativePath]);
 
     /// Save the current set of changes on the stack then clear it.
     fn push_local_changes(&self);

@@ -35,8 +35,6 @@ members = [
     "src/facts/cargo/facts_rust",
     "src/facts/cargo/rust_facts_ffi",
     "src/hackc/bytecode_printer",
-    "src/hackc/cargo/compile_ffi",
-    "src/hackc/cargo/options_ffi",
     "src/hackc/compile/cargo/closure_convert",
     "src/hackc/compile/cargo/compile",
     "src/hackc/compile/cargo/options",

@@ -439,21 +439,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "compile_ffi"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "bumpalo",
- "compile",
- "ocamlrep",
- "ocamlrep_derive",
- "ocamlrep_ocamlpool",
- "oxidized",
- "parser_core_types",
- "serde_json",
-]
-
-[[package]]
 name = "compiler_ffi"
 version = "0.0.0"
 dependencies = [
@@ -2391,15 +2376,6 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
-]
-
-[[package]]
-name = "options_ffi"
-version = "0.0.0"
-dependencies = [
- "compile_ffi",
- "ocamlrep_ocamlpool",
- "options",
 ]
 
 [[package]]

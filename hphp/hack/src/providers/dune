@@ -63,7 +63,7 @@
 (library
  (name file_provider)
  (modules file_provider)
- (libraries ast provider_backend relative_path sys_utils)
+ (libraries ast provider_backend relative_path rust_provider_backend_stubs sys_utils)
  (preprocess
   (pps ppx_deriving.std)))
 

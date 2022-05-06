@@ -7,7 +7,7 @@
  *
  *)
 
-type file_type =
+type file_type = Rust_provider_backend.File.file_type =
   | Disk of string
   | Ide of string
 

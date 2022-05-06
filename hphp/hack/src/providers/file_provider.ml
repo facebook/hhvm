@@ -18,7 +18,7 @@ open Hh_prelude
     That is, the IDE version take precedence over file system's.
 *)
 
-type file_type =
+type file_type = Rust_provider_backend.File.file_type =
   | Disk of string
   | Ide of string
 
@@ -40,9 +40,9 @@ let read_file_contents_from_disk (fn : Relative_path.t) : string option =
 let get fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
-  | Provider_backend.Shared_memory ->
-    FileHeap.get fn
+  | Provider_backend.Shared_memory -> FileHeap.get fn
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.File.get backend fn
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith "File_provider.get not supported with local/decl memory provider"
@@ -50,10 +50,15 @@ let get fn =
 let get_unsafe fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     begin
       match get fn with
+      | Some contents -> contents
+      | None -> failwith ("File not found: " ^ Relative_path.to_absolute fn)
+    end
+  | Provider_backend.Rust_provider_backend backend ->
+    begin
+      match Rust_provider_backend.File.get backend fn with
       | Some contents -> contents
       | None -> failwith ("File not found: " ^ Relative_path.to_absolute fn)
     end
@@ -65,7 +70,6 @@ let get_unsafe fn =
 let get_contents ~writeback_disk_contents_in_shmem_provider fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     begin
       match FileHeap.get fn with
@@ -79,6 +83,8 @@ let get_contents ~writeback_disk_contents_in_shmem_provider fn =
           FileHeap.add fn (Disk contents);
         Some contents
     end
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.File.get_contents backend fn
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     read_file_contents_from_disk fn
@@ -86,10 +92,15 @@ let get_contents ~writeback_disk_contents_in_shmem_provider fn =
 let get_ide_contents_unsafe fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     begin
       match FileHeap.get fn with
+      | Some (Ide f) -> f
+      | _ -> failwith ("IDE file not found: " ^ Relative_path.to_absolute fn)
+    end
+  | Provider_backend.Rust_provider_backend backend ->
+    begin
+      match Rust_provider_backend.File.get backend fn with
       | Some (Ide f) -> f
       | _ -> failwith ("IDE file not found: " ^ Relative_path.to_absolute fn)
     end
@@ -102,9 +113,9 @@ let get_ide_contents_unsafe fn =
 let provide_file_for_tests fn contents =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
-  | Provider_backend.Shared_memory ->
-    FileHeap.add fn (Disk contents)
+  | Provider_backend.Shared_memory -> FileHeap.add fn (Disk contents)
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.File.provide_file_for_tests backend fn contents
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
@@ -113,9 +124,9 @@ let provide_file_for_tests fn contents =
 let provide_file_for_ide fn contents =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
-  | Provider_backend.Shared_memory ->
-    FileHeap.add fn (Ide contents)
+  | Provider_backend.Shared_memory -> FileHeap.add fn (Ide contents)
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.File.provide_file_for_ide backend fn contents
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
@@ -124,12 +135,13 @@ let provide_file_for_ide fn contents =
 let provide_file_hint ~write_disk_contents_in_shmem_provider fn contents =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     (match contents with
     | Ide _ -> FileHeap.add fn contents
     | Disk _ ->
       if write_disk_contents_in_shmem_provider then FileHeap.add fn contents)
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.File.provide_file_hint backend fn contents
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
@@ -138,14 +150,22 @@ let provide_file_hint ~write_disk_contents_in_shmem_provider fn contents =
 let remove_batch paths =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
-  | Provider_backend.Shared_memory ->
-    FileHeap.remove_batch paths
+  | Provider_backend.Shared_memory -> FileHeap.remove_batch paths
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.File.remove_batch backend paths
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
       "File_provider.remove_batch not supported with local/decl memory provider"
 
-let local_changes_push_sharedmem_stack () = FileHeap.LocalChanges.push_stack ()
+let local_changes_push_sharedmem_stack () =
+  match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.File.push_local_changes backend
+  | _ -> FileHeap.LocalChanges.push_stack ()
 
-let local_changes_pop_sharedmem_stack () = FileHeap.LocalChanges.pop_stack ()
+let local_changes_pop_sharedmem_stack () =
+  match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.File.pop_local_changes backend
+  | _ -> FileHeap.LocalChanges.pop_stack ()

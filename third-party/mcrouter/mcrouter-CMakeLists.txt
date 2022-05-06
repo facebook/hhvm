@@ -98,5 +98,5 @@ target_include_directories(mcrouter PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" "${JEMA
 
 install(
   TARGETS mcrouter
-  LIBRARY ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+  LIBRARY ARCHIVE DESTINATION lib
 )

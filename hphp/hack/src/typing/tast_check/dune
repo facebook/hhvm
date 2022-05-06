@@ -8,6 +8,7 @@
   ifc_lib
   nast
   shape_analysis
+  shape_analysis_scuba
   tast_env
   utils_core)
  (preprocess

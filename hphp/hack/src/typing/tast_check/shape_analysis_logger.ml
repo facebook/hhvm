@@ -27,9 +27,7 @@ let log_result typing_env id results : unit =
   in
   match shape_analysis_log_level with
   | Some 1 -> log_result_locally typing_env id results
-  | Some 2 ->
-    (* TODO: Scuba logging *)
-    ()
+  | Some 2 -> Shape_analysis_scuba.log_results_remotely typing_env id results
   | _ -> ()
 
 let compute_result tast_env params body =

@@ -34,18 +34,15 @@ use oxidized::{
 use std::collections::BTreeMap;
 
 fn add_symbol_refs<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     base: Option<&ClassName<'arena>>,
     implements: &[ClassName<'arena>],
-    uses: &[&str],
+    uses: &[ClassName<'arena>],
     requirements: &[(ClassName<'arena>, TraitReqKind)],
 ) {
     base.iter().for_each(|&x| emitter.add_class_ref(*x));
     implements.iter().for_each(|x| emitter.add_class_ref(*x));
-    uses.iter().for_each(|x| {
-        emitter.add_class_ref(ClassName::from_ast_name_and_mangle(alloc, x.to_owned()))
-    });
+    uses.iter().for_each(|x| emitter.add_class_ref(*x));
     requirements
         .iter()
         .for_each(|(x, _)| emitter.add_class_ref(*x));
@@ -581,7 +578,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let is_trait = ast_class.kind == ast::ClassishKind::Ctrait;
     let is_interface = ast_class.kind == ast::ClassishKind::Cinterface;
 
-    let uses: Vec<&str> = ast_class
+    let uses: Vec<ClassName<'arena>> = ast_class
         .uses
         .iter()
         .filter_map(|Hint(pos, hint)| match hint.as_ref() {
@@ -589,7 +586,10 @@ pub fn emit_class<'a, 'arena, 'decl>(
                 if is_interface {
                     Some(Err(Error::fatal_parse(pos, "Interfaces cannot use traits")))
                 } else {
-                    Some(Ok(string_utils::strip_global_ns(name.as_str())))
+                    Some(Ok(ClassName::from_ast_name_and_mangle(
+                        alloc,
+                        name.as_str(),
+                    )))
                 }
             }
             _ => None,
@@ -880,14 +880,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     );
     flags.set(Attr::AttrInternal, ast_class.internal);
 
-    add_symbol_refs(
-        alloc,
-        emitter,
-        base.as_ref(),
-        &implements,
-        uses.as_ref(),
-        &requirements,
-    );
+    add_symbol_refs(emitter, base.as_ref(), &implements, &uses, &requirements);
     Ok(HhasClass {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         base: Maybe::from(base),
@@ -897,7 +890,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         span,
         flags,
         doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &(c.0).1))),
-        uses: Slice::fill_iter(alloc, uses.into_iter().map(|s| Str::new_str(alloc, s))),
+        uses: Slice::fill_iter(alloc, uses.into_iter()),
         methods: Slice::fill_iter(alloc, methods.into_iter()),
         enum_type: Maybe::from(enum_type),
         upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),

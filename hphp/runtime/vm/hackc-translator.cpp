@@ -605,7 +605,7 @@ void translateClass(TranslationState& ts, const HhasClass& c) {
 
   auto uses = range(c.uses);
   for (auto const& u : uses) {
-    ts.pce->addUsedTrait(toStaticString(u));
+    ts.pce->addUsedTrait(toStaticString(u._0));
   }
 
   translateEnumType(ts, c.enum_type);

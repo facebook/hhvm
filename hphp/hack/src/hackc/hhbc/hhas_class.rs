@@ -28,7 +28,7 @@ pub struct HhasClass<'arena> {
     pub enum_includes: Slice<'arena, ClassName<'arena>>,
     pub name: ClassName<'arena>,
     pub span: HhasSpan,
-    pub uses: Slice<'arena, Str<'arena>>,
+    pub uses: Slice<'arena, ClassName<'arena>>,
     pub enum_type: Maybe<HhasTypeInfo<'arena>>,
     pub methods: Slice<'arena, HhasMethod<'arena>>,
     pub properties: Slice<'arena, HhasProperty<'arena>>,

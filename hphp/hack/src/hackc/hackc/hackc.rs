@@ -31,16 +31,23 @@ struct Opts {
     #[clap(flatten)]
     hhvm_options: HhvmOptions,
 
+    #[clap(flatten)]
+    files: FileOpts,
+
     /// Disable toplevel definition elaboration
     #[clap(long)]
     disable_toplevel_elaboration: bool,
 
-    /// Input file(s)
-    filenames: Vec<PathBuf>,
-
     /// Mutate the program as if we're in the debugger repl
     #[clap(long)]
     for_debugger_eval: bool,
+}
+
+/// Hack Compiler
+#[derive(Parser, Debug, Default)]
+struct FileOpts {
+    /// Input file(s)
+    filenames: Vec<PathBuf>,
 
     /// Read a list of files (one-per-line) from this file
     #[clap(long)]
@@ -55,6 +62,9 @@ enum Command {
     /// Compile Hack source files or directories and produce a single CRC per
     /// input file.
     Crc(crc::Opts),
+
+    /// Compute facts for a set of files.
+    Facts(facts::Opts),
 
     /// Parse many files whose filenames are read from stdin
     Parse(parse::Opts),
@@ -100,7 +110,7 @@ struct FlagCommands {
     verify_decls_ffi: bool,
 }
 
-impl Opts {
+impl FileOpts {
     pub fn gather_input_files(&mut self) -> Result<Vec<PathBuf>> {
         let mut files: Vec<PathBuf> = Default::default();
         if let Some(list_path) = self.input_file_list.take() {
@@ -112,6 +122,12 @@ impl Opts {
         Ok(files)
     }
 
+    pub fn is_multi(&self) -> bool {
+        self.input_file_list.is_some() || self.filenames.len() > 1
+    }
+}
+
+impl Opts {
     pub fn env_flags(&self) -> EnvFlags {
         let mut flags = EnvFlags::empty();
         if self.for_debugger_eval {
@@ -207,11 +223,12 @@ fn compile_from_text(_: Opts) -> Result<()> {
 
 fn main() -> Result<()> {
     env_logger::init();
-    let opts = Opts::parse();
-    match opts.command {
+    let mut opts = Opts::parse();
+    match opts.command.take() {
         Some(Command::Compile(opts)) => compile::run(opts),
         Some(Command::Crc(opts)) => crc::run(opts),
         Some(Command::Parse(opts)) => parse::run(opts),
+        Some(Command::Facts(facts_opts)) => facts::extract_facts(opts, facts_opts),
         None => {
             if opts.flag_commands.test {
                 test(opts)
@@ -224,7 +241,11 @@ fn main() -> Result<()> {
             } else if opts.flag_commands.parse {
                 parse(opts)
             } else if opts.flag_commands.extract_facts_from_decls {
-                facts::extract_facts(opts)
+                let facts_opts = facts::Opts {
+                    files: std::mem::take(&mut opts.files),
+                    ..Default::default()
+                };
+                facts::extract_facts(opts, facts_opts)
             } else if opts.flag_commands.test_compile_with_decls {
                 compile_from_text_with_same_file_decl(opts)
             } else if opts.flag_commands.dump_desugared_expression_trees {

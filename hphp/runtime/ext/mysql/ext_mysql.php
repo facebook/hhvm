@@ -230,7 +230,7 @@ function mysql_error(?resource $link_identifier = NULL): mixed;
  * @return string - Returns the escaped string.
  */
 <<__Native>>
-function mysql_escape_string(string $unescaped_string): string;
+function mysql_escape_string(string $unescaped_string)[]: string;
 
 /**
  * Fetch a result row as an associative array, a numeric array, or both

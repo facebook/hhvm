@@ -114,7 +114,7 @@ function mysql_set_charset(string $charset, $link_identifier = null);
 <<__PHPStdLib>>
 function mysql_ping($link_identifier = null);
 <<__PHPStdLib>>
-function mysql_escape_string(string $unescaped_string);
+function mysql_escape_string(string $unescaped_string)[];
 <<__PHPStdLib>>
 function mysql_real_escape_string(string $unescaped_string, $link_identifier = null);
 <<__PHPStdLib>>

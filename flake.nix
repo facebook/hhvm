@@ -27,14 +27,29 @@
         rec {
           packages.hhvm = pkgs.callPackage ./hhvm.nix { };
           packages.default = packages.hhvm;
+          packages.rpm =
+            if pkgs.hostPlatform.isLinux
+            then
+              pkgs.releaseTools.rpmBuild
+                {
+                  __impure = true;
 
-          devShell = pkgs.mkShell ({
-            buildInputs = packages.hhvm.nativeBuildInputs ++ packages.hhvm.buildInputs ++ [
-              pkgs.rnix-lsp
-            ];
+                  diskImage = pkgs.vmTools.diskImageFuns.centos7x86_64 { };
+                  diskImageFormat = "qcow2";
+                  src = packages.hhvm;
+                }
+            else null;
+
+          devShell = pkgs.mkShell {
+            buildInputs =
+              packages.hhvm.nativeBuildInputs
+              ++ packages.hhvm.buildInputs
+              ++ [
+                pkgs.rnix-lsp
+              ];
             NIX_CFLAGS_COMPILE = packages.hhvm.NIX_CFLAGS_COMPILE;
             CMAKE_INIT_CACHE = packages.hhvm.cmakeInitCache;
-          });
+          };
         }
       );
 }

@@ -87,3 +87,10 @@ module EntitySet = Set.Make (struct
 
   let compare = compare_entity_
 end)
+
+type log_event =
+  | Result of {
+      id: string;
+      shape_result: shape_result;
+    }
+  | Failure of { id: string }

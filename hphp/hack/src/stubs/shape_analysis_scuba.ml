@@ -6,4 +6,4 @@
  *
  *)
 
-let log_results_remotely _ _ _ = ()
+let log_events_remotely _ _ = ()

@@ -97,3 +97,11 @@ module PointsToSet : Set.S with type elt = entity_ * entity_
 module EntityMap : Map.S with type key = entity_
 
 module EntitySet : Set.S with type elt = entity_
+
+(** Events used for logging purposes *)
+type log_event =
+  | Result of {
+      id: string;
+      shape_result: shape_result;
+    }  (** Indicates a successfuly analysis result *)
+  | Failure of { id: string }  (** Indicates that the analysis malfunctioned *)

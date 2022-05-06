@@ -59,12 +59,21 @@ struct TransProfCounters {
     if (it == m_regionIndices.end()) return std::nullopt;
     return it->second;
   }
+  Optional<Indices>
+  findIndices(const std::string& name) const {
+    auto const it = m_uniqueStubIndices.find(name);
+    if (it == m_uniqueStubIndices.end()) return std::nullopt;
+    return it->second;
+  }
 
   auto& getIndices(const PrologueID& pid) {
     return m_prologueIndices[pid];
   }
   auto& getIndices(const RegionEntryKey& regionKey) {
     return m_regionIndices[regionKey];
+  }
+  auto& getIndices(const std::string& name) {
+    return m_uniqueStubIndices[name];
   }
 
   /*
@@ -123,6 +132,7 @@ struct TransProfCounters {
     m_meta.clear();
     m_regionIndices.clear();
     m_prologueIndices.clear();
+    m_uniqueStubIndices.clear();
     m_counters.clear();
   }
 
@@ -150,6 +160,13 @@ struct TransProfCounters {
       auto const& pid       = it.first;
       auto const& indices   = it.second;
       write_prologueid(ser, pid);
+      write_counters(indices);
+    }
+    write_raw(ser, m_uniqueStubIndices.size());
+    for (auto& it : m_uniqueStubIndices) {
+      auto const& name      = it.first;
+      auto const& indices   = it.second;
+      write_string(ser, name);
       write_counters(indices);
     }
   }
@@ -188,6 +205,13 @@ struct TransProfCounters {
       auto& indices = m_prologueIndices[pid];
       deserialize_counters(indices, index);
     }
+    size_t nstubs;
+    read_raw(des, nstubs);
+    while (nstubs--) {
+      auto const name = read_cpp_string(des);
+      auto& indices = m_uniqueStubIndices[name];
+      deserialize_counters(indices, index);
+    }
   }
 
  private:
@@ -202,6 +226,9 @@ struct TransProfCounters {
   // Map for prologues.
   hphp_hash_map<PrologueID,Indices,
                 PrologueID::Hasher,PrologueID::Eq> m_prologueIndices;
+
+  // Map for unique stubs.
+  hphp_string_map<Indices> m_uniqueStubIndices;
 
   // This lock protects all concurrent accesses to the vectors and map above.
   mutable folly::SharedMutex m_lock;

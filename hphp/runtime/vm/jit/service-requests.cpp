@@ -137,6 +137,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
         emitFuncEntry(v);
       }
     },
+    nullptr,
     false, /* relocate */
     true   /* nullOnFull */
   );
@@ -216,6 +217,7 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
     cb,
     data,
     [&] (Vout& v) { emitInterpReqNoTranslate(v, sk, spOff); },
+    nullptr,
     false,
     true /* nullOnFull */
   );

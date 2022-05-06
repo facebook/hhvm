@@ -284,6 +284,7 @@ struct Vunit {
   Optional<TransContext> context;
   StructuredLogEntry* log_entry{nullptr};
   Annotations annotations;
+  const char* name{nullptr}; // used for unique stubs
 };
 
 inline tracing::Props traceProps(const Vunit& v) {
@@ -293,4 +294,3 @@ inline tracing::Props traceProps(const Vunit& v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -165,7 +165,7 @@ void unblockParents(Vout& v, Vreg firstBl) {
   });
 }
 
-TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
+TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner, const char* /*name*/) {
   alignCacheLine(cb);
 
   auto const ret = vwrap(cb, data, [] (Vout& v) {
@@ -405,7 +405,7 @@ void asyncGenRetYieldOnly(Vout& v, PhysReg data, PhysReg type) {
   emitDecRefWorkObj(v, wh, TRAP_REASON);
 }
 
-TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
+TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl, const char* name) {
   alignCacheLine(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
@@ -444,10 +444,10 @@ TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
     v = slowPath;
     asyncFuncRetOnly(v, rarg(0), rarg(1), parentBl);
     v << jmpi{switchCtrl, vm_regs_with_sp()};
-  });
+  }, name);
 }
 
-TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet) {
+TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet, const char* name) {
   alignJmpTarget(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
@@ -471,11 +471,11 @@ TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet) {
     asyncFuncRetOnly(v, rarg(0), rarg(1), parentBl);
     v << syncvmrettype{v.cns(KindOfNull)};
     v << leavetc{vm_regs_with_sp() | rret_type()};
-  });
+  }, name);
 }
 
 TCA emitAsyncGenRetR(CodeBlock& cb, DataBlock& data, TCA switchCtrl,
-                     TCA* asyncGenRetYieldR) {
+                     TCA* asyncGenRetYieldR, const char* /*name*/) {
   alignCacheLine(cb);
 
   auto const ret = vwrap(cb, data, [] (Vout& v) {
@@ -508,7 +508,7 @@ TCA emitAsyncGenRetR(CodeBlock& cb, DataBlock& data, TCA switchCtrl,
   return ret;
 }
 
-TCA emitAsyncGenYieldR(CodeBlock& cb, DataBlock& data, TCA asyncGenRetYieldR) {
+TCA emitAsyncGenYieldR(CodeBlock& cb, DataBlock& data, TCA asyncGenRetYieldR, const char* name) {
   alignJmpTarget(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
@@ -540,7 +540,7 @@ TCA emitAsyncGenYieldR(CodeBlock& cb, DataBlock& data, TCA asyncGenRetYieldR) {
     v << copy{vec, rarg(0)};
     v << copy{v.cns(KindOfVec), rarg(1)};
     v << jmpi{asyncGenRetYieldR, vm_regs_with_sp() | rarg(0) | rarg(1)};
-  });
+  }, name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -572,19 +572,19 @@ void UniqueStubs::emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg) {
     return start;                                                  \
   }()
 
-#define ADD(name, v, stub) name = EMIT(#name, v, [&] { return (stub); })
+#define ADD(name, v, stub, ...) name = EMIT(#name, v, [&] { return stub(__VA_ARGS__, #name); })
   TCA switchCtrl;
   ADD(asyncSwitchCtrl,
       hotView(),
-      emitAsyncSwitchCtrl(hot(), data, &switchCtrl));
-  ADD(asyncFuncRet, hotView(), emitAsyncFuncRet(hot(), data, switchCtrl));
-  ADD(asyncFuncRetSlow, view, emitAsyncFuncRetSlow(cold, data, asyncFuncRet));
+      emitAsyncSwitchCtrl, hot(), data, &switchCtrl);
+  ADD(asyncFuncRet, hotView(), emitAsyncFuncRet, hot(), data, switchCtrl);
+  ADD(asyncFuncRetSlow, view, emitAsyncFuncRetSlow, cold, data, asyncFuncRet);
 
   TCA asyncGenRetYieldR;
   ADD(asyncGenRetR, hotView(),
-      emitAsyncGenRetR(hot(), data, switchCtrl, &asyncGenRetYieldR));
+      emitAsyncGenRetR, hot(), data, switchCtrl, &asyncGenRetYieldR);
   ADD(asyncGenYieldR, hotView(),
-      emitAsyncGenYieldR(hot(), data, asyncGenRetYieldR));
+      emitAsyncGenYieldR, hot(), data, asyncGenRetYieldR);
 #undef ADD
 }
 

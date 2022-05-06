@@ -1345,9 +1345,11 @@ void write_string(ProfDataSerializer& ser, const StringData* str) {
 }
 
 void write_string(ProfDataSerializer& ser, const std::string& str) {
+  ITRACE(2, "cpp string>\n");
   uint64_t size = str.size();
   write_raw(ser, size);
   write_raw(ser, str.data(), size);
+  ITRACE(2, "cpp string {}\n", str);
 }
 
 StringData* read_string(ProfDataDeserializer& ser) {
@@ -1358,6 +1360,7 @@ StringData* read_string(ProfDataDeserializer& ser) {
 }
 
 std::string read_cpp_string(ProfDataDeserializer& ser) {
+  ITRACE(2, "cpp string>\n");
   auto const size = read_raw<uint64_t>(ser);
   constexpr uint32_t kMaxStringLen = 2 << 20;
   if (size > kMaxStringLen) {
@@ -1365,7 +1368,9 @@ std::string read_cpp_string(ProfDataDeserializer& ser) {
   }
   auto const buf = std::make_unique<char[]>(size);
   read_raw(ser, buf.get(), size);
-  return std::string{buf.get(), size};
+  auto const res = std::string{buf.get(), size};
+  ITRACE(2, "cpp string : {}\n", res);
+  return res;
 }
 
 void write_array(ProfDataSerializer& ser, const ArrayData* arr) {

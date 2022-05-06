@@ -68,7 +68,7 @@ void insert(Vunit& unit, const T& key) {
   assertx(checkNoCriticalEdges(unit));
   assertx(checkNoSideExits(unit));
 
-  auto const blocks = sortBlocks(unit);
+auto const blocks = sortBlocks(unit);
   for (auto const b : blocks) {
     auto& block = unit.blocks[b];
 
@@ -108,7 +108,10 @@ std::string checkProfile(const Vunit& unit,
                          const jit::vector<Vlabel>& sortedBlocks,
                          const jit::vector<int64_t>& counters,
                          const jit::vector<VOpRaw>& opcodes) {
-  auto const kind = unit.context->kind == TransKind::OptPrologue ? "prologue" : "region";
+
+  auto const kind = unit.context
+    ? unit.context->kind == TransKind::OptPrologue ? "prologue" : "region"
+    : "unique stub";
   if (counters.size() == 0) return folly::sformat("no profile for this {}", kind);
 
   std::string errorMsg;
@@ -116,7 +119,10 @@ std::string checkProfile(const Vunit& unit,
 
   auto report = [&] {
     if (!errorMsg.empty()) return;
-    if (unit.context->kind == TransKind::OptPrologue) {
+    if (!unit.context) {
+      errorMsg = std::string(unit.name) + "\n";
+      FTRACE(1, "VasmBlockCounters::checkProfile: UniqueStub={}", errorMsg);
+    } else if (unit.context->kind == TransKind::OptPrologue) {
       errorMsg = show(unit.context->pid) + "\n";
       FTRACE(1, "VasmBlockCounters::checkProfile: PrologueID={}", errorMsg);
     } else {
@@ -246,6 +252,14 @@ void update(Vunit& unit, const T& key){
 
 void profileGuidedUpdate(Vunit& unit) {
   if (!RuntimeOption::EvalJitPGOVasmBlockCounters) return;
+
+  if (unit.name){
+    // unique stub
+    std::string name(unit.name);
+    update(unit, name);
+    return;
+  }
+
   if (!unit.context) return;
   auto const optimizePrologue = unit.context->kind == TransKind::OptPrologue &&
     RuntimeOption::EvalJitPGOVasmBlockCountersOptPrologue;

@@ -118,7 +118,6 @@ let sound_dynamic_interface_check_from_fun_ty env fun_ty =
       (Typing_return.make_return_type
          ~ety_env:empty_expand_env
          env
-         ~is_explicit:true
          ~hint_pos:Pos.none
          ~explicit:(Some fun_ty.ft_ret.et_type)
          ~default:None)

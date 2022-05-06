@@ -166,10 +166,8 @@ let fun_def ctx fd :
     empty_expand_env_with_on_error
       (Typing_error.Reasons_callback.invalid_type_hint hint_pos)
   in
-  let is_explicit = Option.is_some (hint_of_type_hint f.f_ret) in
   let (env, return_ty) =
     Typing_return.make_return_type
-      ~is_explicit
       ~ety_env
       env
       ~hint_pos
@@ -317,7 +315,6 @@ let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
         {
           return_type = MakeType.unenforced dynamic_return_ty;
           return_disposable = false;
-          return_dynamically_callable = true;
         }
     in
     let (env, param_tys) =
@@ -412,7 +409,6 @@ let method_return env m ret_decl_ty =
     | Some (hint_pos, _) -> hint_pos
     | None -> fst m.m_name
   in
-  let is_explicit = Option.is_some (hint_of_type_hint m.m_ret) in
   let default_ty =
     match ret_decl_ty with
     | None when String.equal (snd m.m_name) SN.Members.__construct ->
@@ -427,7 +423,6 @@ let method_return env m ret_decl_ty =
     Typing_return.make_return_type
       ~ety_env
       env
-      ~is_explicit
       ~hint_pos
       ~explicit:ret_decl_ty
       ~default:default_ty

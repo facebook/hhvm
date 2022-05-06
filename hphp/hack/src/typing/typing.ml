@@ -2385,8 +2385,7 @@ and stmt_ env pos st =
   | Return (Some e) ->
     let env = Typing_return.check_inout_return pos env in
     let (_, expr_pos, _) = e in
-    let Typing_env_return_info.
-          { return_type; return_disposable; return_dynamically_callable = _ } =
+    let Typing_env_return_info.{ return_type; return_disposable } =
       Env.get_return env
     in
     let return_type =
@@ -4891,7 +4890,6 @@ and function_dynamically_callable env f params_decl_ty ret_locl_ty =
         {
           return_type = MakeType.unenforced dynamic_return_ty;
           return_disposable = false;
-          return_dynamically_callable = true;
         }
     in
     let (env, param_tys) =
@@ -5571,11 +5569,9 @@ and closure_make
     empty_expand_env_with_on_error
       (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
   in
-  let is_explicit = Option.is_some (hint_of_type_hint f.f_ret) in
   let (env, hret) =
     Typing_return.make_return_type
       ~ety_env
-      ~is_explicit
       ~is_toplevel:false
       env
       ~hint_pos

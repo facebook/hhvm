@@ -52,7 +52,7 @@ let make_info ret_pos fun_kind attributes env return_type =
   let return_disposable = has_return_disposable_attribute attributes in
   if not return_disposable then
     enforce_return_not_disposable ret_pos fun_kind env return_type;
-  { return_type; return_disposable; return_dynamically_callable = false }
+  { return_type; return_disposable }
 
 (* Create a return type with fresh type variables  *)
 let make_fresh_return_type env p =
@@ -113,7 +113,6 @@ let force_return_kind ~is_toplevel env p ety =
 
 let make_return_type
     ~ety_env
-    ~is_explicit
     env
     ~hint_pos
     ~(explicit : decl_ty option)
@@ -133,12 +132,8 @@ let make_return_type
         ty
     in
     let localize ~wrap env dty =
-      let et_enforced =
-        if is_explicit then
-          Typing_enforceability.get_enforcement env dty
-        else
-          Unenforced
-      in
+      let et_enforced = Typing_enforceability.get_enforcement env dty in
+
       let ((env, ty_err_opt), et_type) =
         Typing_phase.localize ~ety_env env dty
       in
@@ -177,11 +172,8 @@ let make_return_type
     | _ -> localize ~wrap:false env ty)
 
 let make_return_type
-    ~ety_env ~is_explicit ?(is_toplevel = true) env ~hint_pos ~explicit ~default
-    =
-  let (env, ty) =
-    make_return_type ~ety_env ~is_explicit env ~hint_pos ~explicit ~default
-  in
+    ~ety_env ?(is_toplevel = true) env ~hint_pos ~explicit ~default =
+  let (env, ty) = make_return_type ~ety_env env ~hint_pos ~explicit ~default in
   force_return_kind ~is_toplevel env hint_pos ty
 
 let implicit_return env pos ~expected ~actual ~hint_pos ~is_async =

@@ -17,6 +17,4 @@ type t = {
   return_type: Typing_defs.locl_possibly_enforced_ty;
   (* Does the function or function type have the <<__ReturnDisposable>> attribute? *)
   return_disposable: bool;
-  (* Must the function be dynamically callable? *)
-  return_dynamically_callable: bool;
 }

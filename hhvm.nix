@@ -1,5 +1,6 @@
 {
   apt,
+  asImpureDerivation,
   bison,
   boost,
   brotli,
@@ -77,7 +78,12 @@
     else stdenv;
 in
   hhvmStdenv.mkDerivation rec {
-    __impure = true;
+    # Current HHVM' CMake build files will access internet, while Nix by
+    # default would build a package in a sandbox that prevents internet access.
+    #
+    # Therefore, HHVM must be built either as an impure derivation, or without
+    # a sandbox.
+    __impure = asImpureDerivation;
 
     name = "hhvm";
     src = ./.;

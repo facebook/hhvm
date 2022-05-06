@@ -25,7 +25,16 @@
           };
         in
         rec {
-          packages.hhvm = pkgs.callPackage ./hhvm.nix { };
+          # The HHVM package as an impure derivation, which can be built in a
+          # Nix sandbox but it cannot be cached.
+          packages.impure-hhvm = pkgs.callPackage ./hhvm.nix {
+            asImpureDerivation = true;
+          };
+          # The normal HHVM package, which can be cached but must be built with
+          # the --no-sandbox flag
+          packages.hhvm = pkgs.callPackage ./hhvm.nix {
+            asImpureDerivation = false;
+          };
           packages.default = packages.hhvm;
 
           devShell = pkgs.mkShell ({

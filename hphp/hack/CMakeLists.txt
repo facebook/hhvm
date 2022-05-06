@@ -315,9 +315,7 @@ endif()
 
 # Intentionally not using `hack_dune_debug` as it generates output files of a
 # different format (bytecode instead of raw executables, which is useful if
-# you're working with Hack, but means that e.g. hhvm can't find
-# `hh_single_compile` in the source tree. Keep it around, but require it to be
-# explicitly used
+# you're working with Hack. Keep it around, but require it to be explicitly used
 add_custom_target(hack ALL DEPENDS hack_dune "${OPCODE_DATA}")
 add_custom_target(hack_test DEPENDS hack_dune_test "${OPCODE_DATA}")
 

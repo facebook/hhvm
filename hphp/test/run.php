@@ -326,39 +326,6 @@ function bin_root(): string {
   return $home . $routes["cmake"];
 }
 
-function hh_codegen_path(): string {
-  $file = "";
-  $hh = getenv("HH_CODEGEN_BIN");
-  if ($hh is string) {
-    $file = realpath($hh);
-  } else {
-    $file = hh_codegen_bin_root().'/hh_single_compile.opt';
-  }
-  if (!is_file($file)) {
-    error("$file doesn't exist. Did you forget to build first?");
-  }
-  return rel_path($file);
-}
-
-function hh_codegen_bin_root(): string {
-  $home = hphp_home();
-  $env_tool = getenv("FBCODE_BUILD_TOOL");
-  $routes = hh_codegen_binary_routes();
-
-  if ($env_tool !== false) {
-    return $home . $routes[$env_tool];
-  }
-
-  foreach ($routes as $_ => $path) {
-    $dir = $home . $path;
-    if (is_dir($dir)) {
-      return $dir;
-    }
-  }
-
-  return $home . $routes["cmake"];
-}
-
 function unit_cache_file(): string {
   return Status::getTmpPathFile('unit-cache.sql');
 }

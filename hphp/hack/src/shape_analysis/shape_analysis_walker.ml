@@ -195,24 +195,19 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     (* TODO: This is obviously incomplete. It just adds a constraint to each
        dict argument so that we know what shape type that reaches to the
        given position is. *)
-    let expr_arg env (_param_kind, ((ty, pos, _exp) as arg)) =
+    let expr_arg env (_param_kind, ((_ty, pos, _exp) as arg)) =
       let (env, arg_entity) = expr_ env arg in
-      if is_suitable_target_ty env.tast_env ty then
+      match arg_entity with
+      | Some arg_entity_ ->
         let env = Env.add_constraint env (Exists (Argument, pos)) in
-        match arg_entity with
-        | Some arg_entity_ ->
-          let new_entity_ = Literal pos in
-          let env =
-            when_tast_check env.tast_env ~default:env @@ fun () ->
-            Env.add_constraint env @@ Has_dynamic_key new_entity_
-          in
-          let env =
-            Env.add_constraint env (Subset (arg_entity_, new_entity_))
-          in
-          env
-        | None -> env
-      else
+        let new_entity_ = Literal pos in
+        let env =
+          when_tast_check env.tast_env ~default:env @@ fun () ->
+          Env.add_constraint env @@ Has_dynamic_key new_entity_
+        in
+        let env = Env.add_constraint env (Subset (arg_entity_, new_entity_)) in
         env
+      | None -> env
     in
     let env = List.fold ~f:expr_arg ~init:env args in
     (env, None)

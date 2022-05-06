@@ -5,12 +5,11 @@
 
 use hackrs::{
     decl_parser::DeclParser,
-    file_provider::{FileProvider, PlainFileProvider},
+    file_provider::{FileProvider, FileType, PlainFileProvider},
     folded_decl_provider::FoldedDeclProvider,
 };
 use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
 use ocamlrep_custom::Custom;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use ocamlrep_ocamlpool::{ocaml_ffi, ocaml_ffi_with_arena, Bump};
 use oxidized_by_ref::{decl_defs, parser_options::ParserOptions, shallow_decl_defs};
 use pos::{RelativePath, RelativePathCtx, ToOxidized};
@@ -148,66 +147,61 @@ ocaml_ffi! {
 
 // File_provider ////////////////////////////////////////////////////////////
 
-#[derive(ToOcamlRep, FromOcamlRep)]
-enum FileType {
-    Disk(bstr::BString),
-    Ide(bstr::BString),
-}
-
 ocaml_ffi! {
     fn hh_rust_provider_backend_file_provider_get(
-        _backend: Custom<ProviderBackend>,
-        _path: RelativePath,
+        backend: Custom<ProviderBackend>,
+        path: RelativePath,
     ) -> Option<FileType> {
-        todo!()
+        backend.file_provider.get(path)
     }
 
     fn hh_rust_provider_backend_file_provider_get_contents(
-        _backend: Custom<ProviderBackend>,
-        _path: RelativePath,
+        backend: Custom<ProviderBackend>,
+        path: RelativePath,
     ) -> Option<bstr::BString> {
-        todo!()
+        backend.file_provider.get_contents(path).ok().or_else(|| Some("".into()))
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_for_tests(
-        _backend: Custom<ProviderBackend>,
-        _path: RelativePath,
-        _contents: bstr::BString,
+        backend: Custom<ProviderBackend>,
+        path: RelativePath,
+        contents: bstr::BString,
     ) {
-        todo!()
+        backend.file_provider.provide_file_for_tests(path, contents)
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_for_ide(
-        _backend: Custom<ProviderBackend>,
-        _path: RelativePath,
-        _contents: bstr::BString,
+        backend: Custom<ProviderBackend>,
+        path: RelativePath,
+        contents: bstr::BString,
     ) {
-        todo!()
+        backend.file_provider.provide_file_for_ide(path, contents)
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_hint(
-        _backend: Custom<ProviderBackend>,
-        _contents: FileType,
+        backend: Custom<ProviderBackend>,
+        path: RelativePath,
+        file: FileType,
     ) {
-        todo!()
+        backend.file_provider.provide_file_hint(path, file)
     }
 
     fn hh_rust_provider_backend_file_provider_remove_batch(
-        _backend: Custom<ProviderBackend>,
-        _paths: BTreeSet<RelativePath>,
+        backend: Custom<ProviderBackend>,
+        paths: BTreeSet<RelativePath>,
     ) {
-        todo!()
+        backend.file_provider.remove_batch(paths.into_iter().collect::<Vec<_>>().as_slice())
     }
 
     fn hh_rust_provider_backend_file_provider_push_local_changes(
-        _backend: Custom<ProviderBackend>,
+        backend: Custom<ProviderBackend>,
     ) {
-        todo!()
+        backend.file_provider.push_local_changes()
     }
 
     fn hh_rust_provider_backend_file_provider_pop_local_changes(
-        _backend: Custom<ProviderBackend>,
+        backend: Custom<ProviderBackend>,
     ) {
-        todo!()
+        backend.file_provider.pop_local_changes()
     }
 }

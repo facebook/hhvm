@@ -50,7 +50,7 @@ pub trait FileProvider: Debug + Send + Sync {
     fn provide_file_hint(&self, file: RelativePath, file_type: FileType);
 
     /// Associate each path in `files` with `None`.
-    fn remove_batch(&self, files: &[RelativePath]);
+    fn remove_batch(&self, files: &std::collections::BTreeSet<RelativePath>);
 
     /// Save the current set of changes on the stack then clear it.
     fn push_local_changes(&self);

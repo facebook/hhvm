@@ -190,7 +190,7 @@ ocaml_ffi! {
         backend: Custom<ProviderBackend>,
         paths: BTreeSet<RelativePath>,
     ) {
-        backend.file_provider.remove_batch(paths.into_iter().collect::<Vec<_>>().as_slice())
+        backend.file_provider.remove_batch(&paths)
     }
 
     fn hh_rust_provider_backend_file_provider_push_local_changes(

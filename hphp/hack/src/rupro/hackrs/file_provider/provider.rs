@@ -74,7 +74,7 @@ impl FileProvider for PlainFileProvider {
         }
     }
 
-    fn remove_batch(&self, files: &[RelativePath]) {
+    fn remove_batch(&self, files: &std::collections::BTreeSet<RelativePath>) {
         for file in files {
             self.curr.insert(*file, None);
         }

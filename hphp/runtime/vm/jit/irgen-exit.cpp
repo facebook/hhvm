@@ -29,12 +29,12 @@ namespace {
 
 bool branchesToItself(SrcKey sk) {
   if (sk.funcEntry()) return false;
-  auto const pc = sk.pc();
-  auto const op = peek_op(pc);
+  auto const op = sk.op();
   if (!instrIsControlFlow(op)) return false;
   if (isSwitch(op)) return false;
-  auto const offsets = instrJumpOffsets(pc);
-  return std::find(offsets.begin(), offsets.end(), 0) != offsets.end();
+  auto const offset = sk.offset();
+  auto const offsets = instrJumpTargets(sk.func()->entry(), offset);
+  return std::find(offsets.begin(), offsets.end(), offset) != offsets.end();
 }
 
 /*

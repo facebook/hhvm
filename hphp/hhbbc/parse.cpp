@@ -150,7 +150,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const breaksBB =
       instrIsNonCallControlFlow(op) ||
       instrFlags(op) & TF ||
-      (isFCall(op) && !instrJumpOffsets(pc).empty());
+      (isFCall(op) && !instrJumpTargets(bc, offset).empty());
 
     if (options.TraceBytecodes.count(op)) traceBc = true;
 

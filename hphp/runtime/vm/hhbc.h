@@ -487,10 +487,6 @@ Optional<SubOpType> nameToSubop(const char*);
 
 using OffsetList = std::vector<Offset>;
 
-// Returns a jump offsets relative to the instruction, or nothing if
-// the instruction cannot jump.
-OffsetList instrJumpOffsets(PC instr);
-
 // returns absolute address of targets, or nothing if instruction
 // cannot jump
 OffsetList instrJumpTargets(PC instrs, Offset pos);

@@ -383,9 +383,10 @@ Optional<unsigned> scheduleSurprise(const RegionDesc::Block& block) {
     if (sk.funcEntry()) continue;
 
     auto const backwards = [&]{
-      auto const offsets = instrJumpOffsets(sk.pc());
+      auto const offset = sk.offset();
+      auto const offsets = instrJumpTargets(sk.func()->entry(), offset);
       return std::any_of(
-        offsets.begin(), offsets.end(), [] (Offset o) { return o < 0; }
+        offsets.begin(), offsets.end(), [=] (Offset o) { return o < offset; }
       );
     };
     if (i == block.length() - 1 && needsSurpriseCheck(sk.op()) && backwards()) {

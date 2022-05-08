@@ -1958,7 +1958,6 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
   for (uint32_t paramIdx = 0; paramIdx < fe->params.size(); ++paramIdx) {
     auto& pi = fe->params[paramIdx];
     if (!pi.hasDefaultValue() || pi.funcletOff == kInvalidOffset) continue;
-    auto inst = fe->bc() + pi.funcletOff;
 
     // Check that the DV initializer is actually setting the local for the
     // parameter being initialized.
@@ -1984,7 +1983,9 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
         Atom(OpPopL).onlyif(checkloc),
         Atom::seq(Atom(OpSetL).onlyif(checkloc), Atom(OpPopC))
       ),
-    }.ignore({OpAssertRATL, OpAssertRATStk}).matchAnchored(inst, end);
+    }.ignore(
+      {OpAssertRATL, OpAssertRATStk}
+    ).matchAnchored(fe->bc(), pi.funcletOff, fe->bcPos());
 
     // Verify that the pattern we matched is either for the last DV initializer,
     // in which case it must end with a JmpNS that targets the function entry,

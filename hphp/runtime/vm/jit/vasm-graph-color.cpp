@@ -2744,6 +2744,17 @@ void infer_register_classes(State& state) {
  * recursion.
  */
 
+// Is this instruction a (simple) memory read?
+bool is_mem_read(const Vinstr& inst) {
+  // We're looking for instructions which read from memory and nothing
+  // else.
+  return
+    !isPure(inst) &&
+    !isCall(inst) &&
+    touchesMemory(inst.op) &&
+    !writesMemory(inst.op);
+}
+
 // Comparators for instruction source types
 namespace detail {
 
@@ -2766,6 +2777,7 @@ bool src_cmp(const Vunit& unit, VcallArgsId a1, VcallArgsId a2) {
 bool compare_remat_insts(const Vunit& unit,
                          const Vinstr& inst1,
                          const Vinstr& inst2) {
+  if (&inst1 == &inst2) return true;
   if (inst1.op != inst2.op) return false;
 
   switch (inst1.op) {
@@ -2795,6 +2807,25 @@ bool compare_remat_insts(const Vunit& unit,
 #undef U
 #undef I
 #undef O
+  }
+
+  // Special case: If these instructions (which now know are
+  // identical) represent a memory read, they must have an identical
+  // origin, or at least the same PureLoad memory effects. It's
+  // possible for two vasm instructions to be identical, but represent
+  // different memory effects. Once we canonicalize to a single
+  // defining instruction, we'll lose one of the memory effects or the
+  // other, and we won't be able to calculate potential write
+  // conflicts properly. So, if this is a memory read, extend the
+  // notion of equality to their memory effects as well.
+  if (inst1.origin != inst2.origin && is_mem_read(inst1)) {
+    if (!inst1.origin || !inst2.origin) return false;
+    auto const effects1 = memory_effects(*inst1.origin);
+    auto const effects2 = memory_effects(*inst2.origin);
+    auto const load1 = boost::get<PureLoad>(&effects1);
+    auto const load2 = boost::get<PureLoad>(&effects2);
+    if (!load1 || !load2) return false;
+    if (load1->src != load2->src) return false;
   }
 
   return true;
@@ -3092,17 +3123,6 @@ RematLookup find_defining_inst_for_remat(State& state,
       break;
     }
   }
-}
-
-// Is this instruction a (simple) memory read?
-bool is_mem_read(const Vinstr& inst) {
-  // We're looking for instructions which read from memory and nothing
-  // else.
-  return
-    !isPure(inst) &&
-    !isCall(inst) &&
-    touchesMemory(inst.op) &&
-    !writesMemory(inst.op);
 }
 
 // Similar to find_defining_inst_for_remat, but first checks if a

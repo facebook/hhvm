@@ -427,7 +427,6 @@ int numImmediates(Op opcode);
 ArgType immType(Op opcode, int idx);
 bool hasImmVector(Op opcode);
 int instrLen(PC opcode);
-int numSuccs(PC opcode);
 
 PC skipCall(PC pc);
 

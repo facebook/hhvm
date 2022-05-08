@@ -408,18 +408,6 @@ OffsetSet instrSuccOffsets(PC opc, const Func* func) {
 }
 
 /**
- * Return the number of successor-edges including fall-through paths but not
- * implicit exception paths.
- */
-int numSuccs(const PC origPC) {
-  auto pc = origPC;
-  auto numTargets = instrJumpOffsets(pc).size();
-  pc = origPC;
-  if ((instrFlags(decode_op(pc)) & TF) == 0) ++numTargets;
-  return numTargets;
-}
-
-/**
  * instrNumPops() returns the number of values consumed from the stack
  * for a given push/pop instruction. For peek/poke instructions, this
  * function returns 0.

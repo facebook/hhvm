@@ -62,7 +62,14 @@ enum class Flavor { C, U, CU };
 struct PrepKind {
   TriBool inOut;
   TriBool readonly;
+  bool operator==(const PrepKind& o) const {
+    return std::tie(inOut, readonly) == std::tie(o.inOut, o.readonly);
+  }
+  size_t hash() const {
+    return folly::hash::hash_combine(inOut, readonly);
+  }
 };
+using PrepKindVec = CompactVector<PrepKind>;
 
 using LocalId = uint32_t;
 constexpr const LocalId NoLocalId = -1;
@@ -180,3 +187,19 @@ private:
 
 }}
 
+//////////////////////////////////////////////////////////////////////
+
+namespace std {
+
+//////////////////////////////////////////////////////////////////////
+
+template<>
+struct hash<HPHP::HHBBC::PrepKind> {
+  size_t operator()(HPHP::HHBBC::PrepKind k) const {
+    return k.hash();
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+}

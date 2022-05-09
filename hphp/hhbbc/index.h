@@ -1169,12 +1169,11 @@ struct Index {
   /*
    * Return true if the resolved function supports async eager return.
    */
-  Optional<bool> supports_async_eager_return(res::Func rfunc) const;
+  TriBool supports_async_eager_return(res::Func rfunc) const;
 
   /*
    * Return true if the function is effect free.
    */
-  bool is_effect_free(res::Func rfunc) const;
   bool is_effect_free(const php::Func* func) const;
 
   /*

@@ -412,12 +412,76 @@ struct res::Func::FuncFamily {
   friend auto begin(const FuncFamily& ff) { return ff.m_v.begin(); }
   friend auto end(const FuncFamily& ff) { return ff.m_v.end(); }
 
-  PFuncVec  m_v;
+  // We have a lot of FuncFamilies, and most of them have the same
+  // "static" information (doesn't change as a result of
+  // analysis). So, we store unique groups of static info separately
+  // and FuncFamilies point to the same ones.
+  struct StaticInfo {
+    Optional<uint32_t> m_numInOut;
+    Optional<RuntimeCoeffects> m_requiredCoeffects;
+    Optional<CompactVector<CoeffectRule>> m_coeffectRules;
+    PrepKindVec m_paramPreps;
+    uint32_t m_minNonVariadicParams;
+    uint32_t m_maxNonVariadicParams;
+    TriBool m_isReadonlyReturn;
+    TriBool m_isReadonlyThis;
+    TriBool m_supportsAER;
+    bool m_maybeReified : 1;
+    bool m_maybeCaresAboutDynCalls : 1;
+    bool m_maybeBuiltin : 1;
+
+    bool operator==(const StaticInfo& o) const;
+    size_t hash() const;
+  };
+
   LockFreeLazy<Type> m_returnTy;
-  Optional<uint32_t> m_numInOut;
-  TriBool m_isReadonlyReturn;
-  TriBool m_isReadonlyThis;
+  PFuncVec m_v;
+  const StaticInfo* m_static;
 };
+
+bool FuncFamily::StaticInfo::operator==(const FuncFamily::StaticInfo& o) const {
+  return
+    std::tie(m_numInOut, m_requiredCoeffects, m_coeffectRules,
+             m_paramPreps, m_minNonVariadicParams,
+             m_maxNonVariadicParams,
+             m_isReadonlyReturn, m_isReadonlyThis, m_supportsAER,
+             m_maybeReified, m_maybeCaresAboutDynCalls,
+             m_maybeBuiltin) ==
+    std::tie(o.m_numInOut, o.m_requiredCoeffects, o.m_coeffectRules,
+             o.m_paramPreps, o.m_minNonVariadicParams,
+             o.m_maxNonVariadicParams,
+             o.m_isReadonlyReturn, o.m_isReadonlyThis, o.m_supportsAER,
+             o.m_maybeReified, o.m_maybeCaresAboutDynCalls,
+             o.m_maybeBuiltin);
+}
+
+size_t FuncFamily::StaticInfo::hash() const {
+  auto hash = folly::hash::hash_combine(
+    m_numInOut,
+    m_requiredCoeffects,
+    m_minNonVariadicParams,
+    m_maxNonVariadicParams,
+    m_isReadonlyReturn,
+    m_isReadonlyThis,
+    m_supportsAER,
+    m_maybeReified,
+    m_maybeCaresAboutDynCalls,
+    m_maybeBuiltin
+  );
+  hash = folly::hash::hash_range(
+    m_paramPreps.begin(),
+    m_paramPreps.end(),
+    hash
+  );
+  if (m_coeffectRules) {
+    hash = folly::hash::hash_range(
+      m_coeffectRules->begin(),
+      m_coeffectRules->end(),
+      hash
+    );
+  }
+  return hash;
+}
 
 namespace {
 
@@ -431,6 +495,49 @@ struct PFuncVecHasher {
     );
   }
 };
+struct FuncFamilyPtrHasher {
+  using is_transparent = void;
+  size_t operator()(const std::unique_ptr<FuncFamily>& ff) const {
+    return PFuncVecHasher{}(ff->possibleFuncs());
+  }
+  size_t operator()(const FuncFamily::PFuncVec& pf) const {
+    return PFuncVecHasher{}(pf);
+  }
+};
+struct FuncFamilyPtrEquals {
+  using is_transparent = void;
+  bool operator()(const std::unique_ptr<FuncFamily>& a,
+                  const std::unique_ptr<FuncFamily>& b) const {
+    return a->possibleFuncs() == b->possibleFuncs();
+  }
+  bool operator()(const FuncFamily::PFuncVec& pf,
+                  const std::unique_ptr<FuncFamily>& ff) const {
+    return pf == ff->possibleFuncs();
+  }
+};
+
+struct FFStaticInfoPtrHasher {
+  using is_transparent = void;
+  size_t operator()(const std::unique_ptr<FuncFamily::StaticInfo>& i) const {
+    return i->hash();
+  }
+  size_t operator()(const FuncFamily::StaticInfo& i) const {
+    return i.hash();
+  }
+};
+struct FFStaticInfoPtrEquals {
+  using is_transparent = void;
+  bool operator()(const std::unique_ptr<FuncFamily::StaticInfo>& a,
+                  const std::unique_ptr<FuncFamily::StaticInfo>& b) const {
+    return *a == *b;
+  }
+  bool operator()(const FuncFamily::StaticInfo& a,
+                  const std::unique_ptr<FuncFamily::StaticInfo>& b) const {
+    return a == *b;
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
 
 }
 
@@ -642,6 +749,27 @@ struct MagicMapInfo {
 const MagicMapInfo magicMethods[] {
   { StaticString{"__toBoolean"}, &ClassInfo::magicBool },
 };
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+uint32_t numNVArgs(const php::Func& f) {
+  uint32_t cnt = f.params.size();
+  return cnt && f.params[cnt - 1].isVariadic ? cnt - 1 : cnt;
+}
+
+PrepKind func_param_prep(const php::Func* f, uint32_t paramId) {
+  auto const sz = f->params.size();
+  if (paramId >= sz) return PrepKind{TriBool::No, TriBool::No};
+  PrepKind kind;
+  kind.inOut = yesOrNo(f->params[paramId].inout);
+  kind.readonly = yesOrNo(f->params[paramId].readonly);
+  return kind;
+}
+
+}
+
 //////////////////////////////////////////////////////////////////////
 
 namespace res {
@@ -900,12 +1028,7 @@ bool Func::couldHaveReifiedGenerics() const {
     [&](const MethTabEntryPair* mte) {
       return mte->second.func->isReified;
     },
-    [&](FuncFamily* fa) {
-      for (auto const pf : fa->possibleFuncs()) {
-        if (pf->second.func->isReified) return true;
-      }
-      return false;
-    }
+    [&](FuncFamily* fa) { return fa->m_static->m_maybeReified; }
   );
 }
 
@@ -932,13 +1055,7 @@ bool Func::mightCareAboutDynCalls() const {
     [&](const MethTabEntryPair* mte) {
       return dyn_call_error_level(mte->second.func) > 0;
     },
-    [&](FuncFamily* fa) {
-      for (auto const pf : fa->possibleFuncs()) {
-        if (dyn_call_error_level(pf->second.func) > 0)
-          return true;
-      }
-      return false;
-    }
+    [&](FuncFamily* fa) { return fa->m_static->m_maybeCaresAboutDynCalls; }
   );
 }
 
@@ -953,22 +1070,8 @@ bool Func::mightBeBuiltin() const {
     [&](const MethTabEntryPair* mte) {
       return mte->second.func->attrs & AttrBuiltin;
     },
-    [&](FuncFamily* fa) {
-      for (auto const pf : fa->possibleFuncs()) {
-        if (pf->second.func->attrs & AttrBuiltin) return true;
-      }
-      return false;
-    }
+    [&](FuncFamily* fa) { return fa->m_static->m_maybeBuiltin; }
   );
-}
-
-namespace {
-
-uint32_t numNVArgs(const php::Func& f) {
-  uint32_t cnt = f.params.size();
-  return cnt && f.params[cnt - 1].isVariadic ? cnt - 1 : cnt;
-}
-
 }
 
 uint32_t Func::minNonVariadicParams() const {
@@ -978,13 +1081,7 @@ uint32_t Func::minNonVariadicParams() const {
     [&] (MethodName) { return 0; },
     [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
     [&] (const MethTabEntryPair* mte) { return numNVArgs(*mte->second.func); },
-    [&] (FuncFamily* fa) {
-      auto c = std::numeric_limits<uint32_t>::max();
-      for (auto const pf : fa->possibleFuncs()) {
-        c = std::min(c, numNVArgs(*pf->second.func));
-      }
-      return c;
-    }
+    [&] (FuncFamily* fa) { return fa->m_static->m_minNonVariadicParams; }
   );
 }
 
@@ -995,62 +1092,36 @@ uint32_t Func::maxNonVariadicParams() const {
     [&] (MethodName) { return std::numeric_limits<uint32_t>::max(); },
     [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
     [&] (const MethTabEntryPair* mte) { return numNVArgs(*mte->second.func); },
-    [&] (FuncFamily* fa) {
-      uint32_t c = 0;
-      for (auto const pf : fa->possibleFuncs()) {
-        c = std::max(c, numNVArgs(*pf->second.func));
-      }
-      return c;
-    }
+    [&] (FuncFamily* fa) { return fa->m_static->m_maxNonVariadicParams; }
   );
 }
 
 const RuntimeCoeffects* Func::requiredCoeffects() const {
-  auto const get = [&](const php::Func* f) { return &f->requiredCoeffects; };
   return match<const RuntimeCoeffects*>(
     val,
     [&] (FuncName) { return nullptr; },
     [&] (MethodName) { return nullptr; },
-    [&] (FuncInfo* fi) { return get(fi->func); },
-    [&] (const MethTabEntryPair* mte) { return get(mte->second.func); },
-    [&] (FuncFamily* fa) -> const RuntimeCoeffects* {
-      const RuntimeCoeffects* result = nullptr;
-      for (auto const pf : fa->possibleFuncs()) {
-        if (!result) {
-          result = get(pf->second.func);
-          continue;
-        }
-        auto const cur = get(pf->second.func);
-        assertx(cur);
-        if (result->value() != cur->value()) return nullptr;
-      }
-      return result;
+    [&] (FuncInfo* fi) { return &fi->func->requiredCoeffects; },
+    [&] (const MethTabEntryPair* mte) {
+      return &mte->second.func->requiredCoeffects;
+    },
+    [&] (FuncFamily* fa) {
+      return fa->m_static->m_requiredCoeffects.get_pointer();
     }
   );
 }
 
 const CompactVector<CoeffectRule>* Func::coeffectRules() const {
-  auto const get = [&](const php::Func* f) { return &f->coeffectRules; };
   return match<const CompactVector<CoeffectRule>*>(
     val,
     [&] (FuncName) { return nullptr; },
     [&] (MethodName) { return nullptr; },
-    [&] (FuncInfo* fi) { return get(fi->func); },
-    [&] (const MethTabEntryPair* mte) { return get(mte->second.func); },
-    [&] (FuncFamily* fa) -> const CompactVector<CoeffectRule>* {
-      const CompactVector<CoeffectRule>* result = nullptr;
-      for (auto const pf : fa->possibleFuncs()) {
-        if (!result) {
-          result = get(pf->second.func);
-          continue;
-        }
-        auto const cur = get(pf->second.func);
-        if (!std::is_permutation(cur->begin(), cur->end(),
-                                 result->begin(), result->end())) {
-          return nullptr;
-        }
-      }
-      return result;
+    [&] (FuncInfo* fi) { return &fi->func->coeffectRules; },
+    [&] (const MethTabEntryPair* mte) {
+      return &mte->second.func->coeffectRules;
+    },
+    [&] (FuncFamily* fa) {
+      return fa->m_static->m_coeffectRules.get_pointer();
     }
   );
 }
@@ -1174,32 +1245,19 @@ struct Index::IndexData {
 
   // All FuncFamilies. These are stored globally so we can avoid
   // generating duplicates.
-  struct FuncFamilyPtrHasher {
-    using is_transparent = void;
-    size_t operator()(const std::unique_ptr<FuncFamily>& ff) const {
-      return PFuncVecHasher{}(ff->possibleFuncs());
-    }
-    size_t operator()(const FuncFamily::PFuncVec& pf) const {
-      return PFuncVecHasher{}(pf);
-    }
-  };
-  struct FuncFamilyPtrEquals {
-    using is_transparent = void;
-    bool operator()(const std::unique_ptr<FuncFamily>& a,
-                    const std::unique_ptr<FuncFamily>& b) const {
-      return a->possibleFuncs() == b->possibleFuncs();
-    }
-    bool operator()(const FuncFamily::PFuncVec& pf,
-                    const std::unique_ptr<FuncFamily>& ff) const {
-      return pf == ff->possibleFuncs();
-    }
-  };
   folly_concurrent_hash_map_simd<
     std::unique_ptr<FuncFamily>,
     bool,
     FuncFamilyPtrHasher,
     FuncFamilyPtrEquals
   > funcFamilies;
+
+  folly_concurrent_hash_map_simd<
+    std::unique_ptr<FuncFamily::StaticInfo>,
+    bool,
+    FFStaticInfoPtrHasher,
+    FFStaticInfoPtrEquals
+  > funcFamilyStaticInfos;
 
   /*
    * Map from interfaces to their assigned vtable slots, computed in
@@ -2210,65 +2268,17 @@ void add_system_constants_to_index(IndexData& index) {
 
 //////////////////////////////////////////////////////////////////////
 
-Optional<uint32_t> func_num_inout(const php::Func* func) {
+uint32_t func_num_inout(const php::Func* func) {
   if (!func->hasInOutArgs) return 0;
   uint32_t count = 0;
   for (auto& p : func->params) count += p.inout;
   return count;
 }
 
-template<typename PossibleFuncRange>
-Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
-  if (begin(range) == end(range)) return 0;
-
-  struct FuncFind {
-    using F = const php::Func*;
-    static F get(std::pair<SString,F> p) { return p.second; }
-    static F get(const MethTabEntryPair* mte) { return mte->second.func; }
-  };
-
-  Optional<uint32_t> num;
-  for (auto const& item : range) {
-    auto const n = func_num_inout(FuncFind::get(item));
-    if (!n.has_value()) return std::nullopt;
-    if (num.has_value() && n != num) return std::nullopt;
-    num = n;
-  }
-  return num;
-}
-
-template<typename PossibleFuncRange, typename Fn>
-TriBool is_readonly_helper_from_set(PossibleFuncRange range, Fn fn) {
-  if (begin(range) == end(range)) return TriBool::No;
-
-  struct FuncFind {
-    using F = const php::Func*;
-    static F get(std::pair<SString,F> p) { return p.second; }
-    static F get(const MethTabEntryPair* mte) { return mte->second.func; }
-  };
-
-  Optional<bool> result = false;
-  for (auto const& item : range) {
-    auto const b = fn(FuncFind::get(item));
-    if (!result) {
-      result = b;
-      continue;
-    }
-    if (*result != b) return TriBool::Maybe;
-  }
-  return yesOrNo(*result);
-}
-
-template<typename PossibleFuncRange>
-TriBool is_readonly_return_from_set(PossibleFuncRange range) {
-  return is_readonly_helper_from_set(
-    range, [](const php::Func* f) { return f->isReadonlyReturn; });
-}
-
-template<typename PossibleFuncRange>
-TriBool is_readonly_this_from_set(PossibleFuncRange range) {
-  return is_readonly_helper_from_set(
-    range, [](const php::Func* f) { return f->isReadonlyThis; });
+TriBool func_supports_AER(const php::Func* func) {
+  // Async functions always support async eager return, and no other
+  // functions support it yet.
+  return yesOrNo(func->isAsync && !func->isGenerator);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3177,6 +3187,122 @@ void build_abstract_func_families(IndexData& data, ClassInfo* cinfo) {
   return;
 }
 
+// Calculate the StaticInfo for the given FuncFamily, and assign it
+// the pointer to the unique allocation corresponding to it.
+void build_func_family_static_info(IndexData& index, FuncFamily* ff) {
+  auto const& possible = ff->possibleFuncs();
+  assertx(!possible.empty());
+
+  // Calculate the StaticInfo from all possible functions:
+
+  auto info =  [&] {
+    FuncFamily::StaticInfo info;
+
+    auto const func = possible.front()->second.func;
+    info.m_numInOut = func_num_inout(func);
+    info.m_isReadonlyReturn = yesOrNo(func->isReadonlyReturn);
+    info.m_isReadonlyThis = yesOrNo(func->isReadonlyThis);
+    info.m_maybeReified = func->isReified;
+    info.m_maybeCaresAboutDynCalls = (dyn_call_error_level(func) > 0);
+    info.m_maybeBuiltin = (func->attrs & AttrBuiltin);
+    info.m_minNonVariadicParams =
+      info.m_maxNonVariadicParams = numNVArgs(*func);
+    info.m_requiredCoeffects = func->requiredCoeffects;
+    info.m_coeffectRules = func->coeffectRules;
+
+    for (size_t i = 0; i < func->params.size(); ++i) {
+      info.m_paramPreps.emplace_back(func_param_prep(func, i));
+    }
+    for (auto const pf : possible) {
+      if (pf->second.attrs & AttrAbstract) continue;
+      info.m_supportsAER = func_supports_AER(pf->second.func);
+      break;
+    }
+    return info;
+  }();
+
+  auto const addToParamPreps = [&] (const php::Func* f) {
+    if (f->params.size() > info.m_paramPreps.size()) {
+      info.m_paramPreps.resize(
+        f->params.size(),
+        PrepKind{TriBool::No, TriBool::No}
+      );
+    }
+    for (size_t i = 0; i < info.m_paramPreps.size(); ++i) {
+      auto const prep = func_param_prep(f, i);
+      info.m_paramPreps[i].inOut |= prep.inOut;
+      info.m_paramPreps[i].readonly |= prep.readonly;
+    }
+  };
+
+  for (auto const pf : possible) {
+    auto const func = pf->second.func;
+
+    if (info.m_numInOut && *info.m_numInOut != func_num_inout(func)) {
+      info.m_numInOut.reset();
+    }
+    info.m_isReadonlyReturn |= yesOrNo(func->isReadonlyReturn);
+    info.m_isReadonlyThis |= yesOrNo(func->isReadonlyThis);
+    info.m_maybeReified |= func->isReified;
+    info.m_maybeCaresAboutDynCalls |= (dyn_call_error_level(func) > 0);
+    info.m_maybeBuiltin |= (func->attrs & AttrBuiltin);
+    addToParamPreps(func);
+
+    if (info.m_supportsAER != TriBool::Maybe &&
+        !(pf->second.attrs & AttrAbstract)) {
+      info.m_supportsAER |= func_supports_AER(func);
+    }
+
+    auto const numNV = numNVArgs(*func);
+    info.m_minNonVariadicParams =
+      std::min(info.m_minNonVariadicParams, numNV);
+    info.m_maxNonVariadicParams =
+      std::max(info.m_maxNonVariadicParams, numNV);
+
+    if (info.m_requiredCoeffects &&
+        *info.m_requiredCoeffects != func->requiredCoeffects) {
+      info.m_requiredCoeffects.reset();
+    }
+
+    if (info.m_coeffectRules) {
+      if (!std::is_permutation(
+            info.m_coeffectRules->begin(),
+            info.m_coeffectRules->end(),
+            func->coeffectRules.begin(),
+            func->coeffectRules.end())) {
+        info.m_coeffectRules.reset();
+      }
+    }
+  }
+
+  // Modify the info to make it more likely to match an existing one:
+
+  // Any param beyond the size of m_paramPreps is implicitly
+  // TriBool::No, so we can drop trailing entries which are
+  // TriBool::No.
+  while (!info.m_paramPreps.empty()) {
+    auto& back = info.m_paramPreps.back();
+    if (back.inOut != TriBool::No || back.readonly != TriBool::No) break;
+    info.m_paramPreps.pop_back();
+  }
+
+  // Sort the coeffect rules to increase matching.
+  if (info.m_coeffectRules) {
+    std::sort(info.m_coeffectRules->begin(), info.m_coeffectRules->end());
+  }
+
+  // See if the info already exists in the set. If it doesn't exist,
+  // add it. Otherwise use the already created one.
+  ff->m_static = [&] {
+    auto const it = index.funcFamilyStaticInfos.find(info);
+    if (it != index.funcFamilyStaticInfos.end()) return it->first.get();
+    return index.funcFamilyStaticInfos.insert(
+      std::make_unique<FuncFamily::StaticInfo>(std::move(info)),
+      false
+    ).first->first.get();
+  }();
+}
+
 void define_func_families(IndexData& index) {
   trace_time tracer("define_func_families");
 
@@ -3222,9 +3348,8 @@ void define_func_families(IndexData& index) {
   parallel::for_each(
     work,
     [&] (FuncFamily* ff) {
-      ff->m_numInOut = num_inout_from_set(ff->possibleFuncs());
-      ff->m_isReadonlyReturn = is_readonly_return_from_set(ff->possibleFuncs());
-      ff->m_isReadonlyThis = is_readonly_this_from_set(ff->possibleFuncs());
+      build_func_family_static_info(index, ff);
+
       for (auto const pf : ff->possibleFuncs()) {
         auto finfo = create_func_info(index, pf->second.func);
         auto& lock = locks[pointer_hash<FuncInfo>{}(finfo) % locks.size()];
@@ -3841,46 +3966,6 @@ Type context_sensitive_return_type(IndexData& data,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-PrepKind func_param_prep_func_doesnt_exist() {
-  // since function doesnt exist, we will fail anyway, it is fine to remove
-  // readonly checks
-  return PrepKind{TriBool::No, TriBool::Yes};
-}
-
-PrepKind func_param_prep(const php::Func* f, uint32_t paramId) {
-  auto const sz = f->params.size();
-  if (paramId >= sz) return PrepKind{TriBool::No, TriBool::No};
-  PrepKind kind;
-  kind.inOut = yesOrNo(f->params[paramId].inout);
-  kind.readonly = yesOrNo(f->params[paramId].readonly);
-  return kind;
-}
-
-template<class PossibleFuncRange>
-PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
-
-  if (begin(range) == end(range)) return func_param_prep_func_doesnt_exist();
-
-  struct FuncFind {
-    using F = const php::Func*;
-    static F get(std::pair<SString,F> p) { return p.second; }
-    static F get(const MethTabEntryPair* mte) { return mte->second.func; }
-  };
-
-  Optional<PrepKind> prep;
-  for (auto& item : range) {
-    auto const kind = func_param_prep(FuncFind::get(item), paramId);
-    if (!prep) {
-      prep = kind;
-      continue;
-    }
-    prep->inOut |= kind.inOut;
-    prep->readonly |= kind.readonly;
-  }
-  assertx(prep);
-  return *prep;
-}
 
 template<typename F> auto
 visit_parent_cinfo(const ClassInfo* cinfo, F fun) -> decltype(fun(cinfo)) {
@@ -5731,55 +5816,24 @@ bool Index::could_have_reified_type(Context ctx,
   return resolved.value->couldHaveReifiedGenerics();
 }
 
-Optional<bool>
+TriBool
 Index::supports_async_eager_return(res::Func rfunc) const {
-  auto const supportsAER = [] (const php::Func* func) {
-    // Async functions always support async eager return.
-    if (func->isAsync && !func->isGenerator) return true;
-
-    // No other functions support async eager return yet.
-    return false;
-  };
-
-  return match<Optional<bool>>(
+  return match<TriBool>(
     rfunc.val,
-    [&](res::Func::FuncName)   { return std::nullopt; },
-    [&](res::Func::MethodName) { return std::nullopt; },
-    [&](FuncInfo* finfo) { return supportsAER(finfo->func); },
-    [&](const MethTabEntryPair* mte) { return supportsAER(mte->second.func); },
-    [&](FuncFamily* fam) -> Optional<bool> {
-      auto ret = Optional<bool>{};
-      for (auto const pf : fam->possibleFuncs()) {
-        // Abstract functions are never called.
-        if (pf->second.attrs & AttrAbstract) continue;
-        auto const val = supportsAER(pf->second.func);
-        if (ret && *ret != val) return std::nullopt;
-        ret = val;
-      }
-      return ret;
-    });
+    [&](res::Func::FuncName)   { return TriBool::Maybe; },
+    [&](res::Func::MethodName) { return TriBool::Maybe; },
+    [&](FuncInfo* finfo) {
+      return func_supports_AER(finfo->func);
+    },
+    [&](const MethTabEntryPair* mte) {
+      return func_supports_AER(mte->second.func);
+    },
+    [&](FuncFamily* fam) { return fam->m_static->m_supportsAER; }
+  );
 }
 
 bool Index::is_effect_free(const php::Func* func) const {
   return func_info(*m_data, func)->effectFree;
-}
-
-bool Index::is_effect_free(res::Func rfunc) const {
-  return match<bool>(
-    rfunc.val,
-    [&](res::Func::FuncName)   { return false; },
-    [&](res::Func::MethodName) { return false; },
-    [&](FuncInfo* finfo)       { return finfo->effectFree; },
-    [&](const MethTabEntryPair* mte) {
-      return func_info(*m_data, mte->second.func)->effectFree;
-    },
-    [&](FuncFamily* fam) {
-      for (auto const mte : fam->possibleFuncs()) {
-        if (!func_info(*m_data, mte->second.func)->effectFree) return false;
-      }
-      return true;
-    }
-  );
 }
 
 ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
@@ -6290,8 +6344,7 @@ Optional<uint32_t> Index::lookup_num_inout_params(
         // by inout.
         return 0;
       }
-      auto const pair = m_data->methods.equal_range(s.name);
-      return num_inout_from_set(folly::range(pair.first, pair.second));
+      return std::nullopt;
     },
     [&] (FuncInfo* finfo) {
       return func_num_inout(finfo->func);
@@ -6300,12 +6353,13 @@ Optional<uint32_t> Index::lookup_num_inout_params(
       return func_num_inout(mte->second.func);
     },
     [&] (FuncFamily* fam) -> Optional<uint32_t> {
-      return fam->m_numInOut;
+      return fam->m_static->m_numInOut;
     }
   );
 }
 
-PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
+PrepKind Index::lookup_param_prep(Context,
+                                  res::Func rfunc,
                                   uint32_t paramId) const {
   return match<PrepKind>(
     rfunc.val,
@@ -6314,11 +6368,10 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
       auto const it = m_data->funcs.find(s.name);
       return it != end(m_data->funcs)
         ? func_param_prep(it->second, paramId)
-        : func_param_prep_func_doesnt_exist();
+        : PrepKind{TriBool::No, TriBool::Yes};
     },
     [&] (res::Func::MethodName s) {
-
-      auto const couldHaveBit = [&] (auto map, auto index) {
+      auto const couldHaveBit = [&] (auto const& map, auto index) {
         auto const it = map.find(s.name);
         if (it == end(map)) return false;
         if (index < sizeof(it->second) * CHAR_BIT &&
@@ -6328,13 +6381,10 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
         return true;
       };
 
-      if (!couldHaveBit(m_data->method_inout_params_by_name, paramId) &&
-          !couldHaveBit(m_data->method_readonly_by_name, paramId + 2)) {
-        return PrepKind{TriBool::No, TriBool::No};
-      }
-
-      auto const pair = m_data->methods.equal_range(s.name);
-      return prep_kind_from_set(folly::range(pair.first, pair.second), paramId);
+      return PrepKind{
+        maybeOrNo(couldHaveBit(m_data->method_inout_params_by_name, paramId)),
+        maybeOrNo(couldHaveBit(m_data->method_readonly_by_name, paramId + 2))
+      };
     },
     [&] (FuncInfo* finfo) {
       return func_param_prep(finfo->func, paramId);
@@ -6343,7 +6393,10 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
       return func_param_prep(mte->second.func, paramId);
     },
     [&] (FuncFamily* fam) {
-      return prep_kind_from_set(fam->possibleFuncs(), paramId);
+      if (paramId >= fam->m_static->m_paramPreps.size()) {
+        return PrepKind{TriBool::No, TriBool::No};
+      }
+      return fam->m_static->m_paramPreps[paramId];
     }
   );
 }
@@ -6358,8 +6411,8 @@ TriBool Index::lookup_return_readonly(
       if (s.renamable) return TriBool::Maybe;
       auto const it = m_data->funcs.find(s.name);
       return it != end(m_data->funcs)
-       ? yesOrNo(it->second->isReadonlyReturn)
-       : TriBool::No; // if the function doesnt exist, we will error anyway
+        ? yesOrNo(it->second->isReadonlyReturn)
+        : TriBool::No; // if the function doesnt exist, we will error anyway
     },
     [&] (res::Func::MethodName s) {
       auto const it = m_data->method_readonly_by_name.find(s.name);
@@ -6371,8 +6424,7 @@ TriBool Index::lookup_return_readonly(
         // No method of this name returns readonly.
         return TriBool::No;
       }
-      auto const pair = m_data->methods.equal_range(s.name);
-      return is_readonly_return_from_set(folly::range(pair.first, pair.second));
+      return TriBool::Maybe;
     },
     [&] (FuncInfo* finfo) {
       return yesOrNo(finfo->func->isReadonlyReturn);
@@ -6381,7 +6433,7 @@ TriBool Index::lookup_return_readonly(
       return yesOrNo(mte->second.func->isReadonlyReturn);
     },
     [&] (FuncFamily* fam) {
-      return fam->m_isReadonlyReturn;
+      return fam->m_static->m_isReadonlyReturn;
     }
   );
 }
@@ -6396,8 +6448,8 @@ TriBool Index::lookup_readonly_this(
       if (s.renamable) return TriBool::Maybe;
       auto const it = m_data->funcs.find(s.name);
       return it != end(m_data->funcs)
-       ? yesOrNo(it->second->isReadonlyThis)
-       : TriBool::Yes; // if the function doesnt exist, we will error anyway
+        ? yesOrNo(it->second->isReadonlyThis)
+        : TriBool::Yes; // if the function doesnt exist, we will error anyway
     },
     [&] (res::Func::MethodName s) {
       auto const it = m_data->method_readonly_by_name.find(s.name);
@@ -6409,8 +6461,7 @@ TriBool Index::lookup_readonly_this(
         // No method of this name is marked readonly
         return TriBool::No;
       }
-      auto const pair = m_data->methods.equal_range(s.name);
-      return is_readonly_this_from_set(folly::range(pair.first, pair.second));
+      return TriBool::Maybe;
     },
     [&] (FuncInfo* finfo) {
       return yesOrNo(finfo->func->isReadonlyThis);
@@ -6419,7 +6470,7 @@ TriBool Index::lookup_readonly_this(
       return yesOrNo(mte->second.func->isReadonlyThis);
     },
     [&] (FuncFamily* fam) {
-      return fam->m_isReadonlyThis;
+      return fam->m_static->m_isReadonlyThis;
     }
   );
 }
@@ -7452,9 +7503,11 @@ void Index::cleanup_post_emit(php::ProgramPtr program) {
   CLEAR_PARALLEL(m_data->privatePropInfo);
   CLEAR_PARALLEL(m_data->privateStaticPropInfo);
   CLEAR_PARALLEL(m_data->publicSPropMutations);
-  CLEAR_PARALLEL(m_data->funcFamilies);
   CLEAR_PARALLEL(m_data->ifaceSlotMap);
   CLEAR_PARALLEL(m_data->closureUseVars);
+
+  CLEAR_PARALLEL(m_data->funcFamilies);
+  CLEAR_PARALLEL(m_data->funcFamilyStaticInfos);
 
   CLEAR_PARALLEL(m_data->clsConstTypes);
   CLEAR_PARALLEL(m_data->clsConstLookupCache);

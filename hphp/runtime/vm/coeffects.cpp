@@ -461,6 +461,29 @@ bool CoeffectRule::operator==(const CoeffectRule& o) const {
          m_name == o.m_name;
 }
 
+bool CoeffectRule::operator<(const CoeffectRule& o) const {
+  if (m_type != o.m_type) return m_type < o.m_type;
+  if (m_name != o.m_name) return m_name < o.m_name;
+  if (m_isClass != o.m_isClass) return m_isClass < o.m_isClass;
+  if (m_index != o.m_index) return m_index < o.m_index;
+  return m_types < o.m_types;
+}
+
+size_t CoeffectRule::hash() const {
+  auto const hash = folly::hash::hash_combine(
+    m_type,
+    m_isClass,
+    m_index,
+    pointer_hash<StringData>{}(m_name)
+  );
+  return folly::hash::hash_range(
+    m_types.begin(),
+    m_types.end(),
+    hash,
+    pointer_hash<StringData>{}
+  );
+}
+
 template<class SerDe>
 void CoeffectRule::serde(SerDe& sd) {
   sd(m_type)

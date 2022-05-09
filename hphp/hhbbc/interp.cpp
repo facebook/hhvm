@@ -1837,7 +1837,11 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
     ctxType,
     memo_impl_func
   );
-  auto const effectFree = env.index.is_effect_free(memo_impl_func);
+  auto const effectFree = [&] {
+    auto const f = memo_impl_func.exactFunc();
+    if (!f) return false;
+    return env.index.is_effect_free(f);
+  }();
   // Regardless of anything we know the return type will be an InitCell (this is
   // a requirement of memoize functions).
   if (!retTy.subtypeOf(BInitCell)) return { TInitCell, effectFree };
@@ -3527,8 +3531,7 @@ bool fcallOptimizeChecks(
 
   // Infer whether the callee supports async eager return.
   if (fca.asyncEagerTarget() != NoBlockId) {
-    auto const status = env.index.supports_async_eager_return(func);
-    if (status && !*status) {
+    if (env.index.supports_async_eager_return(func) == TriBool::No) {
       reduce(env, fcallWithFCA(fca.withoutAsyncEagerTarget()));
       return true;
     }

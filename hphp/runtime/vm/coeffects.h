@@ -57,6 +57,13 @@ struct RuntimeCoeffects {
 
   const std::string toString() const;
 
+  bool operator==(const RuntimeCoeffects& o) const {
+    return value() == o.value();
+  }
+  bool operator!=(const RuntimeCoeffects& o) const {
+    return !(*this == o);
+  }
+
   // Checks whether provided coeffects in `this` can call
   // required coeffects in `o`
   bool canCall(const RuntimeCoeffects o) const {
@@ -205,6 +212,9 @@ struct CoeffectRule final {
   std::string getDirectiveString() const;
 
   bool operator==(const CoeffectRule&) const;
+  bool operator<(const CoeffectRule&) const;
+
+  size_t hash() const;
 
   template<class SerDe>
   void serde(SerDe&);
@@ -229,4 +239,28 @@ struct CoeffectRule final {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+namespace std {
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<>
+struct hash<HPHP::RuntimeCoeffects> {
+  size_t operator()(HPHP::RuntimeCoeffects c) const {
+    return c.value();
+  }
+};
+
+template<>
+struct hash<HPHP::CoeffectRule> {
+  size_t operator()(const HPHP::CoeffectRule& r) const {
+    return r.hash();
+  }
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
 }

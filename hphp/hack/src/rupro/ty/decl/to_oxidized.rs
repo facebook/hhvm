@@ -512,11 +512,170 @@ impl<'a, P: ToOxidized<'a, Output = &'a obr::pos::Pos<'a>>> ToOxidized<'a>
     }
 }
 
+impl<'a, R: Reason> ToOxidized<'a> for shallow::ShallowMethod<R> {
+    type Output = &'a obr::shallow_decl_defs::ShallowMethod<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let Self {
+            name,
+            ty,
+            visibility,
+            deprecated,
+            flags,
+            attributes,
+        } = self;
+        arena.alloc(obr::shallow_decl_defs::ShallowMethod {
+            name: name.to_oxidized(arena),
+            type_: ty.to_oxidized(arena),
+            visibility: *visibility,
+            deprecated: deprecated.as_ref().map(|s| {
+                bumpalo::collections::String::from_utf8_lossy_in(s.as_bytes(), arena)
+                    .into_bump_str()
+            }),
+            flags: *flags,
+            attributes: attributes.to_oxidized(arena),
+        })
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for shallow::ShallowProp<R> {
+    type Output = &'a obr::shallow_decl_defs::ShallowProp<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let Self {
+            name,
+            xhp_attr,
+            ty,
+            visibility,
+            flags,
+        } = self;
+        arena.alloc(obr::shallow_decl_defs::ShallowProp {
+            name: name.to_oxidized(arena),
+            xhp_attr: *xhp_attr,
+            type_: ty.as_ref().map(|o| o.to_oxidized(arena)),
+            visibility: *visibility,
+            flags: *flags,
+        })
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for shallow::ShallowClassConst<R> {
+    type Output = &'a obr::shallow_decl_defs::ShallowClassConst<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let Self {
+            kind,
+            name,
+            ty,
+            refs,
+        } = self;
+        arena.alloc(obr::shallow_decl_defs::ShallowClassConst {
+            abstract_: *kind,
+            name: name.to_oxidized(arena),
+            type_: ty.to_oxidized(arena),
+            refs: refs.to_oxidized(arena),
+        })
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for shallow::ShallowTypeconst<R> {
+    type Output = &'a obr::shallow_decl_defs::ShallowTypeconst<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let Self {
+            name,
+            kind,
+            enforceable,
+            reifiable,
+            is_ctx,
+        } = self;
+        arena.alloc(obr::shallow_decl_defs::ShallowTypeconst {
+            name: name.to_oxidized(arena),
+            kind: kind.to_oxidized(arena),
+            enforceable: (
+                enforceable
+                    .as_ref()
+                    .map_or_else(obr::pos::Pos::none as fn() -> &'a _, |p| {
+                        p.to_oxidized(arena)
+                    }),
+                self.is_enforceable(),
+            ),
+            reifiable: reifiable.as_ref().map(|p| p.to_oxidized(arena)),
+            is_ctx: *is_ctx,
+        })
+    }
+}
+
 impl<'a, R: Reason> ToOxidized<'a> for shallow::ClassDecl<R> {
     type Output = &'a obr::shallow_decl_defs::ClassDecl<'a>;
 
-    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
-        todo!()
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let Self {
+            mode,
+            is_final,
+            is_abstract,
+            is_internal,
+            is_xhp,
+            has_xhp_keyword,
+            kind,
+            module,
+            name,
+            tparams,
+            where_constraints,
+            extends,
+            uses,
+            xhp_attr_uses,
+            xhp_enum_values,
+            req_extends,
+            req_implements,
+            req_class,
+            implements,
+            support_dynamic_type,
+            consts,
+            typeconsts,
+            props,
+            static_props,
+            constructor,
+            static_methods,
+            methods,
+            user_attributes,
+            enum_type,
+        } = self;
+
+        arena.alloc(obr::shallow_decl_defs::ClassDecl {
+            mode: *mode,
+            final_: *is_final,
+            abstract_: *is_abstract,
+            is_xhp: *is_xhp,
+            internal: *is_internal,
+            has_xhp_keyword: *has_xhp_keyword,
+            kind: *kind,
+            module: module.as_ref().map(|m| {
+                let (pos, id) = m.to_oxidized(arena);
+                oxidized_by_ref::ast_defs::Id(pos, id)
+            }),
+            name: name.to_oxidized(arena),
+            tparams: tparams.to_oxidized(arena),
+            where_constraints: where_constraints.to_oxidized(arena),
+            extends: extends.to_oxidized(arena),
+            uses: uses.to_oxidized(arena),
+            xhp_attr_uses: xhp_attr_uses.to_oxidized(arena),
+            xhp_enum_values: xhp_enum_values.to_oxidized(arena),
+            req_extends: req_extends.to_oxidized(arena),
+            req_implements: req_implements.to_oxidized(arena),
+            req_class: req_class.to_oxidized(arena),
+            implements: implements.to_oxidized(arena),
+            support_dynamic_type: *support_dynamic_type,
+            consts: consts.to_oxidized(arena),
+            typeconsts: typeconsts.to_oxidized(arena),
+            props: props.to_oxidized(arena),
+            sprops: static_props.to_oxidized(arena),
+            constructor: constructor.as_ref().map(|c| c.to_oxidized(arena)),
+            static_methods: static_methods.to_oxidized(arena),
+            methods: methods.to_oxidized(arena),
+            user_attributes: user_attributes.to_oxidized(arena),
+            enum_type: enum_type.as_ref().map(|e| e.to_oxidized(arena)),
+        })
     }
 }
 

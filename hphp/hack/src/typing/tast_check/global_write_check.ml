@@ -120,6 +120,7 @@ let rec is_expr_static env (_, _, te) =
     let class_elts = get_static_prop_elts env class_id expr in
     not (List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable)
   | Obj_get (e, _, _, Is_prop) -> is_expr_static env e
+  | Array_get (e, _) -> is_expr_static env e
   | _ -> false
 
 (* Given a context of global variables and an expression,

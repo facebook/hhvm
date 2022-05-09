@@ -14,12 +14,14 @@ File "test_collection.php", line 43, characters 5-16:
 [Test::test_method_call] A global variable is written. (Other[11002])
 File "test_collection.php", line 45, characters 5-39:
 [Test::test_method_call] A static variable is directly written. (Other[11001])
+File "test_collection.php", line 50, characters 5-31:
+[Test::test_method_call] A static variable is directly written. (Other[11001])
 File "test_collection.php", line 52, characters 5-41:
 [Test::test_method_call] A static variable is directly written. (Other[11001])
 File "test_collection.php", line 55, characters 5-19:
 [Test::test_method_call] A global variable is written. (Other[11002])
 File "test_collection.php", line 58, characters 5-37:
-[Test::test_method_call] A global variable is written. (Other[11002])
+[Test::test_method_call] A static variable is directly written. (Other[11001])
 File "test_collection.php", line 62, characters 5-26:
 [Test::test_method_call] A global variable is written. (Other[11002])
 File "test_collection.php", line 68, characters 5-19:

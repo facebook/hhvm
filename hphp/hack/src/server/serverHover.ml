@@ -158,12 +158,10 @@ let make_hover_full_name env_and_ty occurrence def_opt =
 
 (* Return a markdown description of built-in Hack attributes. *)
 let make_hover_attr_docs name =
-  let special_name_docs attr_name map =
-    Option.map ~f:snd (SMap.find_opt attr_name map)
-  in
   Option.first_some
-    (special_name_docs name SN.UserAttributes.as_map)
-    (special_name_docs name SN.UserAttributes.systemlib_map)
+    (SMap.find_opt name SN.UserAttributes.as_map)
+    (SMap.find_opt name SN.UserAttributes.systemlib_map)
+  |> Option.map ~f:(fun attr_info -> attr_info.SN.UserAttributes.doc)
   |> Option.to_list
 
 let pure_context_info =

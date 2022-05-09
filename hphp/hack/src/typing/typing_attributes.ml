@@ -38,14 +38,18 @@ let check_implements
     (* Check against builtins *)
     let check_attr map =
       match SMap.find_opt attr_name map with
-      | Some (intfs, _docs) ->
+      | Some attr_info ->
         let check_locations =
           TypecheckerOptions.check_attribute_locations
             (Typing_env.get_tcopt env)
         in
         if
           check_locations
-          && (not @@ List.mem intfs attr_interface ~equal:String.equal)
+          && not
+             @@ List.mem
+                  attr_info.SN.UserAttributes.contexts
+                  attr_interface
+                  ~equal:String.equal
         then
           Errors.add_typing_error
             Typing_error.(
@@ -67,8 +71,11 @@ let check_implements
           let bindings = SMap.bindings SN.UserAttributes.as_map in
           let filtered_bindings =
             List.filter
-              ~f:(fun (_, (list, _)) ->
-                List.mem list attr_interface ~equal:String.equal)
+              ~f:(fun (_, attr_info) ->
+                List.mem
+                  attr_info.SN.UserAttributes.contexts
+                  attr_interface
+                  ~equal:String.equal)
               bindings
           in
           List.map ~f:fst filtered_bindings

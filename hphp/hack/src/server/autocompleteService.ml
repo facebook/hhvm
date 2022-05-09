@@ -752,6 +752,54 @@ let autocomplete_shape_literal_in_call
       | _ -> ())
     (zip_truncate args ft.ft_params)
 
+let add_builtin_attribute_result replace_pos ~doc ~name : unit =
+  argument_global_type := Some Acid;
+
+  let complete =
+    {
+      res_pos = Pos.to_absolute Pos.none;
+      res_replace_pos = replace_pos;
+      res_base_class = None;
+      res_ty = "built-in attribute";
+      res_name = name;
+      res_fullname = name;
+      res_kind = SI_Class;
+      func_details = None;
+      ranking_details = None;
+      res_documentation = Some doc;
+    }
+  in
+  add_res complete
+
+let autocomplete_builtin_attribute
+    ((pos, name) : Pos.t * string) (attr_kind : string) : unit =
+  let module UA = Naming_special_names.UserAttributes in
+  let stripped_name = Utils.strip_ns name in
+  if is_auto_complete name && String.is_prefix stripped_name ~prefix:"_" then
+    let replace_pos = replace_pos_of_id (pos, name) in
+    let prefix = strip_suffix stripped_name in
+    (* Built-in attributes that match the prefix the user has typed. *)
+    let possible_attrs =
+      SMap.filter
+        (fun name attr_info ->
+          String.is_prefix name ~prefix
+          && attr_info.UA.autocomplete
+          && List.mem attr_info.UA.contexts attr_kind ~equal:String.equal)
+        UA.as_map
+    in
+    (* Sort by attribute name. This isn't necessary in the IDE, which
+       does its own sorting, but helps tests. *)
+    let sorted_attrs =
+      List.sort (SMap.elements possible_attrs) ~compare:(fun (x, _) (y, _) ->
+          String.compare x y)
+      |> List.rev
+    in
+    List.iter
+      ~f:(fun (name, attr_info) ->
+        let doc = attr_info.UA.doc in
+        add_builtin_attribute_result replace_pos ~name ~doc)
+      sorted_attrs
+
 (* If [name] is an enum, return the list of the constants it defines. *)
 let enum_consts env name : string list option =
   match Decl_provider.get_class (Tast_env.get_ctx env) name with
@@ -1171,6 +1219,12 @@ let visitor ctx autocomplete_context sienv =
         | _ -> ())
       | (_, p, Aast.EnumClassLabel (opt_cname, n)) when is_auto_complete n ->
         autocomplete_enum_class_label env opt_cname (p, n) None
+      | (_, _, Aast.Efun (f, _))
+      | (_, _, Aast.Lfun (f, _)) ->
+        List.iter f.Aast.f_user_attributes ~f:(fun ua ->
+            autocomplete_builtin_attribute
+              ua.Aast.ua_name
+              Naming_special_names.AttributeKinds.lambda)
       | _ -> ());
       super#on_expr env expr
 
@@ -1217,7 +1271,64 @@ let visitor ctx autocomplete_context sienv =
                  | Aast.Xhp_spread _ -> ()));
       super#on_Xml env sid attrs el
 
+    method! on_typedef env t =
+      List.iter t.Aast.t_user_attributes ~f:(fun ua ->
+          autocomplete_builtin_attribute
+            ua.Aast.ua_name
+            Naming_special_names.AttributeKinds.typealias);
+      super#on_typedef env t
+
+    method! on_fun_def env fd =
+      List.iter fd.Aast.fd_fun.Aast.f_user_attributes ~f:(fun ua ->
+          autocomplete_builtin_attribute
+            ua.Aast.ua_name
+            Naming_special_names.AttributeKinds.fn);
+      super#on_fun_def env fd
+
+    method! on_fun_param env fp =
+      List.iter fp.Aast.param_user_attributes ~f:(fun ua ->
+          autocomplete_builtin_attribute
+            ua.Aast.ua_name
+            Naming_special_names.AttributeKinds.parameter);
+      super#on_fun_param env fp
+
+    method! on_tparam env tp =
+      List.iter tp.Aast.tp_user_attributes ~f:(fun ua ->
+          autocomplete_builtin_attribute
+            ua.Aast.ua_name
+            Naming_special_names.AttributeKinds.typeparam);
+      super#on_tparam env tp
+
+    method! on_method_ env m =
+      List.iter m.Aast.m_user_attributes ~f:(fun ua ->
+          autocomplete_builtin_attribute
+            ua.Aast.ua_name
+            Naming_special_names.AttributeKinds.mthd);
+      super#on_method_ env m
+
+    method! on_class_var env cv =
+      List.iter cv.Aast.cv_user_attributes ~f:(fun ua ->
+          autocomplete_builtin_attribute
+            ua.Aast.ua_name
+            (if cv.Aast.cv_is_static then
+              Naming_special_names.AttributeKinds.staticProperty
+            else
+              Naming_special_names.AttributeKinds.instProperty));
+      super#on_class_var env cv
+
+    method! on_class_typeconst_def env ctd =
+      List.iter ctd.Aast.c_tconst_user_attributes ~f:(fun ua ->
+          autocomplete_builtin_attribute
+            ua.Aast.ua_name
+            Naming_special_names.AttributeKinds.typeconst);
+      super#on_class_typeconst_def env ctd
+
     method! on_class_ env cls =
+      List.iter cls.Aast.c_user_attributes ~f:(fun ua ->
+          autocomplete_builtin_attribute
+            ua.Aast.ua_name
+            Naming_special_names.AttributeKinds.cls);
+
       List.iter cls.Aast.c_uses ~f:(fun hint ->
           match snd hint with
           | Aast.Happly (id, params) ->

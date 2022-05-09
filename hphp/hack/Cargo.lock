@@ -776,9 +776,20 @@ dependencies = [
  "depgraph",
  "ocamlrep",
  "ocamlrep_custom",
- "ocamlrep_ocamlpool",
  "once_cell",
  "oxidized",
+ "rpds",
+]
+
+[[package]]
+name = "deps_rust_ffi"
+version = "0.0.0"
+dependencies = [
+ "depgraph",
+ "deps_rust",
+ "ocamlrep",
+ "ocamlrep_custom",
+ "ocamlrep_ocamlpool",
  "rpds",
  "typing_deps_hash",
 ]

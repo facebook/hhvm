@@ -12,8 +12,6 @@ crate-type = ["lib", "staticlib"]
 depgraph = { path = "../../../depgraph/cargo/depgraph" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_custom = { path = "../../../ocamlrep_custom" }
-ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 once_cell = "1.8"
 oxidized = { path = "../../../oxidized" }
 rpds = "0.11.0"
-typing_deps_hash = { path = "../typing_deps_hash" }

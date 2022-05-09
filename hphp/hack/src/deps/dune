@@ -40,12 +40,12 @@
  (name typing_deps_rust)
  (modules)
  (wrapped false)
- (foreign_archives deps_rust))
+ (foreign_archives deps_rust_ffi))
 
 (rule
- (targets libdeps_rust.a)
+ (targets libdeps_rust_ffi.a)
  (deps
   (source_tree %{workspace_root}/src))
  (locks /cargo)
  (action
-  (run %{workspace_root}/scripts/invoke_cargo.sh deps_rust deps_rust)))
+  (run %{workspace_root}/scripts/invoke_cargo.sh deps_rust_ffi deps_rust_ffi)))

@@ -5,6 +5,7 @@ members = [
     "src/decl/cargo/rust_decl_ffi",
     "src/decl/direct_decl_smart_constructors",
     "src/deps/cargo/deps_rust",
+    "src/deps/cargo/deps_rust_ffi",
     "src/deps/cargo/typing_deps_hash",
     "src/facebook/hh",
     "src/facebook/hh/cargo/hh_api",

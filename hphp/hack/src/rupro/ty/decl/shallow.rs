@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl::ty::{
-    ClassConstKind, ClassConstRef, EnumType, FunElt, Tparam, Ty, Typeconst, TypedefType,
-    UserAttribute, WhereConstraint, XhpAttribute, XhpEnumValue,
+    ClassConstKind, ClassConstRef, EnumType, FunElt, ModuleDefType, Tparam, Ty, Typeconst,
+    TypedefType, UserAttribute, WhereConstraint, XhpAttribute, XhpEnumValue,
 };
 use crate::reason::Reason;
 use eq_modulo_pos::EqModuloPos;
@@ -16,7 +16,7 @@ use pos::{
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-pub use crate::decl::ty::{ConstDecl, ModuleDefType};
+pub use crate::decl::ty::ConstDecl;
 pub use oxidized::ast_defs::Visibility;
 pub use oxidized_by_ref::{method_flags::MethodFlags, prop_flags::PropFlags};
 
@@ -147,12 +147,7 @@ pub type ClassDecl<R> = ShallowClass<R>;
 
 pub type TypedefDecl<R> = TypedefType<R>;
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[serde(bound = "R: Reason")]
-pub struct ModuleDecl<R: Reason> {
-    pub pos: R::Pos,
-}
-walkable!(ModuleDecl<R> => []);
+pub type ModuleDecl<R> = ModuleDefType<R>;
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]

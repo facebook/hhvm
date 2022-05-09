@@ -676,7 +676,7 @@ walkable!(TypedefType<R> => [tparams, constraint, ty]);
 
 walkable!(ast_defs::ConstraintKind);
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub struct ModuleDefType<R: Reason> {
     pub pos: R::Pos,
 }

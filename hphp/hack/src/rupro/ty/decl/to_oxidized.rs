@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{folded, ty::*};
+use super::{folded, shallow, ty::*};
 use crate::reason::Reason;
 use oxidized_by_ref::ast::Id;
 use pos::{Pos, ToOxidized};
@@ -509,5 +509,45 @@ impl<'a, P: ToOxidized<'a, Output = &'a obr::pos::Pos<'a>>> ToOxidized<'a>
                 ),
             },
         }
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for shallow::ClassDecl<R> {
+    type Output = &'a obr::shallow_decl_defs::ClassDecl<'a>;
+
+    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
+        todo!()
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for shallow::FunDecl<R> {
+    type Output = &'a obr::shallow_decl_defs::FunDecl<'a>;
+
+    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
+        todo!()
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for shallow::TypedefDecl<R> {
+    type Output = &'a obr::shallow_decl_defs::TypedefDecl<'a>;
+
+    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
+        todo!()
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for shallow::ConstDecl<R> {
+    type Output = &'a obr::shallow_decl_defs::ConstDecl<'a>;
+
+    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
+        todo!()
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for shallow::ModuleDecl<R> {
+    type Output = &'a obr::shallow_decl_defs::ModuleDecl<'a>;
+
+    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
+        todo!()
     }
 }

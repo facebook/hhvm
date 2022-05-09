@@ -12,18 +12,9 @@ use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use oxidized_by_ref::{
     decl_parser_options::DeclParserOptions,
-    direct_decl_parser::{Decl, Decls, ParsedFile},
-    file_info,
+    direct_decl_parser::{Decls, ParsedFile, ParsedFileWithHashes},
 };
 use parser_core_types::indexed_source_text::IndexedSourceText;
-
-// NB: Must keep in sync with OCaml type `Direct_decl_parser.parsed_file_with_hashes`
-#[derive(ocamlrep_derive::ToOcamlRep)]
-struct ParsedFileWithHashes<'a> {
-    pub mode: Option<file_info::Mode>,
-    pub hash: Int64,
-    pub decls: Vec<(&'a str, Decl<'a>, Int64)>,
-}
 
 ocaml_ffi_with_arena! {
     fn hh_parse_decls_ffi<'a>(
@@ -51,9 +42,7 @@ ocaml_ffi_with_arena! {
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
-        let parsed_file =
-            direct_decl_parser::parse_decls(opts, filename.to_oxidized(), text, arena);
-        hash_decls(parsed_file)
+        direct_decl_parser::parse_decls(opts, filename.to_oxidized(), text, arena).into()
     }
 
     fn decls_hash<'a>(arena: &'a Bump, decls: Decls<'a>) -> Int64 {
@@ -76,24 +65,9 @@ unsafe extern "C" fn hh_parse_ast_and_decls_ffi(env: usize, source_text: usize) 
 
         let arena = &Bump::new();
         let (ast_result, decls) = ast_and_decl_parser::from_text(&env, &indexed_source_text, arena);
-        let decls = hash_decls(decls);
+        let decls = ParsedFileWithHashes::from(decls);
         // SAFETY: Requires no concurrent interaction with the OCaml runtime
         unsafe { to_ocaml(&(ast_result, decls)) }
     }
     ocamlrep_ocamlpool::catch_unwind(|| inner(env, source_text))
-}
-
-fn hash_decls<'a>(parsed_file: ParsedFile<'a>) -> ParsedFileWithHashes<'a> {
-    let file_decls_hash = Int64(hh_hash::position_insensitive_hash(&parsed_file.decls) as i64);
-    let decls = Vec::from_iter(
-        parsed_file
-            .decls
-            .into_iter()
-            .map(|(name, decl)| (name, decl, Int64(hh_hash::hash(&decl) as i64))),
-    );
-    ParsedFileWithHashes {
-        mode: parsed_file.mode,
-        hash: file_decls_hash,
-        decls,
-    }
 }

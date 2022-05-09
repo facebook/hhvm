@@ -12,7 +12,9 @@ use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
 use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::{ocaml_ffi, ocaml_ffi_with_arena, Bump};
 use oxidized::{file_info, naming_types};
-use oxidized_by_ref::{decl_defs, parser_options::ParserOptions, shallow_decl_defs};
+use oxidized_by_ref::{
+    decl_defs, direct_decl_parser, parser_options::ParserOptions, shallow_decl_defs,
+};
 use pos::{RelativePath, RelativePathCtx, ToOxidized};
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -61,6 +63,15 @@ ocaml_ffi_with_arena! {
 // Decl_provider ////////////////////////////////////////////////////////////
 
 ocaml_ffi_with_arena! {
+    fn hh_rust_provider_backend_direct_decl_parse_and_cache<'a>(
+        _arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        _path: RelativePath,
+    ) -> Option<direct_decl_parser::ParsedFileWithHashes<'a>> {
+        let _backend = unsafe { get_backend(backend) };
+        todo!()
+    }
+
     fn hh_rust_provider_backend_get_fun<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,

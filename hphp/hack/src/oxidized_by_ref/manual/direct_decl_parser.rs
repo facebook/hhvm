@@ -9,6 +9,7 @@ use arena_collections::List;
 use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
 use ocamlrep::slab::OwnedSlab;
+use ocamlrep_caml_builtins::Int64;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 use oxidized::file_info::NameType;
 
@@ -41,6 +42,31 @@ pub struct ParsedFile<'a> {
     /// are detected in a second pass over the CST, and this field does not
     /// indicate whether errors would be detected in that second pass.
     pub has_first_pass_parse_errors: bool,
+}
+
+// NB: Must keep in sync with OCaml type `Direct_decl_parser.parsed_file_with_hashes`
+#[derive(ocamlrep_derive::ToOcamlRep)]
+pub struct ParsedFileWithHashes<'a> {
+    pub mode: Option<file_info::Mode>,
+    pub hash: Int64,
+    pub decls: Vec<(&'a str, Decl<'a>, Int64)>,
+}
+
+impl<'a> From<ParsedFile<'a>> for ParsedFileWithHashes<'a> {
+    fn from(parsed_file: ParsedFile<'a>) -> ParsedFileWithHashes<'a> {
+        let file_decls_hash = Int64(hh_hash::position_insensitive_hash(&parsed_file.decls) as i64);
+        let decls = Vec::from_iter(
+            parsed_file
+                .decls
+                .into_iter()
+                .map(|(name, decl)| (name, decl, Int64(hh_hash::hash(&decl) as i64))),
+        );
+        ParsedFileWithHashes {
+            mode: parsed_file.mode,
+            hash: file_decls_hash,
+            decls,
+        }
+    }
 }
 
 // NB: Must keep in sync with OCaml type Direct_decl_parser.decls

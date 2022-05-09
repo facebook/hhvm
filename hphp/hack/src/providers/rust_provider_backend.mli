@@ -11,6 +11,9 @@ type t
 val make : ParserOptions.t -> t
 
 module Decl : sig
+  val direct_decl_parse_and_cache :
+    t -> Relative_path.t -> Direct_decl_parser.parsed_file_with_hashes option
+
   val get_fun : t -> string -> Shallow_decl_defs.fun_decl option
 
   val get_shallow_class : t -> string -> Shallow_decl_defs.class_decl option

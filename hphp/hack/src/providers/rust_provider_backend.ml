@@ -22,6 +22,10 @@ let make popt =
     popt
 
 module Decl = struct
+  external direct_decl_parse_and_cache :
+    t -> Relative_path.t -> Direct_decl_parser.parsed_file_with_hashes option
+    = "hh_rust_provider_backend_direct_decl_parse_and_cache"
+
   external get_fun : t -> string -> Shallow_decl_defs.fun_decl option
     = "hh_rust_provider_backend_get_fun"
 

@@ -15,8 +15,10 @@ bitflags = "1.3"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 eq_modulo_pos = { path = "../utils/eq_modulo_pos" }
+hh_hash = { path = "../utils/hh_hash" }
 no_pos_hash = { path = "../utils/no_pos_hash" }
 ocamlrep = { path = "../ocamlrep" }
+ocamlrep_caml_builtins = { path = "../utils/ocamlrep_caml_builtins" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
 oxidized = { path = "../oxidized" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

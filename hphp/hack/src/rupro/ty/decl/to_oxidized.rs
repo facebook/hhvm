@@ -523,31 +523,85 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ClassDecl<R> {
 impl<'a, R: Reason> ToOxidized<'a> for shallow::FunDecl<R> {
     type Output = &'a obr::shallow_decl_defs::FunDecl<'a>;
 
-    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
-        todo!()
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let Self {
+            deprecated,
+            module,
+            internal,
+            ty,
+            pos,
+            php_std_lib,
+            support_dynamic_type,
+        } = self;
+        arena.alloc(obr::shallow_decl_defs::FunDecl {
+            deprecated: deprecated.as_ref().map(|s| {
+                bumpalo::collections::String::from_utf8_lossy_in(s.as_bytes(), arena)
+                    .into_bump_str()
+            }),
+            internal: *internal,
+            type_: ty.to_oxidized(arena),
+            pos: pos.to_oxidized(arena),
+            php_std_lib: *php_std_lib,
+            support_dynamic_type: *support_dynamic_type,
+            module: module.as_ref().map(|m| {
+                let (pos, id) = m.to_oxidized(arena);
+                oxidized_by_ref::ast_defs::Id(pos, id)
+            }),
+        })
     }
 }
 
 impl<'a, R: Reason> ToOxidized<'a> for shallow::TypedefDecl<R> {
     type Output = &'a obr::shallow_decl_defs::TypedefDecl<'a>;
 
-    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
-        todo!()
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let Self {
+            module,
+            pos,
+            vis,
+            tparams,
+            constraint,
+            ty,
+            is_ctx,
+            attributes,
+            internal,
+        } = self;
+        arena.alloc(obr::shallow_decl_defs::TypedefDecl {
+            module: module.as_ref().map(|m| {
+                let (pos, id) = m.to_oxidized(arena);
+                oxidized_by_ref::ast_defs::Id(pos, id)
+            }),
+            pos: pos.to_oxidized(arena),
+            vis: *vis,
+            tparams: tparams.to_oxidized(arena),
+            constraint: constraint.as_ref().map(|t| t.to_oxidized(arena)),
+            type_: ty.to_oxidized(arena),
+            is_ctx: *is_ctx,
+            attributes: attributes.to_oxidized(arena),
+            internal: *internal,
+        })
     }
 }
 
 impl<'a, R: Reason> ToOxidized<'a> for shallow::ConstDecl<R> {
     type Output = &'a obr::shallow_decl_defs::ConstDecl<'a>;
 
-    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
-        todo!()
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let Self { pos, ty } = self;
+        arena.alloc(obr::shallow_decl_defs::ConstDecl {
+            pos: pos.to_oxidized(arena),
+            type_: ty.to_oxidized(arena),
+        })
     }
 }
 
 impl<'a, R: Reason> ToOxidized<'a> for shallow::ModuleDecl<R> {
     type Output = &'a obr::shallow_decl_defs::ModuleDecl<'a>;
 
-    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
-        todo!()
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let Self { pos } = self;
+        arena.alloc(obr::shallow_decl_defs::ModuleDecl {
+            mdt_pos: pos.to_oxidized(arena),
+        })
     }
 }

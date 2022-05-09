@@ -442,6 +442,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::TypedefDecl<'_>> for shallow::Type
             ty: x.type_.into(),
             is_ctx: x.is_ctx,
             attributes: slice(x.attributes),
+            internal: x.internal,
         }
     }
 }

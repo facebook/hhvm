@@ -60,7 +60,7 @@ module Naming = struct
 
     let remove_batch _ _ _ = failwith "unimplemented"
 
-    let get_canon_name _ _ = failwith "unimplemented"
+    let get_canon_name _ _ _ = failwith "unimplemented"
   end
 
   module Funs = struct
@@ -70,7 +70,7 @@ module Naming = struct
 
     let remove_batch _ _ _ = failwith "unimplemented"
 
-    let get_canon_name _ _ = failwith "unimplemented"
+    let get_canon_name _ _ _ = failwith "unimplemented"
   end
 
   module Consts = struct
@@ -79,8 +79,6 @@ module Naming = struct
     let get_pos _ _ _ = failwith "unimplemented"
 
     let remove_batch _ _ _ = failwith "unimplemented"
-
-    let get_canon_name _ _ = failwith "unimplemented"
   end
 
   module Modules = struct
@@ -89,8 +87,6 @@ module Naming = struct
     let get_pos _ _ _ = failwith "unimplemented"
 
     let remove_batch _ _ _ = failwith "unimplemented"
-
-    let get_canon_name _ _ = failwith "unimplemented"
   end
 
   let get_filenames_by_hash _ _ _ = failwith "unimplemented"

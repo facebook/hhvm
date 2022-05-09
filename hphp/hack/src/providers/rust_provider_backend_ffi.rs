@@ -11,10 +11,11 @@ use hackrs::{
 use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
 use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::{ocaml_ffi, ocaml_ffi_with_arena, Bump};
+use oxidized::{file_info, naming_types};
 use oxidized_by_ref::{decl_defs, parser_options::ParserOptions, shallow_decl_defs};
 use pos::{RelativePath, RelativePathCtx, ToOxidized};
 use std::collections::BTreeSet;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use ty::reason::BReason;
 
@@ -203,5 +204,141 @@ ocaml_ffi! {
         backend: Custom<ProviderBackend>,
     ) {
         backend.file_provider.pop_local_changes()
+    }
+}
+
+// Naming_provider //////////////////////////////////////////////////////////
+
+ocaml_ffi! {
+    fn hh_rust_provider_backend_naming_types_add(
+        _backend: Custom<ProviderBackend>,
+        _name: pos::TypeName,
+        _pos: (file_info::Pos, naming_types::KindOfType),
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_types_get_pos(
+        _backend: Custom<ProviderBackend>,
+        _db_path: Option<PathBuf>,
+        _name: pos::TypeName,
+    ) -> Option<(file_info::Pos, naming_types::KindOfType)> {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_types_remove_batch(
+        _backend: Custom<ProviderBackend>,
+        _db_path: Option<PathBuf>,
+        _names: Vec<pos::TypeName>,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_types_get_canon_name(
+        _backend: Custom<ProviderBackend>,
+        _db_path: Option<PathBuf>,
+        _name: pos::TypeName,
+    ) -> Option<pos::TypeName> {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_funs_add(
+        _backend: Custom<ProviderBackend>,
+        _name: pos::FunName,
+        _pos: file_info::Pos,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_funs_get_pos(
+        _backend: Custom<ProviderBackend>,
+        _db_path: Option<PathBuf>,
+        _name: pos::FunName,
+    ) -> Option<file_info::Pos> {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_funs_remove_batch(
+        _backend: Custom<ProviderBackend>,
+        _db_path: Option<PathBuf>,
+        _names: Vec<pos::FunName>,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_funs_get_canon_name(
+        _backend: Custom<ProviderBackend>,
+        _db_path: Option<PathBuf>,
+        _name: pos::FunName,
+    ) -> Option<pos::FunName> {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_consts_add(
+        _backend: Custom<ProviderBackend>,
+        _name: pos::ConstName,
+        _pos: file_info::Pos,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_consts_get_pos(
+        _backend: Custom<ProviderBackend>,
+        _db_path: Option<PathBuf>,
+        _name: pos::ConstName,
+    ) -> Option<file_info::Pos> {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_consts_remove_batch(
+        _backend: Custom<ProviderBackend>,
+        _db_path: Option<PathBuf>,
+        _names: Vec<pos::ConstName>,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_modules_add(
+        _backend: Custom<ProviderBackend>,
+        _name: pos::ModuleName,
+        _pos: file_info::Pos,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_modules_get_pos(
+        _backend: Custom<ProviderBackend>,
+        _db_path: Option<PathBuf>,
+        _name: pos::ModuleName,
+    ) -> Option<file_info::Pos> {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_modules_remove_batch(
+        _backend: Custom<ProviderBackend>,
+        _db_path: Option<PathBuf>,
+        _names: Vec<pos::ModuleName>,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_get_filenames_by_hash(
+        _backend: Custom<ProviderBackend>,
+        _db_path: Option<PathBuf>,
+        _deps: Custom<deps_rust::DepSet>,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_push_local_changes(
+        _backend: Custom<ProviderBackend>,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_pop_local_changes(
+        _backend: Custom<ProviderBackend>,
+    ) {
+        todo!()
     }
 }

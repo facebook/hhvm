@@ -172,21 +172,18 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  *
  * The lambda parameters are as follows:
  *
- * - GetVal:    Return the SSATmp of the value to test
- * - FuncToStr: Emit code to deal with any func to string conversions.
- * - ClsMethToVec: Emit code to deal with any ClsMeth to array conversions
- * - Fail:      Emit code to deal with the type check failing.
- * - Callable:  Emit code to verify that the given value is callable.
- * - VerifyCls: Emit code to verify that the given value is an instance of the
- *              given Class.
- * - Fallback:  Called when the type check cannot be resolved statically. Either
- *              PUNT or call a runtime helper to do the check.
- *
- * `propCls' should only be non-null for property type-hints, and represents the
- * runtime class of the object the property belongs to.
+ * - GetVal:     Return the SSATmp of the value to test
+ * - GetThisCls: Return the SSATmp of the the class of `this'
+ * - SetVal:     Emit code to update the value with the coerced value.
+ * - Fail:       Emit code to deal with the type check failing.
+ * - Callable:   Emit code to verify that the given value is callable.
+ * - VerifyCls:  Emit code to verify that the given value is an instance of the
+ *               given Class.
+ * - Fallback:   Called when the type check cannot be resolved statically.
+ *               Either PUNT or call a runtime helper to do the check.
  */
 template <typename TGetVal,
-          typename TGetCtx,
+          typename TGetThisCls,
           typename TSetVal,
           typename TFail,
           typename TCallable,
@@ -195,9 +192,8 @@ template <typename TGetVal,
 void verifyTypeImpl(IRGS& env,
                     const TypeConstraint& tc,
                     bool onlyCheckNullability,
-                    SSATmp* propCls,
                     TGetVal getVal,
-                    TGetCtx getCtx,
+                    TGetThisCls getThisCls,
                     TSetVal setVal,
                     TFail fail,
                     TCallable callable,
@@ -207,17 +203,16 @@ void verifyTypeImpl(IRGS& env,
   if (!tc.isCheckable()) return;
   assertx(!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB != 0);
 
-  auto const genFail = [&](SSATmp* val, SSATmp* ctx = nullptr) {
-    if (ctx == nullptr) {
-      ctx = tc.isThis() ? propCls ? propCls : getCtx()
-                        : cns(env, nullptr);
+  auto const genFail = [&](SSATmp* val, SSATmp* thisCls = nullptr) {
+    if (thisCls == nullptr) {
+      thisCls = tc.isThis() ? getThisCls() : cns(env, nullptr);
     }
 
     auto const failHard = RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
       && (!tc.isThis() || !tc.couldSeeMockObject())
       && (!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
-    return fail(val, ctx, failHard);
+    return fail(val, thisCls, failHard);
   };
 
   auto const checkOneType = [&](SSATmp* val, AnnotAction result) {
@@ -261,16 +256,16 @@ void verifyTypeImpl(IRGS& env,
     // At this point, we know that val is a TObj.
     if (tc.isThis()) {
       // For this type checks, the class needs to be an exact match.
-      auto const ctxCls = propCls ? propCls : getCtx();
+      auto const thisCls = getThisCls();
       auto const objClass = gen(env, LdObjClass, val);
       ifThen(
         env,
         [&] (Block* taken) {
-          gen(env, JmpZero, taken, gen(env, EqCls, ctxCls, objClass));
+          gen(env, JmpZero, taken, gen(env, EqCls, thisCls, objClass));
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          genFail(val, ctxCls);
+          genFail(val, thisCls);
         }
       );
       return;
@@ -1103,11 +1098,10 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       env,
       tc,
       onlyCheckNullability,
-      nullptr,
       [&] { // Get value to test
         return topC(env, BCSPRelOffset { ind });
       },
-      [&] { // Get the context class
+      [&] { // Get the class representing `this' type
         return ldCtxCls(env);
       },
       [&] (SSATmp* updated) { // Set the potentially coerced value
@@ -1115,7 +1109,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), updated);
         env.irb->exceptionStackBoundary();
       },
-      [&] (SSATmp* val, SSATmp* ctx, bool hard) { // Check failure
+      [&] (SSATmp* val, SSATmp* thisCls, bool hard) { // Check failure
         updateMarker(env);
         env.irb->exceptionStackBoundary();
         gen(
@@ -1123,7 +1117,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
           hard ? VerifyRetFailHard : VerifyRetFail,
           FuncParamWithTCData { func, id, &tc },
           val,
-          ctx
+          thisCls
         );
       },
       [&] (SSATmp* val) { // Callable check
@@ -1180,23 +1174,22 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       env,
       tc,
       false,
-      nullptr,
       [&] { // Get value to test
         return ldLoc(env, id, DataTypeSpecific);
       },
-      [&] { // Get the context class
+      [&] { // Get the class representing `this' type
         return ldCtxCls(env);
       },
       [&] (SSATmp* updated) { // Set the potentially coerced value
         stLocRaw(env, id, fp(env), updated);
       },
-      [&] (SSATmp* val, SSATmp* ctx, bool hard) { // Check failure
+      [&] (SSATmp* val, SSATmp* thisCls, bool hard) { // Check failure
         gen(
           env,
           hard ? VerifyParamFailHard : VerifyParamFail,
           FuncParamWithTCData { func, id, &tc },
           val,
-          ctx
+          thisCls
         );
       },
       [&] (SSATmp* val) { // Callable check
@@ -1283,13 +1276,12 @@ void verifyPropType(IRGS& env,
       env,
       *tc,
       false,
-      cls,
       [&] { // Get value to check
         env.irb->constrainValue(val, DataTypeSpecific);
         return val;
       },
-      [&] { // Get the context class
-        return ldCtxCls(env);
+      [&] { // Get the class representing `this' type
+        return cls;
       },
       [&] (SSATmp* updated) { // Set the potentially coerced value
         if (coerce) *coerce = updated;
@@ -1348,12 +1340,13 @@ void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
     env,
     c.tc,
     false,
-    c.propDecl ? cns(env, c.propDecl) : nullptr,
     [&] { // Get value to test
       return val;
     },
-    [&] { // Get the context class
-      return c.ctx ? cns(env, c.ctx) : cns(env, nullptr);
+    [&] { // Get the class representing `this' type
+      if (c.propDecl) return cns(env, c.propDecl);
+      if (c.ctx) return cns(env, c.ctx);
+      return cns(env, nullptr);
     },
     [&] (SSATmp*) { // Set the potentially coerced value
     },

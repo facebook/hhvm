@@ -24,7 +24,7 @@ macro_rules! impl_CANON_BY_ALIAS {
 lazy_static! {
     /// Each config (JSON) key is implicitly: prefix + lower-cased flag name
     /// the exceptions are overridden here for config list (-v KEY=VAL).
-    pub static ref CANON_BY_ALIAS: HashMap<&'static str, &'static str> =
+    pub(crate) static ref CANON_BY_ALIAS: HashMap<&'static str, &'static str> =
         impl_CANON_BY_ALIAS!(
             // group 1: obtained by removing underscores from JSON field names
             "hack.compiler.constantfolding" => "hack.compiler.constant_folding",
@@ -51,14 +51,7 @@ lazy_static! {
         // TODO(leoo) use const-concat & unsnakecase macro via proc_macro_hack
 }
 
-pub type ParseFn = fn(&str) -> Option<Json>;
-
-/// Given a config key as in JSON (not CLI) returns a to-JSON parse function. E.g.,
-/// for "hhvm.hack_arr_compat_notices" (not "eval.hackarrcompatnotices"), it
-/// returns a boolean parser.
-pub fn to_json(key: &str) -> ParseFn {
-    *BY_JSON_KEY.get(key).unwrap_or(&(parse_str as ParseFn))
-}
+pub(crate) type ParseFn = fn(&str) -> Option<Json>;
 
 lazy_static! {
     static ref BY_JSON_KEY: HashMap<&'static str, ParseFn> = {
@@ -66,10 +59,6 @@ lazy_static! {
         m.insert("hhvm.include_roots", parse_csv_keyval_strs as ParseFn);
         m
     };
-}
-
-fn parse_str(s: &str) -> Option<Json> {
-    Some(json!(s))
 }
 
 fn parse_csv_keyval_strs(s: &str) -> Option<Json> {

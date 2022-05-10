@@ -516,45 +516,6 @@ thread_local! {
 pub(crate) type Cache = LruCache<Vec<String>, Options, fnv::FnvBuildHasher>;
 
 impl Options {
-    pub fn to_json(&self) -> String {
-        serde_json::to_string_pretty(&self).expect("failed to parse JSON")
-    }
-
-    pub fn from_json(s: &str) -> Result<Self, String> {
-        let opts: serde_json::Result<Self> = serde_json::from_str(s);
-        opts.map_err(|e| format!("failed to load config JSON:\n{}", e))
-    }
-
-    fn from_cli_args(args: &[impl AsRef<str>]) -> Result<Json, String> {
-        let mut json = json!({});
-        for arg in args {
-            let arg = arg.as_ref();
-            match arg.find('=') {
-                Some(pos) => {
-                    let (key, val) = arg.split_at(pos);
-                    let val = &val[1..]; // strip '='
-                    let key = key.to_ascii_lowercase();
-                    let key = key.as_ref();
-                    let key: &str = options_cli::CANON_BY_ALIAS.get(key).unwrap_or(&key);
-                    if let Some(val) = options_cli::to_json(key)(val) {
-                        json.as_object_mut().map(|m| {
-                            m.insert(
-                                key.to_owned(),
-                                json!({
-                                    "global_value": val,
-                                }),
-                            )
-                        });
-                    } else {
-                        return Err(format!("Invalid format for CLI arg key: {}", key));
-                    }
-                }
-                None => return Err(format!("Missing '=' key-value separator in: {}", arg)),
-            }
-        }
-        Ok(json)
-    }
-
     /// Merges src JSON into dst JSON, recursively adding or overwriting existing entries.
     /// This method cleverly avoids the need to represent each option as Option<Type>,
     /// since only the ones that are specified by JSON will be actually overridden.
@@ -578,18 +539,14 @@ impl Options {
             if let Some(o) = cache.get_mut(&key) {
                 Ok(o.clone())
             } else {
-                let o = Options::from_configs_::<_, &str>(&key, &[])?;
+                let o = Options::from_configs_(&key)?;
                 cache.put(key, o.clone());
                 Ok(o)
             }
         })
     }
 
-    fn from_configs_<S1, S2>(jsons: &[S1], cli_args: &[S2]) -> Result<Self, String>
-    where
-        S1: AsRef<str>,
-        S2: AsRef<str>,
-    {
+    fn from_configs_<S: AsRef<str>>(jsons: &[S]) -> Result<Self, String> {
         let mut merged = json!({});
         for json in jsons {
             let json: &str = json.as_ref();
@@ -601,8 +558,6 @@ impl Options {
                 &serde_json::from_str(json).map_err(|e| e.to_string())?,
             );
         }
-        let overrides = Self::from_cli_args(cli_args)?;
-        Self::merge(&mut merged, &overrides);
         let opts: serde_json::Result<Self> = serde_json::value::from_value(merged);
         opts.map_err(|e| e.to_string())
     }
@@ -1021,8 +976,6 @@ mod tests {
         );
     }
 
-    const EMPTY_STRS: [&str; 0] = [];
-
     #[test]
     fn test_options_de_multiple_jsons() {
         let jsons: [String; 2] = [
@@ -1041,7 +994,7 @@ mod tests {
             })
             .to_string(),
         ];
-        let act = Options::from_configs_(&jsons, &EMPTY_STRS).unwrap();
+        let act = Options::from_configs_(&jsons).unwrap();
         assert!(
             act.hhvm
                 .hack_lang
@@ -1055,46 +1008,6 @@ mod tests {
                 .contains(LangFlags::ENABLE_ENUM_CLASSES)
         );
         assert!(act.hhvm.flags.contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT));
-    }
-
-    #[test]
-    fn test_hhvm_flags_cli_de_missing_equals() {
-        let args = ["eval.jitenablerenamefunction"];
-        let exp = Options::from_cli_args(args.as_ref());
-        assert!(exp.is_err());
-        let err = exp.unwrap_err();
-        assert!(err.starts_with("Missing '='"));
-        assert!(err.ends_with("function"));
-    }
-
-    #[test]
-    fn test_hhvm_flags_cli_de_to_json() {
-        let args = [
-            "eval.logexterncompilerperf=true",
-            "eval.jitenablerenamefunction=1",
-        ];
-        let act = Options::from_cli_args(&args);
-        assert_eq!(
-            act,
-            Ok(json!({
-                "hhvm.jit_enable_rename_function": {
-                    "global_value": "1",
-                },
-                "hhvm.log_extern_compiler_perf": {
-                    "global_value": "true",
-                },
-            })),
-        );
-    }
-
-    #[test]
-    fn test_options_de_from_cli_comma_separated_key_value() {
-        let mut exp_include_roots = BTreeMap::<BString, BString>::new();
-        exp_include_roots.insert("foo".into(), "bar".into());
-        exp_include_roots.insert("bar".into(), "baz".into());
-        const CLI_ARG: &str = "hhvm.include_roots=foo:bar,bar:baz";
-        let act = Options::from_configs_(&EMPTY_STRS, &[CLI_ARG]).unwrap();
-        assert_eq!(act.hhvm.include_roots.global_value, exp_include_roots,);
     }
 
     #[test]
@@ -1169,7 +1082,6 @@ mod tests {
             }
           }"#,
             ],
-            &EMPTY_STRS,
         );
         assert_eq!(res.err(), None);
     }

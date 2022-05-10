@@ -13,7 +13,7 @@ use anyhow::{anyhow, Result};
 use bitflags::bitflags;
 use bytecode_printer::{print_unit, Context};
 use decl_provider::DeclProvider;
-use emit_unit::{emit_unit, FromAstFlags};
+use emit_unit::emit_unit;
 use env::emitter::Emitter;
 use error::{Error, ErrorKind};
 use hhbc::{hackc_unit::HackCUnit, FatalOp};
@@ -472,9 +472,8 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     Ok(())
 }
 
-fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
+fn rewrite_and_emit<'p, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<S>,
     namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
     profile: &'p mut Profile,
@@ -487,7 +486,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
     let unit = match result {
         Ok(()) => {
             // Rewrite ok, now emit.
-            emit_unit_from_ast(emitter, env, namespace_env, ast)
+            emit_unit_from_ast(emitter, namespace_env, ast)
         }
         Err(e) => match e.into_kind() {
             ErrorKind::IncludeTimeFatalException(op, pos, msg) => {
@@ -537,24 +536,12 @@ pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
     print_result.map_err(|e| anyhow!("{}", e))
 }
 
-fn emit_unit_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
+fn emit_unit_from_ast<'p, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<S>,
     namespace: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
 ) -> Result<HackCUnit<'arena>, Error> {
-    let mut flags = FromAstFlags::empty();
-    if env.flags.contains(EnvFlags::IS_EVALED) {
-        flags |= FromAstFlags::IS_EVALED;
-    }
-    if env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL) {
-        flags |= FromAstFlags::FOR_DEBUGGER_EVAL;
-    }
-    if env.flags.contains(EnvFlags::IS_SYSTEMLIB) {
-        flags |= FromAstFlags::IS_SYSTEMLIB;
-    }
-
-    emit_unit(emitter, flags, namespace, ast)
+    emit_unit(emitter, namespace, ast)
 }
 
 fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
@@ -592,7 +579,7 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
         Ok(mut ast) => {
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
             time(move || {
-                let u = rewrite_and_emit(emitter, env, namespace_env, &mut ast, profile);
+                let u = rewrite_and_emit(emitter, namespace_env, &mut ast, profile);
                 (u, profile)
             })
         }

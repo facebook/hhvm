@@ -1281,7 +1281,6 @@ dependencies = [
 name = "emit_unit"
 version = "0.0.0"
 dependencies = [
- "bitflags",
  "bumpalo",
  "emit_adata",
  "emit_class",

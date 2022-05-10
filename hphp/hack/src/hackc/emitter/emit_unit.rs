@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use bitflags::bitflags;
 use emit_class::emit_classes_from_program;
 use emit_constant::emit_constants_from_program;
 use emit_file_attributes::emit_file_attributes_from_program;
@@ -35,11 +34,10 @@ pub fn emit_fatal_unit<'arena>(
 /// This is the entry point from hh_single_compile
 pub fn emit_unit<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
     tast: &'a ast::Program,
 ) -> Result<HackCUnit<'arena>> {
-    let result = emit_unit_(emitter, flags, namespace, tast);
+    let result = emit_unit_(emitter, namespace, tast);
     match result {
         Err(e) => match e.into_kind() {
             ErrorKind::IncludeTimeFatalException(op, pos, msg) => {
@@ -53,7 +51,6 @@ pub fn emit_unit<'a, 'arena, 'decl>(
 
 fn emit_unit_<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    _flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
     prog: &'a ast::Program,
 ) -> Result<HackCUnit<'arena>> {
@@ -85,12 +82,4 @@ fn emit_unit_<'a, 'arena, 'decl>(
         symbol_refs,
         fatal,
     })
-}
-
-bitflags! {
-    pub struct FromAstFlags: u8 {
-        const IS_EVALED =         0b0001;
-        const FOR_DEBUGGER_EVAL = 0b0010;
-        const IS_SYSTEMLIB =      0b0100;
-    }
 }

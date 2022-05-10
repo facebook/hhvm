@@ -14,7 +14,7 @@ use rpds::HashTrieSet;
 use std::cell::RefCell;
 use std::collections::{HashSet, VecDeque};
 use std::ffi::OsString;
-use std::io::Write;
+use std::path::Path;
 use typing_deps_hash::{hash1, hash2, DepType};
 
 fn tag_to_dep_type(tag: u8) -> DepType {
@@ -285,31 +285,13 @@ ocaml_ffi! {
         }
     }
 
-    fn hh_save_custom_dep_graph_save_delta(source: OsString, dest: OsString) -> usize {
-        let f = std::fs::OpenOptions::new()
-            .read(true)
-            .open(&source).unwrap();
-        let mut r = std::io::BufReader::new(f);
+    fn hh_save_custom_dep_graph_save_delta(source: OsString, dest_dir: OsString) -> usize {
+        let dest_file = Path::new(&dest_dir)
+            .join(&source.to_str().unwrap().replace('/', "-"));
+        std::fs::rename(&source, dest_file).unwrap();
 
-        let f = std::fs::OpenOptions::new()
-            .write(true)
-            .create(true)
-            .append(true)
-            .open(&dest).unwrap();
-        let mut w = std::io::BufWriter::new(f);
-
-        let mut delta = DepGraphDelta::new();
-        let num_edges = delta.read_from(&mut r, |_, _| true).unwrap();
-
-        for (dependency, dependent) in delta.iter() {
-            // To be kept in sync with Typing_deps.ml::filter_discovered_deps_batch
-            let dependent: u64 = dependent.into();
-            let dependency: u64 = dependency.into();
-            w.write_all(&dependent.to_be_bytes()).unwrap();
-            w.write_all(&dependency.to_be_bytes()).unwrap();
-        }
-
-        num_edges
+        // Technically we loaded 0 deps into the hh_server dep graph
+        0
     }
 }
 

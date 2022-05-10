@@ -20,12 +20,15 @@ use deps_rust::DepGraphDelta;
 use ocamlrep_ocamlpool::ocaml_ffi;
 
 struct EdgesDir {
-    handles: Vec<BufReader<fs::File>>,
+    // For local typechecks, we output edges in a list format
+    list_handles: Vec<BufReader<fs::File>>,
+    // For remote typechecks, we output edges in a serialized rust structure format
+    struct_handles: Vec<OsString>,
 }
 
 impl EdgesDir {
     fn open<P: AsRef<Path>>(dir: P) -> io::Result<EdgesDir> {
-        let handles: io::Result<Vec<_>> = fs::read_dir(dir)?
+        let list_handles: io::Result<Vec<_>> = fs::read_dir(&dir)?
             .map(|res| {
                 res.and_then(|entry| {
                     let path = entry.path();
@@ -44,32 +47,67 @@ impl EdgesDir {
             })
             .collect();
 
-        let handles = handles?;
-        Ok(EdgesDir { handles })
+        let struct_handles: io::Result<Vec<_>> = fs::read_dir(&dir)?
+            .map(|res| {
+                res.map(|entry| {
+                    let path = entry.path();
+                    if path.extension().and_then(|x| x.to_str()) == Some("hhdg_delta") {
+                        Some(OsString::from(&entry.path()))
+                    } else {
+                        None
+                    }
+                })
+            })
+            .filter_map(|x| match x {
+                Err(x) => Some(Err(x)),
+                Ok(Some(x)) => Some(Ok(x)),
+                Ok(None) => None,
+            })
+            .collect();
+
+        Ok(EdgesDir {
+            list_handles: list_handles?,
+            struct_handles: struct_handles?,
+        })
     }
 
-    fn count(&self) -> usize {
-        self.handles.len()
+    fn list_handle_count(&self) -> usize {
+        self.list_handles.len()
+    }
+
+    fn struct_handle_count(&self) -> usize {
+        self.struct_handles.len()
     }
 
     fn read_all_edges(&mut self) -> io::Result<Edges> {
         let acc = Edges::new();
-        let num_handles = self.count();
-        let result: io::Result<Vec<()>> = self
-            .handles
+        let num_list_handles = self.list_handle_count();
+        let num_struct_handles = self.struct_handle_count();
+        let list_result: io::Result<Vec<()>> = self
+            .list_handles
             .par_iter_mut()
             .enumerate()
             .map(|(i, handle)| {
-                info!("Reading in file {}/{}", i + 1, num_handles);
-                Self::read_all_edges_for(handle, &acc)?;
+                info!("Reading in list file {}/{}", i + 1, num_list_handles);
+                Self::read_all_list_edges_for(handle, &acc)?;
                 Ok(())
             })
             .collect();
-        let _ = result?;
+        let struct_result: io::Result<Vec<()>> = self
+            .struct_handles
+            .par_iter()
+            .enumerate()
+            .map(|(i, handle)| {
+                info!("Reading in struct file {}/{}", i + 1, num_struct_handles);
+                Self::read_all_struct_edges_for(handle, &acc)?;
+                Ok(())
+            })
+            .collect();
+        let _ = (list_result?, struct_result?);
         Ok(acc)
     }
 
-    fn read_all_edges_for<R: Read>(reader: &mut R, acc: &Edges) -> io::Result<()> {
+    fn read_all_list_edges_for<R: Read>(reader: &mut R, acc: &Edges) -> io::Result<()> {
         let mut bytes: [u8; 8] = [0; 8];
         loop {
             if let Err(err) = reader.read_exact(&mut bytes) {
@@ -85,6 +123,29 @@ impl EdgesDir {
 
             acc.register(dependent, dependency);
         }
+    }
+
+    fn read_all_struct_edges_for(source: &OsString, acc: &Edges) -> io::Result<()> {
+        let f = std::fs::OpenOptions::new()
+            .read(true)
+            .open(&source)
+            .unwrap();
+
+        let mut r = std::io::BufReader::new(f);
+
+        let mut delta = DepGraphDelta::new();
+        delta.read_from(&mut r, |_, _| true).unwrap();
+
+        for (&dependency, dependents) in delta.0.iter() {
+            for &dependent in dependents.iter() {
+                // To be kept in sync with Typing_deps.ml::filter_discovered_deps_batch
+                let dependent: u64 = dependent.into();
+                let dependency: u64 = dependency.into();
+                acc.register(dependent, dependency);
+            }
+        }
+
+        Ok(())
     }
 }
 
@@ -302,7 +363,14 @@ fn main(
             info!("Opening binary files in {:?}", new_edges_dir);
             let mut new_edges_dir = EdgesDir::open(new_edges_dir)?;
 
-            info!("Discovered {} files with edges", new_edges_dir.count());
+            info!(
+                "Discovered {} list files with edges",
+                new_edges_dir.list_handle_count()
+            );
+            info!(
+                "Discovered {} struct files with edges",
+                new_edges_dir.struct_handle_count()
+            );
             let all_edges = new_edges_dir.read_all_edges()?;
             info!(
                 "All binary files loaded ({} unique edges)",

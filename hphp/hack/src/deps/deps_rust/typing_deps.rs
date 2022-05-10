@@ -199,7 +199,7 @@ impl UnsafeDepGraph {
 ///
 /// The second field is used to keep track of the number of edges.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DepGraphDelta(HashMap<Dep, HashSet<Dep>>, usize);
+pub struct DepGraphDelta(pub HashMap<Dep, HashSet<Dep>>, pub usize);
 
 impl DepGraphDelta {
     pub fn new() -> Self {

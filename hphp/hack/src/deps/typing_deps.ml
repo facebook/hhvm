@@ -522,6 +522,11 @@ module SaveCustomGraph = struct
       destination_file_handle_ref := Some handle;
       handle
 
+  let destination_dir mode =
+    match mode with
+    | SaveToDiskMode { new_edges_dir; _ } -> new_edges_dir
+    | _ -> failwith "programming error: wrong mode"
+
   let filter_discovered_deps_batch ~flush mode =
     let handle = destination_file_handle mode in
     Hashtbl.iter
@@ -567,7 +572,7 @@ module SaveCustomGraph = struct
     )
 
   let save_delta mode ~source =
-    let dest = destination_filepath mode in
+    let dest = destination_dir mode in
     hh_save_custom_dep_graph_save_delta source dest
 end
 

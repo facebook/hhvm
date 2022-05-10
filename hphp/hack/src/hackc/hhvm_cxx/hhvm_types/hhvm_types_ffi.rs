@@ -74,7 +74,7 @@ pub mod ffi {
     }
 
     #[repr(u16)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash)]
     enum TypeConstraintFlags {
         NoFlags = 0x0,
         Nullable = 0x1,

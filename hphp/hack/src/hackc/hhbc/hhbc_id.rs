@@ -37,12 +37,12 @@ macro_rules! impl_id {
                 self.0.as_bstr()
             }
 
-            pub fn from_raw_string(alloc: &'arena bumpalo::Bump, s: &str) -> $type<'arena> {
-                $type(Str::new_str(alloc, s))
+            pub fn as_bytes(&self) -> &'arena [u8] {
+                self.0.as_bstr().as_bytes()
             }
 
-            pub fn as_bytes(&self) -> &[u8] {
-                self.0.as_bytes()
+            pub fn from_raw_string(alloc: &'arena bumpalo::Bump, s: &str) -> $type<'arena> {
+                $type(Str::new_str(alloc, s))
             }
         }
 

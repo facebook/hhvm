@@ -5,6 +5,7 @@
 
 use bstr::BStr;
 use std::cmp::Ordering;
+use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::slice::from_raw_parts;
 
@@ -156,7 +157,7 @@ impl<U, V, W, X> std::convert::From<(U, V, W, X)> for Quadruple<U, V, W, X> {
 // `from_raw_parts_mut`/`from_raw_parts`. We rely on this in the
 // implementation of traits such as `Eq` and friends.
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 /// A type to substitute for `&'a[T]`.
 // Safety: Must be initialized from an `&[T]`. Use `Slice<'a,
@@ -166,6 +167,20 @@ pub struct Slice<'a, T> {
     len: usize,
     marker: std::marker::PhantomData<&'a ()>,
 }
+
+// Send+Sync Safety: Slice is no more mutable than T
+unsafe impl<'a, T: Sync> Sync for Slice<'a, T> {}
+unsafe impl<'a, T: Send> Send for Slice<'a, T> {}
+
+// This would be so much better with a specialization for Slice<'a, u8> - but we
+// can't do that without min_specialization which is currently unstable.
+impl<'a, T: fmt::Debug> fmt::Debug for Slice<'a, T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Slice")?;
+        f.debug_list().entries(self.as_ref().iter()).finish()
+    }
+}
+
 impl<'a, T: 'a> Default for Slice<'a, T> {
     fn default() -> Self {
         Slice::empty()

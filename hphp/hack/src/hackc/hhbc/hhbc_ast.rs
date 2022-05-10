@@ -152,6 +152,14 @@ impl Local {
     pub fn is_valid(self) -> bool {
         self != Self::INVALID
     }
+
+    pub fn from_usize(idx: usize) -> Local {
+        Local { idx: idx as u32 }
+    }
+
+    pub fn as_usize(&self) -> usize {
+        self.idx as usize
+    }
 }
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]

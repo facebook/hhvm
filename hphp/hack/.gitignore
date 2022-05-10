@@ -1,5 +1,6 @@
 /.cargo_vendor/
 /facebook/cargo/.package-cache
+/facebook/cargo/git
 /facebook/cargo/registry/
 bin/
 src/inotify-1.0/

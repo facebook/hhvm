@@ -3,11 +3,19 @@
 namespace HH {
 
 <<__Sealed(KeyedContainer::class)>>
-interface Container extends Traversable {
+interface Container<+Tv> extends Traversable<Tv> {
 }
 
-<<__Sealed(\ConstVector::class, \ConstMap::class, \ConstSet::class, dict::class, keyset::class, vec::class)>>
-interface KeyedContainer extends Container, KeyedTraversable {
+<<__Sealed(
+  /* HH_FIXME[2049] */
+  \ConstVector::class,
+  /* HH_FIXME[2049] */
+  \ConstMap::class,
+  /* HH_FIXME[2049] */
+  \ConstSet::class,
+  AnyArray::class,
+)>>
+interface KeyedContainer<+Tk as arraykey, +Tv> extends Container<Tv>, KeyedTraversable<Tk, Tv> {
 }
 
 }

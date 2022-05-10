@@ -82,22 +82,22 @@ void VerifyParamTypeSlow(ObjectData* obj,
 void VerifyParamTypeCallable(TypedValue value,
                              const Func* func,
                              int32_t paramId);
-TypedValue VerifyParamTypeFail(TypedValue value,
-                               const Class* ctx,
-                               const Func* func,
-                               int paramId,
-                               const TypeConstraint* tc);
+void VerifyParamTypeFail(TypedValue value,
+                         const Class* ctx,
+                         const Func* func,
+                         int paramId,
+                         const TypeConstraint* tc);
 void VerifyRetTypeSlow(ObjectData* obj,
                        const Class* constraint,
                        const Func* func,
                        int32_t retId,
                        const TypeConstraint* expected);
 void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId);
-TypedValue VerifyRetTypeFail(TypedValue value,
-                             const Class* ctx,
-                             const Func* func,
-                             int32_t retId,
-                             const TypeConstraint* tc);
+void VerifyRetTypeFail(TypedValue value,
+                       const Class* ctx,
+                       const Func* func,
+                       int32_t retId,
+                       const TypeConstraint* tc);
 
 void VerifyReifiedLocalTypeImpl(TypedValue value,
                                 ArrayData* ts,

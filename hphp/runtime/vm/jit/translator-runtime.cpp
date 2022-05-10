@@ -231,12 +231,13 @@ void VerifyParamTypeCallable(TypedValue value, const Func* func,
 }
 
 
-TypedValue VerifyParamTypeFail(TypedValue value, const Class* ctx,
-                               const Func* func, int32_t paramId,
-                               const TypeConstraint* tc) {
+void VerifyParamTypeFail(TypedValue value, const Class* ctx,
+                         const Func* func, int32_t paramId,
+                         const TypeConstraint* tc) {
+  DEBUG_ONLY auto const origType = value.type();
   assertx(!tc->check(&value, ctx));
   tc->verifyParamFail(&value, ctx, func, paramId);
-  return value;
+  assertx(value.type() == origType);
 }
 
 void VerifyRetTypeSlow(ObjectData* obj,
@@ -261,9 +262,10 @@ void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId) {
   }
 }
 
-TypedValue VerifyRetTypeFail(TypedValue value, const Class* ctx,
-                             const Func* func, int32_t retId,
-                             const TypeConstraint* tc) {
+void VerifyRetTypeFail(TypedValue value, const Class* ctx,
+                       const Func* func, int32_t retId,
+                       const TypeConstraint* tc) {
+  DEBUG_ONLY auto const origType = value.type();
   if (retId == TypeConstraint::ReturnId) {
     assertx(!tc->check(&value, ctx));
     tc->verifyReturnFail(&value, ctx, func);
@@ -271,7 +273,7 @@ TypedValue VerifyRetTypeFail(TypedValue value, const Class* ctx,
     assertx(!tc->check(&value, ctx));
     tc->verifyOutParamFail(&value, ctx, func, retId);
   }
-  return value;
+  assertx(value.type() == origType);
 }
 
 void VerifyReifiedLocalTypeImpl(TypedValue value, ArrayData* ts,

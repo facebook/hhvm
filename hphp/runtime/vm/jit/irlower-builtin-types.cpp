@@ -329,7 +329,7 @@ void cgVerifyRetFail(IRLS& env, const IRInstruction* inst) {
     vmain(env),
     env,
     CallSpec::direct(VerifyRetTypeFail),
-    inst->numDsts() == 0 ? kVoidDest : callDestTV(env, inst),
+    kVoidDest,
     SyncOptions::Sync,
     argGroup(env, inst)
       .typedValue(0)
@@ -350,7 +350,7 @@ void cgVerifyParamFail(IRLS& env, const IRInstruction* inst) {
     vmain(env),
     env,
     CallSpec::direct(VerifyParamTypeFail),
-    inst->numDsts() == 0 ? kVoidDest : callDestTV(env, inst),
+    kVoidDest,
     SyncOptions::Sync,
     argGroup(env, inst)
       .typedValue(0)

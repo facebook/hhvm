@@ -2006,12 +2006,12 @@ To string conversions:
   instruction will raise a recoverable fatal error describing the type
   mismatch.
 
-| VerifyParamFail<func,param,tc>, DVerifyParamFail, S(Cell) S(Cls|Nullptr), NF
+| VerifyParamFail<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), NF
 
   Assumes that parameter specified in extra-data in the current function
-  has failed a its type check. Depending on the typehint being verified and
-  a number of runtime options, may coerce the parameter to the correct type i
-  or raise a recoverable fatal error describing the type mismatch.
+  has failed its type check and could not be satisfied by coercing the value.
+  Depending on the typehint being verified and a number of runtime options, 
+  may raise a recoverable fatal error describing the type mismatch.
 
 | VerifyParamFailHard<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), T
 
@@ -2027,7 +2027,7 @@ To string conversions:
 
   Verify a return type hint for a class.
 
-| VerifyRetFail<func,param,tc>, DVerifyParamFail, S(Cell) S(Cls|Nullptr), NF
+| VerifyRetFail<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), NF
 
   Failure to verify a return type hint.
 

@@ -187,8 +187,7 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  */
 template <typename TGetVal,
           typename TGetCtx,
-          typename TClassToStr,
-          typename TLazyClassToStr,
+          typename TSetVal,
           typename TFail,
           typename TCallable,
           typename TVerifyCls,
@@ -199,8 +198,7 @@ void verifyTypeImpl(IRGS& env,
                     SSATmp* propCls,
                     TGetVal getVal,
                     TGetCtx getCtx,
-                    TClassToStr classToStr,
-                    TLazyClassToStr lazyClassToStr,
+                    TSetVal setVal,
                     TFail fail,
                     TCallable callable,
                     TVerifyCls verifyCls,
@@ -236,7 +234,7 @@ void verifyTypeImpl(IRGS& env,
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
         assertx(val->type() <= TCls);
-        if (!classToStr(val)) return genFail(val);
+        setVal(gen(env, LdClsName, val));
         if (result == AnnotAction::WarnClass) {
           gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
         }
@@ -245,7 +243,7 @@ void verifyTypeImpl(IRGS& env,
       case AnnotAction::WarnLazyClass:
       case AnnotAction::ConvertLazyClass:
         assertx(val->type() <= TLazyCls);
-        if (!lazyClassToStr(val)) return genFail(val);
+        setVal(gen(env, LdLazyClsName, val));
         if (result == AnnotAction::WarnLazyClass) {
           gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
         }
@@ -1112,36 +1110,21 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       [&] { // Get the context class
         return ldCtxCls(env);
       },
-      [&] (SSATmp* val) { // class to string conversions
-        auto const str = gen(env, LdClsName, val);
+      [&] (SSATmp* updated) { // Set the potentially coerced value
         auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
-        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
+        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), updated);
         env.irb->exceptionStackBoundary();
-        return true;
-      },
-      [&] (SSATmp* val) { // lazy class to string conversions
-        auto const str = gen(env, LdLazyClsName, val);
-        auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
-        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
-        env.irb->exceptionStackBoundary();
-        return true;
       },
       [&] (SSATmp* val, SSATmp* ctx, bool hard) { // Check failure
         updateMarker(env);
         env.irb->exceptionStackBoundary();
-        auto const updated = gen(
+        gen(
           env,
           hard ? VerifyRetFailHard : VerifyRetFail,
           FuncParamWithTCData { func, id, &tc },
           val,
           ctx
         );
-
-        if (!hard) {
-          auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
-          gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), updated);
-          env.irb->exceptionStackBoundary();
-        }
       },
       [&] (SSATmp* val) { // Callable check
         gen(
@@ -1204,28 +1187,17 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       [&] { // Get the context class
         return ldCtxCls(env);
       },
-      [&] (SSATmp* val) { // class to string conversions
-        auto const str = gen(env, LdClsName, val);
-        stLocRaw(env, id, fp(env), str);
-        return true;
-      },
-      [&] (SSATmp* val) { // lazy class to string conversions
-        auto const str = gen(env, LdLazyClsName, val);
-        stLocRaw(env, id, fp(env), str);
-        return true;
+      [&] (SSATmp* updated) { // Set the potentially coerced value
+        stLocRaw(env, id, fp(env), updated);
       },
       [&] (SSATmp* val, SSATmp* ctx, bool hard) { // Check failure
-        auto const updated = gen(
+        gen(
           env,
           hard ? VerifyParamFailHard : VerifyParamFail,
           FuncParamWithTCData { func, id, &tc },
           val,
           ctx
         );
-
-        if (!hard) {
-          stLocRaw(env, id, fp(env), updated);
-        }
       },
       [&] (SSATmp* val) { // Callable check
         gen(
@@ -1319,17 +1291,8 @@ void verifyPropType(IRGS& env,
       [&] { // Get the context class
         return ldCtxCls(env);
       },
-      [&] (SSATmp* val) {  // class to string automatic conversions
-        if (!coerce) return false;
-        if (RO::EvalCheckPropTypeHints < 3) return false;
-        *coerce = gen(env, LdClsName, val);
-        return true;
-      },
-      [&] (SSATmp* val) {  // lazy class to string automatic conversions
-        if (!coerce) return false;
-        if (RO::EvalCheckPropTypeHints < 3) return false;
-        *coerce = gen(env, LdLazyClsName, val);
-        return true;
+      [&] (SSATmp* updated) { // Set the potentially coerced value
+        if (coerce) *coerce = updated;
       },
       [&] (SSATmp* val, SSATmp*, bool hard) { // Check failure
         auto const failHard =
@@ -1392,11 +1355,7 @@ void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
     [&] { // Get the context class
       return c.ctx ? cns(env, c.ctx) : cns(env, nullptr);
     },
-    [&] (SSATmp*) { // class to string conversions
-      return false;
-    },
-    [&] (SSATmp*) { // lazy class to string conversions
-      return false;
+    [&] (SSATmp*) { // Set the potentially coerced value
     },
     [&] (SSATmp*, SSATmp*, bool) { // Check failure
       genFail();

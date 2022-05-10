@@ -427,7 +427,6 @@ dependencies = [
  "hhbc",
  "hhvm_options",
  "ocamlrep",
- "ocamlrep_derive",
  "options",
  "oxidized",
  "parser_core_types",

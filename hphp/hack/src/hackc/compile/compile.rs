@@ -18,8 +18,7 @@ use env::emitter::Emitter;
 use error::{Error, ErrorKind};
 use hhbc::{hackc_unit::HackCUnit, FatalOp};
 use hhvm_options::HhvmConfig;
-use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::rc::RcOc;
 use options::{Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, RepoFlags};
 use oxidized::{
     ast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
@@ -31,10 +30,8 @@ use parser_core_types::{
 use rewrite_program::rewrite_program;
 use thiserror::Error;
 
-/// Common input needed for compilation.  Extra care is taken
-/// so that everything is easily serializable at the FFI boundary
-/// until the migration from OCaml is fully complete
-#[derive(Debug, FromOcamlRep)]
+/// Common input needed for compilation.
+#[derive(Debug)]
 pub struct Env<S> {
     pub filepath: RelativePath,
     pub config_jsons: Vec<S>,
@@ -55,8 +52,6 @@ pub struct NativeEnv<S> {
 }
 
 bitflags! {
-    // Note: these flags are intentionally packed into bits to overcome
-    // the limitation of to-OCaml FFI functions having at most 5 parameters
     pub struct EnvFlags: u8 {
         const IS_SYSTEMLIB = 1 << 0;
         const IS_EVALED = 1 << 1;
@@ -110,12 +105,6 @@ bitflags! {
         // No longer using bits 18-19.
         const ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 20;
   }
-}
-
-impl FromOcamlRep for EnvFlags {
-    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
-        Ok(EnvFlags::from_bits(value.as_int().unwrap() as u8).unwrap())
-    }
 }
 
 impl HHBCFlags {
@@ -360,11 +349,8 @@ impl<S: AsRef<str>> NativeEnv<S> {
 
 /// Compilation profile. All times are in seconds,
 /// except when they are ignored and should not be reported,
-/// such as in the case hhvm.log_extern_compiler_perf is false
-/// (this avoids the need to read Options from OCaml, as
-/// they can be simply returned as NaNs to signal that
-/// they should _not_ be passed back as JSON to HHVM process)
-#[derive(Debug, Default, Clone, ToOcamlRep)]
+/// such as in the case hhvm.log_extern_compiler_perf is false.
+#[derive(Debug, Default, Clone)]
 pub struct Profile {
     /// Time in seconds spent in parsing and lowering.
     pub parsing_t: f64,
@@ -688,10 +674,6 @@ fn parse_file(
     let aast_env = AastEnv {
         codegen: true,
         fail_open: false,
-        // Ocaml's implementation
-        // let enable_uniform_variable_syntax o = o.option_php7_uvs in
-        // php5_compat_mode:
-        //   (not (Hhbc_options.enable_uniform_variable_syntax hhbc_options))
         php5_compat_mode: !opts.php7_flags.contains(Php7Flags::UVS),
         keep_errors: false,
         is_systemlib,

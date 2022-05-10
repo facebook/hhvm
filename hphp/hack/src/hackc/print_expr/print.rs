@@ -384,7 +384,7 @@ fn print_expr(
                         if !es.is_empty() {
                             w.write_all(b", ")?;
                         }
-                        // TODO: Should probably have ... also but we are not doing that in ocaml
+                        // TODO: Should probably have ... also
                         print_expr(ctx, w, env, e)
                     }
                 }

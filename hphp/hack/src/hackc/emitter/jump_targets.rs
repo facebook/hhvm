@@ -66,8 +66,7 @@ impl JumpTargets {
         None
     }
 
-    /// Return the IterIds of the enclosing iterator loops.
-    /// This corresponds to collect_iterators in OCaml but doesn't allocate/clone.
+    /// Return the IterIds of the enclosing iterator loops without allocating/cloning.
     pub fn iterators(&self) -> impl Iterator<Item = IterId> + '_ {
         self.regions.iter().rev().filter_map(|r| match r {
             Region::Loop(LoopLabels { iterator, .. }) => *iterator,

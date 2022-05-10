@@ -28,17 +28,7 @@ hphp/system/php/spl/exceptions/exceptions.php
 hphp/system/php/spl/interfaces/Countable.php
 hphp/system/php/spl/interfaces/RecursiveIterator.php
 
-hphp/system/php/lang/rx/Traversable.ns.php
-
 hphp/system/php/lang/Container.ns.php
-
-hphp/system/php/lang/rx/IteratorAggregate.ns.php
-hphp/system/php/lang/rx/Iterator.ns.php
-hphp/system/php/lang/rx/KeyedIterator.ns.php
-hphp/system/php/lang/rx/KeyedIterable.ns.php
-hphp/system/php/lang/rx/AsyncIterator.ns.php
-hphp/system/php/lang/rx/AsyncKeyedIterator.ns.php
-hphp/system/php/lang/rx/Exception.php
 
 hphp/system/php/spl/datastructures/SplHeap.php
 

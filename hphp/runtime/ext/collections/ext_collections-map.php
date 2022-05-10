@@ -6,7 +6,7 @@ namespace {
 /** An iterator implementation for iterating over a Map.
  */
 <<__NativeData("MapIterator")>>
-final class MapIterator implements HH\Rx\KeyedIterator {
+final class MapIterator implements HH\KeyedIterator {
 
   public function __construct()[]: void {}
 

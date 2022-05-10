@@ -4,7 +4,7 @@
 namespace {
 
 <<__Sealed(\HH\Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
-interface ConstCollection extends HH\Rx\Countable, IPureStringishObject {
+interface ConstCollection extends Countable, IPureStringishObject  {
   public readonly function isEmpty()[];
   public readonly function count()[];
   public function items()[];
@@ -72,7 +72,7 @@ interface MapAccess extends ConstMapAccess,
 <<__Sealed(ImmVector::class, MutableVector::class, Pair::class)>>
 interface ConstVector extends ConstCollection,
                               ConstIndexAccess,
-                              \HH\Rx\KeyedIterable,
+                              \HH\KeyedIterable,
                               \HH\KeyedContainer {
 }
 
@@ -85,7 +85,7 @@ interface MutableVector extends ConstVector,
 <<__Sealed(ImmMap::class, MutableMap::class)>>
 interface ConstMap extends ConstCollection,
                            ConstMapAccess,
-                           \HH\Rx\KeyedIterable,
+                           \HH\KeyedIterable,
                            \HH\KeyedContainer {
 }
 
@@ -98,7 +98,7 @@ interface MutableMap extends ConstMap,
 <<__Sealed(ImmSet::class, MutableSet::class)>>
 interface ConstSet extends ConstCollection,
                            ConstSetAccess,
-                           \HH\Rx\KeyedIterable,
+                           \HH\KeyedIterable,
                            \HH\KeyedContainer {
 }
 

@@ -3,6 +3,7 @@
 namespace HH {
 
 <<__Sealed(
+  \HH\Container::class,
   \DOMNodeList::class,
   \Imagick::class,
   \HH\Iterable::class,
@@ -11,13 +12,13 @@ namespace HH {
   \HH\KeyedTraversable::class,
   \ResourceBundle::class,
   \SplHeap::class,
-  \HH\Rx\Traversable::class,
   \SimpleXMLElement::class
 )>>
 interface Traversable {
 }
 
 <<__Sealed(
+  \HH\KeyedContainer::class,
   \ArrayIterator::class,
   \AsyncMysqlRowBlock::class,
   \DOMNamedNodeMap::class,
@@ -26,7 +27,6 @@ interface Traversable {
   \HH\KeyedIterable::class,
   \HH\KeyedIterator::class,
   \MysqlRow::class,
-  \HH\Rx\KeyedTraversable::class
 )>>
 interface KeyedTraversable extends \HH\Traversable {
 }

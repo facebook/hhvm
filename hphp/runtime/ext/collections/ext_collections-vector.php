@@ -6,7 +6,7 @@ namespace {
 /** An iterator implementation for iterating over a Vector/ImmVector.
  */
 <<__NativeData("VectorIterator")>>
-final class VectorIterator implements HH\Rx\KeyedIterator {
+final class VectorIterator implements HH\KeyedIterator {
 
   /** Do nothing */
   public function __construct()[]: void { }

@@ -3,62 +3,33 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::utils;
-use anyhow::{anyhow, Result};
+use crate::FileOpts;
+use anyhow::Result;
 use clap::Parser;
 use compile::Profile;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
-use options::Options;
 use oxidized::relative_path::{self, RelativePath};
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
-
 use std::{
-    fs::File,
-    io::{self, stdout, Read, Write},
+    fs::{self, File},
+    io::{stdout, Write},
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
 };
 
-#[derive(Parser, Clone, Debug)]
+#[derive(Parser, Debug)]
 pub struct Opts {
-    /// " Configuration: Server.Port=<value> "
-    ///     Allows overriding config options passed on a file
-    #[clap(short = 'v')]
-    config_args: Vec<String>,
-
-    /// Config file in JSON format
-    #[clap(short = 'c')]
-    config_file: Option<PathBuf>,
-
     /// Output file. Creates it if necessary
     #[clap(short = 'o')]
     output_file: Option<PathBuf>,
 
-    /// Run a daemon which processes Hack source from standard input
-    #[clap(long)]
-    daemon: bool,
-
-    /// Read a list of files or stdin (one per line) from FILE
-    #[clap(long, value_name = "FILE", conflicts_with("output-file"))]
-    input_file_list: Option<Option<PathBuf>>,
-
-    /// Dump configuration settings
-    #[clap(long)]
-    dump_config: bool,
-
-    /// The path to an input Hack file (omit if --daemon or --input-file-list)
-    #[clap(value_name = "FILE", required_unless_present_any = &["daemon", "input-file-list"])]
-    filename: Option<PathBuf>,
+    #[clap(flatten)]
+    files: FileOpts,
 
     #[clap(flatten)]
     single_file_opts: SingleFileOpts,
-
-    /// Number of parallel worker threads. By default, use num-cpu worker threads.
-    /// If 0 or 1, uses the main (single) thread.
-    #[clap(long)]
-    thread_num: Option<usize>,
 }
 
 #[derive(Parser, Clone, Debug)]
@@ -72,93 +43,64 @@ pub(crate) struct SingleFileOpts {
     pub(crate) verbosity: isize,
 }
 
-pub fn run(opts: Opts) -> Result<()> {
-    type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
+type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
+pub fn run(mut opts: Opts) -> Result<()> {
     if opts.single_file_opts.verbosity > 1 {
         eprintln!("hackc compile options/flags: {:#?}", opts);
     }
-    let config = Config::new(&opts);
 
-    if opts.daemon {
-        unimplemented!("TODO(hrust) handlers for daemon (HHVM) mode");
-    } else {
-        config.dump_if_needed(&opts);
+    let writer: SyncWrite = match &opts.output_file {
+        None => Mutex::new(Box::new(stdout())),
+        Some(output_file) => Mutex::new(Box::new(File::create(output_file)?)),
+    };
 
-        let writer: SyncWrite = match &opts.output_file {
-            None => Mutex::new(Box::new(stdout())),
-            Some(output_file) => Mutex::new(Box::new(File::create(output_file)?)),
-        };
+    let files = opts.files.gather_input_files()?;
 
-        let files: Vec<_> = match &opts.input_file_list {
-            Some(filename) => utils::read_file_list(filename.as_ref())?.collect(),
-            None => vec![
-                opts.filename
-                    .as_ref()
-                    .cloned()
-                    .ok_or_else(|| anyhow!("TODO(hrust) support stdin"))?,
-            ],
-        };
+    // Collect a Vec first so we process all files - not just up to the first failure.
+    files
+        .into_par_iter()
+        .map(|path| process_one_file(&path, &opts, &writer))
+        .collect::<Vec<_>>()
+        .into_iter()
+        .collect()
+}
 
-        // Process a single physical file by breaking it into multiple logical
-        // files (using multifile) and then processing each of those with
-        // process_single_file().
-        //
-        // If an error occurs then continue to process as much as possible,
-        // returning the first error that occured.
-        let process_one_file = |f: &PathBuf| -> Result<()> {
-            let content = utils::read_file(f)?;
-            let files = multifile::to_files(f, content)?;
+/// Process a single physical file by breaking it into multiple logical
+/// files (using multifile) and then processing each of those with
+/// process_single_file().
+///
+/// If an error occurs then continue to process as much as possible,
+/// returning the first error that occured.
+fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
+    let content = fs::read(f)?;
+    let files = multifile::to_files(f, content)?;
 
-            // Collect a Vec so we process all files - not just up to the first
-            // failure.
-            let results: Vec<Result<()>> = files
-                .into_iter()
-                .map(|(f, content)| {
-                    let f = f.as_ref();
-                    match process_single_file(
-                        &opts.single_file_opts,
-                        f.into(),
-                        content,
-                        &mut Profile::default(),
-                    ) {
-                        Err(e) => {
-                            writeln!(
-                                writer.lock().unwrap(),
-                                "Error in file {}: {}",
-                                f.display(),
-                                e
-                            )?;
-                            Err(e)
-                        }
-                        Ok(output) => {
-                            writer.lock().unwrap().write_all(&output)?;
-                            Ok(())
-                        }
-                    }
-                })
-                .collect();
+    // Collect a Vec so we process all files - not just up to the first
+    // failure.
+    let results: Vec<Result<()>> = files
+        .into_iter()
+        .map(|(f, content)| {
+            let f = f.as_ref();
+            match process_single_file(
+                &opts.single_file_opts,
+                f.into(),
+                content,
+                &mut Profile::default(),
+            ) {
+                Err(e) => {
+                    writeln!(w.lock().unwrap(), "Error in file {}: {}", f.display(), e)?;
+                    Err(e)
+                }
+                Ok(output) => {
+                    w.lock().unwrap().write_all(&output)?;
+                    Ok(())
+                }
+            }
+        })
+        .collect();
 
-            results.into_iter().collect()
-        };
-
-        // Collect a Vec so we process all files - not just up to the first
-        // failure.
-        let results: Vec<Result<()>> =
-            if files.len() <= 1 || opts.thread_num.map_or(false, |n| n <= 1) {
-                files.iter().map(process_one_file).collect()
-            } else {
-                opts.thread_num.map_or((), |thread_num| {
-                    rayon::ThreadPoolBuilder::new()
-                        .num_threads(thread_num)
-                        .build_global()
-                        .unwrap();
-                });
-                files.par_iter().map(process_one_file).collect()
-            };
-
-        results.into_iter().collect()
-    }
+    results.into_iter().collect()
 }
 
 fn process_single_file_impl(
@@ -227,45 +169,4 @@ pub(crate) fn process_single_file(
     let new_ctx = Arc::clone(ctx);
     let (opts, filepath, content) = new_ctx.as_ref();
     process_single_file_impl(opts, filepath, content.as_slice(), profile)
-}
-
-fn assert_regular_file(filepath: impl AsRef<Path>) {
-    let filepath = filepath.as_ref();
-    if !filepath.is_file() {
-        panic!("{} not a valid file", filepath.display());
-    }
-}
-
-struct Config {
-    jsons: Vec<String>,
-}
-impl Config {
-    fn new(opts: &Opts) -> Config {
-        let mut ret = Config { jsons: vec![] };
-
-        if let Some(config_path) = opts.config_file.as_ref() {
-            assert_regular_file(config_path);
-            let mut config_json = String::new();
-            File::open(config_path)
-                .map(|mut f| {
-                    f.read_to_string(&mut config_json)
-                        .expect("failed to read config file")
-                })
-                .expect("failed to open config file");
-            ret.jsons.push(config_json);
-        };
-        ret
-    }
-
-    fn to_options(&self, cli_args: &[String]) -> Options {
-        Options::from_configs(&self.jsons, cli_args).unwrap()
-    }
-
-    fn dump_if_needed(&self, opts: &Opts) {
-        if opts.dump_config {
-            let hhbc_options = self.to_options(&opts.config_args);
-            print!("===CONFIG===\n{}\n\n", hhbc_options.to_json());
-            io::stdout().flush().expect("flushing stdout failed");
-        }
-    }
 }

@@ -6,7 +6,6 @@ mod crc;
 mod expr_trees;
 mod facts;
 mod parse;
-mod utils;
 
 use ::compile::EnvFlags;
 use anyhow::Result;
@@ -41,6 +40,10 @@ struct Opts {
     /// Mutate the program as if we're in the debugger repl
     #[clap(long)]
     for_debugger_eval: bool,
+
+    /// Number of parallel worker threads. If 0, use num-cpu worker threads.
+    #[clap(long, default_value("0"))]
+    num_threads: usize,
 }
 
 /// Hack Compiler
@@ -224,6 +227,10 @@ fn compile_from_text(_: Opts) -> Result<()> {
 fn main() -> Result<()> {
     env_logger::init();
     let mut opts = Opts::parse();
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(opts.num_threads)
+        .build_global()
+        .unwrap();
     match opts.command.take() {
         Some(Command::Compile(opts)) => compile::run(opts),
         Some(Command::Crc(opts)) => crc::run(opts),

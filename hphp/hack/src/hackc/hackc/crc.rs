@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{compile::SingleFileOpts, utils};
+use crate::compile::SingleFileOpts;
 use anyhow::Result;
 use clap::Parser;
 use compile::Profile;
@@ -14,6 +14,7 @@ use std::{
     borrow::Cow,
     ffi::OsStr,
     fmt::{self, Display},
+    fs,
     hash::{Hash, Hasher},
     io::Write,
     path::{Path, PathBuf},
@@ -42,7 +43,7 @@ pub struct Opts {
 }
 
 fn process_one_file(writer: &SyncWrite, f: &Path, profile: &mut Profile) -> Result<()> {
-    let content = utils::read_file(f)?;
+    let content = fs::read(f)?;
     let files = multifile::to_files(f, content)?;
     for (f, content) in files {
         let f = f.as_ref();

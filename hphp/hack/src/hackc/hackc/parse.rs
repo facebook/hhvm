@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::utils;
 use aast_parser::{rust_aast_parser_types::Env as AastParserEnv, AastParser};
 use anyhow::{Context, Result};
 use clap::Parser;
@@ -14,6 +13,7 @@ use parser_core_types::{
 };
 use rayon::prelude::*;
 use std::{
+    fs,
     io::{stdin, BufRead, BufReader},
     path::PathBuf,
     sync::Arc,
@@ -22,9 +22,6 @@ use strum_macros::{Display, EnumString};
 
 #[derive(Parser, Clone, Debug)]
 pub struct Opts {
-    #[clap(long)]
-    thread_num: Option<usize>,
-
     #[clap(default_value_t, long)]
     parser: ParserKind,
 }
@@ -53,20 +50,13 @@ pub fn run(opts: Opts) -> Result<()> {
         .map(|l| PathBuf::from(l.trim()))
         .collect::<Vec<_>>();
 
-    opts.thread_num.map_or((), |thread_num| {
-        rayon::ThreadPoolBuilder::new()
-            .num_threads(thread_num)
-            .build_global()
-            .unwrap();
-    });
-
     files
-        .par_iter()
+        .into_par_iter()
         .try_for_each(|f| parse_file(opts.parser, f.clone()))
 }
 
 fn parse_file(parser: ParserKind, filepath: PathBuf) -> anyhow::Result<()> {
-    let content = utils::read_file(&filepath)?;
+    let content = fs::read(&filepath)?;
     let ctx = &Arc::new((filepath, content));
     let new_ctx = Arc::clone(ctx);
     let env = ParserEnv::default();

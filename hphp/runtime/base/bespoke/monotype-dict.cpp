@@ -124,7 +124,7 @@ Layout::LayoutSet getTopMonotypeDictParents(KeyTypes kt) {
 
 Layout::LayoutSet getAllMonotypeDictLayouts() {
   Layout::LayoutSet result;
-#define DT(name, value) {                                                      \
+#define DT(name, value, ...) {                                                 \
     auto const type = KindOf##name;                                            \
     if (type != KindOfUninit) {                                                \
       result.insert(MonotypeDictLayout::Index(KeyTypes::Ints, type));          \
@@ -1579,7 +1579,7 @@ void EmptyMonotypeDict::InitializeLayouts() {
   new TopMonotypeDictLayout(KeyTypes::Strings);
   new TopMonotypeDictLayout(KeyTypes::StaticStrings);
 
-#define DT(name, value) {                                              \
+#define DT(name, value, ...) {                                         \
     auto const type = KindOf##name;                                    \
     if (type == dt_modulo_persistence(type) && type != KindOfUninit) { \
       new MonotypeDictLayout(KeyTypes::Ints, type);                    \
@@ -1590,7 +1590,7 @@ void EmptyMonotypeDict::InitializeLayouts() {
 DATATYPES
 #undef DT
 
-#define DT(name, value) {                                              \
+#define DT(name, value, ...) {                                         \
     auto const type = KindOf##name;                                    \
     if (type != dt_modulo_persistence(type) && type != KindOfUninit) { \
       new MonotypeDictLayout(KeyTypes::Ints, type);                    \

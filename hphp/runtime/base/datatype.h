@@ -78,32 +78,39 @@ constexpr int8_t udt(size_t index, bool counted) {
  * consequences. At a minimum, you must:
  * - Audit every helper function in this file.
  * - Audit jit::emitTypeTest().
+ *
+ * Manually computed bitmasks are provided for convenience of debugging
+ * assembly code of jitted type checks.
  */
 #define DATATYPES \
-  DT(PersistentDict,   udt(0,  false)) \
-  DT(Dict,             udt(0,  true))  \
-  DT(PersistentVec,    udt(1,  false)) \
-  DT(Vec,              udt(1,  true))  \
-  DT(PersistentKeyset, udt(2,  false)) \
-  DT(Keyset,           udt(2,  true))  \
-  DT(PersistentString, udt(3,  false)) \
-  DT(String,           udt(3,  true))  \
-  DT(Object,           udt(4,  true))  \
-  DT(Resource,         udt(5,  true))  \
-  DT(RFunc,            udt(6,  true))  \
-  DT(RClsMeth,         udt(7,  true))  \
-  DT(ClsMeth,          udt(8,  false)) \
-  DT(Boolean,          udt(9,  false)) \
-  DT(Int64,            udt(10, false)) \
-  DT(Double,           udt(11, false)) \
-  DT(Func,             udt(12, false)) \
-  DT(Class,            udt(13, false)) \
-  DT(LazyClass,        udt(14, false)) \
-  DT(Uninit,           udt(15, false)) \
-  DT(Null,             udt(16, false))
+  DT(PersistentDict,   udt(0,  false), 0b00001110) \
+  DT(Dict,             udt(0,  true),  0b00001111) \
+  DT(PersistentVec,    udt(1,  false), 0b00010110) \
+  DT(Vec,              udt(1,  true),  0b00010111) \
+  DT(PersistentKeyset, udt(2,  false), 0b00011010) \
+  DT(Keyset,           udt(2,  true),  0b00011011) \
+  DT(PersistentString, udt(3,  false), 0b00011100) \
+  DT(String,           udt(3,  true),  0b00011101) \
+  DT(Object,           udt(4,  true),  0b00100111) \
+  DT(Resource,         udt(5,  true),  0b00101011) \
+  DT(RFunc,            udt(6,  true),  0b00101101) \
+  DT(RClsMeth,         udt(7,  true),  0b00110011) \
+  DT(ClsMeth,          udt(8,  false), 0b00110100) \
+  DT(Boolean,          udt(9,  false), 0b00111000) \
+  DT(Int64,            udt(10, false), 0b01000110) \
+  DT(Double,           udt(11, false), 0b01001010) \
+  DT(Func,             udt(12, false), 0b01001100) \
+  DT(Class,            udt(13, false), 0b01010010) \
+  DT(LazyClass,        udt(14, false), 0b01010100) \
+  DT(Uninit,           udt(15, false), 0b01011000) \
+  DT(Null,             udt(16, false), 0b01100010)
+
+#define DT(name, value1, value2) static_assert(value1 == value2, "bad bitmask");
+DATATYPES
+#undef DT
 
 enum class DataType : int8_t {
-#define DT(name, value) name = value,
+#define DT(name, value, ...) name = value,
 DATATYPES
 #undef DT
 };

@@ -169,7 +169,7 @@ impl Opts {
         }"#;
 
         // TODO: share this logic with hackc_create_decl_parse_options()
-        let config_opts = options::Options::from_configs(&[AUTO_NAMESPACE_MAP], &[]).unwrap();
+        let config_opts = options::Options::from_configs(&[AUTO_NAMESPACE_MAP]).unwrap();
         let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
             Some(m) => bumpalo::collections::Vec::from_iter_in(
                 m.iter().map(|(k, v)| {

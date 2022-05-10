@@ -513,7 +513,7 @@ thread_local! {
     }
 }
 
-pub(crate) type Cache = LruCache<(Vec<String>, Vec<String>), Options, fnv::FnvBuildHasher>;
+pub(crate) type Cache = LruCache<Vec<String>, Options, fnv::FnvBuildHasher>;
 
 impl Options {
     pub fn to_json(&self) -> String {
@@ -571,17 +571,14 @@ impl Options {
         }
     }
 
-    pub fn from_configs<S: AsRef<str>>(jsons: &[S], clis: &[S]) -> Result<Self, String> {
+    pub fn from_configs(jsons: &[&str]) -> Result<Self, String> {
         CACHE.with(|cache| {
-            let key: (Vec<String>, Vec<String>) = (
-                jsons.iter().map(|x| (*x).as_ref().into()).collect(),
-                clis.iter().map(|x| (*x).as_ref().into()).collect(),
-            );
+            let key: Vec<String> = jsons.iter().map(|&x| x.to_string()).collect();
             let mut cache = cache.borrow_mut();
             if let Some(o) = cache.get_mut(&key) {
                 Ok(o.clone())
             } else {
-                let o = Options::from_configs_(&key.0, &key.1)?;
+                let o = Options::from_configs_::<_, &str>(&key, &[])?;
                 cache.put(key, o.clone());
                 Ok(o)
             }
@@ -1127,7 +1124,6 @@ mod tests {
                 "access":4
               }
                  }"#],
-            &EMPTY_STRS,
         );
         assert_eq!(res.err(), None);
     }

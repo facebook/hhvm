@@ -109,7 +109,7 @@ fn process_single_file_impl(
     content: &[u8],
     profile: &mut Profile,
 ) -> Result<Vec<u8>> {
-    use compile::{Env, EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
+    use compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
     if opts.verbosity > 1 {
         eprintln!("processing file: {}", filepath.display());
     }
@@ -137,22 +137,8 @@ fn process_single_file_impl(
         parser_flags,
         flags,
     };
-    let env = Env {
-        filepath: native_env.filepath.clone(),
-        config_jsons: Default::default(),
-        config_list: Default::default(),
-        flags: native_env.flags,
-    };
     let alloc = bumpalo::Bump::new();
-    compile::from_text(
-        &alloc,
-        &env,
-        &mut output,
-        source_text,
-        Some(&native_env),
-        None,
-        profile,
-    )?;
+    compile::from_text(&alloc, &mut output, source_text, &native_env, None, profile)?;
     if opts.verbosity >= 1 {
         eprintln!("{}: {:#?}", filepath.display(), profile);
     }

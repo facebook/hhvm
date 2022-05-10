@@ -3,16 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{Env, EnvFlags, ParseError, Profile};
+use crate::{EnvFlags, ParseError, Profile};
 // use crate::compile_rust as compile;
 use ocamlrep::rc::RcOc;
 use options::{LangFlags, Options};
-use oxidized::namespace_env::Env as NamespaceEnv;
-use oxidized::pos::Pos;
 use oxidized::{
     aast,
     aast_visitor::{AstParams, Node, Visitor},
     ast,
+    namespace_env::Env as NamespaceEnv,
+    pos::Pos,
+    relative_path::RelativePath,
 };
 use parser_core_types::source_text::SourceText;
 use std::fs;
@@ -69,11 +70,7 @@ fn sort_by_start_pos<T>(items: &mut Vec<(Pos, T)>) {
 
 /// The source code of `program` with expression tree literals
 /// replaced with their desugared form.
-fn desugar_and_replace_et_literals<S: AsRef<str>>(
-    env: &Env<S>,
-    program: ast::Program,
-    src: &str,
-) -> String {
+fn desugar_and_replace_et_literals(flags: EnvFlags, program: ast::Program, src: &str) -> String {
     let mut literals = find_et_literals(program);
     sort_by_start_pos(&mut literals);
 
@@ -83,7 +80,7 @@ fn desugar_and_replace_et_literals<S: AsRef<str>>(
 
     let mut src = src.to_string();
     for (pos, literal) in literals {
-        let desugared_literal_src = crate::expr_to_string_lossy(env, &literal.runtime_expr);
+        let desugared_literal_src = crate::expr_to_string_lossy(flags, &literal.runtime_expr);
         let (pos_start, pos_end) = pos.info_raw();
         src.replace_range(pos_start..pos_end, &desugared_literal_src);
     }
@@ -94,10 +91,9 @@ fn desugar_and_replace_et_literals<S: AsRef<str>>(
 /// Parse the file in `env`, desugar expression tree literals, and
 /// print the source code as if the user manually wrote the desugared
 /// syntax.
-pub fn desugar_and_print<S: AsRef<str>>(env: &Env<S>) {
-    let is_systemlib = env.flags.contains(EnvFlags::IS_SYSTEMLIB);
-    let opts = Options::from_configs(&env.config_jsons, &env.config_list).expect("Invalid options");
-    let filepath = env.filepath.clone();
+pub fn desugar_and_print(filepath: RelativePath, flags: EnvFlags) {
+    let is_systemlib = flags.contains(EnvFlags::IS_SYSTEMLIB);
+    let opts = Options::from_configs(&[]).expect("Invalid options");
     let content = fs::read(filepath.to_absolute()).unwrap();
     let source_text = SourceText::make(RcOc::new(filepath), &content);
     let ns = RcOc::new(NamespaceEnv::empty(
@@ -119,7 +115,7 @@ pub fn desugar_and_print<S: AsRef<str>>(env: &Env<S>) {
         Err(ParseError(_, msg, _)) => panic!("Parsing failed: {}", msg),
         Ok(ast) => {
             let old_src = String::from_utf8_lossy(&content);
-            let new_src = desugar_and_replace_et_literals(env, ast, &old_src);
+            let new_src = desugar_and_replace_et_literals(flags, ast, &old_src);
             print!("{}", new_src);
         }
     }

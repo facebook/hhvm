@@ -21,8 +21,11 @@ use hhvm_options::HhvmConfig;
 use ocamlrep::rc::RcOc;
 use options::{Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, RepoFlags};
 use oxidized::{
-    ast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
-    relative_path::RelativePath,
+    ast,
+    namespace_env::Env as NamespaceEnv,
+    parser_options::ParserOptions,
+    pos::Pos,
+    relative_path::{Prefix, RelativePath},
 };
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, source_text::SourceText, syntax_error::ErrorType,
@@ -32,23 +35,30 @@ use thiserror::Error;
 
 /// Common input needed for compilation.
 #[derive(Debug)]
-pub struct Env<S> {
+pub struct NativeEnv<'a> {
     pub filepath: RelativePath,
-    pub config_jsons: Vec<S>,
-    pub config_list: Vec<S>,
-    pub flags: EnvFlags,
-}
-
-#[derive(Debug)]
-pub struct NativeEnv<S> {
-    pub filepath: RelativePath,
-    pub aliased_namespaces: S,
-    pub include_roots: S,
+    pub aliased_namespaces: &'a str,
+    pub include_roots: &'a str,
     pub emit_class_pointers: i32,
     pub check_int_overflow: i32,
     pub hhbc_flags: HHBCFlags,
     pub parser_flags: ParserFlags,
     pub flags: EnvFlags,
+}
+
+impl Default for NativeEnv<'_> {
+    fn default() -> Self {
+        Self {
+            filepath: RelativePath::make(Prefix::Dummy, Default::default()),
+            aliased_namespaces: "",
+            include_roots: "",
+            emit_class_pointers: 0,
+            check_int_overflow: 0,
+            hhbc_flags: HHBCFlags::empty(),
+            parser_flags: ParserFlags::empty(),
+            flags: EnvFlags::empty(),
+        }
+    }
 }
 
 bitflags! {
@@ -323,11 +333,11 @@ impl ParserFlags {
     }
 }
 
-impl<S: AsRef<str>> NativeEnv<S> {
-    pub fn to_options(native_env: &NativeEnv<S>) -> Options {
+impl<'a> NativeEnv<'a> {
+    fn to_options(native_env: &NativeEnv<'a>) -> Options {
         let hhbc_flags = native_env.hhbc_flags;
-        let config = [&native_env.aliased_namespaces, &native_env.include_roots];
-        let opts = Options::from_configs(&config, &[]).unwrap();
+        let config = [native_env.aliased_namespaces, native_env.include_roots];
+        let opts = Options::from_configs(&config).unwrap();
         let hhvm = Hhvm {
             aliased_namespaces: opts.hhvm.aliased_namespaces,
             include_roots: opts.hhvm.include_roots,
@@ -410,44 +420,24 @@ impl Profile {
     }
 }
 
-pub fn emit_fatal_unit<S: AsRef<str>>(
-    env: &Env<S>,
-    writer: &mut dyn std::io::Write,
-    err_msg: &str,
-) -> Result<()> {
-    let opts =
-        Options::from_configs(&env.config_jsons, &env.config_list).map_err(anyhow::Error::msg)?;
-    let alloc = bumpalo::Bump::new();
-
-    let prog = emit_unit::emit_fatal_unit(&alloc, FatalOp::Parse, Pos::make_none(), err_msg);
-    let prog = prog.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
-    print_unit(
-        &Context::new(&opts, Some(&env.filepath), opts.array_provenance()),
-        writer,
-        &prog,
-    )?;
-    Ok(())
-}
-
 /// Compile Hack source code, write HHAS text to `writer`.
 /// Update `profile` with stats from any passes that run,
 /// even if the compiler ultimately returns Err.
-pub fn from_text<'arena, 'decl, S: AsRef<str>>(
-    alloc: &'arena bumpalo::Bump,
-    env: &Env<S>,
+pub fn from_text<'decl>(
+    alloc: &bumpalo::Bump,
     writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
-    native_env: Option<&NativeEnv<S>>,
+    native_env: &NativeEnv<'_>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     mut profile: &mut Profile,
 ) -> Result<()> {
-    let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
-    let unit = emit_unit_from_text(&mut emitter, env, source_text, profile)?;
+    let mut emitter = create_emitter(native_env.flags, native_env, decl_provider, alloc);
+    let unit = emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)?;
     let opts = emitter.into_options();
 
     let (print_result, printing_t) = time(|| {
         print_unit(
-            &Context::new(&opts, Some(&env.filepath), opts.array_provenance()),
+            &Context::new(&opts, Some(&native_env.filepath), opts.array_provenance()),
             writer,
             &unit,
         )
@@ -493,28 +483,26 @@ fn rewrite<'p, 'arena, 'decl>(
     rewrite_program(emitter, ast, namespace_env)
 }
 
-pub fn unit_from_text<'arena, 'decl, S: AsRef<str>>(
+pub fn unit_from_text<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    env: &Env<S>,
     source_text: SourceText<'_>,
-    native_env: Option<&NativeEnv<S>>,
+    native_env: &NativeEnv<'_>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     profile: &mut Profile,
 ) -> Result<HackCUnit<'arena>> {
-    let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
-    emit_unit_from_text(&mut emitter, env, source_text, profile)
+    let mut emitter = create_emitter(native_env.flags, native_env, decl_provider, alloc);
+    emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)
 }
 
-pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
-    env: &Env<S>,
-    native_env: Option<&NativeEnv<S>>,
+pub fn unit_to_string<W: std::io::Write>(
+    native_env: &NativeEnv<'_>,
     writer: &mut W,
     program: &HackCUnit<'_>,
 ) -> Result<()> {
-    let opts = construct_options(env, native_env)?;
+    let opts = NativeEnv::to_options(native_env);
     let (print_result, _) = time(|| {
         print_unit(
-            &Context::new(&opts, Some(&env.filepath), opts.array_provenance()),
+            &Context::new(&opts, Some(&native_env.filepath), opts.array_provenance()),
             writer,
             program,
         )
@@ -522,17 +510,17 @@ pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
     print_result.map_err(|e| anyhow!("{}", e))
 }
 
-fn emit_unit_from_ast<'p, 'arena, 'decl>(
+fn emit_unit_from_ast<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: RcOc<NamespaceEnv>,
-    ast: &'p mut ast::Program,
+    ast: &mut ast::Program,
 ) -> Result<HackCUnit<'arena>, Error> {
     emit_unit(emitter, namespace, ast)
 }
 
-fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
+fn emit_unit_from_text<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<S>,
+    flags: EnvFlags,
     source_text: SourceText<'_>,
     profile: &mut Profile,
 ) -> Result<HackCUnit<'arena>> {
@@ -553,9 +541,9 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
         parse_file(
             emitter.options(),
             source_text,
-            !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
+            !flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
             RcOc::clone(&namespace_env),
-            env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+            flags.contains(EnvFlags::IS_SYSTEMLIB),
             profile,
         )
     });
@@ -597,32 +585,19 @@ fn emit_fatal<'arena>(
     emit_unit::emit_fatal_unit(alloc, op, pos, msg)
 }
 
-fn construct_options<S: AsRef<str>>(
-    env: &Env<S>,
-    native_env: Option<&NativeEnv<S>>,
-) -> Result<Options> {
-    let opts = match native_env {
-        None => Options::from_configs(&env.config_jsons, &env.config_list)
-            .map_err(anyhow::Error::msg)?,
-        Some(native_env) => NativeEnv::to_options(native_env),
-    };
-    Ok(opts)
-}
-
-fn create_emitter<'arena, 'decl, S: AsRef<str>>(
-    env: &Env<S>,
-    native_env: Option<&NativeEnv<S>>,
+fn create_emitter<'arena, 'decl>(
+    flags: EnvFlags,
+    native_env: &NativeEnv<'_>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     alloc: &'arena bumpalo::Bump,
-) -> Result<Emitter<'arena, 'decl>> {
-    let opts = construct_options(env, native_env)?;
-    Ok(Emitter::new(
-        opts,
-        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
-        env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+) -> Emitter<'arena, 'decl> {
+    Emitter::new(
+        NativeEnv::to_options(native_env),
+        flags.contains(EnvFlags::IS_SYSTEMLIB),
+        flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         alloc,
         decl_provider,
-    ))
+    )
 }
 
 fn create_parser_options(opts: &Options) -> ParserOptions {
@@ -749,17 +724,16 @@ fn time<T>(f: impl FnOnce() -> T) -> (T, f64) {
     (r, t.as_secs_f64())
 }
 
-pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> String {
+pub fn expr_to_string_lossy(flags: EnvFlags, expr: &ast::Expr) -> String {
     use print_expr::Context;
 
-    let opts =
-        Options::from_configs(&env.config_jsons, &env.config_list).expect("Malformed options");
+    let opts = Options::from_configs(&[]).expect("Malformed options");
 
     let alloc = bumpalo::Bump::new();
     let emitter = Emitter::new(
         opts,
-        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
-        env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        flags.contains(EnvFlags::IS_SYSTEMLIB),
+        flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         &alloc,
         None,
     );

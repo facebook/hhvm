@@ -7,13 +7,10 @@ use oxidized::relative_path::{Prefix, RelativePath};
 
 pub(crate) fn dump_expr_trees(mut opts: Opts) -> Result<()> {
     for path in opts.files.gather_input_files()? {
-        let env: compile::Env<&str> = compile::Env {
-            filepath: RelativePath::make(Prefix::Dummy, path),
-            flags: opts.env_flags(),
-            config_jsons: Default::default(),
-            config_list: Default::default(),
-        };
-        compile::dump_expr_tree::desugar_and_print(&env);
+        compile::dump_expr_tree::desugar_and_print(
+            RelativePath::make(Prefix::Dummy, path),
+            opts.env_flags(),
+        );
     }
     Ok(())
 }

@@ -240,7 +240,7 @@ fn make_env_flags(
 }
 
 impl compile_ffi::NativeEnv {
-    fn to_compile_env<'a>(env: &'a compile_ffi::NativeEnv) -> Option<compile::NativeEnv<&'a str>> {
+    fn to_compile_env<'a>(env: &'a compile_ffi::NativeEnv) -> Option<compile::NativeEnv<'a>> {
         use std::os::unix::ffi::OsStrExt;
         Some(compile::NativeEnv {
             filepath: RelativePath::make(
@@ -262,14 +262,7 @@ fn hackc_compile_from_text_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
 ) -> Result<Vec<u8>, String> {
-    let native_env: compile::NativeEnv<&str> = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-    let compile_env = compile::Env::<&str> {
-        filepath: native_env.filepath.clone(),
-        config_jsons: vec![],
-        config_list: vec![],
-        flags: native_env.flags,
-    };
-
+    let native_env = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
     let text = SourceText::make(
         ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
         source_text.as_bytes(),
@@ -296,10 +289,9 @@ fn hackc_compile_from_text_cpp_ffi(
 
     compile::from_text(
         &alloc,
-        &compile_env,
         &mut output,
         text,
-        Some(&native_env),
+        &native_env,
         decl_provider
             .as_ref()
             .map(|provider| provider as &dyn DeclProvider<'_>),
@@ -310,14 +302,8 @@ fn hackc_compile_from_text_cpp_ffi(
 }
 
 fn hackc_dump_expr_trees(env: &compile_ffi::NativeEnv) {
-    let native_env: compile::NativeEnv<&str> = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-    let env: compile::Env<&str> = compile::Env {
-        filepath: native_env.filepath,
-        flags: native_env.flags,
-        config_jsons: Default::default(),
-        config_list: Default::default(),
-    };
-    compile::dump_expr_tree::desugar_and_print(&env);
+    let native_env = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
+    compile::dump_expr_tree::desugar_and_print(native_env.filepath, native_env.flags);
 }
 
 fn hackc_decl_exists(
@@ -351,7 +337,7 @@ pub fn hackc_create_direct_decl_parse_options(
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
     let config_opts =
-        options::Options::from_configs(&[aliased_namespaces.to_str().unwrap()], &[]).unwrap();
+        options::Options::from_configs(&[aliased_namespaces.to_str().unwrap()]).unwrap();
     let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
         Some(m) => bumpalo::collections::Vec::from_iter_in(
             m.iter().map(|(k, v)| {
@@ -445,13 +431,7 @@ fn hackc_compile_unit_from_text_cpp_ffi(
     let bump = bumpalo::Bump::new();
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
-    let native_env: compile::NativeEnv<&str> = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-    let compile_env = compile::Env::<&str> {
-        filepath: native_env.filepath.clone(),
-        config_jsons: vec![],
-        config_list: vec![],
-        flags: native_env.flags,
-    };
+    let native_env = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
     let text = SourceText::make(
         ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
         source_text.as_bytes(),
@@ -476,9 +456,8 @@ fn hackc_compile_unit_from_text_cpp_ffi(
 
     compile::unit_from_text(
         alloc,
-        &compile_env,
         text,
-        Some(&native_env),
+        &native_env,
         decl_provider
             .as_ref()
             .map(|provider| provider as &dyn DeclProvider<'_>),
@@ -493,15 +472,9 @@ pub fn hackc_unit_to_string_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     prog: &HackCUnitWrapper,
 ) -> Result<Vec<u8>, String> {
-    let native_env: compile::NativeEnv<&str> = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-    let env = compile::Env::<&str> {
-        filepath: native_env.filepath.clone(),
-        config_jsons: vec![],
-        config_list: vec![],
-        flags: native_env.flags,
-    };
+    let native_env = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
     let mut output = Vec::new();
-    compile::unit_to_string(&env, Some(&native_env), &mut output, &prog.0)
+    compile::unit_to_string(&native_env, &mut output, &prog.0)
         .map(|_| output)
         .map_err(|e| e.to_string())
 }

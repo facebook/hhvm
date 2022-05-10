@@ -47,14 +47,16 @@ module FetchAsync = struct
   type input = {
     hh_config_version: string;
     destination_path: string;
+    no_limit: bool;
     decl_hashes: string list;
   }
 
   (** The main entry point of the daemon process that fetches the remote old decl blobs
       and writes them to a file. *)
-  let fetch { hh_config_version; destination_path; decl_hashes } : unit =
+  let fetch { hh_config_version; destination_path; no_limit; decl_hashes } :
+      unit =
     let (decl_blobs : string list) =
-      Remote_old_decls_ffi.get_decls hh_config_version decl_hashes
+      Remote_old_decls_ffi.get_decls hh_config_version no_limit decl_hashes
     in
     let chan = Stdlib.open_out_bin destination_path in
     Marshal.to_channel chan decl_blobs [];
@@ -70,14 +72,14 @@ module FetchAsync = struct
     Process.register_entry_point "remote_old_decls_fetch_async_entry" fetch
 end
 
-let fetch_async ~hh_config_version ~destination_path decl_hashes =
+let fetch_async ~hh_config_version ~destination_path ~no_limit decl_hashes =
   Hh_logger.log "Fetching remote old decls to %s" destination_path;
   let open FetchAsync in
   FutureProcess.make
     (Process.run_entry
        Process_types.Default
        fetch_entry
-       { hh_config_version; destination_path; decl_hashes })
+       { hh_config_version; destination_path; no_limit; decl_hashes })
     (fun _output -> Hh_logger.log "Finished fetching remote old decls")
 
 let fetch_old_decls
@@ -97,8 +99,12 @@ let fetch_old_decls
     let start_t = Unix.gettimeofday () in
     let tmp_dir = Tempfile.mkdtemp ~skip_mocking:false in
     let destination_path = Path.(to_string @@ concat tmp_dir "decl_blobs") in
+    let no_limit =
+      TypecheckerOptions.remote_old_decls_no_limit
+        (Provider_context.get_tcopt ctx)
+    in
     let decl_fetch_future =
-      fetch_async ~hh_config_version ~destination_path decl_hashes
+      fetch_async ~hh_config_version ~destination_path ~no_limit decl_hashes
     in
     (match Future.get decl_fetch_future with
     | Error e ->
@@ -129,6 +135,7 @@ let fetch_old_decls
         |> Telemetry.int_ ~key:"to_fetch" ~value:(List.length names)
         |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal decls)
       in
+      Hh_logger.log "Fetched %d decls remotely" (SMap.cardinal decls);
       let telemetry =
         Telemetry.object_ telemetry ~key:telemetry_label ~value:fetch_results
       in

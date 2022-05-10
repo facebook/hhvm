@@ -105,6 +105,8 @@ type t = {
      for typechecking *)
   tco_force_shallow_decl_fanout: bool;
   (* Flag to fetch old decls from remote decl store *)
+  tco_remote_old_decls_no_limit: bool;
+  (* Don't limit amount of remote old decls fetched *)
   tco_fetch_remote_old_decls: bool;
   (* Always load hot shallow decls from saved state *)
   tco_force_load_hot_shallow_decls: bool;
@@ -354,6 +356,7 @@ val make :
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_shallow_class_decl:bool ->
   ?tco_force_shallow_decl_fanout:bool ->
+  ?tco_remote_old_decls_no_limit:bool ->
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_force_load_hot_shallow_decls:bool ->
   ?tco_populate_member_heaps:bool ->
@@ -537,6 +540,8 @@ val po_disable_lval_as_an_expression : t -> bool
 val tco_shallow_class_decl : t -> bool
 
 val tco_force_shallow_decl_fanout : t -> bool
+
+val tco_remote_old_decls_no_limit : t -> bool
 
 val tco_fetch_remote_old_decls : t -> bool
 

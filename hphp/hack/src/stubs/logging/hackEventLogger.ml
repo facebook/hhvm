@@ -64,6 +64,7 @@ type rollout_flags = {
   populate_member_heaps: bool;
   shm_use_sharded_hashtbl: bool;
   shm_cache_size: int;
+  remote_old_decls_no_limit: bool;
 }
 
 let flush () = ()

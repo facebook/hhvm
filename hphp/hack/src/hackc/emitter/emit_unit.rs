@@ -2,6 +2,30 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+mod emit_adata;
+mod emit_attribute;
+mod emit_body;
+mod emit_class;
+mod emit_constant;
+mod emit_expression;
+mod emit_fatal;
+mod emit_file_attributes;
+mod emit_function;
+mod emit_memoize_function;
+mod emit_memoize_helpers;
+mod emit_memoize_method;
+mod emit_method;
+mod emit_module;
+mod emit_native_opcode;
+mod emit_param;
+mod emit_property;
+mod emit_statement;
+mod emit_type_constant;
+mod emit_typedef;
+mod emit_xhp;
+mod generator;
+mod reified_generics_helpers;
+mod try_finally_rewriter;
 
 use emit_class::emit_classes_from_program;
 use emit_constant::emit_constants_from_program;

@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
+use crate::{emit_method, emit_property};
 use emit_property::PropAndInit;
 use env::emitter::Emitter;
 use error::{Error, Result};

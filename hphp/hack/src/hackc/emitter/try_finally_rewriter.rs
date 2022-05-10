@@ -2,9 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-use crate::emit_statement::Level;
-use crate::reified_generics_helpers as reified;
+use crate::{emit_expression, emit_fatal, reified_generics_helpers as reified};
 use bitflags::bitflags;
 use emit_pos::emit_pos;
 use env::{emitter::Emitter, jump_targets as jt, Env, LocalGen};
@@ -16,6 +14,7 @@ use oxidized::pos::Pos;
 use std::collections::BTreeMap;
 
 type LabelMap<'a, 'arena> = BTreeMap<jt::StateId, &'a Instruct<'arena>>;
+type Level = usize;
 
 pub(super) struct JumpInstructions<'a, 'arena>(LabelMap<'a, 'arena>);
 impl<'a, 'arena> JumpInstructions<'a, 'arena> {

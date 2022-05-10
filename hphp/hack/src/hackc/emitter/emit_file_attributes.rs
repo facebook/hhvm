@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use emit_attribute::from_asts;
+use crate::emit_attribute::from_asts;
 use env::emitter::Emitter;
 use error::Result;
 use hhbc::hhas_attribute::HhasAttribute;

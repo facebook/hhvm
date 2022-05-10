@@ -891,280 +891,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "emit_adata"
-version = "0.0.0"
-dependencies = [
- "adata_state",
- "env",
- "error",
- "ffi",
- "hhbc",
- "instruction_sequence",
- "options",
-]
-
-[[package]]
-name = "emit_attribute"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "constant_folder",
- "emit_expression",
- "env",
- "error",
- "ffi",
- "hhbc",
- "naming_special_names_rust",
- "oxidized",
-]
-
-[[package]]
-name = "emit_body"
-version = "0.0.0"
-dependencies = [
- "ast_scope",
- "bitflags",
- "bumpalo",
- "decl_provider",
- "emit_expression",
- "emit_fatal",
- "emit_param",
- "emit_pos",
- "emit_type_hint",
- "env",
- "error",
- "ffi",
- "generator",
- "hack_macro",
- "hash",
- "hhbc",
- "hhbc_string_utils",
- "indexmap",
- "instruction_sequence",
- "label_rewriter",
- "lazy_static",
- "naming_special_names_rust",
- "ocamlrep",
- "options",
- "oxidized",
- "oxidized_by_ref",
- "print_expr",
- "regex",
- "scope",
- "stack_limit",
- "statement_state",
-]
-
-[[package]]
-name = "emit_class"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "emit_adata",
- "emit_attribute",
- "emit_body",
- "emit_constant",
- "emit_expression",
- "emit_memoize_method",
- "emit_method",
- "emit_pos",
- "emit_property",
- "emit_type_constant",
- "emit_type_hint",
- "emit_xhp",
- "env",
- "error",
- "ffi",
- "hhbc",
- "hhbc_string_utils",
- "hhvm_types_ffi",
- "instruction_sequence",
- "itertools 0.10.3",
- "naming_special_names_rust",
- "oxidized",
-]
-
-[[package]]
-name = "emit_constant"
-version = "0.0.0"
-dependencies = [
- "constant_folder",
- "core_utils_rust",
- "emit_body",
- "emit_expression",
- "emit_type_hint",
- "env",
- "error",
- "ffi",
- "hhbc",
- "hhbc_string_utils",
- "hhvm_types_ffi",
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
-name = "emit_expression"
-version = "0.0.0"
-dependencies = [
- "bstr",
- "bumpalo",
- "constant_folder",
- "emit_adata",
- "emit_fatal",
- "emit_pos",
- "emit_type_constant",
- "env",
- "error",
- "ffi",
- "hash",
- "hhbc",
- "hhbc_string_utils",
- "indexmap",
- "instruction_sequence",
- "lazy_static",
- "naming_special_names_rust",
- "options",
- "oxidized",
- "regex",
- "scope",
- "stack_limit",
-]
-
-[[package]]
-name = "emit_fatal"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "emit_pos",
- "hhbc",
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
-name = "emit_file_attributes"
-version = "0.0.0"
-dependencies = [
- "emit_attribute",
- "env",
- "error",
- "hhbc",
- "itertools 0.10.3",
- "oxidized",
-]
-
-[[package]]
-name = "emit_function"
-version = "0.0.0"
-dependencies = [
- "ast_scope",
- "emit_attribute",
- "emit_body",
- "emit_memoize_helpers",
- "emit_param",
- "emit_pos",
- "env",
- "error",
- "ffi",
- "hhbc",
- "hhbc_string_utils",
- "hhvm_types_ffi",
- "instruction_sequence",
- "naming_special_names_rust",
- "ocamlrep",
- "options",
- "oxidized",
-]
-
-[[package]]
-name = "emit_memoize_helpers"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "error",
- "ffi",
- "hhbc",
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
-name = "emit_memoize_method"
-version = "0.0.0"
-dependencies = [
- "ast_scope",
- "bitflags",
- "bumpalo",
- "emit_attribute",
- "emit_body",
- "emit_memoize_helpers",
- "emit_method",
- "emit_param",
- "emit_pos",
- "env",
- "error",
- "ffi",
- "hhbc",
- "hhbc_string_utils",
- "instruction_sequence",
- "naming_special_names_rust",
- "options",
- "oxidized",
-]
-
-[[package]]
-name = "emit_method"
-version = "0.0.0"
-dependencies = [
- "ast_scope",
- "emit_attribute",
- "emit_body",
- "emit_fatal",
- "emit_memoize_helpers",
- "emit_native_opcode",
- "env",
- "error",
- "ffi",
- "hhbc",
- "hhbc_string_utils",
- "hhvm_types_ffi",
- "instruction_sequence",
- "naming_special_names_rust",
- "ocamlrep",
- "options",
- "oxidized",
-]
-
-[[package]]
-name = "emit_module"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "emit_attribute",
- "env",
- "error",
- "ffi",
- "hhbc",
- "oxidized",
-]
-
-[[package]]
-name = "emit_native_opcode"
-version = "0.0.0"
-dependencies = [
- "ast_scope",
- "emit_body",
- "emit_param",
- "env",
- "error",
- "ffi",
- "hhbc",
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
 name = "emit_opcodes"
 version = "0.0.0"
 dependencies = [
@@ -1186,63 +912,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "emit_param"
-version = "0.0.0"
-dependencies = [
- "ast_scope",
- "bumpalo",
- "emit_attribute",
- "emit_expression",
- "emit_pos",
- "emit_type_hint",
- "env",
- "error",
- "ffi",
- "hhbc",
- "hhbc_string_utils",
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
 name = "emit_pos"
 version = "0.0.0"
 dependencies = [
  "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
-name = "emit_property"
-version = "0.0.0"
-dependencies = [
- "constant_folder",
- "emit_attribute",
- "emit_expression",
- "emit_pos",
- "emit_type_hint",
- "env",
- "error",
- "ffi",
- "hhbc",
- "hhbc_string_utils",
- "hhvm_types_ffi",
- "instruction_sequence",
- "naming_special_names_rust",
- "oxidized",
-]
-
-[[package]]
-name = "emit_type_constant"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "error",
- "ffi",
- "hhbc",
- "hhbc_string_utils",
- "naming_special_names_rust",
- "options",
  "oxidized",
 ]
 
@@ -1261,55 +934,42 @@ dependencies = [
 ]
 
 [[package]]
-name = "emit_typedef"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "emit_attribute",
- "emit_body",
- "emit_type_constant",
- "emit_type_hint",
- "env",
- "error",
- "hhbc",
- "hhvm_types_ffi",
- "oxidized",
-]
-
-[[package]]
 name = "emit_unit"
 version = "0.0.0"
 dependencies = [
+ "adata_state",
+ "ast_scope",
+ "bitflags",
+ "bstr",
  "bumpalo",
- "emit_adata",
- "emit_class",
- "emit_constant",
- "emit_file_attributes",
- "emit_function",
- "emit_module",
- "emit_typedef",
+ "constant_folder",
+ "core_utils_rust",
+ "decl_provider",
+ "emit_pos",
+ "emit_type_hint",
  "env",
  "error",
  "ffi",
- "hhbc",
- "ocamlrep",
- "oxidized",
-]
-
-[[package]]
-name = "emit_xhp"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "emit_method",
- "emit_property",
- "env",
- "error",
  "hack_macro",
+ "hash",
  "hhbc",
  "hhbc_string_utils",
+ "hhvm_types_ffi",
+ "indexmap",
+ "instruction_sequence",
+ "itertools 0.10.3",
+ "label_rewriter",
+ "lazy_static",
  "naming_special_names_rust",
+ "ocamlrep",
+ "options",
  "oxidized",
+ "oxidized_by_ref",
+ "print_expr",
+ "regex",
+ "scope",
+ "stack_limit",
+ "statement_state",
 ]
 
 [[package]]
@@ -1498,13 +1158,6 @@ dependencies = [
 [[package]]
 name = "full_fidelity_schema_version_number"
 version = "0.0.0"
-
-[[package]]
-name = "generator"
-version = "0.0.0"
-dependencies = [
- "oxidized",
-]
 
 [[package]]
 name = "generic-array"

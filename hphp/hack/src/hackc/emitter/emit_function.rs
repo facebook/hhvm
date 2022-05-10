@@ -2,9 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-mod emit_memoize_function;
-
+use crate::{emit_attribute, emit_body, emit_memoize_function, emit_memoize_helpers};
 use ast_scope::{self, Scope, ScopeItem};
 use env::emitter::Emitter;
 use error::Result;

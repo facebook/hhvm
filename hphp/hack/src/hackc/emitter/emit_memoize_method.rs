@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::{emit_attribute, emit_body, emit_memoize_helpers, emit_method, emit_param};
 use ast_scope::{Scope, ScopeItem};
 use bitflags::bitflags;
 use emit_method::get_attrs_for_method;

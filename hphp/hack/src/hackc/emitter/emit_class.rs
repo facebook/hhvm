@@ -3,6 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::{
+    emit_adata, emit_attribute, emit_body, emit_constant, emit_expression, emit_memoize_method,
+    emit_method, emit_property, emit_type_constant, emit_xhp,
+};
 use emit_property::PropAndInit;
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};

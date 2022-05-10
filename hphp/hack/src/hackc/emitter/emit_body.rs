@@ -2,10 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-mod emit_statement;
-mod reified_generics_helpers;
-mod try_finally_rewriter;
-
+use crate::{
+    emit_expression, emit_param, emit_statement, generator, reified_generics_helpers as RGH,
+};
 use ast_scope::{Scope, ScopeItem};
 use bitflags::bitflags;
 use emit_pos::emit_pos;
@@ -27,7 +26,6 @@ use instruction_sequence::{instr, InstrSeq};
 use ocamlrep::rc::RcOc;
 use options::CompilerFlags;
 use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
-use reified_generics_helpers as RGH;
 use statement_state::StatementState;
 
 static THIS: &str = "$this";

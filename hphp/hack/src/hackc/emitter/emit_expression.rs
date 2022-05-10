@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
+use crate::{emit_adata, emit_fatal, emit_type_constant};
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, ClassExpr, Env, Flags as EnvFlags};
 use error::{Error, Result};
@@ -68,7 +68,7 @@ pub fn is_local_this<'a, 'arena>(env: &Env<'a, 'arena>, lid: &local_id::LocalId)
 }
 
 mod inout_locals {
-    use crate::{Emitter, Env, Local, ParamKind};
+    use super::{Emitter, Env, Local, ParamKind};
     use hash::HashMap;
     use oxidized::{aast_defs::Lid, aast_visitor, aast_visitor::Node, ast, ast_defs};
     use std::marker::PhantomData;
@@ -180,7 +180,7 @@ mod inout_locals {
         // inout $v
         if let (ParamKind::Pinout(_), Expr_::Lvar(lid)) = (pk, e) {
             let Lid(_, lid) = &**lid;
-            if !crate::is_local_this(env, lid) {
+            if !super::is_local_this(env, lid) {
                 add_use(&lid.1, acc);
                 return if is_top {
                     add_inout(lid.1.as_str(), i, acc);
@@ -266,7 +266,7 @@ mod inout_locals {
         match &*e {
             ast::Expr_::Lvar(lid) => {
                 let Lid(_, lid) = &**lid;
-                if !crate::is_local_this(ctx.env, lid) {
+                if !super::is_local_this(ctx.env, lid) {
                     add_use(lid.1.as_str(), ctx.state);
                     add_write(lid.1.as_str(), ctx.i, ctx.state);
                 }

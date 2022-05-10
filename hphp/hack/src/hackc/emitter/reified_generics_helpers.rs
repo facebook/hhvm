@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use emit_expression::{emit_reified_arg, is_reified_tparam};
+use crate::emit_expression::{emit_reified_arg, is_reified_tparam};
 use env::{emitter::Emitter, Env};
 use error::Result;
 use instruction_sequence::{instr, InstrSeq};

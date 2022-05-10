@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::{emit_body, emit_expression};
 use core_utils_rust as utils;
 use emit_type_hint::Kind;
 use env::{emitter::Emitter, Env};

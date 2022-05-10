@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
+use crate::{emit_attribute, emit_body, emit_fatal, emit_memoize_helpers, emit_native_opcode};
 use ast_scope::{Lambda, Scope, ScopeItem};
 use env::emitter::Emitter;
 use error::{Error, Result};

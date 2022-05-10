@@ -2,8 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::try_finally_rewriter as tfr;
-use emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, SetRange};
+use crate::emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, SetRange};
+use crate::{emit_fatal, try_finally_rewriter as tfr};
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
@@ -32,8 +32,6 @@ pub(crate) fn set_state<'arena, 'decl>(
 ) {
     *e.emit_statement_state_mut() = state;
 }
-
-pub(crate) type Level = usize;
 
 // Wrapper functions
 

@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
+use crate::{emit_attribute, emit_expression};
 use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use ffi::Maybe::*;

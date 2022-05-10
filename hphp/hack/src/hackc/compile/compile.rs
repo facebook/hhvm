@@ -465,8 +465,8 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
             emit_unit_from_ast(emitter, namespace_env, ast)
         }
         Err(e) => match e.into_kind() {
-            ErrorKind::IncludeTimeFatalException(op, pos, msg) => {
-                emit_unit::emit_fatal_unit(emitter.alloc, op, pos, msg)
+            ErrorKind::IncludeTimeFatalException(fatal_op, pos, msg) => {
+                emit_unit::emit_fatal_unit(emitter.alloc, fatal_op, pos, msg)
             }
             ErrorKind::Unrecoverable(x) => Err(Error::unrecoverable(x)),
         },
@@ -557,12 +557,9 @@ fn emit_unit_from_text<'arena, 'decl>(
                 (u, profile)
             })
         }
-        Err(ParseError(pos, msg, is_runtime_error)) => time(move || {
-            (
-                emit_fatal(emitter.alloc, is_runtime_error, pos, msg),
-                profile,
-            )
-        }),
+        Err(ParseError(pos, msg, fatal_op)) => {
+            time(move || (emit_fatal(emitter.alloc, fatal_op, pos, msg), profile))
+        }
     };
     profile.codegen_t = codegen_t;
     match unit {
@@ -573,16 +570,11 @@ fn emit_unit_from_text<'arena, 'decl>(
 
 fn emit_fatal<'arena>(
     alloc: &'arena bumpalo::Bump,
-    is_runtime_error: bool,
+    fatal_op: FatalOp,
     pos: Pos,
     msg: impl AsRef<str> + 'arena,
 ) -> Result<HackCUnit<'arena>, Error> {
-    let op = if is_runtime_error {
-        FatalOp::Runtime
-    } else {
-        FatalOp::Parse
-    };
-    emit_unit::emit_fatal_unit(alloc, op, pos, msg)
+    emit_unit::emit_fatal_unit(alloc, fatal_op, pos, msg)
 }
 
 fn create_emitter<'arena, 'decl>(
@@ -636,7 +628,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
 
 #[derive(Error, Debug)]
 #[error("{0}: {1}")]
-pub(crate) struct ParseError(Pos, String, bool);
+pub(crate) struct ParseError(Pos, String, FatalOp);
 
 fn parse_file(
     opts: &Options,
@@ -661,31 +653,37 @@ fn parse_file(
     let ast_result =
         AastParser::from_text_with_namespace_env(&aast_env, namespace_env, &indexed_source_text);
     match ast_result {
-        Err(AastError::Other(msg)) => Err(ParseError(Pos::make_none(), msg, false)),
+        Err(AastError::Other(msg)) => Err(ParseError(Pos::make_none(), msg, FatalOp::Parse)),
         Err(AastError::NotAHackFile()) => Err(ParseError(
             Pos::make_none(),
             "Not a Hack file".to_string(),
-            false,
+            FatalOp::Parse,
         )),
-        Err(AastError::ParserFatal(syntax_error, pos)) => {
-            Err(ParseError(pos, syntax_error.message.to_string(), false))
-        }
+        Err(AastError::ParserFatal(syntax_error, pos)) => Err(ParseError(
+            pos,
+            syntax_error.message.to_string(),
+            FatalOp::Parse,
+        )),
         Ok(ast) => match ast {
             ParserResult { syntax_errors, .. } if !syntax_errors.is_empty() => {
-                let error = syntax_errors
+                let syntax_error = syntax_errors
                     .iter()
                     .find(|e| e.error_type == ErrorType::RuntimeError)
                     .unwrap_or(&syntax_errors[0]);
-                let pos = indexed_source_text.relative_pos(error.start_offset, error.end_offset);
+                let pos = indexed_source_text
+                    .relative_pos(syntax_error.start_offset, syntax_error.end_offset);
                 Err(ParseError(
                     pos,
-                    error.message.to_string(),
-                    error.error_type == ErrorType::RuntimeError,
+                    syntax_error.message.to_string(),
+                    match syntax_error.error_type {
+                        ErrorType::ParseError => FatalOp::Parse,
+                        ErrorType::RuntimeError => FatalOp::Runtime,
+                    },
                 ))
             }
             ParserResult { lowpri_errors, .. } if !lowpri_errors.is_empty() => {
                 let (pos, msg) = lowpri_errors.into_iter().next().unwrap();
-                Err(ParseError(pos, msg, false))
+                Err(ParseError(pos, msg, FatalOp::Parse))
             }
             ParserResult {
                 errors,
@@ -708,10 +706,14 @@ fn parse_file(
                         && e.code() != 2103
                 });
                 match errors.next() {
-                    Some(e) => Err(ParseError(e.pos().clone(), String::from(e.msg()), false)),
+                    Some(e) => Err(ParseError(
+                        e.pos().clone(),
+                        String::from(e.msg()),
+                        FatalOp::Parse,
+                    )),
                     None => match aast {
                         Ok(aast) => Ok(aast),
-                        Err(msg) => Err(ParseError(Pos::make_none(), msg, false)),
+                        Err(msg) => Err(ParseError(Pos::make_none(), msg, FatalOp::Parse)),
                     },
                 }
             }

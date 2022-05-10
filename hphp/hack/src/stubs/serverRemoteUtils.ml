@@ -6,4 +6,4 @@
  *
  *)
 
-let start_delegate_if_needed env _genv _file_count _errors = env
+let start_delegate_if_needed env _genv _file_count _errors : _ = env

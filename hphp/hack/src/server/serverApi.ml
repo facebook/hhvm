@@ -240,9 +240,11 @@ let make_remote_server_api
       Hh_logger.log "Building naming table - Done!";
       ()
 
-    let download_naming_table
+    let download_dep_table
         (manifold_api_key : string option) (manifold_path : string) :
-        (Path.t, string) result =
+        ( Saved_state_loader.Naming_and_dep_table_info.main_artifacts,
+          string )
+        result =
       let target_path = "/tmp/hh_server/" ^ Random_id.short_string () in
       Disk.mkdir_p target_path;
 
@@ -254,14 +256,15 @@ let make_remote_server_api
               Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
             }
           ~progress_callback:(fun _ -> ())
-          ~saved_state_type:Saved_state_loader.Naming_table
+          ~saved_state_type:
+            (Saved_state_loader.Naming_and_dep_table { naming_sqlite = true })
           ~manifold_path
           ~target_path:(Path.make target_path)
       in
       match Future.get ~timeout:60 naming_table_future with
       | Error err ->
         let err = Future.error_to_string err in
-        Hh_logger.error "Downloading naming table failed: %s" err;
+        Hh_logger.error "Downloading dep table failed: %s" err;
         Error err
       | Ok download_result ->
         begin
@@ -271,17 +274,18 @@ let make_remote_server_api
           | Ok (main_artifacts, _telemetry) ->
             let (_ : float) =
               Hh_logger.log_duration
-                "Finished downloading naming table."
+                "Finished downloading dep table."
                 (Future.start_t naming_table_future)
             in
             let naming_table_path =
               main_artifacts
-                .Saved_state_loader.Naming_table_info.naming_table_path
+                .Saved_state_loader.Naming_and_dep_table_info
+                 .naming_sqlite_table_path
             in
             Hh_logger.log
               "Downloaded naming table to %s"
               (Path.to_string naming_table_path);
-            Ok naming_table_path
+            Ok main_artifacts
         end
 
     let remove_decls naming_table fast_parsed =
@@ -309,91 +313,127 @@ let make_remote_server_api
               ~consts:(List.map consts ~f:snd)
               ~modules:(List.map modules ~f:snd))
 
+    let load_dep_table
+        (saved_state_main_artifacts :
+          Saved_state_loader.Naming_and_dep_table_info.main_artifacts) :
+        (Naming_table.t * Path.t, string) result =
+      let {
+        Saved_state_loader.Naming_and_dep_table_info.naming_table_path = _;
+        dep_table_path;
+        naming_sqlite_table_path;
+        legacy_hot_decls_path = _;
+        shallow_hot_decls_path = _;
+        errors_path = _;
+      } =
+        saved_state_main_artifacts
+      in
+      if not (Sys.file_exists (Path.to_string naming_sqlite_table_path)) then
+        Error
+          (Printf.sprintf
+             "Expected naming sqlite table at %s"
+             (Path.to_string naming_sqlite_table_path))
+      else
+        let naming_table =
+          Naming_table.load_from_sqlite
+            ctx
+            (Path.to_string naming_sqlite_table_path)
+        in
+        Ok (naming_table, dep_table_path)
+
+    let download_and_update_naming_table_helper
+        (manifold_api_key : string option)
+        (path : string)
+        (changed_files : Relative_path.t list option) : (string, string) result
+        =
+      download_dep_table manifold_api_key path
+      >>= fun saved_state_main_artifacts ->
+      Hh_logger.log "Loading dep graph artifacts...";
+      load_dep_table saved_state_main_artifacts
+      >>= fun (naming_table, dep_table_path) ->
+      match changed_files with
+      | None -> Error "No changed files uploaded for remote worker's payload"
+      | Some lst ->
+        Ok (naming_table, lst) >>= fun (naming_table, changed_files) ->
+        Hh_logger.log "Cleaning naming table of changed files";
+        ignore
+          (clean_changed_files_state
+             ctx
+             naming_table
+             changed_files
+             ~t:(Unix.gettimeofday ()));
+        Ok (naming_table, changed_files, dep_table_path)
+        >>= fun (naming_table, changed_files, dep_table_path) ->
+        let changed_hack_files =
+          List.filter_map changed_files ~f:(fun file ->
+              if FindUtils.is_hack (Relative_path.suffix file) then
+                Some (Path.to_string root ^ "/" ^ Relative_path.suffix file)
+              else
+                None)
+        in
+        let indexer =
+          let state = ref changed_hack_files in
+          let max_files_per_batch = 1000 in
+          fun () ->
+            let (next, rest) = List.split_n !state max_files_per_batch in
+            state := rest;
+            next
+        in
+        let get_next =
+          ServerUtils.make_next
+            ~hhi_filter:(fun _ -> true)
+            ~indexer
+            ~extra_roots:(ServerConfig.extra_paths ServerConfig.default_config)
+        in
+        Ok
+          ( naming_table,
+            Direct_decl_service.go
+              ctx
+              workers
+              ~ide_files:Relative_path.Set.empty
+              ~get_next
+              ~trace:false
+              ~cache_decls:true,
+            dep_table_path )
+        >>= fun (naming_table, fast_parsed, dep_table_path) ->
+        Hh_logger.log "Built updated decls for naming table";
+        Hh_logger.log "Clearing old decls from naming table";
+        remove_decls naming_table fast_parsed;
+        Hh_logger.log "Updating naming table";
+        ignore (Naming_table.update_many naming_table fast_parsed);
+        Ok (fast_parsed, dep_table_path)
+        >>= fun (fast_parsed, dep_table_path) ->
+        Hh_logger.log "Updating naming global";
+        Naming_table.create fast_parsed
+        |> Naming_table.iter ~f:(fun k v ->
+               let _ =
+                 Naming_global.ndecl_file_error_if_already_bound ctx k v
+               in
+               ());
+        Ok (Path.to_string dep_table_path)
+
     let download_and_update_naming_table
         (manifold_api_key : string option)
         (saved_state_manifold_path : string option)
-        (changed_files : Relative_path.t list option) : unit =
-      let saved_state_manifold_path =
-        Option.value_exn
-          saved_state_manifold_path
-          ~message:
-            "Must have a saved state manifold path to download a naming table"
-      in
-      download_naming_table manifold_api_key saved_state_manifold_path
-      >>= (fun naming_table_base ->
-            Hh_logger.log "Loading naming table...";
-            load_naming_table_base ~naming_table_base:(Some naming_table_base)
-            >>= function
-            | None -> Error "Failed to load naming table"
-            | Some n -> Ok n)
-      >>= (fun naming_table ->
-            match changed_files with
-            | None ->
-              Error "No changed files uploaded for remote worker's payload"
-            | Some lst -> Ok (naming_table, lst))
-      >>= (fun (naming_table, changed_files) ->
-            Hh_logger.log "Cleaning naming table of changed files";
-            ignore
-              (clean_changed_files_state
-                 ctx
-                 naming_table
-                 changed_files
-                 ~t:(Unix.gettimeofday ()));
-            Ok (naming_table, changed_files))
-      >>= (fun (naming_table, changed_files) ->
-            let changed_hack_files =
-              List.filter_map changed_files ~f:(fun file ->
-                  if FindUtils.is_hack (Relative_path.suffix file) then
-                    Some (Path.to_string root ^ "/" ^ Relative_path.suffix file)
-                  else
-                    None)
-            in
-            let indexer =
-              let state = ref changed_hack_files in
-              let max_files_per_batch = 1000 in
-              fun () ->
-                let (next, rest) = List.split_n !state max_files_per_batch in
-                state := rest;
-                next
-            in
-            let get_next =
-              ServerUtils.make_next
-                ~hhi_filter:(fun _ -> true)
-                ~indexer
-                ~extra_roots:
-                  (ServerConfig.extra_paths ServerConfig.default_config)
-            in
-            Ok
-              ( naming_table,
-                Direct_decl_service.go
-                  ctx
-                  workers
-                  ~ide_files:Relative_path.Set.empty
-                  ~get_next
-                  ~trace:false
-                  ~cache_decls:true ))
-      >>= (fun (naming_table, fast_parsed) ->
-            Hh_logger.log "Built updated decls for naming table";
-            Hh_logger.log "Clearing old decls from naming table";
-            remove_decls naming_table fast_parsed;
-            Hh_logger.log "Updating naming table";
-            ignore (Naming_table.update_many naming_table fast_parsed);
-            Ok fast_parsed)
-      >>= (fun fast_parsed ->
-            Hh_logger.log "Updating naming global";
-            Naming_table.create fast_parsed
-            |> Naming_table.iter ~f:(fun k v ->
-                   let _ =
-                     Naming_global.ndecl_file_error_if_already_bound ctx k v
-                   in
-                   ());
-            Ok ())
-      |> Result.iter_error ~f:(fun err ->
-             Hh_logger.log
-               "Could not build naming table from saved state: %s"
-               err;
-             Hh_logger.log "Falling back to generating naming table";
-             build_naming_table ())
+        (changed_files : Relative_path.t list option) : string option =
+      match saved_state_manifold_path with
+      | None ->
+        Hh_logger.log
+          "[hulk lite] No saved_state_manifold_path, will fall back to building naming table locally";
+        build_naming_table ();
+        None
+      | Some path ->
+        (match
+           download_and_update_naming_table_helper
+             manifold_api_key
+             path
+             changed_files
+         with
+        | Ok dep_table_path -> Some dep_table_path
+        | Error err ->
+          Hh_logger.log "Could not build naming table from saved state: %s" err;
+          Hh_logger.log "Falling back to generating naming table";
+          build_naming_table ();
+          None)
 
     let type_check ctx ~init_id ~check_id files_to_check ~state_filename =
       let t = Unix.gettimeofday () in

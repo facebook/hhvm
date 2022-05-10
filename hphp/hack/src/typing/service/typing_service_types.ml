@@ -195,5 +195,6 @@ type delegate_env = {
      This largely exists to allow unit tests to run without making saved state calls to watchman.
   *)
   saved_state_data_loader:
-    (unit -> (string * Relative_path.t list, string) result Future.t) option;
+    (unit -> (string option * Relative_path.t list, string) result Future.t)
+    option;
 }

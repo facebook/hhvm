@@ -88,51 +88,6 @@ class GenerateLogicRulesTest(unittest.TestCase):
         )
         self.assertTrue(hack_codegen.validate())
 
-    def test_hack_code_gen_with_partial_dependency_graph_given_by_user(self) -> None:
-        solving_context = ClingoContext(
-            number_of_nodes=12,
-            min_depth=3,
-            min_classes=3,
-            min_interfaces=4,
-            lower_bound=1,
-            higher_bound=5,
-        )
-        deps = """\
-Extends A -> Type B
-Extends I -> Type B
-Extends T -> Type A
-Type A -> Type B
-Type I -> Type B
-Type T -> Type A, Type B"""
-        exp = """\
-<?hh
-class S9   {}
-class S10   {}
-class S11   {}
-interface A extends T {}
-interface B extends A,I {}
-interface I  {}
-interface T  {}
-interface S0  {}
-interface S1  {}
-interface S2  {}
-interface S3  {}
-interface S4 extends S0 {}
-interface S5  {}
-interface S6  {}
-interface S7  {}
-interface S8 extends S4 {}
-"""
-
-        hack_codegen = hackGenerator.HackCodeGenerator(solving_context)
-        combined_rules = agentGenerator.generate_logic_rules(
-            solving_context
-        ) + agentGenerator.extract_logic_rules(deps.split("\n"))
-        agentGenerator.do_reasoning(
-            additional_programs=combined_rules, generator=hack_codegen
-        )
-        self.assertEqual(str(hack_codegen), exp)
-
     def test_unsatisfiable_parameters(self) -> None:
         # Given 5 nodes, but asking for 3 classes + 4 interfaces with
         solving_context = ClingoContext(

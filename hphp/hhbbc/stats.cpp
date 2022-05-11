@@ -449,7 +449,7 @@ void collect_stats(Stats& stats,
 //////////////////////////////////////////////////////////////////////
 
 StatsHolder::StatsHolder() {
-  if (!Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) return;
+  if (!Trace::moduleEnabledRelease(Trace::hhbbc_stats, 1)) return;
   stats = new Stats{};
 }
 
@@ -480,9 +480,9 @@ void print_stats(const StatsHolder& stats) {
   if (!stats) return;
 
   auto const str = show(*stats.stats);
-  if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 2)) {
-    std::cout << str;
-  }
+  Trace::ftraceRelease("{}", str);
+
+  if (!Trace::moduleEnabledRelease(Trace::hhbbc_stats, 2)) return;
 
   auto stats_file = options.stats_file;
 

@@ -226,13 +226,18 @@ let typeconsts env tcs =
   in
   List.concat_map ~f tcs
 
+(* Treat private or internal class members as internal *)
+let at_least_internal = function
+  | Internal
+  | Private ->
+    true
+  | Protected
+  | Public ->
+    false
+
 let class_vars env cvs =
   let f cv =
-    let tenv =
-      Env.set_internal
-        env.tenv
-        (Aast.equal_visibility Aast.Internal cv.cv_visibility)
-    in
+    let tenv = Env.set_internal env.tenv (at_least_internal cv.cv_visibility) in
     let env = { env with tenv } in
     type_hint env cv.cv_type
   in
@@ -249,9 +254,7 @@ let method_ env m =
       m.m_where_constraints
   in
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  let tenv =
-    Env.set_internal tenv (Aast.equal_visibility Aast.Internal m.m_visibility)
-  in
+  let tenv = Env.set_internal tenv (at_least_internal m.m_visibility) in
   let env = { env with tenv } in
   fun_params env m.m_params
   @ tparams env m.m_tparams

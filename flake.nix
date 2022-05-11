@@ -28,17 +28,11 @@
           packages.hhvm = pkgs.callPackage ./hhvm.nix { };
           packages.default = packages.hhvm;
 
-          checks.quick = pkgs.stdenv.mkDerivation {
-            name = "hhvm-quick-test";
-
-            buildInputs = [ packages.hhvm ];
-            unpackPhase = "true";
-
-            buildPhase = ''
-              HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" hphp/test/run.php quick
-            '';
-            installPhase = "mkdir -p $out";
-          };
+          checks.quick = pkgs.runCommand "hhvm-quick-test" { } ''
+            set -ex
+            mkdir $out
+            HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" ./hphp/test/run.php quick
+          ''
 
           devShells.default = pkgs.mkShell ({
             buildInputs = packages.hhvm.nativeBuildInputs ++ packages.hhvm.buildInputs ++ [

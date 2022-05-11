@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -192,6 +193,45 @@ private:
   const HPHP::Facts::Clock m_val;
 };
 } // namespace folly
+
+namespace std {
+
+template <> struct hash<HPHP::Facts::Attribute> {
+  std::size_t operator()(const HPHP::Facts::Attribute& attr) const noexcept {
+    return folly::hash::hash_combine(
+        std::hash<std::string>{}(attr.m_name),
+        folly::hash::hash_range(attr.m_args.begin(), attr.m_args.end()));
+  }
+};
+
+template <> struct hash<HPHP::Facts::MethodDetails> {
+  std::size_t
+  operator()(const HPHP::Facts::MethodDetails& method) const noexcept {
+    return folly::hash::hash_combine(
+        std::hash<std::string>{}(method.m_name),
+        folly::hash::hash_range(
+            method.m_attributes.begin(), method.m_attributes.end()));
+  }
+};
+
+template <> struct hash<HPHP::Facts::TypeDetails> {
+  std::size_t operator()(const HPHP::Facts::TypeDetails& type) const noexcept {
+    return folly::hash::hash_combine(
+        std::hash<std::string>{}(type.m_name),
+        std::hash<::HPHP::Facts::TypeKind>{}(type.m_kind),
+        std::hash<int>{}(type.m_flags),
+        folly::hash::hash_range(
+            type.m_baseTypes.begin(), type.m_baseTypes.end()),
+        folly::hash::hash_range(
+            type.m_attributes.begin(), type.m_attributes.end()),
+        folly::hash::hash_range(
+            type.m_requireExtends.begin(), type.m_requireExtends.end()),
+        folly::hash::hash_range(
+            type.m_requireImplements.begin(), type.m_requireImplements.end()),
+        folly::hash::hash_range(type.m_methods.begin(), type.m_methods.end()));
+  }
+};
+} // namespace std
 
 template <> struct fmt::formatter<HPHP::Facts::Clock> {
 

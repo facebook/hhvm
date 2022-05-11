@@ -1124,6 +1124,16 @@ let visitor ctx autocomplete_context sienv =
 
     method complete_id (id : Ast_defs.id) : unit = self#complete_global id Acid
 
+    method! on_def env d =
+      match d with
+      | Aast.Stmt _ ->
+        (* Don't try to complete top-level statements. If we see
+           'fAUTO332' the user will be expecting us to complete
+           'function', not a top-level expression
+           'foo_type::method()`. *)
+        ()
+      | _ -> super#on_def env d
+
     method! on_Id env id =
       autocomplete_id id;
       self#complete_id id;

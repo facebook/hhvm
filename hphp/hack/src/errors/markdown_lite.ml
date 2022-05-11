@@ -126,8 +126,7 @@ let rec parse_and_format_until (delimiter : delimiter) (state : parse_state) :
     (* Example: "*foo bar*" is a valid section, while
        "**", "* foo bar*", "*foo bar *", and "* foo bar *" are not.
        The absence of a leading space is checked before entering this function. *)
-    List.length section > 0
-    && not (Char.equal ' ' (List.last_exn section |> snd))
+    List.length section > 0 && not (Char.equal ' ' (List.hd_exn section |> snd))
   in
   match eat_prefix (delimiter_to_string delimiter) state with
   | Some { parsed; remaining } when is_valid_section parsed ->
@@ -136,7 +135,11 @@ let rec parse_and_format_until (delimiter : delimiter) (state : parse_state) :
        in that larger section. *)
     let parsed =
       parse_markdown (List.map ~f:snd parsed |> String.of_char_list)
-      |> List.map ~f:(fun (delims, c) -> (DelimiterSet.add delimiter delims, c))
+      |> List.map
+           ~f:
+             (List.map ~f:(fun (delims, c) ->
+                  (DelimiterSet.add delimiter delims, c)))
+      |> List.concat
     in
     Some { parsed; remaining }
   | _ ->
@@ -151,7 +154,7 @@ let rec parse_and_format_until (delimiter : delimiter) (state : parse_state) :
          wasn't valid), and we still have text we can try *)
       parse_and_format_until
         delimiter
-        { parsed = parsed @ [(DelimiterSet.empty, first)]; remaining })
+        { parsed = (DelimiterSet.empty, first) :: parsed; remaining })
 
 and parse_and_format_section ~(delimiter : delimiter) (s : parse_state) =
   Option.Monad_infix.(
@@ -159,7 +162,7 @@ and parse_and_format_section ~(delimiter : delimiter) (s : parse_state) =
     >>= (eat_prefix " " |> fail)
     >>= parse_and_format_until delimiter)
 
-and parse_markdown (msg : string) : tagged_char list =
+and parse_markdown (msg : string) : tagged_char list list =
   if String.is_empty msg then
     []
   else
@@ -173,10 +176,10 @@ and parse_markdown (msg : string) : tagged_char list =
     match parse { parsed = []; remaining = msg } with
     | None ->
       failwith "Impossible: unable to parse a single character in error message"
-    | Some { parsed; remaining } -> parsed @ parse_markdown remaining
+    | Some { parsed; remaining } -> List.rev parsed :: parse_markdown remaining
 
 let render ?(add_bold = false) ?(color = Tty.Red) (msg : string) =
-  parse_markdown msg |> format_markdown ~add_bold ~color
+  parse_markdown msg |> List.concat |> format_markdown ~add_bold ~color
 
 let md_codify s = "`" ^ s ^ "`"
 

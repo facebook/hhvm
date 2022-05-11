@@ -11,7 +11,6 @@ use tempdir::TempDir;
 use fbinit::FacebookInit;
 use hackrs::{
     decl_parser::DeclParser,
-    file_provider,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
     naming_provider::{NamingProvider, SqliteNamingTable},
     shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider},

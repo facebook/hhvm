@@ -19,7 +19,7 @@ use tempdir::TempDir;
 use ty::reason::{BReason, NReason, Reason};
 
 use hackrs::{
-    decl_parser::DeclParser, file_provider, folded_decl_provider::FoldedDeclProvider,
+    decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider,
     shallow_decl_provider::ShallowDeclCache,
 };
 use hackrs_test_utils::cache::NonEvictingCache;

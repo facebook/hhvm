@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{file_provider, naming_provider};
+use crate::naming_provider;
+use file_provider;
 use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;

@@ -2,7 +2,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hackrs::{decl_parser::DeclParser, file_provider, folded_decl_provider};
+use hackrs::{decl_parser::DeclParser, folded_decl_provider};
 use ocamlrep_ocamlpool::{ocaml_ffi_with_arena, Bump};
 use oxidized_by_ref::{decl_defs::DeclClassType, parser_options::ParserOptions};
 use pos::{RelativePath, RelativePathCtx, ToOxidized, TypeName};

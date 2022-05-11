@@ -9,6 +9,7 @@ name = "decl_file_rust"
 path = "../../decl_file_rust.rs"
 
 [dependencies]
+file_provider = { path = "../../file_provider/cargo/file_provider" }
 hackrs = { path = "../../hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hhi = { path = "../../../hhi/rust" }

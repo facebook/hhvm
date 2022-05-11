@@ -10,6 +10,7 @@ path = "../../decl_repo_rust.rs"
 test = false
 
 [dependencies]
+file_provider = { path = "../../file_provider/cargo/file_provider" }
 find_utils = { path = "../../../utils/find_utils" }
 hackrs = { path = "../../hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }

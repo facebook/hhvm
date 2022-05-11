@@ -9,7 +9,6 @@
 
 use hackrs::ast_provider::AstProvider;
 use hackrs::decl_parser::DeclParser;
-use hackrs::file_provider;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::shallow_decl_provider::EagerShallowDeclProvider;
 use hackrs::tast;

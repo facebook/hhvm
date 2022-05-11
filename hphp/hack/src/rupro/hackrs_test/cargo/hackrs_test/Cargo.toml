@@ -10,6 +10,7 @@ path = "../../hackrs_test.rs"
 [dependencies]
 anyhow = "1.0.56"
 fbinit = { path = "../../../../../../../common/rust/shed/fbinit" }
+file_provider = { path = "../../../file_provider/cargo/file_provider" }
 hackrs = { path = "../../../hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hh24_test = { path = "../../../../facebook/utils/cargo/hh24_test" }

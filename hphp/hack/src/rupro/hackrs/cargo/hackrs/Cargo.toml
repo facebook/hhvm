@@ -10,11 +10,10 @@ path = "../../lib.rs"
 [dependencies]
 aast_parser = { path = "../../../../parser/cargo/aast_parser" }
 arena_collections = { path = "../../../../arena_collections" }
-bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
-dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 direct_decl_parser = { path = "../../../../parser/api/cargo/direct_decl_parser" }
 eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
+file_provider = { path = "../../../file_provider/cargo/file_provider" }
 hh24_types = { path = "../../../../utils/hh24_types" }
 im = { version = "14.2", features = ["rayon", "serde"] }
 indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
@@ -23,7 +22,6 @@ lint_rust = { path = "../../../../utils/lint" }
 names = { path = "../../../../naming/names_rust" }
 naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
 once_cell = "1.8"
 ouroboros = "0.8"
 oxidized = { path = "../../../../oxidized" }

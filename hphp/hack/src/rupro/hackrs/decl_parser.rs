@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::special_names;
-use crate::{file_provider, file_provider::FileProvider};
 use arena_collections::list::List;
+use file_provider::FileProvider;
 use names::FileSummary;
 use obr::{
     decl_parser_options::DeclParserOptions,

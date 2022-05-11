@@ -10,6 +10,7 @@ test = false
 doctest = false
 
 [dependencies]
+file_provider = { path = "../../file_provider/cargo/file_provider" }
 hackrs = { path = "../../hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 ocaml_runtime = { path = "../../../utils/ocaml_runtime" }

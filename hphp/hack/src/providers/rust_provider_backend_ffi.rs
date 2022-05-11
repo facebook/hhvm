@@ -3,11 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hackrs::{
-    decl_parser::DeclParser,
-    file_provider::{FileProvider, FileType, PlainFileProvider},
-    folded_decl_provider::FoldedDeclProvider,
-};
+use file_provider::{FileProvider, FileType, PlainFileProvider};
+use hackrs::{decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider};
 use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
 use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::{ocaml_ffi, ocaml_ffi_with_arena, Bump};
@@ -22,9 +19,7 @@ use std::sync::Arc;
 use ty::reason::BReason;
 
 struct ProviderBackend {
-    #[allow(dead_code)]
     file_provider: Arc<dyn FileProvider>,
-    #[allow(dead_code)]
     folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
 }
 

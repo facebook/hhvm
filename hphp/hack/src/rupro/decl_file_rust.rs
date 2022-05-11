@@ -5,7 +5,6 @@
 
 use hackrs::{
     decl_parser::DeclParser,
-    file_provider,
     folded_decl_provider::FoldedDeclProvider,
     typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };

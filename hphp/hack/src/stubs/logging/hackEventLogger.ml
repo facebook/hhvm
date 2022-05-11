@@ -65,6 +65,7 @@ type rollout_flags = {
   shm_use_sharded_hashtbl: bool;
   shm_cache_size: int;
   remote_old_decls_no_limit: bool;
+  no_marshalled_naming_table_in_saved_state: bool;
 }
 
 let flush () = ()

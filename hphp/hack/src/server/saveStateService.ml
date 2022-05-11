@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open SaveStateServiceTypes
+open ServerEnv
 
 let get_errors_filename (filename : string) : string = filename ^ ".err"
 
@@ -203,11 +204,18 @@ let dump_naming_errors_decls
     (output_filename : string)
     (naming_table : Naming_table.t)
     (errors : Errors.t) : unit =
-  Hh_logger.log "Marshalling the naming table...";
-  let (naming_table_saved : Naming_table.saved_state_info) =
-    Naming_table.to_saved naming_table
-  in
-  save_contents output_filename naming_table_saved;
+  if
+    genv.local_config
+      .ServerLocalConfig.no_marshalled_naming_table_in_saved_state
+  then
+    Hh_logger.log "Skipping marshalling the naming table..."
+  else (
+    Hh_logger.log "Marshalling the naming table...";
+    let (naming_table_saved : Naming_table.saved_state_info) =
+      Naming_table.to_saved naming_table
+    in
+    save_contents output_filename naming_table_saved
+  );
 
   if genv.ServerEnv.local_config.ServerLocalConfig.naming_sqlite_in_hack_64 then (
     let naming_sql_filename = output_filename ^ "_naming.sql" in
@@ -224,11 +232,8 @@ let dump_naming_errors_decls
     if List.length save_result.Naming_sqlite.errors > 0 then
       Exit.exit Exit_status.Sql_assertion_failure;
 
-    if not (Sys.file_exists output_filename) then
-      failwith
-        (Printf.sprintf "Did not find file infos file '%s'" output_filename)
-    else
-      Hh_logger.log "Saved file infos to '%s'" output_filename
+    assert (Sys.file_exists naming_sql_filename);
+    Hh_logger.log "Saved naming table sqlite to '%s'" naming_sql_filename
   );
 
   (* Let's not write empty error files. *)

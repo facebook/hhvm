@@ -604,7 +604,10 @@ type t = {
   hulk_heavy: bool;
       (** Rewrite of Hulk to be faster and simpler - Does update dep graph *)
   specify_manifold_api_key: bool;
-  remote_old_decls_no_limit: bool;  (**  Remove remote old decl fetching limit *)
+  remote_old_decls_no_limit: bool;
+      (**  Remove remote old decl fetching limit *)
+  no_marshalled_naming_table_in_saved_state: bool;
+      (** Remove marshalled naming table from saved state *)
 }
 
 let default =
@@ -715,6 +718,7 @@ let default =
     log_saved_state_age_and_distance = false;
     specify_manifold_api_key = false;
     remote_old_decls_no_limit = false;
+    no_marshalled_naming_table_in_saved_state = false;
   }
 
 let path =
@@ -1445,6 +1449,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let no_marshalled_naming_table_in_saved_state =
+    bool_if_min_version
+      "no_marshalled_naming_table_in_saved_state"
+      ~default:default.no_marshalled_naming_table_in_saved_state
+      ~current_version
+      config
+  in
   let saved_state_manifold_api_key =
     (* overriding the local_config value so consumers of saved_state_manifold_api_key
        * don't need to explicitly check for specify_manifold_api_key.
@@ -1586,6 +1597,7 @@ let load_ fn ~silent ~current_version overrides =
     log_saved_state_age_and_distance;
     specify_manifold_api_key;
     remote_old_decls_no_limit;
+    no_marshalled_naming_table_in_saved_state;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1621,6 +1633,8 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       hulk_heavy = options.hulk_heavy;
       specify_manifold_api_key = options.specify_manifold_api_key;
       remote_old_decls_no_limit = options.remote_old_decls_no_limit;
+      no_marshalled_naming_table_in_saved_state =
+        options.no_marshalled_naming_table_in_saved_state;
       populate_member_heaps = options.populate_member_heaps;
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;
       shm_cache_size = options.shm_cache_size;

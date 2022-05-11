@@ -766,17 +766,40 @@ type keyword_context =
   | ReturnType
   | AsyncBlockHeader
 
+let trivia_pos (t : Full_fidelity_positioned_trivia.t) : Pos.t =
+  let open Full_fidelity_positioned_trivia in
+  let open Full_fidelity_source_text in
+  relative_pos
+    t.source_text.file_path
+    t.source_text
+    t.offset
+    (t.offset + t.width)
+
+let fixme_elt (t : Full_fidelity_positioned_trivia.t) : Result_set.elt option =
+  match t.Full_fidelity_positioned_trivia.kind with
+  | Full_fidelity_trivia_kind.FixMe ->
+    let pos = trivia_pos t in
+    Some { name = "HH_FIXME"; type_ = HhFixme; is_declaration = false; pos }
+  | _ -> None
+
+let fixmes (tree : Full_fidelity_positioned_syntax.t) : Result_set.elt list =
+  let open Full_fidelity_positioned_syntax in
+  let rec aux acc s =
+    let trivia_list = leading_trivia s in
+    let fixme_elts = List.map trivia_list ~f:fixme_elt |> List.filter_opt in
+    List.fold (children s) ~init:(fixme_elts @ acc) ~f:aux
+  in
+
+  aux [] tree
+
 (** Get keyword positions from the FFP for every keyword that has hover
     documentation. **)
-let keywords ctx entry : Result_set.elt list =
-  let cst = Ast_provider.compute_cst ~ctx ~entry in
-  let tree = Provider_context.PositionedSyntaxTree.root cst in
-
+let keywords tree : Result_set.elt list =
   let open Full_fidelity_positioned_syntax in
   let token_pos (t : Token.t) =
     let offset = t.Token.offset + t.Token.leading_width in
     Full_fidelity_source_text.relative_pos
-      entry.Provider_context.path
+      t.Token.source_text.Full_fidelity_source_text.file_path
       t.Token.source_text
       offset
       (offset + t.Token.width)
@@ -784,9 +807,10 @@ let keywords ctx entry : Result_set.elt list =
 
   let syntax_pos s =
     let offset = start_offset s + leading_width s in
+    let source = source_text s in
     Full_fidelity_source_text.relative_pos
-      entry.Provider_context.path
-      (source_text s)
+      source.Full_fidelity_source_text.file_path
+      source
       offset
       (offset + width s)
   in
@@ -952,11 +976,16 @@ let all_symbols_ctx
     Result_set.elt list =
   match entry.Provider_context.symbols with
   | None ->
-    let keyword_symbols = keywords ctx entry in
+    let cst = Ast_provider.compute_cst ~ctx ~entry in
+    let tree = Provider_context.PositionedSyntaxTree.root cst in
+
+    let fixme_symbols = fixmes tree in
+    let keyword_symbols = keywords tree in
     let { Tast_provider.Compute_tast.tast; _ } =
       Tast_provider.compute_tast_quarantined ~ctx ~entry
     in
-    let symbols = keyword_symbols @ all_symbols ctx tast in
+
+    let symbols = fixme_symbols @ keyword_symbols @ all_symbols ctx tast in
     entry.Provider_context.symbols <- Some symbols;
     symbols
   | Some symbols -> symbols

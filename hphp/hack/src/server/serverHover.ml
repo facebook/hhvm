@@ -168,6 +168,36 @@ let pure_context_info =
   "This function has an empty context list, so it has no capabilities."
   ^ "\nIt may only read properties, access constants, or call other pure functions."
 
+let hh_fixme_info =
+  "`HH_FIXME[N]` disables type checker error N on the next line. It does
+not change runtime behavior.
+
+**`HH_FIXME` is almost always a bad idea**. You might get an
+exception, or you might get an unexpected value. Even scarier, you
+might cause an exception in a totally different part of the codebase.
+
+```
+/* HH_FIXME[4110] My reason here */
+takes_num(\"x\") + takes_num(\"y\");
+```
+
+In this example, the type checker will accept the code, but the code
+will still crash when you run it (`TypeHintViolationException` when
+calling `takes_num`).
+
+Note that `HH_FIXME` applies to all occurrences of the error on the
+next line.
+
+## You can fix it!
+
+It is always possible to write code without `HH_FIXME`. This usually
+requires changing type signatures and some refactoring. Your code will
+be more reliable, the type checker can help you, and future changes
+will be less scary.
+
+See also `HH\\FIXME\\UNSAFE_CAST()`, which is still bad, but much more
+precise."
+
 let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
   let await_explanation =
     "\n\nThis does not give you threads. Only one function is running at any point in time."
@@ -287,6 +317,7 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
               make_hover_const_definition entry def_opt;
             ]
         | { type_ = Keyword info; _ } -> [keyword_info info]
+        | { type_ = HhFixme; _ } -> [hh_fixme_info]
         | { type_ = PureFunctionContext; _ } -> [pure_context_info]
         | { type_ = BuiltInType bt; _ } ->
           [SymbolOccurrence.built_in_type_hover bt]

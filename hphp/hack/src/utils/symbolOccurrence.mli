@@ -96,6 +96,7 @@ type kind =
   | Keyword of keyword_with_hover_docs
   | PureFunctionContext
   | BestEffortArgument of receiver * int
+  | HhFixme
 [@@deriving eq]
 
 type 'a t = {

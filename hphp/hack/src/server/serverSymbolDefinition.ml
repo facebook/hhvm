@@ -192,6 +192,7 @@ let go ctx ast result =
     | Some ast -> ServerFindTypeVar.go ast result.SO.pos result.SO.name)
   | SO.EnumClassLabel (class_name, _member_name) ->
     summarize_class_typedef ctx class_name
+  | SO.HhFixme -> None
 
 let get_definition_cst_node_from_pos ctx entry kind pos =
   try

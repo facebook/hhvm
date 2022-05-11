@@ -89,6 +89,7 @@ type kind =
      This is purely for IDE hover information, and is only used when
      we can easily find a concrete receiver (e.g. no complex generics). *)
   | BestEffortArgument of receiver * int
+  | HhFixme
 [@@deriving ord, eq]
 
 type 'a t = {
@@ -119,6 +120,7 @@ let kind_to_string = function
   | Keyword _ -> "keyword"
   | PureFunctionContext -> "context_braces"
   | BestEffortArgument _ -> "argument"
+  | HhFixme -> "hh_fixme"
 
 let enclosing_class occurrence =
   match occurrence.type_ with

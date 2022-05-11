@@ -268,8 +268,7 @@ fn make_folded_provider<R: Reason>(
             Arc::new(NonEvictingCache::default())
         },
         if let Some(naming_table) = &opts.naming_table {
-            let naming_table =
-                hackrs::naming_provider::SqliteNamingTable::new(naming_table).unwrap();
+            let naming_table = naming_provider::SqliteNamingTable::new(naming_table).unwrap();
             Arc::new(hackrs::shallow_decl_provider::LazyShallowDeclProvider::new(
                 Arc::new(shallow_decl_cache),
                 Arc::new(naming_table),

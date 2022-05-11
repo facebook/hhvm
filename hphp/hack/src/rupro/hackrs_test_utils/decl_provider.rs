@@ -8,11 +8,11 @@ use crate::registrar::DependencyGraph;
 use hackrs::{
     decl_parser::DeclParser,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
-    naming_provider::SqliteNamingTable,
     shallow_decl_provider::{
         EagerShallowDeclProvider, LazyShallowDeclProvider, ShallowDeclProvider,
     },
 };
+use naming_provider::SqliteNamingTable;
 use pos::RelativePath;
 use std::path::PathBuf;
 use std::sync::Arc;

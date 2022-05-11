@@ -12,12 +12,12 @@ use fbinit::FacebookInit;
 use hackrs::{
     decl_parser::DeclParser,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
-    naming_provider::{NamingProvider, SqliteNamingTable},
     shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider},
     typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };
 use hackrs_test_utils::registrar::DependencyGraph;
 use hh24_test::TestRepo;
+use naming_provider::{NamingProvider, SqliteNamingTable};
 use pos::RelativePathCtx;
 use std::{path::PathBuf, rc::Rc, sync::Arc};
 use ty::reason::BReason;

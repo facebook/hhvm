@@ -5,7 +5,7 @@
 
 use super::{Error, Result, ShallowDeclCache, TypeDecl};
 use crate::decl_parser::DeclParser;
-use crate::naming_provider::NamingProvider;
+use naming_provider::NamingProvider;
 use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::sync::Arc;
 use ty::decl::{ConstDecl, FunDecl, Ty};

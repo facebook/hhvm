@@ -14,6 +14,7 @@ file_provider = { path = "../../../file_provider/cargo/file_provider" }
 hackrs = { path = "../../../hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hh24_test = { path = "../../../../facebook/utils/cargo/hh24_test" }
+naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
 oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
 tempdir = "0.3"

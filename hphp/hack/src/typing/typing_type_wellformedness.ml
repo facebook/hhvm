@@ -344,9 +344,9 @@ let class_ tenv c =
         []);
       tparams env c_tparams;
       where_constrs env c_where_constraints;
-      hints env c_extends;
-      (* Implements and use are not signatures from the point of view of modules because the trait
+      (* Classes inherited are not signatures from the point of view of modules because the trait
          being use'd does not need to be seen by users of the class *)
+      hints ~in_signature:false env c_extends;
       hints ~in_signature:false env c_implements;
       hints ~in_signature:false env c_uses;
       typeconsts env c_typeconsts;

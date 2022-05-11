@@ -157,6 +157,20 @@ end
 
 module ParentClassConstSet = Caml.Set.Make (ParentClassConst)
 
+module ParentTypeConst = struct
+  type t = {
+    typeconst: typeconst_type;
+    parent: ParentClassElt.parent;
+  }
+
+  let make typeconst parent = { typeconst; parent }
+
+  let compare { typeconst = left; _ } { typeconst = right; _ } =
+    String.compare left.ttc_origin right.ttc_origin
+end
+
+module ParentTypeConstSet = Caml.Set.Make (ParentTypeConst)
+
 let constructor_is_consistent kind =
   match kind with
   | ConsistentConstruct
@@ -1532,58 +1546,13 @@ let check_typeconst_override
     | _ -> ());
     env
 
-(** For type constants we need to check that a child respects the
-    constraints specified by its parent, and does not conflict
-    with other inherited type constants *)
-let check_typeconsts
-    env
-    implements
-    (parent_class : (Pos.t * string) * decl_ty list * Cls.t)
-    (class_pos, class_)
-    on_error =
-  let ((parent_pos, _), _, parent_class) = parent_class in
-  let ptypeconsts = Cls.typeconsts parent_class in
-  List.fold ptypeconsts ~init:env ~f:(fun env (tconst_name, parent_tconst) ->
-      match Cls.get_typeconst class_ tconst_name with
-      | Some tconst ->
-        check_typeconst_override
-          env
-          implements
-          (class_pos, class_)
-          parent_tconst
-          tconst
-          parent_class
-          on_error
-      | None ->
-        (* The only case when a member belongs to a parent but not the child is if the parent is an
-           interface and the child is a concrete class. Otherwise, the member would have been inherited. *)
-        let err =
-          Typing_error.(
-            primary
-            @@ Primary.Member_not_implemented
-                 {
-                   pos = parent_pos;
-                   member_name = tconst_name;
-                   decl_pos = fst parent_tconst.ttc_name;
-                   quickfixes = [];
-                 })
-        in
-        Errors.add_typing_error err;
-        env)
-
 (* Use the [on_error] callback if we need to wrap the basic error with a
  *   "Class ... does not correctly implement all required members"
  * message pointing at the class being checked.
  *)
-let check_class_extends_parent_typeconsts_constructors
-    env
-    implements
-    (parent_class : (Pos.t * string) * decl_ty list * Cls.t)
-    (name_pos, class_)
-    on_error =
-  let env =
-    check_typeconsts env implements parent_class (name_pos, class_) on_error
-  in
+let check_class_extends_parent_constructors
+    env (parent_class : (Pos.t * string) * decl_ty list * Cls.t) class_ on_error
+    =
   let (_, parent_tparaml, parent_class) = parent_class in
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
   let env = check_constructors env parent_class class_ psubst on_error in
@@ -1813,6 +1782,33 @@ let union_parent_constants parents : ParentClassConstSet.t MemberNameMap.t =
                acc)
            consts)
 
+let union_parent_typeconsts parents : ParentTypeConstSet.t MemberNameMap.t =
+  let get_declared_consts ((parent_name_pos, _), parent_tparaml, parent_class) =
+    let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
+    let typeconsts =
+      Cls.typeconsts parent_class
+      |> List.filter ~f:(fun (_, ttc) -> not ttc.ttc_synthesized)
+      |> List.map
+           ~f:(Tuple.T2.map_snd ~f:(Inst.instantiate_typeconst_type psubst))
+    in
+    ((parent_name_pos, parent_class), typeconsts)
+  in
+  parents
+  |> List.map ~f:get_declared_consts
+  |> List.fold ~init:MemberNameMap.empty ~f:(fun acc (parent, typeconsts) ->
+         List.fold
+           ~init:acc
+           ~f:(fun acc (name, typeconst) ->
+             let open ParentTypeConstSet in
+             let elt = ParentTypeConst.make typeconst parent in
+             MemberNameMap.update
+               name
+               (function
+                 | None -> Some (singleton elt)
+                 | Some elts -> Some (add elt elts))
+               acc)
+           typeconsts)
+
 let check_class_extends_parents_constants
     env
     implements
@@ -1873,6 +1869,57 @@ let check_class_extends_parents_constants
         inherited
         env)
     constants
+    env
+
+let check_class_extends_parents_typeconsts
+    env
+    implements
+    (class_ast, class_)
+    (parents : ((Pos.t * string) * decl_ty list * Cls.t) list)
+    (on_error : Pos.t * string -> Typing_error.Reasons_callback.t) =
+  let typeconsts : ParentTypeConstSet.t MemberNameMap.t =
+    union_parent_typeconsts parents
+  in
+  let class_pos = fst class_ast.Aast.c_name in
+
+  MemberNameMap.fold
+    (fun tconst_name inherited env ->
+      ParentTypeConstSet.fold
+        (fun ParentTypeConst.
+               {
+                 parent = (parent_pos, parent_class);
+                 typeconst = parent_tconst;
+               }
+             env ->
+          match Cls.get_typeconst class_ tconst_name with
+          | Some tconst ->
+            check_typeconst_override
+              env
+              implements
+              (class_pos, class_)
+              parent_tconst
+              tconst
+              parent_class
+              (on_error (parent_pos, Cls.name parent_class))
+          | None ->
+            (* The only case when a member belongs to a parent but not the child is if the parent is an
+               interface and the child is a concrete class. Otherwise, the member would have been inherited. *)
+            let err =
+              Typing_error.(
+                primary
+                @@ Primary.Member_not_implemented
+                     {
+                       pos = parent_pos;
+                       member_name = tconst_name;
+                       decl_pos = fst parent_tconst.ttc_name;
+                       quickfixes = [];
+                     })
+            in
+            Errors.add_typing_error err;
+            env)
+        inherited
+        env)
+    typeconsts
     env
 
 let merge_member_maps
@@ -2125,15 +2172,22 @@ let check_implements_extends_uses
   in
   let env =
     List.fold ~init:env parents ~f:(fun env ((parent_name, _, _) as parent) ->
-        check_class_extends_parent_typeconsts_constructors
+        check_class_extends_parent_constructors
           env
-          implements
           parent
-          (name_pos, class_)
+          class_
           (on_error parent_name))
   in
   let env =
     check_class_extends_parents_constants
+      env
+      implements
+      (class_ast, class_)
+      parents
+      on_error
+  in
+  let env =
+    check_class_extends_parents_typeconsts
       env
       implements
       (class_ast, class_)

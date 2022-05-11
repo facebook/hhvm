@@ -25,13 +25,16 @@
           };
         in
         rec {
-          packages.default = pkgs.callPackage ./hhvm.nix { };
+          packages.hhvm = pkgs.callPackage ./hhvm.nix { };
+          packages.default = packages.hhvm;
 
-          devShells.default = pkgs.mkShell {
-            buildInputs = packages.default.nativeBuildInputs ++ packages.default.buildInputs ++ [
+          devShells.default = pkgs.mkShell ({
+            buildInputs = packages.hhvm.nativeBuildInputs ++ packages.hhvm.buildInputs ++ [
               pkgs.rnix-lsp
             ];
-          };
+            NIX_CFLAGS_COMPILE = packages.hhvm.NIX_CFLAGS_COMPILE;
+            CMAKE_INIT_CACHE = packages.hhvm.cmakeInitCache;
+          });
         }
       );
 }

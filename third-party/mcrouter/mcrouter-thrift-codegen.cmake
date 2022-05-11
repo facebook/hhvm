@@ -1,4 +1,5 @@
 # ----- Generate C++ sources from .thrift files -----
+include(GNUInstallDirs)
 
 add_custom_target(mcrouter_thrift1_codegen)
 
@@ -59,7 +60,7 @@ endmacro()
 
 network_thrift1(Common.thrift)
 network_thrift1(Memcache.thrift)
-network_thrift1(MemcacheService.thrift) 
+network_thrift1(MemcacheService.thrift)
 
 # ----- Build a static library from the generated C++ sources ------
 
@@ -70,5 +71,5 @@ target_include_directories(mcrouter_thrift_lib PUBLIC ${CODEGEN_SOURCES_DIR} "${
 
 install(
   TARGETS mcrouter_thrift_lib
-  LIBRARY ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+  LIBRARY ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 )

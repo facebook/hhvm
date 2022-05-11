@@ -1,4 +1,5 @@
 include(Options)
+include(GNUInstallDirs)
 
 set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug DebugOpt RelWithDebInfo)
 
@@ -60,7 +61,7 @@ if(HHVM_DYNAMIC_EXTENSION_DIR)
   add_definitions(-DHHVM_DYNAMIC_EXTENSION_DIR="${HHVM_DYNAMIC_EXTENSION_DIR}")
 else()
   if(UNIX)
-    add_definitions(-DHHVM_DYNAMIC_EXTENSION_DIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/hhvm/extensions")
+    add_definitions(-DHHVM_DYNAMIC_EXTENSION_DIR="${CMAKE_INSTALL_FULL_LIBDIR}/hhvm/extensions")
   endif()
 endif()
 
@@ -170,7 +171,7 @@ add_definitions(-DHAVE_INTTYPES_H)
 # blacklist the platform rather than whitelisting others.
 option(USE_BUNDLED_TZDATA "Use bundled system tzdata instead of /usr/share/zoneinfo" OFF)
 if (NOT ${USE_BUNDLED_TZDATA})
-  if (NOT EXISTS /usr/share/zoneinfo)
+  if (NOT DEFINED HAVE_SYSTEM_TZDATA AND NOT EXISTS /usr/share/zoneinfo)
     message(FATAL_ERROR "/usr/share/zoneinfo does not exist, and USE_BUNDLED_TZDATA not set")
   endif()
   add_definitions(-DHAVE_SYSTEM_TZDATA)

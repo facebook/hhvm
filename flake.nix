@@ -32,7 +32,7 @@
             set -ex
             mkdir $out
             HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" ./hphp/test/run.php quick
-          ''
+          '';
 
           devShells.default = pkgs.mkShell ({
             buildInputs = packages.hhvm.nativeBuildInputs ++ packages.hhvm.buildInputs ++ [

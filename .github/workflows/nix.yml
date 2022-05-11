@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build-and-test:
     strategy:
       # Run tests on all OS's and HHVM versions, even if one fails
       fail-fast: false
@@ -22,4 +22,5 @@ jobs:
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
           experimental-features = nix-command flakes
     - run: nix profile install --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+    - run: nix flake check "git+file://$(pwd)?submodules=1&shallow=1"
     - run: hhvm --version

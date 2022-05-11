@@ -285,6 +285,7 @@ ocaml_ffi! {
         }
     }
 
+    // Moves the source file to the destination directory.
     fn hh_save_custom_dep_graph_save_delta(source: OsString, dest_dir: OsString) -> usize {
         let dest_file = Path::new(&dest_dir)
             .join(&source.to_str().unwrap().replace('/', "-"));

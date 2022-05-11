@@ -338,8 +338,8 @@ module CustomGraph = struct
   let add_all_deps mode x = x |> add_extend_deps mode |> add_typing_deps mode
 
   type dep_edge = {
-    idependent: Dep.t;
-    idependency: Dep.t;
+    idependent: Dep.t;  (** The node depending on the dependency *)
+    idependency: Dep.t;  (** The node the dependent depends upon *)
   }
 
   module DepEdgeSet = Caml.Set.Make (struct
@@ -353,17 +353,20 @@ module CustomGraph = struct
         d1
   end)
 
-  (* A batch of discovered dependency edges, of which some might
-   * already be in the dependency graph!
-   *
-   * There isn't really any reason why I choose Hashtbl over Set here. *)
-  let discovered_deps_batch : (dep_edge, unit) Hashtbl.t = Hashtbl.create 1000
+  (** A batch of discovered dependency edges, of which some might
+    already be in the dependency graph! *)
+  let discovered_deps_batch : (dep_edge, unit) Hashtbl.t =
+    (* There isn't really any reason why I choose Hashtbl over Set here. *)
+    Hashtbl.create 1000
 
-  (* A batch of dependency edges that are not yet in the dependency graph.
-   * We use a Set, because a Hashtbl is way too expensive to serialize/
-   * deserialize in OCaml. *)
-  let filtered_deps_batch : DepEdgeSet.t ref = ref DepEdgeSet.empty
+  (** A batch of dependency edges that are not yet in the dependency graph. *)
+  let filtered_deps_batch : DepEdgeSet.t ref =
+    (* We use a Set, because a Hashtbl is way too expensive to serialize/
+       deserialize in OCaml. *)
+    ref DepEdgeSet.empty
 
+  (** Filter out the discovered dep edges which are already in the dep graph.
+    Get [!filtered_deps_batch] to obtain the result. *)
   let filter_discovered_deps_batch mode =
     (* Empty discovered_deps_bach by checking for each edge whether it's already
      * in the dependency graph. If it is not, add it to the filtered deps batch. *)
@@ -413,7 +416,15 @@ module CustomGraph = struct
     hh_custom_dep_graph_has_edge mode idependent idependency
 end
 
-module SaveHumanReadableDepMap = struct
+module SaveHumanReadableDepMap : sig
+  (** Add a dep to the current set of human readable deps. *)
+  val add : Typing_deps_mode.t -> 'a Dep.variant * int -> unit
+
+  (** Take the current set of human readable deps and writes them to disk.
+    Reset the set of human readable deps to be empty.
+    If [flush], flush the channel after the write. *)
+  val export_to_disk : ?flush:bool -> Typing_deps_mode.t -> unit
+end = struct
   let should_save mode =
     match mode with
     | SaveToDiskMode { human_readable_dep_map_dir = Some _; _ } -> true
@@ -450,11 +461,10 @@ module SaveHumanReadableDepMap = struct
       handle
     | Some h -> h
 
-  (* For each process, keep a set of the seen (hashcode, dependency name)s to reduce logging duplicates.
-   * Use the name as well as the hashcode in case of hashcode conflicts.
-   *)
   let set_max_size = 20000
 
+  (** The set of the seen (hashcode, dependency name)s, per worker.
+    Use the name as well as the hashcode in case of hashcode conflicts. *)
   let seen_set_ref : (int * string, unit) Hashtbl.t option ref = ref None
 
   let seen_set () =
@@ -465,9 +475,9 @@ module SaveHumanReadableDepMap = struct
       tbl
     | Some tbl -> tbl
 
-  (* Takes the current set of human readable deps and writes them to disk
-   * Resets the set of human readable deps to be empty
-   * ~flush flushes the channel after the write *)
+  (** Take the current set of human readable deps and writes them to disk.
+    Reset the set of human readable deps to be empty.
+    If [flush], flush the channel after the write. *)
   let export_to_disk ?(flush = false) mode =
     if should_save mode then
       let ss = seen_set () in
@@ -481,7 +491,7 @@ module SaveHumanReadableDepMap = struct
       let () = Hashtbl.reset ss in
       if flush then Out_channel.flush out_channel
 
-  (* Adds a dep to the current set of human readable deps *)
+  (** Add a dep to the current set of human readable deps. *)
   let add mode (dep, hash) =
     if should_save mode then
       let ss = seen_set () in
@@ -493,7 +503,18 @@ module SaveHumanReadableDepMap = struct
         if Hashtbl.length ss >= set_max_size then export_to_disk mode
 end
 
-module SaveCustomGraph = struct
+module SaveCustomGraph : sig
+  val add_idep :
+    Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
+
+  (** Write to disk the dep edges which are not already in the depgraph. *)
+  val filter_discovered_deps_batch : flush:bool -> Mode.t -> unit
+
+  (** Move the source file to the worker's depgraph directory. *)
+  val save_delta : Typing_deps_mode.t -> source:string -> int
+end = struct
+  (** [hh_save_custom_dep_graph_save_delta src dest_dir]
+    moves the [src] file to the [dest_dir] directory. *)
   external hh_save_custom_dep_graph_save_delta : string -> string -> int
     = "hh_save_custom_dep_graph_save_delta"
 
@@ -527,6 +548,7 @@ module SaveCustomGraph = struct
     | SaveToDiskMode { new_edges_dir; _ } -> new_edges_dir
     | _ -> failwith "programming error: wrong mode"
 
+  (** Write to disk the dep edges which are not already in the depgraph. *)
   let filter_discovered_deps_batch ~flush mode =
     let handle = destination_file_handle mode in
     Hashtbl.iter
@@ -571,6 +593,7 @@ module SaveCustomGraph = struct
       SaveHumanReadableDepMap.add mode (dependency, idependency)
     )
 
+  (** Move the source file to the worker's depgraph directory. *)
   let save_delta mode ~source =
     let dest = destination_dir mode in
     hh_save_custom_dep_graph_save_delta source dest
@@ -681,6 +704,9 @@ let idep_exists mode dependent dependency =
 
 let dep_edges_make () : dep_edges = Some CustomGraph.DepEdgeSet.empty
 
+(** Depending on [mode], either return discovered edges
+  which are not already in the dep graph
+  or write those edges to disk. *)
 let flush_ideps_batch mode : dep_edges =
   match mode with
   | InMemoryMode _ ->
@@ -699,6 +725,7 @@ let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =
   | (Some x, Some y) -> Some (CustomGraph.DepEdgeSet.union x y)
   | _ -> None
 
+(** Register the provided dep edges in the dep table delta in [typing_deps.rs] *)
 let register_discovered_dep_edges : dep_edges -> unit = function
   | None -> ()
   | Some batch -> CustomGraph.register_discovered_dep_edges batch

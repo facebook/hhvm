@@ -175,7 +175,7 @@ val add_dependency_callback :
   (Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit) ->
   unit
 
-(* returns the previous value of the flag *)
+(** Return the previous value of the flag *)
 val allow_dependency_table_reads : Mode.t -> bool -> bool
 
 val add_idep :
@@ -186,43 +186,45 @@ val idep_exists :
 
 val dep_edges_make : unit -> dep_edges
 
+(** Depending on [mode], either return discovered edges
+  which are not already in the dep graph
+  or write those edges to disk. *)
 val flush_ideps_batch : Mode.t -> dep_edges
 
 val merge_dep_edges : dep_edges -> dep_edges -> dep_edges
 
+(** Register the provided dep edges in the dep table delta in [typing_deps.rs] *)
 val register_discovered_dep_edges : dep_edges -> unit
 
 (** Save discovered edges to a binary file.
-  *
-  * - If mode is [InMemoryMode], the dep table delta in [typing.rs] is saved.
-  * - If mode is [SaveToDiskMode], an exception is raised.
-  *
-  * Setting [reset_state_after_saving] will empty the dep table delta in
-  * [typing.rs].
-  *)
+
+  - If mode is [InMemoryMode], the dep table delta in [typing_deps.rs] is saved.
+  - If mode is [SaveToDiskMode], an exception is raised.
+
+  Setting [reset_state_after_saving] will empty the dep table delta in
+  [typing_deps.rs]. *)
 val save_discovered_edges :
   Mode.t -> dest:string -> reset_state_after_saving:bool -> int
 
 (** Load discovered edges from a binary file.
-  *
-  * - If mode is [InMemoryMode], the binary file is assumed to contain 64-bit
-  *   hashes and they will be added to the dep table delta in [typing.rs].
-  *   If we have an existing table attached, we will first filter out edges
-  *   that are already present in the attached table.
-  * - If mode is [SaveToDiskMode], the file is assumed to contain 64-bit
-  *   hashes and they will be added ot the current worker's on-disk
-  *   dependency edge file.
-  *)
+
+  - If mode is [InMemoryMode], the binary file is assumed to contain 64-bit
+    hashes and they will be added to the dep table delta in [typing_deps.rs].
+    If we have an existing table attached, we will first filter out edges
+    that are already present in the attached table.
+  - If mode is [SaveToDiskMode], the file is assumed to contain 64-bit
+    hashes and they will be added ot the current worker's on-disk
+    dependency edge file. *)
 val load_discovered_edges : Mode.t -> string -> int
 
 val get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
 
 val get_ideps : Mode.t -> Dep.dependency Dep.variant -> DepSet.t
 
-(* Add to accumulator all extend dependencies of source_class. Visited is used
- * to avoid processing nodes reachable in multiple ways more than once. In other
- * words: use DFS to find all nodes reachable by "extends" edges starting from
- * source class *)
+(** Add to accumulator all extend dependencies of source_class. Visited is used
+  to avoid processing nodes reachable in multiple ways more than once. In other
+  words: use DFS to find all nodes reachable by "extends" edges starting from
+  source class *)
 val get_extend_deps :
   mode:Mode.t ->
   visited:VisitedSet.t ->
@@ -230,13 +232,13 @@ val get_extend_deps :
   acc:DepSet.t ->
   DepSet.t
 
-(* Grow input set by adding all its extend dependencies (including recursive) *)
+(** Grow input set by adding all its extend dependencies (including recursive) *)
 val add_extend_deps : Mode.t -> DepSet.t -> DepSet.t
 
-(* Grow input set by adding all its typing dependencies (direct only) *)
+(** Grow input set by adding all its typing dependencies (direct only) *)
 val add_typing_deps : Mode.t -> DepSet.t -> DepSet.t
 
-(* add_extend_deps and add_typing_deps chained together *)
+(** add_extend_deps and add_typing_deps chained together *)
 val add_all_deps : Mode.t -> DepSet.t -> DepSet.t
 
 module Telemetry : sig

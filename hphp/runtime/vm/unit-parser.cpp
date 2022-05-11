@@ -312,7 +312,9 @@ ParseFactsResult extract_facts(
           options.getAliasedNamespacesConfig());
       DeclResult decls = hackc_direct_decl_parse(*decl_opts, filename, source_text);
       FactsResult facts = hackc_decls_to_facts_cpp_ffi(decl_flags, decls, source_text);
-      rust::String facts_as_json = hackc_facts_to_json_cpp_ffi(facts, source_text);
+      rust::String facts_as_json = hackc_facts_to_json_cpp_ffi(
+          facts, source_text, /* pretty= */ false
+      );
       return FactsJSONString { std::string(facts_as_json) };
     } catch (const std::exception& e) {
       return FactsJSONString { "" }; // Swallow errors from HackC

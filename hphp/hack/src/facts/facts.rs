@@ -87,13 +87,17 @@ pub struct Facts {
 }
 
 impl Facts {
-    pub fn to_json(&self, text: &[u8]) -> String {
+    pub fn to_json(&self, pretty: bool, text: &[u8]) -> String {
         let sha1sum = sha1(text);
         let mut json = json!(&self);
         if let Some(m) = json.as_object_mut() {
             m.insert(String::from("sha1sum"), json!(sha1sum));
         };
-        serde_json::to_string_pretty(&json).expect("Could not serialize facts to JSON")
+        if pretty {
+            serde_json::to_string_pretty(&json).expect("Could not serialize facts to JSON")
+        } else {
+            serde_json::to_string(&json).expect("Could not serialize facts to JSON")
+        }
     }
 
     pub fn from_decls(
@@ -617,8 +621,11 @@ mod tests {
     #[test]
     fn round_trip_json() -> serde_json::Result<()> {
         let f1 = fake_facts();
-        let json = f1.to_json(b"fake source text");
-        let f2 = serde_json::from_str(&json)?;
+        let ugly = f1.to_json(false, b"fake source text");
+        let f2 = serde_json::from_str(&ugly)?;
+        assert_eq!(f1, f2);
+        let pretty = f1.to_json(true, b"fake source text");
+        let f2 = serde_json::from_str(&pretty)?;
         assert_eq!(f1, f2);
         Ok(())
     }
@@ -627,7 +634,7 @@ mod tests {
     fn to_json() {
         // test to_string_pretty()
         assert_eq!(
-            fake_facts().to_json(b"some text"),
+            fake_facts().to_json(true, b"some text"),
             r#"{
   "constants": [
     "c1",

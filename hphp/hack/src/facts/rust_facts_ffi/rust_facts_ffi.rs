@@ -70,6 +70,7 @@ fn extract_facts_as_json_ffi(
     let decls =
         direct_decl_parser::parse_decls_without_reference_text(&opts, filename, text, alloc);
 
+    let pretty = false;
     if decls.has_first_pass_parse_errors {
         None
     } else if mangle_xhp {
@@ -78,7 +79,7 @@ fn extract_facts_as_json_ffi(
             decls.file_attributes,
             disable_xhp_element_mangling,
         );
-        Some(facts.to_json(text))
+        Some(facts.to_json(pretty, text))
     } else {
         without_xhp_mangling(|| {
             let facts = Facts::from_decls(
@@ -86,7 +87,7 @@ fn extract_facts_as_json_ffi(
                 decls.file_attributes,
                 disable_xhp_element_mangling,
             );
-            Some(facts.to_json(text))
+            Some(facts.to_json(pretty, text))
         })
     }
 }

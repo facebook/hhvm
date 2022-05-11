@@ -43,7 +43,7 @@ pub(crate) fn extract_facts(hackc_opts: crate::Opts, mut opts: Opts) -> Result<(
 
         // Decls to facts
         if parsed_file.has_first_pass_parse_errors {
-            // XXX swallowing errors is bad.
+            // Swallowing errors is bad.
             continue;
         }
         let facts = Facts::from_decls(
@@ -55,9 +55,11 @@ pub(crate) fn extract_facts(hackc_opts: crate::Opts, mut opts: Opts) -> Result<(
             write!(w, "{}\"{}\":", sep, path.display())?;
         }
         if opts.nohash {
-            serde_json::to_writer_pretty(w, &json!(facts))?;
+            // No pretty-print to save space.
+            serde_json::to_writer(w, &json!(facts))?;
         } else {
-            w.write_all(facts.to_json(&text).as_bytes())?;
+            // Pretty-print for a user friendly CLI.
+            w.write_all(facts.to_json(true, &text).as_bytes())?;
         }
         sep = ",";
     }

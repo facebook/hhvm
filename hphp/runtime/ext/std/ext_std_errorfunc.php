@@ -2,6 +2,16 @@
 
 namespace {
 
+// T119870250: Keep in sync with:
+//  hphp/runtime/ext/std/ext_std_errorfunc.cpp: k_DEBUG_BACKTRACE_PROVIDE_OBJECT
+const int DEBUG_BACKTRACE_PROVIDE_OBJECT = 1 << 0;
+
+// T119870250: Keep in sync with:
+//   hphp/runtime/base/runtime-error.h: ErrorMode::USER_NOTICE
+const int E_USER_NOTICE = 1 << 10;
+//   hphp/runtime/base/runtime-error.h: ErrorMode::PHP_ALL | ErrorMode::STRICT
+const int E_ALL = (1 << 15) - 1;
+
 /**
  * Generates a backtrace
  *
@@ -31,7 +41,7 @@ namespace {
  */
 <<__Native("NoInjection")>>
 function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
-                         int $limit = 0): varray<darray>;
+                         int $limit = 0): vec<dict<string, mixed>>;
 
 /**
  * Prints a backtrace
@@ -178,7 +188,7 @@ function set_error_handler(mixed $error_handler,
  *   defined, NULL is also returned.
  */
 <<__Native>>
-function set_exception_handler(mixed $exception_handler): ?callable;
+function set_exception_handler(mixed $exception_handler): ?dynamic;
 
 /**
  * Generates a user-level error/warning/notice message
@@ -245,7 +255,7 @@ function hphp_clear_unflushed(): void;
  *    indicate the filename, function, line number and class name (if in class
  *    context) of the callsite that invoked the current function or method.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function hphp_debug_caller_info(): darray<string, mixed>;
 
 <<__Native("NoInjection")>>
@@ -282,7 +292,7 @@ namespace HH {
    * additional field called "overflow" set to true.
    */
   <<__Native>>
-  function deferred_errors(): vec;
+  function deferred_errors(): vec<dict<string, mixed>>;
 }
 
 namespace __SystemLib {
@@ -296,5 +306,5 @@ namespace __SystemLib {
    * @return array - the backtrace extracted from $trace
    */
   <<__Native>>
-  function extract_trace(resource $trace): \HH\varray;
+  function extract_trace(resource $trace): vec<dict<string, mixed>>;
 }

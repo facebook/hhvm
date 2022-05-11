@@ -396,16 +396,23 @@ let typedef tenv t =
     Option.iter ~f:Errors.add_typing_error ty_err_opt;
     env
   in
+  (* We only need to check that the type alias as a public API if it's transparent, since
+     an opaque type alias is inherently internal *)
+  let should_check_internal_signature =
+    Aast.equal_typedef_visibility t_vis Transparent
+  in
+
   (* For typdefs, we do want to do the simple kind checks on the body
      (e.g., arities match up), but no constraint checks. We need to check the
      kinds of typedefs separately, because check_happly replaces all the generic
      parameters of typedefs by Tany, which makes the kind check moot *)
   maybe
+    (* We always check the constraints for internal types, so treat in_signature:true *)
     (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:true)
     tenv_with_typedef_tparams
     t_constraint;
   Typing_kinding.Simple.check_well_kinded_hint
-    ~in_signature:true
+    ~in_signature:should_check_internal_signature
     tenv_with_typedef_tparams
     t_kind;
   let env =

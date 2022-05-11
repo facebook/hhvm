@@ -46,6 +46,7 @@ if __name__ == "__main__":
             hh_pessimisation_path,
             "--file=" + file,
             "--update",
+            "--enable-multifile-support",
         ]
         subprocess.run(cmd)
 

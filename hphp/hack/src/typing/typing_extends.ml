@@ -1755,13 +1755,51 @@ let check_no_conflicting_inherited_concrete_constants name constants class_pos =
     in
     Errors.add_typing_error (Typing_error.primary err)
 
+(* When a class inherits a concrete type constant from two different points in its hierarchy
+ * (e.g. a parent class and an interface) HHVM will fail to load the class, and the flag
+ * -vEval.TraitConstantInterfaceBehavior=1 extends this behavior to traits. This function reports
+ * such cases, pointing to the definitions of the constants and reporting which parent brings them
+ * in, e.g. declared in an interface brought in via a trait use. *)
+let check_no_conflicting_inherited_concrete_typeconsts name typeconsts class_pos
+    =
+  let open ParentTypeConst in
+  let definitions =
+    ParentTypeConstSet.filter
+      (fun { typeconst = { ttc_kind; _ }; _ } ->
+        match ttc_kind with
+        | TCConcrete _ -> true
+        | TCAbstract _ -> false)
+      typeconsts
+    |> ParentTypeConstSet.elements
+  in
+  if List.length definitions > 1 then
+    let err =
+      Typing_error.Primary.Constant_multiple_concrete_conflict
+        {
+          pos = class_pos;
+          name;
+          definitions =
+            List.map
+              ~f:(fun { typeconst; parent } ->
+                let parent_name = Cls.name (snd parent) in
+                let via =
+                  if String.(parent_name <> typeconst.ttc_origin) then
+                    Some (Utils.strip_ns parent_name)
+                  else
+                    None
+                in
+                (fst typeconst.ttc_name, via))
+              definitions;
+        }
+    in
+    Errors.add_typing_error (Typing_error.primary err)
+
 let union_parent_constants parents : ParentClassConstSet.t MemberNameMap.t =
-  (* Note, this covers all kinds of constants, including constants of type TypeStructure created for each type constant. *)
   let get_declared_consts ((parent_name_pos, _), parent_tparaml, parent_class) =
     let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
     let consts =
       Cls.consts parent_class
-      |> List.filter ~f:(fun (name, _) -> String.(name <> SN.Members.mClass))
+      |> List.filter ~f:(fun (_, cc) -> not cc.cc_synthesized)
       |> List.map ~f:(Tuple.T2.map_snd ~f:(Inst.instantiate_cc psubst))
     in
     ((parent_name_pos, parent_class), consts)
@@ -1884,6 +1922,12 @@ let check_class_extends_parents_typeconsts
 
   MemberNameMap.fold
     (fun tconst_name inherited env ->
+      if TCO.enable_strict_const_semantics (Env.get_tcopt env) > 1 then
+        check_no_conflicting_inherited_concrete_typeconsts
+          tconst_name
+          inherited
+          class_pos;
+
       ParentTypeConstSet.fold
         (fun ParentTypeConst.
                {

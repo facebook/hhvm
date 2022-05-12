@@ -587,8 +587,9 @@ bool shouldInline(const irgen::IRGS& irgs,
   }
 
   if (region.instrSize() > irgs.budgetBCInstrs) {
-    return refuse(folly::sformat("exhausted budgetBCInstrs={}, regionSize={}",
-                                 irgs.budgetBCInstrs, region.instrSize()));
+    return refuse(folly::sformat(
+      "exhausted bytecode budget: budgetBCInstrs={}, regionSize={}",
+      irgs.budgetBCInstrs, region.instrSize()));
   }
 
   int maxCost = maxTotalCost;

@@ -23,6 +23,7 @@ jobs:
           experimental-features = nix-command flakes
     - run: nix profile install --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - run: nix bundle --bundler github:NixOS/bundlers#toDEB "git+file://$(pwd)?submodules=1&shallow=1"
-    - run: dpkg -L */*.deb
+    - run: dpkg-deb --info */*.deb
+    - run: dpkg-deb --contents */*.deb
     - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - run: hhvm --version

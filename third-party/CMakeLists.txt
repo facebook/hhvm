@@ -22,6 +22,7 @@ add_subdirectory(oniguruma)
 set(EXTRA_INCLUDE_PATHS)
 set(THIRD_PARTY_MODULES)
 set(THIRD_PARTY_HEADERS)
+include(GNUInstallDirs)
 
 function(TP_INSTALL_HEADERS TARGET SRCDIR DEST)
   file(GLOB_RECURSE files "${SRCDIR}/*.h")
@@ -29,7 +30,7 @@ function(TP_INSTALL_HEADERS TARGET SRCDIR DEST)
     CODE "INCLUDE(\"${HPHP_HOME}/CMake/HPHPFunctions.cmake\")
       HHVM_INSTALL_HEADERS(${TARGET}
         \"${CMAKE_CURRENT_BINARY_DIR}/${SRCDIR}\"
-      \"\${CMAKE_INSTALL_PREFIX}/include/hphp/third-party/${DEST}\"
+      \"\${CMAKE_INSTALL_FULL_INCLUDEDIR}/hphp/third-party/${DEST}\"
       ${files})"
     COMPONENT dev)
 endfunction()

@@ -14,6 +14,7 @@ module T = Tast
 module SN = Naming_special_names
 module Env = Shape_analysis_env
 module Logic = Shape_analysis_logic
+module Utils = Shape_analysis_utils
 
 let when_tast_check tast_env ~default f =
   let tcopt = Tast_env.get_tcopt tast_env |> TypecheckerOptions.log_levels in
@@ -149,7 +150,7 @@ let rec assign
            situation, it is not meaningful to report a candidate. *)
         env
     end
-  | _ -> failwithpos pos "An lvalue is not yet supported"
+  | _ -> failwithpos pos ("Unsupported lvalue: " ^ Utils.expr_name lval)
 
 and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   match e with
@@ -252,7 +253,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     (* `is` expressions always evaluate to bools, so we discard the entity. *)
     let (env, _) = expr_ env e in
     (env, None)
-  | _ -> failwithpos pos "An expression is not yet handled"
+  | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
 
 let expr (env : env) (e : T.expr) : env = expr_ env e |> fst
 
@@ -330,7 +331,7 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
   | A.AssertEnv _
   | A.Markup _ ->
     env
-  | _ -> failwithpos pos "A statement is not yet handled"
+  | _ -> failwithpos pos ("Unsupported statement: " ^ Utils.stmt_name stmt)
 
 and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 

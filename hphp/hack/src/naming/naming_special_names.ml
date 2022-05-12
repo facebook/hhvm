@@ -229,6 +229,8 @@ module AttributeKinds = struct
 
   let enumcls = "\\HH\\EnumClassAttribute"
 
+  let module_ = "\\HH\\ModuleAttribute"
+
   let plain_english_map =
     List.fold_left
       ~init:SMap.empty
@@ -248,6 +250,7 @@ module AttributeKinds = struct
         (typeconst, "a type constant");
         (lambda, "a lambda expression");
         (enumcls, "an enum class");
+        (module_, "a module");
       ]
 end
 

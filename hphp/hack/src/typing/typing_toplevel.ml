@@ -2128,8 +2128,10 @@ let module_def ctx md =
   Errors.run_with_span md.md_span @@ fun () ->
   let env = EnvFromDef.module_env ~origin:Decl_counters.TopLevel ctx md in
   let (env, user_attributes) =
-    (* TODO(T108642332) *)
-    Typing.attributes_check_def env SN.AttributeKinds.file md.md_user_attributes
+    Typing.attributes_check_def
+      env
+      SN.AttributeKinds.module_
+      md.md_user_attributes
   in
   {
     md with

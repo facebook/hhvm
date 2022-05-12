@@ -139,6 +139,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getDocComment()[]: mixed; // string | false
   public function getStaticVariables(): darray<string, mixed>;
   public function getReturnTypeText()[];
+  public function getModule()[]: ?string;
   final public function getAttributes()[]: darray<string, varray<mixed>>;
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
@@ -330,6 +331,17 @@ class ReflectionType {
 }
 
 class ReflectionFile implements Reflector {
+  private function __clone();
+  final public function __construct(string $name)[];
+  public function __toString()[]: string;
+  public function getName()[]: string;
+  final public function getAttributes()[]: darray<string, varray<mixed>>;
+  final public function hasAttribute(string $name)[]: bool;
+  final public function getAttribute(string $name)[]: ?varray<mixed>;
+  final public function getAttributeClass<T as HH\FileAttribute>(classname<T> $c)[]: ?T;
+}
+
+class ReflectionModule implements Reflector {
   private function __clone();
   final public function __construct(string $name)[];
   public function __toString()[]: string;

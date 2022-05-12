@@ -104,4 +104,7 @@ type log_event =
       id: string;
       shape_result: shape_result;
     }  (** Indicates a successfuly analysis result *)
-  | Failure of { id: string }  (** Indicates that the analysis malfunctioned *)
+  | Failure of {
+      id: string;
+      error_message: string;
+    }  (** Indicates that the analysis malfunctioned *)

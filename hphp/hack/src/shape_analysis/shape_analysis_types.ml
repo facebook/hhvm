@@ -93,4 +93,7 @@ type log_event =
       id: string;
       shape_result: shape_result;
     }
-  | Failure of { id: string }
+  | Failure of {
+      id: string;
+      error_message: string;
+    }

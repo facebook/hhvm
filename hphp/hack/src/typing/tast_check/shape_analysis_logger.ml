@@ -44,11 +44,11 @@ let compute_results tast_env id params body =
     |> List.filter ~f:SA.is_shape_like_dict
     |> List.map ~f:(fun shape_result -> Result { id; shape_result })
   with
-  | SA.Shape_analysis_exn _ ->
+  | SA.Shape_analysis_exn error_message ->
     (* Logging failures is expensive because there are so many of them right
        now, to see all the shape results in a timely manner, simply don't log
        failure events. *)
-    [Failure { id }]
+    [Failure { id; error_message }]
 
 let should_not_skip tast_env =
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in

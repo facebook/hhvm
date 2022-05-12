@@ -1,11 +1,11 @@
 #!/bin/bash
 
-export OCAML_VERSION="4.13.1+options"
+export OCAML_VERSION="4.14.0+options"
 
 export HACK_OPAM_DEPS=(
   base.v0.14.2
   base64.3.5.0
-  camlp4.4.13+1
+  camlp4.4.14+1
   cmdliner.1.1.1
   core_kernel.v0.14.2
   dtoa.0.3.2
@@ -18,7 +18,7 @@ export HACK_OPAM_DEPS=(
   lwt_log.1.1.1
   lwt_ppx.2.0.2
   memtrace.0.2.1.2
-  merlin.4.4-413
+  merlin.4.5-414
   mtime.1.3.0
   ocp-indent.1.8.1
   ounit2.2.2.4

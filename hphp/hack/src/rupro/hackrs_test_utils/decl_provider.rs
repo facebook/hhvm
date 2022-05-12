@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::cache::{make_non_eviction_shallow_decl_cache, NonEvictingCache};
+use crate::cache::{make_non_evicting_shallow_decl_cache, NonEvictingCache};
 use crate::registrar::DependencyGraph;
 use hackrs::{
     decl_parser::DeclParser,
@@ -23,7 +23,7 @@ fn make_shallow_decl_provider<R: Reason>(
     decl_parser: &DeclParser<R>,
     filenames: impl Iterator<Item = RelativePath>,
 ) -> Arc<dyn ShallowDeclProvider<R>> {
-    let cache = Arc::new(make_non_eviction_shallow_decl_cache());
+    let cache = Arc::new(make_non_evicting_shallow_decl_cache());
     for path in filenames {
         let mut decls = decl_parser.parse(path).unwrap();
         decls.reverse(); // match OCaml behavior for duplicates

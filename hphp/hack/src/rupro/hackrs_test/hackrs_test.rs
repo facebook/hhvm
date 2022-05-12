@@ -68,7 +68,7 @@ impl TestContext {
             Arc::new(SqliteNamingTable::new(&naming_table).unwrap());
         let shallow_decl_provider: Arc<dyn ShallowDeclProvider<_>> =
             Arc::new(LazyShallowDeclProvider::new(
-                Arc::new(hackrs_test_utils::cache::make_non_eviction_shallow_decl_cache()),
+                Arc::new(hackrs_test_utils::cache::make_non_evicting_shallow_decl_cache()),
                 Arc::clone(&naming_provider),
                 decl_parser.clone(),
             ));

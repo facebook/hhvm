@@ -22,8 +22,8 @@ use hackrs::{
     decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider,
     shallow_decl_provider::ShallowDeclCache,
 };
-use hackrs_test_utils::cache::NonEvictingCache;
-use hackrs_test_utils::serde_cache::{Compression, SerializingCache};
+use hackrs_test_utils::cache::{make_shallow_decl_cache, NonEvictingCache};
+use hackrs_test_utils::serde_cache::{CacheOpts, Compression, SerializingCache};
 use pos::{Prefix, RelativePath, RelativePathCtx, TypeName};
 
 #[derive(StructOpt, Debug)]
@@ -103,7 +103,11 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
     let file_provider: Arc<dyn file_provider::FileProvider> =
         Arc::new(file_provider::PlainFileProvider::new(Arc::clone(&ctx)));
     let parser = DeclParser::new(file_provider);
-    let shallow_decl_cache = make_shallow_cache::<R>(opts);
+    let shallow_decl_cache = make_shallow_decl_cache::<R>(if opts.serialize {
+        CacheOpts::Unserialized
+    } else {
+        CacheOpts::Serialized(opts.compression)
+    });
     let classes = match names {
         Names::Classnames(classes) => classes,
         Names::Filenames(filenames) => {
@@ -230,29 +234,6 @@ fn fold<R: Reason>(provider: &impl FoldedDeclProvider<R>, classes: Vec<TypeName>
                 .unwrap_or_else(|e| panic!("failed to fold class {}: {:?}", class, e))
                 .unwrap_or_else(|| panic!("failed to look up class {}", class));
         })
-}
-
-fn make_shallow_cache<R: Reason>(opts: &CliOptions) -> ShallowDeclCache<R> {
-    if opts.serialize {
-        ShallowDeclCache::new(
-            Arc::new(SerializingCache::with_compression(opts.compression)), // types
-            Box::new(SerializingCache::with_compression(opts.compression)), // funs
-            Box::new(SerializingCache::with_compression(opts.compression)), // consts
-            Box::new(SerializingCache::with_compression(opts.compression)), // modules
-            Box::new(SerializingCache::with_compression(opts.compression)), // properties
-            Box::new(SerializingCache::with_compression(opts.compression)), // static_properties
-            Box::new(SerializingCache::with_compression(opts.compression)), // methods
-            Box::new(SerializingCache::with_compression(opts.compression)), // static_methods
-            Box::new(SerializingCache::with_compression(opts.compression)), // constructors
-        )
-    } else {
-        ShallowDeclCache::with_no_member_caches(
-            Arc::new(NonEvictingCache::default()),
-            Box::new(NonEvictingCache::default()),
-            Box::new(NonEvictingCache::default()),
-            Box::new(NonEvictingCache::default()),
-        )
-    }
 }
 
 fn make_folded_provider<R: Reason>(

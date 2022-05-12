@@ -25,6 +25,12 @@ pub enum Compression {
     Lz4,
 }
 
+#[derive(Copy, Clone, Debug)]
+pub enum CacheOpts {
+    Unserialized,
+    Serialized(Compression),
+}
+
 impl<K, V> Default for SerializingCache<K, V>
 where
     K: Copy + Hash + Eq + Send + Sync + 'static,

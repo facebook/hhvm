@@ -16,7 +16,7 @@ use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
 use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
 use hackrs_test_utils::cache::{
-    make_non_eviction_shallow_decl_cache, NonEvictingCache, NonEvictingLocalCache,
+    make_non_evicting_shallow_decl_cache, NonEvictingCache, NonEvictingLocalCache,
 };
 use oxidized::global_options::GlobalOptions;
 use pos::{Prefix, RelativePath, RelativePathCtx};
@@ -87,7 +87,7 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
         file_provider::PlainFileProvider::new(Arc::clone(&relative_path_ctx)),
     );
     let decl_parser = DeclParser::new(Arc::clone(&file_provider));
-    let shallow_decl_cache = Arc::new(make_non_eviction_shallow_decl_cache());
+    let shallow_decl_cache = Arc::new(make_non_evicting_shallow_decl_cache());
     let shallow_decl_provider = Arc::new(EagerShallowDeclProvider::new(Arc::clone(
         &shallow_decl_cache,
     )));

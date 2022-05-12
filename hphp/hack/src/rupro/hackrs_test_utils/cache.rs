@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::serde_cache::CacheOpts;
+use crate::SerializingCache;
 use dashmap::DashMap;
 use hackrs::{
     cache::{Cache, LocalCache},
@@ -91,11 +93,30 @@ impl<K: Hash + Eq, V> Debug for NonEvictingLocalCache<K, V> {
     }
 }
 
-pub fn make_non_eviction_shallow_decl_cache<R: Reason>() -> ShallowDeclCache<R> {
-    ShallowDeclCache::with_no_member_caches(
-        Arc::new(NonEvictingCache::default()),
-        Box::new(NonEvictingCache::default()),
-        Box::new(NonEvictingCache::default()),
-        Box::new(NonEvictingCache::default()),
-    )
+pub fn make_shallow_decl_cache<R: Reason>(opts: CacheOpts) -> ShallowDeclCache<R> {
+    match opts {
+        CacheOpts::Serialized(compression_type) => {
+            ShallowDeclCache::new(
+                Arc::new(SerializingCache::with_compression(compression_type)), // types
+                Box::new(SerializingCache::with_compression(compression_type)), // funs
+                Box::new(SerializingCache::with_compression(compression_type)), // consts
+                Box::new(SerializingCache::with_compression(compression_type)), // modules
+                Box::new(SerializingCache::with_compression(compression_type)), // properties
+                Box::new(SerializingCache::with_compression(compression_type)), // static_properties
+                Box::new(SerializingCache::with_compression(compression_type)), // methods
+                Box::new(SerializingCache::with_compression(compression_type)), // static_methods
+                Box::new(SerializingCache::with_compression(compression_type)), // constructors
+            )
+        }
+        CacheOpts::Unserialized => ShallowDeclCache::with_no_member_caches(
+            Arc::new(NonEvictingCache::default()),
+            Box::new(NonEvictingCache::default()),
+            Box::new(NonEvictingCache::default()),
+            Box::new(NonEvictingCache::default()),
+        ),
+    }
+}
+
+pub fn make_non_evicting_shallow_decl_cache<R: Reason>() -> ShallowDeclCache<R> {
+    make_shallow_decl_cache(CacheOpts::Unserialized)
 }

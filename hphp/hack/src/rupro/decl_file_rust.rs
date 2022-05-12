@@ -8,6 +8,9 @@ use hackrs::{
     folded_decl_provider::FoldedDeclProvider,
     typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };
+use hackrs_test_utils::cache::{make_shallow_decl_cache, populate_shallow_decl_cache};
+use hackrs_test_utils::decl_provider::make_folded_decl_provider;
+use hackrs_test_utils::serde_cache::CacheOpts;
 use jwalk::WalkDir;
 use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
@@ -86,7 +89,8 @@ fn main() {
 }
 
 fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
-    let hhi_filenames = WalkDir::new(&ctx.hhi)
+    // Add hhi files to the given list of filenames
+    let mut all_filenames = WalkDir::new(&ctx.hhi)
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| !e.file_type().is_dir())
@@ -95,11 +99,18 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
     let file_provider: Arc<dyn file_provider::FileProvider> =
         Arc::new(file_provider::PlainFileProvider::new(ctx));
     let decl_parser = DeclParser::new(Arc::clone(&file_provider));
-    let folded_decl_provider = hackrs_test_utils::decl_provider::make_folded_decl_provider(
+    all_filenames.extend(filenames);
+
+    let shallow_decl_cache = make_shallow_decl_cache(CacheOpts::Unserialized);
+    populate_shallow_decl_cache(&shallow_decl_cache, decl_parser.clone(), &all_filenames);
+
+    let folded_decl_provider = Arc::new(make_folded_decl_provider(
+        CacheOpts::Unserialized,
         opts.naming_table.as_ref(),
-        &decl_parser,
-        hhi_filenames.into_iter().chain(filenames.iter().copied()),
-    );
+        shallow_decl_cache,
+        decl_parser.clone(),
+    ));
+
     let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
         Box::new(hackrs_test_utils::cache::NonEvictingLocalCache::new()),
         Arc::clone(&folded_decl_provider) as Arc<dyn FoldedDeclProvider<R>>,

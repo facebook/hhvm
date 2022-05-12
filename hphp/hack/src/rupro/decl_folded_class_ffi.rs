@@ -2,7 +2,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hackrs::{decl_parser::DeclParser, folded_decl_provider};
+use hackrs::decl_parser::DeclParser;
+use hackrs::folded_decl_provider::FoldedDeclProvider;
+use hackrs_test_utils::cache::make_shallow_decl_cache;
+use hackrs_test_utils::serde_cache::CacheOpts;
 use ocamlrep_ocamlpool::{ocaml_ffi_with_arena, Bump};
 use oxidized_by_ref::{decl_defs::DeclClassType, parser_options::ParserOptions};
 use pos::{RelativePath, RelativePathCtx, ToOxidized, TypeName};
@@ -26,19 +29,29 @@ ocaml_ffi_with_arena! {
         });
         let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(file_provider::PlainFileProvider::new(path_ctx));
         let decl_parser = DeclParser::with_options(file_provider, opts);
-        let folded_decl_provider: Arc<dyn folded_decl_provider::FoldedDeclProvider<BReason>> =
+        let shallow_decl_cache = make_shallow_decl_cache(CacheOpts::Unserialized);
+
+        let reverse_files = files.iter().copied().rev().collect::<Vec<_>>();
+        for path in &reverse_files {
+            let mut decls = decl_parser.parse(*path).unwrap();
+            decls.reverse(); // To match OCaml behavior for name collisions
+            shallow_decl_cache.add_decls(decls);
+        };
+
+        let folded_decl_provider =
             hackrs_test_utils::decl_provider::make_folded_decl_provider(
+                CacheOpts::Unserialized,
                 None,
-                &decl_parser,
-                // Reverse to match the OCaml behavior
-                files.iter().copied().rev(),
+                shallow_decl_cache,
+                decl_parser.clone(),
             );
+
         files.into_iter().map(|filename| {
             let classes: Vec<TypeName> = decl_parser
                 .parse(filename)
                 .map_err(|e| format!("Failed to parse {:?}: {:?}", filename, e))?
                 .into_iter()
-                .filter_map(|decl| match decl {
+                .filter_map(|decl: ty::decl::shallow::Decl<BReason>| match decl {
                     shallow::Decl::Class(name, _) => Some(name),
                     _ => None,
                 })

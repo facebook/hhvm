@@ -3,54 +3,48 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::cache::{make_non_evicting_shallow_decl_cache, NonEvictingCache};
+use crate::cache::NonEvictingCache;
 use crate::registrar::DependencyGraph;
+use crate::serde_cache::CacheOpts;
+use crate::SerializingCache;
 use hackrs::{
     decl_parser::DeclParser,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
     shallow_decl_provider::{
-        EagerShallowDeclProvider, LazyShallowDeclProvider, ShallowDeclProvider,
+        EagerShallowDeclProvider, LazyShallowDeclProvider, ShallowDeclCache, ShallowDeclProvider,
     },
 };
 use naming_provider::SqliteNamingTable;
-use pos::RelativePath;
 use std::path::PathBuf;
 use std::sync::Arc;
 use ty::reason::Reason;
 
-fn make_shallow_decl_provider<R: Reason>(
-    naming_table_path_opt: Option<&PathBuf>,
-    decl_parser: &DeclParser<R>,
-    filenames: impl Iterator<Item = RelativePath>,
-) -> Arc<dyn ShallowDeclProvider<R>> {
-    let cache = Arc::new(make_non_evicting_shallow_decl_cache());
-    for path in filenames {
-        let mut decls = decl_parser.parse(path).unwrap();
-        decls.reverse(); // match OCaml behavior for duplicates
-        cache.add_decls(decls);
-    }
-    if let Some(naming_table_path) = naming_table_path_opt {
-        Arc::new(LazyShallowDeclProvider::new(
-            cache,
-            Arc::new(SqliteNamingTable::new(naming_table_path).unwrap()),
-            decl_parser.clone(),
-        ))
-    } else {
-        Arc::new(EagerShallowDeclProvider::new(cache))
-    }
-}
-
 pub fn make_folded_decl_provider<R: Reason>(
-    naming_table_path_opt: Option<&PathBuf>,
-    decl_parser: &DeclParser<R>,
-    filenames: impl Iterator<Item = RelativePath>,
-) -> Arc<dyn FoldedDeclProvider<R>> {
-    let shallow_decl_provider =
-        make_shallow_decl_provider(naming_table_path_opt, decl_parser, filenames);
-    Arc::new(LazyFoldedDeclProvider::new(
+    cache_opts: CacheOpts,
+    naming_table: Option<&PathBuf>,
+    shallow_decl_cache: ShallowDeclCache<R>,
+    decl_parser: DeclParser<R>,
+) -> impl FoldedDeclProvider<R> {
+    let shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>> =
+        if let Some(naming_table_path) = naming_table {
+            Arc::new(LazyShallowDeclProvider::new(
+                Arc::new(shallow_decl_cache),
+                Arc::new(SqliteNamingTable::new(naming_table_path).unwrap()),
+                decl_parser,
+            ))
+        } else {
+            Arc::new(EagerShallowDeclProvider::new(Arc::new(shallow_decl_cache)))
+        };
+
+    LazyFoldedDeclProvider::new(
         Arc::new(oxidized::global_options::GlobalOptions::default()),
-        Arc::new(NonEvictingCache::new()),
+        match cache_opts {
+            CacheOpts::Serialized(compression_type) => {
+                Arc::new(SerializingCache::with_compression(compression_type))
+            }
+            CacheOpts::Unserialized => Arc::new(NonEvictingCache::new()),
+        },
         shallow_decl_provider,
         Arc::new(DependencyGraph::new()),
-    ))
+    )
 }

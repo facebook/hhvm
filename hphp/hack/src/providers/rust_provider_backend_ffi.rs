@@ -5,6 +5,7 @@
 
 use file_provider::{FileProvider, FileType, PlainFileProvider};
 use hackrs::{decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider};
+use hackrs_test_utils::{cache::make_shallow_decl_cache, serde_cache::CacheOpts};
 use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
 use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::{ocaml_ffi, ocaml_ffi_with_arena, Bump};
@@ -42,15 +43,17 @@ ocaml_ffi_with_arena! {
             ..Default::default()
         });
         let file_provider: Arc<dyn FileProvider> = Arc::new(PlainFileProvider::new(Arc::clone(&path_ctx)));
-        let folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>> =
+        let shallow_decl_cache = make_shallow_decl_cache::<BReason>(CacheOpts::Unserialized);
+        let folded_decl_provider =
             hackrs_test_utils::decl_provider::make_folded_decl_provider(
+                CacheOpts::Unserialized,
                 None,
-                &DeclParser::with_options(Arc::clone(&file_provider), opts),
-                std::iter::empty(),
+                shallow_decl_cache,
+                DeclParser::with_options(Arc::clone(&file_provider), opts),
             );
         Custom::from(ProviderBackend {
             file_provider,
-            folded_decl_provider,
+            folded_decl_provider: Arc::new(folded_decl_provider),
         })
     }
 }

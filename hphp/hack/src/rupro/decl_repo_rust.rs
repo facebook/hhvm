@@ -18,12 +18,10 @@ use tempdir::TempDir;
 
 use ty::reason::{BReason, NReason, Reason};
 
-use hackrs::{
-    decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider,
-    shallow_decl_provider::ShallowDeclCache,
-};
-use hackrs_test_utils::cache::{make_shallow_decl_cache, NonEvictingCache};
-use hackrs_test_utils::serde_cache::{CacheOpts, Compression, SerializingCache};
+use hackrs::{decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider};
+use hackrs_test_utils::cache::{make_shallow_decl_cache, populate_shallow_decl_cache};
+use hackrs_test_utils::decl_provider::make_folded_decl_provider;
+use hackrs_test_utils::serde_cache::{CacheOpts, Compression};
 use pos::{Prefix, RelativePath, RelativePathCtx, TypeName};
 
 #[derive(StructOpt, Debug)]
@@ -111,8 +109,9 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
     let classes = match names {
         Names::Classnames(classes) => classes,
         Names::Filenames(filenames) => {
-            let (classes, time_taken) =
-                time(|| parse(parser.clone(), &shallow_decl_cache, filenames));
+            let (classes, time_taken) = time(|| {
+                populate_shallow_decl_cache(&shallow_decl_cache, parser.clone(), &filenames)
+            });
             println!(
                 "Parsed {} classes in repo in {:?}",
                 classes.len(),
@@ -123,7 +122,16 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
         }
     };
 
-    let folded_decl_provider = make_folded_provider(opts, shallow_decl_cache, parser);
+    let folded_decl_provider = make_folded_decl_provider(
+        if opts.serialize {
+            CacheOpts::Serialized(opts.compression)
+        } else {
+            CacheOpts::Unserialized
+        },
+        opts.naming_table.as_ref(),
+        shallow_decl_cache,
+        parser,
+    );
     if opts.fold {
         let len = classes.len();
         let ((), time_taken) = time(|| fold(&folded_decl_provider, classes));
@@ -202,27 +210,6 @@ fn collect_file_or_class_names(opts: &CliOptions, ctx: &RelativePathCtx) -> Name
     }
 }
 
-fn parse<R: Reason>(
-    decl_parser: DeclParser<R>,
-    shallow_decl_cache: &ShallowDeclCache<R>,
-    filenames: Vec<RelativePath>,
-) -> Vec<TypeName> {
-    let len = filenames.len();
-    filenames
-        .into_par_iter()
-        .progress_count(len as u64)
-        .flat_map_iter(|path| {
-            let (decls, summary) = decl_parser.parse_and_summarize(path).unwrap();
-            shallow_decl_cache.add_decls(decls);
-            summary
-                .classes()
-                .map(|(class, _hash)| TypeName::new(class))
-                .collect::<Vec<_>>()
-                .into_iter()
-        })
-        .collect()
-}
-
 fn fold<R: Reason>(provider: &impl FoldedDeclProvider<R>, classes: Vec<TypeName>) {
     let len = classes.len();
     classes
@@ -234,36 +221,6 @@ fn fold<R: Reason>(provider: &impl FoldedDeclProvider<R>, classes: Vec<TypeName>
                 .unwrap_or_else(|e| panic!("failed to fold class {}: {:?}", class, e))
                 .unwrap_or_else(|| panic!("failed to look up class {}", class));
         })
-}
-
-fn make_folded_provider<R: Reason>(
-    opts: &CliOptions,
-    shallow_decl_cache: ShallowDeclCache<R>,
-    decl_parser: DeclParser<R>,
-) -> impl FoldedDeclProvider<R> {
-    hackrs::folded_decl_provider::LazyFoldedDeclProvider::new(
-        Default::default(),
-        if opts.serialize {
-            Arc::new(SerializingCache::with_compression(opts.compression))
-        } else {
-            Arc::new(NonEvictingCache::default())
-        },
-        if let Some(naming_table) = &opts.naming_table {
-            let naming_table = naming_provider::SqliteNamingTable::new(naming_table).unwrap();
-            Arc::new(hackrs::shallow_decl_provider::LazyShallowDeclProvider::new(
-                Arc::new(shallow_decl_cache),
-                Arc::new(naming_table),
-                decl_parser,
-            ))
-        } else {
-            Arc::new(
-                hackrs::shallow_decl_provider::EagerShallowDeclProvider::new(Arc::new(
-                    shallow_decl_cache,
-                )),
-            )
-        },
-        Arc::new(hackrs_test_utils::registrar::DependencyGraph::new()),
-    )
 }
 
 fn find_hack_files(path: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {

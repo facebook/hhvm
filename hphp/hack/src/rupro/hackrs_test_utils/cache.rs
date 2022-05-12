@@ -8,9 +8,13 @@ use crate::SerializingCache;
 use dashmap::DashMap;
 use hackrs::{
     cache::{Cache, LocalCache},
+    decl_parser::DeclParser,
     shallow_decl_provider::ShallowDeclCache,
 };
 use hash::HashMap;
+use indicatif::ParallelProgressIterator;
+use pos::{RelativePath, TypeName};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::cmp::Eq;
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -119,4 +123,26 @@ pub fn make_shallow_decl_cache<R: Reason>(opts: CacheOpts) -> ShallowDeclCache<R
 
 pub fn make_non_evicting_shallow_decl_cache<R: Reason>() -> ShallowDeclCache<R> {
     make_shallow_decl_cache(CacheOpts::Unserialized)
+}
+
+pub fn populate_shallow_decl_cache<R: Reason>(
+    shallow_decl_cache: &ShallowDeclCache<R>,
+    decl_parser: DeclParser<R>,
+    filenames: &[RelativePath],
+) -> Vec<TypeName> {
+    let len = filenames.len();
+    filenames
+        .par_iter()
+        .progress_count(len as u64)
+        .flat_map_iter(|path| {
+            let (mut decls, summary) = decl_parser.parse_and_summarize(*path).unwrap();
+            decls.reverse(); // To match OCaml behavior for name collisions
+            shallow_decl_cache.add_decls(decls);
+            summary
+                .classes()
+                .map(|(class, _hash)| TypeName::new(class))
+                .collect::<Vec<_>>()
+                .into_iter()
+        })
+        .collect()
 }

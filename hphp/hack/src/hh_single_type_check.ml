@@ -7,6 +7,8 @@
  *
  *)
 
+[@@@warning "-3"]
+
 open Hh_prelude
 open String_utils
 open Sys_utils

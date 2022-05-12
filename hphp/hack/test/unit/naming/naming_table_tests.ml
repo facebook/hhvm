@@ -8,6 +8,8 @@
  *
  *)
 
+[@@@warning "-3"]
+
 (* These are basically the same tests as in
  * test/integration_ml/saved_state/test_naming_table_sqlite_fallback.ml, but
  * as stripped down to just the basics as possible to make finding the root

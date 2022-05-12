@@ -8,5 +8,4 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-hash = { path = "../hash" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

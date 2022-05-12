@@ -11,9 +11,15 @@
 <<__PHPStdLib>>
 function apc_add($key, $var, int $ttl = 0, int $bump_ttl = 0) { }
 <<__PHPStdLib>>
+function apc_add_with_pure_sleep($key, $var, int $ttl = 0, int $bump_ttl = 0)[globals];
+<<__PHPStdLib>>
 function apc_store($key, $var, int $ttl = 0, int $bump_ttl = 0) { }
 <<__PHPStdLib>>
+function apc_store_with_pure_sleep($key, $var, int $ttl = 0, int $bump_ttl = 0)[globals];
+<<__PHPStdLib>>
 function apc_fetch($key, inout $success) { }
+<<__PHPStdLib>>
+function apc_fetch_with_pure_wakeup($key, inout $success)[read_globals];
 <<__PHPStdLib>>
 function apc_delete($key) { }
 <<__PHPStdLib>>

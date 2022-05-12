@@ -50,9 +50,15 @@ struct FfpJSONString {
 using ParseFactsResult = boost::variant<FactsJSONString, std::string>;
 using FfpResult = boost::variant<FfpJSONString, std::string>;
 
+// Parse facts from the given file or code with `options`.
+// if code is empty, load source text from filename first.
+// If expect_sha1 is non-empty, return an error message if
+// the actual sha1 of the source text is different.
 ParseFactsResult extract_facts(const std::string& filename,
                                const std::string& code,
-                               const RepoOptionsFlags& options);
+                               const RepoOptionsFlags& options,
+                               folly::StringPiece expect_sha1);
+
 FfpResult ffp_parse_file(const std::string& contents,
                          const RepoOptionsFlags& options);
 

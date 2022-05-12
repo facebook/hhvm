@@ -170,18 +170,20 @@ struct SimpleExtractor final : public Extractor {
   ~SimpleExtractor() override = default;
 
   folly::SemiFuture<std::string> get(const PathAndOptionalHash& key) override {
-    return folly::via(
-        &m_exec, [path = key.m_path]() { return facts_json_from_path(path); });
+    return folly::via(&m_exec, [key]() { return facts_json_from_path(key); });
   }
 };
 
 } // namespace
 
-std::string facts_json_from_path(const folly::fs::path& path) {
-  assertx(path.is_absolute());
+std::string facts_json_from_path(const PathAndOptionalHash& path) {
+  assertx(path.m_path.is_absolute());
 
   auto const result = extract_facts(
-      path.native(), "", RepoOptions::forFile(path.c_str()).flags());
+      path.m_path.native(),
+      "", // ask extract_facts() to load the file.
+      RepoOptions::forFile(path.m_path.c_str()).flags(),
+      path.m_hash ? *path.m_hash : "");
   return match<std::string>(
       result,
       [&](const FactsJSONString& r) { return r.value; },
@@ -266,7 +268,10 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
                     "Error extracting {}: {}",
                     absPathAndHash.m_path.native().c_str(),
                     facts.exception().what().c_str());
-                return parse_json(facts_json_from_path(absPathAndHash.m_path));
+                // There might have been a SHA1 mismatch due to a filesystem
+                // race. Try again without an expected hash.
+                PathAndOptionalHash withoutHash{absPathAndHash.m_path, {}};
+                return parse_json(facts_json_from_path(withoutHash));
               }
             })
             .thenValue([](folly::dynamic&& facts) {

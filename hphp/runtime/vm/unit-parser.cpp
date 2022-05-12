@@ -60,6 +60,7 @@
 #include "hphp/util/sha1.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
+#include "hphp/zend/zend-string.h"
 #include "hphp/zend/zend-strtod.h"
 
 namespace HPHP {
@@ -301,9 +302,18 @@ void compilers_start() {
 ParseFactsResult extract_facts(
   const std::string& filename,
   const std::string& code,
-  const RepoOptionsFlags& options
+  const RepoOptionsFlags& options,
+  folly::StringPiece expect_sha1
 ) {
   auto const get_facts = [&](const std::string& source_text) -> ParseFactsResult {
+    if (!expect_sha1.empty()) {
+      auto actual_sha1 = string_sha1(source_text);
+      if (actual_sha1 != expect_sha1) {
+        return folly::sformat(
+            "Unexpected SHA1: {} != {}", actual_sha1, expect_sha1
+        );
+      }
+    }
     try {
       std::int32_t decl_flags = options.getDeclFlags();
       rust::Box<DeclParserOptions> decl_opts =

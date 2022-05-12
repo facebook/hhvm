@@ -57,11 +57,12 @@ using ExtractorFactory = std::unique_ptr<Extractor> (*)(folly::Executor&);
 void setExtractorFactory(ExtractorFactory factory);
 
 /**
- * Synchronously extract Facts, as JSON, from the given path.
+ * Synchronously extract Facts, as JSON, from the given absolute path.
  *
- * Throw FactsExtractionExc on error.
+ * Throw FactsExtractionExc on error, including the case when a hash
+ * is given but doesn't match the loaded file.
  */
-std::string facts_json_from_path(const folly::fs::path& path);
+std::string facts_json_from_path(const PathAndOptionalHash& path);
 
 /**
  * Call facts_json_from_path on each path and return the results

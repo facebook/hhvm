@@ -120,7 +120,7 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
   R(EvalEnableDecl)                             \
   /**/
 
-std::string mangleUnitSha1(const std::string& fileSha1,
+std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,
                            const RepoOptionsFlags&);
 

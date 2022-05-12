@@ -1325,7 +1325,7 @@ char mangleExtension(const folly::StringPiece fileName) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string mangleUnitSha1(const std::string& fileSha1,
+std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,
                            const RepoOptionsFlags& opts) {
   return string_sha1(

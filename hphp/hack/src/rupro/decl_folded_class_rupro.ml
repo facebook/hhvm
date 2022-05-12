@@ -15,3 +15,14 @@ external fold_classes_in_files :
 
 external show_decl_class_type : Decl_defs.decl_class_type -> string
   = "show_decl_class_type_ffi"
+
+external partition_and_fold_dir :
+  www_root:string ->
+  ParserOptions.t ->
+  int ->
+  int ->
+  Decl_defs.decl_class_type SMap.t = "partition_and_fold_dir_ffi"
+
+external decls_equal :
+  Decl_defs.decl_class_type -> Decl_defs.decl_class_type -> bool
+  = "decls_equal_ffi"

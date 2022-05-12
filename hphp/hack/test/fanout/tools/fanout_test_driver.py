@@ -64,7 +64,7 @@ class Binaries(object):
         allow_type_errors: bool = True,
         env: Optional[Dict[str, str]] = None,
         check: bool = True,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> subprocess.CompletedProcess[str]:
         if env is None:
             env = {}
@@ -150,7 +150,7 @@ def _exec(
     timeout: int = 300,
     text: bool = True,
     check: bool = True,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> subprocess.CompletedProcess[str]:
     logging.debug("_exec: run: %s (%s)", args, kwargs)
     try:
@@ -160,7 +160,7 @@ def _exec(
             timeout=timeout,
             text=text,
             check=check,
-            **kwargs
+            **kwargs,
         )
     except subprocess.CalledProcessError as e:
         logging.debug(

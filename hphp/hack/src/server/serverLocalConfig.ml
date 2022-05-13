@@ -607,6 +607,8 @@ type t = {
       (**  Remove remote old decl fetching limit *)
   no_marshalled_naming_table_in_saved_state: bool;
       (** Remove marshalled naming table from saved state *)
+  no_load_two_saved_states: bool;
+      (** Stop loading hack/naming since hack/64 now has naming table *)
 }
 
 let default =
@@ -717,6 +719,7 @@ let default =
     specify_manifold_api_key = false;
     remote_old_decls_no_limit = false;
     no_marshalled_naming_table_in_saved_state = false;
+    no_load_two_saved_states = false;
   }
 
 let path =
@@ -1447,6 +1450,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let no_load_two_saved_states =
+    bool_if_min_version
+      "no_load_two_saved_states"
+      ~default:default.no_load_two_saved_states
+      ~current_version
+      config
+  in
   let saved_state_manifold_api_key =
     (* overriding the local_config value so consumers of saved_state_manifold_api_key
        * don't need to explicitly check for specify_manifold_api_key.
@@ -1588,6 +1598,7 @@ let load_ fn ~silent ~current_version overrides =
     specify_manifold_api_key;
     remote_old_decls_no_limit;
     no_marshalled_naming_table_in_saved_state;
+    no_load_two_saved_states;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1625,6 +1636,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       remote_old_decls_no_limit = options.remote_old_decls_no_limit;
       no_marshalled_naming_table_in_saved_state =
         options.no_marshalled_naming_table_in_saved_state;
+      no_load_two_saved_states = options.no_load_two_saved_states;
       populate_member_heaps = options.populate_member_heaps;
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;
       shm_cache_size = options.shm_cache_size;

@@ -33,10 +33,10 @@ while :; do
     esac
 done
 
+BUILD_PARAMS=()
+
 if [ -z "${HACK_NO_CARGO_VENDOR}" ]; then
-  LOCK_FLAG="--frozen"
-else
-  LOCK_FLAG="--locked"
+  BUILD_PARAMS+=("--frozen")
 fi
 
 if [ -z "${TARGET_DIR}" ]; then
@@ -49,8 +49,6 @@ else
   profile=debug; profile_flags=
 fi
 
-BUILD_PARAMS=()
-BUILD_PARAMS+=("$LOCK_FLAG")
 BUILD_PARAMS+=(--quiet)
 BUILD_PARAMS+=(--target-dir "${TARGET_DIR}")
 BUILD_PARAMS+=(--package "$pkg")

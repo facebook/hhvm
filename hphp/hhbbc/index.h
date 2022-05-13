@@ -510,11 +510,17 @@ private:
     bool operator==(MethodName o) const { return name == o.name; }
     SString name;
   };
+  // Like MethTabEntryPair, but the method is not guaranteed to
+  // actually exist (this only matters for things like exactFunc()).
+  struct MethodOrMissing {
+    const MethTabEntryPair* mte;
+  };
   using Rep = boost::variant< FuncName
                             , MethodName
                             , FuncInfo*
                             , const MethTabEntryPair*
                             , FuncFamily*
+                            , MethodOrMissing
                             >;
 
 private:
@@ -587,6 +593,13 @@ struct Index {
   bool frozen() const;
   void freeze();
   void thaw();
+
+  /*
+   * Throw away data structures that won't be needed during or after
+   * analysis. Currently just some data structures only used while
+   * building the index.
+   */
+  void cleanup_pre_analysis();
 
   /*
    * Throw away data structures that won't be needed during or after

@@ -981,14 +981,9 @@ SString Func::name() const {
     [&] (FuncInfo* fi) { return fi->func->name; },
     [&] (const MethTabEntryPair* mte) { return mte->first; },
     [&] (FuncFamily* fa) -> SString {
-      auto const name = fa->possibleFuncs().front()->first;
-      if (debug) {
-        for (DEBUG_ONLY auto const f : fa->possibleFuncs()) {
-          assertx(f->first->isame(name));
-        }
-      }
-      return name;
-    }
+      return fa->possibleFuncs().front()->first;
+    },
+    [&] (MethodOrMissing m) { return m.mte->first; }
   );
 }
 
@@ -1000,7 +995,8 @@ const php::Func* Func::exactFunc() const {
     [&](MethodName)                  { return Ret{}; },
     [&](FuncInfo* fi)                { return fi->func; },
     [&](const MethTabEntryPair* mte) { return mte->second.func; },
-    [&](FuncFamily* /*fa*/)          { return Ret{}; }
+    [&](FuncFamily*)                 { return Ret{}; },
+    [&](MethodOrMissing)             { return Ret{}; }
   );
 }
 
@@ -1015,7 +1011,8 @@ bool Func::isFoldable() const {
     [&](const MethTabEntryPair* mte) {
       return mte->second.func->attrs & AttrIsFoldable;
     },
-    [&](FuncFamily* fa) { return false; }
+    [&](FuncFamily*)     { return false; },
+    [&](MethodOrMissing) { return false; }
   );
 }
 
@@ -1028,7 +1025,10 @@ bool Func::couldHaveReifiedGenerics() const {
     [&](const MethTabEntryPair* mte) {
       return mte->second.func->isReified;
     },
-    [&](FuncFamily* fa) { return fa->m_static->m_maybeReified; }
+    [&](FuncFamily* fa) { return fa->m_static->m_maybeReified; },
+    [&](MethodOrMissing m) {
+      return m.mte->second.func->isReified;
+    }
   );
 }
 
@@ -1055,7 +1055,10 @@ bool Func::mightCareAboutDynCalls() const {
     [&](const MethTabEntryPair* mte) {
       return dyn_call_error_level(mte->second.func) > 0;
     },
-    [&](FuncFamily* fa) { return fa->m_static->m_maybeCaresAboutDynCalls; }
+    [&](FuncFamily* fa) { return fa->m_static->m_maybeCaresAboutDynCalls; },
+    [&](MethodOrMissing m) {
+      return dyn_call_error_level(m.mte->second.func) > 0;
+    }
   );
 }
 
@@ -1070,7 +1073,10 @@ bool Func::mightBeBuiltin() const {
     [&](const MethTabEntryPair* mte) {
       return mte->second.func->attrs & AttrBuiltin;
     },
-    [&](FuncFamily* fa) { return fa->m_static->m_maybeBuiltin; }
+    [&](FuncFamily* fa) { return fa->m_static->m_maybeBuiltin; },
+    [&](MethodOrMissing m) {
+      return m.mte->second.func->attrs & AttrBuiltin;
+    }
   );
 }
 
@@ -1081,7 +1087,8 @@ uint32_t Func::minNonVariadicParams() const {
     [&] (MethodName) { return 0; },
     [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
     [&] (const MethTabEntryPair* mte) { return numNVArgs(*mte->second.func); },
-    [&] (FuncFamily* fa) { return fa->m_static->m_minNonVariadicParams; }
+    [&] (FuncFamily* fa) { return fa->m_static->m_minNonVariadicParams; },
+    [&] (MethodOrMissing m) { return numNVArgs(*m.mte->second.func); }
   );
 }
 
@@ -1092,7 +1099,8 @@ uint32_t Func::maxNonVariadicParams() const {
     [&] (MethodName) { return std::numeric_limits<uint32_t>::max(); },
     [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
     [&] (const MethTabEntryPair* mte) { return numNVArgs(*mte->second.func); },
-    [&] (FuncFamily* fa) { return fa->m_static->m_maxNonVariadicParams; }
+    [&] (FuncFamily* fa) { return fa->m_static->m_maxNonVariadicParams; },
+    [&] (MethodOrMissing m) { return numNVArgs(*m.mte->second.func); }
   );
 }
 
@@ -1107,6 +1115,9 @@ const RuntimeCoeffects* Func::requiredCoeffects() const {
     },
     [&] (FuncFamily* fa) {
       return fa->m_static->m_requiredCoeffects.get_pointer();
+    },
+    [&] (MethodOrMissing m) {
+      return &m.mte->second.func->requiredCoeffects;
     }
   );
 }
@@ -1122,6 +1133,9 @@ const CompactVector<CoeffectRule>* Func::coeffectRules() const {
     },
     [&] (FuncFamily* fa) {
       return fa->m_static->m_coeffectRules.get_pointer();
+    },
+    [&] (MethodOrMissing m) {
+      return &m.mte->second.func->coeffectRules;
     }
   );
 }
@@ -1134,7 +1148,8 @@ std::string show(const Func& f) {
     [&](Func::MethodName)        {},
     [&](FuncInfo*)               { ret += "*"; },
     [&](const MethTabEntryPair*) { ret += "*"; },
-    [&](FuncFamily*)             { ret += "+"; }
+    [&](FuncFamily*)             { ret += "+"; },
+    [&](Func::MethodOrMissing)   { ret += "-"; }
   );
   return ret;
 }
@@ -1170,15 +1185,20 @@ struct Index::IndexData {
 
   ISStringToOneT<const php::Class*>      classes;
   SStringToMany<const php::Func>         methods;
-  SStringToOneFastT<uint64_t>            method_inout_params_by_name;
-  // 0th index is the return value
-  // 1st index is whether function is marked readonly
-  SStringToOneFastT<uint64_t>            method_readonly_by_name;
   ISStringToOneT<const php::Func*>       funcs;
   ISStringToOneT<const php::TypeAlias*>  typeAliases;
   ISStringToOneT<const php::Class*>      enums;
   SStringToOneT<const php::Constant*>    constants;
   SStringToOneT<const php::Module*>      modules;
+
+  /*
+   * Func families representing methods with a particular name (across
+   * all classes). If only one method with a particular name exists,
+   * it will be present in singleMethodFamilies instead (which saves
+   * space by not requiring a FuncFamily).
+   */
+  SStringToOneFastT<FuncFamily*>             methodFamilies;
+  SStringToOneFastT<const MethTabEntryPair*> singleMethodFamilies;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
@@ -1371,6 +1391,14 @@ void add_dependency(IndexData& data,
   data.dependencyMap.insert(acc, make_dep(src));
   auto& current = acc->second[d];
   current = current | newMask;
+
+  // We should only have a return type dependency on func families.
+  assertx(
+    IMPLIES(
+      acc->first.tag() == DependencyContextType::FuncFamily,
+      newMask == Dep::ReturnTy
+    )
+  );
 }
 
 std::mutex func_info_mutex;
@@ -1408,29 +1436,18 @@ void find_deps(IndexData& data,
                DependencyContextSet& deps) {
   auto const srcDep = make_dep(src);
 
-  {
-    DepMap::const_accessor acc;
-    if (data.dependencyMap.find(acc, srcDep)) {
-      for (auto const& kv : acc->second) {
-        if (has_dep(kv.second, mask)) deps.insert(kv.first);
-      }
-    }
-  }
+  // We should only ever have return type dependencies on func family.
+  assertx(
+    IMPLIES(
+      srcDep.tag() == DependencyContextType::FuncFamily,
+      mask == Dep::ReturnTy
+    )
+  );
 
-  // If this is a Func dep, we need to also check if any FuncFamily
-  // dependencies need to be added.
-  if (srcDep.tag() != DependencyContextType::Func) return;
-
-  auto const fi = func_info(data, static_cast<const php::Func*>(srcDep.ptr()));
-  if (!fi->func) return;
-
-  // Add any associated FuncFamilies
-  for (auto const ff : fi->families) {
-    DepMap::const_accessor acc;
-    if (data.dependencyMap.find(acc, make_dep(ff))) {
-      for (auto const& kv : acc->second) {
-        if (has_dep(kv.second, mask)) deps.insert(kv.first);
-      }
+  DepMap::const_accessor acc;
+  if (data.dependencyMap.find(acc, srcDep)) {
+    for (auto const& kv : acc->second) {
+      if (has_dep(kv.second, mask)) deps.insert(kv.first);
     }
   }
 }
@@ -1603,6 +1620,7 @@ struct ClsPreResolveUpdates {
   CompactVector<
     std::tuple<std::unique_ptr<php::Class>, php::Unit*, uint32_t>
   > newClasses;
+  CompactVector<const php::Func*> newMethods;
 
   uint32_t nextClassId = 0;
 };
@@ -2327,35 +2345,6 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
     for (auto& m : c->methods) {
       attribute_setter(m->attrs, false, AttrNoOverride);
       index.methods.insert({m->name, m.get()});
-
-      uint64_t inOutBits = 0, readonlyBits = 0, cur = 1;
-      bool anyInOut = false, anyReadonly = false;
-      for (auto& p : m->params) {
-        if (p.inout) {
-          inOutBits |= cur;
-          anyInOut = true;
-        }
-        if (p.readonly) {
-          readonlyBits |= cur;
-          anyReadonly = true;
-        }
-        // It doesn't matter that we lose parameters beyond the 64th,
-        // for those, we'll conservatively check everything anyway.
-        cur <<= 1;
-      }
-      if (anyInOut) {
-        // Multiple methods with the same name will be combined in the same
-        // cell, thus we use |=. This only makes sense in WholeProgram mode
-        // since we use this field to check that no functions has its n-th
-        // parameter as inout, which requires global knowledge.
-        index.method_inout_params_by_name[m->name] |= inOutBits;
-      }
-      if (anyReadonly || m->isReadonlyReturn || m->isReadonlyThis) {
-        index.method_readonly_by_name[m->name] |=
-          ((readonlyBits << 2) |
-           ((m->isReadonlyThis ? 1 : 0) << 1) |
-           (m->isReadonlyReturn ? 1 : 0));
-      }
     }
 
     if (c->closureContextCls) {
@@ -2449,6 +2438,8 @@ std::unique_ptr<php::Func> clone_meth_helper(
   }
   cloneMeth->unit = newContext->unit;
   cloneMeth->originalClass = origMeth->originalClass;
+
+  preResolveUpdates.newMethods.emplace_back(cloneMeth.get());
 
   if (!origMeth->hasCreateCl) return cloneMeth;
 
@@ -3026,14 +3017,33 @@ void compute_subclass_list(IndexData& index) {
 bool define_func_family(IndexData& index, ClassInfo* cinfo,
                         SString name, const php::Func* func = nullptr) {
   FuncFamily::PFuncVec funcs{};
-  for (auto const cleaf : cinfo->subclassList) {
-    auto const leafFn = [&] () -> const MethTabEntryPair* {
-      auto const leafFnIt = cleaf->methods.find(name);
-      if (leafFnIt == end(cleaf->methods)) return nullptr;
-      return mteFromIt(leafFnIt);
-    }();
-    if (!leafFn) continue;
-    funcs.push_back(leafFn);
+  // If cinfo was provided, we're calculating a func family with a set
+  // of methods off a class. Otherwise, we're calculating a func
+  // family for all methods with the given name.
+  if (cinfo) {
+    for (auto const cleaf : cinfo->subclassList) {
+      auto const leafFn = [&] () -> const MethTabEntryPair* {
+          auto const leafFnIt = cleaf->methods.find(name);
+          if (leafFnIt == end(cleaf->methods)) return nullptr;
+          return mteFromIt(leafFnIt);
+        }();
+      if (!leafFn) continue;
+      funcs.emplace_back(leafFn);
+    }
+  } else {
+    auto const range = index.methods.equal_range(name);
+    for (auto it = range.first; it != range.second; ++it) {
+      auto const func = it->second;
+      assertx(func->cls);
+      // Only include methods for classes which have a ClassInfo,
+      // which means they're instantiatable.
+      auto const cinfoIt = index.classInfo.find(func->cls->name);
+      if (cinfoIt == index.classInfo.end()) continue;
+      auto const cinfo = cinfoIt->second;
+      auto const methIt = cinfo->methods.find(name);
+      if (methIt == cinfo->methods.end()) continue;
+      funcs.emplace_back(mteFromIt(methIt));
+    }
   }
 
   if (funcs.empty()) return false;
@@ -3075,17 +3085,25 @@ bool define_func_family(IndexData& index, ClassInfo* cinfo,
 
   if (Trace::moduleEnabled(Trace::hhbbc_index, 4)) {
     FTRACE(4, "define_func_family: {}::{}:\n",
-           cinfo->cls->name, name);
+           cinfo ? cinfo->cls->name->data() : "*", name);
     for (auto const DEBUG_ONLY func : funcs) {
       FTRACE(4, "  {}::{}\n",
-             func->second.func->cls->name, func->second.func->name);
+             func->second.func->cls->name,
+             func->second.func->name);
     }
   }
 
   // Single func resolutions are stored separately. They don't need a
   // FuncFamily and this saves space.
   if (funcs.size() == 1) {
-    cinfo->singleMethodFamilies.emplace(name, funcs[0]);
+    if (cinfo) {
+      cinfo->singleMethodFamilies.emplace(name, funcs[0]);
+    } else {
+      auto it = index.singleMethodFamilies.find(name);
+      assertx(it != index.singleMethodFamilies.end());
+      assertx(!it->second);
+      it->second = funcs[0];
+    }
     return true;
   }
 
@@ -3100,11 +3118,18 @@ bool define_func_family(IndexData& index, ClassInfo* cinfo,
     ).first->first.get();
   }();
 
-  cinfo->methodFamilies.emplace(
-    std::piecewise_construct,
-    std::forward_as_tuple(name),
-    std::forward_as_tuple(ff)
-  );
+  if (cinfo) {
+    cinfo->methodFamilies.emplace(
+      std::piecewise_construct,
+      std::forward_as_tuple(name),
+      std::forward_as_tuple(ff)
+    );
+  } else {
+    auto it = index.methodFamilies.find(name);
+    assertx(it != index.methodFamilies.end());
+    assertx(!it->second);
+    it->second = ff;
+  }
 
   return true;
 }
@@ -3306,6 +3331,7 @@ void build_func_family_static_info(IndexData& index, FuncFamily* ff) {
 void define_func_families(IndexData& index) {
   trace_time tracer("define_func_families");
 
+  // Calculate func families for classes:
   parallel::for_each(
     index.allClassInfos,
     [&] (const std::unique_ptr<ClassInfo>& cinfo) {
@@ -3334,6 +3360,54 @@ void define_func_families(IndexData& index) {
       }
     }
   );
+
+  // Then calculate func families for methods with particular names:
+  {
+    // Build a list of all unique method names. Pre-allocate entries
+    // in methodFamilies and singleMethodFamilies for each one (we
+    // don't know which ones will be used). This lets us insert into
+    // the maps from multiple threads safely (we don't have to mutate
+    // the actual maps).
+    std::vector<SString> allMethods;
+    for (auto const& [name, _] : index.methods) {
+      if (!allMethods.empty() && allMethods.back() == name) continue;
+      allMethods.emplace_back(name);
+      auto const DEBUG_ONLY inserted1 =
+        index.methodFamilies.emplace(name, nullptr);
+      assertx(inserted1.second);
+      auto const DEBUG_ONLY inserted2 =
+        index.singleMethodFamilies.emplace(name, nullptr);
+      assertx(inserted2.second);
+    }
+
+    // Populate the maps
+    parallel::for_each(
+      allMethods,
+      [&] (SString method) {
+        define_func_family(index, nullptr, method, nullptr);
+      }
+    );
+
+    // Now clean any remaining nullptr entries out of the maps. These
+    // correspond to method names which got no func families.
+    for (auto it = index.methodFamilies.begin();
+         it != index.methodFamilies.end();) {
+      if (!it->second) {
+        it = index.methodFamilies.erase(it);
+      } else {
+        ++it;
+      }
+    }
+
+    for (auto it = index.singleMethodFamilies.begin();
+         it != index.singleMethodFamilies.end();) {
+      if (!it->second) {
+        it = index.singleMethodFamilies.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
 
   // Now that all of the FuncFamilies have been created, generate the
   // back links from FuncInfo to their FuncFamilies.
@@ -4546,6 +4620,13 @@ void commitPreResolveUpdates(IndexData& index,
           unit->classes[idx] = std::move(std::get<0>(p));
         }
       }
+    },
+    [&] {
+      for (auto const& u : updates) {
+        for (auto const f : u.newMethods) {
+          index.methods.emplace(f->name, f);
+        }
+      }
     }
   );
 }
@@ -5451,27 +5532,39 @@ res::Class Index::builtin_class(SString name) const {
 res::Func Index::resolve_method(Context ctx,
                                 Type clsType,
                                 SString name) const {
-  auto name_only = [&] {
+  auto const general = [&] {
+    if (options.FuncFamilies) {
+      // Even if we can't resolve to a FuncFamily from the class, we
+      // can still perhaps use a (less percise) func family derived
+      // from just the method name.
+      auto const singleMethIt = m_data->singleMethodFamilies.find(name);
+      if (singleMethIt != m_data->singleMethodFamilies.end()) {
+        return res::Func { res::Func::MethodOrMissing{ singleMethIt->second }};
+      }
+      auto const methIt = m_data->methodFamilies.find(name);
+      if (methIt != m_data->methodFamilies.end()) {
+        return res::Func { methIt->second };
+      }
+    }
     return res::Func { res::Func::MethodName { name } };
   };
 
-  if (!is_specialized_cls(clsType)) {
-    return name_only();
-  }
+  if (!is_specialized_cls(clsType)) return general();
   auto const dcls  = dcls_of(clsType);
   auto const cinfo = dcls.cls.val.right();
-  if (!cinfo) return name_only();
+  if (!cinfo) return general();
 
   // Classes may have more method families than methods. Any such
   // method families are guaranteed to all be public so we can do this
-  // lookup as a last gasp before resorting to name_only().
+  // lookup as a last gasp before resorting to general().
   auto const find_extra_method = [&] {
+    if (!options.FuncFamilies) return general();
     auto singleMethIt = cinfo->singleMethodFamilies.find(name);
     if (singleMethIt != cinfo->singleMethodFamilies.end()) {
       return res::Func { singleMethIt->second };
     }
     auto methIt = cinfo->methodFamilies.find(name);
-    if (methIt == end(cinfo->methodFamilies)) return name_only();
+    if (methIt == end(cinfo->methodFamilies)) return general();
     // If there was a sole implementer we can resolve to a single method, even
     // if the method was not declared on the interface itself.
     assertx(methIt->second->possibleFuncs().size() > 1);
@@ -5517,7 +5610,7 @@ res::Func Index::resolve_method(Context ctx,
   // Be conservative around unflattened trait methods, since their cls
   // may change at runtime.
   if (ftarget->cls && is_used_trait(*ftarget->cls)) {
-    return name_only();
+    return general();
   }
 
   // We need to revisit the hasPrivateAncestor code if we start being
@@ -5540,12 +5633,12 @@ res::Func Index::resolve_method(Context ctx,
       ctx.cls != ftarget->cls) {
     if (could_be_related(ctx.cls, cinfo->cls)) {
       if (contextMayHavePrivateWithSameName()) {
-        return name_only();
+        return general();
       }
     }
   }
 
-  auto resolve = [&] {
+  auto const resolve = [&] {
     create_func_info(*m_data, ftarget);
     return res::Func { mteFromIt(methIt) };
   };
@@ -5557,7 +5650,7 @@ res::Func Index::resolve_method(Context ctx,
     if (methIt->second.attrs & AttrNoOverride) {
       return resolve();
     }
-    if (!options.FuncFamilies) return name_only();
+    if (!options.FuncFamilies) return general();
 
     {
       auto const singleFamIt = cinfo->singleMethodFamilies.find(name);
@@ -5565,7 +5658,7 @@ res::Func Index::resolve_method(Context ctx,
         return res::Func { singleFamIt->second };
       }
       auto const famIt = cinfo->methodFamilies.find(name);
-      if (famIt == end(cinfo->methodFamilies)) return name_only();
+      if (famIt == end(cinfo->methodFamilies)) return general();
       assertx(famIt->second->possibleFuncs().size() > 1);
       return res::Func { famIt->second };
     }
@@ -5828,7 +5921,10 @@ Index::supports_async_eager_return(res::Func rfunc) const {
     [&](const MethTabEntryPair* mte) {
       return func_supports_AER(mte->second.func);
     },
-    [&](FuncFamily* fam) { return fam->m_static->m_supportsAER; }
+    [&](FuncFamily* fam) { return fam->m_static->m_supportsAER; },
+    [&](res::Func::MethodOrMissing m) {
+      return func_supports_AER(m.mte->second.func);
+    }
   );
 }
 
@@ -6231,6 +6327,17 @@ Type Index::lookup_return_type(Context ctx,
           return ret;
         }
       );
+    },
+    [&] (res::Func::MethodOrMissing m) {
+      if (methods) {
+        if (auto ret = methods->lookupReturnType(*m.mte->second.func)) {
+          return unctx(std::move(*ret));
+        }
+      }
+      add_dependency(*m_data, m.mte->second.func, ctx, dep);
+      auto const finfo = func_info(*m_data, m.mte->second.func);
+      if (!finfo->func) return TInitCell;
+      return unctx(finfo->returnTy);
     }
   );
 }
@@ -6292,6 +6399,26 @@ Type Index::lookup_return_type(Context caller,
         }
       );
       return return_with_context(std::move(ret), context);
+    },
+    [&] (res::Func::MethodOrMissing m) {
+      auto const finfo = func_info(*m_data, m.mte->second.func);
+      if (!finfo->func) return TInitCell;
+
+      auto returnType = [&] {
+        if (methods) {
+          if (auto ret = methods->lookupReturnType(*m.mte->second.func)) {
+            return *ret;
+          }
+        }
+        add_dependency(*m_data, m.mte->second.func, caller, dep);
+        return finfo->returnTy;
+      }();
+
+      return context_sensitive_return_type(
+        *m_data,
+        { finfo->func, args, context },
+        std::move(returnType)
+      );
     }
   );
 }
@@ -6338,12 +6465,6 @@ Optional<uint32_t> Index::lookup_num_inout_params(
        : 0;
     },
     [&] (res::Func::MethodName s) -> Optional<uint32_t> {
-      auto const it = m_data->method_inout_params_by_name.find(s.name);
-      if (it == end(m_data->method_inout_params_by_name)) {
-        // There was no entry, so no method by this name takes a parameter
-        // by inout.
-        return 0;
-      }
       return std::nullopt;
     },
     [&] (FuncInfo* finfo) {
@@ -6354,6 +6475,9 @@ Optional<uint32_t> Index::lookup_num_inout_params(
     },
     [&] (FuncFamily* fam) -> Optional<uint32_t> {
       return fam->m_static->m_numInOut;
+    },
+    [&] (res::Func::MethodOrMissing m) {
+      return func_num_inout(m.mte->second.func);
     }
   );
 }
@@ -6371,20 +6495,7 @@ PrepKind Index::lookup_param_prep(Context,
         : PrepKind{TriBool::No, TriBool::Yes};
     },
     [&] (res::Func::MethodName s) {
-      auto const couldHaveBit = [&] (auto const& map, auto index) {
-        auto const it = map.find(s.name);
-        if (it == end(map)) return false;
-        if (index < sizeof(it->second) * CHAR_BIT &&
-            !((it->second >> index) & 1)) {
-          return false;
-        }
-        return true;
-      };
-
-      return PrepKind{
-        maybeOrNo(couldHaveBit(m_data->method_inout_params_by_name, paramId)),
-        maybeOrNo(couldHaveBit(m_data->method_readonly_by_name, paramId + 2))
-      };
+      return PrepKind{TriBool::Maybe, TriBool::Maybe};
     },
     [&] (FuncInfo* finfo) {
       return func_param_prep(finfo->func, paramId);
@@ -6397,6 +6508,9 @@ PrepKind Index::lookup_param_prep(Context,
         return PrepKind{TriBool::No, TriBool::No};
       }
       return fam->m_static->m_paramPreps[paramId];
+    },
+    [&] (res::Func::MethodOrMissing m) {
+      return func_param_prep(m.mte->second.func, paramId);
     }
   );
 }
@@ -6414,18 +6528,7 @@ TriBool Index::lookup_return_readonly(
         ? yesOrNo(it->second->isReadonlyReturn)
         : TriBool::No; // if the function doesnt exist, we will error anyway
     },
-    [&] (res::Func::MethodName s) {
-      auto const it = m_data->method_readonly_by_name.find(s.name);
-      if (it == end(m_data->method_readonly_by_name)) {
-        // There was no entry, so no method by this name returns readonly.
-        return TriBool::No;
-      }
-      if (!(it->second & 1)) {
-        // No method of this name returns readonly.
-        return TriBool::No;
-      }
-      return TriBool::Maybe;
-    },
+    [&] (res::Func::MethodName s) { return TriBool::Maybe; },
     [&] (FuncInfo* finfo) {
       return yesOrNo(finfo->func->isReadonlyReturn);
     },
@@ -6434,6 +6537,9 @@ TriBool Index::lookup_return_readonly(
     },
     [&] (FuncFamily* fam) {
       return fam->m_static->m_isReadonlyReturn;
+    },
+    [&] (res::Func::MethodOrMissing m) {
+      return yesOrNo(m.mte->second.func->isReadonlyReturn);
     }
   );
 }
@@ -6451,18 +6557,7 @@ TriBool Index::lookup_readonly_this(
         ? yesOrNo(it->second->isReadonlyThis)
         : TriBool::Yes; // if the function doesnt exist, we will error anyway
     },
-    [&] (res::Func::MethodName s) {
-      auto const it = m_data->method_readonly_by_name.find(s.name);
-      if (it == end(m_data->method_readonly_by_name)) {
-        // There was no entry, so no method by this name returns readonly.
-        return TriBool::No;
-      }
-      if (!((it->second >> 1) & 1)) {
-        // No method of this name is marked readonly
-        return TriBool::No;
-      }
-      return TriBool::Maybe;
-    },
+    [&] (res::Func::MethodName s) { return TriBool::Maybe; },
     [&] (FuncInfo* finfo) {
       return yesOrNo(finfo->func->isReadonlyThis);
     },
@@ -6471,6 +6566,9 @@ TriBool Index::lookup_readonly_this(
     },
     [&] (FuncFamily* fam) {
       return fam->m_static->m_isReadonlyThis;
+    },
+    [&] (res::Func::MethodOrMissing m) {
+      return yesOrNo(m.mte->second.func->isReadonlyThis);
     }
   );
 }
@@ -7117,12 +7215,13 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
     finfo->unusedParams = unusedParams;
   }
 
+  auto resetFuncFamilies = false;
   if (t.strictlyMoreRefined(finfo->returnTy)) {
     if (finfo->returnRefinements < options.returnTypeRefineLimit) {
       finfo->returnTy = t;
       // We've modifed the return type, so reset any cached FuncFamily
       // return types.
-      for (auto const ff : finfo->families) ff->m_returnTy.reset();
+      resetFuncFamilies = true;
       dep = is_scalar(t) ?
         Dep::ReturnTy | Dep::InlineDepthLimit : Dep::ReturnTy;
       finfo->returnRefinements += fa.localReturnRefinements + 1;
@@ -7156,7 +7255,18 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
     dep = Dep::InlineDepthLimit | Dep::ReturnTy;
   }
 
-  if (dep != Dep{}) find_deps(*m_data, func, dep, deps);
+  if (dep != Dep{}) {
+    find_deps(*m_data, func, dep, deps);
+    if (resetFuncFamilies) {
+      assertx(has_dep(dep, Dep::ReturnTy));
+      for (auto const ff : finfo->families) {
+        // Only load the deps for this func family if we're the ones
+        // who successfully reset. Only one thread needs to do it.
+        if (!ff->m_returnTy.reset()) continue;
+        find_deps(*m_data, ff, Dep::ReturnTy, deps);
+      }
+    }
+  }
 }
 
 bool Index::refine_closure_use_vars(const php::Class* cls,
@@ -7455,14 +7565,19 @@ void Index::freeze() {
     (x).clear();                                \
   }
 
+void Index::cleanup_pre_analysis() {
+  trace_time _{"cleanup pre analysis"};
+  CLEAR(m_data->classes);
+  CLEAR(m_data->methods);
+}
+
 void Index::cleanup_for_final() {
-  trace_time _{"cleanup_for_final"};
+  trace_time _{"cleanup for final"};
   CLEAR(m_data->dependencyMap);
 }
 
-
 void Index::cleanup_post_emit(php::ProgramPtr program) {
-  trace_time _{"cleanup_post_emit"};
+  trace_time _{"cleanup post emit"};
   {
     trace_time t{"reset allClassInfos"};
     parallel::for_each(m_data->allClassInfos, [] (auto& u) { u.reset(); });
@@ -7483,10 +7598,6 @@ void Index::cleanup_post_emit(php::ProgramPtr program) {
   }
   std::vector<std::function<void()>> clearers;
   #define CLEAR_PARALLEL(x) clearers.push_back([&] CLEAR(x));
-  CLEAR_PARALLEL(m_data->classes);
-  CLEAR_PARALLEL(m_data->methods);
-  CLEAR_PARALLEL(m_data->method_inout_params_by_name);
-  CLEAR_PARALLEL(m_data->method_readonly_by_name);
   CLEAR_PARALLEL(m_data->funcs);
   CLEAR_PARALLEL(m_data->typeAliases);
   CLEAR_PARALLEL(m_data->enums);
@@ -7505,6 +7616,9 @@ void Index::cleanup_post_emit(php::ProgramPtr program) {
   CLEAR_PARALLEL(m_data->publicSPropMutations);
   CLEAR_PARALLEL(m_data->ifaceSlotMap);
   CLEAR_PARALLEL(m_data->closureUseVars);
+
+  CLEAR_PARALLEL(m_data->methodFamilies);
+  CLEAR_PARALLEL(m_data->singleMethodFamilies);
 
   CLEAR_PARALLEL(m_data->funcFamilies);
   CLEAR_PARALLEL(m_data->funcFamilyStaticInfos);

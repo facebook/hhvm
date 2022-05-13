@@ -96,9 +96,10 @@ struct LockFreeLazy {
    * value. Concurrent calls to reset() are allowed. Only one thread
    * will destroy the value. However no concurrent calls to get() are
    * allowed at the same time as calling reset(). This invalidates any
-   * references previously returned from get().
+   * references previously returned from get(). Returns true if this
+   * call successfully resets, false otherwise.
    */
-  void reset();
+  bool reset();
 
 private:
   typename std::aligned_storage<sizeof(T), alignof(T)>::type m_storage;
@@ -174,13 +175,13 @@ template<typename T> const T& LockFreeLazy<T>::rawGet() {
   return *std::launder(reinterpret_cast<T*>(&m_storage));
 }
 
-template<typename T> void LockFreeLazy<T>::reset() {
+template<typename T> bool LockFreeLazy<T>::reset() {
   // This logic is very similar to get(), except the meaning of Empty
   // and Present are effectively reversed.
   while (true) {
     auto current = m_state.load(std::memory_order_acquire);
     if (current == State::Empty) {
-      return;
+      return false;
     } else if (current == State::Updating) {
       futex_wait(
         reinterpret_cast<std::atomic<uint32_t>*>(&m_state),
@@ -192,7 +193,7 @@ template<typename T> void LockFreeLazy<T>::reset() {
       std::launder(reinterpret_cast<T*>(&m_storage))->~T();
       m_state.store(State::Empty, std::memory_order_release);
       futex_wake(reinterpret_cast<std::atomic<uint32_t>*>(&m_state), INT_MAX);
-      return;
+      return true;
     }
   }
 }

@@ -586,8 +586,10 @@ void whole_program(php::ProgramPtr program,
     ueq.push(std::move(ue));
   };
 
-  std::thread cleanup_pre;
+  std::thread cleanup_pre_analysis;
+  std::thread cleanup_for_final;
   if (!options.NoOptimizations) {
+    cleanup_pre_analysis = std::thread([&] { index.cleanup_pre_analysis(); });
     assertx(check(*program));
     prop_type_hint_pass(index, *program);
     index.rewrite_default_initial_values(*program);
@@ -601,7 +603,7 @@ void whole_program(php::ProgramPtr program,
     index.preinit_bad_initial_prop_values();
     index.use_class_dependencies(options.HardPrivatePropInference);
     analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
-    cleanup_pre = std::thread([&] { index.cleanup_for_final(); });
+    cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });
     index.join_iface_vtable_thread();
     parallel::num_threads = parallel::final_threads;
     final_pass(index, *program, stats, emitUnit);
@@ -637,7 +639,8 @@ void whole_program(php::ProgramPtr program,
     arrTableReady->set_value();
   }
   ueq.finish();
-  cleanup_pre.join();
+  cleanup_pre_analysis.join();
+  cleanup_for_final.join();
   cleanup_post.join();
 
   summarize_memory(sample);

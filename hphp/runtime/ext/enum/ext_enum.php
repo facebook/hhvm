@@ -90,7 +90,7 @@ newtype Label<-TEnumClass, TType> = mixed;
  * provided for the typechecker and for developer reference.
  */
 abstract class BuiltinAbstractEnumClass {
-  final public static function nameOf<TType>(EnumClass\Label<this, TType> $atom): string {
+  final public static function nameOf<TType>(EnumClass\Label<this, TType> $atom)[]: string {
     return \__SystemLib\unwrap_opaque_value(\__SystemLib\OpaqueValueId::EnumClassLabel, $atom);
   }
 }
@@ -109,12 +109,18 @@ abstract class BuiltinEnumClass<+T> extends BuiltinAbstractEnumClass {
    * Get the values of the public consts defined on this class,
    * indexed by the string name of those consts.
    *
+   * Because calling getValues might trigger the initialisation of
+   * the enum class constants, which are [write_props], we
+   * set the context to [write_props] to make sure the effects are
+   * correctly dealt with.
+   *
    * @return array ('CONST_NAME' => $value, ....)
    */
   <<__Native>>
   final public static function getValues()[write_props]: darray<string, T>;
 
-  final public static function valueOf<TEnum super this, TType>(EnumClass\Label<TEnum, TType> $atom): MemberOf<TEnum, TType> {
+  /* Has the same effects as getValues, thus [write_props] */
+  final public static function valueOf<TEnum super this, TType>(EnumClass\Label<TEnum, TType> $atom)[write_props]: MemberOf<TEnum, TType> {
     $key = \__SystemLib\unwrap_opaque_value(\__SystemLib\OpaqueValueId::EnumClassLabel, $atom);
     return \__SystemLib\get_enum_member_by_label($key);
   }

@@ -69,6 +69,9 @@ bool Option::ExternWorkerForceSubprocess = false;
 int Option::ExternWorkerTimeoutSecs = 0;
 bool Option::ExternWorkerUseExecCache = true;
 bool Option::ExternWorkerCleanup = true;
+bool Option::ExternWorkerUseRichClient = true;
+bool Option::ExternWorkerUseZippyRichClient = true;
+bool Option::ExternWorkerUseP2P = true;
 std::string Option::ExternWorkerWorkingDir;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -229,6 +232,13 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                ExternWorkerCleanup);
   Config::Bind(ExternWorkerWorkingDir, ini, config, "ExternWorker.WorkingDir",
                ExternWorkerWorkingDir);
+  Config::Bind(ExternWorkerUseRichClient, ini, config,
+               "ExternWorker.UseRichClient", ExternWorkerUseRichClient);
+  Config::Bind(ExternWorkerUseZippyRichClient, ini, config,
+               "ExternWorker.UseZippyRichClient",
+               ExternWorkerUseZippyRichClient);
+  Config::Bind(ExternWorkerUseP2P, ini, config, "ExternWorker.UseP2P",
+               ExternWorkerUseP2P);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

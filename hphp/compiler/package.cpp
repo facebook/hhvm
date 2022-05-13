@@ -142,7 +142,10 @@ Options Package::AsyncState::makeOptions() {
                         : Options::UseSubprocess::Fallback)
     .setCacheExecs(Option::ExternWorkerUseExecCache)
     .setCleanup(Option::ExternWorkerCleanup)
-    .setUseEdenFS(RuntimeOption::EvalUseEdenFS);
+    .setUseEdenFS(RuntimeOption::EvalUseEdenFS)
+    .setUseRichClient(Option::ExternWorkerUseRichClient)
+    .setUseZippyRichClient(Option::ExternWorkerUseZippyRichClient)
+    .setUseP2P(Option::ExternWorkerUseP2P);
   if (Option::ExternWorkerTimeoutSecs > 0) {
     options.setTimeout(std::chrono::seconds{Option::ExternWorkerTimeoutSecs});
   }

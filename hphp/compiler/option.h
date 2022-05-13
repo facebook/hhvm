@@ -104,6 +104,9 @@ struct Option {
   static int ExternWorkerTimeoutSecs;
   static bool ExternWorkerUseExecCache;
   static bool ExternWorkerCleanup;
+  static bool ExternWorkerUseRichClient;
+  static bool ExternWorkerUseZippyRichClient;
+  static bool ExternWorkerUseP2P;
   static std::string ExternWorkerWorkingDir;
 
 private:

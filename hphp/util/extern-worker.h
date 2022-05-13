@@ -345,6 +345,22 @@ struct Options {
     return *this;
   }
 
+  // The below options are RE specific and not documented:
+  Options& setUseRichClient(bool b) {
+    m_useRichClient = b;
+    return *this;
+  }
+
+  Options& setUseZippyRichClient(bool b) {
+    m_useZippyRichClient = b;
+    return *this;
+  }
+
+  Options& setUseP2P(bool b) {
+    m_useP2P = b;
+    return *this;
+  }
+
   UseSubprocess m_useSubprocess{UseSubprocess::Fallback};
   folly::fs::path m_workingDir{folly::fs::temp_directory_path()};
   std::chrono::seconds m_timeout{std::chrono::minutes{15}};
@@ -352,6 +368,9 @@ struct Options {
   bool m_cacheExecs{true};
   bool m_useEdenFS{true};
   bool m_cleanup{true};
+  bool m_useRichClient{true};
+  bool m_useZippyRichClient{true};
+  bool m_useP2P{true};
   std::string m_useCase;
 };
 

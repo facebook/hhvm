@@ -7,14 +7,22 @@
  *)
 
 type t = {
-  path: Relative_path.t;
+  path: string;
   cst: Full_fidelity_positioned_syntax.t;
   tast: Tast.program;
   source_text: Full_fidelity_source_text.t;
 }
 
-let create ctx path =
-  let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+let create ctx rel_path ~root_path ~hhi_path =
+  let (ctx, entry) =
+    Provider_context.add_entry_if_missing ~ctx ~path:rel_path
+  in
+  let path =
+    Relative_path.to_absolute_with_prefix
+      ~www:(Path.make root_path)
+      ~hhi:(Path.make hhi_path)
+      rel_path
+  in
   let source_text = Ast_provider.compute_source_text ~entry in
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_unquarantined ~ctx ~entry

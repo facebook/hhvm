@@ -34,7 +34,7 @@ val build_attributes_json_nested :
   ('a, 'b) Aast.user_attribute list ->
   Hh_json.json
 
-val build_bytespan_json : 'a Pos.pos -> Hh_json.json
+val build_bytespan_json : Pos.t -> Hh_json.json
 
 val build_decl_target_json : Hh_json.json -> Hh_json.json
 
@@ -43,7 +43,7 @@ val build_occ_target_json : Hh_json.json -> Hh_json.json
 val build_file_lines_json : string -> int list -> bool -> bool -> Hh_json.json
 
 val build_gen_code_json :
-  filepath:string ->
+  path:string ->
   fully_generated:bool ->
   signature:string option ->
   source:string option ->

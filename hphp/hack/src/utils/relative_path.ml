@@ -60,20 +60,19 @@ let path_of_prefix prefix =
     in
     raise (Invalid_argument message)
 
+let enforce_trailing_slash v =
+  if string_ends_with v Filename.dir_sep then
+    v
+  else
+    v ^ Filename.dir_sep
+
 let set_path_prefix prefix v =
   let v = Path.to_string v in
   assert (String.length v > 0);
 
-  (* Ensure that there is a trailing slash *)
-  let v =
-    if string_ends_with v Filename.dir_sep then
-      v
-    else
-      v ^ Filename.dir_sep
-  in
   match prefix with
   | Dummy -> raise (Failure "Dummy is always represented by an empty string")
-  | _ -> path_ref_of_prefix prefix := Some v
+  | _ -> path_ref_of_prefix prefix := Some (enforce_trailing_slash v)
 
 type t = prefix * string [@@deriving eq, show, ord]
 
@@ -121,6 +120,13 @@ module S = struct
 end
 
 let to_absolute (p, rest) = path_of_prefix p ^ rest
+
+let to_absolute_with_prefix ~www ~hhi (p, rest) =
+  let path_concat p rest = enforce_trailing_slash (Path.to_string p) ^ rest in
+  match p with
+  | Root -> path_concat www rest
+  | Hhi -> path_concat hhi rest
+  | _ -> failwith "invalid prefix"
 
 let to_tmp (_, rest) = (Tmp, rest)
 

@@ -31,9 +31,10 @@ val split_name : string -> (string * string) option
 val add_xref :
   Hh_json.json ->
   Symbol_fact_id.t ->
-  Relative_path.t Pos.pos ->
-  (Hh_json.json * Relative_path.t Pos.pos list) Symbol_fact_id.Map.t SMap.t ->
-  (Hh_json.json * Relative_path.t Pos.pos list) Symbol_fact_id.Map.t SMap.t
+  path:string ->
+  Pos.t ->
+  (Hh_json.json * Pos.t list) Symbol_fact_id.Map.t SMap.t ->
+  (Hh_json.json * Pos.t list) Symbol_fact_id.Map.t SMap.t
 
 (* hack to pretty-print an expression. Get the representation from
   the source file, in lack of a better solution. This assumes that the

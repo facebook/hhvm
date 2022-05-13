@@ -57,6 +57,8 @@ val suffix : t -> string
 
 val to_absolute : t -> string
 
+val to_absolute_with_prefix : www:Path.t -> hhi:Path.t -> t -> string
+
 val to_tmp : t -> t
 
 val to_root : t -> t

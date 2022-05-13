@@ -134,28 +134,22 @@ val gconst_defn :
   Fact_id.t * Fact_acc.t
 
 val decl_loc :
-  Relative_path.t Pos.pos ->
-  Hh_json.json ->
-  Fact_acc.t ->
-  Fact_id.t * Fact_acc.t
+  path:string -> Pos.t -> Hh_json.json -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val decl_comment :
-  Relative_path.t Pos.pos ->
-  Hh_json.json ->
-  Fact_acc.t ->
-  Fact_id.t * Fact_acc.t
+  path:string -> Pos.t -> Hh_json.json -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val decl_span :
-  Relative_path.t Pos.pos ->
-  Hh_json.json ->
+  path:string -> Pos.t -> Hh_json.json -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+
+val file_lines :
+  path:string ->
+  Full_fidelity_source_text.t ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t
 
-val file_lines :
-  string -> Full_fidelity_source_text.t -> Fact_acc.t -> Fact_id.t * Fact_acc.t
-
 val gen_code :
-  filepath:string ->
+  path:string ->
   fully_generated:bool ->
   signature:string option ->
   source:string option ->
@@ -165,16 +159,17 @@ val gen_code :
   Fact_id.t * Fact_acc.t
 
 val file_xrefs :
-  string ->
+  path:string ->
   (Hh_json.json * Pos.t list) Fact_id.Map.t ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t
 
 val file_decls :
-  string -> Hh_json.json list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  path:string -> Hh_json.json list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val file_call :
-  Relative_path.t Pos.pos ->
+  path:string ->
+  Pos.t ->
   call_args:Hh_json.json list ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t

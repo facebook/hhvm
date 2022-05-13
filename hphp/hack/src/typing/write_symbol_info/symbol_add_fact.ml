@@ -463,43 +463,40 @@ let gconst_defn ctx source_text elem decl_id progress =
   let json = JSON_Object json_fields in
   Fact_acc.add_fact Predicate.(Hack GlobalConstDefinition) json prog
 
-let decl_loc pos decl_json progress =
-  let filepath = Relative_path.to_absolute (Pos.filename pos) in
+let decl_loc ~path pos decl_json progress =
   let json =
     JSON_Object
       [
         ("declaration", decl_json);
-        ("file", Build_json.build_file_json_nested filepath);
+        ("file", Build_json.build_file_json_nested path);
         ("span", Build_json.build_bytespan_json pos);
       ]
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationLocation) json progress
 
-let decl_comment pos decl_json progress =
-  let filepath = Relative_path.to_absolute (Pos.filename pos) in
+let decl_comment ~path pos decl_json progress =
   let json =
     JSON_Object
       [
         ("declaration", decl_json);
-        ("file", Build_json.build_file_json_nested filepath);
+        ("file", Build_json.build_file_json_nested path);
         ("span", Build_json.build_bytespan_json pos);
       ]
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationComment) json progress
 
-let decl_span pos decl_json progress =
-  let filepath = Relative_path.to_absolute (Pos.filename pos) in
+let decl_span ~path pos decl_json progress =
   let json =
     JSON_Object
       [
         ("declaration", decl_json);
-        ("file", Build_json.build_file_json_nested filepath);
+        ("file", Build_json.build_file_json_nested path);
         ("span", Build_json.build_bytespan_json pos);
       ]
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationSpan) json progress
 
-let file_lines filepath sourceText progress =
+let file_lines ~path sourceText progress =
   let lineLengths =
     Line_break_map.offsets_to_line_lengths
       sourceText.Full_fidelity_source_text.offset_map
@@ -508,18 +505,18 @@ let file_lines filepath sourceText progress =
   let hasUnicodeOrTabs = Util.has_tabs_or_multibyte_codepoints sourceText in
   let json =
     Build_json.build_file_lines_json
-      filepath
+      path
       lineLengths
       endsInNewline
       hasUnicodeOrTabs
   in
   Fact_acc.add_fact Predicate.(Src FileLines) json progress
 
-let gen_code
-    ~filepath ~fully_generated ~signature ~source ~command ~class_ progress =
+let gen_code ~path ~fully_generated ~signature ~source ~command ~class_ progress
+    =
   let json =
     Build_json.build_gen_code_json
-      ~filepath
+      ~path
       ~fully_generated
       ~signature
       ~source
@@ -528,21 +525,21 @@ let gen_code
   in
   Fact_acc.add_fact Predicate.(Gencode GenCode) json progress
 
-let file_xrefs filepath xref_map progress =
+let file_xrefs ~path xref_map progress =
   let json =
     JSON_Object
       [
-        ("file", Build_json.build_file_json_nested filepath);
+        ("file", Build_json.build_file_json_nested path);
         ("xrefs", Build_json.build_xrefs_json xref_map);
       ]
   in
   Fact_acc.add_fact Predicate.(Hack FileXRefs) json progress
 
-let file_decls filepath decls progress =
+let file_decls ~path decls progress =
   let json =
     JSON_Object
       [
-        ("file", Build_json.build_file_json_nested filepath);
+        ("file", Build_json.build_file_json_nested path);
         ("declarations", JSON_Array decls);
       ]
   in
@@ -565,12 +562,11 @@ let method_occ receiver_class name progress =
     (JSON_Object json)
     progress
 
-let file_call pos ~call_args progress =
-  let filepath = Relative_path.to_absolute (Pos.filename pos) in
+let file_call ~path pos ~call_args progress =
   let json =
     JSON_Object
       [
-        ("file", Build_json.build_file_json_nested filepath);
+        ("file", Build_json.build_file_json_nested path);
         ("callee_span", Build_json.build_bytespan_json pos);
         ("call_args", JSON_Array call_args);
       ]

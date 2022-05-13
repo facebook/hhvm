@@ -78,9 +78,9 @@ let recheck_job
     (_ : float)
     (progress : Relative_path.t list) : float =
   let start_time = Unix.gettimeofday () in
-  let files_info = List.map progress ~f:(File_info.create ctx) in
-  Relative_path.set_path_prefix Relative_path.Root (Path.make root_path);
-  Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi_path);
+  let files_info =
+    List.map progress ~f:(File_info.create ctx ~root_path ~hhi_path)
+  in
   write_json ctx ownership out_dir files_info start_time
 
 let index_files ctx ~out_dir ~files =

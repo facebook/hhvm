@@ -174,10 +174,10 @@ let build_file_lines_json filepath lineLengths endsInNewline hasUnicodeOrTabs =
 let build_string_json_nested str = JSON_Object [("key", JSON_String str)]
 
 let build_gen_code_json
-    ~filepath ~fully_generated ~signature ~source ~command ~class_ =
+    ~path ~fully_generated ~signature ~source ~command ~class_ =
   let fields =
     [
-      ("file", build_file_json_nested filepath);
+      ("file", build_file_json_nested path);
       ( "variant",
         JSON_Number
           (if fully_generated then

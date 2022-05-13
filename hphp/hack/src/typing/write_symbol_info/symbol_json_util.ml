@@ -87,10 +87,9 @@ let split_name (s : string) : (string * string) option =
     else
       Some (parent_namespace, name)
 
-let add_xref target_json target_id ref_pos xrefs =
-  let filepath = Relative_path.to_absolute (Pos.filename ref_pos) in
+let add_xref target_json target_id ~path ref_pos xrefs =
   SMap.update
-    filepath
+    path
     (fun file_map ->
       let new_ref = (target_json, [ref_pos]) in
       match file_map with

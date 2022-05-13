@@ -7,10 +7,16 @@
  *)
 
 type t = private {
-  path: Relative_path.t;
+  (* path to be used in the glean index *)
+  path: string;
   cst: Full_fidelity_positioned_syntax.t;
   tast: Tast.program;
   source_text: Full_fidelity_source_text.t;
 }
 
-val create : Provider_context.t -> Relative_path.t -> t
+val create :
+  Provider_context.t ->
+  Relative_path.t ->
+  root_path:string ->
+  hhi_path:string ->
+  t

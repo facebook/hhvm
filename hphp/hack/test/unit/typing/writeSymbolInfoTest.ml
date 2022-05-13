@@ -124,6 +124,7 @@ let test_build_xrefs _test_ctxt =
   in
   Relative_path.set_path_prefix Relative_path.Root (Path.make "www");
   let file = Relative_path.from_root ~suffix:"test.php" in
+  let path = Relative_path.to_absolute file in
   let decl_name = "TestDecl" in
   let target_json = JSON_Object [("declaration", JSON_String decl_name)] in
   let target_id = Fact_id.next () in
@@ -151,9 +152,9 @@ let test_build_xrefs _test_ctxt =
          ~pos_start:(3, 25, 40)
          ~pos_end:(3, 25, 45))
   in
-  let xrefs = Util.add_xref target_json target_id next_ref_pos xrefs in
-  let xrefs = Util.add_xref target_json target_id ref_pos xrefs in
-  let xrefs = Util.add_xref target_json target_id dup_ref_pos xrefs in
+  let xrefs = Util.add_xref target_json target_id ~path next_ref_pos xrefs in
+  let xrefs = Util.add_xref target_json target_id ~path ref_pos xrefs in
+  let xrefs = Util.add_xref target_json target_id ~path dup_ref_pos xrefs in
   let file_map : (Hh_json.json * Pos.t list) Fact_id.Map.t =
     SMap.find (Relative_path.to_absolute file) xrefs
   in

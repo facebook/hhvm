@@ -17,7 +17,6 @@ hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hhi = { path = "../../../hhi/rust" }
 indicatif = { version = "0.15", features = ["with_rayon"] }
 jwalk = "0.6"
-naming_provider = { path = "../../naming_provider/cargo/naming_provider" }
 pos = { path = "../../pos/cargo/pos" }
 procfs = "0.9"
 rayon = "1.2"

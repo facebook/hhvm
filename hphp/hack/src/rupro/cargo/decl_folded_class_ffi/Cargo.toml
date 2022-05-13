@@ -12,9 +12,15 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 file_provider = { path = "../../file_provider/cargo/file_provider" }
+find_utils = { path = "../../../utils/find_utils" }
 hackrs = { path = "../../hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
+hhi = { path = "../../../hhi/rust" }
+indicatif = { version = "0.15", features = ["with_rayon"] }
+jwalk = "0.6"
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 pos = { path = "../../pos/cargo/pos" }
+rayon = "1.2"
+tempdir = "0.3"
 ty = { path = "../../ty/cargo/ty" }

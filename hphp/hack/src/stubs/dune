@@ -150,14 +150,6 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name re_stubs)
- (wrapped false)
- (modules re reEnv)
- (libraries errors relative_path typing_deps)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name experiments_config_file_stubs)
  (wrapped false)
  (modules experiments_config_file)

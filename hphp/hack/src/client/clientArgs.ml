@@ -535,15 +535,6 @@ let parse_check_args cmd =
         " (mode) rename a symbol, Usage: --refactor "
         ^ "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>" );
       ("--remote", Arg.Set remote, " force remote type checking");
-      ( "--remote-execution",
-        Arg.String
-          (fun s ->
-            if String.equal s "cold" || String.equal s "warm" then
-              set_mode (MODE_STATUS_REMOTE_EXECUTION s)
-            else
-              print_string
-                "Warning: unrecognized remote-execution hulk mode. Please pass in \"cold\" or \"warm\".\n"),
-        "<cold|warm> force type checking with remote execution" );
       ( "--remove-dead-fixme",
         Arg.Int
           begin
@@ -646,12 +637,6 @@ let parse_check_args cmd =
         Arg.String add_single,
         "<path> Return errors in file with provided name (give '-' for stdin)"
       );
-      ( "--single-remote-execution",
-        Arg.String (fun x -> set_mode (MODE_STATUS_SINGLE_REMOTE_EXECUTION x)),
-        "<path> Return (errors, dep_edges) in file with provided name" );
-      ( "--multi-remote-execution",
-        Arg.Unit (fun () -> set_mode MODE_STATUS_MULTI_REMOTE_EXECUTION),
-        "<paths> Return (errors, dep_edges) in files with provided names" );
       ("--sort-results", Arg.Set sort_results, " sort output for CST search.");
       ( "--stats",
         Arg.Unit (fun () -> set_mode MODE_STATS),
@@ -745,7 +730,6 @@ let parse_check_args cmd =
     match (mode, args) with
     | (MODE_LINT, _)
     | (MODE_CONCATENATE_ALL, _)
-    | (MODE_STATUS_MULTI_REMOTE_EXECUTION, _)
     | (MODE_FILE_DEPENDENTS, _) ->
       (Wwwroot.get None, args)
     | (_, []) -> (Wwwroot.get None, [])

@@ -475,12 +475,6 @@ module FullCheckKind : CheckKindType = struct
         (Relative_path.Set.of_list (Relative_path.Map.keys phase_2_decl_defs))
         to_recheck
     in
-    let to_recheck =
-      if Relative_path.Set.is_empty env.remote_execution_files then
-        to_recheck
-      else
-        env.remote_execution_files
-    in
     (to_recheck, Relative_path.Set.empty)
 
   let get_env_after_decl ~old_env ~naming_table ~failed_naming =
@@ -511,7 +505,6 @@ module FullCheckKind : CheckKindType = struct
       old_env with
       errorl;
       needs_phase2_redecl = Relative_path.Set.empty;
-      ServerEnv.remote_execution_files = Relative_path.Set.empty;
       needs_recheck;
       full_check_status;
       remote;
@@ -623,10 +616,7 @@ module LazyCheckKind : CheckKindType = struct
         (Relative_path.Set.of_list (Relative_path.Map.keys phase_2_decl_defs))
         to_recheck_now
     in
-    if Relative_path.Set.is_empty env.remote_execution_files then
-      (to_recheck_now, to_recheck_later)
-    else
-      (env.remote_execution_files, Relative_path.Set.empty)
+    (to_recheck_now, to_recheck_later)
 
   let get_env_after_decl ~old_env ~naming_table ~failed_naming =
     {
@@ -648,7 +638,6 @@ module LazyCheckKind : CheckKindType = struct
       old_env with
       errorl;
       ide_needs_parsing = Relative_path.Set.empty;
-      ServerEnv.remote_execution_files = Relative_path.Set.empty;
       needs_phase2_redecl;
       needs_recheck;
       full_check_status;
@@ -1115,7 +1104,6 @@ functor
             ~longlived_workers
             ~hulk_lite
             ~hulk_heavy
-            ~remote_execution:env.ServerEnv.remote_execution
             ~check_info:(ServerCheckUtils.get_check_info ~check_reason genv env)
         in
         let env =
@@ -1154,13 +1142,6 @@ functor
       (* ... leaving only things that we actually checked, and which can be
        * removed from needs_recheck *)
       let needs_recheck = Relative_path.Set.diff needs_recheck files_checked in
-      let needs_recheck =
-        if Relative_path.Set.is_empty env.remote_execution_files then
-          needs_recheck
-        else
-          (* We never need to recheck in RE single mode *)
-          Relative_path.Set.empty
-      in
       let errors =
         Errors.(
           incremental_update
@@ -1251,13 +1232,6 @@ functor
           { env with full_check_status = Full_check_started }
         else
           env
-      in
-      let env =
-        if Relative_path.Set.is_empty env.remote_execution_files then
-          env
-        else
-          (* We always clear past errors in RE mode *)
-          { env with errorl = Errors.empty }
       in
       (* Files in env.needs_decl contain declarations which were not finished.
        * They were only oldified, but we didn't run phase2 redeclarations for them

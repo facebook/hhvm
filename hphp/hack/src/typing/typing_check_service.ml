@@ -131,16 +131,6 @@ type process_file_results = {
   deferred_decls: Deferred_decl.deferment list;
 }
 
-let process_files_remote_execution
-    (re_env : ReEnv.t)
-    (ctx : Provider_context.t)
-    (files : check_file_workitem list)
-    (recheck_id : string option) : process_file_results =
-  let fns = List.map files ~f:(fun file -> file.path) in
-  let deps_mode = Provider_context.get_deps_mode ctx in
-  let file_errors = Re.process_files re_env fns deps_mode recheck_id in
-  { file_errors; deferred_decls = [] }
-
 let scrape_class_names (ast : Nast.program) : SSet.t =
   let names = ref SSet.empty in
   let visitor =
@@ -304,7 +294,6 @@ let process_one_workitem
     ~batch_info
     ~memory_cap
     ~longlived_workers
-    ~remote_execution
     ~progress
     ~errors
     ~stats
@@ -379,32 +368,7 @@ let process_one_workitem
     | Some mid_stats -> (mid_stats, Some final_stats)
   in
 
-  (* This code doesn't belong here. This function should only process one file,
-     not filtering the list of remaining files. *)
-  let (fns, check_fns, errors) =
-    match remote_execution with
-    | None -> (List.tl_exn progress.remaining, [], errors)
-    | Some re_env ->
-      let (check_workitems, other_workitems) =
-        List.partition_map (List.tl_exn progress.remaining) ~f:(function
-            | Check file -> First file
-            | other -> Second other)
-      in
-      if List.is_empty check_workitems then
-        (other_workitems, [], errors)
-      else
-        let result =
-          process_files_remote_execution
-            re_env
-            ctx
-            check_workitems
-            check_info.recheck_id
-        in
-        let check_workitems = List.map check_workitems ~f:(fun f -> Check f) in
-        ( other_workitems,
-          check_workitems,
-          Errors.merge errors result.file_errors )
-  in
+  let (fns, check_fns, errors) = (List.tl_exn progress.remaining, [], errors) in
 
   (* If the major heap has exceeded the bounds, we (1) first try and bring the size back down
      by flushing the parser cache and doing a major GC; (2) if this fails, we decline to typecheck
@@ -425,19 +389,18 @@ let process_one_workitem
     end
   in
 
-  if Option.is_none remote_execution then
-    HackEventLogger.ProfileTypeCheck.process_workitem
-      ~batch_info
-      ~workitem_index:(ProcessFilesTally.count tally)
-      ~file:(Option.map file ~f:(fun file -> file.path))
-      ~file_was_already_deferred:
-        (Option.map file ~f:(fun file -> file.was_already_deferred))
-      ~decl
-      ~error_code:(Errors.choose_code_opt file_errors)
-      ~workitem_ends_under_cap
-      ~workitem_start_stats:stats
-      ~workitem_end_stats
-      ~workitem_end_second_stats;
+  HackEventLogger.ProfileTypeCheck.process_workitem
+    ~batch_info
+    ~workitem_index:(ProcessFilesTally.count tally)
+    ~file:(Option.map file ~f:(fun file -> file.path))
+    ~file_was_already_deferred:
+      (Option.map file ~f:(fun file -> file.was_already_deferred))
+    ~decl
+    ~error_code:(Errors.choose_code_opt file_errors)
+    ~workitem_ends_under_cap
+    ~workitem_start_stats:stats
+    ~workitem_end_stats
+    ~workitem_end_second_stats;
 
   let progress =
     {
@@ -455,7 +418,6 @@ let process_workitems
     (progress : typing_progress)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
     ~(worker_id : string)
     ~(batch_number : int)
@@ -486,7 +448,6 @@ let process_workitems
       ~batch_info
       ~memory_cap
       ~longlived_workers
-      ~remote_execution
   in
 
   let rec process_workitems_loop ~progress ~errors ~stats ~tally =
@@ -539,7 +500,6 @@ let load_and_process_workitems
     (progress : typing_progress)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
     ~(worker_id : string)
     ~(batch_number : int)
@@ -559,7 +519,6 @@ let load_and_process_workitems
     progress
     ~memory_cap
     ~longlived_workers
-    ~remote_execution
     ~check_info
     ~worker_id
     ~batch_number
@@ -729,15 +688,10 @@ let next
     (workitems_in_progress : workitem Hash_set.Poly.t)
     (remote_payloads : remote_computation_payload list ref)
     (record : Measure.record)
-    (remote_execution : ReEnv.t option)
     (hulk_lite : bool)
     (hulk_heavy : bool)
     (telemetry : Telemetry.t) : unit -> job_progress Bucket.bucket =
-  let max_size =
-    match remote_execution with
-    | Some _ -> 25000
-    | _ -> Bucket.max_size ()
-  in
+  let max_size = Bucket.max_size () in
   let num_workers =
     match workers with
     | Some w -> List.length w
@@ -894,7 +848,6 @@ let process_in_parallel
     ~(longlived_workers : bool)
     ~(hulk_lite : bool)
     ~(hulk_heavy : bool)
-    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result
@@ -954,7 +907,6 @@ let process_in_parallel
       workitems_in_progress
       remote_payloads
       record
-      remote_execution
       hulk_lite
       hulk_heavy
       telemetry
@@ -975,7 +927,6 @@ let process_in_parallel
           ctx
           ~memory_cap
           ~longlived_workers
-          ~remote_execution
           ~check_info
           ~typecheck_info
           ~worker_id
@@ -1055,13 +1006,7 @@ let process_in_parallel
     (!diagnostic_pusher, !time_first_error) )
 
 let process_sequentially
-    ?diagnostic_pusher
-    ctx
-    fnl
-    ~longlived_workers
-    ~remote_execution
-    ~check_info
-    ~typecheck_info :
+    ?diagnostic_pusher ctx fnl ~longlived_workers ~check_info ~typecheck_info :
     typing_result * (Diagnostic_pusher.t option * seconds_since_epoch option) =
   let progress =
     { completed = []; remaining = BigList.as_list fnl; deferred = [] }
@@ -1075,7 +1020,6 @@ let process_sequentially
       progress
       ~memory_cap:None
       ~longlived_workers
-      ~remote_execution
       ~check_info
       ~worker_id:"master"
       ~batch_number:(-1)
@@ -1169,7 +1113,6 @@ let go_with_interrupt
     ~(longlived_workers : bool)
     ~(hulk_lite : bool)
     ~(hulk_heavy : bool)
-    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : (_ * result) job_result =
   let typecheck_info =
     HackEventLogger.ProfileTypeCheck.get_typecheck_info
@@ -1233,7 +1176,6 @@ let go_with_interrupt
           ctx
           fnl
           ~longlived_workers
-          ~remote_execution
           ~check_info
           ~typecheck_info
       in
@@ -1245,11 +1187,7 @@ let go_with_interrupt
         diagnostic_pusher )
     end else begin
       Hh_logger.log "Type checking service will process files in parallel";
-      let num_workers =
-        match remote_execution with
-        | Some _ -> Some 1
-        | _ -> TypecheckerOptions.num_local_workers opts
-      in
+      let num_workers = TypecheckerOptions.num_local_workers opts in
       let workers =
         match (workers, num_workers) with
         | (Some workers, Some num_local_workers) ->
@@ -1271,7 +1209,6 @@ let go_with_interrupt
         ~longlived_workers
         ~hulk_lite
         ~hulk_heavy
-        ~remote_execution
         ~check_info
         ~typecheck_info
     end
@@ -1295,7 +1232,6 @@ let go
     ~(longlived_workers : bool)
     ~(hulk_lite : bool)
     ~(hulk_heavy : bool)
-    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (((), result), cancelled) =
@@ -1311,7 +1247,6 @@ let go
       ~longlived_workers
       ~hulk_lite
       ~hulk_heavy
-      ~remote_execution
       ~check_info
   in
   assert (List.is_empty cancelled);

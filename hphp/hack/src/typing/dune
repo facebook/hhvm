@@ -407,7 +407,6 @@
   file_info
   nast
   heap_global_storage
-  re_stubs
   typing_deps
   typing_toplevel)
  (preprocess
@@ -433,7 +432,6 @@
   procs_bucket
   server_monitor
   counters
-  re_stubs
   typing
   typing_defs
   typing_deps

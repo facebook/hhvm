@@ -77,7 +77,6 @@ let test () =
       ~longlived_workers:false
       ~hulk_lite:false
       ~hulk_heavy:false
-      ~remote_execution:None
       ~check_info
   in
   Test.assert_errors errors "";
@@ -92,7 +91,6 @@ let test () =
       ~longlived_workers:false
       ~hulk_lite:false
       ~hulk_heavy:false
-      ~remote_execution:None
       ~check_info
   in
   Test.assert_errors errors "";
@@ -108,7 +106,6 @@ let test () =
       ~longlived_workers:false
       ~hulk_lite:false
       ~hulk_heavy:false
-      ~remote_execution:None
       ~check_info
   in
   Test.assert_errors errors expected_errors;
@@ -123,7 +120,6 @@ let test () =
       ~longlived_workers:false
       ~hulk_lite:false
       ~hulk_heavy:false
-      ~remote_execution:None
       ~check_info
   in
   Test.assert_errors errors expected_errors;

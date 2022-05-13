@@ -53,9 +53,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | STATS -> false
   | DISCONNECT -> false
   | STATUS_SINGLE _ -> false
-  | STATUS_SINGLE_REMOTE_EXECUTION _ -> true
-  | STATUS_REMOTE_EXECUTION _ -> true
-  | STATUS_MULTI_REMOTE_EXECUTION _ -> true
   | INFER_TYPE _ -> false
   | INFER_TYPE_BATCH _ -> false
   | INFER_TYPE_ERROR _ -> false
@@ -140,36 +137,6 @@ let full_recheck_if_needed' genv env reason profiling =
 let force_remote = function
   | Rpc (_metadata, STATUS status) -> status.remote
   | _ -> false
-
-let rpc_files : type a. a t -> Relative_path.Set.t = function
-  | STATUS_SINGLE_REMOTE_EXECUTION { file_name } ->
-    Relative_path.Set.singleton (Relative_path.create_detect_prefix file_name)
-  | STATUS_MULTI_REMOTE_EXECUTION fns ->
-    List.fold fns ~init:Relative_path.Set.empty ~f:(fun acc fn ->
-        Relative_path.Set.add acc (Relative_path.create_detect_prefix fn))
-  | _ -> Relative_path.Set.empty
-
-let force_remote_execution_files = function
-  | Rpc (_metadata, x) -> rpc_files x
-  | _ -> Relative_path.Set.empty
-
-let rpc_remote_execution : type a. a t -> ReEnv.t option = function
-  | STATUS_REMOTE_EXECUTION { mode; _ } ->
-    let re_env =
-      if String.equal mode "warm" then
-        Re.initialize_lease false ~num_re_workers_opt:None
-      else if String.equal mode "cold" then
-        Re.initialize_lease true ~num_re_workers_opt:None
-      else
-        failwith
-          "Invalid argument to --remote-execution. Please specify \"cold\" or \"warm\""
-    in
-    Some re_env
-  | _ -> None
-
-let force_remote_execution = function
-  | Rpc (_metadata, x) -> rpc_remote_execution x
-  | _ -> None
 
 let ignore_ide = function
   | Rpc (_metadata, STATUS status) -> status.ignore_ide
@@ -333,13 +300,6 @@ let handle
     ~include_in_logs:false
     "%s"
     (ServerCommandTypesUtils.status_describe_cmd msg);
-  let env =
-    {
-      env with
-      ServerEnv.remote_execution_files = force_remote_execution_files msg;
-      ServerEnv.remote_execution = force_remote_execution msg;
-    }
-  in
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale =

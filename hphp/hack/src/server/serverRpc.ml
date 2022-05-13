@@ -70,30 +70,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | STATUS_SINGLE { file_names; max_errors } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, take_max_errors (ServerStatusSingle.go file_names ctx) max_errors)
-  | STATUS_SINGLE_REMOTE_EXECUTION { file_name } ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let (errors, dep_edges) =
-      ServerStatusSingleRemoteExecution.go file_name ctx
-    in
-    (env, (errors, dep_edges))
-  | STATUS_REMOTE_EXECUTION { max_errors; _ } ->
-    (* let ctx = Provider_utils.ctx_from_server_env env in *)
-    let errors = ServerStatusRemoteExecution.go env in
-    let (error_list, dropped_count) = take_max_errors errors max_errors in
-    (env, (error_list, dropped_count))
-  | STATUS_MULTI_REMOTE_EXECUTION _fns ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let errors = env.errorl in
-    let (errors, dep_edges) = ServerStatusMultiRemoteExecution.go errors ctx in
-    (* Set pause mode to prevent watchman from triggering a full recheck *)
-    let env =
-      {
-        env with
-        full_recheck_on_file_changes =
-          Paused { paused_recheck_id = env.init_env.recheck_id };
-      }
-    in
-    (env, (errors, dep_edges))
   | COVERAGE_LEVELS (path, file_input) ->
     let path = Relative_path.create_detect_prefix path in
     let (ctx, entry) = single_ctx env path file_input in

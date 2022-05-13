@@ -482,7 +482,6 @@ type t = {
       (** if set, the worker will perform the same check as for [max_typechecker_worker_memory_mb] after each decl
       and, if over the limit, will defer *)
   longlived_workers: bool;
-  remote_execution: bool;
   hg_aware: bool;
   hg_aware_parsing_restart_threshold: int;
   hg_aware_redecl_restart_threshold: int;
@@ -658,7 +657,6 @@ let default =
     max_typechecker_worker_memory_mb = None;
     use_max_typechecker_worker_memory_for_decl_deferral = false;
     longlived_workers = false;
-    remote_execution = false;
     hg_aware = false;
     hg_aware_parsing_restart_threshold = 0;
     hg_aware_redecl_restart_threshold = 0;
@@ -1075,13 +1073,6 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_min_version
       "longlived_workers"
       ~default:default.longlived_workers
-      ~current_version
-      config
-  in
-  let remote_execution =
-    bool_if_min_version
-      "remote_execution"
-      ~default:default.remote_execution
       ~current_version
       config
   in
@@ -1529,7 +1520,6 @@ let load_ fn ~silent ~current_version overrides =
     max_typechecker_worker_memory_mb;
     use_max_typechecker_worker_memory_for_decl_deferral;
     longlived_workers;
-    remote_execution;
     hg_aware;
     hg_aware_parsing_restart_threshold;
     hg_aware_redecl_restart_threshold;

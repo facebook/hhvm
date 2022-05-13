@@ -132,7 +132,6 @@
   parser_options
   pos
   procs_bucket
-  re_stubs
   server_client_provider
   server_command_types
   server_monitor
@@ -463,9 +462,6 @@
   serverSignatureHelp
   serverStamp
   serverStatusSingle
-  serverStatusSingleRemoteExecution
-  serverStatusRemoteExecution
-  serverStatusMultiRemoteExecution
   serverTypeCheck
   serverTypeDefinition
   serverWorker

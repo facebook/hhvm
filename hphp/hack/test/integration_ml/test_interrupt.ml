@@ -103,7 +103,6 @@ let test () =
       ~longlived_workers:false
       ~hulk_lite:false
       ~hulk_heavy:false
-      ~remote_execution:None
       ~check_info
   in
   assert (Option.is_none diag_pusher);

@@ -338,16 +338,6 @@ type _ t =
       max_errors: int option;
     }
       -> (Errors.finalized_error list * int) t
-  | STATUS_SINGLE_REMOTE_EXECUTION : {
-      file_name: string;
-    }
-      -> (string * string) t
-  | STATUS_REMOTE_EXECUTION : {
-      mode: string;
-      max_errors: int option;
-    }
-      -> (Errors.finalized_error list * int) t
-  | STATUS_MULTI_REMOTE_EXECUTION : string list -> (string * string) t
   | INFER_TYPE : file_input * int * int -> InferAtPosService.result t
   | INFER_TYPE_BATCH :
       (string * int * int * (int * int) option) list

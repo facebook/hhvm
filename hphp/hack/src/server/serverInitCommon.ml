@@ -225,7 +225,6 @@ let type_check
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
-      let remote_execution = env.ServerEnv.remote_execution in
       let hulk_lite = genv.local_config.ServerLocalConfig.hulk_lite in
       let hulk_heavy = genv.local_config.ServerLocalConfig.hulk_heavy in
       let ctx = Provider_utils.ctx_from_server_env env in
@@ -240,7 +239,6 @@ let type_check
         ~longlived_workers
         ~hulk_lite
         ~hulk_heavy
-        ~remote_execution
         ~check_info:
           (ServerCheckUtils.get_check_info
              ~check_reason:(ServerEnv.Init_telemetry.get_reason init_telemetry)

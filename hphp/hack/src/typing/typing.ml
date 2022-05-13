@@ -2289,17 +2289,21 @@ and stmt_ env pos st =
     let env = { env with in_loop = true } in
     let rec loop env n =
       (* Remember the old environment *)
-      let old_next_entry = Env.next_cont_opt env in
+      let old_conts = env.lenv.per_cont_env in
       let (env, result) = f env in
-      let new_next_entry = Env.next_cont_opt env in
+      let new_conts = env.lenv.per_cont_env in
       (* Finish if we reach the bound, or if the environments match *)
       if
         Int.equal n alias_depth
-        || Typing_per_cont_ops.is_sub_opt_entry
-             Typing_subtype.is_sub_type
-             env
-             new_next_entry
-             old_next_entry
+        || CMap.for_all2
+             ~f:(fun _ old_cont_entry new_cont_entry ->
+               Typing_per_cont_ops.is_sub_opt_entry
+                 Typing_subtype.is_sub_type
+                 env
+                 new_cont_entry
+                 old_cont_entry)
+             old_conts
+             new_conts
       then
         let env = { env with in_loop = in_loop_outer } in
         (env, result)

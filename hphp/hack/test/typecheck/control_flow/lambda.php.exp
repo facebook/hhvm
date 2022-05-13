@@ -14,6 +14,14 @@ File "lambda.php", line 51, characters 11-21:[2]
   [unresolved]
 File "lambda.php", line 71, characters 9-19:[2]
   ([unresolved] | exact D | exact G | exact J)
+File "lambda.php", line 23, characters 5-15:[3]
+  (exact A | exact B | exact C)
+File "lambda.php", line 24, characters 5-15:[3]
+  (exact A | exact B | exact C)
+File "lambda.php", line 51, characters 11-21:[3]
+  [unresolved]
+File "lambda.php", line 71, characters 9-19:[3]
+  ([unresolved] | exact D | exact G | exact J)
 File "lambda.php", line 86, characters 3-13:
   (exact A | exact B | exact C | exact E)
 File "lambda.php", line 87, characters 3-13:

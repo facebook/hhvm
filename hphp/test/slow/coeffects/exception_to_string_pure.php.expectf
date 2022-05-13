@@ -1,0 +1,15 @@
+string(%d) "exception 'Exception' with message 'Message ommitted because Exception does not implement IExceptionWithPureGetMessage' in %s:7
+Stack trace:
+%A
+
+Next exception 'LogicException' with message 'pure exception' in %s:9
+Stack trace:
+%A"
+===
+string(%d) "exception 'Exception' with message 'my placeholder' in %s:7
+Stack trace:
+%A
+
+Next exception 'LogicException' with message 'pure exception' in %s:9
+Stack trace:
+%A"

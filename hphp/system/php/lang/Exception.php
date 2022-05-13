@@ -61,6 +61,25 @@ class Exception implements Throwable {
 
     $this->previous = $previous;
   }
+
+  public static function toStringPure(
+    Exception $e,
+    ?(function(Throwable)[]:string) $fallback = null,
+  )[]: string {
+    return self::toStringFromGetMessage(
+      $e,
+      $throwable ==> {
+        if ($throwable is IExceptionWithPureGetMessage) {
+          return $throwable->getMessage();
+        } else if ($fallback is nonnull) {
+          return $fallback($throwable);
+        } else {
+          return 'Message ommitted because '.get_class($throwable).
+            ' does not implement '.IExceptionWithPureGetMessage::class;
+        }
+      },
+    );
+  }
 }
 
 class DivisionByZeroException extends Exception {

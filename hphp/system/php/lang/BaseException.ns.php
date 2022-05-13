@@ -156,9 +156,19 @@ trait BaseException {
    * @return     mixed   Returns the string representation of the exception.
    */
   public function toString() {
+    return self::toStringFromGetMessage(
+      $this,
+      (\Throwable $e) ==> $e->getMessage(),
+    );
+  }
+
+  final protected static function toStringFromGetMessage(
+    \Throwable $throwable,
+    (function(\Throwable)[_]:string) $get_message,
+  )[ctx $get_message]: string {
     $res = "";
     $lst = darray[];
-    $ex = $this;
+    $ex = $throwable;
     while ($ex != null && !\array_key_exists(\spl_object_hash($ex), $lst)) {
       $lst[\spl_object_hash($ex)] = $ex;
       $ex = $ex->getPrevious();
@@ -174,8 +184,8 @@ trait BaseException {
         $cls = \substr($cls, \strlen("__SystemLib\\"));
       }
       $res .= $ex is \Error
-        ? $cls . ": " . $ex->getMessage()
-        : "exception '" . $cls . "' with message '" . $ex->getMessage() .  "'";
+        ? $cls . ": " . $get_message($ex)
+        : "exception '" . $cls . "' with message '" . $get_message($ex) .  "'";
       $res .=  " in " . $ex->getFile() . ":" .
         $ex->getLine() . "\nStack trace:\n" . $ex->getTraceAsString();
       $first = false;

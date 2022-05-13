@@ -1307,8 +1307,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AEmpty
     );
 
-  case DbgTraceCall:
-    return may_load_store(AStackAny | ALocalAny, AEmpty);
+  case DbgTraceCall: {
+    auto const irSPOff = inst.src(1)->inst()->extra<DefStackData>()->irSPOff;
+    auto const stkHigh = SBInvOffset{0}.to<IRSPRelOffset>(irSPOff);
+    auto const stkLow = inst.extra<DbgTraceCall>()->offset;
+    auto const stk = stkLow == stkHigh
+      ? AEmpty : AStack::range(stkLow, stkHigh);
+    return may_load_store(stk | ALocalAny, AEmpty);
+  }
 
   case Unreachable:
     // Unreachable code kills every memory location.
@@ -1841,7 +1847,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   // debug_backtrace() traverses stack and WaitHandles on the heap.
   case DebugBacktrace:
-    return may_load_store(AHeapAny|ALocalAny|AStackAny, AHeapAny);
+    return may_load_store(AHeapAny|ALocalAny, AHeapAny);
 
   // This instruction doesn't touch memory we track, except that it may
   // re-enter to construct php Exception objects.  During this re-entry anything

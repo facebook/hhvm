@@ -2787,7 +2787,9 @@ TypedValue HHVM_FUNCTION(hphp_array_idx,
       auto const index = key.toKey(arr).tv();
       if (!isNullType(index.m_type)) {
         auto const ret = arr->get(index, false);
-        return tvReturn(ret.is_init() ? tvAsCVarRef(ret) : def);
+        if (ret.is_init()) {
+          return tvReturn(tvAsCVarRef(ret));
+        }
       }
     } else {
       raise_error("hphp_array_idx: search must be an array");

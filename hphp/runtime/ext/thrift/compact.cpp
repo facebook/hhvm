@@ -349,10 +349,12 @@ struct CompactWriter {
                     const FieldSpec& valueSpec,
                     TType type,
                     const FieldInfo& fieldInfo) {
-      const auto& thriftValue = valueSpec.adapter ? transformToThriftType(
-                                                      value, *valueSpec.adapter)
-                                                  : value;
-      writeFieldInternal(thriftValue, valueSpec, type, fieldInfo);
+      if (valueSpec.adapter) {
+        const auto& thriftValue = transformToThriftType(value, *valueSpec.adapter);
+        writeFieldInternal(thriftValue, valueSpec, type, fieldInfo);
+      } else {
+        writeFieldInternal(value, valueSpec, type, fieldInfo);
+      }
     }
 
     void writeFieldInternal(const Variant& value,
@@ -807,8 +809,10 @@ struct CompactReader {
 
     Variant readField(const FieldSpec& spec, TType type) {
       const auto thriftValue = readFieldInternal(spec, type);
-      return spec.adapter ? transformToHackType(thriftValue, *spec.adapter)
-                          : thriftValue;
+      if (spec.adapter) {
+        return transformToHackType(thriftValue, *spec.adapter);
+      }
+      return thriftValue;
     }
 
     Variant readFieldInternal(const FieldSpec& spec, TType type) {

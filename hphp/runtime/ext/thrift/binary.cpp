@@ -603,10 +603,12 @@ void binary_serialize(int8_t thrift_typeID,
                       PHPOutputTransport& transport,
                       const Variant& value,
                       const FieldSpec& fieldspec) {
-  const auto& thriftValue = fieldspec.adapter
-                              ? transformToThriftType(value, *fieldspec.adapter)
-                              : value;
-  binary_serialize_internal(thrift_typeID, transport, thriftValue, fieldspec);
+  if (fieldspec.adapter)  {
+    const auto& thriftValue = transformToThriftType(value, *fieldspec.adapter);
+    binary_serialize_internal(thrift_typeID, transport, thriftValue, fieldspec);
+  } else {
+    binary_serialize_internal(thrift_typeID, transport, value, fieldspec);
+  }
 }
 
 void binary_serialize_slow(const FieldSpec& field,

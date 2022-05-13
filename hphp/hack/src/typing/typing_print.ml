@@ -1251,11 +1251,37 @@ module Json = struct
       let callconv cc =
         [("callConvention", JSON_String (param_mode_to_string cc))]
       in
+      let readonly_param ro =
+        if ro then
+          [("readonly", JSON_Bool true)]
+        else
+          []
+      in
       let param fp =
-        obj @@ callconv (get_fp_mode fp) @ typ fp.fp_type.et_type
+        obj
+        @@ callconv (get_fp_mode fp)
+        @ readonly_param (get_fp_readonly fp)
+        @ typ fp.fp_type.et_type
+      in
+      let readonly_this ro =
+        if ro then
+          [("readonly_this", JSON_Bool true)]
+        else
+          []
+      in
+      let readonly_ret ro =
+        if ro then
+          [("readonly_return", JSON_Bool true)]
+        else
+          []
       in
       let params fps = [("params", JSON_Array (List.map fps ~f:param))] in
-      obj @@ fun_kind p @ params ft.ft_params @ result ft.ft_ret.et_type
+      obj
+      @@ fun_kind p
+      @ readonly_this (get_ft_readonly_this ft)
+      @ params ft.ft_params
+      @ readonly_ret (get_ft_returns_readonly ft)
+      @ result ft.ft_ret.et_type
     | (p, Tvec_or_dict (ty1, ty2)) ->
       obj @@ kind p "vec_or_dict" @ args [ty1; ty2]
     (* TODO akenn *)

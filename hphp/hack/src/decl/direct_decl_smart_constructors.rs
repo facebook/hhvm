@@ -1010,7 +1010,6 @@ struct Attributes<'a> {
     can_call: bool,
     soft: bool,
     support_dynamic_type: bool,
-    module: Option<Id<'a>>,
     safe_global_variable: bool,
 }
 
@@ -1399,7 +1398,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             can_call: false,
             soft: false,
             support_dynamic_type: false,
-            module: self.module,
             safe_global_variable: false,
         };
 
@@ -3029,7 +3027,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
 
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
-        let parsed_attributes = self.to_attributes(attributes);
         let user_attributes = if self.retain_or_omit_user_attributes_for_facts {
             self.slice(attributes.iter().rev().filter_map(|attribute| {
                 if let Node::Attribute(attr) = attribute {
@@ -3045,7 +3042,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
             .iter()
             .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
         let typedef = self.alloc(TypedefType {
-            module: parsed_attributes.module,
+            module: self.module,
             pos,
             vis: match keyword.token_kind() {
                 Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
@@ -3104,7 +3101,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
         }
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
-        let parsed_attributes = self.to_attributes(attributes);
         let user_attributes = if self.retain_or_omit_user_attributes_for_facts {
             self.slice(attributes.iter().rev().filter_map(|attribute| {
                 if let Node::Attribute(attr) = attribute {
@@ -3117,7 +3113,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
             &[][..]
         };
         let typedef = self.alloc(TypedefType {
-            module: parsed_attributes.module,
+            module: self.module,
             pos,
             vis: aast::TypedefVisibility::Opaque,
             tparams,
@@ -3379,7 +3375,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
                     .iter()
                     .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
                 let fun_elt = self.alloc(FunElt {
-                    module: parsed_attributes.module,
+                    module: self.module,
                     internal,
                     deprecated,
                     type_,
@@ -4016,7 +4012,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
             self.opts.everything_sdt || class_attributes.support_dynamic_type;
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
-        let module = class_attributes.module;
+        let module = self.module;
 
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
@@ -4451,7 +4447,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
             is_xhp: false,
             has_xhp_keyword: false,
             kind: ClassishKind::Cenum,
-            module: parsed_attributes.module,
+            module: self.module,
             internal,
             name: id.into(),
             tparams: &[],
@@ -4623,7 +4619,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
             has_xhp_keyword: false,
             internal,
             kind: class_kind,
-            module: None, // TODO: grab module from attributes
+            module: self.module,
             name: name.into(),
             tparams: &[],
             where_constraints: &[],

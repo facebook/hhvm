@@ -3672,7 +3672,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn enum_class_errors(&mut self, node: S<'a>) {
         if let EnumClassDeclaration(_) = &node.children {
             // only allow abstract as modifier + detect modifier duplication
-            self.invalid_modifier_errors("Enum classes", node, |kind| kind == TokenKind::Abstract);
+            self.invalid_modifier_errors("Enum classes", node, |kind| {
+                kind == TokenKind::Abstract || kind == TokenKind::Internal
+            });
         }
     }
 

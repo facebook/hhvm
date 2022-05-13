@@ -6,7 +6,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the "hack" directory of this source tree.
 
-set -euf
+set -eufx
 
 unset DUNE_BUILD_DIR
 
@@ -103,7 +103,7 @@ opam_switch_create_if_needed "$HACK_OPAM_NAME" "$HACK_OPAM_SWITCH"
 opam switch "$HACK_OPAM_NAME"
 eval "$(opam env)"
 
-opam install "${HACK_OPAM_DEPS[@]}"
+opam install --assume-depexts --no-depexts "${HACK_OPAM_DEPS[@]}"
 
 dune_version=$(dune --version)
 echo ""

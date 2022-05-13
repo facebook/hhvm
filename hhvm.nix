@@ -67,6 +67,7 @@
   unzip,
   uwimap,
   which,
+  writeTextFile,
   zlib,
   zstd,
 }: let
@@ -75,7 +76,7 @@
     then gcc10Stdenv
     else stdenv;
 in
-  hhvmStdenv.mkDerivation {
+  hhvmStdenv.mkDerivation rec {
     name = "hhvm";
     src = ./.;
     nativeBuildInputs =
@@ -167,16 +168,21 @@ in
         "-Wno-error=unused-command-line-argument"
       ];
 
-    cmakeFlags =
-      [
-        "-DCAN_USE_SYSTEM_ZSTD:BOOL=ON"
-        "-DHAVE_SYSTEM_TZDATA_PREFIX=${tzdata}/share/zoneinfo"
-        "-DHAVE_SYSTEM_TZDATA:BOOL=ON"
-        "-DMYSQL_UNIX_SOCK_ADDR=/run/mysqld/mysqld.sock"
-      ]
-      ++ lib.optionals hostPlatform.isMacOS [
-        "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15"
-      ];
+    cmakeInitCache = writeTextFile {
+      name = "init-cache.cmake";
+      text =
+        ''
+          set(CAN_USE_SYSTEM_ZSTD ON CACHE BOOL "Use system zstd" FORCE)
+          set(HAVE_SYSTEM_TZDATA_PREFIX "${tzdata}/share/zoneinfo" CACHE STRING "The zoneinfo directory" FORCE)
+          set(HAVE_SYSTEM_TZDATA ON CACHE BOOL "Use system zoneinfo" FORCE)
+          set(MYSQL_UNIX_SOCK_ADDR "/run/mysqld/mysqld.sock" CACHE STRING "The MySQL unix socket" FORCE)
+        ''
+        + lib.optionalString hostPlatform.isMacOS ''
+          set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Targeting macOS version" FORCE)
+        '';
+    };
+
+    cmakeFlags = ["-C" cmakeInitCache];
 
     prePatch = ''
       patchShebangs .

@@ -338,7 +338,7 @@ size_t StructDict::valueOffset() const {
 
 void StructLayout::createColoringHashMap() const {
   auto& table = s_hashTableSet[index().raw];
-  for (auto i = 0; i < kMaxColor; i++) {
+  for (auto i = 0; i <= kMaxColor; i++) {
     table[i] = { nullptr, 0, 0 };
   }
   for (auto i = 0; i < numFields(); i++) {

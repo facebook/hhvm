@@ -30,7 +30,10 @@ jobs:
         extra_nix_config: |
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
           experimental-features = nix-command flakes
+          extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
     - run: nix-build --no-sandbox
     - run: nix profile install --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
-    - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - run: hhvm --version
+    - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+    - if: github.event_name != 'pull_request'
+      run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"

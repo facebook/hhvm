@@ -35,7 +35,7 @@
             unpackPhase = "true";
 
             buildPhase = ''
-              HHVM_BIN="${packages.hhvm}" "${packages.hhvm}" hphp/test/run.php quick
+              HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" hphp/test/run.php quick
             '';
             installPhase = "mkdir -p $out";
           };

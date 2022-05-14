@@ -6,7 +6,7 @@
 use crate::FileOpts;
 use anyhow::Result;
 use clap::Parser;
-use compile::Profile;
+use compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags, Profile};
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::{self, RelativePath};
@@ -16,7 +16,7 @@ use std::{
     fs::{self, File},
     io::{stdout, Write},
     path::{Path, PathBuf},
-    sync::{Arc, Mutex},
+    sync::Mutex,
 };
 
 #[derive(Parser, Debug)]
@@ -103,20 +103,17 @@ fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
     results.into_iter().collect()
 }
 
-fn process_single_file_impl(
+pub(crate) fn process_single_file(
     opts: &SingleFileOpts,
-    filepath: &Path,
-    content: &[u8],
+    filepath: PathBuf,
+    content: Vec<u8>,
     profile: &mut Profile,
 ) -> Result<Vec<u8>> {
-    use compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
     if opts.verbosity > 1 {
         eprintln!("processing file: {}", filepath.display());
     }
-
-    let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
-    let source_text = SourceText::make(RcOc::new(rel_path.clone()), content);
-    let mut output = Vec::new();
+    let filepath = RelativePath::make(relative_path::Prefix::Dummy, filepath);
+    let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
     let mut flags = EnvFlags::empty();
     flags.set(
         EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
@@ -128,31 +125,17 @@ fn process_single_file_impl(
         | HHBCFlags::LOG_EXTERN_COMPILER_PERF;
     let parser_flags = ParserFlags::ENABLE_ENUM_CLASSES;
     let native_env = NativeEnv {
-        filepath: rel_path,
-        aliased_namespaces: "",
-        include_roots: "",
-        emit_class_pointers: 0,
-        check_int_overflow: 0,
+        filepath,
         hhbc_flags,
         parser_flags,
         flags,
+        ..Default::default()
     };
     let alloc = bumpalo::Bump::new();
+    let mut output = Vec::new();
     compile::from_text(&alloc, &mut output, source_text, &native_env, None, profile)?;
     if opts.verbosity >= 1 {
-        eprintln!("{}: {:#?}", filepath.display(), profile);
+        eprintln!("{}: {:#?}", native_env.filepath.path().display(), profile);
     }
     Ok(output)
-}
-
-pub(crate) fn process_single_file(
-    opts: &SingleFileOpts,
-    filepath: PathBuf,
-    content: Vec<u8>,
-    profile: &mut Profile,
-) -> Result<Vec<u8>> {
-    let ctx = &Arc::new((opts.clone(), filepath, content));
-    let new_ctx = Arc::clone(ctx);
-    let (opts, filepath, content) = new_ctx.as_ref();
-    process_single_file_impl(opts, filepath, content.as_slice(), profile)
 }

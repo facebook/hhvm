@@ -41,7 +41,6 @@ jobs:
       uses: abhilash1in/aws-secrets-manager-action@v2.1.0
       with:
         secrets: hhvm-nix-cache-1
-        parse-json: false
     - if: github.event_name != 'pull_request'
       run: nix store sign --recursive --key-file <(printf %s "$HHVM_NIX_CACHE_1") --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - if: github.event_name != 'pull_request'

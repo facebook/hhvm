@@ -11,7 +11,7 @@ use aast_parser::{
 };
 use anyhow::{anyhow, Result};
 use bitflags::bitflags;
-use bytecode_printer::{print_unit, Context};
+use bytecode_printer::Context;
 use decl_provider::DeclProvider;
 use emit_unit::emit_unit;
 use env::emitter::Emitter;
@@ -30,7 +30,6 @@ use oxidized::{
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, source_text::SourceText, syntax_error::ErrorType,
 };
-use rewrite_program::rewrite_program;
 use thiserror::Error;
 
 /// Common input needed for compilation.
@@ -436,7 +435,7 @@ pub fn from_text<'decl>(
     let opts = emitter.into_options();
 
     let (print_result, printing_t) = time(|| {
-        print_unit(
+        bytecode_printer::print_unit(
             &Context::new(&opts, Some(&native_env.filepath), opts.array_provenance()),
             writer,
             &unit,
@@ -456,7 +455,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
 ) -> Result<HackCUnit<'arena>, Error> {
     // First rewrite and modify `ast` in place.
     stack_limit::reset();
-    let result = rewrite(emitter, ast, RcOc::clone(&namespace_env));
+    let result = rewrite_program::rewrite_program(emitter, ast, RcOc::clone(&namespace_env));
     profile.rewrite_peak = stack_limit::peak() as i64;
     stack_limit::reset();
     let unit = match result {
@@ -473,14 +472,6 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
     };
     profile.emitter_peak = stack_limit::peak() as i64;
     unit
-}
-
-fn rewrite<'p, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    ast: &'p mut ast::Program,
-    namespace_env: RcOc<NamespaceEnv>,
-) -> Result<(), Error> {
-    rewrite_program(emitter, ast, namespace_env)
 }
 
 pub fn unit_from_text<'arena, 'decl>(
@@ -501,7 +492,7 @@ pub fn unit_to_string<W: std::io::Write>(
 ) -> Result<()> {
     let opts = NativeEnv::to_options(native_env);
     let (print_result, _) = time(|| {
-        print_unit(
+        bytecode_printer::print_unit(
             &Context::new(&opts, Some(&native_env.filepath), opts.array_provenance()),
             writer,
             program,

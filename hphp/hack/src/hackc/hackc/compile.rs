@@ -7,6 +7,7 @@ use crate::FileOpts;
 use anyhow::Result;
 use clap::Parser;
 use compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags, Profile};
+use decl_provider::DeclProvider;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::{self, RelativePath};
@@ -138,4 +139,38 @@ pub(crate) fn process_single_file(
         eprintln!("{}: {:#?}", native_env.filepath.path().display(), profile);
     }
     Ok(output)
+}
+
+pub(crate) fn compile_from_text(mut hackc_opts: crate::Opts) -> Result<()> {
+    let files = hackc_opts.files.gather_input_files()?;
+    for path in files {
+        let source_text = fs::read(&path)?;
+        let native_env = hackc_opts.native_env(path)?;
+        let hhas = compile_impl(native_env, source_text, None)?;
+        std::io::stdout().write_all(&hhas)?;
+        println!(); // print an extra newline to match hh_single_compile_cpp
+    }
+    Ok(())
+}
+
+fn compile_impl<'decl>(
+    native_env: NativeEnv<'_>,
+    source_text: Vec<u8>,
+    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
+) -> Result<Vec<u8>> {
+    let text = SourceText::make(
+        ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
+        &source_text,
+    );
+    let mut hhas = Vec::new();
+    let arena = bumpalo::Bump::new();
+    compile::from_text(
+        &arena,
+        &mut hhas,
+        text,
+        &native_env,
+        decl_provider,
+        &mut Default::default(), // profile
+    )?;
+    Ok(hhas)
 }

@@ -7,10 +7,11 @@ mod expr_trees;
 mod facts;
 mod parse;
 
-use ::compile::EnvFlags;
+use ::compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
 use anyhow::Result;
 use clap::Parser;
 use hhvm_options::HhvmOptions;
+use oxidized::relative_path::{self, RelativePath};
 use oxidized_by_ref::decl_parser_options::DeclParserOptions;
 use std::{
     fs,
@@ -40,6 +41,12 @@ struct Opts {
     /// Mutate the program as if we're in the debugger repl
     #[clap(long)]
     for_debugger_eval: bool,
+
+    #[clap(long, default_value("0"))]
+    emit_class_pointers: i32,
+
+    #[clap(long, default_value("0"))]
+    check_int_overflow: i32,
 
     /// Number of parallel worker threads. If 0, use num-cpu worker threads.
     #[clap(long, default_value("0"))]
@@ -143,33 +150,8 @@ impl Opts {
     }
 
     pub fn decl_opts<'a>(&self, arena: &'a bumpalo::Bump) -> DeclParserOptions<'a> {
-        // TODO (T118266805): get these from nearest .hhconfig enclosing each file.
-        // For now these are all hardcoded in hh_single_compile_cpp, so hardcode
-        // them here too.
-        const AUTO_NAMESPACE_MAP: &str = r#"{
-            "hhvm.aliased_namespaces": {
-                "global_value": {
-                    "Async": "HH\\Lib\\Async",
-                    "C": "FlibSL\\C",
-                    "Dict": "FlibSL\\Dict",
-                    "File": "HH\\Lib\\File",
-                    "IO": "HH\\Lib\\IO",
-                    "Keyset": "FlibSL\\Keyset",
-                    "Locale": "FlibSL\\Locale",
-                    "Math": "FlibSL\\Math",
-                    "OS": "HH\\Lib\\OS",
-                    "PHP": "FlibSL\\PHP",
-                    "PseudoRandom": "FlibSL\\PseudoRandom",
-                    "Regex": "FlibSL\\Regex",
-                    "SecureRandom": "FlibSL\\SecureRandom",
-                    "Str": "FlibSL\\Str",
-                    "Vec": "FlibSL\\Vec"
-                }
-            }
-        }"#;
-
         // TODO: share this logic with hackc_create_decl_parse_options()
-        let config_opts = options::Options::from_configs(&[AUTO_NAMESPACE_MAP]).unwrap();
+        let config_opts = options::Options::from_configs(&[Self::AUTO_NAMESPACE_MAP]).unwrap();
         let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
             Some(m) => bumpalo::collections::Vec::from_iter_in(
                 m.iter().map(|(k, v)| {
@@ -194,6 +176,49 @@ impl Opts {
             ..Default::default()
         }
     }
+
+    pub fn native_env(&self, path: PathBuf) -> Result<NativeEnv<'_>> {
+        let hhvm_options = &self.hhvm_options;
+        let hhvm_config = hhvm_options.to_config()?;
+        let parser_flags = ParserFlags::from_hhvm_config(&hhvm_config)?;
+        let hhbc_flags = HHBCFlags::from_hhvm_config(&hhvm_config)?;
+        Ok(NativeEnv {
+            filepath: RelativePath::make(relative_path::Prefix::Dummy, path),
+            aliased_namespaces: crate::Opts::AUTO_NAMESPACE_MAP,
+            include_roots: crate::Opts::INCLUDE_ROOTS,
+            hhbc_flags,
+            parser_flags,
+            flags: self.env_flags(),
+            emit_class_pointers: self.emit_class_pointers,
+            check_int_overflow: self.check_int_overflow,
+        })
+    }
+
+    // TODO (T118266805): get these from nearest .hhconfig enclosing each file.
+    // For now these are all hardcoded in hh_single_compile_cpp, so hardcode
+    // them here too.
+    pub(crate) const AUTO_NAMESPACE_MAP: &'static str = r#"{
+            "hhvm.aliased_namespaces": {
+                "global_value": {
+                    "Async": "HH\\Lib\\Async",
+                    "C": "FlibSL\\C",
+                    "Dict": "FlibSL\\Dict",
+                    "File": "HH\\Lib\\File",
+                    "IO": "HH\\Lib\\IO",
+                    "Keyset": "FlibSL\\Keyset",
+                    "Locale": "FlibSL\\Locale",
+                    "Math": "FlibSL\\Math",
+                    "OS": "HH\\Lib\\OS",
+                    "PHP": "FlibSL\\PHP",
+                    "PseudoRandom": "FlibSL\\PseudoRandom",
+                    "Regex": "FlibSL\\Regex",
+                    "SecureRandom": "FlibSL\\SecureRandom",
+                    "Str": "FlibSL\\Str",
+                    "Vec": "FlibSL\\Vec"
+                }
+            }
+        }"#;
+    pub(crate) const INCLUDE_ROOTS: &'static str = "";
 }
 
 fn test(_: Opts) -> Result<()> {
@@ -217,10 +242,6 @@ fn parse(_: Opts) -> Result<()> {
 }
 
 fn compile_from_text_with_same_file_decl(_: Opts) -> Result<()> {
-    unimplemented!()
-}
-
-fn compile_from_text(_: Opts) -> Result<()> {
     unimplemented!()
 }
 
@@ -258,7 +279,7 @@ fn main() -> Result<()> {
             } else if opts.flag_commands.dump_desugared_expression_trees {
                 expr_trees::dump_expr_trees(opts)
             } else {
-                compile_from_text(opts)
+                compile::compile_from_text(opts)
             }
         }
     }

@@ -3,6 +3,7 @@ name: Nix CI
 on:
   push:
   pull_request:
+  pull_request_target:
 
 permissions:
   id-token: write

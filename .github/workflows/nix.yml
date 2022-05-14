@@ -20,7 +20,8 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2.4.0
-    - uses: aws-actions/configure-aws-credentials@v1
+    - if: github.event_name != 'pull_request'
+      uses: aws-actions/configure-aws-credentials@v1
       with:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
         aws-region: us-west-2

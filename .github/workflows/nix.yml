@@ -43,6 +43,6 @@ jobs:
         secrets: hhvm-nix-cache-1
         parse-json: false
     - if: github.event_name != 'pull_request'
-      run: nix store sign --recursive --key-file <(cat <<< ${{env.HHVM_NIX_CACHE_1}}) --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+      run: nix store sign --recursive --key-file <(printf %s "$HHVM_NIX_CACHE_1") --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - if: github.event_name != 'pull_request'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"

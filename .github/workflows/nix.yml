@@ -38,10 +38,6 @@ jobs:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
         aws-region: us-west-2
     - if: github.event_name != 'pull_request'
-      uses: abhilash1in/aws-secrets-manager-action@v2.1.0
-      with:
-        secrets: hhvm-nix-cache-1
-    - if: github.event_name != 'pull_request'
-      run: nix store sign --recursive --key-file <(printf %s "$HHVM_NIX_CACHE_1") --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+      run: nix store sign --recursive --key-file <(aws secretsmanager get-secret-value --secret-id hhvm-nix-cache-1 --query SecretString --output text) --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - if: github.event_name != 'pull_request'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"

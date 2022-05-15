@@ -248,10 +248,15 @@ fn compile_from_text_with_same_file_decl(_: Opts) -> Result<()> {
 fn main() -> Result<()> {
     env_logger::init();
     let mut opts = Opts::parse();
-    rayon::ThreadPoolBuilder::new()
-        .num_threads(opts.num_threads)
-        .build_global()
-        .unwrap();
+
+    let builder = rayon::ThreadPoolBuilder::new().num_threads(opts.num_threads);
+    let builder = if matches!(&opts.command, Some(Command::Crc(_))) {
+        builder.stack_size(32 * 1024 * 1024)
+    } else {
+        builder
+    };
+    builder.build_global().unwrap();
+
     match opts.command.take() {
         Some(Command::Compile(opts)) => compile::run(opts),
         Some(Command::Crc(opts)) => crc::run(opts),

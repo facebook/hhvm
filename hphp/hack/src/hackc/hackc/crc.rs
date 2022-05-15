@@ -461,12 +461,6 @@ fn collect_files(
 pub fn run(opts: Opts) -> Result<()> {
     let writer: SyncWrite = Mutex::new(Box::new(std::io::stdout()));
 
-    rayon::ThreadPoolBuilder::new()
-        .num_threads(opts.num_threads)
-        .stack_size(32 * 1024 * 1024)
-        .build_global()
-        .unwrap();
-
     info!("Collecting files");
     let files = {
         let start = Instant::now();

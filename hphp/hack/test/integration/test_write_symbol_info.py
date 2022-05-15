@@ -46,7 +46,7 @@ from glean.schema.hack.types import (
 )
 from glean.schema.src.types import FileLines
 from hh_paths import hh_server
-from thrift.py3 import Protocol, Struct, deserialize
+from thrift.py3 import deserialize, Protocol, Struct
 
 
 class WriteSymbolInfoTests(test_case.TestCase[CommonTestDriver]):

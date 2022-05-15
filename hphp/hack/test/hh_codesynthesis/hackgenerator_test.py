@@ -8,9 +8,9 @@
 import unittest
 
 from hphp.hack.src.hh_codesynthesis.hackGenerator import (
-    _HackInterfaceGenerator,
     _HackClassGenerator,
     _HackFunctionGenerator,
+    _HackInterfaceGenerator,
     HackCodeGenerator,
 )
 

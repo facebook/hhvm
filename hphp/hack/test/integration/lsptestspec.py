@@ -24,11 +24,11 @@ import libcst
 from libcst.metadata import CodeRange, MetadataWrapper, PositionProvider
 from lspcommand import LspCommandProcessor, Transcript, TranscriptEntry
 from utils import (
-    Json,
-    VariableMap,
     fixup_hhi_json,
     interpolate_variables,
+    Json,
     uninterpolate_variables,
+    VariableMap,
 )
 
 

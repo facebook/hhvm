@@ -24,7 +24,7 @@ import sys
 from typing import List, Optional, Union
 
 import clingo
-from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator, ClingoContext
+from hphp.hack.src.hh_codesynthesis.codeGenerator import ClingoContext, CodeGenerator
 from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
 
 # If libfb.py library exists, we run in the internal environment.

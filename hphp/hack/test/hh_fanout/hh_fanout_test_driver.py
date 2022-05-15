@@ -24,7 +24,7 @@ import sys
 import tempfile
 import textwrap
 from dataclasses import dataclass
-from typing import Dict, List, Optional, cast
+from typing import cast, Dict, List, Optional
 
 
 DEBUGGING = False

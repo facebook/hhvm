@@ -11,7 +11,7 @@ import tempfile
 from typing import Iterable, List, Mapping, NamedTuple, Optional, TextIO, TypeVar, Union
 
 import common_tests
-from hh_paths import hh_client, hh_server, hh_fanout
+from hh_paths import hh_client, hh_fanout, hh_server
 
 
 T = TypeVar("T")

@@ -15,9 +15,9 @@ from typing import Iterable, List, Mapping, Tuple
 import common_tests
 from hh_paths import hh_server
 from lspcommand import LspCommandProcessor, Transcript
-from lsptestspec import LspTestSpec, NoResponse, line
+from lsptestspec import line, LspTestSpec, NoResponse
 from test_case import TestCase
-from utils import Json, JsonObject, interpolate_variables
+from utils import interpolate_variables, Json, JsonObject
 
 
 class LspTestDriver(common_tests.CommonTestDriver):

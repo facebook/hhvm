@@ -12,7 +12,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import ClassVar, List, Mapping, Optional, Tuple, NamedTuple
+from typing import ClassVar, List, Mapping, NamedTuple, Optional, Tuple
 
 from hh_paths import hackfmt, hh_client, hh_server
 from test_case import TestCase, TestDriver

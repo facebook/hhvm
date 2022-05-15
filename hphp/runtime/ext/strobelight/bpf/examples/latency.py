@@ -8,7 +8,7 @@ import os
 import time
 from ctypes import c_int
 
-from bcc import BPF, USDT, PerfType, PerfHWConfig
+from bcc import BPF, PerfHWConfig, PerfType, USDT
 
 parser = argparse.ArgumentParser(description="Log latency of signal handling in hhvm")
 parser.add_argument(

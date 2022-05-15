@@ -3,16 +3,16 @@
 
 import os.path
 import tempfile
-from typing import List, Mapping, Tuple, cast
+from typing import cast, List, Mapping, Tuple
 
 from hh_fanout_test_driver import (
     Env,
-    Path,
-    SavedStateInfo,
     generate_saved_state,
+    Path,
     run_hh_fanout,
     run_hh_fanout_calculate_errors,
     run_hh_fanout_status,
+    SavedStateInfo,
 )
 from libfb.py.testutil import BaseFacebookTestCase
 

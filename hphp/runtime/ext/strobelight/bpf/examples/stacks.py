@@ -7,7 +7,7 @@ import argparse
 import ctypes as ct
 import os
 
-from bcc import BPF, USDT, PerfType, PerfHWConfig
+from bcc import BPF, PerfHWConfig, PerfType, USDT
 
 parser = argparse.ArgumentParser(
     description="Log stack snapshots triggered by HW events"

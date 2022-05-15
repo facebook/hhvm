@@ -5,8 +5,7 @@ use anyhow::Result;
 use clap::Parser;
 use facts_rust::Facts;
 use oxidized::relative_path::{Prefix, RelativePath};
-use serde_json::json;
-use std::io::Write;
+use serde_json::{json, Value};
 
 /// Facts subcommand options
 #[derive(Parser, Debug, Default)]
@@ -27,10 +26,9 @@ pub(crate) fn extract_facts(hackc_opts: crate::Opts, mut opts: Opts) -> Result<(
     // If --input-file-list, output a json wrapper object mapping
     // filenames to facts objects
     let multi = opts.files.is_multi();
-    let mut sep = "{";
     let filenames = opts.files.gather_input_files()?;
+    let mut file_to_facts = serde_json::Map::with_capacity(filenames.len());
     for path in filenames {
-        let mut w = std::io::stdout();
         let arena = bumpalo::Bump::new();
         let dp_opts = hackc_opts.decl_opts(&arena);
 
@@ -51,20 +49,17 @@ pub(crate) fn extract_facts(hackc_opts: crate::Opts, mut opts: Opts) -> Result<(
             parsed_file.file_attributes,
             dp_opts.disable_xhp_element_mangling,
         );
-        if multi {
-            write!(w, "{}\"{}\":", sep, path.display())?;
-        }
-        if opts.nohash {
-            // No pretty-print to save space.
-            serde_json::to_writer(w, &json!(facts))?;
+        let json = if opts.nohash {
+            json!(facts)
         } else {
-            // Pretty-print for a user friendly CLI.
-            w.write_all(facts.to_json(true, &text).as_bytes())?;
-        }
-        sep = ",";
+            facts.to_json_value(&text)
+        };
+        file_to_facts.insert(path.to_str().unwrap().to_owned(), json);
     }
-    if multi && sep != "{" {
-        write!(std::io::stdout(), "}}")?;
+    if multi {
+        serde_json::to_writer(std::io::stdout(), &Value::Object(file_to_facts))?;
+    } else if let Some((_, json)) = file_to_facts.into_iter().next() {
+        serde_json::to_writer_pretty(std::io::stdout(), &json)?;
     }
     Ok(())
 }

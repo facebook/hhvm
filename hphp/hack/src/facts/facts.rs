@@ -87,12 +87,17 @@ pub struct Facts {
 }
 
 impl Facts {
-    pub fn to_json(&self, pretty: bool, text: &[u8]) -> String {
+    pub fn to_json_value(&self, text: &[u8]) -> serde_json::Value {
         let sha1sum = sha1(text);
         let mut json = json!(&self);
         if let Some(m) = json.as_object_mut() {
             m.insert(String::from("sha1sum"), json!(sha1sum));
         };
+        json
+    }
+
+    pub fn to_json(&self, pretty: bool, text: &[u8]) -> String {
+        let json = self.to_json_value(text);
         if pretty {
             serde_json::to_string_pretty(&json).expect("Could not serialize facts to JSON")
         } else {

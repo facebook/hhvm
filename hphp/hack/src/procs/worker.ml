@@ -137,10 +137,8 @@ let read_and_process_job ic oc : job_outcome =
             ^^ "If you are sending closures, double-check to ensure that "
             ^^ "they have not captured large values in their environment.")
             len;
-          HackEventLogger.invariant_violation_bug
+          HackEventLogger.worker_large_data_send
             ~path:Relative_path.default
-            ~pos:""
-            ~desc:"WORKER_LARGE_DATA_SEND"
             (Telemetry.create () |> Telemetry.int_ ~key:"len" ~value:len)
         );
 

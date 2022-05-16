@@ -1010,9 +1010,11 @@ function convert_cyr_string(string $str, string $from, string $to)[]: string;
  *
  */
 <<__Native>>
-function get_html_translation_table(int $table = 0,
-                                    int $quote_style = ENT_COMPAT,
-                                    string $encoding = "UTF-8")[]: darray;
+function get_html_translation_table(
+  int $table = 0,
+  int $quote_style = ENT_COMPAT,
+  string $encoding = "UTF-8",
+)[]: darray<string, string>; // TODO(T120001721) This type is nullable
 
 /**
  * Converts logical Hebrew text to visual text.  The function tries to avoid
@@ -1074,8 +1076,8 @@ function hebrevc(string $hebrew_text, int $max_chars_per_line = 0): string;
  *   running. It returns exactly what the system setlocale function returns.
  *
  */
-<<__Native, __NonRx('Sets Global')>>
-function setlocale(int $category, mixed $locale, ...$argv): mixed;
+<<__Native>>
+function setlocale(int $category, mixed $locale, mixed... $argv): mixed;
 
 /**
  * Returns an associative array containing localized numeric and monetary
@@ -1085,7 +1087,7 @@ function setlocale(int $category, mixed $locale, ...$argv): mixed;
  *
  */
 <<__Native>>
-function localeconv(): darray;
+function localeconv(): darray<string, mixed>; // TODO(T119996979)
 
 /**
  * nl_langinfo() is used to access individual elements of the locale
@@ -1592,7 +1594,7 @@ function strlen(string $vstr)[]: int;
 function str_getcsv(string $input,
                     string $delimiter = ",",
                     string $enclosure = "\"",
-                    string $escape = "\\"): varray;
+                    string $escape = "\\"): varray<?string>;
 
 /**
  * Counts the number of occurrences of every byte-value (0..255) in string and

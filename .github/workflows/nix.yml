@@ -18,6 +18,12 @@ jobs:
         - ubuntu-latest
         - macos-latest
     runs-on: ${{matrix.os}}
+    env:
+      NIX_STORE_DIR: /opt/hhvm/nix/store
+      NIX_DATA_DIR: /opt/hhvm/nix/share
+      NIX_LOG_DIR: /opt/hhvm/nix/var/log/nix
+      NIX_STATE_DIR: /opt/hhvm/nix/var/nix
+      NIX_CONF_DIR: /opt/hhvm/nix/etc/nix
     steps:
     - uses: actions/checkout@v2.4.0
     - uses: cachix/install-nix-action@v15

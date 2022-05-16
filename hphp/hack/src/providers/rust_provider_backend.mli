@@ -55,9 +55,9 @@ module Naming : sig
 
     val add : t -> string -> pos -> unit
 
-    val get_pos : t -> Naming_sqlite.db_path option -> string -> pos option
+    val get_pos : t -> string -> pos option
 
-    val remove_batch : t -> Naming_sqlite.db_path option -> string list -> unit
+    val remove_batch : t -> string list -> unit
   end
 
   module Types : sig
@@ -65,15 +65,13 @@ module Naming : sig
       ReverseNamingTable
         with type pos = FileInfo.pos * Naming_types.kind_of_type
 
-    val get_canon_name :
-      t -> Naming_sqlite.db_path option -> string -> string option
+    val get_canon_name : t -> string -> string option
   end
 
   module Funs : sig
     include ReverseNamingTable with type pos = FileInfo.pos
 
-    val get_canon_name :
-      t -> Naming_sqlite.db_path option -> string -> string option
+    val get_canon_name : t -> string -> string option
   end
 
   module Consts : sig
@@ -84,14 +82,14 @@ module Naming : sig
     include ReverseNamingTable with type pos = FileInfo.pos
   end
 
+  val get_db_path : t -> Naming_sqlite.db_path option
+
+  val set_db_path : t -> Naming_sqlite.db_path -> unit
+
   (** This function searches all three namespaces (types, funs, consts) to
       find which one contains each Dep.t. The earlier functions in this module
       only search one specified namespace. Note: this function doesn't
       use the sharedmem cache of names - doesn't benefit from it, doesn't
       write into it. *)
-  val get_filenames_by_hash :
-    t ->
-    Naming_sqlite.db_path option ->
-    Typing_deps.DepSet.t ->
-    Relative_path.Set.t
+  val get_filenames_by_hash : t -> Typing_deps.DepSet.t -> Relative_path.Set.t
 end

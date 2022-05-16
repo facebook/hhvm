@@ -82,14 +82,10 @@ module Naming = struct
 
     val add : t -> string -> pos -> unit
 
-    val get_pos : t -> Naming_sqlite.db_path option -> string -> pos option
+    val get_pos : t -> string -> pos option
 
-    val remove_batch : t -> Naming_sqlite.db_path option -> string list -> unit
+    val remove_batch : t -> string list -> unit
   end
-
-  let unwrap_db_path (Naming_sqlite.Db_path path) = path
-
-  let unwrap_db_path_opt = Option.map ~f:unwrap_db_path
 
   module Types = struct
     type pos = FileInfo.pos * Naming_types.kind_of_type
@@ -97,22 +93,14 @@ module Naming = struct
     external add : t -> string -> pos -> unit
       = "hh_rust_provider_backend_naming_types_add"
 
-    external get_pos_ffi : t -> string option -> string -> pos option
+    external get_pos : t -> string -> pos option
       = "hh_rust_provider_backend_naming_types_get_pos"
 
-    external remove_batch_ffi : t -> string option -> string list -> unit
+    external remove_batch : t -> string list -> unit
       = "hh_rust_provider_backend_naming_types_remove_batch"
 
-    external get_canon_name_ffi : t -> string option -> string -> string option
+    external get_canon_name : t -> string -> string option
       = "hh_rust_provider_backend_naming_types_get_canon_name"
-
-    let get_pos t path name = get_pos_ffi t (unwrap_db_path_opt path) name
-
-    let remove_batch t path names =
-      remove_batch_ffi t (unwrap_db_path_opt path) names
-
-    let get_canon_name t path name =
-      get_canon_name_ffi t (unwrap_db_path_opt path) name
   end
 
   module Funs = struct
@@ -121,22 +109,14 @@ module Naming = struct
     external add : t -> string -> pos -> unit
       = "hh_rust_provider_backend_naming_funs_add"
 
-    external get_pos_ffi : t -> string option -> string -> pos option
+    external get_pos : t -> string -> pos option
       = "hh_rust_provider_backend_naming_funs_get_pos"
 
-    external remove_batch_ffi : t -> string option -> string list -> unit
+    external remove_batch : t -> string list -> unit
       = "hh_rust_provider_backend_naming_funs_remove_batch"
 
-    external get_canon_name_ffi : t -> string option -> string -> string option
+    external get_canon_name : t -> string -> string option
       = "hh_rust_provider_backend_naming_funs_get_canon_name"
-
-    let get_pos t path name = get_pos_ffi t (unwrap_db_path_opt path) name
-
-    let remove_batch t path names =
-      remove_batch_ffi t (unwrap_db_path_opt path) names
-
-    let get_canon_name t path name =
-      get_canon_name_ffi t (unwrap_db_path_opt path) name
   end
 
   module Consts = struct
@@ -145,16 +125,11 @@ module Naming = struct
     external add : t -> string -> pos -> unit
       = "hh_rust_provider_backend_naming_consts_add"
 
-    external get_pos_ffi : t -> string option -> string -> pos option
+    external get_pos : t -> string -> pos option
       = "hh_rust_provider_backend_naming_consts_get_pos"
 
-    external remove_batch_ffi : t -> string option -> string list -> unit
+    external remove_batch : t -> string list -> unit
       = "hh_rust_provider_backend_naming_consts_remove_batch"
-
-    let get_pos t path name = get_pos_ffi t (unwrap_db_path_opt path) name
-
-    let remove_batch t path names =
-      remove_batch_ffi t (unwrap_db_path_opt path) names
   end
 
   module Modules = struct
@@ -163,22 +138,25 @@ module Naming = struct
     external add : t -> string -> pos -> unit
       = "hh_rust_provider_backend_naming_modules_add"
 
-    external get_pos_ffi : t -> string option -> string -> pos option
+    external get_pos : t -> string -> pos option
       = "hh_rust_provider_backend_naming_modules_get_pos"
 
-    external remove_batch_ffi : t -> string option -> string list -> unit
+    external remove_batch : t -> string list -> unit
       = "hh_rust_provider_backend_naming_modules_remove_batch"
-
-    let get_pos t path name = get_pos_ffi t (unwrap_db_path_opt path) name
-
-    let remove_batch t path names =
-      remove_batch_ffi t (unwrap_db_path_opt path) names
   end
 
-  external get_filenames_by_hash_ffi :
-    t -> string option -> Typing_deps.DepSet.t -> Relative_path.Set.t
-    = "hh_rust_provider_backend_naming_get_filenames_by_hash"
+  external get_db_path_ffi : t -> string option
+    = "hh_rust_provider_backend_naming_get_db_path"
 
-  let get_filenames_by_hash t path deps =
-    get_filenames_by_hash_ffi t (unwrap_db_path_opt path) deps
+  let get_db_path t =
+    get_db_path_ffi t |> Option.map ~f:(fun path -> Naming_sqlite.Db_path path)
+
+  external set_db_path_ffi : t -> string -> unit
+    = "hh_rust_provider_backend_naming_set_db_path"
+
+  let set_db_path t (Naming_sqlite.Db_path path) = set_db_path_ffi t path
+
+  external get_filenames_by_hash :
+    t -> Typing_deps.DepSet.t -> Relative_path.Set.t
+    = "hh_rust_provider_backend_naming_get_filenames_by_hash"
 end

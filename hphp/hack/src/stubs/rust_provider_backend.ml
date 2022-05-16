@@ -85,5 +85,9 @@ module Naming = struct
     let remove_batch _ _ _ = failwith "unimplemented"
   end
 
+  let get_db_path _ = failwith "unimplemented"
+
+  let set_db_path _ _ = failwith "unimplemented"
+
   let get_filenames_by_hash _ _ _ = failwith "unimplemented"
 end

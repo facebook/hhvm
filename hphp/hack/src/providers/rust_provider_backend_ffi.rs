@@ -205,7 +205,6 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_types_get_pos(
         _backend: Backend,
-        _db_path: Option<PathBuf>,
         _name: pos::TypeName,
     ) -> Option<(file_info::Pos, naming_types::KindOfType)> {
         todo!()
@@ -213,7 +212,6 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_types_remove_batch(
         _backend: Backend,
-        _db_path: Option<PathBuf>,
         _names: Vec<pos::TypeName>,
     ) {
         todo!()
@@ -221,7 +219,6 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_types_get_canon_name(
         _backend: Backend,
-        _db_path: Option<PathBuf>,
         _name: pos::TypeName,
     ) -> Option<pos::TypeName> {
         todo!()
@@ -237,7 +234,6 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_funs_get_pos(
         _backend: Backend,
-        _db_path: Option<PathBuf>,
         _name: pos::FunName,
     ) -> Option<file_info::Pos> {
         todo!()
@@ -245,7 +241,6 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_funs_remove_batch(
         _backend: Backend,
-        _db_path: Option<PathBuf>,
         _names: Vec<pos::FunName>,
     ) {
         todo!()
@@ -253,7 +248,6 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_funs_get_canon_name(
         _backend: Backend,
-        _db_path: Option<PathBuf>,
         _name: pos::FunName,
     ) -> Option<pos::FunName> {
         todo!()
@@ -269,7 +263,6 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_consts_get_pos(
         _backend: Backend,
-        _db_path: Option<PathBuf>,
         _name: pos::ConstName,
     ) -> Option<file_info::Pos> {
         todo!()
@@ -277,7 +270,6 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_consts_remove_batch(
         _backend: Backend,
-        _db_path: Option<PathBuf>,
         _names: Vec<pos::ConstName>,
     ) {
         todo!()
@@ -293,7 +285,6 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_modules_get_pos(
         _backend: Backend,
-        _db_path: Option<PathBuf>,
         _name: pos::ModuleName,
     ) -> Option<file_info::Pos> {
         todo!()
@@ -301,8 +292,20 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_modules_remove_batch(
         _backend: Backend,
-        _db_path: Option<PathBuf>,
         _names: Vec<pos::ModuleName>,
+    ) {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_get_db_path(
+        _backend: Backend,
+    ) -> Option<PathBuf> {
+        todo!()
+    }
+
+    fn hh_rust_provider_backend_naming_set_db_path(
+        _backend: Backend,
+        _db_path: PathBuf,
     ) {
         todo!()
     }

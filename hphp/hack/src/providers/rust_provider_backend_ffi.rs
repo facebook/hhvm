@@ -3,9 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use file_provider::{FileProvider, FileType, PlainFileProvider};
-use hackrs::{decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider};
-use hackrs_test_utils::{cache::make_shallow_decl_cache, serde_cache::CacheOpts};
+use file_provider::FileType;
+use hackrs_provider_backend::ProviderBackend;
 use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
 use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::{ocaml_ffi, ocaml_ffi_with_arena, Bump};
@@ -16,17 +15,21 @@ use oxidized_by_ref::{
 use pos::{RelativePath, RelativePathCtx, ToOxidized};
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
-use ty::reason::BReason;
 
-struct ProviderBackend {
-    file_provider: Arc<dyn FileProvider>,
-    folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
+struct BackendWrapper(ProviderBackend);
+
+impl std::ops::Deref for BackendWrapper {
+    type Target = ProviderBackend;
+    fn deref(&self) -> &ProviderBackend {
+        &self.0
+    }
 }
 
-impl ocamlrep_custom::CamlSerialize for ProviderBackend {
+impl ocamlrep_custom::CamlSerialize for BackendWrapper {
     ocamlrep_custom::caml_serialize_default_impls!();
 }
+
+type Backend = Custom<BackendWrapper>;
 
 ocaml_ffi_with_arena! {
     fn hh_rust_provider_backend_make<'a>(
@@ -35,26 +38,15 @@ ocaml_ffi_with_arena! {
         hhi_root: &'a Path,
         tmp: &'a Path,
         opts: &'a ParserOptions<'a>,
-    ) -> Custom<ProviderBackend> {
-        let path_ctx = Arc::new(RelativePathCtx {
+    ) -> Backend {
+        let path_ctx = RelativePathCtx {
             root: root.into(),
             hhi: hhi_root.into(),
             tmp: tmp.into(),
             ..Default::default()
-        });
-        let file_provider: Arc<dyn FileProvider> = Arc::new(PlainFileProvider::new(Arc::clone(&path_ctx)));
-        let shallow_decl_cache = make_shallow_decl_cache::<BReason>(CacheOpts::Unserialized);
-        let folded_decl_provider =
-            hackrs_test_utils::decl_provider::make_folded_decl_provider(
-                CacheOpts::Unserialized,
-                None,
-                shallow_decl_cache,
-                DeclParser::with_options(Arc::clone(&file_provider), opts),
-            );
-        Custom::from(ProviderBackend {
-            file_provider,
-            folded_decl_provider: Arc::new(folded_decl_provider),
-        })
+        };
+        let backend = ProviderBackend::new(path_ctx, opts).unwrap();
+        Custom::from(BackendWrapper(backend))
     }
 }
 
@@ -137,19 +129,19 @@ ocaml_ffi_with_arena! {
 // ocaml_ffi_with_arena (it does not implement FromOcamlRepIn, and shouldn't,
 // since arena-allocating a Custom would result in failing to decrement the
 // inner Rc and leaking memory).
-unsafe fn get_backend(ptr: UnsafeOcamlPtr) -> Custom<ProviderBackend> {
-    <Custom<ProviderBackend>>::from_ocamlrep(ptr.as_value()).unwrap()
+unsafe fn get_backend(ptr: UnsafeOcamlPtr) -> Backend {
+    Backend::from_ocamlrep(ptr.as_value()).unwrap()
 }
 
 ocaml_ffi! {
     fn hh_rust_provider_backend_decl_provider_push_local_changes(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
     ) {
         todo!()
     }
 
     fn hh_rust_provider_backend_decl_provider_pop_local_changes(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
     ) {
         todo!()
     }
@@ -159,21 +151,21 @@ ocaml_ffi! {
 
 ocaml_ffi! {
     fn hh_rust_provider_backend_file_provider_get(
-        backend: Custom<ProviderBackend>,
+        backend: Backend,
         path: RelativePath,
     ) -> Option<FileType> {
         backend.file_provider.get(path)
     }
 
     fn hh_rust_provider_backend_file_provider_get_contents(
-        backend: Custom<ProviderBackend>,
+        backend: Backend,
         path: RelativePath,
     ) -> Option<bstr::BString> {
         backend.file_provider.get_contents(path).ok().or_else(|| Some("".into()))
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_for_tests(
-        backend: Custom<ProviderBackend>,
+        backend: Backend,
         path: RelativePath,
         contents: bstr::BString,
     ) {
@@ -181,7 +173,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_for_ide(
-        backend: Custom<ProviderBackend>,
+        backend: Backend,
         path: RelativePath,
         contents: bstr::BString,
     ) {
@@ -189,7 +181,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_hint(
-        backend: Custom<ProviderBackend>,
+        backend: Backend,
         path: RelativePath,
         file: FileType,
     ) {
@@ -197,20 +189,20 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_file_provider_remove_batch(
-        backend: Custom<ProviderBackend>,
+        backend: Backend,
         paths: BTreeSet<RelativePath>,
     ) {
         backend.file_provider.remove_batch(&paths)
     }
 
     fn hh_rust_provider_backend_file_provider_push_local_changes(
-        backend: Custom<ProviderBackend>,
+        backend: Backend,
     ) {
         backend.file_provider.push_local_changes()
     }
 
     fn hh_rust_provider_backend_file_provider_pop_local_changes(
-        backend: Custom<ProviderBackend>,
+        backend: Backend,
     ) {
         backend.file_provider.pop_local_changes()
     }
@@ -220,7 +212,7 @@ ocaml_ffi! {
 
 ocaml_ffi! {
     fn hh_rust_provider_backend_naming_types_add(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _name: pos::TypeName,
         _pos: (file_info::Pos, naming_types::KindOfType),
     ) {
@@ -228,7 +220,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_types_get_pos(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _db_path: Option<PathBuf>,
         _name: pos::TypeName,
     ) -> Option<(file_info::Pos, naming_types::KindOfType)> {
@@ -236,7 +228,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_types_remove_batch(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _db_path: Option<PathBuf>,
         _names: Vec<pos::TypeName>,
     ) {
@@ -244,7 +236,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_types_get_canon_name(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _db_path: Option<PathBuf>,
         _name: pos::TypeName,
     ) -> Option<pos::TypeName> {
@@ -252,7 +244,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_funs_add(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _name: pos::FunName,
         _pos: file_info::Pos,
     ) {
@@ -260,7 +252,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_funs_get_pos(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _db_path: Option<PathBuf>,
         _name: pos::FunName,
     ) -> Option<file_info::Pos> {
@@ -268,7 +260,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_funs_remove_batch(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _db_path: Option<PathBuf>,
         _names: Vec<pos::FunName>,
     ) {
@@ -276,7 +268,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_funs_get_canon_name(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _db_path: Option<PathBuf>,
         _name: pos::FunName,
     ) -> Option<pos::FunName> {
@@ -284,7 +276,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_consts_add(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _name: pos::ConstName,
         _pos: file_info::Pos,
     ) {
@@ -292,7 +284,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_consts_get_pos(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _db_path: Option<PathBuf>,
         _name: pos::ConstName,
     ) -> Option<file_info::Pos> {
@@ -300,7 +292,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_consts_remove_batch(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _db_path: Option<PathBuf>,
         _names: Vec<pos::ConstName>,
     ) {
@@ -308,7 +300,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_modules_add(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _name: pos::ModuleName,
         _pos: file_info::Pos,
     ) {
@@ -316,7 +308,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_modules_get_pos(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _db_path: Option<PathBuf>,
         _name: pos::ModuleName,
     ) -> Option<file_info::Pos> {
@@ -324,7 +316,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_modules_remove_batch(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _db_path: Option<PathBuf>,
         _names: Vec<pos::ModuleName>,
     ) {
@@ -332,7 +324,7 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_get_filenames_by_hash(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
         _db_path: Option<PathBuf>,
         _deps: Custom<deps_rust::DepSet>,
     ) {
@@ -340,13 +332,13 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_push_local_changes(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
     ) {
         todo!()
     }
 
     fn hh_rust_provider_backend_naming_pop_local_changes(
-        _backend: Custom<ProviderBackend>,
+        _backend: Backend,
     ) {
         todo!()
     }

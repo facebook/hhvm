@@ -50,6 +50,16 @@ ocaml_ffi_with_arena! {
     }
 }
 
+ocaml_ffi! {
+    fn hh_rust_provider_backend_push_local_changes(backend: Backend) {
+        backend.file_provider.push_local_changes();
+    }
+
+    fn hh_rust_provider_backend_pop_local_changes(backend: Backend) {
+        backend.file_provider.pop_local_changes();
+    }
+}
+
 // Decl_provider ////////////////////////////////////////////////////////////
 
 ocaml_ffi_with_arena! {
@@ -133,20 +143,6 @@ unsafe fn get_backend(ptr: UnsafeOcamlPtr) -> Backend {
     Backend::from_ocamlrep(ptr.as_value()).unwrap()
 }
 
-ocaml_ffi! {
-    fn hh_rust_provider_backend_decl_provider_push_local_changes(
-        _backend: Backend,
-    ) {
-        todo!()
-    }
-
-    fn hh_rust_provider_backend_decl_provider_pop_local_changes(
-        _backend: Backend,
-    ) {
-        todo!()
-    }
-}
-
 // File_provider ////////////////////////////////////////////////////////////
 
 ocaml_ffi! {
@@ -193,18 +189,6 @@ ocaml_ffi! {
         paths: BTreeSet<RelativePath>,
     ) {
         backend.file_provider.remove_batch(&paths)
-    }
-
-    fn hh_rust_provider_backend_file_provider_push_local_changes(
-        backend: Backend,
-    ) {
-        backend.file_provider.push_local_changes()
-    }
-
-    fn hh_rust_provider_backend_file_provider_pop_local_changes(
-        backend: Backend,
-    ) {
-        backend.file_provider.pop_local_changes()
     }
 }
 
@@ -327,18 +311,6 @@ ocaml_ffi! {
         _backend: Backend,
         _db_path: Option<PathBuf>,
         _deps: Custom<deps_rust::DepSet>,
-    ) {
-        todo!()
-    }
-
-    fn hh_rust_provider_backend_naming_push_local_changes(
-        _backend: Backend,
-    ) {
-        todo!()
-    }
-
-    fn hh_rust_provider_backend_naming_pop_local_changes(
-        _backend: Backend,
     ) {
         todo!()
     }

@@ -137,6 +137,7 @@
   parser
   provider_context
   relative_path
+  rust_provider_backend_stubs
   server_command_types
   server_env
   counters

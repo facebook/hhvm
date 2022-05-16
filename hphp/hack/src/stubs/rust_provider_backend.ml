@@ -10,6 +10,10 @@ type t
 
 let make _ = failwith "unimplemented"
 
+let push_local_changes _ : unit = failwith "unimplemented"
+
+let pop_local_changes _ : unit = failwith "unimplemented"
+
 module Decl = struct
   let direct_decl_parse_and_cache _ _ = failwith "unimplemented"
 
@@ -24,10 +28,6 @@ module Decl = struct
   let get_module _ _ = failwith "unimplemented"
 
   let get_folded_class _ _ = failwith "unimplemented"
-
-  let push_local_changes _ = failwith "unimplemented"
-
-  let pop_local_changes _ = failwith "unimplemented"
 end
 
 module File = struct
@@ -46,10 +46,6 @@ module File = struct
   let provide_file_hint _ _ _ = failwith "unimplemented"
 
   let remove_batch _ _ = failwith "unimplemented"
-
-  let push_local_changes _ = failwith "unimplemented"
-
-  let pop_local_changes _ = failwith "unimplemented"
 end
 
 module Naming = struct
@@ -90,8 +86,4 @@ module Naming = struct
   end
 
   let get_filenames_by_hash _ _ _ = failwith "unimplemented"
-
-  let push_local_changes _ = failwith "unimplemented"
-
-  let pop_local_changes _ = failwith "unimplemented"
 end

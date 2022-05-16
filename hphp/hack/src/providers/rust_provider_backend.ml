@@ -21,6 +21,12 @@ let make popt =
     ~tmp:Relative_path.(path_of_prefix Tmp)
     popt
 
+external push_local_changes : t -> unit
+  = "hh_rust_provider_backend_push_local_changes"
+
+external pop_local_changes : t -> unit
+  = "hh_rust_provider_backend_pop_local_changes"
+
 module Decl = struct
   external direct_decl_parse_and_cache :
     t -> Relative_path.t -> Direct_decl_parser.parsed_file_with_hashes option
@@ -44,12 +50,6 @@ module Decl = struct
 
   external get_folded_class : t -> string -> Decl_defs.decl_class_type option
     = "hh_rust_provider_backend_get_folded_class"
-
-  external push_local_changes : t -> unit
-    = "hh_rust_provider_backend_decl_provider_push_local_changes"
-
-  external pop_local_changes : t -> unit
-    = "hh_rust_provider_backend_decl_provider_pop_local_changes"
 end
 
 module File = struct
@@ -74,12 +74,6 @@ module File = struct
 
   external remove_batch : t -> Relative_path.Set.t -> unit
     = "hh_rust_provider_backend_file_provider_remove_batch"
-
-  external push_local_changes : t -> unit
-    = "hh_rust_provider_backend_file_provider_push_local_changes"
-
-  external pop_local_changes : t -> unit
-    = "hh_rust_provider_backend_file_provider_pop_local_changes"
 end
 
 module Naming = struct
@@ -187,10 +181,4 @@ module Naming = struct
 
   let get_filenames_by_hash t path deps =
     get_filenames_by_hash_ffi t (unwrap_db_path_opt path) deps
-
-  external push_local_changes : t -> unit
-    = "hh_rust_provider_backend_naming_push_local_changes"
-
-  external pop_local_changes : t -> unit
-    = "hh_rust_provider_backend_naming_pop_local_changes"
 end

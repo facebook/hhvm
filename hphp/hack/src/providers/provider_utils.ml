@@ -103,13 +103,22 @@ let respect_but_quarantine_unsaved_changes
   let enter_quarantine_exn () =
     begin
       match Provider_context.get_backend ctx with
-      | Provider_backend.Rust_provider_backend _
       | Provider_backend.Shared_memory ->
         Ast_provider.local_changes_push_sharedmem_stack ();
         Decl_provider.local_changes_push_sharedmem_stack ();
         Shallow_classes_provider.local_changes_push_sharedmem_stack ();
         Linearization_provider.local_changes_push_sharedmem_stack ();
         File_provider.local_changes_push_sharedmem_stack ();
+        Fixme_provider.local_changes_push_sharedmem_stack ();
+        Naming_provider.local_changes_push_sharedmem_stack ();
+        SharedMem.set_allow_hashtable_writes_by_current_process false
+      | Provider_backend.Rust_provider_backend backend ->
+        Rust_provider_backend.push_local_changes backend;
+
+        Ast_provider.local_changes_push_sharedmem_stack ();
+        Decl_provider.local_changes_push_sharedmem_stack ();
+        Shallow_classes_provider.local_changes_push_sharedmem_stack ();
+        Linearization_provider.local_changes_push_sharedmem_stack ();
         Fixme_provider.local_changes_push_sharedmem_stack ();
         Naming_provider.local_changes_push_sharedmem_stack ();
         SharedMem.set_allow_hashtable_writes_by_current_process false
@@ -141,13 +150,23 @@ let respect_but_quarantine_unsaved_changes
     Ide_parser_cache.deactivate ();
     if !backend_pushed then
       match Provider_context.get_backend ctx with
-      | Provider_backend.Rust_provider_backend _
       | Provider_backend.Shared_memory ->
         Ast_provider.local_changes_pop_sharedmem_stack ();
         Decl_provider.local_changes_pop_sharedmem_stack ();
         Shallow_classes_provider.local_changes_pop_sharedmem_stack ();
         Linearization_provider.local_changes_pop_sharedmem_stack ();
         File_provider.local_changes_pop_sharedmem_stack ();
+        Fixme_provider.local_changes_pop_sharedmem_stack ();
+        Naming_provider.local_changes_pop_sharedmem_stack ();
+        SharedMem.set_allow_hashtable_writes_by_current_process true;
+        SharedMem.invalidate_local_caches ()
+      | Provider_backend.Rust_provider_backend backend ->
+        Rust_provider_backend.pop_local_changes backend;
+
+        Ast_provider.local_changes_pop_sharedmem_stack ();
+        Decl_provider.local_changes_pop_sharedmem_stack ();
+        Shallow_classes_provider.local_changes_pop_sharedmem_stack ();
+        Linearization_provider.local_changes_pop_sharedmem_stack ();
         Fixme_provider.local_changes_pop_sharedmem_stack ();
         Naming_provider.local_changes_pop_sharedmem_stack ();
         SharedMem.set_allow_hashtable_writes_by_current_process true;

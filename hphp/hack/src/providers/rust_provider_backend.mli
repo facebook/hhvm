@@ -10,6 +10,10 @@ type t
 
 val make : ParserOptions.t -> t
 
+val push_local_changes : t -> unit
+
+val pop_local_changes : t -> unit
+
 module Decl : sig
   val direct_decl_parse_and_cache :
     t -> Relative_path.t -> Direct_decl_parser.parsed_file_with_hashes option
@@ -25,10 +29,6 @@ module Decl : sig
   val get_module : t -> string -> Shallow_decl_defs.module_decl option
 
   val get_folded_class : t -> string -> Decl_defs.decl_class_type option
-
-  val push_local_changes : t -> unit
-
-  val pop_local_changes : t -> unit
 end
 
 module File : sig
@@ -47,10 +47,6 @@ module File : sig
   val provide_file_hint : t -> Relative_path.t -> file_type -> unit
 
   val remove_batch : t -> Relative_path.Set.t -> unit
-
-  val push_local_changes : t -> unit
-
-  val pop_local_changes : t -> unit
 end
 
 module Naming : sig
@@ -98,8 +94,4 @@ module Naming : sig
     Naming_sqlite.db_path option ->
     Typing_deps.DepSet.t ->
     Relative_path.Set.t
-
-  val push_local_changes : t -> unit
-
-  val pop_local_changes : t -> unit
 end

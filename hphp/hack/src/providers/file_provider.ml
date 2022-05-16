@@ -158,14 +158,6 @@ let remove_batch paths =
     failwith
       "File_provider.remove_batch not supported with local/decl memory provider"
 
-let local_changes_push_sharedmem_stack () =
-  match Provider_backend.get () with
-  | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.File.push_local_changes backend
-  | _ -> FileHeap.LocalChanges.push_stack ()
+let local_changes_push_sharedmem_stack () = FileHeap.LocalChanges.push_stack ()
 
-let local_changes_pop_sharedmem_stack () =
-  match Provider_backend.get () with
-  | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.File.pop_local_changes backend
-  | _ -> FileHeap.LocalChanges.pop_stack ()
+let local_changes_pop_sharedmem_stack () = FileHeap.LocalChanges.pop_stack ()

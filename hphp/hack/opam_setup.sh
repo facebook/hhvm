@@ -103,7 +103,7 @@ opam_switch_create_if_needed "$HACK_OPAM_NAME" "$HACK_OPAM_SWITCH"
 opam switch "$HACK_OPAM_NAME"
 eval "$(opam env)"
 
-opam install "${HACK_OPAM_DEPS[@]}"
+opam install --assume-depexts --no-depexts "${HACK_OPAM_DEPS[@]}"
 
 dune_version=$(dune --version)
 echo ""

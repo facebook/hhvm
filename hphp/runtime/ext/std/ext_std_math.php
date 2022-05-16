@@ -1,10 +1,5 @@
 <?hh // partial
 
-// Keep in sync with hphp/runtime/ext/std/ext_std_math.cpp: k_M_PI
-const float M_PI = 3.1415926535898;
-// Keep in sync with hphp/zend/zend-math.h: PHP_ROUND_HALF_UP
-const int PHP_ROUND_HALF_UP = 1;
-
 /**
  * @return float - The value of pi as float.
  *

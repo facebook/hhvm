@@ -2,16 +2,6 @@
 
 namespace {
 
-// T119870250: Keep in sync with:
-//  hphp/runtime/ext/std/ext_std_errorfunc.cpp: k_DEBUG_BACKTRACE_PROVIDE_OBJECT
-const int DEBUG_BACKTRACE_PROVIDE_OBJECT = 1 << 0;
-
-// T119870250: Keep in sync with:
-//   hphp/runtime/base/runtime-error.h: ErrorMode::USER_NOTICE
-const int E_USER_NOTICE = 1 << 10;
-//   hphp/runtime/base/runtime-error.h: ErrorMode::PHP_ALL | ErrorMode::STRICT
-const int E_ALL = (1 << 15) - 1;
-
 /**
  * Generates a backtrace
  *

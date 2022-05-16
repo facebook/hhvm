@@ -428,10 +428,12 @@ void StandardExtension::requestInitMath() {
 }
 
 void StandardExtension::initMath() {
+  HHVM_RC_INT_SAME(PHP_ROUND_HALF_UP);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_DOWN);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_EVEN);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_ODD);
 
+  HHVM_RC_DBL(M_PI, k_M_PI);
   HHVM_RC_DBL(M_1_PI, k_M_1_PI);
   HHVM_RC_DBL(M_2_PI, k_M_2_PI);
   HHVM_RC_DBL(M_2_SQRTPI, k_M_2_SQRTPI);

@@ -606,7 +606,6 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   <<__Native>>
   private function getClosureScopeClassname(object $closure)[]: ?string;
 
-  <<__MaybeMutable>>
   public function getClosureScopeClass(): ?ReflectionClass {
     if ($this->closure &&
         ($cls = $this->getClosureScopeClassname($this->closure))) {
@@ -741,7 +740,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     return $this->__toStringHelper('Method', $preAttrs, $funcAttrs);
   }
 
-  <<__MaybeMutable>>
   public function __debugInfo() {
     return darray['name' => $this->name, 'class' => $this->class];
   }
@@ -775,7 +773,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     print $str;
   }
 
-  <<__MaybeMutable>>
   private function isAccessible(): bool {
     return $this->forcedAccessible || $this->isPublic();
   }

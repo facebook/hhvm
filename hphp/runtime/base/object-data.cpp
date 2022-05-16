@@ -829,10 +829,6 @@ ObjectData* ObjectData::clone() {
 
 bool ObjectData::equal(const ObjectData& other) const {
   if (this == &other) return true;
-  if (getVMClass() == SystemLib::s_HH_SwitchableClassClass ||
-      other.getVMClass() == SystemLib::s_HH_SwitchableClassClass) {
-    return false; // Never compare for structural equality.
-  }
   if (isCollection()) {
     return collections::equals(this, &other);
   }

@@ -81,13 +81,10 @@ void implCopyConstruct(TypedValue tv, Variant& v) {
 }
 }
 
-// the version of the high frequency function that is not inlined
-NEVER_INLINE
 Variant::Variant(const Variant& v) noexcept {
   implCopyConstruct(*v.asTypedValue(), *this);
 }
 
-NEVER_INLINE
 Variant::Variant(const_variant_ref v) noexcept {
   implCopyConstruct(*v.rval(), *this);
 }

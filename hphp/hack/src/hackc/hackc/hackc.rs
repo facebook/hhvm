@@ -107,10 +107,6 @@ struct FlagCommands {
     #[clap(long)]
     parse: bool,
 
-    /// Test FFIs
-    #[clap(long)]
-    test: bool,
-
     /// Compile file with decls from the same file available during compilation.
     #[clap(long)]
     test_compile_with_decls: bool,
@@ -221,10 +217,6 @@ impl Opts {
     pub(crate) const INCLUDE_ROOTS: &'static str = "";
 }
 
-fn test(_: Opts) -> Result<()> {
-    unimplemented!()
-}
-
 fn verify_decls_ffi(_: Opts) -> Result<()> {
     unimplemented!()
 }
@@ -263,9 +255,7 @@ fn main() -> Result<()> {
         Some(Command::Parse(opts)) => parse::run(opts),
         Some(Command::Facts(facts_opts)) => facts::extract_facts(opts, facts_opts),
         None => {
-            if opts.flag_commands.test {
-                test(opts)
-            } else if opts.flag_commands.verify_decls_ffi {
+            if opts.flag_commands.verify_decls_ffi {
                 verify_decls_ffi(opts)
             } else if opts.flag_commands.compile_and_print_unit {
                 compile_unit_from_text(opts)

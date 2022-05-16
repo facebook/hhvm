@@ -1014,7 +1014,10 @@ function get_html_translation_table(
   int $table = 0,
   int $quote_style = ENT_COMPAT,
   string $encoding = "UTF-8",
-)[]: darray<string, string>; // TODO(T120001721) This type is nullable
+)[]: darray<string, string>;
+// TODO(T120001721) This type is nullable, specifically a
+// `?darray<string, string>`; HHVM's native interface doesn't allow us to
+// differentiate between nullable and non-nullable strings, arrays, or objects.
 
 /**
  * Converts logical Hebrew text to visual text.  The function tries to avoid
@@ -1087,7 +1090,8 @@ function setlocale(int $category, mixed $locale, mixed... $argv): mixed;
  *
  */
 <<__Native>>
-function localeconv(): darray<string, mixed>; // TODO(T119996979)
+function localeconv(): darray<string, mixed>;
+// TODO(T119996979) `localeconv` returns a shape, not a darray
 
 /**
  * nl_langinfo() is used to access individual elements of the locale

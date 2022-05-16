@@ -59,7 +59,7 @@ function is_scalar(readonly mixed $var)[]: bool;
 
 /* Finds whether the given variable is an array.
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function is_array(<<__MaybeMutable>> readonly mixed $var): bool;
 
 /* Finds whether the given variable is an object.
@@ -235,10 +235,10 @@ namespace HH {
   <<__Native, __IsFoldable>>
   function is_keyset(readonly mixed $var)[]: bool;
 
-  <<__Native, __IsFoldable, __Pure>>
+  <<__Native, __IsFoldable>>
   function is_varray(<<__MaybeMutable>> readonly mixed $var): bool;
 
-  <<__Native, __IsFoldable, __Pure>>
+  <<__Native, __IsFoldable>>
   function is_darray(<<__MaybeMutable>> readonly mixed $var): bool;
 
   <<__Native, __IsFoldable>>

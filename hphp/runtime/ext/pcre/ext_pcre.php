@@ -12,7 +12,7 @@
  * occurred, an empty array is returned when subject is an array or NULL
  * otherwise.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function preg_filter(mixed $pattern,
                      mixed $replacement,
                      mixed $subject,

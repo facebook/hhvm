@@ -447,7 +447,7 @@ function str_replace(mixed $search,
                      mixed $replace,
                      mixed $subject)[]: mixed;
 
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function str_replace_with_count(mixed $search,
                                 mixed $replace,
                                 mixed $subject,
@@ -477,12 +477,12 @@ function str_replace_with_count(mixed $search,
  * @return mixed - Returns a string or an array of replacements.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function str_ireplace(mixed $search,
                       mixed $replace,
                       mixed $subject): mixed;
 
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function str_ireplace_with_count(mixed $search,
                                  mixed $replace,
                                  mixed $subject,
@@ -1688,7 +1688,7 @@ function levenshtein(string $str1,
  * @return int - Returns the number of matching chars in both strings.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function similar_text(string $first,
                       string $second,
                       <<__OutOnly("KindOfDouble")>>
@@ -1742,7 +1742,7 @@ namespace HH {
  * non-zero or 0 for a reason other than that the string didn't look numeric enough
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function str_number_coercible(string $str)[]: bool;
 
 /**
@@ -1753,7 +1753,7 @@ function str_number_coercible(string $str)[]: bool;
  * `str_number_coercible` null is returned. Otherwise, return the value of the
  * string coerced to a number
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function str_to_numeric(string $str)[]: ?num;
 
 }

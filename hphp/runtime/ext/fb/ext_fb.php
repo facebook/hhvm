@@ -125,7 +125,7 @@ function fb_rename_function(string $orig_func_name,
  * @param mixed $input - What string to sanitize.
  * @return bool - Sanitized string.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function fb_utf8ize(inout mixed $input): bool;
 
 /** Count the number of UTF-8 code points in string or byte count if it's not
@@ -134,7 +134,7 @@ function fb_utf8ize(inout mixed $input): bool;
  * @return int - Returns the count of code points if valid UTF-8 else byte
  * count.
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function fb_utf8_strlen_deprecated(string $input): int;
 
 /** Count the number of UTF-8 code points in string, substituting U+FFFD for
@@ -275,7 +275,7 @@ function non_crypto_md5_lower(string $str)[]: int;
  * (unsigned)$a and (unsigned)$b. (The lower 64 bits is just `$a * $b`
  * regardless of signed/unsigned).
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function int_mul_overflow(int $a, int $b): int;
 
 /** Returns the overflow part of multiplying two ints plus another int, as if
@@ -283,7 +283,7 @@ function int_mul_overflow(int $a, int $b): int;
  * full (unsigned)$a * (unsigned)$b + (unsigned)$bias. $bias can be used to
  * manipulate rounding of the result.
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function int_mul_add_overflow(int $a, int $b, int $bias): int;
 
 type INCORRECT_TYPE<T> = T;

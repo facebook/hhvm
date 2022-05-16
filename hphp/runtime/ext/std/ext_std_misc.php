@@ -105,7 +105,7 @@ function constant(string $name): mixed;
  * @return bool - Returns TRUE if the named constant given by name has been
  * defined, FALSE otherwise.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function defined(string $name,
                  bool $autoload = true): bool;
 
@@ -254,7 +254,7 @@ namespace __SystemLib {
  * @param mixed $arg2 - The second operand of max.
  * @return mixed - The max of two operands.
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function max2(mixed $arg1, mixed $arg2): mixed;
 
 /** min2() returns the min of two operands (optimized FCallBuiltin for min).
@@ -262,7 +262,7 @@ function max2(mixed $arg1, mixed $arg2): mixed;
  * @param mixed $arg2 - The second operand of min.
  * @return mixed - The min of two operands.
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function min2(mixed $arg1, mixed $arg2): mixed;
 
 }

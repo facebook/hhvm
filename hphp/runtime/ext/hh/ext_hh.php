@@ -490,7 +490,6 @@ interface IMemoizeParam extends \HH\IMemoizeParam {
    * Serialize this object to a string that can be used as a
    * dictionary key to differentiate instances of this class.
    */
-  <<__Pure>>
   public function getInstanceKey(): string;
 }
 }

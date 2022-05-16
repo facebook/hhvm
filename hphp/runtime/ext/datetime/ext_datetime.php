@@ -286,7 +286,7 @@ class DateTimeZone {
   public static function listIdentifiers(int $what = 2047,
                                   string $country = "")[]: mixed;
 
-  <<__Native, __Pure>>
+  <<__Native>>
   public function __debugInfo(): darray;
 }
 

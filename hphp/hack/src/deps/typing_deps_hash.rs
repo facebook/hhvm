@@ -57,7 +57,7 @@ impl DepType {
     #[inline]
     pub fn is_toplevel_symbol(self) -> bool {
         match self {
-            DepType::GConst | DepType::Fun | DepType::Type => true,
+            DepType::GConst | DepType::Fun | DepType::Type | DepType::Module => true,
             _ => false,
         }
     }

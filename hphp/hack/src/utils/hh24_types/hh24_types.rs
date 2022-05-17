@@ -220,7 +220,6 @@ impl<'de> serde::Deserialize<'de> for Timestamp {
 }
 
 // Common impls for types which wrap a hash value represented by u64.
-#[macro_export]
 macro_rules! u64_hash_wrapper_impls {
     ($name:ident) => {
         impl $name {
@@ -266,22 +265,14 @@ macro_rules! u64_hash_wrapper_impls {
 }
 
 /// The hash of a toplevel symbol name, as it appears in the 64bit dependency graph.
-#[derive(
-    Copy,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    PartialOrd,
-    Ord,
-    serde::Deserialize,
-    serde::Serialize
-)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(serde::Deserialize, serde::Serialize)]
 #[derive(derive_more::UpperHex, derive_more::LowerHex)]
 pub struct ToplevelSymbolHash(u64);
 u64_hash_wrapper_impls! { ToplevelSymbolHash }
 
 impl ToplevelSymbolHash {
+    // TODO: Should be called `new`.
     pub fn from(dep_type: typing_deps_hash::DepType, symbol: &str) -> Self {
         assert!(dep_type.is_toplevel_symbol());
         Self(typing_deps_hash::hash1(dep_type, symbol.as_bytes()))
@@ -297,6 +288,10 @@ impl ToplevelSymbolHash {
 
     pub fn from_const(symbol: &str) -> Self {
         Self::from(typing_deps_hash::DepType::GConst, symbol)
+    }
+
+    pub fn from_module(symbol: &str) -> Self {
+        Self::from(typing_deps_hash::DepType::Module, symbol)
     }
 
     #[inline(always)]
@@ -318,6 +313,31 @@ impl ToplevelSymbolHash {
 impl From<ToplevelSymbolHash> for depgraph::dep::Dep {
     fn from(symbol_hash: ToplevelSymbolHash) -> depgraph::dep::Dep {
         depgraph::dep::Dep::new(symbol_hash.0)
+    }
+}
+
+/// The "canon hash" of a toplevel symbol name (i.e., the hash of the symbol
+/// name after ASCII characters in the name have been converted to lowercase),
+/// as it appears in the naming table.
+#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(serde::Deserialize, serde::Serialize)]
+#[derive(derive_more::UpperHex, derive_more::LowerHex)]
+pub struct ToplevelCanonSymbolHash(u64);
+u64_hash_wrapper_impls! { ToplevelCanonSymbolHash }
+
+impl ToplevelCanonSymbolHash {
+    // TODO: Should be called `new`.
+    pub fn from(dep_type: typing_deps_hash::DepType, mut symbol: String) -> Self {
+        symbol.make_ascii_lowercase();
+        Self(typing_deps_hash::hash1(dep_type, symbol.as_bytes()))
+    }
+
+    pub fn from_type(symbol: String) -> Self {
+        Self::from(typing_deps_hash::DepType::Type, symbol)
+    }
+
+    pub fn from_fun(symbol: String) -> Self {
+        Self::from(typing_deps_hash::DepType::Fun, symbol)
     }
 }
 
@@ -435,17 +455,8 @@ pub enum ParseDepgraphEdgeError {
 
 /// The position-insensitive hash of the `Decls` produced by running the direct
 /// decl parser on a file. Used in the NAMING_FILE_INFO table.
-#[derive(
-    Copy,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    PartialOrd,
-    Ord,
-    serde::Deserialize,
-    serde::Serialize
-)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(serde::Deserialize, serde::Serialize)]
 #[derive(derive_more::UpperHex, derive_more::LowerHex)]
 pub struct FileDeclsHash(u64);
 u64_hash_wrapper_impls! { FileDeclsHash }
@@ -459,17 +470,8 @@ impl From<oxidized_by_ref::direct_decl_parser::Decls<'_>> for FileDeclsHash {
 /// The position-insensitive hash of a decl (the type signature of a toplevel
 /// declaration), as it appears in the naming table. Used in the NAMING_FUNS,
 /// NAMING_CONSTS, and NAMING_TYPES tables (in the near future).
-#[derive(
-    Copy,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    PartialOrd,
-    Ord,
-    serde::Deserialize,
-    serde::Serialize
-)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(serde::Deserialize, serde::Serialize)]
 #[derive(derive_more::UpperHex, derive_more::LowerHex)]
 pub struct DeclHash(u64);
 u64_hash_wrapper_impls! { DeclHash }

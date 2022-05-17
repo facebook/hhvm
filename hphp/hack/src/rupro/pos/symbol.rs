@@ -9,6 +9,7 @@
 
 use crate::ToOxidized;
 use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
+use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
 use indexmap::{IndexMap, IndexSet};
 use intern::{
     string::{BytesId, IntoUtf8Bytes, StringId},
@@ -341,6 +342,18 @@ pub type TypeNameIndexSet = IndexSet<TypeName>;
 pub struct TypeName(pub Symbol);
 common_impls!(TypeName);
 
+impl From<TypeName> for ToplevelSymbolHash {
+    fn from(symbol: TypeName) -> Self {
+        Self::from_type(symbol.as_str())
+    }
+}
+
+impl From<TypeName> for ToplevelCanonSymbolHash {
+    fn from(symbol: TypeName) -> Self {
+        Self::from_type(symbol.as_str().to_owned())
+    }
+}
+
 /// ModuleName is introduced by the experimental Modules feature and `internal`
 /// visibility. ModuleNames are not bindable names and are not intended
 /// to be interchangeable with any other kind of name.
@@ -349,17 +362,41 @@ common_impls!(TypeName);
 pub struct ModuleName(pub Symbol);
 common_impls!(ModuleName);
 
+impl From<ModuleName> for ToplevelSymbolHash {
+    fn from(symbol: ModuleName) -> Self {
+        Self::from_module(symbol.as_str())
+    }
+}
+
 /// Name of a top level constant.
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct ConstName(pub Symbol);
 common_impls!(ConstName);
 
+impl From<ConstName> for ToplevelSymbolHash {
+    fn from(symbol: ConstName) -> Self {
+        Self::from_const(symbol.as_str())
+    }
+}
+
 /// Name of a top level function.
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct FunName(pub Symbol);
 common_impls!(FunName);
+
+impl From<FunName> for ToplevelSymbolHash {
+    fn from(symbol: FunName) -> Self {
+        Self::from_fun(symbol.as_str())
+    }
+}
+
+impl From<FunName> for ToplevelCanonSymbolHash {
+    fn from(symbol: FunName) -> Self {
+        Self::from_fun(symbol.as_str().to_owned())
+    }
+}
 
 /// ClassConstName is the name of a class const, which are disjoint from
 /// global constants, type constants, and other class members.

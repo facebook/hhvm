@@ -16,7 +16,7 @@ find_utils = { path = "../../../utils/find_utils" }
 hackrs = { path = "../../hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hhi = { path = "../../../hhi/rust" }
-indicatif = { version = "0.15", features = ["with_rayon"] }
+indicatif = { version = "0.16", features = ["with_rayon"] }
 jwalk = "0.6"
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }

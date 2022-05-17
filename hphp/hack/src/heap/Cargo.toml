@@ -11,5 +11,5 @@ test = false
 
 [dependencies]
 depgraph = { path = "../depgraph/cargo/depgraph" }
-indicatif = { version = "0.15", features = ["with_rayon"] }
+indicatif = { version = "0.16", features = ["with_rayon"] }
 structopt = "0.3.23"

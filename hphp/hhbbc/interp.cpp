@@ -4239,7 +4239,7 @@ namespace {
 
 template <typename Op, class UpdateBC>
 void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
-                        bool dynamic, uint32_t numExtraInputs,
+                        bool dynamic, uint32_t numExtraInputs, SString clsHint,
                         UpdateBC updateBC) {
   if (isBadContext(op.fca)) {
     for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
@@ -4261,7 +4261,7 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
     return;
   }
 
-  if (rfunc.exactFunc() && op.str2->empty()) {
+  if (clsHint && rfunc.exactFunc() && clsHint->empty()) {
     return reduce(env, updateBC(op.fca, rfunc.exactFunc()->cls->name));
   }
 
@@ -4272,22 +4272,22 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
 } // namespace
 
 void in(ISS& env, const bc::FCallClsMethodD& op) {
-  auto const rcls = env.index.resolve_class(env.ctx, op.str3);
+  auto const rcls = env.index.resolve_class(env.ctx, op.str2);
   auto const clsTy = rcls ? clsExact(*rcls) : TCls;
-  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str4);
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str3);
 
   if (op.fca.hasGenerics() && !rfunc.couldHaveReifiedGenerics()) {
     return reduce(
       env,
       bc::PopC {},
       bc::FCallClsMethodD {
-        op.fca.withoutGenerics(), op.str2, op.str3, op.str4 }
+        op.fca.withoutGenerics(), op.str2, op.str3 }
     );
   }
 
   if (auto const func = rfunc.exactFunc()) {
     assertx(func->cls != nullptr);
-    if (func->cls->name->same(op.str3) &&
+    if (func->cls->name->same(op.str2) &&
         optimize_builtin(env, func, op.fca)) {
       // When we use FCallBuiltin to call a static method, the litstr method
       // name will be a fully qualified cls::fn (e.g. "HH\Map::fromItems").
@@ -4299,10 +4299,9 @@ void in(ISS& env, const bc::FCallClsMethodD& op) {
   }
 
   auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
-    if (!clsHint) clsHint = op.str2;
-    return bc::FCallClsMethodD { std::move(fca), clsHint, op.str3, op.str4 };
+    return bc::FCallClsMethodD { std::move(fca), op.str2, op.str3 };
   };
-  fcallClsMethodImpl(env, op, clsTy, op.str4, false, 0, updateBC);
+  fcallClsMethodImpl(env, op, clsTy, op.str3, false, 0, nullptr, updateBC);
 }
 
 void in(ISS& env, const bc::FCallClsMethod& op) {
@@ -4326,7 +4325,7 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
       env,
       bc::PopC {},
       bc::PopC {},
-      bc::FCallClsMethodD { op.fca, op.str2, clsName, methName }
+      bc::FCallClsMethodD { op.fca, clsName, methName }
     );
   }
 
@@ -4334,7 +4333,7 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
     if (!clsHint) clsHint = op.str2;
     return bc::FCallClsMethod { std::move(fca), clsHint, op.subop3 };
   };
-  fcallClsMethodImpl(env, op, clsTy, methName, true, 2, updateBC);
+  fcallClsMethodImpl(env, op, clsTy, methName, true, 2, op.str2, updateBC);
 }
 
 void in(ISS& env, const bc::FCallClsMethodM& op) {
@@ -4374,7 +4373,7 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
     return reduce(
       env,
       bc::PopC {},
-      bc::FCallClsMethodD { op.fca, op.str2, clsName, methName }
+      bc::FCallClsMethodD { op.fca, clsName, methName }
     );
   }
 
@@ -4382,7 +4381,7 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
     if (!clsHint) clsHint = op.str2;
     return bc::FCallClsMethodM { std::move(fca), clsHint, op.subop3 , methName};
   };
-  fcallClsMethodImpl(env, op, clsTy, methName, maybeDynamicCall, 1, updateBC);
+  fcallClsMethodImpl(env, op, clsTy, methName, maybeDynamicCall, 1, op.str2, updateBC);
 }
 
 namespace {
@@ -4394,7 +4393,7 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
       !dynamic && op.subop3 == SpecialClsRef::LateBoundCls) {
     auto const clsName = dcls_of(clsTy).cls.name();
-    reduce(env, bc::FCallClsMethodD { op.fca, op.str2, clsName, methName });
+    reduce(env, bc::FCallClsMethodD { op.fca, clsName, methName });
     return;
   }
 

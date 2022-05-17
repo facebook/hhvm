@@ -214,7 +214,7 @@
   NullUninit
   NullUninit
     CnsE "DEBUG_BACKTRACE_IGNORE_ARGS"
-  FCallClsMethodD <> 1 1 "" "" - "" "" "Exception" "setTraceOptions"
+  FCallClsMethodD <> 1 1 "" "" - "" "Exception" "setTraceOptions"
   PopC
 
   .try {
@@ -236,5 +236,5 @@
     PopC
     Int 1
     RetC
-  } 
+  }
 }

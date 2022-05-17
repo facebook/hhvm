@@ -4105,7 +4105,7 @@ iopFCallClsMethodM(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
 
 OPTBLD_INLINE JitResumeAddr
 iopFCallClsMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
-                   const StringData*, Id classId, const StringData* methName) {
+                   Id classId, const StringData* methName) {
   const NamedEntityPair &nep =
     vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Class::load(nep.second, nep.first);

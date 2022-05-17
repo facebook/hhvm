@@ -190,8 +190,7 @@ namespace HPHP {
                                        FCALL(2, 0),     FCALL,      CF) \
   O(FCallClsMethodM, FOUR(FCA,SA,OA(IsLogAsDynamicCallOp),SA),          \
                                        FCALL(1, 0),     FCALL,      CF) \
-  O(FCallClsMethodD, FOUR(FCA,SA,SA,SA),                                \
-                                       FCALL(0, 0),     FCALL,      CF) \
+  O(FCallClsMethodD, THREE(FCA,SA,SA), FCALL(0, 0),     FCALL,      CF) \
   O(FCallClsMethodS, THREE(FCA,SA,OA(SpecialClsRef)),                   \
                                        FCALL(1, 0),     FCALL,      CF) \
   O(FCallClsMethodSD,FOUR(FCA,SA,OA(SpecialClsRef),SA),                 \

@@ -1080,8 +1080,8 @@ getLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
   if (sk.funcEntry()) return std::nullopt;
   if (sk.op() != Op::FCallClsMethodD) return std::nullopt;
 
-  auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
-  auto const func = sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA);
+  auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
+  auto const func = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
 
   if (!cls->isame(s_HH_Shapes.get()) &&
       !cls->isame(s_HH_Readonly_Shapes.get())) {
@@ -1123,8 +1123,8 @@ jit::vector<Location> guardsForLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
 
   auto const readonlyOkay = [&]{
     auto const callee = [&]() -> Func* {
-      auto const className  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
-      auto const funcName = sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA);
+      auto const className  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
+      auto const funcName = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
       auto const cls = Class::lookup(className);
       if (!cls) return nullptr;
       return cls->lookupMethod(funcName);

@@ -245,10 +245,7 @@ pub mod instr {
         class: ClassName<'a>,
     ) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallClsMethodD(
-            fcall_args,
-            Default::default(),
-            class,
-            method,
+            fcall_args, class, method,
         )))
     }
 

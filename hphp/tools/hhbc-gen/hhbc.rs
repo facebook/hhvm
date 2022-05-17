@@ -258,8 +258,8 @@ mod fixups {
                 replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "FCallClsMethodD" => vec![
-                replace_imm("str3", ImmType::SA, ImmType::OAL("ClassName")),
-                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("ClassName")),
+                replace_imm("str3", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "FCallClsMethodSD" => vec![
                 replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),

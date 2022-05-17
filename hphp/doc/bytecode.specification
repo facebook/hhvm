@@ -1762,7 +1762,7 @@ FCallClsMethod <fca> <class hint> <op>
   [U U C|V..C|V C C:Class]  ->  [C..C]
 FCallClsMethodM <fca> <class hint> <op> <litstr id>
   [U U C|V..C|V C]    ->  [C..C]
-FCallClsMethodD <fca> <class hint> <litstr id> <litstr id>
+FCallClsMethodD <fca> <litstr id> <litstr id>
   [U U C|V..C|V]    ->  [C..C]
 FCallClsMethodS <fca> <class hint> <mode>
   [U U C|V..C|V C]  ->  [C..C]
@@ -1776,12 +1776,12 @@ FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
     --------------------+----+-----
       FCallClsMethod    | $1 | $2
       FCallClsMethodM   | $1 | %4
-      FCallClsMethodD   | %3 | %4
+      FCallClsMethodD   | %2 | %3
       FCallClsMethodS   | %3 | $1
       FCallClsMethodSD  | %3 | %4
 
-  When loading litstr id %3 into x, FCallClsMethodD will perform the work
-  performed by the ClassGetC instruction to convert the name given by %3 into
+  When loading litstr id %2 into x, FCallClsMethodD will perform the work
+  performed by the ClassGetC instruction to convert the name given by %2 into
   a class. Similarly, FCallClsMethodM will convert $1 into a class.
 
   When loading mode %3 into x, FCallClsMethodS and FCallClsMethodSD will

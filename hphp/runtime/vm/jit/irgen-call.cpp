@@ -1621,10 +1621,8 @@ SSATmp* loadClsMethodUnknown(IRGS& env,
 
 void emitFCallClsMethodD(IRGS& env,
                          FCallArgs fca,
-                         const StringData* classHint,
                          const StringData* className,
                          const StringData* methodName) {
-  // TODO: take advantage of classHint if it is unique, but className is not
   auto const cls = lookupUniqueClass(env, className);
   if (cls) {
     auto const callCtx =

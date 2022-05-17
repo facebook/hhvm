@@ -11,7 +11,7 @@ use oxidized::ast_defs::Variance;
 use pos::{Positioned, Symbol, TypeName};
 use std::ops::Deref;
 use ty::{
-    local::{Exact, FunType, Prim, Ty, Ty_, Tyvar},
+    local::{Exact, FunParam, FunType, Prim, Ty, Ty_, Tyvar},
     local_error::{Primary, TypingError},
     prop::Prop,
     reason::Reason,
@@ -417,12 +417,41 @@ fn simp_prim<R: Reason>(prim_sub: &Prim, prim_sup: &Prim) -> Prop<R> {
 
 /// Normalize the propostion `fn <: fn`
 fn simp_fun<R: Reason>(
-    _cfg: &Config,
-    _env: &mut Env<R>,
-    _fn_sub: &FunType<R>,
-    _fn_sup: &FunType<R>,
+    cfg: &Config,
+    env: &mut Env<R>,
+    fn_sub: &FunType<R>,
+    fn_sup: &FunType<R>,
 ) -> Result<Prop<R>> {
-    unimplemented!("Subtype propositions involving function types aren't implemented")
+    let mut prop = Prop::valid();
+    for (param_sub, param_sup) in fn_sub.params.iter().zip(fn_sup.params.iter()) {
+        let next = simp_fun_param(cfg, env, param_sub, param_sup)?;
+        if next.is_unsat() {
+            prop = next;
+            break;
+        } else {
+            prop = prop.conj(next);
+        }
+    }
+    if !prop.is_unsat() {
+        let next = simp_ty(cfg, env, &fn_sub.ret, &fn_sup.ret)?;
+        if next.is_unsat() {
+            Ok(next)
+        } else {
+            Ok(prop.conj(next))
+        }
+    } else {
+        Ok(prop)
+    }
+}
+
+fn simp_fun_param<R: Reason>(
+    cfg: &Config,
+    env: &mut Env<R>,
+    fn_param_sub: &FunParam<R>,
+    fn_param_sup: &FunParam<R>,
+) -> Result<Prop<R>> {
+    // functions are contravariant in their parameters
+    simp_ty(cfg, env, &fn_param_sup.ty, &fn_param_sub.ty)
 }
 
 /// Normalize the proposition `#T <: U` where `#T` is a generic type parameter
@@ -614,6 +643,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pos::Pos;
     use ty::{prop::PropF, reason::NReason};
     use utils::core::IdentGen;
 
@@ -734,6 +764,58 @@ mod tests {
                 .unwrap()
                 .is_unsat()
         );
+    }
+
+    #[test]
+    fn test_fn() {
+        let mut env = Env::default();
+        let cfg = Config::default();
+
+        let ty_fn1 = Ty::fun(
+            NReason::none(),
+            FunType {
+                params: vec![FunParam {
+                    name: None,
+                    pos: Pos::none(),
+                    ty: Ty::arraykey(NReason::none()),
+                }],
+                ret: Ty::float(NReason::none()),
+            },
+        );
+
+        let ty_fn2 = Ty::fun(
+            NReason::none(),
+            FunType {
+                params: vec![FunParam {
+                    name: None,
+                    pos: Pos::none(),
+                    ty: Ty::int(NReason::none()),
+                }],
+                ret: Ty::num(NReason::none()),
+            },
+        );
+
+        // arraykey -> float <: int -> num
+        // int <: arraykey & float <: num
+        assert!(
+            simp_ty(&cfg, &mut env, &ty_fn1, &ty_fn2)
+                .unwrap()
+                .is_valid()
+        );
+
+        // int -> num </: arraykey -> float
+        assert!(
+            simp_ty(&cfg, &mut env, &ty_fn2, &ty_fn1)
+                .unwrap()
+                .is_unsat()
+        );
+
+        // refl
+        assert!(
+            simp_ty(&cfg, &mut env, &ty_fn1, &ty_fn1)
+                .unwrap()
+                .is_valid()
+        )
     }
 
     #[test]

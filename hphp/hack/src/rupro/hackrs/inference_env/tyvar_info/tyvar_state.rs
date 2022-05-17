@@ -8,7 +8,7 @@
 use super::tyvar_constraints::TyvarConstraints;
 use im::HashSet;
 use ty::{
-    local::{Ty, Variance},
+    local::{Ty, Tyvar, Variance},
     prop::CstrTy,
     reason::Reason,
 };
@@ -17,6 +17,7 @@ use ty::{
 pub enum TyvarState<R: Reason> {
     Bound(Ty<R>),
     Constrained(TyvarConstraints<R>),
+    Error,
 }
 
 impl<R: Reason> Default for TyvarState<R> {
@@ -26,20 +27,32 @@ impl<R: Reason> Default for TyvarState<R> {
 }
 
 impl<R: Reason> TyvarState<R> {
+    pub fn new(variance: Variance) -> Self {
+        Self::Constrained(TyvarConstraints::new(variance))
+    }
+
     pub fn is_bound(&self) -> bool {
-        matches!(self, TyvarState::Bound(_))
+        matches!(self, Self::Bound(_))
+    }
+
+    pub fn is_error(&self) -> bool {
+        matches!(self, Self::Error)
     }
 
     pub fn binding(&self) -> Option<&Ty<R>> {
         match self {
             Self::Bound(ty) => Some(ty),
-            Self::Constrained(_) => None,
+            Self::Constrained(_) | Self::Error => None,
         }
     }
 
     pub fn is_informative(&self) -> bool {
         self.constraints_opt()
             .map_or(true, |cstrs| cstrs.is_informative())
+    }
+
+    pub fn variance(&self) -> Option<Variance> {
+        self.constraints_opt().map(|cstr| cstr.variance)
     }
 
     pub fn appears_covariantly(&self) -> bool {
@@ -54,23 +67,24 @@ impl<R: Reason> TyvarState<R> {
 
     pub fn with_appearance(&mut self, appearing: &Variance) {
         match self {
-            TyvarState::Constrained(cstrs) => cstrs.with_appearance(appearing),
-            TyvarState::Bound(_) => {}
+            Self::Constrained(cstrs) => cstrs.with_appearance(appearing),
+            Self::Bound(_) | Self::Error => {}
         }
     }
 
     #[inline]
     fn constraints_opt(&self) -> Option<&TyvarConstraints<R>> {
         match self {
-            TyvarState::Constrained(cstrs) => Some(cstrs),
-            TyvarState::Bound(_) => None,
+            Self::Constrained(cstrs) => Some(cstrs),
+            Self::Bound(_) | Self::Error => None,
         }
     }
 
     fn constraints_exn(&self) -> &TyvarConstraints<R> {
         match self {
-            TyvarState::Constrained(cstrs) => cstrs,
-            TyvarState::Bound(_) => panic!("Already bound"),
+            Self::Constrained(cstrs) => cstrs,
+            Self::Bound(_) => panic!("Already bound"),
+            Self::Error => panic!("Error"),
         }
     }
 
@@ -84,8 +98,9 @@ impl<R: Reason> TyvarState<R> {
 
     fn constraints(&self) -> TyvarConstraints<R> {
         match &self {
-            TyvarState::Constrained(cstrs) => cstrs.clone(),
-            TyvarState::Bound(ty) => {
+            Self::Constrained(cstrs) => cstrs.clone(),
+            Self::Error => TyvarConstraints::default(),
+            Self::Bound(ty) => {
                 let mut lower_bounds: HashSet<CstrTy<R>> = Default::default();
                 let mut upper_bounds: HashSet<CstrTy<R>> = Default::default();
                 lower_bounds.insert(CstrTy::Locl(ty.clone()));
@@ -101,8 +116,9 @@ impl<R: Reason> TyvarState<R> {
 
     pub fn add_upper_bound(&mut self, bound: CstrTy<R>) {
         match self {
-            TyvarState::Constrained(cstrs) => cstrs.add_upper_bound(bound),
-            TyvarState::Bound(_) => {
+            Self::Error => {}
+            Self::Constrained(cstrs) => cstrs.add_upper_bound(bound),
+            Self::Bound(_) => {
                 panic!(
                     "Attempting to add an upper bound to a type variable that is already solved"
                 );
@@ -112,9 +128,57 @@ impl<R: Reason> TyvarState<R> {
 
     pub fn add_lower_bound(&mut self, bound: CstrTy<R>) {
         match self {
-            TyvarState::Constrained(cstrs) => cstrs.add_lower_bound(bound),
-            TyvarState::Bound(_) => {
+            Self::Constrained(cstrs) => cstrs.add_lower_bound(bound),
+            Self::Error => {}
+            Self::Bound(_) => {
                 panic!("Attempting to add a lower bound to a type variable that is already solved");
+            }
+        }
+    }
+
+    pub fn remove_upper_bound(&mut self, bound: &CstrTy<R>) {
+        match self {
+            Self::Constrained(cstrs) => cstrs.remove_upper_bound(bound),
+            Self::Error => {}
+            Self::Bound(_) => {
+                panic!(
+                    "Attempting to remove an upper bound from a type variable that is already solved"
+                );
+            }
+        }
+    }
+
+    pub fn remove_lower_bound(&mut self, bound: &CstrTy<R>) {
+        match self {
+            Self::Constrained(cstrs) => cstrs.remove_lower_bound(bound),
+            Self::Error => {}
+            Self::Bound(_) => {
+                panic!(
+                    "Attempting to remove a lower bound from a type variable that is already solved"
+                );
+            }
+        }
+    }
+    pub fn remove_tyvar_upper_bound(&mut self, tvs: &HashSet<Tyvar>) {
+        match self {
+            Self::Constrained(cstrs) => cstrs.remove_tyvar_upper_bound(tvs),
+            Self::Error => {}
+            Self::Bound(_) => {
+                panic!(
+                    "Attempting to remove an upper bound from a type variable that is already solved"
+                );
+            }
+        }
+    }
+
+    pub fn remove_tyvar_lower_bound(&mut self, tvs: &HashSet<Tyvar>) {
+        match self {
+            Self::Constrained(cstrs) => cstrs.remove_tyvar_lower_bound(tvs),
+            Self::Error => {}
+            Self::Bound(_) => {
+                panic!(
+                    "Attempting to remove a lower bound from a type variable that is already solved"
+                );
             }
         }
     }
@@ -124,8 +188,9 @@ impl<R: Reason> TyvarState<R> {
         F: FnOnce(CstrTy<R>, &HashSet<CstrTy<R>>) -> HashSet<CstrTy<R>>,
     {
         match self {
-            TyvarState::Constrained(cstrs) => cstrs.add_lower_bound_as_union(bound, union),
-            TyvarState::Bound(_) => {
+            Self::Constrained(cstrs) => cstrs.add_lower_bound_as_union(bound, union),
+            Self::Error => {}
+            Self::Bound(_) => {
                 panic!("Attempting to add a lower bound to a type variable that is already solved");
             }
         }

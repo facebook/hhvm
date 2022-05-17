@@ -16,6 +16,7 @@ use env::Env;
 use im::HashSet;
 use oracle::Oracle;
 use pos::{Symbol, TypeName};
+pub use solve::solve;
 use std::{ops::Deref, rc::Rc};
 use ty::{
     local::{Ty, Tyvar},

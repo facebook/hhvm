@@ -9,8 +9,9 @@ mod tyvar_constraints;
 mod tyvar_state;
 
 use im::HashSet;
+use pos::Pos;
 use ty::{
-    local::{Ty, Variance},
+    local::{Ty, Tyvar, Variance},
     prop::CstrTy,
     reason::Reason,
 };
@@ -18,19 +19,40 @@ use tyvar_state::TyvarState;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TyvarInfo<R: Reason> {
-    pos: Option<R::Pos>,
+    pos: R::Pos,
     state: TyvarState<R>,
     early_solve_failed: bool,
 }
 
 impl<R: Reason> TyvarInfo<R> {
-    pub fn is_solved(&self) -> bool {
-        matches!(self.state, TyvarState::Bound(_))
+    pub fn new(variance: Variance, pos: R::Pos) -> Self {
+        TyvarInfo {
+            pos,
+            state: TyvarState::new(variance),
+            early_solve_failed: false,
+        }
     }
 
-    pub fn bind(&mut self, pos: Option<R::Pos>, ty: Ty<R>) {
+    pub fn is_solved(&self) -> bool {
+        self.state.is_bound()
+    }
+
+    pub fn is_error(&self) -> bool {
+        self.state.is_error()
+    }
+
+    pub fn bind(&mut self, pos: R::Pos, ty: Ty<R>) {
         self.pos = pos;
+        let ty = if self.early_solve_failed {
+            ty.map_reason(|r| R::early_solve_failed(r.pos().clone()))
+        } else {
+            ty
+        };
         self.state = TyvarState::Bound(ty);
+    }
+
+    pub fn mark_error(&mut self) {
+        self.state = TyvarState::Error;
     }
 
     pub fn binding(&self) -> Option<&Ty<R>> {
@@ -58,6 +80,26 @@ impl<R: Reason> TyvarInfo<R> {
         self.state.add_lower_bound_as_union(bound, union)
     }
 
+    pub fn remove_upper_bound(&mut self, bound: &CstrTy<R>) {
+        self.state.remove_upper_bound(bound)
+    }
+
+    pub fn remove_lower_bound(&mut self, bound: &CstrTy<R>) {
+        self.state.remove_lower_bound(bound)
+    }
+
+    pub fn remove_tyvar_upper_bound(&mut self, tvs: &HashSet<Tyvar>) {
+        self.state.remove_tyvar_upper_bound(tvs)
+    }
+
+    pub fn remove_tyvar_lower_bound(&mut self, tvs: &HashSet<Tyvar>) {
+        self.state.remove_tyvar_lower_bound(tvs)
+    }
+
+    pub fn variance(&self) -> Option<Variance> {
+        self.state.variance()
+    }
+
     pub fn appears_covariantly(&self) -> bool {
         self.state.appears_covariantly()
     }
@@ -74,7 +116,7 @@ impl<R: Reason> TyvarInfo<R> {
 impl<R: Reason> Default for TyvarInfo<R> {
     fn default() -> Self {
         TyvarInfo {
-            pos: None,
+            pos: R::Pos::none(),
             state: TyvarState::default(),
             early_solve_failed: false,
         }

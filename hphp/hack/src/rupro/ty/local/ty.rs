@@ -6,6 +6,7 @@
 pub use crate::decl::ty::{Exact, Prim};
 use crate::local::tyvar::Tyvar;
 use crate::reason::Reason;
+use crate::visitor::{Visitor, Walkable};
 use hcons::Hc;
 use im::HashSet;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
@@ -112,6 +113,30 @@ impl<R: Reason> Ty<R> {
         Self(reason, Hc::new(ty))
     }
 
+    pub fn with_reason(self, reason: R) -> Self {
+        Self(reason, self.1)
+    }
+
+    pub fn map_reason<F>(self, f: F) -> Self
+    where
+        F: FnOnce(R) -> R,
+    {
+        Self(f(self.0), self.1)
+    }
+
+    pub fn shallow_match(&self, other: &Self) -> bool {
+        match (self.deref(), other.deref()) {
+            (Ty_::Tnonnull, Ty_::Tnonnull) | (Ty_::Tany, Ty_::Tany) => true,
+            (Ty_::Tprim(p1), Ty_::Tprim(p2)) => p1 == p2,
+            (Ty_::Tclass(cn_sub, exact_sub, _), Ty_::Tclass(cn_sup, exact_sup, _)) => {
+                cn_sub.id() == cn_sup.id() && exact_sub == exact_sup
+            }
+            //   TODO[mjt] compares function flags here
+            (Ty_::Tfun(_fty_sub), Ty_::Tfun(_fty_sup)) => true,
+            _ => false,
+        }
+    }
+
     pub fn prim(r: R, prim: Prim) -> Ty<R> {
         Self::new(r, Ty_::Tprim(prim))
     }
@@ -151,8 +176,24 @@ impl<R: Reason> Ty<R> {
         }
     }
 
+    pub fn class(r: R, cname: Positioned<TypeName, R::Pos>, exact: Exact, tys: Vec<Self>) -> Self {
+        Self::new(r, Ty_::Tclass(cname, exact, tys))
+    }
+
     pub fn union(r: R, tys: Vec<Ty<R>>) -> Self {
-        Self::new(r, Ty_::Tunion(tys))
+        if tys.len() == 1 {
+            tys.into_iter().next().unwrap()
+        } else {
+            Self::new(r, Ty_::Tunion(tys))
+        }
+    }
+
+    pub fn intersection(_: R, tys: Vec<Ty<R>>) -> Self {
+        if tys.len() == 1 {
+            tys.into_iter().next().unwrap()
+        } else {
+            unimplemented!("Intersection types are not implemented")
+        }
     }
 
     pub fn var(r: R, tv: Tyvar) -> Self {
@@ -207,6 +248,10 @@ impl<R: Reason> Ty<R> {
     }
     pub fn node(&self) -> &Hc<Ty_<R, Ty<R>>> {
         &self.1
+    }
+
+    pub fn occurs(&self, tv: Tyvar) -> bool {
+        TyvarOccurs::new(tv, self).occurs
     }
 
     pub fn tyvars<F>(&self, get_tparam_variance: F) -> (HashSet<Tyvar>, HashSet<Tyvar>)
@@ -280,6 +325,37 @@ impl<R: Reason> Deref for Ty<R> {
     type Target = Ty_<R, Ty<R>>;
     fn deref(&self) -> &Self::Target {
         &self.1
+    }
+}
+
+struct TyvarOccurs {
+    tv: Tyvar,
+    occurs: bool,
+}
+
+impl TyvarOccurs {
+    fn new<R: Reason>(tv: Tyvar, ty: &Ty<R>) -> Self {
+        let mut acc = TyvarOccurs { tv, occurs: false };
+        ty.accept(&mut acc);
+        acc
+    }
+}
+
+impl<R: Reason> Visitor<R> for TyvarOccurs {
+    fn object(&mut self) -> &mut dyn Visitor<R> {
+        self
+    }
+
+    fn visit_local_ty(&mut self, ty: &Ty<R>) {
+        match ty.deref() {
+            Ty_::Tvar(tv2) if self.tv == *tv2 => {
+                self.occurs = true;
+            }
+            _ => {}
+        }
+        if !self.occurs {
+            ty.recurse(self.object())
+        }
     }
 }
 
@@ -380,6 +456,17 @@ mod tests {
     }
 
     #[test]
+    fn test_union() {
+        let gen = IdentGen::new();
+        let tv0: Tyvar = gen.make().into();
+        let ty_v0 = Ty::var(NReason::none(), tv0.clone());
+        let ty_union = Ty::union(NReason::none(), vec![ty_v0]);
+        let (covs, contravs) = ty_union.tyvars(|_| None);
+        assert!(covs.contains(&tv0));
+        assert!(contravs.is_empty());
+    }
+
+    #[test]
     fn test_fn_ty() {
         let gen = IdentGen::new();
         let tv0: Tyvar = gen.make().into();
@@ -415,5 +502,26 @@ mod tests {
         assert!(covs.contains(&tv0));
         assert!(covs.contains(&tv2));
         assert!(contravs.contains(&tv1));
+    }
+
+    #[test]
+    fn test_occurs() {
+        let gen = IdentGen::new();
+        let tv: Tyvar = gen.make().into();
+        let ty_v = Ty::var(NReason::none(), tv.clone());
+
+        let tint = Ty::int(NReason::none());
+        assert!(!tint.occurs(tv));
+
+        let tunion = Ty::union(NReason::none(), vec![ty_v, tint]);
+        assert!(tunion.occurs(tv));
+
+        let tclass = Ty::class(
+            NReason::none(),
+            Positioned::new(Pos::none(), TypeName::new("C")),
+            Exact::Exact,
+            vec![tunion],
+        );
+        assert!(tclass.occurs(tv));
     }
 }

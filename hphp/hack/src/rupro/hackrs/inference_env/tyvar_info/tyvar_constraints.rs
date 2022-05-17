@@ -6,7 +6,11 @@
 #![allow(dead_code)]
 
 use im::HashSet;
-use ty::{local::Variance, prop::CstrTy, reason::Reason};
+use ty::{
+    local::{Tyvar, Variance},
+    prop::CstrTy,
+    reason::Reason,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TyvarConstraints<R: Reason> {
@@ -16,6 +20,12 @@ pub struct TyvarConstraints<R: Reason> {
 }
 
 impl<R: Reason> TyvarConstraints<R> {
+    pub fn new(variance: Variance) -> Self {
+        TyvarConstraints {
+            variance,
+            ..Default::default()
+        }
+    }
     pub fn append(&mut self, other: Self) {
         self.variance = self.variance.meet(&other.variance);
         self.lower_bounds.extend(other.lower_bounds);
@@ -55,8 +65,36 @@ impl<R: Reason> TyvarConstraints<R> {
         self.lower_bounds = union(bound, &self.lower_bounds);
     }
 
+    pub fn remove_lower_bound(&mut self, bound: &CstrTy<R>) {
+        self.lower_bounds.remove(bound);
+    }
+
+    pub fn remove_upper_bound(&mut self, bound: &CstrTy<R>) {
+        self.upper_bounds.remove(bound);
+    }
+
+    pub fn remove_tyvar_lower_bound(&mut self, tvs: &HashSet<Tyvar>) {
+        self.lower_bounds.clone().iter().for_each(|cty| {
+            if let CstrTy::Locl(ty) = cty {
+                if ty.tyvar_opt().map_or(false, |tv| tvs.contains(tv)) {
+                    self.remove_lower_bound(cty);
+                }
+            }
+        })
+    }
+
+    pub fn remove_tyvar_upper_bound(&mut self, tvs: &HashSet<Tyvar>) {
+        self.upper_bounds.clone().iter().for_each(|cty| {
+            if let CstrTy::Locl(ty) = cty {
+                if ty.tyvar_opt().map_or(false, |tv| tvs.contains(tv)) {
+                    self.remove_upper_bound(cty);
+                }
+            }
+        })
+    }
+
     pub fn with_appearance(&mut self, appearing: &Variance) {
-        self.variance = self.variance.join(appearing)
+        self.variance = self.variance.meet(appearing)
     }
 }
 

@@ -70,6 +70,14 @@ pub trait Reason:
         Self::mk(|| ReasonImpl::RimplicitUpperBound(pos, sym))
     }
 
+    fn tyvar(pos: Self::Pos) -> Self {
+        Self::mk(|| ReasonImpl::RtypeVariable(pos))
+    }
+
+    fn early_solve_failed(pos: Self::Pos) -> Self {
+        Self::mk(|| ReasonImpl::RsolveFail(pos))
+    }
+
     fn pos(&self) -> &Self::Pos;
 
     fn decl_ty_conser() -> &'static Conser<decl::Ty_<Self>>;

@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 #[serde(bound = "R: Reason")]
 pub enum Primary<R: Reason> {
     Subtype,
+    OccursCheck,
     InvalidTypeHint(R::Pos),
     ExpectingTypeHint(R::Pos),
     ExpectingReturnTypeHint(R::Pos),

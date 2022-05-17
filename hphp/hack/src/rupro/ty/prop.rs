@@ -36,11 +36,22 @@ impl<R: Reason> CstrTy<R> {
     }
 
     #[inline]
-    pub fn tyvar_opt(&self) -> Option<&Tyvar> {
+    pub fn ty_opt(&self) -> Option<&Ty<R>> {
         match self {
-            Self::Locl(ty) => ty.tyvar_opt(),
+            Self::Locl(ty) => Some(ty),
             Self::Cstr(_) => None,
         }
+    }
+
+    pub fn shallow_match(&self, other: &Self) -> bool {
+        self.ty_opt().map_or(false, |ty1| {
+            other.ty_opt().map_or(false, |ty2| ty1.shallow_match(ty2))
+        })
+    }
+
+    #[inline]
+    pub fn tyvar_opt(&self) -> Option<&Tyvar> {
+        self.ty_opt()?.tyvar_opt()
     }
 
     pub fn is_var(&self) -> bool {

@@ -14,4 +14,4 @@ ffi = { path = "../../../../utils/ffi" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
 
 [dev-dependencies]
-pretty_assertions = "0.6"
+pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

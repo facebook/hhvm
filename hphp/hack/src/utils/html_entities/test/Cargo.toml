@@ -13,4 +13,4 @@ path = "bench.rs"
 
 [dev-dependencies]
 html_entities = { path = ".." }
-pretty_assertions = "0.6"
+pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

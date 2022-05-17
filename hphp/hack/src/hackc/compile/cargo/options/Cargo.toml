@@ -23,4 +23,4 @@ serde_derive = "1.0"
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 
 [dev-dependencies]
-pretty_assertions = "0.6"
+pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

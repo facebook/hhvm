@@ -8,4 +8,4 @@ edition = "2021"
 path = "utils.rs"
 
 [dev-dependencies]
-pretty_assertions = "0.6"
+pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

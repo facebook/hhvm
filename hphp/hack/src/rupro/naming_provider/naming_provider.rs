@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hh24_types::ToplevelSymbolHash;
+use oxidized::file_info::NameType;
 use parking_lot::Mutex;
 use pos::{ConstName, FunName, RelativePath, TypeName};
 use std::fmt::{self, Debug};
@@ -37,6 +38,17 @@ impl SqliteNamingTable {
         Ok(Self {
             names: Mutex::new(names::Names::from_file(path)?),
         })
+    }
+
+    pub fn get_type_path_and_kind(
+        &self,
+        name: TypeName,
+    ) -> Result<Option<(RelativePath, NameType)>> {
+        let path_opt = self
+            .names
+            .lock()
+            .get_filename(ToplevelSymbolHash::from_type(name.as_str()))?;
+        Ok(path_opt.map(|(path, kind)| (RelativePath::from(&path), kind)))
     }
 }
 

@@ -220,6 +220,29 @@ impl EqModuloPosAndReason for BPos {
     }
 }
 
+impl From<BPos> for oxidized::pos::Pos {
+    fn from(pos: BPos) -> Self {
+        let file = ocamlrep::rc::RcOc::new(pos.file().into());
+        Self::from_raw_span(
+            file,
+            match &pos.0 {
+                PosImpl::Small { span, .. } => {
+                    let (start, end) = **span;
+                    PosSpanRaw {
+                        start: start.into(),
+                        end: end.into(),
+                    }
+                }
+                PosImpl::Large { span, .. } => {
+                    let (start, end) = **span;
+                    PosSpanRaw { start, end }
+                }
+                PosImpl::Tiny { span, .. } => span.to_raw_span(),
+            },
+        )
+    }
+}
+
 impl<'a> From<&'a oxidized::pos::Pos> for BPos {
     fn from(pos: &'a oxidized::pos::Pos) -> Self {
         Self::from_ast(pos)

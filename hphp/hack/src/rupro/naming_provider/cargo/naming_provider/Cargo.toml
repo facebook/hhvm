@@ -10,6 +10,7 @@ path = "../../naming_provider.rs"
 [dependencies]
 hh24_types = { path = "../../../../utils/hh24_types" }
 names = { path = "../../../../naming/names_rust" }
+oxidized = { path = "../../../../oxidized" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }
 pos = { path = "../../../pos/cargo/pos" }
 rusqlite = { version = "0.26.3", features = ["backup", "blob", "column_decltype"] }

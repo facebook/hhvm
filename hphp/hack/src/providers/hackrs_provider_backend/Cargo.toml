@@ -12,7 +12,13 @@ anyhow = "1.0.56"
 file_provider = { path = "../../rupro/file_provider/cargo/file_provider" }
 hackrs = { path = "../../rupro/hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../rupro/hackrs_test_utils/cargo/hackrs_test_utils" }
+hh24_types = { path = "../../utils/hh24_types" }
+names = { path = "../../naming/names_rust" }
 naming_provider = { path = "../../rupro/naming_provider/cargo/naming_provider" }
+ocamlrep = { path = "../../ocamlrep" }
+oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
+parking_lot = { version = "0.11.2", features = ["send_guard"] }
 pos = { path = "../../rupro/pos/cargo/pos" }
+rusqlite = { version = "0.26.3", features = ["backup", "blob", "column_decltype"] }
 ty = { path = "../../rupro/ty/cargo/ty" }

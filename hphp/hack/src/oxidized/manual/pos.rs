@@ -80,7 +80,7 @@ impl Pos {
         line0 != 1 || char0 != 1 || line1 != 1 || char1 != 1
     }
 
-    fn from_raw_span(file: RcOc<RelativePath>, span: PosSpanRaw) -> Self {
+    pub fn from_raw_span(file: RcOc<RelativePath>, span: PosSpanRaw) -> Self {
         if let Some(span) = PosSpanTiny::make(&span.start, &span.end) {
             return Pos(PosImpl::Tiny { file, span });
         }

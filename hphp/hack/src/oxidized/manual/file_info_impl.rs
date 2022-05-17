@@ -3,10 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::gen::file_info::NameType;
+use crate::gen::file_info::{NameType, Pos};
 use crate::gen::naming_types::KindOfType;
+use crate::relative_path::RelativePath;
 use rusqlite::types::FromSql;
 use rusqlite::types::{FromSqlError, FromSqlResult, ValueRef};
+
+impl Pos {
+    pub fn path(&self) -> &RelativePath {
+        match self {
+            Pos::Full(pos) => pos.filename(),
+            Pos::File(_, path) => path,
+        }
+    }
+}
 
 impl From<KindOfType> for NameType {
     fn from(kind: KindOfType) -> Self {

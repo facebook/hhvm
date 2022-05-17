@@ -53,10 +53,12 @@ ocaml_ffi_with_arena! {
 ocaml_ffi! {
     fn hh_rust_provider_backend_push_local_changes(backend: Backend) {
         backend.file_provider.push_local_changes();
+        backend.naming_table.push_local_changes();
     }
 
     fn hh_rust_provider_backend_pop_local_changes(backend: Backend) {
         backend.file_provider.pop_local_changes();
+        backend.naming_table.pop_local_changes();
     }
 }
 
@@ -196,118 +198,118 @@ ocaml_ffi! {
 
 ocaml_ffi! {
     fn hh_rust_provider_backend_naming_types_add(
-        _backend: Backend,
-        _name: pos::TypeName,
-        _pos: (file_info::Pos, naming_types::KindOfType),
+        backend: Backend,
+        name: pos::TypeName,
+        pos: (file_info::Pos, naming_types::KindOfType),
     ) {
-        todo!()
+        backend.naming_table.add_type(name, &pos);
     }
 
     fn hh_rust_provider_backend_naming_types_get_pos(
-        _backend: Backend,
-        _name: pos::TypeName,
+        backend: Backend,
+        name: pos::TypeName,
     ) -> Option<(file_info::Pos, naming_types::KindOfType)> {
-        todo!()
+        backend.naming_table.get_type_pos(name).unwrap()
     }
 
     fn hh_rust_provider_backend_naming_types_remove_batch(
-        _backend: Backend,
-        _names: Vec<pos::TypeName>,
+        backend: Backend,
+        names: Vec<pos::TypeName>,
     ) {
-        todo!()
+        backend.naming_table.remove_type_batch(&names);
     }
 
     fn hh_rust_provider_backend_naming_types_get_canon_name(
-        _backend: Backend,
-        _name: pos::TypeName,
+        backend: Backend,
+        name: pos::TypeName,
     ) -> Option<pos::TypeName> {
-        todo!()
+        backend.naming_table.get_canon_type_name(name).unwrap()
     }
 
     fn hh_rust_provider_backend_naming_funs_add(
-        _backend: Backend,
-        _name: pos::FunName,
-        _pos: file_info::Pos,
+        backend: Backend,
+        name: pos::FunName,
+        pos: file_info::Pos,
     ) {
-        todo!()
+        backend.naming_table.add_fun(name, &pos);
     }
 
     fn hh_rust_provider_backend_naming_funs_get_pos(
-        _backend: Backend,
-        _name: pos::FunName,
+        backend: Backend,
+        name: pos::FunName,
     ) -> Option<file_info::Pos> {
-        todo!()
+        backend.naming_table.get_fun_pos(name).unwrap()
     }
 
     fn hh_rust_provider_backend_naming_funs_remove_batch(
-        _backend: Backend,
-        _names: Vec<pos::FunName>,
+        backend: Backend,
+        names: Vec<pos::FunName>,
     ) {
-        todo!()
+        backend.naming_table.remove_fun_batch(&names);
     }
 
     fn hh_rust_provider_backend_naming_funs_get_canon_name(
-        _backend: Backend,
-        _name: pos::FunName,
+        backend: Backend,
+        name: pos::FunName,
     ) -> Option<pos::FunName> {
-        todo!()
+        backend.naming_table.get_canon_fun_name(name).unwrap()
     }
 
     fn hh_rust_provider_backend_naming_consts_add(
-        _backend: Backend,
-        _name: pos::ConstName,
-        _pos: file_info::Pos,
+        backend: Backend,
+        name: pos::ConstName,
+        pos: file_info::Pos,
     ) {
-        todo!()
+        backend.naming_table.add_const(name, &pos);
     }
 
     fn hh_rust_provider_backend_naming_consts_get_pos(
-        _backend: Backend,
-        _name: pos::ConstName,
+        backend: Backend,
+        name: pos::ConstName,
     ) -> Option<file_info::Pos> {
-        todo!()
+        backend.naming_table.get_const_pos(name).unwrap()
     }
 
     fn hh_rust_provider_backend_naming_consts_remove_batch(
-        _backend: Backend,
-        _names: Vec<pos::ConstName>,
+        backend: Backend,
+        names: Vec<pos::ConstName>,
     ) {
-        todo!()
+        backend.naming_table.remove_const_batch(&names);
     }
 
     fn hh_rust_provider_backend_naming_modules_add(
-        _backend: Backend,
-        _name: pos::ModuleName,
-        _pos: file_info::Pos,
+        backend: Backend,
+        name: pos::ModuleName,
+        pos: file_info::Pos,
     ) {
-        todo!()
+        backend.naming_table.add_module(name, &pos);
     }
 
     fn hh_rust_provider_backend_naming_modules_get_pos(
-        _backend: Backend,
-        _name: pos::ModuleName,
+        backend: Backend,
+        name: pos::ModuleName,
     ) -> Option<file_info::Pos> {
-        todo!()
+        backend.naming_table.get_module_pos(name).unwrap()
     }
 
     fn hh_rust_provider_backend_naming_modules_remove_batch(
-        _backend: Backend,
-        _names: Vec<pos::ModuleName>,
+        backend: Backend,
+        names: Vec<pos::ModuleName>,
     ) {
-        todo!()
+        backend.naming_table.remove_module_batch(&names);
     }
 
     fn hh_rust_provider_backend_naming_get_db_path(
-        _backend: Backend,
+        backend: Backend,
     ) -> Option<PathBuf> {
-        todo!()
+        backend.naming_table.db_path()
     }
 
     fn hh_rust_provider_backend_naming_set_db_path(
-        _backend: Backend,
-        _db_path: PathBuf,
+        backend: Backend,
+        db_path: PathBuf,
     ) {
-        todo!()
+        backend.naming_table.set_db_path(db_path).unwrap()
     }
 
     fn hh_rust_provider_backend_naming_get_filenames_by_hash(

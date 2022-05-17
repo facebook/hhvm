@@ -182,7 +182,11 @@
 (library
  (name db_path_provider)
  (modules db_path_provider)
- (libraries naming_sqlite provider_backend provider_context)
+ (libraries
+  naming_sqlite
+  provider_backend
+  provider_context
+  rust_provider_backend_stubs)
  (preprocess
   (pps ppx_deriving.std)))
 

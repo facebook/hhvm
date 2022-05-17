@@ -52,42 +52,42 @@ module Naming = struct
   module Types = struct
     let add _ _ _ = failwith "unimplemented"
 
-    let get_pos _ _ _ = failwith "unimplemented"
+    let get_pos _ _ = failwith "unimplemented"
 
-    let remove_batch _ _ _ = failwith "unimplemented"
+    let remove_batch _ _ = failwith "unimplemented"
 
-    let get_canon_name _ _ _ = failwith "unimplemented"
+    let get_canon_name _ _ = failwith "unimplemented"
   end
 
   module Funs = struct
     let add _ _ _ = failwith "unimplemented"
 
-    let get_pos _ _ _ = failwith "unimplemented"
+    let get_pos _ _ = failwith "unimplemented"
 
-    let remove_batch _ _ _ = failwith "unimplemented"
+    let remove_batch _ _ = failwith "unimplemented"
 
-    let get_canon_name _ _ _ = failwith "unimplemented"
+    let get_canon_name _ _ = failwith "unimplemented"
   end
 
   module Consts = struct
     let add _ _ _ = failwith "unimplemented"
 
-    let get_pos _ _ _ = failwith "unimplemented"
+    let get_pos _ _ = failwith "unimplemented"
 
-    let remove_batch _ _ _ = failwith "unimplemented"
+    let remove_batch _ _ = failwith "unimplemented"
   end
 
   module Modules = struct
     let add _ _ _ = failwith "unimplemented"
 
-    let get_pos _ _ _ = failwith "unimplemented"
+    let get_pos _ _ = failwith "unimplemented"
 
-    let remove_batch _ _ _ = failwith "unimplemented"
+    let remove_batch _ _ = failwith "unimplemented"
   end
 
   let get_db_path _ = failwith "unimplemented"
 
   let set_db_path _ _ = failwith "unimplemented"
 
-  let get_filenames_by_hash _ _ _ = failwith "unimplemented"
+  let get_filenames_by_hash _ _ = failwith "unimplemented"
 end

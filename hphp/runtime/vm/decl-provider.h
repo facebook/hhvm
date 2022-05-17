@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs"
+#include "hphp/hack/src/hackc/decl_provider/decl_provider.h"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/util/hash-map.h"
@@ -29,27 +30,6 @@
 namespace HPHP {
 
 struct RepoOptionsFlags;
-
-// This must be kept in sync with `enum ExternalDeclProviderResult` in
-// 'hhbc/decl_provider/external.rs' so they both are layout compatible.
-struct DeclProviderResult {
-    enum class Tag {
-      Missing,
-      Decls,
-      Bytes,
-    };
-    struct DeclProviderDecls_Body {
-      Decls const* _0;
-    };
-    struct DeclProviderBytes_Body {
-      Bytes const* _0;
-    };
-    Tag tag;
-    union {
-      DeclProviderDecls_Body decl_provider_decls_result;
-      DeclProviderBytes_Body decl_provider_bytes_result;
-    };
-};
 
 struct HhvmDeclProvider {
   HhvmDeclProvider(int32_t flags, std::string const& aliased_namespaces,

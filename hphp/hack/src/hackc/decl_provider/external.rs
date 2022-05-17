@@ -63,7 +63,7 @@ let decls: &Decls<'decl> = unsafe { p.as_ref() }.unwrap();
 pub enum ExternalDeclProviderResult<'decl> {
     Missing,
     Decls(*const direct_decl_parser::Decls<'decl>),
-    Bytes(*const ffi::Bytes),
+    Bytes(*const Vec<u8>),
 }
 
 /// Function signature for external provider functions.

@@ -22,23 +22,6 @@ namespace HPHP {
 
 TRACE_SET_MOD(unit_parse);
 
-namespace {
-
-// Helper to return DeclProviderResult::Missing
-DeclProviderResult missing() {
-  return DeclProviderResult{DeclProviderResult::Tag::Missing, {}};
-}
-
-// Helper to return DeclProviderResult::Decls
-DeclProviderResult decls(const Decls* decls) {
-  DeclProviderResult r;
-  r.tag = DeclProviderResult::Tag::Decls;
-  r.decl_provider_decls_result._0 = decls;
-  return r;
-}
-
-} // namespace {}
-
 std::unique_ptr<HhvmDeclProvider>
 HhvmDeclProvider::create(const RepoOptionsFlags& options) {
   if (!RuntimeOption::EvalEnableDecl) {
@@ -92,7 +75,7 @@ DeclProviderResult HhvmDeclProvider::getDecl(
 
     if (result != m_cache.end()) {
       ITRACE(3, "DP found cached decls for {} in {}\n", sym, filename);
-      return decls(&(*result->second.decls));
+      return DeclProviderResult::from_decls(result->second);
     }
 
     // Nothing cached: Load file, parse decls.
@@ -107,10 +90,10 @@ DeclProviderResult HhvmDeclProvider::getDecl(
     // Insert decl_result into the cache, return DeclResult::decls,
     // a pointer to rust decls in m_cache.
     auto [it, _] = m_cache.insert({filename, std::move(decl_result)});
-    return decls(&(*it->second.decls));
+    return DeclProviderResult::from_decls(it->second);
   }
   ITRACE(4, "DP {}: getFile() returned None\n", sym);
-  return missing();
+  return DeclProviderResult::missing();
 }
 
 extern "C" {

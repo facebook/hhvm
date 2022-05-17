@@ -19,7 +19,6 @@ use decl_provider::{
 };
 use facts_rust as facts;
 use hhbc::hackc_unit;
-use no_pos_hash::position_insensitive_hash;
 use oxidized::file_info::NameType;
 use oxidized::relative_path::{Prefix, RelativePath};
 use oxidized_by_ref::decl_parser_options;
@@ -53,10 +52,8 @@ pub mod compile_ffi {
 
     pub struct DeclResult {
         hash: u64,
-        serialized: Box<Bytes>,
+        serialized: Vec<u8>,
         decls: Box<Decls>,
-        attributes: Box<FileAttributes>,
-        bump: Box<Bump>,
         has_errors: bool,
     }
 
@@ -123,12 +120,9 @@ pub mod compile_ffi {
     }
 
     extern "Rust" {
-        type Bump;
-        type Bytes;
         type Decls;
         type DeclParserOptions;
         type HackCUnitWrapper;
-        type FileAttributes;
 
         fn make_env_flags(
             is_systemlib: bool,
@@ -174,11 +168,8 @@ pub mod compile_ffi {
         /// Testing: pretty-print Decls to stdout.
         fn hackc_print_decls(decls: &Decls);
 
-        /// Testing: print the size of this Bytes to stdout.
-        fn hackc_print_serialized_size(bytes: &Bytes);
-
-        /// For testing: return true if deserializing these bytes produces the expected Decls.
-        unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool;
+        /// For testing: return true if deserializing produces the expected Decls.
+        fn hackc_verify_deserialization(result: &DeclResult) -> bool;
 
         fn hackc_unit_to_string_cpp_ffi(
             env: &NativeEnv,
@@ -203,13 +194,12 @@ pub mod compile_ffi {
 // Opaque to C++.
 
 #[repr(C)]
-pub struct Bump(bumpalo::Bump);
-#[repr(C)]
-pub struct Bytes(ffi::Bytes);
-#[repr(C)]
-pub struct Decls(direct_decl_parser::Decls<'static>);
-#[repr(C)]
-pub struct FileAttributes(&'static [&'static oxidized_by_ref::typing_defs::UserAttribute<'static>]);
+pub struct Decls {
+    arena: bumpalo::Bump,
+    decls: direct_decl_parser::Decls<'static>,
+    attributes: &'static [&'static oxidized_by_ref::typing_defs::UserAttribute<'static>],
+}
+
 #[repr(C)]
 pub struct DeclParserOptions(
     decl_parser_options::DeclParserOptions<'static>,
@@ -322,15 +312,11 @@ fn hackc_decl_exists(
         3 => NameType::Typedef,
         _ => panic!("Requested kind of decl is not an available option"),
     };
-    decls.0.get(kind, symbol) != None
+    decls.decls.get(kind, symbol) != None
 }
 
 fn hackc_print_decls(decls: &Decls) {
-    println!("{:#?}", decls.0)
-}
-
-fn hackc_print_serialized_size(serialized: &Bytes) {
-    println!("Decl-serialized size: {:#?}", serialized.0.len);
+    println!("{:#?}", decls.decls)
 }
 
 pub fn hackc_create_direct_decl_parse_options(
@@ -379,9 +365,9 @@ pub fn hackc_direct_decl_parse(
 ) -> compile_ffi::DeclResult {
     use std::os::unix::ffi::OsStrExt;
 
-    let bump = bumpalo::Bump::new();
+    let arena = bumpalo::Bump::new();
     let alloc: &'static bumpalo::Bump =
-        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
+        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&arena) };
 
     let opts: &decl_parser_options::DeclParserOptions<'static> = &opts.0;
     let opts: &decl_parser_options::DeclParserOptions<'static> = unsafe {
@@ -394,38 +380,37 @@ pub fn hackc_direct_decl_parse(
     let text = text.as_bytes();
     let path = std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes()));
     let filename = RelativePath::make(Prefix::Root, path);
-    let result: direct_decl_parser::ParsedFile<'static> =
+    let parsed_file: direct_decl_parser::ParsedFile<'static> =
         direct_decl_parser::parse_decls_without_reference_text(opts, filename, text, alloc);
 
     let op = bincode::config::Options::with_native_endian(bincode::options());
-    let data = op
-        .serialize(&result.decls)
+    let serialized = op
+        .serialize(&parsed_file.decls)
         .map_err(|e| format!("failed to serialize, error: {}", e))
         .unwrap();
 
     compile_ffi::DeclResult {
-        hash: position_insensitive_hash(&result.decls),
-        serialized: Box::new(Bytes(ffi::Bytes::from(data))),
-        decls: Box::new(Decls(result.decls)),
-        attributes: Box::new(FileAttributes(result.file_attributes)),
-        bump: Box::new(Bump(bump)),
-        has_errors: result.has_first_pass_parse_errors,
+        hash: no_pos_hash::position_insensitive_hash(&parsed_file.decls),
+        serialized,
+        decls: Box::new(Decls {
+            decls: parsed_file.decls,
+            attributes: parsed_file.file_attributes,
+            arena,
+        }),
+        has_errors: parsed_file.has_first_pass_parse_errors,
     }
 }
 
-unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool {
-    let arena = bumpalo::Bump::new();
-    let data = serialized.0.as_slice();
-
+fn hackc_verify_deserialization(result: &compile_ffi::DeclResult) -> bool {
     let op = bincode::config::Options::with_native_endian(bincode::options());
-    let mut de = bincode::de::Deserializer::from_slice(data, op);
-
+    let mut de = bincode::de::Deserializer::from_slice(&result.serialized, op);
+    let arena = bumpalo::Bump::new();
     let de = arena_deserializer::ArenaDeserializer::new(&arena, &mut de);
     let decls = direct_decl_parser::Decls::deserialize(de)
         .map_err(|e| format!("failed to deserialize, error: {}", e))
         .unwrap();
 
-    decls == expected.0
+    decls == result.decls.decls
 }
 
 fn hackc_compile_unit_from_text_cpp_ffi(
@@ -512,8 +497,8 @@ pub fn hackc_decls_to_facts_cpp_ffi(
         let sha1sum = facts::sha1(text);
         let disable_xhp_element_mangling = ((1 << 0) & decl_flags) != 0;
         let facts = compile_ffi::Facts::from(facts::Facts::from_decls(
-            &(*decl_result.decls).0,
-            (*decl_result.attributes).0,
+            &decl_result.decls.decls,
+            decl_result.decls.attributes,
             disable_xhp_element_mangling,
         ));
         compile_ffi::FactsResult {

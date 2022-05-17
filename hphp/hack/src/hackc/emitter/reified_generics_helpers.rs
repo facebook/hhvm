@@ -4,14 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::emit_expression::{emit_reified_arg, is_reified_tparam};
+use decl_provider::TypeDecl;
 use env::{emitter::Emitter, Env};
 use error::Result;
+use hash::HashSet;
 use instruction_sequence::{instr, InstrSeq};
 use naming_special_names_rust as sn;
-use oxidized::{aast, ast_defs::Id, file_info, pos::Pos};
-
-use hash::HashSet;
-use oxidized_by_ref::shallow_decl_defs;
+use oxidized::{aast, ast_defs::Id, pos::Pos};
 
 #[derive(Debug, Clone)]
 pub enum ReificationLevel {
@@ -240,37 +239,35 @@ pub(crate) fn happly_decl_has_reified_generics<'arena, 'decl>(
     aast::Hint(_, hint): &aast::Hint,
 ) -> bool {
     use aast::{Hint_, ReifyKind};
-    use file_info::NameType;
-    use shallow_decl_defs::Decl;
     match hint.as_ref() {
-        Hint_::Happly(Id(_, id), _) => match emitter.get_decl(NameType::Class, id) {
-            Ok(Decl::Class(class_decl)) => {
-                // Found a class with a matching name. Does it's shallow decl have
-                // any reified tparams?
-                class_decl
-                    .tparams
-                    .iter()
-                    .any(|tparam| tparam.reified != ReifyKind::Erased)
+        Hint_::Happly(Id(_, id), _) => {
+            let provider = match emitter.decl_provider {
+                Some(p) => p,
+                None => {
+                    // Don't have a DeclProvider at all.
+                    return true;
+                }
+            };
+            match provider.type_decl(id) {
+                Ok(TypeDecl::Class(class_decl)) => {
+                    // Found a class with a matching name. Does it's shallow decl have
+                    // any reified tparams?
+                    class_decl
+                        .tparams
+                        .iter()
+                        .any(|tparam| tparam.reified != ReifyKind::Erased)
+                }
+                Ok(TypeDecl::Typedef(_)) => {
+                    // TODO: `id` could be an alias for something without reified generics,
+                    // but conservatively assume it has at least one, for now.
+                    true
+                }
+                Err(decl_provider::Error::NotFound) => {
+                    // The DeclProvider has no idea what `id` is.
+                    true
+                }
             }
-            Ok(x @ Decl::Fun(_) | x @ Decl::Const(_) | x @ Decl::Module(_)) => {
-                // We asked for a NameType::Class and got something weird back.
-                // This must be a bug because types/funcs/constants have different
-                // name kinds.
-                unreachable!(
-                    "Unexpected Decl kind from get_decl(NameType::Class): {:?}",
-                    x
-                )
-            }
-            Ok(Decl::Typedef(_)) => {
-                // TODO: `id` could be an alias for something without reified generics,
-                // but assume it has at least one, for now.
-                true
-            }
-            Err(decl_provider::Error::NotFound) => {
-                // The DeclProvider has no idea what `id` is.
-                true
-            }
-        },
+        }
         Hint_::Hoption(_)
         | Hint_::Hlike(_)
         | Hint_::Hfun(_)

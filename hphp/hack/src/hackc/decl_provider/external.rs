@@ -85,7 +85,7 @@ pub struct ExternalDeclProvider<'decl> {
 }
 
 impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
-    fn get_decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>> {
+    fn decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>> {
         // Need to convert NameType into HPHP::AutoloadMap::KindOf.
         let code: i32 = match kind {
             NameType::Class => 0,   // HPHP::AutoloadMap::KindOf::Type

@@ -5,7 +5,7 @@
 
 use crate::{ClassExpr, IterGen, LabelGen, LocalGen};
 use adata_state::AdataState;
-use decl_provider::{DeclProvider, Result};
+use decl_provider::DeclProvider;
 use ffi::{Pair, Slice, Str};
 use global_state::GlobalState;
 use hash::IndexSet;
@@ -16,7 +16,6 @@ use hhbc::{
 };
 use options::Options;
 use oxidized::{ast, ast_defs, pos::Pos};
-use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
 use statement_state::StatementState;
 use std::{borrow::Cow, collections::BTreeSet};
 
@@ -50,7 +49,7 @@ pub struct Emitter<'arena, 'decl> {
     /// None => do not look up any decls. For now this is the same as as a
     /// DeclProvider that always returns NotFound, but this behavior may later
     /// diverge from None provider behavior.
-    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
+    pub decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
 }
 
 impl<'arena, 'decl> Emitter<'arena, 'decl> {
@@ -78,10 +77,6 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             symbol_refs_state: Default::default(),
             global_state_: None,
         }
-    }
-
-    pub fn decl_provider(&self) -> Option<&'decl dyn DeclProvider<'decl>> {
-        self.decl_provider
     }
 
     pub fn options(&self) -> &Options {
@@ -184,13 +179,6 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     }
     pub fn emit_global_state_mut(&mut self) -> &mut GlobalState<'arena> {
         self.global_state_.get_or_insert_with(GlobalState::init)
-    }
-
-    pub fn get_decl(&self, kind: NameType, sym: &str) -> Result<Decl<'decl>> {
-        match self.decl_provider {
-            Some(provider) => provider.get_decl(kind, sym),
-            None => Err(decl_provider::Error::NotFound),
-        }
     }
 
     pub fn add_include_ref(&mut self, inc: IncludePath<'arena>) {

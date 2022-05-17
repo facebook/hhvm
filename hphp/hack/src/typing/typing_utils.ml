@@ -696,15 +696,13 @@ let rec has_ancestor_including_req env cls super_id =
   let kind = Cls.kind cls in
   (Ast_defs.is_c_trait kind || Ast_defs.is_c_interface kind)
   && (Cls.requires_ancestor cls super_id
-     || (Cls.has_upper_bounds_on_this_from_constraints cls
-        || not (TypecheckerOptions.shallow_class_decl (Env.get_tcopt env)))
-        &&
-        let bounds = Cls.upper_bounds_on_this cls in
-        List.exists bounds ~f:(fun ty ->
-            match get_node ty with
-            | Tapply ((_, name), _) ->
-              has_ancestor_including_req_refl env name super_id
-            | _ -> false))
+     ||
+     let bounds = Cls.upper_bounds_on_this cls in
+     List.exists bounds ~f:(fun ty ->
+         match get_node ty with
+         | Tapply ((_, name), _) ->
+           has_ancestor_including_req_refl env name super_id
+         | _ -> false))
 
 and has_ancestor_including_req_refl env sub_id super_id =
   String.equal sub_id super_id

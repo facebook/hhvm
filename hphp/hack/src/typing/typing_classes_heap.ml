@@ -547,6 +547,7 @@ module ApiEager = struct
   let upper_bounds_on_this t =
     (* tally is already done by all_ancestors and upper_bounds *)
     List.map ~f:(fun req -> snd req) (all_ancestor_reqs t)
+    |> List.append (List.map ~f:snd (all_ancestor_req_class_requirements t))
     |> List.append (ApiShallow.upper_bounds_on_this_from_constraints t)
 
   let consts (decl, t, _ctx) =

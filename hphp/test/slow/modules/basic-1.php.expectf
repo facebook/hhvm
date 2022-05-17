@@ -1,0 +1,5 @@
+Warning: Calling internal method Cls::foo_static in module B from module A is not allowed in %s on line 10
+in foo_static
+
+Warning: Calling internal method Cls::foo in module B from module A is not allowed in %s on line 11
+in foo

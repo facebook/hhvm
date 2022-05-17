@@ -421,6 +421,33 @@ void raiseCoeffectsFunParamCoeffectRulesViolation(const Func* f) {
   raise_warning(errMsg);
 }
 
+void raiseModuleBoundaryViolation(const Class* cls,
+                                  const Func* callee,
+                                  const StringData* callerModule) {
+  assertx(cls && callee);
+  assertx(callee->isInternal());
+  // Internal functions must always have a module
+  assertx(callee->moduleName());
+  assertx(callee->moduleName() != callerModule);
+  auto const errMsg = [&] {
+    auto const calleeName = cls
+      ? folly::sformat("method {}::{}", cls->name(), callee->name())
+      : folly::sformat("function {}", callee->name());
+    return folly::sformat(
+      "Calling internal {} in module {} from {} is not allowed",
+      calleeName,
+      callee->moduleName(),
+      callerModule
+        ? folly::sformat("module {}", callerModule)
+        : "outside of a module");
+  };
+  if (RO::EvalEnforceModules == 1) {
+    raise_warning(errMsg());
+  } else if (RO::EvalEnforceModules > 1) {
+    SystemLib::throwModuleBoundaryViolationExceptionObject(errMsg());
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 int64_t zero_error_level() {

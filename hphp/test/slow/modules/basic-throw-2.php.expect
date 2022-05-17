@@ -1,0 +1,2 @@
+Calling internal method Cls::foo_static in module A from outside of a module is not allowed
+Calling internal method Cls::foo in module A from outside of a module is not allowed

@@ -30,9 +30,16 @@ namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void MethProfile::reportMeth(const Class* cls, const Func* meth) {
+void MethProfile::reportMeth(const Class* cls, const Func* meth,
+                             const Func* callerFunc) {
+  auto const checkModule = [&](const Func* f) {
+    return RO::EvalEnforceModules == 1 &&
+           callerFunc &&
+           will_call_raise_module_boundary_violation(f, callerFunc->moduleName());
+  };
+
   auto val = methValue();
-  if (!val) {
+  if (!val && !checkModule(meth)) {
     assertx(cls);
     m_curClass = cls;
     setMeth(meth, Tag::UniqueClass);
@@ -49,10 +56,12 @@ void MethProfile::reportMeth(const Class* cls, const Func* meth) {
         assertx(curMeth == meth);
         return;
       }
+      if (checkModule(meth)) return;
       setMeth(curMeth, Tag::UniqueMeth);
       // fall through
     case Tag::UniqueMeth:
       if (curMeth == meth) return;
+      if (checkModule(meth)) return;
       curMeth = curMeth->baseCls()->getMethod(curMeth->methodSlot());
       setMeth(curMeth, Tag::BaseMeth);
       // fall through
@@ -62,6 +71,7 @@ void MethProfile::reportMeth(const Class* cls, const Func* meth) {
       for (auto iface : curMeth->baseCls()->allInterfaces().range()) {
         if (auto imeth = iface->lookupMethod(curMeth->name())) {
           if (meth->cls()->classof(iface)) {
+            if (checkModule(imeth)) return;
             setMeth(imeth, Tag::InterfaceMeth);
             return;
           }
@@ -93,7 +103,7 @@ void MethProfile::reduce(MethProfile& a, const MethProfile& b) {
       continue;
     }
     assertx(cls);
-    a.reportMeth(cls, fromValue(bMethVal));
+    a.reportMeth(cls, fromValue(bMethVal), nullptr);
     return;
   }
 
@@ -114,7 +124,7 @@ void MethProfile::reduce(MethProfile& a, const MethProfile& b) {
     return;
   }
 
-  a.reportMeth(nullptr, meth);
+  a.reportMeth(nullptr, meth, nullptr);
   if (a.curTag() == Tag::UniqueMeth && toTag(bMethVal) == Tag::BaseMeth) {
     a.setMeth(meth, Tag::BaseMeth);
   }

@@ -152,7 +152,8 @@ void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
     .ssa(0)
-    .ssa(1);
+    .ssa(1)
+    .immPtr(inst->marker().func());
 
   cgCallHelper(vmain(env), env, CallSpec::method(&MethProfile::reportMeth),
                kVoidDest, SyncOptions::None, args);

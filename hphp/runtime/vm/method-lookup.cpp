@@ -18,7 +18,9 @@
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
@@ -132,6 +134,14 @@ const Func* lookupMethodCtx(const Class* cls,
   }
   assertx(method);
   bool accessible = true;
+
+  // Check module boundary
+  if (RO::EvalEnforceModules &&
+      will_call_raise_module_boundary_violation(method, callCtx.moduleName())) {
+    if (!shouldRaise(raise)) return nullptr;
+    raiseModuleBoundaryViolation(cls, method, callCtx.moduleName());
+  }
+
   // If we found a protected or private method, we need to do some
   // accessibility checks.
   if ((method->attrs() & (AttrProtected|AttrPrivate)) &&

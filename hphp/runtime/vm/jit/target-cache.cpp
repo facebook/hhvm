@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/runtime/vm/interp-helpers.h"
+#include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -289,6 +290,11 @@ handleStaticCall(const Class* cls, const StringData* name,
     if (UNLIKELY(mcePrime & 0x1)) {
       // First fill the request local cache for this call.
       auto const func = lookup(cls, name, callCtx);
+      if (RO::EvalEnforceModules == 1 &&
+          will_call_raise_module_boundary_violation(func, callCtx.moduleName())) {
+        // If we raised a warning, do not cache/smash the func
+        return func;
+      }
       mce = Entry { cls, func };
       rds::initHandle(mceHandle);
       if (mcePrime != 0x1) {
@@ -315,6 +321,11 @@ handleStaticCall(const Class* cls, const StringData* name,
   // will strangely generate two loads instead of one.
   if (UNLIKELY(cls->numMethods() <= oldFunc->methodSlot())) {
     auto const func = lookup(cls, name, callCtx);
+    if (RO::EvalEnforceModules == 1 &&
+        will_call_raise_module_boundary_violation(func, callCtx.moduleName())) {
+      // If we raised a warning, do not cache the func
+      return func;
+    }
     mce = Entry { cls, func };
     return func;
   }
@@ -374,6 +385,10 @@ handleStaticCall(const Class* cls, const StringData* name,
       if (UNLIKELY(cand->isStaticInPrologue())) {
         throw_has_this_need_static(cand);
       }
+      if (will_call_raise_module_boundary_violation(cand, callCtx.moduleName())) {
+        raiseModuleBoundaryViolation(cls, cand, callCtx.moduleName());
+        return cand;
+      }
 
       mce = Entry { cls, cand };
       return cand;
@@ -390,12 +405,21 @@ handleStaticCall(const Class* cls, const StringData* name,
     // can't be static, because the last one wasn't.
     if (LIKELY(cand->baseCls() == oldFunc->baseCls())) {
       assertx(!cand->isStaticInPrologue());
+      if (will_call_raise_module_boundary_violation(cand, callCtx.moduleName())) {
+        raiseModuleBoundaryViolation(cls, cand, callCtx.moduleName());
+        return cand;
+      }
       mce = Entry { cls, cand };
       return cand;
     }
   }
 
   auto const func = lookup(cls, name, callCtx);
+  if (RO::EvalEnforceModules == 1 &&
+      will_call_raise_module_boundary_violation(func, callCtx.moduleName())) {
+    // If we raised a warning, do not cache the func
+    return func;
+  }
   mce = Entry { cls, func };
   return func;
 }

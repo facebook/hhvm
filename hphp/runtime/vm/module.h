@@ -58,5 +58,13 @@ struct Module {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Will the call raise a module boundary violation?
+ */
+bool will_call_raise_module_boundary_violation(const Func* callee,
+                                               const StringData* callerModule);
+
+///////////////////////////////////////////////////////////////////////////////
 }
 

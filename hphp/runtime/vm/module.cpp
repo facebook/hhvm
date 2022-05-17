@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-data.h"
 
+#include "hphp/runtime/vm/func.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -60,6 +62,13 @@ void Module::def(Module* m) {
     raise_error("Module already defined: %s", m->name->data());
   }
   link.initWith(m);
+}
+
+bool will_call_raise_module_boundary_violation(const Func* callee,
+                                               const StringData* callerModule) {
+  return RO::EvalEnforceModules &&
+         callee->isInternal() &&
+         callerModule != callee->moduleName();
 }
 
 } // namespace HPHP

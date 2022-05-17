@@ -85,6 +85,10 @@ void raiseCoeffectsCallViolation(const Func* callee,
 void raiseCoeffectsFunParamTypeViolation(TypedValue, int32_t);
 void raiseCoeffectsFunParamCoeffectRulesViolation(const Func*);
 
+void raiseModuleBoundaryViolation(const Class* cls,
+                                  const Func* callee,
+                                  const StringData* callerModule);
+
 inline Iter*
 frame_iter(const ActRec* fp, int i) {
   return (Iter*)(uintptr_t(fp)

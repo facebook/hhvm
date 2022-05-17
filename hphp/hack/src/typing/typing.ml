@@ -1416,12 +1416,6 @@ let call_param
     | None -> ((env, None), dep_ty)
   in
 
-  (* TODO: iterate over thee returned error rather than side effecting in
-     the callback *)
-  let eff () =
-    if env.in_support_dynamic_type_method_check then
-      Typing_log.log_pessimise_param env param.fp_pos param.fp_name
-  in
   let (env, e2) =
     Typing_coercion.coerce_type
       pos
@@ -1429,8 +1423,7 @@ let call_param
       env
       dep_ty
       param.fp_type
-      Typing_error.Callback.(
-        (with_side_effect ~eff unify_error [@alert "-deprecated"]))
+      Typing_error.Callback.unify_error
   in
   let ty_mismatch_opt = mk_ty_mismatch_opt arg_ty param.fp_type.et_type e2 in
   Option.(iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);

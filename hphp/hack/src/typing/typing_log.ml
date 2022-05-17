@@ -776,8 +776,7 @@ let log_pessimise_prop env pos prop_name =
   log_pessimise_ env "prop" pos ("$" ^ prop_name)
 
 let log_pessimise_param env pos param_name =
-  let param_name = Option.value ~default:"$$unknown_name" param_name in
-  log_pessimise_ env "param" pos param_name
+  log_pessimise_ env "param" (Pos_or_decl.of_raw_pos pos) param_name
 
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging env.genv.tcopt then

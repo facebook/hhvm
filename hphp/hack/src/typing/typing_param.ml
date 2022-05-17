@@ -97,6 +97,10 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
           env
           ty
       in
+      (match et_enforced with
+      | Unenforced ->
+        Typing_log.log_pessimise_param env param.param_pos param.param_name
+      | Enforced -> ());
       (* If a non-inout parameter hint has the form ~t, where t is enforced,
        * then we know that the parameter has type t after enforcement.
        *)

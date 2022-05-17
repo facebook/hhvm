@@ -120,7 +120,6 @@ let respect_but_quarantine_unsaved_changes
         Shallow_classes_provider.local_changes_push_sharedmem_stack ();
         Linearization_provider.local_changes_push_sharedmem_stack ();
         Fixme_provider.local_changes_push_sharedmem_stack ();
-        Naming_provider.local_changes_push_sharedmem_stack ();
         SharedMem.set_allow_hashtable_writes_by_current_process false
       | Provider_backend.Local_memory local ->
         Relative_path.Map.iter
@@ -168,7 +167,6 @@ let respect_but_quarantine_unsaved_changes
         Shallow_classes_provider.local_changes_pop_sharedmem_stack ();
         Linearization_provider.local_changes_pop_sharedmem_stack ();
         Fixme_provider.local_changes_pop_sharedmem_stack ();
-        Naming_provider.local_changes_pop_sharedmem_stack ();
         SharedMem.set_allow_hashtable_writes_by_current_process true;
         SharedMem.invalidate_local_caches ()
       | Provider_backend.Local_memory local ->

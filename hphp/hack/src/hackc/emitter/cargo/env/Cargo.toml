@@ -24,6 +24,5 @@ naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
-oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 print_expr = { path = "../../../print_expr" }
 statement_state = { path = "../statement_state" }

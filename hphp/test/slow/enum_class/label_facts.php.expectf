@@ -1,9 +1,6 @@
 dict(1) {
   ["%s/label_facts.php"]=>
-  dict(5) {
-    ["constants"]=>
-    vec(0) {
-    }
+  dict(3) {
     ["functions"]=>
     vec(3) {
       string(9) "afunction"
@@ -12,9 +9,6 @@ dict(1) {
     }
     ["sha1sum"]=>
     string(40) "%s"
-    ["typeAliases"]=>
-    vec(0) {
-    }
     ["types"]=>
     vec(1) {
       dict(4) {

@@ -50,6 +50,7 @@ pub type Methods = BTreeMap<String, MethodFacts>;
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TypeFacts {
+    #[serde(default, skip_serializing_if = "StringSet::is_empty")]
     pub base_types: StringSet,
 
     #[serde(rename = "kindOf")]
@@ -60,10 +61,10 @@ pub struct TypeFacts {
 
     pub flags: isize,
 
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "StringSet::is_empty")]
     pub require_extends: StringSet,
 
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "StringSet::is_empty")]
     pub require_implements: StringSet,
 
     #[serde(default, skip_serializing_if = "Methods::is_empty")]
@@ -75,11 +76,21 @@ pub type TypeFactsByName = BTreeMap<String, TypeFacts>;
 #[derive(Default, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Facts {
-    #[serde(serialize_with = "types_to_json", deserialize_with = "json_to_types")]
+    #[serde(
+        default,
+        skip_serializing_if = "TypeFactsByName::is_empty",
+        serialize_with = "types_to_json",
+        deserialize_with = "json_to_types"
+    )]
     pub types: TypeFactsByName,
 
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub functions: Vec<String>,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub constants: Vec<String>,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub type_aliases: Vec<String>,
 
     #[serde(default, skip_serializing_if = "Attributes::is_empty")]
@@ -645,7 +656,6 @@ mod tests {
     "c1",
     "c2"
   ],
-  "functions": [],
   "sha1sum": "37aa63c77398d954473262e1a0057c1e632eda77",
   "typeAliases": [
     "my_type_alias"
@@ -659,25 +669,19 @@ mod tests {
       ],
       "flags": 6,
       "kindOf": "trait",
-      "name": "include_empty_both_when_trait_kind",
-      "requireExtends": [],
-      "requireImplements": []
+      "name": "include_empty_both_when_trait_kind"
     },
     {
-      "baseTypes": [],
       "flags": 0,
       "kindOf": "class",
       "name": "include_empty_neither_when_class_kind"
     },
     {
-      "baseTypes": [],
       "flags": 1,
       "kindOf": "interface",
-      "name": "include_empty_req_extends_when_interface_kind",
-      "requireExtends": []
+      "name": "include_empty_req_extends_when_interface_kind"
     },
     {
-      "baseTypes": [],
       "flags": 6,
       "kindOf": "class",
       "methods": {
@@ -699,7 +703,6 @@ mod tests {
         ],
         "C": []
       },
-      "baseTypes": [],
       "flags": 9,
       "kindOf": "unknown",
       "name": "include_nonempty_always",

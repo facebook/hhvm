@@ -1,17 +1,10 @@
-vec(5) {
-  vec(0) {
-  }
+vec(3) {
   vec(1) {
     string(8) "test_xhp"
   }
   string(40) "cc3d488676b71ee2776f1663a0f551ecb3627039"
-  vec(0) {
-  }
   vec(1) {
-    dict(4) {
-      ["baseTypes"]=>
-      vec(0) {
-      }
+    dict(3) {
       ["flags"]=>
       int(0)
       ["kindOf"]=>

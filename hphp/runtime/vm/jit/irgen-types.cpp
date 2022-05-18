@@ -221,8 +221,8 @@ void verifyTypeImpl(IRGS& env,
     switch (result) {
       case AnnotAction::Pass:           return;
       case AnnotAction::Fail:           return genFail(val);
-      case AnnotAction::Fallback:       return fallback(val, false);
-      case AnnotAction::FallbackCoerce: return fallback(val, true);
+      case AnnotAction::Fallback:       fallback(val, false); return;
+      case AnnotAction::FallbackCoerce: return setVal(fallback(val, true));
       case AnnotAction::CallableCheck:  return callable(val);
       case AnnotAction::ObjectCheck:    break;
 
@@ -355,7 +355,7 @@ void verifyTypeImpl(IRGS& env,
         fallback(genericVal, false);
         break;
       case FallbackCoerce:
-        fallback(genericVal, true);
+        setVal(fallback(genericVal, true));
         break;
     }
     return cns(env, TBottom);
@@ -1141,6 +1141,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       },
       [] (SSATmp*, bool) { // Fallback
         PUNT(VerifyReturnType);
+        return nullptr;
       }
     );
   };
@@ -1213,6 +1214,7 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       },
       [] (SSATmp*, bool) { // Fallback
         PUNT(VerifyParamType);
+        return nullptr;
       }
     );
   };
@@ -1255,21 +1257,24 @@ void verifyPropType(IRGS& env,
       // Unlike the other type-hint checks, we don't punt here. We instead do
       // the check using a runtime helper. This gives us the freedom to call
       // verifyPropType without us worrying about it punting the whole set op.
-
-      auto const data = TypeConstraintData{tc};
-      auto const sprop = cns(env, isSProp);
-      if (coerce && mayCoerce) {
-        *coerce = gen(env, VerifyPropCoerce, data, cls, cns(env, slot), val, sprop);
-      } else {
-        gen(env, VerifyProp, data, cls, cns(env, slot), val, sprop);
-      }
+      return gen(
+        env,
+        mayCoerce ? VerifyPropCoerce : VerifyProp,
+        TypeConstraintData { tc },
+        cls,
+        cns(env, slot),
+        val,
+        cns(env, isSProp)
+      );
     };
 
     // For non-DataTypeSpecific values, verifyTypeImpl handles the different
     // cases separately. However, our callers want a single coerced value,
     // which we don't track, so we punt if we're going to split it up.
     if (!val->type().isKnownDataType()) {
-      return fallback(val, tc->mayCoerce());
+      auto const updated = fallback(val, tc->mayCoerce());
+      if (coerce && tc->mayCoerce()) *coerce = updated;
+      return;
     }
 
     verifyTypeImpl(
@@ -1361,6 +1366,7 @@ void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
     },
     [&] (SSATmp*, bool) { // Fallback
       genFail();
+      return nullptr;
     }
   );
 }

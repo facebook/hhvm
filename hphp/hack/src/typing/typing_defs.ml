@@ -520,7 +520,8 @@ let rec is_denotable ty =
     && List.for_all ft_params ~f:(fun { fp_type; _ } ->
            is_denotable fp_type.et_type)
   | Toption ty -> is_denotable ty
-  | Tgeneric (nm, _) -> not (DependentKind.is_generic_dep_ty nm)
+  | Tgeneric (nm, _) ->
+    not (DependentKind.is_generic_dep_ty nm || String_utils.is_substring "#" nm)
   | Tunion _
   | Tintersection _
   | Tneg _

@@ -86,6 +86,7 @@ enum UnstableFeatures {
     Modules,
     ClassConstDefault,
     TypeConstMultipleBounds,
+    TypeRefinements,
     ContextAliasDeclaration,
     ContextAliasDeclarationShort,
     MethodTraitDiamond,
@@ -108,6 +109,7 @@ impl UnstableFeatures {
             UnstableFeatures::ContextAliasDeclaration => Unstable,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
             UnstableFeatures::TypeConstMultipleBounds => Unstable,
+            UnstableFeatures::TypeRefinements => Unstable,
             UnstableFeatures::ClassConstDefault => Migration,
             UnstableFeatures::MethodTraitDiamond => Preview,
             UnstableFeatures::UpcastExpression => Unstable,
@@ -3961,6 +3963,29 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
+    fn type_refinement_errors(&mut self, node: S<'a>) {
+        fn member_bounded<'a>(member: S<'a>) -> bool {
+            let nonempty_constraints = |cs| syntax_to_list_no_separators(cs).next().is_some();
+            match &member.children {
+                TypeInRefinement(m) => !m.type_.is_missing() ^ nonempty_constraints(&m.constraints),
+                CtxInRefinement(m) => {
+                    !m.ctx_list.is_missing() ^ nonempty_constraints(&m.constraints)
+                }
+                _ => false, /* unreachable */
+            }
+        }
+        if let TypeRefinement(r) = &node.children {
+            for member in syntax_to_list_no_separators(&r.members) {
+                if !member_bounded(member) {
+                    self.errors.push(make_error_from_node(
+                        member,
+                        errors::unbounded_refinement_member_of(self.text(&r.type_)),
+                    ));
+                }
+            }
+        }
+    }
+
     fn alias_errors(&mut self, node: S<'a>) {
         if let AliasDeclaration(ad) = &node.children {
             let attrs = &ad.attribute_spec;
@@ -5095,6 +5120,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             ClassishDeclaration(_) => {
                 prev_context = Some(self.env.context.clone());
                 self.env.context.active_classish = Some(node)
+            }
+            TypeRefinement(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::TypeRefinements);
+                self.type_refinement_errors(node);
             }
             FileAttributeSpecification(_) => self.file_attribute_spec(node),
             ModuleDeclaration(_) => self.check_can_use_feature(node, &UnstableFeatures::Modules),

@@ -944,6 +944,11 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             raise_parsing_error(node, env, &syntax_error::invalid_reified);
             missing_syntax("refied type", node, env)
         }
+        TypeRefinement(c) => {
+            // TODO: raise error if any name is repeated for the same kind (type, ctx)
+            // TODO: fix below after defining a new kind of hint first, similar to Hlike
+            p_hint_(&c.type_, env) // ignore `with { ... }` (forward-compatible if HHVM is older)
+        }
         _ => missing_syntax("type hint", node, env),
     }
 }

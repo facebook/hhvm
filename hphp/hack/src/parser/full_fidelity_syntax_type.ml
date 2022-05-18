@@ -1015,6 +1015,29 @@ struct
         closure_parameter_readonly: t;
         closure_parameter_type: t;
       }
+    | TypeRefinement of {
+        type_refinement_type: t;
+        type_refinement_keyword: t;
+        type_refinement_left_brace: t;
+        type_refinement_members: t;
+        type_refinement_right_brace: t;
+      }
+    | TypeInRefinement of {
+        type_in_refinement_keyword: t;
+        type_in_refinement_name: t;
+        type_in_refinement_type_parameters: t;
+        type_in_refinement_constraints: t;
+        type_in_refinement_equal: t;
+        type_in_refinement_type: t;
+      }
+    | CtxInRefinement of {
+        ctx_in_refinement_keyword: t;
+        ctx_in_refinement_name: t;
+        ctx_in_refinement_type_parameters: t;
+        ctx_in_refinement_constraints: t;
+        ctx_in_refinement_equal: t;
+        ctx_in_refinement_ctx_list: t;
+      }
     | ClassnameTypeSpecifier of {
         classname_keyword: t;
         classname_left_angle: t;
@@ -1241,6 +1264,7 @@ struct
     | SpecDictionary of dictionary_type_specifier
     | SpecClosure of closure_type_specifier
     | SpecClosureParameter of closure_parameter_type_specifier
+    | SpecTypeRefinement of type_refinement
     | SpecClassname of classname_type_specifier
     | SpecField of field_specifier
     | SpecShape of shape_type_specifier
@@ -1267,6 +1291,10 @@ struct
     | BodyXHPChildren of xhp_children_declaration
     | BodyXHPCategory of xhp_category_declaration
     | BodyXHPClassAttribute of xhp_class_attribute_declaration
+
+  and refinement_member =
+    | TypeRefinementMemberType of type_in_refinement
+    | TypeRefinementMemberCtx of ctx_in_refinement
 
   and statement =
     | StmtInclusionDirective of inclusion_directive
@@ -2406,6 +2434,32 @@ struct
     closure_parameter_call_convention: Token.t option value;
     closure_parameter_readonly: Token.t option value;
     closure_parameter_type: specifier value;
+  }
+
+  and type_refinement = {
+    type_refinement_type: specifier value;
+    type_refinement_keyword: Token.t value;
+    type_refinement_left_brace: Token.t value;
+    type_refinement_members: refinement_member listesque value;
+    type_refinement_right_brace: Token.t value;
+  }
+
+  and type_in_refinement = {
+    type_in_refinement_keyword: Token.t value;
+    type_in_refinement_name: Token.t value;
+    type_in_refinement_type_parameters: type_parameters option value;
+    type_in_refinement_constraints: type_constraint listesque value;
+    type_in_refinement_equal: Token.t option value;
+    type_in_refinement_type: specifier option value;
+  }
+
+  and ctx_in_refinement = {
+    ctx_in_refinement_keyword: Token.t value;
+    ctx_in_refinement_name: Token.t value;
+    ctx_in_refinement_type_parameters: type_parameters option value;
+    ctx_in_refinement_constraints: context_constraint listesque value;
+    ctx_in_refinement_equal: Token.t option value;
+    ctx_in_refinement_ctx_list: specifier option value;
   }
 
   and classname_type_specifier = {

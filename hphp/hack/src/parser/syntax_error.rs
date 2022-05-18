@@ -369,6 +369,24 @@ pub const inline_function_def: Error =
 pub const decl_outside_global_scope: Error =
     Cow::Borrowed("Declarations are not supported outside global scope");
 pub const type_keyword: Error = Cow::Borrowed("The `type` keyword is expected here.");
+pub fn unbounded_refinement_member_of(type_name: &str) -> Error {
+    Cow::Owned(format!(
+        concat!(
+            "A member that belongs to a refinement of type {} must be constrained either by ",
+            "an exact bound (`=`) or by at least one `as`/`super` bound."
+        ),
+        type_name
+    ))
+}
+pub const expected_refinement_member: Error = Cow::Borrowed(concat!(
+    "Expected `type` or `ctx` member(s) within the refinement that ends with `}`, ",
+    "e.g.: `type T as U`, `type T = X`, `ctx C super [defaults]`."
+));
+pub const cannot_chain_type_refinements: Error = Cow::Borrowed(concat!(
+    "A type refinement cannot be chained (e.g., `Cls with { ... } with { type T2 ... }`), ",
+    "consider combining members into a single with-block."
+));
+
 pub const expected_simple_offset_expression: Error =
     Cow::Borrowed("A simple offset expression is expected here");
 pub const expected_user_attribute: Error = Cow::Borrowed("A user attribute is expected here.");

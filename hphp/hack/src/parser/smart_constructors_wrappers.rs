@@ -509,6 +509,15 @@ where S: SmartConstructors<State = St>,
     fn make_closure_parameter_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
         compose(SyntaxKind::ClosureParameterTypeSpecifier, self.s.make_closure_parameter_type_specifier(arg0.1, arg1.1, arg2.1))
     }
+    fn make_type_refinement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::TypeRefinement, self.s.make_type_refinement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
+    }
+    fn make_type_in_refinement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::TypeInRefinement, self.s.make_type_in_refinement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
+    }
+    fn make_ctx_in_refinement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::CtxInRefinement, self.s.make_ctx_in_refinement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
+    }
     fn make_classname_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
         compose(SyntaxKind::ClassnameTypeSpecifier, self.s.make_classname_type_specifier(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }

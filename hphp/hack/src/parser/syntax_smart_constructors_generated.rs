@@ -775,6 +775,21 @@ where
         Self::Output::make_closure_parameter_type_specifier(self.state_mut(), arg0, arg1, arg2)
     }
 
+    fn make_type_refinement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4]);
+        Self::Output::make_type_refinement(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
+    }
+
+    fn make_type_in_refinement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5]);
+        Self::Output::make_type_in_refinement(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5)
+    }
+
+    fn make_ctx_in_refinement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5]);
+        Self::Output::make_ctx_in_refinement(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5)
+    }
+
     fn make_classname_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
         self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4]);
         Self::Output::make_classname_type_specifier(self.state_mut(), arg0, arg1, arg2, arg3, arg4)

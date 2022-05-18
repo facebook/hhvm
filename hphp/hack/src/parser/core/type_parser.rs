@@ -162,7 +162,7 @@ where
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_class_name_or_other_token();
         let new_attr_syntax = self.env.allow_new_attribute_syntax;
-        match token.kind() {
+        let type_spec = match token.kind() {
             | TokenKind::Var if allow_var => {
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
@@ -221,6 +221,12 @@ where
             | _ => {
                 S!(make_missing, self, self.pos())
             }
+        };
+        match self.peek_token_kind() {
+            TokenKind::With if self.peek_token_kind_with_lookahead(1) == TokenKind::LeftBrace => {
+                self.parse_type_refinement(type_spec)
+            }
+            _ => type_spec,
         }
     }
 
@@ -235,6 +241,57 @@ where
         } else {
             result
         }
+    }
+
+    fn parse_type_refinement(&mut self, type_spec: S::Output) -> S::Output {
+        // SPEC
+        // type-refinement:
+        //   type-specifier  with  {  type-refinement-members_opt  ;opt  }
+        //
+        // type-refinement-members:
+        //   type-refinement-member  ;  type-refinement-members
+        let keyword = self.assert_token(TokenKind::With);
+        let left_brace = self.require_left_brace();
+        let members =
+            self.with_decl_parser(
+                |x: &mut DeclarationParser<'a, S>| match x.peek_token_kind() {
+                    TokenKind::Type | TokenKind::Ctx => {
+                        // Note: blindly calling this without matching on expected token first
+                        // would result in confusing error "expected `}`" in error cases such as
+                        // `... with { const ... }`
+                        x.parse_separated_list(
+                            TokenKind::Semicolon,
+                            SeparatedListKind::TrailingAllowed,
+                            TokenKind::RightBrace,
+                            Errors::expected_refinement_member,
+                            |x| x.parse_refinement_member(),
+                        )
+                        .0
+                    }
+                    tk => {
+                        if tk != TokenKind::RightBrace {
+                            x.with_error(Errors::expected_refinement_member);
+                        }
+                        S!(make_missing, x, x.pos())
+                    }
+                },
+            );
+        let right_brace = self.require_right_brace();
+        let refinement = S!(
+            make_type_refinement,
+            self,
+            type_spec,
+            keyword,
+            left_brace,
+            members,
+            right_brace
+        );
+        if self.peek_token_kind() == TokenKind::With {
+            self.with_error(Errors::cannot_chain_type_refinements);
+            // ERROR RECOVERY: nest chained refinement
+            return self.parse_type_refinement(refinement);
+        }
+        refinement
     }
 
     // SPEC

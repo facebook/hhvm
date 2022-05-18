@@ -127,6 +127,7 @@ type t =
   | Varray
   | Vec
   | Void
+  | With
   | Where
   | While
   | Yield
@@ -341,6 +342,7 @@ let from_string keyword ~only_reserved =
   | "varray" when not only_reserved -> Some Varray
   | "vec" when not only_reserved -> Some Vec
   | "void" when not only_reserved -> Some Void
+  | "with" when not only_reserved -> Some With
   | "where" when not only_reserved -> Some Where
   | "while" -> Some While
   | "yield" -> Some Yield
@@ -530,6 +532,7 @@ let to_string kind =
   | Varray -> "varray"
   | Vec -> "vec"
   | Void -> "void"
+  | With -> "with"
   | Where -> "where"
   | While -> "while"
   | Yield -> "yield"

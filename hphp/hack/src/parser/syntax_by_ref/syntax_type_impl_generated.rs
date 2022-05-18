@@ -1623,6 +1623,44 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_type_refinement(ctx: &C, type_: Self, keyword: Self, left_brace: Self, members: Self, right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::TypeRefinement(ctx.get_arena().alloc(TypeRefinementChildren {
+            type_,
+            keyword,
+            left_brace,
+            members,
+            right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_type_in_refinement(ctx: &C, keyword: Self, name: Self, type_parameters: Self, constraints: Self, equal: Self, type_: Self) -> Self {
+        let syntax = SyntaxVariant::TypeInRefinement(ctx.get_arena().alloc(TypeInRefinementChildren {
+            keyword,
+            name,
+            type_parameters,
+            constraints,
+            equal,
+            type_,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_ctx_in_refinement(ctx: &C, keyword: Self, name: Self, type_parameters: Self, constraints: Self, equal: Self, ctx_list: Self) -> Self {
+        let syntax = SyntaxVariant::CtxInRefinement(ctx.get_arena().alloc(CtxInRefinementChildren {
+            keyword,
+            name,
+            type_parameters,
+            constraints,
+            equal,
+            ctx_list,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_classname_type_specifier(ctx: &C, keyword: Self, left_angle: Self, type_: Self, trailing_comma: Self, right_angle: Self) -> Self {
         let syntax = SyntaxVariant::ClassnameTypeSpecifier(ctx.get_arena().alloc(ClassnameTypeSpecifierChildren {
             keyword,

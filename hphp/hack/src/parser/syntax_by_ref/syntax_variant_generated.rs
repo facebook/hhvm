@@ -171,6 +171,9 @@ pub enum SyntaxVariant<'a, T, V> {
     DictionaryTypeSpecifier(&'a DictionaryTypeSpecifierChildren<'a, T, V>),
     ClosureTypeSpecifier(&'a ClosureTypeSpecifierChildren<'a, T, V>),
     ClosureParameterTypeSpecifier(&'a ClosureParameterTypeSpecifierChildren<'a, T, V>),
+    TypeRefinement(&'a TypeRefinementChildren<'a, T, V>),
+    TypeInRefinement(&'a TypeInRefinementChildren<'a, T, V>),
+    CtxInRefinement(&'a CtxInRefinementChildren<'a, T, V>),
     ClassnameTypeSpecifier(&'a ClassnameTypeSpecifierChildren<'a, T, V>),
     FieldSpecifier(&'a FieldSpecifierChildren<'a, T, V>),
     FieldInitializer(&'a FieldInitializerChildren<'a, T, V>),
@@ -1350,6 +1353,35 @@ pub struct ClosureParameterTypeSpecifierChildren<'a, T, V> {
     pub call_convention: Syntax<'a, T, V>,
     pub readonly: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TypeRefinementChildren<'a, T, V> {
+    pub type_: Syntax<'a, T, V>,
+    pub keyword: Syntax<'a, T, V>,
+    pub left_brace: Syntax<'a, T, V>,
+    pub members: Syntax<'a, T, V>,
+    pub right_brace: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TypeInRefinementChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub type_parameters: Syntax<'a, T, V>,
+    pub constraints: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
+    pub type_: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct CtxInRefinementChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub type_parameters: Syntax<'a, T, V>,
+    pub constraints: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
+    pub ctx_list: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

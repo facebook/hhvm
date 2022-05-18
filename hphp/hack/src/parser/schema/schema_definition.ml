@@ -14,6 +14,7 @@ type aggregate_type =
   | AttributeSpecification
   | Parameter
   | ClassBodyDeclaration
+  | RefinementMember
   | Statement
   | SwitchLabel
   | LambdaBody
@@ -2061,6 +2062,56 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "TypeRefinement";
+      type_name = "type_refinement";
+      func_name = "type_refinement";
+      description = "type_refinement";
+      prefix = "type_refinement";
+      aggregates = [Specifier];
+      fields =
+        [
+          ("type", Aggregate Specifier);
+          ("keyword", Token);
+          ("left_brace", Token);
+          ("members", ZeroOrMore (Aggregate RefinementMember));
+          ("right_brace", Token);
+        ];
+    };
+    {
+      kind_name = "TypeInRefinement";
+      type_name = "type_in_refinement";
+      func_name = "type_in_refinement";
+      description = "type_in_refinement";
+      prefix = "type_in_refinement";
+      aggregates = [RefinementMember];
+      fields =
+        [
+          ("keyword", Token);
+          ("name", Token);
+          ("type_parameters", ZeroOrOne (Just "TypeParameters"));
+          ("constraints", ZeroOrMore (Just "TypeConstraint"));
+          ("equal", ZeroOrOne Token);
+          ("type", ZeroOrOne (Aggregate Specifier));
+        ];
+    };
+    {
+      kind_name = "CtxInRefinement";
+      type_name = "ctx_in_refinement";
+      func_name = "ctx_in_refinement";
+      description = "ctx_in_refinement";
+      prefix = "ctx_in_refinement";
+      aggregates = [RefinementMember];
+      fields =
+        [
+          ("keyword", Token);
+          ("name", Token);
+          ("type_parameters", ZeroOrOne (Just "TypeParameters"));
+          ("constraints", ZeroOrMore (Just "ContextConstraint"));
+          ("equal", ZeroOrOne Token);
+          ("ctx_list", ZeroOrOne (Aggregate Specifier));
+        ];
+    };
+    {
       kind_name = "ClassnameTypeSpecifier";
       type_name = "classname_type_specifier";
       func_name = "classname_type_specifier";
@@ -2356,6 +2407,7 @@ let generated_aggregate_types =
     Specifier;
     Parameter;
     ClassBodyDeclaration;
+    RefinementMember;
     Statement;
     SwitchLabel;
     LambdaBody;
@@ -2374,6 +2426,7 @@ let string_of_aggregate_type = function
   | Parameter -> "Parameter"
   | AttributeSpecification -> "AttributeSpecification"
   | ClassBodyDeclaration -> "ClassBodyDeclaration"
+  | RefinementMember -> "RefinementMember"
   | Statement -> "Statement"
   | SwitchLabel -> "SwitchLabel"
   | LambdaBody -> "LambdaBody"
@@ -2410,6 +2463,9 @@ let aggregation_of_attribute_specification =
 let aggregation_of_class_body_declaration =
   List.filter (fun x -> List.mem ClassBodyDeclaration x.aggregates) schema
 
+let aggregation_of_refinement_member =
+  List.filter (fun x -> List.mem RefinementMember x.aggregates) schema
+
 let aggregation_of_statement =
   List.filter (fun x -> List.mem Statement x.aggregates) schema
 
@@ -2444,6 +2500,7 @@ let aggregation_of = function
   | Parameter -> aggregation_of_parameter
   | AttributeSpecification -> aggregation_of_attribute_specification
   | ClassBodyDeclaration -> aggregation_of_class_body_declaration
+  | RefinementMember -> aggregation_of_refinement_member
   | Statement -> aggregation_of_statement
   | SwitchLabel -> aggregation_of_switch_label
   | LambdaBody -> aggregation_of_lambda_body
@@ -2461,6 +2518,7 @@ let aggregate_type_name = function
   | Parameter -> "parameter"
   | AttributeSpecification -> "attribute_specification"
   | ClassBodyDeclaration -> "class_body_declaration"
+  | RefinementMember -> "refinement_member"
   | Statement -> "statement"
   | SwitchLabel -> "switch_label"
   | LambdaBody -> "lambda_body"
@@ -2478,6 +2536,7 @@ let aggregate_type_pfx_trim = function
   | Parameter -> ("Param", "")
   | AttributeSpecification -> ("AttrSpec", "")
   | ClassBodyDeclaration -> ("Body", "Declaration")
+  | RefinementMember -> ("TypeRefinementMember", "InRefinement$")
   | Statement -> ("Stmt", "Statement$")
   | SwitchLabel -> ("Switch", "Label$")
   | LambdaBody -> ("Lambda", "Expression$")

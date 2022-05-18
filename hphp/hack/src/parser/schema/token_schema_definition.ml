@@ -182,6 +182,7 @@ let given_text_tokens =
     make_token_node "Varray" "varray" ~allowed_as_identifier:true ();
     make_token_node "Vec" "vec" ~allowed_as_identifier:true ();
     make_token_node "Void" "void" ~allowed_as_identifier:true ();
+    make_token_node "With" "with" ~allowed_as_identifier:true ();
     make_token_node "Where" "where" ~allowed_as_identifier:true ();
     make_token_node "While" "while" ();
     make_token_node "Yield" "yield" ();

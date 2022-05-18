@@ -209,6 +209,9 @@ module WithToken (Token : TokenType) = struct
       | ClosureTypeSpecifier _ -> SyntaxKind.ClosureTypeSpecifier
       | ClosureParameterTypeSpecifier _ ->
         SyntaxKind.ClosureParameterTypeSpecifier
+      | TypeRefinement _ -> SyntaxKind.TypeRefinement
+      | TypeInRefinement _ -> SyntaxKind.TypeInRefinement
+      | CtxInRefinement _ -> SyntaxKind.CtxInRefinement
       | ClassnameTypeSpecifier _ -> SyntaxKind.ClassnameTypeSpecifier
       | FieldSpecifier _ -> SyntaxKind.FieldSpecifier
       | FieldInitializer _ -> SyntaxKind.FieldInitializer
@@ -571,6 +574,12 @@ module WithToken (Token : TokenType) = struct
 
     let is_closure_parameter_type_specifier =
       has_kind SyntaxKind.ClosureParameterTypeSpecifier
+
+    let is_type_refinement = has_kind SyntaxKind.TypeRefinement
+
+    let is_type_in_refinement = has_kind SyntaxKind.TypeInRefinement
+
+    let is_ctx_in_refinement = has_kind SyntaxKind.CtxInRefinement
 
     let is_classname_type_specifier = has_kind SyntaxKind.ClassnameTypeSpecifier
 
@@ -2199,6 +2208,52 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc closure_parameter_readonly in
         let acc = f acc closure_parameter_type in
         acc
+      | TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          } ->
+        let acc = f acc type_refinement_type in
+        let acc = f acc type_refinement_keyword in
+        let acc = f acc type_refinement_left_brace in
+        let acc = f acc type_refinement_members in
+        let acc = f acc type_refinement_right_brace in
+        acc
+      | TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          } ->
+        let acc = f acc type_in_refinement_keyword in
+        let acc = f acc type_in_refinement_name in
+        let acc = f acc type_in_refinement_type_parameters in
+        let acc = f acc type_in_refinement_constraints in
+        let acc = f acc type_in_refinement_equal in
+        let acc = f acc type_in_refinement_type in
+        acc
+      | CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          } ->
+        let acc = f acc ctx_in_refinement_keyword in
+        let acc = f acc ctx_in_refinement_name in
+        let acc = f acc ctx_in_refinement_type_parameters in
+        let acc = f acc ctx_in_refinement_constraints in
+        let acc = f acc ctx_in_refinement_equal in
+        let acc = f acc ctx_in_refinement_ctx_list in
+        acc
       | ClassnameTypeSpecifier
           {
             classname_keyword;
@@ -3783,6 +3838,55 @@ module WithToken (Token : TokenType) = struct
           closure_parameter_call_convention;
           closure_parameter_readonly;
           closure_parameter_type;
+        ]
+      | TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          } ->
+        [
+          type_refinement_type;
+          type_refinement_keyword;
+          type_refinement_left_brace;
+          type_refinement_members;
+          type_refinement_right_brace;
+        ]
+      | TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          } ->
+        [
+          type_in_refinement_keyword;
+          type_in_refinement_name;
+          type_in_refinement_type_parameters;
+          type_in_refinement_constraints;
+          type_in_refinement_equal;
+          type_in_refinement_type;
+        ]
+      | CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          } ->
+        [
+          ctx_in_refinement_keyword;
+          ctx_in_refinement_name;
+          ctx_in_refinement_type_parameters;
+          ctx_in_refinement_constraints;
+          ctx_in_refinement_equal;
+          ctx_in_refinement_ctx_list;
         ]
       | ClassnameTypeSpecifier
           {
@@ -5372,6 +5476,55 @@ module WithToken (Token : TokenType) = struct
           "closure_parameter_call_convention";
           "closure_parameter_readonly";
           "closure_parameter_type";
+        ]
+      | TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          } ->
+        [
+          "type_refinement_type";
+          "type_refinement_keyword";
+          "type_refinement_left_brace";
+          "type_refinement_members";
+          "type_refinement_right_brace";
+        ]
+      | TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          } ->
+        [
+          "type_in_refinement_keyword";
+          "type_in_refinement_name";
+          "type_in_refinement_type_parameters";
+          "type_in_refinement_constraints";
+          "type_in_refinement_equal";
+          "type_in_refinement_type";
+        ]
+      | CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          } ->
+        [
+          "ctx_in_refinement_keyword";
+          "ctx_in_refinement_name";
+          "ctx_in_refinement_type_parameters";
+          "ctx_in_refinement_constraints";
+          "ctx_in_refinement_equal";
+          "ctx_in_refinement_ctx_list";
         ]
       | ClassnameTypeSpecifier
           {
@@ -7167,6 +7320,58 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_call_convention;
             closure_parameter_readonly;
             closure_parameter_type;
+          }
+      | ( SyntaxKind.TypeRefinement,
+          [
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          ] ) ->
+        TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          }
+      | ( SyntaxKind.TypeInRefinement,
+          [
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          ] ) ->
+        TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          }
+      | ( SyntaxKind.CtxInRefinement,
+          [
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          ] ) ->
+        CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
           }
       | ( SyntaxKind.ClassnameTypeSpecifier,
           [
@@ -9433,6 +9638,67 @@ module WithToken (Token : TokenType) = struct
               closure_parameter_call_convention;
               closure_parameter_readonly;
               closure_parameter_type;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_type_refinement
+          type_refinement_type
+          type_refinement_keyword
+          type_refinement_left_brace
+          type_refinement_members
+          type_refinement_right_brace =
+        let syntax =
+          TypeRefinement
+            {
+              type_refinement_type;
+              type_refinement_keyword;
+              type_refinement_left_brace;
+              type_refinement_members;
+              type_refinement_right_brace;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_type_in_refinement
+          type_in_refinement_keyword
+          type_in_refinement_name
+          type_in_refinement_type_parameters
+          type_in_refinement_constraints
+          type_in_refinement_equal
+          type_in_refinement_type =
+        let syntax =
+          TypeInRefinement
+            {
+              type_in_refinement_keyword;
+              type_in_refinement_name;
+              type_in_refinement_type_parameters;
+              type_in_refinement_constraints;
+              type_in_refinement_equal;
+              type_in_refinement_type;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_ctx_in_refinement
+          ctx_in_refinement_keyword
+          ctx_in_refinement_name
+          ctx_in_refinement_type_parameters
+          ctx_in_refinement_constraints
+          ctx_in_refinement_equal
+          ctx_in_refinement_ctx_list =
+        let syntax =
+          CtxInRefinement
+            {
+              ctx_in_refinement_keyword;
+              ctx_in_refinement_name;
+              ctx_in_refinement_type_parameters;
+              ctx_in_refinement_constraints;
+              ctx_in_refinement_equal;
+              ctx_in_refinement_ctx_list;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in

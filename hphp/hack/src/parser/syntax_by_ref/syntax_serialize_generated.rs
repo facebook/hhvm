@@ -1345,6 +1345,38 @@ ss.serialize_field("closure_parameter_readonly", &self.with(readonly))?;
 ss.serialize_field("closure_parameter_type", &self.with(type_))?;
       ss.end()
 } 
+SyntaxVariant::TypeRefinement (TypeRefinementChildren{type_,keyword,left_brace,members,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 6)?;
+      ss.serialize_field("kind", "type_refinement")?;
+      ss.serialize_field("type_refinement_type", &self.with(type_))?;
+ss.serialize_field("type_refinement_keyword", &self.with(keyword))?;
+ss.serialize_field("type_refinement_left_brace", &self.with(left_brace))?;
+ss.serialize_field("type_refinement_members", &self.with(members))?;
+ss.serialize_field("type_refinement_right_brace", &self.with(right_brace))?;
+      ss.end()
+} 
+SyntaxVariant::TypeInRefinement (TypeInRefinementChildren{keyword,name,type_parameters,constraints,equal,type_} ) => {
+      let mut ss = s.serialize_struct("", 7)?;
+      ss.serialize_field("kind", "type_in_refinement")?;
+      ss.serialize_field("type_in_refinement_keyword", &self.with(keyword))?;
+ss.serialize_field("type_in_refinement_name", &self.with(name))?;
+ss.serialize_field("type_in_refinement_type_parameters", &self.with(type_parameters))?;
+ss.serialize_field("type_in_refinement_constraints", &self.with(constraints))?;
+ss.serialize_field("type_in_refinement_equal", &self.with(equal))?;
+ss.serialize_field("type_in_refinement_type", &self.with(type_))?;
+      ss.end()
+} 
+SyntaxVariant::CtxInRefinement (CtxInRefinementChildren{keyword,name,type_parameters,constraints,equal,ctx_list} ) => {
+      let mut ss = s.serialize_struct("", 7)?;
+      ss.serialize_field("kind", "ctx_in_refinement")?;
+      ss.serialize_field("ctx_in_refinement_keyword", &self.with(keyword))?;
+ss.serialize_field("ctx_in_refinement_name", &self.with(name))?;
+ss.serialize_field("ctx_in_refinement_type_parameters", &self.with(type_parameters))?;
+ss.serialize_field("ctx_in_refinement_constraints", &self.with(constraints))?;
+ss.serialize_field("ctx_in_refinement_equal", &self.with(equal))?;
+ss.serialize_field("ctx_in_refinement_ctx_list", &self.with(ctx_list))?;
+      ss.end()
+} 
 SyntaxVariant::ClassnameTypeSpecifier (ClassnameTypeSpecifierChildren{keyword,left_angle,type_,trailing_comma,right_angle} ) => {
       let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "classname_type_specifier")?;

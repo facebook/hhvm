@@ -1,0 +1,10 @@
+(8,11)-(9,1) Expected `type` or `ctx` member(s) within the refinement that ends with `}`, e.g.: `type T as U`, `type T = X`, `ctx C super [defaults]`.
+(9,11)-(9,11) An expression is expected here.
+(9,16)-(9,16) A semicolon `;` is expected here.
+(9,16)-(9,17) You cannot use this syntax on the left-hand side of an assignment.
+(9,23)-(10,1) A semicolon `;` is expected here.
+(10,7)-(11,1) A semicolon `;` is expected here.
+(11,2)-(11,2) An expression is expected here.
+(11,4)-(11,4) An expression is expected here.
+(11,4)-(11,11) Cannot use collection initialization for non-collection class.
+(11,11)-(12,1) A semicolon `;` is expected here.

@@ -1,0 +1,3 @@
+(7,36)-(7,60) A member that belongs to a refinement of type I must be constrained either by an exact bound (`=`) or by at least one `as`/`super` bound.
+(9,39)-(9,66) A member that belongs to a refinement of type I must be constrained either by an exact bound (`=`) or by at least one `as`/`super` bound.
+(12,12)-(12,63) A member that belongs to a refinement of type I must be constrained either by an exact bound (`=`) or by at least one `as`/`super` bound.

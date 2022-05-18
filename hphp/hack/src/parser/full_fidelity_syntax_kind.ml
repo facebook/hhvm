@@ -166,6 +166,9 @@ type t =
   | DictionaryTypeSpecifier
   | ClosureTypeSpecifier
   | ClosureParameterTypeSpecifier
+  | TypeRefinement
+  | TypeInRefinement
+  | CtxInRefinement
   | ClassnameTypeSpecifier
   | FieldSpecifier
   | FieldInitializer
@@ -340,6 +343,9 @@ let to_string kind =
   | DictionaryTypeSpecifier -> "dictionary_type_specifier"
   | ClosureTypeSpecifier -> "closure_type_specifier"
   | ClosureParameterTypeSpecifier -> "closure_parameter_type_specifier"
+  | TypeRefinement -> "type_refinement"
+  | TypeInRefinement -> "type_in_refinement"
+  | CtxInRefinement -> "ctx_in_refinement"
   | ClassnameTypeSpecifier -> "classname_type_specifier"
   | FieldSpecifier -> "field_specifier"
   | FieldInitializer -> "field_initializer"

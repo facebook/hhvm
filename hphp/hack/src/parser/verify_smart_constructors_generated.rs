@@ -1235,6 +1235,30 @@ impl<'a> SmartConstructors for VerifySmartConstructors<'a>
         r
     }
 
+    fn make_type_refinement(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output) -> Self::Output {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_type_refinement(self, arg0, arg1, arg2, arg3, arg4);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }
+
+    fn make_type_in_refinement(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output, arg5: Self::Output) -> Self::Output {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_type_in_refinement(self, arg0, arg1, arg2, arg3, arg4, arg5);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }
+
+    fn make_ctx_in_refinement(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output, arg5: Self::Output) -> Self::Output {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_ctx_in_refinement(self, arg0, arg1, arg2, arg3, arg4, arg5);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }
+
     fn make_classname_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output) -> Self::Output {
         let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4);
         let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_classname_type_specifier(self, arg0, arg1, arg2, arg3, arg4);

@@ -1489,6 +1489,41 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            TypeRefinement(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.type_),
+                    1 => Some(&x.keyword),
+                    2 => Some(&x.left_brace),
+                    3 => Some(&x.members),
+                    4 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            TypeInRefinement(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.name),
+                    2 => Some(&x.type_parameters),
+                    3 => Some(&x.constraints),
+                    4 => Some(&x.equal),
+                    5 => Some(&x.type_),
+                        _ => None,
+                    }
+                })
+            },
+            CtxInRefinement(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.name),
+                    2 => Some(&x.type_parameters),
+                    3 => Some(&x.constraints),
+                    4 => Some(&x.equal),
+                    5 => Some(&x.ctx_list),
+                        _ => None,
+                    }
+                })
+            },
             ClassnameTypeSpecifier(x) => {
                 get_index(5).and_then(|index| { match index {
                         0 => Some(&x.keyword),

@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2022-04-25-0000",
+  "version" : "2022-05-04-0000",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -231,6 +231,8 @@
       "token_text" : "vec" },
     { "token_kind" : "Void",
       "token_text" : "void" },
+    { "token_kind" : "With",
+      "token_text" : "with" },
     { "token_kind" : "Where",
       "token_text" : "where" },
     { "token_kind" : "While",
@@ -1884,6 +1886,41 @@
         { "field_name" : "call_convention" },
         { "field_name" : "readonly" },
         { "field_name" : "type" }
+      ] },
+    { "kind_name" : "TypeRefinement",
+      "type_name" : "type_refinement",
+      "description" : "type_refinement",
+      "prefix" : "type_refinement",
+      "fields" : [
+        { "field_name" : "type" },
+        { "field_name" : "keyword" },
+        { "field_name" : "left_brace" },
+        { "field_name" : "members" },
+        { "field_name" : "right_brace" }
+      ] },
+    { "kind_name" : "TypeInRefinement",
+      "type_name" : "type_in_refinement",
+      "description" : "type_in_refinement",
+      "prefix" : "type_in_refinement",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "type_parameters" },
+        { "field_name" : "constraints" },
+        { "field_name" : "equal" },
+        { "field_name" : "type" }
+      ] },
+    { "kind_name" : "CtxInRefinement",
+      "type_name" : "ctx_in_refinement",
+      "description" : "ctx_in_refinement",
+      "prefix" : "ctx_in_refinement",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "type_parameters" },
+        { "field_name" : "constraints" },
+        { "field_name" : "equal" },
+        { "field_name" : "ctx_list" }
       ] },
     { "kind_name" : "ClassnameTypeSpecifier",
       "type_name" : "classname_type_specifier",

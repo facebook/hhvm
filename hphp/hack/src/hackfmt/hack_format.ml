@@ -494,6 +494,68 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           where_constraint_right_type = right;
         } ->
       Concat [t env left; Space; t env op; Space; t env right]
+    | Syntax.TypeRefinement
+        {
+          type_refinement_type = ty;
+          type_refinement_keyword = kw;
+          type_refinement_left_brace = left;
+          type_refinement_members = members;
+          type_refinement_right_brace = right;
+        } ->
+      Concat
+        [
+          t env ty;
+          Space;
+          t env kw;
+          Space;
+          Nest
+            [
+              Span
+                [
+                  t env left;
+                  handle_possible_list
+                    env
+                    ~before_each:space_split
+                    ~after_each:(fun last ->
+                      if last then
+                        Space
+                      else
+                        Nothing)
+                    members;
+                  t env right;
+                ];
+            ];
+        ]
+    | Syntax.TypeInRefinement
+        {
+          type_in_refinement_keyword = kw;
+          type_in_refinement_name = name;
+          type_in_refinement_type_parameters = type_params;
+          type_in_refinement_constraints = constraints;
+          type_in_refinement_equal = eq;
+          type_in_refinement_type = eq_bound;
+        }
+    | Syntax.CtxInRefinement
+        {
+          ctx_in_refinement_keyword = kw;
+          ctx_in_refinement_name = name;
+          ctx_in_refinement_type_parameters = type_params;
+          ctx_in_refinement_constraints = constraints;
+          ctx_in_refinement_equal = eq;
+          ctx_in_refinement_ctx_list = eq_bound;
+        } ->
+      Span
+        [
+          t env kw;
+          Space;
+          t env name;
+          t env type_params;
+          handle_possible_list env ~before_each:(fun _ -> Space) constraints;
+          when_present eq space;
+          t env eq;
+          when_present eq_bound (fun _ ->
+              Concat [Space; SplitWith Cost.Moderate; Nest [t env eq_bound]]);
+        ]
     | Syntax.Contexts
         {
           contexts_left_bracket = lb;

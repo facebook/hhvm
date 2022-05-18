@@ -885,6 +885,29 @@ module type Syntax_S = sig
         closure_parameter_readonly: t;
         closure_parameter_type: t;
       }
+    | TypeRefinement of {
+        type_refinement_type: t;
+        type_refinement_keyword: t;
+        type_refinement_left_brace: t;
+        type_refinement_members: t;
+        type_refinement_right_brace: t;
+      }
+    | TypeInRefinement of {
+        type_in_refinement_keyword: t;
+        type_in_refinement_name: t;
+        type_in_refinement_type_parameters: t;
+        type_in_refinement_constraints: t;
+        type_in_refinement_equal: t;
+        type_in_refinement_type: t;
+      }
+    | CtxInRefinement of {
+        ctx_in_refinement_keyword: t;
+        ctx_in_refinement_name: t;
+        ctx_in_refinement_type_parameters: t;
+        ctx_in_refinement_constraints: t;
+        ctx_in_refinement_equal: t;
+        ctx_in_refinement_ctx_list: t;
+      }
     | ClassnameTypeSpecifier of {
         classname_keyword: t;
         classname_left_angle: t;
@@ -1353,6 +1376,12 @@ module type Syntax_S = sig
 
   val make_closure_parameter_type_specifier : t -> t -> t -> t
 
+  val make_type_refinement : t -> t -> t -> t -> t -> t
+
+  val make_type_in_refinement : t -> t -> t -> t -> t -> t -> t
+
+  val make_ctx_in_refinement : t -> t -> t -> t -> t -> t -> t
+
   val make_classname_type_specifier : t -> t -> t -> t -> t -> t
 
   val make_field_specifier : t -> t -> t -> t -> t
@@ -1694,6 +1723,12 @@ module type Syntax_S = sig
   val is_closure_type_specifier : t -> bool
 
   val is_closure_parameter_type_specifier : t -> bool
+
+  val is_type_refinement : t -> bool
+
+  val is_type_in_refinement : t -> bool
+
+  val is_ctx_in_refinement : t -> bool
 
   val is_classname_type_specifier : t -> bool
 

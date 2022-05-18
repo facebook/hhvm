@@ -1337,21 +1337,9 @@ where
         const_: S::Output,
     ) -> S::Output {
         let type_token = self.assert_token(TokenKind::Type);
-        let name = self.require_name_allow_non_reserved();
-        let generic_type_parameter_list = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
-            p.parse_generic_type_parameter_list_opt()
-        });
+        let (name, type_parameters) = self.parse_nonreserved_name_maybe_parameterized();
         let type_constraints = self.parse_type_constraints();
-        let (equal_token, type_specifier) = if self.peek_token_kind() == TokenKind::Equal {
-            let equal_token = self.assert_token(TokenKind::Equal);
-            let type_spec = self
-                .parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ true);
-            (equal_token, type_spec)
-        } else {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
-            (missing1, missing2)
-        };
+        let (equal_token, type_specifier) = self.parse_equal_type();
         let semicolon = self.require_semicolon();
         S!(
             make_type_const_declaration,
@@ -1361,12 +1349,34 @@ where
             const_,
             type_token,
             name,
-            generic_type_parameter_list,
+            type_parameters,
             type_constraints,
             equal_token,
             type_specifier,
             semicolon,
         )
+    }
+
+    /// Parses a non-reserved name optionally followed by type parameter list
+    fn parse_nonreserved_name_maybe_parameterized(&mut self) -> (S::Output, S::Output) {
+        let name = self.require_name_allow_non_reserved();
+        let type_parameter_list = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
+            p.parse_generic_type_parameter_list_opt()
+        });
+        (name, type_parameter_list)
+    }
+
+    fn parse_equal_type(&mut self) -> (S::Output, S::Output) {
+        if self.peek_token_kind() == TokenKind::Equal {
+            let equal_token = self.assert_token(TokenKind::Equal);
+            let type_spec = self
+                .parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ true);
+            (equal_token, type_spec)
+        } else {
+            let missing1 = S!(make_missing, self, self.pos());
+            let missing2 = S!(make_missing, self, self.pos());
+            (missing1, missing2)
+        }
     }
 
     fn parse_context_const_declaration(
@@ -1390,15 +1400,7 @@ where
                 p.parse_list_until_none(|p| p.parse_context_constraint_opt()),
             )
         });
-        let (equal, ctx_list) = if self.peek_token_kind() == TokenKind::Equal {
-            let equal = self.assert_token(TokenKind::Equal);
-            let ctx_list = self.with_type_parser(|p| p.parse_contexts());
-            (equal, ctx_list)
-        } else {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
-            (missing1, missing2)
-        };
+        let (equal, ctx_list) = self.parse_equal_contexts();
         let semicolon = self.require_semicolon();
         S!(
             make_context_const_declaration,
@@ -1413,6 +1415,75 @@ where
             ctx_list,
             semicolon,
         )
+    }
+
+    fn parse_equal_contexts(&mut self) -> (S::Output, S::Output) {
+        if self.peek_token_kind() == TokenKind::Equal {
+            let equal = self.assert_token(TokenKind::Equal);
+            let ctx_list = self.with_type_parser(|p| p.parse_contexts());
+            (equal, ctx_list)
+        } else {
+            let missing1 = S!(make_missing, self, self.pos());
+            let missing2 = S!(make_missing, self, self.pos());
+            (missing1, missing2)
+        }
+    }
+
+    pub(crate) fn parse_refinement_member(&mut self) -> S::Output {
+        // SPEC:
+        // type-refinement-member:
+        //   type  name  type-constraints
+        //   type  name  =  type-specifier
+        //   type  name  type-constraints
+        //   ctx  name  ctx-constraints
+        //   ctx  name  =  context-list
+        //
+        // type-constraints:
+        //   type-constraint
+        //   type-constraint  type-constraints
+        //
+        // ctx-constraints:
+        //   context-constraint
+        //   context-constraint  ctx-constraints
+        match self.peek_token_kind() {
+            TokenKind::Type => {
+                let keyword = self.assert_token(TokenKind::Type);
+                let (name, type_params) = self.parse_nonreserved_name_maybe_parameterized();
+                let constraints = self.with_type_parser(|p| {
+                    p.parse_list_until_none(|p| p.parse_type_constraint_opt())
+                });
+                let (equal_token, type_specifier) = self.parse_equal_type();
+                S!(
+                    make_type_in_refinement,
+                    self,
+                    keyword,
+                    name,
+                    type_params,
+                    constraints,
+                    equal_token,
+                    type_specifier,
+                )
+            }
+            TokenKind::Ctx => {
+                let keyword = self.assert_token(TokenKind::Ctx);
+                let (name, type_params) = self.parse_nonreserved_name_maybe_parameterized();
+                let constraints = self.with_type_parser(|p| {
+                    p.parse_list_until_none(|p| p.parse_context_constraint_opt())
+                });
+                let (equal_token, ctx_list) = self.parse_equal_contexts();
+                S!(
+                    make_ctx_in_refinement,
+                    self,
+                    keyword,
+                    name,
+                    type_params,
+                    constraints,
+                    equal_token,
+                    ctx_list,
+                )
+            }
+            _ => S!(make_missing, self, self.pos()),
+        }
     }
 
     // SPEC:

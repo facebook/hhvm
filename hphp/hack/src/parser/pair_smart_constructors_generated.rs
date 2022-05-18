@@ -661,6 +661,18 @@ where
         Node(self.0.make_closure_parameter_type_specifier(call_convention.0, readonly.0, type_.0), self.1.make_closure_parameter_type_specifier(call_convention.1, readonly.1, type_.1))
     }
 
+    fn make_type_refinement(&mut self, type_: Self::Output, keyword: Self::Output, left_brace: Self::Output, members: Self::Output, right_brace: Self::Output) -> Self::Output {
+        Node(self.0.make_type_refinement(type_.0, keyword.0, left_brace.0, members.0, right_brace.0), self.1.make_type_refinement(type_.1, keyword.1, left_brace.1, members.1, right_brace.1))
+    }
+
+    fn make_type_in_refinement(&mut self, keyword: Self::Output, name: Self::Output, type_parameters: Self::Output, constraints: Self::Output, equal: Self::Output, type_: Self::Output) -> Self::Output {
+        Node(self.0.make_type_in_refinement(keyword.0, name.0, type_parameters.0, constraints.0, equal.0, type_.0), self.1.make_type_in_refinement(keyword.1, name.1, type_parameters.1, constraints.1, equal.1, type_.1))
+    }
+
+    fn make_ctx_in_refinement(&mut self, keyword: Self::Output, name: Self::Output, type_parameters: Self::Output, constraints: Self::Output, equal: Self::Output, ctx_list: Self::Output) -> Self::Output {
+        Node(self.0.make_ctx_in_refinement(keyword.0, name.0, type_parameters.0, constraints.0, equal.0, ctx_list.0), self.1.make_ctx_in_refinement(keyword.1, name.1, type_parameters.1, constraints.1, equal.1, ctx_list.1))
+    }
+
     fn make_classname_type_specifier(&mut self, keyword: Self::Output, left_angle: Self::Output, type_: Self::Output, trailing_comma: Self::Output, right_angle: Self::Output) -> Self::Output {
         Node(self.0.make_classname_type_specifier(keyword.0, left_angle.0, type_.0, trailing_comma.0, right_angle.0), self.1.make_classname_type_specifier(keyword.1, left_angle.1, type_.1, trailing_comma.1, right_angle.1))
     }

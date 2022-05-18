@@ -646,6 +646,18 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors>::make_closure_parameter_type_specifier(self, call_convention, readonly, type_)
     }
 
+    fn make_type_refinement(&mut self, type_: Self::Output, keyword: Self::Output, left_brace: Self::Output, members: Self::Output, right_brace: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_type_refinement(self, type_, keyword, left_brace, members, right_brace)
+    }
+
+    fn make_type_in_refinement(&mut self, keyword: Self::Output, name: Self::Output, type_parameters: Self::Output, constraints: Self::Output, equal: Self::Output, type_: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_type_in_refinement(self, keyword, name, type_parameters, constraints, equal, type_)
+    }
+
+    fn make_ctx_in_refinement(&mut self, keyword: Self::Output, name: Self::Output, type_parameters: Self::Output, constraints: Self::Output, equal: Self::Output, ctx_list: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_ctx_in_refinement(self, keyword, name, type_parameters, constraints, equal, ctx_list)
+    }
+
     fn make_classname_type_specifier(&mut self, keyword: Self::Output, left_angle: Self::Output, type_: Self::Output, trailing_comma: Self::Output, right_angle: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_classname_type_specifier(self, keyword, left_angle, type_, trailing_comma, right_angle)
     }

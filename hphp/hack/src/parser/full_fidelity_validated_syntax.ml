@@ -509,6 +509,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
         validate_closure_parameter_type_specifier
         (fun x -> SpecClosureParameter x)
         x
+    | Syntax.TypeRefinement _ ->
+      tag validate_type_refinement (fun x -> SpecTypeRefinement x) x
     | Syntax.ClassnameTypeSpecifier _ ->
       tag validate_classname_type_specifier (fun x -> SpecClassname x) x
     | Syntax.FieldSpecifier _ ->
@@ -551,6 +553,7 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | SpecClosure thing -> invalidate_closure_type_specifier (value, thing)
     | SpecClosureParameter thing ->
       invalidate_closure_parameter_type_specifier (value, thing)
+    | SpecTypeRefinement thing -> invalidate_type_refinement (value, thing)
     | SpecClassname thing -> invalidate_classname_type_specifier (value, thing)
     | SpecField thing -> invalidate_field_specifier (value, thing)
     | SpecShape thing -> invalidate_shape_type_specifier (value, thing)
@@ -630,6 +633,23 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | BodyXHPCategory thing -> invalidate_xhp_category_declaration (value, thing)
     | BodyXHPClassAttribute thing ->
       invalidate_xhp_class_attribute_declaration (value, thing)
+
+  and validate_refinement_member : refinement_member validator =
+   fun x ->
+    match Syntax.syntax x with
+    | Syntax.TypeInRefinement _ ->
+      tag validate_type_in_refinement (fun x -> TypeRefinementMemberType x) x
+    | Syntax.CtxInRefinement _ ->
+      tag validate_ctx_in_refinement (fun x -> TypeRefinementMemberCtx x) x
+    | s -> aggregation_fail Def.RefinementMember s
+
+  and invalidate_refinement_member : refinement_member invalidator =
+   fun (value, thing) ->
+    match thing with
+    | TypeRefinementMemberType thing ->
+      invalidate_type_in_refinement (value, thing)
+    | TypeRefinementMemberCtx thing ->
+      invalidate_ctx_in_refinement (value, thing)
 
   and validate_statement : statement validator =
    fun x ->
@@ -5877,6 +5897,140 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
                 x.closure_parameter_readonly;
             closure_parameter_type =
               invalidate_specifier x.closure_parameter_type;
+          };
+      Syntax.value = v;
+    }
+
+  and validate_type_refinement : type_refinement validator = function
+    | { Syntax.syntax = Syntax.TypeRefinement x; value = v } ->
+      ( v,
+        {
+          type_refinement_right_brace =
+            validate_token x.type_refinement_right_brace;
+          type_refinement_members =
+            validate_list_with
+              validate_refinement_member
+              x.type_refinement_members;
+          type_refinement_left_brace =
+            validate_token x.type_refinement_left_brace;
+          type_refinement_keyword = validate_token x.type_refinement_keyword;
+          type_refinement_type = validate_specifier x.type_refinement_type;
+        } )
+    | s -> validation_fail (Some SyntaxKind.TypeRefinement) s
+
+  and invalidate_type_refinement : type_refinement invalidator =
+   fun (v, x) ->
+    {
+      Syntax.syntax =
+        Syntax.TypeRefinement
+          {
+            type_refinement_type = invalidate_specifier x.type_refinement_type;
+            type_refinement_keyword = invalidate_token x.type_refinement_keyword;
+            type_refinement_left_brace =
+              invalidate_token x.type_refinement_left_brace;
+            type_refinement_members =
+              invalidate_list_with
+                invalidate_refinement_member
+                x.type_refinement_members;
+            type_refinement_right_brace =
+              invalidate_token x.type_refinement_right_brace;
+          };
+      Syntax.value = v;
+    }
+
+  and validate_type_in_refinement : type_in_refinement validator = function
+    | { Syntax.syntax = Syntax.TypeInRefinement x; value = v } ->
+      ( v,
+        {
+          type_in_refinement_type =
+            validate_option_with validate_specifier x.type_in_refinement_type;
+          type_in_refinement_equal =
+            validate_option_with validate_token x.type_in_refinement_equal;
+          type_in_refinement_constraints =
+            validate_list_with
+              validate_type_constraint
+              x.type_in_refinement_constraints;
+          type_in_refinement_type_parameters =
+            validate_option_with
+              validate_type_parameters
+              x.type_in_refinement_type_parameters;
+          type_in_refinement_name = validate_token x.type_in_refinement_name;
+          type_in_refinement_keyword =
+            validate_token x.type_in_refinement_keyword;
+        } )
+    | s -> validation_fail (Some SyntaxKind.TypeInRefinement) s
+
+  and invalidate_type_in_refinement : type_in_refinement invalidator =
+   fun (v, x) ->
+    {
+      Syntax.syntax =
+        Syntax.TypeInRefinement
+          {
+            type_in_refinement_keyword =
+              invalidate_token x.type_in_refinement_keyword;
+            type_in_refinement_name = invalidate_token x.type_in_refinement_name;
+            type_in_refinement_type_parameters =
+              invalidate_option_with
+                invalidate_type_parameters
+                x.type_in_refinement_type_parameters;
+            type_in_refinement_constraints =
+              invalidate_list_with
+                invalidate_type_constraint
+                x.type_in_refinement_constraints;
+            type_in_refinement_equal =
+              invalidate_option_with invalidate_token x.type_in_refinement_equal;
+            type_in_refinement_type =
+              invalidate_option_with
+                invalidate_specifier
+                x.type_in_refinement_type;
+          };
+      Syntax.value = v;
+    }
+
+  and validate_ctx_in_refinement : ctx_in_refinement validator = function
+    | { Syntax.syntax = Syntax.CtxInRefinement x; value = v } ->
+      ( v,
+        {
+          ctx_in_refinement_ctx_list =
+            validate_option_with validate_specifier x.ctx_in_refinement_ctx_list;
+          ctx_in_refinement_equal =
+            validate_option_with validate_token x.ctx_in_refinement_equal;
+          ctx_in_refinement_constraints =
+            validate_list_with
+              validate_context_constraint
+              x.ctx_in_refinement_constraints;
+          ctx_in_refinement_type_parameters =
+            validate_option_with
+              validate_type_parameters
+              x.ctx_in_refinement_type_parameters;
+          ctx_in_refinement_name = validate_token x.ctx_in_refinement_name;
+          ctx_in_refinement_keyword = validate_token x.ctx_in_refinement_keyword;
+        } )
+    | s -> validation_fail (Some SyntaxKind.CtxInRefinement) s
+
+  and invalidate_ctx_in_refinement : ctx_in_refinement invalidator =
+   fun (v, x) ->
+    {
+      Syntax.syntax =
+        Syntax.CtxInRefinement
+          {
+            ctx_in_refinement_keyword =
+              invalidate_token x.ctx_in_refinement_keyword;
+            ctx_in_refinement_name = invalidate_token x.ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters =
+              invalidate_option_with
+                invalidate_type_parameters
+                x.ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints =
+              invalidate_list_with
+                invalidate_context_constraint
+                x.ctx_in_refinement_constraints;
+            ctx_in_refinement_equal =
+              invalidate_option_with invalidate_token x.ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list =
+              invalidate_option_with
+                invalidate_specifier
+                x.ctx_in_refinement_ctx_list;
           };
       Syntax.value = v;
     }

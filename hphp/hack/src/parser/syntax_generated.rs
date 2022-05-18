@@ -1617,6 +1617,44 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_type_refinement(_: &C, type_refinement_type: Self, type_refinement_keyword: Self, type_refinement_left_brace: Self, type_refinement_members: Self, type_refinement_right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::TypeRefinement(Box::new(TypeRefinementChildren {
+            type_refinement_type,
+            type_refinement_keyword,
+            type_refinement_left_brace,
+            type_refinement_members,
+            type_refinement_right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_type_in_refinement(_: &C, type_in_refinement_keyword: Self, type_in_refinement_name: Self, type_in_refinement_type_parameters: Self, type_in_refinement_constraints: Self, type_in_refinement_equal: Self, type_in_refinement_type: Self) -> Self {
+        let syntax = SyntaxVariant::TypeInRefinement(Box::new(TypeInRefinementChildren {
+            type_in_refinement_keyword,
+            type_in_refinement_name,
+            type_in_refinement_type_parameters,
+            type_in_refinement_constraints,
+            type_in_refinement_equal,
+            type_in_refinement_type,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_ctx_in_refinement(_: &C, ctx_in_refinement_keyword: Self, ctx_in_refinement_name: Self, ctx_in_refinement_type_parameters: Self, ctx_in_refinement_constraints: Self, ctx_in_refinement_equal: Self, ctx_in_refinement_ctx_list: Self) -> Self {
+        let syntax = SyntaxVariant::CtxInRefinement(Box::new(CtxInRefinementChildren {
+            ctx_in_refinement_keyword,
+            ctx_in_refinement_name,
+            ctx_in_refinement_type_parameters,
+            ctx_in_refinement_constraints,
+            ctx_in_refinement_equal,
+            ctx_in_refinement_ctx_list,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_classname_type_specifier(_: &C, classname_keyword: Self, classname_left_angle: Self, classname_type: Self, classname_trailing_comma: Self, classname_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::ClassnameTypeSpecifier(Box::new(ClassnameTypeSpecifierChildren {
             classname_keyword,
@@ -3016,6 +3054,35 @@ where
                 let acc = f(closure_parameter_type, acc);
                 acc
             },
+            SyntaxVariant::TypeRefinement(x) => {
+                let TypeRefinementChildren { type_refinement_type, type_refinement_keyword, type_refinement_left_brace, type_refinement_members, type_refinement_right_brace } = *x;
+                let acc = f(type_refinement_type, acc);
+                let acc = f(type_refinement_keyword, acc);
+                let acc = f(type_refinement_left_brace, acc);
+                let acc = f(type_refinement_members, acc);
+                let acc = f(type_refinement_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::TypeInRefinement(x) => {
+                let TypeInRefinementChildren { type_in_refinement_keyword, type_in_refinement_name, type_in_refinement_type_parameters, type_in_refinement_constraints, type_in_refinement_equal, type_in_refinement_type } = *x;
+                let acc = f(type_in_refinement_keyword, acc);
+                let acc = f(type_in_refinement_name, acc);
+                let acc = f(type_in_refinement_type_parameters, acc);
+                let acc = f(type_in_refinement_constraints, acc);
+                let acc = f(type_in_refinement_equal, acc);
+                let acc = f(type_in_refinement_type, acc);
+                acc
+            },
+            SyntaxVariant::CtxInRefinement(x) => {
+                let CtxInRefinementChildren { ctx_in_refinement_keyword, ctx_in_refinement_name, ctx_in_refinement_type_parameters, ctx_in_refinement_constraints, ctx_in_refinement_equal, ctx_in_refinement_ctx_list } = *x;
+                let acc = f(ctx_in_refinement_keyword, acc);
+                let acc = f(ctx_in_refinement_name, acc);
+                let acc = f(ctx_in_refinement_type_parameters, acc);
+                let acc = f(ctx_in_refinement_constraints, acc);
+                let acc = f(ctx_in_refinement_equal, acc);
+                let acc = f(ctx_in_refinement_ctx_list, acc);
+                acc
+            },
             SyntaxVariant::ClassnameTypeSpecifier(x) => {
                 let ClassnameTypeSpecifierChildren { classname_keyword, classname_left_angle, classname_type, classname_trailing_comma, classname_right_angle } = *x;
                 let acc = f(classname_keyword, acc);
@@ -3325,6 +3392,9 @@ where
             SyntaxVariant::DictionaryTypeSpecifier {..} => SyntaxKind::DictionaryTypeSpecifier,
             SyntaxVariant::ClosureTypeSpecifier {..} => SyntaxKind::ClosureTypeSpecifier,
             SyntaxVariant::ClosureParameterTypeSpecifier {..} => SyntaxKind::ClosureParameterTypeSpecifier,
+            SyntaxVariant::TypeRefinement {..} => SyntaxKind::TypeRefinement,
+            SyntaxVariant::TypeInRefinement {..} => SyntaxKind::TypeInRefinement,
+            SyntaxVariant::CtxInRefinement {..} => SyntaxKind::CtxInRefinement,
             SyntaxVariant::ClassnameTypeSpecifier {..} => SyntaxKind::ClassnameTypeSpecifier,
             SyntaxVariant::FieldSpecifier {..} => SyntaxKind::FieldSpecifier,
             SyntaxVariant::FieldInitializer {..} => SyntaxKind::FieldInitializer,
@@ -4364,6 +4434,32 @@ where
                  closure_parameter_type: ts.pop().unwrap(),
                  closure_parameter_readonly: ts.pop().unwrap(),
                  closure_parameter_call_convention: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TypeRefinement, 5) => SyntaxVariant::TypeRefinement(Box::new(TypeRefinementChildren {
+                 type_refinement_right_brace: ts.pop().unwrap(),
+                 type_refinement_members: ts.pop().unwrap(),
+                 type_refinement_left_brace: ts.pop().unwrap(),
+                 type_refinement_keyword: ts.pop().unwrap(),
+                 type_refinement_type: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TypeInRefinement, 6) => SyntaxVariant::TypeInRefinement(Box::new(TypeInRefinementChildren {
+                 type_in_refinement_type: ts.pop().unwrap(),
+                 type_in_refinement_equal: ts.pop().unwrap(),
+                 type_in_refinement_constraints: ts.pop().unwrap(),
+                 type_in_refinement_type_parameters: ts.pop().unwrap(),
+                 type_in_refinement_name: ts.pop().unwrap(),
+                 type_in_refinement_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::CtxInRefinement, 6) => SyntaxVariant::CtxInRefinement(Box::new(CtxInRefinementChildren {
+                 ctx_in_refinement_ctx_list: ts.pop().unwrap(),
+                 ctx_in_refinement_equal: ts.pop().unwrap(),
+                 ctx_in_refinement_constraints: ts.pop().unwrap(),
+                 ctx_in_refinement_type_parameters: ts.pop().unwrap(),
+                 ctx_in_refinement_name: ts.pop().unwrap(),
+                 ctx_in_refinement_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ClassnameTypeSpecifier, 5) => SyntaxVariant::ClassnameTypeSpecifier(Box::new(ClassnameTypeSpecifierChildren {
@@ -5662,6 +5758,35 @@ pub struct ClosureParameterTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct TypeRefinementChildren<T, V> {
+    pub type_refinement_type: Syntax<T, V>,
+    pub type_refinement_keyword: Syntax<T, V>,
+    pub type_refinement_left_brace: Syntax<T, V>,
+    pub type_refinement_members: Syntax<T, V>,
+    pub type_refinement_right_brace: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TypeInRefinementChildren<T, V> {
+    pub type_in_refinement_keyword: Syntax<T, V>,
+    pub type_in_refinement_name: Syntax<T, V>,
+    pub type_in_refinement_type_parameters: Syntax<T, V>,
+    pub type_in_refinement_constraints: Syntax<T, V>,
+    pub type_in_refinement_equal: Syntax<T, V>,
+    pub type_in_refinement_type: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct CtxInRefinementChildren<T, V> {
+    pub ctx_in_refinement_keyword: Syntax<T, V>,
+    pub ctx_in_refinement_name: Syntax<T, V>,
+    pub ctx_in_refinement_type_parameters: Syntax<T, V>,
+    pub ctx_in_refinement_constraints: Syntax<T, V>,
+    pub ctx_in_refinement_equal: Syntax<T, V>,
+    pub ctx_in_refinement_ctx_list: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ClassnameTypeSpecifierChildren<T, V> {
     pub classname_keyword: Syntax<T, V>,
     pub classname_left_angle: Syntax<T, V>,
@@ -5967,6 +6092,9 @@ pub enum SyntaxVariant<T, V> {
     DictionaryTypeSpecifier(Box<DictionaryTypeSpecifierChildren<T, V>>),
     ClosureTypeSpecifier(Box<ClosureTypeSpecifierChildren<T, V>>),
     ClosureParameterTypeSpecifier(Box<ClosureParameterTypeSpecifierChildren<T, V>>),
+    TypeRefinement(Box<TypeRefinementChildren<T, V>>),
+    TypeInRefinement(Box<TypeInRefinementChildren<T, V>>),
+    CtxInRefinement(Box<CtxInRefinementChildren<T, V>>),
     ClassnameTypeSpecifier(Box<ClassnameTypeSpecifierChildren<T, V>>),
     FieldSpecifier(Box<FieldSpecifierChildren<T, V>>),
     FieldInitializer(Box<FieldInitializerChildren<T, V>>),
@@ -7454,6 +7582,41 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.closure_parameter_call_convention),
                     1 => Some(&x.closure_parameter_readonly),
                     2 => Some(&x.closure_parameter_type),
+                        _ => None,
+                    }
+                })
+            },
+            TypeRefinement(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.type_refinement_type),
+                    1 => Some(&x.type_refinement_keyword),
+                    2 => Some(&x.type_refinement_left_brace),
+                    3 => Some(&x.type_refinement_members),
+                    4 => Some(&x.type_refinement_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            TypeInRefinement(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.type_in_refinement_keyword),
+                    1 => Some(&x.type_in_refinement_name),
+                    2 => Some(&x.type_in_refinement_type_parameters),
+                    3 => Some(&x.type_in_refinement_constraints),
+                    4 => Some(&x.type_in_refinement_equal),
+                    5 => Some(&x.type_in_refinement_type),
+                        _ => None,
+                    }
+                })
+            },
+            CtxInRefinement(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.ctx_in_refinement_keyword),
+                    1 => Some(&x.ctx_in_refinement_name),
+                    2 => Some(&x.ctx_in_refinement_type_parameters),
+                    3 => Some(&x.ctx_in_refinement_constraints),
+                    4 => Some(&x.ctx_in_refinement_equal),
+                    5 => Some(&x.ctx_in_refinement_ctx_list),
                         _ => None,
                     }
                 })

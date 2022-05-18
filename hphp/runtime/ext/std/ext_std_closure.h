@@ -101,6 +101,7 @@ struct c_Closure final : ObjectData {
 
   static ObjectData* instanceCtor(Class* cls);
   static void instanceDtor(ObjectData* obj, const Class* cls);
+  static void releaseShallow(ObjectData* obj);
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -185,4 +186,3 @@ ObjectData* createClosure(Class* cls);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

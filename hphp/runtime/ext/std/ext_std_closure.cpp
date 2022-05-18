@@ -138,9 +138,8 @@ void c_Closure::initActRecFromClosure(ActRec* ar) {
   auto const func = ar->func();
   assertx(func->isClosureBody());
 
-  // Request pointer so that we decref once we are done.
-  auto const closure = req::ptr<c_Closure>::attach(
-    c_Closure::fromObject(ar->getThisInPrologue()));
+  auto const closure = c_Closure::fromObject(ar->getThisInPrologue());
+
   assertx(func->implCls() == closure->getVMClass());
 
   // Put in the correct context
@@ -165,11 +164,25 @@ void c_Closure::initActRecFromClosure(ActRec* ar) {
   assertx((hasCoeffectsProp ? 1 : 0) + func->numClosureUseLocals() ==
           cls->numDeclProperties());
   auto loc = reinterpret_cast<TypedValue*>(ar) - func->firstClosureUseLocalId();
-  closure->props()->foreach(
-    hasCoeffectsProp ? 1 : 0,
-    func->numClosureUseLocals(),
-    [&](tv_rval rval) { tvDup(*rval, *--loc); }
-  );
+
+  auto const iterProps = [&](auto&& assignFunc){
+    closure->props()->foreach(
+      hasCoeffectsProp ? 1 : 0,
+      func->numClosureUseLocals(),
+      assignFunc
+    );
+  };
+
+  // Closure properties can be moved rather than duplicated when closure has
+  // exactly 1 reference. After moving props, closure can be freed.
+  if (closure->hasExactlyOneRef()) {
+    iterProps([&](tv_rval rval) {tvCopy(*rval, *--loc);});
+    releaseShallow(closure);
+  } else {
+    iterProps([&](tv_rval rval) {tvDup(*rval, *--loc);});
+    closure->decRefCount();
+  }
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -187,6 +200,17 @@ void c_Closure::instanceDtor(ObjectData* obj, const Class* cls) {
   if (auto t = closure->getThis()) decRefObj(t);
 
   closure->props()->release(cls->countablePropsEnd());
+  auto hdr = closure->hdr();
+  tl_heap->objFree(hdr, hdr->size());
+}
+
+void c_Closure::releaseShallow(ObjectData* obj) {
+  if (UNLIKELY(obj->getAttribute(ObjectData::IsWeakRefed))) {
+    WeakRefData::invalidateWeakRef((uintptr_t)obj);
+  }
+
+  auto closure = c_Closure::fromObject(obj);
+  if (auto t = closure->getThis()) decRefObj(t);
 
   auto hdr = closure->hdr();
   tl_heap->objFree(hdr, hdr->size());

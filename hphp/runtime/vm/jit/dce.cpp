@@ -790,6 +790,9 @@ void removeDeadInstructions(IRUnit& unit,
           // be dealt with below.
           if (inst.is(Jmp) && inst.numSrcs() > 0) return false;
 
+          // DecReleaseCheck will be dealt with below.
+          if (inst.is(DecReleaseCheck)) return false;
+
           ONTRACE(
             4,
             if (state[inst].isDead()) {
@@ -849,6 +852,11 @@ void removeDeadInstructions(IRUnit& unit,
               }
             }
           }
+        }
+
+        if (back.is(DecReleaseCheck) && state[&back].isDead()) {
+          block->erase(block->backIter());
+          block->push_back(unit.gen(Jmp, bcctx, next));
         }
       }
 
@@ -1241,7 +1249,7 @@ void killInstrAdjustRC(
             FTRACE(3, "{} for {}\n", dec->toString(), inst->toString());
             replaced = true;
             state[dec].setLive();
-          } else {
+          } else if (!dec->is(DecReleaseCheck)) {
             auto const blk = dec->block();
             auto const ins = unit.gen(DecRef, dec->bcctx(), DecRefData{}, src);
             blk->insert(blk->iteratorTo(dec), ins);
@@ -1318,11 +1326,11 @@ void fullDCE(IRUnit& unit) {
 
       if (srcInst->producesReference() && canDCE(*srcInst)) {
         ++uses[src];
-        if (inst->is(DecRef)) {
+        if (inst->is(DecRef, DecReleaseCheck)) {
           rcInsts[srcInst].decs.emplace_back(inst);
         }
         if (inst->is(InitVecElem, InitStructElem, InitStructPositions,
-                     StClosureArg)) {
+                     ReleaseShallow, StClosureArg)) {
           if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
         }
       }

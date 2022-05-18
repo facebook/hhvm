@@ -549,17 +549,37 @@ void emitInitClosureLocals(IRGS& env, const Func* callee) {
   auto const numUses = callee->numClosureUseLocals();
   auto const cls = callee->implCls();
 
-  for (auto i = 0; i < numUses; ++i) {
-    auto const slot = i + (cls->hasClosureCoeffectsProp() ? 1 : 0);
+  auto const getProp = [&](auto index) {
+    assertx(index < numUses);
+    auto const slot = index + (cls->hasClosureCoeffectsProp() ? 1 : 0);
     auto const type =
       typeFromRAT(cls->declPropRepoAuthType(slot), callee->cls()) & TCell;
     auto const addr = ldPropAddr(env, closure, nullptr, cls, slot, type);
-    auto const prop = gen(env, LdMem, type, addr);
-    gen(env, IncRef, prop);
-    gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);
-  }
+    return gen(env, LdMem, type, addr);
+  };
 
-  decRef(env, closure, DecRefProfileId::Default);
+  // Move props and skip incref when closure refcount is 1 and going to be
+  // released.
+  ifThenElse(
+    env,
+    [&](Block* taken){
+      gen(env, DecReleaseCheck, taken, closure);
+    },
+    [&] { // Next: closure RC goes to 0
+      for (auto i = 0; i < numUses; ++i) {
+        auto const prop = getProp(i);
+        gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);
+      }
+      gen(env, ReleaseShallow, closure);
+    },
+    [&] { // Taken: closure RC != 0
+      for (auto i = 0; i < numUses; ++i) {
+        auto const prop = getProp(i);
+        gen(env, IncRef, prop);
+        gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);
+      }
+    }
+  );
 }
 
 /*

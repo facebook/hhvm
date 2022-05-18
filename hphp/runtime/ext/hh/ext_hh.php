@@ -251,36 +251,6 @@ function dynamic_fun_force(string $name)[]: mixed;
 <<__Native>>
 function dynamic_class_meth_force(string $cls, string $meth)[]: mixed;
 
-// class-like
-interface ClassLikeAttribute {}
-interface ClassAttribute extends ClassLikeAttribute {}
-interface ClassConstantAttribute {}
-interface EnumAttribute extends ClassLikeAttribute {}
-interface EnumClassAttribute extends ClassLikeAttribute {}
-
-interface TypeAliasAttribute {}
-
-// function-like
-interface FunctionAttribute {}
-interface MethodAttribute {}
-
-interface LambdaAttribute {}
-
-// Modules
-interface ModuleAttribute {}
-
-// properties
-interface PropertyAttribute {}
-interface InstancePropertyAttribute extends PropertyAttribute {}
-interface StaticPropertyAttribute extends PropertyAttribute {}
-
-interface ParameterAttribute {}
-interface FileAttribute {}
-
-interface TypeParameterAttribute {}
-
-interface TypeConstantAttribute {}
-
 /**
  * Begin collecting code coverage on all subsequent calls into files in $files
  * during this request.

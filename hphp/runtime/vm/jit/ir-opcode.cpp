@@ -80,7 +80,7 @@ TRACE_SET_MOD(hhir);
 #define DMemoKey       HasDest
 #define DLvalOfPtr     HasDest
 #define DTypeCnsClsName HasDest
-#define DVerifyParamFail HasDest
+#define DVerifyCoerce  HasDest
 #define DPropLval      HasDest
 #define DElemLval      HasDest
 #define DElemLvalPos   HasDest
@@ -158,7 +158,7 @@ OpInfo g_opInfo[] = {
 #undef DMemoKey
 #undef DLvalOfPtr
 #undef DTypeCnsClsName
-#undef DVerifyParamFail
+#undef DVerifyCoerce
 #undef DPropLval
 #undef DElemLval
 #undef DElemLvalPos
@@ -431,8 +431,10 @@ bool opcodeMayRaise(Opcode opc) {
   case UnsetElem:
   case UnsetProp:
   case VectorSet:
+  case VerifyParam:
   case VerifyParamCallable:
   case VerifyParamCls:
+  case VerifyParamCoerce:
   case VerifyParamFail:
   case VerifyParamFailHard:
   case VerifyProp:
@@ -444,8 +446,10 @@ bool opcodeMayRaise(Opcode opc) {
   case VerifyPropFailHard:
   case VerifyReifiedLocalType:
   case VerifyReifiedReturnType:
+  case VerifyRet:
   case VerifyRetCallable:
   case VerifyRetCls:
+  case VerifyRetCoerce:
   case VerifyRetFail:
   case VerifyRetFailHard:
     return true;

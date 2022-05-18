@@ -74,25 +74,35 @@ StringData* convObjToStrHelper(ObjectData* o);
 
 void throwUndefPropException(ObjectData* base, const StringData* name);
 void throwUndefVariable(StringData* nm);
-void VerifyParamTypeSlow(ObjectData* obj,
-                         const Class* constraint,
-                         const Func* func,
-                         int32_t paramId,
-                         const TypeConstraint* expected);
+void VerifyParamTypeCls(ObjectData* obj,
+                        const Class* constraint,
+                        const Func* func,
+                        int32_t paramId,
+                        const TypeConstraint* expected);
 void VerifyParamTypeCallable(TypedValue value,
                              const Func* func,
                              int32_t paramId);
+TypedValue VerifyParamType(TypedValue value,
+                           const Class* ctx,
+                           const Func* func,
+                           int paramId,
+                           const TypeConstraint* tc);
 void VerifyParamTypeFail(TypedValue value,
                          const Class* ctx,
                          const Func* func,
                          int paramId,
                          const TypeConstraint* tc);
-void VerifyRetTypeSlow(ObjectData* obj,
-                       const Class* constraint,
-                       const Func* func,
-                       int32_t retId,
-                       const TypeConstraint* expected);
+void VerifyRetTypeCls(ObjectData* obj,
+                      const Class* constraint,
+                      const Func* func,
+                      int32_t retId,
+                      const TypeConstraint* expected);
 void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId);
+TypedValue VerifyRetType(TypedValue value,
+                         const Class* ctx,
+                         const Func* func,
+                         int32_t retId,
+                         const TypeConstraint* tc);
 void VerifyRetTypeFail(TypedValue value,
                        const Class* ctx,
                        const Func* func,

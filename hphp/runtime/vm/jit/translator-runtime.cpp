@@ -195,9 +195,9 @@ void raise_error_sd(const StringData *msg) {
 }
 
 ALWAYS_INLINE
-static bool VerifyTypeSlowImpl(const Class* cls,
-                               const Class* constraint,
-                               const TypeConstraint* expected) {
+static bool VerifyTypeClsImpl(const Class* cls,
+                              const Class* constraint,
+                              const TypeConstraint* expected) {
   // This helper should only be called for the Object and Unresolved cases
   assertx(expected->isObject() || expected->isUnresolved());
   // If we have a resolved class for the constraint, all we have to do is
@@ -209,12 +209,12 @@ static bool VerifyTypeSlowImpl(const Class* cls,
   return expected->isUnresolved() && expected->checkTypeAliasObj(cls);
 }
 
-void VerifyParamTypeSlow(ObjectData* obj,
-                         const Class* constraint,
-                         const Func* func,
-                         int32_t paramId,
-                         const TypeConstraint* expected) {
-  if (!VerifyTypeSlowImpl(obj->getVMClass(), constraint, expected)) {
+void VerifyParamTypeCls(ObjectData* obj,
+                        const Class* constraint,
+                        const Func* func,
+                        int32_t paramId,
+                        const TypeConstraint* expected) {
+  if (!VerifyTypeClsImpl(obj->getVMClass(), constraint, expected)) {
     assertx(expected->isObject() || expected->isUnresolved());
     VerifyParamTypeFail(
       make_tv<KindOfObject>(obj), nullptr, func, paramId, expected);
@@ -230,22 +230,32 @@ void VerifyParamTypeCallable(TypedValue value, const Func* func,
   }
 }
 
+TypedValue VerifyParamType(TypedValue value, const Class* ctx,
+                           const Func* func, int32_t paramId,
+                           const TypeConstraint* tc) {
+  assertx(tvIsPlausible(value));
+  assertx(tc->isCheckable());
+  tc->verifyParam(&value, ctx, func, paramId);
+  assertx(tvIsPlausible(value));
+  return value;
+}
 
 void VerifyParamTypeFail(TypedValue value, const Class* ctx,
                          const Func* func, int32_t paramId,
                          const TypeConstraint* tc) {
   DEBUG_ONLY auto const origType = value.type();
+  assertx(tvIsPlausible(value));
   assertx(!tc->check(&value, ctx));
   tc->verifyParamFail(&value, ctx, func, paramId);
   assertx(value.type() == origType);
 }
 
-void VerifyRetTypeSlow(ObjectData* obj,
-                       const Class* constraint,
-                       const Func* func,
-                       int32_t retId,
-                       const TypeConstraint* expected) {
-  if (!VerifyTypeSlowImpl(obj->getVMClass(), constraint, expected)) {
+void VerifyRetTypeCls(ObjectData* obj,
+                      const Class* constraint,
+                      const Func* func,
+                      int32_t retId,
+                      const TypeConstraint* expected) {
+  if (!VerifyTypeClsImpl(obj->getVMClass(), constraint, expected)) {
     assertx(expected->isObject() || expected->isUnresolved());
     VerifyRetTypeFail(
       make_tv<KindOfObject>(obj), nullptr, func, retId, expected);
@@ -260,6 +270,20 @@ void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId) {
     assertx(tc.isCallable());
     VerifyRetTypeFail(value, nullptr, func, retId, &tc);
   }
+}
+
+TypedValue VerifyRetType(TypedValue value, const Class* ctx,
+                         const Func* func, int32_t retId,
+                         const TypeConstraint* tc) {
+  assertx(tvIsPlausible(value));
+  assertx(tc->isCheckable());
+  if (retId == TypeConstraint::ReturnId) {
+    tc->verifyReturn(&value, ctx, func);
+  } else {
+    tc->verifyOutParam(&value, ctx, func, retId);
+  }
+  assertx(tvIsPlausible(value));
+  return value;
 }
 
 void VerifyRetTypeFail(TypedValue value, const Class* ctx,

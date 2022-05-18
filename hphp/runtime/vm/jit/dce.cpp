@@ -489,14 +489,18 @@ bool canDCE(const IRInstruction& inst) {
   case DefRegSP:
   case InitFrame:
   case Count:
-  case VerifyParamCls:
+  case VerifyParam:
   case VerifyParamCallable:
+  case VerifyParamCls:
+  case VerifyParamCoerce:
   case VerifyParamFail:
   case VerifyParamFailHard:
   case VerifyReifiedLocalType:
   case VerifyReifiedReturnType:
+  case VerifyRet:
   case VerifyRetCallable:
   case VerifyRetCls:
+  case VerifyRetCoerce:
   case VerifyRetFail:
   case VerifyRetFailHard:
   case VerifyProp:

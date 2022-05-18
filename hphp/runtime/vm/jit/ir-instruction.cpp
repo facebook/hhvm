@@ -223,6 +223,10 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case NewColFromArray:
       return true;
 
+    case VerifyParamCoerce:
+    case VerifyRetCoerce:
+      return move != MustMove && srcNo == 0;
+
     case VerifyPropCoerce:
     case VerifyPropCoerceAll:
       return move != MustMove && srcNo == 2;
@@ -649,10 +653,23 @@ Type typeCnsClsName(const IRInstruction* inst) {
   always_assert(false);
 }
 
-Type verifyParamFailReturn(const IRInstruction* inst) {
-  assertx(inst->is(VerifyParamFail, VerifyRetFail));
-  auto const tc = inst->extra<FuncParamWithTCData>()->tc;
-  auto const srcTy = inst->src(0)->type();
+Type verifyCoerceReturn(const IRInstruction* inst) {
+  auto const [tc, srcTy] = [&]() {
+    if (inst->is(VerifyParamCoerce, VerifyRetCoerce)) {
+      return std::make_tuple(
+        inst->extra<FuncParamWithTCData>()->tc,
+        inst->src(0)->type()
+      );
+    }
+    if (inst->is(VerifyPropCoerce)) {
+      return std::make_tuple(
+        inst->extra<TypeConstraintData>()->tc,
+        inst->src(2)->type()
+      );
+    }
+    always_assert(false);
+  }();
+
   auto dstTy = srcTy;
   if (tc->maybeStringCompatible() &&
       (srcTy.maybe(TCls) || srcTy.maybe(TLazyCls))) {
@@ -778,7 +795,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DMemoKey        return memoKeyReturn(inst);
 #define DLvalOfPtr      return ptrToLvalReturn(inst);
 #define DTypeCnsClsName return typeCnsClsName(inst);
-#define DVerifyParamFail return verifyParamFailReturn(inst);
+#define DVerifyCoerce   return verifyCoerceReturn(inst);
 #define DPropLval       return propLval(inst);
 #define DElemLval       return elemLval(inst);
 #define DElemLvalPos    return elemLvalPos(inst);

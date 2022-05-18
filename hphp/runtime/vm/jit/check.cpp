@@ -527,7 +527,7 @@ using TypeNames::TCA;
 #define DMemoKey
 #define DLvalOfPtr
 #define DTypeCnsClsName
-#define DVerifyParamFail
+#define DVerifyCoerce
 #define DPropLval
 #define DElemLval
 #define DElemLvalPos
@@ -596,7 +596,7 @@ using TypeNames::TCA;
 #undef DMemoKey
 #undef DLvalOfPtr
 #undef DTypeCnsClsName
-#undef DVerifyParamFail
+#undef DVerifyCoerce
 #undef DPropLval
 #undef DElemLval
 #undef DElemLvalPos

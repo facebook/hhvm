@@ -509,21 +509,25 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   // These C++ helpers can invoke the user error handler and go do whatever
   // they want to non-frame locations.
+  case VerifyParam:
   case VerifyParamCallable:
   case VerifyParamCls:
+  case VerifyParamCoerce:
   case VerifyParamFail:
   case VerifyParamFailHard:
-  case VerifyPropCls:
-  case VerifyPropFail:
-  case VerifyPropFailHard:
   case VerifyProp:
   case VerifyPropAll:
+  case VerifyPropCls:
   case VerifyPropCoerce:
   case VerifyPropCoerceAll:
+  case VerifyPropFail:
+  case VerifyPropFailHard:
   case VerifyReifiedLocalType:
   case VerifyReifiedReturnType:
+  case VerifyRet:
   case VerifyRetCallable:
   case VerifyRetCls:
+  case VerifyRetCoerce:
   case VerifyRetFail:
   case VerifyRetFailHard:
     return may_load_store(AHeapAny, AHeapAny);

@@ -2019,6 +2019,20 @@ To string conversions:
   statically prove that this failure will result in a fatal error rather than a
   type coercion.
 
+| VerifyParam<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), NF
+
+  Verify that S0 is compatible with the parameter type hint. The verification
+  is guaranteed to not coerce. If the parameter type hint is `this`, S1 contains
+  class corresponding to `this` type.
+
+| VerifyParamCoerce<func,param,tc>,
+|   DVerifyCoerce,
+|   S(Cell) S(Cls|Nullptr),
+|   PRc|CRc
+
+  Verify that S0 is compatible with the parameter type hint. The verification
+  may coerce and the updated value will be returned.
+
 | VerifyRetCallable<func,param>, ND, S(Cell), NF
 
   Verify a return type hint.
@@ -2035,6 +2049,14 @@ To string conversions:
 
   Terminal version of VerifyRetFail, to be used when the compiler can prove
   that this failure will result in a fatal error.
+
+| VerifyRet<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), NF
+
+  Verify a return type hint. The verification is guaranteed to not coerce.
+
+| VerifyRetCoerce<func,param,tc>, DVerifyCoerce, S(Cell) S(Cls|Nullptr), PRc|CRc
+
+  Verify a return type hint. The verification may coerce.
 
 | VerifyPropCls, ND, S(Cls) S(Int) S(Cls|Nullptr) S(Obj) C(Bool), NF
 
@@ -2069,7 +2091,7 @@ To string conversions:
   S1 on S0 including upper-bounds. S3 is true if this is a static property,
   false otherwise.
 
-| VerifyPropCoerce, D(InitCell), S(Cls) S(Int) S(Cell) C(Bool), PRc|CRc
+| VerifyPropCoerce, DVerifyCoerce, S(Cls) S(Int) S(Cell) C(Bool), PRc|CRc
 
   Verify that S2 is compatible with the type hint for the property at slot S1
   on S0. S3 is true if this is a static property, false otherwise. Once support

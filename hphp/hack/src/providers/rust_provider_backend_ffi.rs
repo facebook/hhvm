@@ -313,10 +313,9 @@ ocaml_ffi! {
     }
 
     fn hh_rust_provider_backend_naming_get_filenames_by_hash(
-        _backend: Backend,
-        _db_path: Option<PathBuf>,
-        _deps: Custom<deps_rust::DepSet>,
-    ) {
-        todo!()
+        backend: Backend,
+        deps: Custom<deps_rust::DepSet>,
+    ) -> std::collections::BTreeSet<RelativePath> {
+        backend.naming_table.get_filenames_by_hash(&deps).unwrap()
     }
 }

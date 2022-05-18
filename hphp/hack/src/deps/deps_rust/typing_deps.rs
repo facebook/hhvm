@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use depgraph::reader::{Dep, DepGraph, DepGraphOpener};
+pub use depgraph::reader::Dep;
+use depgraph::reader::{DepGraph, DepGraphOpener};
 use ocamlrep::{FromError, FromOcamlRep, Value};
 use ocamlrep_custom::{caml_serialize_default_impls, CamlSerialize};
 use once_cell::sync::OnceCell;

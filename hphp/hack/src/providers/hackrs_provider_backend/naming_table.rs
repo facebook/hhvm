@@ -168,6 +168,24 @@ impl NamingTable {
         self.consts.pop_local_changes();
         self.modules.pop_local_changes();
     }
+
+    pub fn get_filenames_by_hash(
+        &self,
+        hashes: &deps_rust::DepSet,
+    ) -> Result<std::collections::BTreeSet<RelativePath>> {
+        hashes
+            .iter()
+            .filter_map(|&hash| self.get_filename_by_hash(hash).transpose())
+            .collect()
+    }
+
+    fn get_filename_by_hash(&self, hash: deps_rust::Dep) -> Result<Option<RelativePath>> {
+        Ok(self
+            .db
+            .with_db(|db| db.get_path_by_symbol_hash(ToplevelSymbolHash::from_u64(hash.into())))?
+            .as_ref()
+            .map(Into::into))
+    }
 }
 
 impl NamingProvider for NamingTable {

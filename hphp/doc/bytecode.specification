@@ -2783,9 +2783,9 @@ IterNext  <IterArgs> <rel offset>    []   ->  []
 
   Iterator next. This instruction first advances the iterator with the ID given
   in %1. If the iterator has more elements, then it writes the next element's
-  value (and, for key-value iters, its key) to the output locals given in %1,
-  Otherwise, the base frees the iterator (with an implicit IterFree) and
-  transfers control to the location specified by %2.
+  value (and, for key-value iters, its key) to the output locals given in %1
+  and transfers control to the location specified by %2, Otherwise, the base
+  frees the iterator (with an implicit IterFree).
 
   As with IterInit, the precise semantics of "advance" and "has more elements"
   depend on the iterator type. (We could also say it depends on the type of

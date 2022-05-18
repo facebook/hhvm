@@ -13,7 +13,7 @@ namespace {
  *
  */
 <<__Sealed(Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
-interface ConstCollection<+Te> extends Countable {
+interface ConstCollection<+Te> extends Countable, IPureStringishObject {
 
   /**
    * Is the collection empty?

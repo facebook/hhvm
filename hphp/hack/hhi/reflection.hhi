@@ -8,7 +8,7 @@
  *
  */
 
-interface Reflector {
+interface Reflector extends IPureStringishObject {
   public function __toString()[];
 }
 
@@ -321,7 +321,7 @@ class ReflectionTypeAlias implements Reflector {
   final public function getAttributeClass<T as HH\TypeAliasAttribute>(classname<T> $c)[]: ?T;
 }
 
-class ReflectionType {
+class ReflectionType implements IPureStringishObject {
   private function __clone();
   public function __construct(?Reflector $param_or_ret = null,
                               darray $type_hint_info = darray[]);

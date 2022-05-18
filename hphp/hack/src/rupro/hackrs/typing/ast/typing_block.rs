@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::tast;
-use crate::typing::ast::typing_trait::TC;
+use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use ty::reason::Reason;
@@ -16,7 +16,7 @@ use ty::reason::Reason;
 /// type.
 pub struct TCBlock<'a>(pub &'a oxidized::aast::Block<(), ()>);
 
-impl<'a, R: Reason> TC<R> for TCBlock<'a> {
+impl<'a, R: Reason> Infer<R> for TCBlock<'a> {
     type Params = ();
     type Typed = tast::Block<R>;
 

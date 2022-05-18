@@ -17,4 +17,4 @@ pub mod typing_stmt;
 pub mod typing_tparam;
 pub mod typing_trait;
 
-pub use typing_trait::TC;
+pub use typing_trait::Infer;

@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::special_names;
 use crate::typing::ast::typing_localize::LocalizeEnv;
-use crate::typing::ast::typing_trait::TC;
+use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::hint_utils::HintUtils;
 use crate::typing::typing_error::Result;
@@ -39,7 +39,7 @@ pub struct TCReturnTypeHintParams<R: Reason> {
     pub localize_env: LocalizeEnv,
 }
 
-impl<'a, R: Reason> TC<R> for TCReturnTypeHint<'a> {
+impl<'a, R: Reason> Infer<R> for TCReturnTypeHint<'a> {
     type Params = TCReturnTypeHintParams<R>;
     type Typed = local::Ty<R>;
 

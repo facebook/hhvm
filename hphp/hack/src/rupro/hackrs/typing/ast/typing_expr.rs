@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::tast;
-use crate::typing::ast::typing_trait::TC;
+use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use ty::local::Ty;
@@ -26,7 +26,7 @@ impl TCExprParams {
     }
 }
 
-impl<R: Reason> TC<R> for oxidized::aast::Expr<(), ()> {
+impl<R: Reason> Infer<R> for oxidized::aast::Expr<(), ()> {
     type Params = TCExprParams;
     type Typed = tast::Expr<R>;
 

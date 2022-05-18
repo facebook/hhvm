@@ -6,14 +6,14 @@ use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use ty::reason::Reason;
 
-pub trait TC<R: Reason> {
+pub trait Infer<R: Reason> {
     type Typed;
     type Params;
 
     fn infer(&self, env: &TEnv<R>, params: Self::Params) -> Result<Self::Typed>;
 }
 
-impl<R: Reason, T: TC<R>> TC<R> for &T {
+impl<R: Reason, T: Infer<R>> Infer<R> for &T {
     type Typed = T::Typed;
     type Params = T::Params;
 
@@ -22,9 +22,9 @@ impl<R: Reason, T: TC<R>> TC<R> for &T {
     }
 }
 
-impl<R: Reason, T> TC<R> for [T]
+impl<R: Reason, T> Infer<R> for [T]
 where
-    T: TC<R>,
+    T: Infer<R>,
     T::Params: Clone,
 {
     type Typed = Vec<T::Typed>;

@@ -4,12 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::special_names;
 use crate::tast;
-use crate::typing::ast::typing_trait::TC;
+use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::{Error, Result};
 use ty::reason::Reason;
 
-impl<R: Reason> TC<R> for oxidized::aast::Class_<(), ()> {
+impl<R: Reason> Infer<R> for oxidized::aast::Class_<(), ()> {
     type Params = ();
     type Typed = tast::Class_<R>;
 

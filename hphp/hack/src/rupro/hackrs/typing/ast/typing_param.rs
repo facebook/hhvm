@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::tast;
 use crate::typing::ast::typing_localize::LocalizeEnv;
-use crate::typing::ast::typing_trait::TC;
+use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::hint_utils::HintUtils;
 use crate::typing::typing_error::Result;
@@ -14,7 +14,7 @@ use ty::reason::Reason;
 use utils::core::LocalId;
 
 /// Type function parameters and bind the variables in the environment.
-impl<R: Reason> TC<R> for oxidized::aast::FunParam<(), ()> {
+impl<R: Reason> Infer<R> for oxidized::aast::FunParam<(), ()> {
     type Params = ();
     type Typed = tast::FunParam<R>;
 

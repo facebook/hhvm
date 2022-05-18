@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::tast;
-use crate::typing::ast::TC;
+use crate::typing::ast::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use crate::typing_ctx::TypingCtx;

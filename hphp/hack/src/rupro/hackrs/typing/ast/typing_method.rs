@@ -5,7 +5,7 @@
 use crate::tast;
 use crate::typing::ast::typing_localize::LocalizeEnv;
 use crate::typing::ast::typing_return_type_hint::{TCReturnTypeHint, TCReturnTypeHintParams};
-use crate::typing::ast::typing_trait::TC;
+use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::shared::typing_return::TypingReturn;
 use crate::typing::typing_error::Result;
@@ -14,7 +14,7 @@ use ty::reason::Reason;
 
 /// Parameters that influence the typing of function-like definitions.
 
-impl<R: Reason> TC<R> for oxidized::aast::Method_<(), ()> {
+impl<R: Reason> Infer<R> for oxidized::aast::Method_<(), ()> {
     type Params = ();
     type Typed = tast::Method_<R>;
 

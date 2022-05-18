@@ -5,14 +5,14 @@
 use crate::tast;
 use crate::typing::ast::typing_localize::LocalizeEnv;
 use crate::typing::ast::typing_return_type_hint::{TCReturnTypeHint, TCReturnTypeHintParams};
-use crate::typing::ast::typing_trait::TC;
+use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::shared::typing_return::TypingReturn;
 use crate::typing::typing_error::Result;
 use pos::Symbol;
 use ty::reason::Reason;
 
-impl<R: Reason> TC<R> for oxidized::aast::Fun_<(), ()> {
+impl<R: Reason> Infer<R> for oxidized::aast::Fun_<(), ()> {
     type Params = ();
     type Typed = tast::Fun_<R>;
 

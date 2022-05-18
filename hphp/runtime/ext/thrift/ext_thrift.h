@@ -190,14 +190,14 @@ struct TClientStreamError {
         },
         [&](apache::thrift::detail::EncodedStreamError& err) {
           auto& payload = err.encoded;
-          DCHECK(payload.metadata.payloadMetadata_ref().has_value());
+          DCHECK(payload.metadata.payloadMetadata().has_value());
           DCHECK_EQ(
-              payload.metadata.payloadMetadata_ref()->getType(),
+              payload.metadata.payloadMetadata()->getType(),
               apache::thrift::PayloadMetadata::exceptionMetadata);
           auto& exceptionMetadataBase =
-              payload.metadata.payloadMetadata_ref()->get_exceptionMetadata();
+              payload.metadata.payloadMetadata()->get_exceptionMetadata();
           if (auto exceptionMetadataRef =
-                  exceptionMetadataBase.metadata_ref()) {
+                  exceptionMetadataBase.metadata()) {
             if (exceptionMetadataRef->getType() ==
                 apache::thrift::PayloadExceptionMetadata::declaredException) {
               msgBuffer = std::move(payload.payload);
@@ -205,7 +205,7 @@ struct TClientStreamError {
                 msgStr = "Failed to parse declared exception";
               }
             } else {
-              msgStr = exceptionMetadataBase.what_utf8_ref().value_or("");
+              msgStr = exceptionMetadataBase.what_utf8().value_or("");
             }
           } else {
             msgStr = "Missing payload exception metadata";
@@ -216,7 +216,7 @@ struct TClientStreamError {
           apache::thrift::CompactProtocolReader reader;
           reader.setInput(err.encoded.get());
           streamRpcError.read(&reader);
-          msgStr = streamRpcError.what_utf8_ref().value_or("");
+          msgStr = streamRpcError.what_utf8().value_or("");
         },
         [](...) {});
 

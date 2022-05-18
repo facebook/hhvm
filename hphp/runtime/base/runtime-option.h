@@ -132,17 +132,6 @@ struct RepoOptionsFlags {
     return IndexedMethodAttributes;
   }
 
-  // Getters for the parser options we pass to HackC for extracting facts
-  bool allowNewAttributeSyntax() const {
-    return AllowNewAttributeSyntax;
-  }
-  bool enableXHPClassModifier() const {
-    return EnableXHPClassModifier;
-  }
-  bool disableXHPElementMangling() const {
-    return DisableXHPElementMangling;
-  }
-
   template <typename SerDe> void serde(SerDe& sd) {
     #define N(t, n, ...) sd(n);
     #define P(t, n, ...) sd(n);

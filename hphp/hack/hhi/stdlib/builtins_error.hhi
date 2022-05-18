@@ -34,7 +34,7 @@ function hphp_clear_unflushed();
 <<__PHPStdLib>>
 function hphp_debug_caller_info();
 <<__PHPStdLib>>
-function hphp_debug_backtrace_hash(int $options = 0);
+function hphp_debug_backtrace_hash(int $options = 0)[leak_safe]: int;
 <<__PHPStdLib>>
 function trigger_error(string $error_msg, int $error_type = E_USER_NOTICE)[];
 <<__PHPStdLib>>

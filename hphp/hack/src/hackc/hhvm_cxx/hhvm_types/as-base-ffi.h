@@ -40,4 +40,4 @@ rust::String attrs_to_string_ffi(AttrContext, Attr);
  * Convert a type flag to a string of space-separated type flag names.
  */
 rust::String type_flags_to_string_ffi(TypeConstraintFlags);
-}
+} // namespace HPHP

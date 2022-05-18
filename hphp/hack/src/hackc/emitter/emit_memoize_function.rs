@@ -23,7 +23,7 @@ use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options, RepoFlags};
-use oxidized::{ast as T, pos::Pos};
+use oxidized::{ast, pos::Pos};
 
 pub fn is_interceptable(opts: &Options) -> bool {
     opts.hhvm
@@ -34,7 +34,7 @@ pub fn is_interceptable(opts: &Options) -> bool {
 
 pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    fd: &'a T::FunDef,
+    fd: &'a ast::FunDef,
     user_attrs: &'a [HhasAttribute<'arena>],
     is_memoize_impl: bool,
 ) -> Attr {
@@ -71,7 +71,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     original_id: hhbc::FunctionName<'arena>,
     renamed_id: &hhbc::FunctionName<'arena>,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    fd: &'a T::FunDef,
+    fd: &'a ast::FunDef,
 ) -> Result<HhasFunction<'arena>> {
     let alloc = emitter.alloc;
     let f = &fd.fun;
@@ -150,8 +150,8 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
-    ast_params: &[T::FunParam],
+    hhas_params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    ast_params: &[ast::FunParam],
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
     is_reified: bool,
@@ -182,8 +182,8 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
-    ast_params: &[T::FunParam],
+    hhas_params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    ast_params: &[ast::FunParam],
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
     is_reified: bool,
@@ -351,7 +351,7 @@ fn make_wrapper_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: Env<'a, 'arena>,
     return_type_info: HhasTypeInfo<'arena>,
-    params: Vec<(HhasParam<'arena>, Option<(Label, T::Expr)>)>,
+    params: Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<Str<'arena>>,
     body_instrs: InstrSeq<'arena>,
 ) -> Result<HhasBody<'arena>> {

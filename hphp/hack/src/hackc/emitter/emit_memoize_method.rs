@@ -23,9 +23,9 @@ use hhbc::{
 };
 use hhbc_string_utils::reified;
 use instruction_sequence::{instr, InstrSeq};
-use naming_special_names_rust::{members, user_attributes as ua};
+use naming_special_names_rust::{members, user_attributes};
 use options::HhvmFlags;
-use oxidized::{ast as T, pos::Pos};
+use oxidized::{ast, pos::Pos};
 
 /// Precomputed information required for generation of memoized methods
 pub struct MemoizeInfo<'arena> {
@@ -35,24 +35,24 @@ pub struct MemoizeInfo<'arena> {
     class_name: hhbc::ClassName<'arena>,
 }
 
-fn is_memoize(method: &T::Method_) -> bool {
+fn is_memoize(method: &ast::Method_) -> bool {
     method
         .user_attributes
         .iter()
-        .any(|a| ua::is_memoized(&a.name.1))
+        .any(|a| user_attributes::is_memoized(&a.name.1))
 }
 
-fn is_memoize_lsb(method: &T::Method_) -> bool {
-    method
-        .user_attributes
-        .iter()
-        .any(|a| ua::MEMOIZE_LSB == a.name.1 || ua::POLICY_SHARDED_MEMOIZE_LSB == a.name.1)
+fn is_memoize_lsb(method: &ast::Method_) -> bool {
+    method.user_attributes.iter().any(|a| {
+        user_attributes::MEMOIZE_LSB == a.name.1
+            || user_attributes::POLICY_SHARDED_MEMOIZE_LSB == a.name.1
+    })
 }
 
 pub fn make_info<'arena>(
-    class: &T::Class_,
+    class: &ast::Class_,
     class_name: hhbc::ClassName<'arena>,
-    methods: &[T::Method_],
+    methods: &[ast::Method_],
 ) -> Result<MemoizeInfo<'arena>> {
     for m in methods.iter() {
         // check methods
@@ -88,8 +88,8 @@ pub fn emit_wrapper_methods<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     info: &MemoizeInfo<'arena>,
-    class: &'a T::Class_,
-    methods: &'a [T::Method_],
+    class: &'a ast::Class_,
+    methods: &'a [ast::Method_],
 ) -> Result<Vec<HhasMethod<'arena>>> {
     // Wrapper methods may not have iterators
     emitter.iterator_mut().reset();
@@ -110,8 +110,8 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     info: &MemoizeInfo<'arena>,
-    class: &'a T::Class_,
-    method: &'a T::Method_,
+    class: &'a ast::Class_,
+    method: &'a ast::Method_,
 ) -> Result<HhasMethod<'arena>> {
     let alloc = env.arena;
     let ret = if method.name.1 == members::__CONSTRUCT {
@@ -224,7 +224,7 @@ fn emit_memoize_wrapper_body<'a, 'arena, 'decl>(
 fn emit<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    hhas_params: Vec<(HhasParam<'arena>, Option<(Label, T::Expr)>)>,
+    hhas_params: Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
     return_type_info: HhasTypeInfo<'arena>,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<HhasBody<'arena>> {
@@ -246,7 +246,7 @@ fn make_memoize_method_code<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
+    hhas_params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     if args.params.is_empty()
@@ -264,7 +264,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
+    hhas_params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     let alloc = env.arena;
@@ -485,7 +485,7 @@ fn make_wrapper<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     instrs: InstrSeq<'arena>,
-    params: Vec<(HhasParam<'arena>, Option<(Label, T::Expr)>)>,
+    params: Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<Str<'arena>>,
     return_type_info: HhasTypeInfo<'arena>,
     args: &Args<'_, 'a, 'arena>,
@@ -522,11 +522,11 @@ fn call_cls_method<'a, 'arena>(
 
 struct Args<'r, 'ast, 'arena> {
     pub info: &'r MemoizeInfo<'arena>,
-    pub method: &'r T::Method_,
+    pub method: &'r ast::Method_,
     pub scope: &'r Scope<'ast, 'arena>,
     pub deprecation_info: Option<&'r [TypedValue<'arena>]>,
-    pub params: &'r [T::FunParam],
-    pub ret: Option<&'r T::Hint>,
+    pub params: &'r [ast::FunParam],
+    pub ret: Option<&'r ast::Hint>,
     pub method_id: &'r hhbc::MethodName<'arena>,
     pub flags: Flags,
 }

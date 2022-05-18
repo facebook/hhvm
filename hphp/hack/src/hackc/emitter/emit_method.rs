@@ -20,14 +20,13 @@ use instruction_sequence::instr;
 use naming_special_names_rust::{classes, user_attributes};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
-use oxidized::{ast as T, ast_defs};
-
+use oxidized::{ast, ast_defs};
 use std::borrow::Cow;
 
 pub fn from_asts<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    class: &'a T::Class_,
-    methods: &'a [T::Method_],
+    class: &'a ast::Class_,
+    methods: &'a [ast::Method_],
 ) -> Result<Vec<HhasMethod<'arena>>> {
     methods
         .iter()
@@ -37,10 +36,10 @@ pub fn from_asts<'a, 'arena, 'decl>(
 
 pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    method: &'a T::Method_,
+    method: &'a ast::Method_,
     user_attrs: &'a [HhasAttribute<'arena>],
-    visibility: &'a T::Visibility,
-    class: &'a T::Class_,
+    visibility: &'a ast::Visibility,
+    class: &'a ast::Class_,
     is_memoize_impl: bool,
 ) -> Attr {
     let is_abstract = class.kind.is_cinterface() || method.abstract_;
@@ -77,10 +76,10 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
 
 pub fn from_ast<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    class: &'a T::Class_,
-    method_: impl Into<Cow<'a, T::Method_>>,
+    class: &'a ast::Class_,
+    method_: impl Into<Cow<'a, ast::Method_>>,
 ) -> Result<HhasMethod<'arena>> {
-    let method_: Cow<'a, T::Method_> = method_.into();
+    let method_: Cow<'a, ast::Method_> = method_.into();
     let method = method_.as_ref();
     let is_memoize = method
         .user_attributes
@@ -98,7 +97,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let call_context = if is_closure_body {
         match &method.user_attributes[..] {
             [
-                T::UserAttribute {
+                ast::UserAttribute {
                     name: ast_defs::Id(_, ref s),
                     params: _,
                 },
@@ -141,9 +140,9 @@ pub fn from_ast<'a, 'arena, 'decl>(
     };
 
     let visibility = if is_native_opcode_impl {
-        T::Visibility::Public
+        ast::Visibility::Public
     } else if is_memoize {
-        T::Visibility::Private
+        ast::Visibility::Private
     } else {
         method.visibility
     };

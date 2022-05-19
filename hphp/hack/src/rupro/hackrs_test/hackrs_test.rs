@@ -68,7 +68,7 @@ impl TestContext {
             Arc::new(SqliteNamingTable::new(&naming_table).unwrap());
         let shallow_decl_provider: Arc<dyn ShallowDeclProvider<_>> =
             Arc::new(LazyShallowDeclProvider::new(
-                Arc::new(hackrs_test_utils::cache::make_non_evicting_shallow_decl_cache()),
+                Arc::new(hackrs_test_utils::store::make_non_evicting_shallow_decl_store()),
                 Arc::clone(&naming_provider),
                 decl_parser.clone(),
             ));
@@ -77,13 +77,13 @@ impl TestContext {
         let folded_decl_provider: Arc<dyn FoldedDeclProvider<_>> =
             Arc::new(LazyFoldedDeclProvider::new(
                 Arc::new(oxidized::global_options::GlobalOptions::default()),
-                Arc::new(hackrs_test_utils::cache::NonEvictingCache::new()),
+                Arc::new(hackrs_test_utils::store::NonEvictingStore::new()),
                 Arc::clone(&shallow_decl_provider),
                 Arc::clone(&dependency_graph) as _,
             ));
         let typing_decl_provider: Rc<dyn TypingDeclProvider<_>> =
             Rc::new(FoldingTypingDeclProvider::new(
-                Box::new(hackrs_test_utils::cache::NonEvictingLocalCache::new()),
+                Box::new(hackrs_test_utils::store::NonEvictingLocalStore::new()),
                 Arc::clone(&folded_decl_provider),
             ));
 

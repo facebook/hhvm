@@ -9,12 +9,12 @@ use std::cmp::Eq;
 use std::fmt::Debug;
 use std::hash::Hash;
 
-pub struct SerializingCache<K: Hash + Eq, V: Serialize + DeserializeOwned> {
-    /// A non-evicting cache for serialized values.
-    cache: DashMap<K, Box<[u8]>>,
+pub struct SerializingStore<K: Hash + Eq, V: Serialize + DeserializeOwned> {
+    /// A non-evicting store for serialized values.
+    store: DashMap<K, Box<[u8]>>,
     /// An LRU cache of hashconsed values, in front of the non-evicting
-    /// serialized cache.
-    evicting_cache: moka::sync::SegmentedCache<K, V>,
+    /// serialized store.
+    cache: moka::sync::SegmentedCache<K, V>,
     compression: Compression,
 }
 
@@ -26,20 +26,20 @@ pub enum Compression {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub enum CacheOpts {
+pub enum StoreOpts {
     Unserialized,
     Serialized(Compression),
 }
 
-impl<K, V> Default for SerializingCache<K, V>
+impl<K, V> Default for SerializingStore<K, V>
 where
     K: Copy + Hash + Eq + Send + Sync + 'static,
     V: Clone + Serialize + DeserializeOwned + Send + Sync + 'static,
 {
     fn default() -> Self {
         Self {
-            cache: Default::default(),
-            evicting_cache: moka::sync::SegmentedCache::new(1024, 32),
+            store: Default::default(),
+            cache: moka::sync::SegmentedCache::new(1024, 32),
             compression: Default::default(),
         }
     }
@@ -51,7 +51,7 @@ impl Default for Compression {
     }
 }
 
-impl<K, V> SerializingCache<K, V>
+impl<K, V> SerializingStore<K, V>
 where
     K: Copy + Hash + Eq + Send + Sync + 'static,
     V: Clone + Serialize + DeserializeOwned + Send + Sync + 'static,
@@ -68,16 +68,16 @@ where
     }
 }
 
-impl<K, V> hackrs::cache::Cache<K, V> for SerializingCache<K, V>
+impl<K, V> datastore::Store<K, V> for SerializingStore<K, V>
 where
     K: Copy + Hash + Eq + Send + Sync + 'static,
     V: Clone + Serialize + DeserializeOwned + Send + Sync + 'static,
 {
     fn get(&self, key: K) -> Option<V> {
-        if let val @ Some(..) = self.evicting_cache.get(&key) {
+        if let val @ Some(..) = self.cache.get(&key) {
             return val;
         }
-        let val_opt: Option<V> = self.cache.get(&key).map(|val| match self.compression {
+        let val_opt: Option<V> = self.store.get(&key).map(|val| match self.compression {
             Compression::None => deserialize(&val),
             Compression::Zstd => {
                 let serialized = zstd_decompress(&val);
@@ -88,18 +88,18 @@ where
                 deserialize(&serialized)
             }
         });
-        val_opt.map(|val| self.evicting_cache.get_with(key, || val))
+        val_opt.map(|val| self.cache.get_with(key, || val))
     }
 
     fn insert(&self, key: K, val: V) {
         let serialized = serialize(&val);
-        self.evicting_cache.insert(key, val);
+        self.cache.insert(key, val);
         let compressed = match self.compression {
             Compression::None => serialized,
             Compression::Zstd => zstd_compress(&serialized),
             Compression::Lz4 => lz4_compress(&serialized),
         };
-        self.cache.insert(key, compressed.into_boxed_slice());
+        self.store.insert(key, compressed.into_boxed_slice());
     }
 }
 
@@ -140,13 +140,13 @@ fn lz4_decompress(compressed: &[u8]) -> Vec<u8> {
     decompressed
 }
 
-impl<K, V> Debug for SerializingCache<K, V>
+impl<K, V> Debug for SerializingStore<K, V>
 where
     K: Hash + Eq,
     V: Serialize + DeserializeOwned,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("SerializingCache").finish()
+        f.debug_struct("SerializingStore").finish()
     }
 }
 

@@ -4,10 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{fold::DeclFolder, DeclName, Error, Result, TypeDecl};
-use crate::cache::Cache;
 use crate::dependency_registrar::DependencyName;
 use crate::dependency_registrar::DependencyRegistrar;
 use crate::shallow_decl_provider::{self, ShallowDeclProvider};
+use datastore::Store;
 use oxidized::global_options::GlobalOptions;
 use pos::{
     ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameIndexMap,
@@ -21,13 +21,13 @@ use ty::reason::Reason;
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
 
 /// A `FoldedDeclProvider` which, if the requested class name is not present in
-/// its cache, recursively computes the folded decl for that class by requesting
+/// its store, recursively computes the folded decl for that class by requesting
 /// the shallow decls of that class and its ancestors from its
 /// `ShallowDeclProvider`.
 #[derive(Debug)]
 pub struct LazyFoldedDeclProvider<R: Reason> {
     opts: Arc<GlobalOptions>,
-    cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
+    store: Arc<dyn Store<TypeName, Arc<FoldedClass<R>>>>,
     shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
     dependency_registrar: Arc<dyn DependencyRegistrar>,
 }
@@ -35,13 +35,13 @@ pub struct LazyFoldedDeclProvider<R: Reason> {
 impl<R: Reason> LazyFoldedDeclProvider<R> {
     pub fn new(
         opts: Arc<GlobalOptions>,
-        cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
+        store: Arc<dyn Store<TypeName, Arc<FoldedClass<R>>>>,
         shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
         dependency_registrar: Arc<dyn DependencyRegistrar>,
     ) -> Self {
         Self {
             opts,
-            cache,
+            store,
             shallow_decl_provider,
             dependency_registrar,
         }
@@ -256,12 +256,12 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         stack: &mut TypeNameIndexSet,
         name: TypeName,
     ) -> Result<Option<Arc<FoldedClass<R>>>> {
-        match self.cache.get(name) {
+        match self.store.get(name) {
             Some(rc) => Ok(Some(rc)),
             None => match self.decl_class(stack, name)? {
                 None => Ok(None),
                 Some(rc) => {
-                    self.cache.insert(name, Arc::clone(&rc));
+                    self.store.insert(name, Arc::clone(&rc));
                     Ok(Some(rc))
                 }
             },

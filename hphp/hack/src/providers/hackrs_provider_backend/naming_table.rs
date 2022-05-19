@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hackrs::cache::{Cache, ChangesCache};
+use datastore::{ChangesStore, Store};
 use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
 use naming_provider::NamingProvider;
 use ocamlrep::rc::RcOc;
@@ -23,8 +23,8 @@ pub use naming_provider::Result;
 pub struct NamingTable {
     types: ReverseNamingTable<TypeName, (Pos, naming_types::KindOfType), TypeDb>,
     funs: ReverseNamingTable<FunName, Pos, FunDb>,
-    consts: ChangesCache<ToplevelSymbolHash, Pos, ConstDb>,
-    modules: ChangesCache<ToplevelSymbolHash, Pos, ModuleDb>,
+    consts: ChangesStore<ToplevelSymbolHash, Pos, ConstDb>,
+    modules: ChangesStore<ToplevelSymbolHash, Pos, ModuleDb>,
     db: Arc<MaybeNamingDb>,
 }
 
@@ -34,8 +34,8 @@ impl NamingTable {
         Self {
             types: ReverseNamingTable::new(TypeDb(Arc::clone(&db))),
             funs: ReverseNamingTable::new(FunDb(Arc::clone(&db))),
-            consts: ChangesCache::new(ConstDb(Arc::clone(&db))),
-            modules: ChangesCache::new(ModuleDb(Arc::clone(&db))),
+            consts: ChangesStore::new(ConstDb(Arc::clone(&db))),
+            modules: ChangesStore::new(ModuleDb(Arc::clone(&db))),
             db,
         }
     }
@@ -227,7 +227,7 @@ impl std::fmt::Debug for MaybeNamingDb {
 #[derive(Clone, Debug)]
 struct TypeDb(Arc<MaybeNamingDb>);
 
-impl Cache<ToplevelSymbolHash, (Pos, naming_types::KindOfType)> for TypeDb {
+impl Store<ToplevelSymbolHash, (Pos, naming_types::KindOfType)> for TypeDb {
     fn get(&self, key: ToplevelSymbolHash) -> Option<(Pos, naming_types::KindOfType)> {
         self.0
             .with_db(|db| {
@@ -243,23 +243,23 @@ impl Cache<ToplevelSymbolHash, (Pos, naming_types::KindOfType)> for TypeDb {
             .unwrap()
     }
     fn insert(&self, _key: ToplevelSymbolHash, _val: (Pos, naming_types::KindOfType)) {
-        unreachable!("ChangesCache should not perform inserts on fallback")
+        unreachable!("ChangesStore should not perform inserts on fallback")
     }
 }
 
-impl Cache<ToplevelCanonSymbolHash, TypeName> for TypeDb {
+impl Store<ToplevelCanonSymbolHash, TypeName> for TypeDb {
     fn get(&self, _key: ToplevelCanonSymbolHash) -> Option<TypeName> {
         self.0.with_db(|_db| todo!()).unwrap()
     }
     fn insert(&self, _key: ToplevelCanonSymbolHash, _val: TypeName) {
-        unreachable!("ChangesCache should not perform inserts on fallback")
+        unreachable!("ChangesStore should not perform inserts on fallback")
     }
 }
 
 #[derive(Clone, Debug)]
 struct FunDb(Arc<MaybeNamingDb>);
 
-impl Cache<ToplevelSymbolHash, Pos> for FunDb {
+impl Store<ToplevelSymbolHash, Pos> for FunDb {
     fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
         self.0
             .with_db(|db| {
@@ -270,23 +270,23 @@ impl Cache<ToplevelSymbolHash, Pos> for FunDb {
             .unwrap()
     }
     fn insert(&self, _key: ToplevelSymbolHash, _val: Pos) {
-        unreachable!("ChangesCache should not perform inserts on fallback")
+        unreachable!("ChangesStore should not perform inserts on fallback")
     }
 }
 
-impl Cache<ToplevelCanonSymbolHash, FunName> for FunDb {
+impl Store<ToplevelCanonSymbolHash, FunName> for FunDb {
     fn get(&self, _key: ToplevelCanonSymbolHash) -> Option<FunName> {
         self.0.with_db(|_db| todo!()).unwrap()
     }
     fn insert(&self, _key: ToplevelCanonSymbolHash, _val: FunName) {
-        unreachable!("ChangesCache should not perform inserts on fallback")
+        unreachable!("ChangesStore should not perform inserts on fallback")
     }
 }
 
 #[derive(Clone, Debug)]
 struct ConstDb(Arc<MaybeNamingDb>);
 
-impl Cache<ToplevelSymbolHash, Pos> for ConstDb {
+impl Store<ToplevelSymbolHash, Pos> for ConstDb {
     fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
         self.0
             .with_db(|db| {
@@ -297,14 +297,14 @@ impl Cache<ToplevelSymbolHash, Pos> for ConstDb {
             .unwrap()
     }
     fn insert(&self, _key: ToplevelSymbolHash, _val: Pos) {
-        unreachable!("ChangesCache should not perform inserts on fallback")
+        unreachable!("ChangesStore should not perform inserts on fallback")
     }
 }
 
 #[derive(Clone, Debug)]
 struct ModuleDb(Arc<MaybeNamingDb>);
 
-impl Cache<ToplevelSymbolHash, Pos> for ModuleDb {
+impl Store<ToplevelSymbolHash, Pos> for ModuleDb {
     fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
         self.0
             .with_db(|db| {
@@ -316,32 +316,32 @@ impl Cache<ToplevelSymbolHash, Pos> for ModuleDb {
     }
 
     fn insert(&self, _key: ToplevelSymbolHash, _val: Pos) {
-        unreachable!("ChangesCache should not perform inserts on fallback")
+        unreachable!("ChangesStore should not perform inserts on fallback")
     }
 }
 
 mod reverse_naming_table {
-    use hackrs::cache::{Cache, ChangesCache};
+    use datastore::{ChangesStore, Store};
     use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
     use std::hash::Hash;
 
     /// In-memory delta for symbols which support a canon-name lookup API (types
     /// and funs).
     pub struct ReverseNamingTable<K, P, F> {
-        positions: ChangesCache<ToplevelSymbolHash, P, F>,
-        canon_names: ChangesCache<ToplevelCanonSymbolHash, K, F>,
+        positions: ChangesStore<ToplevelSymbolHash, P, F>,
+        canon_names: ChangesStore<ToplevelCanonSymbolHash, K, F>,
     }
 
     impl<K, P, F> ReverseNamingTable<K, P, F>
     where
         K: Copy + Hash + Eq + Into<ToplevelSymbolHash> + Into<ToplevelCanonSymbolHash>,
         P: Clone,
-        F: Clone + Cache<ToplevelSymbolHash, P> + Cache<ToplevelCanonSymbolHash, K>,
+        F: Clone + Store<ToplevelSymbolHash, P> + Store<ToplevelCanonSymbolHash, K>,
     {
         pub fn new(fallback: F) -> Self {
             Self {
-                positions: ChangesCache::new(fallback.clone()),
-                canon_names: ChangesCache::new(fallback),
+                positions: ChangesStore::new(fallback.clone()),
+                canon_names: ChangesStore::new(fallback),
             }
         }
 

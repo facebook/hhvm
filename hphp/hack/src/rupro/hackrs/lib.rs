@@ -8,7 +8,6 @@
 pub mod todo;
 
 pub mod ast_provider;
-pub mod cache;
 pub mod decl_parser;
 pub mod dependency_registrar;
 pub mod errors;

@@ -15,8 +15,8 @@ use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
 use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
-use hackrs_test_utils::cache::{
-    make_non_evicting_shallow_decl_cache, NonEvictingCache, NonEvictingLocalCache,
+use hackrs_test_utils::store::{
+    make_non_evicting_shallow_decl_store, NonEvictingLocalStore, NonEvictingStore,
 };
 use oxidized::global_options::GlobalOptions;
 use pos::{Prefix, RelativePath, RelativePathCtx};
@@ -87,21 +87,21 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
         file_provider::PlainFileProvider::new(Arc::clone(&relative_path_ctx)),
     );
     let decl_parser = DeclParser::new(Arc::clone(&file_provider));
-    let shallow_decl_cache = Arc::new(make_non_evicting_shallow_decl_cache());
+    let shallow_decl_store = Arc::new(make_non_evicting_shallow_decl_store());
     let shallow_decl_provider = Arc::new(EagerShallowDeclProvider::new(Arc::clone(
-        &shallow_decl_cache,
+        &shallow_decl_store,
     )));
-    let folded_decl_cache = Arc::new(NonEvictingCache::new());
+    let folded_decl_store = Arc::new(NonEvictingStore::new());
     let dependency_registrar = Arc::new(hackrs_test_utils::registrar::DependencyGraph::new());
     let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
         Arc::clone(&options),
-        folded_decl_cache,
+        folded_decl_store,
         shallow_decl_provider,
         dependency_registrar,
     ));
-    let typing_decl_cache = Box::new(NonEvictingLocalCache::new());
+    let typing_decl_store = Box::new(NonEvictingLocalStore::new());
     let typing_decl_provider = Rc::new(FoldingTypingDeclProvider::new(
-        typing_decl_cache,
+        typing_decl_store,
         folded_decl_provider,
     ));
     let ctx = Rc::new(TypingCtx::new(typing_decl_provider));
@@ -114,7 +114,7 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
 
     for &filename in &filenames {
         let decls = decl_parser.parse(filename).unwrap();
-        shallow_decl_cache.add_decls(decls);
+        shallow_decl_store.add_decls(decls);
     }
 
     // println!("{:#?}", shallow_decl_provider);

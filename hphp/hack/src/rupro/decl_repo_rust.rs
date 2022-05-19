@@ -19,9 +19,9 @@ use tempdir::TempDir;
 use ty::reason::{BReason, NReason, Reason};
 
 use hackrs::{decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider};
-use hackrs_test_utils::cache::{make_shallow_decl_cache, populate_shallow_decl_cache};
 use hackrs_test_utils::decl_provider::make_folded_decl_provider;
-use hackrs_test_utils::serde_cache::{CacheOpts, Compression};
+use hackrs_test_utils::serde_store::{Compression, StoreOpts};
+use hackrs_test_utils::store::{make_shallow_decl_store, populate_shallow_decl_store};
 use pos::{Prefix, RelativePath, RelativePathCtx, TypeName};
 
 #[derive(StructOpt, Debug)]
@@ -101,16 +101,16 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
     let file_provider: Arc<dyn file_provider::FileProvider> =
         Arc::new(file_provider::PlainFileProvider::new(Arc::clone(&ctx)));
     let parser = DeclParser::new(file_provider);
-    let shallow_decl_cache = make_shallow_decl_cache::<R>(if opts.serialize {
-        CacheOpts::Unserialized
+    let shallow_decl_store = make_shallow_decl_store::<R>(if opts.serialize {
+        StoreOpts::Unserialized
     } else {
-        CacheOpts::Serialized(opts.compression)
+        StoreOpts::Serialized(opts.compression)
     });
     let classes = match names {
         Names::Classnames(classes) => classes,
         Names::Filenames(filenames) => {
             let (classes, time_taken) = time(|| {
-                populate_shallow_decl_cache(&shallow_decl_cache, parser.clone(), &filenames)
+                populate_shallow_decl_store(&shallow_decl_store, parser.clone(), &filenames)
             });
             println!(
                 "Parsed {} classes in repo in {:?}",
@@ -124,12 +124,12 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
 
     let folded_decl_provider = make_folded_decl_provider(
         if opts.serialize {
-            CacheOpts::Serialized(opts.compression)
+            StoreOpts::Serialized(opts.compression)
         } else {
-            CacheOpts::Unserialized
+            StoreOpts::Unserialized
         },
         opts.naming_table.as_ref(),
-        shallow_decl_cache,
+        shallow_decl_store,
         parser,
     );
     if opts.fold {
@@ -149,7 +149,7 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
     }
 
     // Avoid running the decl provider's destructor or destructors for hcons
-    // tables, since our caches are huge and full of Arcs which reference one
+    // tables, since our stores are huge and full of Arcs which reference one
     // another. Do destroy the hhi_root, so the tempdir gets cleaned up.
     drop(hhi_root);
     std::process::exit(0);

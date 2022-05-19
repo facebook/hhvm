@@ -8,9 +8,9 @@ use hackrs::{
     folded_decl_provider::FoldedDeclProvider,
     typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };
-use hackrs_test_utils::cache::{make_shallow_decl_cache, populate_shallow_decl_cache};
 use hackrs_test_utils::decl_provider::make_folded_decl_provider;
-use hackrs_test_utils::serde_cache::CacheOpts;
+use hackrs_test_utils::serde_store::StoreOpts;
+use hackrs_test_utils::store::{make_shallow_decl_store, populate_shallow_decl_store};
 use jwalk::WalkDir;
 use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
@@ -101,18 +101,18 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
     let decl_parser = DeclParser::new(Arc::clone(&file_provider));
     all_filenames.extend(filenames);
 
-    let shallow_decl_cache = make_shallow_decl_cache(CacheOpts::Unserialized);
-    populate_shallow_decl_cache(&shallow_decl_cache, decl_parser.clone(), &all_filenames);
+    let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
+    populate_shallow_decl_store(&shallow_decl_store, decl_parser.clone(), &all_filenames);
 
     let folded_decl_provider = Arc::new(make_folded_decl_provider(
-        CacheOpts::Unserialized,
+        StoreOpts::Unserialized,
         opts.naming_table.as_ref(),
-        shallow_decl_cache,
+        shallow_decl_store,
         decl_parser.clone(),
     ));
 
     let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
-        Box::new(hackrs_test_utils::cache::NonEvictingLocalCache::new()),
+        Box::new(hackrs_test_utils::store::NonEvictingLocalStore::new()),
         Arc::clone(&folded_decl_provider) as Arc<dyn FoldedDeclProvider<R>>,
     ));
 

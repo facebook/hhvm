@@ -14,11 +14,11 @@ use ty::decl::{
 };
 use ty::reason::Reason;
 
-mod cache;
 mod provider;
+mod store;
 
-pub use cache::ShallowDeclCache;
 pub use provider::{EagerShallowDeclProvider, LazyShallowDeclProvider};
+pub use store::ShallowDeclStore;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -47,7 +47,7 @@ pub enum TypeDecl<R: Reason> {
 ///
 /// Consumers of a `ShallowDeclProvider` expect the member-type accessors
 /// (`get_method_type`, `get_constructor_type`, etc.) to be performant. For
-/// instance, if our `Cache` implementations store data in a serialized format,
+/// instance, if our `Store` implementations store data in a serialized format,
 /// looking up a method type should only deserialize that individual method, not
 /// the entire `ShallowClass` containing that method declaration.
 ///
@@ -93,7 +93,7 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
     /// return the one that appears last in the source text.
     ///
     /// Expected to be no slower than O(recursive_size_of_return_value) in the
-    /// case of a cache hit. In other words, if the provider's cache backend
+    /// case of a Store hit. In other words, if the provider's Store backend
     /// stores data in a serialized format, implementations of this method
     /// should only deserialize the one property type, not the entire containing
     /// `ShallowClass`.
@@ -108,7 +108,7 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
     /// return the one that appears last in the source text.
     ///
     /// Expected to be no slower than O(recursive_size_of_return_value) in the
-    /// case of a cache hit. In other words, if the provider's cache backend
+    /// case of a Store hit. In other words, if the provider's Store backend
     /// stores data in a serialized format, implementations of this method
     /// should only deserialize the one property type, not the entire containing
     /// `ShallowClass`.
@@ -123,7 +123,7 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
     /// one that appears last in the source text.
     ///
     /// Expected to be no slower than O(recursive_size_of_return_value) in the
-    /// case of a cache hit. In other words, if the provider's cache backend
+    /// case of a Store hit. In other words, if the provider's Store backend
     /// stores data in a serialized format, implementations of this method
     /// should only deserialize the one method type, not the entire containing
     /// `ShallowClass`.
@@ -138,7 +138,7 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
     /// one that appears last in the source text.
     ///
     /// Expected to be no slower than O(recursive_size_of_return_value) in the
-    /// case of a cache hit. In other words, if the provider's cache backend
+    /// case of a Store hit. In other words, if the provider's Store backend
     /// stores data in a serialized format, implementations of this method
     /// should only deserialize the one method type, not the entire containing
     /// `ShallowClass`.
@@ -151,7 +151,7 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
     /// Fetch the type of the constructor declared in the given shallow class.
     ///
     /// Expected to be no slower than O(recursive_size_of_return_value) in the
-    /// case of a cache hit. In other words, if the provider's cache backend
+    /// case of a Store hit. In other words, if the provider's Store backend
     /// stores data in a serialized format, implementations of this method
     /// should only deserialize the one constructor type, not the entire
     /// containing `ShallowClass`.

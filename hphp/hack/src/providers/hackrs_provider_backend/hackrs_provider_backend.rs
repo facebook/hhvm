@@ -7,12 +7,12 @@ mod naming_table;
 mod no_depgraph;
 
 use anyhow::Result;
+use datastore::Store;
 use file_provider::{FileProvider, PlainFileProvider};
 use hackrs::{
-    cache::Cache,
     decl_parser::DeclParser,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
-    shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclCache, ShallowDeclProvider},
+    shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider, ShallowDeclStore},
 };
 use naming_table::NamingTable;
 use no_depgraph::NoDepGraph;
@@ -27,9 +27,9 @@ pub struct ProviderBackend {
     pub decl_parser: DeclParser<BReason>,
     pub dependency_graph: Arc<NoDepGraph>,
     pub naming_table: Arc<NamingTable>,
-    pub shallow_decl_cache: Arc<ShallowDeclCache<BReason>>,
+    pub shallow_decl_store: Arc<ShallowDeclStore<BReason>>,
     pub shallow_decl_provider: Arc<dyn ShallowDeclProvider<BReason>>,
-    pub folded_classes_cache: Arc<dyn Cache<pos::TypeName, Arc<FoldedClass<BReason>>>>,
+    pub folded_classes_store: Arc<dyn Store<pos::TypeName, Arc<FoldedClass<BReason>>>>,
     pub folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
 }
 
@@ -42,26 +42,26 @@ impl ProviderBackend {
         let dependency_graph = Arc::new(NoDepGraph::new());
         let naming_table = Arc::new(NamingTable::new());
 
-        let shallow_decl_cache = Arc::new(hackrs_test_utils::cache::make_shallow_decl_cache::<
+        let shallow_decl_store = Arc::new(hackrs_test_utils::store::make_shallow_decl_store::<
             BReason,
         >(
-            hackrs_test_utils::serde_cache::CacheOpts::Unserialized,
+            hackrs_test_utils::serde_store::StoreOpts::Unserialized,
         ));
 
         let shallow_decl_provider: Arc<dyn ShallowDeclProvider<_>> =
             Arc::new(LazyShallowDeclProvider::new(
-                Arc::clone(&shallow_decl_cache),
+                Arc::clone(&shallow_decl_store),
                 Arc::clone(&naming_table) as _,
                 decl_parser.clone(),
             ));
 
-        let folded_classes_cache: Arc<dyn Cache<pos::TypeName, Arc<FoldedClass<_>>>> =
-            Arc::new(hackrs_test_utils::cache::NonEvictingCache::new());
+        let folded_classes_store: Arc<dyn Store<pos::TypeName, Arc<FoldedClass<_>>>> =
+            Arc::new(hackrs_test_utils::store::NonEvictingStore::new());
 
         let folded_decl_provider: Arc<dyn FoldedDeclProvider<_>> =
             Arc::new(LazyFoldedDeclProvider::new(
                 Arc::new(Default::default()), // TODO: remove?
-                Arc::clone(&folded_classes_cache),
+                Arc::clone(&folded_classes_store),
                 Arc::clone(&shallow_decl_provider),
                 Arc::clone(&dependency_graph) as _,
             ));
@@ -72,9 +72,9 @@ impl ProviderBackend {
             decl_parser,
             dependency_graph,
             naming_table,
-            shallow_decl_cache,
+            shallow_decl_store,
             shallow_decl_provider,
-            folded_classes_cache,
+            folded_classes_store,
             folded_decl_provider,
         })
     }

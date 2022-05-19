@@ -4,9 +4,8 @@
 
 use hackrs::decl_parser::DeclParser;
 use hackrs::folded_decl_provider::FoldedDeclProvider;
-use hackrs_test_utils::cache::{make_shallow_decl_cache, populate_shallow_decl_cache};
-use hackrs_test_utils::serde_cache::CacheOpts;
-use hackrs_test_utils::serde_cache::Compression;
+use hackrs_test_utils::serde_store::{Compression, StoreOpts};
+use hackrs_test_utils::store::{make_shallow_decl_store, populate_shallow_decl_store};
 use indicatif::ParallelProgressIterator;
 use jwalk::WalkDir;
 use ocamlrep_ocamlpool::{ocaml_ffi_with_arena, Bump};
@@ -43,20 +42,20 @@ ocaml_ffi_with_arena! {
         });
         let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(file_provider::PlainFileProvider::new(path_ctx));
         let decl_parser = DeclParser::with_options(file_provider, opts);
-        let shallow_decl_cache = make_shallow_decl_cache(CacheOpts::Unserialized);
+        let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
 
         let reverse_files = files.iter().copied().rev().collect::<Vec<_>>();
         for path in &reverse_files {
             let mut decls = decl_parser.parse(*path).unwrap();
             decls.reverse(); // To match OCaml behavior for name collisions
-            shallow_decl_cache.add_decls(decls);
+            shallow_decl_store.add_decls(decls);
         };
 
         let folded_decl_provider =
             hackrs_test_utils::decl_provider::make_folded_decl_provider(
-                CacheOpts::Unserialized,
+                StoreOpts::Unserialized,
                 None,
-                shallow_decl_cache,
+                shallow_decl_store,
                 decl_parser.clone(),
             );
 
@@ -131,14 +130,14 @@ ocaml_ffi_with_arena! {
         // Parse and gather shallow decls
         let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(file_provider::PlainFileProvider::new(Arc::clone(&path_ctx)));
         let decl_parser: DeclParser<BReason> = DeclParser::with_options(file_provider, opts);
-        let shallow_decl_cache = make_shallow_decl_cache(CacheOpts::Serialized(Compression::default()));
+        let shallow_decl_store = make_shallow_decl_store(StoreOpts::Serialized(Compression::default()));
         let mut classes =
-            populate_shallow_decl_cache(&shallow_decl_cache, decl_parser.clone(), &filenames);
+            populate_shallow_decl_store(&shallow_decl_store, decl_parser.clone(), &filenames);
         classes.sort();
         let folded_decl_provider = hackrs_test_utils::decl_provider::make_folded_decl_provider(
-            CacheOpts::Serialized(Compression::default()),
+            StoreOpts::Serialized(Compression::default()),
             None,
-            shallow_decl_cache,
+            shallow_decl_store,
             decl_parser,
         );
 

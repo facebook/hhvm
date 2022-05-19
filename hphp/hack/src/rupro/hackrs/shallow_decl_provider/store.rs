@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::TypeDecl;
-use crate::cache::Cache;
+use datastore::Store;
 use pos::{ConstName, FunName, MethodName, ModuleName, PropName, TypeName};
 use std::sync::Arc;
 use ty::decl::{
@@ -12,44 +12,44 @@ use ty::decl::{
 };
 use ty::reason::Reason;
 
-/// A cache for shallow declarations (i.e., the information we get from
-/// decl-parsing a file). The backing caches are permitted to evict their
+/// A datastore for shallow declarations (i.e., the information we get from
+/// decl-parsing a file). The backing datastores are permitted to evict their
 /// contents at any time.
 ///
-/// Consumers of a `ShallowDeclCache` expect the member-type accessors
+/// Consumers of a `ShallowDeclStore` expect the member-type accessors
 /// (`get_method_type`, `get_constructor_type`, etc.) to be performant. For
-/// instance, if our `Cache` implementations store data in a serialized format,
+/// instance, if our `Store` implementations store data in a serialized format,
 /// looking up a method type should only deserialize that individual method, not
 /// the entire `ShallowClass` containing that method declaration.
 #[derive(Debug)]
-pub struct ShallowDeclCache<R: Reason> {
-    types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
-    funs: Box<dyn Cache<FunName, Arc<FunDecl<R>>>>,
-    consts: Box<dyn Cache<ConstName, Arc<ConstDecl<R>>>>,
-    modules: Box<dyn Cache<ModuleName, Arc<ModuleDecl<R>>>>,
+pub struct ShallowDeclStore<R: Reason> {
+    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
+    funs: Box<dyn Store<FunName, Arc<FunDecl<R>>>>,
+    consts: Box<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
+    modules: Box<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
 
     // The below tables are intended to be index tables for information stored
     // in the `types` table (the underlying data is shared via the `Hc` in
     // `Ty`). When inserting or removing from the `types` table, these
     // indices must be updated.
-    properties: Box<dyn Cache<(TypeName, PropName), Ty<R>>>,
-    static_properties: Box<dyn Cache<(TypeName, PropName), Ty<R>>>,
-    methods: Box<dyn Cache<(TypeName, MethodName), Ty<R>>>,
-    static_methods: Box<dyn Cache<(TypeName, MethodName), Ty<R>>>,
-    constructors: Box<dyn Cache<TypeName, Ty<R>>>,
+    properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
+    static_properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
+    methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
+    static_methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
+    constructors: Box<dyn Store<TypeName, Ty<R>>>,
 }
 
-impl<R: Reason> ShallowDeclCache<R> {
+impl<R: Reason> ShallowDeclStore<R> {
     pub fn new(
-        types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
-        funs: Box<dyn Cache<FunName, Arc<FunDecl<R>>>>,
-        consts: Box<dyn Cache<ConstName, Arc<ConstDecl<R>>>>,
-        modules: Box<dyn Cache<ModuleName, Arc<ModuleDecl<R>>>>,
-        properties: Box<dyn Cache<(TypeName, PropName), Ty<R>>>,
-        static_properties: Box<dyn Cache<(TypeName, PropName), Ty<R>>>,
-        methods: Box<dyn Cache<(TypeName, MethodName), Ty<R>>>,
-        static_methods: Box<dyn Cache<(TypeName, MethodName), Ty<R>>>,
-        constructors: Box<dyn Cache<TypeName, Ty<R>>>,
+        types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
+        funs: Box<dyn Store<FunName, Arc<FunDecl<R>>>>,
+        consts: Box<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
+        modules: Box<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
+        properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
+        static_properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
+        methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
+        static_methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
+        constructors: Box<dyn Store<TypeName, Ty<R>>>,
     ) -> Self {
         Self {
             types,
@@ -64,17 +64,17 @@ impl<R: Reason> ShallowDeclCache<R> {
         }
     }
 
-    /// Construct a `ShallowDeclCache` which looks up class members from the
-    /// given `types` table rather than maintaining separate member caches.
-    /// Intended to be used with `Cache` implementations which hold on to
+    /// Construct a `ShallowDeclStore` which looks up class members from the
+    /// given `types` table rather than maintaining separate member stores.
+    /// Intended to be used with `Store` implementations which hold on to
     /// hash-consed `Ty`s in memory (rather than storing them in a
     /// serialized format), so that looking up individual members doesn't
     /// involve deserializing an entire `ShallowClass`.
-    pub fn with_no_member_caches(
-        types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
-        funs: Box<dyn Cache<FunName, Arc<FunDecl<R>>>>,
-        consts: Box<dyn Cache<ConstName, Arc<ConstDecl<R>>>>,
-        modules: Box<dyn Cache<ModuleName, Arc<ModuleDecl<R>>>>,
+    pub fn with_no_member_stores(
+        types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
+        funs: Box<dyn Store<FunName, Arc<FunDecl<R>>>>,
+        consts: Box<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
+        modules: Box<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
     ) -> Self {
         Self {
             properties: Box::new(PropFinder {
@@ -199,13 +199,13 @@ impl<R: Reason> ShallowDeclCache<R> {
     }
 }
 
-/// Looks up props from the `types` cache instead of storing them separately.
+/// Looks up props from the `types` Store instead of storing them separately.
 #[derive(Debug)]
 struct PropFinder<R: Reason> {
-    types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
+    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
 }
 
-impl<R: Reason> Cache<(TypeName, PropName), Ty<R>> for PropFinder<R> {
+impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for PropFinder<R> {
     fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Option<Ty<R>> {
         self.types
             .get(class_name)
@@ -226,13 +226,13 @@ impl<R: Reason> Cache<(TypeName, PropName), Ty<R>> for PropFinder<R> {
     fn insert(&self, _: (TypeName, PropName), _: Ty<R>) {}
 }
 
-/// Looks up props from the `types` cache instead of storing them separately.
+/// Looks up props from the `types` Store instead of storing them separately.
 #[derive(Debug)]
 struct StaticPropFinder<R: Reason> {
-    types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
+    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
 }
 
-impl<R: Reason> Cache<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
+impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
     fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Option<Ty<R>> {
         self.types
             .get(class_name)
@@ -253,13 +253,13 @@ impl<R: Reason> Cache<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
     fn insert(&self, _: (TypeName, PropName), _: Ty<R>) {}
 }
 
-/// Looks up methods from the `types` cache instead of storing them separately.
+/// Looks up methods from the `types` Store instead of storing them separately.
 #[derive(Debug)]
 struct MethodFinder<R: Reason> {
-    types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
+    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
 }
 
-impl<R: Reason> Cache<(TypeName, MethodName), Ty<R>> for MethodFinder<R> {
+impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for MethodFinder<R> {
     fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Option<Ty<R>> {
         self.types
             .get(class_name)
@@ -280,13 +280,13 @@ impl<R: Reason> Cache<(TypeName, MethodName), Ty<R>> for MethodFinder<R> {
     fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) {}
 }
 
-/// Looks up methods from the `types` cache instead of storing them separately.
+/// Looks up methods from the `types` Store instead of storing them separately.
 #[derive(Debug)]
 struct StaticMethodFinder<R: Reason> {
-    types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
+    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
 }
 
-impl<R: Reason> Cache<(TypeName, MethodName), Ty<R>> for StaticMethodFinder<R> {
+impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for StaticMethodFinder<R> {
     fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Option<Ty<R>> {
         self.types
             .get(class_name)
@@ -307,13 +307,13 @@ impl<R: Reason> Cache<(TypeName, MethodName), Ty<R>> for StaticMethodFinder<R> {
     fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) {}
 }
 
-/// Looks up constructors from the `types` cache instead of storing them separately.
+/// Looks up constructors from the `types` Store instead of storing them separately.
 #[derive(Debug)]
 struct ConstructorFinder<R: Reason> {
-    types: Arc<dyn Cache<TypeName, TypeDecl<R>>>,
+    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
 }
 
-impl<R: Reason> Cache<TypeName, Ty<R>> for ConstructorFinder<R> {
+impl<R: Reason> Store<TypeName, Ty<R>> for ConstructorFinder<R> {
     fn get(&self, class_name: TypeName) -> Option<Ty<R>> {
         self.types
             .get(class_name)

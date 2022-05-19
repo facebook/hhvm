@@ -10,6 +10,7 @@ path = "../../mod.rs"
 [dependencies]
 bincode = "1.3.3"
 dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
+datastore = { path = "../../../datastore" }
 hackrs = { path = "../../../hackrs/cargo/hackrs" }
 hash = { path = "../../../../utils/hash" }
 indicatif = { version = "0.16", features = ["with_rayon"] }

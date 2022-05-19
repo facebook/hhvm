@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{ClassType, Result, TypeDecl, TypingDeclProvider};
-use crate::cache::LocalCache;
 use crate::dependency_registrar::DeclName;
 use crate::folded_decl_provider::{self, FoldedDeclProvider};
+use datastore::LocalStore;
 use pos::{ConstName, FunName, TypeName};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -24,17 +24,17 @@ use ty::reason::Reason;
 /// 1000 classes into 1000 separate serialized blobs.
 #[derive(Debug)]
 pub struct FoldingTypingDeclProvider<R: Reason> {
-    cache: RefCell<Box<dyn LocalCache<TypeName, Rc<ClassType<R>>>>>,
+    store: RefCell<Box<dyn LocalStore<TypeName, Rc<ClassType<R>>>>>,
     folded_decl_provider: Arc<dyn FoldedDeclProvider<R>>,
 }
 
 impl<R: Reason> FoldingTypingDeclProvider<R> {
     pub fn new(
-        cache: Box<dyn LocalCache<TypeName, Rc<ClassType<R>>>>,
+        store: Box<dyn LocalStore<TypeName, Rc<ClassType<R>>>>,
         folded_decl_provider: Arc<dyn FoldedDeclProvider<R>>,
     ) -> Self {
         Self {
-            cache: RefCell::new(cache),
+            store: RefCell::new(store),
             folded_decl_provider,
         }
     }
@@ -50,7 +50,7 @@ impl<R: Reason> TypingDeclProvider<R> for FoldingTypingDeclProvider<R> {
     }
 
     fn get_type(&self, dependent: DeclName, name: TypeName) -> Result<Option<TypeDecl<R>>> {
-        if let Some(cls) = self.cache.borrow().get(name) {
+        if let Some(cls) = self.store.borrow().get(name) {
             return Ok(Some(TypeDecl::Class(cls)));
         }
         match self.folded_decl_provider.get_type(dependent, name)? {
@@ -63,7 +63,7 @@ impl<R: Reason> TypingDeclProvider<R> for FoldingTypingDeclProvider<R> {
                     Arc::clone(&self.folded_decl_provider),
                     folded_decl,
                 ));
-                self.cache.borrow_mut().insert(name, Rc::clone(&cls));
+                self.store.borrow_mut().insert(name, Rc::clone(&cls));
                 Ok(Some(TypeDecl::Class(cls)))
             }
         }

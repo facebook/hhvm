@@ -27,14 +27,31 @@ impl std::convert::From<std::io::Error> for Error {
 }
 type Result<T> = std::result::Result<T, Error>;
 
-/// Auxiliary function to print a 64-bit edge
-fn print_edge_u64(key: u64, dst: u64, hex_dump: bool) {
-    const DIGITS: usize = 20; // (u64::MAX as f64).log10() as usize + 1;
+const MAX_DIGITS_IN_HASH: usize = 20; // (u64::MAX as f64).log10() as usize + 1;
 
+fn print_edges_header() {
+    println!(
+        "  {:>width$}  dependent",
+        "dependency",
+        width = MAX_DIGITS_IN_HASH
+    );
+}
+
+/// Auxiliary function to print a 64-bit edge
+fn print_edge_u64(dependency: u64, dependent: u64, hex_dump: bool) {
     if hex_dump {
-        println!("  {key:#016x} {:#016x}", dst, key = key);
+        println!(
+            "  {dependency:#016x} {dependent:#016x}",
+            dependent = dependent,
+            dependency = dependency
+        );
     } else {
-        println!("  {key:>width$}  {}", dst, key = key, width = DIGITS);
+        println!(
+            "  {dependency:>width$}  {dependent}",
+            dependent = dependent,
+            dependency = dependency,
+            width = MAX_DIGITS_IN_HASH
+        );
     }
 }
 
@@ -88,18 +105,23 @@ fn comp_depgraph64(
     control_file: &str,
     hex_dump: bool,
 ) -> Result<()> {
-    let lo = depgraph::reader::DepGraphOpener::from_path(test_file)?;
-    let ro = depgraph::reader::DepGraphOpener::from_path(control_file)?;
+    let l_opener = depgraph::reader::DepGraphOpener::from_path(test_file)?;
+    let r_opener = depgraph::reader::DepGraphOpener::from_path(control_file)?;
     let mut num_edges_missing = 0;
     match (|| {
-        let (ldg, rdg) = (lo.open()?, ro.open()?);
-        let ((), ()) = (ldg.validate_hash_lists()?, rdg.validate_hash_lists()?);
-        let (lvs, rvs) = (ldg.all_hashes(), rdg.all_hashes());
-        let (lnum_keys, rnum_keys) = (lvs.len(), rvs.len());
+        let (l_depgraph, r_depgraph) = (l_opener.open()?, r_opener.open()?);
+        let ((), ()) = (
+            l_depgraph.validate_hash_lists()?,
+            r_depgraph.validate_hash_lists()?,
+        );
+        let (l_dependencies, r_dependencies) = (l_depgraph.all_hashes(), r_depgraph.all_hashes());
+        let (lnum_keys, rnum_keys) = (l_dependencies.len(), r_dependencies.len());
         let (mut lproc, mut rproc) = (0, 0);
-        let (mut missing, mut extra) = (vec![], vec![]);
-        let (mut lrows, mut rrows) = (lvs.iter(), rvs.iter());
-        let (mut lro, mut rro) = (lrows.next(), rrows.next());
+        let (mut in_r_not_l, mut in_l_not_r) = (vec![], vec![]);
+        let (mut l_dependencies_iter, mut r_dependencies_iter) =
+            (l_dependencies.iter(), r_dependencies.iter());
+        let (mut l_dependency_opt, mut r_dependency_opt) =
+            (l_dependencies_iter.next(), r_dependencies_iter.next());
         let (mut ledge_count, mut redge_count) = (0, 0);
         let bar = if no_progress_bar {
             None
@@ -111,69 +133,78 @@ fn comp_depgraph64(
         if let Some(bar) = bar.as_ref() {
             bar.println("Comparing graphs. Patience...")
         };
-        while lro.is_some() || rro.is_some() {
-            match (lro, rro) {
-                (None, Some(&rk)) => {
+        while l_dependency_opt.is_some() || r_dependency_opt.is_some() {
+            match (l_dependency_opt, r_dependency_opt) {
+                (None, Some(&r_dependency)) => {
                     // These edges are in `r` and not in `l`.
-                    let k = rk;
-                    let vs = hashes(&rdg, k);
-                    redge_count += vs.len();
-                    add_edges(&mut missing, k, &vs);
-                    rro = rrows.next();
+                    let dependency = r_dependency;
+                    let dependents = hashes(&r_depgraph, dependency);
+                    redge_count += dependents.len();
+                    add_edges(&mut in_r_not_l, dependency, &dependents);
+                    r_dependency_opt = r_dependencies_iter.next();
                     rproc += 1;
                     if bar.is_some() && rnum_keys > lnum_keys {
                         bar.as_ref().unwrap().inc(1); // We advanced `r` and there are more keys in `r` than `l`.
                     }
                 }
-                (Some(&lk), None) => {
+                (Some(&l_dependency), None) => {
                     // These edges are in `l` and not in `r`.
-                    let k = lk;
-                    let vs = hashes(&ldg, k);
-                    lro = lrows.next();
-                    ledge_count += vs.len();
-                    add_edges(&mut extra, k, &vs);
+                    let dependency = l_dependency;
+                    let dependents = hashes(&l_depgraph, dependency);
+                    l_dependency_opt = l_dependencies_iter.next();
+                    ledge_count += dependents.len();
+                    add_edges(&mut in_l_not_r, dependency, &dependents);
                     lproc += 1;
                     if bar.is_some() && lnum_keys > rnum_keys {
                         bar.as_ref().unwrap().inc(1); // We advanced `l` and there are more keys in `l` than `r`.
                     }
                 }
-                (Some(&lk), Some(&rk)) => {
-                    let (lvs, rvs) = (hashes(&ldg, lk), hashes(&rdg, rk));
-                    if lk < rk {
+                (Some(&l_dependency), Some(&r_dependency)) => {
+                    let (l_dependencies, r_dependencies) = (
+                        hashes(&l_depgraph, l_dependency),
+                        hashes(&r_depgraph, r_dependency),
+                    );
+                    if l_dependency < r_dependency {
                         // These edges are in `l` but not in `r`.
-                        ledge_count += lvs.len();
-                        add_edges(&mut extra, lk, &lvs);
-                        lro = lrows.next();
+                        ledge_count += l_dependencies.len();
+                        add_edges(&mut in_l_not_r, l_dependency, &l_dependencies);
+                        l_dependency_opt = l_dependencies_iter.next();
                         lproc += 1;
                         if bar.is_some() && lnum_keys >= rnum_keys {
                             bar.as_ref().unwrap().inc(1); // We advanced `l` and there are more keys in `l` than `r`.
                         }
                         continue;
                     }
-                    if lk > rk {
+                    if l_dependency > r_dependency {
                         // These edges are in `r` but not in `l`.
-                        redge_count += rvs.len();
-                        add_edges(&mut missing, rk, &rvs);
-                        rro = rrows.next();
+                        redge_count += r_dependencies.len();
+                        add_edges(&mut in_r_not_l, r_dependency, &r_dependencies);
+                        r_dependency_opt = r_dependencies_iter.next();
                         rproc += 1;
                         if bar.is_some() && rnum_keys > lnum_keys {
                             bar.as_ref().unwrap().inc(1); // We advanced `r` and there are more keys in `r` than `l`.
                         }
                         continue;
                     }
-                    ledge_count += lvs.len();
-                    redge_count += rvs.len();
-                    // Vertices in `rvs` not in `lvs` indicate missing edges.
+                    ledge_count += l_dependencies.len();
+                    redge_count += r_dependencies.len();
                     let mut dests: std::collections::BTreeSet<u64> =
                         std::collections::BTreeSet::new();
-                    dests.extend(rvs.iter().filter(|&v| !lvs.contains(v)));
-                    add_edges(&mut missing, lk, &dests);
-                    // Vertices in `lvs` not in `rvs` indicate extra edges.
+                    dests.extend(
+                        r_dependencies
+                            .iter()
+                            .filter(|&v| !l_dependencies.contains(v)),
+                    );
+                    add_edges(&mut in_r_not_l, l_dependency, &dests);
                     dests.clear();
-                    dests.extend(lvs.iter().filter(|&v| !rvs.contains(v)));
-                    add_edges(&mut extra, lk, &dests);
-                    lro = lrows.next();
-                    rro = rrows.next();
+                    dests.extend(
+                        l_dependencies
+                            .iter()
+                            .filter(|&v| !r_dependencies.contains(v)),
+                    );
+                    add_edges(&mut in_l_not_r, l_dependency, &dests);
+                    l_dependency_opt = l_dependencies_iter.next();
+                    r_dependency_opt = r_dependencies_iter.next();
                     lproc += 1;
                     rproc += 1;
                     if bar.is_some() {
@@ -186,7 +217,7 @@ fn comp_depgraph64(
         if let Some(bar) = bar {
             bar.finish_and_clear()
         };
-        num_edges_missing = missing.len();
+        num_edges_missing = in_r_not_l.len();
         println!("\nResults\n=======");
         println!("Processed {}/{} of nodes in 'test'", lproc, lnum_keys);
         println!("Processed {}/{} of nodes in 'control'", rproc, rnum_keys);
@@ -194,16 +225,18 @@ fn comp_depgraph64(
         println!("Edges in 'control': {}", redge_count);
         println!(
             "Edges in 'control' missing in 'test' (there are {}):",
-            missing.len()
+            in_r_not_l.len()
         );
-        for (key, dst) in missing {
+        print_edges_header();
+        for (key, dst) in in_r_not_l {
             print_edge_u64(key, dst, hex_dump);
         }
         println!(
             "Edges in 'test' missing in 'control' (there are {}):",
-            extra.len()
+            in_l_not_r.len()
         );
-        for (key, dst) in extra {
+        print_edges_header();
+        for (key, dst) in in_l_not_r {
             print_edge_u64(key, dst, hex_dump);
         }
         Ok(())

@@ -126,11 +126,9 @@ type facts = {
   types: type_facts InvSMap.t;
   functions: string list;
   constants: string list;
-  type_aliases: string list;
 }
 
-let empty =
-  { types = InvSMap.empty; functions = []; constants = []; type_aliases = [] }
+let empty = { types = InvSMap.empty; functions = []; constants = [] }
 
 (* Facts to JSON *)
 
@@ -197,13 +195,7 @@ let facts_to_json ~sha1 facts =
   in
   let functions_json = ("functions", list_to_json_array facts.functions) in
   let constants_json = ("constants", list_to_json_array facts.constants) in
-  let type_aliases_json =
-    ("typeAliases", list_to_json_array facts.type_aliases)
-  in
-  J.JSON_Object
-    [
-      sha1sum; type_facts_json; functions_json; constants_json; type_aliases_json;
-    ]
+  J.JSON_Object [sha1sum; type_facts_json; functions_json; constants_json]
 
 (* Facts from JSON *)
 
@@ -263,8 +255,6 @@ let facts_from_json : Hh_json.json -> facts option =
                { acc with constants = list_from_jstr_array xs }
              | JSON_Array xs when String.equal k "functions" ->
                { acc with functions = list_from_jstr_array xs }
-             | JSON_Array xs when String.equal k "typeAliases" ->
-               { acc with type_aliases = list_from_jstr_array xs }
              | JSON_Array types when String.equal k "types" ->
                {
                  acc with

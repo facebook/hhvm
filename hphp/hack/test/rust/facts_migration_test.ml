@@ -38,7 +38,6 @@ let test_json_deser_ser_idempotent () =
             ] );
         ("functions", JSON_Array [JSON_String "foo"; JSON_String "bar"]);
         ("constants", JSON_Array [JSON_String "c1"; JSON_String "c2"]);
-        ("typeAliases", JSON_Array []);
       ]
   in
   validate_json_deser_ser json0 sha1
@@ -63,7 +62,6 @@ let test_json_deser_ser_type_alias () =
             ] );
         ("functions", JSON_Array []);
         ("constants", JSON_Array []);
-        ("typeAliases", JSON_Array [JSON_String "T0"]);
       ]
   in
   validate_json_deser_ser json0 sha1

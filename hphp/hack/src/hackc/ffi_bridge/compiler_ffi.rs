@@ -108,7 +108,6 @@ pub mod compile_ffi {
         pub types: Vec<TypeFactsByName>,
         pub functions: Vec<String>,
         pub constants: Vec<String>,
-        pub type_aliases: Vec<String>,
         pub file_attributes: Vec<Attribute>,
     }
 

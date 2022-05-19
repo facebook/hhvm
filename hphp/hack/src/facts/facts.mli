@@ -44,7 +44,6 @@ type facts = {
   types: type_facts InvSMap.t;
   functions: string list;
   constants: string list;
-  type_aliases: string list;
 }
 
 val empty : facts

@@ -35,8 +35,16 @@ pub enum TypeKind {
     Mixed,
 }
 
+impl Default for TypeKind {
+    fn default() -> Self {
+        Self::Unknown
+    }
+}
+
 pub type StringSet = BTreeSet<String>;
 pub type Attributes = BTreeMap<String, Vec<String>>;
+pub type Methods = BTreeMap<String, MethodFacts>;
+pub type TypeFactsByName = BTreeMap<String, TypeFacts>;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -45,9 +53,7 @@ pub struct MethodFacts {
     pub attributes: Attributes,
 }
 
-pub type Methods = BTreeMap<String, MethodFacts>;
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct TypeFacts {
     #[serde(default, skip_serializing_if = "StringSet::is_empty")]
@@ -71,8 +77,6 @@ pub struct TypeFacts {
     pub methods: Methods,
 }
 
-pub type TypeFactsByName = BTreeMap<String, TypeFacts>;
-
 #[derive(Default, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Facts {
@@ -89,9 +93,6 @@ pub struct Facts {
 
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub constants: Vec<String>,
-
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub type_aliases: Vec<String>,
 
     #[serde(default, skip_serializing_if = "Attributes::is_empty")]
     pub file_attributes: Attributes,
@@ -133,19 +134,14 @@ impl Facts {
             let type_fact = TypeFacts::of_class_decl(decl);
             add_or_update_classish_decl(name, type_fact, &mut types);
         });
-        let mut type_aliases = decls
-            .typedefs()
-            .filter_map(|(name, decl)| {
-                if decl.is_ctx {
-                    // ignore context aliases
-                    None
-                } else {
-                    let type_fact = TypeFacts::of_typedef_decl(decl);
-                    add_or_update_classish_decl(format(name), type_fact, &mut types);
-                    Some(format(name))
-                }
-            })
-            .collect::<Vec<String>>();
+        for (name, decl) in decls.typedefs().filter(|(_, decl)| {
+            // Ignore context aliases
+            !decl.is_ctx
+        }) {
+            let type_fact = TypeFacts::of_typedef_decl(decl);
+            add_or_update_classish_decl(format(name), type_fact, &mut types);
+        }
+
         let mut functions = decls
             .funs()
             .filter_map(|(name, _)| {
@@ -164,13 +160,11 @@ impl Facts {
 
         functions.reverse();
         constants.reverse();
-        type_aliases.reverse();
 
         Facts {
             types,
             functions,
             constants,
-            type_aliases,
             file_attributes: to_facts_attributes(file_attributes),
         }
     }
@@ -533,12 +527,9 @@ mod tests {
             String::from("include_empty_both_when_trait_kind"),
             TypeFacts {
                 kind: TypeKind::Trait,
-                attributes: Attributes::new(),
-                require_extends: StringSet::new(),
-                require_implements: StringSet::new(),
                 base_types,
                 flags: 6,
-                methods: Methods::new(),
+                ..Default::default()
             },
         );
         // verify requireImplements and requireExtends are skipped if empty and Class kind
@@ -546,12 +537,8 @@ mod tests {
             String::from("include_empty_neither_when_class_kind"),
             TypeFacts {
                 kind: TypeKind::Class,
-                attributes: Attributes::new(),
-                require_extends: StringSet::new(),
-                require_implements: StringSet::new(),
-                base_types: StringSet::new(),
                 flags: 0,
-                methods: Methods::new(),
+                ..Default::default()
             },
         );
         // verify only requireImplements is skipped if empty and Interface kind
@@ -559,12 +546,8 @@ mod tests {
             String::from("include_empty_req_extends_when_interface_kind"),
             TypeFacts {
                 kind: TypeKind::Interface,
-                attributes: Attributes::new(),
-                require_extends: StringSet::new(),
-                require_implements: StringSet::new(),
-                base_types: StringSet::new(),
                 flags: 1,
-                methods: Methods::new(),
+                ..Default::default()
             },
         );
         // verify non-empty require* is included
@@ -572,6 +555,7 @@ mod tests {
             String::from("include_nonempty_always"),
             TypeFacts {
                 kind: TypeKind::Unknown,
+                flags: 9,
                 attributes: {
                     let mut map = Attributes::new();
                     map.insert("A".into(), vec!["'B'".into()]);
@@ -588,19 +572,13 @@ mod tests {
                     set.insert("impl1".into());
                     set
                 },
-                base_types: StringSet::new(),
-                flags: 9,
-                methods: Methods::new(),
+                ..Default::default()
             },
         );
         types.insert(
             String::from("include_method_attrs"),
             TypeFacts {
                 kind: TypeKind::Class,
-                attributes: Attributes::new(),
-                require_extends: StringSet::new(),
-                require_implements: StringSet::new(),
-                base_types: StringSet::new(),
                 flags: 6,
                 methods: vec![
                     (
@@ -623,13 +601,20 @@ mod tests {
                 ]
                 .into_iter()
                 .collect(),
+                ..Default::default()
+            },
+        );
+        types.insert(
+            String::from("my_type_alias"),
+            TypeFacts {
+                kind: TypeKind::TypeAlias,
+                ..Default::default()
             },
         );
         Facts {
             constants: vec!["c1".into(), "c2".into()],
             file_attributes: BTreeMap::new(),
             functions: vec![],
-            type_aliases: vec!["my_type_alias".into()],
             types,
         }
     }
@@ -657,9 +642,6 @@ mod tests {
     "c2"
   ],
   "sha1sum": "37aa63c77398d954473262e1a0057c1e632eda77",
-  "typeAliases": [
-    "my_type_alias"
-  ],
   "types": [
     {
       "baseTypes": [
@@ -712,6 +694,11 @@ mod tests {
       "requireImplements": [
         "impl1"
       ]
+    },
+    {
+      "flags": 0,
+      "kindOf": "typeAlias",
+      "name": "my_type_alias"
     }
   ]
 }"#,

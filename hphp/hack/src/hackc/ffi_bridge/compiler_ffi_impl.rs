@@ -127,7 +127,6 @@ impl From<compile_ffi::Facts> for facts::Facts {
             types: vec_to_map(facts.types),
             functions: facts.functions,
             constants: facts.constants,
-            type_aliases: facts.type_aliases,
             file_attributes: vec_to_map(facts.file_attributes),
         }
     }
@@ -138,7 +137,6 @@ impl From<facts::Facts> for compile_ffi::Facts {
             types: map_to_vec(facts.types),
             functions: facts.functions,
             constants: facts.constants,
-            type_aliases: facts.type_aliases,
             file_attributes: map_to_vec(facts.file_attributes),
         }
     }
@@ -236,14 +234,12 @@ mod tests {
             types: ffi_type_facts_by_name,
             functions: vec!["f1".to_string(), "f2".to_string()],
             constants: vec!["C".to_string()],
-            type_aliases: vec!["foo".to_string(), "bar".to_string()],
             file_attributes: ffi_attributes,
         };
         let rust_facts = facts::Facts {
             types: rust_type_facts_by_name,
             functions: vec!["f1".to_string(), "f2".to_string()],
             constants: vec!["C".to_string()],
-            type_aliases: vec!["foo".to_string(), "bar".to_string()],
             file_attributes: rust_attributes,
         };
         assert_eq!(facts::Facts::from(ffi_facts), rust_facts)

@@ -1,6 +1,6 @@
 dict(3) {
   ["%s/ext_factparse.php"]=>
-  dict(5) {
+  dict(4) {
     ["constants"]=>
     vec(6) {
       string(3) "CO0"
@@ -19,12 +19,6 @@ dict(3) {
     }
     ["sha1sum"]=>
     string(40) "a0b0a37c3e4370d06ce60084fe3aec29267d39dd"
-    ["typeAliases"]=>
-    vec(3) {
-      string(3) "TA0"
-      string(3) "TA1"
-      string(3) "TA2"
-    }
     ["types"]=>
     vec(13) {
       dict(3) {
@@ -170,7 +164,7 @@ dict(3) {
     }
   }
   ["%s"]=>
-  dict(5) {
+  dict(4) {
     ["constants"]=>
     vec(6) {
       string(6) "NS\CO0"
@@ -189,12 +183,6 @@ dict(3) {
     }
     ["sha1sum"]=>
     string(40) "76761a6bcdcfee86a1446b8bc989e9139c8793a7"
-    ["typeAliases"]=>
-    vec(3) {
-      string(6) "NS\TA0"
-      string(6) "NS\TA1"
-      string(6) "NS\TA2"
-    }
     ["types"]=>
     vec(13) {
       dict(3) {
@@ -340,7 +328,7 @@ dict(3) {
     }
   }
   ["%s"]=>
-  dict(5) {
+  dict(4) {
     ["constants"]=>
     vec(6) {
       string(9) "NS\NS\CO0"
@@ -359,12 +347,6 @@ dict(3) {
     }
     ["sha1sum"]=>
     string(40) "cc9af13672ef16a46bf5fdefc202a57db511d79c"
-    ["typeAliases"]=>
-    vec(3) {
-      string(9) "NS\NS\TA0"
-      string(9) "NS\NS\TA1"
-      string(9) "NS\NS\TA2"
-    }
     ["types"]=>
     vec(13) {
       dict(3) {

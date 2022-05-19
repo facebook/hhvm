@@ -33,6 +33,7 @@ let get_details_from_info (info_opt : Facts.type_facts option) :
         | TKTrait -> SI_Trait
         | TKMixed -> SI_Mixed
         | TKRecord -> SI_Unknown
+        | TKTypeAlias -> SI_Typedef
         | _ -> SI_Unknown
       in
       let is_abstract = info.flags land flags_abstract > 0 in
@@ -70,17 +71,6 @@ let convert_facts ~(path : Relative_path.t) ~(facts : Facts.facts) : si_capture
           sif_is_final = false;
         })
   in
-  (* Handle typedefs *)
-  let types_mapped =
-    List.map facts.type_aliases ~f:(fun typename ->
-        {
-          sif_name = typename;
-          sif_kind = SI_Typedef;
-          sif_filepath = relative_path_str;
-          sif_is_abstract = false;
-          sif_is_final = false;
-        })
-  in
   (* Handle constants *)
   let constants_mapped =
     List.map facts.constants ~f:(fun constantname ->
@@ -93,9 +83,7 @@ let convert_facts ~(path : Relative_path.t) ~(facts : Facts.facts) : si_capture
         })
   in
   (* Return unified results *)
-  List.append classes_mapped functions_mapped
-  |> List.append types_mapped
-  |> List.append constants_mapped
+  List.append classes_mapped functions_mapped |> List.append constants_mapped
 
 (* Parse one single file and capture information about it *)
 let parse_one_file

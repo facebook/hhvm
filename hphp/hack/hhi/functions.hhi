@@ -15,12 +15,7 @@
  *
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
-
-// isset, and unset only look like functions to static analysis, but
-// in fact act as special expression subtypes within the runtime
 namespace {
-function isset($x)[]: bool;
-function unset($x)[]: void;
 //
 <<__PHPStdLib>>
 function array_fill<T>(int $start_index, int $num, T $value)[]: varray_or_darray<T>;

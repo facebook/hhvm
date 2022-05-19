@@ -1,0 +1,4 @@
+(4,3)-(4,38) Cannot use unstable feature: `type_const_super_bound`
+(5,3)-(5,45) Cannot use unstable feature: `type_const_super_bound`
+(7,3)-(7,55) Cannot use unstable feature: `type_const_super_bound`
+(8,3)-(8,55) Cannot use unstable feature: `type_const_super_bound`

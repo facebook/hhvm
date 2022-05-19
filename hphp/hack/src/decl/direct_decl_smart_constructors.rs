@@ -1378,6 +1378,31 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         Some(ty)
     }
 
+    fn partition_bounds_into_lower_and_upper(
+        &self,
+        constraints: Node<'a>,
+    ) -> (bump::Vec<'a, &'a Ty<'a>>, bump::Vec<'a, &'a Ty<'a>>) {
+        let append = |tys: &mut bump::Vec<'_, _>, ty: Option<_>| {
+            if let Some(ty) = ty {
+                tys.push(ty);
+            }
+        };
+        constraints.iter().fold(
+            (bump::Vec::new_in(self.arena), bump::Vec::new_in(self.arena)),
+            |(mut super_, mut as_), constraint| {
+                if let Node::TypeConstraint(&(kind, hint)) = constraint {
+                    use ConstraintKind::*;
+                    match kind {
+                        ConstraintAs => append(&mut as_, self.node_to_ty(hint)),
+                        ConstraintSuper => append(&mut super_, self.node_to_ty(hint)),
+                        _ => (),
+                    };
+                };
+                (super_, as_)
+            },
+        )
+    }
+
     fn to_attributes(&self, node: Node<'a>) -> Attributes<'a> {
         let mut attributes = Attributes {
             deprecated: None,
@@ -5207,7 +5232,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
         let has_abstract_keyword = modifiers
             .iter()
             .any(|node| node.is_token(TokenKind::Abstract));
-        let reduce_bounds = |mut constraints: bump::Vec<'a, &Ty<'a>>| {
+        let reduce_bounds = |mut constraints: bump::Vec<'a, &Ty<'a>>,
+                             f: fn(&'a [&Ty<'a>]) -> Ty_<'a>| {
             if constraints.len() == 1 {
                 constraints.pop().map(|ty| self.alloc(ty.clone()))
             } else {
@@ -5215,37 +5241,20 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
                 // map doesn't allow moving out of borrowed constraints
                 match constraints.first() {
                     None => None, // no bounds
-                    Some(fst) => Some(
-                        self.alloc(Ty(fst.0, Ty_::Tintersection(constraints.into_bump_slice()))),
-                    ),
+                    Some(fst) => Some(self.alloc(Ty(fst.0, f(constraints.into_bump_slice())))),
                 }
             }
         };
         let type_ = self.node_to_ty(type_);
         let kind = if has_abstract_keyword {
             // Abstract type constant in EBNF-like notation:
-            //     abstract const type T {as X} [= Z];
-            let as_constraint = reduce_bounds(constraints.iter().fold(
-                bump::Vec::new_in(self.arena),
-                |mut tys, constraint| {
-                    if let Node::TypeConstraint(&(kind, hint)) = constraint {
-                        use ConstraintKind::*;
-                        match kind {
-                            ConstraintAs => {
-                                if let Some(ty) = self.node_to_ty(hint) {
-                                    tys.push(ty);
-                                }
-                            }
-                            ConstraintSuper => (/* TODO(leoo) implement later */),
-                            _ => (),
-                        };
-                    };
-                    tys
-                },
-            ));
+            //     abstract const type T {as U | super L} [= D];
+            let (lower, upper) = self.partition_bounds_into_lower_and_upper(constraints);
             Typeconst::TCAbstract(self.alloc(AbstractTypeconst {
-                as_constraint,
-                super_constraint: None,
+                // `as T1 as T2 as ...` == `as (T1 & T2 & ...)`
+                as_constraint: reduce_bounds(upper, |tys| Ty_::Tintersection(tys)),
+                // `super T1 super T2 super ...` == `super (T1 | T2 | ...)`
+                super_constraint: reduce_bounds(lower, |tys| Ty_::Tunion(tys)),
                 default: type_,
             }))
         } else if let Some(tc_type) = type_ {

@@ -216,12 +216,15 @@ impl NastCheck {
         )
     }
 
-    pub fn partially_abstract_typeconst_definition(p: Pos) -> Error {
+    pub fn partially_abstract_typeconst_definition(p: Pos, kind: &str) -> Error {
         UserError::new(
             Self::PartiallyAbstractTypeconstDefinition as isize,
             Message(
                 p,
-                "`as` constraints are only legal on abstract type constants".into(),
+                format!(
+                    "`{}` constraints are only legal on abstract type constants",
+                    kind
+                ),
             ),
             vec![],
             vec![],

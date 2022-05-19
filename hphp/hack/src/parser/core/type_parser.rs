@@ -1158,24 +1158,23 @@ where
         )
     }
 
-    pub(crate) fn parse_type_constraint_opt(&mut self) -> Option<S::Output> {
+    pub(crate) fn parse_type_constraint_opt(&mut self, allow_super: bool) -> Option<S::Output> {
         // SPEC
         // type-constraint:
         //   as  type-specifier
-        // TODO: Is this correct? Or do we need to allow "super" as well?
+        //   super  type-specifier
         // TODO: What about = ?
-        if self.peek_token_kind() == TokenKind::As {
-            let constraint_as = self.next_token();
-            let constraint_as = S!(make_token, self, constraint_as);
-            let constraint_type = self.parse_type_specifier(false, true);
-            Some(S!(
-                make_type_constraint,
-                self,
-                constraint_as,
-                constraint_type
-            ))
-        } else {
-            None
+        let make = |x: &mut Self| {
+            let constraint = x.next_token();
+            let constraint = S!(make_token, x, constraint);
+            let constraint_type = x.parse_type_specifier(false, true);
+            Some(S!(make_type_constraint, x, constraint, constraint_type))
+        };
+        let token = self.peek_token_kind();
+        match token {
+            TokenKind::As => make(self),
+            TokenKind::Super if allow_super => make(self),
+            _ => None,
         }
     }
 

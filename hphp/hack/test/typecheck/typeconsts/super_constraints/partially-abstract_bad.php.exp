@@ -1,0 +1,2 @@
+File "partially-abstract_bad.php", line 10, characters 14-14:
+`super` constraints are only legal on abstract type constants (NastCheck[3093])

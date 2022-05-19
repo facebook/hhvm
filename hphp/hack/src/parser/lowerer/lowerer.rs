@@ -4289,6 +4289,43 @@ fn p_xhp_child<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpChild> {
     }
 }
 
+fn p_tconstraints_into_lower_and_upper<'a>(
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<(Vec<ast::Hint>, Vec<ast::Hint>)> {
+    node.syntax_node_to_list_skip_separator().fold(
+        Ok((Vec::new(), Vec::new())),
+        |acc, constraint| {
+            acc.and_then(|(mut lower, mut upper)| {
+                let (kind, ty) = p_tconstraint(constraint, env)?;
+                use ast::ConstraintKind::*;
+                match kind {
+                    ConstraintAs => upper.push(ty),
+                    ConstraintSuper => lower.push(ty),
+                    _ => (),
+                };
+                Ok((lower, upper))
+            })
+        },
+    )
+}
+
+fn merge_constraints(
+    mut constraints: Vec<ast::Hint>,
+    f: fn(Vec<ast::Hint>) -> ast::Hint_,
+) -> Option<ast::Hint> {
+    if constraints.len() == 1 {
+        constraints.pop()
+    } else {
+        #[allow(clippy::manual_map)]
+        // map doesn't allow moving out of borrowed constraints
+        match constraints.first() {
+            None => None, // no bounds
+            Some(fst) => Some(ast::Hint::new(fst.0.clone(), f(constraints))),
+        }
+    }
+}
+
 fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> Result<()> {
     use ast::Visibility;
     let doc_comment_opt = extract_docblock(node, env);
@@ -4349,39 +4386,34 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 .map(|hint| soften_hint(&user_attributes, hint));
             let kinds = p_kinds(&c.modifiers, env)?;
             let name = pos_name(&c.name, env)?;
-            let as_constraint = {
-                let mut constraints = could_map(&c.type_constraints, env, p_tconstraint_ty)?;
-                if constraints.len() == 1 {
-                    constraints.pop()
-                } else {
-                    #[allow(clippy::manual_map)]
-                    // map doesn't allow moving out of borrowed constraints
-                    match constraints.first() {
-                        None => None, // no bounds
-                        Some(fst) => {
-                            // desugar multiple as constraints into an intersection type
-                            // e.g., `as num as T1` -> `as (num & T1)`
-                            Some(ast::Hint::new(
-                                fst.0.clone(),
-                                ast::Hint_::Hintersection(constraints),
-                            ))
-                        }
-                    }
-                }
-            };
+
+            // desugar multiple same-kinded constraints as folows:
+            let (lower, upper) = p_tconstraints_into_lower_and_upper(&c.type_constraints, env)?;
+            // `as num as T1` -> `as (num & T1)`
+            let as_constraint = merge_constraints(upper, ast::Hint_::Hintersection);
+            // `super int as T2` -> `as (int | T2)`
+            let super_constraint = merge_constraints(lower, ast::Hint_::Hunion);
+
             let span = p_pos(node, env);
             let has_abstract = kinds.has(modifier::ABSTRACT);
             let kind = if has_abstract {
                 TCAbstract(ast::ClassAbstractTypeconst {
                     as_constraint,
-                    super_constraint: None,
+                    super_constraint,
                     default: type__,
                 })
             } else if let Some(type_) = type__ {
-                if env.is_typechecker() && as_constraint.is_some() {
+                if env.is_typechecker() && (as_constraint.is_some() || super_constraint.is_some()) {
                     raise_hh_error(
                         env,
-                        NastCheck::partially_abstract_typeconst_definition(name.0.clone()),
+                        NastCheck::partially_abstract_typeconst_definition(
+                            name.0.clone(),
+                            if as_constraint.is_some() {
+                                "as"
+                            } else {
+                                "super"
+                            },
+                        ),
                     );
                 }
                 TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: type_ })

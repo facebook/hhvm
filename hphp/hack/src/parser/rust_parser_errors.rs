@@ -86,6 +86,7 @@ enum UnstableFeatures {
     Modules,
     ClassConstDefault,
     TypeConstMultipleBounds,
+    TypeConstSuperBound,
     TypeRefinements,
     ContextAliasDeclaration,
     ContextAliasDeclarationShort,
@@ -109,8 +110,9 @@ impl UnstableFeatures {
             UnstableFeatures::ContextAliasDeclaration => Unstable,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
             UnstableFeatures::TypeConstMultipleBounds => Unstable,
-            UnstableFeatures::TypeRefinements => Unstable,
+            UnstableFeatures::TypeConstSuperBound => Unstable,
             UnstableFeatures::ClassConstDefault => Migration,
+            UnstableFeatures::TypeRefinements => Unstable,
             UnstableFeatures::MethodTraitDiamond => Preview,
             UnstableFeatures::UpcastExpression => Unstable,
             UnstableFeatures::RequireClass => Unstable,
@@ -3955,8 +3957,23 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         if self.env.is_typechecker() {
             // HackC & HHVM don't see bounds, so it's pointless to ban (then unban later)
             if let TypeConstDeclaration(tc) = node.children {
-                let count = tc.type_constraints.iter_children().count();
-                if count > 1 {
+                let (super_count, as_count) = tc.type_constraints.iter_children().fold(
+                    (0, 0),
+                    |(super_count, as_count), node| {
+                        if let TypeConstraint(c) = &node.children {
+                            match token_kind(&c.keyword) {
+                                Some(TokenKind::As) => return (super_count, as_count + 1),
+                                Some(TokenKind::Super) => return (super_count + 1, as_count),
+                                _ => (),
+                            }
+                        }
+                        (super_count, as_count)
+                    },
+                );
+                if super_count != 0 {
+                    self.check_can_use_feature(node, &UnstableFeatures::TypeConstSuperBound);
+                }
+                if super_count > 1 || as_count > 1 {
                     self.check_can_use_feature(node, &UnstableFeatures::TypeConstMultipleBounds);
                 }
             }

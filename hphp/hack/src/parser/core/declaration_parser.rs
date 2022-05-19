@@ -241,7 +241,7 @@ where
         let colon = self.require_colon();
         let base =
             self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
-        let enum_type = self.parse_type_constraint_opt();
+        let enum_type = self.parse_type_constraint_opt(false);
         let left_brace = self.require_left_brace();
         let use_clauses = self.parse_enum_use_list_opt();
         let enumerators = self.parse_enumerator_list_opt();
@@ -1313,9 +1313,14 @@ where
     //   abstract-type-constant-declaration
     //   concrete-type-constant-declaration
     // abstract-type-constant-declaration:
-    //   abstract  const  type  name  type-constraintopt  ;
+    //   abstract  const  type  name  type-constraint-list_opt  ;
     // concrete-type-constant-declaration:
-    //   const  type  name  type-constraintopt  =  type-specifier  ;
+    //   const  type  name  type-constraint-list_opt  =  type-specifier  ;
+    // type-constraint-list:
+    //   as  name
+    //   super  name
+    //   type-constraint-list  as  name
+    //   type-constraint-list  super  name
     //
     // ERROR RECOVERY:
     //
@@ -1338,7 +1343,7 @@ where
     ) -> S::Output {
         let type_token = self.assert_token(TokenKind::Type);
         let (name, type_parameters) = self.parse_nonreserved_name_maybe_parameterized();
-        let type_constraints = self.parse_type_constraints();
+        let type_constraints = self.parse_type_constraints(true);
         let (equal_token, type_specifier) = self.parse_equal_type();
         let semicolon = self.require_semicolon();
         S!(
@@ -1450,7 +1455,7 @@ where
                 let keyword = self.assert_token(TokenKind::Type);
                 let (name, type_params) = self.parse_nonreserved_name_maybe_parameterized();
                 let constraints = self.with_type_parser(|p| {
-                    p.parse_list_until_none(|p| p.parse_type_constraint_opt())
+                    p.parse_list_until_none(|p| p.parse_type_constraint_opt(true))
                 });
                 let (equal_token, type_specifier) = self.parse_equal_type();
                 S!(
@@ -2298,16 +2303,16 @@ where
         }
     }
 
-    fn parse_type_constraint_opt(&mut self) -> S::Output {
+    fn parse_type_constraint_opt(&mut self, allow_super: bool) -> S::Output {
         self.with_type_parser(|p: &mut TypeParser<'a, S>| {
-            p.parse_type_constraint_opt()
+            p.parse_type_constraint_opt(allow_super)
                 .unwrap_or_else(|| S!(make_missing, p, p.pos()))
         })
     }
 
-    fn parse_type_constraints(&mut self) -> S::Output {
+    fn parse_type_constraints(&mut self, allow_super: bool) -> S::Output {
         self.with_type_parser(|p: &mut TypeParser<'a, S>| {
-            p.parse_list_until_none(|p| p.parse_type_constraint_opt())
+            p.parse_list_until_none(|p| p.parse_type_constraint_opt(allow_super))
         })
     }
 
@@ -2328,7 +2333,7 @@ where
         let generic = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
             p.parse_generic_type_parameter_list_opt()
         });
-        let constr = self.parse_type_constraint_opt();
+        let constr = self.parse_type_constraint_opt(true);
         let equal = self.require_equal();
         let ty = self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
         let semi = self.require_semicolon();

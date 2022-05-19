@@ -164,17 +164,14 @@ fn dispatch_call_id<R: Reason>(
     id: &oxidized::ast_defs::Id,
 ) -> Result<(tast::Expr_<R>, Ty<R>)> {
     rupro_todo_mark!(Disposable);
-    rupro_todo_mark!(Naming, "this should go into naming phase");
-    let x = utils::core::ns::add_ns(&id.1);
-    let id = oxidized::ast_defs::Id(id.0.clone(), x);
-    let (fty, tal) = fun_type_of_id(env, &id, explicit_targs, el)?;
+    let (fty, tal) = fun_type_of_id(env, id, explicit_targs, el)?;
     let (tel, tunpacked_element, ty, _should_forget_fake_members) =
         call(env, fty.clone(), el, unpacked_element)?;
 
     let te = oxidized::aast::Expr(
         fty,
         expr_pos.clone(),
-        oxidized::aast::Expr_::Id(Box::new(id)),
+        oxidized::aast::Expr_::Id(Box::new(id.clone())),
     );
     Ok((
         oxidized::aast::Expr_::Call(Box::new((te, tal, tel, tunpacked_element))),

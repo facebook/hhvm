@@ -101,6 +101,7 @@ fn fun_(env: &NamingEnv, f: &mut aast::Fun_<(), ()>) {
 
 fn fun_def(env: &NamingEnv, fd: &mut aast::FunDef<(), ()>) {
     rupro_todo_mark!(AST);
+    naming_elaborate_namespaces::elaborate_fun_def(&env.type_params, fd);
     fun_(env, &mut fd.fun);
 }
 

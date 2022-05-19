@@ -6,7 +6,7 @@
 use crate::special_names as sn;
 use im::HashSet;
 use oxidized::aast_visitor::{Params, VisitorMut};
-use oxidized::{aast::*, ast_defs::*};
+use oxidized::{aast::*, ast, ast_defs::*};
 use utils::core::ns;
 
 struct ElaborateNamespacesVisitor<'node> {
@@ -67,9 +67,31 @@ impl<'node> VisitorMut<'node> for ElaborateNamespacesVisitor<'node> {
         }
         Ok(())
     }
+
+    fn visit_expr_(
+        &mut self,
+        _c: &mut <Self::Params as Params>::Context,
+        p: &'node mut Expr_<(), ()>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        rupro_todo_mark!(AST);
+        use Expr_::*;
+        match p {
+            Call(box (Expr(_ty, _pos, Id(box ast::Id(_p, id))), _targs, _el, _uarg)) => {
+                rupro_todo_mark!(Naming, "NS.elaborate_id");
+                *id = ns::add_ns(id);
+            }
+            _ => {}
+        };
+        Ok(())
+    }
 }
 
 pub fn elaborate_class(type_params: &HashSet<String>, cls: &mut Class_<(), ()>) {
     let mut vis = ElaborateNamespacesVisitor::new(type_params);
     vis.visit_class_(&mut (), cls).unwrap();
+}
+
+pub fn elaborate_fun_def(type_params: &HashSet<String>, fd: &mut FunDef<(), ()>) {
+    let mut vis = ElaborateNamespacesVisitor::new(type_params);
+    vis.visit_fun_def(&mut (), fd).unwrap();
 }

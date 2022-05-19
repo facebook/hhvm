@@ -10,6 +10,7 @@ path = "hackrs_provider_backend.rs"
 [dependencies]
 anyhow = "1.0.56"
 datastore = { path = "../../rupro/datastore" }
+deps_rust = { path = "../../deps/cargo/deps_rust" }
 file_provider = { path = "../../rupro/file_provider/cargo/file_provider" }
 hackrs = { path = "../../rupro/hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../rupro/hackrs_test_utils/cargo/hackrs_test_utils" }

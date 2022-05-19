@@ -394,16 +394,10 @@ function two_comment_types(): void { two_comment_types(); }
 function too_many_blank_lines(): void { too_many_blank_lines(); }
 //                                      ^101:41
 
-// For legacy reasons, we have to support a single linebreak between a docblock
-// and the item the docblock is for.
-
-function one_linebreak_is_okay(): void { one_linebreak_is_okay(); }
-//                                       ^107:42
-
 /** A function with an HH_FIXME. */
 /* HH_FIXME[4030] Missing return type hint. */
 function needs_fixing() { needs_fixing(); }
-//                        ^112:27
+//                        ^106:27
 "
 
 let docblock_cases =
@@ -563,23 +557,12 @@ the other stars.";
           pos = pos_at (101, 41) (101, 60);
         };
       ] );
-    ( ("docblock.php", 107, 42),
-      [
-        {
-          snippet = "function one_linebreak_is_okay(): void";
-          addendum =
-            [
-              "For legacy reasons, we have to support a single linebreak between a docblock\nand the item the docblock is for.";
-            ];
-          pos = pos_at (107, 42) (107, 62);
-        };
-      ] );
-    ( ("docblock.php", 112, 27),
+    ( ("docblock.php", 106, 27),
       [
         {
           snippet = "function needs_fixing(): _";
           addendum = ["A function with an HH_FIXME."];
-          pos = pos_at (112, 27) (112, 38);
+          pos = pos_at (106, 27) (106, 38);
         };
       ] );
   ]

@@ -155,43 +155,84 @@ let find_inline_comment (finder : finder) (line : int) : string option =
 (* Regexp matching single-line comments, either # foo or // foo . *)
 let line_comment_prefix = Str.regexp "^\\(//\\|#\\) ?"
 
-let get_docblock node =
-  let rec helper trivia_list acc eols_until_exit =
-    match (trivia_list, eols_until_exit) with
-    | ([], _)
-    | (Trivia.{ kind = TriviaKind.EndOfLine; _ } :: _, 0) ->
-      begin
-        match acc with
-        | [] -> None
-        | comments ->
-          let comment =
-            comments
-            |> List.map ~f:(Str.replace_first line_comment_prefix "")
-            |> String.concat ~sep:"\n"
-            |> Caml.String.trim
-          in
-          Some comment
-      end
-    | (hd :: tail, _) ->
-      begin
-        match Trivia.kind hd with
-        | TriviaKind.DelimitedComment when List.is_empty acc ->
-          Some (tidy_delimited_comment (Trivia.text hd))
-        | TriviaKind.SingleLineComment -> helper tail (Trivia.text hd :: acc) 1
-        | TriviaKind.WhiteSpace -> helper tail acc eols_until_exit
-        | TriviaKind.EndOfLine -> helper tail acc (eols_until_exit - 1)
-        | TriviaKind.FixMe
-        | TriviaKind.IgnoreError ->
-          helper tail acc 1
-        | TriviaKind.DelimitedComment
-        | TriviaKind.FallThrough
-        | TriviaKind.ExtraTokenError ->
-          (* Short circuit immediately. *)
-          helper [] acc 0
-      end
+(**
+ * Extract a // comment docblock that is directly before this node.
+ *
+ *     // A function.
+ *     // It is useful.
+ *     function foo(): void {}
+ *
+ * In this example, we return "A function.\nIt is useful."
+ *)
+let get_single_lines_docblock (node : Syntax.t) : string option =
+  let rec aux trivia_list acc (seen_newline : bool) : string list =
+    match trivia_list with
+    | [] -> acc
+    | hd :: tail ->
+      (match Trivia.kind hd with
+      | TriviaKind.SingleLineComment -> aux tail (Trivia.text hd :: acc) false
+      | TriviaKind.WhiteSpace ->
+        (* Step over whitespace. *)
+        aux tail acc seen_newline
+      | TriviaKind.EndOfLine ->
+        (* Stop if we've seen consecutive newlines, as that means
+           we've reached a blank line. *)
+        if seen_newline then
+          acc
+        else
+          aux tail acc true
+      | TriviaKind.FixMe
+      | TriviaKind.IgnoreError ->
+        (* Step over HH_FIXME comments. *)
+        aux tail acc false
+      | TriviaKind.DelimitedComment
+      | TriviaKind.FallThrough
+      | TriviaKind.ExtraTokenError ->
+        (* Stop if we see a /* ... */ comment, a FALLTHROUGH
+           comment, or a syntax error. *)
+        acc)
   in
-  let trivia_list = Syntax.leading_trivia node in
-  (* Set the starting EOL count to 2 instead of 1 because it's valid to have up
-     to one blank line between the end of a docblock and the start of its
-     associated element. *)
-  helper (List.rev trivia_list) [] 2
+
+  match aux (List.rev (Syntax.leading_trivia node)) [] false with
+  | [] -> None
+  | comment_lines ->
+    Some
+      (comment_lines
+      |> List.map ~f:(Str.replace_first line_comment_prefix "")
+      |> String.concat ~sep:"\n"
+      |> Caml.String.trim)
+
+(**
+ * Extract a /* ... */ comment docblock that is before this node,
+ * even if there are blank lines present.
+ *
+ *)
+let get_delimited_docblock (node : Syntax.t) : string option =
+  let rec aux trivia_list : string option =
+    match trivia_list with
+    | [] -> None
+    | hd :: tail ->
+      (match Trivia.kind hd with
+      | TriviaKind.DelimitedComment ->
+        (* We've found the comment. *)
+        Some (tidy_delimited_comment (Trivia.text hd))
+      | TriviaKind.WhiteSpace
+      | TriviaKind.EndOfLine
+      | TriviaKind.FixMe
+      | TriviaKind.IgnoreError ->
+        (* Step over whitespace and HH_FIXME comments. *)
+        aux tail
+      | TriviaKind.SingleLineComment ->
+        (* Give up if we have a // comment. *)
+        None
+      | TriviaKind.FallThrough
+      | TriviaKind.ExtraTokenError ->
+        (* Give up if we have a // FALLTHROUGH comment or syntax error. *)
+        None)
+  in
+  aux (List.rev (Syntax.leading_trivia node))
+
+let get_docblock (node : Syntax.t) : string option =
+  Option.first_some
+    (get_single_lines_docblock node)
+    (get_delimited_docblock node)

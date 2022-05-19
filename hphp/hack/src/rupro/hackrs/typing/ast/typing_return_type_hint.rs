@@ -36,7 +36,7 @@ pub struct TCReturnTypeHintParams<R: Reason> {
     pub fun_pos: R::Pos,
 
     /// We'll have to localize the return type. This influences the localization.
-    pub localize_env: LocalizeEnv,
+    pub localize_env: LocalizeEnv<R>,
 }
 
 impl<'a, R: Reason> Infer<R> for TCReturnTypeHint<'a> {

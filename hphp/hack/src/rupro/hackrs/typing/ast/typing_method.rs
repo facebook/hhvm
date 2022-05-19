@@ -19,7 +19,6 @@ impl<R: Reason> Infer<R> for oxidized::aast::Method_<(), ()> {
     type Typed = tast::Method_<R>;
 
     fn infer(&self, env: &mut TEnv<R>, _params: ()) -> Result<Self::Typed> {
-        rupro_todo_assert!(self.tparams.is_empty(), AST);
         rupro_todo_assert!(self.where_constraints.is_empty(), AST);
         rupro_todo_assert!(self.user_attributes.is_empty(), AST);
         rupro_todo_mark!(Coeffects);
@@ -48,6 +47,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Method_<(), ()> {
         )?;
         env.set_return(TypingReturn::make_info(return_ty.clone()));
 
+        let tparams = self.tparams.infer(env, ())?;
         let typed_params = self.params.infer(env, ())?;
         let tb = self.body.infer(env, ())?;
 
@@ -63,7 +63,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Method_<(), ()> {
             readonly_ret: self.readonly_ret.clone(),
             ret: oxidized::aast::TypeHint(return_ty, self.ret.1.clone()),
             name: self.name.clone(),
-            tparams: vec![],
+            tparams,
             where_constraints: vec![],
             params: typed_params,
             ctxs: self.ctxs.clone(),

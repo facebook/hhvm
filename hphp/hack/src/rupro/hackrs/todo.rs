@@ -79,6 +79,8 @@ pub enum RuproTodo {
     Naming,
     /// Some specialized localization logic.
     Localization,
+    /// Higher-kinded types are not supported.
+    HKD,
 }
 
 macro_rules! rupro_todo_assert {

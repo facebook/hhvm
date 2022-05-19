@@ -6,7 +6,7 @@ use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use crate::typing_decl_provider::{Class, TypeDecl};
-use pos::{Positioned, TypeName};
+use pos::{Positioned, SymbolMap, TypeName};
 use ty::decl;
 use ty::local::{self, Exact, FunParam, FunType};
 use ty::reason::Reason;
@@ -14,12 +14,22 @@ use ty::reason::Reason;
 /// Localization environment, controlling localization.
 ///
 /// On OCaml, this  called `expand_env`.
-pub struct LocalizeEnv;
+#[derive(Debug, Clone)]
+pub struct LocalizeEnv<R: Reason> {
+    substs: SymbolMap<local::Ty<R>>,
+}
 
-impl LocalizeEnv {
+impl<R: Reason> LocalizeEnv<R> {
     /// Localize a type without substitutions for generic parameters or `this`.
     pub fn no_subst() -> Self {
-        LocalizeEnv
+        LocalizeEnv {
+            substs: Default::default(),
+        }
+    }
+
+    /// Get the substitution for a certain type name.
+    fn get_subst(&self, x: &TypeName) -> Option<local::Ty<R>> {
+        self.substs.get(&x.0).cloned()
     }
 }
 
@@ -32,17 +42,17 @@ impl LocalizeEnv {
 ///  - instantiating generics (TODO(hverr): do we want to extract this?)
 ///  - ...
 impl<R: Reason> Infer<R> for decl::Ty<R> {
-    type Params = LocalizeEnv;
+    type Params = LocalizeEnv<R>;
     type Typed = local::Ty<R>;
 
-    fn infer(&self, env: &mut TEnv<R>, localize_env: LocalizeEnv) -> Result<local::Ty<R>> {
+    fn infer(&self, env: &mut TEnv<R>, localize_env: LocalizeEnv<R>) -> Result<local::Ty<R>> {
         localize(env, &localize_env, self.clone())
     }
 }
 
 fn localize<R: Reason>(
     env: &mut TEnv<R>,
-    localize_env: &LocalizeEnv,
+    localize_env: &LocalizeEnv<R>,
     ty: decl::Ty<R>,
 ) -> Result<local::Ty<R>> {
     use decl::Ty_::*;
@@ -51,6 +61,15 @@ fn localize<R: Reason>(
         Tprim(p) => local::Ty::prim(r, *p),
         Tapply(box (pos_id, tyl)) => localize_tapply(env, localize_env, r, pos_id.clone(), tyl)?,
         Tfun(box ft) => localize_ft(env, localize_env, r, ft)?,
+        Tgeneric(box (tparam, hl)) => {
+            rupro_todo_assert!(hl.is_empty(), HKD);
+            rupro_todo_assert!(
+                localize_env.get_subst(tparam).is_none(),
+                Localization,
+                "type parameter substitution"
+            );
+            local::Ty::generic(r, tparam.clone(), vec![])
+        }
         t => rupro_todo!(AST, "{:?}", t),
     };
     Ok(res)
@@ -58,7 +77,7 @@ fn localize<R: Reason>(
 
 fn localize_tapply<R: Reason>(
     env: &mut TEnv<R>,
-    localize_env: &LocalizeEnv,
+    localize_env: &LocalizeEnv<R>,
     r: R,
     sid: Positioned<TypeName, R::Pos>,
     ty_args: &[decl::Ty<R>],
@@ -72,8 +91,8 @@ fn localize_tapply<R: Reason>(
 }
 
 fn localize_class_instantiation<R: Reason>(
-    _env: &mut TEnv<R>,
-    _localize_env: &LocalizeEnv,
+    env: &mut TEnv<R>,
+    localize_env: &LocalizeEnv<R>,
     r: R,
     sid: Positioned<TypeName, R::Pos>,
     ty_args: &[decl::Ty<R>],
@@ -84,9 +103,8 @@ fn localize_class_instantiation<R: Reason>(
         None => rupro_todo!(Localization),
         Some(class_info) => {
             rupro_todo_assert!(class_info.get_enum_type().is_none(), AST);
-            rupro_todo_assert!(class_info.get_tparams().is_empty(), AST);
-            rupro_todo_assert!(ty_args.is_empty(), AST);
-            local::Ty::new(r, Tclass(sid, Exact::Nonexact, vec![]))
+            let ty_args = ty_args.infer(env, localize_env.clone())?;
+            local::Ty::new(r, Tclass(sid, Exact::Nonexact, ty_args))
         }
     };
     Ok(res)
@@ -94,7 +112,7 @@ fn localize_class_instantiation<R: Reason>(
 
 fn localize_ft<R: Reason>(
     env: &mut TEnv<R>,
-    localize_env: &LocalizeEnv,
+    localize_env: &LocalizeEnv<R>,
     r: R,
     ft: &decl::FunType<R, decl::Ty<R>>,
 ) -> Result<local::Ty<R>> {
@@ -120,7 +138,7 @@ fn localize_ft<R: Reason>(
 
 fn localize_possibly_enforced_ty<R: Reason>(
     env: &mut TEnv<R>,
-    localize_env: &LocalizeEnv,
+    localize_env: &LocalizeEnv<R>,
     ty: decl::PossiblyEnforcedTy<decl::Ty<R>>,
 ) -> Result<local::Ty<R>> {
     localize(env, localize_env, ty.ty)

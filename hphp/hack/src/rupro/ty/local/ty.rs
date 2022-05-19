@@ -373,7 +373,10 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
             Ty_::Tfun(_) => todo!(),
             Ty_::Tany => todo!(),
             Ty_::Tnonnull => todo!(),
-            Ty_::Tgeneric(_, _) => todo!(),
+            Ty_::Tgeneric(x, argl) => OTy_::Tgeneric(&*arena.alloc((
+                &*arena.alloc_str(x.as_str()),
+                &*arena.alloc_slice_fill_iter(argl.iter().map(|_ty| todo!())),
+            ))),
             Ty_::Tclass(pos_id, exact, tys) => OTy_::Tclass(&*arena.alloc((
                 pos_id.to_oxidized(arena),
                 *exact,

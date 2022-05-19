@@ -4,13 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::special_names as sn;
+use im::HashSet;
 use oxidized::aast_visitor::{Params, VisitorMut};
 use oxidized::{aast::*, ast_defs::*};
-use std::collections::HashSet;
 use utils::core::ns;
 
 struct ElaborateNamespacesVisitor<'node> {
-    type_params: HashSet<&'node str>,
+    type_params: &'node HashSet<String>,
 }
 
 struct ElaborateNamespacesVisitorParams;
@@ -23,10 +23,8 @@ impl Params for ElaborateNamespacesVisitorParams {
 }
 
 impl<'node> ElaborateNamespacesVisitor<'node> {
-    fn new() -> Self {
-        Self {
-            type_params: HashSet::new(),
-        }
+    fn new(type_params: &'node HashSet<String>) -> Self {
+        Self { type_params }
     }
 
     fn is_reserved_type_hint(&self, name: &str) -> bool {
@@ -71,7 +69,7 @@ impl<'node> VisitorMut<'node> for ElaborateNamespacesVisitor<'node> {
     }
 }
 
-pub fn elaborate_class(cls: &mut Class_<(), ()>) {
-    let mut vis = ElaborateNamespacesVisitor::new();
+pub fn elaborate_class(type_params: &HashSet<String>, cls: &mut Class_<(), ()>) {
+    let mut vis = ElaborateNamespacesVisitor::new(type_params);
     vis.visit_class_(&mut (), cls).unwrap();
 }

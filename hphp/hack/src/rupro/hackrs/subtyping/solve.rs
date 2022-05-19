@@ -4,8 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![allow(unused_imports, unused_variables, dead_code)]
-use super::Env;
+use super::NormalizeEnv;
 use crate::inference_env::InferenceEnv;
+use crate::subtyping::Subtyper;
 use crate::typing::typing_error::Result;
 use im::HashSet;
 use itertools::{Either, Itertools};
@@ -18,7 +19,7 @@ use ty::prop::CstrTy;
 use ty::reason::Reason;
 
 pub fn solve<R: Reason>(
-    env: &mut Env<R>,
+    env: &mut NormalizeEnv<R>,
     tv: Tyvar,
     reason: &R,
 ) -> Result<Option<Vec<TypingError<R>>>> {
@@ -45,7 +46,7 @@ pub fn solve<R: Reason>(
 }
 
 fn solve_step<R: Reason>(
-    env: &mut Env<R>,
+    env: &mut NormalizeEnv<R>,
     tv: Tyvar,
     reason: &R,
 ) -> Result<Option<TypingError<R>>> {
@@ -75,7 +76,7 @@ impl<R: Reason> TryBindResult<R> {
 /// Solve a type variable by binding to its lower or upper bound, depending on
 /// its variance
 fn try_bind_variance<R: Reason>(
-    env: &mut Env<R>,
+    env: &mut NormalizeEnv<R>,
     tv: Tyvar,
     reason: &R,
 ) -> Result<TryBindResult<R>> {
@@ -97,7 +98,7 @@ fn try_bind_variance<R: Reason>(
 /// the bounds.
 /// TODO[mjt]: move to env impl
 fn bind_to_lower_bound<R: Reason>(
-    env: &mut Env<R>,
+    env: &mut NormalizeEnv<R>,
     tv: Tyvar,
     reason: &R,
     freshen: bool,
@@ -124,15 +125,15 @@ fn bind_to_lower_bound<R: Reason>(
         // 'freshen' type parameters if necessary and add the propositions
         let ty = if freshen {
             let newty = freshen_inside(env, &ty)?;
-            // Since we have only added fresh type variables, this cannot fail
-            let freshen_ty_err_opt_ = super::subtype(
+            // TODO[hverr, mjt]: self should probably be a subtyper
+            let mut subtyper = Subtyper::new(
                 &mut env.inf_env,
                 &mut env.tp_env,
                 env.decl_env.clone(),
                 None,
-                &ty,
-                &newty,
-            )?;
+            );
+            // Since we have only added fresh type variables, this cannot fail
+            let freshen_ty_err_opt_ = subtyper.subtype(&ty, &newty)?;
             newty
         } else {
             ty
@@ -156,7 +157,7 @@ fn bind_to_lower_bound<R: Reason>(
 /// Solve a type variable by binding it to the intersection of its upper bounds.
 /// TODO[mjt]: move to env impl
 fn bind_to_upper_bound<R: Reason>(
-    env: &mut Env<R>,
+    env: &mut NormalizeEnv<R>,
     tv: Tyvar,
     reason: &R,
 ) -> Result<Option<TypingError<R>>> {
@@ -196,7 +197,7 @@ fn bind_to_upper_bound<R: Reason>(
 }
 
 fn try_bind_equal_bound<R: Reason>(
-    env: &mut Env<R>,
+    env: &mut NormalizeEnv<R>,
     tv: Tyvar,
     reason: &R,
     freshen: bool,
@@ -230,23 +231,19 @@ fn try_bind_equal_bound<R: Reason>(
                 // create a new type with fresh tyvars
                 let ty = freshen_inside(env, &ty)?;
                 let ty_v = Ty::var(reason.clone(), tv);
+
+                // TODO[hverr,mjt]: self should probably be a Subtyper
+                // i.e. this function should be on impl Subtyper
+                let mut subtyper = Subtyper::new(
+                    &mut env.inf_env,
+                    &mut env.tp_env,
+                    env.decl_env.clone(),
+                    None,
+                );
+
                 // enforce equality
-                let ty_err_sub_ = super::subtype(
-                    &mut env.inf_env,
-                    &mut env.tp_env,
-                    env.decl_env.clone(),
-                    None,
-                    &ty_v,
-                    &ty,
-                );
-                let ty_err_sup_ = super::subtype(
-                    &mut env.inf_env,
-                    &mut env.tp_env,
-                    env.decl_env.clone(),
-                    None,
-                    &ty,
-                    &ty_v,
-                );
+                let ty_err_sub_ = subtyper.subtype(&ty_v, &ty);
+                let ty_err_sup_ = subtyper.subtype(&ty, &ty_v);
                 // bind
                 Ok(TryBindResult::Bound(bind_help(env, tv, ty)))
             }
@@ -263,7 +260,7 @@ fn try_bind_equal_bound<R: Reason>(
 /// Find the first element in the lower bounds which has a 'shallow match' in
 /// the upper bounds
 fn find_shallow_match<R: Reason>(
-    env: &mut Env<R>,
+    env: &mut NormalizeEnv<R>,
     lower_bounds: &HashSet<CstrTy<R>>,
     upper_bounds: &HashSet<CstrTy<R>>,
 ) -> Option<Ty<R>> {
@@ -282,7 +279,7 @@ fn find_shallow_match<R: Reason>(
 }
 
 #[inline]
-fn bind_help<R: Reason>(env: &mut Env<R>, tv: Tyvar, ty: Ty<R>) -> Option<TypingError<R>> {
+fn bind_help<R: Reason>(env: &mut NormalizeEnv<R>, tv: Tyvar, ty: Ty<R>) -> Option<TypingError<R>> {
     let get_tparam_variance = |cn| {
         let class_res = env.decl_env.get_class(cn);
         match class_res {
@@ -299,7 +296,7 @@ fn bind_help<R: Reason>(env: &mut Env<R>, tv: Tyvar, ty: Ty<R>) -> Option<Typing
 // TODO[mjt] should we accumulate and return the propositions resulting from
 // 'freshening' as well as the resulting type? This would avoid traversing the
 // type again in subsequentg calls to subtyping
-fn freshen_inside<R: Reason>(env: &mut Env<R>, ty: &Ty<R>) -> Result<Ty<R>> {
+fn freshen_inside<R: Reason>(env: &mut NormalizeEnv<R>, ty: &Ty<R>) -> Result<Ty<R>> {
     match env.inf_env.resolve_ty(ty).deref() {
         Ty_::Tclass(cname, exact, tys) if !tys.is_empty() => {
             let ty_opt = env.decl_env.get_class(cname.id())?.map(|cls| {
@@ -407,12 +404,26 @@ fn remove_tyvar_from_lower_bound_help<R: Reason>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::subtyping::subtype;
+    use crate::subtyping::oracle::NoClasses;
+    use crate::subtyping::visited_goals::VisitedGoals;
+    use crate::subtyping::Subtyper;
+    use crate::typaram_env::TyparamEnv;
     use pos::NPos;
     use pos::Pos;
     use ty::prop::PropF;
     use ty::reason::NReason;
     use utils::core::IdentGen;
+
+    fn default_normalize_env<R: Reason>() -> NormalizeEnv<R> {
+        NormalizeEnv {
+            this_ty: None,
+            visited_goals: VisitedGoals::default(),
+            inf_env: InferenceEnv::default(),
+            tp_env: TyparamEnv::default(),
+            decl_env: Rc::new(NoClasses),
+            config: Default::default(),
+        }
+    }
 
     #[test]
     fn test_remove_upper() {
@@ -450,43 +461,29 @@ mod tests {
 
     #[test]
     fn test_solve_equal_bound() {
-        let mut env = Env::default();
+        let mut env = default_normalize_env();
         let tv = env.inf_env.fresh_var(V::Covariant, NPos::none());
         let ty_v = Ty::var(NReason::none(), tv);
         let ty_int = Ty::int(NReason::none());
         let ty_arraykey = Ty::arraykey(NReason::none());
 
-        // #1 <: int
-        let r1 = subtype(
+        let mut subtyper = Subtyper::new(
             &mut env.inf_env,
             &mut env.tp_env,
             env.decl_env.clone(),
             None,
-            &ty_v,
-            &ty_int,
         );
+
+        // #1 <: int
+        let r1 = subtyper.subtype(&ty_v, &ty_int);
         assert!(r1.unwrap().is_none());
 
         // #1 <: arraykey
-        let r2 = subtype(
-            &mut env.inf_env,
-            &mut env.tp_env,
-            env.decl_env.clone(),
-            None,
-            &ty_v,
-            &ty_arraykey,
-        );
+        let r2 = subtyper.subtype(&ty_v, &ty_arraykey);
         assert!(r2.unwrap().is_none());
 
         // int <: #1
-        let r3 = subtype(
-            &mut env.inf_env,
-            &mut env.tp_env,
-            env.decl_env.clone(),
-            None,
-            &ty_int,
-            &ty_v,
-        );
+        let r3 = subtyper.subtype(&ty_int, &ty_v);
         assert!(r3.unwrap().is_none());
 
         let r4 = try_bind_equal_bound(&mut env, tv, &NReason::none(), false);
@@ -496,21 +493,21 @@ mod tests {
 
     #[test]
     fn test_solve_upper_bound() {
-        let mut env = Env::default();
+        let mut env = default_normalize_env();
         let tv = env.inf_env.fresh_var(V::Contravariant, NPos::none());
         assert!(matches!(env.inf_env.variance(&tv), V::Contravariant));
         let ty_v = Ty::var(NReason::none(), tv);
         let ty_arraykey = Ty::arraykey(NReason::none());
 
-        // #1 <: arraykey
-        let r1 = subtype(
+        let mut subtyper = Subtyper::new(
             &mut env.inf_env,
             &mut env.tp_env,
             env.decl_env.clone(),
             None,
-            &ty_v,
-            &ty_arraykey,
         );
+
+        // #1 <: arraykey
+        let r1 = subtyper.subtype(&ty_v, &ty_arraykey);
         assert!(r1.unwrap().is_none());
 
         let r2 = try_bind_variance(&mut env, tv, &NReason::none());
@@ -520,22 +517,22 @@ mod tests {
 
     #[test]
     fn test_solve_lower_bound() {
-        let mut env = Env::default();
+        let mut env = default_normalize_env();
         let tv = env.inf_env.fresh_var(V::Covariant, NPos::none());
         assert!(matches!(env.inf_env.variance(&tv), V::Covariant));
         let ty_v = Ty::var(NReason::none(), tv);
         let ty_arraykey = Ty::arraykey(NReason::none());
         let cty_arraykey = CstrTy::Locl(ty_arraykey.clone());
 
-        // arraykey <: #1
-        let r1 = subtype(
+        let mut subtyper = Subtyper::new(
             &mut env.inf_env,
             &mut env.tp_env,
             env.decl_env.clone(),
             None,
-            &ty_arraykey,
-            &ty_v,
         );
+
+        // arraykey <: #1
+        let r1 = subtyper.subtype(&ty_arraykey, &ty_v);
         assert!(r1.unwrap().is_none());
 
         assert!(

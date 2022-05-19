@@ -375,7 +375,7 @@ impl<'a> std::convert::From<&'a mut str> for Slice<'a, u8> {
 pub struct BumpSliceMut<'a, T> {
     data: *mut T,
     len: usize,
-    alloc: usize, // *const bumpalo::Bump,
+    alloc: &'a bumpalo::Bump,
     marker: std::marker::PhantomData<&'a ()>,
 }
 impl<'a, T> BumpSliceMut<'a, T> {
@@ -384,7 +384,7 @@ impl<'a, T> BumpSliceMut<'a, T> {
         BumpSliceMut {
             data: t.as_mut_ptr(),
             len: t.len(),
-            alloc: alloc as *const bumpalo::Bump as usize,
+            alloc,
             marker: std::marker::PhantomData,
         }
     }
@@ -392,6 +392,10 @@ impl<'a, T> BumpSliceMut<'a, T> {
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.as_ref().is_empty()
+    }
+
+    pub fn alloc(&self) -> &'a bumpalo::Bump {
+        self.alloc
     }
 
     #[inline]
@@ -464,10 +468,7 @@ impl<'a, T> AsMut<[T]> for BumpSliceMut<'a, T> {
 }
 impl<'arena, T: 'arena + Clone> Clone for BumpSliceMut<'arena, T> {
     fn clone(&self) -> Self {
-        // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
-        // safety].
-        let alloc: &'arena bumpalo::Bump =
-            unsafe { (self.alloc as *const bumpalo::Bump).as_ref().unwrap() };
+        let alloc = self.alloc();
         BumpSliceMut::new(alloc, alloc.alloc_slice_clone(self.as_ref()))
     }
 }

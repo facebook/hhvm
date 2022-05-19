@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  id-token: write
+
 jobs:
   build-and-test:
     strategy:
@@ -16,6 +19,10 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2.4.0
+    - uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
+        aws-region: us-west-2
     - uses: cachix/install-nix-action@v15
       with:
         extra_nix_config: |

@@ -7,8 +7,10 @@ use crate::subtyping::oracle::Oracle;
 use crate::typing::typing_error::{Error, Result};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::{Class, TypeDecl};
-use pos::TypeName;
+use pos::{FunName, TypeName};
 use std::rc::Rc;
+use std::sync::Arc;
+use ty::decl::FunDecl;
 use ty::reason::Reason;
 
 /// Provides access to the decl provider, but enforcing dependency tracking.
@@ -47,6 +49,14 @@ impl<R: Reason> TEnvDecls<R> {
             .typing_decl_provider
             .get_type(self.dependent, name)
             .map_err(Into::into)
+    }
+
+    /// Get a function type, return `None` if it can't be found.
+    pub fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
+        self.ctx
+            .typing_decl_provider
+            .get_fun(self.dependent, name)
+            .map_err(|e| e.into())
     }
 }
 

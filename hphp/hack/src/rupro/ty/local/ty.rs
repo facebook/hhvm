@@ -370,7 +370,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
             Ty_::Tprim(x) => OTy_::Tprim(arena.alloc(*x)),
             Ty_::Toption(_) => todo!(),
             Ty_::Tunion(_) => todo!(),
-            Ty_::Tfun(_) => todo!(),
+            Ty_::Tfun(ft) => OTy_::Tfun(&*arena.alloc(ft.to_oxidized(arena))),
             Ty_::Tany => todo!(),
             Ty_::Tnonnull => todo!(),
             Ty_::Tgeneric(x, argl) => OTy_::Tgeneric(&*arena.alloc((
@@ -386,6 +386,53 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
             ))),
         };
         oxidized_by_ref::typing_defs::Ty(r, ty)
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for FunType<R> {
+    type Output = oxidized_by_ref::typing_defs::FunType<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use oxidized_by_ref::typing_defs::FunType as OFunType;
+        use oxidized_by_ref::typing_defs::PossiblyEnforcedTy as OPossiblyEnforcedTy;
+        OFunType {
+            tparams: &[],
+            where_constraints: &[],
+            params: &*arena.alloc_slice_fill_iter(
+                self.params
+                    .iter()
+                    .map(|p| &*arena.alloc(p.to_oxidized(arena))),
+            ),
+            implicit_params: &*arena.alloc(oxidized_by_ref::typing_defs_core::FunImplicitParams {
+                capability: oxidized_by_ref::typing_defs_core::Capability::CapDefaults(
+                    oxidized_by_ref::pos::Pos::none(),
+                ),
+            }),
+            ret: &*arena.alloc(OPossiblyEnforcedTy {
+                enforced: oxidized::typing_defs_core::Enforcement::Enforced,
+                type_: &*arena.alloc(self.ret.to_oxidized(arena)),
+            }),
+            flags: oxidized::typing_defs_flags::FunTypeFlags::from_bits_truncate(0),
+            ifc_decl: oxidized_by_ref::typing_defs_core::IfcFunDecl::FDInferFlows,
+        }
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for FunParam<R> {
+    type Output = oxidized_by_ref::typing_defs::FunParam<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use oxidized_by_ref::typing_defs::FunParam as OFunParam;
+        use oxidized_by_ref::typing_defs::PossiblyEnforcedTy as OPossiblyEnforcedTy;
+        OFunParam {
+            pos: self.pos.to_oxidized(arena),
+            name: self.name.map(|n| n.to_oxidized(arena)),
+            type_: &*arena.alloc(OPossiblyEnforcedTy {
+                enforced: oxidized::typing_defs_core::Enforcement::Enforced,
+                type_: &*arena.alloc(self.ty.to_oxidized(arena)),
+            }),
+            flags: oxidized::typing_defs_flags::FunParamFlags::from_bits_truncate(0),
+        }
     }
 }
 

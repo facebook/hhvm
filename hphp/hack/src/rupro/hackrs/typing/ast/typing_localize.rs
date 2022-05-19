@@ -50,6 +50,15 @@ impl<R: Reason> Infer<R> for decl::Ty<R> {
     }
 }
 
+impl<R: Reason> Infer<R> for decl::FunType<R, decl::Ty<R>> {
+    type Params = LocalizeEnv<R>;
+    type Typed = local::FunType<R>;
+
+    fn infer(&self, env: &mut TEnv<R>, localize_env: LocalizeEnv<R>) -> Result<local::FunType<R>> {
+        localize_ft(env, &localize_env, self)
+    }
+}
+
 fn localize<R: Reason>(
     env: &mut TEnv<R>,
     localize_env: &LocalizeEnv<R>,
@@ -60,7 +69,7 @@ fn localize<R: Reason>(
     let res = match &**ty.node() {
         Tprim(p) => local::Ty::prim(r, *p),
         Tapply(box (pos_id, tyl)) => localize_tapply(env, localize_env, r, pos_id.clone(), tyl)?,
-        Tfun(box ft) => localize_ft(env, localize_env, r, ft)?,
+        Tfun(box ft) => local::Ty::fun(r, localize_ft(env, localize_env, ft)?),
         Tgeneric(box (tparam, hl)) => {
             rupro_todo_assert!(hl.is_empty(), HKD);
             rupro_todo_assert!(
@@ -113,9 +122,8 @@ fn localize_class_instantiation<R: Reason>(
 fn localize_ft<R: Reason>(
     env: &mut TEnv<R>,
     localize_env: &LocalizeEnv<R>,
-    r: R,
     ft: &decl::FunType<R, decl::Ty<R>>,
-) -> Result<local::Ty<R>> {
+) -> Result<local::FunType<R>> {
     rupro_todo_assert!(ft.params.is_empty(), AST);
     let params: Vec<_> = ft
         .params
@@ -132,8 +140,7 @@ fn localize_ft<R: Reason>(
         .collect::<Result<_>>()?;
     let ret = localize_possibly_enforced_ty(env, localize_env, ft.ret.clone())?;
     let ft = FunType { params, ret };
-    let ty = local::Ty::fun(r, ft);
-    Ok(ty)
+    Ok(ft)
 }
 
 fn localize_possibly_enforced_ty<R: Reason>(

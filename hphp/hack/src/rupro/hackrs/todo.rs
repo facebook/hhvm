@@ -81,6 +81,16 @@ pub enum RuproTodo {
     Localization,
     /// Higher-kinded types are not supported.
     HKD,
+    /// Special logic for environment management in the face of `throw`.
+    MightThrow,
+    /// Special functions or special function dispatch.
+    SpecialFunctions,
+    /// Solving logic that is missing.
+    Solving,
+    /// Special typing for format strings is not supported.
+    FormatStrings,
+    /// The idx special function is not supported.
+    Idx,
 }
 
 macro_rules! rupro_todo_assert {

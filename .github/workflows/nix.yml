@@ -23,9 +23,11 @@ jobs:
     - uses: cachix/install-nix-action@v15
       with:
         extra_nix_config: |
-          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-          experimental-features = nix-command flakes
+          extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          extra-experimental-features = nix-command flakes
+          extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
+          extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
     - run: nix-build --no-sandbox
     - run: nix profile install --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - run: hhvm --version
@@ -35,5 +37,12 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
         aws-region: us-west-2
+    - if: github.event_name != 'pull_request'
+      uses: abhilash1in/aws-secrets-manager-action@v2.1.0
+      with:
+        secrets: hhvm-nix-cache-1
+        parse-json: false
+    - if: github.event_name != 'pull_request'
+      run: nix store sign --recursive --key-file <(cat <<< ${{env.HHVM_NIX_CACHE_1}}) --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - if: github.event_name != 'pull_request'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"

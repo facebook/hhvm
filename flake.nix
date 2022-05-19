@@ -25,8 +25,8 @@
             "hhvm-quick-test"
             {
               buildInputs = pkgs.lib.optionals pkgs.hostPlatform.isMacOS [
-                # `procps` provides `sysctl`, which is used in hphp/test/run.php on macOS
-                pkgs.procps
+                # `system_cmds` provides `sysctl`, which is used in hphp/test/run.php on macOS
+                pkgs.darwin.system_cmds
               ];
             }
             ''

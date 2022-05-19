@@ -2981,7 +2981,7 @@ RecordReifiedGeneric [C:Vec] -> [C:Vec]
   representation of these type structures to the global reified generics table.
   Pushes the resulting static list of type structures.
 
-CheckReifiedGenericMismatch [C:Vec] -> []
+CheckClsReifiedGenericMismatch [C:Vec] -> []
 
   Throws a fatal error unless whether each generic in $1 is reified or erased
   matches exactly to the expectations of the current class. If there is

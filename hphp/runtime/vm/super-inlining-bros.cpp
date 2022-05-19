@@ -1349,7 +1349,7 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::ParentCls:
     case Op::LateBoundCls:
     case Op::RecordReifiedGeneric:
-    case Op::CheckReifiedGenericMismatch:
+    case Op::CheckClsReifiedGenericMismatch:
     case Op::CreateCl:
     case Op::CreateCont:
     case Op::WHResult:

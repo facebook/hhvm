@@ -1620,8 +1620,8 @@ void iopRecordReifiedGeneric() {
   iopUnhandled("RecordReifiedGeneric");
 }
 
-void iopCheckReifiedGenericMismatch() {
-  iopUnhandled("CheckReifiedGenericMismatch");
+void iopCheckClsReifiedGenericMismatch() {
+  iopUnhandled("CheckClsReifiedGenericMismatch");
 }
 
 void iopNativeImpl(PC& /* pc */) {

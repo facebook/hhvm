@@ -325,7 +325,7 @@ static const struct {
   { OpLateBoundCls,{None,             Stack1,       OutClass        }},
   { OpRecordReifiedGeneric,
                    {Stack1,           Stack1,       OutVec          }},
-  { OpCheckReifiedGenericMismatch,
+  { OpCheckClsReifiedGenericMismatch,
                    {Stack1,           None,         OutNone         }},
   { OpNativeImpl,  {None,             None,         OutNone         }},
   { OpCreateCl,    {BStackN,          Stack1,       OutObject       }},
@@ -943,7 +943,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ColFromArray:
   case Op::CombineAndResolveTypeStruct:
   case Op::RecordReifiedGeneric:
-  case Op::CheckReifiedGenericMismatch:
+  case Op::CheckClsReifiedGenericMismatch:
   case Op::ConcatN:
   case Op::Concat:
   case Op::ContCheck:

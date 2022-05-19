@@ -1679,12 +1679,12 @@ OPTBLD_INLINE void iopRecordReifiedGeneric() {
   vmStack().pushStaticArrayLike(result);
 }
 
-OPTBLD_INLINE void iopCheckReifiedGenericMismatch() {
+OPTBLD_INLINE void iopCheckClsReifiedGenericMismatch() {
   Class* cls = arGetContextClass(vmfp());
   if (!cls) raise_error("No class scope is active");
   auto const c = vmStack().topC();
   if (!tvIsVec(c)) {
-    raise_error("Invalid type-structure list in CheckReifiedGenericMismatch");
+    raise_error("Invalid type-structure list in CheckClsReifiedGenericMismatch");
   }
   checkClassReifiedGenericMismatch(cls, c->m_data.parr);
   vmStack().popC();

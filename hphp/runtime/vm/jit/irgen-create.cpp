@@ -524,7 +524,7 @@ void emitColFromArray(IRGS& env, CollectionType type) {
   push(env, gen(env, NewColFromArray, NewColData{type}, arr));
 }
 
-void emitCheckReifiedGenericMismatch(IRGS& env) {
+void emitCheckClsReifiedGenericMismatch(IRGS& env) {
   auto const cls = curClass(env);
   if (!cls) {
     // no static context class, so this will raise an error
@@ -533,7 +533,7 @@ void emitCheckReifiedGenericMismatch(IRGS& env) {
   }
   auto const reified = popC(env);
   if (!reified->isA(TVec)) {
-    PUNT(CheckReifiedGenericMismatch-InvalidTS);
+    PUNT(CheckClsReifiedGenericMismatch-InvalidTS);
   }
   gen(env, CheckClsReifiedGenericMismatch, cns(env, cls), reified);
 }

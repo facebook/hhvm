@@ -3049,7 +3049,7 @@ void in(ISS& env, const bc::RecordReifiedGeneric& op) {
   push(env, TSVec);
 }
 
-void in(ISS& env, const bc::CheckReifiedGenericMismatch& op) {
+void in(ISS& env, const bc::CheckClsReifiedGenericMismatch& op) {
   auto const location = topStkEquiv(env, 0);
   popC(env);
 

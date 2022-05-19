@@ -415,7 +415,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let check_length = InstrSeq::gather(vec![
         instr::c_get_l(init_meth_param_local),
-        instr::check_reified_generic_mismatch(),
+        instr::check_cls_reified_generic_mismatch(),
     ]);
     let set_prop = if num_reified == 0 {
         instr::empty()

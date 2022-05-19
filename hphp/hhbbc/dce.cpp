@@ -1573,7 +1573,7 @@ void dce(Env& env, const bc::BreakTraceHint& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetCUNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ChainFaults& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CheckReifiedGenericMismatch& op) {
+void dce(Env& env, const bc::CheckClsReifiedGenericMismatch& op) {
   no_dce(env, op);
 }
 void dce(Env& env, const bc::CheckThis& op) { no_dce(env, op); }

@@ -20,11 +20,6 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2.4.0
-    - if: github.event_name != 'pull_request'
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
-        aws-region: us-west-2
     - uses: cachix/install-nix-action@v15
       with:
         extra_nix_config: |
@@ -35,5 +30,10 @@ jobs:
     - run: nix profile install --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - run: hhvm --version
     - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+    - if: github.event_name != 'pull_request'
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
+        aws-region: us-west-2
     - if: github.event_name != 'pull_request'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"

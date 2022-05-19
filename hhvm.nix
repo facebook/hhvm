@@ -29,6 +29,7 @@
   icu,
   imagemagick6,
   jemalloc,
+  lastModifiedDate,
   lib,
   libcap,
   libdwarf,
@@ -74,25 +75,25 @@
     if hostPlatform.isLinux
     then gcc10Stdenv
     else stdenv;
+  versionParts =
+    builtins.match
+      ''
+        .*
+        #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_MAJOR[[:blank:]]+([[:digit:]]+)
+        #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_MINOR[[:blank:]]+([[:digit:]]+)
+        #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_PATCH[[:blank:]]+([[:digit:]]+)
+        #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_SUFFIX[[:blank:]]+"([^"]*)"
+        .*
+      ''
+      (builtins.readFile ./hphp/runtime/version.h);
+  makePName = major: minor: patch: suffix:
+    if suffix == "-dev" then "hhvm_nightly" else "hhvm";
+  makeVersion = major: minor: patch: suffix:
+    if suffix == "-dev" then "${major}.${minor}.${patch}-${lastModifiedDate}" else "${major}.${minor}.${patch}";
 in
   hhvmStdenv.mkDerivation {
-    pname = "hhvm";
-    version =
-      builtins.foldl'
-        lib.trivial.id
-        (major: minor: patch: suffix: "${major}.${minor}.${patch}${suffix}")
-        (
-          builtins.match
-            ''
-              .*
-              #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_MAJOR[[:blank:]]+([[:digit:]]+)
-              #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_MINOR[[:blank:]]+([[:digit:]]+)
-              #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_PATCH[[:blank:]]+([[:digit:]]+)
-              #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_SUFFIX[[:blank:]]+"([^"]*)"
-              .*
-            ''
-            (builtins.readFile ./hphp/runtime/version.h)
-        );
+    pname = builtins.foldl' lib.trivial.id makePName versionParts;
+    version = builtins.foldl' lib.trivial.id makeVersion versionParts;
     src = ./.;
     nativeBuildInputs =
       [

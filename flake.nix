@@ -21,11 +21,19 @@
           };
           packages.default = packages.hhvm;
 
-          checks.quick = pkgs.runCommand "hhvm-quick-test" { } ''
-            set -ex
-            mkdir $out
-            HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" ${./.}/hphp/test/run.php quick
-          '';
+          checks.quick = pkgs.runCommand
+            "hhvm-quick-test"
+            {
+              buildInputs = pkgs.lib.optionals pkgs.hostPlatform.isMacOS [
+                # `procps` provides `sysctl`, which is used in hphp/test/run.php on macOS
+                pkgs.procps
+              ];
+            }
+            ''
+              set -ex
+              HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" ${./.}/hphp/test/run.php quick
+              mkdir $out
+            '';
 
           devShells.default =
             pkgs.callPackage "${nixpkgs.outPath}/pkgs/build-support/mkshell/default.nix"

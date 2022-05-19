@@ -182,10 +182,6 @@ inline ObjectData* ObjectData::newInstanceReified(Class* cls,
                 AttrEnumClass))) {
     raiseAbstractClassError(cls);
   }
-  if (cls->hasReifiedGenerics()) {
-    assertx(reifiedTypes);
-    checkClassReifiedGenericMismatch(cls, reifiedTypes);
-  }
   auto obj = ObjectData::newInstanceImpl<Unlocked>(
     cls,
     [&](void* mem, uint8_t sizeFlag) {

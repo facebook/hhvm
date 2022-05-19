@@ -468,7 +468,7 @@ static CallMap s_callMap {
     /* reified generics operations */
     {CheckClsReifiedGenericMismatch, checkClassReifiedGenericMismatch,
                                      DNone, SSync,
-                                     {{extra(&ClassData::cls)}, {SSA, 0}}},
+                                     {{SSA, 0}, {SSA, 1}}},
     {CheckFunReifiedGenericMismatch, checkFunReifiedGenericMismatch,
                                      DNone, SSync,
                                      {{SSA, 0}, {SSA, 1}}},

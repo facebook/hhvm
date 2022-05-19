@@ -119,6 +119,7 @@ bool canDCE(const IRInstruction& inst) {
   case EqStrPtr:
   case EqArrayDataPtr:
   case FuncHasReifiedGenerics:
+  case ClassHasReifiedGenerics:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:

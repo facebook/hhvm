@@ -4150,6 +4150,9 @@ iopFCallClsMethodSD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
 namespace {
 
 ObjectData* newObjImpl(Class* cls, ArrayData* reified_types) {
+  if (reified_types && cls->hasReifiedGenerics()) {
+    checkClassReifiedGenericMismatch(cls, reified_types);
+  }
   // Replace input with uninitialized instance.
   auto this_ = reified_types
     ? ObjectData::newInstanceReified<true>(cls, reified_types)

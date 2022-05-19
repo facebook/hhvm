@@ -518,6 +518,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckVecBounds:
   case ChrInt:
   case ClassHasAttr:
+  case ClassHasReifiedGenerics:
   case CmpBool:
   case CmpDbl:
   case CmpInt:

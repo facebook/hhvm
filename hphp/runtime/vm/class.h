@@ -1383,6 +1383,13 @@ public:
     return ConstMap::sizeSize();
   }
 
+  static uint8_t reifiedGenericsMask() {
+    Flags mask;
+    mask.m_allFlags = 0;
+    mask.m_hasReifiedGenerics = true;
+    return mask.m_allFlags;
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Lookup.                                                           [static]
 

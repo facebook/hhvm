@@ -1403,6 +1403,19 @@ void emitDynamicConstructChecks(IRGS& env, SSATmp* cls) {
   );
 }
 
+void emitReifiedClassChecks(IRGS& env, SSATmp* cls, SSATmp* generics) {
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto const success = gen(env, ClassHasReifiedGenerics, cls);
+      gen(env, JmpNZero, taken, success);
+    },
+    [&] {
+      gen(env, CheckClsReifiedGenericMismatch, cls, generics);
+    }
+  );
+}
+
 } // namespace
 
 void emitNewObj(IRGS& env) {
@@ -1420,6 +1433,7 @@ void emitNewObjR(IRGS& env) {
   emitDynamicConstructChecks(env, cls);
   auto const obj = [&] {
     if (generics->isA(TVec)) {
+      emitReifiedClassChecks(env, cls, generics);
       return gen(env, AllocObjReified, cls, generics);
     } else if (generics->isA(TInitNull)) {
       return gen(env, AllocObj, cls);
@@ -1446,6 +1460,7 @@ void emitNewObjDImpl(IRGS& env, const StringData* className,
   auto const finishWithKnownCls = [&] {
     if (cls->hasReifiedGenerics()) {
       if (!tsList) PUNT(NewObjD-ReifiedCls);
+      gen(env, CheckClsReifiedGenericMismatch, cns(env, cls), tsList);
       push(env, gen(env, AllocObjReified, cns(env, cls), tsList));
       return;
     }
@@ -1456,6 +1471,7 @@ void emitNewObjDImpl(IRGS& env, const StringData* className,
   auto const cachedCls = gen(env, LdClsCached, cns(env, className));
   if (cls) return finishWithKnownCls();
   if (tsList) {
+    emitReifiedClassChecks(env, cachedCls, tsList);
     push(env, gen(env, AllocObjReified, cachedCls, tsList));
     return;
   }

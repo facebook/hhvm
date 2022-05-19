@@ -743,6 +743,10 @@ To string conversions:
 
   Set D to true iff S0 is a reified function.
 
+| ClassHasReifiedGenerics, D(Bool), S(Cls), NF
+
+  Set D to true iff S0 is a reified class.
+
 5. Branches
 
 | JmpZero,                          ND, S(Int,Bool),                     B
@@ -2224,15 +2228,15 @@ To string conversions:
 
   Raises runtime errors if the func in S0 is not a callable static method.
 
-| CheckClsReifiedGenericMismatch<cls>, ND, S(Vec), LA
+| CheckClsReifiedGenericMismatch, ND, S(Cls) S(Vec), LA
 
-  Raises a runtime error unless whether each generic in S0 is reified or erased
-  matches exactly to the expectations of the cls.
+  Raises a runtime error unless whether each generic in S1 is reified or erased
+  matches exactly to the expectations of the cls in S0.
 
 | CheckFunReifiedGenericMismatch, ND, S(Func) S(Vec), LA
 
-  Raises a runtime error unless whether each generic in S0 is reified or erased
-  matches exactly to the expectations of the func.
+  Raises a runtime error unless whether each generic in S1 is reified or erased
+  matches exactly to the expectations of the func in S0.
 
 | IsFunReifiedGenericsMatched<func>, D(Bool), S(Int), NF
 

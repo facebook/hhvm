@@ -535,7 +535,7 @@ void emitCheckReifiedGenericMismatch(IRGS& env) {
   if (!reified->isA(TVec)) {
     PUNT(CheckReifiedGenericMismatch-InvalidTS);
   }
-  gen(env, CheckClsReifiedGenericMismatch, ClassData{cls}, reified);
+  gen(env, CheckClsReifiedGenericMismatch, cns(env, cls), reified);
 }
 
 //////////////////////////////////////////////////////////////////////

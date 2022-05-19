@@ -2879,8 +2879,6 @@ X(ThrowInOutMismatch,           ParamData);
 X(CheckReadonlyMismatch,        BoolVecArgsData);
 X(ThrowReadonlyMismatch,        ParamData);
 X(ThrowParameterWrongType,      FuncArgTypeData);
-X(CheckClsReifiedGenericMismatch,
-                                ClassData);
 X(IsFunReifiedGenericsMatched,  FuncData);
 X(IsTypeStruct,                 RDSHandleData);
 X(InterpOne,                    InterpOneData);

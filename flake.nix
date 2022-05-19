@@ -24,7 +24,7 @@
           checks.quick = pkgs.runCommand "hhvm-quick-test" { } ''
             set -ex
             mkdir $out
-            HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" ${./hphp/test/run.php} quick
+            HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" ${./.}/hphp/test/run.php quick
           '';
 
           devShells.default =

@@ -5,94 +5,13 @@
 
 use crate::serde_store::StoreOpts;
 use crate::SerializingStore;
-use dashmap::DashMap;
-use datastore::{LocalStore, Store};
+use datastore::NonEvictingStore;
 use hackrs::{decl_parser::DeclParser, shallow_decl_provider::ShallowDeclStore};
-use hash::HashMap;
 use indicatif::ParallelProgressIterator;
 use pos::{RelativePath, TypeName};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-use std::cmp::Eq;
-use std::fmt::Debug;
-use std::hash::Hash;
 use std::sync::Arc;
 use ty::reason::Reason;
-
-pub struct NonEvictingStore<K: Hash + Eq, V> {
-    store: DashMap<K, V>,
-}
-
-pub struct NonEvictingLocalStore<K: Hash + Eq, V> {
-    store: HashMap<K, V>,
-}
-
-impl<K: Hash + Eq, V> Default for NonEvictingStore<K, V> {
-    fn default() -> Self {
-        Self {
-            store: Default::default(),
-        }
-    }
-}
-
-impl<K: Hash + Eq, V> NonEvictingStore<K, V> {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
-impl<K, V> Store<K, V> for NonEvictingStore<K, V>
-where
-    K: Copy + Send + Sync + Hash + Eq,
-    V: Clone + Send + Sync,
-{
-    fn get(&self, key: K) -> Option<V> {
-        self.store.get(&key).map(|x| V::clone(&*x))
-    }
-
-    fn insert(&self, key: K, val: V) {
-        self.store.insert(key, val);
-    }
-}
-
-impl<K: Hash + Eq, V> Debug for NonEvictingStore<K, V> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("NonEvictingStore").finish()
-    }
-}
-
-impl<K: Hash + Eq, V> Default for NonEvictingLocalStore<K, V> {
-    fn default() -> Self {
-        Self {
-            store: Default::default(),
-        }
-    }
-}
-
-impl<K: Hash + Eq, V> NonEvictingLocalStore<K, V> {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
-impl<K, V> LocalStore<K, V> for NonEvictingLocalStore<K, V>
-where
-    K: Copy + Hash + Eq,
-    V: Clone,
-{
-    fn get(&self, key: K) -> Option<V> {
-        self.store.get(&key).map(|x| V::clone(&*x))
-    }
-
-    fn insert(&mut self, key: K, val: V) {
-        self.store.insert(key, val);
-    }
-}
-
-impl<K: Hash + Eq, V> Debug for NonEvictingLocalStore<K, V> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("NonEvictingLocalStore").finish()
-    }
-}
 
 pub fn make_shallow_decl_store<R: Reason>(opts: StoreOpts) -> ShallowDeclStore<R> {
     match opts {

@@ -5,8 +5,8 @@
 
 use crate::registrar::DependencyGraph;
 use crate::serde_store::StoreOpts;
-use crate::store::NonEvictingStore;
 use crate::SerializingStore;
+use datastore::NonEvictingStore;
 use hackrs::{
     decl_parser::DeclParser,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},

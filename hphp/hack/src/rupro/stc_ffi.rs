@@ -15,9 +15,6 @@ use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
 use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
-use hackrs_test_utils::store::{
-    make_non_evicting_shallow_decl_store, NonEvictingLocalStore, NonEvictingStore,
-};
 use oxidized::global_options::GlobalOptions;
 use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
@@ -87,11 +84,12 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
         file_provider::PlainFileProvider::new(Arc::clone(&relative_path_ctx)),
     );
     let decl_parser = DeclParser::new(Arc::clone(&file_provider));
-    let shallow_decl_store = Arc::new(make_non_evicting_shallow_decl_store());
+    let shallow_decl_store =
+        Arc::new(hackrs_test_utils::store::make_non_evicting_shallow_decl_store());
     let shallow_decl_provider = Arc::new(EagerShallowDeclProvider::new(Arc::clone(
         &shallow_decl_store,
     )));
-    let folded_decl_store = Arc::new(NonEvictingStore::new());
+    let folded_decl_store = Arc::new(datastore::NonEvictingStore::new());
     let dependency_registrar = Arc::new(hackrs_test_utils::registrar::DependencyGraph::new());
     let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
         Arc::clone(&options),
@@ -99,7 +97,7 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
         shallow_decl_provider,
         dependency_registrar,
     ));
-    let typing_decl_store = Box::new(NonEvictingLocalStore::new());
+    let typing_decl_store = Box::new(datastore::NonEvictingLocalStore::new());
     let typing_decl_provider = Rc::new(FoldingTypingDeclProvider::new(
         typing_decl_store,
         folded_decl_provider,

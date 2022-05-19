@@ -112,7 +112,7 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
     ));
 
     let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
-        Box::new(hackrs_test_utils::store::NonEvictingLocalStore::new()),
+        Box::new(datastore::NonEvictingLocalStore::new()),
         Arc::clone(&folded_decl_provider) as Arc<dyn FoldedDeclProvider<R>>,
     ));
 

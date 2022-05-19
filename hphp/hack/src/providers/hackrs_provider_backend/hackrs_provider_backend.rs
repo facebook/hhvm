@@ -56,7 +56,7 @@ impl ProviderBackend {
             ));
 
         let folded_classes_store: Arc<dyn Store<pos::TypeName, Arc<FoldedClass<_>>>> =
-            Arc::new(hackrs_test_utils::store::NonEvictingStore::new());
+            Arc::new(datastore::NonEvictingStore::new());
 
         let folded_decl_provider: Arc<dyn FoldedDeclProvider<_>> =
             Arc::new(LazyFoldedDeclProvider::new(

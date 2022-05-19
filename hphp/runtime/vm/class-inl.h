@@ -414,11 +414,11 @@ inline Slot Class::lookupReifiedInitProp() const {
 }
 
 inline bool Class::hasReifiedGenerics() const {
-  return m_hasReifiedGenerics;
+  return m_allFlags.m_hasReifiedGenerics;
 }
 
 inline bool Class::hasReifiedParent() const {
-  return m_hasReifiedParent;
+  return m_allFlags.m_hasReifiedParent;
 }
 
 inline RepoAuthType Class::declPropRepoAuthType(Slot index) const {
@@ -438,7 +438,7 @@ inline const TypeConstraint& Class::staticPropTypeConstraint(Slot index) const {
 }
 
 inline bool Class::hasDeepInitProps() const {
-  return m_hasDeepInitProps;
+  return m_allFlags.m_hasDeepInitProps;
 }
 
 inline bool Class::forbidsDynamicProps() const {
@@ -449,15 +449,15 @@ inline bool Class::forbidsDynamicProps() const {
 // Property initialization.
 
 inline bool Class::needInitialization() const {
-  return m_needInitialization;
+  return m_allFlags.m_needInitialization;
 }
 
 inline bool Class::maybeRedefinesPropTypes() const {
-  return m_maybeRedefsPropTy;
+  return m_allFlags.m_maybeRedefsPropTy;
 }
 
 inline bool Class::needsPropInitialValueCheck() const {
-  return m_needsPropInitialCheck;
+  return m_allFlags.m_needsPropInitialCheck;
 }
 
 inline const Class::PropInitVec& Class::declPropInit() const {
@@ -469,7 +469,7 @@ inline const VMFixedVector<const Func*>& Class::pinitVec() const {
 }
 
 inline rds::Handle Class::checkedPropTypeRedefinesHandle() const {
-  assertx(m_maybeRedefsPropTy);
+  assertx(m_allFlags.m_maybeRedefsPropTy);
   m_extra->m_checkedPropTypeRedefs.bind(
     rds::Mode::Normal,
     rds::LinkName{"PropTypeRedefs", name()}
@@ -478,7 +478,7 @@ inline rds::Handle Class::checkedPropTypeRedefinesHandle() const {
 }
 
 inline rds::Handle Class::checkedPropInitialValuesHandle() const {
-  assertx(m_needsPropInitialCheck);
+  assertx(m_allFlags.m_needsPropInitialCheck);
   m_extra->m_checkedPropInitialValues.bind(
     rds::Mode::Normal,
     rds::LinkName{"PropInitialValues", name()}
@@ -599,7 +599,7 @@ inline bool Class::checkInstanceBit(unsigned int bit) const {
 // Throwable initialization.
 
 inline bool Class::needsInitThrowable() const {
-  return m_needsInitThrowable;
+  return m_allFlags.m_needsInitThrowable;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

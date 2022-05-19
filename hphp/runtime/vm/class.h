@@ -1368,6 +1368,7 @@ public:
   OFF(funcVecLen)
   OFF(RTAttrs)
   OFF(releaseFunc)
+  OFF(allFlags)
 #undef OFF
 
   static constexpr ptrdiff_t constantsVecOff() {
@@ -1834,38 +1835,47 @@ private:
   veclen_t m_funcVecLen;
   veclen_t m_vtableVecLen{0};
 
-  /*
-   * This class, or one of its ancestors, has a property which maybe redefines
-   * an existing property in an incompatible way.
-   */
-  bool m_maybeRedefsPropTy       : 1;
-  /*
-   * This class (and not any of its transitive parents) has a property which
-   * maybe redefines an existing property in an incompatible way.
-   */
-  bool m_selfMaybeRedefsPropTy   : 1;
-  /*
-   * This class has a property with an initial value which might not satisfy
-   * its type-hint (and therefore requires a check when initialized).
-   */
-  bool m_needsPropInitialCheck   : 1;
-  /*
-   * This class has reified generics.
-   */
-  bool m_hasReifiedGenerics      : 1;
-  /*
-   * This class has a refied parent.
-   */
-  bool m_hasReifiedParent        : 1;
-  /*
-   * Whether the Class requires initialization, because it has either
-   * {p,s}init() methods or static members, or possibly has prop type
-   * invariance violations.
-   */
-  bool m_needInitialization : 1;
+  union Flags {
+    struct {
+      /*
+      * This class, or one of its ancestors, has a property which maybe redefines
+      * an existing property in an incompatible way.
+      */
+      bool m_maybeRedefsPropTy       : 1;
+      /*
+      * This class (and not any of its transitive parents) has a property which
+      * maybe redefines an existing property in an incompatible way.
+      */
+      bool m_selfMaybeRedefsPropTy   : 1;
+      /*
+      * This class has a property with an initial value which might not satisfy
+      * its type-hint (and therefore requires a check when initialized).
+      */
+      bool m_needsPropInitialCheck   : 1;
+      /*
+      * This class has reified generics.
+      */
+      bool m_hasReifiedGenerics      : 1;
+      /*
+      * This class has a refied parent.
+      */
+      bool m_hasReifiedParent        : 1;
+      /*
+      * Whether the Class requires initialization, because it has either
+      * {p,s}init() methods or static members, or possibly has prop type
+      * invariance violations.
+      */
+      bool m_needInitialization : 1;
 
-  bool m_needsInitThrowable : 1;
-  bool m_hasDeepInitProps : 1;
+      bool m_needsInitThrowable : 1;
+      bool m_hasDeepInitProps : 1;
+    };
+    uint8_t m_allFlags;
+  };
+
+  static_assert(sizeof(Flags) == sizeof(uint8_t));
+
+  Flags m_allFlags;
 
   // Set if this class is assigned an InstanceBits index; else, one of the
   // two special values kNoInstanceBit or kProfileInstanceBit.

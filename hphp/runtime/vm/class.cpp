@@ -800,8 +800,8 @@ bool Class::isCollectionClass() const {
 // Property initialization.
 
 void Class::initialize() const {
-  if (m_maybeRedefsPropTy) checkPropTypeRedefinitions();
-  if (m_needsPropInitialCheck) checkPropInitialValues();
+  if (m_allFlags.m_maybeRedefsPropTy) checkPropTypeRedefinitions();
+  if (m_allFlags.m_needsPropInitialCheck) checkPropInitialValues();
 
   if (m_pinitVec.size() > 0 && getPropData() == nullptr) {
     initProps();
@@ -818,12 +818,12 @@ bool Class::initialized() const {
   if (numStaticProperties() > 0 && needsInitSProps()) {
     return false;
   }
-  if (m_maybeRedefsPropTy &&
+  if (m_allFlags.m_maybeRedefsPropTy &&
       (!m_extra->m_checkedPropTypeRedefs.bound() ||
        !m_extra->m_checkedPropTypeRedefs.isInit())) {
     return false;
   }
-  if (m_needsPropInitialCheck &&
+  if (m_allFlags.m_needsPropInitialCheck &&
       (!m_extra->m_checkedPropInitialValues.bound() ||
        !m_extra->m_checkedPropInitialValues.isInit())) {
     return false;
@@ -984,7 +984,7 @@ Slot Class::lsbMemoSlot(const Func* func, bool forValue) const {
 }
 
 void Class::checkPropInitialValues() const {
-  assertx(m_needsPropInitialCheck);
+  assertx(m_allFlags.m_needsPropInitialCheck);
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(m_extra.get() != nullptr);
 
@@ -1019,7 +1019,7 @@ void Class::checkPropInitialValues() const {
 }
 
 void Class::checkPropTypeRedefinitions() const {
-  assertx(m_maybeRedefsPropTy);
+  assertx(m_allFlags.m_maybeRedefsPropTy);
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(m_parent);
   assertx(m_extra.get() != nullptr);
@@ -1028,9 +1028,9 @@ void Class::checkPropTypeRedefinitions() const {
   checkedPropTypeRedefinesHandle(); // init handle
   if (extra->m_checkedPropTypeRedefs.isInit()) return;
 
-  if (m_parent->m_maybeRedefsPropTy) m_parent->checkPropTypeRedefinitions();
+  if (m_parent->m_allFlags.m_maybeRedefsPropTy) m_parent->checkPropTypeRedefinitions();
 
-  if (m_selfMaybeRedefsPropTy) {
+  if (m_allFlags.m_selfMaybeRedefsPropTy) {
     for (Slot slot = 0; slot < m_declProperties.size(); slot++) {
       auto const& prop = m_declProperties[slot];
       if (prop.attrs & AttrNoBadRedeclare) continue;
@@ -1042,7 +1042,7 @@ void Class::checkPropTypeRedefinitions() const {
 }
 
 void Class::checkPropTypeRedefinition(Slot slot) const {
-  assertx(m_maybeRedefsPropTy);
+  assertx(m_allFlags.m_maybeRedefsPropTy);
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(m_parent);
   assertx(slot != kInvalidSlot);
@@ -1774,7 +1774,7 @@ const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, false, 0, {}};
 } // namespace
 
 const ReifiedGenericsInfo& Class::getReifiedGenericsInfo() const {
-  if (!m_hasReifiedGenerics) return k_defaultReifiedGenericsInfo;
+  if (!m_allFlags.m_hasReifiedGenerics) return k_defaultReifiedGenericsInfo;
   assertx(m_extra);
   return m_extra.raw()->m_reifiedGenericsInfo;
 }
@@ -1826,7 +1826,7 @@ void Class::setParent() {
     }
 
     m_preClass->enforceInMaybeSealedParentWhitelist(m_parent->preClass());
-    if (m_parent->m_maybeRedefsPropTy) m_maybeRedefsPropTy = true;
+    if (m_parent->m_allFlags.m_maybeRedefsPropTy) m_allFlags.m_maybeRedefsPropTy = true;
   }
 
   // Handle stuff specific to cppext classes
@@ -2020,17 +2020,18 @@ Class::Class(PreClass* preClass, Class* parent,
   , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
   , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
-  , m_maybeRedefsPropTy{false}
-  , m_selfMaybeRedefsPropTy{false}
-  , m_needsPropInitialCheck{false}
-  , m_hasReifiedGenerics{false}
-  , m_hasReifiedParent{false}
   , m_instanceBitsIndex{kProfileInstanceBit}
   , m_parent(parent)
 #ifndef NDEBUG
   , m_magic{kMagic}
 #endif
 {
+  m_allFlags.m_maybeRedefsPropTy = false;
+  m_allFlags.m_selfMaybeRedefsPropTy = false;
+  m_allFlags.m_needsPropInitialCheck = false;
+  m_allFlags.m_hasReifiedGenerics = false;
+  m_allFlags.m_hasReifiedParent = false;
+
   SCOPE_FAIL { if (m_extra) delete m_extra.raw(); };
 
   if (usedTraits.size()) {
@@ -2828,7 +2829,7 @@ void Class::setProperties() {
   int numInaccessible = 0;
   PropMap::Builder curPropMap;
   SPropMap::Builder curSPropMap;
-  m_hasDeepInitProps = false;
+  m_allFlags.m_hasDeepInitProps = false;
   std::vector<uint16_t> slotIndex;
 
   if (m_parent.get() != nullptr) {
@@ -2838,7 +2839,7 @@ void Class::setProperties() {
     // happen if a derived class redeclares a public or protected property
     // from an ancestor class. We still get correct behavior in these cases,
     // so it works out okay.
-    m_hasDeepInitProps = m_parent->m_hasDeepInitProps;
+    m_allFlags.m_hasDeepInitProps = m_parent->m_allFlags.m_hasDeepInitProps;
     for (auto const& parentProp : m_parent->declProperties()) {
       // Copy parent's declared property.  Protected properties may be
       // weakened to public below, but otherwise, the parent's properties
@@ -2862,7 +2863,7 @@ void Class::setProperties() {
       }
     }
     m_declPropInit = m_parent->m_declPropInit;
-    m_needsPropInitialCheck = m_parent->m_needsPropInitialCheck;
+    m_allFlags.m_needsPropInitialCheck = m_parent->m_allFlags.m_needsPropInitialCheck;
     auto& parentSlotIndex = m_parent->m_slotIndex;
     slotIndex.insert(slotIndex.end(),
                      parentSlotIndex.begin(), parentSlotIndex.end());
@@ -2934,7 +2935,7 @@ void Class::setProperties() {
           m_parent->name()->data());
       }
       if (preProp->attrs() & AttrDeepInit) {
-        m_hasDeepInitProps = true;
+        m_allFlags.m_hasDeepInitProps = true;
       }
 
       auto addNewProp = [&] {
@@ -3004,8 +3005,8 @@ void Class::setProperties() {
           // If this property isn't obviously not redeclaring a property in
           // the parent, we need to check that when we initialize the class.
           prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);
-          m_selfMaybeRedefsPropTy = true;
-          m_maybeRedefsPropTy = true;
+          m_allFlags.m_selfMaybeRedefsPropTy = true;
+          m_allFlags.m_maybeRedefsPropTy = true;
         }
         prop.typeConstraint = tc;
 
@@ -3283,7 +3284,7 @@ void Class::importTraitInstanceProp(Prop& traitProp,
                                                   prop.attrs);
     }
     if (prop.attrs & AttrDeepInit) {
-      m_hasDeepInitProps = true;
+      m_allFlags.m_hasDeepInitProps = true;
     }
     if (traitProp.cls != this) {
       // this was a non-flattened trait property.
@@ -3434,7 +3435,7 @@ void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
     } else if (preProp->attrs() & AttrStatic) {
       prop.attrs = Attr(prop.attrs & ~AttrPersistent);
     } else {
-      m_needsPropInitialCheck = true;
+      m_allFlags.m_needsPropInitialCheck = true;
     }
   }
 }
@@ -3501,7 +3502,7 @@ void Class::importTraitProps(int traitIdx,
   for (auto const& t : m_extra->m_usedTraits) {
     auto trait = t.get();
 
-    m_needsPropInitialCheck |= trait->m_needsPropInitialCheck;
+    m_allFlags.m_needsPropInitialCheck |= trait->m_allFlags.m_needsPropInitialCheck;
 
     // instance properties
     for (Slot p = 0; p < trait->m_declProperties.size(); p++) {
@@ -3553,12 +3554,12 @@ void Class::addTraitPropInitializers(std::vector<const Func*>& thisInitVec,
 void Class::setReifiedData() {
   auto const ua = m_preClass->userAttributes();
   auto const it = ua.find(s___Reified.get());
-  if (it != ua.end()) m_hasReifiedGenerics = true;
+  if (it != ua.end()) m_allFlags.m_hasReifiedGenerics = true;
   if (m_parent.get()) {
-    m_hasReifiedParent =
-      m_parent->m_hasReifiedGenerics || m_parent->m_hasReifiedParent;
+    m_allFlags.m_hasReifiedParent =
+      m_parent->m_allFlags.m_hasReifiedGenerics || m_parent->m_allFlags.m_hasReifiedParent;
   }
-  if (m_hasReifiedGenerics) {
+  if (m_allFlags.m_hasReifiedGenerics) {
     auto const tv = it->second;
     assertx(tvIsVec(tv));
     allocExtraData();
@@ -3623,20 +3624,20 @@ void Class::setInitializers() {
   m_sinitVec = sinits;
   m_linitVec = linits;
 
-  m_needInitialization =
+  m_allFlags.m_needInitialization =
     (m_pinitVec.size() > 0 ||
      m_staticProperties.size() > 0 ||
-     m_maybeRedefsPropTy ||
-     m_needsPropInitialCheck);
+     m_allFlags.m_maybeRedefsPropTy ||
+     m_allFlags.m_needsPropInitialCheck);
 
-  if (m_maybeRedefsPropTy || m_needsPropInitialCheck) allocExtraData();
+  if (m_allFlags.m_maybeRedefsPropTy || m_allFlags.m_needsPropInitialCheck) allocExtraData();
 
   // Implementations of Throwable get special treatment.
   if (m_parent.get() != nullptr) {
-    m_needsInitThrowable = m_parent->needsInitThrowable();
+    m_allFlags.m_needsInitThrowable = m_parent->needsInitThrowable();
   } else {
-    m_needsInitThrowable = name()->same(s_Exception.get()) ||
-                           name()->same(s_Error.get());
+    m_allFlags.m_needsInitThrowable = name()->same(s_Exception.get()) ||
+                                      name()->same(s_Error.get());
   }
 }
 

@@ -751,6 +751,10 @@ To string conversions:
 
   Set D to true iff S0 is a reified class.
 
+| HasReifiedParent, D(Bool), S(Cls), NF
+
+  Set D to true iff S0 has a reified parent.
+
 5. Branches
 
 | JmpZero,                          ND, S(Int,Bool),                     B

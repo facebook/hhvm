@@ -292,6 +292,17 @@ void cgClassHasReifiedGenerics(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_NZ, sf, dst};
 }
 
+void cgHasReifiedParent(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const cls = srcLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+
+  v << testbim{(int32_t)Class::reifiedParentMask(), cls[Class::allFlagsOff()], sf};
+  v << setcc{CC_NZ, sf, dst};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

@@ -1390,6 +1390,13 @@ public:
     return mask.m_allFlags;
   }
 
+  static uint8_t reifiedParentMask() {
+    Flags mask;
+    mask.m_allFlags = 0;
+    mask.m_hasReifiedParent = true;
+    return mask.m_allFlags;
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Lookup.                                                           [static]
 

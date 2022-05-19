@@ -10,5 +10,6 @@
 // constant values are not representative of the true runtime value.
 
 const int DEBUG_BACKTRACE_PROVIDE_OBJECT = 0;
+const int E_RECOVERABLE_ERROR = 0;
 const int E_USER_NOTICE = 0;
 const int E_ALL = 0;

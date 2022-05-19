@@ -5,50 +5,93 @@
  * @return array - Returns an array containing the currently available SPL
  * classes.
  */
-function spl_classes(): darray {
+function spl_classes(): darray<classname<mixed>, classname<mixed>> {
   return darray[
+    /* HH_FIXME[2049] */
     ArrayIterator::class => ArrayIterator::class,
+    /* HH_FIXME[2049] */
     BadFunctionCallException::class => BadFunctionCallException::class,
+    /* HH_FIXME[2049] */
     BadMethodCallException::class => BadMethodCallException::class,
+    /* HH_FIXME[2049] */
     Countable::class => Countable::class,
+    /* HH_FIXME[2049] */
     DirectoryIterator::class => DirectoryIterator::class,
+    /* HH_FIXME[2049] */
     DomainException::class => DomainException::class,
+    /* HH_FIXME[2049] */
     EmptyIterator::class => EmptyIterator::class,
+    /* HH_FIXME[2049] */
     FilesystemIterator::class => FilesystemIterator::class,
+    /* HH_FIXME[2049] */
     FilterIterator::class => FilterIterator::class,
+    /* HH_FIXME[2049] */
     GlobIterator::class => GlobIterator::class,
+    /* HH_FIXME[2049] */
     InfiniteIterator::class => InfiniteIterator::class,
+    /* HH_FIXME[2049] */
     InvalidArgumentException::class => InvalidArgumentException::class,
+    /* HH_FIXME[2049] */
     IteratorIterator::class => IteratorIterator::class,
+    /* HH_FIXME[2049] */
     LengthException::class => LengthException::class,
+    /* HH_FIXME[2049] */
     LogicException::class => LogicException::class,
+    /* HH_FIXME[2049] */
     NoRewindIterator::class => NoRewindIterator::class,
+    /* HH_FIXME[2049] */
     OuterIterator::class => OuterIterator::class,
+    /* HH_FIXME[2049] */
     OutOfBoundsException::class => OutOfBoundsException::class,
+    /* HH_FIXME[2049] */
     OutOfRangeException::class => OutOfRangeException::class,
+    /* HH_FIXME[2049] */
     OverflowException::class => OverflowException::class,
+    /* HH_FIXME[2049] */
     RangeException::class => RangeException::class,
+    /* HH_FIXME[2049] */
     RecursiveDirectoryIterator::class => RecursiveDirectoryIterator::class,
+    /* HH_FIXME[2049] */
     RecursiveFilterIterator::class => RecursiveFilterIterator::class,
+    /* HH_FIXME[2049] */
     RecursiveIterator::class => RecursiveIterator::class,
+    /* HH_FIXME[2049] */
     RecursiveIteratorIterator::class => RecursiveIteratorIterator::class,
+    /* HH_FIXME[2049] */
     RecursiveRegexIterator::class => RecursiveRegexIterator::class,
+    /* HH_FIXME[2049] */
     RegexIterator::class => RegexIterator::class,
+    /* HH_FIXME[2049] */
     RuntimeException::class => RuntimeException::class,
+    /* HH_FIXME[2049] */
     SeekableIterator::class => SeekableIterator::class,
+    /* HH_FIXME[2049] */
     SplDoublyLinkedList::class => SplDoublyLinkedList::class,
+    /* HH_FIXME[2049] */
     SplFileInfo::class => SplFileInfo::class,
+    /* HH_FIXME[2049] */
     SplFileObject::class => SplFileObject::class,
+    /* HH_FIXME[2049] */
     SplHeap::class => SplHeap::class,
+    /* HH_FIXME[2049] */
     SplMinHeap::class => SplMinHeap::class,
+    /* HH_FIXME[2049] */
     SplMaxHeap::class => SplMaxHeap::class,
+    /* HH_FIXME[2049] */
     SplObserver::class => SplObserver::class,
+    /* HH_FIXME[2049] */
     SplPriorityQueue::class => SplPriorityQueue::class,
+    /* HH_FIXME[2049] */
     SplQueue::class => SplQueue::class,
+    /* HH_FIXME[2049] */
     SplStack::class => SplStack::class,
+    /* HH_FIXME[2049] */
     SplSubject::class => SplSubject::class,
+    /* HH_FIXME[2049] */
     SplTempFileObject::class => SplTempFileObject::class,
+    /* HH_FIXME[2049] */
     UnderflowException::class => UnderflowException::class,
+    /* HH_FIXME[2049] */
     UnexpectedValueException::class => UnexpectedValueException::class,
   ];
 }
@@ -116,8 +159,12 @@ function class_uses(mixed $obj,
  * @param array $params - Arguments to pass to the callback function.
  * @return mixed - Returns the iteration count.
  */
-function iterator_apply(mixed $obj, mixed $func, varray $params = varray[]): mixed {
-  if (!is_object($obj) || !($obj is \HH\Traversable)) {
+function iterator_apply(
+  mixed $obj,
+  dynamic $func,
+  varray<dynamic> $params = varray[]
+): int {
+  if (!is_object($obj) || !($obj is \HH\Traversable<_>)) {
     trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
     return 0;
   }
@@ -136,7 +183,7 @@ function iterator_apply(mixed $obj, mixed $func, varray $params = varray[]): mix
  * @return mixed - The number of elements in iterator.
  */
 function iterator_count(mixed $obj): mixed {
-  if (!is_object($obj) || !($obj is \HH\Traversable)) {
+  if (!is_object($obj) || !($obj is \HH\Traversable<_>)) {
     trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
     return 0;
   }
@@ -152,19 +199,30 @@ function iterator_count(mixed $obj): mixed {
  * @param bool $use_keys - Whether to use the iterator element keys as index.
  * @return mixed - An array containing the elements of the iterator.
  */
-function iterator_to_array(mixed $obj, bool $use_keys = true): darray {
-  if (!is_object($obj) || !($obj is \HH\Traversable)) {
+function iterator_to_array(mixed $obj, bool $use_keys = true): mixed {
+  if (!is_object($obj) || !($obj is \HH\Traversable<_>)) {
     trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
     return 0;
   }
   $ret = darray[];
   if ($use_keys) {
-    foreach ($obj as $k => $v) {
+    foreach (
+      HH\FIXME\UNSAFE_CAST<
+        Traversable<mixed>,
+        KeyedTraversable<arraykey, mixed>
+      >(
+        $obj,
+        "We only check that the input is a `Traversable<_>` not a ".
+        "`KeyedTraversable<_, _>`"
+      ) as $k => $v
+    ) {
       $ret[$k] = $v;
     }
   } else {
+    $i = 0;
     foreach ($obj as $v) {
-      $ret[] = $v;
+      $ret[$i] = $v;
+      $i++;
     }
   }
   return $ret;

@@ -31,7 +31,8 @@
             }
             ''
               set -ex
-              HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" ${./.}/hphp/test/run.php quick
+              cd ${./.}
+              HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" hphp/test/run.php quick
               mkdir $out
             '';
 

@@ -152,6 +152,24 @@ inline bool isPrologue(TransKind k) {
   always_assert(false);
 }
 
+inline bool isOptimized(TransKind k) {
+  switch (k) {
+    case TransKind::Optimize:
+    case TransKind::OptPrologue:
+      return true;
+
+    case TransKind::Profile:
+    case TransKind::ProfPrologue:
+    case TransKind::Anchor:
+    case TransKind::Interp:
+    case TransKind::Live:
+    case TransKind::LivePrologue:
+    case TransKind::Invalid:
+      return false;
+  }
+  always_assert(false);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

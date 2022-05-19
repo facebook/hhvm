@@ -10,14 +10,14 @@ pub trait Infer<R: Reason> {
     type Typed;
     type Params;
 
-    fn infer(&self, env: &TEnv<R>, params: Self::Params) -> Result<Self::Typed>;
+    fn infer(&self, env: &mut TEnv<R>, params: Self::Params) -> Result<Self::Typed>;
 }
 
 impl<R: Reason, T: Infer<R>> Infer<R> for &T {
     type Typed = T::Typed;
     type Params = T::Params;
 
-    fn infer(&self, env: &TEnv<R>, params: Self::Params) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, params: Self::Params) -> Result<Self::Typed> {
         (*self).infer(env, params)
     }
 }
@@ -30,7 +30,7 @@ where
     type Typed = Vec<T::Typed>;
     type Params = T::Params;
 
-    fn infer(&self, env: &TEnv<R>, params: Self::Params) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, params: Self::Params) -> Result<Self::Typed> {
         self.iter().map(|x| x.infer(env, params.clone())).collect()
     }
 }

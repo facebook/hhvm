@@ -12,7 +12,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Tparam<(), ()> {
     type Params = ();
     type Typed = tast::Tparam<R>;
 
-    fn infer(&self, env: &TEnv<R>, params: ()) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, params: ()) -> Result<Self::Typed> {
         rupro_todo_assert!(self.user_attributes.is_empty(), AST);
         let parameters = self.parameters.infer(env, params)?;
         let tp = tast::Tparam {

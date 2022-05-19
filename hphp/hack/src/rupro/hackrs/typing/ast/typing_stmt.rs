@@ -13,7 +13,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Stmt<(), ()> {
     type Params = ();
     type Typed = tast::Stmt<R>;
 
-    fn infer(&self, env: &TEnv<R>, _params: ()) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, _params: ()) -> Result<Self::Typed> {
         use oxidized::aast::Stmt_::*;
         let res = match &self.1 {
             Noop => Noop,
@@ -26,7 +26,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Stmt<(), ()> {
 }
 
 fn infer_expr<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     e: &oxidized::aast::Expr<(), ()>,
 ) -> Result<tast::Stmt_<R>> {
     rupro_todo_mark!(Terminality);
@@ -35,7 +35,7 @@ fn infer_expr<R: Reason>(
 }
 
 fn infer_return<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     e: Option<&oxidized::aast::Expr<(), ()>>,
 ) -> Result<tast::Stmt_<R>> {
     let res = match e {
@@ -48,7 +48,12 @@ fn infer_return<R: Reason>(
             rupro_todo_mark!(Dynamic);
             rupro_todo_mark!(SubtypeCheck, "check against return type");
             rupro_todo_mark!(Flow, "move_and_merge_next_in_cont");
+
             let te = e.infer(env, TCExprParams::default())?;
+            let ret_ty = env.get_return().return_type;
+            let err = env.subtyper().subtype(&te.0, &ret_ty)?;
+            rupro_todo_assert!(err.is_none(), MissingError);
+
             oxidized::aast::Stmt_::Return(Box::new(Some(te)))
         }
     };

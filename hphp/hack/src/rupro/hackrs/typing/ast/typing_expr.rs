@@ -30,7 +30,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Expr<(), ()> {
     type Params = TCExprParams;
     type Typed = tast::Expr<R>;
 
-    fn infer(&self, env: &TEnv<R>, params: TCExprParams) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, params: TCExprParams) -> Result<Self::Typed> {
         rupro_todo_mark!(BidirectionalTC);
         rupro_todo_mark!(Coeffects);
 
@@ -64,7 +64,7 @@ fn infer_lvar<R: Reason>(
 }
 
 fn infer_binop<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     pos: R::Pos,
     bop: &oxidized::ast_defs::Bop,
     e1: &oxidized::aast::Expr<(), ()>,
@@ -80,7 +80,7 @@ fn infer_binop<R: Reason>(
 }
 
 fn infer_binop_assign<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     pos: R::Pos,
     lhs: &oxidized::aast::Expr<(), ()>,
     rhs: &oxidized::aast::Expr<(), ()>,
@@ -95,7 +95,7 @@ fn infer_binop_assign<R: Reason>(
 }
 
 fn infer_assign<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     pos: R::Pos,
     lhs: &oxidized::aast::Expr<(), ()>,
     trhs: &tast::Expr<R>,

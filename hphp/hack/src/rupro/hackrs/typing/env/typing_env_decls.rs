@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::dependency_registrar::DeclName;
+use crate::subtyping::oracle::Oracle;
 use crate::typing::typing_error::{Error, Result};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::{Class, TypeDecl};
@@ -46,5 +47,21 @@ impl<R: Reason> TEnvDecls<R> {
             .typing_decl_provider
             .get_type(self.dependent, name)
             .map_err(Into::into)
+    }
+}
+
+/// A wrapper around `TEnvDecls` that implements the subtyping `Oracle` trait.
+#[derive(Debug)]
+pub struct TEnvDeclsOracle<R: Reason>(Rc<TEnvDecls<R>>);
+
+impl<R: Reason> TEnvDeclsOracle<R> {
+    pub fn new(decls: Rc<TEnvDecls<R>>) -> Self {
+        Self(decls)
+    }
+}
+
+impl<R: Reason> Oracle<R> for TEnvDeclsOracle<R> {
+    fn get_class(&self, name: TypeName) -> Result<Option<Rc<dyn Class<R>>>> {
+        self.0.get_class(name)
     }
 }

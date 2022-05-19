@@ -18,8 +18,8 @@ impl TypingToplevel {
         ctx: Rc<TypingCtx<R>>,
         fd: &oxidized::aast::FunDef<(), ()>,
     ) -> Result<(tast::FunDef<R>, Vec<TypingError<R>>)> {
-        let env = TEnv::fun_env(ctx, fd);
-        let def = fd.infer(&env, ())?;
+        let mut env = TEnv::fun_env(ctx, fd);
+        let def = fd.infer(&mut env, ())?;
         Ok((def, env.destruct()))
     }
 
@@ -31,8 +31,8 @@ impl TypingToplevel {
         rupro_todo_mark!(Dynamic);
         rupro_todo_mark!(MissingError, "decl errors");
         rupro_todo_mark!(MissingError, "duplicate error");
-        let env = TEnv::class_env(ctx, cd);
-        let def = cd.infer(&env, ())?;
+        let mut env = TEnv::class_env(ctx, cd);
+        let def = cd.infer(&mut env, ())?;
         Ok((def, env.destruct()))
     }
 }

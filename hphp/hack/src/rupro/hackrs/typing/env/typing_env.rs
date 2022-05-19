@@ -3,8 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::dependency_registrar::DeclName;
+use crate::inference_env::InferenceEnv;
+use crate::subtyping::Subtyper;
 use crate::tast::SavedEnv;
-use crate::typing::env::typing_env_decls::TEnvDecls;
+use crate::typaram_env::TyparamEnv;
+use crate::typing::env::typing_env_decls::{TEnvDecls, TEnvDeclsOracle};
 use crate::typing::env::typing_genv::TGEnv;
 use crate::typing::env::typing_lenv::TLEnv;
 use crate::typing::env::typing_local_types::Local;
@@ -26,12 +29,14 @@ use utils::core::{IdentGen, LocalId};
 pub struct TEnv<R: Reason> {
     genv: Rc<TGEnv<R>>,
     lenv: Rc<TLEnv<R>>,
+    inf_env: InferenceEnv<R>,
+    tp_env: TyparamEnv<R>,
 
     idents: IdentGen,
     errors: Rc<RefCell<Vec<TypingError<R>>>>,
 
     dependent: DeclName,
-    decls: TEnvDecls<R>,
+    decls: Rc<TEnvDecls<R>>,
 }
 
 /// Functions for constructing environments.
@@ -44,15 +49,16 @@ impl<R: Reason> TEnv<R> {
     /// This function should not directly be called. Rather, you should
     /// use auxiliary methods in `typing_env_from_def`.
     pub fn new(dependent: DeclName, ctx: Rc<TypingCtx<R>>) -> Self {
-        let genv = Rc::new(TGEnv::new());
         let env = Self {
-            genv,
+            genv: Rc::new(TGEnv::new()),
             lenv: Rc::new(TLEnv::new()),
+            inf_env: InferenceEnv::default(),
+            tp_env: TyparamEnv::default(),
 
             idents: IdentGen::new(),
             errors: Rc::new(RefCell::new(Vec::new())),
             dependent,
-            decls: TEnvDecls::new(Rc::clone(&ctx), dependent),
+            decls: Rc::new(TEnvDecls::new(Rc::clone(&ctx), dependent)),
         };
         env.reinitialize_locals();
         env
@@ -200,5 +206,18 @@ impl<R: Reason> TEnv<R> {
     /// Save the typing environment to be attached to TAST nodes.
     pub fn save(&self, _local_tpenv: ()) -> SavedEnv {
         SavedEnv
+    }
+
+    /// Resolve a subtype query, potentially adding constraints to
+    /// the current environment, if no errors are detected.
+    ///
+    /// Note that any errors are not automatically addded ot the environment.
+    pub fn subtyper<'a>(&'a mut self) -> Subtyper<'a, R> {
+        Subtyper::new(
+            &mut self.inf_env,
+            &mut self.tp_env,
+            Rc::new(TEnvDeclsOracle::new(self.decls.clone())),
+            None,
+        )
     }
 }

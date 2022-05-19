@@ -15,7 +15,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::ClassVar<(), ()> {
     type Params = ();
     type Typed = tast::ClassVar<R>;
 
-    fn infer(&self, env: &TEnv<R>, _params: ()) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, _params: ()) -> Result<Self::Typed> {
         rupro_todo_assert!(self.user_attributes.is_empty(), AST);
         rupro_todo_mark!(MissingError, "missing hint");
         rupro_todo_mark!(Dynamic);

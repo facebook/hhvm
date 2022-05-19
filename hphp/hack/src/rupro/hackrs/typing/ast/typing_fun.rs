@@ -16,7 +16,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Fun_<(), ()> {
     type Params = ();
     type Typed = tast::Fun_<R>;
 
-    fn infer(&self, env: &TEnv<R>, _params: ()) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, _params: ()) -> Result<Self::Typed> {
         rupro_todo_assert!(self.tparams.is_empty(), AST);
         rupro_todo_assert!(self.where_constraints.is_empty(), AST);
         rupro_todo_assert!(self.user_attributes.is_empty(), AST);

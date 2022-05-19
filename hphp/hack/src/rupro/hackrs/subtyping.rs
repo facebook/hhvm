@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod normalize;
-mod oracle;
+pub mod oracle;
 mod solve;
 mod visited_goals;
 

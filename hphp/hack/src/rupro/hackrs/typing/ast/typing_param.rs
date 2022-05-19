@@ -18,7 +18,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::FunParam<(), ()> {
     type Params = ();
     type Typed = tast::FunParam<R>;
 
-    fn infer(&self, env: &TEnv<R>, _params: ()) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, _params: ()) -> Result<Self::Typed> {
         let ty = match HintUtils::fun_param(self) {
             None => Ty::any(R::witness(R::Pos::from(&self.pos))),
             Some(ty) => ty.infer(env, LocalizeEnv::no_subst())?,

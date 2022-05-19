@@ -43,7 +43,7 @@ impl<'a, R: Reason> Infer<R> for TCReturnTypeHint<'a> {
     type Params = TCReturnTypeHintParams<R>;
     type Typed = local::Ty<R>;
 
-    fn infer(&self, env: &TEnv<R>, params: TCReturnTypeHintParams<R>) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, params: TCReturnTypeHintParams<R>) -> Result<Self::Typed> {
         let decl_ty = HintUtils::type_hint(self.0);
         let ty = match decl_ty {
             None => make_default_return(params),
@@ -68,7 +68,7 @@ fn make_default_return<R: Reason>(params: TCReturnTypeHintParams<R>) -> local::T
 }
 
 fn make_return_type<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     params: TCReturnTypeHintParams<R>,
     ty: decl::Ty<R>,
 ) -> Result<local::Ty<R>> {

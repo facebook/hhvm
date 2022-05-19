@@ -20,7 +20,7 @@ impl<'a, R: Reason> Infer<R> for TCBlock<'a> {
     type Params = ();
     type Typed = tast::Block<R>;
 
-    fn infer(&self, env: &TEnv<R>, _params: ()) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, _params: ()) -> Result<Self::Typed> {
         // We eliminate nested blocks.
         use oxidized::aast::Stmt_::*;
         let mut typed_stmts = Vec::new();

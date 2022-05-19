@@ -35,13 +35,13 @@ impl<R: Reason> Infer<R> for decl::Ty<R> {
     type Params = LocalizeEnv;
     type Typed = local::Ty<R>;
 
-    fn infer(&self, env: &TEnv<R>, localize_env: LocalizeEnv) -> Result<local::Ty<R>> {
+    fn infer(&self, env: &mut TEnv<R>, localize_env: LocalizeEnv) -> Result<local::Ty<R>> {
         localize(env, &localize_env, self.clone())
     }
 }
 
 fn localize<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     localize_env: &LocalizeEnv,
     ty: decl::Ty<R>,
 ) -> Result<local::Ty<R>> {
@@ -57,7 +57,7 @@ fn localize<R: Reason>(
 }
 
 fn localize_tapply<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     localize_env: &LocalizeEnv,
     r: R,
     sid: Positioned<TypeName, R::Pos>,
@@ -72,7 +72,7 @@ fn localize_tapply<R: Reason>(
 }
 
 fn localize_class_instantiation<R: Reason>(
-    _env: &TEnv<R>,
+    _env: &mut TEnv<R>,
     _localize_env: &LocalizeEnv,
     r: R,
     sid: Positioned<TypeName, R::Pos>,
@@ -93,7 +93,7 @@ fn localize_class_instantiation<R: Reason>(
 }
 
 fn localize_ft<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     localize_env: &LocalizeEnv,
     r: R,
     ft: &decl::FunType<R, decl::Ty<R>>,
@@ -119,7 +119,7 @@ fn localize_ft<R: Reason>(
 }
 
 fn localize_possibly_enforced_ty<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     localize_env: &LocalizeEnv,
     ty: decl::PossiblyEnforcedTy<decl::Ty<R>>,
 ) -> Result<local::Ty<R>> {

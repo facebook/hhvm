@@ -12,7 +12,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::FunDef<(), ()> {
     type Params = ();
     type Typed = tast::FunDef<R>;
 
-    fn infer(&self, env: &TEnv<R>, _params: ()) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, _params: ()) -> Result<Self::Typed> {
         let ret = env.get_return();
         let params = env.get_params();
         let res = infer_func_body(env, self);
@@ -23,7 +23,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::FunDef<(), ()> {
 }
 
 fn infer_func_body<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     fd: &oxidized::aast::FunDef<(), ()>,
 ) -> Result<tast::FunDef<R>> {
     rupro_todo_assert!(fd.file_attributes.is_empty(), AST);

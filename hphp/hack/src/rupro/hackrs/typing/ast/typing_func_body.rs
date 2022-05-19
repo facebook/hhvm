@@ -14,7 +14,7 @@ impl<'a, R: Reason> Infer<R> for oxidized::aast::FuncBody<(), ()> {
     type Params = ();
     type Typed = tast::FuncBody<R>;
 
-    fn infer(&self, env: &TEnv<R>, _params: ()) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, _params: ()) -> Result<Self::Typed> {
         let ret = env.get_return();
         let params = env.get_params();
         let res = infer_func_body(env, self);
@@ -25,7 +25,7 @@ impl<'a, R: Reason> Infer<R> for oxidized::aast::FuncBody<(), ()> {
 }
 
 fn infer_func_body<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     func_body: &oxidized::aast::FuncBody<(), ()>,
 ) -> Result<tast::FuncBody<R>> {
     rupro_todo_mark!(Hhi);

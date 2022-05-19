@@ -13,7 +13,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Class_<(), ()> {
     type Params = ();
     type Typed = tast::Class_<R>;
 
-    fn infer(&self, env: &TEnv<R>, _params: ()) -> Result<Self::Typed> {
+    fn infer(&self, env: &mut TEnv<R>, _params: ()) -> Result<Self::Typed> {
         rupro_todo_assert!(self.user_attributes.is_empty(), AST);
         rupro_todo_assert!(self.file_attributes.is_empty(), AST);
         rupro_todo_mark!(Wellformedness);
@@ -74,7 +74,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Class_<(), ()> {
 }
 
 fn check_class_members<R: Reason>(
-    env: &TEnv<R>,
+    env: &mut TEnv<R>,
     cd: &oxidized::aast::Class_<(), ()>,
 ) -> Result<(
     Vec<tast::ClassConst<R>>,

@@ -21,6 +21,8 @@ fn hint_id(allow_retonly: bool, cls: &aast::ClassName, _hl: &[aast::Hint]) -> Op
         }
     } else if cls == sn::typehints::int.as_str() {
         Some(Hprim(Tint))
+    } else if cls == sn::typehints::string.as_str() {
+        Some(Hprim(Tstring))
     } else {
         None
     }

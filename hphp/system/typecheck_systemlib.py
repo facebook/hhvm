@@ -6,6 +6,7 @@
 import argparse
 import os
 import subprocess as p
+import sys
 from typing import List
 
 FLAGS: List[str] = [
@@ -36,7 +37,7 @@ def main():
     files = []
     for path in args.paths:
         files.extend(get_files_in(path))
-    p.run([args.hhstc_path] + FLAGS + files, check=True)
+    sys.exit(p.run([args.hhstc_path] + FLAGS + files).returncode)
 
 
 if __name__ == "__main__":

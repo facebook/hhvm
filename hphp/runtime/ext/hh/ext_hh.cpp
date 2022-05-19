@@ -1168,7 +1168,7 @@ String HHVM_FUNCTION(get_implicit_context_memo_key) {
     throw_implicit_context_exception("Implicit context feature is not enabled");
   }
   auto const obj = *ImplicitContext::activeCtx;
-  if (!obj) return "";
+  if (!obj) return empty_string();
   auto const context = Native::data<ImplicitContext>(obj);
   assertx(context->m_memokey);
   return String{context->m_memokey};

@@ -48,7 +48,7 @@ ocaml_ffi_with_arena! {
         for path in &reverse_files {
             let mut decls = decl_parser.parse(*path).unwrap();
             decls.reverse(); // To match OCaml behavior for name collisions
-            shallow_decl_store.add_decls(decls);
+            shallow_decl_store.add_decls(decls).unwrap();
         };
 
         let folded_decl_provider =

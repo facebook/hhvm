@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use anyhow::Result;
 use datastore::{ChangesStore, DeltaStore, NonEvictingStore, ReadonlyStore};
 use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
 use naming_provider::NamingProvider;
@@ -16,8 +17,6 @@ use pos::{ConstName, FunName, ModuleName, RelativePath, TypeName};
 use reverse_naming_table::ReverseNamingTable;
 use std::path::PathBuf;
 use std::sync::Arc;
-
-pub use naming_provider::Result;
 
 /// Designed after naming_heap.ml.
 pub struct NamingTable {
@@ -58,9 +57,9 @@ impl NamingTable {
         &self,
         name: TypeName,
         pos_and_kind: &(file_info::Pos, naming_types::KindOfType),
-    ) {
+    ) -> Result<()> {
         self.types
-            .insert(name, ((&pos_and_kind.0).into(), pos_and_kind.1));
+            .insert(name, ((&pos_and_kind.0).into(), pos_and_kind.1))
     }
 
     pub fn get_type_pos(
@@ -69,58 +68,58 @@ impl NamingTable {
     ) -> Result<Option<(file_info::Pos, naming_types::KindOfType)>> {
         Ok(self
             .types
-            .get_pos(name)
+            .get_pos(name)?
             .map(|(pos, kind)| (pos.into(), kind)))
     }
 
-    pub fn remove_type_batch(&self, names: &[TypeName]) {
-        self.types.remove_batch(names.iter().copied());
+    pub fn remove_type_batch(&self, names: &[TypeName]) -> Result<()> {
+        self.types.remove_batch(names.iter().copied())
     }
 
     pub fn get_canon_type_name(&self, name: TypeName) -> Result<Option<TypeName>> {
-        Ok(self.types.get_canon_name(name))
+        self.types.get_canon_name(name)
     }
 
-    pub fn add_fun(&self, name: FunName, pos: &file_info::Pos) {
-        self.funs.insert(name, pos.into());
+    pub fn add_fun(&self, name: FunName, pos: &file_info::Pos) -> Result<()> {
+        self.funs.insert(name, pos.into())
     }
 
     pub fn get_fun_pos(&self, name: FunName) -> Result<Option<file_info::Pos>> {
-        Ok(self.funs.get_pos(name).map(Into::into))
+        Ok(self.funs.get_pos(name)?.map(Into::into))
     }
 
-    pub fn remove_fun_batch(&self, names: &[FunName]) {
-        self.funs.remove_batch(names.iter().copied());
+    pub fn remove_fun_batch(&self, names: &[FunName]) -> Result<()> {
+        self.funs.remove_batch(names.iter().copied())
     }
 
     pub fn get_canon_fun_name(&self, name: FunName) -> Result<Option<FunName>> {
-        Ok(self.funs.get_canon_name(name))
+        self.funs.get_canon_name(name)
     }
 
-    pub fn add_const(&self, name: ConstName, pos: &file_info::Pos) {
-        self.consts.insert(name.into(), pos.into());
+    pub fn add_const(&self, name: ConstName, pos: &file_info::Pos) -> Result<()> {
+        self.consts.insert(name.into(), pos.into())
     }
 
     pub fn get_const_pos(&self, name: ConstName) -> Result<Option<file_info::Pos>> {
-        Ok(self.consts.get(name.into()).map(Into::into))
+        Ok(self.consts.get(name.into())?.map(Into::into))
     }
 
-    pub fn remove_const_batch(&self, names: &[ConstName]) {
+    pub fn remove_const_batch(&self, names: &[ConstName]) -> Result<()> {
         self.consts
-            .remove_batch(&mut names.iter().copied().map(Into::into));
+            .remove_batch(&mut names.iter().copied().map(Into::into))
     }
 
-    pub fn add_module(&self, name: ModuleName, pos: &file_info::Pos) {
-        self.modules.insert(name.into(), pos.into());
+    pub fn add_module(&self, name: ModuleName, pos: &file_info::Pos) -> Result<()> {
+        self.modules.insert(name.into(), pos.into())
     }
 
     pub fn get_module_pos(&self, name: ModuleName) -> Result<Option<file_info::Pos>> {
-        Ok(self.modules.get(name.into()).map(Into::into))
+        Ok(self.modules.get(name.into())?.map(Into::into))
     }
 
-    pub fn remove_module_batch(&self, names: &[ModuleName]) {
+    pub fn remove_module_batch(&self, names: &[ModuleName]) -> Result<()> {
         self.modules
-            .remove_batch(&mut names.iter().copied().map(Into::into));
+            .remove_batch(&mut names.iter().copied().map(Into::into))
     }
 
     pub fn push_local_changes(&self) {
@@ -213,12 +212,12 @@ impl MaybeNamingDb {
         Ok(())
     }
 
-    fn with_db<T, F>(&self, f: F) -> rusqlite::Result<Option<T>>
+    fn with_db<T, F>(&self, f: F) -> Result<Option<T>>
     where
         F: FnOnce(&names::Names) -> rusqlite::Result<Option<T>>,
     {
         match &*self.0.lock() {
-            Some((db, _)) => f(db),
+            Some((db, _)) => Ok(f(db)?),
             None => Ok(None),
         }
     }
@@ -234,25 +233,23 @@ impl std::fmt::Debug for MaybeNamingDb {
 struct TypeDb(Arc<MaybeNamingDb>);
 
 impl ReadonlyStore<ToplevelSymbolHash, (Pos, naming_types::KindOfType)> for TypeDb {
-    fn get(&self, key: ToplevelSymbolHash) -> Option<(Pos, naming_types::KindOfType)> {
-        self.0
-            .with_db(|db| {
-                Ok(db.get_filename(key)?.and_then(|(path, name_type)| {
-                    let kind = match name_type {
-                        NameType::Class => naming_types::KindOfType::TClass,
-                        NameType::Typedef => naming_types::KindOfType::TTypedef,
-                        _ => return None,
-                    };
-                    Some((Pos::File(kind.into(), (&path).into()), kind))
-                }))
-            })
-            .unwrap()
+    fn get(&self, key: ToplevelSymbolHash) -> Result<Option<(Pos, naming_types::KindOfType)>> {
+        self.0.with_db(|db| {
+            Ok(db.get_filename(key)?.and_then(|(path, name_type)| {
+                let kind = match name_type {
+                    NameType::Class => naming_types::KindOfType::TClass,
+                    NameType::Typedef => naming_types::KindOfType::TTypedef,
+                    _ => return None,
+                };
+                Some((Pos::File(kind.into(), (&path).into()), kind))
+            }))
+        })
     }
 }
 
 impl ReadonlyStore<ToplevelCanonSymbolHash, TypeName> for TypeDb {
-    fn get(&self, _key: ToplevelCanonSymbolHash) -> Option<TypeName> {
-        self.0.with_db(|_db| todo!()).unwrap()
+    fn get(&self, _key: ToplevelCanonSymbolHash) -> Result<Option<TypeName>> {
+        self.0.with_db(|_db| todo!())
     }
 }
 
@@ -260,20 +257,18 @@ impl ReadonlyStore<ToplevelCanonSymbolHash, TypeName> for TypeDb {
 struct FunDb(Arc<MaybeNamingDb>);
 
 impl ReadonlyStore<ToplevelSymbolHash, Pos> for FunDb {
-    fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
-        self.0
-            .with_db(|db| {
-                Ok(db
-                    .get_path_by_symbol_hash(key)?
-                    .map(|path| Pos::File(NameType::Fun, (&path).into())))
-            })
-            .unwrap()
+    fn get(&self, key: ToplevelSymbolHash) -> Result<Option<Pos>> {
+        self.0.with_db(|db| {
+            Ok(db
+                .get_path_by_symbol_hash(key)?
+                .map(|path| Pos::File(NameType::Fun, (&path).into())))
+        })
     }
 }
 
 impl ReadonlyStore<ToplevelCanonSymbolHash, FunName> for FunDb {
-    fn get(&self, _key: ToplevelCanonSymbolHash) -> Option<FunName> {
-        self.0.with_db(|_db| todo!()).unwrap()
+    fn get(&self, _key: ToplevelCanonSymbolHash) -> Result<Option<FunName>> {
+        self.0.with_db(|_db| todo!())
     }
 }
 
@@ -281,14 +276,12 @@ impl ReadonlyStore<ToplevelCanonSymbolHash, FunName> for FunDb {
 struct ConstDb(Arc<MaybeNamingDb>);
 
 impl ReadonlyStore<ToplevelSymbolHash, Pos> for ConstDb {
-    fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
-        self.0
-            .with_db(|db| {
-                Ok(db
-                    .get_path_by_symbol_hash(key)?
-                    .map(|path| Pos::File(NameType::Const, (&path).into())))
-            })
-            .unwrap()
+    fn get(&self, key: ToplevelSymbolHash) -> Result<Option<Pos>> {
+        self.0.with_db(|db| {
+            Ok(db
+                .get_path_by_symbol_hash(key)?
+                .map(|path| Pos::File(NameType::Const, (&path).into())))
+        })
     }
 }
 
@@ -296,18 +289,17 @@ impl ReadonlyStore<ToplevelSymbolHash, Pos> for ConstDb {
 struct ModuleDb(Arc<MaybeNamingDb>);
 
 impl ReadonlyStore<ToplevelSymbolHash, Pos> for ModuleDb {
-    fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
-        self.0
-            .with_db(|db| {
-                Ok(db
-                    .get_path_by_symbol_hash(key)?
-                    .map(|path| Pos::File(NameType::Module, (&path).into())))
-            })
-            .unwrap()
+    fn get(&self, key: ToplevelSymbolHash) -> Result<Option<Pos>> {
+        self.0.with_db(|db| {
+            Ok(db
+                .get_path_by_symbol_hash(key)?
+                .map(|path| Pos::File(NameType::Module, (&path).into())))
+        })
     }
 }
 
 mod reverse_naming_table {
+    use anyhow::Result;
     use datastore::{ChangesStore, DeltaStore, NonEvictingStore, ReadonlyStore};
     use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
     use std::hash::Hash;
@@ -344,16 +336,17 @@ mod reverse_naming_table {
             }
         }
 
-        pub fn insert(&self, name: K, pos: P) {
-            self.positions.insert(name.into(), pos);
-            self.canon_names.insert(name.into(), name);
+        pub fn insert(&self, name: K, pos: P) -> Result<()> {
+            self.positions.insert(name.into(), pos)?;
+            self.canon_names.insert(name.into(), name)?;
+            Ok(())
         }
 
-        pub fn get_pos(&self, name: K) -> Option<P> {
+        pub fn get_pos(&self, name: K) -> Result<Option<P>> {
             self.positions.get(name.into())
         }
 
-        pub fn get_canon_name(&self, name: K) -> Option<K> {
+        pub fn get_canon_name(&self, name: K) -> Result<Option<K>> {
             self.canon_names.get(name.into())
         }
 
@@ -367,10 +360,11 @@ mod reverse_naming_table {
             self.positions.pop_local_changes();
         }
 
-        pub fn remove_batch<I: Iterator<Item = K> + Clone>(&self, keys: I) {
+        pub fn remove_batch<I: Iterator<Item = K> + Clone>(&self, keys: I) -> Result<()> {
             self.canon_names
-                .remove_batch(&mut keys.clone().map(Into::into));
-            self.positions.remove_batch(&mut keys.map(Into::into));
+                .remove_batch(&mut keys.clone().map(Into::into))?;
+            self.positions.remove_batch(&mut keys.map(Into::into))?;
+            Ok(())
         }
     }
 }

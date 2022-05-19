@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use anyhow::Result;
 use hh24_types::ToplevelSymbolHash;
 use oxidized::file_info::NameType;
 use parking_lot::Mutex;
@@ -17,14 +18,6 @@ pub trait NamingProvider: Debug + Send + Sync {
     fn get_type_path(&self, name: TypeName) -> Result<Option<RelativePath>>;
     fn get_fun_path(&self, name: FunName) -> Result<Option<RelativePath>>;
     fn get_const_path(&self, name: ConstName) -> Result<Option<RelativePath>>;
-}
-
-pub type Result<T, E = Error> = std::result::Result<T, E>;
-
-#[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("Failed to read SQLite naming table: {0}")]
-    Sqlite(#[from] rusqlite::Error),
 }
 
 /// A naming table in a SQLite database (with the same database schema as

@@ -41,41 +41,41 @@ impl<R: Reason> LazyShallowDeclProvider<R> {
             path,
             file_provider_error,
         })?;
-        self.store.add_decls(decls);
+        self.store.add_decls(decls)?;
         Ok(())
     }
 }
 
 impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
     fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
-        if let res @ Some(..) = self.store.get_fun(name) {
+        if let res @ Some(..) = self.store.get_fun(name)? {
             return Ok(res);
         }
         if let Some(path) = self.naming_provider.get_fun_path(name)? {
             self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_fun(name));
+            return Ok(self.store.get_fun(name)?);
         }
         Ok(None)
     }
 
     fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
-        if let res @ Some(..) = self.store.get_const(name) {
+        if let res @ Some(..) = self.store.get_const(name)? {
             return Ok(res);
         }
         if let Some(path) = self.naming_provider.get_const_path(name)? {
             self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_const(name));
+            return Ok(self.store.get_const(name)?);
         }
         Ok(None)
     }
 
     fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
-        if let res @ Some(..) = self.store.get_type(name) {
+        if let res @ Some(..) = self.store.get_type(name)? {
             return Ok(res);
         }
         if let Some(path) = self.naming_provider.get_type_path(name)? {
             self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_type(name));
+            return Ok(self.store.get_type(name)?);
         }
         Ok(None)
     }
@@ -85,12 +85,12 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         class_name: TypeName,
         property_name: PropName,
     ) -> Result<Option<Ty<R>>> {
-        if let res @ Some(..) = self.store.get_property_type(class_name, property_name) {
+        if let res @ Some(..) = self.store.get_property_type(class_name, property_name)? {
             return Ok(res);
         }
         if let Some(path) = self.naming_provider.get_type_path(class_name)? {
             self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_property_type(class_name, property_name));
+            return Ok(self.store.get_property_type(class_name, property_name)?);
         }
         Ok(None)
     }
@@ -102,7 +102,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
     ) -> Result<Option<Ty<R>>> {
         if let res @ Some(..) = self
             .store
-            .get_static_property_type(class_name, property_name)
+            .get_static_property_type(class_name, property_name)?
         {
             return Ok(res);
         }
@@ -110,7 +110,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
             self.parse_and_cache_decls_in(path)?;
             return Ok(self
                 .store
-                .get_static_property_type(class_name, property_name));
+                .get_static_property_type(class_name, property_name)?);
         }
         Ok(None)
     }
@@ -120,12 +120,12 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<Ty<R>>> {
-        if let res @ Some(..) = self.store.get_method_type(class_name, method_name) {
+        if let res @ Some(..) = self.store.get_method_type(class_name, method_name)? {
             return Ok(res);
         }
         if let Some(path) = self.naming_provider.get_type_path(class_name)? {
             self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_method_type(class_name, method_name));
+            return Ok(self.store.get_method_type(class_name, method_name)?);
         }
         Ok(None)
     }
@@ -135,23 +135,23 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<Ty<R>>> {
-        if let res @ Some(..) = self.store.get_static_method_type(class_name, method_name) {
+        if let res @ Some(..) = self.store.get_static_method_type(class_name, method_name)? {
             return Ok(res);
         }
         if let Some(path) = self.naming_provider.get_type_path(class_name)? {
             self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_static_method_type(class_name, method_name));
+            return Ok(self.store.get_static_method_type(class_name, method_name)?);
         }
         Ok(None)
     }
 
     fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>> {
-        if let res @ Some(..) = self.store.get_constructor_type(class_name) {
+        if let res @ Some(..) = self.store.get_constructor_type(class_name)? {
             return Ok(res);
         }
         if let Some(path) = self.naming_provider.get_type_path(class_name)? {
             self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_constructor_type(class_name));
+            return Ok(self.store.get_constructor_type(class_name)?);
         }
         Ok(None)
     }
@@ -173,15 +173,15 @@ impl<R: Reason> EagerShallowDeclProvider<R> {
 
 impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
     fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
-        Ok(self.store.get_fun(name))
+        Ok(self.store.get_fun(name)?)
     }
 
     fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
-        Ok(self.store.get_const(name))
+        Ok(self.store.get_const(name)?)
     }
 
     fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
-        Ok(self.store.get_type(name))
+        Ok(self.store.get_type(name)?)
     }
 
     fn get_property_type(
@@ -189,7 +189,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
         class_name: TypeName,
         property_name: PropName,
     ) -> Result<Option<Ty<R>>> {
-        Ok(self.store.get_property_type(class_name, property_name))
+        Ok(self.store.get_property_type(class_name, property_name)?)
     }
 
     fn get_static_property_type(
@@ -199,7 +199,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
     ) -> Result<Option<Ty<R>>> {
         Ok(self
             .store
-            .get_static_property_type(class_name, property_name))
+            .get_static_property_type(class_name, property_name)?)
     }
 
     fn get_method_type(
@@ -207,7 +207,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<Ty<R>>> {
-        Ok(self.store.get_method_type(class_name, method_name))
+        Ok(self.store.get_method_type(class_name, method_name)?)
     }
 
     fn get_static_method_type(
@@ -215,10 +215,10 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<Ty<R>>> {
-        Ok(self.store.get_static_method_type(class_name, method_name))
+        Ok(self.store.get_static_method_type(class_name, method_name)?)
     }
 
     fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>> {
-        Ok(self.store.get_constructor_type(class_name))
+        Ok(self.store.get_constructor_type(class_name)?)
     }
 }

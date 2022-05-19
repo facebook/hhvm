@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::Store;
+use anyhow::Result;
 use dashmap::DashMap;
 use parking_lot::RwLock;
 use std::hash::Hash;
@@ -23,39 +24,41 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
         }
     }
 
-    pub fn get(&self, key: K) -> Option<V> {
+    pub fn get(&self, key: K) -> Result<Option<V>> {
         for store in self.stack.read().iter() {
             if let Some(val_opt) = store.get(&key) {
-                return val_opt.clone();
+                return Ok(val_opt.clone());
             }
         }
         self.fallback.get(key)
     }
 
-    pub fn insert(&self, key: K, val: V) {
+    pub fn insert(&self, key: K, val: V) -> Result<()> {
         if let Some(store) = self.stack.read().last() {
             store.insert(key, Some(val));
         } else {
-            self.fallback.insert(key, val);
+            self.fallback.insert(key, val)?;
         }
+        Ok(())
     }
 
     pub fn push_local_changes(&self) {
-        self.stack.write().push(Default::default())
+        self.stack.write().push(Default::default());
     }
 
     pub fn pop_local_changes(&self) {
         self.stack.write().pop();
     }
 
-    pub fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) {
+    pub fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         if let Some(store) = self.stack.read().last() {
             for key in keys {
                 store.insert(key, None);
             }
         } else {
-            self.fallback.remove_batch(keys)
+            self.fallback.remove_batch(keys)?;
         }
+        Ok(())
     }
 }
 
@@ -64,15 +67,15 @@ where
     K: Copy + Hash + Eq + Send + Sync,
     V: Clone + Send + Sync,
 {
-    fn get(&self, key: K) -> Option<V> {
+    fn get(&self, key: K) -> Result<Option<V>> {
         ChangesStore::get(self, key)
     }
 
-    fn insert(&self, key: K, val: V) {
+    fn insert(&self, key: K, val: V) -> Result<()> {
         ChangesStore::insert(self, key, val)
     }
 
-    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) {
+    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         ChangesStore::remove_batch(self, keys)
     }
 }

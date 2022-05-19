@@ -112,7 +112,7 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
 
     for &filename in &filenames {
         let decls = decl_parser.parse(filename).unwrap();
-        shallow_decl_store.add_decls(decls);
+        shallow_decl_store.add_decls(decls).unwrap();
     }
 
     // println!("{:#?}", shallow_decl_provider);

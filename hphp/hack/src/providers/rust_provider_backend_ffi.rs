@@ -202,7 +202,7 @@ ocaml_ffi! {
         name: pos::TypeName,
         pos: (file_info::Pos, naming_types::KindOfType),
     ) {
-        backend.naming_table.add_type(name, &pos);
+        backend.naming_table.add_type(name, &pos).unwrap();
     }
 
     fn hh_rust_provider_backend_naming_types_get_pos(
@@ -216,7 +216,7 @@ ocaml_ffi! {
         backend: Backend,
         names: Vec<pos::TypeName>,
     ) {
-        backend.naming_table.remove_type_batch(&names);
+        backend.naming_table.remove_type_batch(&names).unwrap();
     }
 
     fn hh_rust_provider_backend_naming_types_get_canon_name(
@@ -231,7 +231,7 @@ ocaml_ffi! {
         name: pos::FunName,
         pos: file_info::Pos,
     ) {
-        backend.naming_table.add_fun(name, &pos);
+        backend.naming_table.add_fun(name, &pos).unwrap();
     }
 
     fn hh_rust_provider_backend_naming_funs_get_pos(
@@ -245,7 +245,7 @@ ocaml_ffi! {
         backend: Backend,
         names: Vec<pos::FunName>,
     ) {
-        backend.naming_table.remove_fun_batch(&names);
+        backend.naming_table.remove_fun_batch(&names).unwrap();
     }
 
     fn hh_rust_provider_backend_naming_funs_get_canon_name(
@@ -260,7 +260,7 @@ ocaml_ffi! {
         name: pos::ConstName,
         pos: file_info::Pos,
     ) {
-        backend.naming_table.add_const(name, &pos);
+        backend.naming_table.add_const(name, &pos).unwrap();
     }
 
     fn hh_rust_provider_backend_naming_consts_get_pos(
@@ -274,7 +274,7 @@ ocaml_ffi! {
         backend: Backend,
         names: Vec<pos::ConstName>,
     ) {
-        backend.naming_table.remove_const_batch(&names);
+        backend.naming_table.remove_const_batch(&names).unwrap();
     }
 
     fn hh_rust_provider_backend_naming_modules_add(
@@ -282,7 +282,7 @@ ocaml_ffi! {
         name: pos::ModuleName,
         pos: file_info::Pos,
     ) {
-        backend.naming_table.add_module(name, &pos);
+        backend.naming_table.add_module(name, &pos).unwrap();
     }
 
     fn hh_rust_provider_backend_naming_modules_get_pos(
@@ -296,7 +296,7 @@ ocaml_ffi! {
         backend: Backend,
         names: Vec<pos::ModuleName>,
     ) {
-        backend.naming_table.remove_module_batch(&names);
+        backend.naming_table.remove_module_batch(&names).unwrap();
     }
 
     fn hh_rust_provider_backend_naming_get_db_path(

@@ -7,6 +7,7 @@ mod changes_store;
 mod delta_store;
 mod non_evicting;
 
+use anyhow::Result;
 use std::fmt::Debug;
 
 pub use changes_store::ChangesStore;
@@ -17,9 +18,9 @@ pub use non_evicting::{NonEvictingLocalStore, NonEvictingStore};
 /// intended to be a `Symbol` or tuple of `Symbol`s, and the value type is
 /// intended to be a ref-counted pointer (like `Arc` or `Hc`).
 pub trait Store<K: Copy, V>: Debug + Send + Sync {
-    fn get(&self, key: K) -> Option<V>;
-    fn insert(&self, key: K, val: V);
-    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>);
+    fn get(&self, key: K) -> Result<Option<V>>;
+    fn insert(&self, key: K, val: V) -> Result<()>;
+    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()>;
 }
 
 /// A thread-local datastore, intended for decl caching in typechecker workers.
@@ -36,11 +37,11 @@ pub trait LocalStore<K: Copy, V>: Debug {
 /// naming_provider) in terms of `datastore` traits (for purposes like
 /// `DeltaStore`).
 pub trait ReadonlyStore<K: Copy, V>: Send + Sync {
-    fn get(&self, key: K) -> Option<V>;
+    fn get(&self, key: K) -> Result<Option<V>>;
 }
 
 impl<T: Store<K, V>, K: Copy, V> ReadonlyStore<K, V> for T {
-    fn get(&self, key: K) -> Option<V> {
+    fn get(&self, key: K) -> Result<Option<V>> {
         Store::get(self, key)
     }
 }

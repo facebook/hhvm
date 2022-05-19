@@ -44,6 +44,9 @@ pub enum Error {
         #[source]
         error: Box<Error>,
     },
+
+    #[error("Error in FoldedDeclProvider datastore: {0}")]
+    Store(#[source] anyhow::Error),
 }
 
 #[derive(Clone, Debug)]

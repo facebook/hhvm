@@ -53,7 +53,7 @@ pub fn populate_shallow_decl_store<R: Reason>(
         .flat_map_iter(|path| {
             let (mut decls, summary) = decl_parser.parse_and_summarize(*path).unwrap();
             decls.reverse(); // To match OCaml behavior for name collisions
-            shallow_decl_store.add_decls(decls);
+            shallow_decl_store.add_decls(decls).unwrap();
             summary
                 .classes()
                 .map(|(class, _hash)| TypeName::new(class))

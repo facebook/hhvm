@@ -256,12 +256,14 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         stack: &mut TypeNameIndexSet,
         name: TypeName,
     ) -> Result<Option<Arc<FoldedClass<R>>>> {
-        match self.store.get(name) {
+        match self.store.get(name).map_err(Error::Store)? {
             Some(rc) => Ok(Some(rc)),
             None => match self.decl_class(stack, name)? {
                 None => Ok(None),
                 Some(rc) => {
-                    self.store.insert(name, Arc::clone(&rc));
+                    self.store
+                        .insert(name, Arc::clone(&rc))
+                        .map_err(Error::Store)?;
                     Ok(Some(rc))
                 }
             },

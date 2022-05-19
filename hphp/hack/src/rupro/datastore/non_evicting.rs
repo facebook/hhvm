@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use anyhow::Result;
 use std::hash::Hash;
 
 pub struct NonEvictingStore<K: Hash + Eq, V> {
@@ -32,18 +33,20 @@ where
     K: Copy + Send + Sync + Hash + Eq,
     V: Clone + Send + Sync,
 {
-    fn get(&self, key: K) -> Option<V> {
-        self.store.get(&key).map(|x| V::clone(&*x))
+    fn get(&self, key: K) -> Result<Option<V>> {
+        Ok(self.store.get(&key).map(|x| V::clone(&*x)))
     }
 
-    fn insert(&self, key: K, val: V) {
+    fn insert(&self, key: K, val: V) -> Result<()> {
         self.store.insert(key, val);
+        Ok(())
     }
 
-    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) {
+    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         for key in keys {
             self.store.remove(&key);
         }
+        Ok(())
     }
 }
 

@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use file_provider;
-use naming_provider;
 use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;
@@ -24,14 +22,14 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("{0}")]
-    Naming(#[from] naming_provider::Error),
     #[error("Failed to parse decls in {path:?}: {file_provider_error}")]
     DeclParse {
         path: RelativePath,
         #[source]
         file_provider_error: file_provider::Error,
     },
+    #[error("Unexpected error: {0}")]
+    Unexpected(#[from] anyhow::Error),
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]

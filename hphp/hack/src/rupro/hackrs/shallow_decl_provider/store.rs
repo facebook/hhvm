@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::TypeDecl;
+use anyhow::Result;
 use datastore::Store;
 use pos::{ConstName, FunName, MethodName, ModuleName, PropName, TypeName};
 use std::sync::Arc;
@@ -100,51 +101,52 @@ impl<R: Reason> ShallowDeclStore<R> {
         }
     }
 
-    pub fn add_decls(&self, decls: Vec<Decl<R>>) {
+    pub fn add_decls(&self, decls: Vec<Decl<R>>) -> Result<()> {
         for decl in decls {
             match decl {
-                Decl::Class(name, decl) => self.add_class(name, Arc::new(decl)),
-                Decl::Fun(name, decl) => self.funs.insert(name, Arc::new(decl)),
+                Decl::Class(name, decl) => self.add_class(name, Arc::new(decl))?,
+                Decl::Fun(name, decl) => self.funs.insert(name, Arc::new(decl))?,
                 Decl::Typedef(name, decl) => {
-                    self.types.insert(name, TypeDecl::Typedef(Arc::new(decl)))
+                    self.types.insert(name, TypeDecl::Typedef(Arc::new(decl)))?
                 }
-                Decl::Const(name, decl) => self.consts.insert(name, Arc::new(decl)),
-                Decl::Module(name, decl) => self.modules.insert(name, Arc::new(decl)),
+                Decl::Const(name, decl) => self.consts.insert(name, Arc::new(decl))?,
+                Decl::Module(name, decl) => self.modules.insert(name, Arc::new(decl))?,
             }
         }
+        Ok(())
     }
 
-    pub fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>> {
+    pub fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
         self.types.get(name)
     }
 
-    pub fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>> {
+    pub fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
         self.funs.get(name)
     }
 
-    pub fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>> {
+    pub fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
         self.consts.get(name)
     }
 
-    pub fn get_class(&self, name: TypeName) -> Option<Arc<ShallowClass<R>>> {
-        self.types.get(name).and_then(|decl| match decl {
+    pub fn get_class(&self, name: TypeName) -> Result<Option<Arc<ShallowClass<R>>>> {
+        Ok(self.types.get(name)?.and_then(|decl| match decl {
             TypeDecl::Class(cls) => Some(cls),
             TypeDecl::Typedef(..) => None,
-        })
+        }))
     }
 
-    pub fn get_typedef(&self, name: TypeName) -> Option<Arc<TypedefDecl<R>>> {
-        self.types.get(name).and_then(|decl| match decl {
+    pub fn get_typedef(&self, name: TypeName) -> Result<Option<Arc<TypedefDecl<R>>>> {
+        Ok(self.types.get(name)?.and_then(|decl| match decl {
             TypeDecl::Typedef(td) => Some(td),
             TypeDecl::Class(..) => None,
-        })
+        }))
     }
 
     pub fn get_property_type(
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<Ty<R>> {
+    ) -> Result<Option<Ty<R>>> {
         self.properties.get((class_name, property_name))
     }
 
@@ -152,11 +154,15 @@ impl<R: Reason> ShallowDeclStore<R> {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<Ty<R>> {
+    ) -> Result<Option<Ty<R>>> {
         self.static_properties.get((class_name, property_name))
     }
 
-    pub fn get_method_type(&self, class_name: TypeName, method_name: MethodName) -> Option<Ty<R>> {
+    pub fn get_method_type(
+        &self,
+        class_name: TypeName,
+        method_name: MethodName,
+    ) -> Result<Option<Ty<R>>> {
         self.methods.get((class_name, method_name))
     }
 
@@ -164,38 +170,40 @@ impl<R: Reason> ShallowDeclStore<R> {
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Option<Ty<R>> {
+    ) -> Result<Option<Ty<R>>> {
         self.static_methods.get((class_name, method_name))
     }
 
-    pub fn get_constructor_type(&self, class_name: TypeName) -> Option<Ty<R>> {
+    pub fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>> {
         self.constructors.get(class_name)
     }
 
-    fn add_class(&self, name: TypeName, cls: Arc<ShallowClass<R>>) {
+    fn add_class(&self, name: TypeName, cls: Arc<ShallowClass<R>>) -> Result<()> {
         let cid = cls.name.id();
         for prop in cls.props.iter() {
             if let Some(ty) = &prop.ty {
-                self.properties.insert((cid, prop.name.id()), ty.clone())
+                self.properties.insert((cid, prop.name.id()), ty.clone())?
             }
         }
         for prop in cls.static_props.iter() {
             if let Some(ty) = &prop.ty {
                 self.static_properties
-                    .insert((cid, prop.name.id()), ty.clone())
+                    .insert((cid, prop.name.id()), ty.clone())?
             }
         }
         for meth in cls.methods.iter() {
-            self.methods.insert((cid, meth.name.id()), meth.ty.clone())
+            self.methods
+                .insert((cid, meth.name.id()), meth.ty.clone())?
         }
         for meth in cls.static_methods.iter() {
             self.static_methods
-                .insert((cid, meth.name.id()), meth.ty.clone())
+                .insert((cid, meth.name.id()), meth.ty.clone())?
         }
         if let Some(constructor) = &cls.constructor {
-            self.constructors.insert(cid, constructor.ty.clone())
+            self.constructors.insert(cid, constructor.ty.clone())?
         }
-        self.types.insert(name, TypeDecl::Class(cls))
+        self.types.insert(name, TypeDecl::Class(cls))?;
+        Ok(())
     }
 }
 
@@ -206,9 +214,10 @@ struct PropFinder<R: Reason> {
 }
 
 impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for PropFinder<R> {
-    fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Option<Ty<R>> {
-        self.types
-            .get(class_name)
+    fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Result<Option<Ty<R>>> {
+        Ok(self
+            .types
+            .get(class_name)?
             .and_then(|decl| match decl {
                 TypeDecl::Class(cls) => Some(cls),
                 TypeDecl::Typedef(..) => None,
@@ -221,10 +230,14 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for PropFinder<R> {
                         None
                     }
                 })
-            })
+            }))
     }
-    fn insert(&self, _: (TypeName, PropName), _: Ty<R>) {}
-    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, PropName)>) {}
+    fn insert(&self, _: (TypeName, PropName), _: Ty<R>) -> Result<()> {
+        Ok(())
+    }
+    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, PropName)>) -> Result<()> {
+        Ok(())
+    }
 }
 
 /// Looks up props from the `types` Store instead of storing them separately.
@@ -234,9 +247,10 @@ struct StaticPropFinder<R: Reason> {
 }
 
 impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
-    fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Option<Ty<R>> {
-        self.types
-            .get(class_name)
+    fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Result<Option<Ty<R>>> {
+        Ok(self
+            .types
+            .get(class_name)?
             .and_then(|decl| match decl {
                 TypeDecl::Class(cls) => Some(cls),
                 TypeDecl::Typedef(..) => None,
@@ -249,10 +263,14 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
                         None
                     }
                 })
-            })
+            }))
     }
-    fn insert(&self, _: (TypeName, PropName), _: Ty<R>) {}
-    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, PropName)>) {}
+    fn insert(&self, _: (TypeName, PropName), _: Ty<R>) -> Result<()> {
+        Ok(())
+    }
+    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, PropName)>) -> Result<()> {
+        Ok(())
+    }
 }
 
 /// Looks up methods from the `types` Store instead of storing them separately.
@@ -262,9 +280,10 @@ struct MethodFinder<R: Reason> {
 }
 
 impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for MethodFinder<R> {
-    fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Option<Ty<R>> {
-        self.types
-            .get(class_name)
+    fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Result<Option<Ty<R>>> {
+        Ok(self
+            .types
+            .get(class_name)?
             .and_then(|decl| match decl {
                 TypeDecl::Class(cls) => Some(cls),
                 TypeDecl::Typedef(..) => None,
@@ -277,10 +296,14 @@ impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for MethodFinder<R> {
                         None
                     }
                 })
-            })
+            }))
     }
-    fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) {}
-    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, MethodName)>) {}
+    fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) -> Result<()> {
+        Ok(())
+    }
+    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, MethodName)>) -> Result<()> {
+        Ok(())
+    }
 }
 
 /// Looks up methods from the `types` Store instead of storing them separately.
@@ -290,9 +313,10 @@ struct StaticMethodFinder<R: Reason> {
 }
 
 impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for StaticMethodFinder<R> {
-    fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Option<Ty<R>> {
-        self.types
-            .get(class_name)
+    fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Result<Option<Ty<R>>> {
+        Ok(self
+            .types
+            .get(class_name)?
             .and_then(|decl| match decl {
                 TypeDecl::Class(cls) => Some(cls),
                 TypeDecl::Typedef(..) => None,
@@ -305,10 +329,14 @@ impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for StaticMethodFinder<R> {
                         None
                     }
                 })
-            })
+            }))
     }
-    fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) {}
-    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, MethodName)>) {}
+    fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) -> Result<()> {
+        Ok(())
+    }
+    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, MethodName)>) -> Result<()> {
+        Ok(())
+    }
 }
 
 /// Looks up constructors from the `types` Store instead of storing them separately.
@@ -318,15 +346,20 @@ struct ConstructorFinder<R: Reason> {
 }
 
 impl<R: Reason> Store<TypeName, Ty<R>> for ConstructorFinder<R> {
-    fn get(&self, class_name: TypeName) -> Option<Ty<R>> {
-        self.types
-            .get(class_name)
+    fn get(&self, class_name: TypeName) -> Result<Option<Ty<R>>> {
+        Ok(self
+            .types
+            .get(class_name)?
             .and_then(|decl| match decl {
                 TypeDecl::Class(cls) => Some(cls),
                 TypeDecl::Typedef(..) => None,
             })
-            .and_then(|cls| cls.constructor.as_ref().map(|meth| meth.ty.clone()))
+            .and_then(|cls| cls.constructor.as_ref().map(|meth| meth.ty.clone())))
     }
-    fn insert(&self, _: TypeName, _: Ty<R>) {}
-    fn remove_batch(&self, _: &mut dyn Iterator<Item = TypeName>) {}
+    fn insert(&self, _: TypeName, _: Ty<R>) -> Result<()> {
+        Ok(())
+    }
+    fn remove_batch(&self, _: &mut dyn Iterator<Item = TypeName>) -> Result<()> {
+        Ok(())
+    }
 }

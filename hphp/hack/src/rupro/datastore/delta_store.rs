@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{ReadonlyStore, Store};
+use anyhow::Result;
 use std::hash::Hash;
 use std::sync::Arc;
 
@@ -21,39 +22,40 @@ impl<K: Copy + Hash + Eq, V> DeltaStore<K, V> {
         Self { delta, fallback }
     }
 
-    pub fn get(&self, key: K) -> Option<V> {
-        if let Some(val_opt) = self.delta.get(key) {
-            val_opt
+    pub fn get(&self, key: K) -> Result<Option<V>> {
+        if let Some(val_opt) = self.delta.get(key)? {
+            Ok(val_opt)
         } else {
             self.fallback.get(key)
         }
     }
 
-    pub fn insert(&self, key: K, val: V) {
-        self.delta.insert(key, Some(val));
+    pub fn insert(&self, key: K, val: V) -> Result<()> {
+        self.delta.insert(key, Some(val))
     }
 
-    pub fn remove(&self, key: K) {
-        self.delta.insert(key, None);
+    pub fn remove(&self, key: K) -> Result<()> {
+        self.delta.insert(key, None)
     }
 
-    pub fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) {
+    pub fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         for key in keys {
-            self.remove(key);
+            self.remove(key)?;
         }
+        Ok(())
     }
 }
 
 impl<K: Copy + Hash + Eq, V> Store<K, V> for DeltaStore<K, V> {
-    fn get(&self, key: K) -> Option<V> {
+    fn get(&self, key: K) -> Result<Option<V>> {
         DeltaStore::get(self, key)
     }
 
-    fn insert(&self, key: K, val: V) {
+    fn insert(&self, key: K, val: V) -> Result<()> {
         DeltaStore::insert(self, key, val)
     }
 
-    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) {
+    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         DeltaStore::remove_batch(self, keys)
     }
 }

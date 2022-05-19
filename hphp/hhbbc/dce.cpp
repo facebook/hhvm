@@ -1506,6 +1506,9 @@ void dce(Env& env, const bc::CastKeyset&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastString&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastVec&)          { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CGetS&)            { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::ClassHasReifiedGenerics&) {
+  pushRemovableIfNoThrow(env);
+}
 void dce(Env& env, const bc::Cmp&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CombineAndResolveTypeStruct&) {
   pushRemovableIfNoThrow(env);

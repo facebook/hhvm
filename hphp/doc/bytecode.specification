@@ -2987,6 +2987,12 @@ CheckClsReifiedGenericMismatch [C:Vec] -> []
   matches exactly to the expectations of the current class. If there is
   no class in the current context, throws a fatal error as well.
 
+ClassHasReifiedGenerics [C:Class|LazyClass] -> [C:Bool]
+
+  Checks if the class in $1 has reified generics and pushes the
+  resulting boolean onto the stack. Throws a fatal error if $1 is not a class
+  or lazy class.
+
 NativeImpl    []  ->  []
 
   Native implementation. This instruction invokes the native implementation

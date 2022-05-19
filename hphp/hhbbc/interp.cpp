@@ -3063,6 +3063,35 @@ void in(ISS& env, const bc::CheckClsReifiedGenericMismatch& op) {
   if (!ok) unreachable(env);
 }
 
+void in(ISS& env, const bc::ClassHasReifiedGenerics& op) {
+  // TODO(T121050961) Optimize for lazy classes too
+  auto const cls = popC(env);
+  if (!cls.couldBe(BCls)) {
+    unreachable(env);
+    return push(env, TBottom);
+  }
+  if (!cls.subtypeOf(BCls)) {
+    push(env, TBool);
+    return;
+  }
+  effect_free(env);
+  constprop(env);
+  auto const t = [&] {
+    if (!is_specialized_cls(cls) || dcls_of(cls).type != DCls::Exact) {
+      return TBool;
+    }
+    auto const& dcls = dcls_of(cls);
+    if (!dcls.cls.couldHaveReifiedGenerics()) {
+      return TFalse;
+    }
+    if (dcls.cls.mustHaveReifiedGenerics()) {
+      return TTrue;
+    }
+    return TBool;
+  }();
+  push(env, t);
+}
+
 namespace {
 
 /*

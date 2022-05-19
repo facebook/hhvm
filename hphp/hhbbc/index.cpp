@@ -893,6 +893,15 @@ bool Class::couldHaveReifiedGenerics() const {
   );
 }
 
+bool Class::mustHaveReifiedGenerics() const {
+  return val.match(
+    [] (SString) { return false; },
+    [] (ClassInfo* cinfo) {
+      return cinfo->cls->hasReifiedGenerics;
+    }
+  );
+}
+
 bool Class::mightCareAboutDynConstructs() const {
   if (RuntimeOption::EvalForbidDynamicConstructs > 0) {
     return val.match(

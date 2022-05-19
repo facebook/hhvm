@@ -1624,6 +1624,10 @@ void iopCheckClsReifiedGenericMismatch() {
   iopUnhandled("CheckClsReifiedGenericMismatch");
 }
 
+void iopClassHasReifiedGenerics() {
+  iopUnhandled("ClassHasReifiedGenerics")
+}
+
 void iopNativeImpl(PC& /* pc */) {
   iopPreamble("NativeImpl");
 

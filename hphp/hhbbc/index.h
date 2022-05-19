@@ -386,6 +386,11 @@ struct Class {
   bool couldHaveReifiedGenerics() const;
 
   /*
+   * Whether this class must have reified generics
+   */
+  bool mustHaveReifiedGenerics() const;
+
+  /*
    * Returns whether this resolved class might distinguish being constructed
    * dynamically versus being constructed normally (IE, might raise a notice).
    */

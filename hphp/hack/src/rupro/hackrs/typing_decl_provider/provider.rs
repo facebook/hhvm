@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{ClassType, Result, TypeDecl, TypingDeclProvider};
-use crate::dependency_registrar::DeclName;
 use crate::folded_decl_provider::{self, FoldedDeclProvider};
 use datastore::LocalStore;
+use depgraph_api::DeclName;
 use pos::{ConstName, FunName, TypeName};
 use std::cell::RefCell;
 use std::rc::Rc;

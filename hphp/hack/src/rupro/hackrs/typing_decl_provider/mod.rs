@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::dependency_registrar::DeclName;
 use defs::ClassType;
+use depgraph_api::DeclName;
 use pos::{ConstName, FunName, MethodName, PropName, TypeName};
 use std::fmt::Debug;
 use std::rc::Rc;

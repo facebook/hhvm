@@ -4,10 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{fold::DeclFolder, DeclName, Error, Result, TypeDecl};
-use crate::dependency_registrar::DependencyName;
-use crate::dependency_registrar::DependencyRegistrar;
 use crate::shallow_decl_provider::{self, ShallowDeclProvider};
 use datastore::Store;
+use depgraph_api::{DependencyName, DepgraphWriter};
 use oxidized::global_options::GlobalOptions;
 use pos::{
     ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameIndexMap,
@@ -29,7 +28,7 @@ pub struct LazyFoldedDeclProvider<R: Reason> {
     opts: Arc<GlobalOptions>,
     store: Arc<dyn Store<TypeName, Arc<FoldedClass<R>>>>,
     shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
-    dependency_registrar: Arc<dyn DependencyRegistrar>,
+    dependency_registrar: Arc<dyn DepgraphWriter>,
 }
 
 impl<R: Reason> LazyFoldedDeclProvider<R> {
@@ -37,7 +36,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         opts: Arc<GlobalOptions>,
         store: Arc<dyn Store<TypeName, Arc<FoldedClass<R>>>>,
         shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
-        dependency_registrar: Arc<dyn DependencyRegistrar>,
+        dependency_registrar: Arc<dyn DepgraphWriter>,
     ) -> Self {
         Self {
             opts,

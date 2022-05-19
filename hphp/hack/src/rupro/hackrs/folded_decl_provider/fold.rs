@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{inherit::Inherited, Result, Substitution};
-use crate::dependency_registrar::DependencyRegistrar;
 use crate::special_names as sn;
+use depgraph_api::DepgraphWriter;
 use eq_modulo_pos::EqModuloPosAndReason;
 use oxidized::global_options::GlobalOptions;
 use pos::{
@@ -34,7 +34,7 @@ pub struct DeclFolder<'a, R: Reason> {
     /// Options affecting typechecking behaviors.
     opts: &'a GlobalOptions,
     /// An observer of dependencies.
-    dependency_registrar: &'a dyn DependencyRegistrar,
+    dependency_registrar: &'a dyn DepgraphWriter,
     /// The class whose folded decl we are producing.
     child: &'a ShallowClass<R>,
     /// The folded decls of all (recursive) ancestors of `child`.
@@ -53,7 +53,7 @@ enum Pass {
 impl<'a, R: Reason> DeclFolder<'a, R> {
     pub fn decl_class(
         opts: &'a GlobalOptions,
-        dependency_registrar: &'a dyn DependencyRegistrar,
+        dependency_registrar: &'a dyn DepgraphWriter,
         child: &'a ShallowClass<R>,
         parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
         errors: Vec<DeclError<R::Pos>>,

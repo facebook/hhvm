@@ -10,6 +10,7 @@ path = "../../hackrs_test.rs"
 [dependencies]
 anyhow = "1.0.56"
 datastore = { path = "../../../datastore" }
+depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
 fbinit = { path = "../../../../../../../common/rust/shed/fbinit" }
 file_provider = { path = "../../../file_provider/cargo/file_provider" }
 hackrs = { path = "../../../hackrs/cargo/hackrs" }

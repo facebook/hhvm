@@ -8,7 +8,7 @@
 
 use crate::{FacebookInit, TestContext};
 use anyhow::Result;
-use hackrs::dependency_registrar::{DeclName, DependencyName};
+use depgraph_api::{DeclName, DependencyName};
 use hackrs_test_utils::registrar::DependencyGraph;
 use maplit::{btreemap, btreeset};
 use pos::TypeName;

@@ -4,10 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod naming_table;
-mod no_depgraph;
 
 use anyhow::Result;
 use datastore::Store;
+use depgraph_api::NoDepGraph;
 use file_provider::{FileProvider, PlainFileProvider};
 use hackrs::{
     decl_parser::DeclParser,
@@ -15,7 +15,6 @@ use hackrs::{
     shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider, ShallowDeclStore},
 };
 use naming_table::NamingTable;
-use no_depgraph::NoDepGraph;
 use oxidized_by_ref::parser_options::ParserOptions;
 use pos::RelativePathCtx;
 use std::sync::Arc;

@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{Class, Error, Result};
-use crate::dependency_registrar::DeclName;
 use crate::folded_decl_provider::{FoldedDeclProvider, Substitution};
+use depgraph_api::DeclName;
 use once_cell::unsync::OnceCell;
 use oxidized::ast_defs::ConstraintKind;
 use pos::{MethodName, MethodNameMap, PropName, PropNameMap, TypeName};

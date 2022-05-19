@@ -12,6 +12,7 @@ aast_parser = { path = "../../../../parser/cargo/aast_parser" }
 arena_collections = { path = "../../../../arena_collections" }
 bumpalo = { version = "3.8", features = ["collections"] }
 datastore = { path = "../../../datastore" }
+depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
 direct_decl_parser = { path = "../../../../parser/api/cargo/direct_decl_parser" }
 eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
 file_provider = { path = "../../../file_provider/cargo/file_provider" }

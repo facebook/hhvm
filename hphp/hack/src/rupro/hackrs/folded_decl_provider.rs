@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::dependency_registrar::DeclName;
+use depgraph_api::DeclName;
 
 use itertools::Itertools;
 use pos::{ConstName, FunName, MethodName, PropName, TypeName};
@@ -31,7 +31,7 @@ pub enum Error {
     Shallow(#[from] crate::shallow_decl_provider::Error),
 
     #[error("{0}")]
-    Dependency(#[from] crate::dependency_registrar::Error),
+    Dependency(#[from] depgraph_api::Error),
 
     #[error(
         "Failed to declare {class} because of error in ancestor {} (via {}): {error}",

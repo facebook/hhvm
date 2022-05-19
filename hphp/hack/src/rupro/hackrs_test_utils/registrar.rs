@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use dashmap::{mapref::entry::Entry, DashMap};
-use hackrs::dependency_registrar::{DeclName, DependencyName, DependencyRegistrar, Result};
+use depgraph_api::{DeclName, DependencyName, DepgraphWriter, Result};
 use std::collections::HashSet;
 
 pub type DeclNameSet = HashSet<DeclName>;
@@ -30,7 +30,7 @@ impl DependencyGraph {
     }
 }
 
-impl DependencyRegistrar for DependencyGraph {
+impl DepgraphWriter for DependencyGraph {
     fn add_dependency(&self, dependent: DeclName, dependency: DependencyName) -> Result<()> {
         match self.rdeps.entry(dependency) {
             Entry::Vacant(e) => {

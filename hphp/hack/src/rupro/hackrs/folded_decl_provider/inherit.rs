@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{subst::Substitution, Result};
-use crate::dependency_registrar::{DeclName, DependencyName, DependencyRegistrar};
+use depgraph_api::{DeclName, DependencyName, DepgraphWriter};
 use indexmap::map::Entry;
 use pos::{
     ClassConstNameIndexMap, MethodName, MethodNameIndexMap, Pos, PropNameIndexMap,
@@ -307,7 +307,7 @@ impl<R: Reason> Inherited<R> {
 struct MemberFolder<'a, R: Reason> {
     child: &'a ShallowClass<R>,
     parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
-    dependency_registrar: &'a dyn DependencyRegistrar,
+    dependency_registrar: &'a dyn DepgraphWriter,
     members: Inherited<R>,
 }
 
@@ -554,7 +554,7 @@ impl<R: Reason> Inherited<R> {
     pub fn make(
         child: &ShallowClass<R>,
         parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
-        dependency_registrar: &dyn DependencyRegistrar,
+        dependency_registrar: &dyn DepgraphWriter,
     ) -> Result<Self> {
         let mut folder = MemberFolder {
             child,

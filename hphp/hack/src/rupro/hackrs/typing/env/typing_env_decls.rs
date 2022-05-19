@@ -2,11 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::dependency_registrar::DeclName;
+
 use crate::subtyping::oracle::Oracle;
 use crate::typing::typing_error::{Error, Result};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::{Class, TypeDecl};
+use depgraph_api::DeclName;
 use pos::{FunName, TypeName};
 use std::rc::Rc;
 use std::sync::Arc;

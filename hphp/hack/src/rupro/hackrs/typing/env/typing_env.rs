@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::dependency_registrar::DeclName;
 use crate::inference_env::InferenceEnv;
 use crate::subtyping::Subtyper;
 use crate::tast::SavedEnv;
@@ -14,6 +13,7 @@ use crate::typing::env::typing_local_types::Local;
 use crate::typing::env::typing_per_cont_env::TypingContKey;
 use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing_ctx::TypingCtx;
+use depgraph_api::DeclName;
 use im::HashMap;
 use pos::FunName;
 use pos::TypeName;

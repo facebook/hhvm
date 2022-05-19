@@ -19,6 +19,7 @@ pub use non_evicting::{NonEvictingLocalStore, NonEvictingStore};
 pub trait Store<K: Copy, V>: Debug + Send + Sync {
     fn get(&self, key: K) -> Option<V>;
     fn insert(&self, key: K, val: V);
+    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>);
 }
 
 /// A thread-local datastore, intended for decl caching in typechecker workers.
@@ -27,6 +28,7 @@ pub trait Store<K: Copy, V>: Debug + Send + Sync {
 pub trait LocalStore<K: Copy, V>: Debug {
     fn get(&self, key: K) -> Option<V>;
     fn insert(&mut self, key: K, val: V);
+    fn remove_batch(&mut self, keys: &mut dyn Iterator<Item = K>);
 }
 
 /// A readonly threadsafe datastore, intended to model readonly data sources

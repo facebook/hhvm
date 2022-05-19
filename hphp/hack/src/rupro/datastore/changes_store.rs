@@ -48,17 +48,13 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
         self.stack.write().pop();
     }
 
-    pub fn remove_batch<I: Iterator<Item = K>>(&self, keys: I) {
+    pub fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) {
         if let Some(store) = self.stack.read().last() {
             for key in keys {
                 store.insert(key, None);
             }
         } else {
-            for key in keys {
-                let _ = key;
-                todo!("delete from fallback store");
-                // self.fallback.remove(key);
-            }
+            self.fallback.remove_batch(keys)
         }
     }
 }
@@ -74,6 +70,10 @@ where
 
     fn insert(&self, key: K, val: V) {
         ChangesStore::insert(self, key, val)
+    }
+
+    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) {
+        ChangesStore::remove_batch(self, keys)
     }
 }
 

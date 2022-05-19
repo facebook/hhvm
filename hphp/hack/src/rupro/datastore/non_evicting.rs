@@ -39,6 +39,12 @@ where
     fn insert(&self, key: K, val: V) {
         self.store.insert(key, val);
     }
+
+    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) {
+        for key in keys {
+            self.store.remove(&key);
+        }
+    }
 }
 
 impl<K: Hash + Eq, V> std::fmt::Debug for NonEvictingStore<K, V> {
@@ -72,6 +78,12 @@ where
 
     fn insert(&mut self, key: K, val: V) {
         self.store.insert(key, val);
+    }
+
+    fn remove_batch(&mut self, keys: &mut dyn Iterator<Item = K>) {
+        for key in keys {
+            self.store.remove(&key);
+        }
     }
 }
 

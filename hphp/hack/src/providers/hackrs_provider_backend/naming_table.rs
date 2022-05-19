@@ -107,7 +107,7 @@ impl NamingTable {
 
     pub fn remove_const_batch(&self, names: &[ConstName]) {
         self.consts
-            .remove_batch(names.iter().copied().map(Into::into));
+            .remove_batch(&mut names.iter().copied().map(Into::into));
     }
 
     pub fn add_module(&self, name: ModuleName, pos: &file_info::Pos) {
@@ -120,7 +120,7 @@ impl NamingTable {
 
     pub fn remove_module_batch(&self, names: &[ModuleName]) {
         self.modules
-            .remove_batch(names.iter().copied().map(Into::into));
+            .remove_batch(&mut names.iter().copied().map(Into::into));
     }
 
     pub fn push_local_changes(&self) {
@@ -368,8 +368,9 @@ mod reverse_naming_table {
         }
 
         pub fn remove_batch<I: Iterator<Item = K> + Clone>(&self, keys: I) {
-            self.canon_names.remove_batch(keys.clone().map(Into::into));
-            self.positions.remove_batch(keys.map(Into::into));
+            self.canon_names
+                .remove_batch(&mut keys.clone().map(Into::into));
+            self.positions.remove_batch(&mut keys.map(Into::into));
         }
     }
 }

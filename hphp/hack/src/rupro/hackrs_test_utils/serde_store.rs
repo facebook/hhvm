@@ -101,6 +101,13 @@ where
         };
         self.store.insert(key, compressed.into_boxed_slice());
     }
+
+    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) {
+        for key in keys {
+            self.store.remove(&key);
+            self.cache.invalidate(&key);
+        }
+    }
 }
 
 fn serialize<T: Serialize>(val: &T) -> Vec<u8> {

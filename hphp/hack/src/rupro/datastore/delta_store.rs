@@ -36,6 +36,12 @@ impl<K: Copy + Hash + Eq, V> DeltaStore<K, V> {
     pub fn remove(&self, key: K) {
         self.delta.insert(key, None);
     }
+
+    pub fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) {
+        for key in keys {
+            self.remove(key);
+        }
+    }
 }
 
 impl<K: Copy + Hash + Eq, V> Store<K, V> for DeltaStore<K, V> {
@@ -45,6 +51,10 @@ impl<K: Copy + Hash + Eq, V> Store<K, V> for DeltaStore<K, V> {
 
     fn insert(&self, key: K, val: V) {
         DeltaStore::insert(self, key, val)
+    }
+
+    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) {
+        DeltaStore::remove_batch(self, keys)
     }
 }
 

@@ -224,6 +224,7 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for PropFinder<R> {
             })
     }
     fn insert(&self, _: (TypeName, PropName), _: Ty<R>) {}
+    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, PropName)>) {}
 }
 
 /// Looks up props from the `types` Store instead of storing them separately.
@@ -251,6 +252,7 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
             })
     }
     fn insert(&self, _: (TypeName, PropName), _: Ty<R>) {}
+    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, PropName)>) {}
 }
 
 /// Looks up methods from the `types` Store instead of storing them separately.
@@ -278,6 +280,7 @@ impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for MethodFinder<R> {
             })
     }
     fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) {}
+    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, MethodName)>) {}
 }
 
 /// Looks up methods from the `types` Store instead of storing them separately.
@@ -305,6 +308,7 @@ impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for StaticMethodFinder<R> {
             })
     }
     fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) {}
+    fn remove_batch(&self, _: &mut dyn Iterator<Item = (TypeName, MethodName)>) {}
 }
 
 /// Looks up constructors from the `types` Store instead of storing them separately.
@@ -324,4 +328,5 @@ impl<R: Reason> Store<TypeName, Ty<R>> for ConstructorFinder<R> {
             .and_then(|cls| cls.constructor.as_ref().map(|meth| meth.ty.clone()))
     }
     fn insert(&self, _: TypeName, _: Ty<R>) {}
+    fn remove_batch(&self, _: &mut dyn Iterator<Item = TypeName>) {}
 }

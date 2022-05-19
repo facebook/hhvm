@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use datastore::{ChangesStore, Store};
+use datastore::{ChangesStore, DeltaStore, NonEvictingStore, ReadonlyStore};
 use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
 use naming_provider::NamingProvider;
 use ocamlrep::rc::RcOc;
@@ -21,10 +21,10 @@ pub use naming_provider::Result;
 
 /// Designed after naming_heap.ml.
 pub struct NamingTable {
-    types: ReverseNamingTable<TypeName, (Pos, naming_types::KindOfType), TypeDb>,
-    funs: ReverseNamingTable<FunName, Pos, FunDb>,
-    consts: ChangesStore<ToplevelSymbolHash, Pos, ConstDb>,
-    modules: ChangesStore<ToplevelSymbolHash, Pos, ModuleDb>,
+    types: ReverseNamingTable<TypeName, (Pos, naming_types::KindOfType)>,
+    funs: ReverseNamingTable<FunName, Pos>,
+    consts: ChangesStore<ToplevelSymbolHash, Pos>,
+    modules: ChangesStore<ToplevelSymbolHash, Pos>,
     db: Arc<MaybeNamingDb>,
 }
 
@@ -32,10 +32,16 @@ impl NamingTable {
     pub fn new() -> Self {
         let db = Arc::new(MaybeNamingDb(Mutex::new(None)));
         Self {
-            types: ReverseNamingTable::new(TypeDb(Arc::clone(&db))),
-            funs: ReverseNamingTable::new(FunDb(Arc::clone(&db))),
-            consts: ChangesStore::new(ConstDb(Arc::clone(&db))),
-            modules: ChangesStore::new(ModuleDb(Arc::clone(&db))),
+            types: ReverseNamingTable::new(Arc::new(TypeDb(Arc::clone(&db)))),
+            funs: ReverseNamingTable::new(Arc::new(FunDb(Arc::clone(&db)))),
+            consts: ChangesStore::new(Arc::new(DeltaStore::new(
+                Arc::new(NonEvictingStore::new()), // TODO: make this sharedmem
+                Arc::new(ConstDb(Arc::clone(&db))),
+            ))),
+            modules: ChangesStore::new(Arc::new(DeltaStore::new(
+                Arc::new(NonEvictingStore::new()), // TODO: make this sharedmem
+                Arc::new(ModuleDb(Arc::clone(&db))),
+            ))),
             db,
         }
     }
@@ -227,7 +233,7 @@ impl std::fmt::Debug for MaybeNamingDb {
 #[derive(Clone, Debug)]
 struct TypeDb(Arc<MaybeNamingDb>);
 
-impl Store<ToplevelSymbolHash, (Pos, naming_types::KindOfType)> for TypeDb {
+impl ReadonlyStore<ToplevelSymbolHash, (Pos, naming_types::KindOfType)> for TypeDb {
     fn get(&self, key: ToplevelSymbolHash) -> Option<(Pos, naming_types::KindOfType)> {
         self.0
             .with_db(|db| {
@@ -242,24 +248,18 @@ impl Store<ToplevelSymbolHash, (Pos, naming_types::KindOfType)> for TypeDb {
             })
             .unwrap()
     }
-    fn insert(&self, _key: ToplevelSymbolHash, _val: (Pos, naming_types::KindOfType)) {
-        unreachable!("ChangesStore should not perform inserts on fallback")
-    }
 }
 
-impl Store<ToplevelCanonSymbolHash, TypeName> for TypeDb {
+impl ReadonlyStore<ToplevelCanonSymbolHash, TypeName> for TypeDb {
     fn get(&self, _key: ToplevelCanonSymbolHash) -> Option<TypeName> {
         self.0.with_db(|_db| todo!()).unwrap()
-    }
-    fn insert(&self, _key: ToplevelCanonSymbolHash, _val: TypeName) {
-        unreachable!("ChangesStore should not perform inserts on fallback")
     }
 }
 
 #[derive(Clone, Debug)]
 struct FunDb(Arc<MaybeNamingDb>);
 
-impl Store<ToplevelSymbolHash, Pos> for FunDb {
+impl ReadonlyStore<ToplevelSymbolHash, Pos> for FunDb {
     fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
         self.0
             .with_db(|db| {
@@ -269,24 +269,18 @@ impl Store<ToplevelSymbolHash, Pos> for FunDb {
             })
             .unwrap()
     }
-    fn insert(&self, _key: ToplevelSymbolHash, _val: Pos) {
-        unreachable!("ChangesStore should not perform inserts on fallback")
-    }
 }
 
-impl Store<ToplevelCanonSymbolHash, FunName> for FunDb {
+impl ReadonlyStore<ToplevelCanonSymbolHash, FunName> for FunDb {
     fn get(&self, _key: ToplevelCanonSymbolHash) -> Option<FunName> {
         self.0.with_db(|_db| todo!()).unwrap()
-    }
-    fn insert(&self, _key: ToplevelCanonSymbolHash, _val: FunName) {
-        unreachable!("ChangesStore should not perform inserts on fallback")
     }
 }
 
 #[derive(Clone, Debug)]
 struct ConstDb(Arc<MaybeNamingDb>);
 
-impl Store<ToplevelSymbolHash, Pos> for ConstDb {
+impl ReadonlyStore<ToplevelSymbolHash, Pos> for ConstDb {
     fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
         self.0
             .with_db(|db| {
@@ -296,15 +290,12 @@ impl Store<ToplevelSymbolHash, Pos> for ConstDb {
             })
             .unwrap()
     }
-    fn insert(&self, _key: ToplevelSymbolHash, _val: Pos) {
-        unreachable!("ChangesStore should not perform inserts on fallback")
-    }
 }
 
 #[derive(Clone, Debug)]
 struct ModuleDb(Arc<MaybeNamingDb>);
 
-impl Store<ToplevelSymbolHash, Pos> for ModuleDb {
+impl ReadonlyStore<ToplevelSymbolHash, Pos> for ModuleDb {
     fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
         self.0
             .with_db(|db| {
@@ -314,34 +305,42 @@ impl Store<ToplevelSymbolHash, Pos> for ModuleDb {
             })
             .unwrap()
     }
-
-    fn insert(&self, _key: ToplevelSymbolHash, _val: Pos) {
-        unreachable!("ChangesStore should not perform inserts on fallback")
-    }
 }
 
 mod reverse_naming_table {
-    use datastore::{ChangesStore, Store};
+    use datastore::{ChangesStore, DeltaStore, NonEvictingStore, ReadonlyStore};
     use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
     use std::hash::Hash;
+    use std::sync::Arc;
 
     /// In-memory delta for symbols which support a canon-name lookup API (types
     /// and funs).
-    pub struct ReverseNamingTable<K, P, F> {
-        positions: ChangesStore<ToplevelSymbolHash, P, F>,
-        canon_names: ChangesStore<ToplevelCanonSymbolHash, K, F>,
+    pub struct ReverseNamingTable<K, P> {
+        positions: ChangesStore<ToplevelSymbolHash, P>,
+        canon_names: ChangesStore<ToplevelCanonSymbolHash, K>,
     }
 
-    impl<K, P, F> ReverseNamingTable<K, P, F>
+    impl<K, P> ReverseNamingTable<K, P>
     where
-        K: Copy + Hash + Eq + Into<ToplevelSymbolHash> + Into<ToplevelCanonSymbolHash>,
-        P: Clone,
-        F: Clone + Store<ToplevelSymbolHash, P> + Store<ToplevelCanonSymbolHash, K>,
+        K: Copy + Hash + Eq + Send + Sync + 'static,
+        K: Into<ToplevelSymbolHash> + Into<ToplevelCanonSymbolHash>,
+        P: Clone + Send + Sync + 'static,
     {
-        pub fn new(fallback: F) -> Self {
+        pub fn new<F>(fallback: Arc<F>) -> Self
+        where
+            F: ReadonlyStore<ToplevelSymbolHash, P>
+                + ReadonlyStore<ToplevelCanonSymbolHash, K>
+                + 'static,
+        {
             Self {
-                positions: ChangesStore::new(fallback.clone()),
-                canon_names: ChangesStore::new(fallback),
+                positions: ChangesStore::new(Arc::new(DeltaStore::new(
+                    Arc::new(NonEvictingStore::new()), // TODO: make this sharedmem
+                    Arc::clone(&fallback) as _,
+                ))),
+                canon_names: ChangesStore::new(Arc::new(DeltaStore::new(
+                    Arc::new(NonEvictingStore::new()), // TODO: make this sharedmem
+                    fallback,
+                ))),
             }
         }
 

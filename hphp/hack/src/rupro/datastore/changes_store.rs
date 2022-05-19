@@ -7,17 +7,18 @@ use crate::Store;
 use dashmap::DashMap;
 use parking_lot::RwLock;
 use std::hash::Hash;
+use std::sync::Arc;
 
 /// A stack of temporary changes on top of a fallback data store.
-pub struct ChangesStore<K, V, F> {
+pub struct ChangesStore<K, V> {
     stack: RwLock<Vec<DashMap<K, Option<V>>>>,
-    fallback: F,
+    fallback: Arc<dyn Store<K, V>>,
 }
 
-impl<K: Copy + Hash + Eq, V: Clone, F: Store<K, V>> ChangesStore<K, V, F> {
-    pub fn new(fallback: F) -> Self {
+impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
+    pub fn new(fallback: Arc<dyn Store<K, V>>) -> Self {
         Self {
-            stack: RwLock::new(vec![Default::default()]),
+            stack: Default::default(),
             fallback,
         }
     }
@@ -32,9 +33,11 @@ impl<K: Copy + Hash + Eq, V: Clone, F: Store<K, V>> ChangesStore<K, V, F> {
     }
 
     pub fn insert(&self, key: K, val: V) {
-        let stack = self.stack.read();
-        let store = stack.last().expect("empty stack");
-        store.insert(key, Some(val));
+        if let Some(store) = self.stack.read().last() {
+            store.insert(key, Some(val));
+        } else {
+            self.fallback.insert(key, val);
+        }
     }
 
     pub fn push_local_changes(&self) {
@@ -46,19 +49,24 @@ impl<K: Copy + Hash + Eq, V: Clone, F: Store<K, V>> ChangesStore<K, V, F> {
     }
 
     pub fn remove_batch<I: Iterator<Item = K>>(&self, keys: I) {
-        let stack = self.stack.read();
-        let store = stack.last().expect("empty stack");
-        for key in keys {
-            store.insert(key, None);
+        if let Some(store) = self.stack.read().last() {
+            for key in keys {
+                store.insert(key, None);
+            }
+        } else {
+            for key in keys {
+                let _ = key;
+                todo!("delete from fallback store");
+                // self.fallback.remove(key);
+            }
         }
     }
 }
 
-impl<K, V, F> Store<K, V> for ChangesStore<K, V, F>
+impl<K, V> Store<K, V> for ChangesStore<K, V>
 where
     K: Copy + Hash + Eq + Send + Sync,
     V: Clone + Send + Sync,
-    F: Store<K, V>,
 {
     fn get(&self, key: K) -> Option<V> {
         ChangesStore::get(self, key)
@@ -69,7 +77,7 @@ where
     }
 }
 
-impl<K: Copy, V, F> std::fmt::Debug for ChangesStore<K, V, F> {
+impl<K: Copy, V> std::fmt::Debug for ChangesStore<K, V> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ChangesStore").finish()
     }

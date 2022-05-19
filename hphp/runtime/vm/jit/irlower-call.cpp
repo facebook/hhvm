@@ -506,7 +506,7 @@ void cgEnterTranslation(IRLS& env, const IRInstruction*) {
 
 IMPL_OPCODE_CALL(NewRFunc)
 
-void cgHasReifiedGenerics(IRLS& env, const IRInstruction* inst) {
+void cgFuncHasReifiedGenerics(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const func = srcLoc(env, inst, 0).reg();
 

@@ -329,7 +329,7 @@ SSATmp* emitGeneratorThis(IRGS& env, const Func* f, SSATmp* prologueCtx) {
         [&] {
           hint(env, Block::Hint::Unlikely);
           gen(env, DbgCheckLocalsDecRefd, genFp);
-          auto const hasReified = gen(env, HasReifiedGenerics, genFunc);
+          auto const hasReified = gen(env, FuncHasReifiedGenerics, genFunc);
           auto const numParams = gen(env, LdFuncNumParams, genFunc);
           auto const locId =
             gen(env, AddInt, numParams, gen(env, ConvBoolToInt, hasReified));

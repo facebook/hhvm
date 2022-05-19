@@ -621,6 +621,7 @@ bool opcodeMayRaise(Opcode opc) {
   case Floor:
   case FuncCred:
   case FuncHasAttr:
+  case FuncHasReifiedGenerics:
   case GenericRetDecRefs:
   case LoadBCSP:
   case GetDictPtrIter:
@@ -636,7 +637,6 @@ bool opcodeMayRaise(Opcode opc) {
   case GteStr:
   case GtInt:
   case GtStr:
-  case HasReifiedGenerics:
   case HasToString:
   case IncCallCounter:
   case IncProfCounter:

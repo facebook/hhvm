@@ -739,7 +739,7 @@ To string conversions:
 
   Sets D to true iff S0 is a collection.
 
-| HasReifiedGenerics, D(Bool), S(Func), NF
+| FuncHasReifiedGenerics, D(Bool), S(Func), NF
 
   Set D to true iff S0 is a reified function.
 

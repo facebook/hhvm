@@ -1592,7 +1592,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CountVec:
   case CountDict:
   case CountKeyset:
-  case HasReifiedGenerics:
+  case FuncHasReifiedGenerics:
   case InstanceOf:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:

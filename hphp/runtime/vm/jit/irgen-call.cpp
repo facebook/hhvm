@@ -1324,7 +1324,7 @@ void emitResolveRFunc(IRGS& env, const StringData* name) {
   ifThenElse(
     env,
     [&] (Block* taken) {
-      auto const res = gen(env, HasReifiedGenerics, funcTmp);
+      auto const res = gen(env, FuncHasReifiedGenerics, funcTmp);
       gen(env, JmpZero, taken, res);
     },
     [&] {
@@ -1704,7 +1704,7 @@ void checkGenericsAndResolveRClsMeth(IRGS& env, SSATmp* cls, SSATmp* func,
   ifThenElse(
     env,
     [&] (Block* taken) {
-      auto const res = gen(env, HasReifiedGenerics, func);
+      auto const res = gen(env, FuncHasReifiedGenerics, func);
       gen(env, JmpZero, taken, res);
     },
     [&] {

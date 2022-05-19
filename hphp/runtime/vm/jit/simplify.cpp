@@ -3476,7 +3476,7 @@ SSATmp* simplifyHasToString(State& env, const IRInstruction* inst) {
     });
 }
 
-SSATmp* simplifyHasReifiedGenerics(State& env, const IRInstruction* inst) {
+SSATmp* simplifyFuncHasReifiedGenerics(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
     return cns(env, src->funcVal()->hasReifiedGenerics());
@@ -3772,7 +3772,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(IsWaitHandle)
       X(IsCol)
       X(HasToString)
-      X(HasReifiedGenerics)
+      X(FuncHasReifiedGenerics)
       X(LdCls)
       X(LdClsName)
       X(LdLazyCls)

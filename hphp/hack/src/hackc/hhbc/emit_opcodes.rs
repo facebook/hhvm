@@ -73,23 +73,25 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
             variant_names_matches.push(quote!(#enum_name :: #name #ignore_args => #name_str,));
 
             let num_inputs = match opcode.inputs {
-                Inputs::NOV => quote!(#enum_name :: #name #ignore_args => Some(0),),
+                Inputs::NOV => quote!(#enum_name :: #name #ignore_args => 0),
                 Inputs::Fixed(ref inputs) => {
                     let n = inputs.len();
-                    quote!(#enum_name :: #name #ignore_args => Some(#n),)
+                    quote!(#enum_name :: #name #ignore_args => #n)
                 }
                 Inputs::FCall { inp, .. } => {
-                    quote!(#enum_name :: #name (fca, ..) => Some(NUM_ACT_REC_CELLS + fca.num_inputs() + #inp as usize),)
+                    quote!(#enum_name :: #name (fca, ..) => NUM_ACT_REC_CELLS + fca.num_inputs() + #inp as usize)
                 }
                 Inputs::CMany | Inputs::CUMany => {
-                    quote!(#enum_name :: #name (n, ..) => Some(*n as usize),)
+                    quote!(#enum_name :: #name (n, ..) => *n as usize)
                 }
                 Inputs::SMany => {
-                    quote!(#enum_name :: #name (n, ..) => Some(n.len()),)
+                    quote!(#enum_name :: #name (n, ..) => n.len())
                 }
-                Inputs::MFinal | Inputs::CMFinal(_) => {
-                    // This is complicated.
-                    quote!(#enum_name :: #name #ignore_args => None,)
+                Inputs::MFinal => {
+                    quote!(#enum_name :: #name (n, ..) => *n as usize)
+                }
+                Inputs::CMFinal(m) => {
+                    quote!(#enum_name :: #name (n, ..) => *n as usize + #m as usize)
                 }
             };
             num_inputs_matches.push(num_inputs);
@@ -102,9 +104,9 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
                     }
                 }
 
-                pub fn num_inputs(&self) -> Option<usize> {
+                pub fn num_inputs(&self) -> usize {
                     match self {
-                        #(#num_inputs_matches)*
+                        #(#num_inputs_matches),*,
                     }
                 }
             }
@@ -615,35 +617,35 @@ mod tests {
                             MyOps::TestVSA(..) => "TestVSA",
                         }
                     }
-                    pub fn num_inputs(&self) -> Option<usize> {
+                    pub fn num_inputs(&self) -> usize {
                         match self {
-                            MyOps::TestZeroImm => Some(0),
-                            MyOps::TestOneImm(..) => Some(0),
-                            MyOps::TestTwoImm(..) => Some(0),
-                            MyOps::TestThreeImm(..) => Some(0),
-                            MyOps::TestAsStruct { .. } => Some(0),
-                            MyOps::TestAA(..) => Some(0),
-                            MyOps::TestARR(..) => Some(0),
-                            MyOps::TestBA(..) => Some(0),
-                            MyOps::TestBA2(..) => Some(0),
-                            MyOps::TestBLA(..) => Some(0),
-                            MyOps::TestDA(..) => Some(0),
-                            MyOps::TestFCA(..) => Some(0),
-                            MyOps::TestI64A(..) => Some(0),
-                            MyOps::TestIA(..) => Some(0),
-                            MyOps::TestILA(..) => Some(0),
-                            MyOps::TestITA(..) => Some(0),
-                            MyOps::TestIVA(..) => Some(0),
-                            MyOps::TestKA(..) => Some(0),
-                            MyOps::TestLA(..) => Some(0),
-                            MyOps::TestLAR(..) => Some(0),
-                            MyOps::TestNLA(..) => Some(0),
-                            MyOps::TestOA(..) => Some(0),
-                            MyOps::TestOAL(..) => Some(0),
-                            MyOps::TestRATA(..) => Some(0),
-                            MyOps::TestSA(..) => Some(0),
-                            MyOps::TestSLA(..) => Some(0),
-                            MyOps::TestVSA(..) => Some(0),
+                            MyOps::TestZeroImm => 0,
+                            MyOps::TestOneImm(..) => 0,
+                            MyOps::TestTwoImm(..) => 0,
+                            MyOps::TestThreeImm(..) => 0,
+                            MyOps::TestAsStruct { .. } => 0,
+                            MyOps::TestAA(..) => 0,
+                            MyOps::TestARR(..) => 0,
+                            MyOps::TestBA(..) => 0,
+                            MyOps::TestBA2(..) => 0,
+                            MyOps::TestBLA(..) => 0,
+                            MyOps::TestDA(..) => 0,
+                            MyOps::TestFCA(..) => 0,
+                            MyOps::TestI64A(..) => 0,
+                            MyOps::TestIA(..) => 0,
+                            MyOps::TestILA(..) => 0,
+                            MyOps::TestITA(..) => 0,
+                            MyOps::TestIVA(..) => 0,
+                            MyOps::TestKA(..) => 0,
+                            MyOps::TestLA(..) => 0,
+                            MyOps::TestLAR(..) => 0,
+                            MyOps::TestNLA(..) => 0,
+                            MyOps::TestOA(..) => 0,
+                            MyOps::TestOAL(..) => 0,
+                            MyOps::TestRATA(..) => 0,
+                            MyOps::TestSA(..) => 0,
+                            MyOps::TestSLA(..) => 0,
+                            MyOps::TestVSA(..) => 0,
                         }
                     }
                 }

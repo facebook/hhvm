@@ -380,7 +380,7 @@ impl Instruct<'_> {
         }
     }
 
-    pub fn num_inputs(&self) -> Option<usize> {
+    pub fn num_inputs(&self) -> usize {
         match self {
             Self::Opcode(opcode) => opcode.num_inputs(),
 
@@ -394,7 +394,7 @@ impl Instruct<'_> {
                 | Pseudo::TryCatchEnd
                 | Pseudo::Comment(_)
                 | Pseudo::SrcLoc(_),
-            ) => Some(0),
+            ) => 0,
         }
     }
 

@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hackrs::cache::{ChangesCache, Lookup};
-use hh24_types::ToplevelSymbolHash;
+use hackrs::cache::{Cache, ChangesCache};
+use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
 use naming_provider::NamingProvider;
 use ocamlrep::rc::RcOc;
 use oxidized::{
@@ -15,26 +15,28 @@ use parking_lot::Mutex;
 use pos::{ConstName, FunName, ModuleName, RelativePath, TypeName};
 use reverse_naming_table::ReverseNamingTable;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 pub use naming_provider::Result;
 
 /// Designed after naming_heap.ml.
 pub struct NamingTable {
-    types: ReverseNamingTable<TypeName, (Pos, naming_types::KindOfType)>,
-    funs: ReverseNamingTable<FunName, Pos>,
-    consts: ChangesCache<ToplevelSymbolHash, Pos>,
-    modules: ChangesCache<ToplevelSymbolHash, Pos>,
-    db: MaybeNamingDb,
+    types: ReverseNamingTable<TypeName, (Pos, naming_types::KindOfType), TypeDb>,
+    funs: ReverseNamingTable<FunName, Pos, FunDb>,
+    consts: ChangesCache<ToplevelSymbolHash, Pos, ConstDb>,
+    modules: ChangesCache<ToplevelSymbolHash, Pos, ModuleDb>,
+    db: Arc<MaybeNamingDb>,
 }
 
 impl NamingTable {
     pub fn new() -> Self {
+        let db = Arc::new(MaybeNamingDb(Mutex::new(None)));
         Self {
-            types: ReverseNamingTable::new(),
-            funs: ReverseNamingTable::new(),
-            consts: ChangesCache::new(),
-            modules: ChangesCache::new(),
-            db: MaybeNamingDb(Mutex::new(None)),
+            types: ReverseNamingTable::new(TypeDb(Arc::clone(&db))),
+            funs: ReverseNamingTable::new(FunDb(Arc::clone(&db))),
+            consts: ChangesCache::new(ConstDb(Arc::clone(&db))),
+            modules: ChangesCache::new(ModuleDb(Arc::clone(&db))),
+            db,
         }
     }
 
@@ -59,22 +61,10 @@ impl NamingTable {
         &self,
         name: TypeName,
     ) -> Result<Option<(file_info::Pos, naming_types::KindOfType)>> {
-        Ok(match self.types.get_pos(name) {
-            Lookup::Present((pos, kind)) => Some((pos.into(), kind)),
-            Lookup::Absent => None,
-            Lookup::Unknown => self.db.with_db(|db| {
-                Ok(db
-                    .get_filename(ToplevelSymbolHash::from_type(name.as_str()))?
-                    .and_then(|(path, name_type)| {
-                        let kind = match name_type {
-                            NameType::Class => naming_types::KindOfType::TClass,
-                            NameType::Typedef => naming_types::KindOfType::TTypedef,
-                            _ => return None,
-                        };
-                        Some((file_info::Pos::File(kind.into(), RcOc::new(path)), kind))
-                    }))
-            })?,
-        })
+        Ok(self
+            .types
+            .get_pos(name)
+            .map(|(pos, kind)| (pos.into(), kind)))
     }
 
     pub fn remove_type_batch(&self, names: &[TypeName]) {
@@ -82,11 +72,7 @@ impl NamingTable {
     }
 
     pub fn get_canon_type_name(&self, name: TypeName) -> Result<Option<TypeName>> {
-        match self.types.get_canon_name(name) {
-            Lookup::Present(v) => Ok(Some(v)),
-            Lookup::Absent => Ok(None),
-            Lookup::Unknown => Ok(self.db.with_db(|_db| todo!())?),
-        }
+        Ok(self.types.get_canon_name(name))
     }
 
     pub fn add_fun(&self, name: FunName, pos: &file_info::Pos) {
@@ -94,15 +80,7 @@ impl NamingTable {
     }
 
     pub fn get_fun_pos(&self, name: FunName) -> Result<Option<file_info::Pos>> {
-        Ok(match self.funs.get_pos(name) {
-            Lookup::Present(pos) => Some(pos.into()),
-            Lookup::Absent => None,
-            Lookup::Unknown => self.db.with_db(|db| {
-                Ok(db
-                    .get_path_by_symbol_hash(ToplevelSymbolHash::from_fun(name.as_str()))?
-                    .map(|path| file_info::Pos::File(NameType::Fun, RcOc::new(path))))
-            })?,
-        })
+        Ok(self.funs.get_pos(name).map(Into::into))
     }
 
     pub fn remove_fun_batch(&self, names: &[FunName]) {
@@ -110,11 +88,7 @@ impl NamingTable {
     }
 
     pub fn get_canon_fun_name(&self, name: FunName) -> Result<Option<FunName>> {
-        match self.funs.get_canon_name(name) {
-            Lookup::Present(v) => Ok(Some(v)),
-            Lookup::Absent => Ok(None),
-            Lookup::Unknown => Ok(self.db.with_db(|_db| todo!())?),
-        }
+        Ok(self.funs.get_canon_name(name))
     }
 
     pub fn add_const(&self, name: ConstName, pos: &file_info::Pos) {
@@ -122,15 +96,7 @@ impl NamingTable {
     }
 
     pub fn get_const_pos(&self, name: ConstName) -> Result<Option<file_info::Pos>> {
-        Ok(match self.consts.get(name.into()) {
-            Lookup::Present(pos) => Some(pos.into()),
-            Lookup::Absent => None,
-            Lookup::Unknown => self.db.with_db(|db| {
-                Ok(db
-                    .get_path_by_symbol_hash(ToplevelSymbolHash::from_const(name.as_str()))?
-                    .map(|path| file_info::Pos::File(NameType::Const, RcOc::new(path))))
-            })?,
-        })
+        Ok(self.consts.get(name.into()).map(Into::into))
     }
 
     pub fn remove_const_batch(&self, names: &[ConstName]) {
@@ -143,11 +109,7 @@ impl NamingTable {
     }
 
     pub fn get_module_pos(&self, name: ModuleName) -> Result<Option<file_info::Pos>> {
-        Ok(match self.modules.get(name.into()) {
-            Lookup::Present(pos) => Some(pos.into()),
-            Lookup::Absent => None,
-            Lookup::Unknown => self.db.with_db(|_db| todo!())?,
-        })
+        Ok(self.modules.get(name.into()).map(Into::into))
     }
 
     pub fn remove_module_batch(&self, names: &[ModuleName]) {
@@ -256,27 +218,130 @@ impl MaybeNamingDb {
     }
 }
 
+impl std::fmt::Debug for MaybeNamingDb {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MaybeNamingDb").finish()
+    }
+}
+
+#[derive(Clone, Debug)]
+struct TypeDb(Arc<MaybeNamingDb>);
+
+impl Cache<ToplevelSymbolHash, (Pos, naming_types::KindOfType)> for TypeDb {
+    fn get(&self, key: ToplevelSymbolHash) -> Option<(Pos, naming_types::KindOfType)> {
+        self.0
+            .with_db(|db| {
+                Ok(db.get_filename(key)?.and_then(|(path, name_type)| {
+                    let kind = match name_type {
+                        NameType::Class => naming_types::KindOfType::TClass,
+                        NameType::Typedef => naming_types::KindOfType::TTypedef,
+                        _ => return None,
+                    };
+                    Some((Pos::File(kind.into(), (&path).into()), kind))
+                }))
+            })
+            .unwrap()
+    }
+    fn insert(&self, _key: ToplevelSymbolHash, _val: (Pos, naming_types::KindOfType)) {
+        unreachable!("ChangesCache should not perform inserts on fallback")
+    }
+}
+
+impl Cache<ToplevelCanonSymbolHash, TypeName> for TypeDb {
+    fn get(&self, _key: ToplevelCanonSymbolHash) -> Option<TypeName> {
+        self.0.with_db(|_db| todo!()).unwrap()
+    }
+    fn insert(&self, _key: ToplevelCanonSymbolHash, _val: TypeName) {
+        unreachable!("ChangesCache should not perform inserts on fallback")
+    }
+}
+
+#[derive(Clone, Debug)]
+struct FunDb(Arc<MaybeNamingDb>);
+
+impl Cache<ToplevelSymbolHash, Pos> for FunDb {
+    fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
+        self.0
+            .with_db(|db| {
+                Ok(db
+                    .get_path_by_symbol_hash(key)?
+                    .map(|path| Pos::File(NameType::Fun, (&path).into())))
+            })
+            .unwrap()
+    }
+    fn insert(&self, _key: ToplevelSymbolHash, _val: Pos) {
+        unreachable!("ChangesCache should not perform inserts on fallback")
+    }
+}
+
+impl Cache<ToplevelCanonSymbolHash, FunName> for FunDb {
+    fn get(&self, _key: ToplevelCanonSymbolHash) -> Option<FunName> {
+        self.0.with_db(|_db| todo!()).unwrap()
+    }
+    fn insert(&self, _key: ToplevelCanonSymbolHash, _val: FunName) {
+        unreachable!("ChangesCache should not perform inserts on fallback")
+    }
+}
+
+#[derive(Clone, Debug)]
+struct ConstDb(Arc<MaybeNamingDb>);
+
+impl Cache<ToplevelSymbolHash, Pos> for ConstDb {
+    fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
+        self.0
+            .with_db(|db| {
+                Ok(db
+                    .get_path_by_symbol_hash(key)?
+                    .map(|path| Pos::File(NameType::Const, (&path).into())))
+            })
+            .unwrap()
+    }
+    fn insert(&self, _key: ToplevelSymbolHash, _val: Pos) {
+        unreachable!("ChangesCache should not perform inserts on fallback")
+    }
+}
+
+#[derive(Clone, Debug)]
+struct ModuleDb(Arc<MaybeNamingDb>);
+
+impl Cache<ToplevelSymbolHash, Pos> for ModuleDb {
+    fn get(&self, key: ToplevelSymbolHash) -> Option<Pos> {
+        self.0
+            .with_db(|db| {
+                Ok(db
+                    .get_path_by_symbol_hash(key)?
+                    .map(|path| Pos::File(NameType::Module, (&path).into())))
+            })
+            .unwrap()
+    }
+
+    fn insert(&self, _key: ToplevelSymbolHash, _val: Pos) {
+        unreachable!("ChangesCache should not perform inserts on fallback")
+    }
+}
+
 mod reverse_naming_table {
-    use hackrs::cache::{ChangesCache, Lookup};
+    use hackrs::cache::{Cache, ChangesCache};
     use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
     use std::hash::Hash;
 
     /// In-memory delta for symbols which support a canon-name lookup API (types
     /// and funs).
-    pub struct ReverseNamingTable<K, P> {
-        positions: ChangesCache<ToplevelSymbolHash, P>,
-        canon_names: ChangesCache<ToplevelCanonSymbolHash, K>,
+    pub struct ReverseNamingTable<K, P, F> {
+        positions: ChangesCache<ToplevelSymbolHash, P, F>,
+        canon_names: ChangesCache<ToplevelCanonSymbolHash, K, F>,
     }
 
-    impl<K, P> ReverseNamingTable<K, P>
+    impl<K, P, F> ReverseNamingTable<K, P, F>
     where
         K: Copy + Hash + Eq + Into<ToplevelSymbolHash> + Into<ToplevelCanonSymbolHash>,
         P: Clone,
+        F: Clone + Cache<ToplevelSymbolHash, P> + Cache<ToplevelCanonSymbolHash, K>,
     {
-        pub fn new() -> Self {
+        pub fn new(fallback: F) -> Self {
             Self {
-                positions: ChangesCache::new(),
-                canon_names: ChangesCache::new(),
+                positions: ChangesCache::new(fallback.clone()),
+                canon_names: ChangesCache::new(fallback),
             }
         }
 
@@ -285,11 +350,11 @@ mod reverse_naming_table {
             self.canon_names.insert(name.into(), name);
         }
 
-        pub fn get_pos(&self, name: K) -> Lookup<P> {
+        pub fn get_pos(&self, name: K) -> Option<P> {
             self.positions.get(name.into())
         }
 
-        pub fn get_canon_name(&self, name: K) -> Lookup<K> {
+        pub fn get_canon_name(&self, name: K) -> Option<K> {
             self.canon_names.get(name.into())
         }
 

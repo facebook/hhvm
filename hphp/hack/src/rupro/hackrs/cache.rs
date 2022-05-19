@@ -24,33 +24,26 @@ pub trait LocalCache<K: Copy, V>: Debug {
     fn insert(&mut self, key: K, val: V);
 }
 
-pub enum Lookup<T> {
-    Present(T),
-    Absent,
-    Unknown,
-}
-
-pub struct ChangesCache<K, V> {
+pub struct ChangesCache<K, V, F> {
     stack: RwLock<Vec<DashMap<K, Option<V>>>>,
+    fallback: F,
 }
 
-impl<K: Copy + Hash + Eq, V: Clone> ChangesCache<K, V> {
-    pub fn new() -> Self {
+impl<K: Copy + Hash + Eq, V: Clone, F: Cache<K, V>> ChangesCache<K, V, F> {
+    pub fn new(fallback: F) -> Self {
         Self {
             stack: RwLock::new(vec![Default::default()]),
+            fallback,
         }
     }
 
-    pub fn get(&self, key: K) -> Lookup<V> {
+    pub fn get(&self, key: K) -> Option<V> {
         for cache in self.stack.read().iter() {
             if let Some(val_opt) = cache.get(&key) {
-                return match &*val_opt {
-                    Some(v) => Lookup::Present(v.clone()),
-                    None => Lookup::Absent,
-                };
+                return val_opt.clone();
             }
         }
-        Lookup::Unknown
+        self.fallback.get(key)
     }
 
     pub fn insert(&self, key: K, val: V) {
@@ -64,9 +57,7 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesCache<K, V> {
     }
 
     pub fn pop_local_changes(&self) {
-        let mut stack = self.stack.write();
-        stack.pop();
-        assert!(stack.len() > 0);
+        self.stack.write().pop();
     }
 
     pub fn remove_batch<I: Iterator<Item = K>>(&self, keys: I) {
@@ -78,7 +69,7 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesCache<K, V> {
     }
 }
 
-impl<K: Copy, V> std::fmt::Debug for ChangesCache<K, V> {
+impl<K: Copy, V, F> std::fmt::Debug for ChangesCache<K, V, F> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ChangesCache").finish()
     }

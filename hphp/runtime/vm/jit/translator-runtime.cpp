@@ -59,6 +59,7 @@
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -568,6 +569,11 @@ bool isTypeStructHelper(ArrayData* a, TypedValue c, rds::Handle h) {
 
 void profileIsTypeStructHelper(ArrayData* a, IsTypeStructProfile* prof) {
   prof->update(a);
+}
+
+void profileCoeffectFunParamHelper(TypedValue tv,
+                                   CoeffectFunParamProfile* prof) {
+  prof->update(&tv);
 }
 
 void throwAsTypeStructExceptionHelper(ArrayData* a, TypedValue c) {

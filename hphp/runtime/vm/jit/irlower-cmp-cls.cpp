@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -333,6 +334,34 @@ void cgProfileIsTypeStruct(IRLS& env, const IRInstruction* inst) {
     kVoidDest,
     SyncOptions::None,
     args
+  );
+}
+
+void cgProfileCoeffectFunParam(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<RDSHandleData>();
+  auto args = argGroup(env, inst)
+              .typedValue(0)
+              .addr(rvmtl(), safe_cast<int32_t>(extra->handle));
+
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(profileCoeffectFunParamHelper),
+    kVoidDest,
+    SyncOptions::None,
+    args
+  );
+}
+
+void cgLdCoeffectFunParamNaive(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<LdCoeffectFunParamNaive>();
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(CoeffectRule::getFunParam),
+    callDest(env, inst),
+    SyncOptions::Sync,
+    argGroup(env, inst).typedValue(0).imm(extra->paramId)
   );
 }
 

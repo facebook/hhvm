@@ -182,6 +182,8 @@ void profileIsTypeStructHelper(ArrayData*, IsTypeStructProfile*);
 [[noreturn]] void throwAsTypeStructExceptionHelper(ArrayData*, TypedValue);
 ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);
 
+void profileCoeffectFunParamHelper(TypedValue, CoeffectFunParamProfile*);
+
 /* Reified generics helpers
  * Both functions decref the input array by turning it into a static array
  */

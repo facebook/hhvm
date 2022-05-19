@@ -639,6 +639,7 @@ bool canDCE(const IRInstruction& inst) {
   case ProfileMethod:
   case ProfileSubClsCns:
   case ProfileGlobal:
+  case ProfileCoeffectFunParam:
   case CheckVecBounds:
   case BespokeElem:
   case BespokeEscalateToVanilla:
@@ -724,6 +725,7 @@ bool canDCE(const IRInstruction& inst) {
   case StructDictSlot:
   case StructDictAddNextSlot:
   case StructDictTypeBoundCheck:
+  case LdCoeffectFunParamNaive:
     return false;
 
   case IsTypeStruct:

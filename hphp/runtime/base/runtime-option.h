@@ -920,6 +920,7 @@ struct RuntimeOption {
    * We specialize if the chosen specialization covers this fraction    \
    * of profiled loops. If the value is > 1.0, we won't specialize. */  \
   F(double, ArrayIterSpecializationRate, 0.99)                          \
+  F(double, CoeffectFunParamProfileThreshold, 0.10)                     \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            true)                            \
@@ -1030,6 +1031,7 @@ struct RuntimeOption {
   F(bool,     DumpLayoutCFG,           false)                           \
   F(bool,     DumpVBC,                 false)                           \
   F(bool,     DumpArrAccProf,          false)                           \
+  F(bool,     DumpCoeffectFunParamProf,false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \

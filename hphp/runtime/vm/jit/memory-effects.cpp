@@ -1491,6 +1491,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdRDSAddr:
   case CheckRange:
   case ProfileType:
+  case ProfileCoeffectFunParam:
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
   case IsTypeStructCached:
@@ -1732,6 +1733,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseCoeffectsCallViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseCoeffectsFunParamTypeViolation:
+  case LdCoeffectFunParamNaive:
     return may_load_store(AEmpty, AEmpty);
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload

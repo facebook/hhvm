@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
+#include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/cow-profile.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"

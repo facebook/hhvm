@@ -2911,6 +2911,7 @@ X(ProfileType,                  RDSHandleData);
 X(ProfileCall,                  ProfileCallTargetData);
 X(ProfileMethod,                ProfileCallTargetData);
 X(ProfileIsTypeStruct,          RDSHandleData);
+X(ProfileCoeffectFunParam,      RDSHandleData);
 X(CheckRDSInitialized,          RDSHandleData);
 X(MarkRDSInitialized,           RDSHandleData);
 X(MarkRDSAccess,                RDSHandleData);
@@ -3007,6 +3008,7 @@ X(ThrowMustBeEnclosedInReadonly,ClassData);
 X(ThrowMustBeMutableException,  ClassData);
 X(ThrowMustBeReadonlyException, ClassData);
 X(ThrowMustBeValueTypeException,ClassData);
+X(LdCoeffectFunParamNaive,      ParamData);
 
 #undef X
 

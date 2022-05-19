@@ -200,6 +200,8 @@ struct CoeffectRule final {
     : m_type(Type::Caller)
   {}
 
+  static uint64_t getFunParam(TypedValue, uint32_t);
+
   RuntimeCoeffects emit(const Func*, uint32_t, void*, RuntimeCoeffects) const;
   jit::SSATmp* emitJit(jit::irgen::IRGS&, const Func*,
                        uint32_t, jit::SSATmp*, jit::SSATmp*) const;

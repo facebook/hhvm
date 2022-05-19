@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/coeffects.h"
 
+#include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -139,6 +140,42 @@ SSATmp* emitCCReified(IRGS& env, const Func* f,
   return gen(env, LookupClsCtxCns, cls, cns(env, name));
 }
 
+void annotCoeffectFunParamProfile(
+    IRGS& env,
+    SSATmp* tv,
+    const CoeffectFunParamProfile& profile,
+    const std::vector<CoeffectFunParamProfile::OptType>& order) {
+  if (!RuntimeOption::EvalDumpCoeffectFunParamProf) return;
+
+  auto const fnName = curFunc(env)->fullName()->data();
+
+  auto const orderToName = [](CoeffectFunParamProfile::OptType o) {
+    switch (o) {
+      case CoeffectFunParamProfile::OptType::Null:
+        return "Null";
+      case CoeffectFunParamProfile::OptType::Closure:
+        return "Closure";
+      case CoeffectFunParamProfile::OptType::Func:
+        return "Func";
+      case CoeffectFunParamProfile::OptType::ClsMeth:
+        return "ClsMeth";
+      default:
+        not_reached();
+    }
+  };
+
+  std::string orderStr;
+  for (int i = 0; i < order.size(); ++i) {
+    orderStr += folly::sformat("{}:{},", i+1, orderToName(order[i]));
+  }
+
+  env.unit.annotationData->add(
+    "CoeffectFunParamProf",
+    folly::sformat("BC={} FN={}: {}: {}: {}\n",
+      bcOff(env), fnName, *tv, profile, orderStr)
+    );
+}
+
 SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
                      uint32_t paramIdx) {
   if (paramIdx >= numArgsInclUnpack) return nullptr;
@@ -146,11 +183,17 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
     numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
   auto const tv = top(env, BCSPRelOffset {static_cast<int32_t>(index)});
 
-  auto const fail = [&] {
-    hint(env, Block::Hint::Unlikely);
+  static const StaticString s_CoeffectFunParam{"CoeffectFunParam"};
+  auto const profile = TargetProfile<CoeffectFunParamProfile> {
+    env.context,
+    env.irb->curMarker(),
+    s_CoeffectFunParam.get()
+  };
+
+  auto const naive = [&] (bool unlikely = false) {
+    if (unlikely) hint(env, Block::Hint::Unlikely);
     auto const data = ParamData { static_cast<int32_t>(paramIdx) };
-    gen(env, RaiseCoeffectsFunParamTypeViolation, data, tv);
-    return cns(env, RuntimeCoeffects::none().value());
+    return gen(env, LdCoeffectFunParamNaive, data, tv);
   };
 
   auto const handleFunc = [&](SSATmp* func) {
@@ -180,114 +223,148 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
     return gen(env, LdObjMethodD, data, cls, methodName);
   };
 
-  auto const objSuccess = [&](SSATmp* obj) {
-    auto const getClsOrMethod = [&](bool is_cls, bool is_dyn) {
-      auto const cls = is_dyn
-        ? SystemLib::s_DynMethCallerHelperClass
-        : SystemLib::s_MethCallerHelperClass;
-      auto const slot = is_cls ? Slot{0} : Slot{1};
-      auto const prop = ldPropAddr(env, obj, nullptr, cls, slot, TStr);
-      auto const ret = gen(env, LdMem, TStr, prop);
-      gen(env, IncRef, ret);
-      return ret;
-    };
-    auto const cls = gen(env, LdObjClass, obj);
-    return cond(
-      env,
-      [&] (Block* taken) {
-        auto const data = AttrData { AttrIsClosureClass };
-        auto const success = gen(env, ClassHasAttr, data, cls);
-        gen(env, JmpZero, taken, success);
-      },
-      [&] {
-        return cond(
-          env,
-          [&] (Block* taken) {
-            auto const data = AttrData { AttrHasClosureCoeffectsProp };
-            auto const success = gen(env, ClassHasAttr, data, cls);
-            gen(env, JmpZero, taken, success);
-          },
-          [&] {
-            // Rules
-            auto const addr = gen(env, LdPropAddr, IndexData { 0 }, TInt, obj);
-            return gen(env, LdMem, TInt, addr);
-          },
-          [&] {
-            // Statically known coeffects
-            auto const unreachable = makeUnreachable(env, ASSERT_REASON);
-            auto const invoke = gen(env, LdObjInvoke, unreachable, cls);
-            return gen(env, LdFuncRequiredCoeffects, invoke);
+  if (profile.profiling()) {
+    gen(env, ProfileCoeffectFunParam, RDSHandleData { profile.handle() }, tv);
+    return naive();
+  }
+
+  auto const order = [&]() -> std::vector<CoeffectFunParamProfile::OptType> {
+    if (!profile.optimizing()) {
+      // If we are not profiling or optimizing, we are most likely doing a
+      // a live translation. Lets give a decent chance order.
+      return {
+        CoeffectFunParamProfile::OptType::ClsMeth,
+        CoeffectFunParamProfile::OptType::Closure
+      };
+    }
+    auto const data = profile.data();
+    auto const order = data.order();
+    FTRACE_MOD(Trace::coeffects, 1, "{}\nCoeffectFunParamProfile: {}\n",
+               env.irb->curMarker().show(), data.toString());
+    annotCoeffectFunParamProfile(env, tv, data, order);
+    return order;
+  }();
+
+  if (order.empty()) return naive();
+
+  MultiCond mc{env};
+  for (auto optType : order) {
+    switch (optType) {
+      case CoeffectFunParamProfile::OptType::Null:
+        mc.ifTypeThen(
+          tv,
+          TNull,
+          [&] (SSATmp*) {
+            return cns(env, RuntimeCoeffects::none().value());
           }
         );
-      },
-      [&] (Block* taken) {
-        auto const success =
-          gen(env, EqCls, cls, cns(env, SystemLib::s_MethCallerHelperClass));
-        gen(env, JmpZero, taken, success);
-      },
-      [&] {
-        return handleFunc(fnFromName(getClsOrMethod(true, false),
-                                     getClsOrMethod(false, false)));
-      },
-      [&] (Block* taken) {
-        auto const success =
-          gen(env, EqCls, cls, cns(env, SystemLib::s_DynMethCallerHelperClass));
-        gen(env, JmpZero, taken, success);
-      },
-      [&] {
-        return handleFunc(fnFromName(getClsOrMethod(true, true),
-                                     getClsOrMethod(false, true)));
-      },
-      fail
-    );
-  };
-
-  auto const fnPtrs = [&] {
-    auto const isAnyFuncType = [&] (Block* toFail) {
-      return cond(
-        env,
-        [&] (Block* taken) { return gen(env, CheckType, TFunc, taken, tv); },
-        [&] (SSATmp* func) {
-          return cond(
-            env,
+        break;
+      case CoeffectFunParamProfile::OptType::Closure:
+        mc.ifThen(
+          [&] (Block* taken) {
+            auto const obj = gen(env, CheckType, TObj, taken, tv);
+            auto const cls = gen(env, LdObjClass, obj);
+            auto const data = AttrData { AttrIsClosureClass };
+            auto const success = gen(env, ClassHasAttr, data, cls);
+            gen(env, JmpZero, taken, success);
+            return cls;
+          },
+          [&] (SSATmp* cls) {
+            return cond(
+              env,
+              [&] (Block* taken) {
+                auto const data = AttrData { AttrHasClosureCoeffectsProp };
+                auto const success = gen(env, ClassHasAttr, data, cls);
+                gen(env, JmpZero, taken, success);
+              },
+              [&] {
+                // Rules
+                auto const obj = gen(env, AssertType, TObj, tv);
+                auto const addr = gen(env, LdPropAddr, IndexData { 0 }, TInt, obj);
+                return gen(env, LdMem, TInt, addr);
+              },
+              [&] {
+                // Statically known coeffects
+                auto const unreachable = makeUnreachable(env, ASSERT_REASON);
+                auto const invoke = gen(env, LdObjInvoke, unreachable, cls);
+                return gen(env, LdFuncRequiredCoeffects, invoke);
+              }
+            );
+          }
+        );
+        break;
+      case CoeffectFunParamProfile::OptType::MethCaller:
+        if (RO::EvalEmitMethCallerFuncPointers) {
+          mc.ifThen(
             [&] (Block* taken) {
+              auto const func = gen(env, CheckType, TFunc, taken, tv);
               auto const success =
                 gen(env, FuncHasAttr, AttrData { AttrIsMethCaller }, func);
               gen(env, JmpZero, taken, success);
+              return func;
             },
-            [&] {
-              return fnFromName(
+            [&] (SSATmp* func) {
+              return handleFunc(fnFromName(
                 gen(env, LdMethCallerName, MethCallerData{true}, func),
                 gen(env, LdMethCallerName, MethCallerData{false}, func)
-              );
-            },
-            [&] { return func; }
+              ));
+            }
           );
-        },
-        [&] (Block* taken) { return gen(env, CheckType, TRFunc, taken, tv); },
-        [&] (SSATmp* ptr)  { return gen(env, LdFuncFromRFunc, ptr); },
-        [&] (Block* taken) { return gen(env, CheckType, TClsMeth, taken, tv); },
-        [&] (SSATmp* ptr)  { return gen(env, LdFuncFromClsMeth, ptr); },
-        [&] (Block* taken) { return gen(env, CheckType, TRClsMeth, taken, tv); },
-        [&] (SSATmp* ptr)  { return gen(env, LdFuncFromRClsMeth, ptr); },
-        [&] {
-          gen(env, Jmp, toFail);
-          return cns(env, TBottom);
+        } else {
+          mc.ifThen(
+            [&] (Block* taken) {
+              auto const obj = gen(env, CheckType, TObj, taken, tv);
+              auto const cls = gen(env, LdObjClass, obj);
+              auto const success =
+                gen(env, EqCls, cls, cns(env, SystemLib::s_MethCallerHelperClass));
+              gen(env, JmpZero, taken, success);
+              return cls;
+            },
+            [&] (SSATmp* cls) {
+              auto const obj = gen(env, AssertType, TObj, tv);
+              auto const getClsOrMethod = [&](bool is_cls) {
+                auto const cls = SystemLib::s_MethCallerHelperClass;
+                auto const slot = is_cls ? Slot{0} : Slot{1};
+                auto const prop = ldPropAddr(env, obj, nullptr, cls, slot, TStr);
+                auto const ret = gen(env, LdMem, TStr, prop);
+                gen(env, IncRef, ret);
+                return ret;
+              };
+              return handleFunc(fnFromName(getClsOrMethod(true),
+                                           getClsOrMethod(false)));
+            }
+          );
         }
-      );
-    };
-    return cond(env, isAnyFuncType, handleFunc, fail);
-  };
-
-  return cond(
-    env,
-    [&] (Block* taken) { return gen(env, CheckType, TNull, taken, tv); },
-    [&] (SSATmp*)      { return cns(env, RuntimeCoeffects::none().value()); },
-    [&] (Block* taken) { return gen(env, CheckType, TObj, taken, tv); },
-    objSuccess,
-    fnPtrs
-  );
-
+        break;
+      case CoeffectFunParamProfile::OptType::Func:
+        mc.ifThen(
+          [&] (Block* taken) {
+            auto const func = gen(env, CheckType, TFunc, taken, tv);
+            if (RO::EvalEmitMethCallerFuncPointers) {
+              auto const success =
+                gen(env, FuncHasAttr, AttrData { AttrIsMethCaller }, func);
+              gen(env, JmpNZero, taken, success);
+            }
+            return func;
+          },
+          handleFunc
+        );
+        break;
+      case CoeffectFunParamProfile::OptType::ClsMeth:
+        mc.ifTypeThen(
+          tv,
+          TClsMeth,
+          [&] (SSATmp* ptr) {
+            auto const func = gen(env, LdFuncFromClsMeth, ptr);
+            return handleFunc(func);
+          }
+        );
+        break;
+      default:
+        not_reached();
+    }
+  }
+  return mc.elseDo([&] { return naive(true); });
 }
 
 SSATmp* emitClosureParentScope(IRGS& env, const Func* f, SSATmp* prologueCtx) {

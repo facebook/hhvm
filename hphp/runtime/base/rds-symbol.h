@@ -37,6 +37,7 @@ struct ArrayAccessProfile;
 struct ArrayIterProfile;
 struct CallTargetProfile;
 struct ClsCnsProfile;
+struct CoeffectFunParamProfile;
 struct COWProfile;
 struct DecRefProfile;
 struct IncRefProfile;
@@ -93,6 +94,7 @@ struct StaticMethodF { LowStringPtr name; };
   PR(COWProfile)          \
   PR(DecRefProfile)       \
   PR(IsTypeStructProfile) \
+  PR(CoeffectFunParamProfile) \
   PR(IncRefProfile)       \
   PR(MethProfile)         \
   PR(SwitchProfile)       \

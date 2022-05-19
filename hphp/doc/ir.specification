@@ -704,6 +704,10 @@ To string conversions:
   type such as callables, erased type variables and trait type hints.
   The input type structure (S0) must be resolved.
 
+| ProfileCoeffectFunParam<handle>, ND, S(Cell), ND
+
+  Profile S0 to determine which code paths to emit for coeffect fun param.
+
 | HasToString, D(Bool), S(Obj), NF
 
   Returns whether the object S0 has a toString method.
@@ -1292,6 +1296,10 @@ To string conversions:
 | LdFuncRequiredCoeffects, D(Int), S(Func), NF
 
   Returns the value of func->requiredCoeffects().
+
+| LdCoeffectFunParamNaive<param-idx>, D(Int), S(Cell), NF
+
+  Returns the coeffects from the S0.
 
 | LdClsFromClsMeth, D(Cls), S(ClsMeth), NF
 

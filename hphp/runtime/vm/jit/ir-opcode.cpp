@@ -333,6 +333,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsCtor:
   case LdClsPropAddrOrNull:
   case LdClsPropAddrOrRaise:
+  case LdCoeffectFunParamNaive:
   case LdFunc:
   case LdFuncCached:
   case LdGblAddr:
@@ -841,6 +842,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileArrayCOW:
   case ProfileArrLikeProps:
   case ProfileCall:
+  case ProfileCoeffectFunParam:
   case ProfileDecRef:
   case ProfileDictAccess:
   case ProfileGlobal:

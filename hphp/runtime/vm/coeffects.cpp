@@ -173,7 +173,7 @@ RuntimeCoeffects emitCCParam(const Func* f,
   if (!tvIsObject(tv)) {
     raise_error(folly::sformat("Coeffect rule requires parameter at "
                                "position {} to be an object or null",
-                               paramIdx + 1));
+                                paramIdx + 1));
   }
   auto const cls = tv->m_data.pobj->getVMClass();
   return *cls->clsCtxCnsGet(name, true);
@@ -233,12 +233,8 @@ RuntimeCoeffects emitCCReified(const Func* f,
   return *cls->clsCtxCnsGet(name, true);
 }
 
-RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
-                              uint32_t paramIdx) {
-  if (paramIdx >= numArgsInclUnpack) return RuntimeCoeffects::none();
-  auto const index =
-    numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
-  auto const tv = vmStack().indC(index);
+RuntimeCoeffects getFunParamHelper(const TypedValue* tv, uint32_t paramIdx) {
+  assertx(tv);
   auto const handleFunc = [&](const Func* func) {
     if (func->hasCoeffectRules()) {
       raiseCoeffectsFunParamCoeffectRulesViolation(func);
@@ -252,7 +248,8 @@ RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
   };
   if (tvIsNull(tv))     return RuntimeCoeffects::none();
   if (tvIsFunc(tv)) {
-    auto const func = tv->m_data.pfunc->isMethCaller()
+    auto const func = RO::EvalEmitMethCallerFuncPointers &&
+                      tv->m_data.pfunc->isMethCaller()
       ? getFuncFromMethCallerFunc(tv->m_data.pfunc) : tv->m_data.pfunc;
     return handleFunc(func);
   }
@@ -278,6 +275,15 @@ RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
     return error();
   }
   return error();
+}
+
+RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
+                              uint32_t paramIdx) {
+  if (paramIdx >= numArgsInclUnpack) return RuntimeCoeffects::none();
+  auto const index =
+    numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
+  auto const tv = vmStack().indC(index);
+  return getFunParamHelper(tv, paramIdx);
 }
 
 RuntimeCoeffects emitClosureParentScope(const Func* f,
@@ -404,6 +410,11 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
       always_assert(false);
   }
   not_reached();
+}
+
+uint64_t CoeffectRule::getFunParam(TypedValue tv, uint32_t paramIdx) {
+  assertx(tvIsPlausible(tv));
+  return getFunParamHelper(&tv, paramIdx).value();
 }
 
 bool CoeffectRule::isClosureParentScope() const {

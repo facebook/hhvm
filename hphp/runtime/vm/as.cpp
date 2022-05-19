@@ -2517,22 +2517,54 @@ MaybeDataType type_constraint_to_data_type(
   LowStringPtr user_type,
   const TypeConstraint& tc
 ) {
-    if (auto type = tc.typeName()) {
-      // in type_annotation.cpp this code uses m_typeArgs
-      // as indicator that type can represent one of collection types
-      // when we extract data from the constraint we know if type is one of
-      // collection types but we don't have direct way to figure out if
-      // type used to have type arguments - do it indirectly by checking
-      // if name of user type contains '>' character as in "Vector<int>"
-      auto const has_type_args =
-        user_type && user_type->slice().rfind('>') != std::string::npos;
-      return get_datatype(
-        type->toCppString(),
-        has_type_args,
-        tc.isNullable(),
-        tc.isSoft());
-    }
+
+  const auto& type = tc.typeName();
+
+  if (!type) {
     return std::nullopt;
+  }
+
+  // The intent of this function is to determine an appropriate datatype given
+  // a user specified type. If we have a nullable or soft type, no matter what,
+  // we need to return `mixed` (nullopt). We cannot represent a nullable type
+  // with a single data type, and soft types are implicitly `mixed`.
+  if (tc.isNullable() || tc.isSoft()) {
+    return std::nullopt;
+  }
+
+  const auto& name = type->toCppString();
+
+  if (!strcasecmp(name.c_str(), "null") ||
+      !strcasecmp(name.c_str(), "HH\\null") ||
+      !strcasecmp(name.c_str(), "HH\\void") ||
+      !strcasecmp(name.c_str(), "HH\\noreturn") ||
+      !strcasecmp(name.c_str(), "HH\\nothing")) {
+    return KindOfNull;
+  }
+
+  if (!strcasecmp(name.c_str(), "HH\\bool"))     return KindOfBoolean;
+  if (!strcasecmp(name.c_str(), "HH\\int"))      return KindOfInt64;
+  if (!strcasecmp(name.c_str(), "HH\\float"))    return KindOfDouble;
+  if (!strcasecmp(name.c_str(), "HH\\num"))      return std::nullopt;
+  if (!strcasecmp(name.c_str(), "HH\\arraykey")) return std::nullopt;
+  if (!strcasecmp(name.c_str(), "HH\\string"))   return KindOfString;
+  if (!strcasecmp(name.c_str(), "HH\\dict"))     return KindOfDict;
+  if (!strcasecmp(name.c_str(), "HH\\vec"))      return KindOfVec;
+  if (!strcasecmp(name.c_str(), "HH\\keyset"))   return KindOfKeyset;
+  if (!strcasecmp(name.c_str(), "HH\\varray"))   return KindOfVec;
+  if (!strcasecmp(name.c_str(), "HH\\darray"))   return KindOfDict;
+  if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return std::nullopt;
+  if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return std::nullopt;
+  if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return std::nullopt;
+  if (!strcasecmp(name.c_str(), "HH\\resource")) return KindOfResource;
+  if (!strcasecmp(name.c_str(), "HH\\mixed"))    return std::nullopt;
+  if (!strcasecmp(name.c_str(), "HH\\nonnull"))  return std::nullopt;
+  if (!strcasecmp(name.c_str(), "HH\\classname") &&
+      RO::EvalClassPassesClassname) {
+    return std::nullopt;
+  }
+
+  return KindOfObject;
 }
 
 /*

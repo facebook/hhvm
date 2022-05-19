@@ -170,11 +170,6 @@ pub mod compile_ffi {
         /// For testing: return true if deserializing produces the expected Decls.
         fn hackc_verify_deserialization(result: &DeclResult) -> bool;
 
-        fn hackc_unit_to_string_cpp_ffi(
-            env: &NativeEnv,
-            prog: &HackCUnitWrapper,
-        ) -> Result<Vec<u8>>;
-
         fn hackc_facts_to_json_cpp_ffi(
             facts: FactsResult,
             source_text: &CxxString,
@@ -453,18 +448,6 @@ fn hackc_compile_unit_from_text_cpp_ffi(
     )
     .map(|unit| Box::new(HackCUnitWrapper(unit, bump)))
     .map_err(|e| e.to_string())
-}
-
-#[no_mangle]
-pub fn hackc_unit_to_string_cpp_ffi(
-    env: &compile_ffi::NativeEnv,
-    prog: &HackCUnitWrapper,
-) -> Result<Vec<u8>, String> {
-    let native_env = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-    let mut output = Vec::new();
-    compile::unit_to_string(&native_env, &mut output, &prog.0)
-        .map(|_| output)
-        .map_err(|e| e.to_string())
 }
 
 pub fn hackc_facts_to_json_cpp_ffi(

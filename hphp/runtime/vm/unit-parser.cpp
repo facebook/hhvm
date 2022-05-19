@@ -217,8 +217,6 @@ CompilerResult hackc_compile(
   if (RO::EvalTranslateHackC) {
     rust::Box<HackCUnitWrapper> unit_wrapped =
       hackc_compile_unit_from_text_cpp_ffi(native_env, code);
-    rust::Vec<uint8_t> hhbc {hackc_unit_to_string_cpp_ffi(native_env, *unit_wrapped)};
-    std::string hhasString(hhbc.begin(), hhbc.end());
 
     auto const assemblerOut = [&]() -> std::string {
       if (auto ue = boost::get<std::unique_ptr<UnitEmitter>>(&res)) {
@@ -233,7 +231,7 @@ CompilerResult hackc_compile(
                                                filename,
                                                sha1,
                                                nativeFuncs,
-                                               hhasString);
+                                               hhas);
       auto const hackCTranslatorOut = disassemble(ue->create().get(), true);
 
       if (hackCTranslatorOut.length() != assemblerOut.length()) {

@@ -85,10 +85,6 @@ enum Command {
 // hh_single_compile_cpp.
 #[derive(Parser, Debug, Default)]
 struct FlagCommands {
-    /// Compile source text to HackCUnit
-    #[clap(long)]
-    compile_and_print_unit: bool,
-
     /// Runs in daemon mode for testing purposes. Do not rely on for production
     #[clap(long)]
     daemon: bool,
@@ -221,10 +217,6 @@ fn verify_decls_ffi(_: Opts) -> Result<()> {
     unimplemented!()
 }
 
-fn compile_unit_from_text(_: Opts) -> Result<()> {
-    unimplemented!()
-}
-
 fn daemon_mode(_: Opts) -> Result<()> {
     unimplemented!()
 }
@@ -257,8 +249,6 @@ fn main() -> Result<()> {
         None => {
             if opts.flag_commands.verify_decls_ffi {
                 verify_decls_ffi(opts)
-            } else if opts.flag_commands.compile_and_print_unit {
-                compile_unit_from_text(opts)
             } else if opts.flag_commands.daemon {
                 daemon_mode(opts)
             } else if opts.flag_commands.parse {

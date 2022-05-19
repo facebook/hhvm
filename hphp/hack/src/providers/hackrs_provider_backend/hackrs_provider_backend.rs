@@ -3,11 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-mod naming_table;
+pub mod naming_table;
 
 use anyhow::Result;
 use datastore::Store;
-use depgraph_api::NoDepGraph;
+use depgraph_api::{DepGraph, NoDepGraph};
 use file_provider::{FileProvider, PlainFileProvider};
 use hackrs::{
     decl_parser::DeclParser,
@@ -16,7 +16,7 @@ use hackrs::{
 };
 use naming_table::NamingTable;
 use oxidized_by_ref::parser_options::ParserOptions;
-use pos::RelativePathCtx;
+use pos::{RelativePathCtx, TypeName};
 use std::sync::Arc;
 use ty::{decl::folded::FoldedClass, reason::BReason};
 
@@ -24,11 +24,11 @@ pub struct ProviderBackend {
     pub path_ctx: Arc<RelativePathCtx>,
     pub file_provider: Arc<dyn FileProvider>,
     pub decl_parser: DeclParser<BReason>,
-    pub dependency_graph: Arc<NoDepGraph>,
+    pub dependency_graph: Arc<dyn DepGraph>,
     pub naming_table: Arc<NamingTable>,
     pub shallow_decl_store: Arc<ShallowDeclStore<BReason>>,
     pub shallow_decl_provider: Arc<dyn ShallowDeclProvider<BReason>>,
-    pub folded_classes_store: Arc<dyn Store<pos::TypeName, Arc<FoldedClass<BReason>>>>,
+    pub folded_classes_store: Arc<dyn Store<TypeName, Arc<FoldedClass<BReason>>>>,
     pub folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
 }
 

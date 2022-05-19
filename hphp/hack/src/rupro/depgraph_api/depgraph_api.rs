@@ -74,7 +74,7 @@ pub enum DependencyName {
 }
 
 /// Organize and administer dependency records.
-pub trait DepgraphWriter: Debug + Send + Sync {
+pub trait DepGraphWriter: Debug + Send + Sync {
     /// Record a dependency.
     // e.g. If class B extends A {} then A <- B (B depends on A). So here,
     // dependent is B and dependency is A.
@@ -82,12 +82,12 @@ pub trait DepgraphWriter: Debug + Send + Sync {
 }
 
 /// Query dependency records.
-pub trait DepgraphReader: Debug + Send + Sync {
+pub trait DepGraphReader: Debug + Send + Sync {
     /// Retrieve dependents of a name.
     fn get_dependents(&self, dependency: DependencyName) -> Box<dyn Iterator<Item = Dep>>;
 }
 
-/// A no-op implementation of the `DepgraphReader` & `DepgraphWriter` traits.
+/// A no-op implementation of the `DepGraphReader` & `DepGraphWriter` traits.
 /// All registered edges are thrown away.
 #[derive(Debug, Clone)]
 pub struct NoDepGraph(());
@@ -98,14 +98,18 @@ impl NoDepGraph {
     }
 }
 
-impl DepgraphWriter for NoDepGraph {
+impl DepGraphWriter for NoDepGraph {
     fn add_dependency(&self, _dependent: DeclName, _dependency: DependencyName) -> Result<()> {
         Ok(())
     }
 }
 
-impl DepgraphReader for NoDepGraph {
+impl DepGraphReader for NoDepGraph {
     fn get_dependents(&self, _dependency: DependencyName) -> Box<dyn Iterator<Item = Dep>> {
         Box::new(std::iter::empty())
     }
 }
+
+/// Read & write dependency records.
+pub trait DepGraph: DepGraphReader + DepGraphWriter {}
+impl<T: DepGraphReader + DepGraphWriter> DepGraph for T {}

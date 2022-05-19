@@ -6,7 +6,7 @@
 use super::{fold::DeclFolder, DeclName, Error, Result, TypeDecl};
 use crate::shallow_decl_provider::{self, ShallowDeclProvider};
 use datastore::Store;
-use depgraph_api::{DependencyName, DepgraphWriter};
+use depgraph_api::{DepGraphWriter, DependencyName};
 use oxidized::global_options::GlobalOptions;
 use pos::{
     ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameIndexMap,
@@ -28,7 +28,7 @@ pub struct LazyFoldedDeclProvider<R: Reason> {
     opts: Arc<GlobalOptions>,
     store: Arc<dyn Store<TypeName, Arc<FoldedClass<R>>>>,
     shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
-    dependency_registrar: Arc<dyn DepgraphWriter>,
+    dependency_registrar: Arc<dyn DepGraphWriter>,
 }
 
 impl<R: Reason> LazyFoldedDeclProvider<R> {
@@ -36,7 +36,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         opts: Arc<GlobalOptions>,
         store: Arc<dyn Store<TypeName, Arc<FoldedClass<R>>>>,
         shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
-        dependency_registrar: Arc<dyn DepgraphWriter>,
+        dependency_registrar: Arc<dyn DepGraphWriter>,
     ) -> Self {
         Self {
             opts,

@@ -1,9 +1,8 @@
-{
-  fetchurl,
-  lib,
-  libelf,
-  stdenv,
-  zlib,
+{ fetchurl
+, lib
+, libelf
+, stdenv
+, zlib
 }:
 stdenv.mkDerivation rec {
   pname = "libdwarf";
@@ -19,9 +18,9 @@ stdenv.mkDerivation rec {
       + "1ecc251b8c3b24090f8cb4046d90f870";
   };
 
-  configureFlags = ["--enable-shared" "--disable-nonshared"];
+  configureFlags = [ "--enable-shared" "--disable-nonshared" ];
 
-  buildInputs = [libelf zlib];
+  buildInputs = [ libelf zlib ];
 
   meta = {
     homepage = "https://www.prevanders.net/dwarf.html";

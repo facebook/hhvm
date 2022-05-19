@@ -148,7 +148,6 @@ let given_text_tokens =
     make_token_node "Newtype" "newtype" ~allowed_as_identifier:true ();
     make_token_node "Noreturn" "noreturn" ~allowed_as_identifier:true ();
     make_token_node "Num" "num" ~allowed_as_identifier:true ();
-    make_token_node "Object" "object" ~allowed_as_identifier:true ();
     make_token_node "Parent" "parent" ~allowed_as_identifier:true ();
     make_token_node "Print" "print" ();
     make_token_node "Private" "private" ();

@@ -93,7 +93,6 @@ type t =
   | Newtype
   | Noreturn
   | Num
-  | Object
   | Parent
   | Print
   | Private
@@ -308,7 +307,6 @@ let from_string keyword ~only_reserved =
   | "newtype" when not only_reserved -> Some Newtype
   | "noreturn" when not only_reserved -> Some Noreturn
   | "num" when not only_reserved -> Some Num
-  | "object" when not only_reserved -> Some Object
   | "parent" when not only_reserved -> Some Parent
   | "print" -> Some Print
   | "private" -> Some Private
@@ -498,7 +496,6 @@ let to_string kind =
   | Newtype -> "newtype"
   | Noreturn -> "noreturn"
   | Num -> "num"
-  | Object -> "object"
   | Parent -> "parent"
   | Print -> "print"
   | Private -> "private"

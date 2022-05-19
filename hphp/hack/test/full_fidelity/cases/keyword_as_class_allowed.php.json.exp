@@ -2004,17 +2004,20 @@
           "object_creation_object":{
             "kind":"constructor_call",
             "constructor_call_type":{
-              "kind":"token",
-              "token":{
-                "kind":"name",
-                "text":"object",
-                "offset":435,
-                "leading_width":0,
-                "width":6,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":32
+              "kind":"simple_type_specifier",
+              "simple_type_specifier":{
+                "kind":"token",
+                "token":{
+                  "kind":"name",
+                  "text":"object",
+                  "offset":435,
+                  "leading_width":0,
+                  "width":6,
+                  "trailing_width":0,
+                  "leading":[],
+                  "trailing":[],
+                  "line_number":32
+                }
               }
             },
             "constructor_call_left_paren":{

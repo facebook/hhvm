@@ -1785,7 +1785,6 @@ where
                 | TokenKind::Real
                 | TokenKind::Int
                 | TokenKind::Integer
-                | TokenKind::Object
                 | TokenKind::String
                 | TokenKind::Binary => true,
                 _ => false,

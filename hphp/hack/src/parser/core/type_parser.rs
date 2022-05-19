@@ -186,7 +186,6 @@ where
             | TokenKind::Void
             | TokenKind::Noreturn
             | TokenKind::Resource
-            | TokenKind::Object
             | TokenKind::Mixed
             | TokenKind::NullLiteral
             | TokenKind::Name => self.parse_simple_type_or_type_constant_or_generic(),

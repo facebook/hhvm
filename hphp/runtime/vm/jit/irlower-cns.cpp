@@ -371,7 +371,19 @@ void ldResolvedTypeHelper(Vout& v, Slot slot, Vreg cls, Vreg cns) {
   };
 }
 
+Vreg getConstModifiersRawData(Vout& v, Slot slot, Vreg cls) {
+  auto const cnsVec = v.makeReg();
+  auto const rawData = v.makeReg();
+
+  v << load{cls[Class::constantsVecOff()], cnsVec};
+  auto const offset = cnsVec[slot * sizeof(Class::Const) +
+                             offsetof(Class::Const, val) +
+                             offsetof(TypedValue, m_aux)];
+  v << loadzlq{offset, rawData};
+  return rawData;
 }
+
+} // namespace
 
 void cgLdResolvedTypeCns(IRLS& env, const IRInstruction* inst) {
   auto const cls = srcLoc(env, inst, 0).reg();
@@ -422,22 +434,19 @@ void cgLdTypeCnsNoThrow(IRLS& env, const IRInstruction* inst) {
 
 void cgLdResolvedTypeCnsClsName(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<LdResolvedTypeCnsClsName>();
+  auto const cls = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
   auto const slot = extra->slot;
-  auto const tmp = v.makeReg();
-  v << load{srcLoc(env, inst, 0).reg()[Class::constantsVecOff()], tmp};
 #ifndef USE_LOWPTR
-  auto const offset = tmp[slot * sizeof(Class::Const) +
-                          offsetof(Class::Const, pointedClsName)];
+  auto const cnsVec = v.makeReg();
+  v << load{cls[Class::constantsVecOff()], cnsVec};
+  auto const offset = cnsVec[slot * sizeof(Class::Const) +
+                             offsetof(Class::Const, pointedClsName)];
   v << load{offset, dst};
 #else
-  auto const rawData = v.makeReg();
-  auto const offset = tmp[slot * sizeof(Class::Const) +
-                          offsetof(Class::Const, val) +
-                          offsetof(TypedValue, m_aux)];
-  v << loadzlq{offset, rawData};
+  auto const rawData = getConstModifiersRawData(v, slot, cls);
   v << andqi{static_cast<int32_t>(ConstModifiers::kMask), rawData,
              dst, v.makeReg()};
 #endif
@@ -447,6 +456,45 @@ void cgLdTypeCnsClsName(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
   cgCallHelper(vmain(env), env, CallSpec::direct(loadClsTypeCnsClsNameHelper),
                callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgLdClsCtxCns(IRLS& env, const IRInstruction* inst) {
+  auto const cls = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const slot = inst->extra<LdClsCtxCns>()->slot;
+  auto& v = vmain(env);
+
+  auto const rawData = getConstModifiersRawData(v, slot, cls);
+  v << shrqi{static_cast<int32_t>(ConstModifiers::kDataShift), rawData,
+             dst, v.makeReg()};
+
+  if (debug) {
+    // Lets assert that the slot we are loading is context constant
+    auto const type = v.makeReg();
+    auto const sf = v.makeReg();
+    v << andqi{
+      static_cast<int32_t>(ConstModifiers::kKindMask),
+      rawData,
+      type,
+      v.makeReg()
+    };
+    v << testqi{static_cast<int32_t>(ConstModifiers::Kind::Context), type, sf};
+    unlikelyIfThen(
+      v, vcold(env), CC_Z, sf,
+      [&] (Vout& v) { v << trap{TRAP_REASON}; }
+    );
+    // Lets assert that the upper bits are zero
+    auto const shifted = v.makeReg();
+    auto const sf2 = v.makeReg();
+    // 16 bits for coeffects and kDataShift for aux data
+    v << shrqi{static_cast<int32_t>(ConstModifiers::kDataShift) + 16, rawData,
+               shifted, v.makeReg()};
+    v << testq{shifted, shifted, sf2};
+    unlikelyIfThen(
+      v, vcold(env), CC_NZ, sf2,
+      [&] (Vout& v) { v << trap{TRAP_REASON}; }
+    );
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

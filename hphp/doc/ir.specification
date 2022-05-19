@@ -1018,6 +1018,11 @@ To string conversions:
   Lookup a class context constant. May raise errors if the context constant
   is not defined, is abstract or is a type/value constant.
 
+| LdClsCtxCns<slot>, D(Int), S(Cls), NF
+
+  Loads the context constant in the slot `slot' on S0. Requires that the slot
+  contains a valid context constant.
+
 | LdSubClsCns<constantName,slot>, D(Uncounted), S(Cls), NF
 
   Load the constant 'constantName' for the class S0. The constant is known to

@@ -284,6 +284,7 @@ bool canDCE(const IRInstruction& inst) {
   case LoadBCSP:
   case LdResolvedTypeCnsNoCheck:
   case LdResolvedTypeCnsClsName:
+  case LdClsCtxCns:
   case AllocInitROM:
   case VoidPtrAsDataType:
   case CopyArray:

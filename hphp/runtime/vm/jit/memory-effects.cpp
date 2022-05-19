@@ -1478,6 +1478,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdResolvedTypeCns:
   case LdResolvedTypeCnsClsName:
   case LdResolvedTypeCnsNoCheck:
+  case LdClsCtxCns:
   case CheckSubClsCns:
   case LdClsCnsVecLen:
   case FuncHasAttr:

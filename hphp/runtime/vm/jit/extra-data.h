@@ -2864,6 +2864,7 @@ X(CheckSubClsCns,               ClsCnsSlotData);
 X(LdResolvedTypeCns,            ClsCnsSlotData);
 X(LdResolvedTypeCnsClsName,     ClsCnsSlotData);
 X(LdResolvedTypeCnsNoCheck,     ClsCnsSlotData);
+X(LdClsCtxCns,                  ClsCnsSlotData);
 X(ProfileSubClsCns,             ProfileSubClsCnsData);
 X(LdFuncCached,                 FuncNameData);
 X(LookupFuncCached,             FuncNameData);

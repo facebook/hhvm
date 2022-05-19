@@ -695,6 +695,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsCachedSafe:
   case LdClsCns:
   case LdClsCnsVecLen:
+  case LdClsCtxCns:
   case LdClsFromClsMeth:
   case LdClsFromRClsMeth:
   case LdClsInitData:

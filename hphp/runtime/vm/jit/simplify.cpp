@@ -362,11 +362,47 @@ SSATmp* simplifyLdFuncRequiredCoeffects(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyLookupClsCtxCns(State& env, const IRInstruction* inst) {
   auto const clsTmp = inst->src(0);
+  auto const clsSpec = clsTmp->type().clsSpec();
+  if (!clsSpec) return nullptr;
   auto const nameTmp = inst->src(1);
-  if (!clsTmp->hasConstVal(TCls) || !nameTmp->hasConstVal(TStr)) return nullptr;
-  auto const result = clsTmp->clsVal()->clsCtxCnsGet(nameTmp->strVal(), false);
-  if (!result) return nullptr; // we will raise warning/error
-  return cns(env, result->value());
+  if (!nameTmp->hasConstVal(TStr)) return nullptr;
+
+  auto const cls = clsSpec.cls();
+  auto const ctxName = nameTmp->strVal();
+
+  if (clsSpec.exact()) {
+    auto const result = cls->clsCtxCnsGet(ctxName, false);
+    if (!result) return nullptr; // we will raise warning/error
+    return cns(env, result->value());
+  }
+
+  // If it is an interface/trait/enum etc, don't optimize
+  if (!isNormalClass(cls)) return nullptr;
+
+  auto const slot =
+    cls->clsCnsSlot(ctxName, ConstModifiers::Kind::Context, false);
+  if (slot == kInvalidSlot) return nullptr; // we will raise warning/error
+  return gen(env, LdClsCtxCns, ClsCnsSlotData { ctxName, slot}, clsTmp);
+}
+
+SSATmp* simplifyLdClsCtxCns(State& env, const IRInstruction* inst) {
+  auto const clsTmp = inst->src(0);
+  auto const clsSpec = clsTmp->type().clsSpec();
+  if (!clsSpec) return nullptr;
+  auto const cls = clsSpec.cls();
+  auto const extra = inst->extra<LdClsCtxCns>();
+
+  assertx(extra->slot < cls->numConstants());
+  auto const& ctxCns = cls->constants()[extra->slot];
+  assertx(ctxCns.kind() == ConstModifiers::Kind::Context);
+  assertx(!ctxCns.isAbstractAndUninit());
+
+  if (clsSpec.exact()) {
+    auto const coeffect =
+      ctxCns.val.constModifiers().getCoeffects().toRequired();
+    return cns(env, coeffect.value());
+  }
+  return nullptr;
 }
 
 SSATmp* simplifyLdResolvedTypeCns(State& env, const IRInstruction* inst) {
@@ -3817,6 +3853,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(ClassHasAttr)
       X(LdFuncRequiredCoeffects)
       X(LookupClsCtxCns)
+      X(LdClsCtxCns)
       X(LdObjClass)
       X(LdObjInvoke)
       X(Mov)

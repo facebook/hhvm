@@ -1521,6 +1521,7 @@ void dce(Env& env, const bc::Div&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Eq&)               { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Gt&)               { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Gte&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::HasReifiedParent&) { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Idx&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::IsLateBoundCls&)   { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::IssetS&)           { pushRemovableIfNoThrow(env); }

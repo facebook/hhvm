@@ -391,6 +391,16 @@ struct Class {
   bool mustHaveReifiedGenerics() const;
 
   /*
+   * Whether this class could have a reified parent
+   */
+  bool couldHaveReifiedParent() const;
+
+  /*
+   * Whether this class must have a reified parent
+   */
+  bool mustHaveReifiedParent() const;
+
+  /*
    * Returns whether this resolved class might distinguish being constructed
    * dynamically versus being constructed normally (IE, might raise a notice).
    */

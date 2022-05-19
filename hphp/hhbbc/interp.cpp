@@ -3092,6 +3092,35 @@ void in(ISS& env, const bc::ClassHasReifiedGenerics& op) {
   push(env, t);
 }
 
+void in(ISS& env, const bc::HasReifiedParent& op) {
+  // TODO(T121050961) Optimize for lazy classes too
+  auto const cls = popC(env);
+  if (!cls.couldBe(BCls)) {
+    unreachable(env);
+    return push(env, TBottom);
+  }
+  if (!cls.subtypeOf(BCls)) {
+    push(env, TBool);
+    return;
+  }
+  effect_free(env);
+  constprop(env);
+  auto const t = [&] {
+    if (!is_specialized_cls(cls) || dcls_of(cls).type != DCls::Exact) {
+      return TBool;
+    }
+    auto const& dcls = dcls_of(cls);
+    if (!dcls.cls.couldHaveReifiedParent()) {
+      return TFalse;
+    }
+    if (dcls.cls.mustHaveReifiedParent()) {
+      return TTrue;
+    }
+    return TBool;
+  }();
+  push(env, t);
+}
+
 namespace {
 
 /*

@@ -1628,6 +1628,10 @@ void iopClassHasReifiedGenerics() {
   iopUnhandled("ClassHasReifiedGenerics")
 }
 
+void iopHasReifiedParent() {
+  iopUnhandled("HasReifiedParent")
+}
+
 void iopNativeImpl(PC& /* pc */) {
   iopPreamble("NativeImpl");
 

@@ -581,10 +581,12 @@ struct Class : ClassBase {
    * This is a reified class.
    */
   bool hasReifiedGenerics : 1;
+
   /*
    * This class has at least one const instance property.
    */
   bool hasConstProp : 1;
+
   /*
    * Dynamic construction of this class can yield at most a warning and is
    * sampled at a user defined rate.

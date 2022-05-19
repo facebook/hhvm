@@ -712,6 +712,11 @@ struct ClassInfo {
    */
   bool derivedHasConstProp{false};
 
+  /*
+   * Track if this class has a reified parent.
+   */
+  bool hasReifiedParent{false};
+
   const php::Class* phpType() const { return cls; }
 
   /*
@@ -898,6 +903,24 @@ bool Class::mustHaveReifiedGenerics() const {
     [] (SString) { return false; },
     [] (ClassInfo* cinfo) {
       return cinfo->cls->hasReifiedGenerics;
+    }
+  );
+}
+
+bool Class::couldHaveReifiedParent() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (ClassInfo* cinfo) {
+      return cinfo->hasReifiedParent;
+    }
+  );
+}
+
+bool Class::mustHaveReifiedParent() const {
+  return val.match(
+    [] (SString) { return false; },
+    [] (ClassInfo* cinfo) {
+      return cinfo->hasReifiedParent;
     }
   );
 }
@@ -3744,6 +3767,18 @@ void mark_const_props(IndexData& index) {
   }
 }
 
+void mark_has_reified_parent(IndexData& index) {
+  trace_time tracer("mark has reified parent");
+
+  for (auto& cinfo : index.allClassInfos) {
+    if (cinfo->cls->hasReifiedGenerics) {
+      for (auto& c : cinfo->subclassList) {
+        c->hasReifiedParent = true;
+      }
+    }
+  }
+}
+
 void mark_no_override_classes(IndexData& index) {
   trace_time tracer("mark no override classes");
 
@@ -4785,6 +4820,7 @@ Index::Index(php::Program* program)
   find_magic_methods(*m_data);          // uses the subclass lists
   find_mocked_classes(*m_data);
   mark_const_props(*m_data);
+  mark_has_reified_parent(*m_data);
   auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
   m_data->compute_iface_vtables = std::thread([&] {
       HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};

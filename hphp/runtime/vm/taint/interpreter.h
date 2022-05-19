@@ -262,6 +262,7 @@ void iopLateBoundCls();
 void iopRecordReifiedGeneric();
 void iopClassHasReifiedGenerics();
 void iopCheckClsReifiedGenericMismatch();
+void iopHasReifiedParent();
 void iopNativeImpl(PC& pc);
 void iopCreateCl(uint32_t numArgs, uint32_t clsIx);
 void iopCreateCont(PC origpc, PC& pc);

@@ -2993,6 +2993,12 @@ ClassHasReifiedGenerics [C:Class|LazyClass] -> [C:Bool]
   resulting boolean onto the stack. Throws a fatal error if $1 is not a class
   or lazy class.
 
+HasReifiedParent [C:Class|LazyClass] -> [C:Bool]
+
+  Checks if the parent of the class in $1 has reified generics and pushes the
+  resulting boolean onto the stack. Throws a fatal error if $1 is not a class.
+  or lazy class.
+
 NativeImpl    []  ->  []
 
   Native implementation. This instruction invokes the native implementation

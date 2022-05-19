@@ -742,8 +742,9 @@ void RegionTranslator::publishMetaImpl() {
   recordGdbTranslation(sk, view.cold(), loc.coldCodeStart(), loc.coldEnd());
 
   TransRec tr{sk, transId, kind, loc.mainStart(), loc.mainSize(),
-      loc.coldStart(), loc.coldSize(), loc.frozenStart(), loc.frozenSize(),
-      std::move(annotations), region, fixups.bcMap, hasLoop};
+              loc.coldCodeStart(), loc.coldCodeSize(),
+              loc.frozenCodeStart(), loc.frozenCodeSize(),
+              std::move(annotations), region, fixups.bcMap, hasLoop};
   transdb::addTranslation(tr);
   FuncOrder::recordTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {

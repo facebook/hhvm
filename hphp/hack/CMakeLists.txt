@@ -196,6 +196,7 @@ set(TYPE_CONSTRAINT_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/type-constraint-
 set(FCALL_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/fcall-args-flags.h")
 set(HHBC_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/hhbc-shared.h")
 set(ATTR_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/base/attr.h")
+set(FFI_EXTRA_HEADER "${CMAKE_SOURCE_DIR}/hphp/hack/src/utils/ffi/ffi_extra.h")
 
 add_custom_command(
   OUTPUT ${HHBC_AST_HEADER}
@@ -204,6 +205,7 @@ add_custom_command(
     ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --exe &&
     ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --bin ffi_cbindgen
       --header "${FFI_HEADER}" --namespaces "HPHP,hackc"
+      --includes "${FFI_EXTRA_HEADER}"
       ${FFI_SRCS} &&
     ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --bin ffi_cbindgen
       --header "${NAMING_SPECIAL_NAMES_HEADER}" --namespaces "HPHP,hackc,hhbc"

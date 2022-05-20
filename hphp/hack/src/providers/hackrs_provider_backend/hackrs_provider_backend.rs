@@ -17,7 +17,7 @@ use hackrs::{
 use naming_table::NamingTable;
 use oxidized_by_ref::parser_options::ParserOptions;
 use pos::{RelativePathCtx, TypeName};
-use std::{path::Path, sync::Arc};
+use std::sync::Arc;
 use ty::{decl::folded::FoldedClass, reason::BReason};
 
 pub struct ProviderBackend {
@@ -33,9 +33,9 @@ pub struct ProviderBackend {
 }
 
 impl ProviderBackend {
-    pub fn mk(
-        popt: &ParserOptions<'_>,
-        naming_db: Option<&Path>,
+    pub fn new(
+        decl_parser: DeclParser<BReason>,
+        naming_table: Arc<NamingTable>,
         path_ctx: Arc<RelativePathCtx>,
         dependency_graph: Arc<dyn DepGraph>,
         file_provider: Arc<dyn FileProvider>,
@@ -44,11 +44,6 @@ impl ProviderBackend {
         folded_classes_store: Arc<dyn Store<TypeName, Arc<FoldedClass<BReason>>>>,
         folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
     ) -> Result<Self> {
-        let decl_parser = DeclParser::with_options(Arc::clone(&file_provider), popt);
-        let naming_table = Arc::new(NamingTable::new());
-        if let Some(path) = naming_db {
-            naming_table.set_db_path(path.to_owned())?;
-        }
         Ok(Self {
             path_ctx,
             file_provider,
@@ -62,7 +57,7 @@ impl ProviderBackend {
         })
     }
 
-    pub fn new(path_ctx: RelativePathCtx, popt: &ParserOptions<'_>) -> Result<Self> {
+    pub fn for_hh_server(path_ctx: RelativePathCtx, popt: &ParserOptions<'_>) -> Result<Self> {
         let path_ctx = Arc::new(path_ctx);
         let file_provider: Arc<dyn FileProvider> =
             Arc::new(PlainFileProvider::new(Arc::clone(&path_ctx)));

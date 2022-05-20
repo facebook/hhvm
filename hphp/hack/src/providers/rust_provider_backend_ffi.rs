@@ -45,7 +45,7 @@ ocaml_ffi_with_arena! {
             tmp: tmp.into(),
             ..Default::default()
         };
-        let backend = ProviderBackend::new(path_ctx, opts).unwrap();
+        let backend = ProviderBackend::for_hh_server(path_ctx, opts).unwrap();
         Custom::from(BackendWrapper(backend))
     }
 }

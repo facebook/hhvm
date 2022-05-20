@@ -27,15 +27,6 @@ either Some (parent, name), or None if the name has no parent namespace.
 The trailing slash is removed from the parent. *)
 val split_name : string -> (string * string) option
 
-(* For building the map of cross-references *)
-val add_xref :
-  Hh_json.json ->
-  Symbol_fact_id.t ->
-  path:string ->
-  Pos.t ->
-  (Hh_json.json * Pos.t list) Symbol_fact_id.Map.t SMap.t ->
-  (Hh_json.json * Pos.t list) Symbol_fact_id.Map.t SMap.t
-
 (* hack to pretty-print an expression. Get the representation from
   the source file, in lack of a better solution. This assumes that the
    expr comes from the the source text parameter. Should be replaced

@@ -14,6 +14,7 @@
 module Fact_id = Symbol_fact_id
 module Predicate = Symbol_predicate
 module Fact_acc = Symbol_predicate.Fact_acc
+module XRefs = Symbol_xrefs
 
 val namespace_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
@@ -159,10 +160,7 @@ val gen_code :
   Fact_id.t * Fact_acc.t
 
 val file_xrefs :
-  path:string ->
-  (Hh_json.json * Pos.t list) Fact_id.Map.t ->
-  Fact_acc.t ->
-  Fact_id.t * Fact_acc.t
+  path:string -> XRefs.fact_map -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val file_decls :
   path:string -> Hh_json.json list -> Fact_acc.t -> Fact_id.t * Fact_acc.t

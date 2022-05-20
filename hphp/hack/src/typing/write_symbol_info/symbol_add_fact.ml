@@ -14,6 +14,7 @@ module Build_json = Symbol_build_json
 module Predicate = Symbol_predicate
 module Fact_id = Symbol_fact_id
 module Fact_acc = Symbol_predicate.Fact_acc
+module XRefs = Symbol_xrefs
 
 let namespace_decl name progress =
   let json_fields =
@@ -525,12 +526,12 @@ let gen_code ~path ~fully_generated ~signature ~source ~command ~class_ progress
   in
   Fact_acc.add_fact Predicate.(Gencode GenCode) json progress
 
-let file_xrefs ~path xref_map progress =
+let file_xrefs ~path fact_map progress =
   let json =
     JSON_Object
       [
         ("file", Build_json.build_file_json_nested path);
-        ("xrefs", Build_json.build_xrefs_json xref_map);
+        ("xrefs", Build_json.build_xrefs_json fact_map);
       ]
   in
   Fact_acc.add_fact Predicate.(Hack FileXRefs) json progress

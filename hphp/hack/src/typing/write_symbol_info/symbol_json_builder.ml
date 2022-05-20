@@ -16,6 +16,7 @@ module Build = Symbol_build_json
 module Predicate = Symbol_predicate
 module File_info = Symbol_file_info
 module Gencode = Symbol_gencode
+module XRefs = Symbol_xrefs
 
 let process_source_text _ctx prog File_info.{ path; source_text; _ } =
   let text = Full_fidelity_source_text.text source_text in
@@ -40,23 +41,7 @@ let process_source_text _ctx prog File_info.{ path; source_text; _ } =
     |> snd
   | _ -> prog
 
-module PosMap = WrappedMap.Make (struct
-  let compare = Pos.compare
-
-  type t = Pos.t
-end)
-
-let xrefs_map_to_pos_map
-    (file_xrefs : (Hh_json.json * Pos.t list) Fact_id.Map.t SMap.t) :
-    Hh_json.json PosMap.t =
-  let res = ref PosMap.empty in
-  let f _fact_id (decl_json, pos_list) =
-    List.iter pos_list ~f:(fun pos -> res := PosMap.add pos decl_json !res)
-  in
-  SMap.iter (fun _filepath fact_map -> Fact_id.Map.iter f fact_map) file_xrefs;
-  !res
-
-let call_handler ~path progress_ref (map_pos_decl : Hh_json.json PosMap.t) =
+let call_handler ~path progress_ref (pos_map : XRefs.pos_map) =
   object (_self)
     inherit Tast_visitor.handler_base
 
@@ -71,7 +56,7 @@ let call_handler ~path progress_ref (map_pos_decl : Hh_json.json PosMap.t) =
           | Aast.Id (id_pos, _id) ->
             Option.map
               ~f:Symbol_build_json.build_argument_xref_json
-              (PosMap.find_opt id_pos map_pos_decl)
+              (XRefs.PosMap.find_opt id_pos pos_map)
           | _ -> None
         in
         (exp_json, arg_pos)
@@ -233,20 +218,18 @@ let process_container_decl ctx path source_text con (all_decls, progress) =
   let prog = process_doc_comment con.c_doc_comment path ref_json prog in
   (all_decls, prog)
 
-let process_xref decl_fun decl_ref_fun symbol_name ~path pos (xrefs, prog) =
+let process_xref decl_fun decl_ref_fun symbol_name pos (xrefs, prog) =
   let (target_id, prog) = decl_fun symbol_name prog in
   let xref_json = decl_ref_fun target_id in
   let target_json = Build.build_decl_target_json xref_json in
-  let xrefs = Util.add_xref target_json target_id ~path pos xrefs in
+  let xrefs = XRefs.add xrefs target_id pos target_json in
   (xrefs, prog)
 
-let process_container_xref
-    (con_type, decl_pred) symbol_name ~path pos (xrefs, prog) =
+let process_container_xref (con_type, decl_pred) symbol_name pos (xrefs, prog) =
   process_xref
     (Add_fact.container_decl decl_pred)
     (Build.build_container_decl_json_ref con_type)
     symbol_name
-    ~path
     pos
     (xrefs, prog)
 
@@ -281,12 +264,11 @@ let process_enum_decl ctx path source_text enm (all_decls, progress) =
     let prog = process_doc_comment enm.c_doc_comment path enum_decl_ref prog in
     (all_decls @ enum_decl_ref :: decl_refs, prog)
 
-let process_enum_xref symbol_name ~path pos (xrefs, prog) =
+let process_enum_xref symbol_name pos (xrefs, prog) =
   process_xref
     Add_fact.enum_decl
     Build.build_enum_decl_json_ref
     symbol_name
-    ~path
     pos
     (xrefs, prog)
 
@@ -308,12 +290,11 @@ let process_func_decl ctx path source_text fd (all_decls, progress) =
   in
   (all_decls @ [Build.build_func_decl_json_ref decl_id], prog)
 
-let process_function_xref symbol_name ~path pos (xrefs, prog) =
+let process_function_xref symbol_name pos (xrefs, prog) =
   process_xref
     Add_fact.func_decl
     Build.build_func_decl_json_ref
     symbol_name
-    ~path
     pos
     (xrefs, prog)
 
@@ -334,17 +315,15 @@ let process_gconst_decl ctx path source_text elem (all_decls, progress) =
   in
   (all_decls @ [Build.build_gconst_decl_json_ref decl_id], prog)
 
-let process_gconst_xref symbol_def ~path pos (xrefs, prog) =
+let process_gconst_xref symbol_def pos (xrefs, prog) =
   process_xref
     Add_fact.gconst_decl
     Build.build_gconst_decl_json_ref
     symbol_def
-    ~path
     pos
     (xrefs, prog)
 
-let process_member_xref ctx member ~path pos mem_decl_fun ref_fun (xrefs, prog)
-    =
+let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
   let SymbolDefinition.{ name; full_name; kind; _ } = member in
   match Str.split (Str.regexp "::") full_name with
   | [] -> (xrefs, prog)
@@ -366,7 +345,6 @@ let process_member_xref ctx member ~path pos mem_decl_fun ref_fun (xrefs, prog)
             (Add_fact.enumerator enum_id)
             Build.build_enumerator_decl_json_ref
             name
-            ~path
             pos
             (xrefs, prog)
         (* This includes references to built-in enum methods *)
@@ -381,11 +359,10 @@ let process_member_xref ctx member ~path pos mem_decl_fun ref_fun (xrefs, prog)
           (mem_decl_fun con_type con_decl_id)
           ref_fun
           name
-          ~path
           pos
           (xrefs, prog))
 
-let process_attribute_xref ctx attr opt_info ~path (xrefs, prog) =
+let process_attribute_xref ctx attr opt_info (xrefs, prog) =
   let get_con_preds_from_name con_name =
     let con_name_with_ns = Utils.add_ns con_name in
     match ServerSymbolDefinition.get_class_by_name ctx con_name_with_ns with
@@ -447,7 +424,7 @@ let process_attribute_xref ctx attr opt_info ~path (xrefs, prog) =
                   (fst override_con_pred_types)
                   prog
               in
-              (* Cross-references for overrides could be added to FileXRefs by calling
+              (* Cross-references for overrides could be added to xefs by calling
                  'process_member_xref' here with 'sym_def' and 'attr.pos' *)
               (xrefs, prog)))))
   (* Ignore other built-in attributes *)
@@ -461,7 +438,7 @@ let process_attribute_xref ctx attr opt_info ~path (xrefs, prog) =
       match get_con_preds_from_name name with
       | None -> (xrefs, prog)
       | Some con_pred_types ->
-        process_container_xref con_pred_types name ~path pos (xrefs, prog)
+        process_container_xref con_pred_types name pos (xrefs, prog)
     with
     | e ->
       Hh_logger.log
@@ -487,12 +464,11 @@ let process_typedef_decl ctx path source_text elem (all_decls, progress) =
   in
   (all_decls @ [Build.build_typedef_decl_json_ref decl_id], prog)
 
-let process_typedef_xref symbol_name ~path pos (xrefs, prog) =
+let process_typedef_xref symbol_name pos (xrefs, prog) =
   process_xref
     Add_fact.typedef_decl
     Build.build_typedef_decl_json_ref
     symbol_name
-    ~path
     pos
     (xrefs, prog)
 
@@ -562,88 +538,81 @@ let process_decls ctx prog File_info.{ path; tast; source_text; cst; _ } =
   in
   Add_fact.file_decls ~path decls prog |> snd
 
-let process_xrefs_and_calls ctx prog File_info.{ path; tast; _ } =
-  let open SymbolDefinition in
+(* given symbols occurring in a file, compute the maps of xrefs *)
+let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
   let open SymbolOccurrence in
-  let symbols = IdentifySymbolService.all_symbols ctx tast in
-  let filepath = path in
-  Fact_acc.set_ownership_unit prog (Some filepath);
-  let ((file_xrefs : (Hh_json.json * Pos.t list) Fact_id.Map.t SMap.t), prog) =
-    List.fold symbols ~init:(SMap.empty, prog) ~f:(fun (xrefs, prog) occ ->
-        if occ.is_declaration then
-          (xrefs, prog)
-        else
-          let pos = occ.pos in
-          match occ.type_ with
-          | Attribute info ->
-            process_attribute_xref ctx occ info ~path (xrefs, prog)
-          | _ ->
-            let symbol_def_res = ServerSymbolDefinition.go ctx None occ in
-            (match symbol_def_res with
-            | None ->
-              (* no symbol info - likely dynamic *)
+  List.fold symbols ~init:(XRefs.empty, prog) ~f:(fun (xrefs, prog) occ ->
+      if occ.is_declaration then
+        (xrefs, prog)
+      else
+        let pos = occ.pos in
+        match occ.type_ with
+        | Attribute info -> process_attribute_xref ctx occ info (xrefs, prog)
+        | _ ->
+          let symbol_def_res = ServerSymbolDefinition.go ctx None occ in
+          (match symbol_def_res with
+          | None ->
+            (* no symbol info - likely dynamic *)
+            (match occ.type_ with
+            | Method (receiver_class, name) ->
+              let (target_id, prog) =
+                Add_fact.method_occ receiver_class name prog
+              in
+              let xref_json = Build.build_method_occ_json_ref target_id in
+              let _target_json = Build.build_occ_target_json xref_json in
+              (xrefs, prog)
+            | _ -> (xrefs, prog))
+          | Some sym_def ->
+            let open SymbolDefinition in
+            let proc_mem = process_member_xref ctx sym_def pos in
+            let name = sym_def.name in
+            (match sym_def.kind with
+            | Class ->
+              let con_kind =
+                Predicate.parent_decl_predicate Predicate.ClassContainer
+              in
+              process_container_xref con_kind name pos (xrefs, prog)
+            | Const ->
               (match occ.type_ with
-              | Method (receiver_class, name) ->
-                let (target_id, prog) =
-                  Add_fact.method_occ receiver_class name prog
-                in
-                let xref_json = Build.build_method_occ_json_ref target_id in
-                let _target_json = Build.build_occ_target_json xref_json in
-                (xrefs, prog)
+              | ClassConst _ ->
+                let ref_fun = Build.build_class_const_decl_json_ref in
+                proc_mem Add_fact.class_const_decl ref_fun (xrefs, prog)
+              | GConst -> process_gconst_xref name pos (xrefs, prog)
               | _ -> (xrefs, prog))
-            | Some sym_def ->
-              let proc_mem = process_member_xref ctx sym_def ~path pos in
-              let name = sym_def.name in
-              (match sym_def.kind with
-              | Class ->
-                let con_kind =
-                  Predicate.parent_decl_predicate Predicate.ClassContainer
-                in
-                process_container_xref con_kind name ~path pos (xrefs, prog)
-              | Const ->
-                (match occ.type_ with
-                | ClassConst _ ->
-                  let ref_fun = Build.build_class_const_decl_json_ref in
-                  proc_mem Add_fact.class_const_decl ref_fun (xrefs, prog)
-                | GConst -> process_gconst_xref name ~path pos (xrefs, prog)
-                | _ -> (xrefs, prog))
-              | Enum -> process_enum_xref name ~path pos (xrefs, prog)
-              | Function -> process_function_xref name ~path pos (xrefs, prog)
-              | Interface ->
-                let con_kind =
-                  Predicate.parent_decl_predicate Predicate.InterfaceContainer
-                in
-                process_container_xref con_kind name ~path pos (xrefs, prog)
-              | Method ->
-                let ref_fun = Build.build_method_decl_json_ref in
-                proc_mem Add_fact.method_decl ref_fun (xrefs, prog)
-              | Property ->
-                let ref_fun = Build.build_property_decl_json_ref in
-                proc_mem Add_fact.property_decl ref_fun (xrefs, prog)
-              | Typeconst ->
-                let ref_fun = Build.build_type_const_decl_json_ref in
-                proc_mem Add_fact.type_const_decl ref_fun (xrefs, prog)
-              | Typedef -> process_typedef_xref name ~path pos (xrefs, prog)
-              | Trait ->
-                let con_kind =
-                  Predicate.parent_decl_predicate Predicate.TraitContainer
-                in
-                process_container_xref con_kind name ~path pos (xrefs, prog)
-              | _ -> (xrefs, prog))))
-  in
-  let prog =
-    SMap.fold
-      (fun path target_map acc ->
-        Add_fact.file_xrefs ~path target_map acc |> snd)
-      file_xrefs
-      prog
-  in
-  (* maps symbol positions to the json representation of the corresponding XRefTarget
+            | Enum -> process_enum_xref name pos (xrefs, prog)
+            | Function -> process_function_xref name pos (xrefs, prog)
+            | Interface ->
+              let con_kind =
+                Predicate.parent_decl_predicate Predicate.InterfaceContainer
+              in
+              process_container_xref con_kind name pos (xrefs, prog)
+            | Method ->
+              let ref_fun = Build.build_method_decl_json_ref in
+              proc_mem Add_fact.method_decl ref_fun (xrefs, prog)
+            | Property ->
+              let ref_fun = Build.build_property_decl_json_ref in
+              proc_mem Add_fact.property_decl ref_fun (xrefs, prog)
+            | Typeconst ->
+              let ref_fun = Build.build_type_const_decl_json_ref in
+              proc_mem Add_fact.type_const_decl ref_fun (xrefs, prog)
+            | Typedef -> process_typedef_xref name pos (xrefs, prog)
+            | Trait ->
+              let con_kind =
+                Predicate.parent_decl_predicate Predicate.TraitContainer
+              in
+              process_container_xref con_kind name pos (xrefs, prog)
+            | _ -> (xrefs, prog))))
 
-     TODO refactoring: compute pos_map together with file_xrefs.
-     I suspect that the string key (file path) in SMap.t is redundant and
-     could be simplified in the process. *)
-  let pos_map = xrefs_map_to_pos_map file_xrefs in
+let process_xrefs_and_calls ctx prog File_info.{ path; tast; _ } =
+  let symbols = IdentifySymbolService.all_symbols ctx tast in
+  Fact_acc.set_ownership_unit prog (Some path);
+  let (XRefs.{ fact_map; pos_map }, prog) = process_xrefs ctx symbols prog in
+  let prog =
+    if Fact_id.Map.is_empty fact_map then
+      prog
+    else
+      Add_fact.file_xrefs ~path fact_map prog |> snd
+  in
   process_calls ctx path tast pos_map prog
 
 let process_xrefs_all_files ctx files_info progress =

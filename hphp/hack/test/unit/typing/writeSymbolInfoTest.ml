@@ -17,6 +17,7 @@ module Predicate = Symbol_predicate
 module Add_fact = Symbol_add_fact
 module Fact_id = Symbol_fact_id
 module Fact_acc = Symbol_predicate.Fact_acc
+module XRefs = Symbol_xrefs
 
 let extract_facts_from_obj pred_name = function
   | JSON_Object [("predicate", JSON_String p); ("facts", JSON_Array l)]
@@ -118,13 +119,9 @@ let test_add_decl_fact _test_ctxt =
   | _ -> assert_failure "Could not extract decl name"
 
 let test_build_xrefs _test_ctxt =
-  let xrefs =
-    (SMap.empty
-      : (Hh_json.json * Relative_path.t Pos.pos list) Fact_id.Map.t SMap.t)
-  in
+  let xrefs = XRefs.empty in
   Relative_path.set_path_prefix Relative_path.Root (Path.make "www");
   let file = Relative_path.from_root ~suffix:"test.php" in
-  let path = Relative_path.to_absolute file in
   let decl_name = "TestDecl" in
   let target_json = JSON_Object [("declaration", JSON_String decl_name)] in
   let target_id = Fact_id.next () in
@@ -152,14 +149,13 @@ let test_build_xrefs _test_ctxt =
          ~pos_start:(3, 25, 40)
          ~pos_end:(3, 25, 45))
   in
-  let xrefs = Util.add_xref target_json target_id ~path next_ref_pos xrefs in
-  let xrefs = Util.add_xref target_json target_id ~path ref_pos xrefs in
-  let xrefs = Util.add_xref target_json target_id ~path dup_ref_pos xrefs in
-  let file_map : (Hh_json.json * Pos.t list) Fact_id.Map.t =
-    SMap.find (Relative_path.to_absolute file) xrefs
+  let xrefs = XRefs.add xrefs target_id next_ref_pos target_json in
+  let xrefs = XRefs.add xrefs target_id ref_pos target_json in
+  let XRefs.{ fact_map; _ } =
+    XRefs.add xrefs target_id dup_ref_pos target_json
   in
   let result =
-    List.nth_exn (get_array_exn (Build_json.build_xrefs_json file_map)) 0
+    List.nth_exn (get_array_exn (Build_json.build_xrefs_json fact_map)) 0
   in
   let target_decl =
     return result >>= get_obj "target" >>= get_string "declaration"

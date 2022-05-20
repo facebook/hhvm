@@ -7,7 +7,6 @@
  *)
 
 open Hh_prelude
-module Fact_id = Symbol_fact_id
 
 let get_context_from_hint ctx h =
   let mode = FileInfo.Mhhi in
@@ -86,26 +85,6 @@ let split_name (s : string) : (string * string) option =
       None
     else
       Some (parent_namespace, name)
-
-let add_xref target_json target_id ~path ref_pos xrefs =
-  SMap.update
-    path
-    (fun file_map ->
-      let new_ref = (target_json, [ref_pos]) in
-      match file_map with
-      | None -> Some (Fact_id.Map.singleton target_id new_ref)
-      | Some map ->
-        let updated_xref_map =
-          Fact_id.Map.update
-            target_id
-            (fun target_tuple ->
-              match target_tuple with
-              | None -> Some new_ref
-              | Some (json, refs) -> Some (json, ref_pos :: refs))
-            map
-        in
-        Some updated_xref_map)
-    xrefs
 
 let ast_expr_to_json source_text (_, pos, _) =
   Hh_json.JSON_String (strip_nested_quotes (source_at_span source_text pos))

@@ -12,6 +12,7 @@ open Hh_json
 open Hh_prelude
 module Util = Symbol_json_util
 module Fact_id = Symbol_fact_id
+module XRefs = Symbol_xrefs
 
 let build_id_json fact_id = JSON_Object [("id", Fact_id.to_json_number fact_id)]
 
@@ -321,7 +322,7 @@ let build_visibility_json (visibility : Aast.visibility) =
   in
   JSON_Number (string_of_int num)
 
-let build_xrefs_json (xref_map : (Hh_json.json * Pos.t list) Fact_id.Map.t) =
+let build_xrefs_json (fact_map : XRefs.fact_map) =
   let xrefs =
     Fact_id.Map.fold
       (fun _id (target_json, pos_list) acc ->
@@ -338,7 +339,7 @@ let build_xrefs_json (xref_map : (Hh_json.json * Pos.t list) Fact_id.Map.t) =
             [("target", target_json); ("ranges", JSON_Array byte_spans)]
         in
         xref :: acc)
-      xref_map
+      fact_map
       []
   in
   JSON_Array xrefs

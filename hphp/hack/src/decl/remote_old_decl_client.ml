@@ -42,46 +42,6 @@ let name_to_decl_hash_opt ~(name : string) ~(db_path : Naming_sqlite.db_path) =
       (Option.value_exn decl_hash);
   decl_hash
 
-module FetchAsync = struct
-  (** The input record that gets passed from the main process to the daemon process *)
-  type input = {
-    hh_config_version: string;
-    destination_path: string;
-    no_limit: bool;
-    decl_hashes: string list;
-  }
-
-  (** The main entry point of the daemon process that fetches the remote old decl blobs
-      and writes them to a file. *)
-  let fetch { hh_config_version; destination_path; no_limit; decl_hashes } :
-      unit =
-    let (decl_blobs : string list) =
-      Remote_old_decls_ffi.get_decls hh_config_version no_limit decl_hashes
-    in
-    let chan = Stdlib.open_out_bin destination_path in
-    Marshal.to_channel chan decl_blobs [];
-    Stdlib.close_out chan;
-
-    (* The intention here is to force the daemon process to exit with
-       an failed exit code so that the main process can detect
-       the condition and log the outcome. *)
-    assert (Disk.file_exists destination_path)
-
-  (** The daemon entry registration - used by the main process *)
-  let fetch_entry =
-    Process.register_entry_point "remote_old_decls_fetch_async_entry" fetch
-end
-
-let fetch_async ~hh_config_version ~destination_path ~no_limit decl_hashes =
-  Hh_logger.log "Fetching remote old decls to %s" destination_path;
-  let open FetchAsync in
-  FutureProcess.make
-    (Process.run_entry
-       Process_types.Default
-       fetch_entry
-       { hh_config_version; destination_path; no_limit; decl_hashes })
-    (fun _output -> Hh_logger.log "Finished fetching remote old decls")
-
 let fetch_old_decls
     ~(telemetry_label : string)
     ~(ctx : Provider_context.t)
@@ -97,47 +57,34 @@ let fetch_old_decls
     in
     let hh_config_version = get_hh_version () in
     let start_t = Unix.gettimeofday () in
-    let tmp_dir = Tempfile.mkdtemp ~skip_mocking:false in
-    let destination_path = Path.(to_string @@ concat tmp_dir "decl_blobs") in
     let no_limit =
       TypecheckerOptions.remote_old_decls_no_limit
         (Provider_context.get_tcopt ctx)
     in
-    let decl_fetch_future =
-      fetch_async ~hh_config_version ~destination_path ~no_limit decl_hashes
+    let decl_blobs =
+      Remote_old_decls_ffi.get_decls hh_config_version no_limit decl_hashes
     in
-    (match Future.get decl_fetch_future with
-    | Error e ->
-      Hh_logger.log
-        "Failed to fetch decls from remote decl store: %s"
-        (Future.error_to_string e);
-      SMap.empty
-    | Ok () ->
-      let chan = Stdlib.open_in_bin destination_path in
-      let decl_blobs : string list = Marshal.from_channel chan in
-      Stdlib.close_in chan;
-      let decls =
-        List.fold
-          ~init:SMap.empty
-          ~f:(fun acc blob ->
-            let contents : Shallow_decl_defs.shallow_class SMap.t =
-              Marshal.from_string blob 0
-            in
-            SMap.fold
-              (fun name cls acc -> SMap.add name (Some cls) acc)
-              contents
-              acc)
-          decl_blobs
-      in
-      let telemetry = Telemetry.create () in
-      let fetch_results =
-        Telemetry.create ()
-        |> Telemetry.int_ ~key:"to_fetch" ~value:(List.length names)
-        |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal decls)
-      in
-      Hh_logger.log "Fetched %d decls remotely" (SMap.cardinal decls);
-      let telemetry =
-        Telemetry.object_ telemetry ~key:telemetry_label ~value:fetch_results
-      in
-      HackEventLogger.remote_old_decl_end telemetry start_t;
-      decls)
+    let decls =
+      List.fold
+        ~init:SMap.empty
+        ~f:(fun acc blob ->
+          let contents : Shallow_decl_defs.shallow_class SMap.t =
+            Marshal.from_string blob 0
+          in
+          SMap.fold
+            (fun name cls acc -> SMap.add name (Some cls) acc)
+            contents
+            acc)
+        decl_blobs
+    in
+    let telemetry = Telemetry.create () in
+    let fetch_results =
+      Telemetry.create ()
+      |> Telemetry.int_ ~key:"to_fetch" ~value:(List.length names)
+      |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal decls)
+    in
+    let telemetry =
+      Telemetry.object_ telemetry ~key:telemetry_label ~value:fetch_results
+    in
+    HackEventLogger.remote_old_decl_end telemetry start_t;
+    decls

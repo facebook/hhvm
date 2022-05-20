@@ -1121,25 +1121,31 @@ let method_is_not_dynamically_callable
       ^ " is not dynamically callable." )
     (parent_class_reason @ attribute_reason @ nested_error_reason)
 
-let static_var_direct_write_error pos fun_name =
+let static_var_direct_write_error pos fun_name data_type =
   add
     (GlobalWriteCheck.err_code GlobalWriteCheck.StaticVariableDirectWrite)
     pos
-    ("[" ^ fun_name ^ "] A static variable is directly written.")
+    ("["
+    ^ fun_name
+    ^ "]("
+    ^ data_type
+    ^ ") A static variable is directly written.")
 
-let global_var_write_error pos fun_name =
+let global_var_write_error pos fun_name data_type =
   add
     (GlobalWriteCheck.err_code GlobalWriteCheck.GlobalVariableWrite)
     pos
-    ("[" ^ fun_name ^ "] A global variable is written.")
+    ("[" ^ fun_name ^ "](" ^ data_type ^ ") A global variable is written.")
 
-let global_var_in_fun_call_error pos fun_name =
+let global_var_in_fun_call_error pos fun_name data_type =
   add
     (GlobalWriteCheck.err_code GlobalWriteCheck.GlobalVariableInFunctionCall)
     pos
     ("["
     ^ fun_name
-    ^ "] A global variable is passed to (or returned from) a function call.")
+    ^ "]("
+    ^ data_type
+    ^ ") A global variable is passed to (or returned from) a function call.")
 
 (*****************************************************************************)
 (* Printing *)

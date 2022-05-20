@@ -311,9 +311,12 @@ let visitor =
         done
       | Return r ->
         (match r with
-        | Some ((_, p, _) as e) ->
+        | Some ((ty, p, _) as e) ->
           if is_expr_global_and_mutable env ctx e then
-            Errors.global_var_in_fun_call_error p fun_name
+            Errors.global_var_in_fun_call_error
+              p
+              fun_name
+              (Tast_env.print_ty env ty)
         | None -> ());
         super#on_stmt_ (env, (ctx, fun_name)) s
       | _ -> super#on_stmt_ (env, (ctx, fun_name)) s
@@ -322,9 +325,10 @@ let visitor =
       (match e with
       | Binop (Ast_defs.Eq _, le, re) ->
         let () = self#on_expr (env, (ctx, fun_name)) re in
+        let re_ty = Tast_env.print_ty env (Tast.get_type re) in
         (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
         if is_expr_static env le then
-          Errors.static_var_direct_write_error p fun_name
+          Errors.static_var_direct_write_error p fun_name re_ty
         else
           let is_le_global = is_expr_global env ctx le in
           let is_re_global_and_mutable =
@@ -334,12 +338,13 @@ let visitor =
           let () = get_vars_in_expr vars_in_le le in
           (match has_global_write_access le with
           | true ->
-            if is_le_global then Errors.global_var_write_error p fun_name
+            if is_le_global then Errors.global_var_write_error p fun_name re_ty
           | false ->
             if is_le_global && not is_re_global_and_mutable then
               remove_vars_to_ctx ctx !vars_in_le);
           if is_re_global_and_mutable then add_vars_to_ctx ctx !vars_in_le
       | Unop (op, e) ->
+        let e_ty = Tast_env.print_ty env (Tast.get_type e) in
         (match op with
         | Ast_defs.Uincr
         | Ast_defs.Udecr
@@ -347,24 +352,33 @@ let visitor =
         | Ast_defs.Updecr ->
           (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
           if is_expr_static env e then
-            Errors.static_var_direct_write_error p fun_name
+            Errors.static_var_direct_write_error p fun_name e_ty
           else if has_global_write_access e && is_expr_global env ctx e then
-            Errors.global_var_write_error p fun_name
+            Errors.global_var_write_error p fun_name e_ty
         | _ -> ())
       | Call (_, _, tpl, _) ->
         (* Check if a global variable is used as the parameter. *)
-        List.iter tpl ~f:(fun (pk, ((_, pos, _) as expr)) ->
+        List.iter tpl ~f:(fun (pk, ((ty, pos, _) as expr)) ->
             match pk with
             | Ast_defs.Pinout _ ->
               if is_expr_global env ctx expr then
-                Errors.global_var_in_fun_call_error pos fun_name
+                Errors.global_var_in_fun_call_error
+                  pos
+                  fun_name
+                  (Tast_env.print_ty env ty)
             | Ast_defs.Pnormal ->
               if is_expr_global_and_mutable env ctx expr then
-                Errors.global_var_in_fun_call_error pos fun_name)
+                Errors.global_var_in_fun_call_error
+                  pos
+                  fun_name
+                  (Tast_env.print_ty env ty))
       | New (_, _, el, _, _) ->
-        List.iter el ~f:(fun ((_, pos, _) as expr) ->
+        List.iter el ~f:(fun ((ty, pos, _) as expr) ->
             if is_expr_global_and_mutable env ctx expr then
-              Errors.global_var_in_fun_call_error pos fun_name)
+              Errors.global_var_in_fun_call_error
+                pos
+                fun_name
+                (Tast_env.print_ty env ty))
       | _ -> ());
       super#on_expr (env, (ctx, fun_name)) te
   end

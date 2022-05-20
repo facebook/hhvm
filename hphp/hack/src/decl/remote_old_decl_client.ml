@@ -106,7 +106,7 @@ let fetch_old_decls
     let decl_fetch_future =
       fetch_async ~hh_config_version ~destination_path ~no_limit decl_hashes
     in
-    (match Future.get decl_fetch_future with
+    (match Future.get ~timeout:120 decl_fetch_future with
     | Error e ->
       Hh_logger.log
         "Failed to fetch decls from remote decl store: %s"
@@ -135,6 +135,11 @@ let fetch_old_decls
         |> Telemetry.int_ ~key:"to_fetch" ~value:(List.length names)
         |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal decls)
       in
+      Hh_logger.log
+        "Fetched %d/%d decls remotely"
+        (SMap.cardinal decls)
+        (List.length names);
+
       let telemetry =
         Telemetry.object_ telemetry ~key:telemetry_label ~value:fetch_results
       in

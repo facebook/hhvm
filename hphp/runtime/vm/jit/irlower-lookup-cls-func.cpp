@@ -174,7 +174,7 @@ void cgLdFunc(IRLS& env, const IRInstruction* inst) {
 const Class* autoloadKnownPersistentType(rds::Handle h,
                                          const StringData* name) {
   assertx(rds::isPersistentHandle(h));
-  AutoloadHandler::s_instance->autoloadClass(
+  AutoloadHandler::s_instance->autoloadType(
     StrNR(const_cast<StringData*>(name))
   );
   auto const ptr =
@@ -190,7 +190,7 @@ const Class* lookupKnownType(rds::Handle cache_handle,
   // The caller should already have checked.
   assertx(!rds::isHandleInit(cache_handle));
 
-  AutoloadHandler::s_instance->autoloadClass(
+  AutoloadHandler::s_instance->autoloadType(
     StrNR(const_cast<StringData*>(name))
   );
 

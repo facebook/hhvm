@@ -42,6 +42,7 @@ struct AutoloadMap {
   };
 
   enum class KindOf {
+    TypeOrTypeAlias,
     Type,
     Function,
     Constant,
@@ -81,6 +82,7 @@ struct AutoloadMap {
    */
   Optional<String> getFile(KindOf kind, const String& symbol) {
     switch (kind) {
+      case AutoloadMap::KindOf::TypeOrTypeAlias: return getTypeOrTypeAliasFile(symbol);
       case AutoloadMap::KindOf::Type: return getTypeFile(symbol);
       case AutoloadMap::KindOf::Function: return getFunctionFile(symbol);
       case AutoloadMap::KindOf::Constant: return getConstantFile(symbol);
@@ -95,6 +97,7 @@ struct AutoloadMap {
    */
   Optional<folly::fs::path> getFile(KindOf kind, std::string_view symbol) {
     switch (kind) {
+      case AutoloadMap::KindOf::TypeOrTypeAlias: return getTypeOrTypeAliasFile(symbol);
       case AutoloadMap::KindOf::Type: return getTypeFile(symbol);
       case AutoloadMap::KindOf::Function: return getFunctionFile(symbol);
       case AutoloadMap::KindOf::Constant: return getConstantFile(symbol);
@@ -104,7 +107,9 @@ struct AutoloadMap {
   }
 
   Array getSymbols(KindOf kind, const String& path) {
+    always_assert(kind != AutoloadMap::KindOf::TypeOrTypeAlias);
     switch (kind) {
+      case AutoloadMap::KindOf::TypeOrTypeAlias: not_reached();
       case AutoloadMap::KindOf::Type: return getFileTypes(path);
       case AutoloadMap::KindOf::Function: return getFileFunctions(path);
       case AutoloadMap::KindOf::Constant: return getFileConstants(path);
@@ -123,11 +128,13 @@ struct AutoloadMap {
   /**
    * Map symbols to files
    */
+  virtual Optional<String> getTypeOrTypeAliasFile(const String& typeName) = 0;
   virtual Optional<String> getTypeFile(const String& typeName) = 0;
   virtual Optional<String> getFunctionFile(const String& functionName) = 0;
   virtual Optional<String> getConstantFile(const String& constantName) = 0;
   virtual Optional<String> getTypeAliasFile(const String& aliasName) = 0;
 
+  virtual Optional<folly::fs::path> getTypeOrTypeAliasFile(std::string_view name) = 0;
   virtual Optional<folly::fs::path> getTypeFile(std::string_view name) = 0;
   virtual Optional<folly::fs::path> getFunctionFile(std::string_view name) = 0;
   virtual Optional<folly::fs::path> getConstantFile(std::string_view name) = 0;

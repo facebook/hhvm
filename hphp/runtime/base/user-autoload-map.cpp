@@ -34,14 +34,14 @@ const StaticString
 
 const StaticString& getStringRepr(AutoloadMap::KindOf kind) {
   switch (kind) {
+    case AutoloadMap::KindOf::TypeOrTypeAlias:
     case AutoloadMap::KindOf::Type:
-      return s_class;
+    case AutoloadMap::KindOf::TypeAlias:
+      return s_type;
     case AutoloadMap::KindOf::Function:
       return s_function;
     case AutoloadMap::KindOf::Constant:
       return s_constant;
-    case AutoloadMap::KindOf::TypeAlias:
-      return s_type;
   }
   not_reached();
 }
@@ -117,6 +117,15 @@ Array UserAutoloadMap::getAllFiles() const {
 }
 
 Optional<String>
+UserAutoloadMap::getTypeOrTypeAliasFile(const String& typeName) {
+  auto typeFile = getTypeFile(typeName);
+  if (typeFile) {
+    return typeFile;
+  }
+  return getTypeAliasFile(typeName);
+}
+
+Optional<String>
 UserAutoloadMap::getTypeFile(const String& typeName) {
   return getFileFromMap(m_typeFile, HHVM_FN(strtolower)(typeName));
 }
@@ -134,6 +143,15 @@ UserAutoloadMap::getConstantFile(const String& constName) {
 Optional<String>
 UserAutoloadMap::getTypeAliasFile(const String& typeAliasName) {
   return getFileFromMap(m_typeAliasFile, HHVM_FN(strtolower)(typeAliasName));
+}
+
+Optional<folly::fs::path>
+UserAutoloadMap::getTypeOrTypeAliasFile(std::string_view typeName) {
+  auto typeFile = getTypeFile(typeName);
+  if (typeFile) {
+    return typeFile;
+  }
+  return getTypeAliasFile(typeName);
 }
 
 Optional<folly::fs::path>
@@ -195,6 +213,7 @@ AutoloadMap::Result UserAutoloadMap::handleFailure(
   if (actionCell->m_type == KindOfBoolean && actionCell->m_data.num) {
     return AutoloadMap::Result::RetryAutoloading;
   }
+
   return AutoloadMap::Result::StopAutoloading;
 }
 

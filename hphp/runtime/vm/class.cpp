@@ -4992,7 +4992,7 @@ Class* Class::load(const NamedEntity* ne, const StringData* name) {
 Class* Class::loadMissing(const NamedEntity* ne, const StringData* name) {
   VMRegAnchor _;
   CoeffectsAutoGuard _2;
-  AutoloadHandler::s_instance->autoloadClass(
+  AutoloadHandler::s_instance->autoloadType(
     StrNR(const_cast<StringData*>(name)));
   return Class::lookup(ne);
 }

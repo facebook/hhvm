@@ -52,11 +52,13 @@ struct RepoAutoloadMap final : AutoloadMap {
       CaseSensitiveMap constants,
       CaseInsensitiveMap typeAliases);
 
+  Optional<String> getTypeOrTypeAliasFile(const String& typeName) override;
   Optional<String> getTypeFile(const String& typeName) override;
   Optional<String> getFunctionFile(const String& functionName) override;
   Optional<String> getConstantFile(const String& constantName) override;
   Optional<String> getTypeAliasFile(const String& typeAliasName) override;
 
+  Optional<folly::fs::path> getTypeOrTypeAliasFile(std::string_view name) override;
   Optional<folly::fs::path> getTypeFile(std::string_view name) override;
   Optional<folly::fs::path> getFunctionFile(std::string_view name) override;
   Optional<folly::fs::path> getConstantFile(std::string_view name) override;

@@ -192,7 +192,7 @@ const TypeAlias* getTypeAliasWithAutoload(const NamedEntity* ne,
   if (!def) {
     VMRegAnchor _;
     String nameStr(const_cast<StringData*>(name));
-    if (!AutoloadHandler::s_instance->autoloadType(nameStr)) {
+    if (!AutoloadHandler::s_instance->autoloadTypeAlias(nameStr)) {
       return nullptr;
     }
     def = ne->getCachedTypeAlias();
@@ -221,7 +221,7 @@ getNamedTypeWithAutoload(const NamedEntity* ne,
   // We don't have the class or the typedef, so autoload.
   if (!klass) {
     String nameStr(const_cast<StringData*>(name));
-    if (AutoloadHandler::s_instance->autoloadNamedType(nameStr)) {
+    if (AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(nameStr)) {
       // Autoload succeeded, try to grab a typedef or a class.
       if (auto def = ne->getCachedTypeAlias()) {
         return def;

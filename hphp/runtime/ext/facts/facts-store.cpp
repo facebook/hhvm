@@ -582,6 +582,13 @@ struct FactsStoreImpl final
     return m_map.isTypeFinal(*type.get());
   }
 
+  Optional<String> getTypeOrTypeAliasFile(const String& type) override {
+    return getSymbolFile<SymKind::Type>(
+        type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeOrTypeAliasFile(s);
+        });
+  }
+
   Optional<String> getTypeFile(const String& type) override {
     return getSymbolFile<SymKind::Type>(
         type,
@@ -606,6 +613,14 @@ struct FactsStoreImpl final
     return getSymbolFile<SymKind::Type>(
         typeAlias, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeAliasFile(s);
+        });
+  }
+
+  Optional<folly::fs::path>
+  getTypeOrTypeAliasFile(std::string_view type) override {
+    return getSymbolFile<SymKind::Type>(
+        type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeOrTypeAliasFile(s);
         });
   }
 

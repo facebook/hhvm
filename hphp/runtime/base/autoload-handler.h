@@ -49,23 +49,16 @@ struct AutoloadHandler final : RequestEventHandler {
   void requestInit() override;
   void requestShutdown() override;
 
-  bool autoloadClass(const String& className);
-
   /**
-   * autoloadNamedType() tries to autoload either a class or a type
-   * alias with the specified name. This method avoids calling the
-   * failure callback until one of the following happens: (1) we tried
-   * to autoload the specified name from the 'class' and 'type' maps
-   * but for each map either nothing was found or the file we included
-   * did not define a class or type alias with the specified name, or
-   * (2) there was an uncaught exception or fatal error during an
-   * include operation.
+   * autoloadTypeOrTypeAlias() tries to autoload either a type or a type
+   * alias with the specified name.
    */
-  bool autoloadNamedType(const String& className);
+  bool autoloadTypeOrTypeAlias(const String& className);
 
+  bool autoloadType(const String& className);
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
-  bool autoloadType(const String& name);
+  bool autoloadTypeAlias(const String& name);
   static RDS_LOCAL(AutoloadHandler, s_instance);
 
   /**

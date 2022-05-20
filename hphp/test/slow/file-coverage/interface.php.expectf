@@ -1,4 +1,4 @@
-In handle_autoload(class, ITest)
+In handle_autoload(type, ITest)
 bool(false)
 
 Printing coverage:

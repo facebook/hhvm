@@ -138,6 +138,7 @@ struct FuncExistsChecker {
            (f->arFuncPtr() != Native::unimplementedWrapper);
   }
 };
+
 struct ClassExistsChecker {
   const String& m_name;
   mutable NamedEntity* m_ne;
@@ -153,6 +154,7 @@ struct ClassExistsChecker {
     return m_ne->getCachedClass() != nullptr;
   }
 };
+
 struct ConstExistsChecker {
   const StringData* m_name;
   explicit ConstExistsChecker(const StringData* name)
@@ -161,10 +163,11 @@ struct ConstExistsChecker {
     return type(Constant::lookup(m_name)) != KindOfUninit;
   }
 };
-struct TypeExistsChecker {
+
+struct TypeAliasExistsChecker {
   const String& m_name;
   mutable NamedEntity* m_ne;
-  explicit TypeExistsChecker(const String& name)
+  explicit TypeAliasExistsChecker(const String& name)
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
@@ -194,7 +197,7 @@ struct NamedTypeExistsChecker {
   }
 };
 
-}
+} // namespace
 
 const StaticString
   s_file("file"),
@@ -323,13 +326,13 @@ bool AutoloadHandler::autoloadConstant(StringData* name) {
                 ConstExistsChecker(name)) != AutoloadMap::Result::Failure;
 }
 
-bool AutoloadHandler::autoloadType(const String& name) {
+bool AutoloadHandler::autoloadTypeAlias(const String& name) {
   tracing::BlockNoTrace _{
     (m_map && m_map->isNative()) ? "autoload-native" : "autoload"
   };
   return m_map &&
     loadFromMap(name, AutoloadMap::KindOf::TypeAlias,
-                TypeExistsChecker(name)) != AutoloadMap::Result::Failure;
+                TypeAliasExistsChecker(name)) != AutoloadMap::Result::Failure;
 }
 
 /**
@@ -351,7 +354,7 @@ bool is_valid_class_name(folly::StringPiece className) {
   ) == className.size();
 }
 
-bool AutoloadHandler::autoloadClass(const String& clsName) {
+bool AutoloadHandler::autoloadType(const String& clsName) {
   tracing::BlockNoTrace _{
     (m_map && m_map->isNative()) ? "autoload-native" : "autoload"
   };
@@ -361,112 +364,22 @@ bool AutoloadHandler::autoloadClass(const String& clsName) {
   if (!is_valid_class_name(className.slice())) {
     return false;
   }
-  if (!m_map) {
-    return false;
-  }
-  ClassExistsChecker ce(className);
-  AutoloadMap::Result res = loadFromMap(className, AutoloadMap::KindOf::Type,
-                                        ce);
-  if (res == AutoloadMap::Result::Success || ce()) return true;
-  return false;
+  return m_map &&
+    loadFromMap(className, AutoloadMap::KindOf::Type,
+                ClassExistsChecker(className)) != AutoloadMap::Result::Failure;
 }
 
-template <class T>
-AutoloadMap::Result
-AutoloadHandler::loadFromMapPartial(const String& className,
-                                    AutoloadMap::KindOf kind,
-                                    const T &checkExists,
-                                    Variant& err) {
-  AutoloadMap::Result res = loadFromMapImpl(className, kind, checkExists, err);
-  if (res == AutoloadMap::Result::Success) {
-    return AutoloadMap::Result::Success;
-  }
-  assertx(res == AutoloadMap::Result::Failure);
-  if (!err.isNull()) {
-    if (m_map->canHandleFailure()) {
-      res = m_map->handleFailure(kind, className, err);
-      assertx(res != AutoloadMap::Result::Failure);
-      if (checkExists()) {
-        return AutoloadMap::Result::Success;
-      }
-    }
-  }
-  return res;
-}
-
-bool AutoloadHandler::autoloadNamedType(const String& clsName) {
+bool AutoloadHandler::autoloadTypeOrTypeAlias(const String& clsName) {
   tracing::BlockNoTrace _{
     (m_map && m_map->isNative()) ? "autoload-native" : "autoload"
   };
 
   if (clsName.empty()) return false;
   const String& className = normalizeNS(clsName);
-  if (!m_map) {
-    return false;
-  }
 
-  NamedTypeExistsChecker cte(className);
-  bool tryType = true, tryTypeAlias = true;
-  AutoloadMap::Result typeRes = AutoloadMap::Result::RetryAutoloading,
-                      typeAliasRes = AutoloadMap::Result::RetryAutoloading;
-  while (true) {
-    Variant typeErr{Variant::NullInit()};
-    if (tryType) {
-      // Try consulting the 'type' map first, but don't call the failure
-      // callback unless there was an uncaught exception or a fatal error
-      // during the include operation.
-      typeRes = loadFromMapPartial(className, AutoloadMap::KindOf::Type, cte,
-                                   typeErr);
-      if (typeRes == AutoloadMap::Result::Success) return true;
-    }
-    Variant typeAliasErr{Variant::NullInit()};
-    if (tryTypeAlias) {
-      // Next, try consulting the 'type alias' map. Again, don't call the
-      // failure callback unless there was an uncaught exception
-      // or fatal error.
-      typeAliasRes = loadFromMapPartial(className,
-                                        AutoloadMap::KindOf::TypeAlias, cte,
-                                        typeAliasErr);
-      if (typeAliasRes == AutoloadMap::Result::Success) return true;
-    }
-    // If we reach this point, then for each map either nothing was
-    // found or the file we included didn't define a class or type
-    // alias with the specified name, and the failure callback (if one
-    // exists) did not throw or raise a fatal error.
-    if (m_map->canHandleFailure()) {
-      // First, call the failure callback for 'class' if we didn't do so
-      // above
-      if (typeRes == AutoloadMap::Result::Failure) {
-        assertx(tryType);
-        typeRes = m_map->handleFailure(AutoloadMap::KindOf::Type,
-                                        className, typeErr);
-        // The failure callback may have defined a class for us, in
-        // which case we're done.
-        if (cte()) return true;
-      }
-      // Next, call the failure callback for 'type alias'
-      // if we didn't do so above
-      if (typeAliasRes == AutoloadMap::Result::Failure) {
-        assertx(tryTypeAlias);
-        typeAliasRes = m_map->handleFailure(AutoloadMap::KindOf::TypeAlias,
-                                            className, typeAliasErr);
-        // The failure callback may have defined a class or type alias for
-        // us, in which case we're done.
-        if (cte()) return true;
-      }
-      assertx(typeRes != AutoloadMap::Result::Failure &&
-              typeAliasRes != AutoloadMap::Result::Failure);
-      tryType = (typeRes == AutoloadMap::Result::RetryAutoloading);
-      tryTypeAlias = (typeAliasRes == AutoloadMap::Result::RetryAutoloading);
-      // If the failure callback requested a retry for 'class' or
-      // 'type' jump back to the top to try again.
-      if (tryType || tryTypeAlias) {
-        continue;
-      }
-    }
-
-    return false;
-  }
+  return m_map &&
+    loadFromMap(className, AutoloadMap::KindOf::TypeOrTypeAlias,
+                NamedTypeExistsChecker(className)) != AutoloadMap::Result::Failure;
 }
 
 void AutoloadHandler::setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap> map) {

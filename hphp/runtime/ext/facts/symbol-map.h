@@ -100,6 +100,8 @@ struct SymbolMap {
    * These methods may fill the map with information from the SQLite
    * DB, and as such may throw SQLite exceptions.
    */
+  Path getTypeOrTypeAliasFile(Symbol<SymKind::Type> type);
+  Path getTypeOrTypeAliasFile(const StringData& type);
   Path getTypeFile(Symbol<SymKind::Type> type);
   Path getTypeFile(const StringData& type);
   Path getFunctionFile(Symbol<SymKind::Function> function);

@@ -137,6 +137,14 @@ SymbolMap::getTypeName(const StringData& typeName) {
   return *it;
 }
 
+Path SymbolMap::getTypeOrTypeAliasFile(Symbol<SymKind::Type> type) {
+  return getSymbolPath(type);
+}
+
+Path SymbolMap::getTypeOrTypeAliasFile(const StringData& type) {
+  return getTypeOrTypeAliasFile(Symbol<SymKind::Type>{type});
+}
+
 Path SymbolMap::getTypeFile(Symbol<SymKind::Type> type) {
   auto path = getSymbolPath(type);
   auto [kind, _] = getKindAndFlags(type, path);

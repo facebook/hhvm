@@ -90,7 +90,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
   }
 
   if (failIsFatal &&
-      AutoloadHandler::s_instance->autoloadNamedType(
+      AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(
         StrNR(const_cast<StringData*>(typeName))
       )) {
     if (auto klass = Class::lookup(targetNE)) {
@@ -130,7 +130,7 @@ const TypeAlias* TypeAlias::load(const StringData* name,
   auto ne = NamedEntity::get(name);
   auto target = ne->getCachedTypeAlias();
   if (!target) {
-    if (AutoloadHandler::s_instance->autoloadNamedType(
+    if (AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(
           StrNR(const_cast<StringData*>(name))
         )) {
       target = ne->getCachedTypeAlias();

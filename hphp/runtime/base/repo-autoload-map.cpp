@@ -130,6 +130,15 @@ Array getSymbolFromPath(
 }
 
 Optional<String>
+RepoAutoloadMap::getTypeOrTypeAliasFile(const String& typeName) {
+  auto typeFile = getTypeFile(typeName);
+  if (typeFile) {
+    return typeFile;
+  }
+  return getTypeAliasFile(typeName);
+}
+
+Optional<String>
 RepoAutoloadMap::getTypeFile(const String& typeName) {
   return getPathFromSymbol(m_types, typeName);
 }
@@ -147,6 +156,15 @@ RepoAutoloadMap::getConstantFile(const String& constName) {
 Optional<String>
 RepoAutoloadMap::getTypeAliasFile(const String& typeAliasName) {
   return getPathFromSymbol(m_typeAliases, typeAliasName);
+}
+
+Optional<folly::fs::path>
+RepoAutoloadMap::getTypeOrTypeAliasFile(std::string_view typeName) {
+  auto typeFile = getTypeFile(typeName);
+  if (typeFile) {
+    return typeFile;
+  }
+  return getTypeAliasFile(typeName);
 }
 
 Optional<folly::fs::path>

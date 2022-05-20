@@ -2,7 +2,7 @@
 
 function handle_autoload($kind, $name) {
   print("In handle_autoload($kind, $name)\n");
-  if ($kind === 'class' && $name === 'ITest') {
+  if (($kind === 'type_or_typealias' || $kind == 'type') && $name === 'ITest') {
     require __DIR__.'/interface-definition.inc';
   }
 }

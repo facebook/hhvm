@@ -137,16 +137,20 @@ struct APCArray {
     return m_handle.kind() == APCKind::SharedKeyset;
   }
 
+  bool toLocalMayRaise() const {
+    return m_may_raise;
+  }
+
 private:
   enum class PackedCtor {};
   APCArray(PackedCtor, APCKind kind, size_t size)
-    : m_handle(kind, kInvalidDataType), m_size(size) {
+    : m_handle(kind, kInvalidDataType), m_may_raise(false), m_size(size) {
     assertx(isPacked());
   }
 
   enum class HashedCtor {};
   APCArray(HashedCtor, APCKind kind, size_t size)
-    : m_handle(kind, kInvalidDataType), m_size(size) {
+    : m_handle(kind, kInvalidDataType), m_may_raise(false), m_size(size) {
     assertx(isHashed());
   }
   ~APCArray();
@@ -179,6 +183,7 @@ private:
 
 private:
   APCHandle m_handle;
+  bool m_may_raise;
   uint32_t m_size;
 };
 

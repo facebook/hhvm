@@ -198,6 +198,7 @@ struct APCHandle {
    */
   Variant toLocalHelper(bool pure) const;
   Variant toLocal(bool pure) const;
+  bool toLocalMayRaise() const;
 
   /*
    * Return the APCKind represented by this APCHandle.

@@ -54,6 +54,7 @@ APCObject::APCObject(ClassOrName cls, uint32_t propCount)
   , m_cls{cls}
   , m_propCount{propCount}
   , m_persistent{0}
+  , m_may_raise{0}
   , m_no_wakeup{0}
   , m_no_verify_prop_types{0}
 {}
@@ -86,6 +87,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
   auto const objProps = objectData->props();
   const ObjectProps* propInit = nullptr;
 
+  auto mayRaise = !apcObj->m_no_wakeup;
   auto propsDontNeedCheck = RuntimeOption::EvalCheckPropTypeHints > 0;
   for (unsigned slot = 0; slot < numRealProps; ++slot) {
     auto index = cls->propSlotToIndex(slot);
@@ -129,6 +131,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
                                  APCHandleLevel::Inner, true, pure);
     size += val.size;
     apcPropVec[index] = val.handle;
+    mayRaise |= val.handle->toLocalMayRaise();
   }
 
   if (RuntimeOption::EvalCheckPropTypeHints <= 0 || propsDontNeedCheck) {
@@ -140,7 +143,11 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
                                  APCHandleLevel::Inner, true, pure);
     size += val.size;
     apcPropVec[numRealProps] = val.handle;
+    mayRaise |= val.handle->toLocalMayRaise();
   }
+
+  mayRaise |= !propsDontNeedCheck;
+  apcObj->m_may_raise = mayRaise;
 
   return {apcObj->getHandle(), size};
 }
@@ -154,6 +161,7 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
 
   auto size = sizeof(APCObject) + sizeof(Prop) * propCount;
   auto const apcObj = new (apc_malloc(size)) APCObject(name, propCount);
+  apcObj->m_may_raise = 1;
   if (!propCount) return {apcObj->getHandle(), size};
 
   auto prop = apcObj->props();

@@ -73,6 +73,7 @@ struct APCObject {
   const APCHandle* getHandle() const { return &m_handle; }
 
   bool isPersistent() const { return m_persistent; }
+  bool toLocalMayRaise() const { return m_may_raise; }
 
 private:
   struct Prop {
@@ -111,6 +112,7 @@ private:
   ClassOrName m_cls;
   uint32_t m_propCount;
   uint8_t m_persistent:1;
+  uint8_t m_may_raise:1;
   uint8_t m_no_wakeup:1;
   uint8_t m_no_verify_prop_types:1;
 };

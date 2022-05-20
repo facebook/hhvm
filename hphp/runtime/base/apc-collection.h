@@ -39,6 +39,7 @@ struct APCCollection {
   }
 
   Object createObject(bool pure) const;
+  bool toLocalMayRaise() const;
 
 private:
   APCCollection();

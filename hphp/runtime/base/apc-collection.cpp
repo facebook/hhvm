@@ -186,6 +186,10 @@ Object APCCollection::createObject(bool pure) const {
   return col;
 }
 
+bool APCCollection::toLocalMayRaise() const {
+  return m_arrayHandle->toLocalMayRaise();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

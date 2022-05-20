@@ -249,6 +249,52 @@ Variant APCHandle::toLocalHelper(bool pure) const {
   not_reached();
 }
 
+bool APCHandle::toLocalMayRaise() const {
+  switch (m_kind) {
+    case APCKind::Uninit:
+    case APCKind::Null:
+    case APCKind::Bool:
+    case APCKind::Int:
+    case APCKind::Double:
+    case APCKind::PersistentFunc:
+    case APCKind::PersistentClass:
+    case APCKind::LazyClass:
+    case APCKind::PersistentClsMeth:
+    case APCKind::StaticArray:
+    case APCKind::StaticBespoke:
+    case APCKind::StaticString:
+    case APCKind::UncountedArray:
+    case APCKind::UncountedBespoke:
+    case APCKind::UncountedString:
+      return false;
+
+    case APCKind::FuncEntity:
+    case APCKind::ClassEntity:
+    case APCKind::ClsMeth:
+    case APCKind::SerializedVec:
+    case APCKind::SerializedDict:
+    case APCKind::SerializedKeyset:
+    case APCKind::SerializedObject:
+    case APCKind::RFunc:
+    case APCKind::RClsMeth:
+      return true;
+
+    case APCKind::SharedVec:
+    case APCKind::SharedLegacyVec:
+    case APCKind::SharedDict:
+    case APCKind::SharedLegacyDict:
+    case APCKind::SharedKeyset:
+      return APCArray::fromHandle(this)->toLocalMayRaise();
+
+    case APCKind::SharedCollection:
+      return APCCollection::fromHandle(this)->toLocalMayRaise();
+
+    case APCKind::SharedObject:
+      return APCObject::fromHandle(this)->toLocalMayRaise();
+  }
+  not_reached();
+}
+
 void APCHandle::deleteShared() {
   assertx(checkInvariants());
   switch (m_kind) {

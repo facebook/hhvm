@@ -8,10 +8,10 @@ edition = "2021"
 path = "../../naming_provider.rs"
 
 [dependencies]
+anyhow = "1.0.56"
 hh24_types = { path = "../../../../utils/hh24_types" }
 names = { path = "../../../../naming/names_rust" }
 oxidized = { path = "../../../../oxidized" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }
 pos = { path = "../../../pos/cargo/pos" }
 rusqlite = { version = "0.27.0", features = ["backup", "blob", "column_decltype"] }
-thiserror = "1.0.30"

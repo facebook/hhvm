@@ -10,7 +10,6 @@ path = "../../hackrs_test.rs"
 [dependencies]
 anyhow = "1.0.56"
 datastore = { path = "../../../datastore" }
-depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
 fbinit = { path = "../../../../../../../common/rust/shed/fbinit" }
 file_provider = { path = "../../../file_provider/cargo/file_provider" }
 hackrs = { path = "../../../hackrs/cargo/hackrs" }
@@ -23,5 +22,6 @@ tempdir = "0.3"
 ty = { path = "../../../ty/cargo/ty" }
 
 [dev-dependencies]
+depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
 itertools = "0.10.3"
 maplit = "1.0"

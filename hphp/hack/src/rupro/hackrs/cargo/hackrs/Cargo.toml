@@ -9,6 +9,7 @@ path = "../../lib.rs"
 
 [dependencies]
 aast_parser = { path = "../../../../parser/cargo/aast_parser" }
+anyhow = "1.0.56"
 arena_collections = { path = "../../../../arena_collections" }
 bumpalo = { version = "3.8", features = ["collections"] }
 datastore = { path = "../../../datastore" }

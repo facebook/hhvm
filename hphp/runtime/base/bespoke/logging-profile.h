@@ -91,6 +91,7 @@ enum class LocationType : uint8_t {
   APCKey,
   InstanceProperty,
   StaticProperty,
+  TypeConstant,
   Runtime,
 };
 
@@ -113,11 +114,10 @@ struct LoggingProfileKey {
     , locationType(LocationType::Runtime)
   {}
 
-  explicit LoggingProfileKey(const Class* cls, Slot slot, bool isStatic)
+  explicit LoggingProfileKey(const Class* cls, Slot slot, LocationType loc)
     : cls(cls)
     , slot(slot)
-    , locationType(isStatic ? LocationType::StaticProperty
-                            : LocationType::InstanceProperty)
+    , locationType(loc)
   {}
 
   bool operator==(const LoggingProfileKey& o) const {
@@ -125,10 +125,11 @@ struct LoggingProfileKey {
   }
 
   bool checkInvariants() const {
-    DEBUG_ONLY auto const prop =
+    DEBUG_ONLY auto const propOrCns =
       locationType == LocationType::InstanceProperty ||
-      locationType == LocationType::StaticProperty;
-    assertx(prop == (slot != kInvalidSlot));
+      locationType == LocationType::StaticProperty ||
+      locationType == LocationType::TypeConstant;
+    assertx(propOrCns == (slot != kInvalidSlot));
     assertx(IMPLIES(
       locationType == LocationType::Runtime,
       runtimeStruct != nullptr));
@@ -148,6 +149,7 @@ struct LoggingProfileKey {
       case LocationType::APCKey:
       case LocationType::Runtime:
       case LocationType::StaticProperty:
+      case LocationType::TypeConstant:
         return std::nullopt;
     }
     always_assert(false);
@@ -167,6 +169,10 @@ struct LoggingProfileKey {
         auto const& prop = cls->staticProperties()[slot];
         return folly::sformat("{}::{}", cls->name(), prop.name);
       }
+      case LocationType::TypeConstant: {
+        auto const& cns = cls->constants()[slot];
+        return folly::sformat("{}::{}", cls->name(), cns.name);
+      }
       case LocationType::Runtime:
         return runtimeStruct->toString()->toCppString();
     }
@@ -182,6 +188,7 @@ struct LoggingProfileKey {
       case LocationType::APCKey:
       case LocationType::Runtime:
       case LocationType::StaticProperty:
+      case LocationType::TypeConstant:
         return toString();
     }
     always_assert(false);
@@ -196,6 +203,7 @@ struct LoggingProfileKey {
           return SrcKey::StableHasher()(sk);
         case LocationType::InstanceProperty:
         case LocationType::StaticProperty:
+        case LocationType::TypeConstant:
           return cls->stableHash() ^ slot;
         case LocationType::Runtime:
           return runtimeStruct->stableHash();
@@ -353,7 +361,8 @@ private:
 LoggingProfile* getLoggingProfile(SrcKey sk);
 LoggingProfile* getLoggingProfile(APCKey ak);
 LoggingProfile* getLoggingProfile(RuntimeStruct* runtimeStruct);
-LoggingProfile* getLoggingProfile(const Class* cls, Slot slot, bool isStatic);
+LoggingProfile* getLoggingProfile(const Class* cls, Slot slot,
+                                  LocationType loc);
 
 // Return a profile for the given profiling tracelet and (valid) sink SrcKey.
 // If no profile for the sink exists, a new one is made. May return nullptr.

@@ -545,6 +545,7 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
         return true;
       case LocationType::InstanceProperty:
       case LocationType::StaticProperty:
+      case LocationType::TypeConstant:
       case LocationType::SrcKey:
         auto const vad = profile.data->staticSampledArray;
         if (vad != nullptr && vad->isDictType()) return true;

@@ -1078,6 +1078,12 @@ public:
                        bool resolve = true) const;
 
   /*
+   * Type constants with the low bit set are already resolved. Return
+   * ArrayData after masking out that bit.
+   */
+  ArrayData* resolvedTypeCnsGet(ArrayData* ad) const;
+
+  /*
    * Look up a class constant's TypedValue if it doesn't require dynamic
    * initialization.  The index of the constant is output via `clsCnsInd'.
    *
@@ -1100,7 +1106,6 @@ public:
    */
   Slot clsCnsSlot(const StringData* name, ConstModifiers::Kind want,
                   bool allowAbstract) const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Interfaces and traits.

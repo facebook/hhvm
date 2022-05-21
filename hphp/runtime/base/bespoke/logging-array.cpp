@@ -232,7 +232,8 @@ void profileArrLikeProps(ObjectData* obj) {
     if (cls->declProperties()[slot].attrs & AttrIsConst) continue;
     auto lval = obj->propLvalAtOffset(slot);
     if (!tvIsArrayLike(lval)) continue;
-    profileArrLikeLval(lval, getLoggingProfile(cls, slot, false));
+    auto profile = getLoggingProfile(cls, slot, LocationType::InstanceProperty);
+    profileArrLikeLval(lval, profile);
   }
 }
 
@@ -247,8 +248,16 @@ void profileArrLikeStaticProps(const Class* cls) {
     if (!owned) continue;
     auto lval = &link->val;
     if (!tvIsArrayLike(lval)) continue;
-    profileArrLikeLval(lval, getLoggingProfile(cls, slot, true));
+    auto profile = getLoggingProfile(cls, slot, LocationType::StaticProperty);
+    profileArrLikeLval(lval, profile);
   }
+}
+
+void profileArrLikeClsCns(const Class* cls, TypedValue* tv, Slot slot) {
+  if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return;
+  if (!tvIsArrayLike(tv)) return;
+  auto profile = getLoggingProfile(cls, slot, LocationType::TypeConstant);
+  profileArrLikeLval(tv, profile);
 }
 
 //////////////////////////////////////////////////////////////////////////////

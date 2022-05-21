@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -248,6 +249,12 @@ unsigned loadUsedTraits(PreClass* preClass,
  * construct one.
  */
 constexpr size_t sizeof_Class = Class::classVecOff();
+
+/*
+ * For a type-constant, store the ArrayData inside the type-structure with
+ * the low bit set to indicate that the type-structure is resolved
+ */
+void setResolvedTypeConstVal(Class::Const& cns, ArrayData* ad);
 
 template<size_t sz>
 struct assert_sizeof_class {
@@ -1477,6 +1484,14 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   return cns.val.constModifiers().getCoeffects().toRequired();
 }
 
+ArrayData* Class::resolvedTypeCnsGet(ArrayData* ad) const {
+  auto const rawData = reinterpret_cast<intptr_t>(ad);
+  if (rawData & 0x1) {
+    return reinterpret_cast<ArrayData*>(rawData ^ 0x1);
+  }
+  return nullptr;
+}
+
 TypedValue Class::clsCnsGet(const StringData* clsCnsName,
                             ConstModifiers::Kind what,
                             bool resolve) const {
@@ -1513,11 +1528,14 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
         assertx(isArrayLikeType(type(cnsVal)));
         assertx(!isRefcountedType(type(cnsVal)));
         typeCns = val(cnsVal).parr;
-        auto const rawData = reinterpret_cast<intptr_t>(typeCns);
-        if (rawData & 0x1) {
-          auto const resolved = reinterpret_cast<ArrayData*>(rawData ^ 0x1);
+        auto const resolved = resolvedTypeCnsGet(typeCns);
+        if (resolved != nullptr) {
           assertx(resolved->isDictType());
-          return make_persistent_array_like_tv(resolved);
+
+          auto tv = make_persistent_array_like_tv(resolved);
+          bespoke::profileArrLikeClsCns(this, &tv, clsCnsInd);
+
+          return tv;
         }
         break;
       }
@@ -1609,25 +1627,39 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
     }
     assertx(resolvedTS.isDict());
 
-    auto const ad = ArrayData::GetScalarArray(std::move(resolvedTS));
+    auto ad = ArrayData::GetScalarArray(std::move(resolvedTS));
     if (persistent) {
-      auto const rawData = reinterpret_cast<intptr_t>(ad);
-      assertx((rawData & 0x7) == 0 && "ArrayData not 8-byte aligned");
-      auto taggedData = reinterpret_cast<ArrayData*>(rawData | 0x1);
+      auto& cns_nc = const_cast<Const&>(cns);
 
       // Multiple threads might create and store the resolved type structure
       // here, but that's fine since they'll all store the same thing thanks to
       // GetScalarArray(). Ditto for the pointed class.
       // We could avoid a little duplicated work during warmup with more
       // complexity but it's not worth it.
-      auto& cns_nc = const_cast<Const&>(cns);
       auto const classname_field = ad->get(s_classname.get());
       if (isStringType(classname_field.type())) {
         cns_nc.setPointedClsName(classname_field.val().pstr);
       }
-      cns_nc.val.m_data.parr = taggedData;
+      setResolvedTypeConstVal(cns_nc, ad);
       clsCnsData.remove(StrNR{clsCnsName});
-      return make_persistent_array_like_tv(ad);
+
+      // Need to check this after storing the resolved array in the
+      // type-constant. LoggingProfile has side effects and
+      // requires this to generate a static array
+      if (allowBespokeArrayLikes()) {
+        auto const profile =
+          getLoggingProfile(this, clsCnsInd, bespoke::LocationType::TypeConstant);
+        if (profile) {
+          auto layout = profile->getLayout();
+          if (layout.bespoke()) {
+            setResolvedTypeConstVal(cns_nc, ad = layout.apply(ad));
+          }
+        }
+      }
+
+      auto tv = make_persistent_array_like_tv(ad);
+      bespoke::profileArrLikeClsCns(this, &tv, clsCnsInd);
+      return tv;
     }
 
     auto tv = make_persistent_array_like_tv(ad);
@@ -2267,6 +2299,13 @@ Class* preConstDefiningCls(const PreClass::Const& preConst,
   return cls;
 }
 
+void setResolvedTypeConstVal(Class::Const& cns, ArrayData* ad) {
+  auto const rawData = reinterpret_cast<intptr_t>(ad);
+  assertx((rawData & 0x7) == 0 && "ArrayData not 8-byte aligned");
+  assertx(tvIsDict(cns.val));
+  cns.val.m_data.parr = reinterpret_cast<ArrayData*>(rawData | 0x1);
+}
+
 // Initialize the val field of a constant. If this is a type-constant,
 // we can store any pre-resolved type-structure in the val from the
 // beginning and save a resolution at runtime. If a constant has a
@@ -2294,11 +2333,7 @@ void setConstVal(Class::Const& cns, const PreClass::Const& preConst) {
   // clsCnsGet(). This prevents the pre-resolved type-structure from
   // being resolved again (which is important, as type-structure
   // resolution is not idempotent).
-  auto const rawData = reinterpret_cast<intptr_t>(a);
-  assertx((rawData & 0x7) == 0 && "ArrayData not 8-byte aligned");
-
-  assertx(tvIsDict(cns.val));
-  cns.val.m_data.parr = reinterpret_cast<ArrayData*>(rawData | 0x1);
+  setResolvedTypeConstVal(cns, a);
 
   // Also cache any classname field.
   auto const classname = a->get(s_classname);

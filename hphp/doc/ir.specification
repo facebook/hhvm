@@ -1058,12 +1058,12 @@ To string conversions:
 
   Load the size of S0's constant table.
 
-| LdResolvedTypeCns<slot>, D(StaticDict), S(Cls), B
+| LdResolvedTypeCns<slot>, D(StaticDict), S(Cls), B|LA
 
   Loads the resolved type constant in the slot `slot' on S0 or branches to B if
   the type constant is not resolved.
 
-| LdResolvedTypeCnsNoCheck<slot>, D(StaticDict), S(Cls), NF
+| LdResolvedTypeCnsNoCheck<slot>, D(StaticDict), S(Cls), LA
 
   Loads the resolved type constant in the slot `slot' on S0. The type constant
   is assumed to be present and resolved.
@@ -2031,7 +2031,7 @@ To string conversions:
 
   Assumes that parameter specified in extra-data in the current function
   has failed its type check and could not be satisfied by coercing the value.
-  Depending on the typehint being verified and a number of runtime options, 
+  Depending on the typehint being verified and a number of runtime options,
   may raise a recoverable fatal error describing the type mismatch.
 
 | VerifyParamFailHard<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), T

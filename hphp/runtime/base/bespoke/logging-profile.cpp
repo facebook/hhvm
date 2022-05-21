@@ -110,6 +110,12 @@ ArrayData* getStaticArray(LoggingProfileKey key) {
       return tvIsArrayLike(tv) ? tv.val().parr : nullptr;
     }
 
+    case LocationType::TypeConstant: {
+      auto const tv = key.cls->constants()[key.slot].val;
+      if (!tvIsArrayLike(tv)) return nullptr;
+      return key.cls->resolvedTypeCnsGet(tv.val().parr);
+    }
+
     case LocationType::SrcKey: {
       auto const op = key.sk.op();
       if (op != Op::Vec && op != Op::Dict && op != Op::Keyset) {
@@ -408,6 +414,14 @@ void LoggingProfile::setStaticBespokeArray(BespokeArray* bad) {
     auto const tv = const_cast<TypedValue*>(&sprops[key.slot].val);
     tv->m_data.parr = bad;
     assertx(tvIsPlausible(*tv));
+  }
+
+  if (key.locationType == LocationType::TypeConstant) {
+    auto const consts = key.cls->constants();
+    auto const tv = const_cast<TypedValueAux*>(&consts[key.slot].val);
+    auto const rawData = reinterpret_cast<intptr_t>(bad);
+    auto const ad = reinterpret_cast<ArrayData*>(rawData | 0x1);
+    tv->m_data.parr = ad;
   }
 }
 
@@ -1149,11 +1163,18 @@ LoggingProfile* getLoggingProfile(RuntimeStruct* runtimeStruct) {
   return newProfile;
 }
 
-LoggingProfile* getLoggingProfile(const Class* cls, Slot slot, bool isStatic) {
-  if (!isStatic && cls->declProperties()[slot].name == s_86reified_prop.get()) {
+LoggingProfile* getLoggingProfile(const Class* cls, Slot slot,
+                                  LocationType loc) {
+  assertx(
+    loc == LocationType::InstanceProperty ||
+    loc == LocationType::StaticProperty ||
+    loc == LocationType::TypeConstant
+  );
+  if (loc == LocationType::InstanceProperty &&
+      cls->declProperties()[slot].name == s_86reified_prop.get()) {
     return nullptr;
   }
-  return getLoggingProfile(LoggingProfileKey(cls, slot, isStatic));
+  return getLoggingProfile(LoggingProfileKey(cls, slot, loc));
 }
 
 SinkProfile* getSinkProfile(TransID id, SrcKey sk) {

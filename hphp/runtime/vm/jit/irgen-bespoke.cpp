@@ -1508,7 +1508,9 @@ void profileArrLikeProps(IRGS& env) {
     auto const tv = cls->declPropInit()[index].val.tv();
     if (!tvIsArrayLike(tv)) continue;
     if (!arrayTypeCouldBeBespoke(tv.val().parr->toDataType())) continue;
-    auto const profile = bespoke::getLoggingProfile(cls, slot, false);
+    auto const profile = bespoke::getLoggingProfile(
+      cls, slot, bespoke::LocationType::InstanceProperty
+    );
     if (!profile) continue;
 
     auto const arr = gen(

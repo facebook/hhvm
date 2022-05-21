@@ -78,6 +78,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData*, LoggingProfile*);
 ArrayData* makeBespokeForTesting(ArrayData*, LoggingProfile*);
 void profileArrLikeStaticProps(const Class*);
 void profileArrLikeProps(ObjectData*);
+void profileArrLikeClsCns(const Class*, TypedValue*, Slot);
 void setLoggingEnabled(bool);
 void selectBespokeLayouts();
 void waitOnExportProfiles();

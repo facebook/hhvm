@@ -322,6 +322,7 @@ void write_source_key(ProfDataSerializer& ser, const LoggingProfileKey& key) {
       break;
     case bespoke::LocationType::InstanceProperty:
     case bespoke::LocationType::StaticProperty:
+    case bespoke::LocationType::TypeConstant:
       write_class(ser, key.cls);
       write_raw(ser, key.slot);
       break;
@@ -344,6 +345,7 @@ LoggingProfileKey read_source_key(ProfDataDeserializer& des) {
       break;
     case bespoke::LocationType::InstanceProperty:
     case bespoke::LocationType::StaticProperty:
+    case bespoke::LocationType::TypeConstant:
       key.cls = read_class(des);
       read_raw(des, key.slot);
       break;

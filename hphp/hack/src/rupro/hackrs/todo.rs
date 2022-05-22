@@ -31,6 +31,8 @@ pub enum RuproTodo {
     UsingVar,
     /// Dependent type of a local expression is not yet implemented.
     LocalExprId,
+    /// Other dependent type logic is also not yet implemented.
+    DependentType,
     /// Readonly is not yet implemented.
     Readonly,
     /// Check whether local variables are defined when accessing them.
@@ -91,6 +93,14 @@ pub enum RuproTodo {
     FormatStrings,
     /// The idx special function is not supported.
     Idx,
+    /// Nullsafe expressions, e.g. `$x?->get()`
+    Nullsafe,
+    /// Calls to `parent`, e.g. `parent::foo()`
+    ParentCall,
+    /// Member access logic that is not yet implemented.
+    MemberAccess,
+    /// Xhp-specific logic that is missing.
+    Xhp,
 }
 
 macro_rules! rupro_todo_assert {

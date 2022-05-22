@@ -6,9 +6,9 @@
 use crate::subtyping::oracle::Oracle;
 use crate::typing::typing_error::{Error, Result};
 use crate::typing_ctx::TypingCtx;
-use crate::typing_decl_provider::{Class, TypeDecl};
+use crate::typing_decl_provider::{Class, ClassElt, TypeDecl};
 use depgraph_api::DeclName;
-use pos::{FunName, TypeName};
+use pos::{FunName, MethodName, TypeName};
 use std::rc::Rc;
 use std::sync::Arc;
 use ty::decl::FunDecl;
@@ -58,6 +58,22 @@ impl<R: Reason> TEnvDecls<R> {
             .typing_decl_provider
             .get_fun(self.dependent, name)
             .map_err(|e| e.into())
+    }
+
+    /// Get the member in a class.
+    pub fn get_class_member(
+        &self,
+        is_method: bool,
+        class: &dyn Class<R>,
+        member_name: MethodName,
+    ) -> Result<Option<Rc<ClassElt<R>>>> {
+        if is_method {
+            class
+                .get_method(self.dependent, member_name)
+                .map_err(|e| e.into())
+        } else {
+            rupro_todo!(MemberAccess);
+        }
     }
 }
 

@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::tast;
 use crate::typing::ast::typing_localize::LocalizeEnv;
+use crate::typing::ast::typing_obj_get::TCObjGet;
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
@@ -151,7 +152,22 @@ fn dispatch_call<R: Reason>(
             rupro_todo_mark!(SpecialFunctions, "needs_special_dispatch");
             dispatch_call_id(env, &e.1, explicit_targs, el, unpacked_element.as_ref(), id)
         }
-        _ => rupro_todo!(AST),
+        ObjGet(box (
+            e1,
+            oxidized::aast::Expr(_, _, Id(box m)),
+            nullflavor,
+            oxidized::ast_defs::PropOrMethod::IsMethod,
+        )) => dispatch_obj_get_method_id(
+            env,
+            &e.1,
+            e1,
+            m,
+            nullflavor,
+            explicit_targs,
+            el,
+            unpacked_element,
+        ),
+        e => rupro_todo!(AST, "{:?}", e),
     }
 }
 
@@ -175,6 +191,54 @@ fn dispatch_call_id<R: Reason>(
     );
     Ok((
         oxidized::aast::Expr_::Call(Box::new((te, tal, tel, tunpacked_element))),
+        ty,
+    ))
+}
+
+fn dispatch_obj_get_method_id<R: Reason>(
+    env: &mut TEnv<R>,
+    expr_pos: &oxidized::pos::Pos,
+    recv_expr: &oxidized::aast::Expr<(), ()>,
+    method_id: &oxidized::ast_defs::Id,
+    nullflavor: &oxidized::ast_defs::OgNullFlavor,
+    explicit_targs: &[oxidized::aast::Targ<()>],
+    el: &[(oxidized::ast_defs::ParamKind, oxidized::aast::Expr<(), ()>)],
+    unpacked_element: &Option<oxidized::aast::Expr<(), ()>>,
+) -> Result<(tast::Expr_<R>, Ty<R>)> {
+    rupro_todo_mark!(MissingError);
+    rupro_todo_mark!(Disposable);
+    rupro_todo_assert!(
+        matches!(nullflavor, oxidized::ast_defs::OgNullFlavor::OGNullthrows),
+        Nullsafe
+    );
+    rupro_todo_assert!(explicit_targs.is_empty(), AST);
+
+    let recv_expr = recv_expr.infer(env, Default::default())?;
+    let member_ty = TCObjGet {
+        receiver_ty: &recv_expr.0,
+        member_id: method_id,
+        is_method: true,
+    }
+    .infer(env, ())?;
+
+    let (tel, typed_unpacked_element, ty, _should_forget_fakes) =
+        call(env, member_ty.ty.clone(), el, unpacked_element.as_ref())?;
+    let te = oxidized::aast::Expr(
+        member_ty.ty.clone(),
+        expr_pos.clone(),
+        oxidized::aast::Expr_::ObjGet(Box::new((
+            recv_expr,
+            oxidized::aast::Expr(
+                member_ty.ty.clone(),
+                method_id.0.clone(),
+                oxidized::aast::Expr_::Id(Box::new(method_id.clone())),
+            ),
+            *nullflavor,
+            oxidized::ast_defs::PropOrMethod::IsMethod,
+        ))),
+    );
+    Ok((
+        oxidized::aast::Expr_::Call(Box::new((te, member_ty.targs, tel, typed_unpacked_element))),
         ty,
     ))
 }

@@ -1,0 +1,164 @@
+// Copyright (c) Meta Platforms, Inc. and affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+use crate::tast;
+use crate::typing::ast::typing_localize::LocalizeEnv;
+use crate::typing::ast::typing_trait::Infer;
+use crate::typing::env::typing_env::TEnv;
+use crate::typing::typing_error::Result;
+use crate::typing_decl_provider::ClassElt;
+use pos::{MethodName, TypeName};
+use ty::decl;
+use ty::local::{Ty, Ty_};
+use ty::reason::Reason;
+
+/// This struct provides typing for member access, both static and instance.
+pub struct TCObjGet<'a, R: Reason> {
+    /// Type of the object/receiver, i.e. type of the `expr` in `expr->get()`.
+    pub receiver_ty: &'a Ty<R>,
+
+    /// Member name
+    pub member_id: &'a oxidized::ast_defs::Id,
+
+    /// Is the member access a method?
+    pub is_method: bool,
+}
+
+/// The result of typing a member access.
+pub struct TCObjGetResult<R: Reason> {
+    /// The return type, i.e. the type of the full `expr->get()` expression.
+    pub ty: Ty<R>,
+
+    /// The types of the type arguments.
+    pub targs: Vec<tast::Targ<R>>,
+
+    /// An optional error based on the receiver's type, if encountered.
+    pub lval_err: Option<()>,
+
+    /// An optional error if the coercion to the object type failed.
+    pub rval_err: Option<()>,
+}
+
+/// Internal struct for shared parameters
+struct TCObjGetInternalParams {
+    /// Is the member access for a method?
+    is_method: bool,
+}
+
+impl<'a, R: Reason> Infer<R> for TCObjGet<'a, R> {
+    type Params = ();
+    type Typed = TCObjGetResult<R>;
+
+    fn infer(&self, env: &mut TEnv<R>, _params: ()) -> Result<Self::Typed> {
+        rupro_todo_mark!(Solving, "solve receiver ty");
+        rupro_todo_mark!(DependentType);
+        rupro_todo_mark!(ParentCall);
+        rupro_todo_mark!(MissingError);
+
+        let args = TCObjGetInternalParams {
+            is_method: self.is_method,
+        };
+        obj_get_inner(env, &args, self.receiver_ty, self.member_id)
+    }
+}
+
+fn obj_get_inner<R: Reason>(
+    env: &mut TEnv<R>,
+    args: &TCObjGetInternalParams,
+    receiver_ty: &Ty<R>,
+    member_id: &oxidized::ast_defs::Id,
+) -> Result<TCObjGetResult<R>> {
+    rupro_todo_mark!(Solving, "expand_type, expand_type_and_solve");
+    rupro_todo_mark!(MemberAccess, "more casing on types");
+
+    rupro_todo_assert!(args.is_method, MemberAccess);
+    obj_get_concrete_ty(env, args, receiver_ty, member_id)
+}
+
+fn obj_get_concrete_ty<R: Reason>(
+    env: &mut TEnv<R>,
+    args: &TCObjGetInternalParams,
+    receiver_ty: &Ty<R>,
+    member_id: &oxidized::ast_defs::Id,
+) -> Result<TCObjGetResult<R>> {
+    rupro_todo_mark!(Solving, "expand_type");
+    match &**receiver_ty {
+        Ty_::Tclass(class_name, _, paraml) => obj_get_concrete_class(
+            env,
+            args,
+            receiver_ty,
+            member_id,
+            class_name.id_ref(),
+            paraml,
+        ),
+        _ => rupro_todo!(MemberAccess),
+    }
+}
+
+fn obj_get_concrete_class<R: Reason>(
+    env: &mut TEnv<R>,
+    args: &TCObjGetInternalParams,
+    receiver_ty: &Ty<R>,
+    member_id: &oxidized::ast_defs::Id,
+    class_name: &TypeName,
+    paraml: &[Ty<R>],
+) -> Result<TCObjGetResult<R>> {
+    match env.decls().get_class(class_name.clone())? {
+        None => rupro_todo!(MissingError),
+        Some(class_info) => {
+            rupro_todo_assert!(
+                class_info.get_tparams().is_empty() && paraml.is_empty(),
+                AST
+            );
+            rupro_todo_mark!(MemberAccess, "private visibility precedence");
+            let member_info = env.decls().get_class_member(
+                args.is_method,
+                &*class_info,
+                MethodName::from(&member_id.1),
+            )?;
+            match member_info {
+                None => rupro_todo!(MissingError),
+                Some(member_info) => obj_get_concrete_class_with_member_info(
+                    env,
+                    args,
+                    receiver_ty,
+                    member_id,
+                    class_name,
+                    paraml,
+                    &*member_info,
+                ),
+            }
+        }
+    }
+}
+
+fn obj_get_concrete_class_with_member_info<R: Reason>(
+    env: &mut TEnv<R>,
+    args: &TCObjGetInternalParams,
+    _receiver_ty: &Ty<R>,
+    _member_id: &oxidized::ast_defs::Id,
+    _class_name: &TypeName,
+    _paraml: &[Ty<R>],
+    member_info: &ClassElt<R>,
+) -> Result<TCObjGetResult<R>> {
+    rupro_todo_mark!(MissingError, "Ambiguous_object_access");
+    rupro_todo_mark!(Xhp, "Typing_enum.member_type");
+    rupro_todo_mark!(Variance, "this_appears_covariantly");
+    let member_decl_ty = member_info.ty();
+    match member_decl_ty.node_ref() {
+        decl::Ty_::Tfun(ft) if args.is_method => {
+            rupro_todo_assert!(ft.tparams.is_empty(), AST);
+            rupro_todo_mark!(Dynamic);
+            let ft = ft.infer(env, LocalizeEnv::no_subst())?;
+            let ty = Ty::fun(member_decl_ty.reason().clone(), ft);
+            Ok(TCObjGetResult {
+                ty,
+                targs: vec![],
+                lval_err: None,
+                rval_err: None,
+            })
+        }
+        _ => rupro_todo!(MemberAccess),
+    }
+}

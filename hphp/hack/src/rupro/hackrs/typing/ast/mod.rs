@@ -11,6 +11,7 @@ pub mod typing_fun_def;
 pub mod typing_func_body;
 pub mod typing_localize;
 pub mod typing_method;
+pub mod typing_obj_get;
 pub mod typing_param;
 pub mod typing_return_type_hint;
 pub mod typing_stmt;

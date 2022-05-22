@@ -10,7 +10,7 @@ use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use pos::FunName;
 use ty::decl;
-use ty::local::{Ty, Ty_};
+use ty::local::{FunParam, Ty, Ty_};
 use ty::reason::Reason;
 use utils::core::LocalId;
 
@@ -249,7 +249,7 @@ fn dispatch_obj_get_method_id<R: Reason>(
 /// (3) the return type (4) a boolean indicating whether fake
 /// members should be forgotten.
 fn call<R: Reason>(
-    _env: &mut TEnv<R>,
+    env: &mut TEnv<R>,
     fty: Ty<R>,
     el: &[(oxidized::ast_defs::ParamKind, oxidized::aast::Expr<(), ()>)],
     unpacked_element: Option<&oxidized::aast::Expr<(), ()>>,
@@ -272,13 +272,117 @@ fn call<R: Reason>(
             rupro_todo_mark!(FakeMembersAndRefinement);
             rupro_todo_mark!(AST, "check arity");
             rupro_todo_mark!(Dynamic);
+            rupro_todo_mark!(Coeffects);
 
-            rupro_todo_assert!(ft.params.is_empty() && el.is_empty(), AST);
+            let mut typed_args: Vec<_> = el.iter().map(|_| None).collect();
+            let (non_variadic_ft_params, variadic_ft_param) =
+                ft.non_variadic_and_variadic_arguments();
+            call_check_args(
+                env,
+                false,
+                el,
+                non_variadic_ft_params,
+                variadic_ft_param,
+                &mut typed_args,
+            )?;
+            call_check_args(
+                env,
+                true,
+                el,
+                non_variadic_ft_params,
+                variadic_ft_param,
+                &mut typed_args,
+            )?;
+            let typed_args = el
+                .iter()
+                .map(|x| x.0.clone())
+                .zip(typed_args.into_iter().map(|x| x.unwrap()))
+                .collect();
+
             rupro_todo_assert!(unpacked_element.is_none(), AST);
-            Ok((vec![], None, ft.ret.clone(), false))
+            Ok((typed_args, None, ft.ret.clone(), false))
         }
         _ => rupro_todo!(AST),
     }
+}
+
+/// Given an expected function type, check types for the non-unpacked
+/// arguments.
+///
+/// If `check_lambdas` is `false` only non-lambda arguments will be type checked.
+/// If it is `true`, only lambda arguments will be type checked.
+fn call_check_args<R: Reason>(
+    env: &mut TEnv<R>,
+    check_lambdas: bool,
+    arg_exprs: &[(oxidized::ast_defs::ParamKind, oxidized::aast::Expr<(), ()>)],
+    non_variadic_ft_params: &[FunParam<R>],
+    variadic_ft_param: Option<&FunParam<R>>,
+    results: &mut [Option<tast::Expr<R>>],
+) -> Result<()> {
+    let mut non_variadic_ft_params = non_variadic_ft_params.iter();
+    for (arg_expr, result) in arg_exprs.iter().zip(results.iter_mut()) {
+        let (is_variadic, opt_param) = match non_variadic_ft_params.next() {
+            Some(param) => (false, Some(param)),
+            None => (true, variadic_ft_param),
+        };
+        let is_lambda = match arg_expr.1.2 {
+            oxidized::aast::Expr_::Efun(..) | oxidized::aast::Expr_::Lfun(..) => true,
+            _ => false,
+        };
+        match (check_lambdas, is_lambda) {
+            (false, false) | (true, true) => {
+                *result = Some(call_check_arg(
+                    env,
+                    &arg_expr.0,
+                    &arg_expr.1,
+                    opt_param,
+                    is_variadic,
+                )?)
+            }
+            (false, true) => {
+                rupro_todo_mark!(Variance);
+            }
+            (true, false) => {}
+        };
+    }
+    Ok(())
+}
+
+fn call_check_arg<R: Reason>(
+    env: &mut TEnv<R>,
+    param_kind: &oxidized::ast_defs::ParamKind,
+    arg_expr: &oxidized::aast::Expr<(), ()>,
+    opt_param: Option<&FunParam<R>>,
+    is_variadic: bool,
+) -> Result<tast::Expr<R>> {
+    match opt_param {
+        None => rupro_todo!(MissingError),
+        Some(param) => {
+            rupro_todo_mark!(EnumClasses);
+            rupro_todo_mark!(Dynamic);
+            rupro_todo_mark!(UsingVar);
+            rupro_todo_mark!(MissingError);
+            let te = arg_expr.infer(env, Default::default())?;
+            check_param(env, param, param_kind, &te, is_variadic)?;
+            rupro_todo_mark!(MissingError, "result of subtype check");
+            Ok(te)
+        }
+    }
+}
+
+fn check_param<R: Reason>(
+    env: &mut TEnv<R>,
+    param: &FunParam<R>,
+    _param_kind: &oxidized::ast_defs::ParamKind,
+    te: &tast::Expr<R>,
+    _is_variadic: bool,
+) -> Result<()> {
+    rupro_todo_mark!(MissingError, "param_modes");
+    rupro_todo_mark!(DependentType);
+    rupro_todo_mark!(Dynamic);
+    let err = env.subtyper().subtype(&te.0, &param.ty)?;
+    rupro_todo_assert!(err.is_none(), MissingError);
+    Ok(())
 }
 
 /// Given an identifier for a function, return its localized type.

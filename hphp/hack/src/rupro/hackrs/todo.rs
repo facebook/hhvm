@@ -101,6 +101,8 @@ pub enum RuproTodo {
     MemberAccess,
     /// Xhp-specific logic that is missing.
     Xhp,
+    /// Enum class logic not yet implemented.
+    EnumClasses,
 }
 
 macro_rules! rupro_todo_assert {

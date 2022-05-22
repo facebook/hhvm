@@ -447,6 +447,7 @@ impl<'a, R: Reason> Visitor<R> for CollectUnsolved<'a, R> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use oxidized::typing_defs_flags::FunTypeFlags;
     use pos::NPos;
     use ty::local::{FunParam, FunType};
     use ty::reason::NReason;
@@ -483,6 +484,7 @@ mod tests {
         let t_fun_ret = Ty::fun(
             NReason::none(),
             FunType {
+                flags: FunTypeFlags::empty(),
                 params: vec![],
                 ret: t_var,
             },
@@ -500,6 +502,7 @@ mod tests {
         let t_fun_fp = Ty::fun(
             NReason::none(),
             FunType {
+                flags: FunTypeFlags::empty(),
                 params: vec![fp],
                 ret: t_void,
             },

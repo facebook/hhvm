@@ -124,7 +124,6 @@ fn localize_ft<R: Reason>(
     localize_env: &LocalizeEnv<R>,
     ft: &decl::FunType<R, decl::Ty<R>>,
 ) -> Result<local::FunType<R>> {
-    rupro_todo_assert!(ft.params.is_empty(), AST);
     let params: Vec<_> = ft
         .params
         .iter()
@@ -139,7 +138,11 @@ fn localize_ft<R: Reason>(
         })
         .collect::<Result<_>>()?;
     let ret = localize_possibly_enforced_ty(env, localize_env, ft.ret.clone())?;
-    let ft = FunType { params, ret };
+    let ft = FunType {
+        params,
+        ret,
+        flags: ft.flags.clone(),
+    };
     Ok(ft)
 }
 

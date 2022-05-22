@@ -322,7 +322,16 @@ fn freshen_inside<R: Reason>(env: &mut NormalizeEnv<R>, ty: &Ty<R>) -> Result<Ty
                 .iter()
                 .map(|fp| freshen_inside(env, &fp.ty).map(|ty| FunParam { ty, ..fp.clone() }))
                 .collect::<Result<_>>()
-                .map(|params| Ty::fun(ty.reason().clone(), FunType { ret, params }))
+                .map(|params| {
+                    Ty::fun(
+                        ty.reason().clone(),
+                        FunType {
+                            ret,
+                            params,
+                            ..ft.clone()
+                        },
+                    )
+                })
         }),
         Ty_::Toption(ty_inner) => {
             freshen_inside(env, ty_inner).map(|ty_inner| Ty::option(ty.reason().clone(), ty_inner))

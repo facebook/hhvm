@@ -650,6 +650,7 @@ impl<R: Reason> NormalizeEnv<R> {
 mod tests {
     use super::*;
     use crate::subtyping::oracle::NoClasses;
+    use oxidized::typing_defs_flags::FunTypeFlags;
     use pos::Pos;
     use ty::{prop::PropF, reason::NReason};
     use utils::core::IdentGen;
@@ -754,6 +755,7 @@ mod tests {
                     pos: Pos::none(),
                     ty: Ty::arraykey(NReason::none()),
                 }],
+                flags: FunTypeFlags::empty(),
                 ret: Ty::float(NReason::none()),
             },
         );
@@ -766,6 +768,7 @@ mod tests {
                     pos: Pos::none(),
                     ty: Ty::int(NReason::none()),
                 }],
+                flags: FunTypeFlags::empty(),
                 ret: Ty::num(NReason::none()),
             },
         );

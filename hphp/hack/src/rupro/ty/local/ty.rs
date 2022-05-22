@@ -11,6 +11,7 @@ use hcons::Hc;
 use im::HashSet;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 use oxidized::ast_defs::Variance;
+use oxidized::typing_defs_flags::FunTypeFlags;
 use pos::{Positioned, Symbol, ToOxidized, TypeName};
 use std::ops::Deref;
 
@@ -29,6 +30,7 @@ walkable!(FunParam<R> => [ty]);
 pub struct FunType<R: Reason> {
     pub params: Vec<FunParam<R>>,
     pub ret: Ty<R>,
+    pub flags: FunTypeFlags,
 }
 
 walkable!(FunType<R> => [params, ret]);
@@ -359,6 +361,21 @@ impl<R: Reason> Visitor<R> for TyvarOccurs {
     }
 }
 
+impl<R: Reason> FunType<R> {
+    pub fn is_variadic(&self) -> bool {
+        self.flags.contains(FunTypeFlags::VARIADIC)
+    }
+
+    pub fn non_variadic_and_variadic_arguments(&self) -> (&[FunParam<R>], Option<&FunParam<R>>) {
+        if self.is_variadic() {
+            let (var, non_var) = self.params.split_last().unwrap();
+            (non_var, Some(var))
+        } else {
+            (&self.params, None)
+        }
+    }
+}
+
 impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
     type Output = oxidized_by_ref::typing_defs::Ty<'a>;
 
@@ -531,7 +548,14 @@ mod tests {
         let ret = Ty::var(NReason::none(), tv1.clone());
 
         // #0 -> #1
-        let ty_fn1 = Ty::fun(NReason::none(), FunType { params, ret });
+        let ty_fn1 = Ty::fun(
+            NReason::none(),
+            FunType {
+                params,
+                flags: FunTypeFlags::empty(),
+                ret,
+            },
+        );
         let (covs, contravs) = ty_fn1.tyvars(|_| None);
         assert!(covs.contains(&tv1));
         assert!(contravs.contains(&tv0));
@@ -545,6 +569,7 @@ mod tests {
                     name: None,
                     ty: ty_fn1,
                 }],
+                flags: FunTypeFlags::empty(),
                 ret: Ty::var(NReason::none(), tv2.clone()),
             },
         );

@@ -164,7 +164,7 @@ pub mod instr {
     use crate::InstrSeq;
     use ffi::{BumpSliceMut, Slice, Str};
     use hhbc::{
-        AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp,
+        AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, Dummy,
         FCallArgs, FatalOp, FloatBits, FunctionName, IncDecOp, InitPropOp, Instruct,
         IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode,
         MemberKey, MethodName, NumParams, OODeclExistsOp, ObjMethodOp, Opcode, ParamName, PropName,
@@ -330,7 +330,7 @@ pub mod instr {
             [label1, label2],
             // Need dummy immediate here to satisfy opcodes translator expectation of immediate
             // with name _0.
-            u8::MAX,
+            Dummy,
             range,
         )))
     }
@@ -371,7 +371,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::SSwitch {
             cases,
             targets,
-            _0: u8::MAX,
+            _0: Dummy,
         }))
     }
 

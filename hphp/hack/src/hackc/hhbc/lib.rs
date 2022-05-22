@@ -30,9 +30,9 @@ pub mod hhas_typedef;
 
 pub use hhas_xhp_attribute::HhasXhpAttribute;
 pub use hhbc_ast::{
-    AdataId, ClassNum, ClassishKind, FCallArgs, HasGenericsOp, Instruct, IterArgs, IterId, Label,
-    Local, LocalRange, MemberKey, NumParams, ParamName, Pseudo, RepoAuthType, SrcLoc, StackIndex,
-    Targets, Visibility,
+    AdataId, ClassNum, ClassishKind, Dummy, FCallArgs, HasGenericsOp, Instruct, IterArgs, IterId,
+    Label, Local, LocalRange, MemberKey, NumParams, ParamName, Pseudo, RepoAuthType, SrcLoc,
+    StackIndex, Targets, Visibility,
 };
 pub use hhbc_id::{ClassName, ConstName, FunctionName, MethodName, PropName};
 pub use hhvm_hhbc_defs_ffi::ffi::{

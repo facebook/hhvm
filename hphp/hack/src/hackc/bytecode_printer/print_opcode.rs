@@ -7,11 +7,11 @@ use crate::print;
 use ffi::Str;
 use hash::HashSet;
 use hhbc::{
-    AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, FCallArgs,
-    FatalOp, FloatBits, FunctionName, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp,
-    IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodName, NumParams,
-    OODeclExistsOp, ObjMethodOp, Opcode, ParamName, PropName, QueryMOp, ReadonlyOp, SetOpOp,
-    SetRangeOp, SilenceOp, SpecialClsRef, StackIndex, SwitchKind, TypeStructResolveOp,
+    AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, Dummy,
+    FCallArgs, FatalOp, FloatBits, FunctionName, IncDecOp, InitPropOp, IsLogAsDynamicCallOp,
+    IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodName,
+    NumParams, OODeclExistsOp, ObjMethodOp, Opcode, ParamName, PropName, QueryMOp, ReadonlyOp,
+    SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, StackIndex, SwitchKind, TypeStructResolveOp,
 };
 use hhbc_string_utils::float;
 use print_opcode::{PrintOpcode, PrintOpcodeTypes};
@@ -84,7 +84,7 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
         w: &mut dyn Write,
         cases: &[Str<'_>],
         targets: &[Label],
-        _dummy_imm: &u8,
+        _dummy_imm: &Dummy,
     ) -> Result<()> {
         if cases.len() != targets.len() {
             return Err(Error::new(

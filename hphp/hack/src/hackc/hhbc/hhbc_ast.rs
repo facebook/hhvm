@@ -22,6 +22,10 @@ pub enum ParamName<'arena> {
 pub type StackIndex = u32;
 pub type ClassNum = u32;
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[repr(C)]
+pub struct Dummy;
+
 /// HHBC encodes bytecode offsets as i32 (HPHP::Offset) so u32
 /// is plenty of range for label ids.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]

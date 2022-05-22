@@ -278,7 +278,7 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
         ImmType::BA2 => quote!([Label; 2]),
         ImmType::BLA => quote!(BumpSliceMut<#lifetime, Label>),
         ImmType::DA => quote!(FloatBits),
-        ImmType::DUMMY => quote!(u8),
+        ImmType::DUMMY => quote!(Dummy),
         ImmType::FCA => quote!(FCallArgs<#lifetime>),
         ImmType::I64A => quote!(i64),
         ImmType::IA => quote!(IterId),

@@ -5,11 +5,11 @@
 
 use crate::{
     hhbc_ast::NUM_ACT_REC_CELLS, AdataId, BareThisOp, ClassName, ClassNum, CollectionType,
-    ConstName, ContCheckOp, FCallArgs, FatalOp, FloatBits, FunctionName, IncDecOp, InitPropOp,
-    IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey,
-    MethodName, NumParams, OODeclExistsOp, ObjMethodOp, ParamName, PropName, QueryMOp, ReadonlyOp,
-    RepoAuthType, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, StackIndex, SwitchKind, Targets,
-    TypeStructResolveOp,
+    ConstName, ContCheckOp, Dummy, FCallArgs, FatalOp, FloatBits, FunctionName, IncDecOp,
+    InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId, Label, Local, LocalRange,
+    MOpMode, MemberKey, MethodName, NumParams, OODeclExistsOp, ObjMethodOp, ParamName, PropName,
+    QueryMOp, ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, StackIndex,
+    SwitchKind, Targets, TypeStructResolveOp,
 };
 use emit_opcodes_macro::Targets;
 use ffi::{BumpSliceMut, Slice, Str};

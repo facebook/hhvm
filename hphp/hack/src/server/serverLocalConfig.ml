@@ -110,9 +110,6 @@ module RemoteTypeCheck = struct
     (* Indicates whether files-to-declare should be fetched by VFS
         (see `declaration_threshold`) *)
     prefetch_deferred_files: bool;
-    (* If set, distributes type checking to remote workers if the number of files to
-       type check exceeds the threshold. If not set, then always checks everything locally. *)
-    recheck_threshold: int option;
     worker_min_log_level: Hh_logger.Level.t;
     (* Indicates the size of the job below which a virtual file system should
        be used by the remote worker *)
@@ -127,6 +124,8 @@ module RemoteTypeCheck = struct
        should be used in remote workers initial payload. Default is 0.0 which means
        one bucket and no special bundling for initial payload *)
     remote_initial_payload_ratio: float;
+    (* Configure remote typechecking activation threshold *)
+    remote_type_check_recheck_threshold: int;
   }
 
   let default =
@@ -143,13 +142,13 @@ module RemoteTypeCheck = struct
       num_workers = 4;
       remote_worker_sandcastle_tenant = "interactive";
       prefetch_deferred_files = false;
-      recheck_threshold = None;
       worker_min_log_level = Hh_logger.Level.Info;
       worker_vfs_checkout_threshold = 10_000;
       file_system_mode = ArtifactStore.Distributed;
       max_cas_bytes = 50_000_000;
       max_artifact_inline_bytes = 2000;
       remote_initial_payload_ratio = 0.0;
+      remote_type_check_recheck_threshold = 1_000_000;
     }
 
   let load ~current_version ~default config =
@@ -239,8 +238,11 @@ module RemoteTypeCheck = struct
         ~current_version
         config
     in
-    let recheck_threshold =
-      int_opt "remote_type_check_recheck_threshold" config
+    let remote_type_check_recheck_threshold =
+      int_
+        "remote_type_check_recheck_threshold"
+        ~default:default.remote_type_check_recheck_threshold
+        config
     in
     let remote_initial_payload_ratio =
       float_
@@ -299,7 +301,7 @@ module RemoteTypeCheck = struct
       min_batch_size;
       num_workers;
       prefetch_deferred_files;
-      recheck_threshold;
+      remote_type_check_recheck_threshold;
       worker_min_log_level;
       worker_vfs_checkout_threshold;
       file_system_mode;

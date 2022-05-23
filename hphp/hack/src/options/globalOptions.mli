@@ -35,7 +35,7 @@ type t = {
   tco_prefetch_deferred_files: bool;
   (* If set, distributes type checking to remote workers if the number of files to
      type check exceeds the threshold. If not set, then always checks everything locally. *)
-  tco_remote_type_check_threshold: int option;
+  tco_remote_type_check_threshold: int;
   (* Turns on remote type checking *)
   tco_remote_type_check: bool;
   (* If set, uses the key to fetch type checking jobs *)
@@ -467,7 +467,7 @@ val tco_defer_class_declaration_threshold : t -> int option
 
 val tco_prefetch_deferred_files : t -> bool
 
-val tco_remote_type_check_threshold : t -> int option
+val tco_remote_type_check_threshold : t -> int
 
 val tco_remote_type_check : t -> bool
 

@@ -15,7 +15,7 @@ impl Default for GlobalOptions {
             tco_max_typechecker_worker_memory_mb: None,
             tco_defer_class_declaration_threshold: None,
             tco_prefetch_deferred_files: false,
-            tco_remote_type_check_threshold: None,
+            tco_remote_type_check_threshold: 1_000_000,
             tco_remote_type_check: true,
             tco_remote_worker_key: None,
             tco_remote_check_id: None,

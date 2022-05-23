@@ -314,9 +314,9 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_defer_class_declaration_threshold:
         local_config.defer_class_declaration_threshold
       ?tco_prefetch_deferred_files:(Some local_config.prefetch_deferred_files)
-      ?tco_remote_type_check_threshold:
+      ~tco_remote_type_check_threshold:
         ServerLocalConfig.RemoteTypeCheck.(
-          local_config.remote_type_check.recheck_threshold)
+          local_config.remote_type_check.remote_type_check_recheck_threshold)
       ?tco_remote_type_check:
         ServerLocalConfig.RemoteTypeCheck.(
           Some local_config.remote_type_check.enabled)

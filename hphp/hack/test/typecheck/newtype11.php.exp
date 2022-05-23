@@ -1,0 +1,6 @@
+File "newtype11.php--file2.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+  File "newtype11.php--file2.php", line 7, characters 32-33:
+  Expected `T2`
+  File "newtype11.php--file2.php", line 7, characters 25-26:
+  But got `T1`

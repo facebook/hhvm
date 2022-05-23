@@ -90,6 +90,9 @@ let is_err ty =
   | _ -> false
 
 type subtype_env = {
+  require_soundness: bool;
+      (** If set, requires the simplification of subtype constraints to be sound,
+          meaning that the simplified constraint must imply the original one. *)
   require_completeness: bool;
       (** If set, requires the simplification of subtype constraints to be complete,
           meaning that the original constraint must imply the simplified one.
@@ -125,12 +128,14 @@ let coercing_to_dynamic se =
   | _ -> false
 
 let make_subtype_env
+    ?(require_soundness = true)
     ?(require_completeness = false)
     ?(no_top_bottom = false)
     ?(coerce = None)
     ?(is_coeffect = false)
     on_error =
   {
+    require_soundness;
     require_completeness;
     visited = VisitedGoals.empty;
     no_top_bottom;
@@ -798,11 +803,9 @@ and default_subtype
 
 (* Attempt to "solve" a subtype assertion ty_sub <: ty_super.
  * Return a proposition that is logically stronger and simpler than
- * the original assertion (meaning that the simplification is
- * sound).
- * If subtype_env.require_completeness is set, the simplfication must
- * also be complete, meaning that returned proposition is equivalent to
- * the original one.
+ * the original assertion
+ * The logical relationship between the original and returned proposition
+ * depends on the flags require_soundness and require_completeness.
  * Fail with Unsat error_function if
  * the assertion is unsatisfiable. Some examples:
  *   string <: arraykey  ==>  True    (represented as Conj [])
@@ -1655,12 +1658,14 @@ and simplify_subtype_i
               List.map tyargs_sub ~f:(fun _ ->
                   (Ast_defs.Invariant, Aast.Erased))
             in
-            simplify_subtype_variance
+            simplify_subtype_variance_for_non_injective
               ~subtype_env
               name_sub
               variance_reifiedl
               tyargs_sub
               tyargs_super
+              ety_sub
+              ety_super
               env
         (* When decomposing subtypes for the purpose of adding bounds on generic
          * parameters to the context, (so seen_generic_params = None), leave
@@ -2103,13 +2108,15 @@ and simplify_subtype_i
                   List.map td_tparams ~f:(fun t ->
                       (t.tp_variance, t.tp_reified))
                 in
-                simplify_subtype_variance
+                simplify_subtype_variance_for_non_injective
                   ~subtype_env
                   ~super_like
                   name_sub
                   variance_reifiedl
                   tyl_sub
                   tyl_super
+                  ety_sub
+                  ety_super
                   env
               | None -> invalid_env env
             end
@@ -2263,12 +2270,7 @@ and simplify_subtype_i
                       List.map (Cls.tparams class_sub) ~f:(fun t ->
                           (t.tp_variance, t.tp_reified))
                 in
-                (* C<t1, .., tn> <: C<u1, .., un> iff
-                 *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
-                 * where vi is the variance of the i'th generic parameter of C,
-                 * and <:v denotes the appropriate direction of subtyping for variance v
-                 *)
-                simplify_subtype_variance
+                simplify_subtype_variance_for_injective
                   ~subtype_env
                   ~super_like
                   cid_sub
@@ -2851,7 +2853,12 @@ and simplify_subtype_has_member
 
       prop &&& simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty)
 
-and simplify_subtype_variance
+(* Given an injective type constructor C (e.g., a class)
+ * C<t1, .., tn> <: C<u1, .., un> iff
+ * t1 <:v1> u1 /\ ... /\ tn <:vn> un
+ * where vi is the variance of the i'th generic parameter of C,
+ * and <:v denotes the appropriate direction of subtyping for variance v *)
+and simplify_subtype_variance_for_injective
     ~(subtype_env : subtype_env)
     ?(super_like = false)
     (cid : string)
@@ -2889,8 +2896,8 @@ and simplify_subtype_variance
     in
     simplify_subtype ~subtype_env ~this_ty:None
   in
-  let simplify_subtype_variance =
-    simplify_subtype_variance ~subtype_env ~super_like
+  let simplify_subtype_variance_for_injective =
+    simplify_subtype_variance_for_injective ~subtype_env ~super_like
   in
   match (variance_reifiedl, children_tyl, super_tyl) with
   | ([], _, _)
@@ -2921,7 +2928,50 @@ and simplify_subtype_variance
         |> simplify_subtype child (liken ~super_like env super')
         &&& simplify_subtype super' child
     end
-    &&& simplify_subtype_variance cid variance_reifiedl childrenl superl
+    &&& simplify_subtype_variance_for_injective
+          cid
+          variance_reifiedl
+          childrenl
+          superl
+
+(* Given a type constructor N that may not be injective (e.g., a newtype)
+ * t1 <:v1> u1 /\ ... /\ tn <:vn> un
+ * implies
+ * N<t1, .., tn> <: N<u1, .., un>
+ * where vi is the variance of the i'th generic parameter of N,
+ * and <:v denotes the appropriate direction of subtyping for variance v.
+ * However, the reverse direction does not hold. *)
+and simplify_subtype_variance_for_non_injective
+    ~(subtype_env : subtype_env)
+    ?super_like
+    (cid : string)
+    (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
+    (children_tyl : locl_ty list)
+    (super_tyl : locl_ty list)
+    ty_sub
+    ty_super
+    env =
+  let ((env, p) as res) =
+    simplify_subtype_variance_for_injective
+      ~subtype_env
+      ?super_like
+      cid
+      variance_reifiedl
+      children_tyl
+      super_tyl
+      env
+  in
+  if subtype_env.require_completeness && not (TL.is_valid p) then
+    (* If we require completeness, then we can still use the incomplete
+     * N<t1, .., tn> <: N<u1, .., un> to t1 <:v1> u1 /\ ... /\ tn <:vn> un
+     * simplification if all of the latter constraints already hold.
+     * If they don't already hold, there is nothing we can (soundly) simplify. *)
+    if subtype_env.require_soundness then
+      (env, mk_issubtype_prop ~coerce:subtype_env.coerce env ty_sub ty_super)
+    else
+      (env, TL.valid)
+  else
+    res
 
 and simplify_subtype_params
     ~(subtype_env : subtype_env)
@@ -4254,7 +4304,11 @@ let rec decompose_subtype
     ty_super;
   let (env, prop) =
     simplify_subtype
-      ~subtype_env:(make_subtype_env ~require_completeness:true on_error)
+      ~subtype_env:
+        (make_subtype_env
+           ~require_soundness:false
+           ~require_completeness:true
+           on_error)
       ~this_ty:None
       ty_sub
       ty_super

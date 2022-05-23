@@ -146,6 +146,10 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   if (callee->userAttributes().count(s_NeverInline.get())) {
     return refuse("callee marked __NEVER_INLINE");
   }
+  // T121145315
+  if (callee->isResumable() && callee->numIterators() > 0) {
+    return refuse("callee is resumable with iterators");
+  }
 
   return true;
 }

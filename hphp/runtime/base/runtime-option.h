@@ -928,11 +928,11 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningCostFactorMain, 100)                          \
   F(uint32_t, HHIRInliningCostFactorCold, 32)                           \
   F(uint32_t, HHIRInliningCostFactorFrozen, 10)                         \
-  F(uint32_t, HHIRInliningVasmCostLimit, 10500)                         \
-  F(uint32_t, HHIRInliningMinVasmCostLimit, 10000)                      \
-  F(uint32_t, HHIRInliningMaxVasmCostLimit, 40000)                      \
+  F(uint32_t, HHIRInliningVasmCostLimit, 80000)                         \
+  F(uint32_t, HHIRInliningMinVasmCostLimit, 6500)                       \
+  F(uint32_t, HHIRInliningMaxVasmCostLimit, 30000)                      \
   F(uint32_t, HHIRAlwaysInlineVasmCostLimit, 4800)                      \
-  F(uint32_t, HHIRInliningMaxDepth,    5)                               \
+  F(uint32_t, HHIRInliningMaxDepth,    6)                               \
   F(double,   HHIRInliningVasmCallerExp, .5)                            \
   F(double,   HHIRInliningVasmCalleeExp, .5)                            \
   F(double,   HHIRInliningDepthExp, 0)                                  \

@@ -269,7 +269,7 @@ let autocomplete_member ~is_static env class_ cid id =
   (* This is used for instance "$x->|" and static "Class1::|" members. *)
   if is_auto_complete (snd id) then (
     (* Detect usage of "parent::|" which can use both static and instance *)
-    let match_both_static_and_instance =
+    let parent_receiver =
       match cid with
       | Some Aast.CIparent -> true
       | _ -> false
@@ -302,7 +302,7 @@ let autocomplete_member ~is_static env class_ cid id =
     (* There's no reason for us to sort -- we can expect our client to do its
        own sorting of our results -- but having a sorted list here makes our tests
        more stable. *)
-    if is_static || match_both_static_and_instance then (
+    if is_static || parent_receiver then (
       List.iter
         (get_class_elt_types
            ~is_method:true
@@ -324,7 +324,7 @@ let autocomplete_member ~is_static env class_ cid id =
         ~f:(fun (name, cc) ->
           add SearchUtils.SI_ClassConstant (name, cc.cc_type))
     );
-    if (not is_static) || match_both_static_and_instance then (
+    if (not is_static) || parent_receiver then (
       List.iter
         (get_class_elt_types
            ~is_method:true
@@ -341,7 +341,23 @@ let autocomplete_member ~is_static env class_ cid id =
            cid
            (Cls.props class_ |> sort))
         ~f:(add SearchUtils.SI_Property)
-    )
+    );
+    (* Only complete __construct() when we see parent::, as we don't
+       allow __construct to be called as e.g. $foo->__construct(). *)
+    if parent_receiver then
+      let (constructor, _) = Cls.construct class_ in
+      let constructor =
+        Option.map constructor ~f:(fun elt ->
+            (Naming_special_names.Members.__construct, elt))
+      in
+      List.iter
+        (get_class_elt_types
+           ~is_method:true
+           env
+           class_
+           cid
+           (Option.to_list constructor))
+        ~f:(add SearchUtils.SI_ClassMethod)
   )
 
 (*

@@ -182,6 +182,9 @@ external uptime : unit -> int = "hh_sysinfo_uptime"
 as reported by  sysconf(_SC_NPROCESSORS_ONLN) *)
 external nproc : unit -> int = "nproc"
 
+(** Return the contents of /proc/cpuinfo, or none if that failed. *)
+val cpuinfo : unit -> string option
+
 (** linux: returns the number of cores (which doesn't include hyperthreads)
 by parsing the content of /proc/cpuinfo, which you pass as argument.
 If you're on a platform without /proc/cpuinfo, you won't even be able to call this!

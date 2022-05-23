@@ -127,6 +127,7 @@ let cat = Disk.cat
 
 let cat_or_failed file =
   try Some (Disk.cat file) with
+  | TestDisk.No_such_file_or_directory _
   | Sys_error _
   | Failure _ ->
     None
@@ -534,6 +535,8 @@ external get_total_ram : unit -> int = "hh_sysinfo_totalram"
 external uptime : unit -> int = "hh_sysinfo_uptime"
 
 external nproc : unit -> int = "nproc"
+
+let cpuinfo () : string option = cat_or_failed "/proc/cpuinfo"
 
 let ncores_linux_only cpuinfo =
   (* How do cores and processors work?

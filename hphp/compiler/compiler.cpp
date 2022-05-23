@@ -486,6 +486,15 @@ int process(const CompilerOptions &po) {
   // prepare a package
   Package package{po.inputDir.c_str(), po.parseOnDemand};
   AnalysisResultPtr ar = package.getAnalysisResult();
+  ar->sample().setStr("use_case", Option::ExternWorkerUseCase);
+  ar->sample().setInt("use_rich_client", Option::ExternWorkerUseRichClient);
+  ar->sample().setInt("use_zippy_rich_client",
+      Option::ExternWorkerUseZippyRichClient);
+  ar->sample().setInt("use_p2p", Option::ExternWorkerUseP2P);
+  ar->sample().setInt("force_subprocess", Option::ExternWorkerForceSubprocess);
+  ar->sample().setInt("use_exec_cache", Option::ExternWorkerUseExecCache);
+  ar->sample().setInt("parser_group_size", Option::ParserGroupSize);
+  ar->sample().setInt("parser_thread_count", Option::ParserThreadCount);
 
   hhbcTargetInit(po, ar);
 
@@ -548,6 +557,11 @@ int process(const CompilerOptions &po) {
       package.getFileReads(),
       package.getFileStores()
     );
+    ar->sample().setInt("parsing_micros", timer2.getMicroSeconds());
+    ar->sample().setInt("total_parses", package.getTotalParses());
+    ar->sample().setInt("parse_cache_hits", package.getParseCacheHits());
+    ar->sample().setInt("file_reads", package.getFileReads());
+    ar->sample().setInt("file_stores", package.getFileStores());
   }
 
   // Start asynchronously destroying the async state, since it may

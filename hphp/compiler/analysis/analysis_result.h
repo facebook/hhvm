@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/util/mutex.h"
+#include "hphp/util/struct-log.h"
 
 #include <tbb/concurrent_hash_map.h>
 #include <atomic>
@@ -68,11 +69,13 @@ struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
   void addHhasFile(std::unique_ptr<UnitEmitter>&& ue);
   std::vector<std::unique_ptr<UnitEmitter>> getHhasFiles();
   HHBBC::php::ProgramPtr& program() { return m_program; }
+  StructuredLogEntry& sample() { return m_sample; }
 private:
   std::function<void(AnalysisResultPtr)> m_finish;
   std::vector<std::unique_ptr<UnitEmitter>> m_hhasFiles;
   std::string m_outputPath;
   HHBBC::php::ProgramPtr m_program;
+  StructuredLogEntry m_sample;
 
   Mutex m_mutex;
  };

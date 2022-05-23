@@ -553,9 +553,10 @@ void add_unit_to_program(const UnitEmitter* ue, php::Program& program) {
 void whole_program(php::ProgramPtr program,
                    UnitEmitterQueue& ueq,
                    std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
+                   StructuredLogEntry sample,
                    int num_threads,
-                   std::promise<void>* arrTableReady) {
-  StructuredLogEntry sample;
+                   std::promise<void>* arrTableReady
+                   ) {
   trace_time tracer("whole program");
 
   if (options.TestCompression || RO::EvalHHBBCTestCompression) {

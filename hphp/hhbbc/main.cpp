@@ -373,7 +373,8 @@ void compile_repo() {
       HphpSession _{Treadmill::SessionKind::CompileRepo};
       Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
       try {
-        whole_program(std::move(program), ueq, arrTable);
+        StructuredLogEntry sample;
+        whole_program(std::move(program), ueq, arrTable, std::move(sample));
       } catch (...) {
         wp_thread_ex = std::current_exception();
         ueq.finish();

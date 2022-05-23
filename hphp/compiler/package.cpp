@@ -811,6 +811,7 @@ void Package::parseAll() {
       {
         Timer timer{Timer::WallTime, "parsing inputs"};
         ondemand = HPHP_CORO_AWAIT(parseGroups(std::move(groups)));
+        m_ar->sample().setInt("parsing_inputs_micros", timer.getMicroSeconds());
       }
 
       if (ondemand.empty()) HPHP_CORO_RETURN_VOID;
@@ -823,6 +824,7 @@ void Package::parseAll() {
         groupFiles(groups, std::move(ondemand));
         ondemand = HPHP_CORO_AWAIT(parseGroups(std::move(groups)));
       } while (!ondemand.empty());
+      m_ar->sample().setInt("parsing_ondemand_micros", timer.getMicroSeconds());
 
       HPHP_CORO_RETURN_VOID;
     }

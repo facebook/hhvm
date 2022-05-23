@@ -34,6 +34,7 @@
 #include "hphp/util/hash-set.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/lock.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/synchronizable.h"
 
 namespace HPHP {
@@ -127,6 +128,7 @@ void add_unit_to_program(const UnitEmitter* ue, php::Program& program);
 void whole_program(php::ProgramPtr program,
                    UnitEmitterQueue& ueq,
                    std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
+                   StructuredLogEntry sample,
                    int num_threads = 0,
                    std::promise<void>* arrTableReady = nullptr);
 

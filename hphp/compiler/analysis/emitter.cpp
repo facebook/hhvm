@@ -349,6 +349,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       }
 
       auto program = std::move(ar->program());
+      auto sample = std::move(ar->sample());
       if (!program.get()) {
         uint32_t id = 0;
         for (auto& ue : ues) {
@@ -395,7 +396,8 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       fut = arrTableReady.get_future();
 
       wp_thread = std::thread(
-        [program = std::move(program), &ueq, &arrTable, &arrTableReady]
+        [program = std::move(program), sample = std::move(sample),
+         &ueq, &arrTable, &arrTableReady]
         () mutable {
           Timer timer(Timer::WallTime, "running HHBBC");
           HphpSessionAndThread _(Treadmill::SessionKind::CompilerEmit);
@@ -405,7 +407,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
             }
             // We rely on this function to provide a value to arrTable
             HHBBC::whole_program(
-              std::move(program), ueq, arrTable,
+              std::move(program), ueq, arrTable, std::move(sample),
               Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0,
               &arrTableReady);
           } catch (...) {

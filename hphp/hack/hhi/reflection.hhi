@@ -60,6 +60,8 @@ class ReflectionClass implements Reflector {
   public function getModifiers()[]: int;
   public function getName()[]: string;
   public function getNamespaceName()[]: string;
+  public function isInternalToModule()[]: bool;
+  public function getModule()[]: ?string;
   /**
    * Returns ReflectionClass or false
    */
@@ -140,6 +142,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getStaticVariables(): darray<string, mixed>;
   public function getReturnTypeText()[];
   public function getModule()[]: ?string;
+  public function isInternalToModule()[]: bool;
   final public function getAttributes()[]: darray<string, varray<mixed>>;
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;

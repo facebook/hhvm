@@ -39,7 +39,11 @@ let name_to_decl_hash_opt ~(name : string) ~(db_path : Naming_sqlite.db_path) =
   if Option.is_some decl_hash then
     Hh_logger.log
       "Attempting to fetch old decl with decl hash %s remotely"
-      (Option.value_exn decl_hash);
+      (Option.value_exn decl_hash)
+  else
+    Hh_logger.log
+      "Couldn't find decl hash for %s in sqlite naming table. Not fetching its old decl."
+      name;
   decl_hash
 
 module FetchAsync = struct

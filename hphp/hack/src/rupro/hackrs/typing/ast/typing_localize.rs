@@ -29,6 +29,13 @@ impl<R: Reason> LocalizeEnv<R> {
         }
     }
 
+    /// A localize environment from the given instantiated class.
+    pub fn with_class_subst(cls: &dyn Class<R>, targs: &[local::Ty<R>]) -> Self {
+        let mut s = Self::no_subst();
+        s.add_explicit_ty_substs(cls.get_tparams(), targs);
+        s
+    }
+
     /// Get the substitution for a certain type name.
     fn get_subst(&self, x: &TypeName) -> Option<local::Ty<R>> {
         self.substs.get(&x.0).cloned()
@@ -45,6 +52,19 @@ impl<R: Reason> LocalizeEnv<R> {
             let n = param.name.id().clone();
             let ty = targ.0.clone();
             self.substs.insert(n.0, ty);
+        }
+    }
+
+    /// Add substitutions using a list of tparams and corresponding types.
+    fn add_explicit_ty_substs(
+        &mut self,
+        tparams: &[decl::Tparam<R, decl::Ty<R>>],
+        targs: &[local::Ty<R>],
+    ) {
+        rupro_todo_assert!(tparams.len() == targs.len(), AST);
+        for (param, ty) in tparams.iter().zip(targs.iter()) {
+            let n = param.name.id().clone();
+            self.substs.insert(n.0, ty.clone());
         }
     }
 }

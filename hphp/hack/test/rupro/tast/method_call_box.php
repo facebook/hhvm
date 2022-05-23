@@ -11,6 +11,6 @@ interface IBoxFactory {
 
 function foo(IBoxFactory $f): void {
     $box = $f->new_box();
-    // $box->set(4);
-    // $y = $box->get();
+    $box->set(4);
+    $y = $box->get();
 }

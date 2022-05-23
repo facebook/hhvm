@@ -155,8 +155,8 @@ impl<'a, R: Reason> ToOxidized<'a> for PropF<R, Prop<R>> {
         use oxidized_by_ref::typing_logic::SubtypeProp;
         let prop = match self {
             PropF::Conj(conjs) => SubtypeProp::Conj(conjs.to_oxidized(bump)),
-            PropF::Disj(..) => todo!(),
-            PropF::Subtype(..) => todo!(),
+            PropF::Disj(..) => unimplemented!("{:?}", self),
+            PropF::Subtype(..) => unimplemented!("{:?}", self),
         };
         prop
     }

@@ -8,7 +8,7 @@ use crate::typing::ast::typing_tparam::{TCTargs, TCTargsParams};
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
-use crate::typing_decl_provider::ClassElt;
+use crate::typing_decl_provider::{Class, ClassElt};
 use pos::{MethodName, Symbol, TypeName};
 use ty::decl;
 use ty::local::{Ty, Ty_};
@@ -30,6 +30,7 @@ pub struct TCObjGet<'a, R: Reason> {
 }
 
 /// The result of typing a member access.
+#[derive(Debug)]
 pub struct TCObjGetResult<R: Reason> {
     /// The return type, i.e. the type of the full `expr->get()` expression.
     pub ty: Ty<R>,
@@ -133,6 +134,7 @@ fn obj_get_concrete_class<R: Reason>(
                     receiver_ty,
                     member_id,
                     class_name,
+                    class_info.as_ref(),
                     paraml,
                     &*member_info,
                 ),
@@ -147,7 +149,8 @@ fn obj_get_concrete_class_with_member_info<R: Reason>(
     _receiver_ty: &Ty<R>,
     member_id: &oxidized::ast_defs::Id,
     _class_name: &TypeName,
-    _paraml: &[Ty<R>],
+    class_info: &dyn Class<R>,
+    paraml: &[Ty<R>],
     member_info: &ClassElt<R>,
 ) -> Result<TCObjGetResult<R>> {
     rupro_todo_mark!(MissingError, "Ambiguous_object_access");
@@ -172,7 +175,7 @@ fn obj_get_concrete_class_with_member_info<R: Reason>(
                 env,
                 LocalizeFunTypeParams {
                     explicit_targs: targs.clone(),
-                    localize_env: LocalizeEnv::no_subst(),
+                    localize_env: LocalizeEnv::with_class_subst(class_info, paraml),
                 },
             )?;
             let ty = Ty::fun(member_decl_ty.reason().clone(), ft);

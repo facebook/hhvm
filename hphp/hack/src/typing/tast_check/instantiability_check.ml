@@ -13,6 +13,9 @@ module ShapeMap = Aast.ShapeMap
 module SN = Naming_special_names
 module Cls = Decl_provider.Class
 
+(* This TAST check raises an error when an abstract final
+   class or a trait appears outside of classname<_>. *)
+
 let validate_classname (pos, hint) =
   match hint with
   | Aast.Happly _
@@ -28,6 +31,7 @@ let validate_classname (pos, hint) =
   | Aast.Hlike _
   | Aast.Hnothing ->
     ()
+  | Aast.Hrefinement _
   | Aast.Htuple _
   | Aast.Hunion _
   | Aast.Hintersection _
@@ -74,6 +78,16 @@ let rec check_hint env (pos, hint) =
       Option.iter (List.hd tal) ~f:validate_classname
     else
       List.iter tal ~f:(check_hint env)
+  | Aast.Hrefinement (h, members) ->
+    let member (Aast.TypeRef (_, ref)) =
+      match ref with
+      | Aast.Texact h -> check_hint env h
+      | Aast.Tloose { Aast.tr_lower; tr_upper } ->
+        List.iter tr_lower ~f:(check_hint env);
+        List.iter tr_upper ~f:(check_hint env)
+    in
+    List.iter members ~f:member;
+    check_hint env h
   | Aast.Hshape hm -> check_shape env hm
   | Aast.Haccess (h, ids) -> check_access env h ids
   | Aast.Hvec_or_dict (hopt1, h2) ->

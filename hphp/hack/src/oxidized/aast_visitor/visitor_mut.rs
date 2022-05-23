@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a88acbe6ae82ca7acc4d1083ad21a53e>>
+// @generated SignedSource<<21bcc1dd660a38afa8c4ae8d26485eb3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -463,6 +463,13 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
+    fn visit_refinement(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut Refinement,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
     fn visit_reify_kind(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
@@ -530,6 +537,20 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node mut TypeHint<<Self::Params as Params>::Ex>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_type_refinement(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut TypeRefinement,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_type_refinement_bounds(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut TypeRefinementBounds,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

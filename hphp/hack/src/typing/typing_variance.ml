@@ -44,6 +44,9 @@ type position_descr =
   | Rconstraint_as
   | Rconstraint_eq
   | Rconstraint_super
+  | Rrefinement_eq
+  | Rrefinement_as
+  | Rrefinement_super
   | Rwhere_as
   | Rwhere_super
   | Rwhere_eq
@@ -151,6 +154,9 @@ let reason_to_string ~sign (_, descr, variance) =
     "`where _ super _` constraints are contravariant on the left, covariant on the right"
   | Rfun_inout_parameter ->
     "Inout/ref function parameters are both covariant and contravariant"
+  | Rrefinement_eq -> "`=` refinement members are invariant"
+  | Rrefinement_as -> "`as` refinement members are covariant"
+  | Rrefinement_super -> "`super` refinement members are contravariant"
 
 let detailed_message variance pos stack =
   match stack with
@@ -552,6 +558,11 @@ let flip reason = function
   | Vinvariant _ as x -> x
   | Vboth -> Vboth
 
+let detail reason = function
+  | Vcovariant stack -> Vcovariant (reason :: stack)
+  | Vcontravariant stack -> Vcontravariant (reason :: stack)
+  | variance -> variance
+
 let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
  fun env variance (pos, h) ->
   let open Aast_defs in
@@ -610,6 +621,9 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
       nsi_field_map
       ~f:(fun { sfi_hint; sfi_optional = _; sfi_name = _ } ->
         hint env variance sfi_hint)
+  | Hrefinement (h, members) ->
+    List.iter members ~f:(refinement_member env variance);
+    hint env variance h
   | Hfun hfun ->
     let {
       hf_is_readonly = _;
@@ -656,17 +670,31 @@ and hfun_param env variance info h =
 and fun_ret env variance h =
   let pos = Ast_defs.get_pos h in
   let reason_covariant = (pos, Rfun_return, Pcovariant) in
-  let variance =
-    match variance with
-    | Vcovariant stack -> Vcovariant (reason_covariant :: stack)
-    | Vcontravariant stack -> Vcontravariant (reason_covariant :: stack)
-    | variance -> variance
-  in
+  let variance = detail reason_covariant variance in
   hint env variance h
 
 and fun_arity env variance h =
   let empty_param_info = None in
   Option.iter h ~f:(hfun_param env variance empty_param_info)
+
+and refinement_member env variance (Aast.TypeRef (_, ref)) =
+  match ref with
+  | Aast.Texact h ->
+    let pos = Ast_defs.get_pos h in
+    let reason = [(pos, Rrefinement_eq, Pinvariant)] in
+    let var = Vinvariant (reason, reason) in
+    hint env var h
+  | Aast.Tloose { Aast.tr_lower = lb; tr_upper = ub } ->
+    List.iter lb ~f:(fun h ->
+        let pos = Ast_defs.get_pos h in
+        let reason = (pos, Rrefinement_super, Pcontravariant) in
+        let var = flip reason variance in
+        hint env var h);
+    List.iter ub ~f:(fun h ->
+        let pos = Ast_defs.get_pos h in
+        let reason = (pos, Rrefinement_as, Pcovariant) in
+        let var = detail reason variance in
+        hint env var h)
 
 let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
  fun env variance param ->

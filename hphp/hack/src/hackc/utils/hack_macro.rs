@@ -922,6 +922,7 @@ mod emit {
                 Hint_::Happly(p0, p1) => emit_wrapper2(quote!(Hint_::Happly), p0, p1, e),
                 Hint_::Hshape(inner) => emit_wrapper(quote!(Hint_::Hshape), inner, e),
                 Hint_::Haccess(p0, p1) => emit_wrapper2(quote!(Hint_::Haccess), p0, p1, e),
+                Hint_::Hrefinement(p0, p1) => emit_wrapper2(quote!(Hint_::Hrefinement), p0, p1, e),
                 Hint_::Hsoft(inner) => emit_wrapper(quote!(Hint_::Hsoft), inner, e),
                 Hint_::Hany => Ok(quote!(Hint_::Hany)),
                 Hint_::Herr => Ok(quote!(Hint_::Herr)),
@@ -1114,6 +1115,12 @@ mod emit {
     impl EmitTokens for Vec<(ast::ParamKind, ast::Expr)> {
         fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
             emit_repl_sequence_helper(self, e, Emitter::lookup_param_replacement)
+        }
+    }
+
+    impl EmitTokens for Vec<ast::Refinement> {
+        fn emit_tokens(&self, _e: &Emitter) -> Result<TokenStream> {
+            todo!("EmitTokens: Refinements")
         }
     }
 

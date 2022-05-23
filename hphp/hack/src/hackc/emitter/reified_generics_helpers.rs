@@ -92,6 +92,7 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
         | Hint_::Hshape(_)
         | Hint_::Hfun(_)
         | Hint_::Haccess(_, _)
+        | Hint_::Hrefinement(_, _)
         | Hint_::HfunContext(_)
         | Hint_::Hvar(_) => ReificationLevel::Not,
         // Not found in the original AST
@@ -120,6 +121,7 @@ fn remove_awaitable(aast::Hint(pos, hint): aast::Hint) -> aast::Hint {
         | Hint_::Hshape(_)
         | Hint_::Hfun(_)
         | Hint_::Haccess(_, _)
+        | Hint_::Hrefinement(_, _)
         | Hint_::Happly(_, _)
         | Hint_::HfunContext(_)
         | Hint_::Hvar(_) => Hint(pos, hint),
@@ -211,7 +213,7 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
                     field_map,
                 })
             }
-            h_ @ Hint_::Hfun(_) | h_ @ Hint_::Haccess(_, _) => h_,
+            h_ @ Hint_::Hfun(_) | h_ @ Hint_::Haccess(_, _) | h_ @ Hint_::Hrefinement(_, _) => h_,
             Hint_::Herr
             | Hint_::Hany
             | Hint_::Hmixed

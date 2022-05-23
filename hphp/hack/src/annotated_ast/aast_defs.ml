@@ -116,6 +116,7 @@ and hint_ =
        * Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
        *)
   | Hsoft of hint
+  | Hrefinement of hint * refinement list
   (* The following constructors don't exist in the AST hint type *)
   | Hany
   | Herr
@@ -144,6 +145,19 @@ and tprim =
   | Tnum
   | Tarraykey
   | Tnoreturn
+
+and refinement =
+  (* TODO(type-refinements): CtxRef of ctx_refinement *)
+  | TypeRef of sid * type_refinement
+
+and type_refinement =
+  | Texact of hint
+  | Tloose of type_refinement_bounds
+
+and type_refinement_bounds = {
+  tr_lower: hint list;
+  tr_upper: hint list;
+}
 
 and shape_field_info = {
   sfi_optional: bool;

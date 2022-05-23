@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0dfe6066720520458445a7f05c330367>>
+// @generated SignedSource<<40da43359a353f283c3d090fd24c448d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -259,6 +259,8 @@ pub enum Hint_<'a> {
     Haccess(&'a (&'a Hint<'a>, &'a [Sid<'a>])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hsoft(&'a Hint<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Hrefinement(&'a (&'a Hint<'a>, &'a [Refinement<'a>])),
     Hany,
     Herr,
     Hmixed,
@@ -285,6 +287,84 @@ impl<'a> TrivialDrop for Hint_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Hint_<'arena>);
 
 pub use oxidized::aast_defs::Tprim;
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum Refinement<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    TypeRef(&'a (Sid<'a>, TypeRefinement<'a>)),
+}
+impl<'a> TrivialDrop for Refinement<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Refinement<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum TypeRefinement<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Texact(&'a Hint<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Tloose(&'a TypeRefinementBounds<'a>),
+}
+impl<'a> TrivialDrop for TypeRefinement<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TypeRefinement<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct TypeRefinementBounds<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub lower: &'a [&'a Hint<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub upper: &'a [&'a Hint<'a>],
+}
+impl<'a> TrivialDrop for TypeRefinementBounds<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TypeRefinementBounds<'arena>);
 
 #[derive(
     Clone,

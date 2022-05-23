@@ -55,6 +55,31 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
       pair ~sep:dbl_colon (pp_hint ~is_ctx:false) @@ list ~sep:dbl_colon string)
       ppf
       (root, List.map ~f:snd ids)
+  | Aast.Hrefinement (ty, members) ->
+    let pp_bounds ppf bounds =
+      let bound ppf (kind, hint) =
+        Fmt.string
+          ppf
+          (match kind with
+          | `E -> "= "
+          | `L -> "as "
+          | `U -> "super ");
+        pp_hint ~is_ctx:false ppf hint
+      in
+      Fmt.list ~sep:Fmt.(const string " ") bound ppf bounds
+    in
+    let member ppf (Aast.TypeRef (ident, ref)) =
+      Fmt.string ppf ("type " ^ snd ident ^ " ");
+      pp_bounds
+        ppf
+        (match ref with
+        | Aast.Texact hint -> [(`E, hint)]
+        | Aast.Tloose { Aast.tr_lower; tr_upper } ->
+          List.map tr_lower ~f:(fun x -> (`L, x))
+          @ List.map tr_upper ~f:(fun x -> (`U, x)))
+    in
+    Fmt.(suffix with_ (pp_hint ~is_ctx:false)) ppf ty;
+    Fmt.(braces (list ~sep:semi_sep member)) ppf members
   | Aast.Hvec_or_dict (None, vhint) ->
     Fmt.(prefix (const string "vec_or_dict") @@ angles @@ pp_hint ~is_ctx:false)
       ppf

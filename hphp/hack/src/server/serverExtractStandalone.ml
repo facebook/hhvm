@@ -426,6 +426,14 @@ end = struct
       | Aast_defs.(Haccess (hint, _) | Hlike hint | Hsoft hint | Hoption hint)
         ->
         aux acc @@ snd hint
+      | Aast_defs.Hrefinement (hint, members) ->
+        let member_hints (Aast_defs.TypeRef (_, ref)) =
+          match ref with
+          | Aast_defs.Texact hint -> [hint]
+          | Aast_defs.Tloose { Aast_defs.tr_lower; tr_upper } ->
+            tr_lower @ tr_upper
+        in
+        auxs acc (hint :: List.concat_map members ~f:member_hints)
       | Aast_defs.Habstr (_, hints)
       | Aast_defs.Hunion hints
       | Aast_defs.Hintersection hints
@@ -1144,6 +1152,7 @@ end = struct
         | Hsoft _
         | Hshape _
         | Htuple _
+        | Hrefinement _
         (* places where function types shouldn't appear *)
         | Haccess _
         | Happly _

@@ -209,6 +209,9 @@ and hint_ p env = function
           ids
     in
     translate root_ty ids
+  | Hrefinement (_subject_ty, _members) ->
+    Errors.internal_error p "TODO: turn refinement hints into decl types";
+    Terr
   | Htuple hl ->
     let tyl = List.map hl ~f:(hint env) in
     Ttuple tyl

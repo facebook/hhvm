@@ -1,4 +1,6 @@
 aast_defs::Hint_
+aast_defs::Refinement
+aast_defs::TypeRefinement
 aast_defs::ParamKind
 aast_defs::ReifyKind
 aast_defs::Sid

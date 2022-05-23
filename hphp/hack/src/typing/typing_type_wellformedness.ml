@@ -145,6 +145,9 @@ and hint_ ~in_signature env p h_ =
         in
         hints env hl
     end
+  | Hrefinement _ ->
+    (* FIXME, TODO(refinements): well formedness checks? *)
+    []
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
     let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in
     List.concat_map ~f:compute_hint_for_shape_field_info nsi_field_map

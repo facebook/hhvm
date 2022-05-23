@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<169fd4de7e44ab6f09686359e906c84a>>
+// @generated SignedSource<<48129f751a137720db9f3894772d61b2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1378,6 +1378,10 @@ impl<P: Params> NodeMut<P> for Hint_ {
                 a1.accept(c, v)
             }
             Hint_::Hsoft(a0) => a0.accept(c, v),
+            Hint_::Hrefinement(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
             Hint_::Hany => Ok(()),
             Hint_::Herr => Ok(()),
             Hint_::Hmixed => Ok(()),
@@ -1678,6 +1682,27 @@ impl<P: Params> NodeMut<P> for ReadonlyKind {
     ) -> Result<(), P::Error> {
         match self {
             ReadonlyKind::Readonly => Ok(()),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for Refinement {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_refinement(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            Refinement::TypeRef(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
         }
     }
 }
@@ -1988,6 +2013,42 @@ impl<P: Params> NodeMut<P> for TypeHint<P::Ex> {
     ) -> Result<(), P::Error> {
         v.visit_ex(c, &mut self.0)?;
         self.1.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for TypeRefinement {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_type_refinement(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            TypeRefinement::Texact(a0) => a0.accept(c, v),
+            TypeRefinement::Tloose(a0) => a0.accept(c, v),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for TypeRefinementBounds {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_type_refinement_bounds(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.lower.accept(c, v)?;
+        self.upper.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for Typedef<P::Ex, P::En> {

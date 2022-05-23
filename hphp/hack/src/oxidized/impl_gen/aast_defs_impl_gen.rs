@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1dfa3f046be60c092f079b050f4c278c>>
+// @generated SignedSource<<b6d7b5c5d0cfad5a2327ad1976f6d790>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -211,6 +211,9 @@ impl Hint_ {
     pub fn mk_hsoft(p0: Hint) -> Self {
         Hint_::Hsoft(p0)
     }
+    pub fn mk_hrefinement(p0: Hint, p1: Vec<Refinement>) -> Self {
+        Hint_::Hrefinement(p0, p1)
+    }
     pub fn mk_hany() -> Self {
         Hint_::Hany
     }
@@ -298,6 +301,12 @@ impl Hint_ {
     pub fn is_hsoft(&self) -> bool {
         match self {
             Hint_::Hsoft(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_hrefinement(&self) -> bool {
+        match self {
+            Hint_::Hrefinement(..) => true,
             _ => false,
         }
     }
@@ -433,6 +442,12 @@ impl Hint_ {
             _ => None,
         }
     }
+    pub fn as_hrefinement(&self) -> Option<(&Hint, &Vec<Refinement>)> {
+        match self {
+            Hint_::Hrefinement(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
     pub fn as_habstr(&self) -> Option<(&String, &Vec<Hint>)> {
         match self {
             Hint_::Habstr(p0, p1) => Some((p0, p1)),
@@ -523,6 +538,12 @@ impl Hint_ {
             _ => None,
         }
     }
+    pub fn as_hrefinement_mut(&mut self) -> Option<(&mut Hint, &mut Vec<Refinement>)> {
+        match self {
+            Hint_::Hrefinement(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
     pub fn as_habstr_mut(&mut self) -> Option<(&mut String, &mut Vec<Hint>)> {
         match self {
             Hint_::Habstr(p0, p1) => Some((p0, p1)),
@@ -610,6 +631,12 @@ impl Hint_ {
     pub fn as_hsoft_into(self) -> Option<Hint> {
         match self {
             Hint_::Hsoft(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_hrefinement_into(self) -> Option<(Hint, Vec<Refinement>)> {
+        match self {
+            Hint_::Hrefinement(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
@@ -745,6 +772,85 @@ impl Tprim {
         match self {
             Tprim::Tnoreturn => true,
             _ => false,
+        }
+    }
+}
+impl Refinement {
+    pub fn mk_type_ref(p0: Sid, p1: TypeRefinement) -> Self {
+        Refinement::TypeRef(p0, p1)
+    }
+    pub fn is_type_ref(&self) -> bool {
+        true
+    }
+    pub fn as_type_ref(&self) -> Option<(&Sid, &TypeRefinement)> {
+        match self {
+            Refinement::TypeRef(p0, p1) => Some((p0, p1)),
+        }
+    }
+    pub fn as_type_ref_mut(&mut self) -> Option<(&mut Sid, &mut TypeRefinement)> {
+        match self {
+            Refinement::TypeRef(p0, p1) => Some((p0, p1)),
+        }
+    }
+    pub fn as_type_ref_into(self) -> Option<(Sid, TypeRefinement)> {
+        match self {
+            Refinement::TypeRef(p0, p1) => Some((p0, p1)),
+        }
+    }
+}
+impl TypeRefinement {
+    pub fn mk_texact(p0: Hint) -> Self {
+        TypeRefinement::Texact(p0)
+    }
+    pub fn mk_tloose(p0: TypeRefinementBounds) -> Self {
+        TypeRefinement::Tloose(p0)
+    }
+    pub fn is_texact(&self) -> bool {
+        match self {
+            TypeRefinement::Texact(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_tloose(&self) -> bool {
+        match self {
+            TypeRefinement::Tloose(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_texact(&self) -> Option<&Hint> {
+        match self {
+            TypeRefinement::Texact(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_tloose(&self) -> Option<&TypeRefinementBounds> {
+        match self {
+            TypeRefinement::Tloose(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_texact_mut(&mut self) -> Option<&mut Hint> {
+        match self {
+            TypeRefinement::Texact(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_tloose_mut(&mut self) -> Option<&mut TypeRefinementBounds> {
+        match self {
+            TypeRefinement::Tloose(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_texact_into(self) -> Option<Hint> {
+        match self {
+            TypeRefinement::Texact(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_tloose_into(self) -> Option<TypeRefinementBounds> {
+        match self {
+            TypeRefinement::Tloose(p0) => Some(p0),
+            _ => None,
         }
     }
 }

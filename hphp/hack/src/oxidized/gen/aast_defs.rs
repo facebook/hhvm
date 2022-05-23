@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<79400c68ee6386cf8837a4bc99213a66>>
+// @generated SignedSource<<f3b6929b929250e46645c353f23e0418>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -269,6 +269,7 @@ pub enum Hint_ {
     /// Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
     Haccess(Hint, Vec<Sid>),
     Hsoft(Hint),
+    Hrefinement(Hint, Vec<Refinement>),
     Hany,
     Herr,
     Hmixed,
@@ -319,6 +320,71 @@ pub enum Tprim {
 }
 impl TrivialDrop for Tprim {}
 arena_deserializer::impl_deserialize_in_arena!(Tprim);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum Refinement {
+    TypeRef(Sid, TypeRefinement),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum TypeRefinement {
+    Texact(Hint),
+    Tloose(TypeRefinementBounds),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct TypeRefinementBounds {
+    pub lower: Vec<Hint>,
+    pub upper: Vec<Hint>,
+}
 
 #[derive(
     Clone,

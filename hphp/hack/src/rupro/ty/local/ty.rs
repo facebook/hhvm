@@ -3,17 +3,33 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub use crate::decl::ty::{Exact, Prim};
+use crate::decl::UserAttribute;
+pub use crate::decl::{
+    self,
+    ty::{Exact, Prim},
+};
 use crate::local::tyvar::Tyvar;
 use crate::reason::Reason;
 use crate::visitor::{Visitor, Walkable};
 use hcons::Hc;
 use im::HashSet;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-use oxidized::ast_defs::Variance;
+use oxidized::aast_defs::ReifyKind;
+use oxidized::ast_defs::{ConstraintKind, Variance};
 use oxidized::typing_defs_flags::FunTypeFlags;
 use pos::{Positioned, Symbol, ToOxidized, TypeName};
 use std::ops::Deref;
+
+// TODO: Share the representation from decl_defs
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Tparam<R: Reason> {
+    pub variance: Variance,
+    pub name: Positioned<TypeName, R::Pos>,
+    pub tparams: Vec<Tparam<R>>,
+    pub constraints: Vec<(ConstraintKind, Ty<R>)>,
+    pub reified: ReifyKind,
+    pub user_attributes: Vec<UserAttribute<R::Pos>>,
+}
 
 // TODO: Share the representation from decl_defs
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -28,6 +44,7 @@ walkable!(FunParam<R> => [ty]);
 // TODO: Share the representation from decl_defs
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FunType<R: Reason> {
+    pub tparams: Box<[Tparam<R>]>,
     pub params: Vec<FunParam<R>>,
     pub ret: Ty<R>,
     pub flags: FunTypeFlags,
@@ -386,7 +403,9 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
             Ty_::Tvar(tv) => OTy_::Tvar((*tv).into()),
             Ty_::Tprim(x) => OTy_::Tprim(arena.alloc(*x)),
             Ty_::Toption(_) => todo!(),
-            Ty_::Tunion(_) => todo!(),
+            Ty_::Tunion(tys) => {
+                OTy_::Tunion(&*arena.alloc_slice_fill_iter(tys.iter().map(|_ty| todo!())))
+            }
             Ty_::Tfun(ft) => OTy_::Tfun(&*arena.alloc(ft.to_oxidized(arena))),
             Ty_::Tany => todo!(),
             Ty_::Tnonnull => todo!(),
@@ -412,14 +431,17 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R> {
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         use oxidized_by_ref::typing_defs::FunType as OFunType;
         use oxidized_by_ref::typing_defs::PossiblyEnforcedTy as OPossiblyEnforcedTy;
+        let FunType {
+            tparams,
+            params,
+            ret,
+            flags,
+        } = self;
         OFunType {
-            tparams: &[],
+            tparams: tparams.to_oxidized(arena),
             where_constraints: &[],
-            params: &*arena.alloc_slice_fill_iter(
-                self.params
-                    .iter()
-                    .map(|p| &*arena.alloc(p.to_oxidized(arena))),
-            ),
+            params: &*arena
+                .alloc_slice_fill_iter(params.iter().map(|p| &*arena.alloc(p.to_oxidized(arena)))),
             implicit_params: &*arena.alloc(oxidized_by_ref::typing_defs_core::FunImplicitParams {
                 capability: oxidized_by_ref::typing_defs_core::Capability::CapDefaults(
                     oxidized_by_ref::pos::Pos::none(),
@@ -427,9 +449,9 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R> {
             }),
             ret: &*arena.alloc(OPossiblyEnforcedTy {
                 enforced: oxidized::typing_defs_core::Enforcement::Enforced,
-                type_: &*arena.alloc(self.ret.to_oxidized(arena)),
+                type_: &*arena.alloc(ret.to_oxidized(arena)),
             }),
-            flags: oxidized::typing_defs_flags::FunTypeFlags::from_bits_truncate(0),
+            flags: flags.clone(),
             ifc_decl: oxidized_by_ref::typing_defs_core::IfcFunDecl::FDInferFlows,
         }
     }
@@ -450,6 +472,32 @@ impl<'a, R: Reason> ToOxidized<'a> for FunParam<R> {
             }),
             flags: oxidized::typing_defs_flags::FunParamFlags::from_bits_truncate(0),
         }
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for Tparam<R> {
+    type Output = &'a oxidized_by_ref::typing_defs::Tparam<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use oxidized_by_ref::typing_defs::Tparam as OTparam;
+        let Tparam {
+            variance,
+            name,
+            tparams,
+            constraints,
+            reified,
+            user_attributes,
+        } = self;
+        assert!(constraints.is_empty(), "TODO");
+        let tp = OTparam {
+            variance: variance.clone(),
+            name: name.to_oxidized(arena),
+            tparams: tparams.to_oxidized(arena),
+            constraints: &[],
+            reified: reified.clone(),
+            user_attributes: user_attributes.to_oxidized(arena),
+        };
+        arena.alloc(tp)
     }
 }
 
@@ -551,6 +599,7 @@ mod tests {
         let ty_fn1 = Ty::fun(
             NReason::none(),
             FunType {
+                tparams: vec![].into_boxed_slice(),
                 params,
                 flags: FunTypeFlags::empty(),
                 ret,
@@ -564,6 +613,7 @@ mod tests {
         let ty_fn2 = Ty::fun(
             NReason::none(),
             FunType {
+                tparams: vec![].into_boxed_slice(),
                 params: vec![FunParam {
                     pos: NPos::none(),
                     name: None,

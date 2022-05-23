@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use pos::ToOxidized;
 use serde::{Deserialize, Serialize};
 use utils::core::Ident;
 
@@ -23,5 +24,13 @@ impl From<Tyvar> for Ident {
 impl From<Tyvar> for isize {
     fn from(x: Tyvar) -> Self {
         x.0.into()
+    }
+}
+
+impl<'a> ToOxidized<'a> for Tyvar {
+    type Output = isize;
+
+    fn to_oxidized(&self, _bump: &'a bumpalo::Bump) -> Self::Output {
+        self.0.into()
     }
 }

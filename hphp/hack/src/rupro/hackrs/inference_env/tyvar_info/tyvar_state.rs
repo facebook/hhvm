@@ -7,6 +7,7 @@
 
 use super::tyvar_constraints::TyvarConstraints;
 use im::HashSet;
+use pos::ToOxidized;
 use ty::{
     local::{Ty, Tyvar, Variance},
     prop::CstrTy,
@@ -193,6 +194,19 @@ impl<R: Reason> TyvarState<R> {
             Self::Bound(_) => {
                 panic!("Attempting to add a lower bound to a type variable that is already solved");
             }
+        }
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for TyvarState<R> {
+    type Output = oxidized_by_ref::typing_inference_env::SolvingInfo<'a>;
+
+    fn to_oxidized(&self, bump: &'a bumpalo::Bump) -> Self::Output {
+        use oxidized_by_ref::typing_inference_env::SolvingInfo;
+        match self {
+            TyvarState::Error => todo!(),
+            TyvarState::Bound(ty) => SolvingInfo::TVIType(ty.to_oxidized_ref(bump)),
+            TyvarState::Constrained(_cstrs) => todo!(),
         }
     }
 }

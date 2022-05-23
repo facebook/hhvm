@@ -9,7 +9,7 @@ mod tyvar_info;
 mod tyvar_occurrences;
 
 use im::{HashMap, HashSet};
-use pos::{Pos, TypeName};
+use pos::{IImmutableHashMapToOxidized, Pos, ToOxidized, TypeName};
 use std::ops::Deref;
 use ty::{
     local::{Ty, Ty_, Tyvar, Variance},
@@ -59,6 +59,10 @@ impl<R: Reason> InferenceEnv<R> {
         self.tyvar_stack.push((pos, vec![]))
     }
 
+    pub fn get_all_tyvars(&self) -> Vec<Tyvar> {
+        self.tyvar_info.keys().copied().collect()
+    }
+
     pub fn close_tyvars(&mut self) {
         let popped = self.tyvar_stack.pop();
         if popped.is_none() {
@@ -73,7 +77,7 @@ impl<R: Reason> InferenceEnv<R> {
             .collect()
     }
 
-    fn is_solved(&self, tv: &Tyvar) -> bool {
+    pub fn is_solved(&self, tv: &Tyvar) -> bool {
         self.tyvar_info
             .get(tv)
             .map_or(false, |info| info.is_solved())
@@ -444,6 +448,35 @@ impl<'a, R: Reason> Visitor<R> for CollectUnsolved<'a, R> {
     }
 }
 
+impl<'a, R: Reason> ToOxidized<'a> for InferenceEnv<R> {
+    type Output = oxidized_by_ref::typing_inference_env::TypingInferenceEnv<'a>;
+
+    fn to_oxidized(&self, bump: &'a bumpalo::Bump) -> Self::Output {
+        let InferenceEnv {
+            gen: _,
+            tyvar_info,
+            tyvar_stack,
+            occurrences,
+            subtype_prop,
+        } = self;
+        rupro_todo_assert!(tyvar_stack.is_empty(), AST);
+        rupro_todo_assert!(occurrences.is_empty(), AST);
+
+        oxidized_by_ref::typing_inference_env::TypingInferenceEnv {
+            tvenv: IImmutableHashMapToOxidized(tyvar_info).to_oxidized(bump),
+            tyvars_stack: &[],
+            subtype_prop: bump.alloc(subtype_prop.to_oxidized(bump)),
+            tyvar_occurrences: bump.alloc(
+                oxidized_by_ref::typing_tyvar_occurrences::TypingTyvarOccurrences {
+                    tyvar_occurrences: Default::default(),
+                    tyvars_in_tyvar: Default::default(),
+                },
+            ),
+            allow_solve_globals: false,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -484,6 +517,7 @@ mod tests {
         let t_fun_ret = Ty::fun(
             NReason::none(),
             FunType {
+                tparams: vec![].into_boxed_slice(),
                 flags: FunTypeFlags::empty(),
                 params: vec![],
                 ret: t_var,
@@ -502,6 +536,7 @@ mod tests {
         let t_fun_fp = Ty::fun(
             NReason::none(),
             FunType {
+                tparams: vec![].into_boxed_slice(),
                 flags: FunTypeFlags::empty(),
                 params: vec![fp],
                 ret: t_void,

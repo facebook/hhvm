@@ -2,10 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use crate::tast;
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use crate::typing_decl_provider::{Class, TypeDecl};
+use oxidized::typing_defs_flags::FunTypeFlags;
 use pos::{Positioned, SymbolMap, TypeName};
 use ty::decl;
 use ty::local::{self, Exact, FunParam, FunType};
@@ -31,6 +33,20 @@ impl<R: Reason> LocalizeEnv<R> {
     fn get_subst(&self, x: &TypeName) -> Option<local::Ty<R>> {
         self.substs.get(&x.0).cloned()
     }
+
+    /// Add substitutions using a list of tparams and explicit targs.
+    fn add_explicit_targs_substs(
+        &mut self,
+        tparams: &[decl::Tparam<R, decl::Ty<R>>],
+        targs: &[tast::Targ<R>],
+    ) {
+        rupro_todo_assert!(tparams.len() == targs.len(), AST);
+        for (param, targ) in tparams.iter().zip(targs.iter()) {
+            let n = param.name.id().clone();
+            let ty = targ.0.clone();
+            self.substs.insert(n.0, ty);
+        }
+    }
 }
 
 /// Type localization is a "simple" conversion from `decl::Ty` to `Ty`.
@@ -50,12 +66,25 @@ impl<R: Reason> Infer<R> for decl::Ty<R> {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct LocalizeFunTypeParams<R: Reason> {
+    /// Localization environment.
+    pub localize_env: LocalizeEnv<R>,
+
+    /// The types used to instantiate the type arguments.
+    pub explicit_targs: Vec<tast::Targ<R>>,
+}
+
 impl<R: Reason> Infer<R> for decl::FunType<R, decl::Ty<R>> {
-    type Params = LocalizeEnv<R>;
+    type Params = LocalizeFunTypeParams<R>;
     type Typed = local::FunType<R>;
 
-    fn infer(&self, env: &mut TEnv<R>, localize_env: LocalizeEnv<R>) -> Result<local::FunType<R>> {
-        localize_ft(env, &localize_env, self)
+    fn infer(
+        &self,
+        env: &mut TEnv<R>,
+        params: LocalizeFunTypeParams<R>,
+    ) -> Result<local::FunType<R>> {
+        localize_ft(env, &params, self)
     }
 }
 
@@ -69,15 +98,28 @@ fn localize<R: Reason>(
     let res = match &**ty.node() {
         Tprim(p) => local::Ty::prim(r, *p),
         Tapply(box (pos_id, tyl)) => localize_tapply(env, localize_env, r, pos_id.clone(), tyl)?,
-        Tfun(box ft) => local::Ty::fun(r, localize_ft(env, localize_env, ft)?),
+        Tfun(box ft) => local::Ty::fun(
+            r,
+            localize_ft(
+                env,
+                &LocalizeFunTypeParams {
+                    explicit_targs: vec![],
+                    localize_env: localize_env.clone(),
+                },
+                ft,
+            )?,
+        ),
         Tgeneric(box (tparam, hl)) => {
             rupro_todo_assert!(hl.is_empty(), HKD);
-            rupro_todo_assert!(
-                localize_env.get_subst(tparam).is_none(),
-                Localization,
-                "type parameter substitution"
-            );
-            local::Ty::generic(r, tparam.clone(), vec![])
+            match localize_env.get_subst(tparam) {
+                Some(x_ty) => {
+                    let x_ty = env.resolve_ty(&x_ty);
+                    let r_inst = R::instantiate(x_ty.reason().clone(), tparam.clone(), r);
+                    rupro_todo_assert!(hl.is_empty(), HKD);
+                    local::Ty::new(r_inst, (&*x_ty).clone())
+                }
+                None => local::Ty::generic(r, tparam.clone(), vec![]),
+            }
         }
         t => rupro_todo!(AST, "{:?}", t),
     };
@@ -121,14 +163,21 @@ fn localize_class_instantiation<R: Reason>(
 
 fn localize_ft<R: Reason>(
     env: &mut TEnv<R>,
-    localize_env: &LocalizeEnv<R>,
+    localize_params: &LocalizeFunTypeParams<R>,
     ft: &decl::FunType<R, decl::Ty<R>>,
 ) -> Result<local::FunType<R>> {
+    let mut localize_params = localize_params.clone();
+    localize_params
+        .localize_env
+        .add_explicit_targs_substs(&ft.tparams, &localize_params.explicit_targs);
+
+    let tparams = ft.tparams.infer(env, ())?.into_boxed_slice();
     let params: Vec<_> = ft
         .params
         .iter()
         .map(|fp| {
-            let ty = localize_possibly_enforced_ty(env, localize_env, fp.ty.clone())?;
+            let ty =
+                localize_possibly_enforced_ty(env, &localize_params.localize_env, fp.ty.clone())?;
             let fp = FunParam {
                 pos: fp.pos.clone(),
                 name: fp.name,
@@ -137,11 +186,13 @@ fn localize_ft<R: Reason>(
             Ok(fp)
         })
         .collect::<Result<_>>()?;
-    let ret = localize_possibly_enforced_ty(env, localize_env, ft.ret.clone())?;
+    let ret = localize_possibly_enforced_ty(env, &localize_params.localize_env, ft.ret.clone())?;
+    let flags = ft.flags.clone() | FunTypeFlags::INSTANTIATED_TARGS;
     let ft = FunType {
+        tparams,
         params,
         ret,
-        flags: ft.flags.clone(),
+        flags,
     };
     Ok(ft)
 }

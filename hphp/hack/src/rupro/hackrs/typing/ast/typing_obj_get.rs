@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::tast;
-use crate::typing::ast::typing_localize::LocalizeEnv;
+use crate::typing::ast::typing_localize::{LocalizeEnv, LocalizeFunTypeParams};
+use crate::typing::ast::typing_tparam::{TCTargs, TCTargsParams};
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use crate::typing_decl_provider::ClassElt;
-use pos::{MethodName, TypeName};
+use pos::{MethodName, Symbol, TypeName};
 use ty::decl;
 use ty::local::{Ty, Ty_};
 use ty::reason::Reason;
@@ -23,6 +24,9 @@ pub struct TCObjGet<'a, R: Reason> {
 
     /// Is the member access a method?
     pub is_method: bool,
+
+    /// Explicit arguments provided to this method call.
+    pub explicit_targs: &'a [oxidized::aast::Targ<()>],
 }
 
 /// The result of typing a member access.
@@ -41,9 +45,12 @@ pub struct TCObjGetResult<R: Reason> {
 }
 
 /// Internal struct for shared parameters
-struct TCObjGetInternalParams {
+struct TCObjGetInternalParams<'a> {
     /// Is the member access for a method?
     is_method: bool,
+
+    /// Explicit arguments provided to this method call.
+    pub explicit_targs: &'a [oxidized::aast::Targ<()>],
 }
 
 impl<'a, R: Reason> Infer<R> for TCObjGet<'a, R> {
@@ -58,6 +65,7 @@ impl<'a, R: Reason> Infer<R> for TCObjGet<'a, R> {
 
         let args = TCObjGetInternalParams {
             is_method: self.is_method,
+            explicit_targs: self.explicit_targs,
         };
         obj_get_inner(env, &args, self.receiver_ty, self.member_id)
     }
@@ -65,7 +73,7 @@ impl<'a, R: Reason> Infer<R> for TCObjGet<'a, R> {
 
 fn obj_get_inner<R: Reason>(
     env: &mut TEnv<R>,
-    args: &TCObjGetInternalParams,
+    args: &TCObjGetInternalParams<'_>,
     receiver_ty: &Ty<R>,
     member_id: &oxidized::ast_defs::Id,
 ) -> Result<TCObjGetResult<R>> {
@@ -78,7 +86,7 @@ fn obj_get_inner<R: Reason>(
 
 fn obj_get_concrete_ty<R: Reason>(
     env: &mut TEnv<R>,
-    args: &TCObjGetInternalParams,
+    args: &TCObjGetInternalParams<'_>,
     receiver_ty: &Ty<R>,
     member_id: &oxidized::ast_defs::Id,
 ) -> Result<TCObjGetResult<R>> {
@@ -98,7 +106,7 @@ fn obj_get_concrete_ty<R: Reason>(
 
 fn obj_get_concrete_class<R: Reason>(
     env: &mut TEnv<R>,
-    args: &TCObjGetInternalParams,
+    args: &TCObjGetInternalParams<'_>,
     receiver_ty: &Ty<R>,
     member_id: &oxidized::ast_defs::Id,
     class_name: &TypeName,
@@ -108,7 +116,7 @@ fn obj_get_concrete_class<R: Reason>(
         None => rupro_todo!(MissingError),
         Some(class_info) => {
             rupro_todo_assert!(
-                class_info.get_tparams().is_empty() && paraml.is_empty(),
+                !paraml.is_empty() || class_info.get_tparams().is_empty(),
                 AST
             );
             rupro_todo_mark!(MemberAccess, "private visibility precedence");
@@ -135,9 +143,9 @@ fn obj_get_concrete_class<R: Reason>(
 
 fn obj_get_concrete_class_with_member_info<R: Reason>(
     env: &mut TEnv<R>,
-    args: &TCObjGetInternalParams,
+    args: &TCObjGetInternalParams<'_>,
     _receiver_ty: &Ty<R>,
-    _member_id: &oxidized::ast_defs::Id,
+    member_id: &oxidized::ast_defs::Id,
     _class_name: &TypeName,
     _paraml: &[Ty<R>],
     member_info: &ClassElt<R>,
@@ -148,13 +156,29 @@ fn obj_get_concrete_class_with_member_info<R: Reason>(
     let member_decl_ty = member_info.ty();
     match member_decl_ty.node_ref() {
         decl::Ty_::Tfun(ft) if args.is_method => {
-            rupro_todo_assert!(ft.tparams.is_empty(), AST);
             rupro_todo_mark!(Dynamic);
-            let ft = ft.infer(env, LocalizeEnv::no_subst())?;
+            rupro_todo_assert!(args.explicit_targs.is_empty(), AST);
+            let targs = TCTargs {
+                tparams: &*ft.tparams,
+            }
+            .infer(
+                env,
+                TCTargsParams {
+                    use_pos: &member_id.0,
+                    use_name: Symbol::from(&member_id.1),
+                },
+            )?;
+            let ft = ft.infer(
+                env,
+                LocalizeFunTypeParams {
+                    explicit_targs: targs.clone(),
+                    localize_env: LocalizeEnv::no_subst(),
+                },
+            )?;
             let ty = Ty::fun(member_decl_ty.reason().clone(), ft);
             Ok(TCObjGetResult {
                 ty,
-                targs: vec![],
+                targs,
                 lval_err: None,
                 rval_err: None,
             })

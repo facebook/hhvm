@@ -11,7 +11,7 @@ use hackrs::ast_provider::AstProvider;
 use hackrs::decl_parser::DeclParser;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::shallow_decl_provider::EagerShallowDeclProvider;
-use hackrs::tast;
+use hackrs::tast::{self, TastExpander};
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
 use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
@@ -119,12 +119,14 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
 
     for fln in filenames {
         let (ast, errs) = ast_provider.get_ast(fln).unwrap();
-        let (tast, errs) = TypingCheckUtils::type_file::<R>(Rc::clone(&ctx), &ast, errs).unwrap();
+        let (mut tast, errs) =
+            TypingCheckUtils::type_file::<R>(Rc::clone(&ctx), &ast, errs).unwrap();
         if !errs.is_empty() {
             for err in errs {
                 println!("{:#?}", err);
             }
         }
+        TastExpander::expand_program(&mut tast);
         print_tast(&options, &tast);
     }
 }

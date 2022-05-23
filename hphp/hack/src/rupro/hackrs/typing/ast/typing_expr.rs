@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::tast;
-use crate::typing::ast::typing_localize::LocalizeEnv;
+use crate::typing::ast::typing_localize::{LocalizeEnv, LocalizeFunTypeParams};
 use crate::typing::ast::typing_obj_get::TCObjGet;
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
@@ -218,6 +218,7 @@ fn dispatch_obj_get_method_id<R: Reason>(
         receiver_ty: &recv_expr.0,
         member_id: method_id,
         is_method: true,
+        explicit_targs,
     }
     .infer(env, ())?;
 
@@ -401,7 +402,13 @@ fn fun_type_of_id<R: Reason>(
             rupro_todo_mark!(Modules);
             rupro_todo_mark!(MissingError, "deprecated");
             rupro_todo_assert!(tal.is_empty(), AST);
-            let ft = ft.infer(env, LocalizeEnv::no_subst())?;
+            let ft = ft.infer(
+                env,
+                LocalizeFunTypeParams {
+                    explicit_targs: vec![],
+                    localize_env: LocalizeEnv::no_subst(),
+                },
+            )?;
             let fty = Ty::fun(fty.ty.reason().clone(), ft);
             Ok((fty, vec![]))
         }

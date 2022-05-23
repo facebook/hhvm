@@ -45,6 +45,26 @@ pub fn solve<R: Reason>(
     }
 }
 
+pub fn always_solve_wrt_variance_or_down<R: Reason>(
+    env: &mut NormalizeEnv<R>,
+    tv: Tyvar,
+    reason: &R,
+) -> Result<Option<Vec<TypingError<R>>>> {
+    let errs1 = solve(env, tv, reason)?;
+    let err2 = if !env.inf_env.is_solved(&tv) {
+        bind_to_lower_bound(env, tv, reason, false)?
+    } else {
+        None
+    };
+    match (errs1, err2) {
+        (Some(mut errs1), Some(err2)) => {
+            errs1.push(err2);
+            Ok(Some(errs1))
+        }
+        (errs1, err2) => Ok(errs1.or_else(|| err2.map(|e| vec![e]))),
+    }
+}
+
 fn solve_step<R: Reason>(
     env: &mut NormalizeEnv<R>,
     tv: Tyvar,

@@ -78,6 +78,10 @@ pub trait Reason:
         Self::mk(|| ReasonImpl::RsolveFail(pos))
     }
 
+    fn type_variable_generics(pos: Self::Pos, kind_name: Symbol, use_name: Symbol) -> Self {
+        Self::mk(|| ReasonImpl::RtypeVariableGenerics(pos, kind_name, use_name))
+    }
+
     fn pos(&self) -> &Self::Pos;
 
     fn decl_ty_conser() -> &'static Conser<decl::Ty_<Self>>;

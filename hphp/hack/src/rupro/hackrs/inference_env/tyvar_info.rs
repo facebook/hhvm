@@ -9,7 +9,7 @@ mod tyvar_constraints;
 mod tyvar_state;
 
 use im::HashSet;
-use pos::Pos;
+use pos::{Pos, ToOxidized};
 use ty::{
     local::{Ty, Tyvar, Variance},
     prop::CstrTy,
@@ -119,6 +119,24 @@ impl<R: Reason> Default for TyvarInfo<R> {
             pos: R::Pos::none(),
             state: TyvarState::default(),
             early_solve_failed: false,
+        }
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for TyvarInfo<R> {
+    type Output = oxidized_by_ref::typing_inference_env::TyvarInfo<'a>;
+
+    fn to_oxidized(&self, bump: &'a bumpalo::Bump) -> Self::Output {
+        let TyvarInfo {
+            pos,
+            state,
+            early_solve_failed,
+        } = self;
+        oxidized_by_ref::typing_inference_env::TyvarInfo {
+            tyvar_pos: pos.to_oxidized(bump),
+            global_reason: None,
+            eager_solve_failed: *early_solve_failed,
+            solving_info: state.to_oxidized(bump),
         }
     }
 }

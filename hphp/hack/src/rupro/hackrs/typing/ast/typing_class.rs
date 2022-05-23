@@ -34,6 +34,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Class_<(), ()> {
         typed_static_vars.extend(typed_vars);
 
         let tparams = self.tparams.infer(env, ())?;
+        rupro_todo_assert!(env.solve_all_unsolved_tyvars()?.is_none(), MissingError);
 
         let res = oxidized::aast::Class_ {
             span: self.span.clone(),

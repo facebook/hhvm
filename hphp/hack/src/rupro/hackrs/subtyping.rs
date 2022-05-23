@@ -15,7 +15,7 @@ use crate::typing::typing_error::Result;
 use im::HashSet;
 use oracle::Oracle;
 use pos::{Symbol, TypeName};
-pub use solve::solve;
+pub use solve::{always_solve_wrt_variance_or_down, solve};
 use std::{ops::Deref, rc::Rc};
 use ty::{
     local::{Ty, Tyvar},
@@ -61,6 +61,12 @@ impl<'a, R: Reason> Subtyper<'a, R> {
         )
     }
 
+    /// Commit the normalization environment.
+    fn commit(&mut self, mut env: NormalizeEnv<R>) {
+        std::mem::swap(self.inf_env, &mut env.inf_env);
+        std::mem::swap(self.tp_env, &mut env.tp_env);
+    }
+
     pub fn subtype(
         &mut self,
         ty_sub: &Ty<R>,
@@ -88,6 +94,17 @@ impl<'a, R: Reason> Subtyper<'a, R> {
         _member_ty: Ty<R>,
     ) -> Result<Option<TypingError<R>>> {
         unimplemented!("Inference for `has_member` propositions is not implemented")
+    }
+
+    pub fn always_solve_wrt_variance_or_down(
+        &mut self,
+        tvar: Tyvar,
+        r: &R,
+    ) -> Result<Option<Vec<TypingError<R>>>> {
+        let mut normalize_env = self.normalize_env();
+        always_solve_wrt_variance_or_down(&mut normalize_env, tvar, r)?;
+        self.commit(normalize_env);
+        Ok(None)
     }
 
     /// Traverse a proposition and add any bounds appearing in sub-propositions of

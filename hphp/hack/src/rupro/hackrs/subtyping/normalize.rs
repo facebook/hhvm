@@ -750,6 +750,7 @@ mod tests {
         let ty_fn1 = Ty::fun(
             NReason::none(),
             FunType {
+                tparams: vec![].into_boxed_slice(),
                 params: vec![FunParam {
                     name: None,
                     pos: Pos::none(),
@@ -763,6 +764,7 @@ mod tests {
         let ty_fn2 = Ty::fun(
             NReason::none(),
             FunType {
+                tparams: vec![].into_boxed_slice(),
                 params: vec![FunParam {
                     name: None,
                     pos: Pos::none(),

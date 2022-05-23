@@ -18,7 +18,7 @@ mod to_oxidized;
 pub use oxidized::file_pos_large::FilePosLarge;
 pub use relative_path::*;
 pub use symbol::*;
-pub use to_oxidized::ToOxidized;
+pub use to_oxidized::{IImmutableHashMapToOxidized, ToOxidized};
 
 pub trait Pos:
     Eq

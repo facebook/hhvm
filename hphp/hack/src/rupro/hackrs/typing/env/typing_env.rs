@@ -12,6 +12,7 @@ use crate::typing::env::typing_lenv::TLEnv;
 use crate::typing::env::typing_local_types::Local;
 use crate::typing::env::typing_per_cont_env::TypingContKey;
 use crate::typing::env::typing_return_info::TypingReturnInfo;
+use crate::typing::typing_error::Result;
 use crate::typing_ctx::TypingCtx;
 use depgraph_api::DeclName;
 use im::HashMap;
@@ -19,7 +20,7 @@ use pos::FunName;
 use pos::TypeName;
 use std::cell::RefCell;
 use std::rc::Rc;
-use ty::local::{ParamMode, Ty};
+use ty::local::{ParamMode, Ty, Variance};
 use ty::local_error::TypingError;
 use ty::reason::Reason;
 use utils::core::{IdentGen, LocalId};
@@ -204,8 +205,10 @@ impl<R: Reason> TEnv<R> {
     }
 
     /// Save the typing environment to be attached to TAST nodes.
-    pub fn save(&self, _local_tpenv: ()) -> SavedEnv {
-        SavedEnv
+    pub fn save(&self, _local_tpenv: ()) -> SavedEnv<R> {
+        SavedEnv {
+            inf_env: self.inf_env.clone(),
+        }
     }
 
     /// Resolve a subtype query, potentially adding constraints to
@@ -219,5 +222,26 @@ impl<R: Reason> TEnv<R> {
             Rc::new(TEnvDeclsOracle::new(self.decls.clone())),
             None,
         )
+    }
+
+    /// Allocate a new type variable in the environment.
+    pub fn fresh(&mut self, variance: Variance, pos: R::Pos, reason_opt: Option<R>) -> Ty<R> {
+        self.inf_env.fresh(variance, pos, reason_opt)
+    }
+
+    /// For solve all type variables.
+    pub fn solve_all_unsolved_tyvars(&mut self) -> Result<Option<Vec<TypingError<R>>>> {
+        for tyvar in self.inf_env.get_all_tyvars() {
+            let err_opt = self
+                .subtyper()
+                .always_solve_wrt_variance_or_down(tyvar, &Reason::none())?;
+            rupro_todo_assert!(err_opt.is_none(), MissingError);
+        }
+        Ok(None)
+    }
+
+    /// Path shorthen the given type.
+    pub fn resolve_ty(&mut self, ty: &Ty<R>) -> Ty<R> {
+        self.inf_env.resolve_ty(ty)
     }
 }

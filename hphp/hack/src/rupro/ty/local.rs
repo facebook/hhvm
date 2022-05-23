@@ -10,6 +10,6 @@ mod variance;
 
 pub use decl::ClassElt;
 pub use kind::Kind;
-pub use ty::{Exact, FunParam, FunType, ParamMode, Prim, Ty, Ty_};
+pub use ty::{Exact, FunParam, FunType, ParamMode, Prim, Tparam, Ty, Ty_};
 pub use tyvar::Tyvar;
 pub use variance::Variance;

@@ -51,6 +51,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Fun_<(), ()> {
             "expecting return type hint, should go in TCReturnTypeHint"
         );
 
+        rupro_todo_assert!(env.solve_all_unsolved_tyvars()?.is_none(), MissingError);
         let res = oxidized::aast::Fun_ {
             annotation: env.save(()),
             readonly_this: self.readonly_this.clone(),

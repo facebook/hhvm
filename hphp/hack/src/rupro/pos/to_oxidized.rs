@@ -6,16 +6,28 @@
 use arena_trait::TrivialDrop;
 use indexmap::{IndexMap, IndexSet};
 use ocamlrep::ToOcamlRep;
-use oxidized_by_ref::{s_map::SMap, s_set::SSet};
+use oxidized_by_ref::{i_map::IMap, s_map::SMap, s_set::SSet};
 use std::collections::{BTreeMap, HashMap};
 
 pub trait ToOxidized<'a> {
     type Output: TrivialDrop + Clone + ToOcamlRep + 'a;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output;
+
+    fn to_oxidized_ref(&self, arena: &'a bumpalo::Bump) -> &'a Self::Output {
+        &*arena.alloc(self.to_oxidized(arena))
+    }
 }
 
 impl<'a, T: ToOxidized<'a>> ToOxidized<'a> for Box<[T]> {
+    type Output = &'a [T::Output];
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        arena.alloc_slice_fill_iter(self.iter().map(|x| x.to_oxidized(arena)))
+    }
+}
+
+impl<'a, T: ToOxidized<'a>> ToOxidized<'a> for [T] {
     type Output = &'a [T::Output];
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
@@ -79,6 +91,23 @@ impl<'a, K: ToOxidized<'a, Output = &'a str>, V: ToOxidized<'a>> ToOxidized<'a> 
             arena,
             self.iter()
                 .map(|(k, v)| (k.to_oxidized(arena), v.to_oxidized(arena))),
+        )
+    }
+}
+
+pub struct IImmutableHashMapToOxidized<'input, K, V>(pub &'input im::HashMap<K, V>);
+
+impl<'a, 'input, K: ToOxidized<'a, Output = isize>, V: ToOxidized<'a>> ToOxidized<'a>
+    for IImmutableHashMapToOxidized<'input, K, V>
+{
+    type Output = IMap<'a, &'a V::Output>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        IMap::from(
+            arena,
+            self.0
+                .iter()
+                .map(|(k, v)| (k.to_oxidized(arena), &*arena.alloc(v.to_oxidized(arena)))),
         )
     }
 }

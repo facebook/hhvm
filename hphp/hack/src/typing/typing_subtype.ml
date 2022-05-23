@@ -90,9 +90,11 @@ let is_err ty =
   | _ -> false
 
 type subtype_env = {
-  ignore_generic_params: bool;
-      (** If set, finish as soon as we see a goal of the form T <: t or t <: T
-        for generic parameter T *)
+  require_completeness: bool;
+      (** If set, requires the simplification of subtype constraints to be complete,
+          meaning that the original constraint must imply the simplified one.
+          If set, we also finish as soon as we see a goal of the form T <: t or
+          t <: T for generic parameter T *)
   visited: VisitedGoals.t;
       (** If above is not set, maintain a visited goal set *)
   no_top_bottom: bool;
@@ -123,13 +125,13 @@ let coercing_to_dynamic se =
   | _ -> false
 
 let make_subtype_env
-    ?(ignore_generic_params = false)
+    ?(require_completeness = false)
     ?(no_top_bottom = false)
     ?(coerce = None)
     ?(is_coeffect = false)
     on_error =
   {
-    ignore_generic_params;
+    require_completeness;
     visited = VisitedGoals.empty;
     no_top_bottom;
     coerce;
@@ -649,6 +651,7 @@ and default_subtype
           | _ ->
             (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
              * not complete.
+             * TODO(T120921930): Don't do this if require_completeness is set.
              *)
             List.fold_left
               tyl
@@ -659,7 +662,7 @@ and default_subtype
         | (_, Tgeneric (name_sub, tyargs)) ->
           (* TODO(T69551141) handle type arguments. right now, just passin tyargs to
              Env.get_upper_bounds *)
-          (if subtype_env.ignore_generic_params then
+          (if subtype_env.require_completeness then
             default env
           else
             (* If we've seen this type parameter before then we must have gone
@@ -794,8 +797,13 @@ and default_subtype
   | ConstraintType _ -> default_subtype_inner env ty_sub ty_super
 
 (* Attempt to "solve" a subtype assertion ty_sub <: ty_super.
- * Return a proposition that is equivalent, but simpler, than
- * the original assertion. Fail with Unsat error_function if
+ * Return a proposition that is logically stronger and simpler than
+ * the original assertion (meaning that the simplification is
+ * sound).
+ * If subtype_env.require_completeness is set, the simplfication must
+ * also be complete, meaning that returned proposition is equivalent to
+ * the original one.
+ * Fail with Unsat error_function if
  * the assertion is unsatisfiable. Some examples:
  *   string <: arraykey  ==>  True    (represented as Conj [])
  * (For covariant C and a type variable v)
@@ -804,7 +812,7 @@ and default_subtype
  *   C <: J              ==>  Unsat _
  * (Assuming we have T <: D in tpenv, and class D implements I)
  *   vec<T> <: vec<I>    ==>  True
- * This last one would be left as T <: I if subtype_env.ignore_generic_params=true
+ * This last one would be left as T <: I if subtype_env.require_completeness=true
  *)
 and simplify_subtype_i
     ~(subtype_env : subtype_env)
@@ -1368,6 +1376,7 @@ and simplify_subtype_i
            * But we deal with unions on the left first (see case above), so this
            * particular situation won't arise.
            * TODO: identify under what circumstances this reduction is complete.
+           * TODO(T120921930): Don't do this if require_completeness is set.
            *)
           let rec try_disjuncts tys env =
             match tys with
@@ -1398,7 +1407,7 @@ and simplify_subtype_i
         | (env, None) ->
           (match deref lty_sub with
           | (_, (Tunion _ | Terr | Tvar _)) -> default_subtype env
-          | (_, Tgeneric _) when subtype_env.ignore_generic_params ->
+          | (_, Tgeneric _) when subtype_env.require_completeness ->
             default_subtype env
           (* Num is not atomic: it is equivalent to int|float. The rule below relies
            * on ty_sub not being a union e.g. consider num <: arraykey | float, so
@@ -1431,6 +1440,7 @@ and simplify_subtype_i
             let simplify_super_intersection env tyl_sub ty_super =
               (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
                * not complete.
+               * TODO(T120921930): Don't do this if require_completeness is set.
                *)
               List.fold_left
                 tyl_sub
@@ -1528,7 +1538,7 @@ and simplify_subtype_i
           (* We do not want to decompose Toption for these cases *)
           | ((_, (Tvar _ | Tunion _ | Tintersection _)), _) ->
             default_subtype env
-          | ((_, Tgeneric _), _) when subtype_env.ignore_generic_params ->
+          | ((_, Tgeneric _), _) when subtype_env.require_completeness ->
             (* TODO(T69551141) handle type arguments ? *)
             default_subtype env
           (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
@@ -1579,6 +1589,7 @@ and simplify_subtype_i
               env
           (* This is treating the option as a union, and using the sound, but incomplete,
              t <: t1 | t2 to (t <: t1) || (t <: t2) reduction
+             TODO(T120921930): Don't do this if require_completeness is set.
           *)
           | ((_, Tneg _), _) ->
             simplify_subtype
@@ -1659,7 +1670,7 @@ and simplify_subtype_i
         | Terr ->
           default_subtype env
         | _ ->
-          if subtype_env.ignore_generic_params then
+          if subtype_env.require_completeness then
             default env
           else (
             (* If we've seen this type parameter before then we must have gone
@@ -3789,8 +3800,7 @@ and sub_type_inner
       prop;
   prop_to_env ty_sub ty_super env prop subtype_env.on_error
 
-and is_sub_type_alt_i ~ignore_generic_params ~no_top_bottom ~coerce env ty1 ty2
-    =
+and is_sub_type_alt_i ~require_completeness ~no_top_bottom ~coerce env ty1 ty2 =
   let this_ty =
     match ty1 with
     | LoclType ty1 -> Some ty1
@@ -3799,7 +3809,7 @@ and is_sub_type_alt_i ~ignore_generic_params ~no_top_bottom ~coerce env ty1 ty2
   let (_env, prop) =
     simplify_subtype_i
       ~subtype_env:
-        (make_subtype_env ~ignore_generic_params ~no_top_bottom ~coerce None)
+        (make_subtype_env ~require_completeness ~no_top_bottom ~coerce None)
       ~this_ty
       (* It is weird that this can cause errors, but I am wary to discard them.
        * Using the generic unify_error to maintain current behavior. *)
@@ -3817,7 +3827,7 @@ and is_sub_type_alt_i ~ignore_generic_params ~no_top_bottom ~coerce env ty1 ty2
 and is_sub_type_for_union_i env ?(coerce = None) ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt_i
-    ~ignore_generic_params:false
+    ~require_completeness:false
     ~no_top_bottom:true
     ~coerce
     env
@@ -3828,7 +3838,8 @@ and is_sub_type_for_union_i env ?(coerce = None) ty1 ty2 =
 and is_sub_type_ignore_generic_params_i env ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt_i
-    ~ignore_generic_params:true
+  (* TODO(T121047839): Should this set a dedicated ignore_generic_param flag instead? *)
+    ~require_completeness:true
     ~no_top_bottom:true
     ~coerce:None
     env
@@ -3951,9 +3962,9 @@ let sub_type
     (LoclType ty_sub)
     (LoclType ty_super)
 
-let is_sub_type_alt ~ignore_generic_params ~no_top_bottom env ty1 ty2 =
+let is_sub_type_alt ~require_completeness ~no_top_bottom env ty1 ty2 =
   is_sub_type_alt_i
-    ~ignore_generic_params
+    ~require_completeness
     ~no_top_bottom
     env
     (LoclType ty1)
@@ -3962,7 +3973,7 @@ let is_sub_type_alt ~ignore_generic_params ~no_top_bottom env ty1 ty2 =
 let is_sub_type env ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
-    ~ignore_generic_params:false
+    ~require_completeness:false
     ~no_top_bottom:false
     ~coerce:None
     env
@@ -3973,7 +3984,7 @@ let is_sub_type env ty1 ty2 =
 let is_sub_type_for_union env ?(coerce = None) ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
-    ~ignore_generic_params:false
+    ~require_completeness:false
     ~no_top_bottom:true
     ~coerce
     env
@@ -3984,7 +3995,7 @@ let is_sub_type_for_union env ?(coerce = None) ty1 ty2 =
 let is_sub_type_for_coercion env ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
-    ~ignore_generic_params:false
+    ~require_completeness:false
     ~no_top_bottom:false
     ~coerce:(Some TL.CoerceFromDynamic)
     env
@@ -3995,7 +4006,8 @@ let is_sub_type_for_coercion env ty1 ty2 =
 let is_sub_type_ignore_generic_params env ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
-    ~ignore_generic_params:true
+  (* TODO(T121047839): Should this set a dedicated ignore_generic_param flag instead? *)
+    ~require_completeness:true
     ~no_top_bottom:true
     ~coerce:None
     env
@@ -4006,7 +4018,7 @@ let is_sub_type_ignore_generic_params env ty1 ty2 =
 let can_sub_type env ty1 ty2 =
   let ( <> ) a b = not (Option.equal Bool.equal a b) in
   is_sub_type_alt
-    ~ignore_generic_params:false
+    ~require_completeness:false
     ~no_top_bottom:true
     ~coerce:None
     env
@@ -4242,7 +4254,7 @@ let rec decompose_subtype
     ty_super;
   let (env, prop) =
     simplify_subtype
-      ~subtype_env:(make_subtype_env ~ignore_generic_params:true on_error)
+      ~subtype_env:(make_subtype_env ~require_completeness:true on_error)
       ~this_ty:None
       ty_sub
       ty_super

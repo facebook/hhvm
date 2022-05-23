@@ -37,11 +37,13 @@ RepoAutoloadMap::RepoAutoloadMap(
       CaseInsensitiveMap types,
       CaseInsensitiveMap functions,
       CaseSensitiveMap constants,
-      CaseInsensitiveMap typeAliases)
+      CaseInsensitiveMap typeAliases,
+      CaseSensitiveMap modules)
   : m_types{std::move(types)},
     m_functions{std::move(functions)},
     m_constants{std::move(constants)},
-    m_typeAliases{std::move(typeAliases)} {
+    m_typeAliases{std::move(typeAliases)},
+    m_modules{std::move(modules)} {
   if (Trace::moduleEnabled(Trace::repo_autoload, 2)) {
     FTRACE(2, "Type:\n");
     for (auto const DEBUG_ONLY& s : types) {
@@ -57,6 +59,10 @@ RepoAutoloadMap::RepoAutoloadMap(
     }
     FTRACE(2, "TypeAliases:\n");
     for (auto const DEBUG_ONLY& s : typeAliases) {
+      FTRACE(2, "{} => {}\n", s.first->data(), s.second);
+    }
+    FTRACE(2, "Modules:\n");
+    for (auto const DEBUG_ONLY& s : modules) {
       FTRACE(2, "{} => {}\n", s.first->data(), s.second);
     }
   }
@@ -167,6 +173,11 @@ RepoAutoloadMap::getTypeOrTypeAliasFile(std::string_view typeName) {
   return getTypeAliasFile(typeName);
 }
 
+Optional<String>
+RepoAutoloadMap::getModuleFile(const String& moduleName) {
+  return getPathFromSymbol(m_modules, moduleName);
+}
+
 Optional<folly::fs::path>
 RepoAutoloadMap::getTypeFile(std::string_view typeName) {
   return getPathFromSymbol(m_types, typeName);
@@ -187,6 +198,11 @@ RepoAutoloadMap::getTypeAliasFile(std::string_view typeAliasName) {
   return getPathFromSymbol(m_typeAliases, typeAliasName);
 }
 
+Optional<folly::fs::path>
+RepoAutoloadMap::getModuleFile(std::string_view moduleName) {
+  return getPathFromSymbol(m_modules, moduleName);
+}
+
 Array RepoAutoloadMap::getFileTypes(const String& path) {
   return getSymbolFromPath(m_types, path);
 }
@@ -201,6 +217,10 @@ Array RepoAutoloadMap::getFileConstants(const String& path) {
 
 Array RepoAutoloadMap::getFileTypeAliases(const String& path) {
   return getSymbolFromPath(m_typeAliases, path);
+}
+
+Array RepoAutoloadMap::getFileModules(const String& path) {
+  return getSymbolFromPath(m_modules, path);
 }
 
 AutoloadMap::Result RepoAutoloadMap::handleFailure(

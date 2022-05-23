@@ -624,6 +624,11 @@ struct FactsStoreImpl final
         });
   }
 
+  Optional<String> getModuleFile(const String& module) override {
+    // TODO(T121190265)
+    return std::nullopt;
+  }
+
   Optional<folly::fs::path> getTypeFile(std::string_view type) override {
     return getSymbolFile<SymKind::Type>(
         type,
@@ -651,6 +656,11 @@ struct FactsStoreImpl final
         });
   }
 
+  Optional<folly::fs::path> getModuleFile(std::string_view name) override {
+    // TODO(T121190265)
+    return std::nullopt;
+  }
+
   Array getFileTypes(const String& path) override {
     return getFileSymbols<SymKind::Type>(
         path, [](SymbolMap& m, Path s) { return m.getFileTypes(s); });
@@ -669,6 +679,11 @@ struct FactsStoreImpl final
   Array getFileTypeAliases(const String& path) override {
     return getFileSymbols<SymKind::Type>(
         path, [](SymbolMap& m, Path s) { return m.getFileTypeAliases(s); });
+  }
+
+  Array getFileModules(const String& path) override {
+    // TODO(T121190265)
+    return Array{};
   }
 
   Array

@@ -30,6 +30,7 @@ const StaticString
   s_function("function"),
   s_constant("constant"),
   s_type("type"),
+  s_module("module"),
   s_failure("failure");
 
 const StaticString& getStringRepr(AutoloadMap::KindOf kind) {
@@ -42,6 +43,8 @@ const StaticString& getStringRepr(AutoloadMap::KindOf kind) {
       return s_function;
     case AutoloadMap::KindOf::Constant:
       return s_constant;
+    case AutoloadMap::KindOf::Module:
+      return s_module;
   }
   not_reached();
 }
@@ -63,6 +66,7 @@ UserAutoloadMap UserAutoloadMap::fromFullMap(const Array& fullMap,
   auto functionFile = getSubMapFromMap(fullMap, s_function);
   auto constantFile = getSubMapFromMap(fullMap, s_constant);
   auto typeAliasFile = getSubMapFromMap(fullMap, s_type);
+  auto moduleFile = getSubMapFromMap(fullMap, s_module);
   auto failFunc = fullMap[s_failure];
 
   // We construct absolute paths with simple concatenation, so make
@@ -76,6 +80,7 @@ UserAutoloadMap UserAutoloadMap::fromFullMap(const Array& fullMap,
       std::move(functionFile),
       std::move(constantFile),
       std::move(typeAliasFile),
+      std::move(moduleFile),
       std::move(failFunc)};
 }
 
@@ -112,6 +117,7 @@ Array UserAutoloadMap::getAllFiles() const {
   addToRet(m_functionFile);
   addToRet(m_constantFile);
   addToRet(m_typeAliasFile);
+  addToRet(m_moduleFile);
 
   return ret.toVec();
 }
@@ -154,6 +160,11 @@ UserAutoloadMap::getTypeOrTypeAliasFile(std::string_view typeName) {
   return getTypeAliasFile(typeName);
 }
 
+Optional<String>
+UserAutoloadMap::getModuleFile(const String& moduleName) {
+  return getFileFromMap(m_moduleFile, moduleName);
+}
+
 Optional<folly::fs::path>
 UserAutoloadMap::getTypeFile(std::string_view typeName) {
   return getPathFromMap(m_typeFile, HHVM_FN(strtolower)(String(typeName)));
@@ -172,6 +183,11 @@ UserAutoloadMap::getConstantFile(std::string_view constName) {
 Optional<folly::fs::path>
 UserAutoloadMap::getTypeAliasFile(std::string_view alias) {
   return getPathFromMap(m_typeAliasFile, HHVM_FN(strtolower)(String(alias)));
+}
+
+Optional<folly::fs::path>
+UserAutoloadMap::getModuleFile(std::string_view moduleName) {
+  return getPathFromMap(m_moduleFile, String(moduleName));
 }
 
 Array UserAutoloadMap::getFileTypes(const String& path) {
@@ -195,6 +211,12 @@ Array UserAutoloadMap::getFileConstants(const String& path) {
 Array UserAutoloadMap::getFileTypeAliases(const String& path) {
   SystemLib::throwInvalidOperationExceptionObject(
     "User Autoload Map does not support getFileTypeAliases"
+  );
+}
+
+Array UserAutoloadMap::getFileModules(const String& path) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "User Autoload Map does not support getFileModules"
   );
 }
 

@@ -2507,17 +2507,13 @@ final class ReflectionModule implements Reflector {
    * @name      string  Name of the module.
    */
   final public function __construct(string $name)[] {
-    $n = $this->__init($name);
-    if (!$n) {
-      throw new ReflectionException(
-        "module {$name} does not exist");
-    }
-    $this->name = $n;
+    $this->__init($name); // throws an exception if module doesn't exist
+    $this->name = $name;
   }
 
   // helper for ctor
   <<__Native>>
-  private function __init(string $name)[]: string;
+  private function __init(string $name)[]: void;
 
   /**
    * Gets all attributes

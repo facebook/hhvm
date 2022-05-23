@@ -52,6 +52,11 @@ struct Module {
   static Module* lookup(const StringData* name);
 
   /*
+   * Look up, or autoload and define, the Module in this request with name `name'.
+   */
+  static Module* load(const StringData* name);
+
+  /*
    * Define module m for this request.
    */
   static void def(Module* m);

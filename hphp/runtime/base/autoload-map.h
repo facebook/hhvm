@@ -47,6 +47,7 @@ struct AutoloadMap {
     Function,
     Constant,
     TypeAlias,
+    Module,
   };
 
   AutoloadMap() = default;
@@ -87,6 +88,7 @@ struct AutoloadMap {
       case AutoloadMap::KindOf::Function: return getFunctionFile(symbol);
       case AutoloadMap::KindOf::Constant: return getConstantFile(symbol);
       case AutoloadMap::KindOf::TypeAlias: return getTypeAliasFile(symbol);
+      case AutoloadMap::KindOf::Module: return getModuleFile(symbol);
     }
     not_reached();
   }
@@ -102,6 +104,7 @@ struct AutoloadMap {
       case AutoloadMap::KindOf::Function: return getFunctionFile(symbol);
       case AutoloadMap::KindOf::Constant: return getConstantFile(symbol);
       case AutoloadMap::KindOf::TypeAlias: return getTypeAliasFile(symbol);
+      case AutoloadMap::KindOf::Module: return getModuleFile(symbol);
     }
     not_reached();
   }
@@ -114,6 +117,7 @@ struct AutoloadMap {
       case AutoloadMap::KindOf::Function: return getFileFunctions(path);
       case AutoloadMap::KindOf::Constant: return getFileConstants(path);
       case AutoloadMap::KindOf::TypeAlias: return getFileTypeAliases(path);
+      case AutoloadMap::KindOf::Module: return getFileModules(path);
     }
     not_reached();
   }
@@ -133,12 +137,14 @@ struct AutoloadMap {
   virtual Optional<String> getFunctionFile(const String& functionName) = 0;
   virtual Optional<String> getConstantFile(const String& constantName) = 0;
   virtual Optional<String> getTypeAliasFile(const String& aliasName) = 0;
+  virtual Optional<String> getModuleFile(const String& moduleName) = 0;
 
   virtual Optional<folly::fs::path> getTypeOrTypeAliasFile(std::string_view name) = 0;
   virtual Optional<folly::fs::path> getTypeFile(std::string_view name) = 0;
   virtual Optional<folly::fs::path> getFunctionFile(std::string_view name) = 0;
   virtual Optional<folly::fs::path> getConstantFile(std::string_view name) = 0;
   virtual Optional<folly::fs::path> getTypeAliasFile(std::string_view name) = 0;
+  virtual Optional<folly::fs::path> getModuleFile(std::string_view name) = 0;
 
   /**
    * Map path to symbols
@@ -147,6 +153,7 @@ struct AutoloadMap {
   virtual Array getFileFunctions(const String& path) = 0;
   virtual Array getFileConstants(const String& path) = 0;
   virtual Array getFileTypeAliases(const String& path) = 0;
+  virtual Array getFileModules(const String& path) = 0;
 
   virtual bool canHandleFailure() const = 0;
   virtual Result handleFailure(KindOf kind, const String& className,

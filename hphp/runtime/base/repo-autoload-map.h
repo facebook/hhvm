@@ -50,24 +50,28 @@ struct RepoAutoloadMap final : AutoloadMap {
       CaseInsensitiveMap types,
       CaseInsensitiveMap functions,
       CaseSensitiveMap constants,
-      CaseInsensitiveMap typeAliases);
+      CaseInsensitiveMap typeAliases,
+      CaseSensitiveMap modules);
 
   Optional<String> getTypeOrTypeAliasFile(const String& typeName) override;
   Optional<String> getTypeFile(const String& typeName) override;
   Optional<String> getFunctionFile(const String& functionName) override;
   Optional<String> getConstantFile(const String& constantName) override;
   Optional<String> getTypeAliasFile(const String& typeAliasName) override;
+  Optional<String> getModuleFile(const String& moduleName) override;
 
   Optional<folly::fs::path> getTypeOrTypeAliasFile(std::string_view name) override;
   Optional<folly::fs::path> getTypeFile(std::string_view name) override;
   Optional<folly::fs::path> getFunctionFile(std::string_view name) override;
   Optional<folly::fs::path> getConstantFile(std::string_view name) override;
   Optional<folly::fs::path> getTypeAliasFile(std::string_view name) override;
+  Optional<folly::fs::path> getModuleFile(std::string_view name) override;
 
   Array getFileTypes(const String& path) override;
   Array getFileFunctions(const String& path) override;
   Array getFileConstants(const String& path) override;
   Array getFileTypeAliases(const String& path) override;
+  Array getFileModules(const String& path) override;
 
   bool canHandleFailure() const override {
     return false;
@@ -89,6 +93,7 @@ private:
   CaseInsensitiveMap m_functions;
   CaseSensitiveMap m_constants;
   CaseInsensitiveMap m_typeAliases;
+  CaseSensitiveMap m_modules;
 };
 
 } // HPHP

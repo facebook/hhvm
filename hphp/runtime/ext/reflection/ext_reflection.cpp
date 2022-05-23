@@ -1107,14 +1107,14 @@ static Array HHVM_METHOD(ReflectionFile, getAttributesNamespaced) {
 const StaticString s_ReflectionModuleHandle("ReflectionModuleHandle");
 
 // helper for __construct
-static String HHVM_METHOD(ReflectionModule, __init, const String& name) {
+static void HHVM_METHOD(ReflectionModule, __init, const String& name) {
   if (name.isNull()) {
     Reflection::ThrowReflectionExceptionObject(
       "Tried to construct ReflectionModule but the name was null"
     );
   }
 
-  const Module* module = Module::lookup(name.get());
+  const Module* module = Module::load(name.get());
   if (!module) {
     Reflection::ThrowReflectionExceptionObject(folly::sformat(
       "Module '{}' does not exist",
@@ -1123,7 +1123,6 @@ static String HHVM_METHOD(ReflectionModule, __init, const String& name) {
   }
 
   ReflectionModuleHandle::Get(this_)->setModule(module);
-  return String::attach(const_cast<StringData*>(module->name.get()));
 }
 
 static Array HHVM_METHOD(ReflectionModule, getAttributesNamespaced) {

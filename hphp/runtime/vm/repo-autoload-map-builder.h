@@ -30,6 +30,7 @@ struct PreClassEmitter;
 struct FuncEmitter;
 struct TypeAlias;
 struct Constant;
+struct Module;
 
 struct RepoAutoloadMapBuilder {
 
@@ -78,6 +79,7 @@ private:
   CaseInsensitiveMap m_funcs;
   CaseInsensitiveMap m_typeAliases;
   CaseSensitiveMap m_constants;
+  CaseSensitiveMap m_modules;
 };
 
 //////////////////////////////////////////////////////////////////////

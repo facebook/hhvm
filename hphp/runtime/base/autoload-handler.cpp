@@ -197,6 +197,15 @@ struct NamedTypeExistsChecker {
   }
 };
 
+struct ModuleExistsChecker {
+  const StringData* m_name;
+  explicit ModuleExistsChecker(const StringData* name)
+    : m_name(name) {}
+  bool operator()() const {
+    return Module::lookup(m_name) != nullptr;
+  }
+};
+
 } // namespace
 
 const StaticString
@@ -333,6 +342,16 @@ bool AutoloadHandler::autoloadTypeAlias(const String& name) {
   return m_map &&
     loadFromMap(name, AutoloadMap::KindOf::TypeAlias,
                 TypeAliasExistsChecker(name)) != AutoloadMap::Result::Failure;
+}
+
+bool AutoloadHandler::autoloadModule(StringData* name) {
+  tracing::BlockNoTrace _{
+    (m_map && m_map->isNative()) ? "autoload-native" : "autoload"
+  };
+  return m_map &&
+    loadFromMap(String{name},
+                AutoloadMap::KindOf::Module,
+                ModuleExistsChecker(name)) != AutoloadMap::Result::Failure;
 }
 
 /**

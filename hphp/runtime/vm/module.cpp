@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/module.h"
 
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/rds-symbol.h"
 #include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -46,6 +47,16 @@ Module* Module::lookup(const StringData* name) {
   }
   auto const link = rds::attachModuleCache<rds::Mode::Normal>(name);
   return link.bound() ? *link : nullptr;
+}
+
+Module* Module::load(const StringData* name) {
+  Module* m = Module::lookup(name);
+  if (LIKELY(m != nullptr)) return m;
+  if (AutoloadHandler::s_instance->autoloadModule(
+        const_cast<StringData*>(name))) {
+    m = Module::lookup(name);
+  }
+  return m;
 }
 
 void Module::def(Module* m) {

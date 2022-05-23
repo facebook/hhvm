@@ -59,6 +59,7 @@ struct AutoloadHandler final : RequestEventHandler {
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
   bool autoloadTypeAlias(const String& name);
+  bool autoloadModule(StringData* name);
   static RDS_LOCAL(AutoloadHandler, s_instance);
 
   /**
@@ -72,6 +73,7 @@ struct AutoloadHandler final : RequestEventHandler {
    *        'function' => dict['fun' => 'fun_file.php', ...],
    *        'constant' => dict['con' => 'con_file.php', ...],
    *        'type'     => dict['type' => 'type_file.php', ...],
+   *        'module'   => dict['module' => 'module_file.php', ...],
    *        'failure'  => (string $type, string $name, mixed $err): ?bool ==> {
    *          return null;  // KEEP_GOING We don't know where this symbol is,
    *                                      but it isn't important. Ignore the

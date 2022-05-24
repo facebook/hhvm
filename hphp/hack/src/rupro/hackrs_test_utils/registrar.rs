@@ -32,8 +32,11 @@ impl DependencyGraph {
 }
 
 impl DepGraphReader for DependencyGraph {
-    fn get_dependents(&self, _dependency: DependencyName) -> Box<dyn Iterator<Item = Dep>> {
-        todo!()
+    fn get_dependents(&self, dependency: DependencyName) -> Box<dyn Iterator<Item = Dep> + '_> {
+        match self.rdeps.get(&dependency) {
+            Some(e) => Box::new(e.value().clone().into_iter().map(|n| n.hash1())),
+            None => Box::new(std::iter::empty()),
+        }
     }
 }
 

@@ -11,3 +11,4 @@ path = "../../depgraph_api.rs"
 deps_rust = { path = "../../../../deps/cargo/deps_rust" }
 pos = { path = "../../../pos/cargo/pos" }
 thiserror = "1.0.30"
+typing_deps_hash = { path = "../../../../deps/cargo/typing_deps_hash" }

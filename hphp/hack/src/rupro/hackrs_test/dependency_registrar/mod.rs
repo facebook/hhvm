@@ -11,6 +11,7 @@ use anyhow::Result;
 use depgraph_api::{DeclName, DependencyName};
 use maplit::{btreemap, btreeset};
 use pos::TypeName;
+use std::collections::BTreeSet;
 
 #[fbinit::test]
 fn extends_relation(fb: FacebookInit) -> Result<()> {
@@ -44,22 +45,20 @@ class B extends A implements I {
         .folded_decl_provider
         .get_class(B.into(), B)?;
     // Retrieve the dependency graph.
-    let _depgraph = &ctx.provider_backend.dependency_graph;
+    let depgraph = &ctx.provider_backend.dependency_graph;
+
     // Doing the comparisons on binary search trees avoids issues with hash
     // map/set orderings.
-    let _expected = btreemap! {
-        DependencyName::Extends(A) => btreeset!{DeclName::Type(T), DeclName::Type(B)},
-        DependencyName::Extends(T) => btreeset!{DeclName::Type(B)},
-        DependencyName::Extends(I) => btreeset!{DeclName::Type(B), DeclName::Type(T)},
+    let expected = btreemap! {
+        DependencyName::Extends(A) => btreeset!{DeclName::Type(T).hash1(), DeclName::Type(B).hash1()},
+        DependencyName::Extends(T) => btreeset!{DeclName::Type(B).hash1()},
+        DependencyName::Extends(I) => btreeset!{DeclName::Type(B).hash1(), DeclName::Type(T).hash1()},
     };
-    /*
-        let actual = (depgraph.rdeps.iter())
-            .map(|e| (*e.key(), e.value().iter().copied().collect()))
-            .filter(|(k, _)| matches!(k, DependencyName::Extends(..)))
-            .collect();
-        // Finally, compare.
-        assert_eq!(expected, actual);
-    */
+    for name in expected.keys() {
+        let act = depgraph.get_dependents(*name).collect::<BTreeSet<_>>();
+        let exp = (expected.get(name).unwrap().iter().copied()).collect::<BTreeSet<_>>();
+        assert_eq!(act, exp);
+    }
 
     Ok(())
 }
@@ -84,7 +83,7 @@ fn constructor_relation(fb: FacebookInit) -> Result<()> {
     // Doing the comparisons on binary search trees avoids issues with hash
     // map/set orderings.
     let _expected = btreemap! {
-        DependencyName::Constructor(A) => btreeset!{DeclName::Type(B)},
+        DependencyName::Constructor(A) => btreeset!{DeclName::Type(B).hash1()},
     };
     /*
         let actual: std::collections::BTreeMap<DependencyName, std::collections::BTreeSet<DeclName>> =

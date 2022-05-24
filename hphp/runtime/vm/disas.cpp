@@ -337,8 +337,8 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_ILA    out.fmt(" {}", loc_name(finfo, decode_iva(pc)));
 #define IMM_IA     out.fmt(" {}", decode_iva(pc));
 #define IMM_DA     out.fmt(" {}", decode<double>(pc));
-#define IMM_SA     out.fmt(" {}", \
-                           escaped(finfo.unit->lookupLitstrId(decode<Id>(pc))));
+#define IMM_SA     out.fmt(" {}", escaped(finfo.unit->lookupLitstrId(decode<Id>(pc))));
+
 #define IMM_RATA   out.fmt(" {}", show(decodeRAT(finfo.unit, pc)));
 #define IMM_AA     out.fmt(" @A_{}", decode<Id>(pc));
 #define IMM_BA     out.fmt(" {}", rel_label(decode<Offset>(pc)));
@@ -404,6 +404,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   out.nl();
 }
 
+template<bool isTest=false>
 void print_func_directives(Output& out, const FuncInfo& finfo) {
   const Func* func = finfo.func;
   if (RuntimeOption::EvalDisassemblerDocComments) {
@@ -435,6 +436,9 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
     }
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }
+
+  // TODO(voork): handle coeffects in HackCTranslator
+  if (isTest) return;
   auto const coeffects = func->staticCoeffectNames();
   if (!coeffects.empty()) {
     std::vector<std::string> names;
@@ -516,7 +520,7 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
     }
 
     // Then, print labels if we have any.  This order keeps the labels
-    // from dangling on weird sides of .try_fault or .try_catch
+    // from dangling on weird sides of .try_catch
     // braces.
     while (lblIter != lblStop && lblIter->first < off) ++lblIter;
     if (lblIter != lblStop && lblIter->first == off) {
@@ -567,6 +571,7 @@ std::string opt_attrs(AttrContext ctx, Attr attrs,
   return str;
 }
 
+template<bool isTest=false>
 std::string func_param_list(const FuncInfo& finfo) {
   auto ret = std::string{};
   auto const func = finfo.func;
@@ -594,7 +599,8 @@ std::string func_param_list(const FuncInfo& finfo) {
       auto const off = func->params()[i].funcletOff;
       ret += folly::format(" = {}", jmp_label(finfo, off)).str();
       if (auto const code = func->params()[i].phpCode) {
-        ret += folly::format("({})", escaped_long(code)).str();
+        // TODO(@voork): Handle escaped default value strings.
+        if (!isTest) ret += folly::format("({})", escaped_long(code)).str();
       }
     }
   }
@@ -643,6 +649,7 @@ std::string opt_ubs(const UBMap& ubs) {
   return ret;
 }
 
+template<bool isTest = false>
 void print_func(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
 
@@ -652,10 +659,10 @@ void print_func(Output& out, const Func* func) {
     format_line_pair(func),
     opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
     func->name(),
-    func_param_list(finfo),
+    func_param_list<isTest>(finfo),
     func_flag_list(finfo));
   indented(out, [&] {
-    print_func_directives(out, finfo);
+    print_func_directives<isTest>(out, finfo);
     print_func_body(out, finfo);
   });
   out.fmtln("}}");
@@ -964,7 +971,7 @@ void print_unit(Output& out, const Unit* unit) {
 void print_unit_test(Output& out, const Unit* unit) {
   out.fmtln("# {} starts here", unit->origFilepath());
   out.nl();
-  print_unit_metadata(out, unit);
+  for (auto* func : unit->funcs())        print_func<true>(out, func);
   for (auto& cls : unit->preclasses())    print_cls<true>(out, cls.get());
   for (auto& alias : unit->typeAliases()) print_alias(out, alias);
   for (auto& c : unit->constants())       print_constant(out, c);

@@ -26,9 +26,7 @@ struct Opts {
 
 fn main() -> Result<()> {
     let opts = Opts::from_args();
-
-    let mut opcode_data: Vec<OpcodeData> = hhbc_gen::opcode_data().to_vec();
-    opcode_data.sort_by(|a: &OpcodeData, b: &OpcodeData| a.name.cmp(b.name));
+    let opcode_data: Vec<OpcodeData> = hhbc_gen::opcode_data().to_vec();
 
     let input = quote!(
         #[emit_opcodes_macro::emit_opcodes]

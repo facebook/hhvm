@@ -352,21 +352,21 @@ mod test {
 
     #[test]
     fn test_tiny_dummy() {
-        let line = 0;
-        let bol = 0;
+        let line: u64 = 0;
+        let bol: u64 = 0;
         let start_offset = u64::max_value();
         let end_offset = u64::max_value();
-        let start = FilePosLarge::from_lnum_bol_offset(line, bol, start_offset);
-        let end = FilePosLarge::from_lnum_bol_offset(line, bol, end_offset);
+        let start = FilePosLarge::from_lnum_bol_offset(line as usize, bol as usize, start_offset as usize);
+        let end = FilePosLarge::from_lnum_bol_offset(line as usize, bol as usize, end_offset as usize);
         let span = PosSpanTiny::make_dummy();
-        assert_eq!(line, span.start_line_number());
-        assert_eq!(line, span.end_line_number());
-        assert_eq!(bol, span.start_beginning_of_line());
-        assert_eq!(bol, span.end_beginning_of_line());
-        assert_eq!(start_offset, span.start_offset());
-        assert_eq!(end_offset, span.end_offset());
-        assert_eq!((start_offset - bol), span.start_column());
-        assert_eq!((end_offset - bol), span.end_column());
+        assert_eq!(line, span.start_line_number() as u64);
+        assert_eq!(line, span.end_line_number() as u64);
+        assert_eq!(bol, span.start_beginning_of_line() as u64);
+        assert_eq!(bol, span.end_beginning_of_line() as u64);
+        assert_eq!(start_offset, span.start_offset() as u64);
+        assert_eq!(end_offset, span.end_offset() as u64);
+        assert_eq!((start_offset - bol), span.start_column() as u64);
+        assert_eq!((end_offset - bol), span.end_column() as u64);
         let PosSpanRaw {
             start: start_,
             end: end_,
@@ -382,22 +382,22 @@ mod test {
         let bol = max_int;
         let start_offset = max_int;
         let end_offset = max_int;
-        let start = FilePosLarge::from_lnum_bol_offset(line, bol, start_offset);
-        let end = FilePosLarge::from_lnum_bol_offset(line, bol, end_offset);
+        let start = FilePosLarge::from_lnum_bol_offset(line as usize, bol as usize, start_offset as usize);
+        let end = FilePosLarge::from_lnum_bol_offset(line as usize, bol as usize, end_offset as usize);
         match PosSpanTiny::make(&start, &end) {
             None => {
                 // expected
             }
             Some(span) => {
                 // will likely fail here
-                assert_eq!(line, span.start_line_number());
-                assert_eq!(line, span.end_line_number());
-                assert_eq!(bol, span.start_beginning_of_line());
-                assert_eq!(bol, span.end_beginning_of_line());
-                assert_eq!(start_offset, span.start_offset());
-                assert_eq!(end_offset, span.end_offset());
-                assert_eq!((start_offset - bol), span.start_column());
-                assert_eq!((end_offset - bol), span.end_column());
+                assert_eq!(line, span.start_line_number() as u64);
+                assert_eq!(line, span.end_line_number() as u64);
+                assert_eq!(bol, span.start_beginning_of_line() as u64);
+                assert_eq!(bol, span.end_beginning_of_line() as u64);
+                assert_eq!(start_offset, span.start_offset() as u64);
+                assert_eq!(end_offset, span.end_offset() as u64);
+                assert_eq!((start_offset - bol), span.start_column() as u64);
+                assert_eq!((end_offset - bol), span.end_column() as u64);
                 let PosSpanRaw {
                     start: start_,
                     end: end_,

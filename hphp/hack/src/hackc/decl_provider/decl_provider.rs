@@ -5,8 +5,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 pub mod external;
 
-use oxidized_by_ref::file_info::NameType;
-use oxidized_by_ref::shallow_decl_defs::{ClassDecl, Decl, TypedefDecl};
+use bincode::Options;
+use oxidized_by_ref::{
+    direct_decl_parser::Decls,
+    file_info::NameType,
+    shallow_decl_defs::{ClassDecl, Decl, TypedefDecl},
+};
 use thiserror::Error;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -15,6 +19,9 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 pub enum Error {
     #[error("Decl not found")]
     NotFound,
+
+    #[error(transparent)]
+    Bincode(#[from] bincode::Error),
 }
 
 pub enum TypeDecl<'a> {
@@ -40,4 +47,19 @@ pub trait DeclProvider<'a>: std::fmt::Debug {
             }
         }
     }
+}
+
+pub fn serialize_decls(decls: &Decls<'_>) -> Result<Vec<u8>, bincode::Error> {
+    bincode::options().with_native_endian().serialize(decls)
+}
+
+pub fn deserialize_decls<'a>(
+    arena: &'a bumpalo::Bump,
+    data: &[u8],
+) -> Result<Decls<'a>, bincode::Error> {
+    use arena_deserializer::serde::Deserialize;
+    let op = bincode::options().with_native_endian();
+    let mut de = bincode::de::Deserializer::from_slice(data, op);
+    let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
+    Decls::deserialize(de)
 }

@@ -7,13 +7,16 @@ use crate::FileOpts;
 use anyhow::Result;
 use clap::Parser;
 use compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags, Profile};
-use decl_provider::DeclProvider;
+use decl_provider::{DeclProvider, Error};
+use direct_decl_parser::{self, Decls};
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
-use oxidized::relative_path::{self, RelativePath};
+use oxidized::relative_path::{Prefix, RelativePath};
+use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use std::{
+    cell::RefCell,
     fs::{self, File},
     io::{stdout, Write},
     path::{Path, PathBuf},
@@ -113,7 +116,7 @@ pub(crate) fn process_single_file(
     if opts.verbosity > 1 {
         eprintln!("processing file: {}", filepath.display());
     }
-    let filepath = RelativePath::make(relative_path::Prefix::Dummy, filepath);
+    let filepath = RelativePath::make(Prefix::Dummy, filepath);
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
     let mut flags = EnvFlags::empty();
     flags.set(
@@ -125,18 +128,18 @@ pub(crate) fn process_single_file(
         | HHBCFlags::FOLD_LAZY_CLASS_KEYS
         | HHBCFlags::LOG_EXTERN_COMPILER_PERF;
     let parser_flags = ParserFlags::ENABLE_ENUM_CLASSES;
-    let native_env = NativeEnv {
+    let env = NativeEnv {
         filepath,
         hhbc_flags,
         parser_flags,
         flags,
         ..Default::default()
     };
-    let alloc = bumpalo::Bump::new();
+    let arena = bumpalo::Bump::new();
     let mut output = Vec::new();
-    compile::from_text(&alloc, &mut output, source_text, &native_env, None, profile)?;
+    compile::from_text(&arena, &mut output, source_text, &env, None, profile)?;
     if opts.verbosity >= 1 {
-        eprintln!("{}: {:#?}", native_env.filepath.path().display(), profile);
+        eprintln!("{}: {:#?}", env.filepath.path().display(), profile);
     }
     Ok(output)
 }
@@ -145,31 +148,108 @@ pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts) -> Result<()> {
     let files = hackc_opts.files.gather_input_files()?;
     for path in files {
         let source_text = fs::read(&path)?;
-        let native_env = hackc_opts.native_env(path)?;
-        let hhas = compile_impl(native_env, source_text, None)?;
+        let env = hackc_opts.native_env(path)?;
+        let hhas = compile_impl(env, source_text, None)?;
         crate::daemon_print(hackc_opts, &hhas)?;
     }
     Ok(())
 }
 
 fn compile_impl<'decl>(
-    native_env: NativeEnv<'_>,
+    env: NativeEnv<'_>,
     source_text: Vec<u8>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
 ) -> Result<Vec<u8>> {
-    let text = SourceText::make(
-        ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
-        &source_text,
-    );
+    let text = SourceText::make(RcOc::new(env.filepath.clone()), &source_text);
     let mut hhas = Vec::new();
     let arena = bumpalo::Bump::new();
     compile::from_text(
         &arena,
         &mut hhas,
         text,
-        &native_env,
+        &env,
         decl_provider,
         &mut Default::default(), // profile
     )?;
     Ok(hhas)
+}
+
+pub(crate) fn test_compile_with_decls(hackc_opts: &mut crate::Opts) -> Result<()> {
+    let files = hackc_opts.files.gather_input_files()?;
+    for path in files {
+        let source_text = fs::read(&path)?;
+
+        // Parse decls
+        let arena = bumpalo::Bump::new();
+        let decl_opts = hackc_opts.decl_opts(&arena);
+        let filename = RelativePath::make(Prefix::Root, path.clone());
+        let parsed_file = direct_decl_parser::parse_decls_without_reference_text(
+            &decl_opts,
+            filename,
+            &source_text,
+            &arena,
+        );
+        let provider = SingleDeclProvider {
+            arena: &arena,
+            decls: match hackc_opts.use_serialized_decls {
+                false => DeclsHolder::ByRef(parsed_file.decls),
+                true => DeclsHolder::Ser(decl_provider::serialize_decls(&parsed_file.decls)?),
+            },
+            requests: Default::default(),
+        };
+        let env = hackc_opts.native_env(path)?;
+        let hhas = compile_impl(env, source_text, Some(&provider))?;
+        if hackc_opts.log_decls_requested {
+            for a in provider.requests.borrow().iter() {
+                let kind = decl_provider::external::name_type_to_autoload_kind(a.kind);
+                println!("{}, {}, {}", a.symbol, kind, a.found);
+            }
+            println!();
+        } else {
+            crate::daemon_print(hackc_opts, &hhas)?;
+        }
+    }
+    Ok(())
+}
+
+#[derive(Debug)]
+enum DeclsHolder<'a> {
+    ByRef(Decls<'a>),
+    Ser(Vec<u8>),
+}
+
+#[derive(Debug)]
+struct Access {
+    kind: NameType,
+    symbol: String,
+    found: bool,
+}
+
+#[derive(Debug)]
+struct SingleDeclProvider<'a> {
+    arena: &'a bumpalo::Bump,
+    decls: DeclsHolder<'a>,
+    requests: RefCell<Vec<Access>>,
+}
+
+impl<'a> DeclProvider<'a> for SingleDeclProvider<'a> {
+    fn decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'a>, Error> {
+        let query = |decls: &Decls<'a>| {
+            decls
+                .iter()
+                .find(|(sym, decl)| *sym == symbol && decl.kind() == kind)
+                .map(|(_, decl)| decl)
+                .ok_or(Error::NotFound)
+        };
+        let decl = match &self.decls {
+            DeclsHolder::ByRef(decls) => query(decls),
+            DeclsHolder::Ser(data) => query(&decl_provider::deserialize_decls(self.arena, data)?),
+        };
+        self.requests.borrow_mut().push(Access {
+            kind,
+            symbol: symbol.into(),
+            found: decl.is_ok(),
+        });
+        decl
+    }
 }

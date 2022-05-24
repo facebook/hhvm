@@ -55,6 +55,16 @@ struct Opts {
     /// Number of parallel worker threads. If 0, use num-cpu worker threads.
     #[clap(long, default_value("0"))]
     num_threads: usize,
+
+    /// Instead of printing the unit, print a list of the decls requested during compilation.
+    /// (only used by --test-compile-with-decls)
+    #[clap(long)]
+    pub(crate) log_decls_requested: bool,
+
+    /// Use serialized decl instead of decl pointer as the decl provider API
+    /// (only used by --test-compile-with-decls)
+    #[clap(long)]
+    pub(crate) use_serialized_decls: bool,
 }
 
 /// Hack Compiler
@@ -229,16 +239,12 @@ fn dispatch(opts: &mut Opts) -> Result<()> {
         };
         facts::extract_facts(opts, facts_opts)
     } else if opts.flag_commands.test_compile_with_decls {
-        compile_from_text_with_same_file_decl(opts)
+        compile::test_compile_with_decls(opts)
     } else if opts.flag_commands.dump_desugared_expression_trees {
         expr_trees::dump_expr_trees(opts)
     } else {
         compile::compile_from_text(opts)
     }
-}
-
-fn compile_from_text_with_same_file_decl(_: &Opts) -> Result<()> {
-    unimplemented!()
 }
 
 fn main() -> Result<()> {

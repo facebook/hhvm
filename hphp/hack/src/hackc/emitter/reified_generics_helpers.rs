@@ -268,6 +268,10 @@ pub(crate) fn happly_decl_has_reified_generics<'arena, 'decl>(
                     // The DeclProvider has no idea what `id` is.
                     true
                 }
+                Err(decl_provider::Error::Bincode(_)) => {
+                    // Infra error while handling serialized decls
+                    true
+                }
             }
         }
         Hint_::Hoption(_)

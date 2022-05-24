@@ -9,8 +9,6 @@
 mod compiler_ffi_impl;
 
 use anyhow::Result;
-use arena_deserializer::serde::Deserialize;
-use bincode::Options;
 use compile::EnvFlags;
 use cxx::CxxString;
 use decl_provider::{
@@ -377,15 +375,9 @@ pub fn hackc_direct_decl_parse(
     let parsed_file: direct_decl_parser::ParsedFile<'static> =
         direct_decl_parser::parse_decls_without_reference_text(opts, filename, text, alloc);
 
-    let op = bincode::config::Options::with_native_endian(bincode::options());
-    let serialized = op
-        .serialize(&parsed_file.decls)
-        .map_err(|e| format!("failed to serialize, error: {}", e))
-        .unwrap();
-
     compile_ffi::DeclResult {
         hash: no_pos_hash::position_insensitive_hash(&parsed_file.decls),
-        serialized,
+        serialized: decl_provider::serialize_decls(&parsed_file.decls).unwrap(),
         decls: Box::new(Decls {
             decls: parsed_file.decls,
             attributes: parsed_file.file_attributes,
@@ -396,14 +388,8 @@ pub fn hackc_direct_decl_parse(
 }
 
 fn hackc_verify_deserialization(result: &compile_ffi::DeclResult) -> bool {
-    let op = bincode::config::Options::with_native_endian(bincode::options());
-    let mut de = bincode::de::Deserializer::from_slice(&result.serialized, op);
     let arena = bumpalo::Bump::new();
-    let de = arena_deserializer::ArenaDeserializer::new(&arena, &mut de);
-    let decls = direct_decl_parser::Decls::deserialize(de)
-        .map_err(|e| format!("failed to deserialize, error: {}", e))
-        .unwrap();
-
+    let decls = decl_provider::deserialize_decls(&arena, &result.serialized).unwrap();
     decls == result.decls.decls
 }
 

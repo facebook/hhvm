@@ -87,20 +87,17 @@ pub struct ExternalDeclProvider<'decl> {
 impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
     fn decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>> {
         // Need to convert NameType into HPHP::AutoloadMap::KindOf.
-        let code: i32 = match kind {
-            NameType::Class => 0,   // HPHP::AutoloadMap::KindOf::Type
-            NameType::Typedef => 3, // HPHP::AutoloadMap::KindOf::TypeAlias
-            NameType::Fun => 1,     // HPHP::AutoloadMap::KindOf::Function
-            NameType::Const => 2,   // HPHP::AutoloadMap::KindOf::Constant
+        if kind == NameType::Module {
             // TODO(T108206307, T111380364) During decls-in-compilation, we should actively panic
             // if we're asking for a module. We *could* just say that all modules are not found,
             // defensively, but that might make it harder to debug in the future if we try to
             // use modules for decls-in-compilation.
-            NameType::Module => panic!(
+            panic!(
                 "Cannot request `{}` as a module decl; fetching module decls is not supported",
                 symbol
-            ),
+            )
         };
+        let code: i32 = name_type_to_autoload_kind(kind);
         let result = unsafe {
             // Invoke extern C/C++ provider implementation.
             (self.provider)(self.data, code, symbol.as_ptr() as _, symbol.len())
@@ -141,3 +138,13 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
         }
     }
 } //impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl>
+
+pub fn name_type_to_autoload_kind(kind: NameType) -> i32 {
+    match kind {
+        NameType::Class => 0,   // HPHP::AutoloadMap::KindOf::Type
+        NameType::Typedef => 3, // HPHP::AutoloadMap::KindOf::TypeAlias
+        NameType::Fun => 1,     // HPHP::AutoloadMap::KindOf::Function
+        NameType::Const => 2,   // HPHP::AutoloadMap::KindOf::Constant
+        NameType::Module => todo!("autoload modules"),
+    }
+}

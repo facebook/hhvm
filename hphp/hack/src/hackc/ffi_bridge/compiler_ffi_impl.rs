@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use super::*;
+use itertools::Itertools;
 use std::collections::{BTreeMap, BTreeSet};
 
 impl From<compile_ffi::TypeKind> for facts::TypeKind {
@@ -35,32 +36,27 @@ impl From<facts::TypeKind> for compile_ffi::TypeKind {
     }
 }
 
-impl From<compile_ffi::Attribute> for (String, Vec<String>) {
-    fn from(attr: compile_ffi::Attribute) -> (String, Vec<String>) {
-        (attr.name, attr.args)
+impl IntoKeyValue<String, Vec<String>> for compile_ffi::Attribute {
+    fn into_key_value(self) -> (String, Vec<String>) {
+        (self.name, self.args)
     }
 }
-impl From<(String, Vec<String>)> for compile_ffi::Attribute {
-    fn from(attr: (String, Vec<String>)) -> compile_ffi::Attribute {
-        compile_ffi::Attribute {
-            name: attr.0,
-            args: attr.1,
-        }
+impl FromKeyValue<String, Vec<String>> for compile_ffi::Attribute {
+    fn from_key_value(name: String, args: Vec<String>) -> compile_ffi::Attribute {
+        compile_ffi::Attribute { name, args }
     }
 }
 
-impl From<compile_ffi::Method> for (String, facts::MethodFacts) {
-    fn from(meth: compile_ffi::Method) -> (String, facts::MethodFacts) {
-        let compile_ffi::Method { name, methfacts } = meth;
+impl IntoKeyValue<String, facts::MethodFacts> for compile_ffi::Method {
+    fn into_key_value(self) -> (String, facts::MethodFacts) {
+        let compile_ffi::Method { name, methfacts } = self;
         (name, methfacts.into())
     }
 }
-impl From<(String, facts::MethodFacts)> for compile_ffi::Method {
-    fn from(methodfacts: (String, facts::MethodFacts)) -> compile_ffi::Method {
-        compile_ffi::Method {
-            name: methodfacts.0,
-            methfacts: methodfacts.1.into(),
-        }
+impl FromKeyValue<String, facts::MethodFacts> for compile_ffi::Method {
+    fn from_key_value(name: String, methfacts: facts::MethodFacts) -> compile_ffi::Method {
+        let methfacts = methfacts.into();
+        compile_ffi::Method { name, methfacts }
     }
 }
 
@@ -106,18 +102,16 @@ impl From<facts::TypeFacts> for compile_ffi::TypeFacts {
     }
 }
 
-impl From<compile_ffi::TypeFactsByName> for (String, facts::TypeFacts) {
-    fn from(typefacts_by_name: compile_ffi::TypeFactsByName) -> (String, facts::TypeFacts) {
-        let compile_ffi::TypeFactsByName { name, typefacts } = typefacts_by_name;
+impl IntoKeyValue<String, facts::TypeFacts> for compile_ffi::TypeFactsByName {
+    fn into_key_value(self) -> (String, facts::TypeFacts) {
+        let compile_ffi::TypeFactsByName { name, typefacts } = self;
         (name, typefacts.into())
     }
 }
-impl From<(String, facts::TypeFacts)> for compile_ffi::TypeFactsByName {
-    fn from((name, typefacts): (String, facts::TypeFacts)) -> compile_ffi::TypeFactsByName {
-        compile_ffi::TypeFactsByName {
-            name,
-            typefacts: typefacts.into(),
-        }
+impl FromKeyValue<String, facts::TypeFacts> for compile_ffi::TypeFactsByName {
+    fn from_key_value(name: String, typefacts: facts::TypeFacts) -> compile_ffi::TypeFactsByName {
+        let typefacts = typefacts.into();
+        compile_ffi::TypeFactsByName { name, typefacts }
     }
 }
 
@@ -142,21 +136,31 @@ impl From<facts::Facts> for compile_ffi::Facts {
     }
 }
 
+trait IntoKeyValue<K, V> {
+    fn into_key_value(self) -> (K, V);
+}
+
+trait FromKeyValue<K, V> {
+    fn from_key_value(k: K, v: V) -> Self;
+}
+
 fn vec_to_map<K, V, T>(v: Vec<T>) -> BTreeMap<K, V>
 where
     K: std::cmp::Ord,
-    T: Into<(K, V)>,
+    T: IntoKeyValue<K, V>,
 {
-    v.into_iter().map(|x| x.into()).collect::<BTreeMap<K, V>>()
+    v.into_iter()
+        .map(|x| x.into_key_value())
+        .collect::<BTreeMap<K, V>>()
 }
 
 fn map_to_vec<K, V, T>(m: BTreeMap<K, V>) -> Vec<T>
 where
-    T: From<(K, V)>,
+    T: FromKeyValue<K, V>,
 {
     m.into_iter()
-        .map(|(k, v)| T::from((k, v)))
-        .collect::<Vec<T>>()
+        .map(|(k, v)| T::from_key_value(k, v))
+        .collect_vec()
 }
 
 fn vec_to_set<T: std::cmp::Ord>(v: Vec<T>) -> BTreeSet<T> {

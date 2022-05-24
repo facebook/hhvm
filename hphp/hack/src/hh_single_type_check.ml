@@ -91,12 +91,12 @@ let magic_builtins =
     ( "hh_single_type_check_magic.hhi",
       "<?hh\n"
       ^ "namespace {\n"
-      ^ "function hh_show<T>(<<__AcceptDisposable>> readonly T $val):T {}\n"
-      ^ "function hh_expect<T>(<<__AcceptDisposable>> readonly T $val):T {}\n"
-      ^ "function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val):T {}\n"
-      ^ "function hh_show_env():void {}\n"
-      ^ "function hh_log_level(string $key, int $level):void {}\n"
-      ^ "function hh_force_solve():void {}"
+      ^ "function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
+      ^ "function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
+      ^ "function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
+      ^ "function hh_show_env()[]:void {}\n"
+      ^ "function hh_log_level(string $key, int $level)[]:void {}\n"
+      ^ "function hh_force_solve()[]:void {}"
       ^ "function hh_time(string $command, string $tag = '_'):void {}\n"
       ^ "}\n" );
   |]
@@ -106,12 +106,12 @@ let pessimised_magic_builtins =
     ( "hh_single_type_check_magic.hhi",
       "<?hh\n"
       ^ "namespace {\n"
-      ^ "function hh_show<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val):~T {}\n"
-      ^ "function hh_expect<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val):~T {}\n"
-      ^ "function hh_expect_equivalent<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val):~T {}\n"
-      ^ "function hh_show_env():void {}\n"
-      ^ "function hh_log_level(string $key, int $level):void {}\n"
-      ^ "function hh_force_solve():void {}"
+      ^ "function hh_show<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val)[]:~T {}\n"
+      ^ "function hh_expect<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val)[]:~T {}\n"
+      ^ "function hh_expect_equivalent<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val)[]:~T {}\n"
+      ^ "function hh_show_env()[]:void {}\n"
+      ^ "function hh_log_level(string $key, int $level)[]:void {}\n"
+      ^ "function hh_force_solve()[]:void {}"
       ^ "}\n" );
   |]
 

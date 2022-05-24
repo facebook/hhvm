@@ -221,7 +221,7 @@ fn daemon_mode(mut opts: Opts) -> Result<()> {
 
 fn dispatch(opts: &mut Opts) -> Result<()> {
     if opts.flag_commands.parse {
-        parse(opts)
+        parse::run_flag_command(opts)
     } else if opts.flag_commands.extract_facts_from_decls {
         let facts_opts = facts::Opts {
             files: std::mem::take(&mut opts.files),
@@ -235,10 +235,6 @@ fn dispatch(opts: &mut Opts) -> Result<()> {
     } else {
         compile::compile_from_text(opts)
     }
-}
-
-fn parse(_: &Opts) -> Result<()> {
-    unimplemented!()
 }
 
 fn compile_from_text_with_same_file_decl(_: &Opts) -> Result<()> {
@@ -260,7 +256,7 @@ fn main() -> Result<()> {
     match opts.command.take() {
         Some(Command::Compile(mut opts)) => compile::run(&mut opts),
         Some(Command::Crc(opts)) => crc::run(opts),
-        Some(Command::Parse(opts)) => parse::run(opts),
+        Some(Command::Parse(opts)) => parse::run_sub_command(opts),
         Some(Command::Facts(facts_opts)) => facts::extract_facts(&mut opts, facts_opts),
         None => {
             if opts.daemon {

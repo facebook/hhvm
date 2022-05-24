@@ -7,7 +7,7 @@ use aast_parser::{rust_aast_parser_types::Env as AastParserEnv, AastParser};
 use anyhow::{Context, Result};
 use clap::Parser;
 use ocamlrep::rc::RcOc;
-use oxidized::relative_path::{self, RelativePath};
+use oxidized::relative_path::{Prefix, RelativePath};
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, parser_env::ParserEnv, source_text::SourceText,
 };
@@ -41,7 +41,7 @@ impl Default for ParserKind {
     }
 }
 
-pub fn run(opts: Opts) -> Result<()> {
+pub fn run_sub_command(opts: Opts) -> Result<()> {
     let files = BufReader::new(stdin())
         .lines()
         .collect::<std::io::Result<Vec<_>>>()
@@ -61,7 +61,7 @@ fn parse_file(parser: ParserKind, filepath: PathBuf) -> anyhow::Result<()> {
     let new_ctx = Arc::clone(ctx);
     let env = ParserEnv::default();
     let (filepath, content) = new_ctx.as_ref();
-    let path = RelativePath::make(relative_path::Prefix::Dummy, filepath.clone());
+    let path = RelativePath::make(Prefix::Dummy, filepath.clone());
     let source_text = SourceText::make(RcOc::new(path.clone()), content.as_slice());
     match parser {
         ParserKind::PositionedWithFullTrivia => {
@@ -88,6 +88,44 @@ fn parse_file(parser: ParserKind, filepath: PathBuf) -> anyhow::Result<()> {
             let env = AastParserEnv::default();
             let _ = AastParser::from_text(&env, &indexed_source_text);
         }
+    }
+    Ok(())
+}
+
+pub(crate) fn run_flag_command(hackc_opts: &mut crate::Opts) -> Result<()> {
+    let filenames = hackc_opts.files.gather_input_files()?;
+    for path in filenames {
+        let source_text = std::fs::read(&path)?;
+        // TODO T118266805: These should come from config files.
+        let env = ParserEnv {
+            codegen: true,
+            hhvm_compat_mode: true,
+            php5_compat_mode: true,
+            allow_new_attribute_syntax: true,
+            enable_xhp_class_modifier: false,
+            disable_xhp_element_mangling: false,
+            disable_xhp_children_declarations: false,
+            disallow_fun_and_cls_meth_pseudo_funcs: true,
+            interpret_soft_types_as_like_types: true,
+        };
+        let filepath = RelativePath::make(Prefix::Dummy, std::path::PathBuf::new());
+        let source_text = SourceText::make(RcOc::new(filepath), &source_text);
+        let indexed_source = IndexedSourceText::new(source_text);
+        let arena = bumpalo::Bump::new();
+        let mut serializer = serde_json::Serializer::new(vec![]);
+        let json = match positioned_full_trivia_parser::parse_script_to_json(
+            &arena,
+            &mut serializer,
+            &indexed_source,
+            env,
+        ) {
+            Ok(()) => serializer.into_inner(),
+            Err(_) => {
+                // TODO T121510771: swallowing errors is bad.
+                Vec::new()
+            }
+        };
+        crate::daemon_print(hackc_opts, &json)?;
     }
     Ok(())
 }

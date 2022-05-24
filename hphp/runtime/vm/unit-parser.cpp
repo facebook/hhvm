@@ -348,8 +348,8 @@ FfpResult ffp_parse_file(
   const RepoOptionsFlags& options
 ) {
   auto const env = options.getParserEnvironment();
-  auto const parse_tree = hackc_parse_positioned_full_trivia_cpp_ffi(contents, env);
-  return FfpJSONString {  std::string(parse_tree) };
+  auto const json = hackc_parse_positioned_full_trivia_cpp_ffi(contents, env);
+  return FfpJSONString { std::string(json.begin(), json.end()) };
 }
 
 std::unique_ptr<UnitCompiler>

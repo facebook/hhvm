@@ -5,7 +5,7 @@ use crate::Opts;
 use anyhow::Result;
 use oxidized::relative_path::{Prefix, RelativePath};
 
-pub(crate) fn dump_expr_trees(mut opts: Opts) -> Result<()> {
+pub(crate) fn dump_expr_trees(opts: &mut Opts) -> Result<()> {
     for path in opts.files.gather_input_files()? {
         compile::dump_expr_tree::desugar_and_print(
             RelativePath::make(Prefix::Dummy, path),

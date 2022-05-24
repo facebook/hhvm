@@ -25,6 +25,10 @@ struct Opts {
     #[clap(subcommand)]
     command: Option<Command>,
 
+    /// Runs in daemon mode for testing purposes. Do not rely on for production
+    #[clap(long)]
+    daemon: bool,
+
     #[clap(flatten)]
     flag_commands: FlagCommands,
 
@@ -85,10 +89,6 @@ enum Command {
 // hh_single_compile_cpp.
 #[derive(Parser, Debug, Default)]
 struct FlagCommands {
-    /// Runs in daemon mode for testing purposes. Do not rely on for production
-    #[clap(long)]
-    daemon: bool,
-
     /// Print the source code with expression tree literals desugared.
     /// Best effort debugging tool.
     #[clap(long)]
@@ -120,7 +120,7 @@ impl FileOpts {
         Ok(files)
     }
 
-    pub fn is_multi(&self) -> bool {
+    pub fn is_batch_mode(&self) -> bool {
         self.input_file_list.is_some() || self.filenames.len() > 1
     }
 }
@@ -209,15 +209,39 @@ impl Opts {
     pub(crate) const INCLUDE_ROOTS: &'static str = "";
 }
 
-fn daemon_mode(_: Opts) -> Result<()> {
+/// In daemon mode, hackc blocks waiting for a filename on stdin.
+/// Then, using the originally invoked options, dispatches that file to be compiled.
+fn daemon_mode(mut opts: Opts) -> Result<()> {
+    for line in std::io::stdin().lock().lines() {
+        opts.files.filenames = vec![Path::new(&line?).to_path_buf()];
+        dispatch(&mut opts)?;
+    }
+    Ok(())
+}
+
+fn dispatch(opts: &mut Opts) -> Result<()> {
+    if opts.flag_commands.parse {
+        parse(opts)
+    } else if opts.flag_commands.extract_facts_from_decls {
+        let facts_opts = facts::Opts {
+            files: std::mem::take(&mut opts.files),
+            ..Default::default()
+        };
+        facts::extract_facts(opts, facts_opts)
+    } else if opts.flag_commands.test_compile_with_decls {
+        compile_from_text_with_same_file_decl(opts)
+    } else if opts.flag_commands.dump_desugared_expression_trees {
+        expr_trees::dump_expr_trees(opts)
+    } else {
+        compile::compile_from_text(opts)
+    }
+}
+
+fn parse(_: &Opts) -> Result<()> {
     unimplemented!()
 }
 
-fn parse(_: Opts) -> Result<()> {
-    unimplemented!()
-}
-
-fn compile_from_text_with_same_file_decl(_: Opts) -> Result<()> {
+fn compile_from_text_with_same_file_decl(_: &Opts) -> Result<()> {
     unimplemented!()
 }
 
@@ -234,30 +258,41 @@ fn main() -> Result<()> {
     builder.build_global().unwrap();
 
     match opts.command.take() {
-        Some(Command::Compile(opts)) => compile::run(opts),
+        Some(Command::Compile(mut opts)) => compile::run(&mut opts),
         Some(Command::Crc(opts)) => crc::run(opts),
         Some(Command::Parse(opts)) => parse::run(opts),
-        Some(Command::Facts(facts_opts)) => facts::extract_facts(opts, facts_opts),
+        Some(Command::Facts(facts_opts)) => facts::extract_facts(&mut opts, facts_opts),
         None => {
-            if opts.flag_commands.daemon {
+            if opts.daemon {
                 daemon_mode(opts)
-            } else if opts.flag_commands.parse {
-                parse(opts)
-            } else if opts.flag_commands.extract_facts_from_decls {
-                let facts_opts = facts::Opts {
-                    files: std::mem::take(&mut opts.files),
-                    ..Default::default()
-                };
-                facts::extract_facts(opts, facts_opts)
-            } else if opts.flag_commands.test_compile_with_decls {
-                compile_from_text_with_same_file_decl(opts)
-            } else if opts.flag_commands.dump_desugared_expression_trees {
-                expr_trees::dump_expr_trees(opts)
             } else {
-                compile::compile_from_text(opts)
+                dispatch(&mut opts)
             }
         }
     }
+}
+
+/// Utility print for daemon mode compatibility
+/// Prints the number of characters of the compiled result to stdout along with
+/// \n and flushes Then prints the compiled result, \n, and flushes.
+/// Do not rely on daemon mode for production use cases.
+pub(crate) fn daemon_print(opts: &Opts, output: &[u8]) -> Result<()> {
+    use std::io::Write;
+    let mut w = std::io::stdout();
+    if opts.daemon {
+        // Need to account for utf-8 encoding and text streams with the python test
+        // runner A whole mess:
+        // https://stackoverflow.com/questions/3586923/counting-unicode-characters-in-c
+        writeln!(
+            w,
+            "{}",
+            output.iter().filter(|&b| (b & 0xc0) != 0x80).count() + 1
+        )?;
+    }
+    w.write_all(output)?;
+    w.write_all(b"\n")?;
+    w.flush()?;
+    Ok(())
 }
 
 #[cfg(test)]

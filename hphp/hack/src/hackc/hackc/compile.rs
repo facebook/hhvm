@@ -46,7 +46,7 @@ pub(crate) struct SingleFileOpts {
 
 type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
-pub fn run(mut opts: Opts) -> Result<()> {
+pub fn run(opts: &mut Opts) -> Result<()> {
     if opts.single_file_opts.verbosity > 1 {
         eprintln!("hackc compile options/flags: {:#?}", opts);
     }
@@ -141,14 +141,13 @@ pub(crate) fn process_single_file(
     Ok(output)
 }
 
-pub(crate) fn compile_from_text(mut hackc_opts: crate::Opts) -> Result<()> {
+pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts) -> Result<()> {
     let files = hackc_opts.files.gather_input_files()?;
     for path in files {
         let source_text = fs::read(&path)?;
         let native_env = hackc_opts.native_env(path)?;
         let hhas = compile_impl(native_env, source_text, None)?;
-        std::io::stdout().write_all(&hhas)?;
-        println!(); // print an extra newline to match hh_single_compile_cpp
+        crate::daemon_print(hackc_opts, &hhas)?;
     }
     Ok(())
 }

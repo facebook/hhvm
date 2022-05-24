@@ -22,10 +22,10 @@ pub(crate) struct Opts {
 /// If input-file-list was specified or if there are multiple CLI files,
 /// the result is a JSON object will map filenames to facts. Otherwise
 /// the result is just the single file's Facts.
-pub(crate) fn extract_facts(hackc_opts: crate::Opts, mut opts: Opts) -> Result<()> {
+pub(crate) fn extract_facts(hackc_opts: &mut crate::Opts, mut opts: Opts) -> Result<()> {
     // If --input-file-list, output a json wrapper object mapping
     // filenames to facts objects
-    let multi = opts.files.is_multi();
+    let is_batch = !hackc_opts.daemon && opts.files.is_batch_mode();
     let filenames = opts.files.gather_input_files()?;
     let mut file_to_facts = serde_json::Map::with_capacity(filenames.len());
     for path in filenames {
@@ -42,6 +42,9 @@ pub(crate) fn extract_facts(hackc_opts: crate::Opts, mut opts: Opts) -> Result<(
         // Decls to facts
         if parsed_file.has_first_pass_parse_errors {
             // Swallowing errors is bad.
+            if !is_batch {
+                crate::daemon_print(hackc_opts, b"")?;
+            }
             continue;
         }
         let facts = Facts::from_decls(
@@ -56,10 +59,11 @@ pub(crate) fn extract_facts(hackc_opts: crate::Opts, mut opts: Opts) -> Result<(
         };
         file_to_facts.insert(path.to_str().unwrap().to_owned(), json);
     }
-    if multi {
+    if is_batch {
         serde_json::to_writer(std::io::stdout(), &Value::Object(file_to_facts))?;
     } else if let Some((_, json)) = file_to_facts.into_iter().next() {
-        serde_json::to_writer_pretty(std::io::stdout(), &json)?;
+        let output = serde_json::to_string_pretty(&json)?;
+        crate::daemon_print(hackc_opts, output.as_bytes())?;
     }
     Ok(())
 }

@@ -79,21 +79,15 @@ fn constructor_relation(fb: FacebookInit) -> Result<()> {
         .folded_decl_provider
         .get_class(B.into(), B)?;
     // Retrieve the dependency graph.
-    let _depgraph = &ctx.provider_backend.dependency_graph;
+    let depgraph = &ctx.provider_backend.dependency_graph;
+
     // Doing the comparisons on binary search trees avoids issues with hash
     // map/set orderings.
-    let _expected = btreemap! {
-        DependencyName::Constructor(A) => btreeset!{DeclName::Type(B).hash1()},
-    };
-    /*
-        let actual: std::collections::BTreeMap<DependencyName, std::collections::BTreeSet<DeclName>> =
-            (depgraph.rdeps.iter())
-                .map(|e| (*e.key(), e.value().iter().copied().collect()))
-                .filter(|(k, _)| matches!(k, DependencyName::Constructor(..)))
-                .collect();
-        // Finally, compare.
-        assert_eq!(expected, actual);
-    */
+    let exp = btreeset! {DeclName::Type(B).hash1()};
+    let act = depgraph
+        .get_dependents(DependencyName::Constructor(A))
+        .collect::<BTreeSet<_>>();
+    assert_eq!(exp, act);
 
     Ok(())
 }
@@ -108,24 +102,24 @@ fn no_constructor_relation_on_hhi_parent(fb: FacebookInit) -> Result<()> {
         },
     )?;
     let A = TypeName::new(r#"\A"#);
+    let Exception = TypeName::new(r#"\ExceptionA"#);
 
     // Fold `A`.
     ctx.provider_backend
         .folded_decl_provider
         .get_class(A.into(), A)?;
     // Retrieve the dependency graph.
-    let _depgraph = &ctx.provider_backend.dependency_graph;
-    // Doing the comparisons on binary search trees avoids issues with hash
-    // map/set orderings (not that it matters here).
-    /*
-    let actual: std::collections::BTreeMap<DependencyName, std::collections::BTreeSet<DeclName>> =
-        (depgraph.rdeps.iter())
-            .map(|e| (*e.key(), e.value().iter().copied().collect()))
-            .filter(|(k, _)| matches!(k, DependencyName::Constructor(..)))
-            .collect();
+    let depgraph = &ctx.provider_backend.dependency_graph;
+
     // The constructor relation of child on parent isn't observed when parent is
     // an hhi.
-    assert!(actual.is_empty());
-     */
+    assert!(
+        depgraph
+            .get_dependents(DependencyName::Constructor(Exception))
+            .peekable()
+            .peek()
+            .is_none()
+    );
+
     Ok(())
 }

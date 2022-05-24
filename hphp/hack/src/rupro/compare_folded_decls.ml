@@ -35,7 +35,6 @@ let make_workers
         ~custom_columns:[]
         ~rollout_flags:(ServerLocalConfig.to_rollout_flags server_local_config)
         ~rollout_group:server_local_config.ServerLocalConfig.rollout_group
-        ~machine_class:server_local_config.ServerLocalConfig.machine_class
         ~hhconfig_version
         ~init_id:(Random_id.short_string ())
         ~time:(Unix.gettimeofday ())

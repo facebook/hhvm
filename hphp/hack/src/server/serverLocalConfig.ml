@@ -592,11 +592,6 @@ type t = {
        into here, [t], it was first used as a lookup in ServerLocalConfigKnobs.
        Intended meaning: what class of user is running hh_server, hence what experiments
        should they be subject to. *)
-  machine_class: string option;
-      (** A string from hh.conf, written to HackEventLogger telemetry. Before it got
-       into here, [t], it was first used as a lookup in ServerLocalConfigKnobs.
-       Intended meaning: what kind of hardware this machine has, hence what settings
-       for workers should be used. *)
   saved_state_manifold_api_key: string option;
       (** A string from hh.conf. The API key is used for saved state downloads
        when we call out to manifold *)
@@ -713,7 +708,6 @@ let default =
     workload_quantile = None;
     enable_disk_heap = true;
     rollout_group = None;
-    machine_class = None;
     saved_state_manifold_api_key = None;
     hulk_lite = false;
     hulk_heavy = false;
@@ -1430,7 +1424,6 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let rollout_group = string_opt "rollout_group" config in
-  let machine_class = string_opt "machine_class" config in
   let specify_manifold_api_key =
     bool_if_min_version
       "specify_manifold_api_key"
@@ -1592,7 +1585,6 @@ let load_ fn ~silent ~current_version overrides =
     workload_quantile;
     enable_disk_heap;
     rollout_group;
-    machine_class;
     saved_state_manifold_api_key;
     hulk_lite;
     hulk_heavy;

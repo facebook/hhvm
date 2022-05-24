@@ -80,7 +80,6 @@ let monitor_daemon_main
         (ServerConfig.version config |> Config_file.version_to_string_opt)
       ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
       ~rollout_group:local_config.ServerLocalConfig.rollout_group
-      ~machine_class:local_config.ServerLocalConfig.machine_class
       ~proc_stack
       (ServerArgs.root options)
       init_id

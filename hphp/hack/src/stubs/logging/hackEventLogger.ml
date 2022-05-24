@@ -87,8 +87,6 @@ let set_hhconfig_version _ = ()
 
 let set_rollout_group _ = ()
 
-let set_machine_class _ = ()
-
 let set_rollout_flags _ = ()
 
 let typechecker_exit _ _ _ ~exit_type:_ ~exit_code:_ ~exit_status:_ ~is_oom:_ =
@@ -102,7 +100,6 @@ let init
     ~informant_managed:_
     ~rollout_flags:_
     ~rollout_group:_
-    ~machine_class:_
     ~time:_
     ~max_workers:_
     ~per_file_profiling:_ =
@@ -115,7 +112,6 @@ let init_worker
     ~custom_columns:_
     ~rollout_flags:_
     ~rollout_group:_
-    ~machine_class:_
     ~time:_
     ~per_file_profiling:_ =
   ()
@@ -127,7 +123,6 @@ let init_monitor
     ~hhconfig_version:_
     ~rollout_flags:_
     ~rollout_group:_
-    ~machine_class:_
     _
     _
     _ =

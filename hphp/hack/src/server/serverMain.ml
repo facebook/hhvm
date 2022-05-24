@@ -1332,7 +1332,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         ~custom_columns:(ServerArgs.custom_telemetry_data options)
         ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
         ~rollout_group:local_config.ServerLocalConfig.rollout_group
-        ~machine_class:local_config.ServerLocalConfig.machine_class
         ~time:(Unix.gettimeofday ())
         ~per_file_profiling:local_config.ServerLocalConfig.per_file_profiling
     else
@@ -1344,7 +1343,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         ~informant_managed
         ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
         ~rollout_group:local_config.ServerLocalConfig.rollout_group
-        ~machine_class:local_config.ServerLocalConfig.machine_class
         ~time:(Unix.gettimeofday ())
         ~max_workers:num_workers
         ~per_file_profiling:local_config.ServerLocalConfig.per_file_profiling

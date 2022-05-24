@@ -1560,6 +1560,34 @@ let def_start_keywords filename s : unit =
   in
   complete_keywords_at_token possible_keywords filename s
 
+let class_member_start_keywords filename s (ctx : Ast_defs.classish_kind option)
+    : unit =
+  let visibility_keywords = ["public"; "protected"] in
+  let const_type_keywords = ["const"; "abstract"] in
+  (* Keywords allowed on class and trait methods, but not allowed on interface methods. *)
+  let concrete_method_keywords = ["private"; "final"] in
+  let trait_member_keywords = ["require extends"; "require implements"] in
+  let inclusion_keywords = ["use"] in
+
+  let possible_keywords =
+    match ctx with
+    | Some (Ast_defs.Cclass _) ->
+      visibility_keywords
+      @ const_type_keywords
+      @ concrete_method_keywords
+      @ inclusion_keywords
+    | Some Ast_defs.Cinterface -> visibility_keywords @ const_type_keywords
+    | Some Ast_defs.Ctrait ->
+      visibility_keywords
+      @ const_type_keywords
+      @ concrete_method_keywords
+      @ trait_member_keywords
+      @ inclusion_keywords
+    | _ -> []
+  in
+
+  complete_keywords_at_token possible_keywords filename s
+
 (* Drop the items from [possible_keywords] if they're already in
    [existing_modifiers], and drop visibility keywords if we already
    have any visibility keyword. *)
@@ -1662,6 +1690,12 @@ let keywords filename tree : unit =
         | "enum" -> inner_ctx := Some Ast_defs.Cenum
         | _ -> ())
       | _ -> ())
+    | ClassishBody cb ->
+      List.iter (syntax_node_to_list cb.classish_body_elements) ~f:(fun d ->
+          match d.syntax with
+          | ErrorSyntax es ->
+            class_member_start_keywords filename es.error_error !inner_ctx
+          | _ -> ())
     | MethodishDeclaration md ->
       let header = md.methodish_function_decl_header in
       (match header.syntax with

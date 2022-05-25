@@ -1454,7 +1454,9 @@ let rec make_a_local_of ~include_this env e =
   | (_, _, Dollardollar x) ->
     (env, Some x)
   | (_, p, This) when include_this -> (env, Some (p, this))
-  | (_, _, Hole (e, _, _, _)) -> make_a_local_of ~include_this env e
+  | (_, _, Hole (e, _, _, _))
+  | (_, _, ReadonlyExpr e) ->
+    make_a_local_of ~include_this env e
   | _ -> (env, None)
 
 let strip_supportdyn ty =

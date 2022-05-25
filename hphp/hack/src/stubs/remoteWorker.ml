@@ -41,6 +41,7 @@ module type RemoteServerApi = sig
     check_id:string ->
     Relative_path.t list ->
     state_filename:string ->
+    telemetry:Telemetry.t ->
     Errors.t
 end
 

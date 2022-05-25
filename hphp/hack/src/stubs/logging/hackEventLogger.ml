@@ -303,7 +303,7 @@ let credentials_check_failure _ _ = ()
 
 let credentials_check_end _ _ = ()
 
-let remote_worker_type_check_end _ = ()
+let remote_worker_type_check_end _ ~start_t:_ = ()
 
 let remote_worker_load_naming_end _ = ()
 
@@ -470,7 +470,7 @@ let worker_exception _ = ()
 
 (* Typing service events. *)
 
-let hulk_type_check_end _ ~start_t:_ = ()
+let hulk_type_check_end _ _ ~start_t:_ = ()
 
 module ProfileTypeCheck = struct
   type stats = unit

@@ -435,7 +435,8 @@ let make_remote_server_api
           build_naming_table ();
           None)
 
-    let type_check ctx ~init_id ~check_id files_to_check ~state_filename =
+    let type_check
+        ctx ~init_id ~check_id files_to_check ~state_filename ~telemetry =
       let t = Unix.gettimeofday () in
       Hh_logger.log "Type checking a batch...";
       let check_info =
@@ -449,12 +450,12 @@ let make_remote_server_api
         }
       in
       (* TODO: use the telemetry *)
-      let { Typing_check_service.errors; _ } =
+      let { Typing_check_service.errors; telemetry; _ } =
         Typing_check_service.go
           ctx
           workers
           Typing_service_delegate.default
-          (Telemetry.create ())
+          telemetry
           files_to_check
           ~memory_cap:(Some 200000)
           ~longlived_workers:false
@@ -462,7 +463,7 @@ let make_remote_server_api
           ~hulk_heavy:false
           ~check_info
       in
-      HackEventLogger.remote_worker_type_check_end t;
+      HackEventLogger.remote_worker_type_check_end telemetry ~start_t:t;
       let t = Hh_logger.log_duration "Type checked files in remote worker" t in
       let dep_table_edges_added =
         Typing_deps.save_discovered_edges

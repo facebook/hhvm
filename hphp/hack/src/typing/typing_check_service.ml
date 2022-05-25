@@ -984,6 +984,7 @@ let process_in_parallel
     if controller_started && (hulk_lite || hulk_heavy) then
       HackEventLogger.hulk_type_check_end
         telemetry
+        workitems_initial_count
         ~start_t:
           (Option.value_exn
              telemetry_start_t

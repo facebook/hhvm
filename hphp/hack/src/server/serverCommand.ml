@@ -284,6 +284,21 @@ let handle
 
   let msg = ClientProvider.read_client_msg client in
 
+  (* This is a helper to update progress.json to things like "[HackIDE:idle done]" or "[HackAst:--type-at-pos check]"
+     or "[HackAst:--type-at-pos]". We try to balance something useful to the user, with something that helps the hack
+     team know what's going on and who is to blame.
+     The form is [FROM:CMD PHASE].
+     FROM is the --from argument passed at the command-line, or "HackIDE" in case of LSP requests.
+     CMD is the "--type-at-pos" or similar command-line argument that gave rise to serverRpc, or something sensible for LSP.
+     PHASE is empty at the start, "done" once we've finished handling, "write" if Needs_writes, "check" if Needs_full_recheck. *)
+  let send_progress phase =
+    ServerProgress.send_progress
+      ~include_in_logs:false
+      "%s%s"
+      (ServerCommandTypesUtils.status_describe_cmd msg)
+      phase
+  in
+
   (* Once again, it's expected that [Server_got_cmd] happens a long time
      after we started waiting for one! *)
   ClientProvider.track
@@ -296,10 +311,6 @@ let handle
          (ServerCommandTypesUtils.debug_describe_cmd msg)
          (ClientProvider.priority_to_string client))
     ~long_delay_okay:(ClientProvider.is_persistent client);
-  ServerProgress.send_progress
-    ~include_in_logs:false
-    "%s"
-    (ServerCommandTypesUtils.status_describe_cmd msg);
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale =
@@ -307,15 +318,19 @@ let handle
   in
 
   let handle_command =
-    actually_handle genv client msg full_recheck_needed ~is_stale
+    send_progress "";
+    let r = actually_handle genv client msg full_recheck_needed ~is_stale in
+    send_progress " done";
+    r
   in
 
-  if commands_needs_writes msg then
+  if commands_needs_writes msg then begin
     (* IDE edits can come in quick succession and be immediately followed
      * by time sensitivie queries (like autocomplete). There is a constant cost
      * to stopping and resuming the global typechecking jobs, which leads to
      * flaky experience. To avoid this, we don't restart the global rechecking
      * after IDE edits - you need to save the file again to restart it. *)
+    send_progress " write";
     ServerUtils.Needs_writes
       {
         env;
@@ -323,8 +338,9 @@ let handle
         recheck_restart_is_needed = not (is_edit msg);
         reason = ServerCommandTypesUtils.debug_describe_cmd msg;
       }
-  else if full_recheck_needed then
+  end else if full_recheck_needed then begin
+    send_progress " typechecking";
     ServerUtils.Needs_full_recheck
       { env; finish_command_handling = handle_command; reason = reason msg }
-  else
+  end else
     ServerUtils.Done (handle_command env)

@@ -452,6 +452,10 @@ let is_critical_rpc : type a. a t -> bool = function
   | EDIT_FILE _ -> true
   | _ -> false
 
+let is_idle_rpc : type a. a t -> bool = function
+  | IDE_IDLE -> true
+  | _ -> false
+
 type 'a command =
   | Rpc of cmd_metadata * 'a t
   | Debug_DO_NOT_USE

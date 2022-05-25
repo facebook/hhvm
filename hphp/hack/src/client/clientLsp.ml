@@ -99,7 +99,6 @@ type server_conn = {
 module Main_env = struct
   type t = {
     conn: server_conn;
-    needs_idle: bool;
     most_recent_file: documentUri option;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_diagnostics: UriSet.t;
@@ -255,6 +254,15 @@ the server state at the time. The second way we handle them is inside
 handle_server_message, called as part of the main message loop, whose
 job is to update the Main_env representation of current hh_server status. *)
 let hh_server_state_log : (float * hh_server_state) list ref = ref []
+
+(** The behavior of hh_server is that, if ever it receives an RPC, then it
+expects an IDLE to be sent once the LSP queue is empty and it won't do
+any typechecks until then. This flag is set to true by [rpc], and reset
+to false in the [main] loop after we send the IDLE.
+I'm sorry to store this as a global mutable ref, but it was easier than
+storing it in Main_env and threading Main_env down through everything
+that uses it. *)
+let hh_server_needs_idle : bool ref = ref true
 
 (** hh_server pushes a different form of its state to the monitor e.g.
 "busy typechecking 1/50 files" or "init is slow due to lack of saved state".
@@ -1494,10 +1502,10 @@ let report_connect_end (ienv : In_init_env.t) : state =
   log "report_connect_end";
   In_init_env.(
     let _state = dismiss_diagnostics (In_init ienv) in
+    hh_server_needs_idle := true;
     let menv =
       {
         Main_env.conn = ienv.In_init_env.conn;
-        needs_idle = true;
         most_recent_file = ienv.most_recent_file;
         editor_open_files = ienv.editor_open_files;
         uris_with_diagnostics = UriSet.empty;
@@ -2036,6 +2044,7 @@ let rpc
         let end_time = Unix.gettimeofday () in
         let duration = end_time -. start_time in
         let msg = ServerCommandTypesUtils.debug_describe_t command in
+        hh_server_needs_idle := not (ServerCommandTypes.is_idle_rpc command);
         log_debug "hh_server rpc: [%s] [%0.3f]" msg duration;
         match result with
         | Ok ((), res, tracker) ->
@@ -2146,7 +2155,7 @@ let state_to_rage (state : state) : string =
         ^^ "uris_with_unsaved_changes: %s\n"
         ^^ "hh_server_status.message: %s\n"
         ^^ "hh_server_status.shortMessage: %s\n")
-        menv.needs_idle
+        !hh_server_needs_idle
         (menv.editor_open_files |> UriMap.keys |> uris_to_string)
         (menv.uris_with_diagnostics |> UriSet.elements |> uris_to_string)
         (menv.uris_with_unsaved_changes |> UriSet.elements |> uris_to_string)
@@ -3605,12 +3614,6 @@ let do_didChangeWatchedFiles_registerCapability () : Lsp.lsp_request =
   Lsp.RegisterCapabilityRequest
     { RegisterCapability.registrations = [registration] }
 
-let handle_idle_if_necessary (state : state) (event : event) : state =
-  match state with
-  | Main_loop menv when not (is_tick event) ->
-    Main_loop { menv with Main_env.needs_idle = true }
-  | _ -> state
-
 let track_open_and_recent_files (state : state) (event : event) : state =
   (* We'll keep track of which files are opened by the editor. *)
   let prev_opened_files =
@@ -4870,6 +4873,8 @@ let handle_client_ide_notification
       "[client-ide] Done processing file changes";
     Lwt.return_none
 
+(** Called once a second but only when there are no pending messages from client,
+hh_server, or clientIdeDaemon. *)
 let handle_tick
     ~(env : env) ~(state : state ref) ~(ref_unblocked_time : float ref) :
     result_telemetry option Lwt.t =
@@ -4899,20 +4904,19 @@ let handle_tick
     | Main_loop menv ->
       let open Main_env in
       let%lwt () =
-        if menv.needs_idle then begin
+        if !hh_server_needs_idle then
           (* If we're connected to a server and have no more messages in the queue, *)
           (* then we must let the server know we're idle, so it will be free to     *)
           (* handle command-line requests.                                          *)
-          state := Main_loop { menv with needs_idle = false };
           let%lwt () =
             rpc
               menv.conn
               ref_unblocked_time
-              ~desc:"idle"
+              ~desc:"ide_idle"
               ServerCommandTypes.IDE_IDLE
           in
           Lwt.return_unit
-        end else
+        else
           Lwt.return_unit
       in
       Lwt.return_unit
@@ -5003,9 +5007,6 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         log_debug "next event: %s" (event_to_string event);
       ref_event := Some event;
       ref_unblocked_time := Unix.gettimeofday ();
-
-      (* maybe set a flag to indicate that we'll need to send an idle message *)
-      state := handle_idle_if_necessary !state event;
 
       (* if we're in a lost-server state, some triggers cause us to reconnect *)
       let%lwt new_state =

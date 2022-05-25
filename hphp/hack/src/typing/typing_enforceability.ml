@@ -17,6 +17,8 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
   let enable_sound_dynamic =
     TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
   in
+  (* hack to avoid yet another flag, just for data gathering for pessimisation *)
+  let mixed_nonnull_unenforced = TypecheckerOptions.like_casts env.genv.tcopt in
   let rec enforcement include_dynamic env visited ty =
     match get_node ty with
     | Tthis -> Unenforced
@@ -97,7 +99,11 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
       end
     | Tany _ -> Enforced
     | Terr -> Enforced
-    | Tnonnull -> Enforced
+    | Tnonnull ->
+      if mixed_nonnull_unenforced then
+        Unenforced
+      else
+        Enforced
     | Tdynamic ->
       if (not enable_sound_dynamic) || include_dynamic then
         Enforced
@@ -109,7 +115,11 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
     | Tunion _ -> Unenforced
     | Tintersection _ -> Unenforced
     | Tshape _ -> Unenforced
-    | Tmixed -> Enforced
+    | Tmixed ->
+      if mixed_nonnull_unenforced then
+        Unenforced
+      else
+        Enforced
     | Tvar _ -> Unenforced
     (* With no parameters, we enforce varray_or_darray just like array *)
     | Tvec_or_dict (_, ty) ->

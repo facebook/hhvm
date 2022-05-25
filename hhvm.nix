@@ -1,5 +1,4 @@
-{ apt
-, bison
+{ bison
 , boost
 , brotli
 , bzip2
@@ -8,7 +7,6 @@
 , curl
 , darwin
 , double-conversion
-, dpkg
 , editline
 , expat
 , flex
@@ -106,10 +104,6 @@ hhvmStdenv.mkDerivation {
       python3
       unixtools.getconf
       which
-    ]
-    ++ lib.optionals hostPlatform.isLinux [
-      apt # opam will try to execute apt-cache on Ubuntu
-      dpkg # opam will try to execute dpkg-query on Ubuntu
     ];
   buildInputs =
     [

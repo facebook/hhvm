@@ -203,7 +203,7 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
         ImmType::BA => quote!(self.print_label(w, #name)?;),
         ImmType::BA2 => quote!(self.print_label2(w, #name)?;),
         ImmType::BLA => quote!(self.print_branch_labels(w, #name.as_ref())?;),
-        ImmType::DA => quote!(print_double(w, *#name)?;),
+        ImmType::DA => quote!(print_float(w, *#name)?;),
         ImmType::DUMMY => TokenStream::new(),
         ImmType::FCA => quote!(self.print_fcall_args(w, #name)?;),
         ImmType::I64A => quote!(write!(w, "{}", #name)?;),
@@ -344,7 +344,7 @@ mod tests {
                             }
                             Opcode::TestDA(dbl1) => {
                                 w.write_all(b"TestDA ")?;
-                                print_double(w, *dbl1)?;
+                                print_float(w, *dbl1)?;
                             }
                             Opcode::TestFCA(fca) => {
                                 w.write_all(b"TestFCA ")?;

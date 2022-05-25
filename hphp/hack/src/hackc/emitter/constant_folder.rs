@@ -329,8 +329,8 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             Expr_::Varray(fields) => varray_to_typed_value(emitter, &fields.1),
             Expr_::Darray(fields) => darray_to_typed_value(emitter, &fields.1),
 
-            Expr_::Id(id) if id.1 == math::NAN => Ok(TypedValue::double(std::f64::NAN)),
-            Expr_::Id(id) if id.1 == math::INF => Ok(TypedValue::double(std::f64::INFINITY)),
+            Expr_::Id(id) if id.1 == math::NAN => Ok(TypedValue::float(std::f64::NAN)),
+            Expr_::Id(id) if id.1 == math::INF => Ok(TypedValue::float(std::f64::INFINITY)),
             Expr_::Id(_) => Err(Error::UserDefinedConstant),
 
             Expr_::Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, &x.2),
@@ -536,14 +536,14 @@ fn float_expr_to_typed_value<'arena, 'decl>(
     s: &str,
 ) -> Result<TypedValue<'arena>, Error> {
     if s == math::INF {
-        Ok(TypedValue::double(std::f64::INFINITY))
+        Ok(TypedValue::float(std::f64::INFINITY))
     } else if s == math::NEG_INF {
-        Ok(TypedValue::double(std::f64::NEG_INFINITY))
+        Ok(TypedValue::float(std::f64::NEG_INFINITY))
     } else if s == math::NAN {
-        Ok(TypedValue::double(std::f64::NAN))
+        Ok(TypedValue::float(std::f64::NAN))
     } else {
         s.parse()
-            .map(TypedValue::double)
+            .map(TypedValue::float)
             .map_err(|_| Error::NotLiteral)
     }
 }
@@ -592,7 +592,7 @@ fn cast_value<'arena>(
             } else if id == typehints::STRING {
                 cast_to_arena_str(v, alloc).map(TypedValue::string)
             } else if id == typehints::FLOAT {
-                cast_to_float(v).map(TypedValue::double)
+                cast_to_float(v).map(TypedValue::float)
             } else {
                 None
             }
@@ -611,7 +611,7 @@ fn unop_on_value<'arena>(
         ast_defs::Uop::Uplus => fold_add(v, TypedValue::Int(0)),
         ast_defs::Uop::Uminus => match v {
             TypedValue::Int(i) => Some(TypedValue::Int((-std::num::Wrapping(i)).0)),
-            TypedValue::Double(i) => Some(TypedValue::double(0.0 - i.to_f64())),
+            TypedValue::Float(i) => Some(TypedValue::float(0.0 - i.to_f64())),
             _ => None,
         },
         ast_defs::Uop::Utild => fold_bitwise_not(v),
@@ -645,7 +645,7 @@ fn value_to_expr_<'arena>(v: TypedValue<'arena>) -> Result<ast::Expr_, Error> {
     use ast::Expr_;
     match v {
         TypedValue::Int(i) => Ok(Expr_::Int(i.to_string())),
-        TypedValue::Double(f) => Ok(Expr_::Float(hhbc_string_utils::float::to_string(
+        TypedValue::Float(f) => Ok(Expr_::Float(hhbc_string_utils::float::to_string(
             f.to_f64(),
         ))),
         TypedValue::Bool(false) => Ok(Expr_::False),
@@ -753,17 +753,17 @@ fn cast_to_arena_str<'a>(x: TypedValue<'a>, alloc: &'a bumpalo::Bump) -> Option<
 // and don't attempt to implement overflow-to-float semantics.
 fn fold_add<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> {
     match (x, y) {
-        (TypedValue::Double(i1), TypedValue::Double(i2)) => {
-            Some(TypedValue::double(i1.to_f64() + i2.to_f64()))
+        (TypedValue::Float(i1), TypedValue::Float(i2)) => {
+            Some(TypedValue::float(i1.to_f64() + i2.to_f64()))
         }
         (TypedValue::Int(i1), TypedValue::Int(i2)) => Some(TypedValue::Int(
             (std::num::Wrapping(i1) + std::num::Wrapping(i2)).0,
         )),
-        (TypedValue::Int(i1), TypedValue::Double(i2)) => {
-            Some(TypedValue::double(i1 as f64 + i2.to_f64()))
+        (TypedValue::Int(i1), TypedValue::Float(i2)) => {
+            Some(TypedValue::float(i1 as f64 + i2.to_f64()))
         }
-        (TypedValue::Double(i1), TypedValue::Int(i2)) => {
-            Some(TypedValue::double(i1.to_f64() + i2 as f64))
+        (TypedValue::Float(i1), TypedValue::Int(i2)) => {
+            Some(TypedValue::float(i1.to_f64() + i2 as f64))
         }
         _ => None,
     }
@@ -776,8 +776,8 @@ fn fold_sub<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> 
         (TypedValue::Int(i1), TypedValue::Int(i2)) => Some(TypedValue::Int(
             (std::num::Wrapping(i1) - std::num::Wrapping(i2)).0,
         )),
-        (TypedValue::Double(f1), TypedValue::Double(f2)) => {
-            Some(TypedValue::double(f1.to_f64() - f2.to_f64()))
+        (TypedValue::Float(f1), TypedValue::Float(f2)) => {
+            Some(TypedValue::float(f1.to_f64() - f2.to_f64()))
         }
         _ => None,
     }
@@ -790,14 +790,14 @@ fn fold_mul<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> 
         (TypedValue::Int(i1), TypedValue::Int(i2)) => Some(TypedValue::Int(
             (std::num::Wrapping(i1) * std::num::Wrapping(i2)).0,
         )),
-        (TypedValue::Double(i1), TypedValue::Double(i2)) => {
-            Some(TypedValue::double(i1.to_f64() * i2.to_f64()))
+        (TypedValue::Float(i1), TypedValue::Float(i2)) => {
+            Some(TypedValue::float(i1.to_f64() * i2.to_f64()))
         }
-        (TypedValue::Int(i1), TypedValue::Double(i2)) => {
-            Some(TypedValue::double(i1 as f64 * i2.to_f64()))
+        (TypedValue::Int(i1), TypedValue::Float(i2)) => {
+            Some(TypedValue::float(i1 as f64 * i2.to_f64()))
         }
-        (TypedValue::Double(i1), TypedValue::Int(i2)) => {
-            Some(TypedValue::double(i1.to_f64() * i2 as f64))
+        (TypedValue::Float(i1), TypedValue::Int(i2)) => {
+            Some(TypedValue::float(i1.to_f64() * i2 as f64))
         }
         _ => None,
     }
@@ -811,16 +811,16 @@ fn fold_div<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> 
             Some(TypedValue::Int(i1 / i2))
         }
         (TypedValue::Int(i1), TypedValue::Int(i2)) if i2 != 0 => {
-            Some(TypedValue::double(i1 as f64 / i2 as f64))
+            Some(TypedValue::float(i1 as f64 / i2 as f64))
         }
-        (TypedValue::Double(f1), TypedValue::Double(f2)) if f2.to_f64() != 0.0 => {
-            Some(TypedValue::double(f1.to_f64() / f2.to_f64()))
+        (TypedValue::Float(f1), TypedValue::Float(f2)) if f2.to_f64() != 0.0 => {
+            Some(TypedValue::float(f1.to_f64() / f2.to_f64()))
         }
-        (TypedValue::Int(i1), TypedValue::Double(f2)) if f2.to_f64() != 0.0 => {
-            Some(TypedValue::double(i1 as f64 / f2.to_f64()))
+        (TypedValue::Int(i1), TypedValue::Float(f2)) if f2.to_f64() != 0.0 => {
+            Some(TypedValue::float(i1 as f64 / f2.to_f64()))
         }
-        (TypedValue::Double(f1), TypedValue::Int(i2)) if i2 != 0 => {
-            Some(TypedValue::double(f1.to_f64() / i2 as f64))
+        (TypedValue::Float(f1), TypedValue::Int(i2)) if i2 != 0 => {
+            Some(TypedValue::float(f1.to_f64() / i2 as f64))
         }
         _ => None,
     }
@@ -886,7 +886,7 @@ pub fn cast_to_bool(x: TypedValue<'_>) -> bool {
         TypedValue::String(s) => !s.is_empty() && s.unsafe_as_str() != "0",
         TypedValue::LazyClass(_) => true,
         TypedValue::Int(i) => i != 0,
-        TypedValue::Double(f) => f.to_f64() != 0.0,
+        TypedValue::Float(f) => f.to_f64() != 0.0,
         // Empty collections cast to false if empty, otherwise true
         TypedValue::Vec(v) => !v.is_empty(),
         TypedValue::Keyset(v) => !v.is_empty(),
@@ -904,7 +904,7 @@ pub fn cast_to_int(x: TypedValue<'_>) -> Option<i64> {
         TypedValue::String(_) => None,    // not worth it
         TypedValue::LazyClass(_) => None, // not worth it
         TypedValue::Int(i) => Some(i),
-        TypedValue::Double(f) => match f.to_f64().classify() {
+        TypedValue::Float(f) => match f.to_f64().classify() {
             std::num::FpCategory::Nan | std::num::FpCategory::Infinite => {
                 Some(if f.to_f64() == f64::INFINITY {
                     0
@@ -926,7 +926,7 @@ pub fn cast_to_float(v: TypedValue<'_>) -> Option<f64> {
         TypedValue::String(_) => None,    // not worth it
         TypedValue::LazyClass(_) => None, // not worth it
         TypedValue::Int(i) => Some(i as f64),
-        TypedValue::Double(f) => Some(f.to_f64()),
+        TypedValue::Float(f) => Some(f.to_f64()),
         _ => Some(if cast_to_bool(v) { 1.0 } else { 0.0 }),
     }
 }
@@ -958,7 +958,7 @@ mod cast_tests {
 
     #[test]
     fn nan_to_int() {
-        let res = cast_to_int(TypedValue::double(std::f64::NAN)).unwrap();
+        let res = cast_to_int(TypedValue::float(std::f64::NAN)).unwrap();
         assert_eq!(res, std::i64::MIN);
     }
 }

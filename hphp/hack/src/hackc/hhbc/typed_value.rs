@@ -57,7 +57,7 @@ pub enum TypedValue<'arena> {
     Int(i64),
     Bool(bool),
     /// Hack, C++, PHP, and Caml floats are IEEE754 64-bit
-    Double(FloatBits),
+    Float(FloatBits),
     String(Str<'arena>),
     LazyClass(Str<'arena>),
     Null,
@@ -88,7 +88,7 @@ impl<'arena> TypedValue<'arena> {
         Self::String((alloc.alloc_str(s.as_ref()) as &str).into())
     }
 
-    pub fn double(f: f64) -> Self {
-        Self::Double(f.into())
+    pub fn float(f: f64) -> Self {
+        Self::Float(f.into())
     }
 }

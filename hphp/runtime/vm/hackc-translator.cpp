@@ -228,8 +228,8 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
         return make_tv<KindOfInt64>(tv.Int._0);
       case kind::Bool:
         return make_tv<KindOfBoolean>(tv.Bool._0);
-      case kind::Double: {
-        return make_tv<KindOfDouble>(tv.Double._0);
+      case kind::Float: {
+        return make_tv<KindOfDouble>(tv.Float._0);
       }
       case kind::String: {
         auto const s = toStaticString(tv.String._0);

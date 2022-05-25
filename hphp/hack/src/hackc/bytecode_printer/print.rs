@@ -689,7 +689,7 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
                 escaper::escape_bstr(s.as_bstr())
             )
         }
-        TypedValue::Double(f) => {
+        TypedValue::Float(f) => {
             write!(w, "d:{};", float::to_string(f.to_f64()))
         }
         TypedValue::Int(i) => write!(w, "i:{};", i),

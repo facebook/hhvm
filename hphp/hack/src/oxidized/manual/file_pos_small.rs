@@ -28,15 +28,8 @@ use crate::file_pos::FilePos;
 // - (col)  column number starts at 0, maximum is 2^9-1 = 511
 //            This is saturating, i.e. every column past 511 has column
 //            number 511 (so as not to raise exceptions).
-//
-// The astute reader may note that this type is defined using `usize` rather
-// than `u64`. This is obviously a problem, but it's one which already exists in
-// our OCaml source--it appears that the File_pos_small module will silently
-// behave incorrectly on a 32-bit machine. We use `usize` here to match its
-// behavior, but once parity is no longer necessary, we may want to switch to
-// `u64`.
 #[derive(Copy, Clone, Deserialize, Hash, Eq, PartialEq, Serialize)]
-pub struct FilePosSmall(usize);
+pub struct FilePosSmall(u64);
 
 arena_deserializer::impl_deserialize_in_arena!(FilePosSmall);
 
@@ -52,15 +45,15 @@ const fn mask(bits: usize) -> usize {
 }
 
 #[inline]
-const fn mask_by(bits: usize, x: usize) -> usize {
-    x & mask(bits)
+const fn mask_by(bits: usize, x: u64) -> usize {
+    (x & (mask(bits) as u64)) as usize
 }
 
 const MAX_COLUMN: usize = mask(COLUMN_BITS);
 const MAX_LINE: usize = mask(LINE_BITS);
 const MAX_BOL: usize = mask(BOL_BITS);
 
-const DUMMY: usize = usize::max_value();
+const DUMMY: u64 = u64::max_value();
 
 impl FilePosSmall {
     #[inline]
@@ -78,7 +71,7 @@ impl FilePosSmall {
         if self.is_dummy() {
             0
         } else {
-            mask_by(BOL_BITS, self.0 >> (LINE_BITS + COLUMN_BITS))
+            mask_by(BOL_BITS, self.0 >> (LINE_BITS + COLUMN_BITS)) as usize
         }
     }
 
@@ -87,22 +80,26 @@ impl FilePosSmall {
         if self.is_dummy() {
             0
         } else {
-            mask_by(LINE_BITS, self.0 >> COLUMN_BITS)
+            mask_by(LINE_BITS, self.0 >> COLUMN_BITS) as usize
         }
     }
 
     #[inline]
     pub fn column(self) -> usize {
         if self.is_dummy() {
-            DUMMY
+            DUMMY as usize
         } else {
-            mask_by(COLUMN_BITS, self.0)
+            mask_by(COLUMN_BITS, self.0) as usize
         }
     }
 
     #[inline]
     const fn bol_line_col_unchecked(bol: usize, line: usize, col: usize) -> Self {
-        FilePosSmall((bol << (COLUMN_BITS + LINE_BITS)) + (line << COLUMN_BITS) + col)
+        FilePosSmall(
+            ((bol as u64) << (COLUMN_BITS + LINE_BITS))
+                + ((line as u64) << COLUMN_BITS)
+                + (col as u64),
+        )
     }
 
     #[inline]
@@ -207,7 +204,7 @@ impl ToOcamlRep for FilePosSmall {
 
 impl FromOcamlRep for FilePosSmall {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        Ok(Self(ocamlrep::from::expect_int(value)? as usize))
+        Ok(Self(ocamlrep::from::expect_int(value)? as u64))
     }
 }
 

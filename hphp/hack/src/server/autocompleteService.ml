@@ -1620,6 +1620,20 @@ let method_keywords filename trivia =
     filename
     trivia
 
+let classish_after_name_keywords filename ctx ~has_extends trivia =
+  let possible_keywords =
+    match ctx with
+    | Some (Ast_defs.Cclass _) ->
+      if has_extends then
+        ["implements"]
+      else
+        ["implements"; "extends"]
+    | Some Ast_defs.Cinterface -> ["extends"]
+    | Some Ast_defs.Ctrait -> ["implements"]
+    | _ -> []
+  in
+  complete_keywords_at_trivia possible_keywords filename trivia
+
 let interface_method_keywords filename existing_modifiers s : unit =
   let possible_keywords =
     available_keywords
@@ -1688,6 +1702,22 @@ let keywords filename tree : unit =
           inner_ctx := Some (Ast_defs.Cclass Ast_defs.Concrete)
         | "trait" -> inner_ctx := Some Ast_defs.Ctrait
         | "enum" -> inner_ctx := Some Ast_defs.Cenum
+        | _ -> ())
+      | _ -> ());
+      (match cd.classish_body.syntax with
+      | ClassishBody cb ->
+        let has_extends =
+          match cd.classish_extends_keyword.syntax with
+          | Token _ -> true
+          | _ -> false
+        in
+        (match cb.classish_body_left_brace.syntax with
+        | Token t ->
+          (* The user has written `class Foo AUTO332`, so we're
+             expecting `extends` or `implements`.*)
+          List.iter
+            (Syntax.Token.leading t)
+            ~f:(classish_after_name_keywords filename !inner_ctx ~has_extends)
         | _ -> ())
       | _ -> ())
     | ClassishBody cb ->

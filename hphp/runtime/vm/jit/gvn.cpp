@@ -331,6 +331,9 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdTVFromRDS:
   case StructDictSlot:
   case StructDictElemAddr:
+  case StructDictSlotInPos:
+  case LdStructDictKey:
+  case LdStructDictVal:
     return true;
 
   case EqArrLike:

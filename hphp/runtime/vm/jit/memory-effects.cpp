@@ -1129,7 +1129,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DictLastKey:
   case LdMonotypeDictTombstones:
   case LdMonotypeDictKey:
+  case StructDictSlotInPos:
+  case LdStructDictKey:
     return may_load_store(AEmpty, AEmpty);
+
+  case LdStructDictVal:
+    return PureLoad { AElemSAny };
 
   case CheckDictKeys:
   case CheckDictOffset:

@@ -3267,6 +3267,11 @@ SSATmp* simplifyBespokeIterGetKey(State& env, const IRInstruction* inst) {
     return gen(env, LdMonotypeDictKey, arr, pos);
   }
 
+  if (arr->isA(TDict) && arr->type().arrSpec().is_struct()) {
+    auto const slot = gen(env, StructDictSlotInPos, arr, pos);
+    return gen(env, LdStructDictKey, arr, slot);
+  }
+
   return nullptr;
 }
 
@@ -3290,6 +3295,11 @@ SSATmp* simplifyBespokeIterGetVal(State& env, const IRInstruction* inst) {
 
   if (arr->isA(TDict) && arr->type().arrSpec().monotype()) {
     return gen(env, LdMonotypeDictVal, arr, pos);
+  }
+
+  if (arr->isA(TDict) && arr->type().arrSpec().is_struct()) {
+    auto const slot = gen(env, StructDictSlotInPos, arr, pos);
+    return gen(env, LdStructDictVal, arr, slot);
   }
 
   return nullptr;
@@ -3335,6 +3345,22 @@ SSATmp* simplifyLdMonotypeVecElem(State& env, const IRInstruction* inst) {
   if (arr->hasConstVal() && key->hasConstVal()) {
     auto const tv = arr->arrLikeVal()->get(key->intVal());
     return tv.is_init() ? cns(env, tv) : nullptr;
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyLdStructDictKey(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  if (arr->hasConstVal() && arr->arrLikeVal()->size() == 1) {
+    return cns(env, arr->arrLikeVal()->nvGetKey(0));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyLdStructDictVal(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  if (arr->hasConstVal() && arr->arrLikeVal()->size() == 1) {
+    return cns(env, arr->arrLikeVal()->nvGetVal(0));
   }
   return nullptr;
 }
@@ -3858,6 +3884,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdMonotypeDictVal)
       X(LdMonotypeVecElem)
       X(LdVecElem)
+      X(LdStructDictKey)
+      X(LdStructDictVal)
       X(MethodExists)
       X(LdFuncInOutBits)
       X(LdFuncNumParams)

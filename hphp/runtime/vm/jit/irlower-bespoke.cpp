@@ -938,6 +938,88 @@ void cgStructDictUnset(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
+void cgStructDictSlotInPos(IRLS& env, const IRInstruction* inst) {
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const rpos = srcLoc(env, inst, 1).reg();
+  auto const rdst = dstLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const arr = inst->src(0);
+  auto const& layout = arr->type().arrSpec().layout();
+  assertx(layout.is_struct());
+  if (layout.bespokeLayout()->isConcrete()) {
+    auto const slayout = StructLayout::As(layout.bespokeLayout());
+    v << loadzbq{rarr[rpos + slayout->positionOffset()], rdst};
+  } else {
+    assertx(StructDict::numFieldsSize() == 1);
+    auto const numFields = v.makeReg();
+    v << loadzbq{rarr[StructDict::numFieldsOffset()], numFields};
+    auto const pos_offset = v.makeReg();
+    v << lea{rpos[numFields + sizeof(StructDict)], pos_offset};
+    v << loadzbq{rarr[pos_offset], rdst};
+  }
+}
+
+void cgLdStructDictKey(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const rslot = srcLoc(env, inst, 1).reg();
+  auto const rdst = dstLoc(env, inst, 0).reg();
+
+  // Get a pointer to the bespoke layout for this array into a register.
+  auto const layout = [&]{
+    auto const layout = inst->src(0)->type().arrSpec().layout().bespokeLayout();
+    if (layout->isConcrete()) return v.cns(uintptr_t(layout));
+
+    auto const value = v.makeReg();
+    auto const index = v.makeReg();
+    auto const array = v.cns(bespoke::layoutsForJIT());
+    v << loadzwq{rarr[ArrayData::offsetOfBespokeIndex()], index};
+    v << load{array[index * safe_cast<int>(sizeof(bespoke::Layout*))], value};
+    return value;
+  }();
+
+  auto constexpr offset = StructLayout::fieldsOffset() +
+                          offsetof(StructLayout::Field, key);
+  auto constexpr size = sizeof(StructLayout::Field);
+  static_assert(!use_lowptr || size == 8);
+  static_assert(use_lowptr || size == 16);
+  if constexpr (use_lowptr) {
+    v << loadzlq{layout[rslot * 8 + offset], rdst};
+  } else {
+    auto const rslot_scaled = v.makeReg();
+    v << shlqi {4, rslot, rslot_scaled, v.makeReg()};
+    v << load{layout[rslot_scaled + offset], rdst};
+  }
+}
+
+void cgLdStructDictVal(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const rslot = srcLoc(env, inst, 1).reg();
+  auto const dst = dstLoc(env, inst, 0);
+
+  auto const layout =
+      inst->src(0)->type().arrSpec().layout().bespokeLayout();
+
+  auto const val = [&] {
+    if (layout->isConcrete()) {
+      auto const slayout = StructLayout::As(layout);
+      auto const val_begin = slayout->valueOffsetForSlot(0);
+      return rarr[rslot * safe_cast<int>(sizeof(Value)) + val_begin];
+    }  else {
+      static_assert(StructDict::valueOffsetSize() == 1);
+      auto const val_begin = v.makeReg();
+      v << loadzbq{rarr[StructDict::valueOffsetOffset()], val_begin};
+      auto const val_offset = v.makeReg();
+      v << addq{val_begin, rslot, val_offset, v.makeReg()};
+      return rarr[val_offset * safe_cast<int>(sizeof(Value))];
+    }
+  }();
+  auto const type = rarr[rslot + StructLayout::staticTypeOffset()];
+  loadTV(v, inst->dst()->type(), dst, type, val);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 }

@@ -290,6 +290,9 @@ bool canDCE(const IRInstruction& inst) {
   case VoidPtrAsDataType:
   case CopyArray:
   case StructDictElemAddr:
+  case StructDictSlotInPos:
+  case LdStructDictKey:
+  case LdStructDictVal:
   case LdImplicitContext:
     assertx(!inst.isControlFlow());
     return true;

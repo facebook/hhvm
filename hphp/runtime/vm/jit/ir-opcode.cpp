@@ -899,6 +899,9 @@ bool opcodeMayRaise(Opcode opc) {
   case StructDictSlot:
   case StructDictTypeBoundCheck:
   case StructDictUnset:
+  case StructDictSlotInPos:
+  case LdStructDictKey:
+  case LdStructDictVal:
   case StMROProp:
   case StPtrAt:
   case StTypeAt:

@@ -846,6 +846,8 @@ SinkLayout selectSinkLayout(
     const SinkProfile& profile, const StructAnalysisResult& sar) {
   auto const decision = makeSinkDecision(profile, sar);
   auto const sideExit = [&]{
+    // We do not specialize iterators for bespoke layouts unless we side exit.
+    if (isIteratorOp(profile.key.second.op())) return true;
     auto const p_cutoff = RO::EvalBespokeArraySinkSideExitThreshold / 100;
     if (decision.coverage < p_cutoff) return false;
 

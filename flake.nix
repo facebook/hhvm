@@ -1,9 +1,11 @@
 {
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
+    flake-compat.url = "github:edolstra/flake-compat";
+    flake-compat.flake = false;
   };
   outputs =
-    { self, nixpkgs, flake-utils }:
+    { self, nixpkgs, flake-utils, flake-compat }:
     flake-utils.lib.eachSystem [
       "x86_64-darwin"
       "x86_64-linux"

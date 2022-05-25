@@ -38,6 +38,8 @@ fi
 export OPAMROOT="$OPAMROOT"
 mkdir -p "$OPAMROOT"
 export OPAMYES="1"
+export OPAMASSUMEDEPEXTS="1"
+export OPAMNODEPEXTS="1"
 
 # shellcheck disable=SC1090
 source "$SOURCE_ROOT/opam_helpers.sh"
@@ -103,7 +105,7 @@ opam_switch_create_if_needed "$HACK_OPAM_NAME" "$HACK_OPAM_SWITCH"
 opam switch "$HACK_OPAM_NAME"
 eval "$(opam env)"
 
-opam install --assume-depexts --no-depexts "${HACK_OPAM_DEPS[@]}"
+opam install "${HACK_OPAM_DEPS[@]}"
 
 dune_version=$(dune --version)
 echo ""

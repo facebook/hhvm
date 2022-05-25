@@ -107,7 +107,12 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
   auto const addInspectable =
     [&] (const Func* func, uint32_t depth) -> AliasClass {
       auto const meta = func->lookupVarId(s_86metadata.get());
-      return meta != kInvalidId ? ALocal { depth, (uint32_t)meta } : AEmpty;;
+      const AliasClass coeffect = func->hasCoeffectsLocal()
+        ? ALocal { depth, func->coeffectsLocalId() }
+        : AEmpty;
+      return meta != kInvalidId
+        ? coeffect | ALocal { depth, (uint32_t)meta }
+        : coeffect;
     };
 
   // Either there's no func or no frame-pointer. Either way, be conservative and

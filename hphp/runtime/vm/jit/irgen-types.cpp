@@ -1420,7 +1420,7 @@ void emitVerifyRetNonNullC(IRGS& env) {
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, true);
 }
 
-void emitVerifyOutType(IRGS& env, uint32_t paramId) {
+void emitVerifyOutType(IRGS& env, int32_t paramId) {
   verifyRetTypeImpl(env, paramId, 0, false);
 }
 

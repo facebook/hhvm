@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 use crate::{
-    BlockId, ClassId, ConstId, FunctionId, LocId, MethodId, ParamId, PropId, UnitStringId, ValueId,
+    BlockId, ClassId, ConstId, FunctionId, LocId, MethodId, PropId, UnitStringId, ValueId,
 };
 use macros::{HasLoc, HasLocals, HasOperands};
 use newtype::newtype_int;
@@ -480,9 +480,9 @@ pub enum Hhbc {
     This(LocId),
     ThrowNonExhaustiveSwitch(LocId),
     UnsetL(LocalId, LocId),
-    VerifyOutType(ValueId, ParamId, LocId),
-    VerifyParamType(ParamId, LocId),
-    VerifyParamTypeTS(ValueId, ParamId, LocId),
+    VerifyOutType(ValueId, LocalId, LocId),
+    VerifyParamType(LocalId, LocId),
+    VerifyParamTypeTS(ValueId, LocalId, LocId),
     VerifyRetTypeC(ValueId, LocId),
     VerifyRetTypeTS([ValueId; 2], LocId),
     WHResult(ValueId, LocId),

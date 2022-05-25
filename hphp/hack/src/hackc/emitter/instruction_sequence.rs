@@ -167,9 +167,9 @@ pub mod instr {
         AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, Dummy,
         FCallArgs, FatalOp, FloatBits, FunctionName, IncDecOp, InitPropOp, Instruct,
         IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode,
-        MemberKey, MethodName, NumParams, OODeclExistsOp, ObjMethodOp, Opcode, ParamName, PropName,
-        Pseudo, QueryMOp, ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef,
-        SrcLoc, StackIndex, SwitchKind, TypeStructResolveOp,
+        MemberKey, MethodName, NumParams, OODeclExistsOp, ObjMethodOp, Opcode, PropName, Pseudo,
+        QueryMOp, ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SrcLoc,
+        StackIndex, SwitchKind, TypeStructResolveOp,
     };
 
     // This macro builds helper functions for each of the given opcodes.  See

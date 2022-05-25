@@ -2917,6 +2917,12 @@ OODeclExists <Class|Interface|Trait> [C C]  ->  [C:Bool]
   the autoloader if needed and if $1 is true. The result of the existence check
   will be pushed on the stack.
 
+VerifyOutType <parameter id>    [C]  ->  [C]
+
+  Verify out param type. Check that $1 is a value compatible with the declared
+  parameter type specified by the given parameter. In case of a mismatch
+  a warning or recoverable error is raised.
+
 VerifyParamType <parameter id>    []  ->  []
 
   Verify parameter type. Functions and methods can optionally specify the types

@@ -9,16 +9,6 @@ use ffi::{Slice, Str};
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
 
-/// Export these publicly so consumers of hhbc_ast don't have to know the
-/// internal details about the ffi.
-
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
-#[repr(C)]
-pub enum ParamName<'arena> {
-    ParamUnnamed(isize),
-    ParamNamed(Str<'arena>),
-}
-
 pub type StackIndex = u32;
 pub type ClassNum = u32;
 

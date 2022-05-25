@@ -1007,23 +1007,23 @@ fn print_hhbc(
         Hhbc::UnsetL(lid, _) => {
             write!(w, "unset {}", FmtLid(lid, ctx.strings))?;
         }
-        Hhbc::VerifyOutType(vid, pid, _) => {
+        Hhbc::VerifyOutType(vid, lid, _) => {
             write!(
                 w,
                 "verify_out_type {}, {}",
                 FmtVid(func, vid, verbose),
-                FmtParamId(pid, ctx.strings),
+                FmtLid(lid, ctx.strings),
             )?;
         }
-        Hhbc::VerifyParamType(pid, _) => {
-            write!(w, "verify_param_type {}", FmtParamId(pid, ctx.strings))?;
+        Hhbc::VerifyParamType(lid, _) => {
+            write!(w, "verify_param_type {}", FmtLid(lid, ctx.strings))?;
         }
-        Hhbc::VerifyParamTypeTS(vid, pid, _) => {
+        Hhbc::VerifyParamTypeTS(vid, lid, _) => {
             write!(
                 w,
                 "verify_param_type_ts {}, {}",
                 FmtVid(func, vid, verbose),
-                FmtParamId(pid, ctx.strings),
+                FmtLid(lid, ctx.strings),
             )?;
         }
         Hhbc::VerifyRetTypeC(op, _) => {

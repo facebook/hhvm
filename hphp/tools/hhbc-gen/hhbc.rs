@@ -352,15 +352,6 @@ mod fixups {
             "UnsetM" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
             ],
-            "VerifyOutType" => vec![
-                replace_imm("arg1", ImmType::IVA, ImmType::OAL("ParamName")),
-            ],
-            "VerifyParamType" => vec![
-                replace_imm("loc1", ImmType::ILA, ImmType::OAL("ParamName")),
-            ],
-            "VerifyParamTypeTS" => vec![
-                replace_imm("loc1", ImmType::ILA, ImmType::OAL("ParamName")),
-            ],
         }
     }
 

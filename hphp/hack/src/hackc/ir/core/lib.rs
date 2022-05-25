@@ -54,7 +54,7 @@ pub use self::{
     module::Module,
     newtype::{
         BlockId, BlockIdMap, BlockIdSet, ClassId, ConstId, FullInstrId, FunctionId, InstrId,
-        InstrIdMap, InstrIdSet, LiteralId, LocId, MethodId, ParamId, PropId, ValueId, ValueIdMap,
+        InstrIdMap, InstrIdSet, LiteralId, LocId, MethodId, PropId, ValueId, ValueIdMap,
         ValueIdSet,
     },
     string_intern::{StringInterner, UnitStringId},

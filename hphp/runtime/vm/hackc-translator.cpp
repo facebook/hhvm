@@ -612,20 +612,9 @@ void handleIVA(TranslationState& ts, const uint32_t& iva) {
   ts.fe->emitIVA(iva);
 }
 
-void handleIVA(TranslationState& ts, const ParamName& pn) {
-  switch (pn.tag) {
-    case ParamName::Tag::ParamNamed: {
-      auto const name = toString(pn.ParamNamed._0);
-      auto const res = folly::tryTo<uint32_t>(name);
-      assertx(!res.hasError());
-      ts.fe->emitIVA(res.value());
-      break;
-    }
-    case ParamName::Tag::ParamUnnamed: {
-      ts.fe->emitIVA(pn.ParamUnnamed._0);
-      break;
-    }
-  }
+void handleIVA(TranslationState& ts, const Local& loc) {
+  ts.trackMaxUnnamed(loc.idx);
+  ts.fe->emitIVA(loc.idx);
 }
 
 void handleLA(TranslationState& ts, const Local& loc) {
@@ -636,22 +625,6 @@ void handleLA(TranslationState& ts, const Local& loc) {
 void handleILA(TranslationState& ts, const Local& loc) {
   ts.trackMaxUnnamed(loc.idx);
   ts.fe->emitIVA(loc.idx);
-}
-
-void handleILA(TranslationState& ts,const ParamName& name) {
-  auto const local_id = [&]() {
-    switch(name.tag) {
-      case ParamName::Tag::ParamUnnamed:
-        return static_cast<int32_t>(name.ParamUnnamed._0);
-      case ParamName::Tag::ParamNamed: {
-        auto const pname = toNamedLocalStaticString(name.ParamNamed._0);
-        return ts.fe->lookupVarId(pname);
-      }
-    }
-    not_reached();
-  }();
-  ts.trackMaxUnnamed(local_id);
-  ts.fe->emitIVA(local_id);
 }
 
 void handleNLA(TranslationState& ts, const Local& local) {

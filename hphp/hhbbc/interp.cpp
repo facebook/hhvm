@@ -5158,7 +5158,7 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
 
 void in(ISS& env, const bc::VerifyOutType& op) {
   TCVec tcs;
-  auto const& pinfo = env.ctx.func->params[op.arg1];
+  auto const& pinfo = env.ctx.func->params[op.loc1];
   tcs.push_back(&pinfo.typeConstraint);
   for (auto const& t : pinfo.upperBounds) tcs.push_back(&t);
   verifyRetImpl(env, tcs, false, false);

@@ -4602,8 +4602,9 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
+OPTBLD_INLINE void iopVerifyOutType(local_var param) {
   auto const func = vmfp()->func();
+  auto const paramId = param.index;
   assertx(paramId < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
   auto const& tc = func->params()[paramId].typeConstraint;

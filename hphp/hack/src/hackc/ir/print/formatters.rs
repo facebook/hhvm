@@ -439,18 +439,6 @@ impl Display for FmtOptKeyValue<'_, '_> {
     }
 }
 
-pub(crate) struct FmtParamId<'a, 'b>(pub ParamId, pub &'b StringInterner<'a>);
-
-impl Display for FmtParamId<'_, '_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtParamId(pid, strings) = *self;
-        match pid {
-            ParamId::ParamUnnamed(i) => write!(f, "unnamed({})", i),
-            ParamId::ParamNamed(name) => FmtIdentifierId(name, strings).fmt(f),
-        }
-    }
-}
-
 pub(crate) struct FmtQuotedStr<'a>(pub(crate) &'a Str<'a>);
 
 impl Display for FmtQuotedStr<'_> {

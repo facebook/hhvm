@@ -10,8 +10,8 @@ use hhbc::{
     AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, Dummy,
     FCallArgs, FatalOp, FloatBits, FunctionName, IncDecOp, InitPropOp, IsLogAsDynamicCallOp,
     IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodName,
-    NumParams, OODeclExistsOp, ObjMethodOp, Opcode, ParamName, PropName, QueryMOp, ReadonlyOp,
-    SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, StackIndex, SwitchKind, TypeStructResolveOp,
+    NumParams, OODeclExistsOp, ObjMethodOp, Opcode, PropName, QueryMOp, ReadonlyOp, SetOpOp,
+    SetRangeOp, SilenceOp, SpecialClsRef, StackIndex, SwitchKind, TypeStructResolveOp,
 };
 use hhbc_string_utils::float;
 use print_opcode::{PrintOpcode, PrintOpcodeTypes};
@@ -261,13 +261,6 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[Str<'_
 
 fn print_method_name(w: &mut dyn Write, id: &MethodName<'_>) -> Result<()> {
     print_quoted_str(w, &id.as_ffi_str())
-}
-
-fn print_param_name(w: &mut dyn Write, param_name: &ParamName<'_>) -> Result<()> {
-    match param_name {
-        ParamName::ParamUnnamed(i) => w.write_all(i.to_string().as_bytes()),
-        ParamName::ParamNamed(s) => w.write_all(s),
-    }
 }
 
 pub(crate) fn print_prop_name(w: &mut dyn Write, id: &PropName<'_>) -> Result<()> {

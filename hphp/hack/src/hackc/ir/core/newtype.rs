@@ -57,38 +57,6 @@ newtype_int!(LiteralId, u32, LiteralIdMap, LiteralIdSet);
 // A LocId represent a SrcLoc interned within a Func.
 newtype_int!(LocId, u32, LocIdMap, LocIdSet);
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum ParamId {
-    ParamUnnamed(isize),
-    ParamNamed(UnitStringId),
-}
-
-impl ParamId {
-    pub fn from_hhbc<'a>(param: &hhbc::ParamName<'a>, strings: &mut StringInterner<'a>) -> Self {
-        match param {
-            hhbc::ParamName::ParamUnnamed(i) => Self::ParamUnnamed(*i),
-            hhbc::ParamName::ParamNamed(s) => {
-                let id = strings.intern_str(*s);
-                Self::ParamNamed(id)
-            }
-        }
-    }
-
-    pub fn to_hhbc<'a>(
-        self,
-        alloc: &'a bumpalo::Bump,
-        strings: &StringInterner<'a>,
-    ) -> hhbc::ParamName<'a> {
-        match self {
-            ParamId::ParamUnnamed(i) => hhbc::ParamName::ParamUnnamed(i),
-            ParamId::ParamNamed(id) => {
-                let s = strings.lookup(id).to_ffi_str(alloc);
-                hhbc::ParamName::ParamNamed(s)
-            }
-        }
-    }
-}
-
 /// An ValueId can be either an InstrId or a LiteralId.
 ///
 /// Note that special care has been taken to make sure this encodes to the same

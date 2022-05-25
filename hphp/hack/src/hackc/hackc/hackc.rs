@@ -1,6 +1,7 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+mod assemble;
 mod compile;
 mod crc;
 mod expr_trees;
@@ -80,6 +81,9 @@ struct FileOpts {
 
 #[derive(Parser, Debug)]
 enum Command {
+    /// Assemble HHAS file(s) into HackCUnit. Prints those HCUs' HHAS representation.
+    Assemble(assemble::Opts),
+
     /// Compile one Hack source file or a list of files to HHAS
     Compile(compile::Opts),
 
@@ -260,6 +264,7 @@ fn main() -> Result<()> {
     builder.build_global().unwrap();
 
     match opts.command.take() {
+        Some(Command::Assemble(opts)) => assemble::run(opts),
         Some(Command::Compile(mut opts)) => compile::run(&mut opts),
         Some(Command::Crc(opts)) => crc::run(opts),
         Some(Command::Parse(opts)) => parse::run_sub_command(opts),

@@ -1,6 +1,6 @@
 dict(3) {
   ["%s/ext_factparse.php"]=>
-  dict(4) {
+  dict(5) {
     ["constants"]=>
     vec(6) {
       string(3) "CO0"
@@ -17,8 +17,19 @@ dict(3) {
       string(2) "f6"
       string(24) "entrypoint_ext_factparse"
     }
+    ["modules"]=>
+    vec(2) {
+      dict(1) {
+        ["name"]=>
+        string(2) "m0"
+      }
+      dict(1) {
+        ["name"]=>
+        string(2) "m1"
+      }
+    }
     ["sha1sum"]=>
-    string(40) "a0b0a37c3e4370d06ce60084fe3aec29267d39dd"
+    string(40) "9dcc2eb8ab7630a16e99d679e0887c33f81d7f16"
     ["types"]=>
     vec(13) {
       dict(3) {
@@ -164,7 +175,7 @@ dict(3) {
     }
   }
   ["%s"]=>
-  dict(4) {
+  dict(5) {
     ["constants"]=>
     vec(6) {
       string(6) "NS\CO0"
@@ -181,8 +192,19 @@ dict(3) {
       string(5) "NS\f6"
       string(27) "NS\entrypoint_ext_factparse"
     }
+    ["modules"]=>
+    vec(2) {
+      dict(1) {
+        ["name"]=>
+        string(2) "m0"
+      }
+      dict(1) {
+        ["name"]=>
+        string(2) "m1"
+      }
+    }
     ["sha1sum"]=>
-    string(40) "76761a6bcdcfee86a1446b8bc989e9139c8793a7"
+    string(40) "befff750465e114b4e8251021a4845423e5e35cb"
     ["types"]=>
     vec(13) {
       dict(3) {
@@ -328,7 +350,7 @@ dict(3) {
     }
   }
   ["%s"]=>
-  dict(4) {
+  dict(5) {
     ["constants"]=>
     vec(6) {
       string(9) "NS\NS\CO0"
@@ -345,8 +367,19 @@ dict(3) {
       string(8) "NS\NS\f6"
       string(30) "NS\NS\entrypoint_ext_factparse"
     }
+    ["modules"]=>
+    vec(2) {
+      dict(1) {
+        ["name"]=>
+        string(2) "m0"
+      }
+      dict(1) {
+        ["name"]=>
+        string(2) "m1"
+      }
+    }
     ["sha1sum"]=>
-    string(40) "cc9af13672ef16a46bf5fdefc202a57db511d79c"
+    string(40) "85e2970540941c1fb4eb4ebb7bfdc326bd6c5071"
     ["types"]=>
     vec(13) {
       dict(3) {

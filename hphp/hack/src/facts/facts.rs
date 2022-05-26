@@ -76,6 +76,12 @@ pub struct TypeFacts {
     #[serde(default, skip_serializing_if = "Methods::is_empty")]
     pub methods: Methods,
 }
+// Currently module facts are empty, but added for backward compatibility
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ModuleFacts {}
+
+pub type ModuleFactsByName = BTreeMap<String, ModuleFacts>;
 
 #[derive(Default, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -96,6 +102,13 @@ pub struct Facts {
 
     #[serde(default, skip_serializing_if = "Attributes::is_empty")]
     pub file_attributes: Attributes,
+    #[serde(
+        default,
+        skip_serializing_if = "ModuleFactsByName::is_empty",
+        serialize_with = "modules_to_json",
+        deserialize_with = "json_to_modules"
+    )]
+    pub modules: ModuleFactsByName,
 }
 
 impl Facts {
@@ -158,6 +171,11 @@ impl Facts {
             .map(|(name, _)| format(name))
             .collect::<Vec<String>>();
 
+        let mut modules = ModuleFactsByName::new();
+        decls.modules().for_each(|(module_name, _decl)| {
+            let name = format(module_name);
+            add_or_update_module_decl(name, ModuleFacts {}, &mut modules);
+        });
         functions.reverse();
         constants.reverse();
 
@@ -166,6 +184,7 @@ impl Facts {
             functions,
             constants,
             file_attributes: to_facts_attributes(file_attributes),
+            modules,
         }
     }
 }
@@ -203,6 +222,21 @@ pub fn sha1(text: &[u8]) -> String {
 }
 
 // implementation details
+
+fn modules_to_json<S: Serializer>(
+    modules_by_name: &ModuleFactsByName,
+    s: S,
+) -> Result<S::Ok, S::Error> {
+    let mut seq = s.serialize_seq(None)?;
+    for (name, modules) in modules_by_name.iter() {
+        let mut modules_json = json!(modules);
+        if let Some(m) = modules_json.as_object_mut() {
+            m.insert("name".to_owned(), json!(name));
+        };
+        seq.serialize_element(&modules_json)?;
+    }
+    seq.end()
+}
 
 /// Serialize the Map<Name, TypeFacts> as a sequence of JSON objects with `name`
 /// as one of the fields.
@@ -264,6 +298,38 @@ fn json_to_types<'de, D: Deserializer<'de>>(d: D) -> Result<TypeFactsByName, D::
         }
     }
     d.deserialize_seq(TypeFactsSeqVisitor)
+}
+
+/// Deserialize a sequence of TypeFacts with `name` fields as a Map by hoisting
+/// the name as the map key.
+fn json_to_modules<'de, D: Deserializer<'de>>(d: D) -> Result<ModuleFactsByName, D::Error> {
+    struct ModuleFactsSeqVisitor;
+    impl<'de> Visitor<'de> for ModuleFactsSeqVisitor {
+        type Value = ModuleFactsByName;
+        fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "a sequence of ModuleFacts")
+        }
+        fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
+            let mut modules = ModuleFactsByName::new();
+            while let Some(mut v) = seq.next_element::<serde_json::Value>()? {
+                let obj = v
+                    .as_object_mut()
+                    .ok_or_else(|| serde::de::Error::custom("Expected ModuleFacts JSON Object"))?;
+                let name = obj
+                    .remove("name")
+                    .ok_or_else(|| serde::de::Error::missing_field("name"))?;
+                let name = name
+                    .as_str()
+                    .ok_or_else(|| serde::de::Error::custom("Expected name JSON String"))?;
+                modules.insert(
+                    name.into(),
+                    serde_json::from_value(v).map_err(serde::de::Error::custom)?,
+                );
+            }
+            Ok(modules)
+        }
+    }
+    d.deserialize_seq(ModuleFactsSeqVisitor)
 }
 
 impl TypeFacts {
@@ -424,6 +490,13 @@ fn add_or_update_classish_decl(name: String, mut delta: TypeFacts, types: &mut T
             tf.require_extends.append(&mut delta.require_extends);
             tf.require_implements.append(&mut delta.require_implements);
         })
+        .or_insert(delta);
+}
+
+fn add_or_update_module_decl(name: String, delta: ModuleFacts, types: &mut ModuleFactsByName) {
+    types
+        .entry(name)
+        // .and_modify(|mf| {}) (to be added when modules have actual bodies)
         .or_insert(delta);
 }
 
@@ -611,10 +684,13 @@ mod tests {
                 ..Default::default()
             },
         );
+        let mut modules = ModuleFactsByName::new();
+        modules.insert(String::from("foo"), ModuleFacts {});
         Facts {
             constants: vec!["c1".into(), "c2".into()],
             file_attributes: BTreeMap::new(),
             functions: vec![],
+            modules,
             types,
         }
     }
@@ -640,6 +716,11 @@ mod tests {
   "constants": [
     "c1",
     "c2"
+  ],
+  "modules": [
+    {
+      "name": "foo"
+    }
   ],
   "sha1sum": "37aa63c77398d954473262e1a0057c1e632eda77",
   "types": [

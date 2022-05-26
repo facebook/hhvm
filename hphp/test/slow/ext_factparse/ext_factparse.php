@@ -1,5 +1,5 @@
 <?hh
-
+<<file:__EnableUnstableFeatures("modules")>>
 // !!! Please contact devx_www oncall if this breaks. !!!
 //
 // "Fact parsing" is a core part of www infrastructure on devservers.
@@ -60,6 +60,9 @@ trait TR2 implements I0, I1<int> {
   require extends CL1;
   require implements I2;
 }
+
+new module m0 {}
+new module m1 {}
 
 enum E0 : int {
   EV0 = 0;

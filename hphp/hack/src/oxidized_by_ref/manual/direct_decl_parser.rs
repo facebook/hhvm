@@ -152,6 +152,13 @@ impl<'a> Decls<'a> {
             NameType::Fun | NameType::Const | NameType::Module => false,
         })
     }
+
+    pub fn modules(&self) -> impl Iterator<Item = (&'a str, &'a typing_defs::ModuleDefType<'a>)> {
+        self.iter().filter_map(|(name, decl)| match decl {
+            Decl::Module(decl) => Some((name, decl)),
+            _ => None,
+        })
+    }
 }
 
 impl<'a> IntoIterator for Decls<'a> {

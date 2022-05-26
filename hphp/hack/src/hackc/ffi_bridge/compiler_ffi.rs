@@ -101,12 +101,20 @@ pub mod compile_ffi {
         typefacts: TypeFacts,
     }
 
+    #[derive(Debug, PartialEq)]
+    struct ModuleFactsByName {
+        name: String,
+        // Currently does not have modulefacts, since it would be an empty struct
+        // modulefacts
+    }
+
     #[derive(Debug, Default, PartialEq)]
     struct Facts {
         pub types: Vec<TypeFactsByName>,
         pub functions: Vec<String>,
         pub constants: Vec<String>,
         pub file_attributes: Vec<Attribute>,
+        pub modules: Vec<ModuleFactsByName>,
     }
 
     #[derive(Debug, Default)]

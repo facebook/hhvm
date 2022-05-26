@@ -121,6 +121,11 @@ impl From<compile_ffi::Facts> for facts::Facts {
             types: vec_to_map(facts.types),
             functions: facts.functions,
             constants: facts.constants,
+            modules: facts
+                .modules
+                .into_iter()
+                .map(|x| (x.name, facts::ModuleFacts {}))
+                .collect(),
             file_attributes: vec_to_map(facts.file_attributes),
         }
     }
@@ -131,6 +136,11 @@ impl From<facts::Facts> for compile_ffi::Facts {
             types: map_to_vec(facts.types),
             functions: facts.functions,
             constants: facts.constants,
+            modules: facts
+                .modules
+                .into_iter()
+                .map(|(name, _)| compile_ffi::ModuleFactsByName { name })
+                .collect(),
             file_attributes: map_to_vec(facts.file_attributes),
         }
     }
@@ -233,17 +243,20 @@ mod tests {
     #[test]
     fn test_facts() {
         let (ffi_type_facts_by_name, rust_type_facts_by_name) = create_type_facts_by_name();
+        let (ffi_module_facts_by_name, rust_module_facts_by_name) = create_module_facts_by_name();
         let (ffi_attributes, rust_attributes) = create_attributes();
         let ffi_facts = compile_ffi::Facts {
             types: ffi_type_facts_by_name,
             functions: vec!["f1".to_string(), "f2".to_string()],
             constants: vec!["C".to_string()],
+            modules: ffi_module_facts_by_name,
             file_attributes: ffi_attributes,
         };
         let rust_facts = facts::Facts {
             types: rust_type_facts_by_name,
             functions: vec!["f1".to_string(), "f2".to_string()],
             constants: vec!["C".to_string()],
+            modules: rust_module_facts_by_name,
             file_attributes: rust_attributes,
         };
         assert_eq!(facts::Facts::from(ffi_facts), rust_facts)
@@ -338,5 +351,19 @@ mod tests {
         rust_type_facts_by_name.insert("C".to_string(), rust_type_facts);
 
         (ffi_type_facts_by_name, rust_type_facts_by_name)
+    }
+
+    fn create_module_facts_by_name() -> (
+        Vec<compile_ffi::ModuleFactsByName>,
+        facts::ModuleFactsByName,
+    ) {
+        let ffi_module_facts_by_name = vec![compile_ffi::ModuleFactsByName {
+            name: "mfoo".to_string(),
+        }];
+
+        let mut rust_module_facts_by_name = BTreeMap::new();
+        rust_module_facts_by_name.insert("mfoo".to_string(), facts::ModuleFacts {});
+
+        (ffi_module_facts_by_name, rust_module_facts_by_name)
     }
 }

@@ -40,10 +40,13 @@ type type_facts = {
   attributes: string list InvSMap.t;
 }
 
+type module_facts = unit
+
 type facts = {
   types: type_facts InvSMap.t;
   functions: string list;
   constants: string list;
+  modules: module_facts InvSMap.t;
 }
 
 val empty : facts

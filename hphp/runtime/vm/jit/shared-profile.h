@@ -28,6 +28,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/tiny-vector.h"
 
+#include <folly/SharedMutex.h>
 #include <tbb/concurrent_hash_map.h>
 
 #include <typeindex>
@@ -49,12 +50,15 @@ void serializeSharedProfiles(ProfDataSerializer& ser);
 
 template <typename T>
 struct alignas(64) SharedProfileEntry {
-  std::mutex mutex;
+  // An exclusive mutex would be sufficient here, but use SharedMutex for the
+  // small footprint (so more of value can fit in the same cache line) and
+  // inlineability.
+  folly::SharedMutex mutex;
   T value;
 
   template <typename F>
   void update(F&& f) {
-    std::unique_lock<std::mutex> lock(mutex, std::try_to_lock);
+    std::unique_lock<folly::SharedMutex> lock(mutex, std::try_to_lock);
     if (!lock.owns_lock()) return;
     f(value);
   }
@@ -92,7 +96,7 @@ struct SharedProfile {
     auto result = T{};
     for (auto const link : m_links) {
       if (!link) continue;
-      std::lock_guard<std::mutex> _(link->mutex);
+      std::lock_guard<folly::SharedMutex> _(link->mutex);
       T::reduce(result, link->value);
     }
     return result;

@@ -1225,6 +1225,14 @@ void killInstrAdjustRC(
   IRInstruction* inst,
   jit::vector<IRInstruction*>& decs
 ) {
+  auto const insertDecRef = [&] (auto before, auto src) {
+    auto const blk = before->block();
+    auto const ins = unit.gen(DecRef, before->bcctx(), DecRefData{}, src);
+    blk->insert(blk->iteratorTo(before), ins);
+    FTRACE(3, "Inserting {} before {} for {}\n",
+           ins->toString(), before->toString(), inst->toString());
+    state[ins].setLive();
+  };
   auto anyRemaining = false;
   if (inst->consumesReferences()) {
     // ConsumesReference inputs that are definitely not moved can
@@ -1238,19 +1246,25 @@ void killInstrAdjustRC(
           anyRemaining = true;
           continue;
         }
-        auto const blk = inst->block();
-        auto const ins = unit.gen(DecRef, inst->bcctx(), DecRefData{}, src);
-        blk->insert(blk->iteratorTo(inst), ins);
-        FTRACE(3, "Inserting {} to replace {}\n",
-               ins->toString(), inst->toString());
-        state[ins].setLive();
+        insertDecRef(inst, src);
       }
     }
   }
   for (auto dec : decs) {
     auto replaced = dec->src(0) != inst->dst();
     auto srcIx = 0;
-    if (anyRemaining) {
+    if (dec->is(DecReleaseCheck)) {
+      if (inst->is(ConstructClosure) && inst->src(0)->type().maybe(TCounted)) {
+        assertx(!replaced);
+        assertx(anyRemaining);
+        assertx(inst->mayMoveReference(0));
+
+        // While the closure is going to be released via ReleaseShallow it will
+        // still be responsible for releasing the captured context.
+        insertDecRef(dec, inst->src(0));
+      }
+    } else if (anyRemaining) {
+      assertx(dec->is(DecRef));
       // The remaining inputs might be moved, so may need to survive
       // until this instruction is decreffed
       for (auto src : inst->srcs()) {
@@ -1261,13 +1275,8 @@ void killInstrAdjustRC(
             FTRACE(3, "{} for {}\n", dec->toString(), inst->toString());
             replaced = true;
             state[dec].setLive();
-          } else if (!dec->is(DecReleaseCheck)) {
-            auto const blk = dec->block();
-            auto const ins = unit.gen(DecRef, dec->bcctx(), DecRefData{}, src);
-            blk->insert(blk->iteratorTo(dec), ins);
-            FTRACE(3, "Inserting {} before {} for {}\n",
-                   ins->toString(), dec->toString(), inst->toString());
-            state[ins].setLive();
+          } else {
+            insertDecRef(dec, src);
           }
         }
       }

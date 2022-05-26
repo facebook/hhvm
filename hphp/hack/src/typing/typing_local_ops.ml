@@ -91,13 +91,39 @@ let enforce_mutable_static_variable ?msg (op_pos : Pos.t) env =
     op_pos
     env
 
-(* Temporarily FIXMEable error for memoizing objects. Once ~65 current cases are removed
-we can change this *)
-let enforce_memoize_object =
-  enforce_local_capability
-    ~err_code:Error_codes.Typing.MemoizeObjectWithoutGlobals
-    Capabilities.(mk accessGlobals)
-    "Memoizing object parameters"
+let enforce_memoize_object pos env =
+  (* Allow zoned_shallow/local policies to memoize objects,
+     since those will convert to PolicyShardedMemoize after conversion to zoned *)
+  (* We use ImplicitPolicy instead of ImplicitPolicyShallow just to not error
+     for zoned, since memoizing a zoned function already has a different error
+     associated with it. *)
+  let (env, zoned) = Capabilities.(mk implicitPolicy) env in
+  let (env, access_globals) = Capabilities.(mk accessGlobals) env in
+
+  let mk_zoned_or_access_globals env =
+    let r = Reason.Rnone in
+    (env, Typing_make_type.union r [zoned; access_globals])
+  in
+  check_local_capability
+    mk_zoned_or_access_globals
+    (fun available _required ->
+      Some
+        Typing_error.(
+          coeffect
+          @@ Primary.Coeffect.Op_coeffect_error
+               {
+                 pos;
+                 op_name = "Memoizing object parameters";
+                 locally_available = Typing_coeffects.pretty env available;
+                 available_pos = Typing_defs.get_pos available;
+                 (* Use access globals in error message *)
+                 required = Typing_coeffects.pretty env access_globals;
+                 (* Temporarily FIXMEable error for memoizing objects. Once ~65 current cases are removed
+                    we can change this *)
+                 err_code = Error_codes.Typing.MemoizeObjectWithoutGlobals;
+                 suggestion = None;
+               }))
+    env
 
 let enforce_io =
   enforce_local_capability Capabilities.(mk io) "`echo` or `print` builtin"

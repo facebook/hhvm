@@ -10,7 +10,7 @@ use anyhow::Result;
 use hh24_types::ToplevelSymbolHash;
 use maplit::btreemap;
 use oxidized::naming_types;
-use pos::{FunName, Prefix, RelativePath, TypeName};
+use pos::{ConstName, FunName, Prefix, RelativePath, TypeName};
 use rpds::HashTrieSet;
 use std::path::PathBuf;
 
@@ -122,6 +122,47 @@ fn fun_test(fb: FacebookInit) -> Result<()> {
             .unwrap(),
         a_fun
     );
+
+    Ok(())
+}
+
+#[fbinit::test]
+fn const_test(fb: FacebookInit) -> Result<()> {
+    let ctx = TestContext::new(
+        fb,
+        // Consts are case sensitive
+        btreemap! {
+            "a.php" => "const int A = 123;",
+            "lowercase_a.php" => "const int a = 321;",
+        },
+    )?;
+
+    let naming_table = ctx.provider_backend.naming_table;
+
+    let a_const = ConstName::new(r#"\A"#);
+    let a_relative_path = make_relative_path_from_str("a.php");
+
+    // Retrieve a const
+    let pos = naming_table.get_const_pos(a_const).unwrap().unwrap();
+    let rp: RelativePath = pos.path().into();
+    assert_eq!(rp, a_relative_path);
+
+    // Remove a const
+    naming_table.remove_const_batch(&[a_const])?;
+    assert_eq!(naming_table.get_const_pos(a_const).unwrap(), None);
+
+    // Add a const
+    naming_table.add_const(
+        a_const,
+        &oxidized::file_info::Pos::File(
+            oxidized::file_info::NameType::Const,
+            ocamlrep::rc::RcOc::new(a_relative_path.into()),
+        ),
+    )?;
+
+    let pos = naming_table.get_const_pos(a_const).unwrap().unwrap();
+    let rp: RelativePath = pos.path().into();
+    assert_eq!(rp, a_relative_path);
 
     Ok(())
 }

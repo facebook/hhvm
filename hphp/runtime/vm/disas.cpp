@@ -736,6 +736,7 @@ void print_property(Output& out, const PreClass::Prop* prop) {
   print_prop_or_field_impl(out, *prop, isTest);
 }
 
+template<bool isTest=false>
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
   out.fmtln(".method{}{}{}{} {}{}({}){}{{",
@@ -745,10 +746,10 @@ void print_method(Output& out, const Func* func) {
     format_line_pair(func),
     opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
     func->name(),
-    func_param_list(finfo),
+    func_param_list<isTest>(finfo),
     func_flag_list(finfo));
   indented(out, [&] {
-    print_func_directives(out, finfo);
+    print_func_directives<isTest>(out, finfo);
     print_func_body(out, finfo);
   });
   out.fmtln("}}");
@@ -835,6 +836,7 @@ void print_cls_directives_test(Output& out, const PreClass* cls) {
   for (auto& r : cls->requirements())  print_requirement(out, r);
   for (auto& c : cls->allConstants())  print_class_constant(out, &c);
   for (auto& p : cls->allProperties()) print_property<true>(out, &p);
+  for (auto* m : cls->allMethods())    print_method<true>(out, m);
 }
 
 template<bool isTest = false>

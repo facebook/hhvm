@@ -218,7 +218,6 @@ StringData* makeDocComment(const Str& str) {
 
 using kind = hhbc::TypedValue::Tag;
 
-// TODO make arrays static
 HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
   auto hphp_tv = [&]() {
     switch(tv.tag) {
@@ -243,7 +242,9 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
         for (auto const& elt : set) {
           v.append(toTypedValue(elt));
         }
-        return make_tv<KindOfVec>(v.create());
+        auto tv = v.create();
+        ArrayData::GetScalarArray(&tv);
+        return make_tv<KindOfVec>(tv);
       }
       case kind::Dict: {
         DictInit d(tv.Dict._0.len);
@@ -270,7 +271,9 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
               always_assert(false);
           }
         }
-        return make_tv<KindOfDict>(d.create());
+        auto tv = d.create();
+        ArrayData::GetScalarArray(&tv);
+        return make_tv<KindOfDict>(tv);
       }
       case kind::Keyset: {
         KeysetInit k(tv.Keyset._0.len);
@@ -278,7 +281,9 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
         for (auto const& elt : set) {
           k.add(toTypedValue(elt));
         }
-        return make_tv<KindOfKeyset>(k.create());
+        auto tv = k.create();
+        ArrayData::GetScalarArray(&tv);
+        return make_tv<KindOfKeyset>(tv);
       }
       case kind::LazyClass: {
         auto const lc = LazyClassData::create(toStaticString(tv.LazyClass._0));
@@ -415,7 +420,7 @@ void translateCtxConstant(TranslationState& ts, const HhasCtxConstant& c) {
   assertx(added);
 }
 
-void translateProperty(TranslationState& ts, const HhasProperty& p, const UpperBoundMap& class_ubs) {
+void translateProperty(TranslationState& ts, const HhasProperty& p, const UpperBoundMap& classUbs) {
   UserAttributeMap userAttributes;
   translateUserAttributes(p.attributes, userAttributes);
 
@@ -429,7 +434,7 @@ void translateProperty(TranslationState& ts, const HhasProperty& p, const UpperB
     userAttributes.find(s___Reified.get()) != userAttributes.end();
 
   // T112889109: Passing in {} as the third argument here exposes a gcc compiler bug.
-  auto ub = getRelevantUpperBounds(typeConstraint, class_ubs, class_ubs, {});
+  auto ub = getRelevantUpperBounds(typeConstraint, classUbs, classUbs, {});
 
   auto needsMultiUBs = false;
   if (ub.size() == 1 && !hasReifiedGenerics) {
@@ -459,10 +464,10 @@ void translateProperty(TranslationState& ts, const HhasProperty& p, const UpperB
 
 void translateClassBody(TranslationState& ts,
                         const HhasClass& c,
-                        const UpperBoundMap& class_ubs) {
+                        const UpperBoundMap& classUbs) {
   auto props = range(c.properties);
   for (auto const& p : props) {
-    translateProperty(ts, p, class_ubs);
+    translateProperty(ts, p, classUbs);
   }
   auto constants = range(c.constants);
   for (auto const& cns : constants) {
@@ -605,6 +610,8 @@ HPHP::MemberKey TranslationState::translateMemberKey(const hhbc::MemberKey& mkey
 
 ArrayData* TranslationState::getArrayfromAdataId(const AdataId& id) {
   auto const it = adataMap.find(toString(id));
+  assertx(it != adataMap.end());
+  assertx(it->second->isStatic());
   return it->second;
 }
 
@@ -916,10 +923,49 @@ void translateDefaultParameterValue(TranslationState& ts,
   parse_default_value(param, str);
 }
 
+void upperBoundsHelper(TranslationState& ts,
+                       const UpperBoundMap& ubs,
+                       const UpperBoundMap& classUbs,
+                       const TParamNameVec& shadowedTParams,
+                       CompactVector<TypeConstraint>& upperBounds,
+                       TypeConstraint& tc,
+                       bool hasReifiedGenerics) {
+  auto currUBs = getRelevantUpperBounds(tc, ubs, classUbs, shadowedTParams);
+  if (currUBs.size() == 1 && !hasReifiedGenerics) {
+    applyFlagsToUB(currUBs[0], tc);
+    tc = currUBs[0];
+  } else if (!currUBs.empty()) {
+    upperBounds = std::move(currUBs);
+    ts.fe->hasReturnWithMultiUBs = true;
+  }
+}
+
+template <bool checkPce=false>
+bool upperBoundsHelper(TranslationState& ts,
+                       const UpperBoundMap& ubs,
+                       const UpperBoundMap& classUbs,
+                       const TParamNameVec& shadowedTParams,
+                       CompactVector<TypeConstraint>& upperBounds,
+                       TypeConstraint& tc,
+                       const UserAttributeMap& userAttrs) {
+  auto const hasReifiedGenerics = [&]() {
+    if (userAttrs.find(s___Reified.get()) != userAttrs.end()) return true;
+    if (checkPce) {
+      return ts.pce->userAttributes().find(s___Reified.get()) !=
+             ts.pce->userAttributes().end();
+    }
+    return false;
+  }();
+
+  upperBoundsHelper(ts, ubs, classUbs, shadowedTParams,
+                    upperBounds, tc, hasReifiedGenerics);
+  return hasReifiedGenerics;
+}
+
 void translateParameter(TranslationState& ts,
                         const UpperBoundMap& ubs,
-                        const UpperBoundMap& class_ubs,
-                        const TParamNameVec& shadowed_tparams,
+                        const UpperBoundMap& classUbs,
+                        const TParamNameVec& shadowedTParams,
                         bool hasReifiedGenerics,
                         const HhasParam& p) {
   FuncEmitter::ParamInfo param;
@@ -934,15 +980,8 @@ void translateParameter(TranslationState& ts,
       [&](HhasTypeInfo& ti) {return translateTypeInfo(ti);},
       [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 
-  auto currUBs = getRelevantUpperBounds(param.typeConstraint, ubs,
-                                        class_ubs, shadowed_tparams);
-  if (currUBs.size() == 1 && !hasReifiedGenerics) {
-    applyFlagsToUB(currUBs[0], param.typeConstraint);
-    param.typeConstraint = currUBs[0];
-  } else if (!currUBs.empty()) {
-    param.upperBounds = std::move(currUBs);
-    ts.fe->hasParamsWithMultiUBs = true;
-  }
+  upperBoundsHelper(ts, ubs, classUbs, shadowedTParams, param.upperBounds,
+                    param.typeConstraint, hasReifiedGenerics);
 
   auto const dv = maybe(p.default_value);
   // TODO default value strings are currently escaped
@@ -955,6 +994,8 @@ void translateParameter(TranslationState& ts,
 void translateFunctionBody(TranslationState& ts,
                            const HhasBody& b,
                            const UpperBoundMap& ubs,
+                           const UpperBoundMap& classUbs,
+                           const TParamNameVec& shadowedTParams,
                            bool hasReifiedGenerics) {
   ts.fe->isMemoizeWrapper = b.is_memoize_wrapper | b.is_memoize_wrapper_lsb;
   ts.fe->isMemoizeWrapperLSB = b.is_memoize_wrapper_lsb;
@@ -962,7 +1003,7 @@ void translateFunctionBody(TranslationState& ts,
 
   auto params = range(b.params);
   for (auto const& p : params) {
-    translateParameter(ts, ubs, {}, {}, hasReifiedGenerics, p);
+    translateParameter(ts, ubs, classUbs, shadowedTParams, hasReifiedGenerics, p);
   }
 
   auto instrs = range(b.body_instrs);
@@ -979,6 +1020,29 @@ void translateFunctionBody(TranslationState& ts,
     auto const dvName = toNamedLocalStaticString(dv);
     ts.fe->allocVarId(dvName);
   }
+
+  for (auto const& label : ts.labelMap) {
+    for (auto const& dvinit : label.second.dvInits) {
+      ts.fe->params[dvinit].funcletOff = label.second.target;
+    }
+
+    for (auto const& source : label.second.sources) {
+      // source.second is the label opcode offset
+      // source.first is the offset of where the label is used as an immediate
+      ts.fe->emitInt32(label.second.target - source.second, source.first);
+    }
+  }
+
+  // finish function
+  while (ts.fe->numLocals() < ts.maxUnnamed) {
+    ts.fe->allocUnnamedLocal();
+  }
+
+  ts.fe->finish();
+  ts.labelMap.clear();
+  assertx(ts.start.empty());
+  assertx(ts.handler.empty());
+  ts.maxUnnamed = 0;
 
 }
 
@@ -1008,50 +1072,66 @@ void translateFunction(TranslationState& ts, const HhasFunction& f) {
       [&](HhasTypeInfo& ti) {return translateTypeInfo(ti);},
       [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 
-  auto currUBs = getRelevantUpperBounds(retTypeInfo.second, ubs, {}, {});
   auto const hasReifiedGenerics =
-    userAttrs.find(s___Reified.get()) != userAttrs.end();
-  if (currUBs.size() == 1 && !hasReifiedGenerics) {
-    applyFlagsToUB(currUBs[0], retTypeInfo.second);
-    retTypeInfo.second = currUBs[0];
-  } else if (!currUBs.empty()) {
-    ts.fe->retUpperBounds = std::move(currUBs);
-    ts.fe->hasReturnWithMultiUBs = true;
-  }
+    upperBoundsHelper(ts, ubs, {}, {},ts.fe->retUpperBounds, retTypeInfo.second, userAttrs);
 
   std::tie(ts.fe->retUserType, ts.fe->retTypeConstraint) = retTypeInfo;
   ts.srcLoc = Location::Range{static_cast<int>(f.span.line_begin), -1, static_cast<int>(f.span.line_end), -1};
-  translateFunctionBody(ts, f.body, ubs, hasReifiedGenerics);
+  translateFunctionBody(ts, f.body, ubs, {}, {}, hasReifiedGenerics);
+}
 
-  for (auto const& label : ts.labelMap) {
-    for (auto const& dvinit : label.second.dvInits) {
-      ts.fe->params[dvinit].funcletOff = label.second.target;
-    }
+void translateShadowedTParams(TParamNameVec& vec, const Slice<Str>& tpms) {
+  auto tparams = range(tpms);
+  for (auto const& t : tparams) {
+    vec.push_back(toStaticString(t));
+  }
+}
 
-    for (auto const& source : label.second.sources) {
-      // source.second is the label opcode offset
-      // source.first is the offset of where the label is used as an immediate
-      ts.fe->emitInt32(label.second.target - source.second, source.first);
-    }
+void translateMethod(TranslationState& ts, const HhasMethod& m, const UpperBoundMap& classUbs) {
+  UpperBoundMap ubs;
+  auto upper_bounds = range(m.body.upper_bounds);
+  for (auto const& u : upper_bounds) {
+    translateUbs(u, ubs);
   }
 
-  // finish function
-  while (ts.fe->numLocals() < ts.maxUnnamed) {
-    ts.fe->allocUnnamedLocal();
-  }
+  TParamNameVec shadowedTParams;
+  translateShadowedTParams(shadowedTParams, m.body.shadowed_tparams);
 
-  ts.fe->finish();
-  ts.labelMap.clear();
-  assertx(ts.start.empty());
-  assertx(ts.handler.empty());
-  ts.maxUnnamed = 0;
+  Attr attrs = m.attrs;
+  if (!SystemLib::s_inited) attrs |= AttrBuiltin;
+
+  ts.fe = ts.ue->newMethodEmitter(toStaticString(m.name._0), ts.pce);
+  ts.pce->addMethod(ts.fe);
+  ts.fe->init(m.span.line_begin, m.span.line_end, attrs, nullptr);
+  ts.fe->isGenerator = (bool)(m.flags & HhasMethodFlags_IS_GENERATOR);
+  ts.fe->isAsync = (bool)(m.flags & HhasMethodFlags_IS_ASYNC);
+  ts.fe->isPairGenerator = (bool)(m.flags & HhasMethodFlags_IS_PAIR_GENERATOR);
+  ts.fe->isClosureBody = (bool)(m.flags & HhasMethodFlags_IS_CLOSURE_BODY);
+
+  UserAttributeMap userAttrs;
+  translateUserAttributes(m.attributes, userAttrs);
+  ts.fe->userAttributes = userAttrs;
+
+  auto retTypeInfo = maybeOrElse(m.body.return_type_info,
+    [&](HhasTypeInfo& ti) {return translateTypeInfo(ti);},
+    [&]() {return std::make_pair(nullptr, TypeConstraint{});});
+
+  auto const hasReifiedGenerics =
+    upperBoundsHelper<true>(ts, ubs, classUbs, shadowedTParams,
+                            ts.fe->retUpperBounds, retTypeInfo.second, userAttrs);
+
+  // TODO(@voork) checkNative
+  ts.srcLoc = Location::Range{static_cast<int>(m.span.line_begin), -1,
+                              static_cast<int>(m.span.line_end), -1};
+  std::tie(ts.fe->retUserType, ts.fe->retTypeConstraint) = retTypeInfo;
+  translateFunctionBody(ts, m.body, ubs, classUbs, shadowedTParams, hasReifiedGenerics);
 }
 
 void translateClass(TranslationState& ts, const HhasClass& c) {
-  UpperBoundMap ubs;
+  UpperBoundMap classUbs;
   auto upper_bounds = range(c.upper_bounds);
   for (auto const& u : upper_bounds) {
-    translateUbs(u, ubs);
+    translateUbs(u, classUbs);
   }
 
   std::string name = toString(c.name._0);
@@ -1092,13 +1172,18 @@ void translateClass(TranslationState& ts, const HhasClass& c) {
     translateRequirements(ts, r);
   }
 
+  auto methods = range(c.methods);
+  for (auto const& m : methods) {
+    translateMethod(ts, m, classUbs);
+  }
+
   auto uses = range(c.uses);
   for (auto const& u : uses) {
     ts.pce->addUsedTrait(toStaticString(u._0));
   }
 
   translateEnumType(ts, c.enum_type);
-  translateClassBody(ts, c, ubs);
+  translateClassBody(ts, c, classUbs);
 }
 
 void translateAdata(TranslationState& ts, const HhasAdata& ad) {
@@ -1134,6 +1219,17 @@ void translateModuleUse(TranslationState& ts, const Optional<Str>& name) {
 }
 
 void translate(TranslationState& ts, const HackCUnit& unit) {
+  translateModuleUse(ts, maybe(unit.module_use));
+  auto adata = range(unit.adata);
+  for (auto const& d : adata) {
+    translateAdata(ts, d);
+  }
+
+  auto funcs = range(unit.functions);
+  for (auto const& f : funcs) {
+    translateFunction(ts, f);
+  }
+
   auto classes = range(unit.classes);
   for (auto const& c : classes) {
     translateClass(ts, c);
@@ -1149,16 +1245,6 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
     translateTypedef(ts, t);
   }
 
-  auto adata = range(unit.adata);
-  for (auto const& d : adata) {
-    translateAdata(ts, d);
-  }
-
-  auto funcs = range(unit.functions);
-  for (auto const& f : funcs) {
-    translateFunction(ts, f);
-  }
-
   translateUserAttributes(unit.file_attributes, ts.ue->m_fileAttributes);
   maybeThen(unit.fatal, [&](Triple<FatalOp, HhasPos, Str> fatal) {
     auto const pos = fatal._1;
@@ -1170,7 +1256,6 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
     );
   });
 
-  translateModuleUse(ts, maybe(unit.module_use));
 
   for (auto& fe : ts.ue->fevec()) fixup_default_values(ts, fe.get());
   for (size_t n = 0; n < ts.ue->numPreClasses(); ++n) {

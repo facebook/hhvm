@@ -686,6 +686,7 @@ let next
     (delegate_state : Delegate.state ref)
     (workitems_to_process : workitem BigList.t ref)
     (workitems_in_progress : workitem Hash_set.Poly.t)
+    (workitems_processed_count : int ref)
     (remote_payloads : remote_computation_payload list ref)
     (record : Measure.record)
     (hulk_lite : bool)
@@ -721,7 +722,15 @@ let next
         worker outputs in once go. For any payloads that aren't available we'll simply stop waiting on the
         remote worker and have the local worker "steal" the work.
        *)
-        let (workitems, controller, payloads, job, _telemetry) =
+        let remote_workitems_to_process_length =
+          List.fold ~init:0 !remote_payloads ~f:(fun acc payload ->
+              acc + BigList.length payload.payload)
+        in
+        let ( remaining_workitems_to_process,
+              controller,
+              payloads,
+              job,
+              _telemetry ) =
           Typing_service_delegate.collect
             ~telemetry
             !delegate_state
@@ -730,7 +739,16 @@ let next
             !remote_payloads
             hulk_heavy
         in
-        workitems_to_process := workitems;
+        (* Update the total workitems_processed_count after remote workers
+           are done, so we can update the progress bar with the correct number
+           of files typechecked.
+        *)
+        if List.length payloads = 0 then
+          workitems_processed_count :=
+            !workitems_processed_count
+            + remote_workitems_to_process_length
+            - BigList.length remaining_workitems_to_process;
+        workitems_to_process := remaining_workitems_to_process;
         delegate_state := controller;
         remote_payloads := payloads;
         job
@@ -905,6 +923,7 @@ let process_in_parallel
       delegate_state
       workitems_to_process
       workitems_in_progress
+      workitems_processed_count
       remote_payloads
       record
       hulk_lite

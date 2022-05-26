@@ -973,6 +973,7 @@ void print_unit(Output& out, const Unit* unit) {
 void print_unit_test(Output& out, const Unit* unit) {
   out.fmtln("# {} starts here", unit->origFilepath());
   out.nl();
+  print_unit_metadata(out, unit);
   for (auto* func : unit->funcs())        print_func<true>(out, func);
   for (auto& cls : unit->preclasses())    print_cls<true>(out, cls.get());
   for (auto& alias : unit->typeAliases()) print_alias(out, alias);

@@ -1,9 +1,9 @@
-\C::f: #{0} [5:10-38] :
+[RESULT] \C::f: #{0} [5:10-38] :
   shape(
     a => int
     b => bool
   )
-\C::g: #{1} [13:10-38] :
+[RESULT] \C::g: #{1} [13:10-38] :
   shape(
     a => int
     b => bool

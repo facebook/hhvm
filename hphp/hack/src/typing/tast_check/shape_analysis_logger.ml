@@ -16,12 +16,15 @@ let log_events_locally typing_env : log_event list -> unit =
   let log_shape = function
     | Result { id; shape_result } ->
       Format.sprintf
-        "%s: %s\n"
+        "[RESULT] %s: %s\n"
         id
         (SA.show_shape_result typing_env shape_result)
       |> Out_channel.output_string !Typing_log.out_channel;
       Out_channel.flush !Typing_log.out_channel
-    | Failure _ -> ()
+    | Failure { id; error_message } ->
+      Format.sprintf "[FAILURE] %s: %s\n" id error_message
+      |> Out_channel.output_string !Typing_log.out_channel;
+      Out_channel.flush !Typing_log.out_channel
   in
   List.iter ~f:log_shape
 

@@ -771,7 +771,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": "width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": "width",
@@ -793,7 +793,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": "color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": "color",
@@ -846,7 +846,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": "width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": "width",
@@ -868,7 +868,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": "color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": "color",
@@ -1202,7 +1202,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": ":width",
@@ -1224,7 +1224,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": ":color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": ":color",
@@ -1277,7 +1277,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": ":width",
@@ -1299,7 +1299,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": ":color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": ":color",
@@ -2578,7 +2578,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": "width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": "width",
@@ -2600,7 +2600,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": "color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": "color",
@@ -2653,7 +2653,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": "width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": "width",
@@ -2675,7 +2675,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": "color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": "color",
@@ -2917,7 +2917,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": ":width",
@@ -2939,7 +2939,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": ":color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": ":color",
@@ -2992,7 +2992,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
                             "inlineDetail": "?int",
                             "sortText": ":width",
@@ -3014,7 +3014,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": ":color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
                             "inlineDetail": "?string",
                             "sortText": ":color",

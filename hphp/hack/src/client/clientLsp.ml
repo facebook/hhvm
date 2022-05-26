@@ -525,7 +525,7 @@ let si_kind_to_completion_kind (kind : SearchUtils.si_kind) :
   | SearchUtils.SI_Mixed
   | SearchUtils.SI_LocalVariable ->
     Some Completion.Variable
-  | SearchUtils.SI_Property -> Some Completion.Property
+  | SearchUtils.SI_Property -> Some Completion.Field
   | SearchUtils.SI_ClassConstant -> Some Completion.Constant
   | SearchUtils.SI_Interface
   | SearchUtils.SI_Trait ->

@@ -26,7 +26,8 @@ module type RemoteServerApi = sig
      Returns the path to the dep table downloaded.
   *)
   val download_and_update_naming_table :
-    string option ->
+    manifold_api_key:string option ->
+    use_manifold_cython_client:bool ->
     string option ->
     Relative_path.t list option ->
     string option

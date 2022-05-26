@@ -311,6 +311,8 @@ let download_and_load_state_exn
       log_saved_state_age_and_distance;
       Saved_state_loader.saved_state_manifold_api_key =
         genv.local_config.ServerLocalConfig.saved_state_manifold_api_key;
+      use_manifold_cython_client =
+        genv.local_config.ServerLocalConfig.use_manifold_cython_client;
     }
   in
   (* TODO(hverr): Support the ignore_hhconfig flag, how to do this with Watchman? *)

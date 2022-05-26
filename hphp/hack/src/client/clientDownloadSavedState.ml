@@ -246,6 +246,8 @@ let load_saved_state :
             log_saved_state_age_and_distance = false;
             Saved_state_loader.saved_state_manifold_api_key =
               local_config.ServerLocalConfig.saved_state_manifold_api_key;
+            use_manifold_cython_client =
+              local_config.ServerLocalConfig.use_manifold_cython_client;
           }
         ~progress_callback:(fun _ -> ())
         ~watchman_opts
@@ -277,6 +279,8 @@ let load_saved_state :
             log_saved_state_age_and_distance = false;
             Saved_state_loader.saved_state_manifold_api_key =
               local_config.ServerLocalConfig.saved_state_manifold_api_key;
+            use_manifold_cython_client =
+              local_config.ServerLocalConfig.use_manifold_cython_client;
           }
         ~progress_callback:(fun _ -> ())
         ~manifold_path

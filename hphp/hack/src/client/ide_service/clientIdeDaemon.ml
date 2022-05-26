@@ -273,8 +273,14 @@ let load_saved_state
             |> Provider_context.get_tcopt
             |> TypecheckerOptions.saved_state_manifold_api_key
           in
+          let use_manifold_cython_client =
+            ctx
+            |> Provider_context.get_tcopt
+            |> TypecheckerOptions.use_manifold_cython_client
+          in
           let env : Saved_state_loader.env =
             {
+              use_manifold_cython_client;
               log_saved_state_age_and_distance;
               Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
             }

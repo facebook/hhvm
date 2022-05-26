@@ -17,6 +17,7 @@
 type env = {
   saved_state_manifold_api_key: string option;
   log_saved_state_age_and_distance: bool;
+  use_manifold_cython_client: bool;
 }
 
 type process_success = {

@@ -74,6 +74,9 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
   let manifold_api_key =
     genv.ServerEnv.local_config.ServerLocalConfig.saved_state_manifold_api_key
   in
+  let use_manifold_cython_client =
+    genv.ServerEnv.local_config.ServerLocalConfig.use_manifold_cython_client
+  in
   let%lwt (naming_table_path, naming_table_changed_files) =
     match env.naming_table_path with
     | Some naming_table_path -> Lwt.return (naming_table_path, [])
@@ -84,6 +87,9 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
             {
               log_saved_state_age_and_distance = false;
               Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
+              use_manifold_cython_client =
+                genv.ServerEnv.local_config
+                  .ServerLocalConfig.use_manifold_cython_client;
             }
           ~progress_callback:(fun _ -> ())
           ~watchman_opts:
@@ -121,6 +127,7 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
             {
               log_saved_state_age_and_distance = false;
               Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
+              use_manifold_cython_client;
             }
           ~progress_callback:(fun _ -> ())
           ~watchman_opts:

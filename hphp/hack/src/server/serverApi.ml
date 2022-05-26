@@ -241,7 +241,9 @@ let make_remote_server_api
       ()
 
     let download_dep_table
-        (manifold_api_key : string option) (manifold_path : string) :
+        (manifold_api_key : string option)
+        (use_manifold_cython_client : bool)
+        (manifold_path : string) :
         ( Saved_state_loader.Naming_and_dep_table_info.main_artifacts,
           string )
         result =
@@ -254,6 +256,7 @@ let make_remote_server_api
             {
               Saved_state_loader.log_saved_state_age_and_distance = false;
               Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
+              Saved_state_loader.use_manifold_cython_client;
             }
           ~progress_callback:(fun _ -> ())
           ~saved_state_type:
@@ -342,10 +345,11 @@ let make_remote_server_api
 
     let download_and_update_naming_table_helper
         (manifold_api_key : string option)
+        (use_manifold_cython_client : bool)
         (path : string)
         (changed_files : Relative_path.t list option) : (string, string) result
         =
-      download_dep_table manifold_api_key path
+      download_dep_table manifold_api_key use_manifold_cython_client path
       >>= fun saved_state_main_artifacts ->
       Hh_logger.log "Loading dep graph artifacts...";
       load_dep_table saved_state_main_artifacts
@@ -412,7 +416,8 @@ let make_remote_server_api
         Ok (Path.to_string dep_table_path)
 
     let download_and_update_naming_table
-        (manifold_api_key : string option)
+        ~(manifold_api_key : string option)
+        ~(use_manifold_cython_client : bool)
         (saved_state_manifold_path : string option)
         (changed_files : Relative_path.t list option) : string option =
       match saved_state_manifold_path with
@@ -425,6 +430,7 @@ let make_remote_server_api
         (match
            download_and_update_naming_table_helper
              manifold_api_key
+             use_manifold_cython_client
              path
              changed_files
          with

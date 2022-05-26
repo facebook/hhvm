@@ -797,12 +797,14 @@ void handleOA(TranslationState& ts, T subop) {
   auto const targets = body.targets;                      \
   auto const cases = body.cases;                          \
   ts.fe->emitIVA(cases.len);                              \
-  for (int i = 0; i < cases.len; i++) {                   \
+  for (int i = 0; i < cases.len-1; i++) {                 \
     auto const caseName = toStaticString(cases.data[i]);  \
     auto const caseId = ts.mergeLitstr(caseName);         \
     ts.fe->emitInt32(caseId);                             \
     ts.addLabelJump(targets.data[i]);                     \
   }                                                       \
+  ts.fe->emitInt32(-1);                                   \
+  ts.addLabelJump(targets.data[cases.len-1]);             \
 } while (0)
 
 #define MAYBE_IMM_ONE(...)

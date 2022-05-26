@@ -134,6 +134,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_profile_top_level_definitions: false,
     tco_allow_all_files_for_module_declarations: false,
     tco_allowed_files_for_module_declarations: &[],
+    tco_use_manifold_cython_client: false,
 };
 
 impl GlobalOptions<'static> {
@@ -406,6 +407,7 @@ impl GlobalOptions<'_> {
         );
         let tco_allowed_files_for_module_declarations: &'a [&'a str] =
             tco_allowed_files_for_module_declarations.into_bump_slice();
+        let tco_use_manifold_cython_client = self.tco_use_manifold_cython_client;
 
         GlobalOptions::<'a> {
             tco_experimental_features,
@@ -536,6 +538,7 @@ impl GlobalOptions<'_> {
             tco_profile_top_level_definitions,
             tco_allow_all_files_for_module_declarations,
             tco_allowed_files_for_module_declarations,
+            tco_use_manifold_cython_client,
         }
     }
 }

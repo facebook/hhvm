@@ -606,6 +606,8 @@ type t = {
       (** Remove marshalled naming table from saved state *)
   no_load_two_saved_states: bool;
       (** Stop loading hack/naming since hack/64 now has naming table *)
+  use_manifold_cython_client: bool;
+      (** Required for Hedwig support for saved state downloads *)
 }
 
 let default =
@@ -716,6 +718,7 @@ let default =
     remote_old_decls_no_limit = false;
     no_marshalled_naming_table_in_saved_state = false;
     no_load_two_saved_states = false;
+    use_manifold_cython_client = false;
   }
 
 let path =
@@ -1478,6 +1481,13 @@ let load_ fn ~silent ~current_version overrides =
   let remote_worker_saved_state_manifold_path =
     string_opt "remote_worker_saved_state_manifold_path" config
   in
+  let use_manifold_cython_client =
+    bool_if_min_version
+      "use_manifold_cython_client"
+      ~default:default.use_manifold_cython_client
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1593,6 +1603,7 @@ let load_ fn ~silent ~current_version overrides =
     remote_old_decls_no_limit;
     no_marshalled_naming_table_in_saved_state;
     no_load_two_saved_states;
+    use_manifold_cython_client;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1634,4 +1645,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       populate_member_heaps = options.populate_member_heaps;
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;
       shm_cache_size = options.shm_cache_size;
+      use_manifold_cython_client = options.use_manifold_cython_client;
     }

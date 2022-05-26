@@ -319,6 +319,7 @@ type t = {
   tco_profile_top_level_definitions: bool;
   tco_allow_all_files_for_module_declarations: bool;
   tco_allowed_files_for_module_declarations: string list;
+  tco_use_manifold_cython_client: bool;
 }
 [@@deriving eq, show]
 
@@ -450,6 +451,7 @@ val make :
   ?tco_profile_top_level_definitions:bool ->
   ?tco_allow_all_files_for_module_declarations:bool ->
   ?tco_allowed_files_for_module_declarations:string list ->
+  ?tco_use_manifold_cython_client:bool ->
   unit ->
   t
 
@@ -742,3 +744,5 @@ val tco_profile_top_level_definitions : t -> bool
 val tco_allow_all_files_for_module_declarations : t -> bool
 
 val tco_allowed_files_for_module_declarations : t -> string list
+
+val tco_use_manifold_cython_client : t -> bool

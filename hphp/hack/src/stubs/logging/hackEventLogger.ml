@@ -67,6 +67,7 @@ type rollout_flags = {
   remote_old_decls_no_limit: bool;
   no_marshalled_naming_table_in_saved_state: bool;
   no_load_two_saved_states: bool;
+  use_manifold_cython_client: bool;
 }
 
 let flush () = ()

@@ -136,6 +136,7 @@ impl Default for GlobalOptions {
             tco_profile_top_level_definitions: false,
             tco_allow_all_files_for_module_declarations: false,
             tco_allowed_files_for_module_declarations: vec![],
+            tco_use_manifold_cython_client: false,
         }
     }
 }

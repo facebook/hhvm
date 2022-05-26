@@ -9,7 +9,8 @@ use crate::{FacebookInit, TestContext};
 use anyhow::Result;
 use hh24_types::ToplevelSymbolHash;
 use maplit::btreemap;
-use pos::{Prefix, RelativePath};
+use oxidized::naming_types;
+use pos::{Prefix, RelativePath, TypeName};
 use rpds::HashTrieSet;
 use std::path::PathBuf;
 
@@ -19,6 +20,61 @@ fn make_dep_from_typename(typename: &str) -> deps_rust::Dep {
 
 fn make_relative_path_from_str(test_path: &str) -> RelativePath {
     RelativePath::new(Prefix::Root, PathBuf::from(test_path))
+}
+
+#[fbinit::test]
+fn type_test(fb: FacebookInit) -> Result<()> {
+    let ctx = TestContext::new(
+        fb,
+        btreemap! {
+            "a.php" => "class A extends B {}",
+            "b.php" => "class B {}"
+        },
+    )?;
+
+    let naming_table = ctx.provider_backend.naming_table;
+
+    let a_type = TypeName::new(r#"\A"#);
+    let a_relative_path = make_relative_path_from_str("a.php");
+
+    // Retrieve a typename
+    let (pos, kindof) = naming_table.get_type_pos(a_type).unwrap().unwrap();
+
+    let rp: RelativePath = pos.path().into();
+    assert_eq!(rp, a_relative_path);
+    assert_eq!(kindof, naming_types::KindOfType::TClass);
+
+    // Remove a typename
+    naming_table.remove_type_batch(&[a_type])?;
+    assert_eq!(naming_table.get_type_pos(a_type).unwrap(), None);
+
+    // Add a typename
+    naming_table.add_type(
+        a_type,
+        &(
+            oxidized::file_info::Pos::File(
+                oxidized::file_info::NameType::Class,
+                ocamlrep::rc::RcOc::new(a_relative_path.into()),
+            ),
+            naming_types::KindOfType::TClass,
+        ),
+    )?;
+
+    let (pos, kindof) = naming_table.get_type_pos(a_type).unwrap().unwrap();
+    let rp: RelativePath = pos.path().into();
+    assert_eq!(rp, a_relative_path);
+    assert_eq!(kindof, naming_types::KindOfType::TClass);
+
+    // Get name from its lowercase version
+    assert_eq!(
+        naming_table
+            .get_canon_type_name(TypeName::new(r#"\a"#))
+            .unwrap()
+            .unwrap(),
+        a_type
+    );
+
+    Ok(())
 }
 
 #[fbinit::test]

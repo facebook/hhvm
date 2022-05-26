@@ -1,10 +1,10 @@
 open Hh_prelude
 
 (** `cgroup_watcher_start filename subtract_kb_for_array` will reset cgroup_watcher counters, and have it
-start monitoring the filename (e.g. "/sys/fs/.../memory.current". See [cgroup_watcher_get] for
-the meaning of [subtract_bytes_for_array]. *)
-external cgroup_watcher_start : string -> subtract_kb_for_array:int -> unit
-  = "cgroup_watcher_start"
+start monitoring the two filenames (e.g. "/sys/fs/.../memory.current" and ".../memory.swap.current")
+and adds them together. See [cgroup_watcher_get] for the meaning of [subtract_kb_for_array]. *)
+external cgroup_watcher_start :
+  string -> string -> subtract_kb_for_array:int -> unit = "cgroup_watcher_start"
 
 (** This returns (hwm_kb, num_readings, seconds_at_gb[||]) that have been tallied since
 [cgroup_watcher_start]. Hwm_kb is the high water mark of the cgroup. Num_readings is the
@@ -55,7 +55,8 @@ let initial_value_map current_cgroup ~f ~default =
   | _ ->
     ( {
         CGroup.total = 0;
-        total_swap = 0;
+        memory_current = 0;
+        memory_swap_current = 0;
         anon = 0;
         shmem = 0;
         file = 0;
@@ -220,18 +221,15 @@ let log_telemetry
       ~step
       ~start_time
       ~total_relative_to:(Option.some_if initial_opt initial.total)
-      ~totalswap_relative_to:(Option.some_if initial_opt initial.total_swap)
       ~anon_relative_to:(Option.some_if initial_opt initial.anon)
       ~shmem_relative_to:(Option.some_if initial_opt initial.shmem)
       ~file_relative_to:(Option.some_if initial_opt initial.file)
       ~total_start:(Some (start_cgroup.total - initial.total))
-      ~totalswap_start:(Some (start_cgroup.total_swap - initial.total_swap))
       ~anon_start:(Some (start_cgroup.anon - initial.anon))
       ~shmem_start:(Some (start_cgroup.shmem - initial.shmem))
       ~file_start:(Some (start_cgroup.file - initial.file))
       ~total_hwm:(total_hwm - initial.total)
       ~total:(cgroup.total - initial.total)
-      ~totalswap:(cgroup.total_swap - initial.total_swap)
       ~anon:(cgroup.anon - initial.anon)
       ~shmem:(cgroup.shmem - initial.shmem)
       ~file:(cgroup.file - initial.file)
@@ -248,18 +246,15 @@ let log_telemetry
       ~step
       ~start_time:None
       ~total_relative_to:(Option.some_if initial_opt initial.total)
-      ~totalswap_relative_to:(Option.some_if initial_opt initial.total_swap)
       ~anon_relative_to:(Option.some_if initial_opt initial.anon)
       ~shmem_relative_to:(Option.some_if initial_opt initial.shmem)
       ~file_relative_to:(Option.some_if initial_opt initial.file)
       ~total_start:None
-      ~totalswap_start:None
       ~anon_start:None
       ~shmem_start:None
       ~file_start:None
       ~total_hwm:(cgroup.total - initial.total)
       ~total:(cgroup.total - initial.total)
-      ~totalswap:(cgroup.total_swap - initial.total_swap)
       ~anon:(cgroup.anon - initial.anon)
       ~shmem:(cgroup.shmem - initial.shmem)
       ~file:(cgroup.file - initial.file)
@@ -316,9 +311,11 @@ let step_start_end step_group ?(telemetry_ref = ref None) name f =
       initial_value_map start_cgroup ~default:() ~f:(fun _ -> ())
     in
     Result.iter start_cgroup ~f:(fun { CGroup.cgroup_name; _ } ->
-        let path = "/sys/fs/cgroup/" ^ cgroup_name ^ "/memory.current" in
+        let path1 = "/sys/fs/cgroup/" ^ cgroup_name ^ "/memory.current" in
+        let path2 = "/sys/fs/cgroup/" ^ cgroup_name ^ "/memory.swap.current" in
         cgroup_watcher_start
-          path
+          path1
+          path2
           ~subtract_kb_for_array:(initial.CGroup.total / 1024));
     Utils.try_finally ~f ~finally:(fun () ->
         try

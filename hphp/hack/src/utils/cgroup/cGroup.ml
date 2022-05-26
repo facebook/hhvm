@@ -65,8 +65,9 @@ let get_cgroup_name =
       ProcFS.first_cgroup_for_pid (Unix.getpid ()))
 
 type stats = {
+  memory_current: int;
+  memory_swap_current: int;
   total: int;
-  total_swap: int;
   anon: int;
   shmem: int;
   file: int;
@@ -105,9 +106,9 @@ let parse_stat stat_contents =
 let get_stats_for_cgroup (cgroup_name : string) : (stats, string) result =
   (* cgroup_name starts with a /, like /my_cgroup *)
   let dir = spf "%s%s" cgroup_dir cgroup_name in
-  let total_result =
+  let memory_current_result =
     read_single_number_file (Filename.concat dir "memory.current")
-  and total_swap_result =
+  and memory_swap_current_result =
     read_single_number_file (Filename.concat dir "memory.swap.current")
   and stat_contents_result =
     try Ok (Sys_utils.cat (Filename.concat dir "memory.stat")) with
@@ -115,11 +116,21 @@ let get_stats_for_cgroup (cgroup_name : string) : (stats, string) result =
     | Sys_error _ ->
       Error "Failed to parse memory.stat"
   in
-  total_result >>= fun total ->
-  total_swap_result >>= fun total_swap ->
+  memory_current_result >>= fun memory_current ->
+  memory_swap_current_result >>= fun memory_swap_current ->
   stat_contents_result >>= fun stat_contents ->
   parse_stat stat_contents >>= fun (anon, file, shmem) ->
-  Ok { total; total_swap; anon; file; shmem; cgroup_name }
+  let total = memory_current + memory_swap_current in
+  Ok
+    {
+      total;
+      memory_current;
+      memory_swap_current;
+      anon;
+      file;
+      shmem;
+      cgroup_name;
+    }
 
 let get_stats () =
   assert_is_using_cgroup_v2 () >>= get_cgroup_name >>= get_stats_for_cgroup

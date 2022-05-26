@@ -528,18 +528,15 @@ module CGroup = struct
       ~step:_
       ~start_time:_
       ~total_relative_to:_
-      ~totalswap_relative_to:_
       ~anon_relative_to:_
       ~shmem_relative_to:_
       ~file_relative_to:_
       ~total_start:_
-      ~totalswap_start:_
       ~anon_start:_
       ~shmem_start:_
       ~file_start:_
       ~total_hwm:_
       ~total:_
-      ~totalswap:_
       ~anon:_
       ~shmem:_
       ~file:_

@@ -24,6 +24,7 @@ use ty::reason::BReason;
 
 mod dependency_registrar;
 mod folded_decl_provider;
+mod naming_table;
 
 struct TestContext {
     #[allow(dead_code)]

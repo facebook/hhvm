@@ -10,7 +10,7 @@ use anyhow::Result;
 use hh24_types::ToplevelSymbolHash;
 use maplit::btreemap;
 use oxidized::naming_types;
-use pos::{Prefix, RelativePath, TypeName};
+use pos::{FunName, Prefix, RelativePath, TypeName};
 use rpds::HashTrieSet;
 use std::path::PathBuf;
 
@@ -72,6 +72,55 @@ fn type_test(fb: FacebookInit) -> Result<()> {
             .unwrap()
             .unwrap(),
         a_type
+    );
+
+    Ok(())
+}
+
+#[fbinit::test]
+fn fun_test(fb: FacebookInit) -> Result<()> {
+    let ctx = TestContext::new(
+        fb,
+        btreemap! {
+            "a.php" => "function A(): void { b(); }",
+            "b.php" => "function b(): void { A(); }",
+        },
+    )?;
+
+    let naming_table = ctx.provider_backend.naming_table;
+
+    let a_fun = FunName::new(r#"\A"#);
+    let a_relative_path = make_relative_path_from_str("a.php");
+
+    // Retrieve a fun
+    let pos = naming_table.get_fun_pos(a_fun).unwrap().unwrap();
+    let rp: RelativePath = pos.path().into();
+    assert_eq!(rp, a_relative_path);
+
+    // Remove a fun
+    naming_table.remove_fun_batch(&[a_fun])?;
+    assert_eq!(naming_table.get_fun_pos(a_fun).unwrap(), None);
+
+    // Add a fun
+    naming_table.add_fun(
+        a_fun,
+        &oxidized::file_info::Pos::File(
+            oxidized::file_info::NameType::Fun,
+            ocamlrep::rc::RcOc::new(a_relative_path.into()),
+        ),
+    )?;
+
+    let pos = naming_table.get_fun_pos(a_fun).unwrap().unwrap();
+    let rp: RelativePath = pos.path().into();
+    assert_eq!(rp, a_relative_path);
+
+    // Get canon name from its lowercase version
+    assert_eq!(
+        naming_table
+            .get_canon_fun_name(FunName::new(r#"\a"#))
+            .unwrap()
+            .unwrap(),
+        a_fun
     );
 
     Ok(())

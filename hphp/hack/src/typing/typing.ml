@@ -5319,8 +5319,13 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
       (* When creating a closure, the 'this' type will mean the
        * late bound type of the current enclosing class
        *)
+      let decl_ty = Decl_hint.hint env.decl_env h in
+      (match Typing_enforceability.get_enforcement env decl_ty with
+      | Unenforced ->
+        Typing_log.log_pessimise_param env param.param_pos param.param_name
+      | Enforced -> ());
       let ((env, ty_err_opt1), h) =
-        Phase.localize_hint_no_subst env ~ignore_errors:false h
+        Phase.localize_no_subst env ~ignore_errors:false decl_ty
       in
       Option.iter ~f:Errors.add_typing_error ty_err_opt1;
       let (env, ty_err_opt2) =

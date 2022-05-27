@@ -147,9 +147,9 @@ impl<'a> Decls<'a> {
         })
     }
     pub fn types(&self) -> impl Iterator<Item = (&'a str, Decl<'a>)> {
-        self.iter().filter(|(_, decl)| match decl.kind() {
-            NameType::Class | NameType::Typedef => true,
-            NameType::Fun | NameType::Const | NameType::Module => false,
+        self.iter().filter(|(_, decl)| match decl {
+            Decl::Class(_) | Decl::Typedef(_) => true,
+            Decl::Fun(_) | Decl::Const(_) | Decl::Module(_) => false,
         })
     }
 

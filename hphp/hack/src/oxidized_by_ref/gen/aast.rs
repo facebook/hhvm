@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e9f0724a676d7559b22fff22666818d4>>
+// @generated SignedSource<<8540db4d32faf1022a6fdcbae2c4e712>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2325,5 +2325,3 @@ impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Def<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Def<'arena, Ex, En>);
 
 pub use oxidized::aast::NsKind;
-
-pub use oxidized::aast::BreakContinueLevel;

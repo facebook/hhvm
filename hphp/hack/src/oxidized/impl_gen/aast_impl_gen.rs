@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f44ab1231ce79c5aa5bb7ea40e4c3d4b>>
+// @generated SignedSource<<ca13550a61fb9da96c80f3b822647f95>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3317,53 +3317,6 @@ impl NsKind {
         match self {
             NsKind::NSConst => true,
             _ => false,
-        }
-    }
-}
-impl BreakContinueLevel {
-    pub fn mk_level_ok(p0: Option<isize>) -> Self {
-        BreakContinueLevel::LevelOk(p0)
-    }
-    pub fn mk_level_non_literal() -> Self {
-        BreakContinueLevel::LevelNonLiteral
-    }
-    pub fn mk_level_non_positive() -> Self {
-        BreakContinueLevel::LevelNonPositive
-    }
-    pub fn is_level_ok(&self) -> bool {
-        match self {
-            BreakContinueLevel::LevelOk(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_level_non_literal(&self) -> bool {
-        match self {
-            BreakContinueLevel::LevelNonLiteral => true,
-            _ => false,
-        }
-    }
-    pub fn is_level_non_positive(&self) -> bool {
-        match self {
-            BreakContinueLevel::LevelNonPositive => true,
-            _ => false,
-        }
-    }
-    pub fn as_level_ok(&self) -> Option<&Option<isize>> {
-        match self {
-            BreakContinueLevel::LevelOk(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_level_ok_mut(&mut self) -> Option<&mut Option<isize>> {
-        match self {
-            BreakContinueLevel::LevelOk(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_level_ok_into(self) -> Option<Option<isize>> {
-        match self {
-            BreakContinueLevel::LevelOk(p0) => Some(p0),
-            _ => None,
         }
     }
 }

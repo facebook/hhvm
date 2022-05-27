@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c1d7b464ac7e92d60cd9ba9469892daf>>
+// @generated SignedSource<<b0c1fd7d6f930e1c48c1a762b7f7d84e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1848,24 +1848,3 @@ pub enum NsKind {
 }
 impl TrivialDrop for NsKind {}
 arena_deserializer::impl_deserialize_in_arena!(NsKind);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C, u8)]
-pub enum BreakContinueLevel {
-    LevelOk(Option<isize>),
-    LevelNonLiteral,
-    LevelNonPositive,
-}

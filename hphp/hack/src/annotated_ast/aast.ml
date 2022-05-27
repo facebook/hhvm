@@ -1118,22 +1118,6 @@ let partition_map_require_kind ~f trait_reqs =
   in
   partition [] [] [] trait_reqs
 
-type break_continue_level =
-  | Level_ok of int option
-  | Level_non_literal
-  | Level_non_positive
-
-let get_break_continue_level level_opt =
-  match level_opt with
-  | (_, Int s) ->
-    let i = int_of_string s in
-    if i <= 0 then
-      Level_non_positive
-    else
-      Level_ok (Some i)
-  | _ -> Level_non_literal
-  | exception _ -> Level_non_literal
-
 (* extract the hint from a type annotation *)
 let hint_of_type_hint : 'ex. 'ex type_hint -> type_hint_ = snd
 

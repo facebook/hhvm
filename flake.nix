@@ -23,7 +23,9 @@
           };
         in
         rec {
-          packages.default = pkgs.callPackage ./hhvm.nix { };
+          packages.default = pkgs.callPackage ./hhvm.nix { 
+            lastModifiedDate = self.lastModifiedDate;
+          };
 
           devShells.default = pkgs.mkShell {
             buildInputs = packages.default.nativeBuildInputs ++ packages.default.buildInputs ++ [

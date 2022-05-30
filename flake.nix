@@ -23,10 +23,10 @@
 
           devShells.default =
             pkgs.callPackage "${nixpkgs.outPath}/pkgs/build-support/mkshell/default.nix"
-              { stdenv = packages.default.stdenv; }
+              { stdenv = packages.hhvm.stdenv; }
               {
                 inputsFrom = [
-                  packages.default
+                  packages.hhvm
                 ];
                 packages = [
                   pkgs.rnix-lsp

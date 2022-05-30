@@ -165,7 +165,8 @@ let method_import_via_diamond_error
                   ~via:(Cls.name first_using_trait));
          })
 
-let generic_property_import_via_diamond_error
+let property_import_via_diamond_error
+    ~generic
     env
     (class_name_pos, class_name)
     (property_name, class_elt)
@@ -175,11 +176,13 @@ let generic_property_import_via_diamond_error
   Errors.add_typing_error
     Typing_error.(
       primary
-      @@ Primary.Generic_property_import_via_diamond
+      @@ Primary.Property_import_via_diamond
            {
+             generic;
              pos = class_name_pos;
              class_name;
-             property_pos = Lazy.force class_elt.Typing_defs.ce_pos;
+             property_pos =
+               Typing_defs.get_pos (Lazy.force class_elt.Typing_defs.ce_type);
              property_name;
              trace1 =
                lazy

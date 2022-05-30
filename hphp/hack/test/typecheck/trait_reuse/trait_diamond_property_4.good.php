@@ -4,17 +4,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-// Diamond import of traits defining only non-generic properties is allowed
+// Diamond import of traits defining generic properties at the same type is allowed
 
-trait MyTrait1 {
-  public int $myprop = 1;
+trait MyTrait1<T> {
+  public ?T $myprop = null;
 }
 
-trait MyTrait2 {
-  use MyTrait1;
+class C {
+  use MyTrait1<int>;
 }
 
-class MyClass {
-  use MyTrait1;
-  use MyTrait2;
+class D extends C {
+  use MyTrait1<int>;
 }

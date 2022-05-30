@@ -1678,21 +1678,37 @@ let check_trait_diamonds
           ParentClassEltSet.remove (default_parent_class_elt ()) elts
         in
         ((parent_class_elt, elts), None)
-      else if
-        MemberKind.is_property member_kind
-        && not
-           @@ ty_equal
-                (Lazy.force class_elt.ce_type)
-                (Lazy.force prev_class_elt.ce_type)
-      then (
-        Trait_reuse_check.generic_property_import_via_diamond_error
-          env
-          class_name
-          (member_name, class_elt)
-          ~first_using_trait:prev_parent
-          ~second_using_trait:parent;
-        ((default_parent_class_elt (), elts), None)
-      ) else
+      else if MemberKind.is_property member_kind then
+        if allow_diamonds then begin
+          (* traits with properties cannot be inherited via multiple paths
+             if the base class has the <<__EnableMethodTraitDiamond>> attribute *)
+          Trait_reuse_check.property_import_via_diamond_error
+            ~generic:false
+            env
+            class_name
+            (member_name, class_elt)
+            ~first_using_trait:prev_parent
+            ~second_using_trait:parent;
+          ((default_parent_class_elt (), elts), None)
+        end else if
+              not
+                (ty_equal
+                   (Lazy.force class_elt.ce_type)
+                   (Lazy.force prev_class_elt.ce_type))
+            then begin
+          (* it is unsouund to use a trait that defines a generic property
+             at different types along multiple paths *)
+          Trait_reuse_check.property_import_via_diamond_error
+            ~generic:true
+            env
+            class_name
+            (member_name, class_elt)
+            ~first_using_trait:prev_parent
+            ~second_using_trait:parent;
+          ((default_parent_class_elt (), elts), None)
+        end else
+          ((default_parent_class_elt (), elts), None)
+      else
         ((default_parent_class_elt (), elts), None)
   else
     ((default_parent_class_elt (), elts), None)

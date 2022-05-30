@@ -1,0 +1,10 @@
+File "trait_diamond_property_mtd_01.bad.php", line 20, characters 7-13:
+Class `MyClass` inherits  trait property `myprop` via multiple paths. Currently, traits with properties are not supported by the <<__EnableMethodTraitDiamond>> experimental feature. (Typing[4462])
+  File "trait_diamond_property_mtd_01.bad.php", line 13, characters 10-12:
+  Trait property is defined here
+  File "trait_diamond_property_mtd_01.bad.php", line 22, characters 7-14:
+  `MyClass` uses `MyTrait2`
+  File "trait_diamond_property_mtd_01.bad.php", line 16, characters 7-19:
+  `MyTrait2` uses `MyTrait1`
+  File "trait_diamond_property_mtd_01.bad.php", line 21, characters 7-22:
+  `MyClass` uses `MyTrait1`

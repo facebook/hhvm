@@ -938,7 +938,8 @@ module Primary : sig
         trace1: Pos_or_decl.t Message.t list Lazy.t;
         trace2: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Generic_property_import_via_diamond of {
+    | Property_import_via_diamond of {
+        generic: bool;
         pos: Pos.t;
         class_name: string;
         property_pos: Pos_or_decl.t;

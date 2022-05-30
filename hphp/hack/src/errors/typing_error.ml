@@ -2076,7 +2076,8 @@ module Primary = struct
         trace1: Pos_or_decl.t Message.t list Lazy.t;
         trace2: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Generic_property_import_via_diamond of {
+    | Property_import_via_diamond of {
+        generic: bool;
         pos: Pos.t;
         class_name: string;
         property_pos: Pos_or_decl.t;
@@ -4208,8 +4209,8 @@ module Primary = struct
     in
     (Error_code.DiamondTraitMethod, claim, reason, [])
 
-  let generic_property_import_via_diamond
-      pos class_name property_pos property_name trace1 trace2 =
+  let property_import_via_diamond
+      generic pos class_name property_pos property_name trace1 trace2 =
     let claim =
       lazy
         (let class_name =
@@ -4221,9 +4222,24 @@ module Primary = struct
          ( pos,
            "Class "
            ^ class_name
-           ^ " inherits generic trait property "
+           ^ " inherits "
+           ^ (if generic then
+               "generic"
+             else
+               "")
+           ^ " trait property "
            ^ property_name
-           ^ " via multiple traits.  Remove the multiple paths" ))
+           ^ " via multiple paths"
+           ^ (if generic then
+               " at different types."
+             else
+               ".")
+           ^
+           if not generic then
+             " Currently, traits with properties are not supported by "
+             ^ "the <<__EnableMethodTraitDiamond>> experimental feature."
+           else
+             "" ))
     in
     let reason =
       Lazy.(
@@ -5769,9 +5785,18 @@ module Primary = struct
         method_name
         trace1
         trace2
-    | Generic_property_import_via_diamond
-        { pos; class_name; property_pos; property_name; trace1; trace2 } ->
-      generic_property_import_via_diamond
+    | Property_import_via_diamond
+        {
+          generic;
+          pos;
+          class_name;
+          property_pos;
+          property_name;
+          trace1;
+          trace2;
+        } ->
+      property_import_via_diamond
+        generic
         pos
         class_name
         property_pos

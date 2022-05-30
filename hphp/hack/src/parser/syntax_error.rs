@@ -378,6 +378,12 @@ pub fn unbounded_refinement_member_of(type_name: &str) -> Error {
         type_name
     ))
 }
+pub fn duplicate_refinement_member_of(type_or_ctx: &str) -> Error {
+    Cow::Owned(format!(
+        "Member {} is involved in multiple refinement constraints. Members must be constrained at most once, consider fusing constraints (e.g., `Cls with {{ type T as A as B super C; }}`)",
+        type_or_ctx
+    ))
+}
 pub const expected_refinement_member: Error = Cow::Borrowed(concat!(
     "Expected `type` or `ctx` member(s) within the refinement that ends with `}`, ",
     "e.g.: `type T as U`, `type T = X`, `ctx C super [defaults]`."

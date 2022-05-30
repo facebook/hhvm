@@ -944,11 +944,10 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             raise_parsing_error(node, env, &syntax_error::invalid_reified);
             missing_syntax("refied type", node, env)
         }
-        TypeRefinement(c) => {
-            // TODO: raise error if any name is repeated for the same kind (type, ctx)
-            // TODO: fix below after defining a new kind of hint first, similar to Hlike
-            p_hint_(&c.type_, env) // ignore `with { ... }` (forward-compatible if HHVM is older)
-        }
+        TypeRefinement(c) => Ok(ast::Hint_::Hrefinement(
+            p_hint(&c.type_, env)?,
+            could_map(&c.members, env, p_refinement_member)?,
+        )),
         _ => missing_syntax("type hint", node, env),
     }
 }
@@ -959,6 +958,22 @@ fn p_hint<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint> {
     let hint = ast::Hint::new(pos, hint_);
     check_valid_reified_hint(env, node, &hint);
     Ok(hint)
+}
+
+fn p_refinement_member<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Refinement> {
+    match &node.children {
+        TypeInRefinement(c) => Ok(ast::Refinement::TypeRef(
+            pos_name(&c.name, env)?,
+            if c.type_.is_missing() {
+                let (lower, upper) = p_tconstraints_into_lower_and_upper(&c.constraints, env)?;
+                ast::TypeRefinement::Tloose(ast::TypeRefinementBounds { lower, upper })
+            } else {
+                ast::TypeRefinement::Texact(p_hint(&c.type_, env)?)
+            },
+        )),
+        CtxInRefinement(_) => missing_syntax("refinement member", node, env),
+        _ => missing_syntax("refinement member", node, env),
+    }
 }
 
 fn p_simple_initializer<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr> {

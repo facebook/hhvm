@@ -3981,6 +3981,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn type_refinement_errors(&mut self, node: S<'a>) {
+        #[derive(Eq, PartialEq, Hash)]
+        enum MemberKind {
+            Type,
+            Ctx,
+        }
+        fn member_id<'a>(member: S<'a>) -> Option<(MemberKind, S<'a>)> {
+            match &member.children {
+                TypeInRefinement(m) => Some((MemberKind::Type, &m.name)),
+                CtxInRefinement(m) => Some((MemberKind::Ctx, &m.name)),
+                _ => None,
+            }
+        }
         fn member_bounded<'a>(member: S<'a>) -> bool {
             let nonempty_constraints = |cs| syntax_to_list_no_separators(cs).next().is_some();
             match &member.children {
@@ -3992,7 +4004,19 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
         }
         if let TypeRefinement(r) = &node.children {
+            // TODO(type-refinements): err when type_parameters is non-empty.
+            // Alternatively, we can just avoid parsing them in the first time.
+            let mut seen_members = HashSet::default();
             for member in syntax_to_list_no_separators(&r.members) {
+                if let Some((kind, node)) = member_id(member) {
+                    let name = self.text(node);
+                    if !seen_members.insert((kind, name)) {
+                        self.errors.push(make_error_from_node(
+                            member,
+                            errors::duplicate_refinement_member_of(name),
+                        ))
+                    }
+                }
                 if !member_bounded(member) {
                     self.errors.push(make_error_from_node(
                         member,

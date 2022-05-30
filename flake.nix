@@ -27,11 +27,18 @@
             lastModifiedDate = self.lastModifiedDate;
           };
 
-          devShells.default = pkgs.mkShell {
-            buildInputs = packages.default.nativeBuildInputs ++ packages.default.buildInputs ++ [
-              pkgs.rnix-lsp
-            ];
-          };
+          devShells.default =
+            pkgs.callPackage "${nixpkgs.outPath}/pkgs/build-support/mkshell/default.nix"
+              { stdenv = packages.default.stdenv; }
+              {
+                inputsFrom = [
+                  packages.default
+                ];
+                packages = [
+                  pkgs.rnix-lsp
+                ];
+              };
+
         }
       );
 }

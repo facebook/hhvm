@@ -11,16 +11,7 @@
       (
         system:
         let
-          pkgs = import nixpkgs {
-            inherit system;
-            overlays = [
-              (final: prev: {
-                # A customized libdwarf.nix is provided because the libdwarf
-                # package in nixpkgs-unstable does not support macOS yet.
-                libdwarf = final.callPackage ./libdwarf.nix { };
-              })
-            ];
-          };
+          pkgs = nixpkgs.legacyPackages.${system};
         in
         rec {
           packages.default = pkgs.callPackage ./hhvm.nix {

@@ -192,6 +192,7 @@ impl<'a> Func<'a> {
         self.blocks.get_mut(bid).unwrap()
     }
 
+    /// Yields normal instructions in bodies (not constants or params).
     pub fn body_iids(&self) -> impl DoubleEndedIterator<Item = InstrId> + '_ {
         self.block_ids().flat_map(|bid| self.blocks[bid].iids())
     }

@@ -473,12 +473,11 @@ pub(crate) fn print_func_body(
     for bid in func.blocks.keys() {
         let block = &func.blocks[bid];
         write!(w, "{}", FmtBid(func, bid, false))?;
-        let params = block.params(func);
-        if !params.is_empty() {
+        if !block.params.is_empty() {
             write!(
                 w,
                 "({})",
-                FmtCommaSep::new(params, |w, iid| FmtVid(
+                FmtCommaSep::new(&block.params, |w, iid| FmtVid(
                     func,
                     ValueId::from_instr(*iid),
                     verbose

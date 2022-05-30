@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{Block, BlockId, Func, Instr, Literal, LocId, SrcLoc, ValueId};
+use crate::{instr::Special, Block, BlockId, Func, Instr, Literal, LocId, SrcLoc, ValueId};
 use hash::HashMap;
 
 pub struct FuncBuilder<'a> {
@@ -58,7 +58,15 @@ impl<'a> FuncBuilder<'a> {
         &mut self.func.blocks[self.cur_bid]
     }
 
+    pub fn add_param(&mut self) -> ValueId {
+        let iid = self
+            .func
+            .alloc_instr_in(self.cur_bid, Instr::Special(Special::Param));
+        ValueId::from_instr(iid)
+    }
+
     pub fn emit(&mut self, i: Instr) -> ValueId {
+        assert!(!i.is_param());
         let iid = self.func.alloc_instr_in(self.cur_bid, i);
         ValueId::from_instr(iid)
     }

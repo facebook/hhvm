@@ -8,6 +8,7 @@ use newtype::IdVec;
 /// InstrIds refer to Instrs in the Block's Func's `Func::instrs` table.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Block {
+    pub params: Vec<InstrId>,
     pub iids: Vec<InstrId>,
     /// A name for the Block. This is used for printing and to a minor extent
     /// when converting from IR to bytecode.
@@ -35,19 +36,6 @@ impl Block {
         } else {
             false
         }
-    }
-
-    /// Returns the params section of the iids.
-    pub fn params(&self, func: &Func<'_>) -> &[InstrId] {
-        let n = self.params_len(func);
-        &self.iids[0..n]
-    }
-
-    pub fn params_len(&self, func: &Func<'_>) -> usize {
-        self.iids
-            .iter()
-            .take_while(|&&iid| func.instr(iid).is_param())
-            .count()
     }
 
     /// Visits all the instructions in the block and uses the `renumber` mapping

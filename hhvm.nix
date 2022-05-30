@@ -76,7 +76,23 @@
     else stdenv;
 in
   hhvmStdenv.mkDerivation {
-    name = "hhvm";
+    pname = "hhvm";
+    version =
+      builtins.foldl'
+        lib.trivial.id
+        (major: minor: patch: suffix: "${major}.${minor}.${patch}${suffix}")
+        (
+          builtins.match
+            ''
+              .*
+              #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_MAJOR[[:blank:]]+([[:digit:]]+)
+              #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_MINOR[[:blank:]]+([[:digit:]]+)
+              #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_PATCH[[:blank:]]+([[:digit:]]+)
+              #[[:blank:]]*define[[:blank:]]+HHVM_VERSION_SUFFIX[[:blank:]]+"([^"]*)"
+              .*
+            ''
+            (builtins.readFile ./hphp/runtime/version.h)
+        );
     src = ./.;
     nativeBuildInputs =
       [

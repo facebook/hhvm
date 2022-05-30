@@ -1696,7 +1696,7 @@ let check_trait_diamonds
                    (Lazy.force class_elt.ce_type)
                    (Lazy.force prev_class_elt.ce_type))
             then begin
-          (* it is unsouund to use a trait that defines a generic property
+          (* it is unsound to use a trait that defines a generic property
              at different types along multiple paths *)
           Trait_reuse_check.property_import_via_diamond_error
             ~generic:true

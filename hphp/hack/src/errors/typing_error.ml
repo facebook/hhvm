@@ -4224,10 +4224,10 @@ module Primary = struct
            ^ class_name
            ^ " inherits "
            ^ (if generic then
-               "generic"
+               "generic "
              else
                "")
-           ^ " trait property "
+           ^ "trait property "
            ^ property_name
            ^ " via multiple paths"
            ^ (if generic then

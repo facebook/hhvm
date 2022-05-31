@@ -228,15 +228,7 @@ impl<'a, R: Reason> Subtyper<'a, R> {
         cty_sub: &CstrTy<R>,
     ) -> HashSet<CstrTy<R>> {
         let lower_bounds_pre = env.inf_env.lower_bounds(tv_sup).unwrap_or_default();
-        let get_tparam_variance = |cn| {
-            let class_res = env.decl_env.get_class(cn);
-            match class_res {
-                Ok(cls_opt) => {
-                    cls_opt.map(|cls| cls.get_tparams().iter().map(|tp| tp.variance).collect())
-                }
-                _ => None,
-            }
-        };
+        let get_tparam_variance = |nm| env.decl_env.get_variance(nm).unwrap();
         env.inf_env
             .add_lower_bound_update_variances(*tv_sup, cty_sub, &get_tparam_variance);
         let lower_bounds_post = env.inf_env.lower_bounds(tv_sup).unwrap_or_default();
@@ -253,15 +245,7 @@ impl<'a, R: Reason> Subtyper<'a, R> {
     ) -> HashSet<CstrTy<R>> {
         let upper_bounds_pre = env.inf_env.upper_bounds(tv_sub).unwrap_or_default();
 
-        let get_tparam_variance = |cn| {
-            let class_res = env.decl_env.get_class(cn);
-            match class_res {
-                Ok(cls_opt) => {
-                    cls_opt.map(|cls| cls.get_tparams().iter().map(|tp| tp.variance).collect())
-                }
-                _ => None,
-            }
-        };
+        let get_tparam_variance = |nm| env.decl_env.get_variance(nm).unwrap();
 
         env.inf_env
             .add_upper_bound_update_variances(*tv_sub, cty_sup, &get_tparam_variance);

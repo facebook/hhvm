@@ -369,15 +369,7 @@ fn find_shallow_match<R: Reason>(
 
 #[inline]
 fn bind_help<R: Reason>(env: &mut NormalizeEnv<R>, tv: Tyvar, ty: Ty<R>) -> Option<TypingError<R>> {
-    let get_tparam_variance = |cn| {
-        let class_res = env.decl_env.get_class(cn);
-        match class_res {
-            Ok(cls_opt) => {
-                cls_opt.map(|cls| cls.get_tparams().iter().map(|tp| tp.variance).collect())
-            }
-            _ => None,
-        }
-    };
+    let get_tparam_variance = |name| env.decl_env.get_variance(name).unwrap();
     env.inf_env
         .bind_update_variance(None, tv, ty, &get_tparam_variance)
 }
@@ -388,13 +380,13 @@ fn bind_help<R: Reason>(env: &mut NormalizeEnv<R>, tv: Tyvar, ty: Ty<R>) -> Opti
 fn freshen_inside<R: Reason>(env: &mut NormalizeEnv<R>, ty: &Ty<R>) -> Result<Ty<R>> {
     match env.inf_env.resolve_ty(ty).deref() {
         Ty_::Tclass(cname, exact, tys) if !tys.is_empty() => {
-            let ty_opt = env.decl_env.get_class(cname.id())?.map(|cls| {
-                let params = cls
-                    .get_tparams()
+            let vars_opt = env.decl_env.get_variance(cname.id())?;
+            let ty_opt = vars_opt.map(|vars| {
+                let params = vars
                     .iter()
                     .zip(tys.iter())
-                    .map(|(tp, ty)| {
-                        if matches!(tp.variance, Variance::Invariant) {
+                    .map(|(v, ty)| {
+                        if matches!(v, Variance::Invariant) {
                             ty.clone()
                         } else {
                             env.inf_env

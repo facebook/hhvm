@@ -10,9 +10,9 @@ use crate::subtyping::visited_goals::{GoalResult, VisitedGoals};
 use crate::typaram_env::TyparamEnv;
 use crate::typing::typing_error::Result;
 use im::HashSet;
-use itertools::{izip, Itertools};
+use itertools::izip;
 use oxidized::ast_defs::Variance;
-use pos::{Positioned, Symbol, TypeName};
+use pos::{Symbol, TypeName};
 use std::ops::Deref;
 use std::rc::Rc;
 use ty::{
@@ -305,8 +305,17 @@ impl<R: Reason> NormalizeEnv<R> {
             // -- Super is class -----------------------------------------------
             Tclass(cn_sup, exact_sup, tp_sups) => {
                 match ety_sub.deref() {
-                    Tclass(cn_sub, exact_sub, tp_subs) => {
-                        self.simp_class(cn_sub, exact_sub, tp_subs, cn_sup, exact_sup, tp_sups)
+                    Tclass(_,exact_sub,_)
+                       if matches!(exact_sub, Exact::Nonexact) && matches!(exact_sup, Exact::Exact) =>
+                        // class(_ , Nonexact, _) <: class(_, Exact, _) <=> false
+                        Ok(Prop::invalid(TypingError::Primary(Primary::Subtype))),
+                    Tclass(cn_sub, _exact_sub, tp_subs) if cn_sub.id() == cn_sup.id() => {
+                        self.simp_equal_class(cn_sub.id(), tp_subs,  tp_sups)
+                    }
+                    Tclass(cn_sub, _exact_sub, tp_subs)  =>
+                       match self.decl_env.get_ancestor(cn_sub.id(), tp_subs, cn_sup.id())? {
+                        Some ( up ) => self.simp_ty(&up, &ety_sup),
+                        _ => Ok(Prop::invalid(TypingError::Primary(Primary::Subtype))),
                     }
                     // TODO[mjt] make a call on whether we bring
                     // string <: Stringish
@@ -410,83 +419,47 @@ impl<R: Reason> NormalizeEnv<R> {
     }
 
     /// Normalize the proposition `#class<...> <: #class<...>`
-    fn simp_class(
+    fn simp_equal_class(
         &mut self,
-        cn_sub: &Positioned<TypeName, R::Pos>,
-        exact_sub: &Exact,
+        name: TypeName,
         tp_subs: &[Ty<R>],
-        cn_sup: &Positioned<TypeName, R::Pos>,
-        exact_sup: &Exact,
         tp_sups: &[Ty<R>],
     ) -> Result<Prop<R>> {
-        let exact_match = match (exact_sub, exact_sup) {
-            (Exact::Nonexact, Exact::Exact) => false,
-            _ => true,
-        };
-        if cn_sub.id() == cn_sup.id() {
-            if tp_subs.is_empty() && tp_sups.is_empty() && exact_match {
-                Ok(Prop::valid())
-            } else {
-                let class_def_sub = self.decl_env.get_class(cn_sub.id())?;
-                // If class is final then exactness is superfluous
-                let is_final = class_def_sub.clone().map_or(false, |cls| cls.is_final());
-                if !(exact_match || is_final) {
-                    Ok(Prop::invalid(TypingError::Primary(Primary::Subtype)))
-                } else if tp_subs.len() != tp_sups.len() {
-                    // TODO[mjt] these are different cases due to the errors
-                    // we want to raise
-                    Ok(Prop::invalid(TypingError::Primary(Primary::Subtype)))
-                } else {
-                    let variance_sub = if tp_subs.is_empty() {
-                        vec![]
-                    } else {
-                        class_def_sub.map_or_else(
-                            || vec![Variance::Invariant; tp_subs.len()],
-                            |cls| cls.get_tparams().iter().map(|t| (t.variance)).collect_vec(),
-                        )
-                    };
-                    self.simp_conjs_with_variance(cn_sub, variance_sub, tp_subs, tp_sups)
-                }
-            }
-        } else if !exact_match {
-            // class in subtype position is non-exact and class is supertype position is exact
+        if tp_subs.is_empty() && tp_sups.is_empty() {
+            // class(X, _ , []) <: class(X, _, []) <=> true
+            // No type params & exactness agrees
+            Ok(Prop::valid())
+        } else if !self.decl_env.is_final(name)?.unwrap_or(false) {
+            // class(X,_,_) <: class(X,_,_) <=> !is_final(X) | false
+            Ok(Prop::invalid(TypingError::Primary(Primary::Subtype)))
+        } else if tp_subs.len() != tp_sups.len() {
+            // class(X,_,XS) <: class(X,_,YS) <=> len(XS) != len(YS) | false
+            // TODO[mjt] these are different cases due to the errors
+            // we want to raise
+            rupro_todo_mark!(TypingError);
             Ok(Prop::invalid(TypingError::Primary(Primary::Subtype)))
         } else {
-            let class_sub_opt = self.decl_env.get_class(cn_sub.id())?;
-            if let Some(class_sub) = class_sub_opt {
-                // is our class is subtype positition a declared subtype of the
-                // class in supertype position
-                match class_sub.get_ancestor(&cn_sup.id()) {
-                    Some(_dty_sub) => {
-                        // instantiate the declared type at the type parameters for
-                        // the class in subtype position
-                        // TODO[mjt] class localization
-                        unimplemented!(
-                            "Proposition normalization is not fully implemented for class types"
-                        )
-                    }
-                    //    None if class_sub.kind
-                    None => Ok(Prop::invalid(TypingError::Primary(Primary::Subtype))),
-                }
-            } else {
-                // This should have been caught already, in the naming phase
-                // TODO[mjt] should we surface some of these implicit assumptions
-                // in the Result?
-                Ok(Prop::valid())
-            }
+            // class(X,_,XS) <: class(X,_,YS) <=> decl_variance(X,VS) | sub(VS,XS,YS)
+            // TODO[mjt] - we implicitly assume that naming has done its job!
+            let variance_sub = self.decl_env.get_variance(name)?.unwrap();
+            self.simp_conjs_with_variance(variance_sub, tp_subs, tp_sups)
         }
     }
 
     fn simp_conjs_with_variance(
         &mut self,
-        cn: &Positioned<TypeName, R::Pos>,
         variances: Vec<Variance>,
         ty_subs: &[Ty<R>],
         ty_sups: &[Ty<R>],
     ) -> Result<Prop<R>> {
         let mut prop = Prop::valid();
+        // sub(Covariant::VS,X::XS,Y::YS) <=> X <: Y , sub(VS,XS,YS)
+        // sub(Contravariant::VS,X::XS,Y::YS) <=> Y <: X, sub(VS,XS,YS)
+        // sub(Invariant::VS,X::XS,Y::YS) <=> X <: Y , Y <: X, sub(VS,XS,YS)
+        // sub(_,X::_,[]) <=> fail
+        // sub(_,[],Y::_) <=> fail
         for (variance, ty_sub, ty_sup) in izip!(variances.iter(), ty_subs, ty_sups) {
-            let next = self.simp_with_variance(cn, variance, ty_sub, ty_sup)?;
+            let next = self.simp_with_variance(variance, ty_sub, ty_sup)?;
             if next.is_unsat() {
                 prop = next;
                 break;
@@ -499,7 +472,6 @@ impl<R: Reason> NormalizeEnv<R> {
 
     fn simp_with_variance(
         &mut self,
-        _cn: &Positioned<TypeName, R::Pos>,
         variance: &Variance,
         ty_sub: &Ty<R>,
         ty_sup: &Ty<R>,

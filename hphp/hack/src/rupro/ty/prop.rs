@@ -4,66 +4,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod constraint;
 
-use crate::{
-    local::{Ty, Tyvar},
-    local_error::TypingError,
-    reason::Reason,
-};
+use crate::{local::Ty, local_error::TypingError, reason::Reason};
 pub use constraint::Cstr;
 use hcons::{Conser, Hc};
-use im::HashSet;
-use oxidized::ast_defs::Variance;
-use pos::{ToOxidized, TypeName};
+use pos::ToOxidized;
 use std::ops::Deref;
-
-/// TODO[mjt] Consider making 'constraints' 'types' to avoid this
-/// or maybe rethink the inference env entirely
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum CstrTy<R: Reason> {
-    Locl(Ty<R>),
-    Cstr(Cstr<R>),
-}
-
-impl<R: Reason> CstrTy<R> {
-    pub fn tyvars<F>(&self, get_tparam_variance: &F) -> (HashSet<Tyvar>, HashSet<Tyvar>)
-    where
-        F: Fn(TypeName) -> Option<Vec<Variance>>,
-    {
-        match self {
-            CstrTy::Locl(ty) => ty.tyvars(get_tparam_variance),
-            CstrTy::Cstr(cstr) => cstr.tyvars(get_tparam_variance),
-        }
-    }
-
-    #[inline]
-    pub fn ty_opt(&self) -> Option<&Ty<R>> {
-        match self {
-            Self::Locl(ty) => Some(ty),
-            Self::Cstr(_) => None,
-        }
-    }
-
-    pub fn shallow_match(&self, other: &Self) -> bool {
-        self.ty_opt().map_or(false, |ty1| {
-            other.ty_opt().map_or(false, |ty2| ty1.shallow_match(ty2))
-        })
-    }
-
-    #[inline]
-    pub fn tyvar_opt(&self) -> Option<&Tyvar> {
-        self.ty_opt()?.tyvar_opt()
-    }
-
-    pub fn is_var(&self) -> bool {
-        self.tyvar_opt().is_some()
-    }
-}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropF<R: Reason, A> {
     Conj(Vec<A>),
     Disj(TypingError<R>, Vec<A>),
-    Subtype(CstrTy<R>, CstrTy<R>),
+    Subtype(Ty<R>, Ty<R>),
 }
 
 impl<R: Reason> PropF<R, Prop<R>> {
@@ -107,12 +58,8 @@ impl<R: Reason> Prop<R> {
         Self::disjs(vec![self, other], fail)
     }
 
-    pub fn subtype(cty_sub: CstrTy<R>, cty_sup: CstrTy<R>) -> Self {
-        PropF::Subtype(cty_sub, cty_sup).inj()
-    }
-
-    pub fn subtype_ty(ty_sub: Ty<R>, ty_sup: Ty<R>) -> Self {
-        Self::subtype(CstrTy::Locl(ty_sub), CstrTy::Locl(ty_sup))
+    pub fn subtype(ty_sub: Ty<R>, ty_sup: Ty<R>) -> Self {
+        PropF::Subtype(ty_sub, ty_sup).inj()
     }
 
     pub fn valid() -> Self {

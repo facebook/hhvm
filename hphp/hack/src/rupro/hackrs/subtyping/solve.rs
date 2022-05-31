@@ -11,12 +11,13 @@ use crate::typing::typing_error::Result;
 use im::HashSet;
 use itertools::{Either, Itertools};
 use oxidized::ast_defs::Variance;
-use std::ops::Deref;
-use std::rc::Rc;
-use ty::local::{FunParam, FunType, Ty, Ty_, Tyvar, Variance as V};
-use ty::local_error::TypingError;
-use ty::prop::CstrTy;
-use ty::reason::Reason;
+use std::{ops::Deref, rc::Rc};
+use ty::{
+    local::{FunParam, FunType, Ty, Ty_, Tyvar, Variance as V},
+    local_error::TypingError,
+    prop::Cstr,
+    reason::Reason,
+};
 
 /// Attempt to 'solve' a type variable. We first look for a type appearing
 /// in both the upper and lower bound. If there is no such type, we consider
@@ -192,19 +193,16 @@ fn bind_to_lower_bound<R: Reason>(
     reason: &R,
     freshen: bool,
 ) -> Result<Option<TypingError<R>>> {
-    let (cstrs, tys): (Vec<_>, Vec<_>) = env
-        .inf_env
-        .lower_bounds(&tv)
-        .unwrap_or_default()
-        .into_iter()
-        .partition_map(|cty| match cty {
-            CstrTy::Cstr(cstr) => Either::Left(cstr),
-            CstrTy::Locl(lty) => Either::Right(remove_tyvar_from_lower_bound(
-                &mut env.inf_env,
-                tv.clone(),
-                &lty,
-            )),
-        });
+    // TODO[mjt] figure out what we should be doing wrt solving and non-subtype
+    // constraints
+    let (cstrs, tys): (Vec<Cstr<R>>, Vec<Ty<R>>) = (
+        vec![],
+        env.inf_env
+            .lower_bounds(&tv)
+            .unwrap_or_default()
+            .into_iter()
+            .collect(),
+    );
     // Don't solve if the lower bounds contains a `CstrTy::Cstr`
     if !cstrs.is_empty() {
         Ok(None)
@@ -250,19 +248,16 @@ fn bind_to_upper_bound<R: Reason>(
     tv: Tyvar,
     reason: &R,
 ) -> Result<Option<TypingError<R>>> {
-    let (cstrs, tys): (Vec<_>, Vec<_>) = env
-        .inf_env
-        .upper_bounds(&tv)
-        .unwrap_or_default()
-        .into_iter()
-        .partition_map(|cty| match cty {
-            CstrTy::Cstr(cstr) => Either::Left(cstr),
-            CstrTy::Locl(lty) => Either::Right(remove_tyvar_from_upper_bound(
-                &mut env.inf_env,
-                tv.clone(),
-                &lty,
-            )),
-        });
+    // TODO[mjt] figure out what we should be doing wrt solving and non-subtype
+    // constraints
+    let (cstrs, tys): (Vec<Cstr<R>>, Vec<Ty<R>>) = (
+        vec![],
+        env.inf_env
+            .upper_bounds(&tv)
+            .unwrap_or_default()
+            .into_iter()
+            .collect(),
+    );
 
     // Don't solve if the upper bounds contains a `CstrTy::Cstr`
     if !cstrs.is_empty() {
@@ -294,25 +289,25 @@ fn try_bind_equal_bound<R: Reason>(
     let tvs = HashSet::unit(tv);
     env.inf_env.remove_tyvar_lower_bound(tv, &tvs);
     env.inf_env.remove_tyvar_upper_bound(tv, &tvs);
-    let lbs: HashSet<CstrTy<R>> = env
+    let lbs: HashSet<Ty<R>> = env
         .inf_env
         .lower_bounds(&tv)
         .unwrap_or_default()
         .iter()
-        .map(|cty| env.inf_env.resolve_cstr_ty(cty))
+        .map(|ty| env.inf_env.resolve_ty(ty))
         .collect();
-    let ubs: HashSet<CstrTy<R>> = env
+    let ubs: HashSet<Ty<R>> = env
         .inf_env
         .upper_bounds(&tv)
         .unwrap_or_default()
         .iter()
-        .map(|cty| env.inf_env.resolve_cstr_ty(cty))
+        .map(|ty| env.inf_env.resolve_ty(ty))
         .collect();
     let eqbs = lbs.clone().intersection(ubs.clone());
     // TODO[mjt] this might be a good time to think about how we want to handle
     // Tany / Terr
-    match eqbs.iter().next().and_then(|cty| cty.ty_opt()) {
-        // We have a common type in the upper and lower bounds, bind to it
+    match eqbs.iter().next() {
+        // We have a common t}ype in the upper and lower bounds, bind to it
         Some(ty) => Ok(TryBindResult::Bound(bind_help(env, tv, ty.clone()))),
         // No common type so try and find a shallow match
         _ if freshen => match find_shallow_match(env, &lbs, &ubs) {
@@ -350,21 +345,19 @@ fn try_bind_equal_bound<R: Reason>(
 /// the upper bounds
 fn find_shallow_match<R: Reason>(
     env: &mut NormalizeEnv<R>,
-    lower_bounds: &HashSet<CstrTy<R>>,
-    upper_bounds: &HashSet<CstrTy<R>>,
+    lower_bounds: &HashSet<Ty<R>>,
+    upper_bounds: &HashSet<Ty<R>>,
 ) -> Option<Ty<R>> {
     lower_bounds
         .iter()
         .find(|lb| {
-            let elb = env.inf_env.resolve_cstr_ty(lb);
+            let elb = env.inf_env.resolve_ty(lb);
             upper_bounds.iter().any(|ub| {
-                let eub = env.inf_env.resolve_cstr_ty(ub);
+                let eub = env.inf_env.resolve_ty(ub);
                 elb.shallow_match(&eub)
             })
-        })?
-        .ty_opt()
+        })
         .cloned()
-    // .map(|ty| ty.clone())
 }
 
 #[inline]
@@ -661,7 +654,6 @@ mod tests {
         assert!(matches!(env.inf_env.variance(&tv), V::Covariant));
         let ty_v = Ty::var(NReason::none(), tv);
         let ty_arraykey = Ty::arraykey(NReason::none());
-        let cty_arraykey = CstrTy::Locl(ty_arraykey.clone());
 
         let mut subtyper = Subtyper::new(
             &mut env.inf_env,
@@ -678,7 +670,7 @@ mod tests {
             env.inf_env
                 .lower_bounds(&tv)
                 .unwrap_or_default()
-                .contains(&cty_arraykey)
+                .contains(&ty_arraykey)
         );
 
         let r2 = try_bind_variance(&mut env, tv, &NReason::none());
@@ -692,7 +684,6 @@ mod tests {
         let tv = env.inf_env.fresh_var(V::Covariant, NPos::none());
         let ty_v = Ty::var(NReason::none(), tv);
         let ty_arraykey = Ty::arraykey(NReason::none());
-        let cty_arraykey = CstrTy::Locl(ty_arraykey.clone());
 
         let mut subtyper = Subtyper::new(
             &mut env.inf_env,
@@ -707,7 +698,7 @@ mod tests {
             env.inf_env
                 .lower_bounds(&tv)
                 .unwrap_or_default()
-                .contains(&cty_arraykey)
+                .contains(&ty_arraykey)
         );
 
         let r2 = solve(&mut env, tv, &NReason::none());
@@ -721,7 +712,6 @@ mod tests {
         let tv = env.inf_env.fresh_var(V::Invariant, NPos::none());
         let ty_v = Ty::var(NReason::none(), tv);
         let ty_arraykey = Ty::arraykey(NReason::none());
-        let cty_arraykey = CstrTy::Locl(ty_arraykey.clone());
         let mut subtyper = Subtyper::new(
             &mut env.inf_env,
             &mut env.tp_env,
@@ -735,7 +725,7 @@ mod tests {
             env.inf_env
                 .lower_bounds(&tv)
                 .unwrap_or_default()
-                .contains(&cty_arraykey)
+                .contains(&ty_arraykey)
         );
 
         let r2 = force_solve(&mut env, tv, &NReason::none(), false);

@@ -91,7 +91,7 @@ impl<R: Reason> NormalizeEnv<R> {
                         // entire `mixed` type, and not separately consider `null` and `nonnull`
                         // TODO[mjt] - note the handling of encodings
                         if ty_sub_inner.is_nonnull() {
-                            Ok(Prop::subtype_ty(ety_sub, ety_sup))
+                            Ok(Prop::subtype(ety_sub, ety_sup))
                         } else {
                             // ?X <: Y <=> null <: Y , X <: Y
                             let ty_null = Ty::null(r_sub.clone());
@@ -106,7 +106,7 @@ impl<R: Reason> NormalizeEnv<R> {
                     | Tclass(_, _, _)
                     | Tintersection(_)
                     | Tfun(_)
-                    | Tnonnull => Ok(Prop::subtype_ty(ety_sub, ety_sup)),
+                    | Tnonnull => Ok(Prop::subtype(ety_sub, ety_sup)),
                     Tany => {
                         unimplemented!("Subtype propositions involving `Tany` aren't implemented")
                     }
@@ -247,7 +247,7 @@ impl<R: Reason> NormalizeEnv<R> {
                 | Tnonnull
                 | Tprim(_) => {
                     if self.config.ignore_generic_params {
-                        Ok(Prop::subtype_ty(ety_sub, ety_sup))
+                        Ok(Prop::subtype(ety_sub, ety_sup))
                     } else {
                         self.simp_ty_typaram(ety_sub, (ety_sup.reason(), tp_name_sup))
                     }
@@ -386,7 +386,7 @@ impl<R: Reason> NormalizeEnv<R> {
             Tunion(ty_subs) => self.simp_conjs_sub(ty_subs, &ty_sup),
             // TODO[mjt] we aren't getting anywhere near HKTs so we should tidy up Tgeneric
             Tgeneric(_, _) if self.config.ignore_generic_params => {
-                Ok(Prop::subtype_ty(ty_sub, ty_sup))
+                Ok(Prop::subtype(ty_sub, ty_sup))
             }
             Tgeneric(tp_name_sub, _) => {
                 self.simp_typaram_ty((ty_sub.reason(), tp_name_sub), ty_sup)
@@ -414,7 +414,7 @@ impl<R: Reason> NormalizeEnv<R> {
             Prop::valid()
         } else {
             let ty_sub = Ty::var(r_sub.clone(), *tv_sub);
-            Prop::subtype_ty(ty_sub, ty_sup)
+            Prop::subtype(ty_sub, ty_sup)
         }
     }
 
@@ -609,7 +609,7 @@ impl<R: Reason> NormalizeEnv<R> {
                 } else {
                     let ty_sup = Ty::generic(tp_sup.0.clone(), tp_sup.1.clone(), vec![]);
                     Ok(prop.disj(
-                        Prop::subtype_ty(ty_sub, ty_sup),
+                        Prop::subtype(ty_sub, ty_sup),
                         TypingError::Primary(Primary::Subtype),
                     ))
                 }

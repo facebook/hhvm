@@ -779,8 +779,6 @@ PrepKind func_param_prep(const php::Func* f, uint32_t paramId) {
 
 namespace res {
 
-Class::Class(Either<SString,ClassInfo*> val) : val(val) {}
-
 // Class type operations here are very conservative for now.
 
 bool Class::same(const Class& o) const {
@@ -5596,7 +5594,7 @@ res::Func Index::resolve_method(Context ctx,
 
   if (!is_specialized_cls(clsType)) return general();
   auto const dcls  = dcls_of(clsType);
-  auto const cinfo = dcls.cls.val.right();
+  auto const cinfo = dcls.cls().val.right();
   if (!cinfo) return general();
 
   // Classes may have more method families than methods. Any such
@@ -5688,7 +5686,7 @@ res::Func Index::resolve_method(Context ctx,
     return res::Func { mteFromIt(methIt) };
   };
 
-  switch (dcls.type) {
+  switch (dcls.type()) {
   case DCls::Exact:
     return resolve();
   case DCls::Sub:
@@ -5999,8 +5997,8 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
   if (!is_specialized_cls(cls)) return conservative();
 
   auto const dcls = dcls_of(cls);
-  if (dcls.cls.val.left()) return conservative();
-  auto const cinfo = dcls.cls.val.right();
+  if (dcls.cls().val.left()) return conservative();
+  auto const cinfo = dcls.cls().val.right();
 
   // We could easy support the case where we don't know the constant
   // name, but know the class (like we do for properties), by unioning
@@ -6062,7 +6060,7 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
   // If we know the exact class, just look up the constant and we're
   // done. Otherwise, loop over all possible subclasses and do the
   // lookup for each.
-  switch (dcls.type) {
+  switch (dcls.type()) {
     case DCls::Sub: {
       // Before anything, look up this entry in the cache. We don't
       // bother with the cache for the DCls::Exact case because it's
@@ -6149,8 +6147,8 @@ Index::lookup_class_type_constant(
   if (!is_specialized_cls(cls)) return conservative();
 
   auto const dcls = dcls_of(cls);
-  if (dcls.cls.val.left()) return conservative();
-  auto const cinfo = dcls.cls.val.right();
+  if (dcls.cls().val.left()) return conservative();
+  auto const cinfo = dcls.cls().val.right();
 
   // As in lookup_class_constant, we could handle this, but it's not
   // worth it.
@@ -6196,7 +6194,7 @@ Index::lookup_class_type_constant(
   // If we know the exact class, just look up the constant and we're
   // done. Otherwise, loop over all possible subclasses and do the
   // lookup for each.
-  switch (dcls.type) {
+  switch (dcls.type()) {
     case DCls::Sub: {
       Optional<R> result;
       for (auto const sub : cinfo->subclassList) {
@@ -6727,8 +6725,8 @@ PropLookupResult<> Index::lookup_static(Context ctx,
   if (!is_specialized_cls(cls)) return conservative();
 
   auto const dcls = dcls_of(cls);
-  if (dcls.cls.val.left()) return conservative();
-  auto const cinfo = dcls.cls.val.right();
+  if (dcls.cls().val.left()) return conservative();
+  auto const cinfo = dcls.cls().val.right();
 
   // Turn the context class into a ClassInfo* for convenience.
   const ClassInfo* ctxCls = nullptr;
@@ -6741,7 +6739,7 @@ PropLookupResult<> Index::lookup_static(Context ctx,
     ctxCls = rCtx.val.right();
   }
 
-  switch (dcls.type) {
+  switch (dcls.type()) {
     case DCls::Sub: {
       // We know that `cls' is at least dcls.type, but could be a
       // subclass. For every subclass (including dcls.type itself),
@@ -6797,10 +6795,10 @@ Type Index::lookup_public_prop(const Type& cls, const Type& name) const {
   auto const sname = sval_of(name);
 
   auto const dcls = dcls_of(cls);
-  if (dcls.cls.val.left()) return TCell;
-  auto const cinfo = dcls.cls.val.right();
+  if (dcls.cls().val.left()) return TCell;
+  auto const cinfo = dcls.cls().val.right();
 
-  switch (dcls.type) {
+  switch (dcls.type()) {
     case DCls::Sub: {
       auto ty = TBottom;
       for (auto const sub : cinfo->subclassList) {
@@ -6932,8 +6930,8 @@ PropMergeResult<> Index::merge_static_type(
   if (!is_specialized_cls(cls)) return unknownCls();
 
   auto const dcls = dcls_of(cls);
-  if (dcls.cls.val.left()) return unknownCls();
-  auto const cinfo = dcls.cls.val.right();
+  if (dcls.cls().val.left()) return unknownCls();
+  auto const cinfo = dcls.cls().val.right();
 
   const ClassInfo* ctxCls = nullptr;
   if (ctx.cls) {
@@ -6951,7 +6949,7 @@ PropMergeResult<> Index::merge_static_type(
     publicMutations.mergeKnown(ci, prop, val);
   };
 
-  switch (dcls.type) {
+  switch (dcls.type()) {
     case DCls::Sub: {
       // We know this class is either dcls.type, or a child class of
       // it. For every child of dcls.type (including dcls.type

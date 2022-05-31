@@ -443,10 +443,19 @@ struct Class {
    */
   void forEachSubclass(const std::function<void(const php::Class*)>&) const;
 
-private:
-  explicit Class(Either<SString,ClassInfo*>);
-  template <bool> bool subtypeOfImpl(const Class&) const;
+  // Convert this class to/from an opaque integer. The integer is
+  // "pointerish" (has upper bits cleared), so can be used in
+  // something like CompactTaggedPtr. It is not, however, guaranteed
+  // to be aligned (lower bits may be set).
+  uintptr_t toOpaque() const { return val.toOpaque(); }
 
+  static Class fromOpaque(uintptr_t o) {
+    return Class{decltype(val)::fromOpaque(o)};
+  }
+
+private:
+  explicit Class(Either<SString,ClassInfo*> val) : val{val} {}
+  template <bool> bool subtypeOfImpl(const Class&) const;
 private:
   friend std::string show(const Class&);
   friend struct ::HPHP::HHBBC::Index;

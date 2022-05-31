@@ -178,8 +178,8 @@ struct Type;
   DT(Int, int64_t, ival)                                        \
   DT(Dbl, double, dval)                                         \
   DT(ArrLikeVal, SArray, aval)                                  \
-  DT(Obj, DObj, dobj)                                           \
-  DT(WaitHandle, DWaitHandle, dwh)                              \
+  DT(Obj, DCls, dobj)                                           \
+  DT(WaitHandle, copy_ptr<DWaitHandle>, dwh)                    \
   DT(Cls, DCls, dcls)                                           \
   DT(LazyCls, SString, lazyclsval)                              \
   DT(ArrLikePacked, copy_ptr<DArrLikePacked>, packed)           \
@@ -198,56 +198,93 @@ enum class DataTag : uint8_t {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Information about a class type.  The class is either exact or a
+ * Information about a class type. The class is either exact or a
  * subtype of the supplied class.
  */
 struct DCls {
-  enum Tag : uint16_t { Exact, Sub };
+  enum Tag { Exact, Sub };
 
   DCls(Tag type, res::Class cls)
-    : type(type)
-    , cls(cls)
+    : val{
+        type == Exact ? PtrTag::Exact : PtrTag::Sub,
+        (void*)cls.toOpaque()
+      }
   {}
 
-  Tag type;
-  bool isCtx = false;
-  res::Class cls;
-};
+  Tag type() const {
+    switch (val.tag()) {
+      case PtrTag::ExactCtx:
+      case PtrTag::Exact:
+        return Exact;
+      case PtrTag::SubCtx:
+      case PtrTag::Sub:
+        return Sub;
+    }
+    not_reached();
+  }
 
-/*
- * Information about a specific object type.  The class is either
- * exact or a subtype of the supplied class.
- *
- * If the class is known to be a wait handle, DWaitHandle will be used
- * instead.
- */
-struct DObj {
-  enum Tag : uint16_t { Exact, Sub };
+  res::Class cls() const {
+    return res::Class::fromOpaque((uintptr_t)val.ptr());
+  }
 
-  DObj(Tag type, res::Class cls)
-    : type(type)
-    , cls(cls)
-  {}
+  bool isCtx() const {
+    switch (val.tag()) {
+      case PtrTag::ExactCtx:
+      case PtrTag::SubCtx:
+        return true;
+      case PtrTag::Exact:
+      case PtrTag::Sub:
+        return false;
+    }
+    not_reached();
+  }
 
-  Tag type;
-  bool isCtx = false;
-  res::Class cls;
+  void setCtx(bool ctx) {
+    switch (val.tag()) {
+      case PtrTag::ExactCtx:
+        if (ctx) break;
+        val.set(PtrTag::Exact, val.ptr());
+        break;
+      case PtrTag::SubCtx:
+        if (ctx) break;
+        val.set(PtrTag::Sub, val.ptr());
+        break;
+      case PtrTag::Exact:
+        if (!ctx) break;
+        val.set(PtrTag::ExactCtx, val.ptr());
+        break;
+      case PtrTag::Sub:
+        if (!ctx) break;
+        val.set(PtrTag::SubCtx, val.ptr());
+        break;
+    }
+  }
+
+private:
+  // To keep size down, we encode everything into a single pointer.
+  enum class PtrTag : uint8_t {
+    Exact,
+    ExactCtx,
+    Sub,
+    SubCtx
+  };
+  CompactTaggedPtr<void, PtrTag> val;
 };
 
 /*
  * Information about a wait handle (sub-class of HH\\Awaitable) carry a
  * type that awaiting the wait handle will produce.
  */
-struct DWaitHandle {
-  DWaitHandle(res::Class cls, copy_ptr<Type> inner)
-    : cls{std::move(cls)}
-    , inner{std::move(inner)} {}
+template <typename T = Type>
+struct DWaitHandleT {
   // Strictly speaking, we know that cls is HH\\Awaitable, but keeping
-  // it around lets us demote to a DObj without having the Index
+  // it around lets us demote to a DCls without having the Index
   // available.
+  DWaitHandleT(res::Class cls, T inner) : cls{cls}, inner{std::move(inner)} {}
   res::Class cls;
-  copy_ptr<Type> inner;
+  T inner;
 };
+using DWaitHandle = DWaitHandleT<>;
 
 struct DArrLikePacked;
 struct DArrLikePackedN;
@@ -496,9 +533,9 @@ private:
   friend Type packedn_impl(trep, HAMSandwich, Type);
   friend Type map_impl(trep, HAMSandwich, MapElems, Type, Type);
   friend Type mapn_impl(trep, HAMSandwich, Type, Type);
-  friend DObj dobj_of(const Type&);
+  friend DCls dobj_of(const Type&);
   friend Type demote_wait_handle(Type);
-  friend DCls dcls_of(Type);
+  friend DCls dcls_of(const Type&);
   friend SString sval_of(const Type&);
   friend SString lazyclsval_of(const Type&);
   friend int64_t ival_of(const Type&);
@@ -582,7 +619,7 @@ private:
   friend Type set_trep_for_testing(Type, trep);
   friend trep get_trep_for_testing(const Type&);
 
-  friend Type make_obj_for_testing(trep, res::Class, DObj::Tag, bool);
+  friend Type make_obj_for_testing(trep, res::Class, DCls::Tag, bool);
   friend Type make_cls_for_testing(trep, res::Class, DCls::Tag, bool);
   friend Type make_arrval_for_testing(trep, SArray);
   friend Type make_arrpacked_for_testing(trep, std::vector<Type>,
@@ -1054,18 +1091,18 @@ Optional<IsTypeOp> type_to_istypeop(const Type& t);
 Optional<Type> type_of_type_structure(const Index&, Context, SArray ts);
 
 /*
- * Return the DObj structure for a strict subtype of TObj or TOptObj.
+ * Return the DCls structure for a strict subtype of TObj or TOptObj.
  *
  * Pre: is_specialized_obj(t)
  */
-DObj dobj_of(const Type& t);
+DCls dobj_of(const Type& t);
 
 /*
  * Return the DCls structure for a strict subtype of TCls.
  *
  * Pre: is_specialized_cls(t)
  */
-DCls dcls_of(Type t);
+DCls dcls_of(const Type& t);
 
 /*
  * Return the SString for a strict subtype of TStr.

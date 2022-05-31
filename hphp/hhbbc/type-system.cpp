@@ -82,12 +82,9 @@ constexpr trep kNonSupportBits = BCell & ~kSupportBits;
 // We keep the type representation compact; don't expand it accidentally.
 template <typename T, size_t Expected, size_t Actual = sizeof(T)>
 constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
-static_assert(CheckSize<DCls, 16>(), "");
-static_assert(CheckSize<DObj, 16>(), "");
-static_assert(CheckSize<DWaitHandle, 16>(), "");
-static_assert(CheckSize<copy_ptr<DArrLikeMapN>, 8>(), "");
+static_assert(CheckSize<DCls, 8>(), "");
 static_assert(CheckSize<HAMSandwich, 1>(), "");
-static_assert(CheckSize<Type, 32>(), "");
+static_assert(CheckSize<Type, 24>(), "");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -374,18 +371,10 @@ std::pair<Type,Type> map_key_values(const DArrLikeMap& a) {
 //////////////////////////////////////////////////////////////////////
 
 template <bool context>
-bool subtypeObj(const DObj& a, const DObj& b) {
-  if (context && !a.isCtx && b.isCtx) return false;
-  if (a.type == b.type && a.cls.same(b.cls)) return true;
-  if (b.type == DObj::Sub) return a.cls.mustBeSubtypeOf(b.cls);
-  return false;
-}
-
-template <bool context>
 bool subtypeCls(const DCls& a, const DCls& b) {
-  if (context && !a.isCtx && b.isCtx) return false;
-  if (a.type == b.type && a.cls.same(b.cls)) return true;
-  if (b.type == DCls::Sub) return a.cls.mustBeSubtypeOf(b.cls);
+  if (context && !a.isCtx() && b.isCtx()) return false;
+  if (a.type() == b.type() && a.cls().same(b.cls())) return true;
+  if (b.type() == DCls::Sub) return a.cls().mustBeSubtypeOf(b.cls());
   return false;
 }
 
@@ -1970,20 +1959,20 @@ Type Type::unctxHelper(Type t, bool& changed) {
 
   switch (t.m_dataTag) {
   case DataTag::Obj:
-    if (t.m_data.dobj.isCtx) {
-      t.m_data.dobj.isCtx = false;
+    if (t.m_data.dobj.isCtx()) {
+      t.m_data.dobj.setCtx(false);
       changed = true;
     }
     break;
   case DataTag::WaitHandle: {
-    auto const inner = t.m_data.dwh.inner.get();
-    auto ty = unctxHelper(*inner, changed);
-    if (changed) *t.m_data.dwh.inner.mutate() = std::move(ty);
+    auto const& inner = t.m_data.dwh->inner;
+    auto ty = unctxHelper(inner, changed);
+    if (changed) t.m_data.dwh.mutate()->inner = std::move(ty);
     break;
   }
   case DataTag::Cls:
-    if (t.m_data.dcls.isCtx) {
-      t.m_data.dcls.isCtx = false;
+    if (t.m_data.dcls.isCtx()) {
+      t.m_data.dcls.setCtx(false);
       changed = true;
     }
     break;
@@ -2251,7 +2240,7 @@ bool Type::equivImpl(const Type& o) const {
   if (m_dataTag != o.m_dataTag) return false;
 
   auto const contextCheck = [] (auto const& a, auto const& b) {
-    if (contextSensitive && a.isCtx != b.isCtx) return false;
+    if (contextSensitive && a.isCtx() != b.isCtx()) return false;
     return true;
   };
 
@@ -2275,15 +2264,17 @@ bool Type::equivImpl(const Type& o) const {
   case DataTag::Dbl:
     return double_equals(m_data.dval, o.m_data.dval);
   case DataTag::Obj:
-    return m_data.dobj.type == o.m_data.dobj.type &&
-           m_data.dobj.cls.same(o.m_data.dobj.cls) &&
+    return m_data.dobj.type() == o.m_data.dobj.type() &&
+           m_data.dobj.cls().same(o.m_data.dobj.cls()) &&
            contextCheck(m_data.dobj, o.m_data.dobj);
   case DataTag::WaitHandle:
-    assertx(m_data.dwh.cls.same(o.m_data.dwh.cls));
-    return m_data.dwh.inner->equivImpl<contextSensitive>(*o.m_data.dwh.inner);
+    assertx(m_data.dwh->cls.same(o.m_data.dwh->cls));
+    return m_data.dwh->inner.equivImpl<contextSensitive>(
+      o.m_data.dwh->inner
+    );
   case DataTag::Cls:
-    return m_data.dcls.type == o.m_data.dcls.type &&
-           m_data.dcls.cls.same(o.m_data.dcls.cls) &&
+    return m_data.dcls.type() == o.m_data.dcls.type() &&
+           m_data.dcls.cls().same(o.m_data.dcls.cls()) &&
            contextCheck(m_data.dcls, o.m_data.dcls);
   case DataTag::ArrLikePacked:
     if (m_data.packed->elems.size() != o.m_data.packed->elems.size()) {
@@ -2343,11 +2334,11 @@ size_t Type::hash() const {
         case DataTag::None:
           return 0;
         case DataTag::Obj:
-          return (uintptr_t)m_data.dobj.cls.name();
+          return (uintptr_t)m_data.dobj.cls().name();
         case DataTag::WaitHandle:
-          return m_data.dwh.inner->hash();
+          return m_data.dwh->inner.hash();
         case DataTag::Cls:
-          return (uintptr_t)m_data.dcls.cls.name();
+          return (uintptr_t)m_data.dcls.cls().name();
         case DataTag::Str:
           return (uintptr_t)m_data.sval;
         case DataTag::LazyCls:
@@ -2419,22 +2410,22 @@ bool Type::subtypeOfImpl(const Type& o) const {
 
     if (is_specialized_wait_handle(*this)) {
       if (is_specialized_wait_handle(o)) {
-        assertx(m_data.dwh.cls.same(o.m_data.dwh.cls));
-        return m_data.dwh.inner->subtypeOfImpl<contextSensitive>(
-          *o.m_data.dwh.inner
+        assertx(m_data.dwh->cls.same(o.m_data.dwh->cls));
+        return m_data.dwh->inner.subtypeOfImpl<contextSensitive>(
+          o.m_data.dwh->inner
         );
       }
-      return subtypeObj<contextSensitive>(
-        DObj { DObj::Sub, m_data.dwh.cls },
+      return subtypeCls<contextSensitive>(
+        DCls { DCls::Sub, m_data.dwh->cls },
         o.m_data.dobj
       );
     } else if (is_specialized_wait_handle(o)) {
-      const DObj whDObj{ DObj::Sub, o.m_data.dwh.cls };
-      if (!subtypeObj<contextSensitive>(m_data.dobj, whDObj)) return false;
-      if (subtypeObj<contextSensitive>(whDObj, m_data.dobj)) return false;
+      const DCls whDObj{ DCls::Sub, o.m_data.dwh->cls };
+      if (!subtypeCls<contextSensitive>(m_data.dobj, whDObj)) return false;
+      if (subtypeCls<contextSensitive>(whDObj, m_data.dobj)) return false;
       return true;
     } else {
-      return subtypeObj<contextSensitive>(m_data.dobj, o.m_data.dobj);
+      return subtypeCls<contextSensitive>(m_data.dobj, o.m_data.dobj);
     }
   }
 
@@ -2529,42 +2520,42 @@ bool Type::couldBe(const Type& o) const {
   if (subtypeOf(isect, BObj)) {
     if (!is_specialized_obj(*this) || !is_specialized_obj(o)) return true;
 
-    auto const couldBeObj = [] (DObj::Tag type1, res::Class cls1,
-                                DObj::Tag type2, res::Class cls2) {
+    auto const couldBeObj = [] (DCls::Tag type1, res::Class cls1,
+                                DCls::Tag type2, res::Class cls2) {
       if (type1 == type2 && cls1.same(cls2)) return true;
-      if (type1 == DObj::Sub) {
-        return type2 == DObj::Sub
+      if (type1 == DCls::Sub) {
+        return type2 == DCls::Sub
           ? cls2.couldBe(cls1)
           : cls2.maybeSubtypeOf(cls1);
       }
-      if (type2 == DObj::Sub) return cls1.maybeSubtypeOf(cls2);
+      if (type2 == DCls::Sub) return cls1.maybeSubtypeOf(cls2);
       return false;
     };
 
     if (is_specialized_wait_handle(*this)) {
       if (is_specialized_wait_handle(o)) {
-        assertx(m_data.dwh.cls.same(o.m_data.dwh.cls));
-        return m_data.dwh.inner->couldBe(*o.m_data.dwh.inner);
+        assertx(m_data.dwh->cls.same(o.m_data.dwh->cls));
+        return m_data.dwh->inner.couldBe(o.m_data.dwh->inner);
       }
       return couldBeObj(
-        DObj::Sub,
-        m_data.dwh.cls,
-        o.m_data.dobj.type,
-        o.m_data.dobj.cls
+        DCls::Sub,
+        m_data.dwh->cls,
+        o.m_data.dobj.type(),
+        o.m_data.dobj.cls()
       );
     } else if (is_specialized_wait_handle(o)) {
       return couldBeObj(
-        m_data.dobj.type,
-        m_data.dobj.cls,
-        DObj::Sub,
-        o.m_data.dwh.cls
+        m_data.dobj.type(),
+        m_data.dobj.cls(),
+        DCls::Sub,
+        o.m_data.dwh->cls
       );
     } else {
       return couldBeObj(
-        m_data.dobj.type,
-        m_data.dobj.cls,
-        o.m_data.dobj.type,
-        o.m_data.dobj.cls
+        m_data.dobj.type(),
+        m_data.dobj.cls(),
+        o.m_data.dobj.type(),
+        o.m_data.dobj.cls()
       );
     }
   }
@@ -2573,13 +2564,13 @@ bool Type::couldBe(const Type& o) const {
     if (!is_specialized_cls(*this) || !is_specialized_cls(o)) return true;
     auto const& cls1 = m_data.dcls;
     auto const& cls2 = o.m_data.dcls;
-    if (cls1.type == cls2.type && cls1.cls.same(cls2.cls)) return true;
-    if (cls1.type == DCls::Sub) {
-      return cls2.type == DCls::Sub
-        ? cls2.cls.couldBe(cls1.cls)
-        : cls2.cls.maybeSubtypeOf(cls1.cls);
+    if (cls1.type() == cls2.type() && cls1.cls().same(cls2.cls())) return true;
+    if (cls1.type() == DCls::Sub) {
+      return cls2.type() == DCls::Sub
+        ? cls2.cls().couldBe(cls1.cls())
+        : cls2.cls().maybeSubtypeOf(cls1.cls());
     }
-    if (cls2.type == DCls::Sub) return cls1.cls.maybeSubtypeOf(cls2.cls);
+    if (cls2.type() == DCls::Sub) return cls1.cls().maybeSubtypeOf(cls2.cls());
     return false;
   }
 
@@ -2671,10 +2662,10 @@ bool Type::checkInvariants() const {
   case DataTag::WaitHandle:
     assertx(couldBe(BObj));
     assertx(subtypeOf(BObj | kNonSupportBits));
-    assertx(!m_data.dwh.inner.isNull());
+    assertx(!m_data.dwh.isNull());
     // We need to know something relevant about the inner type if we
     // have a specialization.
-    assertx(m_data.dwh.inner->strictSubtypeOf(BInitCell));
+    assertx(m_data.dwh->inner.strictSubtypeOf(BInitCell));
     break;
   case DataTag::ArrLikeVal: {
     assertx(m_data.aval->isStatic());
@@ -2855,10 +2846,10 @@ Type wait_handle(const Index& index, Type inner) {
   auto const wh = index.builtin_class(s_Awaitable.get());
   auto t = Type { BObj, HAMSandwich::None };
   if (!inner.strictSubtypeOf(BInitCell)) {
-    construct(t.m_data.dobj, DObj::Sub, wh);
+    construct(t.m_data.dobj, DCls::Sub, wh);
     t.m_dataTag = DataTag::Obj;
   } else {
-    construct(t.m_data.dwh, wh, copy_ptr<Type>(std::move(inner)));
+    construct(t.m_data.dwh, copy_ptr<DWaitHandle>(wh, std::move(inner)));
     t.m_dataTag = DataTag::WaitHandle;
   }
   assertx(t.checkInvariants());
@@ -2871,7 +2862,7 @@ bool is_specialized_wait_handle(const Type& t) {
 
 Type wait_handle_inner(const Type& t) {
   assertx(is_specialized_wait_handle(t));
-  return *t.m_data.dwh.inner;
+  return t.m_data.dwh->inner;
 }
 
 // Turn a DWaitHandle into the matching DObj specialization (IE,
@@ -2879,7 +2870,7 @@ Type wait_handle_inner(const Type& t) {
 Type demote_wait_handle(Type wh) {
   assertx(is_specialized_wait_handle(wh));
   auto t = Type { wh.bits(), wh.m_ham };
-  construct(t.m_data.dobj, DObj::Sub, wh.m_data.dwh.cls);
+  construct(t.m_data.dobj, DCls::Sub, wh.m_data.dwh->cls);
   t.m_dataTag = DataTag::Obj;
   assertx(!is_specialized_wait_handle(t));
   assertx(is_specialized_obj(t));
@@ -3134,7 +3125,7 @@ Type subObj(res::Class val) {
   auto t = Type { BObj, HAMSandwich::None };
   construct(
     t.m_data.dobj,
-    val.couldBeOverriden() ? DObj::Sub : DObj::Exact,
+    val.couldBeOverriden() ? DCls::Sub : DCls::Exact,
     val
   );
   t.m_dataTag = DataTag::Obj;
@@ -3144,7 +3135,7 @@ Type subObj(res::Class val) {
 
 Type objExact(res::Class val) {
   auto t = Type { BObj, HAMSandwich::None };
-  construct(t.m_data.dobj, DObj::Exact, val);
+  construct(t.m_data.dobj, DCls::Exact, val);
   t.m_dataTag = DataTag::Obj;
   assertx(t.checkInvariants());
   return t;
@@ -3279,12 +3270,12 @@ Type return_with_context(Type t, Type context) {
 
   if (context.is(BBottom)) return unctx(t);
 
-  if (t.m_dataTag == DataTag::Obj && t.m_data.dobj.isCtx) {
+  if (t.m_dataTag == DataTag::Obj && t.m_data.dobj.isCtx()) {
     if (!context.subtypeOf(BObj)) context = toobj(context);
     if (context.m_dataTag == DataTag::Obj) {
       auto const d = dobj_of(context);
-      if (d.type == DObj::Exact && d.cls.couldBeMocked()) {
-        context = subObj(d.cls);
+      if (d.type() == DCls::Exact && d.cls().couldBeMocked()) {
+        context = subObj(d.cls());
       }
     }
     auto [obj, rest] = split_obj(std::move(t));
@@ -3293,12 +3284,12 @@ Type return_with_context(Type t, Type context) {
       rest
     );
   }
-  if (is_specialized_cls(t) && t.m_data.dcls.isCtx) {
+  if (is_specialized_cls(t) && t.m_data.dcls.isCtx()) {
     if (!context.subtypeOf(BCls)) context = objcls(context);
     if (is_specialized_cls(context)) {
       auto const d = dcls_of(context);
-      if (d.type == DCls::Exact && d.cls.couldBeMocked()) {
-        context = subCls(d.cls);
+      if (d.type() == DCls::Exact && d.cls().couldBeMocked()) {
+        context = subCls(d.cls());
       }
     }
     auto [cls, rest] = split_cls(std::move(t));
@@ -3311,8 +3302,8 @@ Type return_with_context(Type t, Type context) {
 }
 
 Type setctx(Type t, bool to) {
-  if (t.m_dataTag == DataTag::Obj) t.m_data.dobj.isCtx = to;
-  if (is_specialized_cls(t))       t.m_data.dcls.isCtx = to;
+  if (t.m_dataTag == DataTag::Obj) t.m_data.dobj.setCtx(to);
+  if (is_specialized_cls(t))       t.m_data.dcls.setCtx(to);
   return t;
 }
 
@@ -3391,8 +3382,8 @@ Type toobj(const Type& t) {
   if (!is_specialized_cls(t)) return TObj;
   auto const d = dcls_of(t);
   return setctx(
-    d.type == DCls::Exact ? objExact(d.cls) : subObj(d.cls),
-    d.isCtx
+    d.type() == DCls::Exact ? objExact(d.cls()) : subObj(d.cls()),
+    d.isCtx()
   );
 }
 
@@ -3403,8 +3394,8 @@ Type objcls(const Type& t) {
   if (!is_specialized_obj(t)) return TCls;
   auto const d = dobj_of(t);
   return setctx(
-    d.type == DObj::Exact ? clsExact(d.cls) : subCls(d.cls),
-    d.isCtx
+    d.type() == DCls::Exact ? clsExact(d.cls()) : subCls(d.cls()),
+    d.isCtx()
   );
 }
 
@@ -3900,15 +3891,15 @@ Optional<Type> type_of_type_structure(const Index& index,
   return base;
 }
 
-DObj dobj_of(const Type& t) {
+DCls dobj_of(const Type& t) {
   assertx(t.checkInvariants());
   assertx(is_specialized_obj(t));
   if (t.m_dataTag == DataTag::Obj) return t.m_data.dobj;
   assertx(is_specialized_wait_handle(t));
-  return DObj { DObj::Sub, t.m_data.dwh.cls };
+  return DCls { DCls::Sub, t.m_data.dwh->cls };
 }
 
-DCls dcls_of(Type t) {
+DCls dcls_of(const Type& t) {
   assertx(t.checkInvariants());
   assertx(is_specialized_cls(t));
   return t.m_data.dcls;
@@ -4088,17 +4079,17 @@ Type intersection_of(Type a, Type b) {
   // object are a subtype of either. If so, return the (reused) more
   // specific type. Return std::nullopt if neither are.
   auto const whAndObj = [&] (Type& wh, Type& obj) -> Optional<Type> {
-    if (obj.m_data.dobj.type == DObj::Sub &&
-        obj.m_data.dobj.cls.same(wh.m_data.dwh.cls) &&
-        !obj.m_data.dobj.isCtx) {
+    if (obj.m_data.dobj.type() == DCls::Sub &&
+        obj.m_data.dobj.cls().same(wh.m_data.dwh->cls) &&
+        !obj.m_data.dobj.isCtx()) {
       return reuse(wh);
     }
-    const DObj whDObj{ DObj::Sub, wh.m_data.dwh.cls };
-    if (subtypeObj<true>(obj.m_data.dobj, whDObj)) return reuse(obj);
-    if (subtypeObj<true>(whDObj, obj.m_data.dobj)) return reuse(wh);
+    const DCls whDObj{ DCls::Sub, wh.m_data.dwh->cls };
+    if (subtypeCls<true>(obj.m_data.dobj, whDObj)) return reuse(obj);
+    if (subtypeCls<true>(whDObj, obj.m_data.dobj)) return reuse(wh);
 
-    if (obj.m_data.dobj.type == DObj::Sub &&
-        obj.m_data.dobj.cls.couldBeInterface()) return reuse(wh);
+    if (obj.m_data.dobj.type() == DCls::Sub &&
+        obj.m_data.dobj.cls().couldBeInterface()) return reuse(wh);
 
     return std::nullopt;
   };
@@ -4124,14 +4115,20 @@ Type intersection_of(Type a, Type b) {
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
       assertx(couldBe(isect, BObj));
-      assertx(a.m_data.dwh.cls.same(b.m_data.dwh.cls));
-      if (a.m_data.dwh.inner->subtypeOf(*b.m_data.dwh.inner)) return reuse(a);
-      if (b.m_data.dwh.inner->subtypeOf(*a.m_data.dwh.inner)) return reuse(b);
-
-      auto i = intersection_of(*a.m_data.dwh.inner, *b.m_data.dwh.inner);
+      assertx(a.m_data.dwh->cls.same(b.m_data.dwh->cls));
+      if (a.m_data.dwh->inner.subtypeOf(b.m_data.dwh->inner)) {
+        return reuse(a);
+      }
+      if (b.m_data.dwh->inner.subtypeOf(a.m_data.dwh->inner)) {
+        return reuse(b);
+      }
+      auto i = intersection_of(
+        a.m_data.dwh->inner,
+        b.m_data.dwh->inner
+      );
       if (!i.is(BBottom)) {
         if (i.strictSubtypeOf(BInitCell)) {
-          *a.m_data.dwh.inner.mutate() = std::move(i);
+          a.m_data.dwh.mutate()->inner = std::move(i);
           return reuse(a);
         }
         a = demote_wait_handle(std::move(a));
@@ -4163,23 +4160,23 @@ Type intersection_of(Type a, Type b) {
       assertx(!is_specialized_wait_handle(a));
       assertx(!is_specialized_wait_handle(b));
       assertx(couldBe(isect, BObj));
-      auto const ctx = a.m_data.dobj.isCtx || b.m_data.dobj.isCtx;
-      if (subtypeObj<false>(a.m_data.dobj, b.m_data.dobj)) {
+      auto const ctx = a.m_data.dobj.isCtx() || b.m_data.dobj.isCtx();
+      if (subtypeCls<false>(a.m_data.dobj, b.m_data.dobj)) {
         return setctx(reuse(a), ctx);
       }
-      if (subtypeObj<false>(b.m_data.dobj, a.m_data.dobj)) {
+      if (subtypeCls<false>(b.m_data.dobj, a.m_data.dobj)) {
         return setctx(reuse(b), ctx);
       }
 
-      if (a.m_data.dobj.type == DObj::Sub &&
-          b.m_data.dobj.type == DObj::Sub) {
-        if (a.m_data.dobj.cls.couldBeInterface()) {
-          if (!b.m_data.dobj.cls.couldBeInterface()) {
+      if (a.m_data.dobj.type() == DCls::Sub &&
+          b.m_data.dobj.type() == DCls::Sub) {
+        if (a.m_data.dobj.cls().couldBeInterface()) {
+          if (!b.m_data.dobj.cls().couldBeInterface()) {
             return setctx(reuse(b), ctx);
           } else {
             return nodata();
           }
-        } else if (b.m_data.dobj.cls.couldBeInterface()) {
+        } else if (b.m_data.dobj.cls().couldBeInterface()) {
           return setctx(reuse(a), ctx);
         }
       }
@@ -4195,7 +4192,7 @@ Type intersection_of(Type a, Type b) {
   if (is_specialized_cls(a)) {
     if (is_specialized_cls(b)) {
       assertx(couldBe(isect, BCls));
-      auto const ctx = a.m_data.dcls.isCtx || b.m_data.dcls.isCtx;
+      auto const ctx = a.m_data.dcls.isCtx() || b.m_data.dcls.isCtx();
       if (subtypeCls<false>(a.m_data.dcls, b.m_data.dcls)) {
         return setctx(reuse(a), ctx);
       }
@@ -4342,14 +4339,14 @@ Type union_of(Type a, Type b) {
   // other, returning the less specific type. Returns std::nullopt if
   // neither of them is.
   auto const whAndObj = [&] (Type& wh, Type& obj) -> Optional<Type> {
-    if (obj.m_data.dobj.type == DObj::Sub &&
-        obj.m_data.dobj.cls.same(wh.m_data.dwh.cls) &&
-        !obj.m_data.dobj.isCtx) {
+    if (obj.m_data.dobj.type() == DCls::Sub &&
+        obj.m_data.dobj.cls().same(wh.m_data.dwh->cls) &&
+        !obj.m_data.dobj.isCtx()) {
       return reuse(obj);
     }
-    const DObj whDObj{ DObj::Sub, wh.m_data.dwh.cls };
-    if (subtypeObj<true>(obj.m_data.dobj, whDObj)) return reuse(wh);
-    if (subtypeObj<true>(whDObj, obj.m_data.dobj)) return reuse(obj);
+    const DCls whDObj{ DCls::Sub, wh.m_data.dwh->cls };
+    if (subtypeCls<true>(obj.m_data.dobj, whDObj)) return reuse(wh);
+    if (subtypeCls<true>(whDObj, obj.m_data.dobj)) return reuse(obj);
     return std::nullopt;
   };
 
@@ -4369,16 +4366,16 @@ Type union_of(Type a, Type b) {
   // handle to a DObj and use that.
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
-      assertx(a.m_data.dwh.cls.same(b.m_data.dwh.cls));
-      auto& atype = a.m_data.dwh.inner;
-      auto& btype = b.m_data.dwh.inner;
-      if (atype->subtypeOf(*btype)) return reuse(b);
-      if (btype->subtypeOf(*atype)) return reuse(a);
-      auto u = union_of(*atype, *btype);
+      assertx(a.m_data.dwh->cls.same(b.m_data.dwh->cls));
+      auto const& atype = a.m_data.dwh->inner;
+      auto const& btype = b.m_data.dwh->inner;
+      if (atype.subtypeOf(btype)) return reuse(b);
+      if (btype.subtypeOf(atype)) return reuse(a);
+      auto u = union_of(atype, btype);
       if (!u.strictSubtypeOf(BInitCell)) {
         a = demote_wait_handle(std::move(a));
       } else {
-        *atype.mutate() = std::move(u);
+        a.m_data.dwh.mutate()->inner = std::move(u);
       }
       return reuse(a);
     }
@@ -4409,14 +4406,14 @@ Type union_of(Type a, Type b) {
       assertx(!is_specialized_wait_handle(b));
       auto const& aobj = a.m_data.dobj;
       auto const& bobj = b.m_data.dobj;
-      auto const isCtx = aobj.isCtx && bobj.isCtx;
-      if (subtypeObj<false>(aobj, bobj)) {
+      auto const isCtx = aobj.isCtx() && bobj.isCtx();
+      if (subtypeCls<false>(aobj, bobj)) {
         return setctx(reuse(b), isCtx);
       }
-      if (subtypeObj<false>(bobj, aobj)) {
+      if (subtypeCls<false>(bobj, aobj)) {
         return setctx(reuse(a), isCtx);
       }
-      if (auto const ancestor = aobj.cls.commonAncestor(bobj.cls)) {
+      if (auto const ancestor = aobj.cls().commonAncestor(bobj.cls())) {
         // We need not to distinguish between Obj<=T and Obj=T, and
         // always return an Obj<=Ancestor, because that is the single
         // type that includes both children.
@@ -4440,14 +4437,14 @@ Type union_of(Type a, Type b) {
     if (is_specialized_cls(b)) {
       auto const& acls = a.m_data.dcls;
       auto const& bcls = b.m_data.dcls;
-      auto const isCtx = acls.isCtx && bcls.isCtx;
+      auto const isCtx = acls.isCtx() && bcls.isCtx();
       if (subtypeCls<false>(acls, bcls)) {
         return setctx(reuse(b), isCtx);
       }
       if (subtypeCls<false>(bcls, acls)) {
         return setctx(reuse(a), isCtx);
       }
-      if (auto const ancestor = acls.cls.commonAncestor(bcls.cls)) {
+      if (auto const ancestor = acls.cls().commonAncestor(bcls.cls())) {
         // Similar to above, this must always return an Obj<=Ancestor.
         auto ret = subCls(*ancestor);
         return setctx(reuse(ret), isCtx);
@@ -4553,7 +4550,7 @@ Type union_of(Type a, Type b) {
 
 bool could_have_magic_bool_conversion(const Type& t) {
   if (!t.couldBe(BObj)) return false;
-  if (is_specialized_obj(t)) return dobj_of(t).cls.couldHaveMagicBool();
+  if (is_specialized_obj(t)) return dobj_of(t).cls().couldHaveMagicBool();
   return true;
 }
 
@@ -4628,7 +4625,7 @@ void widen_type_impl(Type& t, uint32_t depth) {
       return;
 
     case DataTag::WaitHandle:
-      widen_type_impl(*t.m_data.dwh.inner.mutate(), depth + 1);
+      widen_type_impl(t.m_data.dwh.mutate()->inner, depth + 1);
       return;
 
     case DataTag::ArrLikePacked: {
@@ -4690,7 +4687,7 @@ bool more_refined_for_index(const Type& a, const Type& b) {
       !is_specialized_obj(b)) {
     return false;
   }
-  return dobj_of(b).cls.mustBeInterface();
+  return dobj_of(b).cls().mustBeInterface();
 }
 
 Type stack_flav(Type a) {
@@ -4701,16 +4698,16 @@ Type stack_flav(Type a) {
 
 Type loosen_interfaces(Type t) {
   if (is_specialized_wait_handle(t)) {
-    auto inner = loosen_interfaces(*t.m_data.dwh.inner);
-    if (!inner.subtypeOf(*t.m_data.dwh.inner)) {
+    auto inner = loosen_interfaces(t.m_data.dwh->inner);
+    if (!inner.subtypeOf(t.m_data.dwh->inner)) {
       if (!inner.strictSubtypeOf(BInitCell)) return demote_wait_handle(t);
-      *t.m_data.dwh.inner.mutate() = std::move(inner);
+      t.m_data.dwh.mutate()->inner = std::move(inner);
       assertx(t.checkInvariants());
     }
     return t;
   }
 
-  if (is_specialized_obj(t) && dobj_of(t).cls.couldBeInterface()) {
+  if (is_specialized_obj(t) && dobj_of(t).cls().couldBeInterface()) {
     return Type { t.bits(), t.m_ham };
   }
 
@@ -4779,7 +4776,7 @@ Type loosen_staticness(Type t) {
       break;
 
     case DataTag::WaitHandle: {
-      auto& inner = *t.m_data.dwh.inner.mutate();
+      auto& inner = t.m_data.dwh.mutate()->inner;
       auto loosened = loosen_staticness(std::move(inner));
       if (!loosened.strictSubtypeOf(BInitCell)) {
         return demote_wait_handle(t);
@@ -4939,7 +4936,7 @@ Type loosen_likeness_recursively(Type t) {
     break;
 
   case DataTag::WaitHandle: {
-    auto& inner = *t.m_data.dwh.inner.mutate();
+    auto& inner = t.m_data.dwh.mutate()->inner;
     auto loosened = loosen_likeness_recursively(inner);
     if (!loosened.strictSubtypeOf(BInitCell)) {
       return demote_wait_handle(std::move(t));
@@ -6617,8 +6614,8 @@ std::pair<Type, Promotion> promote_classlike_to_key(Type ty) {
     auto t = [&] {
       if (!is_specialized_cls(ty)) return TSStr;
       auto const dcls = dcls_of(ty);
-      if (dcls.type != DCls::Exact) return TSStr;
-      return sval(dcls.cls.name());
+      if (dcls.type() != DCls::Exact) return TSStr;
+      return sval(dcls.cls().name());
     }();
     ty = union_of(remove_cls(std::move(ty)), std::move(t));
     promoted = true;
@@ -6719,16 +6716,16 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
       auto const dobj = dobj_of(t);
       auto const tag =
         t.couldBe(BInitNull)
-        ? (dobj.type == DObj::Exact ? T::OptExactObj : T::OptSubObj)
-        : (dobj.type == DObj::Exact ? T::ExactObj    : T::SubObj);
-      return RepoAuthType { tag, dobj.cls.name() };
+        ? (dobj.type() == DCls::Exact ? T::OptExactObj : T::OptSubObj)
+        : (dobj.type() == DCls::Exact ? T::ExactObj    : T::SubObj);
+      return RepoAuthType { tag, dobj.cls().name() };
     }
     if (t.subtypeOf(BUninit | BObj)) {
       auto const dobj = dobj_of(t);
-      auto const tag = dobj.type == DObj::Exact
+      auto const tag = dobj.type() == DCls::Exact
         ? T::UninitExactObj
         : T::UninitSubObj;
-      return RepoAuthType { tag, dobj.cls.name() };
+      return RepoAuthType { tag, dobj.cls().name() };
     }
   }
 
@@ -6736,9 +6733,9 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
     auto const dcls = dcls_of(t);
     auto const tag =
       t.couldBe(BInitNull)
-        ? (dcls.type == DCls::Exact ? T::OptExactCls : T::OptSubCls)
-        : (dcls.type == DCls::Exact ? T::ExactCls : T::SubCls);
-    return RepoAuthType { tag, dcls.cls.name() };
+        ? (dcls.type() == DCls::Exact ? T::OptExactCls : T::OptSubCls)
+        : (dcls.type() == DCls::Exact ? T::ExactCls : T::SubCls);
+    return RepoAuthType { tag, dcls.cls().name() };
   }
 
   if (is_specialized_array_like(t) && t.subtypeOf(BOptArrLike)) {
@@ -6840,11 +6837,11 @@ trep get_trep_for_testing(const Type& t) {
 }
 
 Type make_obj_for_testing(trep bits, res::Class cls,
-                          DObj::Tag type, bool isCtx) {
+                          DCls::Tag type, bool isCtx) {
   auto t = Type { bits, HAMSandwich::TopForBits(bits) };
   construct(t.m_data.dobj, type, cls);
   t.m_dataTag = DataTag::Obj;
-  t.m_data.dobj.isCtx = isCtx;
+  t.m_data.dobj.setCtx(isCtx);
   assertx(t.checkInvariants());
   return t;
 }
@@ -6854,7 +6851,7 @@ Type make_cls_for_testing(trep bits, res::Class cls,
   auto t = Type { bits, HAMSandwich::TopForBits(bits) };
   construct(t.m_data.dcls, type, cls);
   t.m_dataTag = DataTag::Cls;
-  t.m_data.dcls.isCtx = isCtx;
+  t.m_data.dcls.setCtx(isCtx);
   assertx(t.checkInvariants());
   return t;
 }
@@ -6934,7 +6931,7 @@ Type loosen_mark_for_testing(Type t) {
       break;
 
     case DataTag::WaitHandle: {
-      auto& inner = *t.m_data.dwh.inner.mutate();
+      auto& inner = t.m_data.dwh.mutate()->inner;
       inner = loosen_mark_for_testing(std::move(inner));
       break;
     }

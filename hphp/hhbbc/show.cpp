@@ -575,33 +575,33 @@ std::string show(const Type& t) {
     switch (t.m_dataTag) {
     case DataTag::Obj: {
       std::string ret;
-      switch (t.m_data.dobj.type) {
-      case DObj::Exact:
-        folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
+      switch (t.m_data.dobj.type()) {
+      case DCls::Exact:
+        folly::toAppend("=", show(t.m_data.dobj.cls()), &ret);
         break;
-      case DObj::Sub:
-        folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
+      case DCls::Sub:
+        folly::toAppend("<=", show(t.m_data.dobj.cls()), &ret);
         break;
       }
-      if (t.m_data.dobj.isCtx) folly::toAppend(" this", &ret);
+      if (t.m_data.dobj.isCtx()) folly::toAppend(" this", &ret);
       return impl(BObj, ret);
     }
     case DataTag::WaitHandle:
       return impl(
         BObj,
-        folly::sformat("=WaitH<{}>", show(*t.m_data.dwh.inner))
+        folly::sformat("=WaitH<{}>", show(t.m_data.dwh->inner))
       );
     case DataTag::Cls: {
       std::string ret;
-      switch (t.m_data.dcls.type) {
+      switch (t.m_data.dcls.type()) {
       case DCls::Exact:
-        folly::toAppend("=", show(t.m_data.dcls.cls), &ret);
+        folly::toAppend("=", show(t.m_data.dcls.cls()), &ret);
         break;
       case DCls::Sub:
-        folly::toAppend("<=", show(t.m_data.dcls.cls), &ret);
+        folly::toAppend("<=", show(t.m_data.dcls.cls()), &ret);
         break;
       }
-      if (t.m_data.dcls.isCtx) folly::toAppend(" this", &ret);
+      if (t.m_data.dcls.isCtx()) folly::toAppend(" this", &ret);
       return impl(BCls, ret);
     }
     case DataTag::ArrLikePacked:

@@ -239,20 +239,20 @@ bool is_sub_obj(const Type& t) {
   return
     is_specialized_obj(t) &&
     !is_specialized_wait_handle(t) &&
-    dobj_of(t).type == DObj::Sub;
+    dobj_of(t).type() == DCls::Sub;
 }
 bool is_exact_obj(const Type& t) {
   return
     is_specialized_obj(t) &&
     !is_specialized_wait_handle(t) &&
-    dobj_of(t).type == DObj::Exact;
+    dobj_of(t).type() == DCls::Exact;
 }
 
 bool is_sub_cls(const Type& t) {
-  return is_specialized_cls(t) && dcls_of(t).type == DCls::Sub;
+  return is_specialized_cls(t) && dcls_of(t).type() == DCls::Sub;
 }
 bool is_exact_cls(const Type& t) {
-  return is_specialized_cls(t) && dcls_of(t).type == DCls::Exact;
+  return is_specialized_cls(t) && dcls_of(t).type() == DCls::Exact;
 }
 
 void add_type(TypeStat& stat, const Type& t) {

@@ -471,7 +471,7 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
     // The method may be foldable if we know more about $this.
     if (is_specialized_obj(context)) {
       auto const dobj = dobj_of(context);
-      if (dobj.type == DObj::Exact || dobj.cls.cls() != func->cls) {
+      if (dobj.type() == DCls::Exact || dobj.cls().cls() != func->cls) {
         return true;
       }
     }

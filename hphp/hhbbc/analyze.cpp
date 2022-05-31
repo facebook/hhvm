@@ -80,8 +80,8 @@ State entry_state(const Index& index, const Context& ctx,
       }
       if (is_specialized_cls(knownArgs->context)) {
         auto const dcls = dcls_of(knownArgs->context);
-        return setctx(dcls.type == DCls::Exact ?
-                      objExact(dcls.cls) : subObj(dcls.cls));
+        return setctx(dcls.type() == DCls::Exact ?
+                      objExact(dcls.cls()) : subObj(dcls.cls()));
       }
     }
     auto const maybeThisType = thisType(index, ctx);

@@ -51,7 +51,7 @@ void PrintTo(Emptiness e, ::std::ostream* os) {
   }
 }
 
-Type make_obj_for_testing(trep, res::Class, DObj::Tag, bool);
+Type make_obj_for_testing(trep, res::Class, DCls::Tag, bool);
 Type make_cls_for_testing(trep, res::Class, DCls::Tag, bool);
 Type make_arrval_for_testing(trep, SArray);
 Type make_arrpacked_for_testing(trep, std::vector<Type>);
@@ -197,12 +197,12 @@ Type make_specialized_wait_handle(trep bits, Type inner, const Index& index) {
 
 Type make_specialized_exact_object(trep bits, res::Class cls,
                                    bool isCtx = false) {
-  return make_obj_for_testing(bits, cls, DObj::Exact, isCtx);
+  return make_obj_for_testing(bits, cls, DCls::Exact, isCtx);
 }
 
 Type make_specialized_sub_object(trep bits, res::Class cls,
                                  bool isCtx = false) {
-  return make_obj_for_testing(bits, cls, DObj::Sub, isCtx);
+  return make_obj_for_testing(bits, cls, DCls::Sub, isCtx);
 }
 
 Type make_specialized_exact_class(trep bits, res::Class cls,
@@ -437,9 +437,9 @@ std::vector<Type> withData(const Index& index) {
 
       auto const dobj =
         dobj_of(make_specialized_wait_handle(b, TArrKey, index));
-      if (!dobj.cls.resolved()) ADD_FAILURE();
-      types.emplace_back(make_specialized_sub_object(b, dobj.cls));
-      types.emplace_back(make_specialized_exact_object(b, dobj.cls));
+      if (!dobj.cls().resolved()) ADD_FAILURE();
+      types.emplace_back(make_specialized_sub_object(b, dobj.cls()));
+      types.emplace_back(make_specialized_exact_object(b, dobj.cls()));
     }
     if (couldBe(b, BCls) && subtypeOf(b, BCls | nonSupport)) {
       types.emplace_back(make_specialized_exact_class(b, *clsA));
@@ -1048,10 +1048,10 @@ void test_basic_operators(const std::vector<Type>& types) {
       if (is_specialized_wait_handle(t1) || is_specialized_wait_handle(t2)) {
         return false;
       }
-      return dobj_of(t1).isCtx != dobj_of(t2).isCtx;
+      return dobj_of(t1).isCtx() != dobj_of(t2).isCtx();
     }
     if (!is_specialized_cls(t1) || !is_specialized_cls(t2)) return false;
-    return dcls_of(t1).isCtx != dcls_of(t2).isCtx;
+    return dcls_of(t1).isCtx() != dcls_of(t2).isCtx();
   };
 
   auto const matchingData = [] (const Type& t1, const Type& t2, auto const& self) {
@@ -1075,10 +1075,10 @@ void test_basic_operators(const std::vector<Type>& types) {
       return self(wait_handle_inner(t1), wait_handle_inner(t2), self);
     }
     if (is_specialized_obj(t1)) {
-      if (dobj_of(t1).cls.couldBeInterface()) return false;
+      if (dobj_of(t1).cls().couldBeInterface()) return false;
       if (!t2.hasData()) return true;
       if (!is_specialized_obj(t2)) return false;
-      return !dobj_of(t2).cls.couldBeInterface();
+      return !dobj_of(t2).cls().couldBeInterface();
     }
     return true;
   };
@@ -1091,8 +1091,8 @@ void test_basic_operators(const std::vector<Type>& types) {
     return
       !is_specialized_obj(t1) ||
       !is_specialized_obj(t2) ||
-      !dobj_of(t1).cls.couldBeInterface() ||
-      !dobj_of(t2).cls.couldBeInterface();
+      !dobj_of(t1).cls().couldBeInterface() ||
+      !dobj_of(t2).cls().couldBeInterface();
   };
 
   for (size_t i1 = 0; i1 < types.size(); ++i1) {
@@ -4037,7 +4037,7 @@ TEST(Type, LoosenInterfaces) {
     if (is_specialized_wait_handle(obj)) {
       EXPECT_EQ(loosen_interfaces(obj),
                 wait_handle(index, self(wait_handle_inner(obj), self)));
-    } else if (is_specialized_obj(obj) && dobj_of(obj).cls.couldBeInterface()) {
+    } else if (is_specialized_obj(obj) && dobj_of(obj).cls().couldBeInterface()) {
       EXPECT_EQ(loosen_interfaces(obj), TObj);
     } else {
       EXPECT_EQ(loosen_interfaces(obj), obj);

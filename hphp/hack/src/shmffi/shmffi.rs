@@ -7,17 +7,15 @@
 use ocaml_blob::{HeapValue, SerializedValue};
 use ocamlrep::{ptr::UnsafeOcamlPtr, Value};
 use ocamlrep_ocamlpool::catch_unwind;
-use once_cell::unsync::OnceCell;
+use once_cell::sync::OnceCell;
 use shmrs::chashmap::{MINIMUM_EVICTABLE_BYTES_PER_SHARD, NUM_SHARDS};
 use shmrs::segment::{ShmemTableSegment, ShmemTableSegmentRef};
 use std::convert::TryInto;
 
-thread_local! {
-    static SEGMENT: OnceCell<ShmemTableSegmentRef<'static, HeapValue>> = OnceCell::new();
-}
+static SEGMENT: OnceCell<ShmemTableSegmentRef<'static, HeapValue>> = OnceCell::new();
 
 fn with<R>(f: impl FnOnce(&ShmemTableSegmentRef<'static, HeapValue>) -> R) -> R {
-    SEGMENT.with(|cell| f(cell.get().unwrap()))
+    f(SEGMENT.get().unwrap())
 }
 
 #[no_mangle]
@@ -37,20 +35,22 @@ pub extern "C" fn shmffi_init(
         max_evictable_bytes,
     ) as libc::size_t;
     catch_unwind(|| {
-        SEGMENT.with(move |cell| {
-            assert!(cell.get().is_none());
-            cell.get_or_init(move ||
-            // Safety:
-            //  - We are the only one initializing!
-            unsafe {
-                ShmemTableSegment::initialize(
-                    mmap_address,
-                    file_size,
-                    max_evictable_bytes / NUM_SHARDS,
-                )
-            });
-        });
-
+        if SEGMENT
+            .set(
+                // Safety:
+                //  - We are the only one initializing!
+                unsafe {
+                    ShmemTableSegment::initialize(
+                        mmap_address,
+                        file_size,
+                        max_evictable_bytes / NUM_SHARDS,
+                    )
+                },
+            )
+            .is_err()
+        {
+            panic!("Unexpected prior value in SEGMENT");
+        }
         0
     });
 }
@@ -58,16 +58,16 @@ pub extern "C" fn shmffi_init(
 #[no_mangle]
 pub extern "C" fn shmffi_attach(mmap_address: *mut libc::c_void, file_size: libc::size_t) {
     catch_unwind(|| {
-        SEGMENT.with(move |cell| {
-            assert!(cell.get().is_none());
-            cell.get_or_init(move ||
-            // Safety:
-            //  - Should be already initialized by the master process.
-            unsafe {
-                ShmemTableSegment::attach(mmap_address, file_size)
-            });
-        });
-
+        if SEGMENT
+            .set(
+                // Safety:
+                //  - Should be already initialized by the master process.
+                unsafe { ShmemTableSegment::attach(mmap_address, file_size) },
+            )
+            .is_err()
+        {
+            panic!("Unexpected prior value in SEGMENT");
+        }
         0
     });
 }

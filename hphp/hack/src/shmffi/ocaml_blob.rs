@@ -100,6 +100,14 @@ pub struct HeapValue {
     pub data: NonNull<u8>,
 }
 
+// Safety: The memory behind `data` is owned by this HeapValue, but
+// we never write to that memory, only read.
+//
+// Most importantly, we never violate the the aliasing rule: we never
+// create two mutable references to the same underlying data.
+unsafe impl Send for HeapValue {}
+unsafe impl Sync for HeapValue {}
+
 impl HeapValue {
     /// Convert the heap value into an OCaml object.
     ///

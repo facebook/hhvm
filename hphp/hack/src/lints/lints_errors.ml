@@ -316,6 +316,18 @@ let nullsafe_not_needed pos =
   ^ Markdown_lite.md_codify "->"
   ^ " operator instead."
 
+let invalid_attribute_value
+    pos (attr_name : string) (valid_values : string list) =
+  let valid_values = List.map valid_values ~f:Markdown_lite.md_codify in
+  Lints.add
+    Codes.bad_xhp_enum_attribute_value
+    Lint_error
+    pos
+    (Printf.sprintf
+       "Invalid value for %s, expected one of %s."
+       (Markdown_lite.md_codify attr_name)
+       (String.concat ~sep:", " valid_values))
+
 let parse_error code pos msg = Lints.add code Lint_error pos msg
 
 let rec prettify_class_list names =

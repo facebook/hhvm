@@ -92,4 +92,6 @@ module Codes = struct
   let inferred_variance = 5639
 
   let switch_nonexhaustive = 5640
+
+  let bad_xhp_enum_attribute_value = 5641
 end

@@ -723,7 +723,10 @@ mod tests {
     use crate::subtyping::oracle::NoClasses;
     use oxidized::typing_defs_flags::FunTypeFlags;
     use pos::Pos;
-    use ty::{prop::PropF, reason::NReason};
+    use ty::{
+        prop::{Cstr, PropF},
+        reason::NReason,
+    };
     use utils::core::IdentGen;
 
     fn default_env<R: Reason>() -> NormalizeEnv<R> {
@@ -755,8 +758,11 @@ mod tests {
         // #0 <: int => #0 <: int
         let ty_int = Ty::int(NReason::none());
         let p1 = env.simp_tvar_ty(&r_tv_0, &also_tv_0, &ty_int);
-        assert!(matches!(p1.deref(), PropF::Subtype(_, _)));
-
+        assert!(if let PropF::Atom(cstr) = p1.deref() {
+            matches!(cstr, Cstr::Subtype(_, _))
+        } else {
+            false
+        });
         // #0 <: int | 0 => true
         let ty_int_or_tv0 = Ty::union(NReason::none(), vec![ty_v0.clone(), ty_int.clone()]);
         let p2 = env.simp_tvar_ty(&r_tv_0, &also_tv_0, &ty_int_or_tv0);

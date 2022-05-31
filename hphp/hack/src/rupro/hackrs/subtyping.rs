@@ -20,7 +20,7 @@ use std::{ops::Deref, rc::Rc};
 use ty::{
     local::{Ty, Tyvar},
     local_error::TypingError,
-    prop::{Prop, PropF},
+    prop::{Cstr, Prop, PropF},
     reason::Reason,
 };
 
@@ -145,9 +145,12 @@ impl<'a, R: Reason> Subtyper<'a, R> {
                 // TODO[mjt] simplify the disjuncton
                 Self::disjs_to_env(env, disjs, err, remain, errs)
             }
-            PropF::Subtype(cty_sub, cty_sup) => {
-                Self::subtype_to_env(env, cty_sub, cty_sup, props, remain);
-            }
+            PropF::Atom(cstr) => match cstr {
+                Cstr::Subtype(cty_sub, cty_sup) => {
+                    Self::subtype_to_env(env, cty_sub, cty_sup, props, remain);
+                }
+                _ => {}
+            },
         }
     }
 

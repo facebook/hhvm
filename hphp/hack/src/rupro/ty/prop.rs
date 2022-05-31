@@ -12,9 +12,9 @@ use std::ops::Deref;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropF<R: Reason, A> {
+    Atom(Cstr<R>),
     Conj(Vec<A>),
     Disj(TypingError<R>, Vec<A>),
-    Subtype(Ty<R>, Ty<R>),
 }
 
 impl<R: Reason> PropF<R, Prop<R>> {
@@ -59,7 +59,7 @@ impl<R: Reason> Prop<R> {
     }
 
     pub fn subtype(ty_sub: Ty<R>, ty_sup: Ty<R>) -> Self {
-        PropF::Subtype(ty_sub, ty_sup).inj()
+        PropF::Atom(Cstr::subtype(ty_sub, ty_sup)).inj()
     }
 
     pub fn valid() -> Self {
@@ -72,7 +72,7 @@ impl<R: Reason> Prop<R> {
 
     pub fn is_valid(&self) -> bool {
         match self.deref() {
-            PropF::Subtype(_, _) => false,
+            PropF::Atom(_) => false,
             PropF::Conj(ps) => ps.iter().all(|p| p.is_valid()),
             PropF::Disj(_, ps) => ps.iter().any(|p| p.is_valid()),
         }
@@ -80,7 +80,7 @@ impl<R: Reason> Prop<R> {
 
     pub fn is_unsat(&self) -> bool {
         match self.deref() {
-            PropF::Subtype(_, _) => false,
+            PropF::Atom(_) => false,
             PropF::Conj(ps) => ps.iter().any(|p| p.is_unsat()),
             PropF::Disj(_, ps) => ps.iter().all(|p| p.is_unsat()),
         }
@@ -103,7 +103,7 @@ impl<'a, R: Reason> ToOxidized<'a> for PropF<R, Prop<R>> {
         let prop = match self {
             PropF::Conj(conjs) => SubtypeProp::Conj(conjs.to_oxidized(bump)),
             PropF::Disj(..) => unimplemented!("{:?}", self),
-            PropF::Subtype(..) => unimplemented!("{:?}", self),
+            PropF::Atom(_) => unimplemented!("{:?}", self),
         };
         prop
     }

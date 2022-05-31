@@ -99,6 +99,7 @@ pub enum Ty_<R: Reason, TY> {
 
     Tunion(Vec<TY>),
     Toption(TY),
+    Tintersection(Vec<TY>),
     Tnonnull,
 }
 
@@ -110,6 +111,7 @@ walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
     Ty_::Tclass(_, _, args) => [args],
     Ty_::Tunion(args) => [args],
     Ty_::Toption(arg) => [arg],
+    Ty_::Tintersection(args) => [args],
     Ty_::Tvar(_) => [],
     Ty_::Tnonnull => [],
 });
@@ -207,11 +209,11 @@ impl<R: Reason> Ty<R> {
         }
     }
 
-    pub fn intersection(_: R, tys: Vec<Ty<R>>) -> Self {
+    pub fn intersection(r: R, tys: Vec<Ty<R>>) -> Self {
         if tys.len() == 1 {
             tys.into_iter().next().unwrap()
         } else {
-            unimplemented!("Intersection types are not implemented")
+            Self::new(r, Ty_::Tintersection(tys))
         }
     }
 
@@ -311,7 +313,7 @@ impl<R: Reason> Ty<R> {
                 }
             },
             Ty_::Toption(ty) => ty.tyvars_help(variance, covs, contravs, get_tparam_variance),
-            Ty_::Tunion(tys) => tys
+            Ty_::Tunion(tys) | Ty_::Tintersection(tys) => tys
                 .iter()
                 .for_each(|ty| ty.tyvars_help(variance, covs, contravs, get_tparam_variance)),
             Ty_::Tfun(ft) => {
@@ -406,6 +408,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
             Ty_::Tunion(tys) => {
                 OTy_::Tunion(&*arena.alloc_slice_fill_iter(tys.iter().map(|_ty| todo!())))
             }
+            Ty_::Tintersection(_) => todo!(),
             Ty_::Tfun(ft) => OTy_::Tfun(&*arena.alloc(ft.to_oxidized(arena))),
             Ty_::Tany => todo!(),
             Ty_::Tnonnull => todo!(),
@@ -577,6 +580,17 @@ mod tests {
         let ty_v0 = Ty::var(NReason::none(), tv0.clone());
         let ty_union = Ty::union(NReason::none(), vec![ty_v0]);
         let (covs, contravs) = ty_union.tyvars(|_| None);
+        assert!(covs.contains(&tv0));
+        assert!(contravs.is_empty());
+    }
+
+    #[test]
+    fn test_intersection() {
+        let gen = IdentGen::new();
+        let tv0: Tyvar = gen.make().into();
+        let ty_v0 = Ty::var(NReason::none(), tv0.clone());
+        let ty_intersection = Ty::intersection(NReason::none(), vec![ty_v0]);
+        let (covs, contravs) = ty_intersection.tyvars(|_| None);
         assert!(covs.contains(&tv0));
         assert!(contravs.is_empty());
     }

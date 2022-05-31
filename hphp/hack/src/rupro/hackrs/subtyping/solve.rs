@@ -430,6 +430,11 @@ fn freshen_inside<R: Reason>(env: &mut NormalizeEnv<R>, ty: &Ty<R>) -> Result<Ty
             .map(|ty| freshen_inside(env, ty))
             .collect::<Result<_>>()
             .map(|tys| Ty::union(ty.reason().clone(), tys)),
+        Ty_::Tintersection(tys) => tys
+            .iter()
+            .map(|ty| freshen_inside(env, ty))
+            .collect::<Result<_>>()
+            .map(|tys| Ty::intersection(ty.reason().clone(), tys)),
         Ty_::Tclass(_, _, _)
         | Ty_::Tnonnull
         | Ty_::Tgeneric(_, _)
@@ -452,20 +457,26 @@ fn remove_tyvar_from_upper_bound_help<R: Reason>(
     tv: Tyvar,
     ty: &Ty<R>,
 ) -> Option<Ty<R>> {
-    use Ty_::*;
     let ty = env.resolve_ty(ty);
     match ty.deref() {
-        Tvar(tv2) if tv == *tv2 => None,
-        Toption(ty2) => {
+        Ty_::Tvar(tv2) if tv == *tv2 => None,
+        Ty_::Toption(ty2) => {
             let ety2 = remove_tyvar_from_upper_bound_help(env, tv, ty2)?;
             Some(Ty::option(ty.reason().clone(), ety2))
         }
-        Tunion(tys) => {
+        Ty_::Tunion(tys) => {
             let tys_out = tys
                 .iter()
                 .map(|ty| remove_tyvar_from_upper_bound_help(env, tv, ty))
                 .collect::<Option<_>>()?;
             Some(Ty::union(ty.reason().clone(), tys_out))
+        }
+        Ty_::Tintersection(tys) => {
+            let tys_out = tys
+                .iter()
+                .filter_map(|ty| remove_tyvar_from_upper_bound_help(env, tv, ty))
+                .collect();
+            Some(Ty::intersection(ty.reason().clone(), tys_out))
         }
         _ => Some(ty),
     }
@@ -484,16 +495,26 @@ fn remove_tyvar_from_lower_bound_help<R: Reason>(
     tv: Tyvar,
     ty: &Ty<R>,
 ) -> Option<Ty<R>> {
-    use Ty_::*;
     let ty = env.resolve_ty(ty);
     match ty.deref() {
-        Tvar(tv2) if tv == *tv2 => None,
-        Tunion(tys) => {
+        Ty_::Tvar(tv2) if tv == *tv2 => None,
+        Ty_::Toption(ty) => {
+            let ty = remove_tyvar_from_lower_bound_help(env, tv, ty)?;
+            Some(Ty::option(ty.reason().clone(), ty))
+        }
+        Ty_::Tunion(tys) => {
             let tys_out = tys
                 .iter()
                 .filter_map(|ty| remove_tyvar_from_lower_bound_help(env, tv, ty))
                 .collect();
             Some(Ty::union(ty.reason().clone(), tys_out))
+        }
+        Ty_::Tintersection(tys) => {
+            let tys_out = tys
+                .iter()
+                .map(|ty| remove_tyvar_from_upper_bound_help(env, tv, ty))
+                .collect::<Option<_>>()?;
+            Some(Ty::intersection(ty.reason().clone(), tys_out))
         }
         _ => Some(ty),
     }
@@ -508,6 +529,7 @@ mod tests {
     use crate::typaram_env::TyparamEnv;
     use pos::NPos;
     use pos::Pos;
+    use ty::local::Variance as V;
     use ty::prop::PropF;
     use ty::reason::NReason;
     use utils::core::IdentGen;
@@ -524,7 +546,7 @@ mod tests {
     }
 
     #[test]
-    fn test_remove_upper() {
+    fn test_remove_upper_union() {
         let mut env = InferenceEnv::default();
         let gen = IdentGen::new();
 
@@ -555,6 +577,33 @@ mod tests {
 
         assert!(remove_tyvar_from_upper_bound_help(&mut env, tv_0, &ty_no_v0).is_some());
         assert!(remove_tyvar_from_upper_bound_help(&mut env, tv_0, &ty_with_v0).is_none());
+    }
+
+    #[test]
+    fn test_remove_upper_intersection() {
+        let mut env = InferenceEnv::default();
+        let tv_0 = env.fresh_var(V::Bivariant, NPos::none());
+        let tv_1 = env.fresh_var(V::Bivariant, NPos::none());
+        let ty_v0 = Ty::var(NReason::none(), tv_0);
+        let ty_v1 = Ty::var(NReason::none(), tv_1);
+
+        let ty_no_v0 = Ty::intersection(
+            NReason::none(),
+            vec![
+                Ty::int(NReason::none()),
+                Ty::union(NReason::none(), vec![Ty::float(NReason::none()), ty_v1]),
+            ],
+        );
+        let ty_with_v0 = Ty::intersection(
+            NReason::none(),
+            vec![
+                Ty::int(NReason::none()),
+                Ty::union(NReason::none(), vec![Ty::float(NReason::none()), ty_v0]),
+            ],
+        );
+
+        assert!(remove_tyvar_from_upper_bound_help(&mut env, tv_0, &ty_no_v0).is_some());
+        assert!(remove_tyvar_from_upper_bound_help(&mut env, tv_0, &ty_with_v0).is_some());
     }
 
     #[test]

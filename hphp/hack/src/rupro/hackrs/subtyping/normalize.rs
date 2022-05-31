@@ -196,6 +196,9 @@ impl<R: Reason> NormalizeEnv<R> {
                                 "Subtype propositions involving `Tany` aren't implemented"
                             )
                         }
+                        Tintersection(_) => unimplemented!(
+                            "Subtype propositions involving `Tintersection` are not implemented"
+                        ),
                     }
                 }
             }
@@ -223,6 +226,9 @@ impl<R: Reason> NormalizeEnv<R> {
                 Tvar(_) | Tgeneric(_, _) | Toption(_) | Tunion(_) => {
                     self.simp_ty_common(&ety_sub, &ety_sup)
                 }
+                Tintersection(_) => unimplemented!(
+                    "Subtype propositions involving `Tintersection` are not implemented"
+                ),
                 Tany => unimplemented!("Subtype propositions involving `Tany` aren't implemented"),
             },
 
@@ -237,6 +243,9 @@ impl<R: Reason> NormalizeEnv<R> {
                 | Tgeneric(_, _)
                 | Toption(_)
                 | Tunion(_) => self.simp_ty_common(&ety_sub, &ety_sup),
+                Tintersection(_) => unimplemented!(
+                    "Subtype propositions involving `Tintersection` are not implemented"
+                ),
                 Tany => unimplemented!("Subtype propositions involving `Tany` aren't implemented"),
             },
 
@@ -250,6 +259,9 @@ impl<R: Reason> NormalizeEnv<R> {
                 | Tvar(_)
                 | Tgeneric(_, _)
                 | Tunion(_) => self.simp_ty_common(&ety_sub, &ety_sup),
+                Tintersection(_) => unimplemented!(
+                    "Subtype propositions involving `Tintersection` are not implemented"
+                ),
                 Tany => unimplemented!("Subtype propositions involving `Tany` aren't implemented"),
             },
 
@@ -267,12 +279,18 @@ impl<R: Reason> NormalizeEnv<R> {
                     Tfun(_) | Toption(_) | Tnonnull | Tvar(_) | Tgeneric(_, _) | Tunion(_) => {
                         self.simp_ty_common(&ety_sub, &ety_sup)
                     }
+                    Tintersection(_) => unimplemented!(
+                        "Subtype propositions involving `Tintersection` are not implemented"
+                    ),
                     Tany => {
                         unimplemented!("Subtype propositions involving `Tany` aren't implemented")
                     }
                 }
             }
 
+            Tintersection(_) => {
+                unimplemented!("Subtype propositions involving `Tintersection` are not implemented")
+            }
             // -- Tany should not be in subtyping ----------------------------------
             Tany => unimplemented!("Subtype propositions involving `Tany` aren't implemented"),
         }
@@ -307,6 +325,9 @@ impl<R: Reason> NormalizeEnv<R> {
             }
             Tclass(_, _, _) | Toption(_) | Tnonnull | Tfun(_) | Tany => {
                 Ok(Prop::invalid(TypingError::Primary(Primary::Subtype)))
+            }
+            Tintersection(_) => {
+                unimplemented!("Subtype propositions involving `Tintersection` are not implemented")
             }
         }
     }

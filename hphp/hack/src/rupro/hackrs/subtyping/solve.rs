@@ -18,23 +18,105 @@ use ty::local_error::TypingError;
 use ty::prop::CstrTy;
 use ty::reason::Reason;
 
+/// Attempt to 'solve' a type variable. We first look for a type appearing
+/// in both the upper and lower bound. If there is no such type, we consider
+/// the variance of the tyvar (w.r.t to the types in which we have seen it
+/// appear) and solve to the appropriate bound. Note, we will not solve the
+/// tyvar if either:
+/// - there is a 'constraint type' in the bound to which we want to solve
+/// - it appears invariantly
+/// - we reach a 'dead-end' i.e. the type would be 'solved' to itself
+/// - we encounter a cyle
 pub fn solve<R: Reason>(
     env: &mut NormalizeEnv<R>,
     tv: Tyvar,
     reason: &R,
 ) -> Result<Option<Vec<TypingError<R>>>> {
+    solve_with(env, tv, reason, false, &solve_step::<R>)
+}
+
+/// Force solve all unsolved tyvars
+pub fn force_solve_all<R: Reason>(
+    env: &mut NormalizeEnv<R>,
+    tv: Tyvar,
+    reason: &R,
+) -> Result<Option<Vec<TypingError<R>>>> {
+    let mut errs = vec![];
+    for tv in env.inf_env.unsolved() {
+        force_solve(env, tv, reason, false)?
+            .into_iter()
+            .for_each(|xs| {
+                errs.extend(xs);
+            });
+    }
+    Ok(if errs.is_empty() { None } else { Some(errs) })
+}
+
+/// Force a solution for a type variable; in the worst case, we will solve to
+/// the union of the tyvars lower bound irrespective of its variance.
+/// Note that this may still fail to bind a type variable if there is a
+/// 'constraint type' in the lower bound
+pub fn force_solve<R: Reason>(
+    env: &mut NormalizeEnv<R>,
+    tv: Tyvar,
+    reason: &R,
+    freshen: bool,
+) -> Result<Option<Vec<TypingError<R>>>> {
+    solve_with(env, tv, reason, false, &force_solve_step::<R>)
+}
+
+fn solve_step<R: Reason>(
+    env: &mut NormalizeEnv<R>,
+    tv: Tyvar,
+    reason: &R,
+    freshen: bool,
+) -> Result<Option<TypingError<R>>> {
+    match try_bind_equal_bound(env, tv, reason, freshen)? {
+        TryBindResult::Bound(err_opt) => Ok(err_opt),
+        TryBindResult::Unbound => {
+            try_bind_variance(env, tv, reason).map(|bind_res| bind_res.typing_error())
+        }
+    }
+}
+
+fn force_solve_step<R: Reason>(
+    env: &mut NormalizeEnv<R>,
+    tv: Tyvar,
+    reason: &R,
+    freshen: bool,
+) -> Result<Option<TypingError<R>>> {
+    match try_bind_equal_bound(env, tv, reason, freshen)? {
+        TryBindResult::Bound(err_opt) => Ok(err_opt),
+        TryBindResult::Unbound => bind_to_lower_bound(env, tv, reason, freshen),
+    }
+}
+
+fn solve_with<R, F>(
+    env: &mut NormalizeEnv<R>,
+    tv: Tyvar,
+    reason: &R,
+    freshen: bool,
+    step: &F,
+) -> Result<Option<Vec<TypingError<R>>>>
+where
+    R: Reason,
+    F: Fn(&mut NormalizeEnv<R>, Tyvar, &R, bool) -> Result<Option<TypingError<R>>>,
+{
     let mut errs = vec![];
     // Repeatedly solve & then resolve the tyvar. We stop when:
     // - We encounter a cylcle (`resolve` returns an `err`)
     // - The tyvar is bound to a concrete type
     // - We get back the same tyvar
+    step(env, tv, reason, freshen)?
+        .into_iter()
+        .for_each(|err| errs.push(err));
     while env
         .inf_env
         .resolve(reason, tv)
         .map(|ty| ty.tyvar_opt().map_or(false, |tv2| tv != *tv2))
         .unwrap_or(false)
     {
-        solve_step(env, tv, reason)?
+        step(env, tv, reason, freshen)?
             .into_iter()
             .for_each(|err| errs.push(err));
     }
@@ -62,19 +144,6 @@ pub fn always_solve_wrt_variance_or_down<R: Reason>(
             Ok(Some(errs1))
         }
         (errs1, err2) => Ok(errs1.or_else(|| err2.map(|e| vec![e]))),
-    }
-}
-
-fn solve_step<R: Reason>(
-    env: &mut NormalizeEnv<R>,
-    tv: Tyvar,
-    reason: &R,
-) -> Result<Option<TypingError<R>>> {
-    match try_bind_equal_bound(env, tv, reason, false)? {
-        TryBindResult::Unbound => {
-            try_bind_variance(env, tv, reason).map(|bind_res| bind_res.typing_error())
-        }
-        res => Ok(res.typing_error()),
     }
 }
 
@@ -573,6 +642,63 @@ mod tests {
 
         let r2 = try_bind_variance(&mut env, tv, &NReason::none());
         assert!(matches!(r2.unwrap(), TryBindResult::Bound(_)));
+        assert!(env.inf_env.binding(&tv).unwrap() == &ty_arraykey);
+    }
+
+    #[test]
+    fn test_solve_covariant() {
+        let mut env = default_normalize_env();
+        let tv = env.inf_env.fresh_var(V::Covariant, NPos::none());
+        let ty_v = Ty::var(NReason::none(), tv);
+        let ty_arraykey = Ty::arraykey(NReason::none());
+        let cty_arraykey = CstrTy::Locl(ty_arraykey.clone());
+
+        let mut subtyper = Subtyper::new(
+            &mut env.inf_env,
+            &mut env.tp_env,
+            env.decl_env.clone(),
+            None,
+        );
+        // arraykey <: #1
+        let r1 = subtyper.subtype(&ty_arraykey, &ty_v);
+        assert!(r1.unwrap().is_none());
+        assert!(
+            env.inf_env
+                .lower_bounds(&tv)
+                .unwrap_or_default()
+                .contains(&cty_arraykey)
+        );
+
+        let r2 = solve(&mut env, tv, &NReason::none());
+        assert!(r2.unwrap().is_none());
+        assert!(env.inf_env.binding(&tv).unwrap() == &ty_arraykey);
+    }
+
+    #[test]
+    fn test_force_solve() {
+        let mut env = default_normalize_env();
+        let tv = env.inf_env.fresh_var(V::Invariant, NPos::none());
+        let ty_v = Ty::var(NReason::none(), tv);
+        let ty_arraykey = Ty::arraykey(NReason::none());
+        let cty_arraykey = CstrTy::Locl(ty_arraykey.clone());
+        let mut subtyper = Subtyper::new(
+            &mut env.inf_env,
+            &mut env.tp_env,
+            env.decl_env.clone(),
+            None,
+        );
+        // arraykey <: #1
+        let r1 = subtyper.subtype(&ty_arraykey, &ty_v);
+        assert!(r1.unwrap().is_none());
+        assert!(
+            env.inf_env
+                .lower_bounds(&tv)
+                .unwrap_or_default()
+                .contains(&cty_arraykey)
+        );
+
+        let r2 = force_solve(&mut env, tv, &NReason::none(), false);
+        assert!(r2.unwrap().is_none());
         assert!(env.inf_env.binding(&tv).unwrap() == &ty_arraykey);
     }
 }

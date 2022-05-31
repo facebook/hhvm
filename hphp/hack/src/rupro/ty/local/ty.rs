@@ -168,6 +168,9 @@ impl<R: Reason> Ty<R> {
     pub fn void(r: R) -> Ty<R> {
         Self::prim(r, Prim::Tvoid)
     }
+    pub fn bool(r: R) -> Ty<R> {
+        Self::prim(r, Prim::Tbool)
+    }
     pub fn int(r: R) -> Ty<R> {
         Self::prim(r, Prim::Tint)
     }
@@ -215,6 +218,14 @@ impl<R: Reason> Ty<R> {
         } else {
             Self::new(r, Ty_::Tintersection(tys))
         }
+    }
+
+    pub fn is_intersection(&self) -> bool {
+        matches!(self.deref(), Ty_::Tintersection(_))
+    }
+
+    pub fn is_union(&self) -> bool {
+        matches!(self.deref(), Ty_::Tunion(_))
     }
 
     pub fn var(r: R, tv: Tyvar) -> Self {

@@ -78,9 +78,10 @@ impl<R: Reason> NormalizeEnv<R> {
         let ety_sup = self.inf_env.resolve_ty(ty_sup);
         let ety_sub = self.inf_env.resolve_ty(ty_sub);
         match ety_sup.deref() {
-            // -- Super is var -----------------------------------------------------
+            // -- Super is var -------------------------------------------------
             Tvar(tv_sup) => {
                 match ety_sub.deref() {
+                    // union(YS) <: X <=> forall(YS,\Y. Y <: X)
                     Tunion(_) => self.simp_ty_common(&ety_sub, &ety_sup),
                     Toption(ty_sub_inner) => {
                         let ty_sub_inner = self.inf_env.resolve_ty(ty_sub_inner);
@@ -88,23 +89,38 @@ impl<R: Reason> NormalizeEnv<R> {
                         // as a lower bound. This enables clearer error messages when upper bounds
                         // are added to the type variable: transitive closure picks up the
                         // entire `mixed` type, and not separately consider `null` and `nonnull`
+                        // TODO[mjt] - note the handling of encodings
                         if ty_sub_inner.is_nonnull() {
                             Ok(Prop::subtype_ty(ety_sub, ety_sup))
                         } else {
+                            // ?X <: Y <=> null <: Y , X <: Y
                             let ty_null = Ty::null(r_sub.clone());
                             self.simp_conj_sub(&ty_sub_inner, &ty_null, &ety_sup)
                         }
                     }
+                    // X <: X <=> true
                     Tvar(tv_sub) if tv_sub == tv_sup => Ok(Prop::valid()),
-                    _ => Ok(Prop::subtype_ty(ety_sub, ety_sup)),
+                    Tvar(_)
+                    | Tprim(_)
+                    | Tgeneric(_, _)
+                    | Tclass(_, _, _)
+                    | Tintersection(_)
+                    | Tfun(_)
+                    | Tnonnull => Ok(Prop::subtype_ty(ety_sub, ety_sup)),
+                    Tany => {
+                        unimplemented!("Subtype propositions involving `Tany` aren't implemented")
+                    }
                 }
             }
 
-            // -- Super is union ---------------------------------------------------
+            // -- Super is union -----------------------------------------------
             Tunion(ty_sups) => {
                 // TOOD[mjt] we don't have negation yet so we're dropping special
                 // case code for t <: (#1 | arraykey) here
                 match ety_sub.deref() {
+                    // union(XS) <: union(YS) <=> forall(XS,\X. X <: union(YS))
+                    // TODO[mjt] when flattening down `simp_ty_common`, lets start
+                    // with the tyvar cases.
                     Tunion(_) | Tvar(_) => self.simp_ty_common(&ety_sub, &ety_sup),
                     Tgeneric(_, _) if self.config.ignore_generic_params => {
                         self.simp_ty_common(&ety_sub, &ety_sup)
@@ -125,93 +141,121 @@ impl<R: Reason> NormalizeEnv<R> {
                             Ok(p)
                         }
                     }
+                    // TODO[mjt] this is a good example of where we are using
+                    // a heuristic in hope of improving completeness; show
+                    // comparison of DNF <: CNF case
+                    // Try to handle the case
+                    // `A & B <: (A & B) | C` <=> A&B <: A&B \/ A&B <:C
+                    Tintersection(_)
+                        if ty_sups
+                            .iter()
+                            .any(|ty| self.inf_env.resolve_ty(ty).is_intersection()) =>
+                    {
+                        self.simp_sub_union(&ety_sub, &ety_sup, ty_sups)
+                    }
+
+                    // Try to handle the case
+                    // A & (B|C) <: B|C <=> A <: B|C \/ B|C <: B|C
+                    Tintersection(ty_subs)
+                        if ty_subs
+                            .iter()
+                            .any(|ty| self.inf_env.resolve_ty(ty).is_union()) =>
+                    {
+                        // It's sound to reduce t1 & t2 <: t to (t1 <: t) \/ (t2 <: t)
+                        // but not complete.
+                        self.simp_disjs_sub(ty_subs.iter(), &ety_sup)
+                    }
+                    Tintersection(_) => self.simp_sub_union(&ety_sub, &ety_sup, ty_sups),
                     _ => {
-                        // TODO[mjt] this omits all the like-type pushing for
-                        // sound dynamic
-                        let p1 = self.simp_disjs_sup(&ety_sub, ty_sups.iter())?;
-                        let p2 = match ety_sub.deref() {
-                            // TODO[mjt] It's this kind of thing which makes
-                            // understanding subtyping unnecessarily difficult; here
-                            // we are matching on the subtype 3 times(!) - twice
-                            // here and once in `simp_ty_common` when we really
-                            // should pull the generic subtyping logic out instead
-                            // and leave this match one level up.
-                            // We should go through this and simplify the nested
-                            // matches
-                            Tgeneric(_, _) => self.simp_ty_common(&ety_sub, ty_sup)?,
-                            _ => Prop::invalid(TypingError::Primary(Primary::Subtype)),
-                        };
-                        Ok(p1.disj(p2, TypingError::Primary(Primary::Subtype)))
+                        self.simp_sub_union(&ety_sub, &ety_sup, ty_sups)
+                        // let p1 = self.simp_disjs_sup(&ety_sub, ty_sups.iter())?;
+                        // let p2 = match ety_sub.deref() {
+                        //     Tgeneric(_, _) => self.simp_ty_common(&ety_sub, ty_sup)?,
+                        //     _ => Prop::invalid(TypingError::Primary(Primary::Subtype)),
+                        // };
+                        // Ok(p1.disj(p2, TypingError::Primary(Primary::Subtype)))
                     }
                 }
             }
 
-            // -- Super is option --------------------------------------------------
+            // -- Super is option ----------------------------------------------
+            // ?nonnull === mixed
+            Toption(ty_sup_inner) if self.inf_env.resolve_ty(ty_sup_inner).is_nonnull() => {
+                Ok(Prop::valid())
+            }
             Toption(ty_sup_inner) => {
-                let ety_sup_inner = self.inf_env.resolve_ty(ty_sup_inner);
-                // ?nonnull === mixed
-                // TODO[mjt] why do we use this encoding?
-                if ety_sup_inner.is_nonnull() {
-                    Ok(Prop::valid())
-                } else {
-                    match ety_sub.deref() {
-                        Tprim(p_sub) => match p_sub {
-                            Prim::Tnull => Ok(Prop::valid()),
-                            Prim::Tvoid => {
-                                let p1 = self.simp_ty(&ety_sub, &ety_sup_inner)?;
-                                if p1.is_valid() {
-                                    Ok(p1)
-                                } else {
-                                    // TODO[mjt]: check on this rule! Here `simp_ty_common`
-                                    // is `?nonnull == mixed <: ety_sup` (as an implicit upper bound ?)
-                                    // but we already know that ty_sup is _not_ top, don't we?
-                                    let p2 = self.simp_ty_common(&ety_sub, &ety_sup)?;
-                                    Ok(p1.disj(p2, TypingError::Primary(Primary::Subtype)))
-                                }
+                match ety_sub.deref() {
+                    Tprim(p_sub) => match p_sub {
+                        Prim::Tnull => Ok(Prop::valid()),
+                        Prim::Tvoid => {
+                            let p1 = self.simp_ty(&ety_sub, ty_sup_inner)?;
+                            if p1.is_valid() {
+                                Ok(p1)
+                            } else {
+                                // TODO[mjt]: check on this rule! Here `simp_ty_common`
+                                // is `?nonnull == mixed <: ety_sup` (as an implicit upper bound ?)
+                                // but we already know that ty_sup is _not_ top, don't we?
+                                let p2 = self.simp_ty_common(&ety_sub, &ety_sup)?;
+                                Ok(p1.disj(p2, TypingError::Primary(Primary::Subtype)))
                             }
-                            _ => self.simp_ty(&ety_sub, &ety_sup_inner),
-                        },
-                        // ?t <: ?u iff t < ?u
-                        // Why?
-                        // Since t <: ?t and the transitivity of <: we have t <: ?u
-                        // or
-                        // If t <: ?u by covariance of ? we have ?t <: ?u and
-                        // by idempotence we have ?t <: ??t
-                        // so this step preserves the set of solutions
-                        Toption(ty_sub_inner) => self.simp_ty(ty_sub_inner, &ety_sup),
-                        // TODO[mjt] Again, this needlessly repeats pattern matching
-                        // - lets pull the Tvar case out from `simp_ty_common`
-                        Tvar(_) | Tunion(_) => self.simp_ty_common(&ety_sub, &ety_sup),
-                        Tgeneric(_, _) if self.config.ignore_generic_params => {
-                            self.simp_ty_common(&ety_sub, &ety_sup)
                         }
-                        Tgeneric(_, _) => self.simp_disj_sup(&ety_sub, &ety_sup_inner, &ety_sup),
-                        // All of these cannot we have t </: null so we have
-                        // t < ?u iff t <: u
-                        Tnonnull | Tfun(_) | Tclass(_, _, _) => {
-                            self.simp_ty(&ety_sub, &ety_sup_inner)
-                        }
-                        Tany => {
-                            unimplemented!(
-                                "Subtype propositions involving `Tany` aren't implemented"
-                            )
-                        }
-                        Tintersection(_) => unimplemented!(
-                            "Subtype propositions involving `Tintersection` are not implemented"
-                        ),
+                        _ => self.simp_ty(&ety_sub, ty_sup_inner),
+                    },
+                    // ?t <: ?u iff t < ?u
+                    // Why?
+                    // Since t <: ?t and the transitivity of <: we have t <: ?u
+                    // or
+                    // If t <: ?u by covariance of ? we have ?t <: ?u and
+                    // by idempotence we have ?t <: ??t
+                    // so this step preserves the set of solutions
+                    Toption(ty_sub_inner) => self.simp_ty(ty_sub_inner, &ety_sup),
+                    // TODO[mjt] Again, this needlessly repeats pattern matching
+                    // - lets pull the Tvar case out from `simp_ty_common`
+                    Tvar(_) | Tunion(_) => self.simp_ty_common(&ety_sub, &ety_sup),
+                    Tgeneric(_, _) if self.config.ignore_generic_params => {
+                        self.simp_ty_common(&ety_sub, &ety_sup)
+                    }
+                    Tgeneric(_, _) => self.simp_disj_sup(&ety_sub, ty_sup_inner, &ety_sup),
+                    // All of these cannot we have t </: null so we have
+                    // t < ?u iff t <: u
+                    Tnonnull | Tfun(_) | Tclass(_, _, _) => self.simp_ty(&ety_sub, ty_sup_inner),
+                    Tintersection(_) =>
+                    // TODO[mjt] there is another heuristic in OCaml for this case which
+                    // mentions osciallations - follow up on this:
+                    // A <: ?B iff A & nonnull <: B
+                    // Only apply if B is a type variable or an intersection, to avoid oscillating
+                    // forever between this case and the previous one.
+                    {
+                        self.simp_ty_common(&ety_sub, &ety_sup)
+                    }
+                    Tany => {
+                        unimplemented!("Subtype propositions involving `Tany` aren't implemented")
                     }
                 }
             }
-            // -- Super is generic -------------------------------------------------
+
+            // -- Super is generic ---------------------------------------------
             Tgeneric(tp_name_sup, _) => match ety_sub.deref() {
                 // If subtype and supertype are the same generic parameter, we're done
                 Tgeneric(tp_name_sub, _) if tp_name_sub == tp_name_sup => Ok(Prop::valid()),
                 Tvar(_) | Tunion(_) => self.simp_ty_common(&ety_sub, &ety_sup),
-                _ if self.config.ignore_generic_params => Ok(Prop::subtype_ty(ety_sub, ety_sup)),
-                _ => self.simp_ty_typaram(ety_sub, (ety_sup.reason(), tp_name_sup)),
+                Tgeneric(_, _)
+                | Toption(_)
+                | Tintersection(_)
+                | Tfun(_)
+                | Tclass(_, _, _)
+                | Tnonnull
+                | Tprim(_) => {
+                    if self.config.ignore_generic_params {
+                        Ok(Prop::subtype_ty(ety_sub, ety_sup))
+                    } else {
+                        self.simp_ty_typaram(ety_sub, (ety_sup.reason(), tp_name_sup))
+                    }
+                }
+                Tany => unimplemented!("Subtype propositions involving `Tany` aren't implemented"),
             },
 
-            // -- Super is nonnull -------------------------------------------------
+            // -- Super is nonnull ---------------------------------------------
             Tnonnull => match ety_sub.deref() {
                 Tprim(p_sub) => {
                     use Prim::*;
@@ -223,16 +267,13 @@ impl<R: Reason> NormalizeEnv<R> {
                     }
                 }
                 Tnonnull | Tfun(_) | Tclass(_, _, _) => Ok(Prop::valid()),
-                Tvar(_) | Tgeneric(_, _) | Toption(_) | Tunion(_) => {
+                Tvar(_) | Tgeneric(_, _) | Toption(_) | Tunion(_) | Tintersection(_) => {
                     self.simp_ty_common(&ety_sub, &ety_sup)
                 }
-                Tintersection(_) => unimplemented!(
-                    "Subtype propositions involving `Tintersection` are not implemented"
-                ),
                 Tany => unimplemented!("Subtype propositions involving `Tany` aren't implemented"),
             },
 
-            // -- Super is prim ----------------------------------------------------
+            // -- Super is prim ------------------------------------------------
             Tprim(p_sup) => match ety_sub.deref() {
                 Tprim(p_sub) => Ok(Self::simp_prim(p_sub, p_sup)),
                 Toption(ty_sub_inner) if p_sup.is_tnull() => self.simp_ty(ty_sub_inner, &ety_sup),
@@ -242,14 +283,12 @@ impl<R: Reason> NormalizeEnv<R> {
                 | Tvar(_)
                 | Tgeneric(_, _)
                 | Toption(_)
-                | Tunion(_) => self.simp_ty_common(&ety_sub, &ety_sup),
-                Tintersection(_) => unimplemented!(
-                    "Subtype propositions involving `Tintersection` are not implemented"
-                ),
+                | Tunion(_)
+                | Tintersection(_) => self.simp_ty_common(&ety_sub, &ety_sup),
                 Tany => unimplemented!("Subtype propositions involving `Tany` aren't implemented"),
             },
 
-            // -- Super is fun -----------------------------------------------------
+            // -- Super is fun -------------------------------------------------
             Tfun(fn_sup) => match ety_sub.deref() {
                 Tfun(fn_sub) => self.simp_fun(fn_sub, fn_sup),
                 Tprim(_)
@@ -258,14 +297,12 @@ impl<R: Reason> NormalizeEnv<R> {
                 | Tclass(_, _, _)
                 | Tvar(_)
                 | Tgeneric(_, _)
-                | Tunion(_) => self.simp_ty_common(&ety_sub, &ety_sup),
-                Tintersection(_) => unimplemented!(
-                    "Subtype propositions involving `Tintersection` are not implemented"
-                ),
+                | Tunion(_)
+                | Tintersection(_) => self.simp_ty_common(&ety_sub, &ety_sup),
                 Tany => unimplemented!("Subtype propositions involving `Tany` aren't implemented"),
             },
 
-            // -- Super is class ---------------------------------------------------
+            // -- Super is class -----------------------------------------------
             Tclass(cn_sup, exact_sup, tp_sups) => {
                 match ety_sub.deref() {
                     Tclass(cn_sub, exact_sub, tp_subs) => {
@@ -276,24 +313,46 @@ impl<R: Reason> NormalizeEnv<R> {
                     // string , arraykey ,int, float, num <: XHPChild
                     // special-cases across
                     Tprim(_) => Ok(Prop::invalid(TypingError::Primary(Primary::Subtype))),
-                    Tfun(_) | Toption(_) | Tnonnull | Tvar(_) | Tgeneric(_, _) | Tunion(_) => {
-                        self.simp_ty_common(&ety_sub, &ety_sup)
-                    }
-                    Tintersection(_) => unimplemented!(
-                        "Subtype propositions involving `Tintersection` are not implemented"
-                    ),
+                    Tfun(_)
+                    | Toption(_)
+                    | Tnonnull
+                    | Tvar(_)
+                    | Tgeneric(_, _)
+                    | Tunion(_)
+                    | Tintersection(_) => self.simp_ty_common(&ety_sub, &ety_sup),
                     Tany => {
                         unimplemented!("Subtype propositions involving `Tany` aren't implemented")
                     }
                 }
             }
 
-            Tintersection(_) => {
-                unimplemented!("Subtype propositions involving `Tintersection` are not implemented")
-            }
-            // -- Tany should not be in subtyping ----------------------------------
+            // -- Super is intersection ----------------------------------------
+            Tintersection(_) if ety_sub.is_union() => self.simp_ty_common(&ety_sub, &ety_sup),
+            Tintersection(ty_sups) => self.simp_conjs_sup(&ety_sub, ty_sups),
+
+            // -- Tany should not be in subtyping ------------------------------
             Tany => unimplemented!("Subtype propositions involving `Tany` aren't implemented"),
         }
+    }
+
+    // TODO[mjt] - I think there are a few examples where we attempt to
+    // normalize then, if the resulting proposition is invalid, we try something
+    // else. It probably makes more sense to add a combinator. It is also
+    // worth looking where this is being used and why
+    fn simp_sub_union(
+        &mut self,
+        ty_sub: &Ty<R>,
+        ty_sup: &Ty<R>,
+        ty_sups: &[Ty<R>],
+    ) -> Result<Prop<R>> {
+        // TODO[mjt] this omits all the like-type pushing for
+        // sound dynamic
+        let p1 = self.simp_disjs_sup(ty_sub, ty_sups.iter())?;
+        let p2 = match ty_sub.deref() {
+            Ty_::Tgeneric(_, _) => self.simp_ty_common(ty_sub, ty_sup)?,
+            _ => Prop::invalid(TypingError::Primary(Primary::Subtype)),
+        };
+        Ok(p1.disj(p2, TypingError::Primary(Primary::Subtype)))
     }
 
     fn simp_ty_common(&mut self, ty_sub: &Ty<R>, ty_sup: &Ty<R>) -> Result<Prop<R>> {
@@ -323,11 +382,16 @@ impl<R: Reason> NormalizeEnv<R> {
             Tgeneric(tp_name_sub, _) => {
                 self.simp_typaram_ty((ty_sub.reason(), tp_name_sub), ty_sup)
             }
-            Tclass(_, _, _) | Toption(_) | Tnonnull | Tfun(_) | Tany => {
+            Tclass(_, _, _) | Toption(_) | Tnonnull | Tfun(_) => {
                 Ok(Prop::invalid(TypingError::Primary(Primary::Subtype)))
             }
-            Tintersection(_) => {
-                unimplemented!("Subtype propositions involving `Tintersection` are not implemented")
+            Tintersection(ty_subs) => {
+                // It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t),
+                // but not complete.
+                self.simp_disjs_sub(ty_subs.iter(), &ty_sup)
+            }
+            Tany => {
+                unimplemented!("Subtype propositions involving `Tany` are not implemented")
             }
         }
     }
@@ -628,6 +692,20 @@ impl<R: Reason> NormalizeEnv<R> {
         Ok(prop)
     }
 
+    fn simp_conjs_sup(&mut self, ty_sub: &Ty<R>, ty_sups: &[Ty<R>]) -> Result<Prop<R>> {
+        let mut prop = Prop::valid();
+        for ty_sup in ty_sups {
+            let next = self.simp_ty(ty_sub, ty_sup)?;
+            if next.is_unsat() {
+                prop = next;
+                break;
+            } else {
+                prop = prop.conj(next);
+            }
+        }
+        Ok(prop)
+    }
+
     /// Normalize the proposition `T <: U1 \/  T <: U2`
     fn simp_disjs_sup<'a>(
         &mut self,
@@ -865,5 +943,87 @@ mod tests {
                 .unwrap()
                 .is_valid()
         );
+    }
+
+    #[test]
+    fn test_union_sub() {
+        let mut env = default_env();
+        let ty_int = Ty::int(NReason::none());
+        let ty_string = Ty::string(NReason::none());
+        let ty_bool = Ty::bool(NReason::none());
+        let ty_sub1 = Ty::union(NReason::none(), vec![ty_string.clone(), ty_int]);
+        let ty_sub2 = Ty::union(NReason::none(), vec![ty_string, ty_bool]);
+        let ty_sup = Ty::arraykey(NReason::none());
+        //  (t1 | ... | tn) <: 2 <=>  t1 <: t /\  ... /\ tn <: t
+        assert!(env.simp_ty(&ty_sub1, &ty_sup).unwrap().is_valid());
+        assert!(env.simp_ty(&ty_sub2, &ty_sup).unwrap().is_unsat());
+    }
+    #[test]
+    fn test_union_sup() {
+        let mut env = default_env();
+
+        let ty_sub = Ty::int(NReason::none());
+        let ty_arraykey = Ty::arraykey(NReason::none());
+        let ty_string = Ty::string(NReason::none());
+        let ty_bool = Ty::bool(NReason::none());
+        let ty_sup1 = Ty::union(NReason::none(), vec![ty_string.clone(), ty_arraykey]);
+        let ty_sup2 = Ty::union(NReason::none(), vec![ty_string, ty_bool]);
+
+        //  t <: (t1 | ... | tn) <=>  t <: t1 \/  ... \/ t <: tn
+        assert!(env.simp_ty(&ty_sub, &ty_sup1).unwrap().is_valid());
+        assert!(env.simp_ty(&ty_sub, &ty_sup2).unwrap().is_unsat());
+    }
+
+    #[test]
+    fn test_intersect_sub() {
+        let mut env = default_env();
+
+        let ty_float = Ty::float(NReason::none());
+        let ty_string = Ty::string(NReason::none());
+        let ty_bool = Ty::bool(NReason::none());
+
+        let ty_sub1 = Ty::intersection(NReason::none(), vec![ty_string, ty_float.clone()]);
+        let ty_sub2 = Ty::intersection(NReason::none(), vec![ty_bool, ty_float]);
+        let ty_sup = Ty::arraykey(NReason::none());
+
+        //  (t1 & ... & tn) <: t <=>  t1 <: t \/  ... \/ tn <: t
+        assert!(env.simp_ty(&ty_sub1, &ty_sup).unwrap().is_valid());
+        assert!(env.simp_ty(&ty_sub2, &ty_sup).unwrap().is_unsat());
+    }
+
+    #[test]
+    fn test_intersect_sup() {
+        let mut env = default_env();
+
+        let ty_num = Ty::num(NReason::none());
+        let ty_arraykey = Ty::arraykey(NReason::none());
+        let ty_bool = Ty::bool(NReason::none());
+
+        let ty_sub = Ty::int(NReason::none());
+        let ty_sup1 = Ty::intersection(NReason::none(), vec![ty_num, ty_arraykey.clone()]);
+        let ty_sup2 = Ty::intersection(NReason::none(), vec![ty_bool, ty_arraykey]);
+
+        // t <: (t1 & ... & tn) <=>  t <: t1 /\  ... /\ t <: tn
+        assert!(env.simp_ty(&ty_sub, &ty_sup1).unwrap().is_valid());
+        assert!(env.simp_ty(&ty_sub, &ty_sup2).unwrap().is_unsat());
+    }
+
+    #[test]
+    fn test_intersect_sub_union() {
+        let mut env = default_env();
+
+        let ty_arraykey = Ty::arraykey(NReason::none());
+        let ty_bool = Ty::bool(NReason::none());
+        let ty_float = Ty::float(NReason::none());
+
+        // (arraykey & bool) <: float | (arraykey & bool)
+        let ty_sub1 = Ty::intersection(NReason::none(), vec![ty_arraykey.clone(), ty_bool.clone()]);
+        let ty_sup1 = Ty::union(NReason::none(), vec![ty_float.clone(), ty_sub1.clone()]);
+        assert!(env.simp_ty(&ty_sub1, &ty_sup1).unwrap().is_valid());
+
+        // float & (arraykey | bool) <: (arraykey | bool)
+        let ty_sup2 = Ty::union(NReason::none(), vec![ty_arraykey, ty_bool]);
+        let ty_sub2 = Ty::intersection(NReason::none(), vec![ty_float, ty_sup2.clone()]);
+        assert!(env.simp_ty(&ty_sub2, &ty_sup2).unwrap().is_valid());
     }
 }

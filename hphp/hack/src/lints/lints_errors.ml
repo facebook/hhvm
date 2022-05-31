@@ -137,16 +137,25 @@ let is_always_false p lhs_class rhs_class =
 let as_always_succeeds p lhs_class rhs_class =
   let lhs_class = Markdown_lite.md_codify lhs_class in
   let rhs_class = Markdown_lite.md_codify rhs_class in
+
+  let derive_message =
+    if String.equal lhs_class rhs_class then
+      ""
+    else
+      Printf.sprintf
+        ". It is always an instance of %s because %s derives from %s"
+        rhs_class
+        lhs_class
+        rhs_class
+  in
   Lints.add
     Codes.as_always_succeeds
     Lint_warning
     p
     (Printf.sprintf
-       "This `as` assertion will always succeed and hence is redundant. The expression on the left is an instance of %s. It is always an instance of %s because %s derives from %s."
+       "This `as` assertion will always succeed and hence is redundant. The expression on the left is an instance of %s%s."
        lhs_class
-       rhs_class
-       lhs_class
-       rhs_class)
+       derive_message)
 
 let as_always_fails p lhs_class rhs_class =
   let lhs_class = Markdown_lite.md_codify lhs_class in

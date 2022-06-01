@@ -230,8 +230,8 @@ namespace {
       exCls->declPropTypeConstraint(s_fileSlot).isString() &&
       erCls->declPropTypeConstraint(s_lineSlot).isInt() &&
       exCls->declPropTypeConstraint(s_lineSlot).isInt() &&
-      !erCls->declPropTypeConstraint(s_traceSlot).isCheckable() &&
-      !exCls->declPropTypeConstraint(s_traceSlot).isCheckable();
+      erCls->declPropTypeConstraint(s_traceSlot).isVec() &&
+      exCls->declPropTypeConstraint(s_traceSlot).isVec();
   }
 
   int64_t exception_get_trace_options() {

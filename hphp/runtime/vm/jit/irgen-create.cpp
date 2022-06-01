@@ -105,7 +105,9 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
   // $throwable->trace = $trace
   auto const traceSlot = rootCls->lookupDeclProp(s_trace.get());
   assertx(traceSlot != kInvalidSlot);
-  assertx(!rootCls->declPropTypeConstraint(traceSlot).isCheckable());
+  assertx(rootCls->declPropTypeConstraint(traceSlot).isVec());
+  // `DebugBacktrace` unconditionally returns a `Vec`, so we shouldn't need to
+  // check that it's such before assigning it into `$trace`.
   gen(env, StMem, propAddr(traceSlot), trace);
 
   // Populate $throwable->{file,line}

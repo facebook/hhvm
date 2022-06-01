@@ -403,7 +403,7 @@ function array_rand(mixed $input, int $num_req = 1)[leak_safe]: mixed;
 function array_reverse(
   mixed $array,
   bool $preserve_keys = false,
-)[]: mixed;
+)[]: ?darray<arraykey, mixed>;
 
 /**
  * Searches haystack for needle.

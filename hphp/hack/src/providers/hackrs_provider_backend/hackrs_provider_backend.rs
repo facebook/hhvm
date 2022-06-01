@@ -5,6 +5,9 @@
 
 pub mod naming_table;
 
+#[cfg(test)]
+mod test_naming_table;
+
 use anyhow::Result;
 use datastore::Store;
 use depgraph_api::{DepGraph, NoDepGraph};
@@ -14,6 +17,7 @@ use hackrs::{
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
     shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider, ShallowDeclStore},
 };
+use naming_provider::NamingProvider;
 use naming_table::NamingTable;
 use oxidized_by_ref::parser_options::ParserOptions;
 use pos::{RelativePathCtx, TypeName};
@@ -25,39 +29,22 @@ pub struct ProviderBackend {
     pub file_provider: Arc<dyn FileProvider>,
     pub decl_parser: DeclParser<BReason>,
     pub dependency_graph: Arc<dyn DepGraph>,
-    pub naming_table: Arc<NamingTable>,
-    pub shallow_decl_store: Arc<ShallowDeclStore<BReason>>,
+    pub naming_provider: Arc<dyn NamingProvider>,
     pub shallow_decl_provider: Arc<dyn ShallowDeclProvider<BReason>>,
-    pub folded_classes_store: Arc<dyn Store<TypeName, Arc<FoldedClass<BReason>>>>,
     pub folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
 }
 
-impl ProviderBackend {
-    pub fn new(
-        decl_parser: DeclParser<BReason>,
-        naming_table: Arc<NamingTable>,
-        path_ctx: Arc<RelativePathCtx>,
-        dependency_graph: Arc<dyn DepGraph>,
-        file_provider: Arc<dyn FileProvider>,
-        shallow_decl_store: Arc<ShallowDeclStore<BReason>>,
-        shallow_decl_provider: Arc<dyn ShallowDeclProvider<BReason>>,
-        folded_classes_store: Arc<dyn Store<TypeName, Arc<FoldedClass<BReason>>>>,
-        folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
-    ) -> Result<Self> {
-        Ok(Self {
-            path_ctx,
-            file_provider,
-            decl_parser,
-            dependency_graph,
-            naming_table,
-            shallow_decl_store,
-            shallow_decl_provider,
-            folded_classes_store,
-            folded_decl_provider,
-        })
-    }
+pub struct HhServerProviderBackend {
+    naming_table: Arc<NamingTable>,
+    #[allow(dead_code)]
+    shallow_decl_store: Arc<ShallowDeclStore<BReason>>,
+    #[allow(dead_code)]
+    folded_classes_store: Arc<dyn Store<TypeName, Arc<FoldedClass<BReason>>>>,
+    providers: ProviderBackend,
+}
 
-    pub fn for_hh_server(path_ctx: RelativePathCtx, popt: &ParserOptions<'_>) -> Result<Self> {
+impl HhServerProviderBackend {
+    pub fn new(path_ctx: RelativePathCtx, popt: &ParserOptions<'_>) -> Result<Self> {
         let path_ctx = Arc::new(path_ctx);
         let file_provider: Arc<dyn FileProvider> =
             Arc::new(PlainFileProvider::new(Arc::clone(&path_ctx)));
@@ -90,15 +77,44 @@ impl ProviderBackend {
             ));
 
         Ok(Self {
-            path_ctx,
-            file_provider,
-            decl_parser,
-            dependency_graph,
+            providers: ProviderBackend {
+                path_ctx,
+                file_provider,
+                decl_parser,
+                dependency_graph,
+                naming_provider: Arc::clone(&naming_table) as _,
+                shallow_decl_provider,
+                folded_decl_provider,
+            },
             naming_table,
             shallow_decl_store,
-            shallow_decl_provider,
             folded_classes_store,
-            folded_decl_provider,
         })
+    }
+
+    pub fn naming_table(&self) -> &NamingTable {
+        &self.naming_table
+    }
+
+    pub fn file_provider(&self) -> &dyn FileProvider {
+        Arc::as_ref(&self.providers.file_provider)
+    }
+
+    pub fn shallow_decl_provider(&self) -> &dyn ShallowDeclProvider<BReason> {
+        Arc::as_ref(&self.providers.shallow_decl_provider)
+    }
+
+    pub fn folded_decl_provider(&self) -> &dyn FoldedDeclProvider<BReason> {
+        Arc::as_ref(&self.providers.folded_decl_provider)
+    }
+
+    pub fn push_local_changes(&self) {
+        self.providers.file_provider.push_local_changes();
+        self.naming_table.push_local_changes();
+    }
+
+    pub fn pop_local_changes(&self) {
+        self.providers.file_provider.pop_local_changes();
+        self.naming_table.pop_local_changes();
     }
 }

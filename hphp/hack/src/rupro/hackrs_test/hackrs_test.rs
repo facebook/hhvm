@@ -11,12 +11,13 @@ use hackrs::{
     decl_parser::DeclParser, folded_decl_provider::LazyFoldedDeclProvider,
     shallow_decl_provider::LazyShallowDeclProvider,
 };
-use hackrs_provider_backend::{naming_table::NamingTable, ProviderBackend};
+use hackrs_provider_backend::ProviderBackend;
 use hackrs_test_utils::{
     registrar::DependencyGraph, serde_store::StoreOpts::Unserialized,
     store::make_shallow_decl_store,
 };
 use hh24_test::TestRepo;
+use naming_provider::SqliteNamingTable;
 use pos::RelativePathCtx;
 use std::{collections::BTreeMap, path::PathBuf, sync::Arc};
 use tempdir::TempDir;
@@ -24,7 +25,6 @@ use ty::reason::BReason;
 
 mod dependency_registrar;
 mod folded_decl_provider;
-mod naming_table;
 
 struct TestContext {
     #[allow(dead_code)]
@@ -42,8 +42,7 @@ impl TestContext {
         let tmpdir = TempDir::new("rupro_test")?;
         let naming_db = tmpdir.path().join("names.sql");
         hh24_test::create_naming_table(&naming_db, &files)?;
-        let naming_table = Arc::new(NamingTable::new());
-        naming_table.set_db_path(naming_db)?;
+        let naming_provider = Arc::new(SqliteNamingTable::new(&naming_db).unwrap());
 
         let path_ctx = Arc::new(RelativePathCtx {
             root: root.path().to_path_buf(),
@@ -54,31 +53,27 @@ impl TestContext {
         let dependency_graph = Arc::new(DependencyGraph::new());
         let file_provider = Arc::new(PlainFileProvider::new(Arc::clone(&path_ctx)));
         let decl_parser = DeclParser::new(Arc::clone(&file_provider) as _);
-        let shallow_decl_store = Arc::new(make_shallow_decl_store::<BReason>(Unserialized));
         let shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
-            Arc::clone(&shallow_decl_store),
-            Arc::clone(&naming_table) as _,
+            Arc::new(make_shallow_decl_store::<BReason>(Unserialized)),
+            Arc::clone(&naming_provider) as _,
             decl_parser.clone(),
         ));
-        let folded_classes_store = Arc::new(NonEvictingStore::new());
         let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
             Arc::new(Default::default()), // TODO: remove?
-            Arc::clone(&folded_classes_store) as _,
+            Arc::new(NonEvictingStore::new()),
             Arc::clone(&shallow_decl_provider) as _,
             Arc::clone(&dependency_graph) as _,
         ));
 
-        let provider_backend = ProviderBackend::new(
+        let provider_backend = ProviderBackend {
             decl_parser,
-            naming_table,
+            naming_provider,
             path_ctx,
             dependency_graph,
             file_provider,
-            shallow_decl_store,
             shallow_decl_provider,
-            folded_classes_store,
             folded_decl_provider,
-        )?;
+        };
 
         Ok(Self {
             root,

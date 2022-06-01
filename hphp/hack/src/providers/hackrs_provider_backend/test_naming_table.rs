@@ -3,9 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![cfg(test)]
-
-use crate::{FacebookInit, TestContext};
+use super::NamingTable;
 use anyhow::Result;
 use hh24_types::ToplevelSymbolHash;
 use maplit::btreemap;
@@ -13,6 +11,15 @@ use oxidized::naming_types;
 use pos::{ConstName, FunName, Prefix, RelativePath, TypeName};
 use rpds::HashTrieSet;
 use std::path::PathBuf;
+
+fn setup(files: std::collections::BTreeMap<&str, &str>) -> (hh24_test::TestRepo, NamingTable) {
+    let repo = hh24_test::TestRepo::new(&files).unwrap();
+    let db_path = repo.path().join("names.sql");
+    hh24_test::create_naming_table(&db_path, &files).unwrap();
+    let naming_table = NamingTable::new();
+    naming_table.set_db_path(db_path).unwrap();
+    (repo, naming_table)
+}
 
 fn make_dep_from_typename(typename: &str) -> deps_rust::Dep {
     deps_rust::Dep::new(ToplevelSymbolHash::from_type(typename).as_u64())
@@ -22,17 +29,12 @@ fn make_relative_path_from_str(test_path: &str) -> RelativePath {
     RelativePath::new(Prefix::Root, PathBuf::from(test_path))
 }
 
-#[fbinit::test]
-fn type_test(fb: FacebookInit) -> Result<()> {
-    let ctx = TestContext::new(
-        fb,
-        btreemap! {
-            "a.php" => "class A extends B {}",
-            "b.php" => "class B {}"
-        },
-    )?;
-
-    let naming_table = ctx.provider_backend.naming_table;
+#[test]
+fn type_test() -> Result<()> {
+    let (_repo, naming_table) = setup(btreemap! {
+        "a.php" => "class A extends B {}",
+        "b.php" => "class B {}"
+    });
 
     let a_type = TypeName::new(r#"\A"#);
     let a_relative_path = make_relative_path_from_str("a.php");
@@ -77,17 +79,12 @@ fn type_test(fb: FacebookInit) -> Result<()> {
     Ok(())
 }
 
-#[fbinit::test]
-fn fun_test(fb: FacebookInit) -> Result<()> {
-    let ctx = TestContext::new(
-        fb,
-        btreemap! {
-            "a.php" => "function A(): void { b(); }",
-            "b.php" => "function b(): void { A(); }",
-        },
-    )?;
-
-    let naming_table = ctx.provider_backend.naming_table;
+#[test]
+fn fun_test() -> Result<()> {
+    let (_repo, naming_table) = setup(btreemap! {
+        "a.php" => "function A(): void { b(); }",
+        "b.php" => "function b(): void { A(); }",
+    });
 
     let a_fun = FunName::new(r#"\A"#);
     let a_relative_path = make_relative_path_from_str("a.php");
@@ -126,18 +123,12 @@ fn fun_test(fb: FacebookInit) -> Result<()> {
     Ok(())
 }
 
-#[fbinit::test]
-fn const_test(fb: FacebookInit) -> Result<()> {
-    let ctx = TestContext::new(
-        fb,
-        // Consts are case sensitive
-        btreemap! {
-            "a.php" => "const int A = 123;",
-            "lowercase_a.php" => "const int a = 321;",
-        },
-    )?;
-
-    let naming_table = ctx.provider_backend.naming_table;
+#[test]
+fn const_test() -> Result<()> {
+    let (_repo, naming_table) = setup(btreemap! {
+        "a.php" => "const int A = 123;",
+        "lowercase_a.php" => "const int a = 321;",
+    });
 
     let a_const = ConstName::new(r#"\A"#);
     let a_relative_path = make_relative_path_from_str("a.php");
@@ -167,16 +158,13 @@ fn const_test(fb: FacebookInit) -> Result<()> {
     Ok(())
 }
 
-#[fbinit::test]
-fn get_filenames_by_hash_test(fb: FacebookInit) -> Result<()> {
-    let ctx = TestContext::new(
-        fb,
-        btreemap! {
-            "a.php" => "class A extends B {}",
-            "b.php" => "class B {}"
-        },
-    )?;
-    let naming_table = ctx.provider_backend.naming_table;
+#[test]
+fn get_filenames_by_hash_test() -> Result<()> {
+    let (_repo, naming_table) = setup(btreemap! {
+        "a.php" => "class A extends B {}",
+        "b.php" => "class B {}"
+    });
+
     let a_type = make_dep_from_typename(r#"\A"#);
     let b_type = make_dep_from_typename(r#"\B"#);
     let a_relative_path = make_relative_path_from_str("a.php");

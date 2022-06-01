@@ -652,6 +652,7 @@ void disasmRange(std::ostream& os,
                  uint64_t adjust,
                  bool useColor) {
   assertx(begin <= end);
+  if (!dumpIREnabled(kind, kDisasmLevel)) return;
   int const indent = kIndent + 4;
   bool const printEncoding = dumpIREnabled(kind, kAsmEncodingLevel);
   char const* colorStr = useColor ? color(ANSI_COLOR_BROWN) : "";

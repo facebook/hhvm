@@ -26,17 +26,36 @@ open Aast
 module MakeType = Typing_make_type
 module Reason = Typing_reason
 module Cls = Decl_provider.Class
+module Hashtbl = Stdlib.Hashtbl
+module Option = Stdlib.Option
 
-(* The context is a set of global variables. *)
-type ctx = { global_vars: SSet.t ref }
+(* The context maintains a hash table from each global variable to the
+  corresponding references of static variables or memoized functions.
+  For example, consider the following program:
+  "if (condition) { $a = Foo::$bar } else { $a = memoized_func() }"
+  after the above conditional, $a is a global variable which is a reference to
+  either Foo::$bar or memoized_func, thus the context gets a hash table
+  {"a" => {"Foo::$bar", "memoized_func"}}. *)
+type ctx = { global_var_refs_tbl: (string, SSet.t) Hashtbl.t ref }
 
-let current_ctx = { global_vars = ref SSet.empty }
+let current_ctx = { global_var_refs_tbl = ref (Hashtbl.create 0) }
 
-let add_vars_to_ctx ctx vars =
-  ctx.global_vars := SSet.union !(ctx.global_vars) vars
+(* Add the key (a variable name) and the value (a set of references) to the table. *)
+let add_var_refs_to_tbl tbl var refs =
+  let pre_ref_set =
+    if Hashtbl.mem tbl var then
+      Hashtbl.find tbl var
+    else
+      SSet.empty
+  in
+  Hashtbl.replace tbl var (SSet.union pre_ref_set refs)
 
-let remove_vars_to_ctx ctx vars =
-  ctx.global_vars := SSet.diff !(ctx.global_vars) vars
+(* Given two hash tables of type (string, SSet.t) Hashtbl.t, merge the second
+  table into the first one. *)
+let merge_var_refs_tbls tbl1 tbl2 = Hashtbl.iter (add_var_refs_to_tbl tbl1) tbl2
+
+(* Remove a set of variables from the var_refs_tbl table. *)
+let remove_vars_from_tbl tbl vars = SSet.iter (Hashtbl.remove tbl) vars
 
 let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
   let open Typing_defs in
@@ -117,45 +136,100 @@ let rec is_expr_static env (_, _, te) =
   | Array_get (e, _) -> is_expr_static env e
   | _ -> false
 
-(* Given a context of global variables and an expression,
-  check if the expression is global or not. *)
-let rec is_expr_global env ctx (_, _, te) =
+(* Print out global variables, e.g. Foo::$bar => "Foo::$bar", self::$bar => "Foo::$bar",
+  memoized_func => "memoized_func", $baz->memoized_method => "Baz::$memoized_method".
+  Notice that this does not handle arbitrary expressions. *)
+let rec print_global_expr env expr =
+  match expr with
+  | Call ((_, _, caller_expr), _, _, _) ->
+    (* For function/method calls, we print the caller expression, which could be
+       Id (e.g. memoized_func()) or Obj_get (e.g. $baz->memoized_method()). *)
+    print_global_expr env caller_expr
+  | Class_get ((c_ty, _, _), expr, Is_prop) ->
+    (* For static properties, we concatenate the class type (instead of class_id_, which
+       could be self, parent, static) and the property name. *)
+    let class_ty_str = Tast_env.print_ty env c_ty in
+    (match expr with
+    | CGstring (_, expr_str) -> class_ty_str ^ "::" ^ expr_str
+    | CGexpr _ -> class_ty_str ^ "::Unknown")
+  | Class_const ((c_ty, _, _), (_, const_str)) ->
+    (* For static method calls, we concatenate the class type and the method name. *)
+    Tast_env.print_ty env c_ty ^ "::" ^ const_str
+  | Id (_, name) -> name
+  | Obj_get (obj, m, _, Is_method) ->
+    (* For Obj_get (e.g. $baz->memoized_method()), we concatenate the class type and the method id. *)
+    let class_ty_str = Tast_env.print_ty env (Tast.get_type obj) in
+    let (_, _, m_id) = m in
+    class_ty_str ^ "::" ^ print_global_expr env m_id
+  | _ -> "Unknown"
+
+(* Given the environment, the context of global variables and an expression,
+  get the set of static variables / memoized functions referenced in that expression.
+  If there is no such reference, return None. *)
+let rec get_globals_from_expr env ctx (_, _, te) =
+  let merge_opt_sets opt_s1 opt_s2 =
+    match opt_s1 with
+    | None -> opt_s2
+    | Some s1 ->
+      (match opt_s2 with
+      | None -> opt_s1
+      | Some s2 -> Some (SSet.union s1 s2))
+  in
   match te with
   | Class_get (class_id, expr, Is_prop) ->
     (* Ignore static variables annotated with <<__SafeForGlobalWriteCheck>> *)
     let class_elts = get_static_prop_elts env class_id expr in
-    not (List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable)
-  | Lvar (_, id) -> SSet.mem (Local_id.to_string id) !(ctx.global_vars)
-  | Obj_get (e, _, _, Is_prop) -> is_expr_global env ctx e
+    if not (List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable)
+    then
+      Some (SSet.singleton (print_global_expr env te))
+    else
+      None
+  | Lvar (_, id) ->
+    Hashtbl.find_opt !(ctx.global_var_refs_tbl) (Local_id.to_string id)
+  | Obj_get (e, _, _, Is_prop) -> get_globals_from_expr env ctx e
   | Darray (_, tpl) ->
-    List.exists tpl ~f:(fun (_, e) -> is_expr_global env ctx e)
-  | Varray (_, el) -> List.exists el ~f:(fun e -> is_expr_global env ctx e)
-  | Shape tpl -> List.exists tpl ~f:(fun (_, e) -> is_expr_global env ctx e)
+    List.fold tpl ~init:None ~f:(fun cur_opt_set (_, e) ->
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
+  | Varray (_, el) ->
+    List.fold el ~init:None ~f:(fun cur_opt_set e ->
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
+  | Shape tpl ->
+    List.fold tpl ~init:None ~f:(fun cur_opt_set (_, e) ->
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
   | ValCollection (_, _, el) ->
-    List.exists el ~f:(fun e -> is_expr_global env ctx e)
+    List.fold el ~init:None ~f:(fun cur_opt_set e ->
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
   | KeyValCollection (_, _, fl) ->
-    List.exists fl ~f:(fun (_, e) -> is_expr_global env ctx e)
-  | Array_get (e, _) -> is_expr_global env ctx e
-  | Await e -> is_expr_global env ctx e
-  | ReadonlyExpr e -> is_expr_global env ctx e
-  | Tuple el -> List.exists el ~f:(fun e -> is_expr_global env ctx e)
-  | List el -> List.exists el ~f:(fun e -> is_expr_global env ctx e)
-  | Cast (_, e) -> is_expr_global env ctx e
+    List.fold fl ~init:None ~f:(fun cur_opt_set (_, e) ->
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
+  | Array_get (e, _) -> get_globals_from_expr env ctx e
+  | Await e -> get_globals_from_expr env ctx e
+  | ReadonlyExpr e -> get_globals_from_expr env ctx e
+  | Tuple el
+  | List el ->
+    List.fold el ~init:None ~f:(fun cur_opt_set e ->
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
+  | Cast (_, e) -> get_globals_from_expr env ctx e
   | Eif (_, e1, e2) ->
-    (match e1 with
-    | Some e -> is_expr_global env ctx e
-    | None -> false)
-    || is_expr_global env ctx e2
-  | As (e, _, _) -> is_expr_global env ctx e
-  | Upcast (e, _) -> is_expr_global env ctx e
-  | Pair (_, e1, e2) -> is_expr_global env ctx e1 || is_expr_global env ctx e2
+    merge_opt_sets
+      (match e1 with
+      | Some e -> get_globals_from_expr env ctx e
+      | None -> None)
+      (get_globals_from_expr env ctx e2)
+  | As (e, _, _) -> get_globals_from_expr env ctx e
+  | Upcast (e, _) -> get_globals_from_expr env ctx e
+  | Pair (_, e1, e2) ->
+    merge_opt_sets
+      (get_globals_from_expr env ctx e1)
+      (get_globals_from_expr env ctx e2)
   | Call (caller, _, _, _) ->
     let caller_ty = Tast.get_type caller in
     let open Typing_defs in
     (match get_node caller_ty with
-    | Tfun fty when get_ft_is_memoized fty -> true
-    | _ -> false)
-  | _ -> false
+    | Tfun fty when get_ft_is_memoized fty ->
+      Some (SSet.singleton (print_global_expr env te))
+    | _ -> None)
+  | _ -> None
 
 (* Check if type is a collection. *)
 let is_value_collection_ty env ty =
@@ -231,9 +305,11 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
     let union = MakeType.union Reason.none primitive_types in
     not (Typing_subtype.is_type_disjoint env ty union)
 
-let is_expr_global_and_mutable env ctx (tp, p, te) =
-  is_expr_global env ctx (tp, p, te)
-  && not (has_no_object_ref_ty env SSet.empty tp)
+let get_global_and_mutable_from_expr env ctx (tp, p, te) =
+  if not (has_no_object_ref_ty env SSet.empty tp) then
+    get_globals_from_expr env ctx (tp, p, te)
+  else
+    None
 
 (* Given an expression that appears on LHS of an assignment,
   this method gets the set of variables whose value may be assigned. *)
@@ -265,51 +341,66 @@ let visitor =
     inherit [_] Tast_visitor.iter_with_state as super
 
     method! on_method_ (env, (ctx, fun_name)) m =
-      ctx.global_vars := SSet.empty;
+      Hashtbl.clear !(ctx.global_var_refs_tbl);
       super#on_method_ (env, (ctx, fun_name)) m
 
     method! on_fun_def (env, (ctx, fun_name)) f =
-      ctx.global_vars := SSet.empty;
+      Hashtbl.clear !(ctx.global_var_refs_tbl);
       super#on_fun_def (env, (ctx, fun_name)) f
 
     method! on_fun_ (env, (ctx, fun_name)) f =
-      let ctx_cpy = !(ctx.global_vars) in
+      let ctx_cpy = Hashtbl.copy !(ctx.global_var_refs_tbl) in
       super#on_fun_ (env, (ctx, fun_name)) f;
-      ctx.global_vars := ctx_cpy
+      ctx.global_var_refs_tbl := ctx_cpy
 
     method! on_stmt_ (env, (ctx, fun_name)) s =
       match s with
       | If (_, b1, b2) ->
         (* Union the contexts from two branches *)
-        let ctx1 = { global_vars = ref !(ctx.global_vars) } in
-        super#on_block (env, (ctx1, fun_name)) b1;
+        let ctx_cpy =
+          {
+            global_var_refs_tbl = ref (Hashtbl.copy !(ctx.global_var_refs_tbl));
+          }
+        in
+        super#on_block (env, (ctx_cpy, fun_name)) b1;
         super#on_block (env, (ctx, fun_name)) b2;
-        add_vars_to_ctx ctx !(ctx1.global_vars)
+        merge_var_refs_tbls
+          !(ctx.global_var_refs_tbl)
+          !(ctx_cpy.global_var_refs_tbl)
       | Do (b, _)
       | While (_, b)
       | For (_, _, _, b)
       | Foreach (_, _, b) ->
         (* Iterate the block and update the set of global varialbes until
            no new global variable is found *)
-        let ctx_cpy = { global_vars = ref !(ctx.global_vars) } in
-        let ctx_len = ref (SSet.cardinal !(ctx.global_vars)) in
+        let ctx_cpy =
+          {
+            global_var_refs_tbl = ref (Hashtbl.copy !(ctx.global_var_refs_tbl));
+          }
+        in
+        let ctx_len = ref (Hashtbl.length !(ctx.global_var_refs_tbl)) in
         let has_context_change = ref true in
         while !has_context_change do
           super#on_block (env, (ctx_cpy, fun_name)) b;
-          add_vars_to_ctx ctx !(ctx_cpy.global_vars);
-          if SSet.cardinal !(ctx.global_vars) <> !ctx_len then
-            ctx_len := SSet.cardinal !(ctx.global_vars)
+          merge_var_refs_tbls
+            !(ctx.global_var_refs_tbl)
+            !(ctx_cpy.global_var_refs_tbl);
+          if Hashtbl.length !(ctx.global_var_refs_tbl) <> !ctx_len then
+            ctx_len := Hashtbl.length !(ctx.global_var_refs_tbl)
           else
             has_context_change := false
         done
       | Return r ->
         (match r with
         | Some ((ty, p, _) as e) ->
-          if is_expr_global_and_mutable env ctx e then
+          (match get_global_and_mutable_from_expr env ctx e with
+          | Some global_set ->
             Errors.global_var_in_fun_call_error
               p
               fun_name
               (Tast_env.print_ty env ty)
+              global_set
+          | None -> ())
         | None -> ());
         super#on_stmt_ (env, (ctx, fun_name)) s
       | _ -> super#on_stmt_ (env, (ctx, fun_name)) s
@@ -319,59 +410,90 @@ let visitor =
       | Binop (Ast_defs.Eq _, le, re) ->
         let () = self#on_expr (env, (ctx, fun_name)) re in
         let re_ty = Tast_env.print_ty env (Tast.get_type re) in
+        let le_global_opt = get_globals_from_expr env ctx le in
         (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
-        if is_expr_static env le then
-          Errors.static_var_direct_write_error p fun_name re_ty
+        if is_expr_static env le && Option.is_some le_global_opt then
+          Errors.static_var_direct_write_error
+            p
+            fun_name
+            re_ty
+            (Option.get le_global_opt)
         else
-          let is_le_global = is_expr_global env ctx le in
-          let is_re_global_and_mutable =
-            is_expr_global_and_mutable env ctx re
+          let re_global_and_mutable_opt =
+            get_global_and_mutable_from_expr env ctx re
           in
           let vars_in_le = ref SSet.empty in
           let () = get_vars_in_expr vars_in_le le in
           (match has_global_write_access le with
           | true ->
-            if is_le_global then Errors.global_var_write_error p fun_name re_ty
+            if Option.is_some le_global_opt then
+              Errors.global_var_write_error
+                p
+                fun_name
+                re_ty
+                (Option.get le_global_opt)
           | false ->
-            if is_le_global && not is_re_global_and_mutable then
-              remove_vars_to_ctx ctx !vars_in_le);
-          if is_re_global_and_mutable then add_vars_to_ctx ctx !vars_in_le
+            if
+              Option.is_some le_global_opt
+              && Option.is_none re_global_and_mutable_opt
+            then
+              remove_vars_from_tbl !(ctx.global_var_refs_tbl) !vars_in_le);
+          if Option.is_some re_global_and_mutable_opt then
+            SSet.iter
+              (fun v ->
+                add_var_refs_to_tbl
+                  !(ctx.global_var_refs_tbl)
+                  v
+                  (Option.get re_global_and_mutable_opt))
+              !vars_in_le
+        (* add_var_refs_to_tbl !(ctx.global_var_refs_tbl) !vars_in_le *)
       | Unop (op, e) ->
-        let e_ty = Tast_env.print_ty env (Tast.get_type e) in
-        (match op with
-        | Ast_defs.Uincr
-        | Ast_defs.Udecr
-        | Ast_defs.Upincr
-        | Ast_defs.Updecr ->
-          (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
-          if is_expr_static env e then
-            Errors.static_var_direct_write_error p fun_name e_ty
-          else if has_global_write_access e && is_expr_global env ctx e then
-            Errors.global_var_write_error p fun_name e_ty
-        | _ -> ())
+        let e_global_opt = get_globals_from_expr env ctx e in
+        if Option.is_some e_global_opt then
+          let e_global = Option.get e_global_opt in
+          let e_ty = Tast_env.print_ty env (Tast.get_type e) in
+          (match op with
+          | Ast_defs.Uincr
+          | Ast_defs.Udecr
+          | Ast_defs.Upincr
+          | Ast_defs.Updecr ->
+            (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
+            if is_expr_static env e then
+              Errors.static_var_direct_write_error p fun_name e_ty e_global
+            else if has_global_write_access e then
+              Errors.global_var_write_error p fun_name e_ty e_global
+          | _ -> ())
       | Call (_, _, tpl, _) ->
         (* Check if a global variable is used as the parameter. *)
         List.iter tpl ~f:(fun (pk, ((ty, pos, _) as expr)) ->
             match pk with
             | Ast_defs.Pinout _ ->
-              if is_expr_global env ctx expr then
+              let e_global_opt = get_globals_from_expr env ctx expr in
+              if Option.is_some e_global_opt then
                 Errors.global_var_in_fun_call_error
                   pos
                   fun_name
                   (Tast_env.print_ty env ty)
+                  (Option.get e_global_opt)
             | Ast_defs.Pnormal ->
-              if is_expr_global_and_mutable env ctx expr then
+              let e_global_opt =
+                get_global_and_mutable_from_expr env ctx expr
+              in
+              if Option.is_some e_global_opt then
                 Errors.global_var_in_fun_call_error
                   pos
                   fun_name
-                  (Tast_env.print_ty env ty))
+                  (Tast_env.print_ty env ty)
+                  (Option.get e_global_opt))
       | New (_, _, el, _, _) ->
         List.iter el ~f:(fun ((ty, pos, _) as expr) ->
-            if is_expr_global_and_mutable env ctx expr then
+            let e_global_opt = get_global_and_mutable_from_expr env ctx expr in
+            if Option.is_some e_global_opt then
               Errors.global_var_in_fun_call_error
                 pos
                 fun_name
-                (Tast_env.print_ty env ty))
+                (Tast_env.print_ty env ty)
+                (Option.get e_global_opt))
       | _ -> ());
       super#on_expr (env, (ctx, fun_name)) te
   end

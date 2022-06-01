@@ -1121,31 +1121,66 @@ let method_is_not_dynamically_callable
       ^ " is not dynamically callable." )
     (parent_class_reason @ attribute_reason @ nested_error_reason)
 
-let static_var_direct_write_error pos fun_name data_type =
+(* Convert a set to a string, e.g. {"a", "b", "c"} to "a,b,c". *)
+let set_to_string set =
+  SSet.fold set ~init:"" ~f:(fun s cur_str ->
+      cur_str
+      ^ (if String.length cur_str > 0 then
+          ","
+        else
+          "")
+      ^ s)
+
+(* Raise an error when a static variable is directly written,
+  e.g. Foo::$bar = new Bar() or (Foo::$bar)->prop = 1. *)
+let static_var_direct_write_error pos fun_name data_type global_set =
+  let error_message =
+    "["
+    ^ fun_name
+    ^ "]{"
+    ^ set_to_string global_set
+    ^ "}("
+    ^ data_type
+    ^ ") A static variable is directly written."
+  in
   add
     (GlobalWriteCheck.err_code GlobalWriteCheck.StaticVariableDirectWrite)
     pos
-    ("["
-    ^ fun_name
-    ^ "]("
-    ^ data_type
-    ^ ") A static variable is directly written.")
+    error_message
 
-let global_var_write_error pos fun_name data_type =
+(* Raise an error when a global variable is written via reference, which
+  may be a false positive, e.g. $a[0] = Foo::$bar; $a[1]->prop = 1. *)
+let global_var_write_error pos fun_name data_type global_set =
+  let error_message =
+    "["
+    ^ fun_name
+    ^ "]{"
+    ^ set_to_string global_set
+    ^ "}("
+    ^ data_type
+    ^ ") A global variable is written."
+  in
   add
     (GlobalWriteCheck.err_code GlobalWriteCheck.GlobalVariableWrite)
     pos
-    ("[" ^ fun_name ^ "](" ^ data_type ^ ") A global variable is written.")
+    error_message
 
-let global_var_in_fun_call_error pos fun_name data_type =
+(* Raise an error when a global variable is passed to another function call,
+  and such errors will disappear after inter-procedural analysis is ready. *)
+let global_var_in_fun_call_error pos fun_name data_type global_set =
+  let error_message =
+    "["
+    ^ fun_name
+    ^ "]{"
+    ^ set_to_string global_set
+    ^ "}("
+    ^ data_type
+    ^ ") A global variable is passed to (or returned from) a function call."
+  in
   add
     (GlobalWriteCheck.err_code GlobalWriteCheck.GlobalVariableInFunctionCall)
     pos
-    ("["
-    ^ fun_name
-    ^ "]("
-    ^ data_type
-    ^ ") A global variable is passed to (or returned from) a function call.")
+    error_message
 
 (*****************************************************************************)
 (* Printing *)

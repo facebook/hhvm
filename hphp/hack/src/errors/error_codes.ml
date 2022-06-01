@@ -690,8 +690,9 @@ end
 
 (* 11xxx: reserved for global write check (fbcode/hphp/hack/src/typing/tast_check/global_write_check.ml),
  * which is used to detect data leaks through global variable access.
- * 11001 represents the error when a global variable is written.
- * 11002 represents the error when a global variable is passed to (or returned from) a function call.
+ * 11001 represents the error when a static variable is directly written.
+ * 11002 represents the error when a global variable is written via reference.
+ * 11003 represents the error when a global variable is passed to (or returned from) a function call.
  *)
 module GlobalWriteCheck = struct
   type t =

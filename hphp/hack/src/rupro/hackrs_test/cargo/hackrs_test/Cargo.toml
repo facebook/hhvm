@@ -22,5 +22,10 @@ ty = { path = "../../../ty/cargo/ty" }
 
 [dev-dependencies]
 depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
+deps_rust = { path = "../../../../deps/cargo/deps_rust" }
+hh24_types = { path = "../../../../utils/hh24_types" }
 itertools = "0.10.3"
 maplit = "1.0"
+ocamlrep = { path = "../../../../ocamlrep" }
+oxidized = { path = "../../../../oxidized" }
+rpds = "0.11.0"

@@ -12,6 +12,7 @@ path = "../../hackc/hackc.rs"
 aast_parser = { path = "../../../parser/cargo/aast_parser" }
 anyhow = "1.0.56"
 bumpalo = { version = "3.8", features = ["collections"] }
+bytecode_printer = { path = "../../bytecode_printer" }
 clap = { version = "=3.1.8", features = ["derive", "regex", "unicode", "wrap_help"] }
 compile = { path = "../../compile/cargo/compile" }
 decl_provider = { path = "../../decl_provider" }
@@ -19,6 +20,7 @@ direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
 env_logger = "0.7"
 facts_rust = { path = "../../../facts/cargo/facts_rust" }
 hdrhistogram = "6.3"
+hhbc = { path = "../../hhbc/cargo/hhbc" }
 hhvm_options = { path = "../../../utils/hhvm_options" }
 jwalk = "0.6"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }

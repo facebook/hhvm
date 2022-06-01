@@ -27,22 +27,16 @@ module MakeType = Typing_make_type
 module Reason = Typing_reason
 module Cls = Decl_provider.Class
 
-(* The context is a list of global variables. *)
-type ctx = { global_vars: string list ref }
+(* The context is a set of global variables. *)
+type ctx = { global_vars: SSet.t ref }
 
-let current_ctx = { global_vars = ref [] }
-
-let add_var_to_ctx ctx var =
-  if not (List.mem !(ctx.global_vars) var ~equal:String.equal) then
-    ctx.global_vars := var :: !(ctx.global_vars)
+let current_ctx = { global_vars = ref SSet.empty }
 
 let add_vars_to_ctx ctx vars =
-  List.iter vars ~f:(fun var -> add_var_to_ctx ctx var)
+  ctx.global_vars := SSet.union !(ctx.global_vars) vars
 
 let remove_vars_to_ctx ctx vars =
-  ctx.global_vars :=
-    List.filter !(ctx.global_vars) ~f:(fun v ->
-        not (List.mem vars v ~equal:String.equal))
+  ctx.global_vars := SSet.diff !(ctx.global_vars) vars
 
 let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
   let open Typing_defs in
@@ -131,8 +125,7 @@ let rec is_expr_global env ctx (_, _, te) =
     (* Ignore static variables annotated with <<__SafeForGlobalWriteCheck>> *)
     let class_elts = get_static_prop_elts env class_id expr in
     not (List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable)
-  | Lvar (_, id) ->
-    List.mem !(ctx.global_vars) (Local_id.to_string id) ~equal:String.equal
+  | Lvar (_, id) -> SSet.mem (Local_id.to_string id) !(ctx.global_vars)
   | Obj_get (e, _, _, Is_prop) -> is_expr_global env ctx e
   | Darray (_, tpl) ->
     List.exists tpl ~f:(fun (_, e) -> is_expr_global env ctx e)
@@ -243,10 +236,10 @@ let is_expr_global_and_mutable env ctx (tp, p, te) =
   && not (has_no_object_ref_ty env SSet.empty tp)
 
 (* Given an expression that appears on LHS of an assignment,
-  this method gets the list of variables whose value may be assigned. *)
+  this method gets the set of variables whose value may be assigned. *)
 let rec get_vars_in_expr vars (_, _, te) =
   match te with
-  | Lvar (_, id) -> vars := [Local_id.to_string id] @ !vars
+  | Lvar (_, id) -> vars := SSet.add (Local_id.to_string id) !vars
   | Obj_get (e, _, _, Is_prop) -> get_vars_in_expr vars e
   | Array_get (e, _) -> get_vars_in_expr vars e
   | ReadonlyExpr e -> get_vars_in_expr vars e
@@ -272,11 +265,11 @@ let visitor =
     inherit [_] Tast_visitor.iter_with_state as super
 
     method! on_method_ (env, (ctx, fun_name)) m =
-      ctx.global_vars := [];
+      ctx.global_vars := SSet.empty;
       super#on_method_ (env, (ctx, fun_name)) m
 
     method! on_fun_def (env, (ctx, fun_name)) f =
-      ctx.global_vars := [];
+      ctx.global_vars := SSet.empty;
       super#on_fun_def (env, (ctx, fun_name)) f
 
     method! on_fun_ (env, (ctx, fun_name)) f =
@@ -299,13 +292,13 @@ let visitor =
         (* Iterate the block and update the set of global varialbes until
            no new global variable is found *)
         let ctx_cpy = { global_vars = ref !(ctx.global_vars) } in
-        let ctx_len = ref (List.length !(ctx.global_vars)) in
+        let ctx_len = ref (SSet.cardinal !(ctx.global_vars)) in
         let has_context_change = ref true in
         while !has_context_change do
           super#on_block (env, (ctx_cpy, fun_name)) b;
           add_vars_to_ctx ctx !(ctx_cpy.global_vars);
-          if List.length !(ctx.global_vars) <> !ctx_len then
-            ctx_len := List.length !(ctx.global_vars)
+          if SSet.cardinal !(ctx.global_vars) <> !ctx_len then
+            ctx_len := SSet.cardinal !(ctx.global_vars)
           else
             has_context_change := false
         done
@@ -334,7 +327,7 @@ let visitor =
           let is_re_global_and_mutable =
             is_expr_global_and_mutable env ctx re
           in
-          let vars_in_le = ref [] in
+          let vars_in_le = ref SSet.empty in
           let () = get_vars_in_expr vars_in_le le in
           (match has_global_write_access le with
           | true ->

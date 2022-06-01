@@ -91,42 +91,44 @@ ocaml_ffi_with_arena! {
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: pos::FunName,
-    ) -> Option<shallow_decl_defs::FunDecl<'a>> {
+    ) -> Option<&shallow_decl_defs::FunDecl<'a>> {
         let backend = unsafe { get_backend(backend) };
         backend.folded_decl_provider().get_fun(name.into(), name)
             .unwrap()
-            .map(|_f| todo!("f.to_oxidized(arena)"))
+            .map(|f| f.to_oxidized(arena))
     }
 
     fn hh_rust_provider_backend_get_shallow_class<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
-        _name: pos::TypeName,
-    ) -> Option<shallow_decl_defs::ClassDecl<'a>> {
-        let _backend = unsafe { get_backend(backend) };
-        todo!()
+        name: pos::TypeName,
+    ) -> Option<&shallow_decl_defs::ClassDecl<'a>> {
+        let backend = unsafe { get_backend(backend) };
+        backend.shallow_decl_provider().get_class(name)
+            .unwrap()
+            .map(|c| c.to_oxidized(arena))
     }
 
     fn hh_rust_provider_backend_get_typedef<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: pos::TypeName,
-    ) -> Option<shallow_decl_defs::TypedefDecl<'a>> {
+    ) -> Option<&shallow_decl_defs::TypedefDecl<'a>> {
         let backend = unsafe { get_backend(backend) };
         backend.folded_decl_provider().get_typedef(name.into(), name)
             .unwrap()
-            .map(|_td| todo!("td.to_oxidized(arena)"))
+            .map(|td| td.to_oxidized(arena))
     }
 
     fn hh_rust_provider_backend_get_gconst<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: pos::ConstName,
-    ) -> Option<shallow_decl_defs::ConstDecl<'a>> {
+    ) -> Option<&shallow_decl_defs::ConstDecl<'a>> {
         let backend = unsafe { get_backend(backend) };
         backend.folded_decl_provider().get_const(name.into(), name)
             .unwrap()
-            .map(|_c| todo!("c.to_oxidized(arena)"))
+            .map(|c| c.to_oxidized(arena))
     }
 
     fn hh_rust_provider_backend_get_module<'a>(

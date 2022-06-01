@@ -25,32 +25,32 @@ use ty::reason::Reason;
 #[derive(Debug)]
 pub struct ShallowDeclStore<R: Reason> {
     types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
-    funs: Box<dyn Store<FunName, Arc<FunDecl<R>>>>,
-    consts: Box<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
-    modules: Box<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
+    funs: Arc<dyn Store<FunName, Arc<FunDecl<R>>>>,
+    consts: Arc<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
+    modules: Arc<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
 
     // The below tables are intended to be index tables for information stored
     // in the `types` table (the underlying data is shared via the `Hc` in
     // `Ty`). When inserting or removing from the `types` table, these
     // indices must be updated.
-    properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
-    static_properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
-    methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
-    static_methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
-    constructors: Box<dyn Store<TypeName, Ty<R>>>,
+    properties: Arc<dyn Store<(TypeName, PropName), Ty<R>>>,
+    static_properties: Arc<dyn Store<(TypeName, PropName), Ty<R>>>,
+    methods: Arc<dyn Store<(TypeName, MethodName), Ty<R>>>,
+    static_methods: Arc<dyn Store<(TypeName, MethodName), Ty<R>>>,
+    constructors: Arc<dyn Store<TypeName, Ty<R>>>,
 }
 
 impl<R: Reason> ShallowDeclStore<R> {
     pub fn new(
         types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
-        funs: Box<dyn Store<FunName, Arc<FunDecl<R>>>>,
-        consts: Box<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
-        modules: Box<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
-        properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
-        static_properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
-        methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
-        static_methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
-        constructors: Box<dyn Store<TypeName, Ty<R>>>,
+        funs: Arc<dyn Store<FunName, Arc<FunDecl<R>>>>,
+        consts: Arc<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
+        modules: Arc<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
+        properties: Arc<dyn Store<(TypeName, PropName), Ty<R>>>,
+        static_properties: Arc<dyn Store<(TypeName, PropName), Ty<R>>>,
+        methods: Arc<dyn Store<(TypeName, MethodName), Ty<R>>>,
+        static_methods: Arc<dyn Store<(TypeName, MethodName), Ty<R>>>,
+        constructors: Arc<dyn Store<TypeName, Ty<R>>>,
     ) -> Self {
         Self {
             types,
@@ -73,24 +73,24 @@ impl<R: Reason> ShallowDeclStore<R> {
     /// involve deserializing an entire `ShallowClass`.
     pub fn with_no_member_stores(
         types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
-        funs: Box<dyn Store<FunName, Arc<FunDecl<R>>>>,
-        consts: Box<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
-        modules: Box<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
+        funs: Arc<dyn Store<FunName, Arc<FunDecl<R>>>>,
+        consts: Arc<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
+        modules: Arc<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
     ) -> Self {
         Self {
-            properties: Box::new(PropFinder {
+            properties: Arc::new(PropFinder {
                 types: Arc::clone(&types),
             }),
-            static_properties: Box::new(StaticPropFinder {
+            static_properties: Arc::new(StaticPropFinder {
                 types: Arc::clone(&types),
             }),
-            methods: Box::new(MethodFinder {
+            methods: Arc::new(MethodFinder {
                 types: Arc::clone(&types),
             }),
-            static_methods: Box::new(StaticMethodFinder {
+            static_methods: Arc::new(StaticMethodFinder {
                 types: Arc::clone(&types),
             }),
-            constructors: Box::new(ConstructorFinder {
+            constructors: Arc::new(ConstructorFinder {
                 types: Arc::clone(&types),
             }),
 

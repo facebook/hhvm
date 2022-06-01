@@ -15,7 +15,9 @@ use file_provider::{DiskProvider, FileProvider};
 use hackrs::{
     decl_parser::DeclParser,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
-    shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider, ShallowDeclStore},
+    shallow_decl_provider::{
+        LazyShallowDeclProvider, ShallowDeclProvider, ShallowDeclStore, TypeDecl,
+    },
 };
 use naming_provider::NamingProvider;
 use naming_table::NamingTable;
@@ -23,7 +25,10 @@ use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized_by_ref::parser_options::ParserOptions;
 use pos::{RelativePath, RelativePathCtx, TypeName};
 use std::sync::Arc;
-use ty::{decl::folded::FoldedClass, reason::BReason};
+use ty::{
+    decl::{self, folded::FoldedClass},
+    reason::BReason,
+};
 
 pub struct ProviderBackend {
     pub path_ctx: Arc<RelativePathCtx>,
@@ -38,6 +43,9 @@ pub struct ProviderBackend {
 pub struct HhServerProviderBackend {
     file_store: Arc<ChangesStore<RelativePath, FileType>>,
     naming_table: Arc<NamingTable>,
+    /// Collection of Arcs pointing to the backing stores for the
+    /// ShallowDeclStore below, allowing us to invoke push/pop_local_changes.
+    shallow_decl_changes_store: Arc<ShallowStoreWithChanges>,
     shallow_decl_store: Arc<ShallowDeclStore<BReason>>,
     lazy_shallow_decl_provider: Arc<LazyShallowDeclProvider<BReason>>,
     #[allow(dead_code)]
@@ -59,11 +67,8 @@ impl HhServerProviderBackend {
         let dependency_graph = Arc::new(NoDepGraph::new());
         let naming_table = Arc::new(NamingTable::new());
 
-        let shallow_decl_store = Arc::new(hackrs_test_utils::store::make_shallow_decl_store::<
-            BReason,
-        >(
-            hackrs_test_utils::serde_store::StoreOpts::Unserialized,
-        ));
+        let shallow_decl_changes_store = Arc::new(ShallowStoreWithChanges::new());
+        let shallow_decl_store = Arc::new(shallow_decl_changes_store.as_shallow_decl_store());
 
         let lazy_shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
             Arc::clone(&shallow_decl_store),
@@ -94,6 +99,7 @@ impl HhServerProviderBackend {
             },
             file_store,
             naming_table,
+            shallow_decl_changes_store,
             shallow_decl_store,
             lazy_shallow_decl_provider,
             folded_classes_store,
@@ -153,11 +159,80 @@ impl HhServerProviderBackend {
     pub fn push_local_changes(&self) {
         self.file_store.push_local_changes();
         self.naming_table.push_local_changes();
+        self.shallow_decl_changes_store.push_local_changes();
     }
 
     pub fn pop_local_changes(&self) {
         self.file_store.pop_local_changes();
         self.naming_table.pop_local_changes();
+        self.shallow_decl_changes_store.pop_local_changes();
+    }
+}
+
+pub struct ShallowStoreWithChanges {
+    types: Arc<ChangesStore<TypeName, TypeDecl<BReason>>>,
+    funs: Arc<ChangesStore<pos::FunName, Arc<decl::FunDecl<BReason>>>>,
+    consts: Arc<ChangesStore<pos::ConstName, Arc<decl::ConstDecl<BReason>>>>,
+    modules: Arc<ChangesStore<pos::ModuleName, Arc<decl::ModuleDecl<BReason>>>>,
+    properties: Arc<ChangesStore<(TypeName, pos::PropName), decl::Ty<BReason>>>,
+    static_properties: Arc<ChangesStore<(TypeName, pos::PropName), decl::Ty<BReason>>>,
+    methods: Arc<ChangesStore<(TypeName, pos::MethodName), decl::Ty<BReason>>>,
+    static_methods: Arc<ChangesStore<(TypeName, pos::MethodName), decl::Ty<BReason>>>,
+    constructors: Arc<ChangesStore<TypeName, decl::Ty<BReason>>>,
+}
+
+impl ShallowStoreWithChanges {
+    pub fn new() -> Self {
+        // TODO: all these NonEvictingStores should be sharedmem
+        Self {
+            types: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+            funs: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+            consts: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+            modules: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+            properties: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+            static_properties: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+            methods: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+            static_methods: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+            constructors: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+        }
+    }
+
+    pub fn push_local_changes(&self) {
+        self.types.push_local_changes();
+        self.funs.push_local_changes();
+        self.consts.push_local_changes();
+        self.modules.push_local_changes();
+        self.properties.push_local_changes();
+        self.static_properties.push_local_changes();
+        self.methods.push_local_changes();
+        self.static_methods.push_local_changes();
+        self.constructors.push_local_changes();
+    }
+
+    pub fn pop_local_changes(&self) {
+        self.types.pop_local_changes();
+        self.funs.pop_local_changes();
+        self.consts.pop_local_changes();
+        self.modules.pop_local_changes();
+        self.properties.pop_local_changes();
+        self.static_properties.pop_local_changes();
+        self.methods.pop_local_changes();
+        self.static_methods.pop_local_changes();
+        self.constructors.pop_local_changes();
+    }
+
+    pub fn as_shallow_decl_store(&self) -> ShallowDeclStore<BReason> {
+        ShallowDeclStore::new(
+            Arc::clone(&self.types) as _,
+            Arc::clone(&self.funs) as _,
+            Arc::clone(&self.consts) as _,
+            Arc::clone(&self.modules) as _,
+            Arc::clone(&self.properties) as _,
+            Arc::clone(&self.static_properties) as _,
+            Arc::clone(&self.methods) as _,
+            Arc::clone(&self.static_methods) as _,
+            Arc::clone(&self.constructors) as _,
+        )
     }
 }
 

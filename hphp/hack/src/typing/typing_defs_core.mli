@@ -427,8 +427,6 @@ module Pp : sig
 
   val pp_ty_ : Format.formatter -> 'a ty_ -> unit
 
-  val pp_ty_list : Format.formatter -> 'a ty list -> unit
-
   val pp_taccess_type : Format.formatter -> 'a taccess_type -> unit
 
   val pp_possibly_enforced_ty :
@@ -445,8 +443,6 @@ module Pp : sig
   val pp_fun_type : Format.formatter -> 'a ty fun_type -> unit
 
   val pp_fun_param : Format.formatter -> 'a ty fun_param -> unit
-
-  val pp_fun_params : Format.formatter -> 'a ty fun_params -> unit
 
   val show_decl_ty : decl_ty -> string
 

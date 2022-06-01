@@ -1350,8 +1350,8 @@ void fullDCE(IRUnit& unit) {
         if (inst->is(DecRef, DecReleaseCheck)) {
           rcInsts[srcInst].decs.emplace_back(inst);
         }
-        if (inst->is(InitVecElem, InitStructElem, InitStructPositions,
-                     ReleaseShallow, StClosureArg)) {
+        if (inst->is(InitVecElem, InitDictElem, InitStructElem,
+                     InitStructPositions, ReleaseShallow, StClosureArg)) {
           if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
         }
       }

@@ -1472,7 +1472,7 @@ To string conversions:
   immediates for keys. This op initializes the header and hash table of the
   new array-like, but does not its elements; use InitDictElem for that.
 
-| InitDictElem<index,key>, ND, S(Dict) S(Cell), NF
+| InitDictElem<index,key>, ND, S(Dict) S(Cell), CRc
 
   Initialize the element at position `index` in array S0 to have the string
   literal `key` as its key and S1 as its value. This instruction assumes that

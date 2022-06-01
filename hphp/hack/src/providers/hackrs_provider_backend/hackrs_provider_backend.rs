@@ -15,9 +15,7 @@ use file_provider::{DiskProvider, FileProvider};
 use hackrs::{
     decl_parser::DeclParser,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
-    shallow_decl_provider::{
-        LazyShallowDeclProvider, ShallowDeclProvider, ShallowDeclStore, TypeDecl,
-    },
+    shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider, ShallowDeclStore},
 };
 use naming_provider::NamingProvider;
 use naming_table::NamingTable;
@@ -170,7 +168,8 @@ impl HhServerProviderBackend {
 }
 
 pub struct ShallowStoreWithChanges {
-    types: Arc<ChangesStore<TypeName, TypeDecl<BReason>>>,
+    classes: Arc<ChangesStore<TypeName, Arc<decl::ShallowClass<BReason>>>>,
+    typedefs: Arc<ChangesStore<TypeName, Arc<decl::TypedefDecl<BReason>>>>,
     funs: Arc<ChangesStore<pos::FunName, Arc<decl::FunDecl<BReason>>>>,
     consts: Arc<ChangesStore<pos::ConstName, Arc<decl::ConstDecl<BReason>>>>,
     modules: Arc<ChangesStore<pos::ModuleName, Arc<decl::ModuleDecl<BReason>>>>,
@@ -185,7 +184,8 @@ impl ShallowStoreWithChanges {
     pub fn new() -> Self {
         // TODO: all these NonEvictingStores should be sharedmem
         Self {
-            types: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+            classes: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+            typedefs: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
             funs: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
             consts: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
             modules: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
@@ -198,7 +198,8 @@ impl ShallowStoreWithChanges {
     }
 
     pub fn push_local_changes(&self) {
-        self.types.push_local_changes();
+        self.classes.push_local_changes();
+        self.typedefs.push_local_changes();
         self.funs.push_local_changes();
         self.consts.push_local_changes();
         self.modules.push_local_changes();
@@ -210,7 +211,8 @@ impl ShallowStoreWithChanges {
     }
 
     pub fn pop_local_changes(&self) {
-        self.types.pop_local_changes();
+        self.classes.pop_local_changes();
+        self.typedefs.pop_local_changes();
         self.funs.pop_local_changes();
         self.consts.pop_local_changes();
         self.modules.pop_local_changes();
@@ -223,7 +225,8 @@ impl ShallowStoreWithChanges {
 
     pub fn as_shallow_decl_store(&self) -> ShallowDeclStore<BReason> {
         ShallowDeclStore::new(
-            Arc::clone(&self.types) as _,
+            Arc::clone(&self.classes) as _,
+            Arc::clone(&self.typedefs) as _,
             Arc::clone(&self.funs) as _,
             Arc::clone(&self.consts) as _,
             Arc::clone(&self.modules) as _,

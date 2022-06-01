@@ -17,7 +17,8 @@ pub fn make_shallow_decl_store<R: Reason>(opts: StoreOpts) -> ShallowDeclStore<R
     match opts {
         StoreOpts::Serialized(compression_type) => {
             ShallowDeclStore::new(
-                Arc::new(SerializingStore::with_compression(compression_type)), // types
+                Arc::new(SerializingStore::with_compression(compression_type)), // classes
+                Arc::new(SerializingStore::with_compression(compression_type)), // typedefs
                 Arc::new(SerializingStore::with_compression(compression_type)), // funs
                 Arc::new(SerializingStore::with_compression(compression_type)), // consts
                 Arc::new(SerializingStore::with_compression(compression_type)), // modules
@@ -29,10 +30,11 @@ pub fn make_shallow_decl_store<R: Reason>(opts: StoreOpts) -> ShallowDeclStore<R
             )
         }
         StoreOpts::Unserialized => ShallowDeclStore::with_no_member_stores(
-            Arc::new(NonEvictingStore::default()),
-            Arc::new(NonEvictingStore::default()),
-            Arc::new(NonEvictingStore::default()),
-            Arc::new(NonEvictingStore::default()),
+            Arc::new(NonEvictingStore::default()), // classes
+            Arc::new(NonEvictingStore::default()), // typedefs
+            Arc::new(NonEvictingStore::default()), // funs
+            Arc::new(NonEvictingStore::default()), // consts
+            Arc::new(NonEvictingStore::default()), // modules
         ),
     }
 }

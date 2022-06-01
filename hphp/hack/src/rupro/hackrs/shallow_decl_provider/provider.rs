@@ -7,9 +7,10 @@ use super::{Error, Result, ShallowDeclStore, TypeDecl};
 use crate::decl_parser::DeclParser;
 use itertools::Itertools;
 use naming_provider::NamingProvider;
+use oxidized::naming_types::KindOfType;
 use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::sync::Arc;
-use ty::decl::{shallow::Decl, ConstDecl, FunDecl, Ty};
+use ty::decl::{shallow::Decl, ConstDecl, FunDecl, ShallowClass, Ty, TypedefDecl};
 use ty::reason::Reason;
 
 /// A `ShallowDeclProvider` which, if the requested name is not present in its
@@ -111,12 +112,36 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
     }
 
     fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
-        if let res @ Some(..) = self.store.get_type(name)? {
+        if let Some((_path, kind)) = self.naming_provider.get_type_path_and_kind(name)? {
+            match kind {
+                KindOfType::TClass => Ok(self.get_class(name)?.map(|decl| TypeDecl::Class(decl))),
+                KindOfType::TTypedef => {
+                    Ok(self.get_typedef(name)?.map(|decl| TypeDecl::Typedef(decl)))
+                }
+            }
+        } else {
+            Ok(None)
+        }
+    }
+
+    fn get_typedef(&self, name: TypeName) -> Result<Option<Arc<TypedefDecl<R>>>> {
+        if let res @ Some(..) = self.store.get_typedef(name)? {
             return Ok(res);
         }
         if let Some(path) = self.naming_provider.get_type_path(name)? {
             self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_type(name)?);
+            return Ok(self.store.get_typedef(name)?);
+        }
+        Ok(None)
+    }
+
+    fn get_class(&self, name: TypeName) -> Result<Option<Arc<ShallowClass<R>>>> {
+        if let res @ Some(..) = self.store.get_class(name)? {
+            return Ok(res);
+        }
+        if let Some(path) = self.naming_provider.get_type_path(name)? {
+            self.parse_and_cache_decls_in(path)?;
+            return Ok(self.store.get_class(name)?);
         }
         Ok(None)
     }
@@ -222,7 +247,19 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
     }
 
     fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
-        Ok(self.store.get_type(name)?)
+        if let Some(class) = self.get_class(name)? {
+            Ok(Some(TypeDecl::Class(class)))
+        } else {
+            Ok(self.get_typedef(name)?.map(TypeDecl::Typedef))
+        }
+    }
+
+    fn get_typedef(&self, name: TypeName) -> Result<Option<Arc<TypedefDecl<R>>>> {
+        Ok(self.store.get_typedef(name)?)
+    }
+
+    fn get_class(&self, name: TypeName) -> Result<Option<Arc<ShallowClass<R>>>> {
+        Ok(self.store.get_class(name)?)
     }
 
     fn get_property_type(

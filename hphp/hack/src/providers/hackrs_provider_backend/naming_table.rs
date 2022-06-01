@@ -156,10 +156,13 @@ impl NamingTable {
 }
 
 impl NamingProvider for NamingTable {
-    fn get_type_path(&self, name: pos::TypeName) -> Result<Option<RelativePath>> {
+    fn get_type_path_and_kind(
+        &self,
+        name: pos::TypeName,
+    ) -> Result<Option<(RelativePath, naming_types::KindOfType)>> {
         Ok(self
             .get_type_pos(name)?
-            .map(|(pos, _kind)| pos.path().into()))
+            .map(|(pos, kind)| (pos.path().into(), kind)))
     }
     fn get_fun_path(&self, name: pos::FunName) -> Result<Option<RelativePath>> {
         Ok(self.get_fun_pos(name)?.map(|pos| pos.path().into()))

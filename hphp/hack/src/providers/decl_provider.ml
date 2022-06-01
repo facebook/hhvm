@@ -158,7 +158,6 @@ let get_fun
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_fun fun_name)
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_fun fun_name) with
     | Some c -> Some c
@@ -203,6 +202,8 @@ let get_fun
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_fun decl fun_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_fun backend fun_name
 
 let declare_typedef_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
@@ -221,7 +222,6 @@ let get_typedef
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c
@@ -266,6 +266,8 @@ let get_typedef
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_typedef decl typedef_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_typedef backend typedef_name
 
 let declare_const_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : gconst_key) :
@@ -284,7 +286,6 @@ let get_gconst
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_gconst gconst_name)
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_gconst gconst_name) with
     | Some c -> Some c
@@ -329,6 +330,8 @@ let get_gconst
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_gconst decl gconst_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_gconst backend gconst_name
 
 let prepare_for_typecheck
     (ctx : Provider_context.t) (path : Relative_path.t) (content : string) :
@@ -383,7 +386,6 @@ let get_module
   in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_module module_name)
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Option.first_some
       Decl_store.((get ()).get_module module_name)
@@ -395,6 +397,8 @@ let get_module
       ~default:fetch_from_backing_store
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_module decl module_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_module backend module_name
 
 let local_changes_push_sharedmem_stack () =
   Decl_store.((get ()).push_local_changes ())

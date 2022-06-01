@@ -95,6 +95,7 @@
   decl_service_client
   direct_decl_utils
   provider_backend
+  rust_provider_backend_stubs
   shallow_classes_provider
   shallow_decl_defs
   linearization_provider
@@ -155,6 +156,7 @@
   direct_decl_utils
   provider_backend
   provider_context
+  rust_provider_backend_stubs
   shallow_classes_heap)
  (preprocess
   (pps ppx_deriving.std)))

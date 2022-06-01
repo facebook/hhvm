@@ -46,6 +46,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Expr<(), ()> {
         let p = R::Pos::from(&self.1);
         let (e, ty) = match &self.2 {
             Int(s) => (Int(s.clone()), Ty::int(R::witness(p))),
+            String(s) => (String(s.clone()), Ty::string(R::witness(p))),
             Binop(box (op, e1, e2)) => infer_binop(env, p, op, e1, e2)?,
             Lvar(box id) => infer_lvar(env, id)?,
             Call(box (e, explicit_targs, el, unpacked_element)) => {

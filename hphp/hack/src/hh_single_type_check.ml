@@ -68,7 +68,7 @@ type options = {
   verbosity: int;
   should_print_position: bool;
   custom_hhi_path: string option;
-  profile_type_check_twice: bool;
+  profile_type_check_multi: int option;
   memtrace: string option;
   pessimise_builtins: bool;
   rust_provider_backend: bool;
@@ -301,7 +301,7 @@ let parse_options () =
   let type_printer_fuel =
     ref (TypecheckerOptions.type_printer_fuel GlobalOptions.default)
   in
-  let profile_type_check_twice = ref false in
+  let profile_type_check_multi = ref None in
   let profile_top_level_definitions =
     ref (TypecheckerOptions.profile_top_level_definitions GlobalOptions.default)
   in
@@ -750,8 +750,11 @@ let parse_options () =
         " Raise an error for class constants missing types; 1 for abstract constants, 2 for all "
       );
       ( "--profile-type-check-twice",
-        Arg.Set profile_type_check_twice,
+        Arg.Unit (fun () -> profile_type_check_multi := Some 1),
         " Typecheck the file twice" );
+      ( "--profile-type-check-multi",
+        Arg.Int (fun n -> profile_type_check_multi := Some n),
+        " Typecheck the files n times extra (!)" );
       ( "--profile-top-level-definitions",
         Arg.Set profile_top_level_definitions,
         " Profile typechecking of top-level definitions" );
@@ -994,7 +997,7 @@ let parse_options () =
       verbosity = !verbosity;
       should_print_position = !print_position;
       custom_hhi_path = !custom_hhi_path;
-      profile_type_check_twice = !profile_type_check_twice;
+      profile_type_check_multi = !profile_type_check_multi;
       memtrace = !memtrace;
       pessimise_builtins = !pessimise_builtins;
       rust_provider_backend = !rust_provider_backend;
@@ -1135,8 +1138,10 @@ let print_elapsed fn desc ~start_time =
     desc
     elapsed_ms
 
-let check_file ctx errors files_info ~profile_type_check_twice ~memtrace =
-  if profile_type_check_twice then
+let check_file ctx errors files_info ~profile_type_check_multi ~memtrace =
+  let profiling = Option.is_some profile_type_check_multi in
+  let is_twice = Option.equal Int.equal profile_type_check_multi (Some 1) in
+  if profiling then
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
         let start_time = Unix.gettimeofday () in
         let _ = Typing_check_utils.type_file ctx fn fileinfo in
@@ -1148,17 +1153,27 @@ let check_file ctx errors files_info ~profile_type_check_twice ~memtrace =
           ~sampling_rate:Memtrace.default_sampling_rate
           ~filename)
   in
-  let errors =
-    Relative_path.Map.fold
-      files_info
-      ~f:(fun fn fileinfo errors ->
-        let start_time = Unix.gettimeofday () in
-        let (_, new_errors) = Typing_check_utils.type_file ctx fn fileinfo in
-        if profile_type_check_twice then
-          print_elapsed fn "second typecheck" ~start_time;
-        errors @ Errors.get_sorted_error_list new_errors)
-      ~init:errors
+  let rec go n =
+    let errors =
+      Relative_path.Map.fold
+        files_info
+        ~f:(fun fn fileinfo errors ->
+          let start_time = Unix.gettimeofday () in
+          let (_, new_errors) = Typing_check_utils.type_file ctx fn fileinfo in
+          if profiling && is_twice then
+            print_elapsed fn "second typecheck" ~start_time;
+          errors @ Errors.get_sorted_error_list new_errors)
+        ~init:errors
+    in
+    if n > 1 then
+      go (n - 1)
+    else
+      errors
   in
+  let start_cpu = Sys.time () in
+  let errors = go (max 1 (Option.value ~default:1 profile_type_check_multi)) in
+  if profiling then
+    Printf.printf "total warm cpu time (s) - %f\n" (Sys.time () -. start_cpu);
   Option.iter tracer ~f:Memtrace.stop_tracing;
   errors
 
@@ -1670,7 +1685,7 @@ let handle_mode
     dbg_deps
     dbg_glean_deps
     ~should_print_position
-    ~profile_type_check_twice
+    ~profile_type_check_multi
     ~memtrace
     ~verbosity =
   let expect_single_file () : Relative_path.t =
@@ -1710,7 +1725,7 @@ let handle_mode
       let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
       let error_list = Errors.get_sorted_error_list parse_errors in
       let check_errors =
-        check_file ctx error_list file_info ~profile_type_check_twice ~memtrace
+        check_file ctx error_list file_info ~profile_type_check_multi ~memtrace
       in
       if not (List.is_empty check_errors) then
         print_errors check_errors
@@ -1752,7 +1767,7 @@ let handle_mode
       let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
       let check_errors =
         let error_list = Errors.get_sorted_error_list parse_errors in
-        check_file ctx error_list file_info ~profile_type_check_twice ~memtrace
+        check_file ctx error_list file_info ~profile_type_check_multi ~memtrace
       in
       if not (List.is_empty check_errors) then
         print_errors check_errors
@@ -2140,7 +2155,7 @@ let handle_mode
                   ctx
                   (Errors.get_sorted_error_list parse_errors)
                   individual_file_info
-                  ~profile_type_check_twice
+                  ~profile_type_check_multi
                   ~memtrace
               in
               write_error_list error_format errors oc max_errors)
@@ -2176,7 +2191,7 @@ let handle_mode
   | Errors ->
     (* Don't typecheck builtins *)
     let errors =
-      check_file ctx parse_errors files_info ~profile_type_check_twice ~memtrace
+      check_file ctx parse_errors files_info ~profile_type_check_multi ~memtrace
     in
     print_error_list error_format errors max_errors;
     if not (List.is_empty errors) then exit 2
@@ -2481,7 +2496,7 @@ let decl_and_run_mode
       verbosity;
       should_print_position;
       custom_hhi_path;
-      profile_type_check_twice;
+      profile_type_check_multi;
       memtrace;
       pessimise_builtins;
       rust_provider_backend;
@@ -2671,7 +2686,7 @@ let decl_and_run_mode
     dbg_deps
     dbg_glean_deps
     ~should_print_position
-    ~profile_type_check_twice
+    ~profile_type_check_multi
     ~memtrace
     ~verbosity
 

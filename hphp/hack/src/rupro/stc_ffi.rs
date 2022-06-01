@@ -9,12 +9,14 @@
 
 use hackrs::ast_provider::AstProvider;
 use hackrs::decl_parser::DeclParser;
+use hackrs::errors::HackError;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::shallow_decl_provider::EagerShallowDeclProvider;
 use hackrs::tast::{self, TastExpander};
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
 use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
+use hcons::Consable;
 use oxidized::global_options::GlobalOptions;
 use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
@@ -57,6 +59,9 @@ struct CliOptions {
     /// Hack source files
     #[structopt(value_name("FILEPATH"))]
     filenames: Vec<PathBuf>,
+
+    #[structopt(long)]
+    profile_type_check_multi: Option<i64>,
 }
 
 #[no_mangle]
@@ -83,7 +88,7 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
     let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(
         file_provider::PlainFileProvider::new(Arc::clone(&relative_path_ctx)),
     );
-    let decl_parser = DeclParser::new(Arc::clone(&file_provider));
+    let decl_parser = DeclParser::<R>::new(Arc::clone(&file_provider));
     let shallow_decl_store =
         Arc::new(hackrs_test_utils::store::make_non_evicting_shallow_decl_store());
     let shallow_decl_provider = Arc::new(EagerShallowDeclProvider::new(Arc::clone(
@@ -106,8 +111,8 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
 
     let filenames: Vec<RelativePath> = cli_options
         .filenames
-        .into_iter()
-        .map(|fln| RelativePath::new(Prefix::Root, &fln))
+        .iter()
+        .map(|fln| RelativePath::new(Prefix::Root, fln.clone()))
         .collect();
 
     for &filename in &filenames {
@@ -116,17 +121,101 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
     }
 
     // println!("{:#?}", shallow_decl_provider);
+    let (tasts, errs) = check_files(&cli_options, &ast_provider, Rc::clone(&ctx), filenames);
+    if !errs.is_empty() {
+        for err in errs {
+            println!("{:#?}", err);
+        }
+    }
+    for tast in tasts {
+        print_tast(&options, &tast);
+        println!()
+    }
+}
 
-    for fln in filenames {
-        let (ast, errs) = ast_provider.get_ast(fln).unwrap();
+fn check_files<R: Reason>(
+    cli_options: &CliOptions,
+    ast_provider: &AstProvider,
+    ctx: Rc<TypingCtx<R>>,
+    filenames: Vec<RelativePath>,
+) -> (Vec<tast::Program<R>>, Vec<HackError<R>>) {
+    let mut tasts = Vec::new();
+    let mut all_errs = Vec::new();
+    for fln in &filenames {
+        let (ast, errs) = ast_provider.get_ast(fln.clone()).unwrap();
         let (mut tast, errs) =
             TypingCheckUtils::type_file::<R>(Rc::clone(&ctx), &ast, errs).unwrap();
-        if !errs.is_empty() {
-            for err in errs {
-                println!("{:#?}", err);
+        TastExpander::expand_program(&mut tast);
+        tasts.push(tast);
+        all_errs.extend(errs);
+    }
+
+    if let Some(n) = cli_options.profile_type_check_multi {
+        let cpu_start = sys_time();
+        for _ in 0..n {
+            // Clear the hash conser, to simulate freeing types.
+            ty::local::Ty_::<R, ty::local::Ty<R>>::conser().clear();
+            ty::decl::Ty_::<R>::conser().clear();
+            ty::prop::PropF::<R, ty::prop::Prop<R>>::conser().clear();
+
+            // The decl cache is already warm just as in OCaml!
+            for fln in &filenames {
+                let (ast, errs) = ast_provider.get_ast(fln.clone()).unwrap();
+                let (mut tast, _errs) =
+                    TypingCheckUtils::type_file::<R>(Rc::clone(&ctx), &ast, errs).unwrap();
+                TastExpander::expand_program(&mut tast);
             }
         }
-        TastExpander::expand_program(&mut tast);
-        print_tast(&options, &tast);
+        println!("total warm cpu time (s) - {}", sys_time() - cpu_start);
     }
+
+    (tasts, all_errs)
+}
+
+/// Return the processor time. Same implementation as OCaml for optimal
+/// comparison. See `caml_sys_time_include_children_unboxed` in
+/// `ocaml/runtime/sys.c`.
+fn sys_time() -> f64 {
+    let mut acc: f64 = 0.0;
+    let mut ru = libc::rusage {
+        ru_utime: libc::timeval {
+            tv_sec: 0,
+            tv_usec: 0,
+        },
+        ru_stime: libc::timeval {
+            tv_sec: 0,
+            tv_usec: 0,
+        },
+        ru_maxrss: 0,
+        ru_ixrss: 0,
+        ru_idrss: 0,
+        ru_isrss: 0,
+        ru_minflt: 0,
+        ru_majflt: 0,
+        ru_nswap: 0,
+        ru_inblock: 0,
+        ru_oublock: 0,
+        ru_msgsnd: 0,
+        ru_msgrcv: 0,
+        ru_nsignals: 0,
+        ru_nvcsw: 0,
+        ru_nivcsw: 0,
+    };
+
+    assert_eq!(unsafe { libc::getrusage(libc::RUSAGE_SELF, &mut ru) }, 0);
+    acc += (ru.ru_utime.tv_sec as f64)
+        + (ru.ru_utime.tv_usec as f64) / 1e6_f64
+        + (ru.ru_stime.tv_sec as f64)
+        + (ru.ru_stime.tv_usec as f64) / 1e6_f64;
+
+    assert_eq!(
+        unsafe { libc::getrusage(libc::RUSAGE_CHILDREN, &mut ru) },
+        0
+    );
+    acc += (ru.ru_utime.tv_sec as f64)
+        + (ru.ru_utime.tv_usec as f64) / 1e6_f64
+        + (ru.ru_stime.tv_sec as f64)
+        + (ru.ru_stime.tv_usec as f64) / 1e6_f64;
+
+    acc
 }

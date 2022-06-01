@@ -2175,7 +2175,7 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
       failwith
         "Invalid nodes in NAST. These nodes should be removed during naming."
   in
-  Nast_check.program ctx nast;
+  if do_tast_checks then Nast_check.program ctx nast;
   let (tast, envs) = List.unzip @@ List.filter_map nast ~f:convert_def in
   let envs = List.concat envs in
   if do_tast_checks then Tast_check.program ctx tast;

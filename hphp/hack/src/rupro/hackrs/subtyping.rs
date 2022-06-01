@@ -15,10 +15,10 @@ use crate::typing::typing_error::Result;
 use im::HashSet;
 use oracle::Oracle;
 use pos::{Symbol, TypeName};
-pub use solve::{always_solve_wrt_variance_or_down, solve};
+pub use solve::{force_solve, solve};
 use std::{ops::Deref, rc::Rc};
 use ty::{
-    local::{Ty, Tyvar},
+    local::{Ty, Ty_, Tyvar},
     local_error::TypingError,
     prop::{Cstr, Prop, PropF},
     reason::Reason,
@@ -96,15 +96,21 @@ impl<'a, R: Reason> Subtyper<'a, R> {
         unimplemented!("Inference for `has_member` propositions is not implemented")
     }
 
-    pub fn always_solve_wrt_variance_or_down(
-        &mut self,
-        tvar: Tyvar,
-        r: &R,
-    ) -> Result<Option<Vec<TypingError<R>>>> {
-        let mut normalize_env = self.normalize_env();
-        always_solve_wrt_variance_or_down(&mut normalize_env, tvar, r)?;
-        self.commit(normalize_env);
+    pub fn force_solve(&mut self, tvar: Tyvar, r: &R) -> Result<Option<Vec<TypingError<R>>>> {
+        if self.inf_env.is_unsolved(&tvar) {
+            let mut normalize_env = self.normalize_env();
+            solve::force_solve(&mut normalize_env, tvar, r, false)?;
+            self.commit(normalize_env);
+        }
         Ok(None)
+    }
+
+    pub fn force_solve_ty(&mut self, ty: &Ty<R>) -> Result<Option<Vec<TypingError<R>>>> {
+        match &**ty {
+            Ty_::Tvar(var) => self.force_solve(var.clone(), ty.reason()),
+            Ty_::Tunion(..) => todo!(),
+            _ => Ok(None),
+        }
     }
 
     /// Traverse a proposition and add any bounds appearing in sub-propositions of

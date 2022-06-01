@@ -57,6 +57,8 @@ pub fn force_solve_all<R: Reason>(
 /// the union of the tyvars lower bound irrespective of its variance.
 /// Note that this may still fail to bind a type variable if there is a
 /// 'constraint type' in the lower bound
+///
+/// Will panic if variable is already solved.
 pub fn force_solve<R: Reason>(
     env: &mut NormalizeEnv<R>,
     tv: Tyvar,

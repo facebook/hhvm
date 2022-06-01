@@ -83,7 +83,7 @@ impl<R: Reason> InferenceEnv<R> {
             .map_or(false, |info| info.is_solved())
     }
 
-    fn is_unsolved(&self, tv: &Tyvar) -> bool {
+    pub fn is_unsolved(&self, tv: &Tyvar) -> bool {
         !self.is_solved(tv)
     }
 
@@ -452,18 +452,12 @@ impl<'a, R: Reason> ToOxidized<'a> for InferenceEnv<R> {
             subtype_prop,
         } = self;
         rupro_todo_assert!(tyvar_stack.is_empty(), AST);
-        rupro_todo_assert!(occurrences.is_empty(), AST);
 
         oxidized_by_ref::typing_inference_env::TypingInferenceEnv {
             tvenv: IImmutableHashMapToOxidized(tyvar_info).to_oxidized(bump),
             tyvars_stack: &[],
             subtype_prop: bump.alloc(subtype_prop.to_oxidized(bump)),
-            tyvar_occurrences: bump.alloc(
-                oxidized_by_ref::typing_tyvar_occurrences::TypingTyvarOccurrences {
-                    tyvar_occurrences: Default::default(),
-                    tyvars_in_tyvar: Default::default(),
-                },
-            ),
+            tyvar_occurrences: occurrences.to_oxidized(bump),
             allow_solve_globals: false,
         }
     }

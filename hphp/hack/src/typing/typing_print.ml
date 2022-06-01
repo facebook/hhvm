@@ -943,14 +943,16 @@ module Full = struct
     (fuel, str)
 
   let to_string_with_identity ~fuel env x occurrence definition_opt =
+    let open SymbolOccurrence in
     let ty = locl_ty in
     let penv = Loclenv env in
     let prefix =
       SymbolDefinition.(
         let print_mod m = text (string_of_modifier m) ^^ Space in
-        match definition_opt with
-        | None -> Nothing
-        | Some def ->
+        match (definition_opt, occurrence.type_) with
+        | (None, _) -> Nothing
+        | (_, XhpLiteralAttr _) -> Nothing
+        | (Some def, _) ->
           begin
             match def.modifiers with
             | [] -> Nothing
@@ -960,30 +962,46 @@ module Full = struct
           end)
     in
     let (fuel, body_doc) =
-      SymbolOccurrence.(
-        match (occurrence, get_node x) with
-        | ({ type_ = Class _; name; _ }, _) ->
-          (fuel, Concat [text "class"; Space; text_strip_ns name])
-        | ({ type_ = Function; name; _ }, Tfun ft)
-        | ({ type_ = Method (_, name); _ }, Tfun ft) ->
-          (* Use short names for function types since they display a lot more
-             information to the user. *)
-          let (fuel, fun_ty_doc) =
-            fun_type ~fuel ~ty text_strip_ns ISet.empty penv ft
-          in
-          let fun_doc =
-            Concat [text "function"; Space; text_strip_ns name; fun_ty_doc]
-          in
-          (fuel, fun_doc)
-        | ({ type_ = Property _; name; _ }, _)
-        | ({ type_ = XhpLiteralAttr _; name; _ }, _)
-        | ({ type_ = ClassConst _; name; _ }, _)
-        | ({ type_ = GConst; name; _ }, _)
-        | ({ type_ = EnumClassLabel _; name; _ }, _) ->
-          let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
-          let doc = Concat [ty_doc; Space; text_strip_ns name] in
-          (fuel, doc)
-        | _ -> ty ~fuel text_strip_ns ISet.empty penv x)
+      match (occurrence, get_node x) with
+      | ({ type_ = Class _; name; _ }, _) ->
+        (fuel, Concat [text "class"; Space; text_strip_ns name])
+      | ({ type_ = Function; name; _ }, Tfun ft)
+      | ({ type_ = Method (_, name); _ }, Tfun ft) ->
+        (* Use short names for function types since they display a lot more
+           information to the user. *)
+        let (fuel, fun_ty_doc) =
+          fun_type ~fuel ~ty text_strip_ns ISet.empty penv ft
+        in
+        let fun_doc =
+          Concat [text "function"; Space; text_strip_ns name; fun_ty_doc]
+        in
+        (fuel, fun_doc)
+      | ({ type_ = Property (_, name); _ }, _) ->
+        let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+        let name =
+          if String.is_prefix name ~prefix:"$" then
+            (* Static property *)
+            name
+          else
+            (* Instance property *)
+            "$" ^ name
+        in
+        let doc = Concat [ty_doc; Space; Doc.text name] in
+        (fuel, doc)
+      | ({ type_ = XhpLiteralAttr _; name; _ }, _) ->
+        let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+        let doc =
+          Concat
+            [Doc.text "attribute"; Space; ty_doc; Space; text_strip_ns name]
+        in
+        (fuel, doc)
+      | ({ type_ = ClassConst _; name; _ }, _)
+      | ({ type_ = GConst; name; _ }, _)
+      | ({ type_ = EnumClassLabel _; name; _ }, _) ->
+        let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+        let doc = Concat [ty_doc; Space; text_strip_ns name] in
+        (fuel, doc)
+      | _ -> ty ~fuel text_strip_ns ISet.empty penv x
     in
     let (fuel, constraints) = constraints_for_type ~fuel text_strip_ns env x in
     let str =

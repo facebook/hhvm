@@ -4525,7 +4525,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?string name"},
+                        {"language": "hack", "value": "attribute ?string name"},
                         ":xhp:enum-attribute::name docblock",
                     ],
                     "range": {
@@ -4545,7 +4545,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?MyEnum enum-attribute"}
+                        {
+                            "language": "hack",
+                            "value": "attribute ?MyEnum enum-attribute",
+                        }
                     ],
                     "range": {
                         "start": {"line": 62, "character": 33},
@@ -4564,7 +4567,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?ID<EntSomething> id"}
+                        {"language": "hack", "value": "attribute ?ID<EntSomething> id"}
                     ],
                     "range": {
                         "start": {"line": 63, "character": 15},
@@ -4599,7 +4602,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?string name"},
+                        {"language": "hack", "value": "attribute ?string name"},
                         ":xhp:enum-attribute::name docblock",
                     ],
                     "range": {

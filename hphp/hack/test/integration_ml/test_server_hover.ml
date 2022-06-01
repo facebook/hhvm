@@ -85,7 +85,7 @@ let class_members_cases =
     ( ("class_members.php", 20, 12),
       [
         {
-          snippet = "public string ClassMembers::public";
+          snippet = "public string $public";
           addendum = [];
           pos = pos_at (20, 12) (20, 17);
         };
@@ -93,7 +93,7 @@ let class_members_cases =
     ( ("class_members.php", 22, 12),
       [
         {
-          snippet = "protected string ClassMembers::protected";
+          snippet = "protected string $protected";
           addendum = [];
           pos = pos_at (22, 12) (22, 20);
         };
@@ -101,7 +101,7 @@ let class_members_cases =
     ( ("class_members.php", 24, 12),
       [
         {
-          snippet = "private string ClassMembers::private";
+          snippet = "private string $private";
           addendum = [];
           pos = pos_at (24, 12) (24, 18);
         };
@@ -109,7 +109,7 @@ let class_members_cases =
     ( ("class_members.php", 26, 19),
       [
         {
-          snippet = "public static string ClassMembers::staticVar";
+          snippet = "public static string $staticVar";
           addendum = [];
           pos = pos_at (26, 19) (26, 28);
         };
@@ -868,7 +868,7 @@ let class_id_positions_cases =
     ( ("class_id_positions.php", 5, 26),
       [
         {
-          snippet = "public static int CIPos2::myStaticInt";
+          snippet = "public static int $myStaticInt";
           addendum = [];
           pos = pos_at (5, 26) (5, 37);
         };

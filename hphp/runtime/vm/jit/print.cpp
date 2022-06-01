@@ -236,7 +236,6 @@ dynamic getIRInstruction(const IRInstruction& inst,
   if (!sk.valid()) {
     markerObj = dynamic(nullptr);
   } else {
-    sk.func()->prettyPrint(mStr, Func::PrintOpts().noBytecode());
     mStr << std::string(kIndent, ' ')
          << inst.marker().show()
          << std::endl
@@ -710,10 +709,6 @@ void printIRInstruction(std::ostream& os,
          << color(ANSI_COLOR_END)
          << std::endl;
     } else {
-      auto func = newMarker.func();
-      if (!curMarker.hasFunc() || func != curMarker.func()) {
-        func->prettyPrint(mStr, Func::PrintOpts().noBytecode());
-      }
       mStr << std::string(kIndent, ' ')
            << newMarker.show()
            << std::endl

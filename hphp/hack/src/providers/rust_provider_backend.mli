@@ -38,7 +38,7 @@ module File : sig
 
   val get : t -> Relative_path.t -> file_type option
 
-  val get_contents : t -> Relative_path.t -> string option
+  val get_contents : t -> Relative_path.t -> string
 
   val provide_file_for_tests : t -> Relative_path.t -> string -> unit
 

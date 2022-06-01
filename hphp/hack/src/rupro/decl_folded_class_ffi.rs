@@ -40,7 +40,8 @@ ocaml_ffi_with_arena! {
             root: root.into(),
             ..Default::default()
         });
-        let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(file_provider::PlainFileProvider::new(path_ctx));
+        let file_provider: Arc<dyn file_provider::FileProvider> =
+            Arc::new(file_provider::PlainFileProvider::with_no_cache(path_ctx));
         let decl_parser = DeclParser::with_options(file_provider, opts);
         let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
 
@@ -92,7 +93,6 @@ ocaml_ffi_with_arena! {
         format!("{:#?}", decl)
     }
 
-
     // Due to memory constraints when folding over a large directory, it may be necessary to
     // fold over www in parts. This is achieved by finding the shallow decls of all of the files
     // in the directory but then only folding over a portion of the classes in those files
@@ -128,7 +128,8 @@ ocaml_ffi_with_arena! {
         });
 
         // Parse and gather shallow decls
-        let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(file_provider::PlainFileProvider::new(Arc::clone(&path_ctx)));
+        let file_provider: Arc<dyn file_provider::FileProvider> =
+            Arc::new(file_provider::PlainFileProvider::with_no_cache(path_ctx));
         let decl_parser: DeclParser<BReason> = DeclParser::with_options(file_provider, opts);
         let shallow_decl_store = make_shallow_decl_store(StoreOpts::Serialized(Compression::default()));
         let mut classes =

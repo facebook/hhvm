@@ -60,7 +60,7 @@ module File = struct
   external get : t -> Relative_path.t -> file_type option
     = "hh_rust_provider_backend_file_provider_get"
 
-  external get_contents : t -> Relative_path.t -> string option
+  external get_contents : t -> Relative_path.t -> string
     = "hh_rust_provider_backend_file_provider_get_contents"
 
   external provide_file_for_tests : t -> Relative_path.t -> string -> unit

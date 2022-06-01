@@ -26,7 +26,7 @@ pub enum Error {
     DeclParse {
         path: RelativePath,
         #[source]
-        file_provider_error: file_provider::Error,
+        file_provider_error: anyhow::Error,
     },
     #[error("Unexpected error: {0}")]
     Unexpected(#[from] anyhow::Error),

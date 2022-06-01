@@ -50,7 +50,7 @@ impl<R: Reason> DeclParser<R> {
         }
     }
 
-    pub fn parse(&self, path: RelativePath) -> Result<Vec<shallow::Decl<R>>, file_provider::Error> {
+    pub fn parse(&self, path: RelativePath) -> anyhow::Result<Vec<shallow::Decl<R>>> {
         let arena = bumpalo::Bump::new();
         let text = self.file_provider.get_contents(path)?;
         let decl_parser_opts = DeclParserOptions::from_parser_options(self.opts.get());
@@ -61,7 +61,7 @@ impl<R: Reason> DeclParser<R> {
     pub fn parse_and_summarize(
         &self,
         path: RelativePath,
-    ) -> Result<(Vec<shallow::Decl<R>>, FileSummary), file_provider::Error> {
+    ) -> anyhow::Result<(Vec<shallow::Decl<R>>, FileSummary)> {
         let arena = bumpalo::Bump::new();
         let text = self.file_provider.get_contents(path)?;
         let opts = DeclParserOptions::from(self.opts.get());

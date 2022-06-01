@@ -9,7 +9,7 @@ pub mod naming_table;
 mod test_naming_table;
 
 use anyhow::Result;
-use datastore::Store;
+use datastore::{ChangesStore, NonEvictingStore, Store};
 use depgraph_api::{DepGraph, NoDepGraph};
 use file_provider::{FileProvider, PlainFileProvider};
 use hackrs::{
@@ -20,7 +20,7 @@ use hackrs::{
 use naming_provider::NamingProvider;
 use naming_table::NamingTable;
 use oxidized_by_ref::parser_options::ParserOptions;
-use pos::{RelativePathCtx, TypeName};
+use pos::{RelativePath, RelativePathCtx, TypeName};
 use std::sync::Arc;
 use ty::{decl::folded::FoldedClass, reason::BReason};
 
@@ -35,6 +35,7 @@ pub struct ProviderBackend {
 }
 
 pub struct HhServerProviderBackend {
+    file_store: Arc<ChangesStore<RelativePath, file_provider::FileType>>,
     naming_table: Arc<NamingTable>,
     #[allow(dead_code)]
     shallow_decl_store: Arc<ShallowDeclStore<BReason>>,
@@ -46,8 +47,11 @@ pub struct HhServerProviderBackend {
 impl HhServerProviderBackend {
     pub fn new(path_ctx: RelativePathCtx, popt: &ParserOptions<'_>) -> Result<Self> {
         let path_ctx = Arc::new(path_ctx);
-        let file_provider: Arc<dyn FileProvider> =
-            Arc::new(PlainFileProvider::new(Arc::clone(&path_ctx)));
+        let file_store = Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new())));
+        let file_provider: Arc<dyn FileProvider> = Arc::new(PlainFileProvider::new(
+            Arc::clone(&path_ctx),
+            Arc::clone(&file_store) as _,
+        ));
         let decl_parser = DeclParser::with_options(Arc::clone(&file_provider), popt);
         let dependency_graph = Arc::new(NoDepGraph::new());
         let naming_table = Arc::new(NamingTable::new());
@@ -86,6 +90,7 @@ impl HhServerProviderBackend {
                 shallow_decl_provider,
                 folded_decl_provider,
             },
+            file_store,
             naming_table,
             shallow_decl_store,
             folded_classes_store,
@@ -109,12 +114,12 @@ impl HhServerProviderBackend {
     }
 
     pub fn push_local_changes(&self) {
-        self.providers.file_provider.push_local_changes();
+        self.file_store.push_local_changes();
         self.naming_table.push_local_changes();
     }
 
     pub fn pop_local_changes(&self) {
-        self.providers.file_provider.pop_local_changes();
+        self.file_store.pop_local_changes();
         self.naming_table.pop_local_changes();
     }
 }

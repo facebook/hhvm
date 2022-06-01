@@ -150,14 +150,20 @@ ocaml_ffi! {
         backend: Backend,
         path: RelativePath,
     ) -> Option<FileType> {
-        backend.file_provider().get(path)
+        backend.file_provider().get(path).unwrap()
     }
 
     fn hh_rust_provider_backend_file_provider_get_contents(
         backend: Backend,
         path: RelativePath,
-    ) -> Option<bstr::BString> {
-        backend.file_provider().get_contents(path).ok().or_else(|| Some("".into()))
+    ) -> bstr::BString {
+        match backend.file_provider().get_contents(path) {
+            Ok(contents) => contents,
+            Err(e) => match e.downcast_ref::<std::io::Error>() {
+                Some(e) if e.kind() == std::io::ErrorKind::NotFound => "".into(),
+                _ => panic!("{}", e),
+            },
+        }
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_for_tests(
@@ -165,7 +171,7 @@ ocaml_ffi! {
         path: RelativePath,
         contents: bstr::BString,
     ) {
-        backend.file_provider().provide_file_for_tests(path, contents)
+        backend.file_provider().provide_file_for_tests(path, contents).unwrap()
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_for_ide(
@@ -173,7 +179,7 @@ ocaml_ffi! {
         path: RelativePath,
         contents: bstr::BString,
     ) {
-        backend.file_provider().provide_file_for_ide(path, contents)
+        backend.file_provider().provide_file_for_ide(path, contents).unwrap()
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_hint(
@@ -181,14 +187,14 @@ ocaml_ffi! {
         path: RelativePath,
         file: FileType,
     ) {
-        backend.file_provider().provide_file_hint(path, file)
+        backend.file_provider().provide_file_hint(path, file).unwrap()
     }
 
     fn hh_rust_provider_backend_file_provider_remove_batch(
         backend: Backend,
         paths: BTreeSet<RelativePath>,
     ) {
-        backend.file_provider().remove_batch(&paths)
+        backend.file_provider().remove_batch(&paths).unwrap()
     }
 }
 

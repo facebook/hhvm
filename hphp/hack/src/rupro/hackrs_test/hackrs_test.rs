@@ -51,7 +51,10 @@ impl TestContext {
             tmp: tmpdir.path().to_path_buf(),
         });
         let dependency_graph = Arc::new(DependencyGraph::new());
-        let file_provider = Arc::new(PlainFileProvider::new(Arc::clone(&path_ctx)));
+        let file_provider = Arc::new(PlainFileProvider::new(
+            Arc::clone(&path_ctx),
+            Arc::new(datastore::EmptyStore),
+        ));
         let decl_parser = DeclParser::new(Arc::clone(&file_provider) as _);
         let shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
             Arc::new(make_shallow_decl_store::<BReason>(Unserialized)),

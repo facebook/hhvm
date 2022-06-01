@@ -113,7 +113,6 @@ let get_class
       | None -> None
       | Some v -> Some (counter, v, Some ctx)
     end
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory
   | Provider_backend.Decl_service _ ->
     begin
@@ -140,6 +139,16 @@ let get_class
     | Some obj ->
       let v : Typing_classes_heap.class_t = Obj.obj obj in
       Some (counter, v, Some ctx))
+  | Provider_backend.Rust_provider_backend backend ->
+    begin
+      match
+        lookup_or_populate_class_cache class_name (fun class_name ->
+            Rust_provider_backend.Decl.get_folded_class backend class_name
+            |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
+      with
+      | None -> None
+      | Some v -> Some (counter, v, Some ctx)
+    end
 
 let declare_fun_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : fun_key) :

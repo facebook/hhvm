@@ -14,13 +14,6 @@ external make_ffi :
   root:string -> hhi_root:string -> tmp:string -> ParserOptions.t -> t
   = "hh_rust_provider_backend_make"
 
-let make popt =
-  make_ffi
-    ~root:Relative_path.(path_of_prefix Root)
-    ~hhi_root:Relative_path.(path_of_prefix Hhi)
-    ~tmp:Relative_path.(path_of_prefix Tmp)
-    popt
-
 external push_local_changes_ffi : t -> unit
   = "hh_rust_provider_backend_push_local_changes"
 
@@ -246,6 +239,35 @@ module Decl = struct
           = "hh_rust_provider_backend_get_folded_class"
       end)
 
+  let decl_store t =
+    let noop_add _ _ = () in
+    let noop () = () in
+    Decl_store.
+      {
+        add_prop = noop_add;
+        get_prop = Props.get t;
+        add_static_prop = noop_add;
+        get_static_prop = StaticProps.get t;
+        add_method = noop_add;
+        get_method = Methods.get t;
+        add_static_method = noop_add;
+        get_static_method = StaticMethods.get t;
+        add_constructor = noop_add;
+        get_constructor = Constructors.get t;
+        add_class = noop_add;
+        get_class = FoldedClasses.get t;
+        add_fun = noop_add;
+        get_fun = Funs.get t;
+        add_typedef = noop_add;
+        get_typedef = Typedefs.get t;
+        add_gconst = noop_add;
+        get_gconst = GConsts.get t;
+        add_module = noop_add;
+        get_module = Modules.get t;
+        pop_local_changes = noop;
+        push_local_changes = noop;
+      }
+
   external direct_decl_parse_and_cache :
     t ->
     DeclParserOptions.t ->
@@ -273,6 +295,17 @@ module Decl = struct
   external declare_folded_class : t -> string -> unit
     = "hh_rust_provider_backend_declare_folded_class"
 end
+
+let make popt =
+  let backend =
+    make_ffi
+      ~root:Relative_path.(path_of_prefix Root)
+      ~hhi_root:Relative_path.(path_of_prefix Hhi)
+      ~tmp:Relative_path.(path_of_prefix Tmp)
+      popt
+  in
+  Decl_store.set (Decl.decl_store backend);
+  backend
 
 let push_local_changes t =
   Decl.Funs.clear_cache ();

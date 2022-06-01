@@ -116,7 +116,6 @@ let respect_but_quarantine_unsaved_changes
         Rust_provider_backend.push_local_changes backend;
 
         Ast_provider.local_changes_push_sharedmem_stack ();
-        Decl_provider.local_changes_push_sharedmem_stack ();
         (* Shallow classes are stored in Rust when we're using
            Rust_provider_backend, but member filters are not, so we still need
            to push/pop the sharedmem stack for member filters. *)
@@ -166,7 +165,6 @@ let respect_but_quarantine_unsaved_changes
         Rust_provider_backend.pop_local_changes backend;
 
         Ast_provider.local_changes_pop_sharedmem_stack ();
-        Decl_provider.local_changes_pop_sharedmem_stack ();
         Shallow_classes_provider.local_changes_pop_sharedmem_stack ();
         Linearization_provider.local_changes_pop_sharedmem_stack ();
         Fixme_provider.local_changes_pop_sharedmem_stack ();

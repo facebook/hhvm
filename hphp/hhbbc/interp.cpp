@@ -4634,7 +4634,7 @@ bool objMightHaveConstProps(const Type& t) {
     case DCls::Exact:
       return dobj.cls().couldHaveConstProp();
     case DCls::Sub:
-      return dobj.cls().derivedCouldHaveConstProp();
+      return dobj.cls().subCouldHaveConstProp();
   }
   not_reached();
 }

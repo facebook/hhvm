@@ -688,7 +688,7 @@ struct ClassInfo {
    * are mocked.
    */
   bool isMocked{false};
-  bool isDerivedMocked{false};
+  bool isSubMocked{false};
 
   /*
    * Track if this class has a property which might redeclare a property in a
@@ -710,7 +710,7 @@ struct ClassInfo {
   /*
    * Track if any derived classes (including this one) have any const props.
    */
-  bool derivedHasConstProp{false};
+  bool subHasConstProp{false};
 
   /*
    * Track if this class has a reified parent.
@@ -869,18 +869,18 @@ bool Class::couldHaveMagicBool() const {
   );
 }
 
-bool Class::couldHaveMockedDerivedClass() const {
+bool Class::couldHaveMockedSubClass() const {
   return val.match(
-    [] (SString) { return true;},
+    [] (SString) { return true; },
     [] (ClassInfo* cinfo) {
-      return cinfo->isDerivedMocked;
+      return cinfo->isSubMocked;
     }
   );
 }
 
 bool Class::couldBeMocked() const {
   return val.match(
-    [] (SString) { return true;},
+    [] (SString) { return true; },
     [] (ClassInfo* cinfo) {
       return cinfo->isMocked;
     }
@@ -942,10 +942,10 @@ bool Class::couldHaveConstProp() const {
   );
 }
 
-bool Class::derivedCouldHaveConstProp() const {
+bool Class::subCouldHaveConstProp() const {
   return val.match(
     [] (SString) { return true; },
-    [] (ClassInfo* cinfo) { return cinfo->derivedHasConstProp; }
+    [] (ClassInfo* cinfo) { return cinfo->subHasConstProp; }
   );
 }
 
@@ -3734,35 +3734,51 @@ void find_mocked_classes(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     if (is_mock_class(cinfo->cls) && cinfo->parent) {
       cinfo->parent->isMocked = true;
-      for (auto c = cinfo->parent; c; c = c->parent) {
-        c->isDerivedMocked = true;
-      }
     }
   }
+
+  parallel::for_each(
+    index.allClassInfos,
+    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+      for (auto const sub : cinfo->subclassList) {
+        if (sub->isMocked) {
+          cinfo->isSubMocked = true;
+          break;
+        }
+      }
+    }
+  );
 }
 
 void mark_const_props(IndexData& index) {
   trace_time tracer("mark const props");
 
   for (auto& cinfo : index.allClassInfos) {
-    auto const hasConstProp = [&]() {
+    assertx(!cinfo->hasConstProp);
+    cinfo->hasConstProp = [&]{
       if (cinfo->cls->hasConstProp) return true;
       if (cinfo->parent && cinfo->parent->hasConstProp) return true;
       if (!(cinfo->cls->attrs & AttrNoExpandTrait)) {
-        for (auto t : cinfo->usedTraits) {
+        for (auto const t : cinfo->usedTraits) {
           if (t->cls->hasConstProp) return true;
         }
       }
       return false;
     }();
-    if (hasConstProp) {
-      cinfo->hasConstProp = true;
-      for (auto c = cinfo.get(); c; c = c->parent) {
-        if (c->derivedHasConstProp) break;
-        c->derivedHasConstProp = true;
+  }
+
+  parallel::for_each(
+    index.allClassInfos,
+    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+      assertx(!cinfo->subHasConstProp);
+      for (auto const sub : cinfo->subclassList) {
+        if (sub->hasConstProp) {
+          cinfo->subHasConstProp = true;
+          break;
+        }
       }
     }
-  }
+  );
 }
 
 void mark_has_reified_parent(IndexData& index) {

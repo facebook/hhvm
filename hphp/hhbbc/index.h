@@ -370,10 +370,10 @@ struct Class {
   bool couldHaveMagicBool() const;
 
   /*
-   * Whether this class could possibly have a derived class that is mocked.
-   * Including itself.
+   * Whether this class could possibly have a sub-class that is
+   * mocked, including itself.
    */
-  bool couldHaveMockedDerivedClass() const;
+  bool couldHaveMockedSubClass() const;
 
   /*
    * Whether this class could possibly be mocked.
@@ -410,7 +410,7 @@ struct Class {
    * Whether this class (or clases derived from it) could have const props.
    */
   bool couldHaveConstProp() const;
-  bool derivedCouldHaveConstProp() const;
+  bool subCouldHaveConstProp() const;
 
   /*
    * Returns the Class that is the first common ancestor between 'this' and 'o'.

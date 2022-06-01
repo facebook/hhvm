@@ -690,7 +690,7 @@ void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
 
   if (resolved.type == AnnotType::Object) {
     tc.resolveType(resolved.type, resolved.nullable, resolved.value->name());
-    if (!resolved.value->couldHaveMockedDerivedClass()) tc.setNoMockObjects();
+    if (!resolved.value->couldHaveMockedSubClass()) tc.setNoMockObjects();
   } else {
     tc.resolveType(resolved.type, resolved.nullable, nullptr);
   }

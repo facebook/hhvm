@@ -2616,15 +2616,14 @@ let decl_and_run_mode
     Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace
   | _ -> ());
   let ctx =
-    if rust_provider_backend then
+    if rust_provider_backend then (
+      Provider_backend.set_rust_backend popt;
       Provider_context.empty_for_tool
         ~popt
         ~tcopt
-        ~backend:
-          (Provider_backend.Rust_provider_backend
-             (Rust_provider_backend.make popt))
+        ~backend:(Provider_backend.get ())
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-    else
+    ) else
       Provider_context.empty_for_test
         ~popt
         ~tcopt

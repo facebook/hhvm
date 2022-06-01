@@ -37,6 +37,8 @@ module Decl : sig
   val get_module : t -> string -> Shallow_decl_defs.module_decl option
 
   val get_folded_class : t -> string -> Decl_defs.decl_class_type option
+
+  val declare_folded_class : t -> string -> unit
 end
 
 module File : sig

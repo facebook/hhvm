@@ -21,13 +21,231 @@ let make popt =
     ~tmp:Relative_path.(path_of_prefix Tmp)
     popt
 
-external push_local_changes : t -> unit
+external push_local_changes_ffi : t -> unit
   = "hh_rust_provider_backend_push_local_changes"
 
-external pop_local_changes : t -> unit
+external pop_local_changes_ffi : t -> unit
   = "hh_rust_provider_backend_pop_local_changes"
 
 module Decl = struct
+  module type Store = sig
+    type key
+
+    type value
+
+    val get : t -> key -> value option
+
+    val clear_cache : unit -> unit
+  end
+
+  module StoreWithLocalCache
+      (Key : SharedMem.Key)
+      (Value : SharedMem.Value) (Ffi : sig
+        val get : t -> Key.t -> Value.t option
+
+        (* val remove_batch : t -> Key.t list -> unit *)
+      end) : Store with type key = Key.t and type value = Value.t = struct
+    type key = Key.t
+
+    type value = Value.t
+
+    module Cache =
+      SharedMem.FreqCache (Key) (Value)
+        (struct
+          let capacity = 1000
+        end)
+
+    let get t key =
+      match Cache.get key with
+      | Some _ as value_opt -> value_opt
+      | None ->
+        let value_opt = Ffi.get t key in
+        (match value_opt with
+        | Some value -> Cache.add key value
+        | None -> ());
+        value_opt
+
+    (* let remove_batch backend keys =
+       Cache.remove_batch keys;
+       Ffi.remove_batch backend keys *)
+
+    let clear_cache = Cache.clear
+  end
+
+  module Funs =
+    StoreWithLocalCache
+      (StringKey)
+      (struct
+        type t = Shallow_decl_defs.fun_decl
+
+        let description = "Rust_Decl_Fun"
+      end)
+      (struct
+        external get : t -> string -> Shallow_decl_defs.fun_decl option
+          = "hh_rust_provider_backend_get_fun"
+      end)
+
+  module ShallowClasses =
+    StoreWithLocalCache
+      (StringKey)
+      (struct
+        type t = Shallow_decl_defs.class_decl
+
+        let description = "Rust_Decl_ShallowClass"
+      end)
+      (struct
+        external get : t -> string -> Shallow_decl_defs.class_decl option
+          = "hh_rust_provider_backend_get_shallow_class"
+      end)
+
+  module Typedefs =
+    StoreWithLocalCache
+      (StringKey)
+      (struct
+        type t = Shallow_decl_defs.typedef_decl
+
+        let description = "Rust_Decl_Typedef"
+      end)
+      (struct
+        external get : t -> string -> Shallow_decl_defs.typedef_decl option
+          = "hh_rust_provider_backend_get_typedef"
+      end)
+
+  module GConsts =
+    StoreWithLocalCache
+      (StringKey)
+      (struct
+        type t = Shallow_decl_defs.const_decl
+
+        let description = "Rust_Decl_GConst"
+      end)
+      (struct
+        external get : t -> string -> Shallow_decl_defs.const_decl option
+          = "hh_rust_provider_backend_get_gconst"
+      end)
+
+  module Modules =
+    StoreWithLocalCache
+      (StringKey)
+      (struct
+        type t = Shallow_decl_defs.module_decl
+
+        let description = "Rust_Decl_Module"
+      end)
+      (struct
+        external get : t -> string -> Shallow_decl_defs.module_decl option
+          = "hh_rust_provider_backend_get_module"
+      end)
+
+  module ClassEltKey = struct
+    type t = string * string
+
+    let compare (cls1, elt1) (cls2, elt2) =
+      let r = String.compare cls1 cls2 in
+      if not (Core_kernel.Int.equal r 0) then
+        r
+      else
+        String.compare elt1 elt2
+
+    let to_string (cls, elt) = cls ^ "::" ^ elt
+  end
+
+  module Props =
+    StoreWithLocalCache
+      (ClassEltKey)
+      (struct
+        type t = Typing_defs.decl_ty
+
+        let description = "Rust_Decl_Prop"
+      end)
+      (struct
+        external get : t -> string * string -> Typing_defs.decl_ty option
+          = "hh_rust_provider_backend_get_prop"
+      end)
+
+  module StaticProps =
+    StoreWithLocalCache
+      (ClassEltKey)
+      (struct
+        type t = Typing_defs.decl_ty
+
+        let description = "Rust_Decl_StaticProp"
+      end)
+      (struct
+        external get : t -> string * string -> Typing_defs.decl_ty option
+          = "hh_rust_provider_backend_get_static_prop"
+      end)
+
+  let build_fun_elt fe_type =
+    Typing_defs.
+      {
+        fe_module = None;
+        fe_pos = Typing_defs.get_pos fe_type;
+        fe_internal = false;
+        fe_deprecated = None;
+        fe_type;
+        fe_php_std_lib = false;
+        fe_support_dynamic_type = false;
+      }
+
+  module Methods =
+    StoreWithLocalCache
+      (ClassEltKey)
+      (struct
+        type t = Typing_defs.fun_elt
+
+        let description = "Rust_Decl_Method"
+      end)
+      (struct
+        external get_ffi : t -> string * string -> Typing_defs.decl_ty option
+          = "hh_rust_provider_backend_get_method"
+
+        let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
+      end)
+
+  module StaticMethods =
+    StoreWithLocalCache
+      (ClassEltKey)
+      (struct
+        type t = Typing_defs.fun_elt
+
+        let description = "Rust_Decl_StaticMethod"
+      end)
+      (struct
+        external get_ffi : t -> string * string -> Typing_defs.decl_ty option
+          = "hh_rust_provider_backend_get_static_method"
+
+        let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
+      end)
+
+  module Constructors =
+    StoreWithLocalCache
+      (StringKey)
+      (struct
+        type t = Typing_defs.fun_elt
+
+        let description = "Rust_Decl_Constructor"
+      end)
+      (struct
+        external get_ffi : t -> string -> Typing_defs.decl_ty option
+          = "hh_rust_provider_backend_get_constructor"
+
+        let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
+      end)
+
+  module FoldedClasses =
+    StoreWithLocalCache
+      (StringKey)
+      (struct
+        type t = Decl_defs.decl_class_type
+
+        let description = "Rust_Decl_FoldedClass"
+      end)
+      (struct
+        external get : t -> string -> Decl_defs.decl_class_type option
+          = "hh_rust_provider_backend_get_folded_class"
+      end)
+
   external direct_decl_parse_and_cache :
     t ->
     DeclParserOptions.t ->
@@ -40,25 +258,49 @@ module Decl = struct
     t -> (string * Shallow_decl_defs.decl) list -> unit
     = "hh_rust_provider_backend_add_shallow_decls"
 
-  external get_fun : t -> string -> Shallow_decl_defs.fun_decl option
-    = "hh_rust_provider_backend_get_fun"
+  let get_fun = Funs.get
 
-  external get_shallow_class :
-    t -> string -> Shallow_decl_defs.class_decl option
-    = "hh_rust_provider_backend_get_shallow_class"
+  let get_shallow_class = ShallowClasses.get
 
-  external get_typedef : t -> string -> Shallow_decl_defs.typedef_decl option
-    = "hh_rust_provider_backend_get_typedef"
+  let get_typedef = Typedefs.get
 
-  external get_gconst : t -> string -> Shallow_decl_defs.const_decl option
-    = "hh_rust_provider_backend_get_gconst"
+  let get_gconst = GConsts.get
 
-  external get_module : t -> string -> Shallow_decl_defs.module_decl option
-    = "hh_rust_provider_backend_get_module"
+  let get_module = Modules.get
 
-  external get_folded_class : t -> string -> Decl_defs.decl_class_type option
-    = "hh_rust_provider_backend_get_folded_class"
+  let get_folded_class = FoldedClasses.get
+
+  external declare_folded_class : t -> string -> unit
+    = "hh_rust_provider_backend_declare_folded_class"
 end
+
+let push_local_changes t =
+  Decl.Funs.clear_cache ();
+  Decl.ShallowClasses.clear_cache ();
+  Decl.Typedefs.clear_cache ();
+  Decl.GConsts.clear_cache ();
+  Decl.Modules.clear_cache ();
+  Decl.Props.clear_cache ();
+  Decl.StaticProps.clear_cache ();
+  Decl.Methods.clear_cache ();
+  Decl.StaticMethods.clear_cache ();
+  Decl.Constructors.clear_cache ();
+  Decl.FoldedClasses.clear_cache ();
+  push_local_changes_ffi t
+
+let pop_local_changes t =
+  Decl.Funs.clear_cache ();
+  Decl.ShallowClasses.clear_cache ();
+  Decl.Typedefs.clear_cache ();
+  Decl.GConsts.clear_cache ();
+  Decl.Modules.clear_cache ();
+  Decl.Props.clear_cache ();
+  Decl.StaticProps.clear_cache ();
+  Decl.Methods.clear_cache ();
+  Decl.StaticMethods.clear_cache ();
+  Decl.Constructors.clear_cache ();
+  Decl.FoldedClasses.clear_cache ();
+  pop_local_changes_ffi t
 
 module File = struct
   type file_type =

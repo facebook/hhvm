@@ -9,7 +9,7 @@ use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::{ocaml_ffi, ocaml_ffi_with_arena, Bump};
 use oxidized::{file_info, naming_types};
 use oxidized_by_ref::{
-    decl_defs, direct_decl_parser, parser_options::ParserOptions, shallow_decl_defs,
+    decl_defs, direct_decl_parser, parser_options::ParserOptions, shallow_decl_defs, typing_defs,
 };
 use pos::{RelativePath, RelativePathCtx, ToOxidized};
 use std::collections::BTreeSet;
@@ -140,6 +140,61 @@ ocaml_ffi_with_arena! {
         todo!()
     }
 
+    fn hh_rust_provider_backend_get_prop<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: (pos::TypeName, pos::PropName),
+    ) -> Option<&typing_defs::Ty<'a>> {
+        let backend = unsafe { get_backend(backend) };
+        backend.shallow_decl_provider().get_property_type(name.0, name.1)
+            .unwrap()
+            .map(|ty| ty.to_oxidized(arena))
+    }
+
+    fn hh_rust_provider_backend_get_static_prop<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: (pos::TypeName, pos::PropName),
+    ) -> Option<&typing_defs::Ty<'a>> {
+        let backend = unsafe { get_backend(backend) };
+        backend.shallow_decl_provider().get_static_property_type(name.0, name.1)
+            .unwrap()
+            .map(|ty| ty.to_oxidized(arena))
+    }
+
+    fn hh_rust_provider_backend_get_method<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: (pos::TypeName, pos::MethodName),
+    ) -> Option<&typing_defs::Ty<'a>> {
+        let backend = unsafe { get_backend(backend) };
+        backend.shallow_decl_provider().get_method_type(name.0, name.1)
+            .unwrap()
+            .map(|ty| ty.to_oxidized(arena))
+    }
+
+    fn hh_rust_provider_backend_get_static_method<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: (pos::TypeName, pos::MethodName),
+    ) -> Option<&typing_defs::Ty<'a>> {
+        let backend = unsafe { get_backend(backend) };
+        backend.shallow_decl_provider().get_static_method_type(name.0, name.1)
+            .unwrap()
+            .map(|ty| ty.to_oxidized(arena))
+    }
+
+    fn hh_rust_provider_backend_get_constructor<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: pos::TypeName,
+    ) -> Option<&typing_defs::Ty<'a>> {
+        let backend = unsafe { get_backend(backend) };
+        backend.shallow_decl_provider().get_constructor_type(name)
+            .unwrap()
+            .map(|ty| ty.to_oxidized(arena))
+    }
+
     fn hh_rust_provider_backend_get_folded_class<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
@@ -149,6 +204,15 @@ ocaml_ffi_with_arena! {
         backend.folded_decl_provider().get_class(name.into(), name)
             .unwrap()
             .map(|c| c.to_oxidized(arena))
+    }
+
+    fn hh_rust_provider_backend_declare_folded_class<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        name: pos::TypeName,
+    ) {
+        let backend = unsafe { get_backend(backend) };
+        backend.folded_decl_provider().get_class(name.into(), name).unwrap();
     }
 }
 

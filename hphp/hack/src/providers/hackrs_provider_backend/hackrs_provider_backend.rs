@@ -46,8 +46,7 @@ pub struct HhServerProviderBackend {
     shallow_decl_changes_store: Arc<ShallowStoreWithChanges>,
     shallow_decl_store: Arc<ShallowDeclStore<BReason>>,
     lazy_shallow_decl_provider: Arc<LazyShallowDeclProvider<BReason>>,
-    #[allow(dead_code)]
-    folded_classes_store: Arc<dyn Store<TypeName, Arc<FoldedClass<BReason>>>>,
+    folded_classes_store: Arc<ChangesStore<TypeName, Arc<FoldedClass<BReason>>>>,
     providers: ProviderBackend,
 }
 
@@ -74,13 +73,12 @@ impl HhServerProviderBackend {
             decl_parser.clone(),
         ));
 
-        let folded_classes_store: Arc<dyn Store<pos::TypeName, Arc<FoldedClass<_>>>> =
-            Arc::new(datastore::NonEvictingStore::new());
+        let folded_classes_store = Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new())));
 
         let folded_decl_provider: Arc<dyn FoldedDeclProvider<_>> =
             Arc::new(LazyFoldedDeclProvider::new(
                 Arc::new(Default::default()), // TODO: remove?
-                Arc::clone(&folded_classes_store),
+                Arc::clone(&folded_classes_store) as _,
                 Arc::clone(&lazy_shallow_decl_provider) as _,
                 Arc::clone(&dependency_graph) as _,
             ));
@@ -158,12 +156,14 @@ impl HhServerProviderBackend {
         self.file_store.push_local_changes();
         self.naming_table.push_local_changes();
         self.shallow_decl_changes_store.push_local_changes();
+        self.folded_classes_store.push_local_changes();
     }
 
     pub fn pop_local_changes(&self) {
         self.file_store.pop_local_changes();
         self.naming_table.pop_local_changes();
         self.shallow_decl_changes_store.pop_local_changes();
+        self.folded_classes_store.pop_local_changes();
     }
 }
 

@@ -30,6 +30,8 @@ module Decl = struct
   let get_module _ _ = failwith "unimplemented"
 
   let get_folded_class _ _ = failwith "unimplemented"
+
+  let declare_folded_class _ _ = failwith "unimplemented"
 end
 
 module File = struct

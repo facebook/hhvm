@@ -137,25 +137,6 @@ let make_hover_const_definition entry def_opt =
     ]
   | _ -> []
 
-let make_hover_full_name env_and_ty occurrence def_opt =
-  SymbolOccurrence.(
-    let found_it () =
-      let name =
-        match def_opt with
-        | Some def -> def.SymbolDefinition.full_name
-        | None -> occurrence.name
-      in
-      [Printf.sprintf "Full name: `%s`" (Utils.strip_ns name)]
-    in
-    Typing_defs.(
-      match (occurrence, env_and_ty) with
-      | ({ type_ = Method _; _ }, Some (_, _ty)) -> found_it ()
-      | ( { type_ = Property _ | ClassConst _ | XhpLiteralAttr _; _ },
-          Some (_, ty) )
-        when is_fun ty ->
-        found_it ()
-      | _ -> []))
-
 (* Return a markdown description of built-in Hack attributes. *)
 let make_hover_attr_docs name =
   Option.first_some
@@ -275,9 +256,23 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
     ^ "\n\nIf the current class `use`s a trait, the trait methods can also access `private` methods and properties."
     ^ "\n\nSee also `public` and `protected`."
 
+let split_class_name (full_name : string) : string =
+  match String.lsplit2 full_name ~on:':' with
+  | Some (class_name, _member) -> class_name
+  | None -> full_name
+
 let make_hover_info ctx env_and_ty entry occurrence def_opt =
   SymbolOccurrence.(
     Typing_defs.(
+      let defined_in =
+        match def_opt with
+        | Some def ->
+          Printf.sprintf
+            "// Defined in %s\n"
+            (split_class_name def.SymbolDefinition.full_name)
+        | None -> ""
+      in
+
       let snippet =
         match (occurrence, env_and_ty) with
         | ({ name; _ }, None) -> Utils.strip_hh_lib_ns name
@@ -290,15 +285,19 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
               let ty = Lazy.force_val elt.ce_type in
               Tast_env.print_ty_with_identity env (DeclTy ty) occurrence def_opt)
           in
-          begin
-            match snippet_opt with
-            | Some s -> s
-            | None ->
-              Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
-          end
+          defined_in
+          ^
+          (match snippet_opt with
+          | Some s -> s
+          | None ->
+            Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt)
         | ({ type_ = BestEffortArgument (recv, i); _ }, _) ->
           let param_name = nth_param ctx recv i in
           Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name)
+        | ({ type_ = Method _; _ }, Some (env, ty))
+        | ({ type_ = Property _; _ }, Some (env, ty)) ->
+          defined_in
+          ^ Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
         | (occurrence, Some (env, ty)) ->
           Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
       in
@@ -321,12 +320,7 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
         | { type_ = PureFunctionContext; _ } -> [pure_context_info]
         | { type_ = BuiltInType bt; _ } ->
           [SymbolOccurrence.built_in_type_hover bt]
-        | _ ->
-          List.concat
-            [
-              make_hover_doc_block ctx entry occurrence def_opt;
-              make_hover_full_name env_and_ty occurrence def_opt;
-            ]
+        | _ -> make_hover_doc_block ctx entry occurrence def_opt
       in
       HoverService.
         { snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }))

@@ -4718,12 +4718,11 @@ class TestLsp(TestCase[LspTestDriver]):
                     "contents": [
                         {
                             "language": "hack",
-                            "value": "public static function staticMethod(string $z): void",
+                            "value": "// Defined in HoverWithErrorsClass\npublic static function staticMethod(string $z): void",
                         },
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
-                        "Full name: `HoverWithErrorsClass::staticMethod`",
                     ],
                     "range": {
                         "end": {"character": 39, "line": 14},
@@ -4760,12 +4759,11 @@ class TestLsp(TestCase[LspTestDriver]):
                     "contents": [
                         {
                             "language": "hack",
-                            "value": "public static function staticMethod(string $z): void",
+                            "value": "// Defined in HoverWithErrorsClass\npublic static function staticMethod(string $z): void",
                         },
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
-                        "Full name: `HoverWithErrorsClass::staticMethod`",
                     ],
                     "range": {
                         "end": {"character": 39, "line": 14},
@@ -5850,8 +5848,10 @@ function __hh_loop_forever_foo(): int {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public function foo(): int"},
-                        "Full name: `BaseClassIncremental::foo`",
+                        {
+                            "language": "hack",
+                            "value": "// Defined in BaseClassIncremental\npublic function foo(): int",
+                        },
                     ],
                     "range": {
                         "start": {"line": 7, "character": 12},
@@ -5880,8 +5880,10 @@ class BaseClassIncremental {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public function foo(): string"},
-                        "Full name: `BaseClassIncremental::foo`",
+                        {
+                            "language": "hack",
+                            "value": "// Defined in BaseClassIncremental\npublic function foo(): string",
+                        },
                     ],
                     "range": {
                         "start": {"line": 7, "character": 12},

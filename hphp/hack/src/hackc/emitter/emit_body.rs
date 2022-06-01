@@ -294,8 +294,8 @@ pub fn emit_return_type_info<'arena>(
 ) -> Result<HhasTypeInfo<'arena>> {
     match ret {
         None => Ok(HhasTypeInfo::make(
-            Just(Str::new_str(alloc, "")),
-            hhas_type::constraint::Constraint::default(),
+            Just("".into()),
+            hhas_type::Constraint::default(),
         )),
         Some(hint) => emit_type_hint::hint_to_type_info(
             alloc,

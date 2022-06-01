@@ -8,7 +8,7 @@ use error::{Error, Result};
 use ffi::Maybe::*;
 use hhbc::{
     hhas_property::HhasProperty,
-    hhas_type::{constraint, HhasTypeInfo},
+    hhas_type::{Constraint, HhasTypeInfo},
     InitPropOp, TypedValue, Visibility,
 };
 use hhbc_string_utils as string_utils;
@@ -73,7 +73,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     };
 
     let type_info = match args.typehint.as_ref() {
-        None => HhasTypeInfo::make_empty(alloc),
+        None => HhasTypeInfo::make_empty(),
         Some(th) => emit_type_hint::hint_to_type_info(
             alloc,
             &emit_type_hint::Kind::Property,
@@ -197,7 +197,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     })
 }
 
-fn valid_for_prop(tc: &constraint::Constraint<'_>) -> bool {
+fn valid_for_prop(tc: &Constraint<'_>) -> bool {
     match &tc.name {
         Nothing => true,
         Just(s) => {

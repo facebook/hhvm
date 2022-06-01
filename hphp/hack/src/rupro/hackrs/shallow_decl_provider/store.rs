@@ -180,22 +180,22 @@ impl<R: Reason> ShallowDeclStore<R> {
 
     fn add_class(&self, name: TypeName, cls: Arc<ShallowClass<R>>) -> Result<()> {
         let cid = cls.name.id();
-        for prop in cls.props.iter() {
+        for prop in cls.props.iter().rev() {
             if let Some(ty) = &prop.ty {
                 self.properties.insert((cid, prop.name.id()), ty.clone())?
             }
         }
-        for prop in cls.static_props.iter() {
+        for prop in cls.static_props.iter().rev() {
             if let Some(ty) = &prop.ty {
                 self.static_properties
                     .insert((cid, prop.name.id()), ty.clone())?
             }
         }
-        for meth in cls.methods.iter() {
+        for meth in cls.methods.iter().rev() {
             self.methods
                 .insert((cid, meth.name.id()), meth.ty.clone())?
         }
-        for meth in cls.static_methods.iter() {
+        for meth in cls.static_methods.iter().rev() {
             self.static_methods
                 .insert((cid, meth.name.id()), meth.ty.clone())?
         }

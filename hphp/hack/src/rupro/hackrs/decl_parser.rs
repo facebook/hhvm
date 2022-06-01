@@ -52,7 +52,7 @@ impl<R: Reason> DeclParser<R> {
 
     pub fn parse(&self, path: RelativePath) -> anyhow::Result<Vec<shallow::Decl<R>>> {
         let arena = bumpalo::Bump::new();
-        let text = self.file_provider.get_contents(path)?;
+        let text = self.file_provider.get(path)?;
         let decl_parser_opts = DeclParserOptions::from_parser_options(self.opts.get());
         let parsed_file = self.parse_impl(&decl_parser_opts, path, &text, &arena);
         Ok(parsed_file.decls.iter().map(Into::into).collect())
@@ -63,7 +63,7 @@ impl<R: Reason> DeclParser<R> {
         path: RelativePath,
     ) -> anyhow::Result<(Vec<shallow::Decl<R>>, FileSummary)> {
         let arena = bumpalo::Bump::new();
-        let text = self.file_provider.get_contents(path)?;
+        let text = self.file_provider.get(path)?;
         let opts = DeclParserOptions::from(self.opts.get());
         let parsed_file = self.parse_impl(&opts, path, &text, &arena);
         let summary = FileSummary::from_decls(parsed_file);

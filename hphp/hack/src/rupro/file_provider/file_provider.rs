@@ -4,44 +4,23 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Result;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use bstr::BString;
 use pos::RelativePath;
 use std::fmt::Debug;
 use std::marker::{Send, Sync};
 
 mod provider;
-pub use provider::PlainFileProvider;
+pub use provider::DiskProvider;
 
-#[derive(Clone, Debug, ToOcamlRep, FromOcamlRep)]
-pub enum FileType {
-    Disk(bstr::BString),
-    Ide(bstr::BString),
-}
-
-/// Acts as a sort of caching facade which is filled on-demand as contents are
-/// needed. The "cache" is (or rather, might be) filled by loading from the file
-/// system if the file isn't open in the IDE (otherwise use the IDE contents).
-/// That is, any IDE version of a file takes precedence over the file system's.
-// note(sf, 2022-04-28): c.f. hphp/hack/src/providers/file_provider.ml
+/// The interface through which the typechecker can access the contents of the
+/// repository and HHI files.
+///
+/// The implementation may load file contents from the filesystem, or from a
+/// cache in front of the filesystem, or from in-memory IDE buffers.
 pub trait FileProvider: Debug + Send + Sync {
-    /// Lookup a path.
-    fn get(&self, file: RelativePath) -> Result<Option<FileType>>;
-
-    /// If a cached entry for the provided path exists then return its contents.
-    /// If not, try to read the contents from disk. Reading from disk might
-    /// produce a `std::io::Error` (wrapped in `anyhow::Error`).
-    fn get_contents(&self, file: RelativePath) -> Result<bstr::BString>;
-
-    /// Register `file` as a disk file containing `contents`.
-    fn provide_file_for_tests(&self, file: RelativePath, contents: bstr::BString) -> Result<()>;
-
-    /// Register `file` as an IDE file containing `contents`.
-    fn provide_file_for_ide(&self, file: RelativePath, contents: bstr::BString) -> Result<()>;
-
-    /// If `file_type` is an IDE file, register it. If it is a disk file, do
-    /// nothing.
-    fn provide_file_hint(&self, file: RelativePath, file_type: FileType) -> Result<()>;
-
-    /// Associate each path in `files` with `None`.
-    fn remove_batch(&self, files: &std::collections::BTreeSet<RelativePath>) -> Result<()>;
+    /// Return the contents of the given file. May return `Ok("")` if the file
+    /// can't be found in the underlying store, or may return a `std::io::Error`
+    /// with `ErrorKind::NotFound` (wrapped in `anyhow::Error`), depending on
+    /// the use case.
+    fn get(&self, file: RelativePath) -> Result<BString>;
 }

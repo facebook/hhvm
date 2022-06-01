@@ -41,7 +41,7 @@ ocaml_ffi_with_arena! {
             ..Default::default()
         });
         let file_provider: Arc<dyn file_provider::FileProvider> =
-            Arc::new(file_provider::PlainFileProvider::with_no_cache(path_ctx));
+            Arc::new(file_provider::DiskProvider::new(path_ctx));
         let decl_parser = DeclParser::with_options(file_provider, opts);
         let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
 
@@ -129,7 +129,7 @@ ocaml_ffi_with_arena! {
 
         // Parse and gather shallow decls
         let file_provider: Arc<dyn file_provider::FileProvider> =
-            Arc::new(file_provider::PlainFileProvider::with_no_cache(path_ctx));
+            Arc::new(file_provider::DiskProvider::new(path_ctx));
         let decl_parser: DeclParser<BReason> = DeclParser::with_options(file_provider, opts);
         let shallow_decl_store = make_shallow_decl_store(StoreOpts::Serialized(Compression::default()));
         let mut classes =

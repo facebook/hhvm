@@ -97,7 +97,7 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
         .map(|e| RelativePath::new(Prefix::Hhi, e.path().strip_prefix(&ctx.hhi).unwrap()))
         .collect::<Vec<_>>();
     let file_provider: Arc<dyn file_provider::FileProvider> =
-        Arc::new(file_provider::PlainFileProvider::with_no_cache(ctx));
+        Arc::new(file_provider::DiskProvider::new(ctx));
     let decl_parser = DeclParser::new(Arc::clone(&file_provider));
     all_filenames.extend(filenames);
 

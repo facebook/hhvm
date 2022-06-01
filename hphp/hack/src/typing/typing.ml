@@ -8188,7 +8188,8 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
     in
     let should_forget_fakes = true in
     (env, tel, None, TUtils.terr env Reason.Rnone, should_forget_fakes)
-  | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; _ } ->
+  | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; ce_flags; _ }
+    ->
     let def_pos = get_pos m in
     Option.iter
       ~f:Errors.add_typing_error
@@ -8235,7 +8236,16 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
               ft)
         in
         Option.iter ~f:Errors.add_typing_error ty_err_opt2;
-        (env, mk (r, Tfun ft))
+        let should_wrap =
+          TCO.enable_sound_dynamic (Env.get_tcopt env)
+          && (Typing_defs_flags.ClassElt.supports_dynamic_type ce_flags
+             || Cls.get_support_dynamic_type class_)
+        in
+        ( env,
+          Typing_dynamic.maybe_wrap_with_supportdyn
+            ~should_wrap
+            (get_reason m)
+            ft )
       | _ ->
         Errors.internal_error p "Expected function type for constructor";
         let ty = TUtils.terr env r in
@@ -8266,7 +8276,10 @@ and inout_write_back env { fp_type; _ } (pk, ((_, pos, _) as e)) =
 (** Typechecks a call.
  * Returns in this order the typed expressions for the arguments, for the
  * variadic arguments, the return type, and a boolean indicating whether fake
- * members should be forgotten.
+ * members should be forgotten. If dynamic_func is not None, then we are trying
+ * to call the function with dynamic arguments using the fact that is is a SDT
+ * function. That is, we have already ruled out trying to call it with just its
+ * declared type.
  *)
 and call
     ~(expected : ExpectedTy.t option)

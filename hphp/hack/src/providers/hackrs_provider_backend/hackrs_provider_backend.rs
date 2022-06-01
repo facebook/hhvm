@@ -38,8 +38,8 @@ pub struct ProviderBackend {
 pub struct HhServerProviderBackend {
     file_store: Arc<ChangesStore<RelativePath, FileType>>,
     naming_table: Arc<NamingTable>,
-    #[allow(dead_code)]
     shallow_decl_store: Arc<ShallowDeclStore<BReason>>,
+    lazy_shallow_decl_provider: Arc<LazyShallowDeclProvider<BReason>>,
     #[allow(dead_code)]
     folded_classes_store: Arc<dyn Store<TypeName, Arc<FoldedClass<BReason>>>>,
     providers: ProviderBackend,
@@ -65,12 +65,11 @@ impl HhServerProviderBackend {
             hackrs_test_utils::serde_store::StoreOpts::Unserialized,
         ));
 
-        let shallow_decl_provider: Arc<dyn ShallowDeclProvider<_>> =
-            Arc::new(LazyShallowDeclProvider::new(
-                Arc::clone(&shallow_decl_store),
-                Arc::clone(&naming_table) as _,
-                decl_parser.clone(),
-            ));
+        let lazy_shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
+            Arc::clone(&shallow_decl_store),
+            Arc::clone(&naming_table) as _,
+            decl_parser.clone(),
+        ));
 
         let folded_classes_store: Arc<dyn Store<pos::TypeName, Arc<FoldedClass<_>>>> =
             Arc::new(datastore::NonEvictingStore::new());
@@ -79,7 +78,7 @@ impl HhServerProviderBackend {
             Arc::new(LazyFoldedDeclProvider::new(
                 Arc::new(Default::default()), // TODO: remove?
                 Arc::clone(&folded_classes_store),
-                Arc::clone(&shallow_decl_provider),
+                Arc::clone(&lazy_shallow_decl_provider) as _,
                 Arc::clone(&dependency_graph) as _,
             ));
 
@@ -90,12 +89,13 @@ impl HhServerProviderBackend {
                 decl_parser,
                 dependency_graph,
                 naming_provider: Arc::clone(&naming_table) as _,
-                shallow_decl_provider,
+                shallow_decl_provider: Arc::clone(&lazy_shallow_decl_provider) as _,
                 folded_decl_provider,
             },
             file_store,
             naming_table,
             shallow_decl_store,
+            lazy_shallow_decl_provider,
             folded_classes_store,
         })
     }
@@ -118,6 +118,36 @@ impl HhServerProviderBackend {
 
     pub fn folded_decl_provider(&self) -> &dyn FoldedDeclProvider<BReason> {
         Arc::as_ref(&self.providers.folded_decl_provider)
+    }
+
+    /// Decl-parse the given file, dedup duplicate definitions of the same
+    /// symbol (within the file, as well as removing losers of naming conflicts
+    /// with other files), and add the parsed decls to the shallow decl store.
+    pub fn parse_and_cache_decls<'a>(
+        &self,
+        opts: &'a oxidized_by_ref::decl_parser_options::DeclParserOptions<'a>,
+        path: RelativePath,
+        text: &'a [u8],
+        arena: &'a bumpalo::Bump,
+    ) -> Result<oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes<'a>> {
+        let mut parsed_file = self
+            .providers
+            .decl_parser
+            .parse_impl(opts, path, text, arena);
+        self.lazy_shallow_decl_provider
+            .dedup_and_add_decls(path, parsed_file.decls.iter().map(Into::into))?;
+        parsed_file.decls.rev(arena); // To match OCaml behavior
+        Ok(parsed_file.into())
+    }
+
+    /// Directly add the given decls to the shallow decl store (without removing
+    /// php_stdlib decls, deduping, or removing naming conflict losers).
+    pub fn add_decls(
+        &self,
+        decls: &[(&str, oxidized_by_ref::shallow_decl_defs::Decl<'_>)],
+    ) -> Result<()> {
+        self.shallow_decl_store
+            .add_decls(decls.iter().copied().map(Into::into))
     }
 
     pub fn push_local_changes(&self) {

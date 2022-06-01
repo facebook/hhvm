@@ -70,18 +70,19 @@ impl<R: Reason> DeclParser<R> {
         Ok((parsed_file.decls.iter().map(Into::into).collect(), summary))
     }
 
-    fn parse_impl<'a>(
+    pub fn parse_impl<'a>(
         &self,
         opts: &'a DeclParserOptions<'a>,
         path: RelativePath,
         text: &'a [u8],
         arena: &'a bumpalo::Bump,
     ) -> oxidized_by_ref::direct_decl_parser::ParsedFile<'a> {
+        let parser_options = self.opts.get();
+        assert_eq!(opts, &DeclParserOptions::from(parser_options));
         let mut parsed_file = direct_decl_parser::parse_decls(opts, path.into(), text, arena);
         // TODO: The direct decl parser should return decls in the same
         // order as they are declared in the file. At the moment it reverses
         // them. Reverse them again to match the syntactic order.
-        let parser_options = self.opts.get();
         let deregister_std_lib = path.is_hhi() && parser_options.po_deregister_php_stdlib;
         if deregister_std_lib {
             parsed_file.decls = Decls(List::rev_from_iter_in(

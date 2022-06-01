@@ -101,8 +101,8 @@ impl<R: Reason> ShallowDeclStore<R> {
         }
     }
 
-    pub fn add_decls(&self, decls: Vec<Decl<R>>) -> Result<()> {
-        for decl in decls {
+    pub fn add_decls(&self, decls: impl IntoIterator<Item = Decl<R>>) -> Result<()> {
+        for decl in decls.into_iter() {
             match decl {
                 Decl::Class(name, decl) => self.add_class(name, Arc::new(decl))?,
                 Decl::Fun(name, decl) => self.funs.insert(name, Arc::new(decl))?,

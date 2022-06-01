@@ -29,8 +29,16 @@ external pop_local_changes : t -> unit
 
 module Decl = struct
   external direct_decl_parse_and_cache :
-    t -> Relative_path.t -> Direct_decl_parser.parsed_file_with_hashes option
+    t ->
+    DeclParserOptions.t ->
+    Relative_path.t ->
+    string ->
+    Direct_decl_parser.parsed_file_with_hashes
     = "hh_rust_provider_backend_direct_decl_parse_and_cache"
+
+  external add_shallow_decls :
+    t -> (string * Shallow_decl_defs.decl) list -> unit
+    = "hh_rust_provider_backend_add_shallow_decls"
 
   external get_fun : t -> string -> Shallow_decl_defs.fun_decl option
     = "hh_rust_provider_backend_get_fun"

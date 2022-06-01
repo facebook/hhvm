@@ -15,7 +15,9 @@ let push_local_changes _ : unit = failwith "unimplemented"
 let pop_local_changes _ : unit = failwith "unimplemented"
 
 module Decl = struct
-  let direct_decl_parse_and_cache _ _ = failwith "unimplemented"
+  let direct_decl_parse_and_cache _ _ _ _ = failwith "unimplemented"
+
+  let add_shallow_decls _ _ = failwith "unimplemented"
 
   let get_fun _ _ = failwith "unimplemented"
 

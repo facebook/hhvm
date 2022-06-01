@@ -63,12 +63,28 @@ ocaml_ffi! {
 
 ocaml_ffi_with_arena! {
     fn hh_rust_provider_backend_direct_decl_parse_and_cache<'a>(
-        _arena: &'a Bump,
+        arena: &'a Bump,
         backend: UnsafeOcamlPtr,
-        _path: RelativePath,
-    ) -> Option<direct_decl_parser::ParsedFileWithHashes<'a>> {
-        let _backend = unsafe { get_backend(backend) };
-        todo!()
+        opts: &'a oxidized_by_ref::decl_parser_options::DeclParserOptions<'a>,
+        path: RelativePath,
+        text: UnsafeOcamlPtr,
+    ) -> direct_decl_parser::ParsedFileWithHashes<'a> {
+        let backend = unsafe { get_backend(backend) };
+        // SAFETY: Borrow the contents of the source file from the value on the
+        // OCaml heap rather than copying it over. This is safe as long as we
+        // don't call into OCaml within this function scope.
+        let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
+        let text = ocamlrep::bytes_from_ocamlrep(text_value).expect("expected string");
+        backend.parse_and_cache_decls(opts, path, text, arena).unwrap()
+    }
+
+    fn hh_rust_provider_backend_add_shallow_decls<'a>(
+        arena: &'a Bump,
+        backend: UnsafeOcamlPtr,
+        decls: &[(&'a str, shallow_decl_defs::Decl<'a>)],
+    ) {
+        let backend = unsafe { get_backend(backend) };
+        backend.add_decls(decls).unwrap();
     }
 
     fn hh_rust_provider_backend_get_fun<'a>(

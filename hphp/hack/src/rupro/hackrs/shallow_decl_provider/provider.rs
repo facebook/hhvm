@@ -5,10 +5,11 @@
 
 use super::{Error, Result, ShallowDeclStore, TypeDecl};
 use crate::decl_parser::DeclParser;
+use itertools::Itertools;
 use naming_provider::NamingProvider;
 use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::sync::Arc;
-use ty::decl::{ConstDecl, FunDecl, Ty};
+use ty::decl::{shallow::Decl, ConstDecl, FunDecl, Ty};
 use ty::reason::Reason;
 
 /// A `ShallowDeclProvider` which, if the requested name is not present in its
@@ -35,14 +36,54 @@ impl<R: Reason> LazyShallowDeclProvider<R> {
         }
     }
 
-    fn parse_and_cache_decls_in(&self, path: RelativePath) -> Result<()> {
+    pub fn parse_and_cache_decls_in(&self, path: RelativePath) -> Result<()> {
         let decls_result = self.parser.parse(path);
         let decls = decls_result.map_err(|file_provider_error| Error::DeclParse {
             path,
             file_provider_error,
         })?;
+        self.dedup_and_add_decls(path, decls)?;
+        Ok(())
+    }
+
+    pub fn dedup_and_add_decls(
+        &self,
+        path: RelativePath,
+        decls: impl IntoIterator<Item = Decl<R>>,
+    ) -> Result<()> {
+        // dedup, taking the decl which was declared first syntactically
+        let decls = decls
+            .into_iter()
+            .unique_by(|decl| (decl.name(), decl.name_kind()));
+        // dedup with symbols declared in other files
+        let decls = self.remove_naming_conflict_losers(path, decls)?;
         self.store.add_decls(decls)?;
         Ok(())
+    }
+
+    /// If a symbol was also declared in another file, and that file
+    /// was determined to be the winner in the naming table, remove
+    /// its decl from the list.
+    fn remove_naming_conflict_losers(
+        &self,
+        path: RelativePath,
+        decls: impl Iterator<Item = Decl<R>>,
+    ) -> Result<Vec<Decl<R>>> {
+        let mut winners = vec![];
+        for decl in decls {
+            let path_opt = match decl {
+                Decl::Class(name, _) | Decl::Typedef(name, _) => {
+                    self.naming_provider.get_type_path(name)?
+                }
+                Decl::Fun(name, _) => self.naming_provider.get_fun_path(name)?,
+                Decl::Const(name, _) => self.naming_provider.get_const_path(name)?,
+                Decl::Module(..) => Some(path), // TODO: look this up from naming provider
+            };
+            if path_opt.map_or(true, |p| p == path) {
+                winners.push(decl)
+            }
+        }
+        Ok(winners)
     }
 }
 

@@ -213,6 +213,7 @@
   provider_backend
   provider_context
   relative_path
+  rust_provider_backend_stubs
   shallow_classes_heap
   shallow_decl_defs
   typechecker_options)

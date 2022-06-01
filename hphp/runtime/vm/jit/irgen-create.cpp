@@ -82,7 +82,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
     false,
     ReadonlyOp::Any
   );
-  assertx(!lookup.tc->isCheckable());
+  assertx(lookup.tc->isInt());
   auto const sprop = lookup.propPtr;
   assertx(sprop);
 

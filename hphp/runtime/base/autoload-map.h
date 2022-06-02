@@ -41,13 +41,16 @@ struct AutoloadMap {
     RetryAutoloading
   };
 
-  enum class KindOf {
-    TypeOrTypeAlias,
-    Type,
-    Function,
-    Constant,
-    TypeAlias,
-    Module,
+  /**
+   * Keep enum values in sync with `HH\Facts\SymbolKind` in `ext_facts.php`
+   */
+  enum class KindOf : int {
+    Type = 1,
+    Function = 2,
+    Constant = 3,
+    Module = 4,
+    TypeAlias = 5,
+    TypeOrTypeAlias = 6,
   };
 
   AutoloadMap() = default;

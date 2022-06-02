@@ -2,6 +2,18 @@
 
 namespace HH\Facts {
 
+/**
+ * Used to communicate whether a symbol string is the name of a type, function,
+ * constant, or type alias.
+ *
+ * Replicated as `AutoloadMap::KindOf` in `autoload-map.h`
+ */
+enum SymbolKind : int {
+  K_TYPE = 1;
+  K_FUNCTION = 2;
+  K_CONSTANT = 3;
+}
+
 enum TypeKind : string {
   K_CLASS = 'class';
   K_ENUM = 'enum';

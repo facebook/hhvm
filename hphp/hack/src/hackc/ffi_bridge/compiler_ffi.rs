@@ -170,9 +170,6 @@ pub mod compile_ffi {
             symbol: &str,
         ) -> bool;
 
-        /// Testing: pretty-print Decls to stdout.
-        fn hackc_print_decls(decls: &Decls);
-
         /// For testing: return true if deserializing produces the expected Decls.
         fn hackc_verify_deserialization(result: &DeclResult) -> bool;
 
@@ -313,10 +310,6 @@ fn hackc_decl_exists(
         _ => panic!("Requested kind of decl is not an available option"),
     };
     decls.decls.get(kind, symbol) != None
-}
-
-fn hackc_print_decls(decls: &Decls) {
-    println!("{:#?}", decls.decls)
 }
 
 pub fn hackc_create_direct_decl_parse_options(

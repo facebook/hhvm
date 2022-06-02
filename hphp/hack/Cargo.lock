@@ -1472,7 +1472,6 @@ version = "0.0.0"
 dependencies = [
  "cxx",
  "cxx-build",
- "oxidized",
 ]
 
 [[package]]
@@ -2207,7 +2206,6 @@ dependencies = [
  "parser_core_types",
  "positioned_full_trivia_parser",
  "serde_json",
- "stack_limit",
 ]
 
 [[package]]

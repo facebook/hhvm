@@ -9,16 +9,18 @@ path = "hackrs_provider_backend.rs"
 
 [dependencies]
 anyhow = "1.0.56"
+bstr = { version = "0.2", features = ["serde1"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 datastore = { path = "../../rupro/datastore" }
 depgraph_api = { path = "../../rupro/depgraph_api/cargo/depgraph_api" }
 deps_rust = { path = "../../deps/cargo/deps_rust" }
 file_provider = { path = "../../rupro/file_provider/cargo/file_provider" }
 hackrs = { path = "../../rupro/hackrs/cargo/hackrs" }
-hackrs_test_utils = { path = "../../rupro/hackrs_test_utils/cargo/hackrs_test_utils" }
 hh24_types = { path = "../../utils/hh24_types" }
 names = { path = "../../naming/names_rust" }
 naming_provider = { path = "../../rupro/naming_provider/cargo/naming_provider" }
 ocamlrep = { path = "../../ocamlrep" }
+ocamlrep_derive = { path = "../../ocamlrep_derive" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }

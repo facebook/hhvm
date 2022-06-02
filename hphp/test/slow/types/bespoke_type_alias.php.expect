@@ -1,0 +1,20 @@
+int(14)
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["a"]=>
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+    ["b"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(3) "Foo"
+}

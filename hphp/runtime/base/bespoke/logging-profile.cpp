@@ -116,6 +116,11 @@ ArrayData* getStaticArray(LoggingProfileKey key) {
       return key.cls->resolvedTypeCnsGet(tv.val().parr);
     }
 
+    case LocationType::TypeAlias: {
+      auto const& ts = key.ta->resolvedTypeStructureRaw();
+      return !ts.isNull() ? ts.get() : nullptr;
+    }
+
     case LocationType::SrcKey: {
       auto const op = key.sk.op();
       if (op != Op::Vec && op != Op::Dict && op != Op::Keyset) {
@@ -422,6 +427,11 @@ void LoggingProfile::setStaticBespokeArray(BespokeArray* bad) {
     auto const rawData = reinterpret_cast<intptr_t>(bad);
     auto const ad = reinterpret_cast<ArrayData*>(rawData | 0x1);
     tv->m_data.parr = ad;
+  }
+
+  if (key.locationType == LocationType::TypeAlias) {
+    auto const ta = const_cast<TypeAlias*>(key.ta);
+    ta->setResolvedTypeStructure(bad);
   }
 }
 
@@ -1175,6 +1185,10 @@ LoggingProfile* getLoggingProfile(const Class* cls, Slot slot,
     return nullptr;
   }
   return getLoggingProfile(LoggingProfileKey(cls, slot, loc));
+}
+
+LoggingProfile* getLoggingProfile(const TypeAlias* ta) {
+  return getLoggingProfile(LoggingProfileKey(ta));
 }
 
 SinkProfile* getSinkProfile(TransID id, SrcKey sk) {

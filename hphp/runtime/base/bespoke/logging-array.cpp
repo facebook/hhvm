@@ -260,6 +260,22 @@ void profileArrLikeClsCns(const Class* cls, TypedValue* tv, Slot slot) {
   profileArrLikeLval(tv, profile);
 }
 
+void profileArrLikeTypeAlias(const TypeAlias* ta, Array* ts) {
+  if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return;
+
+  auto const ad = ts->get();
+  auto const profile = getLoggingProfile(ta);
+  if (profile) {
+    auto const layout = profile->getLayout();
+    if (layout.bespoke()) {
+      ts->reset(layout.apply(ad));
+    } else {
+      auto loggingAd = maybeMakeLoggingArray(ad, profile);
+      ts->reset(loggingAd);
+    }
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 void LoggingArray::InitializeLayouts() {

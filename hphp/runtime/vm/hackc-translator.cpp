@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/hackc-translator.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/as-shared.h"
@@ -1043,7 +1044,71 @@ void translateFunctionBody(TranslationState& ts,
   assertx(ts.start.empty());
   assertx(ts.handler.empty());
   ts.maxUnnamed = 0;
+}
 
+void translateCoeffects(TranslationState& ts, const HhasCoeffects& coeffects) {
+  auto static_coeffects = range(coeffects.static_coeffects);
+  for (auto const& c : static_coeffects) {
+    auto const coeffectStr = CoeffectsConfig::fromHackCCtx(c);
+    ts.fe->staticCoeffects.push_back(makeStaticString(coeffectStr));
+  }
+
+  auto unenforced_coeffects = range(coeffects.unenforced_static_coeffects);
+  for (auto const& c : unenforced_coeffects) {
+    ts.fe->staticCoeffects.push_back(toStaticString(c));
+  }
+
+  auto fun_param = range(coeffects.fun_param);
+  for (auto const& f : fun_param) {
+    ts.fe->coeffectRules.emplace_back(
+      CoeffectRule(CoeffectRule::FunParam{}, f));
+  }
+
+  auto cc_param = range(coeffects.cc_param);
+  for (auto const& c : cc_param) {
+    ts.fe->coeffectRules.emplace_back(
+      CoeffectRule(CoeffectRule::CCParam{}, c._0, toStaticString(c._1)));
+  }
+
+  auto cc_this_vec = range(coeffects.cc_this);
+  for (auto const& cc_this : cc_this_vec) {
+
+    std::vector<LowStringPtr> names;
+    for (int i = 0; i < cc_this.len - 1; i++) {
+      names.push_back(toStaticString(cc_this.data[i]));
+    }
+    auto const ctx_name = toStaticString(cc_this.data[cc_this.len - 1]);
+    ts.fe->coeffectRules.emplace_back(
+        CoeffectRule(CoeffectRule::CCThis{}, names, ctx_name));
+  }
+
+  auto cc_reified_vec = range(coeffects.cc_reified);
+  for (auto const& cc_reified : cc_reified_vec) {
+    auto const isClass = cc_reified._0;
+    auto const pos = cc_reified._1;
+    auto types = cc_reified._2;
+
+    std::vector<LowStringPtr> names;
+    for (int i = 0; i < types.len - 1; i++) {
+      names.push_back(toStaticString(types.data[i]));
+    }
+
+    auto const ctx_name = toStaticString(types.data[types.len - 1]);
+     ts.fe->coeffectRules.emplace_back(
+        CoeffectRule(CoeffectRule::CCReified{}, isClass, pos, names, ctx_name));
+  }
+
+  if (coeffects.closure_parent_scope) {
+    ts.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::ClosureParentScope{}));
+  }
+
+  if (coeffects.generator_this) {
+    ts.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::GeneratorThis{}));
+  }
+
+  if (coeffects.caller) {
+    ts.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::Caller{}));
+  }
 }
 
 void translateFunction(TranslationState& ts, const HhasFunction& f) {
@@ -1067,6 +1132,8 @@ void translateFunction(TranslationState& ts, const HhasFunction& f) {
   ts.fe->isAsync = (bool)(f.flags & HhasFunctionFlags_ASYNC);
   ts.fe->isPairGenerator = (bool)(f.flags & HhasFunctionFlags_PAIR_GENERATOR);
   ts.fe->userAttributes = userAttrs;
+
+  translateCoeffects(ts, f.coeffects);
 
   auto retTypeInfo = maybeOrElse(f.body.return_type_info,
       [&](HhasTypeInfo& ti) {return translateTypeInfo(ti);},
@@ -1111,6 +1178,8 @@ void translateMethod(TranslationState& ts, const HhasMethod& m, const UpperBound
   UserAttributeMap userAttrs;
   translateUserAttributes(m.attributes, userAttrs);
   ts.fe->userAttributes = userAttrs;
+
+  translateCoeffects(ts, m.coeffects);
 
   auto retTypeInfo = maybeOrElse(m.body.return_type_info,
     [&](HhasTypeInfo& ti) {return translateTypeInfo(ti);},
@@ -1255,7 +1324,6 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
       fatal._0
     );
   });
-
 
   for (auto& fe : ts.ue->fevec()) fixup_default_values(ts, fe.get());
   for (size_t n = 0; n < ts.ue->numPreClasses(); ++n) {

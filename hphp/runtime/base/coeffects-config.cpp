@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/hack/src/hackc/hhbc-ast.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/vm/coeffects.h"
 
@@ -398,6 +399,26 @@ StaticCoeffects CoeffectsConfig::combine(const StaticCoeffects a,
     result |= std::max(a.value() & mask, b.value() & mask);
   }
   return StaticCoeffects::fromValue(result);
+}
+
+std::string CoeffectsConfig::fromHackCCtx(const hackc::Ctx& ctx) {
+  switch (ctx) {
+    case hackc::Ctx::Defaults:       return C::s_defaults;
+    case hackc::Ctx::WriteThisProps: return C::s_write_this_props;
+    case hackc::Ctx::WriteProps:     return C::s_write_props;
+    case hackc::Ctx::RxLocal:        return C::s_rx_local;
+    case hackc::Ctx::RxShallow:      return C::s_rx_shallow;
+    case hackc::Ctx::Rx:             return C::s_rx;
+    case hackc::Ctx::ZonedWith:      return C::s_zoned_with;
+    case hackc::Ctx::ZonedLocal:     return C::s_zoned_local;
+    case hackc::Ctx::ZonedShallow:   return C::s_zoned_shallow;
+    case hackc::Ctx::Zoned:          return C::s_zoned;
+    case hackc::Ctx::LeakSafe:       return C::s_leak_safe;
+    case hackc::Ctx::ReadGlobals:    return C::s_read_globals;
+    case hackc::Ctx::Globals:        return C::s_globals;
+    case hackc::Ctx::Pure:           return C::s_pure;
+  }
+  not_reached();
 }
 
 std::vector<std::string>

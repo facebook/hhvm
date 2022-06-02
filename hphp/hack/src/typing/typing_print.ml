@@ -141,7 +141,7 @@ module Full = struct
     let fields = List.sort ~compare (TShapeMap.bindings fdm) in
     List.fold_map fields ~f:f_field ~init:fuel
 
-  let rec fun_type ~fuel ~ty to_doc st penv ft =
+  let rec fun_type ~fuel ~ty to_doc st penv ft fun_implicit_params =
     let n = List.length ft.ft_params in
     let (fuel, params) =
       List.fold_mapi ft.ft_params ~init:fuel ~f:(fun i fuel p ->
@@ -162,15 +162,19 @@ module Full = struct
       | (l, FTKinstantiated_targs) ->
         list ~fuel "<" (tparam ~ty to_doc st penv) l ">"
     in
-    let (fuel, params_doc) = list ~fuel "(" id params "):" in
     let (fuel, return_doc) =
       possibly_enforced_ty ~fuel ~ty to_doc st penv ft.ft_ret
     in
+    let (fuel, capabilities_doc) =
+      fun_implicit_params ~fuel to_doc st penv ft.ft_implicit_params
+    in
+    let (fuel, params_doc) = list ~fuel "(" id params ")" in
     let tparams_doc =
       Span
         [
           tparams_doc;
           params_doc;
+          capabilities_doc;
           Space;
           (if get_ft_returns_readonly ft then
             text "readonly" ^^ Space
@@ -284,7 +288,7 @@ module Full = struct
 
   let tprim x = text @@ Aast_defs.string_of_tprim x
 
-  let tfun ~fuel ~ty to_doc st penv ft =
+  let tfun ~fuel ~ty to_doc st penv ft fun_implicit_params =
     let sdt =
       match penv with
       | Loclenv env when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
@@ -295,7 +299,9 @@ module Full = struct
           Nothing
       | _ -> Nothing
     in
-    let (fuel, fun_type_doc) = fun_type ~fuel ~ty to_doc st penv ft in
+    let (fuel, fun_type_doc) =
+      fun_type ~fuel ~ty to_doc st penv ft fun_implicit_params
+    in
     let tfun_doc =
       Concat
         [
@@ -498,7 +504,7 @@ module Full = struct
       (fuel, like_doc)
     | Tprim x -> (fuel, tprim x)
     | Tvar x -> (fuel, text (Printf.sprintf "#%d" x))
-    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft
+    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft fun_decl_implicit_params
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
     | Tapply ((_, s), tyl)
@@ -516,6 +522,10 @@ module Full = struct
       let intersection_doc = Concat [text "&"; tys_doc] in
       (fuel, intersection_doc)
     | Tshape (shape_kind, fdm) -> tshape ~fuel k to_doc shape_kind fdm
+
+  (* TODO (T86471586): Display capabilities that are decls for functions *)
+  and fun_decl_implicit_params ~fuel _to_doc _st _penv _implicit_param =
+    (fuel, text ":")
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam penv tparam =
@@ -631,7 +641,7 @@ module Full = struct
           let (fuel, ty_doc) = ty ~fuel to_doc st penv ety in
           (fuel, Concat [prepend; ty_doc])
       end
-    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft
+    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft fun_locl_implicit_params
     | Tclass ((_, s), exact, tyl) ->
       let (fuel, targs_doc) = list ~fuel "<" k tyl ">" in
       let class_doc = to_doc s ^^ targs_doc in
@@ -839,6 +849,29 @@ module Full = struct
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
       (fuel, access_doc)
 
+  and fun_locl_implicit_params ~fuel to_doc st penv { capability } =
+    match capability with
+    | CapDefaults _ -> (fuel, text ":")
+    | CapTy t ->
+      let default_capability : locl_ty =
+        Typing_make_type.default_capability Pos_or_decl.none
+      in
+      if ty_equal ~normalize_lists:true t default_capability then
+        (fuel, text ":")
+      else
+        let (fuel, capabilities) =
+          match get_node t with
+          | Tintersection [] -> (fuel, Nothing)
+          | Toption t ->
+            begin
+              match deref t with
+              | (_, Tnonnull) -> (fuel, Nothing)
+              | _ -> locl_ty ~fuel to_doc st penv t
+            end
+          | _ -> locl_ty ~fuel to_doc st penv t
+        in
+        (fuel, Concat [text "["; capabilities; text "]:"])
+
   let rec constraint_type_ ~fuel to_doc st penv x =
     let k ~fuel lty = locl_ty ~fuel to_doc st penv lty in
     let k' ~fuel cty = constraint_type ~fuel to_doc st penv cty in
@@ -938,7 +971,9 @@ module Full = struct
 
   let fun_to_string ~fuel (x : decl_fun_type) =
     let ty = decl_ty in
-    let (fuel, doc) = fun_type ~fuel ~ty Doc.text ISet.empty Declenv x in
+    let (fuel, doc) =
+      fun_type ~fuel ~ty Doc.text ISet.empty Declenv x fun_decl_implicit_params
+    in
     let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
     (fuel, str)
 
@@ -970,7 +1005,14 @@ module Full = struct
         (* Use short names for function types since they display a lot more
            information to the user. *)
         let (fuel, fun_ty_doc) =
-          fun_type ~fuel ~ty text_strip_ns ISet.empty penv ft
+          fun_type
+            ~fuel
+            ~ty
+            text_strip_ns
+            ISet.empty
+            penv
+            ft
+            fun_locl_implicit_params
         in
         let fun_doc =
           Concat [text "function"; Space; text_strip_ns name; fun_ty_doc]

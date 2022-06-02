@@ -24,6 +24,7 @@ let debug_describe_t : type a. a t -> string = function
   | IDE_GO_TO_IMPL _ -> "IDE_GO_TO_IMPL"
   | IDE_HIGHLIGHT_REFS _ -> "IDE_HIGHLIGHT_REFS"
   | REFACTOR _ -> "REFACTOR"
+  | REFACTOR_CHECK_SD _ -> "REFACTOR_CHECK_SD"
   | IDE_REFACTOR _ -> "IDE_REFACTOR"
   | DUMP_SYMBOL_INFO _ -> "DUMP_SYMBOL_INFO"
   | REMOVE_DEAD_FIXMES _ -> "REMOVE_DEAD_FIXMES"

@@ -42,6 +42,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | COVERAGE_COUNTS _ -> true
   (* Codebase-wide rename, uses find references *)
   | REFACTOR _ -> true
+  | REFACTOR_CHECK_SD _ -> true
   | IDE_REFACTOR _ -> true
   (* Same case as Ai commands *)
   | CREATE_CHECKPOINT _ -> true

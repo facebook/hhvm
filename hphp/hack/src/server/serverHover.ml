@@ -255,6 +255,8 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
     ^ "For example, if you have a private property `name`, you can access both `$this->name` and `$other_instance->name`."
     ^ "\n\nIf the current class `use`s a trait, the trait methods can also access `private` methods and properties."
     ^ "\n\nSee also `public` and `protected`."
+  | SymbolOccurrence.Internal ->
+    "An `internal` symbol can only be accessed from files that belong to the current `module`."
 
 let split_class_name (full_name : string) : string =
   match String.lsplit2 full_name ~on:':' with

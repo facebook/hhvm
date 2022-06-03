@@ -42,6 +42,7 @@ type keyword_with_hover_docs =
   | Public
   | Protected
   | Private
+  | Internal
 [@@deriving ord, eq]
 
 type built_in_type_hint =

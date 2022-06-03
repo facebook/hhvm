@@ -962,6 +962,14 @@ let keywords tree : Result_set.elt list =
           pos = token_pos t;
         }
         :: acc
+      | Token.TokenKind.Internal ->
+        {
+          name = "internal";
+          type_ = Keyword Internal;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
       | _ -> acc)
     | _ -> List.fold (children s) ~init:acc ~f:(aux ctx)
   in

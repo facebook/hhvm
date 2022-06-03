@@ -229,7 +229,7 @@ final class RescheduleWaitHandle extends WaitableWaitHandle<void> {
   public static function create(
     int $queue,
     int $priority,
-  ): \HH\RescheduleWaitHandle;
+  )[]: \HH\RescheduleWaitHandle;
 }
 
 /** A wait handle that succeeds with null after the desired timeout expires

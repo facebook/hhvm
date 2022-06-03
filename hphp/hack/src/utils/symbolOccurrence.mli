@@ -49,6 +49,8 @@ type keyword_with_hover_docs =
   | Protected
   | Private
   | Internal
+  | ModuleInModuleDeclaration
+  | ModuleInModuleMembershipDeclaration
 [@@deriving ord, eq]
 
 type built_in_type_hint =

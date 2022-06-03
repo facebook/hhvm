@@ -755,16 +755,21 @@ let visitor =
   end
 
 (* Types of decls used in keyword extraction.*)
-type decl_kind =
+type classish_decl_kind =
   | DKclass
   | DKinterface
 
+type module_decl_kind =
+  | DKModuleDeclaration
+  | DKModuleMembershipDeclaration
+
 type keyword_context =
-  | Decl of decl_kind
+  | ClassishDecl of classish_decl_kind
   | Method
   | Parameter
   | ReturnType
   | AsyncBlockHeader
+  | ModuleDecl of module_decl_kind
 
 let trivia_pos (t : Full_fidelity_positioned_trivia.t) : Pos.t =
   let open Full_fidelity_positioned_trivia in
@@ -818,7 +823,7 @@ let keywords tree : Result_set.elt list =
   let rec aux ctx acc s =
     match s.syntax with
     | ClassishDeclaration cd ->
-      let decl_kind =
+      let classish_decl_kind =
         match cd.classish_keyword.syntax with
         | Token t ->
           (match t.Token.kind with
@@ -827,7 +832,7 @@ let keywords tree : Result_set.elt list =
           | _ -> DKclass)
         | _ -> DKclass
       in
-      let ctx = Some (Decl decl_kind) in
+      let ctx = Some (ClassishDecl classish_decl_kind) in
       List.fold (children s) ~init:acc ~f:(aux ctx)
     | MethodishDeclaration _ ->
       List.fold (children s) ~init:acc ~f:(aux (Some Method))
@@ -841,6 +846,16 @@ let keywords tree : Result_set.elt list =
       let acc = aux ctx acc ace.awaitable_attribute_spec in
       let acc = aux (Some AsyncBlockHeader) acc ace.awaitable_async in
       aux ctx acc ace.awaitable_compound_statement
+    | ModuleDeclaration md ->
+      aux
+        (Some (ModuleDecl DKModuleDeclaration))
+        acc
+        md.module_declaration_module_keyword
+    | ModuleMembershipDeclaration mmd ->
+      aux
+        (Some (ModuleDecl DKModuleMembershipDeclaration))
+        acc
+        mmd.module_membership_declaration_module_keyword
     | Contexts c ->
       let is_empty =
         match c.contexts_types.syntax with
@@ -865,8 +880,8 @@ let keywords tree : Result_set.elt list =
           type_ =
             Keyword
               (match ctx with
-              | Some (Decl DKclass) -> ExtendsOnClass
-              | Some (Decl DKinterface) -> ExtendsOnInterface
+              | Some (ClassishDecl DKclass) -> ExtendsOnClass
+              | Some (ClassishDecl DKinterface) -> ExtendsOnInterface
               | _ -> ExtendsOnClass);
           is_declaration = false;
           pos = token_pos t;
@@ -966,6 +981,21 @@ let keywords tree : Result_set.elt list =
         {
           name = "internal";
           type_ = Keyword Internal;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
+      | Token.TokenKind.Module ->
+        {
+          name = "module";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some (ModuleDecl DKModuleDeclaration) ->
+                ModuleInModuleDeclaration
+              | Some (ModuleDecl DKModuleMembershipDeclaration) ->
+                ModuleInModuleMembershipDeclaration
+              | _ -> ModuleInModuleDeclaration);
           is_declaration = false;
           pos = token_pos t;
         }

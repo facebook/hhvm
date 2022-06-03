@@ -257,6 +257,12 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
     ^ "\n\nSee also `public` and `protected`."
   | SymbolOccurrence.Internal ->
     "An `internal` symbol can only be accessed from files that belong to the current `module`."
+  | SymbolOccurrence.ModuleInModuleDeclaration ->
+    "`new module Foo {}` defines a new module but does not associate any code with it."
+    ^ "\n\nYou must use `module Foo;` to mark all the definitions in a given file as associated with the `Foo` module and enable them to use `internal`."
+  | SymbolOccurrence.ModuleInModuleMembershipDeclaration ->
+    "`module Foo;` marks all the definitions in the current file as associated with the `Foo` module, and enables them to use `internal`."
+    ^ "\n\nYou must also define this module with `new module Foo {}` inside or outside this file."
 
 let split_class_name (full_name : string) : string =
   match String.lsplit2 full_name ~on:':' with

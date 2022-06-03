@@ -229,11 +229,8 @@ let direct_decl_parse_and_cache ctx file =
     Counters.count Counters.Category.Get_decl @@ fun () ->
     get_file_contents ctx file
     |> Option.map ~f:(fun contents ->
-           let popt = Provider_context.get_popt ctx in
-           let opts = DeclParserOptions.from_parser_options popt in
            Rust_provider_backend.Decl.direct_decl_parse_and_cache
              backend
-             opts
              file
              contents)
   | _ ->

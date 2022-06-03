@@ -65,7 +65,6 @@ ocaml_ffi_with_arena! {
     fn hh_rust_provider_backend_direct_decl_parse_and_cache<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
-        opts: &'a oxidized_by_ref::decl_parser_options::DeclParserOptions<'a>,
         path: RelativePath,
         text: UnsafeOcamlPtr,
     ) -> direct_decl_parser::ParsedFileWithHashes<'a> {
@@ -75,7 +74,7 @@ ocaml_ffi_with_arena! {
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = ocamlrep::bytes_from_ocamlrep(text_value).expect("expected string");
-        backend.parse_and_cache_decls(opts, path, text, arena).unwrap()
+        backend.parse_and_cache_decls(path, text, arena).unwrap()
     }
 
     fn hh_rust_provider_backend_add_shallow_decls<'a>(

@@ -53,8 +53,7 @@ impl<R: Reason> DeclParser<R> {
     pub fn parse(&self, path: RelativePath) -> anyhow::Result<Vec<shallow::Decl<R>>> {
         let arena = bumpalo::Bump::new();
         let text = self.file_provider.get(path)?;
-        let decl_parser_opts = DeclParserOptions::from_parser_options(self.opts.get());
-        let parsed_file = self.parse_impl(&decl_parser_opts, path, &text, &arena);
+        let parsed_file = self.parse_impl(path, &text, &arena);
         Ok(parsed_file.decls.iter().map(Into::into).collect())
     }
 
@@ -64,21 +63,19 @@ impl<R: Reason> DeclParser<R> {
     ) -> anyhow::Result<(Vec<shallow::Decl<R>>, FileSummary)> {
         let arena = bumpalo::Bump::new();
         let text = self.file_provider.get(path)?;
-        let opts = DeclParserOptions::from(self.opts.get());
-        let parsed_file = self.parse_impl(&opts, path, &text, &arena);
+        let parsed_file = self.parse_impl(path, &text, &arena);
         let summary = FileSummary::from_decls(parsed_file);
         Ok((parsed_file.decls.iter().map(Into::into).collect(), summary))
     }
 
     pub fn parse_impl<'a>(
         &self,
-        opts: &'a DeclParserOptions<'a>,
         path: RelativePath,
         text: &'a [u8],
         arena: &'a bumpalo::Bump,
     ) -> oxidized_by_ref::direct_decl_parser::ParsedFile<'a> {
         let parser_options = self.opts.get();
-        assert_eq!(opts, &DeclParserOptions::from(parser_options));
+        let opts = &DeclParserOptions::from(parser_options);
         let mut parsed_file = direct_decl_parser::parse_decls(opts, path.into(), text, arena);
         // TODO: The direct decl parser should return decls in the same
         // order as they are declared in the file. At the moment it reverses

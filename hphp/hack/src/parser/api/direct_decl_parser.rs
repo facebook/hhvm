@@ -29,7 +29,7 @@ pub use oxidized_by_ref::{
 ///   identifiers into the arena (when possible).
 /// - Excludes user attributes which are irrelevant to typechecking.
 pub fn parse_decls<'a>(
-    opts: &'a DeclParserOptions<'a>,
+    opts: &DeclParserOptions<'_>,
     filename: RelativePath,
     text: &'a [u8],
     arena: &'a Bump,
@@ -60,7 +60,7 @@ pub fn parse_decls<'a>(
 ///   keep the source text in memory when caching decls.
 /// - Preserves user attributes in decls necessary for producing facts.
 pub fn parse_decls_without_reference_text<'a, 'text>(
-    opts: &'a DeclParserOptions<'a>,
+    opts: &DeclParserOptions<'_>,
     filename: RelativePath,
     text: &'text [u8],
     arena: &'a Bump,
@@ -100,7 +100,7 @@ fn collect_file_attributes<'a>(
 }
 
 fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>>(
-    opts: &'a DeclParserOptions<'a>,
+    opts: &DeclParserOptions<'_>,
     source: &SourceText<'text>,
     arena: &'a Bump,
     source_text_allocator: S,

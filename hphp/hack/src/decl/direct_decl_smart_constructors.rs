@@ -67,7 +67,7 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     // encounters while it's "Some"
     const_refs: Option<arena_collections::set::Set<'a, typing_defs::ClassConstRef<'a>>>,
 
-    opts: &'a DeclParserOptions<'a>,
+    opts: DeclParserOptions<'a>,
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
@@ -81,7 +81,7 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
 
 impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
     pub fn new(
-        opts: &'a DeclParserOptions<'a>,
+        opts: &DeclParserOptions<'_>,
         src: &SourceText<'text>,
         file_mode: Mode,
         arena: &'a Bump,
@@ -94,12 +94,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         let prefix = path.prefix();
         let path = bump::String::from_str_in(path.path_str(), arena).into_bump_str();
         let filename = RelativePath::make(prefix, path);
+        let opts = opts.clone_in(arena);
         Self {
             token_factory: SimpleTokenFactoryImpl::new(),
 
             source_text,
             arena,
-            opts,
             filename: arena.alloc(filename),
             file_mode,
             decls: Decls::empty(),
@@ -111,6 +111,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 elaborate_xhp_namespaces_for_facts,
                 arena,
             )),
+            opts,
             classish_name_builder: ClassishNameBuilder::new(),
             type_parameters: Rc::new(Vec::new()),
             // EndOfFile is used here as a None value (signifying "beginning of

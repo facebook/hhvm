@@ -127,15 +127,11 @@ impl HhServerProviderBackend {
     /// with other files), and add the parsed decls to the shallow decl store.
     pub fn parse_and_cache_decls<'a>(
         &self,
-        opts: &'a oxidized_by_ref::decl_parser_options::DeclParserOptions<'a>,
         path: RelativePath,
         text: &'a [u8],
         arena: &'a bumpalo::Bump,
     ) -> Result<oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes<'a>> {
-        let mut parsed_file = self
-            .providers
-            .decl_parser
-            .parse_impl(opts, path, text, arena);
+        let mut parsed_file = self.providers.decl_parser.parse_impl(path, text, arena);
         self.lazy_shallow_decl_provider
             .dedup_and_add_decls(path, parsed_file.decls.iter().map(Into::into))?;
         parsed_file.decls.rev(arena); // To match OCaml behavior

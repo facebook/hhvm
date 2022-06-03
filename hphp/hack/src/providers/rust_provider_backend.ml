@@ -269,11 +269,7 @@ module Decl = struct
       }
 
   external direct_decl_parse_and_cache :
-    t ->
-    DeclParserOptions.t ->
-    Relative_path.t ->
-    string ->
-    Direct_decl_parser.parsed_file_with_hashes
+    t -> Relative_path.t -> string -> Direct_decl_parser.parsed_file_with_hashes
     = "hh_rust_provider_backend_direct_decl_parse_and_cache"
 
   external add_shallow_decls :

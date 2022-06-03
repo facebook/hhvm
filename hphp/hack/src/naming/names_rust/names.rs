@@ -10,5 +10,3 @@ mod summary;
 
 pub use naming_table::{Names, NamingTable};
 pub use summary::{DeclSummary, FileSummary};
-
-pub use rusqlite::{Error, Result};

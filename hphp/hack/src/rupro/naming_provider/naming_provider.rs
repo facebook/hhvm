@@ -30,7 +30,7 @@ pub struct SqliteNamingTable {
 }
 
 impl SqliteNamingTable {
-    pub fn new(path: impl AsRef<Path>) -> rusqlite::Result<Self> {
+    pub fn new(path: impl AsRef<Path>) -> anyhow::Result<Self> {
         Ok(Self {
             names: Mutex::new(names::Names::from_file(path)?),
         })

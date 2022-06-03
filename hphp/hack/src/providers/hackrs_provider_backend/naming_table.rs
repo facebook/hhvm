@@ -209,7 +209,7 @@ impl MaybeNamingDb {
         self.0.lock().as_ref().map(|(_, path)| path.clone())
     }
 
-    fn set_db_path(&self, db_path: PathBuf) -> rusqlite::Result<()> {
+    fn set_db_path(&self, db_path: PathBuf) -> Result<()> {
         let mut lock = self.0.lock();
         *lock = Some((names::Names::from_file(&db_path)?, db_path));
         Ok(())
@@ -217,7 +217,7 @@ impl MaybeNamingDb {
 
     fn with_db<T, F>(&self, f: F) -> Result<Option<T>>
     where
-        F: FnOnce(&names::Names) -> rusqlite::Result<Option<T>>,
+        F: FnOnce(&names::Names) -> Result<Option<T>>,
     {
         match &*self.0.lock() {
             Some((db, _)) => Ok(f(db)?),

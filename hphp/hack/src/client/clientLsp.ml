@@ -24,7 +24,6 @@ type env = {
   args: args;
   init_id: string;
   use_serverless_ide: bool;
-  use_ffp_autocomplete: bool;
   use_ranked_autocomplete: bool;
 }
 
@@ -2609,23 +2608,7 @@ let make_ide_completion_response
       items = List.map result.completions ~f:hack_completion_to_lsp;
     }
 
-let do_completion_ffp
-    (conn : server_conn)
-    (ref_unblocked_time : float ref)
-    (params : Completion.params) : Completion.result Lwt.t =
-  let open Completion in
-  let open TextDocumentIdentifier in
-  let pos =
-    lsp_position_to_ide params.loc.TextDocumentPositionParams.position
-  in
-  let filename =
-    lsp_uri_to_path params.loc.TextDocumentPositionParams.textDocument.uri
-  in
-  let command = ServerCommandTypes.IDE_FFP_AUTOCOMPLETE (filename, pos) in
-  let%lwt result = rpc conn ref_unblocked_time ~desc:"completion" command in
-  make_ide_completion_response result filename
-
-let do_completion_legacy
+let do_completion
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : Completion.params) : Completion.result Lwt.t =
@@ -4572,12 +4555,6 @@ let handle_client_message
         { result_count = List.length result; result_extra_telemetry }
     (* textDocument/completion request *)
     | (Main_loop menv, _, RequestMessage (id, CompletionRequest params)) ->
-      let do_completion =
-        if env.use_ffp_autocomplete then
-          do_completion_ffp
-        else
-          do_completion_legacy
-      in
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result = do_completion menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (CompletionResult result);
@@ -4949,8 +4926,6 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
     {
       args;
       init_id;
-      use_ffp_autocomplete =
-        versionless_local_config.ServerLocalConfig.ide_ffp_autocomplete;
       use_ranked_autocomplete =
         versionless_local_config.ServerLocalConfig.ide_ranked_autocomplete;
       use_serverless_ide =

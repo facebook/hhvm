@@ -238,11 +238,6 @@
  (wrapped false)
  (modules
   autocompleteService
-  ffpAutocompleteContextParser
-  ffpAutocompleteGlobals
-  ffpAutocompleteKeywords
-  ffpAutocompleteService
-  ffpAutocompleteTypeCheck
   serverAutoComplete)
  (libraries
   provider_utils

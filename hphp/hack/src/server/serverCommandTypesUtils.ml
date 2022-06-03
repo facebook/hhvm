@@ -49,7 +49,6 @@ let debug_describe_t : type a. a t -> string = function
   | CLOSE_FILE _ -> "CLOSE_FILE"
   | EDIT_FILE _ -> "EDIT_FILE"
   | IDE_AUTOCOMPLETE _ -> "IDE_AUTOCOMPLETE"
-  | IDE_FFP_AUTOCOMPLETE _ -> "IDE_FFP_AUTOCOMPLETE"
   | CODE_ACTIONS _ -> "CODE_ACTIONS"
   | DISCONNECT -> "DISCONNECT"
   | OUTLINE _ -> "OUTLINE"

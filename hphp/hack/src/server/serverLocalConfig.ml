@@ -470,8 +470,6 @@ type t = {
   ide_serverless: bool;  (** whether clientLsp should use serverless-ide *)
   ide_ranked_autocomplete: bool;
       (** whether clientLsp should use ranked autocomplete *)
-  ide_ffp_autocomplete: bool;
-      (** whether clientLsp should use ffp-autocomplete *)
   ide_max_num_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_max_num_shallow_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_max_num_linearizations: int;  (** tuning of clientIdeDaemon local cache *)
@@ -650,7 +648,6 @@ let default =
     re_worker = false;
     ide_serverless = false;
     ide_ranked_autocomplete = false;
-    ide_ffp_autocomplete = false;
     ide_max_num_decls = 5000;
     ide_max_num_shallow_decls = 10000;
     ide_max_num_linearizations = 10000;
@@ -1035,10 +1032,6 @@ let load_ fn ~silent ~current_version overrides =
       "ide_ranked_autocomplete"
       ~default:default.ide_ranked_autocomplete
       config
-  in
-  (* ide_ffp_autocomplete CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
-  let ide_ffp_autocomplete =
-    bool_ "ide_ffp_autocomplete" ~default:default.ide_ffp_autocomplete config
   in
   let ide_max_num_decls =
     int_ "ide_max_num_decls" ~default:default.ide_max_num_decls config
@@ -1526,7 +1519,6 @@ let load_ fn ~silent ~current_version overrides =
     re_worker;
     ide_serverless;
     ide_ranked_autocomplete;
-    ide_ffp_autocomplete;
     ide_max_num_decls;
     ide_max_num_shallow_decls;
     ide_max_num_linearizations;

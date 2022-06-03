@@ -401,35 +401,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             ~column:pos.File_content.column)
     in
     (env, results)
-  | IDE_FFP_AUTOCOMPLETE (path, pos) ->
-    let pos = pos |> Ide_api_types.ide_pos_to_fc in
-    let contents =
-      ServerFileSync.get_file_content (ServerCommandTypes.FileName path)
-    in
-    let offset = File_content.get_offset contents pos in
-    (* will raise if out of bounds *)
-    let char_at_pos = File_content.get_char contents offset in
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let (ctx, entry) =
-      Provider_context.add_or_overwrite_entry_contents
-        ~ctx
-        ~path:(Relative_path.create_detect_prefix path)
-        ~contents
-    in
-    let result =
-      FfpAutocompleteService.auto_complete
-        ctx
-        entry
-        pos
-        ~filter_by_token:false
-        ~sienv:env.ServerEnv.local_symbol_table
-    in
-    ( env,
-      {
-        AutocompleteTypes.completions = result;
-        char_at_pos;
-        is_complete = true;
-      } )
   | CODE_ACTIONS (path, range) ->
     let (ctx, entry) = single_ctx_path env path in
     let actions = CodeActionsService.go ~ctx ~entry ~path ~range in

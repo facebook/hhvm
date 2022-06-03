@@ -409,7 +409,6 @@ type _ t =
   | IDE_AUTOCOMPLETE :
       string * position * bool
       -> AutocompleteTypes.ide_result t
-  | IDE_FFP_AUTOCOMPLETE : string * position -> AutocompleteTypes.ide_result t
   | CODE_ACTIONS : string * range -> Lsp.CodeAction.command_or_action list t
   | DISCONNECT : unit t
   | OUTLINE : string -> Outline.outline t

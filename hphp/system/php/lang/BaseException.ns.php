@@ -29,10 +29,8 @@ trait BaseException {
   protected string $file = '';    // source filename of exception
   protected int $line = 0;        // source line of exception
   /**
-   * Full stack trace that this exception rerepresents. This can be either:
-   * - A `vec<shape( ... )>`
-   * - A `resource`, that is specifically a `CompactTrace` in the runtime
-   * `dynamic` ends up being the best type here, unfortunately.
+   * Full stack trace that this exception represents. Historically this could
+   * be a resource, but now is always a `vec<this::TFrame>`.
    */
   private vec<this::TFrame> $trace = vec[];
   private ?\Throwable $previous = null;
@@ -43,7 +41,7 @@ trait BaseException {
    *
    * Returns the Exception message.
    *
-   * @return     mixed   Returns the Exception message as a string.
+   * @return     string   Returns the Exception message as a string.
    */
   public function getMessage(): string {
     return $this->message;
@@ -56,8 +54,8 @@ trait BaseException {
    * Returns previous Exception (the third parameter of
    * Exception::__construct()).
    *
-   * @return     mixed   Returns the previous Exception if available or NULL
-   *                     otherwise.
+   * @return     Throwable Returns the previous Exception if available or NULL
+   *                       otherwise.
    */
   final public function getPrevious()[]: ?\Throwable {
     return $this->previous;
@@ -73,7 +71,7 @@ trait BaseException {
    *
    * Returns the Exception code.
    *
-   * @return     mixed   Returns the exception code as integer in Exception
+   * @return     int     Returns the exception code as integer in Exception
    *                     but possibly as other type in Exception descendants
    *                     (for example as string in PDOException).
    */
@@ -87,8 +85,8 @@ trait BaseException {
    *
    * Get the name of the file the exception was created.
    *
-   * @return     mixed   Returns the filename in which the exception was
-   *                     created.
+   * @return     string   Returns the filename in which the exception was
+   *                      created.
    */
   final public function getFile()[]: string {
     return $this->file;
@@ -100,8 +98,8 @@ trait BaseException {
    *
    * Get line number where the exception was created.
    *
-   * @return     mixed   Returns the line number where the exception was
-   *                     created.
+   * @return     int   Returns the line number where the exception was
+   *                   created.
    */
   final public function getLine()[]: int {
     return $this->line;

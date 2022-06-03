@@ -396,7 +396,7 @@ function array_rand(mixed $input, int $num_req = 1)[leak_safe]: mixed;
  * @param mixed $array - The input array.
  * @param bool $preserve_keys - If set to TRUE keys are preserved.
  *
- * @return mixed - Returns the reversed array.
+ * @return ?array - Returns the reversed array.
  *
  */
 <<__Native, __IsFoldable>>

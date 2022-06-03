@@ -380,6 +380,7 @@ function backtrace<T>(
   int $options = \DEBUG_BACKTRACE_PROVIDE_OBJECT,
   int $limit = 0,
 ): vec<dict<string, mixed>>;
+// TODO(T120344399): This ought to return a real backtrace type
 
 
 } // namespace

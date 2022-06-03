@@ -249,7 +249,8 @@ namespace {
     assertx(throwable_has_expected_props());
 
     auto const trace_rval = throwable->propRvalAtOffset(s_traceSlot);
-
+    // We ought to only populate `$trace` from inside HHVM, to start. This
+    // should *always* be an array. If it's not, then we ought to assert.
     assertx(isArrayLikeType(trace_rval.type()));
     auto const trace = trace_rval.val().parr;
     for (ArrayIter iter(trace); iter; ++iter) {

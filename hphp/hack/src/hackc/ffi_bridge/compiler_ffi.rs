@@ -173,16 +173,14 @@ pub mod compile_ffi {
         /// For testing: return true if deserializing produces the expected Decls.
         fn hackc_verify_deserialization(result: &DeclResult) -> bool;
 
-        fn hackc_facts_to_json_cpp_ffi(
-            facts: FactsResult,
-            source_text: &CxxString,
-            pretty: bool,
-        ) -> String;
+        /// Serialize a FactsResult to JSON
+        fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, pretty: bool) -> String;
 
+        /// Extract Facts from Decls, passing along the source text hash.
         unsafe fn hackc_decls_to_facts_cpp_ffi(
             decl_flags: i32,
             decl_result: &DeclResult,
-            source_text: &CxxString,
+            sha1sum: &CxxString,
         ) -> FactsResult;
     }
 }
@@ -437,24 +435,19 @@ fn hackc_compile_unit_from_text_cpp_ffi(
     .map_err(|e| e.to_string())
 }
 
-pub fn hackc_facts_to_json_cpp_ffi(
-    facts: compile_ffi::FactsResult,
-    source_text: &CxxString,
-    pretty: bool,
-) -> String {
-    if facts.has_errors {
+pub fn hackc_facts_to_json_cpp_ffi(facts_result: compile_ffi::FactsResult, pretty: bool) -> String {
+    if facts_result.has_errors {
         String::new()
     } else {
-        let facts = facts::Facts::from(facts.facts);
-        let text = source_text.as_bytes();
-        facts.to_json(pretty, text)
+        let facts = facts::Facts::from(facts_result.facts);
+        facts.to_json(pretty, &facts_result.sha1sum)
     }
 }
 
 pub fn hackc_decls_to_facts_cpp_ffi(
     decl_flags: i32,
     decl_result: &compile_ffi::DeclResult,
-    source_text: &CxxString,
+    sha1sum: &CxxString,
 ) -> compile_ffi::FactsResult {
     if decl_result.has_errors {
         compile_ffi::FactsResult {
@@ -462,8 +455,6 @@ pub fn hackc_decls_to_facts_cpp_ffi(
             ..Default::default()
         }
     } else {
-        let text = source_text.as_bytes();
-        let sha1sum = facts::sha1(text);
         let disable_xhp_element_mangling = ((1 << 0) & decl_flags) != 0;
         let facts = compile_ffi::Facts::from(facts::Facts::from_decls(
             &decl_result.decls.decls,
@@ -472,7 +463,7 @@ pub fn hackc_decls_to_facts_cpp_ffi(
         ));
         compile_ffi::FactsResult {
             facts,
-            sha1sum,
+            sha1sum: sha1sum.to_string_lossy().to_string(),
             has_errors: false,
         }
     }

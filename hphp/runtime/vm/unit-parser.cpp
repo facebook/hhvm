@@ -304,8 +304,8 @@ ParseFactsResult extract_facts(
   folly::StringPiece expect_sha1
 ) {
   auto const get_facts = [&](const std::string& source_text) -> ParseFactsResult {
+    auto actual_sha1 = string_sha1(source_text);
     if (!expect_sha1.empty()) {
-      auto actual_sha1 = string_sha1(source_text);
       if (actual_sha1 != expect_sha1) {
         return folly::sformat(
             "Unexpected SHA1: {} != {}", actual_sha1, expect_sha1
@@ -319,11 +319,11 @@ ParseFactsResult extract_facts(
           decl_flags,
           options.getAliasedNamespacesConfig());
       DeclResult decls = hackc_direct_decl_parse(*decl_opts, filename, source_text);
-      FactsResult facts = hackc_decls_to_facts_cpp_ffi(decl_flags, decls, source_text);
-      rust::String facts_as_json = hackc_facts_to_json_cpp_ffi(
-          facts, source_text, /* pretty= */ false
+      FactsResult facts = hackc_decls_to_facts_cpp_ffi(decl_flags, decls, actual_sha1);
+      rust::String json = hackc_facts_to_json_cpp_ffi(
+          facts, /* pretty= */ false
       );
-      return FactsJSONString { std::string(facts_as_json) };
+      return FactsJSONString { std::string(json) };
     } catch (const std::exception& e) {
       return FactsJSONString { "" }; // Swallow errors from HackC
     }

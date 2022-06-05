@@ -3,7 +3,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use anyhow::Result;
 use clap::Parser;
-use facts_rust::Facts;
+use facts_rust::{self as facts, Facts};
 use oxidized::relative_path::{Prefix, RelativePath};
 use serde_json::{json, Value};
 
@@ -55,7 +55,7 @@ pub(crate) fn extract_facts(hackc_opts: &mut crate::Opts, mut opts: Opts) -> Res
         let json = if opts.nohash {
             json!(facts)
         } else {
-            facts.to_json_value(&text)
+            facts.to_json_value(&facts::sha1(&text))
         };
         file_to_facts.insert(path.to_str().unwrap().to_owned(), json);
     }

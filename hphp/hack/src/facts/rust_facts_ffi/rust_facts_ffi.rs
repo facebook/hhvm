@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use direct_decl_parser::DeclParserOptions;
-use facts_rust::Facts;
+use facts_rust::{self as facts, Facts};
 use hhbc_string_utils::without_xhp_mangling;
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_ocamlpool::ocaml_ffi;
@@ -73,21 +73,24 @@ fn extract_facts_as_json_ffi(
     let pretty = false;
     if decls.has_first_pass_parse_errors {
         None
-    } else if mangle_xhp {
-        let facts = Facts::from_decls(
-            &decls.decls,
-            decls.file_attributes,
-            disable_xhp_element_mangling,
-        );
-        Some(facts.to_json(pretty, text))
     } else {
-        without_xhp_mangling(|| {
+        let sha1sum = facts::sha1(text);
+        if mangle_xhp {
             let facts = Facts::from_decls(
                 &decls.decls,
                 decls.file_attributes,
                 disable_xhp_element_mangling,
             );
-            Some(facts.to_json(pretty, text))
-        })
+            Some(facts.to_json(pretty, &sha1sum))
+        } else {
+            without_xhp_mangling(|| {
+                let facts = Facts::from_decls(
+                    &decls.decls,
+                    decls.file_attributes,
+                    disable_xhp_element_mangling,
+                );
+                Some(facts.to_json(pretty, &sha1sum))
+            })
+        }
     }
 }

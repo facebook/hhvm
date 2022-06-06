@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open Decl_inheritance
 open Shallow_decl_defs
 open Typing_defs
 open Typing_class_types

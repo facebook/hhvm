@@ -8,10 +8,24 @@
 
 open Hh_prelude
 
+type inherited_members = {
+  consts: Typing_defs.class_const Lazy_string_table.t;
+  typeconsts: Typing_defs.typeconst_type Lazy_string_table.t;
+  props: Typing_defs.class_elt Lazy_string_table.t;
+  sprops: Typing_defs.class_elt Lazy_string_table.t;
+  methods: Typing_defs.class_elt Lazy_string_table.t;
+  smethods: Typing_defs.class_elt Lazy_string_table.t;
+  all_inherited_methods: Typing_defs.class_elt list Lazy_string_table.t;
+  all_inherited_smethods: Typing_defs.class_elt list Lazy_string_table.t;
+  typeconst_enforceability: (Pos_or_decl.t * bool) Lazy_string_table.t;
+  construct:
+    (Typing_defs.class_elt option * Typing_defs_core.consistent_kind) Lazy.t;
+}
+
 type lazy_class_type = {
   lin_members: Decl_defs.mro_element list;
   lin_ancestors: Decl_defs.mro_element list;
-  ih: Decl_inheritance.inherited_members;
+  ih: inherited_members;
   ancestors: Typing_defs_core.decl_ty Lazy_string_table.t;
       (** Types of parents, interfaces, and traits *)
   req_ancestor_names: unit Lazy_string_table.t;

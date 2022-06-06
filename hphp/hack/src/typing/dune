@@ -62,7 +62,6 @@
  (libraries
   collections
   decl_defs
-  decl_inheritance
   pos_or_decl
   shallow_decl_defs
   typing_defs

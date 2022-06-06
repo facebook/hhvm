@@ -404,7 +404,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   out.nl();
 }
 
-template<bool isTest=false>
 void print_func_directives(Output& out, const FuncInfo& finfo) {
   const Func* func = finfo.func;
   if (RuntimeOption::EvalDisassemblerDocComments) {
@@ -437,8 +436,6 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }
 
-  // TODO(voork): handle coeffects in HackCTranslator
-  if (isTest) return;
   auto const coeffects = func->staticCoeffectNames();
   if (!coeffects.empty()) {
     std::vector<std::string> names;
@@ -662,7 +659,7 @@ void print_func(Output& out, const Func* func) {
     func_param_list<isTest>(finfo),
     func_flag_list(finfo));
   indented(out, [&] {
-    print_func_directives<isTest>(out, finfo);
+    print_func_directives(out, finfo);
     print_func_body(out, finfo);
   });
   out.fmtln("}}");
@@ -749,7 +746,7 @@ void print_method(Output& out, const Func* func) {
     func_param_list<isTest>(finfo),
     func_flag_list(finfo));
   indented(out, [&] {
-    print_func_directives<isTest>(out, finfo);
+    print_func_directives(out, finfo);
     print_func_body(out, finfo);
   });
   out.fmtln("}}");

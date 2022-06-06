@@ -66,6 +66,10 @@ struct Opts {
     /// (only used by --test-compile-with-decls)
     #[clap(long)]
     pub(crate) use_serialized_decls: bool,
+
+    /// Controls systemlib specific logic
+    #[clap(long)]
+    is_systemlib: bool,
 }
 
 /// Hack Compiler
@@ -147,6 +151,9 @@ impl Opts {
         }
         if self.disable_toplevel_elaboration {
             flags |= EnvFlags::DISABLE_TOPLEVEL_ELABORATION;
+        }
+        if self.is_systemlib {
+            flags |= EnvFlags::IS_SYSTEMLIB;
         }
         flags
     }

@@ -853,6 +853,7 @@ dependencies = [
  "bumpalo",
  "escaper",
  "flatten_smart_constructors",
+ "hash",
  "hh_autoimport_rust",
  "namespaces_rust",
  "naming_special_names_rust",

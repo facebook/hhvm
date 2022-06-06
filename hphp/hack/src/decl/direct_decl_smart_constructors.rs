@@ -8,6 +8,7 @@ use arena_collections::{AssocListMut, List, MultiSetMut};
 use bstr::BStr;
 use bumpalo::{collections as bump, Bump};
 use flatten_smart_constructors::FlattenSmartConstructors;
+use hash::HashSet;
 use hh_autoimport_rust as hh_autoimport;
 use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
@@ -65,7 +66,7 @@ pub struct DirectDeclSmartConstructors<'a, 't, S: SourceTextAllocator<'t, 'a>> {
 
     // const_refs will accumulate all scope-resolution-expressions it
     // encounters while it's "Some"
-    const_refs: Option<arena_collections::set::Set<'a, typing_defs::ClassConstRef<'a>>>,
+    const_refs: Option<HashSet<typing_defs::ClassConstRef<'a>>>,
 
     opts: DeclParserOptions<'a>,
     filename: &'a RelativePath<'a>,
@@ -259,7 +260,7 @@ impl<'a, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 't,
     }
 
     fn start_accumulating_const_refs(&mut self) {
-        self.const_refs = Some(arena_collections::set::Set::empty());
+        self.const_refs = Some(Default::default());
     }
 
     fn accumulate_const_ref(&mut self, class_id: &'a aast::ClassId<'_, (), ()>, value_id: &Id<'a>) {
@@ -269,38 +270,34 @@ impl<'a, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 't,
         // TODO: Hack is the wrong place to detect circularity (because we can never do
         // it completely soundly, and because it's a cross-body problem). The right place
         // to do it is in a linter. All this should be removed from here and put into a linter.
-        if let Some(const_refs) = self.const_refs {
+        if let Some(const_refs) = &mut self.const_refs {
             match class_id.2 {
                 nast::ClassId_::CI(sid) => {
-                    self.const_refs = Some(const_refs.add(
-                        self.arena,
-                        typing_defs::ClassConstRef(
-                            typing_defs::ClassConstFrom::From(sid.1),
-                            value_id.1,
-                        ),
+                    const_refs.insert(typing_defs::ClassConstRef(
+                        typing_defs::ClassConstFrom::From(sid.1),
+                        value_id.1,
                     ));
                 }
                 nast::ClassId_::CIself => {
-                    self.const_refs = Some(const_refs.add(
-                        self.arena,
-                        typing_defs::ClassConstRef(typing_defs::ClassConstFrom::Self_, value_id.1),
+                    const_refs.insert(typing_defs::ClassConstRef(
+                        typing_defs::ClassConstFrom::Self_,
+                        value_id.1,
                     ));
                 }
-                // Not allowed
                 nast::ClassId_::CIparent | nast::ClassId_::CIstatic | nast::ClassId_::CIexpr(_) => {
+                    // Not allowed
                 }
             }
         }
     }
 
     fn stop_accumulating_const_refs(&mut self) -> &'a [typing_defs::ClassConstRef<'a>] {
-        let const_refs = self.const_refs;
-        self.const_refs = None;
-        match const_refs {
+        match self.const_refs.take() {
             Some(const_refs) => {
                 let mut elements: bump::Vec<'_, typing_defs::ClassConstRef<'_>> =
-                    bumpalo::collections::Vec::with_capacity_in(const_refs.count(), self.arena);
+                    bumpalo::collections::Vec::with_capacity_in(const_refs.len(), self.arena);
                 elements.extend(const_refs.into_iter());
+                elements.sort_unstable();
                 elements.into_bump_slice()
             }
             None => &[],

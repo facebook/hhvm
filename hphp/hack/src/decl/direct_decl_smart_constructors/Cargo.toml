@@ -15,6 +15,7 @@ bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 escaper = { path = "../../utils/escaper" }
 flatten_smart_constructors = { path = "../../parser/cargo/flatten_smart_constructors" }
+hash = { path = "../../utils/hash" }
 hh_autoimport_rust = { path = "../../parser/cargo/hh_autoimport" }
 namespaces_rust = { path = "../../parser/cargo/namespaces" }
 naming_special_names_rust = { path = "../../naming" }

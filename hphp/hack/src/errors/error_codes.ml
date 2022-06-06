@@ -699,6 +699,7 @@ module GlobalWriteCheck = struct
     | StaticVariableDirectWrite [@value 11001]
     | GlobalVariableWrite [@value 11002]
     | GlobalVariableInFunctionCall [@value 11003]
+    | GlobalVariableDirectRead [@value 11004]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

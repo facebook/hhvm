@@ -28,6 +28,7 @@ module Reason = Typing_reason
 module Cls = Decl_provider.Class
 module Hashtbl = Stdlib.Hashtbl
 module Option = Stdlib.Option
+module GlobalWriteCheck = Error_codes.GlobalWriteCheck
 
 (* The context maintains a hash table from each global variable to the
   corresponding references of static variables or memoized functions.
@@ -35,7 +36,7 @@ module Option = Stdlib.Option
   "if (condition) { $a = Foo::$bar } else { $a = memoized_func() }"
   after the above conditional, $a is a global variable which is a reference to
   either Foo::$bar or memoized_func, thus the context gets a hash table
-  {"a" => {"Foo::$bar", "memoized_func"}}. *)
+  {"a" => {"Foo::$bar", "\memoized_func"}}. *)
 type ctx = { global_var_refs_tbl: (string, SSet.t) Hashtbl.t ref }
 
 let current_ctx = { global_var_refs_tbl = ref (Hashtbl.create 0) }
@@ -137,7 +138,7 @@ let rec is_expr_static env (_, _, te) =
   | _ -> false
 
 (* Print out global variables, e.g. Foo::$bar => "Foo::$bar", self::$bar => "Foo::$bar",
-  memoized_func => "memoized_func", $baz->memoized_method => "Baz::$memoized_method".
+  memoized_func => "\memoized_func", $baz->memoized_method => "Baz::memoized_method".
   Notice that this does not handle arbitrary expressions. *)
 let rec print_global_expr env expr =
   match expr with
@@ -145,7 +146,7 @@ let rec print_global_expr env expr =
     (* For function/method calls, we print the caller expression, which could be
        Id (e.g. memoized_func()) or Obj_get (e.g. $baz->memoized_method()). *)
     print_global_expr env caller_expr
-  | Class_get ((c_ty, _, _), expr, Is_prop) ->
+  | Class_get ((c_ty, _, _), expr, _) ->
     (* For static properties, we concatenate the class type (instead of class_id_, which
        could be self, parent, static) and the property name. *)
     let class_ty_str = Tast_env.print_ty env c_ty in
@@ -156,7 +157,7 @@ let rec print_global_expr env expr =
     (* For static method calls, we concatenate the class type and the method name. *)
     Tast_env.print_ty env c_ty ^ "::" ^ const_str
   | Id (_, name) -> name
-  | Obj_get (obj, m, _, Is_method) ->
+  | Obj_get (obj, m, _, _) ->
     (* For Obj_get (e.g. $baz->memoized_method()), we concatenate the class type and the method id. *)
     let class_ty_str = Tast_env.print_ty env (Tast.get_type obj) in
     let (_, _, m_id) = m in
@@ -395,11 +396,12 @@ let visitor =
         | Some ((ty, p, _) as e) ->
           (match get_global_and_mutable_from_expr env ctx e with
           | Some global_set ->
-            Errors.global_var_in_fun_call_error
+            Errors.global_access_error
               p
               fun_name
               (Tast_env.print_ty env ty)
               global_set
+              GlobalWriteCheck.GlobalVariableInFunctionCall
           | None -> ())
         | None -> ());
         super#on_stmt_ (env, (ctx, fun_name)) s
@@ -413,11 +415,12 @@ let visitor =
         let le_global_opt = get_globals_from_expr env ctx le in
         (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
         if is_expr_static env le && Option.is_some le_global_opt then
-          Errors.static_var_direct_write_error
+          Errors.global_access_error
             p
             fun_name
             re_ty
             (Option.get le_global_opt)
+            GlobalWriteCheck.StaticVariableDirectWrite
         else
           let re_global_and_mutable_opt =
             get_global_and_mutable_from_expr env ctx re
@@ -427,11 +430,12 @@ let visitor =
           (match has_global_write_access le with
           | true ->
             if Option.is_some le_global_opt then
-              Errors.global_var_write_error
+              Errors.global_access_error
                 p
                 fun_name
                 re_ty
                 (Option.get le_global_opt)
+                GlobalWriteCheck.GlobalVariableWrite
           | false ->
             if
               Option.is_some le_global_opt
@@ -459,9 +463,19 @@ let visitor =
           | Ast_defs.Updecr ->
             (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
             if is_expr_static env e then
-              Errors.static_var_direct_write_error p fun_name e_ty e_global
+              Errors.global_access_error
+                p
+                fun_name
+                e_ty
+                e_global
+                GlobalWriteCheck.StaticVariableDirectWrite
             else if has_global_write_access e then
-              Errors.global_var_write_error p fun_name e_ty e_global
+              Errors.global_access_error
+                p
+                fun_name
+                e_ty
+                e_global
+                GlobalWriteCheck.GlobalVariableWrite
           | _ -> ())
       | Call (_, _, tpl, _) ->
         (* Check if a global variable is used as the parameter. *)
@@ -470,30 +484,33 @@ let visitor =
             | Ast_defs.Pinout _ ->
               let e_global_opt = get_globals_from_expr env ctx expr in
               if Option.is_some e_global_opt then
-                Errors.global_var_in_fun_call_error
+                Errors.global_access_error
                   pos
                   fun_name
                   (Tast_env.print_ty env ty)
                   (Option.get e_global_opt)
+                  GlobalWriteCheck.GlobalVariableInFunctionCall
             | Ast_defs.Pnormal ->
               let e_global_opt =
                 get_global_and_mutable_from_expr env ctx expr
               in
               if Option.is_some e_global_opt then
-                Errors.global_var_in_fun_call_error
+                Errors.global_access_error
                   pos
                   fun_name
                   (Tast_env.print_ty env ty)
-                  (Option.get e_global_opt))
+                  (Option.get e_global_opt)
+                  GlobalWriteCheck.GlobalVariableInFunctionCall)
       | New (_, _, el, _, _) ->
         List.iter el ~f:(fun ((ty, pos, _) as expr) ->
             let e_global_opt = get_global_and_mutable_from_expr env ctx expr in
             if Option.is_some e_global_opt then
-              Errors.global_var_in_fun_call_error
+              Errors.global_access_error
                 pos
                 fun_name
                 (Tast_env.print_ty env ty)
-                (Option.get e_global_opt))
+                (Option.get e_global_opt)
+                GlobalWriteCheck.GlobalVariableInFunctionCall)
       | _ -> ());
       super#on_expr (env, (ctx, fun_name)) te
   end

@@ -749,6 +749,7 @@ struct RuntimeOption {
   F(bool, EnableFuncCoverage,          false)                           \
   /* The number of worker threads to spawn for facts extraction. */     \
   F(uint64_t, FactsWorkers,            Process::GetCPUCount())          \
+  F(bool, EnableExternFacts,           true)                            \
   /* Whether to log extern compiler performance */                      \
   F(bool, LogExternCompilerPerf,       false)                           \
   /* Whether to write verbose log messages to the error log and include

@@ -206,14 +206,14 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
           static_cast<uint64_t>(pathsAndHashes.size())),
       make_thread_factory("FactExtractor")};
 
-  // If we defined a fancy memcache Extractor in closed-source code, use that.
+  // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
   auto extractor = [&]() -> std::unique_ptr<Extractor> {
-    if (s_extractorFactory) {
-      XLOG(INFO) << "Creating a custom HPHP::Facts::Extractor.";
+    if (s_extractorFactory && RuntimeOption::EvalEnableExternFacts) {
+      XLOG(INFO) << "Creating a external HPHP::Facts::Extractor.";
       return s_extractorFactory(exec);
     } else {
-      XLOG(INFO) << "Creating a HPHP::Facts::SimpleExtractor.";
+      XLOG(INFO) << "Creating an internal HPHP::Facts::SimpleExtractor.";
       return std::make_unique<SimpleExtractor>(exec);
     }
   }();

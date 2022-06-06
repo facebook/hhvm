@@ -46,6 +46,7 @@ constexpr uintptr_t kLocalArenaMinAddr = 1ull << 40;
 constexpr size_t kLocalArenaSizeLimit = 64ull << 30;
 // Extra pages for Arena 0
 constexpr uintptr_t kArena0Base = 2ull << 40;
+constexpr uintptr_t kDebugAddr = 3ull << 39;
 
 namespace alloc {
 

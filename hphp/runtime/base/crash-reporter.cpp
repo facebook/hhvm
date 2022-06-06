@@ -66,12 +66,17 @@ enum class CrashReportStage {
   ReportPhpStack,
   ReportApproximatePhpStack,
   DumpTransDB,
+  DumpProfileData,
   SendEmail,
   Log,
   Done,
 };
 
 static CrashReportStage s_crash_report_stage;
+
+// size of the mapping in the core starting from kDebugAddr, currently
+// containing JitSerDes file when applicable.
+static size_t s_debugSize;
 
 static const char* s_newBlacklist[] = {
   "_ZN4HPHP16StackTraceNoHeap",
@@ -262,10 +267,30 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
 
       // fall through
     case CrashReportStage::DumpTransDB:
-      s_crash_report_stage = CrashReportStage::SendEmail;
+      s_crash_report_stage = CrashReportStage::DumpProfileData;
 
       if (jit::transdb::enabled() && RuntimeOption::EvalJit) {
         jit::tc::dump(true);
+      }
+      // fall through
+    case CrashReportStage::DumpProfileData:
+      s_crash_report_stage = CrashReportStage::SendEmail;
+      if (isJitDeserializing()) {
+        // Copy JitSerdesFile to fixed address (the debug range), so that they
+        // get included in the coredump.
+        auto file = fopen(RO::EvalJitSerdesFile.c_str(), "r");
+        if (file) {
+          fseek(file, 0, SEEK_END);
+          s_debugSize = ftell(file);
+          fseek(file, 0, SEEK_SET);
+          if (s_debugSize > 0) {
+            mmap(reinterpret_cast<void*>(kDebugAddr),
+                 s_debugSize, PROT_READ | PROT_WRITE,
+                 MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+            fread(reinterpret_cast<void*>(kDebugAddr), 1, s_debugSize, file);
+          }
+          fclose(file);
+        }
       }
       // fall through
     case CrashReportStage::SendEmail:

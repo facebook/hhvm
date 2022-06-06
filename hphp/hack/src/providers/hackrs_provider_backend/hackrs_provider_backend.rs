@@ -10,14 +10,12 @@ mod test_naming_table;
 
 use anyhow::Result;
 use datastore::{ChangesStore, NonEvictingStore, Store};
-use depgraph_api::{DepGraph, NoDepGraph};
 use file_provider::{DiskProvider, FileProvider};
 use hackrs::{
     decl_parser::DeclParser,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
     shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider, ShallowDeclStore},
 };
-use naming_provider::NamingProvider;
 use naming_table::NamingTable;
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized_by_ref::parser_options::ParserOptions;
@@ -28,18 +26,10 @@ use ty::{
     reason::BReason,
 };
 
-pub struct ProviderBackend {
-    pub path_ctx: Arc<RelativePathCtx>,
-    pub file_provider: Arc<dyn FileProvider>,
-    pub decl_parser: DeclParser<BReason>,
-    pub dependency_graph: Arc<dyn DepGraph>,
-    pub naming_provider: Arc<dyn NamingProvider>,
-    pub shallow_decl_provider: Arc<dyn ShallowDeclProvider<BReason>>,
-    pub folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
-}
-
 pub struct HhServerProviderBackend {
+    decl_parser: DeclParser<BReason>,
     file_store: Arc<ChangesStore<RelativePath, FileType>>,
+    file_provider: Arc<FileProviderWithChanges>,
     naming_table: Arc<NamingTable>,
     /// Collection of Arcs pointing to the backing stores for the
     /// ShallowDeclStore below, allowing us to invoke push/pop_local_changes.
@@ -47,7 +37,7 @@ pub struct HhServerProviderBackend {
     shallow_decl_store: Arc<ShallowDeclStore<BReason>>,
     lazy_shallow_decl_provider: Arc<LazyShallowDeclProvider<BReason>>,
     folded_classes_store: Arc<ChangesStore<TypeName, Arc<FoldedClass<BReason>>>>,
-    providers: ProviderBackend,
+    folded_decl_provider: Arc<LazyFoldedDeclProvider<BReason>>,
 }
 
 impl HhServerProviderBackend {
@@ -58,10 +48,10 @@ impl HhServerProviderBackend {
         ));
         let file_provider = Arc::new(FileProviderWithChanges {
             delta_and_changes: Arc::clone(&file_store),
-            disk: DiskProvider::new(Arc::clone(&path_ctx)),
+            disk: DiskProvider::new(path_ctx),
         });
         let decl_parser = DeclParser::with_options(Arc::clone(&file_provider) as _, popt);
-        let dependency_graph = Arc::new(NoDepGraph::new());
+        let dependency_graph = Arc::new(depgraph_api::NoDepGraph::new());
         let naming_table = Arc::new(NamingTable::new());
 
         let shallow_decl_changes_store = Arc::new(ShallowStoreWithChanges::new());
@@ -75,25 +65,18 @@ impl HhServerProviderBackend {
 
         let folded_classes_store = Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new())));
 
-        let folded_decl_provider: Arc<dyn FoldedDeclProvider<_>> =
-            Arc::new(LazyFoldedDeclProvider::new(
-                Arc::new(Default::default()), // TODO: remove?
-                Arc::clone(&folded_classes_store) as _,
-                Arc::clone(&lazy_shallow_decl_provider) as _,
-                Arc::clone(&dependency_graph) as _,
-            ));
+        let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
+            Arc::new(Default::default()), // TODO: remove?
+            Arc::clone(&folded_classes_store) as _,
+            Arc::clone(&lazy_shallow_decl_provider) as _,
+            dependency_graph,
+        ));
 
         Ok(Self {
-            providers: ProviderBackend {
-                path_ctx,
-                file_provider,
-                decl_parser,
-                dependency_graph,
-                naming_provider: Arc::clone(&naming_table) as _,
-                shallow_decl_provider: Arc::clone(&lazy_shallow_decl_provider) as _,
-                folded_decl_provider,
-            },
             file_store,
+            file_provider,
+            decl_parser,
+            folded_decl_provider,
             naming_table,
             shallow_decl_changes_store,
             shallow_decl_store,
@@ -107,19 +90,19 @@ impl HhServerProviderBackend {
     }
 
     pub fn file_store(&self) -> &dyn Store<RelativePath, FileType> {
-        Arc::as_ref(&self.file_store) as _
+        &*self.file_store
     }
 
     pub fn file_provider(&self) -> &dyn FileProvider {
-        Arc::as_ref(&self.providers.file_provider)
+        &*self.file_provider
     }
 
     pub fn shallow_decl_provider(&self) -> &dyn ShallowDeclProvider<BReason> {
-        Arc::as_ref(&self.providers.shallow_decl_provider)
+        &*self.lazy_shallow_decl_provider
     }
 
     pub fn folded_decl_provider(&self) -> &dyn FoldedDeclProvider<BReason> {
-        Arc::as_ref(&self.providers.folded_decl_provider)
+        &*self.folded_decl_provider
     }
 
     /// Decl-parse the given file, dedup duplicate definitions of the same
@@ -131,7 +114,7 @@ impl HhServerProviderBackend {
         text: &'a [u8],
         arena: &'a bumpalo::Bump,
     ) -> Result<oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes<'a>> {
-        let mut parsed_file = self.providers.decl_parser.parse_impl(path, text, arena);
+        let mut parsed_file = self.decl_parser.parse_impl(path, text, arena);
         self.lazy_shallow_decl_provider
             .dedup_and_add_decls(path, parsed_file.decls.iter().map(Into::into))?;
         parsed_file.decls.rev(arena); // To match OCaml behavior

@@ -7,10 +7,10 @@ use anyhow::Result;
 use datastore::NonEvictingStore;
 use fbinit::FacebookInit;
 use hackrs::{
-    decl_parser::DeclParser, folded_decl_provider::LazyFoldedDeclProvider,
+    decl_parser::DeclParser,
+    folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
     shallow_decl_provider::LazyShallowDeclProvider,
 };
-use hackrs_provider_backend::ProviderBackend;
 use hackrs_test_utils::{
     registrar::DependencyGraph, serde_store::StoreOpts::Unserialized,
     store::make_shallow_decl_store,
@@ -26,15 +26,13 @@ mod dependency_registrar;
 mod folded_decl_provider;
 
 struct TestContext {
-    #[allow(dead_code)]
-    pub root: TestRepo,
-
-    #[allow(dead_code)]
-    pub provider_backend: ProviderBackend,
+    root: TestRepo,
+    decl_parser: DeclParser<BReason>,
+    dependency_graph: Arc<dyn depgraph_api::DepGraph>,
+    folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
 }
 
 impl TestContext {
-    #[allow(dead_code)]
     fn new(_fb: FacebookInit, files: BTreeMap<&str, &str>) -> Result<Self> {
         let root = TestRepo::new(&files)?;
 
@@ -50,33 +48,23 @@ impl TestContext {
             tmp: tmpdir.path().to_path_buf(),
         });
         let dependency_graph = Arc::new(DependencyGraph::new());
-        let file_provider = Arc::new(file_provider::DiskProvider::new(Arc::clone(&path_ctx)));
-        let decl_parser = DeclParser::new(Arc::clone(&file_provider) as _);
+        let decl_parser = DeclParser::new(Arc::new(file_provider::DiskProvider::new(path_ctx)));
         let shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
             Arc::new(make_shallow_decl_store::<BReason>(Unserialized)),
-            Arc::clone(&naming_provider) as _,
+            naming_provider,
             decl_parser.clone(),
         ));
         let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
             Arc::new(Default::default()), // TODO: remove?
             Arc::new(NonEvictingStore::new()),
-            Arc::clone(&shallow_decl_provider) as _,
+            shallow_decl_provider,
             Arc::clone(&dependency_graph) as _,
         ));
-
-        let provider_backend = ProviderBackend {
-            decl_parser,
-            naming_provider,
-            path_ctx,
-            dependency_graph,
-            file_provider,
-            shallow_decl_provider,
-            folded_decl_provider,
-        };
-
         Ok(Self {
             root,
-            provider_backend,
+            decl_parser,
+            dependency_graph,
+            folded_decl_provider,
         })
     }
 }

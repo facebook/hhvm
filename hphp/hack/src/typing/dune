@@ -56,6 +56,21 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name typing_class_types)
+ (wrapped false)
+ (modules typing_class_types)
+ (libraries
+  collections
+  decl_defs
+  decl_inheritance
+  pos_or_decl
+  shallow_decl_defs
+  typing_defs
+  utils_core)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
  (name typing_heap)
  (wrapped false)
  (modules typing_classes_heap)
@@ -68,6 +83,7 @@
   deferred_decl
   naming_provider
   shallow_decl_defs
+  typing_class_types
   typing_defs)
  (preprocess
   (pps ppx_deriving.std)))

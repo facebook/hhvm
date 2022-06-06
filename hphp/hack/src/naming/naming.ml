@@ -21,7 +21,6 @@ open String_utils
 module N = Aast
 module SN = Naming_special_names
 module NS = Namespaces
-module GEnv = Naming_global.GEnv
 
 (*****************************************************************************)
 (* The types *)
@@ -1152,33 +1151,6 @@ and type_paraml ?(forbid_this = false) env tparams =
   every Ti is in scope of the constraints of all other Tj, and in the constraints on T itself.
 *)
 and type_param ~forbid_this genv t =
-  begin
-    if
-    TypecheckerOptions.experimental_feature_enabled
-      (Provider_context.get_tcopt genv.ctx)
-      TypecheckerOptions.experimental_type_param_shadowing
-   then
-      (* Treat type params as inline class declarations that don't go into the naming heap *)
-      let (pos, name) =
-        NS.elaborate_id genv.namespace NS.ElaborateClass t.Aast.tp_name
-      in
-      match Naming_provider.get_type_pos genv.ctx name with
-      | Some def_pos ->
-        let (def_pos, _) = GEnv.get_type_full_pos genv.ctx (def_pos, name) in
-        Errors.add_naming_error
-        @@ Naming_error.Error_name_already_bound
-             { pos; name; prev_name = name; prev_pos = def_pos }
-      | None ->
-        (match Naming_provider.get_type_canon_name genv.ctx name with
-        | Some canonical ->
-          let def_pos =
-            Option.value ~default:Pos.none (GEnv.type_pos genv.ctx canonical)
-          in
-          Errors.add_naming_error
-          @@ Naming_error.Error_name_already_bound
-               { pos; name; prev_name = canonical; prev_pos = def_pos }
-        | None -> ())
-  end;
   let hk_types_enabled =
     TypecheckerOptions.higher_kinded_types (Provider_context.get_tcopt genv.ctx)
   in

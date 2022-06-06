@@ -59,9 +59,6 @@ let experimental_infer_flows = GlobalOptions.tco_experimental_infer_flows
 let experimental_disallow_static_memoized =
   GlobalOptions.tco_experimental_disallow_static_memoized
 
-let experimental_type_param_shadowing =
-  GlobalOptions.tco_experimental_type_param_shadowing
-
 let experimental_abstract_type_const_with_default =
   GlobalOptions.tco_experimental_abstract_type_const_with_default
 

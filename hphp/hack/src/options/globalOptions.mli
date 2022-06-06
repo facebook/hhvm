@@ -517,8 +517,6 @@ val tco_experimental_forbid_nullable_cast : string
 
 val tco_experimental_disallow_static_memoized : string
 
-val tco_experimental_type_param_shadowing : string
-
 val tco_experimental_abstract_type_const_with_default : string
 
 val tco_experimental_infer_flows : string

@@ -161,11 +161,6 @@ let tco_experimental_forbid_nullable_cast = "forbid_nullable_cast"
 let tco_experimental_disallow_static_memoized = "disallow_static_memoized"
 
 (**
- * Prevent type param names from shadowing class names
- *)
-let tco_experimental_type_param_shadowing = "type_param_shadowing"
-
-(**
  * Enable abstract const type with default syntax, i.e.
  * abstract const type T as num = int;
  *)

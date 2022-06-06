@@ -164,10 +164,12 @@ let rec print_global_expr env expr =
     class_ty_str ^ "::" ^ print_global_expr env m_id
   | _ -> "Unknown"
 
-(* Given the environment, the context of global variables and an expression,
-  get the set of static variables / memoized functions referenced in that expression.
-  If there is no such reference, return None. *)
-let rec get_globals_from_expr env ctx (_, _, te) =
+(* Given the environment, the context and an expression, this function returns
+  the set of global variables (i.e static variables / return of memoized functions)
+  used in that expression. When track_refs is true, the references to global variables
+  are also taken into account; otherwise, we get only the direct use of global variables.
+  If there is no such global variable, return None. *)
+let rec get_globals_from_expr env ctx (_, _, te) ~track_refs =
   let merge_opt_sets opt_s1 opt_s2 =
     match opt_s1 with
     | None -> opt_s2
@@ -186,43 +188,46 @@ let rec get_globals_from_expr env ctx (_, _, te) =
     else
       None
   | Lvar (_, id) ->
-    Hashtbl.find_opt !(ctx.global_var_refs_tbl) (Local_id.to_string id)
-  | Obj_get (e, _, _, Is_prop) -> get_globals_from_expr env ctx e
+    if track_refs then
+      Hashtbl.find_opt !(ctx.global_var_refs_tbl) (Local_id.to_string id)
+    else
+      None
+  | Obj_get (e, _, _, Is_prop) -> get_globals_from_expr env ctx e ~track_refs
   | Darray (_, tpl) ->
     List.fold tpl ~init:None ~f:(fun cur_opt_set (_, e) ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
   | Varray (_, el) ->
     List.fold el ~init:None ~f:(fun cur_opt_set e ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
   | Shape tpl ->
     List.fold tpl ~init:None ~f:(fun cur_opt_set (_, e) ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
   | ValCollection (_, _, el) ->
     List.fold el ~init:None ~f:(fun cur_opt_set e ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
   | KeyValCollection (_, _, fl) ->
     List.fold fl ~init:None ~f:(fun cur_opt_set (_, e) ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
-  | Array_get (e, _) -> get_globals_from_expr env ctx e
-  | Await e -> get_globals_from_expr env ctx e
-  | ReadonlyExpr e -> get_globals_from_expr env ctx e
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
+  | Array_get (e, _) -> get_globals_from_expr env ctx e ~track_refs
+  | Await e -> get_globals_from_expr env ctx e ~track_refs
+  | ReadonlyExpr e -> get_globals_from_expr env ctx e ~track_refs
   | Tuple el
   | List el ->
     List.fold el ~init:None ~f:(fun cur_opt_set e ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e))
-  | Cast (_, e) -> get_globals_from_expr env ctx e
+        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
+  | Cast (_, e) -> get_globals_from_expr env ctx e ~track_refs
   | Eif (_, e1, e2) ->
     merge_opt_sets
       (match e1 with
-      | Some e -> get_globals_from_expr env ctx e
+      | Some e -> get_globals_from_expr env ctx e ~track_refs
       | None -> None)
-      (get_globals_from_expr env ctx e2)
-  | As (e, _, _) -> get_globals_from_expr env ctx e
-  | Upcast (e, _) -> get_globals_from_expr env ctx e
+      (get_globals_from_expr env ctx e2 ~track_refs)
+  | As (e, _, _) -> get_globals_from_expr env ctx e ~track_refs
+  | Upcast (e, _) -> get_globals_from_expr env ctx e ~track_refs
   | Pair (_, e1, e2) ->
     merge_opt_sets
-      (get_globals_from_expr env ctx e1)
-      (get_globals_from_expr env ctx e2)
+      (get_globals_from_expr env ctx e1 ~track_refs)
+      (get_globals_from_expr env ctx e2 ~track_refs)
   | Call (caller, _, _, _) ->
     let caller_ty = Tast.get_type caller in
     let open Typing_defs in
@@ -306,9 +311,9 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
     let union = MakeType.union Reason.none primitive_types in
     not (Typing_subtype.is_type_disjoint env ty union)
 
-let get_global_and_mutable_from_expr env ctx (tp, p, te) =
+let get_global_and_mutable_from_expr env ctx (tp, p, te) ~track_refs =
   if not (has_no_object_ref_ty env SSet.empty tp) then
-    get_globals_from_expr env ctx (tp, p, te)
+    get_globals_from_expr env ctx (tp, p, te) ~track_refs
   else
     None
 
@@ -394,7 +399,9 @@ let visitor =
       | Return r ->
         (match r with
         | Some ((ty, p, _) as e) ->
-          (match get_global_and_mutable_from_expr env ctx e with
+          (match
+             get_global_and_mutable_from_expr env ctx e ~track_refs:true
+           with
           | Some global_set ->
             Errors.global_access_error
               p
@@ -412,7 +419,19 @@ let visitor =
       | Binop (Ast_defs.Eq _, le, re) ->
         let () = self#on_expr (env, (ctx, fun_name)) re in
         let re_ty = Tast_env.print_ty env (Tast.get_type re) in
-        let le_global_opt = get_globals_from_expr env ctx le in
+        let le_global_opt = get_globals_from_expr env ctx le ~track_refs:true in
+        let re_direct_global_opt =
+          get_globals_from_expr env ctx re ~track_refs:false
+        in
+        (match re_direct_global_opt with
+        | Some re_direct_global ->
+          Errors.global_access_error
+            p
+            fun_name
+            re_ty
+            re_direct_global
+            GlobalWriteCheck.GlobalVariableDirectRead
+        | None -> ());
         (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
         if is_expr_static env le && Option.is_some le_global_opt then
           Errors.global_access_error
@@ -423,7 +442,7 @@ let visitor =
             GlobalWriteCheck.StaticVariableDirectWrite
         else
           let re_global_and_mutable_opt =
-            get_global_and_mutable_from_expr env ctx re
+            get_global_and_mutable_from_expr env ctx re ~track_refs:true
           in
           let vars_in_le = ref SSet.empty in
           let () = get_vars_in_expr vars_in_le le in
@@ -452,7 +471,7 @@ let visitor =
               !vars_in_le
         (* add_var_refs_to_tbl !(ctx.global_var_refs_tbl) !vars_in_le *)
       | Unop (op, e) ->
-        let e_global_opt = get_globals_from_expr env ctx e in
+        let e_global_opt = get_globals_from_expr env ctx e ~track_refs:true in
         if Option.is_some e_global_opt then
           let e_global = Option.get e_global_opt in
           let e_ty = Tast_env.print_ty env (Tast.get_type e) in
@@ -482,7 +501,9 @@ let visitor =
         List.iter tpl ~f:(fun (pk, ((ty, pos, _) as expr)) ->
             match pk with
             | Ast_defs.Pinout _ ->
-              let e_global_opt = get_globals_from_expr env ctx expr in
+              let e_global_opt =
+                get_globals_from_expr env ctx expr ~track_refs:true
+              in
               if Option.is_some e_global_opt then
                 Errors.global_access_error
                   pos
@@ -492,7 +513,7 @@ let visitor =
                   GlobalWriteCheck.GlobalVariableInFunctionCall
             | Ast_defs.Pnormal ->
               let e_global_opt =
-                get_global_and_mutable_from_expr env ctx expr
+                get_global_and_mutable_from_expr env ctx expr ~track_refs:true
               in
               if Option.is_some e_global_opt then
                 Errors.global_access_error
@@ -503,7 +524,9 @@ let visitor =
                   GlobalWriteCheck.GlobalVariableInFunctionCall)
       | New (_, _, el, _, _) ->
         List.iter el ~f:(fun ((ty, pos, _) as expr) ->
-            let e_global_opt = get_global_and_mutable_from_expr env ctx expr in
+            let e_global_opt =
+              get_global_and_mutable_from_expr env ctx expr ~track_refs:true
+            in
             if Option.is_some e_global_opt then
               Errors.global_access_error
                 pos

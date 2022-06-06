@@ -711,10 +711,8 @@ void print_class_constant(Output& out, const PreClass::Const* cns) {
 
 const StaticString s_coeffectsProp("86coeffects");
 
-// TODO: T112774575 remove isTest flag when HackC Translator is complete
 template<class T>
-void print_prop_or_field_impl(Output& out, const T& f, bool isTest) {
-  if (isTest && f.name() == s_coeffectsProp.get()) return;
+void print_prop_or_field_impl(Output& out, const T& f) {
   out.fmtln(".property{}{} {}{} =",
     opt_attrs(AttrContext::Prop, f.attrs(), &f.userAttributes()),
     RuntimeOption::EvalDisassemblerDocComments &&
@@ -728,9 +726,8 @@ void print_prop_or_field_impl(Output& out, const T& f, bool isTest) {
   });
 }
 
-template<bool isTest = false>
 void print_property(Output& out, const PreClass::Prop* prop) {
-  print_prop_or_field_impl(out, *prop, isTest);
+  print_prop_or_field_impl(out, *prop);
 }
 
 template<bool isTest=false>
@@ -808,6 +805,7 @@ void print_requirement(Output& out, const PreClass::ClassRequirement& req) {
   out.fmtln(".require {} <{}>;", kind, req.name()->data());
 }
 
+template<bool isTest = false>
 void print_cls_directives(Output& out, const PreClass* cls) {
   if (RuntimeOption::EvalDisassemblerDocComments) {
     if (cls->docComment() && !cls->docComment()->empty()) {
@@ -819,21 +817,7 @@ void print_cls_directives(Output& out, const PreClass* cls) {
   for (auto& r : cls->requirements())  print_requirement(out, r);
   for (auto& c : cls->allConstants())  print_class_constant(out, &c);
   for (auto& p : cls->allProperties()) print_property(out, &p);
-  for (auto* m : cls->allMethods())    print_method(out, m);
-}
-
-void print_cls_directives_test(Output& out, const PreClass* cls) {
-  if (RuntimeOption::EvalDisassemblerDocComments) {
-    if (cls->docComment() && !cls->docComment()->empty()) {
-      out.fmtln(".doc {};", escaped_long(cls->docComment()));
-    }
-  }
-  print_cls_enum_ty(out, cls);
-  print_cls_used_traits(out, cls);
-  for (auto& r : cls->requirements())  print_requirement(out, r);
-  for (auto& c : cls->allConstants())  print_class_constant(out, &c);
-  for (auto& p : cls->allProperties()) print_property<true>(out, &p);
-  for (auto* m : cls->allMethods())    print_method<true>(out, m);
+  for (auto* m : cls->allMethods())    print_method<isTest>(out, m);
 }
 
 template<bool isTest = false>
@@ -864,11 +848,7 @@ void print_cls(Output& out, const PreClass* cls) {
   print_enum_includes(out, cls);
   out.fmt(" {{");
   out.nl();
-  if (isTest) {
-    indented(out, [&] { print_cls_directives_test(out, cls); });
-  } else {
-    indented(out, [&] { print_cls_directives(out, cls); });
-  }
+  indented(out, [&] { print_cls_directives<isTest>(out, cls); });
   out.fmtln("}}");
   out.nl();
 }

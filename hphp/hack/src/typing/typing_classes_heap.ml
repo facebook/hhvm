@@ -30,7 +30,7 @@ type eager_members = {
   static_props: class_elt String.Table.t;
   methods: class_elt String.Table.t;
   static_methods: class_elt String.Table.t;
-  construct: Provider_context.t option -> class_elt option * consistent_kind;
+  construct: (class_elt option * consistent_kind) option ref;
 }
 
 (** class_t:
@@ -103,21 +103,7 @@ let make_eager_class_decl decl =
         static_methods = String.Table.create ();
         props = String.Table.create ();
         static_props = String.Table.create ();
-        construct =
-          (let cstr_ref = ref None in
-           fun ctx ->
-             match !cstr_ref with
-             | Some cstr -> cstr
-             | None ->
-               let cstr =
-                 Decl_class.lookup_constructor_lazy
-                   ctx
-                   ~child_class_name:decl.Decl_defs.dc_name
-                   decl.Decl_defs.dc_substs
-                   decl.Decl_defs.dc_construct
-               in
-               cstr_ref := Some cstr;
-               cstr);
+        construct = ref None;
       } )
 
 let make_eager_class_type ctx class_name declare_folded_class_in_file =
@@ -329,7 +315,19 @@ module ApiLazy = struct
     Decl_counters.count_subdecl decl Decl_counters.Construct @@ fun () ->
     match t with
     | Lazy (_sc, lc) -> Lazy.force (Lazy.force lc).ih.construct
-    | Eager (_, members) -> members.construct ctx
+    | Eager (cls, members) ->
+      (match !(members.construct) with
+      | Some x -> x
+      | None ->
+        let x =
+          Decl_class.lookup_constructor_lazy
+            ctx
+            ~child_class_name:cls.Decl_defs.dc_name
+            cls.Decl_defs.dc_substs
+            cls.Decl_defs.dc_construct
+        in
+        members.construct := Some x;
+        x)
 
   let need_init (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Need_init @@ fun () ->

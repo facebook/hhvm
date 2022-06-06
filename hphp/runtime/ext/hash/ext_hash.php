@@ -290,7 +290,7 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
     $prev = $xor;
     for ($j = 1; $j < $iterations; $j++) {
       $prev = hash_hmac($algo, $prev, $password, true);
-      $xor ^= $prev;
+      $xor = \HH\str_bitwise_xor($xor, $prev);
     }
     $result .= $xor;
   }

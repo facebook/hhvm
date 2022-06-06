@@ -102,9 +102,8 @@ enum Command {
     Parse(parse::Opts),
 }
 
-// Which command are we running? Every bool option here conflicts with
-// every other one. Using bool opts for backward compatibility with
-// hh_single_compile_cpp.
+/// Which command are we running? Using bool opts for compatibility with test harnesses.
+/// New commands should be defined as subcommands using the Command enum.
 #[derive(Parser, Debug, Default)]
 struct FlagCommands {
     /// Print the source code with expression tree literals desugared.
@@ -204,8 +203,6 @@ impl Opts {
     }
 
     // TODO (T118266805): get these from nearest .hhconfig enclosing each file.
-    // For now these are all hardcoded in hh_single_compile_cpp, so hardcode
-    // them here too.
     pub(crate) const AUTO_NAMESPACE_MAP: &'static str = r#"{
             "hhvm.aliased_namespaces": {
                 "global_value": {

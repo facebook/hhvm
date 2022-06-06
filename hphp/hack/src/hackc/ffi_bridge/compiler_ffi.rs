@@ -148,9 +148,6 @@ pub mod compile_ffi {
             source_text: &CxxString,
         ) -> Result<Vec<u8>>;
 
-        /// Dump expression trees interleaved with source, for debugging.
-        fn hackc_dump_expr_trees(env: &NativeEnv);
-
         fn hackc_create_direct_decl_parse_options(
             flags: i32,
             aliased_namespaces: &CxxString,
@@ -288,11 +285,6 @@ fn hackc_compile_from_text_cpp_ffi(
     )
     .map_err(|e| e.to_string())?;
     Ok(output)
-}
-
-fn hackc_dump_expr_trees(env: &compile_ffi::NativeEnv) {
-    let native_env = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-    compile::dump_expr_tree::desugar_and_print(native_env.filepath, native_env.flags);
 }
 
 fn hackc_decl_exists(

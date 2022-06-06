@@ -55,10 +55,10 @@ type SK = SyntaxKind;
 type SSet<'a> = arena_collections::SortedSet<'a, &'a str>;
 
 #[derive(Clone)]
-pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 'a>> {
+pub struct DirectDeclSmartConstructors<'a, 't, S: SourceTextAllocator<'t, 'a>> {
     pub token_factory: SimpleTokenFactoryImpl<CompactToken>,
 
-    pub source_text: IndexedSourceText<'text>,
+    pub source_text: IndexedSourceText<'t>,
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
     pub file_attributes: List<'a, &'a typing_defs::UserAttribute<'a>>,
@@ -79,10 +79,10 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     module: Option<Id<'a>>,
 }
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
+impl<'a, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 't, S> {
     pub fn new(
         opts: &DeclParserOptions<'_>,
-        src: &SourceText<'text>,
+        src: &SourceText<'t>,
         file_mode: Mode,
         arena: &'a Bump,
         source_text_allocator: S,
@@ -308,26 +308,26 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     }
 }
 
-pub trait SourceTextAllocator<'text, 'target>: Clone {
-    fn alloc(&self, text: &'text str) -> &'target str;
+pub trait SourceTextAllocator<'s, 'd>: Clone {
+    fn alloc(&self, text: &'s str) -> &'d str;
 }
 
 #[derive(Clone)]
 pub struct NoSourceTextAllocator;
 
-impl<'text> SourceTextAllocator<'text, 'text> for NoSourceTextAllocator {
+impl<'t> SourceTextAllocator<'t, 't> for NoSourceTextAllocator {
     #[inline]
-    fn alloc(&self, text: &'text str) -> &'text str {
+    fn alloc(&self, text: &'t str) -> &'t str {
         text
     }
 }
 
 #[derive(Clone)]
-pub struct ArenaSourceTextAllocator<'arena>(pub &'arena bumpalo::Bump);
+pub struct ArenaSourceTextAllocator<'a>(pub &'a bumpalo::Bump);
 
-impl<'text, 'arena> SourceTextAllocator<'text, 'arena> for ArenaSourceTextAllocator<'arena> {
+impl<'t, 'a> SourceTextAllocator<'t, 'a> for ArenaSourceTextAllocator<'a> {
     #[inline]
-    fn alloc(&self, text: &'text str) -> &'arena str {
+    fn alloc(&self, text: &'t str) -> &'a str {
         self.0.alloc_str(text)
     }
 }
@@ -1014,7 +1014,7 @@ struct Attributes<'a> {
     safe_global_variable: bool,
 }
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
+impl<'a, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 't, S> {
     fn add_class(&mut self, name: &'a str, decl: &'a shallow_decl_defs::ShallowClass<'a>) {
         self.decls.add(name, Decl::Class(decl), self.arena);
     }
@@ -1036,7 +1036,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         concat(self.arena, str1, str2)
     }
 
-    fn token_bytes(&self, token: &CompactToken) -> &'text [u8] {
+    fn token_bytes(&self, token: &CompactToken) -> &'t [u8] {
         self.source_text
             .source_text()
             .sub(token.start_offset(), token.width())
@@ -1045,7 +1045,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     // Check that the slice is valid UTF-8. If it is, return a &str referencing
     // the same data. Otherwise, copy the slice into our arena using
     // String::from_utf8_lossy_in, and return a reference to the arena str.
-    fn str_from_utf8(&self, slice: &'text [u8]) -> &'a str {
+    fn str_from_utf8(&self, slice: &'t [u8]) -> &'a str {
         if let Ok(s) = std::str::from_utf8(slice) {
             self.source_text_allocator.alloc(s)
         } else {
@@ -1335,8 +1335,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         _ => None,
                     }
                 }
-                fn create_vars_for_reinfer_types<'a, 'text, S: SourceTextAllocator<'text, 'a>>(
-                    this: &DirectDeclSmartConstructors<'a, 'text, S>,
+                fn create_vars_for_reinfer_types<'a, 't, S: SourceTextAllocator<'t, 'a>>(
+                    this: &DirectDeclSmartConstructors<'a, 't, S>,
                     ty: &'a Ty<'a>,
                     tvar: &'a Ty<'a>,
                 ) -> &'a Ty<'a> {
@@ -1962,7 +1962,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         ))
     }
 
-    fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'text [u8] {
+    fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'t [u8] {
         let start = pos.start_offset();
         let end = pos.end_offset();
         self.source_text.source_text().sub(start, end - start)
@@ -2455,8 +2455,8 @@ impl<'a, 'b> DoubleEndedIterator for NodeIterHelper<'a, 'b> {
     }
 }
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
-    for DirectDeclSmartConstructors<'a, 'text, S>
+impl<'a, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
+    for DirectDeclSmartConstructors<'a, 't, S>
 {
     // type Output = Node<'a> in direct_decl_smart_constructors_generated.rs
 

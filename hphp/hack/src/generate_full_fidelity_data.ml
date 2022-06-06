@@ -1722,22 +1722,22 @@ use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::SyntaxSmartConstructors;
 use crate::*;
 
-impl<'src, 'arena, Token, Value, TF> SmartConstructors
-    for DeclModeSmartConstructors<'src, 'arena, Syntax<'arena, Token, Value>, Token, Value, TF>
+impl<'s, 'a, Token, Value, TF> SmartConstructors
+    for DeclModeSmartConstructors<'s, 'a, Syntax<'a, Token, Value>, Token, Value, TF>
 where
-    TF: TokenFactory<Token = SyntaxToken<'src, 'arena, Token, Value>>,
+    TF: TokenFactory<Token = SyntaxToken<'s, 'a, Token, Value>>,
     Token: LexableToken + Copy,
     Value: SyntaxValueType<Token> + Clone,
 {
-    type State = State<'src, 'arena, Syntax<'arena, Token, Value>>;
+    type State = State<'s, 'a, Syntax<'a, Token, Value>>;
     type Factory = TF;
-    type Output = Syntax<'arena, Token, Value>;
+    type Output = Syntax<'a, Token, Value>;
 
-    fn state_mut(&mut self) -> &mut State<'src, 'arena, Syntax<'arena, Token, Value>> {
+    fn state_mut(&mut self) -> &mut State<'s, 'a, Syntax<'a, Token, Value>> {
         &mut self.state
     }
 
-    fn into_state(self) -> State<'src, 'arena, Syntax<'arena, Token, Value>> {
+    fn into_state(self) -> State<'s, 'a, Syntax<'a, Token, Value>> {
         self.state
     }
 
@@ -1877,10 +1877,10 @@ use smart_constructors::SmartConstructors;
 
 use crate::{DirectDeclSmartConstructors, Node, SourceTextAllocator};
 
-impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for DirectDeclSmartConstructors<'src, 'text, S> {
+impl<'a, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDeclSmartConstructors<'a, 't, S> {
     type State = Self;
     type Factory = SimpleTokenFactoryImpl<CompactToken>;
-    type Output = Node<'src>;
+    type Output = Node<'a>;
 
     fn state_mut(&mut self) -> &mut Self {
         self

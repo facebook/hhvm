@@ -23,10 +23,10 @@ use smart_constructors::SmartConstructors;
 
 use crate::{DirectDeclSmartConstructors, Node, SourceTextAllocator};
 
-impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for DirectDeclSmartConstructors<'src, 'text, S> {
+impl<'a, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDeclSmartConstructors<'a, 't, S> {
     type State = Self;
     type Factory = SimpleTokenFactoryImpl<CompactToken>;
-    type Output = Node<'src>;
+    type Output = Node<'a>;
 
     fn state_mut(&mut self) -> &mut Self {
         self

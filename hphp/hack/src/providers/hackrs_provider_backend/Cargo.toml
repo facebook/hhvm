@@ -25,7 +25,6 @@ oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }
 pos = { path = "../../rupro/pos/cargo/pos" }
-rusqlite = { version = "0.27.0", features = ["backup", "blob", "column_decltype"] }
 ty = { path = "../../rupro/ty/cargo/ty" }
 
 [dev-dependencies]

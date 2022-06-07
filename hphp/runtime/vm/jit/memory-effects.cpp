@@ -469,17 +469,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EndInlining: {
     assertx(inst.src(0)->inst()->is(BeginInlining));
     auto const fp = inst.src(0);
-    auto const callee = inst.src(0)->inst()->extra<BeginInlining>()->func;
-    const AliasClass ar = AActRec { inst.src(0) };
+    auto const callee = fp->inst()->extra<BeginInlining>()->func;
+    const AliasClass ar = AActRec { fp };
     auto const locals = [&] () -> AliasClass {
       if (!callee->numLocals()) return AEmpty;
       return ALocal {fp, AliasIdSet::IdRange(0, callee->numLocals())};
     }();
 
+    // Ensure the kill-set is precise- it represents *must*-kill locations
+    //
     // NB: It's okay if the AliasIdSet for locals cannot be precise. We want to
     //     kill *every* local in the frame so there's nothing else that can
     //     accidentally be included in the set.
-    return may_load_store_kill(AEmpty, AEmpty, ar | locals | AMIStateAny);
+    auto const kills = *ar.precise_union(locals)->precise_union(AMIStateAny);
+    return may_load_store_kill(AEmpty, AEmpty, kills);
   }
 
   case InlineCall:
@@ -643,12 +646,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const fp = canonical(inst.src(0));
     auto fpInst = fp->inst();
     auto const frame = [&] () -> AliasClass {
-      if (fpInst->is(DefFP, DefFuncEntryFP)) return ALocalAny;
+      if (fpInst->is(DefFP, DefFuncEntryFP)) return ALocalAny | AIterAny;
       assertx(fpInst->is(BeginInlining));
+      auto const func = fpInst->extra<BeginInlining>()->func;
       auto const nlocals = fpInst->extra<BeginInlining>()->func->numLocals();
-      return nlocals
+      auto acls = nlocals
         ? ALocal { fp, AliasIdSet::IdRange(0, nlocals)}
         : AEmpty;
+      for (auto i = 0; i < func->numIterators(); ++i) {
+        acls |= aiter_all(fp, i);
+      }
+      return acls;
     }();
     return may_load_store_move(
       frame | AActRec { fp },

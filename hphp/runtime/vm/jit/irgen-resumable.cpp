@@ -183,6 +183,14 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       auto const wh = gen(env, CreateAFWH, fp(env),
                           cns(env, func->numSlotsInFrame()),
                           resumeAddr(), suspendOff, child);
+      // Constructing a waithandle teleports locals and iterators to the heap,
+      // kill them here to improve alias analysis.
+      for (uint32_t i = 0; i < func->numLocals(); ++i) {
+        gen(env, KillLoc, LocalId{i}, fp(env));
+      }
+      for (uint32_t i = 0; i < func->numIterators(); ++i) {
+        gen(env, KillIter, IterId{i}, fp(env));
+      }
       suspendHook(env, [&] {
         auto const asyncAR = gen(env, LdAFWHActRec, wh);
         gen(env, SuspendHookAwaitEF, fp(env), asyncAR, wh);

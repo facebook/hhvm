@@ -2330,6 +2330,34 @@ void rc_analyze_step(Env& env,
   // now, and SSATmps can't span calls.
   mrinfo_step(env, inst, state.avail);
   assertx(check_state(state));
+
+  if (RO::EvalHHIRInliningAssertMemoryEffects && inst.is(EndInlining)) {
+    assertx(inst.src(0)->inst()->is(BeginInlining));
+    auto const fp = inst.src(0);
+    auto const callee = fp->inst()->extra<BeginInlining>()->func;
+
+    auto const assertDead = [&] (AliasClass acls, const char* what) {
+      auto const canon = canonicalize(acls);
+      auto const mustBeDead = env.ainfo.expand(canon);
+      bitset_for_each_set(
+        mustBeDead,
+        [&] (size_t id) {
+          always_assert_flog(
+            state.support_map[id] == -1,
+            "Detected that {} location was still used as reference support "
+            "after accounting for all effects at an EndInlining position\n"
+            "    Locations: {}\n",
+            what,
+            show(mustBeDead)
+          );
+        }
+      );
+    };
+
+    // Assert that all of the locals and iterators for this frame as well as
+    // the ActRec itself and the minstr state have been marked dead.
+    for_each_frame_location(fp, callee, assertDead);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

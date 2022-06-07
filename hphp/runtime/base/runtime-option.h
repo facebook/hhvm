@@ -943,6 +943,7 @@ struct RuntimeOption {
   F(bool,     HHIRInliningIgnoreHints, !debug)                          \
   F(bool,     HHIRInliningUseStackedCost, false)                        \
   F(bool,     HHIRInliningUseLayoutBlocks, false)                       \
+  F(bool,     HHIRInliningAssertMemoryEffects, true)                    \
   F(bool, HHIRAlwaysInterpIgnoreHint,  !debug)                          \
   F(bool, HHIRGenerateAsserts,         false)                           \
   F(bool, HHIRDeadCodeElim,            true)                            \

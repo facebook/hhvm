@@ -88,11 +88,11 @@ function hash_hmac(string $algo,
   // Rely on the fact that HMAC keys are null padded
   // making a key of "\0" equivalent to ""
   $ctx = hash_init($algo, HASH_HMAC, ($key !== '') ? $key : "\0");
-  if (!$ctx) {
+  if (!($ctx is resource)) {
     return false;
   }
   hash_update($ctx, (string) $data);
-  return hash_final($ctx, $raw_output);
+  return hash_final($ctx, HH\FIXME\UNSAFE_CAST<?bool, bool>($raw_output));
 }
 
 /**
@@ -121,11 +121,11 @@ function hash_hmac_file(string $algo,
   // Rely on the fact that HMAC keys are null padded
   // making a key of "\0" equivalent to ""
   $ctx = hash_init($algo, HASH_HMAC, ($key !== '') ? $key : "\0");
-  if (!$ctx) {
+  if (!($ctx is resource)) {
     return false;
   }
   hash_update_file($ctx, $filename);
-  return hash_final($ctx, $raw_output);
+  return hash_final($ctx, HH\FIXME\UNSAFE_CAST<?bool, bool>($raw_output));
 }
 
 /**
@@ -173,11 +173,15 @@ function hash_update(resource $context, string $data)[write_props]: bool;
 function hash_update_file(mixed $context, string $filename,
                           mixed $stream_context = null): bool {
   $fp = fopen($filename, 'r', false, $stream_context);
-  if (!$fp) {
+  if (!($fp is resource)) {
     return false;
   }
-  while (strlen($data = fread($fp, 1024))) {
-    if (!hash_update($context, $data)) {
+  for (
+    $data = HH\FIXME\UNSAFE_CAST<mixed, string>(fread($fp, 1024));
+    strlen($data);
+    $data = HH\FIXME\UNSAFE_CAST<mixed, string>(fread($fp, 1024))
+  ) {
+    if (!hash_update(HH\FIXME\UNSAFE_CAST<mixed, resource>($context), $data)) {
       return false;
     }
   }
@@ -200,8 +204,12 @@ function hash_update_file(mixed $context, string $filename,
 function hash_update_stream(mixed $context, mixed $handle,
                             int $maxlen = -1): int {
   $didread = 0;
+  $context = HH\FIXME\UNSAFE_CAST<mixed, resource>($context);
+  $handle = HH\FIXME\UNSAFE_CAST<mixed, resource>($handle);
   while ($maxlen) {
-    $chunk = fread($handle, ($maxlen > 0) ? $maxlen : 1024);
+    $chunk = HH\FIXME\UNSAFE_CAST<mixed, string>(
+      fread($handle, ($maxlen > 0) ? $maxlen : 1024)
+    );
     $len = strlen($chunk);
     if (!$len) {
       return $didread;
@@ -275,7 +283,9 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
   }
 
   $result = "";
-  $hash_length = strlen(hash($algo, "", true));
+  $hash_length = strlen(
+    HH\FIXME\UNSAFE_CAST<mixed, string>(hash($algo, "", true))
+  );
   if (!$length) {
     $length = $hash_length;
     if (!$raw_output) {
@@ -283,13 +293,20 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
       $length *= 2;
     }
   }
-  $key_blocks = ceil($length / $hash_length);
+  $key_blocks = HH\FIXME\UNSAFE_CAST<mixed, num>(ceil($length / $hash_length));
   for ($i = 1; $i <= $key_blocks; $i++) {
     // Note: $i encoded with most siginificant octet first.
-    $xor = hash_hmac($algo, $salt.pack("N", $i), $password, true);
+    $xor = HH\FIXME\UNSAFE_CAST<mixed, string>(hash_hmac(
+      $algo,
+      $salt.HH\FIXME\UNSAFE_CAST<mixed, string>(pack("N", $i)),
+      $password,
+      true,
+    ));
     $prev = $xor;
     for ($j = 1; $j < $iterations; $j++) {
-      $prev = hash_hmac($algo, $prev, $password, true);
+      $prev = HH\FIXME\UNSAFE_CAST<mixed, string>(
+        hash_hmac($algo, $prev, $password, true)
+      );
       $xor = \HH\str_bitwise_xor($xor, $prev);
     }
     $result .= $xor;

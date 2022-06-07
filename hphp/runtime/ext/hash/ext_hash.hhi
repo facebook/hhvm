@@ -8,6 +8,4 @@
 // TODO(T119870250)
 // Used as part of typechecking `hphp/runtime/ext/` without builtins; these
 // constant values are not representative of the true runtime value.
-const int INI_SCANNER_NORMAL = 0;
-const int SEEK_SET = 0;
-const int SEEK_CUR = 0;
+const int HASH_HMAC = 0;

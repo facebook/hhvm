@@ -141,12 +141,8 @@ struct RangeState {
     return high() - low();
   }
 
-  void lock() {
-    low_internal.lock_for_update();
-  }
-
-  void unlock() {
-    low_internal.unlock();
+  LockFreePtrWrapper<char*>::ScopedLock lock() {
+    return low_internal.lock_for_update();
   }
 
   // Whether it is possible (but not guaranteed when multiple threads are

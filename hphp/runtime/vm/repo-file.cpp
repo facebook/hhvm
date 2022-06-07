@@ -560,65 +560,59 @@ const StringData* UnitInfo::getPath(const RepoFileData& data) {
   auto wrapper = path.copy();
   if (wrapper.isPtr()) return wrapper.ptr();
 
-  path.lock_for_update();
+  auto lock = path.lock_for_update();
 
   wrapper = path.copy();
   if (wrapper.isPtr()) {
     assertx(wrapper.ptr());
-    path.unlock();
     return wrapper.ptr();
   }
 
-  try {
-    auto const loadedPath = [&] {
-      auto const token = wrapper.token();
-      assertx(token < data.sizes.unitEmittersIndexSize);
+  auto const loadedPath = [&] {
+    auto const token = wrapper.token();
+    assertx(token < data.sizes.unitEmittersIndexSize);
 
-      // We don't know how large the path actually is. Take an initial
-      // guess (enough to read the size). If the guess is
-      // insufficient, do another read with the proper size.
-      size_t actualSize;
+    // We don't know how large the path actually is. Take an initial
+    // guess (enough to read the size). If the guess is insufficient,
+    // do another read with the proper size.
+    size_t actualSize;
 
-      {
-        auto const firstSize =
-          std::min<size_t>(data.sizes.unitEmittersIndexSize - token, 128);
-        auto blob = loadBlob(
-          data.fd,
-          data.unitEmittersIndexOffset + token,
-          firstSize,
-          true
-        );
-
-        actualSize = blob.decoder.peekStdStringSize();
-        if (actualSize <= firstSize) {
-          std::string pathStr;
-          blob.decoder(pathStr);
-          assertx(blob.decoder.advanced() == actualSize);
-          assertx(!pathStr.empty());
-          return makeStaticString(pathStr);
-        }
-      }
-
-      assertx(actualSize <= data.sizes.unitEmittersIndexSize - token);
+    {
+      auto const firstSize =
+        std::min<size_t>(data.sizes.unitEmittersIndexSize - token, 128);
       auto blob = loadBlob(
         data.fd,
         data.unitEmittersIndexOffset + token,
-        actualSize,
+        firstSize,
         true
       );
-      std::string pathStr;
-      blob.decoder(pathStr);
-      blob.decoder.assertDone();
-      assertx(!pathStr.empty());
-      return makeStaticString(pathStr);
-    }();
 
-    path.update_and_unlock(StringOrToken::FromPtr(loadedPath));
-    return loadedPath;
-  } catch (...) {
-    path.unlock();
-    throw;
-  }
+      actualSize = blob.decoder.peekStdStringSize();
+      if (actualSize <= firstSize) {
+        std::string pathStr;
+        blob.decoder(pathStr);
+        assertx(blob.decoder.advanced() == actualSize);
+        assertx(!pathStr.empty());
+        return makeStaticString(pathStr);
+      }
+    }
+
+    assertx(actualSize <= data.sizes.unitEmittersIndexSize - token);
+    auto blob = loadBlob(
+      data.fd,
+      data.unitEmittersIndexOffset + token,
+      actualSize,
+      true
+    );
+    std::string pathStr;
+    blob.decoder(pathStr);
+    blob.decoder.assertDone();
+    assertx(!pathStr.empty());
+    return makeStaticString(pathStr);
+  }();
+
+  lock.update(StringOrToken::FromPtr(loadedPath));
+  return loadedPath;
 }
 
 }

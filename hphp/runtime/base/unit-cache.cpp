@@ -158,10 +158,9 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
 
   if (cu.unit.copy() != CachedUnitInternal::Uninit) return cu.cachedUnit();
 
-  cu.unit.lock_for_update();
+  auto lock = cu.unit.lock_for_update();
   if (cu.unit.copy() != CachedUnitInternal::Uninit) {
     // Someone else updated the unit while we were waiting on the lock
-    cu.unit.unlock();
     return cu.cachedUnit();
   }
 
@@ -217,12 +216,12 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
     if (auto ue = load()) {
       auto unit = create(std::move(ue));
       cu.rdsBitId = rds::allocBit();
-      cu.unit.update_and_unlock(unit.release());
+      lock.update(unit.release());
     } else {
-      cu.unit.update_and_unlock(nullptr);
+      lock.update(nullptr);
     }
   } catch (...) {
-    cu.unit.unlock();
+    lock.release();
     s_repoUnitCache.erase(acc);
     throw;
   }
@@ -529,7 +528,7 @@ void releaseFromHashCache(Unit* unit) {
 
   // Acquire the entry lock. This is probably pedantic since nobody
   // else should have an accessor on this entry.
-  cached.lock_for_update();
+  auto lock = cached.lock_for_update();
   // Since we have an exclusive accessor, the ref-count should be
   // unchanged.
   assertx(!unit->hasCacheRef());
@@ -538,7 +537,7 @@ void releaseFromHashCache(Unit* unit) {
   // Unit since we already checked that. Treadmill the Unit and we're
   // done. Once we release the accessor, any other thread waiting to
   // delete this Unit will see that the entry is gone.
-  auto const DEBUG_ONLY old = cached.update_and_unlock(nullptr);
+  auto const DEBUG_ONLY old = lock.update(nullptr);
   assertx(old == unit);
   Treadmill::enqueue([unit] { delete unit; });
 }
@@ -636,34 +635,29 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
         if (auto const unit = cached.copy()) return hit(unit);
 
         // No entry, so acquire the lock:
-        if (!cached.try_lock_for_update()) {
+        auto lock = cached.try_lock_for_update();
+        if (!lock) {
           tracing::BlockNoTrace _{"unit-hash-cache-lock-acquire"};
-          cached.lock_for_update();
+          lock.emplace(cached.lock_for_update());
         }
-        SCOPE_FAIL { cached.unlock(); };
 
         // Try again now that we have the lock
         if (auto const unit = cached.copy()) {
           // NB: Its safe to unlock first. The Unit can only be freed by
           // releaseFromHashCache() which acquires an exclusive lock on
           // this table slot first (so cannot happen concurrently).
-          cached.unlock();
           return hit(unit);
         }
 
         // There's no Unit, compile a new one and store it in the cache.
         auto unit = compileNew();
-        if (!unit) {
-          cached.unlock();
-          return makeCachedFilePtr(nullptr);
-        }
+        if (!unit) return makeCachedFilePtr(nullptr);
         assertx(unit->sha1() == loader.sha1());
         assertx(!unit->hasCacheRef());
         assertx(!unit->hasPerRequestFilepath());
 
         // Try to re-use the original Unit if possible
         if (sameBC(unit)) {
-          cached.unlock();
           delete unit;
           return CachedFilePtr{*orig, statInfo};
         }
@@ -675,13 +669,12 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
         // per-request filepaths cannot be stored in this cache.
         assertx(unit->origFilepath()->isStatic());
         if (unit->origFilepath() != path) {
-          cached.unlock();
           return makeCachedFilePtr(unit);
         }
         unit->makeFilepathPerRequest();
 
         // Store the Unit in the cache.
-        auto const DEBUG_ONLY old = cached.update_and_unlock(std::move(unit));
+        auto const DEBUG_ONLY old = lock->update(std::move(unit));
         assertx(!old);
         return makeCachedFilePtr(unit);
       }();
@@ -1004,77 +997,68 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
 
   // We've already checked the cache before calling this function,
   // so don't bother again before grabbing the lock.
-  if (!cachedUnit.try_lock_for_update()) {
+  auto lock = cachedUnit.try_lock_for_update();
+  if (!lock) {
     tracing::BlockNoTrace _{"unit-cache-lock-acquire"};
-    cachedUnit.lock_for_update();
+    lock.emplace(cachedUnit.lock_for_update());
   }
 
-  try {
-    auto forceNewUnit = false;
+  auto forceNewUnit = false;
 
-    if (auto const tmp = cachedUnit.copy()) {
-      if (!isChanged(tmp, statInfo, options)) {
-        if (forPrefetch || canBeBoundToPath(tmp, rpath)) {
-          cachedUnit.unlock();
-          flags = FileLoadFlags::kWaited;
-          if (ent) ent->setStr("type", "cache_hit_writelock");
-          logTearing(tmp);
-          return tmp->cu;
-        } else {
-          // An unit exists, but is already bound to a different
-          // path. We need to compile a new one.
-          forceNewUnit = true;
-        }
+  if (auto const tmp = cachedUnit.copy()) {
+    if (!isChanged(tmp, statInfo, options)) {
+      if (forPrefetch || canBeBoundToPath(tmp, rpath)) {
+        flags = FileLoadFlags::kWaited;
+        if (ent) ent->setStr("type", "cache_hit_writelock");
+        logTearing(tmp);
+        return tmp->cu;
+      } else {
+        // An unit exists, but is already bound to a different
+        // path. We need to compile a new one.
+        forceNewUnit = true;
       }
-      if (ent) ent->setStr("type", "cache_stale");
-    } else {
-      if (ent) ent->setStr("type", "cache_miss");
     }
-
-    trace.finish();
-    auto ptr = [&] {
-      auto orig = (RuntimeOption::EvalCheckUnitSHA1 && !forceNewUnit)
-        ? cachedUnit.copy()
-        : CachedFilePtr{};
-      return createUnitFromFile(rpath, wrapper, &releaseUnit, ent,
-                                nativeFuncs, options, flags,
-                                statInfo, std::move(orig), forPrefetch);
-    }();
-    if (UNLIKELY(!ptr)) {
-      cachedUnit.unlock();
-      return CachedUnit{};
-    }
-
-    // Don't cache the unit if it was created in response to an
-    // internal error in ExternCompiler. Such units represent
-    // transient events. The copy_ptr dtor will ensure the unit is
-    // automatically treadmilled the Unit after the request ends.
-    // Also don't cache the unit if we only created it due to the path
-    // binding check above. We want to keep the original unit in the
-    // cache for that case.
-    if (UNLIKELY(forceNewUnit || !ptr->cu.unit || ptr->cu.unit->isICE())) {
-      cachedUnit.unlock();
-      return ptr->cu;
-    }
-
-    assertx(cachedUnit.copy() != ptr);
-    logTearing(ptr);
-
-    // Otherwise update the entry. Defer the destruction of the
-    // old copy_ptr using the Treadmill. Other threads may be
-    // reading the entry simultaneously so the ref-count cannot
-    // drop to zero here.
-    auto const cu = ptr->cu;
-    if (auto old = cachedUnit.update_and_unlock(std::move(ptr))) {
-      // We don't need to do anything explicitly; the copy_ptr
-      // destructor will take care of it.
-      Treadmill::enqueue([o = std::move(old)] {});
-    }
-    return cu;
-  } catch (...) {
-    cachedUnit.unlock();
-    throw;
+    if (ent) ent->setStr("type", "cache_stale");
+  } else {
+    if (ent) ent->setStr("type", "cache_miss");
   }
+
+  trace.finish();
+  auto ptr = [&] {
+    auto orig = (RuntimeOption::EvalCheckUnitSHA1 && !forceNewUnit)
+      ? cachedUnit.copy()
+      : CachedFilePtr{};
+    return createUnitFromFile(rpath, wrapper, &releaseUnit, ent,
+                              nativeFuncs, options, flags,
+                              statInfo, std::move(orig), forPrefetch);
+  }();
+  if (UNLIKELY(!ptr)) return CachedUnit{};
+
+  // Don't cache the unit if it was created in response to an
+  // internal error in ExternCompiler. Such units represent
+  // transient events. The copy_ptr dtor will ensure the unit is
+  // automatically treadmilled the Unit after the request ends.
+  // Also don't cache the unit if we only created it due to the path
+  // binding check above. We want to keep the original unit in the
+  // cache for that case.
+  if (UNLIKELY(forceNewUnit || !ptr->cu.unit || ptr->cu.unit->isICE())) {
+    return ptr->cu;
+  }
+
+  assertx(cachedUnit.copy() != ptr);
+  logTearing(ptr);
+
+  // Otherwise update the entry. Defer the destruction of the
+  // old copy_ptr using the Treadmill. Other threads may be
+  // reading the entry simultaneously so the ref-count cannot
+  // drop to zero here.
+  auto const cu = ptr->cu;
+  if (auto old = lock->update(std::move(ptr))) {
+    // We don't need to do anything explicitly; the copy_ptr
+    // destructor will take care of it.
+    Treadmill::enqueue([o = std::move(old)] {});
+  }
+  return cu;
 }
 
 CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
@@ -1421,8 +1405,8 @@ void invalidateUnit(StringData* path) {
       // treadmill. Manually move the copy_ptr onto the treadmill, and
       // then replace it with a null copy_ptr.
       auto& cached = acc->second.cachedUnit;
-      cached.lock_for_update();
-      if (auto old = cached.update_and_unlock({})) {
+      auto lock = cached.lock_for_update();
+      if (auto old = lock.update({})) {
         Treadmill::enqueue([o = std::move(old)] {});
       }
     }
@@ -1705,21 +1689,14 @@ void prefetchUnit(StringData* requestedPath,
       // prefetcher thread, or a request thread is currently loading
       // the unit. In either case, we don't want to do anything with
       // it, and just move onto another request.
-      if (!cachedUnit.try_lock_for_update()) return;
-
-      // If we throw, release the lock. Successful paths will
-      // manually release the lock, as they may want to update the
-      // value simultaneously.
-      SCOPE_FAIL { cachedUnit.unlock(); };
+      auto lock = cachedUnit.try_lock_for_update();
+      if (!lock) return;
 
       // Now that we have the lock, check if the path has a Unit
       // already, and if so, has the file has changed since that
       // Unit was created. If not, there's nothing to do.
       if (auto const tmp = cachedUnit.copy()) {
-        if (!isChanged(tmp, fileStat.get_pointer(), options)) {
-          cachedUnit.unlock();
-          return;
-        }
+        if (!isChanged(tmp, fileStat.get_pointer(), options)) return;
       }
 
       // The Unit doesn't already exist, or the file has
@@ -1740,10 +1717,7 @@ void prefetchUnit(StringData* requestedPath,
       // We don't want to prefetch ICE units (they can be
       // transient), so if we encounter one, just drop it and leave
       // the cached entry as is.
-      if (!ptr || !ptr->cu.unit || ptr->cu.unit->isICE()) {
-        cachedUnit.unlock();
-        return;
-      }
+      if (!ptr || !ptr->cu.unit || ptr->cu.unit->isICE()) return;
 
       // The new Unit is good. Atomically update the cache entry
       // with it while releasing the lock.
@@ -1754,7 +1728,7 @@ void prefetchUnit(StringData* requestedPath,
       // old copy_ptr using the Treadmill. Other threads may be
       // reading the entry simultaneously so the ref-count cannot
       // drop to zero here.
-      if (auto old = cachedUnit.update_and_unlock(std::move(ptr))) {
+      if (auto old = lock->update(std::move(ptr))) {
         // We don't need to do anything explicitly; the copy_ptr
         // destructor will take care of it.
         Treadmill::enqueue([o = std::move(old)] {});
@@ -2000,25 +1974,20 @@ private:
       // Lock the entry. NB: this entry may have been changed since we
       // iterated over it. It may not even have the same Unit in it.
       auto& cachedUnit = accessor->second.cachedUnit;
-      cachedUnit.lock_for_update();
+      auto lock = cachedUnit.lock_for_update();
 
       // The Unit could have been touched (or there could be a
       // different Unit in it), so redo the expiration check. If its
       // not actually expired now, skip it.
       auto const cached = cachedUnit.copy();
-      if (!cached || !cached->cu.unit) {
-        cachedUnit.unlock();
-        continue;
-      }
+      if (!cached || !cached->cu.unit) continue;
+
       auto const [lastRequest, lastTime] = cached->cu.unit->getLastTouch();
-      if (!isExpired(now, oldestRequest, lastRequest, lastTime)) {
-        cachedUnit.unlock();
-        continue;
-      }
+      if (!isExpired(now, oldestRequest, lastRequest, lastTime)) continue;
 
       // Still expired. Replace the entry with a nullptr and put the
       // Unit on the treadmill to be deleted.
-      if (auto old = cachedUnit.update_and_unlock({})) {
+      if (auto old = lock.update({})) {
         Treadmill::enqueue([o = std::move(old)] {});
         s_unitsPathReaped->increment();
       }

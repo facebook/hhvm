@@ -72,12 +72,11 @@ inline
 void LitarrayTable::setLitarray(Id id, const ArrayData* arr) {
   assertx(contains(id));
   auto& elem = m_arrays[id];
-  elem.lock_for_update();
+  auto lock = elem.lock_for_update();
   if (DEBUG_ONLY auto const curr = elem.get()) {
     assertx(arr == curr);
-    elem.unlock();
   } else {
-    elem.update_and_unlock(std::move(arr));
+    lock.update(std::move(arr));
   }
 }
 

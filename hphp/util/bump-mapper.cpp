@@ -47,7 +47,7 @@ bool Bump1GMapper::addMappingImpl() {
   if (m_currHugePages >= m_maxHugePages) return false;
   if (get_huge1g_info().free_hugepages <= 0) return false;
 
-  std::lock_guard<RangeState> _(m_state);
+  auto _ = m_state.lock();
   auto const currFrontier = m_state.low_map.load(std::memory_order_relaxed);
   if (currFrontier % size1g != 0) return false;
   auto const newFrontier = currFrontier + size1g;
@@ -95,7 +95,7 @@ bool Bump2MMapper::addMappingImpl() {
                                : get_huge2m_info().free_hugepages;
   if (freePages <= 0) return false;
 
-  std::lock_guard<RangeState> _(m_state);
+  auto _ = m_state.lock();
   // Recheck the mapping frontiers after grabbing the lock
   auto const currFrontier = m_state.low_map.load(std::memory_order_relaxed);
   if (currFrontier % size2m != 0) return false;
@@ -145,7 +145,7 @@ bool Bump2MMapper::addMappingImpl() {
 
 template<Direction D>
 bool BumpNormalMapper<D>::addMappingImpl() {
-  std::lock_guard<RangeState> _(m_state);
+  auto _ = m_state.lock();
   auto const high = m_state.high_map.load(std::memory_order_relaxed);
   auto const low = m_state.low_map.load(std::memory_order_relaxed);
   auto const maxSize = static_cast<size_t>(high - low);
@@ -191,7 +191,7 @@ bool BumpFileMapper::setDirectory(const char* dir) {
 }
 
 bool BumpFileMapper::addMappingImpl() {
-  std::lock_guard<RangeState> _(m_state);
+  auto _ = m_state.lock();
   if (m_fd) return false;               // already initialized
   if (!m_dirName[0]) return false;      // setDirectory() not done successfully
   // Create a temporary file and map it in upon the first request.
@@ -217,7 +217,7 @@ bool BumpFileMapper::addMappingImpl() {
 }
 
 bool BumpEmergencyMapper::addMappingImpl() {
-  std::lock_guard<RangeState> _(m_state);
+  auto _ = m_state.lock();
   auto low = m_state.low();
   auto const high = m_state.high();
   if (low == high) return false; // another thread added this range already.

@@ -81,12 +81,11 @@ inline
 void LitstrTable::setLitstr(Id id, const StringData* str) {
   assertx(contains(id));
   auto& elem = m_namedInfo[id];
-  elem.lock_for_update();
+  auto lock = elem.lock_for_update();
   if (DEBUG_ONLY auto const curr = elem.get()) {
     assertx(str == curr);
-    elem.unlock();
   } else {
-    elem.update_and_unlock(LowStringPtr{str});
+    lock.update(LowStringPtr{str});
   }
 }
 

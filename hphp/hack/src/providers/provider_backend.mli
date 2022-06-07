@@ -12,7 +12,7 @@ module Cache (Entry : Lfu_cache.Entry) : module type of Lfu_cache.Cache (Entry)
 module Decl_cache_entry : sig
   type _ t =
     | Fun_decl : string -> Typing_defs.fun_elt t
-    | Class_decl : string -> Obj.t t
+    | Class_decl : string -> Typing_class_types.class_t t
     | Typedef_decl : string -> Typing_defs.typedef_type t
     | Gconst_decl : string -> Typing_defs.const_decl t
     | Module_decl : string -> Typing_defs.module_def_type t

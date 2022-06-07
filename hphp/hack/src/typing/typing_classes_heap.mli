@@ -191,3 +191,13 @@ module Api : sig
 
   val valid_newable_class : t -> bool
 end
+
+val get_class_with_cache :
+  Provider_context.t ->
+  string ->
+  Provider_backend.Decl_cache.t ->
+  (Provider_context.t ->
+  Relative_path.t ->
+  string ->
+  Decl_defs.decl_class_type * 'a) ->
+  class_t option

@@ -613,3 +613,10 @@ module Api = struct
     else
       false
 end
+
+let get_class_with_cache ctx class_name decl_cache declare_folded_class_in_file
+    =
+  Provider_backend.Decl_cache.find_or_add
+    decl_cache
+    ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
+    ~default:(fun () -> get ctx class_name declare_folded_class_in_file)

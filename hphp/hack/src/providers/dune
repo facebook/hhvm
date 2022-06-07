@@ -12,6 +12,7 @@
   pos
   relative_path
   shallow_decl_defs
+  typing_class_types
   typing_defs)
  (preprocess
   (pps ppx_deriving.std)))

@@ -13,17 +13,10 @@ module Decl_cache_entry = struct
   (* NOTE: we can't simply use a string as a key. In the case of a name
      conflict, we may put e.g. a function named 'foo' into the cache whose value is
      one type, and then later try to withdraw a class named 'foo' whose value is
-     another type.
-
-     The actual value type for [Class_decl] is a [Typing_classes_heap.Classes.t],
-     but that module depends on this module, so we can't write it down or else we
-     will cause a circular dependency. (It could probably be refactored to break
-     the dependency.) We just use [Obj.t] instead, which is better than using
-     [Obj.t] for all of the cases here.
-  *)
+     another type. *)
   type _ t =
     | Fun_decl : string -> Typing_defs.fun_elt t
-    | Class_decl : string -> Obj.t t
+    | Class_decl : string -> Typing_class_types.class_t t
     | Typedef_decl : string -> Typing_defs.typedef_type t
     | Gconst_decl : string -> Typing_defs.const_decl t
     | Module_decl : string -> Typing_defs.module_def_type t

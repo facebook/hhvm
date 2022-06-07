@@ -124,21 +124,13 @@ let get_class
       | Some v -> Some (counter, v, Some ctx)
     end
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
-    let result : Obj.t option =
-      Provider_backend.Decl_cache.find_or_add
-        decl_cache
-        ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
-        ~default:(fun () ->
-          let v : Typing_classes_heap.class_t option =
-            Typing_classes_heap.get ctx class_name declare_folded_class_in_file
-          in
-          Option.map v ~f:Obj.repr)
-    in
-    (match result with
-    | None -> None
-    | Some obj ->
-      let v : Typing_classes_heap.class_t = Obj.obj obj in
-      Some (counter, v, Some ctx))
+    let open Option.Monad_infix in
+    Typing_classes_heap.get_class_with_cache
+      ctx
+      class_name
+      decl_cache
+      declare_folded_class_in_file
+    >>| fun cls -> (counter, cls, Some ctx)
   | Provider_backend.Rust_provider_backend backend ->
     begin
       match

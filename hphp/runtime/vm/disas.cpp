@@ -955,6 +955,7 @@ void print_unit_test(Output& out, const Unit* unit) {
   for (auto& cls : unit->preclasses())    print_cls<true>(out, cls.get());
   for (auto& alias : unit->typeAliases()) print_alias(out, alias);
   for (auto& c : unit->constants())       print_constant(out, c);
+  for (auto& m : unit->modules())         print_module(out, m);
   out.fmtln("# {} ends here", unit->origFilepath());
 }
 

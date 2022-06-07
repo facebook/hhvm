@@ -1287,6 +1287,19 @@ void translateModuleUse(TranslationState& ts, const Optional<Str>& name) {
   ts.ue->m_moduleName = toStaticString(name.value());
 }
 
+void translateModule(TranslationState& ts, const HhasModule& m) {
+  UserAttributeMap userAttrs;
+  translateUserAttributes(m.attributes, userAttrs);
+
+  ts.ue->addModule(Module{
+    toStaticString(m.name._0),
+    static_cast<int>(m.span.line_begin),
+    static_cast<int>(m.span.line_end),
+    Attr(AttrNone),
+    userAttrs
+  });
+}
+
 void translate(TranslationState& ts, const HackCUnit& unit) {
   translateModuleUse(ts, maybe(unit.module_use));
   auto adata = range(unit.adata);
@@ -1312,6 +1325,11 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
   auto typedefs = range(unit.typedefs);
   for (auto const& t : typedefs) {
     translateTypedef(ts, t);
+  }
+
+  auto modules = range(unit.modules);
+  for (auto const& m : modules) {
+    translateModule(ts, m);
   }
 
   translateUserAttributes(unit.file_attributes, ts.ue->m_fileAttributes);

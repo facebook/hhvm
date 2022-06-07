@@ -438,6 +438,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (* TODO(bobren) remove dir entirely from saved state job invocation *)
     let _ = dir in
     (env, ServerGenPrefetchDir.go env genv genv.workers)
+  | GEN_REMOTE_DECLS -> (env, ServerGenRemoteDecls.go env genv genv.workers)
   | FUN_DEPS_BATCH positions ->
     (env, ServerFunDepsBatch.go genv.workers positions env)
   | LIST_FILES_WITH_ERRORS -> (env, ServerEnv.list_files env)

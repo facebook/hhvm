@@ -51,6 +51,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | IN_MEMORY_DEP_TABLE_SIZE -> true
   | NO_PRECHECKED_FILES -> true
   | GEN_PREFETCH_DIR _ -> false
+  | GEN_REMOTE_DECLS -> false
   | STATS -> false
   | DISCONNECT -> false
   | STATUS_SINGLE _ -> false

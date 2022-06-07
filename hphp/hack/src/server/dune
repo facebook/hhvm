@@ -443,6 +443,7 @@
   serverFileSync
   serverFormat
   serverGenPrefetchDir
+  serverGenRemoteDecls
   serverIdle
   serverInferTypeBatch
   serverInvalidateUnits

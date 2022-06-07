@@ -457,26 +457,17 @@ pub fn emit_type_constraint_for_native_function<'arena>(
             Just(String::from("HH\\void")),
             TypeConstraintFlags::ExtendedHint,
         ),
-        (Just(t), _) => {
-            if t.unsafe_as_str() == "HH\\mixed" || t.unsafe_as_str() == "callable" {
-                (Nothing, TypeConstraintFlags::default())
-            } else {
+        (Just(t), _) => match t.unsafe_as_str() {
+            "HH\\mixed" | "callable" => (Nothing, TypeConstraintFlags::default()),
+            "HH\\void" => {
                 let Hint(_, h) = ret_opt.as_ref().unwrap();
-                let name = Just(
-                    string_utils::strip_type_list(
-                        t.unsafe_as_str()
-                            .trim_start_matches('?')
-                            .trim_start_matches('@')
-                            .trim_start_matches('?'),
-                    )
-                    .to_string(),
-                );
                 (
-                    name,
+                    Just("HH\\void".to_string()),
                     get_flags(tparams, TypeConstraintFlags::ExtendedHint, h),
                 )
             }
-        }
+            _ => return ti,
+        },
     };
     let tc = Constraint::make(name.map(|n| Str::new_str(alloc, &n)), flags);
     HhasTypeInfo::make(ti.user_type, tc)

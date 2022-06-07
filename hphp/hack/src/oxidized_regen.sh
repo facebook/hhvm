@@ -126,7 +126,6 @@ summary "Write oxidized_by_ref/gen/"
   hphp/hack/src/naming/naming_types.ml                                        \
   hphp/hack/src/naming/nast.ml                                                \
   hphp/hack/src/options/globalOptions.ml                                      \
-  hphp/hack/src/options/parserOptions.ml                                      \
   hphp/hack/src/options/typecheckerOptions.ml                                 \
   hphp/hack/src/parser/scoured_comments.ml                                    \
   hphp/hack/src/typing/tast.ml                                                \

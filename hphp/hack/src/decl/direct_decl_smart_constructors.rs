@@ -13,13 +13,13 @@ use hh_autoimport_rust as hh_autoimport;
 use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
 use naming_special_names_rust as naming_special_names;
+use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized_by_ref::{
     aast,
     ast_defs::{
         Abstraction, Bop, ClassishKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance,
         XhpEnumValue,
     },
-    decl_parser_options::DeclParserOptions,
     direct_decl_parser::Decls,
     file_info::Mode,
     method_flags::MethodFlags,
@@ -56,7 +56,7 @@ type SK = SyntaxKind;
 type SSet<'a> = arena_collections::SortedSet<'a, &'a str>;
 
 #[derive(Clone)]
-pub struct DirectDeclSmartConstructors<'a, 't, S: SourceTextAllocator<'t, 'a>> {
+pub struct DirectDeclSmartConstructors<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
     pub token_factory: SimpleTokenFactoryImpl<CompactToken>,
 
     pub source_text: IndexedSourceText<'t>,
@@ -68,7 +68,7 @@ pub struct DirectDeclSmartConstructors<'a, 't, S: SourceTextAllocator<'t, 'a>> {
     // encounters while it's "Some"
     const_refs: Option<HashSet<typing_defs::ClassConstRef<'a>>>,
 
-    opts: DeclParserOptions<'a>,
+    opts: &'o DeclParserOptions,
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
@@ -80,9 +80,9 @@ pub struct DirectDeclSmartConstructors<'a, 't, S: SourceTextAllocator<'t, 'a>> {
     module: Option<Id<'a>>,
 }
 
-impl<'a, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 't, S> {
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 'o, 't, S> {
     pub fn new(
-        opts: &DeclParserOptions<'_>,
+        opts: &'o DeclParserOptions,
         src: &SourceText<'t>,
         file_mode: Mode,
         arena: &'a Bump,
@@ -95,7 +95,6 @@ impl<'a, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 't,
         let prefix = path.prefix();
         let path = bump::String::from_str_in(path.path_str(), arena).into_bump_str();
         let filename = RelativePath::make(prefix, path);
-        let opts = opts.clone_in(arena);
         Self {
             token_factory: SimpleTokenFactoryImpl::new(),
 
@@ -107,7 +106,7 @@ impl<'a, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 't,
             file_attributes: List::empty(),
             const_refs: None,
             namespace_builder: Rc::new(NamespaceBuilder::new_in(
-                opts.auto_namespace_map,
+                &opts.auto_namespace_map,
                 opts.disable_xhp_element_mangling,
                 elaborate_xhp_namespaces_for_facts,
                 arena,
@@ -404,11 +403,18 @@ struct NamespaceBuilder<'a> {
 
 impl<'a> NamespaceBuilder<'a> {
     fn new_in(
-        auto_ns_map: &'a [(&'a str, &'a str)],
+        auto_ns_map: &[(String, String)],
         disable_xhp_element_mangling: bool,
         elaborate_xhp_namespaces_for_facts: bool,
         arena: &'a Bump,
     ) -> Self {
+        // Copy auto_namespace_map entries into the arena so decls can use them.
+        let auto_ns_map = arena.alloc_slice_fill_iter(
+            auto_ns_map
+                .iter()
+                .map(|(n, v)| (arena.alloc_str(n) as &str, arena.alloc_str(v) as &str)),
+        );
+
         let mut ns_uses = SMap::empty();
         for &alias in hh_autoimport::NAMESPACES {
             ns_uses = ns_uses.add(arena, alias, concat(arena, "HH\\", alias));
@@ -422,7 +428,7 @@ impl<'a> NamespaceBuilder<'a> {
             class_uses = class_uses.add(arena, alias, concat(arena, "HH\\", alias));
         }
 
-        NamespaceBuilder {
+        Self {
             arena,
             stack: vec![NamespaceEnv {
                 ns_uses,
@@ -1011,7 +1017,7 @@ struct Attributes<'a> {
     safe_global_variable: bool,
 }
 
-impl<'a, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 't, S> {
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 'o, 't, S> {
     fn add_class(&mut self, name: &'a str, decl: &'a shallow_decl_defs::ShallowClass<'a>) {
         self.decls.add(name, Decl::Class(decl), self.arena);
     }
@@ -1332,15 +1338,15 @@ impl<'a, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 't,
                         _ => None,
                     }
                 }
-                fn create_vars_for_reinfer_types<'a, 't, S: SourceTextAllocator<'t, 'a>>(
-                    this: &DirectDeclSmartConstructors<'a, 't, S>,
+                fn create_vars_for_reinfer_types<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
+                    this: &DirectDeclSmartConstructors<'a, 'o, 't, S>,
                     ty: &'a Ty<'a>,
                     tvar: &'a Ty<'a>,
                 ) -> &'a Ty<'a> {
                     let mk = |r, ty_| this.alloc(Ty(r, ty_));
                     let must_reinfer_type = |ty| match reinfer_type_to_string_opt(this.arena, ty) {
                         None => false,
-                        Some(ty_str) => this.opts.gi_reinfer_types.contains(&ty_str),
+                        Some(ty_str) => this.opts.gi_reinfer_types.iter().any(|t| t == ty_str),
                     };
                     match *ty {
                         Ty(r, Ty_::Tapply(&(id, [ty1]))) if id.1 == "\\HH\\Awaitable" => {
@@ -2452,8 +2458,8 @@ impl<'a, 'b> DoubleEndedIterator for NodeIterHelper<'a, 'b> {
     }
 }
 
-impl<'a, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
-    for DirectDeclSmartConstructors<'a, 't, S>
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
+    for DirectDeclSmartConstructors<'a, 'o, 't, S>
 {
     // type Output = Node<'a> in direct_decl_smart_constructors_generated.rs
 

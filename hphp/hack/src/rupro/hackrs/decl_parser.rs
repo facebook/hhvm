@@ -8,11 +8,10 @@ use arena_collections::list::List;
 use file_provider::FileProvider;
 use names::FileSummary;
 use obr::{
-    decl_parser_options::DeclParserOptions,
     direct_decl_parser::Decls,
-    parser_options::ParserOptions,
     shallow_decl_defs::{Decl, ShallowClass},
 };
+use oxidized::{decl_parser_options::DeclParserOptions, parser_options::ParserOptions};
 use oxidized_by_ref as obr;
 use pos::{RelativePath, TypeName};
 use std::marker::PhantomData;
@@ -20,13 +19,10 @@ use std::sync::Arc;
 use ty::decl::shallow;
 use ty::reason::Reason;
 
-mod options;
-use options::Options;
-
 #[derive(Debug, Clone)]
 pub struct DeclParser<R: Reason> {
     file_provider: Arc<dyn FileProvider>,
-    opts: Options,
+    opts: ParserOptions,
     // We could make our parse methods generic over `R` instead, but it's
     // usually more convenient for callers (especially tests) to pin the decl
     // parser to a single Reason type.
@@ -42,10 +38,10 @@ impl<R: Reason> DeclParser<R> {
         }
     }
 
-    pub fn with_options(file_provider: Arc<dyn FileProvider>, opts: &ParserOptions<'_>) -> Self {
+    pub fn with_options(file_provider: Arc<dyn FileProvider>, opts: ParserOptions) -> Self {
         Self {
             file_provider,
-            opts: Options::from(opts),
+            opts,
             _phantom: PhantomData,
         }
     }
@@ -74,13 +70,12 @@ impl<R: Reason> DeclParser<R> {
         text: &'a [u8],
         arena: &'a bumpalo::Bump,
     ) -> oxidized_by_ref::direct_decl_parser::ParsedFile<'a> {
-        let parser_options = self.opts.get();
-        let opts = &DeclParserOptions::from(parser_options);
-        let mut parsed_file = direct_decl_parser::parse_decls(opts, path.into(), text, arena);
+        let opts = DeclParserOptions::from_parser_options(&self.opts);
+        let mut parsed_file = direct_decl_parser::parse_decls(&opts, path.into(), text, arena);
         // TODO: The direct decl parser should return decls in the same
         // order as they are declared in the file. At the moment it reverses
         // them. Reverse them again to match the syntactic order.
-        let deregister_std_lib = path.is_hhi() && parser_options.po_deregister_php_stdlib;
+        let deregister_std_lib = path.is_hhi() && self.opts.po_deregister_php_stdlib;
         if deregister_std_lib {
             parsed_file.decls = Decls(List::rev_from_iter_in(
                 (parsed_file.decls.iter()).filter_map(|d| remove_php_stdlib_decls(arena, d)),

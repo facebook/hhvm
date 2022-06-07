@@ -158,6 +158,7 @@ dependencies = [
  "aast_parser",
  "bumpalo",
  "cst_and_decl_parser",
+ "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
  "rust_aast_parser_types",
@@ -625,6 +626,7 @@ dependencies = [
  "bumpalo",
  "direct_decl_parser",
  "direct_decl_smart_constructors",
+ "oxidized",
  "oxidized_by_ref",
  "pair_smart_constructors",
  "parser",
@@ -857,6 +859,7 @@ dependencies = [
  "hh_autoimport_rust",
  "namespaces_rust",
  "naming_special_names_rust",
+ "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
  "smart_constructors",
@@ -2192,7 +2195,6 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_derive",
  "oxidized",
- "oxidized_by_ref",
  "serde",
 ]
 
@@ -2598,6 +2600,7 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_caml_builtins",
  "ocamlrep_ocamlpool",
+ "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
 ]

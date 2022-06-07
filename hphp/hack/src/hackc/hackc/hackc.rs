@@ -12,8 +12,8 @@ use ::compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
 use anyhow::Result;
 use clap::Parser;
 use hhvm_options::HhvmOptions;
+use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::relative_path::{self, RelativePath};
-use oxidized_by_ref::decl_parser_options::DeclParserOptions;
 use std::{
     fs,
     io::{BufRead, BufReader},
@@ -157,21 +157,12 @@ impl Opts {
         flags
     }
 
-    pub fn decl_opts<'a>(&self, arena: &'a bumpalo::Bump) -> DeclParserOptions<'a> {
+    pub fn decl_opts(&self) -> DeclParserOptions {
         // TODO: share this logic with hackc_create_decl_parse_options()
         let config_opts = options::Options::from_configs(&[Self::AUTO_NAMESPACE_MAP]).unwrap();
         let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
-            Some(m) => bumpalo::collections::Vec::from_iter_in(
-                m.iter().map(|(k, v)| {
-                    (
-                        arena.alloc_str(k.as_str()) as &str,
-                        arena.alloc_str(v.as_str()) as &str,
-                    )
-                }),
-                arena,
-            )
-            .into_bump_slice(),
-            None => &[],
+            Some(m) => m.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
+            None => Vec::new(),
         };
         DeclParserOptions {
             auto_namespace_map,
@@ -314,8 +305,7 @@ mod tests {
     /// If the alias map length changes, keep this test in sync.
     #[test]
     fn test_auto_namespace_map() {
-        let arena = bumpalo::Bump::new();
-        let dp_opts = Opts::default().decl_opts(&arena);
+        let dp_opts = Opts::default().decl_opts();
         assert_eq!(dp_opts.auto_namespace_map.len(), 15);
     }
 }

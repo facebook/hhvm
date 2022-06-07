@@ -48,16 +48,6 @@ fn extract_facts_as_json_ffi(
     text: &[u8],
     mangle_xhp: bool,
 ) -> Option<String> {
-    let bump = bumpalo::Bump::new();
-    let alloc: &'static bumpalo::Bump =
-        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
-    let auto_namespace_map =
-        alloc.alloc_slice_fill_iter(auto_namespace_map.iter().map(|(k, v)| {
-            (
-                alloc.alloc_str(k.as_str()) as &str,
-                alloc.alloc_str(v.as_str()) as &str,
-            )
-        }));
     let opts = DeclParserOptions {
         auto_namespace_map,
         hhvm_compat_mode,
@@ -67,8 +57,10 @@ fn extract_facts_as_json_ffi(
         disable_xhp_element_mangling,
         ..Default::default()
     };
+
+    let arena = bumpalo::Bump::new();
     let decls =
-        direct_decl_parser::parse_decls_without_reference_text(&opts, filename, text, alloc);
+        direct_decl_parser::parse_decls_without_reference_text(&opts, filename, text, &arena);
 
     let pretty = false;
     if decls.has_first_pass_parse_errors {

@@ -26,7 +26,6 @@ naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
 naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
 once_cell = "1.8"
-ouroboros = "0.8"
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 parser_core_types = { path = "../../../../parser/cargo/core_types" }

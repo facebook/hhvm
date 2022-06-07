@@ -81,7 +81,7 @@ fn parse_file(parser: ParserKind, filepath: PathBuf) -> anyhow::Result<()> {
         }
         ParserKind::DirectDecl => {
             let arena = bumpalo::Bump::new();
-            let _ = direct_decl_parser::parse_decls(Default::default(), path, content, &arena);
+            let _ = direct_decl_parser::parse_decls(&Default::default(), path, content, &arena);
         }
         ParserKind::Aast => {
             let indexed_source_text = IndexedSourceText::new(source_text);

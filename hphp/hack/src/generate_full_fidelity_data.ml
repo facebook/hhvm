@@ -1877,7 +1877,7 @@ use smart_constructors::SmartConstructors;
 
 use crate::{DirectDeclSmartConstructors, Node, SourceTextAllocator};
 
-impl<'a, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDeclSmartConstructors<'a, 't, S> {
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDeclSmartConstructors<'a, 'o, 't, S> {
     type State = Self;
     type Factory = SimpleTokenFactoryImpl<CompactToken>;
     type Output = Node<'a>;

@@ -18,8 +18,8 @@ use parser_core_types::{
     parser_env::ParserEnv, source_text::SourceText, syntax_error::SyntaxError,
 };
 
+pub use oxidized::decl_parser_options::DeclParserOptions;
 pub use oxidized_by_ref::{
-    decl_parser_options::DeclParserOptions,
     direct_decl_parser::{Decls, ParsedFile},
     typing_defs::UserAttribute,
 };
@@ -29,7 +29,7 @@ pub use oxidized_by_ref::{
 ///   identifiers into the arena (when possible).
 /// - Excludes user attributes which are irrelevant to typechecking.
 pub fn parse_decls<'a>(
-    opts: &DeclParserOptions<'_>,
+    opts: &DeclParserOptions,
     filename: RelativePath,
     text: &'a [u8],
     arena: &'a Bump,
@@ -60,7 +60,7 @@ pub fn parse_decls<'a>(
 ///   keep the source text in memory when caching decls.
 /// - Preserves user attributes in decls necessary for producing facts.
 pub fn parse_decls_without_reference_text<'a, 'text>(
-    opts: &DeclParserOptions<'_>,
+    opts: &DeclParserOptions,
     filename: RelativePath,
     text: &'text [u8],
     arena: &'a Bump,
@@ -99,9 +99,9 @@ fn collect_file_attributes<'a>(
     attrs.into_bump_slice()
 }
 
-fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>>(
-    opts: &DeclParserOptions<'_>,
-    source: &SourceText<'text>,
+fn parse_script_with_text_allocator<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
+    opts: &'o DeclParserOptions,
+    source: &SourceText<'t>,
     arena: &'a Bump,
     source_text_allocator: S,
     retain_or_omit_user_attributes_for_facts: bool,
@@ -109,7 +109,7 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
 ) -> (
     Node<'a>,
     Vec<SyntaxError>,
-    DirectDeclSmartConstructors<'a, 'text, S>,
+    DirectDeclSmartConstructors<'a, 'o, 't, S>,
     Option<file_info::Mode>,
 ) {
     let env = ParserEnv::from(opts);

@@ -7,13 +7,12 @@ use hackrs_provider_backend::{FileType, HhServerProviderBackend};
 use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
 use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::{ocaml_ffi, ocaml_ffi_with_arena, Bump};
+use oxidized::parser_options::ParserOptions;
 use oxidized::{file_info, naming_types};
-use oxidized_by_ref::{
-    decl_defs, direct_decl_parser, parser_options::ParserOptions, shallow_decl_defs, typing_defs,
-};
+use oxidized_by_ref::{decl_defs, direct_decl_parser, shallow_decl_defs, typing_defs};
 use pos::{RelativePath, RelativePathCtx, ToOxidized};
 use std::collections::BTreeSet;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 struct BackendWrapper(HhServerProviderBackend);
 
@@ -30,18 +29,17 @@ impl ocamlrep_custom::CamlSerialize for BackendWrapper {
 
 type Backend = Custom<BackendWrapper>;
 
-ocaml_ffi_with_arena! {
-    fn hh_rust_provider_backend_make<'a>(
-        arena: &'a Bump,
-        root: &'a Path,
-        hhi_root: &'a Path,
-        tmp: &'a Path,
-        opts: &'a ParserOptions<'a>,
+ocaml_ffi! {
+    fn hh_rust_provider_backend_make(
+        root: PathBuf,
+        hhi_root: PathBuf,
+        tmp: PathBuf,
+        opts: ParserOptions,
     ) -> Backend {
         let path_ctx = RelativePathCtx {
-            root: root.into(),
-            hhi: hhi_root.into(),
-            tmp: tmp.into(),
+            root,
+            hhi: hhi_root,
+            tmp,
             ..Default::default()
         };
         let backend = HhServerProviderBackend::new(path_ctx, opts).unwrap();

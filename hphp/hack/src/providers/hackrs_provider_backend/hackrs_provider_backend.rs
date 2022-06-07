@@ -18,7 +18,7 @@ use hackrs::{
 };
 use naming_table::NamingTable;
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use oxidized_by_ref::parser_options::ParserOptions;
+use oxidized::parser_options::ParserOptions;
 use pos::{RelativePath, RelativePathCtx, TypeName};
 use std::sync::Arc;
 use ty::{
@@ -41,7 +41,7 @@ pub struct HhServerProviderBackend {
 }
 
 impl HhServerProviderBackend {
-    pub fn new(path_ctx: RelativePathCtx, popt: &ParserOptions<'_>) -> Result<Self> {
+    pub fn new(path_ctx: RelativePathCtx, popt: ParserOptions) -> Result<Self> {
         let path_ctx = Arc::new(path_ctx);
         let file_store = Arc::new(ChangesStore::new(
             Arc::new(NonEvictingStore::new()), // TODO: make this sharedmem

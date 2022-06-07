@@ -180,9 +180,9 @@ pub(crate) fn test_compile_with_decls(hackc_opts: &mut crate::Opts) -> Result<()
         let source_text = fs::read(&path)?;
 
         // Parse decls
-        let arena = bumpalo::Bump::new();
-        let decl_opts = hackc_opts.decl_opts(&arena);
+        let decl_opts = hackc_opts.decl_opts();
         let filename = RelativePath::make(Prefix::Root, path.clone());
+        let arena = bumpalo::Bump::new();
         let parsed_file = direct_decl_parser::parse_decls_without_reference_text(
             &decl_opts,
             filename,

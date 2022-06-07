@@ -29,12 +29,12 @@ pub(crate) fn extract_facts(hackc_opts: &mut crate::Opts, mut opts: Opts) -> Res
     let filenames = opts.files.gather_input_files()?;
     let mut file_to_facts = serde_json::Map::with_capacity(filenames.len());
     for path in filenames {
-        let arena = bumpalo::Bump::new();
-        let dp_opts = hackc_opts.decl_opts(&arena);
+        let dp_opts = hackc_opts.decl_opts();
 
         // Parse decls
         let text = std::fs::read(&path)?;
         let filename = RelativePath::make(Prefix::Root, path.clone());
+        let arena = bumpalo::Bump::new();
         let parsed_file = direct_decl_parser::parse_decls_without_reference_text(
             &dp_opts, filename, &text, &arena,
         );

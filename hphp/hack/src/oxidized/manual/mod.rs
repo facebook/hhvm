@@ -38,3 +38,5 @@ pub mod typing_defs_core_impl;
 pub mod typing_defs_flags;
 pub mod typing_logic;
 pub mod typing_set;
+
+mod decl_parser_options_impl;

@@ -1509,7 +1509,6 @@ let check_typeconst_override
     in
     (match (parent_tconst.ttc_kind, tconst.ttc_kind) with
     | (TCConcrete _, TCConcrete _)
-    | (TCAbstract { atc_default = Some _; _ }, TCConcrete _)
     | ( TCAbstract { atc_default = Some _; _ },
         TCAbstract { atc_default = Some _; _ } ) ->
       if

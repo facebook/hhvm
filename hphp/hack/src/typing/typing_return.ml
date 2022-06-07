@@ -133,7 +133,9 @@ let make_return_type
     in
     let localize ~wrap env dty =
       let et_enforced = Typing_enforceability.get_enforcement env dty in
-
+      (match et_enforced with
+      | Unenforced -> Typing_log.log_pessimise_return env hint_pos
+      | Enforced -> ());
       let ((env, ty_err_opt), et_type) =
         Typing_phase.localize ~ety_env env dty
       in

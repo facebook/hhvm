@@ -109,6 +109,8 @@ val increment_feature_count : Typing_env_types.env -> string -> unit
 
 val log_pessimise_prop : Typing_env_types.env -> Pos_or_decl.t -> string -> unit
 
+val log_pessimise_return : Typing_env_types.env -> Pos.t -> unit
+
 val log_pessimise_param : Typing_env_types.env -> Pos.t -> string -> unit
 
 module GlobalInference : sig

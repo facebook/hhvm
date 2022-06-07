@@ -778,6 +778,9 @@ let log_pessimise_prop env pos prop_name =
 let log_pessimise_param env pos param_name =
   log_pessimise_ env "param" (Pos_or_decl.of_raw_pos pos) param_name
 
+let log_pessimise_return env pos =
+  log_pessimise_ env "ret" (Pos_or_decl.of_raw_pos pos) ""
+
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging env.genv.tcopt then
     Measure.sample s 1.0

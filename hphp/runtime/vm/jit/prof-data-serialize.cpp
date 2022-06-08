@@ -1806,6 +1806,7 @@ std::string serializeProfData(const std::string& filename) {
     if (RO::EnableIntrinsicsExtension) {
       write_container(ser, prioritySerializeClasses(), write_class);
     }
+    write_container(ser, Class::serializeLazyAPCClasses(), write_class);
 
     serializeSharedProfiles(ser);
 
@@ -1938,6 +1939,11 @@ std::string deserializeProfData(const std::string& filename,
 
     if (RO::EnableIntrinsicsExtension) {
       read_container(ser, [&] { read_class(ser); });
+    }
+    {
+      std::vector<const Class*> list;
+      read_container(ser, [&] { list.push_back(read_class(ser)); });
+      Class::deserializeLazyAPCClasses(list);
     }
 
     deserializeSharedProfiles(ser);

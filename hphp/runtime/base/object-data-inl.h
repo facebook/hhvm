@@ -291,8 +291,8 @@ inline void ObjectData::verifyPropTypeHint(Slot slot) {
 inline bool ObjectData::assertPropTypeHints() const {
   auto const end = m_cls->declProperties().size();
   for (size_t slot = 0; slot < end; ++slot) {
-    auto index = m_cls->propSlotToIndex(slot);
-    if (!assertTypeHint(props()->at(index), slot)) return false;
+    auto const prop = props()->at(m_cls->propSlotToIndex(slot));
+    if (!isLazyProp(prop) && !assertTypeHint(prop, slot)) return false;
   }
   return true;
 }

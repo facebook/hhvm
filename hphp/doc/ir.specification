@@ -1159,6 +1159,12 @@ To string conversions:
   method. Returns nullptr if it is an instance method defined in S2's class
   hierarchy, indicating that this legacy call should be handled by interpreter.
 
+| DeserializeLazyProp<index>, ND, S(Obj), NF
+
+  Given the `index` of a property in S0 that may be a handle to some lazily-
+  deserialized APC value, check if the property is lazy and deserialize it in
+  place if so. After this op, the prop will be a valid TypedValue.
+
 | LdPropAddr<T,index>, D(LvalToProp), S(Obj), NF
 
   Load the address of the object property at physical index `index`.

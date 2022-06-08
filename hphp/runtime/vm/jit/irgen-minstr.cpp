@@ -1484,6 +1484,13 @@ SSATmp* ldPropAddr(IRGS& env, SSATmp* obj, Block* taken,
 
   auto const data = IndexData { cls->propSlotToIndex(slot) };
 
+  auto const TSerializedAsAPCTypedValue =
+      TUninit | TInitNull | TBool | TInt | TDbl | TStr | TLazyCls;
+  auto const maybe_lazy = !(type <= TSerializedAsAPCTypedValue) &&
+                          cls->mayUseLazyAPCDeserialization();
+
+  if (maybe_lazy) gen(env, DeserializeLazyProp, data, obj);
+
   return taken
     ? gen(env, LdInitPropAddr, taken, data, type & TInitCell, obj)
     : gen(env, LdPropAddr, data, type, obj);

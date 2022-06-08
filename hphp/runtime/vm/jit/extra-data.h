@@ -2960,6 +2960,7 @@ X(DbgTrashFrame,                IRSPRelOffsetData);
 X(DbgTraceCall,                 IRSPRelOffsetData);
 X(LdPropAddr,                   IndexData);
 X(LdInitPropAddr,               IndexData);
+X(DeserializeLazyProp,          IndexData);
 X(NewCol,                       NewColData);
 X(NewColFromArray,              NewColData);
 X(CheckSurpriseFlagsEnter,      FuncEntryData);

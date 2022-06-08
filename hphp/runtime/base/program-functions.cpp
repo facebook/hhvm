@@ -2980,6 +2980,9 @@ void hphp_memory_cleanup() {
   // so we can't destroy it yet
   mm.sweep();
 
+  // Freeing hazard pointers can enqueue APCHandles into g_context.
+  APCTypedValue::FreeHazardPointers();
+
   // We should never have any registered RequestEventHandlers. If we do
   // something after onRequestShutdown registered a RequestEventHandler.
   // Its now too late to run the requestShutdown functions, but if we carry
@@ -2996,8 +2999,6 @@ void hphp_memory_cleanup() {
   weakref_cleanup();
   mm.resetAllocator();
   mm.resetCouldOOM();
-
-  APCTypedValue::FreeHazardPointers();
 }
 
 void hphp_session_exit(Transport* transport) {

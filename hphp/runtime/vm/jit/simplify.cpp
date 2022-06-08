@@ -1800,6 +1800,11 @@ SSATmp* simplifyNInstanceOfBitmask(State& env, const IRInstruction* inst) {
   return cns(env, true);
 }
 
+SSATmp* simplifyDeserializeLazyProp(State& env, const IRInstruction* inst) {
+  auto const cls = inst->src(0)->type().clsSpec().cls();
+  return cls->mayUseLazyAPCDeserialization() ? nullptr : gen(env, Nop);
+}
+
 SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
@@ -3854,6 +3859,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(ExtendsClass)
       X(InstanceOfBitmask)
       X(NInstanceOfBitmask)
+      X(DeserializeLazyProp)
       X(Floor)
       X(IncRef)
       X(InitObjProps)

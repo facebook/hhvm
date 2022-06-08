@@ -585,6 +585,7 @@ bool opcodeMayRaise(Opcode opc) {
   case DefFuncPrologueNumArgs:
   case DefLabel:
   case DefRegSP:
+  case DeserializeLazyProp:
   case DictFirst:
   case DictFirstKey:
   case DictGetK:

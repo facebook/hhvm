@@ -1157,6 +1157,24 @@ void ObjectData::checkReadonly(const PropLookup& lookup, ReadonlyOp op,
   }
 }
 
+void ObjectData::deserializeAllLazyProps() {
+  if (!m_cls->currentlyUsingLazyAPCDeserialization()) return;
+  props()->foreach(m_cls->numDeclProperties(), [&](tv_lval lval) {
+    if (isLazyProp(lval)) deserializeLazyProp(lval);
+  });
+}
+
+void ObjectData::deserializeLazyProp(tv_lval prop) {
+  assertx(isLazyProp(prop));
+  auto const handle = reinterpret_cast<APCHandle*>(prop.val().num);
+  assertx(handle->checkInvariants());
+  tvCopy(handle->toLocalHelper(false).detach(), prop);
+}
+
+bool ObjectData::isLazyProp(tv_rval prop) {
+  return prop.type() == kInvalidDataType;
+}
+
 template <bool forWrite, bool forRead, bool ignoreLateInit>
 ALWAYS_INLINE
 ObjectData::PropLookup ObjectData::getPropImpl(
@@ -1167,10 +1185,11 @@ ObjectData::PropLookup ObjectData::getPropImpl(
   auto const propSlot = lookup.slot;
 
   if (LIKELY(propSlot != kInvalidSlot)) {
-    // We found a visible property, but it might not be accessible.  No need to
-    // check if there is a dynamic property with this name.
+    // We found a visible property in one of the object's slots. Immediately
+    // deserialize it if it's a lazy prop. Then, check if it's accessible.
     auto const propIndex = m_cls->propSlotToIndex(propSlot);
     auto prop = props()->at(propIndex);
+    if (isLazyProp(prop)) deserializeLazyProp(prop);
     assertx(assertTypeHint(prop, propSlot));
 
     auto const& declProp = m_cls->declProperties()[propSlot];

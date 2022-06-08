@@ -131,7 +131,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(ExpireOnSets, ini, config, "Server.APC.ExpireOnSets");
   Config::Bind(PurgeInterval, ini, config, "Server.APC.PurgeIntervalSeconds",
                PurgeInterval);
-  Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject");
+  Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject", true);
   Config::Bind(TTLLimit, ini, config, "Server.APC.TTLLimit", -1);
   Config::Bind(DeferredExpiration, ini, config,
                "Server.APC.DeferredExpiration", DeferredExpiration);

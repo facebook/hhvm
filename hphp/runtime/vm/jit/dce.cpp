@@ -732,6 +732,7 @@ bool canDCE(const IRInstruction& inst) {
   case StructDictAddNextSlot:
   case StructDictTypeBoundCheck:
   case LdCoeffectFunParamNaive:
+  case DeserializeLazyProp:
     return false;
 
   case IsTypeStruct:

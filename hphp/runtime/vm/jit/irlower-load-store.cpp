@@ -412,6 +412,27 @@ IMPL_OPCODE_CALL(LdGblAddrDef)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgDeserializeLazyProp(IRLS& env, const IRInstruction* inst) {
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const val = Immed(static_cast<int8_t>(kInvalidDataType));
+  auto const index = inst->extra<DeserializeLazyProp>()->index;
+  auto const offset = ObjectProps::offsetOf(index).shift(sizeof(ObjectData));
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << cmpbim{val, src[offset.typeOffset()], sf};
+
+  ifThen(v, CC_Z, sf, [&](Vout& v) {
+    auto const type = v.makeReg();
+    auto const data = v.makeReg();
+    v << lea{src[offset.typeOffset()], type};
+    v << lea{src[offset.dataOffset()], data};
+    auto const args = argGroup(env, inst).reg(type).reg(data);
+    cgCallHelper(v, env, CallSpec::direct(ObjectData::deserializeLazyProp),
+                 kVoidDest, SyncOptions::None, args);
+  });
+}
+
 void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const dstLoc = irlower::dstLoc(env, inst, 0);

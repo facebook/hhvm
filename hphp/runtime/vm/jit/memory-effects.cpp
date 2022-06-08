@@ -1241,6 +1241,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VectorSet:
     return may_load_store(AHeapAny, AEmpty /* Note */);
 
+  case DeserializeLazyProp:
+    return may_load_store(AHeapAny, AHeapAny);
+
   case LdInitPropAddr:
     return may_load_store(
       AProp {

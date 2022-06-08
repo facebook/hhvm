@@ -57,6 +57,7 @@ APCObject::APCObject(ClassOrName cls, uint32_t propCount)
   , m_may_raise{0}
   , m_no_wakeup{0}
   , m_no_verify_prop_types{0}
+  , m_lazy_deserialization{0}
 {}
 
 APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
@@ -87,6 +88,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
   auto const objProps = objectData->props();
   const ObjectProps* propInit = nullptr;
 
+  auto allTypedValues = true;
   auto mayRaise = !apcObj->m_no_wakeup;
   auto propsDontNeedCheck = RuntimeOption::EvalCheckPropTypeHints > 0;
   for (unsigned slot = 0; slot < numRealProps; ++slot) {
@@ -132,6 +134,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
     size += val.size;
     apcPropVec[index] = val.handle;
     mayRaise |= val.handle->toLocalMayRaise();
+    allTypedValues &= val.handle->isTypedValue();
   }
 
   if (RuntimeOption::EvalCheckPropTypeHints <= 0 || propsDontNeedCheck) {
@@ -148,6 +151,9 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
 
   mayRaise |= !propsDontNeedCheck;
   apcObj->m_may_raise = mayRaise;
+  if (!mayRaise && (allTypedValues || cls->enableLazyAPCDeserialization())) {
+    apcObj->m_lazy_deserialization = 1;
+  }
 
   return {apcObj->getHandle(), size};
 }
@@ -254,6 +260,7 @@ APCHandle::Pair APCObject::MakeAPCObject(APCHandle* obj, const Variant& value, b
 
 Variant APCObject::MakeLocalObject(const APCHandle* handle, bool pure) {
   auto apcObj = APCObject::fromHandle(handle);
+  if (apcObj->m_lazy_deserialization) return apcObj->createObjectLazy(pure);
   return apcObj->m_persistent ? apcObj->createObject(pure)
                               : apcObj->createObjectSlow(pure);
 }
@@ -282,8 +289,7 @@ Object APCObject::createObject(bool pure) const {
   try {
     obj->setHasUninitProps();
     for (; it != range.end(); ++it, ++i) {
-      auto const val = apcProp[i]->toLocal(pure);
-      tvDup(*val.asTypedValue(), tv_lval{it});
+      tvCopy(apcProp[i]->toLocal(pure).detach(), tv_lval{it});
     }
     obj->clearHasUninitProps();
   } catch (...) {
@@ -308,6 +314,53 @@ Object APCObject::createObject(bool pure) const {
   }
 
   auto const providedCoeffects =
+    pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults();
+  if (!m_no_wakeup) obj->invokeWakeup(providedCoeffects);
+  return obj;
+}
+
+Object APCObject::createObjectLazy(bool pure) const {
+  assertx(!m_may_raise);
+  assertx(m_lazy_deserialization);
+  assertx(m_no_verify_prop_types);
+  assertx(m_no_wakeup);
+
+  auto const cls = m_cls.left();
+  assertx(cls != nullptr);
+
+  auto obj = Object::attach(
+    ObjectData::newInstanceNoPropInit(const_cast<Class*>(cls))
+  );
+
+  auto const numProps = cls->numDeclProperties();
+  auto const apcProp = persistentProps();
+  auto const objProp = obj->props();
+
+  objProp->init(numProps);
+  auto const range = objProp->range(0, numProps);
+  auto it = range.begin();
+
+  auto i = 0;
+  for (; it != range.end(); ++it, ++i) {
+    auto const tv = apcProp[i]->toLazyProp();
+    auto const lval = tv_lval{it};
+    lval.type() = tv.m_type;
+    lval.val() = tv.m_data;
+  }
+  assertx(obj->assertPropTypeHints());
+
+  if (UNLIKELY(numProps < m_propCount)) {
+    auto dynProps = apcProp[numProps];
+    assertx(dynProps->type() == KindOfPersistentDict ||
+            dynProps->kind() == APCKind::SharedDict);
+    obj->setDynProps(dynProps->toLocal(pure).asCArrRef());
+  }
+
+  auto const handle = getHandle();
+  APCTypedValue::PushHazardPointer(handle);
+  handle->referenceNonRoot();
+
+   auto const providedCoeffects =
     pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults();
   if (!m_no_wakeup) obj->invokeWakeup(providedCoeffects);
   return obj;

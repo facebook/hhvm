@@ -500,6 +500,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // don't use getPropIgnoreAccessibility in new code
   tv_lval getPropIgnoreAccessibility(const StringData*);
 
+  void deserializeAllLazyProps();
+  static void deserializeLazyProp(tv_lval prop);
+  static bool isLazyProp(tv_rval prop);
+
  private:
   struct PropLookup {
     tv_lval val;

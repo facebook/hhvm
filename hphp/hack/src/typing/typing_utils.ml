@@ -711,8 +711,18 @@ and has_ancestor_including_req_refl env sub_id super_id =
   | None -> false
   | Some cls -> has_ancestor_including_req env cls super_id
 
+let rec is_dynamic_or_intersection env ty =
+  let (env, ty) = Env.expand_type env ty in
+  Typing_defs.is_dynamic ty
+  ||
+  match get_node ty with
+  | Tintersection tyl -> List.exists tyl ~f:(is_dynamic_or_intersection env)
+  | _ -> false
+
 let rec try_strip_dynamic_from_union env r tyl =
-  let (dyns, nondyns) = List.partition_tf tyl ~f:Typing_defs.is_dynamic in
+  let (dyns, nondyns) =
+    List.partition_tf tyl ~f:(is_dynamic_or_intersection env)
+  in
   match (dyns, nondyns) with
   | ([], _) -> None
   | (_, [ty]) -> Some (strip_dynamic env ty)

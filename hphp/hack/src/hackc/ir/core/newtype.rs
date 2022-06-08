@@ -54,7 +54,7 @@ pub type InstrIdIndexSet = indexmap::set::IndexSet<InstrId, newtype::BuildIdHash
 // A LiteralId represents a Literal within a Func.
 newtype_int!(LiteralId, u32, LiteralIdMap, LiteralIdSet);
 
-// A LocId represent a SrcLoc interned within a Func.
+// A LocId represents a SrcLoc interned within a Func.
 newtype_int!(LocId, u32, LocIdMap, LocIdSet);
 
 /// An ValueId can be either an InstrId or a LiteralId.

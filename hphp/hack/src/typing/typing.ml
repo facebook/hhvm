@@ -5322,7 +5322,11 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
       let decl_ty = Decl_hint.hint env.decl_env h in
       (match Typing_enforceability.get_enforcement env decl_ty with
       | Unenforced ->
-        Typing_log.log_pessimise_param env param.param_pos param.param_name
+        Typing_log.log_pessimise_param
+          env
+          ~is_promoted_property:false
+          param.param_pos
+          param.param_name
       | Enforced -> ());
       let ((env, ty_err_opt1), h) =
         Phase.localize_no_subst env ~ignore_errors:false decl_ty

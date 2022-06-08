@@ -773,10 +773,17 @@ let log_pessimise_ env kind pos name =
   lnewline ()
 
 let log_pessimise_prop env pos prop_name =
-  log_pessimise_ env "prop" pos ("$" ^ prop_name)
+  log_pessimise_ env "prop" (Pos_or_decl.of_raw_pos pos) ("$" ^ prop_name)
 
-let log_pessimise_param env pos param_name =
-  log_pessimise_ env "param" (Pos_or_decl.of_raw_pos pos) param_name
+let log_pessimise_param env ~is_promoted_property pos param_name =
+  log_pessimise_
+    env
+    (if is_promoted_property then
+      "prop"
+    else
+      "param")
+    (Pos_or_decl.of_raw_pos pos)
+    param_name
 
 let log_pessimise_return env pos =
   log_pessimise_ env "ret" (Pos_or_decl.of_raw_pos pos) ""

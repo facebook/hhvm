@@ -804,7 +804,10 @@ and obj_get_concrete_class_with_member_info
   let eff () =
     let open Typing_env_types in
     if env.in_support_dynamic_type_method_check then
-      Typing_log.log_pessimise_prop env mem_pos id_str
+      Typing_log.log_pessimise_prop
+        env
+        (Pos_or_decl.unsafe_to_raw_pos mem_pos)
+        id_str
   in
   let (env, coerce_ty_err_opt, rval_mismatch) =
     Option.value_map

@@ -6,7 +6,7 @@ Typing error (Typing[4110])
   But got `int`
 File "splice_err4.php", line 13, characters 25-26:
 Invalid argument (Typing[4110])
-  File "expr_tree.hhi", line 203, characters 5-47:
+  File "expr_tree.hhi", line 195, characters 5-47:
   Expected `Spliceable<ExampleDsl, mixed, [unresolved]>`
   File "splice_err4.php", line 9, characters 10-10:
   But got `int`

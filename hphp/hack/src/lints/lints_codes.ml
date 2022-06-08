@@ -94,4 +94,6 @@ module Codes = struct
   let switch_nonexhaustive = 5640
 
   let bad_xhp_enum_attribute_value = 5641
+
+  let unreachable_method_in_trait = 5642
 end

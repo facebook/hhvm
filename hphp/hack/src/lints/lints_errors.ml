@@ -191,6 +191,20 @@ let class_overrides_all_trait_methods pos class_name trait_name =
        (Utils.strip_ns class_name |> Markdown_lite.md_codify)
        (Utils.strip_ns trait_name |> Markdown_lite.md_codify))
 
+let trait_requires_class_that_overrides_method
+    pos class_name trait_name method_name =
+  Lints.add
+    Codes.unreachable_method_in_trait
+    Lint_warning
+    pos
+    (Printf.sprintf
+       "Method %s in trait %s is overriden in class %s and trait %s has `require class %s`. This method is never used."
+       (Utils.strip_ns method_name |> Markdown_lite.md_codify)
+       (Utils.strip_ns trait_name |> Markdown_lite.md_codify)
+       (Utils.strip_ns class_name |> Markdown_lite.md_codify)
+       (Utils.strip_ns trait_name |> Markdown_lite.md_codify)
+       (Utils.strip_ns class_name |> Markdown_lite.md_codify))
+
 let invalid_null_check p ret ty =
   Lints.add Codes.invalid_null_check Lint_warning p
   @@ Printf.sprintf

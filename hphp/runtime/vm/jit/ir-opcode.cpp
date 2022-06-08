@@ -381,6 +381,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
+  case RaiseModuleBoundaryViolation:
   case RaiseNotice:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:
@@ -492,6 +493,7 @@ bool opcodeMayRaise(Opcode opc) {
   case BespokeIterEnd:
   case BespokeIterGetKey:
   case BespokeIterGetVal:
+  case CallViolatesModuleBoundary:
   case Ceil:
   case CheckArrayCOW:
   case CheckCold:

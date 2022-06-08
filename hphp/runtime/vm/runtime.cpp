@@ -424,7 +424,8 @@ void raiseCoeffectsFunParamCoeffectRulesViolation(const Func* f) {
 void raiseModuleBoundaryViolation(const Class* cls,
                                   const Func* callee,
                                   const StringData* callerModule) {
-  assertx(cls && callee);
+  assertx(callee);
+  assertx(IMPLIES(callee->isMethod(), cls));
   assertx(callee->isInternal());
   // Internal functions must always have a module
   assertx(callee->moduleName());

@@ -1271,6 +1271,13 @@ public:
   static Func* load(const StringData* name);
 
   /*
+   * Same as Func::load but also checks for module boundary violations
+   */
+  static Func* resolve(const NamedEntity* ne, const StringData* name,
+                       const Func* callerFunc);
+  static Func* resolve(const StringData* name, const Func* callerFunc);
+
+  /*
    * Lookup the builtin in this request with name `name', or nullptr if none
    * exists. This does not access RDS so it is safe to use from within the
    * compiler. Note that does not mean imply that the name binding for the

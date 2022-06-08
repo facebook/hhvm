@@ -3544,6 +3544,17 @@ OPTBLD_INLINE JitResumeAddr fcallFuncObj(bool retToJit, PC origpc, PC& pc,
   }
 }
 
+namespace {
+
+void checkModuleBoundaryViolation(const Class* ctx, const Func* callee) {
+  auto const caller = vmfp()->func();
+  if (will_call_raise_module_boundary_violation(callee, caller->moduleName())) {
+    raiseModuleBoundaryViolation(ctx, callee, caller->moduleName());
+  }
+}
+
+} // namespace
+
 /*
  * Supports callables:
  *   array($instance, 'method')
@@ -3571,6 +3582,8 @@ OPTBLD_INLINE JitResumeAddr fcallFuncArr(bool retToJit, PC origpc, PC& pc,
   if (UNLIKELY(func == nullptr)) {
     raise_error("Invalid callable (array)");
   }
+
+  checkModuleBoundaryViolation(cls, func);
 
   Object thisRC(thiz);
   arr.reset();
@@ -3605,6 +3618,8 @@ OPTBLD_INLINE JitResumeAddr fcallFuncStr(bool retToJit, PC origpc, PC& pc,
   if (UNLIKELY(func == nullptr)) {
     raise_call_to_undefined(str.get());
   }
+
+  checkModuleBoundaryViolation(cls, func);
 
   Object thisRC(thiz);
   str.reset();
@@ -3673,7 +3688,7 @@ OPTBLD_INLINE JitResumeAddr fcallFuncRClsMeth(bool retToJit, PC origpc, PC& pc,
 Func* resolveFuncImpl(Id id) {
   auto unit = vmfp()->func()->unit();
   auto const nep = unit->lookupNamedEntityPairId(id);
-  auto func = Func::load(nep.second, nep.first);
+  auto func = Func::resolve(nep.second, nep.first, vmfp()->func());
   if (func == nullptr) raise_resolve_undefined(unit->lookupLitstrId(id));
   return func;
 }
@@ -3686,7 +3701,7 @@ OPTBLD_INLINE void iopResolveFunc(Id id) {
 OPTBLD_INLINE void iopResolveMethCaller(Id id) {
   auto unit = vmfp()->func()->unit();
   auto const nep = unit->lookupNamedEntityPairId(id);
-  auto func = Func::load(nep.second, nep.first);
+  auto func = Func::resolve(nep.second, nep.first, vmfp()->func());
   assertx(func && func->isMethCaller());
   checkMethCaller(func, arGetContextClass(vmfp()));
   vmStack().pushFunc(func);
@@ -3741,7 +3756,7 @@ OPTBLD_INLINE JitResumeAddr iopFCallFunc(bool retToJit, PC origpc, PC& pc,
 OPTBLD_INLINE JitResumeAddr iopFCallFuncD(bool retToJit, PC origpc, PC& pc,
                                           FCallArgs fca, Id id) {
   auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
-  auto const func = Func::load(nep.second, nep.first);
+  auto const func = Func::resolve(nep.second, nep.first, vmfp()->func());
   if (UNLIKELY(func == nullptr)) {
     raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
   }
@@ -3918,7 +3933,7 @@ const Func* resolveClsMethodFunc(Class* cls, const StringData* methName) {
   auto const callCtx = MethodLookupCallContext(ctx, vmfp()->func());
   auto const res = lookupClsMethod(func, cls, methName, nullptr,
                                    callCtx,
-                                   MethodLookupErrorOptions::None);
+                                   MethodLookupErrorOptions::NoErrorOnModule);
   if (res == LookupResult::MethodNotFound) {
     raise_error("Failure to resolve method name \'%s::%s\'",
                 cls->name()->data(), methName->data());
@@ -3926,6 +3941,7 @@ const Func* resolveClsMethodFunc(Class* cls, const StringData* methName) {
   assertx(res == LookupResult::MethodFoundNoThis);
   assertx(func);
   checkClsMethFuncHelper(func);
+  checkModuleBoundaryViolation(cls, func);
   return func;
 }
 

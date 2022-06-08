@@ -1671,6 +1671,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsCachedSafe:
   case LdClsInitData:
   case UnwindCheckSideExit:
+  case CallViolatesModuleBoundary:
   case LdCns:
   case LdFuncVecLen:
   case LdClsMethod:
@@ -1753,6 +1754,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseCoeffectsFunParamTypeViolation:
   case LdCoeffectFunParamNaive:
+  case RaiseModuleBoundaryViolation:
     return may_load_store(AEmpty, AEmpty);
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload

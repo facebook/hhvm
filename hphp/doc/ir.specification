@@ -755,6 +755,11 @@ To string conversions:
 
   Set D to true iff S0 has a reified parent.
 
+| CallViolatesModuleBoundary<caller>, D(Bool), S(Func), NF
+
+  Set D to true iff function call from caller to S0 violates module boundary.
+  Requires that S0 is an internal method.
+
 5. Branches
 
 | JmpZero,                          ND, S(Int,Bool),                     B
@@ -2236,6 +2241,11 @@ To string conversions:
 
   Raises a warning to indicate a violation for the input S0 to coeffect rule
   FunParam uses polymorphic coeffect rules.
+
+| RaiseModuleBoundaryViolation<ctx, caller>, ND, S(Func), NF
+
+  Raises a warning to indicate a module boundary violation resulting from caller
+  attempting to call the the callee in S0 in context `ctx`.
 
 | RaiseStrToClassNotice, ND, S(Str), NF
 

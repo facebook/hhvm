@@ -515,6 +515,10 @@ public:
   // Total number of currently allocated Units
   static size_t liveUnitCount() { return s_liveUnits; }
 
+  static constexpr ptrdiff_t moduleNameOff() {
+    return offsetof(Unit, m_moduleName);
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
 

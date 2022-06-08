@@ -315,6 +315,17 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyCallViolatesModuleBoundary(State& env,
+                                           const IRInstruction* inst) {
+  if (!inst->src(0)->hasConstVal(TFunc)) return nullptr;
+  auto const callee = inst->src(0)->funcVal();
+  auto const callerModule = inst->extra<FuncData>()->func->moduleName();
+  auto const result =
+    will_call_raise_module_boundary_violation(callee, callerModule);
+  return cns(env, result);
+}
+
+
 SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
   auto const src0 = inst->src(0);
   auto const src1 = inst->src(1);
@@ -3892,6 +3903,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(FuncHasAttr)
       X(ClassHasAttr)
       X(LdFuncRequiredCoeffects)
+      X(CallViolatesModuleBoundary)
       X(LookupClsCtxCns)
       X(LdClsCtxCns)
       X(LdObjClass)

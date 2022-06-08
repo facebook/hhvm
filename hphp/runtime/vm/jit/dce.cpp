@@ -294,6 +294,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdStructDictKey:
   case LdStructDictVal:
   case LdImplicitContext:
+  case CallViolatesModuleBoundary:
     assertx(!inst.isControlFlow());
     return true;
 
@@ -531,6 +532,7 @@ bool canDCE(const IRInstruction& inst) {
   case RaiseCoeffectsFunParamTypeViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseStrToClassNotice:
+  case RaiseModuleBoundaryViolation:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:

@@ -1,0 +1,17 @@
+Warning: Calling internal function foo in module a from module b is not allowed in %s/resolve-1.inc on line 6
+in f
+
+Warning: Calling internal function foo in module a from module b is not allowed in %s/resolve-1.php on line 12
+in f
+
+Warning: Calling internal function foo in module a from module b is not allowed in %s/resolve-1.inc on line 8
+in f
+
+Warning: Calling internal method C::foo_static in module a from module b is not allowed in %s/resolve-1.inc on line 9
+in f_static
+
+Warning: Calling internal method C::foo_static in module a from module b is not allowed in %s/resolve-1.php on line 15
+in f_static
+
+Warning: Calling internal method C::foo_static in module a from module b is not allowed in %s/resolve-1.inc on line 11
+in f_static

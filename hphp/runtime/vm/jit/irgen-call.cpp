@@ -224,6 +224,35 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
   }
 }
 
+void emitModuleBoundaryCheckKnown(IRGS& env, const Func* callee) {
+  auto const caller = curFunc(env);
+  if (will_call_raise_module_boundary_violation(callee, caller->moduleName())) {
+      auto const data = OptClassAndFuncData { curClass(env), caller };
+      gen(env, RaiseModuleBoundaryViolation, data, cns(env, callee));
+  }
+}
+
+void emitModuleBoundaryCheck(IRGS& env, SSATmp* callee) {
+  if (!RO::EvalEnforceModules) return;
+  auto const caller = curFunc(env);
+  ifElse(
+    env,
+    [&] (Block* skip) {
+      auto const data = AttrData { AttrInternal };
+      auto const internal = gen(env, FuncHasAttr, data, callee);
+      gen(env, JmpZero, skip, internal);
+      auto violate =
+        gen(env, CallViolatesModuleBoundary, FuncData { caller }, callee);
+      gen(env, JmpZero, skip, violate);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      auto const data = OptClassAndFuncData { curClass(env), caller };
+      gen(env, RaiseModuleBoundaryViolation, data, callee);
+    }
+  );
+}
+
 SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                  SSATmp* objOrClass, bool skipRepack, bool dynamicCall,
                  bool asyncEagerReturn) {
@@ -1221,6 +1250,7 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
   auto const func = gen(env, CheckNonNull, makeExitSlow(env), funcN);
   popDecRef(env, DecRefProfileId::Default);
   updateStackOffset(env);
+  emitModuleBoundaryCheck(env, func);
   prepareAndCallProfiled(env, func, fca, nullptr, true, false);
 }
 
@@ -1241,12 +1271,14 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
     if (lookup.needsUnitLoad) {
       gen(env, LdFuncCached, FuncNameData { funcName, callerCtx });
     }
+    emitModuleBoundaryCheckKnown(env, lookup.func);
     prepareAndCallKnown(env, lookup.func, fca, nullptr, false, false);
     return;
   }
 
   auto const func =
     gen(env, LdFuncCached, FuncNameData { funcName, callerCtx });
+  emitModuleBoundaryCheck(env, func);
   prepareAndCallProfiled(env, func, fca, nullptr, false, false);
 }
 
@@ -1263,15 +1295,18 @@ void emitFCallFunc(IRGS& env, FCallArgs fca) {
 
 void emitResolveFunc(IRGS& env, const StringData* name) {
   auto const lookup = lookupImmutableFunc(curUnit(env), name);
-  auto func = lookup.func;
-  if (!func) {
-    push(env, gen(env, LookupFuncCached, FuncNameData { name, curClass(env) }));
+  if (!lookup.func) {
+    auto const func =
+      gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
+    emitModuleBoundaryCheck(env, func);
+    push(env, func);
     return;
   }
   if (lookup.needsUnitLoad) {
     gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
   }
-  push(env, cns(env, func));
+  emitModuleBoundaryCheckKnown(env, lookup.func);
+  push(env, cns(env, lookup.func));
 }
 
 void emitResolveMethCaller(IRGS& env, const StringData* name) {

@@ -430,6 +430,12 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
     return false;
   }
 
+  // Internal functions may raise module boundary violations
+  if ((func->attrs & AttrInternal) &&
+      env.ctx.func->unit->moduleName != func->unit->moduleName) {
+    return false;
+  }
+
   // We only fold functions when numRets == 1
   if (func->hasInOutArgs) return false;
 

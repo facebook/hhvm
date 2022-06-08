@@ -2875,6 +2875,8 @@ X(RaiseTooManyArg,              FuncData);
 X(RaiseCoeffectsCallViolation,  FuncData);
 X(RaiseCoeffectsFunParamTypeViolation,
                                 ParamData);
+X(RaiseModuleBoundaryViolation, OptClassAndFuncData);
+X(CallViolatesModuleBoundary,   FuncData);
 X(CheckInOutMismatch,           BoolVecArgsData);
 X(ThrowInOutMismatch,           ParamData);
 X(CheckReadonlyMismatch,        BoolVecArgsData);

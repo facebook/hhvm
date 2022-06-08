@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -878,6 +879,28 @@ Func* Func::load(const StringData* name) {
   return AutoloadHandler::s_instance->autoloadFunc(
     const_cast<StringData*>(name)
   ) ? ne->getCachedFunc() : nullptr;
+}
+
+namespace {
+void handleModuleBoundaryViolation(const Func* callee, const Func* caller) {
+  if (!RO::EvalEnforceModules || !callee || !caller) return;
+  auto const moduleName = caller->unit()->moduleName();
+  if (!will_call_raise_module_boundary_violation(callee, moduleName)) return;
+  raiseModuleBoundaryViolation(nullptr, callee, moduleName);
+}
+} // namespace
+
+Func* Func::resolve(const NamedEntity* ne, const StringData* name,
+                    const Func* callerFunc) {
+  Func* func = load(ne, name);
+  handleModuleBoundaryViolation(func, callerFunc);
+  return func;
+}
+
+Func* Func::resolve(const StringData* name, const Func* callerFunc) {
+  Func* func = load(name);
+  handleModuleBoundaryViolation(func, callerFunc);
+  return func;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

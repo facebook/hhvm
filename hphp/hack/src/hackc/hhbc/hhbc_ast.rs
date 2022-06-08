@@ -14,7 +14,11 @@ pub type ClassNum = u32;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 #[repr(C)]
-pub struct Dummy;
+pub struct Dummy(bool);
+
+impl Dummy {
+    pub const DEFAULT: Dummy = Dummy(false);
+}
 
 /// HHBC encodes bytecode offsets as i32 (HPHP::Offset) so u32
 /// is plenty of range for label ids.

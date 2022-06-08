@@ -330,7 +330,7 @@ pub mod instr {
             [label1, label2],
             // Need dummy immediate here to satisfy opcodes translator expectation of immediate
             // with name _0.
-            Dummy,
+            Dummy::DEFAULT,
             range,
         )))
     }
@@ -371,7 +371,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::SSwitch {
             cases,
             targets,
-            _0: Dummy,
+            _0: Dummy::DEFAULT,
         }))
     }
 

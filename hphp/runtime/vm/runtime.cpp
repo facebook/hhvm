@@ -435,7 +435,7 @@ void raiseModuleBoundaryViolation(const Class* cls,
       ? folly::sformat("method {}::{}", cls->name(), callee->name())
       : folly::sformat("function {}", callee->name());
     return folly::sformat(
-      "Calling internal {} in module {} from {} is not allowed",
+      "Accessing internal {} in module {} from {} is not allowed",
       calleeName,
       callee->moduleName(),
       callerModule

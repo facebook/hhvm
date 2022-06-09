@@ -468,7 +468,12 @@ TypedValue LoggingArray::GetPosKey(const LoggingArray* lad, ssize_t pos) {
   return lad->wrapped->nvGetKey(pos);
 }
 TypedValue LoggingArray::GetPosVal(const LoggingArray* lad, ssize_t pos) {
-  return lad->wrapped->nvGetVal(pos);
+  auto const k = lad->wrapped->nvGetKey(pos);
+  tvIsString(k) ?
+    logEvent(lad, ArrayOp::GetStrPos, val(k).pstr) :
+    logEvent(lad, ArrayOp::GetIntPos, val(k).num) ;
+  auto const v = lad->wrapped->nvGetVal(pos);
+  return v;
 }
 
 bool LoggingArray::PosIsValid(const LoggingArray* lad, ssize_t pos) {

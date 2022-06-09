@@ -373,6 +373,7 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
 }
 
 void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
+  if (!RO::EvalEmitBespokeMonotypes) return;
   // Hold the read mutex for the duration of the mutation so that profiling
   // cannot be interrupted until the mutation is complete.
   folly::SharedMutex::ReadHolder lock{s_profilingLock};

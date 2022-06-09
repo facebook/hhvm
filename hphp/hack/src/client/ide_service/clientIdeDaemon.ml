@@ -445,7 +445,13 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
 
   (* We need shallow class declarations so that we can invalidate individual
      members in a class hierarchy. *)
-  let tcopt = { tcopt with GlobalOptions.tco_shallow_class_decl = true } in
+  let tcopt =
+    {
+      tcopt with
+      GlobalOptions.tco_shallow_class_decl =
+        local_config.ServerLocalConfig.ide_use_shallow_decls;
+    }
+  in
 
   let start_time = log_startup_time "basic_startup" start_time in
   let sienv =

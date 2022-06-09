@@ -43,6 +43,7 @@ lazy_init2 = {use_saved_state}
 symbolindex_search_provider = SqliteIndex
 allow_unstable_features = true
 ide_serverless = {use_serverless_ide}
+ide_use_shallow_decls = true
 """.format(
                     use_saved_state=str(use_saved_state).lower(),
                     use_serverless_ide=str(use_serverless_ide).lower(),

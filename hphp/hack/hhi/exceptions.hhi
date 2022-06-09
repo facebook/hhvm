@@ -87,7 +87,7 @@ class Exception implements Throwable {
   public function __construct (
     protected string $message = '',
     int $code = 0,
-    protected ?Exception $previous = null,
+    protected ?Throwable $previous = null,
   )[];
 
   /**

@@ -395,7 +395,7 @@ abstract class ImplicitContext {
     }
   }
 
-  protected static function get()[zoned]: this::T {
+  protected static function get()[zoned]: ?this::T {
     return ImplicitContext\_Private\get_implicit_context(static::class);
   }
 }

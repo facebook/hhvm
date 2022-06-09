@@ -34,6 +34,7 @@ positioned_by_ref_parser = { path = "../../../parser/api/cargo/positioned_by_ref
 positioned_full_trivia_parser = { path = "../../../parser/api/cargo/positioned_full_trivia_parser" }
 positioned_parser = { path = "../../../parser/api/cargo/positioned_parser" }
 rayon = "1.2"
+regex = "1.5.4"
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 strum = "0.21"
 strum_macros = "0.21"

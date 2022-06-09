@@ -19,6 +19,7 @@
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/optional.h"
 
+#include <folly/experimental/io/FsUtil.h>
 #include <folly/sorted_vector_types.h>
 #include <folly/Varint.h>
 
@@ -192,6 +193,10 @@ struct BlobEncoder {
     const size_t start = m_blob.size();
     m_blob.resize(start + sz);
     std::copy(s.data(), s.data() + sz, &m_blob[start]);
+  }
+
+  void encode(const boost::filesystem::path& p) {
+    encode(p.string());
   }
 
   template<class T>
@@ -438,6 +443,12 @@ struct BlobDecoder {
     assertx(m_last - m_p >= sz);
     s = std::string{m_p, m_p + sz};
     m_p += sz;
+  }
+
+  void decode(boost::filesystem::path& p) {
+    std::string s;
+    decode(s);
+    p = boost::filesystem::path(std::move(s));
   }
 
   size_t peekStdStringSize() {

@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/constant.h"
+#include "hphp/runtime/vm/decl-dep.h"
 #include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/type-alias.h"
@@ -263,7 +264,13 @@ public:
   bool m_fatalUnit{false}; // parse/runtime error
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
+
+  // m_deps is a list of dependencies queried by the frontend while compiling
+  // this unit, while m_symbol_refs is a list of symbols which were observed
+  // but not necessarily queried during compilation.
+  std::vector<DeclDep> m_deps;
   SymbolRefs m_symbol_refs;
+
   /*
    * name=>NativeFuncInfo for native funcs in this unit
    */

@@ -542,6 +542,11 @@ struct FactsStoreImpl final
     return true;
   }
 
+  Holder getNativeHolder() noexcept override {
+    return Holder{
+        this, [sptr = shared_from_this()]() mutable { sptr.reset(); }};
+  }
+
   /**
    * Return an object representing the last time this store was updated
    */

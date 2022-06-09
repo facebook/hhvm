@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/containers.h"
+#include "hphp/runtime/vm/decl-dep.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -519,6 +520,8 @@ public:
     return offsetof(Unit, m_moduleName);
   }
 
+  const std::vector<DeclDep> deps() const { return m_deps; }
+
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
 
@@ -564,6 +567,7 @@ private:
   UserAttributeMap m_fileAttributes;
   std::unique_ptr<FatalInfo> m_fatalInfo{nullptr};
   const StringData* m_moduleName{nullptr};
+  std::vector<DeclDep> m_deps;
 
   rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
 

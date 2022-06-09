@@ -492,6 +492,7 @@ struct ParseJob {
         loader,
         fileName.c_str(),
         Native::s_noNativeFuncs,
+        nullptr, // TODO: repo mode support for decl providers
         false,
         false
       );

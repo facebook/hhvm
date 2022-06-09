@@ -74,6 +74,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
     auto phpUnit = compile_string(phpLib.c_str(), phpLib.size(),
                                   "systemlib.php",
                                   Native::s_systemNativeFuncs,
+                                  nullptr,
                                   RepoOptions::defaults());
     addUnit(phpUnit);
   }
@@ -81,6 +82,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
     auto hhasUnit = compile_string(hhasLib.c_str(), hhasLib.size(),
                                    "systemlib.hhas",
                                    Native::s_systemNativeFuncs,
+                                   nullptr,
                                    RepoOptions::defaults());
     addUnit(hhasUnit);
   }

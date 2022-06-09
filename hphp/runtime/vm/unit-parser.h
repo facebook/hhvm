@@ -28,6 +28,7 @@ namespace Native {
 struct FuncTable;
 }
 
+struct HhvmDeclProvider;
 struct LazyUnitContentsLoader;
 struct SHA1;
 
@@ -87,11 +88,13 @@ struct UnitCompiler {
   UnitCompiler(LazyUnitContentsLoader& loader,
                const char* filename,
                const Native::FuncTable& nativeFuncs,
+               AutoloadMap* map,
                bool isSystemLib,
                bool forDebuggerEval)
     : m_loader{loader}
     , m_filename{filename}
     , m_nativeFuncs{nativeFuncs}
+    , m_map{map}
     , m_isSystemLib{isSystemLib}
     , m_forDebuggerEval{forDebuggerEval}
   {}
@@ -101,20 +104,28 @@ struct UnitCompiler {
     LazyUnitContentsLoader& loader,
     const char* filename,
     const Native::FuncTable& nativeFuncs,
+    AutoloadMap* map,
     bool isSystemLib,
     bool forDebuggerEval
   );
 
   virtual std::unique_ptr<UnitEmitter> compile(
     bool& cacheHit,
+    HhvmDeclProvider*,
     CompileAbortMode = CompileAbortMode::Never) = 0;
 
   virtual const char* getName() const = 0;
+
+
+  std::unique_ptr<UnitEmitter> compile(
+    bool& cacheHit,
+    CompileAbortMode = CompileAbortMode::Never);
 
  protected:
   LazyUnitContentsLoader& m_loader;
   const char* m_filename;
   const Native::FuncTable& m_nativeFuncs;
+  AutoloadMap* m_map;
   bool m_isSystemLib;
   bool m_forDebuggerEval;
 };
@@ -124,6 +135,7 @@ struct HackcUnitCompiler : public UnitCompiler {
 
   virtual std::unique_ptr<UnitEmitter> compile(
     bool& cacheHit,
+    HhvmDeclProvider*,
     CompileAbortMode = CompileAbortMode::Never) override;
 
   virtual const char* getName() const override { return "HackC"; }
@@ -138,14 +150,23 @@ struct CacheUnitCompiler : public UnitCompiler {
   CacheUnitCompiler(LazyUnitContentsLoader& loader,
                     const char* filename,
                     const Native::FuncTable& nativeFuncs,
+                    AutoloadMap* map,
                     bool isSystemLib,
                     bool forDebuggerEval,
                     std::function<std::unique_ptr<UnitCompiler>()> makeFallback)
-    : UnitCompiler{loader, filename, nativeFuncs, isSystemLib, forDebuggerEval}
+    : UnitCompiler{
+        loader,
+        filename,
+        nativeFuncs,
+        map,
+        isSystemLib,
+        forDebuggerEval
+      }
     , m_makeFallback{std::move(makeFallback)} {}
 
   virtual std::unique_ptr<UnitEmitter> compile(
     bool& cacheHit,
+    HhvmDeclProvider*,
     CompileAbortMode = CompileAbortMode::Never) override;
 
   virtual const char* getName() const override { return "Cache"; }
@@ -159,6 +180,7 @@ using UnitEmitterCacheHook =
     const char*,
     const SHA1&,
     folly::StringPiece::size_type,
+    HhvmDeclProvider* provider,
     // First parameter is whether ICE UEs are allowed. If not, a
     // nullptr will be returned for ICE UEs instead.
     const std::function<std::unique_ptr<UnitEmitter>(bool)>&,

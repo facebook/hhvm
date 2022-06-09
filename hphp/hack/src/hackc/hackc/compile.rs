@@ -233,7 +233,7 @@ struct SingleDeclProvider<'a> {
 }
 
 impl<'a> DeclProvider<'a> for SingleDeclProvider<'a> {
-    fn decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'a>, Error> {
+    fn decl(&self, kind: NameType, symbol: &str, _depth: u64) -> Result<Decl<'a>, Error> {
         let query = |decls: &Decls<'a>| {
             decls
                 .iter()

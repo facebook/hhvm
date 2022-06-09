@@ -596,6 +596,10 @@ AUTOLOADFLAGS();
   filterNamespaces();
   calcCacheKey();
   calcDynamic();
+
+  if (!m_path.empty()) {
+    m_flags.m_repo = folly::fs::path(m_path).parent_path();
+  }
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {

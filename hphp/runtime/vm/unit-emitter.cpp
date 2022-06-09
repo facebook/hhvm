@@ -388,6 +388,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_fileAttributes = m_fileAttributes;
   u->m_moduleName = m_moduleName;
   u->m_ICE = m_ICE;
+  u->m_deps = m_deps;
 
   for (auto const& m : m_modules) u->m_modules.push_back(m);
 
@@ -461,6 +462,7 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_bcSha1)
     (m_fatalUnit)
     (m_entryPointId)
+    (m_deps)
     ;
   if (m_fatalUnit) {
     sd(m_fatalLoc)

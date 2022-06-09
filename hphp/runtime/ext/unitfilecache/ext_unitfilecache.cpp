@@ -87,6 +87,7 @@ std::unique_ptr<UnitEmitter> cache_hook(
   const char* filenamePtr,
   const SHA1& sha1,
   folly::StringPiece::size_type codeLen,
+  HhvmDeclProvider* provider,
   const std::function<std::unique_ptr<UnitEmitter>(bool)>& compile,
   const Native::FuncTable& nativeFuncs
 ) {

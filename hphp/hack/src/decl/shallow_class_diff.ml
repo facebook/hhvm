@@ -169,17 +169,16 @@ module Method : Member_S with type t = shallow_method = struct
 end
 
 let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =
-  match (old_cstr, new_cstr) with
-  | (None, None) -> None
-  | (Some _, None) -> Some Removed
-  | (None, Some _) -> Some Added
-  | (Some old_method, Some new_method) ->
-    let consistent1 = Decl_utils.consistent_construct_kind old_cls in
-    let consistent2 = Decl_utils.consistent_construct_kind new_cls in
-    if not (Typing_defs.equal_consistent_kind consistent1 consistent2) then
-      Some Changed_inheritance
-    else
-      Method.diff old_method new_method
+  let consistent1 = Decl_utils.consistent_construct_kind old_cls in
+  let consistent2 = Decl_utils.consistent_construct_kind new_cls in
+  if not (Typing_defs.equal_consistent_kind consistent1 consistent2) then
+    Some Changed_inheritance
+  else
+    match (old_cstr, new_cstr) with
+    | (None, None) -> None
+    | (Some _, None) -> Some Removed
+    | (None, Some _) -> Some Added
+    | (Some old_method, Some new_method) -> Method.diff old_method new_method
 
 let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     ClassDiff.member_diff =

@@ -1,8 +1,12 @@
 Typing[4163] Invalid return type [1]
 -> The field y is optional [2]
 -> The field y is defined as required [3]
+-> y is defined here [4]
 
 required_field_optional.php:13:10
+     3 | type my_shape = shape(
+     4 |   'x' => int,
+[4]  5 |   'y' => bool,
      6 | );
      7 | 
 [3]  8 | function foo(bool $cond): my_shape {

@@ -2436,6 +2436,7 @@ and simplify_subtype_shape
     | (`Required sub_ty, `Optional super_ty)
     | (`Optional sub_ty, `Optional super_ty) ->
       let super_ty = liken ~super_like env super_ty in
+
       res &&& simplify_subtype ~subtype_env ~this_ty sub_ty super_ty
     | (`Absent, `Optional _)
     | (`Absent, `Absent) ->
@@ -2458,7 +2459,7 @@ and simplify_subtype_shape
                      })
       in
       with_error ty_err_opt res
-    | (`Optional _, `Required _) ->
+    | (`Optional _, `Required super_ty) ->
       let ty_err_opt =
         Option.map
           subtype_env.on_error
@@ -2471,6 +2472,7 @@ and simplify_subtype_shape
                        pos = Reason.to_pos r_sub;
                        decl_pos = Reason.to_pos r_super;
                        name = printable_name;
+                       def_pos = get_pos super_ty;
                      })
       in
       with_error ty_err_opt res

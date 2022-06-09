@@ -6323,6 +6323,7 @@ and Secondary : sig
     | Required_field_is_optional of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
+        def_pos: Pos_or_decl.t;
         name: string;
       }
     | Return_disposable_mismatch of {
@@ -6590,6 +6591,7 @@ end = struct
     | Required_field_is_optional of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
+        def_pos: Pos_or_decl.t;
         name: string;
       }
     | Return_disposable_mismatch of {
@@ -7004,7 +7006,7 @@ end = struct
     in
     (Error_code.IFCExternalContravariant, reasons, [])
 
-  let required_field_is_optional pos name decl_pos =
+  let required_field_is_optional pos name decl_pos def_pos =
     let reasons =
       lazy
         [
@@ -7013,6 +7015,7 @@ end = struct
             "The field "
             ^ Markdown_lite.md_codify name
             ^ " is defined as **required**" );
+          (def_pos, Markdown_lite.md_codify name ^ " is defined here");
         ]
     in
     (Error_code.RequiredFieldIsOptional, reasons, [])
@@ -7454,8 +7457,8 @@ end = struct
       Eval_result.single (accept_disposable_invariant pos decl_pos)
     | Ifc_external_contravariant { pos_sub; pos_super } ->
       Eval_result.single (ifc_external_contravariant pos_sub pos_super)
-    | Required_field_is_optional { pos; name; decl_pos } ->
-      Eval_result.single (required_field_is_optional pos name decl_pos)
+    | Required_field_is_optional { pos; name; decl_pos; def_pos } ->
+      Eval_result.single (required_field_is_optional pos name decl_pos def_pos)
     | Return_disposable_mismatch
         { pos_sub; is_marked_return_disposable; pos_super } ->
       Eval_result.single

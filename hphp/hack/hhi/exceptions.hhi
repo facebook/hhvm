@@ -94,8 +94,8 @@ class Exception implements Throwable {
    * This method isn't pure. Consider using IExceptionWithPureGetMessage
    */
   public function getMessage()[defaults]: string;
-  final public function getPrevious()[]: ?Exception;
-  public final function setPrevious(Exception $previous)[write_props]: void;
+  final public function getPrevious()[]: ?Throwable;
+  public final function setPrevious(Throwable $previous)[write_props]: void;
   public function getCode()[]: int;
   final public function getFile()[]: string;
   final public function getLine()[]: int;

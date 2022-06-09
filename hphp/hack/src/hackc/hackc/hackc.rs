@@ -98,8 +98,11 @@ enum Command {
     /// Compute facts for a set of files.
     Facts(facts::Opts),
 
-    /// Parse many files whose filenames are read from stdin
+    /// Render the source text parse tree for each given file.
     Parse(parse::Opts),
+
+    /// Parse many files whose filenames are read from stdin, discard parser output.
+    ParseBench(parse::BenchOpts),
 }
 
 /// Which command are we running? Using bool opts for compatibility with test harnesses.
@@ -115,10 +118,6 @@ struct FlagCommands {
     /// in JSON format.
     #[clap(long)]
     extract_facts_from_decls: bool,
-
-    /// Render the source text parse tree
-    #[clap(long)]
-    parse: bool,
 
     /// Compile file with decls from the same file available during compilation.
     #[clap(long)]
@@ -229,9 +228,7 @@ fn daemon_mode(mut opts: Opts) -> Result<()> {
 }
 
 fn dispatch(opts: &mut Opts) -> Result<()> {
-    if opts.flag_commands.parse {
-        parse::run_flag_command(opts)
-    } else if opts.flag_commands.extract_facts_from_decls {
+    if opts.flag_commands.extract_facts_from_decls {
         let facts_opts = facts::Opts {
             files: std::mem::take(&mut opts.files),
             ..Default::default()
@@ -262,7 +259,8 @@ fn main() -> Result<()> {
         Some(Command::Assemble(opts)) => assemble::run(opts),
         Some(Command::Compile(mut opts)) => compile::run(&mut opts),
         Some(Command::Crc(opts)) => crc::run(opts),
-        Some(Command::Parse(opts)) => parse::run_sub_command(opts),
+        Some(Command::Parse(parse_opts)) => parse::run(&mut opts, parse_opts),
+        Some(Command::ParseBench(bench_opts)) => parse::run_bench_command(bench_opts),
         Some(Command::Facts(facts_opts)) => facts::extract_facts(&mut opts, facts_opts),
         None => {
             if opts.daemon {

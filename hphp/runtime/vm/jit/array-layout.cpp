@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
@@ -172,6 +173,11 @@ bool ArrayLayout::monotype() const {
 bool ArrayLayout::is_struct() const {
   auto const index = layoutIndex();
   return index && bespoke::StructLayout::IsStructLayout(*index);
+}
+
+bool ArrayLayout::is_type_structure() const {
+  auto const index = layoutIndex();
+  return index && *index == bespoke::TypeStructure::GetLayoutIndex();
 }
 
 bool ArrayLayout::is_concrete() const {

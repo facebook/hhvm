@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/memory-stats.h"
@@ -468,6 +469,30 @@ std::vector<const StringData*> LoggingProfile::knownStructKeys() const {
     return ret;
   }
   return ret;
+}
+
+bool LoggingProfile::shouldUseBespokeTypeStructure() {
+  if (key.locationType != LocationType::TypeConstant &&
+      key.locationType != LocationType::TypeAlias) {
+    return false;
+  }
+
+  // check for correct keys and values types
+  auto const vad = data->staticSampledArray;
+  if (vad == nullptr || !TypeStructure::isValidTypeStructure(vad)) return false;
+
+  // check that no operations could have modified the array
+  for (auto const& eventAndCount : data->events) {
+    auto const event = EventKey(eventAndCount.first);
+    if (!arrayOpIsRead(event.getOp()) &&
+        event.getOp() != ArrayOp::ConstructStr &&
+        event.getOp() != ArrayOp::ConstructInt &&
+        event.getOp() != ArrayOp::APCInitStr &&
+        event.getOp() != ArrayOp::APCInitStr) {
+      return false;
+    }
+  }
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////

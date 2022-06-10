@@ -70,6 +70,8 @@ using Kind = HPHP::TypeStructure::Kind;
 struct TypeStructureLayout;
 
 struct TypeStructure : BespokeArray {
+  static LayoutIndex GetLayoutIndex();
+  static void InitializeLayouts();
 
   static bool isValidTypeStructure(ArrayData* ad);
   static TypeStructure* MakeFromVanilla(ArrayData* ad);

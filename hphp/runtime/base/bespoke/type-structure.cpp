@@ -50,6 +50,14 @@ size_t TypeStructure::sizeIndex(Kind kind) {
   return MemoryManager::size2Index(getSizeOfTypeStruct(kind));
 }
 
+LayoutIndex TypeStructure::GetLayoutIndex() {
+  return LayoutIndex{uint16_t(kTypeStructureLayoutByte << 8)};
+}
+
+void TypeStructure::InitializeLayouts() {
+  new TypeStructureLayout();
+}
+
 template <bool Static>
 TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
   auto const index = MemoryManager::size2Index(getSizeOfTypeStruct(kind));
@@ -66,7 +74,7 @@ TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
     Static ? StaticValue : OneReference, aux);
 
   tad->m_size = numFields(kind);
-  tad->m_layout_index = LayoutIndex{uint16_t(kTypeStructureLayoutByte << 8)};
+  tad->m_layout_index = GetLayoutIndex();
   tad->m_extra_lo8 = 0;
   tad->m_extra_hi8 = 0;
   tad->m_alias = nullptr;
@@ -172,7 +180,8 @@ ArrayData* TypeStructure::escalateWithCapacity(
 #define X(Field, FieldString, KindOfType) {                           \
   auto const key = s_##FieldString.get();                             \
   auto const tv = TypeStructure::NvGetStr(this, key);                 \
-  if (tv.m_type != KindOfUninit) {                                    \
+  if (tv.m_type != KindOfUninit &&                                    \
+      (tv.m_type != KindOfBoolean || tv.val().num)) {                 \
     auto const res = VanillaDict::SetStrMove(ad, key, tv);            \
     assertx(ad == res);                                               \
     tvIncRefGen(tv);                                                  \
@@ -243,7 +252,8 @@ TypedValue make_tv_safe(int8_t val) {
   return make_tv<KindOfInt64>(val);
 }
 TypedValue make_tv_safe(bool val) {
-  return make_tv<KindOfBoolean>(val);
+  // to match the current behaviour of type structures
+  return val ? make_tv<KindOfBoolean>(true) : make_tv<KindOfUninit>();
 }
 TypedValue make_tv_safe(StringData* val) {
   return val ? make_tv<KindOfString>(val) : make_tv<KindOfUninit>();

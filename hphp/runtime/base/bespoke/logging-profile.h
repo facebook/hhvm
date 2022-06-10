@@ -296,6 +296,8 @@ struct LoggingProfile {
   BespokeArray* getStaticBespokeArray() const;
   void setStaticBespokeArray(BespokeArray* array);
 
+  bool shouldUseBespokeTypeStructure();
+
   jit::ArrayLayout getLayout() const;
   void setLayout(jit::ArrayLayout layout);
 

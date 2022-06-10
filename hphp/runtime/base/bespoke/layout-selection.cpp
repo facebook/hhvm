@@ -20,9 +20,11 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke/key-coloring.h"
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/union-find.h"
 
@@ -689,7 +691,19 @@ ArrayLayout selectSourceLayout(
   auto const mode = RO::EvalBespokeArraySpecializationMode;
   if (mode == 1 || mode == 2) return ArrayLayout::Vanilla();
 
-  // 1. Use a struct layout if the union-find algorithm chose one.
+  // 1. If we're emitting type structures, try to use type structure layout
+
+  if (RO::EvalEmitBespokeTypeStructures && profile.shouldUseBespokeTypeStructure()) {
+    auto const vad = profile.data->staticSampledArray;
+    if (vad == nullptr) return ArrayLayout::Vanilla();
+    auto const tad = TypeStructure::MakeFromVanilla(vad);
+    if (tad == nullptr) return ArrayLayout::Vanilla();
+    auto const idx = tad->layoutIndex();
+    profile.setStaticBespokeArray(tad);
+    return ArrayLayout(idx);
+  }
+
+  // 2. Use a struct layout if the union-find algorithm chose one.
 
   auto const it = sar.sources.find(&profile);
   if (it != sar.sources.end()) {
@@ -704,22 +718,22 @@ ArrayLayout selectSourceLayout(
     return ArrayLayout(it->second);
   }
 
-  // 2. If we aren't emitting monotypes, use a vanilla layout.
+  // 3. If we aren't emitting monotypes, use a vanilla layout.
 
   if (!RO::EvalEmitBespokeMonotypes) return ArrayLayout::Vanilla();
 
-  // 3. If the array is a runtime source, use a vanilla layout.
+  // 4. If the array is a runtime source, use a vanilla layout.
   // TODO(mcolavita): We can eventually support more general runtime sources.
 
   if (profile.key.isRuntimeLocation()) return ArrayLayout::Vanilla();
 
-  // 4. If we escalate too often, use a vanilla layout.
+  // 5. If we escalate too often, use a vanilla layout.
 
   auto const p_cutoff = RO::EvalBespokeArraySourceSpecializationThreshold / 100;
   auto const p_escalated = probabilityOfEscalation(profile);
   if (p_escalated > 1 - p_cutoff) return ArrayLayout::Vanilla();
 
-  // 5. If the array is likely to stay monotyped, use a monotype layout.
+  // 6. If the array is likely to stay monotyped, use a monotype layout.
 
   uint64_t monotype = 0;
   uint64_t total = 0;

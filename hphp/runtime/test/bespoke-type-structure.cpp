@@ -72,6 +72,9 @@ TEST(BespokeTypeStructure, Methods) {
     EXPECT_TRUE(tvKind.m_type == KindOfInt64);
     EXPECT_TRUE(val(tvKind).num == int64_t(TypeStructure::Kind::T_int));
 
+    auto tvSoft = bespoke::TypeStructure::NvGetStr(ts, soft);
+    EXPECT_TRUE(tvSoft.m_type == KindOfUninit);
+
     auto tvAlias = bespoke::TypeStructure::NvGetStr(ts, alias);
     EXPECT_TRUE(tvAlias.m_type == KindOfUninit);
   }
@@ -120,6 +123,9 @@ TEST(BespokeTypeStructure, Methods) {
   auto const vadKind = vad->get(Variant{"kind"});
   EXPECT_TRUE(vadKind.m_type == KindOfInt64);
   EXPECT_TRUE(val(vadKind).num == uint64_t(TypeStructure::Kind::T_int));
+
+  auto const vadLike = vad->get(Variant{"like"});
+  EXPECT_TRUE(vadLike.m_type == KindOfUninit);
 
   auto const vadAlias = vad->get(Variant{"alias"});
   EXPECT_TRUE(vadAlias.m_type == KindOfString);

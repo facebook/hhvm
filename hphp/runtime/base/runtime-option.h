@@ -1175,6 +1175,8 @@ struct RuntimeOption {
   /* Should we use monotypes? */                                        \
   F(bool, EmitBespokeMonotypes, false)                                  \
   F(int64_t, ObjProfMaxNesting, 5000)                                   \
+  /* Should we use type structures? */                                  \
+  F(bool, EmitBespokeTypeStructures, false)                             \
   /* Choice of layout selection algorithms:                             \
    *                                                                    \
    * 0 - Default layout selection algorithm based on profiling.         \

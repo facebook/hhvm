@@ -1115,6 +1115,9 @@ pub(crate) fn print_instr(
         Instr::Special(instr::Special::PopL(lid)) => {
             write!(w, "pop_local {}", FmtLid(*lid, ctx.strings),)?
         }
+        Instr::Special(Special::Copy(vid)) => {
+            write!(w, "copy {}", FmtVid(func, *vid, ctx.verbose))?;
+        }
         Instr::Special(instr::Special::PushL(lid)) => {
             write!(w, "push {}", FmtLid(*lid, ctx.strings))?;
         }

@@ -148,10 +148,6 @@ impl<'a> Func<'a> {
     // By definition the entry block is block zero.
     pub const ENTRY_BID: BlockId = BlockId(0);
 
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     pub fn alloc_literal(&mut self, literal: Literal<'a>) -> LiteralId {
         let lid = LiteralId::from_usize(self.literals.len());
         self.literals.push(literal);
@@ -167,6 +163,12 @@ impl<'a> Func<'a> {
     pub fn alloc_instr_in(&mut self, bid: BlockId, i: Instr) -> InstrId {
         let iid = self.alloc_instr(i);
         self.blocks[bid].iids.push(iid);
+        iid
+    }
+
+    pub fn alloc_param_in(&mut self, bid: BlockId) -> InstrId {
+        let iid = self.alloc_instr(Instr::param());
+        self.blocks[bid].params.push(iid);
         iid
     }
 

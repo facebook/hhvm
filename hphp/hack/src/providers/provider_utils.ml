@@ -16,6 +16,17 @@ let invalidate_tast_cache_of_entries (entries : Provider_context.entries) : unit
 let invalidate_local_decl_caches_for_file
     (local_memory : Provider_backend.local_memory) (file_info : FileInfo.t) :
     unit =
+  let {
+    Provider_backend.shallow_decl_cache;
+    folded_class_cache;
+    decl_cache;
+    linearization_cache;
+    reverse_naming_table_delta = _;
+    fixmes = _;
+    naming_db_path_ref = _;
+  } =
+    local_memory
+  in
   let open FileInfo in
   let open Provider_backend in
   (* Consideration: would it have been better to decl-diff, detect
@@ -26,7 +37,7 @@ let invalidate_local_decl_caches_for_file
   (* Shallow decl cache: we only need clear the ones affected *)
   List.iter file_info.classes ~f:(fun (_, name, _) ->
       Shallow_decl_cache.remove
-        local_memory.shallow_decl_cache
+        shallow_decl_cache
         ~key:(Shallow_decl_cache_entry.Shallow_class_decl name));
 
   (* Decl and linearization cache: we don't track fine-grained
@@ -46,19 +57,20 @@ let invalidate_local_decl_caches_for_file
      IDE to get their relevant decls+linearizations correct. *)
   let open Provider_backend.Decl_cache_entry in
   List.iter file_info.consts ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl name));
+      Decl_cache.remove decl_cache ~key:(Gconst_decl name));
   List.iter file_info.funs ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl name));
+      Decl_cache.remove decl_cache ~key:(Fun_decl name));
   List.iter file_info.typedefs ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl name));
+      Decl_cache.remove decl_cache ~key:(Typedef_decl name));
   List.iter file_info.classes ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Class_decl name));
+      Decl_cache.remove decl_cache ~key:(Class_decl name);
+      Folded_class_cache.remove
+        folded_class_cache
+        ~key:(Folded_class_cache_entry.Folded_class_decl name));
   (* Linearizations are only keyed by class names *)
   let open Provider_backend.Linearization_cache_entry in
   List.iter file_info.classes ~f:(fun (_, name, _) ->
-      Linearization_cache.remove
-        local_memory.linearization_cache
-        ~key:(Linearization name));
+      Linearization_cache.remove linearization_cache ~key:(Linearization name));
   ()
 
 let invalidate_local_decl_caches_for_entries

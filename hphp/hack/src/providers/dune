@@ -4,6 +4,7 @@
  (libraries
   collections
   decl_service_client
+  decl_store
   rust_provider_backend_stubs
   heap_shared_mem
   lfu_cache

@@ -109,13 +109,12 @@ struct UnitCompiler {
     bool forDebuggerEval
   );
 
+  virtual const char* getName() const = 0;
+
   virtual std::unique_ptr<UnitEmitter> compile(
     bool& cacheHit,
     HhvmDeclProvider*,
     CompileAbortMode = CompileAbortMode::Never) = 0;
-
-  virtual const char* getName() const = 0;
-
 
   std::unique_ptr<UnitEmitter> compile(
     bool& cacheHit,
@@ -128,51 +127,6 @@ struct UnitCompiler {
   AutoloadMap* m_map;
   bool m_isSystemLib;
   bool m_forDebuggerEval;
-};
-
-struct HackcUnitCompiler : public UnitCompiler {
-  using UnitCompiler::UnitCompiler;
-
-  virtual std::unique_ptr<UnitEmitter> compile(
-    bool& cacheHit,
-    HhvmDeclProvider*,
-    CompileAbortMode = CompileAbortMode::Never) override;
-
-  virtual const char* getName() const override { return "HackC"; }
-};
-
-// UnitCompiler which first tries to retrieve the UnitEmitter via the
-// g_unit_emitter_cache_hook. If that fails, delegate to the
-// UnitCompiler produced by the "makeFallback" lambda (this avoids
-// having to create the fallback UnitEmitter until we need it). The
-// lambda will only be called once. Its output is cached afterwards.
-struct CacheUnitCompiler : public UnitCompiler {
-  CacheUnitCompiler(LazyUnitContentsLoader& loader,
-                    const char* filename,
-                    const Native::FuncTable& nativeFuncs,
-                    AutoloadMap* map,
-                    bool isSystemLib,
-                    bool forDebuggerEval,
-                    std::function<std::unique_ptr<UnitCompiler>()> makeFallback)
-    : UnitCompiler{
-        loader,
-        filename,
-        nativeFuncs,
-        map,
-        isSystemLib,
-        forDebuggerEval
-      }
-    , m_makeFallback{std::move(makeFallback)} {}
-
-  virtual std::unique_ptr<UnitEmitter> compile(
-    bool& cacheHit,
-    HhvmDeclProvider*,
-    CompileAbortMode = CompileAbortMode::Never) override;
-
-  virtual const char* getName() const override { return "Cache"; }
-private:
-  std::function<std::unique_ptr<UnitCompiler>()> m_makeFallback;
-  std::unique_ptr<UnitCompiler> m_fallback;
 };
 
 using UnitEmitterCacheHook =

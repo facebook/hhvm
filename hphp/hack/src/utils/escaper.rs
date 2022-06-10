@@ -402,6 +402,17 @@ fn unescape_single_or_nowdoc(
     output: &mut impl GrowableBytes,
 ) -> Result<(), InvalidString> {
     let s = s.as_bytes();
+    unescape_bytes_to_gb(is_nowdoc, s, output)
+}
+
+/// Copies `s` into `output`, replacing escape sequences with the characters
+/// they represent. They bytes added to `output` are not guaranteed to be valid UTF-8, unless
+/// `s` is solely valid UTF-8.
+fn unescape_bytes_to_gb(
+    is_nowdoc: bool,
+    s: &[u8],
+    output: &mut impl GrowableBytes,
+) -> Result<(), InvalidString> {
     let len = s.len();
     let mut idx = 0;
     while idx < len {
@@ -450,6 +461,12 @@ fn unescape_single_or_nowdoc_into_arena<'a>(
     // output, only adding and removing valid UTF-8 codepoints.
     let string = unsafe { bumpalo::collections::String::from_utf8_unchecked(output) };
     Ok(string.into_bump_str())
+}
+
+pub fn unescape_bytes(s: &[u8]) -> Result<Vec<u8>, InvalidString> {
+    let mut v8 = Vec::new();
+    unescape_bytes_to_gb(false, s, &mut v8)?;
+    Ok(v8)
 }
 
 pub fn unescape_single(s: &str) -> Result<String, InvalidString> {
@@ -700,5 +717,10 @@ mod tests {
 
         assert_eq!(unquote_str("<<<"), "<<<");
         assert_eq!(unquote_str("<<<EOTEOT"), "<<<EOTEOT");
+    }
+    #[test]
+    fn unquote_slice_test() {
+        let s = "abc\"".as_bytes();
+        assert_eq!(unquote_slice(s), s);
     }
 }

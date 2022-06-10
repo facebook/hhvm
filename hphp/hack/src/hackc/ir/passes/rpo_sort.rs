@@ -46,11 +46,14 @@ pub fn rpo_sort(func: &mut Func<'_>) {
         }
     }
 
+    // Update catch_bids for TryCatch frames.
     for ex_frame in &mut func.ex_frames.values_mut() {
         let bid = &mut ex_frame.catch_bid;
         if *bid != BlockId::NONE {
             let target = remap[*bid];
-            debug_assert_ne!(target, BlockId::NONE);
+            // TODO: If target is BlockId::NONE then this ex_frame is no longer
+            // needed and should be reaped.
+            // debug_assert_ne!(target, BlockId::NONE);
             *bid = target;
         }
     }

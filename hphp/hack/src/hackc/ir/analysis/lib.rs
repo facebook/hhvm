@@ -10,5 +10,6 @@ pub mod rpo;
 pub use liveness::LiveInstrs;
 pub use predecessors::{
     compute_num_predecessors, compute_predecessor_blocks, PredecessorCatchMode, PredecessorFlags,
+    Predecessors,
 };
 pub use rpo::{compute_rpo, compute_rrpo};

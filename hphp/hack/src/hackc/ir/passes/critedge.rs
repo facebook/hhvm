@@ -1,3 +1,4 @@
+use analysis::{PredecessorCatchMode, PredecessorFlags};
 use core::{
     instr::{HasEdges, HasLoc},
     Block, BlockId, Func, Instr,
@@ -18,7 +19,13 @@ use core::{
 /// 3. re-run rpo_sort().
 ///
 pub fn split_critical_edges(func: &mut Func<'_>, rpo_sort: bool) {
-    let pred_counts = analysis::compute_num_predecessors(func);
+    let pred_counts = analysis::compute_num_predecessors(
+        func,
+        PredecessorFlags {
+            mark_entry_blocks: false,
+            catch: PredecessorCatchMode::Ignore,
+        },
+    );
     let mut work = Vec::new();
     let num_blocks = func.blocks.len();
     for bid in func.block_ids() {

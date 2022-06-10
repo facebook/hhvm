@@ -42,8 +42,7 @@ void c_WaitableWaitHandle::join() {
 
   assertx(!isFinished());
 
-  auto const context =
-    RO::EvalEnableImplicitContext ? *ImplicitContext::activeCtx : nullptr;
+  auto const context = *ImplicitContext::activeCtx;
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnJoin())) {
@@ -61,9 +60,7 @@ void c_WaitableWaitHandle::join() {
   // run queues until we are finished
   session->getCurrentContext()->runUntil(this);
   assertx(isFinished());
-  if (RO::EvalEnableImplicitContext) {
-    *ImplicitContext::activeCtx = context;
-  }
+  *ImplicitContext::activeCtx = context;
 }
 
 String c_WaitableWaitHandle::getName() {

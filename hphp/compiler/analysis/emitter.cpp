@@ -183,7 +183,6 @@ RepoGlobalData getGlobalData() {
     RO::EvalBuildMayNoticeOnMethCallerHelperIsObject;
   gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
-  gd.EnableImplicitContext = RO::EvalEnableImplicitContext;
 
   if (Option::ConstFoldFileBC) {
     gd.SourceRootForFileBC.emplace(RO::SourceRoot);

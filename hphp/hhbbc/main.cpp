@@ -334,7 +334,6 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalBuildMayNoticeOnMethCallerHelperIsObject;
   gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
-  gd.EnableImplicitContext = RO::EvalEnableImplicitContext;
   gd.SourceRootForFileBC = options.SourceRootForFileBC;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {

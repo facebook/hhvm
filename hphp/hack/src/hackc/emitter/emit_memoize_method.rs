@@ -24,7 +24,6 @@ use hhbc::{
 use hhbc_string_utils::reified;
 use instruction_sequence::{instr, InstrSeq};
 use naming_special_names_rust::{members, user_attributes};
-use options::HhvmFlags;
 use oxidized::{ast, pos::Pos};
 
 /// Precomputed information required for generation of memoized methods
@@ -145,16 +144,11 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
-    let should_emit_implicit_context = emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT)
-        && attributes.iter().any(|a| {
-            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(
-                a.name.unsafe_as_str(),
-            )
-        });
+    let should_emit_implicit_context = attributes.iter().any(|a| {
+        naming_special_names_rust::user_attributes::is_memoized_policy_sharded(
+            a.name.unsafe_as_str(),
+        )
+    });
     let mut arg_flags = Flags::empty();
     arg_flags.set(Flags::IS_ASYNC, is_async);
     arg_flags.set(Flags::IS_REIFIED, is_reified);

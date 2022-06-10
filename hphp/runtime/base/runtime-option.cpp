@@ -315,7 +315,6 @@ std::uint32_t RepoOptionsFlags::getCompilerFlags() const {
     SETFLAGS(RuntimeOption::EnableIntrinsicsExtension, 7)       \
     SETFLAGS(RuntimeOption::EvalEmitClsMethPointers, 10)        \
     SETFLAGS(RuntimeOption::EvalEmitMethCallerFuncPointers, 11) \
-    SETFLAGS(RuntimeOption::EvalEnableImplicitContext, 12)      \
     SETFLAGS(RuntimeOption::EvalFoldLazyClassKeys, 15)
 
   #define SETFLAGS(flag, n)                                     \

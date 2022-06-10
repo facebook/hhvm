@@ -2559,11 +2559,6 @@ void hphp_process_init(bool skipModules) {
     BootStats::mark("extra_process_init_concurrent_wait");
   };
 
-  // Allocate this even if EvalEnableImplicitContext is false. The
-  // correct setting might come from RepoGlobalData, and that isn't
-  // loaded until we call g_vmProcessInit. This needs to run prior to
-  // emitting unique stubs (in jit::mcgen::processInit), so we cannot
-  // move it after the RepoGlobalData load.
   ImplicitContext::activeCtx
     .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::activeCtx"});
 

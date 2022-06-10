@@ -826,7 +826,6 @@ struct RuntimeOption {
    * 2 - Do not do implicit coercion
    */                                                                   \
   F(uint32_t, WarnOnImplicitCoercionOfEnumValue, 0)                     \
-  F(bool, EnableImplicitContext,       true)                            \
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, AllowScopeBinding,           false)                           \
   F(bool, TranslateHackC,              false)                           \

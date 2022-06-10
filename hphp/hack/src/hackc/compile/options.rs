@@ -163,7 +163,6 @@ prefixed_flags!(
     FOLD_LAZY_CLASS_KEYS,
     JIT_ENABLE_RENAME_FUNCTION,
     LOG_EXTERN_COMPILER_PERF,
-    ENABLE_IMPLICIT_CONTEXT,
 );
 impl Default for HhvmFlags {
     fn default() -> HhvmFlags {
@@ -737,9 +736,6 @@ mod tests {
   "hhvm.emit_meth_caller_func_pointers": {
     "global_value": true
   },
-  "hhvm.enable_implicit_context": {
-    "global_value": false
-  },
   "hhvm.enable_intrinsics_extension": {
     "global_value": false
   },
@@ -982,15 +978,11 @@ mod tests {
             json!({
                 // override an options from 1 to 0 in first JSON,
                 "hhvm.hack.lang.enable_enum_classes": { "global_value": false },
-                // but specify the default (0) on enable_implicit_context)
-                "hhvm.enable_implicit_context": { "global_value": false }
             })
             .to_string(),
             json!({
                 // override another option from 0 to 1 in second JSON for the first time
                 "hhvm.hack.lang.disable_xhp_element_mangling": { "global_value": true },
-                // and for the second time, respectively *)
-                "hhvm.enable_implicit_context": { "global_value": true }
             })
             .to_string(),
         ];
@@ -1007,7 +999,6 @@ mod tests {
                 .flags
                 .contains(LangFlags::ENABLE_ENUM_CLASSES)
         );
-        assert!(act.hhvm.flags.contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT));
     }
 
     #[test]
@@ -1113,7 +1104,7 @@ bitflags! {
         const EMIT_CLS_METH_POINTERS = 1 << 26;
         // No longer using bit 27.
         const EMIT_METH_CALLER_FUNC_POINTERS = 1 << 28;
-        const ENABLE_IMPLICIT_CONTEXT = 1 << 29;
+        // No longer using bit 29.
         const DISABLE_LVAL_AS_AN_EXPRESSION = 1 << 30;
         // No longer using bits 31-32.
         const ARRAY_PROVENANCE = 1 << 33;

@@ -23,7 +23,6 @@ namespace HPHP {
 rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::activeCtx;
 
 Object ImplicitContext::setByValue(Object&& obj) {
-  assertx(RO::EvalEnableImplicitContext);
   auto const prev = *ImplicitContext::activeCtx;
   *ImplicitContext::activeCtx = obj.detach();
   return Object::attach(prev);

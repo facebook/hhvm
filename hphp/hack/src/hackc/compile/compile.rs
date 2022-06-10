@@ -84,7 +84,7 @@ bitflags! {
         // No longer using bit 9.
         const EMIT_CLS_METH_POINTERS=1 << 10;
         const EMIT_METH_CALLER_FUNC_POINTERS=1 << 11;
-        const ENABLE_IMPLICIT_CONTEXT=1 << 12;
+        // No longer using bit 12.
         const ARRAY_PROVENANCE=1 << 13;
         // No longer using bit 14.
         const FOLD_LAZY_CLASS_KEYS=1 << 15;
@@ -159,14 +159,6 @@ impl HHBCFlags {
         {
             hhbc_options |= Self::EMIT_METH_CALLER_FUNC_POINTERS;
         }
-        // ini just uses hhvm.enable_implicit_context
-        // hdf uses Eval.EnableImplicitContext
-        if let Some(true) = config.get_bool("Eval.EnableImplicitContext")? {
-            hhbc_options |= Self::ENABLE_IMPLICIT_CONTEXT;
-        }
-        if let Some(true) = config.get_bool("enable_implicit_context")? {
-            hhbc_options |= Self::ENABLE_IMPLICIT_CONTEXT;
-        }
         // ini might use hhvm.array_provenance
         // hdf might use Eval.ArrayProvenance
         // But super unclear here
@@ -216,9 +208,6 @@ impl HHBCFlags {
         }
         if self.contains(Self::LOG_EXTERN_COMPILER_PERF) {
             f |= HhvmFlags::LOG_EXTERN_COMPILER_PERF;
-        }
-        if self.contains(Self::ENABLE_IMPLICIT_CONTEXT) {
-            f |= HhvmFlags::ENABLE_IMPLICIT_CONTEXT;
         }
         f
     }

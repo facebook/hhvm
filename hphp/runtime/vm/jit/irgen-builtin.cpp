@@ -2512,11 +2512,6 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
 }
 
 void emitSetImplicitContextByValue(IRGS& env) {
-  if (!RO::EvalEnableImplicitContext) {
-    popDecRef(env, DecRefProfileId::Default);
-    push(env, cns(env, make_tv<KindOfNull>()));
-    return;
-  }
   auto const tv = topC(env);
   auto const prev_ctx = cond(
     env,

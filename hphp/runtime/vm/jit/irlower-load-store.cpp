@@ -262,7 +262,6 @@ void cgStMem(IRLS& env, const IRInstruction* inst) {
 void cgStMemMeta(IRLS&, const IRInstruction*) {}
 
 void cgLdImplicitContext(IRLS& env, const IRInstruction* inst) {
-  assertx(RO::EvalEnableImplicitContext);
   auto& v = vmain(env);
   markRDSAccess(v, ImplicitContext::activeCtx.handle());
 
@@ -283,7 +282,6 @@ void cgLdImplicitContext(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
-  assertx(RO::EvalEnableImplicitContext);
   auto& v = vmain(env);
   auto const src = inst->src(0);
   auto const data = srcLoc(env, inst, 0).reg(0);
@@ -307,7 +305,6 @@ void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgStImplicitContextWH(IRLS& env, const IRInstruction* inst) {
-  assertx(RO::EvalEnableImplicitContext);
   auto& v = vmain(env);
   auto const wh = srcLoc(env, inst, 0).reg();
   markRDSAccess(v, ImplicitContext::activeCtx.handle());

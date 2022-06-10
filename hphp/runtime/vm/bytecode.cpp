@@ -4971,9 +4971,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     auto waitHandle = c_AsyncFunctionWaitHandle::Create(
       fp, func->numSlotsInFrame(), nullptr, suspendOffset, child);
 
-    if (RO::EvalEnableImplicitContext) {
-      waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
-    }
+    waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
     EventHook::FunctionSuspendAwaitEF(
@@ -5001,9 +4999,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     auto waitHandle = c_AsyncGeneratorWaitHandle::Create(
       fp, nullptr, suspendOffset, child);
 
-    if (RO::EvalEnableImplicitContext) {
-      waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
-    }
+    waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
 
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
@@ -5042,16 +5038,12 @@ OPTBLD_INLINE void asyncSuspendR(PC origpc, PC& pc) {
 
   // Await child and suspend the async function/generator. May throw.
   if (!func->isGenerator()) {  // Async function.
-    if (RO::EvalEnableImplicitContext) {
-      frame_afwh(fp)->m_implicitContext = *ImplicitContext::activeCtx;
-    }
+    frame_afwh(fp)->m_implicitContext = *ImplicitContext::activeCtx;
     frame_afwh(fp)->await(suspendOffset, std::move(child));
   } else {  // Async generator.
     auto const gen = frame_async_generator(fp);
     gen->resumable()->setResumeAddr(nullptr, suspendOffset);
-    if (RO::EvalEnableImplicitContext) {
-      gen->getWaitHandle()->m_implicitContext = *ImplicitContext::activeCtx;
-    }
+    gen->getWaitHandle()->m_implicitContext = *ImplicitContext::activeCtx;
     gen->getWaitHandle()->await(std::move(child));
   }
 
@@ -5149,11 +5141,6 @@ OPTBLD_INLINE void iopWHResult() {
 }
 
 OPTBLD_INLINE void iopSetImplicitContextByValue() {
-  if (!RO::EvalEnableImplicitContext) {
-    vmStack().popC();
-    vmStack().pushNull();
-    return;
-  }
   auto const tv = vmStack().topC();
   auto const obj = [&]() -> ObjectData* {
     if (tvIsNull(tv)) return nullptr;

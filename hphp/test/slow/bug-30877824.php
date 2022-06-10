@@ -1,6 +1,7 @@
 <?hh
 
 class C {
+  <<__NEVER_INLINE>>
   function g() {
     $ex = new Exception();
     $bt = $ex->getTrace();

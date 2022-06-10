@@ -46,6 +46,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 
+#include <folly/lang/UncaughtExceptions.h>
 #include <vector>
 
 namespace HPHP {
@@ -2503,6 +2504,17 @@ struct ArraySortTmp {
     if (!old->isVanilla()) {
       m_ad = BespokeArray::PostSort(old, m_ad);
     }
+
+    // Do not update the inout value if we are throwing an exception. Builtins
+    // receive inout values by a TV pointer. The JIT expects that the inout
+    // value will not be updated if the builtin throws. For example, it assumes
+    // that the type remains the same and if an exception is thrown, it uses the
+    // corresponding destructor.
+    if (folly::uncaught_exceptions() > m_excCount) {
+      if (m_ad != old) decRefArr(m_ad);
+      return;
+    }
+
     if (m_ad != old) {
       tvMove(make_array_like_tv(m_ad), m_tv);
     }
@@ -2518,6 +2530,7 @@ struct ArraySortTmp {
  private:
   TypedValue* m_tv;
   ArrayData* m_ad;
+  int m_excCount{folly::uncaught_exceptions()};
 };
 }
 

@@ -789,18 +789,23 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
           // NB: Its safe to unlock first. The Unit can only be freed by
           // releaseFromHashCache() which acquires an exclusive lock on
           // this table slot first (so cannot happen concurrently).
+          lock->release();
           return hit(unit);
         }
 
         // There's no Unit, compile a new one and store it in the cache.
         auto unit = compileNew();
-        if (!unit) return makeCachedFilePtr(nullptr);
+        if (!unit) {
+          lock->release();
+          return makeCachedFilePtr(nullptr);
+        }
         assertx(unit->sha1() == loader.sha1());
         assertx(!unit->hasCacheRef());
         assertx(!unit->hasPerRequestFilepath());
 
         // Try to re-use the original Unit if possible
         if (sameBC(unit)) {
+          lock->release();
           delete unit;
           return CachedFilePtr{*orig, statInfo};
         }
@@ -812,6 +817,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
         // per-request filepaths cannot be stored in this cache.
         assertx(unit->origFilepath()->isStatic());
         if (unit->origFilepath() != path) {
+          lock->release();
           return makeCachedFilePtr(unit);
         }
         unit->makeFilepathPerRequest();
@@ -1151,6 +1157,7 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
   if (auto const tmp = cachedUnit.copy()) {
     if (!isChanged(tmp, statInfo, options, wrapper)) {
       if (forPrefetch || canBeBoundToPath(tmp, rpath)) {
+        lock->release();
         flags = FileLoadFlags::kWaited;
         if (ent) ent->setStr("type", "cache_hit_writelock");
         logTearing(tmp);

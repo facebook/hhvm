@@ -95,6 +95,10 @@ enum Command {
     /// input file.
     Crc(crc::Opts),
 
+    /// Print the source code with expression tree literals desugared.
+    /// Best effort debugging tool.
+    DesugarExprTrees(expr_trees::Opts),
+
     /// Compute facts for a set of files.
     Facts(facts::Opts),
 
@@ -110,7 +114,7 @@ enum Command {
 #[derive(Parser, Debug, Default)]
 struct FlagCommands {
     /// Print the source code with expression tree literals desugared.
-    /// Best effort debugging tool.
+    /// Deprecated: use desugar-expr-trees subcommand.
     #[clap(long)]
     dump_desugared_expression_trees: bool,
 
@@ -237,7 +241,11 @@ fn dispatch(opts: &mut Opts) -> Result<()> {
     } else if opts.flag_commands.test_compile_with_decls {
         compile::test_compile_with_decls(opts)
     } else if opts.flag_commands.dump_desugared_expression_trees {
-        expr_trees::dump_expr_trees(opts)
+        let et_opts = expr_trees::Opts {
+            files: std::mem::take(&mut opts.files),
+            ..Default::default()
+        };
+        expr_trees::desugar_expr_trees(opts, et_opts)
     } else {
         compile::compile_from_text(opts)
     }
@@ -259,16 +267,12 @@ fn main() -> Result<()> {
         Some(Command::Assemble(opts)) => assemble::run(opts),
         Some(Command::Compile(mut opts)) => compile::run(&mut opts),
         Some(Command::Crc(opts)) => crc::run(opts),
+        Some(Command::DesugarExprTrees(et_opts)) => expr_trees::desugar_expr_trees(&opts, et_opts),
+        Some(Command::Facts(facts_opts)) => facts::extract_facts(&mut opts, facts_opts),
         Some(Command::Parse(parse_opts)) => parse::run(&mut opts, parse_opts),
         Some(Command::ParseBench(bench_opts)) => parse::run_bench_command(bench_opts),
-        Some(Command::Facts(facts_opts)) => facts::extract_facts(&mut opts, facts_opts),
-        None => {
-            if opts.daemon {
-                daemon_mode(opts)
-            } else {
-                dispatch(&mut opts)
-            }
-        }
+        None if opts.daemon => daemon_mode(opts),
+        None => dispatch(&mut opts),
     }
 }
 

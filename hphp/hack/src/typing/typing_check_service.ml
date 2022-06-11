@@ -728,7 +728,7 @@ let next
         in
         let ( remaining_workitems_to_process,
               controller,
-              payloads,
+              remaining_payloads,
               job,
               _telemetry ) =
           Typing_service_delegate.collect
@@ -743,14 +743,17 @@ let next
            are done, so we can update the progress bar with the correct number
            of files typechecked.
         *)
-        if List.length payloads = 0 then
+        if
+          List.length !remote_payloads <> 0
+          && List.length remaining_payloads = 0
+        then
           workitems_processed_count :=
             !workitems_processed_count
             + remote_workitems_to_process_length
             - BigList.length remaining_workitems_to_process;
         workitems_to_process := remaining_workitems_to_process;
         delegate_state := controller;
-        remote_payloads := payloads;
+        remote_payloads := remaining_payloads;
         job
       ) else
         None

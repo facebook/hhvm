@@ -19,6 +19,25 @@ module PS = Full_fidelity_positioned_syntax
 module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
 
 (*****************************************************************************)
+(* Profiling utilities *)
+(*****************************************************************************)
+
+let mean samples =
+  List.fold ~init:0.0 ~f:( +. ) samples /. Float.of_int (List.length samples)
+
+let standard_deviation mean samples =
+  let sosq =
+    List.fold
+      ~init:0.0
+      ~f:(fun acc sample ->
+        let diff = sample -. mean in
+        (diff *. diff) +. acc)
+      samples
+  in
+  let sosqm = sosq /. Float.of_int (List.length samples) in
+  Float.sqrt sosqm
+
+(*****************************************************************************)
 (* Types, constants *)
 (*****************************************************************************)
 
@@ -1140,7 +1159,6 @@ let print_elapsed fn desc ~start_time =
 
 let check_file ctx errors files_info ~profile_type_check_multi ~memtrace =
   let profiling = Option.is_some profile_type_check_multi in
-  let is_twice = Option.equal Int.equal profile_type_check_multi (Some 1) in
   if profiling then
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
         let start_time = Unix.gettimeofday () in
@@ -1153,27 +1171,49 @@ let check_file ctx errors files_info ~profile_type_check_multi ~memtrace =
           ~sampling_rate:Memtrace.default_sampling_rate
           ~filename)
   in
-  let rec go n =
-    let errors =
+  let add_timing fn timings closure =
+    let start_cpu = Sys.time () in
+    let result = Lazy.force closure in
+    let elapsed_cpu_time = Sys.time () -. start_cpu in
+    let add_sample = function
+      | Some samples -> Some (elapsed_cpu_time :: samples)
+      | None -> Some [elapsed_cpu_time]
+    in
+    let timings = Relative_path.Map.update fn add_sample timings in
+    (result, timings)
+  in
+  let rec go n timings =
+    let (errors, timings) =
       Relative_path.Map.fold
         files_info
-        ~f:(fun fn fileinfo errors ->
-          let start_time = Unix.gettimeofday () in
-          let (_, new_errors) = Typing_check_utils.type_file ctx fn fileinfo in
-          if profiling && is_twice then
-            print_elapsed fn "second typecheck" ~start_time;
-          errors @ Errors.get_sorted_error_list new_errors)
-        ~init:errors
+        ~f:(fun fn fileinfo (errors, timings) ->
+          let ((_, new_errors), timings) =
+            add_timing fn timings
+            @@ lazy (Typing_check_utils.type_file ctx fn fileinfo)
+          in
+          (errors @ Errors.get_sorted_error_list new_errors, timings))
+        ~init:(errors, timings)
     in
     if n > 1 then
-      go (n - 1)
+      go (n - 1) timings
     else
-      errors
+      (errors, timings)
   in
-  let start_cpu = Sys.time () in
-  let errors = go (max 1 (Option.value ~default:1 profile_type_check_multi)) in
-  if profiling then
-    Printf.printf "total warm cpu time (s) - %f\n" (Sys.time () -. start_cpu);
+  let n_of_times_to_typecheck =
+    max 1 (Option.value ~default:1 profile_type_check_multi)
+  in
+  let timings = Relative_path.Map.empty in
+  let (errors, timings) = go n_of_times_to_typecheck timings in
+  let print_elapsed_cpu_time fn samples =
+    let mean = mean samples in
+    Printf.printf
+      "%s: %d typechecks - %f ± %f (s)\n"
+      (Relative_path.to_absolute fn |> Filename.basename)
+      n_of_times_to_typecheck
+      mean
+      (standard_deviation mean samples)
+  in
+  if profiling then Relative_path.Map.iter timings ~f:print_elapsed_cpu_time;
   Option.iter tracer ~f:Memtrace.stop_tracing;
   errors
 

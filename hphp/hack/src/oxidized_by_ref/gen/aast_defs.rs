@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<40da43359a353f283c3d090fd24c448d>>
+// @generated SignedSource<<45b384f248e44a88b38ada221cb39c6d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -308,7 +308,7 @@ pub use oxidized::aast_defs::Tprim;
 #[repr(C, u8)]
 pub enum Refinement<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    TypeRef(&'a (Sid<'a>, TypeRefinement<'a>)),
+    Rtype(&'a (Sid<'a>, TypeRefinement<'a>)),
 }
 impl<'a> TrivialDrop for Refinement<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Refinement<'arena>);

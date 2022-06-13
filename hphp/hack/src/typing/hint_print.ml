@@ -68,7 +68,7 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
       in
       Fmt.list ~sep:Fmt.(const string " ") bound ppf bounds
     in
-    let member ppf (Aast.TypeRef (ident, ref)) =
+    let member ppf (Aast.Rtype (ident, ref)) =
       Fmt.string ppf ("type " ^ snd ident ^ " ");
       pp_bounds
         ppf

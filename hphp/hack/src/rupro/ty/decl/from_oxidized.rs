@@ -169,6 +169,9 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             | typing_defs_core::Ty_::Tneg(_) => {
                 unreachable!("Not used in decl tys")
             }
+            typing_defs_core::Ty_::Trefinement(_) => {
+                panic!("TODO: Trefinement")
+            }
         };
         Ty::new(reason, ty_)
     }

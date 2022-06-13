@@ -13,7 +13,7 @@ module Reason = Typing_reason
 module Nast = Aast
 
 let class_type r name tyl =
-  mk (r, Tclass ((Reason.to_pos r, name), Nonexact, tyl))
+  mk (r, Tclass ((Reason.to_pos r, name), nonexact, tyl))
 
 let classname r tyl = class_type r SN.Classes.cClassname tyl
 

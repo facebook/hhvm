@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<48129f751a137720db9f3894772d61b2>>
+// @generated SignedSource<<eebdefe6d447de8178aa34b96609de68>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1699,7 +1699,7 @@ impl<P: Params> NodeMut<P> for Refinement {
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
-            Refinement::TypeRef(a0, a1) => {
+            Refinement::Rtype(a0, a1) => {
                 a0.accept(c, v)?;
                 a1.accept(c, v)
             }

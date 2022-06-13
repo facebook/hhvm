@@ -85,6 +85,7 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
        * be enforced at the moment; they are disallowed to have upper bounds.
        *)
       Unenforced
+    | Trefinement _ -> Unenforced
     | Taccess _ -> Unenforced
     | Tlike ty when enable_sound_dynamic ->
       enforcement include_dynamic env visited ty

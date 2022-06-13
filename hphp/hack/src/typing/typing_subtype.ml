@@ -2151,7 +2151,7 @@ and simplify_subtype_i
             invalid_env env
         | (_, Tclass ((_, cname), ex, _))
           when String.equal cname SN.Classes.cStringish
-               && equal_exact ex Nonexact
+               && is_nonexact ex
                && Aast.(
                     equal_tprim tprim_super Tstring
                     || equal_tprim tprim_super Tarraykey) ->
@@ -2188,7 +2188,7 @@ and simplify_subtype_i
         (match deref ty_sub with
         | (_, Tnewtype (enum_name, _, _))
           when String.equal enum_name class_name
-               && equal_exact exact_super Nonexact
+               && is_nonexact exact_super
                && Env.is_enum env enum_name ->
           valid env
         | (_, Tnewtype (cid, _, _))
@@ -2207,18 +2207,18 @@ and simplify_subtype_i
           valid env
         | (_, Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum))
           when String.equal class_name SN.Classes.cXHPChild
-               && equal_exact exact_super Nonexact ->
+               && is_nonexact exact_super ->
           valid env
         | (_, Tprim Nast.Tstring)
           when String.equal class_name SN.Classes.cStringish
-               && equal_exact exact_super Nonexact ->
+               && is_nonexact exact_super ->
           valid env
         (* Match what's done in unify for non-strict code *)
         | (r_sub, Tclass (x_sub, exact_sub, tyl_sub)) ->
           let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
           let exact_match =
             match (exact_sub, exact_super) with
-            | (Nonexact, Exact) -> false
+            | (Nonexact _, Exact) -> false
             | (_, _) -> true
           in
           if String.equal cid_super cid_sub then
@@ -2347,7 +2347,7 @@ and simplify_subtype_i
                   invalid_env env))
         | (_r_sub, Tvec_or_dict (_, tv)) ->
           (match (exact_super, tyl_super) with
-          | (Nonexact, [tv_super])
+          | (Nonexact _, [tv_super])
             when String.equal class_name SN.Collections.cTraversable
                  || String.equal class_name SN.Collections.cContainer ->
             (* vec<tv> <: Traversable<tv_super>
@@ -2357,7 +2357,7 @@ and simplify_subtype_i
              *          and map<_,tv> <: Container<tv_super>
              *)
             simplify_subtype ~subtype_env ~this_ty tv tv_super env
-          | (Nonexact, [tk_super; tv_super])
+          | (Nonexact _, [tk_super; tv_super])
             when String.equal class_name SN.Collections.cKeyedTraversable
                  || String.equal class_name SN.Collections.cKeyedContainer
                  || String.equal class_name SN.Collections.cAnyArray ->
@@ -2367,7 +2367,7 @@ and simplify_subtype_i
               |> simplify_subtype ~subtype_env ~this_ty tk tk_super
               &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
             | _ -> default_subtype env)
-          | (Nonexact, [])
+          | (Nonexact _, [])
             when String.equal class_name SN.Collections.cKeyedTraversable
                  || String.equal class_name SN.Collections.cKeyedContainer
                  || String.equal class_name SN.Collections.cAnyArray ->
@@ -4195,8 +4195,7 @@ let is_type_disjoint env ty1 ty2 =
     | (Tprim tp1, Tprim tp2) -> is_tprim_disjoint tp1 tp2
     | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
     | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))
-      when String.equal cname SN.Classes.cStringish && equal_exact ex Nonexact
-      ->
+      when String.equal cname SN.Classes.cStringish && is_nonexact ex ->
       false
     | (Tprim _, (Tfun _ | Tclass _))
     | ((Tfun _ | Tclass _), Tprim _) ->

@@ -401,7 +401,7 @@ and hint_
     N.Haccess ((pos, root_ty), ids)
   | Aast.Hrefinement (subject, members) ->
     let subject = hint env subject in
-    let member (Aast.TypeRef (ident, ref)) =
+    let member (Aast.Rtype (ident, ref)) =
       let ref =
         match ref with
         | Aast.Texact h -> N.Texact (hint env h)
@@ -412,7 +412,7 @@ and hint_
               N.tr_upper = List.map tr_upper ~f:(hint env);
             }
       in
-      N.TypeRef (ident, ref)
+      N.Rtype (ident, ref)
     in
     N.Hrefinement (subject, List.map members ~f:member)
   | Aast.Hshape { Aast.nsi_allows_unknown_fields; nsi_field_map } ->

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5b6dbd38f1d559fc91e3530491a00d70>>
+// @generated SignedSource<<b2e5cccfd5f097c5beb0b2e018eed475>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1699,7 +1699,7 @@ impl<P: Params> Node<P> for Refinement {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
-            Refinement::TypeRef(a0, a1) => {
+            Refinement::Rtype(a0, a1) => {
                 a0.accept(c, v)?;
                 a1.accept(c, v)
             }

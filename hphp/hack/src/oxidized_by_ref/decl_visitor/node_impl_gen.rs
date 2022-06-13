@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c88336921c230c12cdc82440e0ad00e2>>
+// @generated SignedSource<<fd70de1e945c5382c5fe8405bce885ea>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -141,6 +141,47 @@ impl<'a> Node<'a> for ClassConstRef<'a> {
         }
     }
 }
+impl<'a> Node<'a> for ClassRefinement<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_refinement(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassRefinement {
+                cr_types: ref __binding_0,
+            } => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for ClassTypeRefinement<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_type_refinement(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassTypeRefinement::Texact(ref __binding_0) => __binding_0.accept(v),
+            ClassTypeRefinement::Tloose(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for ClassTypeRefinementBounds<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_type_refinement_bounds(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassTypeRefinementBounds {
+                lower: ref __binding_0,
+                upper: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
 impl<'a> Node<'a> for ClassishKind {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_classish_kind(self)
@@ -264,14 +305,14 @@ impl<'a> Node<'a> for EnumType<'a> {
         }
     }
 }
-impl<'a> Node<'a> for Exact {
+impl<'a> Node<'a> for Exact<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_exact(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             Exact::Exact => {}
-            Exact::Nonexact => {}
+            Exact::Nonexact(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -1020,6 +1061,7 @@ impl<'a> Node<'a> for Ty_<'a> {
         match self {
             Ty_::Tthis => {}
             Ty_::Tapply(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Trefinement(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tmixed => {}
             Ty_::Tlike(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tany(ref __binding_0) => __binding_0.accept(v),

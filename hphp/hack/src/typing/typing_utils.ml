@@ -572,13 +572,7 @@ let shape_field_name env field =
 let unwrap_class_type ty =
   match deref ty with
   | (r, Tapply (name, tparaml)) -> (r, name, tparaml)
-  | ( _,
-      ( Terr | Tdynamic | Tany _ | Tmixed | Tnonnull | Tvec_or_dict _
-      | Tgeneric _ | Toption _ | Tlike _ | Tprim _ | Tfun _ | Ttuple _
-      | Tshape _ | Tunion _ | Tintersection _
-      | Taccess (_, _)
-      | Tthis | Tvar _ ) ) ->
-    raise @@ Invalid_argument "unwrap_class_type got non-class"
+  | _ -> raise @@ Invalid_argument "unwrap_class_type got non-class"
 
 let try_unwrap_class_type x = Option.try_with (fun () -> unwrap_class_type x)
 

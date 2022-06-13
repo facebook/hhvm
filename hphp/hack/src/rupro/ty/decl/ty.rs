@@ -17,10 +17,26 @@ pub use oxidized::{
     aast_defs::{ReifyKind, Tprim as Prim},
     ast_defs::{Abstraction, ClassishKind, ConstraintKind, Visibility},
     typing_defs::ClassConstKind,
-    typing_defs_core::{ConsistentKind, Enforcement, Exact, ParamMode, ShapeKind},
+    typing_defs_core::{ConsistentKind, Enforcement, ParamMode, ShapeKind},
     typing_defs_flags::{self, ClassEltFlags, ClassEltFlagsArgs, FunParamFlags, FunTypeFlags},
     xhp_attribute::{Tag, XhpAttribute},
 };
+
+#[derive(
+    Copy,
+    Clone,
+    Debug,
+    Eq,
+    EqModuloPos,
+    Hash,
+    PartialEq,
+    Serialize,
+    Deserialize
+)]
+pub enum Exact {
+    Exact,
+    Nonexact,
+}
 
 // c.f. ast_defs::XhpEnumValue
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]

@@ -125,6 +125,7 @@ impl std::fmt::Debug for Ty_<'_> {
         match self {
             Tthis => write!(f, "Tthis"),
             Tapply((id, tys)) => f.debug_tuple("Tapply").field(id).field(tys).finish(),
+            Trefinement((ty, rs)) => f.debug_tuple("Trefinement").field(ty).field(rs).finish(),
             Taccess(taccess) => f.debug_tuple("Taccess").field(taccess).finish(),
             Tmixed => write!(f, "Tmixed"),
             Tlike(ty) => f.debug_tuple("Tlike").field(ty).finish(),

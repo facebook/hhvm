@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7895406f8e96b26dd10260f21d57b7bc>>
+// @generated SignedSource<<01c0138a686a44288d066579219363d1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -80,8 +80,6 @@ pub enum IfcFunDecl<'a> {
 }
 impl<'a> TrivialDrop for IfcFunDecl<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(IfcFunDecl<'arena>);
-
-pub use oxidized::typing_defs_core::Exact;
 
 pub use oxidized::typing_defs_core::ValKind;
 
@@ -391,6 +389,9 @@ pub enum Ty_<'a> {
     /// Either an object type or a type alias, ty list are the arguments
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tapply(&'a (PosId<'a>, &'a [&'a Ty<'a>])),
+    /// 'With' refinements of the form `_ with { type T as int; type TC = C; }`.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Trefinement(&'a (&'a Ty<'a>, ClassRefinement<'a>)),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -520,13 +521,7 @@ pub enum Ty_<'a> {
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Tclass(
-        &'a (
-            PosId<'a>,
-            oxidized::typing_defs_core::Exact,
-            &'a [&'a Ty<'a>],
-        ),
-    ),
+    Tclass(&'a (PosId<'a>, Exact<'a>, &'a [&'a Ty<'a>])),
     /// The negation of the type in neg_type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tneg(&'a NegType<'a>),
@@ -557,6 +552,111 @@ pub struct TaccessType<'a>(
 );
 impl<'a> TrivialDrop for TaccessType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TaccessType<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum Exact<'a> {
+    Exact,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Nonexact(&'a ClassRefinement<'a>),
+}
+impl<'a> TrivialDrop for Exact<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Exact<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct ClassRefinement<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub cr_types: s_map::SMap<'a, ClassTypeRefinement<'a>>,
+}
+impl<'a> TrivialDrop for ClassRefinement<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ClassRefinement<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum ClassTypeRefinement<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Texact(&'a Ty<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Tloose(&'a ClassTypeRefinementBounds<'a>),
+}
+impl<'a> TrivialDrop for ClassTypeRefinement<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ClassTypeRefinement<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct ClassTypeRefinementBounds<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub lower: &'a [&'a Ty<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub upper: &'a [&'a Ty<'a>],
+}
+impl<'a> TrivialDrop for ClassTypeRefinementBounds<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ClassTypeRefinementBounds<'arena>);
 
 #[derive(
     Clone,

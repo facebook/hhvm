@@ -406,6 +406,23 @@ impl<R: Reason> FunType<R> {
     }
 }
 
+impl<'a> ToOxidized<'a> for Exact {
+    type Output = oxidized_by_ref::typing_defs::Exact<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use oxidized_by_ref::typing_defs::Exact as E;
+        match &self {
+            Exact::Exact => E::Exact,
+            Exact::Nonexact => {
+                let r = oxidized_by_ref::decl_defs::ClassRefinement {
+                    cr_types: arena_collections::map::Map::empty(),
+                };
+                E::Nonexact(&*arena.alloc(r))
+            }
+        }
+    }
+}
+
 impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
     type Output = oxidized_by_ref::typing_defs::Ty<'a>;
 
@@ -429,7 +446,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
             ))),
             Ty_::Tclass(pos_id, exact, tys) => OTy_::Tclass(&*arena.alloc((
                 pos_id.to_oxidized(arena),
-                *exact,
+                exact.to_oxidized(arena),
                 &*arena.alloc_slice_fill_iter(
                     tys.iter().map(|ty| &*arena.alloc(ty.to_oxidized(arena))),
                 ),

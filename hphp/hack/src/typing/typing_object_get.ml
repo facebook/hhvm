@@ -267,7 +267,7 @@ let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
       ((env, None), None)
   | (r2, Tclass (((_, class_name) as class_id), _, tyl)) ->
     let default () =
-      let ty = mk (r2, Tclass (class_id, Nonexact, tyl)) in
+      let ty = mk (r2, Tclass (class_id, nonexact, tyl)) in
       ((env, None), Some ty)
     in
     begin
@@ -370,6 +370,7 @@ let rec this_appears_covariantly ~contra env ty =
     List.exists fields ~f:(fun (_, f) ->
         this_appears_covariantly ~contra env f.sft_ty)
   | Taccess (ty, _)
+  | Trefinement (ty, _)
   | Tlike ty
   | Toption ty ->
     this_appears_covariantly ~contra env ty

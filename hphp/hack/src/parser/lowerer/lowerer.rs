@@ -962,7 +962,7 @@ fn p_hint<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint> {
 
 fn p_refinement_member<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Refinement> {
     match &node.children {
-        TypeInRefinement(c) => Ok(ast::Refinement::TypeRef(
+        TypeInRefinement(c) => Ok(ast::Refinement::Rtype(
             pos_name(&c.name, env)?,
             if c.type_.is_missing() {
                 let (lower, upper) = p_tconstraints_into_lower_and_upper(&c.constraints, env)?;

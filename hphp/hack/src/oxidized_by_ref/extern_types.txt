@@ -77,7 +77,6 @@ oxidized::typing_defs::ClassConstKind
 oxidized::typing_defs_core::ConsistentKind
 oxidized::typing_defs_core::DestructureKind
 oxidized::typing_defs_core::Enforcement
-oxidized::typing_defs_core::Exact
 oxidized::typing_defs_core::FunTparamsKind
 oxidized::typing_defs_core::ParamMode
 oxidized::typing_defs_core::ShapeKind

@@ -150,6 +150,9 @@ struct
     | Tfun ft -> Tfun (fun_type ft)
     | Tapply (sid, xl) -> Tapply (positioned_id sid, List.map xl ~f:ty)
     | Taccess (root_ty, id) -> Taccess (ty root_ty, positioned_id id)
+    | Trefinement (root_ty, rs) ->
+      let rs = Class_refinement.map ty rs in
+      Trefinement (ty root_ty, rs)
     | Tshape (shape_kind, fdm) ->
       Tshape (shape_kind, ShapeFieldMap.map_and_rekey fdm shape_field_name ty)
 

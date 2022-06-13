@@ -325,6 +325,8 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   | Tlike ty
   | Taccess (ty, _) ->
     get_typarams ty
+  | Trefinement (ty, rs) ->
+    Class_refinement.fold rs ~f:get_typarams_union ~init:(get_typarams ty)
   | Tunion tyl
   | Tintersection tyl
   | Ttuple tyl ->
@@ -677,7 +679,7 @@ and fun_arity env variance h =
   let empty_param_info = None in
   Option.iter h ~f:(hfun_param env variance empty_param_info)
 
-and refinement_member env variance (Aast.TypeRef (_, ref)) =
+and refinement_member env variance (Aast.Rtype (_, ref)) =
   match ref with
   | Aast.Texact h ->
     let pos = Ast_defs.get_pos h in

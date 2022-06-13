@@ -38,177 +38,144 @@ inline bool ArrayData::notCyclic(TypedValue v) const {
   return !tvIsArrayLike(v) || v.m_data.parr != this;
 }
 
-NO_PROFILING
 inline void ArrayData::releaseUncounted() {
   g_array_funcs.releaseUncounted[kind()](this);
 }
 
-NO_PROFILING
 inline ArrayData* ArrayData::copyStatic() const {
   auto ret = g_array_funcs.copyStatic[kind()](this);
   assertx(ret != this && ret->isStatic());
   return ret;
 }
 
-NO_PROFILING
 inline bool ArrayData::isVectorData() const {
   return g_array_funcs.isVectorData[kind()](this);
 }
 
-NO_PROFILING
 inline bool ArrayData::exists(int64_t k) const {
   return g_array_funcs.existsInt[kind()](this, k);
 }
 
-NO_PROFILING
 inline bool ArrayData::exists(const StringData* k) const {
   return g_array_funcs.existsStr[kind()](this, k);
 }
 
-NO_PROFILING
 inline arr_lval ArrayData::lval(int64_t k) {
   return g_array_funcs.lvalInt[kind()](this, k);
 }
 
-NO_PROFILING
 inline arr_lval ArrayData::lval(StringData* k) {
   return g_array_funcs.lvalStr[kind()](this, k);
 }
 
-NO_PROFILING
 inline TypedValue ArrayData::nvGetKey(ssize_t pos) const {
   return g_array_funcs.getPosKey[kind()](this, pos);
 }
 
-NO_PROFILING
 inline TypedValue ArrayData::nvGetVal(ssize_t pos) const {
   return g_array_funcs.getPosVal[kind()](this, pos);
 }
 
-NO_PROFILING
 inline bool ArrayData::posIsValid(ssize_t pos) const {
   return g_array_funcs.posIsValid[kind()](this, pos);
 }
 
-NO_PROFILING
 inline Variant ArrayData::getKey(ssize_t pos) const {
   return Variant::wrap(nvGetKey(pos));
 }
 
-NO_PROFILING
 inline Variant ArrayData::getValue(ssize_t pos) const {
   return Variant::wrap(nvGetVal(pos));
 }
 
-NO_PROFILING
 inline ArrayData* ArrayData::setMove(int64_t k, TypedValue v) {
   assertx(tvIsPlausible(v));
   assertx(cowCheck() || notCyclic(v));
   return g_array_funcs.setIntMove[kind()](this, k, v);
 }
 
-NO_PROFILING
 inline ArrayData* ArrayData::setMove(StringData* k, TypedValue v) {
   assertx(tvIsPlausible(v));
   assertx(cowCheck() || notCyclic(v));
   return g_array_funcs.setStrMove[kind()](this, k, v);
 }
 
-NO_PROFILING
 inline ArrayData* ArrayData::removeMove(int64_t k) {
   return g_array_funcs.removeIntMove[kind()](this, k);
 }
 
-NO_PROFILING
 inline ArrayData* ArrayData::removeMove(const StringData* k) {
   return g_array_funcs.removeStrMove[kind()](this, k);
 }
 
-NO_PROFILING
 inline ArrayData* ArrayData::appendMove(TypedValue v) {
   assertx(v.m_type != KindOfUninit);
   assertx(cowCheck() || notCyclic(v));
   return g_array_funcs.appendMove[kind()](this, v);
 }
 
-NO_PROFILING
 inline ssize_t ArrayData::iter_begin() const {
   return g_array_funcs.iterBegin[kind()](this);
 }
 
-NO_PROFILING
 inline ssize_t ArrayData::iter_last() const {
   return g_array_funcs.iterLast[kind()](this);
 }
 
-NO_PROFILING
 inline ssize_t ArrayData::iter_end() const {
   return g_array_funcs.iterEnd[kind()](this);
 }
 
-NO_PROFILING
 inline ssize_t ArrayData::iter_advance(ssize_t pos) const {
   return g_array_funcs.iterAdvance[kind()](this, pos);
 }
 
-NO_PROFILING
 inline ssize_t ArrayData::iter_rewind(ssize_t pos) const {
   return g_array_funcs.iterRewind[kind()](this, pos);
 }
 
-NO_PROFILING
 inline ArrayData* ArrayData::escalateForSort(SortFunction sf) {
   return g_array_funcs.escalateForSort[kind()](this, sf);
 }
 
-NO_PROFILING
 inline void ArrayData::ksort(int sort_flags, bool ascending) {
   return g_array_funcs.ksort[kind()](this, sort_flags, ascending);
 }
 
-NO_PROFILING
 inline void ArrayData::sort(int sort_flags, bool ascending) {
   return g_array_funcs.sort[kind()](this, sort_flags, ascending);
 }
 
-NO_PROFILING
 inline void ArrayData::asort(int sort_flags, bool ascending) {
   return g_array_funcs.asort[kind()](this, sort_flags, ascending);
 }
 
-NO_PROFILING
 inline bool ArrayData::uksort(const Variant& compare) {
   return g_array_funcs.uksort[kind()](this, compare);
 }
 
-NO_PROFILING
 inline bool ArrayData::usort(const Variant& compare) {
   return g_array_funcs.usort[kind()](this, compare);
 }
 
-NO_PROFILING
 inline bool ArrayData::uasort(const Variant& compare) {
   return g_array_funcs.uasort[kind()](this, compare);
 }
 
-NO_PROFILING
 inline ArrayData* ArrayData::popMove(Variant& value) {
   return g_array_funcs.popMove[kind()](this, value);
 }
 
-NO_PROFILING
 inline void ArrayData::onSetEvalScalar() {
   if (isStatic()) return;
   return g_array_funcs.onSetEvalScalar[kind()](this);
 }
 
-NO_PROFILING
 inline ArrayData* ArrayData::makeUncounted(
     const MakeUncountedEnv& env, bool hasApcTv) {
   return g_array_funcs.makeUncounted[kind()](this, env, hasApcTv);
 }
 
-NO_PROFILING
 inline ArrayData* ArrayData::copy() const {
   return g_array_funcs.copy[kind()](this);
 }
@@ -249,45 +216,38 @@ inline arr_lval ArrayData::lval(TypedValue k) {
                              : lval(detail::getStringKey(k));
 }
 
-NO_PROFILING
 inline TypedValue ArrayData::get(int64_t k) const {
   return g_array_funcs.nvGetInt[kind()](this, k);
 }
 
-NO_PROFILING
 inline TypedValue ArrayData::get(const StringData* k) const {
   return g_array_funcs.nvGetStr[kind()](this, k);
 }
 
-NO_PROFILING
 inline TypedValue ArrayData::getThrow(int64_t k) const {
   auto const res = get(k);
   if (!res.is_init()) getNotFound(k);
   return res;
 }
 
-NO_PROFILING
 inline TypedValue ArrayData::getThrow(const StringData* k) const {
   auto const res = get(k);
   if (!res.is_init()) getNotFound(k);
   return res;
 }
 
-NO_PROFILING
 inline TypedValue ArrayData::get(int64_t k, bool error) const {
   auto const result = get(k);
   if (error && !result.is_init()) getNotFound(k);
   return result;
 }
 
-NO_PROFILING
 inline TypedValue ArrayData::get(const StringData* k, bool error) const {
   auto const result = get(k);
   if (error && !result.is_init()) getNotFound(k);
   return result;
 }
 
-NO_PROFILING
 inline TypedValue ArrayData::get(TypedValue k, bool error) const {
   assertx(IsValidKey(k));
   return detail::isIntKey(k) ? get(detail::getIntKey(k), error)

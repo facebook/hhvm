@@ -45,8 +45,8 @@ pub fn run(mut opts: Opts) -> Result<()> {
 pub fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
     let alloc = Bump::default();
     // If it's not an hhas file don't assemble. Return Err(e):
-    let hcu = assemble(&alloc, f, opts)?; // Assemble will print the tokens to output
-    let filepath = RelativePath::make(relative_path::Prefix::Dummy, f.to_owned());
+    let (hcu, fp) = assemble(&alloc, f, opts)?; // Assemble will print the tokens to output
+    let filepath = RelativePath::make(relative_path::Prefix::Dummy, fp.as_path().to_owned());
     let comp_options: Options = Default::default();
     let ctxt = bytecode_printer::Context::new(&comp_options, Some(&filepath), false);
     let mut output = Vec::new();
@@ -67,7 +67,7 @@ pub fn assemble<'arena>(
     alloc: &'arena Bump,
     f: &Path,
     _opts: &Opts,
-) -> Result<hhbc::hackc_unit::HackCUnit<'arena>> {
+) -> Result<(hhbc::hackc_unit::HackCUnit<'arena>, PathBuf)> {
     let s: Vec<u8> = fs::read(f)?;
     assemble_from_bytes(alloc, &s)
 }
@@ -132,7 +132,7 @@ where
 fn assemble_from_bytes<'arena>(
     alloc: &'arena Bump,
     s: &[u8],
-) -> Result<hhbc::hackc_unit::HackCUnit<'arena>> {
+) -> Result<(hhbc::hackc_unit::HackCUnit<'arena>, PathBuf)> {
     let lex = Lexer::from_str(s);
     let mut lex_iter = lex.into_iter().peekable();
     assemble_from_toks(alloc, &mut lex_iter)
@@ -142,15 +142,16 @@ fn assemble_from_bytes<'arena>(
 fn assemble_from_toks<'arena, 'a, I>(
     alloc: &'arena Bump,
     token_iter: &mut Peekable<I>,
-) -> Result<hhbc::hackc_unit::HackCUnit<'arena>>
+) -> Result<(hhbc::hackc_unit::HackCUnit<'arena>, PathBuf)>
 where
     I: Iterator<Item = Token<'a>>,
 {
     let mut funcs = Vec::new();
     let mut func_refs = None; // Only one func_refs which is itself a list, but that's inside the object
+    let mut fp = PathBuf::new();
     while token_iter.peek() != None {
         if next_if_str(token_iter, Token::is_decl, ".filepath") {
-            assemble_filepath(token_iter)?;
+            fp = assemble_filepath(token_iter)?;
         } else if next_if_str(token_iter, Token::is_decl, ".function") {
             funcs.push(assemble_function(alloc, token_iter)?);
         } else if next_if_str(token_iter, Token::is_decl, ".function_refs") {
@@ -180,7 +181,7 @@ where
         constants: Default::default(),
         fatal: Default::default(),
     };
-    Ok(hcu)
+    Ok((hcu, fp))
 }
 
 /// State of tokenizer here: { ident ident ident ... }
@@ -238,6 +239,7 @@ where
         name,
         body,
         span,
+        // Not too sure where the bottom stuff come from
         coeffects: Default::default(),
         flags: hhbc::hhas_function::HhasFunctionFlags::empty(), // Empty set of flags. Look at rust bitflags for documetnation
         attrs: attr,
@@ -247,13 +249,16 @@ where
 
 /// Parses over filepath. Note that HCU doesn't hold the filepath; filepath is in the context passed to the
 /// bytecode printer. So we don't store the filepath in our HCU or anywhere, but still parse over it
-fn assemble_filepath<'a, I>(token_iter: &mut Peekable<I>) -> Result<()>
+fn assemble_filepath<'a, I>(token_iter: &mut Peekable<I>) -> Result<PathBuf>
 where
     I: Iterator<Item = Token<'a>>,
 {
     // Filepath is .filepath (already consumed), strliteral and semicolon
-    expect(token_iter, Token::into_str_literal)?;
-    expect(token_iter, Token::into_semicolon)
+    let fp = expect(token_iter, Token::into_str_literal)?;
+    let fp = escaper::unquote_str(std::str::from_utf8(fp)?);
+    let fp = PathBuf::from(String::from(fp));
+    expect(token_iter, Token::into_semicolon)?;
+    Ok(fp)
 }
 
 fn assemble_span<'a, I>(token_iter: &mut Peekable<I>) -> Result<hhbc::hhas_pos::HhasSpan>

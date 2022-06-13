@@ -323,6 +323,11 @@ impl<'a> Str<'a> {
         Slice::new(alloc.alloc_str(src.as_ref()).as_bytes())
     }
 
+    /// Make a copy of a slice of bytes in an `'a Bump' and return it as a `Str<'a>`.
+    pub fn new_slice(alloc: &'a bumpalo::Bump, src: &[u8]) -> Str<'a> {
+        Slice::new(alloc.alloc_slice_copy(src))
+    }
+
     /// Cast a `Str<'a>` back into a `&'a str`.
     pub fn unsafe_as_str(&self) -> &'a str {
         // Safety: Assumes `self` has been constructed via `Slice<'a,

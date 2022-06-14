@@ -649,8 +649,7 @@ struct ClassInfo {
    * the trait wasn't flattened into the class (including the trait
    * itself).
    *
-   * Note, unlike baseList, the order of the elements in this vector
-   * is unspecified.
+   * The elements in this vector are sorted by their pointer value.
    */
   CompactVector<ClassInfo*> subclassList;
 
@@ -662,6 +661,49 @@ struct ClassInfo {
    * order.
    */
   CompactVector<ClassInfo*> baseList;
+
+  /*
+   * Information about interfaces' relationship to each other. Used to
+   * speed up subtypeOf and couldBe operations involving
+   * interfaces. Since interfaces are a minority, we heap allocate the
+   * information (so only need a pointer when we don't need
+   * it). Furthermore, we lazily calculate the information (we may not
+   * need the information ever for a given interface.
+   */
+  struct InterfaceInfo {
+    // The set of interfaces or base classes which have some non-empty
+    // intersection with this interface. If an interface is in this
+    // set, one of it's implementations also implements this
+    // ClassInfo. If a non-interface is in this set, it or one of it's
+    // base classes implements this ClassInfo. This set can
+    // potentially be large and is needed rarely, so it is lazily
+    // calculated (on top of InterfaceInfo being lazily calculated).
+    using CouldBeSet = hphp_fast_set<const ClassInfo*>;
+    mutable LockFreeLazy<CouldBeSet> lazyCouldBe;
+
+    // The set of interfaces which this interface is a subtype
+    // of. That is, every implementation of this interface also
+    // implements those interfaces. Every interface is a subtypeOf
+    // itself, but itself is not stored here (space optimization).
+    hphp_fast_set<const ClassInfo*> subtypeOf;
+
+    // Non-nullptr if there's a single class which is a super class of
+    // all implementations of this interface, nullptr otherwise.
+    const ClassInfo* commonBase;
+    // If two interfaces are equivalent (which means they are
+    // implemented by the exact same set of classes), this will point
+    // to the "canonical" one that should be used. Always not
+    // nullptr. If there's no equivalent, it will point to this
+    // ClassInfo.
+    const ClassInfo* equivalent;
+  };
+  // Don't access this directly, use interfaceInfo().
+  LockFreeLazyPtr<InterfaceInfo> lazyInterfaceInfo;
+
+  // Obtain the InterfaceInfo or CouldBeSet for this interface
+  // (calculating it if necessary). This class must be an interface.
+  const InterfaceInfo& interfaceInfo();
+  const InterfaceInfo::CouldBeSet& couldBe();
 
   /*
    * Property types for public static properties, declared on this exact class
@@ -717,8 +759,6 @@ struct ClassInfo {
    */
   bool hasReifiedParent{false};
 
-  const php::Class* phpType() const { return cls; }
-
   /*
    * Return true if this is derived from o.
    */
@@ -755,6 +795,110 @@ const MagicMapInfo magicMethods[] {
   { StaticString{"__toBoolean"}, &ClassInfo::magicBool },
 };
 
+const ClassInfo::InterfaceInfo::CouldBeSet& ClassInfo::couldBe() {
+  return interfaceInfo().lazyCouldBe.get(
+    [this] {
+      // For every implementation of this interface, add all of the
+      // interfaces it implements, and all of its parent classes.
+      InterfaceInfo::CouldBeSet couldBe;
+      for (auto const sub : subclassList) {
+        for (auto const& [_, impl] : sub->implInterfaces) {
+          if (impl == this) continue;
+          couldBe.emplace(impl);
+        }
+        auto c = sub;
+        do {
+          // If we already added it, all subsequent parents are also
+          // added, so we can stop.
+          if (!couldBe.emplace(c).second) break;
+          c = c->parent;
+        } while (c);
+      }
+      return couldBe;
+    }
+  );
+}
+
+const ClassInfo::InterfaceInfo& ClassInfo::interfaceInfo() {
+  assertx(cls->attrs & AttrInterface);
+  return lazyInterfaceInfo.get(
+    [this] {
+      auto info = std::make_unique<ClassInfo::InterfaceInfo>();
+
+      auto const commonAncestor = [] (const ClassInfo* c1,
+                                      const ClassInfo* c2) {
+        if (c1 == c2) return c1;
+        const ClassInfo* ancestor = nullptr;
+        auto it1 = c1->baseList.begin();
+        auto it2 = c2->baseList.begin();
+        while (it1 != c1->baseList.end() && it2 != c2->baseList.end()) {
+          if (*it1 != *it2) break;
+          ancestor = *it1;
+          ++it1;
+          ++it2;
+        }
+        return ancestor;
+      };
+
+      // Start out with the info from the first implementation.
+      if (!subclassList.empty()) {
+        info->commonBase = subclassList[0];
+        for (auto const& [_, impl] : subclassList[0]->implInterfaces) {
+          if (impl == this) continue; // Skip ourself
+          info->subtypeOf.emplace(impl);
+        }
+      }
+
+      // Update the common base and subtypeOf list for every
+      // implementation. We're only a subtype of an interface if
+      // *every* implementation of us implements that interface, so
+      // the set can only shrink.
+      for (auto const sub : subclassList) {
+        if (info->commonBase) {
+          info->commonBase = commonAncestor(info->commonBase, sub);
+        }
+
+        folly::erase_if(
+          info->subtypeOf,
+          [&] (const ClassInfo* i) {
+            return !sub->implInterfaces.count(i->cls->name);
+          }
+        );
+      }
+
+      // Compute equivalency. Two interfaces are equivalent if one is
+      // a subtype of another, and their implementations all implement
+      // the other interface. We canonicalize to the interface with
+      // the name which compares less.
+      info->equivalent = this;
+      for (auto const maybeEquiv : info->subtypeOf) {
+        if (info->equivalent->cls->name->compare(maybeEquiv->cls->name) < 0) {
+          continue;
+        }
+        auto const isEquiv = [&] {
+          for (auto const sub : maybeEquiv->subclassList) {
+            if (!sub->implInterfaces.count(info->equivalent->cls->name)) {
+              return false;
+            }
+          }
+          return true;
+        }();
+        if (isEquiv) info->equivalent = const_cast<ClassInfo*>(maybeEquiv);
+      }
+
+      // Special case: If this interface has a common base, and the
+      // common base implements the interface (which it may not), then
+      // it's the best "equivalent" for this interface.
+      if (info->commonBase &&
+          info->commonBase->implInterfaces.count(cls->name)) {
+        info->equivalent = info->commonBase;
+      }
+
+      return info.release();
+    }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -779,46 +923,88 @@ PrepKind func_param_prep(const php::Func* f, uint32_t paramId) {
 
 namespace res {
 
-// Class type operations here are very conservative for now.
-
 bool Class::same(const Class& o) const {
   return val == o.val;
 }
 
-template <bool returnTrueOnMaybe>
-bool Class::subtypeOfImpl(const Class& o) const {
-  auto s1 = val.left();
-  auto s2 = o.val.left();
-  if (s1 || s2) return returnTrueOnMaybe || s1 == s2;
-  auto c1 = val.right();
-  auto c2 = o.val.right();
+bool Class::exactSubtypeOf(const Class& o) const {
+  // An unresolved class is only a subtype of another if they're the
+  // same.
+  if (val.left() || o.val.left()) return same(o);
+  // If the lhs is an interface, it cannot be a subtype of
+  // anything. The interface class itself has no parents (and
+  // implements nothing), so cannot be a subtype of anything
+  // (including itself).
+  auto const c1 = val.right();
+  if (c1->cls->attrs & AttrInterface) return false;
+  // This does the correct check if the rhs is an interface.
+  return same(o) || c1->derivedFrom(*o.val.right());
+}
+
+bool Class::subSubtypeOf(const Class& o) const {
+  // Class with the same name is always a subtype.
+  if (same(o)) return true;
+  // We know they're not the same, so cannot be a subtype if any are
+  // not resolved.
+  if (val.left() || o.val.left()) return false;
+  auto const c1 = val.right();
+  auto const c2 = o.val.right();
+  if (c1->cls->attrs & AttrInterface) {
+    // lhs is an interface. Since this is the "sub" variant, it means
+    // any implementation of the interface (not the interface class
+    // itself).
+    auto& info = c1->interfaceInfo();
+    if (c2->cls->attrs & AttrInterface) {
+      // If both are interfaces, we can use the InterfaceInfo to see
+      // if lhs is a subtype of the rhs.
+      return info.subtypeOf.count(c2);
+    }
+    // lhs is an interface, but rhs is not. The interface can only be
+    // a subtype of the non-interface if it has a common base which is
+    // a subtype of the rhs.
+    return info.commonBase && info.commonBase->derivedFrom(*c2);
+  }
+  // lhs is not an interface. See if it derives from the rhs (which
+  // does the correct check if the rhs is an interface).
   return c1->derivedFrom(*c2);
 }
 
-bool Class::mustBeSubtypeOf(const Class& o) const {
-  return subtypeOfImpl<false>(o);
+bool Class::exactCouldBe(const Class& o) const {
+  // Two unresolved classes with different names cannot be a subtype
+  // of one, so in the exact case cannot match.
+  if (val.left()) return same(o);
+  // lhs is resolved, but if the rhs is not, cannot match for the same
+  // reason.
+  if (o.val.left()) return false;
+  // For the same reason as exactSubtypeOf(), an interface (for the
+  // exact case) cannot match.
+  auto const c1 = val.right();
+  if (c1->cls->attrs & AttrInterface) return false;
+  // Otherwise equivalent to exactSubtypeOf().
+  return same(o) || c1->derivedFrom(*o.val.right());
 }
 
-bool Class::maybeSubtypeOf(const Class& o) const {
-  return subtypeOfImpl<true>(o);
-}
-
-bool Class::couldBe(const Class& o) const {
+bool Class::subCouldBe(const Class& o) const {
+  // Classes with the same name always can be each other.
   if (same(o)) return true;
+  // Two unresolved classes always can be each other.
+  if (val.left()) return o.val.left();
+  // But an unresolved and resolved class can never be each other.
+  if (o.val.left()) return false;
 
-  // If either types are not unique return true
-  if (val.left() || o.val.left()) return true;
-
-  auto c1 = val.right();
-  auto c2 = o.val.right();
-  // if one or the other is an interface return true for now.
-  // TODO(#3621433): better interface stuff
-  if (c1->cls->attrs & AttrInterface || c2->cls->attrs & AttrInterface) {
-    return true;
+  auto const c1 = val.right();
+  auto const c2 = o.val.right();
+  if (c1->cls->attrs & AttrInterface) {
+    // If lhs is an interface, see if the rhs is in the CouldBeSet
+    // (this works if rhs is an interface or base class).
+    return c1->couldBe().count(c2);
+  } else if (c2->cls->attrs & AttrInterface) {
+    // Same situation, but reversed
+    return c2->couldBe().count(c1);
   }
 
-  // Both types are unique classes so they "could be" if they are in an
-  // inheritance relationship
+  // Both types are non-interfaces so they "could be" if they are in
+  // an inheritance relationship
   if (c1->baseList.size() >= c2->baseList.size()) {
     return c1->baseList[c2->baseList.size() - 1] == c2;
   } else {
@@ -833,20 +1019,16 @@ SString Class::name() const {
   );
 }
 
-bool Class::couldBeInterface() const {
+Optional<res::Class> Class::canonicalizeInterface() const {
   return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) {
-      return cinfo->cls->attrs & AttrInterface;
-    }
-  );
-}
-
-bool Class::mustBeInterface() const {
-  return val.match(
-    [] (SString) { return false; },
-    [] (ClassInfo* cinfo) {
-      return cinfo->cls->attrs & AttrInterface;
+    [&] (SString) -> Optional<res::Class> { return *this; },
+    [&] (ClassInfo* cinfo) -> Optional<res::Class> {
+      if (!(cinfo->cls->attrs & AttrInterface)) return *this;
+      // No implementations is Bottom
+      if (cinfo->subclassList.empty()) return std::nullopt;
+      // Otherwise replace it with its equivalent (which may be
+      // itself).
+      return Class { const_cast<ClassInfo*>(cinfo->interfaceInfo().equivalent) };
     }
   );
 }
@@ -948,28 +1130,6 @@ bool Class::subCouldHaveConstProp() const {
     [] (ClassInfo* cinfo) { return cinfo->subHasConstProp; }
   );
 }
-
-Optional<Class> Class::commonAncestor(const Class& o) const {
-  if (val.left() || o.val.left()) return std::nullopt;
-  auto const c1 = val.right();
-  auto const c2 = o.val.right();
-  if (c1 == c2) return res::Class { c1 };
-  // Walk the arrays of base classes until they match. For common ancestors
-  // to exist they must be on both sides of the baseList at the same positions
-  ClassInfo* ancestor = nullptr;
-  auto it1 = c1->baseList.begin();
-  auto it2 = c2->baseList.begin();
-  while (it1 != c1->baseList.end() && it2 != c2->baseList.end()) {
-    if (*it1 != *it2) break;
-    ancestor = *it1;
-    ++it1; ++it2;
-  }
-  if (ancestor == nullptr) {
-    return std::nullopt;
-  }
-  return res::Class { ancestor };
-}
-
 Optional<res::Class> Class::parent() const {
   if (!val.right()) return std::nullopt;
   auto parent = val.right()->parent;
@@ -990,13 +1150,442 @@ Class::forEachSubclass(const std::function<void(const php::Class*)>& f) const {
 
 std::string show(const Class& c) {
   return c.val.match(
-    [] (SString s) -> std::string {
-      return s->data();
+    [] (SString s) {
+      return folly::sformat("{}*", s);
     },
     [] (ClassInfo* cinfo) {
-      return folly::sformat("{}*", cinfo->cls->name);
+      return cinfo->cls->name->toCppString();
     }
   );
+}
+
+ClassInfo* Class::commonAncestor(ClassInfo* a, ClassInfo* b) {
+  if (a == b) return a;
+  if (!a || !b) return nullptr;
+  ClassInfo* ancestor = nullptr;
+  // Walk the arrays of base classes until they match. For common
+  // ancestors to exist they must be on both sides of the baseList
+  // at the same positions
+  auto it1 = a->baseList.begin();
+  auto it2 = b->baseList.begin();
+  while (it1 != a->baseList.end() && it2 != b->baseList.end()) {
+    if (*it1 != *it2) break;
+    ancestor = *it1;
+    ++it1; ++it2;
+  }
+  return ancestor;
+}
+
+// Call the given callable for every class which is a subclass of
+// *all* the classes in the range. If a class is unresolved, it will
+// be passed, as is, to the callable. If the callable returns false,
+// iteration is stopped.
+template <typename F>
+void Class::visitEverySub(folly::Range<const Class*> classes,
+                          const F& f) {
+  assertx(!classes.empty());
+
+  // Simple case: if there's only one class, just iterate over the
+  // subclass list.
+  if (classes.size() == 1) {
+    auto const cinfo = classes.front().val.right();
+    if (!cinfo) {
+      f(classes.front());
+    } else {
+      for (auto const sub : cinfo->subclassList) {
+        if (!f(Class { sub })) break;
+      }
+    }
+    return;
+  }
+
+  // Otherwise we need to find all of the classes in common:
+  std::vector<ClassInfo*> common;
+
+  // Find the first resolved class, and use that to initialize the
+  // list of subclasses.
+  auto const numClasses = classes.size();
+  int idx = 0;
+  while (idx < numClasses) {
+    if (auto const cinfo = classes[idx].val.right()) {
+      common.insert(
+        common.end(),
+        begin(cinfo->subclassList),
+        end(cinfo->subclassList)
+      );
+      ++idx;
+      break;
+    }
+    if (!f(classes[idx])) return;
+    ++idx;
+  }
+
+  // Now process the result, removing any subclasses which aren't a
+  // subclass of all of the classes.
+  std::vector<ClassInfo*> newCommon;
+  while (idx < numClasses) {
+    if (auto const cinfo = classes[idx].val.right()) {
+      newCommon.clear();
+      std::set_intersection(
+        begin(common),
+        end(common),
+        begin(cinfo->subclassList),
+        end(cinfo->subclassList),
+        std::back_inserter(newCommon)
+      );
+      std::swap(common, newCommon);
+      ++idx;
+      continue;
+    }
+    if (!f(classes[idx])) return;
+    ++idx;
+  }
+
+  // We have the final list. Iterate over these and report them to the
+  // callable.
+  for (auto const c : common) {
+    if (!f(Class { c })) break;
+  }
+}
+
+// Given a list of classes, put them in canonical form for a
+// DCls::IsectSet. It is assumed that couldBe is true between all of
+// the classes in the list, but nothing is assumed otherwise.
+TinyVector<Class, 2> Class::canonicalizeIsects(const TinyVector<Class, 8>& in) {
+  auto const size = in.size();
+  if (size == 0) return {};
+  if (size < 2) return { in.front() };
+
+  // Canonical ordering:
+  auto const compare = [] (Class a, Class b) {
+    auto const c1 = a.val.right();
+    auto const c2 = b.val.right();
+    // Resolved classes always come before unresolved classes.
+    if (!c1) {
+      if (c2) return 1;
+      // Two unresolved classes are just compared by name.
+      return a.val.left()->compare(b.val.left());
+    } else if (!c2) {
+      return -1;
+    }
+
+    // "Smaller" classes (those with less subclasses) should come
+    // first.
+    auto const s1 = c1->subclassList.size();
+    auto const s2 = c2->subclassList.size();
+    if (s1 < s2) return -1;
+    if (s1 > s2) return 1;
+
+    // Non-interfaces should precede interfaces
+    if (c1->cls->attrs & AttrInterface) {
+      if (!(c2->cls->attrs & AttrInterface)) {
+        return 1;
+      }
+    } else if (c2->cls->attrs & AttrInterface) {
+      return -1;
+    }
+    // All else being equal, compare the name.
+    return c1->cls->name->compare(c2->cls->name);
+  };
+
+  // Remove any class which is a superclass of another. Such classes
+  // are redundant because there's a "smaller" class which already
+  // implies it. This also gets rid of duplicates. This is a naive
+  // O(N^2) algorithm but it's fine because the lists do not get very
+  // large at all.
+  TinyVector<Class, 2> out;
+  for (int i = 0; i < size; ++i) {
+    // For every pair of classes:
+    auto const c1 = in[i];
+    auto const subtypeOf = [&] {
+      for (int j = 0; j < size; ++j) {
+        auto const c2 = in[j];
+        if (i == j || !c2.subSubtypeOf(c1)) continue;
+        // c2 is a subtype of c1. If c1 is not a subtype of c2, then
+        // c2 is preferred and we return true to drop c1.
+        if (!c1.subSubtypeOf(c2)) return true;
+        // They're both subtypes of each other, so they're actually
+        // equivalent. We only want to keep one, so use the sorting
+        // order and keep the "lesser" one.
+        auto const cmp = compare(c1, c2);
+        if (cmp > 0 || (cmp == 0 && i > j)) return true;
+      }
+      return false;
+    }();
+    if (!subtypeOf) out.emplace_back(c1);
+  }
+
+  // Finally sort the list
+  std::sort(
+    out.begin(),
+    out.end(),
+    [&] (Class a, Class b) { return compare(a, b) < 0; }
+  );
+  return out;
+}
+
+TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
+                                    folly::Range<const Class*> classes2,
+                                    bool isSub1,
+                                    bool isSub2) {
+  TinyVector<Class, 8> common;
+  Optional<ClassInfo*> commonBase;
+  Optional<hphp_fast_set<ClassInfo*>> commonInterfaces;
+
+  // The algorithm for unioning together two intersection lists is
+  // simple. For every class which is "in" either the first or second
+  // list, track the interfaces which are implemented by all of the
+  // classes, and the common base class amongst all of them. Build a
+  // list of these classes and normalize them.
+
+  auto const processSub = [&] (ClassInfo* cinfo) {
+    assertx(!(cinfo->cls->attrs & AttrInterface));
+
+    // Set commonBase, or update it depending on whether this is the
+    // first class processed.
+    if (!commonBase) {
+      commonBase = cinfo;
+    } else {
+      commonBase = commonAncestor(*commonBase, cinfo);
+    }
+
+    // Likewise, initialize the set of common interfaces, or remove
+    // any which aren't present.
+    if (!commonInterfaces) {
+      commonInterfaces.emplace();
+      for (auto const i : cinfo->implInterfaces) {
+        commonInterfaces->emplace(const_cast<ClassInfo*>(i.second));
+      }
+    } else {
+      folly::erase_if(
+        *commonInterfaces,
+        [&] (ClassInfo* i) {
+          return !cinfo->implInterfaces.count(i->cls->name);
+        }
+      );
+    }
+  };
+
+  auto const processIface = [&] (ClassInfo* cinfo) {
+    assertx(cinfo->cls->attrs & AttrInterface);
+    auto& info = cinfo->interfaceInfo();
+
+    // The logic for processing an interface is similar to processSub,
+    // except we use the interface's common base (if any).
+    auto const ifaceCommon = const_cast<ClassInfo*>(info.commonBase);
+    if (!commonBase) {
+      commonBase = ifaceCommon;
+    } else {
+      commonBase = commonAncestor(*commonBase, ifaceCommon);
+    }
+
+    // Instead of implInterfaces (which isn't meaningful for an
+    // interface), we use the set of interfaces it is a subtype of.
+    if (!commonInterfaces) {
+      commonInterfaces.emplace();
+      for (auto const i : info.subtypeOf) {
+        commonInterfaces->emplace(const_cast<ClassInfo*>(i));
+      }
+      commonInterfaces->emplace(cinfo);
+    } else {
+      folly::erase_if(
+        *commonInterfaces,
+        [&] (ClassInfo* i) { return i != cinfo && !info.subtypeOf.count(i); }
+      );
+    }
+  };
+
+  auto const processList = [&] (folly::Range<const Class*> classes, bool isSub) {
+    if (classes.size() == 1) {
+      // If the list is just a single class, we can process things
+      // more efficiently.
+      auto const cinfo = classes[0].val.right();
+      assertx(cinfo);
+      if (cinfo->cls->attrs & AttrInterface) {
+        // An "exact" interface is just the interface class (not the
+        // implementations). These classes have no parents and
+        // implement nothing, so any union with them is going to
+        // result in TObj/TCls. Return false to bail out and signal
+        // this.
+        if (!isSub) return false;
+        // A "sub" interface. We'll process it's implementations.
+        processIface(cinfo);
+      } else {
+        processSub(cinfo);
+      }
+      return true;
+    }
+
+    // The list has multiple classes. This is more expensive, we need
+    // to visit every subclass in the intersection of the classes on
+    // the list.
+    visitEverySub(
+      classes,
+      [&] (res::Class c) {
+        assertx(c.val.right());
+        // We'll only "visit" non-interface sub-classes, so only use
+        // processSub here.
+        processSub(c.val.right());
+        // No point in continuing if there's nothing in common left.
+        return *commonBase || !commonInterfaces->empty();
+      }
+    );
+    return true;
+  };
+
+  assertx(!classes1.empty());
+  assertx(!classes2.empty());
+  assertx(IMPLIES(!isSub1, classes1.size() == 1));
+  assertx(IMPLIES(!isSub2, classes2.size() == 1));
+
+  // Sanity check that if the list starts with an unresolved class,
+  // then the rest of the list contains nothing but unresolved
+  // classes. If the list starts with a resolved class, processList
+  // will assert if the rest are not resolved.
+  auto const unresolved1 = (bool)classes1[0].val.left();
+  auto const unresolved2 = (bool)classes2[0].val.left();
+  if (debug) {
+    if (unresolved1) {
+      for (auto const c : classes1) always_assert(c.val.left());
+    }
+    if (unresolved2) {
+      for (auto const c : classes2) always_assert(c.val.left());
+    }
+  }
+
+  // Treat lists of unresolved classes separately (since we cannot
+  // look at their subclasses). If one list is all unresolved classes
+  // and the other isn't (and vice versa), there's nothing in common,
+  // so return an empty list (this will become TObj or
+  // TCls). Otherwise return the unresolved classes which are in both
+  // lists. The result is guaranteed to already be canonicalized.
+  if (unresolved1) {
+    if (unresolved2) {
+      TinyVector<Class, 2> out;
+      for (auto const c1 : classes1) {
+        for (auto const c2 : classes2) {
+          if (c1.same(c2)) out.emplace_back(c1);
+        }
+      }
+      return out;
+    }
+    return {};
+  } else if (unresolved2) {
+    return {};
+  }
+
+  // Otherwise process both lists and build the common sets.
+  if (!processList(classes1, isSub1)) return {};
+  if (!processList(classes2, isSub2)) return {};
+  // Combine the common classes
+  if (commonBase && *commonBase) {
+    common.emplace_back(Class { *commonBase });
+  }
+  if (commonInterfaces) {
+    for (auto const i : *commonInterfaces) {
+      common.emplace_back(Class { i });
+    }
+  }
+
+  // And canonicalize
+  return canonicalizeIsects(common);
+}
+
+TinyVector<Class, 2> Class::intersect(folly::Range<const Class*> classes1,
+                                      folly::Range<const Class*> classes2) {
+  TinyVector<Class, 8> common;
+  Optional<ClassInfo*> commonBase;
+  Optional<hphp_fast_set<ClassInfo*>> commonInterfaces;
+
+  // The algorithm for intersecting two intersection lists is similar
+  // to unioning, except we only need to consider the classes which
+  // are subclasses of all the classes in *both* lists.
+
+  assertx(!classes1.empty());
+  assertx(!classes2.empty());
+
+  auto const unresolved1 = (bool)classes1[0].val.left();
+  auto const unresolved2 = (bool)classes2[0].val.left();
+  if (debug) {
+    if (unresolved1) {
+      for (auto const c : classes1) always_assert(c.val.left());
+    }
+    if (unresolved2) {
+      for (auto const c : classes2) always_assert(c.val.left());
+    }
+  }
+
+  // Intersection of a list of all resolved classes and a list of all
+  // unresolved classes (or vice versa) is always going to be the
+  // empty set (an unresolved class cannot be a resolved class
+  // ever). Otherwise if both are unresolved, just combine the lists
+  // and canonicalize them.
+  if (unresolved1) {
+    if (unresolved2) {
+      for (auto const c : classes1) common.emplace_back(c);
+      for (auto const c : classes2) common.emplace_back(c);
+      return canonicalizeIsects(common);
+    }
+    return {};
+  } else if (unresolved2) {
+    return {};
+  }
+
+  // Since we're calculating the intersection, we only have to visit
+  // one list, and check against the other.
+  visitEverySub(
+    classes1,
+    [&] (res::Class c) {
+      // Must have a cinfo because we checked above all the classes
+      // were resolved.
+      auto const cinfo = c.val.right();
+      assertx(cinfo);
+
+      // Could this class be a class in the other list? If not, ignore
+      // it (it's not part of the intersection result).
+      for (auto const other : classes2) {
+        if (!c.exactCouldBe(other)) return true;
+      }
+
+      // Otherwise it is part of the intersection, and we need to
+      // update the common base and interfaces likewise.
+
+      if (!commonBase) {
+        commonBase = cinfo;
+      } else {
+        commonBase = commonAncestor(*commonBase, cinfo);
+      }
+
+      if (!commonInterfaces) {
+        commonInterfaces.emplace();
+        for (auto const i : cinfo->implInterfaces) {
+          commonInterfaces->emplace(const_cast<ClassInfo*>(i.second));
+        }
+      } else {
+        folly::erase_if(
+          *commonInterfaces,
+          [&] (ClassInfo* i) {
+            return !cinfo->implInterfaces.count(i->cls->name);
+          }
+        );
+      }
+
+      // Stop iterating if there's no longer anything in common.
+      return *commonBase || !commonInterfaces->empty();
+    }
+  );
+
+  if (commonBase && *commonBase) {
+    common.emplace_back(Class { *commonBase });
+  }
+  if (commonInterfaces) {
+    for (auto const i : *commonInterfaces) {
+      common.emplace_back(Class { i });
+    }
+  }
+
+  // Canonicalize the common base classes/interfaces.
+  return canonicalizeIsects(common);
 }
 
 Func::Func(Rep val)
@@ -1013,7 +1602,11 @@ SString Func::name() const {
     [&] (FuncFamily* fa) -> SString {
       return fa->possibleFuncs().front()->first;
     },
-    [&] (MethodOrMissing m) { return m.mte->first; }
+    [&] (MethodOrMissing m) { return m.mte->first; },
+    [&] (const Isect& i) -> SString {
+      assertx(i.families.size() > 1);
+      return i.families[0]->possibleFuncs().front()->first;
+    }
   );
 }
 
@@ -1026,7 +1619,8 @@ const php::Func* Func::exactFunc() const {
     [&](FuncInfo* fi)                { return fi->func; },
     [&](const MethTabEntryPair* mte) { return mte->second.func; },
     [&](FuncFamily*)                 { return Ret{}; },
-    [&](MethodOrMissing)             { return Ret{}; }
+    [&](MethodOrMissing)             { return Ret{}; },
+    [&](const Isect&)                { return Ret{}; }
   );
 }
 
@@ -1042,7 +1636,8 @@ bool Func::isFoldable() const {
       return mte->second.func->attrs & AttrIsFoldable;
     },
     [&](FuncFamily*)     { return false; },
-    [&](MethodOrMissing) { return false; }
+    [&](MethodOrMissing) { return false; },
+    [&](const Isect&)    { return false; }
   );
 }
 
@@ -1058,6 +1653,12 @@ bool Func::couldHaveReifiedGenerics() const {
     [&](FuncFamily* fa) { return fa->m_static->m_maybeReified; },
     [&](MethodOrMissing m) {
       return m.mte->second.func->isReified;
+    },
+    [&](const Isect& i) {
+      for (auto const ff : i.families) {
+        if (!ff->m_static->m_maybeReified) return false;
+      }
+      return true;
     }
   );
 }
@@ -1088,6 +1689,12 @@ bool Func::mightCareAboutDynCalls() const {
     [&](FuncFamily* fa) { return fa->m_static->m_maybeCaresAboutDynCalls; },
     [&](MethodOrMissing m) {
       return dyn_call_error_level(m.mte->second.func) > 0;
+    },
+    [&](const Isect& i) {
+      for (auto const ff : i.families) {
+        if (!ff->m_static->m_maybeCaresAboutDynCalls) return false;
+      }
+      return true;
     }
   );
 }
@@ -1106,6 +1713,12 @@ bool Func::mightBeBuiltin() const {
     [&](FuncFamily* fa) { return fa->m_static->m_maybeBuiltin; },
     [&](MethodOrMissing m) {
       return m.mte->second.func->attrs & AttrBuiltin;
+    },
+    [&](const Isect& i) {
+      for (auto const ff : i.families) {
+        if (!ff->m_static->m_maybeBuiltin) return false;
+      }
+      return true;
     }
   );
 }
@@ -1118,7 +1731,14 @@ uint32_t Func::minNonVariadicParams() const {
     [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
     [&] (const MethTabEntryPair* mte) { return numNVArgs(*mte->second.func); },
     [&] (FuncFamily* fa) { return fa->m_static->m_minNonVariadicParams; },
-    [&] (MethodOrMissing m) { return numNVArgs(*m.mte->second.func); }
+    [&] (MethodOrMissing m) { return numNVArgs(*m.mte->second.func); },
+    [&] (const Isect& i) {
+      uint32_t nv = 0;
+      for (auto const ff : i.families) {
+        nv = std::max(nv, ff->m_static->m_minNonVariadicParams);
+      }
+      return nv;
+    }
   );
 }
 
@@ -1130,7 +1750,14 @@ uint32_t Func::maxNonVariadicParams() const {
     [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
     [&] (const MethTabEntryPair* mte) { return numNVArgs(*mte->second.func); },
     [&] (FuncFamily* fa) { return fa->m_static->m_maxNonVariadicParams; },
-    [&] (MethodOrMissing m) { return numNVArgs(*m.mte->second.func); }
+    [&] (MethodOrMissing m) { return numNVArgs(*m.mte->second.func); },
+    [&] (const Isect& i) {
+      auto nv = std::numeric_limits<uint32_t>::max();
+      for (auto const ff : i.families) {
+        nv = std::min(nv, ff->m_static->m_maxNonVariadicParams);
+      }
+      return nv;
+    }
   );
 }
 
@@ -1148,6 +1775,22 @@ const RuntimeCoeffects* Func::requiredCoeffects() const {
     },
     [&] (MethodOrMissing m) {
       return &m.mte->second.func->requiredCoeffects;
+    },
+    [&] (const Isect& i) {
+      const RuntimeCoeffects* coeffects = nullptr;
+      for (auto const ff : i.families) {
+        if (!ff->m_static->m_requiredCoeffects) continue;
+        assertx(
+          IMPLIES(
+            coeffects,
+            *coeffects == *ff->m_static->m_requiredCoeffects
+          )
+        );
+        if (!coeffects) {
+          coeffects = ff->m_static->m_requiredCoeffects.get_pointer();
+        }
+      }
+      return coeffects;
     }
   );
 }
@@ -1166,6 +1809,27 @@ const CompactVector<CoeffectRule>* Func::coeffectRules() const {
     },
     [&] (MethodOrMissing m) {
       return &m.mte->second.func->coeffectRules;
+    },
+    [&] (const Isect& i) {
+      const CompactVector<CoeffectRule>* coeffects = nullptr;
+      for (auto const ff : i.families) {
+        if (!ff->m_static->m_coeffectRules) continue;
+        assertx(
+          IMPLIES(
+            coeffects,
+            std::is_permutation(
+              begin(*coeffects),
+              end(*coeffects),
+              begin(*ff->m_static->m_coeffectRules),
+              end(*ff->m_static->m_coeffectRules)
+            )
+          )
+        );
+        if (!coeffects) {
+          coeffects = ff->m_static->m_coeffectRules.get_pointer();
+        }
+      }
+      return coeffects;
     }
   );
 }
@@ -1179,7 +1843,8 @@ std::string show(const Func& f) {
     [&](FuncInfo*)               { ret += "*"; },
     [&](const MethTabEntryPair*) { ret += "*"; },
     [&](FuncFamily*)             { ret += "+"; },
-    [&](Func::MethodOrMissing)   { ret += "-"; }
+    [&](Func::MethodOrMissing)   { ret += "-"; },
+    [&](const Func::Isect&)      { ret += "&"; }
   );
   return ret;
 }
@@ -2990,8 +3655,8 @@ void compute_subclass_list_rec(IndexData& index,
 }
 
 void compute_included_enums_list_rec(IndexData& index,
-                               ClassInfo* cinfo,
-                               ClassInfo* csub) {
+                                     ClassInfo* cinfo,
+                                     ClassInfo* csub) {
   for (auto const cincluded_enum : csub->includedEnums) {
     auto const cie = const_cast<ClassInfo*>(cincluded_enum);
     cie->subclassList.push_back(cinfo);
@@ -3028,20 +3693,21 @@ void compute_subclass_list(IndexData& index) {
     }
   }
 
-  for (auto& cinfo : index.allClassInfos) {
-    auto& sub = cinfo->subclassList;
-    if ((fixupTraits && cinfo->cls->attrs & AttrTrait) ||
-        (fixupEnums && cinfo->cls->attrs & AnyEnum)) {
-      // traits and enums can be reached by multiple paths, so we need to
-      // uniquify their subclassLists.
+  parallel::for_each(
+    index.allClassInfos,
+    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+      auto& sub = cinfo->subclassList;
       std::sort(begin(sub), end(sub));
-      sub.erase(
-        std::unique(begin(sub), end(sub)),
-        end(sub)
-      );
+
+      if ((fixupTraits && cinfo->cls->attrs & AttrTrait) ||
+          (fixupEnums && cinfo->cls->attrs & AnyEnum)) {
+        // traits and enums can be reached by multiple paths, so we need to
+        // uniquify their subclassLists.
+        sub.erase(std::unique(begin(sub), end(sub)), end(sub));
+      }
+      sub.shrink_to_fit();
     }
-    sub.shrink_to_fit();
-  }
+  );
 }
 
 bool define_func_family(IndexData& index, ClassInfo* cinfo,
@@ -5413,10 +6079,10 @@ Optional<res::Class> Index::resolve_class(Context ctx,
     /*
      * If the preresolved ClassInfo is Unique we can give it out.
      */
-    assertx(tinfo->phpType()->attrs & AttrUnique);
+    assertx(tinfo->cls->attrs & AttrUnique);
     if (debug && m_data->typeAliases.count(clsName)) {
       std::fprintf(stderr, "non unique \"unique\" class: %s\n",
-                   tinfo->phpType()->name->data());
+                   tinfo->cls->name->data());
 
       auto const ta = m_data->typeAliases.find(clsName);
       if (ta != end(m_data->typeAliases)) {
@@ -5609,120 +6275,188 @@ res::Func Index::resolve_method(Context ctx,
   };
 
   if (!is_specialized_cls(clsType)) return general();
-  auto const dcls  = dcls_of(clsType);
-  auto const cinfo = dcls.cls().val.right();
-  if (!cinfo) return general();
 
-  // Classes may have more method families than methods. Any such
-  // method families are guaranteed to all be public so we can do this
-  // lookup as a last gasp before resorting to general().
-  auto const find_extra_method = [&] {
-    if (!options.FuncFamilies) return general();
-    auto singleMethIt = cinfo->singleMethodFamilies.find(name);
-    if (singleMethIt != cinfo->singleMethodFamilies.end()) {
-      return res::Func { singleMethIt->second };
+  // Return the appropriate res::Func for a given ClassInfo (either
+  // exact or sub).
+  auto const process = [&] (ClassInfo* cinfo, bool isExact) {
+    // Classes may have more method families than methods. Any such
+    // method families are guaranteed to all be public so we can do
+    // this lookup as a last gasp before resorting to general().
+    auto const find_extra_method = [&] {
+      if (!options.FuncFamilies) return general();
+      auto singleMethIt = cinfo->singleMethodFamilies.find(name);
+      if (singleMethIt != cinfo->singleMethodFamilies.end()) {
+        return res::Func { singleMethIt->second };
+      }
+      auto methIt = cinfo->methodFamilies.find(name);
+      if (methIt == end(cinfo->methodFamilies)) return general();
+      // If there was a sole implementer we can resolve to a single method, even
+      // if the method was not declared on the interface itself.
+      assertx(methIt->second->possibleFuncs().size() > 1);
+      return res::Func { methIt->second };
+    };
+
+    // Interfaces *only* have the extra methods defined for all
+    // subclasses
+    if (cinfo->cls->attrs & AttrInterface) return find_extra_method();
+
+    /*
+     * Whether or not the context class has a private method with the
+     * same name as the method we're trying to call.
+     */
+    auto const contextMayHavePrivateWithSameName = folly::lazy([&]() -> bool {
+      if (!ctx.cls) return false;
+      auto const cls_it = m_data->classInfo.find(ctx.cls->name);
+      if (cls_it == end(m_data->classInfo)) {
+        // This class had no pre-resolved ClassInfos, which means it
+        // always fatals in any way it could be defined, so it doesn't
+        // matter what we return here (as all methods in the context
+        // class are unreachable code).
+        return true;
+      }
+      // Because of traits, each instantiation of the class could have
+      // different private methods; we need to check them all.
+      auto const iter = cls_it->second->methods.find(name);
+      if (iter != end(cls_it->second->methods) &&
+          iter->second.attrs & AttrPrivate &&
+          iter->second.topLevel) {
+        return true;
+      }
+      return false;
+    });
+
+    /*
+     * Look up the method in the target class.
+     */
+    auto const methIt = cinfo->methods.find(name);
+    if (methIt == end(cinfo->methods)) return find_extra_method();
+    auto const ftarget = methIt->second.func;
+
+    // Be conservative around unflattened trait methods, since their cls
+    // may change at runtime.
+    if (ftarget->cls && is_used_trait(*ftarget->cls)) {
+      return general();
     }
-    auto methIt = cinfo->methodFamilies.find(name);
-    if (methIt == end(cinfo->methodFamilies)) return general();
-    // If there was a sole implementer we can resolve to a single method, even
-    // if the method was not declared on the interface itself.
-    assertx(methIt->second->possibleFuncs().size() > 1);
-    return res::Func { methIt->second };
-  };
 
-  // Interfaces *only* have the extra methods defined for all
-  // subclasses
-  if (cinfo->cls->attrs & AttrInterface) return find_extra_method();
+    // We need to revisit the hasPrivateAncestor code if we start being
+    // able to look up methods on interfaces (currently they have empty
+    // method tables).
+    assertx(!(cinfo->cls->attrs & AttrInterface));
 
-  /*
-   * Whether or not the context class has a private method with the
-   * same name as the method we're trying to call.
-   */
-  auto const contextMayHavePrivateWithSameName = folly::lazy([&]() -> bool {
-    if (!ctx.cls) return false;
-    auto const cls_it = m_data->classInfo.find(ctx.cls->name);
-    if (cls_it == end(m_data->classInfo)) {
-      // This class had no pre-resolved ClassInfos, which means it
-      // always fatals in any way it could be defined, so it doesn't
-      // matter what we return here (as all methods in the context
-      // class are unreachable code).
-      return true;
-    }
-    // Because of traits, each instantiation of the class could have
-    // different private methods; we need to check them all.
-    auto const iter = cls_it->second->methods.find(name);
-    if (iter != end(cls_it->second->methods) &&
-        iter->second.attrs & AttrPrivate &&
-        iter->second.topLevel) {
-      return true;
-    }
-    return false;
-  });
-
-  /*
-   * Look up the method in the target class.
-   */
-  auto const methIt = cinfo->methods.find(name);
-  if (methIt == end(cinfo->methods)) return find_extra_method();
-  auto const ftarget = methIt->second.func;
-
-  // Be conservative around unflattened trait methods, since their cls
-  // may change at runtime.
-  if (ftarget->cls && is_used_trait(*ftarget->cls)) {
-    return general();
-  }
-
-  // We need to revisit the hasPrivateAncestor code if we start being
-  // able to look up methods on interfaces (currently they have empty
-  // method tables).
-  assertx(!(cinfo->cls->attrs & AttrInterface));
-
-  /*
-   * If our candidate method has a private ancestor, unless it is
-   * defined on this class, we need to make sure we don't erroneously
-   * resolve the overriding method if the call is coming from the
-   * context the defines the private method.
-   *
-   * For now this just gives up if the context and the callee class
-   * could be related and the context defines a private of the same
-   * name.  (We should actually try to resolve that method, though.)
-   */
-  if (methIt->second.hasPrivateAncestor &&
-      ctx.cls &&
-      ctx.cls != ftarget->cls) {
-    if (could_be_related(ctx.cls, cinfo->cls)) {
-      if (contextMayHavePrivateWithSameName()) {
-        return general();
+    /*
+     * If our candidate method has a private ancestor, unless it is
+     * defined on this class, we need to make sure we don't erroneously
+     * resolve the overriding method if the call is coming from the
+     * context the defines the private method.
+     *
+     * For now this just gives up if the context and the callee class
+     * could be related and the context defines a private of the same
+     * name.  (We should actually try to resolve that method, though.)
+     */
+    if (methIt->second.hasPrivateAncestor &&
+        ctx.cls &&
+        ctx.cls != ftarget->cls) {
+      if (could_be_related(ctx.cls, cinfo->cls)) {
+        if (contextMayHavePrivateWithSameName()) {
+          return general();
+        }
       }
     }
-  }
 
-  auto const resolve = [&] {
-    create_func_info(*m_data, ftarget);
-    return res::Func { mteFromIt(methIt) };
-  };
+    auto const resolve = [&] {
+      create_func_info(*m_data, ftarget);
+      return res::Func { mteFromIt(methIt) };
+    };
 
-  switch (dcls.type()) {
-  case DCls::Exact:
-    return resolve();
-  case DCls::Sub:
+    if (isExact) return resolve();
     if (methIt->second.attrs & AttrNoOverride) {
       return resolve();
     }
     if (!options.FuncFamilies) return general();
 
-    {
-      auto const singleFamIt = cinfo->singleMethodFamilies.find(name);
-      if (singleFamIt != cinfo->singleMethodFamilies.end()) {
-        return res::Func { singleFamIt->second };
-      }
-      auto const famIt = cinfo->methodFamilies.find(name);
-      if (famIt == end(cinfo->methodFamilies)) return general();
-      assertx(famIt->second->possibleFuncs().size() > 1);
-      return res::Func { famIt->second };
+    auto const singleFamIt = cinfo->singleMethodFamilies.find(name);
+    if (singleFamIt != cinfo->singleMethodFamilies.end()) {
+      return res::Func { singleFamIt->second };
     }
+    auto const famIt = cinfo->methodFamilies.find(name);
+    if (famIt == end(cinfo->methodFamilies)) return general();
+    assertx(famIt->second->possibleFuncs().size() > 1);
+    return res::Func { famIt->second };
+  };
+
+  auto const& dcls  = dcls_of(clsType);
+  if (!dcls.isIsect()) {
+    // If this isn't an intersection, we can just get the res::Func
+    // for this one ClassInfo and we're done.
+    auto const cinfo = dcls.cls().val.right();
+    if (!cinfo) return general();
+    return process(cinfo, dcls.isExact());
   }
-  not_reached();
+
+  using Func = res::Func;
+
+  // Otherwise get a res::Func for all members of the intersection and
+  // combine them into a res::Func::Isect. Since the DCls represents a
+  // class which is a subtype of every ClassInfo in the list, every
+  // res::Func we get is true. This implies that it is invalid for two
+  // different members of the intersection to resolve to different
+  // MethTabEntryPairs, for example.
+
+  auto maybeMissing = true;
+  Func::Isect isect;
+  const MethTabEntryPair* singleMte = nullptr;
+  for (auto const i : dcls.isect()) {
+    auto const cinfo = i.val.right();
+    if (!cinfo) continue;
+
+    auto const func = process(cinfo, false);
+    match<void>(
+      func.val,
+      [&] (Func::MethodName) {},
+      [&] (const MethTabEntryPair* mte) {
+        assertx(IMPLIES(singleMte, singleMte->second.func == mte->second.func));
+        if (!singleMte) singleMte = mte;
+        maybeMissing = false;
+      },
+      [&] (FuncFamily* ff) {
+        isect.families.emplace_back(ff);
+        maybeMissing = false;
+      },
+      [&] (Func::MethodOrMissing m) {
+        assertx(
+          IMPLIES(singleMte, singleMte->second.func == m.mte->second.func)
+        );
+        if (!singleMte) singleMte = m.mte;
+      },
+      [&] (Func::FuncName)     { always_assert(false); },
+      [&] (FuncInfo*)          { always_assert(false); },
+      [&] (const Func::Isect&) { always_assert(false); }
+    );
+  }
+
+  // If we got a MethTabEntryPair, that always wins. Again, every
+  // res::Func is true, and MethTabEntryPair is more specific than a
+  // FuncFamily, so it is preferred.
+  if (singleMte) {
+    // If maybeMissing is true, then *every* resolution was to a
+    // MethodName or MethodOrMissing, so include that fact here by
+    // using MethodOrMissing.
+    if (maybeMissing) return Func { Func::MethodOrMissing { singleMte } };
+    return Func { singleMte };
+  }
+  // We only got unresolved classes, so be pessimistic.
+  if (isect.families.empty()) return general();
+
+  // We could add a FuncFamily multiple times, so remove duplicates.
+  std::sort(begin(isect.families), end(isect.families));
+  isect.families.erase(
+    std::unique(begin(isect.families), end(isect.families)),
+    end(isect.families)
+  );
+  // If everything simplifies down to a single FuncFamily, just use
+  // that.
+  if (isect.families.size() == 1) return Func { isect.families[0] };
+  return Func { std::move(isect) };
 }
 
 Optional<res::Func>
@@ -5983,12 +6717,60 @@ Index::supports_async_eager_return(res::Func rfunc) const {
     [&](FuncFamily* fam) { return fam->m_static->m_supportsAER; },
     [&](res::Func::MethodOrMissing m) {
       return func_supports_AER(m.mte->second.func);
+    },
+    [&](const res::Func::Isect& i) {
+      auto aer = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        if (ff->m_static->m_supportsAER == TriBool::Maybe) continue;
+        assertx(
+          IMPLIES(aer != TriBool::Maybe, aer == ff->m_static->m_supportsAER)
+        );
+        if (aer == TriBool::Maybe) aer = ff->m_static->m_supportsAER;
+      }
+      return aer;
     }
   );
 }
 
 bool Index::is_effect_free(const php::Func* func) const {
   return func_info(*m_data, func)->effectFree;
+}
+
+// Helper function: Given a DCls, visit every subclass it represents,
+// passing it to the given callable. If the callable returns false,
+// stop iteration. Return false if any of the classes is unresolved,
+// true otherwise. This is used to simplify the below functions which
+// need to iterate over all possible subclasses and union the results.
+template <typename F>
+bool Index::visit_every_dcls_cls(const DCls& dcls, const F& f) const {
+  if (dcls.isExact()) {
+    auto const cinfo = dcls.cls().val.right();
+    if (!cinfo) return false;
+    f(cinfo);
+    return true;
+  } else if (dcls.isSub()) {
+    auto const cinfo = dcls.cls().val.right();
+    if (!cinfo) return false;
+    for (auto const sub : cinfo->subclassList) {
+      if (!f(sub)) break;
+    }
+    return true;
+  }
+  auto const& isect = dcls.isect();
+  assertx(isect.size() > 1);
+
+  auto unresolved = false;
+  res::Class::visitEverySub(
+    isect,
+    [&] (res::Class c) {
+      if (auto const cinfo = c.val.right()) {
+        return f(cinfo);
+      }
+      unresolved = true;
+      return false;
+    }
+  );
+  return !unresolved;
 }
 
 ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
@@ -6012,11 +6794,7 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
 
   if (!is_specialized_cls(cls)) return conservative();
 
-  auto const dcls = dcls_of(cls);
-  if (dcls.cls().val.left()) return conservative();
-  auto const cinfo = dcls.cls().val.right();
-
-  // We could easy support the case where we don't know the constant
+  // We could easily support the case where we don't know the constant
   // name, but know the class (like we do for properties), by unioning
   // together all possible constants. However it very rarely happens,
   // but when it does, the set of constants to union together can be
@@ -6027,7 +6805,7 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
   // If this lookup is safe to cache. Some classes can have a huge
   // number of subclasses and unioning together all possible constants
   // can become very expensive. We can aleviate some of this expense
-  // by caching results. We cannot cache a result we use 86cinit
+  // by caching results. We cannot cache a result when we use 86cinit
   // analysis since that can change.
   auto cachable = true;
 
@@ -6073,52 +6851,50 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
     return r;
   };
 
-  // If we know the exact class, just look up the constant and we're
-  // done. Otherwise, loop over all possible subclasses and do the
-  // lookup for each.
-  switch (dcls.type()) {
-    case DCls::Sub: {
-      // Before anything, look up this entry in the cache. We don't
-      // bother with the cache for the DCls::Exact case because it's
-      // quick and there's little point.
-      if (auto const it =
-          m_data->clsConstLookupCache.find(std::make_pair(cinfo->cls, sname));
-          it != m_data->clsConstLookupCache.end()) {
-        ITRACE(4, "cache hit: {}\n", show(it->second));
-        return it->second;
-      }
-
-      Optional<R> result;
-      for (auto const sub : cinfo->subclassList) {
-        if (result) {
-          ITRACE(5, "-> {}\n", show(*result));
-        }
-        auto r = process(sub);
-        if (!result) {
-          result.emplace(std::move(r));
-        } else {
-          *result |= r;
-        }
-      }
-      // This can happen if cls is an interface with no
-      // implementations.
-      if (!result) return notFound();
-
-      // Save this for future lookups if we can
-      if (cachable) {
-        m_data->clsConstLookupCache.emplace(
-          std::make_pair(cinfo->cls, sname),
-          *result
-        );
-      }
-
-      ITRACE(4, "-> {}\n", show(*result));
-      return *result;
+  auto const& dcls = dcls_of(cls);
+  if (dcls.isSub()) {
+    // Before anything, look up this entry in the cache. We don't
+    // bother with the cache for the exact case because it's quick and
+    // there's little point.
+    auto const cinfo = dcls.cls().val.right();
+    if (!cinfo) return conservative();
+    if (auto const it =
+        m_data->clsConstLookupCache.find(std::make_pair(cinfo->cls, sname));
+        it != m_data->clsConstLookupCache.end()) {
+      ITRACE(4, "cache hit: {}\n", show(it->second));
+      return it->second;
     }
-    case DCls::Exact:
-      return process(cinfo);
   }
-  always_assert(false);
+
+  Optional<R> result;
+  auto const resolved = visit_every_dcls_cls(
+    dcls,
+    [&] (const ClassInfo* cinfo) {
+      if (result) ITRACE(5, "-> {}\n", show(*result));
+      auto r = process(cinfo);
+      if (!result) {
+        result.emplace(std::move(r));
+      } else {
+        *result |= r;
+      }
+      return true;
+    }
+  );
+  if (!resolved) return conservative();
+  assertx(result.has_value());
+
+  // Save this for future lookups if we can
+  if (dcls.isSub() && cachable) {
+    auto const cinfo = dcls.cls().val.right();
+    assertx(cinfo);
+    m_data->clsConstLookupCache.emplace(
+      std::make_pair(cinfo->cls, sname),
+      *result
+    );
+  }
+
+  ITRACE(4, "-> {}\n", show(*result));
+  return *result;
 }
 
 ClsTypeConstLookupResult<>
@@ -6162,10 +6938,6 @@ Index::lookup_class_type_constant(
 
   if (!is_specialized_cls(cls)) return conservative();
 
-  auto const dcls = dcls_of(cls);
-  if (dcls.cls().val.left()) return conservative();
-  auto const cinfo = dcls.cls().val.right();
-
   // As in lookup_class_constant, we could handle this, but it's not
   // worth it.
   if (!is_specialized_string(name)) return conservative();
@@ -6207,33 +6979,29 @@ Index::lookup_class_type_constant(
     return r;
   };
 
-  // If we know the exact class, just look up the constant and we're
-  // done. Otherwise, loop over all possible subclasses and do the
-  // lookup for each.
-  switch (dcls.type()) {
-    case DCls::Sub: {
-      Optional<R> result;
-      for (auto const sub : cinfo->subclassList) {
-        if (result) {
-          ITRACE(5, "-> {}\n", show(*result));
-        }
-        auto r = process(sub);
-        if (!result) {
-          result.emplace(std::move(r));
-        } else {
-          *result |= r;
-        }
+  auto const& dcls = dcls_of(cls);
+
+  Optional<R> result;
+  auto const resolved = visit_every_dcls_cls(
+    dcls,
+    [&] (const ClassInfo* cinfo) {
+      if (result) {
+        ITRACE(5, "-> {}\n", show(*result));
       }
-      // This can happen if cls is an interface with no
-      // implementations.
-      if (!result) return notFound();
-      ITRACE(4, "-> {}\n", show(*result));
-      return *result;
+      auto r = process(cinfo);
+      if (!result) {
+        result.emplace(std::move(r));
+      } else {
+        *result |= r;
+      }
+      return true;
     }
-    case DCls::Exact:
-      return process(cinfo);
-  }
-  always_assert(false);
+  );
+  if (!resolved) return conservative();
+  assertx(result.has_value());
+
+  ITRACE(4, "-> {}\n", show(*result));
+  return *result;
 }
 
 Type Index::lookup_constant(Context ctx, SString cnsName) const {
@@ -6353,6 +7121,33 @@ Type Index::lookup_return_type(Context ctx,
                                MethodsInfo* methods,
                                res::Func rfunc,
                                Dep dep) const {
+  auto const funcFamily = [&] (FuncFamily* fam) {
+    add_dependency(*m_data, fam, ctx, dep);
+    return fam->m_returnTy.get(
+      [&] {
+        auto ret = TBottom;
+        for (auto const pf : fam->possibleFuncs()) {
+          auto const finfo = func_info(*m_data, pf->second.func);
+          if (!finfo->func) return TInitCell;
+          ret |= unctx(finfo->returnTy);
+          if (!ret.strictSubtypeOf(BInitCell)) return ret;
+        }
+        return ret;
+      }
+    );
+  };
+  auto const methTab = [&] (const MethTabEntryPair* mte) {
+    if (methods) {
+      if (auto ret = methods->lookupReturnType(*mte->second.func)) {
+        return unctx(std::move(*ret));
+      }
+    }
+    add_dependency(*m_data, mte->second.func, ctx, dep);
+    auto const finfo = func_info(*m_data, mte->second.func);
+    if (!finfo->func) return TInitCell;
+    return unctx(finfo->returnTy);
+  };
+
   return match<Type>(
     rfunc.val,
     [&] (res::Func::FuncName)   { return TInitCell; },
@@ -6361,42 +7156,13 @@ Type Index::lookup_return_type(Context ctx,
       add_dependency(*m_data, finfo->func, ctx, dep);
       return unctx(finfo->returnTy);
     },
-    [&] (const MethTabEntryPair* mte) {
-      if (methods) {
-        if (auto ret = methods->lookupReturnType(*mte->second.func)) {
-          return unctx(std::move(*ret));
-        }
-      }
-      add_dependency(*m_data, mte->second.func, ctx, dep);
-      auto const finfo = func_info(*m_data, mte->second.func);
-      if (!finfo->func) return TInitCell;
-      return unctx(finfo->returnTy);
-    },
-    [&] (FuncFamily* fam) {
-      add_dependency(*m_data, fam, ctx, dep);
-      return fam->m_returnTy.get(
-        [&] {
-          auto ret = TBottom;
-          for (auto const pf : fam->possibleFuncs()) {
-            auto const finfo = func_info(*m_data, pf->second.func);
-            if (!finfo->func) return TInitCell;
-            ret |= unctx(finfo->returnTy);
-            if (!ret.strictSubtypeOf(BInitCell)) return ret;
-          }
-          return ret;
-        }
-      );
-    },
-    [&] (res::Func::MethodOrMissing m) {
-      if (methods) {
-        if (auto ret = methods->lookupReturnType(*m.mte->second.func)) {
-          return unctx(std::move(*ret));
-        }
-      }
-      add_dependency(*m_data, m.mte->second.func, ctx, dep);
-      auto const finfo = func_info(*m_data, m.mte->second.func);
-      if (!finfo->func) return TInitCell;
-      return unctx(finfo->returnTy);
+    [&] (const MethTabEntryPair* mte)  { return methTab(mte); },
+    [&] (FuncFamily* fam)              { return funcFamily(fam); },
+    [&] (res::Func::MethodOrMissing m) { return methTab(m.mte); },
+    [&] (const res::Func::Isect& i) {
+      auto ty = TInitCell;
+      for (auto const ff : i.families) ty &= funcFamily(ff);
+      return ty;
     }
   );
 }
@@ -6407,6 +7173,43 @@ Type Index::lookup_return_type(Context caller,
                                const Type& context,
                                res::Func rfunc,
                                Dep dep) const {
+  auto const funcFamily = [&] (FuncFamily* fam) {
+    add_dependency(*m_data, fam, caller, dep);
+    auto ret = fam->m_returnTy.get(
+      [&] {
+        auto ty = TBottom;
+        for (auto const pf : fam->possibleFuncs()) {
+          auto const finfo = func_info(*m_data, pf->second.func);
+          if (!finfo->func) return TInitCell;
+          ty |= finfo->returnTy;
+          if (!ty.strictSubtypeOf(BInitCell)) return ty;
+        }
+        return ty;
+      }
+    );
+    return return_with_context(std::move(ret), context);
+  };
+  auto const methTab = [&] (const MethTabEntryPair* mte) {
+    auto const finfo = func_info(*m_data, mte->second.func);
+    if (!finfo->func) return TInitCell;
+
+    auto returnType = [&] {
+      if (methods) {
+        if (auto ret = methods->lookupReturnType(*mte->second.func)) {
+          return *ret;
+        }
+      }
+      add_dependency(*m_data, mte->second.func, caller, dep);
+      return finfo->returnTy;
+    }();
+
+    return context_sensitive_return_type(
+      *m_data,
+      { finfo->func, args, context },
+      std::move(returnType)
+    );
+  };
+
   return match<Type>(
     rfunc.val,
     [&] (res::Func::FuncName) {
@@ -6423,61 +7226,13 @@ Type Index::lookup_return_type(Context caller,
         finfo->returnTy
       );
     },
-    [&] (const MethTabEntryPair* mte) {
-      auto const finfo = func_info(*m_data, mte->second.func);
-      if (!finfo->func) return TInitCell;
-
-      auto returnType = [&] {
-        if (methods) {
-          if (auto ret = methods->lookupReturnType(*mte->second.func)) {
-            return *ret;
-          }
-        }
-        add_dependency(*m_data, mte->second.func, caller, dep);
-        return finfo->returnTy;
-      }();
-
-      return context_sensitive_return_type(
-        *m_data,
-        { finfo->func, args, context },
-        std::move(returnType)
-      );
-    },
-    [&] (FuncFamily* fam) {
-      add_dependency(*m_data, fam, caller, dep);
-      auto ret = fam->m_returnTy.get(
-        [&] {
-          auto ret = TBottom;
-          for (auto const pf : fam->possibleFuncs()) {
-            auto const finfo = func_info(*m_data, pf->second.func);
-            if (!finfo->func) return TInitCell;
-            ret |= finfo->returnTy;
-            if (!ret.strictSubtypeOf(BInitCell)) return ret;
-          }
-          return ret;
-        }
-      );
-      return return_with_context(std::move(ret), context);
-    },
-    [&] (res::Func::MethodOrMissing m) {
-      auto const finfo = func_info(*m_data, m.mte->second.func);
-      if (!finfo->func) return TInitCell;
-
-      auto returnType = [&] {
-        if (methods) {
-          if (auto ret = methods->lookupReturnType(*m.mte->second.func)) {
-            return *ret;
-          }
-        }
-        add_dependency(*m_data, m.mte->second.func, caller, dep);
-        return finfo->returnTy;
-      }();
-
-      return context_sensitive_return_type(
-        *m_data,
-        { finfo->func, args, context },
-        std::move(returnType)
-      );
+    [&] (const MethTabEntryPair* mte)  { return methTab(mte); },
+    [&] (FuncFamily* fam)              { return funcFamily(fam); },
+    [&] (res::Func::MethodOrMissing m) { return methTab(m.mte); },
+    [&] (const res::Func::Isect& i) {
+      auto ty = TInitCell;
+      for (auto const ff : i.families) ty &= funcFamily(ff);
+      return ty;
     }
   );
 }
@@ -6537,6 +7292,15 @@ Optional<uint32_t> Index::lookup_num_inout_params(
     },
     [&] (res::Func::MethodOrMissing m) {
       return func_num_inout(m.mte->second.func);
+    },
+    [&] (const res::Func::Isect& i) {
+      Optional<uint32_t> numInOut;
+      for (auto const ff : i.families) {
+        if (!ff->m_static->m_numInOut) continue;
+        assertx(IMPLIES(numInOut, *numInOut == *ff->m_static->m_numInOut));
+        if (!numInOut) numInOut = ff->m_static->m_numInOut;
+      }
+      return numInOut;
     }
   );
 }
@@ -6544,6 +7308,13 @@ Optional<uint32_t> Index::lookup_num_inout_params(
 PrepKind Index::lookup_param_prep(Context,
                                   res::Func rfunc,
                                   uint32_t paramId) const {
+  auto const fromFuncFamily = [&] (FuncFamily* ff) {
+    if (paramId >= ff->m_static->m_paramPreps.size()) {
+      return PrepKind{TriBool::No, TriBool::No};
+    }
+    return ff->m_static->m_paramPreps[paramId];
+  };
+
   return match<PrepKind>(
     rfunc.val,
     [&] (res::Func::FuncName s) {
@@ -6562,14 +7333,30 @@ PrepKind Index::lookup_param_prep(Context,
     [&] (const MethTabEntryPair* mte) {
       return func_param_prep(mte->second.func, paramId);
     },
-    [&] (FuncFamily* fam) {
-      if (paramId >= fam->m_static->m_paramPreps.size()) {
-        return PrepKind{TriBool::No, TriBool::No};
-      }
-      return fam->m_static->m_paramPreps[paramId];
-    },
+    [&] (FuncFamily* fam) { return fromFuncFamily(fam); },
     [&] (res::Func::MethodOrMissing m) {
       return func_param_prep(m.mte->second.func, paramId);
+    },
+    [&] (const res::Func::Isect& i) {
+      auto inOut = TriBool::Maybe;
+      auto readonly = TriBool::Maybe;
+
+      for (auto const ff : i.families) {
+        auto const prepKind = fromFuncFamily(ff);
+        if (prepKind.inOut != TriBool::Maybe) {
+          assertx(IMPLIES(inOut != TriBool::Maybe, inOut == prepKind.inOut));
+          if (inOut == TriBool::Maybe) inOut = prepKind.inOut;
+        }
+
+        if (prepKind.readonly != TriBool::Maybe) {
+          assertx(
+            IMPLIES(readonly != TriBool::Maybe, readonly == prepKind.readonly)
+          );
+          if (readonly == TriBool::Maybe) readonly = prepKind.readonly;
+        }
+      }
+
+      return PrepKind{inOut, readonly};
     }
   );
 }
@@ -6599,6 +7386,22 @@ TriBool Index::lookup_return_readonly(
     },
     [&] (res::Func::MethodOrMissing m) {
       return yesOrNo(m.mte->second.func->isReadonlyReturn);
+    },
+    [&] (const res::Func::Isect& i) {
+      auto readOnly = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        if (ff->m_static->m_isReadonlyReturn == TriBool::Maybe) continue;
+        assertx(
+          IMPLIES(
+            readOnly != TriBool::Maybe,
+            readOnly == ff->m_static->m_isReadonlyReturn
+          )
+        );
+        if (readOnly == TriBool::Maybe) {
+          readOnly = ff->m_static->m_isReadonlyReturn;
+        }
+      }
+      return readOnly;
     }
   );
 }
@@ -6628,6 +7431,22 @@ TriBool Index::lookup_readonly_this(
     },
     [&] (res::Func::MethodOrMissing m) {
       return yesOrNo(m.mte->second.func->isReadonlyThis);
+    },
+    [&] (const res::Func::Isect& i) -> TriBool {
+      auto readOnly = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        if (ff->m_static->m_isReadonlyThis == TriBool::Maybe) continue;
+        assertx(
+          IMPLIES(
+            readOnly != TriBool::Maybe,
+            readOnly == ff->m_static->m_isReadonlyThis
+          )
+        );
+        if (readOnly == TriBool::Maybe) {
+          readOnly = ff->m_static->m_isReadonlyThis;
+        }
+      }
+      return readOnly;
     }
   );
 }
@@ -6714,6 +7533,8 @@ PropLookupResult<> Index::lookup_static(Context ctx,
   ITRACE(4, "lookup_static: {} {}::${}\n", show(ctx), show(cls), show(name));
   Trace::Indent _;
 
+  using R = PropLookupResult<>;
+
   // First try to obtain the property name as a static string
   auto const sname = [&] () -> SString {
     // Treat non-string names conservatively, but the caller should be
@@ -6726,7 +7547,7 @@ PropLookupResult<> Index::lookup_static(Context ctx,
   // anything, and anything might throw.
   auto const conservative = [&] {
     ITRACE(4, "conservative\n");
-    return PropLookupResult<>{
+    return R{
       TInitCell,
       sname,
       TriBool::Maybe,
@@ -6740,10 +7561,6 @@ PropLookupResult<> Index::lookup_static(Context ctx,
   // If we don't know what `cls' is, there's not much we can do.
   if (!is_specialized_cls(cls)) return conservative();
 
-  auto const dcls = dcls_of(cls);
-  if (dcls.cls().val.left()) return conservative();
-  auto const cinfo = dcls.cls().val.right();
-
   // Turn the context class into a ClassInfo* for convenience.
   const ClassInfo* ctxCls = nullptr;
   if (ctx.cls) {
@@ -6755,53 +7572,36 @@ PropLookupResult<> Index::lookup_static(Context ctx,
     ctxCls = rCtx.val.right();
   }
 
-  switch (dcls.type()) {
-    case DCls::Sub: {
-      // We know that `cls' is at least dcls.type, but could be a
-      // subclass. For every subclass (including dcls.type itself),
-      // start the property lookup from there, and union together all
-      // the potential results. This could potentially visit a lot of
-      // parent classes redundently, so tell it not to look into
-      // parent classes, unless we're processing dcls.type.
-      Optional<PropLookupResult<>> result;
-      for (auto const sub : cinfo->subclassList) {
-        auto r = lookup_static_impl(
-          *m_data,
-          ctx,
-          ctxCls,
-          privateProps,
-          sub,
-          sname,
-          !sname && sub != cinfo
-        );
-        ITRACE(4, "{} -> {}\n", sub->cls->name, show(r));
-        if (!result) {
-          result.emplace(std::move(r));
-        } else {
-          *result |= r;
-        }
-      }
-      assertx(result.has_value());
-      ITRACE(4, "union -> {}\n", show(*result));
-      return *result;
-    }
-    case DCls::Exact: {
-      // We know what exactly `cls' is. Just do the property lookup
-      // starting from there.
-      auto const r = lookup_static_impl(
+  auto const& dcls = dcls_of(cls);
+  auto const start = dcls.cls();
+
+  Optional<R> result;
+  auto const resolved = visit_every_dcls_cls(
+    dcls,
+    [&] (const ClassInfo* cinfo) {
+      auto r = lookup_static_impl(
         *m_data,
         ctx,
         ctxCls,
         privateProps,
         cinfo,
         sname,
-        false
+        dcls.isSub() && !sname && cinfo != start.val.right()
       );
       ITRACE(4, "{} -> {}\n", cinfo->cls->name, show(r));
-      return r;
+      if (!result) {
+        result.emplace(std::move(r));
+      } else {
+        *result |= r;
+      }
+      return true;
     }
-  }
-  always_assert(false);
+  );
+  if (!resolved) return conservative();
+  assertx(result.has_value());
+
+  ITRACE(4, "union -> {}\n", show(*result));
+  return *result;
 }
 
 Type Index::lookup_public_prop(const Type& cls, const Type& name) const {
@@ -6810,30 +7610,20 @@ Type Index::lookup_public_prop(const Type& cls, const Type& name) const {
   if (!is_specialized_string(name)) return TCell;
   auto const sname = sval_of(name);
 
-  auto const dcls = dcls_of(cls);
-  if (dcls.cls().val.left()) return TCell;
-  auto const cinfo = dcls.cls().val.right();
-
-  switch (dcls.type()) {
-    case DCls::Sub: {
-      auto ty = TBottom;
-      for (auto const sub : cinfo->subclassList) {
-        ty |= lookup_public_prop_impl(
-          *m_data,
-          sub,
-          sname
-        );
-      }
-      return ty;
-    }
-    case DCls::Exact:
-      return lookup_public_prop_impl(
+  auto ty = TBottom;
+  auto const resolved = visit_every_dcls_cls(
+    dcls_of(cls),
+    [&] (const ClassInfo* cinfo) {
+      ty |= lookup_public_prop_impl(
         *m_data,
         cinfo,
         sname
       );
-  }
-  always_assert(false);
+      return ty.strictSubtypeOf(TCell);
+    }
+  );
+  if (!resolved) return TCell;
+  return ty;
 }
 
 Type Index::lookup_public_prop(const php::Class* cls, SString name) const {
@@ -6945,10 +7735,6 @@ PropMergeResult<> Index::merge_static_type(
   // check if we can determine the class.
   if (!is_specialized_cls(cls)) return unknownCls();
 
-  auto const dcls = dcls_of(cls);
-  if (dcls.cls().val.left()) return unknownCls();
-  auto const cinfo = dcls.cls().val.right();
-
   const ClassInfo* ctxCls = nullptr;
   if (ctx.cls) {
     auto const rCtx = resolve_class(ctx.cls);
@@ -6965,45 +7751,14 @@ PropMergeResult<> Index::merge_static_type(
     publicMutations.mergeKnown(ci, prop, val);
   };
 
-  switch (dcls.type()) {
-    case DCls::Sub: {
-      // We know this class is either dcls.type, or a child class of
-      // it. For every child of dcls.type (including dcls.type
-      // itself), do the merge starting from it. To avoid redundant
-      // work, only iterate into parent classes if we're dcls.type
-      // (this is only a matter of efficiency. The merge is
-      // idiompotent).
-      Optional<PropMergeResult<>> result;
-      for (auto const sub : cinfo->subclassList) {
-        auto r = merge_static_type_impl(
-          *m_data,
-          ctx,
-          mergePublic,
-          privateProps,
-          ctxCls,
-          sub,
-          sname,
-          val,
-          checkUB,
-          ignoreConst,
-          mustBeReadOnly,
-          !sname && sub != cinfo
-        );
-        ITRACE(4, "{} -> {}\n", sub->cls->name, show(r));
-        if (!result) {
-          result.emplace(std::move(r));
-        } else {
-          *result |= r;
-        }
-      }
-      assertx(result.has_value());
-      ITRACE(4, "union -> {}\n", show(*result));
-      return *result;
-    }
-    case DCls::Exact: {
-      // We know the class exactly. Do the merge starting from only
-      // it.
-      auto const r = merge_static_type_impl(
+  auto const& dcls = dcls_of(cls);
+  auto const start = dcls.cls();
+
+  Optional<R> result;
+  auto const resolved = visit_every_dcls_cls(
+    dcls,
+    [&] (const ClassInfo* cinfo) {
+      auto r = merge_static_type_impl(
         *m_data,
         ctx,
         mergePublic,
@@ -7015,13 +7770,21 @@ PropMergeResult<> Index::merge_static_type(
         checkUB,
         ignoreConst,
         mustBeReadOnly,
-        false
+        dcls.isSub() && !sname && cinfo != start.val.right()
       );
       ITRACE(4, "{} -> {}\n", cinfo->cls->name, show(r));
-      return r;
+      if (!result) {
+        result.emplace(std::move(r));
+      } else {
+        *result |= r;
+      }
+      return true;
     }
-  }
-  always_assert(false);
+  );
+  if (!resolved) return unknownCls();
+  assertx(result.has_value());
+  ITRACE(4, "union -> {}\n", show(*result));
+  return *result;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -7130,7 +7893,7 @@ void Index::refine_class_constants(
         }
       } else {
         always_assert_flog(
-          more_refined_for_index(c.second, old.type),
+          c.second.moreRefined(old.type),
           "Class constant type invariant violated for {}::{}\n"
           "    {} is not at least as refined as {}\n",
           ctx.func->cls->name,
@@ -7220,7 +7983,7 @@ void Index::init_return_type(const php::Func* func) {
     tcT = vec(std::move(types));
   }
 
-  tcT = loosen_interfaces(loosen_all(to_cell(std::move(tcT))));
+  tcT = loosen_all(to_cell(std::move(tcT)));
 
   FTRACE(4, "Pre-fixup return type for {}{}{}: {}\n",
          func->cls ? func->cls->name->data() : "",
@@ -7238,7 +8001,6 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
                                DependencyContextSet& deps) {
   auto const& func = fa.ctx.func;
   auto const finfo = create_func_info(*m_data, func);
-  auto const t = loosen_interfaces(fa.inferredReturn);
 
   auto const error_loc = [&] {
     return folly::sformat(
@@ -7275,13 +8037,13 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
   }
 
   auto resetFuncFamilies = false;
-  if (t.strictlyMoreRefined(finfo->returnTy)) {
+  if (fa.inferredReturn.strictlyMoreRefined(finfo->returnTy)) {
     if (finfo->returnRefinements < options.returnTypeRefineLimit) {
-      finfo->returnTy = t;
+      finfo->returnTy = fa.inferredReturn;
       // We've modifed the return type, so reset any cached FuncFamily
       // return types.
       resetFuncFamilies = true;
-      dep = is_scalar(t) ?
+      dep = is_scalar(fa.inferredReturn) ?
         Dep::ReturnTy | Dep::InlineDepthLimit : Dep::ReturnTy;
       finfo->returnRefinements += fa.localReturnRefinements + 1;
       if (finfo->returnRefinements > options.returnTypeRefineLimit) {
@@ -7292,11 +8054,11 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
     }
   } else {
     always_assert_flog(
-      more_refined_for_index(t, finfo->returnTy),
+      fa.inferredReturn.moreRefined(finfo->returnTy),
       "Index return type invariant violated in {}.\n"
       "   {} is not at least as refined as {}\n",
       error_loc(),
-      show(t),
+      show(fa.inferredReturn),
       show(finfo->returnTy)
     );
   }
@@ -7357,7 +8119,7 @@ bool Index::refine_closure_use_vars(const php::Class* cls,
       current[i] = vars[i];
     } else {
       always_assert_flog(
-        more_refined_for_index(vars[i], current[i]),
+        vars[i].moreRefined(current[i]),
         "Index closure_use_var invariant violated in {}.\n"
         "   {} is not at least as refined as {}\n",
         cls->name,
@@ -7391,7 +8153,7 @@ void refine_private_propstate(Container& cont,
     auto& target = elm->second[kv.first];
     assertx(target.tc == kv.second.tc);
     always_assert_flog(
-      more_refined_for_index(kv.second.ty, target.ty),
+      kv.second.ty.moreRefined(target.ty),
       "PropState refinement failed on {}::${} -- {} was not a subtype of {}\n",
       cls->name->data(),
       kv.first->data(),
@@ -7711,32 +8473,27 @@ res::Func Index::do_resolve(const php::Func* f) const {
 bool Index::must_be_derived_from(const php::Class* cls,
                                  const php::Class* parent) const {
   if (cls == parent) return true;
-  auto const clsClass_it   = m_data->classInfo.find(cls->name);
-  auto const parentClass_it = m_data->classInfo.find(parent->name);
-  if (clsClass_it == end(m_data->classInfo) || parentClass_it == end(m_data->classInfo)) {
-    return true;
+  auto const clsIt = m_data->classInfo.find(cls->name);
+  auto const parentIt = m_data->classInfo.find(parent->name);
+  if (clsIt == end(m_data->classInfo) || parentIt == end(m_data->classInfo)) {
+    return false;
   }
-
-  auto const rCls = res::Class { clsClass_it->second };
-  auto const rPar = res::Class { parentClass_it->second };
-  return rCls.mustBeSubtypeOf(rPar);
+  return clsIt->second->derivedFrom(*parentIt->second);
 }
 
 // Return true if any possible definition of one php::Class could
 // derive from another at runtime, or vice versa.
-bool
-Index::could_be_related(const php::Class* cls,
-                        const php::Class* parent) const {
+bool Index::could_be_related(const php::Class* cls,
+                             const php::Class* parent) const {
   if (cls == parent) return true;
-  auto const clsClass_it   = m_data->classInfo.find(cls->name);
-  auto const parentClass_it = m_data->classInfo.find(parent->name);
-  if (clsClass_it == end(m_data->classInfo) || parentClass_it == end(m_data->classInfo)) {
-    return false;
+  auto const clsIt = m_data->classInfo.find(cls->name);
+  auto const parentIt = m_data->classInfo.find(parent->name);
+  if (clsIt == end(m_data->classInfo) || parentIt == end(m_data->classInfo)) {
+    return true;
   }
-
-  auto const rCls = res::Class { clsClass_it->second };
-  auto const rPar = res::Class { parentClass_it->second };
-  return rCls.couldBe(rPar);
+  return
+    clsIt->second->derivedFrom(*parentIt->second) ||
+    parentIt->second->derivedFrom(*clsIt->second);
 }
 
 //////////////////////////////////////////////////////////////////////

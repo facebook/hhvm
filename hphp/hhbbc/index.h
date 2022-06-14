@@ -53,6 +53,8 @@ struct MethodsInfo;
 
 struct TypeStructureResolution;
 
+struct DCls;
+
 extern const Type TCell;
 
 namespace php {
@@ -311,29 +313,41 @@ struct Class {
   bool same(const Class&) const;
 
   /*
-   * Returns true if this class is definitely going to be a subtype
-   * of `o' at runtime.  If this function returns false, this may
-   * still be a subtype of `o' at runtime, it just may not be known.
-   * A typical example is with "non unique" classes.
+   * Returns true if this class is a subtype of 'o'. That is, every
+   * subclass of 'this' (including 'this' itself) is a subclass of
+   * 'o'. For the exact variant, 'this' is considered to be exact
+   * (that is, exactly that class). For the sub variant, 'this' could
+   * also be a subclass. This distinction only matters if 'this' is an
+   * interface. 'o' is always considered to be a subclass (otherwise
+   * you would use same()).
+   *
+   * If 'this' is an interface and the exact variant is used, then the
+   * interface class itself is tested. If the sub variant is used,
+   * then all the classes which implement the interface are tested
+   * (which does not include the interface class itself).
+   *
+   * Note: unresolved classes are not subtypes of anything except
+   * themself.
    */
-  bool mustBeSubtypeOf(const Class& o) const;
+  bool exactSubtypeOf(const Class& o) const;
+  bool subSubtypeOf(const Class& o) const;
 
   /*
-   * Returns false if this class is definitely not going to be a subtype
-   * of `o' at runtime.  If this function returns true, this may
-   * still not be a subtype of `o' at runtime, it just may not be known.
-   * A typical example is with "non unique" classes.
+   * Returns false if this class has no subclasses in common with
+   * 'o'. This is equivalent to saying that their intersection is
+   * empty. For the exact variant, 'this' is considered to be exactly
+   * that class (no sub-classes). For the sub variant, 'this' might be
+   * that class, or any subclass of that class.
+   *
+   * Since couldBe is symmetric, this covers all of the cases. 'o' is
+   * always considered to be a subclass. (Both being exact is covered
+   * by same()).
+   *
+   * Note: unresolved classes always can be another unresolved class,
+   * and never a resolved class.
    */
-  bool maybeSubtypeOf(const Class& o) const;
-
-  /*
-   * If this function return false, it is known that this class
-   * is in no subtype relationship with the argument Class 'o'.
-   * Returns true if this class could be a subtype of `o' at runtime.
-   * When true is returned the two classes may still be unrelated but it is
-   * not possible to tell. A typical example is with "non unique" classes.
-   */
-  bool couldBe(const Class& o) const;
+  bool exactCouldBe(const Class& o) const;
+  bool subCouldBe(const Class& o) const;
 
   /*
    * Returns the name of this class.  Non-null guarantee.
@@ -341,18 +355,16 @@ struct Class {
   SString name() const;
 
   /*
-   * Whether this class could possibly be an interface/interface or trait.
-   *
-   * True means it might be, false means it is not.
+   * If this class is an interface, return the "canonical" interface
+   * among the set of equivalent interfaces. If this interface has no
+   * implementations, it's equivalent to Bottom, and std::nullopt is
+   * returned. If this class is not an interface, itself is
+   * returned. This should be called when wrapping a class within a
+   * Type to ensure that every Type has an unique canonical
+   * representation.
    */
-  bool couldBeInterface() const;
+  Optional<res::Class> canonicalizeInterface() const;
 
-  /*
-   * Whether this class must be an interface.
-   *
-   * True means it is, false means it might not be.
-   */
-  bool mustBeInterface() const;
   /*
    * Returns whether this type has the no override attribute, that is, if it
    * is a final class (explicitly marked by the user or known by the static
@@ -413,12 +425,6 @@ struct Class {
   bool subCouldHaveConstProp() const;
 
   /*
-   * Returns the Class that is the first common ancestor between 'this' and 'o'.
-   * If there is no common ancestor std::nullopt is returned
-   */
-  Optional<Class> commonAncestor(const Class& o) const;
-
-  /*
    * Returns the res::Class for this Class's parent if there is one,
    * or nullptr.
    */
@@ -443,19 +449,52 @@ struct Class {
    */
   void forEachSubclass(const std::function<void(const php::Class*)>&) const;
 
-  // Convert this class to/from an opaque integer. The integer is
-  // "pointerish" (has upper bits cleared), so can be used in
-  // something like CompactTaggedPtr. It is not, however, guaranteed
-  // to be aligned (lower bits may be set).
-  uintptr_t toOpaque() const { return val.toOpaque(); }
+  /*
+   * Given two lists of classes, calculate the union between them (in
+   * canonical form). A list of size 1 represents a single class, and
+   * a larger list represents an intersection of classes. The input
+   * lists are assumed to be in canonical form. If the output is an
+   * empty list, the union is *all* classes (corresponding to TObj or
+   * TCls). This function is really an implementation detail of
+   * union_of() and not a general purpose interface.
+   */
+  static TinyVector<Class, 2> combine(folly::Range<const Class*> classes1,
+                                      folly::Range<const Class*> classes2,
+                                      bool isSub1,
+                                      bool isSub2);
+  /*
+   * Given two lists of classes, calculate the intersection between
+   * them (in canonical form). A list of size 1 represents a single
+   * class, and a larger list represents an intersection of
+   * classes. The input lists are assumed to be in canonical form. If
+   * the output is an empty list, the intersection is empty
+   * (equivalent to Bottom). This function is really an implementation
+   * detail of intersection_of() and not a general purpose interface.
+   */
+  static TinyVector<Class, 2> intersect(folly::Range<const Class*> classes1,
+                                        folly::Range<const Class*> classes2);
 
+  /*
+   * Convert this class to/from an opaque integer. The integer is
+   * "pointerish" (has upper bits cleared), so can be used in
+   * something like CompactTaggedPtr. It is not, however, guaranteed
+   * to be aligned (lower bits may be set).
+   */
+  uintptr_t toOpaque() const { return val.toOpaque(); }
   static Class fromOpaque(uintptr_t o) {
     return Class{decltype(val)::fromOpaque(o)};
   }
 
+  size_t hash() const { return val.toOpaque(); }
+  bool operator==(const Class& o) const { return toOpaque() == o.toOpaque(); }
+
 private:
   explicit Class(Either<SString,ClassInfo*> val) : val{val} {}
-  template <bool> bool subtypeOfImpl(const Class&) const;
+
+  template <typename F>
+  static void visitEverySub(folly::Range<const Class*>, const F&);
+  static ClassInfo* commonAncestor(ClassInfo*, ClassInfo*);
+  static TinyVector<Class, 2> canonicalizeIsects(const TinyVector<Class, 8>&);
 private:
   friend std::string show(const Class&);
   friend struct ::HPHP::HHBBC::Index;
@@ -539,12 +578,19 @@ private:
   struct MethodOrMissing {
     const MethTabEntryPair* mte;
   };
+  // Simultaneously a group of func families. Any data must be
+  // intersected across all of the func families in the list. Used for
+  // method resolution on a DCls where isIsect() is true.
+  struct Isect {
+    CompactVector<FuncFamily*> families;
+  };
   using Rep = boost::variant< FuncName
                             , MethodName
                             , FuncInfo*
                             , const MethTabEntryPair*
                             , FuncFamily*
                             , MethodOrMissing
+                            , Isect
                             >;
 
 private:
@@ -1259,6 +1305,9 @@ private:
     SString name, const Type& candidate) const;
 
   void init_return_type(const php::Func* func);
+
+  template <typename F>
+  bool visit_every_dcls_cls(const DCls&, const F&) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

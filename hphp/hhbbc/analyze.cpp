@@ -78,10 +78,9 @@ State entry_state(const Index& index, const Context& ctx,
       if (knownArgs->context.subtypeOf(BOptObj)) {
         return setctx(knownArgs->context);
       }
-      if (is_specialized_cls(knownArgs->context)) {
-        auto const dcls = dcls_of(knownArgs->context);
-        return setctx(dcls.type() == DCls::Exact ?
-                      objExact(dcls.cls()) : subObj(dcls.cls()));
+      if (knownArgs->context.subtypeOf(BCls) &&
+          is_specialized_cls(knownArgs->context)) {
+        return setctx(toobj(knownArgs->context));
       }
     }
     auto const maybeThisType = thisType(index, ctx);
@@ -881,8 +880,6 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       auto const oldTypeIt = work.returnTypes.find(f);
       assertx(oldTypeIt != work.returnTypes.end());
       auto& oldType = oldTypeIt->second;
-      results.inferredReturn =
-        loosen_interfaces(std::move(results.inferredReturn));
 
       // Heed the return type refinement limit
       if (results.inferredReturn.strictlyMoreRefined(oldType)) {
@@ -894,7 +891,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
           results.inferredReturn = oldType;
         }
         ++meta.localReturnRefinements;
-      } else if (!more_refined_for_index(results.inferredReturn, oldType)) {
+      } else if (!results.inferredReturn.moreRefined(oldType)) {
         // If we have a monotonicity violation, bail out immediately
         // and let the Index complain.
         bail = true;
@@ -925,8 +922,6 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       assertx(returnTypeIt != work.returnTypes.end());
 
       auto& oldReturn = returnTypeIt->second;
-      results.inferredReturn =
-        loosen_interfaces(std::move(results.inferredReturn));
 
       // Heed the return type refinement limit
       if (results.inferredReturn.strictlyMoreRefined(oldReturn)) {
@@ -939,7 +934,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
           results.inferredReturn = oldReturn;
         }
         ++meta.localReturnRefinements;
-      } else if (!more_refined_for_index(results.inferredReturn, oldReturn)) {
+      } else if (!results.inferredReturn.moreRefined(oldReturn)) {
         // If we have a monotonicity violation, bail out immediately
         // and let the Index complain.
         bail = true;

@@ -373,9 +373,88 @@ std::pair<Type,Type> map_key_values(const DArrLikeMap& a) {
 template <bool context>
 bool subtypeCls(const DCls& a, const DCls& b) {
   if (context && !a.isCtx() && b.isCtx()) return false;
-  if (a.type() == b.type() && a.cls().same(b.cls())) return true;
-  if (b.type() == DCls::Sub) return a.cls().mustBeSubtypeOf(b.cls());
-  return false;
+  if (a.isExact()) {
+    if (b.isExact()) return a.cls().same(b.cls());
+    if (b.isSub())   return a.cls().exactSubtypeOf(b.cls());
+    auto const acls = a.cls();
+    for (auto const bcls : b.isect()) {
+      if (!acls.exactSubtypeOf(bcls)) return false;
+    }
+    return true;
+  } else if (a.isSub()) {
+    if (b.isExact()) return false;
+    if (b.isSub())   return a.cls().subSubtypeOf(b.cls());
+    auto const acls = a.cls();
+    for (auto const bcls : b.isect()) {
+      if (!acls.subSubtypeOf(bcls)) return false;
+    }
+    return true;
+  } else {
+    assertx(a.isIsect());
+    if (b.isExact()) return false;
+    if (b.isSub()) {
+      auto const bcls = b.cls();
+      for (auto const acls : a.isect()) {
+        if (acls.subSubtypeOf(bcls)) return true;
+      }
+      return false;
+    }
+    auto const& asect = a.isect();
+    auto const& bsect = b.isect();
+    if (&asect == &bsect) return true;
+
+    // A is a subtype of B only if everything in B is a subclass of
+    // something in A. If this wasn't the case, then their
+    // hypothetical intersection would result in something different
+    // than A, which is another way of thinking about subtypeOf.
+    for (auto const bcls : bsect) {
+      auto const isSub = [&] {
+        for (auto const acls : asect) {
+          if (acls.subSubtypeOf(bcls)) return true;
+        }
+        return false;
+      }();
+      if (!isSub) return false;
+    }
+    return true;
+  }
+}
+
+bool couldBeCls(const DCls& a, const DCls& b) {
+  if (a.isExact()) {
+    if (b.isExact()) return a.cls().same(b.cls());
+    if (b.isSub())   return a.cls().exactCouldBe(b.cls());
+    auto const acls = a.cls();
+    for (auto const bcls : b.isect()) {
+      if (!acls.exactCouldBe(bcls)) return false;
+    }
+    return true;
+  } else if (a.isSub()) {
+    if (b.isExact()) return b.cls().exactCouldBe(a.cls());
+    if (b.isSub())   return a.cls().subCouldBe(b.cls());
+    auto const acls = a.cls();
+    for (auto const bcls : b.isect()) {
+      if (!acls.subCouldBe(bcls)) return false;
+    }
+    return true;
+  } else if (b.isIsect()) {
+    auto const& asect = a.isect();
+    auto const& bsect = b.isect();
+    if (&asect == &bsect) return true;
+    // As compared to subtypeOf, couldBe on two intersection lists is
+    // easy. Every class in A must be "couldBe" on a class in B.
+    for (auto const acls : asect) {
+      for (auto const bcls : bsect) {
+        if (!acls.subCouldBe(bcls)) return false;
+      }
+    }
+    return true;
+  } else {
+    // couldBe is symmetric, so for the rest of the cases we can just
+    // flip the operands.
+    assertx(a.isIsect());
+    return couldBeCls(b, a);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2239,9 +2318,16 @@ bool Type::equivImpl(const Type& o) const {
 
   if (m_dataTag != o.m_dataTag) return false;
 
-  auto const contextCheck = [] (auto const& a, auto const& b) {
+  auto const checkDCls = [&] (const DCls& a, const DCls& b) {
     if (contextSensitive && a.isCtx() != b.isCtx()) return false;
-    return true;
+    if (a.isIsect()) {
+      if (!b.isIsect()) return false;
+      if (&a.isect() == &b.isect()) return true;
+      return a.isect() == b.isect();
+    } else if (b.isIsect()) {
+      return false;
+    }
+    return (a.isExact() == b.isExact()) && a.cls().same(b.cls());
   };
 
   switch (m_dataTag) {
@@ -2264,18 +2350,14 @@ bool Type::equivImpl(const Type& o) const {
   case DataTag::Dbl:
     return double_equals(m_data.dval, o.m_data.dval);
   case DataTag::Obj:
-    return m_data.dobj.type() == o.m_data.dobj.type() &&
-           m_data.dobj.cls().same(o.m_data.dobj.cls()) &&
-           contextCheck(m_data.dobj, o.m_data.dobj);
+    return checkDCls(m_data.dobj, o.m_data.dobj);
   case DataTag::WaitHandle:
-    assertx(m_data.dwh->cls.same(o.m_data.dwh->cls));
+    assertx(m_data.dwh->cls.cls().same(o.m_data.dwh->cls.cls()));
     return m_data.dwh->inner.equivImpl<contextSensitive>(
       o.m_data.dwh->inner
     );
   case DataTag::Cls:
-    return m_data.dcls.type() == o.m_data.dcls.type() &&
-           m_data.dcls.cls().same(o.m_data.dcls.cls()) &&
-           contextCheck(m_data.dcls, o.m_data.dcls);
+    return checkDCls(m_data.dcls, o.m_data.dcls);
   case DataTag::ArrLikePacked:
     if (m_data.packed->elems.size() != o.m_data.packed->elems.size()) {
       return false;
@@ -2334,11 +2416,27 @@ size_t Type::hash() const {
         case DataTag::None:
           return 0;
         case DataTag::Obj:
-          return (uintptr_t)m_data.dobj.cls().name();
+          if (!m_data.dobj.isIsect()) {
+            return m_data.dobj.cls().hash();
+          }
+          return folly::hash::hash_range(
+            begin(m_data.dobj.isect()),
+            end(m_data.dobj.isect()),
+            0,
+            [] (res::Class c) { return c.hash(); }
+          );
         case DataTag::WaitHandle:
           return m_data.dwh->inner.hash();
         case DataTag::Cls:
-          return (uintptr_t)m_data.dcls.cls().name();
+          if (!m_data.dcls.isIsect()) {
+            return m_data.dcls.cls().hash();
+          }
+          return folly::hash::hash_range(
+            begin(m_data.dcls.isect()),
+            end(m_data.dcls.isect()),
+            0,
+            [] (res::Class c) { return c.hash(); }
+          );
         case DataTag::Str:
           return (uintptr_t)m_data.sval;
         case DataTag::LazyCls:
@@ -2410,19 +2508,15 @@ bool Type::subtypeOfImpl(const Type& o) const {
 
     if (is_specialized_wait_handle(*this)) {
       if (is_specialized_wait_handle(o)) {
-        assertx(m_data.dwh->cls.same(o.m_data.dwh->cls));
+        assertx(m_data.dwh->cls.cls().same(o.m_data.dwh->cls.cls()));
         return m_data.dwh->inner.subtypeOfImpl<contextSensitive>(
           o.m_data.dwh->inner
         );
       }
-      return subtypeCls<contextSensitive>(
-        DCls { DCls::Sub, m_data.dwh->cls },
-        o.m_data.dobj
-      );
+      return subtypeCls<contextSensitive>(m_data.dwh->cls, o.m_data.dobj);
     } else if (is_specialized_wait_handle(o)) {
-      const DCls whDObj{ DCls::Sub, o.m_data.dwh->cls };
-      if (!subtypeCls<contextSensitive>(m_data.dobj, whDObj)) return false;
-      if (subtypeCls<contextSensitive>(whDObj, m_data.dobj)) return false;
+      if (!subtypeCls<contextSensitive>(m_data.dobj, o.m_data.dwh->cls)) return false;
+      if (subtypeCls<contextSensitive>(o.m_data.dwh->cls, m_data.dobj)) return false;
       return true;
     } else {
       return subtypeCls<contextSensitive>(m_data.dobj, o.m_data.dobj);
@@ -2520,58 +2614,22 @@ bool Type::couldBe(const Type& o) const {
   if (subtypeOf(isect, BObj)) {
     if (!is_specialized_obj(*this) || !is_specialized_obj(o)) return true;
 
-    auto const couldBeObj = [] (DCls::Tag type1, res::Class cls1,
-                                DCls::Tag type2, res::Class cls2) {
-      if (type1 == type2 && cls1.same(cls2)) return true;
-      if (type1 == DCls::Sub) {
-        return type2 == DCls::Sub
-          ? cls2.couldBe(cls1)
-          : cls2.maybeSubtypeOf(cls1);
-      }
-      if (type2 == DCls::Sub) return cls1.maybeSubtypeOf(cls2);
-      return false;
-    };
-
     if (is_specialized_wait_handle(*this)) {
       if (is_specialized_wait_handle(o)) {
-        assertx(m_data.dwh->cls.same(o.m_data.dwh->cls));
-        return m_data.dwh->inner.couldBe(o.m_data.dwh->inner);
+        assertx(m_data.dwh->cls.cls().same(o.m_data.dwh->cls.cls()));
+        return true;
       }
-      return couldBeObj(
-        DCls::Sub,
-        m_data.dwh->cls,
-        o.m_data.dobj.type(),
-        o.m_data.dobj.cls()
-      );
+      return couldBeCls(m_data.dwh->cls, o.m_data.dobj);
     } else if (is_specialized_wait_handle(o)) {
-      return couldBeObj(
-        m_data.dobj.type(),
-        m_data.dobj.cls(),
-        DCls::Sub,
-        o.m_data.dwh->cls
-      );
+      return couldBeCls(m_data.dobj, o.m_data.dwh->cls);
     } else {
-      return couldBeObj(
-        m_data.dobj.type(),
-        m_data.dobj.cls(),
-        o.m_data.dobj.type(),
-        o.m_data.dobj.cls()
-      );
+      return couldBeCls(m_data.dobj, o.m_data.dobj);
     }
   }
 
   if (subtypeOf(isect, BCls)) {
     if (!is_specialized_cls(*this) || !is_specialized_cls(o)) return true;
-    auto const& cls1 = m_data.dcls;
-    auto const& cls2 = o.m_data.dcls;
-    if (cls1.type() == cls2.type() && cls1.cls().same(cls2.cls())) return true;
-    if (cls1.type() == DCls::Sub) {
-      return cls2.type() == DCls::Sub
-        ? cls2.cls().couldBe(cls1.cls())
-        : cls2.cls().maybeSubtypeOf(cls1.cls());
-    }
-    if (cls2.type() == DCls::Sub) return cls1.cls().maybeSubtypeOf(cls2.cls());
-    return false;
+    return couldBeCls(m_data.dcls, o.m_data.dcls);
   }
 
   if (subtypeOf(isect, BArrLikeN)) {
@@ -2654,10 +2712,28 @@ bool Type::checkInvariants() const {
   case DataTag::Cls:
     assertx(couldBe(BCls));
     assertx(subtypeOf(BCls | kNonSupportBits));
+    if (m_data.dcls.isIsect()) {
+      // There's way more things we could verify here, but it gets
+      // expensive (and requires the index).
+      assertx(m_data.dcls.isect().size() > 1);
+      auto const DEBUG_ONLY resolved = m_data.dcls.isect()[0].resolved();
+      for (auto const DEBUG_ONLY c : m_data.dcls.isect()) {
+        assertx(c.resolved() == resolved);
+      }
+    }
     break;
   case DataTag::Obj:
     assertx(couldBe(BObj));
     assertx(subtypeOf(BObj | kNonSupportBits));
+    if (m_data.dobj.isIsect()) {
+      // There's way more things we could verify here, but it gets
+      // expensive (and requires the index).
+      assertx(m_data.dobj.isect().size() > 1);
+      auto const DEBUG_ONLY resolved = m_data.dobj.isect()[0].resolved();
+      for (auto const DEBUG_ONLY c : m_data.dobj.isect()) {
+        assertx(c.resolved() == resolved);
+      }
+    }
     break;
   case DataTag::WaitHandle:
     assertx(couldBe(BObj));
@@ -2666,6 +2742,8 @@ bool Type::checkInvariants() const {
     // We need to know something relevant about the inner type if we
     // have a specialization.
     assertx(m_data.dwh->inner.strictSubtypeOf(BInitCell));
+    assertx(m_data.dwh->cls.isSub());
+    assertx(!m_data.dwh->cls.isCtx());
     break;
   case DataTag::ArrLikeVal: {
     assertx(m_data.aval->isStatic());
@@ -2846,7 +2924,7 @@ Type wait_handle(const Index& index, Type inner) {
   auto const wh = index.builtin_class(s_Awaitable.get());
   auto t = Type { BObj, HAMSandwich::None };
   if (!inner.strictSubtypeOf(BInitCell)) {
-    construct(t.m_data.dobj, DCls::Sub, wh);
+    construct(t.m_data.dobj, DCls::MakeSub(wh));
     t.m_dataTag = DataTag::Obj;
   } else {
     construct(t.m_data.dwh, copy_ptr<DWaitHandle>(wh, std::move(inner)));
@@ -2870,7 +2948,7 @@ Type wait_handle_inner(const Type& t) {
 Type demote_wait_handle(Type wh) {
   assertx(is_specialized_wait_handle(wh));
   auto t = Type { wh.bits(), wh.m_ham };
-  construct(t.m_data.dobj, DCls::Sub, wh.m_data.dwh->cls);
+  construct(t.m_data.dobj, std::move(wh.m_data.dwh->cls));
   t.m_dataTag = DataTag::Obj;
   assertx(!is_specialized_wait_handle(t));
   assertx(is_specialized_obj(t));
@@ -3122,11 +3200,18 @@ Type keyset_map(MapElems m) {
 }
 
 Type subObj(res::Class val) {
+  // First canonicalize the class. To keep representations unique, we
+  // only want the canonical version of equivalent interfaces. This
+  // also maps empty interfaces to TBottom.
+  if (auto canon = val.canonicalizeInterface()) {
+    val = *canon;
+  } else {
+    return TBottom;
+  }
   auto t = Type { BObj, HAMSandwich::None };
   construct(
     t.m_data.dobj,
-    val.couldBeOverriden() ? DCls::Sub : DCls::Exact,
-    val
+    val.couldBeOverriden() ? DCls::MakeSub(val) : DCls::MakeExact(val)
   );
   t.m_dataTag = DataTag::Obj;
   assertx(t.checkInvariants());
@@ -3134,29 +3219,62 @@ Type subObj(res::Class val) {
 }
 
 Type objExact(res::Class val) {
+  // No canonicalization here. "Exact" interfaces refer to the
+  // interface class itself, not anything implementing the
+  // interface. This is always unique.
   auto t = Type { BObj, HAMSandwich::None };
-  construct(t.m_data.dobj, DCls::Exact, val);
+  construct(t.m_data.dobj, DCls::MakeExact(val));
   t.m_dataTag = DataTag::Obj;
   assertx(t.checkInvariants());
   return t;
 }
 
 Type subCls(res::Class val) {
+  // First canonicalize the class. To keep representations unique, we
+  // only want the canonical version of equivalent interfaces. This
+  // also maps empty interfaces to TBottom.
+  if (auto canon = val.canonicalizeInterface()) {
+    val = *canon;
+  } else {
+    return TBottom;
+  }
   auto r        = Type { BCls, HAMSandwich::None };
-  construct(r.m_data.dcls,
-            val.couldBeOverriden() ? DCls::Sub : DCls::Exact,
-            val);
+  construct(
+    r.m_data.dcls,
+    val.couldBeOverriden() ? DCls::MakeSub(val) : DCls::MakeExact(val)
+  );
   r.m_dataTag = DataTag::Cls;
   assertx(r.checkInvariants());
   return r;
 }
 
 Type clsExact(res::Class val) {
+  // No canonicalization here. "Exact" interfaces refer to the
+  // interface class itself, not anything implementing the
+  // interface. This is always unique.
   auto r        = Type { BCls, HAMSandwich::None };
-  construct(r.m_data.dcls, DCls::Exact, val);
+  construct(r.m_data.dcls, DCls::MakeExact(val));
   r.m_dataTag   = DataTag::Cls;
   assertx(r.checkInvariants());
   return r;
+}
+
+Type isectObj(DCls::IsectSet isect) {
+  assertx(isect.size() > 1);
+  auto t = Type { BObj, HAMSandwich::None };
+  construct(t.m_data.dobj, DCls::MakeIsect(std::move(isect)));
+  t.m_dataTag = DataTag::Obj;
+  assertx(t.checkInvariants());
+  return t;
+}
+
+Type isectCls(DCls::IsectSet isect) {
+  assertx(isect.size() > 1);
+  auto t = Type { BCls, HAMSandwich::None };
+  construct(t.m_data.dcls, DCls::MakeIsect(std::move(isect)));
+  t.m_dataTag = DataTag::Cls;
+  assertx(t.checkInvariants());
+  return t;
 }
 
 Type map_impl(trep bits, HAMSandwich ham, MapElems m,
@@ -3273,8 +3391,8 @@ Type return_with_context(Type t, Type context) {
   if (t.m_dataTag == DataTag::Obj && t.m_data.dobj.isCtx()) {
     if (!context.subtypeOf(BObj)) context = toobj(context);
     if (context.m_dataTag == DataTag::Obj) {
-      auto const d = dobj_of(context);
-      if (d.type() == DCls::Exact && d.cls().couldBeMocked()) {
+      auto const& d = dobj_of(context);
+      if (d.isExact() && d.cls().couldBeMocked()) {
         context = subObj(d.cls());
       }
     }
@@ -3287,8 +3405,8 @@ Type return_with_context(Type t, Type context) {
   if (is_specialized_cls(t) && t.m_data.dcls.isCtx()) {
     if (!context.subtypeOf(BCls)) context = objcls(context);
     if (is_specialized_cls(context)) {
-      auto const d = dcls_of(context);
-      if (d.type() == DCls::Exact && d.cls().couldBeMocked()) {
+      auto const& d = dcls_of(context);
+      if (d.isExact() && d.cls().couldBeMocked()) {
         context = subCls(d.cls());
       }
     }
@@ -3378,25 +3496,23 @@ bool is_specialized_double(const Type& t) {
 Type toobj(const Type& t) {
   assertx(t.subtypeOf(BCls));
   assertx(!t.subtypeOf(BBottom));
-
   if (!is_specialized_cls(t)) return TObj;
-  auto const d = dcls_of(t);
-  return setctx(
-    d.type() == DCls::Exact ? objExact(d.cls()) : subObj(d.cls()),
-    d.isCtx()
-  );
+  auto const& d = dcls_of(t);
+  auto r = Type { BObj, HAMSandwich::None };
+  construct(r.m_data.dobj, d);
+  r.m_dataTag = DataTag::Obj;
+  return setctx(std::move(r), d.isCtx());
 }
 
 Type objcls(const Type& t) {
   assertx(t.subtypeOf(BObj));
   assertx(!t.subtypeOf(BBottom));
-
   if (!is_specialized_obj(t)) return TCls;
-  auto const d = dobj_of(t);
-  return setctx(
-    d.type() == DCls::Exact ? clsExact(d.cls()) : subCls(d.cls()),
-    d.isCtx()
-  );
+  auto const& d = dobj_of(t);
+  auto r = Type { BCls, HAMSandwich::None };
+  construct(r.m_data.dcls, d);
+  r.m_dataTag = DataTag::Cls;
+  return setctx(std::move(r), d.isCtx());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3891,15 +4007,15 @@ Optional<Type> type_of_type_structure(const Index& index,
   return base;
 }
 
-DCls dobj_of(const Type& t) {
+const DCls& dobj_of(const Type& t) {
   assertx(t.checkInvariants());
   assertx(is_specialized_obj(t));
   if (t.m_dataTag == DataTag::Obj) return t.m_data.dobj;
   assertx(is_specialized_wait_handle(t));
-  return DCls { DCls::Sub, t.m_data.dwh->cls };
+  return t.m_data.dwh->cls;
 }
 
-DCls dcls_of(const Type& t) {
+const DCls& dcls_of(const Type& t) {
   assertx(t.checkInvariants());
   assertx(is_specialized_cls(t));
   return t.m_data.dcls;
@@ -4079,18 +4195,13 @@ Type intersection_of(Type a, Type b) {
   // object are a subtype of either. If so, return the (reused) more
   // specific type. Return std::nullopt if neither are.
   auto const whAndObj = [&] (Type& wh, Type& obj) -> Optional<Type> {
-    if (obj.m_data.dobj.type() == DCls::Sub &&
-        obj.m_data.dobj.cls().same(wh.m_data.dwh->cls) &&
+    if (obj.m_data.dobj.isSub() &&
+        obj.m_data.dobj.cls().same(wh.m_data.dwh->cls.cls()) &&
         !obj.m_data.dobj.isCtx()) {
       return reuse(wh);
     }
-    const DCls whDObj{ DCls::Sub, wh.m_data.dwh->cls };
-    if (subtypeCls<true>(obj.m_data.dobj, whDObj)) return reuse(obj);
-    if (subtypeCls<true>(whDObj, obj.m_data.dobj)) return reuse(wh);
-
-    if (obj.m_data.dobj.type() == DCls::Sub &&
-        obj.m_data.dobj.cls().couldBeInterface()) return reuse(wh);
-
+    if (subtypeCls<true>(obj.m_data.dobj, wh.m_data.dwh->cls)) return reuse(obj);
+    if (subtypeCls<true>(wh.m_data.dwh->cls, obj.m_data.dobj)) return reuse(wh);
     return std::nullopt;
   };
 
@@ -4115,7 +4226,7 @@ Type intersection_of(Type a, Type b) {
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
       assertx(couldBe(isect, BObj));
-      assertx(a.m_data.dwh->cls.same(b.m_data.dwh->cls));
+      assertx(a.m_data.dwh->cls.cls().same(b.m_data.dwh->cls.cls()));
       if (a.m_data.dwh->inner.subtypeOf(b.m_data.dwh->inner)) {
         return reuse(a);
       }
@@ -4126,17 +4237,12 @@ Type intersection_of(Type a, Type b) {
         a.m_data.dwh->inner,
         b.m_data.dwh->inner
       );
-      if (!i.is(BBottom)) {
-        if (i.strictSubtypeOf(BInitCell)) {
-          a.m_data.dwh.mutate()->inner = std::move(i);
-          return reuse(a);
-        }
-        a = demote_wait_handle(std::move(a));
+      if (i.strictSubtypeOf(BInitCell)) {
+        a.m_data.dwh.mutate()->inner = std::move(i);
         return reuse(a);
       }
-
-      isect &= ~BObj;
-      return isect ? nodata() : TBottom;
+      a = demote_wait_handle(std::move(a));
+      return reuse(a);
     }
     if (is_specialized_obj(b)) {
       assertx(couldBe(isect, BObj));
@@ -4155,34 +4261,61 @@ Type intersection_of(Type a, Type b) {
     }
   }
 
+  auto const isectDCls = [&] (const DCls& acls, const DCls& bcls, bool isObj) {
+    auto const ctx = acls.isCtx() || bcls.isCtx();
+    if (subtypeCls<false>(acls, bcls)) return setctx(reuse(a), ctx);
+    if (subtypeCls<false>(bcls, acls)) return setctx(reuse(b), ctx);
+    if (!couldBeCls(acls, bcls)) {
+      isect &= isObj ? ~BObj : ~BCls;
+      return isect ? nodata() : TBottom;
+    }
+
+    assertx(!acls.isExact());
+    assertx(!bcls.isExact());
+
+    auto const i = [&] {
+      if (acls.isIsect()) {
+        if (bcls.isIsect()) {
+          return res::Class::intersect(acls.isect(), bcls.isect());
+        } else {
+          return res::Class::intersect(
+            acls.isect(),
+            std::array<res::Class, 1>{bcls.cls()}
+          );
+        }
+      } else if (bcls.isIsect()) {
+        return res::Class::intersect(
+          std::array<res::Class, 1>{acls.cls()},
+          bcls.isect()
+        );
+      } else {
+        return res::Class::intersect(
+          std::array<res::Class, 1>{acls.cls()},
+          std::array<res::Class, 1>{bcls.cls()}
+        );
+      }
+    }();
+
+    // Empty list here means the intersection is empty, which
+    // shouldn't happen because we already checked that they could be
+    // each other.
+    assertx(!i.empty());
+    if (i.size() == 1) {
+      auto ret = isObj ? subObj(i.front()) : subCls(i.front());
+      return setctx(reuse(ret), ctx);
+    }
+
+    DCls::IsectSet set{i.begin(), i.end()};
+    auto ret = isObj ? isectObj(std::move(set)) : isectCls(std::move(set));
+    return setctx(reuse(ret), ctx);
+  };
+
   if (is_specialized_obj(a)) {
     if (is_specialized_obj(b)) {
       assertx(!is_specialized_wait_handle(a));
       assertx(!is_specialized_wait_handle(b));
       assertx(couldBe(isect, BObj));
-      auto const ctx = a.m_data.dobj.isCtx() || b.m_data.dobj.isCtx();
-      if (subtypeCls<false>(a.m_data.dobj, b.m_data.dobj)) {
-        return setctx(reuse(a), ctx);
-      }
-      if (subtypeCls<false>(b.m_data.dobj, a.m_data.dobj)) {
-        return setctx(reuse(b), ctx);
-      }
-
-      if (a.m_data.dobj.type() == DCls::Sub &&
-          b.m_data.dobj.type() == DCls::Sub) {
-        if (a.m_data.dobj.cls().couldBeInterface()) {
-          if (!b.m_data.dobj.cls().couldBeInterface()) {
-            return setctx(reuse(b), ctx);
-          } else {
-            return nodata();
-          }
-        } else if (b.m_data.dobj.cls().couldBeInterface()) {
-          return setctx(reuse(a), ctx);
-        }
-      }
-
-      isect &= ~BObj;
-      return isect ? nodata() : TBottom;
+      return isectDCls(a.m_data.dobj, b.m_data.dobj, true);
     }
     if (couldBe(isect, BObj)) return reuse(a);
   } else if (is_specialized_obj(b)) {
@@ -4192,15 +4325,7 @@ Type intersection_of(Type a, Type b) {
   if (is_specialized_cls(a)) {
     if (is_specialized_cls(b)) {
       assertx(couldBe(isect, BCls));
-      auto const ctx = a.m_data.dcls.isCtx() || b.m_data.dcls.isCtx();
-      if (subtypeCls<false>(a.m_data.dcls, b.m_data.dcls)) {
-        return setctx(reuse(a), ctx);
-      }
-      if (subtypeCls<false>(b.m_data.dcls, a.m_data.dcls)) {
-        return setctx(reuse(b), ctx);
-      }
-      isect &= ~BCls;
-      return isect ? nodata() : TBottom;
+      return isectDCls(a.m_data.dcls, b.m_data.dcls, false);
     }
     if (couldBe(isect, BCls)) return reuse(a);
   } else if (is_specialized_cls(b)) {
@@ -4339,14 +4464,13 @@ Type union_of(Type a, Type b) {
   // other, returning the less specific type. Returns std::nullopt if
   // neither of them is.
   auto const whAndObj = [&] (Type& wh, Type& obj) -> Optional<Type> {
-    if (obj.m_data.dobj.type() == DCls::Sub &&
-        obj.m_data.dobj.cls().same(wh.m_data.dwh->cls) &&
+    if (obj.m_data.dobj.isSub() &&
+        obj.m_data.dobj.cls().same(wh.m_data.dwh->cls.cls()) &&
         !obj.m_data.dobj.isCtx()) {
       return reuse(obj);
     }
-    const DCls whDObj{ DCls::Sub, wh.m_data.dwh->cls };
-    if (subtypeCls<true>(obj.m_data.dobj, whDObj)) return reuse(wh);
-    if (subtypeCls<true>(whDObj, obj.m_data.dobj)) return reuse(obj);
+    if (subtypeCls<true>(obj.m_data.dobj, wh.m_data.dwh->cls)) return reuse(wh);
+    if (subtypeCls<true>(wh.m_data.dwh->cls, obj.m_data.dobj)) return reuse(obj);
     return std::nullopt;
   };
 
@@ -4366,7 +4490,7 @@ Type union_of(Type a, Type b) {
   // handle to a DObj and use that.
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
-      assertx(a.m_data.dwh->cls.same(b.m_data.dwh->cls));
+      assertx(a.m_data.dwh->cls.cls().same(b.m_data.dwh->cls.cls()));
       auto const& atype = a.m_data.dwh->inner;
       auto const& btype = b.m_data.dwh->inner;
       if (atype.subtypeOf(btype)) return reuse(b);
@@ -4400,27 +4524,66 @@ Type union_of(Type a, Type b) {
     }
   }
 
+  auto const unionDcls = [&] (const DCls& acls, const DCls& bcls, bool isObj) {
+    auto const isCtx = acls.isCtx() && bcls.isCtx();
+    if (subtypeCls<false>(acls, bcls)) return setctx(reuse(b), isCtx);
+    if (subtypeCls<false>(bcls, acls)) return setctx(reuse(a), isCtx);
+
+    auto const u = [&] {
+      if (acls.isIsect()) {
+        if (bcls.isIsect()) {
+          return res::Class::combine(
+            acls.isect(),
+            bcls.isect(),
+            true,
+            true
+          );
+        } else {
+          return res::Class::combine(
+            acls.isect(),
+            std::array<res::Class, 1>{bcls.cls()},
+            true,
+            !bcls.isExact()
+          );
+        }
+      } else if (bcls.isIsect()) {
+        return res::Class::combine(
+          std::array<res::Class, 1>{acls.cls()},
+          bcls.isect(),
+          !acls.isExact(),
+          true
+        );
+      } else {
+        return res::Class::combine(
+          std::array<res::Class, 1>{acls.cls()},
+          std::array<res::Class, 1>{bcls.cls()},
+          !acls.isExact(),
+          !bcls.isExact()
+        );
+      }
+    }();
+
+    // Empty list means there's no classes in common, which means it's
+    // just a TObj/TCls.
+    if (u.empty()) return nodata();
+    if (u.size() == 1) {
+      // We need not to distinguish between Obj<=T and Obj=T, and
+      // always return an Obj<=Ancestor, because that is the single
+      // type that includes both children.
+      auto ret = isObj ? subObj(u.front()) : subCls(u.front());
+      return setctx(reuse(ret), isCtx);
+    }
+
+    DCls::IsectSet set{u.begin(), u.end()};
+    auto ret = isObj ? isectObj(std::move(set)) : isectCls(std::move(set));
+    return setctx(reuse(ret), isCtx);
+  };
+
   if (is_specialized_obj(a)) {
     if (is_specialized_obj(b)) {
       assertx(!is_specialized_wait_handle(a));
       assertx(!is_specialized_wait_handle(b));
-      auto const& aobj = a.m_data.dobj;
-      auto const& bobj = b.m_data.dobj;
-      auto const isCtx = aobj.isCtx() && bobj.isCtx();
-      if (subtypeCls<false>(aobj, bobj)) {
-        return setctx(reuse(b), isCtx);
-      }
-      if (subtypeCls<false>(bobj, aobj)) {
-        return setctx(reuse(a), isCtx);
-      }
-      if (auto const ancestor = aobj.cls().commonAncestor(bobj.cls())) {
-        // We need not to distinguish between Obj<=T and Obj=T, and
-        // always return an Obj<=Ancestor, because that is the single
-        // type that includes both children.
-        auto ret = subObj(*ancestor);
-        return setctx(reuse(ret), isCtx);
-      }
-      return nodata();
+      return unionDcls(a.m_data.dobj, b.m_data.dobj, true);
     }
     if (b.couldBe(BObj) || !subtypeOf(combined, BObj | kNonSupportBits)) {
       return nodata();
@@ -4434,23 +4597,7 @@ Type union_of(Type a, Type b) {
   }
 
   if (is_specialized_cls(a)) {
-    if (is_specialized_cls(b)) {
-      auto const& acls = a.m_data.dcls;
-      auto const& bcls = b.m_data.dcls;
-      auto const isCtx = acls.isCtx() && bcls.isCtx();
-      if (subtypeCls<false>(acls, bcls)) {
-        return setctx(reuse(b), isCtx);
-      }
-      if (subtypeCls<false>(bcls, acls)) {
-        return setctx(reuse(a), isCtx);
-      }
-      if (auto const ancestor = acls.cls().commonAncestor(bcls.cls())) {
-        // Similar to above, this must always return an Obj<=Ancestor.
-        auto ret = subCls(*ancestor);
-        return setctx(reuse(ret), isCtx);
-      }
-      return nodata();
-    }
+    if (is_specialized_cls(b)) return unionDcls(a.m_data.dcls, b.m_data.dcls, false);
     if (b.couldBe(BCls) || !subtypeOf(combined, BCls | kNonSupportBits)) {
       return nodata();
     }
@@ -4550,8 +4697,15 @@ Type union_of(Type a, Type b) {
 
 bool could_have_magic_bool_conversion(const Type& t) {
   if (!t.couldBe(BObj)) return false;
-  if (is_specialized_obj(t)) return dobj_of(t).cls().couldHaveMagicBool();
-  return true;
+  if (!is_specialized_obj(t)) return true;
+  auto const& dobj = dobj_of(t);
+  if (dobj.isIsect()) {
+    for (auto const cls : dobj.isect()) {
+      if (!cls.couldHaveMagicBool()) return false;
+    }
+    return true;
+  }
+  return dobj.cls().couldHaveMagicBool();
 }
 
 Emptiness emptiness(const Type& t) {
@@ -4680,38 +4834,10 @@ Type widening_union(const Type& a, const Type& b) {
   return widen_type(union_of(a, b));
 }
 
-bool more_refined_for_index(const Type& a, const Type& b) {
-  if (a.moreRefined(b)) return true;
-  if (!a.subtypeOf(BOptObj) ||
-      !b.subtypeOf(BOptObj) ||
-      !is_specialized_obj(b)) {
-    return false;
-  }
-  return dobj_of(b).cls().mustBeInterface();
-}
-
 Type stack_flav(Type a) {
   if (a.subtypeOf(BUninit))   return TUninit;
   if (a.subtypeOf(BInitCell)) return TInitCell;
   always_assert(0 && "stack_flav passed invalid type");
-}
-
-Type loosen_interfaces(Type t) {
-  if (is_specialized_wait_handle(t)) {
-    auto inner = loosen_interfaces(t.m_data.dwh->inner);
-    if (!inner.subtypeOf(t.m_data.dwh->inner)) {
-      if (!inner.strictSubtypeOf(BInitCell)) return demote_wait_handle(t);
-      t.m_data.dwh.mutate()->inner = std::move(inner);
-      assertx(t.checkInvariants());
-    }
-    return t;
-  }
-
-  if (is_specialized_obj(t) && dobj_of(t).cls().couldBeInterface()) {
-    return Type { t.bits(), t.m_ham };
-  }
-
-  return t;
 }
 
 Type loosen_string_staticness(Type t) {
@@ -6613,8 +6739,8 @@ std::pair<Type, Promotion> promote_classlike_to_key(Type ty) {
   if (ty.couldBe(BCls)) {
     auto t = [&] {
       if (!is_specialized_cls(ty)) return TSStr;
-      auto const dcls = dcls_of(ty);
-      if (dcls.type() != DCls::Exact) return TSStr;
+      auto const& dcls = dcls_of(ty);
+      if (!dcls.isExact()) return TSStr;
       return sval(dcls.cls().name());
     }();
     ty = union_of(remove_cls(std::move(ty)), std::move(t));
@@ -6713,29 +6839,31 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
 
   if (is_specialized_obj(t)) {
     if (t.subtypeOf(BOptObj)) {
-      auto const dobj = dobj_of(t);
-      auto const tag =
-        t.couldBe(BInitNull)
-        ? (dobj.type() == DCls::Exact ? T::OptExactObj : T::OptSubObj)
-        : (dobj.type() == DCls::Exact ? T::ExactObj    : T::SubObj);
-      return RepoAuthType { tag, dobj.cls().name() };
+      auto const& dobj = dobj_of(t);
+      return RepoAuthType {
+        dobj.isExact()
+          ? (t.couldBe(BInitNull) ? T::OptExactObj : T::ExactObj)
+          : (t.couldBe(BInitNull) ? T::OptSubObj : T::SubObj),
+        dobj.smallestCls().name()
+      };
     }
     if (t.subtypeOf(BUninit | BObj)) {
-      auto const dobj = dobj_of(t);
-      auto const tag = dobj.type() == DCls::Exact
-        ? T::UninitExactObj
-        : T::UninitSubObj;
-      return RepoAuthType { tag, dobj.cls().name() };
+      auto const& dobj = dobj_of(t);
+      return RepoAuthType {
+        dobj.isExact() ? T::UninitExactObj : T::UninitSubObj,
+        dobj.smallestCls().name()
+      };
     }
   }
 
   if (is_specialized_cls(t) && t.subtypeOf(BOptCls)) {
-    auto const dcls = dcls_of(t);
-    auto const tag =
-      t.couldBe(BInitNull)
-        ? (dcls.type() == DCls::Exact ? T::OptExactCls : T::OptSubCls)
-        : (dcls.type() == DCls::Exact ? T::ExactCls : T::SubCls);
-    return RepoAuthType { tag, dcls.cls().name() };
+    auto const& dcls = dcls_of(t);
+    return RepoAuthType {
+      dcls.isExact()
+        ? (t.couldBe(BInitNull) ? T::OptExactCls : T::ExactCls)
+        : (t.couldBe(BInitNull) ? T::OptSubCls : T::SubCls),
+      dcls.smallestCls().name()
+    };
   }
 
   if (is_specialized_array_like(t) && t.subtypeOf(BOptArrLike)) {
@@ -6814,7 +6942,7 @@ Type adjust_type_for_prop(const Index& index,
   auto const ctx = Context { nullptr, nullptr, &propCls };
   // Otherwise lookup what we know about the constraint.
   auto const tcBase = index.lookup_constraint(ctx, *tc, ret);
-  auto const tcType = unctx(loosen_interfaces(remove_uninit(tcBase)));
+  auto const tcType = unctx(remove_uninit(tcBase));
   // The adjusted type is the intersection of the constraint and the type
   // (which might not exist).
   return intersection_of(tcType, std::move(ret));
@@ -6837,9 +6965,16 @@ trep get_trep_for_testing(const Type& t) {
 }
 
 Type make_obj_for_testing(trep bits, res::Class cls,
-                          DCls::Tag type, bool isCtx) {
+                          bool isSub, bool isCtx, bool canonicalize) {
+  if (isSub && canonicalize) {
+    if (auto canon = cls.canonicalizeInterface()) {
+      cls = *canon;
+    } else {
+      return TBottom;
+    }
+  }
   auto t = Type { bits, HAMSandwich::TopForBits(bits) };
-  construct(t.m_data.dobj, type, cls);
+  construct(t.m_data.dobj, isSub ? DCls::MakeSub(cls) : DCls::MakeExact(cls));
   t.m_dataTag = DataTag::Obj;
   t.m_data.dobj.setCtx(isCtx);
   assertx(t.checkInvariants());
@@ -6847,9 +6982,16 @@ Type make_obj_for_testing(trep bits, res::Class cls,
 }
 
 Type make_cls_for_testing(trep bits, res::Class cls,
-                          DCls::Tag type, bool isCtx) {
+                          bool isSub, bool isCtx, bool canonicalize) {
+  if (isSub && canonicalize) {
+    if (auto canon = cls.canonicalizeInterface()) {
+      cls = *canon;
+    } else {
+      return TBottom;
+    }
+  }
   auto t = Type { bits, HAMSandwich::TopForBits(bits) };
-  construct(t.m_data.dcls, type, cls);
+  construct(t.m_data.dcls, isSub ? DCls::MakeSub(cls) : DCls::MakeExact(cls));
   t.m_dataTag = DataTag::Cls;
   t.m_data.dcls.setCtx(isCtx);
   assertx(t.checkInvariants());

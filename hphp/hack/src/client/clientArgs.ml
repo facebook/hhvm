@@ -527,7 +527,7 @@ let parse_check_args cmd =
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         " enable profile logging" );
       ( "--refactor-check-sound-dynamic",
-        Arg.Unit (fun () -> set_mode MODE_REFACTOR_CHECK_SOUND_DYNAMIC),
+        Arg.String (fun x -> set_mode @@ MODE_REFACTOR_CHECK_SOUND_DYNAMIC x),
         "" );
       ( "--refactor",
         Arg.Tuple

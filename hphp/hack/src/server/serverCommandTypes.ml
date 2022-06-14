@@ -376,7 +376,7 @@ type _ t =
       string * file_input * int * int
       -> ServerHighlightRefsTypes.result t
   | REFACTOR : ServerRefactorTypes.action -> Refactor.result_or_retry t
-  | REFACTOR_CHECK_SD : unit -> bool t
+  | REFACTOR_CHECK_SD : string -> bool t
   | IDE_REFACTOR : Ide_refactor_type.t -> Refactor.ide_result_or_retry t
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | REMOVE_DEAD_FIXMES :

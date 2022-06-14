@@ -10,6 +10,7 @@
 open Hh_prelude
 open ServerEnv
 open ServerRefactorTypes
+open ServerCommandTypes.Done_or_retry
 
 let maybe_add_dollar s =
   if not (Char.equal s.[0] '$') then
@@ -405,6 +406,90 @@ let get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name =
           }
         in
         Insert patch)))
+
+let upcast_visitor =
+  object (self)
+    inherit [_] Tast_visitor.reduce as super
+
+    val mutable upcasted_fid = ""
+
+    method zero = []
+
+    method plus = ( @ )
+
+    method set_upcasted_fid fid = upcasted_fid <- fid
+
+    method! on_expr env expr =
+      let acc =
+        let (_ty, pos, expr_) = expr in
+        match expr_ with
+        | Aast.Upcast (e, _hint) ->
+          begin
+            match e with
+            | (_, _, Aast.FunctionPointer (Aast.FP_id (_, id), _)) ->
+              if String.equal id upcasted_fid then
+                [pos]
+              else
+                self#zero
+            | _ -> self#zero
+          end
+        | _ -> self#zero
+      in
+      self#plus acc (super#on_expr env expr)
+  end
+
+let go_sound_dynamic ctx function_name genv env =
+  let function_name = ServerFindRefs.add_ns function_name in
+  ServerFindRefs.handle_prechecked_files
+    genv
+    env
+    Typing_deps.(Dep.(make (Fun function_name)))
+  @@ fun () ->
+  let files =
+    FindRefsService.get_dependent_files_function
+      ctx
+      genv.ServerEnv.workers
+      function_name
+    |> Relative_path.Set.elements
+  in
+  (* [files] can legitimately refer to non-existent files, e.g.
+     if they've been deleted since the depgraph was created.
+     This is how we'll filter them out. *)
+  let is_entry_valid entry =
+    entry |> Provider_context.get_file_contents_if_present |> Option.is_some
+  in
+  (* These are the tasts for all the 'fileinfo_l' passed in *)
+  let tasts_of_files : (Relative_path.t * Tast.program) list =
+    List.filter_map files ~f:(fun path ->
+        let (_ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+        try
+          let { Tast_provider.Compute_tast.tast; _ } =
+            Tast_provider.compute_tast_unquarantined ~ctx ~entry
+          in
+          Some (path, tast)
+        with
+        | _ when not (is_entry_valid entry) -> None)
+  in
+  let () = upcast_visitor#set_upcasted_fid function_name in
+  let upcast_positions =
+    List.rev_map tasts_of_files ~f:(fun (_, tast) -> upcast_visitor#go ctx tast)
+    |> List.concat
+  in
+  let () =
+    Hh_logger.log
+      "Refactor-check-sound-dynamic: number of upcast positions for function %s is %d\n"
+      function_name
+      (List.length upcast_positions)
+  in
+  let () =
+    List.iter
+      ~f:(fun pos ->
+        Hh_logger.log
+          "Refactor-check-sound-dynamic: position = %s\n"
+          (Pos.string (Pos.to_absolute pos)))
+      upcast_positions
+  in
+  Done true
 
 let go ctx action genv env =
   let module Types = ServerCommandTypes.Find_refs in

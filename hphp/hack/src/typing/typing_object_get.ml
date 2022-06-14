@@ -825,7 +825,17 @@ and obj_get_concrete_class_with_member_info
             ur
             env
             ty
-            { et_type = member_ty; et_enforced }
+            {
+              et_type =
+                (match et_enforced with
+                | Enforced
+                  when TypecheckerOptions.enable_sound_dynamic
+                         (Env.get_tcopt env)
+                       && Env.get_support_dynamic_type env ->
+                  Typing_utils.make_like env member_ty
+                | _ -> member_ty);
+              et_enforced;
+            }
             err
         in
         let coerce_ty_mismatch =

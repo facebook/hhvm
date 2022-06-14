@@ -241,19 +241,6 @@ let add_inherited inherited acc =
     ih_smethods = add_methods inherited.ih_smethods acc.ih_smethods;
   }
 
-let collapse_trait_inherited methods smethods acc =
-  let collapse_methods name sigs acc =
-    (* fold_right because when traits get considered in order
-     * T1, T2, T3, the list will be built up as [T3::f; T2::f; T1::f],
-     * so this way we still call add_method in the declared order *)
-    List.fold_right sigs ~f:(add_method name) ~init:acc
-  in
-  {
-    acc with
-    ih_methods = SMap.fold collapse_methods methods acc.ih_methods;
-    ih_smethods = SMap.fold collapse_methods smethods acc.ih_smethods;
-  }
-
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
@@ -526,20 +513,9 @@ let from_requirements env c parents acc reqs =
   let inherited = mark_as_synthesized inherited in
   add_inherited inherited acc
 
-let from_trait env c parents (acc, methods, smethods) uses =
-  let ({ ih_methods; ih_smethods; _ } as inherited) =
-    from_class env c parents uses
-  in
-  let inherited =
-    { inherited with ih_methods = SMap.empty; ih_smethods = SMap.empty }
-  in
-  let extend_methods name sig_ methods =
-    let sigs = Option.value ~default:[] (SMap.find_opt name methods) in
-    SMap.add name (sig_ :: sigs) methods
-  in
-  let methods = SMap.fold extend_methods ih_methods methods in
-  let smethods = SMap.fold extend_methods ih_smethods smethods in
-  (add_inherited inherited acc, methods, smethods)
+let from_trait env c parents acc uses =
+  let inherited = from_class env c parents uses in
+  add_inherited inherited acc
 
 let from_xhp_attr_use env (parents : Decl_store.class_entries SMap.t) acc uses =
   let inherited = from_class_xhp_attrs_only env parents uses in
@@ -570,13 +546,7 @@ let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
       (c.sc_req_class @ c.sc_req_extends)
   in
   (* ... are overridden with those inherited from used traits *)
-  let (acc, methods, smethods) =
-    List.fold_left
-      ~f:(from_trait env c parents)
-      ~init:(acc, SMap.empty, SMap.empty)
-      c.sc_uses
-  in
-  let acc = collapse_trait_inherited methods smethods acc in
+  let acc = List.fold_left ~f:(from_trait env c parents) ~init:acc c.sc_uses in
   let acc =
     List.fold_left
       ~f:(from_xhp_attr_use env parents)

@@ -402,6 +402,9 @@ struct Client {
   // Return true if the implementation in use is the built-in
   // fork+exec implementation.
   bool usingSubprocess() const;
+  // Return true if the implementation in use supports "optimistic"
+  // storing.
+  bool supportsOptimistic() const;
 
   // Loading. These take various different permutations of Refs, load
   // them, deserialize the blobs into the appropriate types, and
@@ -429,15 +432,19 @@ struct Client {
   // be set to true if the file was read and whether it was actually
   // uploaded. If the file has been cached, neither may need to be
   // done. For the vector variant, the out params will be set to the
-  // number of files actually read or uploaded.
+  // number of files actually read or uploaded. Optimistic mode (if
+  // supported) won't ever actually store anything. It will just
+  // generate the Refs and assume the data is already stored.
   coro::Task<Ref<std::string>> storeFile(folly::fs::path,
                                          bool* read = nullptr,
-                                         bool* uploaded = nullptr);
+                                         bool* uploaded = nullptr,
+                                         bool optimistic = false);
 
   coro::Task<std::vector<Ref<std::string>>>
   storeFile(std::vector<folly::fs::path>,
             size_t* read = nullptr,
-            size_t* uploaded = nullptr);
+            size_t* uploaded = nullptr,
+            bool optimistic = false);
 
   // Storing blobs. These take various different permutations of data,
   // serialize them (using BlobEncoder), store however the
@@ -450,12 +457,19 @@ struct Client {
   template <typename T, typename... Ts>
   coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> store(T, Ts...);
 
+  template <typename T> coro::Task<Ref<T>> storeOptimistically(T);
+
+  template <typename T, typename... Ts>
+  coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> storeOptimistically(T, Ts...);
+
   template <typename T>
-  coro::Task<std::vector<Ref<T>>> storeMulti(std::vector<T>);
+  coro::Task<std::vector<Ref<T>>> storeMulti(std::vector<T>,
+                                             bool optimistic = false);
 
   template <typename T, typename... Ts>
   coro::Task<std::vector<std::tuple<Ref<T>, Ref<Ts>...>>>
-  storeMultiTuple(std::vector<std::tuple<T, Ts...>>);
+  storeMultiTuple(std::vector<std::tuple<T, Ts...>>,
+                  bool optimistic = false);
 
   // Execute a job with the given sets of inputs (and any config setup
   // params). The output of those job executions will be returned as a
@@ -463,12 +477,18 @@ struct Client {
   // determined (at compile time) by the job being run and matches the
   // job's specification. If "cached" is provided, it will be set to
   // true if the outputs are coming from a cached job and the job
-  // isn't actually run.
+  // isn't actually run. If "optimistic" is set to true, then at least
+  // one of the inputs was stored using the optimistic flag. This
+  // means the inputs may not actually exist on the worker side. If it
+  // doesn't, the execution will fail (by throwing an exception), and
+  // the caller should (actually) store the data and retry. The flag
+  // disables automatic fallback.
   template <typename C> coro::Task<std::vector<typename Job<C>::ReturnT>>
   exec(const Job<C>& job,
        typename Job<C>::ConfigT config,
        std::vector<typename Job<C>::InputsT> inputs,
-       bool* cached = nullptr);
+       bool* cached = nullptr,
+       bool optimistic = false);
 
   // Synthetically force a fallback event when storing data or
   // executing a job, as if the implementation failed. This is for
@@ -485,7 +505,13 @@ private:
   Options m_options;
   bool m_forceFallback;
 
-  template <typename T, typename F> coro::Task<T> tryWithFallback(F, bool&);
+  template <typename T> coro::Task<Ref<T>> storeImpl(bool, T);
+
+  template <typename T, typename... Ts>
+  coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> storeImpl(bool, T, Ts...);
+
+  template <typename T, typename F>
+  coro::Task<T> tryWithFallback(F, bool&, bool noFallback = false);
 
   template <typename T> static T unblobify(std::string&&);
   template <typename T> static std::string blobify(T&&);
@@ -514,6 +540,9 @@ struct Client::Impl {
   // Whether this is a the special subprocess impl. Its treated
   // specially when it comes to falling back.
   virtual bool isSubprocess() const = 0;
+  // Whether this impl supports optimistic uploading (or whether its
+  // profitable to do so).
+  virtual bool supportsOptimistic() const = 0;
   // An implementation can declare itself "disabled" at any point (for
   // example, due to some internal error). After that point, either
   // Client will fail, or the fallback subprocess implementation will
@@ -534,6 +563,7 @@ struct Client::Impl {
   virtual coro::Task<IdVec> store(const RequestId& requestId,
                                   PathVec files,
                                   BlobVec blobs,
+                                  bool optimistic,
                                   size_t* read,
                                   size_t* uploaded) = 0;
 

@@ -288,14 +288,18 @@ inline const std::string& Client::implName() const {
 }
 
 inline bool Client::usingSubprocess() const {
-  return m_impl->isSubprocess();
+  return m_impl->isSubprocess() || m_impl->isDisabled();
+}
+
+inline bool Client::supportsOptimistic() const {
+  return m_impl->supportsOptimistic() && !m_impl->isDisabled();
 }
 
 // Run the given callable F with the normal implementation. If it
 // throws an Error, set didFallback to true, and attempt to re-run F
 // with the fallback implementation.
 template <typename T, typename F>
-coro::Task<T> Client::tryWithFallback(F f, bool& didFallback) {
+coro::Task<T> Client::tryWithFallback(F f, bool& didFallback, bool noFallback) {
   // If we're forcing fallbacks, or if the main implementation has
   // disabled itself, go straight to the fallback case.
   if (!m_forceFallback && !m_impl->isDisabled()) {
@@ -309,6 +313,7 @@ coro::Task<T> Client::tryWithFallback(F f, bool& didFallback) {
       // rethrow the error. Likewise, if Options has determined we
       // shouldn't use the subprocess implementaiton, rethrow the
       // error.
+      if (noFallback) throw;
       if (m_impl->isSubprocess()) throw;
       if (m_options.m_useSubprocess == Options::UseSubprocess::Never) throw;
       // Check this again. The implementation could have disabled
@@ -616,7 +621,7 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
 // appropriate types.
 
 template <typename T>
-coro::Task<Ref<T>> Client::store(T t) {
+coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
   RequestId requestId{"store blob"};
 
   auto wasFallback = false;
@@ -624,7 +629,14 @@ coro::Task<Ref<T>> Client::store(T t) {
     [&] (Impl& i, bool) {
       auto blob = blobify(t);
       FTRACE(2, "{} blob is {} bytes\n", requestId.tracePrefix(), blob.size());
-      return i.store(requestId, {}, BlobVec{std::move(blob)}, nullptr, nullptr);
+      return i.store(
+        requestId,
+        {},
+        BlobVec{std::move(blob)},
+        optimistic,
+        nullptr,
+        nullptr
+      );
     },
     wasFallback
   ));
@@ -635,7 +647,9 @@ coro::Task<Ref<T>> Client::store(T t) {
 }
 
 template <typename T, typename... Ts>
-coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::store(T t, Ts... ts) {
+coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::storeImpl(bool optimistic,
+                                                             T t,
+                                                             Ts... ts) {
   using namespace detail;
   RequestId requestId{"store blobs"};
 
@@ -652,7 +666,14 @@ coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::store(T t, Ts... ts) {
                  requestId.tracePrefix(), b.size());
         }
       }());
-      return i.store(requestId, {}, std::move(blobs), nullptr, nullptr);
+      return i.store(
+        requestId,
+        {},
+        std::move(blobs),
+        optimistic,
+        nullptr,
+        nullptr
+      );
     },
     wasFallback
   ));
@@ -671,13 +692,41 @@ coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::store(T t, Ts... ts) {
 }
 
 template <typename T>
-coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts) {
+coro::Task<Ref<T>> Client::store(T t) {
+  return storeImpl(false, std::move(t));
+}
+
+template <typename T, typename... Ts>
+coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::store(T t,
+                                                         Ts... ts) {
+  return storeImpl(false, std::move(t), std::move(ts)...);
+}
+
+template <typename T>
+coro::Task<Ref<T>> Client::storeOptimistically(T t) {
+  return storeImpl(true, std::move(t));
+}
+
+template <typename T, typename... Ts>
+coro::Task<std::tuple<Ref<T>, Ref<Ts>...>>
+Client::storeOptimistically(T t,
+                            Ts... ts) {
+  return storeImpl(true, std::move(t), std::move(ts)...);
+}
+
+template <typename T>
+coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
+                                                   bool optimistic) {
   using namespace folly::gen;
 
   RequestId requestId{"store blobs"};
 
-  FTRACE(2, "{} storing {} blobs\n",
-         requestId.tracePrefix(), ts.size());
+  FTRACE(
+    2, "{} storing {} blobs{}\n",
+    requestId.tracePrefix(),
+    ts.size(),
+    optimistic ? " (optimistically)" : ""
+  );
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
@@ -691,7 +740,14 @@ coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts) {
           })
         | as<std::vector>();
       assertx(blobs.size() == ts.size());
-      return i.store(requestId, {}, std::move(blobs), nullptr, nullptr);
+      return i.store(
+        requestId,
+        {},
+        std::move(blobs),
+        optimistic,
+        nullptr,
+        nullptr
+      );
     },
     wasFallback
   ));
@@ -706,7 +762,8 @@ coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts) {
 
 template <typename T, typename... Ts>
 coro::Task<std::vector<std::tuple<Ref<T>, Ref<Ts>...>>>
-Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts) {
+Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
+                        bool optimistic) {
   using namespace folly::gen;
   using namespace detail;
 
@@ -715,8 +772,12 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts) {
   using OutTuple = std::tuple<T, Ts...>;
   auto constexpr tupleSize = std::tuple_size<OutTuple>{};
 
-  FTRACE(2, "{} storing {} blobs\n",
-         requestId.tracePrefix(), ts.size() * tupleSize);
+  FTRACE(
+    2, "{} storing {} blobs{}\n",
+    requestId.tracePrefix(),
+    ts.size() * tupleSize,
+    optimistic ? " (optimistically)" : ""
+  );
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
@@ -741,7 +802,14 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts) {
         | concat
         | as<std::vector>();
       assertx(blobs.size() == ts.size() * tupleSize);
-      return i.store(requestId, {}, std::move(blobs), nullptr, nullptr);
+      return i.store(
+        requestId,
+        {},
+        std::move(blobs),
+        optimistic,
+        nullptr,
+        nullptr
+      );
     },
     wasFallback
   ));
@@ -772,7 +840,8 @@ template <typename C> coro::Task<std::vector<typename Job<C>::ReturnT>>
 Client::exec(const Job<C>& job,
              typename Job<C>::ConfigT config,
              std::vector<typename Job<C>::InputsT> inputs,
-             bool* cached) {
+             bool* cached,
+             bool optimistic) {
   using namespace folly::gen;
   using namespace detail;
 
@@ -855,6 +924,7 @@ Client::exec(const Job<C>& job,
         requestId,
         {},
         std::move(blobs),
+        false,
         nullptr,
         nullptr
       )
@@ -1039,7 +1109,12 @@ Client::exec(const Job<C>& job,
                   cached
                 )));
               },
-              useFallback
+              useFallback,
+              // Disable fallback if we're using optimistic
+              // stores. It's expected we'll get an exception thrown
+              // if everything isn't uploaded and we don't want to
+              // fallback in that case.
+              optimistic
             )
           )
         );

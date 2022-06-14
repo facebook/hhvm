@@ -290,11 +290,12 @@ struct SubprocessImpl : public Client::Impl {
   ~SubprocessImpl() override;
 
   bool isSubprocess() const override { return true; }
+  bool supportsOptimistic() const override { return false; }
   bool isDisabled() const override { return false; }
 
   coro::Task<BlobVec> load(const RequestId&, IdVec) override;
   coro::Task<IdVec> store(const RequestId&, PathVec, BlobVec,
-                          size_t*, size_t*) override;
+                          bool, size_t*, size_t*) override;
   coro::Task<std::vector<RefValVec>>
   exec(const RequestId&,
        const std::string&,
@@ -426,6 +427,7 @@ coro::Task<BlobVec> SubprocessImpl::load(const RequestId& requestId,
 coro::Task<IdVec> SubprocessImpl::store(const RequestId& requestId,
                                         PathVec paths,
                                         BlobVec blobs,
+                                        bool,
                                         size_t* read,
                                         size_t* uploaded) {
   // SubprocessImpl always "reads" and "uploads" the data (there's no
@@ -721,17 +723,30 @@ std::unique_ptr<Client::Impl> Client::makeFallbackImpl() const {
 
 coro::Task<Ref<std::string>> Client::storeFile(folly::fs::path path,
                                                bool* read,
-                                               bool* uploaded) {
+                                               bool* uploaded,
+                                               bool optimistic) {
   RequestId requestId{"store file"};
 
-  FTRACE(2, "{} storing {}\n", requestId.tracePrefix(), path.native());
+  FTRACE(
+    2, "{} storing {}{}\n",
+    requestId.tracePrefix(),
+    path.native(),
+    optimistic ? " (optimistically)" : ""
+  );
 
   size_t readCount;
   size_t uploadedCount;
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
     [&] (Impl& i, bool) {
-      return i.store(requestId, PathVec{path}, {}, &readCount, &uploadedCount);
+      return i.store(
+        requestId,
+        PathVec{path},
+        {},
+        optimistic,
+        &readCount,
+        &uploadedCount
+      );
     },
     wasFallback
   ));
@@ -748,10 +763,16 @@ coro::Task<Ref<std::string>> Client::storeFile(folly::fs::path path,
 coro::Task<std::vector<Ref<std::string>>>
 Client::storeFile(std::vector<folly::fs::path> paths,
                   size_t* read,
-                  size_t* uploaded) {
+                  size_t* uploaded,
+                  bool optimistic) {
   RequestId requestId{"store files"};
 
-  FTRACE(2, "{} storing {} files\n", requestId.tracePrefix(), paths.size());
+  FTRACE(
+    2, "{} storing {} files{}\n",
+    requestId.tracePrefix(),
+    paths.size(),
+    optimistic ? " (optimistically)" : ""
+  );
   ONTRACE(4, [&] {
     for (auto const& p : paths) {
       FTRACE(4, "{} storing {}\n", requestId.tracePrefix(), p.native());
@@ -762,7 +783,7 @@ Client::storeFile(std::vector<folly::fs::path> paths,
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
     [&] (Impl& i, bool) {
-      return i.store(requestId, paths, {}, read, uploaded);
+      return i.store(requestId, paths, {}, optimistic, read, uploaded);
     },
     wasFallback
   ));

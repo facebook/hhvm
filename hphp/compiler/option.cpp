@@ -63,6 +63,7 @@ const int Option::kDefaultParserDirGroupSizeLimit = 50000;
 int Option::ParserGroupSize = kDefaultParserGroupSize;
 int Option::ParserDirGroupSizeLimit = kDefaultParserDirGroupSizeLimit;
 bool Option::ParserAsyncCleanup = true;
+bool Option::ParserOptimisticStore = true;
 
 std::string Option::ExternWorkerUseCase;
 bool Option::ExternWorkerForceSubprocess = false;
@@ -217,6 +218,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(ParserAsyncCleanup, ini, config,
                "ParserAsyncCleanup", ParserAsyncCleanup);
+  Config::Bind(ParserOptimisticStore, ini, config,
+               "ParserOptimisticStore", ParserOptimisticStore);
 
   Config::Bind(ExternWorkerUseCase, ini, config, "ExternWorker.UseCase",
                ExternWorkerUseCase);

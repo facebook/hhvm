@@ -507,20 +507,19 @@ let from_class_xhp_attrs_only env (parents : Decl_store.class_entries SMap.t) ty
     (* The class lives in Hack *)
     inherit_hack_xhp_attrs_only class_ parent_members
 
-let from_parent env c (parents : Decl_store.class_entries SMap.t) =
-  let extends =
-    (* In an abstract class or a trait, we assume the interfaces
-     * will be implemented in the future, so we take them as
-     * part of the class (as requested by dependency injection implementers)
-     *)
-    match c.sc_kind with
-    | Ast_defs.Cclass k when Ast_defs.is_abstract k ->
-      c.sc_implements @ c.sc_extends
-    | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
-    | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> c.sc_extends
-  in
-  let inherited_l = List.map extends ~f:(from_class env c parents) in
-  List.fold_right ~f:add_inherited inherited_l ~init:empty
+let parents_which_provide_members c =
+  (* In an abstract class or a trait, we assume the interfaces
+   * will be implemented in the future, so we take them as
+   * part of the class (as requested by dependency injection implementers) *)
+  match c.sc_kind with
+  | Ast_defs.Cclass k when Ast_defs.is_abstract k ->
+    c.sc_implements @ c.sc_extends
+  | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
+  | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> c.sc_extends
+
+let from_parent env c (parents : Decl_store.class_entries SMap.t) parent acc =
+  let inherited = from_class env c parents parent in
+  add_inherited inherited acc
 
 let from_requirements env c parents acc reqs =
   let inherited = from_class env c parents reqs in
@@ -556,8 +555,14 @@ let from_interface_constants
 (*****************************************************************************)
 
 let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
+  let acc = empty in
   (* members inherited from parent class ... *)
-  let (acc : inherited) = from_parent env c parents in
+  let (acc : inherited) =
+    List.fold_right
+      ~f:(from_parent env c parents)
+      ~init:acc
+      (parents_which_provide_members c)
+  in
   let acc =
     List.fold_left
       ~f:(from_requirements env c parents)

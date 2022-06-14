@@ -221,36 +221,6 @@ impl Opts {
     pub(crate) const INCLUDE_ROOTS: &'static str = "";
 }
 
-/// In daemon mode, hackc blocks waiting for a filename on stdin.
-/// Then, using the originally invoked options, dispatches that file to be compiled.
-fn daemon_mode(mut opts: Opts) -> Result<()> {
-    for line in std::io::stdin().lock().lines() {
-        opts.files.filenames = vec![Path::new(&line?).to_path_buf()];
-        dispatch(&mut opts)?;
-    }
-    Ok(())
-}
-
-fn dispatch(opts: &mut Opts) -> Result<()> {
-    if opts.flag_commands.extract_facts_from_decls {
-        let facts_opts = facts::Opts {
-            files: std::mem::take(&mut opts.files),
-            ..Default::default()
-        };
-        facts::extract_facts(opts, facts_opts)
-    } else if opts.flag_commands.test_compile_with_decls {
-        compile::test_compile_with_decls(opts)
-    } else if opts.flag_commands.dump_desugared_expression_trees {
-        let et_opts = expr_trees::Opts {
-            files: std::mem::take(&mut opts.files),
-            ..Default::default()
-        };
-        expr_trees::desugar_expr_trees(opts, et_opts)
-    } else {
-        compile::compile_from_text(opts)
-    }
-}
-
 fn main() -> Result<()> {
     env_logger::init();
     let mut opts = Opts::parse();
@@ -265,15 +235,53 @@ fn main() -> Result<()> {
 
     match opts.command.take() {
         Some(Command::Assemble(opts)) => assemble::run(opts),
-        Some(Command::Compile(mut opts)) => compile::run(&mut opts),
         Some(Command::Crc(opts)) => crc::run(opts),
-        Some(Command::DesugarExprTrees(et_opts)) => expr_trees::desugar_expr_trees(&opts, et_opts),
-        Some(Command::Facts(facts_opts)) => facts::extract_facts(&mut opts, facts_opts),
         Some(Command::Parse(parse_opts)) => parse::run(&mut opts, parse_opts),
         Some(Command::ParseBench(bench_opts)) => parse::run_bench_command(bench_opts),
-        None if opts.daemon => daemon_mode(opts),
-        None => dispatch(&mut opts),
+
+        // Expr trees
+        Some(Command::DesugarExprTrees(et_opts)) => expr_trees::desugar_expr_trees(&opts, et_opts),
+        None if opts.flag_commands.dump_desugared_expression_trees => {
+            let expr_opts = expr_trees::Opts {
+                files: std::mem::take(&mut opts.files),
+                ..Default::default()
+            };
+            expr_trees::desugar_expr_trees(&opts, expr_opts)
+        }
+
+        // Facts
+        Some(Command::Facts(facts_opts)) => facts::extract_facts(&mut opts, facts_opts),
+        None if opts.daemon && opts.flag_commands.extract_facts_from_decls => {
+            facts::run_daemon(&mut opts)
+        }
+        None if opts.flag_commands.extract_facts_from_decls => facts::run_flag(&mut opts),
+
+        // Test Decls-in-Compilation
+        None if opts.daemon && opts.flag_commands.test_compile_with_decls => daemon_mode(|path| {
+            opts.files.filenames = vec![path];
+            compile::test_compile_with_decls(&mut opts)
+        }),
+        None if opts.flag_commands.test_compile_with_decls => {
+            compile::test_compile_with_decls(&mut opts)
+        }
+
+        // Compile to hhas
+        Some(Command::Compile(mut opts)) => compile::run(&mut opts),
+        None if opts.daemon => daemon_mode(|path| {
+            opts.files.filenames = vec![path];
+            compile::compile_from_text(&mut opts)
+        }),
+        None => compile::compile_from_text(&mut opts),
     }
+}
+
+/// In daemon mode, hackc blocks waiting for a filename on stdin.
+/// Then, using the originally invoked options, dispatches that file to be compiled.
+fn daemon_mode(mut f: impl FnMut(PathBuf) -> Result<()>) -> Result<()> {
+    for line in std::io::stdin().lock().lines() {
+        f(Path::new(&line?).to_path_buf())?;
+    }
+    Ok(())
 }
 
 /// Utility print for daemon mode compatibility
@@ -287,11 +295,8 @@ pub(crate) fn daemon_print(opts: &Opts, output: &[u8]) -> Result<()> {
         // Need to account for utf-8 encoding and text streams with the python test
         // runner A whole mess:
         // https://stackoverflow.com/questions/3586923/counting-unicode-characters-in-c
-        writeln!(
-            w,
-            "{}",
-            output.iter().filter(|&b| (b & 0xc0) != 0x80).count() + 1
-        )?;
+        let nbytes = output.iter().filter(|&b| (b & 0xc0) != 0x80).count() + 1;
+        writeln!(w, "{nbytes}",)?;
     }
     w.write_all(output)?;
     w.write_all(b"\n")?;

@@ -67,3 +67,18 @@ pub(crate) fn extract_facts(hackc_opts: &mut crate::Opts, mut opts: Opts) -> Res
     }
     Ok(())
 }
+
+pub(crate) fn run_flag(hackc_opts: &mut crate::Opts) -> Result<()> {
+    let facts_opts = Opts {
+        files: std::mem::take(&mut hackc_opts.files),
+        ..Default::default()
+    };
+    extract_facts(hackc_opts, facts_opts)
+}
+
+pub(crate) fn run_daemon(hackc_opts: &mut crate::Opts) -> Result<()> {
+    crate::daemon_mode(|path| {
+        hackc_opts.files.filenames = vec![path];
+        run_flag(hackc_opts)
+    })
+}

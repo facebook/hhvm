@@ -1345,10 +1345,10 @@ let generate_splat_type_vars
   (env, (d_required, d_optional, d_variadic))
 
 let strip_dynamic env ty =
-  let (env, ty) = Env.expand_type env ty in
-  match get_node ty with
-  | Tdynamic -> Typing_make_type.nothing (get_reason ty)
-  | _ -> Typing_utils.strip_dynamic env ty
+  if Typing_utils.is_dynamic_or_intersection env ty then
+    Typing_make_type.nothing (get_reason ty)
+  else
+    Typing_utils.strip_dynamic env ty
 
 let call_param
     ~dynamic_func

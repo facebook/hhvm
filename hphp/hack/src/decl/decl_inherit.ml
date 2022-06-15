@@ -504,7 +504,7 @@ let parents_which_provide_members c =
   | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
   | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> c.sc_extends
 
-let from_parent env c (parents : Decl_store.class_entries SMap.t) parent acc =
+let from_parent env c (parents : Decl_store.class_entries SMap.t) acc parent =
   let inherited = from_class env c parents parent in
   add_inherited inherited acc
 
@@ -526,27 +526,46 @@ let from_interface_constants
   let inherited = from_class_constants_only env parents impls in
   add_inherited inherited acc
 
-(*****************************************************************************)
-(* The API to the outside *)
-(*****************************************************************************)
+type parent_kind =
+  | Parent
+  | Requirement
+  | Trait
+
+type parent = decl_ty
+
+module OrderedParents : sig
+  type t
+
+  (** This provides the parent traversal order for member folding.
+    This is appropriate for all members except XHP attributes and constants.
+    The order is different for those and these are handled elsewhere. *)
+  val get : shallow_class -> t
+
+  val fold : t -> init:'acc -> f:(parent_kind -> 'acc -> parent -> 'acc) -> 'acc
+end = struct
+  type t = (parent_kind * parent list) list
+
+  let get (c : shallow_class) : t =
+    [
+      (Parent, parents_which_provide_members c |> List.rev);
+      (Requirement, c.sc_req_class @ c.sc_req_extends);
+      (Trait, c.sc_uses);
+    ]
+
+  let fold (t : t) ~init ~(f : parent_kind -> 'acc -> parent -> 'acc) =
+    List.fold_left t ~init ~f:(fun acc (parent_kind, parents) ->
+        List.fold_left ~init:acc ~f:(f parent_kind) parents)
+end
 
 let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
   let acc = empty in
-  (* members inherited from parent class ... *)
-  let (acc : inherited) =
-    List.fold_right
-      ~f:(from_parent env c parents)
-      ~init:acc
-      (parents_which_provide_members c)
-  in
   let acc =
-    List.fold_left
-      ~f:(from_requirements env c parents)
-      ~init:acc
-      (c.sc_req_class @ c.sc_req_extends)
+    OrderedParents.get c
+    |> OrderedParents.fold ~init:acc ~f:(function
+           | Parent -> from_parent env c parents
+           | Requirement -> from_requirements env c parents
+           | Trait -> from_trait env c parents)
   in
-  (* ... are overridden with those inherited from used traits *)
-  let acc = List.fold_left ~f:(from_trait env c parents) ~init:acc c.sc_uses in
   let acc =
     List.fold_left
       ~f:(from_xhp_attr_use env parents)

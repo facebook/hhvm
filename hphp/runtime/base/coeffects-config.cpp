@@ -62,6 +62,8 @@ static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
   X(zoned_local)        \
   X(zoned_shallow)      \
   X(zoned)              \
+  X(leak_safe_local)    \
+  X(leak_safe_shallow)  \
   X(leak_safe)          \
   X(globals)            \
   X(read_globals)       \
@@ -179,7 +181,7 @@ void initCapabilityGraphs() {
                     zoned),
            addEdges(createNode(Cap::s_zoned_with, true),
                     addEdges(zoned,
-                             addEdges(createNode(Cap::s_leak_safe),
+                             addEdges(createNode(Cap::s_leak_safe, true),
                                       addEdges(createNode(Cap::s_write_props),
                                                addEdges(createNode(Cap::s_write_this_props),
                                                         zoned_maybe)),
@@ -383,6 +385,7 @@ RuntimeCoeffects CoeffectsConfig::escapesTo(const std::string& coeffect) {
   }
   if (CoeffectsConfig::zonedEnforcementLevel()) {
     if (coeffect == C::s_zoned_local) return RuntimeCoeffects::defaults();
+    if (coeffect == C::s_leak_safe_local) return RuntimeCoeffects::defaults();
   }
   if (coeffect == C::s_86backdoor) return RuntimeCoeffects::defaults();
   if (coeffect == C::s_86backdoor_globals_leak_safe) {
@@ -413,6 +416,8 @@ std::string CoeffectsConfig::fromHackCCtx(const hackc::hhbc::Ctx& ctx) {
     case hackc::hhbc::Ctx::ZonedLocal:     return C::s_zoned_local;
     case hackc::hhbc::Ctx::ZonedShallow:   return C::s_zoned_shallow;
     case hackc::hhbc::Ctx::Zoned:          return C::s_zoned;
+    case hackc::hhbc::Ctx::LeakSafeLocal:  return C::s_leak_safe_local;
+    case hackc::hhbc::Ctx::LeakSafeShallow:return C::s_leak_safe_shallow;
     case hackc::hhbc::Ctx::LeakSafe:       return C::s_leak_safe;
     case hackc::hhbc::Ctx::ReadGlobals:    return C::s_read_globals;
     case hackc::hhbc::Ctx::Globals:        return C::s_globals;

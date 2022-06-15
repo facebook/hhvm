@@ -146,7 +146,7 @@ final class AsyncGeneratorWaitHandle<<<__RequireDynamic>> +Tk, <<__RequireDynami
  * multiple `Awaitable`s and you want to wait for all of them
  * together, use `concurrent` or helper functions like
  * `Vec\map_async`.
- * 
+ *
  * `Awaitable` is not multithreading. Hack is single threaded, so
  * `Awaitable` allows you to wait for multiple external results at
  * once, rather than sequentially.
@@ -201,7 +201,7 @@ final class ConditionWaitHandle<T> extends WaitableWaitHandle<T> {
 final class RescheduleWaitHandle extends WaitableWaitHandle<void> {
   const int QUEUE_DEFAULT = 0;
   const int QUEUE_NO_PENDING_IO = 1;
-  public static function create(int $queue, int $priority): RescheduleWaitHandle {}
+  public static function create(int $queue, int $priority)[]: RescheduleWaitHandle {}
 }
 
 <<__SupportDynamicType>>

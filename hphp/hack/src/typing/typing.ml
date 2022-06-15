@@ -7775,7 +7775,17 @@ and class_get_inner
                   ur
                   env
                   ty
-                  { et_type = member_ty; et_enforced }
+                  {
+                    et_type =
+                      (match et_enforced with
+                      | Enforced
+                        when TypecheckerOptions.enable_sound_dynamic
+                               (Env.get_tcopt env)
+                             && Env.get_support_dynamic_type env ->
+                        Typing_utils.make_like env member_ty
+                      | _ -> member_ty);
+                    et_enforced;
+                  }
                   Typing_error.Callback.unify_error
               in
               Option.iter ty_err_opt ~f:Errors.add_typing_error;

@@ -4719,8 +4719,9 @@ module Primary = struct
   let undefined_field use_pos name shape_type_pos =
     ( Error_code.UndefinedField,
       lazy
-        (use_pos, "The field " ^ Markdown_lite.md_codify name ^ " is undefined"),
-      lazy [(shape_type_pos, "Definition is here")],
+        ( use_pos,
+          "This shape doesn't have a field " ^ Markdown_lite.md_codify name ),
+      lazy [(shape_type_pos, "The shape is defined here")],
       [] )
 
   let array_access code pos1 pos2 ty =

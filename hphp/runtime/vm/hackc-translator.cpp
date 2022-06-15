@@ -378,6 +378,7 @@ void addConstant(TranslationState& ts,
   }
 
   auto tvInit = toTypedValue(tv.value());
+  tvAsVariant(&tvInit).setEvalScalar();
   ts.pce->addConstant(name,
                       nullptr,
                       &tvInit,
@@ -446,7 +447,11 @@ void translateProperty(TranslationState& ts, const HhasProperty& p, const UpperB
   }
 
   auto const tv = maybeOrElse(p.initial_value,
-    [&](hhbc::TypedValue& s) {return toTypedValue(s);},
+    [&](hhbc::TypedValue& s) {
+      auto hphpTv = toTypedValue(s);
+      tvAsVariant(&hphpTv).setEvalScalar();
+      return hphpTv;
+    },
     [&]() {return make_tv<KindOfNull>();});
 
   auto const name = toStaticString(p.name._0);

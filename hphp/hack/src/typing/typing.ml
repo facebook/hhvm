@@ -5000,23 +5000,17 @@ and lambda ~is_anon ?expected p env f idl =
   let is_explicit = Option.is_some (hint_of_type_hint f.f_ret) in
   let check_body_under_known_params ~supportdyn env ?ret_ty ft :
       env * _ * locl_ty =
-    let (env, (tefun, ty, ft)) =
+    let (env, (tefun, ft, support_dynamic_type)) =
       closure_make ~supportdyn ?ret_ty env p declared_decl_ft f ft idl is_anon
     in
-    let inferred_ty =
-      mk
-        ( Reason.Rwitness p,
-          Tfun
-            {
-              ft with
-              ft_ret =
-                (if is_explicit then
-                  declared_ft.ft_ret
-                else
-                  MakeType.unenforced ty);
-            } )
+    let ty = mk (Reason.Rwitness p, Tfun ft) in
+    let ty =
+      if support_dynamic_type then
+        MakeType.supportdyn (Reason.Rwitness p) ty
+      else
+        ty
     in
-    (env, tefun, inferred_ty)
+    (env, tefun, ty)
   in
   let (env, eexpected) =
     expand_expected_and_get_node ~for_lambda:true env expected
@@ -5425,9 +5419,13 @@ and closure_make
        parts of the environment; the clobbered parts are restored before
        returning the result. Additionally, we also prevent type parameters
        created in the closure from unsoundly leaking into the environment
-       of the enclosing function. *)
+       of the enclosing function.
+
+       Also here we wrap `supportdyn<_>` around the function type if
+       this is an SDT function.
+    *)
     let snap = Typing_escape.snapshot_env env in
-    let (env, (escaping, (te, hret, ft))) =
+    let (env, (escaping, (te, ft, support_dynamic_type))) =
       Env.closure env (fun env ->
           stash_conts_for_closure env lambda_pos is_anon idl (fun env ->
               let (env, res) = f env in
@@ -5436,17 +5434,20 @@ and closure_make
     in
     (* After the body of the function is checked, erase all the type parameters
        created from the env and the return type. *)
-    let (env, hret) =
+    let (env, ret_ty) =
       if check_escapes then
         Typing_escape.refresh_env_and_type
           ~remove:escaping
           ~pos:lambda_pos
           env
-          hret
+          ft.ft_ret.et_type
       else
-        (env, hret)
+        (env, ft.ft_ret.et_type)
     in
-    (env, (te, hret, ft))
+    ( env,
+      ( te,
+        { ft with ft_ret = { ft.ft_ret with et_type = ret_ty } },
+        support_dynamic_type ) )
   in
   type_closure @@ fun env ->
   let nb = f.f_body in
@@ -5660,12 +5661,6 @@ and closure_make
     }
   in
   let ty = mk (Reason.Rwitness lambda_pos, Tfun ft) in
-  let ty =
-    if support_dynamic_type then
-      MakeType.supportdyn (Reason.Rwitness lambda_pos) ty
-    else
-      ty
-  in
   let te =
     Tast.make_typed_expr
       lambda_pos
@@ -5676,7 +5671,7 @@ and closure_make
         Aast.Lfun (tfun_, idl))
   in
   let env = Env.set_tyvar_variance env ty in
-  (env, (te, hret.et_type, ft))
+  (env, (te, ft, support_dynamic_type))
 
 (*****************************************************************************)
 (* End of anonymous functions & lambdas. *)

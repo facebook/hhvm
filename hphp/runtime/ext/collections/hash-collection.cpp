@@ -60,42 +60,6 @@ int32_t* HashCollection::warnUnbalanced(size_t n, int32_t* ei) const {
   return ei;
 }
 
-NEVER_INLINE
-void HashCollection::warnOnStrIntDup() const {
-  req::fast_set<int64_t> seenVals;
-
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    int64_t newVal = 0;
-
-    if (e->hasIntKey()) {
-      newVal = e->ikey;
-    } else {
-      assertx(e->hasStrKey());
-      // isStriclyInteger() puts the int value in newVal as a side effect.
-      if (!e->skey->isStrictlyInteger(newVal)) continue;
-    }
-
-    if (!seenVals.insert(newVal).second) {
-      auto cls = getVMClass()->name()->toCppString();
-      auto pos = cls.rfind('\\');
-      if (pos != std::string::npos) {
-        cls = cls.substr(pos + 1);
-      }
-      raise_warning(
-        "%s::toArray() for a %s containing both int(%" PRId64 ") "
-        "and string('%" PRId64 "')",
-        cls.c_str(),
-        toLower(cls).c_str(),
-        newVal,
-        newVal
-      );
-      return;
-    }
-  }
-  // Do nothing if no 'duplicates' were found.
-}
-
 Array HashCollection::toVArray() {
   if (!m_size) return empty_vec_array();
   return Array{arrayData()}.toVec();
@@ -103,9 +67,7 @@ Array HashCollection::toVArray() {
 
 Array HashCollection::toDArray() {
   if (!m_size) return empty_dict_array();
-  auto arr = Array{arrayData()}.toDict();
-  if (UNLIKELY(arr->size() < m_size)) warnOnStrIntDup();
-  return arr;
+  return Array{arrayData()}.toDict();
 }
 
 Array HashCollection::toKeysArray() {

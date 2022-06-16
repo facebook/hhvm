@@ -72,8 +72,6 @@ module Dep = struct
     | KModule [@value 13]
   [@@deriving enum]
 
-  let _ = (min_dep_kind, max_dep_kind, dep_kind_of_enum)
-
   module Member = struct
     type t =
       | Method of string
@@ -129,6 +127,23 @@ module Dep = struct
        will show it as a positive integer. *)
     b
 
+  let to_int hash = hash
+
+  let dep_kind_of_variant : type a. a variant -> dep_kind = function
+    | GConst _ -> KGConst
+    | GConstName _ -> KGConstName
+    | Const _ -> KConst
+    | Type _ -> KType
+    | Fun _ -> KFun
+    | Prop _ -> KProp
+    | SProp _ -> KSProp
+    | Method _ -> KMethod
+    | SMethod _ -> KSMethod
+    | Constructor _ -> KConstructor
+    | AllMembers _ -> KAllMembers
+    | Extends _ -> KExtends
+    | Module _ -> KModule
+
   let make_member_dep_from_type_dep : t -> Member.t -> t =
    fun type_hash -> function
     | Member.Const name -> hash2 (dep_kind_to_enum KConst) type_hash name
@@ -183,6 +198,22 @@ module Dep = struct
     | AllMembers s -> Utils.strip_ns s
     | Extends s -> Utils.strip_ns s
     | Module m -> m
+
+  let extract_root_name : type a. a variant -> string = function
+    | GConst s
+    | GConstName s
+    | Constructor s
+    | AllMembers s
+    | Extends s
+    | Module s
+    | Type s
+    | Fun s
+    | Prop (s, _)
+    | SProp (s, _)
+    | Method (s, _)
+    | SMethod (s, _)
+    | Const (s, _) ->
+      Utils.strip_ns s
 
   let extract_member_name : type a. a variant -> string option = function
     | GConst _

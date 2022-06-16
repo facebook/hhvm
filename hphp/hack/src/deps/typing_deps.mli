@@ -65,6 +65,24 @@ module Dep : sig
 
   val dependency_of_variant : 'a variant -> dependency variant
 
+  type dep_kind =
+    | KGConst
+    | KFun
+    | KType
+    | KExtends
+    | KConst
+    | KConstructor
+    | KProp
+    | KSProp
+    | KMethod
+    | KSMethod
+    | KAllMembers
+    | KGConstName
+    | KModule
+  [@@deriving enum]
+
+  val dep_kind_of_variant : 'a variant -> dep_kind
+
   module Member : sig
     type t
 
@@ -93,6 +111,8 @@ module Dep : sig
   (** A 64bit representation of the 63bit hash. *)
   val to_int64 : t -> int64
 
+  val to_int : t -> int
+
   val is_class : t -> bool
 
   val extends_of_class : t -> t
@@ -100,6 +120,8 @@ module Dep : sig
   val compare : t -> t -> int
 
   val extract_name : 'a variant -> string
+
+  val extract_root_name : 'a variant -> string
 
   val extract_member_name : 'a variant -> string option
 

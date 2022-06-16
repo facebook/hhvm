@@ -29,6 +29,8 @@
   logging
   ocamlpool
   relative_path
+  sqlite3
+  sqlite_utils
   typing_deps_rust
   worker_cancel)
  (preprocess

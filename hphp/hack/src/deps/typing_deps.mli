@@ -63,6 +63,8 @@ module Dep : sig
         (** Represents a toplevel symbol being defined as a member of
         this module *)
 
+  val dependency_of_variant : 'a variant -> dependency variant
+
   module Member : sig
     type t
 
@@ -98,6 +100,8 @@ module Dep : sig
   val compare : t -> t -> int
 
   val extract_name : 'a variant -> string
+
+  val extract_member_name : 'a variant -> string option
 
   val to_decl_reference : 'a variant -> Decl_reference.t
 

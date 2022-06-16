@@ -40,6 +40,21 @@ module Dep = struct
     | GConstName : string -> 'a variant
     | Module : string -> 'a variant
 
+  let dependency_of_variant : type a. a variant -> dependency variant = function
+    | GConst s -> GConst s
+    | GConstName s -> GConstName s
+    | Type s -> Type s
+    | Fun s -> Fun s
+    | Module m -> Module m
+    | Const (cls, s) -> Const (cls, s)
+    | Prop (cls, s) -> Prop (cls, s)
+    | SProp (cls, s) -> SProp (cls, s)
+    | Method (cls, s) -> Method (cls, s)
+    | SMethod (cls, s) -> SMethod (cls, s)
+    | Constructor s -> Constructor s
+    | AllMembers s -> AllMembers s
+    | Extends s -> Extends s
+
   (** NOTE: keep in sync with `typing_deps_hash.rs`. *)
   type dep_kind =
     | KGConst [@value 0]
@@ -168,6 +183,23 @@ module Dep = struct
     | AllMembers s -> Utils.strip_ns s
     | Extends s -> Utils.strip_ns s
     | Module m -> m
+
+  let extract_member_name : type a. a variant -> string option = function
+    | GConst _
+    | GConstName _
+    | Constructor _
+    | AllMembers _
+    | Extends _
+    | Module _
+    | Type _
+    | Fun _ ->
+      None
+    | Const (_cls, s)
+    | Prop (_cls, s)
+    | SProp (_cls, s)
+    | Method (_cls, s)
+    | SMethod (_cls, s) ->
+      Some s
 
   let to_decl_reference : type a. a variant -> Decl_reference.t = function
     | Type s -> Decl_reference.Type s

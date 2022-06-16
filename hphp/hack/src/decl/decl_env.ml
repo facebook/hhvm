@@ -14,6 +14,7 @@ module Dep = Typing_deps.Dep
 type env = {
   mode: FileInfo.mode;
   droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant option;
+  droot_member: Typing_fine_deps.dependent_member option;
   ctx: Provider_context.t;
 }
 

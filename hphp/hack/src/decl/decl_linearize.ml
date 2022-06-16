@@ -580,6 +580,7 @@ let get_linearizations (ctx : Provider_context.t) (class_name : string) :
     {
       Decl_env.mode = FileInfo.Mstrict;
       droot = Some (Typing_deps.Dep.Type class_name);
+      droot_member = None;
       ctx;
     }
   in

@@ -781,7 +781,14 @@ and class_decl
   let internal = c.sc_internal in
   let (_p, cls_name) = c.sc_name in
   let class_dep = Dep.Type cls_name in
-  let env = { Decl_env.mode = c.sc_mode; droot = Some class_dep; ctx } in
+  let env =
+    {
+      Decl_env.mode = c.sc_mode;
+      droot = Some class_dep;
+      droot_member = None;
+      ctx;
+    }
+  in
   let inherited = Decl_inherit.make env c ~cache:parents in
   let props = inherited.Decl_inherit.ih_props in
   let props =

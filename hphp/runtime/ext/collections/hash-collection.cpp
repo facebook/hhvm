@@ -205,7 +205,7 @@ void HashCollection::compact() {
   if (!arrayData()->cowCheck()) {
     // VanillaDict::compact can only handle cases where the buffer's
     // refcount is 1.
-    arrayData()->compact(false);
+    arrayData()->compact();
   } else {
     // For cases where the buffer's refcount is greater than 1, call
     // resizeHelper().

@@ -14,7 +14,7 @@ FLAGS: List[str] = [
     "--enable-systemlib-annotations",
     # TODO(T118594542)
     "--allowed-fixme-codes-strict",
-    "2049",
+    "2049,4107",
     "--allowed-decl-fixme-codes",
     "2049",
 ]

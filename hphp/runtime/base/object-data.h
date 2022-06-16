@@ -141,10 +141,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                                // finished. Set during construction to
                                // temporarily allow writing to const props.
     UsedMemoCache      = 0x10, // Object has had data set in its memo slots
-    HasUninitProps     = 0x20, // The object's properties are being initialized
-    BigAllocSize       = 0x40, // The object was allocated using Big Size
+    BigAllocSize       = 0x20, // The object was allocated using Big Size
 #ifndef NDEBUG
-    SmallAllocSize     = 0x80, // For Debug, the object was allocated with
+    SmallAllocSize     = 0x40, // For Debug, the object was allocated with
                                // small buffers. If needed can be removed to
                                // free up Attribute bits.
 #else
@@ -303,13 +302,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   void lockObject();
   // Temporarily set the IsBeingConstructed bit
   void unlockObject();
-
-  // Set if we might re-enter while some of the properties contain
-  // garbage, eg after calling newInstanceNoPropInit, and before
-  // initializing all the props.
-  bool hasUninitProps() const;
-  void setHasUninitProps();
-  void clearHasUninitProps();
 
   // Whether the object is a collection, [and [not] mutable].
   bool isCollection() const;

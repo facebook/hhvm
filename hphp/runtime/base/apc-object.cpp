@@ -287,17 +287,14 @@ Object APCObject::createObject(bool pure) const {
   auto it = range.begin();
 
   try {
-    obj->setHasUninitProps();
     for (; it != range.end(); ++it, ++i) {
       tvCopy(apcProp[i]->toLocal(pure).detach(), tv_lval{it});
     }
-    obj->clearHasUninitProps();
   } catch (...) {
     for (; it != range.end(); ++it, ++i) {
       auto const val = apcProp[i]->toLocal(pure);
       type(tv_lval{it}) = KindOfUninit;
     }
-    obj->clearHasUninitProps();
     throw;
   }
 

@@ -423,13 +423,8 @@ void record_perf_mem_event(PerfEvent kind, const perf_event_sample* sample) {
       return record_vm_stack_mem_event(addr, record);
     }
 
-    if (auto const thing = tl_heap->find(addr)) {
-      if (UNLIKELY(thing->kind() != HeaderKind::Slab)) {
-        return record_request_heap_mem_event(addr, thing, record);
-      }
-      auto const slab = static_cast<const Slab*>(thing);
-      auto const obj = slab->find(addr);
-      return record_request_heap_mem_event(addr, obj ? obj : slab, record);
+    if (auto const obj = tl_heap->find(addr)) {
+      return record_request_heap_mem_event(addr, obj, record);
     }
     if (tl_heap->contains(const_cast<void*>(addr))) {
       record.setStr("location", "request_heap");

@@ -294,7 +294,6 @@ private:
     check(Attr::IsWeakRefed, "IsWeakRefed");
     check(Attr::HasDynPropArr, "HasDynPropArr");
     check(Attr::UsedMemoCache, "UsedMemoCache");
-    check(Attr::HasUninitProps, "HasUninitProps");
     if (error.size()) {
       throw ScanException(folly::sformat(
           "Unhandled object due to attribute(s) ({})", error));

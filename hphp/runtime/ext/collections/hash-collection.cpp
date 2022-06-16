@@ -229,11 +229,6 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     for (; newCap < m_size; newCap <<= 1) {}
     assertx(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
   } else {
-    if (m_size == 0 && nextKI() == 0) {
-      decRefArr(arrayData());
-      setArrayData(CreateDictAsMixed());
-      return;
-    }
     // If no old capacity was provided, we compute the largest capacity
     // where m_size/cap() is less than or equal to 0.5 for good hysteresis
     size_t doubleSz = size_t(m_size) * 2;

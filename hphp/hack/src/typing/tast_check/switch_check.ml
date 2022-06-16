@@ -170,6 +170,14 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
     let decl_env = Env.get_decl_env env in
     Option.iter decl_env.Decl_env.droot ~f:(fun root ->
         Typing_deps.add_idep (Env.get_deps_mode env) root dep);
+    if TypecheckerOptions.record_fine_grained_dependencies @@ Env.get_tcopt env
+    then
+      Typing_fine_deps.try_add_fine_dep
+        (Env.get_deps_mode env)
+        decl_env.Decl_env.droot
+        decl_env.Decl_env.droot_member
+        dep;
+
     let tc = unsafe_opt @@ Env.get_enum env id in
     check_enum_exhaustiveness pos tc kind caselist enum_coming_from_unresolved;
     env

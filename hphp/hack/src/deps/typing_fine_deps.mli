@@ -10,23 +10,16 @@
   * depends on (e.g., due to calling it) *)
 type dependency = Typing_deps.Dep.dependency Typing_deps.Dep.variant
 
-(** A dependent as used by the original, "coarse" dependency graph mechanism *)
+(** A dependent (= something with dependencies) as used by the original,
+  * "coarse" dependency graph mechanism *)
 type coarse_dependent = Typing_deps.Dep.dependent Typing_deps.Dep.variant
 
-(** A dependent offering more granularity than [coarse_dependent] *)
-type fine_dependent
-
-(** A [dependent_member] augments a [coarse_dependent], yielding a
-  * [fine_dependent]. It denotes a child/member of the toplevel
-  * definition represented by [coarse_dependent] *)
+(** A [dependent_member] augments a [coarse_dependent]. It denotes a
+  * child/member of the toplevel definition represented by
+  * [coarse_dependent] *)
 type dependent_member =
   | Method of string
   | SMethod of string
-
-val fine_dependent_of_coarse_and_child :
-  coarse_dependent -> dependent_member option -> fine_dependent
-
-val add_fine_dep : Typing_deps_mode.t -> fine_dependent -> dependency -> unit
 
 val add_coarse_dep :
   Typing_deps_mode.t -> coarse_dependent -> dependency -> unit
@@ -37,3 +30,6 @@ val try_add_fine_dep :
   dependent_member option ->
   dependency ->
   unit
+
+(** Persists all currently cached dependencies to disk *)
+val finalize : Typing_deps_mode.t -> unit

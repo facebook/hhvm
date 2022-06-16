@@ -962,7 +962,15 @@ and class_decl
       Typing_deps.add_idep
         (Provider_context.get_deps_mode ctx)
         (Dep.Type cls_name)
-        (Dep.Type x)
+        (Dep.Type x);
+      if
+        TypecheckerOptions.record_fine_grained_dependencies
+        @@ Provider_context.get_tcopt ctx
+      then
+        Typing_fine_deps.add_coarse_dep
+          (Provider_context.get_deps_mode ctx)
+          (Dep.Type cls_name)
+          (Dep.Type x)
     end
     impl;
   (tc, member_heaps_values)

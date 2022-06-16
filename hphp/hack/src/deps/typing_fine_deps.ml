@@ -19,7 +19,7 @@ type coarse_dependent = Typing_deps.Dep.dependent Typing_deps.Dep.variant
 (** [Typing_deps.Dep.dependency Typing_deps.Dep.variant] contains additionally
   * constructors that we don't need here.
   * Also, the fact that we use it for dependents rather than dependencies may
-  * be confusing. Therefore we keep the type abstract in the interface *)
+  * be confusing. But this type is not part of the module's interface *)
 type fine_dependent = Typing_deps.Dep.dependency Typing_deps.Dep.variant
 
 (** For debugging: When enabled, should record exactly the same dependencies as
@@ -63,3 +63,5 @@ let try_add_fine_dep mode coarse child dependency =
   | (Some root, child_opt) ->
     let dependent = fine_dependent_of_coarse_and_child root child_opt in
     add_fine_dep mode dependent dependency
+
+let finalize _mode = failwith "Not implemented, yet"

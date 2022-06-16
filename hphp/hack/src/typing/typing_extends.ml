@@ -467,9 +467,25 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
                 })
     | (_, _) -> ()
 
+let add_fine_grained_member_dep
+    env dependent_class dependen_member_name dependent_member_kind dependency =
+  let root = Some (Dep.Type (Cls.name dependent_class)) in
+  let member =
+    match dependent_member_kind with
+    | MemberKind.Method -> Some (Typing_fine_deps.Method dependen_member_name)
+    | MemberKind.Static_method ->
+      Some (Typing_fine_deps.SMethod dependen_member_name)
+    | _ -> None
+  in
+  Typing_fine_deps.try_add_fine_dep
+    (Env.get_deps_mode env)
+    root
+    member
+    dependency
+
 let add_member_dep
     env class_ (member_kind, member_name, member_origin, origin_pos) =
-  if not (Pos_or_decl.is_hhi origin_pos) then
+  if not (Pos_or_decl.is_hhi origin_pos) then (
     let dep =
       match member_kind with
       | MemberKind.Method -> Dep.Method (member_origin, member_name)
@@ -481,7 +497,13 @@ let add_member_dep
     Typing_deps.add_idep
       (Env.get_deps_mode env)
       (Dep.Type (Cls.name class_))
-      dep
+      dep;
+    if
+      TypecheckerOptions.record_fine_grained_dependencies
+      @@ Typing_env.get_tcopt env
+    then
+      add_fine_grained_member_dep env class_ member_name member_kind dep
+  )
 
 let check_compatible_sound_dynamic_attributes
     env member_name member_kind parent_class_elt class_elt on_error =

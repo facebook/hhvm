@@ -438,6 +438,10 @@ let method_def ~is_disposable env cls m =
   Errors.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name @@ fun env ->
   FunUtils.check_params m.m_params;
+  let method_name = Ast_defs.get_id m.m_name in
+  let env =
+    Typing_env.env_with_method_droot_member env method_name ~static:m.m_static
+  in
   let initial_env = env in
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
@@ -445,7 +449,7 @@ let method_def ~is_disposable env cls m =
     get_decl_method_header
       (Env.get_tcopt env)
       cls
-      (snd m.m_name)
+      method_name
       ~is_static:m.m_static
   in
   let pos = fst m.m_name in
@@ -471,7 +475,7 @@ let method_def ~is_disposable env cls m =
   let (env, _) =
     Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
   in
-  let is_ctor = String.equal (snd m.m_name) SN.Members.__construct in
+  let is_ctor = String.equal method_name SN.Members.__construct in
   let env = Env.set_fun_is_constructor env is_ctor in
   let (env, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
@@ -548,7 +552,7 @@ let method_def ~is_disposable env cls m =
   in
   let type_hint' =
     match hint_of_type_hint m.m_ret with
-    | None when String.equal (snd m.m_name) SN.Members.__construct ->
+    | None when String.equal method_name SN.Members.__construct ->
       Some (pos, Hprim Tvoid)
     | None ->
       if not @@ Env.is_hhi env then

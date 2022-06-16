@@ -478,6 +478,11 @@ let process_workitems
     Typing_deps.flush_ideps_batch (Provider_context.get_deps_mode ctx)
   in
   let dep_edges = Typing_deps.merge_dep_edges dep_edges new_dep_edges in
+  if
+    Provider_context.get_tcopt ctx
+    |> TypecheckerOptions.record_fine_grained_dependencies
+  then
+    Typing_fine_deps.finalize (Provider_context.get_deps_mode ctx);
 
   (* Gather up our various forms of telemetry... *)
   let end_heap_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in

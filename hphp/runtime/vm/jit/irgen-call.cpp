@@ -565,7 +565,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       }
     }
 
-    auto const numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
+    auto numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
     auto const coeffects = curCoeffects(env);
     auto const prologueFlags = cns(env, PrologueFlags(
       fca.hasGenerics(),

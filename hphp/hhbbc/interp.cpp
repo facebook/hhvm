@@ -4298,8 +4298,11 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
                         bool dynamic, uint32_t numExtraInputs, SString clsHint,
                         UpdateBC updateBC) {
   if (isBadContext(op.fca)) {
+    if (op.fca.asyncEagerTarget() != NoBlockId) {
+      return reduce(env, updateBC(op.fca.withoutAsyncEagerTarget()));
+    }
     for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
-    fcallUnknownImpl(env, op.fca);
+    fcallUnknownImpl(env, op.fca, TBottom);
     unreachable(env);
     return;
   }
@@ -4395,8 +4398,20 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
 void in(ISS& env, const bc::FCallClsMethodM& op) {
   auto const t = topC(env);
   if (!t.couldBe(BObj | BCls | BStr | BLazyCls)) {
+    if (op.fca.asyncEagerTarget() != NoBlockId) {
+      // Kill the async eager target if the function never returns.
+      return reduce(
+        env,
+        bc::FCallClsMethodM {
+          op.fca.withoutAsyncEagerTarget(),
+          op.str2,
+          op.subop3,
+          op.str4
+        }
+      );
+    }
     popC(env);
-    fcallUnknownImpl(env, op.fca);
+    fcallUnknownImpl(env, op.fca, TBottom);
     unreachable(env);
     return;
   }

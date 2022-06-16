@@ -331,7 +331,7 @@ version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d7ac49647ca72e4ecf4a1ca559dbc7fa43e2c5620dbd2cf198e6bf4671de6f2"
 dependencies = [
- "clap 3.1.8",
+ "clap 3.1.18",
  "heck 0.4.0",
  "indexmap",
  "log",
@@ -379,16 +379,16 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.1.8"
+version = "3.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71c47df61d9e16dc010b55dba1952a57d8c215dbb533fd13cdd13369aac73b1c"
+checksum = "d2dbdf4bdacb33466e854ce889eee8dfd5729abf7ccd7664d0a2d60cd384440b"
 dependencies = [
  "atty",
  "bitflags",
  "clap_derive",
+ "clap_lex",
  "indexmap",
  "lazy_static",
- "os_str_bytes",
  "regex",
  "strsim 0.10.0",
  "termcolor",
@@ -399,15 +399,24 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "3.1.7"
+version = "3.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3aab4734e083b809aaf5794e14e756d1c798d2c69c7f7de7a09a2f5214993c1"
+checksum = "25320346e922cffe59c0bbc5410c8d8784509efb321488971081313cb1e1a33c"
 dependencies = [
  "heck 0.4.0",
  "proc-macro-error",
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "clap_lex"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5538cd660450ebeb4234cfecf8f2284b844ffc4c50531e66d584ad5b91293613"
+dependencies = [
+ "os_str_bytes",
 ]
 
 [[package]]
@@ -1206,7 +1215,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "cbindgen",
- "clap 3.1.8",
+ "clap 3.1.18",
 ]
 
 [[package]]
@@ -1343,17 +1352,21 @@ version = "0.0.0"
 dependencies = [
  "aast_parser",
  "anyhow",
+ "bstr",
  "bumpalo",
  "bytecode_printer",
- "clap 3.1.8",
+ "clap 3.1.18",
  "compile",
  "decl_provider",
  "direct_decl_parser",
  "env_logger 0.7.1",
+ "escaper",
  "facts_rust",
+ "ffi",
  "hdrhistogram",
  "hhbc",
  "hhvm_options",
+ "hhvm_types_ffi",
  "jwalk",
  "log",
  "multifile_rust",
@@ -1617,7 +1630,7 @@ name = "hhvm_options"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 3.1.8",
+ "clap 3.1.18",
  "hdf",
  "hhvm_runtime_options",
 ]
@@ -2234,9 +2247,6 @@ name = "os_str_bytes"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8e22443d1643a904602595ba1cd8f7d896afe56d26712531c5ff73a15b2fbf64"
-dependencies = [
- "memchr",
-]
 
 [[package]]
 name = "output_vt100"

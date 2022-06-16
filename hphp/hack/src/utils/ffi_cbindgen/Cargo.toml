@@ -11,4 +11,4 @@ path = "ffi_cbindgen.rs"
 [dependencies]
 anyhow = "1.0.56"
 cbindgen = "0.22.0"
-clap = { version = "=3.1.8", features = ["derive", "regex", "unicode", "wrap_help"] }
+clap = { version = "=3.1.18", features = ["derive", "regex", "unicode", "wrap_help"] }

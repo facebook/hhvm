@@ -139,6 +139,7 @@ type t = {
   tco_allow_all_files_for_module_declarations: bool;
   tco_allowed_files_for_module_declarations: string list;
   tco_use_manifold_cython_client: bool;
+  tco_record_fine_grained_dependencies: bool;
 }
 [@@deriving eq, show]
 
@@ -322,6 +323,7 @@ let default =
     tco_allow_all_files_for_module_declarations = false;
     tco_allowed_files_for_module_declarations = [];
     tco_use_manifold_cython_client = false;
+    tco_record_fine_grained_dependencies = false;
   }
 
 let make
@@ -482,6 +484,8 @@ let make
     ?(tco_allowed_files_for_module_declarations =
       default.tco_allowed_files_for_module_declarations)
     ?(tco_use_manifold_cython_client = default.tco_use_manifold_cython_client)
+    ?(tco_record_fine_grained_dependencies =
+      default.tco_record_fine_grained_dependencies)
     () =
   {
     tco_experimental_features;
@@ -613,6 +617,7 @@ let make
     tco_allow_all_files_for_module_declarations;
     tco_allowed_files_for_module_declarations;
     tco_use_manifold_cython_client;
+    tco_record_fine_grained_dependencies;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -910,3 +915,6 @@ let tco_allowed_files_for_module_declarations t =
   t.tco_allowed_files_for_module_declarations
 
 let tco_use_manifold_cython_client t = t.tco_use_manifold_cython_client
+
+let tco_record_fine_grained_dependencies t =
+  t.tco_record_fine_grained_dependencies

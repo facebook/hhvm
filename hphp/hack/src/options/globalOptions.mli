@@ -320,6 +320,9 @@ type t = {
   tco_allow_all_files_for_module_declarations: bool;
   tco_allowed_files_for_module_declarations: string list;
   tco_use_manifold_cython_client: bool;
+  (* If enabled, the type checker records more fine-grained dependencies than usual,
+     for example between individual methods. *)
+  tco_record_fine_grained_dependencies: bool;
 }
 [@@deriving eq, show]
 
@@ -452,6 +455,7 @@ val make :
   ?tco_allow_all_files_for_module_declarations:bool ->
   ?tco_allowed_files_for_module_declarations:string list ->
   ?tco_use_manifold_cython_client:bool ->
+  ?tco_record_fine_grained_dependencies:bool ->
   unit ->
   t
 
@@ -744,3 +748,5 @@ val tco_allow_all_files_for_module_declarations : t -> bool
 val tco_allowed_files_for_module_declarations : t -> string list
 
 val tco_use_manifold_cython_client : t -> bool
+
+val tco_record_fine_grained_dependencies : t -> bool

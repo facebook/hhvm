@@ -236,3 +236,6 @@ let allowed_files_for_module_declarations =
   GlobalOptions.tco_allowed_files_for_module_declarations
 
 let use_manifold_cython_client = GlobalOptions.tco_use_manifold_cython_client
+
+let record_fine_grained_dependencies =
+  GlobalOptions.tco_record_fine_grained_dependencies

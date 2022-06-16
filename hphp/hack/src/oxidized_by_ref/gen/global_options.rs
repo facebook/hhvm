@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a684adc0b006e9be81104319aae028ce>>
+// @generated SignedSource<<9cdd06692cccb27584b059f6db9b4f8f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -187,6 +187,7 @@ pub struct GlobalOptions<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_allowed_files_for_module_declarations: &'a [&'a str],
     pub tco_use_manifold_cython_client: bool,
+    pub tco_record_fine_grained_dependencies: bool,
 }
 impl<'a> TrivialDrop for GlobalOptions<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(GlobalOptions<'arena>);

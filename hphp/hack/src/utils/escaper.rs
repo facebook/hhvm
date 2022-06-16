@@ -246,6 +246,15 @@ fn unescape_literal(
     s: &str,
     output: &mut impl GrowableBytes,
 ) -> Result<(), InvalidString> {
+    unescape_literal_bytes(literal_kind, s.as_bytes(), output)
+}
+
+/// Helper method for `unescape_literal`
+fn unescape_literal_bytes(
+    literal_kind: LiteralKind,
+    s: &[u8],
+    output: &mut impl GrowableBytes,
+) -> Result<(), InvalidString> {
     struct Scanner<'a> {
         s: &'a [u8],
         i: usize,
@@ -289,7 +298,7 @@ fn unescape_literal(
         }
     }
 
-    let mut s = Scanner::new(s.as_bytes());
+    let mut s = Scanner::new(s);
     while !s.is_empty() {
         let c = s.next()?;
         if c != b'\\' || s.is_empty() {
@@ -376,6 +385,19 @@ fn unescape_literal_into_arena<'a>(
     let mut output = bumpalo::collections::Vec::with_capacity_in(s.len(), arena);
     unescape_literal(literal_kind, s, &mut output)?;
     Ok(output.into_bump_slice().into())
+}
+
+fn unescape_literal_bytes_into_vec_u8(
+    literal_kind: LiteralKind,
+    s: &[u8],
+) -> Result<Vec<u8>, InvalidString> {
+    let mut output = Vec::with_capacity(s.len());
+    unescape_literal_bytes(literal_kind, s, &mut output)?;
+    Ok(output)
+}
+
+pub fn unescape_literal_bytes_into_vec_bytes(s: &[u8]) -> Result<Vec<u8>, InvalidString> {
+    unescape_literal_bytes_into_vec_u8(LiteralKind::LiteralDoubleQuote, s)
 }
 
 pub fn unescape_double(s: &str) -> Result<BString, InvalidString> {

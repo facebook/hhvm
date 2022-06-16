@@ -85,7 +85,7 @@ fn assemble_from_toks<'arena, 'a>(
     let mut funcs = Vec::new();
     let mut func_refs = None; // Only one func_refs which is itself a list, but that's inside the object
     let mut fp = PathBuf::new();
-    while token_iter.peek() != None {
+    while token_iter.peek().is_some() {
         if token_iter.next_if_str(Token::is_decl, ".filepath") {
             fp = assemble_filepath(token_iter)?;
         } else if token_iter.next_if_str(Token::is_decl, ".function") {
@@ -170,7 +170,7 @@ fn assemble_function<'arena, 'a>(
         body,
         span,
         // Not too sure where the bottom stuff come from
-        coeffects: Default::default(),
+        coeffects: Default::default(), // Get this from the body -- it's printed there (?)
         flags: hhbc::hhas_function::HhasFunctionFlags::empty(), // Empty set of flags. Look at rust bitflags for documetnation
         attrs: attr,
     };
@@ -256,8 +256,8 @@ fn assemble_user_attr<'arena, 'a>(
     // "name"("""v:a.args.len():{args}""")
     // The v and a.args.len() are added by the printer for all hhasattributes, so just parse the args
     let nm = token_iter.expect(Token::into_str_literal)?;
-    let nm = escaper::unquote_slice(nm); //here take away quotes
-    let nm = escaper::unescape_bytes(nm)?; //unescape
+    let nm = escaper::unquote_slice(nm); // Here take away quotes
+    let nm = escaper::unescape_bytes(nm)?; // Unescape
     let name = ffi::Str::new_slice(alloc, &nm);
     token_iter.expect(Token::into_open_paren)?;
     let args = token_iter.expect(Token::into_triple_str_literal)?; //is a &[u8]
@@ -332,26 +332,147 @@ fn assemble_params<'arena, 'a>(
 }
 
 fn assemble_body<'arena, 'a>(
-    _alloc: &'arena Bump,
+    alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
 ) -> Result<hhbc::hhas_body::HhasBody<'arena>> {
-    let mut curly_count = 0;
+    let mut instrs = Vec::new();
     token_iter.expect(Token::into_open_curly)?;
-    curly_count += 1;
-    // Pass over everything in the body
-    while token_iter.peek() != None && curly_count > 0 {
-        if token_iter.next_if(Token::is_open_curly) {
-            curly_count += 1;
-        } else if token_iter.next_if(Token::is_close_curly) {
-            curly_count -= 1;
-        } else {
-            token_iter.next();
-        }
+    // Two ways to deal with nested {}s -- have trybegin, trymiddle, and tryend assemblers know about the curlies
+    // or pass around a curly_counter and wait until that reaches 0. I think the former is cleaner for now.
+    // Look at previous diffs for the curly counter
+    while !token_iter.peek_if(Token::is_close_curly) {
+        instrs.push(assemble_instr(alloc, token_iter)?);
     }
-    debug_assert!(curly_count == 0);
-    Ok(Default::default()) // Not actually parsing the body; skipping until we consume the last open curly
+    token_iter.expect(Token::into_close_curly)?;
+    let tr = hhbc::hhas_body::HhasBody {
+        body_instrs: ffi::Slice::from_vec(alloc, instrs),
+        ..Default::default()
+    };
+    Ok(tr)
 }
 
+fn assemble_instr<'arena, 'a>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'a>,
+) -> Result<hhbc::Instruct<'arena>> {
+    // Does not yet support try/catch. For that, maybe add `fetch_until_matching_curly`
+    // method to Lexer.
+    if let Some(mut sl_lexer) = token_iter.fetch_until_newline() {
+        if sl_lexer.peek_if(Token::is_decl) {
+            // Not all pseudos are decls, but all decls are pseudos
+            if sl_lexer.peek_if_str(Token::is_decl, ".srcloc") {
+                Ok(hhbc::Instruct::Pseudo(hhbc::Pseudo::SrcLoc(
+                    assemble_srcloc(&mut sl_lexer)?,
+                )))
+            } else {
+                todo!(); // Don't yet know how to parse pseudos other than the pseudo srcloc
+            }
+        } else if sl_lexer.peek_if(Token::is_identifier) {
+            if let Some(tok) = sl_lexer.peek() {
+                match tok.as_bytes() {
+                    b"Print" => Ok(hhbc::Instruct::Opcode(assemble_print_opcode(
+                        alloc,
+                        &mut sl_lexer,
+                    )?)),
+                    b"PopC" => Ok(hhbc::Instruct::Opcode(assemble_popc_opcode(
+                        alloc,
+                        &mut sl_lexer,
+                    )?)),
+                    b"Null" => Ok(hhbc::Instruct::Opcode(assemble_null_opcode(
+                        alloc,
+                        &mut sl_lexer,
+                    )?)),
+                    b"RetC" => Ok(hhbc::Instruct::Opcode(assemble_retc_opcode(
+                        alloc,
+                        &mut sl_lexer,
+                    )?)),
+                    b"String" => Ok(hhbc::Instruct::Opcode(assemble_string_opcode(
+                        alloc,
+                        &mut sl_lexer,
+                    )?)),
+                    _ => todo!("assembling instrs: {}", tok),
+                }
+            } else {
+                bail!("Something wrong in assemble_instr") // Shouldn't happen, we peek_if so there must be something
+            }
+        } else {
+            bail!(
+                "Function body line that's neither decl or identifier: {}",
+                sl_lexer.next().unwrap() // Know there is something here because fetch_until_new_line won't return empty
+            );
+        }
+    } else {
+        bail!("Expected an additional instruction in body, reached EOF");
+    }
+}
+
+fn assemble_srcloc<'a>(token_iter: &mut Lexer<'a>) -> Result<hhbc::SrcLoc> {
+    token_iter.expect_is_str(Token::into_decl, ".srcloc")?;
+    let tr = hhbc::SrcLoc {
+        line_begin: std::str::from_utf8(token_iter.expect(Token::into_number)?)?
+            .parse::<isize>()?,
+        col_begin: {
+            token_iter.expect(Token::into_colon)?;
+            std::str::from_utf8(token_iter.expect(Token::into_number)?)?.parse::<isize>()?
+        },
+        line_end: {
+            token_iter.expect(Token::into_comma)?;
+            std::str::from_utf8(token_iter.expect(Token::into_number)?)?.parse::<isize>()?
+        },
+        col_end: {
+            token_iter.expect(Token::into_colon)?;
+            std::str::from_utf8(token_iter.expect(Token::into_number)?)?.parse::<isize>()?
+        },
+    };
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(tr)
+}
+
+fn assemble_print_opcode<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Opcode<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "Print")?;
+    debug_assert!(token_iter.is_empty());
+
+    Ok(hhbc::Opcode::Print)
+}
+fn assemble_popc_opcode<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Opcode<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "PopC")?;
+    debug_assert!(token_iter.is_empty());
+    Ok(hhbc::Opcode::PopC)
+}
+fn assemble_null_opcode<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Opcode<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "Null")?;
+    debug_assert!(token_iter.is_empty());
+    Ok(hhbc::Opcode::Null)
+}
+fn assemble_retc_opcode<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Opcode<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "RetC")?;
+    debug_assert!(token_iter.is_empty());
+    Ok(hhbc::Opcode::RetC)
+}
+
+fn assemble_string_opcode<'arena, 'a>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'a>,
+) -> Result<hhbc::Opcode<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "String")?;
+    let st_data = token_iter.expect(Token::into_str_literal)?;
+    let st_data =
+        escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(st_data.as_bytes()))?;
+    debug_assert!(token_iter.is_empty());
+    Ok(hhbc::Opcode::String(ffi::Str::new_slice(alloc, &st_data)))
+}
 fn assemble_name<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
@@ -440,9 +561,9 @@ impl<'a> Token<'a> {
     /// The "to" series of methods both check that [self] is the correct
     /// variant of Token and return a Result of [self]'s inner string
     #[allow(dead_code)]
-    fn into_newline(self) -> Result<()> {
+    fn into_newline(self) -> Result<&'a [u8]> {
         match self {
-            Token::Newline(_) => Ok(()),
+            Token::Newline(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a newline, got: {}", self),
         }
     }
@@ -507,105 +628,105 @@ impl<'a> Token<'a> {
     }
 
     // The following intos just return Result<()>s, because their position info is only useful for the bail that happens inside the into
-    fn into_semicolon(self) -> Result<()> {
+    fn into_semicolon(self) -> Result<&'a [u8]> {
         match self {
-            Token::Semicolon(_) => Ok(()),
+            Token::Semicolon(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a semicolon, got: {}", self),
         }
     }
 
     #[allow(dead_code)]
-    fn into_dash(self) -> Result<()> {
+    fn into_dash(self) -> Result<&'a [u8]> {
         match self {
-            Token::Dash(_) => Ok(()),
+            Token::Dash(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a dash, got: {}", self),
         }
     }
 
-    fn into_open_curly(self) -> Result<()> {
+    fn into_open_curly(self) -> Result<&'a [u8]> {
         match self {
-            Token::OpenCurly(_) => Ok(()),
+            Token::OpenCurly(_) => Ok(self.as_bytes()),
             _ => bail!("Expected an open curly, got: {}", self),
         }
     }
 
     #[allow(dead_code)]
-    fn into_open_bracket(self) -> Result<()> {
+    fn into_open_bracket(self) -> Result<&'a [u8]> {
         match self {
-            Token::OpenBracket(_) => Ok(()),
+            Token::OpenBracket(_) => Ok(self.as_bytes()),
             _ => bail!("Expected an open bracket, got: {}", self),
         }
     }
 
-    fn into_open_paren(self) -> Result<()> {
+    fn into_open_paren(self) -> Result<&'a [u8]> {
         match self {
-            Token::OpenParen(_) => Ok(()),
+            Token::OpenParen(_) => Ok(self.as_bytes()),
             _ => bail!("Expected an open paren, got: {}", self),
         }
     }
 
-    fn into_close_paren(self) -> Result<()> {
+    fn into_close_paren(self) -> Result<&'a [u8]> {
         match self {
-            Token::CloseParen(_) => Ok(()),
+            Token::CloseParen(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a close paren, got: {}", self),
         }
     }
 
-    fn into_close_bracket(self) -> Result<()> {
+    fn into_close_bracket(self) -> Result<&'a [u8]> {
         match self {
-            Token::CloseBracket(_) => Ok(()),
+            Token::CloseBracket(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a close bracket, got: {}", self),
         }
     }
 
-    fn into_close_curly(self) -> Result<()> {
+    fn into_close_curly(self) -> Result<&'a [u8]> {
         match self {
-            Token::CloseCurly(_) => Ok(()),
+            Token::CloseCurly(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a close curly, got: {}", self),
         }
     }
 
     #[allow(dead_code)]
-    fn into_equal(self) -> Result<()> {
+    fn into_equal(self) -> Result<&'a [u8]> {
         match self {
-            Token::Equal(_) => Ok(()),
+            Token::Equal(_) => Ok(self.as_bytes()),
             _ => bail!("Expected an equal, got: {}", self),
         }
     }
 
-    fn into_comma(self) -> Result<()> {
+    fn into_comma(self) -> Result<&'a [u8]> {
         match self {
-            Token::Comma(_) => Ok(()),
+            Token::Comma(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a comma, got: {}", self),
         }
     }
 
-    fn into_lt(self) -> Result<()> {
+    fn into_lt(self) -> Result<&'a [u8]> {
         match self {
-            Token::Lt(_) => Ok(()),
+            Token::Lt(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a lt (<), got: {}", self),
         }
     }
 
-    fn into_gt(self) -> Result<()> {
+    fn into_gt(self) -> Result<&'a [u8]> {
         match self {
-            Token::Gt(_) => Ok(()),
+            Token::Gt(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a gt (>), got: {}", self),
         }
     }
 
     #[allow(dead_code)]
-    fn into_colon(self) -> Result<()> {
+    fn into_colon(self) -> Result<&'a [u8]> {
         match self {
-            Token::Colon(_) => Ok(()),
+            Token::Colon(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a colon, got: {}", self),
         }
     }
 
     #[allow(dead_code)]
-    fn into_variadic(self) -> Result<()> {
+    fn into_variadic(self) -> Result<&'a [u8]> {
         match self {
-            Token::Variadic(_) => Ok(()),
+            Token::Variadic(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a variadic, got: {}", self),
         }
     }
@@ -778,6 +899,16 @@ impl<'a> Iterator for Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
+    /// Counts tokens in this `Lexer`, including newlines. Because of this it only makes sense to call
+    /// `size` on `Lexer`s spawned from `fetch_until_newline`
+    fn _size(&self) -> usize {
+        if self.pending.is_some() {
+            1 + self.tokens.len()
+        } else {
+            self.tokens.len()
+        }
+    }
+
     /// If `pending` is none, fills with the next non-newline token, or None of one does not exist.
     fn fill(&mut self) {
         if self.pending.is_none() {
@@ -795,7 +926,7 @@ impl<'a> Lexer<'a> {
         None
     }
 
-    pub fn _is_empty(&mut self) -> bool {
+    pub fn is_empty(&mut self) -> bool {
         self.fill();
         if self.pending.is_none() {
             debug_assert!(self.tokens.is_empty()); // VD should never have \n \n \n and empty pending
@@ -806,7 +937,7 @@ impl<'a> Lexer<'a> {
     }
 
     /// Advances the lexer passed its first non-leading newline, returning a mini-lexer of the tokens up until that newline.
-    pub fn _fetch_until_newline(&mut self) -> Option<Lexer<'a>> {
+    pub fn fetch_until_newline(&mut self) -> Option<Lexer<'a>> {
         self.fill();
         if let Some(t) = self.pending {
             let mut first_toks = VecDeque::new();
@@ -888,12 +1019,29 @@ impl<'a> Lexer<'a> {
             .map_or_else(|| bail!("End of token stream sooner than expected"), f)
     }
 
+    /// Like `expect` in that bails if incorrect token passed, but dissimilarly does not return the `into` of the passed token
+    fn expect_is_str<F>(&mut self, f: F, s: &str) -> Result<()>
+    where
+        F: FnOnce(Token<'a>) -> Result<&[u8]>,
+    {
+        self.next().map_or_else(
+            || bail!("End of token stream sooner than expected"),
+            |t| {
+                if f(t)? != s.as_bytes() {
+                    bail!("Expected {} got {}", s, t)
+                } else {
+                    Ok(())
+                }
+            },
+        )
+    }
+
     pub fn from_slice(s: &'a [u8]) -> Self {
         // First create the regex that matches any token. Done this way for readability
         let v = [
             r#"""".*""""#,                                          // Triple str literal
             "#.*",                                                  // Comment
-            r"(?-u)[\.@][_a-zA-Z\x80-\xff][_/a-zA-Z0-9\x80-\xff]*", // Decl, var, global. (?-u) turns off utf8 check
+            r"(?-u)[\.@][_a-zA-Z\x80-\xff][_/a-zA-Z0-9\x80-\xff]*", // Decl, global. (?-u) turns off utf8 check
             r"(?-u)\$[_a-zA-Z0-9\x80-\xff][_/a-zA-Z0-9\x80-\xff]*", // Var. See /home/almathaler/fbsource/fbcode/hphp/test/quick/reified-and-variadic.php's assembly for a var w/ a digit at front
             r#""((\\.)|[^\\"])*""#,                                 // Str literal
             r"[-+]?[0-9]+\.?[0-9]*",                                // Number
@@ -1059,17 +1207,25 @@ fn _print_from_lexer<'a>(l: Lexer<'a>) {
 mod test {
     use super::*;
     #[test]
+    fn just_nl_is_empty() {
+        let s = "\n \n \n";
+        let s = s.as_bytes();
+        let mut lex = Lexer::from_slice(s);
+        assert!(lex.fetch_until_newline().is_none());
+        assert!(lex.is_empty());
+    }
+    #[test]
     fn splits_mult_newlines_go_away() {
         // Point of this test: want to make sure that 3 mini-lexers are spawned (multiple new lines don't do anything)
         let s = "\n \n a \n \n \n b \n \n c \n";
         let s = s.as_bytes();
         let mut lex = Lexer::from_slice(s);
         let vc_of_lexers = vec![
-            lex._fetch_until_newline(),
-            lex._fetch_until_newline(),
-            lex._fetch_until_newline(),
+            lex.fetch_until_newline(),
+            lex.fetch_until_newline(),
+            lex.fetch_until_newline(),
         ];
-        assert!(lex._is_empty());
+        assert!(lex.is_empty());
         assert!(lex.next().is_none());
         assert_eq!(vc_of_lexers.len(), 3);
     }
@@ -1079,7 +1235,7 @@ mod test {
         let s = s.as_bytes();
         let mut lex = Lexer::from_slice(s);
         assert!(lex.next().is_some());
-        assert!(lex._is_empty());
+        assert!(lex.is_empty());
     }
     #[test]
     fn splitting_multiple_lines() {
@@ -1087,8 +1243,8 @@ mod test {
         let s = s.as_bytes();
         let mut lex = Lexer::from_slice(s);
         let mut vc_of_lexers = Vec::new();
-        while !lex._is_empty() {
-            vc_of_lexers.push(lex._fetch_until_newline());
+        while !lex.is_empty() {
+            vc_of_lexers.push(lex.fetch_until_newline());
         }
         assert_eq!(vc_of_lexers.len(), 10)
     }
@@ -1098,7 +1254,7 @@ mod test {
         let mut lex = Lexer::from_slice(s.as_bytes());
         assert!(lex.peek().is_some());
         assert!(lex.next().is_some());
-        assert!(lex._fetch_until_newline().is_none()); // Have consumed the a here -- "\n\n" was left and that's been consumed.
+        assert!(lex.fetch_until_newline().is_none()); // Have consumed the a here -- "\n\n" was left and that's been consumed.
     }
     #[test]
     #[should_panic]

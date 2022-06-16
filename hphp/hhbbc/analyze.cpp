@@ -452,7 +452,12 @@ FuncAnalysis do_analyze_collect(const Index& index,
       );
     }
     ret += sep + bsep;
-    folly::format(&ret, "Inferred return type: {}\n", show(ai.inferredReturn));
+    folly::format(
+      &ret,
+      "Inferred return type: {}{}\n",
+      show(ai.inferredReturn),
+      ai.effectFree ? " (effect-free)" : ""
+    );
     ret += bsep;
     return ret;
   }());

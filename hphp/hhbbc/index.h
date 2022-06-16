@@ -901,6 +901,8 @@ struct Index {
    */
   Type lookup_return_type(Context, MethodsInfo*, res::Func,
                           Dep dep = Dep::ReturnTy) const;
+  Type lookup_return_type(Context, MethodsInfo*, const php::Func*,
+                          Dep dep = Dep::ReturnTy) const;
 
   /*
    * Return the best known return type for a resolved function, given
@@ -1257,7 +1259,9 @@ struct Index {
   /*
    * Return true if the function is effect free.
    */
-  bool is_effect_free(const php::Func* func) const;
+  bool is_effect_free(Context, res::Func rfunc) const;
+  bool is_effect_free(Context, const php::Func* func) const;
+  bool is_effect_free_raw(const php::Func* func) const;
 
   /*
    * Do any necessary fixups to a return type.

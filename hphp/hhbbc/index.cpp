@@ -6732,8 +6732,45 @@ Index::supports_async_eager_return(res::Func rfunc) const {
   );
 }
 
-bool Index::is_effect_free(const php::Func* func) const {
+bool Index::is_effect_free_raw(const php::Func* func) const {
   return func_info(*m_data, func)->effectFree;
+}
+
+bool Index::is_effect_free(Context ctx, const php::Func* func) const {
+  add_dependency(*m_data, func, ctx, Dep::InlineDepthLimit);
+  return func_info(*m_data, func)->effectFree;
+}
+
+bool Index::is_effect_free(Context ctx, res::Func rfunc) const {
+  auto const processFF = [&] (FuncFamily* ff) {
+    add_dependency(*m_data, ff, ctx, Dep::InlineDepthLimit);
+    for (auto const mte : ff->possibleFuncs()) {
+      if (!func_info(*m_data, mte->second.func)->effectFree) return false;
+    }
+    return true;
+  };
+
+  return match<bool>(
+    rfunc.val,
+    [&](res::Func::FuncName)   { return false; },
+    [&](res::Func::MethodName) { return false; },
+    [&](FuncInfo* finfo)       {
+      add_dependency(*m_data, finfo->func, ctx, Dep::InlineDepthLimit);
+      return finfo->effectFree;
+    },
+    [&](const MethTabEntryPair* mte) {
+      add_dependency(*m_data, mte->second.func, ctx, Dep::InlineDepthLimit);
+      return func_info(*m_data, mte->second.func)->effectFree;
+    },
+    [&](FuncFamily* fam) { return processFF(fam); },
+    [&] (res::Func::MethodOrMissing m) { return false; },
+    [&] (const res::Func::Isect& i) {
+      for (auto const ff : i.families) {
+        if (processFF(ff)) return true;
+      }
+      return false;
+    }
+  );
 }
 
 // Helper function: Given a DCls, visit every subclass it represents,
@@ -7115,6 +7152,24 @@ Type Index::lookup_foldable_return_type(Context ctx,
     assertx(acc->second == contextType);
   }
   return contextType;
+}
+
+Type Index::lookup_return_type(Context ctx,
+                               MethodsInfo* methods,
+                               const php::Func* f,
+                               Dep dep) const {
+  if (methods) {
+    if (auto ret = methods->lookupReturnType(*f)) {
+      return unctx(std::move(*ret));
+    }
+  }
+  auto it = func_info(*m_data, f);
+  if (it->func) {
+    assertx(it->func == f);
+    add_dependency(*m_data, f, ctx, dep);
+    return it->returnTy;
+  }
+  return TInitCell;
 }
 
 Type Index::lookup_return_type(Context ctx,

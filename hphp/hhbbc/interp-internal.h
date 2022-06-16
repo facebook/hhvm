@@ -464,8 +464,16 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
 
   // The function has no args. Check if it's effect free and returns
   // a literal.
-  if (env.index.is_effect_free(func) &&
-      is_scalar(env.index.lookup_return_type_raw(func).first)) {
+  if (env.index.is_effect_free(env.ctx, func) &&
+      is_scalar(
+        env.index.lookup_return_type(
+          env.ctx,
+          &env.collect.methods,
+          func,
+          Dep::InlineDepthLimit
+        )
+      )
+     ) {
     return true;
   }
 

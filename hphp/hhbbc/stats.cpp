@@ -364,7 +364,7 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
 void collect_func(Stats& stats, const Index& index, const php::Func& func) {
   if (!func.cls) ++stats.totalFunctions;
 
-  if (index.is_effect_free(&func)) {
+  if (index.is_effect_free_raw(&func)) {
     ++stats.effectFreeFuncs;
   } else {
     ++stats.effectfulFuncs;

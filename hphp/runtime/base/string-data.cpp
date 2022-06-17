@@ -517,16 +517,6 @@ StringData* StringData::shrinkImpl(size_t len) {
   return sd;
 }
 
-StringData* StringData::shrink(size_t len) {
-  assertx(!hasMultipleRefs());
-  if (capacity() - len > kMinShrinkThreshold) {
-    return shrinkImpl(len);
-  }
-  assertx(len < MaxSize);
-  setSize(len);
-  return this;
-}
-
 void StringData::dump() const {
   auto s = slice();
 

@@ -230,11 +230,8 @@ struct StringData final : MaybeCountable,
    * May not be called for strings created with MakeUncounted or
    * MakeStatic.
    *
-   * Returns: possibly a new StringData, if we decided to reallocate. The new
-   * string's reference count is be pre-initialized to 1.  shrinkImpl
-   * always returns a new StringData.
+   * Returns: a new StringData with reference count 1
    */
-  StringData* shrink(size_t len);
   StringData* shrinkImpl(size_t len);
 
   /*

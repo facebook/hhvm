@@ -162,7 +162,6 @@ inline String apc_serialize(const Variant& var, bool pure) {
   return apc_serialize(const_variant_ref{var}, pure);
 }
 Variant apc_unserialize(const char* data, int len, bool pure);
-String apc_reserialize(const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support

@@ -813,18 +813,6 @@ Variant apc_unserialize(const char* data, int len, bool pure) {
   return unserialize_ex(data, len, sType, null_array, pure);
 }
 
-String apc_reserialize(const String& str) {
-  if (str.empty() ||
-      !apcExtension::EnableApcSerialize) return str;
-
-  VariableUnserializer uns(str.data(), str.size(),
-                           VariableUnserializer::Type::APCSerialize);
-  StringBuffer buf;
-  uns.reserialize(buf);
-
-  return buf.detach();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support
 

@@ -6,6 +6,7 @@
 use std::fmt::{self, Display};
 use std::path::{Path, PathBuf};
 
+use camino::Utf8Path;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
@@ -143,6 +144,10 @@ impl RelativePath {
         let mut r = PathBuf::from(prefix);
         r.push(self.path.as_path());
         r
+    }
+
+    pub fn utf8_path(&self) -> &Utf8Path {
+        Utf8Path::new(self.path_str())
     }
 }
 

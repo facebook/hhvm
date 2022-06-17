@@ -7,6 +7,7 @@ use std::fmt::{self, Debug, Display};
 use std::path::{Path, PathBuf};
 
 use bumpalo::Bump;
+use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 
 use eq_modulo_pos::EqModuloPos;
@@ -88,6 +89,10 @@ impl<'a> RelativePath<'a> {
         let mut r = PathBuf::from(prefix);
         r.push(self.path());
         r
+    }
+
+    pub fn utf8_path(&self) -> &Utf8Path {
+        Utf8Path::new(self.path_str().unwrap())
     }
 
     pub fn to_oxidized(&self) -> oxidized::relative_path::RelativePath {

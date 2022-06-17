@@ -579,8 +579,6 @@ void CollectionsExtension::initSet() {
   BASE_ME(__construct,   &BaseSet::init);
   BASE_ME(count,         &BaseSet::size);
   BASE_ME(contains,      &BaseSet::php_contains);
-  BASE_ME(toVArray,      &BaseSet::toVArray);
-  BASE_ME(toDArray,      &BaseSet::toDArray);
   BASE_ME(toKeysArray,   &BaseSet::toKeysArray);
   BASE_ME(toValuesArray, &BaseSet::toValuesArray);
   BASE_ME(getIterator,   &BaseSet::getIterator);

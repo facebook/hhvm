@@ -1008,9 +1008,6 @@ struct Variant : private TypedValue {
     return Array::attach(copy.detach().m_data.parr);
   }
 
-  Array toVArray() const { return toVec(); }
-  Array toDArray() const { return toDict(); }
-
   template <typename T>
   typename std::enable_if<std::is_base_of<ResourceData,T>::value, bool>::type
   isa() const {

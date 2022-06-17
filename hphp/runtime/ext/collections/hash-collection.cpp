@@ -60,16 +60,6 @@ int32_t* HashCollection::warnUnbalanced(size_t n, int32_t* ei) const {
   return ei;
 }
 
-Array HashCollection::toVArray() {
-  if (!m_size) return empty_vec_array();
-  return Array{arrayData()}.toVec();
-}
-
-Array HashCollection::toDArray() {
-  if (!m_size) return empty_dict_array();
-  return Array{arrayData()}.toDict();
-}
-
 Array HashCollection::toKeysArray() {
   VecInit ai(m_size);
   auto* eLimit = elmLimit();
@@ -85,7 +75,8 @@ Array HashCollection::toKeysArray() {
 }
 
 Array HashCollection::toValuesArray() {
-  return toVArray();
+  if (!m_size) return empty_vec_array();
+  return Array{arrayData()}.toVec();
 }
 
 void HashCollection::remove(int64_t key) {

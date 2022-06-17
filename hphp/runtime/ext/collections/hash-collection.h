@@ -68,9 +68,6 @@ struct HashCollection : ObjectData {
     return ad != arrayData() ? Array::attach(ad) : Array{ad};
   }
 
-  Array toVArray();
-  Array toDArray();
-
   Array toKeysArray();
   Array toValuesArray();
 

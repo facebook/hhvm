@@ -1354,7 +1354,7 @@ static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
       st->add(const_cast<StringData*>(interface->name()));
     }
   }
-  return st->toVArray();
+  return st->toValuesArray();
 }
 
 static Array HHVM_METHOD(ReflectionClass, getTraitNames) {

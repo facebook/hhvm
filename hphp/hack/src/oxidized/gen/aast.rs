@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b0c1fd7d6f930e1c48c1a762b7f7d84e>>
+// @generated SignedSource<<8bb28367aabd0d2cc74bbf0244955d5d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1791,6 +1791,7 @@ pub struct ModuleDef<Ex, En> {
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
     pub span: Pos,
     pub mode: file_info::Mode,
+    pub doc_comment: Option<DocComment>,
 }
 
 #[derive(

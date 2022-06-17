@@ -1,1 +1,4 @@
 foo
+/**
+ * This is the docstring for my module.
+ */

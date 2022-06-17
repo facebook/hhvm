@@ -5510,6 +5510,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             user_attributes: p_user_attributes(&md.attribute_spec, env)?,
             span: p_pos(node, env),
             mode: env.file_mode(),
+            doc_comment: doc_comment_opt,
         })]),
         ModuleMembershipDeclaration(mm) => {
             Ok(vec![ast::Def::mk_set_module(pos_name(&mm.name, env)?)])

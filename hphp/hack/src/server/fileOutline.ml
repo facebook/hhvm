@@ -400,6 +400,12 @@ let summarize_module_def md =
   let full_name = get_full_name None name in
   let id = get_symbol_id kind None name in
   let span = md.md_span in
+  let doc_comment = md.md_doc_comment in
+  let docblock =
+    match doc_comment with
+    | None -> None
+    | Some dc -> Some (snd dc)
+  in
   {
     kind;
     name;
@@ -410,7 +416,7 @@ let summarize_module_def md =
     modifiers = [];
     children = None;
     params = None;
-    docblock = None;
+    docblock;
   }
 
 let outline_ast ast =

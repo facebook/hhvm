@@ -1014,6 +1014,7 @@ and ('ex, 'en) module_def = {
   md_user_attributes: ('ex, 'en) user_attribute list;
   md_span: pos;
   md_mode: FileInfo.mode; [@visitors.opaque]
+  md_doc_comment: doc_comment option;
 }
 
 and ('ex, 'en) def =

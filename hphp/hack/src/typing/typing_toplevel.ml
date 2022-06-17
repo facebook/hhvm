@@ -2175,10 +2175,10 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
       let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
       Some (Aast.Stmt (snd (Typing.stmt env s)), [])
     | Module md -> Some (Aast.Module (module_def ctx md), [])
+    | SetModule sm -> Some (Aast.SetModule sm, [])
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _
-    | SetModule _
     | FileAttributes _ ->
       failwith
         "Invalid nodes in NAST. These nodes should be removed during naming."

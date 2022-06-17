@@ -2502,10 +2502,9 @@ let program ctx ast =
       top_level_env := genv;
       acc
     | Aast.Module md -> N.Module (module_ ctx md) :: acc
+    | Aast.SetModule sm -> N.SetModule sm :: acc
     (* These are elaborated away in Namespaces.elaborate_toplevel_defs *)
-    | Aast.SetModule _
-    | Aast.FileAttributes _ ->
-      acc
+    | Aast.FileAttributes _ -> acc
   in
   let on_program aast =
     let nast = List.fold_left ~f:aux ~init:[] aast in

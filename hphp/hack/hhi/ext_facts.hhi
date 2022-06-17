@@ -12,6 +12,7 @@ enum SymbolKind : int {
   K_TYPE = 1;
   K_FUNCTION = 2;
   K_CONSTANT = 3;
+  K_MODULE = 4;
 }
 
 enum TypeKind : string {

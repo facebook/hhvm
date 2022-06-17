@@ -236,7 +236,7 @@ fn main() -> Result<()> {
     match opts.command.take() {
         Some(Command::Assemble(opts)) => assemble::run(opts),
         Some(Command::Crc(opts)) => crc::run(opts),
-        Some(Command::Parse(parse_opts)) => parse::run(&mut opts, parse_opts),
+        Some(Command::Parse(parse_opts)) => parse::run(parse_opts),
         Some(Command::ParseBench(bench_opts)) => parse::run_bench_command(bench_opts),
 
         // Expr trees
@@ -257,20 +257,14 @@ fn main() -> Result<()> {
         None if opts.flag_commands.extract_facts_from_decls => facts::run_flag(&mut opts),
 
         // Test Decls-in-Compilation
-        None if opts.daemon && opts.flag_commands.test_compile_with_decls => daemon_mode(|path| {
-            opts.files.filenames = vec![path];
-            compile::test_compile_with_decls(&mut opts)
-        }),
-        None if opts.flag_commands.test_compile_with_decls => {
-            compile::test_compile_with_decls(&mut opts)
+        None if opts.daemon && opts.flag_commands.test_compile_with_decls => {
+            compile::test_decl_compile_daemon(&mut opts)
         }
+        None if opts.flag_commands.test_compile_with_decls => compile::test_decl_compile(&mut opts),
 
         // Compile to hhas
         Some(Command::Compile(mut opts)) => compile::run(&mut opts),
-        None if opts.daemon => daemon_mode(|path| {
-            opts.files.filenames = vec![path];
-            compile::compile_from_text(&mut opts)
-        }),
+        None if opts.daemon => compile::daemon(&mut opts),
         None => compile::compile_from_text(&mut opts),
     }
 }

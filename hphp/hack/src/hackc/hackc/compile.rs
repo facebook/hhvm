@@ -174,7 +174,14 @@ fn compile_impl<'decl>(
     Ok(hhas)
 }
 
-pub(crate) fn test_compile_with_decls(hackc_opts: &mut crate::Opts) -> Result<()> {
+pub(crate) fn daemon(hackc_opts: &mut crate::Opts) -> Result<()> {
+    crate::daemon_mode(|path| {
+        hackc_opts.files.filenames = vec![path];
+        compile_from_text(hackc_opts)
+    })
+}
+
+pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts) -> Result<()> {
     let files = hackc_opts.files.gather_input_files()?;
     for path in files {
         let source_text = fs::read(&path)?;
@@ -210,6 +217,13 @@ pub(crate) fn test_compile_with_decls(hackc_opts: &mut crate::Opts) -> Result<()
         }
     }
     Ok(())
+}
+
+pub(crate) fn test_decl_compile_daemon(hackc_opts: &mut crate::Opts) -> Result<()> {
+    crate::daemon_mode(|path| {
+        hackc_opts.files.filenames = vec![path];
+        test_decl_compile(hackc_opts)
+    })
 }
 
 #[derive(Debug)]

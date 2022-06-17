@@ -13,7 +13,7 @@ use parser_core_types::{
 };
 use rayon::prelude::*;
 use std::{
-    io::{stdin, BufRead, BufReader},
+    io::{stdin, BufRead, BufReader, Write},
     path::PathBuf,
 };
 use strum::VariantNames;
@@ -84,27 +84,42 @@ pub fn run_bench_command(bench_opts: BenchOpts) -> Result<()> {
         })
 }
 
-#[derive(Parser, Clone, Debug)]
-pub struct Opts {}
+#[derive(Parser, Debug)]
+pub(crate) struct Opts {
+    #[clap(flatten)]
+    pub files: crate::FileOpts,
 
-pub(crate) fn run(hackc_opts: &mut crate::Opts, _: Opts) -> Result<()> {
-    let filenames = hackc_opts.files.gather_input_files()?;
-    for path in filenames {
-        let source_text = std::fs::read(&path)?;
-        // TODO T118266805: These should come from config files.
-        let env = ParserEnv {
-            codegen: true,
-            hhvm_compat_mode: true,
-            php5_compat_mode: true,
-            allow_new_attribute_syntax: true,
-            disallow_fun_and_cls_meth_pseudo_funcs: true,
-            interpret_soft_types_as_like_types: true,
-            ..Default::default()
-        };
-        let filepath = RelativePath::make(Prefix::Dummy, path);
-        let source_text = SourceText::make(RcOc::new(filepath), &source_text);
-        let indexed_source = IndexedSourceText::new(source_text);
-        let arena = bumpalo::Bump::new();
+    /// Print compact JSON instead of formatted & indented JSON.
+    #[clap(long)]
+    compact: bool,
+}
+
+fn parse(path: PathBuf, w: &mut impl Write, pretty: bool) -> Result<()> {
+    let source_text = std::fs::read(&path)?;
+    // TODO T118266805: These should come from config files.
+    let env = ParserEnv {
+        codegen: true,
+        hhvm_compat_mode: true,
+        php5_compat_mode: true,
+        allow_new_attribute_syntax: true,
+        disallow_fun_and_cls_meth_pseudo_funcs: true,
+        interpret_soft_types_as_like_types: true,
+        ..Default::default()
+    };
+    let filepath = RelativePath::make(Prefix::Dummy, path);
+    let source_text = SourceText::make(RcOc::new(filepath), &source_text);
+    let indexed_source = IndexedSourceText::new(source_text);
+    let arena = bumpalo::Bump::new();
+    let json = if pretty {
+        let mut serializer = serde_json::Serializer::pretty(vec![]);
+        positioned_full_trivia_parser::parse_script_to_json(
+            &arena,
+            &mut serializer,
+            &indexed_source,
+            env,
+        )?;
+        serializer.into_inner()
+    } else {
         let mut serializer = serde_json::Serializer::new(vec![]);
         positioned_full_trivia_parser::parse_script_to_json(
             &arena,
@@ -112,8 +127,19 @@ pub(crate) fn run(hackc_opts: &mut crate::Opts, _: Opts) -> Result<()> {
             &indexed_source,
             env,
         )?;
-        let json = serializer.into_inner();
-        crate::daemon_print(hackc_opts, &json)?;
+        serializer.into_inner()
+    };
+    w.write_all(&json)?;
+    Ok(())
+}
+
+pub(crate) fn run(mut opts: Opts) -> Result<()> {
+    let filenames = opts.files.gather_input_files()?;
+    let mut w = std::io::stdout();
+    for path in filenames {
+        parse(path, &mut w, !opts.compact)?;
+        w.write_all(b"\n")?;
+        w.flush()?;
     }
     Ok(())
 }

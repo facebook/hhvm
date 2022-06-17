@@ -100,6 +100,7 @@ type kind =
   | PureFunctionContext
   | BestEffortArgument of receiver * int
   | HhFixme
+  | Module
 [@@deriving eq]
 
 type 'a t = {

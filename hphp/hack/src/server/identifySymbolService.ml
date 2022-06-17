@@ -752,6 +752,22 @@ let visitor =
     method! on_user_attribute env ua =
       let acc = process_attribute ua.Aast.ua_name !class_name !method_name in
       self#plus acc (super#on_user_attribute env ua)
+
+    method! on_SetModule env sm =
+      let (pos, id) = sm in
+      let acc =
+        Result_set.singleton
+          { name = id; type_ = Module; is_declaration = false; pos }
+      in
+      self#plus acc (super#on_SetModule env sm)
+
+    method! on_module_def env md =
+      let (pos, id) = md.Aast.md_name in
+      let acc =
+        Result_set.singleton
+          { name = id; type_ = Module; is_declaration = false; pos }
+      in
+      self#plus acc (super#on_module_def env md)
   end
 
 (* Types of decls used in keyword extraction.*)

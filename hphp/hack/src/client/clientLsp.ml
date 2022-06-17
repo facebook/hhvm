@@ -2945,6 +2945,7 @@ let rec hack_symbol_tree_to_lsp
     (* e.g. top level type alias -- absent from LSP *)
     | SymbolDefinition.Param -> SymbolInformation.Variable
     (* We never return a param from a document-symbol-search *)
+    | SymbolDefinition.Module -> SymbolInformation.Module
   in
   let hack_symbol_to_lsp definition containerName =
     {

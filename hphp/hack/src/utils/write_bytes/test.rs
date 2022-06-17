@@ -1,10 +1,10 @@
-#![allow(unused_mut, unused_variables, unused_imports)]
 // Copyright (c) Facebook, Inc. and its affiliates.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{format_bytes, write_bytes};
+use std::borrow::Cow;
 
 type Result = std::io::Result<()>;
 
@@ -42,6 +42,6 @@ fn test_named() -> Result {
 fn test_types() -> Result {
     assert_eq!(format_bytes!(b"{}", 5), b"5");
     assert_eq!(format_bytes!(b"{}", "abc"), b"abc");
-    assert_eq!(format_bytes!(b"{}", std::borrow::Cow::from("abc")), b"abc");
+    assert_eq!(format_bytes!(b"{}", Cow::from("abc")), b"abc");
     Ok(())
 }

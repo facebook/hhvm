@@ -2,16 +2,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-#![allow(unused_imports, unused_variables, dead_code)]
+#![allow(unused_variables, dead_code)]
 use super::NormalizeEnv;
 use crate::inference_env::InferenceEnv;
 use crate::subtyping::Subtyper;
 use crate::typing::typing_error::Result;
 use im::HashSet;
-use itertools::{Either, Itertools};
 use oxidized::ast_defs::Variance;
-use std::{ops::Deref, rc::Rc};
+use std::ops::Deref;
 use ty::{
     local::{FunParam, FunType, Ty, Ty_, Tyvar, Variance as V},
     local_error::TypingError,
@@ -516,8 +514,8 @@ mod tests {
     use crate::typaram_env::TyparamEnv;
     use pos::NPos;
     use pos::Pos;
+    use std::rc::Rc;
     use ty::local::Variance as V;
-    use ty::prop::PropF;
     use ty::reason::NReason;
     use utils::core::IdentGen;
 

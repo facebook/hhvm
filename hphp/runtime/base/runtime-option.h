@@ -520,6 +520,7 @@ struct RuntimeOption {
 
   static bool AutoloadEnabled;
   static std::string AutoloadDBPath;
+  static bool AutoloadDBCanCreate;
   static std::string AutoloadDBPerms;
   static std::string AutoloadDBGroup;
   static std::string AutoloadLogging;

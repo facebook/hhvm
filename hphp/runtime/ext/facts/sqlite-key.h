@@ -21,6 +21,8 @@
 
 #include <folly/experimental/io/FsUtil.h>
 
+#include "hphp/util/sqlite-wrapper.h"
+
 namespace HPHP {
 namespace Facts {
 
@@ -31,7 +33,9 @@ namespace Facts {
 struct SQLiteKey {
 
   static SQLiteKey readOnly(folly::fs::path path);
-  static SQLiteKey readWrite(folly::fs::path path, ::gid_t gid, ::mode_t perms);
+  static SQLiteKey readWrite(folly::fs::path path);
+  static SQLiteKey
+  readWriteCreate(folly::fs::path path, ::gid_t gid, ::mode_t perms);
 
   bool operator==(const SQLiteKey& rhs) const noexcept;
 
@@ -46,13 +50,17 @@ struct SQLiteKey {
   size_t hash() const;
 
   folly::fs::path m_path;
-  bool m_writable;
+  SQLite::OpenMode m_writable;
   ::gid_t m_gid;
   ::mode_t m_perms;
 
 private:
   SQLiteKey() = delete;
-  SQLiteKey(folly::fs::path path, bool writable, ::gid_t gid, ::mode_t perms);
+  SQLiteKey(
+      folly::fs::path path,
+      SQLite::OpenMode writable,
+      ::gid_t gid,
+      ::mode_t perms);
 };
 
 } // namespace Facts

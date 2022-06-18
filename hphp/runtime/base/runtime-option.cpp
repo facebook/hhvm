@@ -855,6 +855,7 @@ std::map<std::string, std::string> RuntimeOption::IncludeRoots;
 std::map<std::string, std::string> RuntimeOption::AutoloadRoots;
 bool RuntimeOption::AutoloadEnabled;
 std::string RuntimeOption::AutoloadDBPath;
+bool RuntimeOption::AutoloadDBCanCreate;
 std::string RuntimeOption::AutoloadDBPerms{"0644"};
 std::string RuntimeOption::AutoloadDBGroup;
 std::string RuntimeOption::AutoloadLogging;
@@ -2447,6 +2448,20 @@ void RuntimeOption::Load(
 
     Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", false);
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
+
+    /**
+     * If true, and if a Facts DB doesn't already exist, native Facts will
+     * attempt to load the repo from scratch and create the DB. If the repo is
+     * very large, this may not be practical. Setting up the DB could grind the
+     * system to a halt, and you may have some other system to download a DB
+     * from saved state. You may rather prefer that requests fail until the
+     * saved state DB has been set up. Setting `AutoloadDBCanCreate=false`
+     * will prevent us from creating the DB if none exists, causing requests
+     * to fail in the meantime.
+     */
+    Config::Bind(AutoloadDBCanCreate, ini, config,
+      "Autoload.DB.CanCreate", true);
+
     Config::Bind(AutoloadDBPerms, ini, config, "Autoload.DB.Perms", "0644");
     Config::Bind(AutoloadDBGroup, ini, config, "Autoload.DB.Group");
     Config::Bind(AutoloadLogging, ini, config, "Autoload.Logging",

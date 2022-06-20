@@ -226,6 +226,7 @@
  (wrapped false)
  (modules
   typing
+  typing_class
   typing_memoize
   typing_toplevel
   typing_typedef

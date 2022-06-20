@@ -171,7 +171,7 @@ void ProcessInit() {
   INIT_SYSTEMLIB_CLASS_FIELD(MethCallerHelper)
   INIT_SYSTEMLIB_CLASS_FIELD(DynMethCallerHelper)
 
-  // Stash a pointer to the VM Classes for stdclass, Exception,
+  // Stash a pointer to the VM Classes for stdClass, Exception,
   // pinitSentinel and resource
   SYSTEMLIB_CLASSES(INIT_SYSTEMLIB_CLASS_FIELD)
 

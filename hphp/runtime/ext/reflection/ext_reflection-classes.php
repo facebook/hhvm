@@ -497,7 +497,7 @@ class ReflectionParameter implements Reflector {
       throw new ReflectionException('Parameter is not optional');
     }
     $defaultValue = $this->info['default'];
-    if ($defaultValue is stdclass) {
+    if ($defaultValue is stdClass) {
       throw new ReflectionException($defaultValue->msg);
     }
     return $defaultValue;

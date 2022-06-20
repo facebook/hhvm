@@ -681,7 +681,7 @@ static bool pdo_stmt_verify_mode(sp_PDOStatement stmt, int64_t mode,
 static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
   String clsname = stmt->fetch.clsname;
   if (clsname.empty()) {
-    stmt->fetch.clsname = "stdclass";
+    stmt->fetch.clsname = "stdClass";
   }
   stmt->fetch.constructor = empty_string(); //NULL;
   HPHP::Class* cls = HPHP::Class::load(clsname.get());
@@ -1796,7 +1796,7 @@ static bool do_fetch(sp_PDOStatement stmt,
       fetch_value(stmt, val, i++, NULL);
       if (!val.isNull()) {
         if (!HHVM_FN(class_exists)(val.toString())) {
-          stmt->fetch.clsname = "stdclass";
+          stmt->fetch.clsname = "stdClass";
         } else {
           stmt->fetch.clsname = val.toString();
         }
@@ -1832,7 +1832,7 @@ static bool do_fetch(sp_PDOStatement stmt,
 
     ret = stmt->fetch.into;
     if (ret.isObject() &&
-        ret.getObjectData()->instanceof(SystemLib::s_stdclassClass)) {
+        ret.getObjectData()->instanceof(SystemLib::s_stdClassClass)) {
       how = PDO_FETCH_OBJ;
     }
     break;
@@ -2773,7 +2773,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
 
   data->m_stmt->fetch.clsname = class_name;
   if (class_name.empty()) {
-    data->m_stmt->fetch.clsname = "stdclass";
+    data->m_stmt->fetch.clsname = "stdClass";
   }
   if (!HHVM_FN(class_exists)(data->m_stmt->fetch.clsname)) {
     pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "HY000",
@@ -2841,7 +2841,7 @@ Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
   case PDO_FETCH_CLASS:
     self->m_stmt->fetch.clsname = class_name.toString();
     if (class_name.isNull()) {
-      self->m_stmt->fetch.clsname = "stdclass";
+      self->m_stmt->fetch.clsname = "stdClass";
     }
     if (!HHVM_FN(class_exists)(self->m_stmt->fetch.clsname)) {
       pdo_raise_impl_error(self->m_stmt->dbh, self->m_stmt, "HY000",

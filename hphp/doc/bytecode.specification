@@ -2111,7 +2111,7 @@ PropLD <local variable id>    [B]  ->  [B]
          y->x has been unset previously
     -------+--------------------------------------------------------------------
     00XXXX | null
-    01XXXX | y = new stdclass; create property y->x; y->x
+    01XXXX | y = new stdClass; create property y->x; y->x
     1X0X0X | create property y->x; y->x
     1X0X1X | y->__get(x)
     1X100X | throw fatal error
@@ -2468,7 +2468,7 @@ SetPropL <local variable id>    [C B]  ->  [C]
          y->k has been unset previously
     -------+--------------------------------------------------------------------
     00XXXX | raise warning; push null
-    01XXXX | y = new stdclass; y->k = x; push x
+    01XXXX | y = new stdClass; y->k = x; push x
     1X0X0X | create property y->k; y->k = x; push x
     1X0X1X | y->__set(k, x); push x
     1X100X | throw fatal error
@@ -2501,7 +2501,7 @@ SetOpPropL <op> <local variable id>    [C B]  ->  [C]
           y->k has been unset previously
     --------+-------------------------------------------------------------------
     00XXXXX | raise warning; push null
-    01XXXXX | y = new stdclass; z = null <op> x; y->k = z; push z
+    01XXXXX | y = new stdClass; z = null <op> x; y->k = z; push z
     100X0XX | z = null <op> x; y->k = z; push z
     100X10X | w = y->__get(k); z = w <op> x; y->k = z; push z
     100X11X | w = y->__get(k); z = w <op> x; y->__set(k, z), push z
@@ -2537,7 +2537,7 @@ IncDecPropL <op> <local variable id>    [B]  ->  [C]
           y->x has been unset previously
     --------+-------------------------------------------------------------------
     00XXXXX | raise warning; push null
-    01XXXXX | y = new stdclass; b = null; a = b; <op>a; y->x = a;
+    01XXXXX | y = new stdClass; b = null; a = b; <op>a; y->x = a;
             |   push a (Pre*) or b (Post*)
     100X0XX | b = null; a = b; <op>a; y->x = a; push a (Pre*) or b (Post*)
     100X10X | b = y->__get(x); a = b; <op>a; y->x = a;

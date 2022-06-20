@@ -1385,7 +1385,7 @@ StaticString
   s_evaluate_default_argument("evaluate_default_argument"),
   s_function_middle("() { return "),
   s_semicolon(";"),
-  s_stdclass("stdclass");
+  s_stdClass("stdClass");
 
 void ExecutionContext::requestInit() {
   assertx(SystemLib::s_unit);
@@ -1430,9 +1430,9 @@ void ExecutionContext::requestInit() {
   HHProf::Request::StartProfiling();
 
 #ifndef NDEBUG
-  Class* cls = NamedEntity::get(s_stdclass.get())->clsList();
+  Class* cls = NamedEntity::get(s_stdClass.get())->clsList();
   assertx(cls);
-  assertx(cls == SystemLib::s_stdclassClass);
+  assertx(cls == SystemLib::s_stdClassClass);
 #endif
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(&m_logger_hook);

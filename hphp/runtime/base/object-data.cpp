@@ -1092,7 +1092,7 @@ ObjectData::~ObjectData() {
 
 Object ObjectData::FromArray(ArrayData* properties) {
   auto const props = properties->toDict(true);
-  Object retval{SystemLib::s_stdclassClass};
+  Object retval{SystemLib::s_stdClassClass};
   retval->setAttribute(HasDynPropArr);
   g_context->dynPropTable.emplace(retval.get(), props);
   if (props != properties) decRefArr(props);
@@ -1623,7 +1623,7 @@ void ObjectData::throwUndefPropException(const StringData* key) const {
 }
 
 void ObjectData::raiseCreateDynamicProp(const StringData* key) const {
-  if (m_cls == SystemLib::s_stdclassClass ||
+  if (m_cls == SystemLib::s_stdClassClass ||
       m_cls == SystemLib::s___PHP_Incomplete_ClassClass) {
     // these classes (but not classes derived from them) don't get notices
     return;
@@ -1638,7 +1638,7 @@ void ObjectData::raiseCreateDynamicProp(const StringData* key) const {
 }
 
 void ObjectData::raiseReadDynamicProp(const StringData* key) const {
-  if (m_cls == SystemLib::s_stdclassClass ||
+  if (m_cls == SystemLib::s_stdClassClass ||
       m_cls == SystemLib::s___PHP_Incomplete_ClassClass) {
     // these classes (but not classes derived from them) don't get notices
     return;

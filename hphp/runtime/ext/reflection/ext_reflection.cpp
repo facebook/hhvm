@@ -771,7 +771,7 @@ static Array get_function_param_info(const Func* func) {
       : staticEmptyString();
     param.set(s_type_hint, make_tv<KindOfPersistentString>(typeHint));
 
-    // callable typehint considered builtin; stdclass typehint is not
+    // callable typehint considered builtin; stdClass typehint is not
     if (
       fpi.typeConstraint.isCallable() ||
       (fpi.typeConstraint.underlyingDataType() &&

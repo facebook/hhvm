@@ -218,7 +218,7 @@ void PreClassEmitter::addUsedTrait(const StringData* traitName) {
 }
 
 const StaticString
-  s_nativedata("__nativedata"),
+  s_NativeData("__NativeData"),
   s_DynamicallyConstructible("__DynamicallyConstructible"),
   s_invoke("__invoke"),
   s_coeffectsProp("86coeffects");
@@ -278,7 +278,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     if (!m_userAttributes.size()) return;
 
     // Check for <<__NativeData("Type")>>.
-    auto it = m_userAttributes.find(s_nativedata.get());
+    auto it = m_userAttributes.find(s_NativeData.get());
     if (it == m_userAttributes.end()) return;
 
     TypedValue ndiInfo = it->second;

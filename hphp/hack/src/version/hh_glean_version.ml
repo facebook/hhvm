@@ -8,7 +8,7 @@
 
 (** This is the version of the Glean "all" schema to be used for
     code indexation *)
-let schema_version = 8
+let schema_version = 10
 
 (** This is the version of the Glean "hack" schema to be used for
     code indexation *)

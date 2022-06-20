@@ -579,6 +579,25 @@ module ApiEager = struct
       LSTable.get (Lazy.force lc).ih.all_inherited_smethods id
       |> Option.value ~default:[]
     | Eager _ -> failwith "shallow_class_decl is disabled"
+
+  let overridden_method (decl, t, ctx) ~method_name ~is_static ~get_class =
+    let open Option.Monad_infix in
+    Decl_counters.count_subdecl decl Decl_counters.Overridden_method
+    @@ fun () ->
+    ctx >>= fun ctx ->
+    let get_method (ty : decl_ty) : class_elt option =
+      let (_, (_, class_name), _) = Decl_utils.unwrap_class_type ty in
+      get_class ctx class_name >>= fun cls ->
+      ApiLazy.get_any_method ~is_static cls method_name
+    in
+    match t with
+    | Lazy (_sc, lc) ->
+      (Lazy.force lc).ancestors
+      |> LSTable.to_list
+      |> List.find_map ~f:(fun (_, ty) -> get_method ty)
+    | Eager (cls, _members) ->
+      Shallow_classes_provider.get ctx cls.Decl_defs.dc_name
+      >>= Decl_inherit.find_overridden_method ~get_method
 end
 
 module Api = struct

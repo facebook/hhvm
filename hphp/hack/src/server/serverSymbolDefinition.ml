@@ -112,23 +112,12 @@ let go ctx ast result =
   let module SO = SymbolOccurrence in
   match result.SO.type_ with
   | SO.Attribute (Some { SO.class_name; method_name; is_static }) ->
-    Decl_provider.get_class ctx class_name >>= fun cls ->
     let matching_method =
-      Cls.all_ancestor_names cls
-      |> List.filter_map ~f:(Decl_provider.get_class ctx)
-      (* Find all inherited methods with the same name. *)
-      |> List.filter_map ~f:(fun cls ->
-             (if is_static then
-               Cls.get_smethod
-             else
-               Cls.get_method)
-               cls
-               method_name)
-      (* It'd be nice to take the "earliest" method in the linearization,
-         whatever that is. But alas order of all_ancestor_names isn't
-         specified (in practice is alphabetical). So we'll just pick an
-         arbitrary one. *)
-      |> List.hd
+      Decl_provider.get_overridden_method
+        ctx
+        ~class_name
+        ~method_name
+        ~is_static
     in
     (match matching_method with
     | Some meth -> get_member_def ctx (Method, meth.ce_origin, method_name)

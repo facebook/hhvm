@@ -401,6 +401,12 @@ let get_module
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Decl.get_module backend module_name
 
+let get_overridden_method ctx ~class_name ~method_name ~is_static :
+    Typing_defs.class_elt option =
+  let open Option.Monad_infix in
+  get_class ctx class_name >>= fun cls ->
+  Class.overridden_method cls ~method_name ~is_static ~get_class
+
 let local_changes_push_sharedmem_stack () =
   Decl_store.((get ()).push_local_changes ())
 

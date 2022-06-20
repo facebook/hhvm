@@ -87,6 +87,7 @@ type subdecl_kind =
   | SMethods
   | All_inherited_methods
   | All_inherited_smethods
+  | Overridden_method
   (* Misc *)
   | Deferred_init_members
 [@@deriving show { with_path = false }]
@@ -173,7 +174,8 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Methods
   | SMethods
   | All_inherited_methods
-  | All_inherited_smethods ->
+  | All_inherited_smethods
+  | Overridden_method ->
     "eager"
   | Deferred_init_members -> "misc"
 

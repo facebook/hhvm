@@ -80,6 +80,7 @@
   decl_ancestors
   decl_counters
   decl_inheritance
+  decl_folded_class
   deferred_decl
   naming_provider
   shallow_decl_defs

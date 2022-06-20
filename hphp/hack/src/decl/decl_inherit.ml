@@ -27,13 +27,13 @@ module Inst = Decl_instantiate
 
 type inherited = {
   ih_substs: subst_context SMap.t;
-  ih_cstr: (element * fun_elt option) option * consistent_kind;
+  ih_cstr: (Decl_defs.element * fun_elt option) option * consistent_kind;
   ih_consts: class_const SMap.t;
   ih_typeconsts: typeconst_type SMap.t;
-  ih_props: (element * decl_ty option) SMap.t;
-  ih_sprops: (element * decl_ty option) SMap.t;
-  ih_methods: (element * fun_elt option) SMap.t;
-  ih_smethods: (element * fun_elt option) SMap.t;
+  ih_props: (Decl_defs.element * decl_ty option) SMap.t;
+  ih_sprops: (Decl_defs.element * decl_ty option) SMap.t;
+  ih_methods: (Decl_defs.element * fun_elt option) SMap.t;
+  ih_smethods: (Decl_defs.element * fun_elt option) SMap.t;
 }
 
 let empty =
@@ -54,6 +54,83 @@ let empty =
  *)
 (*****************************************************************************)
 
+module type Member_S = sig
+  type t
+
+  val is_abstract : t -> bool
+
+  val is_synthesized : t -> bool
+
+  val has_lsb : t -> bool
+
+  val visibility : t -> ce_visibility
+end
+
+module Decl_defs_element : Member_S with type t = Decl_defs.element = struct
+  type t = Decl_defs.element
+
+  let is_abstract = get_elt_abstract
+
+  let is_synthesized = get_elt_synthesized
+
+  let has_lsb = get_elt_lsb
+
+  let visibility m = m.elt_visibility
+end
+
+module Typing_defs_class_elt : Member_S with type t = Typing_defs.class_elt =
+struct
+  type t = Typing_defs.class_elt
+
+  let is_abstract = get_ce_abstract
+
+  let is_synthesized = get_ce_synthesized
+
+  let has_lsb = get_ce_lsb
+
+  let visibility m = m.ce_visibility
+end
+
+module OverridePrecedence : sig
+  (** The override precedence of a member is used to determine if a member overrides
+    previous members from other parents with the same name. *)
+  type t
+
+  val make : (module Member_S with type t = 'member) -> 'member -> t
+
+  val ( > ) : t -> t -> bool
+
+  val is_highest : t -> bool
+end = struct
+  type t = {
+    is_concrete: bool;
+    is_not_synthesized: bool;
+  }
+
+  let make
+      (type member)
+      (module Member : Member_S with type t = member)
+      (member : member) =
+    {
+      is_concrete = not @@ Member.is_abstract member;
+      is_not_synthesized = not @@ Member.is_synthesized member;
+    }
+
+  let bool_to_int b =
+    if b then
+      1
+    else
+      0
+
+  let to_int { is_concrete; is_not_synthesized } =
+    (2 * bool_to_int is_concrete) + bool_to_int is_not_synthesized
+
+  let ( > ) x y = Int.( > ) (to_int x) (to_int y)
+
+  let is_highest { is_concrete; is_not_synthesized } =
+    is_concrete && is_not_synthesized
+end
+
 (** Reasons to keep the old signature:
   - We don't want to override a concrete method with
     an abstract one.
@@ -62,12 +139,13 @@ let empty =
     e.g. arising merely from a require-extends declaration in
     a trait.
 When these two considerations conflict, we give precedence to
-abstractness for determining priority of the method. *)
+abstractness for determining priority of the method.
+It's possible to implement this boolean logic by just comparing
+the boolean tuples (is_concrete, is_non_synthesized) of each member,
+which we do in the OverridePrecedence module. *)
 let should_keep_old_sig (sig_, _) (old_sig, _) =
-  ((not (get_elt_abstract old_sig)) && get_elt_abstract sig_)
-  || Bool.equal (get_elt_abstract old_sig) (get_elt_abstract sig_)
-     && (not (get_elt_synthesized old_sig))
-     && get_elt_synthesized sig_
+  let precedence = OverridePrecedence.make (module Decl_defs_element) in
+  OverridePrecedence.(precedence old_sig > precedence sig_)
 
 let add_method name sig_ methods =
   match SMap.find_opt name methods with
@@ -275,16 +353,19 @@ let mark_as_synthesized inh =
 (* Code filtering the private members (useful for inheritance) *)
 (*****************************************************************************)
 
+let is_private
+    (type member)
+    (module Member : Member_S with type t = member)
+    (member : member) : bool =
+  match Member.visibility member with
+  | Vprivate _ -> not @@ Member.has_lsb member
+  | Vpublic
+  | Vprotected _
+  | Vinternal _ ->
+    false
+
 let filter_privates class_type =
-  let is_not_private _ elt =
-    match elt.elt_visibility with
-    | Vprivate _ when get_elt_lsb elt -> true
-    | Vprivate _ -> false
-    | Vpublic
-    | Vprotected _
-    | Vinternal _ ->
-      true
-  in
+  let is_not_private _ elt = not @@ is_private (module Decl_defs_element) elt in
   {
     class_type with
     dc_props = SMap.filter is_not_private class_type.dc_props;
@@ -526,6 +607,45 @@ let from_interface_constants
   let inherited = from_class_constants_only env parents impls in
   add_inherited inherited acc
 
+let has_highest_precedence : (OverridePrecedence.t * 'a) option -> bool =
+  function
+  | Some (precedence, _) -> OverridePrecedence.is_highest precedence
+  | _ -> false
+
+let max_precedence (type a) :
+    (OverridePrecedence.t * a) option ->
+    (OverridePrecedence.t * a) option ->
+    (OverridePrecedence.t * a) option =
+  Option.merge ~f:(fun x y ->
+      let (x_precedence, _) = x and (y_precedence, _) = y in
+      if OverridePrecedence.(y_precedence > x_precedence) then
+        y
+      else
+        x)
+
+let ( >?? )
+    (x : (OverridePrecedence.t * 'a) option)
+    (y : (OverridePrecedence.t * 'a) option lazy_t) :
+    (OverridePrecedence.t * 'a) option =
+  if has_highest_precedence x then
+    x
+  else
+    max_precedence x (Lazy.force y)
+
+let find_first_with_highest_precedence
+    (l : 'a list) ~(f : 'a -> (OverridePrecedence.t * _) option) :
+    (OverridePrecedence.t * _) option =
+  let rec loop found = function
+    | [] -> found
+    | x :: l ->
+      let x = f x in
+      if has_highest_precedence x then
+        x
+      else
+        loop (max_precedence found x) l
+  in
+  loop None l
+
 type parent_kind =
   | Parent
   | Requirement
@@ -542,6 +662,14 @@ module OrderedParents : sig
   val get : shallow_class -> t
 
   val fold : t -> init:'acc -> f:(parent_kind -> 'acc -> parent -> 'acc) -> 'acc
+
+  (** Reverse the ordered parents. *)
+  val rev : t -> t
+
+  val find_map_first_with_highest_precedence :
+    t ->
+    f:(parent_kind -> parent -> (OverridePrecedence.t * 'res) option) ->
+    (OverridePrecedence.t * 'res) option
 end = struct
   type t = (parent_kind * parent list) list
 
@@ -555,6 +683,17 @@ end = struct
   let fold (t : t) ~init ~(f : parent_kind -> 'acc -> parent -> 'acc) =
     List.fold_left t ~init ~f:(fun acc (parent_kind, parents) ->
         List.fold_left ~init:acc ~f:(f parent_kind) parents)
+
+  let rev : t -> t = List.rev_map ~f:(Tuple2.map_snd ~f:List.rev)
+
+  let find_map_first_with_highest_precedence
+      (type res)
+      (t : t)
+      ~(f : parent_kind -> parent -> (OverridePrecedence.t * res) option) :
+      (OverridePrecedence.t * res) option =
+    List.fold t ~init:None ~f:(fun acc (parent_kind, parents) ->
+        acc
+        >?? lazy (find_first_with_highest_precedence parents ~f:(f parent_kind)))
 end
 
 let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
@@ -598,3 +737,24 @@ let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
     ~f:(from_interface_constants env parents)
     ~init:acc
     c.sc_implements
+
+let find_overridden_method
+    (cls : shallow_class) ~(get_method : decl_ty -> class_elt option) :
+    class_elt option =
+  let is_not_private m = not @@ is_private (module Typing_defs_class_elt) m in
+  let precedence : class_elt -> OverridePrecedence.t =
+    OverridePrecedence.make (module Typing_defs_class_elt)
+  in
+  let get_method_with_precedence parent_kind ty =
+    match parent_kind with
+    | Trait -> None
+    | Parent
+    | Requirement ->
+      get_method ty |> Option.filter ~f:is_not_private >>| fun method_ ->
+      (precedence method_, method_)
+  in
+  OrderedParents.get cls
+  |> OrderedParents.rev
+  |> OrderedParents.find_map_first_with_highest_precedence
+       ~f:get_method_with_precedence
+  >>| snd

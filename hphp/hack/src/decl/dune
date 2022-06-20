@@ -85,6 +85,7 @@
 
 (library
  (name decl_folded_class)
+ (wrapped false)
  (modules decl_folded_class decl_inherit decl_requirements)
  (libraries
   ast_provider

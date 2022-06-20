@@ -2287,6 +2287,17 @@ and stmt_ env pos st =
         (Env.get_tcopt env |> TypecheckerOptions.loop_iteration_upper_bound)
     in
     let env = { env with in_loop = true } in
+    let continuations_converge env old_conts new_conts =
+      CMap.for_all2
+        ~f:(fun _ old_cont_entry new_cont_entry ->
+          Typing_per_cont_ops.is_sub_opt_entry
+            Typing_subtype.is_sub_type
+            env
+            new_cont_entry
+            old_cont_entry)
+        old_conts
+        new_conts
+    in
     let rec loop env n =
       (* Remember the old environment *)
       let old_conts = env.lenv.per_cont_env in
@@ -2295,15 +2306,7 @@ and stmt_ env pos st =
       (* Finish if we reach the bound, or if the environments match *)
       if
         Int.equal n max_number_of_iterations
-        || CMap.for_all2
-             ~f:(fun _ old_cont_entry new_cont_entry ->
-               Typing_per_cont_ops.is_sub_opt_entry
-                 Typing_subtype.is_sub_type
-                 env
-                 new_cont_entry
-                 old_cont_entry)
-             old_conts
-             new_conts
+        || continuations_converge env old_conts new_conts
       then
         let env = { env with in_loop = in_loop_outer } in
         (env, result)

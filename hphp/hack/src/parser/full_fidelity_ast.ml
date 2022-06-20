@@ -163,12 +163,15 @@ let make_rust_env (env : env) : Rust_aast_parser_types.env =
     }
 
 let unwrap_rust_parser_result
+    st
     (rust_result :
       (Rust_aast_parser_types.result, Rust_aast_parser_types.error) result) :
     Rust_aast_parser_types.result =
   match rust_result with
   | Ok r -> r
-  | Error Rust_aast_parser_types.NotAHackFile -> failwith "Not a Hack file"
+  | Error Rust_aast_parser_types.NotAHackFile ->
+    failwith
+      ("Not a Hack file: " ^ Relative_path.to_absolute (SourceText.file_path st))
   | Error (Rust_aast_parser_types.ParserFatal (e, p)) ->
     raise @@ SyntaxError.ParserFatal (e, p)
   | Error (Rust_aast_parser_types.Other msg) -> failwith msg
@@ -176,13 +179,15 @@ let unwrap_rust_parser_result
 let from_text_rust (env : env) (source_text : SourceText.t) :
     Rust_aast_parser_types.result =
   let rust_env = make_rust_env env in
-  unwrap_rust_parser_result (rust_from_text_ffi rust_env source_text)
+  unwrap_rust_parser_result
+    source_text
+    (rust_from_text_ffi rust_env source_text)
 
 let ast_and_decls_from_text_rust (env : env) (source_text : SourceText.t) :
     Rust_aast_parser_types.result * Direct_decl_parser.parsed_file_with_hashes =
   let rust_env = make_rust_env env in
   let (ast_result, decls) = parse_ast_and_decls_ffi rust_env source_text in
-  let ast_result = unwrap_rust_parser_result ast_result in
+  let ast_result = unwrap_rust_parser_result source_text ast_result in
   (ast_result, decls)
 
 let process_lowerer_result

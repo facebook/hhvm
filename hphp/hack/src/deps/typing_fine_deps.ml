@@ -30,6 +30,8 @@ let record_coarse_only = false
 type cache = (fine_dependent, dependency Hash_set.t) Hashtbl.t
 
 module SQLitePersistence : sig
+  val worker_file_name_glob : string
+
   val persist_cache : cache -> Typing_deps_mode.t -> unit
 
   val close_db : unit -> unit

@@ -33,3 +33,9 @@ val try_add_fine_dep :
 
 (** Persists all currently cached dependencies to disk *)
 val finalize : Typing_deps_mode.t -> unit
+
+module SQLitePersistence : sig
+  (** A glob pattern for the file names used by the per-worker output files.
+   A star is used in place of the worker id *)
+  val worker_file_name_glob : string
+end

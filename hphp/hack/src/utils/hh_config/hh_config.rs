@@ -20,6 +20,11 @@ pub struct HhConfig {
     pub everything_sdt: bool,
     pub deregister_php_stdlib: bool,
     pub version: Option<String>,
+
+    /// List of regex patterns of root-relative paths to ignore.
+    pub ignored_paths: Vec<String>,
+
+    /// SHA1 Hash of the .hhconfig file contents.
     pub hash: String,
 }
 
@@ -33,13 +38,7 @@ impl HhConfig {
     pub fn from_slice(bytes: &[u8]) -> Self {
         use bstr::ByteSlice;
 
-        let mut auto_namespace_map = BTreeMap::new();
-        let mut disable_xhp_element_mangling = false;
-        let mut interpret_soft_types_as_like_types = false;
-        let mut everything_sdt = false;
-        let mut deregister_php_stdlib = false;
-        let mut version = None;
-
+        let mut c = Self::default();
         for line in bytes.lines() {
             if matches!(line.get(0), Some(b'#')) {
                 continue;
@@ -56,37 +55,31 @@ impl HhConfig {
 
             match key {
                 b"auto_namespace_map" => {
-                    auto_namespace_map = serde_json::from_slice(value).unwrap();
+                    c.auto_namespace_map = serde_json::from_slice(value).unwrap();
                 }
                 b"disable_xhp_element_mangling" => {
-                    disable_xhp_element_mangling = serde_json::from_slice(value).unwrap();
+                    c.disable_xhp_element_mangling = serde_json::from_slice(value).unwrap();
                 }
                 b"interpret_soft_types_as_like_types" => {
-                    interpret_soft_types_as_like_types = serde_json::from_slice(value).unwrap();
+                    c.interpret_soft_types_as_like_types = serde_json::from_slice(value).unwrap();
                 }
                 b"everything_sdt" => {
-                    everything_sdt = serde_json::from_slice(value).unwrap();
+                    c.everything_sdt = serde_json::from_slice(value).unwrap();
                 }
                 b"deregister_php_stdlib" => {
-                    deregister_php_stdlib = serde_json::from_slice(value).unwrap();
+                    c.deregister_php_stdlib = serde_json::from_slice(value).unwrap();
                 }
                 b"version" => {
-                    version = Some(String::from_utf8_lossy(value).into_owned());
+                    c.version = Some(String::from_utf8_lossy(value).into_owned());
+                }
+                b"ignored_paths" => {
+                    c.ignored_paths = serde_json::from_slice(value).unwrap();
                 }
                 _ => {}
             }
         }
-
-        let hash = format!("{:x}", Sha1::digest(bytes));
-        Self {
-            auto_namespace_map,
-            disable_xhp_element_mangling,
-            interpret_soft_types_as_like_types,
-            everything_sdt,
-            deregister_php_stdlib,
-            version,
-            hash,
-        }
+        c.hash = format!("{:x}", Sha1::digest(bytes));
+        c
     }
 
     pub fn get_decl_parser_options(&self) -> DeclParserOptions {

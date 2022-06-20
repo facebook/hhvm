@@ -341,6 +341,7 @@ let parse_options () =
     | _ -> enable_global_write_check_functions := SSet.empty
   in
   let allow_all_files_for_module_declarations = ref true in
+  let loop_iteration_upper_bound = ref None in
   let options =
     [
       ( "--no-print-position",
@@ -794,6 +795,10 @@ let parse_options () =
         Arg.String set_enable_global_write_check_functions,
         " Run global write checker on functions listed in the given JSON file"
       );
+      ( "--overwrite-loop-iteration-upper-bound",
+        Arg.Int (fun u -> loop_iteration_upper_bound := Some u),
+        " Sets the maximum number of iterations that will be used to typecheck loops"
+      );
     ]
   in
 
@@ -955,6 +960,7 @@ let parse_options () =
       ~tco_profile_top_level_definitions:!profile_top_level_definitions
       ~tco_allow_all_files_for_module_declarations:
         !allow_all_files_for_module_declarations
+      ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
       ()
   in
   Errors.allowed_fixme_codes_strict :=

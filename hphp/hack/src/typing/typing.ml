@@ -2281,6 +2281,11 @@ and stmt_ env pos st =
       else
         Typing_alias.get_depth (pos, st)
     in
+    let max_number_of_iterations =
+      Option.value
+        ~default:alias_depth
+        (Env.get_tcopt env |> TypecheckerOptions.loop_iteration_upper_bound)
+    in
     let env = { env with in_loop = true } in
     let rec loop env n =
       (* Remember the old environment *)
@@ -2289,7 +2294,7 @@ and stmt_ env pos st =
       let new_conts = env.lenv.per_cont_env in
       (* Finish if we reach the bound, or if the environments match *)
       if
-        Int.equal n alias_depth
+        Int.equal n max_number_of_iterations
         || CMap.for_all2
              ~f:(fun _ old_cont_entry new_cont_entry ->
                Typing_per_cont_ops.is_sub_opt_entry

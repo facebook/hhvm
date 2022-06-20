@@ -239,3 +239,5 @@ let use_manifold_cython_client = GlobalOptions.tco_use_manifold_cython_client
 
 let record_fine_grained_dependencies =
   GlobalOptions.tco_record_fine_grained_dependencies
+
+let loop_iteration_upper_bound = GlobalOptions.tco_loop_iteration_upper_bound

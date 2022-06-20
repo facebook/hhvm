@@ -323,6 +323,8 @@ type t = {
   (* If enabled, the type checker records more fine-grained dependencies than usual,
      for example between individual methods. *)
   tco_record_fine_grained_dependencies: bool;
+  (* When set, uses the given number of iterations while typechecking loops *)
+  tco_loop_iteration_upper_bound: int option;
 }
 [@@deriving eq, show]
 
@@ -456,6 +458,7 @@ val make :
   ?tco_allowed_files_for_module_declarations:string list ->
   ?tco_use_manifold_cython_client:bool ->
   ?tco_record_fine_grained_dependencies:bool ->
+  ?tco_loop_iteration_upper_bound:int option ->
   unit ->
   t
 
@@ -750,3 +753,5 @@ val tco_allowed_files_for_module_declarations : t -> string list
 val tco_use_manifold_cython_client : t -> bool
 
 val tco_record_fine_grained_dependencies : t -> bool
+
+val tco_loop_iteration_upper_bound : t -> int option

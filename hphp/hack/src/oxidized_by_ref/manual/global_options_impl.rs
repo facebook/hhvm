@@ -136,6 +136,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_allowed_files_for_module_declarations: &[],
     tco_use_manifold_cython_client: false,
     tco_record_fine_grained_dependencies: false,
+    tco_loop_iteration_upper_bound: None,
 };
 
 impl GlobalOptions<'static> {
@@ -410,6 +411,7 @@ impl GlobalOptions<'_> {
             tco_allowed_files_for_module_declarations.into_bump_slice();
         let tco_use_manifold_cython_client = self.tco_use_manifold_cython_client;
         let tco_record_fine_grained_dependencies = self.tco_record_fine_grained_dependencies;
+        let tco_loop_iteration_upper_bound = self.tco_loop_iteration_upper_bound;
 
         GlobalOptions::<'a> {
             tco_experimental_features,
@@ -542,6 +544,7 @@ impl GlobalOptions<'_> {
             tco_allowed_files_for_module_declarations,
             tco_use_manifold_cython_client,
             tco_record_fine_grained_dependencies,
+            tco_loop_iteration_upper_bound,
         }
     }
 }

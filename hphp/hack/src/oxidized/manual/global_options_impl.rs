@@ -138,6 +138,7 @@ impl Default for GlobalOptions {
             tco_allowed_files_for_module_declarations: vec![],
             tco_use_manifold_cython_client: false,
             tco_record_fine_grained_dependencies: false,
+            tco_loop_iteration_upper_bound: None,
         }
     }
 }

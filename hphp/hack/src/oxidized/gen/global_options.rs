@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4e844b548a2745f425155938b30f8342>>
+// @generated SignedSource<<cea9442fb05660b5ae7675581b0f570b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -158,4 +158,5 @@ pub struct GlobalOptions {
     pub tco_allowed_files_for_module_declarations: Vec<String>,
     pub tco_use_manifold_cython_client: bool,
     pub tco_record_fine_grained_dependencies: bool,
+    pub tco_loop_iteration_upper_bound: Option<isize>,
 }

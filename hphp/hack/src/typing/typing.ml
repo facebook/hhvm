@@ -77,6 +77,24 @@ let debug_print_last_pos _ =
 (* Helpers *)
 (*****************************************************************************)
 
+let log_iteration_count env pos n =
+  let should_log_iteration_count =
+    Env.get_tcopt env
+    |> TypecheckerOptions.log_levels
+    |> SMap.find_opt "loop_iteration_count"
+    |> Option.is_some
+  in
+  if should_log_iteration_count then
+    let msg =
+      Format.asprintf
+        "Loop iteration count %s:%a: %d\n"
+        (Pos.to_absolute pos |> Pos.filename)
+        Pos.pp
+        pos
+        n
+    in
+    Hh_logger.log "%s" msg
+
 let mk_ty_mismatch_opt ty_have ty_expect = function
   | Some _ -> Some (ty_have, ty_expect)
   | _ -> None
@@ -2308,6 +2326,7 @@ and stmt_ env pos st =
         Int.equal n max_number_of_iterations
         || continuations_converge env old_conts new_conts
       then
+        let () = log_iteration_count env pos n in
         let env = { env with in_loop = in_loop_outer } in
         (env, result)
       else

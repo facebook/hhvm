@@ -308,10 +308,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ServerRefactor.go ctx refactor_action genv env)
   | REFACTOR_CHECK_SD function_name ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    let (_env, _result) =
-      ServerRefactor.go_sound_dynamic ctx function_name genv env
-    in
-    (env, GlobalOptions.tco_enable_sound_dynamic env.tcopt)
+    ServerRefactor.go_sound_dynamic ctx function_name genv env
   | IDE_REFACTOR
       { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } ->
     let ctx = Provider_utils.ctx_from_server_env env in

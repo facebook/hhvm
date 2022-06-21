@@ -348,19 +348,13 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let%lwt () = ClientSymbolInfo.go conn ~desc:args.desc files expand_path in
       Lwt.return (Exit_status.No_error, Telemetry.create ())
     | MODE_REFACTOR_CHECK_SOUND_DYNAMIC function_name ->
-      let%lwt conn = connect args in
-      let%lwt (is_sound_dynamic, telemetry) =
-        ClientConnect.rpc conn ~desc:args.desc
+      let conn () = connect args in
+      let%lwt result =
+        ClientConnect.rpc_with_retry conn ~desc:args.desc
         @@ Rpc.REFACTOR_CHECK_SD function_name
       in
-      let () =
-        if is_sound_dynamic then
-          Printf.printf "Server is using sound dynamic. \n"
-        else
-          Printf.printf
-            "Server is NOT using sound dynamic. Change the .hhconfig file to enable sound dynamic. \n"
-      in
-      Lwt.return (Exit_status.No_error, telemetry)
+      let () = Printf.printf "%s" result in
+      Lwt.return (Exit_status.No_error, Telemetry.create ())
     | MODE_REFACTOR (ref_mode, before, after) ->
       let conn () = connect args in
       let%lwt () =

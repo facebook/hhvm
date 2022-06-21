@@ -6702,6 +6702,36 @@ bool Index::could_have_reified_type(Context ctx,
   return resolved.value->couldHaveReifiedGenerics();
 }
 
+std::tuple<Type, bool> Index::verify_param_type(Context ctx, uint32_t paramId,
+                                                Type t) const {
+  auto const& pinfo = ctx.func->params[paramId];
+  bool effectFree = true;
+  std::vector<const TypeConstraint*> tcs{&pinfo.typeConstraint};
+  for (auto const& tc : pinfo.upperBounds) tcs.push_back(&tc);
+
+  for (auto const tc : tcs) {
+    if (!tc->isCheckable()) continue;
+    if (satisfies_constraint(ctx, t, *tc)) continue;
+
+    effectFree = false;
+
+    if (tc->mayCoerce() && t.couldBe(BCls | BLazyCls)) {
+      // Add the result of possible coercion.
+      t = union_of(std::move(t), TStr);
+    }
+
+    auto tcTy = lookup_constraint(ctx, *tc);
+    if (tc->isThis()) {
+      auto const cls = selfCls(ctx);
+      if (cls && cls->couldBeMocked()) tcTy = unctx(std::move(tcTy));
+    }
+
+    t = intersection_of(std::move(t), std::move(tcTy));
+  }
+
+  return { t, effectFree };
+}
+
 TriBool
 Index::supports_async_eager_return(res::Func rfunc) const {
   return match<TriBool>(

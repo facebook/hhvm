@@ -841,6 +841,13 @@ struct Index {
   bool could_have_reified_type(Context ctx, const TypeConstraint& tc) const;
 
   /*
+   * Returns a tuple containing a type after the parameter type verification
+   * and a flag indicating whether the verification was effect free.
+   */
+  std::tuple<Type, bool>
+  verify_param_type(Context ctx, uint32_t paramId, Type t) const;
+
+  /*
    * Lookup metadata about the constant access `cls'::`name', in the
    * current context `ctx'. The returned metadata not only includes
    * the best known type of the constant, but whether it is definitely

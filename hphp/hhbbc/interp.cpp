@@ -4992,40 +4992,13 @@ void in(ISS& env, const bc::VerifyParamType& op) {
     return reduce(env);
   }
 
-  auto const& pinfo = env.ctx.func->params[op.loc1];
-  // Generally we won't know anything about the params, but
-  // analyze_func_inline does - and this can help with effect-free analysis
-  TCVec tcs = {&pinfo.typeConstraint};
-  for (auto const& t : pinfo.upperBounds) tcs.push_back(&t);
-  if (std::all_of(std::begin(tcs), std::end(tcs),
-        [&](const TypeConstraint* tc) {
-          return env.index.satisfies_constraint(env.ctx,
-                                                locAsCell(env, op.loc1),
-                                                *tc);
-          })) {
-    if (!locAsCell(env, op.loc1).couldBe(BCls)) {
-      return reduce(env);
-    }
-  }
+  auto [newTy, effectFree] =
+    env.index.verify_param_type(env.ctx, op.loc1, locAsCell(env, op.loc1));
 
-  /*
-   * We assume that if this opcode doesn't throw, the parameter was of the
-   * specified type.
-   */
-  auto tcT = TTop;
-  for (auto const& constraint : tcs) {
-    if (constraint->hasConstraint() && !constraint->isTypeVar() &&
-      !constraint->isTypeConstant()) {
-      auto t = env.index.lookup_constraint(env.ctx, *constraint);
-      if (constraint->isThis() && couldBeMocked(t)) {
-        t = unctx(std::move(t));
-      }
-      FTRACE(2, "     {} ({})\n", constraint->displayName(), show(t));
-      tcT = intersection_of(std::move(tcT), std::move(t));
-      if (tcT.subtypeOf(BBottom)) unreachable(env);
-    }
-  }
-  if (tcT != TTop) setLoc(env, op.loc1, std::move(tcT));
+  if (effectFree) return reduce(env);
+  if (newTy.subtypeOf(BBottom)) unreachable(env);
+
+  setLoc(env, op.loc1, std::move(newTy));
 }
 
 void in(ISS& env, const bc::VerifyParamTypeTS& op) {

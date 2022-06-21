@@ -1397,7 +1397,7 @@ static Array HHVM_STATIC_METHOD(
 
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
-  req::StringIFastSet visitedMethods;
+  req::StringFastSet visitedMethods;
   req::StringIFastSet visitedInterfaces;
   auto st = Array::CreateKeyset();
 

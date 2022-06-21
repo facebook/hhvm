@@ -1362,7 +1362,7 @@ let generate_splat_type_vars
   in
   (env, (d_required, d_optional, d_variadic))
 
-let strip_dynamic env ty =
+let _strip_dynamic env ty =
   if Typing_utils.is_dynamic_or_intersection env ty then
     Typing_make_type.nothing (get_reason ty)
   else
@@ -1410,7 +1410,7 @@ let call_param
     | Ast_defs.Pnormal -> pos
     | Ast_defs.Pinout pk_pos -> Pos.merge pk_pos pos
   in
-  let ((env, e1), dep_ty) =
+  let ((env, e1), param_ty) =
     match dynamic_func with
     | Some dyn_func_kind ->
       let (env, e1) =
@@ -1418,29 +1418,33 @@ let call_param
            or ~(t1 ... tn -> t)
            and we are trying to call it as though it were dynamic. Hence all of the
            arguments must be subtypes of dynamic, regardless of whether they have
-           a like to be stripped. *)
+           a like type. *)
         Typing_utils.supports_dynamic env dep_ty
         @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
       in
-      (* It is only sound to like strip the arguments to supportdyn functions, since there we
-         are semantically just using the &dynamic, where as for like functions, they have to
-         check both sides. *)
-      let dep_ty =
+      (* It is only sound to add like types to the parameters of supportdyn functions, since
+         in this case we are semantically just using the &dynamic part of the type to call them.
+         For like functions, they have to check both sides. *)
+      let param_ty =
         match dyn_func_kind with
-        | Supportdyn_function -> strip_dynamic env dep_ty
-        | Like_function -> dep_ty
+        | Supportdyn_function ->
+          Typing_make_type.locl_like
+            (get_reason param.fp_type.et_type)
+            param.fp_type.et_type
+        | Like_function -> param.fp_type.et_type
       in
-      ((env, e1), dep_ty)
-    | None -> ((env, None), dep_ty)
+      ((env, e1), param_ty)
+    | None -> ((env, None), param.fp_type.et_type)
   in
 
   let (env, e2) =
     Typing_coercion.coerce_type
+      ~coerce:None
       pos
       Reason.URparam
       env
       dep_ty
-      param.fp_type
+      { param.fp_type with et_type = param_ty }
       Typing_error.Callback.unify_error
   in
   let ty_mismatch_opt = mk_ty_mismatch_opt arg_ty param.fp_type.et_type e2 in

@@ -190,8 +190,8 @@ static const struct {
 
   /*** 4. Control flow instructions ***/
 
+  { OpEnter,       {None,             None,         OutNone         }},
   { OpJmp,         {None,             None,         OutNone         }},
-  { OpJmpNS,       {None,             None,         OutNone         }},
   { OpJmpZ,        {Stack1,           None,         OutNone         }},
   { OpJmpNZ,       {Stack1,           None,         OutNone         }},
   { OpSwitch,      {Stack1,           None,         OutNone         }},
@@ -871,10 +871,10 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::LIterNext:
   case Op::IterInit:
   case Op::LIterInit:
+  case Op::Enter:
+  case Op::Jmp:
   case Op::JmpZ:
   case Op::JmpNZ:
-  case Op::Jmp:
-  case Op::JmpNS:
   case Op::ClsCnsD:
   case Op::NewStructDict:
   case Op::Switch:

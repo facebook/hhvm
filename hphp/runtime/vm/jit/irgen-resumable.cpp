@@ -103,7 +103,7 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
         resultLocal = kInvalidId;
         break;
       }
-      case Op::Jmp: case Op::JmpNS: {
+      case Op::Jmp: {
         sk = SrcKey(sk, sk.offset() + getImm(sk.pc(), 0).u_BA);
         continue;
       }

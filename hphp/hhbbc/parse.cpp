@@ -529,9 +529,9 @@ void populate_block(ParseUnitState& puState,
   };
 
   switch (blk.hhbcs.back().op) {
-  case Op::Jmp:   make_fallthrough();                           break;
-  case Op::JmpNS: make_fallthrough(); blk.fallthroughNS = true; break;
-  default:                                                      break;
+  case Op::Enter: make_fallthrough(); blk.fallthroughEnter = true; break;
+  case Op::Jmp:   make_fallthrough();                              break;
+  default:                                                         break;
   }
 }
 

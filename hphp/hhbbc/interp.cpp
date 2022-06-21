@@ -1683,8 +1683,8 @@ void in(ISS& env, const bc::Clone& /*op*/) {
 void in(ISS& env, const bc::Exit&)  { popC(env); push(env, TInitNull); }
 void in(ISS& env, const bc::Fatal&) { popC(env); }
 
-void in(ISS& /*env*/, const bc::JmpNS&) {
-  always_assert(0 && "blocks should not contain JmpNS instructions");
+void in(ISS& /*env*/, const bc::Enter&) {
+  always_assert(0 && "blocks should not contain Enter instructions");
 }
 
 void in(ISS& /*env*/, const bc::Jmp&) {

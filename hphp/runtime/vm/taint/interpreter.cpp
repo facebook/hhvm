@@ -629,12 +629,12 @@ void iopFatal(FatalOp /* kind_char */) {
   iopDoesNotAffectTaint("Fatal");
 }
 
-void iopJmp(PC& /* pc */, PC /* targetpc */) {
-  iopUnhandled("Jmp");
+void iopEnter(PC& /* pc */, PC /* targetpc */) {
+  iopUnhandled("Enter");
 }
 
-void iopJmpNS(PC& /* pc */, PC /* targetpc */) {
-  iopUnhandled("JmpNS");
+void iopJmp(PC& /* pc */, PC /* targetpc */) {
+  iopUnhandled("Jmp");
 }
 
 void iopJmpZ(PC& /* pc */, PC /* targetpc */) {

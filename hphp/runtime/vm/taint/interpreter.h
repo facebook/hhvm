@@ -113,8 +113,8 @@ void iopPrint();
 void iopClone();
 void iopExit();
 void iopFatal(FatalOp kind_char);
+void iopEnter(PC& pc, PC targetpc);
 void iopJmp(PC& pc, PC targetpc);
-void iopJmpNS(PC& pc, PC targetpc);
 void iopJmpZ(PC& pc, PC targetpc);
 void iopJmpNZ(PC& pc, PC targetpc);
 void iopSwitch(

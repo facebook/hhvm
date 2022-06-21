@@ -518,7 +518,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
 
       auto const blk = func.blocks()[bid].mutate();
       blk->fallthrough = cnxt->fallthrough;
-      blk->fallthroughNS = cnxt->fallthroughNS;
+      blk->fallthroughEnter = cnxt->fallthroughEnter;
       if (useNextCatch) {
         blk->throwExit = cnxt->throwExit;
         blk->exnNodeId = cnxt->exnNodeId;

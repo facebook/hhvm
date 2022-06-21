@@ -1774,12 +1774,12 @@ OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
   }
 }
 
-OPTBLD_INLINE void iopJmp(PC& pc, PC targetpc) {
-  jmpSurpriseCheck(targetpc - pc);
+OPTBLD_INLINE void iopEnter(PC& pc, PC targetpc) {
   pc = targetpc;
 }
 
-OPTBLD_INLINE void iopJmpNS(PC& pc, PC targetpc) {
+OPTBLD_INLINE void iopJmp(PC& pc, PC targetpc) {
+  jmpSurpriseCheck(targetpc - pc);
   pc = targetpc;
 }
 

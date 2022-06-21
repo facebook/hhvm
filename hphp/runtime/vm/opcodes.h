@@ -114,8 +114,8 @@ namespace HPHP {
   O(Clone,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Exit,            NA,               ONE(CV),         ONE(CV),    TF) \
   O(Fatal,           ONE(OA(FatalOp)), ONE(CV),         NOV,        TF) \
+  O(Enter,           ONE(BA),          NOV,             NOV,        CF_TF) \
   O(Jmp,             ONE(BA),          NOV,             NOV,        CF_TF) \
-  O(JmpNS,           ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \
   O(Switch,          THREE(OA(SwitchKind),I64A,BLA),                    \

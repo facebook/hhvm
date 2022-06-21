@@ -1271,8 +1271,8 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::ThrowAsTypeStructException:
     case Op::CombineAndResolveTypeStruct:
     case Op::Select:
+    case Op::Enter:
     case Op::Jmp:
-    case Op::JmpNS:
     case Op::JmpZ:
     case Op::JmpNZ:
     case Op::Switch:

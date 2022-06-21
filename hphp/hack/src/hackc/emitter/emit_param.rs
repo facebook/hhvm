@@ -201,7 +201,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
         let l = emitter.label_gen_mut().next_regular();
         Ok((
             instr::label(l),
-            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::jmp_ns(l)]),
+            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::enter(l)]),
         ))
     }
 }

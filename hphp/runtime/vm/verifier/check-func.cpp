@@ -252,8 +252,8 @@ bool mayTakeExnEdges(Op op) {
   switch (op) {
     case Op::AssertRATL:
     case Op::AssertRATStk:
+    case Op::Enter:
     case Op::Jmp:
-    case Op::JmpNS:
     case Op::Fatal:
     case Op::IterFree:
     case Op::LIterFree:
@@ -432,8 +432,8 @@ bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
     auto const targets = instrJumpTargets(bc, offset(branch));
     for (auto const& target : targets) {
       ok &= checkOffset("branch target", target, "primary body", base, past);
-      if (peek_op(branch) == Op::JmpNS && target == offset(branch)) {
-        error("JmpNS may not have zero offset in %s\n", "primary body");
+      if (peek_op(branch) == Op::Enter && target == offset(branch)) {
+        error("Enter may not have zero offset in %s\n", "primary body");
         ok = false;
       }
     }

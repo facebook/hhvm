@@ -1225,17 +1225,14 @@ Fatal <fatal subop>  [C]  ->  []
 4. Control flow instructions
 ----------------------------
 
+Enter <rel offset>   []  ->  []
+
+  Enter the function body. This instruction is used at the end of default value
+  initializers to transfer control to the function body.
+
 Jmp <rel offset>    []  ->  []
 
   Jump. Transfers control to the location specified by %1.
-
-JmpNS <rel offset>   []  ->  []
-
-  Jump, with no surprise flag checks (NS means "no surprise"). This behaves
-  identically to the Jmp instruction, except that internal VM checks for things
-  like OOM and timeouts do not need to be performed even if the offset is
-  negative.  This instruction cannot have a zero offset (i.e. it cannot jump to
-  itself).
 
 JmpZ <rel offset>    [C]  ->  []
 

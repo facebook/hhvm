@@ -35,21 +35,26 @@ impl Checker {
 */
 fn check_module_declaration_first(checker: &mut Checker, program: &aast::Program<(), ()>) {
     let mut past_first_def = false;
+    let mut past_module_membership = false;
     for def in program {
         match def {
             aast::Def::Stmt(_) /* Stmt is only used for Markup */
             | aast::Def::FileAttributes(_)
-            /* We allow module declarations before module membership because they aren't affected
-            by the module of a file, and it makes unit testing easier to write.
-            In practice, we'll probably have different conventions/lint about these declarations.*/
-            | aast::Def::Module(_)
             => {}
             aast::Def::SetModule(m) => {
                 if past_first_def {
                     let oxidized::ast::Id(pos, name) = &**m;
                     checker.add_error(pos, syntax_error::module_first_in_file(name));
                 }
-                past_first_def = true
+                past_first_def = true;
+                past_module_membership = true
+            }
+            // We do not allow module declarations within a module
+            aast::Def::Module(m) => {
+                if past_module_membership {
+                    checker.add_error(&m.name.0, syntax_error::module_declaration_in_module);
+                }
+                past_first_def = true;
             }
             aast::Def::Fun(_)
             | aast::Def::Class(_)

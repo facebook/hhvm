@@ -1149,3 +1149,6 @@ pub fn module_first_in_file(name: &str) -> Error {
         name
     ))
 }
+
+pub const module_declaration_in_module: Error =
+    Cow::Borrowed("You cannot declare new modules within an existing module");

@@ -640,7 +640,10 @@ where
         let mut acc = vec![];
         loop {
             match self.peek_token_kind() {
-                TokenKind::Abstract | TokenKind::Final | TokenKind::Internal => {
+                TokenKind::Abstract
+                | TokenKind::Final
+                | TokenKind::Internal
+                | TokenKind::Public => {
                     // TODO(T25649779)
                     let token = self.next_token();
                     let token = S!(make_token, self, token);
@@ -2128,7 +2131,7 @@ where
         S!(make_list, self, items, self.pos())
     }
 
-    fn parse_toplevel_with_attributes_or_internal(&mut self) -> S::Output {
+    fn parse_toplevel_with_attributes_or_visibility(&mut self) -> S::Output {
         // An enum, type alias, function, interface, trait or class may all
         // begin with an attribute.
         let attribute_specification = match self.peek_token_kind() {
@@ -2141,15 +2144,16 @@ where
         // For most toplevel entities we will parse internal as another modifier with no issues,
         // but we will need to lookahead at least 1 extra spot to see what we're actually parsing.
         let next_token_kind = self.peek_token_kind();
-        let (token_maybe_after_internal, is_internal) = if next_token_kind == TokenKind::Internal {
-            (self.peek_token_kind_with_lookahead(1), true)
-        } else {
-            (next_token_kind, false)
-        };
+        let (token_maybe_after_internal, has_visibility) =
+            if next_token_kind == TokenKind::Internal || next_token_kind == TokenKind::Public {
+                (self.peek_token_kind_with_lookahead(1), true)
+            } else {
+                (next_token_kind, false)
+            };
 
         match token_maybe_after_internal {
             TokenKind::Enum => {
-                let modifiers = if is_internal {
+                let modifiers = if has_visibility {
                     self.parse_modifiers()
                 } else {
                     S!(make_missing, self, self.pos())
@@ -2161,7 +2165,7 @@ where
             }
             TokenKind::Newctx => self.parse_ctx_alias_declaration(attribute_specification),
             TokenKind::Async | TokenKind::Function => {
-                if attribute_specification.is_missing() && !is_internal {
+                if attribute_specification.is_missing() && !has_visibility {
                     // if attribute section is missing - it might be either
                     // function declaration or expression statement containing
                     // anonymous function - use statement parser to determine in which case
@@ -2181,7 +2185,8 @@ where
             | TokenKind::Class => self.parse_classish_declaration(attribute_specification),
             // The only thing that can put an attribute on a new is a module declaration
             TokenKind::New
-                if !is_internal && self.peek_token_kind_with_lookahead(1) == TokenKind::Module =>
+                if !has_visibility
+                    && self.peek_token_kind_with_lookahead(1) == TokenKind::Module =>
             {
                 self.parse_module_declaration(attribute_specification)
             }
@@ -2543,9 +2548,10 @@ where
                     p.parse_possible_php_function(true)
                 })
             }
-            TokenKind::Internal => self.parse_toplevel_with_attributes_or_internal(),
+            TokenKind::Internal => self.parse_toplevel_with_attributes_or_visibility(),
+            TokenKind::Public => self.parse_toplevel_with_attributes_or_visibility(),
             TokenKind::At if self.env.allow_new_attribute_syntax => {
-                self.parse_toplevel_with_attributes_or_internal()
+                self.parse_toplevel_with_attributes_or_visibility()
             }
             TokenKind::LessThanLessThan => match parser1.peek_token_kind() {
                 TokenKind::File
@@ -2553,7 +2559,7 @@ where
                 {
                     self.parse_file_attribute_specification_opt()
                 }
-                _ => self.parse_toplevel_with_attributes_or_internal(),
+                _ => self.parse_toplevel_with_attributes_or_visibility(),
             },
             // TODO figure out what global const differs from class const
             TokenKind::Const => {

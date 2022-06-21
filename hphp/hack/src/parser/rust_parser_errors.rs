@@ -288,6 +288,7 @@ struct ParserErrors<'a, State> {
     namespace_type: NamespaceType,
     namespace_name: String,
     uses_readonly: bool,
+    in_module: bool,
 }
 
 fn strip_ns(name: &str) -> &str {
@@ -338,6 +339,17 @@ fn get_modifiers_of_declaration<'a>(node: S<'a>) -> Option<S<'a>> {
         EnumDeclaration(x) => Some(&x.modifiers),
         AliasDeclaration(x) => Some(&x.modifiers),
         _ => None,
+    }
+}
+
+fn declaration_is_toplevel<'a>(node: S<'a>) -> bool {
+    match &node.children {
+        FunctionDeclaration(_)
+        | ClassishDeclaration(_)
+        | EnumClassDeclaration(_)
+        | EnumDeclaration(_)
+        | AliasDeclaration(_) => true,
+        _ => false,
     }
 }
 
@@ -1150,6 +1162,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             is_in_concurrent_block: false,
             nested_namespaces: vec![],
             uses_readonly: false,
+            in_module: false,
         }
     }
 
@@ -1550,13 +1563,28 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         F: Fn(TokenKind) -> bool,
     {
         if let Some(modifiers) = get_modifiers_of_declaration(node) {
+            let toplevel = declaration_is_toplevel(node);
             for modifier in syntax_to_list_no_separators(modifiers) {
                 if let Some(kind) = token_kind(modifier) {
                     if kind == TokenKind::Readonly {
                         self.mark_uses_readonly()
                     }
                     if kind == TokenKind::Internal {
-                        self.check_can_use_feature(modifier, &UnstableFeatures::Modules)
+                        if !self.in_module {
+                            self.check_can_use_feature(node, &UnstableFeatures::Modules);
+                            self.errors.push(make_error_from_node(
+                                modifier,
+                                errors::internal_outside_of_module,
+                            ))
+                        }
+                    } else if kind == TokenKind::Public && toplevel {
+                        if !self.in_module {
+                            self.check_can_use_feature(node, &UnstableFeatures::Modules);
+                            self.errors.push(make_error_from_node(
+                                modifier,
+                                errors::public_toplevel_outside_of_module,
+                            ))
+                        }
                     }
                     if !ok(kind) {
                         self.errors.push(make_error_from_node(
@@ -2019,8 +2047,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let function_attrs = &fd.attribute_spec;
                 let body = &fd.body;
                 self.check_attr_enabled(function_attrs);
+
                 self.invalid_modifier_errors("Top-level functions", node, |kind| {
-                    kind == TokenKind::Async || kind == TokenKind::Internal
+                    kind == TokenKind::Async
+                        || kind == TokenKind::Internal
+                        || kind == TokenKind::Public
                 });
                 self.produce_error(
                     |self_, x| self_.function_declaration_external_not_native(x),
@@ -3675,9 +3706,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn enum_class_errors(&mut self, node: S<'a>) {
         if let EnumClassDeclaration(_) = &node.children {
-            // only allow abstract as modifier + detect modifier duplication
             self.invalid_modifier_errors("Enum classes", node, |kind| {
-                kind == TokenKind::Abstract || kind == TokenKind::Internal
+                kind == TokenKind::Abstract
+                    || kind == TokenKind::Internal
+                    || kind == TokenKind::Public
             });
         }
     }
@@ -3801,12 +3833,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 || errors::error2037,
                 &cd.extends_list,
             );
-
             self.invalid_modifier_errors("Classes, interfaces, and traits", node, |kind| {
                 kind == TokenKind::Abstract
                     || kind == TokenKind::Final
                     || kind == TokenKind::XHP
                     || kind == TokenKind::Internal
+                    || kind == TokenKind::Public
             });
 
             self.produce_error(
@@ -4031,7 +4063,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         if let AliasDeclaration(ad) = &node.children {
             let attrs = &ad.attribute_spec;
             self.check_attr_enabled(attrs);
-            self.invalid_modifier_errors("Type aliases", node, |kind| kind == TokenKind::Internal);
+            self.invalid_modifier_errors("Type aliases", node, |kind| {
+                kind == TokenKind::Internal || kind == TokenKind::Public
+            });
             if token_kind(&ad.keyword) == Some(TokenKind::Type) && !ad.constraint.is_missing() {
                 self.errors
                     .push(make_error_from_node(&ad.keyword, errors::error2034))
@@ -4822,7 +4856,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     errors::no_const_interfaces_traits_enums,
                 ))
             }
-            self.invalid_modifier_errors("Enums", node, |kind| kind == TokenKind::Internal);
+            self.invalid_modifier_errors("Enums", node, |kind| {
+                kind == TokenKind::Internal || kind == TokenKind::Public
+            });
             if !x.name.is_missing() {
                 let name = self.text(&x.name);
                 let location = make_location_of_node(&x.name);
@@ -5169,7 +5205,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             FileAttributeSpecification(_) => self.file_attribute_spec(node),
             ModuleDeclaration(_) => self.check_can_use_feature(node, &UnstableFeatures::Modules),
             ModuleMembershipDeclaration(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::Modules)
+                self.check_can_use_feature(node, &UnstableFeatures::Modules);
+                self.in_module = true;
             }
             _ => {}
         };

@@ -421,3 +421,6 @@ let switch_nonexhaustive p =
     ^ " The expression it scrutinises has a type with infinitely many values and the statement does not have a default case."
     ^ " If none of the cases match, an exception will be thrown."
     ^ " Consider adding a default case.")
+
+let calling_pointless_boolean p txt =
+  Lints.add Codes.pointless_booleans_expression Lint_warning p txt

@@ -96,4 +96,6 @@ module Codes = struct
   let bad_xhp_enum_attribute_value = 5641
 
   let unreachable_method_in_trait = 5642
+
+  let pointless_booleans_expression = 5644
 end

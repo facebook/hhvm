@@ -529,11 +529,22 @@ SSATmp* simplifyLdClsMethod(State& env, const IRInstruction* inst) {
   auto const clsTmp = inst->src(0);
   auto const idxTmp = inst->src(1);
 
-  if (clsTmp->hasConstVal() && idxTmp->hasConstVal()) {
+  if (!idxTmp->hasConstVal()) return nullptr;
+  auto const idx = idxTmp->intVal();
+
+  if (clsTmp->hasConstVal()) {
     auto const cls = clsTmp->clsVal();
-    auto const idx = idxTmp->intVal();
     if (idx < cls->numMethods()) {
       return cns(env, cls->getMethod(idx));
+    }
+  }
+
+  if (auto const cls = clsTmp->type().clsSpec().cls()) {
+    if (idx < cls->numMethods()) {
+      auto func = cls->getMethod(idx);
+      if (func->isImmutableFrom(cls)) {
+        return cns(env, func);
+      }
     }
   }
 

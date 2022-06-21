@@ -1354,7 +1354,7 @@ namespace HH {
   /**
    * Same as type_structure but does not throw when there's an undefined symbol
    */
-  <<__Native>>
+  <<__Native,NoDoc>>
   function type_structure_no_throw(
     mixed $cls_or_obj,
     ?string $cns_name = null
@@ -1364,7 +1364,7 @@ namespace HH {
    * Retrieves the classname on the the TypeStructure pointed by a type
    * constant or a type alias.
    */
-  <<__Native>>
+  <<__Native,NoDoc>>
   function type_structure_classname(mixed $cls_or_obj,
                                     ?string $cns_name = null)[]: string;
 

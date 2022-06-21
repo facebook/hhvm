@@ -32,5 +32,4 @@ pub struct HhasBody<'arena> {
     pub params: Slice<'arena, HhasParam<'arena>>,
     pub return_type_info: Maybe<HhasTypeInfo<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
-    pub env: Maybe<HhasBodyEnv<'arena>>,
 }

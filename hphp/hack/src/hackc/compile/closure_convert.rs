@@ -765,7 +765,7 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
     let efun = Expr((), pos(), Expr_::mk_efun(fd, vec![]));
     let fun_handle = hack_expr!(
         pos = pos(),
-        r#"\__systemlib\dynamic_meth_caller(#{clone(cexpr)}, #{clone(fexpr)}, #efun, #force_val_expr)"#
+        r#"\__SystemLib\dynamic_meth_caller(#{clone(cexpr)}, #{clone(fexpr)}, #efun, #force_val_expr)"#
     );
     fun_handle.2
 }
@@ -1483,7 +1483,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         let mangle_name = string_utils::mangle_meth_caller(cls, fname);
         let fun_handle = hack_expr!(
             pos = pos(),
-            r#"\__systemlib\meth_caller(#{str(clone(mangle_name))})"#
+            r#"\__SystemLib\meth_caller(#{str(clone(mangle_name))})"#
         );
         if self
             .state()

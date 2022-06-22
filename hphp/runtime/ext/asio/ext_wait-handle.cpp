@@ -39,12 +39,12 @@ namespace HPHP {
 const StaticString s_result("<result>");
 const StaticString s_exception("<exception>");
 
-void HHVM_STATIC_METHOD(Awaitable, setOnIoWaitEnterCallback,
+void HHVM_STATIC_METHOD(Awaitable, setOnIOWaitEnterCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnIOWaitEnter(callback);
 }
 
-void HHVM_STATIC_METHOD(Awaitable, setOnIoWaitExitCallback,
+void HHVM_STATIC_METHOD(Awaitable, setOnIOWaitExitCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnIOWaitExit(callback);
 }
@@ -106,8 +106,8 @@ void AsioExtension::initWaitHandle() {
   (void)type_scan::getIndexForMalloc<AsioBlockable>();
 #define WH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\Awaitable, meth, Awaitable, meth)
-  WH_SME(setOnIoWaitEnterCallback);
-  WH_SME(setOnIoWaitExitCallback);
+  WH_SME(setOnIOWaitEnterCallback);
+  WH_SME(setOnIOWaitExitCallback);
   WH_SME(setOnJoinCallback);
 #undef WH_SME
 

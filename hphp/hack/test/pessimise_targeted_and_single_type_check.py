@@ -43,22 +43,15 @@ if __name__ == "__main__":
 
     # pessimise all the current tests
     # 1. run hh_single_type_check to collect pessimisation targets
-    targets_file_pid: str = (str(os.getpid())) + ".targets"
-    targets_fd: io.TextIOWrapper = open(targets_file_pid, "w")
-    # if the --batch-files option is selected then hh_single_type_check does not
-    # output on stdout/stderr.  Removing it temporarily from the list of options
-    hh_stc_arguments.remove("--batch-files")
     cmd: List[str] = (
         [hh_stc_path]
         + hh_stc_arguments
-        + ["--enable-sound-dynamic-type"]
         + ["--hh-log-level", "pessimise", "1"]
         + ["--error-format", "raw"]
         + files
     )
 
-    subprocess.call(cmd, stdout=targets_fd, stderr=subprocess.STDOUT)
-    targets_fd.close()
+    subprocess.call(cmd)
 
     for file in files:
         # 2. run targeted hh_pessimisation on each file
@@ -67,11 +60,10 @@ if __name__ == "__main__":
             "--file=" + file,
             "--update",
             "--forward",
-            "--pessimisation-targets=" + targets_file_pid,
+            "--pessimisation-targets=" + file + ".out",
             "--enable-multifile-support",
         ]
         subprocess.run(cmd)
-    os.remove(targets_file_pid)
 
     # identify the extra builtins used
     extra_builtins: List[str] = []

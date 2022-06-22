@@ -452,6 +452,7 @@
   serverFormat
   serverGenPrefetchDir
   serverGenRemoteDecls
+  serverGenShallowDeclsToDir
   serverIdle
   serverInferTypeBatch
   serverInvalidateUnits

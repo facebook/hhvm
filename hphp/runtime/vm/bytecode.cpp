@@ -985,9 +985,6 @@ static UNUSED int innerCount(TypedValue tv) {
 OPTBLD_INLINE void iopNop() {
 }
 
-OPTBLD_INLINE void iopEntryNop() {
-}
-
 OPTBLD_INLINE void iopPopC() {
   vmStack().popC();
 }

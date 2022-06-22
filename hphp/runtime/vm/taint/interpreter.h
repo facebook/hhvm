@@ -29,7 +29,6 @@ namespace taint {
 using jit::TCA;
 
 void iopNop();
-void iopEntryNop();
 void iopBreakTraceHint();
 void iopPopC();
 void iopPopU();

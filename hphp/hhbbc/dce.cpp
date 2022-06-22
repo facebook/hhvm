@@ -1596,7 +1596,6 @@ void dce(Env& env, const bc::ContRaise& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContValid& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CreateCont& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Enter& op) { no_dce(env, op); }
-void dce(Env& env, const bc::EntryNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Eval& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallClsMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallClsMethodM& op) { no_dce(env, op); }

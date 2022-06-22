@@ -626,15 +626,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
     auto end = b->hhbcs.end();
     auto flip = false;
 
-    if (is_single_nop(*b)) {
-      if (blockIt == begin(ret.blockOrder)) {
-        // If the first block is just a Nop, this means that there is
-        // a jump to the second block from somewhere in the
-        // function. We don't want this, so we change this nop to an
-        // EntryNop so it doesn't get optimized away
-        emit_inst(bc_with_loc(b->hhbcs.front().srcLoc, bc::EntryNop {}));
-      }
-    } else {
+    if (!is_single_nop(*b)) {
       // If the block ends with JmpZ or JmpNZ to the next block, flip
       // the condition to make the fallthrough the next block
       if (b->hhbcs.back().op == Op::JmpZ ||

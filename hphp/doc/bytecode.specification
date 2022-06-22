@@ -780,12 +780,6 @@ Nop    []  ->  []
 
   No operation. This instruction does nothing.
 
-EntryNop []  ->  []
-
-  No operation. This instruction is occasionally inserted by the emitter to
-  avoid having jumps to the entry of a function. Contrary to a Nop, EntryNop
-  is guaranteed to not be optimized away.
-
 PopC                  [C]  ->  []
 PopU                  [U]  ->  []
 

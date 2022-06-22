@@ -547,7 +547,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
   case Op::Nop:
   case Op::CGetCUNop:
   case Op::UGetCUNop:
-  case Op::EntryNop:
     return true;
   default:
     return false;
@@ -1075,7 +1074,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
 
   // These are instructions that are always interp-one'd, or are always no-ops.
   case Op::Nop:
-  case Op::EntryNop:
   case Op::CGetCUNop:
   case Op::UGetCUNop:
   case Op::ClsCns:

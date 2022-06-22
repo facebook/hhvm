@@ -419,7 +419,6 @@ pub enum Hhbc {
     },
     CreateCont(LocId),
     Div([ValueId; 2], LocId),
-    EntryNop(LocId),
     GetMemoKeyL(LocalId, LocId),
     Idx([ValueId; 3], LocId),
     #[has_operands(none)]

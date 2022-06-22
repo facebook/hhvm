@@ -206,10 +206,6 @@ void iopNop() {
   iopPreamble("Nop");
 }
 
-void iopEntryNop() {
-  iopPreamble("EntryNop");
-}
-
 void iopBreakTraceHint() {
   iopDoesNotAffectTaint("BreakTraceHint");
 }

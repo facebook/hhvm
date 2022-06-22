@@ -25,7 +25,6 @@ namespace HPHP {
 //  name             immediates        inputs           outputs     flags
 #define OPCODES \
   O(Nop,             NA,               NOV,             NOV,        NF) \
-  O(EntryNop,        NA,               NOV,             NOV,        NF) \
   O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
   O(PopU,            NA,               ONE(UV),         NOV,        NF) \

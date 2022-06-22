@@ -1821,16 +1821,11 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
       error("Enter target offset %d must point to the entry block\n",
             offset(t->start));
       ok = false;
-    }
-  }
-
-  for (int i = 0; i < b->succ_count; i++) {
-    auto const t = b->succs[i];
-    if (t && offset(t->start) == 0) {
+    } else {
       boost::dynamic_bitset<> visited(m_graph->block_count);
       if (Block::reachable(t, b, visited)) {
-        error("%s: Control flow cycles from the entry-block "
-              "to itself are not allowed\n", opcodeToName(peek_op(b->last)));
+        error("DV initializer at B%d can't be reachable from the entry block\n",
+              b->id);
         ok = false;
       }
     }

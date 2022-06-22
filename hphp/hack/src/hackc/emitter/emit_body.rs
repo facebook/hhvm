@@ -18,7 +18,7 @@ use hhbc::{
     hhas_body::{HhasBody, HhasBodyEnv},
     hhas_param::HhasParam,
     hhas_type::{self, HhasTypeInfo},
-    FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, Pseudo, TypedValue,
+    FCallArgs, FCallArgsFlags, IsTypeOp, Label, Local, TypedValue,
 };
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
@@ -194,15 +194,8 @@ fn make_body_instrs<'a, 'arena, 'decl>(
         ast_params,
         flags,
     )?;
-    let first_instr_is_label = match InstrSeq::first(&stmt_instrs) {
-        Some(Instruct::Pseudo(Pseudo::Label(_))) => true,
-        _ => false,
-    };
-    let header = if first_instr_is_label && InstrSeq::is_empty(&header_content) {
-        InstrSeq::gather(vec![begin_label, instr::entry_nop()])
-    } else {
-        InstrSeq::gather(vec![begin_label, header_content])
-    };
+
+    let header = InstrSeq::gather(vec![begin_label, header_content]);
 
     let mut body_instrs = InstrSeq::gather(vec![header, stmt_instrs, default_value_setters]);
     if flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM) {

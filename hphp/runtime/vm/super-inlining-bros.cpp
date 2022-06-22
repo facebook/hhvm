@@ -1193,7 +1193,6 @@ bool mayReadOrWriteGlobals(Op op) {
       return true;
 
     case Op::Nop:
-    case Op::EntryNop:
     case Op::BreakTraceHint:
     case Op::PopC:
     case Op::PopU:

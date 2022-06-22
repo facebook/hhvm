@@ -599,8 +599,6 @@ void in(ISS& env, const bc::PopU2&) {
   push(env, std::move(val), equiv != StackDupId ? equiv : NoLocalId);
 }
 
-void in(ISS& env, const bc::EntryNop&) { effect_free(env); }
-
 void in(ISS& env, const bc::Dup& /*op*/) {
   effect_free(env);
   auto equiv = topStkEquiv(env);

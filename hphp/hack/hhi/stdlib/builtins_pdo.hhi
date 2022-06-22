@@ -113,8 +113,8 @@ class PDO {
   public function errorInfo();
   public function query(string $sql);
   public function quote(string $str, int $paramtype = PDO::PARAM_STR);
-  public function __wakeup();
-  public function __sleep();
+  public function __wakeup()[];
+  public function __sleep()[];
   static public function getAvailableDrivers();
 }
 class PDOStatement {
@@ -141,8 +141,8 @@ class PDOStatement {
   public function next();
   public function rewind();
   public function valid();
-  public function __wakeup();
-  public function __sleep();
+  public function __wakeup()[];
+  public function __sleep()[];
 }
 class PDOException extends RuntimeException {
   public ?varray $errorInfo = null;

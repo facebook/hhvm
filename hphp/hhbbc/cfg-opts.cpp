@@ -426,9 +426,14 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
     forEachNormalSuccessor(
       *cblk,
       [&] (BlockId succId) {
-        auto const realSucc = next_real_block(func, succId);
-        if (succId != realSucc) bbi.followSucc = true;
-        handleSucc(realSucc);
+        if (cblk->hhbcs.back().op == Op::Enter) {
+          // Enter must always point to the main func entry.
+          handleSucc(succId);
+        } else {
+          auto const realSucc = next_real_block(func, succId);
+          if (succId != realSucc) bbi.followSucc = true;
+          handleSucc(realSucc);
+        }
         numSucc++;
       }
     );
@@ -455,6 +460,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
   for (auto bid : func.blockRange()) {
     if (blockInfo[bid].followSucc) {
       auto const blk = func.blocks()[bid].mutate();
+      assertx(blk->hhbcs.back().op != Op::Enter);
       forEachNormalSuccessor(
         *blk,
         [&] (BlockId& succId) {
@@ -518,7 +524,6 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
 
       auto const blk = func.blocks()[bid].mutate();
       blk->fallthrough = cnxt->fallthrough;
-      blk->fallthroughEnter = cnxt->fallthroughEnter;
       if (useNextCatch) {
         blk->throwExit = cnxt->throwExit;
         blk->exnNodeId = cnxt->exnNodeId;
@@ -581,6 +586,7 @@ void split_critical_edges(const Index& index, FuncAnalysis& ainfo,
   // updated with the correct state info.
   auto const split_edge = [&](BlockId srcBid, php::Block* srcBlk,
                               BlockId dstBid) {
+    assertx(srcBlk->hhbcs.back().op != Op::Enter);
     auto const srcLoc = srcBlk->hhbcs.back().srcLoc;
     auto const newBid = make_block(func, srcBlk);
     auto const newBlk = func.blocks()[newBid].mutate();

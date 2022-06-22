@@ -1683,8 +1683,9 @@ void in(ISS& env, const bc::Clone& /*op*/) {
 void in(ISS& env, const bc::Exit&)  { popC(env); push(env, TInitNull); }
 void in(ISS& env, const bc::Fatal&) { popC(env); }
 
-void in(ISS& /*env*/, const bc::Enter&) {
-  always_assert(0 && "blocks should not contain Enter instructions");
+void in(ISS& env, const bc::Enter& op) {
+  always_assert(op.target1 == env.ctx.func->mainEntry);
+  env.propagate(env.ctx.func->mainEntry, &env.state);
 }
 
 void in(ISS& /*env*/, const bc::Jmp&) {
@@ -5912,6 +5913,7 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
     }
     if (needsUpdate) {
       auto& bc = mutate_last_op(env);
+      assertx(bc.op != Op::Enter);
       forEachTakenEdge(
         bc,
         [&] (BlockId& bid) {

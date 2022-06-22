@@ -1814,6 +1814,16 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     }
   }
 
+  if (peek_op(b->last) == OpEnter) {
+    assertx(b->succ_count == 1);
+    auto const t = b->succs[0];
+    if (offset(t->start) != 0) {
+      error("Enter target offset %d must point to the entry block\n",
+            offset(t->start));
+      ok = false;
+    }
+  }
+
   for (int i = 0; i < b->succ_count; i++) {
     auto const t = b->succs[i];
     if (t && offset(t->start) == 0) {

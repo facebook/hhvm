@@ -665,11 +665,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       set_expected_depth(fallthrough);
       if (std::next(blockIt) == endBlockIt ||
           blockIt[1] != fallthrough) {
-        if (b->fallthroughEnter) {
-          emit_inst(bc::Enter { fallthrough });
-        } else {
-          emit_inst(bc::Jmp { fallthrough });
-        }
+        emit_inst(bc::Jmp { fallthrough });
 
         auto const nextExnId = func.blocks()[fallthrough]->exnNodeId;
         auto const parent = commonParent(*func, nextExnId, b->exnNodeId);

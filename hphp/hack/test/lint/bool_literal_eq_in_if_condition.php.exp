@@ -1,0 +1,16 @@
+File "bool_literal_eq_in_if_condition.php", line 4, characters 3-37:
+Consider changing this statement to if ($x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 9, characters 3-38:
+Consider changing this statement to if (!$x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 15, characters 3-37:
+Consider changing this statement to if ($x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 20, characters 3-38:
+Consider changing this statement to if (!$x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 26, characters 3-38:
+Consider changing this statement to if ($x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 31, characters 3-39:
+Consider changing this statement to if (!$x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 37, characters 3-38:
+Consider changing this statement to if ($x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 42, characters 3-39:
+Consider changing this statement to if (!$x) instead (Lint[5643])

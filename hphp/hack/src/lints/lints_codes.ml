@@ -97,5 +97,7 @@ module Codes = struct
 
   let unreachable_method_in_trait = 5642
 
+  let comparing_booleans = 5643
+
   let pointless_booleans_expression = 5644
 end

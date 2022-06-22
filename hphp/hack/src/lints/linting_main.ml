@@ -37,6 +37,7 @@ let typed_linters =
     Linter_loose_unsafe_cast.handler;
     Linter_xhp_attr_value.handler;
     Linter_pointless_booleans.handler;
+    Linter_comparing_booleans.handler;
   ]
   @ Linting_service.typed_linters
 

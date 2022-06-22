@@ -424,3 +424,13 @@ let switch_nonexhaustive p =
 
 let calling_pointless_boolean p txt =
   Lints.add Codes.pointless_booleans_expression Lint_warning p txt
+
+let comparing_booleans p name value =
+  let msg =
+    match value with
+    | true ->
+      "Consider changing this statement to " ^ "if (" ^ name ^ ") instead"
+    | false ->
+      "Consider changing this statement to " ^ "if (!" ^ name ^ ") instead"
+  in
+  Lints.add Codes.comparing_booleans Lint_advice p msg

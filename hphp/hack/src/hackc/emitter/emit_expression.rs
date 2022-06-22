@@ -3499,13 +3499,11 @@ fn emit_reified_type_opt<'a, 'arena>(
 ) -> Result<Option<InstrSeq<'arena>>> {
     let is_in_lambda = env.scope.is_in_lambda();
     let cget_instr = |is_fun, i| {
-        instr::c_get_l(
-            e.named_local(
-                string_utils::reified::reified_generic_captured_name(is_fun, i)
-                    .as_str()
-                    .into(),
-            ),
-        )
+        instr::c_get_l(e.named_local(
+            string_utils::reified::reified_generic_captured_name(is_fun, i)
+                .as_str()
+                .into(),
+        ))
     };
     let check = |is_soft| -> Result<()> {
         if is_soft {

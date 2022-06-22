@@ -242,7 +242,6 @@ struct PreClassEmitter {
     return m_enumIncludes;
   }
   bool addMethod(FuncEmitter* method);
-  void renameMethod(const StringData* oldName, const StringData *newName);
   bool addProperty(const StringData* n,
                    Attr attrs,
                    const StringData* userType,

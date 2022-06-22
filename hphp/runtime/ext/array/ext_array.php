@@ -252,8 +252,6 @@ function array_merge(mixed $array1, mixed... $arrays)[]: mixed {
       }
       $arr1[$k] = $v;
     }
-  /* HH_FIXME[2049] TODO(hgoldstein) declaration not visible while typechecking systemlib */
-  /* HH_FIXME[4107] TODO(hgoldstein) declaration not visible while typechecking systemlib */
   } else if (\HH\is_class_meth($array1)) {
     throw new InvalidOperationException("Cannot convert clsmeth to array");
   } else {

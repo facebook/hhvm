@@ -130,7 +130,6 @@ namespace HH {
   function clear_instance_memoization($obj) : bool;
 
   function is_list_like(readonly mixed $arg)[]: bool;
-  function is_class_meth(readonly mixed $arg)[]: bool;
   function is_meth_caller(readonly mixed $arg)[]: bool;
   function is_fun(readonly mixed $arg)[]: bool;
 

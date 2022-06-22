@@ -621,7 +621,7 @@ static int php_mb_parse_encoding_list(const char* value, int value_length,
             ret = 0;
           }
         }
-        p1 = p2 + 1;
+        if (p2 != nullptr) p1 = p2 + 1;
       } while (n < size && p2 != nullptr);
       if (n > 0) {
         if (return_list) {

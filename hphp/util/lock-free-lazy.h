@@ -268,7 +268,7 @@ const T& LockFreeLazyPtr<T>::get(const F& f) {
   if (auto const p = m_ptr.copy()) return *p;
   auto lock = m_ptr.lock_for_update();
   if (auto const p = m_ptr.copy()) return *p;
-  const T* newPtr = f();
+  auto newPtr = f();
   assertx(newPtr);
   lock.update(std::move(newPtr));
   return *m_ptr.copy();

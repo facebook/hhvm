@@ -572,39 +572,38 @@ std::string show(const Type& t) {
       return std::make_pair(ret, specMatches + restMatches);
     };
 
-    auto const showDCls = [&] (const DCls& dcls) {
-      std::string ret;
-      if (dcls.isExact()) {
-        folly::toAppend("=", show(dcls.cls()), &ret);
-      } else if (dcls.isSub()) {
-        folly::toAppend("<=", show(dcls.cls()), &ret);
-      } else {
-        folly::toAppend(
-          "<={",
-          [&] {
-            using namespace folly::gen;
-            return from(dcls.isect())
-              | map([] (res::Class c) { return show(c); })
-              | unsplit<std::string>("&");
-          }(),
-          "}",
-          &ret
-        );
-      }
-      if (dcls.isCtx()) folly::toAppend(" this", &ret);
-      return ret;
-    };
-
     switch (t.m_dataTag) {
-    case DataTag::Obj:
-      return impl(BObj, showDCls(t.m_data.dobj));
+    case DataTag::Obj: {
+      std::string ret;
+      switch (t.m_data.dobj.type()) {
+      case DCls::Exact:
+        folly::toAppend("=", show(t.m_data.dobj.cls()), &ret);
+        break;
+      case DCls::Sub:
+        folly::toAppend("<=", show(t.m_data.dobj.cls()), &ret);
+        break;
+      }
+      if (t.m_data.dobj.isCtx()) folly::toAppend(" this", &ret);
+      return impl(BObj, ret);
+    }
     case DataTag::WaitHandle:
       return impl(
         BObj,
         folly::sformat("=WaitH<{}>", show(t.m_data.dwh->inner))
       );
-    case DataTag::Cls:
-      return impl(BCls, showDCls(t.m_data.dcls));
+    case DataTag::Cls: {
+      std::string ret;
+      switch (t.m_data.dcls.type()) {
+      case DCls::Exact:
+        folly::toAppend("=", show(t.m_data.dcls.cls()), &ret);
+        break;
+      case DCls::Sub:
+        folly::toAppend("<=", show(t.m_data.dcls.cls()), &ret);
+        break;
+      }
+      if (t.m_data.dcls.isCtx()) folly::toAppend(" this", &ret);
+      return impl(BCls, ret);
+    }
     case DataTag::ArrLikePacked:
       return impl(
         BArrLikeN,

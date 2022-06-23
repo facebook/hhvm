@@ -943,8 +943,8 @@ void in(ISS& env, const bc::ClsCns& op) {
   auto const cls = topC(env);
 
   if (cls.subtypeOf(BCls) && is_specialized_cls(cls)) {
-    auto const& dcls = dcls_of(cls);
-    if (dcls.isExact()) {
+    auto const dcls = dcls_of(cls);
+    if (dcls.type() == DCls::Exact) {
       return reduce(
         env, bc::PopC {}, bc::ClsCnsD { op.str1, dcls.cls().name() }
       );
@@ -1028,8 +1028,8 @@ void in(ISS& env, const bc::FuncCred&) { effect_free(env); push(env, TObj); }
 void in(ISS& env, const bc::ClassName& op) {
   auto const ty = topC(env);
   if (ty.subtypeOf(BCls) && is_specialized_cls(ty)) {
-    auto const& dcls = dcls_of(ty);
-    if (dcls.isExact()) {
+    auto const dcls = dcls_of(ty);
+    if (dcls.type() == DCls::Exact) {
       return reduce(env,
                     bc::PopC {},
                     bc::String { dcls.cls().name() });
@@ -1043,8 +1043,8 @@ void in(ISS& env, const bc::ClassName& op) {
 void in(ISS& env, const bc::LazyClassFromClass&) {
   auto const ty = topC(env);
   if (ty.subtypeOf(BCls) && is_specialized_cls(ty)) {
-    auto const& dcls = dcls_of(ty);
-    if (dcls.isExact()) {
+    auto const dcls = dcls_of(ty);
+    if (dcls.type() == DCls::Exact) {
       return reduce(env,
                     bc::PopC {},
                     bc::LazyClass { dcls.cls().name() });
@@ -2521,7 +2521,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       // generic mode, which can handle collections or classes which don't
       // implement getInstanceKey.
       if (resolvedCls &&
-          resolvedCls->subSubtypeOf(rclsIMemoizeParam) &&
+          resolvedCls->mustBeSubtypeOf(rclsIMemoizeParam) &&
           inTy.subtypeOf(tyIMemoizeParam)) {
         return reduce(
           env,
@@ -2543,7 +2543,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       // or the integer 0. This might seem wasteful, but the JIT does a good job
       // inlining away the call in the null case.
       if (resolvedCls &&
-          resolvedCls->subSubtypeOf(rclsIMemoizeParam) &&
+          resolvedCls->mustBeSubtypeOf(rclsIMemoizeParam) &&
           inTy.subtypeOf(opt(tyIMemoizeParam))) {
         return reduce(
           env,
@@ -2762,8 +2762,11 @@ void in(ISS& env, const bc::InstanceOf& /*op*/) {
   }
 
   if (t1.subtypeOf(BObj) && is_specialized_obj(t1)) {
-    auto const& dobj = dobj_of(t1);
-    if (dobj.isExact()) {
+    auto const dobj = dobj_of(t1);
+    switch (dobj.type()) {
+    case DCls::Sub:
+      break;
+    case DCls::Exact:
       return reduce(env, bc::PopC {},
                          bc::InstanceOfD { dobj.cls().name() });
     }
@@ -3074,7 +3077,7 @@ void in(ISS& env, const bc::ClassHasReifiedGenerics& op) {
   effect_free(env);
   constprop(env);
   auto const t = [&] {
-    if (!is_specialized_cls(cls) || !dcls_of(cls).isExact()) {
+    if (!is_specialized_cls(cls) || dcls_of(cls).type() != DCls::Exact) {
       return TBool;
     }
     auto const& dcls = dcls_of(cls);
@@ -3103,7 +3106,7 @@ void in(ISS& env, const bc::HasReifiedParent& op) {
   effect_free(env);
   constprop(env);
   auto const t = [&] {
-    if (!is_specialized_cls(cls) || !dcls_of(cls).isExact()) {
+    if (!is_specialized_cls(cls) || dcls_of(cls).type() != DCls::Exact) {
       return TBool;
     }
     auto const& dcls = dcls_of(cls);
@@ -4163,7 +4166,7 @@ template<bool reifiedVersion = false>
 void resolveClsMethodSImpl(ISS& env, SpecialClsRef ref, LSString meth_name) {
   auto const clsTy = specialClsRefToCls(env, ref);
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, meth_name);
-  if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type() == DCls::Exact &&
       !rfunc.couldHaveReifiedGenerics()) {
     auto const clsName = dcls_of(clsTy).cls().name();
     return reduce(env, bc::ResolveClsMethodD { clsName, meth_name });
@@ -4376,7 +4379,7 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
   auto const skipLogAsDynamicCall =
     !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
-  if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type() == DCls::Exact &&
       (!rfunc.mightCareAboutDynCalls() || skipLogAsDynamicCall)) {
     auto const clsName = dcls_of(clsTy).cls().name();
     return reduce(
@@ -4433,7 +4436,7 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
   auto const skipLogAsDynamicCall =
     !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
-  if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type() == DCls::Exact &&
       (!rfunc.mightCareAboutDynCalls() ||
         !maybeDynamicCall ||
         skipLogAsDynamicCall
@@ -4460,7 +4463,7 @@ template <typename Op, class UpdateBC>
 void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
                          bool extraInput, UpdateBC updateBC) {
   auto const clsTy = specialClsRefToCls(env, op.subop3);
-  if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type() == DCls::Exact &&
       !dynamic && op.subop3 == SpecialClsRef::LateBoundCls) {
     auto const clsName = dcls_of(clsTy).cls().name();
     reduce(env, bc::FCallClsMethodD { op.fca, clsName, methName });
@@ -4567,8 +4570,9 @@ void in(ISS& env, const bc::NewObjS& op) {
     return;
   }
 
-  auto const& dcls = dcls_of(cls);
-  if (dcls.isExact() && !dcls.cls().couldHaveReifiedGenerics() &&
+  auto const dcls = dcls_of(cls);
+  auto const exact = dcls.type() == DCls::Exact;
+  if (exact && !dcls.cls().couldHaveReifiedGenerics() &&
       (!dcls.cls().couldBeOverriden() ||
        equivalently_refined(cls, unctx(cls)))) {
     return reduce(env, bc::NewObjD { dcls.cls().name() });
@@ -4585,8 +4589,9 @@ void in(ISS& env, const bc::NewObj& op) {
     return;
   }
 
-  auto const& dcls = dcls_of(cls);
-  if (dcls.isExact() && !dcls.cls().mightCareAboutDynConstructs()) {
+  auto const dcls = dcls_of(cls);
+  auto const exact = dcls.type() == DCls::Exact;
+  if (exact && !dcls.cls().mightCareAboutDynConstructs()) {
     return reduce(
       env,
       bc::PopC {},
@@ -4617,8 +4622,9 @@ void in(ISS& env, const bc::NewObjR& op) {
     return;
   }
 
-  auto const& dcls = dcls_of(cls);
-  if (dcls.isExact() && !dcls.cls().couldHaveReifiedGenerics()) {
+  auto const dcls = dcls_of(cls);
+  auto const exact = dcls.type() == DCls::Exact;
+  if (exact && !dcls.cls().couldHaveReifiedGenerics()) {
     return reduce(
       env,
       bc::PopC {},
@@ -4636,13 +4642,14 @@ namespace {
 bool objMightHaveConstProps(const Type& t) {
   assertx(t.subtypeOf(BObj));
   assertx(is_specialized_obj(t));
-  auto const& dobj = dobj_of(t);
-  if (dobj.isExact()) return dobj.cls().couldHaveConstProp();
-  if (dobj.isSub()) return dobj.cls().subCouldHaveConstProp();
-  for (auto const cls : dobj.isect()) {
-    if (!cls.subCouldHaveConstProp()) return false;
+  auto const dobj = dobj_of(t);
+  switch (dobj.type()) {
+    case DCls::Exact:
+      return dobj.cls().couldHaveConstProp();
+    case DCls::Sub:
+      return dobj.cls().subCouldHaveConstProp();
   }
-  return true;
+  not_reached();
 }
 
 }
@@ -4661,8 +4668,9 @@ void in(ISS& env, const bc::FCallCtor& op) {
     );
   }
 
-  auto const& dobj = dobj_of(obj);
-  auto const rfunc = env.index.resolve_ctor(env.ctx, dobj.cls(), dobj.isExact());
+  auto const dobj = dobj_of(obj);
+  auto const exact = dobj.type() == DCls::Exact;
+  auto const rfunc = env.index.resolve_ctor(env.ctx, dobj.cls(), exact);
   if (!rfunc) {
     return fcallUnknownImpl(env, op.fca);
   }
@@ -4962,21 +4970,13 @@ void in(ISS& env, const bc::OODeclExists& op) {
 
 namespace {
 bool couldBeMocked(const Type& t) {
-  auto const dcls = [&] () -> const DCls* {
-    if (is_specialized_cls(t)) {
-      return &dcls_of(t);
-    } else if (is_specialized_obj(t)) {
-      return &dobj_of(t);
-    }
-    return nullptr;
-  }();
-  // In practice this should not occur since this is used mostly on
-  // the result of looked up type constraints.
-  if (!dcls) return true;
-  if (!dcls->isIsect()) return dcls->cls().couldBeMocked();
-  for (auto const cls : dcls->isect()) {
-    if (!cls.couldBeMocked()) return false;
+  if (is_specialized_cls(t)) {
+    return dcls_of(t).cls().couldBeMocked();
+  } else if (is_specialized_obj(t)) {
+    return dobj_of(t).cls().couldBeMocked();
   }
+  // In practice this should not occur since this is used mostly on the result
+  // of looked up type constraints.
   return true;
 }
 }

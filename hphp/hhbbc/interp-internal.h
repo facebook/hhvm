@@ -484,8 +484,8 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
 
     // The method may be foldable if we know more about $this.
     if (is_specialized_obj(context)) {
-      auto const& dobj = dobj_of(context);
-      if (dobj.isExact() || (!dobj.isIsect() && dobj.cls().cls() != func->cls)) {
+      auto const dobj = dobj_of(context);
+      if (dobj.type() == DCls::Exact || dobj.cls().cls() != func->cls) {
         return true;
       }
     }
@@ -759,9 +759,17 @@ bool refineLocation(ISS& env, LocalId l, F fun) {
   bool ok = true;
   auto refine = [&] (Type t) {
     always_assert(t.subtypeOf(BCell));
-    auto i = intersection_of(fun(t), t);
-    if (i.subtypeOf(BBottom)) ok = false;
-    return i;
+    auto r1 = fun(t);
+    auto r2 = intersection_of(r1, t);
+    // In unusual edge cases (mainly intersection of two unrelated
+    // interfaces) the intersection may not be a subtype of its inputs.
+    // In that case, always choose fun's type.
+    if (r2.subtypeOf(r1)) {
+      if (r2.subtypeOf(BBottom)) ok = false;
+      return r2;
+    }
+    if (r1.subtypeOf(BBottom)) ok = false;
+    return r1;
   };
   if (l == StackDupId) {
     auto stkIdx = env.state.stack.size();

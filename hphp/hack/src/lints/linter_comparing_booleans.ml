@@ -27,27 +27,41 @@ let checking_the_expression exp1 exp2 =
   else
     None
 
+(* let finding_lint_error exp pos =
+  match exp with
+  | Aast.Binop (op, exp1, exp2) ->
+    (match op with
+    | Ast_defs.Eqeq
+    | Ast_defs.Eqeqeq ->
+      (match checking_the_expression exp1 exp2 with
+      | Some (name, boolean_var) ->
+        Lints_errors.comparing_booleans pos name boolean_var
+      | None ->
+        (match checking_the_expression exp2 exp1 with
+        | Some (name, boolean_var) ->
+          Lints_errors.comparing_booleans pos name boolean_var
+        | None -> ()))
+    | _ -> ())
+  | _ -> () *)
+
 let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_stmt _env (pos, stmt) =
-      match stmt with
-      | Aast.If ((_ty, _pos, e), _, _) ->
-        (match e with
-        | Aast.Binop (op, exp1, exp2) ->
-          (match op with
-          | Ast_defs.Eqeq
-          | Ast_defs.Eqeqeq ->
-            (match checking_the_expression exp1 exp2 with
+    method! at_expr _env (_, pos, expr_) =
+      match expr_ with
+      | Aast.Binop (op, exp1, exp2) ->
+        (match op with
+        | Ast_defs.Eqeq
+        | Ast_defs.Eqeqeq ->
+          (match checking_the_expression exp1 exp2 with
+          | Some (name, boolean_var) ->
+            Lints_errors.comparing_booleans pos name boolean_var
+          | None ->
+            (match checking_the_expression exp2 exp1 with
             | Some (name, boolean_var) ->
               Lints_errors.comparing_booleans pos name boolean_var
-            | None ->
-              (match checking_the_expression exp2 exp1 with
-              | Some (name, boolean_var) ->
-                Lints_errors.comparing_booleans pos name boolean_var
-              | None -> ()))
-          | _ -> ())
+            | None -> ()))
         | _ -> ())
       | _ -> ()
   end

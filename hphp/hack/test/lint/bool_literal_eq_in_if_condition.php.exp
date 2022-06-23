@@ -1,16 +1,26 @@
-File "bool_literal_eq_in_if_condition.php", line 4, characters 3-37:
-Consider changing this statement to if ($x) instead (Lint[5643])
-File "bool_literal_eq_in_if_condition.php", line 9, characters 3-38:
-Consider changing this statement to if (!$x) instead (Lint[5643])
-File "bool_literal_eq_in_if_condition.php", line 15, characters 3-37:
-Consider changing this statement to if ($x) instead (Lint[5643])
-File "bool_literal_eq_in_if_condition.php", line 20, characters 3-38:
-Consider changing this statement to if (!$x) instead (Lint[5643])
-File "bool_literal_eq_in_if_condition.php", line 26, characters 3-38:
-Consider changing this statement to if ($x) instead (Lint[5643])
-File "bool_literal_eq_in_if_condition.php", line 31, characters 3-39:
-Consider changing this statement to if (!$x) instead (Lint[5643])
-File "bool_literal_eq_in_if_condition.php", line 37, characters 3-38:
-Consider changing this statement to if ($x) instead (Lint[5643])
-File "bool_literal_eq_in_if_condition.php", line 42, characters 3-39:
-Consider changing this statement to if (!$x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 3, characters 7-16:
+Consider changing this statement to ($x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 8, characters 7-17:
+Consider changing this statement to (!$x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 14, characters 7-16:
+Consider changing this statement to ($x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 19, characters 7-17:
+Consider changing this statement to (!$x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 25, characters 7-17:
+Consider changing this statement to ($x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 30, characters 7-18:
+Consider changing this statement to (!$x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 36, characters 7-17:
+Consider changing this statement to ($x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 41, characters 7-18:
+Consider changing this statement to (!$x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 59, characters 10-19:
+Consider changing this statement to ($x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 66, characters 12-22:
+Consider changing this statement to (!$x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 69, characters 16-25:
+Consider changing this statement to ($x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 74, characters 8-18:
+Consider changing this statement to ($x) instead (Lint[5643])
+File "bool_literal_eq_in_if_condition.php", line 77, characters 7-17:
+Consider changing this statement to ($x) instead (Lint[5643])

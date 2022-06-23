@@ -359,7 +359,7 @@ pub fn make_body<'a, 'arena, 'decl>(
         .hack_compiler_flags
         .contains(CompilerFlags::RELABEL)
     {
-        label_rewriter::relabel_function(&mut params, &mut body_instrs);
+        label_rewriter::relabel_function(alloc, &mut params, &mut body_instrs);
     }
     let num_iters = if is_memoize_wrapper {
         0

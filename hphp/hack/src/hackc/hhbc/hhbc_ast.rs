@@ -109,14 +109,6 @@ impl<'arena> FCallArgs<'arena> {
         }
     }
 
-    pub fn targets_mut(&mut self) -> &mut [Label] {
-        if self.has_async_eager_target() {
-            std::slice::from_mut(&mut self.async_eager_target)
-        } else {
-            &mut []
-        }
-    }
-
     pub fn num_inputs(&self) -> usize {
         self.num_args as usize
             + self.flags.contains(FCallArgsFlags::HasUnpack) as usize
@@ -317,11 +309,6 @@ pub trait Targets {
     /// instruction. This excludes the Label in an ILabel instruction, which is
     /// not a conditional branch.
     fn targets(&self) -> &[Label];
-
-    /// Return a mutable slice of labels for the conditional branch targets of
-    /// this instruction. This excludes the Label in an ILabel instruction,
-    /// which is not a conditional branch.
-    fn targets_mut(&mut self) -> &mut [Label];
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
@@ -353,28 +340,6 @@ impl Instruct<'_> {
                 | Pseudo::Comment(_)
                 | Pseudo::SrcLoc(_),
             ) => &[],
-        }
-    }
-
-    /// Return a mutable slice of labels for the conditional branch targets of this instruction.
-    /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
-    pub fn targets_mut(&mut self) -> &mut [Label] {
-        match self {
-            Self::Opcode(opcode) => opcode.targets_mut(),
-
-            // Make sure new variants with branch target Labels are handled
-            // above before adding items to this catch-all.
-            Self::Pseudo(
-                Pseudo::TypedValue(_)
-                | Pseudo::Continue(_)
-                | Pseudo::Break(_)
-                | Pseudo::Label(_)
-                | Pseudo::TryCatchBegin
-                | Pseudo::TryCatchMiddle
-                | Pseudo::TryCatchEnd
-                | Pseudo::Comment(_)
-                | Pseudo::SrcLoc(_),
-            ) => &mut [],
         }
     }
 

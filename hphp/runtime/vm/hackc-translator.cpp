@@ -647,7 +647,7 @@ void handleNLA(TranslationState& ts, const Local& local) {
   ts.fe->emitNamedLocal(loc);
 }
 
-void handleBLA(TranslationState& ts, const BumpSliceMut<Label>& labels) {
+void handleBLA(TranslationState& ts, const Slice<Label>& labels) {
   ts.fe->emitIVA(labels.len);
   auto targets = range(labels);
   for (auto const& t : targets) {

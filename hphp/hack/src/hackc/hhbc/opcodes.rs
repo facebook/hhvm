@@ -12,7 +12,7 @@ use crate::{
     SwitchKind, Targets, TypeStructResolveOp,
 };
 use emit_opcodes_macro::Targets;
-use ffi::{BumpSliceMut, Slice, Str};
+use ffi::{Slice, Str};
 
 #[emit_opcodes_macro::emit_opcodes]
 #[derive(Clone, Debug, Targets, Hash, Eq, PartialEq)]

@@ -533,7 +533,7 @@ let parse_check_args cmd =
       ( "--refactor-check-sound-dynamic",
         Arg.Tuple
           [
-            Arg.Symbol (["Function"], (fun x -> refactor_mode := x));
+            Arg.Symbol (["Class"; "Function"], (fun x -> refactor_mode := x));
             Arg.String
               (fun x ->
                 set_mode @@ MODE_REFACTOR_CHECK_SOUND_DYNAMIC (!refactor_mode, x));

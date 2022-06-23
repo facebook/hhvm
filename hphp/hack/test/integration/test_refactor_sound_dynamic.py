@@ -32,7 +32,7 @@ enable_sound_dynamic_type = true
         if using_sd:
             expected_output = [
                 "Server is using sound dynamic. ",
-                f"Number of upcast positions for \\h is {len(upcast_locations)}",
+                f"Number of upcast positions for \\{element_name} is {len(upcast_locations)}",
             ]
             expected_output.extend(upcast_locations)
         else:
@@ -72,6 +72,31 @@ enable_sound_dynamic_type = true
             "h",
             [
                 f'File "{self.test_driver.repo_dir}/a.php", line 4, characters 20-37:',
+            ],
+        )
+
+    def test_one_upcast_one_class(self) -> None:
+
+        self.write_and_test_one_file(
+            """
+<?hh
+
+<<__SupportDynamicType>>
+class Counter {
+  private int $i = 0;
+}
+
+function c(dynamic $d): void {
+  $g = Counter::class upcast dynamic;
+  $h = new Counter() upcast dynamic;
+}
+
+            """,
+            "Class",
+            "Counter",
+            [
+                f'File "{self.test_driver.repo_dir}/a.php", line 10, characters 8-36:',
+                f'File "{self.test_driver.repo_dir}/a.php", line 11, characters 8-35:',
             ],
         )
 

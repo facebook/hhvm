@@ -516,6 +516,21 @@ let go_sound_dynamic ctx action genv env =
         |> Relative_path.Set.elements
       in
       is_sound_dynamic_str ^ get_upcast_locations ctx files old_name
+    | ServerRefactorTypes.ClassRename (class_name, _) ->
+      let class_name = ServerFindRefs.add_ns class_name in
+      ServerFindRefs.handle_prechecked_files
+        genv
+        env
+        Typing_deps.(Dep.(make (Type class_name)))
+      @@ fun () ->
+      let files =
+        FindRefsService.get_dependent_files
+          ctx
+          genv.ServerEnv.workers
+          (SSet.singleton class_name)
+        |> Relative_path.Set.elements
+      in
+      is_sound_dynamic_str ^ get_upcast_locations ctx files class_name
     | _ -> (env, Done "")
 
 let go ctx action genv env =

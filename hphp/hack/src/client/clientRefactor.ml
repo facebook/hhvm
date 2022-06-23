@@ -103,6 +103,7 @@ let go_sound_dynamic
     (name : string) =
   let command =
     match mode with
+    | "Class" -> ServerRefactorTypes.ClassRename (name, "")
     | "Function" ->
       let filename = None in
       let definition = None in

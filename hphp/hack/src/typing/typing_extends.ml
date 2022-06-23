@@ -603,6 +603,36 @@ let check_multiple_concrete_definitions
                class_name = Cls.name class_;
              })
 
+let maybe_poison_ancestors env ft_parent ft_child class_ member_name member_kind
+    =
+  if
+    TypecheckerOptions.like_casts (Provider_context.get_tcopt (Env.get_ctx env))
+  then
+    match
+      ( Typing_enforceability.get_enforcement env ft_parent.ft_ret.et_type,
+        Typing_enforceability.get_enforcement env ft_child.ft_ret.et_type )
+    with
+    | (Enforced, Unenforced) ->
+      Cls.all_ancestor_names class_
+      |> List.map ~f:(Env.get_class env)
+      |> List.filter_opt
+      |> List.iter ~f:(fun cls ->
+             MemberKind.(
+               match member_kind with
+               | Static_method -> Cls.get_smethod cls member_name
+               | Method -> Cls.get_method cls member_name
+               | _ -> None)
+             |> Option.iter ~f:(fun elt ->
+                    let (lazy fty) = elt.ce_type in
+                    match get_node fty with
+                    | Tfun { ft_ret; _ } ->
+                      let pos =
+                        Pos_or_decl.unsafe_to_raw_pos (get_pos ft_ret.et_type)
+                      in
+                      Typing_log.log_pessimise_return env pos
+                    | _ -> ()))
+    | _ -> ()
+
 (* Check that overriding is correct *)
 let check_override
     env
@@ -702,6 +732,13 @@ let check_override
        * subtyping rules except with __ConsistentConstruct *)
       env
     | _ ->
+      maybe_poison_ancestors
+        env
+        ft_parent
+        ft_child
+        class_
+        member_name
+        member_kind;
       check_ambiguous_inheritance
         (check_subtype_methods
            env

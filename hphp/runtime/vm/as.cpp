@@ -1272,7 +1272,7 @@ NamedLocal read_named_local(AsmState& as) {
     return NamedLocal { .name = id, .id = id };
   }
   if (as.in.tryConsume('_')) {
-    return NamedLocal { .name = kInvalidId, .id = id };
+    return NamedLocal { .name = kInvalidLocalName, .id = id };
   }
   std::string name;
   if (!as.in.readQuotedStr(name)) {

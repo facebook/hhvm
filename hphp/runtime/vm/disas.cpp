@@ -301,8 +301,9 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 
   auto print_mk = [&] (MemberKey m) {
     if (m.mcode == MEL || m.mcode == MPL) {
+      // FIXME: encode NamedLocal properly in hhas
       std::string ret = memberCodeString(m.mcode);
-      folly::toAppend(':', loc_name(finfo, m.iva), " ", subopToName(m.rop), &ret);
+      folly::toAppend(':', loc_name(finfo, m.local.id), " ", subopToName(m.rop), &ret);
       return ret;
     }
     return show(m);
@@ -321,10 +322,12 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   };
 
   auto const print_nla = [&](const NamedLocal& nla) {
+    auto const locName = loc_name(finfo, nla.id);
+    if (nla.name == kInvalidLocalName) return folly::sformat("{};_", locName);
     auto const sd = finfo.func->localVarName(nla.name);
-    if (!sd) return folly::sformat("{};_", loc_name(finfo, nla.id));
+    if (!sd) return folly::sformat("{};_", locName);
     auto const name = folly::cEscape<std::string>(sd->slice());
-    return folly::sformat("{};\"{}\"", loc_name(finfo, nla.id), name);
+    return folly::sformat("{};\"{}\"", locName, name);
   };
 
 #define IMM_BLA    print_switch();

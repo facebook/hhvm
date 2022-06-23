@@ -2,7 +2,7 @@
 <?hh
 
 class :element {
-  attribute int prop @required;
+  attribute int prop @required, string prop2;
   public function __construct(
     public darray<string, dynamic> $attributes,
     public varray<dynamic> $children,

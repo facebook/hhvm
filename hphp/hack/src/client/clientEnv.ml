@@ -49,7 +49,7 @@ type client_mode =
   | MODE_OUTLINE2
   | MODE_PAUSE of bool
   | MODE_REFACTOR of string * string * string
-  | MODE_REFACTOR_CHECK_SOUND_DYNAMIC of string
+  | MODE_REFACTOR_CHECK_SOUND_DYNAMIC of string * string
   | MODE_REMOVE_DEAD_FIXMES of int list
   | MODE_REWRITE_LAMBDA_PARAMETERS of string list
   | MODE_REWRITE_TYPE_PARAMS_TYPE of string list

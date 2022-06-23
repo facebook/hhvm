@@ -411,13 +411,19 @@ let upcast_visitor =
   object (self)
     inherit [_] Tast_visitor.reduce as super
 
-    val mutable upcasted_fid = ""
+    val mutable upcasted_id = ""
 
     method zero = []
 
     method plus = ( @ )
 
-    method set_upcasted_fid fid = upcasted_fid <- fid
+    method set_upcasted_fid fid = upcasted_id <- fid
+
+    method private check_id id pos =
+      if String.equal id upcasted_id then
+        [pos]
+      else
+        self#zero
 
     method! on_expr env expr =
       let acc =
@@ -427,10 +433,11 @@ let upcast_visitor =
           begin
             match e with
             | (_, _, Aast.FunctionPointer (Aast.FP_id (_, id), _)) ->
-              if String.equal id upcasted_fid then
-                [pos]
-              else
-                self#zero
+              self#check_id id pos
+            | (_, _, Aast.New ((_, _, Aast.CI (_, id)), _, _, _, _)) ->
+              self#check_id id pos
+            | (_, _, Aast.Class_const ((_, _, Aast.CI (_, id)), _)) ->
+              self#check_id id pos
             | _ -> self#zero
           end
         | _ -> self#zero
@@ -438,8 +445,54 @@ let upcast_visitor =
       self#plus acc (super#on_expr env expr)
   end
 
-let go_sound_dynamic ctx function_name genv env =
-  let function_name = ServerFindRefs.add_ns function_name in
+let get_upcast_locations ctx files element_name =
+  let element_name = ServerFindRefs.add_ns element_name in
+  (* [files] can legitimately refer to non-existent files, e.g.
+     if they've been deleted since the depgraph was created.
+     This is how we'll filter them out. *)
+  let is_entry_valid entry =
+    entry |> Provider_context.get_file_contents_if_present |> Option.is_some
+  in
+  (* These are the tasts for all the 'fileinfo_l' passed in *)
+  let tasts_of_files : (Relative_path.t * Tast.program) list =
+    List.filter_map files ~f:(fun path ->
+        let (_ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+        try
+          let { Tast_provider.Compute_tast.tast; _ } =
+            Tast_provider.compute_tast_unquarantined ~ctx ~entry
+          in
+          Some (path, tast)
+        with
+        | _ when not (is_entry_valid entry) -> None)
+  in
+  let () = upcast_visitor#set_upcasted_fid element_name in
+  let upcast_positions =
+    List.rev_map tasts_of_files ~f:(fun (_, tast) -> upcast_visitor#go ctx tast)
+    |> List.concat
+  in
+  let buf = Buffer.create (31 * List.length upcast_positions) in
+  let refactor_check_sd_string = "Refactor-check-sound-dynamic: " in
+  let len_string =
+    Printf.sprintf
+      "Number of upcast positions for %s is %d\n"
+      element_name
+      (List.length upcast_positions)
+  in
+  Hh_logger.log "%s%s" refactor_check_sd_string len_string;
+  Buffer.add_string buf len_string;
+  let () =
+    List.iter
+      ~f:(fun pos ->
+        let pos_string =
+          Printf.sprintf "%s\n" (Pos.string (Pos.to_absolute pos))
+        in
+        Hh_logger.log "%sposition = %s" refactor_check_sd_string pos_string;
+        Buffer.add_string buf pos_string)
+      upcast_positions
+  in
+  Buffer.contents buf
+
+let go_sound_dynamic ctx action genv env =
   if not (GlobalOptions.tco_enable_sound_dynamic env.tcopt) then
     ( env,
       Done
@@ -447,65 +500,23 @@ let go_sound_dynamic ctx function_name genv env =
     )
   else
     let is_sound_dynamic_str = "Server is using sound dynamic. \n" in
-    ServerFindRefs.handle_prechecked_files
-      genv
-      env
-      Typing_deps.(Dep.(make (Fun function_name)))
-    @@ fun () ->
-    let files =
-      FindRefsService.get_dependent_files_function
-        ctx
-        genv.ServerEnv.workers
-        function_name
-      |> Relative_path.Set.elements
-    in
-    (* [files] can legitimately refer to non-existent files, e.g.
-       if they've been deleted since the depgraph was created.
-       This is how we'll filter them out. *)
-    let is_entry_valid entry =
-      entry |> Provider_context.get_file_contents_if_present |> Option.is_some
-    in
-    (* These are the tasts for all the 'fileinfo_l' passed in *)
-    let tasts_of_files : (Relative_path.t * Tast.program) list =
-      List.filter_map files ~f:(fun path ->
-          let (_ctx, entry) =
-            Provider_context.add_entry_if_missing ~ctx ~path
-          in
-          try
-            let { Tast_provider.Compute_tast.tast; _ } =
-              Tast_provider.compute_tast_unquarantined ~ctx ~entry
-            in
-            Some (path, tast)
-          with
-          | _ when not (is_entry_valid entry) -> None)
-    in
-    let () = upcast_visitor#set_upcasted_fid function_name in
-    let upcast_positions =
-      List.rev_map tasts_of_files ~f:(fun (_, tast) ->
-          upcast_visitor#go ctx tast)
-      |> List.concat
-    in
-    let buf = Buffer.create (31 * List.length upcast_positions) in
-    let refactor_check_sd_string = "Refactor-check-sound-dynamic: " in
-    let len_string =
-      Printf.sprintf
-        "Number of upcast positions for function %s is %d\n"
-        function_name
-        (List.length upcast_positions)
-    in
-    Hh_logger.log "%s%s" refactor_check_sd_string len_string;
-    Buffer.add_string buf len_string;
-    let () =
-      List.iter
-        ~f:(fun pos ->
-          let pos_string =
-            Printf.sprintf "%s\n" (Pos.string (Pos.to_absolute pos))
-          in
-          Hh_logger.log "%sposition = %s" refactor_check_sd_string pos_string;
-          Buffer.add_string buf pos_string)
-        upcast_positions
-    in
-    is_sound_dynamic_str ^ Buffer.contents buf
+    match action with
+    | ServerRefactorTypes.FunctionRename { old_name; _ } ->
+      let function_name = ServerFindRefs.add_ns old_name in
+      ServerFindRefs.handle_prechecked_files
+        genv
+        env
+        Typing_deps.(Dep.(make (Fun function_name)))
+      @@ fun () ->
+      let files =
+        FindRefsService.get_dependent_files_function
+          ctx
+          genv.ServerEnv.workers
+          function_name
+        |> Relative_path.Set.elements
+      in
+      is_sound_dynamic_str ^ get_upcast_locations ctx files old_name
+    | _ -> (env, Done "")
 
 let go ctx action genv env =
   let module Types = ServerCommandTypes.Find_refs in

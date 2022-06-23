@@ -350,11 +350,10 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let%lwt conn = connect args in
       let%lwt () = ClientSymbolInfo.go conn ~desc:args.desc files expand_path in
       Lwt.return (Exit_status.No_error, Telemetry.create ())
-    | MODE_REFACTOR_CHECK_SOUND_DYNAMIC function_name ->
+    | MODE_REFACTOR_CHECK_SOUND_DYNAMIC (ref_mode, name) ->
       let conn () = connect args in
       let%lwt result =
-        ClientConnect.rpc_with_retry conn ~desc:args.desc
-        @@ Rpc.REFACTOR_CHECK_SD function_name
+        ClientRefactor.go_sound_dynamic conn args ref_mode name
       in
       let () = Printf.printf "%s" result in
       Lwt.return (Exit_status.No_error, Telemetry.create ())

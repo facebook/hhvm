@@ -306,9 +306,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         ServerRefactor.go ctx refactor_action genv env)
-  | REFACTOR_CHECK_SD function_name ->
+  | REFACTOR_CHECK_SD refactor_action ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    ServerRefactor.go_sound_dynamic ctx function_name genv env
+    ServerRefactor.go_sound_dynamic ctx refactor_action genv env
   | IDE_REFACTOR
       { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } ->
     let ctx = Provider_utils.ctx_from_server_env env in

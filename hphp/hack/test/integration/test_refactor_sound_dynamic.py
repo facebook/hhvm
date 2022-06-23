@@ -17,30 +17,32 @@ enable_sound_dynamic_type = true
             )
 
     def write_and_test_one_file(
-        self, file_input, function_name, upcast_locations, using_sd=True
+        self, file_input, command_type, element_name, upcast_locations, using_sd=True
     ) -> None:
         with open(os.path.join(self.test_driver.repo_dir, "a.php"), "w") as f:
             f.write(file_input)
         if using_sd:
             self.write_load_config()
         self.test_driver.start_hh_server(changed_files=["a.php"], args=["--no-load"])
-        self.check_upcast_cmd(function_name, upcast_locations, using_sd)
+        self.check_upcast_cmd(command_type, element_name, upcast_locations, using_sd)
 
-    def check_upcast_cmd(self, function_name, upcast_locations, using_sd=True):
+    def check_upcast_cmd(
+        self, command_type, element_name, upcast_locations, using_sd=True
+    ):
         if using_sd:
             expected_output = [
                 "Server is using sound dynamic. ",
-                f"Number of upcast positions for function \\h is {len(upcast_locations)}",
+                f"Number of upcast positions for \\h is {len(upcast_locations)}",
             ]
+            expected_output.extend(upcast_locations)
         else:
             expected_output = [
                 "Server is NOT using sound dynamic. Change the .hhconfig file to enable sound dynamic. ",
             ]
 
-        expected_output.extend(upcast_locations)
         self.test_driver.check_cmd(
             expected_output=expected_output,
-            options=["--refactor-check-sound-dynamic", function_name],
+            options=["--refactor-check-sound-dynamic", command_type, element_name],
         )
 
     def test_no_sd(self) -> None:
@@ -51,6 +53,7 @@ enable_sound_dynamic_type = true
               $x = h<> upcast dynamic;
             }
             """,
+            "Function",
             "h",
             [],
             using_sd=False,
@@ -65,6 +68,7 @@ enable_sound_dynamic_type = true
               $x = h<> upcast dynamic;
             }
             """,
+            "Function",
             "h",
             [
                 f'File "{self.test_driver.repo_dir}/a.php", line 4, characters 20-37:',
@@ -83,6 +87,7 @@ enable_sound_dynamic_type = true
               $x = g<> upcast dynamic;
             }
             """,
+            "Function",
             "h",
             [
                 f'File "{self.test_driver.repo_dir}/a.php", line 4, characters 20-37:',
@@ -128,6 +133,7 @@ enable_sound_dynamic_type = true
             changed_files=["a.php", "b.php", "c.php"], args=["--no-load"]
         )
         self.check_upcast_cmd(
+            "Function",
             "h",
             [
                 f'File "{self.test_driver.repo_dir}/a.php", line 4, characters 20-37:',

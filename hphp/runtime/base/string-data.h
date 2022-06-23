@@ -38,6 +38,7 @@ struct Array;
 struct String;
 struct APCHandle;
 struct NamedEntity;
+struct UnitEmitter;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -615,9 +616,16 @@ ALWAYS_INLINE StringData* staticEmptyString() {
 template<>
 struct BlobEncoderHelper<const StringData*> {
   static void serde(BlobEncoder&, const StringData*);
-  static void serde(BlobDecoder&, const StringData*&);
+  static void serde(BlobDecoder&, const StringData*&,
+                    bool makeStatic = true);
+
+  static folly::StringPiece asStringPiece(BlobDecoder&);
 
   static void skip(BlobDecoder&);
+  static size_t peekSize(BlobDecoder&);
+
+  // If set, will utilize the UnitEmitter's string table.
+  static __thread UnitEmitter* tl_unitEmitter;
 };
 
 //////////////////////////////////////////////////////////////////////

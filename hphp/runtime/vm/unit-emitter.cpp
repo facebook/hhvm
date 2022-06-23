@@ -35,8 +35,6 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
-#include "hphp/runtime/vm/litstr-table.h"
-#include "hphp/runtime/vm/litarray-table.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -73,10 +71,8 @@ TRACE_SET_MOD(hhbc);
 
 UnitEmitter::UnitEmitter(const SHA1& sha1,
                          const SHA1& bcSha1,
-                         const Native::FuncTable& nativeFuncs,
-                         bool useGlobalIds)
-  : m_useGlobalIds(useGlobalIds)
-  , m_nativeFuncs(nativeFuncs)
+                         const Native::FuncTable& nativeFuncs)
+  : m_nativeFuncs(nativeFuncs)
   , m_sha1(sha1)
   , m_bcSha1(bcSha1)
   , m_nextFuncSn(0)
@@ -90,37 +86,86 @@ UnitEmitter::~UnitEmitter() {
 // Litstrs and Arrays.
 
 const StringData* UnitEmitter::lookupLitstr(Id id) const {
-  if (!isUnitId(id)) {
-    return LitstrTable::get().lookupLitstrId(id);
+  assertx(id >= 0 && id < m_litstrs.size());
+  auto& elem = m_litstrs[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(!wrapper.ptr() || wrapper.ptr()->isStatic());
+    return wrapper.ptr();
   }
-  auto unitId = decodeUnitId(id);
-  assertx(unitId < m_litstrs.size());
-  return m_litstrs[unitId];
+  auto lock = elem.lock_for_update();
+  wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(!wrapper.ptr() || wrapper.ptr()->isStatic());
+    return wrapper.ptr();
+  }
+  auto const str = loadLitstrFromRepo(m_sn, wrapper.token(), true);
+  assertx(!str || str->isStatic());
+  lock.update(StringOrToken::FromPtr(str));
+  return str;
 }
 
 const ArrayData* UnitEmitter::lookupArray(Id id) const {
-  if (!isUnitId(id)) {
-    return LitarrayTable::get().lookupLitarrayId(id);
+  assertx(id >= 0 && id < m_arrays.size());
+  auto& elem = m_arrays[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    assertx(wrapper.ptr()->isStatic());
+    return wrapper.ptr();
   }
-  auto unitId = decodeUnitId(id);
-  assertx(unitId < m_arrays.size());
-  return m_arrays[unitId];
+  auto lock = elem.lock_for_update();
+  wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    assertx(wrapper.ptr()->isStatic());
+    return wrapper.ptr();
+  }
+  auto const array =
+    loadLitarrayFromRepo(m_sn, wrapper.token(), m_filepath, true);
+  assertx(array);
+  assertx(array->isStatic());
+  lock.update(ArrayOrToken::FromPtr(array));
+  return array;
+}
+
+String UnitEmitter::lookupLitstrCopy(Id id) const {
+  assertx(id >= 0 && id < m_litstrs.size());
+  auto& elem = m_litstrs[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(!wrapper.ptr() || wrapper.ptr()->isStatic());
+    if (!wrapper.ptr()) return String{};
+    return String::attach(const_cast<StringData*>(wrapper.ptr()));
+  }
+  auto const str = loadLitstrFromRepo(m_sn, wrapper.token(), false);
+  if (!str) return String{};
+  return String::attach(const_cast<StringData*>(str));
+}
+
+Array UnitEmitter::lookupArrayCopy(Id id) const {
+  assertx(id >= 0 && id < m_arrays.size());
+  auto& elem = m_arrays[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    assertx(wrapper.ptr()->isStatic());
+    return Array::attach(const_cast<ArrayData*>(wrapper.ptr()));
+  }
+  auto const array =
+    loadLitarrayFromRepo(m_sn, wrapper.token(), m_filepath, false);
+  assertx(array);
+  return Array::attach(const_cast<ArrayData*>(array));
 }
 
 Id UnitEmitter::mergeLitstr(const StringData* litstr) {
-  if (m_useGlobalIds) {
-    return LitstrTable::get().mergeLitstr(litstr);
-  }
-  return encodeUnitId(mergeUnitLitstr(litstr));
-}
-
-Id UnitEmitter::mergeUnitLitstr(const StringData* litstr) {
-  auto it = m_litstr2id.find(litstr);
+  assertx(!litstr || litstr->isStatic());
+  auto const it = m_litstr2id.find(litstr);
   if (it == m_litstr2id.end()) {
-    const StringData* str = makeStaticString(litstr);
-    Id id = m_litstrs.size();
-    m_litstrs.push_back(str);
-    m_litstr2id[str] = id;
+    auto const id = m_litstrs.size();
+    m_litstrs.emplace_back(StringOrToken::FromPtr(litstr));
+    auto const DEBUG_ONLY insert = m_litstr2id.emplace(litstr, id);
+    assertx(insert.second);
     return id;
   } else {
     return it->second;
@@ -128,21 +173,114 @@ Id UnitEmitter::mergeUnitLitstr(const StringData* litstr) {
 }
 
 Id UnitEmitter::mergeArray(const ArrayData* a) {
+  assertx(a);
   assertx(a->isStatic());
-  if (m_useGlobalIds) {
-    return LitarrayTable::get().mergeLitarray(a);
+  auto const it = m_array2id.find(a);
+  if (it == m_array2id.end()) {
+    auto const id = m_arrays.size();
+    m_arrays.emplace_back(ArrayOrToken::FromPtr(a));
+    auto const DEBUG_ONLY insert = m_array2id.emplace(a, id);
+    assertx(insert.second);
+    return id;
+  } else {
+    return it->second;
   }
-  return encodeUnitId(mergeUnitArray(a));
 }
 
-Id UnitEmitter::mergeUnitArray(const ArrayData* a) {
-  assertx(a->isStatic());
-  auto const id = static_cast<Id>(m_arrays.size());
-  m_array2id.emplace(a, id);
-  m_arrays.push_back(a);
-  return id;
+const StringData* UnitEmitter::loadLitstrFromRepo(int64_t unitSn,
+                                                  RepoFile::Token token,
+                                                  bool makeStatic) {
+  assertx(RO::RepoAuthoritative);
+
+  // Reset tl_unitEmitter (if set). We're loading a string for the
+  // unit's string table, so the encoder shouldn't access the string
+  // table.
+  auto const oldEmitter = BlobEncoderHelper<const StringData*>::tl_unitEmitter;
+  BlobEncoderHelper<const StringData*>::tl_unitEmitter = nullptr;
+  SCOPE_EXIT {
+    assertx(!BlobEncoderHelper<const StringData*>::tl_unitEmitter);
+    BlobEncoderHelper<const StringData*>::tl_unitEmitter = oldEmitter;
+  };
+
+  auto const remaining = RepoFile::remainingSizeOfUnit(unitSn, token);
+
+  size_t actualSize;
+  {
+    auto const size = std::min<size_t>(remaining, 64);
+    auto const data = std::make_unique<unsigned char[]>(size);
+    RepoFile::readRawFromUnit(unitSn, token, data.get(), size);
+    BlobDecoder decoder{data.get(), size};
+    actualSize = BlobEncoderHelper<const StringData*>::peekSize(decoder);
+    if (actualSize <= decoder.remaining()) {
+      const StringData* s;
+      decoder(s, makeStatic);
+      return s;
+    }
+  }
+
+  always_assert(actualSize <= remaining);
+  always_assert(actualSize <= std::numeric_limits<uint32_t>::max());
+
+  auto const data = std::make_unique<unsigned char[]>(actualSize);
+  RepoFile::readRawFromUnit(unitSn, token, data.get(), actualSize);
+  BlobDecoder decoder{data.get(), actualSize};
+  const StringData* s;
+  decoder(s, makeStatic);
+  decoder.assertDone();
+  return s;
 }
 
+const ArrayData* UnitEmitter::loadLitarrayFromRepo(int64_t unitSn,
+                                                   RepoFile::Token token,
+                                                   const StringData* filepath,
+                                                   bool makeStatic) {
+  assertx(RO::RepoAuthoritative);
+
+  MemoryManager::SuppressOOM so(*tl_heap);
+
+  auto const serialized = [&] {
+    auto const remaining = RepoFile::remainingSizeOfUnit(unitSn, token);
+
+    size_t actualSize;
+    {
+      auto const size = std::min<size_t>(remaining, 64);
+      auto const data = std::make_unique<unsigned char[]>(size);
+      RepoFile::readRawFromUnit(unitSn, token, data.get(), size);
+      BlobDecoder decoder{data.get(), size};
+      actualSize = decoder.peekStdStringSize();
+      if (actualSize <= decoder.remaining()) {
+        std::string serialized;
+        decoder(serialized);
+        return serialized;
+      }
+    }
+
+    always_assert(actualSize <= remaining);
+    always_assert(actualSize <= std::numeric_limits<uint32_t>::max());
+
+    auto const data = std::make_unique<unsigned char[]>(actualSize);
+    RepoFile::readRawFromUnit(unitSn, token, data.get(), actualSize);
+    BlobDecoder decoder{data.get(), actualSize};
+    std::string serialized;
+    decoder(serialized);
+    decoder.assertDone();
+    return serialized;
+  }();
+
+  auto v = [&] {
+    VariableUnserializer vu{
+      serialized.data(),
+      serialized.size(),
+      VariableUnserializer::Type::Internal
+    };
+    vu.setUnitFilename(filepath);
+    return vu.unserialize();
+  }();
+  assertx(v.isArray());
+  auto ad = v.detach().m_data.parr;
+  if (makeStatic) ArrayData::GetScalarArray(&ad);
+  return ad;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // FuncEmitters.
@@ -363,9 +501,8 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   }
 
   std::unique_ptr<Unit> u {
-    RuntimeOption::RepoAuthoritative && !RuntimeOption::SandboxMode &&
-      m_litstrs.empty() && m_arrays.empty() ?
-    new Unit : new UnitExtended
+    RuntimeOption::RepoAuthoritative && !RuntimeOption::SandboxMode ?
+      new Unit : new UnitExtended
   };
 
   if (m_fatalUnit) {
@@ -390,7 +527,21 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_ICE = m_ICE;
   u->m_deps = m_deps;
 
-  for (auto const& m : m_modules) u->m_modules.push_back(m);
+  u->m_modules.reserve(m_modules.size());
+  for (auto const& m : m_modules) u->m_modules.emplace_back(m);
+
+  u->m_litstrs.reserve(m_litstrs.size());
+  for (auto const& s : m_litstrs) {
+    assertx(s->isToken() || !s->ptr() || s->ptr()->isStatic());
+    assertx(IMPLIES(s->isToken(), RO::RepoAuthoritative));
+    u->m_litstrs.emplace_back(s);
+  }
+  u->m_arrays.reserve(m_arrays.size());
+  for (auto const& a : m_arrays) {
+    assertx(a->isToken() || a->ptr()->isStatic());
+    assertx(IMPLIES(a->isToken(), RO::RepoAuthoritative));
+    u->m_arrays.emplace_back(a);
+  }
 
   size_t ix = 0;
   for (auto& fe : m_fes) {
@@ -404,10 +555,6 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
 
   if (u->m_extended) {
     auto ux = u->getExtended();
-    for (auto s : m_litstrs) {
-      ux->m_namedInfo.emplace_back(LowStringPtr{s});
-    }
-    ux->m_arrays = m_arrays;
 
     // If prefetching is enabled, store the symbol refs in the Unit so
     // the prefetcher can claim them. Reset the atomic flag to mark
@@ -419,8 +566,6 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     } else {
       ux->m_symbolRefsPrefetched.test_and_set();
     }
-  } else {
-    assertx(!m_litstrs.size());
   }
 
   if (RuntimeOption::EvalDumpHhas > 1 ||
@@ -453,44 +598,22 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class SerDe>
-void UnitEmitter::serdeMetaData(SerDe& sd) {
-  sd(m_metaData)
-    (m_fileAttributes)
-    (m_moduleName)
-    (m_symbol_refs)
-    (m_bcSha1)
-    (m_fatalUnit)
-    (m_entryPointId)
-    (m_deps)
-    ;
-  if (m_fatalUnit) {
-    sd(m_fatalLoc)
-      (m_fatalOp)
-      (m_fatalMsg)
-      ;
-  }
-
-  if (RuntimeOption::EvalLoadFilepathFromUnitCache) {
-    assertx(!RO::RepoAuthoritative);
-    /* May be different than the unit origin: e.g. for hhas files. */
-    sd(m_filepath);
-  }
-
-  if constexpr (SerDe::deserializing) {
-    setEntryPointIdCalculated();
-  } else {
-    assertx(m_entryPointIdCalculated);
-  }
-}
-
 template <typename SerDe>
 void UnitEmitter::serde(SerDe& sd, bool lazy) {
-  MemoryManager::SuppressOOM so(*tl_heap);
+  assertx(IMPLIES(lazy, RO::RepoAuthoritative));
+  assertx(IMPLIES(!SerDe::deserializing, !lazy));
 
-  serdeMetaData(sd);
-  // These are not touched by serdeMetaData:
-  sd(m_ICE);
+  MemoryManager::SuppressOOM so{*tl_heap};
+
+  if (isASystemLib()) lazy = false;
+
+  // Have SerDe use this unit's string table for encoding or decoding.
+  assertx(!BlobEncoderHelper<const StringData*>::tl_unitEmitter);
+  BlobEncoderHelper<const StringData*>::tl_unitEmitter = this;
+  SCOPE_EXIT {
+    assertx(BlobEncoderHelper<const StringData*>::tl_unitEmitter == this);
+    BlobEncoderHelper<const StringData*>::tl_unitEmitter = nullptr;
+  };
 
   auto const seq = [&] (auto const& c, auto const& r, auto const& w) {
     if constexpr (SerDe::deserializing) {
@@ -503,53 +626,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
     }
   };
 
-  // Literal strings
-  seq(
-    m_litstrs,
-    [&] (auto& sd, size_t i) {
-      const StringData* s;
-      sd(s);
-      auto const id UNUSED = mergeUnitLitstr(s);
-      assertx(id == i);
-    },
-    [&] (auto& sd, const StringData* s) { sd(s); }
-  );
-
-  // Arrays
-  seq(
-    m_arrays,
-    [&] (auto& sd, size_t i) {
-      std::string key;
-      sd(key);
-
-      auto v = [&]{
-        VariableUnserializer vu{
-          key.data(),
-          key.size(),
-          VariableUnserializer::Type::Internal
-        };
-        vu.setUnitFilename(m_filepath);
-        return vu.unserialize();
-      }();
-      assertx(v.isArray());
-      auto ad = v.detach().m_data.parr;
-      ArrayData::GetScalarArray(&ad);
-      auto const id DEBUG_ONLY = mergeUnitArray(ad);
-      assertx(id == i);
-    },
-    [&] (auto& sd, const ArrayData* a) {
-      auto const str = [&]{
-        VariableSerializer vs{VariableSerializer::Type::Internal};
-        vs.setUnitFilename(m_filepath);
-        return
-          vs.serializeValue(VarNR(const_cast<ArrayData*>(a)), false)
-          .toCppString();
-      }();
-      sd(str);
-    }
-  );
-
-  auto serdeFuncEmitters = [&](auto& funcs, auto create) {
+  auto const serdeFuncEmitters = [&] (auto& funcs, auto create) {
     seq(
       funcs,
       [&] (auto& sd, size_t i) {
@@ -571,89 +648,219 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
     );
   };
 
-  serdeFuncEmitters(m_fes,
-    [&](auto& name, auto sn, auto i) {
-      auto fe = newFuncEmitter(name, sn);
-      assertx(fe->id() == i);
-      return fe;
-    });
-
-  auto serdeMethods = [&](PreClassEmitter* pce) {
-    serdeFuncEmitters(pce->methods(),
+  auto const serdeMethods = [&] (PreClassEmitter* pce) {
+    serdeFuncEmitters(
+      pce->methods(),
       [&](auto& name, auto sn, auto /* i */) {
         auto fe = newMethodEmitter(name, pce, sn);
         auto const added UNUSED = pce->addMethod(fe);
         assertx(added);
         return fe;
-      });
+      }
+    );
   };
 
-  // Pre-class emitters
-  seq(
-    m_pceVec,
-    [&] (auto& sd, size_t i) {
-      std::string name;
-      sd(name);
-      auto pce = newPreClassEmitter(name);
-      pce->serdeMetaData(sd);
-      assertx(pce->id() == i);
-      serdeMethods(pce);
-    },
-    [&] (auto& sd, PreClassEmitter* pce) {
-      sd(pce->name()->toCppString());
-      pce->serdeMetaData(sd);
-      serdeMethods(pce);
-    }
-  );
-
-  // Type aliases
-  seq(
-    m_typeAliases,
-    [&] (auto& sd, size_t i) {
-      std::string name;
-      sd(name);
-      auto te = newTypeAliasEmitter(name);
-      te->serdeMetaData(sd);
-      assertx(te->id() == i);
-    },
-    [&] (auto& sd, const std::unique_ptr<TypeAliasEmitter>& te) {
-      sd(te->name()->toCppString());
-      te->serdeMetaData(sd);
-    }
-  );
-
-  // Constants
-  seq(
-    m_constants,
-    [&] (auto& sd, size_t i) {
-      Constant cns;
-      sd(cns.name);
-      sd(cns);
-      if (type(cns.val) == KindOfUninit) {
-        cns.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Constant::get);
+  // Using the unit's string table adds an ordering dependency on
+  // serialization. When encoding, we need to encode the string table
+  // last. This is because encoding everything else may add to the
+  // string table. However, when decoding, we need to decode the
+  // string table first. This is because the rest of the decoding will
+  // query the string table. Use BlobEncoder/BlobDecoder's alternate
+  // mechanism for this. When encoding, the second lambda will be
+  // called last. When decoding, the second lambda will be called
+  // first.
+  sd.alternate(
+    [&] {
+      sd(m_metaData)
+        (m_fileAttributes)
+        (m_moduleName)
+        (m_symbol_refs)
+        (m_bcSha1)
+        (m_fatalUnit)
+        (m_entryPointId)
+        (m_deps)
+        (m_ICE);
+      if (m_fatalUnit) {
+        sd(m_fatalLoc)
+          (m_fatalOp)
+          (m_fatalMsg);
       }
-      auto const id UNUSED = addConstant(cns);
-      assertx(id == i);
-    },
-    [&] (auto& sd, const Constant& cns) {
-      sd(cns.name);
-      sd(cns);
-    }
-  );
 
-  // Modules
-  seq(
-    m_modules,
-    [&] (auto& sd, size_t i) {
-      Module m;
-      sd(m.name);
-      sd(m);
-      auto const id UNUSED = addModule(m);
-      assertx(id == i);
+      if (RO::EvalLoadFilepathFromUnitCache) {
+        assertx(!RO::RepoAuthoritative);
+        /* May be different than the unit origin: e.g. for hhas files. */
+        sd(m_filepath);
+      }
+
+      if constexpr (SerDe::deserializing) {
+        setEntryPointIdCalculated();
+      } else {
+        assertx(m_entryPointIdCalculated);
+      }
+
+      // Arrays
+      seq(
+        m_arrays,
+        [&] (auto& sd, size_t i) {
+          if (lazy && RO::RepoLitstrLazyLoad) {
+            assertx(m_arrays.size() == i);
+            m_arrays.emplace_back(ArrayOrToken::FromToken(sd.advanced()));
+            sd.skipStdString();
+          } else {
+            std::string key;
+            sd(key);
+
+            auto v = [&]{
+                VariableUnserializer vu{
+                  key.data(),
+                  key.size(),
+                  VariableUnserializer::Type::Internal
+                };
+                vu.setUnitFilename(m_filepath);
+                return vu.unserialize();
+              }();
+            assertx(v.isArray());
+            auto ad = v.detach().m_data.parr;
+            ArrayData::GetScalarArray(&ad);
+            auto const id DEBUG_ONLY = mergeArray(ad);
+            assertx(id == i);
+          }
+        },
+        [&] (auto& sd, auto const& wrapper) {
+          auto const str = [&]{
+            VariableSerializer vs{VariableSerializer::Type::Internal};
+            vs.setUnitFilename(m_filepath);
+            return
+              vs.serializeValue(
+                VarNR(const_cast<ArrayData*>(wrapper->ptr())),
+                false
+              ).toCppString();
+          }();
+          sd(str);
+        }
+      );
+
+      serdeFuncEmitters(
+        m_fes,
+        [&](auto& name, auto sn, auto i) {
+          auto fe = newFuncEmitter(name, sn);
+          assertx(fe->id() == i);
+          return fe;
+        }
+      );
+
+      // Pre-class emitters
+      seq(
+        m_pceVec,
+        [&] (auto& sd, size_t i) {
+          std::string name;
+          sd(name);
+          auto pce = newPreClassEmitter(name);
+          pce->serdeMetaData(sd);
+          assertx(pce->id() == i);
+          serdeMethods(pce);
+        },
+        [&] (auto& sd, PreClassEmitter* pce) {
+          sd(pce->name()->toCppString());
+          pce->serdeMetaData(sd);
+          serdeMethods(pce);
+        }
+      );
+
+      // Type aliases
+      seq(
+        m_typeAliases,
+        [&] (auto& sd, size_t i) {
+          std::string name;
+          sd(name);
+          auto te = newTypeAliasEmitter(name);
+          te->serdeMetaData(sd);
+          assertx(te->id() == i);
+        },
+        [&] (auto& sd, const std::unique_ptr<TypeAliasEmitter>& te) {
+          sd(te->name()->toCppString());
+          te->serdeMetaData(sd);
+        }
+      );
+
+      // Constants
+      seq(
+        m_constants,
+        [&] (auto& sd, size_t i) {
+          Constant cns;
+          sd(cns.name);
+          sd(cns);
+          if (type(cns.val) == KindOfUninit) {
+            cns.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Constant::get);
+          }
+          auto const id UNUSED = addConstant(cns);
+          assertx(id == i);
+        },
+        [&] (auto& sd, const Constant& cns) {
+          sd(cns.name);
+          sd(cns);
+        }
+      );
+
+      // Modules
+      seq(
+        m_modules,
+        [&] (auto& sd, size_t i) {
+          Module m;
+          sd(m.name);
+          sd(m);
+          auto const id UNUSED = addModule(m);
+          assertx(id == i);
+        },
+        [&] (auto& sd, const Module& m) {
+          sd(m.name);
+          sd(m);
+        }
+      );
     },
-    [&] (auto& sd, const Module& m) {
-      sd(m.name);
-      sd(m);
+    [&] {
+      // Don't access the string table here since we're populating it.
+      assertx(BlobEncoderHelper<const StringData*>::tl_unitEmitter == this);
+      BlobEncoderHelper<const StringData*>::tl_unitEmitter = nullptr;
+      SCOPE_EXIT {
+        assertx(!BlobEncoderHelper<const StringData*>::tl_unitEmitter);
+        BlobEncoderHelper<const StringData*>::tl_unitEmitter = this;
+      };
+
+      // Literal strings
+      seq(
+        m_litstrs,
+        [&] (auto& sd, size_t i) {
+          if (lazy && RO::RepoLitstrLazyLoad) {
+            assertx(m_litstrs.size() == i);
+            // When lazy loading, check if the string corresponds to
+            // an already existing static string. If so, put that in
+            // the table directly. This avoids redundant loads later
+            // from the repo at very little cost, especially for very
+            // common strings which are almost certainly going to be
+            // loaded already. If not, just record the offset for
+            // later loading (if necessary).
+            auto const offset = sd.advanced();
+            auto const sp =
+              BlobEncoderHelper<const StringData*>::asStringPiece(sd);
+            if (!sp.data()) {
+              m_litstrs.emplace_back(StringOrToken::FromPtr(nullptr));
+            } else if (sp.size() == 0) {
+              m_litstrs.emplace_back(StringOrToken::FromPtr(staticEmptyString()));
+            } else if (auto const sd = lookupStaticString(sp)) {
+              m_litstrs.emplace_back(StringOrToken::FromPtr(sd));
+            } else {
+              m_litstrs.emplace_back(StringOrToken::FromToken(offset));
+            }
+          } else {
+            const StringData* s;
+            sd(s);
+            auto const id UNUSED = mergeLitstr(s);
+            assertx(id == i);
+          }
+        },
+        [&] (auto& sd, auto const& wrapper) { sd(wrapper->ptr()); }
+      );
     }
   );
 }
@@ -664,8 +871,8 @@ template void UnitEmitter::serde<>(BlobEncoder&, bool);
 std::unique_ptr<UnitEmitter>
 createFatalUnit(const StringData* filename, const SHA1& sha1, FatalOp op,
                 std::string err, Location::Range loc) {
-  auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, Native::s_noNativeFuncs,
-                                          false);
+  auto ue =
+    std::make_unique<UnitEmitter>(sha1, SHA1{}, Native::s_noNativeFuncs);
   ue->m_filepath = filename;
 
   ue->m_fatalUnit = true;

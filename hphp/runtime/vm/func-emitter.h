@@ -127,7 +127,6 @@ struct FuncEmitter {
   int sn() const;
   Id id() const;
 
-  bool useGlobalIds() const;
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and parameters.
 

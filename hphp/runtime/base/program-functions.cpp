@@ -2053,9 +2053,7 @@ static int execute_program_impl(int argc, char** argv) {
     hphp_thread_init();
     always_assert(RO::RepoAuthoritative);
     init_repo_file();
-    LitstrTable::init();
-    LitarrayTable::init();
-    RepoFile::loadGlobalTables(RO::RepoLitstrLazyLoad);
+    RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
     return 0;
   }

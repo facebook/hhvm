@@ -103,6 +103,7 @@ HPHP::arrprov::(anonymous namespace)::tl_tag_override
 HPHP::tracing::detail::tl_active
 HPHP::jit::(anonymous namespace)::tl_ownedFunc
 HPHP::jit::tc::tl_is_jitting
+HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unitEmitter
 
 # Native Facts is not request-scoped.
 HPHP::Facts::(anonymous namespace)::t_adb

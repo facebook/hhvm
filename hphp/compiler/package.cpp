@@ -369,7 +369,7 @@ struct UnitEmitterWrapper {
         sd(filepath);
 
         auto ue = std::make_unique<UnitEmitter>(
-          sha1, SHA1{}, Native::s_noNativeFuncs, false
+          sha1, SHA1{}, Native::s_noNativeFuncs
         );
         ue->m_filepath = makeStaticString(filepath);
         ue->serde(sd, false);

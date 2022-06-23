@@ -120,7 +120,7 @@ template <typename T> struct BlobEncoderHelper {};
 
 struct BlobEncoder {
   static const bool deserializing = false;
-  explicit BlobEncoder(bool l) : m_useGlobalIds{l} {}
+  BlobEncoder() = default;
 
   void writeRaw(const char* ptr, size_t size) {
     auto const start = m_blob.size();
@@ -295,7 +295,17 @@ struct BlobEncoder {
     return *this;
   }
 
-  bool usesGlobalIds() const { return m_useGlobalIds; }
+  // Run f1 to encode data, then run f2 to encode more data. The data
+  // encoded by f1 is encoded with a size prefix (using withSize), so
+  // that it can be skipped. This is meant to be paired with
+  // BlobDecoder::alternate, where the data will be decoded in
+  // opposite order.
+  template <typename F1, typename F2>
+  BlobEncoder& alternate(F1 f1, F2 f2) {
+    withSize(std::move(f1));
+    f2();
+    return *this;
+  }
 
   size_t size() const { return m_blob.size(); }
   const void* data() const { return m_blob.data(); }
@@ -334,7 +344,6 @@ private:
   }
 
   std::vector<char> m_blob;
-  bool m_useGlobalIds;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -342,11 +351,10 @@ private:
 struct BlobDecoder {
   static const bool deserializing = true;
 
-  BlobDecoder(const void* vp, size_t sz, bool l)
+  BlobDecoder(const void* vp, size_t sz)
     : m_start{static_cast<const unsigned char*>(vp)}
     , m_p{m_start}
     , m_last{m_p + sz}
-    , m_useGlobalIds{l}
   {}
 
   void assertDone() {
@@ -354,9 +362,15 @@ struct BlobDecoder {
   }
 
   const unsigned char* data() const { return m_p; }
+
   void advance(size_t s) {
     assertx(remaining() >= s);
     m_p += s;
+  }
+
+  void retreat(size_t s) {
+    assertx(advanced() >= s);
+    m_p -= s;
   }
 
   size_t remaining() const {
@@ -598,6 +612,32 @@ struct BlobDecoder {
     return size + sizeof(uint64_t);
   }
 
+  // Decode data encoded by BlobEncoder::alternate. First the data
+  // encoded by f2 is decoded (this involves skipping over the f1
+  // data), then the data cursor is rewound to point at the data
+  // encoded by f1. Once decoded, the data cursor is then set to point
+  // to after f2. The end result is that the data blocks are decoded
+  // in the opposite order as they were encoded.
+  template <typename F1, typename F2>
+  BlobDecoder& alternate(F1 f1, F2 f2) {
+    auto const start = advanced();
+    // Skip over f1
+    skipWithSize();
+    // Decode f2
+    f2();
+    auto const end = advanced();
+    assertx(end >= start);
+    // Move back to f1
+    retreat(end - start);
+    // Decode f1
+    withSize(std::move(f1));
+    auto const middle = advanced();
+    assertx(end >= middle);
+    // Advance past f2
+    advance(end - middle);
+    return *this;
+  }
+
   /*
    * Skip over an encoded std::string
    */
@@ -609,9 +649,6 @@ struct BlobDecoder {
     advance(sz);
     return *this;
   }
-
-  bool usesGlobalIds() const { return m_useGlobalIds; }
-  void setUseGlobalIds(bool b) { m_useGlobalIds = b; }
 
 private:
   template<typename Cont>
@@ -655,7 +692,6 @@ private:
   const unsigned char* m_start;
   const unsigned char* m_p;
   const unsigned char* const m_last;
-  bool m_useGlobalIds;
 };
 
 //////////////////////////////////////////////////////////////////////

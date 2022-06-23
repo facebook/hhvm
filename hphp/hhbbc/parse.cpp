@@ -34,7 +34,6 @@
 #include <folly/ScopeGuard.h>
 #include <folly/sorted_vector_types.h>
 
-#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/vm/func-emitter.h"

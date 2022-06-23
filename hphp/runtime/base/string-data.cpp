@@ -868,9 +868,11 @@ StringData::substr(int start, int length /* = StringData::MaxSize */) {
 // Serialization
 
 __thread UnitEmitter* BlobEncoderHelper<const StringData*>::tl_unitEmitter{nullptr};
+__thread Unit* BlobEncoderHelper<const StringData*>::tl_unit{nullptr};
 
 void BlobEncoderHelper<const StringData*>::serde(BlobEncoder& encoder,
                                                  const StringData* sd) {
+  assertx(!tl_unit);
   if (auto const ue = tl_unitEmitter) {
     Id id = ue->mergeLitstr(sd);
     encoder(id);
@@ -893,6 +895,11 @@ void BlobEncoderHelper<const StringData*>::serde(BlobDecoder& decoder,
     Id id;
     decoder(id);
     sd = ue->lookupLitstr(id);
+    return;
+  } else if (auto const u = tl_unit) {
+    Id id;
+    decoder(id);
+    sd = u->lookupLitstrId(id);
     return;
   }
 

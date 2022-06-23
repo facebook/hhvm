@@ -85,7 +85,6 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/as-shared.h"

@@ -232,7 +232,6 @@ constexpr uint16_t kCurrentVersion = 1;
 constexpr size_t kGlobalDataSizeLimit        = 1ull << 28;
 constexpr size_t kUnitEmittersIndexSizeLimit = 1ull << 32;
 constexpr size_t kAutoloadMapSizeLimit       = 1ull << 32;
-constexpr size_t kArrayTypesSizeLimit        = 1ull << 28;
 constexpr size_t kUnitEmitterSizeLimit       = 1ull << 33;
 
 // Blob of data containing the sizes of the various sections. This is
@@ -244,21 +243,18 @@ struct SizeHeader {
   uint64_t unitEmittersIndexSize = 0;
   uint64_t globalDataSize        = 0;
   uint64_t autoloadMapSize       = 0;
-  uint64_t arrayTypesSize        = 0;
 
   constexpr static size_t kFileSize =
     sizeof(unitEmittersSize) +
     sizeof(unitEmittersIndexSize) +
     sizeof(globalDataSize) +
-    sizeof(autoloadMapSize) +
-    sizeof(arrayTypesSize);
+    sizeof(autoloadMapSize);
 
   void write(const FD& fd) const {
     writeInt(fd, unitEmittersSize);
     writeInt(fd, unitEmittersIndexSize);
     writeInt(fd, globalDataSize);
     writeInt(fd, autoloadMapSize);
-    writeInt(fd, arrayTypesSize);
   }
 
   void read(const FD& fd) {
@@ -266,7 +262,6 @@ struct SizeHeader {
     unitEmittersIndexSize = readInt<decltype(unitEmittersIndexSize)>(fd);
     globalDataSize        = readInt<decltype(globalDataSize)>(fd);
     autoloadMapSize       = readInt<decltype(autoloadMapSize)>(fd);
-    arrayTypesSize        = readInt<decltype(arrayTypesSize)>(fd);
   }
 };
 
@@ -386,15 +381,6 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
     always_assert(m_data->sizes.autoloadMapSize <= kAutoloadMapSizeLimit);
   }
 
-  // Global array type table
-  {
-    BlobEncoder encoder;
-    globalArrayTypeTable().serde(encoder);
-    m_data->fd.write(encoder.data(), encoder.size());
-    m_data->sizes.arrayTypesSize = encoder.size();
-    always_assert(m_data->sizes.arrayTypesSize <= kArrayTypesSizeLimit);
-  }
-
   // All the sizes are updated, so now go patch the size table.
   m_data->fd.seek(m_data->sizeHeaderOffset);
   m_data->sizes.write(m_data->fd);
@@ -460,7 +446,6 @@ struct RepoFileData {
   uint64_t unitEmittersIndexOffset = 0;
   uint64_t globalDataOffset = 0;
   uint64_t autoloadMapOffset = 0;
-  uint64_t arrayTypesOffset = 0;
 
   RepoGlobalData globalData;
 
@@ -619,10 +604,6 @@ void RepoFile::init(const std::string& path) {
     data.autoloadMapOffset = offset;
     offset += data.sizes.autoloadMapSize;
 
-    check("array-types", data.sizes.arrayTypesSize, kArrayTypesSizeLimit);
-    data.arrayTypesOffset = offset;
-    offset += data.sizes.arrayTypesSize;
-
     always_assert_flog(
       offset == data.fileSize,
       "Corrupted size table for {}: "
@@ -737,18 +718,6 @@ void RepoFile::loadGlobalTables() {
     blob.decoder.assertDone();
     setSize(std::string{}, data.sizes.unitEmittersSize);
     data.loadedUnitEmitterIndices.store(true);
-  }
-
-  // Global array type table
-  {
-    assertx(globalArrayTypeTable().empty());
-    auto blob = loadBlob(
-      data.fd,
-      data.arrayTypesOffset,
-      data.sizes.arrayTypesSize
-    );
-    globalArrayTypeTable().serde(blob.decoder);
-    blob.decoder.assertDone();
   }
 
   // Repo autoload map

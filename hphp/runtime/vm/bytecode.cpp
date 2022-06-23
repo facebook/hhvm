@@ -56,7 +56,7 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"

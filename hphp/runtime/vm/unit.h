@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/req-bitset.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/containers.h"
@@ -115,6 +115,8 @@ using SymbolRefs =
  * Table specializations.
  */
 using FuncTable      = VMCompactVector<const Func*>;
+
+using RATArrayOrToken = TokenOrPtr<const RepoAuthType::Array>;
 
 /*
  * Sum of all Unit::m_bclen
@@ -372,6 +374,14 @@ public:
   const ArrayData* lookupArrayId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // RAT Arrays.
+
+  /*
+   * Look up a RAT array by ID.
+   */
+  const RepoAuthType::Array* lookupRATArray(Id id) const;
+
+  /////////////////////////////////////////////////////////////////////////////
   // PreClasses.
 
   PreClass* lookupPreClassId(Id id) const;
@@ -544,6 +554,7 @@ private:
 
   mutable VMCompactVector<UnsafeLockFreePtrWrapper<StringOrToken>> m_litstrs;
   mutable VMCompactVector<UnsafeLockFreePtrWrapper<ArrayOrToken>> m_arrays;
+  mutable VMCompactVector<UnsafeLockFreePtrWrapper<RATArrayOrToken>> m_rats;
 
   Id m_entryPointId{kInvalidId};
 

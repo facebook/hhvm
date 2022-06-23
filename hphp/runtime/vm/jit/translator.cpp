@@ -34,7 +34,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/unit-cache.h"

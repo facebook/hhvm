@@ -287,6 +287,37 @@ const ArrayData* Unit::lookupArrayId(Id id) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// RAT arrays.
+
+const RepoAuthType::Array* Unit::lookupRATArray(Id id) const {
+  assertx(id >= 0 && id < m_rats.size());
+  auto& elem = m_rats[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    return wrapper.ptr();
+  }
+  auto lock = elem.lock_for_update();
+  wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    return wrapper.ptr();
+  }
+
+  assertx(!BlobEncoderHelper<const StringData*>::tl_unit);
+  BlobEncoderHelper<const StringData*>::tl_unit = const_cast<Unit*>(this);
+  SCOPE_EXIT {
+    assertx(BlobEncoderHelper<const StringData*>::tl_unit == this);
+    BlobEncoderHelper<const StringData*>::tl_unit = nullptr;
+  };
+
+  auto const array = UnitEmitter::loadRATArrayFromRepo(m_sn, wrapper.token());
+  assertx(array);
+  lock.update(RATArrayOrToken::FromPtr(array));
+  return array;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Merge.
 
 namespace {

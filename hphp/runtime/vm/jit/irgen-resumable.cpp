@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/resumable.h"

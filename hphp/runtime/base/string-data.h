@@ -39,6 +39,7 @@ struct String;
 struct APCHandle;
 struct NamedEntity;
 struct UnitEmitter;
+struct Unit;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -626,6 +627,9 @@ struct BlobEncoderHelper<const StringData*> {
 
   // If set, will utilize the UnitEmitter's string table.
   static __thread UnitEmitter* tl_unitEmitter;
+  // Likewise, but only for lazy loading (so only deserializing
+  // supported).
+  static __thread Unit* tl_unit;
 };
 
 //////////////////////////////////////////////////////////////////////

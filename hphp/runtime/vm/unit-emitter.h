@@ -23,9 +23,9 @@
 #include <vector>
 
 #include "hphp/runtime/base/location.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/decl-dep.h"
 #include "hphp/runtime/vm/module.h"
@@ -110,6 +110,7 @@ struct UnitEmitter {
    */
   const StringData* lookupLitstr(Id id) const;
   const ArrayData* lookupArray(Id id) const;
+  const RepoAuthType::Array* lookupRATArray(Id id) const;
 
   /*
    * Like the above lookup functions, but create ref-counted copies,
@@ -126,12 +127,17 @@ struct UnitEmitter {
   /*
    * Merge a literal string into the Unit.
    */
-  Id mergeLitstr(const StringData* litstr);
+  Id mergeLitstr(const StringData*);
 
   /*
    * Merge a scalar array into the Unit.
    */
-  Id mergeArray(const ArrayData* a);
+  Id mergeArray(const ArrayData*);
+
+  /*
+   * Merge a RAT array into the Unit.
+   */
+  Id mergeRATArray(const RepoAuthType::Array*);
 
   /*
    * Load literal array or strings from the repo. The data is loaded
@@ -146,6 +152,8 @@ struct UnitEmitter {
   static const StringData* loadLitstrFromRepo(int64_t unitSn,
                                               RepoFile::Token token,
                                               bool makeStatic);
+  static const RepoAuthType::Array* loadRATArrayFromRepo(int64_t unitSn,
+                                                         RepoFile::Token token);
 
   /////////////////////////////////////////////////////////////////////////////
   // FuncEmitters.
@@ -308,6 +316,12 @@ private:
    */
   hphp_fast_map<const ArrayData*, Id> m_array2id;
   mutable std::vector<UnsafeLockFreePtrWrapper<ArrayOrToken>> m_arrays;
+
+  /*
+   * Repo-auth-type arrays.
+   */
+  hphp_fast_map<const RepoAuthType::Array*, Id> m_rat2id;
+  mutable std::vector<UnsafeLockFreePtrWrapper<RATArrayOrToken>> m_rats;
 
   /*
    * Type alias table.

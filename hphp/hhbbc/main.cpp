@@ -362,7 +362,6 @@ void compile_repo() {
   RepoAutoloadMapBuilder autoloadMapBuilder;
   UnitEmitterQueue ueq{&autoloadMapBuilder};
 
-  std::unique_ptr<ArrayTypeTable::Builder> arrTable;
   std::exception_ptr wp_thread_ex = nullptr;
   VMWorker wp_thread(
     [&] {
@@ -370,7 +369,7 @@ void compile_repo() {
       Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
       try {
         StructuredLogEntry sample;
-        whole_program(std::move(program), ueq, arrTable, std::move(sample));
+        whole_program(std::move(program), ueq, std::move(sample));
       } catch (...) {
         wp_thread_ex = std::current_exception();
         ueq.finish();
@@ -390,7 +389,6 @@ void compile_repo() {
 
     if (!wp_thread_ex) {
       trace_time timer2("finalizing repo");
-      if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
       repoBuilder.finish(
         get_global_data(),
         autoloadMapBuilder

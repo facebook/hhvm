@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/double-to-int64.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-structure-helpers.h"

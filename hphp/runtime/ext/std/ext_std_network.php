@@ -56,14 +56,14 @@ function define_syslog_variables(): void {
 /**
  * Alias of checkdnsrr()
  */
-function dns_check_record(mixed $host, mixed $type = 'MX')[defaults]: bool {
+function dns_check_record(string $host, string $type = 'MX')[defaults]: bool {
   return checkdnsrr($host, $type);
 }
 
 /**
  * Alias of getmxrr
  */
-function dns_get_mx(mixed $host, inout mixed $mxhosts, inout mixed $weight)[defaults] {
+function dns_get_mx(string $host, inout mixed $mxhosts, inout mixed $weight)[defaults]: bool {
   $ret = getmxrr($host, inout $mxhosts, inout $weight);
   return $ret;
 }
@@ -557,15 +557,15 @@ function setrawcookie(string $name,
                       bool $secure = false,
                       bool $httponly = false): bool;
 
-function socket_get_status(mixed $stream): mixed {
+function socket_get_status(resource $stream): mixed {
   return stream_get_meta_data($stream);
 }
 
-function socket_set_blocking(mixed $stream, mixed $mode): bool {
+function socket_set_blocking(resource $stream, bool $mode): bool {
   return stream_set_blocking($stream, $mode);
 }
 
-function socket_set_timeout(mixed $stream, mixed $secs, mixed $msecs = 0): bool {
+function socket_set_timeout(resource $stream, int $secs, int $msecs = 0): bool {
   return stream_set_timeout($stream, $secs, $msecs);
 }
 

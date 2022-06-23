@@ -2,8 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
 use crate::compile::SingleFileOpts;
+use crate::regex;
 use clap::Parser;
 use compile::Profile;
 use itertools::Itertools;
@@ -13,6 +13,7 @@ use ocamlrep::rc::RcOc;
 use oxidized::relative_path::{Prefix, RelativePath};
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
+use regex::Regex;
 use std::{
     cell::RefCell,
     collections::HashMap,
@@ -66,6 +67,10 @@ pub struct Opts {
     /// The input Hack files or directories to process.
     #[clap(name = "PATH")]
     paths: Vec<PathBuf>,
+
+    /// Print full error messages
+    #[clap(short = 'l')]
+    long_msg: bool,
 }
 
 fn verify_assemble_file(
@@ -87,12 +92,18 @@ fn verify_assemble_file(
         .map_err(|err| VerifyError::PrintError(err.to_string()))?;
 
     let (post_unit, _) = crate::assemble::assemble_from_bytes(&alloc, &output)
-        .map_err(|err| VerifyError::AssembleError(err.to_string()))?;
+        .map_err(|err| VerifyError::AssembleError(truncate_pos_err(err.to_string())))?;
 
     crate::cmp_unit::cmp_hack_c_unit(&pre_unit, &post_unit)
         .map_err(VerifyError::UnitMismatchError)?;
 
     Ok(())
+}
+
+/// Truncates "Pos { line: 5, col: 2}" to "Pos ...", because in verify tool this isn't important
+fn truncate_pos_err(err_str: String) -> String {
+    let pos_reg = regex!(r"Pos \{ line: \d+, col: \d+ \}");
+    pos_reg.replace(err_str.as_str(), "Pos {...}").to_string()
 }
 
 fn catch_panics<F>(
@@ -101,6 +112,7 @@ fn catch_panics<F>(
     compile_opts: &SingleFileOpts,
     profile: &mut Profile,
     action: F,
+    long_msg: bool,
 ) -> Result<()>
 where
     F: FnOnce(&Path, Vec<u8>, &SingleFileOpts, &mut Profile) -> Result<()> + std::panic::UnwindSafe,
@@ -121,9 +133,9 @@ where
             } else {
                 panic_message::panic_message(&err).to_string()
             };
-
+            let msg = truncate_pos_err(msg);
             let mut msg = msg.replace('\n', "\\n");
-            if msg.len() > 80 {
+            if !long_msg && msg.len() > 80 {
                 msg.truncate(77);
                 msg.push_str("...");
             }
@@ -250,7 +262,10 @@ fn report_final(wall: Duration, count: usize, total: usize, profile: ProfileAcc)
         println!("Failed to complete");
     }
 
+    // The # of files that failed are sum of error_histogram's values' usize field
+
     if !profile.error_histogram.is_empty() {
+        println!("{}/{} files passed", total - profile.num_failed(), total);
         println!("Failure histogram:");
         for (k, v) in profile
             .error_histogram
@@ -301,9 +316,15 @@ impl ProfileAcc {
             .0 += 1;
         self
     }
+
+    fn num_failed(&self) -> usize {
+        self.error_histogram
+            .values()
+            .fold(0, |acc, (val, _)| acc + val)
+    }
 }
 
-fn verify_one_file(path: &Path, compile_opts: &SingleFileOpts) -> ProfileAcc {
+fn verify_one_file(path: &Path, compile_opts: &SingleFileOpts, long_msg: bool) -> ProfileAcc {
     let acc = ProfileAcc::default();
 
     let content = match fs::read(path) {
@@ -327,6 +348,7 @@ fn verify_one_file(path: &Path, compile_opts: &SingleFileOpts) -> ProfileAcc {
             compile_opts,
             &mut Default::default(),
             verify_assemble_file,
+            long_msg,
         );
         if let Err(err) = result {
             return acc.record_error(err, &path);
@@ -336,7 +358,12 @@ fn verify_one_file(path: &Path, compile_opts: &SingleFileOpts) -> ProfileAcc {
     acc
 }
 
-fn verify_files(files: &[PathBuf], num_threads: usize, compile_opts: &SingleFileOpts) {
+fn verify_files(
+    files: &[PathBuf],
+    num_threads: usize,
+    compile_opts: &SingleFileOpts,
+    long_msg: bool,
+) {
     let total = files.len();
     let count = Arc::new(AtomicUsize::new(0));
     let finished = Arc::new(AtomicBool::new(false));
@@ -356,7 +383,7 @@ fn verify_files(files: &[PathBuf], num_threads: usize, compile_opts: &SingleFile
     let verify_one_file = |acc: ProfileAcc, f: &PathBuf| -> ProfileAcc {
         count.fetch_add(1, Ordering::Release);
 
-        let profile = verify_one_file(f, compile_opts);
+        let profile = verify_one_file(f, compile_opts, long_msg);
         acc.fold(profile)
     };
 
@@ -407,7 +434,12 @@ pub fn run(opts: Opts) -> Result<(), anyhow::Error> {
         });
     }));
 
-    verify_files(&files, opts.num_threads, &opts.single_file_opts);
+    verify_files(
+        &files,
+        opts.num_threads,
+        &opts.single_file_opts,
+        opts.long_msg,
+    );
 
     std::panic::set_hook(old_hook);
 

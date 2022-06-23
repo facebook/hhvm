@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::regex;
 use crate::FileOpts;
 use anyhow::{anyhow, bail, Result};
 use bstr::ByteSlice;
@@ -24,15 +25,6 @@ use std::{
     str::FromStr,
     sync::Mutex,
 };
-
-/// Took this from https://docs.rs/once_cell/latest/once_cell/index.html#lazily-compiled-regex
-/// with this macro we can avoid re-initializing the label bytes regex each `assemble_instr` and `assemble_label`
-macro_rules! regex {
-    ($re:literal $(,)?) => {{
-        static RE: once_cell::sync::OnceCell<Regex> = once_cell::sync::OnceCell::new();
-        RE.get_or_init(|| Regex::new($re).unwrap())
-    }};
-}
 
 pub fn run(mut opts: Opts) -> Result<()> {
     let writer: SyncWrite = match &opts.output_file {

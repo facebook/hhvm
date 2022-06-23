@@ -232,7 +232,9 @@ fn main() -> Result<()> {
     let mut opts = Opts::parse();
 
     let builder = rayon::ThreadPoolBuilder::new().num_threads(opts.num_threads);
-    let builder = if matches!(&opts.command, Some(Command::Crc(_))) {
+    let builder = if matches!(&opts.command, Some(Command::Crc(_)))
+        || matches!(&opts.command, Some(Command::Verify(_)))
+    {
         builder.stack_size(32 * 1024 * 1024)
     } else {
         builder

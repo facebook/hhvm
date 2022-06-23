@@ -9,6 +9,16 @@ use std::{
     path::{Path, PathBuf},
 };
 
+/// Took this from https://docs.rs/once_cell/latest/once_cell/index.html#lazily-compiled-regex
+/// with this macro we can avoid re-initializing regexes, which are expensive to do
+#[macro_export]
+macro_rules! regex {
+    ($re:literal $(,)?) => {{
+        static RE: once_cell::sync::OnceCell<Regex> = once_cell::sync::OnceCell::new();
+        RE.get_or_init(|| Regex::new($re).unwrap())
+    }};
+}
+
 pub(crate) fn collect_files(
     paths: &[PathBuf],
     limit: Option<usize>,

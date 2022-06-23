@@ -2,11 +2,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 mod assemble;
+mod cmp_unit;
 mod compile;
 mod crc;
 mod expr_trees;
 mod facts;
 mod parse;
+mod util;
+mod verify;
 
 use ::compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
 use anyhow::Result;
@@ -107,6 +110,9 @@ enum Command {
 
     /// Parse many files whose filenames are read from stdin, discard parser output.
     ParseBench(parse::BenchOpts),
+
+    /// Compile Hack source files or directories and check for compilation errors.
+    Verify(verify::Opts),
 }
 
 /// Which command are we running? Using bool opts for compatibility with test harnesses.
@@ -238,6 +244,7 @@ fn main() -> Result<()> {
         Some(Command::Crc(opts)) => crc::run(opts),
         Some(Command::Parse(parse_opts)) => parse::run(parse_opts),
         Some(Command::ParseBench(bench_opts)) => parse::run_bench_command(bench_opts),
+        Some(Command::Verify(opts)) => verify::run(opts),
 
         // Expr trees
         Some(Command::DesugarExprTrees(et_opts)) => expr_trees::desugar_expr_trees(&opts, et_opts),

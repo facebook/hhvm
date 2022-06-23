@@ -22,10 +22,12 @@ env_logger = "0.7"
 escaper = { path = "../../../utils/escaper" }
 facts_rust = { path = "../../../facts/cargo/facts_rust" }
 ffi = { path = "../../../utils/ffi" }
+hash = { path = "../../../utils/hash" }
 hdrhistogram = "6.3"
 hhbc = { path = "../../hhbc/cargo/hhbc" }
 hhvm_options = { path = "../../../utils/hhvm_options" }
 hhvm_types_ffi = { path = "../../hhvm_cxx/hhvm_types" }
+itertools = "0.10.3"
 jwalk = "0.6"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 multifile_rust = { path = "../../../utils/multifile" }
@@ -33,6 +35,7 @@ ocamlrep = { path = "../../../ocamlrep" }
 options = { path = "../../compile/cargo/options" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
+panic-message = "0.3"
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 positioned_by_ref_parser = { path = "../../../parser/api/cargo/positioned_by_ref_parser" }
 positioned_full_trivia_parser = { path = "../../../parser/api/cargo/positioned_full_trivia_parser" }
@@ -42,3 +45,4 @@ regex = "1.5.4"
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 strum = "0.21"
 strum_macros = "0.21"
+thiserror = "1.0.30"

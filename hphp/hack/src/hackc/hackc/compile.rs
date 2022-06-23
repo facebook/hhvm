@@ -107,6 +107,26 @@ fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
     results.into_iter().collect()
 }
 
+pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> NativeEnv<'_> {
+    let mut flags = EnvFlags::empty();
+    flags.set(
+        EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
+        opts.disable_toplevel_elaboration,
+    );
+    let hhbc_flags = HHBCFlags::EMIT_CLS_METH_POINTERS
+        | HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS
+        | HHBCFlags::FOLD_LAZY_CLASS_KEYS
+        | HHBCFlags::LOG_EXTERN_COMPILER_PERF;
+    let parser_flags = ParserFlags::ENABLE_ENUM_CLASSES;
+    NativeEnv {
+        filepath,
+        hhbc_flags,
+        parser_flags,
+        flags,
+        ..Default::default()
+    }
+}
+
 pub(crate) fn process_single_file(
     opts: &SingleFileOpts,
     filepath: PathBuf,
@@ -118,23 +138,7 @@ pub(crate) fn process_single_file(
     }
     let filepath = RelativePath::make(Prefix::Dummy, filepath);
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
-    let mut flags = EnvFlags::empty();
-    flags.set(
-        EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
-        opts.disable_toplevel_elaboration,
-    );
-    let hhbc_flags = HHBCFlags::EMIT_CLS_METH_POINTERS
-        | HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS
-        | HHBCFlags::FOLD_LAZY_CLASS_KEYS
-        | HHBCFlags::LOG_EXTERN_COMPILER_PERF;
-    let parser_flags = ParserFlags::ENABLE_ENUM_CLASSES;
-    let env = NativeEnv {
-        filepath,
-        hhbc_flags,
-        parser_flags,
-        flags,
-        ..Default::default()
-    };
+    let env = native_env(filepath, opts);
     let arena = bumpalo::Bump::new();
     let mut output = Vec::new();
     compile::from_text(&arena, &mut output, source_text, &env, None, profile)?;

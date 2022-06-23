@@ -1372,10 +1372,12 @@ dependencies = [
  "escaper",
  "facts_rust",
  "ffi",
+ "hash",
  "hdrhistogram",
  "hhbc",
  "hhvm_options",
  "hhvm_types_ffi",
+ "itertools 0.10.3",
  "jwalk",
  "log",
  "multifile_rust",
@@ -1383,6 +1385,7 @@ dependencies = [
  "options",
  "oxidized",
  "oxidized_by_ref",
+ "panic-message",
  "parser_core_types",
  "positioned_by_ref_parser",
  "positioned_full_trivia_parser",
@@ -1392,6 +1395,7 @@ dependencies = [
  "serde_json",
  "strum",
  "strum_macros",
+ "thiserror",
 ]
 
 [[package]]
@@ -2330,6 +2334,12 @@ dependencies = [
  "parser_core_types",
  "smart_constructors",
 ]
+
+[[package]]
+name = "panic-message"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "384e52fd8fbd4cbe3c317e8216260c21a0f9134de108cea8a4dd4e7e152c472d"
 
 [[package]]
 name = "parking_lot"

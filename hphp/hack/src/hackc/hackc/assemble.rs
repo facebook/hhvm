@@ -80,7 +80,7 @@ pub fn assemble<'arena>(
 }
 
 /// Assembles the hhas represented by the slice of bytes input
-fn assemble_from_bytes<'arena>(
+pub fn assemble_from_bytes<'arena>(
     alloc: &'arena Bump,
     s: &[u8],
 ) -> Result<(hhbc::hackc_unit::HackCUnit<'arena>, PathBuf)> {

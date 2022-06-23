@@ -417,7 +417,7 @@ pub fn from_text<'decl>(
     source_text: SourceText<'_>,
     native_env: &NativeEnv<'_>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
-    mut profile: &mut Profile,
+    profile: &mut Profile,
 ) -> Result<()> {
     let mut emitter = create_emitter(native_env.flags, native_env, decl_provider, alloc);
     let unit = emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)?;

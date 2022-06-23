@@ -1382,6 +1382,7 @@ dependencies = [
  "log",
  "multifile_rust",
  "ocamlrep",
+ "once_cell",
  "options",
  "oxidized",
  "oxidized_by_ref",

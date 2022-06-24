@@ -17,6 +17,7 @@ function main(): void {
 
   $ts = type_structure($foo, 'FooBool');
   var_dump($ts['kind']);
+  var_dump($ts['nullable'] ?? 'is not nullable');
 
   $ts = type_structure($foo, 'FooMixed');
   var_dump($ts['kind']);

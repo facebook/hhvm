@@ -63,6 +63,10 @@ SSATmp* emitProfiledGet(IRGS& env, SSATmp* arr, SSATmp* key,
       auto const elem = gen(env, StructDictElemAddr, arr, key, slot, arr);
       return gen(env, LdMem, TCell, elem);
     }
+    if (arr->type().arrSpec().is_type_structure()) {
+      if (key->isA(TInt)) return cns(env, TUninit);
+      return gen(env, LdTypeStructureVal, taken, arr, key);
+    }
     auto const data = BespokeGetData { BespokeGetData::KeyState::Unknown };
     return gen(env, BespokeGet, data, arr, key);
   }();

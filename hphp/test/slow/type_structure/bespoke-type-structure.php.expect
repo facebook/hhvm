@@ -1,4 +1,5 @@
 int(14)
 int(2)
+string(15) "is not nullable"
 int(9)
 int(1)

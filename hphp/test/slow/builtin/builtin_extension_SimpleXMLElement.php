@@ -14,7 +14,7 @@ function basicXML() {
 }
 
 function testIteration() {
-  $s = new SimpleXMLElement(basicXMl());
+  $s = new SimpleXMLElement(basicXML());
   $i = 1;
   foreach ($s as $e) {
     echo 'Of basic XML structure the ';
@@ -23,7 +23,7 @@ function testIteration() {
 }
 
 function testCanBeWrappedByIteratorIterator() {
-  $i = new IteratorIterator(new SimpleXMLElement(basicXMl()));
+  $i = new IteratorIterator(new SimpleXMLElement(basicXML()));
   echo "Basic XML has " . iterator_count($i) . " root children\n";
 }
 

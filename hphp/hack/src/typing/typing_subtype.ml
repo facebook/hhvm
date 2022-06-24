@@ -519,6 +519,10 @@ let mk_issubtype_prop ~coerce env ty1 ty2 =
   match ty2 with
   | LoclType ty2 ->
     let (coerce, ty2) =
+      (* If we are in dynamic-aware subtyping mode, that fact will be lost when ty2
+         ends up on the upper bound of a type variable. Here we find if ty2 contains
+         dynamic and replace it with supportdyn<mixed> which is equivalent, but does not
+         require dynamic-aware subtyping mode to be a supertype of types that support dynamic. *)
       match (coerce, Typing_utils.try_strip_dynamic env ty2) with
       | (Some TL.CoerceToDynamic, Some non_dyn_ty) ->
         let r = get_reason ty2 in

@@ -714,6 +714,8 @@ let rec is_dynamic_or_intersection env ty =
   | _ -> false
 
 let rec try_strip_dynamic_from_union env r tyl =
+  (* search through tyl, and any unions directly-recursively contained in tyl,
+     and return those that satisfy f, and those that do not, separately.*)
   let rec partition_union tyl ~f =
     match tyl with
     | [] -> ([], [])

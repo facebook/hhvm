@@ -2,4 +2,16 @@ int(14)
 int(2)
 string(15) "is not nullable"
 int(9)
+bool(true)
+string(6) "FooInt"
+int(1)
+bool(true)
+string(15) "FooTypevarTypes"
+dict(1) {
+  ["F"]=>
+  dict(1) {
+    ["kind"]=>
+    int(1)
+  }
+}
 int(1)

@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -574,6 +575,19 @@ Type structDictReturn(const IRInstruction* inst) {
   return TDict.narrowToLayout(layout);
 }
 
+Type typeStructElemReturn(const IRInstruction* inst) {
+  assertx(inst->is(LdTypeStructureValCns));
+  auto const key = inst->extra<KeyedData>()->key;
+  auto const dt = bespoke::TypeStructure::getKindOfField(key);
+  if (dt == KindOfBoolean) return TBool;
+  if (dt == KindOfInt64) return TInt;
+  if (dt == KindOfVec) return TVec|TNullptr;
+  if (dt == KindOfDict) return TDict|TNullptr;
+  if (isStringType(dt)) return TStr|TNullptr;
+  assertx(dt == KindOfUninit);
+  return TNullptr;
+}
+
 Type arrLikeSetReturn(const IRInstruction* inst) {
   assertx(inst->is(BespokeSet, DictSet));
   auto const arr = inst->src(0)->type();
@@ -784,6 +798,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DArrLikeUnset     return arrLikeUnsetReturn(inst);
 #define DArrLikeAppend    return arrLikeAppendReturn(inst);
 #define DStructDict     return structDictReturn(inst);
+#define DTypeStructElem return typeStructElemReturn(inst);
 #define DCol            return newColReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);
@@ -833,6 +848,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DLastKey
 #undef DLoggingArrLike
 #undef DStructDict
+#undef DTypeStructElem
 #undef DCol
 #undef DMulti
 #undef DSetElem

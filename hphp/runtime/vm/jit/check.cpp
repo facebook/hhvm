@@ -453,6 +453,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     }
     return types;
   };
+  auto const addNullptr = [&] (std::vector<Type> types) {
+    for (auto& type : types) type = type|TNullptr;
+    return types;
+  };
   auto const getTypeNames = [&] (const std::vector<Type>& types) {
     auto parts = std::vector<std::string>{};
     for (auto const& type : types) parts.push_back(type.toString());
@@ -471,6 +475,13 @@ using TypeNames::TCA;
 #define NA            return checkNoArgs();
 #define S(T...)       {                                                     \
                         static auto const types = checkLayoutFlags({T});    \
+                        static auto const names = getTypeNames(types);      \
+                        checkMultiple(src(), types, names);                 \
+                        ++curSrc;                                           \
+                      }
+#define SNullptr(T...){                                                     \
+                        static auto const types                             \
+                          = addNullptr(checkLayoutFlags({T}));              \
                         static auto const names = getTypeNames(types);      \
                         checkMultiple(src(), types, names);                 \
                         ++curSrc;                                           \
@@ -536,6 +547,7 @@ using TypeNames::TCA;
 #define DMemoKey
 #define DLvalOfPtr
 #define DTypeCnsClsName
+#define DTypeStructElem
 #define DVerifyCoerce
 #define DPropLval
 #define DElemLval
@@ -555,6 +567,7 @@ using TypeNames::TCA;
 
 #undef NA
 #undef S
+#undef SNullptr
 #undef AK
 #undef C
 #undef CStr
@@ -606,6 +619,7 @@ using TypeNames::TCA;
 #undef DMemoKey
 #undef DLvalOfPtr
 #undef DTypeCnsClsName
+#undef DTypeStructElem
 #undef DVerifyCoerce
 #undef DPropLval
 #undef DElemLval

@@ -982,6 +982,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   }
 
+  case LdTypeStructureValCns: {
+    auto const base = inst.src(0);
+    auto const key = inst.extra<KeyedData>()->key;
+    return PureLoad { AElemS { base, key } };
+  }
+
   case DictIsset:
   case DictIdx:
   case KeysetIsset:

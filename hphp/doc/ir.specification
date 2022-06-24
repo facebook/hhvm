@@ -248,7 +248,7 @@ Instruction set
   A no-op at runtime, this instruction serves to mark the end of the initial
   sequence of guards in a trace.
 
-| CheckNonNull, DSubtract(0, Nullptr), S(Cls|Func|Obj|Str|Mem|TCA|Nullptr), B
+| CheckNonNull, DSubtract(0, Nullptr), SNullptr(Cls,Func,Obj,Str,Mem,TCA,Dict,Vec), B|LA
 
   If the value in S0 is Nullptr, branch to block B. If S0 cannot be Nullptr, or
   always is Nullptr, this check may be optimized away.
@@ -3235,6 +3235,10 @@ fields of that struct for holding intermediate values.
   Specialization of BespokeGet for when the base is a type structure. Get
   element with key S1 in the type structure S0. Branches if the key is not in
   the type structure.
+
+| LdTypeStructureValCns<key>, DTypeStructElem, STypeStructure, LA
+
+  Simplification of LdTypeStructureVal for when the key is a constant value.
 
 | MapSet, ND, S(Obj) S(Int,Str) S(InitCell), CRc
 

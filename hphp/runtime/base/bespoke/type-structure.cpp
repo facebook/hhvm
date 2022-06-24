@@ -243,6 +243,53 @@ TYPE_STRUCTURE_FIELDS
   return false;
 }
 
+DataType TypeStructure::getKindOfField(const StringData* k) {
+  if (k->isStatic()) {
+#define X(Field, FieldString, KindOfType) \
+    if (k == s_##FieldString.get()) return KindOfType;
+  TYPE_STRUCTURE_FIELDS
+#undef X
+  } else {
+#define X(Field, FieldString, KindOfType) \
+    if (s_##FieldString.same(k)) return KindOfType;
+  TYPE_STRUCTURE_FIELDS
+#undef X
+  }
+  return KindOfUninit;
+}
+
+size_t TypeStructure::getFieldOffset(const StringData* key) {
+  if (s_kind.same(key)) {
+    return kindOffset();
+  } else if (s_nullable.same(key)) {
+    return bitFieldOffset();
+  } else if (s_soft.same(key)) {
+    return bitFieldOffset();
+  } else if (s_like.same(key)) {
+    return bitFieldOffset();
+  } else if (s_opaque.same(key)) {
+    return bitFieldOffset();
+  } else if (s_optional_shape_field.same(key)) {
+    return bitFieldOffset();
+  } else if (s_alias.same(key)) {
+    return offsetof(TypeStructure, m_alias);
+  } else if (s_typevars.same(key)) {
+    return offsetof(TypeStructure, m_typevars);
+  } else if (s_typevar_types.same(key)) {
+    return offsetof(TypeStructure, m_typevar_types);
+  }
+  always_assert(false);
+}
+
+uint8_t TypeStructure::getBitOffset(const StringData* key) {
+  if (s_nullable.same(key)) return kNullableOffset;
+  if (s_soft.same(key)) return kSoftOffset;
+  if (s_like.same(key)) return kLikeOffset;
+  if (s_opaque.same(key)) return kOpaqueOffset;
+  if (s_optional_shape_field.same(key)) return kOptionalShapeFieldOffset;
+  always_assert(false);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // ArrayData interface
 
@@ -486,6 +533,17 @@ ArrayLayout TypeStructureLayout::setType(Type key, Type val) const {
 }
 
 std::pair<Type, bool> TypeStructureLayout::elemType(Type key) const {
+  if (key <= TInt) return {TBottom, false};
+  if (key.hasConstVal(TStr)) {
+    auto const dt = bespoke::TypeStructure::getKindOfField(key.strVal());
+    if (dt == KindOfBoolean) return {TBool, false};
+    // 'kind' field should always be present
+    if (dt == KindOfInt64) return {TInt, true};
+    if (dt == KindOfVec) return {TVec, false};
+    if (dt == KindOfDict) return {TDict, false};
+    if (isStringType(dt)) return {TStr, false};
+  }
+
   return {TInitCell, false};
 }
 std::pair<Type, bool> TypeStructureLayout::firstLastType(

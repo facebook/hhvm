@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -149,10 +150,11 @@ DEBUG_ONLY bool validate(const State& env,
                          SSATmp* newDst,
                          const IRInstruction* origInst) {
   // simplify() rules are not allowed to add new uses to SSATmps that aren't
-  // known to be available.  All the sources to the original instruction must
-  // be available, and non-reference counted values reachable through the
-  // source chain are also always available.  Anything else requires more
-  // complicated analysis than belongs in the simplifier right now.
+  // known to be available.  All the sources to the original instruction and
+  // sources produced from new instructions must be available, and
+  // non-reference counted values reachable through the source chain are also
+  // always available. Anything else requires more complicated analysis than
+  // belongs in the simplifier right now.
   auto known_available = [&] (SSATmp* src) -> bool {
     if (!src->type().maybe(TCounted)) return true;
     for (auto& oldSrc : origInst->srcs()) {
@@ -164,6 +166,11 @@ DEBUG_ONLY bool validate(const State& env,
       // also be available. For now CreateSSWH is the only instruction of this
       // form that we care about.
       if (oldSrc->inst()->is(CreateSSWH) && oldSrc->inst()->src(0) == src) {
+        return true;
+      }
+    }
+    for (auto& newInst : env.newInsts) {
+      if (newInst->dst() == src) {
         return true;
       }
     }
@@ -213,9 +220,7 @@ DEBUG_ONLY bool validate(const State& env,
   }
 
   if (newDst) {
-    const bool available = known_available(newDst) ||
-      std::any_of(env.newInsts.begin(), env.newInsts.end(),
-                  [&] (IRInstruction* inst) { return newDst == inst->dst(); });
+    const bool available = known_available(newDst);
 
     always_assert_flog(
       available,
@@ -3396,7 +3401,7 @@ SSATmp* simplifyLdStructDictVal(State& env, const IRInstruction* inst) {
 SSATmp* simplifyLdTypeStructureVal(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
-  if (arr->hasConstVal() && key->hasConstVal()) {
+  if (arr->hasConstVal() && key->hasConstVal(TStr)) {
     auto const tv = arr->arrLikeVal()->get(key->strVal());
     if (!tv.is_init()) {
       gen(env, Jmp, inst->taken());
@@ -3404,6 +3409,31 @@ SSATmp* simplifyLdTypeStructureVal(State& env, const IRInstruction* inst) {
     }
     return cns(env, tv);
   }
+
+  if (key->hasConstVal(TStr)) {
+    auto const dt = bespoke::TypeStructure::getKindOfField(key->strVal());
+
+    if (dt == KindOfUninit) {
+      gen(env, Jmp, inst->taken());
+      return cns(env, TBottom);
+    }
+
+    auto const val =
+      gen(env, LdTypeStructureValCns, KeyedData{ key->strVal() }, arr);
+
+    if (dt == KindOfBoolean) {
+      // match current TS array behaviour - treat false as not present
+      gen(env, JmpZero, inst->taken(), val);
+      return cns(env, true);
+    } else if (dt == KindOfInt64) {
+      return val;
+    } else if (isArrayLikeType(dt) || isStringType(dt)) {
+      return gen(env, CheckNonNull, inst->taken(), val);
+    }
+
+    not_reached();
+  }
+
   return nullptr;
 }
 

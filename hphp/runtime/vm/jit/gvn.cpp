@@ -302,6 +302,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
   case LdTypeStructureVal:
+  case LdTypeStructureValCns:
   case Select:
   case StrictlyIntegerConv:
   case LookupSPropSlot:

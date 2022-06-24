@@ -68,6 +68,7 @@ TRACE_SET_MOD(hhir);
 #define DLastKey          HasDest
 #define DLoggingArrLike   HasDest
 #define DStructDict    HasDest
+#define DTypeStructElem   HasDest
 #define DCol           HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
@@ -145,6 +146,7 @@ OpInfo g_opInfo[] = {
 #undef DKeysetLastElem
 #undef DLoggingArrLike
 #undef DStructDict
+#undef DTypeStructElem
 #undef DCol
 #undef DAllocObj
 #undef DMulti
@@ -769,13 +771,14 @@ bool opcodeMayRaise(Opcode opc) {
   case LdSubClsCns:
   case LdTVAux:
   case LdTVFromRDS:
-  case LdTypeStructureVal:
   case LdUnitPerRequestFilepath:
   case LdUnwinderValue:
   case LdMonotypeDictTombstones:
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
+  case LdTypeStructureVal:
+  case LdTypeStructureValCns:
   case LdVecElem:
   case LdVecElemAddr:
   case LdVectorSize:

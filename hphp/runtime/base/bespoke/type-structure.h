@@ -97,6 +97,21 @@ struct TypeStructure : BespokeArray {
 
   static auto constexpr kNumFields = 9;
 
+  static constexpr size_t kindOffset() {
+    static_assert(folly::kIsLittleEndian);
+    return offsetof(TypeStructure, m_extra_hi8);
+  }
+  static constexpr size_t bitFieldOffset() {
+    return offsetof(TypeStructure, m_extra_lo8);
+  }
+  static constexpr size_t childOffset() {
+    return sizeof(TypeStructure);
+  }
+
+  static DataType getKindOfField(const StringData* key);
+  static size_t getFieldOffset(const StringData* key);
+  static uint8_t getBitOffset(const StringData* key);
+
 #define X(Return, Name, Args...) static Return Name(Args);
   BESPOKE_LAYOUT_FUNCTIONS(TypeStructure)
 #undef X

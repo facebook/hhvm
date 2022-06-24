@@ -402,6 +402,14 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     ++curSrc;
   };
 
+  auto checkTypeStructure = [&]() {
+    auto const t = src()->type();
+    if (t != TBottom) {
+      check(t.arrSpec().is_type_structure(), Type(), "TArrLike=TypeStructure");
+    }
+    ++curSrc;
+  };
+
   auto checkStructDict = [&]() {
     auto const t = src()->type();
     if (t != TBottom) {
@@ -480,6 +488,7 @@ using TypeNames::TCA;
 #define SBespokeArr   checkBespokeArr();
 #define SMonotypeVec  checkMonotypeArr(TVec);
 #define SMonotypeDict checkMonotypeArr(TDict);
+#define STypeStructure checkTypeStructure();
 #define SStructDict   checkStructDict();
 #define ND
 #define DMulti
@@ -552,6 +561,7 @@ using TypeNames::TCA;
 #undef SBespokeArr
 #undef SMonotypeVec
 #undef SMonotypeDict
+#undef STypeStructure
 #undef SStructDict
 #undef SKnownArrLike
 

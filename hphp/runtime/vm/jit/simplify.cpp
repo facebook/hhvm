@@ -3172,7 +3172,8 @@ SSATmp* simplifyBespokeGetThrow(State& env, const IRInstruction* inst) {
     }
   }
 
-  if (arr->type().arrSpec().is_struct() && key->isA(TInt)) {
+  auto const arrSpec = arr->type().arrSpec();
+  if ((arrSpec.is_struct() || arrSpec.is_type_structure()) && key->isA(TInt)) {
     gen(env, ThrowOutOfBounds, inst->taken(), arr, key);
     return cns(env, TBottom);
   }
@@ -3388,6 +3389,20 @@ SSATmp* simplifyLdStructDictVal(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   if (arr->hasConstVal() && arr->arrLikeVal()->size() == 1) {
     return cns(env, arr->arrLikeVal()->nvGetVal(0));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyLdTypeStructureVal(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  if (arr->hasConstVal() && key->hasConstVal()) {
+    auto const tv = arr->arrLikeVal()->get(key->strVal());
+    if (!tv.is_init()) {
+      gen(env, Jmp, inst->taken());
+      return cns(env, TBottom);
+    }
+    return cns(env, tv);
   }
   return nullptr;
 }
@@ -3914,6 +3929,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdVecElem)
       X(LdStructDictKey)
       X(LdStructDictVal)
+      X(LdTypeStructureVal)
       X(MethodExists)
       X(LdFuncInOutBits)
       X(LdFuncNumParams)

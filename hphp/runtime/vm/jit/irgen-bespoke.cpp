@@ -144,6 +144,29 @@ SSATmp* emitProfiledGetThrow(IRGS& env, SSATmp* arr, SSATmp* key,
     );
   }
 
+  if (arr->type().arrSpec().is_type_structure()) {
+    if (key->isA(TInt)) {
+      gen(env, ThrowOutOfBounds, arr, key);
+      return cns(env, TBottom);
+    }
+
+    SSATmp* result;
+    ifThen(
+      env,
+      [&] (Block *taken) {
+        auto const val = gen(env, LdTypeStructureVal, taken, arr, key);
+        result = profiled
+          ? profiledType(env, val, [&] { finish(val); })
+          : val;
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, ThrowOutOfBounds, arr, key);
+      }
+    );
+    return result;
+  }
+
   auto const val = gen(env, BespokeGetThrow, arr, key);
   if (!profiled) return val;
   return profiledType(env, val, [&] { finish(val); });

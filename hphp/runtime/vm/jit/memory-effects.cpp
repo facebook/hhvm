@@ -974,6 +974,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
   }
 
+  case LdTypeStructureVal: {
+    auto const base = inst.src(0);
+    auto const key  = inst.src(1);
+    return PureLoad {
+      key->hasConstVal() ? AElemS { base, key->strVal() } : AElemSAny,
+    };
+  }
+
   case DictIsset:
   case DictIdx:
   case KeysetIsset:

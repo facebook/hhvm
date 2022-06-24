@@ -582,16 +582,21 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
   auto groups = std::vector<StructGroup>{};
 
   // Sort groups by weight to preferentially create hot struct layouts.
-  // We also filter out groups that are likely to need escalation here.
+  // We also filter out groups that are likely to need escalation here and
+  // groups that have a type structure as a source.
   sa.union_find.forEachGroup([&](auto& group) {
     double weight = 0;
     double p_escalated = 0;
+    double type_structs = 0;
     for (auto const source : group) {
+      if (source->getLayout().is_type_structure()) {
+        type_structs++;
+      }
       auto const source_weight = source->getProfileWeight();
       weight += source_weight;
       p_escalated += source_weight * probabilityOfEscalation(*source);
     }
-    if (weight > 0 && !(p_escalated / weight > 1 - p_cutoff)) {
+    if (type_structs == 0 && weight > 0 && !(p_escalated / weight > 1 - p_cutoff)) {
       groups.emplace_back(std::move(group), weight);
     }
   });
@@ -685,25 +690,27 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
 //////////////////////////////////////////////////////////////////////////////
 // Generic dispatch
 
+void setTypeStructureLayoutForSources() {
+  eachSource([&](auto& profile) {
+    if (RO::EvalEmitBespokeTypeStructures && profile.shouldUseBespokeTypeStructure()) {
+      auto const vad = profile.data->staticSampledArray;
+      if (vad == nullptr) return;
+      auto const tad = TypeStructure::MakeFromVanilla(vad);
+      if (tad == nullptr) return;
+      auto const idx = tad->layoutIndex();
+      profile.setStaticBespokeArray(tad);
+      profile.setLayout(ArrayLayout(idx));
+    }
+  });
+}
+
 ArrayLayout selectSourceLayout(
     LoggingProfile& profile, const StructAnalysisResult& sar) {
   assertx(profile.data);
   auto const mode = RO::EvalBespokeArraySpecializationMode;
   if (mode == 1 || mode == 2) return ArrayLayout::Vanilla();
 
-  // 1. If we're emitting type structures, try to use type structure layout
-
-  if (RO::EvalEmitBespokeTypeStructures && profile.shouldUseBespokeTypeStructure()) {
-    auto const vad = profile.data->staticSampledArray;
-    if (vad == nullptr) return ArrayLayout::Vanilla();
-    auto const tad = TypeStructure::MakeFromVanilla(vad);
-    if (tad == nullptr) return ArrayLayout::Vanilla();
-    auto const idx = tad->layoutIndex();
-    profile.setStaticBespokeArray(tad);
-    return ArrayLayout(idx);
-  }
-
-  // 2. Use a struct layout if the union-find algorithm chose one.
+  // 1. Use a struct layout if the union-find algorithm chose one.
 
   auto const it = sar.sources.find(&profile);
   if (it != sar.sources.end()) {
@@ -718,22 +725,22 @@ ArrayLayout selectSourceLayout(
     return ArrayLayout(it->second);
   }
 
-  // 3. If we aren't emitting monotypes, use a vanilla layout.
+  // 2. If we aren't emitting monotypes, use a vanilla layout.
 
   if (!RO::EvalEmitBespokeMonotypes) return ArrayLayout::Vanilla();
 
-  // 4. If the array is a runtime source, use a vanilla layout.
+  // 3. If the array is a runtime source, use a vanilla layout.
   // TODO(mcolavita): We can eventually support more general runtime sources.
 
   if (profile.key.isRuntimeLocation()) return ArrayLayout::Vanilla();
 
-  // 5. If we escalate too often, use a vanilla layout.
+  // 4. If we escalate too often, use a vanilla layout.
 
   auto const p_cutoff = RO::EvalBespokeArraySourceSpecializationThreshold / 100;
   auto const p_escalated = probabilityOfEscalation(profile);
   if (p_escalated > 1 - p_cutoff) return ArrayLayout::Vanilla();
 
-  // 6. If the array is likely to stay monotyped, use a monotype layout.
+  // 5. If the array is likely to stay monotyped, use a monotype layout.
 
   uint64_t monotype = 0;
   uint64_t total = 0;
@@ -778,6 +785,7 @@ Decision<ArrayLayout> makeSinkDecision(
   uint64_t vanilla = 0;
   uint64_t monotype = 0;
   uint64_t is_struct = 0;
+  uint64_t is_type_structure = 0;
   uint64_t total = 0;
 
   std::unordered_map<const bespoke::Layout*, uint64_t> structs;
@@ -792,6 +800,8 @@ Decision<ArrayLayout> makeSinkDecision(
     } else if (layout.is_struct()) {
       is_struct += count;
       structs[layout.bespokeLayout()] += count;
+    } else if (layout.is_type_structure()) {
+      is_type_structure += count;
     }
     total += count;
   }
@@ -808,6 +818,7 @@ Decision<ArrayLayout> makeSinkDecision(
   auto const p_vanilla = p_sampled * vanilla / total + (1 - p_sampled);
   auto const p_monotype = p_sampled * monotype / total;
   auto const p_is_struct = p_sampled * is_struct / total;
+  auto const p_is_type_structure = p_sampled * is_type_structure / total;
 
   if (p_vanilla >= p_cutoff) return {ArrayLayout::Vanilla(), p_vanilla};
 
@@ -844,6 +855,10 @@ Decision<ArrayLayout> makeSinkDecision(
         ? DAL{ArrayLayout(TopMonotypeDictLayout::Index(kt)), p_monotype_key}
         : DAL{ArrayLayout(MonotypeDictLayout::Index(kt, dt)), p_monotype_key};
     }
+  }
+
+  if (p_is_type_structure >= p_cutoff) {
+    return {ArrayLayout(TypeStructure::GetLayoutIndex()), p_is_type_structure};
   }
 
   if (p_is_struct >= p_cutoff) {
@@ -910,6 +925,11 @@ void selectBespokeLayouts() {
   if (Layout::HierarchyFinalized()) return;
 
   setLoggingEnabled(false);
+
+  // need to set type structure layouts first so that relevant type structure
+  // sources and sinks can be excluded in the struct analysis
+  setTypeStructureLayoutForSources();
+
   auto const sar = []{
     if (!RO::EvalEmitBespokeStructDicts) return StructAnalysisResult();
     StructAnalysis sa;
@@ -917,7 +937,11 @@ void selectBespokeLayouts() {
     eachSink([&](auto const& x) { updateStructAnalysis(x, sa); });
     return finishStructAnalysis(sa);
   }();
-  eachSource([&](auto& x) { x.setLayout(selectSourceLayout(x, sar)); });
+  eachSource([&](auto& x) {
+    if (x.getStaticBespokeArray() == nullptr) {
+      x.setLayout(selectSourceLayout(x, sar));
+    }
+  });
   eachSink([&](auto& x) { x.setLayout(selectSinkLayout(x, sar)); });
   Layout::FinalizeHierarchy();
   startExportProfiles();

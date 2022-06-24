@@ -650,6 +650,7 @@ bool canDCE(const IRInstruction& inst) {
   case BespokeElem:
   case BespokeEscalateToVanilla:
   case BespokeGetThrow:
+  case LdTypeStructureVal:
   case LdVectorSize:
   case BeginCatch:
   case EndCatch:

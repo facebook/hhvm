@@ -486,7 +486,7 @@ ArrayLayout TypeStructureLayout::setType(Type key, Type val) const {
 }
 
 std::pair<Type, bool> TypeStructureLayout::elemType(Type key) const {
-  return {TBottom, false};
+  return {TInitCell, false};
 }
 std::pair<Type, bool> TypeStructureLayout::firstLastType(
     bool isFirst, bool isKey) const {

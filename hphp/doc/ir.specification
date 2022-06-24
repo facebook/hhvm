@@ -3230,6 +3230,12 @@ fields of that struct for holding intermediate values.
   Returns the key or value at slot S1 in the struct dict S0. This slot must be
   known to be present. (The result of StructDictSlotInPos is always present.)
 
+| LdTypeStructureVal, DBespokeElem, STypeStructure S(Str), B|LA
+
+  Specialization of BespokeGet for when the base is a type structure. Get
+  element with key S1 in the type structure S0. Branches if the key is not in
+  the type structure.
+
 | MapSet, ND, S(Obj) S(Int,Str) S(InitCell), CRc
 
   Set element with key S1 in S0 to S2.

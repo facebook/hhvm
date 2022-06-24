@@ -769,6 +769,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdSubClsCns:
   case LdTVAux:
   case LdTVFromRDS:
+  case LdTypeStructureVal:
   case LdUnitPerRequestFilepath:
   case LdUnwinderValue:
   case LdMonotypeDictTombstones:

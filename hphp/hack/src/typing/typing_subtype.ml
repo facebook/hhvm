@@ -515,14 +515,17 @@ let transform_dynamic_upper_bound ~coerce env ty =
     | (Some TL.CoerceToDynamic, _) -> ty
     | _ -> ty
 
-let mk_issubtype_prop ~coerce _env ty1 ty2 =
+let mk_issubtype_prop ~coerce env ty1 ty2 =
   match ty2 with
   | LoclType ty2 ->
     let (coerce, ty2) =
-      match (coerce, get_node ty2) with
-      | (Some TL.CoerceToDynamic, Tdynamic) ->
+      match (coerce, Typing_utils.try_strip_dynamic env ty2) with
+      | (Some TL.CoerceToDynamic, Some non_dyn_ty) ->
         let r = get_reason ty2 in
-        (None, MakeType.supportdyn r (MakeType.mixed r))
+        ( None,
+          MakeType.union
+            r
+            [non_dyn_ty; MakeType.supportdyn r (MakeType.mixed r)] )
       | _ -> (coerce, ty2)
     in
     TL.IsSubtype (coerce, ty1, LoclType ty2)

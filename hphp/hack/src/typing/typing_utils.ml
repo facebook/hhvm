@@ -714,13 +714,33 @@ let rec is_dynamic_or_intersection env ty =
   | _ -> false
 
 let rec try_strip_dynamic_from_union env r tyl =
-  let (dyns, nondyns) =
-    List.partition_tf tyl ~f:(is_dynamic_or_intersection env)
+  let rec partition_union tyl ~f =
+    match tyl with
+    | [] -> ([], [])
+    | t :: tyl ->
+      let (dyns, nondyns) = partition_union tyl ~f in
+      if f t then
+        (t :: dyns, nondyns)
+      else (
+        match get_node t with
+        | Tunion tyl ->
+          (match strip_union (get_reason t) tyl with
+          | Some (sub_dyns, sub_nondyns) ->
+            (sub_dyns @ dyns, sub_nondyns :: nondyns)
+          | None -> (dyns, t :: nondyns))
+        | _ -> (dyns, t :: nondyns)
+      )
+  and strip_union r tyl =
+    let (dyns, nondyns) =
+      partition_union tyl ~f:(is_dynamic_or_intersection env)
+    in
+    match (dyns, nondyns) with
+    | ([], _) -> None
+    | (_, _) -> Some (dyns, Typing_make_type.union r nondyns)
   in
-  match (dyns, nondyns) with
-  | ([], _) -> None
-  | (_, [ty]) -> Some (strip_dynamic env ty)
-  | (_, _) -> Some (Typing_make_type.union r nondyns)
+  match strip_union r tyl with
+  | None -> None
+  | Some (_, ty) -> Some ty
 
 and try_strip_dynamic env ty =
   let (env, ty) = Env.expand_type env ty in

@@ -13,7 +13,7 @@ proc-macro = true
 [dependencies]
 aast_parser = { path = "../../../../parser/cargo/aast_parser" }
 ocamlrep = { path = "../../../../ocamlrep" }
-once_cell = "1.8"
+once_cell = "1.12"
 oxidized = { path = "../../../../oxidized" }
 parser_core_types = { path = "../../../../parser/cargo/core_types" }
 proc-macro2 = "1.0"

@@ -1005,6 +1005,9 @@ fn print_hhbc(
         Hhbc::UnsetL(lid, _) => {
             write!(w, "unset {}", FmtLid(lid, ctx.strings))?;
         }
+        Hhbc::VerifyImplicitContextState(_) => {
+            write!(w, "verify_implicit_context_state")?;
+        }
         Hhbc::VerifyOutType(vid, lid, _) => {
             write!(
                 w,

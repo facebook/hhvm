@@ -1539,6 +1539,10 @@ void iopOODeclExists(OODeclExistsOp /* subop */) {
   iopUnhandled("OODeclExists");
 }
 
+void iopVerifyImplicitContextState() {
+  iopUnhandled("VerifyImplicitContextState");
+}
+
 void iopVerifyOutType(uint32_t /* paramId */) {
   iopUnhandled("VerifyOutType");
 }

@@ -1337,6 +1337,7 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::CheckThis:
     case Op::ChainFaults:
     case Op::OODeclExists:
+    case Op::VerifyImplicitContextState:
     case Op::VerifyOutType:
     case Op::VerifyParamType:
     case Op::VerifyParamTypeTS:

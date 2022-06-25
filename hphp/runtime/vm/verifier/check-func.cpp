@@ -1439,7 +1439,12 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-
+    case Op::VerifyImplicitContextState:
+      if (!m_func->isMemoizeWrapper && !m_func->isMemoizeWrapperLSB) {
+        ferror("VerifyImplicitContextState can only be used in memoize wrappers\n");
+        return false;
+      }
+      break;
     default:
       break;
   }

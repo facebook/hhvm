@@ -449,6 +449,14 @@ void raiseModuleBoundaryViolation(const Class* cls,
   }
 }
 
+void raiseImplicitContextStateInvalidException(const Func* func) {
+  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+    "{} is a [defaults] memoized function, "
+    "but it is called with an active implicit context",
+    func->fullName()
+  ));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 int64_t zero_error_level() {

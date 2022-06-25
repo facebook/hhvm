@@ -249,6 +249,7 @@ void iopBareThis(BareThisOp bto);
 void iopCheckThis();
 void iopChainFaults();
 void iopOODeclExists(OODeclExistsOp subop);
+void iopVerifyImplicitContextState();
 void iopVerifyOutType(uint32_t paramId);
 void iopVerifyParamType(local_var param);
 void iopVerifyParamTypeTS(local_var param);

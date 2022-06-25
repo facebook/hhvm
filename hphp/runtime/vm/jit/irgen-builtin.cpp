@@ -2537,5 +2537,28 @@ void emitSetImplicitContextByValue(IRGS& env) {
   push(env, prev_ctx);
 }
 
+void emitVerifyImplicitContextState(IRGS& env) {
+  auto const func = curFunc(env);
+  assertx(!func->hasCoeffectRules());
+  assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
+  if (!func->isPolicyShardedMemoize() &&
+      providedCoeffectsKnownStatically(env).canCall(
+        RuntimeCoeffects::leak_safe_shallow())) {
+    // We are in a memoized that can call [defaults] code or any escape
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const ctx = gen(env, LdImplicitContext);
+        gen(env, CheckType, TInitNull, taken, ctx);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, RaiseImplicitContextStateInvalidException, FuncData { func });
+        return cns(env, TBottom);
+      }
+    );
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 }

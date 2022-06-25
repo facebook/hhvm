@@ -3231,6 +3231,13 @@ SetImplicitContextByValue [C:?Obj] -> [C:?Obj]
 
   Sets the implicit context to %1 and returns the previous implicit context.
 
+VerifyImplicitContextState [] -> []
+
+  Verifies whether the current state of the implicit context is valid with
+  respect to the current calling context. Raises warning or throws an
+  exception if the state is invalid, set to soft implicit context or cleared.
+  Can only be used in memoized wrapper functions.
+
 14. Generator creation and execution
 ---------------------------------------
 

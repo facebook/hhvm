@@ -5156,6 +5156,20 @@ OPTBLD_INLINE void iopSetImplicitContextByValue() {
   }
 }
 
+OPTBLD_INLINE void iopVerifyImplicitContextState() {
+  auto const func = vmfp()->func();
+  assertx(!func->hasCoeffectRules());
+  assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
+  if (!func->isPolicyShardedMemoize() &&
+      vmfp()->providedCoeffectsForCall(false).canCall(
+        RuntimeCoeffects::leak_safe_shallow())) {
+    // We are in a memoized that can call [defaults] code or any escape
+    if (UNLIKELY(*ImplicitContext::activeCtx != nullptr)) {
+      raiseImplicitContextStateInvalidException(func);
+    }
+  }
+}
+
 OPTBLD_INLINE void iopCheckProp(const StringData* propName) {
   auto* cls = vmfp()->getClass();
   auto* propVec = cls->getPropData();

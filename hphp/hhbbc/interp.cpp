@@ -2126,6 +2126,20 @@ void in(ISS& env, const bc::Throw& /*op*/) {
 
 void in(ISS& env, const bc::ThrowNonExhaustiveSwitch& /*op*/) {}
 
+void in(ISS& env, const bc::VerifyImplicitContextState& /*op*/) {
+  assertx(env.ctx.func->coeffectRules.empty());
+  assertx(env.ctx.func->isMemoizeWrapper || env.ctx.func->isMemoizeWrapperLSB);
+  auto const providedCoeffects =
+    RuntimeCoeffects::fromValue(env.ctx.func->requiredCoeffects.value() |
+                                env.ctx.func->coeffectEscapes.value());
+  if (!providedCoeffects.canCall(RuntimeCoeffects::zoned()) &&
+      !providedCoeffects.canCall(RuntimeCoeffects::leak_safe_shallow())) {
+    // If the current function cannot call zoned code, it cannot retrieve the
+    // implicit context, so it is safe to kill the verify instruction.
+    return reduce(env, bc::Nop {});
+  }
+}
+
 void in(ISS& env, const bc::RaiseClassStringConversionWarning& /*op*/) {}
 
 void in(ISS& env, const bc::ChainFaults&) {

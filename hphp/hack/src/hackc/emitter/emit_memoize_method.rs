@@ -346,6 +346,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         } else {
             instr::check_this()
         },
+        instr::verify_implicit_context_state(),
         emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
@@ -429,6 +430,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         } else {
             instr::check_this()
         },
+        instr::verify_implicit_context_state(),
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
                 instr::memo_get_eager(notfound, suspended_get, LocalRange::default()),

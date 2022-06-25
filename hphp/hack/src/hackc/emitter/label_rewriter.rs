@@ -379,6 +379,7 @@ where
             | Opcode::UnsetL(..)
             | Opcode::UnsetM(..)
             | Opcode::Vec(..)
+            | Opcode::VerifyImplicitContextState
             | Opcode::VerifyOutType(..)
             | Opcode::VerifyParamType(..)
             | Opcode::VerifyParamTypeTS(..)

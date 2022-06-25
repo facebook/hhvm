@@ -251,6 +251,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         begin_label,
         emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[])?,
         deprecation_body,
+        instr::verify_implicit_context_state(),
         emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
@@ -310,6 +311,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     );
     let instrs = InstrSeq::gather(vec![
         deprecation_body,
+        instr::verify_implicit_context_state(),
         if is_async {
             InstrSeq::gather(vec![
                 instr::memo_get_eager(notfound, suspended_get, LocalRange::default()),

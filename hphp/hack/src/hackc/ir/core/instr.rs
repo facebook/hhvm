@@ -479,6 +479,7 @@ pub enum Hhbc {
     This(LocId),
     ThrowNonExhaustiveSwitch(LocId),
     UnsetL(LocalId, LocId),
+    VerifyImplicitContextState(LocId),
     VerifyOutType(ValueId, LocalId, LocId),
     VerifyParamType(LocalId, LocId),
     VerifyParamTypeTS(ValueId, LocalId, LocId),

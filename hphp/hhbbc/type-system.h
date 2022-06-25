@@ -197,42 +197,120 @@ enum class DataTag : uint8_t {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Information about a class type. The class is either exact or a
- * subtype of the supplied class.
+ * Information about a class type. The class is either exactly the
+ * supplied class, a subtype of the supplied class, or an intersection
+ * of classes it is a subtype of.
+ *
+ * The intersection case is needed to maintain monotonicity when
+ * performing unions or intersections involving intersections. We want
+ * to maintain the invariant that if a <= A, and b <= B, then
+ * union_of(a, b) <= union_of(A, B) (the same applies for
+ * intersection_of). Another way to state this is that refining a type
+ * anywhere should never result in a worse type anywhere else.
+ *
+ * When unioning/intersecting an interface with anything else, there's
+ * not necessarily a single result class which guarantees
+ * monotonicity. In one of those cases, we instead produce a list of
+ * classes which the result is a subtype of.
+ *
+ * In addition, we want the intersection representation to uniquely
+ * identify a class, so we impose a certain canonical form. No class
+ * in the list can be a subtype of another (if so, the "larger" class
+ * is redundant and should be dropped). Every class "could be" every
+ * other class. If not, the intersection is empty and the type is
+ * actually Bottom. Finally, the list is kept sorted. The ordering is
+ * fixed but arbitrary and we try to ensure that "smaller" classes
+ * come first.
+ *
+ * The intersection always have 2 or more elements (any less should be
+ * Bottom, Exact or Sub instead). The intersection can only ever
+ * contain resolved classes or unresolved classes, never a mix
+ * (unioning a resolved class with an unresolved class results in
+ * TObj/TCls, and intersecting a resolved class with an unresolved
+ * class results in TBottom).
  */
 struct DCls {
-  enum Tag { Exact, Sub };
+  using IsectSet = std::vector<res::Class>;
 
-  DCls(Tag type, res::Class cls)
-    : val{
-        type == Exact ? PtrTag::Exact : PtrTag::Sub,
-        (void*)cls.toOpaque()
-      }
-  {}
-
-  Tag type() const {
-    switch (val.tag()) {
-      case PtrTag::ExactCtx:
-      case PtrTag::Exact:
-        return Exact;
-      case PtrTag::SubCtx:
-      case PtrTag::Sub:
-        return Sub;
-    }
-    not_reached();
+  static DCls MakeExact(res::Class cls) {
+    return DCls{PtrTag::Exact, (void*)cls.toOpaque()};
+  }
+  static DCls MakeSub(res::Class cls) {
+    return DCls{PtrTag::Sub, (void*)cls.toOpaque()};
+  }
+  static DCls MakeIsect(IsectSet isect) {
+    auto w = new IsectWrapper{std::move(isect)};
+    return DCls{PtrTag::Isect, (void*)w};
   }
 
+  // Need to implement these manually so we do proper ref-counting on
+  // the IsectWrapper (if available).
+  DCls(const DCls& o) : val{o.val}
+  { if (isIsect()) rawIsect()->acquire(); }
+  DCls(DCls&& o) noexcept : val{std::move(o.val)}
+  { o.val.set(PtrTag::Exact, nullptr); }
+
+  DCls& operator=(const DCls& o) {
+    if (this == &o) return *this;
+    auto const i = isIsect() ? rawIsect() : nullptr;
+    if (o.isIsect()) o.rawIsect()->acquire();
+    val = o.val;
+    if (i) i->release();
+    return *this;
+  }
+  DCls& operator=(DCls&& o) { val.swap(o.val); return *this; }
+
+  ~DCls() { if (isIsect()) rawIsect()->release(); }
+
+  bool isExact() const {
+    return
+      val.tag() == PtrTag::Exact ||
+      val.tag() == PtrTag::ExactCtx;
+  }
+
+  bool isSub() const {
+    return
+      val.tag() == PtrTag::Sub ||
+      val.tag() == PtrTag::SubCtx;
+  }
+
+  bool isIsect() const {
+    return
+      val.tag() == PtrTag::Isect ||
+      val.tag() == PtrTag::IsectCtx;
+  }
+
+  // Obtain the res::Class this DCls represents. Only valid if
+  // !isSect(), as that cannot be completely represented by any single
+  // res::Class.
   res::Class cls() const {
+    assertx(!isIsect());
+    assertx(val.ptr());
     return res::Class::fromOpaque((uintptr_t)val.ptr());
   }
+
+  // Obtain a res::Class which is a super-type of what this DCls
+  // represents. That is, it may be larger than the "actual"
+  // class. For non-intersections, this is just cls(). For
+  // intersections, it's one of the classes in the intersection (any
+  // of them is valid, as we're a subclass of all of them). We use the
+  // first class in the list, which in canonical order is the
+  // smallest.
+  res::Class smallestCls() const {
+    return isIsect() ? isect().front() : cls();
+  }
+
+  const IsectSet& isect() const { return rawIsect()->isects; }
 
   bool isCtx() const {
     switch (val.tag()) {
       case PtrTag::ExactCtx:
       case PtrTag::SubCtx:
+      case PtrTag::IsectCtx:
         return true;
       case PtrTag::Exact:
       case PtrTag::Sub:
+      case PtrTag::Isect:
         return false;
     }
     not_reached();
@@ -248,6 +326,10 @@ struct DCls {
         if (ctx) break;
         val.set(PtrTag::Sub, val.ptr());
         break;
+      case PtrTag::IsectCtx:
+        if (ctx) break;
+        val.set(PtrTag::Isect, val.ptr());
+        break;
       case PtrTag::Exact:
         if (!ctx) break;
         val.set(PtrTag::ExactCtx, val.ptr());
@@ -256,19 +338,52 @@ struct DCls {
         if (!ctx) break;
         val.set(PtrTag::SubCtx, val.ptr());
         break;
+      case PtrTag::Isect:
+        if (!ctx) break;
+        val.set(PtrTag::IsectCtx, val.ptr());
+        break;
     }
   }
 
 private:
-  // To keep size down, we encode everything into a single pointer.
+  // To keep size down, we encode everything into a single
+  // pointer. The tag encodes whether isCtx() is true, and the type of
+  // pointer. The pointer will either be a res::Class (in opaque
+  // encoding), or to an IsectWrapper.
   enum class PtrTag : uint8_t {
     Exact,
     ExactCtx,
     Sub,
-    SubCtx
+    SubCtx,
+    Isect,
+    IsectCtx
   };
   CompactTaggedPtr<void, PtrTag> val;
+
+  DCls(PtrTag t, void* p) : val{t, p} {}
+
+  // We ref-count the IsectSet, so multiple copies of a DCls can share
+  // it. This is basically copy_ptr, but we can't use that easily with
+  // our CompactTaggedPtr representation.
+  struct IsectWrapper {
+    IsectSet isects;
+    std::atomic<uint32_t> refcount{1};
+    void acquire() { refcount.fetch_add(1, std::memory_order_relaxed); }
+    void release() {
+      if (refcount.fetch_sub(1, std::memory_order_relaxed) == 1) {
+        delete this;
+      }
+    }
+  };
+
+  IsectWrapper* rawIsect() const {
+    assertx(isIsect());
+    assertx(val.ptr());
+    return (IsectWrapper*)val.ptr();
+  }
 };
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * Information about a wait handle (sub-class of HH\\Awaitable) carry a
@@ -279,8 +394,10 @@ struct DWaitHandleT {
   // Strictly speaking, we know that cls is HH\\Awaitable, but keeping
   // it around lets us demote to a DCls without having the Index
   // available.
-  DWaitHandleT(res::Class cls, T inner) : cls{cls}, inner{std::move(inner)} {}
-  res::Class cls;
+  DWaitHandleT(res::Class cls, T inner)
+    : cls{DCls::MakeSub(cls)}
+    , inner{std::move(inner)} {}
+  DCls cls;
   T inner;
 };
 using DWaitHandle = DWaitHandleT<>;
@@ -532,9 +649,9 @@ private:
   friend Type packedn_impl(trep, HAMSandwich, Type);
   friend Type map_impl(trep, HAMSandwich, MapElems, Type, Type);
   friend Type mapn_impl(trep, HAMSandwich, Type, Type);
-  friend DCls dobj_of(const Type&);
+  friend const DCls& dobj_of(const Type&);
   friend Type demote_wait_handle(Type);
-  friend DCls dcls_of(const Type&);
+  friend const DCls& dcls_of(const Type&);
   friend SString sval_of(const Type&);
   friend SString lazyclsval_of(const Type&);
   friend int64_t ival_of(const Type&);
@@ -595,7 +712,6 @@ private:
   friend Type some_dict_empty();
   friend Type keyset_val(SArray);
   friend bool could_contain_objects(const Type&);
-  friend Type loosen_interfaces(Type);
   friend Type loosen_staticness(Type);
   friend Type loosen_string_staticness(Type);
   friend Type loosen_array_staticness(Type);
@@ -613,12 +729,19 @@ private:
   friend Type to_cell(Type t);
   friend bool inner_types_might_raise(const Type& t1, const Type& t2);
   friend std::pair<Type, Promotion> promote_classlike_to_key(Type);
+  friend Type toobj(const Type&);
+  friend Type objcls(const Type&);
+
+  // These have to be defined here but are not meant to be used
+  // outside of type-system.cpp
+  friend Type isectObj(DCls::IsectSet);
+  friend Type isectCls(DCls::IsectSet);
 
   friend Type set_trep_for_testing(Type, trep);
   friend trep get_trep_for_testing(const Type&);
 
-  friend Type make_obj_for_testing(trep, res::Class, DCls::Tag, bool);
-  friend Type make_cls_for_testing(trep, res::Class, DCls::Tag, bool);
+  friend Type make_obj_for_testing(trep, res::Class, bool, bool, bool);
+  friend Type make_cls_for_testing(trep, res::Class, bool, bool, bool);
   friend Type make_arrval_for_testing(trep, SArray);
   friend Type make_arrpacked_for_testing(trep, std::vector<Type>,
                                          Optional<LegacyMark>);
@@ -676,6 +799,14 @@ private:
   };
   HAMSandwich m_ham;
   Data m_data;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+struct TypeHasher {
+  size_t operator()(const Type& t) const {
+    return t.hash();
+  }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -773,7 +904,7 @@ Type wait_handle(const Index&, Type t);
 /*
  * Return T from a WaitH<T>.
  *
- * Pre: is_specialized_handle(t);
+ * Pre: is_specialized_wait_handle(t);
  */
 Type wait_handle_inner(const Type& t);
 
@@ -1093,14 +1224,14 @@ Optional<Type> type_of_type_structure(const Index&, Context, SArray ts);
  *
  * Pre: is_specialized_obj(t)
  */
-DCls dobj_of(const Type& t);
+const DCls& dobj_of(const Type& t);
 
 /*
  * Return the DCls structure for a strict subtype of TCls.
  *
  * Pre: is_specialized_cls(t)
  */
-DCls dcls_of(const Type& t);
+const DCls& dcls_of(const Type& t);
 
 /*
  * Return the SString for a strict subtype of TStr.
@@ -1198,13 +1329,6 @@ Type widening_union(const Type& a, const Type& b);
 Type widen_type(Type t);
 
 /*
- * Check if the first type is more refined than the second type for
- * the purposes of use in the Index. This is basically moreRefined()
- * plus some additional rules for interfaces.
- */
-bool more_refined_for_index(const Type&, const Type&);
-
-/*
  * Returns what we know about the emptiness of the type.
  */
 Emptiness emptiness(const Type&);
@@ -1222,21 +1346,6 @@ bool could_have_magic_bool_conversion(const Type&);
  * Pre: `a' is a subtype of TCell.
  */
 Type stack_flav(Type a);
-
-/*
- * The HHBBC type system is not monotonic. However, we want types stored in
- * the index to become monotonically more refined. We call this helper before
- * updating function return types to help maintain that invariant. A function
- * return type should never be an object with some known interface.
- *
- * The monotonicity requirement on our types is that given a, b, A, and B
- * such that A <= a and B <= b, we must have union_of(A, B) <= union_of(a, b)
- * and intersection_of(A, B) <= intersection_of(a, b).
- *
- * The union_of case can fail if a and b are some interface and A and B are
- * concrete, unrelated classes that implement that interface.
- */
-Type loosen_interfaces(Type);
 
 /*
  * Discard any countedness information about the type. Force any type

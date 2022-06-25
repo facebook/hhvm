@@ -32,7 +32,7 @@ jwalk = "0.6"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 multifile_rust = { path = "../../../utils/multifile" }
 ocamlrep = { path = "../../../ocamlrep" }
-once_cell = "1.8"
+once_cell = "1.12"
 options = { path = "../../compile/cargo/options" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }

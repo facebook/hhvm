@@ -722,7 +722,7 @@ public:
    */
   bool isMemoizeWrapperLSB() const;
 
-  bool isPolicyShardedMemoize() const;
+  bool isKeyedByImplicitContextMemoize() const;
 
   /*
    * Is this string the name of a memoize implementation.
@@ -1341,7 +1341,7 @@ private:
         bool m_returnByValue : true; // only for builtins
         bool m_isMemoizeWrapper : true;
         bool m_isMemoizeWrapperLSB : true;
-        bool m_isPolicyShardedMemoize : true;
+        bool m_isKeyedByImplicitContextMemoize : true;
         bool m_isPhpLeafFn : true;
         bool m_hasReifiedGenerics : true;
         bool m_hasParamsWithMultiUBs : true;

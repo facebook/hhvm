@@ -5160,7 +5160,7 @@ OPTBLD_INLINE void iopVerifyImplicitContextState() {
   auto const func = vmfp()->func();
   assertx(!func->hasCoeffectRules());
   assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
-  if (!func->isPolicyShardedMemoize() &&
+  if (!func->isKeyedByImplicitContextMemoize() &&
       vmfp()->providedCoeffectsForCall(false).canCall(
         RuntimeCoeffects::leak_safe_shallow())) {
     // We are in a memoized that can call [defaults] code or any escape

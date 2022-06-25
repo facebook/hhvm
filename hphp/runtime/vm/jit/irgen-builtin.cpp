@@ -2541,7 +2541,7 @@ void emitVerifyImplicitContextState(IRGS& env) {
   auto const func = curFunc(env);
   assertx(!func->hasCoeffectRules());
   assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
-  if (!func->isPolicyShardedMemoize() &&
+  if (!func->isKeyedByImplicitContextMemoize() &&
       providedCoeffectsKnownStatically(env).canCall(
         RuntimeCoeffects::leak_safe_shallow())) {
     // We are in a memoized that can call [defaults] code or any escape

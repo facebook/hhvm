@@ -563,8 +563,8 @@ inline bool Func::isMemoizeWrapperLSB() const {
   return shared()->m_allFlags.m_isMemoizeWrapperLSB;
 }
 
-inline bool Func::isPolicyShardedMemoize() const {
-  return shared()->m_allFlags.m_isPolicyShardedMemoize;
+inline bool Func::isKeyedByImplicitContextMemoize() const {
+  return shared()->m_allFlags.m_isKeyedByImplicitContextMemoize;
 }
 
 inline bool Func::isMemoizeImpl() const {
@@ -579,7 +579,7 @@ inline const StringData* Func::memoizeImplName() const {
 inline size_t Func::numKeysForMemoize() const {
   return numParams()
          + (hasReifiedGenerics() ? 1 : 0)
-         + (isPolicyShardedMemoize() ? 1 : 0);
+         + (isKeyedByImplicitContextMemoize() ? 1 : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

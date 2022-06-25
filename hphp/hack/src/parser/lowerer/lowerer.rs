@@ -4081,6 +4081,25 @@ fn process_attribute_constructor_call<'a>(
     {
         raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
     }
+    // TODO(T123026333): Remove once migration is over
+    if env.codegen()
+        && naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&name.1)
+    {
+        let memo_name =
+            if name.1 == naming_special_names_rust::user_attributes::POLICY_SHARDED_MEMOIZE {
+                naming_special_names_rust::user_attributes::MEMOIZE
+            } else {
+                naming_special_names_rust::user_attributes::MEMOIZE_LSB
+            };
+        return Ok(ast::UserAttribute {
+            name: ast::Id(name.0, String::from(memo_name)),
+            params: vec![ast::Expr(
+                (),
+                Pos::make_none(),
+                ast::Expr_::String("KeyedByIC".into()),
+            )],
+        });
+    }
     let params = could_map(constructor_call_argument_list, env, |n, e| {
         is_valid_attribute_arg(n, e);
         p_expr(n, e)
@@ -4946,29 +4965,17 @@ fn check_effect_memoized<'a>(
             )
         }
     }
-    let has_policied = has_any_policied_context(contexts);
-    if has_policied {
-        if let Some(u) = user_attributes
-            .iter()
-            .find(|u| naming_special_names_rust::user_attributes::is_memoized_regular(&u.name.1))
-        {
-            raise_parsing_error_pos(
-                &u.name.0,
-                env,
-                &syntax_error::effect_policied_memoized(kind),
-            )
-        }
-    }
-    if let Some(u) = user_attributes
-        .iter()
-        .find(|u| naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&u.name.1))
-    {
-        if !has_policied {
-            raise_parsing_error_pos(
-                &u.name.0,
-                env,
-                &syntax_error::policy_sharded_memoized_without_policied(kind),
-            )
+    if env.is_typechecker() {
+        if let Some(u) = user_attributes.iter().find(|u| {
+            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&u.name.1)
+        }) {
+            if !has_any_policied_context(contexts) {
+                raise_parsing_error_pos(
+                    &u.name.0,
+                    env,
+                    &syntax_error::policy_sharded_memoized_without_policied(kind),
+                )
+            }
         }
     }
 }

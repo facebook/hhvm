@@ -97,11 +97,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
-    let should_emit_implicit_context = attributes.iter().any(|a| {
-        naming_special_names_rust::user_attributes::is_memoized_policy_sharded(
-            a.name.unsafe_as_str(),
-        )
-    });
+    let should_emit_implicit_context = hhas_attribute::is_keyed_by_ic_memoize(attributes.iter());
     let mut env = Env::default(alloc, RcOc::clone(&fd.namespace)).with_scope(scope);
     let (body_instrs, decl_vars) = make_memoize_function_code(
         emitter,

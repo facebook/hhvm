@@ -12,7 +12,7 @@ use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use ffi::{Slice, Str};
 use hhbc::{
-    hhas_attribute::deprecation_info,
+    hhas_attribute::{deprecation_info, is_keyed_by_ic_memoize},
     hhas_body::HhasBody,
     hhas_coeffects::HhasCoeffects,
     hhas_method::{HhasMethod, HhasMethodFlags},
@@ -42,10 +42,10 @@ fn is_memoize(method: &ast::Method_) -> bool {
 }
 
 fn is_memoize_lsb(method: &ast::Method_) -> bool {
-    method.user_attributes.iter().any(|a| {
-        user_attributes::MEMOIZE_LSB == a.name.1
-            || user_attributes::POLICY_SHARDED_MEMOIZE_LSB == a.name.1
-    })
+    method
+        .user_attributes
+        .iter()
+        .any(|a| user_attributes::MEMOIZE_LSB == a.name.1)
 }
 
 pub fn make_info<'arena>(
@@ -144,17 +144,12 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
-    let should_emit_implicit_context = attributes.iter().any(|a| {
-        naming_special_names_rust::user_attributes::is_memoized_policy_sharded(
-            a.name.unsafe_as_str(),
-        )
-    });
     let mut arg_flags = Flags::empty();
     arg_flags.set(Flags::IS_ASYNC, is_async);
     arg_flags.set(Flags::IS_REIFIED, is_reified);
     arg_flags.set(
         Flags::SHOULD_EMIT_IMPLICIT_CONTEXT,
-        should_emit_implicit_context,
+        is_keyed_by_ic_memoize(attributes.iter()),
     );
     let mut args = Args {
         info,

@@ -340,7 +340,7 @@ version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d7ac49647ca72e4ecf4a1ca559dbc7fa43e2c5620dbd2cf198e6bf4671de6f2"
 dependencies = [
- "clap 3.1.18",
+ "clap 3.2.6",
  "heck 0.4.0",
  "indexmap",
  "log",
@@ -388,16 +388,16 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.1.18"
+version = "3.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2dbdf4bdacb33466e854ce889eee8dfd5729abf7ccd7664d0a2d60cd384440b"
+checksum = "9f1fe12880bae935d142c8702d500c63a4e8634b6c3c57ad72bf978fc7b6249a"
 dependencies = [
  "atty",
  "bitflags",
  "clap_derive",
  "clap_lex",
  "indexmap",
- "lazy_static",
+ "once_cell",
  "regex",
  "strsim 0.10.0",
  "termcolor",
@@ -408,9 +408,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "3.1.18"
+version = "3.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25320346e922cffe59c0bbc5410c8d8784509efb321488971081313cb1e1a33c"
+checksum = "ed6db9e867166a43a53f7199b5e4d1f522a1e5bd626654be263c999ce59df39a"
 dependencies = [
  "heck 0.4.0",
  "proc-macro-error",
@@ -1224,7 +1224,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "cbindgen",
- "clap 3.1.18",
+ "clap 3.2.6",
 ]
 
 [[package]]
@@ -1364,7 +1364,7 @@ dependencies = [
  "bstr",
  "bumpalo",
  "bytecode_printer",
- "clap 3.1.18",
+ "clap 3.2.6",
  "compile",
  "decl_provider",
  "direct_decl_parser",
@@ -1644,7 +1644,7 @@ name = "hhvm_options"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 3.1.18",
+ "clap 3.2.6",
  "hdf",
  "hhvm_runtime_options",
 ]

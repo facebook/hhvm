@@ -762,7 +762,13 @@ void fcallObjMethodUnknown(
 
   auto const func = [&] {
     auto const cls = gen(env, LdObjClass, obj);
-    if (!methodName->hasConstVal()) {
+    // Note that we don't use this inline-caching mechanism (which caches the
+    // first class seen) for optimized translations, because they use more
+    // advanced, profile-guided method-lookup techniques.  If we get here within
+    // an optimized translation, it's because those techniques didn't apply, and
+    // therefore the inline caching mechanism in here is very likely to hurt
+    // more than help.
+    if (!methodName->hasConstVal() || env.context.kind == TransKind::Optimize) {
       auto const focData = OptClassAndFuncData { callerCtx, curFunc(env) };
       return gen(env, LdObjMethodD, focData, cls, methodName);
     }

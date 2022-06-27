@@ -116,6 +116,7 @@ struct Option {
   static bool ExternWorkerUseRichClient;
   static bool ExternWorkerUseZippyRichClient;
   static bool ExternWorkerUseP2P;
+  static bool ExternWorkerVerboseLogging;
   static int ExternWorkerThrottleRetries;
   static int ExternWorkerThrottleBaseWaitMSecs;
   static std::string ExternWorkerWorkingDir;

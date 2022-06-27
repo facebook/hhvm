@@ -145,7 +145,8 @@ Options Package::AsyncState::makeOptions() {
     .setUseEdenFS(RuntimeOption::EvalUseEdenFS)
     .setUseRichClient(Option::ExternWorkerUseRichClient)
     .setUseZippyRichClient(Option::ExternWorkerUseZippyRichClient)
-    .setUseP2P(Option::ExternWorkerUseP2P);
+    .setUseP2P(Option::ExternWorkerUseP2P)
+    .setVerboseLogging(Option::ExternWorkerVerboseLogging);
   if (Option::ExternWorkerTimeoutSecs > 0) {
     options.setTimeout(std::chrono::seconds{Option::ExternWorkerTimeoutSecs});
   }

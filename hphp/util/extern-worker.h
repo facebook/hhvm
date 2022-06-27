@@ -312,6 +312,12 @@ struct Options {
     return *this;
   }
 
+  // Whether to log verbosely
+  Options& setVerboseLogging(bool v) {
+    m_verboseLogging = v;
+    return *this;
+  }
+
   // Whether to cache execution of jobs. Not all implementations cache
   // execution (subprocess does not), so is a noop on those.
   Options& setCacheExecs(bool c) {
@@ -388,6 +394,7 @@ struct Options {
   std::chrono::seconds m_minTTL{std::chrono::hours{3}};
   std::chrono::milliseconds m_throttleBaseWait{0};
   size_t m_throttleRetries{0};
+  bool m_verboseLogging{false};
   bool m_cacheExecs{true};
   bool m_useEdenFS{true};
   bool m_cleanup{true};

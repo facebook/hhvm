@@ -286,7 +286,7 @@ namespace {
  * output directory.
  */
 struct SubprocessImpl : public Client::Impl {
-  explicit SubprocessImpl(const Options&);
+  SubprocessImpl(const Options&, Client&);
   ~SubprocessImpl() override;
 
   bool isSubprocess() const override { return true; }
@@ -295,14 +295,13 @@ struct SubprocessImpl : public Client::Impl {
 
   coro::Task<BlobVec> load(const RequestId&, IdVec) override;
   coro::Task<IdVec> store(const RequestId&, PathVec, BlobVec,
-                          bool, size_t*, size_t*) override;
+                          bool) override;
   coro::Task<std::vector<RefValVec>>
   exec(const RequestId&,
        const std::string&,
        RefValVec,
        std::vector<RefValVec>,
-       const folly::Range<const OutputType*>&,
-       bool*) override;
+       const folly::Range<const OutputType*>&) override;
 
 private:
   folly::fs::path newBlob();
@@ -328,8 +327,8 @@ private:
   std::atomic<size_t> m_nextExec;
 };
 
-SubprocessImpl::SubprocessImpl(const Options& options)
-  : Impl{"subprocess"}
+SubprocessImpl::SubprocessImpl(const Options& options, Client& parent)
+  : Impl{"subprocess", parent}
   , m_options{options}
   , m_root{newRoot(m_options)}
     // Cheap way of generating semi-unique integer:
@@ -427,13 +426,12 @@ coro::Task<BlobVec> SubprocessImpl::load(const RequestId& requestId,
 coro::Task<IdVec> SubprocessImpl::store(const RequestId& requestId,
                                         PathVec paths,
                                         BlobVec blobs,
-                                        bool,
-                                        size_t* read,
-                                        size_t* uploaded) {
-  // SubprocessImpl always "reads" and "uploads" the data (there's no
-  // caching of any kind).
-  if (read) *read = paths.size();
-  if (uploaded) *uploaded = paths.size() + blobs.size();
+                                        bool) {
+  // SubprocessImpl always "uploads" the data (there's no caching of
+  // any kind).
+  stats().filesUploaded += paths.size();
+  stats().blobsUploaded += blobs.size();
+
   // Create RefIds from the given paths, then write the blobs to disk,
   // then use their paths.
   auto out =
@@ -460,8 +458,7 @@ SubprocessImpl::exec(const RequestId& requestId,
                      const std::string& command,
                      RefValVec config,
                      std::vector<RefValVec> inputs,
-                     const folly::Range<const OutputType*>& output,
-                     bool* cached = nullptr) {
+                     const folly::Range<const OutputType*>& output) {
   auto const execPath = newExec();
   auto const configPath = execPath / "config";
   auto const inputsPath = execPath / "input";
@@ -470,9 +467,6 @@ SubprocessImpl::exec(const RequestId& requestId,
   FTRACE(4, "{} executing \"{}\" inside {} ({} runs)\n",
          requestId.tracePrefix(), command,
          execPath.native(), inputs.size());
-
-  // SubprocessImpl never caches
-  if (cached) *cached = false;
 
   // Set up the directory structure that the worker expects:
 
@@ -689,7 +683,7 @@ Client::Client(folly::Executor::KeepAlive<> executor,
   // try to use it.
   if (g_impl_hook &&
       m_options.m_useSubprocess != Options::UseSubprocess::Always) {
-    m_impl = g_impl_hook(m_options, executor);
+    m_impl = g_impl_hook(m_options, executor, *this);
   }
   // The hook can return nullptr even if registered. In each case, we
   // have no special implementation to use.
@@ -700,7 +694,7 @@ Client::Client(folly::Executor::KeepAlive<> executor,
     if (m_options.m_useSubprocess == Options::UseSubprocess::Never) {
       throw Error{"No non-subprocess impl available"};
     }
-    m_impl = std::make_unique<SubprocessImpl>(m_options);
+    m_impl = std::make_unique<SubprocessImpl>(m_options, *this);
   }
   FTRACE(2, "created \"{}\" impl\n", m_impl->name());
 }
@@ -711,19 +705,17 @@ Client::~Client() {
   m_fallbackImpl.reset();
 }
 
-std::unique_ptr<Client::Impl> Client::makeFallbackImpl() const {
+std::unique_ptr<Client::Impl> Client::makeFallbackImpl() {
   // This will be called once from within LockFreeLazy, so we only
   // emit this warning once.
   Logger::Warning(
     "Certain operations will use local fallback from this "
     "point on and may run slower."
   );
-  return std::make_unique<SubprocessImpl>(m_options);
+  return std::make_unique<SubprocessImpl>(m_options, *this);
 }
 
 coro::Task<Ref<std::string>> Client::storeFile(folly::fs::path path,
-                                               bool* read,
-                                               bool* uploaded,
                                                bool optimistic) {
   RequestId requestId{"store file"};
 
@@ -734,27 +726,22 @@ coro::Task<Ref<std::string>> Client::storeFile(folly::fs::path path,
     optimistic ? " (optimistically)" : ""
   );
 
-  size_t readCount;
-  size_t uploadedCount;
+  ++m_stats.files;
+
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
-    [&] (Impl& i, bool) {
+    [&] (Impl& i, bool isFallback) {
+      if (isFallback) ++m_stats.fileFallbacks;
       return i.store(
         requestId,
         PathVec{path},
         {},
-        optimistic,
-        &readCount,
-        &uploadedCount
+        optimistic
       );
     },
     wasFallback
   ));
   assertx(ids.size() == 1);
-  assertx(readCount <= 1);
-  assertx(uploadedCount <= 1);
-  if (read) *read = (readCount > 0);
-  if (uploaded) *uploaded = (uploadedCount > 0);
 
   Ref<std::string> ref{std::move(ids[0]), wasFallback};
   HPHP_CORO_MOVE_RETURN(ref);
@@ -762,8 +749,6 @@ coro::Task<Ref<std::string>> Client::storeFile(folly::fs::path path,
 
 coro::Task<std::vector<Ref<std::string>>>
 Client::storeFile(std::vector<folly::fs::path> paths,
-                  size_t* read,
-                  size_t* uploaded,
                   bool optimistic) {
   RequestId requestId{"store files"};
 
@@ -779,17 +764,18 @@ Client::storeFile(std::vector<folly::fs::path> paths,
     }
   }());
 
+  m_stats.files += paths.size();
+
   auto const DEBUG_ONLY size = paths.size();
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
-    [&] (Impl& i, bool) {
-      return i.store(requestId, paths, {}, optimistic, read, uploaded);
+    [&] (Impl& i, bool isFallback) {
+      if (isFallback) m_stats.fileFallbacks += paths.size();
+      return i.store(requestId, paths, {}, optimistic);
     },
     wasFallback
   ));
   assertx(ids.size() == size);
-  assertx(!read || *read <= ids.size());
-  assertx(!uploaded || *uploaded <= ids.size());
 
   auto out = from(ids)
     | move

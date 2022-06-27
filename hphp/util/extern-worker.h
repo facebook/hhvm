@@ -428,22 +428,14 @@ struct Client {
   // blobs. However, it might be more efficient as some
   // implementations can deal with on-disk files specially. Note that
   // the returned Refs are for strings, since you're uploading the
-  // contents of the file. If provided, "read" and/or "uploaded" will
-  // be set to true if the file was read and whether it was actually
-  // uploaded. If the file has been cached, neither may need to be
-  // done. For the vector variant, the out params will be set to the
-  // number of files actually read or uploaded. Optimistic mode (if
-  // supported) won't ever actually store anything. It will just
-  // generate the Refs and assume the data is already stored.
+  // contents of the file. Optimistic mode (if supported) won't ever
+  // actually store anything. It will just generate the Refs and
+  // assume the data is already stored.
   coro::Task<Ref<std::string>> storeFile(folly::fs::path,
-                                         bool* read = nullptr,
-                                         bool* uploaded = nullptr,
                                          bool optimistic = false);
 
   coro::Task<std::vector<Ref<std::string>>>
   storeFile(std::vector<folly::fs::path>,
-            size_t* read = nullptr,
-            size_t* uploaded = nullptr,
             bool optimistic = false);
 
   // Storing blobs. These take various different permutations of data,
@@ -475,20 +467,57 @@ struct Client {
   // params). The output of those job executions will be returned as a
   // vector of Refs. The exact format of the inputs and outputs is
   // determined (at compile time) by the job being run and matches the
-  // job's specification. If "cached" is provided, it will be set to
-  // true if the outputs are coming from a cached job and the job
-  // isn't actually run. If "optimistic" is set to true, then at least
-  // one of the inputs was stored using the optimistic flag. This
-  // means the inputs may not actually exist on the worker side. If it
-  // doesn't, the execution will fail (by throwing an exception), and
-  // the caller should (actually) store the data and retry. The flag
-  // disables automatic fallback.
+  // job's specification. If "optimistic" is set to true, then at
+  // least one of the inputs was stored using the optimistic
+  // flag. This means the inputs may not actually exist on the worker
+  // side. If it doesn't, the execution will fail (by throwing an
+  // exception), and the caller should (actually) store the data and
+  // retry. The flag disables automatic fallback.
   template <typename C> coro::Task<std::vector<typename Job<C>::ReturnT>>
   exec(const Job<C>& job,
        typename Job<C>::ConfigT config,
        std::vector<typename Job<C>::InputsT> inputs,
-       bool* cached = nullptr,
        bool optimistic = false);
+
+  // Statistics about the usage of this extern-worker.
+  struct Stats {
+    // Files whose contents were read from disk (on EdenFS we might
+    // not have to actually read the file).
+    std::atomic<size_t> filesRead{0};
+
+    // Total number of files and blobs we "stored" (they might have
+    // had to be uploaded).
+    std::atomic<size_t> files{0};
+    std::atomic<size_t> blobs{0};
+
+    // Number of times we had to query the back-end if a file or blob
+    // is present. Using "optimistic" uploading, we might be able to
+    // skip checking.
+    std::atomic<size_t> filesQueried{0};
+    std::atomic<size_t> blobsQueried{0};
+
+    // Number of files or blobs actually uploaded.
+    std::atomic<size_t> filesUploaded{0};
+    std::atomic<size_t> blobsUploaded{0};
+
+    // Number of times we fell back when uploading a file or blob.
+    std::atomic<size_t> fileFallbacks{0};
+    std::atomic<size_t> blobFallbacks{0};
+
+    // Number of blobs downloaded (because of a load call).
+    std::atomic<size_t> downloads{0};
+
+    // Total number of execs attempted (per input).
+    std::atomic<size_t> execs{0};
+    // Execs which hit the result cache
+    std::atomic<size_t> execCacheHits{0};
+    // Execs which fellback
+    std::atomic<size_t> execFallbacks{0};
+
+    // Execs in optimistic mode which succeeded
+    std::atomic<size_t> optimisticExecs{0};
+  };
+  const Stats& getStats() const { return m_stats; }
 
   // Synthetically force a fallback event when storing data or
   // executing a job, as if the implementation failed. This is for
@@ -503,6 +532,7 @@ private:
   std::unique_ptr<Impl> m_impl;
   LockFreeLazy<std::unique_ptr<Impl>> m_fallbackImpl;
   Options m_options;
+  Stats m_stats;
   bool m_forceFallback;
 
   template <typename T> coro::Task<Ref<T>> storeImpl(bool, T);
@@ -520,7 +550,7 @@ private:
   static const std::array<OutputType, 1> s_vecOutputType;
   static const std::array<OutputType, 1> s_optOutputType;
 
-  std::unique_ptr<Impl> makeFallbackImpl() const;
+  std::unique_ptr<Impl> makeFallbackImpl();
 
   TRACE_SET_MOD(extern_worker);
 };
@@ -555,34 +585,30 @@ struct Client::Impl {
                                    IdVec ids) = 0;
   // Store some number of files and/or blobs, returning their
   // associated RefIds (in the same order as requested, with files
-  // before blobs). "read" and "uploaded", if provided, are set to the
-  // number of files actually read, and the number of items actually
-  // uploaded to some storage. Some implementations can avoid reading
-  // files directly, and others can use caching to avoid having to
-  // upload already present data.
+  // before blobs).
   virtual coro::Task<IdVec> store(const RequestId& requestId,
                                   PathVec files,
                                   BlobVec blobs,
-                                  bool optimistic,
-                                  size_t* read,
-                                  size_t* uploaded) = 0;
+                                  bool optimistic) = 0;
 
   // Execute a job with the given sets of inputs. The job will be
   // executed on a worker, with the job's run function called once for
-  // each set of inputs. "cache", if provided, will be set to true if
-  // the output comes from a cached result and the job didn't actually
-  // run.
+  // each set of inputs.
   virtual coro::Task<std::vector<RefValVec>>
   exec(const RequestId& requestId,
        const std::string& command,
        RefValVec config,
        std::vector<RefValVec> inputs,
-       const folly::Range<const OutputType*>& output,
-       bool* cached) = 0;
+       const folly::Range<const OutputType*>& output) = 0;
 protected:
-  explicit Impl(std::string name) : m_name{std::move(name)} {}
+  Impl(std::string name, Client& parent)
+    : m_name{std::move(name)}
+    , m_parent{parent} {}
+
+  Client::Stats& stats() { return m_parent.m_stats; }
 private:
   std::string m_name;
+  Client& m_parent;
 };
 
 // Hook for providing an implementation. An implementation can set
@@ -590,7 +616,8 @@ private:
 using ImplHook =
   std::unique_ptr<Client::Impl>(*)(
     const Options&,
-    folly::Executor::KeepAlive<>
+    folly::Executor::KeepAlive<>,
+    Client&
   );
 extern ImplHook g_impl_hook;
 

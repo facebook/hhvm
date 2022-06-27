@@ -347,6 +347,7 @@ coro::Task<T> Client::load(Ref<T> r) {
   assertx(result.size() == 1);
   FTRACE(4, "{} blob is {} bytes\n",
          requestId.tracePrefix(), result[0].size());
+  ++m_stats.downloads;
   HPHP_CORO_RETURN(unblobify<T>(std::move(result[0])));
 }
 
@@ -441,6 +442,8 @@ coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
       return unblobify<typename decltype(tag)::Type>(std::move(blob));
     }
   );
+
+  m_stats.downloads += (sizeof...(Ts) + 1);
   HPHP_CORO_MOVE_RETURN(ret);
 }
 
@@ -509,6 +512,7 @@ coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   assertx(mainIdx == mainBlobs.size());
   assertx(fallbackIdx == fallbackBlobs.size());
 
+  m_stats.downloads += rs.size();
   HPHP_CORO_MOVE_RETURN(out);
 }
 
@@ -612,6 +616,7 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
   }
   assertx(out.size() == rs.size());
 
+  m_stats.downloads += (rs.size() * tupleSize);
   HPHP_CORO_MOVE_RETURN(out);
 }
 
@@ -624,18 +629,19 @@ template <typename T>
 coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
   RequestId requestId{"store blob"};
 
+  ++m_stats.blobs;
+
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
-    [&] (Impl& i, bool) {
+    [&] (Impl& i, bool isFallback) {
+      if (isFallback) ++m_stats.blobFallbacks;
       auto blob = blobify(t);
       FTRACE(2, "{} blob is {} bytes\n", requestId.tracePrefix(), blob.size());
       return i.store(
         requestId,
         {},
         BlobVec{std::move(blob)},
-        optimistic,
-        nullptr,
-        nullptr
+        optimistic
       );
     },
     wasFallback
@@ -656,9 +662,12 @@ coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::storeImpl(bool optimistic,
   FTRACE(2, "{} storing {} blobs\n",
          requestId.tracePrefix(), sizeof...(Ts) + 1);
 
+  m_stats.blobs += (sizeof...(Ts) + 1);
+
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
-    [&] (Impl& i, bool) {
+    [&] (Impl& i, bool isFallback) {
+      if (isFallback) m_stats.blobFallbacks += (sizeof...(Ts) + 1);
       BlobVec blobs{{ blobify(t), blobify(ts)... }};
       ONTRACE(4, [&] {
         for (auto const& b : blobs) {
@@ -670,9 +679,7 @@ coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::storeImpl(bool optimistic,
         requestId,
         {},
         std::move(blobs),
-        optimistic,
-        nullptr,
-        nullptr
+        optimistic
       );
     },
     wasFallback
@@ -728,9 +735,12 @@ coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
     optimistic ? " (optimistically)" : ""
   );
 
+  m_stats.blobs += ts.size();
+
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
-    [&] (Impl& i, bool) {
+    [&] (Impl& i, bool isFallback) {
+      if (isFallback) m_stats.blobFallbacks += ts.size();
       auto blobs = from(ts)
         | mapped([&] (const T& t) {
             auto blob = blobify(t);
@@ -744,9 +754,7 @@ coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
         requestId,
         {},
         std::move(blobs),
-        optimistic,
-        nullptr,
-        nullptr
+        optimistic
       );
     },
     wasFallback
@@ -779,9 +787,12 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
     optimistic ? " (optimistically)" : ""
   );
 
+  m_stats.blobs += (ts.size() * tupleSize);
+
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
-    [&] (Impl& i, bool) {
+    [&] (Impl& i, bool isFallback) {
+      if (isFallback) m_stats.blobFallbacks += (ts.size() * tupleSize);
       // Map each tuple to a vector of RefIds, then concat all of the
       // vectors together to get one flat list.
       auto blobs = from(ts)
@@ -806,9 +817,7 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
         requestId,
         {},
         std::move(blobs),
-        optimistic,
-        nullptr,
-        nullptr
+        optimistic
       );
     },
     wasFallback
@@ -840,7 +849,6 @@ template <typename C> coro::Task<std::vector<typename Job<C>::ReturnT>>
 Client::exec(const Job<C>& job,
              typename Job<C>::ConfigT config,
              std::vector<typename Job<C>::InputsT> inputs,
-             bool* cached,
              bool optimistic) {
   using namespace folly::gen;
   using namespace detail;
@@ -849,6 +857,8 @@ Client::exec(const Job<C>& job,
   FTRACE(2, "{} executing \"{}\" ({} runs)\n",
          requestId.tracePrefix(), job.name(),
          inputs.size());
+
+  m_stats.execs += inputs.size();
 
   // Return true if a Ref (or some container of them allowed as
   // inputs) came from the fallback implementation. If so, we'll force
@@ -924,9 +934,7 @@ Client::exec(const Job<C>& job,
         requestId,
         {},
         std::move(blobs),
-        false,
-        nullptr,
-        nullptr
+        false
       )
     );
     assertx(stores.size() == size);
@@ -1064,6 +1072,7 @@ Client::exec(const Job<C>& job,
   auto outputs = HPHP_CORO_AWAIT(coro::invoke(
     [&] () -> coro::Task<std::vector<RefValVec>> {
       if (useFallback) {
+        m_stats.execFallbacks += inputs.size();
         auto configRefVals = toRefVals(config);
         auto inputsRefVals = from(inputs)
           | mapped(toRefVals)
@@ -1075,8 +1084,7 @@ Client::exec(const Job<C>& job,
               job.name(),
               std::move(configRefVals),
               std::move(inputsRefVals),
-              outputTypes,
-              cached
+              outputTypes
             )
           )
         );
@@ -1091,7 +1099,10 @@ Client::exec(const Job<C>& job,
                 // If we've failed and we're now trying the fallback,
                 // we need to make all of the inputs be from the
                 // fallback executor.
-                if (fallback) HPHP_CORO_AWAIT(makeAllFallback());
+                if (fallback) {
+                  m_stats.execFallbacks += inputs.size();
+                  HPHP_CORO_AWAIT(makeAllFallback());
+                }
                 // Note we calculate the RefVals here within the
                 // lambda. This lets us move them into the exec call
                 // (so we don't need to copy in the common case where
@@ -1105,8 +1116,7 @@ Client::exec(const Job<C>& job,
                   job.name(),
                   std::move(configRefVals),
                   std::move(inputsRefVals),
-                  outputTypes,
-                  cached
+                  outputTypes
                 )));
               },
               useFallback,
@@ -1177,6 +1187,10 @@ Client::exec(const Job<C>& job,
       );
     }
   };
+
+  if (optimistic && supportsOptimistic()) {
+    m_stats.optimisticExecs += inputs.size();
+  }
 
   // Map over the outputs for each input set, and map them to Refs.
   auto out = from(outputs)

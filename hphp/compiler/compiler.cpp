@@ -361,6 +361,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   } else {
     Logger::LogLevel = Logger::LogInfo;
   }
+  Logger::Escape = false;
+  Logger::AlwaysEscapeLog = false;
 
   tl_heap.getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
@@ -545,18 +547,49 @@ int process(const CompilerOptions &po) {
     }
     if (!package.parse()) return 1;
 
+    auto const& stats = package.stats();
     Logger::FInfo(
-      "{} files parsed, {} cached, {} files read, {} files stored",
-      package.getTotalParses(),
-      package.getParseCacheHits(),
-      package.getFileReads(),
-      package.getFileStores()
+      "{:,} files parsed\n"
+      "  Execs: {:,} total, {:,} cache-hits, {:,} optimistically, {:,} fallback\n"
+      "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded, {:,} fallback\n"
+      "  Blobs: {:,} total, {:,} queried, {:,} uploaded, {:,} fallback\n"
+      "  {:,} downloads",
+      package.getTotalFiles(),
+      stats.execs.load(),
+      stats.execCacheHits.load(),
+      stats.optimisticExecs.load(),
+      stats.execFallbacks.load(),
+      stats.files.load(),
+      stats.filesRead.load(),
+      stats.filesQueried.load(),
+      stats.filesUploaded.load(),
+      stats.fileFallbacks.load(),
+      stats.blobs.load(),
+      stats.blobsQueried.load(),
+      stats.blobsUploaded.load(),
+      stats.blobFallbacks.load(),
+      stats.downloads.load()
     );
     ar->sample().setInt("parsing_micros", timer2.getMicroSeconds());
-    ar->sample().setInt("total_parses", package.getTotalParses());
-    ar->sample().setInt("parse_cache_hits", package.getParseCacheHits());
-    ar->sample().setInt("file_reads", package.getFileReads());
-    ar->sample().setInt("file_stores", package.getFileStores());
+    ar->sample().setInt("total_parses", package.getTotalFiles());
+
+    ar->sample().setInt("parse_total_execs", stats.execs.load());
+    ar->sample().setInt("parse_cache_hits", stats.execCacheHits.load());
+    ar->sample().setInt("parse_optimistically", stats.optimisticExecs.load());
+    ar->sample().setInt("parse_fallbacks", stats.execFallbacks.load());
+
+    ar->sample().setInt("parse_total_files", stats.files.load());
+    ar->sample().setInt("parse_file_reads", stats.filesRead.load());
+    ar->sample().setInt("parse_file_queries", stats.filesQueried.load());
+    ar->sample().setInt("parse_file_stores", stats.filesUploaded.load());
+    ar->sample().setInt("parse_file_fallbacks", stats.fileFallbacks.load());
+
+    ar->sample().setInt("parse_total_blobs", stats.blobs.load());
+    ar->sample().setInt("parse_blob_queries", stats.blobsQueried.load());
+    ar->sample().setInt("parse_blob_stores", stats.blobsUploaded.load());
+    ar->sample().setInt("parse_blob_fallbacks", stats.blobFallbacks.load());
+
+    ar->sample().setInt("parse_total_loads", stats.downloads.load());
   }
 
   // Start asynchronously destroying the async state, since it may

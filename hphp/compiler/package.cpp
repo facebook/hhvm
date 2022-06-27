@@ -160,9 +160,6 @@ Options Package::AsyncState::makeOptions() {
 Package::Package(const char* root, bool parseOnDemand)
   : m_parseFailed{false}
   , m_parseOnDemand{parseOnDemand}
-  , m_cacheHits{0}
-  , m_readFiles{0}
-  , m_storedFiles{0}
   , m_total{0}
 {
   m_root = FileUtil::normalizeDir(root);
@@ -950,15 +947,11 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
       [&] (bool opportunistic) ->
       coro::Task<std::pair<const Ref<Config>*, InputsT>> {
       // Store the inputs and get their refs
-      size_t readFiles = 0;
-      size_t storedFiles = 0;
       auto [fileRefs, metaRefs, optionRefs, configRef] =
         HPHP_CORO_AWAIT(
           coro::collect(
             m_async->m_client.storeFile(
               paths,
-              &readFiles,
-              &storedFiles,
               opportunistic
             ),
             m_async->m_client.storeMulti(
@@ -990,11 +983,6 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
         if (opportunistic) storedOptions = optionRefs;
       }
 
-      assertx(readFiles <= workItems);
-      assertx(storedFiles <= workItems);
-      m_readFiles += readFiles;
-      m_storedFiles += storedFiles;
-
       // "Tuplize" the input refs (so they're in the format that
       // extern-worker expects).
       std::vector<decltype(g_parseJob)::InputsT> inputs;
@@ -1012,18 +1000,15 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
     auto const doExec = [&] (auto inputs,
                              bool opportunistic) -> coro::Task<OutputsT> {
       // Run the job. This does the parsing.
-      bool cached = false;
       auto outputRefs = HPHP_CORO_AWAIT(
         m_async->m_client.exec(
           g_parseJob,
           std::make_tuple(*inputs.first),
           std::move(inputs.second),
-          &cached,
           opportunistic
         )
       );
       assertx(outputRefs.size() == workItems);
-      if (cached) m_cacheHits += workItems;
       HPHP_CORO_MOVE_RETURN(outputRefs);
     };
 

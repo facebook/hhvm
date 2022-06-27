@@ -473,6 +473,9 @@ int main(int argc, char** argv) try {
   rds::local::init();
   SCOPE_EXIT { rds::local::fini(); };
 
+  Logger::Escape = false;
+  Logger::AlwaysEscapeLog = false;
+
   Hdf config;
   IniSetting::Map ini = IniSetting::Map::object;
 

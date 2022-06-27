@@ -38,6 +38,7 @@ let typed_linters =
     Linter_xhp_attr_value.handler;
     Linter_pointless_booleans.handler;
     Linter_comparing_booleans.handler;
+    Linter_unconditional_recursion.handler;
   ]
   @ Linting_service.typed_linters
 

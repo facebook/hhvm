@@ -433,3 +433,10 @@ let comparing_booleans p name value =
       "Consider changing this statement to " ^ "(!" ^ name ^ ") instead"
   in
   Lints.add Codes.comparing_booleans Lint_advice p msg
+
+let unconditional_recursion p =
+  Lints.add
+    Codes.unconditional_recursion
+    Lint_error
+    p
+    "There is no condition to terminate this recursive function"

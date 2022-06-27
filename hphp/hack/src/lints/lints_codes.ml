@@ -100,4 +100,6 @@ module Codes = struct
   let comparing_booleans = 5643
 
   let pointless_booleans_expression = 5644
+
+  let unconditional_recursion = 5645
 end

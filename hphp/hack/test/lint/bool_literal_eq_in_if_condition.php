@@ -4,8 +4,8 @@ function check1(bool $x): int {
     return 1;
   }
 }
-function check2(bool $x): int {
-  if ($x == false) {
+function check2(bool $y): int {
+  if ($y == false) {
     return 2;
   }
 }
@@ -21,8 +21,8 @@ function check4(bool $x): int {
   }
 }
 
-function check5(bool $x): int {
-  if ($x === true) {
+function check5(bool $y): int {
+  if ($y === true) {
     return 1;
   }
 }

@@ -427,9 +427,9 @@ let calling_pointless_boolean p txt =
 
 let comparing_booleans p name value =
   let msg =
-    match value with
-    | true -> "Consider changing this statement to " ^ "(" ^ name ^ ") instead"
-    | false ->
+    if value then
+      "Consider changing this statement to " ^ "(" ^ name ^ ") instead"
+    else
       "Consider changing this statement to " ^ "(!" ^ name ^ ") instead"
   in
   Lints.add Codes.comparing_booleans Lint_advice p msg

@@ -1,38 +1,38 @@
 <?hh
 
-public function check1 (int $x, int $y, mixed $z1): int {
+function check1 (int $x, int $y, mixed $z1): int {
      ($x === 1) && true; // pointless
      return 1;
 }
-public function check2 (int $x, int $y, mixed $z1): int {
+function check2 (int $x, int $y, mixed $z1): int {
      ($x === 2) || false; // pointless
      return 1;
 }
-public function check3 (int $x, int $y, mixed $z1): int {
+function check3 (int $x, int $y, mixed $z1): int {
      ($x === 3) && false; // always false
      return 1;
 }
-public function check4 (int $x, int $y, mixed $z1): int {
+function check4 (int $x, int $y, mixed $z1): int {
      ($x > 3) && false; // always false
      return 1;
 }
-public function check5 (int $x, int $y, mixed $z1): int {
+function check5 (int $x, int $y, mixed $z1): int {
      true || false; // always true
      return 1;
 }
-public function check6 (int $x, int $y, mixed $z1): int {
+function check6 (int $x, int $y, mixed $z1): int {
      false && ($x === 3); // always false
      return 1;
 }
-public function check7 (int $x, int $y, mixed $z1): int {
+function check7 (int $x, int $y, mixed $z1): int {
      ($x === 3) && ($y === 3); // shouldn't give lint
      return 1;
 }
-public function check8 (int $x, int $y, mixed $z1): int {
+function check8 (int $x, int $y, mixed $z1): int {
      $x > 3 && false; // always false
      return 1;
 }
-public function check9 (int $x, int $y, mixed $z1): int {
+function check9 (int $x, int $y, mixed $z1): int {
      $z1 && false; //pointless boolean should not be detected
      return 1;
 }

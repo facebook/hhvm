@@ -112,6 +112,12 @@ struct Error : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 
+// Thrown by some implementations if the backend is busy. Depending on
+// configuration, we might retry the action automatically.
+struct Throttle : public Error {
+  using Error::Error;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -345,6 +351,21 @@ struct Options {
     return *this;
   }
 
+  // If the backend is busy, retry the action this number of times (0
+  // disables retrying).
+  Options& setThrottleRetries(size_t r) {
+    m_throttleRetries = r;
+    return *this;
+  }
+
+  // Each time we retry because of throttling, we will wait up to
+  // twice as long as the previous time. This is the amount of time we
+  // wait the first time (so everything is scaled from it).
+  Options& setThrottleBaseWait(std::chrono::milliseconds m) {
+    m_throttleBaseWait = m;
+    return *this;
+  }
+
   // The below options are RE specific and not documented:
   Options& setUseRichClient(bool b) {
     m_useRichClient = b;
@@ -365,6 +386,8 @@ struct Options {
   folly::fs::path m_workingDir{folly::fs::temp_directory_path()};
   std::chrono::seconds m_timeout{std::chrono::minutes{15}};
   std::chrono::seconds m_minTTL{std::chrono::hours{3}};
+  std::chrono::milliseconds m_throttleBaseWait{0};
+  size_t m_throttleRetries{0};
   bool m_cacheExecs{true};
   bool m_useEdenFS{true};
   bool m_cleanup{true};
@@ -516,6 +539,8 @@ struct Client {
 
     // Execs in optimistic mode which succeeded
     std::atomic<size_t> optimisticExecs{0};
+
+    std::atomic<size_t> throttles{0};
   };
   const Stats& getStats() const { return m_stats; }
 
@@ -541,7 +566,10 @@ private:
   coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> storeImpl(bool, T, Ts...);
 
   template <typename T, typename F>
-  coro::Task<T> tryWithFallback(F, bool&, bool noFallback = false);
+  coro::Task<T> tryWithThrottling(const F&);
+
+  template <typename T, typename F>
+  coro::Task<T> tryWithFallback(const F&, bool&, bool noFallback = false);
 
   template <typename T> static T unblobify(std::string&&);
   template <typename T> static std::string blobify(T&&);
@@ -606,9 +634,19 @@ protected:
     , m_parent{parent} {}
 
   Client::Stats& stats() { return m_parent.m_stats; }
+
+  template <typename T, typename F>
+  static coro::Task<T> tryWithThrottling(size_t,
+                                         std::chrono::milliseconds,
+                                         std::atomic<size_t>&,
+                                         const F&);
 private:
   std::string m_name;
   Client& m_parent;
+
+  static void throttleSleep(size_t, std::chrono::milliseconds);
+
+  friend struct Client;
 };
 
 // Hook for providing an implementation. An implementation can set

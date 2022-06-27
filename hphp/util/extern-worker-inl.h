@@ -295,18 +295,42 @@ inline bool Client::supportsOptimistic() const {
   return m_impl->supportsOptimistic() && !m_impl->isDisabled();
 }
 
+// Run the given callable, retrying if Throttle is thrown, until the
+// configured retry limit is reached.
+template <typename T, typename F>
+coro::Task<T> Client::tryWithThrottling(const F& f) {
+  HPHP_CORO_RETURN(
+    HPHP_CORO_AWAIT(
+      Impl::tryWithThrottling<T>(
+        m_options.m_throttleRetries,
+        m_options.m_throttleBaseWait,
+        m_stats.throttles,
+        f
+      )
+    )
+  );
+}
+
 // Run the given callable F with the normal implementation. If it
 // throws an Error, set didFallback to true, and attempt to re-run F
 // with the fallback implementation.
 template <typename T, typename F>
-coro::Task<T> Client::tryWithFallback(F f, bool& didFallback, bool noFallback) {
+coro::Task<T> Client::tryWithFallback(const F& f,
+                                      bool& didFallback,
+                                      bool noFallback) {
   // If we're forcing fallbacks, or if the main implementation has
   // disabled itself, go straight to the fallback case.
   if (!m_forceFallback && !m_impl->isDisabled()) {
     try {
       // Attempt the normal implementation.
       didFallback = false;
-      HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f(*m_impl, false)));
+      HPHP_CORO_RETURN(
+        HPHP_CORO_AWAIT(
+          tryWithThrottling<T>(
+            [&] { return f(*m_impl, false); }
+          )
+        )
+      );
     } catch (const Error& exn) {
       // It failed. If the main implementation *is* the subprocess
       // implementation, there's no point in trying again. Just
@@ -343,7 +367,9 @@ coro::Task<T> Client::load(Ref<T> r) {
   // Get the appropriate implementation (it could have been created by
   // a fallback implementation), and forward the request to it.
   auto& impl = r.m_fromFallback ? *m_fallbackImpl.rawGet() : *m_impl;
-  auto result = HPHP_CORO_AWAIT(impl.load(requestId, IdVec{std::move(r.m_id)}));
+  auto result = HPHP_CORO_AWAIT(tryWithThrottling<BlobVec>(
+    [&] { return impl.load(requestId, IdVec{r.m_id}); }
+  ));
   assertx(result.size() == 1);
   FTRACE(4, "{} blob is {} bytes\n",
          requestId.tracePrefix(), result[0].size());
@@ -392,8 +418,13 @@ coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
   // Do the loads from either implementation (in the normal case, only
   // one of these will be executed).
   auto mainBlobs = !main.empty()
-    ? HPHP_CORO_AWAIT(m_impl->load(requestId, std::move(main)))
+    ? HPHP_CORO_AWAIT(
+        tryWithThrottling<BlobVec>(
+          [&] { return m_impl->load(requestId, main); }
+        )
+      )
     : BlobVec{};
+  // Fallback impl cannot throttle
   auto fallbackBlobs = !fallback.empty()
     ? HPHP_CORO_AWAIT(
         m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
@@ -475,8 +506,13 @@ coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   // Do the loads from either implementation (in the normal case, only
   // one of these will be executed).
   auto mainBlobs = !main.empty()
-    ? HPHP_CORO_AWAIT(m_impl->load(requestId, std::move(main)))
+    ? HPHP_CORO_AWAIT(
+        tryWithThrottling<BlobVec>(
+          [&] { return m_impl->load(requestId, main); }
+        )
+      )
     : BlobVec{};
+  // Fallback impl cannot throttle
   auto fallbackBlobs = !fallback.empty()
     ? HPHP_CORO_AWAIT(
         m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
@@ -563,8 +599,13 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
   // Do the loads from either implementation (in the normal case, only
   // one of these will be executed).
   auto mainBlobs = !main.empty()
-    ? HPHP_CORO_AWAIT(m_impl->load(requestId, std::move(main)))
+    ? HPHP_CORO_AWAIT(
+        tryWithThrottling<BlobVec>(
+          [&] { return m_impl->load(requestId, main); }
+        )
+      )
     : BlobVec{};
+  // Fallback impl cannot throttle
   auto fallbackBlobs = !fallback.empty()
     ? HPHP_CORO_AWAIT(
         m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
@@ -925,7 +966,11 @@ Client::exec(const Job<C>& job,
     // Otherwise load just those from the non-fallback implementation
     // (if this fails, there's nothing we can do).
     auto const DEBUG_ONLY size = ids.size();
-    auto blobs = HPHP_CORO_AWAIT(m_impl->load(requestId, std::move(ids)));
+    auto blobs = HPHP_CORO_AWAIT(
+      tryWithThrottling<BlobVec>(
+        [&] { return m_impl->load(requestId, ids); }
+      )
+    );
     assertx(blobs.size() == size);
 
     // Then store them with the fallback implementation.
@@ -1227,6 +1272,39 @@ template <typename T> std::string Client::blobify(T&& t) {
     // "attach" the BlobEncoder's buffer into the std::string without
     // copying.
     return std::string{(const char*)encoder.data(), encoder.size()};
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// Run the given callable. If it throws Throttle, sleep for some
+// amount of time, then retry. Repeat the process until the max number
+// of retries is reached. Each retry will sleep longer.
+template <typename T, typename F>
+coro::Task<T> Client::Impl::tryWithThrottling(size_t retries,
+                                              std::chrono::milliseconds wait,
+                                              std::atomic<size_t>& throttles,
+                                              const F& f) {
+  try {
+    // If no retries, just run it normally
+    if (retries == 0) {
+      HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f()));
+    }
+    for (size_t i = 0; i < retries-1; ++i) {
+      try {
+        HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f()));
+      } catch (const Throttle&) {
+        ++throttles;
+        throttleSleep(i, wait);
+      }
+    }
+    // The last retry will just let whatever throws escape, since we
+    // won't rerun.
+    HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f()));
+  } catch (const Throttle& exn) {
+    // Don't let a Throttle escape from here. Convert it to a normal
+    // Error. This keeps us from getting nested throttles.
+    throw Error{exn.what()};
   }
 }
 

@@ -152,6 +152,14 @@ Options Package::AsyncState::makeOptions() {
   if (!Option::ExternWorkerWorkingDir.empty()) {
     options.setWorkingDir(Option::ExternWorkerWorkingDir);
   }
+  if (Option::ExternWorkerThrottleRetries >= 0) {
+    options.setThrottleRetries(Option::ExternWorkerThrottleRetries);
+  }
+  if (Option::ExternWorkerThrottleBaseWaitMSecs >= 0) {
+    options.setThrottleBaseWait(
+      std::chrono::milliseconds{Option::ExternWorkerThrottleBaseWaitMSecs}
+    );
+  }
   return options;
 }
 

@@ -75,6 +75,9 @@ bool Option::ExternWorkerUseZippyRichClient = true;
 bool Option::ExternWorkerUseP2P = true;
 std::string Option::ExternWorkerWorkingDir;
 
+int Option::ExternWorkerThrottleRetries = 7;
+int Option::ExternWorkerThrottleBaseWaitMSecs = 25;
+
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
 
@@ -242,6 +245,12 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                ExternWorkerUseZippyRichClient);
   Config::Bind(ExternWorkerUseP2P, ini, config, "ExternWorker.UseP2P",
                ExternWorkerUseP2P);
+  Config::Bind(ExternWorkerThrottleRetries, ini, config,
+               "ExternWorker.ThrottleRetries",
+               ExternWorkerThrottleRetries);
+  Config::Bind(ExternWorkerThrottleBaseWaitMSecs, ini, config,
+               "ExternWorker.ThrottleBaseWaitMSecs",
+               ExternWorkerThrottleBaseWaitMSecs);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

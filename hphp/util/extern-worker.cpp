@@ -788,4 +788,34 @@ Client::storeFile(std::vector<folly::fs::path> paths,
 
 //////////////////////////////////////////////////////////////////////
 
+// Sleep some random amount corresponding to the number of retries
+// we've tried.
+void Client::Impl::throttleSleep(size_t retry,
+                                 std::chrono::milliseconds base) {
+  // Each retry doubles the size of the window. We select a random
+  // amount from within that.
+  auto const scale = uint64_t{1} << std::min(retry, size_t{16});
+  auto const window = std::chrono::microseconds{base} * scale;
+
+  static std::mt19937_64 engine = [&] {
+    std::random_device rd;
+    std::seed_seq seed{rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()};
+    return std::mt19937_64{seed};
+  }();
+
+  std::uniform_int_distribution<> distrib(0, window.count());
+  auto const wait = [&] {
+    static std::mutex lock;
+    std::lock_guard<std::mutex> _{lock};
+    return std::chrono::microseconds{distrib(engine)};
+  }();
+
+  // Use normal sleep here, not coro friendly sleep. The whole purpose
+  // is to slow down execution and using a coro sleep will just allow
+  // a lot of other actions to run.
+  std::this_thread::sleep_for(wait);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }

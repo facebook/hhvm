@@ -553,7 +553,7 @@ int process(const CompilerOptions &po) {
       "  Execs: {:,} total, {:,} cache-hits, {:,} optimistically, {:,} fallback\n"
       "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded, {:,} fallback\n"
       "  Blobs: {:,} total, {:,} queried, {:,} uploaded, {:,} fallback\n"
-      "  {:,} downloads",
+      "  {:,} downloads, {:,} throttles",
       package.getTotalFiles(),
       stats.execs.load(),
       stats.execCacheHits.load(),
@@ -568,7 +568,8 @@ int process(const CompilerOptions &po) {
       stats.blobsQueried.load(),
       stats.blobsUploaded.load(),
       stats.blobFallbacks.load(),
-      stats.downloads.load()
+      stats.downloads.load(),
+      stats.throttles.load()
     );
     ar->sample().setInt("parsing_micros", timer2.getMicroSeconds());
     ar->sample().setInt("total_parses", package.getTotalFiles());
@@ -590,6 +591,7 @@ int process(const CompilerOptions &po) {
     ar->sample().setInt("parse_blob_fallbacks", stats.blobFallbacks.load());
 
     ar->sample().setInt("parse_total_loads", stats.downloads.load());
+    ar->sample().setInt("parse_throttles", stats.throttles.load());
   }
 
   // Start asynchronously destroying the async state, since it may

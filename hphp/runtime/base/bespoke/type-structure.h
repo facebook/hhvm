@@ -116,7 +116,7 @@ struct TypeStructure : BespokeArray {
   BESPOKE_LAYOUT_FUNCTIONS(TypeStructure)
 #undef X
 
-  static void setField(TypeStructure* tad, StringData* k, TypedValue v);
+  static bool setField(TypeStructure* tad, StringData* k, TypedValue v);
   static ssize_t numFields(Kind);
 
   bool nullable() const { return m_extra_lo8 & (1 << kNullableOffset); }
@@ -139,10 +139,7 @@ private:
   void clearBitField(BitFieldOffsets offset) {
     m_extra_lo8 &= ~(1 << offset);
   }
-  void setBitField(uint8_t val, BitFieldOffsets offset) {
-    clearBitField(offset);
-    m_extra_lo8 |= val << offset;
-  }
+  void setBitField(TypedValue v, BitFieldOffsets offset);
   bool containsField(const StringData* k) const;
 
   StringData* m_alias;
@@ -187,28 +184,28 @@ private:
   StringData* m_name;
 };
 
-struct TypeStructureWithClassishTypes : TypeStructure {
+struct TSWithClassishTypes : TypeStructure {
 private:
   StringData* m_classname;
   bool m_exact;
 };
-struct TSClass : TypeStructureWithClassishTypes {};
-struct TSInterface : TypeStructureWithClassishTypes {};
-struct TSEnum : TypeStructureWithClassishTypes {};
-struct TSTrait : TypeStructureWithClassishTypes {};
+struct TSClass : TSWithClassishTypes {};
+struct TSInterface : TSWithClassishTypes {};
+struct TSEnum : TSWithClassishTypes {};
+struct TSTrait : TSWithClassishTypes {};
 
-struct TypeStructureWithGenericTypes : TypeStructure {
+struct TSWithGenericTypes : TypeStructure {
 private:
   ArrayData* m_generic_types;
 };
-struct TSDict : TypeStructureWithGenericTypes {};
-struct TSVec : TypeStructureWithGenericTypes {};
-struct TSKeyset : TypeStructureWithGenericTypes {};
-struct TSVecOrDict : TypeStructureWithGenericTypes {};
-struct TSDarray : TypeStructureWithGenericTypes {};
-struct TSVarray : TypeStructureWithGenericTypes {};
-struct TSVarrayOrDarray : TypeStructureWithGenericTypes {};
-struct TSAnyArray : TypeStructureWithGenericTypes {};
+struct TSDict : TSWithGenericTypes {};
+struct TSVec : TSWithGenericTypes {};
+struct TSKeyset : TSWithGenericTypes {};
+struct TSVecOrDict : TSWithGenericTypes {};
+struct TSDarray : TSWithGenericTypes {};
+struct TSVarray : TSWithGenericTypes {};
+struct TSVarrayOrDarray : TSWithGenericTypes {};
+struct TSAnyArray : TSWithGenericTypes {};
 
 
 //////////////////////////////////////////////////////////////////////////////

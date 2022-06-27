@@ -41,9 +41,34 @@ const TypeStructure* TypeStructure::As(const ArrayData* ad) {
   return As(const_cast<ArrayData*>(ad));
 }
 
+namespace {
+
 size_t getSizeOfTypeStruct(Kind kind) {
   // TODO: return different sizes for children structs
   return sizeof(TypeStructure);
+}
+void moveFieldToVanilla(ArrayData* vad, StringData* key, TypedValue tv) {
+  auto const type = tv.m_type;
+  if (type == KindOfUninit || (type == KindOfBoolean && !val(tv).num)) {
+    return;
+  }
+  auto const res = VanillaDict::SetStrMove(vad, key, tv);
+  assertx(vad == res);
+  if (isRefcountedType(type)) tvIncRefGen(tv);
+  vad = res;
+}
+
+void setStringField(StringData*& field, TypedValue v) {
+  assertx(tvIsString(v));
+  if (field) field->decRefAndRelease();
+  field = val(v).pstr;
+}
+void setArrayField(ArrayData*& field, TypedValue v) {
+  assertx(tvIsArrayLike(v));
+  if (field) field->decRefAndRelease();
+  field = val(v).parr;
+}
+
 }
 
 size_t TypeStructure::sizeIndex(Kind kind) {
@@ -89,44 +114,47 @@ template <typename Type>
 void setFields(Type* result, ArrayData* ad) {
   VanillaDict::IterateKV(VanillaDict::as(ad), [&](auto k, auto v) {
     assertx(tvIsString(k));
-    Type::setField(result, val(k).pstr, v);
-    tvIncRefGen(v);
+    auto const res = Type::setField(result, val(k).pstr, v);
+    if (res && isRefcountedType(v.m_type)) tvIncRefGen(v);
   });
 }
 
+void TypeStructure::setBitField(TypedValue v, BitFieldOffsets offset) {
+  assertx(tvIsBool(v));
+  uint8_t val = v.val().num;
+  clearBitField(offset);
+  m_extra_lo8 |= val << offset;
+}
+
 // caller must incref TypedValue
-void TypeStructure::setField(TypeStructure* tad, StringData* k, TypedValue v) {
-  if (s_kind.same(k)) {
+bool TypeStructure::setField(TypeStructure* tad, StringData* k, TypedValue v) {
+  auto compare = k->isStatic()
+    ? [](StringData* a, StringData* b) { return a == b; }
+    : [](StringData* a, StringData* b) { return a->same(b); };
+
+  if (compare(s_kind.get(), k)) {
     assertx(tvIsInt(v));
     tad->m_extra_hi8 = safe_cast<uint8_t>(val(v).num);
-  } else if (s_nullable.same(k)) {
-    assertx(tvIsBool(v));
-    tad->setBitField(val(v).num, kNullableOffset);
-  } else if (s_soft.same(k)) {
-    assertx(tvIsBool(v));
-    tad->setBitField(val(v).num, kSoftOffset);
-  } else if (s_like.same(k)) {
-    assertx(tvIsBool(v));
-    tad->setBitField(val(v).num, kLikeOffset);
-  } else if (s_opaque.same(k)) {
-    assertx(tvIsBool(v));
-    tad->setBitField(val(v).num, kOpaqueOffset);
-  } else if (s_optional_shape_field.same(k)) {
-    assertx(tvIsBool(v));
-    tad->setBitField(val(v).num, kOptionalShapeFieldOffset);
-  } else if (s_alias.same(k)) {
-    assertx(tvIsString(v));
-    if (tad->m_alias) tad->m_alias->decRefAndRelease();
-    tad->m_alias = val(v).pstr;
-  } else if (s_typevars.same(k)) {
-    assertx(tvIsString(v));
-    if (tad->m_typevars) tad->m_typevars->decRefAndRelease();
-    tad->m_typevars = val(v).pstr;
-  } else if (s_typevar_types.same(k)) {
-    assertx(tvIsArrayLike(v));
-    if (tad->m_typevar_types) tad->m_typevar_types->decRefAndRelease();
-    tad->m_typevar_types = val(v).parr;
+  } else if (compare(s_nullable.get(), k)) {
+    tad->setBitField(v, kNullableOffset);
+  } else if (compare(s_soft.get(), k)) {
+    tad->setBitField(v, kSoftOffset);
+  } else if (compare(s_like.get(), k)) {
+    tad->setBitField(v, kLikeOffset);
+  } else if (compare(s_opaque.get(), k)) {
+    tad->setBitField(v, kOpaqueOffset);
+  } else if (compare(s_optional_shape_field.get(), k)) {
+    tad->setBitField(v, kOptionalShapeFieldOffset);
+  } else if (compare(s_alias.get(), k)) {
+    setStringField(tad->m_alias, v);
+  } else if (compare(s_typevars.get(), k)) {
+    setStringField(tad->m_typevars, v);
+  } else if (compare(s_typevar_types.get(), k)) {
+    setArrayField(tad->m_typevar_types, v);
+  } else {
+    return false;
   }
+  return true;
 }
 
 TypeStructure* TypeStructure::MakeFromVanilla(ArrayData* ad) {
@@ -180,13 +208,7 @@ ArrayData* TypeStructure::escalateWithCapacity(
 #define X(Field, FieldString, KindOfType) {                           \
   auto const key = s_##FieldString.get();                             \
   auto const tv = TypeStructure::NvGetStr(this, key);                 \
-  if (tv.m_type != KindOfUninit &&                                    \
-      (tv.m_type != KindOfBoolean || tv.val().num)) {                 \
-    auto const res = VanillaDict::SetStrMove(ad, key, tv);            \
-    assertx(ad == res);                                               \
-    tvIncRefGen(tv);                                                  \
-    ad = res;                                                         \
-  }                                                                   \
+  moveFieldToVanilla(ad, key, tv);                                    \
 }
 TYPE_STRUCTURE_FIELDS
 #undef X
@@ -236,8 +258,12 @@ ssize_t TypeStructure::numFields(Kind kind) {
 }
 
 bool TypeStructure::containsField(const StringData* k) const {
+  auto compare = k->isStatic()
+    ? [](StringData* a, const StringData* b) { return a == b; }
+    : [](StringData* a, const StringData* b) { return a->same(b); };
+
 #define X(Field, FieldString, KindOfType) \
-  if (s_##FieldString.same(k)) return true;
+  if (compare(s_##FieldString.get(), k)) return true;
 TYPE_STRUCTURE_FIELDS
 #undef X
   return false;
@@ -306,7 +332,8 @@ TypedValue make_tv_safe(StringData* val) {
   return val ? make_tv<KindOfString>(val) : make_tv<KindOfUninit>();
 }
 TypedValue make_tv_safe(ArrayData* val) {
-  return val ? make_tv<KindOfDict>(val) : make_tv<KindOfUninit>();
+  if (val == nullptr) return make_tv<KindOfUninit>();
+  return val->isDictType() ? make_tv<KindOfDict>(val) : make_tv<KindOfVec>(val);
 }
 
 }
@@ -351,8 +378,12 @@ TypedValue TypeStructure::NvGetInt(const TypeStructure*, int64_t) {
 
 TypedValue TypeStructure::NvGetStr(
     const TypeStructure* tad, const StringData* k) {
+  auto compare = k->isStatic()
+    ? [](StringData* a, const StringData* b) { return a == b; }
+    : [](StringData* a, const StringData* b) { return a->same(b); };
+
 #define X(Field, FieldString, KindOfType)                             \
-  if (s_##FieldString.same(k)) {                                      \
+  if (compare(s_##FieldString.get(), k)) {                            \
     return make_tv_safe(tad->Field());                                \
   }
 TYPE_STRUCTURE_FIELDS

@@ -86,7 +86,6 @@ TEST(BespokeTypeStructure, Methods) {
     auto tv = bespoke::TypeStructure::GetPosKey(ts, 1);
     EXPECT_TRUE(tv.m_type == KindOfString);
     EXPECT_TRUE(val(tv).pstr->same(soft));
-
     auto numFields = bespoke::TypeStructure::numFields(ts->typeKind());
     auto tvUninit = bespoke::TypeStructure::GetPosKey(ts, numFields + 5);
     EXPECT_TRUE(tvUninit.m_type == KindOfUninit);

@@ -458,7 +458,7 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   // Any native functions at this point are known to be
   // non-foldable, but other builtins might be, even if they
   // don't have the __Foldable attribute.
-  if (func->nativeInfo) return false;
+  if (func->isNative) return false;
 
   if (func->params.size()) return true;
 

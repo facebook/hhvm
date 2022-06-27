@@ -57,7 +57,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_bcmax(0)
   , name(n)
   , maxStackCells(0)
-  , hniReturnType(std::nullopt)
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
@@ -82,7 +81,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_bcmax(0)
   , name(n)
   , maxStackCells(0)
-  , hniReturnType(std::nullopt)
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
@@ -407,8 +405,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (isNative) {
     auto const ex = f->extShared();
 
-    ex->m_hniReturnType = hniReturnType;
-
     auto const info = getNativeInfo();
 
     Attr dummy = AttrNone;
@@ -676,7 +672,6 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (a)
     (m_bclen)
     (staticCoeffects)
-    (hniReturnType)
     (repoReturnType)
     (repoAwaitedReturnType)
     (docComment)

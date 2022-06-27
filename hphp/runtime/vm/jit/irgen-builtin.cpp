@@ -1819,10 +1819,10 @@ Type builtinReturnType(const Func* builtin) {
     // If this is a collection method which returns $this, use that fact to
     // infer the exact returning type. Otherwise try to use HNI declaration.
     if (collectionMethodReturnsThis(builtin)) {
-      assertx(builtin->hniReturnType() == KindOfObject);
+      assertx(builtin->returnTypeConstraint().asSystemlibType() == KindOfObject);
       return Type::ExactObj(builtin->implCls());
     }
-    if (auto const hniType = builtin->hniReturnType()) {
+    if (auto const hniType = builtin->returnTypeConstraint().asSystemlibType()) {
       return Type{*hniType};
     }
     return TInitCell;

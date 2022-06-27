@@ -573,7 +573,7 @@ bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   if (any(env.collect.opts & CollectionOpts::Speculating) ||
       func->attrs & AttrNoFCallBuiltin ||
       (func->cls && !(func->attrs & AttrStatic))  ||
-      !func->nativeInfo ||
+      !func->isNative ||
       func->params.size() >= Native::maxFCallBuiltinArgs() ||
       fca.hasGenerics() ||
       !RuntimeOption::EvalEnableCallBuiltin) {

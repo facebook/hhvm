@@ -254,7 +254,7 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
 void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CallBuiltin>();
   auto const callee = extra->callee;
-  auto const funcReturnType = callee->hniReturnType();
+  auto const funcReturnType = callee->returnTypeConstraint().asSystemlibType();
   auto const returnByValue = callee->isReturnByValue();
 
   auto& v = vmain(env);

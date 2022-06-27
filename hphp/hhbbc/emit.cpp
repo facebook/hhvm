@@ -987,7 +987,7 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.isAsync = func.isAsync;
   fe.isGenerator = func.isGenerator;
   fe.isPairGenerator = func.isPairGenerator;
-  fe.isNative = func.nativeInfo != nullptr;
+  fe.isNative = func.isNative;
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
   fe.isMemoizeWrapperLSB = func.isMemoizeWrapperLSB;
   fe.hasParamsWithMultiUBs = func.hasParamsWithMultiUBs;
@@ -1008,9 +1008,6 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
     }
   }
 
-  if (func.nativeInfo) {
-    fe.hniReturnType = func.nativeInfo->returnType;
-  }
   fe.retTypeConstraint = func.retTypeConstraint;
 
   fe.maxStackCells = info.maxStackDepth +

@@ -220,17 +220,6 @@ struct Local {
   uint32_t unusedName : 1;
 };
 
-/*
- * Extra information for function with a HNI native implementation.
- */
-struct NativeInfo {
-  /*
-   * Return type from the C++ implementation function, as an optional DataType;
-   * std::nullopt stands for a Variant return.
-   */
-  Optional<DataType> returnType;
-};
-
 using BlockVec = CompactVector<copy_ptr<Block>>;
 
 /*
@@ -254,11 +243,9 @@ struct FuncBase {
   CompactVector<ExnNode> exnNodes;
 
   /*
-   * For HNI-based extensions, additional information for functions
-   * with a native-implementation is here.  If this isn't a function
-   * with an HNI-based native implementation, this will be nullptr.
+   * Does this function have a native (C++) implementation?
    */
-  std::unique_ptr<NativeInfo> nativeInfo;
+  bool isNative : 1;
 
 private:
   /*

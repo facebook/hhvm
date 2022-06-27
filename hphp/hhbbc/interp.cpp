@@ -2154,7 +2154,7 @@ void in(ISS& env, const bc::NativeImpl&) {
     return doRet(env, objExact(resCls), true);
   }
 
-  if (env.ctx.func->nativeInfo) {
+  if (env.ctx.func->isNative) {
     return doRet(env, native_function_return_type(env.ctx.func), true);
   }
   doRet(env, TInitCell, true);

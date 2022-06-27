@@ -453,24 +453,6 @@ public:
   // Return type.                                                       [const]
 
   /*
-   * CPP builtin's return type. Returns std::nullopt if function is not a CPP
-   * builtin.
-   *
-   * There are a number of caveats regarding this value:
-   *
-   *    - If the return type is std::nullopt, the return is a Variant.
-   *
-   *    - If the return type is a string, array-like, object, ref, or resource
-   *      type, null may also be returned.
-   *
-   *    - Likewise, if the function is marked AttrParamCoerceModeNull, null
-   *      might also be returned.
-   *
-   *    - This list of caveats may be incorrect and/or incomplete.
-   */
-  MaybeDataType hniReturnType() const;
-
-  /*
    * Return type inferred by HHBBC's static analysis. TGen if no data is
    * available.
    */
@@ -1419,7 +1401,6 @@ private:
     Offset m_bclen;  // Only read if SharedData::m_bclen is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
-    MaybeDataType m_hniReturnType;
     RuntimeCoeffects m_coeffectEscapes{RuntimeCoeffects::none()};
     int64_t m_dynCallSampleRate;
     LowStringPtr m_docComment;

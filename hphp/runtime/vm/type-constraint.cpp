@@ -21,6 +21,7 @@
 #include <folly/Format.h>
 #include <folly/MapUtil.h>
 
+#include <hphp/runtime/base/datatype.h>
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
@@ -849,6 +850,19 @@ bool TypeConstraint::maybeStringCompatible() const {
   return
     isString() || isArrayKey() || isUnresolved() ||
     (isObject() && interface_supports_string(clsName()));
+}
+
+MaybeDataType TypeConstraint::asSystemlibType() const {
+  // Nullable and soft types are generally unknown: don't give an exact type.
+  if (isNullable() || isSoft()) return std::nullopt;
+  // TODO(T124220067) `noreturn` and `nothing` are their own non-"precise" types
+  // under the hood but for systemlib both of these become KindOfNull. The JIT
+  // and HPHP::Native::callFunc both expect this.
+  if (isNoReturn() || isNothing()) return KindOfNull;
+  // This is a kludge that replicates some unfortunate implicit behavior in
+  // systemlib: all unresolved types are assumed to be `KindOfObject`.
+  if (isUnresolved()) return KindOfObject;
+  return underlyingDataType();
 }
 
 void TypeConstraint::verifyParamFail(tv_lval val,

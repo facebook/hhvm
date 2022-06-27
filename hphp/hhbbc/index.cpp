@@ -2177,7 +2177,7 @@ std::mutex func_info_mutex;
 FuncInfo* create_func_info(IndexData& data, const php::Func* f) {
   auto fi = &data.funcInfo[f->idx];
   if (UNLIKELY(fi->func == nullptr)) {
-    if (f->nativeInfo) {
+    if (f->isNative) {
       std::lock_guard<std::mutex> g{func_info_mutex};
       if (fi->func) {
         assertx(fi->func == f);

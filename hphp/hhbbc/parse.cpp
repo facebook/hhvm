@@ -705,6 +705,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isMemoizeWrapper    = fe.isMemoizeWrapper;
   ret->isMemoizeWrapperLSB = fe.isMemoizeWrapperLSB;
   ret->isMemoizeImpl       = Func::isMemoizeImplName(fe.name);
+  ret->isNative            = fe.isNative;
   ret->isReified           = fe.userAttributes.find(s___Reified.get()) !=
                              fe.userAttributes.end();
   ret->isReadonlyReturn    = fe.attrs & AttrReadonlyReturn;
@@ -791,8 +792,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
       }
     }();
 
-    ret->nativeInfo                   = std::make_unique<php::NativeInfo>();
-    ret->nativeInfo->returnType       = fe.hniReturnType;
     if (f && ret->params.size()) {
       for (auto i = 0; i < ret->params.size(); i++) {
         auto& pi = ret->params[i];

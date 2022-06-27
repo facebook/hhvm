@@ -349,11 +349,6 @@ inline void Func::setCtiEntry(Offset base, uint32_t size) {
 ///////////////////////////////////////////////////////////////////////////////
 // Return type.
 
-inline MaybeDataType Func::hniReturnType() const {
-  auto const ex = extShared();
-  return ex ? ex->m_hniReturnType : std::nullopt;
-}
-
 inline RepoAuthType Func::repoReturnType() const {
   return shared()->m_repoReturnType;
 }

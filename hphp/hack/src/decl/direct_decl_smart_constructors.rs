@@ -2031,12 +2031,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 self.convert_tapply_to_tgeneric(tk),
                 self.convert_tapply_to_tgeneric(tv),
             ))),
-            Ty_::Ttuple(tys) => {
-                Ty_::Ttuple(self.slice(
+            Ty_::Ttuple(tys) => Ty_::Ttuple(
+                self.slice(
                     tys.iter()
                         .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
-                ))
-            }
+                ),
+            ),
             _ => return ty,
         };
         self.alloc(Ty(ty.0, ty_))
@@ -2980,25 +2980,24 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 let id_pos = class_id.0;
                 let pos = self.merge(id_pos, self.get_pos(type_arguments));
                 let type_arguments = type_arguments.as_slice(self.arena);
-                let ty_ =
-                    match type_arguments {
-                        [tk, tv] => {
-                            Ty_::TvecOrDict(self.alloc((
-                                self.node_to_ty(*tk)
-                                    .unwrap_or_else(|| self.tany_with_pos(id_pos)),
-                                self.node_to_ty(*tv)
-                                    .unwrap_or_else(|| self.tany_with_pos(id_pos)),
-                            )))
-                        }
-                        [tv] => {
-                            Ty_::TvecOrDict(self.alloc((
-                                self.vec_or_dict_key(pos),
-                                self.node_to_ty(*tv)
-                                    .unwrap_or_else(|| self.tany_with_pos(id_pos)),
-                            )))
-                        }
-                        _ => TANY_,
-                    };
+                let ty_ = match type_arguments {
+                    [tk, tv] => Ty_::TvecOrDict(
+                        self.alloc((
+                            self.node_to_ty(*tk)
+                                .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                            self.node_to_ty(*tv)
+                                .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                        )),
+                    ),
+                    [tv] => Ty_::TvecOrDict(
+                        self.alloc((
+                            self.vec_or_dict_key(pos),
+                            self.node_to_ty(*tv)
+                                .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                        )),
+                    ),
+                    _ => TANY_,
+                };
                 self.hint_ty(pos, ty_)
             }
             _ => {
@@ -3361,21 +3360,19 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         ellipsis: Self::Output,
     ) -> Self::Output {
         Node::FunParam(
-            self.alloc(
-                FunParamDecl {
-                    attributes: Node::Ignored(SK::Missing),
-                    visibility: Node::Ignored(SK::Missing),
-                    kind: ParamMode::FPnormal,
-                    readonly: false,
-                    hint,
-                    pos: self
-                        .get_pos_opt(hint)
-                        .unwrap_or_else(|| self.get_pos(ellipsis)),
-                    name: None,
-                    variadic: true,
-                    initializer: Node::Ignored(SK::Missing),
-                },
-            ),
+            self.alloc(FunParamDecl {
+                attributes: Node::Ignored(SK::Missing),
+                visibility: Node::Ignored(SK::Missing),
+                kind: ParamMode::FPnormal,
+                readonly: false,
+                hint,
+                pos: self
+                    .get_pos_opt(hint)
+                    .unwrap_or_else(|| self.get_pos(ellipsis)),
+                name: None,
+                variadic: true,
+                initializer: Node::Ignored(SK::Missing),
+            }),
         )
     }
 
@@ -4541,16 +4538,14 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         };
 
         Node::Const(
-            self.alloc(
-                ShallowClassConst {
-                    abstract_: ClassConstKind::CCConcrete,
-                    name: id.into(),
-                    type_: self
-                        .infer_const(name, value)
-                        .unwrap_or_else(|| self.tany_with_pos(id.0)),
-                    refs,
-                },
-            ),
+            self.alloc(ShallowClassConst {
+                abstract_: ClassConstKind::CCConcrete,
+                name: id.into(),
+                type_: self
+                    .infer_const(name, value)
+                    .unwrap_or_else(|| self.tany_with_pos(id.0)),
+                refs,
+            }),
         )
     }
 

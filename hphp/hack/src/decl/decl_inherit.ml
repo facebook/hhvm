@@ -197,7 +197,7 @@ let add_const name const acc =
 
 let add_members members acc = SMap.fold SMap.add members acc
 
-let add_typeconst name sig_ typeconsts =
+let add_typeconst ~strict_const_semantics name sig_ typeconsts =
   match SMap.find_opt name typeconsts with
   | None ->
     (* The type constant didn't exist so far, let's add it *)
@@ -215,7 +215,24 @@ let add_typeconst name sig_ typeconsts =
       else
         typeconsts
     in
-    (match (old_sig.ttc_kind, sig_.ttc_kind) with
+    (match
+       ( old_sig.ttc_synthesized,
+         sig_.ttc_synthesized,
+         old_sig.ttc_kind,
+         sig_.ttc_kind )
+     with
+    | (false, true, _, _) when strict_const_semantics ->
+      (* Don't replace a type constant with a synthesized type constant. This
+         covers the following case:
+
+         class A { const type T = int; }
+         trait T { require extends A; }
+         class Child extends A {
+            use T;
+         }
+
+         Child should not consider T to be synthesized. *)
+      typeconsts
     (* This covers the following case
      *
      * interface I1 { abstract const type T; }
@@ -225,7 +242,7 @@ let add_typeconst name sig_ typeconsts =
      *
      * Then C::T == I2::T since I2::T is not abstract
      *)
-    | (TCConcrete _, TCAbstract _) -> typeconsts
+    | (_, _, TCConcrete _, TCAbstract _) -> typeconsts
     (* This covers the following case
      *
      * interface I {
@@ -241,10 +258,12 @@ let add_typeconst name sig_ typeconsts =
      * C::T must come from A, not I, as A provides the default that will synthesize
      * into a concrete type constant in C.
      *)
-    | ( TCAbstract { atc_default = Some _; _ },
+    | ( _,
+        _,
+        TCAbstract { atc_default = Some _; _ },
         TCAbstract { atc_default = None; _ } ) ->
       typeconsts
-    | (_, _) ->
+    | (_, _, _, _) ->
       (* When a type constant is declared in multiple parents we need to make a
        * subtle choice of what type we inherit. For example in:
        *
@@ -277,7 +296,7 @@ let add_constructor (cstr, cstr_consist) (acc, acc_consist) =
   in
   (ce, Decl_utils.coalesce_consistent acc_consist cstr_consist)
 
-let add_inherited inherited acc =
+let add_inherited env inherited acc =
   {
     ih_substs =
       SMap.merge
@@ -312,7 +331,14 @@ let add_inherited inherited acc =
     ih_cstr = add_constructor inherited.ih_cstr acc.ih_cstr;
     ih_consts = SMap.fold add_const inherited.ih_consts acc.ih_consts;
     ih_typeconsts =
-      SMap.fold add_typeconst inherited.ih_typeconsts acc.ih_typeconsts;
+      (let strict_const_semantics =
+         TypecheckerOptions.enable_strict_const_semantics (Decl_env.tcopt env)
+         > 2
+       in
+       SMap.fold
+         (add_typeconst ~strict_const_semantics)
+         inherited.ih_typeconsts
+         acc.ih_typeconsts);
     ih_props = add_members inherited.ih_props acc.ih_props;
     ih_sprops = add_members inherited.ih_sprops acc.ih_sprops;
     ih_methods = add_methods inherited.ih_methods acc.ih_methods;
@@ -587,25 +613,25 @@ let parents_which_provide_members c =
 
 let from_parent env c (parents : Decl_store.class_entries SMap.t) acc parent =
   let inherited = from_class env c parents parent in
-  add_inherited inherited acc
+  add_inherited env inherited acc
 
 let from_requirements env c parents acc reqs =
   let inherited = from_class env c parents reqs in
   let inherited = mark_as_synthesized inherited in
-  add_inherited inherited acc
+  add_inherited env inherited acc
 
 let from_trait env c parents acc uses =
   let inherited = from_class env c parents uses in
-  add_inherited inherited acc
+  add_inherited env inherited acc
 
 let from_xhp_attr_use env (parents : Decl_store.class_entries SMap.t) acc uses =
   let inherited = from_class_xhp_attrs_only env parents uses in
-  add_inherited inherited acc
+  add_inherited env inherited acc
 
 let from_interface_constants
     env (parents : Decl_store.class_entries SMap.t) acc impls =
   let inherited = from_class_constants_only env parents impls in
-  add_inherited inherited acc
+  add_inherited env inherited acc
 
 let has_highest_precedence : (OverridePrecedence.t * 'a) option -> bool =
   function

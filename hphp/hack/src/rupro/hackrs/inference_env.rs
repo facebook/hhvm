@@ -9,7 +9,7 @@ mod tyvar_info;
 mod tyvar_occurrences;
 
 use im::{HashMap, HashSet};
-use pos::{IImmutableHashMapToOxidized, Pos, ToOxidized, TypeName};
+use pos::{Pos, ToOxidized, TypeName};
 use std::ops::Deref;
 use ty::{
     local::{Ty, Ty_, Tyvar, Variance},
@@ -454,7 +454,7 @@ impl<'a, R: Reason> ToOxidized<'a> for InferenceEnv<R> {
         rupro_todo_assert!(tyvar_stack.is_empty(), AST);
 
         oxidized_by_ref::typing_inference_env::TypingInferenceEnv {
-            tvenv: IImmutableHashMapToOxidized(tyvar_info).to_oxidized(bump),
+            tvenv: tyvar_info.to_oxidized(bump),
             tyvars_stack: &[],
             subtype_prop: bump.alloc(subtype_prop.to_oxidized(bump)),
             tyvar_occurrences: occurrences.to_oxidized(bump),

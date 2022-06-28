@@ -181,7 +181,7 @@ fn assemble_function<'arena, 'a>(
     // Assemble_name
     let name = assemble_name(alloc, token_iter)?;
     let params = assemble_params(token_iter)?;
-    let mut decl_map: HashMap<&[u8], u32> = HashMap::new(); // Will store decls in this order: params, decl_vars, unnamed
+    let mut decl_map: HashMap<&[u8], u32> = HashMap::new();
     let partial_body = assemble_body(alloc, token_iter, &mut decl_map)?;
     // Fill partial_body in with params, return_type_info, and bd_upper_bounds
     let body = hhbc::hhas_body::HhasBody {
@@ -231,7 +231,7 @@ fn assemble_span<'a>(token_iter: &mut Lexer<'a>) -> Result<hhbc::hhas_pos::HhasS
 
 /// Ex: {(T as <"HH\\int" "HH\\int" upper_bound>)}
 fn assemble_upper_bounds<'arena, 'a>(
-    _alloc: &'arena Bump, // Has this alloc for the Str in user_type and Str in name of type_constraint
+    _alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
 ) -> Result<Slice<'arena, Pair<Str<'arena>, Slice<'arena, hhbc::hhas_type::HhasTypeInfo<'arena>>>>>
 {
@@ -245,7 +245,6 @@ fn assemble_upper_bounds<'arena, 'a>(
 }
 
 /// Currently expects everything within the braces to be user_attrs (as in, not hhvm_types_ffi::Attr)
-/// Done because a) can't find example of Attrs in all_of_quick.hhas b) for hello.php, just has EntryPoint which is a user_attr (?)
 /// Ex: [ "__EntryPoint"("""v:0:{}""")]. This example lacks Attrs
 fn assemble_special_and_user_attrs<'arena, 'a>(
     alloc: &'arena Bump,
@@ -277,10 +276,9 @@ fn assemble_user_attr<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
 ) -> Result<hhbc::hhas_attribute::HhasAttribute<'arena>> {
-    // The v and a.args.len() are added by the printer for all hhasattributes, so just parse the args
     let nm = token_iter.expect(Token::into_str_literal)?;
-    let nm = escaper::unquote_slice(nm); // Here take away quotes
-    let nm = escaper::unescape_bytes(nm)?; // Unescape
+    let nm = escaper::unquote_slice(nm);
+    let nm = escaper::unescape_bytes(nm)?;
     let name = Str::new_slice(alloc, &nm);
     token_iter.expect(Token::into_open_paren)?;
     let (args, args_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?; //is a &[u8]
@@ -741,12 +739,110 @@ fn assemble_instr<'arena, 'a>(
                         || hhbc::Opcode::True,
                         "True",
                     ),
+                    b"VerifyOutType" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::VerifyOutType,
+                        "VerifyOutType",
+                    ),
+                    b"VerifyParamType" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::VerifyParamType,
+                        "VerifyParamType",
+                    ),
+                    b"VerifyParamTypeTS" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::VerifyParamTypeTS,
+                        "VerifyParamTypeTS",
+                    ),
+                    b"SetL" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::SetL,
+                        "SetL",
+                    ),
+                    b"UnsetL" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::UnsetL,
+                        "UnsetL",
+                    ),
+                    b"PopL" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::PopL,
+                        "PopL",
+                    ),
+                    b"ClsCnsL" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::ClsCnsL,
+                        "ClsCnsL",
+                    ),
+                    b"CGetL2" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::CGetL2,
+                        "CGetL2",
+                    ),
                     b"CGetL" => assemble_local_carrying_opcode_instr(
                         alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::CGetL,
                         "CGetL",
+                    ),
+                    b"CUGetL" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::CUGetL,
+                        "CUGetL",
+                    ),
+                    b"PushL" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::PushL,
+                        "PushL",
+                    ),
+                    b"GetMemoKeyL" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::GetMemoKeyL,
+                        "GetMemoKeyL",
+                    ),
+                    b"IssetL" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::IssetL,
+                        "IssetL",
+                    ),
+                    b"CGetQuietL" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::CGetQuietL,
+                        "CGetQuietL",
+                    ),
+                    b"IsUnsetL" => assemble_local_carrying_opcode_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::IsUnsetL,
+                        "IsUnsetL",
                     ),
                     b"JmpZ" => {
                         assemble_jump_opcode_instr(alloc, &mut sl_lexer, hhbc::Opcode::JmpZ, "JmpZ")
@@ -767,12 +863,60 @@ fn assemble_instr<'arena, 'a>(
                         "Enter",
                     ),
                     b"FCallFuncD" => assemble_fcallfuncd_opcode(alloc, &mut sl_lexer),
+                    b"IncDecL" => assemble_incdecl_opcode(alloc, &mut sl_lexer, decl_map),
+                    b"IsTypeStructC" => assemble_is_type_struct_c(alloc, &mut sl_lexer),
+                    b"IsTypeC" => assemble_is_type_c(alloc, &mut sl_lexer),
+                    b"IsTypeL" => assemble_is_type_l(alloc, &mut sl_lexer, decl_map),
+                    b"IterFree" => assemble_iter_free(alloc, &mut sl_lexer),
+                    b"IterInit" => assemble_iter_init_iter_next(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::IterInit,
+                        "IterInit",
+                    ),
+                    b"IterNext" => assemble_iter_init_iter_next(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::IterNext,
+                        "IterNext",
+                    ),
+                    b"BaseGC" => {
+                        assemble_base_gc_or_c(alloc, &mut sl_lexer, hhbc::Opcode::BaseGC, "BaseGC")
+                    }
+                    b"BaseGL" => assemble_base_gl(alloc, &mut sl_lexer, decl_map),
+                    b"BaseSC" => assemble_base_sc(alloc, &mut sl_lexer),
+                    b"BaseL" => assemble_base_l(alloc, &mut sl_lexer, decl_map),
+                    b"BaseC" => {
+                        assemble_base_gc_or_c(alloc, &mut sl_lexer, hhbc::Opcode::BaseC, "BaseC")
+                    }
                     b"BaseH" => assemble_single_opcode_instr(
                         alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::BaseH,
                         "BaseH",
                     ),
+                    b"Dim" => assemble_dim(alloc, &mut sl_lexer, decl_map),
+                    b"QueryM" => assemble_query_m(alloc, &mut sl_lexer, decl_map),
+                    b"SetM" => assemble_set_unset_m(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::SetM,
+                        "SetM",
+                    ),
+                    b"IncDecM" => assemble_inc_dec_m(alloc, &mut sl_lexer, decl_map),
+                    b"SetOpM" => assemble_set_op_m(alloc, &mut sl_lexer, decl_map),
+                    b"UnsetM" => assemble_set_unset_m(
+                        alloc,
+                        &mut sl_lexer,
+                        decl_map,
+                        hhbc::Opcode::UnsetM,
+                        "UnsetM",
+                    ),
+                    b"ClsCns" => assemble_cls_cns(alloc, &mut sl_lexer),
+                    b"RetM" => assemble_retm_opcode_instr(alloc, &mut sl_lexer),
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -915,6 +1059,408 @@ fn assemble_fcallfuncd_opcode<'arena, 'a>(
     )))
 }
 
+fn assemble_is_type_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IsTypeOp> {
+    match token_iter.expect(Token::into_identifier)? {
+        b"Null" => Ok(hhbc::IsTypeOp::Null),
+        b"Bool" => Ok(hhbc::IsTypeOp::Bool),
+        b"Int" => Ok(hhbc::IsTypeOp::Int),
+        b"Dbl" => Ok(hhbc::IsTypeOp::Dbl),
+        b"Str" => Ok(hhbc::IsTypeOp::Str),
+        b"Obj" => Ok(hhbc::IsTypeOp::Obj),
+        b"Res" => Ok(hhbc::IsTypeOp::Res),
+        b"Scalar" => Ok(hhbc::IsTypeOp::Scalar),
+        b"Keyset" => Ok(hhbc::IsTypeOp::Keyset),
+        b"Dict" => Ok(hhbc::IsTypeOp::Vec),
+        b"ArrLike" => Ok(hhbc::IsTypeOp::ArrLike),
+        b"ClsMeth" => Ok(hhbc::IsTypeOp::ClsMeth),
+        b"Func" => Ok(hhbc::IsTypeOp::Func),
+        b"LegacyArrLike" => Ok(hhbc::IsTypeOp::LegacyArrLike),
+        b"Class" => Ok(hhbc::IsTypeOp::Class),
+        ito => bail!("Unknown IsTypeOp: {:?}", ito),
+    }
+}
+
+/// Ex: IterFree 0
+fn assemble_iter_free<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "IterFree")?;
+    let iter_id = hhbc::IterId {
+        idx: token_iter.expect_and_get_number()?,
+    };
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IterFree(iter_id)))
+}
+
+/// Ex:
+/// IterInit: IterInit 0 NK V:$v L0 (IterInit IterArgs Label)
+/// IterNext: IterNext 0 NK V:$v L1 (IterInit IterArgs Label)
+fn assemble_iter_init_iter_next<
+    'arena,
+    F: FnOnce(hhbc::IterArgs, hhbc::Label) -> hhbc::Opcode<'arena>,
+>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+    op_con: F,
+    op_str: &str,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, op_str)?;
+    let iter_args = assemble_iter_args(token_iter, decl_map)?;
+    let lbl = assemble_label(token_iter, false)?;
+    Ok(hhbc::Instruct::Opcode(op_con(iter_args, lbl)))
+}
+
+/// IterArg { iter_id: IterId (~u32), key_id: Local, val_id: Local}
+/// Ex: 0 NK V:$v
+fn assemble_iter_args(
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::IterArgs> {
+    let idx: u32 = token_iter.expect_and_get_number()?;
+    let key_id: hhbc::Local = match token_iter.expect(Token::into_identifier)? {
+        b"NK" => hhbc::Local::INVALID,
+        b"K" => {
+            token_iter.expect(Token::into_colon)?;
+            assemble_var_to_local(token_iter, decl_map)?
+        }
+        o => bail!("Invalid key_id given as iter args to IterArg: {:?}", o),
+    };
+    token_iter.expect_is_str(Token::into_identifier, "V")?;
+    token_iter.expect(Token::into_colon)?;
+    Ok(hhbc::IterArgs {
+        iter_id: hhbc::IterId { idx },
+        key_id,
+        val_id: assemble_var_to_local(token_iter, decl_map)?,
+    })
+}
+
+/// Ex: IsTypeL $a Obj
+fn assemble_is_type_l<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "IsTypeL")?;
+    let lcl = assemble_var_to_local(token_iter, decl_map)?;
+    let type_op = assemble_is_type_op(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeL(lcl, type_op)))
+}
+
+/// Ex: IsTypeC Obj
+fn assemble_is_type_c<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "IsTypeC")?;
+    let type_op = assemble_is_type_op(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeC(type_op)))
+}
+
+/// Ex: ClsCns "CLASSNAME"
+fn assemble_cls_cns<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "ClsCns")?;
+    let nm = token_iter.expect(Token::into_identifier)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::ClsCns(
+        hhbc::ConstName::new(Str::new_slice(alloc, nm)),
+    )))
+}
+
+/// IsTypeStructC (Resolve|DontResolve)
+fn assemble_is_type_struct_c<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "IsTypeStructC")?;
+    let res_op = token_iter.expect(Token::into_identifier)?;
+    match res_op {
+        b"Resolve" => Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeStructC(
+            hhbc::TypeStructResolveOp::Resolve,
+        ))),
+        b"DontResolve" => Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeStructC(
+            hhbc::TypeStructResolveOp::DontResolve,
+        ))),
+        _ => bail!(
+            "Unknown TypeStructResolveOp passed to TypeStructC instr: {:?}",
+            res_op
+        ),
+    }
+}
+
+/// StackIndex : u32
+fn assemble_stack_index(token_iter: &mut Lexer<'_>) -> Result<hhbc::StackIndex> {
+    token_iter.expect_and_get_number()
+}
+
+/// struct Propname<'arena>(Str<'arena>)
+fn assemble_prop_name<'arena>(
+    _alloc: &'arena Bump,
+    _token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::PropName<'arena>> {
+    todo!()
+}
+
+fn assemble_mop_mode(token_iter: &mut Lexer<'_>) -> Result<hhbc::MOpMode> {
+    match token_iter.expect(Token::into_identifier)? {
+        b"None" => Ok(hhbc::MOpMode::None),
+        b"Warn" => Ok(hhbc::MOpMode::Warn),
+        b"Define" => Ok(hhbc::MOpMode::Define),
+        b"Unset" => Ok(hhbc::MOpMode::Unset),
+        b"Inout" => Ok(hhbc::MOpMode::InOut),
+        mop => bail!("Expected a MOpMode but got: {:?}", mop),
+    }
+}
+
+fn assemble_readonly_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::ReadonlyOp> {
+    match token_iter.expect(Token::into_identifier)? {
+        b"Any" => Ok(hhbc::ReadonlyOp::Any),
+        b"Readonly" => Ok(hhbc::ReadonlyOp::Readonly),
+        b"Mutable" => Ok(hhbc::ReadonlyOp::Mutable),
+        b"CheckROCOW" => Ok(hhbc::ReadonlyOp::CheckROCOW),
+        b"CheckMutROCOW" => Ok(hhbc::ReadonlyOp::CheckMutROCOW),
+        rop => {
+            bail!("Expected a ReadonlyOp but got: {:?}", rop)
+        }
+    }
+}
+
+/// EC: stackIndex readOnlyOp | EL: local readOnlyOp | ET: string readOnlyOp | EI: int readOnlyOp
+/// PC: stackIndex readOnlyOp | PL: local readOnlyOp | PT: propName readOnlyOp | QT: propName readOnlyOp
+fn assemble_member_key<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::MemberKey<'arena>> {
+    match token_iter.expect(Token::into_identifier)? {
+        b"EC" => {
+            token_iter.expect(Token::into_colon)?;
+            Ok(hhbc::MemberKey::EC(
+                assemble_stack_index(token_iter)?,
+                assemble_readonly_op(token_iter)?,
+            ))
+        }
+        b"EL" => {
+            token_iter.expect(Token::into_colon)?;
+            Ok(hhbc::MemberKey::EL(
+                assemble_var_to_local(token_iter, decl_map)?,
+                assemble_readonly_op(token_iter)?,
+            ))
+        }
+        b"ET" => {
+            token_iter.expect(Token::into_colon)?;
+            Ok(hhbc::MemberKey::ET(
+                Str::new_slice(
+                    alloc,
+                    &escaper::unescape_literal_bytes_into_vec_bytes(
+                        // In bp, print_quoted_str also escapes the string
+                        escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?),
+                    )?,
+                ),
+                assemble_readonly_op(token_iter)?,
+            ))
+        }
+        b"EI" => {
+            token_iter.expect(Token::into_colon)?;
+            Ok(hhbc::MemberKey::EI(
+                token_iter.expect_and_get_number()?,
+                assemble_readonly_op(token_iter)?,
+            ))
+        }
+        b"PC" => {
+            token_iter.expect(Token::into_colon)?;
+            Ok(hhbc::MemberKey::PC(
+                assemble_stack_index(token_iter)?,
+                assemble_readonly_op(token_iter)?,
+            ))
+        }
+        b"PL" => {
+            token_iter.expect(Token::into_colon)?;
+            Ok(hhbc::MemberKey::PL(
+                assemble_var_to_local(token_iter, decl_map)?,
+                assemble_readonly_op(token_iter)?,
+            ))
+        }
+        b"PT" => {
+            token_iter.expect(Token::into_colon)?;
+            Ok(hhbc::MemberKey::PT(
+                assemble_prop_name(alloc, token_iter)?,
+                assemble_readonly_op(token_iter)?,
+            ))
+        }
+        b"QT" => {
+            token_iter.expect(Token::into_colon)?;
+            Ok(hhbc::MemberKey::QT(
+                assemble_prop_name(alloc, token_iter)?,
+                assemble_readonly_op(token_iter)?,
+            ))
+        }
+        b"W" => Ok(hhbc::MemberKey::W),
+        mk => {
+            bail!("Expected a MemberKey but got: {:?}", mk)
+        }
+    }
+}
+
+/// Dim MOpMode MemberKey
+fn assemble_dim<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "Dim")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Dim(
+        assemble_mop_mode(token_iter)?,
+        assemble_member_key(alloc, token_iter, decl_map)?,
+    )))
+}
+
+/// QueryM ...
+fn assemble_query_m<'arena>(
+    _alloc: &'arena Bump,
+    _token_iter: &mut Lexer<'_>,
+    _decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    todo!()
+}
+
+/// (SetM|UnsetM) stackIndex MemberKey
+fn assemble_set_unset_m<
+    'arena,
+    F: FnOnce(hhbc::StackIndex, hhbc::MemberKey<'arena>) -> hhbc::Opcode<'arena>,
+>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+    op_con: F,
+    op_str: &str,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, op_str)?;
+    Ok(hhbc::Instruct::Opcode(op_con(
+        assemble_stack_index(token_iter)?,
+        assemble_member_key(alloc, token_iter, decl_map)?,
+    )))
+}
+
+/// IncDecM stackIndex IncDecOp MemberKey
+fn assemble_inc_dec_m<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "IncDecM")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IncDecM(
+        assemble_stack_index(token_iter)?,
+        assemble_inc_dec_op(token_iter)?,
+        assemble_member_key(alloc, token_iter, decl_map)?,
+    )))
+}
+
+/// SetOpM ...
+fn assemble_set_op_m<'arena>(
+    _alloc: &'arena Bump,
+    _token_iter: &mut Lexer<'_>,
+    _decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    todo!()
+}
+
+/// BaseGL $var MOpMode
+fn assemble_base_gl<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "BaseGL")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseGL(
+        assemble_var_to_local(token_iter, decl_map)?,
+        assemble_mop_mode(token_iter)?,
+    )))
+}
+
+/// BaseSC stackIndex stackIndex MOpMode ReadOnlyOp
+fn assemble_base_sc<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "BaseSC")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseSC(
+        assemble_stack_index(token_iter)?,
+        assemble_stack_index(token_iter)?,
+        assemble_mop_mode(token_iter)?,
+        assemble_readonly_op(token_iter)?,
+    )))
+}
+
+/// BaseL $var MOpMode ReadOnlyOp
+fn assemble_base_l<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "BaseL")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseL(
+        assemble_var_to_local(token_iter, decl_map)?,
+        assemble_mop_mode(token_iter)?,
+        assemble_readonly_op(token_iter)?,
+    )))
+}
+
+/// Ex: BaseC 0 Warn
+/// BaseGC 0 Warn
+fn assemble_base_gc_or_c<
+    'arena,
+    F: FnOnce(hhbc::StackIndex, hhbc::MOpMode) -> hhbc::Opcode<'arena>,
+>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    op_con: F,
+    op_str: &str,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, op_str)?;
+    Ok(hhbc::Instruct::Opcode(op_con(
+        assemble_stack_index(token_iter)?,
+        assemble_mop_mode(token_iter)?,
+    )))
+}
+
+fn assemble_inc_dec_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IncDecOp> {
+    match token_iter.expect(Token::into_identifier)? {
+        b"PreInc" => Ok(hhbc::IncDecOp::PreInc),
+        b"PostInc" => Ok(hhbc::IncDecOp::PostInc),
+        b"PreDec" => Ok(hhbc::IncDecOp::PreDec),
+        b"PostDec" => Ok(hhbc::IncDecOp::PostDec),
+        b"PreIncO" => Ok(hhbc::IncDecOp::PreIncO),
+        b"PostIncO" => Ok(hhbc::IncDecOp::PostIncO),
+        b"PreDecO" => Ok(hhbc::IncDecOp::PreDecO),
+        b"PostDecO" => Ok(hhbc::IncDecOp::PostDecO),
+
+        ido => bail!("Expected a IncDecOp but got: {:?}", ido),
+    }
+}
+
+/// IncDecL $var IncDecOp
+fn assemble_incdecl_opcode<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "IncDecL")?;
+    let lcl = token_iter.expect(Token::into_variable)?;
+    if let Some(idx) = decl_map.get(lcl) {
+        let ido = assemble_inc_dec_op(token_iter)?;
+        token_iter.expect_end()?;
+        Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IncDecL(
+            hhbc::Local { idx: *idx },
+            ido,
+        )))
+    } else {
+        bail!("Unknown local var given to IncDecL instr");
+    }
+}
+
 /// L#: or DV#: if needs_colon else L# or DV#
 fn assemble_label<'a>(token_iter: &mut Lexer<'a>, needs_colon: bool) -> Result<hhbc::Label> {
     let mut lcl = token_iter.expect(Token::into_identifier)?;
@@ -961,6 +1507,17 @@ fn assemble_var_to_local(
     } else {
         bail!("Unknown local var: {:?}", lcl);
     }
+}
+
+/// Ex: RetM 2
+fn assemble_retm_opcode_instr<'arena>(
+    _alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "RetM")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::RetM(
+        token_iter.expect_and_get_number()?,
+    )))
 }
 
 /// Assembles one of CGetL/Push/SetL/etc...

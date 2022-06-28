@@ -215,7 +215,7 @@ let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
 
 let remove_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Analysis
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.Classes.remove_batch names;

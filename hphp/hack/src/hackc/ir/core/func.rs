@@ -8,13 +8,13 @@ use crate::{
     HasEdges, Instr, InstrId, Literal, LiteralId, LocId, SrcLoc, Type, UnitStringId, ValueId,
     ValueIdMap,
 };
+
 use ffi::Str;
 use newtype::{newtype_int, IdVec};
 
 pub use hhbc::{
-    hhas_body::HhasBodyEnv, hhas_function::HhasFunctionFlags as FunctionFlags,
-    hhas_method::HhasMethodFlags as MethodFlags, hhas_pos::HhasSpan, FunctionName, MethodName,
-    Visibility,
+    hhas_function::HhasFunctionFlags as FunctionFlags, hhas_method::HhasMethodFlags as MethodFlags,
+    hhas_pos::HhasSpan, FunctionName, MethodName, Visibility,
 };
 
 /// Func parameters.
@@ -132,7 +132,6 @@ impl Default for TryCatchId {
 pub struct Func<'a> {
     pub blocks: IdVec<BlockId, Block>,
     pub doc_comment: Option<Str<'a>>,
-    pub env: Option<HhasBodyEnv<'a>>,
     pub ex_frames: ExFrameIdMap<ExFrame>,
     pub instrs: IdVec<InstrId, Instr>,
     pub is_memoize_wrapper: bool,

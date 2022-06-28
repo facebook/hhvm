@@ -296,6 +296,7 @@ dependencies = [
  "hhvm_types_ffi",
  "itertools 0.10.3",
  "oxidized",
+ "print_expr",
  "print_opcode",
  "thiserror",
  "write_bytes",

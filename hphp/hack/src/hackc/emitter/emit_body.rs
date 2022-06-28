@@ -15,7 +15,7 @@ use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 use hash::HashSet;
 use hhbc::{
     decl_vars,
-    hhas_body::{HhasBody, HhasBodyEnv},
+    hhas_body::HhasBody,
     hhas_param::HhasParam,
     hhas_type::{self, HhasTypeInfo},
     FCallArgs, FCallArgsFlags, IsTypeOp, Label, Local, TypedValue,
@@ -26,6 +26,7 @@ use instruction_sequence::{instr, InstrSeq};
 use ocamlrep::rc::RcOc;
 use options::CompilerFlags;
 use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
+use print_expr::HhasBodyEnv;
 use statement_state::StatementState;
 
 static THIS: &str = "$this";
@@ -371,19 +372,14 @@ pub fn make_body<'a, 'arena, 'decl>(
         if let Some(cd) = env.scope.get_class() {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: Just(
-                    (cd.get_kind().into(), Str::new_str(alloc, cd.get_name_str())).into(),
-                ),
-                parent_name: ClassExpr::get_parent_class_name(cd)
-                    .as_ref()
-                    .map(|s| Str::new_str(alloc, s))
-                    .into(),
+                class_info: Some((cd.get_kind().into(), cd.get_name_str())),
+                parent_name: ClassExpr::get_parent_class_name(cd),
             })
         } else {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: Nothing,
-                parent_name: Nothing,
+                class_info: None,
+                parent_name: None,
             })
         }
     } else {

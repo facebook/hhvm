@@ -87,6 +87,7 @@ struct CompilerOptions {
   std::vector<std::string> ffiles;
   std::vector<std::string> cfiles;
   std::vector<std::string> cmodules;
+  std::string push_phases;
   bool parseOnDemand;
   bool keepTempDir;
   int logLevel;
@@ -162,8 +163,10 @@ int compiler_main(int argc, char **argv) {
 
 namespace {
 
-void applyBuildOverrides(IniSetting::Map& ini, Hdf& config) {
+void
+applyBuildOverrides(IniSetting::Map& ini, Hdf& config, CompilerOptions& po) {
   std::string push_phases = Config::GetString(ini, config, "Build.PushPhases");
+  po.push_phases = push_phases;
   // convert push phases to newline-separated, to make matching them less
   // error-prone.
   replaceAll(push_phases, ",", "\n");
@@ -376,7 +379,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   for (auto const& confString : po.confStrings) {
     Config::ParseHdfString(confString, config);
   }
-  applyBuildOverrides(ini, config);
+  applyBuildOverrides(ini, config, po);
   Hdf runtime = config["Runtime"];
   // The configuration command line strings were already processed above
   // Don't process them again.
@@ -497,6 +500,7 @@ int process(const CompilerOptions &po) {
   ar->sample().setInt("use_exec_cache", Option::ExternWorkerUseExecCache);
   ar->sample().setInt("parser_group_size", Option::ParserGroupSize);
   ar->sample().setInt("parser_thread_count", Option::ParserThreadCount);
+  ar->sample().setStr("push_phases", po.push_phases);
 
   hhbcTargetInit(po, ar);
 

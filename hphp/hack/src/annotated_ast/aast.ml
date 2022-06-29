@@ -890,6 +890,7 @@ and ('ex, 'en) class_const = {
   cc_type: hint option;
   cc_id: sid;
   cc_kind: ('ex, 'en) class_const_kind;
+  cc_span: pos;
   cc_doc_comment: doc_comment option;
 }
 

@@ -4386,6 +4386,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             let has_abstract = kinds.has(modifier::ABSTRACT);
             // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
             let type_ = map_optional(&c.type_specifier, env, p_hint)?;
+            let span = p_pos(node, env);
             // ocaml's behavior is that if anything throw, it will
             // discard all lowered elements. So adding to class
             // must be at the last.
@@ -4403,6 +4404,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                         type_: type_.clone(),
                         id,
                         kind,
+                        span: span.clone(),
                         doc_comment: doc_comment_opt.clone(),
                     })
                 }
@@ -5269,6 +5271,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             })])
         }
         EnumDeclaration(c) => {
+            let span = p_pos(node, env);
             let p_enumerator = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::ClassConst> {
                 match &n.children {
                     Enumerator(c) => Ok(ast::ClassConst {
@@ -5276,6 +5279,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                         type_: None,
                         id: pos_name(&c.name, e)?,
                         kind: ast::ClassConstKind::CCConcrete(p_expr(&c.value, e)?),
+                        span: span.clone(),
                         doc_comment: None,
                     }),
                     _ => missing_syntax("enumerator", n, e),
@@ -5438,6 +5442,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                             type_: Some(full_type),
                             id: name,
                             kind,
+                            span: p_pos(node, env),
                             doc_comment: None,
                         };
                         enum_class.consts.push(class_const)

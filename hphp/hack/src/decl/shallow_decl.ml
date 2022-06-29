@@ -63,6 +63,7 @@ let class_const env (cc : Nast.class_const) =
     cc_id = name;
     cc_type = h;
     cc_kind = k;
+    cc_span = _;
     cc_doc_comment = _;
     cc_user_attributes = _;
   } =

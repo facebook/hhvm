@@ -1043,6 +1043,7 @@ let class_const_def ~in_enum_class c env cc =
         Aast.cc_type = cc.cc_type;
         Aast.cc_id = cc.cc_id;
         Aast.cc_kind = kind;
+        Aast.cc_span = cc.cc_span;
         Aast.cc_doc_comment = cc.cc_doc_comment;
         Aast.cc_user_attributes = user_attributes;
       },

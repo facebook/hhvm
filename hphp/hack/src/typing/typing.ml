@@ -3185,7 +3185,6 @@ and expr_
    *)
   let compute_exprs_and_supertype
       ~(expected : ExpectedTy.t option)
-      ?(add_holes = true)
       ?(reason = Reason.URarray_value)
       ?(can_pessimise = false)
       ~bound
@@ -3226,13 +3225,13 @@ and expr_
         tys
     in
     let exprs =
-      if add_holes then
-        List.map2_exn
-          ~f:(fun te ty_mismatch_opt -> hole_on_ty_mismatch te ~ty_mismatch_opt)
-          exprs
-          err_opts
-      else
+      List.map2_exn
+        ~f:(fun te ty_mismatch_opt ->
+          match te with
+          | (_, _, Hole _) -> te
+          | _ -> hole_on_ty_mismatch te ~ty_mismatch_opt)
         exprs
+        err_opts
     in
     (env, exprs, supertype)
   in
@@ -3322,7 +3321,7 @@ and expr_
           | Set
           | ImmSet
           | Keyset ->
-            ( arraykey_value ~add_hole:true p class_name true,
+            ( arraykey_value p class_name true,
               true,
               Some
                 (MakeType.arraykey
@@ -3381,7 +3380,6 @@ and expr_
         ~can_pessimise:true
         ~coerce_for_op
         ~bound:key_bound
-        ~add_holes:false
         (Reason.Rtype_variable_generics (p, "T", strip_ns name))
         env
         el
@@ -6448,13 +6446,8 @@ and array_value ~(expected : ExpectedTy.t option) env x =
   (env, (te, ty))
 
 and arraykey_value
-    ?(add_hole = false)
-    p
-    class_name
-    is_set
-    ~(expected : ExpectedTy.t option)
-    env
-    ((_, pos, _) as x) =
+    p class_name is_set ~(expected : ExpectedTy.t option) env ((_, pos, _) as x)
+    =
   let (env, (te, ty)) = array_value ~expected env x in
   let (ty_arraykey, reason) =
     if is_set then
@@ -6465,74 +6458,63 @@ and arraykey_value
   in
   let ty_expected = { et_type = ty_arraykey; et_enforced = Enforced } in
   let ((env, ty_err_opt), te) =
-    if add_hole then
-      (* If we have an error in coercion here, we will add a `Hole` indicating the
-           actual and expected type. The `Hole` may then be used in a codemod to
-           add a call to `UNSAFE_CAST` so we need to consider what type we expect.
+    (* If we have an error in coercion here, we will add a `Hole` indicating the
+         actual and expected type. The `Hole` may then be used in a codemod to
+         add a call to `UNSAFE_CAST` so we need to consider what type we expect.
 
-           If we were to add an expected type of 'arraykey' here it would be
-           correct but adding an `UNSAFE_CAST<?string,arraykey>($x)` means we
-           get cascading errors if we have e.g. a return type of keyset<string>.
+         If we were to add an expected type of 'arraykey' here it would be
+         correct but adding an `UNSAFE_CAST<?string,arraykey>($x)` means we
+         get cascading errors if we have e.g. a return type of keyset<string>.
 
-           To try and prevent this, if this is an optional type where the nonnull
-           part can be coerced to arraykey, we prefer that type as our expected type.
-      *)
-      let (ty_actual, is_option) =
-        match deref ty with
-        | (_, Toption ty_inner) -> (ty_inner, true)
-        | _ -> (ty, false)
-      in
-      let (env, e1) =
-        Typing_coercion.coerce_type
-          ~coerce_for_op:true
-          p
-          reason
-          env
-          ty_actual
-          ty_expected
-          Typing_error.Callback.unify_error
-      in
-      let (ty_mismatch_opt, e2) =
-        match e1 with
-        | None when is_option ->
-          let ty_str = lazy (Typing_print.full_strip_ns env ty_actual) in
-          let reasons_opt =
-            Some
-              (Lazy.map ty_str ~f:(fun ty_str ->
-                   Reason.to_string "Expected `arraykey`" (Reason.Ridx_dict pos)
-                   @ [(get_pos ty, Format.sprintf "But got `?%s`" ty_str)]))
-          in
-          (* We actually failed so generate the error we should
-             have seen *)
-          let ty_err =
-            Typing_error.(
-              primary
-              @@ Primary.Unify_error
-                   {
-                     pos;
-                     msg_opt = Some (Reason.string_of_ureason reason);
-                     reasons_opt;
-                   })
-          in
-          (Some (ty, ty_actual), Some ty_err)
-        | None -> (None, None)
-        | Some _ -> (Some (ty_actual, ty_arraykey), None)
-      in
-      let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-      ((env, ty_err_opt), hole_on_ty_mismatch ~ty_mismatch_opt te)
-    else
-      let env =
-        Typing_coercion.coerce_type
-          ~coerce_for_op:true
-          p
-          reason
-          env
-          ty
-          ty_expected
-          Typing_error.Callback.unify_error
-      in
-      (env, te)
+         To try and prevent this, if this is an optional type where the nonnull
+         part can be coerced to arraykey, we prefer that type as our expected type.
+    *)
+    let (ty_actual, is_option) =
+      match deref ty with
+      | (_, Toption ty_inner) -> (ty_inner, true)
+      | _ -> (ty, false)
+    in
+    let (env, e1) =
+      Typing_coercion.coerce_type
+        ~coerce_for_op:true
+        p
+        reason
+        env
+        ty_actual
+        ty_expected
+        Typing_error.Callback.unify_error
+    in
+    let (ty_mismatch_opt, e2) =
+      match e1 with
+      | None when is_option ->
+        let ty_str = lazy (Typing_print.full_strip_ns env ty_actual) in
+        let reasons_opt =
+          Some
+            (Lazy.map ty_str ~f:(fun ty_str ->
+                 Reason.to_string "Expected `arraykey`" (Reason.Ridx_dict pos)
+                 @ [(get_pos ty, Format.sprintf "But got `?%s`" ty_str)]))
+        in
+        (* We actually failed so generate the error we should
+           have seen *)
+        let ty_err =
+          Typing_error.(
+            primary
+            @@ Primary.Unify_error
+                 {
+                   pos;
+                   msg_opt = Some (Reason.string_of_ureason reason);
+                   reasons_opt;
+                 })
+        in
+        (Some (ty, ty_actual), Some ty_err)
+      | Some _
+      | None ->
+        (None, None)
+    in
+    let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+    ((env, ty_err_opt), hole_on_ty_mismatch ~ty_mismatch_opt te)
   in
+
   Option.iter ty_err_opt ~f:Errors.add_typing_error;
 
   (env, (te, ty))

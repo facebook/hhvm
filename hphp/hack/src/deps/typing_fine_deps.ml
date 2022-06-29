@@ -84,7 +84,7 @@ end = struct
       "CREATE TABLE IF NOT EXISTS nodes(
            root TEXT NOT NULL,
            kind INTEGER NOT NULL,
-           child TEXT,
+           member TEXT,
            hash INTEGER NOT NULL
        );"
     in
@@ -115,7 +115,7 @@ end = struct
   let write_node stmt_cache data hash =
     let (root, member_opt, kind_id) = data in
     let sql =
-      "INSERT INTO nodes(root, kind, child, hash) VALUES (?, ?, ?, ?)"
+      "INSERT INTO nodes(root, kind, member, hash) VALUES (?, ?, ?, ?)"
     in
 
     let stmt = SU.StatementCache.make_stmt stmt_cache sql in
@@ -215,35 +215,35 @@ let add_fine_dep mode fine_dependent dependency =
 let add_coarse_dep mode coarse_dep =
   add_fine_dep mode (Typing_deps.Dep.dependency_of_variant coarse_dep)
 
-let fine_dependent_of_coarse_and_child :
+let fine_dependent_of_coarse_and_member :
     coarse_dependent -> dependent_member option -> fine_dependent =
- fun coarse child ->
-  let child =
+ fun coarse member ->
+  let member =
     if record_coarse_only then
       None
     else
-      child
+      member
   in
-  match (coarse, child) with
+  match (coarse, member) with
   | (root, None) -> Typing_deps.Dep.dependency_of_variant root
   | (Typing_deps.Dep.Type t, Some (Method m)) -> Typing_deps.Dep.Method (t, m)
   | (Typing_deps.Dep.Type t, Some (SMethod m)) -> Typing_deps.Dep.SMethod (t, m)
   | (_, Some _) ->
     failwith
-      "Only types/classes can have children for the purposes of dependency tracking!"
+      "Only types/classes can have members for the purposes of dependency tracking!"
 
-let try_add_fine_dep mode coarse child dependency =
-  let child =
+let try_add_fine_dep mode coarse member dependency =
+  let member =
     if record_coarse_only then
       None
     else
-      child
+      member
   in
-  match (coarse, child) with
+  match (coarse, member) with
   | (None, None) -> ()
-  | (None, Some _) -> failwith "Cannot have child dependent without root"
-  | (Some root, child_opt) ->
-    let dependent = fine_dependent_of_coarse_and_child root child_opt in
+  | (None, Some _) -> failwith "Cannot have member dependent without root"
+  | (Some root, member_opt) ->
+    let dependent = fine_dependent_of_coarse_and_member root member_opt in
     add_fine_dep mode dependent dependency
 
 let finalize = Backend.finalize

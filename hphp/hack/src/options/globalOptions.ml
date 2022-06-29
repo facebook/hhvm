@@ -122,6 +122,7 @@ type t = {
   tco_math_new_code: bool;
   tco_typeconst_concrete_concrete_error: bool;
   tco_enable_strict_const_semantics: int;
+  tco_strict_wellformedness: int;
   tco_meth_caller_only_public_visibility: bool;
   tco_require_extends_implements_ancestors: bool;
   tco_strict_value_equality: bool;
@@ -307,6 +308,7 @@ let default =
     tco_math_new_code = false;
     tco_typeconst_concrete_concrete_error = false;
     tco_enable_strict_const_semantics = 0;
+    tco_strict_wellformedness = 0;
     tco_meth_caller_only_public_visibility = true;
     tco_require_extends_implements_ancestors = false;
     tco_strict_value_equality = false;
@@ -461,6 +463,7 @@ let make
       default.tco_typeconst_concrete_concrete_error)
     ?(tco_enable_strict_const_semantics =
       default.tco_enable_strict_const_semantics)
+    ?(tco_strict_wellformedness = default.tco_strict_wellformedness)
     ?(tco_meth_caller_only_public_visibility =
       default.tco_meth_caller_only_public_visibility)
     ?(tco_require_extends_implements_ancestors =
@@ -603,6 +606,7 @@ let make
     tco_math_new_code;
     tco_typeconst_concrete_concrete_error;
     tco_enable_strict_const_semantics;
+    tco_strict_wellformedness;
     tco_meth_caller_only_public_visibility;
     tco_require_extends_implements_ancestors;
     tco_strict_value_equality;
@@ -879,6 +883,8 @@ let tco_typeconst_concrete_concrete_error t =
   t.tco_typeconst_concrete_concrete_error
 
 let tco_enable_strict_const_semantics t = t.tco_enable_strict_const_semantics
+
+let tco_strict_wellformedness t = t.tco_strict_wellformedness
 
 let tco_meth_caller_only_public_visibility t =
   t.tco_meth_caller_only_public_visibility

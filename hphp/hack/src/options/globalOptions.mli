@@ -287,6 +287,8 @@ type t = {
    * any time two parents declare concrete constants with the same name, matching HHVM
    * -vEval.TraitConstantInterfaceBehavior=1 *)
   tco_enable_strict_const_semantics: int;
+  (* Different levels here raise previously missing well-formedness errors (see Typing_type_wellformedness) *)
+  tco_strict_wellformedness: int;
   (* meth_caller can only reference public methods *)
   tco_meth_caller_only_public_visibility: bool;
   (* Consider `require extends` and `require implements` as ancestors when checking a class *)
@@ -440,6 +442,7 @@ val make :
   ?tco_math_new_code:bool ->
   ?tco_typeconst_concrete_concrete_error:bool ->
   ?tco_enable_strict_const_semantics:int ->
+  ?tco_strict_wellformedness:int ->
   ?tco_meth_caller_only_public_visibility:bool ->
   ?tco_require_extends_implements_ancestors:bool ->
   ?tco_strict_value_equality:bool ->
@@ -717,6 +720,8 @@ val tco_math_new_code : t -> bool
 val tco_typeconst_concrete_concrete_error : t -> bool
 
 val tco_enable_strict_const_semantics : t -> int
+
+val tco_strict_wellformedness : t -> int
 
 val tco_meth_caller_only_public_visibility : t -> bool
 

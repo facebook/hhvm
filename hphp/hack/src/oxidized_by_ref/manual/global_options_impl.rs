@@ -118,6 +118,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_math_new_code: false,
     tco_typeconst_concrete_concrete_error: false,
     tco_enable_strict_const_semantics: 0,
+    tco_strict_wellformedness: 0,
     tco_meth_caller_only_public_visibility: true,
     tco_require_extends_implements_ancestors: false,
     tco_strict_value_equality: false,
@@ -378,6 +379,7 @@ impl GlobalOptions<'_> {
         let tco_math_new_code = self.tco_math_new_code;
         let tco_typeconst_concrete_concrete_error = self.tco_typeconst_concrete_concrete_error;
         let tco_enable_strict_const_semantics = self.tco_enable_strict_const_semantics;
+        let tco_strict_wellformedness = self.tco_strict_wellformedness;
         let tco_meth_caller_only_public_visibility = self.tco_meth_caller_only_public_visibility;
         let tco_require_extends_implements_ancestors =
             self.tco_require_extends_implements_ancestors;
@@ -526,6 +528,7 @@ impl GlobalOptions<'_> {
             tco_math_new_code,
             tco_typeconst_concrete_concrete_error,
             tco_enable_strict_const_semantics,
+            tco_strict_wellformedness,
             tco_meth_caller_only_public_visibility,
             tco_require_extends_implements_ancestors,
             tco_strict_value_equality,

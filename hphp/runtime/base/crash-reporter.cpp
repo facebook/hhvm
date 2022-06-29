@@ -82,6 +82,7 @@ static const char* s_newBlacklist[] = {
   "_ZN4HPHP16StackTraceNoHeap",
   "_ZN5folly10symbolizer17getStackTraceSafe",
   "_ZN4HPHPL10bt_handlerEi",
+  "_ZN5folly6fibers12_GLOBAL__N_120sigsegvSignalHandlerEiP9siginfo_tPv",
   "killpg"
 };
 
@@ -160,7 +161,7 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
       // Turn on stack traces for coredumps
       StackTrace::Enabled = true;
       StackTrace::FunctionBlacklist = s_newBlacklist;
-      StackTrace::FunctionBlacklistCount = 3;
+      StackTrace::FunctionBlacklistCount = 5;
       st.emplace();
       // fall through
     case CrashReportStage::ReportHeader:

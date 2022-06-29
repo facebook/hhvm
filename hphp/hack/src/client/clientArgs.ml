@@ -1122,6 +1122,7 @@ invocations of `hh` faster.|}
   let saved_state_type = ref None in
   let should_save_replay = ref false in
   let replay_token = ref None in
+  let saved_state_manifold_api_key = ref None in
   let options =
     Arg.align
       [
@@ -1134,6 +1135,10 @@ invocations of `hh` faster.|}
         ( "--save-replay",
           Arg.Set should_save_replay,
           " Produce a token that can be later consumed by --replay-token to replay the same saved-state download."
+        );
+        ( "--saved-state-manifold-api-key",
+          Arg.String (fun arg -> saved_state_manifold_api_key := Some arg),
+          " An API key for Manifold to use when downloading the specified saved state."
         );
         ( "--replay-token",
           Arg.String (fun arg -> replay_token := Some arg),
@@ -1176,6 +1181,7 @@ invocations of `hh` faster.|}
       ClientDownloadSavedState.root;
       from;
       saved_state_type;
+      saved_state_manifold_api_key = !saved_state_manifold_api_key;
       should_save_replay = !should_save_replay;
       replay_token = !replay_token;
     }

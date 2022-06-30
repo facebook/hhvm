@@ -312,6 +312,8 @@ pub enum Ty_<R: Reason> {
     Tthis,
     /// Either an object type or a type alias, ty list are the arguments
     Tapply(Box<(Positioned<TypeName, R::Pos>, Box<[Ty<R>]>)>),
+    /// 'With' refinements of the form `_ with { type T as int; type TC = C; }`.
+    Trefinement(Box<TrefinementType<Ty<R>>>),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -427,6 +429,7 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
                 vty.accept(v)
             }
             Taccess(tt) => tt.accept(v),
+            Trefinement(tr) => tr.accept(v),
         }
     }
 }
@@ -453,6 +456,53 @@ pub struct TaccessType<R: Reason, TY> {
 }
 
 walkable!(impl<R: Reason, TY> for TaccessType<R, TY> => [ty]);
+
+/// A decl refinement type of the form 'T with { Refinements }'
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    Hash,
+    PartialEq,
+    Serialize,
+    Deserialize
+)]
+#[serde(bound = "TY: Serialize + DeserializeOwned")]
+pub struct TrefinementType<TY> {
+    /// Type expression to the left of `::`
+    pub ty: TY,
+
+    /// The type refinements
+    pub typeconsts: BTreeMap<TypeConstName, TypeConstRef<TY>>,
+}
+
+walkable!(TypeConstName); // To walk the typeconsts BTreeMap
+walkable!(impl<R: Reason> for TrefinementType<Ty<R>> => [ty, typeconsts]);
+
+/// Type constant refinements
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    Hash,
+    PartialEq,
+    Serialize,
+    Deserialize
+)]
+#[serde(bound = "TY: Serialize + DeserializeOwned")]
+pub enum TypeConstRef<TY> {
+    Exact(TY),
+    Loose(Box<[TY]>, Box<[TY]>),
+}
+
+walkable!(impl<R: Reason, TY> for TypeConstRef<TY> => {
+    Self::Exact(ty) => [ty],
+    Self::Loose(lo, hi) => [lo, hi],
+});
 
 #[derive(
     Clone,

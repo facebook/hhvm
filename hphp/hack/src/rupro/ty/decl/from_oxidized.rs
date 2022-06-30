@@ -152,6 +152,16 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
                     })
                     .collect(),
             ))),
+            typing_defs_core::Ty_::Trefinement(&(ty, tr)) => {
+                Trefinement(Box::new(decl::TrefinementType {
+                    ty: ty.into(),
+                    typeconsts: tr
+                        .cr_types
+                        .iter()
+                        .map(|(k, v)| ((*k).into(), v.into()))
+                        .collect(),
+                }))
+            }
             typing_defs_core::Ty_::Tvar(ident) => Tvar(ident.into()),
             typing_defs_core::Ty_::Tgeneric(&(pos_id, tys)) => {
                 Tgeneric(Box::new((pos_id.into(), slice(tys))))
@@ -169,11 +179,18 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             | typing_defs_core::Ty_::Tneg(_) => {
                 unreachable!("Not used in decl tys")
             }
-            typing_defs_core::Ty_::Trefinement(_) => {
-                panic!("TODO: Trefinement")
-            }
         };
         Ty::new(reason, ty_)
+    }
+}
+
+impl<R: Reason> From<&obr::typing_defs::ClassTypeRefinement<'_>> for ty::TypeConstRef<Ty<R>> {
+    fn from(ctr: &obr::typing_defs::ClassTypeRefinement<'_>) -> Self {
+        use obr::typing_defs::ClassTypeRefinement::{Texact, Tloose};
+        match ctr {
+            &Texact(ty) => Self::Exact(ty.into()),
+            Tloose(bnds) => Self::Loose(slice(bnds.lower), slice(bnds.upper)),
+        }
     }
 }
 

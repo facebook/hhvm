@@ -167,6 +167,31 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
             Ty_::Tintersection(x) => typing_defs::Ty_::Tintersection(x.to_oxidized(arena)),
             Ty_::TvecOrDict(x) => typing_defs::Ty_::TvecOrDict(x.to_oxidized(arena)),
             Ty_::Taccess(x) => typing_defs::Ty_::Taccess(x.to_oxidized(arena)),
+            Ty_::Trefinement(tr) => typing_defs::Ty_::Trefinement(arena.alloc((
+                tr.ty.to_oxidized(arena),
+                typing_defs::ClassRefinement {
+                    cr_types: tr.typeconsts.to_oxidized(arena),
+                },
+            ))),
+        }
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for TypeConstRef<Ty<R>> {
+    type Output = obr::typing_defs::ClassTypeRefinement<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use obr::typing_defs::ClassTypeRefinement::*;
+        use obr::typing_defs::ClassTypeRefinementBounds;
+        match self {
+            Self::Exact(ty) => Texact(ty.to_oxidized(arena)),
+            Self::Loose(lo, hi) => {
+                let bounds = arena.alloc(ClassTypeRefinementBounds {
+                    lower: lo.to_oxidized(arena),
+                    upper: hi.to_oxidized(arena),
+                });
+                Tloose(bounds)
+            }
         }
     }
 }

@@ -245,7 +245,7 @@ struct FuncBase {
   /*
    * Does this function have a native (C++) implementation?
    */
-  bool isNative : 1;
+  bool isNative;
 
 private:
   /*

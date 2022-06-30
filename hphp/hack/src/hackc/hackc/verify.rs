@@ -133,6 +133,7 @@ where
             } else {
                 panic_message::panic_message(&err).to_string()
             };
+
             let msg = truncate_pos_err(msg);
             let mut msg = msg.replace('\n', "\\n");
             if !long_msg && msg.len() > 80 {
@@ -263,7 +264,6 @@ fn report_final(wall: Duration, count: usize, total: usize, profile: ProfileAcc)
     }
 
     // The # of files that failed are sum of error_histogram's values' usize field
-
     if !profile.error_histogram.is_empty() {
         println!("{}/{} files passed", total - profile.num_failed(), total);
         println!("Failure histogram:");

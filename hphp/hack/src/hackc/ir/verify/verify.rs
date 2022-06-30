@@ -19,16 +19,9 @@ use std::collections::hash_map::Entry;
 type Result<T = ()> = anyhow::Result<T>;
 
 /// Flags controlling the details of verification.
+#[derive(Default)]
 pub struct Flags {
     pub allow_critical_edges: bool,
-}
-
-impl std::default::Default for Flags {
-    fn default() -> Self {
-        Self {
-            allow_critical_edges: false,
-        }
-    }
 }
 
 /// Asserts that a condition is true and reports if it's not.

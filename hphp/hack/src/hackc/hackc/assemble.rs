@@ -85,9 +85,9 @@ pub fn assemble_from_bytes<'arena>(
 /// .filepath <str_literal>
 /// (.function <...>)+
 /// (.function_refs <...>)+
-fn assemble_from_toks<'arena, 'a>(
+fn assemble_from_toks<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<(hhbc::hackc_unit::HackCUnit<'arena>, PathBuf)> {
     let mut funcs = Vec::new();
     let mut classes = Vec::new();
@@ -153,12 +153,12 @@ fn assemble_from_toks<'arena, 'a>(
     Ok((hcu, fp.unwrap())) // If made it here, fp is Some
 }
 
-fn assemble_class<'arena, 'a>(
+fn assemble_class<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::hhas_class::HhasClass<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".class")?;
-    let upper_bounds = assemble_upper_bounds(alloc, token_iter)?;
+    let upper_bounds = assemble_upper_bounds(token_iter)?;
     let (flags, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let name = assemble_class_name(alloc, token_iter)?;
     let span = assemble_span(token_iter)?;
@@ -166,7 +166,7 @@ fn assemble_class<'arena, 'a>(
     let implements = assemble_imp_or_enum_includes(alloc, token_iter, "implements")?;
     let enum_includes = assemble_imp_or_enum_includes(alloc, token_iter, "enum_includes")?;
     token_iter.expect(Token::into_open_curly)?;
-    let doc_comment = assemble_doc_comment(alloc, token_iter)?;
+    let doc_comment = assemble_doc_comment(token_iter)?;
     let uses = assemble_uses(alloc, token_iter)?;
     let enum_type = assemble_enum_ty(alloc, token_iter)?;
     // Prints content of class in this order: all requirements,
@@ -256,9 +256,9 @@ fn _assemble_method_name<'arena>(
 /// Ex:
 /// extends C
 /// There is only one base per HhasClass
-fn assemble_base<'arena, 'a>(
+fn assemble_base<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<Maybe<hhbc::ClassName<'arena>>> {
     if token_iter.next_if_str(Token::is_identifier, "extends") {
         Ok(Maybe::Just(assemble_class_name(alloc, token_iter)?))
@@ -270,9 +270,9 @@ fn assemble_base<'arena, 'a>(
 /// Ex:
 /// implements (Fooable Barable)
 /// enum_includes (Fooable Barable)
-fn assemble_imp_or_enum_includes<'arena, 'a>(
+fn assemble_imp_or_enum_includes<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
     imp_or_inc: &str,
 ) -> Result<Slice<'arena, hhbc::ClassName<'arena>>> {
     let mut classes = Vec::new();
@@ -287,10 +287,7 @@ fn assemble_imp_or_enum_includes<'arena, 'a>(
 }
 
 /// Ex: .doc """doc""";
-fn assemble_doc_comment<'arena, 'a>(
-    _alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
-) -> Result<Maybe<Str<'arena>>> {
+fn assemble_doc_comment<'arena>(token_iter: &mut Lexer<'_>) -> Result<Maybe<Str<'arena>>> {
     if token_iter.next_if_str(Token::is_decl, ".doc") {
         todo!()
     } else {
@@ -299,9 +296,9 @@ fn assemble_doc_comment<'arena, 'a>(
 }
 
 /// Ex: .use TNonScalar;
-fn assemble_uses<'arena, 'a>(
+fn assemble_uses<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<Slice<'arena, hhbc::ClassName<'arena>>> {
     let mut classes = Vec::new();
     if token_iter.next_if_str(Token::is_decl, ".use") {
@@ -314,9 +311,9 @@ fn assemble_uses<'arena, 'a>(
 }
 
 /// Ex: .enum_ty <type_info>
-fn assemble_enum_ty<'arena, 'a>(
+fn assemble_enum_ty<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<Maybe<hhbc::hhas_type::HhasTypeInfo<'arena>>> {
     if token_iter.next_if_str(Token::is_decl, ".enum_ty") {
         Ok(assemble_type_info(alloc, token_iter, true)?)
@@ -326,9 +323,9 @@ fn assemble_enum_ty<'arena, 'a>(
 }
 
 /// Ex: .fatal 2:63,2:63 Parse "A right parenthesis `)` is expected here.";
-fn assemble_fatal<'arena, 'a>(
+fn assemble_fatal<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<ffi::Triple<hhbc::FatalOp, hhbc::hhas_pos::HhasPos, Str<'arena>>> {
     token_iter.expect_is_str(Token::into_decl, ".fatal")?;
     let pos = hhbc::hhas_pos::HhasPos {
@@ -367,9 +364,9 @@ fn assemble_fatal<'arena, 'a>(
 /// A line of adata looks like:
 /// .adata id = """<tv>"""
 /// with tv being a typed value; see `assemble_typed_value` doc for what <tv> looks like.
-fn assemble_adata<'arena, 'a>(
+fn assemble_adata<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::hhas_adata::HhasAdata<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".adata")?;
     let id = Str::new_slice(alloc, token_iter.expect(Token::into_identifier)?);
@@ -391,10 +388,10 @@ fn assemble_adata<'arena, 'a>(
 /// tv can look like:
 /// uninit | N; | s:s.len():"(escaped s)"; | l:s.len():"(escaped s)"; | d:#; | i:#; | b:0; | b:1; | D:dict.len():{((tv1);(tv2);)*}
 /// | v:vec.len():{(tv;)*} | k:keyset.len():{(tv;)*}
-fn assemble_typed_value<'arena, 'a>(
+fn assemble_typed_value<'arena>(
     // can use this for arguments of user_attrs as well .v.
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::TypedValue<'arena>> {
     let tok = token_iter
         .peek()
@@ -442,7 +439,7 @@ fn assemble_typed_value<'arena, 'a>(
             }
         }
         b"v" => assemble_tv_vec(alloc, token_iter), // Vec
-        b"k" => assemble_tv_keyset(alloc, token_iter), // Keyset
+        b"k" => assemble_tv_keyset(token_iter),     // Keyset
         b"D" => assemble_tv_dict(alloc, token_iter), // Dict
         _ => bail!("Unknown typed value passed to .adata: {}", tok),
     }
@@ -450,9 +447,9 @@ fn assemble_typed_value<'arena, 'a>(
 
 // For these collection data types, `print_pos_as_prov_tag` is called in bytecode_printer if
 // context has `array_provenance` true... but rarely happens and not sure how to parse that, so todo!()
-fn assemble_tv_vec<'arena, 'a>(
+fn assemble_tv_vec<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::TypedValue<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "v")?;
     token_iter.expect(Token::into_colon)?;
@@ -468,9 +465,9 @@ fn assemble_tv_vec<'arena, 'a>(
 }
 
 /// D:(D.len):{p1_0; p1_1; ...; pD.len_0; pD.len_1}
-fn assemble_tv_dict<'arena, 'a>(
+fn assemble_tv_dict<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::TypedValue<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "D")?;
     token_iter.expect(Token::into_colon)?;
@@ -489,10 +486,7 @@ fn assemble_tv_dict<'arena, 'a>(
     Ok(hhbc::TypedValue::Dict(Slice::from_vec(alloc, dict)))
 }
 
-fn assemble_tv_keyset<'arena, 'a>(
-    _alloc: &'arena Bump,
-    _token_iter: &mut Lexer<'a>,
-) -> Result<hhbc::TypedValue<'arena>> {
+fn assemble_tv_keyset<'arena>(_token_iter: &mut Lexer<'_>) -> Result<hhbc::TypedValue<'arena>> {
     todo!()
 }
 
@@ -507,12 +501,12 @@ fn assemble_tv_keyset<'arena, 'a>(
 ///
 fn assemble_refs<'arena, 'a, T: 'arena, F>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
     name_str: &str,
     assemble_name: F,
 ) -> Result<Slice<'arena, T>>
 where
-    F: Fn(&'arena Bump, &mut Lexer<'a>) -> Result<T>,
+    F: Fn(&'arena Bump, &mut Lexer<'_>) -> Result<T>,
 {
     token_iter.expect_is_str(Token::into_decl, name_str)?;
     token_iter.expect(Token::into_open_curly)?;
@@ -526,12 +520,12 @@ where
 
 /// A function def is composed of the following:
 /// .function {upper bounds} [special_and_user_attrs] (span) <type_info> name (params) flags? {body}
-fn assemble_function<'arena, 'a>(
+fn assemble_function<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::hhas_function::HhasFunction<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".function")?;
-    let upper_bounds = assemble_upper_bounds(alloc, token_iter)?;
+    let upper_bounds = assemble_upper_bounds(token_iter)?;
     // Special and user attrs may or may not be specified. If not specified, no [] printed
     let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let span = assemble_span(token_iter)?;
@@ -570,8 +564,8 @@ fn assemble_function<'arena, 'a>(
 }
 
 /// Have to parse flags which may or may not appear: isGenerator isAsync isPairGenerator
-fn assemble_function_flags<'a>(
-    token_iter: &mut Lexer<'a>,
+fn assemble_function_flags(
+    token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::hhas_function::HhasFunctionFlags> {
     let mut flag = hhbc::hhas_function::HhasFunctionFlags::empty();
     while token_iter.peek_if(Token::is_identifier) {
@@ -588,7 +582,7 @@ fn assemble_function_flags<'a>(
 /// Parses over filepath. Note that HCU doesn't hold the filepath; filepath is in the context passed to the
 /// bytecode printer. So we don't store the filepath in our HCU or anywhere, but still parse over it
 /// Filepath: .filepath strliteral semicolon (.filepath already consumed in `assemble_from_toks)
-fn assemble_filepath<'a>(token_iter: &mut Lexer<'a>) -> Result<PathBuf> {
+fn assemble_filepath(token_iter: &mut Lexer<'_>) -> Result<PathBuf> {
     // Filepath is .filepath strliteral and semicolon
     token_iter.expect_is_str(Token::into_decl, ".filepath")?;
     let fp = token_iter.expect(Token::into_str_literal)?;
@@ -599,7 +593,7 @@ fn assemble_filepath<'a>(token_iter: &mut Lexer<'a>) -> Result<PathBuf> {
 }
 
 /// Span ex: (2, 4)
-fn assemble_span<'a>(token_iter: &mut Lexer<'a>) -> Result<hhbc::hhas_pos::HhasSpan> {
+fn assemble_span(token_iter: &mut Lexer<'_>) -> Result<hhbc::hhas_pos::HhasSpan> {
     token_iter.expect(Token::into_open_paren)?;
     let line_begin: usize = token_iter.expect_and_get_number()?;
     token_iter.expect(Token::into_comma)?;
@@ -612,9 +606,8 @@ fn assemble_span<'a>(token_iter: &mut Lexer<'a>) -> Result<hhbc::hhas_pos::HhasS
 }
 
 /// Ex: {(T as <"HH\\int" "HH\\int" upper_bound>)}
-fn assemble_upper_bounds<'arena, 'a>(
-    _alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+fn assemble_upper_bounds<'arena>(
+    token_iter: &mut Lexer<'_>,
 ) -> Result<Slice<'arena, Pair<Str<'arena>, Slice<'arena, hhbc::hhas_type::HhasTypeInfo<'arena>>>>>
 {
     token_iter.expect(Token::into_open_curly)?;
@@ -628,9 +621,9 @@ fn assemble_upper_bounds<'arena, 'a>(
 
 /// Ex: [ "__EntryPoint"("""v:0:{}""")]. This example lacks Attrs
 /// Ex: [abstract final] This example lacks HhasAttributes
-fn assemble_special_and_user_attrs<'arena, 'a>(
+fn assemble_special_and_user_attrs<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<(
     hhvm_types_ffi::ffi::Attr,
     Slice<'arena, hhbc::hhas_attribute::HhasAttribute<'arena>>,
@@ -672,9 +665,9 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
 
 /// HhasAttributes are printed as follows:
 /// "name"("""v:args.len:{args}""") where args are typed values.
-fn assemble_user_attr<'arena, 'a>(
+fn assemble_user_attr<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::hhas_attribute::HhasAttribute<'arena>> {
     let nm = escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
         token_iter.expect(Token::into_str_literal)?,
@@ -694,9 +687,9 @@ fn assemble_user_attr<'arena, 'a>(
 
 /// Printed as follows (print_attributes in bcp)
 /// "v:args.len:{args}" where args are typed values
-fn assemble_user_attr_args<'arena, 'a>(
+fn assemble_user_attr_args<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<Slice<'arena, hhbc::TypedValue<'arena>>> {
     if let hhbc::TypedValue::Vec(sl) = assemble_typed_value(alloc, token_iter)? {
         Ok(sl)
@@ -708,9 +701,9 @@ fn assemble_user_attr_args<'arena, 'a>(
 /// Ex: <"HH\\void" N >
 /// < "user_type" "type_constraint.name" type_constraint.flags >
 /// if 'is_enum', no  name printed
-fn assemble_type_info<'arena, 'a>(
+fn assemble_type_info<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
     is_enum: bool,
 ) -> Result<Maybe<hhbc::hhas_type::HhasTypeInfo<'arena>>> {
     token_iter.expect(Token::into_lt)?;
@@ -871,7 +864,7 @@ fn assemble_body<'arena, 'a>(
 }
 
 /// Expects .numiters #+;
-fn assemble_numiters<'a>(token_iter: &mut Lexer<'a>) -> Result<usize> {
+fn assemble_numiters(token_iter: &mut Lexer<'_>) -> Result<usize> {
     token_iter.expect_is_str(Token::into_decl, ".numiters")?;
     let num = token_iter.expect_and_get_number()?;
     token_iter.expect(Token::into_semicolon)?;
@@ -898,7 +891,7 @@ fn assemble_decl_vars<'arena, 'a>(
 /// Opcodes and Pseudos
 fn assemble_instr<'arena, 'a>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
     decl_map: &mut HashMap<&'a [u8], u32>,
     tcb_count: &mut usize, // Increase this when get TryCatchBegin, decrease when TryCatchEnd
 ) -> Result<hhbc::Instruct<'arena>> {
@@ -934,274 +927,166 @@ fn assemble_instr<'arena, 'a>(
                     label if label_reg.is_match(label) => Ok(hhbc::Instruct::Pseudo(
                         hhbc::Pseudo::Label(assemble_label(&mut sl_lexer, true)?),
                     )),
-                    b"Add" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Add,
-                        "Add",
-                    ),
-                    b"Sub" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Sub,
-                        "Sub",
-                    ),
-                    b"Mul" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Mul,
-                        "Mul",
-                    ),
-                    b"AddO" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::AddO,
-                        "AddO",
-                    ),
-                    b"SubO" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::SubO,
-                        "SubO",
-                    ),
-                    b"MulO" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::MulO,
-                        "MulO",
-                    ),
-                    b"Pow" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Pow,
-                        "Pow",
-                    ),
-                    b"Not" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Not,
-                        "Not",
-                    ),
-                    b"NSame" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::NSame,
-                        "NSame",
-                    ),
-                    b"Eq" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Eq,
-                        "Eq",
-                    ),
-                    b"Neq" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Neq,
-                        "Neq",
-                    ),
-                    b"Lte" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Lte,
-                        "Lte",
-                    ),
-                    b"Gt" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Gt,
-                        "Gt",
-                    ),
-                    b"Gte" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Gte,
-                        "Gte",
-                    ),
-                    b"Cmp" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Cmp,
-                        "Cmp",
-                    ),
+                    b"Add" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Add, "Add")
+                    }
+                    b"Sub" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Sub, "Sub")
+                    }
+                    b"Mul" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Mul, "Mul")
+                    }
+                    b"AddO" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::AddO, "AddO")
+                    }
+                    b"SubO" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::SubO, "SubO")
+                    }
+                    b"MulO" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::MulO, "MulO")
+                    }
+                    b"Pow" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Pow, "Pow")
+                    }
+                    b"Not" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Not, "Not")
+                    }
+                    b"NSame" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::NSame, "NSame")
+                    }
+                    b"Eq" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Eq, "Eq"),
+                    b"Neq" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Neq, "Neq")
+                    }
+                    b"Lte" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Lte, "Lte")
+                    }
+                    b"Gt" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Gt, "Gt"),
+                    b"Gte" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Gte, "Gte")
+                    }
+                    b"Cmp" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Cmp, "Cmp")
+                    }
                     b"BitAnd" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::BitAnd,
                         "BitAnd",
                     ),
-                    b"BitOr" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::BitOr,
-                        "BitOr",
-                    ),
+                    b"BitOr" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::BitOr, "BitOr")
+                    }
                     b"BitXor" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::BitXor,
                         "BitXor",
                     ),
                     b"BitNot" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::BitNot,
                         "BitNot",
                     ),
-                    b"Shl" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Shl,
-                        "Shl",
-                    ),
-                    b"Shr" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Shr,
-                        "Shr",
-                    ),
+                    b"Shl" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Shl, "Shl")
+                    }
+                    b"Shr" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Shr, "Shr")
+                    }
                     b"CastBool" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::CastBool,
                         "CastBool",
                     ),
                     b"CastInt" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::CastInt,
                         "CastInt",
                     ),
                     b"CastDouble" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::CastDouble,
                         "CastDouble",
                     ),
                     b"CastString" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::CastString,
                         "CastString",
                     ),
                     b"CastDict" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::CastDict,
                         "CastDict",
                     ),
                     b"CastKeyset" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::CastKeyset,
                         "CastKeyset",
                     ),
                     b"CastVec" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::CastVec,
                         "CastVec",
                     ),
                     b"DblAsBits" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::DblAsBits,
                         "DblAsBits",
                     ),
                     b"InstanceOf" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::InstanceOf,
                         "InstanceOf",
                     ),
 
-                    b"Print" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Print,
-                        "Print",
-                    ),
-                    b"Div" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Div,
-                        "Div",
-                    ),
-                    b"Dir" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Dir,
-                        "Dir",
-                    ),
-                    b"PopC" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::PopC,
-                        "PopC",
-                    ),
+                    b"Print" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Print, "Print")
+                    }
+                    b"Div" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Div, "Div")
+                    }
+                    b"Dir" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Dir, "Dir")
+                    }
+                    b"PopC" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::PopC, "PopC")
+                    }
                     b"Concat" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::Concat,
                         "Concat",
                     ),
                     b"ClassGetC" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::ClassGetC,
                         "ClassGetC",
                     ),
-                    b"Null" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Null,
-                        "Null",
-                    ),
-                    b"RetC" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::RetC,
-                        "RetC",
-                    ),
-                    b"Lt" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Lt,
-                        "Lt",
-                    ),
-                    b"Mod" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Mod,
-                        "Mod",
-                    ),
-                    b"Exit" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Exit,
-                        "Exit",
-                    ),
-                    b"Same" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Same,
-                        "Same",
-                    ),
+                    b"Null" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Null, "Null")
+                    }
+                    b"RetC" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::RetC, "RetC")
+                    }
+                    b"Lt" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Lt, "Lt"),
+                    b"Mod" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Mod, "Mod")
+                    }
+                    b"Exit" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Exit, "Exit")
+                    }
+                    b"Same" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Same, "Same")
+                    }
                     b"NullUninit" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::NullUninit,
                         "NullUninit",
                     ),
                     b"String" => assemble_string_opcode(alloc, &mut sl_lexer),
-                    b"Int" => assemble_int_opcode(alloc, &mut sl_lexer),
-                    b"Double" => assemble_double_opcode(alloc, &mut sl_lexer),
-                    b"False" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::False,
-                        "False",
-                    ),
+                    b"Int" => assemble_int_opcode(&mut sl_lexer),
+                    b"Double" => assemble_double_opcode(&mut sl_lexer),
+                    b"False" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::False, "False")
+                    }
                     b"Dict" => assemble_adata_id_carrying_instr(
                         alloc,
                         &mut sl_lexer,
@@ -1214,174 +1099,141 @@ fn assemble_instr<'arena, 'a>(
                         hhbc::Opcode::Vec,
                         "Vec",
                     ),
-                    b"True" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::True,
-                        "True",
-                    ),
+                    b"True" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::True, "True")
+                    }
                     b"VerifyOutType" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::VerifyOutType,
                         "VerifyOutType",
                     ),
                     b"VerifyParamType" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::VerifyParamType,
                         "VerifyParamType",
                     ),
                     b"VerifyParamTypeTS" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::VerifyParamTypeTS,
                         "VerifyParamTypeTS",
                     ),
                     b"SetL" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::SetL,
                         "SetL",
                     ),
                     b"UnsetL" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::UnsetL,
                         "UnsetL",
                     ),
                     b"PopL" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::PopL,
                         "PopL",
                     ),
                     b"ClsCnsL" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::ClsCnsL,
                         "ClsCnsL",
                     ),
                     b"CGetL2" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::CGetL2,
                         "CGetL2",
                     ),
                     b"CGetL" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::CGetL,
                         "CGetL",
                     ),
                     b"CUGetL" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::CUGetL,
                         "CUGetL",
                     ),
                     b"PushL" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::PushL,
                         "PushL",
                     ),
                     b"GetMemoKeyL" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::GetMemoKeyL,
                         "GetMemoKeyL",
                     ),
                     b"IssetL" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::IssetL,
                         "IssetL",
                     ),
                     b"CGetQuietL" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::CGetQuietL,
                         "CGetQuietL",
                     ),
                     b"IsUnsetL" => assemble_local_carrying_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::IsUnsetL,
                         "IsUnsetL",
                     ),
                     b"JmpZ" => {
-                        assemble_jump_opcode_instr(alloc, &mut sl_lexer, hhbc::Opcode::JmpZ, "JmpZ")
+                        assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::JmpZ, "JmpZ")
                     }
-                    b"Jmp" => {
-                        assemble_jump_opcode_instr(alloc, &mut sl_lexer, hhbc::Opcode::Jmp, "Jmp")
+                    b"Jmp" => assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::Jmp, "Jmp"),
+                    b"JmpNZ" => {
+                        assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::JmpNZ, "JmpNZ")
                     }
-                    b"JmpNZ" => assemble_jump_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        hhbc::Opcode::JmpNZ,
-                        "JmpNZ",
-                    ),
-                    b"Enter" => assemble_jump_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        hhbc::Opcode::Enter,
-                        "Enter",
-                    ),
+                    b"Enter" => {
+                        assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::Enter, "Enter")
+                    }
                     b"FCallFuncD" | b"FCallCtor" | b"FCallClsMethod" | b"FCallClsMethodM"
                     | b"FCallClsMethodD" | b"FCallClsMethodS" | b"FCallClsMethodSD"
                     | b"FCallFunc" | b"FCallObjMethod" | b"FCallObjMethodD" => {
                         assemble_fcall(alloc, &mut sl_lexer)
                     }
-                    b"IncDecL" => assemble_incdecl_opcode(alloc, &mut sl_lexer, decl_map),
-                    b"IsTypeStructC" => assemble_is_type_struct_c(alloc, &mut sl_lexer),
-                    b"IsTypeC" => assemble_is_type_c(alloc, &mut sl_lexer),
-                    b"IsTypeL" => assemble_is_type_l(alloc, &mut sl_lexer, decl_map),
-                    b"IterFree" => assemble_iter_free(alloc, &mut sl_lexer),
+                    b"IncDecL" => assemble_incdecl_opcode(&mut sl_lexer, decl_map),
+                    b"IsTypeStructC" => assemble_is_type_struct_c(&mut sl_lexer),
+                    b"IsTypeC" => assemble_is_type_c(&mut sl_lexer),
+                    b"IsTypeL" => assemble_is_type_l(&mut sl_lexer, decl_map),
+                    b"IterFree" => assemble_iter_free(&mut sl_lexer),
                     b"IterInit" => assemble_iter_init_iter_next(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::IterInit,
                         "IterInit",
                     ),
                     b"IterNext" => assemble_iter_init_iter_next(
-                        alloc,
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::IterNext,
                         "IterNext",
                     ),
                     b"BaseGC" => {
-                        assemble_base_gc_or_c(alloc, &mut sl_lexer, hhbc::Opcode::BaseGC, "BaseGC")
+                        assemble_base_gc_or_c(&mut sl_lexer, hhbc::Opcode::BaseGC, "BaseGC")
                     }
-                    b"BaseGL" => assemble_base_gl(alloc, &mut sl_lexer, decl_map),
-                    b"BaseSC" => assemble_base_sc(alloc, &mut sl_lexer),
-                    b"BaseL" => assemble_base_l(alloc, &mut sl_lexer, decl_map),
-                    b"BaseC" => {
-                        assemble_base_gc_or_c(alloc, &mut sl_lexer, hhbc::Opcode::BaseC, "BaseC")
+                    b"BaseGL" => assemble_base_gl(&mut sl_lexer, decl_map),
+                    b"BaseSC" => assemble_base_sc(&mut sl_lexer),
+                    b"BaseL" => assemble_base_l(&mut sl_lexer, decl_map),
+                    b"BaseC" => assemble_base_gc_or_c(&mut sl_lexer, hhbc::Opcode::BaseC, "BaseC"),
+                    b"BaseH" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::BaseH, "BaseH")
                     }
-                    b"BaseH" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::BaseH,
-                        "BaseH",
-                    ),
                     b"Dim" => assemble_dim(alloc, &mut sl_lexer, decl_map),
                     b"QueryM" => assemble_query_m(alloc, &mut sl_lexer, decl_map),
                     b"SetM" => assemble_set_unset_m(
@@ -1392,7 +1244,7 @@ fn assemble_instr<'arena, 'a>(
                         "SetM",
                     ),
                     b"IncDecM" => assemble_inc_dec_m(alloc, &mut sl_lexer, decl_map),
-                    b"SetOpM" => assemble_set_op_m(alloc, &mut sl_lexer, decl_map),
+                    b"SetOpM" => assemble_set_op_m(&mut sl_lexer, decl_map),
                     b"UnsetM" => assemble_set_unset_m(
                         alloc,
                         &mut sl_lexer,
@@ -1401,15 +1253,13 @@ fn assemble_instr<'arena, 'a>(
                         "UnsetM",
                     ),
                     b"ClsCns" => assemble_cls_cns(alloc, &mut sl_lexer),
-                    b"RetM" => assemble_retm_opcode_instr(alloc, &mut sl_lexer),
+                    b"RetM" => assemble_retm_opcode_instr(&mut sl_lexer),
                     b"NewObj" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::NewObj,
                         "NewObj",
                     ),
                     b"NewObjR" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::NewObjR,
                         "NewObjR",
@@ -1428,17 +1278,13 @@ fn assemble_instr<'arena, 'a>(
                     ),
                     b"NewObjS" => todo!(),
                     b"LockObj" => assemble_single_opcode_instr(
-                        alloc,
                         &mut sl_lexer,
                         || hhbc::Opcode::LockObj,
                         "LockObj",
                     ),
-                    b"Dup" => assemble_single_opcode_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Dup,
-                        "Dup",
-                    ),
+                    b"Dup" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Dup, "Dup")
+                    }
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -1456,7 +1302,7 @@ fn assemble_instr<'arena, 'a>(
 }
 
 /// .srcloc #:#,#:#;
-fn assemble_srcloc<'a>(token_iter: &mut Lexer<'a>) -> Result<hhbc::SrcLoc> {
+fn assemble_srcloc(token_iter: &mut Lexer<'_>) -> Result<hhbc::SrcLoc> {
     token_iter.expect_is_str(Token::into_decl, ".srcloc")?;
     let tr = hhbc::SrcLoc {
         line_begin: token_iter.expect_and_get_number()?,
@@ -1505,9 +1351,9 @@ fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgs
 }
 
 /// "(0|1)*"
-fn assemble_inouts_or_readonly<'arena, 'a>(
+fn assemble_inouts_or_readonly<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<Slice<'arena, bool>> {
     let literal = token_iter.expect(Token::into_str_literal)?; //
     debug_assert!(literal[0] == b'"' && literal[literal.len() - 1] == b'"');
@@ -1527,7 +1373,7 @@ fn assemble_inouts_or_readonly<'arena, 'a>(
 }
 
 /// -
-fn assemble_async_eager_target<'a>(token_iter: &mut Lexer<'a>) -> Result<Option<hhbc::Label>> {
+fn assemble_async_eager_target(token_iter: &mut Lexer<'_>) -> Result<Option<hhbc::Label>> {
     if token_iter.next_if(Token::is_dash) {
         // Not sure how this appears otherwise. If it's just a dash means no async eager target
         Ok(None)
@@ -1539,7 +1385,7 @@ fn assemble_async_eager_target<'a>(token_iter: &mut Lexer<'a>) -> Result<Option<
 /// Just a string literal
 fn assemble_fcall_context<'a, 'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<Str<'arena>> {
     let st = token_iter.expect(Token::into_str_literal)?;
     debug_assert!(st[0] == b'"' && st[st.len() - 1] == b'"');
@@ -1610,9 +1456,9 @@ fn assemble_unescaped_unquoted_str<'arena>(
 /// Ex:
 /// FCallClsMethodM <EnforceMutableReturn> 0 1 "" "" - "" "" DontLogAsDynamicCall "foo"
 /// Opcode fargs str is_log_as_dynamic_call method_name_in_quotes
-fn assemble_fcall<'arena, 'a>(
+fn assemble_fcall<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Instruct<'arena>> {
     use hhbc::Opcode;
     let tok = token_iter
@@ -1708,10 +1554,7 @@ fn assemble_obj_class_name_instr<
 }
 
 /// Ex: IterFree 0
-fn assemble_iter_free<'arena>(
-    _alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_iter_free<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IterFree")?;
     let iter_id = hhbc::IterId {
         idx: token_iter.expect_and_get_number()?,
@@ -1726,7 +1569,6 @@ fn assemble_iter_init_iter_next<
     'arena,
     F: FnOnce(hhbc::IterArgs, hhbc::Label) -> hhbc::Opcode<'arena>,
 >(
-    _alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<&'_ [u8], u32>,
     op_con: F,
@@ -1764,7 +1606,6 @@ fn assemble_iter_args(
 
 /// Ex: IsTypeL $a Obj
 fn assemble_is_type_l<'arena>(
-    _alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<&'_ [u8], u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
@@ -1775,10 +1616,7 @@ fn assemble_is_type_l<'arena>(
 }
 
 /// Ex: IsTypeC Obj
-fn assemble_is_type_c<'arena>(
-    _alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_is_type_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IsTypeC")?;
     let type_op = assemble_is_type_op(token_iter)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeC(type_op)))
@@ -1797,10 +1635,7 @@ fn assemble_cls_cns<'arena>(
 }
 
 /// IsTypeStructC (Resolve|DontResolve)
-fn assemble_is_type_struct_c<'arena>(
-    _alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_is_type_struct_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IsTypeStructC")?;
     let res_op = token_iter.expect(Token::into_identifier)?;
     match res_op {
@@ -1823,10 +1658,7 @@ fn assemble_stack_index(token_iter: &mut Lexer<'_>) -> Result<hhbc::StackIndex> 
 }
 
 /// struct Propname<'arena>(Str<'arena>)
-fn assemble_prop_name<'arena>(
-    _alloc: &'arena Bump,
-    _token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::PropName<'arena>> {
+fn assemble_prop_name<'arena>(_token_iter: &mut Lexer<'_>) -> Result<hhbc::PropName<'arena>> {
     todo!()
 }
 
@@ -1913,14 +1745,14 @@ fn assemble_member_key<'arena>(
         b"PT" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::PT(
-                assemble_prop_name(alloc, token_iter)?,
+                assemble_prop_name(token_iter)?,
                 assemble_readonly_op(token_iter)?,
             ))
         }
         b"QT" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::QT(
-                assemble_prop_name(alloc, token_iter)?,
+                assemble_prop_name(token_iter)?,
                 assemble_readonly_op(token_iter)?,
             ))
         }
@@ -2003,7 +1835,6 @@ fn assemble_inc_dec_m<'arena>(
 
 /// SetOpM ...
 fn assemble_set_op_m<'arena>(
-    _alloc: &'arena Bump,
     _token_iter: &mut Lexer<'_>,
     _decl_map: &HashMap<&'_ [u8], u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
@@ -2012,7 +1843,6 @@ fn assemble_set_op_m<'arena>(
 
 /// BaseGL $var MOpMode
 fn assemble_base_gl<'arena>(
-    _alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<&'_ [u8], u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
@@ -2024,10 +1854,7 @@ fn assemble_base_gl<'arena>(
 }
 
 /// BaseSC stackIndex stackIndex MOpMode ReadOnlyOp
-fn assemble_base_sc<'arena>(
-    _alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_base_sc<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "BaseSC")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseSC(
         assemble_stack_index(token_iter)?,
@@ -2039,7 +1866,6 @@ fn assemble_base_sc<'arena>(
 
 /// BaseL $var MOpMode ReadOnlyOp
 fn assemble_base_l<'arena>(
-    _alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<&'_ [u8], u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
@@ -2057,7 +1883,6 @@ fn assemble_base_gc_or_c<
     'arena,
     F: FnOnce(hhbc::StackIndex, hhbc::MOpMode) -> hhbc::Opcode<'arena>,
 >(
-    _alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     op_con: F,
     op_str: &str,
@@ -2086,7 +1911,6 @@ fn assemble_inc_dec_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IncDecOp> {
 
 /// IncDecL $var IncDecOp
 fn assemble_incdecl_opcode<'arena>(
-    _alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<&'_ [u8], u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
@@ -2105,7 +1929,7 @@ fn assemble_incdecl_opcode<'arena>(
 }
 
 /// L#: or DV#: if needs_colon else L# or DV#
-fn assemble_label<'a>(token_iter: &mut Lexer<'a>, needs_colon: bool) -> Result<hhbc::Label> {
+fn assemble_label(token_iter: &mut Lexer<'_>, needs_colon: bool) -> Result<hhbc::Label> {
     let mut lcl = token_iter.expect(Token::into_identifier)?;
     if needs_colon {
         token_iter.expect(Token::into_colon)?;
@@ -2127,7 +1951,6 @@ fn assemble_label<'a>(token_iter: &mut Lexer<'a>, needs_colon: bool) -> Result<h
 
 /// Assembles one of Enter/Jmp/JmpZ/JmpNZ
 fn assemble_jump_opcode_instr<'arena, F: FnOnce(hhbc::Label) -> hhbc::Opcode<'arena>>(
-    _alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     op_con: F,
     op_str: &str,
@@ -2154,7 +1977,6 @@ fn assemble_var_to_local(
 
 /// Ex: RetM 2
 fn assemble_retm_opcode_instr<'arena>(
-    _alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "RetM")?;
@@ -2165,7 +1987,6 @@ fn assemble_retm_opcode_instr<'arena>(
 
 /// Assembles one of CGetL/Push/SetL/etc...
 fn assemble_local_carrying_opcode_instr<'arena, F: FnOnce(hhbc::Local) -> hhbc::Opcode<'arena>>(
-    _alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<&'_ [u8], u32>,
     op_con: F,
@@ -2177,7 +1998,6 @@ fn assemble_local_carrying_opcode_instr<'arena, F: FnOnce(hhbc::Local) -> hhbc::
 }
 
 fn assemble_single_opcode_instr<'arena, F: FnOnce() -> hhbc::Opcode<'arena>>(
-    _alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     op_con: F, // Because of the trait bound, guaranteed only trying to build opcodes that take no arguments
     op_str: &str,
@@ -2219,20 +2039,14 @@ fn assemble_string_opcode<'arena>(
     )))
 }
 
-fn assemble_int_opcode<'arena>(
-    _alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_int_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "Int")?;
     let num: i64 = token_iter.expect_and_get_number()?;
     token_iter.expect_end()?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Int(num)))
 }
 
-fn assemble_double_opcode<'arena>(
-    _alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_double_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "Double")?;
     let num: f64 = token_iter.expect_and_get_number()?;
     token_iter.expect_end()?;

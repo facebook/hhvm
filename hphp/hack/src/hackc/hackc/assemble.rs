@@ -338,7 +338,7 @@ fn assemble_function_refs<'arena, 'a>(
 }
 
 /// A function def is composed of the following:
-/// .function {upper bounds} [special_and_user_attrs] (span) <type_info> name (params) {body}
+/// .function {upper bounds} [special_and_user_attrs] (span) <type_info> name (params) flags? {body}
 fn assemble_function<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
@@ -359,7 +359,8 @@ fn assemble_function<'arena, 'a>(
     let name = assemble_name(alloc, token_iter)?;
     let mut decl_map: HashMap<&[u8], u32> = HashMap::new(); // Will store decls in this order: params, decl_vars, unnamed
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
-    let partial_body = assemble_body(alloc, token_iter, &mut decl_map)?;
+    let flags = assemble_function_flags(token_iter)?;
+    let partial_body = assemble_body(alloc, token_iter, &mut decl_map)?; // Takes ownership of decl_map
     // Fill partial_body in with params, return_type_info, and bd_upper_bounds
     let body = hhbc::hhas_body::HhasBody {
         params,
@@ -374,10 +375,26 @@ fn assemble_function<'arena, 'a>(
         span,
         // Not too sure where the bottom stuff come from
         coeffects: Default::default(), // Get this from the body -- it's printed there (?)
-        flags: hhbc::hhas_function::HhasFunctionFlags::empty(), // Empty set of flags. Look at rust bitflags for documetnation
+        flags,
         attrs: attr,
     };
     Ok(hhas_func)
+}
+
+/// Have to parse flags which may or may not appear: isGenerator isAsync isPairGenerator
+fn assemble_function_flags<'a>(
+    token_iter: &mut Lexer<'a>,
+) -> Result<hhbc::hhas_function::HhasFunctionFlags> {
+    let mut flag = hhbc::hhas_function::HhasFunctionFlags::empty();
+    while token_iter.peek_if(Token::is_identifier) {
+        match token_iter.expect(Token::into_identifier)? {
+            b"isPairGenerator" => flag |= hhbc::hhas_function::HhasFunctionFlags::PAIR_GENERATOR,
+            b"isAsync" => flag |= hhbc::hhas_function::HhasFunctionFlags::ASYNC,
+            b"isGenerator" => flag |= hhbc::hhas_function::HhasFunctionFlags::GENERATOR,
+            f => bail!("Unknown function flag: {:?}", f),
+        }
+    }
+    Ok(flag)
 }
 
 /// Parses over filepath. Note that HCU doesn't hold the filepath; filepath is in the context passed to the
@@ -448,41 +465,38 @@ fn assemble_special_and_user_attrs<'arena, 'a>(
 }
 
 /// HhasAttributes are printed as follows:
-/// "name"("""v:a.args.len():{args}""")
+/// "name"("""v:args.len:{args}""") where args are typed values.
 fn assemble_user_attr<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
 ) -> Result<hhbc::hhas_attribute::HhasAttribute<'arena>> {
-    let nm = token_iter.expect(Token::into_str_literal)?;
-    let nm = escaper::unquote_slice(nm);
-    let nm = escaper::unescape_bytes(nm)?;
+    let nm = escaper::unescape_bytes(escaper::unquote_slice(
+        token_iter.expect(Token::into_str_literal)?,
+    ))?;
     let name = Str::new_slice(alloc, &nm);
     token_iter.expect(Token::into_open_paren)?;
-    let (args, args_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?; //is a &[u8]
-    // Only care about the last part of the args after v:0:
-    // So have to parse the """{}:{}:{}""" string, get the last {}, make a lexer out of that and pass
-    // to  assemble_user_attr_args.
+    let (args, args_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
     debug_assert!(&args[0..3] == b"\"\"\"" && &args[args.len() - 3..args.len()] == b"\"\"\"");
     let args = &args[3..args.len() - 3];
-    let temp: Vec<&[u8]> = args.split_str(":").collect();
-    let mut args_lexer = Lexer::from_slice(temp[2], args_line);
-    let arguments = assemble_user_attr_args(alloc, &mut args_lexer)?;
+    let mut args_lexer = Lexer::from_slice(args, args_line);
     token_iter.expect(Token::into_close_paren)?;
-    Ok(hhbc::hhas_attribute::HhasAttribute { name, arguments })
+    Ok(hhbc::hhas_attribute::HhasAttribute {
+        name,
+        arguments: assemble_user_attr_args(alloc, &mut args_lexer)?,
+    })
 }
 
+/// Printed as follows (print_attributes in bcp)
+/// "v:args.len:{args}" where args are typed values
 fn assemble_user_attr_args<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
 ) -> Result<Slice<'arena, hhbc::TypedValue<'arena>>> {
-    let args = Vec::new();
-    token_iter.expect(Token::into_open_curly)?;
-    while !matches!(token_iter.peek(), Some(Token::CloseCurly(_))) {
-        todo!(); // Don't actually know yet how to get these interior args
-        // actually it's just adata!
+    if let hhbc::TypedValue::Vec(sl) = assemble_typed_value(alloc, token_iter)? {
+        Ok(sl)
+    } else {
+        bail!("Malformed user_attr_args -- should be a vec")
     }
-    token_iter.expect(Token::into_close_curly)?;
-    Ok(Slice::from_vec(alloc, args))
 }
 
 /// Ex: <"HH\\void" N >

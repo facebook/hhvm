@@ -183,10 +183,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_alias_declaration(_: &C, alias_attribute_spec: Self, alias_modifiers: Self, alias_keyword: Self, alias_name: Self, alias_generic_parameter: Self, alias_constraint: Self, alias_equal: Self, alias_type: Self, alias_semicolon: Self) -> Self {
+    fn make_alias_declaration(_: &C, alias_attribute_spec: Self, alias_modifiers: Self, alias_module_kw_opt: Self, alias_keyword: Self, alias_name: Self, alias_generic_parameter: Self, alias_constraint: Self, alias_equal: Self, alias_type: Self, alias_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
             alias_attribute_spec,
             alias_modifiers,
+            alias_module_kw_opt,
             alias_keyword,
             alias_name,
             alias_generic_parameter,
@@ -2011,9 +2012,10 @@ where
                 acc
             },
             SyntaxVariant::AliasDeclaration(x) => {
-                let AliasDeclarationChildren { alias_attribute_spec, alias_modifiers, alias_keyword, alias_name, alias_generic_parameter, alias_constraint, alias_equal, alias_type, alias_semicolon } = *x;
+                let AliasDeclarationChildren { alias_attribute_spec, alias_modifiers, alias_module_kw_opt, alias_keyword, alias_name, alias_generic_parameter, alias_constraint, alias_equal, alias_type, alias_semicolon } = *x;
                 let acc = f(alias_attribute_spec, acc);
                 let acc = f(alias_modifiers, acc);
+                let acc = f(alias_module_kw_opt, acc);
                 let acc = f(alias_keyword, acc);
                 let acc = f(alias_name, acc);
                 let acc = f(alias_generic_parameter, acc);
@@ -3522,7 +3524,7 @@ where
                  enum_class_enumerator_modifiers: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::AliasDeclaration, 9) => SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
+             (SyntaxKind::AliasDeclaration, 10) => SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
                  alias_semicolon: ts.pop().unwrap(),
                  alias_type: ts.pop().unwrap(),
                  alias_equal: ts.pop().unwrap(),
@@ -3530,6 +3532,7 @@ where
                  alias_generic_parameter: ts.pop().unwrap(),
                  alias_name: ts.pop().unwrap(),
                  alias_keyword: ts.pop().unwrap(),
+                 alias_module_kw_opt: ts.pop().unwrap(),
                  alias_modifiers: ts.pop().unwrap(),
                  alias_attribute_spec: ts.pop().unwrap(),
                  
@@ -4717,6 +4720,7 @@ pub struct EnumClassEnumeratorChildren<T, V> {
 pub struct AliasDeclarationChildren<T, V> {
     pub alias_attribute_spec: Syntax<T, V>,
     pub alias_modifiers: Syntax<T, V>,
+    pub alias_module_kw_opt: Syntax<T, V>,
     pub alias_keyword: Syntax<T, V>,
     pub alias_name: Syntax<T, V>,
     pub alias_generic_parameter: Syntax<T, V>,
@@ -6283,16 +6287,17 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AliasDeclaration(x) => {
-                get_index(9).and_then(|index| { match index {
+                get_index(10).and_then(|index| { match index {
                         0 => Some(&x.alias_attribute_spec),
                     1 => Some(&x.alias_modifiers),
-                    2 => Some(&x.alias_keyword),
-                    3 => Some(&x.alias_name),
-                    4 => Some(&x.alias_generic_parameter),
-                    5 => Some(&x.alias_constraint),
-                    6 => Some(&x.alias_equal),
-                    7 => Some(&x.alias_type),
-                    8 => Some(&x.alias_semicolon),
+                    2 => Some(&x.alias_module_kw_opt),
+                    3 => Some(&x.alias_keyword),
+                    4 => Some(&x.alias_name),
+                    5 => Some(&x.alias_generic_parameter),
+                    6 => Some(&x.alias_constraint),
+                    7 => Some(&x.alias_equal),
+                    8 => Some(&x.alias_type),
+                    9 => Some(&x.alias_semicolon),
                         _ => None,
                     }
                 })

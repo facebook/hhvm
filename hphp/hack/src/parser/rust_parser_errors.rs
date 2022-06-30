@@ -4063,6 +4063,16 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         if let AliasDeclaration(ad) = &node.children {
             let attrs = &ad.attribute_spec;
             self.check_attr_enabled(attrs);
+            // Module newtype errors
+            if !ad.module_kw_opt.is_missing() {
+                self.check_can_use_feature(node, &UnstableFeatures::Modules);
+                if !self.in_module {
+                    self.errors.push(make_error_from_node(
+                        &ad.module_kw_opt,
+                        errors::module_newtype_outside_of_module,
+                    ));
+                }
+            }
             self.invalid_modifier_errors("Type aliases", node, |kind| {
                 kind == TokenKind::Internal || kind == TokenKind::Public
             });

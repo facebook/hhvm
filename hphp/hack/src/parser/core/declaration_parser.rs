@@ -2160,8 +2160,14 @@ where
                 };
                 self.parse_enum_or_enum_class_declaration(attribute_specification, modifiers)
             }
+            TokenKind::Module
+                if !has_visibility
+                    && self.peek_token_kind_with_lookahead(1) == TokenKind::Newtype =>
+            {
+                self.parse_type_alias_declaration(attribute_specification, true)
+            }
             TokenKind::Type | TokenKind::Newtype => {
-                self.parse_type_alias_declaration(attribute_specification)
+                self.parse_type_alias_declaration(attribute_specification, false)
             }
             TokenKind::Newctx => self.parse_ctx_alias_declaration(attribute_specification),
             TokenKind::Async | TokenKind::Function => {
@@ -2321,7 +2327,7 @@ where
         })
     }
 
-    fn parse_type_alias_declaration(&mut self, attr: S::Output) -> S::Output {
+    fn parse_type_alias_declaration(&mut self, attr: S::Output, module_newtype: bool) -> S::Output {
         // SPEC
         // alias-declaration:
         //   attribute-spec-opt modifiers type  name
@@ -2330,6 +2336,11 @@ where
         //     generic-type-parameter-list-opt type-constraint-opt
         //       =  type-specifier  ;
         let modifiers = self.parse_modifiers();
+        let module_kw_opt = if module_newtype {
+            self.assert_token(TokenKind::Module)
+        } else {
+            S!(make_missing, self, self.pos())
+        };
         let token = self.fetch_token();
         // Not `require_name` but `require_name_allow_non_reserved`, because the parser
         // must allow keywords in the place of identifiers; at least to parse .hhi
@@ -2347,6 +2358,7 @@ where
             self,
             attr,
             modifiers,
+            module_kw_opt,
             token,
             name,
             generic,
@@ -2514,7 +2526,7 @@ where
                 } =>
             {
                 let missing = S!(make_missing, self, self.pos());
-                self.parse_type_alias_declaration(missing)
+                self.parse_type_alias_declaration(missing, false)
             }
             TokenKind::Newctx => {
                 let missing = S!(make_missing, self, self.pos());
@@ -2568,6 +2580,10 @@ where
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 self.parse_const_declaration(missing1, missing2, token)
+            }
+            TokenKind::Module if parser1.peek_token_kind() == TokenKind::Newtype => {
+                let missing = S!(make_missing, self, self.pos());
+                self.parse_type_alias_declaration(missing, true)
             }
             TokenKind::Module => self.parse_module_membership_declaration(),
             // If we see new as a token, it's a module definition

@@ -126,8 +126,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_enum_class_enumerator(self, modifiers, type_, name, initializer, semicolon)
     }
 
-    fn make_alias_declaration(&mut self, attribute_spec: Self::Output, modifiers: Self::Output, keyword: Self::Output, name: Self::Output, generic_parameter: Self::Output, constraint: Self::Output, equal: Self::Output, type_: Self::Output, semicolon: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_alias_declaration(self, attribute_spec, modifiers, keyword, name, generic_parameter, constraint, equal, type_, semicolon)
+    fn make_alias_declaration(&mut self, attribute_spec: Self::Output, modifiers: Self::Output, module_kw_opt: Self::Output, keyword: Self::Output, name: Self::Output, generic_parameter: Self::Output, constraint: Self::Output, equal: Self::Output, type_: Self::Output, semicolon: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_alias_declaration(self, attribute_spec, modifiers, module_kw_opt, keyword, name, generic_parameter, constraint, equal, type_, semicolon)
     }
 
     fn make_context_alias_declaration(&mut self, attribute_spec: Self::Output, keyword: Self::Output, name: Self::Output, generic_parameter: Self::Output, as_constraint: Self::Output, equal: Self::Output, context: Self::Output, semicolon: Self::Output) -> Self::Output {

@@ -3032,6 +3032,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         &mut self,
         attributes: Self::Output,
         modifiers: Self::Output,
+        _module_kw_opt: Self::Output,
         keyword: Self::Output,
         name: Self::Output,
         generic_params: Self::Output,

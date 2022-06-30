@@ -1,0 +1,49 @@
+name: Nix CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-test:
+    strategy:
+      # Run tests on all OS's and HHVM versions, even if one fails
+      fail-fast: false
+      matrix:
+        os:
+        - ubuntu-latest
+        - macos-latest
+    runs-on: ${{matrix.os}}
+    env:
+      NIX_STORE_DIR: /opt/hhvm/nix/store
+      NIX_DATA_DIR: /opt/hhvm/nix/share
+      NIX_LOG_DIR: /opt/hhvm/nix/var/log/nix
+      NIX_STATE_DIR: /opt/hhvm/nix/var/nix
+    steps:
+    - uses: actions/checkout@v2.4.0
+    - uses: cachix/install-nix-action@v15
+      with:
+        extra_nix_config: |
+          extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          extra-experimental-features = nix-command flakes
+          extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
+          extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
+          extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
+    - run: sudo mkdir -p /opt/hhvm/nix
+    - run: sudo mount --bind /nix /opt/hhvm/nix
+    - run: nix profile install --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+    - run: hhvm --version
+    - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+    - if: github.event_name != 'pull_request'
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
+        aws-region: us-west-2
+    - if: github.event_name != 'pull_request'
+      run: nix store sign --recursive --key-file <(aws secretsmanager get-secret-value --secret-id hhvm-nix-cache-1 --query SecretString --output text) --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+    - if: github.event_name != 'pull_request'
+      run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"

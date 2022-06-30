@@ -19,6 +19,7 @@
 #include "hphp/util/address-range.h"
 #include "hphp/util/alloc-defs.h"
 #include "hphp/util/alloc.h"
+#include <atomic>
 #include <functional>
 #include <utility>
 
@@ -176,6 +177,7 @@ struct BumpEmergencyMapper : public RangeMapper {
   explicit BumpEmergencyMapper(ExitFun&& exitFn, Args&&... args)
     : RangeMapper(std::forward<Args>(args)...)
     , m_exit(exitFn) {}
+  static std::atomic_flag s_emergencyFlag;
  protected:
   Direction direction() const override { return Direction::LowToHigh; }
   bool addMappingImpl() override;

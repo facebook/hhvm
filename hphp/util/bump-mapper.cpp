@@ -216,6 +216,8 @@ bool BumpFileMapper::addMappingImpl() {
   return true;
 }
 
+std::atomic_flag BumpEmergencyMapper::s_emergencyFlag = ATOMIC_FLAG_INIT;
+
 bool BumpEmergencyMapper::addMappingImpl() {
   auto _ = m_state.lock();
   auto low = m_state.low();
@@ -224,6 +226,7 @@ bool BumpEmergencyMapper::addMappingImpl() {
   mprotect(reinterpret_cast<void*>(low), high - low,
            PROT_READ | PROT_WRITE);
   m_state.low_map.store(high, std::memory_order_release);
+  s_emergencyFlag.test_and_set();
   if (m_exit) m_exit();
   return true;
 }

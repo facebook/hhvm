@@ -213,7 +213,7 @@ let default_capability p : locl_ty =
         class_type r writeProperty [];
         class_type r accessGlobals [];
         class_type r rxLocal [];
-        class_type r system [];
+        class_type r systemLocal [];
         class_type r implicitPolicyLocal [];
         class_type r io [];
       ]

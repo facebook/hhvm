@@ -1,0 +1,19 @@
+name: RPM Package
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.4.0
+    - uses: cachix/install-nix-action@v15
+      with:
+        extra_nix_config: |
+          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          experimental-features = nix-command flakes impure-derivations ca-derivations
+          system-features = nixos-test benchmark big-parallel kvm
+    - run: NIXPKGS_ALLOW_INSECURE=1 nix build --impure --print-build-logs '.?submodules=1&shallow=1#rpm'
+    - run: ls -l result/*/

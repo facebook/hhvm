@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{
-    block::BlockIdIterator, instr::Terminator, Attr, Attribute, Block, BlockId, Coeffects,
-    HasEdges, Instr, InstrId, Literal, LiteralId, LocId, SrcLoc, Type, UnitStringId, ValueId,
-    ValueIdMap,
+    block::BlockIdIterator, instr::Terminator, Attr, Attribute, Block, BlockId, BlockIdMap,
+    Coeffects, HasEdges, Instr, InstrId, Literal, LiteralId, LocId, SrcLoc, Type, UnitStringId,
+    ValueId, ValueIdMap,
 };
 
 use ffi::Str;
@@ -146,6 +146,10 @@ pub struct Func<'a> {
 impl<'a> Func<'a> {
     // By definition the entry block is block zero.
     pub const ENTRY_BID: BlockId = BlockId(0);
+
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     pub fn alloc_literal(&mut self, literal: Literal<'a>) -> LiteralId {
         let lid = LiteralId::from_usize(self.literals.len());
@@ -317,6 +321,23 @@ impl<'a> Func<'a> {
     pub fn remap_vids(&mut self, remap: &ValueIdMap<ValueId>) {
         for bid in self.block_ids() {
             self.remap_block_vids(bid, remap);
+        }
+    }
+
+    /// Rewrite BlockIds using the remap remapping. Won't renumber the blocks
+    /// themselves (so a remapping with b1 -> b2 won't remap block b1 to b2,
+    /// just references to b1 will be remapped to b2).
+    pub fn remap_bids(&mut self, remap: &BlockIdMap<BlockId>) {
+        for param in &mut self.params {
+            if let Some((bid, _)) = param.default_value.as_mut() {
+                *bid = remap.get(bid).copied().unwrap_or(*bid);
+            }
+        }
+
+        for instr in self.instrs.iter_mut() {
+            for bid in instr.edges_mut() {
+                *bid = remap.get(bid).copied().unwrap_or(*bid);
+            }
         }
     }
 

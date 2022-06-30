@@ -219,12 +219,38 @@ fn assemble_class<'arena, 'a>(
     Ok(hhas_class)
 }
 
-fn assemble_class_name<'arena, 'a>(
+fn assemble_class_name_from_str<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::ClassName<'arena>> {
+    Ok(hhbc::ClassName::new(assemble_unescaped_unquoted_str(
+        alloc, token_iter,
+    )?))
+}
+
+fn assemble_class_name<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::ClassName<'arena>> {
     let name = token_iter.expect(Token::into_identifier)?;
     Ok(hhbc::ClassName::new(Str::new_slice(alloc, name)))
+}
+
+fn assemble_method_name_from_str<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::MethodName<'arena>> {
+    Ok(hhbc::MethodName::new(assemble_unescaped_unquoted_str(
+        alloc, token_iter,
+    )?))
+}
+
+fn _assemble_method_name<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::MethodName<'arena>> {
+    let name = token_iter.expect(Token::into_identifier)?;
+    Ok(hhbc::MethodName::new(Str::new_slice(alloc, name)))
 }
 
 /// Ex:
@@ -1317,7 +1343,11 @@ fn assemble_instr<'arena, 'a>(
                         hhbc::Opcode::Enter,
                         "Enter",
                     ),
-                    b"FCallFuncD" => assemble_fcallfuncd_opcode(alloc, &mut sl_lexer),
+                    b"FCallFuncD" | b"FCallCtor" | b"FCallClsMethod" | b"FCallClsMethodM"
+                    | b"FCallClsMethodD" | b"FCallClsMethodS" | b"FCallClsMethodSD"
+                    | b"FCallFunc" | b"FCallObjMethod" | b"FCallObjMethodD" => {
+                        assemble_fcall(alloc, &mut sl_lexer)
+                    }
                     b"IncDecL" => assemble_incdecl_opcode(alloc, &mut sl_lexer, decl_map),
                     b"IsTypeStructC" => assemble_is_type_struct_c(alloc, &mut sl_lexer),
                     b"IsTypeC" => assemble_is_type_c(alloc, &mut sl_lexer),
@@ -1449,12 +1479,11 @@ fn assemble_srcloc<'a>(token_iter: &mut Lexer<'a>) -> Result<hhbc::SrcLoc> {
 }
 
 /// <(fcallargflag)*>
-fn assemble_fcallargsflags<'a>(token_iter: &mut Lexer<'a>) -> Result<hhbc::FCallArgsFlags> {
+fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgsFlags> {
     let mut flags = hhbc::FCallArgsFlags::FCANone;
     token_iter.expect(Token::into_lt)?;
     while !token_iter.peek_if(Token::is_gt) {
-        let flg = token_iter.expect(Token::into_identifier)?;
-        match flg {
+        match token_iter.expect(Token::into_identifier)? {
             b"HasUnpack" => flags.add(hhbc::FCallArgsFlags::HasUnpack),
             b"HasGenerics" => flags.add(hhbc::FCallArgsFlags::HasGenerics),
             b"LockWhileUnwinding" => flags.add(hhbc::FCallArgsFlags::LockWhileUnwinding),
@@ -1517,19 +1546,45 @@ fn assemble_fcall_context<'a, 'arena>(
     Ok(Str::new_slice(alloc, &st[1..st.len() - 1])) // if not hugged by "", won't pass into_str_literal
 }
 
-/// FCallFuncD <(fcargflags)*> numargs numrets inouts readonly async_eager_target context name
-fn assemble_fcallfuncd_opcode<'arena, 'a>(
+fn assemble_is_log_as_dynamic_call_op(
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::IsLogAsDynamicCallOp> {
+    match token_iter.expect(Token::into_identifier)? {
+        b"LogAsDynamicCall" => Ok(hhbc::IsLogAsDynamicCallOp::LogAsDynamicCall),
+        b"DontLogAsDynamicCall" => Ok(hhbc::IsLogAsDynamicCallOp::DontLogAsDynamicCall),
+        b => bail!("Unknown IsLogAsDynamicCallOp: {:?}", b),
+    }
+}
+
+fn assemble_special_class_ref(token_iter: &mut Lexer<'_>) -> Result<hhbc::SpecialClsRef> {
+    match token_iter.expect(Token::into_identifier)? {
+        b"SelfCls" => Ok(hhbc::SpecialClsRef::SelfCls),
+        b"ParentCls" => Ok(hhbc::SpecialClsRef::ParentCls),
+        b"LateBoundCls" => Ok(hhbc::SpecialClsRef::LateBoundCls),
+        b => bail!("Unknown SpecialClassRef: {:?}", b),
+    }
+}
+
+fn assemble_obj_method_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::ObjMethodOp> {
+    match token_iter.expect(Token::into_identifier)? {
+        b"NullThrows" => Ok(hhbc::ObjMethodOp::NullThrows),
+        b"NullSafe" => Ok(hhbc::ObjMethodOp::NullSafe),
+        b => bail!("Unknown ObjMethodOp: {:?}", b),
+    }
+}
+
+/// <(fcargflags)*> numargs numrets inouts readonly async_eager_target context
+fn assemble_fcall_args<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
-) -> Result<hhbc::Instruct<'arena>> {
-    token_iter.expect_is_str(Token::into_identifier, "FCallFuncD")?;
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::FCallArgs<'arena>> {
     let fcargflags = assemble_fcallargsflags(token_iter)?;
-    let num_args: u32 = token_iter.expect_and_get_number()?;
-    let num_rets: u32 = token_iter.expect_and_get_number()?;
-    let inouts: Slice<'arena, bool> = assemble_inouts_or_readonly(alloc, token_iter)?;
-    let readonly: Slice<'arena, bool> = assemble_inouts_or_readonly(alloc, token_iter)?;
-    let async_eager_target: Option<hhbc::Label> = assemble_async_eager_target(token_iter)?;
-    let context: Str<'arena> = assemble_fcall_context(alloc, token_iter)?;
+    let num_args = token_iter.expect_and_get_number()?;
+    let num_rets = token_iter.expect_and_get_number()?;
+    let inouts = assemble_inouts_or_readonly(alloc, token_iter)?;
+    let readonly = assemble_inouts_or_readonly(alloc, token_iter)?;
+    let async_eager_target = assemble_async_eager_target(token_iter)?;
+    let context = assemble_fcall_context(alloc, token_iter)?;
     let fcargs = hhbc::FCallArgs::new(
         fcargflags,
         num_rets,
@@ -1537,18 +1592,82 @@ fn assemble_fcallfuncd_opcode<'arena, 'a>(
         inouts,
         readonly,
         async_eager_target,
-        None, // I did this b/c FCA's new expects a context that is a Option<'arena &str>, not sure how to make it
+        None,
     );
-    let fcargs = hhbc::FCallArgs { context, ..fcargs };
-    // Set fname (which is printed in quotes)
-    let func_name = escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
+    Ok(hhbc::FCallArgs { context, ..fcargs })
+}
+
+fn assemble_unescaped_unquoted_str<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Str<'arena>> {
+    let st = escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
         token_iter.expect(Token::into_str_literal)?,
     ))?;
-    let func_name = hhbc::FunctionName::new(Str::new_slice(alloc, &func_name));
-    token_iter.expect_end()?;
-    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::FCallFuncD(
-        fcargs, func_name,
-    )))
+    Ok(Str::new_slice(alloc, &st))
+}
+
+/// Ex:
+/// FCallClsMethodM <EnforceMutableReturn> 0 1 "" "" - "" "" DontLogAsDynamicCall "foo"
+/// Opcode fargs str is_log_as_dynamic_call method_name_in_quotes
+fn assemble_fcall<'arena, 'a>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'a>,
+) -> Result<hhbc::Instruct<'arena>> {
+    use hhbc::Opcode;
+    let tok = token_iter
+        .next()
+        .ok_or_else(|| anyhow!("Expected an additional instruction in body, reached EOF"))?;
+    let args = assemble_fcall_args(alloc, token_iter)?;
+    let fcall = match tok.as_bytes() {
+        b"FCallFuncD" => {
+            Opcode::FCallFuncD(args, assemble_function_name_from_str(alloc, token_iter)?)
+        }
+        b"FCallCtor" => {
+            Opcode::FCallCtor(args, assemble_unescaped_unquoted_str(alloc, token_iter)?)
+        }
+        b"FCallClsMethodM" => Opcode::FCallClsMethodM(
+            args,
+            assemble_unescaped_unquoted_str(alloc, token_iter)?,
+            assemble_is_log_as_dynamic_call_op(token_iter)?,
+            assemble_method_name_from_str(alloc, token_iter)?,
+        ),
+        b"FCallClsMethodSD" => Opcode::FCallClsMethodSD(
+            args,
+            assemble_unescaped_unquoted_str(alloc, token_iter)?,
+            assemble_special_class_ref(token_iter)?,
+            assemble_method_name_from_str(alloc, token_iter)?,
+        ),
+        b"FCallObjMethodD" => Opcode::FCallObjMethodD(
+            args,
+            assemble_unescaped_unquoted_str(alloc, token_iter)?,
+            assemble_obj_method_op(token_iter)?,
+            assemble_method_name_from_str(alloc, token_iter)?,
+        ),
+        b"FCallClsMethod" => Opcode::FCallClsMethod(
+            args,
+            assemble_unescaped_unquoted_str(alloc, token_iter)?,
+            assemble_is_log_as_dynamic_call_op(token_iter)?,
+        ),
+        b"FCallClsMethodS" => Opcode::FCallClsMethodS(
+            args,
+            assemble_unescaped_unquoted_str(alloc, token_iter)?,
+            assemble_special_class_ref(token_iter)?,
+        ),
+        b"FCallObjMethod" => Opcode::FCallObjMethod(
+            args,
+            assemble_unescaped_unquoted_str(alloc, token_iter)?,
+            assemble_obj_method_op(token_iter)?,
+        ),
+        b"FCallClsMethodD" => Opcode::FCallClsMethodD(
+            args,
+            assemble_class_name_from_str(alloc, token_iter)?,
+            assemble_method_name_from_str(alloc, token_iter)?,
+        ),
+        b"FCallFunc" => Opcode::FCallFunc(args),
+        _ => bail!("Unknown fcall: {}", tok),
+    };
+    Ok(hhbc::Instruct::Opcode(fcall))
 }
 
 fn assemble_is_type_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IsTypeOp> {
@@ -2122,9 +2241,18 @@ fn assemble_double_opcode<'arena>(
     )))
 }
 
-fn assemble_function_name<'arena, 'a>(
+fn assemble_function_name_from_str<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'a>,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::FunctionName<'arena>> {
+    Ok(hhbc::FunctionName::new(assemble_unescaped_unquoted_str(
+        alloc, token_iter,
+    )?))
+}
+
+fn assemble_function_name<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::FunctionName<'arena>> {
     let name = token_iter.expect(Token::into_identifier)?;
     let fname = hhbc::FunctionName::new(Str::new_slice(alloc, name));

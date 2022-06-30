@@ -35,9 +35,10 @@ use oxidized_by_ref::{
     shape_map::ShapeField,
     t_shape_map::TShapeField,
     typing_defs::{
-        self, AbstractTypeconst, Capability::*, ClassConstKind, ConcreteTypeconst, ConstDecl,
-        Enforcement, EnumType, FunElt, FunImplicitParams, FunParam, FunParams, FunType, IfcFunDecl,
-        ParamMode, PosByteString, PosId, PosString, PossiblyEnforcedTy, ShapeFieldType, ShapeKind,
+        self, AbstractTypeconst, Capability::*, ClassConstKind, ClassRefinement,
+        ClassTypeRefinement, ClassTypeRefinementBounds, ConcreteTypeconst, ConstDecl, Enforcement,
+        EnumType, FunElt, FunImplicitParams, FunParam, FunParams, FunType, IfcFunDecl, ParamMode,
+        PosByteString, PosId, PosString, PossiblyEnforcedTy, ShapeFieldType, ShapeKind,
         TaccessType, Tparam, TshapeFieldName, Ty, Ty_, Typeconst, TypedefType, WhereConstraint,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
@@ -850,6 +851,7 @@ pub enum Node<'a> {
     Expr(&'a nast::Expr<'a>),
     TypeParameters(&'a &'a [&'a Tparam<'a>]),
     WhereConstraint(&'a WhereConstraint<'a>),
+    ClassTypeRefinement(&'a (&'a str, ClassTypeRefinement<'a>)),
 
     // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
     Token(FixedWidthToken),
@@ -5388,6 +5390,69 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         Node::Ty(self.alloc(Ty(
             reason,
             Ty_::Taccess(self.alloc(TaccessType(ty, id.into()))),
+        )))
+    }
+
+    fn make_type_in_refinement(
+        &mut self,
+        _type_keyword: Self::Output,
+        type_constant_name: Self::Output,
+        _type_params: Self::Output,
+        constraints: Self::Output,
+        _equal_token: Self::Output,
+        type_specifier: Self::Output,
+    ) -> Self::Output {
+        let Id(_, id) = match self.expect_name(type_constant_name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::TypeInRefinement),
+        };
+        if type_specifier.is_ignored() {
+            // A loose refinement, with bounds
+            let (lower, upper) = self.partition_bounds_into_lower_and_upper(constraints);
+            Node::ClassTypeRefinement(self.alloc((
+                id,
+                ClassTypeRefinement::Tloose(self.alloc(ClassTypeRefinementBounds {
+                    lower: self.alloc(lower),
+                    upper: self.alloc(upper),
+                })),
+            )))
+        } else {
+            // An exact refinement
+            let ty = match self.node_to_ty(type_specifier) {
+                Some(ty) => ty,
+                None => return Node::Ignored(SK::TypeInRefinement),
+            };
+            Node::ClassTypeRefinement(self.alloc((id, ClassTypeRefinement::Texact(ty))))
+        }
+    }
+
+    fn make_type_refinement(
+        &mut self,
+        root_type: Self::Output,
+        _with_keyword: Self::Output,
+        _left_brace: Self::Output,
+        members: Self::Output,
+        right_brace: Self::Output,
+    ) -> Self::Output {
+        let pos = self.merge_positions(root_type, right_brace);
+        let reason = self.alloc(Reason::hint(pos));
+        let root_type = match self.node_to_ty(root_type) {
+            Some(ty) => ty,
+            None => return Node::Ignored(SK::TypeRefinement),
+        };
+        let type_members = arena_collections::map::Map::from(
+            self.arena,
+            members.iter().filter_map(|node| match node {
+                Node::ClassTypeRefinement(&(id, ctr)) => Some((id, ctr)),
+                _ => None,
+            }),
+        );
+        let class_ref = ClassRefinement {
+            cr_types: type_members,
+        };
+        Node::Ty(self.alloc(Ty(
+            reason,
+            Ty_::Trefinement(self.alloc((root_type, class_ref))),
         )))
     }
 

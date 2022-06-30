@@ -579,6 +579,13 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       in
       List.iter responses ~f:print_endline;
       Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_DEPS_OUT_AT_POS_BATCH positions ->
+      let positions = parse_positions positions in
+      let%lwt (responses, telemetry) =
+        rpc args @@ Rpc.DEPS_OUT_BATCH positions
+      in
+      List.iter responses ~f:print_endline;
+      Lwt.return (Exit_status.No_error, telemetry)
     | MODE_AUTO_COMPLETE ->
       let content = Sys_utils.read_stdin_to_string () in
       let%lwt (results, telemetry) =

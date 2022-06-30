@@ -71,6 +71,7 @@ type client_mode =
   | MODE_FILE_DEPENDENTS
   | MODE_GLOBAL_INFERENCE of ServerGlobalInferenceTypes.mode * string list
   | MODE_VERBOSE of bool
+  | MODE_DEPS_OUT_AT_POS_BATCH of string list
 
 type client_check_env = {
   ai_mode: string option;
@@ -169,3 +170,4 @@ let mode_to_string = function
   | MODE_FILE_DEPENDENTS -> "MODE_FILE_LEVEL_DEPENDENCIES"
   | MODE_GLOBAL_INFERENCE _ -> "MODE_GLOBAL_INFERENCE"
   | MODE_VERBOSE _ -> "MODE_VERBOSE"
+  | MODE_DEPS_OUT_AT_POS_BATCH _ -> "MODE_DEPS_OUT_AT_POS_BATCH"

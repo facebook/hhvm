@@ -433,6 +433,7 @@ type _ t =
       ServerGlobalInferenceTypes.mode * string list
       -> ServerGlobalInferenceTypes.result t
   | VERBOSE : bool -> unit t
+  | DEPS_OUT_BATCH : (string * int * int) list -> string list t
 
 type cmd_metadata = {
   from: string;

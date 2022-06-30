@@ -265,6 +265,7 @@
   identifySymbolService
   methodJumps
   saveStateService
+  serverDepsOutBatch
   serverFindTypeVar
   serverFindLocals
   serverFunDepsBatch

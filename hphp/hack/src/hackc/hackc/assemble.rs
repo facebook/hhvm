@@ -90,14 +90,26 @@ fn assemble_from_toks<'arena, 'a>(
     token_iter: &mut Lexer<'a>,
 ) -> Result<(hhbc::hackc_unit::HackCUnit<'arena>, PathBuf)> {
     let mut funcs = Vec::new();
+    let mut adatas = Vec::new();
     let mut func_refs = None; // Only one func_refs which is itself a list, but that's inside the func_refs object
-    let mut fp = None;
+    let mut fp = None; // Option<PathBuf>
+    let mut fatal = None; // Maybe<ffi::Triple<hhbc::FatalOp, hhbc::hhas_pos::HhasPos, Str<'arena>>>
     while token_iter.peek().is_some() {
         if token_iter.peek_if_str(Token::is_decl, ".filepath") {
             if fp.is_some() {
                 bail!(".filepath specified more than once in file");
             }
             fp = Some(assemble_filepath(token_iter)?);
+        } else if token_iter.peek_if_str(Token::is_decl, ".fatal") {
+            if fp.is_none() {
+                bail!("No .filepath specified in file. Must be specified before other headers");
+            }
+            fatal = Some(assemble_fatal(alloc, token_iter)?);
+        } else if token_iter.peek_if_str(Token::is_decl, ".adata") {
+            if fp.is_none() {
+                bail!("No .filepath specified in file. Must be specified before other headers");
+            }
+            adatas.push(assemble_adata(alloc, token_iter)?);
         } else if token_iter.peek_if_str(Token::is_decl, ".function") {
             if fp.is_none() {
                 bail!("No .filepath specified in file. Must be specified before other headers");
@@ -119,25 +131,190 @@ fn assemble_from_toks<'arena, 'a>(
         }
     }
     let hcu = hhbc::hackc_unit::HackCUnit {
+        adata: Slice::fill_iter(alloc, adatas.into_iter()),
+        functions: Slice::fill_iter(alloc, funcs.into_iter()),
         classes: Default::default(),
         typedefs: Default::default(),
         file_attributes: Default::default(),
         modules: Default::default(),
-        fatal: Default::default(),
-        adata: Default::default(),
-        functions: Slice::fill_iter(alloc, funcs.into_iter()),
         module_use: Maybe::Nothing,
         symbol_refs: hhbc::hhas_symbol_refs::HhasSymbolRefs {
             functions: func_refs.unwrap_or_default(),
             ..Default::default()
         },
         constants: Default::default(),
+        fatal: fatal.into(),
     };
     if let Some(fp) = fp {
         Ok((hcu, fp))
     } else {
         bail!("No .filepath specified in file")
     }
+}
+
+/// Ex: .fatal 2:63,2:63 Parse "A right parenthesis `)` is expected here.";
+fn assemble_fatal<'arena, 'a>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'a>,
+) -> Result<ffi::Triple<hhbc::FatalOp, hhbc::hhas_pos::HhasPos, Str<'arena>>> {
+    token_iter.expect_is_str(Token::into_decl, ".fatal")?;
+    let pos = hhbc::hhas_pos::HhasPos {
+        line_begin: token_iter.expect_and_get_number()?,
+        col_begin: {
+            token_iter.expect(Token::into_colon)?;
+            token_iter.expect_and_get_number()?
+        },
+        line_end: {
+            token_iter.expect(Token::into_comma)?;
+            token_iter.expect_and_get_number()?
+        },
+        col_end: {
+            token_iter.expect(Token::into_colon)?;
+            token_iter.expect_and_get_number()?
+        },
+    };
+    let fat_op = token_iter.expect(Token::into_identifier)?;
+    let fat_op = match fat_op {
+        b"Parse" => hhbc::FatalOp::Parse,
+        b"Runtime" => hhbc::FatalOp::Runtime,
+        b"RuntimeOmitFrame" => hhbc::FatalOp::RuntimeOmitFrame,
+        _ => bail!("Unknown fatal op: {:?}", fat_op),
+    };
+    let msg = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(ffi::Triple::from((fat_op, pos, Str::new_slice(alloc, msg))))
+}
+
+/// A line of adata looks like:
+/// .adata id = """<tv>"""
+/// with tv being a typed value; see `assemble_typed_value` doc for what <tv> looks like.
+fn assemble_adata<'arena, 'a>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'a>,
+) -> Result<hhbc::hhas_adata::HhasAdata<'arena>> {
+    token_iter.expect_is_str(Token::into_decl, ".adata")?;
+    let id = Str::new_slice(alloc, token_iter.expect(Token::into_identifier)?);
+    token_iter.expect(Token::into_equal)?;
+    // What's left here is tv
+    let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
+    debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
+    let tv = &tv[3..tv.len() - 3];
+    let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
+    // Have to unescape tv -- for example, """D:1:{s:5:\"class\"; D:...""" causes error parsing \"class\"
+    let mut tv_lexer = Lexer::from_slice(tv, tv_line);
+    // this so it's accurate again?
+    let value = assemble_typed_value(alloc, &mut tv_lexer)?;
+    tv_lexer.expect_end()?;
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(hhbc::hhas_adata::HhasAdata { id, value })
+}
+
+/// tv can look like:
+/// uninit | N; | s:s.len():"(escaped s)"; | l:s.len():"(escaped s)"; | d:#; | i:#; | b:0; | b:1; | D:dict.len():{((tv1);(tv2);)*}
+/// | v:vec.len():{(tv;)*} | k:keyset.len():{(tv;)*}
+fn assemble_typed_value<'arena, 'a>(
+    // can use this for arguments of user_attrs as well .v.
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'a>,
+) -> Result<hhbc::TypedValue<'arena>> {
+    let tok = token_iter
+        .peek()
+        .ok_or_else(|| anyhow!("No typed value to parse"))?;
+    match tok.as_bytes() {
+        b"uninit" => {
+            token_iter.next();
+            Ok(hhbc::TypedValue::Uninit)
+        }
+        b"N" => {
+            token_iter.expect_is_str(Token::into_identifier, "N")?;
+            token_iter.expect(Token::into_semicolon)?;
+            Ok(hhbc::TypedValue::Null)
+        }
+        b"s" => {
+            // String
+            token_iter.expect_is_str(Token::into_identifier, "s")?;
+            token_iter.expect(Token::into_colon)?;
+            token_iter.expect(Token::into_number)?;
+            token_iter.expect(Token::into_colon)?;
+            let st = token_iter.expect(Token::into_str_literal)?;
+            token_iter.expect(Token::into_semicolon)?;
+            Ok(hhbc::TypedValue::string(Str::new_slice(alloc, st))) // Have to check escaping
+        }
+        b"l" => todo!(), // LazyClass
+        b"d" => todo!(), // Float
+        b"i" => {
+            // Int
+            token_iter.expect_is_str(Token::into_identifier, "i")?;
+            token_iter.expect(Token::into_colon)?;
+            let num: i64 = token_iter.expect_and_get_number()?;
+            token_iter.expect(Token::into_semicolon)?;
+            Ok(hhbc::TypedValue::Int(num))
+        }
+        b"b" => {
+            // Bool
+            token_iter.expect_is_str(Token::into_identifier, "b")?;
+            token_iter.expect(Token::into_colon)?;
+            let num = token_iter.expect_and_get_number()?;
+            token_iter.expect(Token::into_semicolon)?;
+            match num {
+                0 => Ok(hhbc::TypedValue::Bool(false)),
+                1 => Ok(hhbc::TypedValue::Bool(true)),
+                _ => bail!("Given bool adata specified as number other than 0 or 1"),
+            }
+        }
+        b"v" => assemble_tv_vec(alloc, token_iter), // Vec
+        b"k" => assemble_tv_keyset(alloc, token_iter), // Keyset
+        b"D" => assemble_tv_dict(alloc, token_iter), // Dict
+        _ => bail!("Unknown typed value passed to .adata: {}", tok),
+    }
+}
+
+// For these collection data types, `print_pos_as_prov_tag` is called in bytecode_printer if
+// context has `array_provenance` true... but rarely happens and not sure how to parse that, so todo!()
+fn assemble_tv_vec<'arena, 'a>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'a>,
+) -> Result<hhbc::TypedValue<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "v")?;
+    token_iter.expect(Token::into_colon)?;
+    let ln: usize = token_iter.expect_and_get_number()?;
+    token_iter.expect(Token::into_colon)?;
+    token_iter.expect(Token::into_open_curly)?;
+    let mut vec = Vec::with_capacity(ln);
+    for _ in 0..ln {
+        vec.push(assemble_typed_value(alloc, token_iter)?);
+    }
+    token_iter.expect(Token::into_close_curly)?;
+    Ok(hhbc::TypedValue::Vec(Slice::from_vec(alloc, vec)))
+}
+
+/// D:(D.len):{p1_0; p1_1; ...; pD.len_0; pD.len_1}
+fn assemble_tv_dict<'arena, 'a>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'a>,
+) -> Result<hhbc::TypedValue<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "D")?;
+    token_iter.expect(Token::into_colon)?;
+    let ln: usize = token_iter.expect_and_get_number()?; // Length is the # of pairs in the dict
+    token_iter.expect(Token::into_colon)?;
+    token_iter.expect(Token::into_open_curly)?;
+    let mut dict: Vec<Pair<hhbc::TypedValue<'arena>, hhbc::TypedValue<'arena>>> =
+        Vec::with_capacity(ln);
+    for _ in 0..ln {
+        dict.push(Pair::from((
+            assemble_typed_value(alloc, token_iter)?,
+            assemble_typed_value(alloc, token_iter)?,
+        )));
+    }
+    token_iter.expect(Token::into_close_curly)?;
+    Ok(hhbc::TypedValue::Dict(Slice::from_vec(alloc, dict)))
+}
+
+fn assemble_tv_keyset<'arena, 'a>(
+    _alloc: &'arena Bump,
+    _token_iter: &mut Lexer<'a>,
+) -> Result<hhbc::TypedValue<'arena>> {
+    todo!()
 }
 
 /// Function ref looks like:
@@ -180,8 +357,8 @@ fn assemble_function<'arena, 'a>(
     };
     // Assemble_name
     let name = assemble_name(alloc, token_iter)?;
-    let params = assemble_params(token_iter)?;
-    let mut decl_map: HashMap<&[u8], u32> = HashMap::new();
+    let mut decl_map: HashMap<&[u8], u32> = HashMap::new(); // Will store decls in this order: params, decl_vars, unnamed
+    let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let partial_body = assemble_body(alloc, token_iter, &mut decl_map)?;
     // Fill partial_body in with params, return_type_info, and bd_upper_bounds
     let body = hhbc::hhas_body::HhasBody {
@@ -340,15 +517,66 @@ fn assemble_type_info<'arena, 'a>(
     )))
 }
 
+/// ((a, )*a) | () where a is a param
 fn assemble_params<'arena, 'a>(
+    alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
+    decl_map: &mut HashMap<&'a [u8], u32>,
 ) -> Result<Slice<'arena, hhbc::hhas_param::HhasParam<'arena>>> {
     token_iter.expect(Token::into_open_paren)?;
+    let mut params = Vec::new();
     while !token_iter.peek_if(Token::is_close_paren) {
-        todo!();
+        params.push(assemble_param(alloc, token_iter, decl_map)?);
+        if !token_iter.peek_if(Token::is_close_paren) {
+            token_iter.expect(Token::into_comma)?;
+        }
     }
     token_iter.expect(Token::into_close_paren)?;
-    Ok(Default::default())
+    Ok(Slice::from_vec(alloc, params))
+}
+
+/// a: <user_attributes>? inout? readonly? ...?<type_info>?name (= default_value)?
+fn assemble_param<'arena, 'a>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'a>,
+    decl_map: &mut HashMap<&'a [u8], u32>,
+) -> Result<hhbc::hhas_param::HhasParam<'arena>> {
+    let mut ua_vec = Vec::new();
+    let user_attributes = {
+        if token_iter.peek_if(Token::is_open_bracket) {
+            token_iter.expect(Token::into_open_bracket)?;
+            while !token_iter.peek_if(Token::is_close_bracket) {
+                ua_vec.push(assemble_user_attr(alloc, token_iter)?);
+            }
+            token_iter.expect(Token::into_close_bracket)?;
+        }
+        Slice::from_vec(alloc, ua_vec)
+    };
+    let is_inout = token_iter.next_if_str(Token::is_identifier, "inout");
+    let is_readonly = token_iter.next_if_str(Token::is_identifier, "readonly");
+    let is_variadic = token_iter.next_if(Token::is_variadic);
+    let type_info = if token_iter.peek_if(Token::is_lt) {
+        assemble_type_info(alloc, token_iter)? // Unlike user_attrs, consumes <> too
+    } else {
+        Maybe::Nothing
+    };
+    let name = token_iter.expect(Token::into_variable)?;
+    decl_map.insert(name, decl_map.len() as u32);
+    let name = Str::new_slice(alloc, name);
+    let default_value = if token_iter.peek_if(Token::is_equal) {
+        todo!() // is type Maybe<Pair<Label, Str<'arena>>>
+    } else {
+        Maybe::Nothing
+    };
+    Ok(hhbc::hhas_param::HhasParam {
+        name,
+        is_variadic,
+        is_inout,
+        is_readonly,
+        user_attributes,
+        type_info,
+        default_value,
+    })
 }
 
 /// { (.doc ...)? (.ismemoizewrapper)? (.ismemoizewrapperlsb)? (.numiters)? (.declvars)? (instructions)* }
@@ -732,6 +960,18 @@ fn assemble_instr<'arena, 'a>(
                         &mut sl_lexer,
                         || hhbc::Opcode::False,
                         "False",
+                    ),
+                    b"Dict" => assemble_adata_id_carrying_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        hhbc::Opcode::Dict,
+                        "Dict",
+                    ),
+                    b"Vec" => assemble_adata_id_carrying_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        hhbc::Opcode::Vec,
+                        "Vec",
                     ),
                     b"True" => assemble_single_opcode_instr(
                         alloc,
@@ -1542,6 +1782,24 @@ fn assemble_single_opcode_instr<'arena, F: FnOnce() -> hhbc::Opcode<'arena>>(
     token_iter.expect_is_str(Token::into_identifier, op_str)?;
     token_iter.expect_end()?;
     Ok(hhbc::Instruct::Opcode(op_con()))
+}
+
+/// Assembles one of Dict/Keyset/Vec opcodes. Note that
+/// when printing, the printer adds a `@` at the front of the AdataId; it's not part of the name
+fn assemble_adata_id_carrying_instr<
+    'arena,
+    F: FnOnce(hhbc::AdataId<'arena>) -> hhbc::Opcode<'arena>,
+>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    op_con: F,
+    op_str: &str,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, op_str)?;
+    let adata_id = token_iter.expect(Token::into_global)?;
+    debug_assert!(adata_id[0] == b'@');
+    let adata_id: hhbc::AdataId<'arena> = Str::new_slice(alloc, &adata_id[1..]);
+    Ok(hhbc::Instruct::Opcode(op_con(adata_id)))
 }
 
 fn assemble_string_opcode<'arena>(

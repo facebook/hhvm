@@ -197,7 +197,6 @@ function unserialize_pure(
  */
 function import_request_variables(string $types,
                                   string $prefix = ""): bool {
-  /* HH_FIXME[2049] */
   throw new Exception("It is bad coding practice to remove scoping of ".
                       "variables just to achieve coding convenience, ".
                       "esp. in a language that encourages global ".

@@ -509,6 +509,24 @@ struct KeyedIndexData : IRExtraData {
 };
 
 /*
+ * A key used to access a dict-ish array element.
+ */
+struct KeyedData : IRExtraData {
+  explicit KeyedData(const StringData* key)
+    : key(key)
+  {}
+
+  std::string show() const {
+    return folly::sformat("\"{}\"", key);
+  }
+  size_t hash() const { return stableHash(); }
+  size_t stableHash() const { return key->hashStatic(); }
+  bool equals(const KeyedData& o) const { return key == o.key; }
+
+  const StringData* key;
+};
+
+/*
  * Used to optimize array accesses. Does not change semantics, but changes how
  * we do the lookup - e.g. we scan small static arrays for static string keys.
  *
@@ -2872,9 +2890,13 @@ X(LdObjMethodS,                 FuncNameCtxData);
 X(LdObjMethodD,                 OptClassAndFuncData);
 X(ThrowMissingArg,              FuncArgData);
 X(RaiseTooManyArg,              FuncData);
+X(RaiseImplicitContextStateInvalidException,
+                                FuncData);
 X(RaiseCoeffectsCallViolation,  FuncData);
 X(RaiseCoeffectsFunParamTypeViolation,
                                 ParamData);
+X(RaiseModuleBoundaryViolation, OptClassAndFuncData);
+X(CallViolatesModuleBoundary,   FuncData);
 X(CheckInOutMismatch,           BoolVecArgsData);
 X(ThrowInOutMismatch,           ParamData);
 X(CheckReadonlyMismatch,        BoolVecArgsData);
@@ -2900,6 +2922,7 @@ X(InitVecElemLoop,              InitVanillaVecLoopData);
 X(InitVecElem,                  IndexData);
 X(InitDictElem,                 KeyedIndexData);
 X(InitStructElem,               KeyedIndexData);
+X(LdTypeStructureValCns,        KeyedData);
 X(CreateAAWH,                   CreateAAWHData);
 X(CountWHNotDone,               CountWHNotDoneData);
 X(CheckDictOffset,              IndexData);
@@ -2958,6 +2981,7 @@ X(DbgTrashFrame,                IRSPRelOffsetData);
 X(DbgTraceCall,                 IRSPRelOffsetData);
 X(LdPropAddr,                   IndexData);
 X(LdInitPropAddr,               IndexData);
+X(DeserializeLazyProp,          IndexData);
 X(NewCol,                       NewColData);
 X(NewColFromArray,              NewColData);
 X(CheckSurpriseFlagsEnter,      FuncEntryData);

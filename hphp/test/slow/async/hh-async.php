@@ -1,7 +1,7 @@
 <?hh
 /* Tests identity and basic helper functions */
 
-async function waitForme(): Awaitable<string> {
+async function waitForMe(): Awaitable<string> {
   return 'Thank you for waiting';
 }
 

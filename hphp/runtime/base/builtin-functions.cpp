@@ -297,7 +297,7 @@ const Func* vm_decode_func_from_name(
     ar ? ar->func()->unit()->moduleName() : (const StringData*)nullptr;
   auto const callCtx = MethodLookupCallContext(ctx, moduleName);
   auto f = lookupMethodCtx(cc, funcName.get(), callCtx, lookupType,
-                           MethodLookupErrorOptions::None);
+                           MethodLookupErrorOptions::NoErrorOnModule);
   if (f && (f->attrs() & AttrStatic)) {
     // If we found a method and its static, null out this_
     this_ = nullptr;
@@ -1056,22 +1056,18 @@ void raise_bad_type_warning(const char *fmt, ...) {
 
 void raise_expected_array_warning(const char* fn /*=nullptr*/) {
   if (!fn) {
-    if (auto ar = g_context->getStackFrame()) {
-     fn = ar->func()->name()->data();
-    } else {
-     fn = "(unknown)";
-    }
+    fn = fromLeaf([&](const BTFrame& frm) {
+      return frm.func()->name()->data();
+    }, backtrace_detail::true_pred, "(unknown)");
   }
   raise_bad_type_warning("%s expects array(s)", fn);
 }
 
 void raise_expected_array_or_collection_warning(const char* fn /*=nullptr*/) {
   if (!fn) {
-    if (auto ar = g_context->getStackFrame()) {
-      fn = ar->func()->name()->data();
-    } else {
-      fn = "(unknown)";
-    }
+    fn = fromLeaf([&](const BTFrame& frm) {
+      return frm.func()->name()->data();
+    }, backtrace_detail::true_pred, "(unknown)");
   }
   raise_bad_type_warning("%s expects array(s) or collection(s)", fn);
 }

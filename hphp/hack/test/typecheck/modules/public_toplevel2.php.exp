@@ -1,0 +1,10 @@
+File "public_toplevel2.php", line 3, characters 1-6:
+`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+File "public_toplevel2.php", line 4, characters 1-6:
+`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+File "public_toplevel2.php", line 5, characters 1-6:
+`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+File "public_toplevel2.php", line 7, characters 1-6:
+`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+File "public_toplevel2.php", line 10, characters 1-6:
+`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])

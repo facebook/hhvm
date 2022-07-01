@@ -73,15 +73,11 @@ fn get_contents(filenames: &[PathBuf]) -> Vec<(RcOc<RelativePath>, String)> {
 
 fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
     let mut arena = Bump::with_capacity(1024 * 1024); // 1 MB
+    let opts = Default::default();
     c.bench_function("direct_decl_parse", |b| {
         b.iter(|| {
             for (filename, text) in files {
-                let _ = direct_decl_parser::parse_decls(
-                    Default::default(),
-                    (**filename).clone(),
-                    text,
-                    &arena,
-                );
+                let _ = direct_decl_parser::parse_decls(&opts, (**filename).clone(), text, &arena);
                 arena.reset();
             }
         })
@@ -90,12 +86,13 @@ fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8
 
 fn bench_cst_and_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
     let mut arena = Bump::with_capacity(1024 * 1024); // 1 MB
+    let opts = Default::default();
     c.bench_function("cst_and_decl_parse", |b| {
         b.iter(|| {
             for (filename, text) in files {
                 let text = SourceText::make(RcOc::clone(filename), text);
                 let _ = cst_and_decl_parser::parse_script(
-                    Default::default(),
+                    &opts,
                     Default::default(),
                     &text,
                     None,

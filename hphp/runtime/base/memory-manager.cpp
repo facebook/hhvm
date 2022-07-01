@@ -490,6 +490,8 @@ void MemoryManager::reinitFree() {
       }
     }
   }
+  m_lastInitFreeAllocated = m_stats.mmAllocated();
+  m_lastInitFreeFreed = m_stats.mm_freed;
 }
 
 MemoryManager::FreelistArray MemoryManager::beginQuarantine() {

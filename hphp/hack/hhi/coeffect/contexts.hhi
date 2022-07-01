@@ -52,7 +52,7 @@
  * This namespace defines all the contexts available in HHVM, the Hack
  * runtime. When your code runs, HHVM will check that your functions have
  * the necessary capabilities in their contexts.
- */ 
+ */
 namespace HH\Contexts {
 
   /**
@@ -76,7 +76,7 @@ namespace HH\Contexts {
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\AccessGlobals &
     \HH\Capabilities\RxLocal &
-    \HH\Capabilities\System &
+    \HH\Capabilities\SystemLocal &
     \HH\Capabilities\ImplicitPolicyLocal &
     \HH\Capabilities\IO &
   );
@@ -106,6 +106,40 @@ namespace HH\Contexts {
   );
 
   /**
+   * The `leak_safe_shallow` context is a less restricted form of the
+   * `leak_safe` context, to help with gradual migration to `leak_safe`.
+   *
+   * Functions with the `leak_shallow` context have the same
+   * restrictions as `leak_safe` for internal operations (e.g. no mutating
+   * static variables). They are also allowed to call `leak_safe_local` or
+   * `leak_safe_shallow` functions.
+   *
+   * See also `leak_safe_local`.
+   */
+  type leak_safe_shallow = (
+    \HH\Capabilities\WriteProperty &
+    \HH\Capabilities\ReadGlobals &
+    \HH\Capabilities\SystemShallow &
+  );
+
+  /**
+   * The `leak_safe_local` context is the least restricted form of the
+   * `leak_safe` context, to help with gradual migration to `leak_safe`.
+   *
+   * Functions with the `leak_safe_local` context have the same restrictions
+   * as `leak_safe` for internal operations (e.g. no mutating static
+   * variables). They are also allowed to call `leak_safe_local` or
+   * `leak_safe_shallow` functions and their leak-safe counterparts,
+   * and even `defaults` functions.  However, they cannot call
+   * functions with the `zoned_with` context nor its shallow/local variant.
+   */
+  type leak_safe_local = (
+    \HH\Capabilities\WriteProperty &
+    \HH\Capabilities\ReadGlobals &
+    \HH\Capabilities\SystemLocal &
+  );
+
+  /**
    * `zoned` includes all the capabilities of `leak_safe`, but also allows
    * accessing the current zone policy.
    *
@@ -127,7 +161,7 @@ namespace HH\Contexts {
    * Functions with the `zoned_shallow` context have the same
    * restrictions as `zoned` for internal operations (e.g. no mutating
    * static variables). They are also allowed to call `zoned_local` or
-   * `zoned_shallow` functions.
+   * `zoned_shallow` functions, as well as `leak_safe_shallow` functions.
    *
    * See also `zoned_local`.
    */
@@ -135,7 +169,7 @@ namespace HH\Contexts {
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\ImplicitPolicyShallow &
-    \HH\Capabilities\System &
+    \HH\Capabilities\SystemShallow &
   );
 
   /**
@@ -145,13 +179,15 @@ namespace HH\Contexts {
    * Functions with the `zoned_local` context have the same restrictions
    * as `zoned` for internal operations (e.g. no mutating static
    * variables). They are also allowed to call `zoned_local` or
-   * `zoned_shallow` functions, or even `defaults` functions.
+   * `zoned_shallow` functions and their leak-safe counterparts,
+   * and even `defaults` functions.  Notably, they cannot call
+   * functions with the `zoned_with` context nor its shallow/local variant.
    */
   type zoned_local = (
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\ImplicitPolicyLocal &
-    \HH\Capabilities\System &
+    \HH\Capabilities\SystemLocal &
   );
 
   /**
@@ -185,7 +221,7 @@ namespace HH\Contexts {
   /**
    * The `globals` context gives your function the capability to read
    * and write global state, such as static properties on classes.
-   * 
+   *
    * See `read_globals` if you only need to read global state.
    */
   type globals = \HH\Capabilities\AccessGlobals;

@@ -43,7 +43,7 @@ fn main() -> ::anyhow::Result<()> {
 
         let arena = bumpalo::Bump::new();
         let parsed_file =
-            direct_decl_parser::parse_decls(Default::default(), relative_path, &content, &arena);
+            direct_decl_parser::parse_decls(&Default::default(), relative_path, &content, &arena);
         let decls = parsed_file.decls;
 
         results.push(round_trip::<Decls<'_>, Json>(&arena, path, decls));

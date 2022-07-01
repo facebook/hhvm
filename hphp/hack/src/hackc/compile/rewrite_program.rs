@@ -124,7 +124,7 @@ fn extract_debugger_main(
             let name = local_id::make_unscoped(name);
             hack_stmt!(
                 pos = p(),
-                r#"if (\__systemlib\__debugger_is_uninit(#{lvar(clone(name))})) {
+                r#"if (\__SystemLib\__debugger_is_uninit(#{lvar(clone(name))})) {
                        #{lvar(name)} = new __uninitSentinel();
                      }
                 "#

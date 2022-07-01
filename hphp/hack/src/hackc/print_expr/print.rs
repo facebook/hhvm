@@ -10,7 +10,7 @@ use crate::{
 use bstr::{BString, ByteSlice};
 use core_utils_rust::add_ns;
 use error::ErrorKind;
-use hhbc::{hhas_body::HhasBodyEnv, ClassName};
+use hhbc::ClassName;
 use hhbc_string_utils::{
     integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
     strip_global_ns, strip_ns, types,
@@ -29,6 +29,14 @@ use std::{
     write,
 };
 use write_bytes::write_bytes;
+
+#[derive(Default, Debug, Clone, Eq, PartialEq)]
+#[repr(C)]
+pub struct HhasBodyEnv<'a> {
+    pub is_namespaced: bool,
+    pub class_info: Option<(hhbc::ClassishKind, &'a str)>,
+    pub parent_name: Option<&'a str>,
+}
 
 pub struct ExprEnv<'arena, 'e> {
     pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,

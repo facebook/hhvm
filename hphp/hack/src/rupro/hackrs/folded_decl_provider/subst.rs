@@ -8,7 +8,8 @@ use std::collections::BTreeMap;
 use ty::decl::subst::Subst;
 use ty::decl::{
     AbstractTypeconst, ClassConst, ConcreteTypeconst, FunParam, FunType, PossiblyEnforcedTy,
-    ShapeFieldType, TaccessType, Tparam, Ty, Ty_, TypeConst, Typeconst, WhereConstraint,
+    ShapeFieldType, TaccessType, Tparam, TrefinementType, Ty, Ty_, TypeConst, TypeConstRef,
+    Typeconst, WhereConstraint,
 };
 use ty::reason::Reason;
 
@@ -199,6 +200,25 @@ impl<'a, R: Reason> Substitution<'a, R> {
                     .collect::<BTreeMap<_, _>>();
                 Ty_::Tshape(Box::new((shape_kind, fdm)))
             }
+            Ty_::Trefinement(tr) => Ty_::Trefinement(Box::new(TrefinementType {
+                ty: self.instantiate(&tr.ty),
+                typeconsts: tr
+                    .typeconsts
+                    .iter()
+                    .map(|(k, v)| (*k, self.instantiate_typeconst_ref(v)))
+                    .collect(),
+            })),
+        }
+    }
+
+    fn instantiate_typeconst_ref(&self, tr: &TypeConstRef<Ty<R>>) -> TypeConstRef<Ty<R>> {
+        use TypeConstRef::{Exact, Loose};
+        match tr {
+            Exact(ty) => Exact(self.instantiate(ty)),
+            Loose(lo, hi) => Loose(
+                lo.iter().map(|ty| self.instantiate(ty)).collect(),
+                hi.iter().map(|ty| self.instantiate(ty)).collect(),
+            ),
         }
     }
 

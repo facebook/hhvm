@@ -78,11 +78,9 @@ fn obj_get_inner<R: Reason>(
     receiver_ty: &Ty<R>,
     member_id: &oxidized::ast_defs::Id,
 ) -> Result<TCObjGetResult<R>> {
-    rupro_todo_mark!(Solving, "expand_type, expand_type_and_solve");
-    rupro_todo_mark!(MemberAccess, "more casing on types");
-
     rupro_todo_assert!(args.is_method, MemberAccess);
-    obj_get_concrete_ty(env, args, receiver_ty, member_id)
+    let receiver_ty = env.resolve_ty_and_solve(receiver_ty)?;
+    obj_get_concrete_ty(env, args, &receiver_ty, member_id)
 }
 
 fn obj_get_concrete_ty<R: Reason>(

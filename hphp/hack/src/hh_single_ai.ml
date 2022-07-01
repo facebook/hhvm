@@ -163,6 +163,7 @@ let parse_options () =
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~po_allowed_decl_fixme_codes:
         (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)
+      ~tco_use_direct_decl_parser:true
       ()
   in
   Errors.allowed_fixme_codes_strict :=
@@ -186,8 +187,11 @@ let parse_options () =
     SharedMem.default_config )
 
 let parse_and_name ctx files_contents =
-  let parsed_files =
-    Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
+  Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
+      let tcopt = Provider_context.get_tcopt ctx in
+      (* Get parse errors. Hold on to the AST, since we'll convert it to
+         fileinfo below if direct decl is disabled. *)
+      let parsed_file =
         Errors.run_in_context fn Errors.Parsing (fun () ->
             let popt = Provider_context.get_tcopt ctx in
             let parsed_file =
@@ -201,40 +205,36 @@ let parse_and_name ctx files_contents =
                 ast
             in
             Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
-            { parsed_file with Parser_return.ast }))
-  in
-  let files_info =
-    Relative_path.Map.mapi
-      ~f:
-        begin
-          fun _fn parsed_file ->
-          let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
-          (* If the feature is turned on, deregister functions with attribute
-             __PHPStdLib. This does it for all functions, not just hhi files *)
-          let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
-          {
-            FileInfo.file_mode;
-            funs;
-            classes;
-            typedefs;
-            consts;
-            modules;
-            comments = Some comments;
-            hash = None;
-          }
-        end
-      parsed_files
-  in
-  Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
-      let (errors, _failed_naming_fns) =
-        Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
+            { parsed_file with Parser_return.ast })
       in
-      Errors.merge_into_current errors);
-  (parsed_files, files_info)
+      if TypecheckerOptions.use_direct_decl_parser tcopt then
+        match Direct_decl_utils.direct_decl_parse_and_cache ctx fn with
+        | None -> failwith "no file contents"
+        | Some decls -> Direct_decl_utils.decls_to_fileinfo fn decls
+      else
+        let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
+        (* If the feature is turned on, deregister functions with attribute
+           __PHPStdLib. This does it for all functions, not just hhi files *)
+        let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
+        {
+          FileInfo.file_mode;
+          funs;
+          classes;
+          typedefs;
+          consts;
+          modules;
+          comments = Some comments;
+          hash = None;
+        })
 
 let parse_name_and_skip_decl ctx files_contents =
   Errors.do_ (fun () ->
-      let (_parsed_files, files_info) = parse_and_name ctx files_contents in
+      let files_info = parse_and_name ctx files_contents in
+      Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
+          let (errors, _failed_naming_fns) =
+            Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
+          in
+          Errors.merge_into_current errors);
       files_info)
 
 let handle_mode ai_options ctx files_info parse_errors error_format =

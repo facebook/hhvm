@@ -1209,7 +1209,7 @@ module Capabilities = struct
 
   let readGlobals = prefix ^ "ReadGlobals"
 
-  let system = prefix ^ "System"
+  let systemLocal = prefix ^ "SystemLocal"
 
   let implicitPolicy = prefix ^ "ImplicitPolicy"
 

@@ -14,7 +14,7 @@ use oxidized::relative_path::RelativePath;
 
 use nohash_hasher::{IntMap, IntSet};
 
-use crate::{naming_sqlite, FileSummary, Result};
+use crate::{naming_sqlite, FileSummary};
 
 pub struct NamingTable {
     path_cache: IntMap<ToplevelSymbolHash, Option<RelativePath>>,
@@ -37,7 +37,7 @@ impl NamingTable {
         self.checksum
     }
 
-    pub fn derive_checksum(&mut self) -> Result<()> {
+    pub fn derive_checksum(&mut self) -> anyhow::Result<()> {
         // This is a temporary workaround to the fact that we don't have checksums
         // in our saved state. One day once we have this we can remove this
         // machinery
@@ -49,7 +49,7 @@ impl NamingTable {
         &mut self,
         path: &RelativePath,
         file_summary: FileSummary,
-    ) -> Result<(IntSet<ToplevelSymbolHash>, IntSet<ToplevelSymbolHash>)> {
+    ) -> anyhow::Result<(IntSet<ToplevelSymbolHash>, IntSet<ToplevelSymbolHash>)> {
         let mut removed_symbol_hashes = self.get_symbol_hashes(path)?;
         let mut changed_symbol_hashes = IntSet::default();
 
@@ -87,11 +87,14 @@ impl NamingTable {
     pub fn process_deleted_file(
         &mut self,
         path: &RelativePath,
-    ) -> Result<IntSet<ToplevelSymbolHash>> {
+    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
         self.remove_file(path)
     }
 
-    pub fn remove_file(&mut self, path: &RelativePath) -> Result<IntSet<ToplevelSymbolHash>> {
+    pub fn remove_file(
+        &mut self,
+        path: &RelativePath,
+    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
         let symbol_hashes = self.get_symbol_hashes(path)?;
         let overflow_symbol_hashes = self.get_overflow_symbol_hashes(path)?;
         let affected_symbol_hashes: IntSet<_> = symbol_hashes
@@ -149,14 +152,14 @@ impl NamingTable {
         self.rich_checksums.get(&checksum).map(|x| x.to_owned())
     }
 
-    pub fn save_state(&self, output_dir: &Path) -> Result<()> {
+    pub fn save_state(&self, output_dir: &Path) -> anyhow::Result<()> {
         self.names.save_state(output_dir)
     }
 
     pub fn get_path_by_symbol_hash(
         &mut self,
         symbol_hash: ToplevelSymbolHash,
-    ) -> Result<Option<RelativePath>> {
+    ) -> anyhow::Result<Option<RelativePath>> {
         if let Some(path_opt) = self.path_cache.get(&symbol_hash) {
             return Ok(path_opt.clone());
         }
@@ -165,14 +168,17 @@ impl NamingTable {
         Ok(path_opt)
     }
 
-    pub fn get_symbol_hashes(&self, path: &RelativePath) -> Result<IntSet<ToplevelSymbolHash>> {
+    pub fn get_symbol_hashes(
+        &self,
+        path: &RelativePath,
+    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
         self.names.get_symbol_hashes(path)
     }
 
     pub fn get_overflow_symbol_hashes(
         &self,
         path: &RelativePath,
-    ) -> Result<IntSet<ToplevelSymbolHash>> {
+    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
         self.names.get_overflow_symbol_hashes(path)
     }
 
@@ -180,33 +186,42 @@ impl NamingTable {
         &self,
         symbol_hash: ToplevelSymbolHash,
         path: &RelativePath,
-    ) -> Result<()> {
+    ) -> anyhow::Result<()> {
         self.names.remove_symbol(symbol_hash, path)
     }
 
     pub fn get_symbol_and_decl_hashes(
         &self,
         path: &RelativePath,
-    ) -> Result<IntMap<ToplevelSymbolHash, DeclHash>> {
+    ) -> anyhow::Result<IntMap<ToplevelSymbolHash, DeclHash>> {
         self.names.get_symbol_and_decl_hashes(path)
     }
 
-    pub fn get_decl_hash(&self, symbol_hash: ToplevelSymbolHash) -> Result<Option<DeclHash>> {
+    pub fn get_decl_hash(
+        &self,
+        symbol_hash: ToplevelSymbolHash,
+    ) -> anyhow::Result<Option<DeclHash>> {
         self.names.get_decl_hash(symbol_hash)
     }
 
     pub fn get_filename(
         &self,
         symbol_hash: ToplevelSymbolHash,
-    ) -> Result<Option<(RelativePath, NameType)>> {
+    ) -> anyhow::Result<Option<(RelativePath, NameType)>> {
         self.names.get_filename(symbol_hash)
     }
 
-    pub fn get_fun_path_case_insensitive(&self, name: String) -> Result<Option<RelativePath>> {
+    pub fn get_fun_path_case_insensitive(
+        &self,
+        name: String,
+    ) -> anyhow::Result<Option<RelativePath>> {
         self.names.get_fun_path_case_insensitive(name)
     }
 
-    pub fn get_type_path_case_insensitive(&self, name: String) -> Result<Option<RelativePath>> {
+    pub fn get_type_path_case_insensitive(
+        &self,
+        name: String,
+    ) -> anyhow::Result<Option<RelativePath>> {
         self.names.get_type_path_case_insensitive(name)
     }
 }
@@ -217,25 +232,25 @@ pub struct Names {
 }
 
 impl Names {
-    pub fn from_file(path: impl AsRef<Path>) -> Result<Self> {
+    pub fn from_file(path: impl AsRef<Path>) -> anyhow::Result<Self> {
         let path = path.as_ref();
         let mut connection = Connection::open(path)?;
         Self::create_tables(&mut connection)?;
         Ok(Self { connection })
     }
 
-    pub fn new_in_memory() -> Result<Self> {
+    pub fn new_in_memory() -> anyhow::Result<Self> {
         let mut connection = Connection::open_in_memory()?;
         Self::create_tables(&mut connection)?;
         Ok(Self { connection })
     }
 
-    pub fn from_connection(mut connection: Connection) -> Result<Self> {
+    pub fn from_connection(mut connection: Connection) -> anyhow::Result<Self> {
         Self::create_tables(&mut connection)?;
         Ok(Self { connection })
     }
 
-    pub fn create_tables(connection: &mut Connection) -> Result<()> {
+    pub fn create_tables(connection: &mut Connection) -> anyhow::Result<()> {
         naming_sqlite::create_tables(connection)?;
         Ok(())
     }
@@ -244,7 +259,7 @@ impl Names {
         conn: &Connection,
         path: &RelativePath,
         file_summary: &FileSummary,
-    ) -> Result<()> {
+    ) -> anyhow::Result<()> {
         naming_sqlite::insert_file_info(conn, path, file_summary)?;
         let file_info_id = conn.last_insert_rowid();
         naming_sqlite::insert_file_summary(
@@ -302,37 +317,43 @@ impl Names {
         Ok(())
     }
 
-    pub fn save(&self, path: &RelativePath, file_summary: &FileSummary) -> Result<()> {
+    pub fn save(&self, path: &RelativePath, file_summary: &FileSummary) -> anyhow::Result<()> {
         Self::save_file_summary(&self.connection, path, file_summary)
     }
 
-    pub fn remove_file(&self, path: &RelativePath) -> Result<()> {
+    pub fn remove_file(&self, path: &RelativePath) -> anyhow::Result<()> {
         naming_sqlite::delete(&self.connection, path)
     }
 
-    pub fn get_symbol_hashes(&self, path_rel: &RelativePath) -> Result<IntSet<ToplevelSymbolHash>> {
+    pub fn get_symbol_hashes(
+        &self,
+        path_rel: &RelativePath,
+    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
         naming_sqlite::get_symbol_hashes(&self.connection, path_rel)
     }
 
     pub fn get_overflow_symbol_hashes(
         &self,
         path_rel: &RelativePath,
-    ) -> Result<IntSet<ToplevelSymbolHash>> {
+    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
         naming_sqlite::get_overflow_symbol_hashes(&self.connection, path_rel)
     }
 
     pub fn get_symbol_and_decl_hashes(
         &self,
         path_rel: &RelativePath,
-    ) -> Result<IntMap<ToplevelSymbolHash, DeclHash>> {
+    ) -> anyhow::Result<IntMap<ToplevelSymbolHash, DeclHash>> {
         naming_sqlite::get_symbol_and_decl_hashes(&self.connection, path_rel)
     }
 
-    pub fn get_decl_hash(&self, symbol_hash: ToplevelSymbolHash) -> Result<Option<DeclHash>> {
+    pub fn get_decl_hash(
+        &self,
+        symbol_hash: ToplevelSymbolHash,
+    ) -> anyhow::Result<Option<DeclHash>> {
         naming_sqlite::get_decl_hash(&self.connection, symbol_hash)
     }
 
-    pub fn derive_checksum(&self) -> Result<Checksum> {
+    pub fn derive_checksum(&self) -> anyhow::Result<Checksum> {
         naming_sqlite::derive_checksum(&self.connection)
     }
 
@@ -340,22 +361,23 @@ impl Names {
         &self,
         symbol_hash: ToplevelSymbolHash,
         path: &RelativePath,
-    ) -> Result<()> {
+    ) -> anyhow::Result<()> {
         naming_sqlite::remove_symbol(&self.connection, symbol_hash, path)
     }
 
-    pub fn save_state(&self, output_dir: &Path) -> Result<()> {
-        self.connection.backup(
+    pub fn save_state(&self, output_dir: &Path) -> anyhow::Result<()> {
+        let result = self.connection.backup(
             rusqlite::DatabaseName::Main,
             output_dir.join("naming.sql"),
             None,
-        )
+        );
+        Ok(result?)
     }
 
     pub fn get_path_by_symbol_hash(
         &self,
         symbol_hash: ToplevelSymbolHash,
-    ) -> Result<Option<RelativePath>> {
+    ) -> anyhow::Result<Option<RelativePath>> {
         match naming_sqlite::get_path(&self.connection, symbol_hash)? {
             Some((path, _nametype)) => Ok(Some(path)),
             None => Ok(None),
@@ -365,18 +387,24 @@ impl Names {
     pub fn get_filename(
         &self,
         symbol_hash: ToplevelSymbolHash,
-    ) -> Result<Option<(RelativePath, NameType)>> {
+    ) -> anyhow::Result<Option<(RelativePath, NameType)>> {
         naming_sqlite::get_path(&self.connection, symbol_hash)
     }
 
-    pub fn get_fun_path_case_insensitive(&self, name: String) -> Result<Option<RelativePath>> {
+    pub fn get_fun_path_case_insensitive(
+        &self,
+        name: String,
+    ) -> anyhow::Result<Option<RelativePath>> {
         naming_sqlite::get_path_case_insensitive(
             &self.connection,
             ToplevelCanonSymbolHash::from_fun(name),
         )
     }
 
-    pub fn get_type_path_case_insensitive(&self, name: String) -> Result<Option<RelativePath>> {
+    pub fn get_type_path_case_insensitive(
+        &self,
+        name: String,
+    ) -> anyhow::Result<Option<RelativePath>> {
         naming_sqlite::get_path_case_insensitive(
             &self.connection,
             ToplevelCanonSymbolHash::from_type(name),

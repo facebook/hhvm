@@ -736,7 +736,6 @@ fn print_hhbc(
             )?;
         }
         Hhbc::CreateCont(_) => write!(w, "create_cont")?,
-        Hhbc::EntryNop(_) => write!(w, "entry_nop")?,
         Hhbc::GetMemoKeyL(lid, _) => {
             write!(w, "get_memo_key {}", FmtLid(lid, ctx.strings))?;
         }
@@ -1006,6 +1005,9 @@ fn print_hhbc(
         Hhbc::UnsetL(lid, _) => {
             write!(w, "unset {}", FmtLid(lid, ctx.strings))?;
         }
+        Hhbc::VerifyImplicitContextState(_) => {
+            write!(w, "verify_implicit_context_state")?;
+        }
         Hhbc::VerifyOutType(vid, lid, _) => {
             write!(
                 w,
@@ -1114,6 +1116,9 @@ pub(crate) fn print_instr(
         Instr::Special(instr::Special::PopC) => write!(w, "popc")?,
         Instr::Special(instr::Special::PopL(lid)) => {
             write!(w, "pop_local {}", FmtLid(*lid, ctx.strings),)?
+        }
+        Instr::Special(Special::Copy(vid)) => {
+            write!(w, "copy {}", FmtVid(func, *vid, ctx.verbose))?;
         }
         Instr::Special(instr::Special::PushL(lid)) => {
             write!(w, "push {}", FmtLid(*lid, ctx.strings))?;

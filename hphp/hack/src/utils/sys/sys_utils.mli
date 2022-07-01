@@ -174,17 +174,14 @@ val set_signal : int -> Sys.signal_behavior -> unit
 
 val signal : int -> Sys.signal_behavior -> unit
 
-external get_total_ram : unit -> int = "hh_sysinfo_totalram"
+(** as reported by sysinfo().uptime. Is 0 if not on linux. *)
+val uptime : unit -> int
 
-external uptime : unit -> int = "hh_sysinfo_uptime"
+(** in bytes, as reported by sysinfo().totalram. Is 0 if not on linux. *)
+val total_ram : int
 
 (** returns the number of processors (which includes hyperthreads),
 as reported by  sysconf(_SC_NPROCESSORS_ONLN) *)
-external nproc : unit -> int = "nproc"
-
-(** in bytes, as reported by sysinifo().totalram *)
-val total_ram : int
-
 val nbr_procs : int
 
 external set_priorities : cpu_priority:int -> io_priority:int -> unit
@@ -219,6 +216,21 @@ type processor_info = {
 }
 
 external processor_info : unit -> processor_info = "hh_processor_info"
+
+type sysinfo = {
+  uptime: int;
+  totalram: int;
+  freeram: int;
+  sharedram: int;
+  bufferram: int;
+  totalswap: int;
+  freeswap: int;
+  totalhigh: int;
+  freehigh: int;
+}
+
+(** returns None if not on linux. *)
+external sysinfo : unit -> sysinfo option = "hh_sysinfo"
 
 (** Calls Unix.select but ignores EINTR, i.e. retries select with
     an adjusted timout upon EINTR.

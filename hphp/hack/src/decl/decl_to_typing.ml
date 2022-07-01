@@ -138,7 +138,9 @@ let shallow_prop_to_telt child_class mname mro subst prop : tagged_elt =
             ~abstract:(sp_abstract prop)
             ~final:true
             ~superfluous_override:false
-            ~synthesized:false
+            ~synthesized:
+              (is_set mro_via_req_extends mro.mro_flags
+              || is_set mro_via_req_class mro.mro_flags)
             ~dynamicallycallable:false
             ~readonly_prop:(sp_readonly prop)
             ~support_dynamic_type:false
@@ -165,7 +167,9 @@ let shallow_const_to_class_const child_class mro subst const =
   in
   ( snd scc_name,
     {
-      cc_synthesized = is_set mro_via_req_extends mro.mro_flags;
+      cc_synthesized =
+        is_set mro_via_req_extends mro.mro_flags
+        || is_set mro_via_req_class mro.mro_flags;
       cc_abstract;
       cc_pos = fst scc_name;
       cc_type = ty;

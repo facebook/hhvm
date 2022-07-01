@@ -15,10 +15,10 @@ use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 use hash::HashSet;
 use hhbc::{
     decl_vars,
-    hhas_body::{HhasBody, HhasBodyEnv},
+    hhas_body::HhasBody,
     hhas_param::HhasParam,
     hhas_type::{self, HhasTypeInfo},
-    FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, Pseudo, TypedValue,
+    FCallArgs, FCallArgsFlags, IsTypeOp, Label, Local, TypedValue,
 };
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
@@ -26,6 +26,7 @@ use instruction_sequence::{instr, InstrSeq};
 use ocamlrep::rc::RcOc;
 use options::CompilerFlags;
 use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
+use print_expr::HhasBodyEnv;
 use statement_state::StatementState;
 
 static THIS: &str = "$this";
@@ -194,15 +195,8 @@ fn make_body_instrs<'a, 'arena, 'decl>(
         ast_params,
         flags,
     )?;
-    let first_instr_is_label = match InstrSeq::first(&stmt_instrs) {
-        Some(Instruct::Pseudo(Pseudo::Label(_))) => true,
-        _ => false,
-    };
-    let header = if first_instr_is_label && InstrSeq::is_empty(&header_content) {
-        InstrSeq::gather(vec![begin_label, instr::entry_nop()])
-    } else {
-        InstrSeq::gather(vec![begin_label, header_content])
-    };
+
+    let header = InstrSeq::gather(vec![begin_label, header_content]);
 
     let mut body_instrs = InstrSeq::gather(vec![header, stmt_instrs, default_value_setters]);
     if flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM) {
@@ -294,8 +288,8 @@ pub fn emit_return_type_info<'arena>(
 ) -> Result<HhasTypeInfo<'arena>> {
     match ret {
         None => Ok(HhasTypeInfo::make(
-            Just(Str::new_str(alloc, "")),
-            hhas_type::constraint::Constraint::default(),
+            Just("".into()),
+            hhas_type::Constraint::default(),
         )),
         Some(hint) => emit_type_hint::hint_to_type_info(
             alloc,
@@ -366,7 +360,7 @@ pub fn make_body<'a, 'arena, 'decl>(
         .hack_compiler_flags
         .contains(CompilerFlags::RELABEL)
     {
-        label_rewriter::relabel_function(&mut params, &mut body_instrs);
+        label_rewriter::relabel_function(alloc, &mut params, &mut body_instrs);
     }
     let num_iters = if is_memoize_wrapper {
         0
@@ -378,19 +372,14 @@ pub fn make_body<'a, 'arena, 'decl>(
         if let Some(cd) = env.scope.get_class() {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: Just(
-                    (cd.get_kind().into(), Str::new_str(alloc, cd.get_name_str())).into(),
-                ),
-                parent_name: ClassExpr::get_parent_class_name(cd)
-                    .as_ref()
-                    .map(|s| Str::new_str(alloc, s))
-                    .into(),
+                class_info: Some((cd.get_kind().into(), cd.get_name_str())),
+                parent_name: ClassExpr::get_parent_class_name(cd),
             })
         } else {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: Nothing,
-                parent_name: Nothing,
+                class_info: None,
+                parent_name: None,
             })
         }
     } else {
@@ -434,7 +423,6 @@ pub fn make_body<'a, 'arena, 'decl>(
         params: Slice::fill_iter(alloc, params.into_iter().map(|(p, _)| p)),
         return_type_info: return_type_info.into(),
         doc_comment: doc_comment.map(|c| Str::new_str(alloc, &(c.0).1)).into(),
-        env: body_env.into(),
     })
 }
 

@@ -36,8 +36,6 @@
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/unit-util.h"
 
-#include "hphp/runtime/base/repo-auth-type-array.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 
@@ -626,15 +624,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
     auto end = b->hhbcs.end();
     auto flip = false;
 
-    if (is_single_nop(*b)) {
-      if (blockIt == begin(ret.blockOrder)) {
-        // If the first block is just a Nop, this means that there is
-        // a jump to the second block from somewhere in the
-        // function. We don't want this, so we change this nop to an
-        // EntryNop so it doesn't get optimized away
-        emit_inst(bc_with_loc(b->hhbcs.front().srcLoc, bc::EntryNop {}));
-      }
-    } else {
+    if (!is_single_nop(*b)) {
       // If the block ends with JmpZ or JmpNZ to the next block, flip
       // the condition to make the fallthrough the next block
       if (b->hhbcs.back().op == Op::JmpZ ||
@@ -665,11 +655,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       set_expected_depth(fallthrough);
       if (std::next(blockIt) == endBlockIt ||
           blockIt[1] != fallthrough) {
-        if (b->fallthroughNS) {
-          emit_inst(bc::JmpNS { fallthrough });
-        } else {
-          emit_inst(bc::Jmp { fallthrough });
-        }
+        emit_inst(bc::Jmp { fallthrough });
 
         auto const nextExnId = func.blocks()[fallthrough]->exnNodeId;
         auto const parent = commonParent(*func, nextExnId, b->exnNodeId);
@@ -1001,7 +987,7 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.isAsync = func.isAsync;
   fe.isGenerator = func.isGenerator;
   fe.isPairGenerator = func.isPairGenerator;
-  fe.isNative = func.nativeInfo != nullptr;
+  fe.isNative = func.isNative;
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
   fe.isMemoizeWrapperLSB = func.isMemoizeWrapperLSB;
   fe.hasParamsWithMultiUBs = func.hasParamsWithMultiUBs;
@@ -1012,24 +998,16 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
 
   auto const retTy = state.index.lookup_return_type_raw(&func).first;
   if (!retTy.subtypeOf(BBottom)) {
-    auto const rat = make_repo_type(*state.index.array_table_builder(), retTy);
-    fe.repoReturnType = rat;
+    fe.repoReturnType = make_repo_type(retTy);
   }
 
   if (is_specialized_wait_handle(retTy)) {
     auto const awaitedTy = wait_handle_inner(retTy);
     if (!awaitedTy.subtypeOf(BBottom)) {
-      auto const rat = make_repo_type(
-        *state.index.array_table_builder(),
-        awaitedTy
-      );
-      fe.repoAwaitedReturnType = rat;
+      fe.repoAwaitedReturnType = make_repo_type(awaitedTy);
     }
   }
 
-  if (func.nativeInfo) {
-    fe.hniReturnType = func.nativeInfo->returnType;
-  }
   fe.retTypeConstraint = func.retTypeConstraint;
 
   fe.maxStackCells = info.maxStackDepth +
@@ -1184,8 +1162,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
         // since such a prop will be inaccessible.
         return RepoAuthType{};
       }
-
-      return make_repo_type(*state.index.array_table_builder(), ty);
+      return make_repo_type(ty);
     };
 
     auto const privPropTy = [&] (const PropState& ps) -> std::pair<Type, bool> {
@@ -1288,8 +1265,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
 
   auto ue = std::make_unique<UnitEmitter>(unit.sha1,
                                           SHA1{},
-                                          Native::s_noNativeFuncs,
-                                          true);
+                                          Native::s_noNativeFuncs);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_sn = unit.sn;
   ue->m_filepath = unit.filename;

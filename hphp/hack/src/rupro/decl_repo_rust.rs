@@ -99,7 +99,7 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
     let names = collect_file_or_class_names(opts, &ctx);
 
     let file_provider: Arc<dyn file_provider::FileProvider> =
-        Arc::new(file_provider::PlainFileProvider::new(Arc::clone(&ctx)));
+        Arc::new(file_provider::DiskProvider::new(Arc::clone(&ctx)));
     let parser = DeclParser::new(file_provider);
     let shallow_decl_store = make_shallow_decl_store::<R>(if opts.serialize {
         StoreOpts::Unserialized

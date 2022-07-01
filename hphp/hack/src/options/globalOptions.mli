@@ -287,6 +287,8 @@ type t = {
    * any time two parents declare concrete constants with the same name, matching HHVM
    * -vEval.TraitConstantInterfaceBehavior=1 *)
   tco_enable_strict_const_semantics: int;
+  (* Different levels here raise previously missing well-formedness errors (see Typing_type_wellformedness) *)
+  tco_strict_wellformedness: int;
   (* meth_caller can only reference public methods *)
   tco_meth_caller_only_public_visibility: bool;
   (* Consider `require extends` and `require implements` as ancestors when checking a class *)
@@ -320,6 +322,11 @@ type t = {
   tco_allow_all_files_for_module_declarations: bool;
   tco_allowed_files_for_module_declarations: string list;
   tco_use_manifold_cython_client: bool;
+  (* If enabled, the type checker records more fine-grained dependencies than usual,
+     for example between individual methods. *)
+  tco_record_fine_grained_dependencies: bool;
+  (* When set, uses the given number of iterations while typechecking loops *)
+  tco_loop_iteration_upper_bound: int option;
 }
 [@@deriving eq, show]
 
@@ -435,6 +442,7 @@ val make :
   ?tco_math_new_code:bool ->
   ?tco_typeconst_concrete_concrete_error:bool ->
   ?tco_enable_strict_const_semantics:int ->
+  ?tco_strict_wellformedness:int ->
   ?tco_meth_caller_only_public_visibility:bool ->
   ?tco_require_extends_implements_ancestors:bool ->
   ?tco_strict_value_equality:bool ->
@@ -452,6 +460,8 @@ val make :
   ?tco_allow_all_files_for_module_declarations:bool ->
   ?tco_allowed_files_for_module_declarations:string list ->
   ?tco_use_manifold_cython_client:bool ->
+  ?tco_record_fine_grained_dependencies:bool ->
+  ?tco_loop_iteration_upper_bound:int option ->
   unit ->
   t
 
@@ -516,8 +526,6 @@ val tco_experimental_generics_arity : string
 val tco_experimental_forbid_nullable_cast : string
 
 val tco_experimental_disallow_static_memoized : string
-
-val tco_experimental_type_param_shadowing : string
 
 val tco_experimental_abstract_type_const_with_default : string
 
@@ -713,6 +721,8 @@ val tco_typeconst_concrete_concrete_error : t -> bool
 
 val tco_enable_strict_const_semantics : t -> int
 
+val tco_strict_wellformedness : t -> int
+
 val tco_meth_caller_only_public_visibility : t -> bool
 
 val tco_require_extends_implements_ancestors : t -> bool
@@ -746,3 +756,7 @@ val tco_allow_all_files_for_module_declarations : t -> bool
 val tco_allowed_files_for_module_declarations : t -> string list
 
 val tco_use_manifold_cython_client : t -> bool
+
+val tco_record_fine_grained_dependencies : t -> bool
+
+val tco_loop_iteration_upper_bound : t -> int option

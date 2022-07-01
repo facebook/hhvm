@@ -56,7 +56,7 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
@@ -985,9 +985,6 @@ static UNUSED int innerCount(TypedValue tv) {
 OPTBLD_INLINE void iopNop() {
 }
 
-OPTBLD_INLINE void iopEntryNop() {
-}
-
 OPTBLD_INLINE void iopPopC() {
   vmStack().popC();
 }
@@ -1774,12 +1771,12 @@ OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
   }
 }
 
-OPTBLD_INLINE void iopJmp(PC& pc, PC targetpc) {
-  jmpSurpriseCheck(targetpc - pc);
+OPTBLD_INLINE void iopEnter(PC& pc, PC targetpc) {
   pc = targetpc;
 }
 
-OPTBLD_INLINE void iopJmpNS(PC& pc, PC targetpc) {
+OPTBLD_INLINE void iopJmp(PC& pc, PC targetpc) {
+  jmpSurpriseCheck(targetpc - pc);
   pc = targetpc;
 }
 
@@ -3544,6 +3541,17 @@ OPTBLD_INLINE JitResumeAddr fcallFuncObj(bool retToJit, PC origpc, PC& pc,
   }
 }
 
+namespace {
+
+void checkModuleBoundaryViolation(const Class* ctx, const Func* callee) {
+  auto const caller = vmfp()->func();
+  if (will_call_raise_module_boundary_violation(callee, caller->moduleName())) {
+    raiseModuleBoundaryViolation(ctx, callee, caller->moduleName());
+  }
+}
+
+} // namespace
+
 /*
  * Supports callables:
  *   array($instance, 'method')
@@ -3571,6 +3579,8 @@ OPTBLD_INLINE JitResumeAddr fcallFuncArr(bool retToJit, PC origpc, PC& pc,
   if (UNLIKELY(func == nullptr)) {
     raise_error("Invalid callable (array)");
   }
+
+  checkModuleBoundaryViolation(cls, func);
 
   Object thisRC(thiz);
   arr.reset();
@@ -3605,6 +3615,8 @@ OPTBLD_INLINE JitResumeAddr fcallFuncStr(bool retToJit, PC origpc, PC& pc,
   if (UNLIKELY(func == nullptr)) {
     raise_call_to_undefined(str.get());
   }
+
+  checkModuleBoundaryViolation(cls, func);
 
   Object thisRC(thiz);
   str.reset();
@@ -3673,7 +3685,7 @@ OPTBLD_INLINE JitResumeAddr fcallFuncRClsMeth(bool retToJit, PC origpc, PC& pc,
 Func* resolveFuncImpl(Id id) {
   auto unit = vmfp()->func()->unit();
   auto const nep = unit->lookupNamedEntityPairId(id);
-  auto func = Func::load(nep.second, nep.first);
+  auto func = Func::resolve(nep.second, nep.first, vmfp()->func());
   if (func == nullptr) raise_resolve_undefined(unit->lookupLitstrId(id));
   return func;
 }
@@ -3686,7 +3698,7 @@ OPTBLD_INLINE void iopResolveFunc(Id id) {
 OPTBLD_INLINE void iopResolveMethCaller(Id id) {
   auto unit = vmfp()->func()->unit();
   auto const nep = unit->lookupNamedEntityPairId(id);
-  auto func = Func::load(nep.second, nep.first);
+  auto func = Func::resolve(nep.second, nep.first, vmfp()->func());
   assertx(func && func->isMethCaller());
   checkMethCaller(func, arGetContextClass(vmfp()));
   vmStack().pushFunc(func);
@@ -3741,7 +3753,7 @@ OPTBLD_INLINE JitResumeAddr iopFCallFunc(bool retToJit, PC origpc, PC& pc,
 OPTBLD_INLINE JitResumeAddr iopFCallFuncD(bool retToJit, PC origpc, PC& pc,
                                           FCallArgs fca, Id id) {
   auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
-  auto const func = Func::load(nep.second, nep.first);
+  auto const func = Func::resolve(nep.second, nep.first, vmfp()->func());
   if (UNLIKELY(func == nullptr)) {
     raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
   }
@@ -3918,7 +3930,7 @@ const Func* resolveClsMethodFunc(Class* cls, const StringData* methName) {
   auto const callCtx = MethodLookupCallContext(ctx, vmfp()->func());
   auto const res = lookupClsMethod(func, cls, methName, nullptr,
                                    callCtx,
-                                   MethodLookupErrorOptions::None);
+                                   MethodLookupErrorOptions::NoErrorOnModule);
   if (res == LookupResult::MethodNotFound) {
     raise_error("Failure to resolve method name \'%s::%s\'",
                 cls->name()->data(), methName->data());
@@ -3926,6 +3938,7 @@ const Func* resolveClsMethodFunc(Class* cls, const StringData* methName) {
   assertx(res == LookupResult::MethodFoundNoThis);
   assertx(func);
   checkClsMethFuncHelper(func);
+  checkModuleBoundaryViolation(cls, func);
   return func;
 }
 
@@ -4955,9 +4968,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     auto waitHandle = c_AsyncFunctionWaitHandle::Create(
       fp, func->numSlotsInFrame(), nullptr, suspendOffset, child);
 
-    if (RO::EvalEnableImplicitContext) {
-      waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
-    }
+    waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
     EventHook::FunctionSuspendAwaitEF(
@@ -4985,9 +4996,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     auto waitHandle = c_AsyncGeneratorWaitHandle::Create(
       fp, nullptr, suspendOffset, child);
 
-    if (RO::EvalEnableImplicitContext) {
-      waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
-    }
+    waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
 
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
@@ -5026,16 +5035,12 @@ OPTBLD_INLINE void asyncSuspendR(PC origpc, PC& pc) {
 
   // Await child and suspend the async function/generator. May throw.
   if (!func->isGenerator()) {  // Async function.
-    if (RO::EvalEnableImplicitContext) {
-      frame_afwh(fp)->m_implicitContext = *ImplicitContext::activeCtx;
-    }
+    frame_afwh(fp)->m_implicitContext = *ImplicitContext::activeCtx;
     frame_afwh(fp)->await(suspendOffset, std::move(child));
   } else {  // Async generator.
     auto const gen = frame_async_generator(fp);
     gen->resumable()->setResumeAddr(nullptr, suspendOffset);
-    if (RO::EvalEnableImplicitContext) {
-      gen->getWaitHandle()->m_implicitContext = *ImplicitContext::activeCtx;
-    }
+    gen->getWaitHandle()->m_implicitContext = *ImplicitContext::activeCtx;
     gen->getWaitHandle()->await(std::move(child));
   }
 
@@ -5133,11 +5138,6 @@ OPTBLD_INLINE void iopWHResult() {
 }
 
 OPTBLD_INLINE void iopSetImplicitContextByValue() {
-  if (!RO::EvalEnableImplicitContext) {
-    vmStack().popC();
-    vmStack().pushNull();
-    return;
-  }
   auto const tv = vmStack().topC();
   auto const obj = [&]() -> ObjectData* {
     if (tvIsNull(tv)) return nullptr;
@@ -5153,6 +5153,20 @@ OPTBLD_INLINE void iopSetImplicitContextByValue() {
     vmStack().pushNull();
   } else {
     vmStack().pushObjectNoRc(result.detach());
+  }
+}
+
+OPTBLD_INLINE void iopVerifyImplicitContextState() {
+  auto const func = vmfp()->func();
+  assertx(!func->hasCoeffectRules());
+  assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
+  if (!func->isKeyedByImplicitContextMemoize() &&
+      vmfp()->providedCoeffectsForCall(false).canCall(
+        RuntimeCoeffects::leak_safe_shallow())) {
+    // We are in a memoized that can call [defaults] code or any escape
+    if (UNLIKELY(*ImplicitContext::activeCtx != nullptr)) {
+      raiseImplicitContextStateInvalidException(func);
+    }
   }
 }
 

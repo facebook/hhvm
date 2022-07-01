@@ -36,7 +36,6 @@ pub mod typing_logic;
 pub mod typing_set;
 
 mod ast_defs_impl;
-mod decl_parser_options_impl;
 mod errors_impl;
 mod global_options_impl;
 mod tast_impl;

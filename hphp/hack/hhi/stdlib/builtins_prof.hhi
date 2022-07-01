@@ -53,10 +53,6 @@ function objprof_get_paths(
   varray<string> $exclude_list = varray[],
 ): darray<string, ObjprofObjectStats>; // auto-imported from HH namespace
 
-function objprof_get_strings(
-  int $min_dup,
-): darray<string, ObjprofStringStats>; // auto-imported from HH namespace
-
 //////////////////////////////////////////////////////////////////
 // Heap graph
 

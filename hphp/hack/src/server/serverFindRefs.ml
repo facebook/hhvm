@@ -201,7 +201,8 @@ let get_action symbol (filename, file_content, line, char) =
   | SO.HhFixme
   | SO.Method (SO.UnknownClass, _)
   | SO.Property (SO.UnknownClass, _)
-  | SO.ClassConst (SO.UnknownClass, _) ->
+  | SO.ClassConst (SO.UnknownClass, _)
+  | SO.Module ->
     None
   (* TODO(toyang): find references doesn't work for enum labels yet *)
   | SO.EnumClassLabel _ -> None

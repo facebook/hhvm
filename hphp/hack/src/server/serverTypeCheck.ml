@@ -1072,9 +1072,7 @@ functor
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
-      let hulk_lite = genv.local_config.ServerLocalConfig.hulk_lite in
-      let hulk_heavy = genv.local_config.ServerLocalConfig.hulk_heavy in
-
+      let mode = genv.local_config.ServerLocalConfig.hulk_strategy in
       let cgroup_typecheck_telemetry = ref None in
       let (errorl', telemetry, env, cancelled, time_first_typing_error) =
         let ctx = Provider_utils.ctx_from_server_env env in
@@ -1102,8 +1100,7 @@ functor
             ~interrupt
             ~memory_cap
             ~longlived_workers
-            ~hulk_lite
-            ~hulk_heavy
+            ~mode
             ~check_info:(ServerCheckUtils.get_check_info ~check_reason genv env)
         in
         let env =
@@ -1924,11 +1921,12 @@ functor
       in
 
       let env =
-        if genv.local_config.ServerLocalConfig.hulk_lite then
+        match genv.local_config.ServerLocalConfig.hulk_strategy with
+        | HulkStrategy.Lite ->
           (* For hulk lite we'll kill the server at the end. We use the non stopping state
              to determine if we should kill it *)
           env
-        else
+        | _ ->
           {
             env with
             typing_service =

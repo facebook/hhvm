@@ -105,6 +105,8 @@ SQLite SQLite::connect(const char* path, OpenMode mode) {
       case OpenMode::ReadOnly:
         return SQLITE_OPEN_READONLY;
       case OpenMode::ReadWrite:
+        return SQLITE_OPEN_READWRITE;
+      case OpenMode::ReadWriteCreate:
         return SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
     }
     not_reached();

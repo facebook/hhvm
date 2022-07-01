@@ -108,6 +108,7 @@ impl<R: Reason> TastExpander<R> {
             Tgeneric(n, args) => *ty = Ty::generic(r, *n, self.exp_tys(args)),
             Tclass(n, e, args) => *ty = Ty::class(r, n.clone(), *e, self.exp_tys(args)),
             Tunion(args) => *ty = Ty::union(r, self.exp_tys(args)),
+            Tintersection(args) => *ty = Ty::intersection(r, self.exp_tys(args)),
             Toption(arg) => *ty = Ty::option(r, self.exp_ty(arg)),
         }
     }

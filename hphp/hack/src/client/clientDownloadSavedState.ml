@@ -16,6 +16,7 @@ type env = {
   root: Path.t;
   from: string;
   saved_state_type: saved_state_type;
+  saved_state_manifold_api_key: string option;
   should_save_replay: bool;
   replay_token: string option;
 }
@@ -234,6 +235,11 @@ let load_saved_state :
       Saved_state_loader.load_error )
     Lwt_result.t =
  fun ~env ~local_config ~saved_state_type ->
+  let saved_state_manifold_api_key =
+    Option.first_some
+      env.saved_state_manifold_api_key
+      local_config.ServerLocalConfig.saved_state_manifold_api_key
+  in
   match env.replay_token with
   | None ->
     let watchman_opts =
@@ -244,8 +250,7 @@ let load_saved_state :
         ~env:
           {
             log_saved_state_age_and_distance = false;
-            Saved_state_loader.saved_state_manifold_api_key =
-              local_config.ServerLocalConfig.saved_state_manifold_api_key;
+            Saved_state_loader.saved_state_manifold_api_key;
             use_manifold_cython_client =
               local_config.ServerLocalConfig.use_manifold_cython_client;
           }
@@ -277,8 +282,7 @@ let load_saved_state :
         ~env:
           {
             log_saved_state_age_and_distance = false;
-            Saved_state_loader.saved_state_manifold_api_key =
-              local_config.ServerLocalConfig.saved_state_manifold_api_key;
+            Saved_state_loader.saved_state_manifold_api_key;
             use_manifold_cython_client =
               local_config.ServerLocalConfig.use_manifold_cython_client;
           }

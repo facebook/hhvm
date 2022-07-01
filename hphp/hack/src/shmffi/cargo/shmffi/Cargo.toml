@@ -13,5 +13,5 @@ libc = "0.2.121"
 ocaml_blob = { path = "../ocaml_blob" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
-once_cell = "1.8"
+once_cell = "1.12"
 shmrs = { path = "../../../shmrs" }

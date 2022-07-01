@@ -243,6 +243,19 @@ GeneralEffects general_effects_for_vmreg_liveness(
 bool hasMInstrBaseEffects(const IRInstruction& inst);
 Optional<Type> mInstrBaseEffects(const IRInstruction& inst, Type old);
 
+template<class F>
+void for_each_frame_location(SSATmp* fp, const Func* func, F fun) {
+  fun(AActRec { fp }, "ActRec");
+  fun(AMIStateAny, "MInstr State");
+
+  if (auto const nlocals = func->numLocals()) {
+    fun(ALocal { fp, AliasIdSet::IdRange(0, nlocals) }, "Local");
+  }
+  if (auto const niters = func->numIterators()) {
+    fun(aiter_range(fp, 0, niters), "Iterator");
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

@@ -3,20 +3,44 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{typing::typing_error::Result, typing_decl_provider::Class};
+use crate::typing::typing_error::Result;
+use oxidized::ast_defs::Variance;
 use pos::TypeName;
-use std::{fmt::Debug, rc::Rc};
-use ty::reason::Reason;
+use std::fmt::Debug;
+use ty::{local::Ty, reason::Reason};
+
 pub trait Oracle<R: Reason>: Debug {
-    /// Get a class, return `None` if it can't be found.
-    fn get_class(&self, name: TypeName) -> Result<Option<Rc<dyn Class<R>>>>;
+    /// Given a class name `C`, its type parameters and another class `D`
+    /// return the least common ancestor instantiated at those type params
+    fn get_ancestor(
+        &self,
+        name_sub: TypeName,
+        ty_params: &[Ty<R>],
+        name_sup: TypeName,
+    ) -> Result<Option<Ty<R>>>;
+
+    fn get_variance(&self, name: TypeName) -> Result<Option<Vec<Variance>>>;
+    fn is_final(&self, name: TypeName) -> Result<Option<bool>>;
 }
 
 #[derive(Debug)]
 pub struct NoClasses;
 
 impl<R: Reason> Oracle<R> for NoClasses {
-    fn get_class(&self, _name: TypeName) -> Result<Option<Rc<dyn Class<R>>>> {
+    fn get_ancestor(
+        &self,
+        _name_sub: TypeName,
+        _ty_params: &[Ty<R>],
+        _name_sup: TypeName,
+    ) -> Result<Option<Ty<R>>> {
+        Ok(None)
+    }
+
+    fn get_variance(&self, _name: TypeName) -> Result<Option<Vec<Variance>>> {
+        Ok(None)
+    }
+
+    fn is_final(&self, _name: TypeName) -> Result<Option<bool>> {
         Ok(None)
     }
 }

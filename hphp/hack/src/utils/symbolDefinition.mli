@@ -27,6 +27,7 @@ type kind =
   | Typeconst
   | Param
   | Typedef
+  | Module
 
 and modifier =
   | Final

@@ -38,10 +38,6 @@ inline Id FuncEmitter::id() const {
   return m_id;
 }
 
-inline bool FuncEmitter::useGlobalIds() const {
-  return m_ue.useGlobalIds();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode
 

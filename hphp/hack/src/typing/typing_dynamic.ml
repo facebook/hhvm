@@ -43,7 +43,10 @@ let is_dynamic_decl env ty =
 let check_property_sound_for_dynamic_read ~on_error env classname id ty =
   if not (Typing_utils.is_supportdyn env ty) then (
     let pos = get_pos ty in
-    Typing_log.log_pessimise_prop env pos (snd id);
+    Typing_log.log_pessimise_prop
+      env
+      (Pos_or_decl.unsafe_to_raw_pos pos)
+      (snd id);
     Some
       (on_error
          (fst id)
@@ -77,7 +80,10 @@ let check_property_sound_for_dynamic_write ~on_error env classname id decl_ty ty
            ty)
     then (
       let pos = get_pos decl_ty in
-      Typing_log.log_pessimise_prop env pos (snd id);
+      Typing_log.log_pessimise_prop
+        env
+        (Pos_or_decl.unsafe_to_raw_pos pos)
+        (snd id);
       Some
         (on_error
            (fst id)

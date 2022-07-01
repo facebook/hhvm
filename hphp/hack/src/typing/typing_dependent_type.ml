@@ -100,7 +100,7 @@ module ExprDepTy = struct
       let (env, ty) = Env.expand_type env ty in
       match deref ty with
       | (_, Tclass (_, Exact, _)) -> (env, ty)
-      | (_, Tclass (((_, x) as c), Nonexact, tyl)) ->
+      | (_, Tclass (((_, x) as c), Nonexact _, tyl)) ->
         let class_ = Env.get_class env x in
         (* If a class is both final and variant, we must treat it as non-final
            * since we can't statically guarantee what the runtime type

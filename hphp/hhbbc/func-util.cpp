@@ -189,7 +189,9 @@ BlockId make_block(php::WideFunc& func, const php::Block* srcBlk) {
 }
 
 php::FuncBase::FuncBase(const FuncBase& other) {
-  always_assert(!other.nativeInfo);
+  always_assert(!other.isNative);
+  // If we don't copy this over, we end up with garbage in `isNative`
+  isNative = other.isNative;
   exnNodes = other.exnNodes;
   rawBlocks = other.rawBlocks;
 }

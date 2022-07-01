@@ -306,10 +306,8 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* AppendMove(ArrayData*, TypedValue v);
-  static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* PopMove(ArrayData*, Variant& value);
 
-  static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);
@@ -462,8 +460,6 @@ private:
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
 
-  static ArrayData* ArrayMergeGeneric(VanillaDict*, const ArrayData*);
-
   // Assert a bunch of invariants about this array then return true.
   // usage:  assertx(checkInvariants());
   bool checkInvariants() const;
@@ -481,7 +477,6 @@ private:
 
   using HashTable<VanillaDict, VanillaDictElm>::findForRemove;
 
-  template <bool Move>
   void nextInsert(TypedValue);
 
   template <class K> arr_lval addLvalImpl(K k);
@@ -511,7 +506,7 @@ private:
    * for elements. compact() rebuilds the hash table and compacts the
    * elements into the slots with lower addresses.
    */
-  void compact(bool renumber = false);
+  void compact();
 
   bool isZombie() const { return m_used + 1 == 0; }
   void setZombie() { m_used = -uint32_t{1}; }

@@ -63,8 +63,10 @@ TRACE_SET_MOD(hhbbc_stats);
   X(wh, "wait handle", is_specialized_wait_handle)                   \
   X(obj_sub, "sub obj", is_sub_obj)                                  \
   X(obj_exact, "exact obj", is_exact_obj)                            \
+  X(obj_isect, "isect obj", is_isect_obj)                            \
   X(cls_sub, "sub class", is_sub_cls)                                \
   X(cls_exact, "exact class", is_exact_cls)                          \
+  X(cls_isect, "isect class", is_isect_cls)                          \
   X(arr_val, "array value", is_specialized_array_like_arrval)        \
   X(arr_packedn, "array packedn", is_specialized_array_like_packedn) \
   X(arr_packed, "array packed", is_specialized_array_like_packed)    \
@@ -239,20 +241,29 @@ bool is_sub_obj(const Type& t) {
   return
     is_specialized_obj(t) &&
     !is_specialized_wait_handle(t) &&
-    dobj_of(t).type == DObj::Sub;
+    dobj_of(t).isSub();
 }
 bool is_exact_obj(const Type& t) {
   return
     is_specialized_obj(t) &&
     !is_specialized_wait_handle(t) &&
-    dobj_of(t).type == DObj::Exact;
+    dobj_of(t).isExact();
+}
+bool is_isect_obj(const Type& t) {
+  return
+    is_specialized_obj(t) &&
+    !is_specialized_wait_handle(t) &&
+    dobj_of(t).isIsect();
 }
 
 bool is_sub_cls(const Type& t) {
-  return is_specialized_cls(t) && dcls_of(t).type == DCls::Sub;
+  return is_specialized_cls(t) && dcls_of(t).isSub();
 }
 bool is_exact_cls(const Type& t) {
-  return is_specialized_cls(t) && dcls_of(t).type == DCls::Exact;
+  return is_specialized_cls(t) && dcls_of(t).isExact();
+}
+bool is_isect_cls(const Type& t) {
+  return is_specialized_cls(t) && dcls_of(t).isIsect();
 }
 
 void add_type(TypeStat& stat, const Type& t) {
@@ -353,7 +364,7 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
 void collect_func(Stats& stats, const Index& index, const php::Func& func) {
   if (!func.cls) ++stats.totalFunctions;
 
-  if (index.is_effect_free(&func)) {
+  if (index.is_effect_free_raw(&func)) {
     ++stats.effectFreeFuncs;
   } else {
     ++stats.effectfulFuncs;

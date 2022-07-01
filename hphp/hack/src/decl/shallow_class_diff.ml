@@ -43,6 +43,10 @@ module type Member_S = sig
   (** Whether adding this member implies that the constructor should be considered modified.
     This is the case for example for required XHP attributes. *)
   val constructor_is_modified_when_added : t -> bool
+
+  (** Whether modifying this member implies that the constructor should be considered modified.
+    This is the case for example for required XHP attributes. *)
+  val constructor_is_modified_when_modified : old:t -> new_:t -> bool
 end
 
 (** Returns the diff of two member lists, plus a diff on the constructor if the member changes
@@ -67,18 +71,34 @@ let diff_members
       | (Some _, None) ->
         (SMap.add diff ~key:name ~data:Removed, constructor_change)
       | (None, Some m) ->
-        ( SMap.add diff ~key:name ~data:Added,
+        let constructor_change =
           max_constructor_change
             constructor_change
             (if Member.constructor_is_modified_when_added m then
               Some Modified
             else
-              None) )
+              None)
+        in
+        (SMap.add diff ~key:name ~data:Added, constructor_change)
       | (Some old_member, Some new_member) ->
-        ( Member.diff old_member new_member
+        let member_changes =
+          Member.diff old_member new_member
           |> Option.value_map ~default:diff ~f:(fun ch ->
-                 SMap.add diff ~key:name ~data:ch),
-          constructor_change ))
+                 SMap.add diff ~key:name ~data:ch)
+        in
+        let constructor_change =
+          max_constructor_change
+            constructor_change
+            (if
+             Member.constructor_is_modified_when_modified
+               ~old:old_member
+               ~new_:new_member
+            then
+              Some Modified
+            else
+              None)
+        in
+        (member_changes, constructor_change))
 
 module ClassConst : Member_S with type t = shallow_class_const = struct
   type t = shallow_class_const
@@ -98,6 +118,8 @@ module ClassConst : Member_S with type t = shallow_class_const = struct
   let is_private _ = false
 
   let constructor_is_modified_when_added _ = false
+
+  let constructor_is_modified_when_modified ~old:_ ~new_:_ = false
 end
 
 module TypeConst : Member_S with type t = shallow_typeconst = struct
@@ -119,6 +141,8 @@ module TypeConst : Member_S with type t = shallow_typeconst = struct
   let is_private _ = false
 
   let constructor_is_modified_when_added _ = false
+
+  let constructor_is_modified_when_modified ~old:_ ~new_:_ = false
 end
 
 module Prop : Member_S with type t = shallow_prop = struct
@@ -141,9 +165,11 @@ module Prop : Member_S with type t = shallow_prop = struct
     Aast_defs.equal_visibility p.sp_visibility Aast_defs.Private
 
   let constructor_is_modified_when_added p =
-    match p.sp_xhp_attr with
-    | None -> false
-    | Some attr -> Xhp_attribute.is_required attr
+    Xhp_attribute.opt_is_required p.sp_xhp_attr
+
+  let constructor_is_modified_when_modified ~old ~new_ =
+    Xhp_attribute.opt_is_required new_.sp_xhp_attr
+    && (not @@ Xhp_attribute.opt_is_required old.sp_xhp_attr)
 end
 
 module Method : Member_S with type t = shallow_method = struct
@@ -166,20 +192,21 @@ module Method : Member_S with type t = shallow_method = struct
     Aast_defs.equal_visibility m.sm_visibility Aast_defs.Private
 
   let constructor_is_modified_when_added _ = false
+
+  let constructor_is_modified_when_modified ~old:_ ~new_:_ = false
 end
 
 let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =
-  match (old_cstr, new_cstr) with
-  | (None, None) -> None
-  | (Some _, None) -> Some Removed
-  | (None, Some _) -> Some Added
-  | (Some old_method, Some new_method) ->
-    let consistent1 = Decl_utils.consistent_construct_kind old_cls in
-    let consistent2 = Decl_utils.consistent_construct_kind new_cls in
-    if not (Typing_defs.equal_consistent_kind consistent1 consistent2) then
-      Some Changed_inheritance
-    else
-      Method.diff old_method new_method
+  let consistent1 = Decl_utils.consistent_construct_kind old_cls in
+  let consistent2 = Decl_utils.consistent_construct_kind new_cls in
+  if not (Typing_defs.equal_consistent_kind consistent1 consistent2) then
+    Some Changed_inheritance
+  else
+    match (old_cstr, new_cstr) with
+    | (None, None) -> None
+    | (Some _, None) -> Some Removed
+    | (None, Some _) -> Some Added
+    | (Some old_method, Some new_method) -> Method.diff old_method new_method
 
 let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     ClassDiff.member_diff =

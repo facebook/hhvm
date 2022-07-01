@@ -294,6 +294,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdStructDictKey:
   case LdStructDictVal:
   case LdImplicitContext:
+  case CallViolatesModuleBoundary:
     assertx(!inst.isControlFlow());
     return true;
 
@@ -531,6 +532,8 @@ bool canDCE(const IRInstruction& inst) {
   case RaiseCoeffectsFunParamTypeViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseStrToClassNotice:
+  case RaiseModuleBoundaryViolation:
+  case RaiseImplicitContextStateInvalidException:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
@@ -648,6 +651,8 @@ bool canDCE(const IRInstruction& inst) {
   case BespokeElem:
   case BespokeEscalateToVanilla:
   case BespokeGetThrow:
+  case LdTypeStructureVal:
+  case LdTypeStructureValCns:
   case LdVectorSize:
   case BeginCatch:
   case EndCatch:
@@ -730,6 +735,7 @@ bool canDCE(const IRInstruction& inst) {
   case StructDictAddNextSlot:
   case StructDictTypeBoundCheck:
   case LdCoeffectFunParamNaive:
+  case DeserializeLazyProp:
     return false;
 
   case IsTypeStruct:
@@ -1350,8 +1356,8 @@ void fullDCE(IRUnit& unit) {
         if (inst->is(DecRef, DecReleaseCheck)) {
           rcInsts[srcInst].decs.emplace_back(inst);
         }
-        if (inst->is(InitVecElem, InitStructElem, InitStructPositions,
-                     ReleaseShallow, StClosureArg)) {
+        if (inst->is(InitVecElem, InitDictElem, InitStructElem,
+                     InitStructPositions, ReleaseShallow, StClosureArg)) {
           if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
         }
       }

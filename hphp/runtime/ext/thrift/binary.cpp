@@ -633,6 +633,7 @@ void binary_serialize_slow(const FieldSpec& field,
 void binary_serialize_struct(const Object& obj, PHPOutputTransport& transport) {
   Class* cls = obj->getVMClass();
   auto prop = cls->declProperties().begin();
+  obj->deserializeAllLazyProps();
   auto objProps = obj->props();
   const size_t numProps = cls->numDeclProperties();
 

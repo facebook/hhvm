@@ -109,7 +109,7 @@ void fixup_default_values(T& state, FuncEmitter* fe) {
     ).matchAnchored(fe->bc(), pi.funcletOff, fe->bcPos());
 
     // Verify that the pattern we matched is either for the last DV initializer,
-    // in which case it must end with a JmpNS that targets the function entry,
+    // in which case it must end with an Enter that targets the function entry,
     // or is immediately followed by the next DV initializer.
     if (!result.found() || result.getEnd() >= end) continue;
     auto pc = result.getEnd();
@@ -124,7 +124,7 @@ void fixup_default_values(T& state, FuncEmitter* fe) {
       }
       auto const orig = pc;
       auto const base = fe->bc();
-      return decode_op(pc) == OpJmpNS && orig + decode_raw<Offset>(pc) == base;
+      return decode_op(pc) == OpEnter && orig + decode_raw<Offset>(pc) == base;
     }();
     if (!valid) continue;
 

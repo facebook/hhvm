@@ -355,6 +355,10 @@ val constraint_ty_equal :
 
 val ty_equal : ?normalize_lists:bool -> 'a ty -> 'a ty -> bool
 
+val compare_exact : exact -> exact -> int
+
+val equal_exact : exact -> exact -> bool
+
 val equal_internal_type : internal_type -> internal_type -> bool
 
 val equal_locl_ty : locl_ty -> locl_ty -> bool

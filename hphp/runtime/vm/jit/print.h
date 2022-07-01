@@ -75,26 +75,29 @@ bool dumpIREnabled(TransKind kind, int level = 1);
  * 1, etc...
  *
  * 1: Print hhir units once, after all optimizations and code generation are
- *    complete. The generated machine code will be printed inline if the
+ *    complete.
+ * 2: Same as 1, but also prints the generated machine code inline if the
  *    current build supports disassembly.
- * 2: Print hhir units immediately after initial lowering from hhbc -> hhir,
+ * 3: Print hhir units immediately after initial lowering from hhbc -> hhir,
  *    before any optimizations.
- * 3: Print hhir units after all optimizations, right before lowering to vasm.
- * 4: Print hhir units created for region selection in region-tracelet.cpp, and
+ * 4: Print hhir units after all optimizations, right before lowering to vasm.
+ * 5: Print hhir units created for region selection in region-tracelet.cpp, and
  *    print hhir units after code generation, before they are relocated to
  *    their final destination.
- * 5: In hhir unit dumps that contain disassembly, include the raw instruction
+ * 6: Prints the machine code prior to relocation.
+ * 7: In hhir unit dumps that contain disassembly, include the raw instruction
  *    encoding, printed as hex values.
- * 6: Print stats about the frequency of each opcode at the beginning of hhir
+ * 8: Print stats about the frequency of each opcode at the beginning of hhir
  *    unit dumps.
  */
 constexpr int kCodeGenLevel = 1;
-constexpr int kIRLevel = 2;
-constexpr int kOptLevel = 3;
-constexpr int kTraceletLevel = 4;
-constexpr int kRelocationLevel = 4;
-constexpr int kAsmEncodingLevel = 5;
-constexpr int kExtraExtraLevel = 6;
+constexpr int kDisasmLevel = 2;
+constexpr int kIRLevel = 3;
+constexpr int kOptLevel = 4;
+constexpr int kTraceletLevel = 5;
+constexpr int kRelocationLevel = 6;
+constexpr int kAsmEncodingLevel = 7;
+constexpr int kExtraExtraLevel = 8;
 
 void printUnit(int level, const IRUnit&, const char* caption,
                AsmInfo* ai = nullptr, const GuardConstraints* guards = nullptr,

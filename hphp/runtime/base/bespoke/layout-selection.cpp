@@ -20,9 +20,11 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke/key-coloring.h"
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/union-find.h"
 
@@ -546,6 +548,7 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
       case LocationType::InstanceProperty:
       case LocationType::StaticProperty:
       case LocationType::TypeConstant:
+      case LocationType::TypeAlias:
       case LocationType::SrcKey:
         auto const vad = profile.data->staticSampledArray;
         if (vad != nullptr && vad->isDictType()) return true;
@@ -579,16 +582,21 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
   auto groups = std::vector<StructGroup>{};
 
   // Sort groups by weight to preferentially create hot struct layouts.
-  // We also filter out groups that are likely to need escalation here.
+  // We also filter out groups that are likely to need escalation here and
+  // groups that have a type structure as a source.
   sa.union_find.forEachGroup([&](auto& group) {
     double weight = 0;
     double p_escalated = 0;
+    double type_structs = 0;
     for (auto const source : group) {
+      if (source->getLayout().is_type_structure()) {
+        type_structs++;
+      }
       auto const source_weight = source->getProfileWeight();
       weight += source_weight;
       p_escalated += source_weight * probabilityOfEscalation(*source);
     }
-    if (weight > 0 && !(p_escalated / weight > 1 - p_cutoff)) {
+    if (type_structs == 0 && weight > 0 && !(p_escalated / weight > 1 - p_cutoff)) {
       groups.emplace_back(std::move(group), weight);
     }
   });
@@ -682,6 +690,20 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
 //////////////////////////////////////////////////////////////////////////////
 // Generic dispatch
 
+void setTypeStructureLayoutForSources() {
+  eachSource([&](auto& profile) {
+    if (RO::EvalEmitBespokeTypeStructures && profile.shouldUseBespokeTypeStructure()) {
+      auto const vad = profile.data->staticSampledArray;
+      if (vad == nullptr) return;
+      auto const tad = TypeStructure::MakeFromVanilla(vad);
+      if (tad == nullptr) return;
+      auto const idx = tad->layoutIndex();
+      profile.setStaticBespokeArray(tad);
+      profile.setLayout(ArrayLayout(idx));
+    }
+  });
+}
+
 ArrayLayout selectSourceLayout(
     LoggingProfile& profile, const StructAnalysisResult& sar) {
   assertx(profile.data);
@@ -763,6 +785,7 @@ Decision<ArrayLayout> makeSinkDecision(
   uint64_t vanilla = 0;
   uint64_t monotype = 0;
   uint64_t is_struct = 0;
+  uint64_t is_type_structure = 0;
   uint64_t total = 0;
 
   std::unordered_map<const bespoke::Layout*, uint64_t> structs;
@@ -777,6 +800,8 @@ Decision<ArrayLayout> makeSinkDecision(
     } else if (layout.is_struct()) {
       is_struct += count;
       structs[layout.bespokeLayout()] += count;
+    } else if (layout.is_type_structure()) {
+      is_type_structure += count;
     }
     total += count;
   }
@@ -793,6 +818,7 @@ Decision<ArrayLayout> makeSinkDecision(
   auto const p_vanilla = p_sampled * vanilla / total + (1 - p_sampled);
   auto const p_monotype = p_sampled * monotype / total;
   auto const p_is_struct = p_sampled * is_struct / total;
+  auto const p_is_type_structure = p_sampled * is_type_structure / total;
 
   if (p_vanilla >= p_cutoff) return {ArrayLayout::Vanilla(), p_vanilla};
 
@@ -829,6 +855,10 @@ Decision<ArrayLayout> makeSinkDecision(
         ? DAL{ArrayLayout(TopMonotypeDictLayout::Index(kt)), p_monotype_key}
         : DAL{ArrayLayout(MonotypeDictLayout::Index(kt, dt)), p_monotype_key};
     }
+  }
+
+  if (p_is_type_structure >= p_cutoff) {
+    return {ArrayLayout(TypeStructure::GetLayoutIndex()), p_is_type_structure};
   }
 
   if (p_is_struct >= p_cutoff) {
@@ -895,6 +925,11 @@ void selectBespokeLayouts() {
   if (Layout::HierarchyFinalized()) return;
 
   setLoggingEnabled(false);
+
+  // need to set type structure layouts first so that relevant type structure
+  // sources and sinks can be excluded in the struct analysis
+  setTypeStructureLayoutForSources();
+
   auto const sar = []{
     if (!RO::EvalEmitBespokeStructDicts) return StructAnalysisResult();
     StructAnalysis sa;
@@ -902,7 +937,11 @@ void selectBespokeLayouts() {
     eachSink([&](auto const& x) { updateStructAnalysis(x, sa); });
     return finishStructAnalysis(sa);
   }();
-  eachSource([&](auto& x) { x.setLayout(selectSourceLayout(x, sar)); });
+  eachSource([&](auto& x) {
+    if (x.getStaticBespokeArray() == nullptr) {
+      x.setLayout(selectSourceLayout(x, sar));
+    }
+  });
   eachSink([&](auto& x) { x.setLayout(selectSinkLayout(x, sar)); });
   Layout::FinalizeHierarchy();
   startExportProfiles();

@@ -166,3 +166,26 @@ walkable!(Decl<R> => {
     Decl::Const(_, x) => [x],
     Decl::Module(_, x) =>  [x],
 });
+
+impl<R: Reason> Decl<R> {
+    pub fn name(&self) -> Symbol {
+        match self {
+            Decl::Class(name, _) => name.as_symbol(),
+            Decl::Fun(name, _) => name.as_symbol(),
+            Decl::Typedef(name, _) => name.as_symbol(),
+            Decl::Const(name, _) => name.as_symbol(),
+            Decl::Module(name, _) => name.as_symbol(),
+        }
+    }
+
+    pub fn name_kind(&self) -> oxidized::naming_types::NameKind {
+        use oxidized::naming_types::{KindOfType, NameKind};
+        match self {
+            Decl::Class(..) => NameKind::TypeKind(KindOfType::TClass),
+            Decl::Typedef(..) => NameKind::TypeKind(KindOfType::TTypedef),
+            Decl::Fun(..) => NameKind::FunKind,
+            Decl::Const(..) => NameKind::ConstKind,
+            Decl::Module(..) => NameKind::ModuleKind,
+        }
+    }
+}

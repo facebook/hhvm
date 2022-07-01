@@ -50,6 +50,8 @@ impl<'arena> HhasCoeffects<'arena> {
                 c::ZONED_LOCAL => Some(Ctx::ZonedLocal),
                 c::ZONED_SHALLOW => Some(Ctx::ZonedShallow),
                 c::ZONED => Some(Ctx::Zoned),
+                c::LEAK_SAFE_LOCAL => Some(Ctx::LeakSafeLocal),
+                c::LEAK_SAFE_SHALLOW => Some(Ctx::LeakSafeShallow),
                 c::LEAK_SAFE => Some(Ctx::LeakSafe),
                 c::GLOBALS => Some(Ctx::Globals),
                 c::READ_GLOBALS => Some(Ctx::ReadGlobals),
@@ -65,6 +67,7 @@ impl<'arena> HhasCoeffects<'arena> {
             .map(|c| match c {
                 Ctx::RxLocal => Ctx::RxShallow,
                 Ctx::ZonedLocal => Ctx::ZonedShallow,
+                Ctx::LeakSafeLocal => Ctx::LeakSafeShallow,
                 _ => *c,
             })
             .collect()

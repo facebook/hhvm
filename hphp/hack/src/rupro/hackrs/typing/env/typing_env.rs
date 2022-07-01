@@ -232,9 +232,7 @@ impl<R: Reason> TEnv<R> {
     /// For solve all type variables.
     pub fn solve_all_unsolved_tyvars(&mut self) -> Result<Option<Vec<TypingError<R>>>> {
         for tyvar in self.inf_env.get_all_tyvars() {
-            let err_opt = self
-                .subtyper()
-                .always_solve_wrt_variance_or_down(tyvar, &Reason::none())?;
+            let err_opt = self.subtyper().force_solve(tyvar, &Reason::none())?;
             rupro_todo_assert!(err_opt.is_none(), MissingError);
         }
         Ok(None)
@@ -243,5 +241,12 @@ impl<R: Reason> TEnv<R> {
     /// Path shorthen the given type.
     pub fn resolve_ty(&mut self, ty: &Ty<R>) -> Ty<R> {
         self.inf_env.resolve_ty(ty)
+    }
+
+    /// Resolve a type and force solve it.
+    pub fn resolve_ty_and_solve(&mut self, ty: &Ty<R>) -> Result<Ty<R>> {
+        let ty = self.resolve_ty(ty);
+        rupro_todo_assert!(self.subtyper().force_solve_ty(&ty)?.is_none(), MissingError);
+        Ok(self.resolve_ty(&ty))
     }
 }

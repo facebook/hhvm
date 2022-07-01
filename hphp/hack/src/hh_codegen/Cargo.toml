@@ -15,5 +15,5 @@ md-5 = "0.8"
 proc-macro2 = "1.0"
 quote = "1.0"
 structopt = "0.3.23"
-syn = { version = "1.0", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+syn = { version = "1.0.96", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 synstructure = "0.12"

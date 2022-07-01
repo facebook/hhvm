@@ -9,12 +9,12 @@ mod tyvar_info;
 mod tyvar_occurrences;
 
 use im::{HashMap, HashSet};
-use pos::{IImmutableHashMapToOxidized, Pos, ToOxidized, TypeName};
+use pos::{Pos, ToOxidized, TypeName};
 use std::ops::Deref;
 use ty::{
     local::{Ty, Ty_, Tyvar, Variance},
     local_error::{Primary, TypingError},
-    prop::{CstrTy, Prop},
+    prop::Prop,
     reason::Reason,
     visitor::{Visitor, Walkable},
 };
@@ -83,7 +83,7 @@ impl<R: Reason> InferenceEnv<R> {
             .map_or(false, |info| info.is_solved())
     }
 
-    fn is_unsolved(&self, tv: &Tyvar) -> bool {
+    pub fn is_unsolved(&self, tv: &Tyvar) -> bool {
         !self.is_solved(tv)
     }
 
@@ -168,14 +168,6 @@ impl<R: Reason> InferenceEnv<R> {
         }
     }
 
-    pub fn resolve_cstr_ty(&mut self, cty: &CstrTy<R>) -> CstrTy<R> {
-        if let CstrTy::Locl(ty) = cty {
-            CstrTy::Locl(self.resolve_ty(ty))
-        } else {
-            cty.clone()
-        }
-    }
-
     pub fn is_mixed(&mut self, ty: &Ty<R>) -> bool {
         if let Ty_::Toption(ty_inner) = ty.deref() {
             let ety = self.resolve_ty(ty_inner);
@@ -185,36 +177,36 @@ impl<R: Reason> InferenceEnv<R> {
         }
     }
 
-    pub fn upper_bounds(&self, tv: &Tyvar) -> Option<HashSet<CstrTy<R>>> {
+    pub fn upper_bounds(&self, tv: &Tyvar) -> Option<HashSet<Ty<R>>> {
         self.tyvar_info.get(tv).and_then(|info| info.upper_bounds())
     }
 
-    pub fn lower_bounds(&self, tv: &Tyvar) -> Option<HashSet<CstrTy<R>>> {
+    pub fn lower_bounds(&self, tv: &Tyvar) -> Option<HashSet<Ty<R>>> {
         self.tyvar_info.get(tv).and_then(|info| info.lower_bounds())
     }
 
-    pub fn add_upper_bound(&mut self, tv: Tyvar, bound: CstrTy<R>) {
+    pub fn add_upper_bound(&mut self, tv: Tyvar, bound: Ty<R>) {
         self.tyvar_info
             .entry(tv)
             .or_insert(TyvarInfo::default())
             .add_upper_bound(bound);
     }
 
-    pub fn add_lower_bound(&mut self, tv: Tyvar, bound: CstrTy<R>) {
+    pub fn add_lower_bound(&mut self, tv: Tyvar, bound: Ty<R>) {
         self.tyvar_info
             .entry(tv)
             .or_insert(TyvarInfo::default())
             .add_lower_bound(bound);
     }
 
-    pub fn remove_upper_bound(&mut self, tv: Tyvar, bound: &CstrTy<R>) {
+    pub fn remove_upper_bound(&mut self, tv: Tyvar, bound: &Ty<R>) {
         self.tyvar_info
             .entry(tv)
             .or_insert(TyvarInfo::default())
             .remove_upper_bound(bound);
     }
 
-    pub fn remove_lower_bound(&mut self, tv: Tyvar, bound: &CstrTy<R>) {
+    pub fn remove_lower_bound(&mut self, tv: Tyvar, bound: &Ty<R>) {
         self.tyvar_info
             .entry(tv)
             .or_insert(TyvarInfo::default())
@@ -348,14 +340,14 @@ impl<R: Reason> InferenceEnv<R> {
     pub fn add_upper_bound_update_variances<F>(
         &mut self,
         tv: Tyvar,
-        bound: &CstrTy<R>,
+        bound: &Ty<R>,
         get_tparam_variance: &F,
     ) where
         F: Fn(TypeName) -> Option<Vec<oxidized::ast_defs::Variance>>,
     {
         self.add_upper_bound(tv, bound.clone());
         if self.appears_contravariantly(&tv) {
-            let ety = self.resolve_cstr_ty(bound);
+            let ety = self.resolve_ty(bound);
             if !ety.is_var() {
                 let (covs, contravs) = ety.tyvars(get_tparam_variance);
                 covs.iter()
@@ -371,14 +363,14 @@ impl<R: Reason> InferenceEnv<R> {
     pub fn add_lower_bound_update_variances<F>(
         &mut self,
         tv: Tyvar,
-        bound: &CstrTy<R>,
+        bound: &Ty<R>,
         get_tparam_variance: &F,
     ) where
         F: Fn(TypeName) -> Option<Vec<oxidized::ast_defs::Variance>>,
     {
         self.add_lower_bound(tv, bound.clone());
         if self.appears_covariantly(&tv) {
-            let ety = self.resolve_cstr_ty(bound);
+            let ety = self.resolve_ty(bound);
             if !ety.is_var() {
                 let (covs, contravs) = ety.tyvars(get_tparam_variance);
                 covs.iter()
@@ -460,18 +452,12 @@ impl<'a, R: Reason> ToOxidized<'a> for InferenceEnv<R> {
             subtype_prop,
         } = self;
         rupro_todo_assert!(tyvar_stack.is_empty(), AST);
-        rupro_todo_assert!(occurrences.is_empty(), AST);
 
         oxidized_by_ref::typing_inference_env::TypingInferenceEnv {
-            tvenv: IImmutableHashMapToOxidized(tyvar_info).to_oxidized(bump),
+            tvenv: tyvar_info.to_oxidized(bump),
             tyvars_stack: &[],
             subtype_prop: bump.alloc(subtype_prop.to_oxidized(bump)),
-            tyvar_occurrences: bump.alloc(
-                oxidized_by_ref::typing_tyvar_occurrences::TypingTyvarOccurrences {
-                    tyvar_occurrences: Default::default(),
-                    tyvars_in_tyvar: Default::default(),
-                },
-            ),
+            tyvar_occurrences: occurrences.to_oxidized(bump),
             allow_solve_globals: false,
         }
     }

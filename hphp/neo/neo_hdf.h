@@ -31,7 +31,6 @@ typedef struct _attr
 
 struct _hdf
 {
-  int link;
   int alloc_value;
   char *name;
   int name_len;

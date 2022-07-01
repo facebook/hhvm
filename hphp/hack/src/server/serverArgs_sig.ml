@@ -112,6 +112,12 @@ module type S = sig
 
   val set_config : options -> (string * string) list -> options
 
+  val set_save_64bit : options -> string option -> options
+
+  val set_save_naming_filename : options -> string option -> options
+
+  val set_save_filename : options -> string option -> options
+
   (****************************************************************************)
   (* Misc *)
   (****************************************************************************)

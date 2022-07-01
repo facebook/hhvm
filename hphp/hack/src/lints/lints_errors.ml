@@ -137,16 +137,25 @@ let is_always_false p lhs_class rhs_class =
 let as_always_succeeds p lhs_class rhs_class =
   let lhs_class = Markdown_lite.md_codify lhs_class in
   let rhs_class = Markdown_lite.md_codify rhs_class in
+
+  let derive_message =
+    if String.equal lhs_class rhs_class then
+      ""
+    else
+      Printf.sprintf
+        ". It is always an instance of %s because %s derives from %s"
+        rhs_class
+        lhs_class
+        rhs_class
+  in
   Lints.add
     Codes.as_always_succeeds
     Lint_warning
     p
     (Printf.sprintf
-       "This `as` assertion will always succeed and hence is redundant. The expression on the left is an instance of %s. It is always an instance of %s because %s derives from %s."
+       "This `as` assertion will always succeed and hence is redundant. The expression on the left is an instance of %s%s."
        lhs_class
-       rhs_class
-       lhs_class
-       rhs_class)
+       derive_message)
 
 let as_always_fails p lhs_class rhs_class =
   let lhs_class = Markdown_lite.md_codify lhs_class in
@@ -181,6 +190,20 @@ let class_overrides_all_trait_methods pos class_name trait_name =
        "Unused trait: %s is overriding all the methods in %s"
        (Utils.strip_ns class_name |> Markdown_lite.md_codify)
        (Utils.strip_ns trait_name |> Markdown_lite.md_codify))
+
+let trait_requires_class_that_overrides_method
+    pos class_name trait_name method_name =
+  Lints.add
+    Codes.unreachable_method_in_trait
+    Lint_warning
+    pos
+    (Printf.sprintf
+       "Method %s in trait %s is overriden in class %s and trait %s has `require class %s`. This method is never used."
+       (Utils.strip_ns method_name |> Markdown_lite.md_codify)
+       (Utils.strip_ns trait_name |> Markdown_lite.md_codify)
+       (Utils.strip_ns class_name |> Markdown_lite.md_codify)
+       (Utils.strip_ns trait_name |> Markdown_lite.md_codify)
+       (Utils.strip_ns class_name |> Markdown_lite.md_codify))
 
 let invalid_null_check p ret ty =
   Lints.add Codes.invalid_null_check Lint_warning p
@@ -316,6 +339,18 @@ let nullsafe_not_needed pos =
   ^ Markdown_lite.md_codify "->"
   ^ " operator instead."
 
+let invalid_attribute_value
+    pos (attr_name : string) (valid_values : string list) =
+  let valid_values = List.map valid_values ~f:Markdown_lite.md_codify in
+  Lints.add
+    Codes.bad_xhp_enum_attribute_value
+    Lint_error
+    pos
+    (Printf.sprintf
+       "Invalid value for %s, expected one of %s."
+       (Markdown_lite.md_codify attr_name)
+       (String.concat ~sep:", " valid_values))
+
 let parse_error code pos msg = Lints.add code Lint_error pos msg
 
 let rec prettify_class_list names =
@@ -386,3 +421,22 @@ let switch_nonexhaustive p =
     ^ " The expression it scrutinises has a type with infinitely many values and the statement does not have a default case."
     ^ " If none of the cases match, an exception will be thrown."
     ^ " Consider adding a default case.")
+
+let calling_pointless_boolean p txt =
+  Lints.add Codes.pointless_booleans_expression Lint_warning p txt
+
+let comparing_booleans p name value =
+  let msg =
+    if value then
+      "Consider changing this statement to " ^ "(" ^ name ^ ") instead"
+    else
+      "Consider changing this statement to " ^ "(!" ^ name ^ ") instead"
+  in
+  Lints.add Codes.comparing_booleans Lint_advice p msg
+
+let unconditional_recursion p =
+  Lints.add
+    Codes.unconditional_recursion
+    Lint_error
+    p
+    "There is no condition to terminate this recursive function"

@@ -6,16 +6,16 @@
 use crate::{ClassExpr, IterGen, LabelGen, LocalGen};
 use adata_state::AdataState;
 use decl_provider::DeclProvider;
-use ffi::{Pair, Slice, Str};
+use ffi::{Slice, Str};
 use global_state::GlobalState;
 use hash::IndexSet;
-use hhbc::hhas_body::HhasBodyEnv;
 use hhbc::{
     hhas_symbol_refs::{HhasSymbolRefs, IncludePath, IncludePathSet},
     ClassName, ConstName, FunctionName, Local,
 };
 use options::Options;
 use oxidized::{ast, ast_defs, pos::Pos};
+use print_expr::HhasBodyEnv;
 use statement_state::StatementState;
 use std::{borrow::Cow, collections::BTreeSet};
 
@@ -228,16 +228,8 @@ impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> 
                 self,
                 true,
                 true,
-                body_env
-                    .class_info
-                    .as_ref()
-                    .map(|Pair(k, s)| (k.clone(), s.unsafe_as_str()))
-                    .into(),
-                body_env
-                    .parent_name
-                    .clone()
-                    .map(|s| s.unsafe_as_str().to_owned())
-                    .into(),
+                body_env.class_info.as_ref().map(|(k, s)| (k.clone(), *s)),
+                body_env.parent_name.clone().map(|s| s.to_owned()),
                 ast::Expr(
                     (),
                     Pos::make_none(),

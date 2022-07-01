@@ -44,8 +44,14 @@ namespace HH\Capabilities {
   <<__Sealed()>>
   interface WriteProperty {}
 
-  <<__Sealed()>>
+  <<__Sealed(SystemShallow::class)>>
   interface System {}
+
+  <<__Sealed(SystemLocal::class)>>
+  interface SystemShallow extends System {}
+
+  <<__Sealed()>>
+  interface SystemLocal extends SystemShallow {}
 
   <<__Sealed(ImplicitPolicyOf::class, ImplicitPolicyShallow::class)>>
   interface ImplicitPolicy {}

@@ -595,6 +595,7 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tapply _ -> 101
   | Tmixed -> 102
   | Tlike _ -> 103
+  | Trefinement _ -> 104
   (* exist in both phases *)
   | Tany _
   | Terr ->
@@ -653,6 +654,12 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
         | 0 -> tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
         | n -> n
       end
+    | (Trefinement (ty1, r1), Trefinement (ty2, r2)) ->
+      begin
+        match ty_compare ty1 ty2 with
+        | 0 -> class_refinement_compare r1 r2
+        | n -> n
+      end
     | (Tmixed, Tmixed) -> 0
     | (Tlike ty1, Tlike ty2) -> ty_compare ty1 ty2
     | ((Tthis | Tapply _ | Tmixed | Tlike _), _)
@@ -700,7 +707,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
         | 0 ->
           begin
             match tyl_compare ~sort:false tyl tyl2 with
-            | 0 -> compare_exact exact exact2
+            | 0 -> exact_compare exact exact2
             | n -> n
           end
         | n -> n
@@ -733,7 +740,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | ( ( Tprim _ | Toption _ | Tvec_or_dict _ | Tfun _ | Tintersection _
         | Tunion _ | Ttuple _ | Tgeneric _ | Tnewtype _ | Tdependent _
         | Tclass _ | Tshape _ | Tvar _ | Tunapplied_alias _ | Tnonnull
-        | Tdynamic | Terr | Taccess _ | Tany _ | Tneg _ ),
+        | Tdynamic | Terr | Taccess _ | Tany _ | Tneg _ | Trefinement _ ),
         _ ) ->
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
   and shape_field_type_compare :
@@ -944,15 +951,44 @@ and ft_params_compare :
  fun ?(normalize_lists = false) params1 params2 ->
   List.compare (ft_param_compare ~normalize_lists) params1 params2
 
+and type_refinement_compare :
+    type a. a class_type_refinement -> a class_type_refinement -> int =
+ fun a b ->
+  match (a, b) with
+  | (Texact _, Tloose _) -> -1
+  | (Tloose _, Texact _) -> 1
+  | (Tloose b1, Tloose b2) ->
+    begin
+      match tyl_compare ~sort:true b1.tr_lower b2.tr_lower with
+      | 0 -> tyl_compare ~sort:true b1.tr_upper b2.tr_upper
+      | n -> n
+    end
+  | (Texact ty1, Texact ty2) -> ty_compare ty1 ty2
+
+and class_refinement_compare :
+    type a. a class_refinement -> a class_refinement -> int =
+ fun { cr_types = trs1 } { cr_types = trs2 } ->
+  SMap.compare type_refinement_compare trs1 trs2
+
+and exact_compare e1 e2 =
+  match (e1, e2) with
+  | (Exact, Exact) -> 0
+  | (Nonexact _, Exact) -> 1
+  | (Exact, Nonexact _) -> -1
+  | (Nonexact r1, Nonexact r2) -> class_refinement_compare r1 r2
+
 (* Dedicated functions with more easily discoverable names *)
 let compare_locl_ty : ?normalize_lists:bool -> locl_ty -> locl_ty -> int =
   ty_compare
 
-(* Dedicated functions with more easily discoverable names *)
 let compare_decl_ty : ?normalize_lists:bool -> decl_ty -> decl_ty -> int =
   ty_compare
 
 let tyl_equal tyl1 tyl2 = Int.equal 0 @@ tyl_compare ~sort:false tyl1 tyl2
+
+let compare_exact = exact_compare
+
+let equal_exact e1 e2 = Int.equal 0 (compare_exact e1 e2)
 
 let class_id_con_ordinal cid =
   match cid with

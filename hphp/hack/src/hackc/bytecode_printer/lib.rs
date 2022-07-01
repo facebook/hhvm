@@ -10,5 +10,5 @@ mod print_opcode;
 mod write;
 
 pub use context::{Context, IncludeProcessor};
-pub use print::{external_print_unit as print_unit, ExprEnv};
+pub use print::external_print_unit as print_unit;
 pub use write::Error;

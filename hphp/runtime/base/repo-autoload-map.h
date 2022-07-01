@@ -83,6 +83,10 @@ struct RepoAutoloadMap final : AutoloadMap {
     return true;
   }
 
+  Holder getNativeHolder() noexcept override {
+    return Holder{this, nullptr};
+  }
+
   AutoloadMap::Result handleFailure(KindOf kind, const String& className,
       const Variant& err) const override;
 

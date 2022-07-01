@@ -234,6 +234,9 @@ let test_dupe_setup ~(sqlite : bool) =
       "class fOo"
       setup.Common_setup.foo_contents
   in
+  let contents =
+    Str.global_replace (Str.regexp "new module foo") "new module Foo" contents
+  in
   Disk.write_file
     ~file:(Relative_path.to_absolute setup.Common_setup.nonexistent_path)
     ~contents;
@@ -250,6 +253,14 @@ let test_dupe_setup ~(sqlite : bool) =
     (Some setup.Common_setup.foo_path)
     (Naming_provider.get_fun_path ctx "\\f1")
     "dupe: expected f1 to be in original location";
+  Asserter.Relative_path_asserter.assert_option_equals
+    (Some setup.Common_setup.foo_path)
+    (Naming_provider.get_module_path ctx "foo")
+    "dupe: expected module foo to be in original location";
+  Asserter.Relative_path_asserter.assert_option_equals
+    (Some setup.Common_setup.nonexistent_path)
+    (Naming_provider.get_module_path ctx "Foo")
+    "dupe: expected module Foo to be in the new location";
   Asserter.String_asserter.assert_option_equals
     (Some "\\f1")
     (Naming_provider.get_fun_canon_name ctx "\\F1")
@@ -258,7 +269,6 @@ let test_dupe_setup ~(sqlite : bool) =
     (Some "\\Foo")
     (Naming_provider.get_type_canon_name ctx "\\foo")
     "dupe: expected this canonical spelling of 'foo'";
-
   (setup, ctx, dupe)
 
 let test_dupe_then_delete_dupe ~(sqlite : bool) () =
@@ -287,7 +297,14 @@ let test_dupe_then_delete_dupe ~(sqlite : bool) () =
     (Some "\\Foo")
     (Naming_provider.get_type_canon_name ctx "\\foo")
     "unduped: expected this canonical spelling for 'foo'";
-
+  Asserter.Relative_path_asserter.assert_option_equals
+    (Some setup.Common_setup.foo_path)
+    (Naming_provider.get_module_path ctx "foo")
+    "dupe: expected module foo to be in original location";
+  Asserter.Relative_path_asserter.assert_option_equals
+    None
+    (Naming_provider.get_module_path ctx "Foo")
+    "dupe: expected module Foo to be deleted";
   true
 
 let test_dupe_then_delete_original ~(sqlite : bool) () =
@@ -315,6 +332,14 @@ let test_dupe_then_delete_original ~(sqlite : bool) () =
     (Some "\\fOo")
     (Naming_provider.get_type_canon_name ctx "\\foo")
     "unduped: expected this canonical spelling of 'foo'";
+  Asserter.Relative_path_asserter.assert_option_equals
+    None
+    (Naming_provider.get_module_path ctx "foo")
+    "dupe: expected module foo to be deleted";
+  Asserter.Relative_path_asserter.assert_option_equals
+    (Some setup.Common_setup.nonexistent_path)
+    (Naming_provider.get_module_path ctx "Foo")
+    "dupe: expected module Foo to be in duplicated location";
   true
 
 let test_xhp_name_mangling ~(sqlite : bool) () =

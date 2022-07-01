@@ -1762,4 +1762,10 @@ function str_number_coercible(string $str)[]: bool;
 <<__IsFoldable, __Native>>
 function str_to_numeric(string $str)[]: ?num;
 
+/**
+ * Implements PHP operator ^ (bitwise xor) operator on strings.
+ */
+<<__IsFoldable, __Native>>
+function str_bitwise_xor(string $s1, string $s2)[]: string;
+
 }

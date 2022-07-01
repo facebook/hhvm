@@ -98,6 +98,15 @@ struct Option {
    */
   static bool ParserAsyncCleanup;
 
+  /*
+   * If true, as an optimization, we'll assume the files have already
+   * been stored with extern_worker previously and proceed as if they
+   * had. If not (so execution fails), we'll then store them and try
+   * again. This avoids doing a lot of redundant stores in the common
+   * case.
+   */
+  static bool ParserOptimisticStore;
+
   /* Config passed to extern_worker::Client */
   static std::string ExternWorkerUseCase;
   static bool ExternWorkerForceSubprocess;
@@ -107,6 +116,9 @@ struct Option {
   static bool ExternWorkerUseRichClient;
   static bool ExternWorkerUseZippyRichClient;
   static bool ExternWorkerUseP2P;
+  static bool ExternWorkerVerboseLogging;
+  static int ExternWorkerThrottleRetries;
+  static int ExternWorkerThrottleBaseWaitMSecs;
   static std::string ExternWorkerWorkingDir;
 
 private:

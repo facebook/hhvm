@@ -220,27 +220,49 @@ let get_telemetry (t : t) : Telemetry.t =
        it not being the intended provider. *)
   in
   match t.backend with
-  | Provider_backend.Local_memory lmem ->
+  | Provider_backend.Local_memory
+      {
+        Provider_backend.shallow_decl_cache;
+        linearization_cache;
+        decl_cache;
+        folded_class_cache;
+        reverse_naming_table_delta;
+        fixmes;
+        naming_db_path_ref = _;
+      } ->
     let open Provider_backend in
     telemetry
-    |> Decl_cache.get_telemetry lmem.decl_cache ~key:"decl_cache"
+    |> Decl_cache.get_telemetry decl_cache ~key:"decl_cache"
     |> Shallow_decl_cache.get_telemetry
-         lmem.shallow_decl_cache
+         shallow_decl_cache
          ~key:"shallow_decl_cache"
+    |> Folded_class_cache.get_telemetry
+         folded_class_cache
+         ~key:"folded_class_cache"
     |> Linearization_cache.get_telemetry
-         lmem.linearization_cache
+         linearization_cache
          ~key:"linearization_cache"
     |> Reverse_naming_table_delta.get_telemetry
-         lmem.reverse_naming_table_delta
+         reverse_naming_table_delta
          ~key:"reverse_naming_table_delta"
-    |> Fixmes.get_telemetry lmem.fixmes ~key:"fixmes"
+    |> Fixmes.get_telemetry fixmes ~key:"fixmes"
   | _ -> telemetry
 
 let reset_telemetry (t : t) : unit =
   match t.backend with
   | Provider_backend.Local_memory
-      { Provider_backend.decl_cache; shallow_decl_cache; _ } ->
+      {
+        Provider_backend.shallow_decl_cache;
+        linearization_cache;
+        decl_cache;
+        folded_class_cache;
+        reverse_naming_table_delta = _;
+        fixmes = _;
+        naming_db_path_ref = _;
+      } ->
     Provider_backend.Decl_cache.reset_telemetry decl_cache;
     Provider_backend.Shallow_decl_cache.reset_telemetry shallow_decl_cache;
+    Provider_backend.Linearization_cache.reset_telemetry linearization_cache;
+    Provider_backend.Folded_class_cache.reset_telemetry folded_class_cache;
     ()
   | _ -> ()

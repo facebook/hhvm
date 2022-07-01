@@ -40,24 +40,27 @@ class EmptyClass {}
 class EmptyClass2 {}
 
 // TEST: sizes of classes (including private props)
-class SimpleProps { // 19+16+16 = 51
-  private string $prop1 = "one"; // 3 (byte x char) + 16 (TypedValue bytes) = 19
+class SimpleProps { // 16+16+16 = 48
+  private string $prop1 = "one"; // 16 (TypedValue bytes) = 16 (static str)
   protected int $prop2 = 2; // 16
   public bool $prop3 = true; // 16
 }
 
 // TEST: sizes of arrays
 class SimpleArrays {
-  public varray $arrEmpty = varray[]; // 16 (tv) + 16 (ArrayData) = 32
-  public darray $arrMixed = darray[ // 32 (ArrayData) + 46 + 32 = 110
-    "somekey" => "someval", // 2 * (7 chars + 16 bytes object) = 46
-    321 => 3, // 16 * 2 = 32
+  public varray $arrEmpty = varray[]; // 16 (tv) static
+  public darray $arrMixed = darray[ // 16 (tv) static
+    "somekey" => "someval",
+    321 => 3,
   ];
-  public varray<int> $arrNums = varray[
-    2012,
-    2013,
-    2014
-  ]; // 32 + (16 * 3) = 80
+  public varray<int> $arrNums = varray[];
+  function __construct() {
+    $this->arrNums = varray[
+      2012,
+      2013,
+      rand(1, 2)
+    ]; // 32 + (16 * 3) = 80
+  }
 }
 
 // TEST: sizes of dynamic props
@@ -120,8 +123,8 @@ $myClass = new SimpleProps();              // ++
 __hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
-echo get_bytes('SimpleProps', $objs) == $ObjSize + 19 + 16 + 16 && // 83
-     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleProps', $objs), 51 + $ObjSize - 3) // String is static
+echo get_bytes('SimpleProps', $objs) == $ObjSize + 16 + 16 + 16 &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleProps', $objs), 48 + $ObjSize) // String is static
   ? "(GOOD) Bytes (props) works\n"
   : "(BAD) Bytes (props) failed: ".var_export($objs, true)."\n";
 $objs = null;
@@ -129,21 +132,21 @@ $myClass = new SimpleArrays();
 __hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
-echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 110 + 32 && // 254
-     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays', $objs), $ObjSize + (16 * 3)) // 3 Static Arrays
+echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 16 * 2  &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays', $objs), $ObjSize + 80 + 16 * 2)
   ? "(GOOD) Bytes (arrays) works\n"
   : "(BAD) Bytes (arrays) failed: ".var_export($objs, true)."\n";
 $objs = null;
 $myClass = new DynamicClass();
-$dynamic_field = 'abcd'; // 16 + 4
-$dynamic_field2 = 1234;  // 16 + 4 (dynamic properties - always string)
+$dynamic_field = 'abcd'; // 16
+$dynamic_field2 = rand(1234, 1235);  // 16 (dynamic properties - always converted to static str)
 $myClass->$dynamic_field = 1; // 16
 $myClass->$dynamic_field2 = 1; // 16
 __hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
-echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 32 && // 104
-     HH\Lib\Legacy_FIXME\eq(get_bytesd('DynamicClass', $objs), $ObjSize + 72 - 4 - 4)
+echo get_bytes('DynamicClass', $objs) == $ObjSize + 16 * 4 &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('DynamicClass', $objs), $ObjSize + 16 * 4)
   ? "(GOOD) Bytes (dynamic) works\n"
   : "(BAD) Bytes (dynamic) failed: ".var_export($objs, true)."\n";
 $objs = null;
@@ -163,29 +166,29 @@ __hhvm_intrinsics\launder_value($myClass);
 $MapSize = get_bytes('HH\Map', objprof_get_data());
 __hhvm_intrinsics\launder_value($myClass);
 $myClass = Map {
-  "abc" => 1, // 3 + 16 + 16 = 35
-  1 => "22", // 16 + 16 + 2 = 34
+  "abc" => 1, // 16 + 16 = 32
+  1 => getStr(2), // 16 + 16 + 2 = 34
   1234123 => 3 // 16 + 16 = 32
 };
 __hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
-echo get_bytes('HH\\Map', $objs) == $MapSize + 32 + 34 + 35 && // MapSize+101
-     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\\Map', $objs), $MapSize+101 - 2 - 3) // Static strings
+echo get_bytes('HH\\Map', $objs) == $MapSize + 32 + 34 + 32 &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\\Map', $objs), $MapSize + 32 + 34 + 32)
   ? "(GOOD) Bytes (Mixed Map) works\n"
   : "(BAD) Bytes (Mixed Map) failed: ".var_export($objs, true)."\n";
 $objs = null;
 
 // TEST: vector with int and string vals (Packed)
 $myClass = Vector {
-  "abc", // 3 + 16 = 19
+  "abc", // 16 = 16
   1, // 16
 };
 __hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
-echo get_bytes('HH\\Vector', $objs) == $ObjSize + 32 + 3 && // Vec+35
-     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\\Vector', $objs), $ObjSize + 32) // Static strings
+echo get_bytes('HH\\Vector', $objs) == $ObjSize + 32 &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\\Vector', $objs), $ObjSize + 32)
   ? "(GOOD) Bytes (Vector) works\n"
   : "(BAD) Bytes (Vector) failed: ".var_export($objs, true)."\n";
 $objs = null;

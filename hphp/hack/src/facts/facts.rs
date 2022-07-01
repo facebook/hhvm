@@ -112,17 +112,16 @@ pub struct Facts {
 }
 
 impl Facts {
-    pub fn to_json_value(&self, text: &[u8]) -> serde_json::Value {
-        let sha1sum = sha1(text);
+    pub fn to_json_value(&self, sha1sum: &str) -> serde_json::Value {
         let mut json = json!(&self);
         if let Some(m) = json.as_object_mut() {
-            m.insert(String::from("sha1sum"), json!(sha1sum));
+            m.insert("sha1sum".into(), json!(sha1sum));
         };
         json
     }
 
-    pub fn to_json(&self, pretty: bool, text: &[u8]) -> String {
-        let json = self.to_json_value(text);
+    pub fn to_json(&self, pretty: bool, sha1sum: &str) -> String {
+        let json = self.to_json_value(sha1sum);
         if pretty {
             serde_json::to_string_pretty(&json).expect("Could not serialize facts to JSON")
         } else {
@@ -590,7 +589,7 @@ mod tests {
         );
     }
 
-    fn fake_facts() -> Facts {
+    fn fake_facts() -> (Facts, String) {
         let mut types = TypeFactsByName::new();
         let mut base_types = StringSet::new();
         base_types.insert("bt3".into());
@@ -686,22 +685,23 @@ mod tests {
         );
         let mut modules = ModuleFactsByName::new();
         modules.insert(String::from("foo"), ModuleFacts {});
-        Facts {
+        let facts = Facts {
             constants: vec!["c1".into(), "c2".into()],
             file_attributes: BTreeMap::new(),
             functions: vec![],
             modules,
             types,
-        }
+        };
+        (facts, super::sha1(b"fake source text"))
     }
 
     #[test]
     fn round_trip_json() -> serde_json::Result<()> {
-        let f1 = fake_facts();
-        let ugly = f1.to_json(false, b"fake source text");
+        let (f1, sha1) = fake_facts();
+        let ugly = f1.to_json(false, &sha1);
         let f2 = serde_json::from_str(&ugly)?;
         assert_eq!(f1, f2);
-        let pretty = f1.to_json(true, b"fake source text");
+        let pretty = f1.to_json(true, &sha1);
         let f2 = serde_json::from_str(&pretty)?;
         assert_eq!(f1, f2);
         Ok(())
@@ -710,8 +710,9 @@ mod tests {
     #[test]
     fn to_json() {
         // test to_string_pretty()
+        let (facts, sha1) = fake_facts();
         assert_eq!(
-            fake_facts().to_json(true, b"some text"),
+            facts.to_json(true, &sha1),
             r#"{
   "constants": [
     "c1",
@@ -722,7 +723,7 @@ mod tests {
       "name": "foo"
     }
   ],
-  "sha1sum": "37aa63c77398d954473262e1a0057c1e632eda77",
+  "sha1sum": "883c01f3eb209c249f88908675c8632a04a817cf",
   "types": [
     {
       "baseTypes": [

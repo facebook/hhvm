@@ -18,7 +18,6 @@ oxidized = { path = "../../oxidized" }
 parser_core_types = { path = "../cargo/core_types" }
 positioned_full_trivia_parser = { path = "../api/cargo/positioned_full_trivia_parser" }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
-stack_limit = { path = "../../utils/stack_limit" }
 
 [build-dependencies]
 cxx-build = "1.0.64"

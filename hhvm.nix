@@ -69,6 +69,8 @@
 , zstd
 }:
 let
+  # Use gcc10 in Linux because fbthrift is not compatible with gcc 11+.
+  # For macOS, use the the default compiler, which should be clang.
   hhvmStdenv =
     if hostPlatform.isLinux
     then gcc10Stdenv

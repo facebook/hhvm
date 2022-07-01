@@ -395,7 +395,7 @@ impl Display for FmtLiteralId<'_> {
     }
 }
 
-pub(crate) struct FmtLoc<'a>(pub(crate) &'a SrcLoc);
+pub struct FmtLoc<'a>(pub &'a SrcLoc);
 
 impl Display for FmtLoc<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -455,8 +455,12 @@ pub(crate) struct FmtQuotedStringId<'a, 'b>(
 impl Display for FmtQuotedStringId<'_, '_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtQuotedStringId(id, strings) = *self;
-        let name = strings.lookup(id);
-        FmtEscapedString(name.as_bytes()).fmt(f)
+        if id == UnitStringId::NONE {
+            write!(f, "none")
+        } else {
+            let name = strings.lookup(id);
+            FmtEscapedString(name.as_bytes()).fmt(f)
+        }
     }
 }
 

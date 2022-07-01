@@ -242,6 +242,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             is_readonly_prop: prop_flags.is_readonly(),
             supports_dynamic_type: false,
             needs_init: prop_flags.needs_init(),
+            safe_global_variable: false,
         };
         let elt = FoldedElement {
             origin: self.child.name.id(),
@@ -278,6 +279,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             is_readonly_prop: prop_flags.is_readonly(),
             supports_dynamic_type: false,
             needs_init: false,
+            safe_global_variable: prop_flags.is_safe_global_variable(),
         };
         let elt = FoldedElement {
             origin: self.child.name.id(),
@@ -316,6 +318,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             is_readonly_prop: false,
             supports_dynamic_type: meth_flags.supports_dynamic_type(),
             needs_init: false,
+            safe_global_variable: false,
         };
         let elt = FoldedElement {
             origin: cls,
@@ -360,6 +363,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 is_readonly_prop: false,
                 supports_dynamic_type: false,
                 needs_init: false,
+                safe_global_variable: false,
             };
             FoldedElement {
                 origin: self.child.name.id(),

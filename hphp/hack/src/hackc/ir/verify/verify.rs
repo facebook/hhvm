@@ -1,4 +1,3 @@
-#![allow(unused_mut)]
 // Copyright (c) Facebook, Inc. and its affiliates.
 //
 // This source code is licensed under the MIT license found in the
@@ -7,6 +6,7 @@
 //! Verifier for HackIR.  This traverses the HackIR structures and makes sure
 //! that the required invariants still hold true.
 
+use analysis::{PredecessorFlags, Predecessors};
 use core::{
     instr::{HasEdges, HasOperands, Special, Terminator},
     string_intern::StringInterner,
@@ -19,14 +19,9 @@ use std::collections::hash_map::Entry;
 type Result<T = ()> = anyhow::Result<T>;
 
 /// Flags controlling the details of verification.
+#[derive(Default)]
 pub struct Flags {
-    // Currently empty.
-}
-
-impl Flags {
-    pub fn new() -> Self {
-        Self {}
-    }
+    pub allow_critical_edges: bool,
 }
 
 /// Asserts that a condition is true and reports if it's not.
@@ -60,15 +55,18 @@ struct VerifyFunc<'a, 'b> {
     func: &'b Func<'a>,
     #[allow(dead_code)]
     flags: &'b Flags,
+    predecessors: Predecessors,
     strings: &'b StringInterner<'a>,
 }
 
 impl<'a, 'b> VerifyFunc<'a, 'b> {
     fn new(func: &'b Func<'a>, flags: &'b Flags, strings: &'b StringInterner<'a>) -> Self {
+        let predecessors = analysis::compute_predecessor_blocks(func, PredecessorFlags::default());
         VerifyFunc {
             dominated_iids: Default::default(),
             func,
             flags,
+            predecessors,
             strings,
         }
     }
@@ -93,6 +91,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
             bid
         );
 
+        // This requires RPO to work properly!
         let mut dominated_iids = std::mem::take(self.dominated_iids.entry(bid).or_default());
         for &iid in &block.params {
             dominated_iids.insert(iid);
@@ -153,6 +152,24 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
             }
         }
         self.dominated_iids.insert(bid, dominated_iids);
+
+        if !self.flags.allow_critical_edges {
+            // If we have multiple successors then our successors must all have
+            // only a single predecessor.
+            let i = self.func.terminator(bid);
+            let successors = i.edges();
+            if successors.len() > 1 {
+                for t in successors {
+                    check!(
+                        self,
+                        self.predecessors[t].len() == 1,
+                        "Block {bid} successor {t} is a critical edge! ({bid} has {} successors, {t} has {} predecessors)",
+                        successors.len(),
+                        self.predecessors[t].len()
+                    );
+                }
+            }
+        }
 
         Ok(())
     }
@@ -266,10 +283,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
         check!(
             self,
             expected_args == args,
-            "iid {} is a jump with {} args to block expecting {} args",
-            iid,
-            args,
-            expected_args
+            "iid {iid} is a jump with {args} args to block {bid} expecting {expected_args} args",
         );
 
         Ok(())

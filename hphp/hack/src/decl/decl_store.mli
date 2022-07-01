@@ -51,3 +51,5 @@ type decl_store = {
 val get : unit -> decl_store
 
 val set : decl_store -> unit
+
+val shared_memory_store : decl_store

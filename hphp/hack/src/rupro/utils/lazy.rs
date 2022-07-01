@@ -6,7 +6,8 @@
 //! `once_cell::unsync::Lazy` equivalent that takes an arbitrary closure,
 //! instead of a function pointer.
 
-use std::cell::{Cell, UnsafeCell};
+use std::cell::Cell;
+use std::cell::UnsafeCell;
 
 /// A lazy value that accepts a `dyn FnOnce`.
 pub struct Lazy<'a, T> {

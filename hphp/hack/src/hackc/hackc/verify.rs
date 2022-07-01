@@ -10,22 +10,24 @@ use itertools::Itertools;
 use log::info;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
-use oxidized::relative_path::{Prefix, RelativePath};
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use regex::Regex;
-use std::{
-    cell::RefCell,
-    collections::HashMap,
-    fmt::{self, Display},
-    fs,
-    path::{Path, PathBuf},
-    sync::{
-        atomic::{AtomicBool, AtomicUsize, Ordering},
-        Arc,
-    },
-    time::{Duration, Instant},
-};
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::fmt::Display;
+use std::fmt::{self};
+use std::fs;
+use std::path::Path;
+use std::path::PathBuf;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
+use std::sync::Arc;
+use std::time::Duration;
+use std::time::Instant;
 use thiserror::Error;
 
 // Several of these would be better as the underlying error (anyhow::Error or

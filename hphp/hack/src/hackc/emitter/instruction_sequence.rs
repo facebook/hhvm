@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Slice;
-use hhbc::{Instruct, Pseudo};
+use hhbc::Instruct;
+use hhbc::Pseudo;
 
 /// The various from_X functions below take some kind of AST
 /// (expression, statement, etc.) and produce what is logically a
@@ -162,15 +163,50 @@ impl<'i, 'a> Iterator for ListIterMut<'i, 'a> {
 
 pub mod instr {
     use crate::InstrSeq;
-    use ffi::{Slice, Str};
-    use hhbc::{
-        AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, Dummy,
-        FCallArgs, FatalOp, FloatBits, FunctionName, IncDecOp, InitPropOp, Instruct,
-        IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode,
-        MemberKey, MethodName, NumParams, OODeclExistsOp, ObjMethodOp, Opcode, PropName, Pseudo,
-        QueryMOp, ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SrcLoc,
-        StackIndex, SwitchKind, TypeStructResolveOp,
-    };
+    use ffi::Slice;
+    use ffi::Str;
+    use hhbc::AdataId;
+    use hhbc::BareThisOp;
+    use hhbc::ClassName;
+    use hhbc::ClassNum;
+    use hhbc::CollectionType;
+    use hhbc::ConstName;
+    use hhbc::ContCheckOp;
+    use hhbc::Dummy;
+    use hhbc::FCallArgs;
+    use hhbc::FatalOp;
+    use hhbc::FloatBits;
+    use hhbc::FunctionName;
+    use hhbc::IncDecOp;
+    use hhbc::InitPropOp;
+    use hhbc::Instruct;
+    use hhbc::IsLogAsDynamicCallOp;
+    use hhbc::IsTypeOp;
+    use hhbc::IterArgs;
+    use hhbc::IterId;
+    use hhbc::Label;
+    use hhbc::Local;
+    use hhbc::LocalRange;
+    use hhbc::MOpMode;
+    use hhbc::MemberKey;
+    use hhbc::MethodName;
+    use hhbc::NumParams;
+    use hhbc::OODeclExistsOp;
+    use hhbc::ObjMethodOp;
+    use hhbc::Opcode;
+    use hhbc::PropName;
+    use hhbc::Pseudo;
+    use hhbc::QueryMOp;
+    use hhbc::ReadonlyOp;
+    use hhbc::RepoAuthType;
+    use hhbc::SetOpOp;
+    use hhbc::SetRangeOp;
+    use hhbc::SilenceOp;
+    use hhbc::SpecialClsRef;
+    use hhbc::SrcLoc;
+    use hhbc::StackIndex;
+    use hhbc::SwitchKind;
+    use hhbc::TypeStructResolveOp;
 
     // This macro builds helper functions for each of the given opcodes.  See
     // the definition of define_instr_seq_helpers for details.
@@ -534,7 +570,8 @@ impl<'a> InstrSeq<'a> {
 mod tests {
     use super::*;
     use ffi::Str;
-    use instr::{instr, instrs};
+    use instr::instr;
+    use instr::instrs;
     use pretty_assertions::assert_eq;
 
     #[test]

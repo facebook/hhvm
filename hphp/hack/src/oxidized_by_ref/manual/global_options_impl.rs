@@ -3,7 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{gen::global_options::GlobalOptions, i_set, s_map, s_set};
+use crate::gen::global_options::GlobalOptions;
+use crate::i_set;
+use crate::s_map;
+use crate::s_set;
 
 const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_experimental_features: s_set::SSet::empty(),

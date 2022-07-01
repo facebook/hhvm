@@ -7,19 +7,19 @@
 use anyhow::Result;
 use datastore::NonEvictingStore;
 use fbinit::FacebookInit;
-use hackrs::{
-    decl_parser::DeclParser,
-    folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
-    shallow_decl_provider::LazyShallowDeclProvider,
-};
-use hackrs_test_utils::{
-    registrar::DependencyGraph, serde_store::StoreOpts::Unserialized,
-    store::make_shallow_decl_store,
-};
+use hackrs::decl_parser::DeclParser;
+use hackrs::folded_decl_provider::FoldedDeclProvider;
+use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
+use hackrs::shallow_decl_provider::LazyShallowDeclProvider;
+use hackrs_test_utils::registrar::DependencyGraph;
+use hackrs_test_utils::serde_store::StoreOpts::Unserialized;
+use hackrs_test_utils::store::make_shallow_decl_store;
 use hh24_test::TestRepo;
 use naming_provider::SqliteNamingTable;
 use pos::RelativePathCtx;
-use std::{collections::BTreeMap, path::PathBuf, sync::Arc};
+use std::collections::BTreeMap;
+use std::path::PathBuf;
+use std::sync::Arc;
 use tempdir::TempDir;
 use ty::reason::BReason;
 

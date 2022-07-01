@@ -1,15 +1,30 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-use crate::{string_intern::StringInterner, UnitStringId};
+use crate::string_intern::StringInterner;
+use crate::UnitStringId;
 use newtype::newtype_int;
 
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
-pub use hhbc::{
-    BareThisOp, ClassishKind, CollectionType, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp,
-    InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterId, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp,
-    SetOpOp, SpecialClsRef, SrcLoc, TypeStructResolveOp,
-};
+pub use hhbc::BareThisOp;
+pub use hhbc::ClassishKind;
+pub use hhbc::CollectionType;
+pub use hhbc::ContCheckOp;
+pub use hhbc::FCallArgsFlags;
+pub use hhbc::FatalOp;
+pub use hhbc::IncDecOp;
+pub use hhbc::InitPropOp;
+pub use hhbc::IsLogAsDynamicCallOp;
+pub use hhbc::IsTypeOp;
+pub use hhbc::IterId;
+pub use hhbc::MOpMode;
+pub use hhbc::ObjMethodOp;
+pub use hhbc::QueryMOp;
+pub use hhbc::ReadonlyOp;
+pub use hhbc::SetOpOp;
+pub use hhbc::SpecialClsRef;
+pub use hhbc::SrcLoc;
+pub use hhbc::TypeStructResolveOp;
 
 macro_rules! interned_hhbc_id {
     ($name: ident, $hhbc: ident) => {

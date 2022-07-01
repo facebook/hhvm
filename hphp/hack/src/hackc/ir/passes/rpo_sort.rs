@@ -4,8 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use analysis::rpo::compute_rpo;
-use core::{BlockId, Func};
-use newtype::{HasNone, IdVec};
+use core::BlockId;
+use core::Func;
+use newtype::HasNone;
+use newtype::IdVec;
 
 /// Sort func's blocks using reverse postorder DFS, renumbering successor edges as needed.
 ///
@@ -133,9 +135,13 @@ fn block_order_matches<'a>(func: &Func<'a>, order: &[BlockId]) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use core::{Block, BlockId};
-    use hash::{HashMap, HashSet};
-    use rand::{seq::SliceRandom, thread_rng, Rng};
+    use core::Block;
+    use core::BlockId;
+    use hash::HashMap;
+    use hash::HashSet;
+    use rand::seq::SliceRandom;
+    use rand::thread_rng;
+    use rand::Rng;
 
     fn make_dummy_blocks(names: &[&str]) -> IdVec<BlockId, Block> {
         IdVec::new_from_vec(

@@ -6,7 +6,8 @@ use crate::inference_env::InferenceEnv;
 use crate::subtyping::Subtyper;
 use crate::tast::SavedEnv;
 use crate::typaram_env::TyparamEnv;
-use crate::typing::env::typing_env_decls::{TEnvDecls, TEnvDeclsOracle};
+use crate::typing::env::typing_env_decls::TEnvDecls;
+use crate::typing::env::typing_env_decls::TEnvDeclsOracle;
 use crate::typing::env::typing_genv::TGEnv;
 use crate::typing::env::typing_lenv::TLEnv;
 use crate::typing::env::typing_local_types::Local;
@@ -20,10 +21,13 @@ use pos::FunName;
 use pos::TypeName;
 use std::cell::RefCell;
 use std::rc::Rc;
-use ty::local::{ParamMode, Ty, Variance};
+use ty::local::ParamMode;
+use ty::local::Ty;
+use ty::local::Variance;
 use ty::local_error::TypingError;
 use ty::reason::Reason;
-use utils::core::{IdentGen, LocalId};
+use utils::core::IdentGen;
+use utils::core::LocalId;
 
 /// The main typing environment.
 #[derive(Debug)]

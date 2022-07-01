@@ -6,7 +6,8 @@
 pub use analysis;
 pub use core::*;
 pub use passes;
-pub use print::{self, print_unit};
+pub use print::print_unit;
+pub use print::{self};
 pub use verify;
 
 #[cfg(test)]

@@ -11,17 +11,15 @@ mod compiler_ffi_impl;
 use anyhow::Result;
 use compile::EnvFlags;
 use cxx::CxxString;
-use decl_provider::{
-    external::{ExternalDeclProvider, ProviderFunc},
-    DeclProvider,
-};
+use decl_provider::external::ExternalDeclProvider;
+use decl_provider::external::ProviderFunc;
+use decl_provider::DeclProvider;
 use facts_rust as facts;
 use hhbc::hackc_unit;
-use oxidized::{
-    decl_parser_options,
-    file_info::NameType,
-    relative_path::{Prefix, RelativePath},
-};
+use oxidized::decl_parser_options;
+use oxidized::file_info::NameType;
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;

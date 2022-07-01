@@ -3,16 +3,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::{
-    hash::Hasher,
-    io::{BufRead, ErrorKind, Read},
-    path::{Path, PathBuf},
-    process::{Child, Command, Stdio},
-};
+use std::hash::Hasher;
+use std::io::BufRead;
+use std::io::ErrorKind;
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
+use std::process::Child;
+use std::process::Command;
+use std::process::Stdio;
 
 use itertools::Itertools;
-use rayon::iter::{ParallelBridge, ParallelIterator};
-use structopt::{clap::arg_enum, StructOpt};
+use rayon::iter::ParallelBridge;
+use rayon::iter::ParallelIterator;
+use structopt::clap::arg_enum;
+use structopt::StructOpt;
 
 use framing::LineFeedUnescaper;
 

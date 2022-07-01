@@ -6,11 +6,22 @@
 use pos::TypeName;
 use std::collections::BTreeMap;
 use ty::decl::subst::Subst;
-use ty::decl::{
-    AbstractTypeconst, ClassConst, ConcreteTypeconst, FunParam, FunType, PossiblyEnforcedTy,
-    ShapeFieldType, TaccessType, Tparam, TrefinementType, Ty, Ty_, TypeConst, TypeConstRef,
-    Typeconst, WhereConstraint,
-};
+use ty::decl::AbstractTypeconst;
+use ty::decl::ClassConst;
+use ty::decl::ConcreteTypeconst;
+use ty::decl::FunParam;
+use ty::decl::FunType;
+use ty::decl::PossiblyEnforcedTy;
+use ty::decl::ShapeFieldType;
+use ty::decl::TaccessType;
+use ty::decl::Tparam;
+use ty::decl::TrefinementType;
+use ty::decl::Ty;
+use ty::decl::Ty_;
+use ty::decl::TypeConst;
+use ty::decl::TypeConstRef;
+use ty::decl::Typeconst;
+use ty::decl::WhereConstraint;
 use ty::reason::Reason;
 
 // note(sf, 2022-02-14): c.f. `Decl_subst`, `Decl_instantiate`
@@ -212,7 +223,8 @@ impl<'a, R: Reason> Substitution<'a, R> {
     }
 
     fn instantiate_typeconst_ref(&self, tr: &TypeConstRef<Ty<R>>) -> TypeConstRef<Ty<R>> {
-        use TypeConstRef::{Exact, Loose};
+        use TypeConstRef::Exact;
+        use TypeConstRef::Loose;
         match tr {
             Exact(ty) => Exact(self.instantiate(ty)),
             Loose(lo, hi) => Loose(

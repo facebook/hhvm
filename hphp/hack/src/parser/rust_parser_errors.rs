@@ -5,29 +5,37 @@
 
 use itertools::Itertools;
 use std::collections::BTreeMap;
-use std::{matches, str::FromStr};
+use std::matches;
+use std::str::FromStr;
 
 use strum::IntoEnumIterator;
-use strum_macros::{Display, EnumIter, EnumString, IntoStaticStr};
+use strum_macros::Display;
+use strum_macros::EnumIter;
+use strum_macros::EnumString;
+use strum_macros::IntoStaticStr;
 
-use hash::{HashMap, HashSet};
+use hash::HashMap;
+use hash::HashSet;
 use naming_special_names_rust as sn;
 use oxidized::parser_options::ParserOptions;
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText,
-    lexable_token::LexableToken,
-    syntax_by_ref::{
-        positioned_syntax::PositionedSyntax,
-        positioned_token::PositionedToken,
-        positioned_value::PositionedValue,
-        syntax::Syntax,
-        syntax_variant_generated::{ListItemChildren, SyntaxVariant, SyntaxVariant::*},
-    },
-    syntax_error::{self as errors, Error, ErrorType, LvalRoot, SyntaxError, SyntaxQuickfix},
-    syntax_trait::SyntaxTrait,
-    syntax_tree::SyntaxTree,
-    token_kind::TokenKind,
-};
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax_by_ref::positioned_syntax::PositionedSyntax;
+use parser_core_types::syntax_by_ref::positioned_token::PositionedToken;
+use parser_core_types::syntax_by_ref::positioned_value::PositionedValue;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::ListItemChildren;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant::*;
+use parser_core_types::syntax_error::Error;
+use parser_core_types::syntax_error::ErrorType;
+use parser_core_types::syntax_error::LvalRoot;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::SyntaxQuickfix;
+use parser_core_types::syntax_error::{self as errors};
+use parser_core_types::syntax_trait::SyntaxTrait;
+use parser_core_types::syntax_tree::SyntaxTree;
+use parser_core_types::token_kind::TokenKind;
 
 use hh_autoimport_rust as hh_autoimport;
 
@@ -423,8 +431,10 @@ fn syntax_to_list<'a>(
     include_separators: bool,
     node: S<'a>,
 ) -> impl DoubleEndedIterator<Item = S<'a>> {
-    use itertools::Either::{Left, Right};
-    use std::iter::{empty, once};
+    use itertools::Either::Left;
+    use itertools::Either::Right;
+    use std::iter::empty;
+    use std::iter::once;
     let on_list_item =
         move |x: &'a ListItemChildren<'_, PositionedToken<'_>, PositionedValue<'_>>| {
             if include_separators {
@@ -466,7 +476,8 @@ where
 }
 
 fn attr_spec_to_node_list<'a>(node: S<'a>) -> impl DoubleEndedIterator<Item = S<'a>> {
-    use itertools::Either::{Left, Right};
+    use itertools::Either::Left;
+    use itertools::Either::Right;
     let f = |attrs| Left(syntax_to_list_no_separators(attrs));
     match &node.children {
         AttributeSpecification(x) => f(&x.attributes),
@@ -1447,7 +1458,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     // Don't allow a promoted parameter in a constructor if the class
     // already has a property with the same name. Return the clashing name found.
     fn class_constructor_param_promotion_clash(&self, node: S<'a>) -> Option<&str> {
-        use itertools::Either::{Left, Right};
+        use itertools::Either::Left;
+        use itertools::Either::Right;
         let class_elts = |node: Option<S<'a>>| match node.map(|x| &x.children) {
             Some(ClassishDeclaration(cd)) => match &cd.body.children {
                 ClassishBody(cb) => Left(syntax_to_list_no_separators(&cb.elements)),

@@ -3,10 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{folded, shallow, ty::*};
+use super::folded;
+use super::shallow;
+use super::ty::*;
 use crate::reason::Reason;
 use oxidized_by_ref::ast::Id;
-use pos::{Pos, ToOxidized};
+use pos::Pos;
+use pos::ToOxidized;
 
 use oxidized_by_ref as obr;
 
@@ -137,7 +140,8 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
     type Output = obr::typing_defs::Ty_<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use obr::t_shape_map::{TShapeField, TShapeMap};
+        use obr::t_shape_map::TShapeField;
+        use obr::t_shape_map::TShapeMap;
         use obr::typing_defs;
         match self {
             Ty_::Tthis => typing_defs::Ty_::Tthis,

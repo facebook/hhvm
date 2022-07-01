@@ -9,8 +9,10 @@
  */
 use cxx::CxxString;
 use ocamlrep::rc::RcOc;
-use oxidized::relative_path::{Prefix, RelativePath};
-use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::source_text::SourceText;
 use std::path::PathBuf;
 
 #[cxx::bridge]

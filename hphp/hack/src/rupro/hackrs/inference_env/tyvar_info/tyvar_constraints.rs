@@ -6,10 +6,10 @@
 #![allow(dead_code)]
 
 use im::HashSet;
-use ty::{
-    local::{Ty, Tyvar, Variance},
-    reason::Reason,
-};
+use ty::local::Ty;
+use ty::local::Tyvar;
+use ty::local::Variance;
+use ty::reason::Reason;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TyvarConstraints<R: Reason> {

@@ -4,11 +4,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::{aast, pos::Pos};
-use parser_core_types::{
-    syntax_error,
-    syntax_error::{Error as ErrorMsg, SyntaxError},
-};
+use oxidized::aast;
+use oxidized::pos::Pos;
+use parser_core_types::syntax_error;
+use parser_core_types::syntax_error::Error as ErrorMsg;
+use parser_core_types::syntax_error::SyntaxError;
 
 struct Checker {
     errors: Vec<SyntaxError>,

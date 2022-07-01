@@ -5,13 +5,15 @@
 
 use crate::naming;
 use crate::parsing_error::ParsingError;
-use aast_parser::{AastParser, Error as ParserError};
+use aast_parser::AastParser;
+use aast_parser::Error as ParserError;
 use lint_rust::LintError;
 use ocamlrep::rc::RcOc;
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText, source_text::SourceText, syntax_error::SyntaxError,
-};
-use pos::{RelativePath, RelativePathCtx};
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_error::SyntaxError;
+use pos::RelativePath;
+use pos::RelativePathCtx;
 use rust_aast_parser_types::Env as ParserEnv;
 use std::fs;
 use std::sync::Arc;

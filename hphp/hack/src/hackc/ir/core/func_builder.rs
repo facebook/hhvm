@@ -3,10 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    instr::{HasOperands, Special},
-    Block, BlockId, Func, Instr, InstrId, InstrIdMap, Literal, LocId, SrcLoc, ValueId,
-};
+use crate::instr::HasOperands;
+use crate::instr::Special;
+use crate::Block;
+use crate::BlockId;
+use crate::Func;
+use crate::Instr;
+use crate::InstrId;
+use crate::InstrIdMap;
+use crate::Literal;
+use crate::LocId;
+use crate::SrcLoc;
+use crate::ValueId;
 use hash::HashMap;
 
 pub struct FuncBuilder<'a> {

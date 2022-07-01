@@ -6,21 +6,28 @@
 use crate::inference_env::InferenceEnv;
 use crate::subtyping::oracle::Oracle;
 use crate::subtyping::solve;
-use crate::subtyping::visited_goals::{GoalResult, VisitedGoals};
+use crate::subtyping::visited_goals::GoalResult;
+use crate::subtyping::visited_goals::VisitedGoals;
 use crate::typaram_env::TyparamEnv;
 use crate::typing::typing_error::Result;
 use im::HashSet;
 use itertools::izip;
 use oxidized::ast_defs::Variance;
-use pos::{Symbol, TypeName};
+use pos::Symbol;
+use pos::TypeName;
 use std::ops::Deref;
 use std::rc::Rc;
-use ty::{
-    local::{Exact, FunParam, FunType, Prim, Ty, Ty_, Tyvar},
-    local_error::{Primary, TypingError},
-    prop::Prop,
-    reason::Reason,
-};
+use ty::local::Exact;
+use ty::local::FunParam;
+use ty::local::FunType;
+use ty::local::Prim;
+use ty::local::Ty;
+use ty::local::Ty_;
+use ty::local::Tyvar;
+use ty::local_error::Primary;
+use ty::local_error::TypingError;
+use ty::prop::Prop;
+use ty::reason::Reason;
 
 /// Some read-only configuration that influences normalization.
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
@@ -723,10 +730,9 @@ mod tests {
     use crate::subtyping::oracle::NoClasses;
     use oxidized::typing_defs_flags::FunTypeFlags;
     use pos::Pos;
-    use ty::{
-        prop::{Cstr, PropF},
-        reason::NReason,
-    };
+    use ty::prop::Cstr;
+    use ty::prop::PropF;
+    use ty::reason::NReason;
     use utils::core::IdentGen;
 
     fn default_env<R: Reason>() -> NormalizeEnv<R> {

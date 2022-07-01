@@ -7,8 +7,10 @@
 //
 
 use crate::token_kind::TokenKind;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use std::{borrow::Cow, cmp::Ordering};
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
+use std::borrow::Cow;
+use std::cmp::Ordering;
 
 // many errors are static strings, but not all of them
 pub type Error = Cow<'static, str>;

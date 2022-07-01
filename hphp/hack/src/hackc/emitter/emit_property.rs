@@ -2,20 +2,29 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{emit_attribute, emit_expression};
-use env::{emitter::Emitter, Env};
-use error::{Error, Result};
+use crate::emit_attribute;
+use crate::emit_expression;
+use env::emitter::Emitter;
+use env::Env;
+use error::Error;
+use error::Result;
 use ffi::Maybe::*;
-use hhbc::{
-    hhas_property::HhasProperty,
-    hhas_type::{Constraint, HhasTypeInfo},
-    InitPropOp, TypedValue, Visibility,
-};
+use hhbc::hhas_property::HhasProperty;
+use hhbc::hhas_type::Constraint;
+use hhbc::hhas_type::HhasTypeInfo;
+use hhbc::InitPropOp;
+use hhbc::TypedValue;
+use hhbc::Visibility;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::{instr, InstrSeq};
-use naming_special_names_rust::{pseudo_consts, user_attributes as ua};
-use oxidized::{aast_defs, ast, ast_defs, doc_comment};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
+use naming_special_names_rust::pseudo_consts;
+use naming_special_names_rust::user_attributes as ua;
+use oxidized::aast_defs;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::doc_comment;
 
 pub struct FromAstArgs<'ast> {
     pub user_attributes: &'ast [ast::UserAttribute],

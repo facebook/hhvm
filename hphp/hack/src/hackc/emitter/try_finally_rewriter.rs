@@ -2,14 +2,25 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{emit_expression, emit_fatal, reified_generics_helpers as reified};
+use crate::emit_expression;
+use crate::emit_fatal;
+use crate::reified_generics_helpers as reified;
 use bitflags::bitflags;
 use emit_pos::emit_pos;
-use env::{emitter::Emitter, jump_targets as jt, Env, LocalGen};
+use env::emitter::Emitter;
+use env::jump_targets as jt;
+use env::Env;
+use env::LocalGen;
 use error::Result;
-use hhbc::{Instruct, IsTypeOp, IterId, Label, Opcode, Pseudo};
+use hhbc::Instruct;
+use hhbc::IsTypeOp;
+use hhbc::IterId;
+use hhbc::Label;
+use hhbc::Opcode;
+use hhbc::Pseudo;
 use indexmap::IndexSet;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use oxidized::pos::Pos;
 use std::collections::BTreeMap;
 

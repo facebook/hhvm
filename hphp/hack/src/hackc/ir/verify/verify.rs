@@ -6,14 +6,27 @@
 //! Verifier for HackIR.  This traverses the HackIR structures and makes sure
 //! that the required invariants still hold true.
 
-use analysis::{PredecessorFlags, Predecessors};
-use core::{
-    instr::{HasEdges, HasOperands, Special, Terminator},
-    string_intern::StringInterner,
-    Block, BlockId, BlockIdMap, FullInstrId, Func, Instr, InstrId, InstrIdSet, ValueId,
-};
+use analysis::PredecessorFlags;
+use analysis::Predecessors;
+use core::instr::HasEdges;
+use core::instr::HasOperands;
+use core::instr::Special;
+use core::instr::Terminator;
+use core::string_intern::StringInterner;
+use core::Block;
+use core::BlockId;
+use core::BlockIdMap;
+use core::FullInstrId;
+use core::Func;
+use core::Instr;
+use core::InstrId;
+use core::InstrIdSet;
+use core::ValueId;
 use itertools::Itertools;
-use print::{DisplayFunc, FmtBid, FmtRawVid, FmtVid};
+use print::DisplayFunc;
+use print::FmtBid;
+use print::FmtRawVid;
+use print::FmtVid;
 use std::collections::hash_map::Entry;
 
 type Result<T = ()> = anyhow::Result<T>;

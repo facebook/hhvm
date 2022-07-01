@@ -6,7 +6,8 @@
 use std::cmp::Ordering;
 
 use crate::aast_defs::Tprim;
-use crate::ast_defs::{Id, ParamKind};
+use crate::ast_defs::Id;
+use crate::ast_defs::ParamKind;
 use crate::ident::Ident;
 use crate::pos::Pos;
 use crate::typing_defs_core::*;

@@ -2,7 +2,8 @@
 
 use crate::cxx_ffi;
 use anyhow::Result;
-use std::{borrow::Cow, fs};
+use std::borrow::Cow;
+use std::fs;
 
 /// A machine can belong to a tier, which can overwrite
 /// various settings, even if they are set in the same

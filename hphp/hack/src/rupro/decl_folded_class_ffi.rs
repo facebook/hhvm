@@ -4,20 +4,31 @@
 
 use hackrs::decl_parser::DeclParser;
 use hackrs::folded_decl_provider::FoldedDeclProvider;
-use hackrs_test_utils::serde_store::{Compression, StoreOpts};
-use hackrs_test_utils::store::{make_shallow_decl_store, populate_shallow_decl_store};
+use hackrs_test_utils::serde_store::Compression;
+use hackrs_test_utils::serde_store::StoreOpts;
+use hackrs_test_utils::store::make_shallow_decl_store;
+use hackrs_test_utils::store::populate_shallow_decl_store;
 use indicatif::ParallelProgressIterator;
 use jwalk::WalkDir;
-use ocamlrep_ocamlpool::{ocaml_ffi_arena_result, ocaml_ffi_with_arena, Bump};
+use ocamlrep_ocamlpool::ocaml_ffi_arena_result;
+use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
+use ocamlrep_ocamlpool::Bump;
 use oxidized::parser_options::ParserOptions;
 use oxidized_by_ref::decl_defs::DeclClassType;
-use pos::{Prefix, RelativePath, RelativePathCtx, ToOxidized, TypeName};
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use pos::Prefix;
+use pos::RelativePath;
+use pos::RelativePathCtx;
+use pos::ToOxidized;
+use pos::TypeName;
+use rayon::iter::IntoParallelIterator;
+use rayon::iter::ParallelIterator;
 use std::cmp;
 use std::collections::BTreeMap;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 use std::sync::Arc;
-use ty::decl::{folded::FoldedClass, shallow};
+use ty::decl::folded::FoldedClass;
+use ty::decl::shallow;
 use ty::reason::BReason;
 
 fn find_hack_files(path: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {

@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use oxidized::decl_parser_options::DeclParserOptions;
-use sha1::{Digest, Sha1};
+use sha1::Digest;
+use sha1::Sha1;
 use std::collections::BTreeMap;
 use std::path::Path;
 

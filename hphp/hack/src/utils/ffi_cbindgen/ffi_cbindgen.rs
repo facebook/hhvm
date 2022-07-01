@@ -4,7 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Result;
-use cbindgen::{Builder, Config, EnumConfig, Language, MacroExpansionConfig, RenameRule};
+use cbindgen::Builder;
+use cbindgen::Config;
+use cbindgen::EnumConfig;
+use cbindgen::Language;
+use cbindgen::MacroExpansionConfig;
+use cbindgen::RenameRule;
 use clap::Parser;
 use std::path::PathBuf;
 

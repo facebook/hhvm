@@ -4,13 +4,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{
-    context::Context, gen_helper::*, generator::Generator, syn_helper::*, visitor_trait_generator,
-};
+use super::context::Context;
+use super::gen_helper::*;
+use super::generator::Generator;
+use super::syn_helper::*;
+use super::visitor_trait_generator;
 use crate::impl_generator;
-use anyhow::{anyhow, Result};
-use proc_macro2::{Ident, TokenStream};
-use quote::{format_ident, quote};
+use anyhow::anyhow;
+use anyhow::Result;
+use proc_macro2::Ident;
+use proc_macro2::TokenStream;
+use quote::format_ident;
+use quote::quote;
 
 pub trait NodeImpl {
     fn filename() -> String;
@@ -106,7 +111,8 @@ pub trait NodeImpl {
     }
 
     fn gen_recurse_body(ctx: &Context<'_>, ty_name: &str, ty: &syn::Item) -> Result<TokenStream> {
-        use syn::{Item::*, *};
+        use syn::Item::*;
+        use syn::*;
         match ty {
             Struct(ItemStruct { fields, .. }) => Self::gen_recurse_struct_body(ctx, fields),
             Enum(ItemEnum { variants, .. }) => Self::gen_recurse_enum_body(ctx, ty_name, variants),

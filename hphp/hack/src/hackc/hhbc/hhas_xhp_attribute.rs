@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::{ast, pos::Pos};
+use oxidized::ast;
+use oxidized::pos::Pos;
 
 #[derive(Debug)]
 pub struct HhasXhpAttribute<'a> {

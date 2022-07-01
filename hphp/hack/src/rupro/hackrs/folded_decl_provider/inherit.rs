@@ -3,19 +3,37 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{subst::Substitution, Result};
-use depgraph_api::{DeclName, DepGraphWriter, DependencyName};
+use super::subst::Substitution;
+use super::Result;
+use depgraph_api::DeclName;
+use depgraph_api::DepGraphWriter;
+use depgraph_api::DependencyName;
 use indexmap::map::Entry;
-use pos::{
-    ClassConstNameIndexMap, MethodName, MethodNameIndexMap, Pos, PropNameIndexMap,
-    TypeConstNameIndexMap, TypeName, TypeNameIndexMap,
-};
+use pos::ClassConstNameIndexMap;
+use pos::MethodName;
+use pos::MethodNameIndexMap;
+use pos::Pos;
+use pos::PropNameIndexMap;
+use pos::TypeConstNameIndexMap;
+use pos::TypeName;
+use pos::TypeNameIndexMap;
 use std::sync::Arc;
-use ty::decl::{
-    folded::Constructor, subst::Subst, ty::ConsistentKind, AbstractTypeconst, Abstraction,
-    CeVisibility, ClassConst, ClassConstKind, ClassishKind, FoldedClass, FoldedElement,
-    ShallowClass, SubstContext, Ty, TypeConst, Typeconst,
-};
+use ty::decl::folded::Constructor;
+use ty::decl::subst::Subst;
+use ty::decl::ty::ConsistentKind;
+use ty::decl::AbstractTypeconst;
+use ty::decl::Abstraction;
+use ty::decl::CeVisibility;
+use ty::decl::ClassConst;
+use ty::decl::ClassConstKind;
+use ty::decl::ClassishKind;
+use ty::decl::FoldedClass;
+use ty::decl::FoldedElement;
+use ty::decl::ShallowClass;
+use ty::decl::SubstContext;
+use ty::decl::Ty;
+use ty::decl::TypeConst;
+use ty::decl::Typeconst;
 use ty::reason::Reason;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_inherit.ml

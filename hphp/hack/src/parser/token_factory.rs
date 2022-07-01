@@ -4,12 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    lexable_token::LexableToken,
-    lexable_trivia::LexableTrivia,
-    token_kind::TokenKind,
-    trivia_factory::{SimpleTriviaFactory, SimpleTriviaFactoryImpl, TriviaFactory},
-};
+use crate::lexable_token::LexableToken;
+use crate::lexable_trivia::LexableTrivia;
+use crate::token_kind::TokenKind;
+use crate::trivia_factory::SimpleTriviaFactory;
+use crate::trivia_factory::SimpleTriviaFactoryImpl;
+use crate::trivia_factory::TriviaFactory;
 use std::fmt::Debug;
 
 pub type Trivia<TF> = <<TF as TokenFactory>::Token as LexableToken>::Trivia;

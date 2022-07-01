@@ -5,26 +5,34 @@
 
 use crate::regex;
 use crate::FileOpts;
-use anyhow::{anyhow, bail, Result};
+use anyhow::anyhow;
+use anyhow::bail;
+use anyhow::Result;
 use bstr::ByteSlice;
 use bumpalo::Bump;
 use clap::Parser;
-use ffi::{Maybe, Pair, Slice, Str};
+use ffi::Maybe;
+use ffi::Pair;
+use ffi::Slice;
+use ffi::Str;
 use options::Options;
-use oxidized::relative_path::{self, RelativePath};
+use oxidized::relative_path::RelativePath;
+use oxidized::relative_path::{self};
 use rayon::prelude::*;
 use regex::bytes::Regex;
-use std::{
-    collections::{HashMap, VecDeque},
-    ffi::OsString,
-    fmt,
-    fs::{self, File},
-    io::{stdout, Write},
-    os::unix::ffi::OsStringExt,
-    path::{Path, PathBuf},
-    str::FromStr,
-    sync::Mutex,
-};
+use std::collections::HashMap;
+use std::collections::VecDeque;
+use std::ffi::OsString;
+use std::fmt;
+use std::fs::File;
+use std::fs::{self};
+use std::io::stdout;
+use std::io::Write;
+use std::os::unix::ffi::OsStringExt;
+use std::path::Path;
+use std::path::PathBuf;
+use std::str::FromStr;
+use std::sync::Mutex;
 
 pub fn run(mut opts: Opts) -> Result<()> {
     let writer: SyncWrite = match &opts.output_file {

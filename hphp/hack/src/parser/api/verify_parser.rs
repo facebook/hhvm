@@ -3,11 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use bumpalo::Bump;
-use parser::{
-    parser::Parser, parser_env::ParserEnv, source_text::SourceText,
-    syntax_by_ref::positioned_syntax::PositionedSyntax, syntax_error::SyntaxError,
-};
-use verify_smart_constructors::{State as VerifyState, VerifySmartConstructors};
+use parser::parser::Parser;
+use parser::parser_env::ParserEnv;
+use parser::source_text::SourceText;
+use parser::syntax_by_ref::positioned_syntax::PositionedSyntax;
+use parser::syntax_error::SyntaxError;
+use verify_smart_constructors::State as VerifyState;
+use verify_smart_constructors::VerifySmartConstructors;
 
 pub type SmartConstructors<'a> = VerifySmartConstructors<'a>;
 

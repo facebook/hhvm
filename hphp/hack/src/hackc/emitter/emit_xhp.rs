@@ -2,14 +2,20 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{emit_method, emit_property};
+use crate::emit_method;
+use crate::emit_property;
 use emit_property::PropAndInit;
 use env::emitter::Emitter;
-use error::{Error, Result};
-use hack_macro::{hack_expr, hack_stmts};
-use hhbc::{hhas_method::HhasMethod, HhasXhpAttribute};
+use error::Error;
+use error::Result;
+use hack_macro::hack_expr;
+use hack_macro::hack_stmts;
+use hhbc::hhas_method::HhasMethod;
+use hhbc::HhasXhpAttribute;
 use hhbc_string_utils as string_utils;
-use oxidized::{ast::*, ast_defs, pos::Pos};
+use oxidized::ast::*;
+use oxidized::ast_defs;
+use oxidized::pos::Pos;
 
 pub fn properties_for_cache<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,

@@ -3,11 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use analysis::{PredecessorCatchMode, PredecessorFlags};
-use core::{
-    instr::{HasEdges, Terminator},
-    BlockId, BlockIdMap, Func, InstrId, ValueId,
-};
+use analysis::PredecessorCatchMode;
+use analysis::PredecessorFlags;
+use core::instr::HasEdges;
+use core::instr::Terminator;
+use core::BlockId;
+use core::BlockIdMap;
+use core::Func;
+use core::InstrId;
+use core::ValueId;
 use newtype::IdVec;
 
 /// Attempt to merge simple blocks together. Returns true if the Func was

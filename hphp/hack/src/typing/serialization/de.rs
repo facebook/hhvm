@@ -31,7 +31,8 @@ fn to_type<'a, 'de>(
 mod tests {
     use super::*;
 
-    use serde_json::{json, value::Value as Json};
+    use serde_json::json;
+    use serde_json::value::Value as Json;
 
     fn roundtrip(js: &[Json]) -> Vec<Json> {
         trait JsonRoundtrip: AsMut<Vec<Json>> {

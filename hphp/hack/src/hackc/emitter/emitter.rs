@@ -3,21 +3,31 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{ClassExpr, IterGen, LabelGen, LocalGen};
+use crate::ClassExpr;
+use crate::IterGen;
+use crate::LabelGen;
+use crate::LocalGen;
 use adata_state::AdataState;
 use decl_provider::DeclProvider;
-use ffi::{Slice, Str};
+use ffi::Slice;
+use ffi::Str;
 use global_state::GlobalState;
 use hash::IndexSet;
-use hhbc::{
-    hhas_symbol_refs::{HhasSymbolRefs, IncludePath, IncludePathSet},
-    ClassName, ConstName, FunctionName, Local,
-};
+use hhbc::hhas_symbol_refs::HhasSymbolRefs;
+use hhbc::hhas_symbol_refs::IncludePath;
+use hhbc::hhas_symbol_refs::IncludePathSet;
+use hhbc::ClassName;
+use hhbc::ConstName;
+use hhbc::FunctionName;
+use hhbc::Local;
 use options::Options;
-use oxidized::{ast, ast_defs, pos::Pos};
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::pos::Pos;
 use print_expr::HhasBodyEnv;
 use statement_state::StatementState;
-use std::{borrow::Cow, collections::BTreeSet};
+use std::borrow::Cow;
+use std::collections::BTreeSet;
 
 #[derive(Debug)]
 pub struct Emitter<'arena, 'decl> {

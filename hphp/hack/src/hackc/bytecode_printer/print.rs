@@ -3,46 +3,76 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    coeffects,
-    context::Context,
-    write::{
-        self, angle, braces, concat, concat_by, concat_str, concat_str_by, fmt_separated,
-        fmt_separated_with, newline, option, option_or, paren, quotes, square, triple_quotes,
-        wrap_by, Error,
-    },
-};
-use ffi::{Maybe, Maybe::*, Pair, Slice, Str, Triple};
+use crate::coeffects;
+use crate::context::Context;
+use crate::write::angle;
+use crate::write::braces;
+use crate::write::concat;
+use crate::write::concat_by;
+use crate::write::concat_str;
+use crate::write::concat_str_by;
+use crate::write::fmt_separated;
+use crate::write::fmt_separated_with;
+use crate::write::newline;
+use crate::write::option;
+use crate::write::option_or;
+use crate::write::paren;
+use crate::write::quotes;
+use crate::write::square;
+use crate::write::triple_quotes;
+use crate::write::wrap_by;
+use crate::write::Error;
+use crate::write::{self};
+use ffi::Maybe;
+use ffi::Maybe::*;
+use ffi::Pair;
+use ffi::Slice;
+use ffi::Str;
+use ffi::Triple;
 use hash::HashSet;
-use hhbc::{
-    hackc_unit::HackCUnit,
-    hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX},
-    hhas_attribute::HhasAttribute,
-    hhas_body::HhasBody,
-    hhas_class::{HhasClass, TraitReqKind},
-    hhas_coeffects::{HhasCoeffects, HhasCtxConstant},
-    hhas_constant::HhasConstant,
-    hhas_function::HhasFunction,
-    hhas_method::{HhasMethod, HhasMethodFlags},
-    hhas_module::HhasModule,
-    hhas_param::HhasParam,
-    hhas_pos::{HhasPos, HhasSpan},
-    hhas_property::HhasProperty,
-    hhas_symbol_refs::{HhasSymbolRefs, IncludePath},
-    hhas_type::HhasTypeInfo,
-    hhas_type_const::HhasTypeConstant,
-    hhas_typedef::HhasTypedef,
-    ClassName, ConstName, FCallArgs, FatalOp, FunctionName, Instruct, Label, Pseudo, TypedValue,
-};
+use hhbc::hackc_unit::HackCUnit;
+use hhbc::hhas_adata::HhasAdata;
+use hhbc::hhas_adata::DICT_PREFIX;
+use hhbc::hhas_adata::KEYSET_PREFIX;
+use hhbc::hhas_adata::VEC_PREFIX;
+use hhbc::hhas_attribute::HhasAttribute;
+use hhbc::hhas_body::HhasBody;
+use hhbc::hhas_class::HhasClass;
+use hhbc::hhas_class::TraitReqKind;
+use hhbc::hhas_coeffects::HhasCoeffects;
+use hhbc::hhas_coeffects::HhasCtxConstant;
+use hhbc::hhas_constant::HhasConstant;
+use hhbc::hhas_function::HhasFunction;
+use hhbc::hhas_method::HhasMethod;
+use hhbc::hhas_method::HhasMethodFlags;
+use hhbc::hhas_module::HhasModule;
+use hhbc::hhas_param::HhasParam;
+use hhbc::hhas_pos::HhasPos;
+use hhbc::hhas_pos::HhasSpan;
+use hhbc::hhas_property::HhasProperty;
+use hhbc::hhas_symbol_refs::HhasSymbolRefs;
+use hhbc::hhas_symbol_refs::IncludePath;
+use hhbc::hhas_type::HhasTypeInfo;
+use hhbc::hhas_type_const::HhasTypeConstant;
+use hhbc::hhas_typedef::HhasTypedef;
+use hhbc::ClassName;
+use hhbc::ConstName;
+use hhbc::FCallArgs;
+use hhbc::FatalOp;
+use hhbc::FunctionName;
+use hhbc::Instruct;
+use hhbc::Label;
+use hhbc::Pseudo;
+use hhbc::TypedValue;
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
 use oxidized::ast_defs;
-use std::{
-    borrow::Cow,
-    io::{self, Result, Write},
-    write,
-};
+use std::borrow::Cow;
+use std::io::Result;
+use std::io::Write;
+use std::io::{self};
+use std::write;
 use write_bytes::write_bytes;
 
 macro_rules! write_if {

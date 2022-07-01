@@ -3,14 +3,24 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hackrs_provider_backend::{FileType, HhServerProviderBackend};
-use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
+use hackrs_provider_backend::FileType;
+use hackrs_provider_backend::HhServerProviderBackend;
+use ocamlrep::ptr::UnsafeOcamlPtr;
+use ocamlrep::FromOcamlRep;
 use ocamlrep_custom::Custom;
-use ocamlrep_ocamlpool::{ocaml_ffi, ocaml_ffi_with_arena, Bump};
+use ocamlrep_ocamlpool::ocaml_ffi;
+use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
+use ocamlrep_ocamlpool::Bump;
+use oxidized::file_info;
+use oxidized::naming_types;
 use oxidized::parser_options::ParserOptions;
-use oxidized::{file_info, naming_types};
-use oxidized_by_ref::{decl_defs, direct_decl_parser, shallow_decl_defs, typing_defs};
-use pos::{RelativePath, RelativePathCtx, ToOxidized};
+use oxidized_by_ref::decl_defs;
+use oxidized_by_ref::direct_decl_parser;
+use oxidized_by_ref::shallow_decl_defs;
+use oxidized_by_ref::typing_defs;
+use pos::RelativePath;
+use pos::RelativePathCtx;
+use pos::ToOxidized;
 use std::collections::BTreeSet;
 use std::path::PathBuf;
 

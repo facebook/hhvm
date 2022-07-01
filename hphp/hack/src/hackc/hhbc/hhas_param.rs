@@ -3,12 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    hhas_attribute::HhasAttribute,
-    hhas_type::{Constraint, HhasTypeInfo},
-    hhbc_ast::Label,
-};
-use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
+use crate::hhas_attribute::HhasAttribute;
+use crate::hhas_type::Constraint;
+use crate::hhas_type::HhasTypeInfo;
+use crate::hhbc_ast::Label;
+use ffi::Maybe;
+use ffi::Maybe::*;
+use ffi::Pair;
+use ffi::Slice;
+use ffi::Str;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[repr(C)]

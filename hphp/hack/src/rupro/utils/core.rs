@@ -7,5 +7,6 @@ mod ident;
 mod local_id;
 pub mod ns;
 
-pub use ident::{Ident, IdentGen};
+pub use ident::Ident;
+pub use ident::IdentGen;
 pub use local_id::LocalId;

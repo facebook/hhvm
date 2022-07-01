@@ -4,20 +4,18 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
-use parser::{
-    lexer::Lexer,
-    parser::Parser,
-    parser_env::ParserEnv,
-    source_text::SourceText,
-    syntax_by_ref::{
-        arena_state::State,
-        positioned_token::{PositionedToken, TokenFactory, TokenFactoryFullTrivia},
-        positioned_trivia::PositionedTrivia,
-        positioned_value::PositionedValue,
-        syntax,
-    },
-    syntax_error::SyntaxError,
-};
+use parser::lexer::Lexer;
+use parser::parser::Parser;
+use parser::parser_env::ParserEnv;
+use parser::source_text::SourceText;
+use parser::syntax_by_ref::arena_state::State;
+use parser::syntax_by_ref::positioned_token::PositionedToken;
+use parser::syntax_by_ref::positioned_token::TokenFactory;
+use parser::syntax_by_ref::positioned_token::TokenFactoryFullTrivia;
+use parser::syntax_by_ref::positioned_trivia::PositionedTrivia;
+use parser::syntax_by_ref::positioned_value::PositionedValue;
+use parser::syntax_by_ref::syntax;
+use parser::syntax_error::SyntaxError;
 use positioned_smart_constructors::*;
 
 type Syntax<'a> = syntax::Syntax<'a, PositionedToken<'a>, PositionedValue<'a>>;

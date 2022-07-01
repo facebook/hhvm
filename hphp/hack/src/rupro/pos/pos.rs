@@ -3,12 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 use intern::string::BytesId;
 use oxidized::file_pos_small::FilePosSmall;
 use oxidized::pos_span_raw::PosSpanRaw;
 use oxidized::pos_span_tiny::PosSpanTiny;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::de::DeserializeOwned;
+use serde::Deserialize;
+use serde::Serialize;
 use std::fmt;
 use std::hash::Hash;
 

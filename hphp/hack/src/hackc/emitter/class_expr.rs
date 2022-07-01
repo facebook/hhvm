@@ -5,11 +5,14 @@
 
 use crate::emitter::Emitter;
 use ast_scope::Scope;
-use hhbc::{ClassishKind, SpecialClsRef};
+use hhbc::ClassishKind;
+use hhbc::SpecialClsRef;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::InstrSeq;
 use naming_special_names_rust::classes;
-use oxidized::{aast::*, ast, ast_defs};
+use oxidized::aast::*;
+use oxidized::ast;
+use oxidized::ast_defs;
 
 #[derive(Debug)]
 pub enum ClassExpr<'arena> {

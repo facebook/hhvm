@@ -5,10 +5,15 @@
 
 use anyhow::Result;
 use hh24_types::ToplevelSymbolHash;
-use oxidized::{file_info::NameType, naming_types::KindOfType};
+use oxidized::file_info::NameType;
+use oxidized::naming_types::KindOfType;
 use parking_lot::Mutex;
-use pos::{ConstName, FunName, RelativePath, TypeName};
-use std::fmt::{self, Debug};
+use pos::ConstName;
+use pos::FunName;
+use pos::RelativePath;
+use pos::TypeName;
+use std::fmt::Debug;
+use std::fmt::{self};
 use std::path::Path;
 
 /// An abstraction over the global symbol table. Should be used by

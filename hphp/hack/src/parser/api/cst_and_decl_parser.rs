@@ -4,16 +4,20 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
-use direct_decl_smart_constructors::{self, DirectDeclSmartConstructors, NoSourceTextAllocator};
+use direct_decl_smart_constructors::DirectDeclSmartConstructors;
+use direct_decl_smart_constructors::NoSourceTextAllocator;
+use direct_decl_smart_constructors::{self};
 use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized_by_ref::{direct_decl_parser::ParsedFile, file_info};
+use oxidized_by_ref::direct_decl_parser::ParsedFile;
+use oxidized_by_ref::file_info;
 use pair_smart_constructors::PairSmartConstructors;
-use parser::{
-    parser::Parser,
-    syntax_by_ref::{self, positioned_syntax::PositionedSyntax},
-    NoState,
-};
-use parser_core_types::{parser_env::ParserEnv, source_text::SourceText, syntax_tree::SyntaxTree};
+use parser::parser::Parser;
+use parser::syntax_by_ref::positioned_syntax::PositionedSyntax;
+use parser::syntax_by_ref::{self};
+use parser::NoState;
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_tree::SyntaxTree;
 
 pub type ConcreteSyntaxTree<'src, 'arena> = SyntaxTree<'src, PositionedSyntax<'arena>, NoState>;
 

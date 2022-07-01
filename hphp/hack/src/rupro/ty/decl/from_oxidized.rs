@@ -3,7 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl::{self, folded, shallow, ty, Ty, Ty_};
+use crate::decl::folded;
+use crate::decl::shallow;
+use crate::decl::ty;
+use crate::decl::Ty;
+use crate::decl::Ty_;
+use crate::decl::{self};
 use crate::reason::Reason;
 use pos::Pos;
 
@@ -186,7 +191,8 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
 
 impl<R: Reason> From<&obr::typing_defs::ClassTypeRefinement<'_>> for ty::TypeConstRef<Ty<R>> {
     fn from(ctr: &obr::typing_defs::ClassTypeRefinement<'_>) -> Self {
-        use obr::typing_defs::ClassTypeRefinement::{Texact, Tloose};
+        use obr::typing_defs::ClassTypeRefinement::Texact;
+        use obr::typing_defs::ClassTypeRefinement::Tloose;
         match ctr {
             &Texact(ty) => Self::Exact(ty.into()),
             Tloose(bnds) => Self::Loose(slice(bnds.lower), slice(bnds.upper)),

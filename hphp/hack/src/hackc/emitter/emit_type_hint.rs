@@ -2,16 +2,25 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use error::{Error, Result};
-use ffi::{Maybe, Maybe::*, Str};
-use hhbc::hhas_type::{Constraint, HhasTypeInfo};
+use error::Error;
+use error::Result;
+use ffi::Maybe;
+use ffi::Maybe::*;
+use ffi::Str;
+use hhbc::hhas_type::Constraint;
+use hhbc::hhas_type::HhasTypeInfo;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
-use naming_special_names_rust::{classes, typehints};
-use oxidized::{
-    aast_defs::{Hint, Hint_, Hint_::*, NastShapeInfo, ShapeFieldInfo, Tprim},
-    ast_defs::{Id, ShapeFieldName},
-};
+use naming_special_names_rust::classes;
+use naming_special_names_rust::typehints;
+use oxidized::aast_defs::Hint;
+use oxidized::aast_defs::Hint_;
+use oxidized::aast_defs::Hint_::*;
+use oxidized::aast_defs::NastShapeInfo;
+use oxidized::aast_defs::ShapeFieldInfo;
+use oxidized::aast_defs::Tprim;
+use oxidized::ast_defs::Id;
+use oxidized::ast_defs::ShapeFieldName;
 use std::borrow::Cow;
 
 #[derive(Eq, PartialEq)]

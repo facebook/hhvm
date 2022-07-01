@@ -6,12 +6,11 @@
 use anyhow::Result;
 use hhbc_gen::OpcodeData;
 use quote::quote;
-use std::{
-    fs::File,
-    io::Write,
-    path::PathBuf,
-    process::{Command, Stdio},
-};
+use std::fs::File;
+use std::io::Write;
+use std::path::PathBuf;
+use std::process::Command;
+use std::process::Stdio;
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
@@ -57,7 +56,8 @@ fn main() -> Result<()> {
     child.stdin(Stdio::piped());
 
     if let Some(out) = opts.output.as_ref() {
-        use std::os::unix::io::{FromRawFd, IntoRawFd};
+        use std::os::unix::io::FromRawFd;
+        use std::os::unix::io::IntoRawFd;
         let file = File::create(out).expect("couldn't create output file");
         child.stdout(unsafe { Stdio::from_raw_fd(file.into_raw_fd()) });
     }

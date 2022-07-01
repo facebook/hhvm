@@ -132,7 +132,8 @@ pub mod collections {
 }
 
 pub mod members {
-    use hash::{HashMap, HashSet};
+    use hash::HashMap;
+    use hash::HashSet;
     use lazy_static::lazy_static;
 
     pub const M_GET_INSTANCE_KEY: &str = "getInstanceKey";

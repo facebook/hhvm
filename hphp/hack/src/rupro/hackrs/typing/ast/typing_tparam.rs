@@ -7,10 +7,13 @@ use crate::tast;
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
-use oxidized::{aast, aast_defs, ast_defs};
+use oxidized::aast;
+use oxidized::aast_defs;
+use oxidized::ast_defs;
 use pos::Symbol;
 use ty::decl;
-use ty::local::{self, Variance};
+use ty::local::Variance;
+use ty::local::{self};
 use ty::reason::Reason;
 
 impl<R: Reason> Infer<R> for oxidized::aast::Tparam<(), ()> {

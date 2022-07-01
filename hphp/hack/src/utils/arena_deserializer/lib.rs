@@ -7,7 +7,8 @@ mod deserializer;
 mod impls;
 mod seed;
 
-use serde::de::{DeserializeSeed, Deserializer};
+use serde::de::DeserializeSeed;
+use serde::de::Deserializer;
 
 pub use crate::deserializer::ArenaDeserializer;
 pub use crate::impls::DeserializeInArena;

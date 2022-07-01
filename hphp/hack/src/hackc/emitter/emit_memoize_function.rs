@@ -2,28 +2,44 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{emit_attribute, emit_body, emit_memoize_helpers, emit_param};
-use ast_scope::{self, Scope, ScopeItem};
+use crate::emit_attribute;
+use crate::emit_body;
+use crate::emit_memoize_helpers;
+use crate::emit_param;
+use ast_scope::Scope;
+use ast_scope::ScopeItem;
+use ast_scope::{self};
 use emit_pos::emit_pos_then;
-use env::{emitter::Emitter, Env};
+use env::emitter::Emitter;
+use env::Env;
 use error::Result;
-use ffi::{Slice, Str};
-use hhbc::{
-    hhas_attribute::{self, HhasAttribute},
-    hhas_body::HhasBody,
-    hhas_coeffects::HhasCoeffects,
-    hhas_function::{HhasFunction, HhasFunctionFlags},
-    hhas_param::HhasParam,
-    hhas_pos::HhasSpan,
-    hhas_type::HhasTypeInfo,
-    FCallArgs, FCallArgsFlags, Label, Local, LocalRange, TypedValue,
-};
+use ffi::Slice;
+use ffi::Str;
+use hhbc::hhas_attribute::HhasAttribute;
+use hhbc::hhas_attribute::{self};
+use hhbc::hhas_body::HhasBody;
+use hhbc::hhas_coeffects::HhasCoeffects;
+use hhbc::hhas_function::HhasFunction;
+use hhbc::hhas_function::HhasFunctionFlags;
+use hhbc::hhas_param::HhasParam;
+use hhbc::hhas_pos::HhasSpan;
+use hhbc::hhas_type::HhasTypeInfo;
+use hhbc::FCallArgs;
+use hhbc::FCallArgsFlags;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::LocalRange;
+use hhbc::TypedValue;
 use hhbc_string_utils::reified;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use ocamlrep::rc::RcOc;
-use options::{HhvmFlags, Options, RepoFlags};
-use oxidized::{ast, pos::Pos};
+use options::HhvmFlags;
+use options::Options;
+use options::RepoFlags;
+use oxidized::ast;
+use oxidized::pos::Pos;
 
 pub fn is_interceptable(opts: &Options) -> bool {
     opts.hhvm

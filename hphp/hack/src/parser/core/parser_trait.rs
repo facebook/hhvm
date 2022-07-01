@@ -4,17 +4,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexer::{self, Lexer};
+use crate::lexer::Lexer;
+use crate::lexer::{self};
 use crate::parser_env::ParserEnv;
-use crate::smart_constructors::{NodeType, SmartConstructors, Token, Trivia};
-use parser_core_types::{
-    lexable_token::LexableToken,
-    lexable_trivia::LexableTrivia,
-    syntax_error::{self as Errors, Error, SyntaxError},
-    token_factory::TokenFactory,
-    token_kind::TokenKind,
-    trivia_factory::TriviaFactory,
-};
+use crate::smart_constructors::NodeType;
+use crate::smart_constructors::SmartConstructors;
+use crate::smart_constructors::Token;
+use crate::smart_constructors::Trivia;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::lexable_trivia::LexableTrivia;
+use parser_core_types::syntax_error::Error;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::{self as Errors};
+use parser_core_types::token_factory::TokenFactory;
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_factory::TriviaFactory;
 
 #[derive(PartialEq)]
 pub enum SeparatedListKind {

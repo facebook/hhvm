@@ -2,8 +2,10 @@
 
 mod idhasher;
 
-use serde::{Deserialize, Serialize};
-use std::hash::{Hash, Hasher};
+use serde::Deserialize;
+use serde::Serialize;
+use std::hash::Hash;
+use std::hash::Hasher;
 
 pub use idhasher::BuildIdHasher;
 

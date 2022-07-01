@@ -5,22 +5,27 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use digest::Digest;
-use hhbc_string_utils::{mangle_xhp_id, strip_global_ns};
+use hhbc_string_utils::mangle_xhp_id;
+use hhbc_string_utils::strip_global_ns;
 use naming_special_names_rust::user_attributes;
-use oxidized_by_ref::{
-    ast_defs::{Abstraction, ClassishKind},
-    direct_decl_parser::Decls,
-    shallow_decl_defs::{ClassDecl, TypedefDecl},
-    typing_defs::{Ty, Ty_, UserAttribute},
-};
+use oxidized_by_ref::ast_defs::Abstraction;
+use oxidized_by_ref::ast_defs::ClassishKind;
+use oxidized_by_ref::direct_decl_parser::Decls;
+use oxidized_by_ref::shallow_decl_defs::ClassDecl;
+use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
+use oxidized_by_ref::typing_defs::Ty;
+use oxidized_by_ref::typing_defs::Ty_;
+use oxidized_by_ref::typing_defs::UserAttribute;
+use serde::de::SeqAccess;
+use serde::de::Visitor;
 use serde::ser::SerializeSeq;
-use serde::{
-    de::{SeqAccess, Visitor},
-    Deserializer, Serializer,
-};
-use serde_derive::{Deserialize, Serialize};
+use serde::Deserializer;
+use serde::Serializer;
+use serde_derive::Deserialize;
+use serde_derive::Serialize;
 use serde_json::json;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

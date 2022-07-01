@@ -7,7 +7,8 @@ use crate::typing::typing_error::Result;
 use oxidized::ast_defs::Variance;
 use pos::TypeName;
 use std::fmt::Debug;
-use ty::{local::Ty, reason::Reason};
+use ty::local::Ty;
+use ty::reason::Reason;
 
 pub trait Oracle<R: Reason>: Debug {
     /// Given a class name `C`, its type parameters and another class `D`

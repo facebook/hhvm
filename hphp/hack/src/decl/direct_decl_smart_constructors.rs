@@ -4,9 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod direct_decl_smart_constructors_generated;
 
-use arena_collections::{AssocListMut, List, MultiSetMut};
+use arena_collections::AssocListMut;
+use arena_collections::List;
+use arena_collections::MultiSetMut;
 use bstr::BStr;
-use bumpalo::{collections as bump, Bump};
+use bumpalo::collections as bump;
+use bumpalo::Bump;
 use flatten_smart_constructors::FlattenSmartConstructors;
 use hash::HashSet;
 use hh_autoimport_rust as hh_autoimport;
@@ -14,41 +17,76 @@ use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
 use naming_special_names_rust as naming_special_names;
 use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized_by_ref::{
-    aast,
-    ast_defs::{
-        Abstraction, Bop, ClassishKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance,
-        XhpEnumValue,
-    },
-    direct_decl_parser::Decls,
-    file_info::Mode,
-    method_flags::MethodFlags,
-    namespace_env::Env as NamespaceEnv,
-    nast,
-    pos::Pos,
-    prop_flags::PropFlags,
-    relative_path::RelativePath,
-    s_map::SMap,
-    shallow_decl_defs::{
-        self, Decl, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst,
-    },
-    shape_map::ShapeField,
-    t_shape_map::TShapeField,
-    typing_defs::{
-        self, AbstractTypeconst, Capability::*, ClassConstKind, ClassRefinement,
-        ClassTypeRefinement, ClassTypeRefinementBounds, ConcreteTypeconst, ConstDecl, Enforcement,
-        EnumType, FunElt, FunImplicitParams, FunParam, FunParams, FunType, IfcFunDecl, ParamMode,
-        PosByteString, PosId, PosString, PossiblyEnforcedTy, ShapeFieldType, ShapeKind,
-        TaccessType, Tparam, TshapeFieldName, Ty, Ty_, Typeconst, TypedefType, WhereConstraint,
-    },
-    typing_defs_flags::{FunParamFlags, FunTypeFlags},
-    typing_reason::Reason,
-    xhp_attribute,
-};
-use parser_core_types::{
-    compact_token::CompactToken, indexed_source_text::IndexedSourceText, source_text::SourceText,
-    syntax_kind::SyntaxKind, token_factory::SimpleTokenFactoryImpl, token_kind::TokenKind,
-};
+use oxidized_by_ref::aast;
+use oxidized_by_ref::ast_defs::Abstraction;
+use oxidized_by_ref::ast_defs::Bop;
+use oxidized_by_ref::ast_defs::ClassishKind;
+use oxidized_by_ref::ast_defs::ConstraintKind;
+use oxidized_by_ref::ast_defs::FunKind;
+use oxidized_by_ref::ast_defs::Id;
+use oxidized_by_ref::ast_defs::ShapeFieldName;
+use oxidized_by_ref::ast_defs::Uop;
+use oxidized_by_ref::ast_defs::Variance;
+use oxidized_by_ref::ast_defs::XhpEnumValue;
+use oxidized_by_ref::direct_decl_parser::Decls;
+use oxidized_by_ref::file_info::Mode;
+use oxidized_by_ref::method_flags::MethodFlags;
+use oxidized_by_ref::namespace_env::Env as NamespaceEnv;
+use oxidized_by_ref::nast;
+use oxidized_by_ref::pos::Pos;
+use oxidized_by_ref::prop_flags::PropFlags;
+use oxidized_by_ref::relative_path::RelativePath;
+use oxidized_by_ref::s_map::SMap;
+use oxidized_by_ref::shallow_decl_defs::Decl;
+use oxidized_by_ref::shallow_decl_defs::ShallowClassConst;
+use oxidized_by_ref::shallow_decl_defs::ShallowMethod;
+use oxidized_by_ref::shallow_decl_defs::ShallowProp;
+use oxidized_by_ref::shallow_decl_defs::ShallowTypeconst;
+use oxidized_by_ref::shallow_decl_defs::{self};
+use oxidized_by_ref::shape_map::ShapeField;
+use oxidized_by_ref::t_shape_map::TShapeField;
+use oxidized_by_ref::typing_defs::AbstractTypeconst;
+use oxidized_by_ref::typing_defs::Capability::*;
+use oxidized_by_ref::typing_defs::ClassConstKind;
+use oxidized_by_ref::typing_defs::ClassRefinement;
+use oxidized_by_ref::typing_defs::ClassTypeRefinement;
+use oxidized_by_ref::typing_defs::ClassTypeRefinementBounds;
+use oxidized_by_ref::typing_defs::ConcreteTypeconst;
+use oxidized_by_ref::typing_defs::ConstDecl;
+use oxidized_by_ref::typing_defs::Enforcement;
+use oxidized_by_ref::typing_defs::EnumType;
+use oxidized_by_ref::typing_defs::FunElt;
+use oxidized_by_ref::typing_defs::FunImplicitParams;
+use oxidized_by_ref::typing_defs::FunParam;
+use oxidized_by_ref::typing_defs::FunParams;
+use oxidized_by_ref::typing_defs::FunType;
+use oxidized_by_ref::typing_defs::IfcFunDecl;
+use oxidized_by_ref::typing_defs::ParamMode;
+use oxidized_by_ref::typing_defs::PosByteString;
+use oxidized_by_ref::typing_defs::PosId;
+use oxidized_by_ref::typing_defs::PosString;
+use oxidized_by_ref::typing_defs::PossiblyEnforcedTy;
+use oxidized_by_ref::typing_defs::ShapeFieldType;
+use oxidized_by_ref::typing_defs::ShapeKind;
+use oxidized_by_ref::typing_defs::TaccessType;
+use oxidized_by_ref::typing_defs::Tparam;
+use oxidized_by_ref::typing_defs::TshapeFieldName;
+use oxidized_by_ref::typing_defs::Ty;
+use oxidized_by_ref::typing_defs::Ty_;
+use oxidized_by_ref::typing_defs::Typeconst;
+use oxidized_by_ref::typing_defs::TypedefType;
+use oxidized_by_ref::typing_defs::WhereConstraint;
+use oxidized_by_ref::typing_defs::{self};
+use oxidized_by_ref::typing_defs_flags::FunParamFlags;
+use oxidized_by_ref::typing_defs_flags::FunTypeFlags;
+use oxidized_by_ref::typing_reason::Reason;
+use oxidized_by_ref::xhp_attribute;
+use parser_core_types::compact_token::CompactToken;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_kind::SyntaxKind;
+use parser_core_types::token_factory::SimpleTokenFactoryImpl;
+use parser_core_types::token_kind::TokenKind;
 use std::collections::BTreeMap;
 use std::rc::Rc;
 

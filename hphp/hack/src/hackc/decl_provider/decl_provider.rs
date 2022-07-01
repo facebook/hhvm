@@ -6,11 +6,11 @@
 pub mod external;
 
 use bincode::Options;
-use oxidized_by_ref::{
-    direct_decl_parser::Decls,
-    file_info::NameType,
-    shallow_decl_defs::{ClassDecl, Decl, TypedefDecl},
-};
+use oxidized_by_ref::direct_decl_parser::Decls;
+use oxidized_by_ref::file_info::NameType;
+use oxidized_by_ref::shallow_decl_defs::ClassDecl;
+use oxidized_by_ref::shallow_decl_defs::Decl;
+use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
 use thiserror::Error;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;

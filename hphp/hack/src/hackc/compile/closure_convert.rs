@@ -4,35 +4,73 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
-use error::{Error, Result};
-use global_state::{ClosureEnclosingClassInfo, GlobalState};
+use error::Error;
+use error::Result;
+use global_state::ClosureEnclosingClassInfo;
+use global_state::GlobalState;
 use hack_macro::hack_expr;
 use hash::IndexSet;
 use hhbc::hhas_coeffects::HhasCoeffects;
 use hhbc_string_utils as string_utils;
 use itertools::Itertools;
-use naming_special_names_rust::{
-    fb, pseudo_consts, pseudo_functions, special_idents, superglobals,
-};
+use naming_special_names_rust::fb;
+use naming_special_names_rust::pseudo_consts;
+use naming_special_names_rust::pseudo_functions;
+use naming_special_names_rust::special_idents;
+use naming_special_names_rust::superglobals;
 use ocamlrep::rc::RcOc;
-use options::{HhvmFlags, Options};
-use oxidized::{
-    aast_visitor::{self, visit_mut, AstParams, NodeMut, VisitorMut},
-    ast::{
-        Abstraction, ClassGetExpr, ClassHint, ClassId, ClassId_, ClassName, ClassVar, Class_,
-        ClassishKind, Contexts, Def, EmitId, Expr, Expr_, FunDef, FunKind, FunParam, Fun_,
-        FuncBody, Hint, Hint_, Id, Lid, LocalId, Method_, Pos, ReifyKind, Sid, Stmt, Stmt_, Targ,
-        Tparam, TypeHint, UserAttribute, Visibility,
-    },
-    ast_defs::{ParamKind, PropOrMethod},
-    file_info::Mode,
-    local_id, namespace_env,
-    s_map::SMap,
-};
+use options::HhvmFlags;
+use options::Options;
+use oxidized::aast_visitor::visit_mut;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::aast_visitor::{self};
+use oxidized::ast::Abstraction;
+use oxidized::ast::ClassGetExpr;
+use oxidized::ast::ClassHint;
+use oxidized::ast::ClassId;
+use oxidized::ast::ClassId_;
+use oxidized::ast::ClassName;
+use oxidized::ast::ClassVar;
+use oxidized::ast::Class_;
+use oxidized::ast::ClassishKind;
+use oxidized::ast::Contexts;
+use oxidized::ast::Def;
+use oxidized::ast::EmitId;
+use oxidized::ast::Expr;
+use oxidized::ast::Expr_;
+use oxidized::ast::FunDef;
+use oxidized::ast::FunKind;
+use oxidized::ast::FunParam;
+use oxidized::ast::Fun_;
+use oxidized::ast::FuncBody;
+use oxidized::ast::Hint;
+use oxidized::ast::Hint_;
+use oxidized::ast::Id;
+use oxidized::ast::Lid;
+use oxidized::ast::LocalId;
+use oxidized::ast::Method_;
+use oxidized::ast::Pos;
+use oxidized::ast::ReifyKind;
+use oxidized::ast::Sid;
+use oxidized::ast::Stmt;
+use oxidized::ast::Stmt_;
+use oxidized::ast::Targ;
+use oxidized::ast::Tparam;
+use oxidized::ast::TypeHint;
+use oxidized::ast::UserAttribute;
+use oxidized::ast::Visibility;
+use oxidized::ast_defs::ParamKind;
+use oxidized::ast_defs::PropOrMethod;
+use oxidized::file_info::Mode;
+use oxidized::local_id;
+use oxidized::namespace_env;
+use oxidized::s_map::SMap;
 use std::borrow::Cow;
-use unique_id_builder::{
-    get_unique_id_for_function, get_unique_id_for_main, get_unique_id_for_method,
-};
+use unique_id_builder::get_unique_id_for_function;
+use unique_id_builder::get_unique_id_for_main;
+use unique_id_builder::get_unique_id_for_method;
 
 #[derive(Default)]
 struct Variables {

@@ -4,9 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 use super::DeclFolder;
 use crate::special_names as sn;
-use pos::{ClassConstNameIndexMap, Positioned, TypeNameIndexMap};
+use pos::ClassConstNameIndexMap;
+use pos::Positioned;
+use pos::TypeNameIndexMap;
 use ty::decl::folded::ClassConst;
-use ty::decl::{Prim, Ty, Ty_};
+use ty::decl::Prim;
+use ty::decl::Ty;
+use ty::decl::Ty_;
 use ty::reason::Reason;
 
 struct EnumKind<R: Reason> {

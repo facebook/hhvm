@@ -8,13 +8,18 @@ use crate::datatypes::ToplevelCanonSymbolHash;
 use rusqlite::Connection;
 use std::path::Path;
 
-use hh24_types::{Checksum, DeclHash, RichChecksum, ToplevelSymbolHash};
+use hh24_types::Checksum;
+use hh24_types::DeclHash;
+use hh24_types::RichChecksum;
+use hh24_types::ToplevelSymbolHash;
 use oxidized::file_info::NameType;
 use oxidized::relative_path::RelativePath;
 
-use nohash_hasher::{IntMap, IntSet};
+use nohash_hasher::IntMap;
+use nohash_hasher::IntSet;
 
-use crate::{naming_sqlite, FileSummary};
+use crate::naming_sqlite;
+use crate::FileSummary;
 
 pub struct NamingTable {
     path_cache: IntMap<ToplevelSymbolHash, Option<RelativePath>>,

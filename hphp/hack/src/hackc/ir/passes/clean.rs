@@ -3,11 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use analysis::{PredecessorCatchMode, PredecessorFlags, Predecessors};
-use core::{
-    instr::{HasOperands, Terminator},
-    BlockId, Func, Instr, InstrId, ValueId, ValueIdMap,
-};
+use analysis::PredecessorCatchMode;
+use analysis::PredecessorFlags;
+use analysis::Predecessors;
+use core::instr::HasOperands;
+use core::instr::Terminator;
+use core::BlockId;
+use core::Func;
+use core::Instr;
+use core::InstrId;
+use core::ValueId;
+use core::ValueIdMap;
 use itertools::Itertools;
 use log::trace;
 use newtype::IdVec;

@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::tast;
 use crate::typing::ast::typing_localize::LocalizeEnv;
-use crate::typing::ast::typing_return_type_hint::{TCReturnTypeHint, TCReturnTypeHintParams};
+use crate::typing::ast::typing_return_type_hint::TCReturnTypeHint;
+use crate::typing::ast::typing_return_type_hint::TCReturnTypeHintParams;
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::shared::typing_return::TypingReturn;

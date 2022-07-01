@@ -5,14 +5,23 @@
 
 //! Library to build `Custom_tag` OCaml values.
 
-use std::ffi::{CStr, CString};
+use std::ffi::CStr;
+use std::ffi::CString;
 use std::mem::MaybeUninit;
 use std::ops::Deref;
-use std::os::raw::{c_char, c_int, c_void};
+use std::os::raw::c_char;
+use std::os::raw::c_int;
+use std::os::raw::c_void;
 use std::rc::Rc;
 
 use ocamlrep::from;
-use ocamlrep::{Allocator, FromError, FromOcamlRep, OpaqueValue, ToOcamlRep, Value, CUSTOM_TAG};
+use ocamlrep::Allocator;
+use ocamlrep::FromError;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
+use ocamlrep::Value;
+use ocamlrep::CUSTOM_TAG;
 use ocamlrep_ocamlpool::catch_unwind;
 
 extern "C" {

@@ -3,18 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::{
-    fs::File,
-    io::Read,
-    path::{Path, PathBuf},
-};
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
 
-use ::anyhow::{Context, Result};
-use serde::{Deserialize, Serialize};
+use ::anyhow::Context;
+use ::anyhow::Result;
+use serde::Deserialize;
+use serde::Serialize;
 use structopt::StructOpt;
 use walkdir::WalkDir;
 
-use oxidized::relative_path::{self, RelativePath};
+use oxidized::relative_path::RelativePath;
+use oxidized::relative_path::{self};
 use oxidized_by_ref::direct_decl_parser::Decls;
 
 #[derive(StructOpt, Clone, Debug)]

@@ -3,21 +3,27 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+pub use crate::decl::ty::Exact;
+pub use crate::decl::ty::Prim;
 use crate::decl::UserAttribute;
-pub use crate::decl::{
-    self,
-    ty::{Exact, Prim},
-};
+pub use crate::decl::{self};
 use crate::local::tyvar::Tyvar;
 use crate::reason::Reason;
-use crate::visitor::{Visitor, Walkable};
+use crate::visitor::Visitor;
+use crate::visitor::Walkable;
 use hcons::Hc;
 use im::HashSet;
-use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
+use ocamlrep::Allocator;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
 use oxidized::aast_defs::ReifyKind;
-use oxidized::ast_defs::{ConstraintKind, Variance};
+use oxidized::ast_defs::ConstraintKind;
+use oxidized::ast_defs::Variance;
 use oxidized::typing_defs_flags::FunTypeFlags;
-use pos::{Positioned, Symbol, ToOxidized, TypeName};
+use pos::Positioned;
+use pos::Symbol;
+use pos::ToOxidized;
+use pos::TypeName;
 use std::ops::Deref;
 
 // TODO: Share the representation from decl_defs
@@ -580,7 +586,8 @@ impl<R: Reason> ToOcamlRep for Ty<R> {
 mod tests {
     use super::*;
     use crate::reason::NReason;
-    use pos::{NPos, Pos};
+    use pos::NPos;
+    use pos::Pos;
     use utils::core::IdentGen;
 
     #[test]

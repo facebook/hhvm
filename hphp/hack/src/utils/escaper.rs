@@ -7,9 +7,13 @@
 // Implementation of string escaping logic.
 // See http://php.net/manual/en/language.types.string.php
 
-use std::{borrow::Cow, error::Error, fmt, io::Write};
+use std::borrow::Cow;
+use std::error::Error;
+use std::fmt;
+use std::io::Write;
 
-use bstr::{BStr, BString};
+use bstr::BStr;
+use bstr::BString;
 use bumpalo::Bump;
 
 #[derive(Debug)]

@@ -8,16 +8,23 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::ToOxidized;
-use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
-use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
-use indexmap::{IndexMap, IndexSet};
-use intern::{
-    string::{BytesId, IntoUtf8Bytes, StringId},
-    BuildIdHasher,
-};
-use ocamlrep::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
-use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
+use hh24_types::ToplevelCanonSymbolHash;
+use hh24_types::ToplevelSymbolHash;
+use indexmap::IndexMap;
+use indexmap::IndexSet;
+use intern::string::BytesId;
+use intern::string::IntoUtf8Bytes;
+use intern::string::StringId;
+use intern::BuildIdHasher;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 pub type BuildSymbolHasher = BuildIdHasher<u32>;
 pub type SymbolMap<V> = HashMap<Symbol, V, BuildSymbolHasher>;

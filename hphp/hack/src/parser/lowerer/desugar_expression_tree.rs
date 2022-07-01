@@ -1,18 +1,30 @@
 use crate::lowerer::Env;
 use bstr::BString;
-use naming_special_names_rust::{
-    classes, expression_trees as et, pseudo_functions, special_idents,
-};
-use oxidized::{
-    aast,
-    aast_visitor::{visit, visit_mut, AstParams, Node, NodeMut, Visitor, VisitorMut},
-    ast,
-    ast::{ClassId, ClassId_, Expr, Expr_, Hint_, Sid, Stmt, Stmt_},
-    ast_defs,
-    ast_defs::*,
-    local_id,
-    pos::Pos,
-};
+use naming_special_names_rust::classes;
+use naming_special_names_rust::expression_trees as et;
+use naming_special_names_rust::pseudo_functions;
+use naming_special_names_rust::special_idents;
+use oxidized::aast;
+use oxidized::aast_visitor::visit;
+use oxidized::aast_visitor::visit_mut;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::Visitor;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast;
+use oxidized::ast::ClassId;
+use oxidized::ast::ClassId_;
+use oxidized::ast::Expr;
+use oxidized::ast::Expr_;
+use oxidized::ast::Hint_;
+use oxidized::ast::Sid;
+use oxidized::ast::Stmt;
+use oxidized::ast::Stmt_;
+use oxidized::ast_defs;
+use oxidized::ast_defs::*;
+use oxidized::local_id;
+use oxidized::pos::Pos;
 
 pub struct DesugarResult {
     pub expr: Expr,

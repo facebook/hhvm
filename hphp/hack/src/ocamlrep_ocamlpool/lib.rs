@@ -6,10 +6,16 @@
 use std::ffi::CString;
 use std::panic::UnwindSafe;
 
-use ocamlrep::{Allocator, BlockBuilder, MemoizationCache, OpaqueValue, ToOcamlRep};
+use ocamlrep::Allocator;
+use ocamlrep::BlockBuilder;
+use ocamlrep::MemoizationCache;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
 
 pub use bumpalo::Bump;
-pub use ocamlrep::{FromOcamlRep, FromOcamlRepIn, Value};
+pub use ocamlrep::FromOcamlRep;
+pub use ocamlrep::FromOcamlRepIn;
+pub use ocamlrep::Value;
 
 extern "C" {
     fn ocamlpool_enter();

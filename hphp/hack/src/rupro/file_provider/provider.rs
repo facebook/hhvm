@@ -5,7 +5,8 @@
 
 use anyhow::Result;
 use bstr::BString;
-use pos::{RelativePath, RelativePathCtx};
+use pos::RelativePath;
+use pos::RelativePathCtx;
 use std::sync::Arc;
 
 #[derive(Debug)]

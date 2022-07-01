@@ -3,17 +3,31 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{fold::DeclFolder, DeclName, Error, Result, TypeDecl};
-use crate::shallow_decl_provider::{self, ShallowDeclProvider};
+use super::fold::DeclFolder;
+use super::DeclName;
+use super::Error;
+use super::Result;
+use super::TypeDecl;
+use crate::shallow_decl_provider::ShallowDeclProvider;
+use crate::shallow_decl_provider::{self};
 use datastore::Store;
-use depgraph_api::{DepGraphWriter, DependencyName};
+use depgraph_api::DepGraphWriter;
+use depgraph_api::DependencyName;
 use oxidized::global_options::GlobalOptions;
-use pos::{
-    ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameIndexMap,
-    TypeNameIndexSet,
-};
+use pos::ConstName;
+use pos::FunName;
+use pos::MethodName;
+use pos::Positioned;
+use pos::PropName;
+use pos::TypeName;
+use pos::TypeNameIndexMap;
+use pos::TypeNameIndexSet;
 use std::sync::Arc;
-use ty::decl::{ConstDecl, FoldedClass, FunDecl, ShallowClass, Ty};
+use ty::decl::ConstDecl;
+use ty::decl::FoldedClass;
+use ty::decl::FunDecl;
+use ty::decl::ShallowClass;
+use ty::decl::Ty;
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
 

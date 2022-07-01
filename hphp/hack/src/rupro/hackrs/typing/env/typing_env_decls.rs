@@ -4,17 +4,23 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::subtyping::oracle::Oracle;
-use crate::typing::typing_error::{Error, Result};
+use crate::typing::typing_error::Error;
+use crate::typing::typing_error::Result;
 use crate::typing_ctx::TypingCtx;
-use crate::typing_decl_provider::{Class, ClassElt, TypeDecl};
+use crate::typing_decl_provider::Class;
+use crate::typing_decl_provider::ClassElt;
+use crate::typing_decl_provider::TypeDecl;
 use depgraph_api::DeclName;
 use oxidized::ast_defs::Variance;
-use pos::{FunName, MethodName, TypeName};
+use pos::FunName;
+use pos::MethodName;
+use pos::TypeName;
 use std::rc::Rc;
 use std::sync::Arc;
 use ty::decl as DTy;
 use ty::decl::FunDecl;
-use ty::local::{Exact, Ty};
+use ty::local::Exact;
+use ty::local::Ty;
 use ty::reason::Reason;
 
 /// Provides access to the decl provider, but enforcing dependency tracking.

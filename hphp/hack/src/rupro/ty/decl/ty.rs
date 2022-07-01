@@ -3,24 +3,44 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::reason::{self, Reason};
-use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
+use crate::reason::Reason;
+use crate::reason::{self};
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 use hcons::Hc;
-use oxidized::{aast, ast_defs};
-use pos::{Bytes, ModuleName, Positioned, Symbol, TypeConstName, TypeName};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use oxidized::aast;
+use oxidized::ast_defs;
+use pos::Bytes;
+use pos::ModuleName;
+use pos::Positioned;
+use pos::Symbol;
+use pos::TypeConstName;
+use pos::TypeName;
+use serde::de::DeserializeOwned;
+use serde::Deserialize;
+use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fmt;
 use utils::core::Ident;
 
-pub use oxidized::{
-    aast_defs::{ReifyKind, Tprim as Prim},
-    ast_defs::{Abstraction, ClassishKind, ConstraintKind, Visibility},
-    typing_defs::ClassConstKind,
-    typing_defs_core::{ConsistentKind, Enforcement, ParamMode, ShapeKind},
-    typing_defs_flags::{self, ClassEltFlags, ClassEltFlagsArgs, FunParamFlags, FunTypeFlags},
-    xhp_attribute::{Tag, XhpAttribute},
-};
+pub use oxidized::aast_defs::ReifyKind;
+pub use oxidized::aast_defs::Tprim as Prim;
+pub use oxidized::ast_defs::Abstraction;
+pub use oxidized::ast_defs::ClassishKind;
+pub use oxidized::ast_defs::ConstraintKind;
+pub use oxidized::ast_defs::Visibility;
+pub use oxidized::typing_defs::ClassConstKind;
+pub use oxidized::typing_defs_core::ConsistentKind;
+pub use oxidized::typing_defs_core::Enforcement;
+pub use oxidized::typing_defs_core::ParamMode;
+pub use oxidized::typing_defs_core::ShapeKind;
+pub use oxidized::typing_defs_flags::ClassEltFlags;
+pub use oxidized::typing_defs_flags::ClassEltFlagsArgs;
+pub use oxidized::typing_defs_flags::FunParamFlags;
+pub use oxidized::typing_defs_flags::FunTypeFlags;
+pub use oxidized::typing_defs_flags::{self};
+pub use oxidized::xhp_attribute::Tag;
+pub use oxidized::xhp_attribute::XhpAttribute;
 
 #[derive(
     Copy,

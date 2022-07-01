@@ -4,16 +4,23 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Result;
-use datastore::{ChangesStore, DeltaStore, NonEvictingStore, ReadonlyStore};
-use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
+use datastore::ChangesStore;
+use datastore::DeltaStore;
+use datastore::NonEvictingStore;
+use datastore::ReadonlyStore;
+use hh24_types::ToplevelCanonSymbolHash;
+use hh24_types::ToplevelSymbolHash;
 use naming_provider::NamingProvider;
 use ocamlrep::rc::RcOc;
-use oxidized::{
-    file_info::{self, NameType},
-    naming_types,
-};
+use oxidized::file_info::NameType;
+use oxidized::file_info::{self};
+use oxidized::naming_types;
 use parking_lot::Mutex;
-use pos::{ConstName, FunName, ModuleName, RelativePath, TypeName};
+use pos::ConstName;
+use pos::FunName;
+use pos::ModuleName;
+use pos::RelativePath;
+use pos::TypeName;
 use reverse_naming_table::ReverseNamingTable;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -303,8 +310,12 @@ impl ReadonlyStore<ToplevelSymbolHash, Pos> for ModuleDb {
 
 mod reverse_naming_table {
     use anyhow::Result;
-    use datastore::{ChangesStore, DeltaStore, NonEvictingStore, ReadonlyStore};
-    use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
+    use datastore::ChangesStore;
+    use datastore::DeltaStore;
+    use datastore::NonEvictingStore;
+    use datastore::ReadonlyStore;
+    use hh24_types::ToplevelCanonSymbolHash;
+    use hh24_types::ToplevelSymbolHash;
     use std::hash::Hash;
     use std::sync::Arc;
 

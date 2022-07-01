@@ -8,16 +8,22 @@
 mod tyvar_info;
 mod tyvar_occurrences;
 
-use im::{HashMap, HashSet};
-use pos::{Pos, ToOxidized, TypeName};
+use im::HashMap;
+use im::HashSet;
+use pos::Pos;
+use pos::ToOxidized;
+use pos::TypeName;
 use std::ops::Deref;
-use ty::{
-    local::{Ty, Ty_, Tyvar, Variance},
-    local_error::{Primary, TypingError},
-    prop::Prop,
-    reason::Reason,
-    visitor::{Visitor, Walkable},
-};
+use ty::local::Ty;
+use ty::local::Ty_;
+use ty::local::Tyvar;
+use ty::local::Variance;
+use ty::local_error::Primary;
+use ty::local_error::TypingError;
+use ty::prop::Prop;
+use ty::reason::Reason;
+use ty::visitor::Visitor;
+use ty::visitor::Walkable;
 use tyvar_info::TyvarInfo;
 use tyvar_occurrences::TyvarOccurrences;
 use utils::core::IdentGen;
@@ -468,7 +474,8 @@ mod tests {
     use super::*;
     use oxidized::typing_defs_flags::FunTypeFlags;
     use pos::NPos;
-    use ty::local::{FunParam, FunType};
+    use ty::local::FunParam;
+    use ty::local::FunType;
     use ty::reason::NReason;
 
     #[test]

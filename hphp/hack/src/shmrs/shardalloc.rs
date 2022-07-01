@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::alloc::{AllocError, Allocator, Layout};
+use std::alloc::AllocError;
+use std::alloc::Allocator;
+use std::alloc::Layout;
 use std::ptr::NonNull;
 
 use crate::filealloc::FileAlloc;

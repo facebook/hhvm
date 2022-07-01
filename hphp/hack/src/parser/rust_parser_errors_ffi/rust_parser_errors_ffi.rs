@@ -9,13 +9,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
-use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
+use ocamlrep::ptr::UnsafeOcamlPtr;
+use ocamlrep::FromOcamlRep;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::parser_options::ParserOptions;
-use parser_core_types::{
-    source_text::SourceText, syntax_by_ref::positioned_syntax::PositionedSyntax,
-    syntax_error::SyntaxError, syntax_tree::SyntaxTree,
-};
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_by_ref::positioned_syntax::PositionedSyntax;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_tree::SyntaxTree;
 
 // "only_for_parser_errors" because it sets only a subset of options relevant to parser errors,
 // leaving the rest default

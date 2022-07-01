@@ -4,16 +4,22 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub use depgraph::reader::Dep;
-use depgraph::reader::{DepGraph, DepGraphOpener};
-use ocamlrep::{FromError, FromOcamlRep, Value};
-use ocamlrep_custom::{caml_serialize_default_impls, CamlSerialize};
+use depgraph::reader::DepGraph;
+use depgraph::reader::DepGraphOpener;
+use ocamlrep::FromError;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::Value;
+use ocamlrep_custom::caml_serialize_default_impls;
+use ocamlrep_custom::CamlSerialize;
 use once_cell::sync::OnceCell;
 use oxidized::typing_deps_mode::TypingDepsMode;
 use rpds::HashTrieSet;
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::io;
-use std::io::{Read, Write};
+use std::io::Read;
+use std::io::Write;
 use std::sync::Mutex;
 
 fn _static_assert() {

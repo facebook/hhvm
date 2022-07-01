@@ -4,12 +4,16 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![feature(allocator_api)]
 
-use ocaml_blob::{HeapValue, SerializedValue};
-use ocamlrep::{ptr::UnsafeOcamlPtr, Value};
+use ocaml_blob::HeapValue;
+use ocaml_blob::SerializedValue;
+use ocamlrep::ptr::UnsafeOcamlPtr;
+use ocamlrep::Value;
 use ocamlrep_ocamlpool::catch_unwind;
 use once_cell::sync::OnceCell;
-use shmrs::chashmap::{MINIMUM_EVICTABLE_BYTES_PER_SHARD, NUM_SHARDS};
-use shmrs::segment::{ShmemTableSegment, ShmemTableSegmentRef};
+use shmrs::chashmap::MINIMUM_EVICTABLE_BYTES_PER_SHARD;
+use shmrs::chashmap::NUM_SHARDS;
+use shmrs::segment::ShmemTableSegment;
+use shmrs::segment::ShmemTableSegmentRef;
 use std::alloc::Layout;
 use std::convert::TryInto;
 

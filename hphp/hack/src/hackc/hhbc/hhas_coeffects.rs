@@ -3,14 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{Pair, Slice, Str, Triple};
+use ffi::Pair;
+use ffi::Slice;
+use ffi::Str;
+use ffi::Triple;
 use hhbc_string_utils::strip_ns;
-use naming_special_names_rust::{self as sn, coeffects as c, coeffects::Ctx};
-use oxidized::{
-    aast as a,
-    aast_defs::{Hint, Hint_},
-    ast_defs::Id,
-};
+use naming_special_names_rust::coeffects as c;
+use naming_special_names_rust::coeffects::Ctx;
+use naming_special_names_rust::{self as sn};
+use oxidized::aast as a;
+use oxidized::aast_defs::Hint;
+use oxidized::aast_defs::Hint_;
+use oxidized::ast_defs::Id;
 
 #[derive(Debug, Eq, PartialEq)]
 #[repr(C)]

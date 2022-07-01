@@ -4,10 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Result;
-use std::{
-    ffi::OsStr,
-    path::{Path, PathBuf},
-};
+use std::ffi::OsStr;
+use std::path::Path;
+use std::path::PathBuf;
 
 /// Took this from https://docs.rs/once_cell/latest/once_cell/index.html#lazily-compiled-regex
 /// with this macro we can avoid re-initializing regexes, which are expensive to do
@@ -33,7 +32,9 @@ pub(crate) fn collect_files(
     let mut files: Vec<(u64, PathBuf)> = paths
         .iter()
         .map(|path| {
-            use jwalk::{DirEntry, Result, WalkDir};
+            use jwalk::DirEntry;
+            use jwalk::Result;
+            use jwalk::WalkDir;
             fn on_read_dir(
                 _: Option<usize>,
                 _: &Path,

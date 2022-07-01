@@ -385,7 +385,9 @@ mod tests {
     use super::*;
     use depgraph::reader::DepGraphOpener;
 
-    use std::collections::{BTreeSet, HashMap, HashSet};
+    use std::collections::BTreeSet;
+    use std::collections::HashMap;
+    use std::collections::HashSet;
     use std::fs;
 
     use tempfile::NamedTempFile;

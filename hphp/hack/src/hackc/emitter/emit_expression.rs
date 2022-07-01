@@ -2,37 +2,84 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{emit_adata, emit_fatal, emit_type_constant};
-use emit_pos::{emit_pos, emit_pos_then};
-use env::{emitter::Emitter, ClassExpr, Env, Flags as EnvFlags};
-use error::{Error, Result};
-use ffi::{Slice, Str};
+use crate::emit_adata;
+use crate::emit_fatal;
+use crate::emit_type_constant;
+use emit_pos::emit_pos;
+use emit_pos::emit_pos_then;
+use env::emitter::Emitter;
+use env::ClassExpr;
+use env::Env;
+use env::Flags as EnvFlags;
+use error::Error;
+use error::Result;
+use ffi::Slice;
+use ffi::Str;
 use hash::HashSet;
-use hhbc::{
-    hhas_symbol_refs::IncludePath, BareThisOp, CollectionType, FCallArgs, FCallArgsFlags,
-    HasGenericsOp, IncDecOp, Instruct, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, Label, Local,
-    MOpMode, MemberKey, MethodName, OODeclExistsOp, ObjMethodOp, Opcode, QueryMOp, ReadonlyOp,
-    SetOpOp, SetRangeOp, SpecialClsRef, StackIndex, TypeStructResolveOp, TypedValue,
-};
+use hhbc::hhas_symbol_refs::IncludePath;
+use hhbc::BareThisOp;
+use hhbc::CollectionType;
+use hhbc::FCallArgs;
+use hhbc::FCallArgsFlags;
+use hhbc::HasGenericsOp;
+use hhbc::IncDecOp;
+use hhbc::Instruct;
+use hhbc::IsLogAsDynamicCallOp;
+use hhbc::IsTypeOp;
+use hhbc::IterArgs;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::MOpMode;
+use hhbc::MemberKey;
+use hhbc::MethodName;
+use hhbc::OODeclExistsOp;
+use hhbc::ObjMethodOp;
+use hhbc::Opcode;
+use hhbc::QueryMOp;
+use hhbc::ReadonlyOp;
+use hhbc::SetOpOp;
+use hhbc::SetRangeOp;
+use hhbc::SpecialClsRef;
+use hhbc::StackIndex;
+use hhbc::TypeStructResolveOp;
+use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use lazy_static::lazy_static;
-use naming_special_names_rust::{
-    emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
-    special_idents, superglobals, typehints, user_attributes,
-};
-use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
-use oxidized::{
-    aast, aast_defs,
-    aast_visitor::{visit, visit_mut, AstParams, Node, NodeMut, Visitor, VisitorMut},
-    ast,
-    ast_defs::{self, ParamKind},
-    local_id,
-    pos::Pos,
-};
+use naming_special_names_rust::emitter_special_functions;
+use naming_special_names_rust::fb;
+use naming_special_names_rust::pseudo_consts;
+use naming_special_names_rust::pseudo_functions;
+use naming_special_names_rust::special_functions;
+use naming_special_names_rust::special_idents;
+use naming_special_names_rust::superglobals;
+use naming_special_names_rust::typehints;
+use naming_special_names_rust::user_attributes;
+use options::CompilerFlags;
+use options::HhvmFlags;
+use options::LangFlags;
+use options::Options;
+use oxidized::aast;
+use oxidized::aast_defs;
+use oxidized::aast_visitor::visit;
+use oxidized::aast_visitor::visit_mut;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::Visitor;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast;
+use oxidized::ast_defs::ParamKind;
+use oxidized::ast_defs::{self};
+use oxidized::local_id;
+use oxidized::pos::Pos;
 use regex::Regex;
-use std::{borrow::Cow, collections::BTreeMap, iter, str::FromStr};
+use std::borrow::Cow;
+use std::collections::BTreeMap;
+use std::iter;
+use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct EmitJmpResult<'arena> {
@@ -68,9 +115,16 @@ pub fn is_local_this<'a, 'arena>(env: &Env<'a, 'arena>, lid: &local_id::LocalId)
 }
 
 mod inout_locals {
-    use super::{Emitter, Env, Local, ParamKind};
+    use super::Emitter;
+    use super::Env;
+    use super::Local;
+    use super::ParamKind;
     use hash::HashMap;
-    use oxidized::{aast_defs::Lid, aast_visitor, aast_visitor::Node, ast, ast_defs};
+    use oxidized::aast_defs::Lid;
+    use oxidized::aast_visitor;
+    use oxidized::aast_visitor::Node;
+    use oxidized::ast;
+    use oxidized::ast_defs;
     use std::marker::PhantomData;
 
     pub(super) struct AliasInfo {
@@ -175,7 +229,8 @@ mod inout_locals {
         arg: &'ast ast::Expr,
         acc: &mut AliasInfoMap<'ast>,
     ) {
-        use ast::{Expr, Expr_};
+        use ast::Expr;
+        use ast::Expr_;
         let Expr(_, _, e) = arg;
         // inout $v
         if let (ParamKind::Pinout(_), Expr_::Lvar(lid)) = (pk, e) {
@@ -1319,7 +1374,8 @@ fn emit_struct_array<
     fields: &[ast::Afield],
     ctor: C,
 ) -> Result<InstrSeq<'arena>> {
-    use ast::{Expr, Expr_};
+    use ast::Expr;
+    use ast::Expr_;
     let alloc = env.arena;
     let (keys, value_instrs): (Vec<String>, _) = fields
         .iter()
@@ -1878,7 +1934,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
     caller_readonly_opt: Option<&Pos>,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     let ast::Expr(_, pos, expr_) = expr;
-    use ast::{Expr, Expr_};
+    use ast::Expr;
+    use ast::Expr_;
     let alloc = env.arena;
     let emit_generics =
         |e: &mut Emitter<'arena, 'decl>, env, fcall_args: &mut FCallArgs<'arena>| {
@@ -2489,7 +2546,8 @@ fn emit_special_function<'a, 'arena, 'decl>(
     uarg: Option<&ast::Expr>,
     lower_fq_name: &str,
 ) -> Result<Option<InstrSeq<'arena>>> {
-    use ast::{Expr, Expr_};
+    use ast::Expr;
+    use ast::Expr_;
     let alloc = env.arena;
     let nargs = args.len() + uarg.map_or(0, |_| 1);
     let fun_and_clsmeth_disabled = e
@@ -3372,7 +3430,8 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         .hhvm
         .flags
         .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
-    use {ast::Expr, ast::Expr_};
+    use ast::Expr;
+    use ast::Expr_;
     match (&expr.2, &args[..], uarg) {
         (Expr_::Id(id), _, None) if id.1 == pseudo_functions::ISSET => {
             emit_call_isset_exprs(e, env, pos, args)
@@ -3890,7 +3949,8 @@ fn emit_xhp_obj_get<'a, 'arena, 'decl>(
     s: &str,
     nullflavor: &ast_defs::OgNullFlavor,
 ) -> Result<InstrSeq<'arena>> {
-    use ast::{Expr, Expr_};
+    use ast::Expr;
+    use ast::Expr_;
     let f = Expr(
         (),
         pos.clone(),
@@ -4201,7 +4261,9 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
     elem: Option<&ast::Expr>,
     null_coalesce_assignment: bool,
 ) -> Result<(MemberKey<'arena>, InstrSeq<'arena>)> {
-    use ast::{ClassId_ as CI_, Expr, Expr_};
+    use ast::ClassId_ as CI_;
+    use ast::Expr;
+    use ast::Expr_;
     let alloc = env.arena;
     match elem {
         // ELement missing (so it's array append)
@@ -6309,7 +6371,8 @@ fn fixup_type_arg<'a, 'b, 'arena>(
         }
 
         fn visit_hint(&mut self, c: &mut (), h: &ast::Hint) -> Result<(), Option<Error>> {
-            use ast::{Hint_ as H_, Id};
+            use ast::Hint_ as H_;
+            use ast::Id;
             match h.1.as_ref() {
                 H_::Happly(Id(_, id), _)
                     if self.erased_tparams.contains(&id.as_str()) && self.isas =>
@@ -6326,7 +6389,8 @@ fn fixup_type_arg<'a, 'b, 'arena>(
         }
 
         fn visit_hint_(&mut self, c: &mut (), h: &ast::Hint_) -> Result<(), Option<Error>> {
-            use ast::{Hint_ as H_, Id};
+            use ast::Hint_ as H_;
+            use ast::Id;
             match h {
                 H_::Happly(Id(_, id), _) if self.erased_tparams.contains(&id.as_str()) => Err(None),
                 _ => h.recurse(c, self.object()),
@@ -6350,7 +6414,8 @@ fn fixup_type_arg<'a, 'b, 'arena>(
         }
 
         fn visit_hint_(&mut self, c: &mut (), h: &mut ast::Hint_) -> Result<(), ()> {
-            use ast::{Hint_ as H_, Id};
+            use ast::Hint_ as H_;
+            use ast::Id;
             match h {
                 H_::Happly(Id(_, id), _) if self.erased_tparams.contains(&id.as_str()) => {
                     Ok(*id = "_".into())
@@ -6405,7 +6470,8 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
         }
 
         fn visit_hint_(&mut self, c: &mut (), h_: &'ast ast::Hint_) -> Result<(), ()> {
-            use ast::{Hint_ as H_, Id};
+            use ast::Hint_ as H_;
+            use ast::Id;
             match h_ {
                 H_::Haccess(_, sids) => Ok(sids.iter().for_each(|Id(_, name)| self.add_name(name))),
                 H_::Habstr(name, h) | H_::Happly(Id(_, name), h) => {
@@ -6532,7 +6598,8 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
             }
         }
         Err(_) => {
-            use {ast::Expr_, ast_defs::Uop};
+            use ast::Expr_;
+            use ast_defs::Uop;
             match expr_ {
                 Expr_::Unop(uo) if uo.0 == Uop::Unot => emit_jmpz(e, env, &uo.1, label)?,
                 Expr_::Binop(bo) if bo.0.is_barbar() => {
@@ -6652,7 +6719,8 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
             }
         }
         Err(_) => {
-            use {ast::Expr_, ast_defs::Uop};
+            use ast::Expr_;
+            use ast_defs::Uop;
             match expr_ {
                 Expr_::Unop(uo) if uo.0 == Uop::Unot => emit_jmpnz(e, env, &uo.1, label)?,
                 Expr_::Binop(bo) if bo.0.is_barbar() => {

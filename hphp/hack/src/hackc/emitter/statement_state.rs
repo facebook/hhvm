@@ -3,8 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use instruction_sequence::{instr, InstrSeq};
-use oxidized::{aast, pos::Pos};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
+use oxidized::aast;
+use oxidized::pos::Pos;
 
 #[derive(Debug)]
 pub struct StatementState<'arena> {

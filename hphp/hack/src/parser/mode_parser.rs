@@ -6,14 +6,11 @@
 
 use bumpalo::Bump;
 use oxidized::file_info::Mode;
-use parser_core_types::{
-    parser_env::ParserEnv,
-    source_text::SourceText,
-    syntax_by_ref::{
-        syntax::Syntax,
-        syntax_variant_generated::{self as syntax, SyntaxVariant},
-    },
-};
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::{self as syntax};
 
 pub enum Language {
     Hack,

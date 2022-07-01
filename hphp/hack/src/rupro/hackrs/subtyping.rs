@@ -14,15 +14,20 @@ use crate::typaram_env::TyparamEnv;
 use crate::typing::typing_error::Result;
 use im::HashSet;
 use oracle::Oracle;
-use pos::{Symbol, TypeName};
-pub use solve::{force_solve, solve};
-use std::{ops::Deref, rc::Rc};
-use ty::{
-    local::{Ty, Ty_, Tyvar},
-    local_error::TypingError,
-    prop::{Cstr, Prop, PropF},
-    reason::Reason,
-};
+use pos::Symbol;
+use pos::TypeName;
+pub use solve::force_solve;
+pub use solve::solve;
+use std::ops::Deref;
+use std::rc::Rc;
+use ty::local::Ty;
+use ty::local::Ty_;
+use ty::local::Tyvar;
+use ty::local_error::TypingError;
+use ty::prop::Cstr;
+use ty::prop::Prop;
+use ty::prop::PropF;
+use ty::reason::Reason;
 
 /// A structure that can handle and normalize subtyping constraints, and
 /// propagate them to the inference environment.

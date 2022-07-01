@@ -3,11 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use error::{Error, Result};
+use error::Error;
+use error::Result;
 use ffi::Slice;
-use hhbc::{FCallArgs, FCallArgsFlags, Local};
-use instruction_sequence::{instr, InstrSeq};
-use oxidized::{aast::FunParam, pos::Pos};
+use hhbc::FCallArgs;
+use hhbc::FCallArgsFlags;
+use hhbc::Local;
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
+use oxidized::aast::FunParam;
+use oxidized::pos::Pos;
 
 pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";
 

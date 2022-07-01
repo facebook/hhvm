@@ -3,15 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{hhas_param::HhasParam, Label};
-use ffi::{Just, Maybe};
+use crate::hhas_param::HhasParam;
+use crate::Label;
+use ffi::Just;
+use ffi::Maybe;
 use hash::IndexSet;
-use naming_special_names_rust::{emitter_special_functions, special_idents};
-use oxidized::{
-    aast,
-    aast_visitor::{visit, AstParams, Node, Visitor},
-    ast::*,
-};
+use naming_special_names_rust::emitter_special_functions;
+use naming_special_names_rust::special_idents;
+use oxidized::aast;
+use oxidized::aast_visitor::visit;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::Visitor;
+use oxidized::ast::*;
 
 type SSet = std::collections::BTreeSet<String>;
 

@@ -6,8 +6,10 @@
 
 mod operator_generated;
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use parser_core_types::{parser_env::ParserEnv, token_kind::TokenKind};
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::token_kind::TokenKind;
 
 pub use crate::operator_generated::*;
 

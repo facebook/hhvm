@@ -6,10 +6,13 @@
 #![cfg(test)]
 #![allow(non_snake_case)] // e.g. Use `A` for hack `class A`.
 
-use crate::{FacebookInit, TestContext};
+use crate::FacebookInit;
+use crate::TestContext;
 use anyhow::Result;
-use depgraph_api::{DeclName, DependencyName};
-use maplit::{btreemap, btreeset};
+use depgraph_api::DeclName;
+use depgraph_api::DependencyName;
+use maplit::btreemap;
+use maplit::btreeset;
 use pos::TypeName;
 use std::collections::BTreeSet;
 

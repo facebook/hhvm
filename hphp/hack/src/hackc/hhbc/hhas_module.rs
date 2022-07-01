@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{hhas_attribute::HhasAttribute, hhas_pos::HhasSpan, ClassName};
+use crate::hhas_attribute::HhasAttribute;
+use crate::hhas_pos::HhasSpan;
+use crate::ClassName;
 use ffi::Slice;
 
 #[derive(Debug)]

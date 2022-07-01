@@ -6,22 +6,31 @@
 use crate::FileOpts;
 use anyhow::Result;
 use clap::Parser;
-use compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags, Profile};
-use decl_provider::{DeclProvider, Error};
-use direct_decl_parser::{self, Decls};
+use compile::EnvFlags;
+use compile::HHBCFlags;
+use compile::NativeEnv;
+use compile::ParserFlags;
+use compile::Profile;
+use decl_provider::DeclProvider;
+use decl_provider::Error;
+use direct_decl_parser::Decls;
+use direct_decl_parser::{self};
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
-use oxidized::relative_path::{Prefix, RelativePath};
-use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::file_info::NameType;
+use oxidized_by_ref::shallow_decl_defs::Decl;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
-use std::{
-    cell::RefCell,
-    fs::{self, File},
-    io::{stdout, Write},
-    path::{Path, PathBuf},
-    sync::Mutex,
-};
+use std::cell::RefCell;
+use std::fs::File;
+use std::fs::{self};
+use std::io::stdout;
+use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
+use std::sync::Mutex;
 
 #[derive(Parser, Debug)]
 pub struct Opts {

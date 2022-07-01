@@ -5,11 +5,10 @@
 
 use hhbc::hhas_symbol_refs::IncludePath;
 use oxidized::relative_path::RelativePath;
-use std::{
-    fmt,
-    io::{Result, Write},
-    path::PathBuf,
-};
+use std::fmt;
+use std::io::Result;
+use std::io::Write;
+use std::path::PathBuf;
 
 /// Indent is an abstraction of indentation. Configurable indentation
 /// and perf tweaking will be easier.

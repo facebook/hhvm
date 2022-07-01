@@ -12,18 +12,23 @@ use hackrs::decl_parser::DeclParser;
 use hackrs::errors::HackError;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::shallow_decl_provider::EagerShallowDeclProvider;
-use hackrs::tast::{self, TastExpander};
+use hackrs::tast::TastExpander;
+use hackrs::tast::{self};
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
 use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
 use hcons::Consable;
 use oxidized::global_options::GlobalOptions;
-use pos::{Prefix, RelativePath, RelativePathCtx};
+use pos::Prefix;
+use pos::RelativePath;
+use pos::RelativePathCtx;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
 use structopt::StructOpt;
-use ty::reason::{BReason, NReason, Reason};
+use ty::reason::BReason;
+use ty::reason::NReason;
+use ty::reason::Reason;
 
 // fn create_nast(path: PathBuf) -> oxidized::aast::Program<(), ()> {}
 

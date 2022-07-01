@@ -9,11 +9,13 @@
 
 #![allow(dead_code)]
 
-use crate::local::{Ty, Tyvar};
+use crate::local::Ty;
+use crate::local::Tyvar;
 use crate::reason::Reason;
 use im::HashSet;
 use oxidized::ast_defs::Variance;
-use pos::{Symbol, TypeName};
+use pos::Symbol;
+use pos::TypeName;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Cstr<R: Reason> {

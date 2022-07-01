@@ -8,7 +8,11 @@ use anyhow::Result;
 use hh24_types::ToplevelSymbolHash;
 use maplit::btreemap;
 use oxidized::naming_types;
-use pos::{ConstName, FunName, Prefix, RelativePath, TypeName};
+use pos::ConstName;
+use pos::FunName;
+use pos::Prefix;
+use pos::RelativePath;
+use pos::TypeName;
 use rpds::HashTrieSet;
 use std::path::PathBuf;
 

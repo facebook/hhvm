@@ -5,7 +5,9 @@
 
 use super::has_arena::HasArena;
 use bumpalo::Bump;
-use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
+use ocamlrep::Allocator;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
 
 #[derive(Clone)]
 pub struct State<'a> {

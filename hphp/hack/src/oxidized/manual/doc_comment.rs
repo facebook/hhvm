@@ -7,8 +7,10 @@ use std::rc::Rc;
 
 use crate::gen::ast_defs::Pstring;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use serde::{Deserialize, Serialize};
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(
     Clone,

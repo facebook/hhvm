@@ -2,14 +2,21 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{emit_body, emit_param};
+use crate::emit_body;
+use crate::emit_param;
 use ast_scope::Scope;
 use env::emitter::Emitter;
-use error::{Error, Result};
-use ffi::{Maybe::Just, Slice};
-use hhbc::{hhas_body::HhasBody, Local};
-use instruction_sequence::{instr, InstrSeq};
-use oxidized::{aast, ast, pos::Pos};
+use error::Error;
+use error::Result;
+use ffi::Maybe::Just;
+use ffi::Slice;
+use hhbc::hhas_body::HhasBody;
+use hhbc::Local;
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
+use oxidized::aast;
+use oxidized::ast;
+use oxidized::pos::Pos;
 
 pub fn emit_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,

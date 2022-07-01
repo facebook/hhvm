@@ -4,12 +4,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::inference_env::InferenceEnv;
 use bumpalo::Bump;
-use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
+use ocamlrep::Allocator;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
 use oxidized::aast;
-use oxidized::aast_visitor::{NodeMut, Params, VisitorMut};
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::Params;
+use oxidized::aast_visitor::VisitorMut;
 use pos::ToOxidized;
 use std::marker::PhantomData;
-use ty::local::{self, Ty};
+use ty::local::Ty;
+use ty::local::{self};
 use ty::reason::Reason;
 
 #[derive(Clone, Debug)]

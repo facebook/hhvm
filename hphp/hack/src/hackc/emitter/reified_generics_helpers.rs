@@ -3,14 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::emit_expression::{emit_reified_arg, is_reified_tparam};
+use crate::emit_expression::emit_reified_arg;
+use crate::emit_expression::is_reified_tparam;
 use decl_provider::TypeDecl;
-use env::{emitter::Emitter, Env};
+use env::emitter::Emitter;
+use env::Env;
 use error::Result;
 use hash::HashSet;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use naming_special_names_rust as sn;
-use oxidized::{aast, ast_defs::Id, pos::Pos};
+use oxidized::aast;
+use oxidized::ast_defs::Id;
+use oxidized::pos::Pos;
 
 #[derive(Debug, Clone)]
 pub enum ReificationLevel {
@@ -102,7 +107,8 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
 }
 
 fn remove_awaitable(aast::Hint(pos, hint): aast::Hint) -> aast::Hint {
-    use aast::{Hint, Hint_};
+    use aast::Hint;
+    use aast::Hint_;
     match *hint {
         Hint_::Happly(sid, mut hs)
             if hs.len() == 1 && sid.1.eq_ignore_ascii_case(sn::classes::AWAITABLE) =>
@@ -175,7 +181,10 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
     env: &Env<'a, 'arena>,
     h: aast::Hint,
 ) -> aast::Hint {
-    use aast::{Hint, Hint_, NastShapeInfo, ShapeFieldInfo};
+    use aast::Hint;
+    use aast::Hint_;
+    use aast::NastShapeInfo;
+    use aast::ShapeFieldInfo;
     fn rec<'a, 'arena>(env: &Env<'a, 'arena>, Hint(pos, h_): Hint) -> Hint {
         fn modify<'a, 'arena>(env: &Env<'a, 'arena>, id: String) -> String {
             if get_erased_tparams(env).any(|p| p == id) {
@@ -240,7 +249,8 @@ pub(crate) fn happly_decl_has_reified_generics<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     aast::Hint(_, hint): &aast::Hint,
 ) -> bool {
-    use aast::{Hint_, ReifyKind};
+    use aast::Hint_;
+    use aast::ReifyKind;
     match hint.as_ref() {
         Hint_::Happly(Id(_, id), _) => {
             let provider = match emitter.decl_provider {

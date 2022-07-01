@@ -6,7 +6,8 @@
 use std::rc::Rc;
 use std::sync::Arc;
 
-pub use eq_modulo_pos_derive::{EqModuloPos, EqModuloPosAndReason};
+pub use eq_modulo_pos_derive::EqModuloPos;
+pub use eq_modulo_pos_derive::EqModuloPosAndReason;
 
 pub trait EqModuloPos {
     fn eq_modulo_pos(&self, rhs: &Self) -> bool;

@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::typed_value::TypedValue;
-use ffi::{Slice, Str};
+use ffi::Slice;
+use ffi::Str;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 

@@ -10,12 +10,15 @@ use crate::typing::typing_error::Result;
 use im::HashSet;
 use oxidized::ast_defs::Variance;
 use std::ops::Deref;
-use ty::{
-    local::{FunParam, FunType, Ty, Ty_, Tyvar, Variance as V},
-    local_error::TypingError,
-    prop::Cstr,
-    reason::Reason,
-};
+use ty::local::FunParam;
+use ty::local::FunType;
+use ty::local::Ty;
+use ty::local::Ty_;
+use ty::local::Tyvar;
+use ty::local::Variance as V;
+use ty::local_error::TypingError;
+use ty::prop::Cstr;
+use ty::reason::Reason;
 
 /// Attempt to 'solve' a type variable. We first look for a type appearing
 /// in both the upper and lower bound. If there is no such type, we consider

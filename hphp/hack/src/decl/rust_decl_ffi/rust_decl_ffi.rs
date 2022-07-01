@@ -6,11 +6,16 @@
 
 use ast_and_decl_parser::Env;
 use bumpalo::Bump;
-use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
+use ocamlrep::bytes_from_ocamlrep;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_caml_builtins::Int64;
-use ocamlrep_ocamlpool::{ocaml_ffi_arena_result, ocaml_ffi_with_arena};
-use oxidized::{decl_parser_options::DeclParserOptions, relative_path::RelativePath};
-use oxidized_by_ref::direct_decl_parser::{Decls, ParsedFile, ParsedFileWithHashes};
+use ocamlrep_ocamlpool::ocaml_ffi_arena_result;
+use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
+use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::direct_decl_parser::Decls;
+use oxidized_by_ref::direct_decl_parser::ParsedFile;
+use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 
 ocaml_ffi_arena_result! {

@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{Maybe, Maybe::Just, Str};
+use ffi::Maybe;
+use ffi::Maybe::Just;
+use ffi::Str;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
 
 /// Type info has additional optional user type

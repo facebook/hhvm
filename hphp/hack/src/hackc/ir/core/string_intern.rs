@@ -6,7 +6,8 @@
 use bstr::BStr;
 use ffi::Str;
 use hash::HashMap;
-use newtype::{newtype_int, IdVec};
+use newtype::newtype_int;
+use newtype::IdVec;
 
 // Improvement list:
 //

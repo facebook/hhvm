@@ -6,7 +6,8 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use sha1::{Digest, Sha1};
+use sha1::Digest;
+use sha1::Sha1;
 
 #[derive(Clone)]
 pub struct ConfigFile {

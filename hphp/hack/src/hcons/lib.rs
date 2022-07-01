@@ -4,12 +4,18 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::fmt;
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::ops::Deref;
-use std::sync::{Arc, Weak};
+use std::sync::Arc;
+use std::sync::Weak;
 
-use dashmap::{mapref::entry::Entry, DashMap};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use dashmap::mapref::entry::Entry;
+use dashmap::DashMap;
+use serde::Deserialize;
+use serde::Deserializer;
+use serde::Serialize;
+use serde::Serializer;
 
 pub use once_cell::sync::Lazy;
 

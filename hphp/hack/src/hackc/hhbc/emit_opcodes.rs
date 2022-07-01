@@ -3,10 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_gen::{ImmType, Inputs, InstrFlags, OpcodeData};
-use proc_macro2::{Ident, Punct, Spacing, Span, TokenStream};
-use quote::{quote, ToTokens};
-use syn::{punctuated::Punctuated, token, ItemEnum, Lifetime, Result, Variant};
+use hhbc_gen::ImmType;
+use hhbc_gen::Inputs;
+use hhbc_gen::InstrFlags;
+use hhbc_gen::OpcodeData;
+use proc_macro2::Ident;
+use proc_macro2::Punct;
+use proc_macro2::Spacing;
+use proc_macro2::Span;
+use proc_macro2::TokenStream;
+use quote::quote;
+use quote::ToTokens;
+use syn::punctuated::Punctuated;
+use syn::token;
+use syn::ItemEnum;
+use syn::Lifetime;
+use syn::Result;
+use syn::Variant;
 
 pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
     let mut enum_def = syn::parse2::<ItemEnum>(input)?;
@@ -333,13 +346,14 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
     // Foo | Bar | Baz => default
     // Foo | Bar | Baz => {}
 
-    use convert_case::{Case, Casing};
+    use convert_case::Case;
+    use convert_case::Casing;
     use proc_macro2::TokenTree;
     use std::collections::HashMap;
-    use syn::{
-        parse::{ParseStream, Parser},
-        Error, Token,
-    };
+    use syn::parse::ParseStream;
+    use syn::parse::Parser;
+    use syn::Error;
+    use syn::Token;
 
     #[derive(Debug)]
     struct Helper<'a> {

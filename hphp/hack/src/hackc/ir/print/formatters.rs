@@ -15,20 +15,27 @@
 //! ```
 //!
 
-use crate::{
-    print::FuncContext,
-    util::{FmtCommaSep, FmtEscapedString},
-};
-use core::{
-    instr::{
-        BareThisOp, CollectionType, HasLoc, IncDecOp, InitPropOp, IsTypeOp, MOpMode, ReadonlyOp,
-        SetOpOp, Special, SpecialClsRef,
-    },
-    string_intern::StringInterner,
-    *,
-};
-use ffi::{Pair, Str};
-use std::fmt::{Display, Formatter, Result};
+use crate::print::FuncContext;
+use crate::util::FmtCommaSep;
+use crate::util::FmtEscapedString;
+use core::instr::BareThisOp;
+use core::instr::CollectionType;
+use core::instr::HasLoc;
+use core::instr::IncDecOp;
+use core::instr::InitPropOp;
+use core::instr::IsTypeOp;
+use core::instr::MOpMode;
+use core::instr::ReadonlyOp;
+use core::instr::SetOpOp;
+use core::instr::Special;
+use core::instr::SpecialClsRef;
+use core::string_intern::StringInterner;
+use core::*;
+use ffi::Pair;
+use ffi::Str;
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result;
 
 pub(crate) struct FmtAttr(pub Attr);
 

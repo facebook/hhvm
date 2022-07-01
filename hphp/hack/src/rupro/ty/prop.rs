@@ -4,9 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod constraint;
 
-use crate::{local::Ty, local_error::TypingError, reason::Reason};
+use crate::local::Ty;
+use crate::local_error::TypingError;
+use crate::reason::Reason;
 pub use constraint::Cstr;
-use hcons::{Conser, Hc};
+use hcons::Conser;
+use hcons::Hc;
 use pos::ToOxidized;
 use std::ops::Deref;
 

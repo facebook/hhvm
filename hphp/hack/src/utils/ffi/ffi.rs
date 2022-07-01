@@ -6,7 +6,8 @@
 use bstr::BStr;
 use std::cmp::Ordering;
 use std::fmt;
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::slice::from_raw_parts;
 
 /// Maybe<T> is similar to C++ `std::option`. It is just like Rust `Option<T>`

@@ -4,8 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::BytesFormatter;
-use bstr::{BStr, BString};
-use std::io::{Result, Write};
+use bstr::BStr;
+use bstr::BString;
+use std::io::Result;
+use std::io::Write;
 
 pub trait DisplayBytes {
     fn fmt(&self, fmt: &mut BytesFormatter<'_>) -> Result<()>;

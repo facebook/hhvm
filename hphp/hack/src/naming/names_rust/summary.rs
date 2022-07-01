@@ -3,9 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hh24_types::{DeclHash, FileDeclsHash, ToplevelSymbolHash};
-use oxidized::file_info::{self, NameType};
-use oxidized_by_ref::direct_decl_parser::{Decl, ParsedFile};
+use hh24_types::DeclHash;
+use hh24_types::FileDeclsHash;
+use hh24_types::ToplevelSymbolHash;
+use oxidized::file_info::NameType;
+use oxidized::file_info::{self};
+use oxidized_by_ref::direct_decl_parser::Decl;
+use oxidized_by_ref::direct_decl_parser::ParsedFile;
 
 /// Similar to `oxidized::file_info::FileInfo`, but containing only the
 /// information which is necessary to populate the naming table (i.e., omitting

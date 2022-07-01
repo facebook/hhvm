@@ -6,10 +6,13 @@
 use crate::serde_store::StoreOpts;
 use crate::SerializingStore;
 use datastore::NonEvictingStore;
-use hackrs::{decl_parser::DeclParser, shallow_decl_provider::ShallowDeclStore};
+use hackrs::decl_parser::DeclParser;
+use hackrs::shallow_decl_provider::ShallowDeclStore;
 use indicatif::ParallelProgressIterator;
-use pos::{RelativePath, TypeName};
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use pos::RelativePath;
+use pos::TypeName;
+use rayon::iter::IntoParallelRefIterator;
+use rayon::iter::ParallelIterator;
 use std::sync::Arc;
 use ty::reason::Reason;
 

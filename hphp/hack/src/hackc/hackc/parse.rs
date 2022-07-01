@@ -4,20 +4,25 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use aast_parser::AastParser;
-use anyhow::{Context, Result};
+use anyhow::Context;
+use anyhow::Result;
 use clap::Parser;
 use ocamlrep::rc::RcOc;
-use oxidized::relative_path::{Prefix, RelativePath};
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText, parser_env::ParserEnv, source_text::SourceText,
-};
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
-use std::{
-    io::{stdin, BufRead, BufReader, Write},
-    path::PathBuf,
-};
+use std::io::stdin;
+use std::io::BufRead;
+use std::io::BufReader;
+use std::io::Write;
+use std::path::PathBuf;
 use strum::VariantNames;
-use strum_macros::{Display, EnumString, EnumVariantNames};
+use strum_macros::Display;
+use strum_macros::EnumString;
+use strum_macros::EnumVariantNames;
 
 #[derive(Parser, Clone, Debug)]
 pub struct BenchOpts {

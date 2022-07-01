@@ -4,9 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::{
-    decl_parser_options::DeclParserOptions, full_fidelity_parser_env::FullFidelityParserEnv,
-};
+use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
 
 #[derive(Clone, Debug, Default)]
 pub struct ParserEnv {

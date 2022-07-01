@@ -3,14 +3,26 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{Pair, Slice, Str, Triple};
-use hash::{HashMap, HashSet};
-use hhbc::{
-    hackc_unit::HackCUnit, hhas_attribute::HhasAttribute, hhas_body::HhasBody,
-    hhas_class::HhasClass, hhas_constant::HhasConstant, hhas_function::HhasFunction,
-    hhas_method::HhasMethod, hhas_module::HhasModule, hhas_param::HhasParam, hhas_pos::HhasPos,
-    hhas_symbol_refs::HhasSymbolRefs, hhas_typedef::HhasTypedef, FatalOp, Instruct,
-};
+use ffi::Pair;
+use ffi::Slice;
+use ffi::Str;
+use ffi::Triple;
+use hash::HashMap;
+use hash::HashSet;
+use hhbc::hackc_unit::HackCUnit;
+use hhbc::hhas_attribute::HhasAttribute;
+use hhbc::hhas_body::HhasBody;
+use hhbc::hhas_class::HhasClass;
+use hhbc::hhas_constant::HhasConstant;
+use hhbc::hhas_function::HhasFunction;
+use hhbc::hhas_method::HhasMethod;
+use hhbc::hhas_module::HhasModule;
+use hhbc::hhas_param::HhasParam;
+use hhbc::hhas_pos::HhasPos;
+use hhbc::hhas_symbol_refs::HhasSymbolRefs;
+use hhbc::hhas_typedef::HhasTypedef;
+use hhbc::FatalOp;
+use hhbc::Instruct;
 use std::fmt;
 
 #[derive(Debug, Hash, PartialEq, Eq)]

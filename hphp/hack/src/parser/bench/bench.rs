@@ -4,8 +4,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fs;
+use std::path::PathBuf;
 use std::time::Duration;
-use std::{fs, path::PathBuf};
 
 use bumpalo::Bump;
 use criterion::Criterion;
@@ -13,8 +14,10 @@ use structopt::StructOpt;
 
 use aast_parser::rust_aast_parser_types::Env as AastParserEnv;
 use ocamlrep::rc::RcOc;
-use oxidized::relative_path::{Prefix, RelativePath};
-use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::source_text::SourceText;
 
 #[derive(Debug, StructOpt)]
 #[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)

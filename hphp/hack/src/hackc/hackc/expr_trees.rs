@@ -4,7 +4,8 @@
 use crate::FileOpts;
 use anyhow::Result;
 use clap::Parser;
-use oxidized::relative_path::{Prefix, RelativePath};
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
 
 #[derive(Parser, Debug, Default)]
 pub(crate) struct Opts {

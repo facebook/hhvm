@@ -3,16 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    literal::AdataId, string_intern::StringInterner, Attribute, Class, Function, HackConstant,
-    Module, SrcLoc, TypedValue,
-};
+use crate::literal::AdataId;
+use crate::string_intern::StringInterner;
+use crate::Attribute;
+use crate::Class;
+use crate::Function;
+use crate::HackConstant;
+use crate::Module;
+use crate::SrcLoc;
+use crate::TypedValue;
 use ffi::Str;
 use hash::HashMap;
-pub use hhbc::{
-    hhas_symbol_refs::IncludePath, hhas_typedef::HhasTypedef as Typedef, ClassName, ConstName,
-    FunctionName,
-};
+pub use hhbc::hhas_symbol_refs::IncludePath;
+pub use hhbc::hhas_typedef::HhasTypedef as Typedef;
+pub use hhbc::ClassName;
+pub use hhbc::ConstName;
+pub use hhbc::FunctionName;
 
 pub enum FatalOp<'a> {
     None,

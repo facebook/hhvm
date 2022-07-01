@@ -3,24 +3,51 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{inherit::Inherited, Result, Substitution};
+use super::inherit::Inherited;
+use super::Result;
+use super::Substitution;
 use crate::special_names as sn;
 use depgraph_api::DepGraphWriter;
 use eq_modulo_pos::EqModuloPosAndReason;
 use oxidized::global_options::GlobalOptions;
-use pos::{
-    ClassConstName, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned,
-    PropNameIndexMap, PropNameIndexSet, TypeConstName, TypeConstNameIndexMap, TypeName,
-    TypeNameIndexMap, TypeNameIndexSet,
-};
+use pos::ClassConstName;
+use pos::ClassConstNameIndexMap;
+use pos::MethodNameIndexMap;
+use pos::ModuleName;
+use pos::Positioned;
+use pos::PropNameIndexMap;
+use pos::PropNameIndexSet;
+use pos::TypeConstName;
+use pos::TypeConstNameIndexMap;
+use pos::TypeName;
+use pos::TypeNameIndexMap;
+use pos::TypeNameIndexSet;
 use std::sync::Arc;
+use ty::decl::folded::Constructor;
 use ty::decl::subst::Subst;
-use ty::decl::{
-    folded::Constructor, AbstractTypeconst, Abstraction, CeVisibility, ClassConst, ClassConstKind,
-    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConcreteTypeconst, ConsistentKind, FoldedClass,
-    FoldedElement, Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,
-    ShallowTypeconst, TaccessType, Ty, TypeConst, Typeconst, Visibility,
-};
+use ty::decl::AbstractTypeconst;
+use ty::decl::Abstraction;
+use ty::decl::CeVisibility;
+use ty::decl::ClassConst;
+use ty::decl::ClassConstKind;
+use ty::decl::ClassEltFlags;
+use ty::decl::ClassEltFlagsArgs;
+use ty::decl::ClassishKind;
+use ty::decl::ConcreteTypeconst;
+use ty::decl::ConsistentKind;
+use ty::decl::FoldedClass;
+use ty::decl::FoldedElement;
+use ty::decl::Requirement;
+use ty::decl::ShallowClass;
+use ty::decl::ShallowClassConst;
+use ty::decl::ShallowMethod;
+use ty::decl::ShallowProp;
+use ty::decl::ShallowTypeconst;
+use ty::decl::TaccessType;
+use ty::decl::Ty;
+use ty::decl::TypeConst;
+use ty::decl::Typeconst;
+use ty::decl::Visibility;
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
 

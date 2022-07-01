@@ -10,19 +10,22 @@ use compile::Profile;
 use log::info;
 use multifile_rust as multifile;
 use rayon::prelude::*;
-use std::{
-    borrow::Cow,
-    fmt::{self, Display},
-    fs,
-    hash::{Hash, Hasher},
-    io::Write,
-    path::{Path, PathBuf},
-    sync::{
-        atomic::{AtomicBool, AtomicUsize, Ordering},
-        Arc, Mutex,
-    },
-    time::{Duration, Instant},
-};
+use std::borrow::Cow;
+use std::fmt::Display;
+use std::fmt::{self};
+use std::fs;
+use std::hash::Hash;
+use std::hash::Hasher;
+use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
+use std::sync::Arc;
+use std::sync::Mutex;
+use std::time::Duration;
+use std::time::Instant;
 
 type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 

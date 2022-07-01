@@ -7,9 +7,18 @@ pub mod formatters;
 pub mod print;
 pub mod util;
 
-pub use formatters::{FmtBid, FmtInstr, FmtLid, FmtLoc, FmtRawBid, FmtRawVid, FmtVid};
+pub use formatters::FmtBid;
+pub use formatters::FmtInstr;
+pub use formatters::FmtLid;
+pub use formatters::FmtLoc;
+pub use formatters::FmtRawBid;
+pub use formatters::FmtRawVid;
+pub use formatters::FmtVid;
 pub use print::print_unit;
-pub use util::{FmtCommaSep, FmtEscapedString, FmtOption, FmtOptionOr};
+pub use util::FmtCommaSep;
+pub use util::FmtEscapedString;
+pub use util::FmtOption;
+pub use util::FmtOptionOr;
 
 // This isn't used by the print crate but is useful for code that wants to print
 // a Func for debugging purposes.

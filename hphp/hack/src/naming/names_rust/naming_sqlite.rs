@@ -6,11 +6,16 @@
 use crate::datatypes::*;
 use crate::FileSummary;
 
-use hh24_types::{Checksum, DeclHash, ToplevelSymbolHash};
-use nohash_hasher::{IntMap, IntSet};
+use hh24_types::Checksum;
+use hh24_types::DeclHash;
+use hh24_types::ToplevelSymbolHash;
+use nohash_hasher::IntMap;
+use nohash_hasher::IntSet;
 use oxidized::file_info::NameType;
 use oxidized::relative_path::RelativePath;
-use rusqlite::{params, Connection, OptionalExtension};
+use rusqlite::params;
+use rusqlite::Connection;
+use rusqlite::OptionalExtension;
 
 #[derive(Clone, Debug)]
 pub struct SymbolItem {

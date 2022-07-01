@@ -3,8 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{opcodes::Opcode, typed_value::TypedValue, FCallArgsFlags, PropName, ReadonlyOp};
-use ffi::{Slice, Str};
+use crate::opcodes::Opcode;
+use crate::typed_value::TypedValue;
+use crate::FCallArgsFlags;
+use crate::PropName;
+use crate::ReadonlyOp;
+use ffi::Slice;
+use ffi::Str;
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;

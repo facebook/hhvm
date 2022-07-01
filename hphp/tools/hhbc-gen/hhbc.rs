@@ -8,7 +8,8 @@
 
 use bitflags::bitflags;
 use once_cell::sync::OnceCell;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 #[cfg(fbcode_build)]
 mod opcodes;
@@ -396,7 +397,11 @@ pub fn opcode_data() -> &'static [OpcodeData] {
 #[cfg(test)]
 mod test {
     use super::*;
-    use fixups::{add_flag, insert_imm, remove_imm, rename_imm, replace_imm};
+    use fixups::add_flag;
+    use fixups::insert_imm;
+    use fixups::remove_imm;
+    use fixups::rename_imm;
+    use fixups::replace_imm;
     use maplit::hashmap;
 
     #[test]

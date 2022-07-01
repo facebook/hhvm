@@ -3,11 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{DeclProvider, Error, Result};
+use crate::DeclProvider;
+use crate::Error;
+use crate::Result;
 use arena_deserializer::serde::Deserialize;
-use libc::{c_char, c_int};
+use libc::c_char;
+use libc::c_int;
+use oxidized_by_ref::direct_decl_parser;
 use oxidized_by_ref::file_info::NameType;
-use oxidized_by_ref::{direct_decl_parser, shallow_decl_defs::Decl};
+use oxidized_by_ref::shallow_decl_defs::Decl;
 use std::ffi::c_void;
 
 /**

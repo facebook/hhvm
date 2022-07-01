@@ -3,19 +3,26 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
+use pos::ConstName;
+use pos::FunName;
+use pos::MethodName;
+use pos::PropName;
+use pos::RelativePath;
+use pos::TypeName;
 use std::fmt::Debug;
 use std::sync::Arc;
-use ty::decl::{
-    shallow::{ConstDecl, FunDecl, TypedefDecl},
-    ShallowClass, Ty,
-};
+use ty::decl::shallow::ConstDecl;
+use ty::decl::shallow::FunDecl;
+use ty::decl::shallow::TypedefDecl;
+use ty::decl::ShallowClass;
+use ty::decl::Ty;
 use ty::reason::Reason;
 
 mod provider;
 mod store;
 
-pub use provider::{EagerShallowDeclProvider, LazyShallowDeclProvider};
+pub use provider::EagerShallowDeclProvider;
+pub use provider::LazyShallowDeclProvider;
 pub use store::ShallowDeclStore;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;

@@ -3,14 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::cmp::{Ord, Ordering, PartialOrd};
-use std::hash::{Hash, Hasher};
+use std::cmp::Ord;
+use std::cmp::Ordering;
+use std::cmp::PartialOrd;
+use std::hash::Hash;
+use std::hash::Hasher;
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 use arena_deserializer::impl_deserialize_in_arena;
-use arena_trait::{Arena, TrivialDrop};
-use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
+use arena_trait::Arena;
+use arena_trait::TrivialDrop;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 
 /// The maximum height difference (or balance factor) that is allowed
@@ -574,7 +580,9 @@ mod tests_arbitrary {
     use super::*;
     use bumpalo::Bump;
     use quickcheck::*;
-    use std::collections::{BTreeMap, BTreeSet, HashMap};
+    use std::collections::BTreeMap;
+    use std::collections::BTreeSet;
+    use std::collections::HashMap;
     use std::hash::Hash;
 
     quickcheck! {

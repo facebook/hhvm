@@ -3,13 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::{cmp::Ordering, ops::Range, result::Result::*};
+use std::cmp::Ordering;
+use std::ops::Range;
+use std::result::Result::*;
 
 use bumpalo::Bump;
-use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
-use serde::{Deserialize, Serialize};
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
+use serde::Deserialize;
+use serde::Serialize;
 
-use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
+use ocamlrep_derive::FromOcamlRepIn;
+use ocamlrep_derive::ToOcamlRep;
 use oxidized::file_pos::FilePos;
 use oxidized::file_pos_large::FilePosLarge;
 use oxidized::file_pos_small::FilePosSmall;

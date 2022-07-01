@@ -3,18 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::fmt::{self, Debug, Display};
-use std::path::{Path, PathBuf};
+use std::fmt::Debug;
+use std::fmt::Display;
+use std::fmt::{self};
+use std::path::Path;
+use std::path::PathBuf;
 
 use bumpalo::Bump;
 use camino::Utf8Path;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep::ToOcamlRep;
 
-pub use oxidized::relative_path::{Prefix, PrefixPathMap};
+pub use oxidized::relative_path::Prefix;
+pub use oxidized::relative_path::PrefixPathMap;
 
 // Named Relative_path.default in OCaml, but it really isn't a suitable default
 // for most purposes.
@@ -266,7 +271,8 @@ pub mod map {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use arena_deserializer::{ArenaDeserializer, DeserializeInArena};
+    use arena_deserializer::ArenaDeserializer;
+    use arena_deserializer::DeserializeInArena;
     use std::path::Path;
 
     #[test]

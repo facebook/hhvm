@@ -5,16 +5,16 @@
 
 mod verify_smart_constructors_generated;
 
-use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-use parser_core_types::{
-    syntax_by_ref::{
-        has_arena::HasArena,
-        positioned_syntax::PositionedSyntax,
-        positioned_token::{PositionedToken, TokenFactory},
-    },
-    syntax_kind::SyntaxKind,
-};
-use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
+use ocamlrep::Allocator;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
+use parser_core_types::syntax_by_ref::has_arena::HasArena;
+use parser_core_types::syntax_by_ref::positioned_syntax::PositionedSyntax;
+use parser_core_types::syntax_by_ref::positioned_token::PositionedToken;
+use parser_core_types::syntax_by_ref::positioned_token::TokenFactory;
+use parser_core_types::syntax_kind::SyntaxKind;
+use syntax_smart_constructors::StateType;
+use syntax_smart_constructors::SyntaxSmartConstructors;
 
 use bumpalo::Bump;
 

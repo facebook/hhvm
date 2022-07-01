@@ -11,17 +11,21 @@ mod parse;
 mod util;
 mod verify;
 
-use ::compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
+use ::compile::EnvFlags;
+use ::compile::HHBCFlags;
+use ::compile::NativeEnv;
+use ::compile::ParserFlags;
 use anyhow::Result;
 use clap::Parser;
 use hhvm_options::HhvmOptions;
 use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized::relative_path::{self, RelativePath};
-use std::{
-    fs,
-    io::{BufRead, BufReader},
-    path::{Path, PathBuf},
-};
+use oxidized::relative_path::RelativePath;
+use oxidized::relative_path::{self};
+use std::fs;
+use std::io::BufRead;
+use std::io::BufReader;
+use std::path::Path;
+use std::path::PathBuf;
 
 /// Hack Compiler
 #[derive(Parser, Debug, Default)]

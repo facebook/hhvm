@@ -4,7 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc::hhas_coeffects::HhasCoeffects;
-use oxidized::{ast, file_info, pos::Pos};
+use oxidized::ast;
+use oxidized::file_info;
+use oxidized::pos::Pos;
 
 use std::rc::Rc;
 

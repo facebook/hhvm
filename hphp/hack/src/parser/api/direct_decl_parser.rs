@@ -5,24 +5,24 @@
 
 use bumpalo::Bump;
 
-use direct_decl_smart_constructors::{
-    ArenaSourceTextAllocator, DirectDeclSmartConstructors, NoSourceTextAllocator, Node,
-    SourceTextAllocator,
-};
+use direct_decl_smart_constructors::ArenaSourceTextAllocator;
+use direct_decl_smart_constructors::DirectDeclSmartConstructors;
+use direct_decl_smart_constructors::NoSourceTextAllocator;
+use direct_decl_smart_constructors::Node;
+use direct_decl_smart_constructors::SourceTextAllocator;
 use mode_parser::parse_mode;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::file_info;
 use parser::parser::Parser;
-use parser_core_types::{
-    parser_env::ParserEnv, source_text::SourceText, syntax_error::SyntaxError,
-};
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_error::SyntaxError;
 
 pub use oxidized::decl_parser_options::DeclParserOptions;
-pub use oxidized_by_ref::{
-    direct_decl_parser::{Decls, ParsedFile},
-    typing_defs::UserAttribute,
-};
+pub use oxidized_by_ref::direct_decl_parser::Decls;
+pub use oxidized_by_ref::direct_decl_parser::ParsedFile;
+pub use oxidized_by_ref::typing_defs::UserAttribute;
 
 /// Parse decls for typechecking.
 /// - References the source text to avoid spending time or space copying

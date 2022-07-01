@@ -9,22 +9,28 @@ pub mod naming_table;
 mod test_naming_table;
 
 use anyhow::Result;
-use datastore::{ChangesStore, NonEvictingStore, Store};
-use file_provider::{DiskProvider, FileProvider};
-use hackrs::{
-    decl_parser::DeclParser,
-    folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
-    shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider, ShallowDeclStore},
-};
+use datastore::ChangesStore;
+use datastore::NonEvictingStore;
+use datastore::Store;
+use file_provider::DiskProvider;
+use file_provider::FileProvider;
+use hackrs::decl_parser::DeclParser;
+use hackrs::folded_decl_provider::FoldedDeclProvider;
+use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
+use hackrs::shallow_decl_provider::LazyShallowDeclProvider;
+use hackrs::shallow_decl_provider::ShallowDeclProvider;
+use hackrs::shallow_decl_provider::ShallowDeclStore;
 use naming_table::NamingTable;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use oxidized::parser_options::ParserOptions;
-use pos::{RelativePath, RelativePathCtx, TypeName};
+use pos::RelativePath;
+use pos::RelativePathCtx;
+use pos::TypeName;
 use std::sync::Arc;
-use ty::{
-    decl::{self, folded::FoldedClass},
-    reason::BReason,
-};
+use ty::decl::folded::FoldedClass;
+use ty::decl::{self};
+use ty::reason::BReason;
 
 pub struct HhServerProviderBackend {
     decl_parser: DeclParser<BReason>,

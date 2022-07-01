@@ -5,11 +5,20 @@
 
 use anyhow::Result;
 use datastore::Store;
-use pos::{ConstName, FunName, MethodName, ModuleName, PropName, TypeName};
+use pos::ConstName;
+use pos::FunName;
+use pos::MethodName;
+use pos::ModuleName;
+use pos::PropName;
+use pos::TypeName;
 use std::sync::Arc;
-use ty::decl::{
-    shallow::Decl, shallow::ModuleDecl, ConstDecl, FunDecl, ShallowClass, Ty, TypedefDecl,
-};
+use ty::decl::shallow::Decl;
+use ty::decl::shallow::ModuleDecl;
+use ty::decl::ConstDecl;
+use ty::decl::FunDecl;
+use ty::decl::ShallowClass;
+use ty::decl::Ty;
+use ty::decl::TypedefDecl;
 use ty::reason::Reason;
 
 /// A datastore for shallow declarations (i.e., the information we get from

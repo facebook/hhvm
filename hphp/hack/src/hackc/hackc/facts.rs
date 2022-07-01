@@ -3,9 +3,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 use anyhow::Result;
 use clap::Parser;
-use facts_rust::{self as facts, Facts};
-use oxidized::relative_path::{Prefix, RelativePath};
-use serde_json::{json, Value};
+use facts_rust::Facts;
+use facts_rust::{self as facts};
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
+use serde_json::json;
+use serde_json::Value;
 
 /// Facts subcommand options
 #[derive(Parser, Debug, Default)]

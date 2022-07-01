@@ -7,13 +7,14 @@ use crate::special_names;
 use arena_collections::list::List;
 use file_provider::FileProvider;
 use names::FileSummary;
-use obr::{
-    direct_decl_parser::Decls,
-    shallow_decl_defs::{Decl, ShallowClass},
-};
-use oxidized::{decl_parser_options::DeclParserOptions, parser_options::ParserOptions};
+use obr::direct_decl_parser::Decls;
+use obr::shallow_decl_defs::Decl;
+use obr::shallow_decl_defs::ShallowClass;
+use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized::parser_options::ParserOptions;
 use oxidized_by_ref as obr;
-use pos::{RelativePath, TypeName};
+use pos::RelativePath;
+use pos::TypeName;
 use std::marker::PhantomData;
 use std::sync::Arc;
 use ty::decl::shallow;

@@ -13,7 +13,8 @@ pub use error_reason::ReasonsCallback;
 use crate::decl_error::DeclError;
 use crate::reason::Reason;
 use eq_modulo_pos::EqModuloPos;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(Clone, Debug)]
 pub struct ErrorMessage<P>(P, String);

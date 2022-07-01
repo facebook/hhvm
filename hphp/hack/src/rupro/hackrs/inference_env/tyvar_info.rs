@@ -9,11 +9,12 @@ mod tyvar_constraints;
 mod tyvar_state;
 
 use im::HashSet;
-use pos::{Pos, ToOxidized};
-use ty::{
-    local::{Ty, Tyvar, Variance},
-    reason::Reason,
-};
+use pos::Pos;
+use pos::ToOxidized;
+use ty::local::Ty;
+use ty::local::Tyvar;
+use ty::local::Variance;
+use ty::reason::Reason;
 use tyvar_state::TyvarState;
 
 #[derive(Debug, Clone, PartialEq, Eq)]

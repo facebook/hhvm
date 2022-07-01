@@ -2,8 +2,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::hdf::ffi;
-use cxx::{let_cxx_string, UniquePtr};
-use std::{borrow::Cow, ffi::CStr, os::unix::ffi::OsStrExt, path::Path};
+use cxx::let_cxx_string;
+use cxx::UniquePtr;
+use std::borrow::Cow;
+use std::ffi::CStr;
+use std::os::unix::ffi::OsStrExt;
+use std::path::Path;
 use thiserror::Error;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -65,7 +69,9 @@ impl Value {
 
     /// Construct an HDF value from the given INI file.
     pub fn from_ini_file(filename: &Path) -> Result<Value> {
-        use std::{fs::File, io::BufRead, io::BufReader};
+        use std::fs::File;
+        use std::io::BufRead;
+        use std::io::BufReader;
         let input = BufReader::new(File::open(filename)?);
         let mut kv = Value::default();
         for line in input.lines() {

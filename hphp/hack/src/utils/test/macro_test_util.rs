@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use proc_macro2::{TokenStream, TokenTree};
+use proc_macro2::TokenStream;
+use proc_macro2::TokenTree;
 use syn::Error;
 
 type Result<T> = std::result::Result<T, Error>;

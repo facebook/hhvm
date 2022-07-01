@@ -7,18 +7,22 @@
 mod decl_mode_smart_constructors_generated;
 
 use bumpalo::Bump;
-use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-use parser_core_types::{
-    lexable_token::LexableToken,
-    source_text::SourceText,
-    syntax::{SyntaxTypeBase, SyntaxValueType},
-    syntax_by_ref::{has_arena::HasArena, syntax::Syntax, syntax_variant_generated::SyntaxVariant},
-    syntax_type::SyntaxType,
-    token_factory::TokenFactory,
-    token_kind::TokenKind,
-    trivia_factory::TriviaFactory,
-};
-use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
+use ocamlrep::Allocator;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax::SyntaxTypeBase;
+use parser_core_types::syntax::SyntaxValueType;
+use parser_core_types::syntax_by_ref::has_arena::HasArena;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;
+use parser_core_types::syntax_type::SyntaxType;
+use parser_core_types::token_factory::TokenFactory;
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_factory::TriviaFactory;
+use syntax_smart_constructors::StateType;
+use syntax_smart_constructors::SyntaxSmartConstructors;
 
 pub struct State<'s, 'a, S> {
     arena: &'a Bump,

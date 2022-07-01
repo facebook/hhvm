@@ -6,16 +6,24 @@
 #![cfg_attr(use_unstable_features, feature(test))]
 
 use depgraph::reader::Dep;
-use deps_rust::{DepGraphDelta, DepSet, RawTypingDepsMode, UnsafeDepGraph, VisitedSet};
+use deps_rust::DepGraphDelta;
+use deps_rust::DepSet;
+use deps_rust::RawTypingDepsMode;
+use deps_rust::UnsafeDepGraph;
+use deps_rust::VisitedSet;
 use ocamlrep::Value;
-use ocamlrep_custom::{CamlSerialize, Custom};
+use ocamlrep_custom::CamlSerialize;
+use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use rpds::HashTrieSet;
 use std::cell::RefCell;
-use std::collections::{HashSet, VecDeque};
+use std::collections::HashSet;
+use std::collections::VecDeque;
 use std::ffi::OsString;
 use std::path::Path;
-use typing_deps_hash::{hash1, hash2, DepType};
+use typing_deps_hash::hash1;
+use typing_deps_hash::hash2;
+use typing_deps_hash::DepType;
 
 fn tag_to_dep_type(tag: u8) -> DepType {
     match DepType::from_u8(tag) {
@@ -396,7 +404,9 @@ ocaml_ffi! {
 mod tests {
     extern crate test;
 
-    use ocamlrep::{Arena, ToOcamlRep, Value};
+    use ocamlrep::Arena;
+    use ocamlrep::ToOcamlRep;
+    use ocamlrep::Value;
     use test::Bencher;
 
     const SHORT_CLASS_NAME: &str = "\\Foo";

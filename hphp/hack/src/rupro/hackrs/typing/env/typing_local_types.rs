@@ -7,7 +7,8 @@ use im::HashMap;
 
 use ty::local::Ty;
 use ty::reason::Reason;
-use utils::core::{Ident, LocalId};
+use utils::core::Ident;
+use utils::core::LocalId;
 
 #[derive(Debug, Clone)]
 pub struct Local<R: Reason> {

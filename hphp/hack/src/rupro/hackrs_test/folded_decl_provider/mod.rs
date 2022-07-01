@@ -5,12 +5,16 @@
 
 #![cfg(test)]
 
-use crate::{FacebookInit, TestContext};
+use crate::FacebookInit;
+use crate::TestContext;
 use anyhow::Result;
 use maplit::btreemap;
-use pos::{Prefix, RelativePath, TypeName};
+use pos::Prefix;
+use pos::RelativePath;
+use pos::TypeName;
 use std::fs;
-use ty::{decl::shallow, decl_error::DeclError};
+use ty::decl::shallow;
+use ty::decl_error::DeclError;
 
 #[fbinit::test]
 fn when_cyclic_class_error(fb: FacebookInit) -> Result<()> {

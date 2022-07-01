@@ -39,20 +39,22 @@
 mod options_cli;
 
 use bitflags::bitflags;
-use bstr::{BString, ByteSlice};
+use bstr::BString;
+use bstr::ByteSlice;
 use hhbc::hhas_symbol_refs::IncludePath;
 use lru::LruCache;
 use options_serde::prefix_all;
 use oxidized::relative_path::RelativePath;
-use serde_derive::{Deserialize, Serialize};
-use serde_json::{json, value::Value as Json};
-use std::{
-    cell::RefCell,
-    collections::BTreeMap,
-    ffi::OsStr,
-    os::unix::ffi::OsStrExt,
-    path::{Path, PathBuf},
-};
+use serde_derive::Deserialize;
+use serde_derive::Serialize;
+use serde_json::json;
+use serde_json::value::Value as Json;
+use std::cell::RefCell;
+use std::collections::BTreeMap;
+use std::ffi::OsStr;
+use std::os::unix::ffi::OsStrExt;
+use std::path::Path;
+use std::path::PathBuf;
 
 /// Provides uniform access to bitflags-generated structs in JSON SerDe
 trait PrefixedFlags:
@@ -174,7 +176,9 @@ impl Default for HhvmFlags {
 
 mod serde_bstr_str {
     use super::*;
-    use serde::{ser::Error, Deserialize, Serialize};
+    use serde::ser::Error;
+    use serde::Deserialize;
+    use serde::Serialize;
     pub(crate) fn serialize<S: Serializer>(s: &Arg<BString>, ser: S) -> Result<S::Ok, S::Error> {
         let s = Arg::new(String::from_utf8(s.get().to_vec()).map_err(Error::custom)?);
         s.serialize(ser)
@@ -188,7 +192,9 @@ mod serde_bstr_str {
 
 mod serde_bstr_vec {
     use super::*;
-    use serde::{ser::Error, Deserialize, Serialize};
+    use serde::ser::Error;
+    use serde::Deserialize;
+    use serde::Serialize;
     pub(crate) fn serialize<S: Serializer>(
         s: &Arg<Vec<BString>>,
         ser: S,
@@ -220,7 +226,9 @@ mod serde_bstr_vec {
 
 mod serde_bstr_btree {
     use super::*;
-    use serde::{ser::Error, Deserialize, Serialize};
+    use serde::ser::Error;
+    use serde::Deserialize;
+    use serde::Serialize;
     pub(crate) fn serialize<S: Serializer>(
         s: &Arg<BTreeMap<BString, BString>>,
         ser: S,
@@ -579,8 +587,12 @@ impl Options {
     }
 }
 
-use serde::de::{self, Deserializer, MapAccess, Visitor};
-use serde::{ser::SerializeMap, Serializer};
+use serde::de::Deserializer;
+use serde::de::MapAccess;
+use serde::de::Visitor;
+use serde::de::{self};
+use serde::ser::SerializeMap;
+use serde::Serializer;
 
 fn serialize_flags<S: Serializer, P: PrefixedFlags>(flags: &P, s: S) -> Result<S::Ok, S::Error> {
     // TODO(leoo) iterate over each set bit: flags.bits() & ~(flags.bits() + 1)

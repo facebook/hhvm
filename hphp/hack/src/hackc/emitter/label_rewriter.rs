@@ -3,9 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use env::{emitter::Emitter, LabelGen};
-use hash::{HashMap, HashSet};
-use hhbc::{hhas_param::HhasParam, Instruct, Label, Opcode, Pseudo};
+use env::emitter::Emitter;
+use env::LabelGen;
+use hash::HashMap;
+use hash::HashSet;
+use hhbc::hhas_param::HhasParam;
+use hhbc::Instruct;
+use hhbc::Label;
+use hhbc::Opcode;
+use hhbc::Pseudo;
 use instruction_sequence::InstrSeq;
 use oxidized::ast;
 

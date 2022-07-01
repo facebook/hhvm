@@ -10,16 +10,17 @@ mod gen_enum_helper;
 mod gen_visitor;
 mod quote_helper;
 
-use anyhow::{anyhow, Result};
+use anyhow::anyhow;
+use anyhow::Result;
 use common::*;
-use md5::{Digest, Md5};
-use std::{
-    fs,
-    fs::File,
-    io::prelude::*,
-    path::{Path, PathBuf},
-    process::Command,
-};
+use md5::Digest;
+use md5::Md5;
+use std::fs;
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
+use std::path::PathBuf;
+use std::process::Command;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]

@@ -3,14 +3,27 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{Error, Result, ShallowDeclStore, TypeDecl};
+use super::Error;
+use super::Result;
+use super::ShallowDeclStore;
+use super::TypeDecl;
 use crate::decl_parser::DeclParser;
 use itertools::Itertools;
 use naming_provider::NamingProvider;
 use oxidized::naming_types::KindOfType;
-use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
+use pos::ConstName;
+use pos::FunName;
+use pos::MethodName;
+use pos::PropName;
+use pos::RelativePath;
+use pos::TypeName;
 use std::sync::Arc;
-use ty::decl::{shallow::Decl, ConstDecl, FunDecl, ShallowClass, Ty, TypedefDecl};
+use ty::decl::shallow::Decl;
+use ty::decl::ConstDecl;
+use ty::decl::FunDecl;
+use ty::decl::ShallowClass;
+use ty::decl::Ty;
+use ty::decl::TypedefDecl;
 use ty::reason::Reason;
 
 /// A `ShallowDeclProvider` which, if the requested name is not present in its

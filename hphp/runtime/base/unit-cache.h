@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#include <folly/experimental/io/FsUtil.h>
 #include <folly/String.h>
 #include <folly/synchronization/AtomicNotification.h>
 
@@ -100,7 +101,6 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
   R(EvalAssemblerFoldDefaultValues)             \
   R(RepoDebugInfo)                              \
   R(CheckIntOverflow)                           \
-  R(EvalEnableImplicitContext)                  \
   R(EvalEmitClsMethPointers)                    \
   R(EvalIsVecNotices)                           \
   R(EvalAllowHhas)                              \
@@ -123,6 +123,10 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
 std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,
                            const RepoOptionsFlags&);
+
+
+Optional<SHA1> getHashForFile(const std::string& path,
+                              const folly::fs::path& root);
 
 /*
  * Return the number of php files that are currently loaded in this process.
@@ -296,8 +300,6 @@ struct LazyUnitContentsLoader {
 
 private:
   void load();
-
-  Optional<std::string> getHashFromEden() const;
 
   const char* m_path;
   Stream::Wrapper* m_wrapper;

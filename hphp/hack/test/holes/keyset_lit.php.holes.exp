@@ -15,7 +15,7 @@
             (Expr
                ((keyset<int>), [5:3-23],
                 (Binop ((Eq None), ((keyset<int>), [5:3-5], (Lvar ([5:3-5], $x))),
-                   ((keyset<int>), [5:8-23], (ValCollection (Keyset, None, [((int), [5:15-16], (Int "1")); ((bool), [5:18-22], (Hole (((bool), [5:18-22], True), (bool), (arraykey), Typing)))]))))))))
+                   ((keyset<int>), [5:8-23], (ValCollection (Keyset, None, [((int), [5:15-16], (Int "1")); ((bool), [5:18-22], (Hole (((bool), [5:18-22], True), (bool), (int), Typing)))]))))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

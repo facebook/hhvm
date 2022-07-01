@@ -113,7 +113,6 @@ size_t compute_size(const Func* func) {
 inline bool isNop(Op opcode) {
   if (!RuntimeOption::RepoAuthoritative) return false;
   return opcode == OpNop ||
-         opcode == OpEntryNop ||
          opcode == OpCGetCUNop ||
          opcode == OpUGetCUNop ||
          (!debug && isTypeAssert(opcode)) ||

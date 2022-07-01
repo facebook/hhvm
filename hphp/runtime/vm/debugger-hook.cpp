@@ -502,10 +502,8 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
   }
 
   // One source line may refer to multiple bytecodes. We want to set the
-  // breakpoint only on the first bytecode. There are two exeptions:
-  // 1. If the first bytecode is EntryNop, set the breakpoint at the next
-  // bytecode because EntryOp is outside the loop the source line refers to.
-  // 2. If the bytecodes refer to different functions, set breakpoints on
+  // breakpoint only on the first bytecode. There is one exeption:
+  // If the bytecodes refer to different functions, set breakpoints on
   // one bytecode of each function. This can happen for lambdas.
   // Add to the breakpoint filter and the line filter.
   assertx(funcOffsets.size() > 0);
@@ -513,18 +511,14 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
   for (auto const& offsets : funcOffsets) {
     auto f = offsets.first;
     assertx(seenFuncs.find(f) == seenFuncs.end());
-    for (auto const offset : offsets.second) {
-      auto bpOffset = offset.base;
-      auto op = f->getOp(bpOffset);
-      if (op != Op::EntryNop) {
-        TRACE(3, "Adding breakpoint at %s::%d, Op %s.\n",
-              f->name()->data(), bpOffset, opcodeToName(op));
-        phpAddBreakPoint(f, bpOffset);
-        auto pc = f->at(bpOffset);
-        RID().m_lineBreakPointFilter.addPC(pc);
-        if (debug) seenFuncs.insert(f);
-        break;
-      }
+    if (!offsets.second.empty()) {
+      auto bpOffset = offsets.second.front().base;
+      TRACE(3, "Adding breakpoint at %s::%d, Op %s.\n",
+            f->name()->data(), bpOffset, opcodeToName(f->getOp(bpOffset)));
+      phpAddBreakPoint(f, bpOffset);
+      auto pc = f->at(bpOffset);
+      RID().m_lineBreakPointFilter.addPC(pc);
+      if (debug) seenFuncs.insert(f);
     }
   }
   return true;

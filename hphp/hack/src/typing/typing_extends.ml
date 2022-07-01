@@ -467,9 +467,25 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
                 })
     | (_, _) -> ()
 
+let add_fine_grained_member_dep
+    env dependent_class dependen_member_name dependent_member_kind dependency =
+  let root = Some (Dep.Type (Cls.name dependent_class)) in
+  let member =
+    match dependent_member_kind with
+    | MemberKind.Method -> Some (Typing_fine_deps.Method dependen_member_name)
+    | MemberKind.Static_method ->
+      Some (Typing_fine_deps.SMethod dependen_member_name)
+    | _ -> None
+  in
+  Typing_fine_deps.try_add_fine_dep
+    (Env.get_deps_mode env)
+    root
+    member
+    dependency
+
 let add_member_dep
     env class_ (member_kind, member_name, member_origin, origin_pos) =
-  if not (Pos_or_decl.is_hhi origin_pos) then
+  if not (Pos_or_decl.is_hhi origin_pos) then (
     let dep =
       match member_kind with
       | MemberKind.Method -> Dep.Method (member_origin, member_name)
@@ -481,7 +497,13 @@ let add_member_dep
     Typing_deps.add_idep
       (Env.get_deps_mode env)
       (Dep.Type (Cls.name class_))
-      dep
+      dep;
+    if
+      TypecheckerOptions.record_fine_grained_dependencies
+      @@ Typing_env.get_tcopt env
+    then
+      add_fine_grained_member_dep env class_ member_name member_kind dep
+  )
 
 let check_compatible_sound_dynamic_attributes
     env member_name member_kind parent_class_elt class_elt on_error =
@@ -580,6 +602,36 @@ let check_multiple_concrete_definitions
                name = member_name;
                class_name = Cls.name class_;
              })
+
+let maybe_poison_ancestors env ft_parent ft_child class_ member_name member_kind
+    =
+  if
+    TypecheckerOptions.like_casts (Provider_context.get_tcopt (Env.get_ctx env))
+  then
+    match
+      ( Typing_enforceability.get_enforcement env ft_parent.ft_ret.et_type,
+        Typing_enforceability.get_enforcement env ft_child.ft_ret.et_type )
+    with
+    | (Enforced, Unenforced) ->
+      Cls.all_ancestor_names class_
+      |> List.map ~f:(Env.get_class env)
+      |> List.filter_opt
+      |> List.iter ~f:(fun cls ->
+             MemberKind.(
+               match member_kind with
+               | Static_method -> Cls.get_smethod cls member_name
+               | Method -> Cls.get_method cls member_name
+               | _ -> None)
+             |> Option.iter ~f:(fun elt ->
+                    let (lazy fty) = elt.ce_type in
+                    match get_node fty with
+                    | Tfun { ft_ret; _ } ->
+                      let pos =
+                        Pos_or_decl.unsafe_to_raw_pos (get_pos ft_ret.et_type)
+                      in
+                      Typing_log.log_pessimise_return env pos
+                    | _ -> ()))
+    | _ -> ()
 
 (* Check that overriding is correct *)
 let check_override
@@ -680,6 +732,13 @@ let check_override
        * subtyping rules except with __ConsistentConstruct *)
       env
     | _ ->
+      maybe_poison_ancestors
+        env
+        ft_parent
+        ft_child
+        class_
+        member_name
+        member_kind;
       check_ambiguous_inheritance
         (check_subtype_methods
            env
@@ -1509,7 +1568,6 @@ let check_typeconst_override
     in
     (match (parent_tconst.ttc_kind, tconst.ttc_kind) with
     | (TCConcrete _, TCConcrete _)
-    | (TCAbstract { atc_default = Some _; _ }, TCConcrete _)
     | ( TCAbstract { atc_default = Some _; _ },
         TCAbstract { atc_default = Some _; _ } ) ->
       if

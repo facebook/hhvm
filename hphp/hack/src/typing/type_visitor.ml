@@ -61,6 +61,9 @@ class type ['a] decl_type_visitor_type =
 
     method on_taccess :
       'a -> decl_phase Reason.t_ -> decl_phase taccess_type -> 'a
+
+    method on_trefinement :
+      'a -> decl_phase Reason.t_ -> decl_ty -> decl_class_refinement -> 'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
@@ -112,6 +115,10 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
 
     method on_tapply acc _ _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
+    method on_trefinement acc _ ty rs =
+      let acc = this#on_type acc ty in
+      Class_refinement.fold rs ~init:acc ~f:this#on_type
+
     method on_taccess acc _ (root, _ids) = this#on_type acc root
 
     method on_ttuple acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
@@ -142,6 +149,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tvar id -> this#on_tvar acc r id
       | Tfun fty -> this#on_tfun acc r fty
       | Tapply (s, tyl) -> this#on_tapply acc r s tyl
+      | Trefinement (ty, rs) -> this#on_trefinement acc r ty rs
       | Taccess aty -> this#on_taccess acc r aty
       | Ttuple tyl -> this#on_ttuple acc r tyl
       | Tunion tyl -> this#on_tunion acc r tyl
@@ -275,7 +283,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
     method on_neg_type acc r neg_ty =
       match neg_ty with
       | Neg_prim p -> this#on_tprim acc r p
-      | Neg_class c -> this#on_tclass acc r c Nonexact []
+      | Neg_class c -> this#on_tclass acc r c nonexact []
 
     method on_tunapplied_alias acc _ _ = acc
 

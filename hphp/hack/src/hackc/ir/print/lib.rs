@@ -7,7 +7,7 @@ pub mod formatters;
 pub mod print;
 pub mod util;
 
-pub use formatters::{FmtBid, FmtInstr, FmtLid, FmtRawBid, FmtRawVid, FmtVid};
+pub use formatters::{FmtBid, FmtInstr, FmtLid, FmtLoc, FmtRawBid, FmtRawVid, FmtVid};
 pub use print::print_unit;
 pub use util::{FmtCommaSep, FmtEscapedString, FmtOption, FmtOptionOr};
 

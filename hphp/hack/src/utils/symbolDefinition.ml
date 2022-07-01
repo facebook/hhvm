@@ -23,6 +23,7 @@ type kind =
   | Typeconst
   | Param
   | Typedef
+  | Module
 
 and modifier =
   | Final
@@ -83,6 +84,7 @@ let string_of_kind = function
   | TypeVar -> "type_var"
   | Param -> "param"
   | Typedef -> "typedef"
+  | Module -> "module"
 
 let string_of_modifier = function
   | Final -> "final"
@@ -104,6 +106,8 @@ let property_kind_name = "property"
 
 let class_const_kind_name = "class_const"
 
+let module_kind_name = "module"
+
 let get_symbol_id kind parent_class name =
   let prefix =
     match kind with
@@ -119,6 +123,7 @@ let get_symbol_id kind parent_class name =
     | Typeconst
     | Const ->
       Some class_const_kind_name
+    | Module -> Some module_kind_name
     | LocalVar
     | TypeVar
     | Param ->

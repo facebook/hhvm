@@ -962,7 +962,7 @@ fn p_hint<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint> {
 
 fn p_refinement_member<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Refinement> {
     match &node.children {
-        TypeInRefinement(c) => Ok(ast::Refinement::TypeRef(
+        TypeInRefinement(c) => Ok(ast::Refinement::Rtype(
             pos_name(&c.name, env)?,
             if c.type_.is_missing() {
                 let (lower, upper) = p_tconstraints_into_lower_and_upper(&c.constraints, env)?;
@@ -4081,6 +4081,25 @@ fn process_attribute_constructor_call<'a>(
     {
         raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
     }
+    // TODO(T123026333): Remove once migration is over
+    if env.codegen()
+        && naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&name.1)
+    {
+        let memo_name =
+            if name.1 == naming_special_names_rust::user_attributes::POLICY_SHARDED_MEMOIZE {
+                naming_special_names_rust::user_attributes::MEMOIZE
+            } else {
+                naming_special_names_rust::user_attributes::MEMOIZE_LSB
+            };
+        return Ok(ast::UserAttribute {
+            name: ast::Id(name.0, String::from(memo_name)),
+            params: vec![ast::Expr(
+                (),
+                Pos::make_none(),
+                ast::Expr_::String("KeyedByIC".into()),
+            )],
+        });
+    }
     let params = could_map(constructor_call_argument_list, env, |n, e| {
         is_valid_attribute_arg(n, e);
         p_expr(n, e)
@@ -4367,6 +4386,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             let has_abstract = kinds.has(modifier::ABSTRACT);
             // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
             let type_ = map_optional(&c.type_specifier, env, p_hint)?;
+            let span = p_pos(node, env);
             // ocaml's behavior is that if anything throw, it will
             // discard all lowered elements. So adding to class
             // must be at the last.
@@ -4384,6 +4404,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                         type_: type_.clone(),
                         id,
                         kind,
+                        span: span.clone(),
                         doc_comment: doc_comment_opt.clone(),
                     })
                 }
@@ -4946,29 +4967,17 @@ fn check_effect_memoized<'a>(
             )
         }
     }
-    let has_policied = has_any_policied_context(contexts);
-    if has_policied {
-        if let Some(u) = user_attributes
-            .iter()
-            .find(|u| naming_special_names_rust::user_attributes::is_memoized_regular(&u.name.1))
-        {
-            raise_parsing_error_pos(
-                &u.name.0,
-                env,
-                &syntax_error::effect_policied_memoized(kind),
-            )
-        }
-    }
-    if let Some(u) = user_attributes
-        .iter()
-        .find(|u| naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&u.name.1))
-    {
-        if !has_policied {
-            raise_parsing_error_pos(
-                &u.name.0,
-                env,
-                &syntax_error::policy_sharded_memoized_without_policied(kind),
-            )
+    if env.is_typechecker() {
+        if let Some(u) = user_attributes.iter().find(|u| {
+            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&u.name.1)
+        }) {
+            if !has_any_policied_context(contexts) {
+                raise_parsing_error_pos(
+                    &u.name.0,
+                    env,
+                    &syntax_error::policy_sharded_memoized_without_policied(kind),
+                )
+            }
         }
     }
 }
@@ -5262,6 +5271,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             })])
         }
         EnumDeclaration(c) => {
+            let span = p_pos(node, env);
             let p_enumerator = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::ClassConst> {
                 match &n.children {
                     Enumerator(c) => Ok(ast::ClassConst {
@@ -5269,6 +5279,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                         type_: None,
                         id: pos_name(&c.name, e)?,
                         kind: ast::ClassConstKind::CCConcrete(p_expr(&c.value, e)?),
+                        span: span.clone(),
                         doc_comment: None,
                     }),
                     _ => missing_syntax("enumerator", n, e),
@@ -5431,6 +5442,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                             type_: Some(full_type),
                             id: name,
                             kind,
+                            span: p_pos(node, env),
                             doc_comment: None,
                         };
                         enum_class.consts.push(class_const)
@@ -5510,6 +5522,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             user_attributes: p_user_attributes(&md.attribute_spec, env)?,
             span: p_pos(node, env),
             mode: env.file_mode(),
+            doc_comment: doc_comment_opt,
         })]),
         ModuleMembershipDeclaration(mm) => {
             Ok(vec![ast::Def::mk_set_module(pos_name(&mm.name, env)?)])

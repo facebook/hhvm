@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<791a177595aa44e51b4be7427fbbbd77>>
+// @generated SignedSource<<6a7888e38f44379662cf56b0d8737b03>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -52,6 +52,15 @@ pub trait Visitor<'a> {
     fn visit_class_const_ref(&mut self, p: &'a ClassConstRef<'a>) {
         p.recurse(self.object())
     }
+    fn visit_class_refinement(&mut self, p: &'a ClassRefinement<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_class_type_refinement(&mut self, p: &'a ClassTypeRefinement<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_class_type_refinement_bounds(&mut self, p: &'a ClassTypeRefinementBounds<'a>) {
+        p.recurse(self.object())
+    }
     fn visit_classish_kind(&mut self, p: &'a ClassishKind) {
         p.recurse(self.object())
     }
@@ -79,7 +88,7 @@ pub trait Visitor<'a> {
     fn visit_enum_type(&mut self, p: &'a EnumType<'a>) {
         p.recurse(self.object())
     }
-    fn visit_exact(&mut self, p: &'a Exact) {
+    fn visit_exact(&mut self, p: &'a Exact<'a>) {
         p.recurse(self.object())
     }
     fn visit_expr_dep_type_reason(&mut self, p: &'a ExprDepTypeReason<'a>) {

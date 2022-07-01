@@ -153,6 +153,10 @@ impl<T: Consable> Conser<T> {
         l != self.table.len()
     }
 
+    pub fn clear(&self) {
+        self.table.clear()
+    }
+
     fn mk(&self, x: T) -> Hc<T> {
         let hash = fnv_hash(&x);
         let rc = match self.table.entry(hash) {

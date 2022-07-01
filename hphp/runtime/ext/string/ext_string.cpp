@@ -2578,6 +2578,10 @@ Variant HHVM_FUNCTION(HH_str_to_numeric,
   return init_null();
 }
 
+String HHVM_FUNCTION(HH_str_bitwise_xor, const String& s1, const String& s2) {
+  return String::attach(strBitXor(s1.get(), s2.get()));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct StringExtension final : Extension {
@@ -2676,6 +2680,7 @@ struct StringExtension final : Extension {
     HHVM_FE(metaphone);
     HHVM_FE(HH_str_number_coercible);
     HHVM_FE(HH_str_to_numeric);
+    HHVM_FE(HH_str_bitwise_xor);
 
     HHVM_RC_INT(ENT_COMPAT, k_ENT_HTML_QUOTE_DOUBLE);
     HHVM_RC_INT(ENT_NOQUOTES, k_ENT_HTML_QUOTE_NONE);
@@ -2774,6 +2779,7 @@ struct StringExtension final : Extension {
 
     HHVM_FALIAS(HH\\str_number_coercible, HH_str_number_coercible);
     HHVM_FALIAS(HH\\str_to_numeric, HH_str_to_numeric);
+    HHVM_FALIAS(HH\\str_bitwise_xor, HH_str_bitwise_xor);
 
     loadSystemlib();
   }

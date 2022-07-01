@@ -3,20 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    hhas_param::HhasParam,
-    hhas_type::HhasTypeInfo,
-    hhbc_ast::{ClassishKind, Instruct},
-};
+use crate::{hhas_param::HhasParam, hhas_type::HhasTypeInfo, hhbc_ast::Instruct};
 use ffi::{Maybe, Pair, Slice, Str};
-
-#[derive(Default, Debug, Clone, Eq, PartialEq)]
-#[repr(C)]
-pub struct HhasBodyEnv<'arena> {
-    pub is_namespaced: bool,
-    pub class_info: Maybe<Pair<ClassishKind, Str<'arena>>>,
-    pub parent_name: Maybe<Str<'arena>>,
-}
 
 #[derive(Debug, Default)]
 #[repr(C)]
@@ -32,5 +20,4 @@ pub struct HhasBody<'arena> {
     pub params: Slice<'arena, HhasParam<'arena>>,
     pub return_type_info: Maybe<HhasTypeInfo<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
-    pub env: Maybe<HhasBodyEnv<'arena>>,
 }

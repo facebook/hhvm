@@ -189,10 +189,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_alias_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, keyword: Self, name: Self, generic_parameter: Self, constraint: Self, equal: Self, type_: Self, semicolon: Self) -> Self {
+    fn make_alias_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, module_kw_opt: Self, keyword: Self, name: Self, generic_parameter: Self, constraint: Self, equal: Self, type_: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AliasDeclaration(ctx.get_arena().alloc(AliasDeclarationChildren {
             attribute_spec,
             modifiers,
+            module_kw_opt,
             keyword,
             name,
             generic_parameter,

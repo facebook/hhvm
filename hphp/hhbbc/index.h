@@ -31,7 +31,7 @@
 #include "hphp/util/either.h"
 #include "hphp/util/tribool.h"
 
-#include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/hhbbc/hhbbc.h"
@@ -52,6 +52,8 @@ struct PropertiesInfo;
 struct MethodsInfo;
 
 struct TypeStructureResolution;
+
+struct DCls;
 
 extern const Type TCell;
 
@@ -311,29 +313,41 @@ struct Class {
   bool same(const Class&) const;
 
   /*
-   * Returns true if this class is definitely going to be a subtype
-   * of `o' at runtime.  If this function returns false, this may
-   * still be a subtype of `o' at runtime, it just may not be known.
-   * A typical example is with "non unique" classes.
+   * Returns true if this class is a subtype of 'o'. That is, every
+   * subclass of 'this' (including 'this' itself) is a subclass of
+   * 'o'. For the exact variant, 'this' is considered to be exact
+   * (that is, exactly that class). For the sub variant, 'this' could
+   * also be a subclass. This distinction only matters if 'this' is an
+   * interface. 'o' is always considered to be a subclass (otherwise
+   * you would use same()).
+   *
+   * If 'this' is an interface and the exact variant is used, then the
+   * interface class itself is tested. If the sub variant is used,
+   * then all the classes which implement the interface are tested
+   * (which does not include the interface class itself).
+   *
+   * Note: unresolved classes are not subtypes of anything except
+   * themself.
    */
-  bool mustBeSubtypeOf(const Class& o) const;
+  bool exactSubtypeOf(const Class& o) const;
+  bool subSubtypeOf(const Class& o) const;
 
   /*
-   * Returns false if this class is definitely not going to be a subtype
-   * of `o' at runtime.  If this function returns true, this may
-   * still not be a subtype of `o' at runtime, it just may not be known.
-   * A typical example is with "non unique" classes.
+   * Returns false if this class has no subclasses in common with
+   * 'o'. This is equivalent to saying that their intersection is
+   * empty. For the exact variant, 'this' is considered to be exactly
+   * that class (no sub-classes). For the sub variant, 'this' might be
+   * that class, or any subclass of that class.
+   *
+   * Since couldBe is symmetric, this covers all of the cases. 'o' is
+   * always considered to be a subclass. (Both being exact is covered
+   * by same()).
+   *
+   * Note: unresolved classes always can be another unresolved class,
+   * and never a resolved class.
    */
-  bool maybeSubtypeOf(const Class& o) const;
-
-  /*
-   * If this function return false, it is known that this class
-   * is in no subtype relationship with the argument Class 'o'.
-   * Returns true if this class could be a subtype of `o' at runtime.
-   * When true is returned the two classes may still be unrelated but it is
-   * not possible to tell. A typical example is with "non unique" classes.
-   */
-  bool couldBe(const Class& o) const;
+  bool exactCouldBe(const Class& o) const;
+  bool subCouldBe(const Class& o) const;
 
   /*
    * Returns the name of this class.  Non-null guarantee.
@@ -341,18 +355,16 @@ struct Class {
   SString name() const;
 
   /*
-   * Whether this class could possibly be an interface/interface or trait.
-   *
-   * True means it might be, false means it is not.
+   * If this class is an interface, return the "canonical" interface
+   * among the set of equivalent interfaces. If this interface has no
+   * implementations, it's equivalent to Bottom, and std::nullopt is
+   * returned. If this class is not an interface, itself is
+   * returned. This should be called when wrapping a class within a
+   * Type to ensure that every Type has an unique canonical
+   * representation.
    */
-  bool couldBeInterface() const;
+  Optional<res::Class> canonicalizeInterface() const;
 
-  /*
-   * Whether this class must be an interface.
-   *
-   * True means it is, false means it might not be.
-   */
-  bool mustBeInterface() const;
   /*
    * Returns whether this type has the no override attribute, that is, if it
    * is a final class (explicitly marked by the user or known by the static
@@ -370,10 +382,10 @@ struct Class {
   bool couldHaveMagicBool() const;
 
   /*
-   * Whether this class could possibly have a derived class that is mocked.
-   * Including itself.
+   * Whether this class could possibly have a sub-class that is
+   * mocked, including itself.
    */
-  bool couldHaveMockedDerivedClass() const;
+  bool couldHaveMockedSubClass() const;
 
   /*
    * Whether this class could possibly be mocked.
@@ -410,13 +422,7 @@ struct Class {
    * Whether this class (or clases derived from it) could have const props.
    */
   bool couldHaveConstProp() const;
-  bool derivedCouldHaveConstProp() const;
-
-  /*
-   * Returns the Class that is the first common ancestor between 'this' and 'o'.
-   * If there is no common ancestor std::nullopt is returned
-   */
-  Optional<Class> commonAncestor(const Class& o) const;
+  bool subCouldHaveConstProp() const;
 
   /*
    * Returns the res::Class for this Class's parent if there is one,
@@ -443,10 +449,52 @@ struct Class {
    */
   void forEachSubclass(const std::function<void(const php::Class*)>&) const;
 
-private:
-  explicit Class(Either<SString,ClassInfo*>);
-  template <bool> bool subtypeOfImpl(const Class&) const;
+  /*
+   * Given two lists of classes, calculate the union between them (in
+   * canonical form). A list of size 1 represents a single class, and
+   * a larger list represents an intersection of classes. The input
+   * lists are assumed to be in canonical form. If the output is an
+   * empty list, the union is *all* classes (corresponding to TObj or
+   * TCls). This function is really an implementation detail of
+   * union_of() and not a general purpose interface.
+   */
+  static TinyVector<Class, 2> combine(folly::Range<const Class*> classes1,
+                                      folly::Range<const Class*> classes2,
+                                      bool isSub1,
+                                      bool isSub2);
+  /*
+   * Given two lists of classes, calculate the intersection between
+   * them (in canonical form). A list of size 1 represents a single
+   * class, and a larger list represents an intersection of
+   * classes. The input lists are assumed to be in canonical form. If
+   * the output is an empty list, the intersection is empty
+   * (equivalent to Bottom). This function is really an implementation
+   * detail of intersection_of() and not a general purpose interface.
+   */
+  static TinyVector<Class, 2> intersect(folly::Range<const Class*> classes1,
+                                        folly::Range<const Class*> classes2);
 
+  /*
+   * Convert this class to/from an opaque integer. The integer is
+   * "pointerish" (has upper bits cleared), so can be used in
+   * something like CompactTaggedPtr. It is not, however, guaranteed
+   * to be aligned (lower bits may be set).
+   */
+  uintptr_t toOpaque() const { return val.toOpaque(); }
+  static Class fromOpaque(uintptr_t o) {
+    return Class{decltype(val)::fromOpaque(o)};
+  }
+
+  size_t hash() const { return val.toOpaque(); }
+  bool operator==(const Class& o) const { return toOpaque() == o.toOpaque(); }
+
+private:
+  explicit Class(Either<SString,ClassInfo*> val) : val{val} {}
+
+  template <typename F>
+  static void visitEverySub(folly::Range<const Class*>, bool, const F&);
+  static ClassInfo* commonAncestor(ClassInfo*, ClassInfo*);
+  static TinyVector<Class, 2> canonicalizeIsects(const TinyVector<Class, 8>&);
 private:
   friend std::string show(const Class&);
   friend struct ::HPHP::HHBBC::Index;
@@ -530,12 +578,19 @@ private:
   struct MethodOrMissing {
     const MethTabEntryPair* mte;
   };
+  // Simultaneously a group of func families. Any data must be
+  // intersected across all of the func families in the list. Used for
+  // method resolution on a DCls where isIsect() is true.
+  struct Isect {
+    CompactVector<FuncFamily*> families;
+  };
   using Rep = boost::variant< FuncName
                             , MethodName
                             , FuncInfo*
                             , const MethTabEntryPair*
                             , FuncFamily*
                             , MethodOrMissing
+                            , Isect
                             >;
 
 private:
@@ -628,15 +683,6 @@ struct Index {
    * stage.
    */
   void cleanup_post_emit(php::ProgramPtr program);
-
-  /*
-   * The Index contains a Builder for an ArrayTypeTable.
-   *
-   * If we're creating assert types with options.InsertAssertions, we
-   * need to keep track of which array types exist in the whole
-   * program in order to include it in the repo.
-   */
-  std::unique_ptr<ArrayTypeTable::Builder>& array_table_builder() const;
 
   /*
    * Find all the closures created inside the context of a given
@@ -786,6 +832,13 @@ struct Index {
   bool could_have_reified_type(Context ctx, const TypeConstraint& tc) const;
 
   /*
+   * Returns a tuple containing a type after the parameter type verification
+   * and a flag indicating whether the verification was effect free.
+   */
+  std::tuple<Type, bool>
+  verify_param_type(Context ctx, uint32_t paramId, Type t) const;
+
+  /*
    * Lookup metadata about the constant access `cls'::`name', in the
    * current context `ctx'. The returned metadata not only includes
    * the best known type of the constant, but whether it is definitely
@@ -845,6 +898,8 @@ struct Index {
    * context insensitive way.  Returns TInitCell at worst.
    */
   Type lookup_return_type(Context, MethodsInfo*, res::Func,
+                          Dep dep = Dep::ReturnTy) const;
+  Type lookup_return_type(Context, MethodsInfo*, const php::Func*,
                           Dep dep = Dep::ReturnTy) const;
 
   /*
@@ -1202,7 +1257,9 @@ struct Index {
   /*
    * Return true if the function is effect free.
    */
-  bool is_effect_free(const php::Func* func) const;
+  bool is_effect_free(Context, res::Func rfunc) const;
+  bool is_effect_free(Context, const php::Func* func) const;
+  bool is_effect_free_raw(const php::Func* func) const;
 
   /*
    * Do any necessary fixups to a return type.
@@ -1250,6 +1307,9 @@ private:
     SString name, const Type& candidate) const;
 
   void init_return_type(const php::Func* func);
+
+  template <typename F>
+  bool visit_every_dcls_cls(const DCls&, const F&) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

@@ -37,7 +37,11 @@ let make text =
     let result = ref [] in
     for i = 1 to len do
       let prev = text.[i - 1] in
-      if Char.((prev = '\r' && not (text.[i] = '\n')) || prev = '\n') then
+      if
+        Char.(
+          (prev = '\r' && (Int.(i = len) || not (text.[i] = '\n')))
+          || prev = '\n')
+      then
         result := i :: !result
     done;
     (match !result with

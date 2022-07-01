@@ -198,12 +198,18 @@ SQLiteKey getDBKey(
     }
   }();
 
-  if (trustedDBPath.empty()) {
-    ::gid_t gid = getGroup();
-    return SQLiteKey::readWrite(getDBPath(repoOptions), gid, getDBPerms());
-  } else {
+  // Autoload out of a read-only, "trusted" DB, like in /var/www
+  if (!trustedDBPath.empty()) {
     return SQLiteKey::readOnly(std::move(trustedDBPath));
   }
+  // Create a DB with the given permissions if none exists
+  if (RuntimeOption::AutoloadDBCanCreate) {
+    ::gid_t gid = getGroup();
+    return SQLiteKey::readWriteCreate(
+        getDBPath(repoOptions), gid, getDBPerms());
+  }
+  // Use an existing DB and throw if it doesn't exist
+  return SQLiteKey::readWrite(getDBPath(repoOptions));
 }
 
 // Convenience wrapper for std::string_view
@@ -284,7 +290,8 @@ struct WatchmanAutoloadMapKey {
    * 2. Read an existing database file somewhere
    */
   bool isAutoloadableRepo() const {
-    return m_queryExpr.isObject() || !m_dbKey.m_writable;
+    return m_queryExpr.isObject() ||
+           m_dbKey.m_writable == SQLite::OpenMode::ReadOnly;
   }
 
   folly::fs::path m_root;
@@ -679,7 +686,7 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
     return SQLiteAutoloadDB::getThreadLocal(dbKey);
   };
 
-  if (!mapKey->m_dbKey.m_writable) {
+  if (mapKey->m_dbKey.m_writable == SQLite::OpenMode::ReadOnly) {
     XLOGF(
         DBG0,
         "Loading {} from trusted Autoload DB at {}",

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f3b6929b929250e46645c353f23e0418>>
+// @generated SignedSource<<a0b3cf17629d79dab8c4685bd0ca3e38>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -339,7 +339,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tprim);
 )]
 #[repr(C, u8)]
 pub enum Refinement {
-    TypeRef(Sid, TypeRefinement),
+    Rtype(Sid, TypeRefinement),
 }
 
 #[derive(

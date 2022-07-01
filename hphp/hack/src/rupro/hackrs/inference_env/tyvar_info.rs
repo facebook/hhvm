@@ -12,7 +12,6 @@ use im::HashSet;
 use pos::{Pos, ToOxidized};
 use ty::{
     local::{Ty, Tyvar, Variance},
-    prop::CstrTy,
     reason::Reason,
 };
 use tyvar_state::TyvarState;
@@ -59,32 +58,32 @@ impl<R: Reason> TyvarInfo<R> {
         self.state.binding()
     }
 
-    pub fn upper_bounds(&self) -> Option<HashSet<CstrTy<R>>> {
+    pub fn upper_bounds(&self) -> Option<HashSet<Ty<R>>> {
         self.state.upper_bounds()
     }
 
-    pub fn lower_bounds(&self) -> Option<HashSet<CstrTy<R>>> {
+    pub fn lower_bounds(&self) -> Option<HashSet<Ty<R>>> {
         self.state.lower_bounds()
     }
 
-    pub fn add_upper_bound(&mut self, bound: CstrTy<R>) {
+    pub fn add_upper_bound(&mut self, bound: Ty<R>) {
         self.state.add_upper_bound(bound)
     }
-    pub fn add_lower_bound(&mut self, bound: CstrTy<R>) {
+    pub fn add_lower_bound(&mut self, bound: Ty<R>) {
         self.state.add_lower_bound(bound)
     }
-    pub fn add_lower_bound_as_union<F>(&mut self, bound: CstrTy<R>, union: F)
+    pub fn add_lower_bound_as_union<F>(&mut self, bound: Ty<R>, union: F)
     where
-        F: FnOnce(CstrTy<R>, &HashSet<CstrTy<R>>) -> HashSet<CstrTy<R>>,
+        F: FnOnce(Ty<R>, &HashSet<Ty<R>>) -> HashSet<Ty<R>>,
     {
         self.state.add_lower_bound_as_union(bound, union)
     }
 
-    pub fn remove_upper_bound(&mut self, bound: &CstrTy<R>) {
+    pub fn remove_upper_bound(&mut self, bound: &Ty<R>) {
         self.state.remove_upper_bound(bound)
     }
 
-    pub fn remove_lower_bound(&mut self, bound: &CstrTy<R>) {
+    pub fn remove_lower_bound(&mut self, bound: &Ty<R>) {
         self.state.remove_lower_bound(bound)
     }
 

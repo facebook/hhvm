@@ -18,5 +18,6 @@ hh_hash = { path = "../../../utils/hh_hash" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_caml_builtins = { path = "../../../utils/ocamlrep_caml_builtins" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
+oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }

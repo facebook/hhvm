@@ -108,6 +108,19 @@ class Exception implements Throwable {
 
   final public static function getTraceOptions()[read_globals];
   final public static function setTraceOptions($opts)[globals];
+
+  /**
+   * Actually defined on \__SystemLib\BaseException
+   */
+  final protected static function toStringFromGetMessage(
+    \Throwable $throwable,
+    (function(\Throwable)[_]:string) $get_message,
+  )[ctx $get_message]: string;
+
+  public static function toStringPure(
+    Exception $e,
+    ?(function(Throwable)[]:string) $fallback = null,
+  )[]: string;
 }
 
 class ErrorException extends Exception {

@@ -27,11 +27,6 @@ type ifc_fun_decl =
 
 val default_ifc_fun_decl : ifc_fun_decl
 
-type exact =
-  | Exact
-  | Nonexact
-[@@deriving eq, ord, show]
-
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
 
@@ -201,6 +196,7 @@ and _ ty_ =
   | Tthis : decl_phase ty_
   (* Either an object type or a type alias, ty list are the arguments *)
   | Tapply : pos_id * decl_ty list -> decl_phase ty_
+  | Trefinement : decl_ty * decl_phase class_refinement -> decl_phase ty_
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
    * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
    * Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -311,6 +307,23 @@ and _ ty_ =
   | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
   | Tneg : neg_type -> locl_phase ty_
 
+and exact =
+  | Exact
+  | Nonexact of locl_phase class_refinement
+
+and 'phase class_refinement = { cr_types: 'phase class_type_refinement SMap.t }
+
+and 'phase class_type_refinement =
+  | Texact : 'phase ty -> 'phase class_type_refinement
+  | Tloose :
+      decl_phase class_type_refinement_bounds
+      -> decl_phase class_type_refinement
+
+and 'phase class_type_refinement_bounds = {
+  tr_lower: 'phase ty list;
+  tr_upper: 'phase ty list;
+}
+
 and 'phase taccess_type = 'phase ty * pos_id
 
 (* Because Tfun is currently used as both a decl and locl ty, without this,
@@ -350,6 +363,10 @@ and 'ty fun_param = {
 }
 
 and 'ty fun_params = 'ty fun_param list
+
+val nonexact : exact
+
+val is_nonexact : exact -> bool
 
 module Flags : sig
   val get_ft_return_disposable : 'a fun_type -> bool
@@ -427,8 +444,6 @@ module Pp : sig
 
   val pp_ty_ : Format.formatter -> 'a ty_ -> unit
 
-  val pp_ty_list : Format.formatter -> 'a ty list -> unit
-
   val pp_taccess_type : Format.formatter -> 'a taccess_type -> unit
 
   val pp_possibly_enforced_ty :
@@ -445,8 +460,6 @@ module Pp : sig
   val pp_fun_type : Format.formatter -> 'a ty fun_type -> unit
 
   val pp_fun_param : Format.formatter -> 'a ty fun_param -> unit
-
-  val pp_fun_params : Format.formatter -> 'a ty fun_params -> unit
 
   val show_decl_ty : decl_ty -> string
 
@@ -484,6 +497,14 @@ type locl_fun_param = locl_ty fun_param
 type decl_fun_params = decl_ty fun_params
 
 type locl_fun_params = locl_ty fun_params
+
+type decl_class_refinement = decl_phase class_refinement
+
+type locl_class_refinement = locl_phase class_refinement
+
+type decl_type_refinement = decl_phase class_type_refinement
+
+type locl_type_refinement = locl_phase class_type_refinement
 
 type has_member = {
   hm_name: Nast.sid;

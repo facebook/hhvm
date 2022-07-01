@@ -8,6 +8,8 @@
 
 let foo_contents =
   {|<?hh //strict
+  <<file:__EnableUnstableFeatures("modules")>>
+  new module foo {}
   class Foo {
     public function foo (Bar $b) : int {
       A::class;
@@ -23,6 +25,8 @@ let foo_contents =
 
 let bar_contents =
   {|<?hh //strict
+  <<file:__EnableUnstableFeatures("modules")>>
+  module foo;
   class A {}
   class B<T> {}
   class D {}
@@ -79,6 +83,13 @@ let setup
         (match xhp_as with
         | `Namespaces -> true
         | `MangledSymbols -> false);
+    }
+  in
+  (* Since the common test has a module in it, always allow all files for module declarations *)
+  let tcopt =
+    {
+      tcopt with
+      GlobalOptions.tco_allow_all_files_for_module_declarations = true;
     }
   in
   let deps_mode = Typing_deps_mode.InMemoryMode None in

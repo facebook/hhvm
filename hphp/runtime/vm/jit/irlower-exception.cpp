@@ -18,6 +18,8 @@
 
 #include "hphp/runtime/base/stats.h"
 
+#include "hphp/runtime/vm/runtime.h"
+
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -215,6 +217,18 @@ void cgRaiseCoeffectsCallViolation(IRLS& env, const IRInstruction* inst) {
                argGroup(env, inst).imm(data->func).ssa(0).ssa(1));
 }
 
+void cgRaiseModuleBoundaryViolation(IRLS& env, const IRInstruction* inst) {
+  auto const data = inst->extra<OptClassAndFuncData>();
+  auto const args =
+    argGroup(env, inst)
+      .imm(data->cls)
+      .ssa(0)
+      .imm(data->func->moduleName());
+  cgCallHelper(vmain(env), env,
+               CallSpec::direct(raiseModuleBoundaryViolation),
+               kVoidDest, SyncOptions::Sync, args);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(InitThrowableFileAndLine)
@@ -257,6 +271,7 @@ IMPL_OPCODE_CALL(ThrowMustBeValueTypeException)
 IMPL_OPCODE_CALL(ThrowOutOfBounds)
 IMPL_OPCODE_CALL(ThrowParameterWrongType)
 IMPL_OPCODE_CALL(ThrowReadonlyMismatch)
+IMPL_OPCODE_CALL(RaiseImplicitContextStateInvalidException)
 
 ///////////////////////////////////////////////////////////////////////////////
 

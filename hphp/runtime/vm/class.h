@@ -1191,6 +1191,26 @@ public:
   Class* getCached() const;
   void setCached();
 
+  /*
+   * Check if the given class supports lazy APC deserialization.
+   *
+   * The "enable" version is used when storing objects into APC; it attempts
+   * to enable this option for this class, and returns true if it succeeds.
+   *
+   * The "mayUse" version is used by the JIT. If it returns false, this class
+   * will surely not be lazily deserialized, which means that we can optimize
+   * reads on its properties, skipping checks for lazy props.
+   *
+   * The "currentlyUsing" version is used in bulk object reads. It returns
+   * true if we've already enabled lazy APC deserialization for this class.
+   */
+  bool enableLazyAPCDeserialization();
+  bool mayUseLazyAPCDeserialization() const;
+  bool currentlyUsingLazyAPCDeserialization() const;
+
+  static void finalizeLazyAPCClasses();
+  static void deserializeLazyAPCClasses(const std::vector<const Class*>& list);
+  static std::vector<const Class*> serializeLazyAPCClasses();
 
   /////////////////////////////////////////////////////////////////////////////
   // Native data.
@@ -1932,6 +1952,7 @@ private:
    * to the closure's context class.
    */
   std::atomic<bool> m_scoped{false};
+  std::atomic<bool> m_useLazyAPCDeserialization{false};
   int32_t m_declPropNumAccessible;
 
   LowPtr<Func> m_ctor;

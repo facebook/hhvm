@@ -303,12 +303,12 @@ class PDO {
   /* @return mixed
    */
   <<__Native>>
-  public function __wakeup(): mixed;
+  public function __wakeup()[]: mixed;
 
   /* @return mixed
    */
   <<__Native>>
-  public function __sleep(): mixed;
+  public function __sleep()[]: mixed;
 
   /* This function returns all currently available PDO drivers which can be used
    * in DSN parameter of PDO::__construct(). This is a static method.
@@ -610,12 +610,12 @@ class PDOStatement implements Iterator {
   /* @return mixed
    */
   <<__Native>>
-  public function __wakeup(): mixed;
+  public function __wakeup()[]: mixed;
 
   /* @return mixed
    */
   <<__Native>>
-  public function __sleep(): mixed;
+  public function __sleep()[]: mixed;
 }
 
 /* @return vec<string>

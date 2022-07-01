@@ -8,8 +8,6 @@
  *)
 
 open Hh_prelude
-open File_content
-open String_utils
 open Sys_utils
 
 (*****************************************************************************)
@@ -20,7 +18,6 @@ type mode =
   | NoMode
   | Autocomplete
   | Autocomplete_manually_invoked
-  | Ffp_autocomplete
 
 type options = {
   files: string list;
@@ -116,10 +113,6 @@ let parse_options () =
       ( "--auto-complete-manually-invoked",
         Arg.Unit (set_mode Autocomplete_manually_invoked),
         " Produce autocomplete suggestions as if manually triggered by user" );
-      ( "--ffp-auto-complete",
-        Arg.Unit (set_mode Ffp_autocomplete),
-        " Produce autocomplete suggestions using the full-fidelity parse tree"
-      );
       ( "--manifold-api-key",
         Arg.String (set "manifold api key" saved_state_manifold_api_key),
         " API key used to download a saved state from Manifold (optional)" );
@@ -263,7 +256,6 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) =
     | [x] -> x
     | _ -> die "Only single file expected"
   in
-  let iter_over_files f : unit = List.iter filenames ~f in
   match mode with
   | NoMode -> die "Exactly one mode must be setup"
   | Autocomplete
@@ -308,43 +300,6 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) =
           AutocompleteTypes.(Printf.printf "%s %s\n" r.res_name r.res_ty)
         end
       result.Utils.With_complete_flag.value
-  | Ffp_autocomplete ->
-    iter_over_files (fun path ->
-        try
-          let sienv = scan_files_for_symbol_index path sienv ctx in
-          let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-          (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
-          let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
-          let position =
-            try
-              let file_text = Provider_context.read_file_contents_exn entry in
-              let _ = Str.search_forward args_regex file_text 0 in
-              let raw_flags = Str.matched_string file_text in
-              match split ' ' raw_flags with
-              | [_; row; column] ->
-                { line = int_of_string row; column = int_of_string column }
-              | _ -> failwith "Invalid test file: no flags found"
-            with
-            | Caml.Not_found -> failwith "Invalid test file: no flags found"
-          in
-          let result =
-            FfpAutocompleteService.auto_complete
-              ctx
-              entry
-              position
-              ~filter_by_token:true
-              ~sienv
-          in
-          match result with
-          | [] -> Printf.printf "No result found\n"
-          | res ->
-            List.iter res ~f:(fun r ->
-                AutocompleteTypes.(Printf.printf "%s\n" r.res_name))
-        with
-        | Failure msg
-        | Invalid_argument msg ->
-          Printf.printf "%s\n" msg;
-          exit 1)
 
 (*****************************************************************************)
 (* Main entry point *)

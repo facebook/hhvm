@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::TypeDecl;
 use anyhow::Result;
 use datastore::Store;
 use pos::{ConstName, FunName, MethodName, ModuleName, PropName, TypeName};
@@ -24,36 +23,39 @@ use ty::reason::Reason;
 /// the entire `ShallowClass` containing that method declaration.
 #[derive(Debug)]
 pub struct ShallowDeclStore<R: Reason> {
-    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
-    funs: Box<dyn Store<FunName, Arc<FunDecl<R>>>>,
-    consts: Box<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
-    modules: Box<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
+    classes: Arc<dyn Store<TypeName, Arc<ShallowClass<R>>>>,
+    typedefs: Arc<dyn Store<TypeName, Arc<TypedefDecl<R>>>>,
+    funs: Arc<dyn Store<FunName, Arc<FunDecl<R>>>>,
+    consts: Arc<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
+    modules: Arc<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
 
     // The below tables are intended to be index tables for information stored
-    // in the `types` table (the underlying data is shared via the `Hc` in
-    // `Ty`). When inserting or removing from the `types` table, these
+    // in the `classes` table (the underlying data is shared via the `Hc` in
+    // `Ty`). When inserting or removing from the `classes` table, these
     // indices must be updated.
-    properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
-    static_properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
-    methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
-    static_methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
-    constructors: Box<dyn Store<TypeName, Ty<R>>>,
+    properties: Arc<dyn Store<(TypeName, PropName), Ty<R>>>,
+    static_properties: Arc<dyn Store<(TypeName, PropName), Ty<R>>>,
+    methods: Arc<dyn Store<(TypeName, MethodName), Ty<R>>>,
+    static_methods: Arc<dyn Store<(TypeName, MethodName), Ty<R>>>,
+    constructors: Arc<dyn Store<TypeName, Ty<R>>>,
 }
 
 impl<R: Reason> ShallowDeclStore<R> {
     pub fn new(
-        types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
-        funs: Box<dyn Store<FunName, Arc<FunDecl<R>>>>,
-        consts: Box<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
-        modules: Box<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
-        properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
-        static_properties: Box<dyn Store<(TypeName, PropName), Ty<R>>>,
-        methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
-        static_methods: Box<dyn Store<(TypeName, MethodName), Ty<R>>>,
-        constructors: Box<dyn Store<TypeName, Ty<R>>>,
+        classes: Arc<dyn Store<TypeName, Arc<ShallowClass<R>>>>,
+        typedefs: Arc<dyn Store<TypeName, Arc<TypedefDecl<R>>>>,
+        funs: Arc<dyn Store<FunName, Arc<FunDecl<R>>>>,
+        consts: Arc<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
+        modules: Arc<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
+        properties: Arc<dyn Store<(TypeName, PropName), Ty<R>>>,
+        static_properties: Arc<dyn Store<(TypeName, PropName), Ty<R>>>,
+        methods: Arc<dyn Store<(TypeName, MethodName), Ty<R>>>,
+        static_methods: Arc<dyn Store<(TypeName, MethodName), Ty<R>>>,
+        constructors: Arc<dyn Store<TypeName, Ty<R>>>,
     ) -> Self {
         Self {
-            types,
+            classes,
+            typedefs,
             funs,
             consts,
             modules,
@@ -66,58 +68,54 @@ impl<R: Reason> ShallowDeclStore<R> {
     }
 
     /// Construct a `ShallowDeclStore` which looks up class members from the
-    /// given `types` table rather than maintaining separate member stores.
+    /// given `classes` table rather than maintaining separate member stores.
     /// Intended to be used with `Store` implementations which hold on to
     /// hash-consed `Ty`s in memory (rather than storing them in a
     /// serialized format), so that looking up individual members doesn't
     /// involve deserializing an entire `ShallowClass`.
     pub fn with_no_member_stores(
-        types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
-        funs: Box<dyn Store<FunName, Arc<FunDecl<R>>>>,
-        consts: Box<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
-        modules: Box<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
+        classes: Arc<dyn Store<TypeName, Arc<ShallowClass<R>>>>,
+        typedefs: Arc<dyn Store<TypeName, Arc<TypedefDecl<R>>>>,
+        funs: Arc<dyn Store<FunName, Arc<FunDecl<R>>>>,
+        consts: Arc<dyn Store<ConstName, Arc<ConstDecl<R>>>>,
+        modules: Arc<dyn Store<ModuleName, Arc<ModuleDecl<R>>>>,
     ) -> Self {
         Self {
-            properties: Box::new(PropFinder {
-                types: Arc::clone(&types),
+            properties: Arc::new(PropFinder {
+                classes: Arc::clone(&classes),
             }),
-            static_properties: Box::new(StaticPropFinder {
-                types: Arc::clone(&types),
+            static_properties: Arc::new(StaticPropFinder {
+                classes: Arc::clone(&classes),
             }),
-            methods: Box::new(MethodFinder {
-                types: Arc::clone(&types),
+            methods: Arc::new(MethodFinder {
+                classes: Arc::clone(&classes),
             }),
-            static_methods: Box::new(StaticMethodFinder {
-                types: Arc::clone(&types),
+            static_methods: Arc::new(StaticMethodFinder {
+                classes: Arc::clone(&classes),
             }),
-            constructors: Box::new(ConstructorFinder {
-                types: Arc::clone(&types),
+            constructors: Arc::new(ConstructorFinder {
+                classes: Arc::clone(&classes),
             }),
 
-            types,
+            classes,
+            typedefs,
             funs,
             consts,
             modules,
         }
     }
 
-    pub fn add_decls(&self, decls: Vec<Decl<R>>) -> Result<()> {
-        for decl in decls {
+    pub fn add_decls(&self, decls: impl IntoIterator<Item = Decl<R>>) -> Result<()> {
+        for decl in decls.into_iter() {
             match decl {
                 Decl::Class(name, decl) => self.add_class(name, Arc::new(decl))?,
                 Decl::Fun(name, decl) => self.funs.insert(name, Arc::new(decl))?,
-                Decl::Typedef(name, decl) => {
-                    self.types.insert(name, TypeDecl::Typedef(Arc::new(decl)))?
-                }
+                Decl::Typedef(name, decl) => self.typedefs.insert(name, Arc::new(decl))?,
                 Decl::Const(name, decl) => self.consts.insert(name, Arc::new(decl))?,
                 Decl::Module(name, decl) => self.modules.insert(name, Arc::new(decl))?,
             }
         }
         Ok(())
-    }
-
-    pub fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
-        self.types.get(name)
     }
 
     pub fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
@@ -129,17 +127,11 @@ impl<R: Reason> ShallowDeclStore<R> {
     }
 
     pub fn get_class(&self, name: TypeName) -> Result<Option<Arc<ShallowClass<R>>>> {
-        Ok(self.types.get(name)?.and_then(|decl| match decl {
-            TypeDecl::Class(cls) => Some(cls),
-            TypeDecl::Typedef(..) => None,
-        }))
+        self.classes.get(name)
     }
 
     pub fn get_typedef(&self, name: TypeName) -> Result<Option<Arc<TypedefDecl<R>>>> {
-        Ok(self.types.get(name)?.and_then(|decl| match decl {
-            TypeDecl::Typedef(td) => Some(td),
-            TypeDecl::Class(..) => None,
-        }))
+        self.typedefs.get(name)
     }
 
     pub fn get_property_type(
@@ -180,57 +172,50 @@ impl<R: Reason> ShallowDeclStore<R> {
 
     fn add_class(&self, name: TypeName, cls: Arc<ShallowClass<R>>) -> Result<()> {
         let cid = cls.name.id();
-        for prop in cls.props.iter() {
+        for prop in cls.props.iter().rev() {
             if let Some(ty) = &prop.ty {
                 self.properties.insert((cid, prop.name.id()), ty.clone())?
             }
         }
-        for prop in cls.static_props.iter() {
+        for prop in cls.static_props.iter().rev() {
             if let Some(ty) = &prop.ty {
                 self.static_properties
                     .insert((cid, prop.name.id()), ty.clone())?
             }
         }
-        for meth in cls.methods.iter() {
+        for meth in cls.methods.iter().rev() {
             self.methods
                 .insert((cid, meth.name.id()), meth.ty.clone())?
         }
-        for meth in cls.static_methods.iter() {
+        for meth in cls.static_methods.iter().rev() {
             self.static_methods
                 .insert((cid, meth.name.id()), meth.ty.clone())?
         }
         if let Some(constructor) = &cls.constructor {
             self.constructors.insert(cid, constructor.ty.clone())?
         }
-        self.types.insert(name, TypeDecl::Class(cls))?;
+        self.classes.insert(name, cls)?;
         Ok(())
     }
 }
 
-/// Looks up props from the `types` Store instead of storing them separately.
+/// Looks up props from the `classes` Store instead of storing them separately.
 #[derive(Debug)]
 struct PropFinder<R: Reason> {
-    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
+    classes: Arc<dyn Store<TypeName, Arc<ShallowClass<R>>>>,
 }
 
 impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for PropFinder<R> {
     fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Result<Option<Ty<R>>> {
-        Ok(self
-            .types
-            .get(class_name)?
-            .and_then(|decl| match decl {
-                TypeDecl::Class(cls) => Some(cls),
-                TypeDecl::Typedef(..) => None,
+        Ok(self.classes.get(class_name)?.and_then(|cls| {
+            cls.props.iter().rev().find_map(|prop| {
+                if prop.name.id() == property_name {
+                    prop.ty.clone()
+                } else {
+                    None
+                }
             })
-            .and_then(|cls| {
-                cls.props.iter().rev().find_map(|prop| {
-                    if prop.name.id() == property_name {
-                        prop.ty.clone()
-                    } else {
-                        None
-                    }
-                })
-            }))
+        }))
     }
     fn insert(&self, _: (TypeName, PropName), _: Ty<R>) -> Result<()> {
         Ok(())
@@ -240,30 +225,23 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for PropFinder<R> {
     }
 }
 
-/// Looks up props from the `types` Store instead of storing them separately.
+/// Looks up props from the `classes` Store instead of storing them separately.
 #[derive(Debug)]
 struct StaticPropFinder<R: Reason> {
-    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
+    classes: Arc<dyn Store<TypeName, Arc<ShallowClass<R>>>>,
 }
 
 impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
     fn get(&self, (class_name, property_name): (TypeName, PropName)) -> Result<Option<Ty<R>>> {
-        Ok(self
-            .types
-            .get(class_name)?
-            .and_then(|decl| match decl {
-                TypeDecl::Class(cls) => Some(cls),
-                TypeDecl::Typedef(..) => None,
+        Ok(self.classes.get(class_name)?.and_then(|cls| {
+            cls.static_props.iter().rev().find_map(|prop| {
+                if prop.name.id() == property_name {
+                    prop.ty.clone()
+                } else {
+                    None
+                }
             })
-            .and_then(|cls| {
-                cls.static_props.iter().rev().find_map(|prop| {
-                    if prop.name.id() == property_name {
-                        prop.ty.clone()
-                    } else {
-                        None
-                    }
-                })
-            }))
+        }))
     }
     fn insert(&self, _: (TypeName, PropName), _: Ty<R>) -> Result<()> {
         Ok(())
@@ -273,30 +251,23 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
     }
 }
 
-/// Looks up methods from the `types` Store instead of storing them separately.
+/// Looks up methods from the `classes` Store instead of storing them separately.
 #[derive(Debug)]
 struct MethodFinder<R: Reason> {
-    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
+    classes: Arc<dyn Store<TypeName, Arc<ShallowClass<R>>>>,
 }
 
 impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for MethodFinder<R> {
     fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Result<Option<Ty<R>>> {
-        Ok(self
-            .types
-            .get(class_name)?
-            .and_then(|decl| match decl {
-                TypeDecl::Class(cls) => Some(cls),
-                TypeDecl::Typedef(..) => None,
+        Ok(self.classes.get(class_name)?.and_then(|cls| {
+            cls.methods.iter().rev().find_map(|meth| {
+                if meth.name.id() == method_name {
+                    Some(meth.ty.clone())
+                } else {
+                    None
+                }
             })
-            .and_then(|cls| {
-                cls.methods.iter().rev().find_map(|meth| {
-                    if meth.name.id() == method_name {
-                        Some(meth.ty.clone())
-                    } else {
-                        None
-                    }
-                })
-            }))
+        }))
     }
     fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) -> Result<()> {
         Ok(())
@@ -306,30 +277,23 @@ impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for MethodFinder<R> {
     }
 }
 
-/// Looks up methods from the `types` Store instead of storing them separately.
+/// Looks up methods from the `classes` Store instead of storing them separately.
 #[derive(Debug)]
 struct StaticMethodFinder<R: Reason> {
-    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
+    classes: Arc<dyn Store<TypeName, Arc<ShallowClass<R>>>>,
 }
 
 impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for StaticMethodFinder<R> {
     fn get(&self, (class_name, method_name): (TypeName, MethodName)) -> Result<Option<Ty<R>>> {
-        Ok(self
-            .types
-            .get(class_name)?
-            .and_then(|decl| match decl {
-                TypeDecl::Class(cls) => Some(cls),
-                TypeDecl::Typedef(..) => None,
+        Ok(self.classes.get(class_name)?.and_then(|cls| {
+            cls.static_methods.iter().rev().find_map(|meth| {
+                if meth.name.id() == method_name {
+                    Some(meth.ty.clone())
+                } else {
+                    None
+                }
             })
-            .and_then(|cls| {
-                cls.static_methods.iter().rev().find_map(|meth| {
-                    if meth.name.id() == method_name {
-                        Some(meth.ty.clone())
-                    } else {
-                        None
-                    }
-                })
-            }))
+        }))
     }
     fn insert(&self, _: (TypeName, MethodName), _: Ty<R>) -> Result<()> {
         Ok(())
@@ -339,21 +303,17 @@ impl<R: Reason> Store<(TypeName, MethodName), Ty<R>> for StaticMethodFinder<R> {
     }
 }
 
-/// Looks up constructors from the `types` Store instead of storing them separately.
+/// Looks up constructors from the `classes` Store instead of storing them separately.
 #[derive(Debug)]
 struct ConstructorFinder<R: Reason> {
-    types: Arc<dyn Store<TypeName, TypeDecl<R>>>,
+    classes: Arc<dyn Store<TypeName, Arc<ShallowClass<R>>>>,
 }
 
 impl<R: Reason> Store<TypeName, Ty<R>> for ConstructorFinder<R> {
     fn get(&self, class_name: TypeName) -> Result<Option<Ty<R>>> {
         Ok(self
-            .types
+            .classes
             .get(class_name)?
-            .and_then(|decl| match decl {
-                TypeDecl::Class(cls) => Some(cls),
-                TypeDecl::Typedef(..) => None,
-            })
             .and_then(|cls| cls.constructor.as_ref().map(|meth| meth.ty.clone())))
     }
     fn insert(&self, _: TypeName, _: Ty<R>) -> Result<()> {

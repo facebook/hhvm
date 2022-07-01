@@ -2523,7 +2523,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 pos.clone(),
                 ast::Expr_::mk_id(ast_defs::Id(
                     pos.clone(),
-                    "\\hh\\invariant_violation".into(),
+                    "\\HH\\invariant_violation".into(),
                 )),
             );
             let call = ast::Expr(
@@ -2617,7 +2617,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 }
             }
         }
-        ("__systemlib\\meth_caller", _) => {
+        ("__SystemLib\\meth_caller", _) => {
             // used by meth_caller() to directly emit func ptr
             if nargs != 1 {
                 return Err(Error::fatal_runtime(
@@ -2646,7 +2646,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 )),
             }
         }
-        ("__systemlib\\__debugger_is_uninit", _) => {
+        ("__SystemLib\\__debugger_is_uninit", _) => {
             if nargs != 1 {
                 Err(Error::fatal_runtime(
                     pos,

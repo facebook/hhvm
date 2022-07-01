@@ -249,6 +249,7 @@ let schema : schema_node list =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
           ("modifiers", ZeroOrOne Token);
+          ("module_kw_opt", ZeroOrOne Token);
           ("keyword", Token);
           ("name", ZeroOrOne Token);
           ("generic_parameter", ZeroOrOne (Just "TypeParameters"));

@@ -17,6 +17,7 @@ use pos::{Symbol, TypeName};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Cstr<R: Reason> {
+    Subtype(Ty<R>, Ty<R>),
     HasMethod {
         name: Symbol,
         ty: Ty<R>,
@@ -37,6 +38,10 @@ pub enum Cstr<R: Reason> {
 }
 
 impl<R: Reason> Cstr<R> {
+    pub fn subtype(ty_sub: Ty<R>, ty_sup: Ty<R>) -> Self {
+        Self::Subtype(ty_sub, ty_sup)
+    }
+
     pub fn has_method(
         name: Symbol,
         ty: Ty<R>,
@@ -60,6 +65,11 @@ impl<R: Reason> Cstr<R> {
         F: Fn(TypeName) -> Option<Vec<Variance>>,
     {
         match self {
+            Cstr::Subtype(ty_sub, ty_sup) => {
+                let (pos_sub, neg_sub) = ty_sub.tyvars(get_tparam_variance);
+                let (pos_sup, neg_sup) = ty_sup.tyvars(get_tparam_variance);
+                (pos_sub.union(pos_sup), neg_sub.union(neg_sup))
+            }
             Cstr::HasMethod { ty, .. } | Cstr::HasProp { ty, .. } => ty.tyvars(get_tparam_variance),
         }
     }

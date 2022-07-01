@@ -20,8 +20,7 @@ let init
     ~(init_start_t : float)
     ~(bin_root : Path.t)
     ~(root : Path.t)
-    ~(hulk_lite : bool)
-    ~(hulk_heavy : bool)
+    ~(mode : HulkStrategy.hulk_mode)
     ~(saved_state_manifold_path : string option) : unit =
   let (server
         : (module RemoteWorker.RemoteServerApi
@@ -57,8 +56,7 @@ let init
       ~nonce
       ~transport_channel
       ~root
-      ~hulk_lite
-      ~hulk_heavy
+      ~mode
       ~saved_state_manifold_path
       artifact_store_config
       server

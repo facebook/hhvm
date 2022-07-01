@@ -18,20 +18,8 @@ use crate::{file_info, shallow_decl_defs, typing_defs};
 pub use shallow_decl_defs::Decl;
 
 // NB: Must keep in sync with OCaml type Direct_decl_parser.parsed_file
-#[derive(
-    Copy,
-    Clone,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
+#[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Deserialize, FromOcamlRepIn, NoPosHash, Serialize, ToOcamlRep)]
 pub struct ParsedFile<'a> {
     pub mode: Option<file_info::Mode>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

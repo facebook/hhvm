@@ -23,6 +23,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <tuple>
 #include <unistd.h>
 #include <utility>
 #include <vector>
@@ -48,7 +49,8 @@ namespace {
  * Create the given file if it doesn't exist, setting its group ownership and
  * permissions along the way.
  */
-void setFilePerms(const folly::fs::path& path, ::gid_t gid, ::mode_t perms) {
+void createFileWithPerms(
+    const folly::fs::path& path, ::gid_t gid, ::mode_t perms) {
   XLOGF(
       DBG1,
       "Creating {} with gid={} and perms={:04o}",
@@ -559,14 +561,11 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     assertx(dbData.m_path.is_absolute());
     auto db = [&]() {
       try {
-        return SQLite::connect(
-            dbData.m_path.native(),
-            dbData.m_writable ? SQLite::OpenMode::ReadWrite
-                              : SQLite::OpenMode::ReadOnly);
+        return SQLite::connect(dbData.m_path.native(), dbData.m_writable);
       } catch (SQLiteExc& e) {
         XLOGF(
             ERR,
-            "Exception when trying to openo/create native Facts DB at {} ({})",
+            "Exception when trying to open/create native Facts DB at {} ({})",
             dbData.m_path.native(),
             e.what());
         throw std::runtime_error{folly::sformat(
@@ -575,17 +574,23 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       }
     }();
 
-    if (dbData.m_writable) {
-      // If writable, ensure the DB has the correct owner and permissions.
-      setFilePerms(dbData.m_path, dbData.m_gid, dbData.m_perms);
-      setFilePerms(
-          folly::fs::path{dbData.m_path} += "-shm",
-          dbData.m_gid,
-          dbData.m_perms);
-      setFilePerms(
-          folly::fs::path{dbData.m_path} += "-wal",
-          dbData.m_gid,
-          dbData.m_perms);
+    switch (dbData.m_writable) {
+      case SQLite::OpenMode::ReadOnly:
+      case SQLite::OpenMode::ReadWrite:
+        break;
+      case SQLite::OpenMode::ReadWriteCreate:
+        // If we can create the DB, create it with the correct owner and
+        // permissions.
+        createFileWithPerms(dbData.m_path, dbData.m_gid, dbData.m_perms);
+        createFileWithPerms(
+            folly::fs::path{dbData.m_path} += "-shm",
+            dbData.m_gid,
+            dbData.m_perms);
+        createFileWithPerms(
+            folly::fs::path{dbData.m_path} += "-wal",
+            dbData.m_gid,
+            dbData.m_perms);
+        break;
     }
 
     if (!db.isReadOnly()) {
@@ -1231,7 +1236,8 @@ THREAD_LOCAL(SQLiteAutoloadDBThreadLocal, t_adb);
 
 SQLiteAutoloadDB& SQLiteAutoloadDB::getThreadLocal(const SQLiteKey& key) {
   SQLiteAutoloadDBThreadLocal& dbVault = *t_adb.get();
-  auto& dbPtr = dbVault[{key.m_path.native(), key.m_writable}];
+  auto& dbPtr = dbVault[{
+      key.m_path.native(), key.m_writable != SQLite::OpenMode::ReadOnly}];
   if (!dbPtr) {
     dbPtr = SQLiteAutoloadDBImpl::get(key);
   }

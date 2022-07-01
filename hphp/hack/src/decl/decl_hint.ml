@@ -209,9 +209,24 @@ and hint_ p env = function
           ids
     in
     translate root_ty ids
-  | Hrefinement (_subject_ty, _members) ->
-    Errors.internal_error p "TODO: turn refinement hints into decl types";
-    Terr
+  | Hrefinement (root_ty, members) ->
+    let root_ty = hint env root_ty in
+    let class_ref =
+      (* We do not err on duplicate refinements as the parser will
+       * already have *)
+      let cr_types =
+        List.fold members ~init:SMap.empty ~f:(fun map r ->
+            match r with
+            | Rtype ((_, id), Texact h) -> SMap.add id (Texact (hint env h)) map
+            | Rtype ((_, id), Tloose { tr_lower; tr_upper }) ->
+              let decl_bounds = List.map ~f:(hint env) in
+              let tr_lower = decl_bounds tr_lower in
+              let tr_upper = decl_bounds tr_upper in
+              SMap.add id (Tloose { tr_lower; tr_upper }) map)
+      in
+      { cr_types }
+    in
+    Trefinement (root_ty, class_ref)
   | Htuple hl ->
     let tyl = List.map hl ~f:(hint env) in
     Ttuple tyl

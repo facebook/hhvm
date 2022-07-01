@@ -116,9 +116,19 @@ struct TypeAlias {
   const Unit* unit() const { return m_preTypeAlias->unit; }
   UserAttributeMap userAttrs() const { return m_preTypeAlias->userAttrs; }
   const Array& typeStructure() const { return m_preTypeAlias->typeStructure; }
-  const Array& resolvedTypeStructure() const {
+  const Array& resolvedTypeStructureRaw() const {
     return m_preTypeAlias->resolvedTypeStructure;
   }
+
+  // Return the type-structure, possibly as a logging array
+  const Array resolvedTypeStructure() const;
+
+  // Should only be used to change the existing type-structure to
+  // a bespoke array layout.
+  void setResolvedTypeStructure(ArrayData* ad);
+
+  // A hash for this class that will remain constant across process restarts.
+  size_t stableHash() const;
 
   /*
    * Define the type alias given by `id', binding it to the appropriate

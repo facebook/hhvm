@@ -2,22 +2,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![feature(allocator_api)]
 
 use lz4::liblz4;
-use ocamlrep::{Value, STRING_TAG};
 use shmrs::chashmap::CMapValue;
-use std::alloc::Layout;
 use std::convert::TryInto;
 use std::ptr::NonNull;
 
 extern "C" {
     fn caml_input_value_from_block(data: *const u8, size: usize) -> usize;
     fn caml_alloc_initialized_string(size: usize, data: *const u8) -> usize;
-    fn caml_output_value_to_malloc(value: usize, flags: usize, ptr: *mut usize, len: *mut usize);
-
-    fn free(data: *const u8);
-    fn malloc(size: libc::size_t) -> *mut u8;
+    fn caml_output_value_to_malloc(value: usize, flags: usize, ptr: *mut *mut u8, len: *mut usize);
 }
 
 /// A struct to make sure we don't mix up fields in `HeapValueHeader` that
@@ -100,6 +94,14 @@ pub struct HeapValue {
     pub data: NonNull<u8>,
 }
 
+// Safety: The memory behind `data` is owned by this HeapValue, but
+// we never write to that memory, only read.
+//
+// Most importantly, we never violate the the aliasing rule: we never
+// create two mutable references to the same underlying data.
+unsafe impl Send for HeapValue {}
+unsafe impl Sync for HeapValue {}
+
 impl HeapValue {
     /// Convert the heap value into an OCaml object.
     ///
@@ -114,21 +116,21 @@ impl HeapValue {
         } else if !self.header.is_compressed() {
             caml_input_value_from_block(self.data.as_ptr(), self.header.buffer_size())
         } else {
-            // Ideally, we'd have this a bit more Rust-idiomatic, but
-            // unfortunately, we can't get rid of all the malloc free-ing
-            // due to our interaction with OCaml.
-            let data = malloc(self.header.uncompressed_size());
+            let mut data: Vec<u8> = Vec::with_capacity(self.header.uncompressed_size());
             let uncompressed_size = liblz4::LZ4_decompress_safe(
                 self.data.as_ptr() as *const i8,
-                data as *mut i8,
+                data.as_mut_ptr() as *mut i8,
                 self.header.buffer_size().try_into().unwrap(),
                 self.header.uncompressed_size().try_into().unwrap(),
             );
-            assert!(self.header.uncompressed_size() == uncompressed_size as usize);
+            let uncompressed_size: usize = uncompressed_size.try_into().unwrap();
+            assert!(self.header.uncompressed_size() == uncompressed_size);
+            // SAFETY: `LZ4_decompress_safe` should have initialized
+            // `uncompressed_size` bytes; we assert above that
+            // `uncompressed_size` is equal to the capacity we set
+            data.set_len(uncompressed_size);
 
-            let result = caml_input_value_from_block(data, uncompressed_size as libc::size_t);
-            free(data);
-            result
+            caml_input_value_from_block(data.as_ptr(), data.len())
         }
     }
 
@@ -147,116 +149,108 @@ impl CMapValue for HeapValue {
 
 /// An OCaml serialized value, in all its forms.
 ///
-/// Each `SerializedValue` is bound by a lifetime 'a because it
-/// might reference an OCaml value on the OCaml heap.
+/// Each `SerializedValue` is bound by a lifetime 'a because it might reference
+/// a borrowed string (which may be on the OCaml heap, or it may be in
+/// Rust-managed memory).
 pub enum SerializedValue<'a> {
-    /// An OCaml STRING value on the OCaml heap.
-    CamlString(Value<'a>),
-    /// An OCaml STRING value on the Rust heap (owned by Rust)
-    OwnedString { ptr: *mut u8, len: usize },
-    /// An OCaml serialized (marshaled) value.
-    Serialized { ptr: *mut u8, len: usize },
-    /// An OCaml serialized (marshaled) value, which was then
-    /// compressed.
+    /// A plain uncompressed byte string. Stored in shm as-is (i.e., without
+    /// marshaling/serialization/compression).
+    BStr(&'a [u8]),
+    /// An OCaml serialized (marshaled) value, allocated on the heap via `malloc`.
+    Serialized(MallocBuf),
+    /// An OCaml serialized (marshaled) value, which was then compressed using lz4.
     Compressed {
-        ptr: *mut u8,
-        len: usize,
-        uncompressed_size: i32,
+        data: Vec<u8>,
+        uncompressed_size: usize,
     },
 }
 
-impl<'a> SerializedValue<'a> {
-    pub fn from(value: Value<'a>) -> Self {
-        use SerializedValue::*;
+/// A byte buffer allocated by `malloc`, via `caml_output_value_to_malloc`.
+/// Essentially `Box<[u8]>`, but with a `Drop` impl that invokes `free`.
+pub struct MallocBuf {
+    ptr: *const u8,
+    len: usize,
+}
 
+impl Drop for MallocBuf {
+    fn drop(&mut self) {
+        extern "C" {
+            fn free(data: *const u8);
+        }
+        unsafe { free(self.ptr) };
+    }
+}
+
+impl MallocBuf {
+    fn as_slice(&self) -> &[u8] {
+        unsafe { std::slice::from_raw_parts(self.ptr, self.len) }
+    }
+}
+
+impl<'a> From<ocamlrep::Value<'a>> for SerializedValue<'a> {
+    fn from(value: ocamlrep::Value<'a>) -> Self {
         // We are entering the OCaml runtime, is there a risk
         // that `value` (or other values) get deallocated?
         // I don't think so: caml_output_value_to_malloc shouldn't
         // allocate on the OCaml heap, and thus not trigger the GC.
-        if value
-            .as_block()
-            .map_or(false, |blck| blck.tag() == STRING_TAG)
-        {
-            CamlString(value)
+        if let Some(str) = value.as_byte_string() {
+            SerializedValue::BStr(str)
         } else {
-            let mut ptr: usize = 0;
+            let mut ptr: *mut u8 = std::ptr::null_mut();
             let mut len: usize = 0;
             unsafe {
                 caml_output_value_to_malloc(
                     value.to_bits(),
-                    Value::int(0).to_bits(),
-                    (&mut ptr) as *mut usize,
-                    (&mut len) as *mut usize,
+                    ocamlrep::Value::int(0).to_bits(),
+                    &mut ptr,
+                    &mut len,
                 )
             };
-            Serialized {
-                ptr: ptr as *mut u8,
-                len,
-            }
+            SerializedValue::Serialized(MallocBuf { ptr, len })
         }
     }
+}
 
+impl<'a> SerializedValue<'a> {
     pub fn as_slice(&self) -> &[u8] {
         use SerializedValue::*;
         match self {
-            CamlString(value) => value.as_byte_string().unwrap(),
-            &OwnedString { ptr, len } | &Serialized { ptr, len } | &Compressed { ptr, len, .. } => unsafe {
-                std::slice::from_raw_parts(ptr as *const u8, len)
-            },
+            BStr(value) => value,
+            Serialized(buf) => buf.as_slice(),
+            Compressed { data, .. } => data,
         }
     }
 
     pub fn maybe_compress(self) -> Self {
         use SerializedValue::*;
         match self {
-            CamlString(value) => CamlString(value),
-            OwnedString { ptr, len } => OwnedString { ptr, len },
-            Compressed {
-                ptr,
-                len,
-                uncompressed_size,
-            } => Compressed {
-                ptr,
-                len,
-                uncompressed_size,
-            },
-            Serialized { ptr, len } => unsafe {
-                let uncompressed_size: i32 = len.try_into().unwrap();
+            this @ (BStr(..) | Compressed { .. }) => this,
+            Serialized(buf) => unsafe {
+                let uncompressed_size: i32 = buf.len.try_into().unwrap();
                 let max_compression_size = liblz4::LZ4_compressBound(uncompressed_size);
-                let compressed_data = malloc(max_compression_size as libc::size_t);
+                let mut compressed_data =
+                    Vec::with_capacity(max_compression_size.try_into().unwrap());
                 let compressed_size = liblz4::LZ4_compress_default(
-                    ptr as *const i8,
-                    compressed_data as *mut i8,
+                    buf.ptr as *const i8,
+                    compressed_data.as_mut_ptr() as *mut i8,
                     uncompressed_size,
                     max_compression_size,
                 );
                 if compressed_size == 0 || compressed_size >= uncompressed_size {
-                    free(compressed_data);
-                    Serialized { ptr, len }
+                    Serialized(buf)
                 } else {
-                    free(ptr);
+                    // SAFETY: `LZ4_compress_default` should have initialized
+                    // `compressed_size` bytes (which should be no more than
+                    // `max_compression_size` bytes, which is our vec's
+                    // capacity).
+                    compressed_data.set_len(compressed_size.try_into().unwrap());
                     Compressed {
-                        ptr: compressed_data,
-                        len: compressed_size as usize,
-                        uncompressed_size,
+                        data: compressed_data,
+                        uncompressed_size: buf.len,
                     }
                 }
             },
         }
-    }
-
-    pub fn free(self) {
-        use SerializedValue::*;
-        match self {
-            CamlString(..) => {}
-            OwnedString { ptr, .. } | Serialized { ptr, .. } | Compressed { ptr, .. } => unsafe {
-                free(ptr);
-            },
-        }
-    }
-
-    pub fn layout_for_buffer(&self) -> Layout {
-        Layout::from_size_align(self.as_slice().len(), 1).unwrap()
     }
 
     pub fn to_heap_value_in(&self, is_evictable: bool, buffer: &mut [u8]) -> HeapValue {
@@ -265,7 +259,7 @@ impl<'a> SerializedValue<'a> {
 
         use SerializedValue::*;
         let header = match self {
-            OwnedString { .. } | CamlString(..) => HeapValueHeaderFields {
+            BStr(..) => HeapValueHeaderFields {
                 buffer_size: slice.len(),
                 uncompressed_size: slice.len(),
                 is_serialized: false,
@@ -293,56 +287,23 @@ impl<'a> SerializedValue<'a> {
         }
     }
 
-    pub fn from_heap_value(heap_value: &HeapValue) -> (Self, bool) {
-        let buffer_size = heap_value.header.buffer_size();
-        let uncompressed_size = heap_value.header.uncompressed_size().try_into().unwrap();
-        let is_evictable = heap_value.header.is_evictable();
-
-        let ptr = unsafe { malloc(buffer_size) };
-        assert_ne!(ptr, std::ptr::null_mut());
-        let data = unsafe { std::slice::from_raw_parts_mut(ptr, buffer_size) };
-        data.clone_from_slice(heap_value.as_slice());
-        let len = data.len();
-
-        use SerializedValue::*;
-        let serialized_value = if !heap_value.header.is_serialized() {
-            assert!(!heap_value.header.is_compressed());
-            OwnedString { ptr, len }
-        } else if !heap_value.header.is_compressed() {
-            Serialized { ptr, len }
-        } else {
-            Compressed {
-                ptr,
-                len,
-                uncompressed_size,
-            }
-        };
-        (serialized_value, is_evictable)
-    }
-
     pub fn uncompressed_size(&self) -> usize {
         use SerializedValue::*;
         match self {
-            OwnedString { .. } | CamlString(..) => self.as_slice().len(),
-            Serialized { ptr: _, len } => *len,
-            Compressed {
-                ptr: _,
-                uncompressed_size,
-                len: _,
-            } => *uncompressed_size as usize,
+            BStr(data) => data.len(),
+            Serialized(buf) => buf.len,
+            &Compressed {
+                uncompressed_size, ..
+            } => uncompressed_size,
         }
     }
 
     pub fn compressed_size(&self) -> usize {
         use SerializedValue::*;
         match self {
-            OwnedString { .. } | CamlString(..) => self.as_slice().len(),
-            Serialized { ptr: _, len } => *len,
-            Compressed {
-                ptr: _,
-                uncompressed_size: _,
-                len,
-            } => *len,
+            BStr(data) => data.len(),
+            Serialized(buf) => buf.len,
+            Compressed { data, .. } => data.len(),
         }
     }
 }
@@ -385,84 +346,42 @@ mod tests {
     }
 
     #[test]
-    fn test_heap_value_from_into() {
-        fn assert_serialized_value_eq(x: &SerializedValue<'_>, y: &SerializedValue<'_>) {
-            use SerializedValue::*;
-            let (x_ptr, x_len, y_ptr, y_len) = match (x, y) {
-                (CamlString(..), CamlString(..)) => unimplemented!(),
-                (
-                    &OwnedString {
-                        ptr: x_ptr,
-                        len: x_len,
-                    },
-                    &OwnedString {
-                        ptr: y_ptr,
-                        len: y_len,
-                    },
-                ) => (x_ptr, x_len, y_ptr, y_len),
-                (
-                    &Serialized {
-                        ptr: x_ptr,
-                        len: x_len,
-                    },
-                    &Serialized {
-                        ptr: y_ptr,
-                        len: y_len,
-                    },
-                ) => (x_ptr, x_len, y_ptr, y_len),
-                (
-                    &Compressed {
-                        ptr: x_ptr,
-                        len: x_len,
-                        uncompressed_size: x_uncompressed_size,
-                    },
-                    &Compressed {
-                        ptr: y_ptr,
-                        len: y_len,
-                        uncompressed_size: y_uncompressed_size,
-                    },
-                ) => {
-                    assert_eq!(x_uncompressed_size, y_uncompressed_size);
-                    (x_ptr, x_len, y_ptr, y_len)
-                }
-                (_, _) => panic!(),
-            };
-            assert_eq!(x_len, y_len);
-            let x_slice = unsafe { std::slice::from_raw_parts(x_ptr, x_len) };
-            let y_slice = unsafe { std::slice::from_raw_parts(y_ptr, y_len) };
-            assert_eq!(x_slice, y_slice);
-        }
-
+    fn test_to_heap_value() {
         fn test_once(x: SerializedValue<'_>) {
             let x = x.maybe_compress();
             let mut buffer = vec![0_u8; x.as_slice().len()];
 
             let heap_value = x.to_heap_value_in(true, &mut buffer);
-            let (y, evictable) = SerializedValue::from_heap_value(&heap_value);
-            assert_serialized_value_eq(&x, &y);
-            assert!(evictable);
+            assert!(heap_value.header.is_evictable());
+            assert_eq!(heap_value.as_slice(), x.as_slice());
 
             let heap_value = x.to_heap_value_in(false, &mut buffer);
-            let (y, evictable) = SerializedValue::from_heap_value(&heap_value);
-            assert_serialized_value_eq(&x, &y);
-            assert!(!evictable);
+            assert!(!heap_value.header.is_evictable());
+            assert_eq!(heap_value.as_slice(), x.as_slice());
         }
 
-        fn buf_to_ptr(buf: &[u8]) -> (*mut u8, usize) {
+        fn malloc_buf(buf: &[u8]) -> MallocBuf {
+            extern "C" {
+                fn malloc(size: usize) -> *mut u8;
+            }
             let ptr = unsafe { malloc(buf.len()) };
             assert_ne!(ptr, std::ptr::null_mut());
             let slice = unsafe { std::slice::from_raw_parts_mut(ptr, buf.len()) };
             slice.copy_from_slice(buf);
-            (ptr, buf.len())
+            MallocBuf {
+                ptr,
+                len: buf.len(),
+            }
         }
 
-        let (ptr, len) = buf_to_ptr(&[0xdb, 0x7f, 0x13, 0xa6, 0xab, 0x0e, 0x51, 0x74, 0x2b]);
-        test_once(SerializedValue::OwnedString { ptr, len });
+        test_once(SerializedValue::BStr(&[
+            0xdb, 0x7f, 0x13, 0xa6, 0xab, 0x0e, 0x51, 0x74, 0x2b,
+        ]));
 
-        let (ptr, len) = buf_to_ptr(&[0xdb, 0x7f, 0x13, 0xa6, 0xab, 0x0e, 0x51, 0x74, 0x2b]);
-        test_once(SerializedValue::Serialized { ptr, len });
+        let buf = malloc_buf(&[0xdb, 0x7f, 0x13, 0xa6, 0xab, 0x0e, 0x51, 0x74, 0x2b]);
+        test_once(SerializedValue::Serialized(buf));
 
-        let (ptr, len) = buf_to_ptr(&vec![95; 1024]);
-        test_once(SerializedValue::Serialized { ptr, len });
+        let buf = malloc_buf(&vec![95; 1024]);
+        test_once(SerializedValue::Serialized(buf));
     }
 }

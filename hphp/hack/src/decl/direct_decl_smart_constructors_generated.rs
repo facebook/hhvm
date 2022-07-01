@@ -23,10 +23,10 @@ use smart_constructors::SmartConstructors;
 
 use crate::{DirectDeclSmartConstructors, Node, SourceTextAllocator};
 
-impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for DirectDeclSmartConstructors<'src, 'text, S> {
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDeclSmartConstructors<'a, 'o, 't, S> {
     type State = Self;
     type Factory = SimpleTokenFactoryImpl<CompactToken>;
-    type Output = Node<'src>;
+    type Output = Node<'a>;
 
     fn state_mut(&mut self) -> &mut Self {
         self
@@ -126,8 +126,8 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors>::make_enum_class_enumerator(self, modifiers, type_, name, initializer, semicolon)
     }
 
-    fn make_alias_declaration(&mut self, attribute_spec: Self::Output, modifiers: Self::Output, keyword: Self::Output, name: Self::Output, generic_parameter: Self::Output, constraint: Self::Output, equal: Self::Output, type_: Self::Output, semicolon: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_alias_declaration(self, attribute_spec, modifiers, keyword, name, generic_parameter, constraint, equal, type_, semicolon)
+    fn make_alias_declaration(&mut self, attribute_spec: Self::Output, modifiers: Self::Output, module_kw_opt: Self::Output, keyword: Self::Output, name: Self::Output, generic_parameter: Self::Output, constraint: Self::Output, equal: Self::Output, type_: Self::Output, semicolon: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_alias_declaration(self, attribute_spec, modifiers, module_kw_opt, keyword, name, generic_parameter, constraint, equal, type_, semicolon)
     }
 
     fn make_context_alias_declaration(&mut self, attribute_spec: Self::Output, keyword: Self::Output, name: Self::Output, generic_parameter: Self::Output, as_constraint: Self::Output, equal: Self::Output, context: Self::Output, semicolon: Self::Output) -> Self::Output {

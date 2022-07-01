@@ -248,7 +248,7 @@ Instruction set
   A no-op at runtime, this instruction serves to mark the end of the initial
   sequence of guards in a trace.
 
-| CheckNonNull, DSubtract(0, Nullptr), S(Cls|Func|Obj|Str|Mem|TCA|Nullptr), B
+| CheckNonNull, DSubtract(0, Nullptr), SNullptr(Cls,Func,Obj,Str,Mem,TCA,Dict,Vec), B|LA
 
   If the value in S0 is Nullptr, branch to block B. If S0 cannot be Nullptr, or
   always is Nullptr, this check may be optimized away.
@@ -755,6 +755,11 @@ To string conversions:
 
   Set D to true iff S0 has a reified parent.
 
+| CallViolatesModuleBoundary<caller>, D(Bool), S(Func), NF
+
+  Set D to true iff function call from caller to S0 violates module boundary.
+  Requires that S0 is an internal method.
+
 5. Branches
 
 | JmpZero,                          ND, S(Int,Bool),                     B
@@ -1154,6 +1159,12 @@ To string conversions:
   method. Returns nullptr if it is an instance method defined in S2's class
   hierarchy, indicating that this legacy call should be handled by interpreter.
 
+| DeserializeLazyProp<index>, ND, S(Obj), NF
+
+  Given the `index` of a property in S0 that may be a handle to some lazily-
+  deserialized APC value, check if the property is lazy and deserialize it in
+  place if so. After this op, the prop will be a valid TypedValue.
+
 | LdPropAddr<T,index>, D(LvalToProp), S(Obj), NF
 
   Load the address of the object property at physical index `index`.
@@ -1472,7 +1483,7 @@ To string conversions:
   immediates for keys. This op initializes the header and hash table of the
   new array-like, but does not its elements; use InitDictElem for that.
 
-| InitDictElem<index,key>, ND, S(Dict) S(Cell), NF
+| InitDictElem<index,key>, ND, S(Dict) S(Cell), CRc
 
   Initialize the element at position `index` in array S0 to have the string
   literal `key` as its key and S1 as its value. This instruction assumes that
@@ -2236,6 +2247,17 @@ To string conversions:
 
   Raises a warning to indicate a violation for the input S0 to coeffect rule
   FunParam uses polymorphic coeffect rules.
+
+| RaiseModuleBoundaryViolation<ctx, caller>, ND, S(Func), NF
+
+  Raises a warning to indicate a module boundary violation resulting from caller
+  attempting to call the the callee in S0 in context `ctx`.
+
+| RaiseImplicitContextStateInvalidException<func>, ND, NA, NF
+
+  Raises a warning or throws an exception for invalid, soft implicit context
+  or cleared states.
+  Can only be used in memoized wrapper functions.
 
 | RaiseStrToClassNotice, ND, S(Str), NF
 
@@ -3213,6 +3235,16 @@ fields of that struct for holding intermediate values.
 
   Returns the key or value at slot S1 in the struct dict S0. This slot must be
   known to be present. (The result of StructDictSlotInPos is always present.)
+
+| LdTypeStructureVal, DBespokeElem, STypeStructure S(Str), B|LA
+
+  Specialization of BespokeGet for when the base is a type structure. Get
+  element with key S1 in the type structure S0. Branches if the key is not in
+  the type structure.
+
+| LdTypeStructureValCns<key>, DTypeStructElem, STypeStructure, LA
+
+  Simplification of LdTypeStructureVal for when the key is a constant value.
 
 | MapSet, ND, S(Obj) S(Int,Str) S(InitCell), CRc
 

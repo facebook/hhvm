@@ -1093,9 +1093,6 @@ void HHVM_FUNCTION(clear_coverage_for_file, StringArg file) {
 }
 
 TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
-  if (!RO::EvalEnableImplicitContext) {
-    throw_implicit_context_exception("Implicit context feature is not enabled");
-  }
   auto const obj = *ImplicitContext::activeCtx;
   if (!obj) return make_tv<KindOfNull>();
   auto const context = Native::data<ImplicitContext>(obj);
@@ -1113,9 +1110,6 @@ const StaticString
 
 Object HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
                                            TypedValue data) {
-  if (!RO::EvalEnableImplicitContext) {
-    throw_implicit_context_exception("Implicit context feature is not enabled");
-  }
   auto const key = keyarg.get();
   // Reserve the underscore prefix for the time being in case we want to
   // emit keys from the compiler. This would allow us to avoid having
@@ -1164,9 +1158,6 @@ Object HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
 }
 
 String HHVM_FUNCTION(get_implicit_context_memo_key) {
-  if (!RO::EvalEnableImplicitContext) {
-    throw_implicit_context_exception("Implicit context feature is not enabled");
-  }
   auto const obj = *ImplicitContext::activeCtx;
   if (!obj) return empty_string();
   auto const context = Native::data<ImplicitContext>(obj);

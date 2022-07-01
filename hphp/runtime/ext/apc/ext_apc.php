@@ -127,7 +127,22 @@ function apc_delete(mixed $key): mixed;
  *
  */
 <<__Native>>
-function apc_cache_info(string $cache_type = "", bool $limited = false): darray;
+function apc_cache_info(string $cache_type = "", bool $limited = false): shape(
+  'start_time' => int,
+  ?'ttl' => int,
+  ?'cache_list' => vec<shape(
+    'info' => string,
+    'in_memory' => int,
+    'ttl' => int,
+    'mem_size' => int,
+    'type' => int,
+    'c_time' => int,
+    'max_ttl' => int,
+    'bump_tll' => int,
+    'in_hotcache' => bool,
+  )>,
+  ...
+);
 
 /**
  * Clears the user/system cache.
@@ -147,8 +162,9 @@ function apc_clear_cache(string $cache_type = ""): bool;
  * @return array - Array of Shared Memory Allocation data; FALSE on failure.
  *
  */
-<<__NonRx('APC')>>
-function apc_sma_info(bool $limited = false): darray { return darray[]; }
+function apc_sma_info(bool $limited = false): darray<arraykey, mixed> {
+  return darray[];
+}
 
 /**
  * Increases a stored number.

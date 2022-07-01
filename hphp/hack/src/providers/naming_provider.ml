@@ -888,7 +888,6 @@ let update
       newfi.typedefs
       deltas.types_canon_key
       FileInfo.Typedef;
-    updatei oldfi.modules newfi.modules deltas.modules FileInfo.Module;
     ()
 
 let local_changes_push_sharedmem_stack () : unit =

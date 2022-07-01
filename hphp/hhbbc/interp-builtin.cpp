@@ -61,14 +61,10 @@ TypeOrReduced builtin_get_class(ISS& env, const php::Func* func,
   if (!ty.subtypeOf(BObj)) return NoReduced{};
 
   if (!is_specialized_obj(ty)) return TStr;
-  auto const d = dobj_of(ty);
-  switch (d.type) {
-  case DObj::Sub:   return TStr;
-  case DObj::Exact: break;
-  }
-
+  auto const& d = dobj_of(ty);
+  if (!d.isExact()) return TStr;
   constprop(env);
-  return sval(d.cls.name());
+  return sval(d.cls().name());
 }
 
 TypeOrReduced builtin_abs(ISS& env, const php::Func* func,
@@ -220,9 +216,9 @@ TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
   }
   if (ty.couldBe(BCls)) {
     if (is_specialized_cls(ty)) {
-      auto const dcls = dcls_of(ty);
-      if (dcls.type == DCls::Exact) {
-        auto cname = dcls_of(ty).cls.name();
+      auto const& dcls = dcls_of(ty);
+      if (dcls.isExact()) {
+        auto cname = dcls.cls().name();
         retTy |= sval(cname);
       } else {
         retTy |= TSStr;
@@ -334,10 +330,10 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     auto const clsStr = [&] () -> SString {
       auto const t = getArg(env, func, fca, 0);
       if (t.subtypeOf(BCls) && is_specialized_cls(t)) {
-        auto const dcls = dcls_of(t);
-        if (dcls.type != DCls::Exact) return nullptr;
+        auto const& dcls = dcls_of(t);
+        if (!dcls.isExact()) return nullptr;
         if (RO::EvalRaiseClassConversionWarning) throws = TriBool::Maybe;
-        return dcls.cls.name();
+        return dcls.cls().name();
       }
       if (t.subtypeOf(BStr) && is_specialized_string(t)) {
         return sval_of(t);
@@ -577,7 +573,7 @@ bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   if (any(env.collect.opts & CollectionOpts::Speculating) ||
       func->attrs & AttrNoFCallBuiltin ||
       (func->cls && !(func->attrs & AttrStatic))  ||
-      !func->nativeInfo ||
+      !func->isNative ||
       func->params.size() >= Native::maxFCallBuiltinArgs() ||
       fca.hasGenerics() ||
       !RuntimeOption::EvalEnableCallBuiltin) {

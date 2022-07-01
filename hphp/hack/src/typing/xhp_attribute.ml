@@ -27,3 +27,8 @@ let is_required attr =
   | Some LateInit ->
     false
   | Some Required -> true
+
+let opt_is_required (attr : t option) : bool =
+  match attr with
+  | None -> false
+  | Some attr -> is_required attr

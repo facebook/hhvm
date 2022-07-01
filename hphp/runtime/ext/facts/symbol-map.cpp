@@ -119,7 +119,11 @@ SymbolMap::SymbolMap(
 }
 
 SymbolMap::~SymbolMap() {
-  waitForDBUpdate();
+  try {
+    waitForDBUpdate();
+  } catch (...) {
+    // Swallow the exception so we don't crash the program
+  }
 }
 
 Optional<Symbol<SymKind::Type>>
@@ -1574,7 +1578,11 @@ void SymbolMap::waitForDBUpdate() {
     updateDBFuture.wait();
   }
   // Refresh the DB transaction
-  getDB().commit();
+  try {
+    getDB().commit();
+  } catch (const std::runtime_error& e) {
+    XLOG(ERR) << e.what();
+  }
 }
 
 AutoloadDB& SymbolMap::getDB() const {

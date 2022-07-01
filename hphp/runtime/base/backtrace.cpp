@@ -99,7 +99,14 @@ bool BTFrame::isRegularResumed() const {
 
 bool BTFrame::localsAvailable() const {
   assertx(m_fp != nullptr);
-  if (m_frameId != kRootIFrameID) return true;
+  if (m_frameId != kRootIFrameID) {
+    // Inlined functions generally don't run surprise checks with the notable
+    // exception of suspending async functions. In these cases the locals will
+    // have been teleported off the stack and into the wait handle.
+    auto pc = func()->at(bcOff());
+    auto const op = decode_op(pc);
+    return op != OpAwait && op != OpAwaitAll;
+  }
   if (m_afwhTailFrameIdx != kInvalidAfwhTailFrameIdx) return false;
   return !m_fp->localsDecRefd();
 }

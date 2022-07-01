@@ -206,10 +206,6 @@ void iopNop() {
   iopPreamble("Nop");
 }
 
-void iopEntryNop() {
-  iopPreamble("EntryNop");
-}
-
 void iopBreakTraceHint() {
   iopDoesNotAffectTaint("BreakTraceHint");
 }
@@ -629,12 +625,12 @@ void iopFatal(FatalOp /* kind_char */) {
   iopDoesNotAffectTaint("Fatal");
 }
 
-void iopJmp(PC& /* pc */, PC /* targetpc */) {
-  iopUnhandled("Jmp");
+void iopEnter(PC& /* pc */, PC /* targetpc */) {
+  iopUnhandled("Enter");
 }
 
-void iopJmpNS(PC& /* pc */, PC /* targetpc */) {
-  iopUnhandled("JmpNS");
+void iopJmp(PC& /* pc */, PC /* targetpc */) {
+  iopUnhandled("Jmp");
 }
 
 void iopJmpZ(PC& /* pc */, PC /* targetpc */) {
@@ -1541,6 +1537,10 @@ void iopChainFaults() {
 
 void iopOODeclExists(OODeclExistsOp /* subop */) {
   iopUnhandled("OODeclExists");
+}
+
+void iopVerifyImplicitContextState() {
+  iopUnhandled("VerifyImplicitContextState");
 }
 
 void iopVerifyOutType(uint32_t /* paramId */) {

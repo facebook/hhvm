@@ -4,8 +4,8 @@ open Hh_prelude
 
 [@@@warning "+33"]
 
-let visitor =
-  Nast_visitor.iter_with
+let visitor ctx =
+  let handlers =
     [
       Const_prohibited_check.handler;
       Prop_modifier_prohibited_check.handler;
@@ -31,6 +31,14 @@ let visitor =
       Private_final_check.handler;
       Well_formed_internal_trait.handler;
     ]
+  in
+  let handlers =
+    if TypecheckerOptions.skip_tast_checks (Provider_context.get_tcopt ctx) then
+      []
+    else
+      handlers
+  in
+  Nast_visitor.iter_with handlers
 
 let stateful_visitor ctx =
   Stateful_aast_visitor.checker
@@ -39,11 +47,11 @@ let stateful_visitor ctx =
        Function_pointer_check.handler)
 
 let program ctx p =
-  let () = visitor#go ctx p in
+  let () = (visitor ctx)#go ctx p in
   let v = stateful_visitor ctx in
   v#on_program v#initial_state p
 
 let def ctx d =
-  let () = visitor#go_def ctx d in
+  let () = (visitor ctx)#go_def ctx d in
   let v = stateful_visitor ctx in
   v#on_def v#initial_state d

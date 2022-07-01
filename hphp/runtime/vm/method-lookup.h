@@ -41,6 +41,7 @@ enum class LookupResult {
 enum class MethodLookupErrorOptions {
   None                       = 0,
   RaiseOnNotFound            = (1u << 0),
+  NoErrorOnModule            = (1u << 1),
 };
 
 struct MethodLookupCallContext {

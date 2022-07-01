@@ -85,7 +85,6 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/as-shared.h"
@@ -1273,7 +1272,7 @@ NamedLocal read_named_local(AsmState& as) {
     return NamedLocal { .name = id, .id = id };
   }
   if (as.in.tryConsume('_')) {
-    return NamedLocal { .name = kInvalidId, .id = id };
+    return NamedLocal { .name = kInvalidLocalName, .id = id };
   }
   std::string name;
   if (!as.in.readQuotedStr(name)) {
@@ -1311,7 +1310,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
   auto const vecImmStackValues = vecImm.size();                         \
   as.fe->emitIVA(vecImmStackValues);                                    \
   for (size_t i = 0; i < vecImmStackValues; ++i) {                      \
-    as.fe->emitInt32(as.ue->mergeLitstr(String(vecImm[i]).get()));      \
+    as.fe->emitInt32(as.ue->mergeLitstr(makeStaticString(vecImm[i])));  \
   }
 
 #define IMM_SA     as.fe->emitInt32(create_litstr_id(as))
@@ -2369,60 +2368,6 @@ bool parse_line_range(AsmState& as, int& line0, int& line1) {
 
 static StaticString s_native("__Native");
 
-MaybeDataType type_constraint_to_data_type(
-  LowStringPtr user_type,
-  const TypeConstraint& tc
-) {
-
-  const auto& type = tc.typeName();
-
-  if (!type) {
-    return std::nullopt;
-  }
-
-  // The intent of this function is to determine an appropriate datatype given
-  // a user specified type. If we have a nullable or soft type, no matter what,
-  // we need to return `mixed` (nullopt). We cannot represent a nullable type
-  // with a single data type, and soft types are implicitly `mixed`.
-  if (tc.isNullable() || tc.isSoft()) {
-    return std::nullopt;
-  }
-
-  const auto& name = type->toCppString();
-
-  if (!strcasecmp(name.c_str(), "null") ||
-      !strcasecmp(name.c_str(), "HH\\null") ||
-      !strcasecmp(name.c_str(), "HH\\void") ||
-      !strcasecmp(name.c_str(), "HH\\noreturn") ||
-      !strcasecmp(name.c_str(), "HH\\nothing")) {
-    return KindOfNull;
-  }
-
-  if (!strcasecmp(name.c_str(), "HH\\bool"))     return KindOfBoolean;
-  if (!strcasecmp(name.c_str(), "HH\\int"))      return KindOfInt64;
-  if (!strcasecmp(name.c_str(), "HH\\float"))    return KindOfDouble;
-  if (!strcasecmp(name.c_str(), "HH\\num"))      return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\arraykey")) return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\string"))   return KindOfString;
-  if (!strcasecmp(name.c_str(), "HH\\dict"))     return KindOfDict;
-  if (!strcasecmp(name.c_str(), "HH\\vec"))      return KindOfVec;
-  if (!strcasecmp(name.c_str(), "HH\\keyset"))   return KindOfKeyset;
-  if (!strcasecmp(name.c_str(), "HH\\varray"))   return KindOfVec;
-  if (!strcasecmp(name.c_str(), "HH\\darray"))   return KindOfDict;
-  if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\resource")) return KindOfResource;
-  if (!strcasecmp(name.c_str(), "HH\\mixed"))    return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\nonnull"))  return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\classname") &&
-      RO::EvalClassPassesClassname) {
-    return std::nullopt;
-  }
-
-  return KindOfObject;
-}
-
 /*
  * Checks whether the current function is native by looking at the user
  * attribute map and sets the isNative flag accoringly
@@ -2430,10 +2375,6 @@ MaybeDataType type_constraint_to_data_type(
  */
 void check_native(AsmState& as, bool is_construct) {
   if (as.fe->userAttributes.count(s_native.get())) {
-    as.fe->hniReturnType = is_construct
-      ? KindOfNull
-      : type_constraint_to_data_type(as.fe->retUserType,
-        as.fe->retTypeConstraint);
 
     as.fe->isNative =
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
@@ -2454,8 +2395,7 @@ void check_native(AsmState& as, bool is_construct) {
     if (!SystemLib::s_inited) as.fe->attrs |= AttrBuiltin;
 
     for (auto& pi : as.fe->params) {
-      pi.builtinType =
-        type_constraint_to_data_type(pi.userType, pi.typeConstraint);
+      pi.builtinType = pi.typeConstraint.asSystemlibType();
     }
   }
 }
@@ -3347,7 +3287,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   };
 
   auto const bcSha1 = SHA1{string_sha1(folly::StringPiece(code, codeLen))};
-  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, false);
+  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 

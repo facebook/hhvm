@@ -5,7 +5,7 @@
 
 use crate::{
     hhas_attribute::HhasAttribute,
-    hhas_type::{constraint, HhasTypeInfo},
+    hhas_type::{Constraint, HhasTypeInfo},
     hhbc_ast::Label,
 };
 use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
@@ -31,7 +31,7 @@ impl<'arena> HhasParam<'arena> {
 
     pub fn without_type(&mut self) {
         if let Just(ti) = self.type_info.as_mut() {
-            ti.type_constraint = constraint::Constraint::default()
+            ti.type_constraint = Constraint::default()
         }
     }
 

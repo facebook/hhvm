@@ -340,10 +340,11 @@ let validate_options
       check,
       config ) =
   let fail msg = raise (InvalidCliArg msg) in
+  let multifile_allowed = inplace || check in
   let filename =
     match files with
     | [filename] -> Some filename
-    | filename :: _ :: _ when inplace || check -> Some filename
+    | filename :: _ :: _ when multifile_allowed -> Some filename
     | [] -> None
     | _ -> fail "More than one file given"
   in
@@ -362,6 +363,25 @@ let validate_options
   in
   assert_file_exists filename;
   assert_file_exists (Some env.Env.root);
+  let files =
+    if multifile_allowed then
+      List.rev_filter files ~f:(fun path ->
+          is_hack path
+          ||
+          (Printf.eprintf
+             "Unexpected file extension (probably not a Hack file): %s\n"
+             path;
+           false))
+    else (
+      (match text_source with
+      | File path
+      | Stdin (Some path)
+        when not (is_hack path) ->
+        fail ("Unexpected file extension (probably not a Hack file): " ^ path)
+      | _ -> ());
+      files
+    )
+  in
 
   (* Let --diff-dry-run imply --diff *)
   let diff = diff || diff_dry in

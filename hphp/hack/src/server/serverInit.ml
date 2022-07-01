@@ -103,6 +103,7 @@ let remote_init genv env root worker_key nonce check_id _profiling =
   let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
   let t = Unix.gettimeofday () in
   let ctx = Provider_utils.ctx_from_server_env env in
+  let mode = genv.local_config.ServerLocalConfig.hulk_strategy in
   let open ServerLocalConfig in
   let { recli_version; remote_transport_channel = transport_channel; _ } =
     genv.local_config
@@ -124,8 +125,7 @@ let remote_init genv env root worker_key nonce check_id _profiling =
     ~root
     ~saved_state_manifold_path:
       genv.local_config.remote_worker_saved_state_manifold_path
-    ~hulk_lite:genv.local_config.ServerLocalConfig.hulk_lite
-    ~hulk_heavy:genv.local_config.ServerLocalConfig.hulk_heavy;
+    ~mode;
   let _ = Hh_logger.log_duration "Remote type check" t in
   (env, Load_state_declined "Out-of-band naming table initialization only")
 

@@ -39,6 +39,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/bump-mapper.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -194,13 +195,12 @@ HttpServer::HttpServer() {
       counters["queued_requests"] = queued_requests;
       counters["queued_requests_high"] =
         queued_requests > RuntimeOption::ServerHighQueueingThreshold;
-
-
       auto const sat_requests = getSatelliteRequestCount();
       counters["satellite_inflight_requests"] = sat_requests.first;
       counters["satellite_queued_requests"] = sat_requests.second;
       auto const uptime = f_server_uptime();
       counters["uptime"] = uptime;
+      counters["stopping_soon"] = f_server_is_prepared_to_stop();
 
       // Temporary counter that is available only during a short uptime window.
       if (uptime > RO::EvalMemTrackStart && uptime < RO::EvalMemTrackEnd) {
@@ -237,6 +237,16 @@ void HttpServer::onServerShutdown() {
   SparseHeap::PrepareToStop();
 #ifdef USE_JEMALLOC
   shutdown_slab_managers();
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (use_lowptr && HPHP::alloc::BumpEmergencyMapper::s_emergencyFlag.test()) {
+    // Server is shutting down when it almost exhausted low memory.
+    if (StructuredLog::enabled()) {
+      auto record = StructuredLogEntry{};
+      record.setInt("low_mapped", alloc::getLowMapped());
+      StructuredLog::log("hhvm_emergency_restart", record);
+    }
+  }
+#endif
 #endif
   InitFiniNode::ServerFini();
 

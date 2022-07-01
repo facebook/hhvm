@@ -21,7 +21,7 @@ function xhp_simple_attribute(int $prop): :element{
 <?hh
 
 class :element {
- attribute int prop @required, string prop2 @required;
+  attribute int prop @required, string prop2 @required;
   public function __construct(
     public darray<string, dynamic> $attributes,
     public varray<dynamic> $children,

@@ -226,8 +226,72 @@ function array_merge_recursive(mixed $array1, mixed... $arrays)[]: mixed;
  * @return mixed - Returns the resulting array.
  *
  */
-<<__Native, __IsFoldable>>
-function array_merge(mixed $array1, mixed... $arrays)[]: mixed;
+function array_merge(mixed $array1, mixed... $arrays)[]: mixed {
+  // This is basically tvCastToArrayInPlace<..., IntishCast::Cast> with special
+  // errors for inputs that are not Container<_>
+  $arr1 = dict[];
+  if ($array1 is keyset<_>) {
+    foreach ($array1 as $k) {
+      if ($k is string) {
+        $intish = (int)$k;
+        if ((string)$intish === $k) {
+          $arr1[$intish] = $intish;
+          continue;
+        }
+      }
+      $arr1[$k] = $k;
+    }
+  } else if ($array1 is KeyedContainer<_, _>) {
+    foreach ($array1 as $k => $v) {
+      if ($k is string) {
+        $intish = (int)$k;
+        if ((string)$intish === $k) {
+          $arr1[$intish] = $v;
+          continue;
+        }
+      }
+      $arr1[$k] = $v;
+    }
+  } else if (\HH\is_class_meth($array1)) {
+    throw new InvalidOperationException("Cannot convert clsmeth to array");
+  } else {
+    trigger_error(
+      "Invalid operand type was used: array_merge expects array(s) or collection(s)",
+      E_WARNING,
+    );
+    return null;
+  }
+
+  $ret = dict[];
+  $nextKI = 0;
+  foreach ($arr1 as $k => $v) {
+    if ($k is int) {
+      $ret[$nextKI] = $v;
+      $nextKI++;
+    } else {
+      $ret[$k] = $v;
+    }
+  }
+  foreach ($arrays as $arr) {
+    if (!($arr is vec<_> || $arr is dict<_, _> || $arr is keyset<_>)) {
+      trigger_error(
+        "Invalid operand type was used: array_merge expects array(s)",
+        E_WARNING,
+      );
+      return null;
+    }
+    foreach ($arr as $k => $v) {
+      if ($k is int) {
+        $ret[$nextKI] = $v;
+        $nextKI++;
+      } else {
+        $ret[$k] = $v;
+      }
+    }
+  }
+
+  return $ret;
+}
 
 /**
  * array_replace_recursive() replaces the values of the first array with the
@@ -396,14 +460,14 @@ function array_rand(mixed $input, int $num_req = 1)[leak_safe]: mixed;
  * @param mixed $array - The input array.
  * @param bool $preserve_keys - If set to TRUE keys are preserved.
  *
- * @return mixed - Returns the reversed array.
+ * @return ?array - Returns the reversed array.
  *
  */
 <<__Native, __IsFoldable>>
 function array_reverse(
   mixed $array,
   bool $preserve_keys = false,
-)[]: mixed;
+)[]: ?darray<arraykey, mixed>;
 
 /**
  * Searches haystack for needle.

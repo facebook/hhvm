@@ -250,7 +250,7 @@ pub(crate) fn happly_decl_has_reified_generics<'arena, 'decl>(
                     return true;
                 }
             };
-            match provider.type_decl(id) {
+            match provider.type_decl(id, 0) {
                 Ok(TypeDecl::Class(class_decl)) => {
                     // Found a class with a matching name. Does it's shallow decl have
                     // any reified tparams?

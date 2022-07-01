@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -720,7 +721,7 @@ Func::SharedData::SharedData(BCPtr bc, Offset bclen,
   m_allFlags.m_returnByValue = false;
   m_allFlags.m_isMemoizeWrapper = false;
   m_allFlags.m_isMemoizeWrapperLSB = false;
-  m_allFlags.m_isPolicyShardedMemoize = false;
+  m_allFlags.m_isKeyedByImplicitContextMemoize = false;
   m_allFlags.m_isPhpLeafFn = isPhpLeafFn;
   m_allFlags.m_hasReifiedGenerics = false;
   m_allFlags.m_hasParamsWithMultiUBs = false;
@@ -880,6 +881,28 @@ Func* Func::load(const StringData* name) {
   ) ? ne->getCachedFunc() : nullptr;
 }
 
+namespace {
+void handleModuleBoundaryViolation(const Func* callee, const Func* caller) {
+  if (!RO::EvalEnforceModules || !callee || !caller) return;
+  auto const moduleName = caller->unit()->moduleName();
+  if (!will_call_raise_module_boundary_violation(callee, moduleName)) return;
+  raiseModuleBoundaryViolation(nullptr, callee, moduleName);
+}
+} // namespace
+
+Func* Func::resolve(const NamedEntity* ne, const StringData* name,
+                    const Func* callerFunc) {
+  Func* func = load(ne, name);
+  handleModuleBoundaryViolation(func, callerFunc);
+  return func;
+}
+
+Func* Func::resolve(const StringData* name, const Func* callerFunc) {
+  Func* func = load(name);
+  handleModuleBoundaryViolation(func, callerFunc);
+  return func;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Code locations.
 
@@ -887,9 +910,9 @@ Func::ExtendedLineInfoCache Func::s_extendedLineInfo;
 
 void Func::setLineTable(LineTable lineTable) {
   auto& table = shared()->m_lineTable;
-  table.lock_for_update();
+  auto lock = table.lock_for_update();
   assertx(table.copy().isPtr() && !table.copy().ptr());
-  table.update_and_unlock(
+  lock.update(
     LineTablePtr::FromPtr(new LineTable{std::move(lineTable)})
   );
 }
@@ -897,9 +920,9 @@ void Func::setLineTable(LineTable lineTable) {
 void Func::setLineTable(LineTablePtr::Token token) {
   assertx(RO::RepoAuthoritative);
   auto& table = shared()->m_lineTable;
-  table.lock_for_update();
+  auto lock = table.lock_for_update();
   assertx(table.copy().isPtr() && !table.copy().ptr());
-  table.update_and_unlock(LineTablePtr::FromToken(token));
+  lock.update(LineTablePtr::FromToken(token));
 }
 
 void Func::stashExtendedLineTable(SourceLocTable table) const {
@@ -969,18 +992,15 @@ const LineTable& Func::getOrLoadLineTable() const {
   assertx(RO::RepoAuthoritative);
 
   auto& wrapper = shared()->m_lineTable;
-  wrapper.lock_for_update();
+  auto lock = wrapper.lock_for_update();
 
   auto const table = wrapper.copy();
-  if (table.isPtr()) {
-    wrapper.unlock();
-    return *table.ptr();
-  }
+  if (table.isPtr()) return *table.ptr();
 
   auto newTable = new LineTable{
     FuncEmitter::loadLineTableFromRepo(m_unit->sn(), table.token())
   };
-  wrapper.update_and_unlock(LineTablePtr::FromPtr(newTable));
+  lock.update(LineTablePtr::FromPtr(newTable));
   return *newTable;
 }
 
@@ -1021,33 +1041,25 @@ int Func::getLineNumber(Offset offset) const {
     return SourceLocation::getLineNumber(getOrLoadLineTable(), offset);
   }
 
-  shared()->m_lineMap.lock_for_update();
-  try {
-    line = findLine();
-    if (line != INT_MIN) {
-      shared()->m_lineMap.unlock();
-      return line;
-    }
+  auto lock = shared()->m_lineMap.lock_for_update();
+  line = findLine();
+  if (line != INT_MIN) return line;
 
-    auto const info = SourceLocation::getLineInfo(getOrLoadLineTable(), offset);
-    auto copy = shared()->m_lineMap.copy();
-    auto const it = std::upper_bound(
-      copy.begin(), copy.end(),
-      info,
-      [&] (const LineInfo& a, const LineInfo& b) {
-        return a.first.base < b.first.past;
-      }
-    );
-    assertx(it == copy.end() ||
-            (it->first.past > offset && it->first.base > offset));
-    copy.insert(it, info);
-    auto old = shared()->m_lineMap.update_and_unlock(std::move(copy));
-    Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });
-    return info.second;
-  } catch (...) {
-    shared()->m_lineMap.unlock();
-    throw;
-  }
+  auto const info = SourceLocation::getLineInfo(getOrLoadLineTable(), offset);
+  auto copy = shared()->m_lineMap.copy();
+  auto const it = std::upper_bound(
+    copy.begin(), copy.end(),
+    info,
+    [&] (const LineInfo& a, const LineInfo& b) {
+      return a.first.base < b.first.past;
+    }
+  );
+  assertx(it == copy.end() ||
+          (it->first.past > offset && it->first.base > offset));
+  copy.insert(it, info);
+  auto old = lock.update(std::move(copy));
+  Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });
+  return info.second;
 }
 
 bool Func::getSourceLoc(Offset offset, SourceLoc& sLoc) const {
@@ -1118,17 +1130,14 @@ void freeBCRegion(const unsigned char* bc, size_t bclen) {
 PC Func::loadBytecode() {
   assertx(RO::RepoAuthoritative);
   auto& wrapper = shared()->m_bc;
-  wrapper.lock_for_update();
+  auto lock = wrapper.lock_for_update();
   auto const bc = wrapper.copy();
-  if (bc.isPtr()) {
-    wrapper.unlock();
-    return bc.ptr();
-  }
+  if (bc.isPtr()) return bc.ptr();
   auto const length = bclen();
   g_hhbc_size->addValue(length);
   auto mem = (unsigned char*)bytecode_arena().allocate(length);
   RepoFile::readRawFromUnit(m_unit->sn(), bc.token(), mem, length);
-  wrapper.update_and_unlock(BCPtr::FromPtr(mem));
+  lock.update(BCPtr::FromPtr(mem));
   return mem;
 }
 

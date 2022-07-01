@@ -4,6 +4,7 @@
  (libraries
   collections
   decl_service_client
+  decl_store
   rust_provider_backend_stubs
   heap_shared_mem
   lfu_cache
@@ -12,6 +13,7 @@
   pos
   relative_path
   shallow_decl_defs
+  typing_class_types
   typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
@@ -95,6 +97,7 @@
   decl_service_client
   direct_decl_utils
   provider_backend
+  rust_provider_backend_stubs
   shallow_classes_provider
   shallow_decl_defs
   linearization_provider
@@ -155,6 +158,7 @@
   direct_decl_utils
   provider_backend
   provider_context
+  rust_provider_backend_stubs
   shallow_classes_heap)
  (preprocess
   (pps ppx_deriving.std)))
@@ -213,6 +217,7 @@
   provider_backend
   provider_context
   relative_path
+  rust_provider_backend_stubs
   shallow_classes_heap
   shallow_decl_defs
   typechecker_options)

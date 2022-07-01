@@ -32,14 +32,22 @@ namespace Facts {
 SQLiteKey SQLiteKey::readOnly(folly::fs::path path) {
   return {
       std::move(path),
-      false,
+      SQLite::OpenMode::ReadOnly,
+      static_cast<::gid_t>(-1),
+      static_cast<::mode_t>(0)};
+}
+
+SQLiteKey SQLiteKey::readWrite(folly::fs::path path) {
+  return {
+      std::move(path),
+      SQLite::OpenMode::ReadWrite,
       static_cast<::gid_t>(-1),
       static_cast<::mode_t>(0)};
 }
 
 SQLiteKey
-SQLiteKey::readWrite(folly::fs::path path, ::gid_t gid, ::mode_t perms) {
-  return {std::move(path), true, gid, perms};
+SQLiteKey::readWriteCreate(folly::fs::path path, ::gid_t gid, ::mode_t perms) {
+  return {std::move(path), SQLite::OpenMode::ReadWriteCreate, gid, perms};
 }
 
 bool SQLiteKey::operator==(const SQLiteKey& rhs) const noexcept {
@@ -60,7 +68,10 @@ size_t SQLiteKey::hash() const {
 }
 
 SQLiteKey::SQLiteKey(
-    folly::fs::path path, bool writable, ::gid_t gid, ::mode_t perms)
+    folly::fs::path path,
+    SQLite::OpenMode writable,
+    ::gid_t gid,
+    ::mode_t perms)
     : m_path{std::move(path)}
     , m_writable{writable}
     , m_gid{gid}

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/runtime-compiler.h"
 
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -43,6 +44,7 @@ namespace {
 std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
                                    const char* filename,
                                    const Native::FuncTable& nativeFuncs,
+                                   AutoloadMap* map,
                                    Unit** releaseUnit,
                                    bool isSystemLib,
                                    bool forDebuggerEval) {
@@ -103,6 +105,7 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
       loader,
       filename,
       nativeFuncs,
+      map,
       isSystemLib,
       forDebuggerEval
     );
@@ -133,12 +136,14 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
 Unit* compile_file(LazyUnitContentsLoader& loader,
                    const char* filename,
                    const Native::FuncTable& nativeFuncs,
+                   AutoloadMap* map,
                    Unit** releaseUnit) {
   assertx(!filename || filename[0] != '/' || filename[1] != ':');
   return parse(
     loader,
     filename,
     nativeFuncs,
+    map,
     releaseUnit,
     false,
     false
@@ -149,6 +154,7 @@ Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname,
                      const Native::FuncTable& nativeFuncs,
+                     AutoloadMap* map,
                      const RepoOptions& options,
                      bool isSystemLib,
                      bool forDebuggerEval) {
@@ -164,6 +170,7 @@ Unit* compile_string(const char* s,
     loader,
     fname,
     nativeFuncs,
+    map,
     nullptr,
     isSystemLib,
     forDebuggerEval
@@ -189,6 +196,7 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
     loader,
     fname,
     nativeFuncs,
+    nullptr, // TODO: decl provider for systemlib
     nullptr,
     true,
     false
@@ -203,11 +211,20 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
 Unit* compile_debugger_string(
   const char* s, size_t sz, const RepoOptions& options
 ) {
+  auto const map = [] () -> AutoloadMap* {
+    if (!AutoloadHandler::s_instance) {
+      // It is not safe to autoinit AutoloadHandler outside a normal request.
+      return nullptr;
+    }
+    return AutoloadHandler::s_instance->getAutoloadMap();
+  }();
+
   return compile_string(
     s,
     sz,
     nullptr,
     Native::s_noNativeFuncs,
+    map,
     options,
     false,
     true

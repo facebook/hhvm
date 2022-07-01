@@ -1,19 +1,19 @@
-Warning: Calling internal method C::foo in module B from module A is not allowed in %s on line 8
+Warning: Accessing internal method C::foo in module B from module A is not allowed in %s on line 8
 in C::foo
 in D::foo
 
-Warning: Calling internal method E::foo in module B from module A is not allowed in %s on line 8
+Warning: Accessing internal method E::foo in module B from module A is not allowed in %s on line 8
 in E::foo
 
-Warning: Calling internal method C::foo in module B from module A is not allowed in %s on line 8
+Warning: Accessing internal method C::foo in module B from module A is not allowed in %s on line 8
 in C::foo
 
-Warning: Calling internal method C::foo_static in module B from module A is not allowed in %s on line 12
+Warning: Accessing internal method C::foo_static in module B from module A is not allowed in %s on line 12
 in C::foo_static
 in D::foo_static
 
-Warning: Calling internal method E::foo_static in module B from module A is not allowed in %s on line 12
+Warning: Accessing internal method E::foo_static in module B from module A is not allowed in %s on line 12
 in E::foo_static
 
-Warning: Calling internal method C::foo_static in module B from module A is not allowed in %s on line 12
+Warning: Accessing internal method C::foo_static in module B from module A is not allowed in %s on line 12
 in C::foo_static

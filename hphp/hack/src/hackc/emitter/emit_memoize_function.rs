@@ -97,16 +97,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
-    let should_emit_implicit_context = emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT)
-        && attributes.iter().any(|a| {
-            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(
-                a.name.unsafe_as_str(),
-            )
-        });
+    let should_emit_implicit_context = hhas_attribute::is_keyed_by_ic_memoize(attributes.iter());
     let mut env = Env::default(alloc, RcOc::clone(&fd.namespace)).with_scope(scope);
     let (body_instrs, decl_vars) = make_memoize_function_code(
         emitter,
@@ -256,6 +247,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         begin_label,
         emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[])?,
         deprecation_body,
+        instr::verify_implicit_context_state(),
         emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
@@ -315,6 +307,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     );
     let instrs = InstrSeq::gather(vec![
         deprecation_body,
+        instr::verify_implicit_context_state(),
         if is_async {
             InstrSeq::gather(vec![
                 instr::memo_get_eager(notfound, suspended_get, LocalRange::default()),

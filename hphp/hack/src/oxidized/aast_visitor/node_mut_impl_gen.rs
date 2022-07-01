@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<48129f751a137720db9f3894772d61b2>>
+// @generated SignedSource<<1d0971589bb48deede9b269f2573f19f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -277,6 +277,7 @@ impl<P: Params> NodeMut<P> for ClassConst<P::Ex, P::En> {
         self.type_.accept(c, v)?;
         self.id.accept(c, v)?;
         self.kind.accept(c, v)?;
+        self.span.accept(c, v)?;
         self.doc_comment.accept(c, v)
     }
 }
@@ -1552,7 +1553,8 @@ impl<P: Params> NodeMut<P> for ModuleDef<P::Ex, P::En> {
         self.name.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.span.accept(c, v)?;
-        self.mode.accept(c, v)
+        self.mode.accept(c, v)?;
+        self.doc_comment.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for NastShapeInfo {
@@ -1699,7 +1701,7 @@ impl<P: Params> NodeMut<P> for Refinement {
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
-            Refinement::TypeRef(a0, a1) => {
+            Refinement::Rtype(a0, a1) => {
                 a0.accept(c, v)?;
                 a1.accept(c, v)
             }

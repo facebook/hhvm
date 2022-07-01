@@ -4,7 +4,7 @@ function throw_one_time($why, $what) {
   if ($what === 'a' && $why == 'exit') {
     if (AsyncSuspendHookThrow::$counter++ == 1) {
       echo "throwing\n";
-      throw new exception('x');
+      throw new Exception('x');
     }
   }
 }

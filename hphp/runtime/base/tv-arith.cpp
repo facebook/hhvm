@@ -509,6 +509,14 @@ TypedValue tvBitXor(TypedValue c1, TypedValue c2) {
   );
 }
 
+StringData* strBitXor(StringData* s1, StringData* s2) {
+  return stringBitOp(
+    std::bit_xor<char>(),
+    [] (uint32_t a, uint32_t b) { return std::min(a, b); },
+    s1, s2
+  );
+}
+
 TypedValue tvShl(TypedValue c1, TypedValue c2) {
   if (!tvIsInt(c1) || !tvIsInt(c2)) throwBitOpBadTypesException(&c1, &c2);
   return make_int(shl_ignore_overflow(c1.m_data.num, c2.m_data.num));

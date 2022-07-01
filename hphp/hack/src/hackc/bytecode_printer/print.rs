@@ -18,7 +18,7 @@ use hhbc::{
     hackc_unit::HackCUnit,
     hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX},
     hhas_attribute::HhasAttribute,
-    hhas_body::{HhasBody, HhasBodyEnv},
+    hhas_body::HhasBody,
     hhas_class::{HhasClass, TraitReqKind},
     hhas_coeffects::{HhasCoeffects, HhasCtxConstant},
     hhas_constant::HhasConstant,
@@ -49,10 +49,6 @@ macro_rules! write_if {
     ($pred:expr, $($rest:tt)*) => {
         if ($pred) { write!($($rest)*) } else { Ok(()) }
     };
-}
-
-pub struct ExprEnv<'arena, 'e> {
-    pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,
 }
 
 fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Result<()> {

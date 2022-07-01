@@ -14,7 +14,7 @@ eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
 hcons = { path = "../../../../hcons" }
 im = { version = "14.2", features = ["rayon", "serde"] }
 ocamlrep = { path = "../../../../ocamlrep" }
-once_cell = "1.8"
+once_cell = "1.12"
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 pos = { path = "../../../pos/cargo/pos" }

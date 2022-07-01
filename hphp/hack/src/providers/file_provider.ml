@@ -84,7 +84,7 @@ let get_contents ~writeback_disk_contents_in_shmem_provider fn =
         Some contents
     end
   | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.File.get_contents backend fn
+    Some (Rust_provider_backend.File.get_contents backend fn)
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     read_file_contents_from_disk fn

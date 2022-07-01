@@ -23,13 +23,13 @@ class ExceptionWithPureGetMessage extends Exception {
 class Exception implements Throwable {
   use \__SystemLib\BaseException;
 
-  private static $traceOpts = 0;
+  private static int $traceOpts = 0;
 
-  final public static function getTraceOptions()[read_globals] : int {
+  final public static function getTraceOptions()[read_globals]: int {
     return (readonly self::$traceOpts) as int;
   }
 
-  final public static function setTraceOptions($opts)[globals] {
+  final public static function setTraceOptions(mixed $opts)[globals]: void {
     self::$traceOpts = (int)$opts;
   }
 
@@ -44,19 +44,22 @@ class Exception implements Throwable {
    * @previous   mixed   The previous exception used for the exception
    *                     chaining.
    */
-  public function __construct($message = '', $code = 0,
-                              ?Throwable $previous = null)[] {
+  public function __construct(
+    mixed $message = '',
+    mixed $code = 0,
+    ?Throwable $previous = null,
+  )[] {
 
     // Child classes may just override the protected property
     // without implementing a constructor or calling parent one.
     // In this case we should not override it from the param.
 
     if ($message !== '' || $this->message === '') {
-      $this->message = $message;
+      $this->message = HH\FIXME\UNSAFE_CAST<mixed, string>($message);
     }
 
     if ($code !== 0 || $this->code === 0) {
-      $this->code = $code;
+      $this->code = HH\FIXME\UNSAFE_CAST<mixed, int>($code);
     }
 
     $this->previous = $previous;
@@ -74,8 +77,9 @@ class Exception implements Throwable {
         } else if ($fallback is nonnull) {
           return $fallback($throwable);
         } else {
-          return 'Message ommitted because '.get_class($throwable).
-            ' does not implement '.IExceptionWithPureGetMessage::class;
+          return 'Message ommitted because ' .
+            HH\FIXME\UNSAFE_CAST<mixed, string>(get_class($throwable)) .
+            ' does not implement ' . IExceptionWithPureGetMessage::class;
         }
       },
     );

@@ -34,7 +34,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -190,8 +190,8 @@ static const struct {
 
   /*** 4. Control flow instructions ***/
 
+  { OpEnter,       {None,             None,         OutNone         }},
   { OpJmp,         {None,             None,         OutNone         }},
-  { OpJmpNS,       {None,             None,         OutNone         }},
   { OpJmpZ,        {Stack1,           None,         OutNone         }},
   { OpJmpNZ,       {Stack1,           None,         OutNone         }},
   { OpSwitch,      {Stack1,           None,         OutNone         }},
@@ -370,6 +370,8 @@ static const struct {
   { OpResolveClass,{None,             Stack1,       OutUnknown      }},
   { OpSetImplicitContextByValue,
                    {Stack1,           Stack1,       OutUnknown      }},
+  { OpVerifyImplicitContextState,
+                   {None,             None,         OutNone         }},
 
   /*** 14. Generator instructions ***/
 
@@ -547,7 +549,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
   case Op::Nop:
   case Op::CGetCUNop:
   case Op::UGetCUNop:
-  case Op::EntryNop:
     return true;
   default:
     return false;
@@ -871,10 +872,10 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::LIterNext:
   case Op::IterInit:
   case Op::LIterInit:
+  case Op::Enter:
+  case Op::Jmp:
   case Op::JmpZ:
   case Op::JmpNZ:
-  case Op::Jmp:
-  case Op::JmpNS:
   case Op::ClsCnsD:
   case Op::NewStructDict:
   case Op::Switch:
@@ -1071,11 +1072,11 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::LockObj:
   case Op::ClsCnsL:
   case Op::SetImplicitContextByValue:
+  case Op::VerifyImplicitContextState:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.
   case Op::Nop:
-  case Op::EntryNop:
   case Op::CGetCUNop:
   case Op::UGetCUNop:
   case Op::ClsCns:

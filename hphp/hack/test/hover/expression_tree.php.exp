@@ -8,5 +8,5 @@ converted (at compile time) to calls on these methods.
 This .hhi file is only used when testing the type checker. Otherwise
 every test file would need to include a class with all these methods.
 -------------
+// Defined in ExampleDsl
 public static ExampleString
-Full name: `ExampleDsl::stringType`

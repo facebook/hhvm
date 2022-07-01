@@ -167,8 +167,6 @@ struct RepoGlobalData {
    */
   bool DiamondTraitMethods = false;
 
-  bool EnableImplicitContext = false;
-
   /*
    * If set, const fold the File and Dir bytecodes, using this as the
    * SourceRoot.
@@ -219,7 +217,6 @@ struct RepoGlobalData {
       (BuildMayNoticeOnMethCallerHelperIsObject)
       (DiamondTraitMethods)
       (EvalCoeffectEnforcementLevels)
-      (EnableImplicitContext)
       (SourceRootForFileBC)
       ;
   }

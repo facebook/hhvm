@@ -24,6 +24,7 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/lock-free-ptr-wrapper.h"
 #include "hphp/util/smalllocks.h"
 
 namespace HPHP {
@@ -196,6 +197,95 @@ template<typename T> bool LockFreeLazy<T>::reset() {
       return true;
     }
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * LockFreeLazyPtr is like LockFreeLazy, but space optimized for the
+ * case where you're wrapping a pointer (to a heap allocated
+ * value). Nullptr is used to indicate "not present", so that must not
+ * be a valid value.
+ */
+
+template <typename T>
+struct LockFreeLazyPtr {
+  LockFreeLazyPtr() : m_ptr{nullptr} {}
+
+  LockFreeLazyPtr(const LockFreeLazyPtr&) = delete;
+  LockFreeLazyPtr(LockFreeLazyPtr&&) = delete;
+  LockFreeLazyPtr& operator=(const LockFreeLazyPtr&) = delete;
+  LockFreeLazyPtr& operator=(LockFreeLazyPtr&&) = delete;
+
+  ~LockFreeLazyPtr();
+
+  /*
+   * Return a const reference to the value the pointer points to, if
+   * present. If not, call the given callable to obtain the pointer
+   * and store it This call may block if another thread is calculating
+   * the pointer. Concurrent calls to get() are allowed. Only one
+   * thread will calculate the pointer. However no concurrent calls to
+   * reset() are allowed at the same time as calling get(). The
+   * returned reference will remain valid as long as this
+   * LockFreeLazyPtr is alive, and reset() has not been called.
+   *
+   * The callable must return a non-null pointer which can be freed
+   * via delete.
+   */
+  template <typename F> const T& get(const F&);
+
+  /*
+   * Check (without blocking) whether there's a contained value. This
+   * must be used carefully, as concurrent get() or reset() calls can
+   * change this result at any instant.
+   */
+  bool present() const;
+
+  /*
+   * Delete the value pointed to by the contained pointer (if any) and
+   * set the pointer to nullptr. After this calling this, any
+   * subsequent calls to get() will re-calculate the value. This call
+   * may block if another thread is destroying the value. Concurrent
+   * calls to reset() are allowed. Only one thread will destroy the
+   * value. However no concurrent calls to get() are allowed at the
+   * same time as calling reset(). This invalidates any references
+   * previously returned from get(). Returns true if this call
+   * successfully resets, false otherwise.
+   */
+  bool reset();
+private:
+  LockFreePtrWrapper<const T*> m_ptr;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+template<typename T> LockFreeLazyPtr<T>::~LockFreeLazyPtr() {
+  if (auto const p = m_ptr.copy()) delete p;
+}
+
+template<typename T> template<typename F>
+const T& LockFreeLazyPtr<T>::get(const F& f) {
+  if (auto const p = m_ptr.copy()) return *p;
+  auto lock = m_ptr.lock_for_update();
+  if (auto const p = m_ptr.copy()) return *p;
+  const T* newPtr = f();
+  assertx(newPtr);
+  lock.update(std::move(newPtr));
+  return *m_ptr.copy();
+}
+
+template<typename T> bool LockFreeLazyPtr<T>::present() const {
+  return m_ptr.copy() != nullptr;
+}
+
+template<typename T> bool LockFreeLazyPtr<T>::reset() {
+  if (auto const p = m_ptr.copy(); !p) return false;
+  auto lock = m_ptr.lock_for_update();
+  auto const p = m_ptr.copy();
+  if (!p) return false;
+  delete p;
+  lock.update(nullptr);
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -147,8 +147,8 @@ and tprim =
   | Tnoreturn
 
 and refinement =
-  (* TODO(type-refinements): CtxRef of ctx_refinement *)
-  | TypeRef of sid * type_refinement
+  (* TODO(type-refinements): Rctx of ctx_refinement *)
+  | Rtype of sid * type_refinement
 
 and type_refinement =
   | Texact of hint

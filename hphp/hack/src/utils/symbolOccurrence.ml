@@ -42,6 +42,9 @@ type keyword_with_hover_docs =
   | Public
   | Protected
   | Private
+  | Internal
+  | ModuleInModuleDeclaration
+  | ModuleInModuleMembershipDeclaration
 [@@deriving ord, eq]
 
 type built_in_type_hint =
@@ -90,6 +93,7 @@ type kind =
      we can easily find a concrete receiver (e.g. no complex generics). *)
   | BestEffortArgument of receiver * int
   | HhFixme
+  | Module
 [@@deriving ord, eq]
 
 type 'a t = {
@@ -121,6 +125,7 @@ let kind_to_string = function
   | PureFunctionContext -> "context_braces"
   | BestEffortArgument _ -> "argument"
   | HhFixme -> "hh_fixme"
+  | Module -> "module"
 
 let enclosing_class occurrence =
   match occurrence.type_ with

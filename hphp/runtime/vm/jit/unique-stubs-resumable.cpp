@@ -201,15 +201,13 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner, const char* 
       afwh[AFWH::stateOff()]
     };
 
-    if (RO::EvalEnableImplicitContext) {
-      markRDSAccess(v, ImplicitContext::activeCtx.handle());
-      auto const implicitContext = v.makeReg();
-      v << load {
-        afwh[c_ResumableWaitHandle::implicitContextOff()],
-        implicitContext
-      };
-      v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};
-    }
+    markRDSAccess(v, ImplicitContext::activeCtx.handle());
+    auto const implicitContext = v.makeReg();
+    v << load {
+      afwh[c_ResumableWaitHandle::implicitContextOff()],
+      implicitContext
+    };
+    v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};
 
     auto const child = v.makeReg();
     v << load{afwh[AFWH::childrenOff() + AFWH::Node::childOff()], child};
@@ -336,12 +334,10 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
   );
   v << storebi{runningState, parentBl[afwhToBl(AFWH::stateOff())]};
 
-  if (RO::EvalEnableImplicitContext) {
-    markRDSAccess(v, ImplicitContext::activeCtx.handle());
-    auto const implicitContext = v.makeReg();
-    v << load{parentBl[afwhToBl(AFWH::implicitContextOff())], implicitContext};
-    v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};
-  }
+  markRDSAccess(v, ImplicitContext::activeCtx.handle());
+  auto const implicitContext = v.makeReg();
+  v << load{parentBl[afwhToBl(AFWH::implicitContextOff())], implicitContext};
+  v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};
 
   // Transfer control to the resume address.
   v << jmpm{rvmfp()[afwhToAr(AFWH::resumeAddrOff())], vm_regs_with_sp()};

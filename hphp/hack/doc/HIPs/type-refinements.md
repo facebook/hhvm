@@ -4,16 +4,23 @@ Stage: DRAFT
 
 ## Summary
 
-This feature, referred to as type _refinements_, adds the ability to
-specify additional constraints on the type being refined: each of its
-type constants or context constants can specify either an exact bound
-or loose (upper and/or lower) bounds. For example, provided the definition
+This feature, referred to as _type refinements_, adds the ability to
+specify structural constraints on a type. The type subject to the
+constraints is said to be _refined_. In this HIP, type refinements
+can only constrain type and context constants of a class/interface.
+The constraints on such constants can be either _exact_ or _loose_.
+An exact constraint fully specifies the constant while a loose
+constraint is a combination of lower and/or upper bounds that may
+match multiple concrete constants. In the future, type refinements
+could be further extended to apply other constraints to other types.
 
+We now give an example use of the feature. Assuming the following
+interface definition
 ```
 interface Box { abstract const type T; const ctx C super [defaults]; }
 ```
 
-the feature would allow writing types such as:
+type refinements would allow writing types such as:
 
 * `Box with { type T = int; ctx C super [globals]; }`
 * `Box with { type T as arraykey }`
@@ -21,22 +28,25 @@ the feature would allow writing types such as:
 
 ## Feature motivation
 
-Type refinements is a feature that has a sound semantics and already
-exists in another widely used programming language; it would enhance
+Type refinements is a feature that is present in the Scala programming
+language where it was proved to be useful and safe. It would enhance
 Hack in 3 key areas:
 
-* _expressiveness_ -- __more general form of where-constraints__; i.e.,
-  the existing where-constraints cannot span to a class level and cannot
-  talk about the return type alone
-* _soundness_ -- __more principled basis for type projections__, offering
-  a limited form of dependent types needed to soundly model polymorphic
-  contexts, for example.
-* _convenience_ -- __reduces boilerplate Hack code__: no intermediate
+* _expressiveness_ -- __complementing where-constraints__; some
+  useful constraints cannot be expressed with where constraints,
+  but can be expressed with type refinements; e.g., constraints
+  on type constants of class-level generic parameters, or constraints
+  on an existentially quantified return type.
+* _soundness_ -- __more principled basis for type accesses__;
+  offering a limited form of dependent types that can help
+  replace unsafe where constraints with type accesses and
+  needed to soundly model polymorphic contexts, for example.
+* _convenience_ -- __reduces boilerplate Hack code__; no intermediate
   interfaces/classes need to be introduced to merely refine the constraints
   on type/context constants.
 
 
-### More expressiveness
+### Increased expressiveness
 
 Considering the following definitions
 
@@ -50,9 +60,10 @@ interface TBox extends ReadonlyBox {
 }
 ```
 
-suppose we want to write a class that delegates to a _generic_ box that
-is provided via a constructor, where the class also provides a getter
-that returns an Readonly Box for wrapper (for safety reason):
+suppose we want to write a delegator class that exposes the box's
+content type via a generic parameter and also provides a getter
+function returning a ReadonlyBox; using type refinements, we can
+write
 
 ```
 class SafeBoxDelegator<Tref> {
@@ -64,28 +75,32 @@ class SafeBoxDelegator<Tref> {
 
 The above example is currently inexpressible in Hack for two
 reasons. First, the refinement in the constructor would require
-_class_-level where-clauses, which have been experimented with but are
-tricky because they do not have sound foundation. Second, an attempt to
-use where-clauses at the function level fails when there the type does
-not appear as part of “input” to the function:
+class-level where clauses, which are not available today and would
+in this case include one occurrence of poorly-supported type
+accesses on generic variables. Second, a common attempt to use
+where-clauses to type the getter function fails:
 
 ```
-public function get<TIB as ReadonlyBox, Tbad>(): TIB
-        where Tbad = TIB::T { … }
+class SafeBoxDelegator<Tref> {
+  ...
+  public function get<TIB as ReadonlyBox>(): TIB
+          where TIB::T = Tref { … }
 ```
 
-The reason is that Hack would need to treat generic `Tbad` as an
-_existential_ type here (because it only holds for some instantiations),
-which is non-trivial during type inference. Other languages such as Scala
-have banned user-denotable existential types, and by further generalizing
-where clauses we would be dangerously close to the Scala-banned behavior.
+This function prototype, while usable, is not practically
+implementable. To implement it, the programmer has to write code
+that returns an object that is in _all_ subtypes of ReadonlyBox
+that satisfy the where constraint. This is not the intent of the
+programmer, who likely meant to return _one_ subtype of ReadonlyBox
+satisfying the constraint. In terms of type theory, `TIB` is
+universally quantified when the intent was to existentially
+quantify it.
 
 ### Replacement for unsound projections
 
 One might attempt to work around the existing limitations of where
-clauses by changing the interface
-
-of `SafeBoxDelegator` to accept the Box as a class generic, i.e.:
+clauses by changing the interface of `SafeBoxDelegator` to accept
+the Box as a class generic, i.e.:
 
 ```
 class SafeBoxDelegator<TBox as Box> {
@@ -97,12 +112,14 @@ class SafeBoxDelegator<TBox as Box> {
 }
 ```
 
-However, this would result in errors because it is unsound to project
-off an abstract type (`TBox`, which is a subtype of `Box` and may not
-have its `T` defined yet).
-
-Fortunately, the above can be soundly modeled if a refinement is added
-to the constraint of the class generic `TBox` as follows:
+However, the definition above is rejected by Hack because type
+accesses on generics are not permitted as type hints. More
+generally, type accesses on generics are poorly supported by the
+language; for example, the typechecker does not prevent instantiating
+generics with class types that have abstract type constants, leading
+to unsoundness.
+With refinements, it is possible to constrain a class-level generic
+parameter to define a type constant of interest. For example
 
 ```
 class SafeBoxDelegator<TinBox, TBox as Box with { type T = TinBox }> {
@@ -112,30 +129,26 @@ class SafeBoxDelegator<TinBox, TBox as Box with { type T = TinBox }> {
 }
 ```
 
-Currently, Hack does allow a similar trick for expressing a limited form
-of dependent typing for cases where a where-clause does not span beyond
-function level: i.e., a function where the type of one parameter depends
-on the type of another, such as:
+Currently, Hack does allow one way to express a limited form of dependent
+typing (i.e., a function where the type of one parameter depends on the
+type of another one)
 
 ```
-function set_box<T1, TBox as Box>(Tbox $b, T1 $v): void
-    where T1 = TBox::T // OK
-// different than: set_box(Box $b, Box::T $v): void  // ERROR
+function setBox<T1, TBox as Box>(Tbox $b, T1 $v): void
+    where T1 = TBox::T
 ```
 
-which is semantically different from the alternative signature in the
-comment. This is a common source of confusion, since there is _more than
-one way_ to write such functions using projections but _only one way is
-right_. Conversely, using the proposed feature results in a single and
-the correct solution,
+However, the boilerplate required in the accepted prototype is a common
+source of confusion for users and, as explained above, is only very weakly
+shielding them from unsound code.  Using type refinements we write
 
 ```
 function setBox<T1>(Box with { type T = T1; } $b, T1 $v): void
 ```
 
-and is backed by a solid theoretical foundation in the
-[DOT calculus](http://lampwww.epfl.ch/~amin/dot/fool.pdf) [3,4] unlike
-the former approach that employs where-clauses and type projections.
+And the function `setBox` can no longer recieve as first argument a
+value of a type for which we do not precisely know what the associated
+type constant is.
 
 As a final benefit, type refinements would serve as a more solid
 intermediate representation for dependent context constants in the
@@ -146,8 +159,8 @@ interface BoxWithCtx extends Box { const ctx C; }
 function useBox(BoxWithCtx $b)[$b::C]: void { … }
 ```
 
-would be internally represented via refinement of context constant `C`
-(which desugars to a type in the typechecker)
+would be internally represented via refinement of context constant
+`C` (which is then further desugared into a type)
 
 ```
 function useBox<TC>(
@@ -155,31 +168,20 @@ function useBox<TC>(
 )[Ctx]: void
 ```
 
-as opposed to the current desugaring into where-clauses and projections
-of questionable soundness.
+this new internal representation would replace the current desugaring
+into where-clauses, generics, and projections of questionable soundness.
+
+As a final remark about soundness, we will point out that unlike projections
+off types, the type refinements feature has been well studied in the context
+of Scala's core [DOT calculus](http://lampwww.epfl.ch/~amin/dot/fool.pdf)
+[3,4].
 
 ### Less definition boilerplate
 
-Another use case is a bounded class generic whose usage throughout the
-class makes consistent assumptions on the bound. E.g., to parameterize
-with a subtype of `Box` whose type constant `T` is `num`eric, one could
-use the proposed feature,
-
-```
-class NumericComputation<TBox as Box with { type T as num; }> {
-  public function run_iterative_until_convergence(
-    vec<this::TBox> boxed_input_params,
-    // input/output parameters (each assignment will be logged, which
-    //                          requires `globals` context)
-    Box with { type T = int; ctx C super [globals] } $lastIteration,
-    this::TBox with { ctx C super [globals] } $lastIterationError,
-  )[globals]: BoxWithCtx with { type T as vec<num>; ctx C = [] } { … }
-}
-```
-
-Without the proposed solution, one would have to create “opaque”
-abstract class/interfaces -- introducing overhead -- and use concrete
-type, e.g.:
+In the special case where a type refinement involves only concrete type
+and context constants, it is possible to replace the refinement with
+an additional subtyping constraint involving an interface that represents
+the `with { … }` refinement component. Such interfaces may look like
 
 ```
 interface LoggedBox extends BoxWithCtx { abstract ctx C super [globals]; }
@@ -192,90 +194,200 @@ interface VecNumericBoxPure extends Box {
 }
 ```
 
-However, this workaround not only degrades users’ experience but also
-_doesn’t scale_: it leads to an exponential number of “phantom”
-interfaces with combinations of constraints.
+However, this nominal encoding of refinements does not scale: it leads to
+an exponential number of artificial interfaces with combinations of
+constraints, significantly cluttering code and namespaces. In a sense,
+we allow the use of some form of anonymous interfaces.
 
+## Feature definition
 
-## User experience
+We now expose in more details the specifics of type refinements. This
+section aims to provide enough foundational information to successfully
+complete an implementation of the feature.
 
 ### Syntax
 
-A type refinement would be written as `Classish with { … }` where
-`...` refines one or more type constants. An example is a function
-signature that returns a `Box` whose type constant `T` is fixed to `int`
-(the new syntax is overlined):
+A type refinement would be written as `Classish<…> with { … }` where
+`{ … }` refines one or more type and context constants.  An example
+is a function signature that returns a `Box` whose type constant `T`
+is fixed to `int` (the new syntax is overlined):
 
 ```
                            _____________________
 function getIntBox(): (Box with { type T = int })
 ```
 
-Each refinements inside `{`...`}` should be a valid type/context
-definition, possibly abstract, but must introduce either `=` or any
-combination of `as`/`super` bounds
+Each refinement inside `{ … }` should be a valid type/context
+constraint, it must contain either an exact `=` constraint or
+an arbitrary combination of one or more `as`/`super` bounds.
 
 #### EBNF notation
 
 Add rules:
 
 ```
-TypeRefinement ::= TypeSpecifier, `with`, `{`, Refinement `}` ;
-Refinement ::= (* empty *) | { RefineConst [`;`] } ;
-RefineConst ::= RefineType | RefineCtx ;
+TypeRefinement   ::= TypeSpecifier `with` `{` Refinement [`;`] `}` ;
+Refinement       ::= RefineType | RefineCtx | Refinement `;` Refinement  ;
 
-RefineType ::= `type` QualifiedName ( `=` TypeSpecifier | RefineTypeBounds ) ;
-RefineTypeBounds ::= RefineTypeBounds ( `as` | `super` ) TypeSpecifier
-                                    | ( `as` | `super` ) TypeSpecifier ;
+RefineType       ::= `type` QualifiedName ( `=` TypeSpecifier | RefineTypeBounds ) ;
+RefineTypeBounds ::= ( `as` | `super` ) TypeSpecifier RefineTypeBounds
+                   | ( `as` | `super` ) TypeSpecifier ;
 
-RefineCtx ::= `ctx` QualifiedName ( `=` CtxList | RefineCtxBounds ) ;
-RefineTypeBounds ::= RefineTypeBounds ( `as` | `super` ) CtxList
-                                    | ( `as` | `super` ) CtxList ;
+RefineCtx        ::= `ctx` QualifiedName ( `=` CtxList | RefineCtxBounds ) ;
+RefineTypeBounds ::= ( `as` | `super` ) CtxList RefineTypeBounds
+                   | ( `as` | `super` ) CtxList ;
 ```
 
 Extend rule:
 
 ```
-TypeSpecifier ::= (* new* ) TypeRefinement | (* old rules *) … ;
+TypeSpecifier ::= (* new *) TypeRefinement | (* old syntax *) … ;
+```
+
+Note: Our draft implementation does not allow multiple sequenced
+refinements and instead suggests to the user to merge them into
+a single refinement.
+
+### Well-formedness
+
+In a refinement `Classish<…> with { … }`, the left-hand side classish
+must be a fully applied interface, class, or type alias that
+recursively expands to an interface or a class. This constraint means
+that we currently do not support refining opaque types aliases (newtype),
+the this type, or generics.
+
+There is no constraint on the bounds of a refinement. In particular,
+we may well have an unsatisfiable loose refinement. We will see in the
+semantics section that the result of such a refinement is simply an
+empty type equivalent to the bottom type nothing.
+
+There is no requirement that the type/context constants in the
+refinement are defined in the classish they refine. However, in this
+case, a linter (TAST check) could warn the user and suggest constants
+appearing in the classish with similar names.
+
+### Typing rules
+
+We only give typing rules for type constant refinements, context
+constant refinements are handled very similarly.
+
+First, we modify the type access expansion algorithm to have the
+following new clauses:
+
+```
+taccess((C<…> with { type T = t'; … }), 'T') = t'
+taccess((C<…> with { … }),              'T') = taccess(C<…>, 'T')
+... (* old clauses *)
+```
+
+These additional rules guarantee that any existing typing logic
+will successfully take exact refinements into account. Since type
+accesses on abstract type constants are poorly handled in general,
+we suggest to not implement any specific rules about loose
+refinements in the type access expansion logic.
+
+We define a new type member lookup unit. The goal is to eventually
+have this unit take care of all the type access expansion logic.
+Throughout the transition, we take care to keep this type member
+lookup principled and stick to well-understood accesses.
+
+```
+lookupty(/*class*/ C, 'T') =
+  if 'T' is Abstract(lowerBnd,upperBnd) in C:
+    BOUNDED(lowerBnd,upperBnd)
+  else if 'T' is Concrete(ty) in C:
+    BOUNDED(ty,ty)
+  else
+    ERROR
+
+lookupty((/*class*/ C with { R }), 'T') =
+  if R['T'] is (super lowerBnd as upperBnd):
+    merge(lookupty(C, 'T'), BOUNDED(lowerBnd,upperBnd))
+  else if R['T'] is (= ty):
+    merge(lookupty(C, 'T'), BOUNDED(ty,ty))
+  else
+    lookupty(C, 'T')
+
+// Merge two lookup results
+merge(ERROR,other)                       = other
+merge(other,ERROR)                       = other
+merge(BOUNDED(lo1,up1),BOUNDED(lo2,up2)) = BOUNDED((lo1|lo2),(up1&up2))
+```
+
+We also modify the subtyping algorithm so that it applies the
+following rules. The rules are listed by order of precendence.
+
+```
+          t ⊢ R          t <: C<…>
+    (<:1) ------------------------
+            t <: C<…> with { R }
+
+
+                C<…> <: t
+    (<:2) ------------------------
+           C<…> with { … } <: t
+```
+
+Thinking about inference, we note that it is important to apply the
+rule (<:1) before applying any rule that goes looking up into the
+bounds or extends/implements of the type on the left-hand side of a
+subtype query. This ensures that we have the best information
+possible when looking up type constants.
+
+The first typing rule uses a new judgement that we define below.
+
+```
+            lookupty(C,'T') = BOUNDED(lo,up)
+            lo' <: lo              up <: up'
+            C ⊢ { R }
+    (⊢l) --------------------------------------
+           C ⊢ { type T super lo' as up'; R }
+
+
+            lookupty(C,'T') = BOUNDED(lo,up)
+            ty <: lo              up <: ty
+            C ⊢ { R }
+    (⊢e) --------------------------------------
+                 C ⊢ { type T = ty; R }
+
+
+    (⊢[]) -----------
+            C ⊢ { }
 ```
 
 ### Semantics
 
-We should allow any type (hint) that represents a _class-like_ object to
-be optionally followed by `with { … }` syntax, with the following rules:
-
-1. refinements cannot reference the `this` type, but paths/projections through
-   it are allowed
-2. projections off _abstract_ refined type alias/constant is allowed;
-   e.g., `const type B = Box with { type T as int }` we can still refer to
-   `B::T` but if Box wasn’t refined it would be unsound
-3. projecting off an upper bound that is a refinement is still disallowed;
-   e.g., in `const type B as Box with { type T as int }` we cannot refer to
-   `B::T`
-
-E.g., these should be allowed:
-
-* `Box with { type T = int }`
-* `BoxWithCtx with { ctx C super [defaults]; /* OK: T isn't refined */ }`
-* ` `
-    ```
-    abstract class GoodBoxRefinements {
-      const type TB = Box with { type T as int; };
-      abstract function good_get(this::TB $box): this::TB::T; // OK (rule 2.)
-
-    }
-    ```
-
-while these should be disallowed:
+In the spirit of the [Shack](https://github.com/facebookresearch/shack)
+project that interprets Hack types as sets of values, we give a semantics
+for type refinements by defining the interpretation of refinements
 
 ```
-class BadBoxRefinementAndBadAbstractProjection {
-  const type TBad = Box with { type T as this }; // ERROR (rule 1.)
-  const type TB as Box with { type T = int };  // OK here
-  public function bad_get(this::TB $box): this::TB::T; // ERROR (rule 3.)
-}
+[[ C with { type T cstr } ]]Σ =
+    [[ C ]]Σ ∩ { l ∈ loc |
+                 l ↦ (tag, phi);
+                 [[ class_def[tag].T ]]_ ⊢ [[ cstr ]]Σ }
 ```
 
+That is, the constrained class type is all the objects in the class type
+of C that, additionally, have a type member that satisfies the constraint
+in the type. It is noteworthy that the semantics interpret the type
+refinements as an intersection type.
+
+The interpretation function [[ . ]]Σ is parameterized by Σ an environment
+that contains the interpretation for ambient generic parameters. When
+interpreting a type constant obtained from the class definition this
+environment is irrelevant because type constants are currently required
+to be independent from all generic parameters. The constraint in the
+refinement, on the other hand, is interpreted using the ambient generic
+parameters. One unknown is that the current typechecker implementation
+allows using the 'this' type in type constant definition, and 'this' has
+not been formalized in Shack yet.
+
+Another shortcoming of these semantics is the lack of account for Hack's
+parallel object model where classname values are used as singleton objects
+for final abstract classes. This lack of precision in the semantics sheds
+doubts about the interaction of type refinements with classname values
+and their associated capabilities (call to static methods).
 
 ## IDE experience:
 
@@ -416,7 +528,7 @@ support instance-based projections (e.g., Scala) do offer refinements
 of types, attesting to the value added by this feature alone.
 
 
-## Drawbacks:
+## Drawbacks
 
 This feature does not strip away or change existing functionality,
 so this section is largely inapplicable.
@@ -431,7 +543,7 @@ type constants, we need to make the design intuitive in order to avoid
 confusing Hack users with seemingly interchangeable sets of features.
 
 
-## Prior art:
+## Prior art
 
 ### Type refinements in Scala
 
@@ -478,7 +590,7 @@ trait Outer { self => // refer to `Outer.this` as `self`
 ```
 
 
-### References:
+### References
 
 [1] Scala 2.13 Specification, [Sec 3.2.9 (Compound Types)](https://www.scala-lang.org/files/archive/spec/2.13/03-types.html#compound-types)
 
@@ -490,6 +602,7 @@ trait Outer { self => // refer to `Outer.this` as `self`
 
 [5] HIP: [context and coeffects](https://www.internalfb.com/code/fbsource/[a56b675db21fb8c075f735721a3147fe4e660822]/fbcode/hphp/hack/doc/HIPs/contexts_and_coeffects.md)
 
+[6] [Shack](https://github.com/facebookresearch/shack), formal semantics for Hack types
 
 ## Unresolved questions:
 

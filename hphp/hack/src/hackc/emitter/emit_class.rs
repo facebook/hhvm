@@ -324,7 +324,7 @@ fn from_enum_type<'arena>(
     alloc: &'arena bumpalo::Bump,
     opt: Option<&ast::Enum_>,
 ) -> Result<Option<HhasTypeInfo<'arena>>> {
-    use hhas_type::constraint::Constraint;
+    use hhas_type::Constraint;
     opt.map(|e| {
         let type_info_user_type = Just(Str::new_str(
             alloc,
@@ -466,7 +466,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     ast_class: &'a ast::Class_,
 ) -> Result<Option<HhasMethod<'arena>>> {
-    use hhas_type::constraint::Constraint;
+    use hhas_type::Constraint;
 
     let alloc = env.arena;
     let num_reified = ast_class

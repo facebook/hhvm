@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
@@ -188,7 +189,6 @@ void cgBespokeGet(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
   cgCallHelper(v, env, target, callDestTV(env, inst), syncMode, args);
-
 }
 
 void cgBespokeGetThrow(IRLS& env, const IRInstruction* inst) {
@@ -336,8 +336,6 @@ void cgBespokeEscalateToVanilla(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), syncMode, args);
 }
 
-#undef CALL_TARGET
-
 void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const dest = callDest(env, inst);
@@ -476,6 +474,71 @@ void cgLdMonotypeVecElem(IRLS& env, const IRInstruction* inst) {
   loadTV(vmain(env), inst->dst()->type(), dstLoc(env, inst, 0),
          type, value);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+// TypeStructure
+
+void callBespokeGetStr(IRLS& env, const IRInstruction* inst, CallDest dest) {
+  using GetStr = TypedValue (ArrayData::*)(const StringData*) const;
+  auto const getStr =
+    CallSpec::method(static_cast<GetStr>(&ArrayData::get));
+
+  auto const arr = inst->src(0)->type();
+  auto const target = CALL_TARGET(arr, NvGetStr, getStr);
+
+  auto const syncMode = maybeLogging(arr)
+    ? SyncOptions::Sync
+    : SyncOptions::None;
+
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  cgCallHelper(v, env, target, dest, syncMode, args);
+}
+
+void cgLdTypeStructureVal(IRLS &env, const IRInstruction *inst) {
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  auto const data = v.makeReg();
+  auto const dt = v.makeReg();
+  auto next = v.makeBlock();
+  auto const dst = dstLoc(env, inst, 0);
+
+  callBespokeGetStr(env, inst, callDest(data, dt));
+  emitCmpTVType(v, sf, KindOfUninit, dt);
+  v << jcc{CC_E, sf, {next, label(env, inst->taken())}};
+  v = next;
+  v << copy{data, dst.reg(0)};
+  v << copy{dt, dst.reg(1)};
+}
+
+void cgLdTypeStructureValCns(IRLS &env, const IRInstruction *inst) {
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const key = inst->extra<KeyedData>()->key;
+  assertx(!key->empty());
+
+  auto& v = vmain(env);
+  auto const dst = dstLoc(env, inst, 0);
+
+  auto const dt = bespoke::TypeStructure::getKindOfField(key);
+  auto const offset = bespoke::TypeStructure::getFieldOffset(key);
+
+
+  if (dt == KindOfBoolean) {
+    // TODO: add different load for boolean fields that aren't stored in
+    // ArrayData header after adding children type structs
+    auto const bitOffset = bespoke::TypeStructure::getBitOffset(key);
+    auto const sf = v.makeReg();
+    v << testbim{static_cast<uint8_t>(1 << bitOffset), rarr[offset], sf};
+    v << setcc{CC_NE, sf, dst.reg(0)};
+  } else if (dt == KindOfInt64) {
+    v << loadzbq{rarr[offset], dst.reg(0)};
+  } else if (isArrayLikeType(dt) || isStringType(dt)) {
+    v << load{rarr[offset], dst.reg(0)};
+  }
+}
+
+#undef CALL_TARGET
 
 //////////////////////////////////////////////////////////////////////////////
 // StructDict

@@ -8,10 +8,13 @@ use crate::typing::typing_error::{Error, Result};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_decl_provider::{Class, ClassElt, TypeDecl};
 use depgraph_api::DeclName;
+use oxidized::ast_defs::Variance;
 use pos::{FunName, MethodName, TypeName};
 use std::rc::Rc;
 use std::sync::Arc;
+use ty::decl as DTy;
 use ty::decl::FunDecl;
+use ty::local::{Exact, Ty};
 use ty::reason::Reason;
 
 /// Provides access to the decl provider, but enforcing dependency tracking.
@@ -85,10 +88,58 @@ impl<R: Reason> TEnvDeclsOracle<R> {
     pub fn new(decls: Rc<TEnvDecls<R>>) -> Self {
         Self(decls)
     }
+
+    pub fn get_class(&self, name: TypeName) -> Result<Option<Rc<dyn Class<R>>>> {
+        self.0.get_class(name)
+    }
 }
 
 impl<R: Reason> Oracle<R> for TEnvDeclsOracle<R> {
-    fn get_class(&self, name: TypeName) -> Result<Option<Rc<dyn Class<R>>>> {
-        self.0.get_class(name)
+    fn get_ancestor(
+        &self,
+        sub_name: TypeName,
+        ty_params: &[Ty<R>],
+        sup_name: TypeName,
+    ) -> Result<Option<Ty<R>>> {
+        let cls_opt = self.get_class(sub_name)?;
+        if let Some(cls) = cls_opt {
+            match cls.get_ancestor(&sup_name) {
+                Some(dty) => match &**dty.node() {
+                    DTy::Ty_::Tapply(box (cname, dtys)) => {
+                        if dtys.len() == ty_params.len() {
+                            let lty = Ty::class(
+                                R::none(),
+                                cname.clone(),
+                                Exact::Nonexact,
+                                ty_params.to_vec(),
+                            );
+                            Ok(Some(lty))
+                        } else {
+                            Ok(None)
+                        }
+                    }
+                    _ =>
+                    // not a class
+                    {
+                        Ok(None)
+                    }
+                },
+                // no ancestor
+                _ => Ok(None),
+            }
+        } else {
+            // TODO[mjt] we're swallowing a failure in Naming here
+            Ok(None)
+        }
+    }
+
+    fn get_variance(&self, name: TypeName) -> Result<Option<Vec<Variance>>> {
+        Ok(self
+            .get_class(name)?
+            .map(|cls| cls.get_tparams().iter().map(|p| p.variance).collect()))
+    }
+
+    fn is_final(&self, name: TypeName) -> Result<Option<bool>> {
+        Ok(self.get_class(name)?.map(|x| x.is_final()))
     }
 }

@@ -66,7 +66,8 @@ struct SQLite {
 
   enum class OpenMode {
     ReadOnly = 1,
-    ReadWrite = 2
+    ReadWrite = 2,
+    ReadWriteCreate = 3,
   };
 
   /**
@@ -76,8 +77,9 @@ struct SQLite {
    * if you want to store data in memory instead.
    */
   static SQLite connect(const std::string& path,
-                        OpenMode mode = OpenMode::ReadWrite);
-  static SQLite connect(const char* path, OpenMode mode = OpenMode::ReadWrite);
+                        OpenMode mode = OpenMode::ReadWriteCreate);
+  static SQLite connect(const char* path,
+                        OpenMode mode = OpenMode::ReadWriteCreate);
 
   /**
    * Compile the given SQL query into a statement object which can run and rerun

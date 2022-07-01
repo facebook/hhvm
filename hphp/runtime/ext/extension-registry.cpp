@@ -7,7 +7,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/version.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
-#include "hphp/runtime/vm/litstr-table.h"
 #include "hphp/system/systemlib.h"
 
 #ifdef HAVE_LIBDL

@@ -21,11 +21,12 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+
+#include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -98,9 +99,194 @@ size_t RepoAuthType::hash() const {
     return folly::hash::hash_128_to_64(iTag, n->hash());
   }
   if (auto const a = array()) {
-    return folly::hash::hash_128_to_64(iTag, a->id());
+    // It's fine to use the pointer for the hash here, as we guarantee
+    // the pointer uniquely identifies that array.
+    return folly::hash::hash_128_to_64(
+      iTag,
+      pointer_hash<RepoAuthType::Array>{}(a)
+    );
   }
   return iTag;
+}
+
+size_t RepoAuthType::stableHash() const {
+  auto const iTag = static_cast<size_t>(tag());
+  if (auto const n = name()) {
+    return folly::hash::hash_128_to_64(iTag, n->hash());
+  }
+  if (auto const a = array()) {
+    return folly::hash::hash_128_to_64(
+      iTag, a->stableHash()
+    );
+  }
+  return iTag;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+struct repo_auth_array_hash {
+  size_t operator()(const RepoAuthType::Array* ar) const {
+    return ar->stableHash();
+  }
+};
+
+struct repo_auth_array_eq {
+  bool operator()(const RepoAuthType::Array* a,
+                  const RepoAuthType::Array* b) const {
+    // We cannot rely on the array pointers being unique like normal
+    // (since we're inserting here) (but sub-arrays are fine because
+    // those are always inserted).
+    if (a->tag() != b->tag() || a->emptiness() != b->emptiness()) {
+      return false;
+    }
+    using T = RepoAuthType::Array::Tag;
+    switch (a->tag()) {
+      case T::Tuple: {
+        if (a->size() != b->size()) return false;
+        auto const size = a->size();
+        for (auto i = uint32_t{0}; i < size; ++i) {
+          if (a->tupleElem(i) != b->tupleElem(i)) return false;
+        }
+      }
+      return true;
+    case T::Packed:
+      return a->packedElems() == b->packedElems();
+    }
+    not_reached();
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+folly_concurrent_hash_map_simd<
+  const RepoAuthType::Array*,
+  bool,
+  repo_auth_array_hash,
+  repo_auth_array_eq
+> s_arrays;
+
+// Returns the `cand' if it was successfully inserted; otherwise it's
+// the callers responsibility to free it.
+const RepoAuthType::Array* insert(const RepoAuthType::Array* cand) {
+  auto const insert = s_arrays.emplace(cand, true);
+  assertx(IMPLIES(insert.second, insert.first->first == cand));
+  return insert.first->first;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+const RepoAuthType::Array*
+RepoAuthType::Array::tuple(Empty emptiness,
+                           const std::vector<RepoAuthType>& types) {
+  assertx(!types.empty());
+  assertx(types.size() <= std::numeric_limits<uint32_t>::max());
+
+  auto const size = types.size() * sizeof(RepoAuthType) +
+    sizeof(RepoAuthType::Array);
+  auto const arr = new (std::malloc(size)) RepoAuthType::Array(
+    RepoAuthType::Array::Tag::Tuple,
+    emptiness,
+    types.size()
+  );
+
+  auto hash = folly::hash::hash_combine(
+    RepoAuthType::Array::Tag::Tuple,
+    static_cast<uint32_t>(emptiness)
+  );
+  hash = folly::hash::hash_128_to_64(hash, types.size());
+
+  auto elems = arr->types();
+  for (auto& t : types) {
+    hash = folly::hash::hash_128_to_64(hash, t.stableHash());
+    *elems++ = t;
+  }
+  arr->m_hash = hash;
+
+  auto const ret = insert(arr);
+  if (arr != ret) {
+    arr->~Array();
+    std::free(arr);
+  }
+
+  return ret;
+}
+
+const RepoAuthType::Array*
+RepoAuthType::Array::packed(Empty emptiness, RepoAuthType elemTy) {
+  auto const size = sizeof elemTy + sizeof(RepoAuthType::Array);
+  auto const arr = new (std::malloc(size)) RepoAuthType::Array(
+    RepoAuthType::Array::Tag::Packed,
+    emptiness,
+    std::numeric_limits<uint32_t>::max()
+  );
+  arr->types()[0] = elemTy;
+  arr->m_hash = folly::hash::hash_combine(
+    RepoAuthType::Array::Tag::Packed,
+    static_cast<uint32_t>(emptiness),
+    elemTy.stableHash()
+  );
+
+  auto const ret = insert(arr);
+  if (arr != ret) {
+    arr->~Array();
+    std::free(arr);
+  }
+
+  return ret;
+}
+
+template <typename SerDe>
+const RepoAuthType::Array*
+RepoAuthType::Array::deserialize(SerDe& sd) {
+  Tag tag;
+  Empty emptiness;
+  sd(tag)(emptiness);
+
+  switch (tag) {
+    case Tag::Tuple: {
+      uint32_t size;
+      sd(size);
+      std::vector<RepoAuthType> types;
+      types.reserve(size);
+      for (uint32_t i = 0; i < size; ++i) {
+        RepoAuthType type;
+        sd(type);
+        types.emplace_back(std::move(type));
+      }
+      return RepoAuthType::Array::tuple(emptiness, std::move(types));
+    }
+    case Tag::Packed: {
+      RepoAuthType type;
+      sd(type);
+      return RepoAuthType::Array::packed(emptiness, std::move(type));
+    }
+  }
+  always_assert(false);
+}
+
+template<typename SerDe>
+void RepoAuthType::Array::serialize(SerDe& sd) const {
+  sd(m_tag)(m_emptiness);
+
+  switch (m_tag) {
+    case Tag::Tuple: {
+      sd(m_size);
+      for (uint32_t i = 0; i < m_size; ++i) sd(types()[i]);
+    }
+    return;
+  case Tag::Packed:
+    sd(types()[0]);
+    return;
+  }
+  always_assert(false);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -270,6 +456,43 @@ std::string show(RepoAuthType rat) {
   return base;
 }
 
+std::string show(const RepoAuthType::Array& ar) {
+  auto ret = std::string{};
+
+  static constexpr size_t kPrintLimit = 4000;
+
+  using A = RepoAuthType::Array;
+  using T = A::Tag;
+  switch (ar.emptiness()) {
+  case A::Empty::No:
+    ret += "N(";    // non-empty
+    break;
+  case A::Empty::Maybe:
+    ret += '(';
+    break;
+  }
+
+  switch (ar.tag()) {
+  case T::Tuple:
+    for (auto i = uint32_t{0}; i < ar.size(); ++i) {
+      ret += show(ar.tupleElem(i));
+      if (i != ar.size() - 1) ret += ',';
+      if (ret.size() > kPrintLimit) break;
+    }
+    break;
+  case T::Packed:
+    folly::format(&ret, "[{}]", show(ar.packedElems()));
+    break;
+  }
+
+  ret += ')';
+  if (ret.size() > kPrintLimit) {
+    ret.resize(kPrintLimit);
+    ret += " <truncated>";
+  }
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 template <typename SerDe>
@@ -278,28 +501,100 @@ void RepoAuthType::serde(SerDe& sd) {
     Tag t;
     sd(t);
     if (tagHasArrData(t)) {
-      ArrayTypeTable::Id id;
-      sd(id);
-      m_data.set(t, globalArrayTypeTable().lookup(id));
+      m_data.set(t, RepoAuthType::Array::deserialize(sd));
     } else if (tagHasName(t)) {
-      LowStringPtr name;
+      const StringData* name;
       sd(name);
-      m_data.set(t, name.get());
+      always_assert(name);
+      m_data.set(t, name);
     } else {
       m_data.set(t, nullptr);
     }
   } else {
-    sd(tag());
+    auto const t = tag();
+    sd(t);
     if (auto const a = array()) {
-      sd(a->id());
+      a->serialize(sd);
     } else if (auto const n = name()) {
-      sd(LowStringPtr{n});
+      sd(n);
     }
   }
 }
 
 template void RepoAuthType::serde<>(BlobDecoder&);
 template void RepoAuthType::serde<>(BlobEncoder&);
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+template <typename LookupStr, typename LookupArr>
+RepoAuthType decodeRATImpl(const unsigned char*& pc,
+                           LookupStr lookupStr,
+                           LookupArr lookupArr) {
+  using T = RepoAuthType::Tag;
+  static_assert(sizeof(T) == sizeof(uint8_t));
+  auto const tag = static_cast<T>(*pc++);
+
+  if (RepoAuthType::tagHasArrData(tag)) {
+    auto const id = decode_iva(pc);
+    return RepoAuthType{tag, lookupArr(id)};
+  }
+
+  if (RepoAuthType::tagHasName(tag)) {
+    auto const id = decode_iva(pc);
+    return RepoAuthType{tag, lookupStr(id)};
+  }
+
+  return RepoAuthType{tag};
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+RepoAuthType decodeRAT(const Unit* unit, const unsigned char*& pc) {
+  return decodeRATImpl(
+    pc,
+    [&] (Id id) { return unit->lookupLitstrId(id); },
+    [&] (Id id) { return unit->lookupRATArray(id); }
+  );
+}
+
+RepoAuthType decodeRAT(const UnitEmitter& ue, const unsigned char*& pc) {
+  return decodeRATImpl(
+    pc,
+    [&] (Id id) { return ue.lookupLitstr(id); },
+    [&] (Id id) { return ue.lookupRATArray(id); }
+  );
+}
+
+void encodeRAT(FuncEmitter& fe, RepoAuthType rat) {
+  using T = RepoAuthType::Tag;
+  static_assert(sizeof(T) == sizeof(uint8_t));
+
+  fe.emitByte((uint8_t)rat.tag());
+  if (auto const a = rat.array()) {
+    fe.emitIVA(fe.ue().mergeRATArray(a));
+  } else if (auto const n = rat.name()) {
+    fe.emitIVA(fe.ue().mergeLitstr(n));
+  }
+}
+
+size_t encodedRATSize(const unsigned char* pc) {
+  using T = RepoAuthType::Tag;
+  static_assert(sizeof(T) == sizeof(uint8_t));
+  auto const tag = static_cast<T>(*pc++);
+
+  if (!RepoAuthType::tagHasArrData(tag) && !RepoAuthType::tagHasName(tag)) {
+    return 1;
+  }
+
+  auto const start = pc;
+  decode_iva(pc);
+  return
+    reinterpret_cast<uintptr_t>(pc) - reinterpret_cast<uintptr_t>(start) + 1;
+}
 
 //////////////////////////////////////////////////////////////////////
 

@@ -1725,6 +1725,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               x.alias_generic_parameter;
           alias_name = validate_option_with validate_token x.alias_name;
           alias_keyword = validate_token x.alias_keyword;
+          alias_module_kw_opt =
+            validate_option_with validate_token x.alias_module_kw_opt;
           alias_modifiers =
             validate_option_with validate_token x.alias_modifiers;
           alias_attribute_spec =
@@ -1746,6 +1748,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
                 x.alias_attribute_spec;
             alias_modifiers =
               invalidate_option_with invalidate_token x.alias_modifiers;
+            alias_module_kw_opt =
+              invalidate_option_with invalidate_token x.alias_module_kw_opt;
             alias_keyword = invalidate_token x.alias_keyword;
             alias_name = invalidate_option_with invalidate_token x.alias_name;
             alias_generic_parameter =

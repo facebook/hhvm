@@ -12,7 +12,7 @@ use env::{emitter::Emitter, Env};
 use error::{Error, Result};
 use ffi::{Slice, Str};
 use hhbc::{
-    hhas_attribute::deprecation_info,
+    hhas_attribute::{deprecation_info, is_keyed_by_ic_memoize},
     hhas_body::HhasBody,
     hhas_coeffects::HhasCoeffects,
     hhas_method::{HhasMethod, HhasMethodFlags},
@@ -24,7 +24,6 @@ use hhbc::{
 use hhbc_string_utils::reified;
 use instruction_sequence::{instr, InstrSeq};
 use naming_special_names_rust::{members, user_attributes};
-use options::HhvmFlags;
 use oxidized::{ast, pos::Pos};
 
 /// Precomputed information required for generation of memoized methods
@@ -43,10 +42,10 @@ fn is_memoize(method: &ast::Method_) -> bool {
 }
 
 fn is_memoize_lsb(method: &ast::Method_) -> bool {
-    method.user_attributes.iter().any(|a| {
-        user_attributes::MEMOIZE_LSB == a.name.1
-            || user_attributes::POLICY_SHARDED_MEMOIZE_LSB == a.name.1
-    })
+    method
+        .user_attributes
+        .iter()
+        .any(|a| user_attributes::MEMOIZE_LSB == a.name.1)
 }
 
 pub fn make_info<'arena>(
@@ -145,22 +144,12 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
-    let should_emit_implicit_context = emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT)
-        && attributes.iter().any(|a| {
-            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(
-                a.name.unsafe_as_str(),
-            )
-        });
     let mut arg_flags = Flags::empty();
     arg_flags.set(Flags::IS_ASYNC, is_async);
     arg_flags.set(Flags::IS_REIFIED, is_reified);
     arg_flags.set(
         Flags::SHOULD_EMIT_IMPLICIT_CONTEXT,
-        should_emit_implicit_context,
+        is_keyed_by_ic_memoize(attributes.iter()),
     );
     let mut args = Args {
         info,
@@ -352,6 +341,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         } else {
             instr::check_this()
         },
+        instr::verify_implicit_context_state(),
         emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
@@ -435,6 +425,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         } else {
             instr::check_this()
         },
+        instr::verify_implicit_context_state(),
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
                 instr::memo_get_eager(notfound, suspended_get, LocalRange::default()),

@@ -46,6 +46,11 @@ let get_gconst_by_name ctx x =
   Ide_parser_cache.with_ide_cache @@ fun () ->
   Ast_provider.find_gconst_in_file ctx fn x
 
+let get_module_def_by_name ctx x =
+  Naming_provider.get_module_path ctx x >>= fun md ->
+  Ide_parser_cache.with_ide_cache @@ fun () ->
+  Ast_provider.find_module_in_file ctx md x
+
 (* Span information is stored only in parsing AST *)
 let get_member_def (ctx : Provider_context.t) (x : class_element) =
   let (type_, member_origin, member_name) = x in
@@ -107,23 +112,12 @@ let go ctx ast result =
   let module SO = SymbolOccurrence in
   match result.SO.type_ with
   | SO.Attribute (Some { SO.class_name; method_name; is_static }) ->
-    Decl_provider.get_class ctx class_name >>= fun cls ->
     let matching_method =
-      Cls.all_ancestor_names cls
-      |> List.filter_map ~f:(Decl_provider.get_class ctx)
-      (* Find all inherited methods with the same name. *)
-      |> List.filter_map ~f:(fun cls ->
-             (if is_static then
-               Cls.get_smethod
-             else
-               Cls.get_method)
-               cls
-               method_name)
-      (* It'd be nice to take the "earliest" method in the linearization,
-         whatever that is. But alas order of all_ancestor_names isn't
-         specified (in practice is alphabetical). So we'll just pick an
-         arbitrary one. *)
-      |> List.hd
+      Decl_provider.get_overridden_method
+        ctx
+        ~class_name
+        ~method_name
+        ~is_static
     in
     (match matching_method with
     | Some meth -> get_member_def ctx (Method, meth.ce_origin, method_name)
@@ -193,6 +187,9 @@ let go ctx ast result =
   | SO.EnumClassLabel (class_name, _member_name) ->
     summarize_class_typedef ctx class_name
   | SO.HhFixme -> None
+  | SO.Module ->
+    get_module_def_by_name ctx result.SO.name >>= fun md ->
+    Some (FileOutline.summarize_module_def md)
 
 let get_definition_cst_node_from_pos ctx entry kind pos =
   try

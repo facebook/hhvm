@@ -63,6 +63,10 @@ SSATmp* emitProfiledGet(IRGS& env, SSATmp* arr, SSATmp* key,
       auto const elem = gen(env, StructDictElemAddr, arr, key, slot, arr);
       return gen(env, LdMem, TCell, elem);
     }
+    if (arr->type().arrSpec().is_type_structure()) {
+      if (key->isA(TInt)) return cns(env, TUninit);
+      return gen(env, LdTypeStructureVal, taken, arr, key);
+    }
     auto const data = BespokeGetData { BespokeGetData::KeyState::Unknown };
     return gen(env, BespokeGet, data, arr, key);
   }();
@@ -142,6 +146,29 @@ SSATmp* emitProfiledGetThrow(IRGS& env, SSATmp* arr, SSATmp* key,
         return cns(env, TBottom);
       }
     );
+  }
+
+  if (arr->type().arrSpec().is_type_structure()) {
+    if (key->isA(TInt)) {
+      gen(env, ThrowOutOfBounds, arr, key);
+      return cns(env, TBottom);
+    }
+
+    SSATmp* result;
+    ifThen(
+      env,
+      [&] (Block *taken) {
+        auto const val = gen(env, LdTypeStructureVal, taken, arr, key);
+        result = profiled
+          ? profiledType(env, val, [&] { finish(val); })
+          : val;
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, ThrowOutOfBounds, arr, key);
+      }
+    );
+    return result;
   }
 
   auto const val = gen(env, BespokeGetThrow, arr, key);

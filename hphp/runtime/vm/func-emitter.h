@@ -127,7 +127,6 @@ struct FuncEmitter {
   int sn() const;
   Id id() const;
 
-  bool useGlobalIds() const;
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and parameters.
 
@@ -347,7 +346,6 @@ public:
   ParamInfoVec params;
   int16_t maxStackCells{0};
 
-  MaybeDataType hniReturnType;
   TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
   UpperBoundVec retUpperBounds;

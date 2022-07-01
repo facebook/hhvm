@@ -419,7 +419,6 @@ pub enum Hhbc {
     },
     CreateCont(LocId),
     Div([ValueId; 2], LocId),
-    EntryNop(LocId),
     GetMemoKeyL(LocalId, LocId),
     Idx([ValueId; 3], LocId),
     #[has_operands(none)]
@@ -480,6 +479,7 @@ pub enum Hhbc {
     This(LocId),
     ThrowNonExhaustiveSwitch(LocId),
     UnsetL(LocalId, LocId),
+    VerifyImplicitContextState(LocId),
     VerifyOutType(ValueId, LocalId, LocId),
     VerifyParamType(LocalId, LocId),
     VerifyParamTypeTS(ValueId, LocalId, LocId),
@@ -903,6 +903,7 @@ pub enum CmpOp {
 
 #[derive(Debug, HasLoc, HasLocals, HasOperands)]
 pub enum Special {
+    Copy(ValueId),
     Param,
     // Used during ir_to_bc - not in normal IR.
     PopC,
@@ -962,6 +963,10 @@ impl Instr {
 
     pub fn tombstone() -> Instr {
         Instr::Special(Special::Tombstone)
+    }
+
+    pub fn copy(value: ValueId) -> Instr {
+        Instr::Special(Special::Copy(value))
     }
 
     pub fn unreachable() -> Instr {

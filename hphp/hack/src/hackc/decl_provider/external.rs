@@ -75,6 +75,7 @@ pub type ProviderFunc<'decl> = unsafe extern "C" fn(
     // The symbol & len
     *const c_char,
     usize,
+    u64, // the depth
 ) -> ExternalDeclProviderResult<'decl>;
 
 #[derive(Debug)]
@@ -85,7 +86,7 @@ pub struct ExternalDeclProvider<'decl> {
 }
 
 impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
-    fn decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>> {
+    fn decl(&self, kind: NameType, symbol: &str, depth: u64) -> Result<Decl<'decl>> {
         // Need to convert NameType into HPHP::AutoloadMap::KindOf.
         if kind == NameType::Module {
             // TODO(T108206307, T111380364) During decls-in-compilation, we should actively panic
@@ -100,7 +101,7 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
         let code: i32 = name_type_to_autoload_kind(kind);
         let result = unsafe {
             // Invoke extern C/C++ provider implementation.
-            (self.provider)(self.data, code, symbol.as_ptr() as _, symbol.len())
+            (self.provider)(self.data, code, symbol.as_ptr() as _, symbol.len(), depth)
         };
         match result {
             ExternalDeclProviderResult::Missing => Err(Error::NotFound),

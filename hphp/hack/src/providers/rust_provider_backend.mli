@@ -16,7 +16,11 @@ val pop_local_changes : t -> unit
 
 module Decl : sig
   val direct_decl_parse_and_cache :
-    t -> Relative_path.t -> Direct_decl_parser.parsed_file_with_hashes option
+    t -> Relative_path.t -> string -> Direct_decl_parser.parsed_file_with_hashes
+
+  (** Directly add decls to the underlying store without processing them (no
+      removing php_stdlib decls, deduping, or removing naming conflict losers) *)
+  val add_shallow_decls : t -> (string * Shallow_decl_defs.decl) list -> unit
 
   val get_fun : t -> string -> Shallow_decl_defs.fun_decl option
 
@@ -29,6 +33,8 @@ module Decl : sig
   val get_module : t -> string -> Shallow_decl_defs.module_decl option
 
   val get_folded_class : t -> string -> Decl_defs.decl_class_type option
+
+  val declare_folded_class : t -> string -> unit
 end
 
 module File : sig
@@ -38,7 +44,7 @@ module File : sig
 
   val get : t -> Relative_path.t -> file_type option
 
-  val get_contents : t -> Relative_path.t -> string option
+  val get_contents : t -> Relative_path.t -> string
 
   val provide_file_for_tests : t -> Relative_path.t -> string -> unit
 

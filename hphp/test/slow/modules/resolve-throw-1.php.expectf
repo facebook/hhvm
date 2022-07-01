@@ -1,0 +1,6 @@
+Accessing internal function foo in module a from module b is not allowed @ %s/resolve-1.inc:6
+Accessing internal function foo in module a from module b is not allowed @ %s/resolve-throw-1.php:17
+Accessing internal function foo in module a from module b is not allowed @ %s/resolve-1.inc:8
+Accessing internal method C::foo_static in module a from module b is not allowed @ %s/resolve-1.inc:9
+Accessing internal method C::foo_static in module a from module b is not allowed @ %s/resolve-throw-1.php:22
+Accessing internal method C::foo_static in module a from module b is not allowed @ %s/resolve-1.inc:11

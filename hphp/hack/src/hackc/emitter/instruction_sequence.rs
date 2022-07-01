@@ -162,7 +162,7 @@ impl<'i, 'a> Iterator for ListIterMut<'i, 'a> {
 
 pub mod instr {
     use crate::InstrSeq;
-    use ffi::{BumpSliceMut, Slice, Str};
+    use ffi::{Slice, Str};
     use hhbc::{
         AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, Dummy,
         FCallArgs, FatalOp, FloatBits, FunctionName, IncDecOp, InitPropOp, Instruct,
@@ -330,7 +330,7 @@ pub mod instr {
             [label1, label2],
             // Need dummy immediate here to satisfy opcodes translator expectation of immediate
             // with name _0.
-            Dummy,
+            Dummy::DEFAULT,
             range,
         )))
     }
@@ -360,18 +360,16 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         cases: bumpalo::collections::Vec<'a, (&'a str, Label)>,
     ) -> InstrSeq<'a> {
-        let targets = BumpSliceMut::new(
-            alloc,
-            alloc.alloc_slice_fill_iter(cases.iter().map(|(_, target)| *target)),
-        );
-        let cases = BumpSliceMut::new(
-            alloc,
-            alloc.alloc_slice_fill_iter(cases.into_iter().map(|(s, _)| Str::from(s))),
-        );
+        let targets = alloc
+            .alloc_slice_fill_iter(cases.iter().map(|(_, target)| *target))
+            .into();
+        let cases = alloc
+            .alloc_slice_fill_iter(cases.into_iter().map(|(s, _)| Str::from(s)))
+            .into();
         instr(Instruct::Opcode(Opcode::SSwitch {
             cases,
             targets,
-            _0: Dummy,
+            _0: Dummy::DEFAULT,
         }))
     }
 
@@ -382,14 +380,11 @@ pub mod instr {
         ))))
     }
 
-    pub fn switch<'a>(
-        alloc: &'a bumpalo::Bump,
-        targets: bumpalo::collections::Vec<'a, Label>,
-    ) -> InstrSeq<'a> {
+    pub fn switch<'a>(targets: bumpalo::collections::Vec<'a, Label>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::Switch(
             SwitchKind::Unbounded,
             0,
-            BumpSliceMut::new(alloc, targets.into_bump_slice_mut()),
+            targets.into_bump_slice().into(),
         )))
     }
 

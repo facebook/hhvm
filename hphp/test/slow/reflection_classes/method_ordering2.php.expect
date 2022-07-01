@@ -1,0 +1,16 @@
+A
+a
+vec(2) {
+  object(ReflectionMethod) (2) {
+    ["name"]=>
+    string(1) "a"
+    ["class"]=>
+    string(1) "C"
+  }
+  object(ReflectionMethod) (2) {
+    ["name"]=>
+    string(1) "A"
+    ["class"]=>
+    string(1) "B"
+  }
+}

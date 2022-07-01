@@ -80,16 +80,3 @@ dict(1) {
     }
   }
 }
-dict(1) {
-  ["%d"]=>
-  dict(4) {
-    ["dups"]=>
-    int(1)
-    ["refs"]=>
-    int(1)
-    ["srefs"]=>
-    int(0)
-    ["path"]=>
-    string(13) "LeafClass:str"
-  }
-}

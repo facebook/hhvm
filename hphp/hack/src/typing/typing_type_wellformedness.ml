@@ -47,7 +47,14 @@ let check_happly unchecked_tparams env h =
   in
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in
-  let ety_env = { empty_expand_env with expand_visible_newtype = false } in
+  let ety_env =
+    if TypecheckerOptions.strict_wellformedness (Env.get_tcopt env) > 1 then
+      empty_expand_env_with_on_error
+        (Typing_error.Reasons_callback.invalid_type_hint hint_pos)
+    else
+      empty_expand_env
+  in
+  let ety_env = { ety_env with expand_visible_newtype = false } in
   let ((env, ty_err_opt1), locl_ty) = Phase.localize env ~ety_env decl_ty in
   Option.iter ~f:Errors.add_typing_error ty_err_opt1;
   let (env, ty_err_opt2) =
@@ -188,6 +195,8 @@ let where_constr env (h1, _, h2) = hint env h1 @ hint env h2
 
 let where_constrs env = List.concat_map ~f:(where_constr env)
 
+let requirements env = List.concat_map ~f:(fun (h, _kind) -> hint env h)
+
 let fun_ tenv f =
   FunUtils.check_params f.f_params;
   let env = { typedef_tparams = []; tenv } in
@@ -296,8 +305,7 @@ let class_ tenv c =
     c_extends;
     c_uses;
     c_xhp_category = _;
-    (* TODO: c_reqs should be checked too. Problem: that causes errors in un-fixmeable places. *)
-    c_reqs = _;
+    c_reqs;
     c_implements;
     c_where_constraints;
     c_consts;
@@ -306,10 +314,11 @@ let class_ tenv c =
     c_methods;
     c_attributes;
     c_xhp_children = _;
-    (* c_xhp_attrs and c_xhp_attr_uses should probably be checked too, but
-     * they have weird generics rules, e.g. not providing type arguments seems allowed. *)
     c_xhp_attrs = _;
+    (* Collapsed into c_vars during Naming *)
     c_xhp_attr_uses = _;
+    (* These represent `attribute :a;` declarations, and it is a parse error
+     * to write `attribute :a<string>` *)
     c_namespace = _;
     c_user_attributes = _;
     c_file_attributes = _;
@@ -325,7 +334,7 @@ let class_ tenv c =
   (* Add type parameters to typing environment and localize the bounds *)
   let (tenv, ty_err_opt) =
     let req_class_constraints =
-      List.filter_map c.c_reqs ~f:(fun req ->
+      List.filter_map c_reqs ~f:(fun req ->
           match req with
           | (t, RequireClass) ->
             let pos = fst t in
@@ -355,6 +364,11 @@ let class_ tenv c =
       hints ~in_signature:false env c_extends;
       hints ~in_signature:false env c_implements;
       hints ~in_signature:false env c_uses;
+      (if TypecheckerOptions.strict_wellformedness (Env.get_tcopt env.tenv) > 0
+      then
+        requirements env c_reqs
+      else
+        []);
       typeconsts env c_typeconsts;
       class_vars env c_static_vars;
       class_vars env c_vars;

@@ -100,7 +100,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     in_expr_tree = false;
     inside_constructor = false;
     in_support_dynamic_type_method_check = false;
-    decl_env = { Decl_env.mode; droot; ctx };
+    decl_env = { Decl_env.mode; droot; droot_member = None; ctx };
     tracing_info =
       Option.map origin ~f:(fun origin -> { Decl_counters.origin; file });
     genv =

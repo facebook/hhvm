@@ -61,28 +61,11 @@ module Funs =
     (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
     (Fun)
     (Capacity)
-
-module Classes = struct
-  include
-    SharedMem.HeapWithLocalCache
-      (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
-      (Class)
-      (Capacity)
-
-  let add class_name decl =
-    if Provider_backend.(get () = Analysis) then
-      let stack = Printexc.get_callstack 10 in
-      let () =
-        Format.eprintf
-          "Decl_heap: adding %s\n%s\n%!"
-          class_name
-          (Printexc.raw_backtrace_to_string stack)
-      in
-      failwith "bad decl"
-    else
-      add class_name decl
-end
-
+module Classes =
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+    (Class)
+    (Capacity)
 module Typedefs =
   SharedMem.HeapWithLocalCache
     (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)

@@ -681,7 +681,7 @@ static bool pdo_stmt_verify_mode(sp_PDOStatement stmt, int64_t mode,
 static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
   String clsname = stmt->fetch.clsname;
   if (clsname.empty()) {
-    stmt->fetch.clsname = "stdclass";
+    stmt->fetch.clsname = "stdClass";
   }
   stmt->fetch.constructor = empty_string(); //NULL;
   HPHP::Class* cls = HPHP::Class::load(clsname.get());
@@ -835,7 +835,7 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc,
 ///////////////////////////////////////////////////////////////////////////////
 // forward declarations
 
-bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
+bool HHVM_METHOD(PDO, setAttribute, int64_t attribute,
                  const Variant& value);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -968,7 +968,7 @@ void HHVM_METHOD(PDO, __construct, const String& dsn,
   if (!call_factory) {
     /* we got a persistent guy from our cache */
     for (ArrayIter iter(options); iter; ++iter) {
-      HHVM_MN(PDO, setattribute)(this_, iter.first().toInt64(),
+      HHVM_MN(PDO, setAttribute)(this_, iter.first().toInt64(),
                                       iter.second());
     }
   } else if (data->m_dbh) {
@@ -979,7 +979,7 @@ void HHVM_METHOD(PDO, __construct, const String& dsn,
 
     data->m_dbh->conn()->driver = driver;
     for (ArrayIter iter(options); iter; ++iter) {
-      HHVM_MN(PDO, setattribute)(this_, iter.first().toInt64(),
+      HHVM_MN(PDO, setAttribute)(this_, iter.first().toInt64(),
                                       iter.second());
     }
   }
@@ -1032,7 +1032,7 @@ Variant HHVM_METHOD(PDO, prepare, const String& statement,
   return false;
 }
 
- static bool HHVM_METHOD(PDO, begintransaction) {
+ static bool HHVM_METHOD(PDO, beginTransaction) {
   auto data = Native::data<PDOData>(this_);
 
   if (data->m_dbh->conn()->in_txn) {
@@ -1064,14 +1064,14 @@ static bool HHVM_METHOD(PDO, commit) {
   return false;
 }
 
-static bool HHVM_METHOD(PDO, intransaction) {
+static bool HHVM_METHOD(PDO, inTransaction) {
   auto data = Native::data<PDOData>(this_);
 
   assertx(data->m_dbh->conn()->driver);
   return data->m_dbh->conn()->in_txn;
 }
 
-static bool HHVM_METHOD(PDO, rollback) {
+static bool HHVM_METHOD(PDO, rollBack) {
   auto data = Native::data<PDOData>(this_);
 
   assertx(data->m_dbh->conn()->driver);
@@ -1086,7 +1086,7 @@ static bool HHVM_METHOD(PDO, rollback) {
   return false;
 }
 
-bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
+bool HHVM_METHOD(PDO, setAttribute, int64_t attribute,
                  const Variant& value) {
   auto data = Native::data<PDOData>(this_);
 
@@ -1282,7 +1282,7 @@ Variant HHVM_METHOD(PDO, exec, const String& query) {
   return ret;
 }
 
-static Variant HHVM_METHOD(PDO, lastinsertid,
+static Variant HHVM_METHOD(PDO, lastInsertId,
                            const String& seqname /* = null_string */) {
   auto data = Native::data<PDOData>(this_);
 
@@ -1304,7 +1304,7 @@ static Variant HHVM_METHOD(PDO, lastinsertid,
   return ret;
 }
 
-static Variant HHVM_METHOD(PDO, errorcode) {
+static Variant HHVM_METHOD(PDO, errorCode) {
   auto data = Native::data<PDOData>(this_);
 
   assertx(data->m_dbh->conn()->driver);
@@ -1323,7 +1323,7 @@ static Variant HHVM_METHOD(PDO, errorcode) {
   return String(data->m_dbh->conn()->error_code, CopyString);
 }
 
-static Array HHVM_METHOD(PDO, errorinfo) {
+static Array HHVM_METHOD(PDO, errorInfo) {
   auto data = Native::data<PDOData>(this_);
 
   assertx(data->m_dbh->conn()->driver);
@@ -1447,7 +1447,7 @@ static Variant HHVM_METHOD(PDO, quote, const String& str,
   return false;
 }
 
-static bool HHVM_METHOD(PDO, sqlitecreatefunction, const String& name,
+static bool HHVM_METHOD(PDO, sqliteCreateFunction, const String& name,
                         const Variant& callback, int64_t argcount /* = -1 */) {
 #ifdef ENABLE_EXTENSION_PDO_SQLITE
   auto data = Native::data<PDOData>(this_);
@@ -1463,7 +1463,7 @@ static bool HHVM_METHOD(PDO, sqlitecreatefunction, const String& name,
 #endif
 }
 
-static bool HHVM_METHOD(PDO, sqlitecreateaggregate, const String& /*name*/,
+static bool HHVM_METHOD(PDO, sqliteCreateAggregate, const String& /*name*/,
                         const Variant& /*step*/, const Variant& /*final*/,
                         int64_t /*argcount*/ /* = -1 */) {
   raise_recoverable_error("PDO::sqliteCreateAggregate not implemented");
@@ -1796,7 +1796,7 @@ static bool do_fetch(sp_PDOStatement stmt,
       fetch_value(stmt, val, i++, NULL);
       if (!val.isNull()) {
         if (!HHVM_FN(class_exists)(val.toString())) {
-          stmt->fetch.clsname = "stdclass";
+          stmt->fetch.clsname = "stdClass";
         } else {
           stmt->fetch.clsname = val.toString();
         }
@@ -1832,7 +1832,7 @@ static bool do_fetch(sp_PDOStatement stmt,
 
     ret = stmt->fetch.into;
     if (ret.isObject() &&
-        ret.getObjectData()->instanceof(SystemLib::s_stdclassClass)) {
+        ret.getObjectData()->instanceof(SystemLib::s_stdClassClass)) {
       how = PDO_FETCH_OBJ;
     }
     break;
@@ -1999,7 +1999,7 @@ static bool do_fetch(sp_PDOStatement stmt,
 }
 
 
-bool HHVM_METHOD(PDOStatement, bindvalue, const Variant& paramno,
+bool HHVM_METHOD(PDOStatement, bindValue, const Variant& paramno,
                  const Variant& param,
                  int64_t type /* = PDO_PARAM_STR */) {
   auto data = Native::data<PDOStatementData>(this_);
@@ -2754,7 +2754,7 @@ static Variant HHVM_METHOD(PDOStatement, fetch, int64_t how  = 0,
   return ret;
 }
 
-static Variant HHVM_METHOD(PDOStatement, fetchobject,
+static Variant HHVM_METHOD(PDOStatement, fetchObject,
                            const String& class_name /* = null_string */,
                            const Variant& ctor_args /* = null */) {
   auto data = Native::data<PDOStatementData>(this_);
@@ -2773,7 +2773,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
 
   data->m_stmt->fetch.clsname = class_name;
   if (class_name.empty()) {
-    data->m_stmt->fetch.clsname = "stdclass";
+    data->m_stmt->fetch.clsname = "stdClass";
   }
   if (!HHVM_FN(class_exists)(data->m_stmt->fetch.clsname)) {
     pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "HY000",
@@ -2804,7 +2804,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
   return ret;
 }
 
-static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
+static Variant HHVM_METHOD(PDOStatement, fetchColumn,
                            int64_t column_numner /* = 0 */) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
@@ -2821,7 +2821,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
   return ret;
 }
 
-Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
+Variant HHVM_METHOD(PDOStatement, fetchAll, int64_t how /* = 0 */,
                     const Variant& class_name /* = null */,
                     const Variant& ctor_args /* = null */) {
   auto self = Native::data<PDOStatementData>(this_);
@@ -2841,7 +2841,7 @@ Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
   case PDO_FETCH_CLASS:
     self->m_stmt->fetch.clsname = class_name.toString();
     if (class_name.isNull()) {
-      self->m_stmt->fetch.clsname = "stdclass";
+      self->m_stmt->fetch.clsname = "stdClass";
     }
     if (!HHVM_FN(class_exists)(self->m_stmt->fetch.clsname)) {
       pdo_raise_impl_error(self->m_stmt->dbh, self->m_stmt, "HY000",
@@ -2951,7 +2951,7 @@ Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
   return return_value;
 }
 
-static int64_t HHVM_METHOD(PDOStatement, rowcount) {
+static int64_t HHVM_METHOD(PDOStatement, rowCount) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return 0;
@@ -2960,7 +2960,7 @@ static int64_t HHVM_METHOD(PDOStatement, rowcount) {
   return data->m_stmt->row_count;
 }
 
-static Variant HHVM_METHOD(PDOStatement, errorcode) {
+static Variant HHVM_METHOD(PDOStatement, errorCode) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return false;
@@ -2971,7 +2971,7 @@ static Variant HHVM_METHOD(PDOStatement, errorcode) {
   return String(data->m_stmt->error_code, CopyString);
 }
 
-static Array HHVM_METHOD(PDOStatement, errorinfo) {
+static Array HHVM_METHOD(PDOStatement, errorInfo) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return null_array;
@@ -2995,7 +2995,7 @@ static Array HHVM_METHOD(PDOStatement, errorinfo) {
   return ret;
 }
 
-static Variant HHVM_METHOD(PDOStatement, setattribute, int64_t attribute,
+static Variant HHVM_METHOD(PDOStatement, setAttribute, int64_t attribute,
                            const Variant& value) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
@@ -3051,7 +3051,7 @@ static Variant HHVM_METHOD(PDOStatement, getAttribute, int64_t attribute) {
   return ret;
 }
 
-static int64_t HHVM_METHOD(PDOStatement, columncount) {
+static int64_t HHVM_METHOD(PDOStatement, columnCount) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return 0;
@@ -3066,7 +3066,7 @@ const StaticString
   s_precision("precision"),
   s_pdo_type("pdo_type");
 
-static Variant HHVM_METHOD(PDOStatement, getcolumnmeta, int64_t column) {
+static Variant HHVM_METHOD(PDOStatement, getColumnMeta, int64_t column) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return false;
@@ -3103,7 +3103,7 @@ static Variant HHVM_METHOD(PDOStatement, getcolumnmeta, int64_t column) {
   return ret;
 }
 
-static bool HHVM_METHOD(PDOStatement, setfetchmode,
+static bool HHVM_METHOD(PDOStatement, setFetchMode,
                         int64_t mode, const Array& _argv /* = null_array */) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
@@ -3114,7 +3114,7 @@ static bool HHVM_METHOD(PDOStatement, setfetchmode,
   return pdo_stmt_set_fetch_mode(data->m_stmt, argc, mode, _argv);
 }
 
-static bool HHVM_METHOD(PDOStatement, nextrowset) {
+static bool HHVM_METHOD(PDOStatement, nextRowSet) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return false;
@@ -3143,7 +3143,7 @@ static bool HHVM_METHOD(PDOStatement, nextrowset) {
   return true;
 }
 
-static bool HHVM_METHOD(PDOStatement, closecursor) {
+static bool HHVM_METHOD(PDOStatement, closeCursor) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return false;
@@ -3154,7 +3154,7 @@ static bool HHVM_METHOD(PDOStatement, closecursor) {
     do {
       while (data->m_stmt->fetcher(PDO_FETCH_ORI_NEXT, 0));
       // if (!data->t_nextrowset()) {
-      if (HHVM_MN(PDOStatement, nextrowset)(this_)) {
+      if (HHVM_MN(PDOStatement, nextRowSet)(this_)) {
         break;
       }
     } while (true);
@@ -3171,7 +3171,7 @@ static bool HHVM_METHOD(PDOStatement, closecursor) {
   return true;
 }
 
-static Variant HHVM_METHOD(PDOStatement, debugdumpparams) {
+static Variant HHVM_METHOD(PDOStatement, debugDumpParams) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return false;
@@ -3292,40 +3292,40 @@ static struct PDOExtension final : Extension {
     HHVM_FE(pdo_drivers);
     HHVM_ME(PDO, __construct);
     HHVM_ME(PDO, prepare);
-    HHVM_ME(PDO, begintransaction);
+    HHVM_ME(PDO, beginTransaction);
     HHVM_ME(PDO, commit);
-    HHVM_ME(PDO, intransaction);
-    HHVM_ME(PDO, rollback);
-    HHVM_ME(PDO, setattribute);
+    HHVM_ME(PDO, inTransaction);
+    HHVM_ME(PDO, rollBack);
+    HHVM_ME(PDO, setAttribute);
     HHVM_ME(PDO, getAttribute);
     HHVM_ME(PDO, exec);
-    HHVM_ME(PDO, lastinsertid);
-    HHVM_ME(PDO, errorcode);
-    HHVM_ME(PDO, errorinfo);
+    HHVM_ME(PDO, lastInsertId);
+    HHVM_ME(PDO, errorCode);
+    HHVM_ME(PDO, errorInfo);
     HHVM_ME(PDO, query);
     HHVM_ME(PDO, quote);
-    HHVM_ME(PDO, sqlitecreatefunction);
-    HHVM_ME(PDO, sqlitecreateaggregate);
+    HHVM_ME(PDO, sqliteCreateFunction);
+    HHVM_ME(PDO, sqliteCreateAggregate);
     HHVM_ME(PDO, __wakeup);
     HHVM_ME(PDO, __sleep);
     HHVM_STATIC_ME(PDO, getAvailableDrivers);
     HHVM_ME(PDOStatement, execute);
     HHVM_ME(PDOStatement, fetch);
-    HHVM_ME(PDOStatement, fetchobject);
-    HHVM_ME(PDOStatement, fetchcolumn);
-    HHVM_ME(PDOStatement, fetchall);
-    HHVM_ME(PDOStatement, bindvalue);
-    HHVM_ME(PDOStatement, rowcount);
-    HHVM_ME(PDOStatement, errorcode);
-    HHVM_ME(PDOStatement, errorinfo);
-    HHVM_ME(PDOStatement, setattribute);
+    HHVM_ME(PDOStatement, fetchObject);
+    HHVM_ME(PDOStatement, fetchColumn);
+    HHVM_ME(PDOStatement, fetchAll);
+    HHVM_ME(PDOStatement, bindValue);
+    HHVM_ME(PDOStatement, rowCount);
+    HHVM_ME(PDOStatement, errorCode);
+    HHVM_ME(PDOStatement, errorInfo);
+    HHVM_ME(PDOStatement, setAttribute);
     HHVM_ME(PDOStatement, getAttribute);
-    HHVM_ME(PDOStatement, columncount);
-    HHVM_ME(PDOStatement, getcolumnmeta);
-    HHVM_ME(PDOStatement, setfetchmode);
-    HHVM_ME(PDOStatement, nextrowset);
-    HHVM_ME(PDOStatement, closecursor);
-    HHVM_ME(PDOStatement, debugdumpparams);
+    HHVM_ME(PDOStatement, columnCount);
+    HHVM_ME(PDOStatement, getColumnMeta);
+    HHVM_ME(PDOStatement, setFetchMode);
+    HHVM_ME(PDOStatement, nextRowSet);
+    HHVM_ME(PDOStatement, closeCursor);
+    HHVM_ME(PDOStatement, debugDumpParams);
     HHVM_ME(PDOStatement, current);
     HHVM_ME(PDOStatement, key);
     HHVM_ME(PDOStatement, next);

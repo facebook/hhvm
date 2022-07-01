@@ -82,7 +82,7 @@ impl DeclSummary {
 }
 
 impl From<(&str, Decl<'_>)> for DeclSummary {
-    fn from(symbol_and_decl: (&str, Decl<'_>)) -> Self {
-        Self::new(symbol_and_decl.0, symbol_and_decl.1)
+    fn from((symbol, decl): (&str, Decl<'_>)) -> Self {
+        Self::new(symbol, decl)
     }
 }

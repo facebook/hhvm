@@ -303,7 +303,8 @@ protected:
             std::move(root),
             [dbPath]() -> AutoloadDB& {
               return SQLiteAutoloadDB::getThreadLocal(
-                  SQLiteKey::readWrite(dbPath, static_cast<::gid_t>(-1), 0644));
+                  SQLiteKey::readWriteCreate(
+                      dbPath, static_cast<::gid_t>(-1), 0644));
             },
             std::move(indexedMethodAttributes)),
         std::move(exec)});

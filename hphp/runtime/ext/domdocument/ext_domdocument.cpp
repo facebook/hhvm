@@ -831,7 +831,7 @@ DOMXPath* getDOMXPath(const Object& obj) {
 
 }
 
-static bool HHVM_METHOD(DomDocument, _load, const String& source,
+static bool HHVM_METHOD(DOMDocument, _load, const String& source,
                         int64_t options, bool isFile) {
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
@@ -855,7 +855,7 @@ static bool HHVM_METHOD(DomDocument, _load, const String& source,
   return true;
 }
 
-static bool HHVM_METHOD(DomDocument, _loadHTML, const String& source,
+static bool HHVM_METHOD(DOMDocument, _loadHTML, const String& source,
                         int64_t options, bool isFile) {
   VMRegGuard _;
 
@@ -5936,8 +5936,8 @@ struct DOMDocumentExtension final : Extension {
     HHVM_ME(DOMDocument, getElementsByTagName);
     HHVM_ME(DOMDocument, getElementsByTagNameNS);
     HHVM_ME(DOMDocument, importNode);
-    HHVM_ME(DomDocument, _load);
-    HHVM_ME(DomDocument, _loadHTML);
+    HHVM_ME(DOMDocument, _load);
+    HHVM_ME(DOMDocument, _loadHTML);
     HHVM_ME(DOMDocument, normalizeDocument);
     HHVM_ME(DOMDocument, registerNodeClass);
     HHVM_ME(DOMDocument, relaxNGValidate);

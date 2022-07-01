@@ -59,9 +59,6 @@ let experimental_infer_flows = GlobalOptions.tco_experimental_infer_flows
 let experimental_disallow_static_memoized =
   GlobalOptions.tco_experimental_disallow_static_memoized
 
-let experimental_type_param_shadowing =
-  GlobalOptions.tco_experimental_type_param_shadowing
-
 let experimental_abstract_type_const_with_default =
   GlobalOptions.tco_experimental_abstract_type_const_with_default
 
@@ -196,6 +193,8 @@ let typeconst_concrete_concrete_error =
 let enable_strict_const_semantics =
   GlobalOptions.tco_enable_strict_const_semantics
 
+let strict_wellformedness = GlobalOptions.tco_strict_wellformedness
+
 let meth_caller_only_public_visibility =
   GlobalOptions.tco_meth_caller_only_public_visibility
 
@@ -239,3 +238,8 @@ let allowed_files_for_module_declarations =
   GlobalOptions.tco_allowed_files_for_module_declarations
 
 let use_manifold_cython_client = GlobalOptions.tco_use_manifold_cython_client
+
+let record_fine_grained_dependencies =
+  GlobalOptions.tco_record_fine_grained_dependencies
+
+let loop_iteration_upper_bound = GlobalOptions.tco_loop_iteration_upper_bound

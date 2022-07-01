@@ -531,6 +531,15 @@ bool conflicts(const IRInstruction& instr,
         test_reads(ARdsAny);
     },
     [&] (const GeneralEffects& g2)   {
+      // Two general effects instructions where one may not be DCEd must
+      // conflict.  Non DCE able instructions might have effects not
+      // enumerated by memory effects.  Notably today we omit certain locations
+      // from being analyzed by memory effects.  Assuming no conlicting effects
+      // means the instructions do not conflict omits the fact they might
+      // conflict on a non tracked location.  Today such locations are read and
+      // written to using may_load_store(AEmpty, AEmpty).
+      if (!canDCE(instr) || !canDCE(sinkee)) return true;
+
       return
         test_reads(g2.stores) ||
         test_reads(g2.kills) ||

@@ -41,13 +41,11 @@ static Object setByValue(Object&&);
  */
 struct Saver {
   Saver() {
-    if (RO::EvalEnableImplicitContext) {
-      m_context = *ImplicitContext::activeCtx;
-      *ImplicitContext::activeCtx = nullptr;
-    }
+    m_context = *ImplicitContext::activeCtx;
+    *ImplicitContext::activeCtx = nullptr;
   }
   ~Saver() {
-    if (RO::EvalEnableImplicitContext) *ImplicitContext::activeCtx = m_context;
+    *ImplicitContext::activeCtx = m_context;
   }
 
 private:

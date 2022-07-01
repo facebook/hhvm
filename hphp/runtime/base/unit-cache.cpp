@@ -54,6 +54,7 @@
 #include <string>
 #include <thread>
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <folly/AtomicHashMap.h>
 #include <folly/FileUtil.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
@@ -158,10 +159,9 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
 
   if (cu.unit.copy() != CachedUnitInternal::Uninit) return cu.cachedUnit();
 
-  cu.unit.lock_for_update();
+  auto lock = cu.unit.lock_for_update();
   if (cu.unit.copy() != CachedUnitInternal::Uninit) {
     // Someone else updated the unit while we were waiting on the lock
-    cu.unit.unlock();
     return cu.cachedUnit();
   }
 
@@ -217,12 +217,12 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
     if (auto ue = load()) {
       auto unit = create(std::move(ue));
       cu.rdsBitId = rds::allocBit();
-      cu.unit.update_and_unlock(unit.release());
+      lock.update(unit.release());
     } else {
-      cu.unit.update_and_unlock(nullptr);
+      lock.update(nullptr);
     }
   } catch (...) {
-    cu.unit.unlock();
+    lock.release();
     s_repoUnitCache.erase(acc);
     throw;
   }
@@ -377,15 +377,122 @@ ServiceData::ExportedCounter* s_unitEdenInconsistencies =
 
 }
 
-//////////////////////////////////////////////////////////////////////
+using HashCache = tbb::concurrent_hash_map<
+  std::string,
+  std::pair<struct stat, SHA1>
+>;
 
-#ifndef _MSC_VER
+using PerRepoHC = tbb::concurrent_hash_map<
+  std::string,
+  std::unique_ptr<HashCache>
+>;
+
+PerRepoHC s_hashCaches;
+
+HashCache& getHashCache(const std::string& repo) {
+  PerRepoHC::const_accessor cns_acc;
+  if (s_hashCaches.find(cns_acc, repo)) return *cns_acc->second;
+
+  PerRepoHC::accessor acc;
+  if (!s_hashCaches.insert(acc, repo)) return *acc->second;
+  acc->second = std::make_unique<HashCache>();
+  return *acc->second;
+}
+
+Optional<std::string> getHashFromEden(const char* path,
+                                      Stream::Wrapper* wrapper) {
+  assertx(RO::EvalUseEdenFS);
+#if !defined(__linux__)
+  return std::nullopt;
+#else
+  assertx(path);
+  if (wrapper) {
+    // We only allow normal file streams, which cannot re-enter
+    assertx(wrapper->isNormalFileStream());
+    auto const xattr = wrapper->getxattr(path, "user.sha1");
+    if (!xattr || xattr->size() != SHA1::kStrLen) return std::nullopt;
+    return xattr;
+  }
+  char xattr_buf[SHA1::kStrLen];
+  auto const ret = getxattr(path, "user.sha1", xattr_buf, sizeof(xattr_buf));
+  if (ret != sizeof(xattr_buf)) return std::nullopt;
+  return std::string{xattr_buf, sizeof(xattr_buf)};
+#endif
+}
+
+Optional<String> loadFileContents(const char* path,
+                                  Stream::Wrapper* wrapper) {
+  std::string contents;
+  assertx(path);
+
+  tracing::Block _{
+    "read-file", [&] { return tracing::Props{}.add("path", path); }
+  };
+  // If the file is too large it may OOM the request
+  MemoryManager::SuppressOOM so(*tl_heap);
+  if (wrapper) {
+    // We only allow normal file streams, which cannot re-enter
+    assertx(wrapper->isNormalFileStream());
+    if (auto const f = wrapper->open(String{path}, "r", 0, nullptr)) {
+      return f->read();
+    }
+    return {};
+  }
+
+  auto const fd = open(path, O_RDONLY);
+  if (fd < 0) return {};
+  auto file = req::make<PlainFile>(fd);
+  return file->read();
+}
+
 int64_t timespecCompare(const struct timespec& l,
                         const struct timespec& r) {
   if (l.tv_sec != r.tv_sec) return l.tv_sec - r.tv_sec;
   return l.tv_nsec - r.tv_nsec;
 }
-#endif
+
+bool isChanged(const struct stat* old_st, const struct stat* new_st) {
+  return timespecCompare(old_st->st_mtim, new_st->st_mtim) < 0 ||
+         timespecCompare(old_st->st_ctim, new_st->st_ctim) < 0 ||
+         old_st->st_ino != new_st->st_ino ||
+         old_st->st_dev != new_st->st_dev;
+}
+
+Optional<SHA1> getHashForFile(const std::string& path,
+                              Stream::Wrapper* wrapper,
+                              const folly::fs::path& root) {
+  if (RO::EvalUseEdenFS) {
+    if (auto const h = getHashFromEden(path.data(), wrapper)) return SHA1{*h};
+  }
+
+  auto& cache = getHashCache(root.string());
+
+  struct stat st;
+  auto const fullpath = root / path;
+  if (StatCache::stat(fullpath.string(), &st) != 0) return {};
+
+  {
+    HashCache::const_accessor acc;
+    if (cache.find(acc, path)) {
+      if (!isChanged(&acc->second.first, &st)) return acc->second.second;
+    }
+  }
+
+  HashCache::accessor acc;
+  if (!cache.insert(acc, path)) {
+    if (!isChanged(&acc->second.first, &st)) return acc->second.second;
+  }
+
+  if (auto const c = loadFileContents(path.data(), wrapper)) {
+    auto const ret = SHA1{string_sha1(c->slice())};
+    acc->second = std::make_pair(st, ret);
+    return ret;
+  }
+
+  return {};
+}
+
+//////////////////////////////////////////////////////////////////////
 
 uint64_t g_units_seen_count = 0;
 
@@ -395,28 +502,62 @@ bool stressUnitCache() {
   return ++g_units_seen_count % RuntimeOption::EvalStressUnitCacheFreq == 0;
 }
 
+/*
+ * Determine whether or not cachedUnit can be used from the cache or requires
+ * recompilation from disk.
+ *
+ * When RO::EnableDecl is false this a pure function of whether or not the
+ * source text of the file has been modified. In this function we check to see
+ * if the stat() information has changed on disk as a shortcut.
+ *
+ * When decls are enabled we must also know if any files that the requested
+ * source file depended on have been modified. For this purpose each unit
+ * stores a vector of dependent files and their SHA-1 hashes. We check each
+ * file in this list to see if a dependency has changed.
+ *
+ * To speed up this operation on non-eden filesystems we store a separate cache
+ * of SHA-1 sums for each repository, again leveraging stat to determine when
+ * entries require recomputation.
+ *
+ * Notice that this cache is lazily invalidated both with and without decl
+ * information. Entries are not preemptively evicted when changed on disk or
+ * when dependencies are modified. This allows us to avoid maintaining a reverse
+ * dependency map and can save substantial time when files with significant fan-
+ * out are modified.
+ *
+ * While systems that require a "complete" compilation of the world (e.g. a type
+ * checker) benefit from eager recomputation, hhvm seldom requires a substantial
+ * working set when running in sandbox mode and thus a lazy approach is well
+ * suited to appear more responsive even after changes that ultimately cause
+ * large invalidation fan-out.
+ */
 bool isChanged(
   const CachedFilePtr& cachedUnit,
   const struct stat* s,
-  const RepoOptions& options
+  const RepoOptions& options,
+  Stream::Wrapper* wrapper
 ) {
   // If the cached unit is null, we always need to consider it out of date (in
   // case someone created the file).  This case should only happen if something
   // successfully stat'd the file, but then it was gone by the time we tried to
   // open() it.
   if (!s) return false;
-  return !cachedUnit ||
+  auto const fileChanged = !cachedUnit ||
          cachedUnit->cu.unit == nullptr ||
-#ifdef _MSC_VER
-         cachedUnit->mtime - s->st_mtime < 0 ||
-#else
          timespecCompare(cachedUnit->mtime, s->st_mtim) < 0 ||
          timespecCompare(cachedUnit->ctime, s->st_ctim) < 0 ||
-#endif
          cachedUnit->ino != s->st_ino ||
          cachedUnit->devId != s->st_dev ||
          cachedUnit->repoOptionsHash != options.flags().cacheKeySha1() ||
          stressUnitCache();
+
+  if (fileChanged) return true;
+  if (auto const u = cachedUnit->cu.unit) {
+    for (auto& [file, hash] : u->deps()) {
+      if (getHashForFile(file, wrapper, options.dir()) != hash) return true;
+    }
+  }
+  return false;
 }
 
 // Returns true if the given unit has no bound path, or it has already
@@ -529,7 +670,7 @@ void releaseFromHashCache(Unit* unit) {
 
   // Acquire the entry lock. This is probably pedantic since nobody
   // else should have an accessor on this entry.
-  cached.lock_for_update();
+  auto lock = cached.lock_for_update();
   // Since we have an exclusive accessor, the ref-count should be
   // unchanged.
   assertx(!unit->hasCacheRef());
@@ -538,7 +679,7 @@ void releaseFromHashCache(Unit* unit) {
   // Unit since we already checked that. Treadmill the Unit and we're
   // done. Once we release the accessor, any other thread waiting to
   // delete this Unit will see that the entry is gone.
-  auto const DEBUG_ONLY old = cached.update_and_unlock(nullptr);
+  auto const DEBUG_ONLY old = lock.update(nullptr);
   assertx(old == unit);
   Treadmill::enqueue([unit] { delete unit; });
 }
@@ -548,6 +689,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
                                  Unit** releaseUnit,
                                  OptLog& ent,
                                  const Native::FuncTable& nativeFuncs,
+                                 AutoloadMap* map,
                                  const RepoOptions& options,
                                  FileLoadFlags& flags,
                                  const struct stat* statInfo,
@@ -588,7 +730,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
       rqtrace::EventGuard trace{"COMPILE_UNIT"};
       trace.annotate("file_size", folly::to<std::string>(loader.fileLength()));
       flags = FileLoadFlags::kCompiled;
-      return compile_file(loader, path->data(), nativeFuncs, releaseUnit);
+      return compile_file(loader, path->data(), nativeFuncs, map, releaseUnit);
     };
 
     // If orig is provided, check if the given Unit has the same bcSha1
@@ -636,25 +778,25 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
         if (auto const unit = cached.copy()) return hit(unit);
 
         // No entry, so acquire the lock:
-        if (!cached.try_lock_for_update()) {
+        auto lock = cached.try_lock_for_update();
+        if (!lock) {
           tracing::BlockNoTrace _{"unit-hash-cache-lock-acquire"};
-          cached.lock_for_update();
+          lock.emplace(cached.lock_for_update());
         }
-        SCOPE_FAIL { cached.unlock(); };
 
         // Try again now that we have the lock
         if (auto const unit = cached.copy()) {
           // NB: Its safe to unlock first. The Unit can only be freed by
           // releaseFromHashCache() which acquires an exclusive lock on
           // this table slot first (so cannot happen concurrently).
-          cached.unlock();
+          lock->release();
           return hit(unit);
         }
 
         // There's no Unit, compile a new one and store it in the cache.
         auto unit = compileNew();
         if (!unit) {
-          cached.unlock();
+          lock->release();
           return makeCachedFilePtr(nullptr);
         }
         assertx(unit->sha1() == loader.sha1());
@@ -663,7 +805,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
 
         // Try to re-use the original Unit if possible
         if (sameBC(unit)) {
-          cached.unlock();
+          lock->release();
           delete unit;
           return CachedFilePtr{*orig, statInfo};
         }
@@ -675,13 +817,13 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
         // per-request filepaths cannot be stored in this cache.
         assertx(unit->origFilepath()->isStatic());
         if (unit->origFilepath() != path) {
-          cached.unlock();
+          lock->release();
           return makeCachedFilePtr(unit);
         }
         unit->makeFilepathPerRequest();
 
         // Store the Unit in the cache.
-        auto const DEBUG_ONLY old = cached.update_and_unlock(std::move(unit));
+        auto const DEBUG_ONLY old = lock->update(std::move(unit));
         assertx(!old);
         return makeCachedFilePtr(unit);
       }();
@@ -1004,77 +1146,77 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
 
   // We've already checked the cache before calling this function,
   // so don't bother again before grabbing the lock.
-  if (!cachedUnit.try_lock_for_update()) {
+  auto lock = cachedUnit.try_lock_for_update();
+  if (!lock) {
     tracing::BlockNoTrace _{"unit-cache-lock-acquire"};
-    cachedUnit.lock_for_update();
+    lock.emplace(cachedUnit.lock_for_update());
   }
 
-  try {
-    auto forceNewUnit = false;
+  auto forceNewUnit = false;
 
-    if (auto const tmp = cachedUnit.copy()) {
-      if (!isChanged(tmp, statInfo, options)) {
-        if (forPrefetch || canBeBoundToPath(tmp, rpath)) {
-          cachedUnit.unlock();
-          flags = FileLoadFlags::kWaited;
-          if (ent) ent->setStr("type", "cache_hit_writelock");
-          logTearing(tmp);
-          return tmp->cu;
-        } else {
-          // An unit exists, but is already bound to a different
-          // path. We need to compile a new one.
-          forceNewUnit = true;
-        }
+  if (auto const tmp = cachedUnit.copy()) {
+    if (!isChanged(tmp, statInfo, options, wrapper)) {
+      if (forPrefetch || canBeBoundToPath(tmp, rpath)) {
+        lock->release();
+        flags = FileLoadFlags::kWaited;
+        if (ent) ent->setStr("type", "cache_hit_writelock");
+        logTearing(tmp);
+        return tmp->cu;
+      } else {
+        // An unit exists, but is already bound to a different
+        // path. We need to compile a new one.
+        forceNewUnit = true;
       }
-      if (ent) ent->setStr("type", "cache_stale");
-    } else {
-      if (ent) ent->setStr("type", "cache_miss");
     }
-
-    trace.finish();
-    auto ptr = [&] {
-      auto orig = (RuntimeOption::EvalCheckUnitSHA1 && !forceNewUnit)
-        ? cachedUnit.copy()
-        : CachedFilePtr{};
-      return createUnitFromFile(rpath, wrapper, &releaseUnit, ent,
-                                nativeFuncs, options, flags,
-                                statInfo, std::move(orig), forPrefetch);
-    }();
-    if (UNLIKELY(!ptr)) {
-      cachedUnit.unlock();
-      return CachedUnit{};
-    }
-
-    // Don't cache the unit if it was created in response to an
-    // internal error in ExternCompiler. Such units represent
-    // transient events. The copy_ptr dtor will ensure the unit is
-    // automatically treadmilled the Unit after the request ends.
-    // Also don't cache the unit if we only created it due to the path
-    // binding check above. We want to keep the original unit in the
-    // cache for that case.
-    if (UNLIKELY(forceNewUnit || !ptr->cu.unit || ptr->cu.unit->isICE())) {
-      cachedUnit.unlock();
-      return ptr->cu;
-    }
-
-    assertx(cachedUnit.copy() != ptr);
-    logTearing(ptr);
-
-    // Otherwise update the entry. Defer the destruction of the
-    // old copy_ptr using the Treadmill. Other threads may be
-    // reading the entry simultaneously so the ref-count cannot
-    // drop to zero here.
-    auto const cu = ptr->cu;
-    if (auto old = cachedUnit.update_and_unlock(std::move(ptr))) {
-      // We don't need to do anything explicitly; the copy_ptr
-      // destructor will take care of it.
-      Treadmill::enqueue([o = std::move(old)] {});
-    }
-    return cu;
-  } catch (...) {
-    cachedUnit.unlock();
-    throw;
+    if (ent) ent->setStr("type", "cache_stale");
+  } else {
+    if (ent) ent->setStr("type", "cache_miss");
   }
+
+  trace.finish();
+  auto ptr = [&] {
+    auto const map = [] () -> AutoloadMap* {
+      if (!AutoloadHandler::s_instance) {
+        // It is not safe to autoinit AutoloadHandler outside a normal
+        // request.
+        return nullptr;
+      }
+      return AutoloadHandler::s_instance->getAutoloadMap();
+    }();
+    auto orig = (RuntimeOption::EvalCheckUnitSHA1 && !forceNewUnit)
+      ? cachedUnit.copy()
+      : CachedFilePtr{};
+    return createUnitFromFile(rpath, wrapper, &releaseUnit, ent,
+                              nativeFuncs, map, options, flags,
+                              statInfo, std::move(orig), forPrefetch);
+  }();
+  if (UNLIKELY(!ptr)) return CachedUnit{};
+
+  // Don't cache the unit if it was created in response to an
+  // internal error in ExternCompiler. Such units represent
+  // transient events. The copy_ptr dtor will ensure the unit is
+  // automatically treadmilled the Unit after the request ends.
+  // Also don't cache the unit if we only created it due to the path
+  // binding check above. We want to keep the original unit in the
+  // cache for that case.
+  if (UNLIKELY(forceNewUnit || !ptr->cu.unit || ptr->cu.unit->isICE())) {
+    return ptr->cu;
+  }
+
+  assertx(cachedUnit.copy() != ptr);
+  logTearing(ptr);
+
+  // Otherwise update the entry. Defer the destruction of the
+  // old copy_ptr using the Treadmill. Other threads may be
+  // reading the entry simultaneously so the ref-count cannot
+  // drop to zero here.
+  auto const cu = ptr->cu;
+  if (auto old = lock->update(std::move(ptr))) {
+    // We don't need to do anything explicitly; the copy_ptr
+    // destructor will take care of it.
+    Treadmill::enqueue([o = std::move(old)] {});
+  }
+  return cu;
 }
 
 CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
@@ -1112,7 +1254,7 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
       NonRepoUnitCache::const_accessor acc;
       if (cache->find(acc, rpath)) {
         auto const cachedUnit = acc->second.cachedUnit.copy();
-        if (!isChanged(cachedUnit, statInfo, options)) {
+        if (!isChanged(cachedUnit, statInfo, options, wrapper)) {
           if (forPrefetch || canBeBoundToPath(cachedUnit, rpath)) {
             if (ent) ent->setStr("type", "cache_hit_readlock");
             flags = FileLoadFlags::kHitMem;
@@ -1342,6 +1484,12 @@ std::string mangleUnitSha1(const folly::StringPiece fileSha1,
   );
 }
 
+Optional<SHA1> getHashForFile(const std::string& path,
+                              const folly::fs::path& root) {
+  auto wrapper = Stream::getWrapperFromURI(String{root.string()});
+  return getHashForFile(path, wrapper, root);
+}
+
 size_t numLoadedUnits() {
   if (RuntimeOption::RepoAuthoritative) return s_repoUnitCache.size();
   auto count = s_nonRepoUnitCache.size();
@@ -1421,8 +1569,8 @@ void invalidateUnit(StringData* path) {
       // treadmill. Manually move the copy_ptr onto the treadmill, and
       // then replace it with a null copy_ptr.
       auto& cached = acc->second.cachedUnit;
-      cached.lock_for_update();
-      if (auto old = cached.update_and_unlock({})) {
+      auto lock = cached.lock_for_update();
+      if (auto old = lock.update({})) {
         Treadmill::enqueue([o = std::move(old)] {});
       }
     }
@@ -1633,6 +1781,21 @@ void prefetchUnit(StringData* requestedPath,
 
   tracing::BlockNoTrace _2{"prefetch-unit-enqueue"};
 
+  // We can't share raw AutoloadMap* pointers across threads, some of them are
+  // request local while others may be treadmilled. To ensure we hold a valid
+  // reference to the map we construct a holder which may in some cases wrap
+  // a std::shared_ptr.
+  auto holder = [] () -> AutoloadMap::Holder {
+    if (!AutoloadHandler::s_instance) {
+      // It is not safe to autoinit AutoloadHandler outside a normal request.
+      return {};
+    }
+    if (auto const ahm = AutoloadHandler::s_instance->getAutoloadMap()) {
+      return ahm->getNativeHolder();
+    }
+    return {};
+  }();
+
   // The rest of the work can be done in the worker thread. Enqueue
   // it.
   getPrefetchExecutor().addWithPriority(
@@ -1641,7 +1804,7 @@ void prefetchUnit(StringData* requestedPath,
     // you capture here.
     [path, fileStat, cache = cache,
      loadingUnitPath = loadingUnit ? loadingUnit->filepath() : nullptr,
-     gate = std::move(gate)] () mutable {
+     gate = std::move(gate), w = wrapper, map = std::move(holder)] () mutable {
       SCOPE_EXIT {
         // Decrement the gate whenever we're done. If the gate hits
         // zero, do a notification to wake up any thread waiting on
@@ -1705,21 +1868,14 @@ void prefetchUnit(StringData* requestedPath,
       // prefetcher thread, or a request thread is currently loading
       // the unit. In either case, we don't want to do anything with
       // it, and just move onto another request.
-      if (!cachedUnit.try_lock_for_update()) return;
-
-      // If we throw, release the lock. Successful paths will
-      // manually release the lock, as they may want to update the
-      // value simultaneously.
-      SCOPE_FAIL { cachedUnit.unlock(); };
+      auto lock = cachedUnit.try_lock_for_update();
+      if (!lock) return;
 
       // Now that we have the lock, check if the path has a Unit
       // already, and if so, has the file has changed since that
       // Unit was created. If not, there's nothing to do.
       if (auto const tmp = cachedUnit.copy()) {
-        if (!isChanged(tmp, fileStat.get_pointer(), options)) {
-          cachedUnit.unlock();
-          return;
-        }
+        if (!isChanged(tmp, fileStat.get_pointer(), options, w)) return;
       }
 
       // The Unit doesn't already exist, or the file has
@@ -1732,6 +1888,7 @@ void prefetchUnit(StringData* requestedPath,
         OptLog optLog;
         return createUnitFromFile(rpath, nullptr, &releaseUnit, optLog,
                                   Native::s_noNativeFuncs,
+                                  map.get(),
                                   options, flags,
                                   fileStat.get_pointer(),
                                   std::move(orig), true);
@@ -1740,10 +1897,7 @@ void prefetchUnit(StringData* requestedPath,
       // We don't want to prefetch ICE units (they can be
       // transient), so if we encounter one, just drop it and leave
       // the cached entry as is.
-      if (!ptr || !ptr->cu.unit || ptr->cu.unit->isICE()) {
-        cachedUnit.unlock();
-        return;
-      }
+      if (!ptr || !ptr->cu.unit || ptr->cu.unit->isICE()) return;
 
       // The new Unit is good. Atomically update the cache entry
       // with it while releasing the lock.
@@ -1754,7 +1908,7 @@ void prefetchUnit(StringData* requestedPath,
       // old copy_ptr using the Treadmill. Other threads may be
       // reading the entry simultaneously so the ref-count cannot
       // drop to zero here.
-      if (auto old = cachedUnit.update_and_unlock(std::move(ptr))) {
+      if (auto old = lock->update(std::move(ptr))) {
         // We don't need to do anything explicitly; the copy_ptr
         // destructor will take care of it.
         Treadmill::enqueue([o = std::move(old)] {});
@@ -1808,11 +1962,19 @@ Unit* compileEvalString(const StringData* code, const char* evalFilename) {
   auto const scode = makeStaticString(code);
   EvaledUnitsMap::accessor acc;
   if (s_evaledUnits.insert(acc, scode) || !acc->second) {
+    auto const map = [] () -> AutoloadMap* {
+      if (!AutoloadHandler::s_instance) {
+        // It is not safe to autoinit AutoloadHandler outside a normal request.
+        return nullptr;
+      }
+      return AutoloadHandler::s_instance->getAutoloadMap();
+    }();
     acc->second = compile_string(
       scode->data(),
       scode->size(),
       evalFilename,
       Native::s_noNativeFuncs,
+      map,
       g_context->getRepoOptionsForCurrentFrame()
     );
   }
@@ -2000,25 +2162,20 @@ private:
       // Lock the entry. NB: this entry may have been changed since we
       // iterated over it. It may not even have the same Unit in it.
       auto& cachedUnit = accessor->second.cachedUnit;
-      cachedUnit.lock_for_update();
+      auto lock = cachedUnit.lock_for_update();
 
       // The Unit could have been touched (or there could be a
       // different Unit in it), so redo the expiration check. If its
       // not actually expired now, skip it.
       auto const cached = cachedUnit.copy();
-      if (!cached || !cached->cu.unit) {
-        cachedUnit.unlock();
-        continue;
-      }
+      if (!cached || !cached->cu.unit) continue;
+
       auto const [lastRequest, lastTime] = cached->cu.unit->getLastTouch();
-      if (!isExpired(now, oldestRequest, lastRequest, lastTime)) {
-        cachedUnit.unlock();
-        continue;
-      }
+      if (!isExpired(now, oldestRequest, lastRequest, lastTime)) continue;
 
       // Still expired. Replace the entry with a nullptr and put the
       // Unit on the treadmill to be deleted.
-      if (auto old = cachedUnit.update_and_unlock({})) {
+      if (auto old = lock.update({})) {
         Treadmill::enqueue([o = std::move(old)] {});
         s_unitsPathReaped->increment();
       }
@@ -2183,7 +2340,7 @@ LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
     // If there's no emitter cache hook, we're always going to have to
     // read the file contents, so there's no point in deferring.
     if (!forceEager && g_unit_emitter_cache_hook && RO::EvalUseEdenFS) {
-      if (auto const h = getHashFromEden()) return *h;
+      if (auto const h = getHashFromEden(m_path, m_wrapper)) return *h;
     }
     load();
     return string_sha1(m_contents.slice());
@@ -2210,25 +2367,6 @@ LazyUnitContentsLoader::LazyUnitContentsLoader(SHA1 sha,
 {
 }
 
-Optional<std::string> LazyUnitContentsLoader::getHashFromEden() const {
-#if !defined(__linux__)
-  return std::nullopt;
-#else
-  assertx(m_path);
-  if (m_wrapper) {
-    // We only allow normal file streams, which cannot re-enter
-    assertx(m_wrapper->isNormalFileStream());
-    auto const xattr = m_wrapper->getxattr(m_path, "user.sha1");
-    if (!xattr || xattr->size() != SHA1::kStrLen) return std::nullopt;
-    return xattr;
-  }
-  char xattr_buf[SHA1::kStrLen];
-  auto const ret = getxattr(m_path, "user.sha1", xattr_buf, sizeof(xattr_buf));
-  if (ret != sizeof(xattr_buf)) return std::nullopt;
-  return std::string{xattr_buf, sizeof(xattr_buf)};
-#endif
-}
-
 folly::StringPiece LazyUnitContentsLoader::contents() {
   if (!m_loaded) {
     auto const oldSize = m_file_length;
@@ -2251,34 +2389,16 @@ folly::StringPiece LazyUnitContentsLoader::contents() {
 }
 
 void LazyUnitContentsLoader::load() {
-  assertx(m_path);
   assertx(!m_loaded);
 
-  tracing::Block _{
-    "read-file", [&] { return tracing::Props{}.add("path", m_path); }
-  };
-  // If the file is too large it may OOM the request
-  MemoryManager::SuppressOOM so(*tl_heap);
-  if (m_wrapper) {
-    // We only allow normal file streams, which cannot re-enter
-    assertx(m_wrapper->isNormalFileStream());
-    if (auto const f = m_wrapper->open(String{m_path}, "r", 0, nullptr)) {
-      m_contents = f->read();
-      m_file_length = m_contents.size();
-      m_contents_ptr = m_contents.slice();
-      m_loaded = true;
-      return;
-    }
+  if (auto c = loadFileContents(m_path, m_wrapper)) {
+    m_contents = std::move(*c);
+    m_file_length = m_contents.size();
+    m_contents_ptr = m_contents.slice();
+    m_loaded = true;
+  } else {
     throw LoadError{};
   }
-
-  auto const fd = open(m_path, O_RDONLY);
-  if (fd < 0) throw LoadError{};
-  auto file = req::make<PlainFile>(fd);
-  m_contents = file->read();
-  m_file_length = m_contents.size();
-  m_contents_ptr = m_contents.slice();
-  m_loaded = true;
 }
 
 //////////////////////////////////////////////////////////////////////

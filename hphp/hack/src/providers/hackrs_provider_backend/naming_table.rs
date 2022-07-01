@@ -156,10 +156,13 @@ impl NamingTable {
 }
 
 impl NamingProvider for NamingTable {
-    fn get_type_path(&self, name: pos::TypeName) -> Result<Option<RelativePath>> {
+    fn get_type_path_and_kind(
+        &self,
+        name: pos::TypeName,
+    ) -> Result<Option<(RelativePath, naming_types::KindOfType)>> {
         Ok(self
             .get_type_pos(name)?
-            .map(|(pos, _kind)| pos.path().into()))
+            .map(|(pos, kind)| (pos.path().into(), kind)))
     }
     fn get_fun_path(&self, name: pos::FunName) -> Result<Option<RelativePath>> {
         Ok(self.get_fun_pos(name)?.map(|pos| pos.path().into()))
@@ -206,7 +209,7 @@ impl MaybeNamingDb {
         self.0.lock().as_ref().map(|(_, path)| path.clone())
     }
 
-    fn set_db_path(&self, db_path: PathBuf) -> rusqlite::Result<()> {
+    fn set_db_path(&self, db_path: PathBuf) -> Result<()> {
         let mut lock = self.0.lock();
         *lock = Some((names::Names::from_file(&db_path)?, db_path));
         Ok(())
@@ -214,7 +217,7 @@ impl MaybeNamingDb {
 
     fn with_db<T, F>(&self, f: F) -> Result<Option<T>>
     where
-        F: FnOnce(&names::Names) -> rusqlite::Result<Option<T>>,
+        F: FnOnce(&names::Names) -> Result<Option<T>>,
     {
         match &*self.0.lock() {
             Some((db, _)) => Ok(f(db)?),

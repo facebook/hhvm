@@ -298,7 +298,7 @@ void setup_low_arena(PageSpec s) {
                    true,                // 4K
                    numa_node_set, 1);
   auto emergencyMapper =
-    new BumpEmergencyMapper([]{kill(getpid(), SIGTERM);}, emergencyRange);
+    new BumpEmergencyMapper([]{ kill(getpid(), SIGTERM);}, emergencyRange);
   veryLowRange.setLowMapper(veryLowMapper);
   lowRange.setLowMapper(lowMapper);
   emergencyRange.setLowMapper(emergencyMapper);

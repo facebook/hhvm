@@ -5,11 +5,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-// isset, and unset only look like functions to static analysis, but
-// in fact act as special expression subtypes within the runtime
+// The functions in this file only *look* like functions to static analysis,
+// but are compiled to bespoke bytecodes by HackC.
 
+namespace {
 /**
- * Determines whether or not a variable is "set."
+ * Determines whether or not a variable is "set." This can take a subscript
+ * expression and checks whether a given index exists, e.g.:
+ * ```
+ * // Returns `false` if 42 doesn't exist at all, or maps to `null`
+ * isset($d[42]);
+ * ```
  */
 function isset(mixed $x)[]: bool;
 
@@ -26,3 +32,15 @@ function isset(mixed $x)[]: bool;
  * is disallowed by Hack.
  */
 function unset(mixed $x)[]: void;
+}
+
+namespace HH {
+  /**
+   * Checks whether the input is a native class method pointer.
+   * ```
+   * HH\is_class_meth(Foo::bar<>); // true
+   * HH\is_class_meth(bing<>); // false
+   * ```
+   */
+  function is_class_meth(readonly mixed $arg)[]: bool;
+}

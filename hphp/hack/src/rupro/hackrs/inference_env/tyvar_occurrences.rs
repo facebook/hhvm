@@ -6,6 +6,7 @@
 #![allow(dead_code)]
 
 use im::{HashMap, HashSet};
+use pos::ToOxidized;
 use ty::local::Tyvar;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -88,6 +89,33 @@ impl TyvarOccurrences {
             })
         }
         self.unbind(tv);
+    }
+}
+
+impl<'a> ToOxidized<'a> for TyvarOccurrences {
+    type Output = &'a oxidized_by_ref::typing_tyvar_occurrences::TypingTyvarOccurrences<'a>;
+
+    fn to_oxidized(&self, bump: &'a bumpalo::Bump) -> Self::Output {
+        use oxidized_by_ref::typing_tyvar_occurrences::TypingTyvarOccurrences;
+        use oxidized_by_ref::{i_map::IMap, i_set::ISet};
+
+        let Self { tyvs_in, occs_of } = self;
+        let conv = |x: &HashMap<Tyvar, HashSet<Tyvar>>| {
+            IMap::from(
+                bump,
+                x.iter().map(|(k, v)| {
+                    (
+                        k.to_oxidized(bump),
+                        ISet::from(bump, v.iter().map(|v| v.to_oxidized(bump))),
+                    )
+                }),
+            )
+        };
+        let occ = TypingTyvarOccurrences {
+            tyvar_occurrences: conv(occs_of),
+            tyvars_in_tyvar: conv(tyvs_in),
+        };
+        bump.alloc(occ)
     }
 }
 

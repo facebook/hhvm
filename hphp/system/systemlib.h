@@ -36,7 +36,7 @@ namespace HPHP::SystemLib {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define SYSTEMLIB_CLASSES(x)                    \
-  x(stdclass)                                   \
+  x(stdClass)                                   \
   x(Exception)                                  \
   x(BadMethodCallException)                     \
   x(InvalidArgumentException)                   \

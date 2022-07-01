@@ -65,6 +65,13 @@ impl<U> Maybe<U> {
         matches!(self, Just(_))
     }
 
+    pub fn into_option(self) -> Option<U> {
+        match self {
+            Just(t) => Some(t),
+            Nothing => None,
+        }
+    }
+
     #[inline]
     pub const fn is_nothing(&self) -> bool {
         matches!(self, Nothing)
@@ -188,10 +195,7 @@ impl<'a, T: 'a> Default for Slice<'a, T> {
 }
 impl<'a, T> AsRef<[T]> for Slice<'a, T> {
     fn as_ref(&self) -> &[T] {
-        // Safety: Assumes `self` has been constructed via `Slice<'a,
-        // T>::new()` from some `&'a [T]` and so the call to
-        // `from_raw_parts` is a valid.
-        unsafe { std::slice::from_raw_parts(self.data, self.len) }
+        self.as_arena_ref()
     }
 }
 
@@ -210,6 +214,15 @@ impl<'a, T: 'a> Slice<'a, T> {
             len: t.len(),
             marker: std::marker::PhantomData,
         }
+    }
+
+    /// Like `as_ref()` but reflects the fact that the underlying ref has a
+    /// lifetime of `arena and not the same lifetime as `self`.
+    pub fn as_arena_ref(&self) -> &'a [T] {
+        // Safety: Assumes `self` has been constructed via `Slice<'a,
+        // T>::new()` from some `&'a [T]` and so the call to
+        // `from_raw_parts` is a valid.
+        unsafe { std::slice::from_raw_parts(self.data, self.len) }
     }
 
     pub fn fill_iter<I>(alloc: &'a bumpalo::Bump, iter: I) -> Slice<'a, T>
@@ -268,11 +281,9 @@ impl<'a, T: PartialEq> PartialEq for Slice<'a, T> {
     fn eq(&self, other: &Self) -> bool {
         // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
         // safety].
-        unsafe {
-            let left = from_raw_parts(self.data, self.len);
-            let right = from_raw_parts(other.data, other.len);
-            left.eq(right)
-        }
+        let left = unsafe { from_raw_parts(self.data, self.len) };
+        let right = unsafe { from_raw_parts(other.data, other.len) };
+        left.eq(right)
     }
 }
 impl<'a, T: Eq> Eq for Slice<'a, T> {}
@@ -280,32 +291,26 @@ impl<'a, T: Hash> Hash for Slice<'a, T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
         // safety].
-        unsafe {
-            let me = from_raw_parts(self.data, self.len);
-            me.hash(state);
-        }
+        let me = unsafe { from_raw_parts(self.data, self.len) };
+        me.hash(state);
     }
 }
 impl<'a, T: Ord> Ord for Slice<'a, T> {
     fn cmp(&self, other: &Self) -> Ordering {
         // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
         // safety].
-        unsafe {
-            let left = from_raw_parts(self.data, self.len);
-            let right = from_raw_parts(other.data, other.len);
-            left.cmp(right)
-        }
+        let left = unsafe { from_raw_parts(self.data, self.len) };
+        let right = unsafe { from_raw_parts(other.data, other.len) };
+        left.cmp(right)
     }
 }
 impl<'a, T: PartialOrd> PartialOrd for Slice<'a, T> {
     // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
     // safety].
     fn partial_cmp(&self, other: &Self) -> std::option::Option<Ordering> {
-        unsafe {
-            let left = from_raw_parts(self.data, self.len);
-            let right = from_raw_parts(other.data, other.len);
-            left.partial_cmp(right)
-        }
+        let left = unsafe { from_raw_parts(self.data, self.len) };
+        let right = unsafe { from_raw_parts(other.data, other.len) };
+        left.partial_cmp(right)
     }
 }
 
@@ -321,6 +326,11 @@ impl<'a> Str<'a> {
     //  `Str::from` in that case and avoid a copy.
     pub fn new_str(alloc: &'a bumpalo::Bump, src: &str) -> Str<'a> {
         Slice::new(alloc.alloc_str(src.as_ref()).as_bytes())
+    }
+
+    /// Make a copy of a slice of bytes in an `'a Bump' and return it as a `Str<'a>`.
+    pub fn new_slice(alloc: &'a bumpalo::Bump, src: &[u8]) -> Str<'a> {
+        Slice::new(alloc.alloc_slice_copy(src))
     }
 
     /// Cast a `Str<'a>` back into a `&'a str`.

@@ -5,7 +5,7 @@ function doh($x, $y) {
     if ($x === 'exit') {
 
       if ((YieldYieldSuspendHook::$counter++ % 2) == 1) {
-        throw new exception('x');
+        throw new Exception('x');
       }
     }
   }

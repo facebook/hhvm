@@ -85,6 +85,7 @@
 
 (library
  (name decl_folded_class)
+ (wrapped false)
  (modules decl_folded_class decl_inherit decl_requirements)
  (libraries
   ast_provider
@@ -202,14 +203,14 @@
 (library
  (name decl_heap)
  (modules decl_heap)
- (libraries decl_defs heap_shared_mem provider_backend typing_defs)
+ (libraries decl_defs heap_shared_mem typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name decl_store)
  (modules decl_store)
- (libraries decl_defs decl_heap provider_backend typing_defs)
+ (libraries decl_defs decl_heap typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -231,6 +232,7 @@
   decl_linearize
   decl_to_typing
   shallow_classes_provider
+  typing_class_types
   typing_defs)
  (preprocess
   (pps ppx_deriving.std)))

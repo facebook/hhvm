@@ -62,6 +62,13 @@ let files =
     new module Corge {}
   |}
     );
+    ( "corge2.php",
+      {|<?hh
+    <<file: __EnableUnstableFeatures('modules')>>
+    // modules are case sensitive, this is a different symbol
+    new module corge {}
+  |}
+    );
   ]
 
 let write_and_parse_test_files ctx =
@@ -152,9 +159,9 @@ let run_naming_table_test f =
       let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
       let save_results = Naming_table.save unbacked_naming_table db_name in
       Asserter.Int_asserter.assert_equals
-        10
+        12
         Naming_sqlite.(save_results.files_added + save_results.symbols_added)
-        "Expected to add eight rows (four files and four symbols)";
+        "Expected to add 12 rows (6 files and 6 symbols)";
 
       let ctx_for_sqlite_load =
         Provider_context.empty_for_test ~popt ~tcopt ~deps_mode
@@ -514,6 +521,34 @@ let test_context_changes_classes () =
         "Old class in context should NOT be accessible by non-canon name \\FoO";
       ())
 
+let test_context_changes_modules () =
+  run_naming_table_test
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+      Asserter.Relative_path_asserter.assert_option_equals
+        (Some (Relative_path.from_root ~suffix:"corge.php"))
+        (Naming_provider.get_module_path ctx "Corge")
+        "Existing module Corge should be in corge.php";
+      Asserter.Relative_path_asserter.assert_option_equals
+        (Some (Relative_path.from_root ~suffix:"corge2.php"))
+        (Naming_provider.get_module_path ctx "corge")
+        "Existing module corge (lowercase) should be in corge2.php";
+      let (ctx, _entry) =
+        Provider_context.add_or_overwrite_entry_contents
+          ~ctx
+          ~path:(Relative_path.from_root ~suffix:"corge.php")
+          ~contents:{|<?hh
+          |}
+      in
+      Asserter.Relative_path_asserter.assert_option_equals
+        None
+        (Naming_provider.get_module_path ctx "Corge")
+        "module Corge should be deleted";
+      Asserter.Relative_path_asserter.assert_option_equals
+        (Some (Relative_path.from_root ~suffix:"corge2.php"))
+        (Naming_provider.get_module_path ctx "corge")
+        "Existing module corge (lowercase) should be in corge2.php";
+      ())
+
 let test_context_changes_typedefs () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
@@ -785,6 +820,7 @@ let () =
       ("test_context_changes_funs", test_context_changes_funs);
       ("test_context_changes_classes", test_context_changes_classes);
       ("test_context_changes_typedefs", test_context_changes_typedefs);
+      ("test_context_changes_modules", test_context_changes_modules);
       ("test_naming_table_hash", test_naming_table_hash);
       ( "test_naming_table_query_by_dep_hash",
         test_naming_table_query_by_dep_hash );

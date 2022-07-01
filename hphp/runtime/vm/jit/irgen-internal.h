@@ -117,6 +117,13 @@ inline SSATmp* curCoeffects(IRGS& env) {
   return gen(env, OrInt, coeffects, cns(env, mask));
 }
 
+inline RuntimeCoeffects providedCoeffectsKnownStatically(IRGS& env) {
+  auto const func = curFunc(env);
+  assertx(!func->hasCoeffectsLocal());
+  return RuntimeCoeffects::fromValue(func->requiredCoeffects().value() |
+                                     func->coeffectEscapes().value());
+}
+
 //////////////////////////////////////////////////////////////////////
 // Control-flow helpers.
 

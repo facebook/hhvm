@@ -212,7 +212,13 @@ impl<R: Reason> Inherited<R> {
                         e.get_mut().enforceable = new_const.enforceable.clone();
                     }
                     let old_const = e.get();
-                    match (&old_const.kind, &new_const.kind) {
+                    match (
+                        old_const.is_synthesized,
+                        new_const.is_synthesized,
+                        &old_const.kind,
+                        &new_const.kind,
+                    ) {
+                        (false, true, _, _) => {}
                         // This covers the following case
                         // ```
                         // interface I1 { abstract const type T; }
@@ -220,7 +226,7 @@ impl<R: Reason> Inherited<R> {
                         // class C implements I1, I2 {}
                         // ```
                         // Then `C::T == I2::T` since `I2::T `is not abstract
-                        (Typeconst::TCConcrete(_), Typeconst::TCAbstract(_)) => {}
+                        (_, _, Typeconst::TCConcrete(_), Typeconst::TCAbstract(_)) => {}
                         // This covers the following case
                         // ```
                         // interface I {
@@ -237,6 +243,8 @@ impl<R: Reason> Inherited<R> {
                         // provides the default that will synthesize into a
                         // concrete type constant in `C`.
                         (
+                            _,
+                            _,
                             Typeconst::TCAbstract(AbstractTypeconst {
                                 default: Some(_), ..
                             }),

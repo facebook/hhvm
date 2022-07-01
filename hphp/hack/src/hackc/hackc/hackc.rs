@@ -2,18 +2,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 mod assemble;
+mod cmp_unit;
 mod compile;
 mod crc;
 mod expr_trees;
 mod facts;
 mod parse;
+mod util;
+mod verify;
 
 use ::compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
 use anyhow::Result;
 use clap::Parser;
 use hhvm_options::HhvmOptions;
+use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::relative_path::{self, RelativePath};
-use oxidized_by_ref::decl_parser_options::DeclParserOptions;
 use std::{
     fs,
     io::{BufRead, BufReader},
@@ -66,6 +69,10 @@ struct Opts {
     /// (only used by --test-compile-with-decls)
     #[clap(long)]
     pub(crate) use_serialized_decls: bool,
+
+    /// Controls systemlib specific logic
+    #[clap(long)]
+    is_systemlib: bool,
 }
 
 /// Hack Compiler
@@ -91,20 +98,29 @@ enum Command {
     /// input file.
     Crc(crc::Opts),
 
+    /// Print the source code with expression tree literals desugared.
+    /// Best effort debugging tool.
+    DesugarExprTrees(expr_trees::Opts),
+
     /// Compute facts for a set of files.
     Facts(facts::Opts),
 
-    /// Parse many files whose filenames are read from stdin
+    /// Render the source text parse tree for each given file.
     Parse(parse::Opts),
+
+    /// Parse many files whose filenames are read from stdin, discard parser output.
+    ParseBench(parse::BenchOpts),
+
+    /// Compile Hack source files or directories and check for compilation errors.
+    Verify(verify::Opts),
 }
 
-// Which command are we running? Every bool option here conflicts with
-// every other one. Using bool opts for backward compatibility with
-// hh_single_compile_cpp.
+/// Which command are we running? Using bool opts for compatibility with test harnesses.
+/// New commands should be defined as subcommands using the Command enum.
 #[derive(Parser, Debug, Default)]
 struct FlagCommands {
     /// Print the source code with expression tree literals desugared.
-    /// Best effort debugging tool.
+    /// Deprecated: use desugar-expr-trees subcommand.
     #[clap(long)]
     dump_desugared_expression_trees: bool,
 
@@ -112,10 +128,6 @@ struct FlagCommands {
     /// in JSON format.
     #[clap(long)]
     extract_facts_from_decls: bool,
-
-    /// Render the source text parse tree
-    #[clap(long)]
-    parse: bool,
 
     /// Compile file with decls from the same file available during compilation.
     #[clap(long)]
@@ -148,24 +160,18 @@ impl Opts {
         if self.disable_toplevel_elaboration {
             flags |= EnvFlags::DISABLE_TOPLEVEL_ELABORATION;
         }
+        if self.is_systemlib {
+            flags |= EnvFlags::IS_SYSTEMLIB;
+        }
         flags
     }
 
-    pub fn decl_opts<'a>(&self, arena: &'a bumpalo::Bump) -> DeclParserOptions<'a> {
+    pub fn decl_opts(&self) -> DeclParserOptions {
         // TODO: share this logic with hackc_create_decl_parse_options()
         let config_opts = options::Options::from_configs(&[Self::AUTO_NAMESPACE_MAP]).unwrap();
         let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
-            Some(m) => bumpalo::collections::Vec::from_iter_in(
-                m.iter().map(|(k, v)| {
-                    (
-                        arena.alloc_str(k.as_str()) as &str,
-                        arena.alloc_str(v.as_str()) as &str,
-                    )
-                }),
-                arena,
-            )
-            .into_bump_slice(),
-            None => &[],
+            Some(m) => m.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
+            None => Vec::new(),
         };
         DeclParserOptions {
             auto_namespace_map,
@@ -197,8 +203,6 @@ impl Opts {
     }
 
     // TODO (T118266805): get these from nearest .hhconfig enclosing each file.
-    // For now these are all hardcoded in hh_single_compile_cpp, so hardcode
-    // them here too.
     pub(crate) const AUTO_NAMESPACE_MAP: &'static str = r#"{
             "hhvm.aliased_namespaces": {
                 "global_value": {
@@ -223,40 +227,14 @@ impl Opts {
     pub(crate) const INCLUDE_ROOTS: &'static str = "";
 }
 
-/// In daemon mode, hackc blocks waiting for a filename on stdin.
-/// Then, using the originally invoked options, dispatches that file to be compiled.
-fn daemon_mode(mut opts: Opts) -> Result<()> {
-    for line in std::io::stdin().lock().lines() {
-        opts.files.filenames = vec![Path::new(&line?).to_path_buf()];
-        dispatch(&mut opts)?;
-    }
-    Ok(())
-}
-
-fn dispatch(opts: &mut Opts) -> Result<()> {
-    if opts.flag_commands.parse {
-        parse::run_flag_command(opts)
-    } else if opts.flag_commands.extract_facts_from_decls {
-        let facts_opts = facts::Opts {
-            files: std::mem::take(&mut opts.files),
-            ..Default::default()
-        };
-        facts::extract_facts(opts, facts_opts)
-    } else if opts.flag_commands.test_compile_with_decls {
-        compile::test_compile_with_decls(opts)
-    } else if opts.flag_commands.dump_desugared_expression_trees {
-        expr_trees::dump_expr_trees(opts)
-    } else {
-        compile::compile_from_text(opts)
-    }
-}
-
 fn main() -> Result<()> {
     env_logger::init();
     let mut opts = Opts::parse();
 
     let builder = rayon::ThreadPoolBuilder::new().num_threads(opts.num_threads);
-    let builder = if matches!(&opts.command, Some(Command::Crc(_))) {
+    let builder = if matches!(&opts.command, Some(Command::Crc(_)))
+        || matches!(&opts.command, Some(Command::Verify(_)))
+    {
         builder.stack_size(32 * 1024 * 1024)
     } else {
         builder
@@ -265,18 +243,48 @@ fn main() -> Result<()> {
 
     match opts.command.take() {
         Some(Command::Assemble(opts)) => assemble::run(opts),
-        Some(Command::Compile(mut opts)) => compile::run(&mut opts),
         Some(Command::Crc(opts)) => crc::run(opts),
-        Some(Command::Parse(opts)) => parse::run_sub_command(opts),
-        Some(Command::Facts(facts_opts)) => facts::extract_facts(&mut opts, facts_opts),
-        None => {
-            if opts.daemon {
-                daemon_mode(opts)
-            } else {
-                dispatch(&mut opts)
-            }
+        Some(Command::Parse(parse_opts)) => parse::run(parse_opts),
+        Some(Command::ParseBench(bench_opts)) => parse::run_bench_command(bench_opts),
+        Some(Command::Verify(opts)) => verify::run(opts),
+
+        // Expr trees
+        Some(Command::DesugarExprTrees(et_opts)) => expr_trees::desugar_expr_trees(&opts, et_opts),
+        None if opts.flag_commands.dump_desugared_expression_trees => {
+            let expr_opts = expr_trees::Opts {
+                files: std::mem::take(&mut opts.files),
+                ..Default::default()
+            };
+            expr_trees::desugar_expr_trees(&opts, expr_opts)
         }
+
+        // Facts
+        Some(Command::Facts(facts_opts)) => facts::extract_facts(&mut opts, facts_opts),
+        None if opts.daemon && opts.flag_commands.extract_facts_from_decls => {
+            facts::run_daemon(&mut opts)
+        }
+        None if opts.flag_commands.extract_facts_from_decls => facts::run_flag(&mut opts),
+
+        // Test Decls-in-Compilation
+        None if opts.daemon && opts.flag_commands.test_compile_with_decls => {
+            compile::test_decl_compile_daemon(&mut opts)
+        }
+        None if opts.flag_commands.test_compile_with_decls => compile::test_decl_compile(&mut opts),
+
+        // Compile to hhas
+        Some(Command::Compile(mut opts)) => compile::run(&mut opts),
+        None if opts.daemon => compile::daemon(&mut opts),
+        None => compile::compile_from_text(&mut opts),
     }
+}
+
+/// In daemon mode, hackc blocks waiting for a filename on stdin.
+/// Then, using the originally invoked options, dispatches that file to be compiled.
+fn daemon_mode(mut f: impl FnMut(PathBuf) -> Result<()>) -> Result<()> {
+    for line in std::io::stdin().lock().lines() {
+        f(Path::new(&line?).to_path_buf())?;
+    }
+    Ok(())
 }
 
 /// Utility print for daemon mode compatibility
@@ -290,11 +298,8 @@ pub(crate) fn daemon_print(opts: &Opts, output: &[u8]) -> Result<()> {
         // Need to account for utf-8 encoding and text streams with the python test
         // runner A whole mess:
         // https://stackoverflow.com/questions/3586923/counting-unicode-characters-in-c
-        writeln!(
-            w,
-            "{}",
-            output.iter().filter(|&b| (b & 0xc0) != 0x80).count() + 1
-        )?;
+        let nbytes = output.iter().filter(|&b| (b & 0xc0) != 0x80).count() + 1;
+        writeln!(w, "{nbytes}",)?;
     }
     w.write_all(output)?;
     w.write_all(b"\n")?;
@@ -310,8 +315,7 @@ mod tests {
     /// If the alias map length changes, keep this test in sync.
     #[test]
     fn test_auto_namespace_map() {
-        let arena = bumpalo::Bump::new();
-        let dp_opts = Opts::default().decl_opts(&arena);
+        let dp_opts = Opts::default().decl_opts();
         assert_eq!(dp_opts.auto_namespace_map.len(), 15);
     }
 }

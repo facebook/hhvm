@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/memory-stats.h"
@@ -114,6 +115,11 @@ ArrayData* getStaticArray(LoggingProfileKey key) {
       auto const tv = key.cls->constants()[key.slot].val;
       if (!tvIsArrayLike(tv)) return nullptr;
       return key.cls->resolvedTypeCnsGet(tv.val().parr);
+    }
+
+    case LocationType::TypeAlias: {
+      auto const& ts = key.ta->resolvedTypeStructureRaw();
+      return !ts.isNull() ? ts.get() : nullptr;
     }
 
     case LocationType::SrcKey: {
@@ -368,6 +374,7 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
 }
 
 void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
+  if (!RO::EvalEmitBespokeMonotypes) return;
   // Hold the read mutex for the duration of the mutation so that profiling
   // cannot be interrupted until the mutation is complete.
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
@@ -423,6 +430,11 @@ void LoggingProfile::setStaticBespokeArray(BespokeArray* bad) {
     auto const ad = reinterpret_cast<ArrayData*>(rawData | 0x1);
     tv->m_data.parr = ad;
   }
+
+  if (key.locationType == LocationType::TypeAlias) {
+    auto const ta = const_cast<TypeAlias*>(key.ta);
+    ta->setResolvedTypeStructure(bad);
+  }
 }
 
 jit::ArrayLayout LoggingProfile::getLayout() const {
@@ -457,6 +469,30 @@ std::vector<const StringData*> LoggingProfile::knownStructKeys() const {
     return ret;
   }
   return ret;
+}
+
+bool LoggingProfile::shouldUseBespokeTypeStructure() {
+  if (key.locationType != LocationType::TypeConstant &&
+      key.locationType != LocationType::TypeAlias) {
+    return false;
+  }
+
+  // check for correct keys and values types
+  auto const vad = data->staticSampledArray;
+  if (vad == nullptr || !TypeStructure::isValidTypeStructure(vad)) return false;
+
+  // check that no operations could have modified the array
+  for (auto const& eventAndCount : data->events) {
+    auto const event = EventKey(eventAndCount.first);
+    if (!arrayOpIsRead(event.getOp()) &&
+        event.getOp() != ArrayOp::ConstructStr &&
+        event.getOp() != ArrayOp::ConstructInt &&
+        event.getOp() != ArrayOp::APCInitStr &&
+        event.getOp() != ArrayOp::APCInitStr) {
+      return false;
+    }
+  }
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1175,6 +1211,10 @@ LoggingProfile* getLoggingProfile(const Class* cls, Slot slot,
     return nullptr;
   }
   return getLoggingProfile(LoggingProfileKey(cls, slot, loc));
+}
+
+LoggingProfile* getLoggingProfile(const TypeAlias* ta) {
+  return getLoggingProfile(LoggingProfileKey(ta));
 }
 
 SinkProfile* getSinkProfile(TransID id, SrcKey sk) {

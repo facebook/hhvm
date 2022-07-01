@@ -26,7 +26,7 @@ pub enum Error {
     DeclParse {
         path: RelativePath,
         #[source]
-        file_provider_error: file_provider::Error,
+        file_provider_error: anyhow::Error,
     },
     #[error("Unexpected error: {0}")]
     Unexpected(#[from] anyhow::Error),
@@ -70,21 +70,11 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
 
     /// Fetch the declaration of the typedef with the given name. If the given
     /// name is bound to a class rather than a typedef, return `None`.
-    fn get_typedef(&self, name: TypeName) -> Result<Option<Arc<TypedefDecl<R>>>> {
-        Ok(self.get_type(name)?.and_then(|decl| match decl {
-            TypeDecl::Typedef(td) => Some(td),
-            TypeDecl::Class(..) => None,
-        }))
-    }
+    fn get_typedef(&self, name: TypeName) -> Result<Option<Arc<TypedefDecl<R>>>>;
 
     /// Fetch the declaration of the class with the given name. If the given
     /// name is bound to a typedef rather than a class, return `None`.
-    fn get_class(&self, name: TypeName) -> Result<Option<Arc<ShallowClass<R>>>> {
-        Ok(self.get_type(name)?.and_then(|decl| match decl {
-            TypeDecl::Class(cls) => Some(cls),
-            TypeDecl::Typedef(..) => None,
-        }))
-    }
+    fn get_class(&self, name: TypeName) -> Result<Option<Arc<ShallowClass<R>>>>;
 
     /// Fetch the type of the property with the given name from the given
     /// shallow class. When multiple properties are declared with the same name,

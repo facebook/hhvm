@@ -240,6 +240,7 @@ struct
     | AliasDeclaration of {
         alias_attribute_spec: t;
         alias_modifiers: t;
+        alias_module_kw_opt: t;
         alias_keyword: t;
         alias_name: t;
         alias_generic_parameter: t;
@@ -1527,6 +1528,7 @@ struct
   and alias_declaration = {
     alias_attribute_spec: attribute_specification option value;
     alias_modifiers: Token.t option value;
+    alias_module_kw_opt: Token.t option value;
     alias_keyword: Token.t value;
     alias_name: Token.t option value;
     alias_generic_parameter: type_parameters option value;

@@ -43,6 +43,7 @@ lazy_init2 = {use_saved_state}
 symbolindex_search_provider = SqliteIndex
 allow_unstable_features = true
 ide_serverless = {use_serverless_ide}
+ide_use_shallow_decls = true
 """.format(
                     use_saved_state=str(use_saved_state).lower(),
                     use_serverless_ide=str(use_serverless_ide).lower(),
@@ -4525,7 +4526,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?string name"},
+                        {"language": "hack", "value": "attribute ?string name"},
                         ":xhp:enum-attribute::name docblock",
                     ],
                     "range": {
@@ -4545,7 +4546,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?MyEnum enum-attribute"}
+                        {
+                            "language": "hack",
+                            "value": "attribute ?MyEnum enum-attribute",
+                        }
                     ],
                     "range": {
                         "start": {"line": 62, "character": 33},
@@ -4564,7 +4568,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?ID<EntSomething> id"}
+                        {"language": "hack", "value": "attribute ?ID<EntSomething> id"}
                     ],
                     "range": {
                         "start": {"line": 63, "character": 15},
@@ -4599,7 +4603,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?string name"},
+                        {"language": "hack", "value": "attribute ?string name"},
                         ":xhp:enum-attribute::name docblock",
                     ],
                     "range": {
@@ -4715,12 +4719,11 @@ class TestLsp(TestCase[LspTestDriver]):
                     "contents": [
                         {
                             "language": "hack",
-                            "value": "public static function staticMethod(string $z): void",
+                            "value": "// Defined in HoverWithErrorsClass\npublic static function staticMethod(string $z): void",
                         },
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
-                        "Full name: `HoverWithErrorsClass::staticMethod`",
                     ],
                     "range": {
                         "end": {"character": 39, "line": 14},
@@ -4757,12 +4760,11 @@ class TestLsp(TestCase[LspTestDriver]):
                     "contents": [
                         {
                             "language": "hack",
-                            "value": "public static function staticMethod(string $z): void",
+                            "value": "// Defined in HoverWithErrorsClass\npublic static function staticMethod(string $z): void",
                         },
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
-                        "Full name: `HoverWithErrorsClass::staticMethod`",
                     ],
                     "range": {
                         "end": {"character": 39, "line": 14},
@@ -5847,8 +5849,10 @@ function __hh_loop_forever_foo(): int {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public function foo(): int"},
-                        "Full name: `BaseClassIncremental::foo`",
+                        {
+                            "language": "hack",
+                            "value": "// Defined in BaseClassIncremental\npublic function foo(): int",
+                        },
                     ],
                     "range": {
                         "start": {"line": 7, "character": 12},
@@ -5877,8 +5881,10 @@ class BaseClassIncremental {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public function foo(): string"},
-                        "Full name: `BaseClassIncremental::foo`",
+                        {
+                            "language": "hack",
+                            "value": "// Defined in BaseClassIncremental\npublic function foo(): string",
+                        },
                     ],
                     "range": {
                         "start": {"line": 7, "character": 12},

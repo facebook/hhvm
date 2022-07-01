@@ -43,10 +43,10 @@ impl<'arena> ClassExpr<'arena> {
         None
     }
 
-    pub fn get_parent_class_name<'a>(class: &ast_scope::Class<'a>) -> Option<String> {
+    pub fn get_parent_class_name<'a>(class: &'a ast_scope::Class<'a>) -> Option<&'a str> {
         if let [Hint(_, hint)] = class.get_extends() {
             if let Hint_::Happly(ast_defs::Id(_, parent_cid), _) = &**hint {
-                return Some(parent_cid.to_string());
+                return Some(parent_cid);
             }
         }
         None
@@ -90,7 +90,7 @@ impl<'arena> ClassExpr<'arena> {
                 check_traits,
                 resolve_self,
                 Some((ClassishKind::from(cd.get_kind()), cd.get_name_str())),
-                Self::get_parent_class_name(cd),
+                Self::get_parent_class_name(cd).map(String::from),
                 expr,
             )
         } else {

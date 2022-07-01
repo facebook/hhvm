@@ -62,6 +62,16 @@ fn is_native_arg<'arena>(s: &str, attrs: impl AsRef<[HhasAttribute<'arena>]>) ->
     })
 }
 
+pub fn is_keyed_by_ic_memoize<'arena>(attrs: impl AsRef<[HhasAttribute<'arena>]>) -> bool {
+    attrs.as_ref().iter().any(|attr| {
+        ua::is_memoized_regular(attr.name.unsafe_as_str())
+            && attr.arguments.as_ref().iter().any(|tv| match *tv {
+                TypedValue::String(s0) => s0.unsafe_as_str() == "KeyedByIC",
+                _ => false,
+            })
+    })
+}
+
 fn is_foldable<'arena>(attr: &HhasAttribute<'arena>) -> bool {
     is("__IsFoldable", attr)
 }
@@ -104,7 +114,6 @@ fn is_memoize<'arena>(attr: &HhasAttribute<'arena>) -> bool {
 
 fn is_memoize_lsb<'arena>(attr: &HhasAttribute<'arena>) -> bool {
     attr.name.unsafe_as_str() == ua::MEMOIZE_LSB
-        || attr.name.unsafe_as_str() == ua::POLICY_SHARDED_MEMOIZE_LSB
 }
 
 pub fn has_native<'arena>(attrs: &[HhasAttribute<'arena>]) -> bool {

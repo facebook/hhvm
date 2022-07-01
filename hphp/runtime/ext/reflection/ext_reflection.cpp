@@ -771,7 +771,7 @@ static Array get_function_param_info(const Func* func) {
       : staticEmptyString();
     param.set(s_type_hint, make_tv<KindOfPersistentString>(typeHint));
 
-    // callable typehint considered builtin; stdclass typehint is not
+    // callable typehint considered builtin; stdClass typehint is not
     if (
       fpi.typeConstraint.isCallable() ||
       (fpi.typeConstraint.underlyingDataType() &&
@@ -1354,7 +1354,7 @@ static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
       st->add(const_cast<StringData*>(interface->name()));
     }
   }
-  return st->toVArray();
+  return st->toValuesArray();
 }
 
 static Array HHVM_METHOD(ReflectionClass, getTraitNames) {
@@ -1397,7 +1397,7 @@ static Array HHVM_STATIC_METHOD(
 
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
-  req::StringIFastSet visitedMethods;
+  req::StringFastSet visitedMethods;
   req::StringIFastSet visitedInterfaces;
   auto st = Array::CreateKeyset();
 

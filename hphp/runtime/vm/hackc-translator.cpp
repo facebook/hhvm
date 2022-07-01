@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/hackc-translator.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/as-shared.h"
@@ -377,6 +378,7 @@ void addConstant(TranslationState& ts,
   }
 
   auto tvInit = toTypedValue(tv.value());
+  tvAsVariant(&tvInit).setEvalScalar();
   ts.pce->addConstant(name,
                       nullptr,
                       &tvInit,
@@ -445,7 +447,11 @@ void translateProperty(TranslationState& ts, const HhasProperty& p, const UpperB
   }
 
   auto const tv = maybeOrElse(p.initial_value,
-    [&](hhbc::TypedValue& s) {return toTypedValue(s);},
+    [&](hhbc::TypedValue& s) {
+      auto hphpTv = toTypedValue(s);
+      tvAsVariant(&hphpTv).setEvalScalar();
+      return hphpTv;
+    },
     [&]() {return make_tv<KindOfNull>();});
 
   auto const name = toStaticString(p.name._0);
@@ -641,7 +647,7 @@ void handleNLA(TranslationState& ts, const Local& local) {
   ts.fe->emitNamedLocal(loc);
 }
 
-void handleBLA(TranslationState& ts, const BumpSliceMut<Label>& labels) {
+void handleBLA(TranslationState& ts, const Slice<Label>& labels) {
   ts.fe->emitIVA(labels.len);
   auto targets = range(labels);
   for (auto const& t : targets) {
@@ -1043,7 +1049,71 @@ void translateFunctionBody(TranslationState& ts,
   assertx(ts.start.empty());
   assertx(ts.handler.empty());
   ts.maxUnnamed = 0;
+}
 
+void translateCoeffects(TranslationState& ts, const HhasCoeffects& coeffects) {
+  auto static_coeffects = range(coeffects.static_coeffects);
+  for (auto const& c : static_coeffects) {
+    auto const coeffectStr = CoeffectsConfig::fromHackCCtx(c);
+    ts.fe->staticCoeffects.push_back(makeStaticString(coeffectStr));
+  }
+
+  auto unenforced_coeffects = range(coeffects.unenforced_static_coeffects);
+  for (auto const& c : unenforced_coeffects) {
+    ts.fe->staticCoeffects.push_back(toStaticString(c));
+  }
+
+  auto fun_param = range(coeffects.fun_param);
+  for (auto const& f : fun_param) {
+    ts.fe->coeffectRules.emplace_back(
+      CoeffectRule(CoeffectRule::FunParam{}, f));
+  }
+
+  auto cc_param = range(coeffects.cc_param);
+  for (auto const& c : cc_param) {
+    ts.fe->coeffectRules.emplace_back(
+      CoeffectRule(CoeffectRule::CCParam{}, c._0, toStaticString(c._1)));
+  }
+
+  auto cc_this_vec = range(coeffects.cc_this);
+  for (auto const& cc_this : cc_this_vec) {
+
+    std::vector<LowStringPtr> names;
+    for (int i = 0; i < cc_this.len - 1; i++) {
+      names.push_back(toStaticString(cc_this.data[i]));
+    }
+    auto const ctx_name = toStaticString(cc_this.data[cc_this.len - 1]);
+    ts.fe->coeffectRules.emplace_back(
+        CoeffectRule(CoeffectRule::CCThis{}, names, ctx_name));
+  }
+
+  auto cc_reified_vec = range(coeffects.cc_reified);
+  for (auto const& cc_reified : cc_reified_vec) {
+    auto const isClass = cc_reified._0;
+    auto const pos = cc_reified._1;
+    auto types = cc_reified._2;
+
+    std::vector<LowStringPtr> names;
+    for (int i = 0; i < types.len - 1; i++) {
+      names.push_back(toStaticString(types.data[i]));
+    }
+
+    auto const ctx_name = toStaticString(types.data[types.len - 1]);
+     ts.fe->coeffectRules.emplace_back(
+        CoeffectRule(CoeffectRule::CCReified{}, isClass, pos, names, ctx_name));
+  }
+
+  if (coeffects.closure_parent_scope) {
+    ts.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::ClosureParentScope{}));
+  }
+
+  if (coeffects.generator_this) {
+    ts.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::GeneratorThis{}));
+  }
+
+  if (coeffects.caller) {
+    ts.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::Caller{}));
+  }
 }
 
 void translateFunction(TranslationState& ts, const HhasFunction& f) {
@@ -1067,6 +1137,8 @@ void translateFunction(TranslationState& ts, const HhasFunction& f) {
   ts.fe->isAsync = (bool)(f.flags & HhasFunctionFlags_ASYNC);
   ts.fe->isPairGenerator = (bool)(f.flags & HhasFunctionFlags_PAIR_GENERATOR);
   ts.fe->userAttributes = userAttrs;
+
+  translateCoeffects(ts, f.coeffects);
 
   auto retTypeInfo = maybeOrElse(f.body.return_type_info,
       [&](HhasTypeInfo& ti) {return translateTypeInfo(ti);},
@@ -1111,6 +1183,8 @@ void translateMethod(TranslationState& ts, const HhasMethod& m, const UpperBound
   UserAttributeMap userAttrs;
   translateUserAttributes(m.attributes, userAttrs);
   ts.fe->userAttributes = userAttrs;
+
+  translateCoeffects(ts, m.coeffects);
 
   auto retTypeInfo = maybeOrElse(m.body.return_type_info,
     [&](HhasTypeInfo& ti) {return translateTypeInfo(ti);},
@@ -1218,6 +1292,19 @@ void translateModuleUse(TranslationState& ts, const Optional<Str>& name) {
   ts.ue->m_moduleName = toStaticString(name.value());
 }
 
+void translateModule(TranslationState& ts, const HhasModule& m) {
+  UserAttributeMap userAttrs;
+  translateUserAttributes(m.attributes, userAttrs);
+
+  ts.ue->addModule(Module{
+    toStaticString(m.name._0),
+    static_cast<int>(m.span.line_begin),
+    static_cast<int>(m.span.line_end),
+    Attr(AttrNone),
+    userAttrs
+  });
+}
+
 void translate(TranslationState& ts, const HackCUnit& unit) {
   translateModuleUse(ts, maybe(unit.module_use));
   auto adata = range(unit.adata);
@@ -1245,6 +1332,11 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
     translateTypedef(ts, t);
   }
 
+  auto modules = range(unit.modules);
+  for (auto const& m : modules) {
+    translateModule(ts, m);
+  }
+
   translateUserAttributes(unit.file_attributes, ts.ue->m_fileAttributes);
   maybeThen(unit.fatal, [&](Triple<FatalOp, HhasPos, Str> fatal) {
     auto const pos = fatal._1;
@@ -1255,7 +1347,6 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
       fatal._0
     );
   });
-
 
   for (auto& fe : ts.ue->fevec()) fixup_default_values(ts, fe.get());
   for (size_t n = 0; n < ts.ue->numPreClasses(); ++n) {
@@ -1272,7 +1363,7 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
   const std::string& hhasString
 ) {
   auto const bcSha1 = SHA1{string_sha1(hhasString)};
-  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, false);
+  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 

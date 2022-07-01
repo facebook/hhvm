@@ -41,11 +41,9 @@ class B extends A implements I {
     );
 
     // Fold `B`.
-    ctx.provider_backend
-        .folded_decl_provider
-        .get_class(B.into(), B)?;
+    ctx.folded_decl_provider.get_class(B.into(), B)?;
     // Retrieve the dependency graph.
-    let depgraph = &ctx.provider_backend.dependency_graph;
+    let depgraph = &ctx.dependency_graph;
 
     // Doing the comparisons on binary search trees avoids issues with hash
     // map/set orderings.
@@ -75,11 +73,9 @@ fn constructor_relation(fb: FacebookInit) -> Result<()> {
     let (A, B) = (TypeName::new(r#"\A"#), TypeName::new(r#"\B"#));
 
     // Fold `B`.
-    ctx.provider_backend
-        .folded_decl_provider
-        .get_class(B.into(), B)?;
+    ctx.folded_decl_provider.get_class(B.into(), B)?;
     // Retrieve the dependency graph.
-    let depgraph = &ctx.provider_backend.dependency_graph;
+    let depgraph = &ctx.dependency_graph;
 
     // Doing the comparisons on binary search trees avoids issues with hash
     // map/set orderings.
@@ -105,11 +101,9 @@ fn no_constructor_relation_on_hhi_parent(fb: FacebookInit) -> Result<()> {
     let Exception = TypeName::new(r#"\ExceptionA"#);
 
     // Fold `A`.
-    ctx.provider_backend
-        .folded_decl_provider
-        .get_class(A.into(), A)?;
+    ctx.folded_decl_provider.get_class(A.into(), A)?;
     // Retrieve the dependency graph.
-    let depgraph = &ctx.provider_backend.dependency_graph;
+    let depgraph = &ctx.dependency_graph;
 
     // The constructor relation of child on parent isn't observed when parent is
     // an hhi.

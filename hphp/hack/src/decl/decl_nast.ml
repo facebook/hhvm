@@ -35,7 +35,9 @@ let rec fun_naming_and_decl_DEPRECATED
 and fun_decl (ctx : Provider_context.t) (f : Nast.fun_def) : Typing_defs.fun_elt
     =
   let dep = Dep.Fun (snd f.fd_fun.f_name) in
-  let env = { Decl_env.mode = f.fd_mode; droot = Some dep; ctx } in
+  let env =
+    { Decl_env.mode = f.fd_mode; droot = Some dep; droot_member = None; ctx }
+  in
   let module_ = f.fd_module in
   fun_decl_in_env
     env
@@ -151,7 +153,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     tdef
   in
   let dep = Typing_deps.Dep.Type tid in
-  let env = { Decl_env.mode; droot = Some dep; ctx } in
+  let env = { Decl_env.mode; droot = Some dep; droot_member = None; ctx } in
   let td_tparams = List.map params ~f:(FunUtils.type_param env) in
   let td_type = Decl_hint.hint env concrete_type in
   let td_constraint = Option.map tcstr ~f:(Decl_hint.hint env) in
@@ -199,7 +201,9 @@ let const_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
     cst
   in
   let dep = Dep.GConst name in
-  let env = { Decl_env.mode = cst_mode; droot = Some dep; ctx } in
+  let env =
+    { Decl_env.mode = cst_mode; droot = Some dep; droot_member = None; ctx }
+  in
   let cd_type =
     match cst_type with
     | Some h -> Decl_hint.hint env h

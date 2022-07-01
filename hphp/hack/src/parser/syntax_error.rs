@@ -1138,6 +1138,13 @@ pub const invalid_enum_class_label_qualifier: Error = Cow::Borrowed(
 pub const internal_outside_of_module: Error = Cow::Borrowed(
     "`internal` cannot be used outside of a module. Please define a module for this file.",
 );
+pub const module_newtype_outside_of_module: Error = Cow::Borrowed(
+    "`module newtype` type aliases cannot be used outside of a module. Please define a module for this file.",
+);
+
+pub const public_toplevel_outside_of_module: Error = Cow::Borrowed(
+    "`public` on toplevel entities cannot be used outside of a module. Please define a module for this file.",
+);
 
 pub fn module_first_in_file(name: &str) -> Error {
     Cow::Owned(format!(
@@ -1145,3 +1152,6 @@ pub fn module_first_in_file(name: &str) -> Error {
         name
     ))
 }
+
+pub const module_declaration_in_module: Error =
+    Cow::Borrowed("You cannot declare new modules within an existing module");

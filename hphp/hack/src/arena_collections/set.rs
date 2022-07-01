@@ -9,7 +9,7 @@ use crate::map::{Map, MapIter};
 use arena_trait::{Arena, TrivialDrop};
 use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
 
-/// An arena-allocated map.
+/// An arena-allocated set.
 ///
 /// See `Map` for more info.
 #[derive(Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

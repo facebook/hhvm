@@ -34,7 +34,8 @@ let get_name_and_decl_hashes_from_decls decls : (string * Int64.t) list =
       | Shallow_decl_defs.Class _ -> Some (name, decl_hash)
       | _ -> None)
 
-let get_hh_version ~(repo : Path.t) : (string, string) result Future.Promise.t =
+let get_hh_config_version ~(repo : Path.t) :
+    (string, string) result Future.Promise.t =
   let hhconfig_path =
     Path.to_string
       (Path.concat repo Config_file.file_path_relative_to_repo_root)
@@ -56,7 +57,7 @@ let get_hh_version ~(repo : Path.t) : (string, string) result Future.Promise.t =
       let version = "v" ^ String_utils.lstrip version "^" in
       return_ok version
   end
-  >>= fun hh_version -> return_ok hh_version
+  >>= fun hh_config_version -> return_ok hh_config_version
 
 let go
     (env : ServerEnv.env)
@@ -64,15 +65,15 @@ let go
     (workers : MultiWorker.worker list option) : unit =
   let ctx = Provider_utils.ctx_from_server_env env in
   let repo = Wwwroot.get None in
-  let hh_version =
-    match Future.get @@ get_hh_version ~repo with
+  let hh_config_version =
+    match Future.get @@ get_hh_config_version ~repo with
     | Ok (Ok result) -> result
     | Ok (Error e) -> failwith (Printf.sprintf "%s" e)
     | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
   in
   let cmd =
     "manifold mkdirs hack_decl_prefetching/tree/prefetch/"
-    ^ hh_version
+    ^ hh_config_version
     ^ "/shallow_decls"
   in
   ignore (Sys.command cmd);
@@ -134,6 +135,6 @@ let go
       ~next:get_next
   in
 
-  let _ = Remote_old_decls_ffi.put_decls hh_version results in
+  let _ = Remote_old_decls_ffi.put_decls hh_config_version results in
   Hh_logger.log "Processed %d decls" (List.length results);
   ()

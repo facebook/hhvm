@@ -13,7 +13,7 @@ module Reason = Typing_reason
 module Nast = Aast
 
 let class_type r name tyl =
-  mk (r, Tclass ((Reason.to_pos r, name), Nonexact, tyl))
+  mk (r, Tclass ((Reason.to_pos r, name), nonexact, tyl))
 
 let classname r tyl = class_type r SN.Classes.cClassname tyl
 
@@ -213,7 +213,7 @@ let default_capability p : locl_ty =
         class_type r writeProperty [];
         class_type r accessGlobals [];
         class_type r rxLocal [];
-        class_type r system [];
+        class_type r systemLocal [];
         class_type r implicitPolicyLocal [];
         class_type r io [];
       ]

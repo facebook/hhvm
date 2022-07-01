@@ -780,12 +780,6 @@ Nop    []  ->  []
 
   No operation. This instruction does nothing.
 
-EntryNop []  ->  []
-
-  No operation. This instruction is occasionally inserted by the emitter to
-  avoid having jumps to the entry of a function. Contrary to a Nop, EntryNop
-  is guaranteed to not be optimized away.
-
 PopC                  [C]  ->  []
 PopU                  [U]  ->  []
 
@@ -1225,17 +1219,14 @@ Fatal <fatal subop>  [C]  ->  []
 4. Control flow instructions
 ----------------------------
 
+Enter <rel offset>   []  ->  []
+
+  Enter the function body. This instruction is used at the end of default value
+  initializers to transfer control to the function body.
+
 Jmp <rel offset>    []  ->  []
 
   Jump. Transfers control to the location specified by %1.
-
-JmpNS <rel offset>   []  ->  []
-
-  Jump, with no surprise flag checks (NS means "no surprise"). This behaves
-  identically to the Jmp instruction, except that internal VM checks for things
-  like OOM and timeouts do not need to be performed even if the offset is
-  negative.  This instruction cannot have a zero offset (i.e. it cannot jump to
-  itself).
 
 JmpZ <rel offset>    [C]  ->  []
 
@@ -2111,7 +2102,7 @@ PropLD <local variable id>    [B]  ->  [B]
          y->x has been unset previously
     -------+--------------------------------------------------------------------
     00XXXX | null
-    01XXXX | y = new stdclass; create property y->x; y->x
+    01XXXX | y = new stdClass; create property y->x; y->x
     1X0X0X | create property y->x; y->x
     1X0X1X | y->__get(x)
     1X100X | throw fatal error
@@ -2468,7 +2459,7 @@ SetPropL <local variable id>    [C B]  ->  [C]
          y->k has been unset previously
     -------+--------------------------------------------------------------------
     00XXXX | raise warning; push null
-    01XXXX | y = new stdclass; y->k = x; push x
+    01XXXX | y = new stdClass; y->k = x; push x
     1X0X0X | create property y->k; y->k = x; push x
     1X0X1X | y->__set(k, x); push x
     1X100X | throw fatal error
@@ -2501,7 +2492,7 @@ SetOpPropL <op> <local variable id>    [C B]  ->  [C]
           y->k has been unset previously
     --------+-------------------------------------------------------------------
     00XXXXX | raise warning; push null
-    01XXXXX | y = new stdclass; z = null <op> x; y->k = z; push z
+    01XXXXX | y = new stdClass; z = null <op> x; y->k = z; push z
     100X0XX | z = null <op> x; y->k = z; push z
     100X10X | w = y->__get(k); z = w <op> x; y->k = z; push z
     100X11X | w = y->__get(k); z = w <op> x; y->__set(k, z), push z
@@ -2537,7 +2528,7 @@ IncDecPropL <op> <local variable id>    [B]  ->  [C]
           y->x has been unset previously
     --------+-------------------------------------------------------------------
     00XXXXX | raise warning; push null
-    01XXXXX | y = new stdclass; b = null; a = b; <op>a; y->x = a;
+    01XXXXX | y = new stdClass; b = null; a = b; <op>a; y->x = a;
             |   push a (Pre*) or b (Post*)
     100X0XX | b = null; a = b; <op>a; y->x = a; push a (Pre*) or b (Post*)
     100X10X | b = y->__get(x); a = b; <op>a; y->x = a;
@@ -3239,6 +3230,13 @@ RaiseClassStringConversionWarning [] -> []
 SetImplicitContextByValue [C:?Obj] -> [C:?Obj]
 
   Sets the implicit context to %1 and returns the previous implicit context.
+
+VerifyImplicitContextState [] -> []
+
+  Verifies whether the current state of the implicit context is valid with
+  respect to the current calling context. Raises warning or throws an
+  exception if the state is invalid, set to soft implicit context or cleared.
+  Can only be used in memoized wrapper functions.
 
 14. Generator creation and execution
 ---------------------------------------

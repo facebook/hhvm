@@ -39,8 +39,7 @@ val go :
   Relative_path.t list ->
   memory_cap:int option ->
   longlived_workers:bool ->
-  hulk_lite:bool ->
-  hulk_heavy:bool ->
+  mode:HulkStrategy.hulk_mode ->
   check_info:Typing_service_types.check_info ->
   result
 
@@ -56,8 +55,7 @@ val go_with_interrupt :
   interrupt:'env MultiWorker.interrupt_config ->
   memory_cap:int option ->
   longlived_workers:bool ->
-  hulk_lite:bool ->
-  hulk_heavy:bool ->
+  mode:HulkStrategy.hulk_mode ->
   check_info:Typing_service_types.check_info ->
   ('env * result) job_result
 

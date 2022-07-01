@@ -4,17 +4,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{
-    block::BlockIdIterator, instr::Terminator, Attr, Attribute, Block, BlockId, Coeffects,
-    HasEdges, Instr, InstrId, Literal, LiteralId, LocId, SrcLoc, Type, UnitStringId, ValueId,
-    ValueIdMap,
+    block::BlockIdIterator, instr::Terminator, Attr, Attribute, Block, BlockId, BlockIdMap,
+    Coeffects, HasEdges, Instr, InstrId, Literal, LiteralId, LocId, SrcLoc, Type, UnitStringId,
+    ValueId, ValueIdMap,
 };
+
 use ffi::Str;
 use newtype::{newtype_int, IdVec};
 
 pub use hhbc::{
-    hhas_body::HhasBodyEnv, hhas_function::HhasFunctionFlags as FunctionFlags,
-    hhas_method::HhasMethodFlags as MethodFlags, hhas_pos::HhasSpan, FunctionName, MethodName,
-    Visibility,
+    hhas_function::HhasFunctionFlags as FunctionFlags, hhas_method::HhasMethodFlags as MethodFlags,
+    hhas_pos::HhasSpan, FunctionName, MethodName, Visibility,
 };
 
 /// Func parameters.
@@ -132,7 +132,6 @@ impl Default for TryCatchId {
 pub struct Func<'a> {
     pub blocks: IdVec<BlockId, Block>,
     pub doc_comment: Option<Str<'a>>,
-    pub env: Option<HhasBodyEnv<'a>>,
     pub ex_frames: ExFrameIdMap<ExFrame>,
     pub instrs: IdVec<InstrId, Instr>,
     pub is_memoize_wrapper: bool,
@@ -167,6 +166,12 @@ impl<'a> Func<'a> {
     pub fn alloc_instr_in(&mut self, bid: BlockId, i: Instr) -> InstrId {
         let iid = self.alloc_instr(i);
         self.blocks[bid].iids.push(iid);
+        iid
+    }
+
+    pub fn alloc_param_in(&mut self, bid: BlockId) -> InstrId {
+        let iid = self.alloc_instr(Instr::param());
+        self.blocks[bid].params.push(iid);
         iid
     }
 
@@ -316,6 +321,23 @@ impl<'a> Func<'a> {
     pub fn remap_vids(&mut self, remap: &ValueIdMap<ValueId>) {
         for bid in self.block_ids() {
             self.remap_block_vids(bid, remap);
+        }
+    }
+
+    /// Rewrite BlockIds using the remap remapping. Won't renumber the blocks
+    /// themselves (so a remapping with b1 -> b2 won't remap block b1 to b2,
+    /// just references to b1 will be remapped to b2).
+    pub fn remap_bids(&mut self, remap: &BlockIdMap<BlockId>) {
+        for param in &mut self.params {
+            if let Some((bid, _)) = param.default_value.as_mut() {
+                *bid = remap.get(bid).copied().unwrap_or(*bid);
+            }
+        }
+
+        for instr in self.instrs.iter_mut() {
+            for bid in instr.edges_mut() {
+                *bid = remap.get(bid).copied().unwrap_or(*bid);
+            }
         }
     }
 

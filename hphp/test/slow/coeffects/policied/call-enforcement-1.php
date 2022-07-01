@@ -20,6 +20,14 @@ function zoned_with($fn)[zoned_with] {
   if ($fn) $fn(null);
 }
 
+function leak_safe_local($fn)[leak_safe_local] {
+  if ($fn) $fn(null);
+}
+
+function leak_safe_shallow($fn)[leak_safe_shallow] {
+  if ($fn) $fn(null);
+}
+
 function leak_safe($fn)[leak_safe] {
   if ($fn) $fn(null);
 }
@@ -52,6 +60,8 @@ function main()[zoned_with, defaults] {
     'zoned_shallow',
     'zoned',
     'zoned_with',
+    'leak_safe_local',
+    'leak_safe_shallow',
     'leak_safe',
     'globals',
     'read_globals',

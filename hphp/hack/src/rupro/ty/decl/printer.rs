@@ -55,6 +55,11 @@ impl<R: Reason> Display for Ty_<R> {
             Tfun(ft) => write!(f, "{}", ft),
             Tshape(params) => tshape(f, params.0, &params.1),
             Ttuple(tys) => list(f, "(", ", ", ")", tys.iter()),
+            Trefinement(r) => {
+                write!(f, "({} with ", r.ty)?;
+                trefinements(f, &r.typeconsts)?;
+                write!(f, ")")
+            }
             Tunion(tys) => {
                 if tys.len() <= 1 {
                     write!(f, "|")?;
@@ -166,6 +171,33 @@ impl<TY: Display> Display for PossiblyEnforcedTy<TY> {
         }
         write!(f, "{}", self.ty)
     }
+}
+
+fn trefinements<TY: Display>(
+    f: &mut Formatter<'_>,
+    typeconsts: &BTreeMap<pos::TypeConstName, TypeConstRef<TY>>,
+) -> fmt::Result {
+    write!(f, "{{")?;
+    let mut is_first = true;
+    for (name, tr) in typeconsts {
+        if !is_first {
+            write!(f, "; ")?;
+        }
+        is_first = false;
+        write!(f, "type {}", name)?;
+        match tr {
+            TypeConstRef::Exact(ref ty) => write!(f, " = {}", ty)?,
+            TypeConstRef::Loose(lo, hi) => {
+                for ty in lo.iter() {
+                    write!(f, " super {}", ty)?;
+                }
+                for ty in hi.iter() {
+                    write!(f, " as {}", ty)?;
+                }
+            }
+        }
+    }
+    write!(f, "}}")
 }
 
 fn tshape<R: Reason>(

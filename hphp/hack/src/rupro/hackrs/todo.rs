@@ -103,6 +103,8 @@ pub enum RuproTodo {
     Xhp,
     /// Enum class logic not yet implemented.
     EnumClasses,
+    /// Typing errors are not fully implemented
+    TypingError,
 }
 
 macro_rules! rupro_todo_assert {

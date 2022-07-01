@@ -24,7 +24,7 @@ module type Delegate_sig = sig
     raise_on_failure:bool ->
     state
 
-  val start : delegate_env -> state -> bool -> bool -> state
+  val start : delegate_env -> state -> HulkStrategy.hulk_mode -> state
 
   val stop : state -> state
 

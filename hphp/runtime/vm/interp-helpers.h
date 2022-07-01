@@ -217,7 +217,7 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
  * Check for too few or too many arguments and trim extra args.
  */
 inline void calleeArgumentArityChecks(const Func* callee,
-                                      uint32_t numArgsInclUnpack) {
+                                      uint32_t& numArgsInclUnpack) {
   if (numArgsInclUnpack < callee->numRequiredParams()) {
     throwMissingArgument(callee, numArgsInclUnpack);
   }
@@ -225,6 +225,7 @@ inline void calleeArgumentArityChecks(const Func* callee,
   if (numArgsInclUnpack > callee->numParams()) {
     assertx(!callee->hasVariadicCaptureParam());
     assertx(numArgsInclUnpack == callee->numNonVariadicParams() + 1);
+    --numArgsInclUnpack;
 
     GenericsSaver gs{callee->hasReifiedGenerics()};
 
@@ -233,17 +234,17 @@ inline void calleeArgumentArityChecks(const Func* callee,
     vmStack().popC();
 
     if (numUnpackArgs != 0) {
-      raiseTooManyArguments(callee, numArgsInclUnpack + numUnpackArgs - 1);
+      raiseTooManyArguments(callee, numArgsInclUnpack + numUnpackArgs);
     }
   }
 }
 
 inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
-  assertx(numArgsInclUnpack <= callee->numNonVariadicParams() + 1);
+  assertx(numArgsInclUnpack <= callee->numParams());
 
   // All arguments already initialized. Extra arguments already popped
   // by calleeArgumentArityChecks().
-  if (LIKELY(numArgsInclUnpack >= callee->numParams())) return;
+  if (LIKELY(numArgsInclUnpack == callee->numParams())) return;
 
   CoeffectsSaver cs{callee->hasCoeffectsLocal()};
   GenericsSaver gs{callee->hasReifiedGenerics()};

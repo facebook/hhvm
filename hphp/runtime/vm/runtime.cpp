@@ -424,7 +424,8 @@ void raiseCoeffectsFunParamCoeffectRulesViolation(const Func* f) {
 void raiseModuleBoundaryViolation(const Class* cls,
                                   const Func* callee,
                                   const StringData* callerModule) {
-  assertx(cls && callee);
+  assertx(callee);
+  assertx(IMPLIES(callee->isMethod(), cls));
   assertx(callee->isInternal());
   // Internal functions must always have a module
   assertx(callee->moduleName());
@@ -434,7 +435,7 @@ void raiseModuleBoundaryViolation(const Class* cls,
       ? folly::sformat("method {}::{}", cls->name(), callee->name())
       : folly::sformat("function {}", callee->name());
     return folly::sformat(
-      "Calling internal {} in module {} from {} is not allowed",
+      "Accessing internal {} in module {} from {} is not allowed",
       calleeName,
       callee->moduleName(),
       callerModule
@@ -446,6 +447,14 @@ void raiseModuleBoundaryViolation(const Class* cls,
   } else if (RO::EvalEnforceModules > 1) {
     SystemLib::throwModuleBoundaryViolationExceptionObject(errMsg());
   }
+}
+
+void raiseImplicitContextStateInvalidException(const Func* func) {
+  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+    "{} is a [defaults] memoized function, "
+    "but it is called with an active implicit context",
+    func->fullName()
+  ));
 }
 
 //////////////////////////////////////////////////////////////////////

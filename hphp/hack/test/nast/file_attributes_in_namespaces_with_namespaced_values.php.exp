@@ -62,7 +62,7 @@
        c_consts =
        [{ cc_user_attributes = []; cc_type = (Some ([9:11-17], (Hprim Tstring))); 
           cc_id = ([9:18-32], "MY_CLASS_CONST"); cc_kind = (CCConcrete ((), [9:35-57], (String "my class const value"))); 
-          cc_doc_comment = None }
+          cc_span = [9:5-57]; cc_doc_comment = None }
          ];
        c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
        c_xhp_children = []; c_xhp_attrs = [];

@@ -12,7 +12,6 @@
    gc_profiling
    getrusage
    handle_stubs
-   nproc
    priorities
    processor_info
    realpath

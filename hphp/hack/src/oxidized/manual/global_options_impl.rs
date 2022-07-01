@@ -120,6 +120,7 @@ impl Default for GlobalOptions {
             tco_math_new_code: false,
             tco_typeconst_concrete_concrete_error: false,
             tco_enable_strict_const_semantics: 0,
+            tco_strict_wellformedness: 0,
             tco_meth_caller_only_public_visibility: true,
             tco_require_extends_implements_ancestors: false,
             tco_strict_value_equality: false,
@@ -137,6 +138,8 @@ impl Default for GlobalOptions {
             tco_allow_all_files_for_module_declarations: false,
             tco_allowed_files_for_module_declarations: vec![],
             tco_use_manifold_cython_client: false,
+            tco_record_fine_grained_dependencies: false,
+            tco_loop_iteration_upper_bound: None,
         }
     }
 }

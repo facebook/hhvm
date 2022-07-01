@@ -29,11 +29,11 @@ type message =
 
 type message_queue = message Lwt_message_queue.t
 
-exception Outfd_write_error
+exception Outfd_write_error of string * string
 
 let is_outfd_write_error (exn : Exception.t) : bool =
   match Exception.unwrap exn with
-  | Outfd_write_error -> true
+  | Outfd_write_error _ -> true
   | _ -> false
 
 (** istate, "initialized state", is the state the daemon after it has
@@ -221,7 +221,8 @@ let write_message
     let%lwt (_ : int) = Marshal_tools_lwt.to_fd_with_preamble out_fd message in
     Lwt.return_unit
   with
-  | Unix.Unix_error (Unix.EPIPE, _, _) -> raise Outfd_write_error
+  | Unix.Unix_error (Unix.EPIPE, fn, param) ->
+    raise @@ Outfd_write_error (fn, param)
 
 let load_saved_state
     (ctx : Provider_context.t)
@@ -445,7 +446,13 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
 
   (* We need shallow class declarations so that we can invalidate individual
      members in a class hierarchy. *)
-  let tcopt = { tcopt with GlobalOptions.tco_shallow_class_decl = true } in
+  let tcopt =
+    {
+      tcopt with
+      GlobalOptions.tco_shallow_class_decl =
+        local_config.ServerLocalConfig.ide_use_shallow_decls;
+    }
+  in
 
   let start_time = log_startup_time "basic_startup" start_time in
   let sienv =

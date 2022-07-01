@@ -861,6 +861,7 @@ module WithToken (Token : TokenType) = struct
           {
             alias_attribute_spec;
             alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -871,6 +872,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         let acc = f acc alias_attribute_spec in
         let acc = f acc alias_modifiers in
+        let acc = f acc alias_module_kw_opt in
         let acc = f acc alias_keyword in
         let acc = f acc alias_name in
         let acc = f acc alias_generic_parameter in
@@ -2572,6 +2574,7 @@ module WithToken (Token : TokenType) = struct
           {
             alias_attribute_spec;
             alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -2583,6 +2586,7 @@ module WithToken (Token : TokenType) = struct
         [
           alias_attribute_spec;
           alias_modifiers;
+          alias_module_kw_opt;
           alias_keyword;
           alias_name;
           alias_generic_parameter;
@@ -4185,6 +4189,7 @@ module WithToken (Token : TokenType) = struct
           {
             alias_attribute_spec;
             alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -4196,6 +4201,7 @@ module WithToken (Token : TokenType) = struct
         [
           "alias_attribute_spec";
           "alias_modifiers";
+          "alias_module_kw_opt";
           "alias_keyword";
           "alias_name";
           "alias_generic_parameter";
@@ -5926,6 +5932,7 @@ module WithToken (Token : TokenType) = struct
           [
             alias_attribute_spec;
             alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -5938,6 +5945,7 @@ module WithToken (Token : TokenType) = struct
           {
             alias_attribute_spec;
             alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -7792,6 +7800,7 @@ module WithToken (Token : TokenType) = struct
       let make_alias_declaration
           alias_attribute_spec
           alias_modifiers
+          alias_module_kw_opt
           alias_keyword
           alias_name
           alias_generic_parameter
@@ -7804,6 +7813,7 @@ module WithToken (Token : TokenType) = struct
             {
               alias_attribute_spec;
               alias_modifiers;
+              alias_module_kw_opt;
               alias_keyword;
               alias_name;
               alias_generic_parameter;

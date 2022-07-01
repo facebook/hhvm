@@ -17,22 +17,24 @@ pub fn make_shallow_decl_store<R: Reason>(opts: StoreOpts) -> ShallowDeclStore<R
     match opts {
         StoreOpts::Serialized(compression_type) => {
             ShallowDeclStore::new(
-                Arc::new(SerializingStore::with_compression(compression_type)), // types
-                Box::new(SerializingStore::with_compression(compression_type)), // funs
-                Box::new(SerializingStore::with_compression(compression_type)), // consts
-                Box::new(SerializingStore::with_compression(compression_type)), // modules
-                Box::new(SerializingStore::with_compression(compression_type)), // properties
-                Box::new(SerializingStore::with_compression(compression_type)), // static_properties
-                Box::new(SerializingStore::with_compression(compression_type)), // methods
-                Box::new(SerializingStore::with_compression(compression_type)), // static_methods
-                Box::new(SerializingStore::with_compression(compression_type)), // constructors
+                Arc::new(SerializingStore::with_compression(compression_type)), // classes
+                Arc::new(SerializingStore::with_compression(compression_type)), // typedefs
+                Arc::new(SerializingStore::with_compression(compression_type)), // funs
+                Arc::new(SerializingStore::with_compression(compression_type)), // consts
+                Arc::new(SerializingStore::with_compression(compression_type)), // modules
+                Arc::new(SerializingStore::with_compression(compression_type)), // properties
+                Arc::new(SerializingStore::with_compression(compression_type)), // static_properties
+                Arc::new(SerializingStore::with_compression(compression_type)), // methods
+                Arc::new(SerializingStore::with_compression(compression_type)), // static_methods
+                Arc::new(SerializingStore::with_compression(compression_type)), // constructors
             )
         }
         StoreOpts::Unserialized => ShallowDeclStore::with_no_member_stores(
-            Arc::new(NonEvictingStore::default()),
-            Box::new(NonEvictingStore::default()),
-            Box::new(NonEvictingStore::default()),
-            Box::new(NonEvictingStore::default()),
+            Arc::new(NonEvictingStore::default()), // classes
+            Arc::new(NonEvictingStore::default()), // typedefs
+            Arc::new(NonEvictingStore::default()), // funs
+            Arc::new(NonEvictingStore::default()), // consts
+            Arc::new(NonEvictingStore::default()), // modules
         ),
     }
 }

@@ -128,7 +128,7 @@ Class* s_MethCallerHelperClass;
 Class* s_DynMethCallerHelperClass;
 
 Object AllocStdClassObject() {
-  return Object{s_stdclassClass};
+  return Object{s_stdClassClass};
 }
 
 Object AllocPinitSentinel() {

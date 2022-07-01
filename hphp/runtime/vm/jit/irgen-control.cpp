@@ -86,12 +86,12 @@ void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitJmp(IRGS& env, Offset relOffset) {
-  surpriseCheck(env, relOffset);
+void emitEnter(IRGS& env, Offset relOffset) {
   jmpImpl(env, bcOff(env) + relOffset);
 }
 
-void emitJmpNS(IRGS& env, Offset relOffset) {
+void emitJmp(IRGS& env, Offset relOffset) {
+  surpriseCheck(env, relOffset);
   jmpImpl(env, bcOff(env) + relOffset);
 }
 

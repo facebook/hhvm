@@ -8220,24 +8220,27 @@
         }
       },
       {
+        "kind":"error",
+        "error_error":{
+          "kind":"token",
+          "token":{
+            "kind":"public",
+            "text":"public",
+            "offset":2282,
+            "leading_width":0,
+            "width":6,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":108
+          }
+        }
+      },
+      {
         "kind":"expression_statement",
         "expression_statement_expression":{
-          "kind":"function_call_expression",
-          "function_call_receiver":{
-            "kind":"token",
-            "token":{
-              "kind":"public",
-              "text":"public",
-              "offset":2282,
-              "leading_width":0,
-              "width":6,
-              "trailing_width":0,
-              "leading":[],
-              "trailing":[],
-              "line_number":108
-            }
-          },
-          "function_call_left_paren":{
+          "kind":"parenthesized_expression",
+          "parenthesized_expression_left_paren":{
             "kind":"token",
             "token":{
               "kind":"(",
@@ -8251,7 +8254,7 @@
               "line_number":108
             }
           },
-          "function_call_right_paren":{
+          "parenthesized_expression_expression":{
             "kind":"token",
             "token":{
               "kind":")",

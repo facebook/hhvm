@@ -51,7 +51,9 @@ let decl_DEPRECATED (ctx : Provider_context.t) (class_ : Nast.class_) :
   let (_, name) = class_.Aast.c_name in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Rust_provider_backend _ ->
+    failwith
+      "Rust_provider_backend: Shallow_classes_provider.decl_DEPRECATED not supported"
   | Provider_backend.Shared_memory ->
     let decl = class_naming_and_decl_DEPRECATED ctx class_ in
     if shallow_decl_enabled ctx && not (Shallow_classes_heap.Classes.mem name)
@@ -75,7 +77,8 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
     (match Shallow_classes_heap.Classes.get name with
     | Some _ as decl_opt -> decl_opt
     | None -> failwith (Printf.sprintf "failed to get shallow class %S" name))
-  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_shallow_class backend name
   | Provider_backend.Shared_memory ->
     (match Shallow_classes_heap.Classes.get name with
     | Some _ as decl_opt -> decl_opt
@@ -212,7 +215,7 @@ let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
 
 let remove_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Analysis
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.Classes.remove_batch names;

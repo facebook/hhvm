@@ -1,0 +1,10 @@
+<?hh
+
+<<file:__EnableUnstableFeatures("modules")>>
+module a;
+
+internal function foo() { echo "in f\n"; }
+
+class C {
+  static internal function foo_static() { echo "in f_static\n"; }
+}

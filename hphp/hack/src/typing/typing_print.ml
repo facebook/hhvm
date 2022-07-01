@@ -82,6 +82,8 @@ module Full = struct
 
   let comma_sep = Concat [text ","; Space]
 
+  let semi_sep = Concat [text ";"; Space]
+
   let id ~fuel x = (fuel, x)
 
   let list_sep
@@ -141,7 +143,7 @@ module Full = struct
     let fields = List.sort ~compare (TShapeMap.bindings fdm) in
     List.fold_map fields ~f:f_field ~init:fuel
 
-  let rec fun_type ~fuel ~ty to_doc st penv ft =
+  let rec fun_type ~fuel ~ty to_doc st penv ft fun_implicit_params =
     let n = List.length ft.ft_params in
     let (fuel, params) =
       List.fold_mapi ft.ft_params ~init:fuel ~f:(fun i fuel p ->
@@ -162,15 +164,19 @@ module Full = struct
       | (l, FTKinstantiated_targs) ->
         list ~fuel "<" (tparam ~ty to_doc st penv) l ">"
     in
-    let (fuel, params_doc) = list ~fuel "(" id params "):" in
     let (fuel, return_doc) =
       possibly_enforced_ty ~fuel ~ty to_doc st penv ft.ft_ret
     in
+    let (fuel, capabilities_doc) =
+      fun_implicit_params ~fuel to_doc st penv ft.ft_implicit_params
+    in
+    let (fuel, params_doc) = list ~fuel "(" id params ")" in
     let tparams_doc =
       Span
         [
           tparams_doc;
           params_doc;
+          capabilities_doc;
           Space;
           (if get_ft_returns_readonly ft then
             text "readonly" ^^ Space
@@ -284,7 +290,7 @@ module Full = struct
 
   let tprim x = text @@ Aast_defs.string_of_tprim x
 
-  let tfun ~fuel ~ty to_doc st penv ft =
+  let tfun ~fuel ~ty to_doc st penv ft fun_implicit_params =
     let sdt =
       match penv with
       | Loclenv env when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
@@ -295,7 +301,9 @@ module Full = struct
           Nothing
       | _ -> Nothing
     in
-    let (fuel, fun_type_doc) = fun_type ~fuel ~ty to_doc st penv ft in
+    let (fuel, fun_type_doc) =
+      fun_type ~fuel ~ty to_doc st penv ft fun_implicit_params
+    in
     let tfun_doc =
       Concat
         [
@@ -349,6 +357,36 @@ module Full = struct
       | Open_shape -> fields_doc @ [text "..."]
     in
     list ~fuel "shape(" id fields_doc ")"
+
+  let refinement (type a) ~fuel k ({ cr_types = trs } : a class_refinement) =
+    let tref ~fuel (name, (tr : a class_type_refinement)) =
+      let (fuel, tr_doc) =
+        match tr with
+        | Texact ty ->
+          let (fuel, ty_doc) = k ~fuel ty in
+          (fuel, Concat [text "= "; ty_doc])
+        | Tloose { tr_lower = ls; tr_upper = us } ->
+          let bound kind (fuel, docs) ty =
+            let (fuel, ty_doc) = k ~fuel ty in
+            (fuel, (text (kind ^ " ") ^^ ty_doc) :: docs)
+          in
+          let (fuel, docs) = List.fold ~init:(fuel, []) ~f:(bound "super") ls in
+          let (fuel, docs) = List.fold ~init:(fuel, docs) ~f:(bound "as") us in
+          list_sep ~fuel Space id docs
+      in
+      (fuel, text ("type " ^ name ^ " ") ^^ tr_doc)
+    in
+    delimited_list ~fuel semi_sep "{" tref (SMap.bindings trs) "}"
+
+  let refinements ~fuel k e =
+    match e with
+    | Exact -> (fuel, Nothing)
+    | Nonexact r ->
+      if Class_refinement.is_empty r then
+        (fuel, Nothing)
+      else
+        let (fuel, r_doc) = refinement ~fuel k r in
+        (fuel, Concat [Space; text "with"; Space; r_doc])
 
   let thas_member ~fuel k hm =
     let { hm_name = (_, name); hm_type; hm_class_id = _; hm_explicit_targs } =
@@ -488,6 +526,10 @@ module Full = struct
       let (fuel, root_ty_doc) = k ~fuel root_ty in
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
       (fuel, access_doc)
+    | Trefinement (root_ty, r) ->
+      let (fuel, root_ty_doc) = k ~fuel root_ty in
+      let (fuel, rs_doc) = refinement ~fuel k r in
+      (fuel, root_ty_doc ^^ text " with " ^^ rs_doc)
     | Toption x ->
       let (fuel, ty_doc) = k ~fuel x in
       let option_doc = Concat [text "?"; ty_doc] in
@@ -498,7 +540,7 @@ module Full = struct
       (fuel, like_doc)
     | Tprim x -> (fuel, tprim x)
     | Tvar x -> (fuel, text (Printf.sprintf "#%d" x))
-    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft
+    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft fun_decl_implicit_params
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
     | Tapply ((_, s), tyl)
@@ -516,6 +558,10 @@ module Full = struct
       let intersection_doc = Concat [text "&"; tys_doc] in
       (fuel, intersection_doc)
     | Tshape (shape_kind, fdm) -> tshape ~fuel k to_doc shape_kind fdm
+
+  (* TODO (T86471586): Display capabilities that are decls for functions *)
+  and fun_decl_implicit_params ~fuel _to_doc _st _penv _implicit_param =
+    (fuel, text ":")
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam penv tparam =
@@ -576,9 +622,6 @@ module Full = struct
     | Tdynamic -> (fuel, text "dynamic")
     | Tnonnull -> (fuel, text "nonnull")
     | Tvec_or_dict (x, y) -> list ~fuel "vec_or_dict<" k [x; y] ">"
-    | Tclass ((_, s), Exact, []) when !debug_mode ->
-      (fuel, Concat [text "exact"; Space; to_doc s])
-    | Tclass ((_, s), _, []) -> (fuel, to_doc s)
     | Toption ty ->
       begin
         match deref ty with
@@ -631,10 +674,16 @@ module Full = struct
           let (fuel, ty_doc) = ty ~fuel to_doc st penv ety in
           (fuel, Concat [prepend; ty_doc])
       end
-    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft
+    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft fun_locl_implicit_params
     | Tclass ((_, s), exact, tyl) ->
-      let (fuel, targs_doc) = list ~fuel "<" k tyl ">" in
-      let class_doc = to_doc s ^^ targs_doc in
+      let (fuel, targs_doc) =
+        if List.is_empty tyl then
+          (fuel, Nothing)
+        else
+          list ~fuel "<" k tyl ">"
+      in
+      let (fuel, with_doc) = refinements ~fuel k exact in
+      let class_doc = to_doc s ^^ targs_doc ^^ with_doc in
       let class_doc =
         match exact with
         | Exact when !debug_mode -> Concat [text "exact"; Space; class_doc]
@@ -839,6 +888,29 @@ module Full = struct
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
       (fuel, access_doc)
 
+  and fun_locl_implicit_params ~fuel to_doc st penv { capability } =
+    match capability with
+    | CapDefaults _ -> (fuel, text ":")
+    | CapTy t ->
+      let default_capability : locl_ty =
+        Typing_make_type.default_capability Pos_or_decl.none
+      in
+      if ty_equal ~normalize_lists:true t default_capability then
+        (fuel, text ":")
+      else
+        let (fuel, capabilities) =
+          match get_node t with
+          | Tintersection [] -> (fuel, Nothing)
+          | Toption t ->
+            begin
+              match deref t with
+              | (_, Tnonnull) -> (fuel, Nothing)
+              | _ -> locl_ty ~fuel to_doc st penv t
+            end
+          | _ -> locl_ty ~fuel to_doc st penv t
+        in
+        (fuel, Concat [text "["; capabilities; text "]:"])
+
   let rec constraint_type_ ~fuel to_doc st penv x =
     let k ~fuel lty = locl_ty ~fuel to_doc st penv lty in
     let k' ~fuel cty = constraint_type ~fuel to_doc st penv cty in
@@ -938,19 +1010,23 @@ module Full = struct
 
   let fun_to_string ~fuel (x : decl_fun_type) =
     let ty = decl_ty in
-    let (fuel, doc) = fun_type ~fuel ~ty Doc.text ISet.empty Declenv x in
+    let (fuel, doc) =
+      fun_type ~fuel ~ty Doc.text ISet.empty Declenv x fun_decl_implicit_params
+    in
     let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
     (fuel, str)
 
   let to_string_with_identity ~fuel env x occurrence definition_opt =
+    let open SymbolOccurrence in
     let ty = locl_ty in
     let penv = Loclenv env in
     let prefix =
       SymbolDefinition.(
         let print_mod m = text (string_of_modifier m) ^^ Space in
-        match definition_opt with
-        | None -> Nothing
-        | Some def ->
+        match (definition_opt, occurrence.type_) with
+        | (None, _) -> Nothing
+        | (_, XhpLiteralAttr _) -> Nothing
+        | (Some def, _) ->
           begin
             match def.modifiers with
             | [] -> Nothing
@@ -960,30 +1036,53 @@ module Full = struct
           end)
     in
     let (fuel, body_doc) =
-      SymbolOccurrence.(
-        match (occurrence, get_node x) with
-        | ({ type_ = Class _; name; _ }, _) ->
-          (fuel, Concat [text "class"; Space; text_strip_ns name])
-        | ({ type_ = Function; name; _ }, Tfun ft)
-        | ({ type_ = Method (_, name); _ }, Tfun ft) ->
-          (* Use short names for function types since they display a lot more
-             information to the user. *)
-          let (fuel, fun_ty_doc) =
-            fun_type ~fuel ~ty text_strip_ns ISet.empty penv ft
-          in
-          let fun_doc =
-            Concat [text "function"; Space; text_strip_ns name; fun_ty_doc]
-          in
-          (fuel, fun_doc)
-        | ({ type_ = Property _; name; _ }, _)
-        | ({ type_ = XhpLiteralAttr _; name; _ }, _)
-        | ({ type_ = ClassConst _; name; _ }, _)
-        | ({ type_ = GConst; name; _ }, _)
-        | ({ type_ = EnumClassLabel _; name; _ }, _) ->
-          let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
-          let doc = Concat [ty_doc; Space; text_strip_ns name] in
-          (fuel, doc)
-        | _ -> ty ~fuel text_strip_ns ISet.empty penv x)
+      match (occurrence, get_node x) with
+      | ({ type_ = Class _; name; _ }, _) ->
+        (fuel, Concat [text "class"; Space; text_strip_ns name])
+      | ({ type_ = Function; name; _ }, Tfun ft)
+      | ({ type_ = Method (_, name); _ }, Tfun ft) ->
+        (* Use short names for function types since they display a lot more
+           information to the user. *)
+        let (fuel, fun_ty_doc) =
+          fun_type
+            ~fuel
+            ~ty
+            text_strip_ns
+            ISet.empty
+            penv
+            ft
+            fun_locl_implicit_params
+        in
+        let fun_doc =
+          Concat [text "function"; Space; text_strip_ns name; fun_ty_doc]
+        in
+        (fuel, fun_doc)
+      | ({ type_ = Property (_, name); _ }, _) ->
+        let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+        let name =
+          if String.is_prefix name ~prefix:"$" then
+            (* Static property *)
+            name
+          else
+            (* Instance property *)
+            "$" ^ name
+        in
+        let doc = Concat [ty_doc; Space; Doc.text name] in
+        (fuel, doc)
+      | ({ type_ = XhpLiteralAttr _; name; _ }, _) ->
+        let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+        let doc =
+          Concat
+            [Doc.text "attribute"; Space; ty_doc; Space; text_strip_ns name]
+        in
+        (fuel, doc)
+      | ({ type_ = ClassConst _; name; _ }, _)
+      | ({ type_ = GConst; name; _ }, _)
+      | ({ type_ = EnumClassLabel _; name; _ }, _) ->
+        let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+        let doc = Concat [ty_doc; Space; text_strip_ns name] in
+        (fuel, doc)
+      | _ -> ty ~fuel text_strip_ns ISet.empty penv x
     in
     let (fuel, constraints) = constraints_for_type ~fuel text_strip_ns env x in
     let str =
@@ -1001,8 +1100,7 @@ let with_blank_tyvars f =
   res
 
 (*****************************************************************************)
-(* Computes the string representing a type in an error message.
- *)
+(* Computes the string representing a type in an error message.              *)
 (*****************************************************************************)
 
 module ErrorString = struct
@@ -1018,8 +1116,12 @@ module ErrorString = struct
     | Nast.Tarraykey -> "an array key (int | string)"
     | Nast.Tnoreturn -> "noreturn (throws or exits)"
 
-  let rec type_ ~fuel ?(ignore_dynamic = false) env ty =
-    match ty with
+  let rec type_ ~fuel ?(ignore_dynamic = false) env ety =
+    let ety_to_string ety =
+      with_blank_tyvars (fun () ->
+          Full.to_string_strip_ns ~fuel ~ty:Full.locl_ty (Loclenv env) ety)
+    in
+    match get_node ety with
     | Tany _ -> (fuel, "an untyped value")
     | Terr -> (fuel, "a type error")
     | Tdynamic -> (fuel, "a dynamic value")
@@ -1041,26 +1143,28 @@ module ErrorString = struct
     | Tprim tp -> (fuel, tprim tp)
     | Tvar _ -> (fuel, "some value")
     | Tfun _ -> (fuel, "a function")
-    | Tgeneric (s, tyl) when DependentKind.is_generic_dep_ty s ->
-      let (fuel, tyl_str) = inst ~fuel env tyl in
-      (fuel, "the expression dependent type " ^ s ^ tyl_str)
-    | Tgeneric (x, tyl) ->
-      let (fuel, tyl_str) = inst ~fuel env tyl in
-      (fuel, "a value of generic type " ^ x ^ tyl_str)
+    | Tgeneric (s, _) when DependentKind.is_generic_dep_ty s ->
+      let (fuel, ty_str) = ety_to_string ety in
+      (fuel, "the expression dependent type " ^ ty_str)
+    | Tgeneric _ ->
+      let (fuel, ty_str) = ety_to_string ety in
+      (fuel, "a value of generic type " ^ ty_str)
     | Tnewtype (x, _, _) when String.equal x SN.Classes.cClassname ->
       (fuel, "a classname string")
     | Tnewtype (x, _, _) when String.equal x SN.Classes.cTypename ->
       (fuel, "a typename string")
-    | Tnewtype (x, tyl, _) ->
-      let (fuel, tyl_str) = inst ~fuel env tyl in
-      (fuel, "a value of type " ^ strip_ns x ^ tyl_str)
+    | Tnewtype _ ->
+      let (fuel, ty_str) = ety_to_string ety in
+      (fuel, "a value of type " ^ ty_str)
     | Tdependent (dep, _cstr) -> (fuel, dependent dep)
-    | Tclass ((_, x), Exact, tyl) ->
-      let (fuel, tyl_str) = inst ~fuel env tyl in
-      (fuel, "an object of exactly the class " ^ strip_ns x ^ tyl_str)
-    | Tclass ((_, x), Nonexact, tyl) ->
-      let (fuel, tyl_str) = inst ~fuel env tyl in
-      (fuel, "an object of type " ^ strip_ns x ^ tyl_str)
+    | Tclass (_, e, _) ->
+      let (fuel, ty_str) = ety_to_string ety in
+      let prefix =
+        match e with
+        | Exact -> "an object of exactly the class "
+        | Nonexact _ -> "an object of type "
+      in
+      (fuel, prefix ^ ty_str)
     | Tshape _ -> (fuel, "a shape")
     | Tunapplied_alias _ ->
       (* FIXME it seems like this function is only for
@@ -1071,18 +1175,6 @@ module ErrorString = struct
     | Taccess (_ty, _id) -> (fuel, "a type constant")
     | Tneg (Neg_prim p) -> (fuel, "anything but a " ^ tprim p)
     | Tneg (Neg_class (_, c)) -> (fuel, "anything but a " ^ strip_ns c)
-
-  and inst ~fuel env tyl =
-    if List.is_empty tyl then
-      (fuel, "")
-    else
-      with_blank_tyvars (fun () ->
-          let (fuel, arg_strs) =
-            List.fold_map tyl ~init:fuel ~f:(fun fuel ->
-                Full.to_string_strip_ns ~fuel ~ty:Full.locl_ty (Loclenv env))
-          in
-          let str = "<" ^ String.concat ~sep:", " arg_strs ^ ">" in
-          (fuel, str))
 
   and dependent dep =
     let x = strip_ns @@ DependentKind.to_string dep in
@@ -1141,7 +1233,7 @@ module ErrorString = struct
 
   and to_string ~fuel ?(ignore_dynamic = false) env ty =
     let (_, ety) = Typing_inference_env.expand_type env.inference_env ty in
-    type_ ~fuel ~ignore_dynamic env (get_node ety)
+    type_ ~fuel ~ignore_dynamic env ety
 end
 
 module Json = struct
@@ -1159,11 +1251,21 @@ module Json = struct
   let rec from_type : env -> locl_ty -> json =
    fun env ty ->
     (* Helpers to construct fields that appear in JSON rendering of type *)
+    let obj x = JSON_Object x in
     let kind p k = [("src_pos", Pos_or_decl.json p); ("kind", JSON_String k)] in
     let args tys = [("args", JSON_Array (List.map tys ~f:(from_type env)))] in
+    let refs e =
+      match e with
+      | Exact -> []
+      | Nonexact r when Class_refinement.is_empty r -> []
+      | Nonexact { cr_types = trs } ->
+        let ref (id, (Texact ty : locl_type_refinement)) =
+          obj [("type", JSON_String id); ("equal", from_type env ty)]
+        in
+        [("refs", JSON_Array (List.map (SMap.bindings trs) ~f:ref))]
+    in
     let typ ty = [("type", from_type env ty)] in
     let result ty = [("result", from_type env ty)] in
-    let obj x = JSON_Object x in
     let name x = [("name", JSON_String x)] in
     let optional x = [("optional", JSON_Bool x)] in
     let is_array x = [("is_array", JSON_Bool x)] in
@@ -1227,8 +1329,8 @@ module Json = struct
     | (p, Tneg (Neg_prim tp)) ->
       obj @@ kind p "negation" @ name (Aast_defs.string_of_tprim tp)
     | (p, Tneg (Neg_class (_, c))) -> obj @@ kind p "negation" @ name c
-    | (p, Tclass ((_, cid), _, tys)) ->
-      obj @@ kind p "class" @ name cid @ args tys
+    | (p, Tclass ((_, cid), e, tys)) ->
+      obj @@ kind p "class" @ name cid @ args tys @ refs e
     | (p, Tshape (shape_kind, fl)) ->
       let fields_known =
         match shape_kind with
@@ -1318,7 +1420,6 @@ module Json = struct
   let wrong_phase ~message ~keytrace =
     Error (Wrong_phase (message ^ Hh_json.Access.keytrace_to_string keytrace))
 
-  (* TODO(T36532263) add PU stuff in here *)
   let to_locl_ty
       ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json) :
       deserialized_result =
@@ -1458,9 +1559,15 @@ module Json = struct
           in
           get_array "args" (json, keytrace) >>= fun (args, _args_keytrace) ->
           aux_args args ~keytrace >>= fun tyl ->
-          (* NB: "class" could have come from either a `Tapply` or a `Tclass`. Right
-           * now, we always return a `Tclass`. *)
-          ty (Tclass ((class_pos, name), Nonexact, tyl))
+          let refs =
+            match get_array "refs" (json, keytrace) with
+            | Ok (l, _) -> l
+            | Error _ -> []
+          in
+          aux_refs refs ~keytrace >>= fun rs ->
+          (* NB: "class" could have come from either a `Tapply` or a `Tclass`.
+           * Right now, we always return a `Tclass`. *)
+          ty (Tclass ((class_pos, name), Nonexact rs, tyl))
         | "shape" ->
           get_array "fields" (json, keytrace)
           >>= fun (fields, fields_keytrace) ->
@@ -1620,6 +1727,17 @@ module Json = struct
         (args : Hh_json.json list) ~(keytrace : Hh_json.Access.keytrace) :
         (locl_ty list, deserialization_error) result =
       map_array args ~keytrace ~f:aux
+    and aux_refs
+        (refs : Hh_json.json list) ~(keytrace : Hh_json.Access.keytrace) :
+        (locl_class_refinement, deserialization_error) result =
+      let of_type_refs trs = { cr_types = SMap.of_list trs } in
+      Result.map ~f:of_type_refs (map_array refs ~keytrace ~f:aux_ref)
+    and aux_ref (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
+        (string * locl_type_refinement, deserialization_error) result =
+      Result.Monad_infix.(
+        get_string "type" (json, keytrace) >>= fun (id, _) ->
+        get_obj "equal" (json, keytrace) >>= fun (ty_json, ty_keytrace) ->
+        aux ty_json ~keytrace:ty_keytrace >>= fun ty -> Ok (id, Texact ty))
     and aux_as (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
         (locl_ty, deserialization_error) result =
       Result.Monad_infix.(

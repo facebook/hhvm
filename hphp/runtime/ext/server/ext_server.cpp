@@ -210,6 +210,7 @@ bool HHVM_FUNCTION(server_is_stopping) {
 }
 
 bool HHVM_FUNCTION(server_is_prepared_to_stop) {
+  if (isJitSerializing()) return true;
   auto const now = time(nullptr);
   auto const lastPrepareTime = HttpServer::GetPrepareToStopTime();
   if (lastPrepareTime == 0) return false;

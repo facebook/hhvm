@@ -61,32 +61,6 @@ let _ = show_forward_naming_table_delta
 
 let _ = show_local_changes
 
-module StatementCache = struct
-  type t = {
-    db: Sqlite3.db;
-    statements: (string, Sqlite3.stmt) Hashtbl.t;
-  }
-
-  let make ~db = { db; statements = Hashtbl.Poly.create () }
-
-  (** Prepared statements must be finalized before we can close the database
-  connection, or else an exception is thrown. Call this function before
-  attempting `Sqlite3.close_db`. *)
-  let close t =
-    Hashtbl.iter t.statements ~f:(fun stmt ->
-        Sqlite3.finalize stmt |> check_rc t.db);
-    Hashtbl.clear t.statements
-
-  let make_stmt t query =
-    let stmt =
-      Hashtbl.find_or_add t.statements query ~default:(fun () ->
-          Sqlite3.prepare t.db query)
-    in
-    (* Clear any previous bindings for prepared statement parameters. *)
-    Sqlite3.reset stmt |> check_rc t.db;
-    stmt
-end
-
 let make_relative_path ~prefix_int ~suffix =
   let prefix =
     let open Option in

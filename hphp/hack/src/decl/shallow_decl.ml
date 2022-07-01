@@ -63,6 +63,7 @@ let class_const env (cc : Nast.class_const) =
     cc_id = name;
     cc_type = h;
     cc_kind = k;
+    cc_span = _;
     cc_doc_comment = _;
     cc_user_attributes = _;
   } =
@@ -333,7 +334,14 @@ let class_DEPRECATED ctx c =
     Errors.do_ @@ fun () ->
     let (_, cls_name) = c.c_name in
     let class_dep = Dep.Type cls_name in
-    let env = { Decl_env.mode = c.c_mode; droot = Some class_dep; ctx } in
+    let env =
+      {
+        Decl_env.mode = c.c_mode;
+        droot = Some class_dep;
+        droot_member = None;
+        ctx;
+      }
+    in
     let hint = Decl_hint.hint env in
     let (req_extends, req_implements, req_class) = split_reqs c.c_reqs in
     let (static_vars, vars) = split_vars c.c_vars in

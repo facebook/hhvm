@@ -1129,59 +1129,11 @@ fn rewrite_expr(
                 // Virtualized: $x->bar()
                 // Desugared: $0v->visitCall($0v->visitMethodCall(new ExprPos(...), $0v->visitLocal(new ExprPos(...), '$x'), 'bar'), vec[])
                 ObjGet(og) if og.3 == ast::PropOrMethod::IsMethod => {
-                    let (e1, e2, null_flavor, is_prop_call) = *og;
-                    if null_flavor == OgNullFlavor::OGNullsafe {
-                        errors.push((
-                            pos.clone(),
-                            "Expression Trees do not support nullsafe method calls".into(),
-                        ));
-                    }
-                    let rewritten_e1 = rewrite_expr(temps, e1, visitor_name, errors);
-                    let id = if let Id(id) = &e2.2 {
-                        string_literal(id.0.clone(), &id.1)
-                    } else {
-                        errors.push((
-                            pos.clone(),
-                            "Expression trees only support named method calls.".into(),
-                        ));
-                        e2.clone()
-                    };
-                    let desugar_expr = v_meth_call(
-                        et::VISIT_CALL,
-                        vec![
-                            pos_expr.clone(),
-                            v_meth_call(
-                                et::VISIT_INSTANCE_METHOD,
-                                vec![pos_expr, rewritten_e1.desugar_expr, id],
-                                &pos,
-                            ),
-                            vec_literal(desugar_args),
-                        ],
-                        &pos,
-                    );
-                    let virtual_expr = Expr(
-                        (),
-                        pos.clone(),
-                        Call(Box::new((
-                            Expr(
-                                (),
-                                pos,
-                                ObjGet(Box::new((
-                                    rewritten_e1.virtual_expr,
-                                    e2,
-                                    null_flavor,
-                                    is_prop_call,
-                                ))),
-                            ),
-                            vec![],
-                            build_args(virtual_args),
-                            None,
-                        ))),
-                    );
-                    RewriteResult {
-                        virtual_expr,
-                        desugar_expr,
-                    }
+                    errors.push((
+                        pos,
+                        "Expression trees do not support calling instance methods".into(),
+                    ));
+                    unchanged_result
                 }
                 _ => {
                     let rewritten_recv =

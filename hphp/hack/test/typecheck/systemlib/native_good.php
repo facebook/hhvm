@@ -26,3 +26,15 @@ abstract class Baz {
   abstract public function getNothing(): nothing;
 
 }
+
+<<__NativeData('BingParent')>>
+class BingParent {
+  <<__Native>>
+  public function __construct(): void;
+}
+
+<<__NativeData('Bing')>>
+class Bing extends BingParent {
+  <<__Native>>
+  public function __construct(): void;
+}

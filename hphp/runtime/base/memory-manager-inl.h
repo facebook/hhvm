@@ -383,11 +383,6 @@ inline bool MemoryManager::contains(const void* p) const {
   return m_heap.contains(p);
 }
 
-inline HeapObject* MemoryManager::find(const void* p) {
-  initFree();
-  return m_heap.find(p);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool MemoryManager::sweeping() {

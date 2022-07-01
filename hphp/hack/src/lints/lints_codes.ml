@@ -92,4 +92,14 @@ module Codes = struct
   let inferred_variance = 5639
 
   let switch_nonexhaustive = 5640
+
+  let bad_xhp_enum_attribute_value = 5641
+
+  let unreachable_method_in_trait = 5642
+
+  let comparing_booleans = 5643
+
+  let pointless_booleans_expression = 5644
+
+  let unconditional_recursion = 5645
 end

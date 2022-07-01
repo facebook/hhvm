@@ -7,16 +7,15 @@
 
 use im::HashSet;
 use ty::{
-    local::{Tyvar, Variance},
-    prop::CstrTy,
+    local::{Ty, Tyvar, Variance},
     reason::Reason,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TyvarConstraints<R: Reason> {
     pub variance: Variance,
-    pub lower_bounds: HashSet<CstrTy<R>>,
-    pub upper_bounds: HashSet<CstrTy<R>>,
+    pub lower_bounds: HashSet<Ty<R>>,
+    pub upper_bounds: HashSet<Ty<R>>,
 }
 
 impl<R: Reason> TyvarConstraints<R> {
@@ -46,7 +45,7 @@ impl<R: Reason> TyvarConstraints<R> {
         self.variance.appears_contravariantly()
     }
 
-    pub fn add_upper_bound(&mut self, bound: CstrTy<R>) {
+    pub fn add_upper_bound(&mut self, bound: Ty<R>) {
         rupro_todo_mark!(
             UnionsIntersections,
             "Provide a function to simplify the upper bound as an intersection"
@@ -54,41 +53,37 @@ impl<R: Reason> TyvarConstraints<R> {
         self.upper_bounds.insert(bound);
     }
 
-    pub fn add_lower_bound(&mut self, bound: CstrTy<R>) {
+    pub fn add_lower_bound(&mut self, bound: Ty<R>) {
         self.lower_bounds.insert(bound);
     }
 
-    pub fn add_lower_bound_as_union<F>(&mut self, bound: CstrTy<R>, union: F)
+    pub fn add_lower_bound_as_union<F>(&mut self, bound: Ty<R>, union: F)
     where
-        F: FnOnce(CstrTy<R>, &HashSet<CstrTy<R>>) -> HashSet<CstrTy<R>>,
+        F: FnOnce(Ty<R>, &HashSet<Ty<R>>) -> HashSet<Ty<R>>,
     {
         self.lower_bounds = union(bound, &self.lower_bounds);
     }
 
-    pub fn remove_lower_bound(&mut self, bound: &CstrTy<R>) {
+    pub fn remove_lower_bound(&mut self, bound: &Ty<R>) {
         self.lower_bounds.remove(bound);
     }
 
-    pub fn remove_upper_bound(&mut self, bound: &CstrTy<R>) {
+    pub fn remove_upper_bound(&mut self, bound: &Ty<R>) {
         self.upper_bounds.remove(bound);
     }
 
     pub fn remove_tyvar_lower_bound(&mut self, tvs: &HashSet<Tyvar>) {
-        self.lower_bounds.clone().iter().for_each(|cty| {
-            if let CstrTy::Locl(ty) = cty {
-                if ty.tyvar_opt().map_or(false, |tv| tvs.contains(tv)) {
-                    self.remove_lower_bound(cty);
-                }
+        self.lower_bounds.clone().iter().for_each(|ty| {
+            if ty.tyvar_opt().map_or(false, |tv| tvs.contains(tv)) {
+                self.remove_lower_bound(ty);
             }
         })
     }
 
     pub fn remove_tyvar_upper_bound(&mut self, tvs: &HashSet<Tyvar>) {
-        self.upper_bounds.clone().iter().for_each(|cty| {
-            if let CstrTy::Locl(ty) = cty {
-                if ty.tyvar_opt().map_or(false, |tv| tvs.contains(tv)) {
-                    self.remove_upper_bound(cty);
-                }
+        self.upper_bounds.clone().iter().for_each(|ty| {
+            if ty.tyvar_opt().map_or(false, |tv| tvs.contains(tv)) {
+                self.remove_upper_bound(ty);
             }
         })
     }

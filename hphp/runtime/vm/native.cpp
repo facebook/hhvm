@@ -215,7 +215,7 @@ void callFunc(const Func* const func,
               bool isFCallBuiltin) {
   auto const f = func->nativeFuncPtr();
   auto const numArgs = func->numParams();
-  auto retType = func->hniReturnType();
+  auto retType = func->returnTypeConstraint().asSystemlibType();
   auto regs = Registers{};
 
   if (ctx) pushInt(regs, (int64_t)ctx);

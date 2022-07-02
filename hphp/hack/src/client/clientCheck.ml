@@ -196,6 +196,13 @@ let rpc_with_retry
   let%lwt result = rpc args command ClientConnect.rpc_with_retry in
   Lwt.return result
 
+let rpc_with_retry_list
+    (args : ClientEnv.client_check_env)
+    (command : 'a ServerCommandTypes.Done_or_retry.t list ServerCommandTypes.t)
+    : 'a list Lwt.t =
+  let%lwt result = rpc args command ClientConnect.rpc_with_retry_list in
+  Lwt.return result
+
 let rpc
     (args : ClientEnv.client_check_env) (command : 'result ServerCommandTypes.t)
     : ('result * Telemetry.t) Lwt.t =
@@ -954,6 +961,13 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
     | MODE_VERBOSE verbose ->
       let%lwt ((), telemetry) = rpc args @@ Rpc.VERBOSE verbose in
       Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_DEPS_IN_AT_POS_BATCH positions ->
+      let positions = parse_positions positions in
+      let%lwt results =
+        rpc_with_retry_list args @@ Rpc.DEPS_IN_BATCH positions
+      in
+      List.iter results ~f:(fun s -> ClientFindRefs.go s true);
+      Lwt.return (Exit_status.No_error, Telemetry.create ())
   in
   HackEventLogger.client_check exit_status telemetry;
   Lwt.return exit_status

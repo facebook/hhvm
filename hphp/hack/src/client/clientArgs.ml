@@ -257,6 +257,20 @@ let parse_check_args cmd =
           end,
         " (mode) for each entry in input list get list of what it depends on [file:line:character list]"
       );
+      ( "--deps-in-at-pos-batch",
+        Arg.Rest
+          begin
+            fun position ->
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_DEPS_IN_AT_POS_BATCH [position]
+              | Some (MODE_DEPS_IN_AT_POS_BATCH positions) ->
+                MODE_DEPS_IN_AT_POS_BATCH (position :: positions)
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
+          end,
+        " (mode) for each entry in input list get list of what depends on it [file:line:character list]"
+      );
       ( "--dump-full-fidelity-parse",
         Arg.String (fun x -> set_mode (MODE_FULL_FIDELITY_PARSE x)),
         "" );

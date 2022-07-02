@@ -72,6 +72,7 @@ let debug_describe_t : type a. a t -> string = function
   | GLOBAL_INFERENCE _ -> "GLOBAL_INFERENCE"
   | VERBOSE _ -> "VERBOSE"
   | DEPS_OUT_BATCH _ -> "DEPS_OUT_BATCH"
+  | DEPS_IN_BATCH _ -> "DEPS_IN_BATCH"
 
 let debug_describe_cmd : type a. a command -> string = function
   | Rpc ({ ServerCommandTypes.from; _ }, rpc) ->

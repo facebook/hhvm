@@ -434,6 +434,9 @@ type _ t =
       -> ServerGlobalInferenceTypes.result t
   | VERBOSE : bool -> unit t
   | DEPS_OUT_BATCH : (string * int * int) list -> string list t
+  | DEPS_IN_BATCH :
+      (string * int * int) list
+      -> Find_refs.result_or_retry list t
 
 type cmd_metadata = {
   from: string;

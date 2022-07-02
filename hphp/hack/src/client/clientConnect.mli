@@ -71,3 +71,10 @@ val rpc_with_retry :
   desc:string ->
   'a ServerCommandTypes.Done_or_retry.t ServerCommandTypes.t ->
   'a Lwt.t
+
+(**For batch commands, retries each result in turn **)
+val rpc_with_retry_list :
+  (unit -> conn Lwt.t) ->
+  desc:string ->
+  'a ServerCommandTypes.Done_or_retry.t list ServerCommandTypes.t ->
+  'a list Lwt.t

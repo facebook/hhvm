@@ -502,3 +502,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | DEPS_OUT_BATCH positions ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerDepsOutBatch.go ctx positions)
+  | DEPS_IN_BATCH positions ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    (env, ServerDepsInBatch.go ~ctx ~genv ~env positions)

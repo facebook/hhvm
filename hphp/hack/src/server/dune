@@ -69,7 +69,7 @@
 (library
  (name server_find_refs)
  (wrapped false)
- (modules serverFindRefs)
+ (modules serverFindRefs serverDepsInBatch)
  (libraries
   provider_context
   server_command_types

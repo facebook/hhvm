@@ -7,6 +7,6 @@ trait T {
   require class C;
 }
 
-class C {
+final class C {
   use T;
 }

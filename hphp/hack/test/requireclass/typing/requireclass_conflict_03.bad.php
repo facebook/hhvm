@@ -3,12 +3,9 @@
 
 <<file:__EnableUnstableFeatures('require_class')>>
 
-trait T {
-  require class C;
-}
+class C {}
 
-class C {
-  use T;
-}
+trait T1 { require class C; }
+trait T2 { require extends C; }
 
-class D extends C {}
+trait T { use T1, T2; }

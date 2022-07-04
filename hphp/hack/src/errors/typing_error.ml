@@ -1592,6 +1592,11 @@ module Primary = struct
         req_pos: Pos_or_decl.t;
         req_name: string;
       }
+    | Req_class_not_final of {
+        pos: Pos.t;
+        trait_pos: Pos_or_decl.t;
+        req_pos: Pos_or_decl.t;
+      }
     | Incompatible_reqs of {
         pos: Pos.t;
         req_name: string;
@@ -2641,6 +2646,24 @@ module Primary = struct
       lazy
         ( pos,
           "This class does not satisfy all the requirements of its traits or interfaces."
+        )
+    in
+    (Error_code.UnsatisfiedReq, claim, reasons, [])
+
+  let req_class_not_final pos trait_pos req_pos =
+    let reasons =
+      lazy
+        (let r =
+           (trait_pos, "The trait with a require class constraint is used here")
+         in
+         if Pos_or_decl.equal trait_pos req_pos then
+           [r]
+         else
+           [r; (req_pos, "The require class constraint is here")])
+    and claim =
+      lazy
+        ( pos,
+          "This class must be final because it uses a trait with a require class constraint."
         )
     in
     (Error_code.UnsatisfiedReq, claim, reasons, [])
@@ -5431,6 +5454,8 @@ module Primary = struct
       unsatisfied_req pos trait_pos req_name req_pos
     | Unsatisfied_req_class { pos; trait_pos; req_name; req_pos } ->
       unsatisfied_req_class pos trait_pos req_name req_pos
+    | Req_class_not_final { pos; trait_pos; req_pos } ->
+      req_class_not_final pos trait_pos req_pos
     | Incompatible_reqs { pos; req_name; req_class_pos; req_extends_pos } ->
       incompatible_reqs pos req_name req_class_pos req_extends_pos
     | Invalid_echo_argument pos -> invalid_echo_argument pos

@@ -3,8 +3,10 @@
 
 <<file:__EnableUnstableFeatures('require_class')>>
 
-trait MyTrait {
-  require class C<int>;
+trait T {
+  require class C;
 }
 
-final class C<T> {}
+class C {
+  use T;
+}

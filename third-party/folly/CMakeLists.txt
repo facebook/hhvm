@@ -4,9 +4,9 @@ include(HPHPFunctions)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   FOLLY_SOURCE_ARGS
   SOURCE_URL
-  "https://github.com/facebook/folly/releases/download/v2022.03.14.00/folly-v2022.03.14.00.tar.gz"
+  "https://github.com/facebook/folly/releases/download/v2022.07.04.00/folly-v2022.07.04.00.tar.gz"
   SOURCE_HASH
-  "SHA256=dfa2bf72ef166b2f52a5d5ef6b0e728d3658aff090fb273c7f4fed5541c3e54a"
+  "SHA256=fff7caa4a230ac0b3ee88e383fa9ea1ee2b2f3f7611ae5b18c73a71a40ec0d43"
 )
 
 get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)

@@ -21,9 +21,9 @@ get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   WANGLE_SOURCE_ARGS
   SOURCE_URL
-  "https://github.com/facebook/wangle/releases/download/v2022.03.14.00/wangle-v2022.03.14.00.tar.gz"
+  "https://github.com/facebook/wangle/releases/download/v2022.07.04.00/wangle-v2022.07.04.00.tar.gz"
   SOURCE_HASH
-  "SHA256=3586bcd5132c9eb7b7656b7de7164ffbe4d8fd24877cdf5101450758b9a2b4a0"
+  "SHA256=8c7b538f9e9d84162056d6dc757bea1d0d4c0978889469f10e9d05b1dc4e5a83"
 )
 
 ExternalProject_Add(

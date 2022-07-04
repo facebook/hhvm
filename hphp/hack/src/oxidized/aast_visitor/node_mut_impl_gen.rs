@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1d0971589bb48deede9b269f2573f19f>>
+// @generated SignedSource<<f0a0d5ca179c975cc43c092d869d512b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,13 +13,15 @@
 use super::node_mut::NodeMut;
 use super::type_params::Params;
 use super::visitor_mut::VisitorMut;
-use crate::{
-    aast::{self, *},
-    aast_defs::{self, *},
-    ast_defs::{self, *},
-    doc_comment::{self, *},
-    *,
-};
+use crate::aast::*;
+use crate::aast::{self};
+use crate::aast_defs::*;
+use crate::aast_defs::{self};
+use crate::ast_defs::*;
+use crate::ast_defs::{self};
+use crate::doc_comment::*;
+use crate::doc_comment::{self};
+use crate::*;
 impl<P: Params> NodeMut<P> for Abstraction {
     fn accept<'node>(
         &'node mut self,

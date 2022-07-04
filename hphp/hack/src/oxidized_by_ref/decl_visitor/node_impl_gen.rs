@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fd70de1e945c5382c5fe8405bce885ea>>
+// @generated SignedSource<<312204e91e7170da5b915fddfeb5b555>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,18 +13,25 @@
 #![allow(unused_variables)]
 use super::node::Node;
 use super::visitor::Visitor;
-use crate::{
-    aast_defs::{self, *},
-    ast_defs::{self, *},
-    direct_decl_parser::{self, *},
-    shallow_decl_defs::{self, *},
-    t_shape_map::{self, *},
-    typing_defs::{self, *},
-    typing_defs_core::{self, *},
-    typing_reason::{self, *},
-    xhp_attribute::{self, *},
-    *,
-};
+use crate::aast_defs::*;
+use crate::aast_defs::{self};
+use crate::ast_defs::*;
+use crate::ast_defs::{self};
+use crate::direct_decl_parser::*;
+use crate::direct_decl_parser::{self};
+use crate::shallow_decl_defs::*;
+use crate::shallow_decl_defs::{self};
+use crate::t_shape_map::*;
+use crate::t_shape_map::{self};
+use crate::typing_defs::*;
+use crate::typing_defs::{self};
+use crate::typing_defs_core::*;
+use crate::typing_defs_core::{self};
+use crate::typing_reason::*;
+use crate::typing_reason::{self};
+use crate::xhp_attribute::*;
+use crate::xhp_attribute::{self};
+use crate::*;
 impl<'a> Node<'a> for AbstractTypeconst<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_abstract_typeconst(self)

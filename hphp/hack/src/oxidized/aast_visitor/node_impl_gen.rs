@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<14e56d6057a0f18454283110a8534a37>>
+// @generated SignedSource<<7f946d2ac10b9b206329cbc119e54016>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,13 +13,15 @@
 use super::node::Node;
 use super::type_params::Params;
 use super::visitor::Visitor;
-use crate::{
-    aast::{self, *},
-    aast_defs::{self, *},
-    ast_defs::{self, *},
-    doc_comment::{self, *},
-    *,
-};
+use crate::aast::*;
+use crate::aast::{self};
+use crate::aast_defs::*;
+use crate::aast_defs::{self};
+use crate::ast_defs::*;
+use crate::ast_defs::{self};
+use crate::doc_comment::*;
+use crate::doc_comment::{self};
+use crate::*;
 impl<P: Params> Node<P> for Abstraction {
     fn accept<'node>(
         &'node self,

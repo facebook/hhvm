@@ -164,22 +164,30 @@ let push_like_tyargs env tyl tparams =
       | Ast_defs.Contravariant -> (changed, ty)
       | _ ->
         let (changed', ty') = make_like env changed ty in
-        (* Only push like onto type argument if it produces a well-formed type
-         * i.e. satisfies any as constraints
+        (* Push like onto type argument; if the resulting type is not a subtype of
+         * the the upper bound on the type parameter, then intersect it with the
+         * upper bonud so that the resulting type is well-formed.
+         * For example, dict<~string & arraykey,bool> <: ~dict<string,bool>
+         * because the first type parameter has an upper bound of arraykey.
          *)
-        if
-          List.for_all tp.tp_constraints ~f:(fun (c, cty) ->
+        let upper_bounds =
+          List.filter_map tp.tp_constraints ~f:(fun (c, cty) ->
               match c with
               | Ast_defs.Constraint_as ->
                 let (_env, cty) =
                   Typing_phase.localize_no_subst env ~ignore_errors:true cty
                 in
-                Typing_utils.is_sub_type_for_union env ty' cty
-              | _ -> true)
+                Some cty
+              | _ -> None)
+        in
+        (* Type meets all bounds, so leave alone *)
+        if
+          List.for_all upper_bounds ~f:(fun bound ->
+              Typing_utils.is_sub_type_for_union env ty' bound)
         then
           (changed', ty')
         else
-          (changed, ty)
+          (changed', mk (get_reason ty, Tintersection (ty' :: upper_bounds)))
     in
 
     List.map2_env false tyl tparams ~f:make_like

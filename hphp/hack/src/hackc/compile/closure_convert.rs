@@ -643,6 +643,7 @@ fn make_closure(
         internal: false,
         // TODO: closures should have the visibility of the module they are defined in
         module: None,
+        docs_url: None,
     };
 
     // TODO(hrust): can we reconstruct fd here from the scratch?

@@ -70,6 +70,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Class_<(), ()> {
             // TODO(T116039119): Populate value with presence of internal attribute
             internal: false,
             module: None,
+            docs_url: None,
         };
         Ok(res)
     }

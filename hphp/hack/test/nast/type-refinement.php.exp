@@ -52,8 +52,8 @@
            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
          }
         ];
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+      c_internal = false; c_module = None });
   (Typedef
      { t_annotation = (); t_name = ([10:6-10], "\\IBox"); t_tparams = []; 
        t_constraint = None; t_kind = ([10:13-39], (Hrefinement (([10:13-16], (Happly (([10:13-16], "\\Box"), []))), [(Rtype (([10:29-31], "Tb"), (Texact ([10:34-37], (Hprim Tint)))))])));

@@ -1777,6 +1777,7 @@ let class_def_ env c tc =
       Aast.c_emit_id = c.c_emit_id;
       Aast.c_internal = c.c_internal;
       Aast.c_module = c.c_module;
+      Aast.c_docs_url = c.c_docs_url;
     },
     global_inference_envs )
 

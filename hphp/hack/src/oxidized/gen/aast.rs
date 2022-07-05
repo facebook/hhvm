@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<71e7d74c1497c94a5c83d21a60f09212>>
+// @generated SignedSource<<2abc1b50c5c8dbc44a30c38131a22352>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1338,6 +1338,7 @@ pub struct Class_<Ex, En> {
     pub namespace: Nsenv,
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
     pub file_attributes: Vec<FileAttribute<Ex, En>>,
+    pub docs_url: Option<String>,
     pub enum_: Option<Enum_>,
     pub doc_comment: Option<DocComment>,
     pub emit_id: Option<EmitId>,

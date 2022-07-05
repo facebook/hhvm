@@ -263,6 +263,8 @@ module UserAttributes = struct
 
   let uaDeprecated = "__Deprecated"
 
+  let uaDocs = "__Docs"
+
   let uaEntryPoint = "__EntryPoint"
 
   let uaMemoize = "__Memoize"
@@ -400,6 +402,12 @@ module UserAttributes = struct
                 ^ "\n\nThe optional second argument specifies a sampling rate for raising notices at runtime."
                 ^ " If the sampling rate is 100, a notice is only raised every 1/100 calls. If omitted, the default sampling rate is 1 (i.e. all calls raise notices)."
                 ^ " To disable runtime notices, use a sampling rate of 0.";
+            } );
+          ( uaDocs,
+            {
+              contexts = [cls];
+              autocomplete = true;
+              doc = "Shows the linked URL when hovering over this type.";
             } );
           ( uaEntryPoint,
             {

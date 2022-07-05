@@ -30,6 +30,6 @@
            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
          }
         ];
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None })
+      c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+      c_internal = false; c_module = None })
   ]

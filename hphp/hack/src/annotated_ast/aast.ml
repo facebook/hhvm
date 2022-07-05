@@ -834,6 +834,7 @@ and ('ex, 'en) class_ = {
   c_namespace: nsenv;
   c_user_attributes: ('ex, 'en) user_attribute list;
   c_file_attributes: ('ex, 'en) file_attribute list;
+  c_docs_url: string option;
   c_enum: enum_ option;
   c_doc_comment: doc_comment option;
   c_emit_id: emit_id option;

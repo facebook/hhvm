@@ -173,4 +173,10 @@ let handler =
           Errors.add_nast_check_error
           @@ Nast_check_error.Variadic_memoize p.param_pos
         | None -> ()
+
+    method! at_class_ _env c =
+      check_attribute_arity
+        c.c_user_attributes
+        SN.UserAttributes.uaDocs
+        (`Exact 1)
   end

@@ -327,6 +327,7 @@ let class_ tenv c =
     c_emit_id = _;
     c_internal = _;
     c_module = _;
+    c_docs_url = _;
   } =
     c
   in

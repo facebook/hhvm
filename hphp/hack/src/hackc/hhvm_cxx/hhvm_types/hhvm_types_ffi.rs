@@ -201,6 +201,18 @@ impl Attr {
             self.add(attr)
         }
     }
+    pub fn is_internal(&self) -> bool {
+        (*self & Self::AttrInternal) != 0
+    }
+    pub fn is_public(&self) -> bool {
+        (*self & Self::AttrPublic) != 0
+    }
+    pub fn is_private(&self) -> bool {
+        (*self & Self::AttrPrivate) != 0
+    }
+    pub fn is_protected(&self) -> bool {
+        (*self & Self::AttrProtected) != 0
+    }
     pub fn is_final(&self) -> bool {
         (*self & Self::AttrFinal) != 0
     }

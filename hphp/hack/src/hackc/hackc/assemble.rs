@@ -199,9 +199,9 @@ fn assemble_class<'arena>(
     while token_iter.peek_if_str(Token::is_decl, ".property") {
         properties.push(assemble_property(alloc, token_iter)?);
     }
-    let methods = Vec::new();
+    let mut methods = Vec::new();
     while token_iter.peek_if_str(Token::is_decl, ".method") {
-        todo!()
+        methods.push(assemble_method(alloc, token_iter)?);
     }
     token_iter.expect(Token::into_close_curly)?;
 
@@ -225,6 +225,84 @@ fn assemble_class<'arena>(
         flags,
     };
     Ok(hhas_class)
+}
+
+fn assemble_method<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::hhas_method::HhasMethod<'arena>> {
+    token_iter.expect_is_str(Token::into_decl, ".method")?;
+    let shadowed_tparams = assemble_shadowed_tparams(alloc, token_iter)?;
+    let upper_bounds = assemble_upper_bounds(token_iter)?;
+    let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
+    let span = assemble_span(token_iter)?;
+    let return_type_info = match token_iter.peek() {
+        Some(Token::Lt(_)) => assemble_type_info(alloc, token_iter, false)?,
+        _ => Maybe::Nothing,
+    };
+    let name = assemble_method_name(alloc, token_iter)?;
+    let mut decl_map: HashMap<&[u8], u32> = HashMap::new();
+    let params = assemble_params(alloc, token_iter, &mut decl_map)?;
+    let flags = assemble_method_flags(token_iter)?;
+    let partial_body = assemble_body(alloc, token_iter, &mut decl_map)?;
+    let body = hhbc::hhas_body::HhasBody {
+        params,
+        return_type_info,
+        upper_bounds,
+        shadowed_tparams,
+        ..partial_body
+    };
+    // the visibility is printed in the attrs
+    // confusion: Visibility::Internal is a mix of AttrInternal and AttrPublic?
+    let visibility = if attr.is_internal() && attr.is_public() {
+        hhbc::Visibility::Internal
+    } else if attr.is_public() {
+        hhbc::Visibility::Public
+    } else if attr.is_private() {
+        hhbc::Visibility::Private
+    } else if attr.is_protected() {
+        hhbc::Visibility::Protected
+    } else {
+        bail!("No visibility specified in method def")
+    };
+    let met = hhbc::hhas_method::HhasMethod {
+        attributes,
+        visibility,
+        name,
+        body,
+        span,
+        coeffects: Default::default(), // Get this from the body -- it's printed there (?)
+        flags,
+        attrs: attr,
+    };
+    Ok(met)
+}
+
+fn assemble_shadowed_tparams<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Slice<'arena, Str<'arena>>> {
+    token_iter.expect(Token::into_open_curly)?;
+    let mut stp = Vec::new();
+    while token_iter.peek_if(Token::is_identifier) {
+        stp.push(token_iter.expect_identifier_into_ffi_str(alloc)?)
+    }
+    token_iter.expect(Token::into_close_curly)?;
+    Ok(Slice::from_vec(alloc, stp))
+}
+
+fn assemble_method_flags(token_iter: &mut Lexer<'_>) -> Result<hhbc::hhas_method::HhasMethodFlags> {
+    let mut flag = hhbc::hhas_method::HhasMethodFlags::empty();
+    while token_iter.peek_if(Token::is_identifier) {
+        match token_iter.expect(Token::into_identifier)? {
+            b"isPairGenerator" => flag |= hhbc::hhas_method::HhasMethodFlags::IS_PAIR_GENERATOR,
+            b"isAsync" => flag |= hhbc::hhas_method::HhasMethodFlags::IS_ASYNC,
+            b"isGenerator" => flag |= hhbc::hhas_method::HhasMethodFlags::IS_GENERATOR,
+            b"isClosureBody" => flag |= hhbc::hhas_method::HhasMethodFlags::IS_CLOSURE_BODY,
+            f => bail!("Unknown function flag: {:?}", f),
+        }
+    }
+    Ok(flag)
 }
 
 fn assemble_property<'arena>(
@@ -296,16 +374,18 @@ fn assemble_class_name<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::ClassName<'arena>> {
-    let name = token_iter.expect(Token::into_identifier)?;
-    Ok(hhbc::ClassName::new(Str::new_slice(alloc, name)))
+    Ok(hhbc::ClassName::new(
+        token_iter.expect_identifier_into_ffi_str(alloc)?,
+    ))
 }
 
 fn assemble_prop_name<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::PropName<'arena>> {
-    let name = token_iter.expect(Token::into_identifier)?;
-    Ok(hhbc::PropName::new(Str::new_slice(alloc, name)))
+    Ok(hhbc::PropName::new(
+        token_iter.expect_identifier_into_ffi_str(alloc)?,
+    ))
 }
 
 fn assemble_method_name_from_str<'arena>(
@@ -315,6 +395,15 @@ fn assemble_method_name_from_str<'arena>(
     Ok(hhbc::MethodName::new(assemble_unescaped_unquoted_str(
         alloc, token_iter,
     )?))
+}
+
+fn assemble_method_name<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::MethodName<'arena>> {
+    Ok(hhbc::MethodName::new(
+        token_iter.expect_identifier_into_ffi_str(alloc)?,
+    ))
 }
 
 /// Ex:
@@ -433,7 +522,7 @@ fn assemble_adata<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::hhas_adata::HhasAdata<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".adata")?;
-    let id = Str::new_slice(alloc, token_iter.expect(Token::into_identifier)?);
+    let id = token_iter.expect_identifier_into_ffi_str(alloc)?;
     token_iter.expect(Token::into_equal)?;
     // What's left here is tv
     let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
@@ -719,23 +808,60 @@ fn assemble_special_and_user_attrs<'arena>(
     }
     // If no special and user attrs then no [] printed
     let user_atts = Slice::from_vec(alloc, user_atts);
-    Ok((hhvm_types_ffi::ffi::Attr::AttrNone, user_atts))
+    Ok((tr, user_atts))
 }
 
 fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi::Attr> {
     use hhvm_types_ffi::ffi::Attr;
-    // Not sure how to thread in context. It seems like `AttrContext` affects how
-    // `attrs_to_string_ffi` prints Attrs. So prints differently for classes and functions
-
-    match token_iter.expect(Token::into_identifier)? {
-        b"final" => Ok(Attr::AttrFinal),
-        b"trait" => Ok(Attr::AttrTrait),
-        b"no_override" => Ok(Attr::AttrNoOverride),
-        b"abstract" => Ok(Attr::AttrAbstract),
-        b"noreifiedinit" => Ok(Attr::AttrNoReifiedInit),
-        b"interface" => Ok(Attr::AttrInterface),
-        _ => todo!(),
-    }
+    let flag = match token_iter.expect(Token::into_identifier)? {
+        b"none" => Attr::AttrNone,
+        b"forbid_dynamic_props" => Attr::AttrForbidDynamicProps,
+        b"deep_init" => Attr::AttrDeepInit,
+        b"public" => Attr::AttrPublic,
+        b"protected" => Attr::AttrProtected,
+        b"private" => Attr::AttrPrivate,
+        b"enum" => Attr::AttrEnum,
+        b"sys_initial_val" => Attr::AttrSystemInitialValue,
+        b"no_implicit_nullable" => Attr::AttrNoImplicitNullable,
+        b"static" => Attr::AttrStatic,
+        b"abstract" => Attr::AttrAbstract,
+        b"final" => Attr::AttrFinal,
+        b"interface" => Attr::AttrInterface,
+        b"lsb" => Attr::AttrLSB,
+        b"support_async_eager_return" => Attr::AttrSupportsAsyncEagerReturn,
+        b"trait" => Attr::AttrTrait,
+        b"no_injection" => Attr::AttrNoInjection,
+        b"initial_satisifes_tc" => Attr::AttrInitialSatisfiesTC,
+        b"unique" => Attr::AttrUnique,
+        b"bad_redeclare" => Attr::AttrNoBadRedeclare,
+        b"interceptable" => Attr::AttrInterceptable,
+        b"sealed" => Attr::AttrSealed,
+        b"late_init" => Attr::AttrLateInit,
+        b"no_expand_trait" => Attr::AttrNoExpandTrait,
+        b"no_override" => Attr::AttrNoOverride,
+        b"is_readonly" => Attr::AttrIsReadonly,
+        b"readonly_this" => Attr::AttrReadonlyThis,
+        b"readonly_return" => Attr::AttrReadonlyReturn,
+        b"internal" => Attr::AttrInternal,
+        b"persistent" => Attr::AttrPersistent,
+        b"dynamically_callable" => Attr::AttrDynamicallyCallable,
+        b"dynamically_constructible" => Attr::AttrDynamicallyConstructible,
+        b"builtin" => Attr::AttrBuiltin,
+        b"is_const" => Attr::AttrIsConst,
+        b"no_reified_init" => Attr::AttrNoReifiedInit,
+        b"is_meth_caller" => Attr::AttrIsMethCaller,
+        b"is_closure_class" => Attr::AttrIsClosureClass,
+        b"has_closure_coeffects_prop" => Attr::AttrHasClosureCoeffectsProp,
+        b"has_coeffect_rules" => Attr::AttrHasCoeffectRules,
+        b"is_foldable" => Attr::AttrIsFoldable,
+        b"no_fcall_builtin" => Attr::AttrNoFCallBuiltin,
+        b"variadic_param" => Attr::AttrVariadicParam,
+        b"provenance_skip_frame" => Attr::AttrProvenanceSkipFrame,
+        b"enum_class" => Attr::AttrEnumClass,
+        b"unused_max_attr" => Attr::AttrUnusedMaxAttr,
+        o => bail!("Unknown attr: {:?}", o),
+    };
+    Ok(flag)
 }
 
 /// HhasAttributes are printed as follows:
@@ -1714,9 +1840,8 @@ fn assemble_cls_cns<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "ClsCns")?;
-    let nm = token_iter.expect(Token::into_identifier)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::ClsCns(
-        hhbc::ConstName::new(Str::new_slice(alloc, nm)),
+        hhbc::ConstName::new(token_iter.expect_identifier_into_ffi_str(alloc)?),
     )))
 }
 
@@ -2149,9 +2274,9 @@ fn assemble_function_name<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::FunctionName<'arena>> {
-    let name = token_iter.expect(Token::into_identifier)?;
-    let fname = hhbc::FunctionName::new(Str::new_slice(alloc, name));
-    Ok(fname)
+    Ok(hhbc::FunctionName::new(
+        token_iter.expect_identifier_into_ffi_str(alloc)?,
+    ))
 }
 
 #[derive(Parser, Debug)]
@@ -2722,6 +2847,15 @@ impl<'a> Lexer<'a> {
                 }
             },
         )
+    }
+
+    /// Similar to `expect_and_get_number` but puts identifier into a Str<'arena>
+    fn expect_identifier_into_ffi_str<'arena>(
+        &mut self,
+        alloc: &'arena Bump,
+    ) -> Result<Str<'arena>> {
+        let st = self.expect(Token::into_identifier)?;
+        Ok(Str::new_slice(alloc, st))
     }
 
     /// Similar to `expect` but instead of returning a Result that usually contains a slice of u8,

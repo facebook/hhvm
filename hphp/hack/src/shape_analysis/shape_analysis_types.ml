@@ -39,9 +39,7 @@ module ShapeKeyMap = Map.Make (struct
   let compare = compare_shape_key
 end)
 
-module ResultID = ISet
-
-type shape_keys = ResultID.t * Typing_defs.locl_ty ShapeKeyMap.t
+type shape_keys = Typing_defs.locl_ty ShapeKeyMap.t
 
 type exists_kind =
   | Allocation
@@ -50,13 +48,12 @@ type exists_kind =
 
 type constraint_ =
   | Exists of exists_kind * Pos.t
-  | Has_static_key of entity_ * ResultID.t * shape_key * Typing_defs.locl_ty
+  | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
   | Has_dynamic_key of entity_
   | Subset of entity_ * entity_
 
 type shape_result =
-  | Shape_like_dict of
-      Pos.t * ResultID.t * (shape_key * Typing_defs.locl_ty) list
+  | Shape_like_dict of Pos.t * (shape_key * Typing_defs.locl_ty) list
   | Dynamically_accessed_dict of entity_
 
 type lenv = entity LMap.t KMap.t

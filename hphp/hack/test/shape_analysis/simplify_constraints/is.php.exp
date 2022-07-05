@@ -1,7 +1,7 @@
 === Shape analysis results for is.php
 Summary for \f:
-#{} [6:8-14] : shape()
-#{} [10:11-13] :
+[6:8-14] : shape()
+[10:11-13] :
   shape(
     k => int
   )

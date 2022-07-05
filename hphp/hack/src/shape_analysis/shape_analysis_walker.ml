@@ -13,7 +13,6 @@ module A = Aast
 module T = Tast
 module SN = Naming_special_names
 module Env = Shape_analysis_env
-module Logic = Shape_analysis_logic
 module Utils = Shape_analysis_utils
 
 let when_tast_check tast_env ~default f =
@@ -79,17 +78,15 @@ let rec is_suitable_target_ty tast_env ty =
   | _ -> false
 
 let add_key_constraint
-    (result_id : ResultID.t)
-    (env : env)
-    entity
-    (((_, _, key), ty) : T.expr * Typing_defs.locl_ty) : env =
+    (env : env) entity (((_, _, key), ty) : T.expr * Typing_defs.locl_ty) : env
+    =
   match entity with
   | Some entity ->
     let constraint_ =
       match key with
       | A.String str ->
         let ty = Tast_env.fully_expand env.tast_env ty in
-        Has_static_key (entity, result_id, SK_string str, ty)
+        Has_static_key (entity, SK_string str, ty)
       | _ -> Has_dynamic_key entity
     in
     Env.add_constraint env constraint_
@@ -118,11 +115,7 @@ let rec assign
           Env.add_constraint env (Subset (entity_, current_assignment))
         in
         let env =
-          add_key_constraint
-            ResultID.empty
-            env
-            (Some current_assignment)
-            (ix, ty_rhs)
+          add_key_constraint env (Some current_assignment) (ix, ty_rhs)
         in
 
         (* Handle copy-on-write by creating a variable indirection *)
@@ -149,11 +142,10 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let entity_ = Literal pos in
     let entity = Some entity_ in
     let env = Env.add_constraint env (Exists (Allocation, pos)) in
-    let result_id = Logic.fresh_result_id () in
     let add_key_constraint env (key, ((ty, _, _) as value)) : env =
       let (env, _key_entity) = expr_ env key in
       let (env, _val_entity) = expr_ env value in
-      let env = add_key_constraint result_id env entity (key, ty) in
+      let env = add_key_constraint env entity (key, ty) in
       env
     in
     let env = List.fold ~init:env ~f:add_key_constraint key_value_pairs in
@@ -164,7 +156,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   | A.Array_get (base, Some ix) ->
     let (env, entity_exp) = expr_ env base in
     let (env, _entity_ix) = expr_ env ix in
-    let env = add_key_constraint ResultID.empty env entity_exp (ix, ty) in
+    let env = add_key_constraint env entity_exp (ix, ty) in
     (env, None)
   | A.Lvar (_, lid) ->
     let entity = Env.get_local env lid in

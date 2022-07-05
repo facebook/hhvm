@@ -104,7 +104,7 @@ fn assemble_from_toks<'arena>(
     let mut class_refs = None;
     let mut fatal = None;
     // First non-comment token should be the filepath
-    let fp = Some(assemble_filepath(token_iter)?);
+    let fp = assemble_filepath(token_iter)?;
     while token_iter.peek().is_some() {
         if token_iter.peek_if_str(Token::is_decl, ".fatal") {
             fatal = Some(assemble_fatal(alloc, token_iter)?);
@@ -158,7 +158,7 @@ fn assemble_from_toks<'arena>(
         fatal: fatal.into(),
     };
 
-    Ok((hcu, fp.unwrap())) // If made it here, fp is Some
+    Ok((hcu, fp)) // If made it here, fp is Some
 }
 
 fn assemble_class<'arena>(
@@ -195,9 +195,9 @@ fn assemble_class<'arena>(
     while token_iter.peek_if_str(Token::is_decl, ".ctx") {
         todo!()
     }
-    let properties = Vec::new();
+    let mut properties = Vec::new();
     while token_iter.peek_if_str(Token::is_decl, ".property") {
-        todo!()
+        properties.push(assemble_property(alloc, token_iter)?);
     }
     let methods = Vec::new();
     while token_iter.peek_if_str(Token::is_decl, ".method") {
@@ -227,6 +227,62 @@ fn assemble_class<'arena>(
     Ok(hhas_class)
 }
 
+fn assemble_property<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::hhas_property::HhasProperty<'arena>> {
+    token_iter.expect_is_str(Token::into_decl, ".property")?;
+    let (flags, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
+    // A doc comment is just a triple string literal : """{}""", escaper::escape_bstr(s.as_bstr)
+    let doc_comment = if token_iter.peek_if(Token::is_triple_str_literal) {
+        Maybe::Just(assemble_unescaped_unquoted_triple_str(alloc, token_iter)?)
+    } else {
+        Maybe::Nothing
+    };
+    let type_info = if let Maybe::Just(ti) = assemble_type_info(alloc, token_iter, false)? {
+        ti
+    } else {
+        bail!("No type_info for class property")
+    };
+    let name = assemble_prop_name(alloc, token_iter)?;
+    token_iter.expect(Token::into_equal)?;
+    let initial_value = assemble_property_initial_value(alloc, token_iter)?;
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(hhbc::hhas_property::HhasProperty {
+        name,
+        flags,
+        attributes,
+        visibility: hhbc::Visibility::Public,
+        initial_value,
+        type_info,
+        doc_comment,
+    })
+}
+
+/// Initial values are printed slightly differently from typed values:
+/// whlie a TV prints uninit as uninit, initial value is printed as uninit;
+/// for all other typed values, initial_value is printed nested in triple quotes.
+fn assemble_property_initial_value<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Maybe<hhbc::TypedValue<'arena>>> {
+    let tok = token_iter
+        .peek()
+        .ok_or_else(|| anyhow!("Expected init value for property, reached EOF"))?;
+    let tv = match tok.as_bytes() {
+        b"uninit" => {
+            token_iter.expect_is_str(Token::into_identifier, "uninit")?;
+            Maybe::Just(hhbc::TypedValue::Uninit)
+        }
+        b"\"\"\"N;\"\"\"" => {
+            token_iter.expect_is_str(Token::into_triple_str_literal, "\"\"\"N;\"\"\"")?;
+            Maybe::Nothing
+        }
+        _ => Maybe::Just(assemble_triple_quoted_typed_value(alloc, token_iter)?),
+    };
+    Ok(tv)
+}
+
 fn assemble_class_name_from_str<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
@@ -244,6 +300,14 @@ fn assemble_class_name<'arena>(
     Ok(hhbc::ClassName::new(Str::new_slice(alloc, name)))
 }
 
+fn assemble_prop_name<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::PropName<'arena>> {
+    let name = token_iter.expect(Token::into_identifier)?;
+    Ok(hhbc::PropName::new(Str::new_slice(alloc, name)))
+}
+
 fn assemble_method_name_from_str<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
@@ -251,14 +315,6 @@ fn assemble_method_name_from_str<'arena>(
     Ok(hhbc::MethodName::new(assemble_unescaped_unquoted_str(
         alloc, token_iter,
     )?))
-}
-
-fn _assemble_method_name<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::MethodName<'arena>> {
-    let name = token_iter.expect(Token::into_identifier)?;
-    Ok(hhbc::MethodName::new(Str::new_slice(alloc, name)))
 }
 
 /// Ex:
@@ -391,6 +447,18 @@ fn assemble_adata<'arena>(
     tv_lexer.expect_end()?;
     token_iter.expect(Token::into_semicolon)?;
     Ok(hhbc::hhas_adata::HhasAdata { id, value })
+}
+
+/// For use by initial value
+fn assemble_triple_quoted_typed_value<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::TypedValue<'arena>> {
+    let (st, line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
+    // Guaranteed st is encased by """ """
+    let st = &st[3..st.len() - 3];
+    let st = escaper::unescape_literal_bytes_into_vec_bytes(st)?;
+    assemble_typed_value(alloc, &mut Lexer::from_slice(&st, line))
 }
 
 /// tv can look like:
@@ -563,8 +631,7 @@ fn assemble_function<'arena>(
         name,
         body,
         span,
-        // Not too sure where the bottom stuff come from
-        coeffects: Default::default(), // Get this from the body -- it's printed there (?)
+        coeffects: Default::default(), // todo!()
         flags,
         attrs: attr,
     };
@@ -1461,6 +1528,17 @@ fn assemble_unescaped_unquoted_str<'arena>(
     Ok(Str::new_slice(alloc, &st))
 }
 
+fn assemble_unescaped_unquoted_triple_str<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Str<'arena>> {
+    let st = escaper::unquote_slice(escaper::unquote_slice(escaper::unquote_slice(
+        token_iter.expect(Token::into_str_literal)?,
+    )));
+    let st = escaper::unescape_literal_bytes_into_vec_bytes(st)?;
+    Ok(Str::new_slice(alloc, &st))
+}
+
 /// Ex:
 /// FCallClsMethodM <EnforceMutableReturn> 0 1 "" "" - "" "" DontLogAsDynamicCall "foo"
 /// Opcode fargs str is_log_as_dynamic_call method_name_in_quotes
@@ -1665,11 +1743,6 @@ fn assemble_stack_index(token_iter: &mut Lexer<'_>) -> Result<hhbc::StackIndex> 
     token_iter.expect_and_get_number()
 }
 
-/// struct Propname<'arena>(Str<'arena>)
-fn assemble_prop_name<'arena>(_token_iter: &mut Lexer<'_>) -> Result<hhbc::PropName<'arena>> {
-    todo!()
-}
-
 fn assemble_mop_mode(token_iter: &mut Lexer<'_>) -> Result<hhbc::MOpMode> {
     match token_iter.expect(Token::into_identifier)? {
         b"None" => Ok(hhbc::MOpMode::None),
@@ -1753,14 +1826,14 @@ fn assemble_member_key<'arena>(
         b"PT" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::PT(
-                assemble_prop_name(token_iter)?,
+                assemble_prop_name(alloc, token_iter)?,
                 assemble_readonly_op(token_iter)?,
             ))
         }
         b"QT" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::QT(
-                assemble_prop_name(token_iter)?,
+                assemble_prop_name(alloc, token_iter)?,
                 assemble_readonly_op(token_iter)?,
             ))
         }
